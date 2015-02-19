@@ -759,6 +759,8 @@ public class CommitUtil {
         if (jmsConnection != null) {
             jmsConnection.setWorkspace( workspaceId );
             jmsConnection.setProjectId( projectId );
+            // TODO FIXME The topic is hard coded as "master" in JsmConnection.  Do we want that
+            //            hardcoded or the worskpaceId?
             jmsStatus = jmsConnection.publish( deltaJson, workspaceId );
         }
         if (restConnection != null) {
@@ -770,9 +772,26 @@ public class CommitUtil {
             }
         }
 
-        //System.out.println(deltaJson);
-
         return jmsStatus && restStatus;
+    }
+    
+    /**
+     * Send off progress to various endpoints
+     * @param msg       String message to be published
+     * @param projectId String of the project Id to post to
+     * @return          true if publish completed
+     * @throws JSONException
+     */
+    public static boolean sendProgress(String msg, String workspaceId, String projectId) {
+        boolean jmsStatus = false;
+
+        if (jmsConnection != null) {
+            jmsConnection.setWorkspace( workspaceId );
+            jmsConnection.setProjectId( projectId );
+            jmsStatus = jmsConnection.publishTopic( msg, "progress" );
+        }
+
+        return jmsStatus;
     }
 
 

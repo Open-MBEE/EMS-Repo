@@ -32,7 +32,9 @@ import gov.nasa.jpl.mbee.util.Debug;
 import gov.nasa.jpl.mbee.util.Pair;
 import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.mbee.util.Utils;
+import gov.nasa.jpl.view_repo.actions.ActionUtil;
 import gov.nasa.jpl.view_repo.util.Acm;
+import gov.nasa.jpl.view_repo.util.CommitUtil;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.EmsTransaction;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
@@ -951,8 +953,42 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
         }
     }
     
-    public void sendProgress( String msg, String projectSysmlId ) {
-        System.out.println("Project: "+projectSysmlId+" msg: "+msg+"\n");
+    /**
+     * Send progress messages to the log, JMS, and email.
+     * 
+     * @param msg  The message
+     * @param projectSysmlId  The project sysml id
+     * @param workspaceName  The workspace name
+     */
+    public void sendProgress( String msg, String projectSysmlId, String workspaceName ) {
+        
+        String projectId = Utils.isNullOrEmpty(projectSysmlId) ? "unknown_project" : projectSysmlId;
+        String workspaceId = Utils.isNullOrEmpty(workspaceName) ? "unknown_workspace" : workspaceName;        
+        String subject = "Progress for project: "+projectId+" workspace: "+workspaceId;
+
+        // Log the progress:
+        log(LogLevel.INFO,subject+" msg: "+msg+"\n");
+        
+        // Send the progress over JMS:
+        CommitUtil.sendProgress(msg, workspaceId, projectId);
+        
+        // Email the progress:
+        String hostname = services.getSysAdminParams().getAlfrescoHost();
+        if (!Utils.isNullOrEmpty( hostname )) {
+            String sender = hostname + "@jpl.nasa.gov";
+            String username = NodeUtil.getUserName();
+            if (!Utils.isNullOrEmpty( username )) {
+                EmsScriptNode user = new EmsScriptNode(services.getPersonService().getPerson(username), 
+                                                       services);
+                if (user != null) {
+                    String recipient = (String) user.getProperty("cm:email");
+                    if (!Utils.isNullOrEmpty( recipient )) {
+                        ActionUtil.sendEmailTo( sender, recipient, msg, subject, services );
+                    }
+                }
+            }
+        }
+        
     }
     
 }

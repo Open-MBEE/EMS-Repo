@@ -79,14 +79,6 @@ import kexpparser.KExpParser;
 //import k.frontend.Frontend;
 
 
-
-
-
-
-
-
-
-
 import org.alfresco.repo.model.Repository;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
@@ -159,6 +151,8 @@ public class ModelPost extends AbstractJavaWebScript {
     private EmsScriptNode sitePackageNode = null;
     private boolean internalRunWithoutTransactions = false;
     private Set<String> ownersNotFound = null;
+    private final int minElementsForProgress = 10;
+    private int numElementsToPost = 0;
     
     /**
      * JSONObject of the relationships
@@ -206,7 +200,7 @@ public class ModelPost extends AbstractJavaWebScript {
                 new SystemModelToAeExpression< EmsScriptNode, EmsScriptNode, String, Object, EmsSystemModel >( getSystemModel() );
 
     }
-
+    
     /**
      * Keep track of update elements
      */
@@ -236,6 +230,7 @@ public class ModelPost extends AbstractJavaWebScript {
             createOrUpdateModel( Object content, Status status,
                                  WorkspaceNode targetWS, WorkspaceNode sourceWS,
                                  boolean createCommit) throws Exception {
+        
         JSONObject postJson = (JSONObject) content;
         populateSourceFromJson( postJson );
 
@@ -263,6 +258,10 @@ public class ModelPost extends AbstractJavaWebScript {
         if(!(elementsArray == null))
             collections.add(elementsArray);
         TreeSet<EmsScriptNode> elements = new TreeSet< EmsScriptNode >();
+        
+        // Note: Cannot have any sendProgress methods before setting numElementsToPost
+        numElementsToPost = elementsArray.length();
+        sendProgress( "Got request - starting", projectId);
 
         for(JSONArray jsonArray : collections){
             JSONObject object = new JSONObject();
@@ -366,9 +365,23 @@ public class ModelPost extends AbstractJavaWebScript {
         double percent = 0;
         String relString = isRelationship ? " relationships" : "";
 
-        if ((rootElemNum%10) == 0) {
+        if ((rootElemNum%minElementsForProgress) == 0) {
             percent = (rootElemNum/numRootElems)*100;
-            sendProgress(String.format("Processed %.1f%% of root elements %s",percent,relString), projectId);
+            sendProgress(String.format("Processed %.1f%% of root elements %s",percent,relString), 
+                         projectId);
+        }
+    }
+    
+    /**
+     * Send progress messages to the log, JMS, and email if the number of elements we
+     * are posting is greater than minElementsForProgress (currently 10).
+     * 
+     * @param msg  The message
+     * @param projectSysmlId  The project sysml id
+     */
+    private void sendProgress( String msg, String projectSysmlId) {
+        if (numElementsToPost >= minElementsForProgress) {
+            sendProgress( msg, projectSysmlId, WorkspaceNode.getWorkspaceName(myWorkspace) );
         }
     }
     
@@ -931,7 +944,7 @@ public class ModelPost extends AbstractJavaWebScript {
      */
     protected boolean buildElementMap(final JSONArray jsonArray, 
                                       final WorkspaceNode workspace) throws JSONException {
-        sendProgress( "Starting to build element map", projectId );
+        sendProgress( "Starting to build element map", projectId);
         boolean isValid = true;
         final List<Boolean> validList = new ArrayList<Boolean>();
         
@@ -1165,7 +1178,8 @@ public class ModelPost extends AbstractJavaWebScript {
             //elements.add( reifiedNode );
             int numChildren = children.length();
             if (numChildren > 0) {
-                sendProgress("Processing "+numChildren+" children of node "+reifiedNode.getSysmlId(), projectId);
+                sendProgress("Processing "+numChildren+" children of node "+reifiedNode.getSysmlId(), 
+                             projectId);
             }
             for (int ii = 0; ii < numChildren; ii++) {
                 Set< EmsScriptNode > childElements = null;
@@ -2797,7 +2811,6 @@ public class ModelPost extends AbstractJavaWebScript {
                     if (getResponseStatus().getCode() == HttpServletResponse.SC_BAD_REQUEST) {
                         log(LogLevel.WARNING, "No write priveleges", HttpServletResponse.SC_FORBIDDEN);
                     } else if (projectNode != null) {
-                        sendProgress( "Got request - starting", projectId );
                         handleUpdate( postJson, status, myWorkspace, fix, model, true );
                     }
                 }
@@ -2815,7 +2828,7 @@ public class ModelPost extends AbstractJavaWebScript {
 
         status.setCode(responseStatus.getCode());
 
-        sendProgress( "Load/sync/update request is finished processing.", projectId );
+        sendProgress( "Load/sync/update request is finished processing.", projectId);
 
         printFooter();
 
