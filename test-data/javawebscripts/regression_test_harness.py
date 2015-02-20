@@ -639,20 +639,21 @@ common_filters+['"id"','"qualifiedId"','"timestamp"'],
 
 # SNAPSHOTS: ==========================    
 
-[
-240,
-"PostSnapshot",
-"Post snapshot test",
-create_curl_cmd(type="POST",base_url=BASE_URL_WS,
-                branch="master/sites/europa/products/301/",
-                post_type="snapshots"),
-True, 
-common_filters+['"created"','"id"','"url"'],
-["test","workspaces","develop", "develop2"],
-None,
-None,
-3
-],
+# This functionality is deprecated:
+# [
+# 240,
+# "PostSnapshot",
+# "Post snapshot test",
+# create_curl_cmd(type="POST",base_url=BASE_URL_WS,
+#                 branch="master/sites/europa/products/301/",
+#                 post_type="snapshots"),
+# True, 
+# common_filters+['"created"','"id"','"url"'],
+# ["test","workspaces","develop", "develop2"],
+# None,
+# None,
+# 3
+# ],
 
 # EXPRESSIONS: ==========================    
 
