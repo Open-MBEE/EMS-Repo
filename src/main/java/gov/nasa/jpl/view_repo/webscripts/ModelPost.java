@@ -151,7 +151,7 @@ public class ModelPost extends AbstractJavaWebScript {
     private EmsScriptNode sitePackageNode = null;
     private boolean internalRunWithoutTransactions = false;
     private Set<String> ownersNotFound = null;
-    private final int minElementsForProgress = 10;
+    private final int minElementsForProgress = 100;
     private int numElementsToPost = 0;
     
     /**
@@ -365,7 +365,8 @@ public class ModelPost extends AbstractJavaWebScript {
         double percent = 0;
         String relString = isRelationship ? " relationships" : "";
 
-        if ((rootElemNum%minElementsForProgress) == 0) {
+        // Sending percentage messages every 10 root elements processed:
+        if ((rootElemNum%10) == 0) {
             percent = (rootElemNum/numRootElems)*100;
             sendProgress(String.format("Processed %.1f%% of root elements %s",percent,relString), 
                          projectId, false);
