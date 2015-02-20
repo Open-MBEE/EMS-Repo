@@ -1,0 +1,16 @@
+{"elements":[
+ 
+
+   {
+        "documentation": "",
+        "sysmlid": "jsonTest1",
+        "name": "jsonTest1",
+        "owner": "123456",
+        "specialization": {"type": "Constraint",
+                          "specification":
+                            {"type": "LiteralInteger",
+					         "integer": 1}
+					        }
+    },
+     
+]}

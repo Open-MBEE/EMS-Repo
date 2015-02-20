@@ -53,6 +53,7 @@ import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.search.LimitBy;
+import org.alfresco.service.cmr.search.PermissionEvaluationMode;
 import org.alfresco.service.cmr.search.ResultSet;
 import org.alfresco.service.cmr.search.ResultSetRow;
 import org.alfresco.service.cmr.search.SearchParameters;
@@ -60,7 +61,6 @@ import org.alfresco.service.cmr.search.SearchService;
 import org.alfresco.service.cmr.security.AccessStatus;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.alfresco.service.cmr.security.PersonService;
-import org.alfresco.service.cmr.site.SiteInfo;
 import org.alfresco.service.cmr.version.Version;
 import org.alfresco.service.cmr.version.VersionHistory;
 import org.alfresco.service.namespace.QName;
@@ -157,7 +157,7 @@ public class NodeUtil {
     public static boolean doFullCaching = true;
     public static boolean doSimpleCaching = true;
     public static boolean doHeisenCheck = true;
-    public static boolean doVersionCaching = true;
+    public static boolean doVersionCaching = false; // turn this off by default
     public static boolean activeVersionCaching = true;
     public static boolean doJsonCaching = true;
     public static boolean doJsonDeepCaching = true;
@@ -785,7 +785,6 @@ public class NodeUtil {
             // Make sure we didn't just get a near match.
             try {
                 if ( !esn.checkPermissions( PermissionService.READ ) ) {
-
                     continue;
                 }
                 boolean match = true;
@@ -1669,35 +1668,16 @@ public class NodeUtil {
                                              StringBuffer response ) {
         if ( Utils.isNullOrEmpty( siteName ) ) return null;
 
-        // Try to find the site in the workspace first.
-        ArrayList< NodeRef > refs =
-                findNodeRefsByType( siteName, SearchType.CM_NAME.prefix,
-                                    ignoreWorkspace, workspace, dateTime, true,
-                                    true, getServices(), false );
-        for ( NodeRef ref : refs ) {
-            EmsScriptNode siteNode = new EmsScriptNode(ref, services, response);
-            if ( siteNode.isSite() ) {
-                return siteNode;
-            }
+        // Don't need to lookup sites using findNodeRefs, since we know where they are
+        EmsScriptNode context = null;
+        if (workspace == null) {
+            context = NodeUtil.getCompanyHome( services );
+        } else {
+            context = workspace;
         }
-
-        // Get the site from SiteService.
-        SiteInfo siteInfo = services.getSiteService().getSite(siteName);
-        if (siteInfo != null) {
-            NodeRef siteRef = siteInfo.getNodeRef();
-            if ( dateTime != null ) {
-                siteRef = getNodeRefAtTime( siteRef, dateTime );
-            }
-
-            if (siteRef != null) {
-                EmsScriptNode siteNode = new EmsScriptNode(siteRef, services, response);
-                if ( siteNode != null
-                     && ( workspace == null || workspace.contains( siteNode ) ) ) {
-                    return siteNode;
-                }
-            }
-        }
-        return null;
+        
+        EmsScriptNode siteNode = context.childByNamePath( "Sites/" + siteName );
+        return siteNode;
     }
 
     /**
@@ -2211,11 +2191,13 @@ public class NodeUtil {
     }
 
     public static String getName( NodeRef ref ) {
+        if ( ref == null ) return null;
         EmsScriptNode node = new EmsScriptNode( ref, getServices() );
         return node.getName();
     }
 
     public static String getSysmlId( NodeRef ref ) {
+        if ( ref == null ) return null;
         EmsScriptNode node = new EmsScriptNode( ref, getServices() );
         return node.getSysmlId();
     }
@@ -2603,6 +2585,7 @@ public class NodeUtil {
      */
     public static void sendNotificationEvent( String subject, String msg,
                                               ServiceRegistry services ) {
+        // FIXME: need to base the single send on the same subject
         if (!heisenbugSeen) {
             String hostname = services.getSysAdminParams().getAlfrescoHost();
             
@@ -2617,6 +2600,50 @@ public class NodeUtil {
             ActionUtil.sendEmailTo( sender, recipient, msg, subject, services );
             heisenbugSeen = true;
         }
+    }
+    
+    /**
+     * Adds embedded values specs in node if present to the nodes set.
+     * 
+     * @param node Node to check for embedded value spec
+     * @param nodes Adds found value spec nodes to this set
+     * @param services
+     */
+    public static void addEmbeddedValueSpecs(NodeRef ref,  Set< NodeRef > nodes,
+                                              ServiceRegistry services) {
+        
+        Object propVal;
+        EmsScriptNode node = new EmsScriptNode(ref, services);
+        
+        for ( String acmType : Acm.TYPES_WITH_VALUESPEC.keySet() ) {
+            // It has a apsect that has properties that map to value specs:
+            if ( node.hasOrInheritsAspect( acmType ) ) {
+                
+                for ( String acmProp : Acm.TYPES_WITH_VALUESPEC.get(acmType) ) {
+                    propVal = node.getProperty(acmProp);
+                    
+                    if (propVal != null) {
+                        // Note: We want to include deleted nodes also, so no need to check for that
+                        if (propVal instanceof NodeRef){
+                            NodeRef propValRef = (NodeRef)propVal;
+                            if (NodeUtil.scriptNodeExists( propValRef )) {
+                                nodes.add( propValRef );
+                            }
+                        }
+                        else if (propVal instanceof List){
+                            List<NodeRef> nrList = (ArrayList<NodeRef>) propVal;
+                            for (NodeRef propValRef : nrList) {
+                                if (propValRef != null && NodeUtil.scriptNodeExists( propValRef )) {
+                                    nodes.add( propValRef );
+                                }
+                            }
+                        }
+                        break;
+                    }
+                }
+            }
+        }
+        
     }
 
 }

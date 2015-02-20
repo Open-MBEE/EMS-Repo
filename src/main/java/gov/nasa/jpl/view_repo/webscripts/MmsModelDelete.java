@@ -26,6 +26,7 @@ import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.security.PermissionService;
+import org.apache.log4j.Logger;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.extensions.webscripts.Cache;
@@ -33,6 +34,8 @@ import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
 
 public class MmsModelDelete extends AbstractJavaWebScript {
+    static Logger logger = Logger.getLogger(MmsModelDelete.class);
+
     Set< EmsScriptNode > valueSpecs = new LinkedHashSet<EmsScriptNode>();
 
     @Override
@@ -158,7 +161,8 @@ public class MmsModelDelete extends AbstractJavaWebScript {
                 if (wsDiff.isDiff()) {
                     // Send deltas to all listeners
                     if ( !CommitUtil.sendDeltas(result, wsId, projectId, source) ) {
-                        log(Level.WARN, "createOrUpdateModel deltas not posted properly");
+                        //log(Level.WARN, "createOrUpdateModel deltas not posted properly");
+                        logger.warn("deltas not posted properly");
                     }
         
                     CommitUtil.commit( result, workspace, "", true, services, response );

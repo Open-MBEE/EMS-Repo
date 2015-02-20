@@ -1,652 +1,14 @@
 #
+# The regression harness.  Define the tests to run in this file.
+#
 # TODO:
 #    -Have script check test list to ensure unique numbers/names
 #    -Fix run server if we use it
 #    -Get SOAP UI tests working
 #    -Add ability to run test functions instead of just curl string commands
 
-import os
-import commands
-import re
-import time
-import subprocess
-import sys
-import optparse
-import glob
-import json
-import datetime
+from regression_lib import *
 
-CURL_STATUS = '-w "\\n%{http_code}\\n"'
-CURL_POST_FLAGS_NO_DATA = "-X POST"
-CURL_POST_FLAGS = '-X POST -H "Content-Type:application/json" --data'
-CURL_PUT_FLAGS = "-X PUT"
-CURL_GET_FLAGS = "-X GET"
-CURL_DELETE_FLAGS = "-X DELETE"
-CURL_USER = " -u admin:admin"
-CURL_FLAGS = CURL_STATUS+CURL_USER
-HOST = "localhost:8080" 
-SERVICE_URL = "http://%s/alfresco/service/"%HOST
-BASE_URL_WS_NOBS = SERVICE_URL+"workspaces"
-BASE_URL_WS = BASE_URL_WS_NOBS+"/"
-BASE_URL_JW = SERVICE_URL+"javawebscripts/"
-
-failed_tests = 0
-errs = []
-passed_tests = 0
-result_dir = ""
-baseline_dir = ""
-display_width = 100
-test_dir_path = "test-data/javawebscripts"
-test_nums = []
-test_names = []
-create_baselines = False
-common_filters = ['"created"','"read"','"lastModified"','"modified"']
-cmd_git_branch = None
-
-# Some global variables for lambda functions in tests
-gv1 = None
-gv2 = None
-gv3 = None
-gv4 = None
-gv5 = None
-gv6 = None
-
-# These capture the curl output for any teardown functions
-orig_output = None
-filtered_output = None
-orig_json = None
-filtered_json = None
-
-def set_gv1( v ):
-    global gv1
-    gv1 = v
-def set_gv2( v ):
-    global gv2
-    gv2 = v
-def set_gv3( v ):
-    global gv3
-    gv3 = v
-def set_gv4( v ):
-    global gv4
-    gv4 = v
-def set_gv5( v ):
-    global gv5
-    gv5 = v
-def set_gv6( v ):
-    global gv6
-    gv6 = v
-
-import re
-
-def get_json_output_no_status():
-    '''Gets the output json and removes the status code from it for use in the next test'''
-
-    json_output = ""
-    #print 'orig_output=' + str(orig_output)
-    if orig_output != None and len(str(orig_output)) > 5:
-        # find the status code at the end of the string and remove it
-        # comput i as the index to the start of the status code
-        # walk backwards over whitespace 
-        i=len(orig_output)-1
-        while i >= 0:
-            if not (orig_output[i] in [' ', '\n', '\t' ]):
-                break
-            i = i - 1
-        # walk backwards over digits
-        while i >= 0:
-            if not (orig_output[i] >= '0' and orig_output[i] <= '9'):
-                break
-            i = i - 1
-        # set json_output to orig_output without the ststus code
-        if i > 0:
-            json_output = orig_output[0:i]
-#         json_output = re.sub(r'^[2][0-9][0-9]', r'', orig_output, 1)
-#         #json_output = re.sub("^$", "", json_output)
-        #print 'json_output=' + str(json_output)
-        
-    return json_output
-        
-def do20():
-    ''' Gets the "modified" date out of the json output and sets gv4 to it.'''
-    modDate = None
-    json_output = get_json_output_no_status()
-    if json_output:
-        j = json.loads(json_output)
-        #print "j=" + str(j)
-        if j and j['workspace2'] and j['workspace2']['updatedElements'] and \
-        len(j['workspace2']['updatedElements']) > 0:
-            modDate = j['workspace2']['updatedElements'][0]['modified']
-    set_gv4(modDate)
-    
-def set_json_output_to_gv(gv):
-    '''Sets the json output to gv variable'''
-    if gv == 1:
-        set_gv1(get_json_output_no_status().replace("\n",""))
-    elif gv == 2:
-        set_gv2(get_json_output_no_status().replace("\n",""))
-    elif gv == 3:
-        set_gv3(get_json_output_no_status().replace("\n",""))
-    elif gv == 4:
-        set_gv4(get_json_output_no_status().replace("\n",""))
-    elif gv == 5:
-        set_gv5(get_json_output_no_status().replace("\n",""))
-    elif gv == 6:
-        set_gv6(get_json_output_no_status().replace("\n",""))
-    
-def set_json_output_to_gv1():
-    '''Sets the json output to gv1 variable'''
-    set_json_output_to_gv(1)
-    
-def set_json_output_to_gv2():
-    '''Sets the json output to gv2 variable'''
-    set_json_output_to_gv(2)
-
-def set_json_output_to_gv3():
-    '''Sets the json output to gv3 variable'''
-    set_json_output_to_gv(3)
-    
-def do176():
-    '''Get the json output, modifies the description and name keys,
-       and set to gv1'''
-    json_output = get_json_output_no_status()
-    j = json.loads(json_output)
-    
-    if j and j['workspaces'] and j['workspaces'][0]:
-        j["workspaces"][0]["description"] = "modified the workspace name and desc"
-        j["workspaces"][0]["name"] = "modifiedWorkspaceName"
-    
-    set_gv3(json.dumps(j))
-    
-def set_wsid_to_gv(gv):
-    '''Get the json output, and sets gvi to the that workspace id'''
-    json_output = get_json_output_no_status()
-    j = json.loads(json_output)
-    
-    if j and 'workspaces' in j and len(j['workspaces']) > 0: # and j['workspaces'][0]['id']:
-        if gv == 1:
-            set_gv1(j["workspaces"][0]["id"])
-        elif gv == 2:
-            set_gv2(j["workspaces"][0]["id"])
-        elif gv == 3:
-            set_gv3(j["workspaces"][0]["id"])
-        elif gv == 4:
-            set_gv4(j["workspaces"][0]["id"])
-        elif gv == 5:
-            set_gv5(j["workspaces"][0]["id"])
-        elif gv == 6:
-            set_gv6(j["workspaces"][0]["id"])
-            
-def set_wsid_to_gv1():
-    '''Get the json output, and sets gv1 to the that workspace id'''
-    set_wsid_to_gv(1)
-    
-def set_wsid_to_gv2():
-    '''Get the json output, and sets gv2 to the that workspace id'''
-    set_wsid_to_gv(2)
-    
-def set_wsid_to_gv3():
-    '''Get the json output, and sets gv3 to the that workspace id'''
-    set_wsid_to_gv(3)
-    
-def set_wsid_to_gv4():
-    '''Get the json output, and sets gv4 to the that workspace id'''
-    set_wsid_to_gv(4)
-    
-def set_wsid_to_gv5():
-    '''Get the json output, and sets gv5 to the that workspace id'''
-    set_wsid_to_gv(5)
-    
-def set_wsid_to_gv6():
-    '''Get the json output, and sets gv6 to the that workspace id'''
-    set_wsid_to_gv(6)
-    
-def set_read_to_gv(gv):
-    '''Get the json output, and sets gvi to the read time'''
-    json_output = get_json_output_no_status()
-    j = json.loads(json_output)
-    
-    if j:
-        if gv == 1:
-            set_gv1(j["elements"][0]["read"])
-        elif gv == 2:
-            set_gv2(j["elements"][0]["read"])
-        elif gv == 3:
-            set_gv3(j["elements"][0]["read"])
-        elif gv == 4:
-            set_gv4(j["elements"][0]["read"])
-        elif gv == 5:
-            set_gv5(j["elements"][0]["read"])
-        elif gv == 6:
-            set_gv6(j["elements"][0]["read"])
-            
-def set_read_to_gv1():
-    '''Get the json output, and sets gv1 to the read time'''
-    set_read_to_gv(1)
-    
-def set_read_to_gv2():
-    '''Get the json output, and sets gv2 to the read time'''
-    set_read_to_gv(2)
-    
-def set_read_to_gv3():
-    '''Get the json output, and sets gv3 to the read time'''
-    set_read_to_gv(3)
-    
-def set_read_to_gv4():
-    '''Get the json output, and sets gv4 to the read time'''
-    set_read_to_gv(4)
-    
-def set_read_to_gv5():
-    '''Get the json output, and sets gv5 to the read time'''
-    set_read_to_gv(5)
-    
-def set_read_to_gv6():
-    '''Get the json output, and sets gv6 to the read time'''
-    set_read_to_gv(6)
-    
-def get_current_time(delay=3):
-    '''Gets the current time and adds delay mins b/c it lags behind'''
-    a = datetime.datetime.now() + datetime.timedelta(minutes=delay)
-    return a.strftime("%Y-%m-%dT%H:%M:%X.000")
-    
-def create_command_line_options():
-
-    '''Create all the command line options for this application
-    
-    Returns
-    --------
-    An optparse.OptionParser object for parsing the command line arguments fed to this application'''
-    
-    usageText = '''
-    python regression_test_harness.py [-t <TESTNUMS> -n <TESTNAMES> -b -g <GITBRANCH>]
-    
-    To run all tests for the branch:
-    
-    python regression_test_harness.py 
-    
-    To run test numbers 1,2,11,5-9:
-    
-    python regression_test_harness.py -t 1,2,11,5-9
-    
-    To create baselines of all tests for the branch:
-    
-    python regression_test_harness.py -b
-    
-    To run tests with names "test1" and "test2"
-    
-    python regression_test_harness.py -n test1,test2
-     
-    After generating the baselines you will need to copy them from testBaselineDir 
-    into the desired folder for that branch, ie workspacesBaselineDir, if you like the results.  
-    This is because when running this script outside of jenkins, the script will output to testBaselineDir.
-    Alternatively, change the branch name used using the -g command line arg when creating the baselines,
-    to output to the correct baseline folder.
-    
-    When all tests are ran, it runs all the tests mapped to the current branch, which is specified in
-    the tests table.  The current branch is determined via the GIT_BRANCH environment variable, or the
-    -g command line argument.
-    
-    The -t option can take test numbers in any order, and it will run them in the order specified.
-    Similarly for -n option.
-    '''
-                
-    versionText = 'Version 1 (9_16_2014)'
-    
-    parser = optparse.OptionParser(usage=usageText,version=versionText)
-        
-    parser.add_option("-t","--testNums",action="callback",type="string",metavar="TESTNUMS",callback=parse_test_nums,
-                      help='''Specify the test numbers to run or create baselines for, ie "1,2,5-9,11".  Can only supply this if not supplying -n also.  (Optional)''')
-    parser.add_option("-n","--testNames",action="callback",type="string",metavar="TESTNAMES",callback=parse_test_names,
-                      help='''Specify the test names to run or create baselines for, ie "test1,test2".  Can only supply this if not supplying -t also.  (Optional)''')
-    parser.add_option("-b","--createBaselines",action="store_true",dest="create_baselines",
-                      help='''Supply this option if you want to create the baseline files for the tests (Optional)''')
-    parser.add_option("-g","--gitBranch",action="callback",type="string",metavar="GITBRANCH",callback=parse_git_branch,
-                      help='''Specify the branch to use, otherwise uses the value of $GIT_BRANCH, and if that env variable is not defined uses 'test'. (Optional)''')
-    parser.add_option("-v","--evaluate",action="store_true",dest="evaluate_only",
-                      help='''Do not execute the tests. Just evaluate the existing output. (Optional)''')
-        
-    return parser
-
-def parse_command_line():
-    '''Parse the command line options given to this application'''
-
-    global test_nums, create_baselines, evaluate_only, cmd_git_branch, test_names
-    
-    parser = create_command_line_options()
-    
-    parser.test_nums = None
-    parser.cmd_git_branch = None
-    parser.test_names = None
-    
-    (_options,_args) = parser.parse_args()
-    
-    test_nums = parser.test_nums
-    test_names = parser.test_names
-    create_baselines = _options.create_baselines
-    evaluate_only = _options.evaluate_only
-    cmd_git_branch = parser.cmd_git_branch
-    
-    if test_nums and test_names:
-        print "ERROR: Cannot supply both the -t and -n options!  Please remove one of them."
-        sys.exit(1)
- 
-def parse_git_branch(option, opt, value, parser):
-    '''
-    Parses the GIT_BRANCH command line arg
-    '''
-    
-    if value is not None:
-        parser.cmd_git_branch = value.strip()
-
-def parse_test_nums(option, opt, value, parser):
-    '''
-    Parses out the section numbers ran from the passed string and creates
-    a list of the corresponding section numbers, ie "1,3-5,7" will
-    create [1,3,4,5,7].  Assigns this to list to parser.test_nums
-    '''
-    
-    def parse_range(str):
-    
-        myList = []
-        keyListBounds = str.split('-')
-        bound1 = int(keyListBounds[0])
-        bound2 = int(keyListBounds[1])
-        
-        mult = 1 if bound2 >= bound1 else -1
-
-        for key in range(bound1,bound2+mult,mult):
-            myList.append(key)
-            
-        return myList
-            
-    keyList = []
-    
-    if value is not None:
-        value = value.strip()
-        
-        # value is comma separated ie 1,3-5,7:
-        if value.find(',') != -1:
-            keyListArray = value.split(',')
-            
-            for keyStr in keyListArray:
-                                          
-                # testKey is a range ie 1-5:
-                if keyStr.find('-') != -1:
-                    keyList += parse_range(keyStr)
-                    
-                # It was a single key:
-                else:
-                    keyList.append(int(keyStr))
-                    
-        # value is just a range ie 1-3:
-        elif value.find('-') != -1:
-            keyList += parse_range(value)
-
-        #value was just a single key:
-        else:
-            keyList = [int(value)]
-                    
-    parser.test_nums = keyList
-    
-def parse_test_names(option, opt, value, parser):
-    '''
-    Parses out the test names from the command line arg.  Assigns this to list to parser.test_names
-    '''
-    
-    keyList = []
-    
-    if value is not None:
-        value = value.strip()
-        
-        # value is comma separated:
-        if value.find(',') != -1:
-            keyList = value.split(',')
-                       
-        #value was just a single key:
-        else:
-            keyList = [value]
-                    
-    parser.test_names = keyList
-
-def thick_divider():
-    print "\n"+"="*display_width+"\n"
-
-def thin_divider():
-    print "-"*display_width
-    
-def print_pass(msg):
-    global passed_tests
-    passed_tests += 1
-    print "\nPASS: "+str(msg)
-
-def print_error(msg, outpt):
-    global failed_tests
-    failed_tests += 1
-    errs.append(msg)
-    print "\nFAIL: "+str(msg)
-    print str(outpt)
-    
-def mbee_util_jar_path():
-    path = "../../../../.m2/repository/gov/nasa/jpl/mbee/util/mbee_util/"
-    pathList = glob.glob(path+"*SNAPSHOT/*SNAPSHOT.jar")
-    if pathList:
-        return pathList[0]
-    else:
-        return path+"0.0.16/mbee_util-0.0.16.jar"
-
-def run_curl_test(test_num, test_name, test_desc, curl_cmd, use_json_diff=False, filters=None,
-                  setupFcn=None, teardownFcn=None, delay=None):
-    '''
-    Runs the curl test and diffs against the baseline if create_baselines is false, otherwise
-    runs the curl command and creates the baseline .json file. 
-    
-    test_num: The unique test number for this test
-    test_name: The name of the test
-    test_desc: The test description
-    curl_cmd: The curl command to send
-    use_json_diff: Set to True to use a JsonDiff when comparing to the baseline
-    filters: A list of strings that should be removed from the post output, ie ['"modified"']
-    delay: Delay time in seconds before running the test
-    '''
-    
-    global orig_output
-    global filtered_output
-    global orig_json
-    global filtered_json
-    global gv1, gv2, gv3, gv4, gv5, gv6
-
-    result_json = "%s/%s.json"%(result_dir,test_name)
-    result_orig_json = "%s/%s_orig.json"%(result_dir,test_name)
-    baseline_json = "%s/%s.json"%(baseline_dir,test_name)
-    baseline_orig_json = "%s/%s_orig.json"%(baseline_dir,test_name)
-
-    thick_divider()
-    if create_baselines and not evaluate_only:
-        print "CREATING BASELINE FOR TEST %s (%s)"%(test_num, test_name)
-        orig_json = baseline_orig_json
-        filtered_json = baseline_json
-    else:
-        print "TEST %s (%s) %s"%(test_num, test_name, datetime.datetime.now())
-        orig_json = result_orig_json
-        filtered_json = result_json
-        
-    if delay and not evaluate_only:
-        print "Delaying %s seconds before running the test"%delay
-        time.sleep(delay)
-        
-    print "TEST DESCRIPTION: "+test_desc
-    
-    if setupFcn and not evaluate_only:
-        print "calling setup function"
-        setupFcn()
-
-    #replace gv variable references in curl command
-    curl_cmd = str(curl_cmd).replace("$gv1", str(gv1))
-    curl_cmd = str(curl_cmd).replace("$gv2", str(gv2))
-    curl_cmd = str(curl_cmd).replace("$gv3", str(gv3))
-    curl_cmd = str(curl_cmd).replace("$gv4", str(gv4))
-    curl_cmd = str(curl_cmd).replace("$gv5", str(gv5))
-    curl_cmd = str(curl_cmd).replace("$gv6", str(gv6))
-
-    foo=""
-    if (evaluate_only):
-        foo="Not "
-    print foo + "Executing curl cmd: \n"+str(curl_cmd) 
-    
-    status = 0
-    if (not evaluate_only):
-        (status,output) = commands.getstatusoutput(curl_cmd+"> "+orig_json)
-        
-    if status == 0:
-                
-        file_orig = open(orig_json, "r")
-        
-        # Apply filters to output of curl cmd (not using output b/c getstatusoutput pipes stderr to stdout):
-        orig_output = ""
-        filter_output = ""
-        if filters:
-            for line in file_orig:
-                filterFnd = False
-                for filter in filters:
-                    # If the contains the filter:
-                    if re.search(filter,line):
-                        filterFnd = True
-                        break
-                    
-                # Add line if it does not contain the filter:
-                if not filterFnd:
-                    filter_output += (line)
-                    
-                # Always add lines to orig_output
-                orig_output += (line)
-        else:
-            stuffRead = file_orig.read()
-            filter_output = stuffRead
-            orig_output = stuffRead
-        
-        # Write to result .json file:
-        file = open(filtered_json, "w")
-        file.write(filter_output)
-        file.close()
-        file_orig.close()
-     
-        if teardownFcn and not evaluate_only:
-            print "calling teardown function"
-            teardownFcn()
-        
-        if create_baselines and not evaluate_only:
-            
-            print "Filtered output of curl command:\n"+filter_output
-            
-        else:
-            # Perform diff:
-            if use_json_diff:
-                cp = ".:%s:../../target/mms-repo-ent-war/WEB-INF/lib/json-20140107.jar:../../target/mms-repo-war/WEB-INF/lib/json-20090211.jar:../../target/classes"%mbee_util_jar_path()
-                diff_cmd = "java -cp %s gov.nasa.jpl.view_repo.util.JsonDiff"%cp
-            else:
-                diff_cmd = "diff"
-
-            (status_diff,output_diff) = commands.getstatusoutput("%s %s %s"%(diff_cmd,baseline_json,result_json))
-
-            if output_diff:
-                print_error("Test number %s (%s) failed!"%(test_num,test_name), "  Diff returned bad status or diffs found in the filtered .json files (%s,%s), status: %s, output: \n'%s'"%(baseline_json,result_json,status_diff,output_diff))
-            else:
-                print_pass("Test number %s (%s) passed!  No differences in the filtered .json files (%s,%s)"%(test_num,test_name,baseline_json,result_json))
-    else:
-        print_error("Test number %s (%s) failed!"%(test_num,test_name), "Curl command return a bad status and output doesnt start with json: %s, output: '%s'"%(status,output))
-
-    thick_divider()
-    
-def run_test(test):
-    '''
-    Runs the curl test specified the passed test list
-    '''
-    
-    run_curl_test(test_num=test[0],test_name=test[1],
-                  test_desc=test[2],curl_cmd=test[3],
-                  use_json_diff=test[4],filters=test[5],
-                  setupFcn=test[7] if (len(test) > 7) else None,
-                  teardownFcn=test[8] if (len(test) > 8) else None,
-                  delay=test[9] if (len(test) > 9) else None)
-    
-    
-def create_curl_cmd(type, data="", base_url=BASE_URL_WS, post_type="elements", branch="master/", 
-                    project_post=False):
-    '''
-    Helper method to create curl commands.  Returns the curl cmd (string).
-    
-    type: POST, GET, DELETE
-    data: Data to post in JsonData ie elementsNew.json, or the key/value pair when making a project ie "'{"name":"JW_TEST"}'",
-          or the data to get ie views/301 or data to delete ie workspaces/master/elements/771
-    base_url:  What base url to use, ie %s
-    post_type: "elements", "views", "products"
-    branch: The workspace branch, ie "master/", or the project/site to use to ie "sites/europa/projects/123456/"
-    project_post: Set to True if creating a project
-    post_no_data: Set to True if posting with no data
-    '''%BASE_URL_WS
-    
-    cmd = ""
-    
-    if type == "POST":
-        if project_post:
-            cmd = 'curl %s %s %s "%s%s"'%(CURL_FLAGS, CURL_POST_FLAGS, data, base_url, branch)
-        elif data:
-            cmd = 'curl %s %s @JsonData/%s "%s%s%s"'%(CURL_FLAGS, CURL_POST_FLAGS, data, base_url, branch, post_type)
-        else:
-            cmd = 'curl %s %s "%s%s%s"'%(CURL_FLAGS, CURL_POST_FLAGS_NO_DATA, base_url, branch, post_type)
-            
-    elif type == "GET":
-        cmd = 'curl %s %s "%s%s%s"'%(CURL_FLAGS, CURL_GET_FLAGS, base_url, branch, data)
-        
-    elif type == "DELETE":
-        cmd = 'curl %s %s "%s%s%s"'%(CURL_FLAGS, CURL_DELETE_FLAGS, base_url, branch, data)
-
-    return cmd
-
-def kill_server():
-    (status,output) = commands.getstatusoutput("pkill -fn 'integration-test'")
-
-def startup_server():
-    
-    print "KILLING SERVER IF ONE IS RUNNING"
-    kill_server()
-    time.sleep(1)
-    
-    print "STARTING UP SERVER"
-    #subprocess.call("./runserver_regression.sh")
-    # Is this inheriting the correct environment variables?
-    #p = subprocess.Popen("./runserver_regression.sh", shell=True) # still not working, eventually hangs and server doesn't come up
-    commands.getstatusoutput("./runserver_regression.sh")
-    #time.sleep(30)
-    
-    print "POLLING SERVER"
-    server_log = open("runserver.log","r")
-    seek = 0
-    fnd_line = False
-    for timeout in range(0,600):
-        server_log.seek(seek)
-        for line in server_log:
-            if "Starting ProtocolHandler" in line:
-                fnd_line = True
-                break
-            
-        if fnd_line:
-            break
-        
-        seek = server_log.tell()
-        time.sleep(1)
-        
-        if timeout%10 == 0:
-            print ".."
-
-    if fnd_line:
-        print "SERVER CONNECTED"
-        
-    else:
-        print "ERROR: SERVER TIME-OUT"
-        kill_server()
-        sys.exit(1)
-        
-        
 ##########################################################################################
 #
 # TABLE OF ALL POSSIBLE TESTS TO RUN
@@ -693,6 +55,17 @@ common_filters,
 ],
         
 [
+21,
+"PostElementsBadOwners",
+"Post elements to the master branch that have owners that cant be found",
+create_curl_cmd(type="POST",data="badOwners.json",base_url=BASE_URL_WS,
+                post_type="elements",branch="master/"),
+True, 
+common_filters,
+["test","workspaces","develop", "develop2"]
+],
+        
+[
 30,
 "PostViews",
 "Post views",
@@ -722,6 +95,17 @@ None,
 create_curl_cmd(type="GET",data="sites/europa/projects/123456",base_url=BASE_URL_WS,
                 branch="master/"),
 False, 
+None,
+["test","workspaces","develop", "develop2"]
+],
+        
+[
+51,
+"GetProjects",
+"Get all projects for master",
+create_curl_cmd(type="GET",data="projects",base_url=BASE_URL_WS,
+                branch="master/"),
+True, 
 None,
 ["test","workspaces","develop", "develop2"]
 ],
@@ -1104,7 +488,7 @@ common_filters,
         
 # This test case depends on the previous two
 [
-230,
+225,
 "CompareWorkspacesWithBranchTime",
 "Compare workspaces",
 create_curl_cmd(type="GET",base_url=SERVICE_URL,
@@ -1116,7 +500,7 @@ common_filters+['"id"','"qualifiedId"'],
         
 # This test case depends on previous ones
 [
-231,
+226,
 "PostToWorkspace3",
 "Post element z to workspace",
 create_curl_cmd(type="POST",data="z.json",base_url=BASE_URL_WS,
@@ -1128,7 +512,7 @@ common_filters,
         
 # This test case depends on previous ones
 [
-232,
+227,
 "CreateWorkspaceWithBranchTime2",
 "Create workspace with a branch time using the current time for the branch time",
 create_curl_cmd(type="POST",base_url=BASE_URL_WS,
@@ -1142,7 +526,7 @@ set_wsid_to_gv6
         
 # This test case depends on the previous ones
 [
-233,
+228,
 "CompareWorkspacesWithBranchTimes",
 "Compare workspaces both which have a branch time and with a modified element on the common parent",
 create_curl_cmd(type="GET",base_url=SERVICE_URL,
@@ -1153,7 +537,7 @@ common_filters+['"id"','"qualifiedId"'],
 ],
         
 [
-234,
+229,
 "CreateWorkspaceAgain1",
 "Create workspace for another diff test",
 create_curl_cmd(type="POST",base_url=BASE_URL_WS,
@@ -1166,7 +550,7 @@ set_wsid_to_gv1
 ],
         
 [
-235,
+230,
 "CreateWorkspaceAgain2",
 "Create workspace for another diff test",
 create_curl_cmd(type="POST",base_url=BASE_URL_WS,
@@ -1178,9 +562,21 @@ None,
 set_wsid_to_gv2
 ],
         
+# This is to test CMED-533.  Where we post the same elements to two different workspaces and diff.
+[
+231,
+"PostToWorkspaceG1ForCMED533",
+"Post elements to workspace wsG1 for testing CMED-533",
+create_curl_cmd(type="POST",data="elementsForBothWorkspaces.json",base_url=BASE_URL_WS,
+                post_type="elements",branch="$gv1/"),
+True, 
+common_filters,
+["test","workspaces","develop", "develop2"],
+],
+        
 # This test case depends on test 234
 [
-236,
+232,
 "PostToWorkspaceG1",
 "Post element to workspace wsG1",
 create_curl_cmd(type="POST",data="x.json",base_url=BASE_URL_WS,
@@ -1193,7 +589,7 @@ set_read_to_gv3
 ],
 
 [
-237,
+233,
 "PostToMaster",
 "Post element to master for a later diff",
 create_curl_cmd(type="POST",data="y.json",base_url=BASE_URL_WS,
@@ -1203,9 +599,21 @@ common_filters,
 ["test","workspaces","develop", "develop2"]
 ],
         
+# This is to test CMED-533.  Where we post the same elements to two different workspaces and diff.
+[
+234,
+"PostToWorkspaceG2ForCMED533",
+"Post elements to workspace wsG2 for testing CMED-533",
+create_curl_cmd(type="POST",data="elementsForBothWorkspaces.json",base_url=BASE_URL_WS,
+                post_type="elements",branch="$gv2/"),
+True, 
+common_filters,
+["test","workspaces","develop", "develop2"],
+],
+        
 # This test case depends on test 235
 [
-238,
+235,
 "PostToWorkspaceG2",
 "Post element to workspace wsG2",
 create_curl_cmd(type="POST",data="z.json",base_url=BASE_URL_WS,
@@ -1219,7 +627,7 @@ set_read_to_gv4
         
 # This test case depends on test 234 and 235
 [
-239,
+236,
 "CompareWorkspacesG1G2",
 "Compare workspaces wsG1 and wsG2 with timestamps",
 create_curl_cmd(type="GET",base_url=SERVICE_URL,
@@ -1231,20 +639,21 @@ common_filters+['"id"','"qualifiedId"','"timestamp"'],
 
 # SNAPSHOTS: ==========================    
 
-[
-240,
-"PostSnapshot",
-"Post snapshot test",
-create_curl_cmd(type="POST",base_url=BASE_URL_WS,
-                branch="master/sites/europa/products/301/",
-                post_type="snapshots"),
-True, 
-common_filters+['"created"','"id"','"url"'],
-["test","workspaces","develop", "develop2"],
-None,
-None,
-3
-],
+# This functionality is deprecated:
+# [
+# 240,
+# "PostSnapshot",
+# "Post snapshot test",
+# create_curl_cmd(type="POST",base_url=BASE_URL_WS,
+#                 branch="master/sites/europa/products/301/",
+#                 post_type="snapshots"),
+# True, 
+# common_filters+['"created"','"id"','"url"'],
+# ["test","workspaces","develop", "develop2"],
+# None,
+# None,
+# 3
+# ],
 
 # EXPRESSIONS: ==========================    
 
@@ -1560,7 +969,7 @@ None,
 ["test","workspaces","develop"]
 ],
 
-# DOWNGRADE TO VIEW AND ELEMENT: ==================    
+# DOWNGRADING: ==================    
 
 [
 500,
@@ -1708,112 +1117,250 @@ common_filters+['MMS_'],
 # PERMISSION TESTING =====================================================
 
 # Creating users for user testing
-# [
-# 610,
-# "Create Collaborator",
-# "Create Collaborator user for europa",
-# create_curl_cmd(type="POST",
-#                 data='\'{"userName": "Collaborator", "firstName": "Collaborator", "lastName": "user", "email": "Collaborator@jpl.nasa.gov", "groups": ["GROUP_site_europa_SiteCollaborator"]}\'',
-#                 base_url=SERVICE_URL,
-#                 post_type="",branch="api/people",project_post=True),
-# False, 
-# common_filters+['MMS_'],
-# ["test","workspaces","develop", "develop2"]
-# ],
-# 
-# [
-# 611,
-# "Create Contributor",
-# "Create Contributor user for europa",
-# create_curl_cmd(type="POST",
-#                 data='\'{"userName": "Contributor", "firstName": "Contributor", "lastName": "user", "email": "Contributor@jpl.nasa.gov", "groups": ["GROUP_site_europa_SiteContributor"]}\'',
-#                 base_url=SERVICE_URL,
-#                 post_type="",branch="api/people",project_post=True),
-# False, 
-# common_filters+['MMS_'],
-# ["test","workspaces","develop", "develop2"]
-# ],
-# 
-# [
-# 612,
-# "Create Consumer",
-# "Create Consumer user for europa",
-# create_curl_cmd(type="POST",
-#                 data='\'{"userName": "Consumer", "firstName": "Consumer", "lastName": "user", "email": "Consumer@jpl.nasa.gov", "groups": ["GROUP_site_europa_SiteConsumer"]}\'',
-#                 base_url=SERVICE_URL,
-#                 post_type="",branch="api/people",project_post=True),
-# False, 
-# common_filters+['MMS_'],
-# ["test","workspaces","develop", "develop2"]
-# ],
-# 
-# [
-# 613,
-# "Create Manager",
-# "Create Manager user for europa",
-# create_curl_cmd(type="POST",
-#                 data='\'{"userName": "Manager", "firstName": "Manager", "lastName": "user", "email": "Manager@jpl.nasa.gov", "groups": ["GROUP_site_europa_SiteManager"]}\'',
-#                 base_url=SERVICE_URL,
-#                 post_type="",branch="api/people",project_post=True),
-# False, 
-# common_filters+['MMS_'],
-# ["test","workspaces","develop", "develop2"]
-# ],
-#         
-# [
-# 614,
-# "Create None",
-# "Create user with no europa priveleges",
-# create_curl_cmd(type="POST",
-#                 data='\'{"userName": "None", "firstName": "None", "lastName": "user", "email": "None@jpl.nasa.gov"}\'',
-#                 base_url=SERVICE_URL,
-#                 post_type="",branch="api/people",project_post=True),
-# False, 
-# common_filters+['MMS_'],
-# ["test","workspaces","develop", "develop2"]
-# ]
-#
+[
+610,
+"CreateCollaborator",
+"Create Collaborator user for europa",
+create_curl_cmd(type="POST",
+                data='\'{"userName": "Collaborator", "firstName": "Collaborator", "lastName": "user", "email": "Collaborator@jpl.nasa.gov", "groups": ["GROUP_site_europa_SiteCollaborator"]}\'',
+                base_url=SERVICE_URL,
+                post_type="",branch="api/people",project_post=True),
+False, 
+common_filters+['MMS_', '"url"'],
+["test","workspaces","develop", "develop2"]
+],
+ 
+[
+611,
+"CreateContributor",
+"Create Contributor user for europa",
+create_curl_cmd(type="POST",
+                data='\'{"userName": "Contributor", "firstName": "Contributor", "lastName": "user", "email": "Contributor@jpl.nasa.gov", "groups": ["GROUP_site_europa_SiteContributor"]}\'',
+                base_url=SERVICE_URL,
+                post_type="",branch="api/people",project_post=True),
+False, 
+common_filters+['MMS_', '"url"'],
+["test","workspaces","develop", "develop2"]
+],
+ 
+[
+612,
+"CreateConsumer",
+"Create Consumer user for europa",
+create_curl_cmd(type="POST",
+                data='\'{"userName": "Consumer", "firstName": "Consumer", "lastName": "user", "email": "Consumer@jpl.nasa.gov", "groups": ["GROUP_site_europa_SiteConsumer"]}\'',
+                base_url=SERVICE_URL,
+                post_type="",branch="api/people",project_post=True),
+False, 
+common_filters+['MMS_', '"url"'],
+["test","workspaces","develop", "develop2"]
+],
+ 
+[
+613,
+"CreateManager",
+"Create Manager user for europa",
+create_curl_cmd(type="POST",
+                data='\'{"userName": "Manager", "firstName": "Manager", "lastName": "user", "email": "Manager@jpl.nasa.gov", "groups": ["GROUP_site_europa_SiteManager"]}\'',
+                base_url=SERVICE_URL,
+                post_type="",branch="api/people",project_post=True),
+False, 
+common_filters+['MMS_', '"url"'],
+["test","workspaces","develop", "develop2"]
+],
+         
+[
+614,
+"CreateNone",
+"Create user with no europa priveleges",
+create_curl_cmd(type="POST",
+                data='\'{"userName": "None", "firstName": "None", "lastName": "user", "email": "None@jpl.nasa.gov"}\'',
+                base_url=SERVICE_URL,
+                post_type="",branch="api/people",project_post=True),
+False, 
+common_filters+['MMS_', '"url"'],
+["test","workspaces","develop", "develop2"]
+],
+
 # lets do the None permissions
 # [
 # 620,
 # "NoneRead",
 # "Read element with user None",
-# "curl -w '\n%{http_code}\n' -u None:password -X GET http://localhost:8080/alfresco/service/workspaces/master/elements/y",
+# "curl -w '\\n%{http_code}\\n' -u None:password -X GET http://localhost:8080/alfresco/service/workspaces/master/elements/y",
 # True,
-# comon_filters,
-# ["develop"]
+# common_filters,
+# ["test","workspaces","develop", "develop2"]
 # ],
-# 
+#    
 # [
 # 621,
 # "NoneDelete",
 # "Delete element with user None",
-# "curl -w '\n%{http_code}\n' -u None:password -X DELETE http://localhost:8080/alfresco/service/workspaces/master/elements/y",
+# "curl -w '\\n%{http_code}\\n' -u None:password -X DELETE http://localhost:8080/alfresco/service/workspaces/master/elements/y",
 # True,
-# comon_filters,
-# ["develop"]
+# common_filters+['"timestamp"', '"id"'],
+# ["test","workspaces","develop", "develop2"]
 # ],
-# 
+#    
 # [
 # 622,
 # "NoneUpdate",
 # "Update element with user None",
-# "curl -w '\n%{http_code}\n' -u None:password -H Content-Type:application/json http://localhost:8080/alfresco/service/workspaces/master/elements -d '{\"elements\":[{\"sysmlid\":\"y\",\"documentation\":\"y is modified by None\"}]}'",
+# "curl -w '\\n%{http_code}\\n' -u None:password -H Content-Type:application/json http://localhost:8080/alfresco/service/workspaces/master/elements -d '{\"elements\":[{\"sysmlid\":\"y\",\"documentation\":\"y is modified by None\"}]}'",
 # True,
-# comon_filters,
-# ["develop"]
+# common_filters,
+# ["test","workspaces","develop", "develop2"]
 # ],
-# 
+#    
 # [
 # 623,
 # "NoneCreate",
 # "Create element with user None",
-# "curl -w '\n%{http_code}\n' -u None:password -H Content-Type:application/json http://localhost:8080/alfresco/service/workspaces/master/elements -d '{\"elements\":[{\"sysmlid\":\"ychild\",\"documentation\":\"y child\",\"owner\":\"y\"}]}'",
+# "curl -w '\\n%{http_code}\\n' -u None:password -H Content-Type:application/json http://localhost:8080/alfresco/service/workspaces/master/elements -d '{\"elements\":[{\"sysmlid\":\"ychild\",\"documentation\":\"y child\",\"owner\":\"y\"}]}'",
 # True,
-# comon_filters,
-# ["develop"]
+# common_filters,
+# ["test","workspaces","develop", "develop2"]
 # ],
+ 
+[
+624,
+"CollaboratorRead",
+"Read element with user Collaborator",
+"curl -w '\\n%{http_code}\\n' -u Collaborator:password -X GET http://localhost:8080/alfresco/service/workspaces/master/elements/y",
+True,
+common_filters,
+["test","workspaces","develop", "develop2"]
+],
+   
+[
+625,
+"CollaboratorUpdate",
+"Update element with user Collaborator",
+"curl -w '\\n%{http_code}\\n' -u Collaborator:password -H Content-Type:application/json http://localhost:8080/alfresco/service/workspaces/master/elements -d '{\"elements\":[{\"sysmlid\":\"y\",\"documentation\":\"y is modified by Collaborator\"}]}'",
+True,
+common_filters,
+["test","workspaces","develop", "develop2"]
+],
+   
+[
+626,
+"CollaboratorCreate",
+"Create element with user Collaborator",
+"curl -w '\\n%{http_code}\\n' -u Collaborator:password -H Content-Type:application/json http://localhost:8080/alfresco/service/workspaces/master/elements -d '{\"elements\":[{\"sysmlid\":\"ychild\",\"documentation\":\"y child\",\"owner\":\"y\"}]}'",
+True,
+common_filters,
+["test","workspaces","develop", "develop2"]
+],
+ 
+[
+627,
+"CollaboratorDelete",
+"Delete element with user Collaborator",
+"curl -w '\\n%{http_code}\\n' -u Collaborator:password -X DELETE http://localhost:8080/alfresco/service/workspaces/master/elements/y",
+True,
+common_filters+['"timestamp"', '"id"'],
+["test","workspaces","develop", "develop2"]
+],
+  
 
+# NULL PROPERTIES =====================================================
+
+[
+640,
+"PostNullElements",
+"Post elements to the master branch with null properties",
+create_curl_cmd(type="POST",data="nullElements.json",base_url=BASE_URL_WS,
+                post_type="elements",branch="master/"),
+True, 
+common_filters,
+["test","workspaces","develop", "develop2"]
+],
+        
+# JSON CACHE TESTING =====================================================
+
+# These test post the same element with updates to the embedded value spec.
+# This tests that the json cache doesnt return a outdated embedded value spec
+[
+650,
+"TestJsonCache1",
+"Post elements for json cache testing.",
+create_curl_cmd(type="POST",data="jsonCache1.json",base_url=BASE_URL_WS,
+                post_type="elements",branch="master/"),
+True, 
+common_filters,
+["test","workspaces","develop", "develop2"]
+],
+ 
+[
+651,
+"TestJsonCache2",
+"Post elements for json cache testing.",
+create_curl_cmd(type="POST",data="jsonCache2.json",base_url=BASE_URL_WS,
+                post_type="elements",branch="master/"),
+True, 
+common_filters,
+["test","workspaces","develop", "develop2"]
+],
+         
+[
+652,
+"TestJsonCache3",
+"Post elements for json cache testing.",
+create_curl_cmd(type="POST",data="jsonCache3.json",base_url=BASE_URL_WS,
+                post_type="elements",branch="master/"),
+True, 
+common_filters,
+["test","workspaces","develop", "develop2"]
+],
+         
+[
+653,
+"TestJsonCache4",
+"Post elements for json cache testing.",
+create_curl_cmd(type="POST",data="jsonCache4.json",base_url=BASE_URL_WS,
+                post_type="elements",branch="master/"),
+True, 
+common_filters,
+["test","workspaces","develop", "develop2"]
+],
+        
+# RESURRECTION TESTING (CMED-430): ==========================    
+
+[
+660,
+"TestResurrection1",
+"Post elements for resurrection of parents testing.  Has two parents that will be resurrected.",
+create_curl_cmd(type="POST",data="resurrectParents.json",base_url=BASE_URL_WS,
+                post_type="elements",branch="master/"),
+True, 
+common_filters,
+["test","workspaces","develop", "develop2"]
+],
+        
+# This test depends on the previous one:
+[
+661,
+"DeleteParents",
+"Delete parents",
+create_curl_cmd(type="DELETE",data="elements/parentToDelete1",base_url=BASE_URL_WS,
+                branch="master/"),
+True, 
+common_filters+['"timestamp"','"MMS_','"id"','"qualifiedId"','"version"', '"modified"'],
+["test","workspaces","develop", "develop2"]
+],
+        
+[
+662,
+"TestResurrection2",
+"Post elements for resurrection of parents testing.  Has two parents that will be resurrected.",
+create_curl_cmd(type="POST",data="resurrectParentsChild.json",base_url=BASE_URL_WS,
+                post_type="elements",branch="master/"),
+True, 
+common_filters,
+["test","workspaces","develop", "develop2"]
+],
+        
 ]
 
 ##########################################################################################    
@@ -1823,77 +1370,5 @@ common_filters+['MMS_'],
 ##########################################################################################    
 if __name__ == '__main__':
     
-    # Parse the command line arguments:
-    parse_command_line()
-    
-    # this is not working yet, so assumption for now is that this will be called 
-    # by the bash script which will start up the server
-    #startup_server() 
-    
-    # Change directories to where we are used to sending curl cmds:
-    if not os.path.exists(test_dir_path):
-        print "ERROR: Test directory path '%s' does not exists!\n"%test_dir_path
-        sys.exit(1)
-    
-    os.chdir(test_dir_path)
-
-    # Determine the branch to use based on the command line arg if supplied, otherwise
-    # use the environment variable:
-    if cmd_git_branch:
-        git_branch = cmd_git_branch
-    else:
-        git_branch = os.getenv("GIT_BRANCH", "test")
-    
-    # Make the directories if needed:
-    if "/" in git_branch:
-        git_branch = git_branch.split("/")[1]
-
-    result_dir = "%sResultDir"%git_branch
-    baseline_dir = "%sBaselineDir"%git_branch
-    
-    if not os.path.exists(result_dir):
-        os.makedirs(result_dir)
-        
-    if not os.path.exists(baseline_dir):
-        os.makedirs(baseline_dir)
-        
-    print "\nUSING BASELINE DIR: '%s'\nOUTPUT DIR: '%s'\n"%(baseline_dir, result_dir)
-    
-    # Run tests or create baselines:
-    # If there were test numbers specified:
-    if test_nums:
-        for test_num in test_nums:
-            # If it is a valid test number then run the test:
-            for test in tests:
-                if test_num == test[0]:
-                    run_test(test)
-                     
-    # If there were test names specified:
-    elif test_names:
-        for test_name in test_names:
-                # If it is a valid test number then run the test:
-                for test in tests:
-                    if test_name == test[1]:
-                        run_test(test)
-
-    # Otherwise, run all the tests for the branch:
-    else:
-        for test in tests:            
-            if git_branch in test[6]:
-                run_test(test)
-
-    # uncomment once startup_server() works
-#     print "KILLING SERVER"
-#     kill_server()
-    
-    if not create_baselines:
-        print "\nNUMBER OF PASSED TESTS: "+str(passed_tests)
-        print "NUMBER OF FAILED TESTS: "+str(failed_tests)+"\n"
-        if failed_tests > 0:
-            print "FAILED TESTS:"
-            for item in errs[:]:
-                print item
-            print "\n"
-    
-    sys.exit(failed_tests)
+    run(tests)
     

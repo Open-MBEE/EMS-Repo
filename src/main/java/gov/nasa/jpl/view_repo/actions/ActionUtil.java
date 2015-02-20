@@ -91,6 +91,7 @@ public class ActionUtil {
             mailAction.setParameterValue(MailActionExecuter.PARAM_TO, recipient);
             mailAction.setParameterValue(MailActionExecuter.PARAM_FROM, sender);
             mailAction.setParameterValue(MailActionExecuter.PARAM_TEXT, msg);
+            mailAction.setExecuteAsynchronously( true );
             services.getActionService().executeAction(mailAction, null);
         } catch (Exception e) {
             e.printStackTrace();
@@ -170,6 +171,7 @@ public class ActionUtil {
         EmsScriptNode jobPkgNode = contextFolder.childByNamePath("Jobs");
         if (jobPkgNode == null) {
             jobPkgNode = contextFolder.createFolder("Jobs", "cm:folder");
+            jobPkgNode.setPermission( "SiteCollaborator", "GROUP_EVERYONE" );
             contextFolder.getOrSetCachedVersion();
             WorkspaceNode ws = contextFolder.getWorkspace();
             if ( ws != null ) {

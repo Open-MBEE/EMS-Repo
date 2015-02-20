@@ -1,27 +1,28 @@
 {"elements": [{
+    "creator": "admin",
+    "editable": true,
+    "modified": "2015-02-18T14:10:51.044-0800",
+    "owner": "holding_bin_no_site_no_project",
     "qualifiedId": "/no_site/no_project/holding_bin_no_site_no_project/54321",
     "qualifiedName": "/no_site/no_project/holding_bin/null",
-    "sysmlid": "54321",
-    "owner": "holding_bin_no_site_no_project",
-    "read": "2015-02-11T14:19:16.301-0800",
+    "read": "2015-02-18T14:10:51.445-0800",
     "specialization": {
-        "view2view": [{
-            "childrenViews": [
-                "301",
-                "302"
-            ],
-            "sysmlid": "301"
-        }],
+        "contents": null,
         "displayedElements": [
             "301",
             "302",
             "303"
         ],
         "noSections": ["302"],
-        "type": "Product"
+        "type": "Product",
+        "view2view": [{
+            "childrenViews": [
+                "301",
+                "302"
+            ],
+            "sysmlid": "301"
+        }]
     },
-    "editable": true,
-    "creator": "admin",
-    "modified": "2015-02-11T14:19:14.388-0800"
+    "sysmlid": "54321"
 }]}
 200

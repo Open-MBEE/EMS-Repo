@@ -1,12 +1,12 @@
 {"elements": [{
-    "qualifiedId": "/europa/123456/_17_0_2_4_f3a0363_1394140430311_23731_27741/_17_0_2_4_f3a0363_1394142290412_487571_28478",
-    "name": "BLUCam CubeSat A",
-    "qualifiedName": "/europa/JW_TEST/_17_0_2_4_f3a0363_1394140430311_23731_27741/BLUCam CubeSat A",
-    "sysmlid": "_17_0_2_4_f3a0363_1394142290412_487571_28478",
-    "documentation": "",
-    "owner": "_17_0_2_4_f3a0363_1394140430311_23731_27741",
-    "specialization": {"type": "Package"},
-    "editable": true,
     "creator": "admin",
+    "documentation": "",
+    "editable": true,
+    "name": "BLUCam CubeSat A",
+    "owner": "123456",
+    "qualifiedId": "/europa/123456/_17_0_2_4_f3a0363_1394142290412_487571_28478",
+    "qualifiedName": "/europa/JW_TEST/BLUCam CubeSat A",
+    "specialization": {"type": "Package"},
+    "sysmlid": "_17_0_2_4_f3a0363_1394142290412_487571_28478"
 }]}
 200

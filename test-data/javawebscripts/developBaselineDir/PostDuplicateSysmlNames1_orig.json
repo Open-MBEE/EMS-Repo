@@ -1,17 +1,18 @@
 {"elements": [{
-    "qualifiedId": "/europa/123456/testCmed416",
+    "creator": "admin",
+    "editable": true,
+    "modified": "2015-02-18T14:10:49.855-0800",
     "name": "testName",
-    "qualifiedName": "/europa/JW_TEST2/testName",
-    "sysmlid": "testCmed416",
     "owner": "123456",
-    "read": "2015-02-11T14:19:13.918-0800",
+    "qualifiedId": "/europa/123456/testCmed416",
+    "qualifiedName": "/europa/JW_TEST2/testName",
+    "read": "2015-02-18T14:10:50.180-0800",
     "specialization": {
         "isDerived": false,
         "isSlot": false,
+        "propertyType": null,
         "type": "Property"
     },
-    "editable": true,
-    "creator": "admin",
-    "modified": "2015-02-11T14:19:13.351-0800"
+    "sysmlid": "testCmed416"
 }]}
 200

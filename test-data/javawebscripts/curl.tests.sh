@@ -30,7 +30,7 @@ echo POSTS
 echo curl $CURL_FLAGS $CURL_POST_FLAGS @JsonData/project.json $SERVICE_URL"workspaces/master/sites/europa/projects?createSite=true\""
 
 # post elements to project
-echo curl $CURL_FLAGS $CURL_POST_FLAGS @JsonData/elementsNew.json $BASE_URL"sites/europa/projects/123456/elements\""
+echo curl $CURL_FLAGS $CURL_POST_FLAGS @JsonData/elementsNew.json $SERVICE_URL"workspaces/master/sites/europa/elements\""
 
 # post views
 echo curl $CURL_FLAGS $CURL_POST_FLAGS @JsonData/views.json $BASE_URL"views\""

@@ -32,7 +32,9 @@ import gov.nasa.jpl.mbee.util.Debug;
 import gov.nasa.jpl.mbee.util.Pair;
 import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.mbee.util.Utils;
+import gov.nasa.jpl.view_repo.actions.ActionUtil;
 import gov.nasa.jpl.view_repo.util.Acm;
+import gov.nasa.jpl.view_repo.util.CommitUtil;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.EmsTransaction;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
@@ -57,7 +59,6 @@ import org.alfresco.repo.model.Repository;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
-import org.alfresco.service.cmr.security.AccessStatus;
 import org.alfresco.service.cmr.site.SiteInfo;
 import org.alfresco.service.cmr.site.SiteVisibility;
 //import org.apache.log4j.Level;
@@ -595,6 +596,14 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
             siteNode = new EmsScriptNode( foo.getNodeRef(), services );
             siteNode.createOrUpdateAspect( "cm:taggable" );
             siteNode.createOrUpdateAspect(Acm.ACM_SITE);
+            // this should always be in master so no need to check workspace
+//            if (workspace == null) { // && !siteNode.getName().equals(NO_SITE_ID)) {
+                // default creation adds GROUP_EVERYONE as SiteConsumer, so remove
+                siteNode.removePermission( "SiteConsumer", "GROUP_EVERYONE" );
+                if ( siteNode.getName().equals(NO_SITE_ID)) {
+                    siteNode.setPermission( "SiteCollaborator", "GROUP_EVERYONE" );
+                }
+//            }
         }
 
         // If this site is supposed to go into a non-master workspace, then create the site folders
@@ -1034,4 +1043,47 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
             source = null;
         }
     }
+    
+    /**
+     * Send progress messages to the log, JMS, and email.
+     * 
+     * @param msg  The message
+     * @param projectSysmlId  The project sysml id
+     * @param workspaceName  The workspace name
+     * @param sendEmail Set to true to send a email also
+     */
+    public void sendProgress( String msg, String projectSysmlId, String workspaceName,
+                              boolean sendEmail) {
+        
+        String projectId = Utils.isNullOrEmpty(projectSysmlId) ? "unknown_project" : projectSysmlId;
+        String workspaceId = Utils.isNullOrEmpty(workspaceName) ? "unknown_workspace" : workspaceName;        
+        String subject = "Progress for project: "+projectId+" workspace: "+workspaceId;
+
+        // Log the progress:
+        log(Level.INFO,"%s msg: %s\n",subject,msg);
+        
+        // Send the progress over JMS:
+        CommitUtil.sendProgress(msg, workspaceId, projectId);
+        
+        // Email the progress (this takes a long time, so only do it for critical events):
+        if (sendEmail) {
+            String hostname = services.getSysAdminParams().getAlfrescoHost();
+            if (!Utils.isNullOrEmpty( hostname )) {
+                String sender = hostname + "@jpl.nasa.gov";
+                String username = NodeUtil.getUserName();
+                if (!Utils.isNullOrEmpty( username )) {
+                    EmsScriptNode user = new EmsScriptNode(services.getPersonService().getPerson(username), 
+                                                           services);
+                    if (user != null) {
+                        String recipient = (String) user.getProperty("cm:email");
+                        if (!Utils.isNullOrEmpty( recipient )) {
+                            ActionUtil.sendEmailTo( sender, recipient, msg, subject, services );
+                        }
+                    }
+                }
+            }
+        }
+        
+    }
+    
 }

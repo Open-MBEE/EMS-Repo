@@ -1,6 +1,5 @@
 {
-    "message": "[WARNING]: MmsWorkspaceDiffPost deltas not posted properly\n",
-    "sequence": 24,
+    "sequence": 26,
     "workspace1": {
         "elements": [
             {
@@ -13,10 +12,12 @@
                 "specialization": {
                     "isDerived": false,
                     "isSlot": false,
+                    "propertyType": null,
                     "type": "Property",
                     "value": [{
                         "string": "dlam_string",
-                        "type": "LiteralString"
+                        "type": "LiteralString",
+                        "valueExpression": null
                     }]
                 },
                 "sysmlid": "402",
@@ -27,22 +28,24 @@
                 "documentation": "",
                 "editable": true,
                 "name": "duration",
-                "owner": "e_38304",
-                "qualifiedName": "/europa/JW_TEST2/e_38304/duration",
+                "owner": "123456",
+                "qualifiedName": "/europa/JW_TEST2/duration",
                 "specialization": {
                     "isDerived": false,
                     "isSlot": false,
+                    "propertyType": null,
                     "type": "Property",
                     "value": [{
                         "integer": 22,
-                        "type": "LiteralInteger"
+                        "type": "LiteralInteger",
+                        "valueExpression": null
                     }]
                 },
                 "sysmlid": "arg_ev_38307"
             }
         ],
         "name": "ws2",
-        "qualifiedName": "master/ws2"
+        "qualifiedName": "master/ws2",
     },
     "workspace2": {
         "addedElements": [{
@@ -54,10 +57,12 @@
             "specialization": {
                 "isDerived": false,
                 "isSlot": false,
+                "propertyType": null,
                 "type": "Property",
                 "value": [{
                     "string": "the element added to ws1",
-                    "type": "LiteralString"
+                    "type": "LiteralString",
+                    "valueExpression": null
                 }]
             },
             "sysmlid": "newElement"
@@ -68,15 +73,17 @@
             "documentation": "",
             "editable": true,
             "name": "duration",
-            "owner": "e_38304",
-            "qualifiedName": "/europa/JW_TEST2/e_38304/duration",
+            "owner": "123456",
+            "qualifiedName": "/europa/JW_TEST2/duration",
             "specialization": {
                 "isDerived": false,
                 "isSlot": false,
+                "propertyType": null,
                 "type": "Property",
                 "value": [{
                     "integer": 22,
-                    "type": "LiteralInteger"
+                    "type": "LiteralInteger",
+                    "valueExpression": null
                 }]
             },
             "sysmlid": "arg_ev_38307"
@@ -94,10 +101,12 @@
             "specialization": {
                 "isDerived": false,
                 "isSlot": false,
+                "propertyType": null,
                 "type": "Property",
                 "value": [{
                     "string": "the x value",
-                    "type": "LiteralString"
+                    "type": "LiteralString",
+                    "valueExpression": null
                 }]
             },
             "sysmlid": "402"

@@ -3,7 +3,7 @@
         "sysmlid": "_17_0_2_3_e610336_1394148449252_91190_29556",
         "name": "ComponentViewPoint",
         "documentation": "",
-        "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
+        "owner": "123456",
         "specialization" : {
         "method": "name_list",
         "type": "Viewpoint"
@@ -13,7 +13,7 @@
         "sysmlid": "_17_0_2_3_e610336_1394148311476_17302_29388",
         "name": "Components",
         "documentation": "",
-        "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
+        "owner": "123456",
     "specialization" : {
         "type": "View"
     }
@@ -22,7 +22,7 @@
         "sysmlid": "_17_0_2_4_f3a0363_1394142290412_487571_28478",
         "name": "BLUCam CubeSat A",
         "documentation": "",
-        "owner": "_17_0_2_4_f3a0363_1394140430311_23731_27741",
+        "owner": "123456",
     "specialization" : {
         "type": "Package"
     }
@@ -31,7 +31,7 @@
         "sysmlid": "name_list",
         "name": "viewpoint_op",
         "documentation": "",
-        "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
+        "owner": "123456",
       "specialization" : {
         "parameters": ["exposed_id"],
         "type": "Operation",
@@ -53,7 +53,7 @@
         "sysmlid": "exposed_id",
         "name": "exposed",
         "documentation": "",
-        "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
+        "owner": "123456",
     "specialization" : {
         "type": "Parameter"
     }
@@ -62,7 +62,7 @@
         "sysmlid": "op_list",
         "name": "List",
         "documentation": "",
-        "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
+        "owner": "123456",
     "specialization" : {
         "type": "Operation"
     }
@@ -71,7 +71,7 @@
         "sysmlid": "op_map_arg",
         "name": "",
         "documentation": "",
-        "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
+        "owner": "123456",
     "specialization" : {
         "operand":[{"type":"ElementValue",
                     "element":"op_map"},
@@ -86,7 +86,7 @@
         "sysmlid": "op_map",
         "name": "map",
         "documentation": "",
-        "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
+        "owner": "123456",
     "specialization" : {
         "type": "Operation"
     }
@@ -95,7 +95,7 @@
         "sysmlid": "op_name_arg",
         "name": "Name",
         "documentation": "",
-        "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
+        "owner": "123456",
     "specialization" : {
         "type": "Operation"
     }
@@ -115,7 +115,7 @@
         "id": "_17_0_2_3_e610336_1394148759911_783211_29758",
         "name": "",
         "documentation": "",
-        "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
+        "owner": "123456",
         "specialization" : {
             "type": "Expose",
             "source": "_17_0_2_3_e610336_1394148311476_17302_29388",

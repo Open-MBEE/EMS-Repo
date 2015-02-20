@@ -786,6 +786,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
             jobName += postJson.getString( "id" );
             List< String > formats = getSnapshotFormats( postJson );
             for ( String s : formats ) {
+            	if(s.compareToIgnoreCase("html")==0) s = "zip";
                 jobName += "_" + s;
             }
         } catch ( JSONException ex ) {
@@ -809,7 +810,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
         boolean isGenerated = false;
         if(status != null && !status.isEmpty() && status.compareToIgnoreCase("Completed")==0){
         	isGenerated = true;
-        	log(Level.INFO, "HTML artifacts were already generated.");
+        	log(Level.INFO, "Zip artifacts were already generated.");
         }
 
         if(!isGenerated){
@@ -823,7 +824,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
 	        catch(Exception ex){
 	        	ex.printStackTrace();
 	        	this.setHtmlZipStatus(snapshotNode, "Error");
-	        	throw new Exception("Failed to generate HTML artifact!", ex);
+	        	throw new Exception("Failed to generate zip artifact!", ex);
 	        }
         }
         return populateSnapshotProperties( snapshotNode );
@@ -845,7 +846,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
         DocBookWrapper docBookWrapper = new DocBookWrapper( this.snapshotName, snapshotNode );//need workspace and timestamp
 
         if ( !hasHtmlZipNode( snapshotNode ) ) {
-            log( Level.INFO, "Generating HTML zip..." );
+            log( Level.INFO, "Generating zip artifact..." );
             docBookWrapper.saveHtmlZipToRepo( snapshotFolderNode, workspace, timestamp );
         }
         return snapshotNode;
@@ -966,12 +967,9 @@ public class SnapshotPost extends AbstractJavaWebScript {
 
         if (snapshotNode == null) {
             snapshotNode = sitesFolder.createFolder("snapshots");
+            snapshotNode.setPermission( "SiteCollaborator", "GROUP_EVERYONE" );
             if (snapshotNode != null) snapshotNode.getOrSetCachedVersion();
             sitesFolder.getOrSetCachedVersion();
-        }
-
-        if ( snapshotNode == null ) {
-            return null;
         }
 
         EmsScriptNode snapshotDateFolder = NodeUtil.getOrCreateDateFolder(snapshotNode);

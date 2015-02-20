@@ -50,8 +50,10 @@ public abstract class EmsTransaction {
             Timer.stopTimer(timerCommit, "!!!!! EmsTransaction commit time", NodeUtil.timeEvents);
         } catch (Throwable e) {
             tryRollback( trx, e, "DB transaction failed" );
-            responseStatus.setCode( HttpServletResponse.SC_BAD_REQUEST );
-            response.append( "Could not complete DB transaction, see Alfresco logs for details" );
+            if (responseStatus.getCode() != HttpServletResponse.SC_BAD_REQUEST) {
+                responseStatus.setCode( HttpServletResponse.SC_BAD_REQUEST );
+                response.append( "Could not complete DB transaction, see Alfresco logs for details" );
+            }
         } finally {
             NodeUtil.setInsideTransactionNow( false );
         }
@@ -66,14 +68,13 @@ public abstract class EmsTransaction {
             msg = "DB transaction failed";
         }
         try {
-            log( Level.ERROR,
-                 msg + "\n\t####### ERROR: Need to rollback: " + e.getMessage(),
-                 HttpServletResponse.SC_INTERNAL_SERVER_ERROR );
+//            log( Level.ERROR,
+//                 msg + "\n\t####### ERROR: Need to rollback: " + e.getMessage(),
+//                 HttpServletResponse.SC_INTERNAL_SERVER_ERROR );
             e.printStackTrace();
             trx.rollback();
-            log( Level.ERROR, "### Rollback succeeded!" );
         } catch ( Throwable ee ) {
-            log( Level.ERROR, "\tryRollback(): rollback failed: " + ee.getMessage() );
+            log( Level.ERROR, "\tryRollback(): rollback failed: " + ee.getMessage(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR );
             ee.printStackTrace();
             String addr = null;
             try {
