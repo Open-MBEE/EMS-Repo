@@ -33,6 +33,7 @@ import gov.nasa.jpl.mbee.util.Debug;
 import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
+import gov.nasa.jpl.view_repo.util.NodeUtil;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 import gov.nasa.jpl.view_repo.webscripts.util.ProductsWebscript;
 
@@ -107,7 +108,7 @@ public class ProductGet extends AbstractJavaWebScript {
     protected Map<String, Object> executeImplImpl(WebScriptRequest req, Status status, Cache cache) {
         printHeader( req );
 
-		clearCaches();
+		//clearCaches();
 
 		Map<String, Object> model = new HashMap<String, Object>();
 
@@ -150,8 +151,8 @@ public class ProductGet extends AbstractJavaWebScript {
                                                       ? "views" : "products" ),
                          productsJson );
                 if (!Utils.isNullOrEmpty(response.toString())) json.put("message", response.toString());
-                if ( prettyPrint ) model.put("res", json.toString(4));
-                else model.put("res", json.toString());
+                if ( prettyPrint ) model.put("res", NodeUtil.jsonToString( json, 4 ));
+                else model.put("res", NodeUtil.jsonToString( json ));
 			} catch (JSONException e) {
 				log(Level.ERROR, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "JSON creation error");
 				model.put("res", response.toString());

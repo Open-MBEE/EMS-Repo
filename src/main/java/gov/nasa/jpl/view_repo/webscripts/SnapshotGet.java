@@ -85,7 +85,7 @@ public class SnapshotGet extends AbstractJavaWebScript {
     protected Map<String, Object> executeImplImpl(WebScriptRequest req, Status status, Cache cache) {
         printHeader( req );
 
-        clearCaches();
+        //clearCaches();
 
         // get timestamp if specified
         String timestamp = req.getParameter("timestamp");

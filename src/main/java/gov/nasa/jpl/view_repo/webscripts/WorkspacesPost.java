@@ -33,6 +33,7 @@ import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.util.CommitUtil;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
+import gov.nasa.jpl.view_repo.util.NodeUtil;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 //import gov.nasa.jpl.view_repo.webscripts.AbstractJavaWebScript.LogLevel;
 
@@ -49,6 +50,7 @@ import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 import org.json.JSONObject;
 import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
@@ -85,7 +87,6 @@ public class WorkspacesPost extends AbstractJavaWebScript{
     @Override
     protected Map<String, Object> executeImplImpl(WebScriptRequest req, Status status, Cache cache){
         printHeader( req );
-        clearCaches();
         Map<String, Object> model = new HashMap<String, Object>();
         int statusCode = HttpServletResponse.SC_OK;
         String user = AuthenticationUtil.getRunAsUser();
@@ -96,7 +97,9 @@ public class WorkspacesPost extends AbstractJavaWebScript{
                 String newName = req.getServiceMatch().getTemplateVars().get(WORKSPACE_ID);
                 String copyTime = req.getParameter("copyTime");
                 Date copyDateTime = TimeUtils.dateFromTimestamp( copyTime );
-                WorkspaceNode ws = createWorkSpace(sourceWorkspaceParam, newName, copyDateTime, (JSONObject)req.parseContent(), user, status);
+                JSONObject reqJson = //JSONObject.make( 
+                        (JSONObject)req.parseContent();// );
+                WorkspaceNode ws = createWorkSpace(sourceWorkspaceParam, newName, copyDateTime, reqJson, user, status);
                 statusCode = status.getCode();
                 json = printObject(ws);
             } else {
@@ -114,7 +117,7 @@ public class WorkspacesPost extends AbstractJavaWebScript{
         else
             try {
             	if (!Utils.isNullOrEmpty(response.toString())) json.put("message", response.toString());
-                model.put("res", json.toString(4));
+                model.put("res", NodeUtil.jsonToString( json, 4 ));
             } catch (JSONException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();

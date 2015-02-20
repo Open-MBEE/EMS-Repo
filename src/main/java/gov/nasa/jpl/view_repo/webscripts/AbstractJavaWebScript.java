@@ -50,6 +50,8 @@ import java.util.Arrays;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.alfresco.repo.jscript.ScriptNode;
 import org.alfresco.repo.model.Repository;
 import org.alfresco.service.ServiceRegistry;
@@ -113,6 +115,9 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 
     public static boolean alwaysTurnOffDebugOut = true;
 
+    // keeps track of who made the call to the service
+    protected String source = null;
+
     protected void initMemberVariables(String siteName) {
 		companyhome = new ScriptNode(repository.getCompanyHome(), services);
 	}
@@ -133,47 +138,36 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
         this.response = response ;
         // TODO -- set maximum log level; Overrides that specified in log4j.properties (I THINK)
         logger.setLevel(logLevel);
-        
-        NodeUtil.setBeenInsideTransaction( false );
-        NodeUtil.setBeenOutsideTransaction( false );
-        NodeUtil.setInsideTransactionNow( false );
     }
 
     public AbstractJavaWebScript(Repository repositoryHelper, ServiceRegistry registry) {
         this.setRepositoryHelper(repositoryHelper);
         this.setServices(registry);
-        
         // TODO -- set maximum log level; Overrides that specified in log4j.properties (I THINK)
         logger.setLevel(logLevel);
-        
-        NodeUtil.setBeenInsideTransaction( false );
-        NodeUtil.setBeenOutsideTransaction( false );
-        NodeUtil.setInsideTransactionNow( false );
-        
     }
 
     public AbstractJavaWebScript() {
         // default constructor for spring
         super();
-
         // TODO -- set maximum log level; Overrides that specified in log4j.properties (I THINK)
         logger.setLevel(logLevel);
-
-        NodeUtil.setBeenInsideTransaction( false );
-        NodeUtil.setBeenOutsideTransaction( false );
-        NodeUtil.setInsideTransactionNow( false );
-
     }
     
     /**
 	 * Utility for clearing out caches
 	 * TODO: do we need to clear caches if Spring isn't making singleton instances
 	 */
-	protected void clearCaches() {
-        NodeUtil.setBeenInsideTransaction( false );
-        NodeUtil.setBeenOutsideTransaction( false );
-        NodeUtil.setInsideTransactionNow( false );
-
+    protected void clearCaches() {
+        clearCaches( true );
+    }
+	protected void clearCaches( boolean resetTransactionState ) {
+	    if ( resetTransactionState ) {
+            NodeUtil.setBeenInsideTransaction( false );
+            NodeUtil.setBeenOutsideTransaction( false );
+            NodeUtil.setInsideTransactionNow( false );
+	    }
+	    
 		foundElements = new HashMap<String, EmsScriptNode>();
 		response = new StringBuffer();
 		responseStatus.setCode(HttpServletResponse.SC_OK);
@@ -190,11 +184,14 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
     protected Map< String, Object > executeImplImpl( final WebScriptRequest req,
                                                      final Status status, final Cache cache,
                                                      boolean withoutTransactions ) {
+        clearCaches( true );
+        clearCaches(); // calling twice for those redefine clearCaches() to
+                       // always call clearCaches( false )
         if ( withoutTransactions ) {
             return executeImplImpl( req, status, cache );
         }
         final Map< String, Object > model = new HashMap<String, Object>();
-        new EmsTransaction(getServices(), getResponse(), getResponseStatus() ) {
+        new EmsTransaction( getServices(), getResponse(), getResponseStatus() ) {
             @Override
             public void run() throws Exception {
                 Map< String, Object > m = executeImplImpl( req, status, cache );
@@ -441,6 +438,8 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 
 	protected void log(String msg) {
 	    response.append(msg + "\n");
+	    //TODO: add to responseStatus too (below)?
+	    //responseStatus.setMessage(msg);
 	}
 
 	protected void log (Level level, String msg){
@@ -485,7 +484,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 				else {arrString = Arrays.toString((Object[])obj);}
 				formattedMsg = m.replaceFirst(arrString);
 			}
-			else {
+			else { // captures Timer, EmsScriptNode, Date, primitive types, NodeRef, JSONObject type objects; applies toString() on all
 				formattedMsg = m.replaceFirst(obj.toString());
 			}
 			m = p.matcher(formattedMsg);
@@ -512,19 +511,20 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 	    }
 	}
 
-	/**
-	 * Checks whether user has permissions to the nodeRef and logs results and status as appropriate
-	 * @param nodeRef      NodeRef to check permissions againts
-	 * @param permissions  Permissions to check
-	 * @return             true if user has specified permissions to node, false otherwise
-	 */
-	protected boolean checkPermissions(NodeRef nodeRef, String permissions) {
-		if (services.getPermissionService().hasPermission(nodeRef, permissions) != AccessStatus.ALLOWED) {
-			log(Level.WARN, HttpServletResponse.SC_BAD_REQUEST, "No %s priveleges to %s.\n",permissions, nodeRef.toString());
-			return false;
-		}
-		return true;
-	}
+
+//	/**
+//	 * Checks whether user has permissions to the nodeRef and logs results and status as appropriate
+//	 * @param nodeRef      NodeRef to check permissions againts
+//	 * @param permissions  Permissions to check
+//	 * @return             true if user has specified permissions to node, false otherwise
+//	 */
+//	protected boolean checkPermissions(NodeRef nodeRef, String permissions) {
+//		if (services.getPermissionService().hasPermission(nodeRef, permissions) != AccessStatus.ALLOWED) {
+//			log(LogLevel.WARNING, "No " + permissions + " priveleges to " + nodeRef.toString() + ".\n", HttpServletResponse.SC_BAD_REQUEST);
+//			return false;
+//		}
+//		return true;
+//	}
 
 
     protected static final String WORKSPACE_ID = "workspaceId";
@@ -1020,4 +1020,18 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
         return pkgSiteParentNode;
     }
 
+    
+    /**
+     * This needs to be called with the incoming JSON request to populate the local source
+     * variable that is used in the sendDeltas call.
+     * @param postJson
+     * @throws JSONException
+     */
+    protected void populateSourceFromJson(JSONObject postJson) throws JSONException {
+        if (postJson.has( "source" )) {
+            source = postJson.getString( "source" );
+        } else {
+            source = null;
+        }
+    }
 }

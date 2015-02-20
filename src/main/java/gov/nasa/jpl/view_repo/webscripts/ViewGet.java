@@ -31,6 +31,7 @@ package gov.nasa.jpl.view_repo.webscripts;
 
 import gov.nasa.jpl.mbee.util.Debug;
 import gov.nasa.jpl.mbee.util.TimeUtils;
+import gov.nasa.jpl.mbee.util.Timer;
 import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.sysml.View;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
@@ -49,6 +50,7 @@ import org.alfresco.repo.model.Repository;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.json.JSONArray;
+import org.apache.log4j.Logger;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.extensions.webscripts.Cache;
@@ -56,6 +58,8 @@ import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
 
 public class ViewGet extends AbstractJavaWebScript {
+    static Logger logger = Logger.getLogger(ViewGet.class);
+
     protected boolean gettingDisplayedElements = false;
     protected boolean gettingContainedViews = false;
 
@@ -125,9 +129,11 @@ public class ViewGet extends AbstractJavaWebScript {
         return instance.executeImplImpl( req, status, cache );
     }
     protected Map<String, Object> executeImplImpl(WebScriptRequest req, Status status, Cache cache) {
+        Timer timer = new Timer();
+
         printHeader( req );
 
-        clearCaches();
+        //clearCaches();
 
         Map<String, Object> model = new HashMap<String, Object>();
         // default recurse=false but recurse only applies to displayed elements and contained views
@@ -163,8 +169,8 @@ public class ViewGet extends AbstractJavaWebScript {
                 JSONObject json = new JSONObject();
                 json.put(gettingDisplayedElements ? "elements" : "views", viewsJson);
                 if (!Utils.isNullOrEmpty(response.toString())) json.put("message", response.toString());
-                if ( prettyPrint ) model.put("res", json.toString(4));
-                else model.put("res", json.toString()); 
+                if ( prettyPrint ) model.put("res", NodeUtil.jsonToString( json, 4 ));
+                else model.put("res", NodeUtil.jsonToString( json )); 
             } catch (JSONException e) {
                 e.printStackTrace();
                 log(Level.ERROR, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "JSON creation error");
@@ -178,6 +184,10 @@ public class ViewGet extends AbstractJavaWebScript {
         status.setCode(responseStatus.getCode());
 
         printFooter();
+
+        if (logger.isInfoEnabled()) {
+            logger.info( "ViewGet: " + timer );
+        }
 
         return model;
     }

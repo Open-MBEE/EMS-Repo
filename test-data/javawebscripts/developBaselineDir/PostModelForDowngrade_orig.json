@@ -1,30 +1,27 @@
-{
-    "elements": [{
-        "creator": "admin",
-        "editable": true,
-        "modified": "2014-12-10T14:58:25.363-0800",
-        "owner": "holding_bin_no_site_no_project",
-        "qualifiedId": "/no_project/holding_bin_no_site_no_project/54321",
-        "qualifiedName": "/no_project/holding_bin/null",
-        "read": "2014-12-10T14:58:26.448-0800",
-        "specialization": {
-            "displayedElements": [
+{"elements": [{
+    "qualifiedId": "/no_site/no_project/holding_bin_no_site_no_project/54321",
+    "qualifiedName": "/no_site/no_project/holding_bin/null",
+    "sysmlid": "54321",
+    "owner": "holding_bin_no_site_no_project",
+    "read": "2015-02-11T14:19:16.301-0800",
+    "specialization": {
+        "view2view": [{
+            "childrenViews": [
                 "301",
-                "302",
-                "303"
+                "302"
             ],
-            "noSections": ["302"],
-            "type": "Product",
-            "view2view": [{
-                "childrenViews": [
-                    "301",
-                    "302"
-                ],
-                "sysmlid": "301"
-            }]
-        },
-        "sysmlid": "54321"
-    }],
-    "message": "[WARNING]: createOrUpdateModel deltas not posted properly\n"
-}
+            "sysmlid": "301"
+        }],
+        "displayedElements": [
+            "301",
+            "302",
+            "303"
+        ],
+        "noSections": ["302"],
+        "type": "Product"
+    },
+    "editable": true,
+    "creator": "admin",
+    "modified": "2015-02-11T14:19:14.388-0800"
+}]}
 200

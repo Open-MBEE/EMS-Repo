@@ -131,8 +131,8 @@ public class CommitUtil {
 
 	    if (commitPkg != null) {
             commits.addAll(WebScriptUtil.getAllNodesInPath(commitPkg.getQnamePath(),
-                                                           "TYPE",
-                                                           "cm:content",
+                                                           "ASPECT",
+                                                           "ems:Committable",
                                                            workspace,
                                                            null,
                                                            services,
@@ -222,14 +222,8 @@ public class CommitUtil {
                 if (monthFolder != null) {
                     dayFolder = getLatestFolder(monthFolder);
                     if (dayFolder != null) {
-                        commits.addAll(WebScriptUtil.getAllNodesInPath(dayFolder.getQnamePath(),
-                                                                       "TYPE",
-                                                                       "cm:content",
-                                                                       ws,
-                                                                       null,
-                                                                       services,
-                                                                       response));
-
+                        commits.addAll( dayFolder.getChildNodes() );
+                        
                         // Sort the commits so that the latest commit is first:
                         Collections.sort( commits, new ConfigurationsWebscript.EmsScriptNodeCreatedAscendingComparator() );
                     }
@@ -281,13 +275,7 @@ public class CommitUtil {
                     if (monthFolder != null) {
                         dayFolder = getLatestFolderBeforeTime(monthFolder, day);
                         if (dayFolder != null) {
-                            commits.addAll(WebScriptUtil.getAllNodesInPath(dayFolder.getQnamePath(),
-                                                                           "TYPE",
-                                                                           "cm:content",
-                                                                           workspace,
-                                                                           null,
-                                                                           services,
-                                                                           response));
+                            commits.addAll( dayFolder.getChildNodes() );
 
                             // Sort the commits so that the latest commit is first:
                             Collections.sort( commits, new ConfigurationsWebscript.EmsScriptNodeCreatedAscendingComparator() );
@@ -754,13 +742,18 @@ public class CommitUtil {
     /**
      * Send off the deltas to various endpoints
      * @param deltas    JSONObject of the deltas to be published
+     * @param projectId String of the project Id to post to
+     * @param source    Source of the delta (e.g., MD, EVM, whatever, only necessary for MD so it can ignore)
      * @return          true if publish completed
      * @throws JSONException
      */
-    public static boolean sendDeltas(JSONObject deltaJson, String workspaceId, String projectId) throws JSONException {
+    public static boolean sendDeltas(JSONObject deltaJson, String workspaceId, String projectId, String source) throws JSONException {
         boolean jmsStatus = false;
         boolean restStatus = false;
 
+        if (source != null) {
+            deltaJson.put( "source", source );
+        }
         if (jmsConnection != null) {
             jmsConnection.setWorkspace( workspaceId );
             jmsConnection.setProjectId( projectId );
@@ -795,7 +788,8 @@ public class CommitUtil {
                                              long start, long end,
                                              String projectId,
                                              Status status,
-                                             boolean useTransactions ) throws Exception {
+                                             boolean useTransactions,
+                                             String source) throws Exception {
         if (false == wsDiff.isDiff()) {
             return;
         }
@@ -814,6 +808,7 @@ public class CommitUtil {
         commitAction.setParameterValue(CommitActionExecuter.PARAM_START, start);
         commitAction.setParameterValue(CommitActionExecuter.PARAM_END, end);
         commitAction.setParameterValue( CommitActionExecuter.TRANSACTION, useTransactions );
+        commitAction.setParameterValue( CommitActionExecuter.PARAM_SOURCE, source );
 
         // create empty commit for now (executing action will fill it in later)
         NodeRef commitRef = CommitUtil.commit(null, targetWS, "", true, services, new StringBuffer() );

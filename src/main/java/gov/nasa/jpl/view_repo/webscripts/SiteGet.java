@@ -82,7 +82,7 @@ public class SiteGet extends AbstractJavaWebScript {
     protected Map<String, Object> executeImplImpl(WebScriptRequest req, Status status, Cache cache) {
         printHeader( req );
 
-        clearCaches();
+        //clearCaches();
 
         Map<String, Object> model = new HashMap<String, Object>();
         JSONObject json = null;
@@ -108,7 +108,7 @@ public class SiteGet extends AbstractJavaWebScript {
         if (json == null) {
             model.put("res", response.toString());
         } else {
-            model.put("res", json.toString());
+            model.put("res", NodeUtil.jsonToString( json ));
         }
         status.setCode(responseStatus.getCode());
 

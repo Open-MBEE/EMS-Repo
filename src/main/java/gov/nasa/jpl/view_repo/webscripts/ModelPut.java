@@ -77,7 +77,7 @@ public class ModelPut extends ModelPost {
         printHeader( req );
 
         Map<String, Object> model = new HashMap<String, Object>();
-        clearCaches();
+        //clearCaches();
 
         ModelPut instance = new ModelPut(repository, getServices());
 

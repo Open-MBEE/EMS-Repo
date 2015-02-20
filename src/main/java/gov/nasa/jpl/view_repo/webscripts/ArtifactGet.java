@@ -96,7 +96,7 @@ public class ArtifactGet extends AbstractJavaWebScript {
 		Map<String, Object> model = new HashMap<String, Object>();
 
         printHeader( req );
-		clearCaches();
+		//clearCaches();
 
         String cs = req.getParameter("cs");
         String extensionArg = req.getParameter("extension");

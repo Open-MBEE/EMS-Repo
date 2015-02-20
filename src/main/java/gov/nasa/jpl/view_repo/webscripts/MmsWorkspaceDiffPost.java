@@ -30,6 +30,7 @@
 package gov.nasa.jpl.view_repo.webscripts;
 
 import gov.nasa.jpl.mbee.util.TimeUtils;
+import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.CommitUtil;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
@@ -43,6 +44,7 @@ import org.apache.log4j.*;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import javax.servlet.http.HttpServletResponse;
@@ -50,9 +52,14 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.log4j.*;
 import org.alfresco.repo.model.Repository;
 import org.alfresco.service.ServiceRegistry;
+import org.alfresco.service.cmr.version.Version;
 import org.json.JSONArray;
+
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import org.json.JSONObject;
+
 import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
@@ -85,22 +92,34 @@ public class MmsWorkspaceDiffPost extends ModelPost {
     protected Map<String, Object> executeImplImpl(WebScriptRequest req, Status status, Cache cache) {
         printHeader( req );
 
-		clearCaches();
+		//clearCaches();
 
 		Map<String, Object> model = new HashMap<String, Object>();
-
+		JSONObject top = new JSONObject();
+		
 		try {
-			handleDiff(req, (JSONObject)req.parseContent(), status, model);
-		} catch (JSONException e) {
-			log(Level.ERROR, HttpServletResponse.SC_BAD_REQUEST, "JSON parse exception: %s", e.getMessage());
-			e.printStackTrace();
+		    JSONObject json = //JSONObject.make( 
+		            (JSONObject)req.parseContent(); //);
+		    top = handleDiff(req, json, status);
 		} catch ( Exception e ) {
             log(Level.ERROR, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Internal server error: %s", e.getMessage());
             e.printStackTrace();
+        } finally {
+            try {
+                if (!Utils.isNullOrEmpty(response.toString())) {
+                    top.put("message", response.toString());
+                }
+                model.put("res", top.toString(4));
+            } catch ( JSONException e ) {
+                log(Level.ERROR, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "JSON parse exception: %s", e.getMessage());
+                if (!model.containsKey( "res" )) {
+                    model.put( "res", String.format("{'message':'%s'}", response.toString()) );
+                }
+                e.printStackTrace();
+            }
         }
 
         status.setCode(responseStatus.getCode());
-		model.put("res", response.toString());
 
 		printFooter();
 
@@ -162,7 +181,12 @@ public class MmsWorkspaceDiffPost extends ModelPost {
 
     boolean succ = true;
 
-    private void handleDiff(final WebScriptRequest req, final JSONObject jsonDiff, final Status status, final Map<String, Object> model) throws Exception {
+    private JSONObject handleDiff(final WebScriptRequest req, final JSONObject jsonDiff, final Status status) throws Exception {
+        
+        long start = System.currentTimeMillis();
+        JSONObject finalJsonDiff = new JSONObject();
+        
+        populateSourceFromJson( jsonDiff );
 		if (jsonDiff.has( "workspace1" ) && jsonDiff.has("workspace2")) {
 		    srcJson = jsonDiff.getJSONObject( "workspace2" );
 		    targetJson = jsonDiff.getJSONObject( "workspace1" );
@@ -186,7 +210,7 @@ public class MmsWorkspaceDiffPost extends ModelPost {
     					}
 				};
 		        }
-				if ( !succ ) return;
+				if ( !succ ) return finalJsonDiff;
 				
 		        // Add/update the elements in the target workspace:
 		        // Must remove the modified time, as it is for the source workspace, not the target
@@ -216,7 +240,7 @@ public class MmsWorkspaceDiffPost extends ModelPost {
 	            top.put( "elements", elements );
 
 	            Set<EmsScriptNode> updatedElements = handleUpdate( top, status, targetWs, false,
-	                                                               model, false );
+	                                                               new HashMap<String,Object>(), false );
 
 	            // Delete the elements in the target workspace:
 		        WorkspaceDiff deleteWsDiff = null;
@@ -228,7 +252,7 @@ public class MmsWorkspaceDiffPost extends ModelPost {
                         for (int ii = 0; ii < deleted.length(); ii++) {
                             String id = ((JSONObject)deleted.get(ii)).getString( "sysmlid" );
                             EmsScriptNode root = NodeUtil.findScriptNodeById( id, targetWs, null, false, services, response );
-                            deleteService.handleElementHierarchy( root, targetWs, false );
+                            deleteService.deleteNodeRecursively( root, targetWs);
                         }
 	                }
 	                else {
@@ -238,43 +262,17 @@ public class MmsWorkspaceDiffPost extends ModelPost {
     		                    for (int ii = 0; ii < deleted.length(); ii++) {
     		                        String id = ((JSONObject)deleted.get(ii)).getString( "sysmlid" );
     		                        EmsScriptNode root = NodeUtil.findScriptNodeById( id, targetWs, null, false, services, response );
-    		                        deleteService.handleElementHierarchy( root, targetWs, false );
+    		                        deleteService.deleteNodeRecursively( root, targetWs);
     		                    }
     						}
     					};
 	                }
 
-                    // Update the needed aspects of the deleted nodes:
-			        final WorkspaceDiff delWsDiff = deleteService.getWsDiff();
-			        deleteWsDiff = delWsDiff;
-			        
-	                if (runWithoutTransactions) {
-                        for (EmsScriptNode deletedNode: delWsDiff.getDeletedElements().values()) {
-                            if (deletedNode.exists()) {
-                                deletedNode.removeAspect( "ems:Added" );
-                                deletedNode.removeAspect( "ems:Updated" );
-                                deletedNode.removeAspect( "ems:Moved" );
-                                deletedNode.createOrUpdateAspect( "ems:Deleted" );
-                            }
-                        }
-	                }
-	                else {
-    	                new EmsTransaction(getServices(), getResponse(), getResponseStatus()) {
-    			    		@Override
-    			    		public void run() throws Exception {
-    		                    for (EmsScriptNode deletedNode: delWsDiff.getDeletedElements().values()) {
-    		                        if (deletedNode.exists()) {
-    		                            deletedNode.removeAspect( "ems:Added" );
-    		                            deletedNode.removeAspect( "ems:Updated" );
-    		                            deletedNode.removeAspect( "ems:Moved" );
-    		                            deletedNode.createOrUpdateAspect( "ems:Deleted" );
-    		                        }
-    		                    }
-    						}
-    					};
-	                }
+			        deleteWsDiff = deleteService.getWsDiff();
 	            }
 
+	            long end = System.currentTimeMillis();
+	            
 	            // Send deltas and make merge commit:
 	            // FIXME: Need to split elements by project Id - since they won't always be in same project
 	            String projectId = !updatedElements.isEmpty() ?
@@ -282,17 +280,62 @@ public class MmsWorkspaceDiffPost extends ModelPost {
 	                                           NO_PROJECT_ID;
 	            boolean modelPostDiff = wsDiff.isDiff();
 	            boolean modelDeleteDiff = deleteWsDiff != null && deleteWsDiff.isDiff();
-
+	            
 	            if (modelDeleteDiff || modelPostDiff) {
-	                if ( !CommitUtil.sendDeltas(jsonDiff, targetWsId, projectId) ) {
+	                
+	                // Need to update the jsonDiff object with the diffs output from the model delete:
+	                if (modelDeleteDiff) {
+	                    Map<String,EmsScriptNode> currentElements = wsDiff.getElements();
+	                    Map<String,Version> currentElementVersions = wsDiff.getElementsVersions();
+                        Map<String,EmsScriptNode> currentDeletedElements = wsDiff.getDeletedElements();
+
+                        // Add elements, elementVersions, deleted elements:
+                        // Note: these all have the same key set for deleted nodes:
+	                    for (Entry< String, EmsScriptNode > entry : deleteWsDiff.getElements().entrySet()) {
+	                        String id = entry.getKey();
+	                        if (!currentElements.containsKey( id )) {
+	                            currentElements.put( id, entry.getValue() );
+	                            if (deleteWsDiff.getElementsVersions().containsKey( id )) {
+	                                currentElementVersions.put( id , deleteWsDiff.getElementsVersions().get( id ) );
+	                            }
+	                            if (deleteWsDiff.getDeletedElements().containsKey( id )) {
+	                                currentDeletedElements.put( id , deleteWsDiff.getDeletedElements().get( id ) );
+                                }
+	                        }
+	                    }
+	                    
+	                }
+	                
+	                // This has to be done before adding deleted aspects
+	                finalJsonDiff = wsDiff.toJSONObject( new Date(start), new Date(end) ); 
+	                
+	                // Apply the deleted aspects if needed to the deleted nodes:
+	                if (modelDeleteDiff) {
+	                    	                    
+	                    if (runWithoutTransactions) {
+	                        deleteService.applyAspects();
+	                    }
+	                    else {
+	                        new EmsTransaction(getServices(), getResponse(), getResponseStatus()) {
+	                            @Override
+	                            public void run() throws Exception {
+	                                deleteService.applyAspects();
+	                            }
+	                        };
+	                    }
+	                }
+	                
+	                if ( !CommitUtil.sendDeltas(finalJsonDiff, targetWsId, projectId, source) ) {
                         log(Level.WARN, "MmsWorkspaceDiffPost deltas not posted properly");
                     }
 
-	                CommitUtil.merge( jsonDiff, srcWs, targetWs, dateTimeSrc, dateTimeTarget,
+	                CommitUtil.merge( finalJsonDiff, srcWs, targetWs, dateTimeSrc, dateTimeTarget,
 	                                  null, runWithoutTransactions, services, response );
 	            }
-
+	            
 		    }
 		}
+		
+        return finalJsonDiff;
 	}
 }

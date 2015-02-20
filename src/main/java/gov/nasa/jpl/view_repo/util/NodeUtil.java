@@ -5,6 +5,7 @@ import gov.nasa.jpl.mbee.util.CompareUtils;
 import gov.nasa.jpl.mbee.util.CompareUtils.GenericComparator;
 import gov.nasa.jpl.mbee.util.Debug;
 import gov.nasa.jpl.mbee.util.MethodCall;
+import gov.nasa.jpl.mbee.util.Pair;
 import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.mbee.util.Timer;
 import gov.nasa.jpl.mbee.util.Utils;
@@ -51,8 +52,10 @@ import org.alfresco.service.cmr.repository.InvalidNodeRefException;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.cmr.repository.StoreRef;
+import org.alfresco.service.cmr.search.LimitBy;
 import org.alfresco.service.cmr.search.ResultSet;
 import org.alfresco.service.cmr.search.ResultSetRow;
+import org.alfresco.service.cmr.search.SearchParameters;
 import org.alfresco.service.cmr.search.SearchService;
 import org.alfresco.service.cmr.security.AccessStatus;
 import org.alfresco.service.cmr.security.PermissionService;
@@ -64,6 +67,7 @@ import org.alfresco.service.namespace.QName;
 import org.alfresco.util.ApplicationContextHelper;
 import org.apache.commons.logging.Log;
 import org.apache.log4j.Logger;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.context.ApplicationContext;
 import org.springframework.extensions.webscripts.Status;
@@ -131,13 +135,33 @@ public class NodeUtil {
         insideTransactionNow = b;
         insideTransactionNowMap.put( "" + Thread.currentThread().getId(), b );
     }
+    protected static Map< String, StackTraceElement[] > insideTransactionStrackTrace =
+            new LinkedHashMap< String, StackTraceElement[] >();
+    protected static Map< String, StackTraceElement[] > outsideTransactionStrackTrace =
+            new LinkedHashMap< String, StackTraceElement[] >();
+    public static void setInsideTransactionStackTrace() {
+        insideTransactionStrackTrace.put( "" + Thread.currentThread().getId(),
+                                          Thread.currentThread().getStackTrace() );
+    }
+    public static void setOutsideTransactionStackTrace() {
+        outsideTransactionStrackTrace.put( "" + Thread.currentThread().getId(),
+                                           Thread.currentThread().getStackTrace() );
+    }
+    public static StackTraceElement[] getInsideTransactionStackTrace() {
+        return insideTransactionStrackTrace.get( "" + Thread.currentThread().getId() );
+    }
+    public static StackTraceElement[] getOutsideTransactionStackTrace() {
+        return outsideTransactionStrackTrace.get( "" + Thread.currentThread().getId() );
+    }
 
     public static boolean doFullCaching = true;
     public static boolean doSimpleCaching = true;
     public static boolean doHeisenCheck = true;
     public static boolean doVersionCaching = true;
     public static boolean activeVersionCaching = true;
-    public static boolean doJsonCaching = false;
+    public static boolean doJsonCaching = true;
+    public static boolean doJsonDeepCaching = true;
+    public static boolean doJsonStringCaching = false;
     
     // global flag that is enabled once heisenbug is seen, so it will email admins the first time heisenbug is seen
     public static boolean heisenbugSeen = false;
@@ -171,11 +195,26 @@ public class NodeUtil {
     public static Map< NodeRef, NodeRef > frozenNodeCache =
             Collections.synchronizedMap( new HashMap<NodeRef, NodeRef>() );
 
-//    public static Map<String, JSONObject> jsonCache = 
-//    		Collections.synchronizedMap(new HashMap<String, JSONObject>());
     // Set< String > filter, boolean isExprOrProp,Date dateTime, boolean isIncludeQualified
-    public static Map< String, Map< Long, Map< Boolean, Map< Boolean, Map< Set< String >, JSONObject > > > > > jsonCache =
-        Collections.synchronizedMap( new HashMap< String, Map< Long, Map< Boolean, Map< Boolean, Map< Set< String >, JSONObject > > > > >() );
+    public static Map< String, Map< Long, Map< Boolean, Map< Set<String>, JSONObject > > > > jsonDeepCache =
+            Collections.synchronizedMap( new HashMap< String, Map< Long, Map< Boolean, Map< Set<String>, JSONObject > > > >() );
+    public static Map< String, Map< Long, JSONObject > > jsonCache =
+        Collections.synchronizedMap( new HashMap< String, Map< Long, JSONObject > >() );
+    public static long jsonCacheHits = 0;
+    public static long jsonCacheMisses = 0;
+
+    // The json string cache maps JSONObjects to an integer (date in millis) to
+    // a string rendering of itself paired with the date.
+    public static Map<JSONObject, Map< Integer, Pair< Date, String > > > jsonStringCache =
+            Collections.synchronizedMap( new HashMap< JSONObject, Map< Integer, Pair< Date, String > > >() );
+    public static long jsonStringCacheHits = 0;
+    public static long jsonStringCacheMisses = 0;
+
+    
+    // REVIEW -- TODO -- Should we try and cache the toString() output of the json, too?    
+    // REVIEW -- TODO -- This would mean we'd have to concatenate the json
+    // REVIEW -- TODO -- strings ourselves instead of just one big toString() 
+    // REVIEW -- TODO -- on the collection as done currently.
     
     // Set the flag to time events that occur during a model post using the timers
     // below
@@ -230,6 +269,54 @@ public class NodeUtil {
 //        }
 //    }
 
+    public static String jsonToString( JSONObject json ) {
+        if ( !doJsonStringCaching ) return json.toString();
+        try {
+            return jsonToString( json, -1 );
+        } catch ( JSONException e ) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public static String jsonToString( JSONObject json, int numSpacesToIndent ) throws JSONException {
+        if ( !doJsonStringCaching ) return json.toString( numSpacesToIndent );
+        String result = null;
+        String modString = json.optString("modified");
+        Date mod = null;
+        // Only cache json with a modified date so that we know when to update
+        // it.
+        if ( modString != null ) {
+            mod = TimeUtils.dateFromTimestamp( modString );
+            if ( mod != null && jsonStringCache.containsKey( json ) ) {
+                Pair< Date, String > p = Utils.get( jsonStringCache, json, numSpacesToIndent );//stringCache.get( this );
+                if ( p != null ) {
+                    if ( p.first != null && !mod.after( p.first ) ) {
+                        result = p.second;
+                        // cache hit
+                        ++jsonStringCacheHits;
+                        //System.out.println("string cache hit : " + result );
+                        return result;
+                    }
+                }
+            }
+        }
+        if ( numSpacesToIndent < 0 ) {
+            result = json.toString();
+        } else {
+            result = json.toString(numSpacesToIndent);
+        }
+        if ( mod == null ) {
+            // cache not applicable
+        } else {
+            // cache miss; add to cache
+            ++jsonStringCacheMisses;
+            Utils.put(jsonStringCache, json, numSpacesToIndent,
+                      new Pair< Date, String >( mod, result ) );
+        }
+        return result;
+    }
+    
 
     public static StoreRef getStoreRef() {
         if ( SEARCH_STORE == null ) {
@@ -290,9 +377,10 @@ public class NodeUtil {
         }
         ResultSet results = null;
         if ( searchService != null ) {
-            results = searchService.query( getStoreRef(),
-                                           SearchService.LANGUAGE_LUCENE,
-                                           queryPattern );
+//            results = searchService.query( getStoreRef(),
+//                                           SearchService.LANGUAGE_LUCENE,
+//                                           queryPattern );
+            results = searchService.query( getSearchParameters(queryPattern) );
         }
         if ( Debug.isOn() ) {
             Debug.outln( "luceneSearch(" + queryPattern + "): returned "
@@ -302,6 +390,19 @@ public class NodeUtil {
      	Timer.stopTimer(timerLucene, "***** luceneSearch(): time", timeEvents);
 
         return results;
+    }
+    
+    public static SearchParameters getSearchParameters(String queryPattern) {
+        final SearchParameters params = new SearchParameters();
+        params.addStore(getStoreRef());
+        params.setLanguage(SearchService.LANGUAGE_LUCENE);
+        params.setQuery(queryPattern);
+        params.setLimitBy(LimitBy.UNLIMITED);
+        params.setLimit(0);
+        params.setMaxPermissionChecks(100000);
+        params.setMaxPermissionCheckTimeMillis(100000);
+        params.setMaxItems(-1);
+        return params;
     }
 
     public static List<EmsScriptNode> resultSetToList( ResultSet results ) {
@@ -1458,7 +1559,11 @@ public class NodeUtil {
     {
         if ( s == null ) return null;
         if ( Acm.getJSON2ACM().keySet().contains( s ) ) {
-            s = Acm.getACM2JSON().get( s );
+            String possibleString = Acm.getACM2JSON().get( s );
+            // Bad mapping, ie type, just use the original string:
+            if (possibleString != null) {
+                s = possibleString;
+            }
         }
         QName qname;
         if (s.indexOf("{") != -1)
@@ -2448,18 +2553,25 @@ public class NodeUtil {
                 Exception e = new Exception();
                 logger.error( "In transaction when have been outside! " + node,
                               e );
+                logger.error( "Stack trace when last outside transaction:\n"
+                              + Utils.toString( getOutsideTransactionStackTrace() ) );
             }
             NodeUtil.setBeenInsideTransaction( true );
+            setInsideTransactionStackTrace();
         } else {
             if ( NodeUtil.hasBeenInsideTransaction() ) {
                 Exception e = new Exception();
                 logger.error( "Outside transaction when have been inside! "
                               + node, e );
+                logger.error( "Stack trace when last inside transaction:\n"
+                        + Utils.toString( getInsideTransactionStackTrace() ) );
             }
             NodeUtil.setBeenOutsideTransaction( true );
+            setOutsideTransactionStackTrace();
         }
     }
 
+    
     public static void transactionCheck( Logger logger, EmsScriptNode node ) {
         //logger.error( "inTransaction = " + NodeUtil.isInsideTransactionNow() );
         if ( NodeUtil.isInsideTransactionNow() ) {
@@ -2467,17 +2579,23 @@ public class NodeUtil {
                 Exception e = new Exception();
                 logger.error( "In transaction when have been outside! " + node,
                               e );
+                logger.error( "Stack trace when last outside transaction:\n"
+                              + Utils.toString( getOutsideTransactionStackTrace() ) );
             }
             NodeUtil.setBeenInsideTransaction( true );
+            setInsideTransactionStackTrace();
         } else {
             if ( NodeUtil.hasBeenInsideTransaction() ) {
                 Exception e = new Exception();
                 logger.error( "Outside transaction when have been inside! "
                               + node, e );
+                logger.error( "Stack trace when last inside transaction:\n"
+                        + Utils.toString( getInsideTransactionStackTrace() ) );
             }
             NodeUtil.setBeenOutsideTransaction( true );
+            setOutsideTransactionStackTrace();
         }
-    }
+      }
     /**
      * FIXME Recipients and senders shouldn't be hardcoded - need to have these spring injected
      * @param subject

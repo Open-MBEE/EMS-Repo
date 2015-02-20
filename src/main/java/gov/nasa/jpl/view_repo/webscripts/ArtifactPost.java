@@ -95,7 +95,7 @@ public class ArtifactPost extends AbstractJavaWebScript {
 		Map<String, Object> model = new HashMap<String, Object>();
 
         printHeader( req );
-		clearCaches();
+		//clearCaches();
 
 //        String cs = req.getParameter("cs"); // Ignoring this b/c we calculate it from the data
         String extension = req.getParameter("extension") != null ? req.getParameter("extension") : ".svg";

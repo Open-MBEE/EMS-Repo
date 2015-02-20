@@ -237,11 +237,7 @@ public class WorkspaceNode extends EmsScriptNode {
 
     	// Make sure the workspace does not already exist in the target folder with the same
     	// parent workspace:
-    	Set<EmsScriptNode> childs = WebScriptUtil.getAllNodesInPath(folder.getQnamePath(),
-    	                                                            "TYPE",
-    	                                                            "cm:folder",
-    	                                                            null,null,
-    	                                                            services,response);
+    	Set<EmsScriptNode> childs = folder.getChildNodes(); 
     	for (EmsScriptNode child : childs) {
     	    if ( child != null && child.exists() ) {
     	        String childWsName = (String)child.getProperty("ems:workspace_name");
@@ -658,9 +654,6 @@ public class WorkspaceNode extends EmsScriptNode {
         // dateTime.
         while ( parent != null && !parent.equals( targetParent ) ) {
             Set< NodeRef > changes = parent.getChangedNodeRefs( dateTime );
-
-            //System.out.println( "nodes in " + getName(parent) + " = " + changes );
-
             changedNodeRefs.addAll( changes );
             parent = parent.getParentWorkspace();
             if ( parent != null ) lastParent = parent;
@@ -717,16 +710,16 @@ public class WorkspaceNode extends EmsScriptNode {
             // others'.
             for ( EmsScriptNode commit : commits ) {
                 String type = (String)commit.getProperty( "ems:commitType" );
-                if ( "COMMIT".equals( type ) ) {
+                if ( "COMMIT".equals( type ) || "MERGE".equals( type )) {
                     String diffStr = (String)commit.getProperty( "ems:commit" );
                     try {
                         JSONObject diff = new JSONObject( diffStr );
 
-                        Set< EmsScriptNode > elements =
+                        Set< NodeRef > elements =
                                 WorkspaceDiff.getAllChangedElementsInDiffJson( diff,
                                                                                services );
                         if ( elements != null )
-                            changedNodeRefs.addAll( NodeUtil.getNodeRefs( elements ) );
+                            changedNodeRefs.addAll( elements );
                     } catch ( JSONException e ) {
                         String msg = "ERROR! Could not parse json from CommitUtil: \"" + diffStr + "\"";
                         if ( response != null ) {

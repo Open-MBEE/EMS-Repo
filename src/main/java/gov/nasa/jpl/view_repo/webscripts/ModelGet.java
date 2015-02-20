@@ -49,8 +49,8 @@ import org.alfresco.repo.model.Repository;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.security.PermissionService;
-import org.apache.log4j.Logger;
 import org.json.JSONArray;
+import org.apache.log4j.Logger;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.extensions.webscripts.Cache;
@@ -161,7 +161,7 @@ public class ModelGet extends AbstractJavaWebScript {
 	    Timer timer = new Timer();
 	    printHeader( req );
 
-		clearCaches();
+		//clearCaches();
 
 		Map<String, Object> model = new HashMap<String, Object>();
 		// make sure to pass down view request flag to instance
@@ -176,14 +176,16 @@ public class ModelGet extends AbstractJavaWebScript {
 		try {
 		    if (elementsJson.length() > 0) {
 		        top.put("elements", elementsJson);
-		        if (!Utils.isNullOrEmpty(response.toString())) top.put("message", response.toString());
-		        if ( prettyPrint ) model.put("res", top.toString(4));
-		        else model.put("res", top.toString());
 		    } else {
 		        log(Level.WARN, HttpServletResponse.SC_NOT_FOUND, "No elements found");
-		        model.put("res", response.toString());
+		        //model.put("res", response.toString());
 		    }
+	        if (!Utils.isNullOrEmpty(response.toString())) top.put("message", response.toString());
+	        if ( prettyPrint ) model.put("res", NodeUtil.jsonToString( top, 4 ));
+	        else model.put("res", NodeUtil.jsonToString( top ));
 		} catch (JSONException e) {
+            log(Level.ERROR, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Could not create JSONObject");
+            model.put( "res", String.format("{'message':'%s'}", response.toString()) );
 			e.printStackTrace();
 		}
 
@@ -193,6 +195,7 @@ public class ModelGet extends AbstractJavaWebScript {
 
         if (logger.isInfoEnabled()) {
             log( Level.INFO, "ModelGet: %s", timer );
+            // logger.info( "ModelGet: " + timer );
         }
 
 		return model;
@@ -241,14 +244,29 @@ public class ModelGet extends AbstractJavaWebScript {
                     return new JSONArray();
             }
 
+            String depthParam = req.getParameter( "depth" );
+            Long depth = null;
+            if (depthParam != null) {
+                try {
+                    depth = Long.parseLong( req.getParameter("depth") );
+                } catch (NumberFormatException nfe) {
+                    // don't do any recursion, ignore the depth
+                    log(Level.WARN, HttpServletResponse.SC_BAD_REQUEST, "Bad depth specified, returning depth 0");
+                }
+            }
             // recurse default is false
             boolean recurse = getBooleanArg(req, "recurse", false);
+            // for backwards compatiblity convert recurse to infinite depth (this overrides
+            // any depth setting)
+            if (recurse) {
+                depth = new Long(-1);
+            }
             boolean includeQualified = getBooleanArg(req, "qualified", true);
 
             if (isViewRequest) {
-                handleViewHierarchy(modelRootNode, recurse, workspace, dateTime);
+                handleViewHierarchy(modelRootNode, workspace, dateTime, depth, new Long(0));
             } else {
-                handleElementHierarchy( modelRootNode, recurse, workspace, dateTime );
+                handleElementHierarchy( modelRootNode, workspace, dateTime, depth, new Long(0) );
             }
 
             handleElements(dateTime, includeQualified);
@@ -266,8 +284,9 @@ public class ModelGet extends AbstractJavaWebScript {
 	 * @param recurse	If true, find elements for children views
 	 * @throws JSONException	JSON element creation error
 	 */
-	protected void handleViewHierarchy(EmsScriptNode root, boolean recurse,
-	                                   WorkspaceNode workspace, Date dateTime)
+	protected void handleViewHierarchy(EmsScriptNode root,
+	                                   WorkspaceNode workspace, Date dateTime,
+	                                   final Long maxDepth, Long currDepth)
 	                                           throws JSONException {
 		Object allowedElements = root.getProperty(Acm.ACM_ALLOWED_ELEMENTS);
 		if (allowedElements != null) {
@@ -287,7 +306,8 @@ public class ModelGet extends AbstractJavaWebScript {
                          + ( dateTime == null ? "" : " at " + dateTime ));
     				}
 			}
-			if (recurse) {
+			if (maxDepth != null && (maxDepth < 0 || currDepth < maxDepth)) {
+			    currDepth++;
 				Object childrenViews = root.getProperty(Acm.ACM_CHILDREN_VIEWS);
 				if (childrenViews != null) {
 					JSONArray childViewJson = new JSONArray(childrenViews.toString());
@@ -297,8 +317,9 @@ public class ModelGet extends AbstractJavaWebScript {
                                 findScriptNodeById( id, workspace, dateTime, false );
 						if (childView != null && childView.exists()) {
 					        if (checkPermissions(childView, PermissionService.READ)) {
-					            handleViewHierarchy( childView, recurse,
-					                                 workspace, dateTime );
+					            handleViewHierarchy( childView, 
+					                                 workspace, dateTime,
+					                                 maxDepth, currDepth );
 					        } // TODO -- REVIEW -- Warning if no permissions?
 						} else {
 		                    log( Level.WARN,  HttpServletResponse.SC_NOT_FOUND,
@@ -316,12 +337,16 @@ public class ModelGet extends AbstractJavaWebScript {
      *
      * @param root
      *            Root node to get children for
+     * @param recurse
      * @param workspace
      * @param dateTime
+     * @param maxDepth
+     * @param currDepth
      * @throws JSONException
      */
-	protected void handleElementHierarchy( EmsScriptNode root, boolean recurse,
-	                                       WorkspaceNode workspace, Date dateTime )
+	protected void handleElementHierarchy( EmsScriptNode root,
+	                                       WorkspaceNode workspace, Date dateTime,
+	                                       final Long maxDepth, Long currDepth)
 	                                              throws JSONException {
 
 		// don't return any elements
@@ -341,7 +366,8 @@ public class ModelGet extends AbstractJavaWebScript {
 		    }
 		}
 
-		if (recurse) {
+		if (maxDepth != null && (maxDepth < 0 || currDepth < maxDepth)) {
+		    ++currDepth;
 			// Find all the children, recurse or add to array as needed.
 		    // If it is a reified package, then need get the reifiedNode
 		    if ( rootName.endsWith("_pkg") ) {
@@ -349,7 +375,7 @@ public class ModelGet extends AbstractJavaWebScript {
                                                                 workspace,
                                                                 dateTime, false );
 		        if (reifiedNode != null) {
-                    handleElementHierarchy( reifiedNode, recurse, workspace, dateTime );
+                    handleElementHierarchy( reifiedNode, workspace, dateTime, maxDepth, currDepth );
 		        } // TODO -- REVIEW -- Warning or error?
 		    }
 
@@ -371,7 +397,7 @@ public class ModelGet extends AbstractJavaWebScript {
                             elementsFound.put( value, child );
                         }
 
-                        handleElementHierarchy( child, recurse, workspace, dateTime );
+                        handleElementHierarchy( child, workspace, dateTime, maxDepth, currDepth );
 
                     } // ends if (child.exists() && !child.isOwnedValueSpec())
                 } // ends if ( checkPermissions( child, PermissionService.READ ) )

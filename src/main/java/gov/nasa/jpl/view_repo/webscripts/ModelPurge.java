@@ -113,7 +113,7 @@ public class ModelPurge extends AbstractJavaWebScript {
                                                  Status status, Cache cache ) {
         printHeader( req );
 
-		clearCaches();
+		//clearCaches();
 
 		Map<String, Object> model = new HashMap<String, Object>();
 

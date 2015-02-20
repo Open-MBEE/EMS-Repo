@@ -46,9 +46,14 @@ import org.alfresco.repo.model.Repository;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.security.PermissionService;
+
 import org.json.JSONArray;
+
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import org.json.JSONObject;
+
 import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
@@ -84,7 +89,7 @@ public class ViewModelPost extends ModelPost {
         //            aspect to this one.  See ModelPost.checkForObsoleteValueSpecs()
         
         Map<String, Object> model = new HashMap<String, Object>();
-        clearCaches();
+        //clearCaches();
 
         String[] idKeys = {"modelid", "elementId"};
         String viewid = null;
@@ -150,7 +155,8 @@ public class ViewModelPost extends ModelPost {
     protected void createOrUpdateModel(WebScriptRequest req, Status status) throws Exception {
         clearCaches();
 
-        JSONObject postJson = (JSONObject) req.parseContent();
+        JSONObject postJson = //JSONObject.make( 
+                (JSONObject)req.parseContent();// );
         JSONArray array = postJson.getJSONArray("elements");
 
         WorkspaceNode workspace = getWorkspace( req );

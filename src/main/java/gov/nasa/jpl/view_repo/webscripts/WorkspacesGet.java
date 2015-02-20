@@ -57,7 +57,7 @@ public class WorkspacesGet extends AbstractJavaWebScript{
     protected Map<String, Object> executeImplImpl (WebScriptRequest req, Status status, Cache cache) {
         printHeader( req );
 
-        clearCaches();
+        //clearCaches();
 
         Map<String, Object> model = new HashMap<String, Object>();
         JSONObject json = null;
@@ -80,7 +80,7 @@ public class WorkspacesGet extends AbstractJavaWebScript{
         } else {
             try {
                 if (!Utils.isNullOrEmpty(response.toString())) json.put("message", response.toString());
-                model.put("res", json.toString(4));
+                model.put("res", NodeUtil.jsonToString( json, 4 ));
             } catch ( JSONException e ) {
                 e.printStackTrace();
             }

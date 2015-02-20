@@ -29,7 +29,6 @@
 
 package gov.nasa.jpl.view_repo.webscripts;
 
-import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.actions.ActionUtil;
 import gov.nasa.jpl.view_repo.actions.ConfigurationGenerationActionExecuter;
@@ -51,9 +50,14 @@ import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.action.Action;
 import org.alfresco.service.cmr.action.ActionService;
 import org.alfresco.service.cmr.repository.NodeRef;
+
 import org.json.JSONArray;
+
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import org.json.JSONObject;
+
 import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
@@ -93,7 +97,7 @@ public class ConfigurationPost extends AbstractJavaWebScript {
 
         printHeader( req );
 
-        clearCaches();
+        //clearCaches();
 
 		ConfigurationPost instance = new ConfigurationPost(repository, services);
 
@@ -106,7 +110,7 @@ public class ConfigurationPost extends AbstractJavaWebScript {
 		} else {
 		    try {
 		    	if (!Utils.isNullOrEmpty(response.toString())) result.put("message", response.toString());
-                model.put("res", result.toString(2));
+                model.put("res", NodeUtil.jsonToString( result, 2 ));
             } catch ( JSONException e ) {
                 e.printStackTrace();
             }
@@ -131,7 +135,8 @@ public class ConfigurationPost extends AbstractJavaWebScript {
 
         EmsScriptNode siteNode = getSiteNodeFromRequest( req, false );
 
-		JSONObject reqPostJson = (JSONObject) req.parseContent();
+        JSONObject reqPostJson = //JSONObject.make( 
+                (JSONObject)req.parseContent();// );
 		JSONObject postJson;
 		try {
 		    // for backwards compatibility
@@ -198,7 +203,6 @@ public class ConfigurationPost extends AbstractJavaWebScript {
 		        return handleUpdate( postJson, siteName, context, workspace, status );
 		    }
 
-		    Date date = new Date();
             jobNode = ActionUtil.getOrCreateJob( context, name,
                                                  "ems:ConfigurationSet",
                                                  status, response );
@@ -208,33 +212,28 @@ public class ConfigurationPost extends AbstractJavaWebScript {
                         new ConfigurationsWebscript( repository, services,
                                                      response );
                 configWs.updateConfiguration( jobNode, postJson, context,
-                                              workspace, date );
+                                              workspace, new Date() );
 
 	            HashSet<String> productList = getProductList(postJson);
 
-	            Date datetime = null;
-	            if ( !postJson.has( "timestamp" ) ) {
-	                datetime = new Date();
-	            } else {
-	                String timestamp = postJson.getString("timestamp");
-	                datetime = TimeUtils.dateFromTimestamp(timestamp);
-	                
-	                if (datetime != null) {
-        	                // Check that the timestamp is before the workspace was branched/created
-        	                // or in the future:
-        	                Date now = new Date();
-        	                if (datetime.after( now )) {
-        	                    log(Level.ERROR, HttpServletResponse.SC_BAD_REQUEST, "Timestamp provided in json: %s is in the future.  Current time: %s", 
-        	                       datetime,now);
-        	                    return null;
-        	                }
-        	                else if (workspace != null && datetime.before( workspace.getCopyOrCreationTime() )) {
-        	                    log(Level.ERROR, HttpServletResponse.SC_BAD_REQUEST, "Timestamp provided in json: %s is before the workspace branch/creation time: %s", 
-                                    datetime,workspace.getCopyOrCreationTime());
-        	                    return null;
-        	                }
-	                }
-	            }
+	            // update configuration sets the timestamp, so lets grab timestamp from there
+	            Date datetime = (Date) jobNode.getProperty( "view2:timestamp" );
+                if (datetime != null) {
+    	                // Check that the timestamp is before the workspace was branched/created
+    	                // or in the future:
+    	                Date now = new Date();
+    	                if (datetime.after( now )) {
+    	                    log(Level.ERROR, "Timestamp provided in json: "+datetime+" is in the future.  Current time: "+now, 
+    	                        HttpServletResponse.SC_BAD_REQUEST);
+    	                    return null;
+    	                }
+    	                else if (workspace != null && datetime.before( workspace.getCopyOrCreationTime() )) {
+    	                    log(Level.ERROR, "Timestamp provided in json: "+datetime+" is before the workspace branch/creation time: "+workspace.getCopyOrCreationTime(), 
+                                HttpServletResponse.SC_BAD_REQUEST);
+    	                    return null;
+    	                }
+                }
+
 	            startAction(jobNode, siteName, productList, workspace, datetime);
 
 				return configWs.getConfigJson( jobNode, workspace, null );

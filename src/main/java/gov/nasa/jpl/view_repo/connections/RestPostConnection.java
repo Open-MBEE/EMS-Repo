@@ -1,5 +1,7 @@
 package gov.nasa.jpl.view_repo.connections;
 
+import gov.nasa.jpl.view_repo.util.NodeUtil;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -33,7 +35,7 @@ public class RestPostConnection extends AbstractConnection {
     public boolean publish(JSONObject jsonObject, String dst) {
         boolean status = true;
         Client client = Client.create();
-        String msg = jsonObject.toString( );
+        String msg = NodeUtil.jsonToString( jsonObject );
     
         if (logger.isDebugEnabled()) {
             logger.debug("sending to: " + uri);

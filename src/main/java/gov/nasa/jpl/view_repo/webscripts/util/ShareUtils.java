@@ -1,5 +1,7 @@
 package gov.nasa.jpl.view_repo.webscripts.util;
 
+import gov.nasa.jpl.view_repo.util.NodeUtil;
+
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
@@ -110,11 +112,11 @@ public class ShareUtils {
             e.printStackTrace();
             success = false;
         }
-        if (false == makeSharePostCall(httpClient, CREATE_SITE_URL, json.toString() , CONTENT_TYPE_JSON, "Create site with name: " + siteId, HttpStatus.SC_OK)) {
+        if (false == makeSharePostCall(httpClient, CREATE_SITE_URL, NodeUtil.jsonToString( json ) , CONTENT_TYPE_JSON, "Create site with name: " + siteId, HttpStatus.SC_OK)) {
             success = false;
         }
         // for some reason need to do this twice unsure why this is the case
-        if (false == makeSharePostCall(httpClient, CREATE_SITE_URL, json.toString() , CONTENT_TYPE_JSON, "Create site with name: " + siteId, HttpStatus.SC_OK)) {
+        if (false == makeSharePostCall(httpClient, CREATE_SITE_URL, NodeUtil.jsonToString( json ) , CONTENT_TYPE_JSON, "Create site with name: " + siteId, HttpStatus.SC_OK)) {
             success = false;
         }
         

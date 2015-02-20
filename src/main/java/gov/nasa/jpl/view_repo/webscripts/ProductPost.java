@@ -42,9 +42,14 @@ import org.apache.log4j.*;
 import org.alfresco.repo.model.Repository;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.security.PermissionService;
+
 import org.json.JSONArray;
+
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import org.json.JSONObject;
+
 import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
@@ -80,14 +85,16 @@ public class ProductPost extends AbstractJavaWebScript {
 	    
         printHeader( req );
 
-		clearCaches();
+		//clearCaches();
 
 		Map<String, Object> model = new HashMap<String, Object>();
 
         WorkspaceNode workspace = getWorkspace( req );
 
 		try {
-			updateProducts((JSONObject)req.parseContent(), workspace);
+	        JSONObject json = //JSONObject.make(
+	                (JSONObject)req.parseContent();// );
+			updateProducts(json, workspace);
 		} catch (JSONException e) {
 			log(Level.ERROR, HttpServletResponse.SC_BAD_REQUEST, "JSON parse exception: %s", e.getMessage());
 			e.printStackTrace();

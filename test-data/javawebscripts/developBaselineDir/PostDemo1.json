@@ -1,314 +1,157 @@
 {
-
     "elements": [
-
         {
-
-            "creator": "admin",
-
-            "documentation": "",
-
-            "editable": true,
-
             "name": "",
-
+            "qualifiedName": "/europa/JW_TEST/_17_0_2_4_f3a0363_1394146455624_407543_30441/",
+            "documentation": "",
             "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
-
-            "qualifiedName": "/JW_TEST/_17_0_2_4_f3a0363_1394146455624_407543_30441/",
-
             "specialization": {
-
-                "source": "_17_0_2_3_e610336_1394148311476_17302_29388",
-
-                "target": "_17_0_2_4_f3a0363_1394142290412_487571_28478",
-
-                "type": "Expose"
-
-            },
-
-        },
-
-        {
-
-            "creator": "admin",
-
-            "documentation": "",
-
-            "editable": true,
-
-            "name": "List",
-
-            "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
-
-            "qualifiedName": "/JW_TEST/_17_0_2_4_f3a0363_1394146455624_407543_30441/List",
-
-            "specialization": {"type": "Operation"},
-
-        },
-
-        {
-
-            "creator": "admin",
-
-            "documentation": "",
-
-            "editable": true,
-
-            "name": "Name",
-
-            "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
-
-            "qualifiedName": "/JW_TEST/_17_0_2_4_f3a0363_1394146455624_407543_30441/Name",
-
-            "specialization": {"type": "Operation"},
-
-        },
-
-        {
-
-            "creator": "admin",
-
-            "documentation": "",
-
-            "editable": true,
-
-            "name": "",
-
-            "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
-
-            "qualifiedName": "/JW_TEST/_17_0_2_4_f3a0363_1394146455624_407543_30441/",
-
-            "specialization": {
-
+                "type": "Expression",
                 "operand": [
-
                     {
-
                         "element": "op_map",
-
                         "type": "ElementValue"
-
                     },
-
                     {
-
                         "element": "exposed_id",
-
                         "type": "ElementValue"
-
                     },
-
                     {
-
                         "element": "op_name_arg",
-
                         "type": "ElementValue"
-
                     }
-
-                ],
-
-                "type": "Expression"
-
+                ]
             },
-
-        },
-
-        {
-
-            "creator": "admin",
-
-            "documentation": "",
-
             "editable": true,
-
-            "name": "map",
-
+            "creator": "admin",
+        },
+        {
+            "name": "List",
+            "qualifiedName": "/europa/JW_TEST/_17_0_2_4_f3a0363_1394146455624_407543_30441/List",
+            "documentation": "",
             "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
-
-            "qualifiedName": "/JW_TEST/_17_0_2_4_f3a0363_1394146455624_407543_30441/map",
-
             "specialization": {"type": "Operation"},
-
-        },
-
-        {
-
-            "creator": "admin",
-
-            "documentation": "",
-
             "editable": true,
-
-            "name": "exposed",
-
-            "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
-
-            "qualifiedName": "/JW_TEST/_17_0_2_4_f3a0363_1394146455624_407543_30441/exposed",
-
-            "specialization": {"type": "Parameter"},
-
-        },
-
-        {
-
             "creator": "admin",
-
-            "documentation": "",
-
-            "editable": true,
-
-            "name": "Components",
-
-            "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
-
-            "qualifiedName": "/JW_TEST/_17_0_2_4_f3a0363_1394146455624_407543_30441/Components",
-
-            "specialization": {"type": "View"},
-
         },
-
         {
-
-            "creator": "admin",
-
-            "documentation": "",
-
-            "editable": true,
-
-            "name": "BLUCam CubeSat A",
-
-            "owner": "_17_0_2_4_f3a0363_1394140430311_23731_27741",
-
-            "qualifiedName": "/JW_TEST/_17_0_2_4_f3a0363_1394140430311_23731_27741/BLUCam CubeSat A",
-
-            "specialization": {"type": "Package"},
-
-        },
-
-        {
-
-            "creator": "admin",
-
-            "documentation": "",
-
-            "editable": true,
-
-            "name": "viewpoint_op",
-
-            "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
-
-            "qualifiedName": "/JW_TEST/_17_0_2_4_f3a0363_1394146455624_407543_30441/viewpoint_op",
-
-            "specialization": {
-
-                "expression": {
-
-                    "operand": [
-
-                        {
-
-                            "element": "op_list",
-
-                            "type": "ElementValue"
-
-                        },
-
-                        {
-
-                            "operand": [
-
-                                {
-
-                                    "element": "op_map",
-
-                                    "type": "ElementValue"
-
-                                },
-
-                                {
-
-                                    "element": "exposed_id",
-
-                                    "type": "ElementValue"
-
-                                },
-
-                                {
-
-                                    "element": "op_name_arg",
-
-                                    "type": "ElementValue"
-
-                                }
-
-                            ],
-
-                            "type": "Expression"
-
-                        }
-
-                    ],
-
-                    "type": "Expression"
-
-                },
-
-                "parameters": ["exposed_id"],
-
-                "type": "Operation"
-
-            },
-
-        },
-
-        {
-
-            "creator": "admin",
-
-            "documentation": "",
-
-            "editable": true,
-
             "name": "",
-
-            "owner": "_17_0_2_3_e610336_1394148311476_17302_29388",
-
-            "qualifiedName": "/JW_TEST/_17_0_2_4_f3a0363_1394146455624_407543_30441/Components/",
-
-            "specialization": {
-
-                "source": "_17_0_2_3_e610336_1394148311476_17302_29388",
-
-                "target": "_17_0_2_3_e610336_1394148449252_91190_29556",
-
-                "type": "Conform"
-
-            },
-
-        },
-
-        {
-
-            "creator": "admin",
-
+            "qualifiedName": "/europa/JW_TEST/_17_0_2_4_f3a0363_1394146455624_407543_30441/",
             "documentation": "",
-
-            "editable": true,
-
-            "name": "ComponentViewPoint",
-
             "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
-
-            "qualifiedName": "/JW_TEST/_17_0_2_4_f3a0363_1394146455624_407543_30441/ComponentViewPoint",
-
+            "specialization": {
+                "source": "_17_0_2_3_e610336_1394148311476_17302_29388",
+                "target": "_17_0_2_4_f3a0363_1394142290412_487571_28478",
+                "type": "Expose"
+            },
+            "editable": true,
+            "creator": "admin",
+        },
+        {
+            "name": "BLUCam CubeSat A",
+            "qualifiedName": "/europa/JW_TEST/_17_0_2_4_f3a0363_1394140430311_23731_27741/BLUCam CubeSat A",
+            "documentation": "",
+            "owner": "_17_0_2_4_f3a0363_1394140430311_23731_27741",
+            "specialization": {"type": "Package"},
+            "editable": true,
+            "creator": "admin",
+        },
+        {
+            "name": "map",
+            "qualifiedName": "/europa/JW_TEST/_17_0_2_4_f3a0363_1394146455624_407543_30441/map",
+            "documentation": "",
+            "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
+            "specialization": {"type": "Operation"},
+            "editable": true,
+            "creator": "admin",
+        },
+        {
+            "name": "exposed",
+            "qualifiedName": "/europa/JW_TEST/_17_0_2_4_f3a0363_1394146455624_407543_30441/exposed",
+            "documentation": "",
+            "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
+            "specialization": {"type": "Parameter"},
+            "editable": true,
+            "creator": "admin",
+        },
+        {
+            "name": "Name",
+            "qualifiedName": "/europa/JW_TEST/_17_0_2_4_f3a0363_1394146455624_407543_30441/Name",
+            "documentation": "",
+            "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
+            "specialization": {"type": "Operation"},
+            "editable": true,
+            "creator": "admin",
+        },
+        {
+            "name": "Components",
+            "qualifiedName": "/europa/JW_TEST/_17_0_2_4_f3a0363_1394146455624_407543_30441/Components",
+            "documentation": "",
+            "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
+            "specialization": {"type": "View"},
+            "editable": true,
+            "creator": "admin",
+        },
+        {
+            "name": "",
+            "qualifiedName": "/europa/JW_TEST/_17_0_2_4_f3a0363_1394146455624_407543_30441/Components/",
+            "documentation": "",
+            "owner": "_17_0_2_3_e610336_1394148311476_17302_29388",
+            "specialization": {
+                "source": "_17_0_2_3_e610336_1394148311476_17302_29388",
+                "target": "_17_0_2_3_e610336_1394148449252_91190_29556",
+                "type": "Conform"
+            },
+            "editable": true,
+            "creator": "admin",
+        },
+        {
+            "name": "ComponentViewPoint",
+            "qualifiedName": "/europa/JW_TEST/_17_0_2_4_f3a0363_1394146455624_407543_30441/ComponentViewPoint",
+            "documentation": "",
+            "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
             "specialization": {"type": "Viewpoint"},
-
+            "editable": true,
+            "creator": "admin",
+        },
+        {
+            "name": "viewpoint_op",
+            "qualifiedName": "/europa/JW_TEST/_17_0_2_4_f3a0363_1394146455624_407543_30441/viewpoint_op",
+            "documentation": "",
+            "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
+            "specialization": {
+                "expression": {
+                    "operand": [
+                        {
+                            "element": "op_list",
+                            "type": "ElementValue"
+                        },
+                        {
+                            "type": "Expression",
+                            "operand": [
+                                {
+                                    "element": "op_map",
+                                    "type": "ElementValue"
+                                },
+                                {
+                                    "element": "exposed_id",
+                                    "type": "ElementValue"
+                                },
+                                {
+                                    "element": "op_name_arg",
+                                    "type": "ElementValue"
+                                }
+                            ]
+                        }
+                    ],
+                    "type": "Expression"
+                },
+                "parameters": ["exposed_id"],
+                "type": "Operation"
+            },
+            "editable": true,
+            "creator": "admin",
         }
-
-    ],
-
+    ]
 }
-
 200
-

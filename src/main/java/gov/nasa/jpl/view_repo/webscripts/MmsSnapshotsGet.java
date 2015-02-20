@@ -3,8 +3,10 @@ package gov.nasa.jpl.view_repo.webscripts;
 import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
+import gov.nasa.jpl.view_repo.util.NodeUtil;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 import gov.nasa.jpl.view_repo.webscripts.util.ConfigurationsWebscript;
+import gov.nasa.jpl.view_repo.webscripts.util.ConfigurationsWebscript.ConfigurationType;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -44,14 +46,14 @@ public class MmsSnapshotsGet extends AbstractJavaWebScript {
     @Override
     protected  Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
 		MmsSnapshotsGet instance = new MmsSnapshotsGet(repository, getServices());
-    	    return instance.executeImplImpl(req, status, cache, runWithoutTransactions);
+		return instance.executeImplImpl(req, status, cache, runWithoutTransactions);
     }
 
     @Override
     protected  Map<String, Object> executeImplImpl(WebScriptRequest req, Status status, Cache cache) {
         printHeader( req );
 
-        clearCaches();
+        //clearCaches();
 
         Map<String, Object> model = new HashMap<String, Object>();
 
@@ -62,7 +64,7 @@ public class MmsSnapshotsGet extends AbstractJavaWebScript {
             jsonObject.put("snapshots", instance.handleRequest(req));
             appendResponseStatusInfo( instance );
             if (!Utils.isNullOrEmpty(response.toString())) jsonObject.put("message", response.toString());
-            model.put("res", jsonObject.toString(2));
+            model.put("res", NodeUtil.jsonToString( jsonObject, 2 ));
         } catch (Exception e) {
             model.put("res", response.toString());
             if (e instanceof JSONException) {
@@ -135,6 +137,7 @@ public class MmsSnapshotsGet extends AbstractJavaWebScript {
             }
         }
 
+        // for backwards compatibility, keep noderefs
         List< NodeRef > productSnapshots = product.getPropertyNodeRefs( "view2:productSnapshots" );
         for (NodeRef productSnapshotNodeRef: productSnapshots) {
             EmsScriptNode productSnapshot = new EmsScriptNode(productSnapshotNodeRef, services, response);
@@ -142,7 +145,14 @@ public class MmsSnapshotsGet extends AbstractJavaWebScript {
                 snapshotsJson.put( configWs.getSnapshotJson( productSnapshot, product, workspace ) );
             }
         }
-
+        
+        // all we really need to do is grab all the configurations and place them in as snapshots
+        ConfigurationsWebscript configService = new ConfigurationsWebscript( repository, services, response );
+        JSONArray configSnapshots = configService.handleConfigurations( req, ConfigurationType.CONFIG_SNAPSHOT );
+        for (int ii = 0; ii < configSnapshots.length(); ii++) {
+            snapshotsJson.put( configSnapshots.get( ii ) );
+        }
+        
         return snapshotsJson;
     }
 

@@ -1,40 +1,20 @@
 {"elements": [{
-
-    "creator": "admin",
-
-    "documentation": "x is x",
-
-    "editable": true,
-
+    "qualifiedId": "/europa/123456/4000/401/402",
     "name": "402",
-
+    "qualifiedName": "/europa/JW_TEST2/400/401/402",
+    "sysmlid": "402",
+    "documentation": "x is x",
     "owner": "401",
-
-    "qualifiedId": "/123456/4000/401/402",
-
-    "qualifiedName": "/JW_TEST2/400/401/402",
-
     "specialization": {
-
         "isDerived": false,
-
         "isSlot": false,
-
-        "type": "Property",
-
         "value": [{
-
             "string": "the x value",
-
             "type": "LiteralString"
-
-        }]
-
+        }],
+        "type": "Property"
     },
-
-    "sysmlid": "402"
-
+    "editable": true,
+    "creator": "admin",
 }]}
-
 200
-
