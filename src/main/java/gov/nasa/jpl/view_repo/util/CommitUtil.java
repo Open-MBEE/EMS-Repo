@@ -759,9 +759,7 @@ public class CommitUtil {
         if (jmsConnection != null) {
             jmsConnection.setWorkspace( workspaceId );
             jmsConnection.setProjectId( projectId );
-            // TODO FIXME The topic is hard coded as "master" in JsmConnection.  Do we want that
-            //            hardcoded or the worskpaceId?
-            jmsStatus = jmsConnection.publish( deltaJson, workspaceId );
+            jmsStatus = jmsConnection.publish( deltaJson );
         }
         if (restConnection != null) {
             try {
