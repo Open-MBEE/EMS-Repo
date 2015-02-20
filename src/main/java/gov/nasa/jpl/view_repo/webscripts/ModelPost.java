@@ -2678,6 +2678,12 @@ public class ModelPost extends AbstractJavaWebScript {
                 else {
                 	log( Level.INFO, "Satisfied all of the constraints!" );
                 	
+                	// Update the values of the nodes after solving the constraints:
+                    EmsScriptNode node;
+                    Parameter<Object> param;
+                    Set<Entry<EmsScriptNode, Parameter<Object>>> entrySet = sysmlToAe.getExprParamMap().entrySet();
+                    for (Entry<EmsScriptNode, Parameter<Object>> entry : entrySet) {
+                	
 	                	node = entry.getKey();
 	                	param = entry.getValue();
 	                	systemModel.setValue(node, (Serializable)param.getValue());
@@ -2690,7 +2696,7 @@ public class ModelPost extends AbstractJavaWebScript {
 
         } // End if constraints list is non-empty
 
-    //}
+    }
 
     /**
      * Entry point
@@ -2785,18 +2791,16 @@ public class ModelPost extends AbstractJavaWebScript {
                     if ( !Utils.isNullOrEmpty( expressionString ) ) {
 
                         JSONObject exprJson = new JSONObject(KExpParser.parseExpression(expressionString));
-
                         log(Level.DEBUG, "********************************************************************************");
                         log(Level.DEBUG, expressionString);
                         log(Level.DEBUG, NodeUtil.jsonToString( exprJson, 4 ));
 //                        log(LogLevel.DEBUG, NodeUtil.jsonToString( exprJson0, 4 ));
                         log(Level.DEBUG, "********************************************************************************");
-
                         JSONArray expJarr = exprJson.getJSONArray("elements");
                         for (int i=0; i<expJarr.length(); ++i) {
                             jarr.put(expJarr.get( i ) );
                         }
-                    
+                    }
 
                     // Get the project node from the request:
                     new EmsTransaction(getServices(), getResponse(), getResponseStatus(),
@@ -2810,7 +2814,7 @@ public class ModelPost extends AbstractJavaWebScript {
                     // if DB rolled back, it's because the no_site node couldn't be created
                     // this is indicative of no permissions (inside the DB transaction)
                     if (getResponseStatus().getCode() == HttpServletResponse.SC_BAD_REQUEST) {
-                        log(LogLevel.WARNING, "No write priveleges", HttpServletResponse.SC_FORBIDDEN);
+                        log(Level.WARN, HttpServletResponse.SC_FORBIDDEN, "No write priveleges");
                     } else if (projectNode != null) {
                         handleUpdate( postJson, status, myWorkspace, fix, model, true );
                     }
