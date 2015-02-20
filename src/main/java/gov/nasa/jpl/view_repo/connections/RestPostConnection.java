@@ -33,9 +33,13 @@ public class RestPostConnection extends AbstractConnection {
     }
     
     public boolean publish(JSONObject jsonObject, String dst) {
+        String msg = NodeUtil.jsonToString( jsonObject );
+        return publish(msg, dst);
+    }
+    
+    public boolean publish(String msg, String dst) {
         boolean status = true;
         Client client = Client.create();
-        String msg = NodeUtil.jsonToString( jsonObject );
     
         if (logger.isDebugEnabled()) {
             logger.debug("sending to: " + uri);

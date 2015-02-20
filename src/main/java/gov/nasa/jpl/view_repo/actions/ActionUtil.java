@@ -91,6 +91,7 @@ public class ActionUtil {
             mailAction.setParameterValue(MailActionExecuter.PARAM_TO, recipient);
             mailAction.setParameterValue(MailActionExecuter.PARAM_FROM, sender);
             mailAction.setParameterValue(MailActionExecuter.PARAM_TEXT, msg);
+            mailAction.setExecuteAsynchronously( true );
             services.getActionService().executeAction(mailAction, null);
         } catch (Exception e) {
             e.printStackTrace();

@@ -2191,11 +2191,13 @@ public class NodeUtil {
     }
 
     public static String getName( NodeRef ref ) {
+        if ( ref == null ) return null;
         EmsScriptNode node = new EmsScriptNode( ref, getServices() );
         return node.getName();
     }
 
     public static String getSysmlId( NodeRef ref ) {
+        if ( ref == null ) return null;
         EmsScriptNode node = new EmsScriptNode( ref, getServices() );
         return node.getSysmlId();
     }

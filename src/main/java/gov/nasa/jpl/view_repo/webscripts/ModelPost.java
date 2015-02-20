@@ -79,13 +79,6 @@ import kexpparser.KExpParser;
 //import k.frontend.Frontend;
 
 
-
-
-
-
-
-
-
 import org.alfresco.repo.model.Repository;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
@@ -99,12 +92,9 @@ import org.alfresco.service.cmr.site.SiteInfo;
 import org.alfresco.service.cmr.version.Version;
 import org.alfresco.service.namespace.QName;
 import org.apache.log4j.Logger;
-
 import org.json.JSONArray;
-
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
@@ -161,6 +151,8 @@ public class ModelPost extends AbstractJavaWebScript {
     private EmsScriptNode sitePackageNode = null;
     private boolean internalRunWithoutTransactions = false;
     private Set<String> ownersNotFound = null;
+    private final int minElementsForProgress = 100;
+    private int numElementsToPost = 0;
     
     /**
      * JSONObject of the relationships
@@ -208,7 +200,7 @@ public class ModelPost extends AbstractJavaWebScript {
                 new SystemModelToAeExpression< EmsScriptNode, EmsScriptNode, String, Object, EmsSystemModel >( getSystemModel() );
 
     }
-
+    
     /**
      * Keep track of update elements
      */
@@ -238,6 +230,7 @@ public class ModelPost extends AbstractJavaWebScript {
             createOrUpdateModel( Object content, Status status,
                                  WorkspaceNode targetWS, WorkspaceNode sourceWS,
                                  boolean createCommit) throws Exception {
+        
         JSONObject postJson = (JSONObject) content;
         populateSourceFromJson( postJson );
 
@@ -265,6 +258,10 @@ public class ModelPost extends AbstractJavaWebScript {
         if(!(elementsArray == null))
             collections.add(elementsArray);
         TreeSet<EmsScriptNode> elements = new TreeSet< EmsScriptNode >();
+        
+        // Note: Cannot have any sendProgress methods before setting numElementsToPost
+        numElementsToPost = elementsArray.length();
+        sendProgress( "Got request - starting", projectId, true);
 
         for(JSONArray jsonArray : collections){
             JSONObject object = new JSONObject();
@@ -362,6 +359,36 @@ public class ModelPost extends AbstractJavaWebScript {
         elements.addAll( updatedElements );
     }
     
+    private void givePercentProgress(double rootElemNum, boolean isRelationship) {
+        
+        int numRootElems = rootElements.size();
+        double percent = 0;
+        String relString = isRelationship ? " relationships" : "";
+
+        // Sending percentage messages every 10 root elements processed:
+        if ((rootElemNum%10) == 0) {
+            percent = (rootElemNum/numRootElems)*100;
+            sendProgress(String.format("Processed %.1f%% of root elements %s",percent,relString), 
+                         projectId, false);
+        }
+    }
+    
+    /**
+     * Send progress messages to the log, JMS, and email if the number of elements we
+     * are posting is greater than minElementsForProgress (currently 10).
+     * 
+     * @param msg  The message
+     * @param projectSysmlId  The project sysml id
+     * @param sendEmail Set to true to send a email also
+     * 
+     */
+    private void sendProgress( String msg, String projectSysmlId, boolean sendEmail) {
+        if (numElementsToPost >= minElementsForProgress) {
+            sendProgress( msg, projectSysmlId, WorkspaceNode.getWorkspaceName(myWorkspace),
+                          sendEmail);
+        }
+    }
+    
     public Set< EmsScriptNode >
             createOrUpdateModel2( Object content, Status status,
                                   final WorkspaceNode targetWS, WorkspaceNode sourceWS,
@@ -397,8 +424,11 @@ public class ModelPost extends AbstractJavaWebScript {
 
         // create the element map and hierarchies
         if (buildElementMap(postJson.getJSONArray(ELEMENTS), targetWS)) {
+
             final Set<String> elementsWithoutPermissions = new HashSet<String>();
-            
+            double rootElemNum = 1;
+            sendProgress("Processing "+rootElements.size()+" root elements", projectId, true);
+
             // start building up elements from the root elements
             for (final String rootElement : rootElements) {
                 log(LogLevel.INFO, "ROOT ELEMENT FOUND: " + rootElement);
@@ -414,6 +444,9 @@ public class ModelPost extends AbstractJavaWebScript {
                         }
                     };
                 }
+                
+                givePercentProgress(rootElemNum++, false);
+                
             } // end for (String rootElement: rootElements) {
 
             // remove the elementsWithoutPermissions from further processing
@@ -424,6 +457,7 @@ public class ModelPost extends AbstractJavaWebScript {
 
             Timer.stopTimer(timerUpdateModel, "!!!!! createOrUpdateModel(): main loop time", timeEvents);
 
+            sendProgress("Handling relationships", projectId, true);
             if (runWithoutTransactions) {
                 handleRelationships( targetWS, nodeMap, elements, singleElement, postJson );
             }
@@ -446,6 +480,7 @@ public class ModelPost extends AbstractJavaWebScript {
 
             // Send deltas to all listeners
             if (createCommit && wsDiff.isDiff()) {
+                sendProgress("Sending deltas and creating commit node", projectId, false);
                 if (runWithoutTransactions) {
                     sendDeltasAndCommit( targetWS, elements, start, end );
                 }
@@ -472,6 +507,8 @@ public class ModelPost extends AbstractJavaWebScript {
                                                       WorkspaceNode workspace) throws Exception {
         TreeSet<EmsScriptNode> elements =
                 new TreeSet<EmsScriptNode>();
+        double rootElemNum = 1;
+        sendProgress("Processing "+rootElements.size()+" root element relationships", projectId, true);
 
         if ( singleElement ) {
             elements.addAll( updateOrCreateElement( postJson, projectNode, workspace, true ) );
@@ -489,6 +526,8 @@ public class ModelPost extends AbstractJavaWebScript {
                 } catch ( JSONException e ) {
                     e.printStackTrace();
                 }
+                
+                givePercentProgress(rootElemNum++, true);
             }
         } // end for (String rootElement: rootElements) {
         return elements;
@@ -909,6 +948,7 @@ public class ModelPost extends AbstractJavaWebScript {
      */
     protected boolean buildElementMap(final JSONArray jsonArray, 
                                       final WorkspaceNode workspace) throws JSONException {
+        sendProgress( "Starting to build element map", projectId, true);
         boolean isValid = true;
         final List<Boolean> validList = new ArrayList<Boolean>();
         
@@ -1140,7 +1180,12 @@ public class ModelPost extends AbstractJavaWebScript {
         // create the children elements
         if (reifiedNode != null && reifiedNode.exists()) {
             //elements.add( reifiedNode );
-            for (int ii = 0; ii < children.length(); ii++) {
+            int numChildren = children.length();
+            if (numChildren > 0) {
+                sendProgress("Processing "+numChildren+" children of node "+reifiedNode.getSysmlId(), 
+                             projectId, false);
+            }
+            for (int ii = 0; ii < numChildren; ii++) {
                 Set< EmsScriptNode > childElements = null;
                 childElements = updateOrCreateElement(elementMap.get(children.getString(ii)),
                                                       reifiedNode, workspace, ingest);
@@ -2664,6 +2709,7 @@ public class ModelPost extends AbstractJavaWebScript {
     }
 
     WorkspaceNode myWorkspace = null;
+    private String projectId;
     
     @Override
     protected Map<String, Object> executeImplImpl(final WebScriptRequest req,
@@ -2756,17 +2802,13 @@ public class ModelPost extends AbstractJavaWebScript {
                     }
 
                     // Get the project node from the request:
-                    if (runWithoutTransactions || internalRunWithoutTransactions) {
-                        getProjectNodeFromRequest( req, true );
-                    }
-                    else {
-                        new EmsTransaction(getServices(), getResponse(), getResponseStatus() ) {
-                            @Override
-                            public void run() throws Exception {
-                                getProjectNodeFromRequest( req, true );
-                            }
-                        };
-                    }
+                    new EmsTransaction(getServices(), getResponse(), getResponseStatus(),
+                                       runWithoutTransactions || internalRunWithoutTransactions ) {
+                        @Override
+                        public void run() throws Exception {
+                            getProjectNodeFromRequest( req, true );
+                        }
+                    };
                     // FIXME: this is a hack to get the right site permissions
                     // if DB rolled back, it's because the no_site node couldn't be created
                     // this is indicative of no permissions (inside the DB transaction)
@@ -2790,6 +2832,8 @@ public class ModelPost extends AbstractJavaWebScript {
 
         status.setCode(responseStatus.getCode());
 
+        sendProgress( "Load/sync/update request is finished processing.", projectId, true);
+
         printFooter();
 
         if (logger.isInfoEnabled()) {
@@ -2807,43 +2851,33 @@ public class ModelPost extends AbstractJavaWebScript {
         final Set< EmsScriptNode > elements = createOrUpdateModel( postJson, status, workspace, null, createCommit );
 
         if ( !Utils.isNullOrEmpty( elements ) ) {
+            sendProgress("Adding relationships to properties", projectId, true);
             addRelationshipsToProperties( elements );
 
             // Fix constraints if desired:
-            if (fix) {               
-                if (runWithoutTransactions || internalRunWithoutTransactions) {
-                    fix(elements);
-                }
-                else {
-                    new EmsTransaction(getServices(), getResponse(), getResponseStatus() ) {
-                        @Override
-                        public void run() throws Exception {
-                            fix(elements);
-                        }
-                    };
-                }
+            if (fix) {        
+                sendProgress("Fixing constraints", projectId, true);
+                new EmsTransaction( getServices(), getResponse(), getResponseStatus(),
+                                    runWithoutTransactions || internalRunWithoutTransactions ) {
+                    @Override
+                    public void run() throws Exception {
+                        fix(elements);
+                    }
+                };
             }
 
             // Create JSON object of the elements to return:
             final JSONArray elementsJson = new JSONArray();
           
-            if (runWithoutTransactions || internalRunWithoutTransactions) {
-                for ( EmsScriptNode element : elements ) {
-                	JSONObject json = element.toJSONObject(null);
-//                	NodeUtil.jsonCache.put(element.getName(), json);
-                    elementsJson.put( json );
-                }            
-            }
-            else {
-                new EmsTransaction(getServices(), getResponse(), getResponseStatus() ) {
-                    @Override
-                    public void run() throws Exception {
-                        for ( EmsScriptNode element : elements ) {
-                            elementsJson.put( element.toJSONObject(null) );
-                        }
+            new EmsTransaction(getServices(), getResponse(), getResponseStatus(),
+                               runWithoutTransactions || internalRunWithoutTransactions ) {
+                @Override
+                public void run() throws Exception {
+                    for ( EmsScriptNode element : elements ) {
+                        elementsJson.put( element.toJSONObject(null) );
                     }
-                };
-            }
+                }
+            };
             
             top.put( "elements", elementsJson );
         }
@@ -2877,17 +2911,13 @@ public class ModelPost extends AbstractJavaWebScript {
     public void addRelationshipsToProperties( Set< EmsScriptNode > elems ) {
         
         for ( final EmsScriptNode element : elems ) {
-            if (runWithoutTransactions || internalRunWithoutTransactions) {
-                element.addRelationshipToPropertiesOfParticipants();
-            }
-            else {
-                new EmsTransaction(getServices(), getResponse(), getResponseStatus() ) {
-                    @Override
-                    public void run() throws Exception {
-                        element.addRelationshipToPropertiesOfParticipants();
-                    }
-                };
-            }
+            new EmsTransaction(getServices(), getResponse(), getResponseStatus(),
+                               runWithoutTransactions || internalRunWithoutTransactions) {
+                @Override
+                public void run() throws Exception {
+                    element.addRelationshipToPropertiesOfParticipants();
+                }
+            };
         }
     }
 
@@ -2948,7 +2978,7 @@ public class ModelPost extends AbstractJavaWebScript {
     protected EmsScriptNode getProjectNodeFromRequest(WebScriptRequest req, boolean createIfNonexistent) {
 
         WorkspaceNode workspace = getWorkspace( req );
-        String projectId = getProjectId(req);
+        projectId = getProjectId(req);
         String siteName = getSiteName(req);
         EmsScriptNode mySiteNode = getSiteNode( siteName, workspace, null, false );
 
@@ -3004,36 +3034,6 @@ public class ModelPost extends AbstractJavaWebScript {
         }
 
         projectNode = siteNode.childByNamePath("/Models/" + projectId);
-        if (projectNode == null) {
-                // for backwards compatibility
-                projectNode = siteNode.childByNamePath("/ViewEditor/" + projectId);
-        }
-
-        if ( projectNode == null ) {
-            String elementId =
-                    req.getServiceMatch().getTemplateVars().get( "elementid" );
-            if ( elementId != null ) {
-
-                // projectNode is the node with the element id, right?
-                projectNode = findScriptNodeById( elementId, workspace, null, false );
-
-                if ( projectNode == null ) {
-                    // projectNode should be the owner..., which should exist
-                    try {
-                        JSONObject postJson = //JSONObject.make( 
-                                (JSONObject)req.parseContent();// );
-                        JSONObject elementsJson =
-                                postJson.getJSONObject( "elements" );
-                        JSONObject elementJson =
-                                elementsJson.getJSONObject( elementId );
-                        projectNode =
-                                findScriptNodeById( elementJson.getString( Acm.JSON_OWNER ), workspace, null, false );
-                    } catch ( JSONException e ) {
-                        e.printStackTrace();
-                    }
-                }
-            } else {}
-        }
 
         if ( projectNode == null ) {
             ProjectPost pp = new ProjectPost( repository, services );

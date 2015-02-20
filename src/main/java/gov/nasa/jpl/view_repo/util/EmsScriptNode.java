@@ -5150,6 +5150,7 @@ public class EmsScriptNode extends ScriptNode implements
     public static List< EmsScriptNode >
             toEmsScriptNodeList( Collection< NodeRef > refs ) {
         ArrayList<EmsScriptNode> nodes = new ArrayList< EmsScriptNode >();
+        if ( refs == null ) return nodes;
         for ( NodeRef ref : refs ) {
             nodes.add( new EmsScriptNode( ref, NodeUtil.getServices() ) );
         }
