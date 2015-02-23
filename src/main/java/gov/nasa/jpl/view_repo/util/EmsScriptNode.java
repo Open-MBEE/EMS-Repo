@@ -2235,7 +2235,6 @@ public class EmsScriptNode extends ScriptNode implements
                             + dateTime + ", isIncludeQualified="
                             + isIncludeQualified + ") on " + this );
         boolean forceCacheUpdate = false;
-        //this.forceCacheUpdate = true;
         
         // Return empty json if this element does not exist.
         JSONObject element = NodeUtil.newJsonObject();
@@ -2262,8 +2261,6 @@ public class EmsScriptNode extends ScriptNode implements
             return json;
         }
         
-        long readTime = System.currentTimeMillis();
-        
         if ( dateTime != null ) millis = dateTime.getTime();
         
         boolean deepMatch = false;
@@ -2273,15 +2270,10 @@ public class EmsScriptNode extends ScriptNode implements
             cachedJson = !NodeUtil.doJsonDeepCaching ? null :
                 NodeUtil.jsonDeepCacheGet( getId(), millis, isIncludeQualified,
                                   jsonFilter, false );
-//                Utils.get( NodeUtil.jsonDeepCache, getId(), millis,
-//                           isIncludeQualified,
-//                           jsonFilter == null ? new TreeSet< String >()
-//                                             : jsonFilter );
             if ( cachedJson != null && cachedJson.length() > 0 ) {
                 deepMatch = true;
             } else {
                 cachedJson = NodeUtil.jsonCacheGet( id, millis, false ); 
-                        //Utils.get( NodeUtil.jsonCache, getId(), millis );//, isIncludeQualified );//, filter );
             }
             if ( Debug.isOn() )
                 Debug.outln( "cachedJson = "
@@ -2324,7 +2316,6 @@ public class EmsScriptNode extends ScriptNode implements
                  json != null && json.length() > 0 ) {
                 ++NodeUtil.jsonCacheMisses;
                 NodeUtil.jsonCachePut( json, getId(), millis );
-//                NodeUtil.jsonStringCache.remove( json );
                 if ( Debug.isOn() )
                     Debug.outln("put json = " + (json==null?"null":json.toString( 4 )));
             }
@@ -2354,8 +2345,7 @@ public class EmsScriptNode extends ScriptNode implements
             }
         }
 
-        
-//        // add read time again
+//        // add read time again -- otherwise, the cached read time is used
 //        if ( !isExprOrProp  && jsonFilter.contains( Acm.JSON_READ ) ) {
 //            System.out.println("put read in newJson");
 //            putInJson( newJson, Acm.JSON_READ, getIsoTime( new Date( readTime ) ), null );
@@ -2363,10 +2353,6 @@ public class EmsScriptNode extends ScriptNode implements
 
         if ( NodeUtil.doJsonDeepCaching ) {
             json = NodeUtil.jsonDeepCachePut( json, getId(), millis, isIncludeQualified, jsonFilter );
-//            Utils.put( NodeUtil.jsonDeepCache, getId(), millis, isIncludeQualified,
-//                       jsonFilter == null ? new TreeSet< String >() : jsonFilter,
-//                       clone(json) );
-//            NodeUtil.jsonStringCache.remove( json );
         }
         
         if ( Debug.isOn() )
@@ -2397,7 +2383,7 @@ public class EmsScriptNode extends ScriptNode implements
                                     Date dateTime, boolean isIncludeQualified ) throws JSONException {
         JSONObject element = NodeUtil.newJsonObject();
         if ( !exists() ) return element;
-        JSONObject specializationJSON = new JSONObject();//NodeUtil.newJsonObject();
+        JSONObject specializationJSON = new JSONObject();
     	
         Long readTime = System.currentTimeMillis();
         
@@ -2414,7 +2400,6 @@ public class EmsScriptNode extends ScriptNode implements
         // add read time
         if ( !isExprOrProp ) {
             putInJson( element, Acm.JSON_READ, getIsoTime( new Date( readTime ) ), filter );
-            //element.put( Acm.JSON_READ, getIsoTime( new Date( readTime ) ) );
         }
 
         // fix the artifact urls
@@ -2426,14 +2411,14 @@ public class EmsScriptNode extends ScriptNode implements
     }
 
     public JSONObject toSimpleJSONObject( Date dateTime ) throws JSONException {
-        JSONObject element = new JSONObject();//NodeUtil.newJsonObject();
+        JSONObject element = new JSONObject();
         element.put( "sysmlid", getSysmlId() );
         if ( dateTime == null ) {
             element.put( "name", getSysmlName() );
         } else {
             element.put( "name", getSysmlName( dateTime ) );
         }
-        JSONObject specializationJSON = new JSONObject();//NodeUtil.newJsonObject();
+        JSONObject specializationJSON = new JSONObject();
         addSpecializationJSON( specializationJSON, null, dateTime, true );
         if ( specializationJSON.length() > 0 ) {
             element.put( Acm.JSON_SPECIALIZATION, specializationJSON );

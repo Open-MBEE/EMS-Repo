@@ -262,21 +262,8 @@ public class NodeUtil {
     public static NodeRef getCurrentNodeRefFromCache( NodeRef maybeFrozenNodeRef ) {
         NodeRef ref = frozenNodeCache.get( maybeFrozenNodeRef );
         if ( ref != null ) return ref;
-        //EmsScriptNode node = new EmsScriptNode( maybeFrozenNodeRef, getServices() );
-        return null;//node.getLiveNodeRefFromVersion();
+        return null;
     }
-//    public static void cacheNodeVersion( EmsScriptNode node ) {
-//        if ( activeVersionCaching && NodeUtil.exists( node ) ) {
-//            Version v = node.getCurrentVersion();
-//            if ( doVersionCaching ) {
-//                EmsVersion cachedVersion = versionCache.get( node.getId() );
-//            }
-//            NodeUtil.heisenCachePut( node.getName(),
-//                                     ( v != null && v.getFrozenStateNodeRef() != null )
-//                                     ? v.getFrozenStateNodeRef()
-//                                     : node.getNodeRef() );
-//        }
-//    }
 
     public static JSONObject jsonCacheGet( String id, long millis,
                                            boolean noMetadata ) {
@@ -576,37 +563,41 @@ public class NodeUtil {
         }
         
         /**
+         * Create json string for non-elements whose json is not cached but
+         * whose children may include cached elements.
          * 
          * @param numSpaces
          * @return
          */
         private String nonCachedToString( int numSpaces ) {
-            // look for entries with arrays of CachedJsonObjects
-            Iterator keys = keys();
-            
-            //CachedJsonObject[] arr = new CachedJsonObject[];
-//            while ( keys.hasNext() ) {
-//                String key = (String)keys.next();
-            //JSONObject newEntries = new JSONObject();
+            // Look for entries with CachedObjects or arrays of CachedJsonObjects.
             LinkedHashMap< String, String > newEntries =
-                new LinkedHashMap< String, String >();// new TreeMap< String,
-                                                      // String >();
+                new LinkedHashMap< String, String >();
             JSONObject oldEntries = newJsonObject();
+            // Temporarily replace CachedJsonObjects with fixed strings in order
+            // to generate a minimal json string and later substitute back the
+            // cached strings.
             for ( Object k : keySet().toArray() ) {
                 if ( !( k instanceof String ) ) continue;
                 String key = (String)k;
                 replaceJsonArrays( key, numSpaces, newEntries, oldEntries );
             }
-            //StringBuffer sb = new StringBuffer( super.toString() );
+            
+            // Generate the json string with temporary replacements.
             String s = null;
             if ( numSpaces < 0 ) s = super.toString();
             else s = super.toString( numSpaces );
+            
+            // Now substitute back in the cached json strings using a
+            // StringBuffer.
             int len = newEntries.size();
             if ( len > 0 ) {
                 StringBuffer sb = new StringBuffer( s );
                 String[] keysNew = new String[len];
                 newEntries.keySet().toArray( keysNew );
                 int pos = s.length()-replacementWithQuotesLength;
+
+                // Loop through replacements.
                 for ( int i=len-1; i >= 0; --i  ) {
                     String keyn = keysNew[i];
                     int pos1 = s.lastIndexOf( replacementWithQuotes, pos );
@@ -616,7 +607,8 @@ public class NodeUtil {
                     }
                 }
                 s = sb.toString();
-                // put json back
+
+                // Put replaced json elements back.
                 for ( Object k : oldEntries.keySet().toArray() ) {
                     if ( !( k instanceof String ) ) continue;
                     String key = (String)k;
@@ -626,6 +618,16 @@ public class NodeUtil {
             return s;
         }
 
+        /**
+         *  Temporarily replace CachedJsonObjects with fixed strings in order
+         *  to generate a minimal json string and later substitute back the
+         *  cached strings.
+         *  
+         * @param key
+         * @param numSpaces
+         * @param newEntries
+         * @param oldEntries
+         */
         public void replaceJsonArrays( String key, int numSpaces,
                                        LinkedHashMap< String, String > newEntries,
                                        JSONObject oldEntries  ) {
@@ -633,7 +635,7 @@ public class NodeUtil {
             if ( jarr != null && jarr.length() > 0 ) {
                 Object val = jarr.get( 0 );
                 if ( val instanceof CachedJsonObject ) {
-                    // temporarily replace
+                    // Replace and build array string.
                     StringBuffer sb = new StringBuffer("[");
                     for ( int i=0; i<jarr.length(); ++i ) {
                         val = jarr.get( i );
@@ -693,6 +695,7 @@ public class NodeUtil {
     }
     
     public static JSONObject newJsonObject(String s) throws JSONException {
+        if ( !doJsonStringCaching ) return new JSONObject( s );
         JSONObject newJson = new CachedJsonObject(s);
         return newJson;
     }
