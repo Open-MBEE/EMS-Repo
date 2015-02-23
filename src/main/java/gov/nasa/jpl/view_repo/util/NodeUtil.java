@@ -667,31 +667,6 @@ public class NodeUtil {
                 }
             }
         }
-
-//        @Override
-//        public Writer write( Writer writer ) throws JSONException {
-////            if ( true ) {
-////                return super.write( writer );
-////            }
-//
-////            String s = toString();
-////            try {
-////                writer.append( s );
-////            } catch ( IOException e ) {
-////                e.printStackTrace();
-////            }
-//            Exception f = new Exception();
-//            f.printStackTrace();
-//            if ( has( "jsonString" ) ) {
-//                try {
-//                    writer.write( getString( "jsonString" ) );
-//                } catch ( IOException e ) {
-//                    e.printStackTrace();
-//                }
-//                return writer;
-//            }
-//            return super.write( writer );
-//        }
     }
     
     public static JSONObject newJsonObject(String s) throws JSONException {
