@@ -370,6 +370,10 @@ public class NodeUtil {
             e1.printStackTrace();
             return null;
         }
+        if ( jsonString4 == null ) {
+            logger.warn( "json.toString(4) returned empty for " + json );
+            return null;
+        }
         String jsonString = jsonString4.replaceAll( "( |\n)+", " " ); 
         JSONArray keyJson = new JSONArray();
         keyJson.put( id );
@@ -885,6 +889,7 @@ public class NodeUtil {
                 if ( has( "jsonString4" ) ) {
                     if ( Debug.isOn()) logger.debug( "has jsonString4: "
                                         + jsonToString( this, n ) );
+                    // need to replace spaces for proper indentation
                     return jsonToString( this, n );
                 }
                 if ( Debug.isOn()) logger.debug( "no jsonString4: " + super.toString( n ) );
@@ -913,7 +918,7 @@ public class NodeUtil {
             LinkedHashMap< String, String > newEntries =
                 new LinkedHashMap< String, String >();// new TreeMap< String,
                                                       // String >();
-            JSONObject oldEntries = new JSONObject();
+            JSONObject oldEntries = newJsonObject();
             for ( Object k : keySet().toArray() ) {
                 if ( !( k instanceof String ) ) continue;
                 String key = (String)k;
@@ -942,7 +947,7 @@ public class NodeUtil {
                 for ( Object k : oldEntries.keySet().toArray() ) {
                     if ( !( k instanceof String ) ) continue;
                     String key = (String)k;
-                    put( key, oldEntries.getJSONArray( key ) );
+                    put( key, oldEntries.get( key ) );
                 }
             }
             return s;
@@ -975,6 +980,14 @@ public class NodeUtil {
                     sb.append( "]" );
                     newEntries.put( key, sb.toString() );
                     oldEntries.put( key, jarr );
+                    put( key, replacement );
+                }
+            } else {
+                Object o = get( key );
+                if ( o instanceof CachedJsonObject ) {
+                    CachedJsonObject cjo = (CachedJsonObject)o;
+                    newEntries.put( key, cjo.toString( numSpaces ) );
+                    oldEntries.put( key, cjo );
                     put( key, replacement );
                 }
             }
