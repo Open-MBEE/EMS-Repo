@@ -3,18 +3,18 @@
         "creator": "admin",
         "documentation": "A site package",
         "editable": true,
-        "modified": "2014-12-10T14:58:00.406-0800",
+        "modified": "2015-02-18T14:10:42.980-0800",
         "name": "package",
         "owner": "123456",
-        "qualifiedId": "/123456/package",
-        "qualifiedName": "/JW_TEST2/package",
-        "read": "2014-12-10T14:58:01.762-0800",
+        "qualifiedId": "/europa/123456/package",
+        "qualifiedName": "/europa/JW_TEST2/package",
+        "read": "2015-02-18T14:10:43.718-0800",
         "specialization": {
             "isSite": true,
             "type": "Package"
         },
         "sysmlid": "package"
     }],
-    "message": "[WARNING]: createOrUpdateModel deltas not posted properly\n"
+    "message": "[ERROR]: Site node is null\n"
 }
-200
+400

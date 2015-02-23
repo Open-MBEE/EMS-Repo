@@ -38,17 +38,22 @@ public class JmsConnection extends AbstractConnection {
         }
     }
     
+    @Override
     public boolean publish(JSONObject json, String topic) {
         boolean result = false;
         try {
             json.put( "sequence", sequenceId++ );
-            // FIXME: topic is always the same since we're using metadata now
-            result = publishTopic(NodeUtil.jsonToString( json, 2 ), "master");
+            result = publishTopic(NodeUtil.jsonToString( json, 2 ), topic);
         } catch ( JSONException e ) {
             e.printStackTrace();
         }
         
         return result;
+    }
+    
+    public boolean publish(JSONObject json) {
+        // topic is always the same since we're using metadata for workspaces now
+        return publish( json, "master" );
     }
     
     public boolean publishTopic(String msg, String topic) {

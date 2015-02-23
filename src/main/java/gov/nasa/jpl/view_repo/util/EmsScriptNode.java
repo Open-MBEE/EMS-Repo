@@ -91,7 +91,6 @@ import org.apache.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.json.JSONObject;
 import org.mozilla.javascript.Scriptable;
 import org.springframework.extensions.webscripts.Status;
 
@@ -478,6 +477,9 @@ public class EmsScriptNode extends ScriptNode implements
     }
 
     public EmsScriptNode createFolder( String name, String type, NodeRef sourceFolder ) {
+        if (logger.isInfoEnabled()) {
+            logger.info( "creating " + name + " in " + sourceFolder );
+        }
 
         makeSureNodeRefIsNotFrozen();
         NodeRef folderRef = super.createFolder( name, type ).getNodeRef();
@@ -487,10 +489,6 @@ public class EmsScriptNode extends ScriptNode implements
 
         if ( ws != null && !folder.isWorkspace() ) {
             folder.setWorkspace( ws, sourceFolder );
-        }
-
-        if ( Debug.isOn() ) {
-            Debug.outln( "createFolder(" + name + "): returning " + folder );
         }
 
         return folder;
@@ -666,19 +664,29 @@ public class EmsScriptNode extends ScriptNode implements
         // a parent workspace, and this wont detect it; however, all the getProperty() will look
         // for the correct workspace node, so perhaps this is overkill:
         T oldValue = (T)getProperty( acmType, true, null, false, true );
-        if ( oldValue != null ) {
+        if ( oldValue != null && value != null) {
             if ( !value.equals( oldValue ) ) {
                 setProperty( acmType, value );
                 log( getName() + ": " + acmType
                      + " property updated to value = " + value );
                 return true;
             }
-        } else {
+        } 
+        // Note: Per CMED-461, we are allowing properties to be set to null
+        else {
             log( getName() + ": " + acmType + " property created with value = "
                  + value );
             boolean changed = setProperty( acmType, value );
-            logger.warn( "Failed to set property for new value in createOrUpdateProperty("
-                         + acmType + ", " + value + ")" );
+            // If setting the property to null, the modified time is not changed by alfresco if
+            // it was previously null, which is the initial state of the property, but we want
+            // the modification time to be altered in this case too:
+            if (oldValue == null && value == null) {
+                setProperty( Acm.ACM_LAST_MODIFIED, new Date());
+            }
+            if (!changed) {
+                logger.warn( "Failed to set property for new value in createOrUpdateProperty("
+                             + acmType + ", " + value + ")" );
+            }
             return changed;
         }
         
@@ -873,7 +881,12 @@ public class EmsScriptNode extends ScriptNode implements
             return false;
         }
         for ( int ii = 0; ii < x.size(); ii++ ) {
-            if ( !x.get( ii ).equals( y.get( ii ) ) ) {
+            T xVal = x.get(ii);
+            T yVal = y.get(ii);
+            if ( xVal != null && !xVal.equals( yVal ) ) {
+                return false;
+            }
+            if ( yVal != null && !yVal.equals( xVal ) ) {
                 return false;
             }
         }
@@ -1431,7 +1444,7 @@ public class EmsScriptNode extends ScriptNode implements
                            + this.getNodeRef() + ".  Replacing node with unmodifiable frozen node, "
                            + cachedVersion.getLabel() + ".";
           logger.error( msg );
-          Debug.error( true, msg );
+//          Debug.error( true, msg );
 //          sendNotificationEvent( "Heisenbug Occurence!", "" );
           if ( response != null ) {
               response.append( msg + "\n");
@@ -1531,27 +1544,23 @@ public class EmsScriptNode extends ScriptNode implements
     }
 
     public Date getLastModified( Date dateTime ) {
+        Set< NodeRef > dependentNodes = new HashSet< NodeRef >();
+
         Date lastModifiedDate = (Date)getProperty( Acm.ACM_LAST_MODIFIED );
 
-        // We no longer need to check this, as values specs are always embedded within
-        // the nodes that use them, ie Property, so the modified time will always be updated
-        // when modifying the value spec
-//        Object value = getProperty( Acm.ACM_VALUE );
-//        ArrayList< NodeRef > dependentNodes = new ArrayList< NodeRef >();
-//        if ( value instanceof Collection ) {
-//            Collection< ? > c = (Collection< ? >)value;
-//            dependentNodes.addAll( Utils.asList( c, NodeRef.class ) );
-//        }
-//        for ( NodeRef nodeRef : dependentNodes ) {
-//            nodeRef = NodeUtil.getNodeRefAtTime( nodeRef, dateTime );
-//            if ( nodeRef == null ) continue;
-//            EmsScriptNode oNode = new EmsScriptNode( nodeRef, services );
-//            if ( !oNode.exists() ) continue;
-//            Date modified = oNode.getLastModified( dateTime );
-//            if ( modified.after( lastModifiedDate ) ) {
-//                lastModifiedDate = modified;
-//            }
-//        }
+        // Check to see if any embedded value specs have been modified after
+        // the modified time of this node:
+        NodeUtil.addEmbeddedValueSpecs( getNodeRef(), dependentNodes, services );
+        for ( NodeRef nodeRef : dependentNodes ) {
+            nodeRef = NodeUtil.getNodeRefAtTime( nodeRef, dateTime );
+            if ( nodeRef == null ) continue;
+            EmsScriptNode oNode = new EmsScriptNode( nodeRef, services );
+            if ( !oNode.exists() ) continue;
+            Date modified = oNode.getLastModified( dateTime );
+            if ( modified.after( lastModifiedDate ) ) {
+                lastModifiedDate = modified;
+            }
+        }
         return lastModifiedDate;
     }
     
@@ -1640,7 +1649,6 @@ public class EmsScriptNode extends ScriptNode implements
                 // Try again with the live node, but make sure it's the latest
                 // version.
                 NodeRef liveRef = nodeRef;
-                NodeRef oldRef = nodeRef;
                 if ( isAVersion() ) {
                     success = true;
                     logger.error( "Tried to set property of a version nodeRef in "
@@ -1766,7 +1774,7 @@ public class EmsScriptNode extends ScriptNode implements
             owner = new EmsScriptNode( ownerRef, services, response );
             String nameProp = (String)owner.getProperty( "sysml:name" );
             String idProp = (String)owner.getProperty( "sysml:id" );
-            if ( nameProp == null ) {
+            if ( idProp == null ) {
                 break;
             }
             //nameProp = nameProp.endsWith(pkgSuffix) ? nameProp.replace(pkgSuffix, "" ) : nameProp;
@@ -1956,24 +1964,21 @@ public class EmsScriptNode extends ScriptNode implements
                    node.hasPermission( PermissionService.WRITE ), filter );
 
         if ( filter == null || filter.size() == 0 || filter.contains( "owner" ) ) {
-//        NodeRef ownerRef = (NodeRef)node.getProperty( "ems:owner" );
-//        EmsScriptNode owner;
-//        if ( ownerRef != null ) {
-//            owner = new EmsScriptNode( ownerRef, services, response );
-//        } else {
+
             EmsScriptNode owner = node.getOwningParent(dateTime);
-//        }
+
             String ownerId = null;
+            Object owernIdObj = null;
             if ( owner != null ) {
                 ownerId = (String)owner.getProperty( "sysml:id" );
                 if ( ownerId != null ) {
                     ownerId = ownerId.replace( "_pkg", "" );
                 }
             }
-            if ( ownerId == null ) {
-                ownerId = "null";
-            }
-            putInJson( elementJson, "owner", ownerId, filter );
+
+            // No longer using "null".  This works better.
+            owernIdObj = ownerId == null ? JSONObject.NULL : ownerId;
+            putInJson( elementJson, "owner", owernIdObj, filter );
         }
     }
 
@@ -2014,7 +2019,8 @@ public class EmsScriptNode extends ScriptNode implements
       TimeExpression,
       TimeInterval,
       ValueSpecification,
-      View
+      View,
+      Viewpoint
     };
 
     public static Map<String, SpecEnum> aspect2Key = new HashMap<String, SpecEnum>() {
@@ -2058,6 +2064,8 @@ public class EmsScriptNode extends ScriptNode implements
             put("TimeInterval", SpecEnum.TimeInterval);
             put("ValueSpecification", SpecEnum.ValueSpecification);
             put("View", SpecEnum.View);
+            put("Viewpoint", SpecEnum.Viewpoint);
+
         }
     };
 
@@ -2199,6 +2207,9 @@ public class EmsScriptNode extends ScriptNode implements
                         break;
                     case View:
                         addViewJSON( json, node, filter, dateTime );
+                        break;
+                    case Viewpoint:
+                        addViewpointJSON( json, node, filter, dateTime );
                         break;
                     default:
 
@@ -2954,33 +2965,42 @@ public class EmsScriptNode extends ScriptNode implements
                     try {
                         property = jsonArray.getString( i );
                     } catch ( JSONException e ) {
-                        property = "" + jsonArray.get( i );
+                        Object val = jsonArray.get( i );
+                        property = val != null ? "" + val : null;
                     }
                     break;
                 case NODE_REF:
-                    String sysmlId = jsonArray.getString( i );
-                    EmsScriptNode node =
-                            convertIdToEmsScriptNode( sysmlId, false, workspace,
-                                                      dateTime );
-                    if ( node != null ) {
-                        property = node.getNodeRef();
-                    } else {
-                        // String jsonStr = "{ \"id\" : \"\", " //"\"owner\" : "
-                        // + + ", " +
-                        // + "\"type\" : \"Element\" }";
-                        // JSONObject json = new JSONObject( jsonStr ) ;
-                        // updateOrCreateElement(json, null, true);
-                        String msg =
-                                "Error! No element found for " + sysmlId
-                                        + ".\n";
-                        if ( getResponse() == null || getStatus() == null ) {
-                            Debug.error( msg );
+                    String sysmlId = null;
+                    try {
+                        sysmlId = jsonArray.getString( i );
+                    } catch ( JSONException e ) {
+                        Object val = jsonArray.get( i );
+                        sysmlId = val != null ? "" + val : null;
+                    }
+                    
+                    if (!Utils.isNullOrEmpty( sysmlId )) {
+                        EmsScriptNode node =
+                                convertIdToEmsScriptNode( sysmlId, false, workspace,
+                                                          dateTime );
+                        if ( node != null ) {
+                            property = node.getNodeRef();
                         } else {
-                            getResponse().append( msg );
-                            getStatus().setCode( HttpServletResponse.SC_BAD_REQUEST,
-                                                 msg );
+                            String msg =
+                                    "Error! No element found for " + sysmlId
+                                            + ".\n";
+                            if ( getResponse() == null || getStatus() == null ) {
+                                Debug.error( msg );
+                            } else {
+                                getResponse().append( msg );
+                                getStatus().setCode( HttpServletResponse.SC_BAD_REQUEST,
+                                                     msg );
+                            }
+                            return null; // REVIEW this may be overkill, can still proceed
                         }
-                        return null;
+                    }
+                    // A null sysmId indicates we should store null as the property value
+                    else {
+                        property = null;
                     }
                     break;
                 case UNKNOWN:
@@ -2998,6 +3018,7 @@ public class EmsScriptNode extends ScriptNode implements
                     return null;
             };
 
+            // Note: No harm comes from adding null to the array, as alfresco wont store it
             properties.add( property );
         }
         return properties;
@@ -3048,25 +3069,35 @@ public class EmsScriptNode extends ScriptNode implements
                 try {
                     sysmlId = jsonObject.getString( jsonKey );
                 } catch ( JSONException e ) {
-                    sysmlId = "" + jsonObject.get( jsonKey );
+                    Object val = jsonObject.get( jsonKey );
+                    sysmlId = val != null ? "" + val : null;
                 }
-                EmsScriptNode node =
-                        convertIdToEmsScriptNode( sysmlId, false, workspace,
-                                                  dateTime );
-                if ( node != null ) {
-                    property = node.getNodeRef();
-                } else if ( !Utils.isNullOrEmpty( sysmlId ) ) {
-                    String msg =
-                            "Error! Could not find element for sysml id = "
-                                    + sysmlId + ".\n";
-                    if ( getResponse() == null || getStatus() == null ) {
-                        Debug.error( false, msg );
-                    } else {
-                        getResponse().append( msg );
-                        getStatus().setCode( HttpServletResponse.SC_BAD_REQUEST,
-                                             msg );
+                
+                if (!Utils.isNullOrEmpty( sysmlId )) {
+                    EmsScriptNode node =
+                            convertIdToEmsScriptNode( sysmlId, false, workspace,
+                                                      dateTime );
+                    if ( node != null ) {
+                        property = node.getNodeRef();
+                    } 
+                    else {
+                        String msg =
+                                "Error! Could not find element for sysml id = "
+                                        + sysmlId + ".\n";
+                        if ( getResponse() == null || getStatus() == null ) {
+                            Debug.error( false, msg );
+                        } else {
+                            getResponse().append( msg );
+                            getStatus().setCode( HttpServletResponse.SC_BAD_REQUEST,
+                                                 msg );
+                        }
                     }
                 }
+                // A null sysmId indicates we should store null as the property value,
+                else {
+                    property = null;
+                }
+                
             } else {
                 property = jsonObject.getString( jsonKey );
             }
@@ -3074,17 +3105,18 @@ public class EmsScriptNode extends ScriptNode implements
             property = jsonObject.getString( jsonKey );
         }
 
-        if ( property == null ) {
-            String msg =
-                    "Error! Couldn't get property " + propDef + "=" + property
-                            + ".\n";
-            if ( getResponse() == null || getStatus() == null ) {
-                Debug.error( false, msg );
-            } else {
-                getResponse().append( msg );
-                getStatus().setCode( HttpServletResponse.SC_BAD_REQUEST, msg );
-            }
-        }
+        // Per CMED-461, we are allowing properties to be set to null
+//        if ( property == null ) {
+//            String msg =
+//                    "Error! Couldn't get property " + propDef + "=" + property
+//                            + ".\n";
+//            if ( getResponse() == null || getStatus() == null ) {
+//                Debug.error( false, msg );
+//            } else {
+//                getResponse().append( msg );
+//                getStatus().setCode( HttpServletResponse.SC_BAD_REQUEST, msg );
+//            }
+//        }
         return property;
     }
 
@@ -3391,8 +3423,14 @@ public class EmsScriptNode extends ScriptNode implements
     public boolean exists() {
         return exists( false );
     }
+    
     public boolean exists(boolean includeDeleted) {
-        // REVIEW -- TODO -- Will overriding this cause problems in ScriptNode?
+        if (NodeUtil.doFullCaching) {
+            // full caching doesn't cache permissions, just references to script node
+            // so make sure we can read before doing actual check
+            if (!checkPermissions( "Read" ))
+                return false;
+        } 
         if ( !scriptNodeExists() ) return false;
         if ( !includeDeleted && hasAspect( "ems:Deleted" ) ) {
             return false;
@@ -3405,6 +3443,11 @@ public class EmsScriptNode extends ScriptNode implements
     }
 
     public boolean isDeleted() {
+        if (NodeUtil.doFullCaching) {
+            // full caching doesn't cache permissions, just references to script node
+            // so make sure we can read before doing actual check
+            if (!checkPermissions("Read")) return false;
+        }
         if (super.exists()) {
             return hasAspect( "ems:Deleted" );
         }
@@ -4400,7 +4443,7 @@ public class EmsScriptNode extends ScriptNode implements
             EmsScriptNode node =
                     new EmsScriptNode( nodeRef, services, response );
             if ( node != null && node.exists() ) {
-                return (String)node.getProperty( "sysml:id" );
+                return node.getSysmlId();
             }
         }
         return null;
@@ -4412,11 +4455,8 @@ public class EmsScriptNode extends ScriptNode implements
         if ( nodeRefs != null ) {
             for ( NodeRef nodeRef : nodeRefs ) {
                 String id = getSysmlIdFromNodeRef( nodeRef );
-                if ( id != null ) {
-                    ids.add( id );
-                } else {
-                    // TODO error handling
-                }
+                // Allowing id of null per CMED-461:
+                ids.add( id );
             }
         }
         return ids;
@@ -4449,7 +4489,9 @@ public class EmsScriptNode extends ScriptNode implements
         if ( nodeRefs instanceof Collection ) {
             Collection< NodeRef > nodeRefColl = (Collection< NodeRef >)nodeRefs;
             for ( NodeRef nRef : nodeRefColl ) {
-                addVersionToArray( nRef, dateTime, jsonArray );
+                if (nRef != null) {
+                    addVersionToArray( nRef, dateTime, jsonArray );
+                }
             }
         } else if ( nodeRefs instanceof NodeRef ) {
             addVersionToArray( (NodeRef)nodeRefs, dateTime, jsonArray );
@@ -4458,14 +4500,26 @@ public class EmsScriptNode extends ScriptNode implements
         return jsonArray;
     }
 
-    private JSONArray addNodeRefIdsJSON( ArrayList< NodeRef > nodeRefs,
-                                         Date dateTime ) {
+    private JSONArray addNodeRefIdsJSON( ArrayList< NodeRef > nodeRefs) {
         ArrayList< String > nodeIds = getSysmlIdsFromNodeRefs( nodeRefs );
         JSONArray ids = new JSONArray();
         for ( String nodeId : nodeIds ) {
-            ids.put( nodeId );
+            // Per CMED-461, allowing null; however, alfresco will never store this
+            // so this code is essentially dead.
+            if (nodeId == null) {
+                ids.put( JSONObject.NULL );
+            }
+            else {
+                ids.put( nodeId );
+            }
         }
         return ids;
+    }
+    
+    private Object addNodeRefIdJSON( NodeRef nodeRef ) {
+        String id = getSysmlIdFromNodeRef( nodeRef );
+        // Per CMED-461, allowing null:
+        return id == null ? JSONObject.NULL : id;
     }
 
     /***************************************************************************************
@@ -4486,10 +4540,11 @@ public class EmsScriptNode extends ScriptNode implements
                    filter );
     }
 
-    protected void addViewpointJSON( JSONObject json, Set< String > filter,
+    protected void addViewpointJSON( JSONObject json, EmsScriptNode node, Set< String > filter,
                                      Date dateTime ) throws JSONException {
-        json.put( "method",
-                  this.getSysmlIdOfProperty( "sysml:method" ) );
+        
+        NodeRef methodNode = (NodeRef) node.getProperty( Acm.ACM_METHOD );
+        json.put( Acm.JSON_METHOD, addNodeRefIdJSON(methodNode));
     }
 
     protected void addViewJSON( JSONObject json, EmsScriptNode node,
@@ -4520,10 +4575,9 @@ public class EmsScriptNode extends ScriptNode implements
             }
         }
         // TODO: Snapshots?
-        String id = node.getSysmlIdOfProperty( Acm.ACM_CONTENTS );
-        if (id != null) {
-            putInJson( json, Acm.JSON_CONTENTS, id, filter );
-        }
+        NodeRef contentsNode = (NodeRef) node.getProperty( Acm.ACM_CONTENTS );
+        putInJson( json, Acm.JSON_CONTENTS, addNodeRefIdJSON(contentsNode), filter );
+
     }
 
     protected void addProductJSON( JSONObject json, EmsScriptNode node,
@@ -4561,10 +4615,7 @@ public class EmsScriptNode extends ScriptNode implements
                    addInternalJSON( node.getProperty( "sysml:value" ), dateTime ),
                    filter );
         NodeRef propertyType = (NodeRef) node.getProperty( "sysml:propertyType" );
-        if ( propertyType != null ) {
-            EmsScriptNode propertyTypeNode = new EmsScriptNode(propertyType, services, response);
-            putInJson( json, "propertyType", propertyTypeNode.getSysmlId(), filter);
-        }
+        putInJson( json, "propertyType", addNodeRefIdJSON(propertyType), filter);
 
         putInJson( json, Acm.JSON_LOWER,
                    addInternalJSON( node.getProperty(Acm.ACM_LOWER), dateTime ),
@@ -4580,17 +4631,13 @@ public class EmsScriptNode extends ScriptNode implements
             addDirectedRelationshipJSON( JSONObject json, EmsScriptNode node,
                                          Set< String > filter, Date dateTime )
                                                                               throws JSONException {
-        String id;
+        
+        NodeRef sourceNode = (NodeRef) node.getProperty( "sysml:source" );
+        putInJson( json, "source", addNodeRefIdJSON(sourceNode), filter );
 
-        id = node.getSysmlIdOfProperty( "sysml:source" );
-        if ( id != null ) {
-            putInJson( json, "source", id, filter );
-        }
+        NodeRef targetNode = (NodeRef) node.getProperty( "sysml:target" );
+        putInJson( json, "target", addNodeRefIdJSON(targetNode), filter );
 
-        id = node.getSysmlIdOfProperty( "sysml:target" );
-        if ( id != null ) {
-            putInJson( json, "target", id, filter );
-        }
     }
 
     protected
@@ -4630,11 +4677,10 @@ public class EmsScriptNode extends ScriptNode implements
             addValueSpecificationJSON( JSONObject json, EmsScriptNode node,
                                        Set< String > filter, Date dateTime )
                                                                             throws JSONException {
-        String valueExpressionId =
-                node.getSysmlIdOfProperty( "sysml:valueExpression" );
-        if ( valueExpressionId != null ) {
-            putInJson( json, "expression", valueExpressionId, filter );
-        }
+        NodeRef valExprNode =
+                (NodeRef) node.getProperty( Acm.ACM_VALUE_EXPRESSION);
+        putInJson( json, Acm.JSON_VALUE_EXPRESSION, addNodeRefIdJSON(valExprNode), filter );
+
     }
 
     protected
@@ -4652,17 +4698,12 @@ public class EmsScriptNode extends ScriptNode implements
                                                                           throws JSONException {
         addValueSpecificationJSON( json, node, filter, dateTime );
 
-        String id;
+        NodeRef durMaxNode = (NodeRef) node.getProperty( "sysml:durationMax" );
+        putInJson( json, "max", addNodeRefIdJSON(durMaxNode), filter );
 
-        id = node.getSysmlIdOfProperty( "sysml:durationMax" );
-        if ( id != null ) {
-            putInJson( json, "max", id, filter );
-        }
+        NodeRef durMinNode = (NodeRef) node.getProperty( "sysml:durationMin" );
+        putInJson( json, "min", addNodeRefIdJSON(durMinNode), filter );
 
-        id = node.getSysmlIdOfProperty( "sysml:durationMin" );
-        if ( id != null ) {
-            putInJson( json, "min", id, filter );
-        }
     }
 
     protected
@@ -4671,16 +4712,10 @@ public class EmsScriptNode extends ScriptNode implements
                                  Set< String > filter, Date dateTime )
                                                                       throws JSONException {
 
-//        String elementId =
-//                node.getSysmlIdOfProperty( "sysml:element", dateTime );
-//        if ( elementId == null ) {
-        String elementId =
-                node.getSysmlIdOfProperty( "sysml:elementValueOfElement" );
-        //        }
-        if ( elementId != null ) {
-            addValueSpecificationJSON( json, node, filter, dateTime );
-            putInJson( json, "element", elementId, filter );
-        }
+        NodeRef elementNode = (NodeRef) node.getProperty( Acm.ACM_ELEMENT_VALUE_ELEMENT );
+        addValueSpecificationJSON( json, node, filter, dateTime );
+        putInJson( json, "element", addNodeRefIdJSON(elementNode), filter );
+        
     }
 
     protected void addLiteralSetJSON( JSONObject json, EmsScriptNode node,
@@ -4704,33 +4739,6 @@ public class EmsScriptNode extends ScriptNode implements
                                                           throws JSONException {
         addValueSpecificationJSON( json, node, filter, dateTime );
 
-//        ArrayList< NodeRef > nodeRefs =
-//                (ArrayList< NodeRef >)node.getProperty( "sysml:operand" );
-//        if (nodeRefs == null) {
-//            return;
-//        }
-//
-//        JSONArray array = new JSONArray();
-//        for ( NodeRef nodeRef : nodeRefs ) {
-//            NodeRef versionedRef = nodeRef;
-//            if ( dateTime != null ) {
-//                versionedRef = NodeUtil.getNodeRefAtTime( nodeRef, dateTime );
-//            }
-//            if ( versionedRef != null
-//                 && services.getNodeService().exists( versionedRef ) ) {
-//                EmsScriptNode versionedNode =
-//                        new EmsScriptNode( versionedRef, services, response );
-//                JSONObject jsonObject = new JSONObject();
-//                // operands can reference anything, so call recursively as
-//                // necessary
-//                versionedNode.addSpecializationJSON( jsonObject, filter,
-//                                                     dateTime );
-//                array.put( jsonObject );
-//            } else {
-//                // TODO: Error handling
-//            }
-//
-//        }
         putInJson( json, "operand",
                    addInternalJSON( node.getProperty( Acm.ACM_OPERAND ), dateTime ),
                    filter );
@@ -4757,10 +4765,9 @@ public class EmsScriptNode extends ScriptNode implements
                                                                        throws JSONException {
         addValueSpecificationJSON( json, node, filter, dateTime );
 
-        String id = node.getSysmlIdOfProperty( "sysml:instance" );
-        if ( id != null ) {
-            putInJson( json, "instance", id, filter );
-        }
+        NodeRef instanceNode = (NodeRef) node.getProperty( Acm.ACM_INSTANCE );
+        putInJson( json, "instance", addNodeRefIdJSON(instanceNode), filter );
+
     }
 
     protected
@@ -4868,17 +4875,14 @@ public class EmsScriptNode extends ScriptNode implements
                                  Set< String > filter, Date dateTime )
                                                                       throws JSONException {
         addValueSpecificationJSON( json, node, filter, dateTime );
-        String id;
 
-        id = node.getSysmlIdOfProperty( "sysml:timeIntervalMax" );
-        if ( id != null ) {
-            putInJson( json, "max", id, filter );
-        }
+        NodeRef timeMaxNode = (NodeRef) node.getProperty( "sysml:timeIntervalMax" );
+        putInJson( json, "max", addNodeRefIdJSON(timeMaxNode), filter );
 
-        id = node.getSysmlIdOfProperty( "sysml:timeIntervalMin" );
-        if ( id != null ) {
-            putInJson( json, "min", id, filter );
-        }
+
+        NodeRef timeMinNode = (NodeRef) node.getProperty( "sysml:timeIntervalMin" );
+        putInJson( json, "min", addNodeRefIdJSON(timeMinNode), filter );
+
     }
 
     protected
@@ -4888,16 +4892,15 @@ public class EmsScriptNode extends ScriptNode implements
                                                                    throws JSONException {
         ArrayList< NodeRef > nodeRefs =
                 (ArrayList< NodeRef >)node.getProperty( "sysml:operationParameter" );
-        JSONArray ids = addNodeRefIdsJSON( nodeRefs, dateTime );
+        JSONArray ids = addNodeRefIdsJSON( nodeRefs );
         if ( ids.length() > 0 ) {
             putInJson( json, "parameters", ids, filter );
         }
 
         if ( !embeddingExpressionInOperation  ) {
-            String id = node.getSysmlIdOfProperty( "sysml:operationExpression" );
-            if ( id != null ) {
-              putInJson( json, "expression", id, filter );
-            }
+            NodeRef opExpNode = (NodeRef) node.getProperty( "sysml:operationExpression" );
+            putInJson( json, "expression", addNodeRefIdJSON(opExpNode), filter );
+
         } else {
             Object property = node.getProperty( "sysml:operationExpression" );
             if ( property != null ) {
@@ -4912,9 +4915,11 @@ public class EmsScriptNode extends ScriptNode implements
             addInstanceSpecificationJSON( JSONObject json, EmsScriptNode node,
                                           Set< String > filter, Date dateTime )
                                                                                throws JSONException {
+        
+        NodeRef specNode = (NodeRef) node.getProperty( Acm.ACM_INSTANCE_SPECIFICATION_SPECIFICATION );
         putInJson( json,
-                   "specification",
-                   node.getProperty( "sysml:instanceSpecificationSpecification" ),
+                   Acm.JSON_INSTANCE_SPECIFICATION_SPECIFICATION,
+                   addNodeRefIdJSON(specNode),
                    filter );
     }
 
@@ -4924,11 +4929,10 @@ public class EmsScriptNode extends ScriptNode implements
                                Set< String > filter, Date dateTime )
                                                                     throws JSONException {
         if ( !embeddingExpressionInConstraint  ) {
-            String specId =
-                    node.getSysmlIdOfProperty( "sysml:constraintSpecification" );
-            if ( specId != null ) {
-                putInJson( json, "specification", specId, filter );
-            }
+            NodeRef specNode =
+                    (NodeRef) node.getProperty( "sysml:constraintSpecification" );
+            putInJson( json, "specification", addNodeRefIdJSON(specNode), filter );
+
         } else {
             Object property = node.getProperty( "sysml:constraintSpecification" );
             if ( property != null ) {
@@ -4948,11 +4952,10 @@ public class EmsScriptNode extends ScriptNode implements
         putInJson( json, "parameterType",
                    node.getProperty( "sysml:parameterType" ), filter );
 
-        String id =
-                node.getSysmlIdOfProperty( "sysml:parameterDefaultValue" );
-        if ( id != null ) {
-            putInJson( json, "defaultValue", id, filter );
-        }
+        NodeRef paramValNode =
+                (NodeRef) node.getProperty( "sysml:parameterDefaultValue" );
+        putInJson( json, "defaultValue", addNodeRefIdJSON(paramValNode), filter );
+
     }
 
     protected void addConnectorJSON( JSONObject json, EmsScriptNode node,
@@ -4963,12 +4966,12 @@ public class EmsScriptNode extends ScriptNode implements
 
         ArrayList< NodeRef > nodeRefsSource =
                 (ArrayList< NodeRef >)node.getProperty( Acm.ACM_SOURCE_PATH );
-        JSONArray sourceIds = addNodeRefIdsJSON( nodeRefsSource, dateTime );
+        JSONArray sourceIds = addNodeRefIdsJSON( nodeRefsSource );
         putInJson( json, Acm.JSON_SOURCE_PATH, sourceIds, filter );
 
         ArrayList< NodeRef > nodeRefsTarget =
                 (ArrayList< NodeRef >)node.getProperty( Acm.ACM_TARGET_PATH );
-        JSONArray targetIds = addNodeRefIdsJSON( nodeRefsTarget, dateTime );
+        JSONArray targetIds = addNodeRefIdsJSON( nodeRefsTarget );
         putInJson( json, Acm.JSON_TARGET_PATH, targetIds, filter );
 
         String kind = (String) node.getProperty( Acm.ACM_CONNECTOR_KIND );
@@ -4977,10 +4980,7 @@ public class EmsScriptNode extends ScriptNode implements
         }
         
         NodeRef connectorType = (NodeRef) node.getProperty( Acm.ACM_CONNECTOR_TYPE);
-        if ( connectorType != null ) {
-            EmsScriptNode connectorTypeNode = new EmsScriptNode(connectorType, services, response);
-            putInJson( json, Acm.JSON_CONNECTOR_TYPE, connectorTypeNode.getSysmlId(), filter);
-        }
+        putInJson( json, Acm.JSON_CONNECTOR_TYPE, addNodeRefIdJSON(connectorType), filter);
 
         putInJson( json, Acm.JSON_CONNECTOR_VALUE,
                    addInternalJSON( node.getProperty(Acm.ACM_CONNECTOR_VALUE), dateTime ),
@@ -5012,7 +5012,7 @@ public class EmsScriptNode extends ScriptNode implements
 
         ArrayList< NodeRef > nodeRefsOwnedEnd =
                 (ArrayList< NodeRef >)node.getProperty( Acm.ACM_OWNED_END );
-        JSONArray ownedEndIds = addNodeRefIdsJSON( nodeRefsOwnedEnd, dateTime );
+        JSONArray ownedEndIds = addNodeRefIdsJSON( nodeRefsOwnedEnd );
         putInJson( json, Acm.JSON_OWNED_END, ownedEndIds, filter );
 
         putInJson( json, Acm.JSON_SOURCE_AGGREGATION,
@@ -5091,6 +5091,7 @@ public class EmsScriptNode extends ScriptNode implements
     public static List< EmsScriptNode >
             toEmsScriptNodeList( Collection< NodeRef > refs ) {
         ArrayList<EmsScriptNode> nodes = new ArrayList< EmsScriptNode >();
+        if ( refs == null ) return nodes;
         for ( NodeRef ref : refs ) {
             nodes.add( new EmsScriptNode( ref, NodeUtil.getServices() ) );
         }

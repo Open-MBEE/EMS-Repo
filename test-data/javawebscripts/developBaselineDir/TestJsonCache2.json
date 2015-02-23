@@ -1,0 +1,19 @@
+{"elements": [{
+    "creator": "admin",
+    "documentation": "",
+    "editable": true,
+    "name": "jsonTest2",
+    "owner": "123456",
+    "qualifiedId": "/europa/123456/jsonTest2",
+    "qualifiedName": "/europa/JW_TEST2/jsonTest2",
+    "specialization": {
+        "specification": {
+            "integer": 2,
+            "type": "LiteralInteger",
+            "valueExpression": null
+        },
+        "type": "Constraint"
+    },
+    "sysmlid": "jsonTest2"
+}]}
+200

@@ -1,0 +1,126 @@
+{ "elements" : [
+
+    {"documentation" : "Connector with null values", 
+     "sysmlid":"connectorNull", 
+     "name":"connectorNull", 
+     "owner":"123456", 
+     "specialization": {"type":"Connector",
+                        "targetLower":{"type":"LiteralString",
+                                       "string":"targetLower!"},
+                        "targetUpper":{"type":"LiteralString",
+                                       "string":"targetUpper!"},
+                        "sourceLower":{"type":"LiteralString",
+                                       "string":"sourceLower!"},
+                        "sourceUpper":{"type":"LiteralString",
+                                       "string":"sourceUpper!"},
+                        "connectorKind":"BINDING",
+                        "connectorType":null,
+                        "connectorValue":{"type":"LiteralString",
+                                           "string":"Ninja Attack!"}}
+    },
+    
+    {"documentation" : "directed_relationship with null values", 
+     "sysmlid":"directedRelationshipNull",
+     "owner":"123456",
+     "name":"directedRelationshipNull",
+     "specialization": {"type":"DirectedRelationship",
+                        "source":null,
+                        "target":null}
+     },
+     
+    {"documentation" : "DurationInterval with null values", 
+     "sysmlid":"durationIntervalNull",
+     "owner":"123456",
+     "name":"durationIntervalNull",
+     "specialization": {"type":"DurationInterval",
+                        "max":null,
+                        "min":null}
+     },
+     
+    {"documentation" : "ElementValue with null values", 
+     "sysmlid":"elementValueNull",
+     "owner":"123456",
+     "name":"elementValueNull",
+     "specialization": {"type":"ElementValue",
+                        "element":null}
+     },
+     
+    {"documentation" : "InstanceSpecification with null values", 
+     "sysmlid":"instanceSpecificationNull",
+     "owner":"123456",
+     "name":"instanceSpecificationNull",
+     "specialization": {"type":"InstanceSpecification",
+                        "instanceSpecificationSpecification":null}
+     },
+     
+    {"documentation" : "InstanceValue with null values", 
+     "sysmlid":"instanceValueNull",
+     "owner":"123456",
+     "name":"instanceValueNull",
+     "specialization": {"type":"InstanceValue",
+                        "instance":null}
+     },
+     
+    {"documentation" : "Parameter with null values", 
+     "sysmlid":"parameterNull",
+     "owner":"123456",
+     "name":"parameterNull",
+     "specialization": {"type":"Parameter",
+                        "defaultValue":null}
+     },
+     
+    {"documentation" : "Property with null values", 
+     "sysmlid":"propertyNull", 
+     "name":"propertyNull", 
+     "owner":"123456", 
+     "specialization": {"type":"Property",
+                        "isDerived":false,
+                        "propertyType":null,
+                        "value":[{"type":"LiteralString",
+                                  "string":"dlam_string"}]}
+    },
+    
+    {"documentation" : "TimeInterval with null values", 
+     "sysmlid":"timeIntervalNull",
+     "owner":"123456",
+     "name":"timeIntervalNull",
+     "specialization": {"type":"TimeInterval",
+                        "max":null,
+                        "min":null}
+     },
+     
+    {"documentation" : "ValueSpecification with null values", 
+     "sysmlid":"valueSpecificationNull",
+     "owner":"123456",
+     "name":"valueSpecificationNull",
+     "specialization": {"type":"ValueSpecification",
+                        "valueExpression":null}
+     },
+     
+    {"documentation" : "View with null values", 
+     "sysmlid":"viewNull",
+     "owner":"123456",
+     "name":"viewNull",
+     "specialization": {"type":"View",
+                        "contents":null}
+     },
+     
+    {"documentation" : "Viewpoint with null values", 
+     "sysmlid":"viewpointNull",
+     "owner":"123456",
+     "name":"viewpointNull",
+     "specialization": {"type":"Viewpoint",
+                        "method":null}
+     },
+     
+     {"documentation" : "Property with missing propertyType and null owner", 
+     "sysmlid":"propertyMissing", 
+     "name":"propertyMissing", 
+     "owner":null, 
+     "specialization": {"type":"Property",
+                        "isDerived":false,
+                        "value":[{"type":"LiteralString",
+                                  "string":"dlam_string"}]}
+    }
+     
+]}

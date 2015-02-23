@@ -55,8 +55,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import org.json.JSONObject;
-
 import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
@@ -324,7 +322,7 @@ public class MmsWorkspaceDiffPost extends ModelPost {
 	                }
 	                
 	                if ( !CommitUtil.sendDeltas(finalJsonDiff, targetWsId, projectId, source) ) {
-                        log(LogLevel.WARNING, "MmsWorkspaceDiffPost deltas not posted properly");
+                        logger.warn( "MmsWorkspaceDiffPost deltas not posted properly");
                     }
 
 	                CommitUtil.merge( finalJsonDiff, srcWs, targetWs, dateTimeSrc, dateTimeTarget,

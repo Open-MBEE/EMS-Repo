@@ -1,0 +1,22 @@
+<webscript> 
+  <shortname>Get all projects for the workspace</shortname> 
+  <description>
+    Retrieves the project information in the following format:
+    {elements:[{
+            "sysmlid": projectId,
+            "name": projectName,
+            "specialization":{"type":"Project",
+                              "projectVersion": projectVersion if there is a version
+                             }
+            ...
+                            
+     }]} 
+  </description>
+  <url>/workspaces/{workspaceId}/projects</url>
+  <format default="json">argument</format> 
+  <authentication>user</authentication> 
+  <transaction>none</transaction>
+  <family>MMS REST API</family>
+  <args>
+  </args>
+</webscript>

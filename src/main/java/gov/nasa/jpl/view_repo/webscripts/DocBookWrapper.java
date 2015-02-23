@@ -338,19 +338,19 @@ public class DocBookWrapper {
 			this.transformToHTML(workspace, timestamp);
 			tableToCSV();
 			String zipPath = this.zipHtml();
-			if(zipPath == null || zipPath.isEmpty()) throw new Exception("Failed to zip HTML files and resources!");
+			if(zipPath == null || zipPath.isEmpty()) throw new Exception("Failed to zip files and resources!");
 
-			EmsScriptNode node = snapshotFolder.createNode(this.snapshotName + "_HTML_Zip", "cm:content");
-			if(node == null) throw new Exception("Failed to create HTML repository node!");
+			EmsScriptNode node = snapshotFolder.createNode(this.snapshotName + "_Zip", "cm:content");
+			if(node == null) throw new Exception("Failed to create zip repository node!");
 
-			if(!this.saveFileToRepo(node, MimetypeMap.MIMETYPE_ZIP, zipPath)) throw new Exception("Failed to save HTML artifact to repository!");
+			if(!this.saveFileToRepo(node, MimetypeMap.MIMETYPE_ZIP, zipPath)) throw new Exception("Failed to save zip artifact to repository!");
 			this.snapshotNode.createOrUpdateAspect("view2:htmlZip");
 			this.snapshotNode.createOrUpdateProperty("view2:htmlZipNode", node.getNodeRef());
 
 			if ( node != null ) node.getOrSetCachedVersion();
 		}
 		catch(Exception ex){
-			throw new Exception("Failed to generate HTML zip!", ex);
+			throw new Exception("Failed to generate zip artifact!", ex);
 		}
 	}
 

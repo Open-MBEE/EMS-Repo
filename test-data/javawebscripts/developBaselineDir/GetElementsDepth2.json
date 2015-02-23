@@ -1,141 +1,158 @@
 {"elements": [
     {
-        "qualifiedId": "/europa/123456/300",
-        "name": "300",
-        "qualifiedName": "/europa/JW_TEST/300",
-        "sysmlid": "300",
+        "creator": "admin",
         "documentation": "something",
+        "editable": true,
+        "name": "300",
         "owner": "123456",
+        "qualifiedId": "/europa/123456/300",
+        "qualifiedName": "/europa/JW_TEST/300",
         "specialization": {
             "isDerived": false,
             "isSlot": false,
+            "propertyType": null,
+            "type": "Property",
             "value": [{
                 "string": "dlam_string",
-                "type": "LiteralString"
-            }],
-            "type": "Property"
+                "type": "LiteralString",
+                "valueExpression": null
+            }]
         },
-        "editable": true,
-        "creator": "admin",
+        "sysmlid": "300"
     },
     {
-        "qualifiedId": "/europa/123456/300/301",
-        "name": "301",
-        "qualifiedName": "/europa/JW_TEST/300/301",
-        "sysmlid": "301",
+        "creator": "admin",
         "documentation": "else",
+        "editable": true,
+        "name": "301",
         "owner": "300",
+        "qualifiedId": "/europa/123456/300/301",
+        "qualifiedName": "/europa/JW_TEST/300/301",
         "specialization": {
-            "displayedElements": [
+            "allowedElements": [
                 "301",
                 "302",
                 "303"
             ],
             "childrenViews": ["304"],
+            "contains": [{
+                "source": "301",
+                "sourceProperty": "documentation",
+                "sourceType": "reference",
+                "type": "Paragraph"
+            }],
+            "contents": null,
+            "displayedElements": [
+                "301",
+                "302",
+                "303"
+            ],
+            "noSections": ["302"],
+            "type": "Product",
             "view2view": [{
                 "childrenViews": [
                     "301",
                     "302"
                 ],
                 "sysmlid": "301"
-            }],
-            "allowedElements": [
-                "301",
-                "302",
-                "303"
-            ],
-            "contains": [{
-                "sourceType": "reference",
-                "source": "301",
-                "sourceProperty": "documentation",
-                "type": "Paragraph"
-            }],
-            "noSections": ["302"],
-            "type": "Product"
+            }]
         },
-        "editable": true,
-        "creator": "admin",
+        "sysmlid": "301"
     },
     {
-        "qualifiedId": "/europa/123456/4000/401",
-        "name": "401",
-        "qualifiedName": "/europa/JW_TEST/400/401",
-        "sysmlid": "401",
+        "creator": "admin",
         "documentation": "4else",
+        "editable": true,
+        "name": "401",
         "owner": "4000",
+        "qualifiedId": "/europa/123456/4000/401",
+        "qualifiedName": "/europa/JW_TEST/400/401",
         "specialization": {
-            "displayedElements": [
+            "allowedElements": [
                 "401",
                 "402",
                 "403"
             ],
             "childrenViews": ["404"],
+            "contains": [{
+                "source": "401",
+                "sourceProperty": "documentation",
+                "sourceType": "reference",
+                "type": "Paragraph"
+            }],
+            "contents": null,
+            "displayedElements": [
+                "401",
+                "402",
+                "403"
+            ],
+            "noSections": ["402"],
+            "type": "Product",
             "view2view": [{
                 "childrenViews": [
                     "401",
                     "402"
                 ],
                 "sysmlid": "401"
-            }],
-            "allowedElements": [
-                "401",
-                "402",
-                "403"
-            ],
-            "contains": [{
-                "sourceType": "reference",
-                "source": "401",
-                "sourceProperty": "documentation",
-                "type": "Paragraph"
-            }],
-            "noSections": ["402"],
-            "type": "Product"
+            }]
         },
-        "editable": true,
-        "creator": "admin",
+        "sysmlid": "401"
     },
     {
-        "qualifiedId": "/123456",
+        "creator": "admin",
+        "editable": true,
         "name": "JW_TEST",
+        "owner": null,
+        "qualifiedId": "/123456",
         "qualifiedName": "/JW_TEST",
-        "sysmlid": "123456",
-        "owner": "null",
-        "editable": true,
-        "creator": "admin",
+        "sysmlid": "123456"
     },
     {
-        "qualifiedId": "/europa/123456/4000",
-        "name": "400",
-        "qualifiedName": "/europa/JW_TEST/400",
-        "sysmlid": "4000",
-        "documentation": "4something",
+        "creator": "admin",
+        "documentation": "to make compatible with value specs (this is just a Element)",
+        "editable": true,
+        "name": "dlam",
         "owner": "123456",
+        "qualifiedId": "/europa/123456/dlam",
+        "qualifiedName": "/europa/JW_TEST/dlam",
+        "specialization": {"type": "Element"},
+        "sysmlid": "dlam"
+    },
+    {
+        "creator": "admin",
+        "documentation": "4something",
+        "editable": true,
+        "name": "400",
+        "owner": "123456",
+        "qualifiedId": "/europa/123456/4000",
+        "qualifiedName": "/europa/JW_TEST/400",
         "specialization": {
             "isDerived": false,
             "isSlot": false,
+            "propertyType": null,
+            "type": "Property",
             "value": [{
                 "string": "dlam_string",
-                "type": "LiteralString"
-            }],
-            "type": "Property"
+                "type": "LiteralString",
+                "valueExpression": null
+            }]
         },
-        "editable": true,
-        "creator": "admin",
+        "sysmlid": "4000"
     },
     {
-        "qualifiedId": "/europa/123456/300/500",
-        "name": "500",
-        "qualifiedName": "/europa/JW_TEST/300/500",
-        "sysmlid": "500",
+        "creator": "admin",
         "documentation": "directed_relationship",
+        "editable": true,
+        "name": "500",
         "owner": "300",
+        "qualifiedId": "/europa/123456/300/500",
+        "qualifiedName": "/europa/JW_TEST/300/500",
         "specialization": {
             "source": "302",
             "target": "303",
             "type": "DirectedRelationship"
         },
-        "editable": true,
-        "creator": "admin",
+        "sysmlid": "500"
     }
 ]}
 200

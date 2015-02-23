@@ -1,50 +1,65 @@
 {"elements": [
     {
-        "qualifiedId": "/europa/123456/300",
-        "name": "300",
-        "qualifiedName": "/europa/JW_TEST/300",
-        "sysmlid": "300",
+        "creator": "admin",
         "documentation": "something",
+        "editable": true,
+        "name": "300",
         "owner": "123456",
+        "qualifiedId": "/europa/123456/300",
+        "qualifiedName": "/europa/JW_TEST/300",
         "specialization": {
             "isDerived": false,
             "isSlot": false,
+            "propertyType": null,
+            "type": "Property",
             "value": [{
                 "string": "dlam_string",
-                "type": "LiteralString"
-            }],
-            "type": "Property"
+                "type": "LiteralString",
+                "valueExpression": null
+            }]
         },
-        "editable": true,
-        "creator": "admin",
+        "sysmlid": "300"
     },
     {
-        "qualifiedId": "/123456",
+        "creator": "admin",
+        "editable": true,
         "name": "JW_TEST",
+        "owner": null,
+        "qualifiedId": "/123456",
         "qualifiedName": "/JW_TEST",
-        "sysmlid": "123456",
-        "owner": "null",
-        "editable": true,
-        "creator": "admin",
+        "sysmlid": "123456"
     },
     {
-        "qualifiedId": "/europa/123456/4000",
-        "name": "400",
-        "qualifiedName": "/europa/JW_TEST/400",
-        "sysmlid": "4000",
-        "documentation": "4something",
+        "creator": "admin",
+        "documentation": "to make compatible with value specs (this is just a Element)",
+        "editable": true,
+        "name": "dlam",
         "owner": "123456",
+        "qualifiedId": "/europa/123456/dlam",
+        "qualifiedName": "/europa/JW_TEST/dlam",
+        "specialization": {"type": "Element"},
+        "sysmlid": "dlam"
+    },
+    {
+        "creator": "admin",
+        "documentation": "4something",
+        "editable": true,
+        "name": "400",
+        "owner": "123456",
+        "qualifiedId": "/europa/123456/4000",
+        "qualifiedName": "/europa/JW_TEST/400",
         "specialization": {
             "isDerived": false,
             "isSlot": false,
+            "propertyType": null,
+            "type": "Property",
             "value": [{
                 "string": "dlam_string",
-                "type": "LiteralString"
-            }],
-            "type": "Property"
+                "type": "LiteralString",
+                "valueExpression": null
+            }]
         },
-        "editable": true,
-        "creator": "admin",
+        "sysmlid": "4000"
     }
 ]}
 200
