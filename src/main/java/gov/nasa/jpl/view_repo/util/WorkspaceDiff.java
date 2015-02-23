@@ -622,9 +622,9 @@ public class WorkspaceDiff implements Serializable {
      * @throws JSONException
      */
     public JSONObject toJSONObject(Date time1, Date time2, boolean showAll) throws JSONException {
-        JSONObject deltaJson = new JSONObject();
-        JSONObject ws1Json = new JSONObject();
-        JSONObject ws2Json = new JSONObject();
+        JSONObject deltaJson = NodeUtil.newJsonObject();
+        JSONObject ws1Json = NodeUtil.newJsonObject();
+        JSONObject ws2Json = NodeUtil.newJsonObject();
 
         addJSONArray(ws1Json, "elements", elements, elementsVersions, time1, true);
         addWorkspaceMetadata( ws1Json, ws1, time1 );

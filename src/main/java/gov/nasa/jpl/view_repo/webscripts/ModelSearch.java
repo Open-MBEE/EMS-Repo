@@ -93,7 +93,7 @@ public class ModelSearch extends ModelGet {
 		try {
 	        JSONArray elementsJson = executeSearchRequest(req);
 
-	        JSONObject top = new JSONObject();
+	        JSONObject top = NodeUtil.newJsonObject();
 			top.put("elements", elementsJson);
 			if (!Utils.isNullOrEmpty(response.toString())) top.put("message", response.toString());
 			model.put("res", NodeUtil.jsonToString( top, 4 ));

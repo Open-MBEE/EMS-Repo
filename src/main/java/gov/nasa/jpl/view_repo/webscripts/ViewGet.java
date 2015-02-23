@@ -165,7 +165,7 @@ public class ViewGet extends AbstractJavaWebScript {
 
         if (responseStatus.getCode() == HttpServletResponse.SC_OK) {
             try {
-                JSONObject json = new JSONObject();
+                JSONObject json = NodeUtil.newJsonObject();
                 json.put(gettingDisplayedElements ? "elements" : "views", viewsJson);
                 if (!Utils.isNullOrEmpty(response.toString())) json.put("message", response.toString());
                 if ( prettyPrint ) model.put("res", NodeUtil.jsonToString( json, 4 ));

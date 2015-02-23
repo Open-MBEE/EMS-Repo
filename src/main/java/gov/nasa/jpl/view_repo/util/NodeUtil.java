@@ -11,6 +11,7 @@ import gov.nasa.jpl.mbee.util.Timer;
 import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.actions.ActionUtil;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode.EmsVersion;
+import gov.nasa.jpl.view_repo.webscripts.ModelPost;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -32,6 +33,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.UUID;
 import java.util.Vector;
@@ -103,6 +105,8 @@ public class NodeUtil {
             this.prefix = prefix;
         }
     }
+
+    static Logger logger = Logger.getLogger(NodeUtil.class);
 
     /* static flags and constants */
 
@@ -281,7 +285,7 @@ public class NodeUtil {
     public static JSONObject jsonCacheGet( String id, long millis,
                                            boolean noMetadata ) {
         JSONObject json = Utils.get( jsonCache, id, millis );
-        System.out.println( "jsonCacheGet(" + id + ", " + millis + ", "
+        if ( Debug.isOn()) logger.debug( "jsonCacheGet(" + id + ", " + millis + ", "
                             + noMetadata + ") = " + json );
         return json;
     }
@@ -292,7 +296,7 @@ public class NodeUtil {
         if ( doJsonStringCaching ) {
             json = addJsonMetadata( json, id, millis, true, null );
         }
-        System.out.println( "jsonCachePut(" + id + ", " + millis + ", " + json
+        if ( Debug.isOn()) logger.debug( "jsonCachePut(" + id + ", " + millis + ", " + json
                             + ")" );
         Utils.put( jsonCache, id, millis, json );
         return json;
@@ -309,7 +313,7 @@ public class NodeUtil {
             json = clone( json );
             stripJsonMetadata( json );
         }
-        System.out.println( "jsonDeepCacheGet(" + id + ", " + millis + ", "
+        if ( Debug.isOn()) logger.debug( "jsonDeepCacheGet(" + id + ", " + millis + ", "
                             + isIncludeQualified + ", " + jsonFilter + ", "
                             + noMetadata + ") = " + json );
         return json;
@@ -322,7 +326,7 @@ public class NodeUtil {
         json = clone( json );
         jsonFilter = jsonFilter == null ? new TreeSet< String >() : jsonFilter;
         json = addJsonMetadata( json, id, millis, isIncludeQualified, jsonFilter );
-        System.out.println( "jsonDeepCachePut(" + id + ", " + millis + ", "
+        if ( Debug.isOn()) logger.debug( "jsonDeepCachePut(" + id + ", " + millis + ", "
                             + isIncludeQualified + ", " + jsonFilter + ", "
                             + json + ")" );
         Utils.put( jsonDeepCache, id, millis, isIncludeQualified, jsonFilter,
@@ -331,11 +335,11 @@ public class NodeUtil {
     }
 
     public static JSONObject stripJsonMetadata( JSONObject json ) {
-        System.out.println("stripJsonMetadata -> " + json );
+        if ( Debug.isOn()) logger.debug("stripJsonMetadata -> " + json );
         json.remove( "cacheKey" );
         json.remove( "jsonString" );
         json.remove( "jsonString4" );
-        System.out.println("stripJsonMetadata -> " + json );
+        if ( Debug.isOn()) logger.debug("stripJsonMetadata -> " + json );
         return json;
     }
     
@@ -366,7 +370,7 @@ public class NodeUtil {
             e1.printStackTrace();
             return null;
         }
-        String jsonString = jsonString4.replaceAll( "(    |\n)", " " ); 
+        String jsonString = jsonString4.replaceAll( "( |\n)+", " " ); 
         JSONArray keyJson = new JSONArray();
         keyJson.put( id );
         keyJson.put( millis );
@@ -380,7 +384,7 @@ public class NodeUtil {
             e.printStackTrace();
             return null;
         }
-        System.out.println( "addJsonMetadata(" + id + ", " + millis + ", "
+        if ( Debug.isOn()) logger.debug( "addJsonMetadata(" + id + ", " + millis + ", "
                             + isIncludeQualified + ", " + jsonFilter + ") -> "
                             + json );
         return json;
@@ -444,39 +448,39 @@ public class NodeUtil {
             stripJsonMetadata( json );
             if ( numSpacesToIndent < 0 ) {
                 s = json.toString();
-                System.out.println( "jsonToString( json, " + numSpacesToIndent + " ) = json.toString() = " + s );
+                if ( Debug.isOn()) logger.debug( "jsonToString( json, " + numSpacesToIndent + " ) = json.toString() = " + s );
                 return s;
             }
             s = json.toString( numSpacesToIndent );
-            System.out.println( "jsonToString( json, " + numSpacesToIndent + " ) = json.toString( " + numSpacesToIndent + " ) = " + s );
+            if ( Debug.isOn()) logger.debug( "jsonToString( json, " + numSpacesToIndent + " ) = json.toString( " + numSpacesToIndent + " ) = " + s );
             return s;
         }
         if ( numSpacesToIndent < 0 ) {
             if ( json.has( "jsonString" ) ) {
                 s = json.getString( "jsonString" );
-                System.out.println( "jsonToString( json, " + numSpacesToIndent + " ) = json.getSString( \"jsonString\" ) = " + s );
+                if ( Debug.isOn()) logger.debug( "jsonToString( json, " + numSpacesToIndent + " ) = json.getSString( \"jsonString\" ) = " + s );
                 return s;
             }
             // TODO -- Warning! shouldn't get here!
             json = stripJsonMetadata( clone( json ) );
             s = json.toString();
-            System.out.println( "BAD! jsonToString( json, " + numSpacesToIndent + " ) = json.toString() = " + s );
+            logger.warn( "BAD! jsonToString( json, " + numSpacesToIndent + " ) = json.toString() = " + s );
             return s;
         }
         if ( json.has( "jsonString4" ) ) {
             String jsonString4 = json.getString( "jsonString4" );
             if ( numSpacesToIndent == 4 ) {
-                System.out.println( "jsonToString( json, " + numSpacesToIndent + " ) = jsonString4 = " + jsonString4 );
+                if ( Debug.isOn()) logger.debug( "jsonToString( json, " + numSpacesToIndent + " ) = jsonString4 = " + jsonString4 );
                 return jsonString4;
             }
             s = jsonString4.replaceAll("    ", Utils.repeat( " ", numSpacesToIndent ) );
-            System.out.println( "jsonToString( json, " + numSpacesToIndent + " ) = jsonString4.replaceAll(\"    \", Utils.repeat( \" \", " + numSpacesToIndent + " ) ) = " + s );
+            if ( Debug.isOn()) logger.debug( "jsonToString( json, " + numSpacesToIndent + " ) = jsonString4.replaceAll(\"    \", Utils.repeat( \" \", " + numSpacesToIndent + " ) ) = " + s );
             return s;
         }
         // TODO -- Warning! shouldn't get here!
         json = stripJsonMetadata( clone( json ) );
         s = json.toString( numSpacesToIndent );
-        System.out.println( "BAD! jsonToString( json, " + numSpacesToIndent + " ) = json.toString( " + numSpacesToIndent + " ) = " + s );
+        logger.warn( "BAD! jsonToString( json, " + numSpacesToIndent + " ) = json.toString( " + numSpacesToIndent + " ) = " + s );
         return s;
     }
 
@@ -778,8 +782,8 @@ public class NodeUtil {
             } else if ( value instanceof Character ) {
                 gson.addProperty( key, (Character)value );
             } else {
-                if ( value == null ) System.out.println("value = null" );
-                else System.out.println("value = " + value + "; type = " + value.getClass().getCanonicalName());
+                if ( value == null ) logger.error("value = null" );
+                else logger.error("value = " + value + "; type = " + value.getClass().getCanonicalName());
                 throw new JSONException( "not supported" );
             }
             return this;
@@ -839,77 +843,176 @@ public class NodeUtil {
         }
     }
     
+    protected static JSONObject simpleJsonObject = new JSONObject( new TreeMap<String,Integer>() {
+        { put("a",0); } 
+    });
+    
     public static class CachedJsonObject extends JSONObject {
-        //JsonObject gson;
+        static String replacement = "$%%$";
+        static String replacementWithQuotes = "\"$%%$\"";
+        static int replacementWithQuotesLength = replacementWithQuotes.length();
+
+        protected boolean plain = false; 
+        
         public CachedJsonObject() {
             super();
-            //gson = new JsonObject();
         }
         public CachedJsonObject( String s ) throws JSONException {
-            //gson = new JsonObject();
             super(s);
         }
+        
         @Override
         public String toString() {
-          try {
-            if ( has( "jsonString" ) ) {
-                System.out.println("has jsonString: " + getString( "jsonString" ));
-                return getString( "jsonString" );
+            try {
+                if ( has( "jsonString" ) ) {
+                    if ( Debug.isOn()) logger.debug( "has jsonString: "
+                                        + getString( "jsonString" ) );
+                    return getString( "jsonString" );
+                }
+                if ( Debug.isOn()) logger.debug( "no jsonString: " + super.toString() );
+
+                return nonCachedToString( -1 );
+
+            } catch ( JSONException e ) {
+                e.printStackTrace();
             }
-            System.out.println("no jsonString: " + super.toString());
-            return super.toString();
-          } catch ( JSONException e ) {
-            e.printStackTrace();
-          }
-          return null;
+            return null;
         }
+        
         @Override
         public String toString( int n ) {
-          try {
-            if ( has( "jsonString4" ) ) {
-                System.out.println("has jsonString4: " + jsonToString( this, n ));
-                return jsonToString( this, n );
-            }
-            System.out.println("no jsonString4: " + super.toString(n));
-            return super.toString( n );
-          } catch ( JSONException e ) {
-            e.printStackTrace();
-          }
-          return null;
-        }
-        @Override
-        public Writer write( Writer writer ) throws JSONException {
-//            if ( true ) {
-//                return super.write( writer );
-//            }
-
-//            String s = toString();
-//            try {
-//                writer.append( s );
-//            } catch ( IOException e ) {
-//                e.printStackTrace();
-//            }
-            Exception f = new Exception();
-            f.printStackTrace();
-            if ( has( "jsonString" ) ) {
-                try {
-                    writer.write( getString( "jsonString" ) );
-                } catch ( IOException e ) {
-                    e.printStackTrace();
+            try {
+                if ( has( "jsonString4" ) ) {
+                    if ( Debug.isOn()) logger.debug( "has jsonString4: "
+                                        + jsonToString( this, n ) );
+                    return jsonToString( this, n );
                 }
-                return writer;
+                if ( Debug.isOn()) logger.debug( "no jsonString4: " + super.toString( n ) );
+
+                return nonCachedToString( n );
+
+            } catch ( JSONException e ) {
+                e.printStackTrace();
             }
-            return super.write( writer );
+            return null;
         }
+        
+        /**
+         * 
+         * @param numSpaces
+         * @return
+         */
+        private String nonCachedToString( int numSpaces ) {
+            // look for entries with arrays of CachedJsonObjects
+            Iterator keys = keys();
+            
+            //CachedJsonObject[] arr = new CachedJsonObject[];
+//            while ( keys.hasNext() ) {
+//                String key = (String)keys.next();
+            //JSONObject newEntries = new JSONObject();
+            LinkedHashMap< String, String > newEntries =
+                new LinkedHashMap< String, String >();// new TreeMap< String,
+                                                      // String >();
+            JSONObject oldEntries = new JSONObject();
+            for ( Object k : keySet().toArray() ) {
+                if ( !( k instanceof String ) ) continue;
+                String key = (String)k;
+                replaceJsonArrays( key, numSpaces, newEntries, oldEntries );
+            }
+            //StringBuffer sb = new StringBuffer( super.toString() );
+            String s = null;
+            if ( numSpaces < 0 ) s = super.toString();
+            else s = super.toString( numSpaces );
+            int len = newEntries.size();
+            if ( len > 0 ) {
+                StringBuffer sb = new StringBuffer( s );
+                String[] keysNew = new String[len];
+                newEntries.keySet().toArray( keysNew );
+                int pos = s.length()-replacementWithQuotesLength;
+                for ( int i=len-1; i >= 0; --i  ) {
+                    String keyn = keysNew[i];
+                    int pos1 = s.lastIndexOf( replacementWithQuotes, pos );
+                    pos = s.lastIndexOf( "\"" + keyn + "\"", pos1 );
+                    if ( pos >= 0 && pos1 > 0 ) {
+                        sb.replace( pos1, pos1+replacementWithQuotesLength, newEntries.get( keyn ) );
+                    }
+                }
+                s = sb.toString();
+                // put json back
+                for ( Object k : oldEntries.keySet().toArray() ) {
+                    if ( !( k instanceof String ) ) continue;
+                    String key = (String)k;
+                    put( key, oldEntries.getJSONArray( key ) );
+                }
+            }
+            return s;
+        }
+
+        public void replaceJsonArrays( String key, int numSpaces,
+                                       LinkedHashMap< String, String > newEntries,
+                                       JSONObject oldEntries  ) {
+            JSONArray jarr = optJSONArray( key );
+            if ( jarr != null && jarr.length() > 0 ) {
+                Object val = jarr.get( 0 );
+                if ( val instanceof CachedJsonObject ) {
+                    // temporarily replace
+                    StringBuffer sb = new StringBuffer("[");
+                    for ( int i=0; i<jarr.length(); ++i ) {
+                        val = jarr.get( i );
+                        if (i > 0) sb.append( ", " );
+                        if ( numSpaces < 0 ) {
+                            sb.append( val.toString() );
+                        } else {
+                            if ( val instanceof JSONObject ) {
+                                sb.append( ((JSONObject)val).toString(numSpaces) );
+                            } else if ( val instanceof JSONArray ){
+                                sb.append( ((JSONArray)val).toString(numSpaces) );
+                            } else {
+                                sb.append( val.toString() );
+                            }
+                        }
+                    }
+                    sb.append( "]" );
+                    newEntries.put( key, sb.toString() );
+                    oldEntries.put( key, jarr );
+                    put( key, replacement );
+                }
+            }
+        }
+
+//        @Override
+//        public Writer write( Writer writer ) throws JSONException {
+////            if ( true ) {
+////                return super.write( writer );
+////            }
+//
+////            String s = toString();
+////            try {
+////                writer.append( s );
+////            } catch ( IOException e ) {
+////                e.printStackTrace();
+////            }
+//            Exception f = new Exception();
+//            f.printStackTrace();
+//            if ( has( "jsonString" ) ) {
+//                try {
+//                    writer.write( getString( "jsonString" ) );
+//                } catch ( IOException e ) {
+//                    e.printStackTrace();
+//                }
+//                return writer;
+//            }
+//            return super.write( writer );
+//        }
     }
     
     public static JSONObject newJsonObject(String s) throws JSONException {
-        JSONObject newJson = new GsonJsonObject( s );
+        JSONObject newJson = new CachedJsonObject(s);
         return newJson;
     }
     
     public static JSONObject newJsonObject() {
-        JSONObject newJson = new GsonJsonObject();
+        JSONObject newJson = new CachedJsonObject();
         return newJson;
     }
     

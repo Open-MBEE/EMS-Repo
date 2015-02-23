@@ -92,7 +92,7 @@ public class MmsWorkspaceDiffPost extends ModelPost {
 		//clearCaches();
 
 		Map<String, Object> model = new HashMap<String, Object>();
-		JSONObject top = new JSONObject();
+		JSONObject top = NodeUtil.newJsonObject();
 		
 		try {
 		    JSONObject json = //JSONObject.make( 
@@ -183,7 +183,7 @@ public class MmsWorkspaceDiffPost extends ModelPost {
     private JSONObject handleDiff(final WebScriptRequest req, final JSONObject jsonDiff, final Status status) throws Exception {
         
         long start = System.currentTimeMillis();
-        JSONObject finalJsonDiff = new JSONObject();
+        JSONObject finalJsonDiff = NodeUtil.newJsonObject();
         
         populateSourceFromJson( jsonDiff );
 		if (jsonDiff.has( "workspace1" ) && jsonDiff.has("workspace2")) {
@@ -193,7 +193,7 @@ public class MmsWorkspaceDiffPost extends ModelPost {
 		    if (srcJson.has( "id" ) && targetJson.has("id")) {
 		    	
 		    	//WorkspaceNode targetWs = null;
-		        JSONObject top = new JSONObject();
+		        JSONObject top = NodeUtil.newJsonObject();
 		        JSONArray elements = new JSONArray();
 		        final MmsModelDelete deleteService = new MmsModelDelete(repository, services);
 		    	

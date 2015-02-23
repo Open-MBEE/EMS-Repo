@@ -144,7 +144,7 @@ public class ProductGet extends AbstractJavaWebScript {
 
 		if (responseStatus.getCode() == HttpServletResponse.SC_OK && productsJson != null) {
 			try {
-			    JSONObject json = new JSONObject();
+			    JSONObject json = NodeUtil.newJsonObject();
                 json.put( gettingDisplayedElements ? "elements"
                                                   : ( gettingContainedViews
                                                       ? "views" : "products" ),

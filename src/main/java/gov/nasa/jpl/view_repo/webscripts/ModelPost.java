@@ -2673,6 +2673,7 @@ public class ModelPost extends AbstractJavaWebScript {
         String expressionString = req.getParameter( "expression" );
 
         if (wsFound && validateRequest(req, status)) {
+            
             try {
                 if (runInBackground) {
                     // Get the project node from the request:
