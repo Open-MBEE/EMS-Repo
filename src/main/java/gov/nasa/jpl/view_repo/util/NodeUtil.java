@@ -424,6 +424,14 @@ public class NodeUtil {
         return null;
     }
     
+    /**
+     * Use the cached json string if appropriate; else call json.toString().
+     * 
+     * @param json
+     * @param numSpacesToIndent
+     * @return
+     * @throws JSONException
+     */
     public static String jsonToString( JSONObject json, int numSpacesToIndent ) throws JSONException {
         if ( json == null ) return null;
         String s = null;
@@ -440,6 +448,7 @@ public class NodeUtil {
             if ( Debug.isOn()) logger.debug( "jsonToString( json, " + numSpacesToIndent + " ) = json.toString( " + numSpacesToIndent + " ) = " + s );
             return s;
         }
+        // Get the cached json string with no newlines.
         if ( numSpacesToIndent < 0 ) {
             if ( json.has( "jsonString" ) ) {
                 s = json.getString( "jsonString" );
@@ -452,13 +461,20 @@ public class NodeUtil {
             logger.warn( "BAD! jsonToString( json, " + numSpacesToIndent + " ) = json.toString() = " + s );
             return s;
         }
+        // Get the cached json string with newlines and indentation of four
+        // spaces, and replace the indentation with the specified
+        // numSpacesToIndent.
         if ( json.has( "jsonString4" ) ) {
             String jsonString4 = json.getString( "jsonString4" );
             if ( numSpacesToIndent == 4 ) {
-                if ( Debug.isOn()) logger.debug( "jsonToString( json, " + numSpacesToIndent + " ) = jsonString4 = " + jsonString4 );
+                if ( Debug.isOn() ) logger.debug( "jsonToString( json, "
+                                                  + numSpacesToIndent
+                                                  + " ) = jsonString4 = "
+                                                  + jsonString4 );
                 return jsonString4;
             }
-            s = jsonString4.replaceAll("    ", Utils.repeat( " ", numSpacesToIndent ) );
+            s = jsonString4.replaceAll( "    ",
+                                        Utils.repeat( " ", numSpacesToIndent ) );
             if ( Debug.isOn()) logger.debug( "jsonToString( json, " + numSpacesToIndent + " ) = jsonString4.replaceAll(\"    \", Utils.repeat( \" \", " + numSpacesToIndent + " ) ) = " + s );
             return s;
         }
