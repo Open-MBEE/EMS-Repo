@@ -1025,6 +1025,7 @@ public class NodeUtil {
     }
     
     public static JSONObject newJsonObject() {
+        if ( !doJsonStringCaching ) return new JSONObject();
         JSONObject newJson = new CachedJsonObject();
         return newJson;
     }
