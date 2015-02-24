@@ -170,19 +170,19 @@ public class ArtifactGet extends AbstractJavaWebScript {
 	    	    			String err = Utils.isNullOrEmpty(cs) ? fileStr+" not found!\n" :
 	    	    												  (fileStr+" with cs="+cs+" not found!\n");
 						    log(LogLevel.ERROR, err, HttpServletResponse.SC_BAD_REQUEST);
-						    model.put("res", response.toString());
+						    model.put("res", String.format("{'message':'%s'}", response.toString()));
 	    	    		}
 
 	        		}
 	        		else {
 	        			  log(LogLevel.ERROR, "Invalid artifactId!\n", HttpServletResponse.SC_BAD_REQUEST);
-	    		          model.put("res", response.toString());
+	    		          model.put("res", String.format("{'message':'%s'}", response.toString()));
 	    		    }
 
 	        	}
 	        	else {
 	        		  log(LogLevel.ERROR, "artifactId not supplied!\n", HttpServletResponse.SC_BAD_REQUEST);
-    		          model.put("res", response.toString());
+    		          model.put("res", String.format("{'message':'%s'}", response.toString()));
     		    }
 
         	}
