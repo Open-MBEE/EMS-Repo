@@ -101,7 +101,7 @@ public class ModelCommentGet extends ModelGet {
                     instance.getCommentElements( element, workspace, dateTime );
             appendResponseStatusInfo(instance);
             if (elementsJson != null) {
-                JSONObject top = new JSONObject();
+                JSONObject top = NodeUtil.newJsonObject();
                 try {
                     top.put("elements",  elementsJson);
                     if (!Utils.isNullOrEmpty(response.toString())) top.put("message", response.toString());

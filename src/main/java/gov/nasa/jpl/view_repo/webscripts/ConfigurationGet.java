@@ -81,7 +81,7 @@ public class ConfigurationGet extends AbstractJavaWebScript {
 
         //clearCaches();
 
-        JSONObject jsonObject = new JSONObject();
+        JSONObject jsonObject = NodeUtil.newJsonObject();
 
         try {
             ConfigurationsWebscript configWs = new ConfigurationsWebscript( repository, getServices(), response );

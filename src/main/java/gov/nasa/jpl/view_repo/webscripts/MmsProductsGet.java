@@ -49,7 +49,7 @@ public class MmsProductsGet extends AbstractJavaWebScript {
 
         MmsProductsGet instance = new MmsProductsGet(repository, getServices());
 
-        JSONObject jsonObject = new JSONObject();
+        JSONObject jsonObject = NodeUtil.newJsonObject();
 
         try {
             ProductsWebscript productWs = new ProductsWebscript(repository, getServices(), instance.response);

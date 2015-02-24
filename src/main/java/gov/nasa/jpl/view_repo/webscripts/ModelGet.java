@@ -178,7 +178,7 @@ public class ModelGet extends AbstractJavaWebScript {
 		    elementsJson = handleRequest(req);
 		}
 
-		JSONObject top = new JSONObject();
+		JSONObject top = NodeUtil.newJsonObject();
 		try {
 		    if (elementsJson.length() > 0) {
 		        top.put("elements", elementsJson);

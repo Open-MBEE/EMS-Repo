@@ -2764,6 +2764,7 @@ public class ModelPost extends AbstractJavaWebScript {
         String expressionString = req.getParameter( "expression" );
 
         if (wsFound && validateRequest(req, status)) {
+            
             try {
                 if (runInBackground) {
                     // Get the project node from the request:
@@ -2847,7 +2848,7 @@ public class ModelPost extends AbstractJavaWebScript {
                                                 WorkspaceNode workspace,
                                                 boolean fix, Map<String, Object> model,
                                                 boolean createCommit) throws Exception {
-        JSONObject top = new JSONObject();
+        JSONObject top = NodeUtil.newJsonObject();
         final Set< EmsScriptNode > elements = createOrUpdateModel( postJson, status, workspace, null, createCommit );
 
         if ( !Utils.isNullOrEmpty( elements ) ) {
