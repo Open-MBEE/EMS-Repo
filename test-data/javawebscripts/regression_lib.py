@@ -244,6 +244,15 @@ def get_current_time(delay=3):
     '''Gets the current time and adds delay mins b/c it lags behind'''
     a = datetime.datetime.now() + datetime.timedelta(minutes=delay)
     return a.strftime("%Y-%m-%dT%H:%M:%X.000")
+
+def set_read_delta_to_gv1(delta=5):
+    '''Get the json output, and sets gv1 to the read time - delta mins'''
+    global gv1
+    
+    set_read_to_gv1()
+    if gv1 and "." in gv1:
+        date = datetime.datetime.strptime(gv1.split(".")[0], "%Y-%m-%dT%H:%M:%S")
+        gv1 = date.strftime("%Y-%m-%dT%H:%M:%S.000")
     
 def create_command_line_options():
 

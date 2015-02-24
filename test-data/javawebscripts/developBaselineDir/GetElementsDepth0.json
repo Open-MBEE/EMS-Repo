@@ -1,10 +1,10 @@
 {"elements": [{
-    "creator": "admin",
-    "editable": true,
-    "name": "JW_TEST",
-    "owner": null,
     "qualifiedId": "/123456",
     "qualifiedName": "/JW_TEST",
-    "sysmlid": "123456"
+    "name": "JW_TEST",
+    "owner": null,
+    "sysmlid": "123456",
+    "editable": true,
+    "creator": "admin"
 }]}
 200

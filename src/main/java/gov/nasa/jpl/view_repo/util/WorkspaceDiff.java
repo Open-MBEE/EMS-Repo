@@ -587,7 +587,9 @@ public class WorkspaceDiff implements Serializable {
 
         addJSONArray(ws2Json, "addedElements", addedElements, time2, true);
         addJSONArray(ws2Json, "movedElements", movedElements, time2, showAll);
-        addJSONArray(ws2Json, "deletedElements", deletedElements, time2, showAll);
+        // Note: deleteElements should use time1 and not time2, as element was found in ws1
+        //       at time1, not ws1 at time2!
+        addJSONArray(ws2Json, "deletedElements", deletedElements, time1, showAll);
         addJSONArray(ws2Json, "updatedElements", updatedElements, time2, showAll);
         addJSONArray(ws2Json, "conflictedElements", conflictedElements, time2, showAll);
         addWorkspaceMetadata( ws2Json, ws2, time2);
