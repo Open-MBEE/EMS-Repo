@@ -11,12 +11,9 @@ import gov.nasa.jpl.mbee.util.Timer;
 import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.actions.ActionUtil;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode.EmsVersion;
-import gov.nasa.jpl.view_repo.webscripts.ModelPost;
 
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.io.InputStream;
-import java.io.Writer;
 import java.lang.reflect.Method;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
@@ -59,7 +56,6 @@ import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.search.LimitBy;
-import org.alfresco.service.cmr.search.PermissionEvaluationMode;
 import org.alfresco.service.cmr.search.ResultSet;
 import org.alfresco.service.cmr.search.ResultSetRow;
 import org.alfresco.service.cmr.search.SearchParameters;
@@ -67,6 +63,7 @@ import org.alfresco.service.cmr.search.SearchService;
 import org.alfresco.service.cmr.security.AccessStatus;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.alfresco.service.cmr.security.PersonService;
+import org.alfresco.service.cmr.site.SiteInfo;
 import org.alfresco.service.cmr.version.Version;
 import org.alfresco.service.cmr.version.VersionHistory;
 import org.alfresco.service.namespace.QName;
@@ -205,8 +202,8 @@ public class NodeUtil {
             Collections.synchronizedMap( new HashMap<NodeRef, NodeRef>() );
 
     // Set< String > filter, boolean isExprOrProp,Date dateTime, boolean isIncludeQualified
-    public static Map< String, Map< Long, Map< Boolean, Map< Set<String>, JSONObject > > > > jsonDeepCache =
-            Collections.synchronizedMap( new HashMap< String, Map< Long, Map< Boolean, Map< Set<String>, JSONObject > > > >() );
+    public static Map< String, Map< Long, Map< Boolean, Map< Set<String>, Map<String, JSONObject > > > > > jsonDeepCache =
+            Collections.synchronizedMap( new HashMap< String, Map< Long, Map< Boolean, Map< Set<String>, Map<String, JSONObject > > > > >() );
     public static Map< String, Map< Long, JSONObject > > jsonCache =
         Collections.synchronizedMap( new HashMap< String, Map< Long, JSONObject > >() );
     public static long jsonCacheHits = 0;
@@ -288,10 +285,12 @@ public class NodeUtil {
     public static JSONObject jsonDeepCacheGet( String id, long millis,
                                                boolean isIncludeQualified,
                                                Set< String > jsonFilter,
+                                               String versionLabel,
                                                boolean noMetadata ) {
         jsonFilter = jsonFilter == null ? new TreeSet< String >() : jsonFilter;
+        if ( versionLabel == null ) versionLabel = "";
         JSONObject json = Utils.get( jsonDeepCache, id, millis,
-                                     isIncludeQualified, jsonFilter );
+                                     isIncludeQualified, jsonFilter, versionLabel );
         if ( doJsonStringCaching && noMetadata ) {
             json = clone( json );
             stripJsonMetadata( json );
@@ -305,15 +304,19 @@ public class NodeUtil {
     public static JSONObject jsonDeepCachePut( JSONObject json, String id,
                                                long millis,
                                                boolean isIncludeQualified,
-                                               Set< String > jsonFilter ) {
+                                               Set< String > jsonFilter,
+                                               String versionLabel ) {
         json = clone( json );
         jsonFilter = jsonFilter == null ? new TreeSet< String >() : jsonFilter;
         json = addJsonMetadata( json, id, millis, isIncludeQualified, jsonFilter );
-        if ( Debug.isOn()) logger.debug( "jsonDeepCachePut(" + id + ", " + millis + ", "
-                            + isIncludeQualified + ", " + jsonFilter + ", "
-                            + json + ")" );
+        if ( versionLabel == null ) versionLabel = "";
+        if ( Debug.isOn() ) {
+            logger.debug( "jsonDeepCachePut(" + id + ", " + millis + ", "
+                          + isIncludeQualified + ", " + jsonFilter + ", "
+                          + versionLabel + ", " + json + ")" );
+        }
         Utils.put( jsonDeepCache, id, millis, isIncludeQualified, jsonFilter,
-                   json );
+                   versionLabel, json );
         return json;
     }
 
@@ -357,11 +360,6 @@ public class NodeUtil {
             return null;
         }
         String jsonString = jsonString4.replaceAll( "( |\n)+", " " ); 
-        JSONArray keyJson = new JSONArray();
-        keyJson.put( id );
-        keyJson.put( millis );
-        keyJson.put( isIncludeQualified );
-        keyJson.put( jsonFilter );
         try {
             json.put( "jsonString", jsonString );
             json.put( "jsonString4", jsonString4 );
@@ -393,9 +391,6 @@ public class NodeUtil {
                 Object value = json.get( key );
                 if ( key.equals( Acm.JSON_SPECIALIZATION )
                      && value instanceof JSONObject ) {
-                    // if ( !( value instanceof JSONObject ) ) {
-                    // value = JSONObject.make( (JSONObject)value );
-                    // }
                     JSONObject newSpec = filterJson( (JSONObject)value, 
                                                      jsonFilter, isIncludeQualified );
                     if ( newSpec != null && newSpec.length() > 0 ) {
@@ -2068,16 +2063,46 @@ public class NodeUtil {
                                              StringBuffer response ) {
         if ( Utils.isNullOrEmpty( siteName ) ) return null;
 
-        // Don't need to lookup sites using findNodeRefs, since we know where they are
-        EmsScriptNode context = null;
-        if (workspace == null) {
-            context = NodeUtil.getCompanyHome( services );
-        } else {
-            context = workspace;
-        }
-        
-        EmsScriptNode siteNode = context.childByNamePath( "Sites/" + siteName );
-        return siteNode;
+        // Reverting method back--chilByName doesn't handle workspaces correctly.
+//      // Don't need to lookup sites using findNodeRefs, since we know where they are
+//      EmsScriptNode context = null;
+//      if (workspace == null) {
+//          context = NodeUtil.getCompanyHome( services );
+//      } else {
+//          context = workspace;
+//      }
+//      
+//      EmsScriptNode siteNode = context.childByNamePath( "Sites/" + siteName );
+//      return siteNode;
+
+        // Try to find the site in the workspace first.
+       ArrayList< NodeRef > refs =
+               findNodeRefsByType( siteName, SearchType.CM_NAME.prefix,
+                                   ignoreWorkspace, workspace, dateTime, true,
+                                   true, getServices(), false );
+       for ( NodeRef ref : refs ) {
+           EmsScriptNode siteNode = new EmsScriptNode(ref, services, response);
+           if ( siteNode.isSite() ) {
+               return siteNode;
+           }
+       }
+
+       // Get the site from SiteService.
+       SiteInfo siteInfo = services.getSiteService().getSite(siteName);
+       if (siteInfo != null) {
+           NodeRef siteRef = siteInfo.getNodeRef();
+           if ( dateTime != null ) {
+               siteRef = getNodeRefAtTime( siteRef, dateTime );
+           }
+           if (siteRef != null) {
+               EmsScriptNode siteNode = new EmsScriptNode(siteRef, services, response);
+               if ( siteNode != null
+                    && ( workspace == null || workspace.contains( siteNode ) ) ) {
+                   return siteNode;
+               }
+           }
+       }
+       return null;
     }
 
     /**

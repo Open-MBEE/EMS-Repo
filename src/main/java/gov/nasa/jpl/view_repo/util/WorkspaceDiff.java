@@ -699,23 +699,16 @@ public class WorkspaceDiff implements Serializable {
                 }
             }
             boolean includeQualified = true;
-            
+            Version version = null;
+            if ( !Utils.isNullOrEmpty( versions ) ) {
+                version = versions.get( node.getSysmlId() );
+//                filter.add( "id" );
+//                filter.add( "version" );
+            }
             JSONObject jsonObject =
                     node.toJSONObject( filter, false, dateTime,
-                                       includeQualified );
+                                       includeQualified, version );
             array.put( jsonObject );
-            
-            if (!Utils.isNullOrEmpty( versions ) ) {
-                Version version = versions.get( node.getSysmlId() );
-                if ( version != null ) {
-                    // TODO: perhaps add service and response in method call rather than using the nodes?
-                    EmsScriptNode changedNode = new EmsScriptNode(version.getVersionedNodeRef(), node.getServices(), node.getResponse());
-
-                    // for reverting need to keep track of noderef and versionLabel
-                    jsonObject.put( "id", changedNode.getId() );
-                    jsonObject.put( "version", version.getVersionLabel() );
-                }
-            }
         }
 
         return array;

@@ -76,7 +76,7 @@ False,
 None,
 ["test","workspaces","develop", "develop2"]
 ],
-        
+
 [
 40,
 "PostProducts",
@@ -89,6 +89,17 @@ None,
 ],
   
 # GETS: ==========================    
+
+[
+45,
+"GetSites",
+"Get sites",
+create_curl_cmd(type="GET",data="sites",base_url=BASE_URL_WS, branch="master/"),
+False, 
+None,
+["test","workspaces","develop", "develop2"]
+],
+
 [
 50,
 "GetProject",
@@ -635,6 +646,40 @@ create_curl_cmd(type="GET",base_url=SERVICE_URL,
                 branch="diff?workspace1=$gv1&workspace2=$gv2&timestamp1=$gv3&timestamp2=$gv4"),
 True, 
 common_filters+['"id"','"qualifiedId"','"timestamp"'],
+["test","workspaces","develop", "develop2"]
+],
+
+[
+240,
+"PostSiteInWorkspace",
+"Create a project and site in a workspace",
+create_curl_cmd(type="POST",data='\'{"elements":[{"sysmlid":"proj_id_001","name":"PROJ_1","specialization":{"type":"Project"}}]}\'',
+                base_url=BASE_URL_WS,
+                branch="$gv1/sites/site_in_ws/projects?createSite=true",project_post=True),
+False, 
+None,
+["test","workspaces","develop", "develop2"]
+],
+ 
+[
+241,
+"GetSiteInWorkspace",
+"Get site in workspace",
+create_curl_cmd(type="GET",data="sites",base_url=BASE_URL_WS, branch="$gv1/"),
+False, 
+None,
+["test","workspaces","develop", "develop2"]
+],
+
+
+[
+242,
+"GetProductsInSiteInWorkspace",
+"Get products for a site in a workspace",
+create_curl_cmd(type="GET",data="products",base_url=BASE_URL_WS,
+                branch="$gv1/sites/europa/"),
+True, 
+common_filters,
 ["test","workspaces","develop", "develop2"]
 ],
 
