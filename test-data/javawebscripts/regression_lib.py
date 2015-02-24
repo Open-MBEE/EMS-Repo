@@ -246,13 +246,13 @@ def get_current_time(delay=3):
     return a.strftime("%Y-%m-%dT%H:%M:%X.000")
 
 def set_read_delta_to_gv1(delta=5):
-    '''Get the json output, and sets gv1 to the read time - delta mins'''
+    '''Get the json output, and sets gv1 to the read time - delta secs'''
     global gv1
     
     set_read_to_gv1()
     if gv1 and "." in gv1:
         date = datetime.datetime.strptime(gv1.split(".")[0], "%Y-%m-%dT%H:%M:%S")
-        date = date - datetime.timedelta(minutes=delta)
+        date = date - datetime.timedelta(seconds=delta)
         gv1 = date.strftime("%Y-%m-%dT%H:%M:%S.000")
     
 def create_command_line_options():

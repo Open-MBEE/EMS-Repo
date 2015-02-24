@@ -21,13 +21,13 @@
 }]
 },
     "workspace2": {
-    "deletedElements": [],
-    "addedElements": [],
-    "conflictedElements": [],
-    "updatedElements": [{
+    "deletedElements": [{
     "sysmlid": "notInThePast",
     "creator": "admin",
 }],
+    "addedElements": [],
+    "conflictedElements": [],
+    "updatedElements": [],
     "qualifiedName": "master",
     "name": "master",
     "movedElements": []
