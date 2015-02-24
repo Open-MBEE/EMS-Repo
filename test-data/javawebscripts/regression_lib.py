@@ -252,6 +252,7 @@ def set_read_delta_to_gv1(delta=5):
     set_read_to_gv1()
     if gv1 and "." in gv1:
         date = datetime.datetime.strptime(gv1.split(".")[0], "%Y-%m-%dT%H:%M:%S")
+        date = date - datetime.timedelta(minutes=delta)
         gv1 = date.strftime("%Y-%m-%dT%H:%M:%S.000")
     
 def create_command_line_options():
