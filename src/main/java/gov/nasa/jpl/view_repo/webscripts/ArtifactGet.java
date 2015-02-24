@@ -189,17 +189,17 @@ public class ArtifactGet extends AbstractJavaWebScript {
 	        catch (JSONException e) {
 	            log(LogLevel.ERROR, "Issues creating return JSON\n", HttpServletResponse.SC_BAD_REQUEST);
 	            e.printStackTrace();
-	            model.put("res", response.toString());
+	            model.put("res", String.format("{'message':'%s'}", response.toString()));
 	        }
         }
         else {
-        	log(LogLevel.ERROR, "Invalid request!\n", HttpServletResponse.SC_BAD_REQUEST);
-        	model.put("res", response.toString());
+            	log(LogLevel.ERROR, "Invalid request!\n", HttpServletResponse.SC_BAD_REQUEST);
+            	model.put("res", String.format("{'message':'%s'}", response.toString()));
 	    }
 
         status.setCode(responseStatus.getCode());
         if ( !model.containsKey( "res" ) ) {
-        	model.put("res", resultJson != null ? resultJson : response.toString());
+            model.put("res", resultJson != null ? resultJson : String.format("{'message':'%s'}", response.toString()));
         }
 
 		printFooter();

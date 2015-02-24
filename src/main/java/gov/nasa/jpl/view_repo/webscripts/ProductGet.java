@@ -158,7 +158,7 @@ public class ProductGet extends AbstractJavaWebScript {
                 e.printStackTrace();
 			}
 		} else {
-			model.put("res", response.toString());
+			model.put("res", String.format("{'message':'%s'}", response.toString()));
 		}
 
 		status.setCode(responseStatus.getCode());
