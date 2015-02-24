@@ -4554,7 +4554,7 @@ public class EmsScriptNode extends ScriptNode implements
             }
         } else if ( nodeRefs instanceof NodeRef ) {
             addVersionToArray( (NodeRef)nodeRefs, dateTime, jsonArray );
-            return jsonArray.get( 0 );
+            return jsonArray.length() > 0 ? jsonArray.get( 0 ) : null;
         }
         return jsonArray;
     }
