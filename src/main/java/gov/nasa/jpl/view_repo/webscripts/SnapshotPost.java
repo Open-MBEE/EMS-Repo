@@ -656,9 +656,9 @@ public class SnapshotPost extends AbstractJavaWebScript {
     private DocumentElement createTable( JSONObject obj, DBSection section, WorkspaceNode workspace, Date timestamp  ) throws JSONException {
         DBTable table = new DBTable();
         String title = (String)obj.opt( "title" );
-        String style = (String)obj.opt( "sytle" );
+        String style = (String)obj.opt( "style" );
         table.setId( getSymlId( obj ) );
-        table.setTitle( title );
+        table.setTitle( HtmlSanitize(title) );
         table.setStyle( style );
         //int columnNum = getTableColumnMaxCount(obj);
         DocBookTable dbTable = createDocBookTable(obj);
