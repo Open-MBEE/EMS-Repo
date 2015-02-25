@@ -75,13 +75,14 @@ public class WorkspacesGet extends AbstractJavaWebScript{
             e.printStackTrace();
         }
         if (json == null) {
-            model.put("res", response.toString());
+            model.put("res", createResponseJson());
         } else {
             try {
                 if (!Utils.isNullOrEmpty(response.toString())) json.put("message", response.toString());
                 model.put("res", NodeUtil.jsonToString( json, 4 ));
             } catch ( JSONException e ) {
                 e.printStackTrace();
+                model.put("res", createResponseJson());
             }
         }
         status.setCode(responseStatus.getCode());

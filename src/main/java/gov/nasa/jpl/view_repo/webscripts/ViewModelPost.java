@@ -144,7 +144,7 @@ public class ViewModelPost extends ModelPost {
 //        model.put( "res", top.toString( 4 ) );
 
         status.setCode(responseStatus.getCode());
-        model.put("res", response.toString());
+        model.put("res", createResponseJson());
 
         printFooter();
 

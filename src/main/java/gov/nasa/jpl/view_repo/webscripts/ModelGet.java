@@ -191,7 +191,7 @@ public class ModelGet extends AbstractJavaWebScript {
 	        else model.put("res", NodeUtil.jsonToString( top ));
 		} catch (JSONException e) {
             log(LogLevel.ERROR, "Could not create JSONObject", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            model.put( "res", String.format("{'message':'%s'}", response.toString()) );
+            model.put( "res", createResponseJson() );
 			e.printStackTrace();
 		}
 

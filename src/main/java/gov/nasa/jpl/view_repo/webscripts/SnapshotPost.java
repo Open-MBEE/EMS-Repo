@@ -162,7 +162,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
 
                 status.setCode( responseStatus.getCode() );
                 if ( result == null ) {
-                    model.put( "res", response.toString() );
+                    model.put( "res", createResponseJson() );
                 } else {
                     model.put( "res", result );
                 }
@@ -218,7 +218,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
                 }
                 status.setCode( responseStatus.getCode() );
                 if ( status.getCode() != HttpServletResponse.SC_OK ) {
-                    model.put( "res", response.toString() );
+                    model.put( "res", createResponseJson() );
                 }
             }
         } catch ( Exception ex ) {

@@ -93,7 +93,7 @@ public class ConfigurationGet extends AbstractJavaWebScript {
         		String siteName = getSiteName(req);
         		model.put("title", siteName);
         } catch (Exception e) {
-        		model.put("res", response.toString());
+        		model.put("res", createResponseJson());
         		model.put("title", "ERROR could not load");
         		if (e instanceof JSONException) {
         			log(LogLevel.ERROR, "JSON creation error", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);

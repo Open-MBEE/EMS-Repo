@@ -170,36 +170,36 @@ public class ArtifactGet extends AbstractJavaWebScript {
 	    	    			String err = Utils.isNullOrEmpty(cs) ? fileStr+" not found!\n" :
 	    	    												  (fileStr+" with cs="+cs+" not found!\n");
 						    log(LogLevel.ERROR, err, HttpServletResponse.SC_BAD_REQUEST);
-						    model.put("res", String.format("{'message':'%s'}", response.toString()));
+						    model.put("res", createResponseJson());
 	    	    		}
 
 	        		}
 	        		else {
 	        			  log(LogLevel.ERROR, "Invalid artifactId!\n", HttpServletResponse.SC_BAD_REQUEST);
-	    		          model.put("res", String.format("{'message':'%s'}", response.toString()));
+	    		          model.put("res", createResponseJson());
 	    		    }
 
 	        	}
 	        	else {
 	        		  log(LogLevel.ERROR, "artifactId not supplied!\n", HttpServletResponse.SC_BAD_REQUEST);
-    		          model.put("res", String.format("{'message':'%s'}", response.toString()));
+    		          model.put("res", createResponseJson());
     		    }
 
         	}
 	        catch (JSONException e) {
 	            log(LogLevel.ERROR, "Issues creating return JSON\n", HttpServletResponse.SC_BAD_REQUEST);
 	            e.printStackTrace();
-	            model.put("res", String.format("{'message':'%s'}", response.toString()));
+	            model.put("res", createResponseJson());
 	        }
         }
         else {
             	log(LogLevel.ERROR, "Invalid request!\n", HttpServletResponse.SC_BAD_REQUEST);
-            	model.put("res", String.format("{'message':'%s'}", response.toString()));
+            	model.put("res", createResponseJson());
 	    }
 
         status.setCode(responseStatus.getCode());
         if ( !model.containsKey( "res" ) ) {
-            model.put("res", resultJson != null ? resultJson : String.format("{'message':'%s'}", response.toString()));
+            model.put("res", resultJson != null ? resultJson : createResponseJson());
         }
 
 		printFooter();

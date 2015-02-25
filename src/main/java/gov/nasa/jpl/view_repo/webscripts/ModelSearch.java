@@ -99,7 +99,7 @@ public class ModelSearch extends ModelGet {
 			model.put("res", NodeUtil.jsonToString( top, 4 ));
 		} catch (JSONException e) {
 			log(LogLevel.ERROR, "Could not create the JSON response", HttpServletResponse.SC_BAD_REQUEST);
-			model.put("res", response);
+			model.put("res", createResponseJson());
 			e.printStackTrace();
 		}
 

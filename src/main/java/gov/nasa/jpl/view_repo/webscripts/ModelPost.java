@@ -2828,7 +2828,7 @@ public class ModelPost extends AbstractJavaWebScript {
             }
         }
         if ( !model.containsKey( "res" ) ) {
-            model.put( "res", String.format("{'message':'%s'}", response.toString()) );
+            model.put( "res", createResponseJson());
         }
 
         status.setCode(responseStatus.getCode());

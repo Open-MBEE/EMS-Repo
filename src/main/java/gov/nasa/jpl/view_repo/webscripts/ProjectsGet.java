@@ -81,7 +81,7 @@ public class ProjectsGet extends AbstractJavaWebScript{
             } catch ( JSONException e ) {
                 log(LogLevel.ERROR, "JSON parse exception: " + e.getMessage(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
                 if (!model.containsKey( "res" )) {
-                    model.put( "res", String.format("{'message':'%s'}", response.toString()) );
+                    model.put( "res", createResponseJson() );
                 }
                 e.printStackTrace();
             }

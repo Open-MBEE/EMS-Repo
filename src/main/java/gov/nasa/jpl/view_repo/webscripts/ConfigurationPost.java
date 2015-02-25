@@ -105,7 +105,7 @@ public class ConfigurationPost extends AbstractJavaWebScript {
 
 		status.setCode(responseStatus.getCode());
 		if (result == null) {
-		    model.put("res", response.toString());
+		    model.put("res", createResponseJson());
 		} else {
 		    try {
 		    	if (!Utils.isNullOrEmpty(response.toString())) result.put("message", response.toString());

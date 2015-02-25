@@ -995,4 +995,15 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
         
     }
     
+    /**
+     * Creates a json like object in a string and puts the response in the message key
+     * 
+     * @return The resulting string, ie "{'message':response}" or "{}"
+     */
+    public String createResponseJson() {
+        String resToString = response.toString();
+        String resStr = !Utils.isNullOrEmpty( resToString ) ? resToString.replaceAll( "\n", "" ) : "";
+        return !Utils.isNullOrEmpty( resStr ) ? String.format("{'message':\"%s\"}", resStr) : "{}";
+    }
+    
 }

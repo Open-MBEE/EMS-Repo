@@ -173,11 +173,11 @@ public class ViewGet extends AbstractJavaWebScript {
             } catch (JSONException e) {
                 e.printStackTrace();
                 log(LogLevel.ERROR, "JSON creation error", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-                model.put("res", String.format("{'message':'%s'}", response.toString()));
+                model.put("res", createResponseJson());
                 e.printStackTrace();
             }
         } else {
-            model.put("res", String.format("{'message':'%s'}", response.toString()));
+            model.put("res", createResponseJson());
         }
 
         status.setCode(responseStatus.getCode());

@@ -190,14 +190,14 @@ public class WorkspacesMerge extends AbstractJavaWebScript{
 	           e.printStackTrace();
 	        }
 		if (result == null) {
-             model.put( "res", response.toString() );
+             model.put( "res", createResponseJson() );
          } else {
              try {
                  result.put("message", response.toString());
                  model.put("res",  NodeUtil.jsonToString( result, 2 ));
              } catch (JSONException e) {
-                 // TODO Auto-generated catch block
                  e.printStackTrace();
+                 model.put( "res", createResponseJson() );
              }
          }
 		status.setCode(responseStatus.getCode());
