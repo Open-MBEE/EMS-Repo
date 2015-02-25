@@ -160,14 +160,14 @@ public class NodeUtil {
         return outsideTransactionStrackTrace.get( "" + Thread.currentThread().getId() );
     }
 
-    public static boolean doFullCaching = true;
+    public static boolean doFullCaching = false;
     public static boolean doSimpleCaching = true;
     public static boolean doHeisenCheck = true;
     public static boolean doVersionCaching = false; // turn this off by default
     public static boolean activeVersionCaching = true;
     public static boolean doJsonCaching = true;
     public static boolean doJsonDeepCaching = true;
-    public static boolean doJsonStringCaching = true;
+    public static boolean doJsonStringCaching = false;
     
     // global flag that is enabled once heisenbug is seen, so it will email admins the first time heisenbug is seen
     public static boolean heisenbugSeen = false;
