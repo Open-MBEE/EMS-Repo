@@ -1,55 +1,55 @@
 {
     "workspace1": {
+        "qualifiedName": "master/wsA",
+        "name": "wsA",
         "elements": [
             {
-                "creator": "admin",
-                "documentation": "something",
+                "qualifiedName": "/no_site/no_project/holding_bin",
+                "name": "holding_bin",
+                "sysmlid": "holding_bin_no_site_no_project",
+                "owner": "no_project",
+                "specialization": {"type": "Package"},
                 "editable": true,
-                "name": "300",
-                "owner": "holding_bin_no_site_no_project",
-                "qualifiedName": "/no_site/no_project/holding_bin/300",
-                "specialization": {
-                    "isDerived": false,
-                    "isSlot": false,
-                    "propertyType": null,
-                    "type": "Property",
-                    "value": [{
-                        "string": "dlam_string",
-                        "type": "LiteralString",
-                        "valueExpression": null
-                    }]
-                },
-                "sysmlid": "x"
+                "creator": "admin"
             },
             {
-                "creator": "admin",
+                "qualifiedName": "/no_site/no_project/holding_bin/300",
+                "name": "300",
+                "sysmlid": "x",
+                "owner": "holding_bin_no_site_no_project",
+                "documentation": "something",
+                "specialization": {
+                    "propertyType": null,
+                    "isSlot": false,
+                    "isDerived": false,
+                    "value": [{
+                        "valueExpression": null,
+                        "string": "dlam_string",
+                        "type": "LiteralString"
+                    }],
+                    "type": "Property"
+                },
                 "editable": true,
-                "name": "holding_bin",
-                "owner": "no_project",
-                "qualifiedName": "/no_site/no_project/holding_bin",
-                "specialization": {"type": "Package"},
-                "sysmlid": "holding_bin_no_site_no_project"
+                "creator": "admin"
             }
-        ],
-        "name": "wsA",
-        "qualifiedName": "master/wsA"
+        ]
     },
     "workspace2": {
+        "deletedElements": [],
         "addedElements": [],
         "conflictedElements": [],
-        "deletedElements": [],
-        "movedElements": [],
-        "name": "wsB",
-        "qualifiedName": "master/wsA/wsB",
         "updatedElements": [{
-            "creator": "admin",
+            "sysmlid": "x",
             "documentation": "x is x",
             "specialization": {"value": [{
+                "valueExpression": null,
                 "string": "the x value",
-                "type": "LiteralString",
-                "valueExpression": null
+                "type": "LiteralString"
             }]},
-            "sysmlid": "x"
-        }]
+            "creator": "admin"
+        }],
+        "qualifiedName": "master/wsA/wsB",
+        "name": "wsB",
+        "movedElements": []
     }
 }

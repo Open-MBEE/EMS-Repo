@@ -3484,12 +3484,12 @@ public class EmsScriptNode extends ScriptNode implements
     }
     
     public boolean exists(boolean includeDeleted) {
-        if (NodeUtil.doFullCaching) {
-            // full caching doesn't cache permissions, just references to script node
-            // so make sure we can read before doing actual check
-            if (!checkPermissions( "Read" ))
-                return false;
-        } 
+//        if (NodeUtil.doFullCaching) {
+//            // full caching doesn't cache permissions, just references to script node
+//            // so make sure we can read before doing actual check
+//            if (!checkPermissions( "Read" ))
+//                return false;
+//        } 
         if ( !scriptNodeExists() ) return false;
         if ( !includeDeleted && hasAspect( "ems:Deleted" ) ) {
             return false;
@@ -3502,11 +3502,11 @@ public class EmsScriptNode extends ScriptNode implements
     }
 
     public boolean isDeleted() {
-        if (NodeUtil.doFullCaching) {
-            // full caching doesn't cache permissions, just references to script node
-            // so make sure we can read before doing actual check
-            if (!checkPermissions("Read")) return false;
-        }
+//        if (NodeUtil.doFullCaching) {
+//            // full caching doesn't cache permissions, just references to script node
+//            // so make sure we can read before doing actual check
+//            if (!checkPermissions("Read")) return false;
+//        }
         if (super.exists()) {
             return hasAspect( "ems:Deleted" );
         }

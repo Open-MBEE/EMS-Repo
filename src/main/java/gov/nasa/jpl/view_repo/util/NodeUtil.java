@@ -267,6 +267,12 @@ public class NodeUtil {
         JSONObject json = Utils.get( jsonCache, id, millis );
         if ( Debug.isOn()) logger.debug( "jsonCacheGet(" + id + ", " + millis + ", "
                             + noMetadata + ") = " + json );
+        if ( doJsonStringCaching && noMetadata ) {
+            json = clone( json );
+            stripJsonMetadata( json );
+        } else if ( !doJsonStringCaching ) {
+            stripJsonMetadata( json );
+        }
         return json;
     }
 
@@ -293,6 +299,8 @@ public class NodeUtil {
                                      isIncludeQualified, jsonFilter, versionLabel );
         if ( doJsonStringCaching && noMetadata ) {
             json = clone( json );
+            stripJsonMetadata( json );
+        } else if ( !doJsonStringCaching ) {
             stripJsonMetadata( json );
         }
         if ( Debug.isOn()) logger.debug( "jsonDeepCacheGet(" + id + ", " + millis + ", "
