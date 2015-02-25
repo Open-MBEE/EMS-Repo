@@ -1003,7 +1003,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
     public String createResponseJson() {
         String resToString = response.toString();
         String resStr = !Utils.isNullOrEmpty( resToString ) ? resToString.replaceAll( "\n", "" ) : "";
-        return !Utils.isNullOrEmpty( resStr ) ? String.format("{'message':\"%s\"}", resStr) : "{}";
+        return !Utils.isNullOrEmpty( resStr ) ? String.format("{\"message\":\"%s\"}", resStr) : "{}";
     }
     
 }
