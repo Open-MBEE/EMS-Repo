@@ -682,6 +682,32 @@ True,
 common_filters,
 ["test","workspaces","develop", "develop2"]
 ],
+        
+[
+243,
+"PostNotInPastToWorkspace",
+"Post element to master workspace for a diff test",
+create_curl_cmd(type="POST",data="notInThePast.json",base_url=BASE_URL_WS,
+                post_type="elements",branch="master/"),
+True, 
+common_filters,
+["test","workspaces","develop", "develop2"],
+None,
+set_read_delta_to_gv1,
+10
+],
+        
+# This test depends on the previous one:
+[
+244,
+"CompareWorkspacesNotInPast",
+"Compare workspace master with itself at the current time and a time in the past",
+create_curl_cmd(type="GET",base_url=SERVICE_URL,
+                branch="diff?workspace1=master&workspace2=master&timestamp2=$gv1"),
+True, 
+common_filters+['"id"','"qualifiedId"','"timestamp"'],
+["test","workspaces","develop", "develop2"]
+],
 
 # SNAPSHOTS: ==========================    
 

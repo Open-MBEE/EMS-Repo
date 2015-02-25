@@ -1,40 +1,40 @@
 {
-  "sequence": 23,
+  "sequence": 24,
   "workspace1": {
-    "elements": [{
-      "creator": "admin",
-      "documentation": "",
-      "editable": true,
-      "name": "duration",
-      "owner": "123456",
-      "qualifiedName": "/europa/JW_TEST2/duration",
-      "specialization": {
-        "isDerived": false,
-        "isSlot": false,
-        "propertyType": null,
-        "type": "Property",
-        "value": [{
-          "integer": 22,
-          "type": "LiteralInteger",
-          "valueExpression": null
-        }]
-      },
-      "sysmlid": "arg_ev_38307"
-    }],
-    "name": "ws1",
-    "qualifiedName": "master/ws1",
-  },
+  "qualifiedName": "master/ws1",
+  "name": "ws1",
+  "elements": [{
+  "qualifiedName": "/europa/JW_TEST2/duration",
+  "name": "duration",
+  "owner": "123456",
+  "documentation": "",
+  "sysmlid": "arg_ev_38307",
+  "specialization": {
+  "propertyType": null,
+  "isSlot": false,
+  "isDerived": false,
+  "value": [{
+    "valueExpression": null,
+    "integer": 22,
+    "type": "LiteralInteger"
+  }],
+  "type": "Property"
+},
+  "editable": true,
+  "creator": "admin"
+}]
+},
   "workspace2": {
-    "addedElements": [],
-    "conflictedElements": [],
-    "deletedElements": [{
-      "creator": "admin",
-      "sysmlid": "arg_ev_38307"
-    }],
-    "movedElements": [],
-    "name": "ws1",
-    "qualifiedName": "master/ws1",
-    "updatedElements": []
-  }
+  "deletedElements": [{
+  "sysmlid": "arg_ev_38307",
+  "creator": "admin",
+}],
+  "addedElements": [],
+  "conflictedElements": [],
+  "updatedElements": [],
+  "qualifiedName": "master/ws1",
+  "name": "ws1",
+  "movedElements": []
+}
 }
 200

@@ -100,7 +100,7 @@ public class ProductPost extends AbstractJavaWebScript {
 		}
 
         status.setCode(responseStatus.getCode());
-		model.put("res", response.toString());
+		model.put("res", createResponseJson());
 
 		printFooter();
 

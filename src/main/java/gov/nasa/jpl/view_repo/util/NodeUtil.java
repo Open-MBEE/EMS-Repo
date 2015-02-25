@@ -329,6 +329,7 @@ public class NodeUtil {
     }
 
     public static JSONObject stripJsonMetadata( JSONObject json ) {
+        if ( json == null ) return null;
         if ( Debug.isOn()) logger.debug("stripJsonMetadata -> " + json );
         json.remove( "jsonString" );
         json.remove( "jsonString4" );

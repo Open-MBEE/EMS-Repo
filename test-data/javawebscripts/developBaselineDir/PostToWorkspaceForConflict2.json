@@ -1,12 +1,12 @@
 {"elements": [{
-    "creator": "admin",
-    "documentation": "this will create a conflict!",
-    "editable": true,
-    "name": "conflict",
-    "owner": "123456",
     "qualifiedId": "/europa/123456/conflict",
     "qualifiedName": "/europa/JW_TEST/conflict",
+    "name": "conflict",
+    "owner": "123456",
+    "documentation": "this will create a conflict!",
+    "sysmlid": "conflict",
     "specialization": {"type": "Element"},
-    "sysmlid": "conflict"
+    "editable": true,
+    "creator": "admin"
 }]}
 200

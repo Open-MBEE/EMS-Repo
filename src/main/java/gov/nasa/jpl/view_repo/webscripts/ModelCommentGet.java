@@ -109,6 +109,7 @@ public class ModelCommentGet extends ModelGet {
                 } catch (JSONException e) {
                     log(LogLevel.ERROR, "Could not create the JSON response", HttpServletResponse.SC_BAD_REQUEST);
                     e.printStackTrace();
+                    model.put( "res", createResponseJson() );
                 }
             }
         }

@@ -142,7 +142,7 @@ public class ModelsGet extends AbstractJavaWebScript {
             } else {
                 log(LogLevel.WARNING, "No elements found",
                     HttpServletResponse.SC_NOT_FOUND);
-                model.put("res", response.toString());
+                model.put("res", createResponseJson());
             }
         } catch (JSONException e) {
             e.printStackTrace();

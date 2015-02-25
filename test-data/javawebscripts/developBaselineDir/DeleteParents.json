@@ -1,92 +1,84 @@
 {
-  "sequence": 37,
+  "sequence": 38,
   "workspace1": {
-    "elements": [
-      {
-        "creator": "admin",
-        "documentation": "Child",
-        "editable": true,
-        "name": "childOfParentToDelete2",
-        "owner": "parentToDelete2",
-        "qualifiedName": "/europa/JW_TEST2/parentToDelete1/parentToDelete2/childOfParentToDelete2",
-        "specialization": {
-          "isDerived": false,
-          "isSlot": false,
-          "propertyType": null,
-          "type": "Property",
-          "value": [{
-            "string": "gg_string3",
-            "type": "LiteralString",
-            "valueExpression": null
-          }]
-        },
-        "sysmlid": "childOfParentToDelete2",
-      },
-      {
-        "creator": "admin",
-        "documentation": "Parent 1",
-        "editable": true,
-        "name": "parentToDelete1",
-        "owner": "123456",
-        "qualifiedName": "/europa/JW_TEST2/parentToDelete1",
-        "specialization": {
-          "isDerived": false,
-          "isSlot": false,
-          "propertyType": null,
-          "type": "Property",
-          "value": [{
-            "string": "gg_string",
-            "type": "LiteralString",
-            "valueExpression": null
-          }]
-        },
-        "sysmlid": "parentToDelete1",
-      },
-      {
-        "creator": "admin",
-        "documentation": "Parent 2",
-        "editable": true,
-        "name": "parentToDelete2",
-        "owner": "parentToDelete1",
-        "qualifiedName": "/europa/JW_TEST2/parentToDelete1/parentToDelete2",
-        "specialization": {
-          "isDerived": false,
-          "isSlot": false,
-          "propertyType": null,
-          "type": "Property",
-          "value": [{
-            "string": "gg_string2",
-            "type": "LiteralString",
-            "valueExpression": null
-          }]
-        },
-        "sysmlid": "parentToDelete2",
-      }
-    ],
-    "name": "master",
-    "qualifiedName": "master",
-  },
+  "qualifiedName": "master",
+  "name": "master",
+  "elements": [{
+  "name": "childOfParentToDelete2",
+  "qualifiedName": "/europa/JW_TEST2/parentToDelete1/parentToDelete2/childOfParentToDelete2",
+  "documentation": "Child",
+  "owner": "parentToDelete2",
+  "sysmlid": "childOfParentToDelete2",
+  "specialization": {
+  "propertyType": null,
+  "isSlot": false,
+  "isDerived": false,
+  "value": [{
+    "valueExpression": null,
+    "string": "gg_string3",
+    "type": "LiteralString"
+  }],
+  "type": "Property"
+},
+  "editable": true,
+  "creator": "admin"
+}, {
+  "name": "parentToDelete1",
+  "qualifiedName": "/europa/JW_TEST2/parentToDelete1",
+  "documentation": "Parent 1",
+  "owner": "123456",
+  "sysmlid": "parentToDelete1",
+  "specialization": {
+  "propertyType": null,
+  "isSlot": false,
+  "isDerived": false,
+  "value": [{
+    "valueExpression": null,
+    "string": "gg_string",
+    "type": "LiteralString"
+  }],
+  "type": "Property"
+},
+  "editable": true,
+  "creator": "admin"
+}, {
+  "name": "parentToDelete2",
+  "qualifiedName": "/europa/JW_TEST2/parentToDelete1/parentToDelete2",
+  "documentation": "Parent 2",
+  "owner": "parentToDelete1",
+  "sysmlid": "parentToDelete2",
+  "specialization": {
+  "propertyType": null,
+  "isSlot": false,
+  "isDerived": false,
+  "value": [{
+    "valueExpression": null,
+    "string": "gg_string2",
+    "type": "LiteralString"
+  }],
+  "type": "Property"
+},
+  "editable": true,
+  "creator": "admin"
+}]
+},
   "workspace2": {
-    "addedElements": [],
-    "conflictedElements": [],
-    "deletedElements": [
-      {
-        "creator": "admin",
-        "sysmlid": "childOfParentToDelete2"
-      },
-      {
-        "creator": "admin",
-        "sysmlid": "parentToDelete1"
-      },
-      {
-        "creator": "admin",
-        "sysmlid": "parentToDelete2"
-      }
-    ],
-    "movedElements": [],
-    "name": "master",
-    "qualifiedName": "master",
-    "updatedElements": []
-  }
+  "deletedElements": [{
+  "sysmlid": "childOfParentToDelete2",
+  "creator": "admin",
+}, {
+  "sysmlid": "parentToDelete1",
+  "creator": "admin",
+}, {
+  "sysmlid": "parentToDelete2",
+  "creator": "admin",
+}],
+  "addedElements": [],
+  "conflictedElements": [],
+  "updatedElements": [],
+  "qualifiedName": "master",
+  "name": "master",
+  "movedElements": []
+}
 }
 200

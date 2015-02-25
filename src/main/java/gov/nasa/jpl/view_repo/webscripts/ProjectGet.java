@@ -109,7 +109,7 @@ public class ProjectGet extends AbstractJavaWebScript {
             e.printStackTrace();
         }
         if (json == null) {
-            model.put("res", response.toString());
+            model.put("res", createResponseJson());
         } else {
             model.put("res", NodeUtil.jsonToString( json ));
         }

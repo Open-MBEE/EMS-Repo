@@ -1,13 +1,13 @@
 {"elements": [
     {
         "name": "JW_TEST",
-        "specialization": {"type": "Project"},
-        "sysmlid": "123456"
+        "sysmlid": "123456",
+        "specialization": {"type": "Project"}
     },
     {
         "name": "no_project",
-        "specialization": {"type": "Project"},
-        "sysmlid": "no_project"
+        "sysmlid": "no_project",
+        "specialization": {"type": "Project"}
     }
 ]}
 200

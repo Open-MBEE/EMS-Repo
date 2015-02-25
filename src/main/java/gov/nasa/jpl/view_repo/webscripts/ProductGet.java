@@ -154,11 +154,11 @@ public class ProductGet extends AbstractJavaWebScript {
                 else model.put("res", NodeUtil.jsonToString( json ));
 			} catch (JSONException e) {
 				log(LogLevel.ERROR, "JSON creation error", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-				model.put("res", response.toString());
+				model.put("res", createResponseJson());
                 e.printStackTrace();
 			}
 		} else {
-			model.put("res", response.toString());
+			model.put("res", createResponseJson());
 		}
 
 		status.setCode(responseStatus.getCode());

@@ -65,7 +65,7 @@ public class MmsSnapshotsGet extends AbstractJavaWebScript {
             if (!Utils.isNullOrEmpty(response.toString())) jsonObject.put("message", response.toString());
             model.put("res", NodeUtil.jsonToString( jsonObject, 2 ));
         } catch (Exception e) {
-            model.put("res", response.toString());
+            model.put("res", createResponseJson());
             if (e instanceof JSONException) {
                 log(LogLevel.ERROR, "JSON creation error", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             } else {
