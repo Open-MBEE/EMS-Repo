@@ -775,7 +775,7 @@ common_filters+['"sysmlid"','"qualifiedId"','"message"'],
 270,
 "Demo1",
 "Server side docgen demo 1",
-create_curl_cmd(type="GET",data="views/_17_0_2_3_e610336_1394148311476_17302_29388/elements",base_url=BASE_URL_WS,
+create_curl_cmd(type="GET",data="views/_17_0_2_3_e610336_1394148311476_17302_29388",base_url=BASE_URL_WS,
                 branch="master/"),
 True, 
 common_filters,
@@ -792,19 +792,19 @@ create_curl_cmd(type="POST",base_url=BASE_URL_WS,
                 branch="master/sites/europa/",
                 post_type="elements"),
 True, 
-common_filters,
-[]
+common_filters+['"MMS_','MMS_'],
+["test","workspaces","develop", "develop2"]
 ],
         
 [
 290,
 "Demo2",
 "Server side docgen demo 2",
-create_curl_cmd(type="GET",data="views/_17_0_2_3_e610336_1394148233838_91795_29332/elements",base_url=BASE_URL_WS,
+create_curl_cmd(type="GET",data="views/_17_0_2_3_e610336_1394148233838_91795_29332",base_url=BASE_URL_WS,
                 branch="master/"),
 True, 
 common_filters,
-[]
+["test","workspaces","develop", "develop2"]
 ],
 
 # NEW URLS: ==========================    

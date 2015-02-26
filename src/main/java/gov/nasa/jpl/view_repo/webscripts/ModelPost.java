@@ -129,7 +129,6 @@ public class ModelPost extends AbstractJavaWebScript {
     private Timer timerCommit = null;
     private Timer timerIngest = null;
     private Timer timerUpdateModel = null;
-    private Timer timerToJson = null;
 
     private final String ELEMENTS = "elements";
 
@@ -152,8 +151,11 @@ public class ModelPost extends AbstractJavaWebScript {
     private boolean internalRunWithoutTransactions = false;
     private Set<String> ownersNotFound = null;
     private final int minElementsForProgress = 100;
-    private int numElementsToPost = 0;
-    
+    private double elementProcessedCnt = 0;
+    private double elementRelationshipProcessedCnt = 0;
+
+    protected int numElementsToPost = 0;
+
     /**
      * JSONObject of the relationships
      * "relationshipElements": {
@@ -289,7 +291,7 @@ public class ModelPost extends AbstractJavaWebScript {
                 if (checkPermissions(owner, "Write")) {
                     Set< EmsScriptNode > updatedElements =
                             updateOrCreateElement( elementMap.get( rootElement ),
-                                                   owner, targetWS, false );
+                                                   owner, targetWS, false, false );
                     for ( EmsScriptNode node : updatedElements ) {
                         nodeMap.put(node.getName(), node);
                     }
@@ -359,30 +361,33 @@ public class ModelPost extends AbstractJavaWebScript {
         elements.addAll( updatedElements );
     }
     
-    private void givePercentProgress(double rootElemNum, boolean isRelationship) {
+    private void givePercentProgress(boolean isRelationship) {
         
-        int numRootElems = rootElements.size();
-        double percent = 0;
-        String relString = isRelationship ? " relationships" : "";
-
-        // Sending percentage messages every 10 root elements processed:
-        if ((rootElemNum%10) == 0) {
-            percent = (rootElemNum/numRootElems)*100;
-            sendProgress(String.format("Processed %.1f%% of root elements %s",percent,relString), 
-                         projectId, false);
+        // Sending percentage messages every %5 percent:
+        double cnt = isRelationship ? elementRelationshipProcessedCnt : elementProcessedCnt;
+        if (numElementsToPost >= minElementsForProgress && cnt > 0) {
+            
+            String relString = isRelationship ? " relationships" : "";
+            double interval = 5.0;
+            double tol = minElementsForProgress/(2.0*numElementsToPost);
+            double percent = (cnt/numElementsToPost)*100.0;
+            if (percent%5 < tol || percent%5 > (interval-tol) ) {
+                sendProgress(String.format("Processed %.1f%% of elements %s",percent,relString), 
+                             projectId, false);
+            }
         }
     }
     
     /**
      * Send progress messages to the log, JMS, and email if the number of elements we
-     * are posting is greater than minElementsForProgress (currently 10).
+     * are posting is greater than minElementsForProgress (currently 100).
      * 
      * @param msg  The message
      * @param projectSysmlId  The project sysml id
      * @param sendEmail Set to true to send a email also
      * 
      */
-    private void sendProgress( String msg, String projectSysmlId, boolean sendEmail) {
+    protected void sendProgress( String msg, String projectSysmlId, boolean sendEmail) {
         if (numElementsToPost >= minElementsForProgress) {
             sendProgress( msg, projectSysmlId, WorkspaceNode.getWorkspaceName(myWorkspace),
                           sendEmail);
@@ -426,7 +431,6 @@ public class ModelPost extends AbstractJavaWebScript {
         if (buildElementMap(postJson.getJSONArray(ELEMENTS), targetWS)) {
 
             final Set<String> elementsWithoutPermissions = new HashSet<String>();
-            double rootElemNum = 1;
             sendProgress("Processing "+rootElements.size()+" root elements", projectId, true);
 
             // start building up elements from the root elements
@@ -444,9 +448,7 @@ public class ModelPost extends AbstractJavaWebScript {
                         }
                     };
                 }
-                
-                givePercentProgress(rootElemNum++, false);
-                
+                                
             } // end for (String rootElement: rootElements) {
 
             // remove the elementsWithoutPermissions from further processing
@@ -507,11 +509,10 @@ public class ModelPost extends AbstractJavaWebScript {
                                                       WorkspaceNode workspace) throws Exception {
         TreeSet<EmsScriptNode> elements =
                 new TreeSet<EmsScriptNode>();
-        double rootElemNum = 1;
         sendProgress("Processing "+rootElements.size()+" root element relationships", projectId, true);
 
         if ( singleElement ) {
-            elements.addAll( updateOrCreateElement( postJson, projectNode, workspace, true ) );
+            elements.addAll( updateOrCreateElement( postJson, projectNode, workspace, true, true ) );
         }
         for (String rootElement : rootElements) {
             log(LogLevel.INFO, "ROOT ELEMENT FOUND: " + rootElement);
@@ -521,13 +522,12 @@ public class ModelPost extends AbstractJavaWebScript {
                 try {
                     if (owner != null) {
                         elements.addAll( updateOrCreateElement( elementMap.get( rootElement ),
-                                                                owner, workspace, true ) );
+                                                                owner, workspace, true, true ) );
                     }
                 } catch ( JSONException e ) {
                     e.printStackTrace();
                 }
                 
-                givePercentProgress(rootElemNum++, true);
             }
         } // end for (String rootElement: rootElements) {
         return elements;
@@ -1089,7 +1089,8 @@ public class ModelPost extends AbstractJavaWebScript {
     protected Set< EmsScriptNode > updateOrCreateElement( final JSONObject elementJson,
                                                           final EmsScriptNode parent,
                                                           final WorkspaceNode workspace,
-                                                          final boolean ingest)
+                                                          final boolean ingest,
+                                                          boolean isRelationship)
                                                                   throws Exception {
         final TreeSet<EmsScriptNode> elements = new TreeSet<EmsScriptNode>();
         TreeMap<String, EmsScriptNode> nodeMap =
@@ -1181,14 +1182,10 @@ public class ModelPost extends AbstractJavaWebScript {
         if (reifiedNode != null && reifiedNode.exists()) {
             //elements.add( reifiedNode );
             int numChildren = children.length();
-//            if (numChildren > 0) {
-//                sendProgress("Processing "+numChildren+" children of node "+reifiedNode.getSysmlId(), 
-//                             projectId, false);
-//            }
             for (int ii = 0; ii < numChildren; ii++) {
                 Set< EmsScriptNode > childElements = null;
                 childElements = updateOrCreateElement(elementMap.get(children.getString(ii)),
-                                                      reifiedNode, workspace, ingest);
+                                                      reifiedNode, workspace, ingest, isRelationship);
                 // Elements in new workspace replace originals.
                 for ( EmsScriptNode node : childElements ) {
                     nodeMap.put( node.getName(), node );
@@ -1203,6 +1200,14 @@ public class ModelPost extends AbstractJavaWebScript {
         updateTransactionableWsState(finalElement, jsonId, modStatus, ingest);
 
         fixReadTimeForConflictTransaction(finalElement, elementJson);
+
+        if (isRelationship) {
+            elementRelationshipProcessedCnt++;
+        }
+        else {
+            elementProcessedCnt++;
+        }
+        givePercentProgress(isRelationship);
 
         return new TreeSet< EmsScriptNode >( nodeMap.values() );
     }

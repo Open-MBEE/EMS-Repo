@@ -1,0 +1,15 @@
+{"views": [{
+    "qualifiedId": "/europa/123456/BLUCamTest/_17_0_2_4_f3a0363_1394146455624_407543_30441/_17_0_2_3_e610336_1394148233838_91795_29332",
+    "qualifiedName": "/europa/JW_TEST/BLUCamTest/dont care2/Context",
+    "name": "Context",
+    "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
+    "documentation": "",
+    "sysmlid": "_17_0_2_3_e610336_1394148233838_91795_29332",
+    "specialization": {
+        "contents": null,
+        "type": "View"
+    },
+    "editable": true,
+    "creator": "admin"
+}]}
+200

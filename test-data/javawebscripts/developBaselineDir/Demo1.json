@@ -1,12 +1,15 @@
-{"elements": [{
-    "creator": "admin",
-    "documentation": "",
-    "editable": true,
-    "name": "BLUCam CubeSat A",
+{"views": [{
+    "qualifiedId": "/europa/123456/_17_0_2_3_e610336_1394148311476_17302_29388",
+    "qualifiedName": "/europa/JW_TEST/Components",
+    "name": "Components",
     "owner": "123456",
-    "qualifiedId": "/europa/123456/_17_0_2_4_f3a0363_1394142290412_487571_28478",
-    "qualifiedName": "/europa/JW_TEST/BLUCam CubeSat A",
-    "specialization": {"type": "Package"},
-    "sysmlid": "_17_0_2_4_f3a0363_1394142290412_487571_28478"
+    "documentation": "",
+    "sysmlid": "_17_0_2_3_e610336_1394148311476_17302_29388",
+    "specialization": {
+        "contents": null,
+        "type": "View"
+    },
+    "editable": true,
+    "creator": "admin"
 }]}
 200
