@@ -368,11 +368,11 @@ public class ModelPost extends AbstractJavaWebScript {
         if (numElementsToPost >= minElementsForProgress && cnt > 0) {
             
             String relString = isRelationship ? " relationships" : "";
-            double interval = 5.0;
+            double interval = 10.0;
             double tol = minElementsForProgress/(2.0*numElementsToPost);
             double percent = (cnt/numElementsToPost)*100.0;
-            if (percent%5 < tol || percent%5 > (interval-tol) ) {
-                sendProgress(String.format("Processed %.1f%% of elements %s",percent,relString), 
+            if (percent%10 < tol || percent%10 > (interval-tol) ) {
+                sendProgress(String.format("Processed %.1f%% of elements %s [%.0f of %d]",percent,relString,cnt,elementMap.size()), 
                              projectId, false);
             }
         }
@@ -431,7 +431,7 @@ public class ModelPost extends AbstractJavaWebScript {
         if (buildElementMap(postJson.getJSONArray(ELEMENTS), targetWS)) {
 
             final Set<String> elementsWithoutPermissions = new HashSet<String>();
-            sendProgress("Processing "+rootElements.size()+" root elements", projectId, true);
+            sendProgress("Processing "+elementMap.size()+" elements", projectId, true);
 
             // start building up elements from the root elements
             for (final String rootElement : rootElements) {

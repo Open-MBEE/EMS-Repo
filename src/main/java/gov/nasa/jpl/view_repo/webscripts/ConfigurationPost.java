@@ -55,8 +55,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import org.json.JSONObject;
-
 import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
@@ -205,7 +203,7 @@ public class ConfigurationPost extends AbstractJavaWebScript {
 
             jobNode = ActionUtil.getOrCreateJob( context, name,
                                                  "ems:ConfigurationSet",
-                                                 status, response );
+                                                 status, response, true );
 
 			if (jobNode != null) {
                 ConfigurationsWebscript configWs =

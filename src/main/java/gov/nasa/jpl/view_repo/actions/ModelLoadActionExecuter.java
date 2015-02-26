@@ -120,6 +120,7 @@ public class ModelLoadActionExecuter extends ActionExecuterAbstractBase {
         }
 
         // Update the model
+
         String jobStatus = "Failed";
         if (content == null) {
             response.append("ERROR: Could not load JSON file for job\n");
@@ -130,6 +131,7 @@ public class ModelLoadActionExecuter extends ActionExecuterAbstractBase {
             modelService.setProjectNode( projectNode );
             Status status = new Status();
             try {
+                // FIXME: make sure this all matches with ModelService handleUpdate
                 Set<EmsScriptNode> elements = 
                         modelService.createOrUpdateModel(content, status, workspace, null, true);
                 modelService.addRelationshipsToProperties( elements );
