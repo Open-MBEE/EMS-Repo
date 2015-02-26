@@ -1181,10 +1181,10 @@ public class ModelPost extends AbstractJavaWebScript {
         if (reifiedNode != null && reifiedNode.exists()) {
             //elements.add( reifiedNode );
             int numChildren = children.length();
-            if (numChildren > 0) {
-                sendProgress("Processing "+numChildren+" children of node "+reifiedNode.getSysmlId(), 
-                             projectId, false);
-            }
+//            if (numChildren > 0) {
+//                sendProgress("Processing "+numChildren+" children of node "+reifiedNode.getSysmlId(), 
+//                             projectId, false);
+//            }
             for (int ii = 0; ii < numChildren; ii++) {
                 Set< EmsScriptNode > childElements = null;
                 childElements = updateOrCreateElement(elementMap.get(children.getString(ii)),
