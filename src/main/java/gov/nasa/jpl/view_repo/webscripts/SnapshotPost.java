@@ -1184,7 +1184,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
 	                		//}
 	                	}
 	                	else{
-	                		image.before(String.format(" <ulink xl:href=\"%s\">%s</ulink> ", src, url.getFile()));
+	                		image.before(String.format(" <ulink xl:href=\"%s\"><![CDATA[%s]]></ulink> ", src, url.getFile()));
 	                		image.remove();
 	                	}
 	                }
@@ -1194,7 +1194,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
 	                }
 	    		}
 	    		else{
-	    			image.before(String.format(" <ulink xl:href=\"%s\">%s</ulink> ", src, url.getFile()));
+	    			image.before(String.format(" <ulink xl:href=\"%s\"><![CDATA[%s]]></ulink> ", src, url.getFile()));
 	    			image.remove();
 	    		}
     		}
@@ -1587,7 +1587,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
     		}
     		break;
     	case "A":
-    		String link = String.format(" <ulink xl:href='%s'>%s</ulink> ", elem.attr("href"), elem.text());
+    		String link = String.format(" <ulink xl:href='%s'><![CDATA[%s]]></ulink> ", elem.attr("href"), elem.text());
     		elem.before(link);
     		elem.remove();
     		break;
