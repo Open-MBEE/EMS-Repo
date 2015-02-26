@@ -4611,11 +4611,26 @@ public class EmsScriptNode extends ScriptNode implements
                                         throws JSONException {
         String property;
         property = (String) node.getProperty("view2:contains");
+        boolean noFilter = filter == null || filter.size() == 0;
         if ( expressionStuff && ( property == null || property.length() <= 0 ) ) {
-            json.put( "contains", getView().getContainsJson(true) );
-            json.put( "displayedElements", getView().getDisplayedElements() );
-            json.put( "allowedElements", getView().getDisplayedElements() );
-            json.put( "childrenViews", getView().getChildViews() );
+            if ( noFilter || filter.contains( "contains" ) ) {
+                json.put( "contains", getView().getContainsJson(true) );
+            }
+            JSONArray displayedElements = null;
+            if ( noFilter || filter.contains( "displayedElements" ) ) {
+                displayedElements = toJsonArrayOfSysmlIds( getView().getDisplayedElements() );
+                json.put( "displayedElements", displayedElements );
+            }
+            if ( noFilter || filter.contains( "allowedElements" ) ) {
+                if ( displayedElements == null ) {
+                    displayedElements = toJsonArrayOfSysmlIds( getView().getDisplayedElements() );
+                }
+                json.put( "allowedElements", displayedElements );
+            }
+            if ( noFilter || filter.contains( "childrenViews" ) ) {
+                JSONArray childViews = toJsonArrayOfSysmlIds( getNodesOfViews( getView().getChildViews() ) );
+                json.put( "childrenViews", childViews );
+            }
         } else {
             if (!Utils.isNullOrEmpty(property)) {
                 putInJson( json, "contains", new JSONArray( property ), filter );
@@ -4639,6 +4654,40 @@ public class EmsScriptNode extends ScriptNode implements
 
     }
 
+    public ArrayList<EmsScriptNode> getNodesOfViews( Collection< sysml.view.View< EmsScriptNode > > views ) {
+        ArrayList<EmsScriptNode> nodes = new ArrayList< EmsScriptNode >();
+        if ( views == null ) return nodes;
+        for ( sysml.view.View< EmsScriptNode > view : views ) {
+            if ( view == null ) {
+                logger.error("viewsToSysmlIds() trying to get non-existent sysmlid of null view" );
+                continue;            
+            }
+            EmsScriptNode node = view.getElement();
+            if ( node == null ) {
+                logger.error("viewsToSysmlIds() trying to get non-existent sysmlid of view: " + view );
+            } else {
+                nodes.add( node );
+            }
+        }
+        return nodes;
+    }
+
+    public JSONArray toJsonArrayOfSysmlIds( Collection< EmsScriptNode > nodes ) {
+        JSONArray jarr = new JSONArray();
+        if ( nodes == null ) return jarr;
+        for ( EmsScriptNode node : nodes ) {
+            if ( node != null && node.exists() ) {
+                String id = node.getSysmlId();
+                if ( Utils.isNullOrEmpty( id ) ) {
+                    logger.error( "toJsonArrayOfSysmlIds() trying to get non-existent sysmlid of node: " + node );
+                } else {
+                    jarr.put( node.getSysmlId() );
+                }
+            }
+        }
+        return jarr;
+    }
+    
     protected void addProductJSON( JSONObject json, EmsScriptNode node,
                                    Set< String > filter, Date dateTime )
                                            throws JSONException {

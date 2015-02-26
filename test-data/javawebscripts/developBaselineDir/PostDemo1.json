@@ -1,174 +1,174 @@
 {"elements": [
     {
-        "creator": "admin",
-        "documentation": "",
-        "editable": true,
-        "name": "",
-        "owner": "_17_0_2_3_e610336_1394148311476_17302_29388",
-        "qualifiedName": "/europa/JW_TEST/Components/",
-        "specialization": {
-            "source": "_17_0_2_3_e610336_1394148311476_17302_29388",
-            "target": "_17_0_2_3_e610336_1394148449252_91190_29556",
-            "type": "Conform"
-        },
-    },
-    {
-        "creator": "admin",
-        "documentation": "",
-        "editable": true,
-        "name": "Components",
-        "owner": "123456",
-        "qualifiedName": "/europa/JW_TEST/Components",
-        "specialization": {
-            "contents": null,
-            "type": "View"
-        },
-    },
-    {
-        "creator": "admin",
-        "documentation": "",
-        "editable": true,
-        "name": "map",
-        "owner": "123456",
-        "qualifiedName": "/europa/JW_TEST/map",
-        "specialization": {"type": "Operation"},
-    },
-    {
-        "creator": "admin",
-        "documentation": "",
-        "editable": true,
-        "name": "viewpoint_op",
-        "owner": "123456",
-        "qualifiedName": "/europa/JW_TEST/viewpoint_op",
-        "specialization": {
-            "expression": {
-                "operand": [
-                    {
-                        "element": "op_list",
-                        "type": "ElementValue",
-                        "valueExpression": null
-                    },
-                    {
-                        "operand": [
-                            {
-                                "element": "op_map",
-                                "type": "ElementValue",
-                                "valueExpression": null
-                            },
-                            {
-                                "element": "exposed_id",
-                                "type": "ElementValue",
-                                "valueExpression": null
-                            },
-                            {
-                                "element": "op_name_arg",
-                                "type": "ElementValue",
-                                "valueExpression": null
-                            }
-                        ],
-                        "type": "Expression",
-                        "valueExpression": null
-                    }
-                ],
-                "type": "Expression",
-                "valueExpression": null
-            },
-            "parameters": ["exposed_id"],
-            "type": "Operation"
-        },
-    },
-    {
-        "creator": "admin",
-        "documentation": "",
-        "editable": true,
-        "name": "",
-        "owner": "123456",
         "qualifiedName": "/europa/JW_TEST/",
-        "specialization": {
-            "operand": [
-                {
-                    "element": "op_map",
-                    "type": "ElementValue",
-                    "valueExpression": null
-                },
-                {
-                    "element": "exposed_id",
-                    "type": "ElementValue",
-                    "valueExpression": null
-                },
-                {
-                    "element": "op_name_arg",
-                    "type": "ElementValue",
-                    "valueExpression": null
-                }
-            ],
-            "type": "Expression",
-            "valueExpression": null
-        },
-    },
-    {
-        "creator": "admin",
-        "documentation": "",
-        "editable": true,
-        "name": "ComponentViewPoint",
-        "owner": "123456",
-        "qualifiedName": "/europa/JW_TEST/ComponentViewPoint",
-        "specialization": {
-            "method": "name_list",
-            "type": "Viewpoint"
-        },
-    },
-    {
-        "creator": "admin",
-        "documentation": "",
-        "editable": true,
         "name": "",
         "owner": "123456",
-        "qualifiedName": "/europa/JW_TEST/",
+        "documentation": "",
         "specialization": {
             "source": "_17_0_2_3_e610336_1394148311476_17302_29388",
             "target": "_17_0_2_4_f3a0363_1394142290412_487571_28478",
             "type": "Expose"
         },
+        "editable": true,
+        "creator": "admin"
     },
     {
-        "creator": "admin",
-        "documentation": "",
-        "editable": true,
-        "name": "Name",
+        "qualifiedName": "/europa/JW_TEST/ComponentViewPoint",
+        "name": "ComponentViewPoint",
         "owner": "123456",
-        "qualifiedName": "/europa/JW_TEST/Name",
-        "specialization": {"type": "Operation"},
+        "documentation": "",
+        "specialization": {
+            "method": "name_list",
+            "type": "Viewpoint"
+        },
+        "editable": true,
+        "creator": "admin"
     },
     {
-        "creator": "admin",
-        "documentation": "",
-        "editable": true,
-        "name": "List",
-        "owner": "123456",
-        "qualifiedName": "/europa/JW_TEST/List",
-        "specialization": {"type": "Operation"},
-    },
-    {
-        "creator": "admin",
-        "documentation": "",
-        "editable": true,
-        "name": "BLUCam CubeSat A",
-        "owner": "123456",
-        "qualifiedName": "/europa/JW_TEST/BLUCam CubeSat A",
-        "specialization": {"type": "Package"},
-    },
-    {
-        "creator": "admin",
-        "documentation": "",
-        "editable": true,
+        "qualifiedName": "/europa/JW_TEST/exposed",
         "name": "exposed",
         "owner": "123456",
-        "qualifiedName": "/europa/JW_TEST/exposed",
+        "documentation": "",
         "specialization": {
             "defaultValue": null,
             "type": "Parameter"
         },
+        "editable": true,
+        "creator": "admin"
+    },
+    {
+        "qualifiedName": "/europa/JW_TEST/viewpoint_op",
+        "name": "viewpoint_op",
+        "owner": "123456",
+        "documentation": "",
+        "specialization": {
+            "expression": {
+                "valueExpression": null,
+                "operand": [
+                    {
+                        "element": "op_list",
+                        "valueExpression": null,
+                        "type": "ElementValue"
+                    },
+                    {
+                        "valueExpression": null,
+                        "type": "Expression",
+                        "operand": [
+                            {
+                                "element": "op_map",
+                                "valueExpression": null,
+                                "type": "ElementValue"
+                            },
+                            {
+                                "element": "exposed_id",
+                                "valueExpression": null,
+                                "type": "ElementValue"
+                            },
+                            {
+                                "element": "op_name_arg",
+                                "valueExpression": null,
+                                "type": "ElementValue"
+                            }
+                        ]
+                    }
+                ],
+                "type": "Expression"
+            },
+            "parameters": ["exposed_id"],
+            "type": "Operation"
+        },
+        "editable": true,
+        "creator": "admin"
+    },
+    {
+        "qualifiedName": "/europa/JW_TEST/Components",
+        "name": "Components",
+        "owner": "123456",
+        "documentation": "",
+        "specialization": {
+            "contents": null,
+            "type": "View"
+        },
+        "editable": true,
+        "creator": "admin"
+    },
+    {
+        "qualifiedName": "/europa/JW_TEST/List",
+        "name": "List",
+        "owner": "123456",
+        "documentation": "",
+        "specialization": {"type": "Operation"},
+        "editable": true,
+        "creator": "admin"
+    },
+    {
+        "qualifiedName": "/europa/JW_TEST/BLUCam CubeSat A",
+        "name": "BLUCam CubeSat A",
+        "owner": "123456",
+        "documentation": "",
+        "specialization": {"type": "Package"},
+        "editable": true,
+        "creator": "admin"
+    },
+    {
+        "qualifiedName": "/europa/JW_TEST/Components/",
+        "name": "",
+        "owner": "_17_0_2_3_e610336_1394148311476_17302_29388",
+        "documentation": "",
+        "specialization": {
+            "source": "_17_0_2_3_e610336_1394148311476_17302_29388",
+            "target": "_17_0_2_3_e610336_1394148449252_91190_29556",
+            "type": "Conform"
+        },
+        "editable": true,
+        "creator": "admin"
+    },
+    {
+        "qualifiedName": "/europa/JW_TEST/map",
+        "name": "map",
+        "owner": "123456",
+        "documentation": "",
+        "specialization": {"type": "Operation"},
+        "editable": true,
+        "creator": "admin"
+    },
+    {
+        "qualifiedName": "/europa/JW_TEST/Name",
+        "name": "Name",
+        "owner": "123456",
+        "documentation": "",
+        "specialization": {"type": "Operation"},
+        "editable": true,
+        "creator": "admin"
+    },
+    {
+        "qualifiedName": "/europa/JW_TEST/",
+        "name": "",
+        "owner": "123456",
+        "documentation": "",
+        "specialization": {
+            "valueExpression": null,
+            "operand": [
+                {
+                    "element": "op_map",
+                    "valueExpression": null,
+                    "type": "ElementValue"
+                },
+                {
+                    "element": "exposed_id",
+                    "valueExpression": null,
+                    "type": "ElementValue"
+                },
+                {
+                    "element": "op_name_arg",
+                    "valueExpression": null,
+                    "type": "ElementValue"
+                }
+            ],
+            "type": "Expression"
+        },
+        "editable": true,
+        "creator": "admin"
     }
 ]}
 200
