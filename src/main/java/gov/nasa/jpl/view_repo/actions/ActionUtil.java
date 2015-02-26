@@ -36,6 +36,7 @@ import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.Date;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -200,7 +201,9 @@ public class ActionUtil {
         if (jobNode == null) {
             String filename = jobName;
             if (generateName) {
-                filename = Integer.toString( jobName.hashCode() );
+                Date now = new Date();
+                filename = jobName + now.toString();
+                filename = Integer.toString( filename.hashCode() );
             }
             jobNode = jobPkgNode.createNode(filename, jobType);
             if ( jobNode == null ) {
@@ -210,7 +213,7 @@ public class ActionUtil {
             }
             jobNode.createOrUpdateProperty( Acm.CM_TITLE, jobName );
             if (generateName) {
-                jobNode.createOrUpdateProperty( Acm.CM_NAME, jobNode.getId() );
+                jobNode.createOrUpdateProperty( Acm.CM_NAME, "cm_" + jobNode.getId() );
             }
             jobNode.createOrUpdateProperty("cm:isContentIndexed", false);
         } else if ( jobNode.isDeleted() ) {
