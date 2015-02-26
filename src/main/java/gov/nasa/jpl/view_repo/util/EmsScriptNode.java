@@ -3930,11 +3930,11 @@ public class EmsScriptNode extends ScriptNode implements
     public void appendToPropertyNodeRefs( String acmProperty, NodeRef ref ) {
         if ( checkPermissions( PermissionService.WRITE, response, status ) ) {
             ArrayList< NodeRef > relationships =
-                    getPropertyNodeRefs( acmProperty );
+                    getPropertyNodeRefs( acmProperty, true );
             if ( Utils.isNullOrEmpty( relationships ) ) {
                 relationships = Utils.newList( ref );
             } else if (!relationships.contains(ref )) {
-                    relationships.add( ref );
+                relationships.add( ref );
             }
             setProperty( acmProperty, relationships );
         } else {
@@ -3948,7 +3948,7 @@ public class EmsScriptNode extends ScriptNode implements
     public void removeFromPropertyNodeRefs( String acmProperty, NodeRef ref ) {
         if ( checkPermissions( PermissionService.WRITE, response, status ) ) {
             ArrayList< NodeRef > relationships =
-                    getPropertyNodeRefs( acmProperty );
+                    getPropertyNodeRefs( acmProperty, true );
             if ( !Utils.isNullOrEmpty( relationships ) ) {
                 relationships.remove( ref );
                 setProperty( acmProperty, relationships );
@@ -4118,11 +4118,15 @@ public class EmsScriptNode extends ScriptNode implements
         }
 
     }
-
+    
     public ArrayList< NodeRef > getPropertyNodeRefs( String acmProperty ) {
-        return getPropertyNodeRefs(acmProperty, false, null, false, false);
+        return getPropertyNodeRefs(acmProperty, false);
     }
 
+    public ArrayList< NodeRef > getPropertyNodeRefs(String acmProperty, boolean skipNodeRefCheck) {
+        return getPropertyNodeRefs(acmProperty, false, null, false, skipNodeRefCheck);
+    }
+    
     public ArrayList< NodeRef > getPropertyNodeRefs( String acmProperty, boolean ignoreWorkspace,
                                                      Date dateTime, boolean findDeleted,
                                                      boolean skipNodeRefCheck) {
@@ -4236,7 +4240,7 @@ public class EmsScriptNode extends ScriptNode implements
         createOrUpdateAspect( acmAspect );
         String acmProperty =
                 Acm.PROPERTY_FOR_RELATIONSHIP_PROPERTY_ASPECTS.get( acmAspect );
-        ArrayList< NodeRef > relationships = getPropertyNodeRefs( acmProperty );
+        ArrayList< NodeRef > relationships = getPropertyNodeRefs( acmProperty, true );
         int index =
                 Collections.binarySearch( relationships,
                                           // this.getNodeRef(),
