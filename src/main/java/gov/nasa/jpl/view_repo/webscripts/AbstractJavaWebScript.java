@@ -969,7 +969,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
         String subject = "Progress for project: "+projectId+" workspace: "+workspaceId;
 
         // Log the progress:
-        log(LogLevel.INFO,subject+" msg: "+msg+"\n");
+        logger.info(subject+" msg: "+msg+"\n");
         
         // Send the progress over JMS:
         CommitUtil.sendProgress(msg, workspaceId, projectId);
