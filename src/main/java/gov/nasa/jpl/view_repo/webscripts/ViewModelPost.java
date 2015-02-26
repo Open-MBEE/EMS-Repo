@@ -147,6 +147,8 @@ public class ViewModelPost extends ModelPost {
         model.put("res", createResponseJson());
 
         printFooter();
+        
+        sendProgress( "Load/sync/update request is finished processing.", null, true);
 
         return model;
     }
@@ -160,6 +162,10 @@ public class ViewModelPost extends ModelPost {
 
         WorkspaceNode workspace = getWorkspace( req );
 
+        // Note: Cannot have any sendProgress methods before setting numElementsToPost
+        numElementsToPost = array.length();
+        sendProgress( "Got request - starting", null, true);
+        
         for (int ii = 0; ii < array.length(); ii++) {
             JSONObject elementJson = array.getJSONObject(ii);
 
@@ -171,7 +177,7 @@ public class ViewModelPost extends ModelPost {
 
             EmsScriptNode elementNode = findScriptNodeById(id, workspace, null, true);
             if (elementNode != null) {
-                updateOrCreateElement(elementJson, elementNode.getParent(), workspace, false);
+                updateOrCreateElement(elementJson, elementNode.getParent(), workspace, false, false);
             } else {
                 // new element, we need a proper parent
                 boolean parentFound = true;
@@ -189,7 +195,7 @@ public class ViewModelPost extends ModelPost {
                             } else {
                                 if (checkPermissions(commentParent, PermissionService.WRITE)) {
                                     newElements.add(id);
-                                    updateOrCreateElement(elementJson, commentParent.getOwningParent(null), workspace, false);
+                                    updateOrCreateElement(elementJson, commentParent.getOwningParent(null), workspace, false, false);
                                 }
                             }
                     }
@@ -215,7 +221,7 @@ public class ViewModelPost extends ModelPost {
             String id = elementJson.getString(Acm.JSON_ID);
             EmsScriptNode elementNode = findScriptNodeById(id, workspace, null, true);
             if (elementNode != null) {
-                updateOrCreateElement(elementJson, elementNode.getParent(), workspace, true);
+                updateOrCreateElement(elementJson, elementNode.getParent(), workspace, true, true);
             } else {
                 // new element, we need a proper parent
                 boolean parentFound = true;
@@ -232,7 +238,7 @@ public class ViewModelPost extends ModelPost {
                                 parentFound = false;
                             } else {
                                 if (checkPermissions(commentParent, PermissionService.WRITE)) {
-                                    updateOrCreateElement(elementJson, commentParent.getParent(), workspace, true);
+                                    updateOrCreateElement(elementJson, commentParent.getParent(), workspace, true, true);
                                 }
                             }
                     }
