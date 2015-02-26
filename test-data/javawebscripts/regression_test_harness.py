@@ -792,7 +792,7 @@ create_curl_cmd(type="POST",base_url=BASE_URL_WS,
                 branch="master/sites/europa/",
                 post_type="elements"),
 True, 
-common_filters,
+common_filters+['"MMS_','MMS_'],
 ["test","workspaces","develop", "develop2"]
 ],
         
