@@ -29,12 +29,14 @@
 
 package gov.nasa.jpl.view_repo.actions;
 
+import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.Date;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -161,13 +163,29 @@ public class ActionUtil {
         return true;
     }
 
+    public static EmsScriptNode getOrCreateJob(EmsScriptNode contextFolder,
+                                               String jobName, String jobType,
+                                               Status status, StringBuffer response) {
+        return getOrCreateJob(contextFolder, jobName, jobType, status, response, false);
+    }
+    
+    
     /**
      * Create a job inside a particular site
+     * @param contextFolder Folder to create the job node
+     * @param jobName       String of the filename
+     * @param jobType       The type of job being created
+     * @param status        Initial status to put the job node in
+     * @param response      Response buffer to return to client
+     * @param generateName  If true, jobName will be used as cm:title and the uuid will be
+     *                      returned as the cm:name. If false, jobName is cm:name. This is
+     *                      necessary when the jobName can handle special characters.
      * @return The created job node
      */
     public static EmsScriptNode getOrCreateJob(EmsScriptNode contextFolder,
                                                String jobName, String jobType,
-                                               Status status, StringBuffer response) {
+                                               Status status, StringBuffer response,
+                                               boolean generateName) {
         EmsScriptNode jobPkgNode = contextFolder.childByNamePath("Jobs");
         if (jobPkgNode == null) {
             jobPkgNode = contextFolder.createFolder("Jobs", "cm:folder");
@@ -178,14 +196,24 @@ public class ActionUtil {
                 jobPkgNode.setWorkspace( ws );
             }
         }
-
+        
         EmsScriptNode jobNode = jobPkgNode.childByNamePath(jobName);
         if (jobNode == null) {
-            jobNode = jobPkgNode.createNode(jobName, jobType);
+            String filename = jobName;
+            if (generateName) {
+                Date now = new Date();
+                filename = jobName + now.toString();
+                filename = Integer.toString( filename.hashCode() );
+            }
+            jobNode = jobPkgNode.createNode(filename, jobType);
             if ( jobNode == null ) {
                 status.setCode( HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
                                 "Could not create job, " + jobName + "." );
                 return null;
+            }
+            jobNode.createOrUpdateProperty( Acm.CM_TITLE, jobName );
+            if (generateName) {
+                jobNode.createOrUpdateProperty( Acm.CM_NAME, "cm_" + jobNode.getId() );
             }
             jobNode.createOrUpdateProperty("cm:isContentIndexed", false);
         } else if ( jobNode.isDeleted() ) {
