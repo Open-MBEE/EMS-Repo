@@ -628,7 +628,7 @@ public class NodeDiff extends AbstractDiff<NodeRef, Object, String> {
      */
     protected void fixValueSpecifications() {
 
-        // Identify the elementts that own changed ValueSpecifications and add
+        // Identify the elements that own changed ValueSpecifications and add
         // them to the updatedElements map.
 
         if (Debug.isOn()) Debug.outln("added = " + getAdded() );
@@ -640,40 +640,41 @@ public class NodeDiff extends AbstractDiff<NodeRef, Object, String> {
         if (Debug.isOn()) Debug.outln("updated properties= " + getUpdatedProperties() );
         if (Debug.isOn()) Debug.outln("property changes = " + getPropertyChanges() );
 
-        Set< EmsScriptNode > valueSpecs = new LinkedHashSet<EmsScriptNode>();
-        Set< EmsScriptNode > owningProperties = new LinkedHashSet<EmsScriptNode>();
-        //Map< String, EmsScriptNode > refs = getAddedElements();
+        LinkedHashMap< EmsScriptNode, EmsScriptNode > valueSpecMap = new LinkedHashMap< EmsScriptNode, EmsScriptNode >();
+        
         for ( NodeRef e : getAdded() ) {
             EmsScriptNode node = new EmsScriptNode( e, getServices() );
-            if ( node.isOwnedValueSpec() ) {//isPropertyOwnedValueSpecification() ) {
-                EmsScriptNode owningProp = node.getValueSpecOwner();//getOwningProperty();
+            if ( node.isOwnedValueSpec() ) {
+                EmsScriptNode owningProp = node.getValueSpecOwner();
+                if (owningProp != null) {
                 // TODO -- REVIEW -- Does the if statement below need to be uncommented?
 //                if ( !getRemoved().contains( owningProp ) ) {
-                    owningProperties.add( owningProp );
-                    valueSpecs.add( node );
+                    valueSpecMap.put( node, owningProp );
 //                }
+                }
             }
         }
         for ( NodeRef e : getUpdated() ) {
             EmsScriptNode node = new EmsScriptNode( e, getServices() );
-            if ( node.isOwnedValueSpec() ) { //isPropertyOwnedValueSpecification() ) {
-                valueSpecs.add( node );
-                owningProperties.add( node.getValueSpecOwner() ); //getOwningProperty() );
+            if ( node.isOwnedValueSpec() ) { 
+                EmsScriptNode owningProp = node.getValueSpecOwner();
+                if (owningProp != null) {
+                    valueSpecMap.put( node, owningProp );
+                }
             }
         }
         for ( NodeRef e : getRemoved() ) {
             EmsScriptNode node = new EmsScriptNode( e, getServices() );
-            if ( node.isOwnedValueSpec() ) { //isPropertyOwnedValueSpecification() ) {
-                valueSpecs.add( node );
-                owningProperties.add( node.getValueSpecOwner() ); //getOwningProperty() );
+            if ( node.isOwnedValueSpec() ) {
+                EmsScriptNode owningProp = node.getValueSpecOwner();
+                if (owningProp != null) {
+                    valueSpecMap.put( node, owningProp );
+                }
             }
         }
 
-        if (Debug.isOn()) Debug.outln("valueSpecs = " + valueSpecs );
-        if (Debug.isOn()) Debug.outln("owningProperties = " + owningProperties );
-
         // adding the owning Property elements to these element maps if not already there
-        for ( EmsScriptNode node : owningProperties ) {
+        for ( EmsScriptNode node : valueSpecMap.values() ) {
             if ( !getAdded().contains( node.getNodeRef() ) ) {
                 if ( !getRemoved().contains( node.getNodeRef() ) ) {
                     if ( !getUpdated().contains( node.getNodeRef() ) ) {
@@ -684,8 +685,9 @@ public class NodeDiff extends AbstractDiff<NodeRef, Object, String> {
         }
 
         // Add the owning valuespec properties to the nodeDiff property change maps.
-        for ( EmsScriptNode valueNode : valueSpecs ) {
-            EmsScriptNode owningPropNode = valueNode.getValueSpecOwner(); //getOwningProperty();
+        for ( Entry<EmsScriptNode,EmsScriptNode> entry : valueSpecMap.entrySet() ) {
+            EmsScriptNode valueNode = entry.getKey();
+            EmsScriptNode owningPropNode = entry.getValue();
             Map< String, Pair< Object, Object > > propChanges = getPropertyChanges( owningPropNode.getSysmlId() );
 //            if ( propChanges == null ) {
 //                propChanges = new LinkedHashMap< String, Pair<Object,Object> >();
@@ -745,7 +747,7 @@ public class NodeDiff extends AbstractDiff<NodeRef, Object, String> {
         }
 
         // Remove the owned ValueSpecifications from everything.
-        for ( EmsScriptNode node : valueSpecs ) {
+        for ( EmsScriptNode node : valueSpecMap.keySet() ) {
             getAdded().remove( node.getNodeRef() );
             getUpdated().remove( node.getNodeRef() );
             getRemoved().remove( node.getNodeRef() ); // Is this right?????!!!

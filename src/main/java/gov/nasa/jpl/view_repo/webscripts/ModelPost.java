@@ -1102,13 +1102,6 @@ public class ModelPost extends AbstractJavaWebScript {
         String jsonId = elementJson.getString( Acm.JSON_ID );
         final EmsScriptNode element = findScriptNodeById( jsonId, workspace, null, true );
         if ( element != null ) {
-
-            // Make sure we have the most recent version of the element's node ref.  This is needed for conflict
-            // checks below, and also to make sure we get the most recent properties of the element.
-            // This is only needed b/c of an alfresco bug, where it intermittently does not give the most
-            // recent node ref.  This does have a performance hit, so commenting out for now:
-            //element.checkNodeRefVersion( null );
-
             elements.add( element );
             nodeMap.put( element.getName(), element );
             // only add to original element map if it exists on first pass
@@ -1193,10 +1186,9 @@ public class ModelPost extends AbstractJavaWebScript {
             }
         }
 
-        // Only need to search again for the element, if it was created again for the first time:
-        EmsScriptNode finalElement = element == null ? 
-                                     findScriptNodeById( jsonId, workspace, null, true ) : 
-                                     element;
+        // Note: foundElements is populated with the updated or newly created node in 
+        //       updateOrCreateTransactionableElement()
+        EmsScriptNode finalElement = foundElements.get( jsonId );
         updateTransactionableWsState(finalElement, jsonId, modStatus, ingest);
 
         fixReadTimeForConflictTransaction(finalElement, elementJson);
@@ -1677,7 +1669,8 @@ public class ModelPost extends AbstractJavaWebScript {
 
             // Ingest the JSON for the value to update properties
             timerIngest = Timer.startTimer(timerIngest, timeEvents);
-            processValue( node, id, reifiedPkgNode, parent, nodeWorkspace, newValJson, ingest, modStatus, oldValNode );
+            processValue( node, id, reifiedPkgNode, parent, nodeWorkspace, newValJson, 
+                          ingest, modStatus, oldValNode );
             changed = changed || (modStatus != null && modStatus.getState() != ModStatus.State.NONE );
             //updateOrCreateTransactionableElement
             //boolean didChange = processValueSpecProperty( type, nestedNode, elementJson, specializeJson, oldValNode, ingest, reifiedPkgNode, parent, id, nodeWorkspace );
@@ -2044,7 +2037,11 @@ public class ModelPost extends AbstractJavaWebScript {
                     }
 
                     // Resurrect any parent nodes if needed:
-                    resurrectParents(nodeToUpdate, ingest, workspace);
+                    // Note: nested nodes shouldn't ever need this, as their parents will already
+                    //       be resurrected before they are processed via processValueSpecProperty().
+                    if (!nestedNode) {
+                        resurrectParents(nodeToUpdate, ingest, workspace);
+                    }
 
                     // Update the aspect if the type has changed and its a aspect, or if it is
                     // being changed to an Element.  Need to call this for Elements for downgrading,
