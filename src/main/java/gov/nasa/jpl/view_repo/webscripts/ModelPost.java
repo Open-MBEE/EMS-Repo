@@ -109,8 +109,6 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
  *
  * @author cinyoung
  *
- *         TODO Need merge? and force? similar to View?
- *
  */
 public class ModelPost extends AbstractJavaWebScript {
     static Logger logger = Logger.getLogger(ModelPost.class);
@@ -368,10 +366,10 @@ public class ModelPost extends AbstractJavaWebScript {
         if (numElementsToPost >= minElementsForProgress && cnt > 0) {
             
             String relString = isRelationship ? " relationships" : "";
-            double interval = 10.0;
+            double interval = 5.0;
             double tol = minElementsForProgress/(2.0*numElementsToPost);
             double percent = (cnt/numElementsToPost)*100.0;
-            if (percent%10 < tol || percent%10 > (interval-tol) ) {
+            if (percent%5 < tol || percent%5 > (interval-tol) ) {
                 sendProgress(String.format("Processed %.1f%% of elements %s [%.0f of %d]",percent,relString,cnt,elementMap.size()), 
                              projectId, false);
             }
