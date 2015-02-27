@@ -177,7 +177,7 @@ public class ViewModelPost extends ModelPost {
 
             EmsScriptNode elementNode = findScriptNodeById(id, workspace, null, true);
             if (elementNode != null) {
-                updateOrCreateElement(elementJson, elementNode.getParent(), workspace, false, false);
+                updateOrCreateElement(elementJson, elementNode.getParent(), workspace, false);
             } else {
                 // new element, we need a proper parent
                 boolean parentFound = true;
@@ -195,7 +195,7 @@ public class ViewModelPost extends ModelPost {
                             } else {
                                 if (checkPermissions(commentParent, PermissionService.WRITE)) {
                                     newElements.add(id);
-                                    updateOrCreateElement(elementJson, commentParent.getOwningParent(null), workspace, false, false);
+                                    updateOrCreateElement(elementJson, commentParent.getOwningParent(null), workspace, false);
                                 }
                             }
                     }
@@ -206,8 +206,6 @@ public class ViewModelPost extends ModelPost {
                 }
             }
         }
-
-        updateOrCreateAllRelationships(relationshipsJson, workspace);
 
         updateNodeReferencesForView( array, workspace );
     }
@@ -221,7 +219,7 @@ public class ViewModelPost extends ModelPost {
             String id = elementJson.getString(Acm.JSON_ID);
             EmsScriptNode elementNode = findScriptNodeById(id, workspace, null, true);
             if (elementNode != null) {
-                updateOrCreateElement(elementJson, elementNode.getParent(), workspace, true, true);
+                updateOrCreateElement(elementJson, elementNode.getParent(), workspace, true);
             } else {
                 // new element, we need a proper parent
                 boolean parentFound = true;
@@ -238,7 +236,7 @@ public class ViewModelPost extends ModelPost {
                                 parentFound = false;
                             } else {
                                 if (checkPermissions(commentParent, PermissionService.WRITE)) {
-                                    updateOrCreateElement(elementJson, commentParent.getParent(), workspace, true, true);
+                                    updateOrCreateElement(elementJson, commentParent.getParent(), workspace, true);
                                 }
                             }
                     }
