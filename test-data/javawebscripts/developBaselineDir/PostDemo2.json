@@ -104,12 +104,10 @@
         "creator": "admin"
     },
     {
-        "qualifiedId": "/europa/123456/BLUCamTest/_17_0_2_4_f3a0363_1394146455624_407543_30441/MMS_1424917547254_93dfaf28-6bec-4703-89cf-ac55c7e5f0bd",
         "qualifiedName": "/europa/JW_TEST/BLUCamTest/dont care2/",
         "name": "",
         "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
         "documentation": "",
-        "sysmlid": "MMS_1424917547254_93dfaf28-6bec-4703-89cf-ac55c7e5f0bd",
         "specialization": {
             "source": "_17_0_2_3_e610336_1394148233838_91795_29332",
             "target": "_17_0_2_4_f3a0363_1394140326296_809805_27600",
