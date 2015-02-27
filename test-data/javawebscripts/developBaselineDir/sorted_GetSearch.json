@@ -1,40 +1,44 @@
 {"elements": [
     {
-        "creator": "admin",
-        "documentation": "something",
-        "editable": true,
+        "qualifiedId": "/europa/123456/300",
+        "qualifiedName": "/europa/JW_TEST/300",
         "name": "300",
+        "sysmlid": "300",
         "owner": "123456",
-        "qualifiedId": "/123456/300",
-        "qualifiedName": "/JW_TEST/300",
+        "documentation": "something",
         "specialization": {
-            "isDerived": false,
+            "propertyType": null,
             "isSlot": false,
-            "type": "Property",
+            "isDerived": false,
             "value": [{
+                "valueExpression": null,
                 "string": "dlam_string",
                 "type": "LiteralString"
-            }]
+            }],
+            "type": "Property"
         },
-        "sysmlid": "300"
+        "editable": true,
+        "creator": "admin"
     },
     {
-        "creator": "admin",
-        "documentation": "something",
-        "editable": true,
+        "qualifiedId": "/no_site/no_project/holding_bin_no_site_no_project/x",
+        "qualifiedName": "/no_site/no_project/holding_bin/300",
         "name": "300",
+        "sysmlid": "x",
         "owner": "holding_bin_no_site_no_project",
-        "qualifiedId": "/no_project/holding_bin_no_site_no_project/x",
-        "qualifiedName": "/no_project/holding_bin/300",
+        "documentation": "something",
         "specialization": {
-            "isDerived": false,
+            "propertyType": null,
             "isSlot": false,
-            "type": "Property",
+            "isDerived": false,
             "value": [{
+                "valueExpression": null,
                 "string": "dlam_string",
                 "type": "LiteralString"
-            }]
+            }],
+            "type": "Property"
         },
-        "sysmlid": "x"
+        "editable": true,
+        "creator": "admin"
     }
 ]}

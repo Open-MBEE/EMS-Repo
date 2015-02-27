@@ -1,43 +1,7 @@
 {"elements":[
- 
-
-   {
-        "documentation": "",
-        "sysmlid": "notFoundTest",
-        "name": "notFoundTest",
-        "owner": "notFound",
-        "specialization": {"type": "Constraint",
-                          "specification":
-                            {"type": "OpaqueExpression",
-					         "expressionBody": ["foo8"]}
-					                     }
-    },
-    
     {
-        "documentation": "",
-        "sysmlid": "notFoundTest2",
-        "name": "notFoundTest2",
-        "owner": "notFound2",
-        "specialization": {"type": "Constraint",
-                          "specification":
-                            {"type": "OpaqueExpression",
-					         "expressionBody": ["foo8"]}
-					                     }
-    },
-     
-     
-    {
-        "documentation": "",
-        "sysmlid": "found",
-        "name": "found",
-        "owner": "123456",
-        "specialization": {"type": "Constraint",
-                          "specification":
-                            {"type": "OpaqueExpression",
-					         "expressionBody": ["foo8"]}
-					                     }
-    },
-     
-     
+    "sysmlid":"303",
+    "owner":"123456",
+    "documentation":"this will create a moved element",
+    "specialization":{"type":"Property"}}
 ]}
-
