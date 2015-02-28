@@ -593,7 +593,7 @@ public class ModelPost extends AbstractJavaWebScript {
             } else {
                 // Parent will be a reified package, which we never delete, so no need to
                 // check if we need to resurrect it.  If elementNode is deleted, it will
-                // resurrected later when processing that node.
+                // resurrected later when processing that node. 
                 owner = elementNode.getParent();
             }
         }
@@ -1731,26 +1731,27 @@ public class ModelPost extends AbstractJavaWebScript {
 
         // Error if posting a element with the same sysml name, type, and parent as another if the
         // name is non-empty and its not a Untyped type:
-        String sysmlName = elementJson.has( Acm.JSON_NAME ) ? elementJson.getString( Acm.JSON_NAME ) :
-                                                              existingNodeName;
-        if (!Utils.isNullOrEmpty( sysmlName ) && jsonType != null && !jsonType.equals( Acm.JSON_UNTYPED )
-            && id != null && parent != null) {
-            ArrayList<EmsScriptNode> nodeArray = findScriptNodesBySysmlName(sysmlName, workspace, null, false);
-
-            if (!Utils.isNullOrEmpty( nodeArray )) {
-                for (EmsScriptNode n : nodeArray) {
-                    if ( !id.equals( n.getSysmlId() ) &&
-                         jsonType.equals( n.getTypeName() ) &&
-                         parent.equals( n.getParent() ) ) {
-                        log(LogLevel.ERROR,"Found another element with the same sysml name: "
-                                           +n.getSysmlName()+" type: "+n.getTypeName()
-                                           +" parent: "+n.getParent()+" as the element trying to be posted",
-                            HttpServletResponse.SC_BAD_REQUEST);
-                        return null;
-                    }
-                }
-            }
-        }
+// FIXME: We still want to send a warning in the future, thought this can be a nightly check       
+//        String sysmlName = elementJson.has( Acm.JSON_NAME ) ? elementJson.getString( Acm.JSON_NAME ) :
+//                                                              existingNodeName;
+//        if (!Utils.isNullOrEmpty( sysmlName ) && jsonType != null && !jsonType.equals( Acm.JSON_UNTYPED )
+//            && id != null && parent != null) {
+//            ArrayList<EmsScriptNode> nodeArray = findScriptNodesBySysmlName(sysmlName, workspace, null, false);
+//
+//            if (!Utils.isNullOrEmpty( nodeArray )) {
+//                for (EmsScriptNode n : nodeArray) {
+//                    if ( !id.equals( n.getSysmlId() ) &&
+//                         jsonType.equals( n.getTypeName() ) &&
+//                         parent.equals( n.getParent() ) ) {
+//                        log(LogLevel.ERROR,"Found another element with the same sysml name: "
+//                                           +n.getSysmlName()+" type: "+n.getTypeName()
+//                                           +" parent: "+n.getParent()+" as the element trying to be posted",
+//                            HttpServletResponse.SC_BAD_REQUEST);
+//                        return null;
+//                    }
+//                }
+//            }
+//        }
 
         type = NodeUtil.getContentModelTypeName( acmSysmlType, services );
 

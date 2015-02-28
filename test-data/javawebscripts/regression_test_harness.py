@@ -1038,7 +1038,7 @@ create_curl_cmd(type="POST",data="cmed416_2.json",base_url=BASE_URL_WS,
                 post_type="elements",branch="master/"),
 False, 
 None,
-["test","workspaces","develop"]
+[]
 ],
 
 # DOWNGRADING: ==================    
