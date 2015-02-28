@@ -785,6 +785,8 @@ public class WorkspaceNode extends EmsScriptNode {
         json.put( "parent", getId(getParentWorkspace())); // this handles null as master
         String desc = (String)getProperty("ems:description");
         json.put( "description", Utils.isNullOrEmpty( desc ) ? "" : desc );
+        String permission = (String)getProperty("ems:permission");
+        json.put( "permission", Utils.isNullOrEmpty( permission ) ? "read" : permission );
 
         // REVIEW -- Why is ems:lastTimeSyncParent called the "branched"
         // date? Shouldn't the branched date always be the same as the created

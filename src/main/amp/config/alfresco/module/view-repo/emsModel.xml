@@ -157,6 +157,12 @@
                     <multiple>false</multiple>
                     <index enabled="false"/>
                 </property>
+                <property name="ems:permission">
+                    <type>d:text</type>
+                    <mandatory>false</mandatory>
+                    <multiple>false</multiple>
+                    <index enabled="false"/>
+                </property>
             </properties>
         </aspect>
         

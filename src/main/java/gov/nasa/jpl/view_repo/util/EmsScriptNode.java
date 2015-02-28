@@ -3755,7 +3755,7 @@ public class EmsScriptNode extends ScriptNode implements
             type = "cm:folder";
         }
 
-        parent.makeSureNodeRefIsNotFrozen(); // GG Added this
+        parent.makeSureNodeRefIsNotFrozen();
         EmsScriptNode node = parent.createNode( getName(), type );
         // EmsScriptNode node =  parent.createSysmlNode( getName(), type, modStatus, workspace );
 
@@ -3788,15 +3788,20 @@ public class EmsScriptNode extends ScriptNode implements
             node.setWorkspace( parent.getWorkspace(), this.getNodeRef() );
         }
 
-        // update ems:owner
-        if ( isModelElement() ) {
-            // everything is created in a reified package, so need to make
-            // relations to the reified node rather than the package
-            EmsScriptNode reifiedNode = node.setOwnerToReifiedNode( parent, parent.getWorkspace() );
-            if ( reifiedNode == null ) {
-                // TODO error handling
-            }
-        }
+        // We dont need to call setOwnerToReifiedNode() in clone() because getProperty()
+        // will always get the correct owner and ownedChildren.  So the node refs
+        // that owner/ownedChildren can be in the parent workspace that we are cloning 
+        // from.  This call leads to redudant node refs being added to ownedChildren, 
+        // as there will be a node ref for the parent workspace and this workspace also
+//        // update ems:owner
+//        if ( isModelElement() ) {
+//            // everything is created in a reified package, so need to make
+//            // relations to the reified node rather than the package
+//            EmsScriptNode reifiedNode = node.setOwnerToReifiedNode( parent, parent.getWorkspace());
+//            if ( reifiedNode == null ) {
+//                // TODO error handling
+//            }
+//        }
 
         node.checkedNodeVersion = false;
 
@@ -3961,39 +3966,53 @@ public class EmsScriptNode extends ScriptNode implements
 
     @Override
     public boolean move( ScriptNode destination ) {
-        if ( getParent().equals( destination ) ) {
-            return false;
+        
+        boolean status = false;
+        EmsScriptNode parent = getParent();
+        EmsScriptNode oldParentReifiedNode = parent.getReifiedNode();
+
+        // Create new parent if the parent is not correct:
+        if ( !parent.equals( destination ) ) {
+            
+            // in a move we need to track the parent, the current node, and the destination, just in case
+            getParent().makeSureNodeRefIsNotFrozen();
+            makeSureNodeRefIsNotFrozen();
+            EmsScriptNode dest = new EmsScriptNode(destination.getNodeRef(), services, response);
+            dest.makeSureNodeRefIsNotFrozen();
+            status = super.move( dest );
+    
+            if ( status ) {
+                // keep track of owners and children
+                if ( oldParentReifiedNode != null ) {
+                    oldParentReifiedNode.removeFromPropertyNodeRefs( "ems:ownedChildren",
+                                                                     this.getNodeRef() );
+                }
+    
+                EmsScriptNode newParent =
+                        new EmsScriptNode( destination.getNodeRef(), services,
+                                           response );
+                if (newParent != null) {
+                    setOwnerToReifiedNode( newParent, newParent.getWorkspace() );
+                }
+    
+                // make sure to move package as well
+                EmsScriptNode reifiedPkg = getReifiedPkg();
+                if ( reifiedPkg != null ) {
+                    reifiedPkg.move( destination );
+                }
+                
+                removeChildrenFromJsonCache();
+            }
+            
         }
-
-        EmsScriptNode oldParentPkg =
-                new EmsScriptNode( getParent().getNodeRef(), services, response );
-        // in a move we need to track the parent, the current node, and the destination, just in case
-        getParent().makeSureNodeRefIsNotFrozen();
-        makeSureNodeRefIsNotFrozen();
-        EmsScriptNode dest = new EmsScriptNode(destination.getNodeRef(), services, response);
-        dest.makeSureNodeRefIsNotFrozen();
-        boolean status = super.move( dest );
-
-        if ( status ) {
-            // keep track of owners and children
-            EmsScriptNode oldParentReifiedNode = oldParentPkg.getReifiedNode();
-
-            if ( oldParentReifiedNode != null ) {
-                oldParentReifiedNode.removeFromPropertyNodeRefs( "ems:ownedChildren",
-                                                                 this.getNodeRef() );
-            }
-
-            EmsScriptNode newParent =
-                    new EmsScriptNode( destination.getNodeRef(), services,
-                                       response );
-            if (newParent != null) {
-                setOwnerToReifiedNode( newParent, newParent.getWorkspace() );
-            }
-
-            // make sure to move package as well
-            EmsScriptNode reifiedPkg = getReifiedPkg();
-            if ( reifiedPkg != null ) {
-                reifiedPkg.move( destination );
+        // The parent was equal, but may need to update owner/ownedChildren in case the parent was
+        // cloned already in this workspace:
+        else {
+            EmsScriptNode owningParent = getOwningParent(null);
+            if ( oldParentReifiedNode != null && !oldParentReifiedNode.equals(owningParent)) {
+                owningParent.removeFromPropertyNodeRefs( "ems:ownedChildren", this.getNodeRef() );
+                setOwnerToReifiedNode( parent, parent.getWorkspace() );
+                status = true;
             }
             
             removeChildrenFromJsonCache();

@@ -1,58 +1,58 @@
 {
   "sequence": 1,
   "workspace1": {
-    "elements": [{
-      "creator": "admin",
-      "documentation": "",
-      "editable": true,
-      "id": "694ea1b6-5c90-4c2c-ad4f-fb0c3588c432",
-      "modified": "2015-02-18T14:07:07.041-0800",
-      "name": "6666_name",
-      "owner": "holding_bin_no_site_no_project",
-      "qualifiedId": "/no_site/no_project/holding_bin_no_site_no_project/6666",
-      "qualifiedName": "/no_site/no_project/holding_bin/6666_name",
-      "read": "2015-02-18T14:08:37.163-0800",
-      "specialization": {
-        "operand": [
-          {
-            "element": "300",
-            "type": "ElementValue",
-            "valueExpression": null
-          },
-          {
-            "element": "302",
-            "type": "ElementValue",
-            "valueExpression": null
-          }
-        ],
-        "type": "Expression",
-        "valueExpression": null
-      },
-      "sysmlid": "6666",
-      "version": "1.1"
-    }],
-    "id": "master",
-    "name": "master",
-    "qualifiedId": "master",
-    "qualifiedName": "master",
-    "timestamp": "2015-02-18T14:08:37.110-0800"
-  },
+  "timestamp": "2015-02-24T11:31:20.022-0800",
+  "qualifiedId": "master",
+  "id": "master",
+  "qualifiedName": "master",
+  "name": "master",
+  "elements": [{
+  "id": "4f0a7680-7347-4afe-b30f-7ca729c1664e",
+  "qualifiedId": "/no_site/no_project/holding_bin_no_site_no_project/6666",
+  "name": "6666_name",
+  "qualifiedName": "/no_site/no_project/holding_bin/6666_name",
+  "documentation": "",
+  "owner": "holding_bin_no_site_no_project",
+  "sysmlid": "6666",
+  "read": "2015-02-24T11:31:20.087-0800",
+  "specialization": {
+  "valueExpression": null,
+  "operand": [
+    {
+      "element": "300",
+      "valueExpression": null,
+      "type": "ElementValue"
+    },
+    {
+      "element": "302",
+      "valueExpression": null,
+      "type": "ElementValue"
+    }
+  ],
+  "type": "Expression"
+},
+  "editable": true,
+  "modified": "2015-02-24T11:29:51.946-0800",
+  "version": "1.1",
+  "creator": "admin"
+}]
+},
   "workspace2": {
-    "addedElements": [],
-    "conflictedElements": [],
-    "deletedElements": [{
-      "creator": "admin",
-      "modified": "2015-02-18T14:07:07.041-0800",
-      "read": "2015-02-18T14:08:46.039-0800",
-      "sysmlid": "6666"
-    }],
-    "id": "master",
-    "movedElements": [],
-    "name": "master",
-    "qualifiedId": "master",
-    "qualifiedName": "master",
-    "timestamp": "2015-02-18T14:08:37.163-0800",
-    "updatedElements": []
-  }
+  "timestamp": "2015-02-24T11:31:20.087-0800",
+  "qualifiedId": "master",
+  "id": "master",
+  "deletedElements": [{
+  "sysmlid": "6666",
+  "read": "2015-02-24T11:31:20.229-0800",
+  "creator": "admin",
+  "modified": "2015-02-24T11:29:51.946-0800"
+}],
+  "addedElements": [],
+  "conflictedElements": [],
+  "updatedElements": [],
+  "qualifiedName": "master",
+  "name": "master",
+  "movedElements": []
+}
 }
 200

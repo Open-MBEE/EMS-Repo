@@ -616,6 +616,11 @@ public class CommitUtil {
 	    if (prevCommit == null || currCommit == null) {
 	        return false;
 	    } else {
+	        if (!prevCommit.hasPermission( "Write" )) {
+	            logger.error("no permissions to write to previous commit: " + prevCommit);
+	            return false;
+	        }
+	        
 	        // FIXME: not sure why getting property is providing [null] array
 //            ArrayList< NodeRef > parentRefs = currCommit.getPropertyNodeRefs( "ems:commitParents" );
             @SuppressWarnings( "unchecked" )
@@ -693,6 +698,10 @@ public class CommitUtil {
             return null;
         } else {
             Date now = new Date();
+            if (!commitPkg.hasPermission("Write")) {
+                logger.error("No permissions to write to commit directory: " + commitPkg);
+                return null;
+            }
             EmsScriptNode currCommit = commitPkg.createNode("commit_" + now.getTime(), "cm:content");
             currCommit.createOrUpdateAspect( "cm:titled");
             if (msg != null) currCommit.createOrUpdateProperty("cm:description", msg);
