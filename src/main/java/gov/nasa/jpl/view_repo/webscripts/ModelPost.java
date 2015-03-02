@@ -413,20 +413,10 @@ public class ModelPost extends AbstractJavaWebScript {
             Timer.stopTimer(timerUpdateModel, "!!!!! createOrUpdateModel(): main loop time", timeEvents);
 
             sendProgress("Ingesting metadata", projectId, true);
-            if (runWithoutTransactions) {
-                ingestMetaData( targetWS, nodeMap, elements, singleElement, postJson );
-            }
-            else {
-                new EmsTransaction(getServices(), getResponse(), getResponseStatus() ) {
-                    @Override
-                    public void run() throws Exception {
-                        ingestMetaData( targetWS, nodeMap, elements, singleElement, postJson );
-                    }
-                };
-            }
-
+            // ingest wraps transactions internally
+            ingestMetaData( targetWS, nodeMap, elements, singleElement, postJson );
             internalRunWithoutTransactions = oldRunWithoutTransactions;
-
+            
             now = new Date();
             final long end = System.currentTimeMillis();
             log(LogLevel.INFO, "createOrUpdateModel completed" + now + " : " +  (end - start) + "ms\n");
@@ -457,28 +447,61 @@ public class ModelPost extends AbstractJavaWebScript {
     }
 
 
-    protected void ingestMetaData(WorkspaceNode workspace,
+    protected void ingestMetaData(final WorkspaceNode workspace,
                                   TreeMap<String, EmsScriptNode> nodeMap,
                                   TreeSet<EmsScriptNode> elements,
                                   boolean singleElement,
-                                  JSONObject postJson) throws Exception {
+                                  final JSONObject postJson) throws Exception {
 
         sendProgress("Processing metadata of "+rootElements.size()+" root elements", projectId, true);
 
-        TreeSet<EmsScriptNode> updatedElements = new TreeSet<EmsScriptNode>();
+        final TreeSet<EmsScriptNode> updatedElements = new TreeSet<EmsScriptNode>();
         
         if ( singleElement ) {
-            updatedElements.addAll( updateOrCreateElement( postJson, projectNode, workspace, true ) );
+            new EmsTransaction(getServices(), getResponse(), getResponseStatus(),
+                               runWithoutTransactions) {
+                @Override
+                public void run() throws Exception {
+                    updatedElements.addAll( updateOrCreateElement( postJson, projectNode, workspace, true ) );
+                }
+            };
         }
-        for (String rootElement : rootElements) {
+        
+        for (final String rootElement : rootElements) {
             log(LogLevel.INFO, "ROOT ELEMENT FOUND: " + rootElement);
-            if (projectNode == null || !rootElement.equals(projectNode.getProperty(Acm.CM_NAME))) {
-                EmsScriptNode owner = getOwner( rootElement, workspace, false );
+            final List<Boolean> projectFoundList = new ArrayList<Boolean>();
+            final List<EmsScriptNode> ownerList = new ArrayList<EmsScriptNode>();
+            
+            new EmsTransaction(getServices(), getResponse(), getResponseStatus(),
+                               runWithoutTransactions ) {
+                @Override
+                public void run() throws Exception {
+                    boolean projectFound = false; 
+                    if (projectNode != null) {
+                        projectFound = rootElement.equals(projectNode.getProperty(Acm.CM_NAME));
+                        projectFoundList.add( projectFound );
+                    }
+                    if (projectNode == null || !projectFound) {
+                        EmsScriptNode owner = getOwner( rootElement, workspace, false );
+                        ownerList.add( owner );
+                    }
+                }
+            };
 
+            boolean projectFound = projectFoundList.isEmpty() ? false : projectFoundList.get( 0 );
+            final EmsScriptNode owner = ownerList.isEmpty() ? null : ownerList.get( 0 );
+            
+            if (projectNode == null || !projectFound) {
                 try {
                     if (owner != null) {
-                        updatedElements.addAll( updateOrCreateElement( elementMap.get( rootElement ),
-                                                                owner, workspace, true ) );
+                        new EmsTransaction(getServices(), getResponse(), getResponseStatus(),
+                                           runWithoutTransactions) {
+                            @Override
+                            public void run() throws Exception {
+                                updatedElements.addAll( updateOrCreateElement( elementMap.get( rootElement ),
+                                                                               owner, workspace, true ) );
+                            }
+                        };
                     }
                 } catch ( JSONException e ) {
                     e.printStackTrace();
