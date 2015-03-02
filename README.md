@@ -424,7 +424,7 @@ You also need to set the RMI ports.  By default, these port numbers start with 5
     wcm-deployment-receiver.rmi.service.port=0
     monitor.rmi.service.port=0
 
-The tomcat port (ex. 9091) and the debug port (ex. 10002) may or may not be opened in the firewall.  You may need to open these to access the server locally, and they must be open to access the server remotely.  The instructions variy for different versions of operating systems and are not included here.  For reference, here are some commands that may help you for a linux OS:
+The tomcat port (ex. 9091) and the debug port (ex. 10002) may or may not be opened in the firewall.  You may need to open these to access the server locally, and they must be open to access the server remotely.  The instructions vary for different versions of operating systems and are not included here.  For reference, here are some commands that may help you for a linux OS:
 
 
     # see what ports are open (LISTEN)
