@@ -63,6 +63,7 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
  * @author cinyoung
  *
  */
+@Deprecated
 public class ViewModelPost extends ModelPost {
     public ViewModelPost() {
         super();
