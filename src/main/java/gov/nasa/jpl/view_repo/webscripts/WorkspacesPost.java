@@ -241,15 +241,12 @@ public class WorkspacesPost extends AbstractJavaWebScript{
         }
         
         // Finally, apply the permissions:
-        // TODO issues removing permissions.  Do we need to do this?
         if (finalWorkspace != null) {
             if (permission.equals( "write" )) {
-                //finalWorkspace.removePermission( "SiteConsumer", "GROUP_EVERYONE" );
                 finalWorkspace.setPermission( "SiteCollaborator", "GROUP_EVERYONE" );
             }
-            // Default is read (this handles the empty string case)
+            // Default is read (this handles the empty string case also)
             else {
-                //finalWorkspace.removePermission( "SiteCollaborator", "GROUP_EVERYONE" );
                 finalWorkspace.setPermission( "SiteConsumer", "GROUP_EVERYONE" );
             }
             finalWorkspace.createOrUpdateProperty( "ems:permission", permission );
