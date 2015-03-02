@@ -124,9 +124,11 @@ public class ModelPost extends AbstractJavaWebScript {
     // Set the flag to time events that occur during a model post using the timers
     // below
     public static boolean timeEvents = false;
+    public static boolean timeCleanJsonCache = false;
     private Timer timerCommit = null;
     private Timer timerIngest = null;
     private Timer timerUpdateModel = null;
+    private Timer cleanJsonCacheTimer = null;
 
     private final String ELEMENTS = "elements";
 
@@ -431,6 +433,10 @@ public class ModelPost extends AbstractJavaWebScript {
             final long end = System.currentTimeMillis();
             log(LogLevel.INFO, "createOrUpdateModel completed" + now + " : " +  (end - start) + "ms\n");
 
+            cleanJsonCacheTimer = Timer.startTimer(cleanJsonCacheTimer, timeEvents);
+            cleanJsonCache();
+            Timer.stopTimer( cleanJsonCacheTimer, "cacheClean time", timeEvents );
+            
             timerUpdateModel = Timer.startTimer(timerUpdateModel, timeEvents);
 
             // Send deltas to all listeners
@@ -455,7 +461,6 @@ public class ModelPost extends AbstractJavaWebScript {
 
         return new TreeSet< EmsScriptNode >( nodeMap.values() );
     }
-
 
     protected void ingestMetaData(WorkspaceNode workspace,
                                   TreeMap<String, EmsScriptNode> nodeMap,

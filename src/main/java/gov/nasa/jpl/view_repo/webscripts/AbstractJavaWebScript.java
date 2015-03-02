@@ -30,6 +30,8 @@ package gov.nasa.jpl.view_repo.webscripts;
 
 import gov.nasa.jpl.mbee.util.Debug;
 import gov.nasa.jpl.mbee.util.Pair;
+import gov.nasa.jpl.mbee.util.Seen;
+import gov.nasa.jpl.mbee.util.SeenHashSet;
 import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.actions.ActionUtil;
@@ -45,7 +47,10 @@ import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.Map;
+import java.util.Set;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -95,7 +100,8 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
     // when run in background as an action, this needs to be false
     public boolean runWithoutTransactions = defaultRunWithoutTransactions;
 	protected ScriptNode companyhome;
-	protected Map<String, EmsScriptNode> foundElements = new HashMap<String, EmsScriptNode>();
+	protected Map<String, EmsScriptNode> foundElements = new LinkedHashMap<String, EmsScriptNode>();
+    protected Map<String, EmsScriptNode> movedAndRenamedElements = new LinkedHashMap<String, EmsScriptNode>();
 
 	// needed for Lucene search
 	protected static final StoreRef SEARCH_STORE = new StoreRef(StoreRef.PROTOCOL_WORKSPACE, "SpacesStore");
@@ -164,6 +170,43 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
             Debug.turnOff();
         }
 	}
+	
+    protected void cleanJsonCache() {
+        Map< String, EmsScriptNode > nodesToClean = new LinkedHashMap< String, EmsScriptNode >();
+        
+        Seen< String > seen = new SeenHashSet< String >();
+        for ( EmsScriptNode node : foundElements.values() ) {
+            if ( node.renamed || node.moved ) {
+                String sysmlId = node.getSysmlId();
+                collectChildNodesToClean( sysmlId, node, nodesToClean, seen );
+            }
+        }
+        
+        for ( EmsScriptNode node : nodesToClean.values() ) {
+            node.removeFromJsonCache( false );
+        }
+    }
+    
+    protected void collectChildNodesToClean( String id, EmsScriptNode node,
+                                             Map< String, EmsScriptNode > nodesToClean,
+                                             Seen< String > seen ) {
+        //String sysmlId = node.getSysmlId();
+        
+        Pair< Boolean, Seen< String > > p = Utils.seen( id, true, seen );
+        if ( p.first ) return;
+        seen = p.second;
+
+        ArrayList< NodeRef > children = node.getOwnedChildren( true );
+        for ( NodeRef ref : children ) {
+            EmsScriptNode childNode = new EmsScriptNode( ref, getServices() );
+            String sysmlId = childNode.getSysmlId();
+            if ( foundElements.containsKey( sysmlId ) ) continue;
+            if ( nodesToClean.containsKey( sysmlId ) ) continue;
+            nodesToClean.put( sysmlId, childNode );
+            collectChildNodesToClean( sysmlId, childNode, nodesToClean, seen );
+        }
+
+    }
 
     abstract protected Map< String, Object > executeImplImpl( final WebScriptRequest req,
                                                               final Status status,
