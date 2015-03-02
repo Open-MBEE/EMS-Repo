@@ -894,7 +894,11 @@ public class ModelPost extends AbstractJavaWebScript {
             return elements;
         }
         String jsonId = elementJson.getString( Acm.JSON_ID );
-        final EmsScriptNode element = findScriptNodeById( jsonId, workspace, null, true );
+        
+        // Only try a node search on the first pass, on the second pass it should be in the
+        // fondElements:
+        final EmsScriptNode element = ingest ? foundElements.get(jsonId) :
+                                               findScriptNodeById( jsonId, workspace, null, true );
         if ( element != null ) {
             elements.add( element );
             nodeMap.put( element.getName(), element );
@@ -1827,29 +1831,34 @@ public class ModelPost extends AbstractJavaWebScript {
                     if ( Debug.isOn() ) Debug.outln("moving node <<<" + nodeToUpdate + ">>>");
                     if ( Debug.isOn() ) Debug.outln("to parent <<<" + parent + ">>>");
 
-                    // don't have to move on second pass
-                    if ( !ingest && nodeToUpdate.move(parent) ) {
-                        modStatus.setState( ModStatus.State.MOVED  );
+                    // Not ingesting metadata, ie first pass:
+                    if (!ingest) {
+                        // don't have to move on second pass
+                        if (nodeToUpdate.move(parent) ) {
+                            modStatus.setState( ModStatus.State.MOVED  );
+                        }
+    
+                        // Resurrect any parent nodes if needed:
+                        // Note: nested nodes shouldn't ever need this, as their parents will already
+                        //       be resurrected before they are processed via processValueSpecProperty().
+                        //  don't have to resurrect on second pass
+                        if (!nestedNode) {
+                            resurrectParents(nodeToUpdate, ingest, workspace);
+                        }
                     }
-
-                    // Resurrect any parent nodes if needed:
-                    // Note: nested nodes shouldn't ever need this, as their parents will already
-                    //       be resurrected before they are processed via processValueSpecProperty().
-                    //  don't have to resurrect on second pass
-                    if (!nestedNode && !ingest) {
-                        resurrectParents(nodeToUpdate, ingest, workspace);
-                    }
-
-                    // Update the aspect if the type has changed and its a aspect, or if it is
-                    // being changed to an Element.  Need to call this for Elements for downgrading,
-                    // which will remove all of the needed aspects.
-                    if ( ingest && ( (!type.equals( acmSysmlType ) && NodeUtil.isAspect( acmSysmlType )) || 
-                                      acmSysmlType.equals(Acm.ACM_ELEMENT) ) ) {
-                        
-                        checkForObsoleteValueSpecs(acmSysmlType, nodeToUpdate, workspace, ingest);
-                        
-                        if (nodeToUpdate.createOrUpdateAspect( acmSysmlType )) {
-                            modStatus.setState( ModStatus.State.UPDATED  );
+                    // Ingesting metadata, ie second pass:
+                    else {
+                        // Update the aspect if the type has changed and its a aspect, or if it is
+                        // being changed to an Element.  Need to call this for Elements for downgrading,
+                        // which will remove all of the needed aspects.
+                        if ( (!type.equals( acmSysmlType ) && NodeUtil.isAspect( acmSysmlType )) || 
+                              acmSysmlType.equals(Acm.ACM_ELEMENT)  ) {
+                            
+                            checkForObsoleteValueSpecs(acmSysmlType, nodeToUpdate, workspace, ingest);
+                            
+                            if (nodeToUpdate.createOrUpdateAspect( acmSysmlType )) {
+                                modStatus.setState( ModStatus.State.UPDATED  );
+                            }
                         }
                     }
                 }
