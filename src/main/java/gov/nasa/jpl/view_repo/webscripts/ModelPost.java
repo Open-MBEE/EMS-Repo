@@ -1126,7 +1126,7 @@ public class ModelPost extends AbstractJavaWebScript {
                     }
                     break;
                 case DELETED:
-                    if (ingest && !wsDiff.getDeletedElements().containsKey( jsonId )) {
+                    if (!ingest && !wsDiff.getDeletedElements().containsKey( jsonId )) {
                         wsDiff.getDeletedElements().put( jsonId,  element );
                         if (element.exists()) {
                             element.removeAspect( "ems:Added" );
@@ -1822,14 +1822,16 @@ public class ModelPost extends AbstractJavaWebScript {
                     if ( Debug.isOn() ) Debug.outln("moving node <<<" + nodeToUpdate + ">>>");
                     if ( Debug.isOn() ) Debug.outln("to parent <<<" + parent + ">>>");
 
-                    if ( nodeToUpdate.move(parent) ) {
+                    // don't have to move on second pass
+                    if ( !ingest && nodeToUpdate.move(parent) ) {
                         modStatus.setState( ModStatus.State.MOVED  );
                     }
 
                     // Resurrect any parent nodes if needed:
                     // Note: nested nodes shouldn't ever need this, as their parents will already
                     //       be resurrected before they are processed via processValueSpecProperty().
-                    if (!nestedNode) {
+                    //  don't have to resurrect on second pass
+                    if (!nestedNode && !ingest) {
                         resurrectParents(nodeToUpdate, ingest, workspace);
                     }
 
