@@ -14,6 +14,7 @@ import org.apache.log4j.Logger;
 import org.springframework.extensions.webscripts.Status;
 
 public abstract class EmsTransaction {
+    public static boolean syncTransactions = false;
     static Logger logger = Logger.getLogger(EmsTransaction.class);
     // injected members
     protected ServiceRegistry services;     // get any of the Alfresco services
@@ -28,8 +29,8 @@ public abstract class EmsTransaction {
         this.response = response;
         this.responseStatus = responseStatus;
         this.services = services;
-        Timer timerCommit = null;
         if ( noTransaction ) {
+            // run without transactions
             try {
                 run();
             } catch ( Throwable e ) {
@@ -37,17 +38,16 @@ public abstract class EmsTransaction {
             }
             return;
         }
-        UserTransaction trx;
-        trx = services.getTransactionService().getNonPropagatingUserTransaction();
+        // run with transactions
+        UserTransaction trx = services.getTransactionService().getNonPropagatingUserTransaction();
         try {
-            trx.begin();
-            NodeUtil.setInsideTransactionNow( true );
-            
-            run();
-            
-            timerCommit = Timer.startTimer(timerCommit, NodeUtil.timeEvents);
-            trx.commit();
-            Timer.stopTimer(timerCommit, "!!!!! EmsTransaction commit time", NodeUtil.timeEvents);
+            if ( syncTransactions ) {
+                synchronized ( logger ) {
+                    transactionWrappedRun( trx );
+                }
+            } else {
+                transactionWrappedRun( trx );
+            }
         } catch (Throwable e) {
             tryRollback( trx, e, "DB transaction failed" );
             if (responseStatus.getCode() != HttpServletResponse.SC_BAD_REQUEST) {
@@ -58,6 +58,18 @@ public abstract class EmsTransaction {
             NodeUtil.setInsideTransactionNow( false );
         }
         
+    }
+    
+    protected void transactionWrappedRun( UserTransaction trx ) throws Throwable {
+        Timer timerCommit = null;
+        trx.begin();
+        NodeUtil.setInsideTransactionNow( true );
+        
+        run();
+        
+        timerCommit = Timer.startTimer(timerCommit, NodeUtil.timeEvents);
+        trx.commit();
+        Timer.stopTimer(timerCommit, "!!!!! EmsTransaction commit time", NodeUtil.timeEvents);
     }
     
     abstract public void run() throws Exception;

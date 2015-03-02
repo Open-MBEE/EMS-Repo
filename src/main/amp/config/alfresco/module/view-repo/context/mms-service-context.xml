@@ -42,6 +42,10 @@
         class="gov.nasa.jpl.view_repo.webscripts.JsonStringCacheGet"
         parent="webscript">
     </bean>
+    <bean id="webscript.gov.nasa.jpl.utils.synctransactions.get"
+        class="gov.nasa.jpl.view_repo.webscripts.SyncTransactionsGet"
+        parent="webscript">
+    </bean>
     <bean id="webscript.gov.nasa.jpl.utils.timeevents.get"
         class="gov.nasa.jpl.view_repo.webscripts.TimeEventsGet"
         parent="webscript">
