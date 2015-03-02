@@ -42,14 +42,10 @@ import javax.servlet.http.HttpServletResponse;
 import org.alfresco.repo.model.Repository;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.security.PermissionService;
-
 import org.json.JSONArray;
-
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import org.json.JSONObject;
-
 import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
@@ -237,7 +233,11 @@ public class ProjectPost extends AbstractJavaWebScript {
 			projectNode.setProperty(Acm.ACM_TYPE, "Project");
             if (projectName != null) {
     			projectNode.setProperty(Acm.CM_TITLE, projectName);
-                projectNode.setProperty(Acm.ACM_NAME, projectName);
+    			String oldName = (String)projectNode.getProperty( Acm.ACM_NAME );
+    			if ( !projectName.equals( oldName ) ) {
+    			    projectNode.setProperty(Acm.ACM_NAME, projectName);
+    			    projectNode.removeChildrenFromJsonCache( true );
+    			}
             }
 			if (projectVersion != null) {
 			    projectNode.setProperty(Acm.ACM_PROJECT_VERSION, projectVersion);
