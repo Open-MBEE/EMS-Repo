@@ -132,16 +132,13 @@ public abstract class EmsTransaction {
     }
     
     protected void transactionWrappedRun( UserTransaction trx ) throws Throwable {
-        Timer timerCommit = null;
         trx.begin();
         NodeUtil.setInsideTransactionNow( true );
         
         run();
-        
-        timerCommit = Timer.startTimer(timerCommit, NodeUtil.timeEvents);
+
         UserTransaction commitTrx = NodeUtil.getTransaction();
-        commitTrx.commit();
-        Timer.stopTimer(timerCommit, "!!!!! EmsTransaction commit time", NodeUtil.timeEvents);
+        commit( commitTrx );
     }
 
     protected void commit( UserTransaction trx ) throws SecurityException,

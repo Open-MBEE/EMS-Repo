@@ -106,76 +106,76 @@ public class NodeUtil {
 
     protected static String txMutex = "";
     protected static boolean beenInsideTransaction = false;
-    protected static Map< String, Boolean > beenInsideTransactionMap =
-            new LinkedHashMap< String, Boolean >();
+    protected static Map< Long, Boolean > beenInsideTransactionMap =
+            new LinkedHashMap< Long, Boolean >();
 
     public static synchronized boolean hasBeenInsideTransaction() {
-        Boolean b = beenInsideTransactionMap.get( "" + Thread.currentThread().getId());
+        Boolean b = beenInsideTransactionMap.get( Thread.currentThread().getId());
         if ( b != null ) return b;
         return beenInsideTransaction;
     }
     public static synchronized void setBeenInsideTransaction( boolean b ) {
         beenInsideTransaction = b;
-        beenInsideTransactionMap.put( "" + Thread.currentThread().getId(), b );
+        beenInsideTransactionMap.put( Thread.currentThread().getId(), b );
     }
     protected static boolean beenOutsideTransaction = false;
-    protected static Map< String, Boolean > beenOutsideTransactionMap =
-            new LinkedHashMap< String, Boolean >();
+    protected static Map< Long, Boolean > beenOutsideTransactionMap =
+            new LinkedHashMap< Long, Boolean >();
     public static synchronized boolean hasBeenOutsideTransaction() {
-        Boolean b = beenOutsideTransactionMap.get( "" + Thread.currentThread().getId());
+        Boolean b = beenOutsideTransactionMap.get( Thread.currentThread().getId());
         if ( b != null ) return b;
         return beenOutsideTransaction;
     }
     public static synchronized void setBeenOutsideTransaction( boolean b ) {
         beenOutsideTransaction = b;
-        beenOutsideTransactionMap.put( "" + Thread.currentThread().getId(), b );
+        beenOutsideTransactionMap.put( Thread.currentThread().getId(), b );
     }
     protected static boolean insideTransactionNow = false;
-    protected static Map< String, Boolean > insideTransactionNowMap =
-            new LinkedHashMap< String, Boolean >();
-    protected static Map< String, UserTransaction > transactionMap =
-            Collections.synchronizedMap( new LinkedHashMap< String, UserTransaction >() );
+    protected static Map< Long, Boolean > insideTransactionNowMap =
+            new LinkedHashMap< Long, Boolean >();
+    protected static Map< Long, UserTransaction > transactionMap =
+            Collections.synchronizedMap( new LinkedHashMap< Long, UserTransaction >() );
     public static synchronized boolean isInsideTransactionNow() {
-        Boolean b = insideTransactionNowMap.get( "" + Thread.currentThread().getId());
+        Boolean b = insideTransactionNowMap.get( Thread.currentThread().getId());
         if ( b != null ) return b;
         return insideTransactionNow;
     }
     public static UserTransaction getTransaction() {
-        return transactionMap.get( "" + Thread.currentThread().getId() );
+        return transactionMap.get( Thread.currentThread().getId() );
     }
     public static UserTransaction createTransaction() {
         UserTransaction trx =
                 services.getTransactionService().getNonPropagatingUserTransaction();
-        transactionMap.put( "" + Thread.currentThread().getId(), trx );
+        transactionMap.put( Thread.currentThread().getId(), trx );
         return trx;
     }
     public static synchronized void setInsideTransactionNow( boolean b ) {
         insideTransactionNow = b;
-        insideTransactionNowMap.put( "" + Thread.currentThread().getId(), b );
+        insideTransactionNowMap.put( Thread.currentThread().getId(), b );
     }
-    protected static Map< String, StackTraceElement[] > insideTransactionStrackTrace =
-            new LinkedHashMap< String, StackTraceElement[] >();
-    protected static Map< String, StackTraceElement[] > outsideTransactionStrackTrace =
-            new LinkedHashMap< String, StackTraceElement[] >();
+    protected static Map< Long, StackTraceElement[] > insideTransactionStrackTrace =
+            new LinkedHashMap< Long, StackTraceElement[] >();
+    protected static Map< Long, StackTraceElement[] > outsideTransactionStrackTrace =
+            new LinkedHashMap< Long, StackTraceElement[] >();
     public static void setInsideTransactionStackTrace() {
-        insideTransactionStrackTrace.put( "" + Thread.currentThread().getId(),
+        insideTransactionStrackTrace.put( Thread.currentThread().getId(),
                                           Thread.currentThread().getStackTrace() );
     }
     public static void setOutsideTransactionStackTrace() {
-        outsideTransactionStrackTrace.put( "" + Thread.currentThread().getId(),
+        outsideTransactionStrackTrace.put( Thread.currentThread().getId(),
                                            Thread.currentThread().getStackTrace() );
     }
     public static StackTraceElement[] getInsideTransactionStackTrace() {
-        return insideTransactionStrackTrace.get( "" + Thread.currentThread().getId() );
+        return insideTransactionStrackTrace.get( Thread.currentThread().getId() );
     }
     public static StackTraceElement[] getOutsideTransactionStackTrace() {
-        return outsideTransactionStrackTrace.get( "" + Thread.currentThread().getId() );
+        return outsideTransactionStrackTrace.get( Thread.currentThread().getId() );
     }
 
     public static boolean doFullCaching = false;
     public static boolean doSimpleCaching = true;
     public static boolean doHeisenCheck = true;
-    public static boolean doVersionCaching = false; // turn this off by default
+    public static boolean doVersionCaching = true; // turn this off by default
     public static boolean activeVersionCaching = true;
     public static boolean doJsonCaching = false;
     public static boolean doJsonDeepCaching = false;
