@@ -148,6 +148,8 @@ public class WorkspacesPost extends AbstractJavaWebScript{
         String workspaceName = null;
         String desc = null;
         Date copyTime = null;
+        String permission = "read";  // Default is public read permission
+        WorkspaceNode finalWorkspace = null;
 
         // If the workspace is supplied in the json object then get all parameters from there
         // and ignore any URL parameters:
@@ -160,6 +162,7 @@ public class WorkspacesPost extends AbstractJavaWebScript{
             workspaceName = wsJson.optString( "name", null ); // user or auto-generated name, ems:workspace_name
             copyTime = TimeUtils.dateFromTimestamp( wsJson.optString( "branched", null ) );
             desc = wsJson.optString( "description", null );
+            permission = wsJson.optString( "permission", "read" );  // "read" or "write"
         }
         // If no json object given, this is mainly for backwards compatibility:
         else {
@@ -195,10 +198,9 @@ public class WorkspacesPost extends AbstractJavaWebScript{
 
                 if (dstWs != null) {
                     // keep history of the branch
-                    CommitUtil.branch( srcWs, dstWs,"", true, services, response );
-                    return dstWs;
+                    CommitUtil.branch( srcWs, dstWs,"", true, services, response );                    
+                    finalWorkspace = dstWs;
                 }
-                return null;
             }
         }
         // Otherwise, update the workspace:
@@ -229,7 +231,7 @@ public class WorkspacesPost extends AbstractJavaWebScript{
                 if (desc != null) {
                     existingWs.createOrUpdateProperty("ems:description", desc);
                 }
-                return existingWs;
+                finalWorkspace = existingWs;
             }
             else {
                 log(LogLevel.WARNING, "Workspace not found.", HttpServletResponse.SC_NOT_FOUND);
@@ -237,7 +239,20 @@ public class WorkspacesPost extends AbstractJavaWebScript{
                 return null;
             }
         }
-
+        
+        // Finally, apply the permissions:
+        if (finalWorkspace != null) {
+            if (permission.equals( "write" )) {
+                finalWorkspace.setPermission( "SiteCollaborator", "GROUP_EVERYONE" );
+            }
+            // Default is read (this handles the empty string case also)
+            else {
+                finalWorkspace.setPermission( "SiteConsumer", "GROUP_EVERYONE" );
+            }
+            finalWorkspace.createOrUpdateProperty( "ems:permission", permission );
+        }
+        
+        return finalWorkspace;
     }
 
 }

@@ -391,7 +391,53 @@ Note: Following shortcuts are mainly for Linux.
 	refresh view-share page
 	the final, integrated content model is displayed in view-share in your dashboard (under sites) and in Repository
 	
-### Running with a Tomcat with a different port on Maven
+### Running Multiple Alfrescos with Tomcat on Different Ports via Maven
 
-So you don't clash with other users, run using something like -Dmaven.tomcat.port=9091.
-	
+You may be able to run multiple alfresco servers on the same machine by changing ports used and permissions to a file.  
+
+You may have problems opening a file resulting in a lot of exceptions and SEVERE errors when bringing up alfresco.  You may need write access to /tmp/Alfresco.  One way to do this:
+
+    sudo chmod 777 /tmp/Alfresco
+
+There's a way to specify a different file so that permissions are not an issue.  TODO: What is it?
+
+There are port assignments that must be unique.  Remember that these are specified for the alfresco-view-share as well as the alfresco-view-repo.  You may be able to avoid changing ports if you can configure the server to use a different ip address: http://www.appnovation.com/blog/running-multiple-alfresco-server-instances-same-linux-machine.
+
+To have the alfresco web server run on a different port add -Dmaven.tomcat.port=9091 to the command line options (such as in runserver.sh).  To run the regression test on this server, you need to edit test-data/javawebscripts/regression_lib.py and set the host to the new port:
+
+    HOST="localhost:9091"
+
+The port for connecting a debugger must also be unique.  You probably have this specified as 10000 in your MAVEN_OPTS environment variable.  Change it to something like 10002:
+
+    -Xrunjdwp:transport=dt_socket,address=10002
+
+There are instructions elsewhere on this page on how to change MAVEN_OPTS.
+
+You also need to set the RMI ports.  By default, these port numbers start with 50500.  If you don't set these to be different than a running server, you'll see "java.rmi.server.ExportException: Port already in use: 50501," and alfresco won't work.  You can assign the ports to 0 so that the they are chosen randomly from unused ports.  Edit view-repo/src/test/properties/local/alfresco-global.properties and add/edit to include the following assignments: 
+
+    avm.rmi.service.port=0
+    avmsync.rmi.service.port=0
+    attribute.rmi.service.port=0
+    authentication.rmi.service.port=0
+    repo.rmi.service.port=0
+    action.rmi.service.port=0
+    wcm-deployment-receiver.rmi.service.port=0
+    monitor.rmi.service.port=0
+
+The tomcat port (ex. 9091) and the debug port (ex. 10002) may or may not be opened in the firewall.  You may need to open these to access the server locally, and they must be open to access the server remotely.  The instructions vary for different versions of operating systems and are not included here.  For reference, here are some commands that may help you for a linux OS:
+
+
+    # see what ports are open (LISTEN)
+    sudo netstat -anp
+
+    # edit iptables to add ports to open
+    sudo vi /etc/sysconfig/iptables 
+    
+    # restart iptables
+    sudo /etc/init.d/iptables restart
+    
+    # if that didn't open ports, restart network
+    sudo /etc/init.d/network restart
+    
+If on the amazon cloud, the ports may also need to be opened from the AWS console.
+

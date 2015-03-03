@@ -413,20 +413,10 @@ public class ModelPost extends AbstractJavaWebScript {
             Timer.stopTimer(timerUpdateModel, "!!!!! createOrUpdateModel(): main loop time", timeEvents);
 
             sendProgress("Ingesting metadata", projectId, true);
-            if (runWithoutTransactions) {
-                ingestMetaData( targetWS, nodeMap, elements, singleElement, postJson );
-            }
-            else {
-                new EmsTransaction(getServices(), getResponse(), getResponseStatus() ) {
-                    @Override
-                    public void run() throws Exception {
-                        ingestMetaData( targetWS, nodeMap, elements, singleElement, postJson );
-                    }
-                };
-            }
-
+            // ingest wraps transactions internally
+            ingestMetaData( targetWS, nodeMap, elements, singleElement, postJson );
             internalRunWithoutTransactions = oldRunWithoutTransactions;
-
+            
             now = new Date();
             final long end = System.currentTimeMillis();
             log(LogLevel.INFO, "createOrUpdateModel completed" + now + " : " +  (end - start) + "ms\n");
@@ -457,28 +447,61 @@ public class ModelPost extends AbstractJavaWebScript {
     }
 
 
-    protected void ingestMetaData(WorkspaceNode workspace,
+    protected void ingestMetaData(final WorkspaceNode workspace,
                                   TreeMap<String, EmsScriptNode> nodeMap,
                                   TreeSet<EmsScriptNode> elements,
                                   boolean singleElement,
-                                  JSONObject postJson) throws Exception {
+                                  final JSONObject postJson) throws Exception {
 
         sendProgress("Processing metadata of "+rootElements.size()+" root elements", projectId, true);
 
-        TreeSet<EmsScriptNode> updatedElements = new TreeSet<EmsScriptNode>();
+        final TreeSet<EmsScriptNode> updatedElements = new TreeSet<EmsScriptNode>();
         
         if ( singleElement ) {
-            updatedElements.addAll( updateOrCreateElement( postJson, projectNode, workspace, true ) );
+            new EmsTransaction(getServices(), getResponse(), getResponseStatus(),
+                               runWithoutTransactions) {
+                @Override
+                public void run() throws Exception {
+                    updatedElements.addAll( updateOrCreateElement( postJson, projectNode, workspace, true ) );
+                }
+            };
         }
-        for (String rootElement : rootElements) {
+        
+        for (final String rootElement : rootElements) {
             log(LogLevel.INFO, "ROOT ELEMENT FOUND: " + rootElement);
-            if (projectNode == null || !rootElement.equals(projectNode.getProperty(Acm.CM_NAME))) {
-                EmsScriptNode owner = getOwner( rootElement, workspace, false );
+            final List<Boolean> projectFoundList = new ArrayList<Boolean>();
+            final List<EmsScriptNode> ownerList = new ArrayList<EmsScriptNode>();
+            
+            new EmsTransaction(getServices(), getResponse(), getResponseStatus(),
+                               runWithoutTransactions ) {
+                @Override
+                public void run() throws Exception {
+                    boolean projectFound = false; 
+                    if (projectNode != null) {
+                        projectFound = rootElement.equals(projectNode.getProperty(Acm.CM_NAME));
+                        projectFoundList.add( projectFound );
+                    }
+                    if (projectNode == null || !projectFound) {
+                        EmsScriptNode owner = getOwner( rootElement, workspace, false );
+                        ownerList.add( owner );
+                    }
+                }
+            };
 
+            boolean projectFound = projectFoundList.isEmpty() ? false : projectFoundList.get( 0 );
+            final EmsScriptNode owner = ownerList.isEmpty() ? null : ownerList.get( 0 );
+            
+            if (projectNode == null || !projectFound) {
                 try {
                     if (owner != null) {
-                        updatedElements.addAll( updateOrCreateElement( elementMap.get( rootElement ),
-                                                                owner, workspace, true ) );
+                        new EmsTransaction(getServices(), getResponse(), getResponseStatus(),
+                                           runWithoutTransactions) {
+                            @Override
+                            public void run() throws Exception {
+                                updatedElements.addAll( updateOrCreateElement( elementMap.get( rootElement ),
+                                                                               owner, workspace, true ) );
+                            }
+                        };
                     }
                 } catch ( JSONException e ) {
                     e.printStackTrace();
@@ -593,7 +616,7 @@ public class ModelPost extends AbstractJavaWebScript {
             } else {
                 // Parent will be a reified package, which we never delete, so no need to
                 // check if we need to resurrect it.  If elementNode is deleted, it will
-                // resurrected later when processing that node.
+                // resurrected later when processing that node. 
                 owner = elementNode.getParent();
             }
         }
@@ -889,7 +912,11 @@ public class ModelPost extends AbstractJavaWebScript {
             return elements;
         }
         String jsonId = elementJson.getString( Acm.JSON_ID );
-        final EmsScriptNode element = findScriptNodeById( jsonId, workspace, null, true );
+        
+        // Only try a node search on the first pass, on the second pass it should be in the
+        // fondElements:
+        final EmsScriptNode element = ingest ? foundElements.get(jsonId) :
+                                               findScriptNodeById( jsonId, workspace, null, true );
         if ( element != null ) {
             elements.add( element );
             nodeMap.put( element.getName(), element );
@@ -1126,7 +1153,7 @@ public class ModelPost extends AbstractJavaWebScript {
                     }
                     break;
                 case DELETED:
-                    if (ingest && !wsDiff.getDeletedElements().containsKey( jsonId )) {
+                    if (!ingest && !wsDiff.getDeletedElements().containsKey( jsonId )) {
                         wsDiff.getDeletedElements().put( jsonId,  element );
                         if (element.exists()) {
                             element.removeAspect( "ems:Added" );
@@ -1731,26 +1758,27 @@ public class ModelPost extends AbstractJavaWebScript {
 
         // Error if posting a element with the same sysml name, type, and parent as another if the
         // name is non-empty and its not a Untyped type:
-        String sysmlName = elementJson.has( Acm.JSON_NAME ) ? elementJson.getString( Acm.JSON_NAME ) :
-                                                              existingNodeName;
-        if (!Utils.isNullOrEmpty( sysmlName ) && jsonType != null && !jsonType.equals( Acm.JSON_UNTYPED )
-            && id != null && parent != null) {
-            ArrayList<EmsScriptNode> nodeArray = findScriptNodesBySysmlName(sysmlName, workspace, null, false);
-
-            if (!Utils.isNullOrEmpty( nodeArray )) {
-                for (EmsScriptNode n : nodeArray) {
-                    if ( !id.equals( n.getSysmlId() ) &&
-                         jsonType.equals( n.getTypeName() ) &&
-                         parent.equals( n.getParent() ) ) {
-                        log(LogLevel.ERROR,"Found another element with the same sysml name: "
-                                           +n.getSysmlName()+" type: "+n.getTypeName()
-                                           +" parent: "+n.getParent()+" as the element trying to be posted",
-                            HttpServletResponse.SC_BAD_REQUEST);
-                        return null;
-                    }
-                }
-            }
-        }
+// FIXME: We still want to send a warning in the future, thought this can be a nightly check       
+//        String sysmlName = elementJson.has( Acm.JSON_NAME ) ? elementJson.getString( Acm.JSON_NAME ) :
+//                                                              existingNodeName;
+//        if (!Utils.isNullOrEmpty( sysmlName ) && jsonType != null && !jsonType.equals( Acm.JSON_UNTYPED )
+//            && id != null && parent != null) {
+//            ArrayList<EmsScriptNode> nodeArray = findScriptNodesBySysmlName(sysmlName, workspace, null, false);
+//
+//            if (!Utils.isNullOrEmpty( nodeArray )) {
+//                for (EmsScriptNode n : nodeArray) {
+//                    if ( !id.equals( n.getSysmlId() ) &&
+//                         jsonType.equals( n.getTypeName() ) &&
+//                         parent.equals( n.getParent() ) ) {
+//                        log(LogLevel.ERROR,"Found another element with the same sysml name: "
+//                                           +n.getSysmlName()+" type: "+n.getTypeName()
+//                                           +" parent: "+n.getParent()+" as the element trying to be posted",
+//                            HttpServletResponse.SC_BAD_REQUEST);
+//                        return null;
+//                    }
+//                }
+//            }
+//        }
 
         type = NodeUtil.getContentModelTypeName( acmSysmlType, services );
 
@@ -1821,27 +1849,34 @@ public class ModelPost extends AbstractJavaWebScript {
                     if ( Debug.isOn() ) Debug.outln("moving node <<<" + nodeToUpdate + ">>>");
                     if ( Debug.isOn() ) Debug.outln("to parent <<<" + parent + ">>>");
 
-                    if ( nodeToUpdate.move(parent) ) {
-                        modStatus.setState( ModStatus.State.MOVED  );
+                    // Not ingesting metadata, ie first pass:
+                    if (!ingest) {
+                        // don't have to move on second pass
+                        if (nodeToUpdate.move(parent) ) {
+                            modStatus.setState( ModStatus.State.MOVED  );
+                        }
+    
+                        // Resurrect any parent nodes if needed:
+                        // Note: nested nodes shouldn't ever need this, as their parents will already
+                        //       be resurrected before they are processed via processValueSpecProperty().
+                        //  don't have to resurrect on second pass
+                        if (!nestedNode) {
+                            resurrectParents(nodeToUpdate, ingest, workspace);
+                        }
                     }
-
-                    // Resurrect any parent nodes if needed:
-                    // Note: nested nodes shouldn't ever need this, as their parents will already
-                    //       be resurrected before they are processed via processValueSpecProperty().
-                    if (!nestedNode) {
-                        resurrectParents(nodeToUpdate, ingest, workspace);
-                    }
-
-                    // Update the aspect if the type has changed and its a aspect, or if it is
-                    // being changed to an Element.  Need to call this for Elements for downgrading,
-                    // which will remove all of the needed aspects.
-                    if ( ingest && ( (!type.equals( acmSysmlType ) && NodeUtil.isAspect( acmSysmlType )) || 
-                                      acmSysmlType.equals(Acm.ACM_ELEMENT) ) ) {
-                        
-                        checkForObsoleteValueSpecs(acmSysmlType, nodeToUpdate, workspace, ingest);
-                        
-                        if (nodeToUpdate.createOrUpdateAspect( acmSysmlType )) {
-                            modStatus.setState( ModStatus.State.UPDATED  );
+                    // Ingesting metadata, ie second pass:
+                    else {
+                        // Update the aspect if the type has changed and its a aspect, or if it is
+                        // being changed to an Element.  Need to call this for Elements for downgrading,
+                        // which will remove all of the needed aspects.
+                        if ( (!type.equals( acmSysmlType ) && NodeUtil.isAspect( acmSysmlType )) || 
+                              acmSysmlType.equals(Acm.ACM_ELEMENT)  ) {
+                            
+                            checkForObsoleteValueSpecs(acmSysmlType, nodeToUpdate, workspace, ingest);
+                            
+                            if (nodeToUpdate.createOrUpdateAspect( acmSysmlType )) {
+                                modStatus.setState( ModStatus.State.UPDATED  );
+                            }
                         }
                     }
                 }
