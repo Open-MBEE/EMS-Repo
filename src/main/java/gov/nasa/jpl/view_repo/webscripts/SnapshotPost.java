@@ -48,6 +48,7 @@ import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
+
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.InputStream;
@@ -62,6 +63,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -85,15 +88,13 @@ import org.alfresco.util.TempFileProvider;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
-
 import org.json.JSONArray;
-
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
+import org.jsoup.parser.Tag;
 import org.jsoup.select.Elements;
 import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
@@ -850,6 +851,49 @@ public class SnapshotPost extends AbstractJavaWebScript {
         return snapshotNode;
     }
 
+    private String generateHtmlColSpec(int count){
+    	StringBuffer sb = new StringBuffer();
+    	int index = 1;
+    	while(index++ <= count){
+    		sb.append(String.format("<colspec colname=\"%d\" colnum=\"%d\"/>", index, index));
+    	}
+    	return sb.toString();
+    }
+    
+    private String generateHtmlTableHeader(Element table, int columnCount){
+    	if(table == null) return "";
+    	StringBuffer sb = new StringBuffer();
+    	Elements tbody = table.select("table > tbody");
+    	Elements TRs = null;
+    	if(tbody == null || tbody.size() == 0) TRs = table.select("table > tr");
+    	else TRs = tbody.select("tbody > tr");
+    	
+    	if(TRs == null || TRs.size() == 0) return table.html();
+    	Element tr = TRs.first();
+    	Elements TDs = tr.select("tr > td");
+
+    	sb.append("<thead><row>");
+    	if(TDs == null || TDs.size() == 0){
+    		for(int i=0; i < columnCount; i++){
+    			sb.append("<entry></entry>");
+    		}
+    	}
+    	else{
+	    	for(Element td : TDs){
+	    		sb.append(String.format("<entry"));
+	    		if(td.hasAttr("rowspan")){
+	    			sb.append(" ");	//TODO fill in rowspan attr/value
+	    		}
+	    		if(td.hasAttr("colspan")){
+	    			sb.append(String.format(" namest='' nameend=''", 1,1));	//TODO replace values
+	    		}
+	    		sb.append(">");
+	    	}
+    	}
+    	sb.append("</row></thead>");
+    	return sb.toString();
+    }
+    
     public JSONObject generatePDF(String snapshotId, WorkspaceNode workspace) throws Exception{
     	clearCaches( false );
         //EmsScriptNode snapshotNode = findScriptNodeById(snapshotId, workspace, null, false);
@@ -1002,8 +1046,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
         return (String)snapshotNode.getProperty( "view2:pdfStatus" );
     }
 
-    private ArrayList< String >
-            getSnapshotFormats( JSONObject postJson ) throws JSONException {
+    private ArrayList< String > getSnapshotFormats( JSONObject postJson ) throws JSONException {
         ArrayList< String > list = new ArrayList< String >();
         JSONArray formats = postJson.getJSONArray( "formats" );
         for ( int i = 0; i < formats.length(); i++ ) {
@@ -1017,7 +1060,6 @@ public class SnapshotPost extends AbstractJavaWebScript {
     private String getSymlId( JSONObject jsonObj ) {
         return (String)jsonObj.opt( Acm.SYSMLID );
     }
-
 
     private Date getTimestamp(WebScriptRequest req){
     	if(req == null) return null;
@@ -1099,7 +1141,6 @@ public class SnapshotPost extends AbstractJavaWebScript {
         }
         return null;
     }
-
 
     private NodeRef getUserProfile(String userName){
     	if(personService == null) personService = this.services.getPersonService();
@@ -1255,6 +1296,30 @@ public class SnapshotPost extends AbstractJavaWebScript {
         return null;
     }
 
+    private String handleHtmlList(String s){
+    	s = s.replaceAll("(?i)<ul>", "<itemizedlist>");
+    	s = s.replaceAll("(?i)</ul>", "</itemizedlist>");
+    	s = s.replaceAll("(?i)<ol>", "<orderedlist>");
+    	s = s.replaceAll("(?i)</ol>", "</orderedlist>");
+    	s = s.replaceAll("(?i)<li>", "<listitem>");
+    	s = s.replaceAll("(?i)</li>", "</listitem>");
+    	return s;
+    }
+    
+    private String handleHtmlTable(String s) throws Exception{
+    	Pattern pattern = Pattern.compile("<table[^>]*>(.*)</table>", Pattern.CASE_INSENSITIVE);
+    	Matcher matcher = pattern.matcher(s);
+    	StringBuffer result = new StringBuffer();
+    	while(matcher.find()){
+    		String docbookTable = HtmlTableToDocbookTable(matcher.group(0), matcher.group(1));
+    		
+    		matcher.appendReplacement(result, String.format("<table frame=\"all\" pgwide=\"1\" role=\"longtable\" tabstyle=\"normal\">%s</table>", HtmlSanitize(matcher.group(1))));
+    	}
+    	matcher.appendTail(result);
+    	return result.toString();
+    	
+    }
+    
     /**
      *
      * @param id
@@ -1324,13 +1389,39 @@ public class SnapshotPost extends AbstractJavaWebScript {
     }
 
     private String HtmlSanitize( String s ) {
-    	Document document = Jsoup.parseBodyFragment(s);
-    	removeHtmlTags(document);
-    	StringBuffer sb = new StringBuffer();
-    	traverseHtml(document.body(), sb);
-    	return sb.toString();
+    	if(s == null || s.isEmpty()) return s;
+
+    	try{
+	    	s = handleHtmlList(s);
+	    	//s = handleHtmlTable(s);
+	    	Document document = Jsoup.parseBodyFragment(s);
+	    	removeHtmlTags(document);
+	    	StringBuffer sb = new StringBuffer();
+	    	traverseHtml(document.body(), sb);
+	    	return sb.toString();
+    	}
+    	catch(Exception ex){
+    		return s;
+    	}
     }
 
+    private String HtmlTableToDocbookTable(String table, String tableContent) throws Exception{
+    	if(table == null || table.isEmpty()) return "";
+    	if(tableContent == null || tableContent.isEmpty()) return table;
+    	Document document = Jsoup.parseBodyFragment(table);
+    	if(document == null) throw new Exception("Failed to convert HTML table to DocBook table. Root document element is null.");
+    	StringBuffer sb = new StringBuffer();
+    	Elements tables = document.select("body > table");
+    	for(Element t : tables){
+    		sb.append("<table frame=\"all\" pgwide=\"1\" role=\"longtable\" tabstyle=\"normal\">");
+    		HtmlTable htmlTable = new HtmlTable(t);
+    		sb.append(String.format("<tgroup cols=\"%d\" align=\"left\" colsep=\"1\" rowsep=\"1\">", htmlTable.getColCount()));
+    		sb.append(generateHtmlColSpec(htmlTable.getColCount()));
+    		sb.append(generateHtmlTableHeader(t, htmlTable.getColCount()));
+    	}
+    	return null;
+    }
+    
     // private String parseTransclusion(List<String> cirRefList, String
     // inputString){
 
@@ -1566,7 +1657,6 @@ public class SnapshotPost extends AbstractJavaWebScript {
         return snapshoturl;
     }
 
-
     /**
      * replaces HTML tags to end up with only the HTML text.
      * @param elem: JSoup Element
@@ -1575,28 +1665,66 @@ public class SnapshotPost extends AbstractJavaWebScript {
     	if(elem == null) return;
     	String tagName = elem.tagName().toUpperCase();
     	switch(tagName){
-    	case "P":
-    	case "DIV":
-    	case "BODY":
-    	case "INLINEMEDIAOBJECT":
-    	case "IMAGEOBJECT":
-    	case "LINK":
-    	case "ULINK":
-    		for(Element child:elem.children()){
-    			removeHtmlTag(child);
-    		}
-    		break;
-    	case "A":
-    		String link = String.format(" <ulink xl:href='%s'><![CDATA[%s]]></ulink> ", elem.attr("href"), elem.text());
-    		elem.before(link);
-    		elem.remove();
-    		break;
-		default:
-			elem.before(elem.text());
-			for(Element child:elem.children()){
-				removeHtmlTag(child);
-			}
-			elem.remove();
+	    	case "BODY":
+	    	case "INLINEMEDIAOBJECT":
+	    	case "IMAGEOBJECT":
+	    	case "LINK":
+	    	case "ULINK":
+	    	case "ORDEREDLIST":
+	    	case "ITEMIZEDLIST":
+	    	case "LISTITEM":
+	    		for(Element child:elem.children()){
+	    			removeHtmlTag(child);
+	    		}
+	    		break;
+	    	case "A":
+	    		String link = String.format(" <ulink xl:href='%s'><![CDATA[%s]]></ulink> ", elem.attr("href"), elem.text());
+	    		elem.before(link);
+	    		elem.remove();
+	    		break;
+	    	case "P":
+	    	case "DIV":
+	    		//add linebreak then process the children nodes
+	    		elem.before("<?linebreak?>");
+	    		for(Element child:elem.children()){
+	    			removeHtmlTag(child);
+	    		}
+	    		break;
+	    	case "B":
+	    	case "STRONG":
+	    		Element emphasis = new Element(Tag.valueOf("emphasis"), elem.html());
+	    		elem.replaceWith(emphasis);
+	    		break;
+	    	case "BR":
+	    		//replaces with linebreak;
+	    		elem.before("<?linebreak?>");
+	    		elem.remove();
+	    		break;
+//	    	case "LI":
+//	    		for(Element child:elem.children()){
+//	    			removeHtmlTag(child);
+//	    		}
+//	    		break;
+//	    	case "OL":
+//	    		Element oList = elem.before("orderedlist");
+//	    		for(Element child:elem.children()){
+//	    			removeHtmlTag(child);
+//	    		}
+//	    		//elem.remove();
+//	    		break;
+//	    	case "UL":
+//	    		elem.before("itemizedlist");
+//	    		for(Element child:elem.children()){
+//	    			removeHtmlTag(child);
+//	    		}
+//	    		//elem.remove();
+//	    		break;
+	    	default:
+				elem.before(elem.text());
+				for(Element child:elem.children()){
+					removeHtmlTag(child);
+				}
+				elem.remove();
     	}
     }
 
@@ -1867,11 +1995,17 @@ public class SnapshotPost extends AbstractJavaWebScript {
 
     	if(elm.children() != null && elm.children().size() > 0){
     		for(Element e: elm.children()){
-    			if(e.tagName().compareToIgnoreCase("inlinemediaobject") == 0 ||
-				   e.tagName().compareToIgnoreCase("link")==0 ||
-				   e.tagName().compareToIgnoreCase("ulink")==0){
-    				sb.append(e.outerHtml());
-    				continue;
+    			String tagName = e.tagName().toLowerCase();
+    			switch(tagName){
+    				case "emphasis":
+	    			case "inlinemediaobject":
+	    			case "itemizedlist":
+	    	    	case "link":
+	    			case "listitem":
+	    	    	case "orderedlist":
+	    	    	case "ulink":
+		    				sb.append(e.outerHtml());
+	    				continue;
     			}
     			traverseHtml(e,sb);
     		}

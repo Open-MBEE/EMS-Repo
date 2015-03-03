@@ -235,6 +235,7 @@ public class SnapshotArtifactsGenerationActionExecuter  extends ActionExecuterAb
     	    	for(int i=0; i < formats.length(); i++){
     				JSONObject format = formats.getJSONObject(i);
     				String formatType = format.getString("type");
+    				if(formatType.compareToIgnoreCase("HTML")==0) formatType = "ZIP";
     				String formatUrl = format.getString("url");
     				buf.append("Snapshot ");
     				buf.append(formatType.toUpperCase());
