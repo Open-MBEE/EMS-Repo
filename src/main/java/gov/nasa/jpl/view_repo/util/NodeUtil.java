@@ -37,6 +37,7 @@ import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.transaction.UserTransaction;
 import javax.xml.bind.DatatypeConverter;
 
 import org.alfresco.model.ContentModel;
@@ -132,10 +133,21 @@ public class NodeUtil {
     protected static boolean insideTransactionNow = false;
     protected static Map< String, Boolean > insideTransactionNowMap =
             new LinkedHashMap< String, Boolean >();
+    protected static Map< String, UserTransaction > transactionMap =
+            Collections.synchronizedMap( new LinkedHashMap< String, UserTransaction >() );
     public static synchronized boolean isInsideTransactionNow() {
         Boolean b = insideTransactionNowMap.get( "" + Thread.currentThread().getId());
         if ( b != null ) return b;
         return insideTransactionNow;
+    }
+    public static UserTransaction getTransaction() {
+        return transactionMap.get( "" + Thread.currentThread().getId() );
+    }
+    public static UserTransaction createTransaction() {
+        UserTransaction trx =
+                services.getTransactionService().getNonPropagatingUserTransaction();
+        transactionMap.put( "" + Thread.currentThread().getId(), trx );
+        return trx;
     }
     public static synchronized void setInsideTransactionNow( boolean b ) {
         insideTransactionNow = b;

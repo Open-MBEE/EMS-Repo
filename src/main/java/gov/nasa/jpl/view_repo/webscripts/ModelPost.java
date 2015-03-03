@@ -74,9 +74,11 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 
 import javax.servlet.http.HttpServletResponse;
+import javax.transaction.UserTransaction;
 
 import kexpparser.KExpParser;
 //import k.frontend.Frontend;
+
 
 
 import org.alfresco.repo.model.Repository;
@@ -146,7 +148,7 @@ public class ModelPost extends AbstractJavaWebScript {
     private EmsScriptNode projectNode = null;
     private EmsScriptNode siteNode = null;
     private EmsScriptNode sitePackageNode = null;
-    private boolean internalRunWithoutTransactions = false;
+    //private boolean internalRunWithoutTransactions = false;
     private Set<String> ownersNotFound = null;
     private final int minElementsForProgress = 100;
     private double elementProcessedCnt = 0;
@@ -377,8 +379,8 @@ public class ModelPost extends AbstractJavaWebScript {
 
         timerUpdateModel= Timer.startTimer(timerUpdateModel, timeEvents);
 
-        boolean oldRunWithoutTransactions = internalRunWithoutTransactions;
-        internalRunWithoutTransactions = true;
+        //boolean oldRunWithoutTransactions = internalRunWithoutTransactions;
+        //internalRunWithoutTransactions = true;
 
         // create the element map and hierarchies
         if (buildElementMap(postJson.getJSONArray(ELEMENTS), targetWS)) {
@@ -415,7 +417,7 @@ public class ModelPost extends AbstractJavaWebScript {
             sendProgress("Ingesting metadata", projectId, true);
             // ingest wraps transactions internally
             ingestMetaData( targetWS, nodeMap, elements, singleElement, postJson );
-            internalRunWithoutTransactions = oldRunWithoutTransactions;
+            //internalRunWithoutTransactions = oldRunWithoutTransactions;
             
             now = new Date();
             final long end = System.currentTimeMillis();
@@ -765,21 +767,17 @@ public class ModelPost extends AbstractJavaWebScript {
         boolean isValid = true;
         final List<Boolean> validList = new ArrayList<Boolean>();
         
-        if (runWithoutTransactions || internalRunWithoutTransactions) {
-            isValid =  buildTransactionableElementMap(jsonArray, workspace);
-        }
-        else {
-            log(LogLevel.INFO, "buildElementMap begin transaction {");
-            new EmsTransaction(getServices(), getResponse(), getResponseStatus() ) {
-                @Override
-                public void run() throws Exception {
-                    boolean valid = buildTransactionableElementMap(jsonArray, workspace);
-                    validList.add( valid);
-                }
-            };
-            isValid = validList.get( 0 );
-            log(LogLevel.INFO, "} buildElementMap committing");
-        }
+        log(LogLevel.INFO, "buildElementMap begin transaction {");
+        new EmsTransaction( getServices(), getResponse(), getResponseStatus(),
+                            runWithoutTransactions ) { //|| internalRunWithoutTransactions) {
+            @Override
+            public void run() throws Exception {
+                boolean valid = buildTransactionableElementMap(jsonArray, workspace);
+                validList.add( valid);
+            }
+        };
+        isValid = validList.get( 0 );
+        log(LogLevel.INFO, "} buildElementMap committing");
         
         return isValid;
     }
@@ -957,11 +955,12 @@ public class ModelPost extends AbstractJavaWebScript {
         final ModStatus modStatus = new ModStatus();
         final Pair<Boolean,EmsScriptNode> returnPair = new Pair<Boolean,EmsScriptNode>(false,null);
 
-        if ( !runWithoutTransactions && !internalRunWithoutTransactions ) {
+        if ( !runWithoutTransactions ) {//&& !internalRunWithoutTransactions ) {
             log(LogLevel.INFO, "updateOrCreateElement begin transaction {");
         }
-        new EmsTransaction(getServices(), getResponse(), getResponseStatus(),
-                           runWithoutTransactions || internalRunWithoutTransactions ) {
+        EmsTransaction et = new EmsTransaction(//this.trx, 
+                                               getServices(), getResponse(), getResponseStatus(),
+                           runWithoutTransactions ) {//|| internalRunWithoutTransactions ) {
             @Override
             public void run() throws Exception {
                 // Check to see if the element has been updated since last read/modified by the
@@ -979,7 +978,8 @@ public class ModelPost extends AbstractJavaWebScript {
                 }
             }
         };
-        if ( !runWithoutTransactions && !internalRunWithoutTransactions ) {
+        //this.trx = et.trx;
+        if ( !runWithoutTransactions ) {//&& !internalRunWithoutTransactions ) {
             log(LogLevel.INFO, "} updateOrCreateElement end transaction");
         }            
         if (returnPair.first) {
@@ -1059,7 +1059,7 @@ public class ModelPost extends AbstractJavaWebScript {
     protected void fixReadTimeForConflictTransaction( final EmsScriptNode element,
                                                       final JSONObject elementJson ) {
         
-        if (runWithoutTransactions || internalRunWithoutTransactions) {
+        if (runWithoutTransactions) {// || internalRunWithoutTransactions) {
             try {
                 fixReadTimeForConflict( element, elementJson );
             } catch ( JSONException e ) {
@@ -1081,7 +1081,7 @@ public class ModelPost extends AbstractJavaWebScript {
     private void updateTransactionableWsState(final EmsScriptNode element, final String jsonId, 
                                               final ModStatus modStatus, final boolean ingest) {
 
-        if (runWithoutTransactions || internalRunWithoutTransactions) {
+        if (runWithoutTransactions) {// || internalRunWithoutTransactions) {
             updateTransactionableWsStateImpl(element, jsonId, modStatus, ingest);
         } else {
             new EmsTransaction(getServices(), getResponse(), getResponseStatus() ) {
@@ -1395,7 +1395,7 @@ public class ModelPost extends AbstractJavaWebScript {
         final MmsModelDelete deleteService = new MmsModelDelete(repository, services);
         deleteService.setWsDiff( workspace );
 
-        if (runWithoutTransactions || internalRunWithoutTransactions) {
+        if (runWithoutTransactions) {// || internalRunWithoutTransactions) {
             deleteService.handleElementHierarchy( valueSpec, workspace, true );
         }
         else {
@@ -2536,7 +2536,7 @@ public class ModelPost extends AbstractJavaWebScript {
             logger.debug( req.parseContent() );
         }
         
-        if (runWithoutTransactions || internalRunWithoutTransactions) {
+        if (runWithoutTransactions) {// || internalRunWithoutTransactions) {
             myWorkspace = getWorkspace( req, user );
         }
         else {
@@ -2569,7 +2569,7 @@ public class ModelPost extends AbstractJavaWebScript {
             try {
                 if (runInBackground) {
                     // Get the project node from the request:
-                    if (runWithoutTransactions || internalRunWithoutTransactions) {
+                    if (runWithoutTransactions) {// || internalRunWithoutTransactions) {
                         saveAndStartAction(req, myWorkspace, status);
                     }
                     else {
@@ -2605,7 +2605,7 @@ public class ModelPost extends AbstractJavaWebScript {
 
                     // Get the project node from the request:
                     new EmsTransaction(getServices(), getResponse(), getResponseStatus(),
-                                       runWithoutTransactions || internalRunWithoutTransactions ) {
+                                       runWithoutTransactions) {// || internalRunWithoutTransactions ) {
                         @Override
                         public void run() throws Exception {
                             getProjectNodeFromRequest( req, true );
@@ -2660,7 +2660,7 @@ public class ModelPost extends AbstractJavaWebScript {
             if (fix) {        
                 sendProgress("Fixing constraints", projectId, true);
                 new EmsTransaction( getServices(), getResponse(), getResponseStatus(),
-                                    runWithoutTransactions || internalRunWithoutTransactions ) {
+                                    runWithoutTransactions) {// || internalRunWithoutTransactions ) {
                     @Override
                     public void run() throws Exception {
                         fix(elements);
@@ -2672,7 +2672,7 @@ public class ModelPost extends AbstractJavaWebScript {
             final JSONArray elementsJson = new JSONArray();
           
             new EmsTransaction(getServices(), getResponse(), getResponseStatus(),
-                               runWithoutTransactions || internalRunWithoutTransactions ) {
+                               runWithoutTransactions) {// || internalRunWithoutTransactions ) {
                 @Override
                 public void run() throws Exception {
                     for ( EmsScriptNode element : elements ) {
@@ -2714,7 +2714,7 @@ public class ModelPost extends AbstractJavaWebScript {
         
         for ( final EmsScriptNode element : elems ) {
             new EmsTransaction(getServices(), getResponse(), getResponseStatus(),
-                               runWithoutTransactions || internalRunWithoutTransactions) {
+                               runWithoutTransactions) {// || internalRunWithoutTransactions) {
                 @Override
                 public void run() throws Exception {
                     element.addRelationshipToPropertiesOfParticipants();
