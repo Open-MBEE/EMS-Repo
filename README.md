@@ -403,7 +403,11 @@ There's a way to specify a different file so that permissions are not an issue. 
 
 There are port assignments that must be unique.  Remember that these are specified for the alfresco-view-share as well as the alfresco-view-repo.  You may be able to avoid changing ports if you can configure the server to use a different ip address: http://www.appnovation.com/blog/running-multiple-alfresco-server-instances-same-linux-machine.
 
-To have the alfresco web server run on a different port add -Dmaven.tomcat.port=9091 to the command line options (such as in runserver.sh).  To run the regression test on this server, you need to edit test-data/javawebscripts/regression_lib.py and set the host to the new port:
+To have the alfresco web server run on a different port add 
+
+    -Dmaven.tomcat.port=9091
+    
+to the command line options (such as in runserver.sh).  To run the regression test on this server, you need to edit test-data/javawebscripts/regression_lib.py and set the host to the new port:
 
     HOST="localhost:9091"
 
@@ -428,7 +432,7 @@ The tomcat port (ex. 9091) and the debug port (ex. 10002) may or may not be open
 
 
     # see what ports are open (LISTEN)
-    sudo netstat -anp
+    netstat -anp
 
     # edit iptables to add ports to open
     sudo vi /etc/sysconfig/iptables 
