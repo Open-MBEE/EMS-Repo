@@ -48,6 +48,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
+import javax.transaction.UserTransaction;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -94,6 +95,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 	// internal members
     // when run in background as an action, this needs to be false
     public boolean runWithoutTransactions = defaultRunWithoutTransactions;
+    //public UserTransaction trx = null;
 	protected ScriptNode companyhome;
 	protected Map<String, EmsScriptNode> foundElements = new HashMap<String, EmsScriptNode>();
 
