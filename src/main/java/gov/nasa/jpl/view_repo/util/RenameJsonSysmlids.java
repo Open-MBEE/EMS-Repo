@@ -23,7 +23,14 @@ public class RenameJsonSysmlids {
         
         @Override
         public int compare( String o1, String o2 ) {
-            return 0;
+            if ( o1 == o2 ) return 0;
+            if ( o1 == null || o2 == null ) {
+                if ( o1 == null ) return 1;
+                return -1;
+            }
+            int comp = Integer.compare( o1.length(), o2.length() );
+            if ( comp != 0 ) return -comp;
+            return o1.compareTo( o2 );
         }
         
     }
@@ -36,7 +43,9 @@ public class RenameJsonSysmlids {
     public static void getSysmlIds( JSONObject json, Set<String> ids ) {
         //final String key = "sysmlid";
         String id = json.optString( "sysmlid" );
-        if ( id != null ) ids.add( id );
+        if ( !Utils.isNullOrEmpty( id ) ) {
+            ids.add( id );
+        }
         
         // dig deeper for ids
         for ( Object k : json.keySet() ) {
@@ -77,9 +86,10 @@ public class RenameJsonSysmlids {
             System.err.println( "File " + file1 + " does not exist!" );
             return null;
         }
+        if ( prefix == null ) prefix = "X_000_X_";
         if ( file2 == null ) {
             String ext = FileUtils.getExtension( file1.getAbsolutePath() );
-            String outputFileName = FileUtils.removeFileExtension( file1.getAbsolutePath() ) + "_" + prefix + ext;
+            String outputFileName = FileUtils.removeFileExtension( file1.getAbsolutePath() ) + "_" + prefix + "." + ext;
             file2 = new File( outputFileName );
         }
         
