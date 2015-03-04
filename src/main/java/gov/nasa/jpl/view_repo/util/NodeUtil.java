@@ -175,9 +175,9 @@ public class NodeUtil {
     public static boolean doFullCaching = false;
     public static boolean doSimpleCaching = true;
     public static boolean doHeisenCheck = true;
-    public static boolean doVersionCaching = true; // turn this off by default
+    public static boolean doVersionCaching = false; // turn this off by default
     public static boolean activeVersionCaching = true;
-    public static boolean doJsonCaching = false;
+    public static boolean doJsonCaching = true;
     public static boolean doJsonDeepCaching = false;
     public static boolean doJsonStringCaching = false;
     
