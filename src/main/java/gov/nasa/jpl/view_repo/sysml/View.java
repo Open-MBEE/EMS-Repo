@@ -336,6 +336,62 @@ public class View extends List implements sysml.view.View< EmsScriptNode >, Comp
         return viewpointMethod;
     }
 
+    public Date getLastModified( Date dateTime ) {
+        if ( getElement() == null ) return null;
+        if ( !isGeneratedFromViewpoint() ) {
+            System.out.println("####  ####  Not auto-generated view " + getElement()  );
+            Date date = getElement().getLastModified( dateTime );
+            //return new Date(); 
+            return date;
+        }
+        System.out.println("####  ####  Auto-generated view " + getElement()  );
+        return new Date(); 
+    }
+
+//    public Date getLastModified( Date dateTime ) {
+//        if ( getElement() == null ) return null;
+//        Date date = getElement().getLastModified( dateTime );
+//        if ( !isGeneratedFromViewpoint() ) {
+//            return date;
+//        }
+//        //Set<EmsScriptNode> elems = new LinkedHashSet< EmsScriptNode >();
+//        Collection<EmsScriptNode> elems = getDisplayedElements( getWorkspace(), dateTime, true, false, null );
+//        for ( EmsScriptNode elem : elems ) {
+//            Date d = elem.getLastModified( dateTime );
+//            if ( d.after( date ) ) date = d;
+//        }
+//        elems = getContainedViews( false, getWorkspace(), dateTime, null );
+//        for ( EmsScriptNode elem : elems ) {
+//            View v = new View( elem );
+//            Date d = v.getLastModified( dateTime );
+//            if ( d.after( date ) ) date = d;
+//        }
+//        return date;
+//    }
+
+    public boolean isGeneratedFromViewpoint() {
+        if ( getElement() == null ) {
+//            System.out.println("####  ####  view has no element "  );
+            return false;
+        }
+//        if ( !EmsScriptNode.expressionStuff ) {
+//            System.out.println("####  ####  expressionStuff turned off: " + getElement()  );
+//            return false;
+//        }
+        String property = (String) viewNode.getProperty("view2:contains");
+        if ( property != null && property.length() > 0 ) {
+//            System.out.println("####  ####  has contains " + getElement()  );
+            return false;
+        }
+        EmsScriptNode viewpointOp = getViewpointOperation();
+        if ( viewpointOp == null ) {
+//            System.out.println("####  ####  no viewpoint " + getElement()  );
+            return false;
+        }
+//        System.out.println("####  ####  got viewpoint " + getElement()  );
+        return true;
+    }
+    
     public boolean generateViewables() {
         // Get the related elements that define the the view.
 

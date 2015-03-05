@@ -94,23 +94,36 @@ public class RenameJsonSysmlids {
         }
         
         // Get the input
-        String jstr1 = FileUtils.fileToString( file1 );
+        StringBuffer sb = new StringBuffer( FileUtils.fileToString( file1 ) );
 
-        jstr1 = renameSysmlIds( jstr1, prefix );
+        renameSysmlIds( sb, prefix );
 
         // Now write out the new file.
-        FileUtils.stringToFile( jstr1, file2.getAbsolutePath() );
+        String s = sb.toString();
+        FileUtils.stringToFile( s, file2.getAbsolutePath() );
 
-        return jstr1;
+        return s;
     }
     
-    public static String renameSysmlIds( String jstr1, String prefix ) throws JSONException {
+    public static void replace(StringBuffer sb, String target, String replacement ) {
+        final int targetLength = target.length();
+
+        // Loop through replacements.
+        int pos = sb.length()-targetLength;
+        while ( true ) {
+            pos = sb.lastIndexOf( target, pos );
+            if ( pos < 0 ) break;
+            sb.replace( pos, pos+targetLength, replacement );
+        }
+    }
+    
+    public static void renameSysmlIds( StringBuffer sb, String prefix ) throws JSONException {
 
         // check input
-        if ( Utils.isNullOrEmpty( jstr1 ) ) return null;
+        if ( sb == null || sb.length() <= 0 ) return;
         if ( prefix == null ) prefix = "X_000_X_";
 
-        JSONObject o1 = new JSONObject( jstr1 );
+        JSONObject o1 = new JSONObject( sb.toString() );
         
         // Gather the sysml ids.
         // By ordering these in order of reverse length, ids that are
@@ -121,11 +134,13 @@ public class RenameJsonSysmlids {
         Set<String> ids = new TreeSet<String>( ReverseLengthComparator.instance );
         getSysmlIds( o1, ids );
         
-        // add prefixes to sysml ids using search and replace  
+        // add prefixes to sysml ids using search and replace
+        int ct = 0;
         for ( String id : ids ) {
-            jstr1 = jstr1.replace( "\"" + id + "\"", "\"" + prefix + id + "\"" );
+            replace( sb, "\"" + id + "\"", "\"" + prefix + id + "\"" );
+            ++ct;
         }
-        return jstr1;
+        //return jstr1;
     }
     
     public static void main( String[] args ) {

@@ -177,11 +177,11 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
         clearCaches( true );
         clearCaches(); // calling twice for those redefine clearCaches() to
                        // always call clearCaches( false )
-        if ( withoutTransactions ) {
-            return executeImplImpl( req, status, cache );
-        }
+        
+        req.getParameter( "" );
+        
         final Map< String, Object > model = new HashMap<String, Object>();
-        new EmsTransaction( getServices(), getResponse(), getResponseStatus() ) {
+        new EmsTransaction( getServices(), getResponse(), getResponseStatus(), withoutTransactions ) {
             @Override
             public void run() throws Exception {
                 Map< String, Object > m = executeImplImpl( req, status, cache );
