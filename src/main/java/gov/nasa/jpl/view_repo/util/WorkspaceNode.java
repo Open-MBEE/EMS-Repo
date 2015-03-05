@@ -775,24 +775,11 @@ public class WorkspaceNode extends EmsScriptNode {
         NodeRef siteRef;
         List<SiteInfo> sites = services.getSiteService().listSites(null);
         String user = NodeUtil.getUserName();
-        List<String> authorityNames = new ArrayList<String>();
         
         if (!Utils.isNullOrEmpty( user )) {
             
             // Get all the groups (authorities) for the user:
-            AuthorityService aService = services.getAuthorityService();
-            Set<String> authorities = aService.getContainingAuthoritiesInZone(
-                                        AuthorityType.GROUP,
-                                        user,
-                                        null, null, 1000);
-            for (String authority : authorities)
-            {
-                NodeRef group = aService.getAuthorityNodeRef( authority );
-                if (group != null) {
-                    // Put the names in a list for later use:
-                    authorityNames.add( authority );
-                }
-            }  
+            List<String> authorityNames = NodeUtil.getUserGroups( user );
             
             // Loop through all the sites:
             for (SiteInfo siteInfo : sites ) {
