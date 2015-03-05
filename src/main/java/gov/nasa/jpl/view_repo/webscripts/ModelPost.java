@@ -2000,8 +2000,15 @@ public class ModelPost extends AbstractJavaWebScript {
 
             } // ends if (isSite)
             else {
-                // TODO Should we be removing the SiteCharacterization aspect from the node?
-                //      Should we be removing the Site aspect from the corresponding site for this pkg?
+                // Remove the Site aspect from the corresponding site for this pkg:
+                NodeRef sitePackageSiteRef = (NodeRef) nodeToUpdate.getProperty( Acm.ACM_SITE_SITE );
+                if (sitePackageSiteRef != null) {
+                    EmsScriptNode siteNode = new EmsScriptNode(sitePackageSiteRef, services);
+                    siteNode.removeAspect( Acm.ACM_SITE );
+                    siteNode.removeAspect( "cm:taggable" );
+                }
+                // Remove the SiteCharacterization aspect from the node:
+                nodeToUpdate.removeAspect( Acm.ACM_SITE_CHARACTERIZATION );
                 
                 // Revert permissions to inherit
                 services.getPermissionService().deletePermissions(nodeToUpdate.getNodeRef());
