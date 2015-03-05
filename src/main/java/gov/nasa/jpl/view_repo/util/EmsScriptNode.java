@@ -2288,7 +2288,7 @@ public class EmsScriptNode extends ScriptNode implements
                                     Version version ) throws JSONException {
         JSONObject json = toJSONObjectImpl( jsonFilter, isExprOrProp, dateTime,
                                             isIncludeQualified, version );
-        addEditableJson( json, jsonFilter );
+        if ( !isExprOrProp ) addEditableJson( json, jsonFilter );
         return json;
     }
     public void addEditableJson( JSONObject json, Set< String > jsonFilter ) {
