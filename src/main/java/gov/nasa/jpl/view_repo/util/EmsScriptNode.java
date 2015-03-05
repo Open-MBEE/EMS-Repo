@@ -2352,7 +2352,14 @@ public class EmsScriptNode extends ScriptNode implements
         if ( cachedJson != null && cachedJson.has( "modified" ) ) {
             String cachedModifiedStr = cachedJson.getString( "modified" );
             Date cachedModified = TimeUtils.dateFromTimestamp( cachedModifiedStr );
-            Date lastModified = getLastModified( dateTime );
+            Date lastModified;
+            if ( isView() ) { 
+//                System.out.println("####  ####  view " + getName()  );
+                lastModified = (new View( this )).getLastModified( dateTime );
+            } else {
+//                System.out.println("####  ####  not a view " + getName()  );
+                lastModified = getLastModified( dateTime );
+            }
             if ( cachedModified == null || lastModified == null || lastModified.after( cachedModified ) ) {
                 json = null;
                 forceCacheUpdate = true;
