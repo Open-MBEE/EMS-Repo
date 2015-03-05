@@ -2000,6 +2000,9 @@ public class ModelPost extends AbstractJavaWebScript {
 
             } // ends if (isSite)
             else {
+                // TODO Should we be removing the SiteCharacterization aspect from the node?
+                //      Should we be removing the Site aspect from the corresponding site for this pkg?
+                
                 // Revert permissions to inherit
                 services.getPermissionService().deletePermissions(nodeToUpdate.getNodeRef());
                 nodeToUpdate.setInheritsPermissions( true );

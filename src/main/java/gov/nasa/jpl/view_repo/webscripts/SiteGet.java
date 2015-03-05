@@ -164,6 +164,7 @@ public class SiteGet extends AbstractJavaWebScript {
                 		siteJson.put("sysmlid", name);
                 		siteJson.put("name", siteInfo.getTitle());
                 		siteJson.put("parent", parentId );
+                		siteJson.put("isCharacterization", emsNode.getProperty(Acm.ACM_SITE_PACKAGE) != null );
 
                 		json.put(siteJson);
                 	}

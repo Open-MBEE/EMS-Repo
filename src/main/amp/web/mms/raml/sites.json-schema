@@ -28,6 +28,10 @@
               "parent": {
                 "type": "string",
                 "description": "SysML ID of the parent site"
+              },
+              "isCharacterization": {
+                "type": "boolean",
+                "description": "Set to true if it is a site characterization"
               }
             }
         }
