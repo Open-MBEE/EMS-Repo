@@ -912,9 +912,10 @@ public class ModelPost extends AbstractJavaWebScript {
         String jsonId = elementJson.getString( Acm.JSON_ID );
         
         // Only try a node search on the first pass, on the second pass it should be in the
-        // fondElements:
-        final EmsScriptNode element = ingest ? foundElements.get(jsonId) :
-                                               findScriptNodeById( jsonId, workspace, null, true );
+        // fondElements, but may not be if there was errors with the initial pass:
+        final EmsScriptNode element = (ingest && foundElements.containsKey( jsonId )) ?
+                                                       foundElements.get(jsonId) :
+                                                       findScriptNodeById( jsonId, workspace, null, true );
         if ( element != null ) {
             elements.add( element );
             nodeMap.put( element.getName(), element );
