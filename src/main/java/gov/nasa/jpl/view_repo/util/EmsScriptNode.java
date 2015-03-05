@@ -1961,9 +1961,7 @@ public class EmsScriptNode extends ScriptNode implements
                 putInJson( elementJson, "qualifiedId", node.getSysmlQId(), filter );
             }
         }
-        putInJson( elementJson, "editable",
-                   node.hasPermission( PermissionService.WRITE ), filter );
-
+        //addEditableJson( elementJson );
         if ( filter == null || filter.size() == 0 || filter.contains( "owner" ) ) {
 
             EmsScriptNode owner = node.getOwningParent(dateTime);
@@ -2285,9 +2283,21 @@ public class EmsScriptNode extends ScriptNode implements
      * @return JSONObject serialization of node
      * @throws JSONException
      */
-   public JSONObject toJSONObject( Set< String > jsonFilter, boolean isExprOrProp,
+    public JSONObject toJSONObject( Set< String > jsonFilter, boolean isExprOrProp,
                                     Date dateTime, boolean isIncludeQualified,
                                     Version version ) throws JSONException {
+        JSONObject json = toJSONObjectImpl( jsonFilter, isExprOrProp, dateTime,
+                                            isIncludeQualified, version );
+        addEditableJson( json, jsonFilter );
+        return json;
+    }
+    public void addEditableJson( JSONObject json, Set< String > jsonFilter ) {
+        putInJson( json, "editable",
+                   hasPermission( PermissionService.WRITE ), jsonFilter );
+    }
+    public JSONObject toJSONObjectImpl( Set< String > jsonFilter, boolean isExprOrProp,
+                                        Date dateTime, boolean isIncludeQualified,
+                                        Version version ) throws JSONException {
         if ( Debug.isOn() )
             Debug.outln( "$ $ $ $ toJSONObject(jsonFilter=" + jsonFilter
                             + ", isExprOrProp=" + isExprOrProp + ", dateTime="
