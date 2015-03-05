@@ -19,9 +19,16 @@ import java.util.TreeSet;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.alfresco.repo.security.authority.AuthorityDAO;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
+import org.alfresco.service.cmr.security.AccessPermission;
+import org.alfresco.service.cmr.security.AccessStatus;
+import org.alfresco.service.cmr.security.AuthorityService;
+import org.alfresco.service.cmr.security.AuthorityType;
 import org.alfresco.service.cmr.security.PermissionService;
+import org.alfresco.service.cmr.security.PersonService;
+import org.alfresco.service.cmr.site.SiteInfo;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.extensions.webscripts.Status;
@@ -753,6 +760,80 @@ public class WorkspaceNode extends EmsScriptNode {
         }
         return changedElementIds;
     }
+    
+    /**
+     * Checks all the sites and sees if the current user is the manager of any of those sites.
+     * If this is the case, set "siteManagerPermission" to true in the json.  Otherwise, sets
+     * it to false.
+     * 
+     * @param json
+     * @param services
+     */
+    private static void checkSiteManagerPermissions(JSONObject json, ServiceRegistry services)
+    {
+        boolean siteMgrPerm = false;
+        NodeRef siteRef;
+        List<SiteInfo> sites = services.getSiteService().listSites(null);
+        String user = NodeUtil.getUserName();
+        List<String> authorityNames = new ArrayList<String>();
+        
+        if (!Utils.isNullOrEmpty( user )) {
+            
+            // Get all the groups (authorities) for the user:
+            AuthorityService aService = services.getAuthorityService();
+            Set<String> authorities = aService.getContainingAuthoritiesInZone(
+                                        AuthorityType.GROUP,
+                                        user,
+                                        null, null, 1000);
+            for (String authority : authorities)
+            {
+                NodeRef group = aService.getAuthorityNodeRef( authority );
+                if (group != null) {
+                    // Put the names in a list for later use:
+                    authorityNames.add( authority );
+                }
+            }  
+            
+            // Loop through all the sites:
+            for (SiteInfo siteInfo : sites ) {
+                
+                if (siteMgrPerm) {
+                    break;
+                }
+                
+                siteRef = siteInfo.getNodeRef();
+                if (siteRef != null) {                        
+                    // Get the permissions for the site:
+                    Set< AccessPermission > permList = services.getPermissionService().getAllSetPermissions(siteRef);
+                    for (AccessPermission perm : permList) {
+                        
+                        if (siteMgrPerm) {
+                            break;
+                        }
+                        
+                        AccessStatus access = perm.getAccessStatus(); // ALLOWED|DENIED
+                        String userOrGrp = perm.getAuthority();
+                        String permission = perm.getPermission();
+                        
+                        if ("SiteManager".equals( permission ) && 
+                            AccessStatus.ALLOWED.equals( access )) {
+                            
+                            // If it is this user:
+                            if (user.equals( userOrGrp )) {
+                                siteMgrPerm = true;
+                            }
+                            // If the user is part of the group:
+                            else if (authorityNames.contains( userOrGrp )){
+                                siteMgrPerm = true;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        
+        json.put( "siteManagerPermission", siteMgrPerm );
+    }
 
     /**
      * Add the workspace name and id metadata onto the provided JSONObject
@@ -761,18 +842,25 @@ public class WorkspaceNode extends EmsScriptNode {
      * @throws JSONException
      */
     public static void
-            addWorkspaceNamesAndIds( JSONObject json, WorkspaceNode ws ) throws JSONException {
+            addWorkspaceNamesAndIds( JSONObject json, WorkspaceNode ws, 
+                                     ServiceRegistry services, boolean chkMgrSitePermissions ) throws JSONException {
         json.put( "name",  getWorkspaceName(ws) );
         json.put( "id", getId(ws) );
         json.put( "qualifiedName", getQualifiedName( ws ) );
         json.put( "qualifiedId", getQualifiedId( ws ) );
+        
+        // If it is the master workspace, then determine if the user is manager with permissions to 
+        // any of the sites, and add a indication to the json:
+        if (ws == null && chkMgrSitePermissions) {
+            checkSiteManagerPermissions(json, services);
+        }
     }
 
     @Override
     public JSONObject toJSONObject( Date dateTime ) throws JSONException {
         JSONObject json = new JSONObject();
 
-        addWorkspaceNamesAndIds(json, this );
+        addWorkspaceNamesAndIds(json, this, services, false );
         json.put( "creator", getProperty( "cm:modifier" ) );
         // REVIEW -- This assumes that the workspace does not changed after it
         // is created, but wouldn't it's ems:lastTimeSyncParent property be

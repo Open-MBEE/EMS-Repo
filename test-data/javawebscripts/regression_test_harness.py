@@ -1335,6 +1335,15 @@ common_filters+['"timestamp"', '"id"'],
 ["test","workspaces","develop", "develop2"]
 ],
   
+[
+628,
+"GetWorkspacesManager",
+"Get workspaces by a Manager",
+'curl %s %s "%s"'%(CURL_STATUS+" -u Manager:password", CURL_GET_FLAGS, BASE_URL_WS_NOBS),
+True, 
+common_filters+['"branched"','"created"','"id"','"qualifiedId"','"parent"'],
+["test","workspaces","develop", "develop2"]
+],
 
 # NULL PROPERTIES =====================================================
 
