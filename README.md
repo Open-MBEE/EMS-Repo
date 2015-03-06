@@ -403,6 +403,17 @@ There's a way to specify a different file so that permissions are not an issue. 
 
 There are port assignments that must be unique.  Remember that these are specified for the alfresco-view-share as well as the alfresco-view-repo.  You may be able to avoid changing ports if you can configure the server to use a different ip address: http://www.appnovation.com/blog/running-multiple-alfresco-server-instances-same-linux-machine.
 
+To change ports to 9091 for Alfresco and 10002 for the debugger, run this from the alfresco-view-repo directory:
+
+    . switchPorts.sh 9091 10002
+
+This script automates the detailed instructions below so that you don't have to read them. 
+
+### Detailed Instructions on Running Multiple Alfrescos
+
+You shouldn't need to read these if the switchPorts.sh described above works.
+
+
 To have the alfresco web server run on a different port add 
 
     -Dmaven.tomcat.port=9091
@@ -427,6 +438,10 @@ You also need to set the RMI ports.  By default, these port numbers start with 5
     action.rmi.service.port=0
     wcm-deployment-receiver.rmi.service.port=0
     monitor.rmi.service.port=0
+
+view-repo.launch is used by Eclipse to attach its debugger to a running Alfresco.  The debug port is specified in the file.  So, to make sure you attach to port used by Alfresco as specified in $MAVEN_OPTS, edit this line in view-repo.launch:
+
+    <mapEntry key="port" value="10002"/>
 
 The tomcat port (ex. 9091) and the debug port (ex. 10002) may or may not be opened in the firewall.  You may need to open these to access the server locally, and they must be open to access the server remotely.  The instructions vary for different versions of operating systems and are not included here.  For reference, here are some commands that may help you for a linux OS:
 
