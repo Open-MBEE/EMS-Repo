@@ -62,6 +62,8 @@ import org.alfresco.service.cmr.search.ResultSetRow;
 import org.alfresco.service.cmr.search.SearchParameters;
 import org.alfresco.service.cmr.search.SearchService;
 import org.alfresco.service.cmr.security.AccessStatus;
+import org.alfresco.service.cmr.security.AuthorityService;
+import org.alfresco.service.cmr.security.AuthorityType;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.alfresco.service.cmr.security.PersonService;
 import org.alfresco.service.cmr.site.SiteInfo;
@@ -2594,6 +2596,36 @@ public class NodeUtil {
             homeFolderScriptNode = new EmsScriptNode( homeFolderNode, getServices() );
         }
         return homeFolderScriptNode;
+    }
+    
+    /**
+     * Returns a list of all the groups the passed user belongs to.  Note,
+     * there is no java interface for this, so this code is based on what
+     * the javascript interface does. 
+     * 
+     * See: https://svn.alfresco.com/repos/alfresco-open-mirror/alfresco/HEAD/root/projects/repository/source/java/org/alfresco/repo/jscript/People.java
+     * 
+     * @param user
+     * @return
+     */
+    public static List<String> getUserGroups(String user) {
+        
+        List<String> authorityNames = new ArrayList<String>();
+
+        AuthorityService aService = services.getAuthorityService();
+        Set<String> authorities = aService.getContainingAuthoritiesInZone(
+                                    AuthorityType.GROUP,
+                                    user,
+                                    null, null, 1000);
+        for (String authority : authorities)
+        {
+            NodeRef group = aService.getAuthorityNodeRef( authority );
+            if (group != null) {
+                authorityNames.add( authority );
+            }
+        }
+        
+        return authorityNames;
     }
 
     // REVIEW -- should this be in AbstractJavaWebScript?
