@@ -93,7 +93,7 @@ public class ModelPut extends ModelPost {
         }
 
         status.setCode(responseStatus.getCode());
-        model.put("res", response.toString());
+        model.put("res", createResponseJson());
 
         printFooter();
 

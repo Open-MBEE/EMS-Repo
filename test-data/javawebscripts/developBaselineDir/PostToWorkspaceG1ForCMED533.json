@@ -1,50 +1,47 @@
-{"elements": [
-    {
-        "creator": "admin",
-        "documentation": "",
-        "editable": true,
-        "name": "onBothWorkspaces1",
-        "owner": "123456",
-        "qualifiedId": "/europa/123456/onBothWorkspaces1",
-        "qualifiedName": "/europa/JW_TEST/onBothWorkspaces1",
-        "specialization": {
-            "isDerived": false,
-            "isSlot": false,
-            "propertyType": null,
-            "type": "Property",
-            "value": [{
-                "string": "gg_string",
-                "type": "LiteralString",
-                "valueExpression": null
-            }]
+{"elements": [{
+    "qualifiedId": "/europa/123456/onBothWorkspaces1",
+    "qualifiedName": "/europa/JW_TEST/onBothWorkspaces1",
+    "name": "onBothWorkspaces1",
+    "owner": "123456",
+    "documentation": "",
+    "sysmlid": "onBothWorkspaces1",
+    "specialization": {
+    "propertyType": null,
+    "isSlot": false,
+    "isDerived": false,
+    "value": [{
+        "valueExpression": null,
+        "string": "gg_string",
+        "type": "LiteralString"
+    }],
+    "type": "Property"
+},
+    "editable": true,
+    "creator": "admin"
+}, {
+    "qualifiedId": "/europa/123456/onBothWorkspaces2",
+    "qualifiedName": "/europa/JW_TEST/onBothWorkspaces2",
+    "name": "onBothWorkspaces2",
+    "owner": "123456",
+    "documentation": "",
+    "sysmlid": "onBothWorkspaces2",
+    "specialization": {
+    "valueExpression": null,
+    "operand": [
+        {
+            "element": "300",
+            "valueExpression": null,
+            "type": "ElementValue"
         },
-        "sysmlid": "onBothWorkspaces1"
-    },
-    {
-        "creator": "admin",
-        "documentation": "",
-        "editable": true,
-        "name": "onBothWorkspaces2",
-        "owner": "123456",
-        "qualifiedId": "/europa/123456/onBothWorkspaces2",
-        "qualifiedName": "/europa/JW_TEST/onBothWorkspaces2",
-        "specialization": {
-            "operand": [
-                {
-                    "element": "300",
-                    "type": "ElementValue",
-                    "valueExpression": null
-                },
-                {
-                    "element": "302",
-                    "type": "ElementValue",
-                    "valueExpression": null
-                }
-            ],
-            "type": "Expression",
-            "valueExpression": null
-        },
-        "sysmlid": "onBothWorkspaces2"
-    }
-]}
+        {
+            "element": "302",
+            "valueExpression": null,
+            "type": "ElementValue"
+        }
+    ],
+    "type": "Expression"
+},
+    "editable": true,
+    "creator": "admin"
+}]}
 200

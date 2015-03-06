@@ -258,7 +258,13 @@ public class ConfigurationsWebscript extends AbstractJavaWebScript {
             timestamp = new Date( System.currentTimeMillis() );
         }
         json.put("timestamp", EmsScriptNode.getIsoTime(timestamp));
-        json.put("name", config.getProperty(Acm.CM_NAME));
+        // for back compat with tags, need to used CM_NAME if title isn't being used
+        String title = (String)config.getProperty( Acm.CM_TITLE );
+        if (title == null) {
+            json.put( "name", config.getProperty( Acm.CM_NAME ) );
+        } else {
+            json.put("name", title);
+        }
         json.put("description", config.getProperty("cm:description"));
         // need to unravel id with the storeref, which by default is workspace://SpacesStore/
         json.put("id", config.getNodeRef().getId());
@@ -409,9 +415,14 @@ public class ConfigurationsWebscript extends AbstractJavaWebScript {
                                                      workspace, null );
         for (EmsScriptNode config: configs) {
             JSONObject jsonObject = new JSONObject();
-            jsonObject.put("name", config.getProperty(Acm.CM_NAME));
-            jsonObject.put("id", config.getNodeRef().getId());
-            configsJson.put( jsonObject );
+            // since configuations are created in workspaces, may not have read permissions
+            // need to filter
+            // TODO: add into regression tests
+            if (config.hasPermission("Read")) {
+                jsonObject.put("name", config.getProperty(Acm.CM_NAME));
+                jsonObject.put("id", config.getNodeRef().getId());
+                configsJson.put( jsonObject );
+            }
         }
 
         snapshotJson.put( "configurations", configsJson );
@@ -471,7 +482,8 @@ public class ConfigurationsWebscript extends AbstractJavaWebScript {
                                                           throws JSONException {
         HashSet<String> productSet = new HashSet<String>();
         if (postJson.has("name")) {
-            config.createOrUpdateProperty(Acm.CM_NAME, postJson.getString("name"));
+            // update the title, since title can handle special characters
+            config.createOrUpdateProperty(Acm.CM_TITLE, postJson.getString("name"));
         }
         if (postJson.has("description")) {
             config.createOrUpdateProperty("cm:description", postJson.getString("description"));

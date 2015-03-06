@@ -145,9 +145,11 @@ public class ViewModelPost extends ModelPost {
 //        model.put( "res", top.toString( 4 ) );
 
         status.setCode(responseStatus.getCode());
-        model.put("res", response.toString());
+        model.put("res", createResponseJson());
 
         printFooter();
+        
+        sendProgress( "Load/sync/update request is finished processing.", null, true);
 
         return model;
     }
@@ -161,6 +163,10 @@ public class ViewModelPost extends ModelPost {
 
         WorkspaceNode workspace = getWorkspace( req );
 
+        // Note: Cannot have any sendProgress methods before setting numElementsToPost
+        numElementsToPost = array.length();
+        sendProgress( "Got request - starting", null, true);
+        
         for (int ii = 0; ii < array.length(); ii++) {
             JSONObject elementJson = array.getJSONObject(ii);
 
@@ -201,8 +207,6 @@ public class ViewModelPost extends ModelPost {
                 }
             }
         }
-
-        updateOrCreateAllRelationships(relationshipsJson, workspace);
 
         updateNodeReferencesForView( array, workspace );
     }

@@ -66,13 +66,14 @@ public class WorkspaceGet extends AbstractJavaWebScript{
 		}
 
 		if(object == null){
-			model.put("res", response.toString());
+			model.put("res", createResponseJson());
 		} else {
 			try{
 				if (!Utils.isNullOrEmpty(response.toString())) object.put("message", response.toString());
 				model.put("res", NodeUtil.jsonToString( object, 4 ));
 			} catch (JSONException e){
 				e.printStackTrace();
+	            model.put("res", createResponseJson());
 			}
 		}
 		status.setCode(responseStatus.getCode());
@@ -92,7 +93,7 @@ public class WorkspaceGet extends AbstractJavaWebScript{
 		JSONObject interiorJson = new JSONObject();
 		if(ws == null){
 		    if (wsID.equals("master")) {
-		        WorkspaceNode.addWorkspaceNamesAndIds(interiorJson, ws );
+		        WorkspaceNode.addWorkspaceNamesAndIds(interiorJson, ws, services, true );
 		        jsonArray.put(interiorJson);
 		    } else {
 	            log(Level.WARN, HttpServletResponse.SC_NOT_FOUND, "Workspace not found: %s", (ws == null ? null : ws.getSysmlId()));

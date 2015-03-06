@@ -1,23 +1,23 @@
 {"elements": [{
-    "creator": "admin",
-    "documentation": "y is y",
-    "editable": true,
-    "modified": "2015-02-18T14:09:10.366-0800",
-    "owner": "302",
     "qualifiedId": "/europa/123456/300/301/302/y",
     "qualifiedName": "/europa/JW_TEST/300/301/302/null",
-    "read": "2015-02-18T14:09:11.020-0800",
+    "owner": "302",
+    "documentation": "y is y",
+    "sysmlid": "y",
+    "read": "2015-02-24T11:31:28.562-0800",
     "specialization": {
-        "isDerived": false,
-        "isSlot": false,
-        "propertyType": null,
-        "type": "Property",
-        "value": [{
-            "string": "the y value",
-            "type": "LiteralString",
-            "valueExpression": null
-        }]
-    },
-    "sysmlid": "y"
+    "propertyType": null,
+    "isSlot": false,
+    "isDerived": false,
+    "value": [{
+        "valueExpression": null,
+        "string": "the y value",
+        "type": "LiteralString"
+    }],
+    "type": "Property"
+},
+    "editable": true,
+    "modified": "2015-02-24T11:31:28.006-0800",
+    "creator": "admin"
 }]}
 200

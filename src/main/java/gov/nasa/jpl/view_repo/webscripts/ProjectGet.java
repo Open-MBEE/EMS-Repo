@@ -110,7 +110,7 @@ public class ProjectGet extends AbstractJavaWebScript {
             e.printStackTrace();
         }
         if (json == null) {
-            model.put("res", response.toString());
+            model.put("res", createResponseJson());
         } else {
             model.put("res", NodeUtil.jsonToString( json ));
         }
@@ -165,7 +165,7 @@ public class ProjectGet extends AbstractJavaWebScript {
 
         if (checkPermissions(projectNode, PermissionService.READ)) {
             log(Level.INFO, HttpServletResponse.SC_OK, "Found project");
-            json = new JSONObject();
+			json = NodeUtil.newJsonObject();
             JSONArray elements = new JSONArray();
             JSONObject project = new JSONObject();
             JSONObject specialization = new JSONObject();

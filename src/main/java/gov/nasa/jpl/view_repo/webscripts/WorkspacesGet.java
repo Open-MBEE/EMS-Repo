@@ -76,13 +76,14 @@ public class WorkspacesGet extends AbstractJavaWebScript{
             e.printStackTrace();
         }
         if (json == null) {
-            model.put("res", response.toString());
+            model.put("res", createResponseJson());
         } else {
             try {
                 if (!Utils.isNullOrEmpty(response.toString())) json.put("message", response.toString());
                 model.put("res", NodeUtil.jsonToString( json, 4 ));
             } catch ( JSONException e ) {
                 e.printStackTrace();
+                model.put("res", createResponseJson());
             }
         }
         status.setCode(responseStatus.getCode());
@@ -98,7 +99,7 @@ public class WorkspacesGet extends AbstractJavaWebScript{
         if (!findDeleted) {
             //This is for the master workspace (not located in the user home folder).
             JSONObject interiorJson = new JSONObject();
-            WorkspaceNode.addWorkspaceNamesAndIds(interiorJson, null );
+            WorkspaceNode.addWorkspaceNamesAndIds(interiorJson, null, services, true );
             jArray.put(interiorJson);
         }
 

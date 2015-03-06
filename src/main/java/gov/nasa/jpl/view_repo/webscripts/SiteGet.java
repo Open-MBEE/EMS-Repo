@@ -106,7 +106,7 @@ public class SiteGet extends AbstractJavaWebScript {
             e.printStackTrace();
         }
         if (json == null) {
-            model.put("res", response.toString());
+            model.put("res", createResponseJson());
         } else {
             model.put("res", NodeUtil.jsonToString( json ));
         }
@@ -165,6 +165,7 @@ public class SiteGet extends AbstractJavaWebScript {
                 		siteJson.put("sysmlid", name);
                 		siteJson.put("name", siteInfo.getTitle());
                 		siteJson.put("parent", parentId );
+                		siteJson.put("isCharacterization", emsNode.getProperty(Acm.ACM_SITE_PACKAGE) != null );
 
                 		json.put(siteJson);
                 	}

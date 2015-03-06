@@ -71,7 +71,7 @@ public class MmsDiffGet extends AbstractJavaWebScript {
 
         if (!validateRequest(req, status)) {
             status.setCode(responseStatus.getCode());
-            results.put("res", response.toString());
+            results.put("res", createResponseJson());
             return results;
         }
 
@@ -98,6 +98,7 @@ public class MmsDiffGet extends AbstractJavaWebScript {
             results.put("res", NodeUtil.jsonToString( top, 4 ));
         } catch (JSONException e) {
             e.printStackTrace();
+            results.put("res", createResponseJson());
         }
 
         status.setCode(responseStatus.getCode());

@@ -51,6 +51,7 @@ import java.util.regex.*;
 import java.util.Arrays;
 
 import javax.servlet.http.HttpServletResponse;
+import javax.transaction.UserTransaction;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -102,6 +103,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 	// internal members
     // when run in background as an action, this needs to be false
     public boolean runWithoutTransactions = defaultRunWithoutTransactions;
+    //public UserTransaction trx = null;
 	protected ScriptNode companyhome;
 	protected Map<String, EmsScriptNode> foundElements = new HashMap<String, EmsScriptNode>();
 
@@ -188,11 +190,8 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
         clearCaches( true );
         clearCaches(); // calling twice for those redefine clearCaches() to
                        // always call clearCaches( false )
-        if ( withoutTransactions ) {
-            return executeImplImpl( req, status, cache );
-        }
         final Map< String, Object > model = new HashMap<String, Object>();
-        new EmsTransaction( getServices(), getResponse(), getResponseStatus() ) {
+        new EmsTransaction( getServices(), getResponse(), getResponseStatus(), withoutTransactions ) {
             @Override
             public void run() throws Exception {
                 Map< String, Object > m = executeImplImpl( req, status, cache );
@@ -1061,6 +1060,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 
         // Log the progress:
         log(Level.INFO,"%s msg: %s\n",subject,msg);
+        //logger.info(subject+" msg: "+msg+"\n");
         
         // Send the progress over JMS:
         CommitUtil.sendProgress(msg, workspaceId, projectId);
@@ -1084,6 +1084,17 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
             }
         }
         
+    }
+    
+    /**
+     * Creates a json like object in a string and puts the response in the message key
+     * 
+     * @return The resulting string, ie "{'message':response}" or "{}"
+     */
+    public String createResponseJson() {
+        String resToString = response.toString();
+        String resStr = !Utils.isNullOrEmpty( resToString ) ? resToString.replaceAll( "\n", "" ) : "";
+        return !Utils.isNullOrEmpty( resStr ) ? String.format("{\"message\":\"%s\"}", resStr) : "{}";
     }
     
 }

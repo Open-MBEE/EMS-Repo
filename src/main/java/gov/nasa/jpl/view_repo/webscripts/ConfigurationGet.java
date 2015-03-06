@@ -82,7 +82,7 @@ public class ConfigurationGet extends AbstractJavaWebScript {
 
         //clearCaches();
 
-        JSONObject jsonObject = new JSONObject();
+        JSONObject jsonObject = NodeUtil.newJsonObject();
 
         try {
             ConfigurationsWebscript configWs = new ConfigurationsWebscript( repository, getServices(), response );
@@ -94,7 +94,7 @@ public class ConfigurationGet extends AbstractJavaWebScript {
         		String siteName = getSiteName(req);
         		model.put("title", siteName);
         } catch (Exception e) {
-        		model.put("res", response.toString());
+        		model.put("res", createResponseJson());
         		model.put("title", "ERROR could not load");
         		if (e instanceof JSONException) {
         			log(Level.ERROR, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "JSON creation error");

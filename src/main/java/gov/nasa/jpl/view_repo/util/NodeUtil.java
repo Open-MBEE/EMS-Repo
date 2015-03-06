@@ -23,17 +23,21 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.UUID;
 import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.transaction.UserTransaction;
 import javax.xml.bind.DatatypeConverter;
 
 import org.alfresco.model.ContentModel;
@@ -53,20 +57,23 @@ import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.search.LimitBy;
-import org.alfresco.service.cmr.search.PermissionEvaluationMode;
 import org.alfresco.service.cmr.search.ResultSet;
 import org.alfresco.service.cmr.search.ResultSetRow;
 import org.alfresco.service.cmr.search.SearchParameters;
 import org.alfresco.service.cmr.search.SearchService;
 import org.alfresco.service.cmr.security.AccessStatus;
+import org.alfresco.service.cmr.security.AuthorityService;
+import org.alfresco.service.cmr.security.AuthorityType;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.alfresco.service.cmr.security.PersonService;
+import org.alfresco.service.cmr.site.SiteInfo;
 import org.alfresco.service.cmr.version.Version;
 import org.alfresco.service.cmr.version.VersionHistory;
 import org.alfresco.service.namespace.QName;
 import org.alfresco.util.ApplicationContextHelper;
 import org.apache.commons.logging.Log;
 import org.apache.log4j.Logger;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.context.ApplicationContext;
@@ -95,72 +102,85 @@ public class NodeUtil {
         }
     }
 
+    static Logger logger = Logger.getLogger(NodeUtil.class);
+
     /* static flags and constants */
 
     protected static String txMutex = "";
     protected static boolean beenInsideTransaction = false;
-    protected static Map< String, Boolean > beenInsideTransactionMap =
-            new LinkedHashMap< String, Boolean >();
+    protected static Map< Long, Boolean > beenInsideTransactionMap =
+            new LinkedHashMap< Long, Boolean >();
 
     public static synchronized boolean hasBeenInsideTransaction() {
-        Boolean b = beenInsideTransactionMap.get( "" + Thread.currentThread().getId());
+        Boolean b = beenInsideTransactionMap.get( Thread.currentThread().getId());
         if ( b != null ) return b;
         return beenInsideTransaction;
     }
     public static synchronized void setBeenInsideTransaction( boolean b ) {
         beenInsideTransaction = b;
-        beenInsideTransactionMap.put( "" + Thread.currentThread().getId(), b );
+        beenInsideTransactionMap.put( Thread.currentThread().getId(), b );
     }
     protected static boolean beenOutsideTransaction = false;
-    protected static Map< String, Boolean > beenOutsideTransactionMap =
-            new LinkedHashMap< String, Boolean >();
+    protected static Map< Long, Boolean > beenOutsideTransactionMap =
+            new LinkedHashMap< Long, Boolean >();
     public static synchronized boolean hasBeenOutsideTransaction() {
-        Boolean b = beenOutsideTransactionMap.get( "" + Thread.currentThread().getId());
+        Boolean b = beenOutsideTransactionMap.get( Thread.currentThread().getId());
         if ( b != null ) return b;
         return beenOutsideTransaction;
     }
     public static synchronized void setBeenOutsideTransaction( boolean b ) {
         beenOutsideTransaction = b;
-        beenOutsideTransactionMap.put( "" + Thread.currentThread().getId(), b );
+        beenOutsideTransactionMap.put( Thread.currentThread().getId(), b );
     }
     protected static boolean insideTransactionNow = false;
-    protected static Map< String, Boolean > insideTransactionNowMap =
-            new LinkedHashMap< String, Boolean >();
+    protected static Map< Long, Boolean > insideTransactionNowMap =
+            new LinkedHashMap< Long, Boolean >();
+    protected static Map< Long, UserTransaction > transactionMap =
+            Collections.synchronizedMap( new LinkedHashMap< Long, UserTransaction >() );
     public static synchronized boolean isInsideTransactionNow() {
-        Boolean b = insideTransactionNowMap.get( "" + Thread.currentThread().getId());
+        Boolean b = insideTransactionNowMap.get( Thread.currentThread().getId());
         if ( b != null ) return b;
         return insideTransactionNow;
     }
+    public static UserTransaction getTransaction() {
+        return transactionMap.get( Thread.currentThread().getId() );
+    }
+    public static UserTransaction createTransaction() {
+        UserTransaction trx =
+                services.getTransactionService().getNonPropagatingUserTransaction();
+        transactionMap.put( Thread.currentThread().getId(), trx );
+        return trx;
+    }
     public static synchronized void setInsideTransactionNow( boolean b ) {
         insideTransactionNow = b;
-        insideTransactionNowMap.put( "" + Thread.currentThread().getId(), b );
+        insideTransactionNowMap.put( Thread.currentThread().getId(), b );
     }
-    protected static Map< String, StackTraceElement[] > insideTransactionStrackTrace =
-            new LinkedHashMap< String, StackTraceElement[] >();
-    protected static Map< String, StackTraceElement[] > outsideTransactionStrackTrace =
-            new LinkedHashMap< String, StackTraceElement[] >();
+    protected static Map< Long, StackTraceElement[] > insideTransactionStrackTrace =
+            new LinkedHashMap< Long, StackTraceElement[] >();
+    protected static Map< Long, StackTraceElement[] > outsideTransactionStrackTrace =
+            new LinkedHashMap< Long, StackTraceElement[] >();
     public static void setInsideTransactionStackTrace() {
-        insideTransactionStrackTrace.put( "" + Thread.currentThread().getId(),
+        insideTransactionStrackTrace.put( Thread.currentThread().getId(),
                                           Thread.currentThread().getStackTrace() );
     }
     public static void setOutsideTransactionStackTrace() {
-        outsideTransactionStrackTrace.put( "" + Thread.currentThread().getId(),
+        outsideTransactionStrackTrace.put( Thread.currentThread().getId(),
                                            Thread.currentThread().getStackTrace() );
     }
     public static StackTraceElement[] getInsideTransactionStackTrace() {
-        return insideTransactionStrackTrace.get( "" + Thread.currentThread().getId() );
+        return insideTransactionStrackTrace.get( Thread.currentThread().getId() );
     }
     public static StackTraceElement[] getOutsideTransactionStackTrace() {
-        return outsideTransactionStrackTrace.get( "" + Thread.currentThread().getId() );
+        return outsideTransactionStrackTrace.get( Thread.currentThread().getId() );
     }
 
-    public static boolean doFullCaching = true;
+    public static boolean doFullCaching = false;
     public static boolean doSimpleCaching = true;
     public static boolean doHeisenCheck = true;
     public static boolean doVersionCaching = false; // turn this off by default
     public static boolean activeVersionCaching = true;
     public static boolean doJsonCaching = true;
-    public static boolean doJsonDeepCaching = true;
+    public static boolean doJsonDeepCaching = false;
     public static boolean doJsonStringCaching = false;
     
     // global flag that is enabled once heisenbug is seen, so it will email admins the first time heisenbug is seen
@@ -196,8 +216,8 @@ public class NodeUtil {
             Collections.synchronizedMap( new HashMap<NodeRef, NodeRef>() );
 
     // Set< String > filter, boolean isExprOrProp,Date dateTime, boolean isIncludeQualified
-    public static Map< String, Map< Long, Map< Boolean, Map< Set<String>, JSONObject > > > > jsonDeepCache =
-            Collections.synchronizedMap( new HashMap< String, Map< Long, Map< Boolean, Map< Set<String>, JSONObject > > > >() );
+    public static Map< String, Map< Long, Map< Boolean, Map< Set<String>, Map<String, JSONObject > > > > > jsonDeepCache =
+            Collections.synchronizedMap( new HashMap< String, Map< Long, Map< Boolean, Map< Set<String>, Map<String, JSONObject > > > > >() );
     public static Map< String, Map< Long, JSONObject > > jsonCache =
         Collections.synchronizedMap( new HashMap< String, Map< Long, JSONObject > >() );
     public static long jsonCacheHits = 0;
@@ -253,33 +273,237 @@ public class NodeUtil {
     public static NodeRef getCurrentNodeRefFromCache( NodeRef maybeFrozenNodeRef ) {
         NodeRef ref = frozenNodeCache.get( maybeFrozenNodeRef );
         if ( ref != null ) return ref;
-        //EmsScriptNode node = new EmsScriptNode( maybeFrozenNodeRef, getServices() );
-        return null;//node.getLiveNodeRefFromVersion();
+        return null;
     }
-//    public static void cacheNodeVersion( EmsScriptNode node ) {
-//        if ( activeVersionCaching && NodeUtil.exists( node ) ) {
-//            Version v = node.getCurrentVersion();
-//            if ( doVersionCaching ) {
-//                EmsVersion cachedVersion = versionCache.get( node.getId() );
-//            }
-//            NodeUtil.heisenCachePut( node.getName(),
-//                                     ( v != null && v.getFrozenStateNodeRef() != null )
-//                                     ? v.getFrozenStateNodeRef()
-//                                     : node.getNodeRef() );
-//        }
-//    }
+
+    public static JSONObject jsonCacheGet( String id, long millis,
+                                           boolean noMetadata ) {
+        JSONObject json = Utils.get( jsonCache, id, millis );
+        if ( Debug.isOn()) logger.debug( "jsonCacheGet(" + id + ", " + millis + ", "
+                            + noMetadata + ") = " + json );
+        if ( doJsonStringCaching && noMetadata ) {
+            json = clone( json );
+            stripJsonMetadata( json );
+        } else if ( !doJsonStringCaching ) {
+            stripJsonMetadata( json );
+        }
+        return json;
+    }
+
+    public static JSONObject jsonCachePut( JSONObject json, String id,
+                                           long millis ) {
+        json = clone( json );
+        if ( doJsonStringCaching ) {
+            json = addJsonMetadata( json, id, millis, true, null );
+        }
+        if ( Debug.isOn()) logger.debug( "jsonCachePut(" + id + ", " + millis + ", " + json
+                            + ")" );
+        Utils.put( jsonCache, id, millis, json );
+        return json;
+    }
+
+    public static JSONObject jsonDeepCacheGet( String id, long millis,
+                                               boolean isIncludeQualified,
+                                               Set< String > jsonFilter,
+                                               String versionLabel,
+                                               boolean noMetadata ) {
+        jsonFilter = jsonFilter == null ? new TreeSet< String >() : jsonFilter;
+        if ( versionLabel == null ) versionLabel = "";
+        JSONObject json = Utils.get( jsonDeepCache, id, millis,
+                                     isIncludeQualified, jsonFilter, versionLabel );
+        if ( doJsonStringCaching && noMetadata ) {
+            json = clone( json );
+            stripJsonMetadata( json );
+        } else if ( !doJsonStringCaching ) {
+            stripJsonMetadata( json );
+        }
+        if ( Debug.isOn()) logger.debug( "jsonDeepCacheGet(" + id + ", " + millis + ", "
+                            + isIncludeQualified + ", " + jsonFilter + ", "
+                            + noMetadata + ") = " + json );
+        return json;
+    }
+
+    public static JSONObject jsonDeepCachePut( JSONObject json, String id,
+                                               long millis,
+                                               boolean isIncludeQualified,
+                                               Set< String > jsonFilter,
+                                               String versionLabel ) {
+        json = clone( json );
+        jsonFilter = jsonFilter == null ? new TreeSet< String >() : jsonFilter;
+        json = addJsonMetadata( json, id, millis, isIncludeQualified, jsonFilter );
+        if ( versionLabel == null ) versionLabel = "";
+        if ( Debug.isOn() ) {
+            logger.debug( "jsonDeepCachePut(" + id + ", " + millis + ", "
+                          + isIncludeQualified + ", " + jsonFilter + ", "
+                          + versionLabel + ", " + json + ")" );
+        }
+        Utils.put( jsonDeepCache, id, millis, isIncludeQualified, jsonFilter,
+                   versionLabel, json );
+        return json;
+    }
+
+    public static JSONObject stripJsonMetadata( JSONObject json ) {
+        if ( json == null ) return null;
+        if ( Debug.isOn()) logger.debug("stripJsonMetadata -> " + json );
+        json.remove( "jsonString" );
+        json.remove( "jsonString4" );
+        if ( Debug.isOn()) logger.debug("stripJsonMetadata -> " + json );
+        return json;
+    }
+    
+    /**
+     * Put json.toString() in the json.
+     * @param json
+     * @param id
+     * @param millis
+     * @param isIncludeQualified
+     * @param jsonFilter
+     * @return
+     */
+    public static JSONObject addJsonMetadata( JSONObject json, String id,
+                                              long millis,
+                                              boolean isIncludeQualified,
+                                              Set< String > jsonFilter ) {
+        if ( json == null ) return null;
+        if ( !doJsonStringCaching ) return json;
+        
+        if ( json.has( "jsonString4" ) ) return json;
+        
+        jsonFilter = jsonFilter == null ? new TreeSet< String >() : jsonFilter;
+        String jsonString4 = null;
+    
+        try {
+            jsonString4 = json.toString(4);
+        } catch ( JSONException e1 ) {
+            e1.printStackTrace();
+            return null;
+        }
+        if ( jsonString4 == null ) {
+            logger.warn( "json.toString(4) returned empty for " + json );
+            return null;
+        }
+        String jsonString = jsonString4.replaceAll( "( |\n)+", " " ); 
+        try {
+            json.put( "jsonString", jsonString );
+            json.put( "jsonString4", jsonString4 );
+        } catch ( JSONException e ) {
+            e.printStackTrace();
+            return null;
+        }
+        if ( Debug.isOn()) logger.debug( "addJsonMetadata(" + id + ", " + millis + ", "
+                            + isIncludeQualified + ", " + jsonFilter + ") -> "
+                            + json );
+        return json;
+    }
+
+    protected static List< String > dontFilterList =
+            Utils.newList( "read", Acm.JSON_ID, "id", "creator", Acm.JSON_LAST_MODIFIED,
+                           Acm.JSON_SPECIALIZATION );
+        protected static Set< String > dontFilterOut =
+            Collections.synchronizedSet( new HashSet< String >( dontFilterList ) );
+        
+    protected static JSONObject filterJson( JSONObject json, 
+                                            Set< String > jsonFilter,
+                                            boolean isIncludeQualified ) throws JSONException {
+        JSONObject newJson = new JSONObject();
+        Iterator keys = json.keys();
+        while ( keys.hasNext() ) {
+            String key = (String)keys.next();
+            if ( jsonFilter.contains( key )
+                 || dontFilterOut.contains( key ) ) {
+                Object value = json.get( key );
+                if ( key.equals( Acm.JSON_SPECIALIZATION )
+                     && value instanceof JSONObject ) {
+                    JSONObject newSpec = filterJson( (JSONObject)value, 
+                                                     jsonFilter, isIncludeQualified );
+                    if ( newSpec != null && newSpec.length() > 0 ) {
+                        newJson.put( key, newSpec );
+                    }
+                } else if ( isIncludeQualified ||
+                            ( !key.equals( "qualifiedId" ) && !key.equals( "qualifiedName" ) ) ) {
+                    if ( Debug.isOn() ) Debug.outln( "add to newJson = " + key
+                                                     + ":" + value );
+                    newJson.put( key, value );
+                }
+            }
+        }
+        return newJson;
+    }
 
     public static String jsonToString( JSONObject json ) {
         if ( !doJsonStringCaching ) return json.toString();
         try {
-            return jsonToString( json, -1 );
+            String s = jsonToString( json, -1 );
+            
+            return s;
         } catch ( JSONException e ) {
             e.printStackTrace();
         }
         return null;
     }
-
+    
+    /**
+     * Use the cached json string if appropriate; else call json.toString().
+     * 
+     * @param json
+     * @param numSpacesToIndent
+     * @return
+     * @throws JSONException
+     */
     public static String jsonToString( JSONObject json, int numSpacesToIndent ) throws JSONException {
+        if ( json == null ) return null;
+        String s = null;
+        // If we aren't string caching, or if the string(s) are not cached in
+        // the json, then call toString() the old-fashioned way.
+        if ( !doJsonStringCaching || !json.has( "jsonString4" ) ) {
+            stripJsonMetadata( json );
+            if ( numSpacesToIndent < 0 ) {
+                s = json.toString();
+                if ( Debug.isOn()) logger.debug( "jsonToString( json, " + numSpacesToIndent + " ) = json.toString() = " + s );
+                return s;
+            }
+            s = json.toString( numSpacesToIndent );
+            if ( Debug.isOn()) logger.debug( "jsonToString( json, " + numSpacesToIndent + " ) = json.toString( " + numSpacesToIndent + " ) = " + s );
+            return s;
+        }
+        // Get the cached json string with no newlines.
+        if ( numSpacesToIndent < 0 ) {
+            if ( json.has( "jsonString" ) ) {
+                s = json.getString( "jsonString" );
+                if ( Debug.isOn()) logger.debug( "jsonToString( json, " + numSpacesToIndent + " ) = json.getSString( \"jsonString\" ) = " + s );
+                return s;
+            }
+            // TODO -- Warning! shouldn't get here!
+            json = stripJsonMetadata( clone( json ) );
+            s = json.toString();
+            logger.warn( "BAD! jsonToString( json, " + numSpacesToIndent + " ) = json.toString() = " + s );
+            return s;
+        }
+        // Get the cached json string with newlines and indentation of four
+        // spaces, and replace the indentation with the specified
+        // numSpacesToIndent.
+        if ( json.has( "jsonString4" ) ) {
+            String jsonString4 = json.getString( "jsonString4" );
+            if ( numSpacesToIndent == 4 ) {
+                if ( Debug.isOn() ) logger.debug( "jsonToString( json, "
+                                                  + numSpacesToIndent
+                                                  + " ) = jsonString4 = "
+                                                  + jsonString4 );
+                return jsonString4;
+            }
+            s = jsonString4.replaceAll( "    ",
+                                        Utils.repeat( " ", numSpacesToIndent ) );
+            if ( Debug.isOn()) logger.debug( "jsonToString( json, " + numSpacesToIndent + " ) = jsonString4.replaceAll(\"    \", Utils.repeat( \" \", " + numSpacesToIndent + " ) ) = " + s );
+            return s;
+        }
+        // TODO -- Warning! shouldn't get here!
+        json = stripJsonMetadata( clone( json ) );
+        s = json.toString( numSpacesToIndent );
+        logger.warn( "BAD! jsonToString( json, " + numSpacesToIndent + " ) = json.toString( " + numSpacesToIndent + " ) = " + s );
+        return s;
+    }
+
+    public static String oldJsonToString( JSONObject json, int numSpacesToIndent ) throws JSONException {
         if ( !doJsonStringCaching ) return json.toString( numSpacesToIndent );
         String result = null;
         String modString = json.optString("modified");
@@ -317,6 +541,200 @@ public class NodeUtil {
         return result;
     }
     
+    protected static JSONObject simpleJsonObject = new JSONObject( new TreeMap<String,Integer>() {
+        { put("a",0); } 
+    });
+    
+    public static class CachedJsonObject extends JSONObject {
+        static String replacement = "$%%$";
+        static String replacementWithQuotes = "\"$%%$\"";
+        static int replacementWithQuotesLength = replacementWithQuotes.length();
+
+        protected boolean plain = false; 
+        
+        public CachedJsonObject() {
+            super();
+        }
+        public CachedJsonObject( String s ) throws JSONException {
+            super(s);
+        }
+        
+        @Override
+        public String toString() {
+            try {
+                if ( has( "jsonString" ) ) {
+                    if ( Debug.isOn()) logger.debug( "has jsonString: "
+                                        + getString( "jsonString" ) );
+                    return getString( "jsonString" );
+                }
+                if ( Debug.isOn()) logger.debug( "no jsonString: " + super.toString() );
+
+                return nonCachedToString( -1 );
+
+            } catch ( JSONException e ) {
+                e.printStackTrace();
+            }
+            return null;
+        }
+        
+        @Override
+        public String toString( int n ) {
+            try {
+                if ( has( "jsonString4" ) ) {
+                    if ( Debug.isOn()) logger.debug( "has jsonString4: "
+                                        + jsonToString( this, n ) );
+                    // need to replace spaces for proper indentation
+                    return jsonToString( this, n );
+                }
+                if ( Debug.isOn()) logger.debug( "no jsonString4: " + super.toString( n ) );
+
+                return nonCachedToString( n );
+
+            } catch ( JSONException e ) {
+                e.printStackTrace();
+            }
+            return null;
+        }
+        
+        /**
+         * Create json string for non-elements whose json is not cached but
+         * whose children may include cached elements.
+         * 
+         * @param numSpaces
+         * @return
+         */
+        private String nonCachedToString( int numSpaces ) {
+            // Look for entries with CachedObjects or arrays of CachedJsonObjects.
+            LinkedHashMap< String, String > newEntries =
+                new LinkedHashMap< String, String >();
+            JSONObject oldEntries = newJsonObject();
+            // Temporarily replace CachedJsonObjects with fixed strings in order
+            // to generate a minimal json string and later substitute back the
+            // cached strings.
+            for ( Object k : keySet().toArray() ) {
+                if ( !( k instanceof String ) ) continue;
+                String key = (String)k;
+                replaceJsonArrays( key, numSpaces, newEntries, oldEntries );
+            }
+            
+            // Generate the json string with temporary replacements.
+            String s = null;
+            if ( numSpaces < 0 ) s = super.toString();
+            else s = super.toString( numSpaces );
+            
+            // Now substitute back in the cached json strings using a
+            // StringBuffer.
+            int len = newEntries.size();
+            if ( len > 0 ) {
+                StringBuffer sb = new StringBuffer( s );
+                String[] keysNew = new String[len];
+                newEntries.keySet().toArray( keysNew );
+                int pos = s.length()-replacementWithQuotesLength;
+
+                // Loop through replacements.
+                for ( int i=len-1; i >= 0; --i  ) {
+                    String keyn = keysNew[i];
+                    int pos1 = s.lastIndexOf( replacementWithQuotes, pos );
+                    pos = s.lastIndexOf( "\"" + keyn + "\"", pos1 );
+                    if ( pos >= 0 && pos1 > 0 ) {
+                        sb.replace( pos1, pos1+replacementWithQuotesLength, newEntries.get( keyn ) );
+                    }
+                }
+                s = sb.toString();
+
+                // Put replaced json elements back.
+                for ( Object k : oldEntries.keySet().toArray() ) {
+                    if ( !( k instanceof String ) ) continue;
+                    String key = (String)k;
+                    put( key, oldEntries.get( key ) );
+                }
+            }
+            return s;
+        }
+
+        /**
+         *  Temporarily replace CachedJsonObjects with fixed strings in order
+         *  to generate a minimal json string and later substitute back the
+         *  cached strings.
+         *  
+         * @param key
+         * @param numSpaces
+         * @param newEntries
+         * @param oldEntries
+         */
+        public void replaceJsonArrays( String key, int numSpaces,
+                                       LinkedHashMap< String, String > newEntries,
+                                       JSONObject oldEntries  ) {
+            JSONArray jarr = optJSONArray( key );
+            if ( jarr != null && jarr.length() > 0 ) {
+                Object val = jarr.get( 0 );
+                if ( val instanceof CachedJsonObject ) {
+                    // Replace and build array string.
+                    StringBuffer sb = new StringBuffer("[");
+                    for ( int i=0; i<jarr.length(); ++i ) {
+                        val = jarr.get( i );
+                        if (i > 0) sb.append( ", " );
+                        if ( numSpaces < 0 ) {
+                            sb.append( val.toString() );
+                        } else {
+                            if ( val instanceof JSONObject ) {
+                                sb.append( ((JSONObject)val).toString(numSpaces) );
+                            } else if ( val instanceof JSONArray ){
+                                sb.append( ((JSONArray)val).toString(numSpaces) );
+                            } else {
+                                sb.append( val.toString() );
+                            }
+                        }
+                    }
+                    sb.append( "]" );
+                    newEntries.put( key, sb.toString() );
+                    oldEntries.put( key, jarr );
+                    put( key, replacement );
+                }
+            } else {
+                Object o = get( key );
+                if ( o instanceof CachedJsonObject ) {
+                    CachedJsonObject cjo = (CachedJsonObject)o;
+                    newEntries.put( key, cjo.toString( numSpaces ) );
+                    oldEntries.put( key, cjo );
+                    put( key, replacement );
+                }
+            }
+        }
+    }
+    
+    public static JSONObject newJsonObject(String s) throws JSONException {
+        if ( !doJsonStringCaching ) return new JSONObject( s );
+        JSONObject newJson = new CachedJsonObject(s);
+        return newJson;
+    }
+    
+    public static JSONObject newJsonObject() {
+        if ( !doJsonStringCaching ) return new JSONObject();
+        JSONObject newJson = new CachedJsonObject();
+        return newJson;
+    }
+    
+    public static JSONObject clone( JSONObject json ) {
+        if ( json == null ) return null;
+        JSONObject newJson = newJsonObject();
+        
+        Iterator keys = json.keys();
+        while ( keys.hasNext() ) {
+            String key = (String)keys.next();
+            Object value;
+            try {
+                value = json.get( key );
+                if ( key.equals( Acm.JSON_SPECIALIZATION ) && value instanceof JSONObject ) {
+                    value = clone( (JSONObject)value );
+                }
+                newJson.put( key, value );
+            } catch ( JSONException e ) {
+                e.printStackTrace();
+            }
+        }
+        return newJson;
+    }
 
     public static StoreRef getStoreRef() {
         if ( SEARCH_STORE == null ) {
@@ -1668,16 +2086,46 @@ public class NodeUtil {
                                              StringBuffer response ) {
         if ( Utils.isNullOrEmpty( siteName ) ) return null;
 
-        // Don't need to lookup sites using findNodeRefs, since we know where they are
-        EmsScriptNode context = null;
-        if (workspace == null) {
-            context = NodeUtil.getCompanyHome( services );
-        } else {
-            context = workspace;
-        }
-        
-        EmsScriptNode siteNode = context.childByNamePath( "Sites/" + siteName );
-        return siteNode;
+        // Reverting method back--chilByName doesn't handle workspaces correctly.
+//      // Don't need to lookup sites using findNodeRefs, since we know where they are
+//      EmsScriptNode context = null;
+//      if (workspace == null) {
+//          context = NodeUtil.getCompanyHome( services );
+//      } else {
+//          context = workspace;
+//      }
+//      
+//      EmsScriptNode siteNode = context.childByNamePath( "Sites/" + siteName );
+//      return siteNode;
+
+        // Try to find the site in the workspace first.
+       ArrayList< NodeRef > refs =
+               findNodeRefsByType( siteName, SearchType.CM_NAME.prefix,
+                                   ignoreWorkspace, workspace, dateTime, true,
+                                   true, getServices(), false );
+       for ( NodeRef ref : refs ) {
+           EmsScriptNode siteNode = new EmsScriptNode(ref, services, response);
+           if ( siteNode.isSite() ) {
+               return siteNode;
+           }
+       }
+
+       // Get the site from SiteService.
+       SiteInfo siteInfo = services.getSiteService().getSite(siteName);
+       if (siteInfo != null) {
+           NodeRef siteRef = siteInfo.getNodeRef();
+           if ( dateTime != null ) {
+               siteRef = getNodeRefAtTime( siteRef, dateTime );
+           }
+           if (siteRef != null) {
+               EmsScriptNode siteNode = new EmsScriptNode(siteRef, services, response);
+               if ( siteNode != null
+                    && ( workspace == null || workspace.contains( siteNode ) ) ) {
+                   return siteNode;
+               }
+           }
+       }
+       return null;
     }
 
     /**
@@ -2148,6 +2596,36 @@ public class NodeUtil {
             homeFolderScriptNode = new EmsScriptNode( homeFolderNode, getServices() );
         }
         return homeFolderScriptNode;
+    }
+    
+    /**
+     * Returns a list of all the groups the passed user belongs to.  Note,
+     * there is no java interface for this, so this code is based on what
+     * the javascript interface does. 
+     * 
+     * See: https://svn.alfresco.com/repos/alfresco-open-mirror/alfresco/HEAD/root/projects/repository/source/java/org/alfresco/repo/jscript/People.java
+     * 
+     * @param user
+     * @return
+     */
+    public static List<String> getUserGroups(String user) {
+        
+        List<String> authorityNames = new ArrayList<String>();
+
+        AuthorityService aService = services.getAuthorityService();
+        Set<String> authorities = aService.getContainingAuthoritiesInZone(
+                                    AuthorityType.GROUP,
+                                    user,
+                                    null, null, 1000);
+        for (String authority : authorities)
+        {
+            NodeRef group = aService.getAuthorityNodeRef( authority );
+            if (group != null) {
+                authorityNames.add( authority );
+            }
+        }
+        
+        return authorityNames;
     }
 
     // REVIEW -- should this be in AbstractJavaWebScript?

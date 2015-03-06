@@ -138,6 +138,7 @@ public class DocBookWrapper {
 			String rawContent = this.dbSerializeVisitor.getOut();
 			rawContent = rawContent.replaceAll("<ulink", "<link");
 			rawContent = rawContent.replaceAll("</ulink", "</link");
+			rawContent = rawContent.replaceAll("&nbsp;", " ");
 			//this.content = formatContent(rawContent);
 			this.content = rawContent;
 		}

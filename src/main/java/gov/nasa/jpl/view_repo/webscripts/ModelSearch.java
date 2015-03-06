@@ -94,13 +94,13 @@ public class ModelSearch extends ModelGet {
 		try {
 	        JSONArray elementsJson = executeSearchRequest(req);
 
-	        JSONObject top = new JSONObject();
+	        JSONObject top = NodeUtil.newJsonObject();
 			top.put("elements", elementsJson);
 			if (!Utils.isNullOrEmpty(response.toString())) top.put("message", response.toString());
 			model.put("res", NodeUtil.jsonToString( top, 4 ));
 		} catch (JSONException e) {
 			log(Level.ERROR, HttpServletResponse.SC_BAD_REQUEST, "Could not create the JSON response");
-			model.put("res", response);
+			model.put("res", createResponseJson());
 			e.printStackTrace();
 		}
 

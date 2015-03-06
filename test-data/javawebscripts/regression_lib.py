@@ -54,6 +54,7 @@ orig_output = None
 filtered_output = None
 orig_json = None
 filtered_json = None
+filter_output = None
 
 def set_gv1( v ):
     global gv1
@@ -114,6 +115,13 @@ def do20():
         len(j['workspace2']['updatedElements']) > 0:
             modDate = j['workspace2']['updatedElements'][0]['modified']
     set_gv4(modDate)
+    
+def removeCmNames():
+    global filter_output
+    #print("filter_output before: " + str(filter_output))
+    rrr = re.sub("cm_[a-zA-Z0-9-]*", "some_cm_name", str(filter_output), 0)
+    filter_output = str(rrr)
+    #print("filter_output after: " + filter_output)
     
 def set_json_output_to_gv(gv):
     '''Sets the json output to gv variable'''
@@ -244,6 +252,16 @@ def get_current_time(delay=3):
     '''Gets the current time and adds delay mins b/c it lags behind'''
     a = datetime.datetime.now() + datetime.timedelta(minutes=delay)
     return a.strftime("%Y-%m-%dT%H:%M:%X.000")
+
+def set_read_delta_to_gv1(delta=5):
+    '''Get the json output, and sets gv1 to the read time - delta secs'''
+    global gv1
+    
+    set_read_to_gv1()
+    if gv1 and "." in gv1:
+        date = datetime.datetime.strptime(gv1.split(".")[0], "%Y-%m-%dT%H:%M:%S")
+        date = date - datetime.timedelta(seconds=delta)
+        gv1 = date.strftime("%Y-%m-%dT%H:%M:%S.000")
     
 def create_command_line_options():
 
@@ -431,7 +449,7 @@ def mbee_util_jar_path():
         return path+"0.0.16/mbee_util-0.0.16.jar"
 
 def run_curl_test(test_num, test_name, test_desc, curl_cmd, use_json_diff=False, filters=None,
-                  setupFcn=None, teardownFcn=None, delay=None):
+                  setupFcn=None, postProcessFcn=None, teardownFcn=None, delay=None):
     '''
     Runs the curl test and diffs against the baseline if create_baselines is false, otherwise
     runs the curl command and creates the baseline .json file. 
@@ -447,6 +465,7 @@ def run_curl_test(test_num, test_name, test_desc, curl_cmd, use_json_diff=False,
     
     global orig_output
     global filtered_output
+    global filter_output
     global orig_json
     global filtered_json
     global gv1, gv2, gv3, gv4, gv5, gv6
@@ -520,6 +539,11 @@ def run_curl_test(test_num, test_name, test_desc, curl_cmd, use_json_diff=False,
             filter_output = stuffRead
             orig_output = stuffRead
         
+        if postProcessFcn and not evaluate_only:
+            print "calling post-process function"
+            postProcessFcn()
+            #print("filter_output after post process = " + str(filter_output))
+        
         # Write to result .json file:
         file = open(filtered_json, "w")
         file.write(filter_output)
@@ -537,7 +561,7 @@ def run_curl_test(test_num, test_name, test_desc, curl_cmd, use_json_diff=False,
         else:
             # Perform diff:
             if use_json_diff:
-                cp = ".:%s:../../target/mms-repo-ent-war/WEB-INF/lib/json-20140107.jar:../../target/mms-repo-war/WEB-INF/lib/json-20090211.jar:../../target/classes"%mbee_util_jar_path()
+                cp = ".:%s:../../target/mms-repo-ent-war/WEB-INF/lib/json-20140107.jar:../../target/mms-repo-war/WEB-INF/lib/json-20140107.jar:../../target/mms-repo-war/WEB-INF/lib/json-20090211.jar:../../target/classes"%mbee_util_jar_path()
                 diff_cmd = "java -cp %s gov.nasa.jpl.view_repo.util.JsonDiff"%cp
             else:
                 diff_cmd = "diff"
@@ -562,8 +586,9 @@ def run_test(test):
                   test_desc=test[2],curl_cmd=test[3],
                   use_json_diff=test[4],filters=test[5],
                   setupFcn=test[7] if (len(test) > 7) else None,
-                  teardownFcn=test[8] if (len(test) > 8) else None,
-                  delay=test[9] if (len(test) > 9) else None)
+                  postProcessFcn=test[8] if (len(test) > 8) else None,
+                  teardownFcn=test[9] if (len(test) > 9) else None,
+                  delay=test[10] if (len(test) > 10) else None)
     
     
 def create_curl_cmd(type, data="", base_url=BASE_URL_WS, post_type="elements", branch="master/", 

@@ -46,18 +46,15 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.log4j.*;
 import org.alfresco.repo.model.Repository;
+import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.action.Action;
 import org.alfresco.service.cmr.action.ActionService;
 import org.alfresco.service.cmr.repository.NodeRef;
-
+import org.apache.log4j.Logger;
 import org.json.JSONArray;
-
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import org.json.JSONObject;
-
 import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
@@ -69,6 +66,7 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
  *
  */
 public class ConfigurationPost extends AbstractJavaWebScript {
+    static Logger logger = Logger.getLogger(ConfigurationPost.class);
 	public ConfigurationPost() {
 		super();
 	}
@@ -93,6 +91,11 @@ public class ConfigurationPost extends AbstractJavaWebScript {
 	@Override
     protected Map<String, Object> executeImplImpl(WebScriptRequest req,
 			Status status, Cache cache) {
+        if (logger.isInfoEnabled()) {
+            String user = AuthenticationUtil.getRunAsUser();
+            logger.info( user + " " + req.getURL() );
+        }
+
 		Map<String, Object> model = new HashMap<String, Object>();
 
         printHeader( req );
@@ -106,7 +109,7 @@ public class ConfigurationPost extends AbstractJavaWebScript {
 
 		status.setCode(responseStatus.getCode());
 		if (result == null) {
-		    model.put("res", response.toString());
+		    model.put("res", createResponseJson());
 		} else {
 		    try {
 		    	if (!Utils.isNullOrEmpty(response.toString())) result.put("message", response.toString());
@@ -205,7 +208,7 @@ public class ConfigurationPost extends AbstractJavaWebScript {
 
             jobNode = ActionUtil.getOrCreateJob( context, name,
                                                  "ems:ConfigurationSet",
-                                                 status, response );
+                                                 status, response, true );
 
 			if (jobNode != null) {
                 ConfigurationsWebscript configWs =

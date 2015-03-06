@@ -145,7 +145,7 @@ public class ProductGet extends AbstractJavaWebScript {
 
 		if (responseStatus.getCode() == HttpServletResponse.SC_OK && productsJson != null) {
 			try {
-			    JSONObject json = new JSONObject();
+			    JSONObject json = NodeUtil.newJsonObject();
                 json.put( gettingDisplayedElements ? "elements"
                                                   : ( gettingContainedViews
                                                       ? "views" : "products" ),
@@ -155,11 +155,11 @@ public class ProductGet extends AbstractJavaWebScript {
                 else model.put("res", NodeUtil.jsonToString( json ));
 			} catch (JSONException e) {
 				log(Level.ERROR, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "JSON creation error");
-				model.put("res", response.toString());
+				model.put("res", createResponseJson());
                 e.printStackTrace();
 			}
 		} else {
-			model.put("res", response.toString());
+			model.put("res", createResponseJson());
 		}
 
 		status.setCode(responseStatus.getCode());

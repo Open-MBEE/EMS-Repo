@@ -133,7 +133,7 @@ public class ModelsGet extends AbstractJavaWebScript {
         }
 
 
-        JSONObject top = new JSONObject();
+        JSONObject top = NodeUtil.newJsonObject();
         try {
             if (elementsJson.length() > 0) {
                 top.put("elements", elementsJson);
@@ -143,7 +143,7 @@ public class ModelsGet extends AbstractJavaWebScript {
             } else {
                 log(Level.WARN,
                     HttpServletResponse.SC_NOT_FOUND, "No elements found");
-                model.put("res", response.toString());
+				model.put("res", createResponseJson());
             }
         } catch (JSONException e) {
             e.printStackTrace();

@@ -155,7 +155,7 @@ public class ArtifactPost extends AbstractJavaWebScript {
 
 		    	        	if (artifact == null) {
 		    	        		 log(Level.ERROR, HttpServletResponse.SC_BAD_REQUEST, "Was not able to create the artifact!\n");
-			    		         model.put("res", response.toString());
+								 model.put("res", createResponseJson());
 		    	        	}
 		    	        	else {
 		    	        		resultJson.put("upload", artifact);
@@ -164,35 +164,35 @@ public class ArtifactPost extends AbstractJavaWebScript {
 	    	        	}
 	    	        	else {
 	    		            log(Level.ERROR, HttpServletResponse.SC_BAD_REQUEST, "Invalid artifactId or no content!\n");
-	    		            model.put("res", response.toString());
+							model.put("res", createResponseJson());
 	    	        	}
 	        		}
 	        		else {
 	        			  log(Level.ERROR, HttpServletResponse.SC_BAD_REQUEST, "Invalid artifactId!\n");
-	    		          model.put("res", response.toString());
+						  model.put("res", createResponseJson());
 	    		    }
 
 	        	}
 	        	else {
 	        		  log(Level.ERROR, HttpServletResponse.SC_BAD_REQUEST, "artifactId not supplied!\n");
-    		          model.put("res", response.toString());
+					  model.put("res", createResponseJson());
     		    }
 
         	}
 	        catch (JSONException e) {
 	            log(Level.ERROR, HttpServletResponse.SC_BAD_REQUEST, "Issues creating return JSON\n");
 	            e.printStackTrace();
-	            model.put("res", response.toString());
+	            model.put("res", createResponseJson());
 	        }
         }
         else {
         	log(Level.ERROR, HttpServletResponse.SC_BAD_REQUEST, "Invalid request, no sitename specified or no content provided!\n");
-        	model.put("res", response.toString());
+			model.put("res", createResponseJson());
 	    }
 
         status.setCode(responseStatus.getCode());
         if ( !model.containsKey( "res" ) ) {
-        	model.put("res", resultJson != null ? resultJson : response.toString());
+        	model.put("res", resultJson != null ? resultJson : createResponseJson());
         }
 
 		printFooter();

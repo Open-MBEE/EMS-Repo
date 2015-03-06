@@ -1878,8 +1878,9 @@ public class EmsScriptNode extends ScriptNode implements
      *            JSONObject
      * @return JSONObject serialization of node
      */
-    public JSONObject toJSONObject( Set< String > filter, Date dateTime, boolean isIncludeQualified ) throws JSONException {
-        return toJSONObject( filter, false, dateTime, isIncludeQualified );
+    public JSONObject toJSONObject( Set< String > filter, Date dateTime,
+                                    boolean isIncludeQualified ) throws JSONException {
+        return toJSONObject( filter, false, dateTime, isIncludeQualified, null );
     }
 
     public String nodeRefToSysmlId( NodeRef ref ) throws JSONException {
@@ -1935,9 +1936,9 @@ public class EmsScriptNode extends ScriptNode implements
         return date;
     }
 
-    protected void
-            addElementJSON( JSONObject elementJson, Set< String > filter,
-                            Date dateTime, boolean isIncludeQualified ) throws JSONException {
+    protected void addElementJSON( JSONObject elementJson, Set< String > filter,
+                                   Date dateTime, boolean isIncludeQualified, 
+                                   Version version  ) throws JSONException {
         EmsScriptNode node = findScriptNodeByName( getSysmlId(), false, getWorkspace(), dateTime );//  findNodeRefByType( getSysmlId(), NodeUtil.SearchType., parentWorkspace, dateTime, findDeleted )getNodeAtAtime( dateTime );
         if ( node == null || !node.exists() ) return;
         // mandatory elements put in directly
@@ -1960,9 +1961,7 @@ public class EmsScriptNode extends ScriptNode implements
                 putInJson( elementJson, "qualifiedId", node.getSysmlQId(), filter );
             }
         }
-        putInJson( elementJson, "editable",
-                   node.hasPermission( PermissionService.WRITE ), filter );
-
+        //addEditableJson( elementJson );
         if ( filter == null || filter.size() == 0 || filter.contains( "owner" ) ) {
 
             EmsScriptNode owner = node.getOwningParent(dateTime);
@@ -1979,6 +1978,38 @@ public class EmsScriptNode extends ScriptNode implements
             // No longer using "null".  This works better.
             owernIdObj = ownerId == null ? JSONObject.NULL : ownerId;
             putInJson( elementJson, "owner", owernIdObj, filter );
+        }
+
+        // Add version information for reverting.
+        if ( version != null ) {
+            EmsScriptNode vNode = new EmsScriptNode( version.getVersionedNodeRef(),
+                                                     getServices(), getResponse() );
+
+            // for reverting need to keep track of noderef and versionLabel
+//            if ( filter == null || filter.isEmpty() || filter.contains( "id" ) ) {
+                elementJson.put( "id", vNode.getId() );
+//            }
+//            if ( filter == null || filter.isEmpty() || filter.contains( "version" ) ) {
+                elementJson.put( "version", version.getVersionLabel() );
+//            }
+        } else {
+//            // If the passed-in version is null, then use the current version
+//            // and existing id. The "id" and "version" must be explicit in the
+//            // filter to be added.
+//            if ( filter != null && !filter.isEmpty() ) {
+//                if ( filter.contains( "id" ) ) {
+//                    elementJson.put( "id", getId() );
+//                }
+//                if ( filter.contains( "version" ) ) {
+//                    Version v = getCurrentVersion();
+//                    if ( v != null ) {
+//                        String label = v.getVersionLabel();
+//                        if ( label != null ) {
+//                            elementJson.put( "version", label );
+//                        }
+//                    }
+//                }
+//            }
         }
     }
 
@@ -2218,31 +2249,20 @@ public class EmsScriptNode extends ScriptNode implements
         }
     }
 
-    public static JSONObject clone( JSONObject json ) {
-        JSONObject newJson = new JSONObject();
-        Iterator keys = json.keys();
-        while ( keys.hasNext() ) {
-            String key = (String)keys.next();
-            Object value;
-            try {
-                value = json.get( key );
-                if ( key.equals( Acm.JSON_SPECIALIZATION ) && value instanceof JSONObject ) {
-                    value = clone( (JSONObject)value );
-                }
-                newJson.put( key, value );
-            } catch ( JSONException e ) {
-                e.printStackTrace();
-            }
-        }
-        return newJson;
-    }
-    
-    protected static List< String > dontFilterList =
-        Utils.newList( "read", Acm.JSON_ID, "id", "creator", Acm.JSON_LAST_MODIFIED,
-                       Acm.JSON_SPECIALIZATION );
-    protected static Set< String > dontFilterOut =
-        Collections.synchronizedSet( new HashSet< String >( dontFilterList ) );
-    
+//    public JSONObject toJSONObject( Set< String > filter, boolean b,
+//                                    Date dateTime, boolean includeQualified,
+//                                    Version version ) {
+//            //Version version = versions.get( node.getSysmlId() );
+//            if ( version != null ) {
+//                // TODO: perhaps add service and response in method call rather than using the nodes?
+//                EmsScriptNode changedNode = new EmsScriptNode(version.getVersionedNodeRef(), getServices(), getResponse());
+//
+//                // for reverting need to keep track of noderef and versionLabel
+//                jsonObject.put( "id", changedNode.getId() );
+//                jsonObject.put( "version", version.getVersionLabel() );
+//            }
+//        return null;
+//    }
     /**
      * Convert node into our custom JSONObject. This calls
      * {@link #toJSONObject2(Set, boolean, Date, boolean)}.
@@ -2263,8 +2283,21 @@ public class EmsScriptNode extends ScriptNode implements
      * @return JSONObject serialization of node
      * @throws JSONException
      */
-   public JSONObject toJSONObject( Set< String > jsonFilter , boolean isExprOrProp ,
-                                    Date dateTime , boolean isIncludeQualified  ) throws JSONException {
+    public JSONObject toJSONObject( Set< String > jsonFilter, boolean isExprOrProp,
+                                    Date dateTime, boolean isIncludeQualified,
+                                    Version version ) throws JSONException {
+        JSONObject json = toJSONObjectImpl( jsonFilter, isExprOrProp, dateTime,
+                                            isIncludeQualified, version );
+        if ( !isExprOrProp ) addEditableJson( json, jsonFilter );
+        return json;
+    }
+    public void addEditableJson( JSONObject json, Set< String > jsonFilter ) {
+        putInJson( json, "editable",
+                   hasPermission( PermissionService.WRITE ), jsonFilter );
+    }
+    public JSONObject toJSONObjectImpl( Set< String > jsonFilter, boolean isExprOrProp,
+                                        Date dateTime, boolean isIncludeQualified,
+                                        Version version ) throws JSONException {
         if ( Debug.isOn() )
             Debug.outln( "$ $ $ $ toJSONObject(jsonFilter=" + jsonFilter
                             + ", isExprOrProp=" + isExprOrProp + ", dateTime="
@@ -2273,7 +2306,7 @@ public class EmsScriptNode extends ScriptNode implements
         boolean forceCacheUpdate = false;
         
         // Return empty json if this element does not exist.
-        JSONObject element = new JSONObject();
+        JSONObject element = NodeUtil.newJsonObject();
         if ( !exists() ) {
             if ( Debug.isOn() )
                 Debug.outln("node doesn't exist; returning  " + element);
@@ -2283,34 +2316,35 @@ public class EmsScriptNode extends ScriptNode implements
         // If not caching, generate and return the json for this element.
         JSONObject cachedJson = null;
         JSONObject json = null;
-        Long millis = 0L;
+        long millis = 0L;
+        
+        jsonFilter = jsonFilter == null ? new TreeSet< String >() : jsonFilter;
+        
         boolean tryCache = NodeUtil.doJsonCaching && !isExprOrProp;
         if ( !tryCache ) {
             json = toJSONObject2( jsonFilter, isExprOrProp, dateTime,
-                                  isIncludeQualified );
+                                  isIncludeQualified, version );
             if ( Debug.isOn() )
                 Debug.outln( "not trying cache returning json "
                                 + ( json == null ? "null" : json.toString( 4 ) ) );
             return json;
         }
         
-        Long readTime = System.currentTimeMillis();
-        
         if ( dateTime != null ) millis = dateTime.getTime();
         
         boolean deepMatch = false;
         
         // Check the cache unless forcing an update.
+        String versionLabel = null;
         if ( !forceCacheUpdate ) {
-            cachedJson = !NodeUtil.doJsonDeepCaching ? null : 
-                Utils.get( NodeUtil.jsonDeepCache, getId(), millis,
-                           isIncludeQualified,
-                           jsonFilter == null ? new TreeSet< String >()
-                                             : jsonFilter );
+            if ( version != null ) versionLabel = version.getVersionLabel();
+            cachedJson = !NodeUtil.doJsonDeepCaching ? null :
+                NodeUtil.jsonDeepCacheGet( getId(), millis, isIncludeQualified,
+                                           jsonFilter, versionLabel, false );
             if ( cachedJson != null && cachedJson.length() > 0 ) {
                 deepMatch = true;
             } else {
-                cachedJson = Utils.get( NodeUtil.jsonCache, getId(), millis );//, isIncludeQualified );//, filter );
+                cachedJson = NodeUtil.jsonCacheGet( id, millis, false ); 
             }
             if ( Debug.isOn() )
                 Debug.outln( "cachedJson = "
@@ -2323,11 +2357,19 @@ public class EmsScriptNode extends ScriptNode implements
         }
         
         // Look at last modified time in json and compare with actual last modified.
-        // Force an update if the json is old.
+        // Force an update if the json is old.  Otherwise, if a deep match was found,
+        // then the json is already filtered, so go ahead and return.
         if ( cachedJson != null && cachedJson.has( "modified" ) ) {
             String cachedModifiedStr = cachedJson.getString( "modified" );
             Date cachedModified = TimeUtils.dateFromTimestamp( cachedModifiedStr );
-            Date lastModified = getLastModified( dateTime );
+            Date lastModified;
+            if ( isView() ) { 
+//                System.out.println("####  ####  view " + getName()  );
+                lastModified = (new View( this )).getLastModified( dateTime );
+            } else {
+//                System.out.println("####  ####  not a view " + getName()  );
+                lastModified = getLastModified( dateTime );
+            }
             if ( cachedModified == null || lastModified == null || lastModified.after( cachedModified ) ) {
                 json = null;
                 forceCacheUpdate = true;
@@ -2342,8 +2384,8 @@ public class EmsScriptNode extends ScriptNode implements
         if ( json != null ) {
             ++NodeUtil.jsonCacheHits;
         } else {
-            //json = toJSONObject2( jsonFilter, isExprOrProp, dateTime, isIncludeQualified, forceCacheUpdate );
-            json = toJSONObject2( null, isExprOrProp, dateTime, true );
+            // get full json without filtering
+            json = toJSONObject2( null, isExprOrProp, dateTime, true, version );
             if ( Debug.isOn() )
                 Debug.outln("json = " + (json==null?"null":json.toString( 4 )));
             if ( tryCache &&
@@ -2351,8 +2393,7 @@ public class EmsScriptNode extends ScriptNode implements
                    cachedJson.length() == 0 ) &&
                  json != null && json.length() > 0 ) {
                 ++NodeUtil.jsonCacheMisses;
-                Utils.put( NodeUtil.jsonCache, getId(), millis, json );
-                NodeUtil.jsonStringCache.remove( json );
+                NodeUtil.jsonCachePut( json, getId(), millis );
                 if ( Debug.isOn() )
                     Debug.outln("put json = " + (json==null?"null":json.toString( 4 )));
             }
@@ -2362,9 +2403,10 @@ public class EmsScriptNode extends ScriptNode implements
             return element;
         }
 
+        // Filter full json
         if ( jsonFilter != null && !jsonFilter.isEmpty() ) {
             // If using a filter, only include json with keys in the filter.
-            JSONObject newJson = filterJson( json, jsonFilter, isIncludeQualified );
+            JSONObject newJson = NodeUtil.filterJson( json, jsonFilter, isIncludeQualified );
             json = newJson;
         } else {
             // If not using a filter, check to remove qualifiedId/Name.
@@ -2372,7 +2414,7 @@ public class EmsScriptNode extends ScriptNode implements
                 boolean hasId = json.get( "qualifiedId" ) != null;
                 boolean hasName = json.get( "qualifiedName" ) != null;
                 if ( hasId || hasName ) {
-                    json = clone( json );
+                    json = NodeUtil.clone( json );
                     if ( Debug.isOn() )
                         Debug.outln("remove qualifiedId? " + hasId + ", remove qualifiedName? " + hasName);
                     if ( hasId ) json.remove( "qualifiedId" );
@@ -2381,18 +2423,18 @@ public class EmsScriptNode extends ScriptNode implements
             }
         }
 
-        
-//        // add read time again
+//        // add read time again -- otherwise, the cached read time is used
 //        if ( !isExprOrProp  && jsonFilter.contains( Acm.JSON_READ ) ) {
 //            System.out.println("put read in newJson");
 //            putInJson( newJson, Acm.JSON_READ, getIsoTime( new Date( readTime ) ), null );
 //        }
 
         if ( NodeUtil.doJsonDeepCaching ) {
-            Utils.put( NodeUtil.jsonDeepCache, getId(), millis, isIncludeQualified,
-                       jsonFilter == null ? new TreeSet< String >() : jsonFilter,
-                       clone(json) );
-            NodeUtil.jsonStringCache.remove( json );
+            if ( version != null && versionLabel == null ) versionLabel =
+                version.getVersionLabel();
+            json = NodeUtil.jsonDeepCachePut( json, getId(), millis,
+                                              isIncludeQualified, jsonFilter,
+                                              versionLabel );
         }
         
         if ( Debug.isOn() )
@@ -2400,35 +2442,6 @@ public class EmsScriptNode extends ScriptNode implements
         return json;
     }
 
-   protected JSONObject filterJson( JSONObject json, Set< String > jsonFilter,
-                                    boolean isIncludeQualified) throws JSONException {
-
-       JSONObject newJson = new JSONObject();
-       Iterator keys = json.keys();
-       while ( keys.hasNext() ) {
-           String key = (String)keys.next();
-           if ( jsonFilter.contains( key ) || dontFilterOut.contains( key ) ) {
-               Object value = json.get( key );
-               if ( key.equals( Acm.JSON_SPECIALIZATION ) && value instanceof JSONObject ) {
-//                   if ( !( value instanceof JSONObject ) ) {
-//                       value = JSONObject.make( (JSONObject)value );
-//                   }
-                   JSONObject newSpec = filterJson( (JSONObject)value, jsonFilter, isIncludeQualified );
-                   if ( newSpec != null && newSpec.length() > 0 ) {
-                       newJson.put( key, newSpec );
-                   }
-               } else
-               if ( isIncludeQualified || ( !key.equals( "qualifiedId" ) &&
-                                            !key.equals( "qualifiedName" ) ) ) {
-                   if ( Debug.isOn() )
-                       Debug.outln("add to newJson = " + key + ":" + value);
-                   newJson.put( key, value );
-               }
-           }
-       }
-       return newJson;
-   }
-   
    /**
     * Convert node into our custom JSONObject
     *
@@ -2448,9 +2461,14 @@ public class EmsScriptNode extends ScriptNode implements
     * @return JSONObject serialization of node
     * @throws JSONException
     */
+//    public JSONObject toJSONObject2( Set< String > filter, boolean isExprOrProp,
+//                                    Date dateTime, boolean isIncludeQualified ) throws JSONException {
+//        return toJSONObject2( filter, isExprOrProp, dateTime, isIncludeQualified, null );
+//    }
     public JSONObject toJSONObject2( Set< String > filter, boolean isExprOrProp,
-                                    Date dateTime, boolean isIncludeQualified ) throws JSONException {
-        JSONObject element = new JSONObject();
+                                     Date dateTime, boolean isIncludeQualified,
+                                     Version version  ) throws JSONException {
+        JSONObject element = NodeUtil.newJsonObject();
         if ( !exists() ) return element;
         JSONObject specializationJSON = new JSONObject();
     	
@@ -2459,7 +2477,7 @@ public class EmsScriptNode extends ScriptNode implements
         if ( isExprOrProp ) {
             addSpecializationJSON( element, filter, dateTime );
         } else {
-            addElementJSON( element, filter, dateTime, isIncludeQualified );
+            addElementJSON( element, filter, dateTime, isIncludeQualified, version );
             addSpecializationJSON( specializationJSON, filter, dateTime );
             if ( specializationJSON.length() > 0 ) {
                 element.put( Acm.JSON_SPECIALIZATION, specializationJSON );
@@ -2469,13 +2487,12 @@ public class EmsScriptNode extends ScriptNode implements
         // add read time
         if ( !isExprOrProp ) {
             putInJson( element, Acm.JSON_READ, getIsoTime( new Date( readTime ) ), filter );
-            //element.put( Acm.JSON_READ, getIsoTime( new Date( readTime ) ) );
         }
 
         // fix the artifact urls
         String elementString = element.toString();
         elementString = fixArtifactUrls( elementString, true );
-        element = new JSONObject( elementString );
+        element = NodeUtil.newJsonObject( elementString );
         
         return element;
     }
@@ -3484,12 +3501,12 @@ public class EmsScriptNode extends ScriptNode implements
     }
     
     public boolean exists(boolean includeDeleted) {
-        if (NodeUtil.doFullCaching) {
-            // full caching doesn't cache permissions, just references to script node
-            // so make sure we can read before doing actual check
-            if (!checkPermissions( "Read" ))
-                return false;
-        } 
+//        if (NodeUtil.doFullCaching) {
+//            // full caching doesn't cache permissions, just references to script node
+//            // so make sure we can read before doing actual check
+//            if (!checkPermissions( "Read" ))
+//                return false;
+//        } 
         if ( !scriptNodeExists() ) return false;
         if ( !includeDeleted && hasAspect( "ems:Deleted" ) ) {
             return false;
@@ -3502,11 +3519,11 @@ public class EmsScriptNode extends ScriptNode implements
     }
 
     public boolean isDeleted() {
-        if (NodeUtil.doFullCaching) {
-            // full caching doesn't cache permissions, just references to script node
-            // so make sure we can read before doing actual check
-            if (!checkPermissions("Read")) return false;
-        }
+//        if (NodeUtil.doFullCaching) {
+//            // full caching doesn't cache permissions, just references to script node
+//            // so make sure we can read before doing actual check
+//            if (!checkPermissions("Read")) return false;
+//        }
         if (super.exists()) {
             return hasAspect( "ems:Deleted" );
         }
@@ -3755,7 +3772,7 @@ public class EmsScriptNode extends ScriptNode implements
             type = "cm:folder";
         }
 
-        parent.makeSureNodeRefIsNotFrozen(); // GG Added this
+        parent.makeSureNodeRefIsNotFrozen();
         EmsScriptNode node = parent.createNode( getName(), type );
         // EmsScriptNode node =  parent.createSysmlNode( getName(), type, modStatus, workspace );
 
@@ -3788,15 +3805,20 @@ public class EmsScriptNode extends ScriptNode implements
             node.setWorkspace( parent.getWorkspace(), this.getNodeRef() );
         }
 
-        // update ems:owner
-        if ( isModelElement() ) {
-            // everything is created in a reified package, so need to make
-            // relations to the reified node rather than the package
-            EmsScriptNode reifiedNode = node.setOwnerToReifiedNode( parent, parent.getWorkspace() );
-            if ( reifiedNode == null ) {
-                // TODO error handling
-            }
-        }
+        // We dont need to call setOwnerToReifiedNode() in clone() because getProperty()
+        // will always get the correct owner and ownedChildren.  So the node refs
+        // that owner/ownedChildren can be in the parent workspace that we are cloning 
+        // from.  This call leads to redudant node refs being added to ownedChildren, 
+        // as there will be a node ref for the parent workspace and this workspace also
+//        // update ems:owner
+//        if ( isModelElement() ) {
+//            // everything is created in a reified package, so need to make
+//            // relations to the reified node rather than the package
+//            EmsScriptNode reifiedNode = node.setOwnerToReifiedNode( parent, parent.getWorkspace());
+//            if ( reifiedNode == null ) {
+//                // TODO error handling
+//            }
+//        }
 
         node.checkedNodeVersion = false;
 
@@ -3930,11 +3952,11 @@ public class EmsScriptNode extends ScriptNode implements
     public void appendToPropertyNodeRefs( String acmProperty, NodeRef ref ) {
         if ( checkPermissions( PermissionService.WRITE, response, status ) ) {
             ArrayList< NodeRef > relationships =
-                    getPropertyNodeRefs( acmProperty );
+                    getPropertyNodeRefs( acmProperty, true );
             if ( Utils.isNullOrEmpty( relationships ) ) {
                 relationships = Utils.newList( ref );
             } else if (!relationships.contains(ref )) {
-                    relationships.add( ref );
+                relationships.add( ref );
             }
             setProperty( acmProperty, relationships );
         } else {
@@ -3948,7 +3970,7 @@ public class EmsScriptNode extends ScriptNode implements
     public void removeFromPropertyNodeRefs( String acmProperty, NodeRef ref ) {
         if ( checkPermissions( PermissionService.WRITE, response, status ) ) {
             ArrayList< NodeRef > relationships =
-                    getPropertyNodeRefs( acmProperty );
+                    getPropertyNodeRefs( acmProperty, true );
             if ( !Utils.isNullOrEmpty( relationships ) ) {
                 relationships.remove( ref );
                 setProperty( acmProperty, relationships );
@@ -3961,39 +3983,53 @@ public class EmsScriptNode extends ScriptNode implements
 
     @Override
     public boolean move( ScriptNode destination ) {
-        if ( getParent().equals( destination ) ) {
-            return false;
+        
+        boolean status = false;
+        EmsScriptNode parent = getParent();
+        EmsScriptNode oldParentReifiedNode = parent.getReifiedNode();
+
+        // Create new parent if the parent is not correct:
+        if ( !parent.equals( destination ) ) {
+            
+            // in a move we need to track the parent, the current node, and the destination, just in case
+            getParent().makeSureNodeRefIsNotFrozen();
+            makeSureNodeRefIsNotFrozen();
+            EmsScriptNode dest = new EmsScriptNode(destination.getNodeRef(), services, response);
+            dest.makeSureNodeRefIsNotFrozen();
+            status = super.move( dest );
+    
+            if ( status ) {
+                // keep track of owners and children
+                if ( oldParentReifiedNode != null ) {
+                    oldParentReifiedNode.removeFromPropertyNodeRefs( "ems:ownedChildren",
+                                                                     this.getNodeRef() );
+                }
+    
+                EmsScriptNode newParent =
+                        new EmsScriptNode( destination.getNodeRef(), services,
+                                           response );
+                if (newParent != null) {
+                    setOwnerToReifiedNode( newParent, newParent.getWorkspace() );
+                }
+    
+                // make sure to move package as well
+                EmsScriptNode reifiedPkg = getReifiedPkg();
+                if ( reifiedPkg != null ) {
+                    reifiedPkg.move( destination );
+                }
+                
+                removeChildrenFromJsonCache();
+            }
+            
         }
-
-        EmsScriptNode oldParentPkg =
-                new EmsScriptNode( getParent().getNodeRef(), services, response );
-        // in a move we need to track the parent, the current node, and the destination, just in case
-        getParent().makeSureNodeRefIsNotFrozen();
-        makeSureNodeRefIsNotFrozen();
-        EmsScriptNode dest = new EmsScriptNode(destination.getNodeRef(), services, response);
-        dest.makeSureNodeRefIsNotFrozen();
-        boolean status = super.move( dest );
-
-        if ( status ) {
-            // keep track of owners and children
-            EmsScriptNode oldParentReifiedNode = oldParentPkg.getReifiedNode();
-
-            if ( oldParentReifiedNode != null ) {
-                oldParentReifiedNode.removeFromPropertyNodeRefs( "ems:ownedChildren",
-                                                                 this.getNodeRef() );
-            }
-
-            EmsScriptNode newParent =
-                    new EmsScriptNode( destination.getNodeRef(), services,
-                                       response );
-            if (newParent != null) {
-                setOwnerToReifiedNode( newParent, newParent.getWorkspace() );
-            }
-
-            // make sure to move package as well
-            EmsScriptNode reifiedPkg = getReifiedPkg();
-            if ( reifiedPkg != null ) {
-                reifiedPkg.move( destination );
+        // The parent was equal, but may need to update owner/ownedChildren in case the parent was
+        // cloned already in this workspace:
+        else {
+            EmsScriptNode owningParent = getOwningParent(null);
+            if ( oldParentReifiedNode != null && !oldParentReifiedNode.equals(owningParent)) {
+                owningParent.removeFromPropertyNodeRefs( "ems:ownedChildren", this.getNodeRef() );
+                setOwnerToReifiedNode( parent, parent.getWorkspace() );
+                status = true;
             }
             
             removeChildrenFromJsonCache();
@@ -4039,7 +4075,7 @@ public class EmsScriptNode extends ScriptNode implements
                 removedJson = getValues( oldEntries, JSONObject.class );
             }
             if ( NodeUtil.doJsonDeepCaching ) {
-                Map< Long, Map< Boolean, Map< Set< String >, JSONObject > > > oldEntriesDeep =
+                Map< Long, Map< Boolean, Map< Set< String >, Map< String, JSONObject > > > > oldEntriesDeep =
                         NodeUtil.jsonDeepCache.remove( ref.getId() );
                 if ( NodeUtil.doJsonStringCaching ) {
                     removedJson.addAll( getValues( oldEntriesDeep, JSONObject.class) );
@@ -4118,11 +4154,15 @@ public class EmsScriptNode extends ScriptNode implements
         }
 
     }
-
+    
     public ArrayList< NodeRef > getPropertyNodeRefs( String acmProperty ) {
-        return getPropertyNodeRefs(acmProperty, false, null, false, false);
+        return getPropertyNodeRefs(acmProperty, false);
     }
 
+    public ArrayList< NodeRef > getPropertyNodeRefs(String acmProperty, boolean skipNodeRefCheck) {
+        return getPropertyNodeRefs(acmProperty, false, null, false, skipNodeRefCheck);
+    }
+    
     public ArrayList< NodeRef > getPropertyNodeRefs( String acmProperty, boolean ignoreWorkspace,
                                                      Date dateTime, boolean findDeleted,
                                                      boolean skipNodeRefCheck) {
@@ -4236,7 +4276,7 @@ public class EmsScriptNode extends ScriptNode implements
         createOrUpdateAspect( acmAspect );
         String acmProperty =
                 Acm.PROPERTY_FOR_RELATIONSHIP_PROPERTY_ASPECTS.get( acmAspect );
-        ArrayList< NodeRef > relationships = getPropertyNodeRefs( acmProperty );
+        ArrayList< NodeRef > relationships = getPropertyNodeRefs( acmProperty, true );
         int index =
                 Collections.binarySearch( relationships,
                                           // this.getNodeRef(),
@@ -4528,7 +4568,7 @@ public class EmsScriptNode extends ScriptNode implements
             node = node.findScriptNodeByName( node.getSysmlId(), false, node.getWorkspace(), dateTime );
         }
         if ( node != null && node.exists() ) {
-            jsonArray.put( node.toJSONObject( null, true, dateTime, false ) );
+            jsonArray.put( node.toJSONObject( null, true, dateTime, false, null ) );
         }
     }
 
@@ -4554,7 +4594,7 @@ public class EmsScriptNode extends ScriptNode implements
             }
         } else if ( nodeRefs instanceof NodeRef ) {
             addVersionToArray( (NodeRef)nodeRefs, dateTime, jsonArray );
-            return jsonArray.get( 0 );
+            return jsonArray.length() > 0 ? jsonArray.get( 0 ) : null;
         }
         return jsonArray;
     }
@@ -4611,11 +4651,26 @@ public class EmsScriptNode extends ScriptNode implements
                                         throws JSONException {
         String property;
         property = (String) node.getProperty("view2:contains");
+        boolean noFilter = filter == null || filter.size() == 0;
         if ( expressionStuff && ( property == null || property.length() <= 0 ) ) {
-            json.put( "contains", getView().getContainsJson(true) );
-            json.put( "displayedElements", getView().getDisplayedElements() );
-            json.put( "allowedElements", getView().getDisplayedElements() );
-            json.put( "childrenViews", getView().getChildViews() );
+            if ( noFilter || filter.contains( "contains" ) ) {
+                json.put( "contains", getView().getContainsJson(true) );
+            }
+            JSONArray displayedElements = null;
+            if ( noFilter || filter.contains( "displayedElements" ) ) {
+                displayedElements = toJsonArrayOfSysmlIds( getView().getDisplayedElements() );
+                json.put( "displayedElements", displayedElements );
+            }
+            if ( noFilter || filter.contains( "allowedElements" ) ) {
+                if ( displayedElements == null ) {
+                    displayedElements = toJsonArrayOfSysmlIds( getView().getDisplayedElements() );
+                }
+                json.put( "allowedElements", displayedElements );
+            }
+            if ( noFilter || filter.contains( "childrenViews" ) ) {
+                JSONArray childViews = toJsonArrayOfSysmlIds( getNodesOfViews( getView().getChildViews() ) );
+                json.put( "childrenViews", childViews );
+            }
         } else {
             if (!Utils.isNullOrEmpty(property)) {
                 putInJson( json, "contains", new JSONArray( property ), filter );
@@ -4639,6 +4694,40 @@ public class EmsScriptNode extends ScriptNode implements
 
     }
 
+    public ArrayList<EmsScriptNode> getNodesOfViews( Collection< sysml.view.View< EmsScriptNode > > views ) {
+        ArrayList<EmsScriptNode> nodes = new ArrayList< EmsScriptNode >();
+        if ( views == null ) return nodes;
+        for ( sysml.view.View< EmsScriptNode > view : views ) {
+            if ( view == null ) {
+                logger.error("viewsToSysmlIds() trying to get non-existent sysmlid of null view" );
+                continue;            
+            }
+            EmsScriptNode node = view.getElement();
+            if ( node == null ) {
+                logger.error("viewsToSysmlIds() trying to get non-existent sysmlid of view: " + view );
+            } else {
+                nodes.add( node );
+            }
+        }
+        return nodes;
+    }
+
+    public JSONArray toJsonArrayOfSysmlIds( Collection< EmsScriptNode > nodes ) {
+        JSONArray jarr = new JSONArray();
+        if ( nodes == null ) return jarr;
+        for ( EmsScriptNode node : nodes ) {
+            if ( node != null && node.exists() ) {
+                String id = node.getSysmlId();
+                if ( Utils.isNullOrEmpty( id ) ) {
+                    logger.error( "toJsonArrayOfSysmlIds() trying to get non-existent sysmlid of node: " + node );
+                } else {
+                    jarr.put( node.getSysmlId() );
+                }
+            }
+        }
+        return jarr;
+    }
+    
     protected void addProductJSON( JSONObject json, EmsScriptNode node,
                                    Set< String > filter, Date dateTime )
                                            throws JSONException {
@@ -5321,4 +5410,5 @@ public class EmsScriptNode extends ScriptNode implements
         }
         return false;
     }
+
 }

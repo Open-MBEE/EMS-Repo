@@ -89,7 +89,7 @@ public class MmsModelDelete extends AbstractJavaWebScript {
            e.printStackTrace();
         }
         if (result == null) {
-            model.put( "res", response.toString());
+            model.put( "res", createResponseJson());
         }
 
         status.setCode(responseStatus.getCode());

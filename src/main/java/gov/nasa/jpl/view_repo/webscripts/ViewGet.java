@@ -166,7 +166,7 @@ public class ViewGet extends AbstractJavaWebScript {
 
         if (responseStatus.getCode() == HttpServletResponse.SC_OK) {
             try {
-                JSONObject json = new JSONObject();
+                JSONObject json = NodeUtil.newJsonObject();
                 json.put(gettingDisplayedElements ? "elements" : "views", viewsJson);
                 if (!Utils.isNullOrEmpty(response.toString())) json.put("message", response.toString());
                 if ( prettyPrint ) model.put("res", NodeUtil.jsonToString( json, 4 ));
@@ -174,11 +174,11 @@ public class ViewGet extends AbstractJavaWebScript {
             } catch (JSONException e) {
                 e.printStackTrace();
                 log(Level.ERROR, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "JSON creation error");
-                model.put("res", response.toString());
+				model.put("res", createResponseJson());
                 e.printStackTrace();
             }
         } else {
-            model.put("res", response.toString());
+            model.put("res", createResponseJson());
         }
 
         status.setCode(responseStatus.getCode());

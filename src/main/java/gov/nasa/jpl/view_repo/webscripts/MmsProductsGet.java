@@ -50,7 +50,7 @@ public class MmsProductsGet extends AbstractJavaWebScript {
 
         MmsProductsGet instance = new MmsProductsGet(repository, getServices());
 
-        JSONObject jsonObject = new JSONObject();
+        JSONObject jsonObject = NodeUtil.newJsonObject();
 
         try {
             ProductsWebscript productWs = new ProductsWebscript(repository, getServices(), instance.response);
@@ -59,7 +59,7 @@ public class MmsProductsGet extends AbstractJavaWebScript {
             if (!Utils.isNullOrEmpty(response.toString())) jsonObject.put("message", response.toString());
             model.put("res", NodeUtil.jsonToString( jsonObject, 2 ));
         } catch (Exception e) {
-            model.put("res", response.toString());
+            model.put("res", createResponseJson());
             if (e instanceof JSONException) {
                 log(Level.ERROR,  HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "JSON creation error");
             } else {

@@ -129,7 +129,7 @@ public class ProjectPost extends AbstractJavaWebScript {
         }
 
 		status.setCode(statusCode);
-		model.put("res", response.toString());
+		model.put("res", createResponseJson());
 
         printFooter();
 

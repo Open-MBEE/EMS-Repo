@@ -9,6 +9,7 @@
 
 from regression_lib import *
 
+
 ##########################################################################################
 #
 # TABLE OF ALL POSSIBLE TESTS TO RUN
@@ -75,7 +76,7 @@ False,
 None,
 ["test","workspaces","develop", "develop2"]
 ],
-        
+
 [
 40,
 "PostProducts",
@@ -88,6 +89,17 @@ None,
 ],
   
 # GETS: ==========================    
+
+[
+45,
+"GetSites",
+"Get sites",
+create_curl_cmd(type="GET",data="sites",base_url=BASE_URL_WS, branch="master/"),
+False, 
+None,
+["test","workspaces","develop", "develop2"]
+],
+
 [
 50,
 "GetProject",
@@ -233,6 +245,7 @@ common_filters,
 ["test","workspaces"],
 None,
 None,
+None,
 80
 ],
 
@@ -246,6 +259,7 @@ None,
 #common_filters,
 #["foo"],
 #None,
+#Node,
 #None,
 #0
 #],
@@ -335,6 +349,7 @@ True,
 common_filters+['"branched"','"created"','"id"','"qualifiedId"'],
 ["test","workspaces","develop", "develop2"],
 None,
+None,
 set_wsid_to_gv1
 ],
   
@@ -349,6 +364,7 @@ True,
 common_filters+['"branched"','"created"','"id"','"qualifiedId"','"parent"'],
 ["test","workspaces","develop", "develop2"],
 None,
+None,
 set_wsid_to_gv2
 ],
         
@@ -361,6 +377,7 @@ create_curl_cmd(type="POST",base_url=BASE_URL_WS,
 True, 
 common_filters+['"branched"','"created"','"id"','"qualifiedId"'],
 ["test","workspaces","develop"],
+None,
 None,
 do176 
 ],
@@ -409,6 +426,7 @@ True,
 common_filters+['"id"','"qualifiedId"'],
 ["test","workspaces","develop", "develop2"],
 None,
+None,
 do20 # lambda : set_gv1(json.loads(orig_json)['workspace2']['updatedElements'][0]['modified'] if (orig_json != None and len(str(orig_json)) > 0) else None)
 ],
 
@@ -422,6 +440,7 @@ create_curl_cmd(type="POST",base_url=BASE_URL_WS,
 True, 
 common_filters+['"branched"','"created"','"id"','"qualifiedId"', '"parent"'],
 ["test","workspaces","develop", "develop2"],
+None,
 None,
 set_wsid_to_gv5
 ],
@@ -521,6 +540,7 @@ True,
 common_filters+['"branched"','"created"','"id"','"qualifiedId"', '"parent"'],
 ["test","workspaces","develop", "develop2"],
 None,
+None,
 set_wsid_to_gv6
 ],
         
@@ -546,6 +566,7 @@ True,
 common_filters+['"branched"','"created"','"id"','"qualifiedId"'],
 ["test","workspaces","develop", "develop2"],
 None,
+None,
 set_wsid_to_gv1
 ],
         
@@ -558,6 +579,7 @@ create_curl_cmd(type="POST",base_url=BASE_URL_WS,
 True, 
 common_filters+['"branched"','"created"','"id"','"qualifiedId"'],
 ["test","workspaces","develop", "develop2"],
+None,
 None,
 set_wsid_to_gv2
 ],
@@ -584,6 +606,7 @@ create_curl_cmd(type="POST",data="x.json",base_url=BASE_URL_WS,
 True, 
 common_filters,
 ["test","workspaces","develop", "develop2"],
+None,
 None,
 set_read_to_gv3
 ],
@@ -622,6 +645,7 @@ True,
 common_filters,
 ["test","workspaces","develop", "develop2"],
 None,
+None,
 set_read_to_gv4
 ],
         
@@ -632,6 +656,67 @@ set_read_to_gv4
 "Compare workspaces wsG1 and wsG2 with timestamps",
 create_curl_cmd(type="GET",base_url=SERVICE_URL,
                 branch="diff?workspace1=$gv1&workspace2=$gv2&timestamp1=$gv3&timestamp2=$gv4"),
+True, 
+common_filters+['"id"','"qualifiedId"','"timestamp"'],
+["test","workspaces","develop", "develop2"]
+],
+
+[
+240,
+"PostSiteInWorkspace",
+"Create a project and site in a workspace",
+create_curl_cmd(type="POST",data='\'{"elements":[{"sysmlid":"proj_id_001","name":"PROJ_1","specialization":{"type":"Project"}}]}\'',
+                base_url=BASE_URL_WS,
+                branch="$gv1/sites/site_in_ws/projects?createSite=true",project_post=True),
+False, 
+None,
+["test","workspaces","develop", "develop2"]
+],
+ 
+[
+241,
+"GetSiteInWorkspace",
+"Get site in workspace",
+create_curl_cmd(type="GET",data="sites",base_url=BASE_URL_WS, branch="$gv1/"),
+False, 
+None,
+["test","workspaces","develop", "develop2"]
+],
+
+
+[
+242,
+"GetProductsInSiteInWorkspace",
+"Get products for a site in a workspace",
+create_curl_cmd(type="GET",data="products",base_url=BASE_URL_WS,
+                branch="$gv1/sites/europa/"),
+True, 
+common_filters,
+["test","workspaces","develop", "develop2"]
+],
+        
+[
+243,
+"PostNotInPastToWorkspace",
+"Post element to master workspace for a diff test",
+create_curl_cmd(type="POST",data="notInThePast.json",base_url=BASE_URL_WS,
+                post_type="elements",branch="master/"),
+True, 
+common_filters,
+["test","workspaces","develop", "develop2"],
+None,
+None,
+set_read_delta_to_gv1,
+10
+],
+        
+# This test depends on the previous one:
+[
+244,
+"CompareWorkspacesNotInPast",
+"Compare workspace master with itself at the current time and a time in the past",
+create_curl_cmd(type="GET",base_url=SERVICE_URL,
+                branch="diff?workspace1=master&workspace2=master&timestamp2=$gv1"),
 True, 
 common_filters+['"id"','"qualifiedId"','"timestamp"'],
 ["test","workspaces","develop", "develop2"]
@@ -650,6 +735,7 @@ common_filters+['"id"','"qualifiedId"','"timestamp"'],
 # True, 
 # common_filters+['"created"','"id"','"url"'],
 # ["test","workspaces","develop", "develop2"],
+# None,
 # None,
 # None,
 # 3
@@ -703,7 +789,7 @@ common_filters+['"sysmlid"','"qualifiedId"','"message"'],
 270,
 "Demo1",
 "Server side docgen demo 1",
-create_curl_cmd(type="GET",data="views/_17_0_2_3_e610336_1394148311476_17302_29388/elements",base_url=BASE_URL_WS,
+create_curl_cmd(type="GET",data="views/_17_0_2_3_e610336_1394148311476_17302_29388",base_url=BASE_URL_WS,
                 branch="master/"),
 True, 
 common_filters,
@@ -720,19 +806,19 @@ create_curl_cmd(type="POST",base_url=BASE_URL_WS,
                 branch="master/sites/europa/",
                 post_type="elements"),
 True, 
-common_filters,
-[]
+common_filters+['"MMS_','MMS_'],
+["test","workspaces","develop", "develop2"]
 ],
         
 [
 290,
 "Demo2",
 "Server side docgen demo 2",
-create_curl_cmd(type="GET",data="views/_17_0_2_3_e610336_1394148233838_91795_29332/elements",base_url=BASE_URL_WS,
+create_curl_cmd(type="GET",data="views/_17_0_2_3_e610336_1394148233838_91795_29332",base_url=BASE_URL_WS,
                 branch="master/"),
 True, 
 common_filters,
-[]
+["test","workspaces","develop", "develop2"]
 ],
 
 # NEW URLS: ==========================    
@@ -831,6 +917,7 @@ create_curl_cmd(type="POST",base_url=BASE_URL_WS,
 True,
 common_filters + ['"parent"','"id"','"qualifiedId"'],
 ["develop"],
+None,
 None,
 set_wsid_to_gv1
 ],
@@ -966,7 +1053,7 @@ create_curl_cmd(type="POST",data="cmed416_2.json",base_url=BASE_URL_WS,
                 post_type="elements",branch="master/"),
 False, 
 None,
-["test","workspaces","develop"]
+[]
 ],
 
 # DOWNGRADING: ==================    
@@ -1016,6 +1103,7 @@ True,
 common_filters+['"branched"','"created"','"id"','"qualifiedId"'],
 ["test","workspaces","develop"],
 None,
+None,
 set_wsid_to_gv1
 ], 
 
@@ -1028,6 +1116,7 @@ create_curl_cmd(type="POST",base_url=BASE_URL_WS,
 True, 
 common_filters+['"branched"','"created"','"id"','"qualifiedId"'],
 ["test","workspaces","develop"],
+None,
 None,
 set_wsid_to_gv2
 ],
@@ -1075,6 +1164,7 @@ create_curl_cmd(type="GET",base_url=SERVICE_URL,
 True, 
 common_filters+['"id"','"qualifiedId"'],
 ["test","workspaces","develop", "develop2"],
+None,
 None,
 set_json_output_to_gv3
 ], 
@@ -1187,7 +1277,7 @@ common_filters+['MMS_', '"url"'],
 # 620,
 # "NoneRead",
 # "Read element with user None",
-# "curl -w '\\n%{http_code}\\n' -u None:password -X GET http://localhost:8080/alfresco/service/workspaces/master/elements/y",
+# "curl -w '\\n%{http_code}\\n' -u None:password -X GET " + BASE_URL_WS + "master/elements/y",
 # True,
 # common_filters,
 # ["test","workspaces","develop", "develop2"]
@@ -1197,7 +1287,7 @@ common_filters+['MMS_', '"url"'],
 # 621,
 # "NoneDelete",
 # "Delete element with user None",
-# "curl -w '\\n%{http_code}\\n' -u None:password -X DELETE http://localhost:8080/alfresco/service/workspaces/master/elements/y",
+# "curl -w '\\n%{http_code}\\n' -u None:password -X DELETE " + BASE_URL_WS + "master/elements/y",
 # True,
 # common_filters+['"timestamp"', '"id"'],
 # ["test","workspaces","develop", "develop2"]
@@ -1207,7 +1297,7 @@ common_filters+['MMS_', '"url"'],
 # 622,
 # "NoneUpdate",
 # "Update element with user None",
-# "curl -w '\\n%{http_code}\\n' -u None:password -H Content-Type:application/json http://localhost:8080/alfresco/service/workspaces/master/elements -d '{\"elements\":[{\"sysmlid\":\"y\",\"documentation\":\"y is modified by None\"}]}'",
+# "curl -w '\\n%{http_code}\\n' -u None:password -H Content-Type:application/json " + BASE_URL_WS + "master/elements -d '{\"elements\":[{\"sysmlid\":\"y\",\"documentation\":\"y is modified by None\"}]}'",
 # True,
 # common_filters,
 # ["test","workspaces","develop", "develop2"]
@@ -1217,7 +1307,7 @@ common_filters+['MMS_', '"url"'],
 # 623,
 # "NoneCreate",
 # "Create element with user None",
-# "curl -w '\\n%{http_code}\\n' -u None:password -H Content-Type:application/json http://localhost:8080/alfresco/service/workspaces/master/elements -d '{\"elements\":[{\"sysmlid\":\"ychild\",\"documentation\":\"y child\",\"owner\":\"y\"}]}'",
+# "curl -w '\\n%{http_code}\\n' -u None:password -H Content-Type:application/json " + BASE_URL_WS + "master/elements -d '{\"elements\":[{\"sysmlid\":\"ychild\",\"documentation\":\"y child\",\"owner\":\"y\"}]}'",
 # True,
 # common_filters,
 # ["test","workspaces","develop", "develop2"]
@@ -1227,7 +1317,7 @@ common_filters+['MMS_', '"url"'],
 624,
 "CollaboratorRead",
 "Read element with user Collaborator",
-"curl -w '\\n%{http_code}\\n' -u Collaborator:password -X GET http://localhost:8080/alfresco/service/workspaces/master/elements/y",
+"curl -w '\\n%{http_code}\\n' -u Collaborator:password -X GET " + BASE_URL_WS + "master/elements/y",
 True,
 common_filters,
 ["test","workspaces","develop", "develop2"]
@@ -1237,7 +1327,7 @@ common_filters,
 625,
 "CollaboratorUpdate",
 "Update element with user Collaborator",
-"curl -w '\\n%{http_code}\\n' -u Collaborator:password -H Content-Type:application/json http://localhost:8080/alfresco/service/workspaces/master/elements -d '{\"elements\":[{\"sysmlid\":\"y\",\"documentation\":\"y is modified by Collaborator\"}]}'",
+"curl -w '\\n%{http_code}\\n' -u Collaborator:password -H Content-Type:application/json " + BASE_URL_WS + "master/elements -d '{\"elements\":[{\"sysmlid\":\"y\",\"documentation\":\"y is modified by Collaborator\"}]}'",
 True,
 common_filters,
 ["test","workspaces","develop", "develop2"]
@@ -1247,7 +1337,7 @@ common_filters,
 626,
 "CollaboratorCreate",
 "Create element with user Collaborator",
-"curl -w '\\n%{http_code}\\n' -u Collaborator:password -H Content-Type:application/json http://localhost:8080/alfresco/service/workspaces/master/elements -d '{\"elements\":[{\"sysmlid\":\"ychild\",\"documentation\":\"y child\",\"owner\":\"y\"}]}'",
+"curl -w '\\n%{http_code}\\n' -u Collaborator:password -H Content-Type:application/json " + BASE_URL_WS + "master/elements -d '{\"elements\":[{\"sysmlid\":\"ychild\",\"documentation\":\"y child\",\"owner\":\"y\"}]}'",
 True,
 common_filters,
 ["test","workspaces","develop", "develop2"]
@@ -1257,12 +1347,97 @@ common_filters,
 627,
 "CollaboratorDelete",
 "Delete element with user Collaborator",
-"curl -w '\\n%{http_code}\\n' -u Collaborator:password -X DELETE http://localhost:8080/alfresco/service/workspaces/master/elements/y",
+"curl -w '\\n%{http_code}\\n' -u Collaborator:password -X DELETE " + BASE_URL_WS + "master/elements/y",
 True,
 common_filters+['"timestamp"', '"id"'],
 ["test","workspaces","develop", "develop2"]
 ],
   
+[
+628,
+"CollaboratorResurrect",
+"Resurrect element with user Collaborator",
+"curl -w '\\n%{http_code}\\n' -u Collaborator:password -H Content-Type:application/json " + BASE_URL_WS + "master/elements --data @JsonData/y.json",
+True,
+common_filters,
+["test","workspaces","develop", "develop2"]
+],
+
+# Consumer permissions
+  
+[
+630,
+"ConsumerRead",
+"Read element with user Consumer",
+"curl -w '\\n%{http_code}\\n' -u Consumer:password -X GET " + BASE_URL_WS + "master/elements/y",
+True,
+common_filters,
+["test","workspaces","develop", "develop2"]
+],
+   
+[
+631,
+"ConsumerUpdate",
+"Update element with user Consumer",
+"curl -w '\\n%{http_code}\\n' -u Consumer:password -H Content-Type:application/json " + BASE_URL_WS + "master/elements -d '{\"elements\":[{\"sysmlid\":\"y\",\"documentation\":\"y is modified by Consumer\"}]}'",
+False,
+common_filters,
+["test","workspaces","develop", "develop2"],
+None,
+removeCmNames,
+None
+],
+   
+[
+632,
+"ConsumerCreate",
+"Create element with user Consumer",
+"curl -w '\\n%{http_code}\\n' -u Consumer:password -H Content-Type:application/json " + BASE_URL_WS + "master/elements -d '{\"elements\":[{\"sysmlid\":\"ychildOfConsumer\",\"documentation\":\"y child of Consumer\",\"owner\":\"y\"}]}'",
+False,
+common_filters,
+["test","workspaces","develop", "develop2"],
+None,
+removeCmNames,
+None
+],
+ 
+[
+633,
+"ConsumerDelete",
+"Delete element with user Consumer",
+"curl -w '\\n%{http_code}\\n' -u Consumer:password -X DELETE " + BASE_URL_WS + "master/elements/y",
+False,
+common_filters+['"timestamp"', '"id"'],
+["test","workspaces","develop", "develop2"],
+None,
+removeCmNames,
+None
+],
+
+[
+634,
+"ConsumerResurrect",
+"Resurrect element with user Consumer",
+"curl -w '\\n%{http_code}\\n' -u Consumer:password -H Content-Type:application/json " + BASE_URL_WS + "master/elements --data @JsonData/y.json",
+False,
+common_filters,
+["test","workspaces","develop", "develop2"],
+None,
+removeCmNames,
+None
+],
+
+# Manager
+
+[
+635,
+"GetWorkspacesManager",
+"Get workspaces by a Manager",
+'curl %s %s "%s"'%(CURL_STATUS+" -u Manager:password", CURL_GET_FLAGS, BASE_URL_WS_NOBS),
+True, 
+common_filters+['"branched"','"created"','"id"','"qualifiedId"','"parent"'],
+["test","workspaces","develop", "develop2"]
+],
 
 # NULL PROPERTIES =====================================================
 

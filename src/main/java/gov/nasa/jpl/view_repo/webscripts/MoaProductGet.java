@@ -144,7 +144,7 @@ public class MoaProductGet extends AbstractJavaWebScript {
                 model.put("siteName", product.getSiteName());
             }
         } else {
-            model.put("res", response.toString());
+            model.put("res", createResponseJson());
             model.put("title", "Could not load");
             model.put("siteTitle", "ERROR product not found");
             model.put("siteName", "");

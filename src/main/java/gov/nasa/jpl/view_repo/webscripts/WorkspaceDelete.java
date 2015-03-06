@@ -82,7 +82,7 @@ public class WorkspaceDelete extends AbstractJavaWebScript {
        }
 
        if (result == null) {
-          model.put("res", response.toString());
+          model.put("res", createResponseJson());
        }
        else {
            try {
