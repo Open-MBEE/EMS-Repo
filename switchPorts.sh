@@ -10,7 +10,7 @@
 
 
 if [ "$#" -lt 1 ]; then
-  echo "usage> bash $0 alfresco_port [debug_port]"
+  echo "usage> source $0 alfresco_port [debug_port]"
   exit 1
 fi
 #oldPort=$ALFRESCO_PORT
