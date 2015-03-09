@@ -16,6 +16,7 @@ import java.util.Set;
 
 import javax.transaction.UserTransaction;
 
+import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.action.Action;
 import org.alfresco.service.cmr.action.ActionService;
@@ -612,14 +613,15 @@ public class CommitUtil {
 	 * @return
 	 */
 	protected synchronized static boolean updateCommitHistory(EmsScriptNode prevCommit,
-	                                                          EmsScriptNode currCommit) {
+	                                                          EmsScriptNode currCommit,
+	                                                          String originalUser) {
 	    if (prevCommit == null || currCommit == null) {
 	        return false;
 	    } else {
-	        if (!prevCommit.hasPermission( "Write" )) {
-	            logger.error("no permissions to write to previous commit: " + prevCommit);
-	            return false;
-	        }
+//	        if (!prevCommit.hasPermission( "Write" )) {
+//	            logger.error("no permissions to write to previous commit: " + prevCommit);
+//	            return false;
+//	        }
 	        
 	        // FIXME: not sure why getting property is providing [null] array
 //            ArrayList< NodeRef > parentRefs = currCommit.getPropertyNodeRefs( "ems:commitParents" );
@@ -648,6 +650,10 @@ public class CommitUtil {
             }
             prevCommit.setProperty( "ems:commitChildren", childRefs );
             prevCommit.getOrSetCachedVersion();
+            
+            // set modifier to original user (since we should be running as admin in here)
+            currCommit.setProperty( "cm:modifier", originalUser );
+            prevCommit.setProperty( "cm:modifier", originalUser );
 	    }
         return true;
 	}
@@ -680,7 +686,11 @@ public class CommitUtil {
 	                                          String type, String msg, String body,
 	                                          ServiceRegistry services, StringBuffer response,
 	                                          boolean twoSourceWorkspaces) {
-
+	    NodeRef result = null;
+	    // to make sure no permission issues, run as admin
+	    String originalUser = NodeUtil.getUserName();
+	    AuthenticationUtil.setRunAsUser( "admin" );
+	    
         // Get the most recent commit(s) before creating a new one
 	    // Note: must do this before getOrCreateCommitPkg() call in case the commit to be created is the
 	    //       first for the day, and so will create the day folder in the getOrCreateCommitPkg() call
@@ -695,35 +705,40 @@ public class CommitUtil {
         EmsScriptNode commitPkg = getOrCreateCommitPkg( dstWs, services, response, true );
 
         if (commitPkg == null) {
-            return null;
+            result = null;
         } else {
             Date now = new Date();
             if (!commitPkg.hasPermission("Write")) {
                 logger.error("No permissions to write to commit directory: " + commitPkg);
-                return null;
-            }
-            EmsScriptNode currCommit = commitPkg.createNode("commit_" + now.getTime(), "cm:content");
-            currCommit.createOrUpdateAspect( "cm:titled");
-            if (msg != null) currCommit.createOrUpdateProperty("cm:description", msg);
-
-            currCommit.createOrUpdateAspect( "ems:Committable" );
-            if (type != null) {
-                currCommit.createOrUpdateProperty( "ems:commitType", type );
+                result = null;
             } else {
-                // TODO throw exception
+                EmsScriptNode currCommit = commitPkg.createNode("commit_" + now.getTime(), "cm:content");
+                currCommit.createOrUpdateAspect( "cm:titled");
+                if (msg != null) currCommit.createOrUpdateProperty("cm:description", msg);
+    
+                currCommit.createOrUpdateAspect( "ems:Committable" );
+                if (type != null) {
+                    currCommit.createOrUpdateProperty( "ems:commitType", type );
+                } else {
+                    // TODO throw exception
+                }
+                if (body != null) currCommit.createOrUpdateProperty( "ems:commit", body );
+                
+                if (prevCommit1 != null) {
+                    updateCommitHistory(prevCommit1, currCommit, originalUser);
+                }
+                if (prevCommit2 != null) {
+                    updateCommitHistory(prevCommit2, currCommit, originalUser);
+                }
+    
+                currCommit.getOrSetCachedVersion();
+                result = currCommit.getNodeRef();
             }
-            if (body != null) currCommit.createOrUpdateProperty( "ems:commit", body );
-
-            if (prevCommit1 != null) {
-                updateCommitHistory(prevCommit1, currCommit);
-            }
-            if (prevCommit2 != null) {
-                updateCommitHistory(prevCommit2, currCommit);
-            }
-
-            currCommit.getOrSetCachedVersion();
-            return currCommit.getNodeRef();
         }
+        
+        // make sure we're running back as the originalUser
+        AuthenticationUtil.setRunAsUser( originalUser );
+        return result;
 	}
 
 
@@ -774,7 +789,7 @@ public class CommitUtil {
             try {
                 restStatus = restConnection.publish( deltaJson, "MMS" );
             } catch (Exception e) {
-                e.printStackTrace();
+                logger.warn("REST connection not available");
                 return false;
             }
         }
