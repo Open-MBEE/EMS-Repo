@@ -362,12 +362,13 @@ public class CommitUtil {
     }
 
     private static NodeRef commitRef = null;
-    public static NodeRef commit(final JSONObject wsDiff,
-                                 final WorkspaceNode workspace,
-                                 final String msg,
-                                 final boolean runWithoutTransactions,
-                                 final ServiceRegistry services,
-                                 final StringBuffer response) {
+    public synchronized static NodeRef commit(final JSONObject wsDiff,
+                                              final WorkspaceNode workspace,
+                                              final String msg,
+                                              final boolean runWithoutTransactions,
+                                              final ServiceRegistry services,
+                                              final StringBuffer response) {
+        //logger.warn( "sync commit start" );
         commitRef = null;
         new EmsTransaction(services, response, null, runWithoutTransactions ) {
             
@@ -376,6 +377,7 @@ public class CommitUtil {
                 commitRef = commitTransactionable(wsDiff, workspace, msg, services, response);
             }
         };
+        //logger.warn( "sync commit end" );
         return commitRef;
 	}
 
@@ -396,15 +398,16 @@ public class CommitUtil {
 
 
     private static NodeRef mergeRef = null;
-    public static NodeRef merge( final JSONObject wsDiff,
-                                 final WorkspaceNode source,
-                                 final WorkspaceNode target,
-                                 final Date dateTimeSrc,
-                                 final Date dateTimeTarget,
-                                 final String msg,
-                                 final boolean runWithoutTransactions,
-                                 final ServiceRegistry services,
-                                 final StringBuffer response) {
+    public synchronized static NodeRef merge( final JSONObject wsDiff,
+                                              final WorkspaceNode source,
+                                              final WorkspaceNode target,
+                                              final Date dateTimeSrc,
+                                              final Date dateTimeTarget,
+                                              final String msg,
+                                              final boolean runWithoutTransactions,
+                                              final ServiceRegistry services,
+                                              final StringBuffer response ) {
+        //logger.warn( "sync merge start" );
         mergeRef = null;
         new EmsTransaction(services, response, null, runWithoutTransactions ) {
             
@@ -415,6 +418,7 @@ public class CommitUtil {
                                             msg, services, response);
             }
         };
+        //logger.warn( "sync merge end" );
         return mergeRef;
     }
 
@@ -483,10 +487,13 @@ public class CommitUtil {
 	}
 
     private static NodeRef branchRef = null;
-	public static NodeRef branch(final WorkspaceNode srcWs, final WorkspaceNode dstWs,
-	                             final String msg,
-	                             boolean runWithoutTransactions,
-	                             ServiceRegistry services, StringBuffer response) {
+	public synchronized static NodeRef branch(final WorkspaceNode srcWs,
+	                                          final WorkspaceNode dstWs,
+	                                          final String msg,
+	                                          boolean runWithoutTransactions,
+	                                          ServiceRegistry services,
+	                                          StringBuffer response) {
+        //logger.warn( "sync branch start" );
 	    branchRef = null;
         new EmsTransaction(services, response, null, runWithoutTransactions ) {
             
@@ -495,6 +502,7 @@ public class CommitUtil {
                 branchRef = branchTransactionable(srcWs, dstWs, msg, services, response);
             }
         };
+        //logger.warn( "sync branch end" );
         return branchRef;
 	}
 
@@ -542,7 +550,7 @@ public class CommitUtil {
 	 * @return
 	 */
 	protected static boolean updateCommitHistory(EmsScriptNode prevCommit,
-	                                                          EmsScriptNode currCommit) {
+	                                             EmsScriptNode currCommit) {
 	    if (prevCommit == null || currCommit == null) {
 	        return false;
 	    } else {
@@ -603,7 +611,7 @@ public class CommitUtil {
 	 * a while, the commit node is created first, then it is updated in the background using the
 	 * ActionExecuter.
 	 */
-    protected synchronized static NodeRef
+    protected static NodeRef
             createCommitNode( WorkspaceNode srcWs1, WorkspaceNode srcWs2,
                               WorkspaceNode dstWs, Date dateTime1,
                               Date dateTime2, String type, String msg,
@@ -768,7 +776,8 @@ public class CommitUtil {
         commitAction.setParameterValue( CommitActionExecuter.PARAM_SOURCE, source );
 
         // create empty commit for now (executing action will fill it in later)
-        NodeRef commitRef = CommitUtil.commit(null, targetWS, "", true, services, new StringBuffer() );
+        NodeRef commitRef = CommitUtil.commit(null, targetWS, "", !useTransactions,
+                                              services, new StringBuffer() );
 
         services.getActionService().executeAction(commitAction , commitRef, true, true);
     }

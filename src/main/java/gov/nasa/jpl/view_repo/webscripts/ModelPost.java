@@ -288,7 +288,7 @@ public class ModelPost extends AbstractJavaWebScript {
         // FIXME: Need to split elements by project Id - since they won't always be in same project
         //      CommitUtil.commitAndStartAction( targetWS, wsDiff, start, end, elements.first().getProjectId(), status, true );
         
-        NodeRef commitRef = CommitUtil.commit(null, targetWS, "", true, services, new StringBuffer() );
+        NodeRef commitRef = CommitUtil.commit(null, targetWS, "", runWithoutTransactions, services, new StringBuffer() );
         
         String projectId = "";
         if (elements.size() > 0) {

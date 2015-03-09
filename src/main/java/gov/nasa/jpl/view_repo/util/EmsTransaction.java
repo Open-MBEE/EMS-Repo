@@ -16,7 +16,6 @@ import org.alfresco.service.ServiceRegistry;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.springframework.extensions.webscripts.Status;
-import org.springframework.transaction.TransactionStatus;
 
 public abstract class EmsTransaction {
     public static boolean syncTransactions = false;
@@ -119,6 +118,8 @@ public abstract class EmsTransaction {
     protected void tryBegin( UserTransaction trx ) {
         try {
             trx.begin();
+            //logger.warn( "begin" );
+            //logger.warn(Debug.stackTrace());
             NodeUtil.setInsideTransactionNow( true );
         } catch (Throwable e) {
             tryRollback( trx, e, "DB transaction begin failed" );
@@ -133,10 +134,13 @@ public abstract class EmsTransaction {
     
     protected void transactionWrappedRun( UserTransaction trx ) throws Throwable {
         trx.begin();
+        //logger.warn( "begin" );
+        //logger.warn(Debug.stackTrace());
         NodeUtil.setInsideTransactionNow( true );
         
         run();
 
+        
         UserTransaction commitTrx = NodeUtil.getTransaction();
         commit( commitTrx );
     }
@@ -149,6 +153,8 @@ public abstract class EmsTransaction {
                                                 SystemException {
         Timer timerCommit = null;
         timerCommit = Timer.startTimer(timerCommit, NodeUtil.timeEvents);
+        //logger.warn( "commit" );
+        //logger.warn(Debug.stackTrace());
         trx.commit();
         Timer.stopTimer(timerCommit, "!!!!! EmsTransaction commit time", NodeUtil.timeEvents);
 
