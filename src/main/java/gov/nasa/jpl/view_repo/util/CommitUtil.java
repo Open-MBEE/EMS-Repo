@@ -14,8 +14,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
-import javax.transaction.UserTransaction;
-
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.action.Action;
 import org.alfresco.service.cmr.action.ActionService;
@@ -363,39 +361,21 @@ public class CommitUtil {
         return parentRefs;
     }
 
-    public static NodeRef commit(JSONObject wsDiff,
-                       WorkspaceNode workspace,
-                       String msg,
-                       boolean runWithoutTransactions,
-                       ServiceRegistry services,
-                       StringBuffer response) {
-        NodeRef commitRef = null;
-        if (runWithoutTransactions) {
-            try {
+    private static NodeRef commitRef = null;
+    public static NodeRef commit(final JSONObject wsDiff,
+                                 final WorkspaceNode workspace,
+                                 final String msg,
+                                 final boolean runWithoutTransactions,
+                                 final ServiceRegistry services,
+                                 final StringBuffer response) {
+        commitRef = null;
+        new EmsTransaction(services, response, null, runWithoutTransactions ) {
+            
+            @Override
+            public void run() throws Exception {
                 commitRef = commitTransactionable(wsDiff, workspace, msg, services, response);
-            } catch (JSONException e) {
-                e.printStackTrace();
             }
-        } else {
-            UserTransaction trx;
-            trx = services.getTransactionService()
-                    .getNonPropagatingUserTransaction();
-            try {
-                trx.begin();
-                NodeUtil.setInsideTransactionNow( true );
-                commitRef = commitTransactionable(wsDiff, workspace, msg, services, response);
-                trx.commit();
-                NodeUtil.setInsideTransactionNow( false );
-            } catch (Throwable e) {
-                try {
-                    e.printStackTrace();
-                    trx.rollback();
-                    NodeUtil.setInsideTransactionNow( false );
-                } catch (Throwable ee) {
-                    ee.printStackTrace();
-                }
-            }
-        }
+        };
         return commitRef;
 	}
 
@@ -415,40 +395,26 @@ public class CommitUtil {
     }
 
 
-    public static NodeRef merge(JSONObject wsDiff,
-                             WorkspaceNode source,
-                             WorkspaceNode target,
-                             Date dateTimeSrc,
-                             Date dateTimeTarget,
-                             String msg,
-                             boolean runWithoutTransactions,
-                             ServiceRegistry services,
-                             StringBuffer response) {
-        NodeRef mergeRef = null;
-        if (runWithoutTransactions) {
-            mergeRef = mergeTransactionable(wsDiff, source, target, target, dateTimeSrc, dateTimeTarget,
+    private static NodeRef mergeRef = null;
+    public static NodeRef merge( final JSONObject wsDiff,
+                                 final WorkspaceNode source,
+                                 final WorkspaceNode target,
+                                 final Date dateTimeSrc,
+                                 final Date dateTimeTarget,
+                                 final String msg,
+                                 final boolean runWithoutTransactions,
+                                 final ServiceRegistry services,
+                                 final StringBuffer response) {
+        mergeRef = null;
+        new EmsTransaction(services, response, null, runWithoutTransactions ) {
+            
+            @Override
+            public void run() throws Exception {
+            mergeRef = mergeTransactionable(wsDiff, source, target, target,
+                                            dateTimeSrc, dateTimeTarget,
                                             msg, services, response);
-        } else {
-            UserTransaction trx;
-            trx = services.getTransactionService()
-                    .getNonPropagatingUserTransaction();
-            try {
-                trx.begin();
-                NodeUtil.setInsideTransactionNow( true );
-                mergeRef = mergeTransactionable(wsDiff, source, target, target, dateTimeSrc, dateTimeTarget,
-                                                msg, services, response);
-                trx.commit();
-                NodeUtil.setInsideTransactionNow( false );
-            } catch (Throwable e) {
-                try {
-                    e.printStackTrace();
-                    trx.rollback();
-                    NodeUtil.setInsideTransactionNow( false );
-                } catch (Throwable ee) {
-                    ee.printStackTrace();
-                }
             }
-        }
+        };
         return mergeRef;
     }
 
@@ -516,36 +482,19 @@ public class CommitUtil {
 		return null;
 	}
 
-	public static NodeRef branch(WorkspaceNode srcWs, WorkspaceNode dstWs,
-	                             String msg,
+    private static NodeRef branchRef = null;
+	public static NodeRef branch(final WorkspaceNode srcWs, final WorkspaceNode dstWs,
+	                             final String msg,
 	                             boolean runWithoutTransactions,
 	                             ServiceRegistry services, StringBuffer response) {
-	    NodeRef branchRef = null;
-        if (runWithoutTransactions) {
-            try {
+	    branchRef = null;
+        new EmsTransaction(services, response, null, runWithoutTransactions ) {
+            
+            @Override
+            public void run() throws Exception {
                 branchRef = branchTransactionable(srcWs, dstWs, msg, services, response);
-            } catch (JSONException e) {
-                e.printStackTrace();
             }
-        } else {
-            UserTransaction trx;
-            trx = services.getTransactionService().getNonPropagatingUserTransaction();
-            try {
-                trx.begin();
-                NodeUtil.setInsideTransactionNow( true );
-                branchRef = branchTransactionable(srcWs, dstWs, msg, services, response);
-                trx.commit();
-                NodeUtil.setInsideTransactionNow( false );
-            } catch (Throwable e) {
-                try {
-                    e.printStackTrace();
-                    trx.rollback();
-                    NodeUtil.setInsideTransactionNow( false );
-                } catch (Throwable ee) {
-                    ee.printStackTrace();
-                }
-            }
-        }
+        };
         return branchRef;
 	}
 
@@ -562,36 +511,17 @@ public class CommitUtil {
 
     // TODO -- REVIEW -- Just copied branch and search/replaced "branch" with "merge"
     @Deprecated
-    public static void merge(WorkspaceNode srcWs, WorkspaceNode dstWs,
-                             String msg,
+    public static void merge(final WorkspaceNode srcWs, final WorkspaceNode dstWs,
+                             final String msg,
                              boolean runWithoutTransactions,
                              ServiceRegistry services, StringBuffer response) {
-        if (runWithoutTransactions) {
-            try {
+        new EmsTransaction(services, response, null, runWithoutTransactions ) {
+            
+            @Override
+            public void run() throws Exception {
                 mergeTransactionable(srcWs, dstWs, dstWs, msg, services, response);
-            } catch (JSONException e) {
-                e.printStackTrace();
             }
-        } else {
-            UserTransaction trx;
-            trx = services.getTransactionService()
-                    .getNonPropagatingUserTransaction();
-            try {
-                trx.begin();
-                NodeUtil.setInsideTransactionNow( true );
-                mergeTransactionable(srcWs, dstWs, dstWs, msg, services, response);
-                trx.commit();
-                NodeUtil.setInsideTransactionNow( false );
-            } catch (Throwable e) {
-                try {
-                    e.printStackTrace();
-                    trx.rollback();
-                    NodeUtil.setInsideTransactionNow( false );
-                } catch (Throwable ee) {
-                    ee.printStackTrace();
-                }
-            }
-        }
+        };
     }
 
     private static void mergeTransactionable( WorkspaceNode srcWs1,
@@ -611,7 +541,7 @@ public class CommitUtil {
 	 * @param currCommit   Child commit node
 	 * @return
 	 */
-	protected synchronized static boolean updateCommitHistory(EmsScriptNode prevCommit,
+	protected static boolean updateCommitHistory(EmsScriptNode prevCommit,
 	                                                          EmsScriptNode currCommit) {
 	    if (prevCommit == null || currCommit == null) {
 	        return false;
@@ -673,13 +603,12 @@ public class CommitUtil {
 	 * a while, the commit node is created first, then it is updated in the background using the
 	 * ActionExecuter.
 	 */
-	protected static NodeRef createCommitNode(WorkspaceNode srcWs1, WorkspaceNode srcWs2,
-	                                          WorkspaceNode dstWs,
-	                                          Date dateTime1,
-                                              Date dateTime2,
-	                                          String type, String msg, String body,
-	                                          ServiceRegistry services, StringBuffer response,
-	                                          boolean twoSourceWorkspaces) {
+    protected synchronized static NodeRef
+            createCommitNode( WorkspaceNode srcWs1, WorkspaceNode srcWs2,
+                              WorkspaceNode dstWs, Date dateTime1,
+                              Date dateTime2, String type, String msg,
+                              String body, ServiceRegistry services,
+                              StringBuffer response, boolean twoSourceWorkspaces ) {
 
         // Get the most recent commit(s) before creating a new one
 	    // Note: must do this before getOrCreateCommitPkg() call in case the commit to be created is the
