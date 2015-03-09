@@ -94,6 +94,8 @@ import org.json.JSONObject;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
+import org.jsoup.nodes.Node;
+import org.jsoup.nodes.TextNode;
 import org.jsoup.parser.Tag;
 import org.jsoup.select.Elements;
 import org.springframework.extensions.webscripts.Cache;
@@ -851,15 +853,6 @@ public class SnapshotPost extends AbstractJavaWebScript {
         return snapshotNode;
     }
 
-    private String generateHtmlColSpec(int count){
-    	StringBuffer sb = new StringBuffer();
-    	int index = 1;
-    	while(index++ <= count){
-    		sb.append(String.format("<colspec colname=\"%d\" colnum=\"%d\"/>", index, index));
-    	}
-    	return sb.toString();
-    }
-    
     private String generateHtmlTableHeader(Element table, int columnCount){
     	if(table == null) return "";
     	StringBuffer sb = new StringBuffer();
@@ -1307,13 +1300,12 @@ public class SnapshotPost extends AbstractJavaWebScript {
     }
     
     private String handleHtmlTable(String s) throws Exception{
-    	Pattern pattern = Pattern.compile("<table[^>]*>(.*)</table>", Pattern.CASE_INSENSITIVE);
+    	Pattern pattern = Pattern.compile("<table[^>]*>(.*)</table>", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
     	Matcher matcher = pattern.matcher(s);
     	StringBuffer result = new StringBuffer();
     	while(matcher.find()){
     		String docbookTable = HtmlTableToDocbookTable(matcher.group(0), matcher.group(1));
-    		
-    		matcher.appendReplacement(result, String.format("<table frame=\"all\" pgwide=\"1\" role=\"longtable\" tabstyle=\"normal\">%s</table>", HtmlSanitize(matcher.group(1))));
+    		matcher.appendReplacement(result, docbookTable);
     	}
     	matcher.appendTail(result);
     	return result.toString();
@@ -1393,12 +1385,12 @@ public class SnapshotPost extends AbstractJavaWebScript {
 
     	try{
 	    	s = handleHtmlList(s);
-	    	//s = handleHtmlTable(s);
+	    	s = handleHtmlTable(s);
 	    	Document document = Jsoup.parseBodyFragment(s);
-	    	removeHtmlTags(document);
-	    	StringBuffer sb = new StringBuffer();
-	    	traverseHtml(document.body(), sb);
-	    	return sb.toString();
+	    	removeHtmlTags(document.body());
+	    	Elements paras = document.select("body > para");
+	    	paras.tagName("removeParaTag");
+	    	return document.body().html();
     	}
     	catch(Exception ex){
     		return s;
@@ -1413,13 +1405,10 @@ public class SnapshotPost extends AbstractJavaWebScript {
     	StringBuffer sb = new StringBuffer();
     	Elements tables = document.select("body > table");
     	for(Element t : tables){
-    		sb.append("<table frame=\"all\" pgwide=\"1\" role=\"longtable\" tabstyle=\"normal\">");
     		HtmlTable htmlTable = new HtmlTable(t);
-    		sb.append(String.format("<tgroup cols=\"%d\" align=\"left\" colsep=\"1\" rowsep=\"1\">", htmlTable.getColCount()));
-    		sb.append(generateHtmlColSpec(htmlTable.getColCount()));
-    		sb.append(generateHtmlTableHeader(t, htmlTable.getColCount()));
+    		sb.append(htmlTable.toDocBook());
     	}
-    	return null;
+    	return sb.toString();
     }
     
     // private String parseTransclusion(List<String> cirRefList, String
@@ -1657,80 +1646,191 @@ public class SnapshotPost extends AbstractJavaWebScript {
         return snapshoturl;
     }
 
-    /**
-     * replaces HTML tags to end up with only the HTML text.
-     * @param elem: JSoup Element
-     */
-    private void removeHtmlTag(Element elem){
+    private void removeHtmlTag(Element elem) throws Exception{
     	if(elem == null) return;
+    	Element elemNew = null;
     	String tagName = elem.tagName().toUpperCase();
     	switch(tagName){
 	    	case "BODY":
+	    	case "COLSPEC":
+	    	case "EMPHASIS":
+	    	case "ENTRY":
 	    	case "INLINEMEDIAOBJECT":
 	    	case "IMAGEOBJECT":
 	    	case "LINK":
-	    	case "ULINK":
 	    	case "ORDEREDLIST":
 	    	case "ITEMIZEDLIST":
 	    	case "LISTITEM":
-	    		for(Element child:elem.children()){
-	    			removeHtmlTag(child);
-	    		}
+	    	case "PARA":
+	    	case "ROW":
+	    	case "TBODY":
+	    	case "TFOOT":
+	    	case "TGROUP":
+	    	case "THEAD":
+	    	case "TITLE":
+	    	case "ULINK":
+	    	case "UTABLE":
+	    	case "UTBODY":
+	    	case "UTFOOT":
+	    	case "UTHEAD":
 	    		break;
 	    	case "A":
-	    		String link = String.format(" <ulink xl:href='%s'><![CDATA[%s]]></ulink> ", elem.attr("href"), elem.text());
-	    		elem.before(link);
-	    		elem.remove();
-	    		break;
-	    	case "P":
-	    	case "DIV":
-	    		//add linebreak then process the children nodes
-	    		elem.before("<?linebreak?>");
-	    		for(Element child:elem.children()){
-	    			removeHtmlTag(child);
-	    		}
+	    		elemNew = new Element(Tag.valueOf("ulink"), "");
+	    		elemNew.html(elem.html());
+	    		elemNew.attr("xl:href", elem.attr("href"));
+	    		elem.replaceWith(elemNew);
+	    		elem = elemNew;
 	    		break;
 	    	case "B":
 	    	case "STRONG":
-	    		Element emphasis = new Element(Tag.valueOf("emphasis"), elem.html());
-	    		elem.replaceWith(emphasis);
+	    		elemNew = new Element(Tag.valueOf("emphasis"), "");
+	    		elemNew.html(elem.html());
+	    		elem.replaceWith(elemNew);
+	    		elem = elemNew;
 	    		break;
 	    	case "BR":
+	    	case "P":
+	    	case "DIV":
 	    		//replaces with linebreak;
-	    		elem.before("<?linebreak?>");
-	    		elem.remove();
+	    		elemNew = new Element(Tag.valueOf("para"), "");
+	    		elemNew.html(elem.html());
+	    		elemNew.prepend("<?linebreak?>");
+	    		elem.replaceWith(elemNew);
+	    		elem = elemNew;
 	    		break;
-//	    	case "LI":
-//	    		for(Element child:elem.children()){
-//	    			removeHtmlTag(child);
-//	    		}
-//	    		break;
-//	    	case "OL":
-//	    		Element oList = elem.before("orderedlist");
-//	    		for(Element child:elem.children()){
-//	    			removeHtmlTag(child);
-//	    		}
-//	    		//elem.remove();
-//	    		break;
-//	    	case "UL":
-//	    		elem.before("itemizedlist");
-//	    		for(Element child:elem.children()){
-//	    			removeHtmlTag(child);
-//	    		}
-//	    		//elem.remove();
-//	    		break;
+	    	case "LI":
+	    		elemNew = new Element(Tag.valueOf("listitem"), "");
+	    		elemNew.html(elem.html());
+	    		elem.replaceWith(elemNew);
+	    		break;
+	    	case "OL":
+	    		elemNew = new Element(Tag.valueOf("orderedlist"), "");
+	    		elemNew.html(elem.html());
+	    		elem.replaceWith(elemNew);
+	    		break;
+	    	case "TABLE":
+    			String dbTable = HtmlTableToDocbookTable(elem.outerHtml(), elem.html());
+    			Document doc = Jsoup.parseBodyFragment(dbTable);
+    			elemNew = doc.body().select("utable").first();
+    			elem.replaceWith(elemNew);
+    			break;
+	    	case "UL":
+	    		elemNew = new Element(Tag.valueOf("itemizedlist"), "");
+	    		elemNew.html(elem.html());
+	    		elem.replaceWith(elemNew);
+	    		break;
 	    	default:
-				elem.before(elem.text());
-				for(Element child:elem.children()){
-					removeHtmlTag(child);
-				}
-				elem.remove();
+	    		TextNode textNode = new TextNode(elem.html(), "");
+	    		elem.replaceWith(textNode);
+	    		break;
     	}
+    	removeHtmlTags(elem);
     }
 
-    private void removeHtmlTags(Document doc){
-    	if(doc==null || doc.body()==null) return;
-    	for(Element child : doc.body().children()){
+    
+    
+    
+    /**
+     * replaces HTML tags to end up with only the HTML text.
+     * @param elem: JSoup Element
+     * @throws Exception 
+     */
+//    private void removeHtmlTag(Element elem){
+//    	if(elem == null) return;
+//    	Element elemNew;
+//    	String tagName = elem.tagName().toUpperCase();
+//    	switch(tagName){
+//	    	case "BODY":
+//	    	case "COLSPEC":
+//	    	case "ENTRY":
+//	    	case "INLINEMEDIAOBJECT":
+//	    	case "IMAGEOBJECT":
+//	    	case "LINK":
+//	    	case "ULINK":
+//	    	case "ORDEREDLIST":
+//	    	case "ITEMIZEDLIST":
+//	    	case "LISTITEM":
+//	    	case "ROW":
+//	    	case "TBODY":
+//	    	case "TFOOT":
+//	    	case "TGROUP":
+//	    	case "THEAD":
+//	    	case "UTABLE":
+//	    		for(Element child:elem.children()){
+//	    			removeHtmlTag(child);
+//	    		}
+//	    		break;
+//	    	case "A":
+//	    		String link = String.format(" <ulink xl:href='%s'><![CDATA[%s]]></ulink> ", elem.attr("href"), elem.text());
+//	    		elem.before(link);
+//				for(Element child:elem.children()){
+//					removeHtmlTag(child);
+//				}
+//	    		elem.remove();
+//	    		break;
+//	    	case "P":
+//	    	case "DIV":
+//	    		//add linebreak then process the children nodes
+//	    		elem.before("<?linebreak?>");
+//	    		for(Element child:elem.children()){
+//	    			removeHtmlTag(child);
+//	    		}
+//	    		break;
+//	    	case "B":
+//	    	case "STRONG":
+//	    		Element emphasis = new Element(Tag.valueOf("emphasis"), "");
+//	    		emphasis.html(elem.html());
+//	    		elem.before(emphasis);
+//	    		elem.remove();
+//	    		break;
+//	    	case "BR":
+//	    		//replaces with linebreak;
+//	    		elem.before("<?linebreak?>");
+//	    		elem.remove();
+//	    		break;
+////	    	case "LI":
+////	    		for(Element child:elem.children()){
+////	    			removeHtmlTag(child);
+////	    		}
+////	    		break;
+////	    	case "OL":
+////	    		Element oList = elem.before("orderedlist");
+////	    		for(Element child:elem.children()){
+////	    			removeHtmlTag(child);
+////	    		}
+////	    		//elem.remove();
+////	    		break;
+////	    	case "UL":
+////	    		elem.before("itemizedlist");
+////	    		for(Element child:elem.children()){
+////	    			removeHtmlTag(child);
+////	    		}
+////	    		//elem.remove();
+////	    		break;
+//	    	default:
+//				elem.before(elem.text());
+//				removeHtmlTags(elem);
+//				elem.remove();
+//    	}
+//    }
+
+    private void removeHtmlTags(Element elem) throws Exception{
+    	if(elem==null) return;
+    	
+//    	boolean hasOwnText = false;
+//    	String ownText = elem.ownText();
+//    	if(ownText != null && !ownText.isEmpty()) hasOwnText = true;
+//    	
+//    	if(hasOwnText){
+//			elem.prepend("<para>");
+//    		elem.append("</para>");
+//    	}
+    	
+    	for(Element child : elem.children()){
+//    		if(hasOwnText){
+//    			child.before("</para>");
+//    			child.after("<para>");
+//    		}
     		removeHtmlTag(child);
     	}
 	}
@@ -1983,27 +2083,58 @@ public class SnapshotPost extends AbstractJavaWebScript {
     	if(elm == null) return;
     	if(sb == null) return;
 
-    	if(!elm.isBlock()){
-    		sb.append(" ");
-    	}
+//    	if(!elm.isBlock()){
+//    		sb.append(" ");
+//    	}
 
-    	if(elm.ownText().length() > 0){
-    		sb.append("<![CDATA[");
-    		sb.append(elm.ownText());
-        	sb.append("]]>");
-    	}
+    	//TODO does not work when elem.ownText is not contiguous. eg: <div>This is <b>A</b test</div>
+//    	if(elm.ownText().length() > 0){
+//    		sb.append("<![CDATA[");
+//    		sb.append(elm.ownText());
+//        	sb.append("]]>");
+//    	}
 
+    	switch(elm.tagName().toLowerCase()){
+			case "colspec":
+			case "emphasis":
+			case "entry":
+			case "inlinemediaobject":
+			case "itemizedlist":
+	    	case "link":
+			case "listitem":
+	    	case "orderedlist":
+	    	case "row":
+	    	case "tbody":
+	    	case "tfoot":
+	    	case "tgroup":
+	    	case "thead":
+	    	case "ulink":
+	    	case "utable":
+					sb.append(elm.outerHtml());
+					break;
+			default:
+//				sb.append
+				break;
+    	}
     	if(elm.children() != null && elm.children().size() > 0){
     		for(Element e: elm.children()){
     			String tagName = e.tagName().toLowerCase();
     			switch(tagName){
+    				case "colspec":
     				case "emphasis":
+    				case "entry":
 	    			case "inlinemediaobject":
 	    			case "itemizedlist":
 	    	    	case "link":
 	    			case "listitem":
 	    	    	case "orderedlist":
+	    	    	case "row":
+	    	    	case "tbody":
+	    	    	case "tfoot":
+	    	    	case "tgroup":
+	    	    	case "thead":
 	    	    	case "ulink":
+	    	    	case "utable":
 		    				sb.append(e.outerHtml());
 	    				continue;
     			}
@@ -2014,6 +2145,53 @@ public class SnapshotPost extends AbstractJavaWebScript {
     	if(elm.isBlock()) sb.append("<?linebreak?>");
     }
 
+
+    
+    //
+//    private void traverseHtml(Element elm, StringBuffer sb){
+//    	if(elm == null) return;
+//    	if(sb == null) return;
+//
+//    	if(!elm.isBlock()){
+//    		sb.append(" ");
+//    	}
+//
+//    	//TODO does not work when elem.ownText is not contiguous. eg: <div>This is <b>A</b test</div>
+//    	if(elm.ownText().length() > 0){
+//    		sb.append("<![CDATA[");
+//    		sb.append(elm.ownText());
+//        	sb.append("]]>");
+//    	}
+//
+//    	if(elm.children() != null && elm.children().size() > 0){
+//    		for(Element e: elm.children()){
+//    			String tagName = e.tagName().toLowerCase();
+//    			switch(tagName){
+//    				case "colspec":
+//    				case "emphasis":
+//    				case "entry":
+//	    			case "inlinemediaobject":
+//	    			case "itemizedlist":
+//	    	    	case "link":
+//	    			case "listitem":
+//	    	    	case "orderedlist":
+//	    	    	case "row":
+//	    	    	case "tbody":
+//	    	    	case "tfoot":
+//	    	    	case "tgroup":
+//	    	    	case "thead":
+//	    	    	case "ulink":
+//	    	    	case "utable":
+//		    				sb.append(e.outerHtml());
+//	    				continue;
+//    			}
+//    			traverseHtml(e,sb);
+//    		}
+//    	}
+//
+//    	if(elm.isBlock()) sb.append("<?linebreak?>");
+//    }
+//
     @Override
     protected boolean validateRequest(WebScriptRequest req, Status status) {
         return false;

@@ -138,7 +138,17 @@ public class DocBookWrapper {
 			String rawContent = this.dbSerializeVisitor.getOut();
 			rawContent = rawContent.replaceAll("<ulink", "<link");
 			rawContent = rawContent.replaceAll("</ulink", "</link");
+			rawContent = rawContent.replaceAll("<utable", "<table");
+			rawContent = rawContent.replaceAll("</utable", "</table");
+			rawContent = rawContent.replaceAll("<uthead", "<thead");
+			rawContent = rawContent.replaceAll("</uthead", "</thead");
+			rawContent = rawContent.replaceAll("<utbody", "<tbody");
+			rawContent = rawContent.replaceAll("</utbody", "</tbody");
+			rawContent = rawContent.replaceAll("<utfoot", "<tfoot");
+			rawContent = rawContent.replaceAll("</utfoot", "</tfoot");
 			rawContent = rawContent.replaceAll("&nbsp;", " ");
+			rawContent = rawContent.replaceAll("<removeParaTag>", "");
+			rawContent = rawContent.replaceAll("</removeParaTag>", "");
 			//this.content = formatContent(rawContent);
 			this.content = rawContent;
 		}
