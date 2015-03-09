@@ -14,8 +14,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
-import javax.transaction.UserTransaction;
-
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.action.Action;
@@ -85,8 +83,6 @@ public class CommitUtil {
 
         if (commitPkg == null && create) {
             commitPkg = context.createFolder( "commits" );
-            // everyone should be able to create commits
-            commitPkg.setPermission( "SiteCollaborator", "GROUP_EVERYONE" );
         }
 
         // Create the date folders if needed.  Want to return the "commit" folder
@@ -364,39 +360,23 @@ public class CommitUtil {
         return parentRefs;
     }
 
-    public static NodeRef commit(JSONObject wsDiff,
-                       WorkspaceNode workspace,
-                       String msg,
-                       boolean runWithoutTransactions,
-                       ServiceRegistry services,
-                       StringBuffer response) {
-        NodeRef commitRef = null;
-        if (runWithoutTransactions) {
-            try {
+    private static NodeRef commitRef = null;
+    public synchronized static NodeRef commit(final JSONObject wsDiff,
+                                              final WorkspaceNode workspace,
+                                              final String msg,
+                                              final boolean runWithoutTransactions,
+                                              final ServiceRegistry services,
+                                              final StringBuffer response) {
+        //logger.warn( "sync commit start" );
+        commitRef = null;
+        new EmsTransaction(services, response, null, runWithoutTransactions ) {
+            
+            @Override
+            public void run() throws Exception {
                 commitRef = commitTransactionable(wsDiff, workspace, msg, services, response);
-            } catch (JSONException e) {
-                e.printStackTrace();
             }
-        } else {
-            UserTransaction trx;
-            trx = services.getTransactionService()
-                    .getNonPropagatingUserTransaction();
-            try {
-                trx.begin();
-                NodeUtil.setInsideTransactionNow( true );
-                commitRef = commitTransactionable(wsDiff, workspace, msg, services, response);
-                trx.commit();
-                NodeUtil.setInsideTransactionNow( false );
-            } catch (Throwable e) {
-                try {
-                    e.printStackTrace();
-                    trx.rollback();
-                    NodeUtil.setInsideTransactionNow( false );
-                } catch (Throwable ee) {
-                    ee.printStackTrace();
-                }
-            }
-        }
+        };
+        //logger.warn( "sync commit end" );
         return commitRef;
 	}
 
@@ -416,40 +396,28 @@ public class CommitUtil {
     }
 
 
-    public static NodeRef merge(JSONObject wsDiff,
-                             WorkspaceNode source,
-                             WorkspaceNode target,
-                             Date dateTimeSrc,
-                             Date dateTimeTarget,
-                             String msg,
-                             boolean runWithoutTransactions,
-                             ServiceRegistry services,
-                             StringBuffer response) {
-        NodeRef mergeRef = null;
-        if (runWithoutTransactions) {
-            mergeRef = mergeTransactionable(wsDiff, source, target, target, dateTimeSrc, dateTimeTarget,
+    private static NodeRef mergeRef = null;
+    public synchronized static NodeRef merge( final JSONObject wsDiff,
+                                              final WorkspaceNode source,
+                                              final WorkspaceNode target,
+                                              final Date dateTimeSrc,
+                                              final Date dateTimeTarget,
+                                              final String msg,
+                                              final boolean runWithoutTransactions,
+                                              final ServiceRegistry services,
+                                              final StringBuffer response ) {
+        //logger.warn( "sync merge start" );
+        mergeRef = null;
+        new EmsTransaction(services, response, null, runWithoutTransactions ) {
+            
+            @Override
+            public void run() throws Exception {
+            mergeRef = mergeTransactionable(wsDiff, source, target, target,
+                                            dateTimeSrc, dateTimeTarget,
                                             msg, services, response);
-        } else {
-            UserTransaction trx;
-            trx = services.getTransactionService()
-                    .getNonPropagatingUserTransaction();
-            try {
-                trx.begin();
-                NodeUtil.setInsideTransactionNow( true );
-                mergeRef = mergeTransactionable(wsDiff, source, target, target, dateTimeSrc, dateTimeTarget,
-                                                msg, services, response);
-                trx.commit();
-                NodeUtil.setInsideTransactionNow( false );
-            } catch (Throwable e) {
-                try {
-                    e.printStackTrace();
-                    trx.rollback();
-                    NodeUtil.setInsideTransactionNow( false );
-                } catch (Throwable ee) {
-                    ee.printStackTrace();
-                }
             }
-        }
+        };
+        //logger.warn( "sync merge end" );
         return mergeRef;
     }
 
@@ -517,36 +485,23 @@ public class CommitUtil {
 		return null;
 	}
 
-	public static NodeRef branch(WorkspaceNode srcWs, WorkspaceNode dstWs,
-	                             String msg,
-	                             boolean runWithoutTransactions,
-	                             ServiceRegistry services, StringBuffer response) {
-	    NodeRef branchRef = null;
-        if (runWithoutTransactions) {
-            try {
+    private static NodeRef branchRef = null;
+	public synchronized static NodeRef branch(final WorkspaceNode srcWs,
+	                                          final WorkspaceNode dstWs,
+	                                          final String msg,
+	                                          boolean runWithoutTransactions,
+	                                          ServiceRegistry services,
+	                                          StringBuffer response) {
+        //logger.warn( "sync branch start" );
+	    branchRef = null;
+        new EmsTransaction(services, response, null, runWithoutTransactions ) {
+            
+            @Override
+            public void run() throws Exception {
                 branchRef = branchTransactionable(srcWs, dstWs, msg, services, response);
-            } catch (JSONException e) {
-                e.printStackTrace();
             }
-        } else {
-            UserTransaction trx;
-            trx = services.getTransactionService().getNonPropagatingUserTransaction();
-            try {
-                trx.begin();
-                NodeUtil.setInsideTransactionNow( true );
-                branchRef = branchTransactionable(srcWs, dstWs, msg, services, response);
-                trx.commit();
-                NodeUtil.setInsideTransactionNow( false );
-            } catch (Throwable e) {
-                try {
-                    e.printStackTrace();
-                    trx.rollback();
-                    NodeUtil.setInsideTransactionNow( false );
-                } catch (Throwable ee) {
-                    ee.printStackTrace();
-                }
-            }
-        }
+        };
+        //logger.warn( "sync branch end" );
         return branchRef;
 	}
 
@@ -563,36 +518,17 @@ public class CommitUtil {
 
     // TODO -- REVIEW -- Just copied branch and search/replaced "branch" with "merge"
     @Deprecated
-    public static void merge(WorkspaceNode srcWs, WorkspaceNode dstWs,
-                             String msg,
+    public static void merge(final WorkspaceNode srcWs, final WorkspaceNode dstWs,
+                             final String msg,
                              boolean runWithoutTransactions,
                              ServiceRegistry services, StringBuffer response) {
-        if (runWithoutTransactions) {
-            try {
+        new EmsTransaction(services, response, null, runWithoutTransactions ) {
+            
+            @Override
+            public void run() throws Exception {
                 mergeTransactionable(srcWs, dstWs, dstWs, msg, services, response);
-            } catch (JSONException e) {
-                e.printStackTrace();
             }
-        } else {
-            UserTransaction trx;
-            trx = services.getTransactionService()
-                    .getNonPropagatingUserTransaction();
-            try {
-                trx.begin();
-                NodeUtil.setInsideTransactionNow( true );
-                mergeTransactionable(srcWs, dstWs, dstWs, msg, services, response);
-                trx.commit();
-                NodeUtil.setInsideTransactionNow( false );
-            } catch (Throwable e) {
-                try {
-                    e.printStackTrace();
-                    trx.rollback();
-                    NodeUtil.setInsideTransactionNow( false );
-                } catch (Throwable ee) {
-                    ee.printStackTrace();
-                }
-            }
-        }
+        };
     }
 
     private static void mergeTransactionable( WorkspaceNode srcWs1,
@@ -612,12 +548,13 @@ public class CommitUtil {
 	 * @param currCommit   Child commit node
 	 * @return
 	 */
-	protected synchronized static boolean updateCommitHistory(EmsScriptNode prevCommit,
-	                                                          EmsScriptNode currCommit,
-	                                                          String originalUser) {
+	protected static boolean updateCommitHistory(EmsScriptNode prevCommit,
+                                                 EmsScriptNode currCommit,
+                                                 String originalUser) {
 	    if (prevCommit == null || currCommit == null) {
 	        return false;
 	    } else {
+// This isn't necessary since the user should only be calling this as admin from createCommitNode
 //	        if (!prevCommit.hasPermission( "Write" )) {
 //	            logger.error("no permissions to write to previous commit: " + prevCommit);
 //	            return false;
@@ -679,18 +616,17 @@ public class CommitUtil {
 	 * a while, the commit node is created first, then it is updated in the background using the
 	 * ActionExecuter.
 	 */
-	protected static NodeRef createCommitNode(WorkspaceNode srcWs1, WorkspaceNode srcWs2,
-	                                          WorkspaceNode dstWs,
-	                                          Date dateTime1,
-                                              Date dateTime2,
-	                                          String type, String msg, String body,
-	                                          ServiceRegistry services, StringBuffer response,
-	                                          boolean twoSourceWorkspaces) {
-	    NodeRef result = null;
-	    // to make sure no permission issues, run as admin
-	    String originalUser = NodeUtil.getUserName();
-	    AuthenticationUtil.setRunAsUser( "admin" );
-	    
+    protected static NodeRef
+            createCommitNode( WorkspaceNode srcWs1, WorkspaceNode srcWs2,
+                              WorkspaceNode dstWs, Date dateTime1,
+                              Date dateTime2, String type, String msg,
+                              String body, ServiceRegistry services,
+                              StringBuffer response, boolean twoSourceWorkspaces ) {
+        NodeRef result = null;
+        // to make sure no permission issues, run as admin
+        String originalUser = NodeUtil.getUserName();
+        AuthenticationUtil.setRunAsUser( "admin" );
+
         // Get the most recent commit(s) before creating a new one
 	    // Note: must do this before getOrCreateCommitPkg() call in case the commit to be created is the
 	    //       first for the day, and so will create the day folder in the getOrCreateCommitPkg() call
@@ -854,7 +790,8 @@ public class CommitUtil {
         commitAction.setParameterValue( CommitActionExecuter.PARAM_SOURCE, source );
 
         // create empty commit for now (executing action will fill it in later)
-        NodeRef commitRef = CommitUtil.commit(null, targetWS, "", true, services, new StringBuffer() );
+        NodeRef commitRef = CommitUtil.commit(null, targetWS, "", !useTransactions,
+                                              services, new StringBuffer() );
 
         services.getActionService().executeAction(commitAction , commitRef, true, true);
     }
