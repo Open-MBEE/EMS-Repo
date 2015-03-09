@@ -412,9 +412,14 @@ public class ConfigurationsWebscript extends AbstractJavaWebScript {
                                                      workspace, null );
         for (EmsScriptNode config: configs) {
             JSONObject jsonObject = new JSONObject();
-            jsonObject.put("name", config.getProperty(Acm.CM_NAME));
-            jsonObject.put("id", config.getNodeRef().getId());
-            configsJson.put( jsonObject );
+            // since configuations are created in workspaces, may not have read permissions
+            // need to filter
+            // TODO: add into regression tests
+            if (config.hasPermission("Read")) {
+                jsonObject.put("name", config.getProperty(Acm.CM_NAME));
+                jsonObject.put("id", config.getNodeRef().getId());
+                configsJson.put( jsonObject );
+            }
         }
 
         snapshotJson.put( "configurations", configsJson );

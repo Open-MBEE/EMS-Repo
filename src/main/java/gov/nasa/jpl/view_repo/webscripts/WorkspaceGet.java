@@ -92,7 +92,7 @@ public class WorkspaceGet extends AbstractJavaWebScript{
 		JSONObject interiorJson = new JSONObject();
 		if(ws == null){
 		    if (wsID.equals("master")) {
-		        WorkspaceNode.addWorkspaceNamesAndIds(interiorJson, ws );
+		        WorkspaceNode.addWorkspaceNamesAndIds(interiorJson, ws, services, true );
 		        jsonArray.put(interiorJson);
 		    } else {
 	            log(LogLevel.WARNING, "Workspace not found: " + (ws == null ? null : ws.getSysmlId()), HttpServletResponse.SC_NOT_FOUND);

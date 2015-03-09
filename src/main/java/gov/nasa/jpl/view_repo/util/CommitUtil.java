@@ -611,8 +611,8 @@ public class CommitUtil {
 	 * @param currCommit   Child commit node
 	 * @return
 	 */
-	protected static boolean updateCommitHistory(EmsScriptNode prevCommit,
-	                                             EmsScriptNode currCommit) {
+	protected synchronized static boolean updateCommitHistory(EmsScriptNode prevCommit,
+	                                                          EmsScriptNode currCommit) {
 	    if (prevCommit == null || currCommit == null) {
 	        return false;
 	    } else {

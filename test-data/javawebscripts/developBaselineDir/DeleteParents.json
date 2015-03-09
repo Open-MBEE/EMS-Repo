@@ -1,84 +1,92 @@
 {
-  "sequence": 39,
+  "sequence": 40,
   "workspace1": {
-  "qualifiedName": "master",
-  "name": "master",
-  "elements": [{
-  "name": "childOfParentToDelete2",
-  "qualifiedName": "/europa/JW_TEST2/parentToDelete1/parentToDelete2/childOfParentToDelete2",
-  "documentation": "Child",
-  "owner": "parentToDelete2",
-  "sysmlid": "childOfParentToDelete2",
-  "specialization": {
-  "propertyType": null,
-  "isSlot": false,
-  "isDerived": false,
-  "value": [{
-    "valueExpression": null,
-    "string": "gg_string3",
-    "type": "LiteralString"
-  }],
-  "type": "Property"
-},
-  "editable": true,
-  "creator": "admin"
-}, {
-  "name": "parentToDelete1",
-  "qualifiedName": "/europa/JW_TEST2/parentToDelete1",
-  "documentation": "Parent 1",
-  "owner": "123456",
-  "sysmlid": "parentToDelete1",
-  "specialization": {
-  "propertyType": null,
-  "isSlot": false,
-  "isDerived": false,
-  "value": [{
-    "valueExpression": null,
-    "string": "gg_string",
-    "type": "LiteralString"
-  }],
-  "type": "Property"
-},
-  "editable": true,
-  "creator": "admin"
-}, {
-  "name": "parentToDelete2",
-  "qualifiedName": "/europa/JW_TEST2/parentToDelete1/parentToDelete2",
-  "documentation": "Parent 2",
-  "owner": "parentToDelete1",
-  "sysmlid": "parentToDelete2",
-  "specialization": {
-  "propertyType": null,
-  "isSlot": false,
-  "isDerived": false,
-  "value": [{
-    "valueExpression": null,
-    "string": "gg_string2",
-    "type": "LiteralString"
-  }],
-  "type": "Property"
-},
-  "editable": true,
-  "creator": "admin"
-}]
-},
+    "qualifiedName": "master",
+    "name": "master",
+    "elements": [
+      {
+        "name": "childOfParentToDelete2",
+        "qualifiedName": "/europa/JW_TEST2/parentToDelete1/parentToDelete2/childOfParentToDelete2",
+        "sysmlid": "childOfParentToDelete2",
+        "documentation": "Child",
+        "owner": "parentToDelete2",
+        "specialization": {
+          "propertyType": null,
+          "isDerived": false,
+          "isSlot": false,
+          "value": [{
+            "valueExpression": null,
+            "string": "gg_string3",
+            "type": "LiteralString"
+          }],
+          "type": "Property"
+        },
+        "editable": true,
+        "creator": "admin",
+      },
+      {
+        "name": "parentToDelete1",
+        "qualifiedName": "/europa/JW_TEST2/parentToDelete1",
+        "sysmlid": "parentToDelete1",
+        "documentation": "Parent 1",
+        "owner": "123456",
+        "specialization": {
+          "propertyType": null,
+          "isDerived": false,
+          "isSlot": false,
+          "value": [{
+            "valueExpression": null,
+            "string": "gg_string",
+            "type": "LiteralString"
+          }],
+          "type": "Property"
+        },
+        "editable": true,
+        "creator": "admin",
+      },
+      {
+        "name": "parentToDelete2",
+        "qualifiedName": "/europa/JW_TEST2/parentToDelete1/parentToDelete2",
+        "sysmlid": "parentToDelete2",
+        "documentation": "Parent 2",
+        "owner": "parentToDelete1",
+        "specialization": {
+          "propertyType": null,
+          "isDerived": false,
+          "isSlot": false,
+          "value": [{
+            "valueExpression": null,
+            "string": "gg_string2",
+            "type": "LiteralString"
+          }],
+          "type": "Property"
+        },
+        "editable": true,
+        "creator": "admin",
+      }
+    ]
+  },
   "workspace2": {
-  "deletedElements": [{
-  "sysmlid": "childOfParentToDelete2",
-  "creator": "admin",
-}, {
-  "sysmlid": "parentToDelete1",
-  "creator": "admin",
-}, {
-  "sysmlid": "parentToDelete2",
-  "creator": "admin",
-}],
-  "addedElements": [],
-  "conflictedElements": [],
-  "updatedElements": [],
-  "qualifiedName": "master",
-  "name": "master",
-  "movedElements": []
-}
+    "deletedElements": [
+      {
+        "sysmlid": "childOfParentToDelete2",
+        "creator": "admin"
+      },
+      {
+        "sysmlid": "parentToDelete1",
+        "creator": "admin"
+      },
+      {
+        "sysmlid": "parentToDelete2",
+        "creator": "admin"
+      }
+    ],
+    "addedElements": [],
+    "conflictedElements": [],
+    "updatedElements": [],
+    "qualifiedName": "master",
+    "name": "master",
+    "movedElements": []
+  }
 }
 200

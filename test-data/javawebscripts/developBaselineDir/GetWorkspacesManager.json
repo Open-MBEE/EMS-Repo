@@ -45,6 +45,18 @@
         "qualifiedName": "master/wsA",
         "name": "wsA",
         "creator": "admin"
+    },
+    {
+        "description": "",
+        "qualifiedName": "master/ws1",
+        "name": "ws1",
+        "creator": "admin"
+    },
+    {
+        "description": "",
+        "qualifiedName": "master/ws2",
+        "name": "ws2",
+        "creator": "admin"
     }
 ]}
 200
