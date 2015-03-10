@@ -53,7 +53,6 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.servlet.http.HttpServletResponse;
-
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.alfresco.repo.jscript.ScriptNode;
@@ -99,6 +98,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 	// internal members
     // when run in background as an action, this needs to be false
     public boolean runWithoutTransactions = defaultRunWithoutTransactions;
+    //public UserTransaction trx = null;
 	protected ScriptNode companyhome;
 	protected Map<String, EmsScriptNode> foundElements = new LinkedHashMap<String, EmsScriptNode>();
     protected Map<String, EmsScriptNode> movedAndRenamedElements = new LinkedHashMap<String, EmsScriptNode>();
@@ -218,11 +218,8 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
         clearCaches( true );
         clearCaches(); // calling twice for those redefine clearCaches() to
                        // always call clearCaches( false )
-        if ( withoutTransactions ) {
-            return executeImplImpl( req, status, cache );
-        }
         final Map< String, Object > model = new HashMap<String, Object>();
-        new EmsTransaction( getServices(), getResponse(), getResponseStatus() ) {
+        new EmsTransaction( getServices(), getResponse(), getResponseStatus(), withoutTransactions ) {
             @Override
             public void run() throws Exception {
                 Map< String, Object > m = executeImplImpl( req, status, cache );

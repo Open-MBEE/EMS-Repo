@@ -608,7 +608,7 @@ public class WorkspaceDiff implements Serializable {
      * @throws JSONException
      */
     private void addWorkspaceMetadata(JSONObject jsonObject, WorkspaceNode ws, Date dateTime) throws JSONException {
-        WorkspaceNode.addWorkspaceNamesAndIds( jsonObject, ws );
+        WorkspaceNode.addWorkspaceNamesAndIds( jsonObject, ws, getServices(), false );
         if (dateTime != null) {
             jsonObject.put( "timestamp", TimeUtils.toTimestamp( dateTime ) );
         }

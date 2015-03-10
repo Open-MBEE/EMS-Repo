@@ -37,6 +37,7 @@ import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.transaction.UserTransaction;
 import javax.xml.bind.DatatypeConverter;
 
 import org.alfresco.model.ContentModel;
@@ -61,6 +62,8 @@ import org.alfresco.service.cmr.search.ResultSetRow;
 import org.alfresco.service.cmr.search.SearchParameters;
 import org.alfresco.service.cmr.search.SearchService;
 import org.alfresco.service.cmr.security.AccessStatus;
+import org.alfresco.service.cmr.security.AuthorityService;
+import org.alfresco.service.cmr.security.AuthorityType;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.alfresco.service.cmr.security.PersonService;
 import org.alfresco.service.cmr.site.SiteInfo;
@@ -105,59 +108,70 @@ public class NodeUtil {
 
     protected static String txMutex = "";
     protected static boolean beenInsideTransaction = false;
-    protected static Map< String, Boolean > beenInsideTransactionMap =
-            new LinkedHashMap< String, Boolean >();
+    protected static Map< Long, Boolean > beenInsideTransactionMap =
+            new LinkedHashMap< Long, Boolean >();
 
     public static synchronized boolean hasBeenInsideTransaction() {
-        Boolean b = beenInsideTransactionMap.get( "" + Thread.currentThread().getId());
+        Boolean b = beenInsideTransactionMap.get( Thread.currentThread().getId());
         if ( b != null ) return b;
         return beenInsideTransaction;
     }
     public static synchronized void setBeenInsideTransaction( boolean b ) {
         beenInsideTransaction = b;
-        beenInsideTransactionMap.put( "" + Thread.currentThread().getId(), b );
+        beenInsideTransactionMap.put( Thread.currentThread().getId(), b );
     }
     protected static boolean beenOutsideTransaction = false;
-    protected static Map< String, Boolean > beenOutsideTransactionMap =
-            new LinkedHashMap< String, Boolean >();
+    protected static Map< Long, Boolean > beenOutsideTransactionMap =
+            new LinkedHashMap< Long, Boolean >();
     public static synchronized boolean hasBeenOutsideTransaction() {
-        Boolean b = beenOutsideTransactionMap.get( "" + Thread.currentThread().getId());
+        Boolean b = beenOutsideTransactionMap.get( Thread.currentThread().getId());
         if ( b != null ) return b;
         return beenOutsideTransaction;
     }
     public static synchronized void setBeenOutsideTransaction( boolean b ) {
         beenOutsideTransaction = b;
-        beenOutsideTransactionMap.put( "" + Thread.currentThread().getId(), b );
+        beenOutsideTransactionMap.put( Thread.currentThread().getId(), b );
     }
     protected static boolean insideTransactionNow = false;
-    protected static Map< String, Boolean > insideTransactionNowMap =
-            new LinkedHashMap< String, Boolean >();
+    protected static Map< Long, Boolean > insideTransactionNowMap =
+            new LinkedHashMap< Long, Boolean >();
+    protected static Map< Long, UserTransaction > transactionMap =
+            Collections.synchronizedMap( new LinkedHashMap< Long, UserTransaction >() );
     public static synchronized boolean isInsideTransactionNow() {
-        Boolean b = insideTransactionNowMap.get( "" + Thread.currentThread().getId());
+        Boolean b = insideTransactionNowMap.get( Thread.currentThread().getId());
         if ( b != null ) return b;
         return insideTransactionNow;
     }
+    public static UserTransaction getTransaction() {
+        return transactionMap.get( Thread.currentThread().getId() );
+    }
+    public static UserTransaction createTransaction() {
+        UserTransaction trx =
+                services.getTransactionService().getNonPropagatingUserTransaction();
+        transactionMap.put( Thread.currentThread().getId(), trx );
+        return trx;
+    }
     public static synchronized void setInsideTransactionNow( boolean b ) {
         insideTransactionNow = b;
-        insideTransactionNowMap.put( "" + Thread.currentThread().getId(), b );
+        insideTransactionNowMap.put( Thread.currentThread().getId(), b );
     }
-    protected static Map< String, StackTraceElement[] > insideTransactionStrackTrace =
-            new LinkedHashMap< String, StackTraceElement[] >();
-    protected static Map< String, StackTraceElement[] > outsideTransactionStrackTrace =
-            new LinkedHashMap< String, StackTraceElement[] >();
+    protected static Map< Long, StackTraceElement[] > insideTransactionStrackTrace =
+            new LinkedHashMap< Long, StackTraceElement[] >();
+    protected static Map< Long, StackTraceElement[] > outsideTransactionStrackTrace =
+            new LinkedHashMap< Long, StackTraceElement[] >();
     public static void setInsideTransactionStackTrace() {
-        insideTransactionStrackTrace.put( "" + Thread.currentThread().getId(),
+        insideTransactionStrackTrace.put( Thread.currentThread().getId(),
                                           Thread.currentThread().getStackTrace() );
     }
     public static void setOutsideTransactionStackTrace() {
-        outsideTransactionStrackTrace.put( "" + Thread.currentThread().getId(),
+        outsideTransactionStrackTrace.put( Thread.currentThread().getId(),
                                            Thread.currentThread().getStackTrace() );
     }
     public static StackTraceElement[] getInsideTransactionStackTrace() {
-        return insideTransactionStrackTrace.get( "" + Thread.currentThread().getId() );
+        return insideTransactionStrackTrace.get( Thread.currentThread().getId() );
     }
     public static StackTraceElement[] getOutsideTransactionStackTrace() {
-        return outsideTransactionStrackTrace.get( "" + Thread.currentThread().getId() );
+        return outsideTransactionStrackTrace.get( Thread.currentThread().getId() );
     }
 
     public static boolean doFullCaching = false;
@@ -2582,6 +2596,36 @@ public class NodeUtil {
             homeFolderScriptNode = new EmsScriptNode( homeFolderNode, getServices() );
         }
         return homeFolderScriptNode;
+    }
+    
+    /**
+     * Returns a list of all the groups the passed user belongs to.  Note,
+     * there is no java interface for this, so this code is based on what
+     * the javascript interface does. 
+     * 
+     * See: https://svn.alfresco.com/repos/alfresco-open-mirror/alfresco/HEAD/root/projects/repository/source/java/org/alfresco/repo/jscript/People.java
+     * 
+     * @param user
+     * @return
+     */
+    public static List<String> getUserGroups(String user) {
+        
+        List<String> authorityNames = new ArrayList<String>();
+
+        AuthorityService aService = services.getAuthorityService();
+        Set<String> authorities = aService.getContainingAuthoritiesInZone(
+                                    AuthorityType.GROUP,
+                                    user,
+                                    null, null, 1000);
+        for (String authority : authorities)
+        {
+            NodeRef group = aService.getAuthorityNodeRef( authority );
+            if (group != null) {
+                authorityNames.add( authority );
+            }
+        }
+        
+        return authorityNames;
     }
 
     // REVIEW -- should this be in AbstractJavaWebScript?

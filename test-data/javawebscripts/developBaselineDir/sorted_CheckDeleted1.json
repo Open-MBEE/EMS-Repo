@@ -43,6 +43,7 @@
     },
     {
         "qualifiedName": "master",
-        "name": "master"
+        "name": "master",
+        "siteManagerPermission": true
     }
 ]}

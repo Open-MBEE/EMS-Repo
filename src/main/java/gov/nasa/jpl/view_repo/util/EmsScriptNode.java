@@ -1968,9 +1968,7 @@ public class EmsScriptNode extends ScriptNode implements
                 putInJson( elementJson, "qualifiedId", node.getSysmlQId(), filter );
             }
         }
-        putInJson( elementJson, "editable",
-                   node.hasPermission( PermissionService.WRITE ), filter );
-
+        //addEditableJson( elementJson );
         if ( filter == null || filter.size() == 0 || filter.contains( "owner" ) ) {
 
             EmsScriptNode owner = node.getOwningParent(dateTime);
@@ -2292,9 +2290,21 @@ public class EmsScriptNode extends ScriptNode implements
      * @return JSONObject serialization of node
      * @throws JSONException
      */
-   public JSONObject toJSONObject( Set< String > jsonFilter, boolean isExprOrProp,
+    public JSONObject toJSONObject( Set< String > jsonFilter, boolean isExprOrProp,
                                     Date dateTime, boolean isIncludeQualified,
                                     Version version ) throws JSONException {
+        JSONObject json = toJSONObjectImpl( jsonFilter, isExprOrProp, dateTime,
+                                            isIncludeQualified, version );
+        if ( !isExprOrProp ) addEditableJson( json, jsonFilter );
+        return json;
+    }
+    public void addEditableJson( JSONObject json, Set< String > jsonFilter ) {
+        putInJson( json, "editable",
+                   hasPermission( PermissionService.WRITE ), jsonFilter );
+    }
+    public JSONObject toJSONObjectImpl( Set< String > jsonFilter, boolean isExprOrProp,
+                                        Date dateTime, boolean isIncludeQualified,
+                                        Version version ) throws JSONException {
         if ( Debug.isOn() )
             Debug.outln( "$ $ $ $ toJSONObject(jsonFilter=" + jsonFilter
                             + ", isExprOrProp=" + isExprOrProp + ", dateTime="
@@ -2359,7 +2369,14 @@ public class EmsScriptNode extends ScriptNode implements
         if ( cachedJson != null && cachedJson.has( "modified" ) ) {
             String cachedModifiedStr = cachedJson.getString( "modified" );
             Date cachedModified = TimeUtils.dateFromTimestamp( cachedModifiedStr );
-            Date lastModified = getLastModified( dateTime );
+            Date lastModified;
+            if ( isView() ) { 
+//                System.out.println("####  ####  view " + getName()  );
+                lastModified = (new View( this )).getLastModified( dateTime );
+            } else {
+//                System.out.println("####  ####  not a view " + getName()  );
+                lastModified = getLastModified( dateTime );
+            }
             if ( cachedModified == null || lastModified == null || lastModified.after( cachedModified ) ) {
                 json = null;
                 forceCacheUpdate = true;
