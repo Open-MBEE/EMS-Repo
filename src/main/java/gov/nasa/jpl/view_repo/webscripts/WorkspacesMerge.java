@@ -3,6 +3,7 @@ package gov.nasa.jpl.view_repo.webscripts;
 import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.util.CommitUtil;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
+import gov.nasa.jpl.view_repo.util.EmsTransaction;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
 import gov.nasa.jpl.view_repo.util.WorkspaceDiff;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
@@ -16,8 +17,6 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.servlet.http.HttpServletResponse;
-import javax.transaction.UserTransaction;
-
 import org.alfresco.repo.model.Repository;
 import org.alfresco.service.ServiceRegistry;
 import org.json.JSONArray;
@@ -45,6 +44,7 @@ public class WorkspacesMerge extends AbstractJavaWebScript{
 	    return instance.executeImplImpl( req, status, cache, true );
 	}
 
+	private JSONObject tmpResult;
     @Override
     protected Map<String, Object> executeImplImpl(WebScriptRequest req, Status status, Cache cache){
 		printHeader(req);
@@ -53,8 +53,8 @@ public class WorkspacesMerge extends AbstractJavaWebScript{
 		JSONObject result = new JSONObject();
 		try{
 			if(validateRequest(req, status)){
-				String targetId = req.getParameter("target");
-                WorkspaceNode targetWS =
+				final String targetId = req.getParameter("target");
+                final WorkspaceNode targetWS =
                         WorkspaceNode.getWorkspaceFromId( targetId,
                                                                   getServices(),
                                                                   getResponse(),
@@ -62,7 +62,7 @@ public class WorkspacesMerge extends AbstractJavaWebScript{
                                                                   //false,
                                                                   null );
 
-				String sourceId = req.getParameter("source");
+				final String sourceId = req.getParameter("source");
                 WorkspaceNode sourceWS =
                         WorkspaceNode.getWorkspaceFromId( sourceId,
                                                                   getServices(),
@@ -102,7 +102,7 @@ public class WorkspacesMerge extends AbstractJavaWebScript{
 				*/
 				//For the nodes here, we delete them from the source
 				Map<String, EmsScriptNode> deletedElements = wsDiff.getDeletedElements();
-				Collection <EmsScriptNode> deletedCollection = deletedElements.values();
+				final Collection <EmsScriptNode> deletedCollection = deletedElements.values();
 
 
 				// Prints out the differences after merging.
@@ -131,43 +131,32 @@ public class WorkspacesMerge extends AbstractJavaWebScript{
 				EmsScriptNode projectNode = instance.getProjectNodeFromRequest(req, true);
 				if (projectNode != null) {
 
-				    Set< EmsScriptNode > elements =
+				    final Set< EmsScriptNode > elements =
 	                        instance.createOrUpdateModel( top.getJSONObject("workspace2"), status,
 	                                                      targetWS, sourceWS, true );
                     // REVIEW -- TODO -- shouldn't this be called from instance?
                     instance.addRelationshipsToProperties( elements );
-                    UserTransaction trx;
-                    trx = services.getTransactionService().getNonPropagatingUserTransaction();
-                    try {
-                        if ( !Utils.isNullOrEmpty( elements ) ) {
-    
-                                trx.begin();
+                    
+                    tmpResult = null;
+                    new EmsTransaction(services, response, null, runWithoutTransactions ) {
+                        
+                        @Override
+                        public void run() throws Exception {
+                            if ( !Utils.isNullOrEmpty( elements ) ) {
                                 NodeUtil.setInsideTransactionNow( true );
-                            // Create JSON object of the elements to return:
-                            JSONArray elementsJson = new JSONArray();
-                            for ( EmsScriptNode element : elements ) {
-                                elementsJson.put( element.toJSONObject(null) );
-                            }
+                                // Create JSON object of the elements to return:
+                                JSONArray elementsJson = new JSONArray();
+                                for ( EmsScriptNode element : elements ) {
+                                    elementsJson.put( element.toJSONObject(null) );
+                                }
                            //top.put( "elements", elementsJson );
                             //model.put( "res", NodeUtil.jsonToString( top, 4 ) );
-    	                    }
-        	                result = handleDelete(deletedCollection, targetWS, targetId, null /*time*/, wsDiff);
-    
-                        trx.commit();
-                        NodeUtil.setInsideTransactionNow( false );
-                    } catch (Throwable e) {
-                        try {
-                            trx.rollback();
-                            NodeUtil.setInsideTransactionNow( false );
-                            log(LogLevel.ERROR, "\t####### ERROR: Needed to rollback: " + e.getMessage());
-                            log(LogLevel.ERROR, "\t####### when calling toJson()");
-                            e.printStackTrace();
-                        } catch (Throwable ee) {
-                            log(LogLevel.ERROR, "\tRollback failed: " + ee.getMessage());
-                            log(LogLevel.ERROR, "\tafter calling toJson()");
-                            ee.printStackTrace();
+                            }
+                            tmpResult = handleDelete(deletedCollection, targetWS, targetId, null /*time*/, wsDiff);
                         }
-                    }
+                    };
+                    if ( tmpResult != null ) result = tmpResult;
+
                     // FIXME!! We can't just leave the changes on the merged
                     // branch! If an element is changed in the parent, it could
                     // result in a conflict! But we can't mark them deleted since

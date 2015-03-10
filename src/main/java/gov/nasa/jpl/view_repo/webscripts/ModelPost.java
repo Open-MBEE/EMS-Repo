@@ -74,8 +74,6 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 
 import javax.servlet.http.HttpServletResponse;
-import javax.transaction.UserTransaction;
-
 import kexpparser.KExpParser;
 //import k.frontend.Frontend;
 
@@ -290,7 +288,7 @@ public class ModelPost extends AbstractJavaWebScript {
         // FIXME: Need to split elements by project Id - since they won't always be in same project
         //      CommitUtil.commitAndStartAction( targetWS, wsDiff, start, end, elements.first().getProjectId(), status, true );
         
-        NodeRef commitRef = CommitUtil.commit(null, targetWS, "", true, services, new StringBuffer() );
+        NodeRef commitRef = CommitUtil.commit(null, targetWS, "", runWithoutTransactions, services, new StringBuffer() );
         
         String projectId = "";
         if (elements.size() > 0) {
@@ -1954,17 +1952,18 @@ public class ModelPost extends AbstractJavaWebScript {
             if (false == ShareUtils.constructSiteDashboard( sitePreset, siteName, siteTitle, siteDescription, isPublic )) {
                 // FIXME: add some logging and response here that there were issues creating the site
             }
-            // siteInfo doesnt give the node ref we want, so must search for it:
-            siteNode = getSiteNode( siteName, null, null );
-            if (siteNode != null) {
-                siteNode.createOrUpdateAspect( "cm:taggable" );
-                siteNode.createOrUpdateAspect( Acm.ACM_SITE );
-                siteNode.createOrUpdateProperty( Acm.ACM_SITE_PACKAGE, pkgSiteNode.getNodeRef() );
-                pkgSiteNode.createOrUpdateAspect( Acm.ACM_SITE_CHARACTERIZATION);
-                pkgSiteNode.createOrUpdateProperty( Acm.ACM_SITE_SITE, siteNode.getNodeRef() );
-            }
         }
 
+        // siteInfo doesnt give the node ref we want, so must search for it:
+        siteNode = getSiteNode( siteName, null, null );
+        if (siteNode != null) {
+            siteNode.createOrUpdateAspect( "cm:taggable" );
+            siteNode.createOrUpdateAspect( Acm.ACM_SITE );
+            siteNode.createOrUpdateProperty( Acm.ACM_SITE_PACKAGE, pkgSiteNode.getNodeRef() );
+            pkgSiteNode.createOrUpdateAspect( Acm.ACM_SITE_CHARACTERIZATION);
+            pkgSiteNode.createOrUpdateProperty( Acm.ACM_SITE_SITE, siteNode.getNodeRef() );
+        }
+        
         return siteNode;
     }
 

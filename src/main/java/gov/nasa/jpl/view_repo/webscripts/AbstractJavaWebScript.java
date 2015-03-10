@@ -48,8 +48,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
-import javax.transaction.UserTransaction;
-
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.alfresco.repo.jscript.ScriptNode;
