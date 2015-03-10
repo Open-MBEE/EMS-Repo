@@ -53,6 +53,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.InputStream;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -94,11 +95,14 @@ import org.json.JSONObject;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
+import org.jsoup.nodes.Node;
+import org.jsoup.nodes.TextNode;
 import org.jsoup.parser.Tag;
 import org.jsoup.select.Elements;
 import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
+import org.springframework.web.util.UriUtils;
 
 /**
  * Handles (1) creating a snapshot or (2) generating snapshot artifacts -- PDF or HTML zip
@@ -243,13 +247,16 @@ public class SnapshotPost extends AbstractJavaWebScript {
 
     private String buildInlineImageTag(String nodeId, String imgPath){
     	StringBuffer sb = new StringBuffer();
-    	sb.append("<inlinemediaobject>");
-        sb.append("<imageobject condition='web'>");
-        sb.append("<imagedata scalefit='1' width='100%' fileref='");
+    	sb.append(String.format("<figure xml:id=\"%s\" pgwide=\"1\">", nodeId));
+    	sb.append("<title></title>");
+    	sb.append("<mediaobject>");
+        sb.append("<imageobject>");
+        sb.append("<imagedata scalefit=\"1\" width=\"100%\" fileref=\"");
 		sb.append(imgPath);
-		sb.append("' />");
+		sb.append("\" />");
         sb.append("</imageobject>");
-        sb.append("</inlinemediaobject>");
+        sb.append("</mediaobject>");
+        sb.append("</figure>");
     	return sb.toString();
     }
 
@@ -851,15 +858,6 @@ public class SnapshotPost extends AbstractJavaWebScript {
         return snapshotNode;
     }
 
-    private String generateHtmlColSpec(int count){
-    	StringBuffer sb = new StringBuffer();
-    	int index = 1;
-    	while(index++ <= count){
-    		sb.append(String.format("<colspec colname=\"%d\" colnum=\"%d\"/>", index, index));
-    	}
-    	return sb.toString();
-    }
-    
     private String generateHtmlTableHeader(Element table, int columnCount){
     	if(table == null) return "";
     	StringBuffer sb = new StringBuffer();
@@ -1180,6 +1178,9 @@ public class SnapshotPost extends AbstractJavaWebScript {
         return viewId;
     }
 
+    /*
+     * process images not originated from MagicDraw; images inserted via VE
+     */
     private String handleEmbeddedImage( String inputString)
     {
     	if(inputString == null || inputString.isEmpty()) return "";
@@ -1193,52 +1194,56 @@ public class SnapshotPost extends AbstractJavaWebScript {
     		String src = image.attr("src");
     		if(src == null) continue;
     		try{
-            	URL url = new URL(src);
-	    		if(src.toLowerCase().startsWith("http")){
-	    			String hostname = getHostname();
-	
-	                try{
-	//                	URL url = new URL(src);
-	                	String embedHostname = String.format("%s://%s", url.getProtocol(), url.getHost());
-	                	if(embedHostname.compareToIgnoreCase(hostname)==0){
-	                		String alfrescoContext = "workspace/SpacesStore/";	//this.services.getSysAdminParams().getAlfrescoContext();
-	                		String filePath = url.getFile();
-	                		if(filePath == null || filePath.isEmpty()) return "";
-	
-	                		String nodeId = null;
-	                		if(filePath.contains(alfrescoContext)){
-	                			//filePath = "alfresco/d/d/" + filePath.substring(filePath.indexOf(alfrescoContext));
-	                			nodeId = filePath.substring(filePath.indexOf(alfrescoContext) + alfrescoContext.length());
-	                			nodeId = nodeId.substring(0, nodeId.indexOf("/"));
-	                		}
-	                		if(nodeId == null || nodeId.isEmpty()) return "";
-	
-	                		String filename = filePath.substring(filePath.lastIndexOf("/") + 1);
-	                		DBImage dbImage = retrieveEmbeddedImage(nodeId, filename, null, null);
-	                		String inlineImageTag = buildInlineImageTag(nodeId, "images/" + filename);
-	                		//section.addElement(dbImage);
+    			URL url = null;
+    			if(!src.toLowerCase().startsWith("http")){
+    				//relative URL; needs to prepend URL protocol
+    				url = new URL("http://" + src);
+    			}
+    			else{
+	            	url = new URL(src);
+    			}
+    			
+    			String hostname = getHostname();
+                try{
+                	String embedHostname = String.format("%s://%s", url.getProtocol(), url.getHost());
+                	// is image local or remote resource?
+                	if(embedHostname.compareToIgnoreCase(hostname)==0 || src.toLowerCase().startsWith("/alfresco/")){
+                		//local server image > generate image tags
+                		String alfrescoContext = "workspace/SpacesStore/";	//this.services.getSysAdminParams().getAlfrescoContext();
+                		String filePath = url.getFile();
+                		if(filePath == null || filePath.isEmpty()) return "";
+
+                		String nodeId = null;
+                		if(filePath.contains(alfrescoContext)){
+                			//filePath = "alfresco/d/d/" + filePath.substring(filePath.indexOf(alfrescoContext));
+                			nodeId = filePath.substring(filePath.indexOf(alfrescoContext) + alfrescoContext.length());
+                			nodeId = nodeId.substring(0, nodeId.indexOf("/"));
+                		}
+                		if(nodeId == null || nodeId.isEmpty()) return "";
+
+                		String filename = filePath.substring(filePath.lastIndexOf("/") + 1);
+                		try{
+                			DBImage dbImage = retrieveEmbeddedImage(nodeId, filename, null, null);
+	                		String inlineImageTag = buildInlineImageTag(nodeId, dbImage.getFilePath());
 	                		image.before(inlineImageTag);
 	                		image.remove();
-	
-	                		//if(imgFilename != null && !imgFilename.isEmpty()){
-	                			//image.attr("src", imgFilename);
-	                		//}
-	                	}
-	                	else{
-	                		image.before(String.format(" <ulink xl:href=\"%s\"><![CDATA[%s]]></ulink> ", src, url.getFile()));
-	                		image.remove();
-	                	}
-	                }
-	                catch(Exception ex){
-	                	log(LogLevel.WARNING, String.format("Failed to retrieve embedded image at %s. %s", src, ex.getMessage()));
-	                	ex.printStackTrace();
-	                }
-	    		}
-	    		else{
-	    			image.before(String.format(" <ulink xl:href=\"%s\"><![CDATA[%s]]></ulink> ", src, url.getFile()));
-	    			image.remove();
-	    		}
-    		}
+                		}
+                		catch(Exception ex){
+                			//in case it's not a local resource > generate hyperlink instead
+                			image.before(String.format(" <ulink xl:href=\"%s\"><![CDATA[%s]]></ulink> ", src, url.getFile()));
+                    		image.remove();
+                		}
+                	}
+                	else{	//remote resource > generate a hyperlink
+                		image.before(String.format(" <ulink xl:href=\"%s\"><![CDATA[%s]]></ulink> ", src, url.getFile()));
+                		image.remove();
+                	}
+                }
+                catch(Exception ex){
+                	log(LogLevel.WARNING, String.format("Failed to retrieve embedded image at %s. %s", src, ex.getMessage()));
+                	ex.printStackTrace();
+                }
+			}
             catch(Exception ex){
             	log(LogLevel.WARNING, String.format("Failed to process embedded image at %s. %s", src, ex.getMessage()));
             	ex.printStackTrace();
@@ -1301,19 +1306,18 @@ public class SnapshotPost extends AbstractJavaWebScript {
     	s = s.replaceAll("(?i)</ul>", "</itemizedlist>");
     	s = s.replaceAll("(?i)<ol>", "<orderedlist>");
     	s = s.replaceAll("(?i)</ol>", "</orderedlist>");
-    	s = s.replaceAll("(?i)<li>", "<listitem>");
-    	s = s.replaceAll("(?i)</li>", "</listitem>");
+    	s = s.replaceAll("(?i)<li>", "<listitem><para>");
+    	s = s.replaceAll("(?i)</li>", "</para></listitem>");
     	return s;
     }
     
     private String handleHtmlTable(String s) throws Exception{
-    	Pattern pattern = Pattern.compile("<table[^>]*>(.*)</table>", Pattern.CASE_INSENSITIVE);
+    	Pattern pattern = Pattern.compile("<table[^>]*>(.*)</table>", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
     	Matcher matcher = pattern.matcher(s);
     	StringBuffer result = new StringBuffer();
     	while(matcher.find()){
     		String docbookTable = HtmlTableToDocbookTable(matcher.group(0), matcher.group(1));
-    		
-    		matcher.appendReplacement(result, String.format("<table frame=\"all\" pgwide=\"1\" role=\"longtable\" tabstyle=\"normal\">%s</table>", HtmlSanitize(matcher.group(1))));
+    		matcher.appendReplacement(result, docbookTable);
     	}
     	matcher.appendTail(result);
     	return result.toString();
@@ -1392,13 +1396,13 @@ public class SnapshotPost extends AbstractJavaWebScript {
     	if(s == null || s.isEmpty()) return s;
 
     	try{
-	    	s = handleHtmlList(s);
+	    	//s = handleHtmlList(s);
 	    	//s = handleHtmlTable(s);
 	    	Document document = Jsoup.parseBodyFragment(s);
-	    	removeHtmlTags(document);
-	    	StringBuffer sb = new StringBuffer();
-	    	traverseHtml(document.body(), sb);
-	    	return sb.toString();
+	    	removeHtmlTags(document.body());
+	    	Elements paras = document.select("para > para");
+	    	paras.tagName("removalTag");
+	    	return document.body().html();
     	}
     	catch(Exception ex){
     		return s;
@@ -1413,13 +1417,10 @@ public class SnapshotPost extends AbstractJavaWebScript {
     	StringBuffer sb = new StringBuffer();
     	Elements tables = document.select("body > table");
     	for(Element t : tables){
-    		sb.append("<table frame=\"all\" pgwide=\"1\" role=\"longtable\" tabstyle=\"normal\">");
     		HtmlTable htmlTable = new HtmlTable(t);
-    		sb.append(String.format("<tgroup cols=\"%d\" align=\"left\" colsep=\"1\" rowsep=\"1\">", htmlTable.getColCount()));
-    		sb.append(generateHtmlColSpec(htmlTable.getColCount()));
-    		sb.append(generateHtmlTableHeader(t, htmlTable.getColCount()));
+    		sb.append(htmlTable.toDocBook());
     	}
-    	return null;
+    	return sb.toString();
     }
     
     // private String parseTransclusion(List<String> cirRefList, String
@@ -1657,86 +1658,213 @@ public class SnapshotPost extends AbstractJavaWebScript {
         return snapshoturl;
     }
 
-    /**
-     * replaces HTML tags to end up with only the HTML text.
-     * @param elem: JSoup Element
-     */
-    private void removeHtmlTag(Element elem){
+    private void removeHtmlTag(Element elem) throws Exception{
     	if(elem == null) return;
+    	Element elemNew = null;
+    	Element para = null;
     	String tagName = elem.tagName().toUpperCase();
     	switch(tagName){
 	    	case "BODY":
-	    	case "INLINEMEDIAOBJECT":
+	    	case "COLSPEC":
+	    	case "EMPHASIS":
+	    	case "FIGURE":
+	    	case "IMAGEDATA":
 	    	case "IMAGEOBJECT":
+    		case "INLINEMEDIAOBJECT":
 	    	case "LINK":
-	    	case "ULINK":
+	    	case "MEDIAOBJECT":
 	    	case "ORDEREDLIST":
 	    	case "ITEMIZEDLIST":
 	    	case "LISTITEM":
-	    		for(Element child:elem.children()){
-	    			removeHtmlTag(child);
-	    		}
+	    	case "PARA":
+	    	case "ROW":
+	    	case "TBODY":
+	    	case "TFOOT":
+	    	case "TGROUP":
+	    	case "THEAD":
+	    	case "TITLE":
+	    	case "ULINK":
+	    	case "UTABLE":
+	    	case "UTBODY":
+	    	case "UTFOOT":
+	    	case "UTHEAD":
+	    		break;
+	    	case "ENTRY":
+	    		int i = 1;
+	    		i = i + 1;
 	    		break;
 	    	case "A":
-	    		String link = String.format(" <ulink xl:href='%s'><![CDATA[%s]]></ulink> ", elem.attr("href"), elem.text());
-	    		elem.before(link);
-	    		elem.remove();
-	    		break;
-	    	case "P":
-	    	case "DIV":
-	    		//add linebreak then process the children nodes
-	    		elem.before("<?linebreak?>");
-	    		for(Element child:elem.children()){
-	    			removeHtmlTag(child);
-	    		}
+	    		elemNew = new Element(Tag.valueOf("ulink"), "");
+	    		elemNew.html(elem.html());
+	    		elemNew.attr("xl:href", elem.attr("href"));
+	    		elem.replaceWith(elemNew);
+	    		elem = elemNew;
 	    		break;
 	    	case "B":
 	    	case "STRONG":
-	    		Element emphasis = new Element(Tag.valueOf("emphasis"), elem.html());
-	    		elem.replaceWith(emphasis);
+	    		elemNew = new Element(Tag.valueOf("emphasis"), "");
+	    		elemNew.html(elem.html());
+	    		elem.replaceWith(elemNew);
+	    		elem = elemNew;
 	    		break;
 	    	case "BR":
+	    	case "P":
+	    	case "DIV":
 	    		//replaces with linebreak;
-	    		elem.before("<?linebreak?>");
-	    		elem.remove();
+	    		elemNew = new Element(Tag.valueOf("para"), "");
+	    		elemNew.html(elem.html());
+	    		elemNew.prepend("<?linebreak?>");
+	    		elem.replaceWith(elemNew);
+	    		elem = elemNew;
 	    		break;
-//	    	case "LI":
-//	    		for(Element child:elem.children()){
-//	    			removeHtmlTag(child);
-//	    		}
-//	    		break;
-//	    	case "OL":
-//	    		Element oList = elem.before("orderedlist");
-//	    		for(Element child:elem.children()){
-//	    			removeHtmlTag(child);
-//	    		}
-//	    		//elem.remove();
-//	    		break;
-//	    	case "UL":
-//	    		elem.before("itemizedlist");
-//	    		for(Element child:elem.children()){
-//	    			removeHtmlTag(child);
-//	    		}
-//	    		//elem.remove();
-//	    		break;
+	    	case "LI":
+	    		elemNew = new Element(Tag.valueOf("listitem"), "");
+	    		para = new Element(Tag.valueOf("para"), "");
+	    		para.html(elem.html());
+	    		elemNew.appendChild(para);
+	    		elem.replaceWith(elemNew);
+	    		elem = elemNew;
+	    		break;
+	    	case "OL":
+	    		elemNew = new Element(Tag.valueOf("orderedlist"), "");
+	    		elemNew.html(elem.html());
+	    		elem.replaceWith(elemNew);
+	    		elem = elemNew;
+	    		break;
+	    	case "TABLE":
+    			String dbTable = HtmlTableToDocbookTable(elem.outerHtml(), elem.html());
+    			Document doc = Jsoup.parseBodyFragment(dbTable);
+    			elemNew = doc.body().select("utable").first();
+    			elem.replaceWith(elemNew);
+    			elem = elemNew;
+    			break;
+	    	case "TD":
+	    	case "TH":
+//	    		elemNew = new Element(Tag.valueOf("entry"),"");
+//	    		para = new Element(Tag.valueOf("para"), "");
+//	    		para.html(elem.html());
+//	    		elemNew.appendChild(para);
+//	    		elem.replaceWith(elemNew);
+//	    		elem = elemNew;
+	    		break;
+	    	case "TR":
+//	    		elemNew = new Element(Tag.valueOf("row"),"");
+//	    		elemNew.html(elem.html());
+//	    		elem.replaceWith(elemNew);
+//	    		elem = elemNew;
+	    		break;
+	    	case "UL":
+	    		elemNew = new Element(Tag.valueOf("itemizedlist"), "");
+	    		elemNew.html(elem.html());
+	    		elem.replaceWith(elemNew);
+	    		elem = elemNew;
+	    		break;
 	    	default:
-				elem.before(elem.text());
-				for(Element child:elem.children()){
-					removeHtmlTag(child);
-				}
-				elem.remove();
+//	    		TextNode textNode = new TextNode(elem.html(), "");
+//	    		elem.replaceWith(textNode);
+	    		elemNew = new Element(Tag.valueOf("removalTag"),"");
+	    		elemNew.html(elem.html());
+	    		elem.replaceWith(elemNew);
+	    		elem = elemNew;
+	    		break;
     	}
+    	removeHtmlTags(elem);
     }
 
-    private void removeHtmlTags(Document doc){
-    	if(doc==null || doc.body()==null) return;
-    	for(Element child : doc.body().children()){
+    
+    /**
+     * replaces HTML tags to end up with only the HTML text.
+     * @param elem: JSoup Element
+     * @throws Exception 
+     */
+//    private void removeHtmlTag(Element elem){
+//    	if(elem == null) return;
+//    	Element elemNew;
+//    	String tagName = elem.tagName().toUpperCase();
+//    	switch(tagName){
+//	    	case "BODY":
+//	    	case "COLSPEC":
+//	    	case "ENTRY":
+//	    	case "INLINEMEDIAOBJECT":
+//	    	case "IMAGEOBJECT":
+//	    	case "LINK":
+//	    	case "ULINK":
+//	    	case "ORDEREDLIST":
+//	    	case "ITEMIZEDLIST":
+//	    	case "LISTITEM":
+//	    	case "ROW":
+//	    	case "TBODY":
+//	    	case "TFOOT":
+//	    	case "TGROUP":
+//	    	case "THEAD":
+//	    	case "UTABLE":
+//	    		for(Element child:elem.children()){
+//	    			removeHtmlTag(child);
+//	    		}
+//	    		break;
+//	    	case "A":
+//	    		String link = String.format(" <ulink xl:href='%s'><![CDATA[%s]]></ulink> ", elem.attr("href"), elem.text());
+//	    		elem.before(link);
+//				for(Element child:elem.children()){
+//					removeHtmlTag(child);
+//				}
+//	    		elem.remove();
+//	    		break;
+//	    	case "P":
+//	    	case "DIV":
+//	    		//add linebreak then process the children nodes
+//	    		elem.before("<?linebreak?>");
+//	    		for(Element child:elem.children()){
+//	    			removeHtmlTag(child);
+//	    		}
+//	    		break;
+//	    	case "B":
+//	    	case "STRONG":
+//	    		Element emphasis = new Element(Tag.valueOf("emphasis"), "");
+//	    		emphasis.html(elem.html());
+//	    		elem.before(emphasis);
+//	    		elem.remove();
+//	    		break;
+//	    	case "BR":
+//	    		//replaces with linebreak;
+//	    		elem.before("<?linebreak?>");
+//	    		elem.remove();
+//	    		break;
+////	    	case "LI":
+////	    		for(Element child:elem.children()){
+////	    			removeHtmlTag(child);
+////	    		}
+////	    		break;
+////	    	case "OL":
+////	    		Element oList = elem.before("orderedlist");
+////	    		for(Element child:elem.children()){
+////	    			removeHtmlTag(child);
+////	    		}
+////	    		//elem.remove();
+////	    		break;
+////	    	case "UL":
+////	    		elem.before("itemizedlist");
+////	    		for(Element child:elem.children()){
+////	    			removeHtmlTag(child);
+////	    		}
+////	    		//elem.remove();
+////	    		break;
+//	    	default:
+//				elem.before(elem.text());
+//				removeHtmlTags(elem);
+//				elem.remove();
+//    	}
+//    }
+
+    private void removeHtmlTags(Element elem) throws Exception{
+    	if(elem==null) return;
+    	
+    	for(Element child : elem.children()){
     		removeHtmlTag(child);
     	}
 	}
 
-    private DBImage retrieveEmbeddedImage(String nodeId, String imgName, String workspace, Object timestamp){
-		//NodeUtil.getNodeRefAtTime(nodeId, workspace, timestamp);
+    private DBImage retrieveEmbeddedImage(String nodeId, String imgName, WorkspaceNode workspace, Object timestamp){
 		NodeRef imgNodeRef = NodeUtil.getNodeRefFromNodeId(nodeId);
 		if(imgNodeRef == null) return null;
 
@@ -1755,25 +1883,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
 		image.setId(nodeId);
 		image.setFilePath("images/" + imgName);
 		return image;
-
-		/*
-		ResultSet rs = findNodeRef(nodeId);
-		ContentReader imgReader;
-		for (NodeRef nr: rs.getNodeRefs()) {
-			imgReader = this.services.getContentService().getReader(nr, ContentModel.PROP_CONTENT);
-			if(!Files.exists(Paths.get(this.docBookMgr.getDBDirImage()))){
-				if(!new File(this.docBookMgr.getDBDirImage()).mkdirs()){
-					System.out.println("Failed to create directory for " + this.docBookMgr.getDBDirImage());
-				}
-			}
-			imgReader.getContent(imgFile);
-			break;
-		}
-		return imgFilename;
-		*/
     }
-
-    //nodeUtil.getNodeRefById(id)	//need to get the correct version as well. and workspace
 
     private JSONObject saveAndStartAction(WebScriptRequest req, Status status, WorkspaceNode workspace) {
 	    JSONObject jsonObject = null;
@@ -1912,7 +2022,6 @@ public class SnapshotPost extends AbstractJavaWebScript {
     	}
     }
 
-
     public void setHtmlZipStatus(EmsScriptNode node, String status){
     	if(node==null) return;
     	node.createOrUpdateAspect("view2:htmlZip");
@@ -1955,7 +2064,6 @@ public class SnapshotPost extends AbstractJavaWebScript {
        	services.getActionService().executeAction(snapshotAction, jobNode.getNodeRef(), true, true);
 	}
 
-
     private void traverseElements( DBSection section, EmsScriptNode node, WorkspaceNode workspace, Date timestamp )
             throws Exception {
     	if(node == null) return;
@@ -1983,27 +2091,58 @@ public class SnapshotPost extends AbstractJavaWebScript {
     	if(elm == null) return;
     	if(sb == null) return;
 
-    	if(!elm.isBlock()){
-    		sb.append(" ");
-    	}
+//    	if(!elm.isBlock()){
+//    		sb.append(" ");
+//    	}
 
-    	if(elm.ownText().length() > 0){
-    		sb.append("<![CDATA[");
-    		sb.append(elm.ownText());
-        	sb.append("]]>");
-    	}
+    	//TODO does not work when elem.ownText is not contiguous. eg: <div>This is <b>A</b test</div>
+//    	if(elm.ownText().length() > 0){
+//    		sb.append("<![CDATA[");
+//    		sb.append(elm.ownText());
+//        	sb.append("]]>");
+//    	}
 
+    	switch(elm.tagName().toLowerCase()){
+			case "colspec":
+			case "emphasis":
+			case "entry":
+			case "inlinemediaobject":
+			case "itemizedlist":
+	    	case "link":
+			case "listitem":
+	    	case "orderedlist":
+	    	case "row":
+	    	case "tbody":
+	    	case "tfoot":
+	    	case "tgroup":
+	    	case "thead":
+	    	case "ulink":
+	    	case "utable":
+					sb.append(elm.outerHtml());
+					break;
+			default:
+//				sb.append
+				break;
+    	}
     	if(elm.children() != null && elm.children().size() > 0){
     		for(Element e: elm.children()){
     			String tagName = e.tagName().toLowerCase();
     			switch(tagName){
+    				case "colspec":
     				case "emphasis":
+    				case "entry":
 	    			case "inlinemediaobject":
 	    			case "itemizedlist":
 	    	    	case "link":
 	    			case "listitem":
 	    	    	case "orderedlist":
+	    	    	case "row":
+	    	    	case "tbody":
+	    	    	case "tfoot":
+	    	    	case "tgroup":
+	    	    	case "thead":
 	    	    	case "ulink":
+	    	    	case "utable":
 		    				sb.append(e.outerHtml());
 	    				continue;
     			}
