@@ -28,7 +28,7 @@ public class HtmlTable {
 		int curMax;
 		
 		//looking for table title/caption
-		Elements caption = table.select("table > caption");
+		Elements caption = table.select(" > caption");
 		if(caption == null || caption.size()==0) this.hasTitle = false;
 		else{
 			this.hasTitle = true;
@@ -36,7 +36,7 @@ public class HtmlTable {
 		}
 		
 		//looking for table header
-		Elements thead = table.select("table > thead");
+		Elements thead = table.select(" > thead");
 		if(thead == null || thead.size()==0) this.hasHeader = false;
 		else{
 			this.hasHeader = true;
@@ -47,7 +47,7 @@ public class HtmlTable {
 		}
 		
 		//looking for table footer
-		Elements tfoot = table.select("table > tfoot");
+		Elements tfoot = table.select(" > tfoot");
 		if(tfoot == null || tfoot.size()==0) this.hasFooter = false;
 		else{
 			this.hasFooter = true;
@@ -58,7 +58,7 @@ public class HtmlTable {
 		}
 		
 		//looking for table tbody
-		Elements tbody = table.select("table > tbody");
+		Elements tbody = table.select(" > tbody");
 		if(tbody == null || tbody.size()==0){
 			this.bodyRows = table.select("table > tr");
 			this.bodyRowCount = this.bodyRows.size();
@@ -66,7 +66,7 @@ public class HtmlTable {
 			if(max < curMax) max = curMax;
 		}
 		else{
-			this.bodyRows = tbody.select("tbody > tr");
+			this.bodyRows = tbody.select(" > tr");
 			this.bodyRowCount = this.bodyRows.size();
 			curMax = getColumnMax(this.bodyRows);
 			if(max < curMax) max = curMax;
@@ -94,7 +94,8 @@ public class HtmlTable {
 		sb.append("<utbody>");
 		for(Element tr : bodyRows){
 			sb.append("<row>");
-			Elements cells = tr.select("tr > td");
+			Elements cells = tr.select(" > td");
+			if(cells == null || cells.size() == 0) cells = tr.select(" > th");
 			if(cells != null && cells.size() > 0){
 				for(Element cell : cells){
 					sb.append(String.format("<entry>%s</entry>", cell.html()));
@@ -114,8 +115,8 @@ public class HtmlTable {
 		sb.append("<utfoot>");
 		for(Element tr : footerRows){
 			sb.append("<row>");
-			Elements cells = tr.select("tr > th");
-			if(cells == null || cells.size() == 0) cells = tr.select("tr > td");
+			Elements cells = tr.select(" > th");
+			if(cells == null || cells.size() == 0) cells = tr.select(" > td");
 			if(cells != null && cells.size() > 0){
 				for(Element cell : cells){
 					sb.append(String.format("<entry>%s</entry>", cell.html()));
@@ -134,8 +135,8 @@ public class HtmlTable {
 		if(this.hasHeader){
 			for(Element tr : headerRows){
 				sb.append("<row>");
-				Elements cells = tr.select("tr > th");
-				if(cells == null || cells.size() == 0) cells = tr.select("tr > td");
+				Elements cells = tr.select(" > th");
+				if(cells == null || cells.size() == 0) cells = tr.select(" > td");
 				if(cells != null && cells.size() > 0){
 					for(Element cell : cells){
 						sb.append(String.format("<entry>%s</entry>", cell.html()));
@@ -146,7 +147,8 @@ public class HtmlTable {
 		}
 		else{
 			Element tr = this.bodyRows.first();
-			Elements cells = tr.select("tr > td");
+			Elements cells = tr.select(" > td");
+			if(cells == null || cells.size() == 0) cells = tr.select(" > th");
 			sb.append("<row>");
 			if(cells != null && cells.size() > 0){
 				for(Element cell : cells){
@@ -163,9 +165,10 @@ public class HtmlTable {
 		int max=0;
 		int curMax=0;
 		for(Element tr : TRs){
-			Elements TDs = tr.select("tr > td");
+			Elements TDs = tr.select(" > td");
 			if(TDs != null && TDs.size() > 0){
 				curMax = TDs.size();
+				if(curMax > tr.children().size()) curMax = tr.children().size();
 				if(max < curMax) max = curMax;
 			}
 		}
