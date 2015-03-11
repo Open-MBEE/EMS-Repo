@@ -17,6 +17,7 @@ import datetime
 CURL_STATUS = '-w "\\n%{http_code}\\n"'
 CURL_POST_FLAGS_NO_DATA = "-X POST"
 CURL_POST_FLAGS = '-X POST -H "Content-Type:application/json" --data'
+CURL_POST_FLAGS_K = '-X POST -H "Content-Type:application/k" --data'
 CURL_PUT_FLAGS = "-X PUT"
 CURL_GET_FLAGS = "-X GET"
 CURL_DELETE_FLAGS = "-X DELETE"
@@ -609,10 +610,13 @@ def create_curl_cmd(type, data="", base_url=BASE_URL_WS, post_type="elements", b
     cmd = ""
     
     if type == "POST":
+        post_flags = CURL_POST_FLAGS
+        if data and data[-2:] == ".k":
+            post_flags = CURL_POST_FLAGS_K
         if project_post:
-            cmd = 'curl %s %s %s "%s%s"'%(CURL_FLAGS, CURL_POST_FLAGS, data, base_url, branch)
+            cmd = 'curl %s %s %s "%s%s"'%(CURL_FLAGS, post_flags, data, base_url, branch)
         elif data:
-            cmd = 'curl %s %s @JsonData/%s "%s%s%s"'%(CURL_FLAGS, CURL_POST_FLAGS, data, base_url, branch, post_type)
+            cmd = 'curl %s %s @JsonData/%s "%s%s%s"'%(CURL_FLAGS, post_flags, data, base_url, branch, post_type)
         else:
             cmd = 'curl %s %s "%s%s%s"'%(CURL_FLAGS, CURL_POST_FLAGS_NO_DATA, base_url, branch, post_type)
             
