@@ -319,6 +319,20 @@
               </property>
           </properties>
         </aspect>
+        <aspect name="ems:BranchPerm">
+          <properties>
+              <property name="ems:ldapGroup">
+                  <type>d:text</type>
+                  <mandatory>false</mandatory>
+                  <multiple>false</multiple>
+                  <index enabled="false">
+                      <atomic>false</atomic>
+                      <stored>false</stored>
+                      <tokenised>false</tokenised>
+                  </index>
+              </property>
+          </properties>
+        </aspect>
         <aspect name="ems:Site">
             <properties>
                  <property name="ems:siteParent">

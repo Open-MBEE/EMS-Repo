@@ -398,6 +398,12 @@ resourceTypes:
 /sites/permmissions:
   post:
     description: Service for syncing permissions from Alfresco Share sites to corresponding model packages
+/workspaceldapgroup:
+  post:
+    description: Service updating the LDAP group that has permissions to do workspace operations.
+    uriParameters:
+      ldapGroup:
+        description: The LDAP group (string)
 #/client:
 #  post:
 #    queryParameters:

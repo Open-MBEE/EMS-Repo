@@ -586,6 +586,21 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
         }
         return true;
     }
+    
+    /**
+     * Returns true if the user has permission to do workspace operations, which is determined
+     * by the LDAP group or if the user is admin.
+     * 
+     */
+    protected boolean userHasWorkspaceLdapPermissions() {
+        
+        if (!NodeUtil.userHasWorkspaceLdapPermissions()) {
+            log(LogLevel.ERROR, "User "+NodeUtil.getUserName()+" does not have LDAP permissions to perform workspace operations.  LDAP group with permissions: "+NodeUtil.getWorkspaceLdapGroup(), 
+                HttpServletResponse.SC_FORBIDDEN);
+            return false;
+        }
+        return true;
+    }
 
 
 	protected boolean checkRequestVariable(Object value, String type) {
