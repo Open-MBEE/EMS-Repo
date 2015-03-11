@@ -65,6 +65,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -74,8 +75,11 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 
 import javax.servlet.http.HttpServletResponse;
+
 import kexpparser.KExpParser;
 //import k.frontend.Frontend;
+
+
 
 
 
@@ -1476,7 +1480,7 @@ public class ModelPost extends AbstractJavaWebScript {
 
             JSONObject newValJson = newVal;
             // types are mutually exclusive so put in right aspect
-            if (newValJson.has( "type" )) {
+            if (newValJson != null && newValJson.has( "type" )) {
                 if (oldValNode.createOrUpdateAspect(newValJson.getString( "type" ))) {
                     changed = true;
                 }
@@ -2404,9 +2408,7 @@ public class ModelPost extends AbstractJavaWebScript {
         EmsScriptNode exprNode = getConstraintExpression(constraintNode);
 
         if (exprNode != null) {
-            Expression<Call> expressionCall = getSystemModelAe().toAeExpression( exprNode );
-            Call call = (Call) expressionCall.expression;
-            Expression<Boolean> expression = new Expression<Boolean>(call.evaluate(true, false));
+            Expression<Boolean> expression = toAeExpression( exprNode );
 
             if (expression != null) {
 
@@ -2415,13 +2417,27 @@ public class ModelPost extends AbstractJavaWebScript {
         }
     }
 
-    protected void fix( Set< EmsScriptNode > elements ) {
-
-        log(LogLevel.INFO, "Constraint violations will be fixed if found!");
-
-        SystemModelSolver< EmsScriptNode, EmsScriptNode, EmsScriptNode, EmsScriptNode, String, String, Object, EmsScriptNode, String, String, EmsScriptNode >  solver =
-                new SystemModelSolver< EmsScriptNode, EmsScriptNode, EmsScriptNode, EmsScriptNode, String, String, Object, EmsScriptNode, String, String, EmsScriptNode >(getSystemModel(), new ConstraintLoopSolver() );
-
+    protected <T> Expression<T> toAeExpression( EmsScriptNode exprNode ) {
+        if ( exprNode == null ) {
+            logger.warn( "called toAeExpression() with null argument" );
+            return null;
+        }
+        Expression<Call> expressionCall = getSystemModelAe().toAeExpression( exprNode );
+        if ( expressionCall == null ) {
+            logger.warn( "toAeExpression("+exprNode+") returned null" );
+            return null;
+        }
+        Call call = (Call) expressionCall.expression;
+        if ( call == null ) {
+            logger.warn( "toAeExpression("+exprNode+"): call is null, " + expressionCall );
+            return null;
+        }
+        Expression<T> expression = new Expression<T>(call.evaluate(true, false));
+        return expression;
+    }
+    
+    protected Collection< Constraint > getAeConstraints( Set< EmsScriptNode > elements ) {
+        //Map<EmsScriptNode, Constraint> constraints = new LinkedHashMap<EmsScriptNode, Constraint>();
         Collection<Constraint> constraints = new ArrayList<Constraint>();
 
         // Search for all constraints in the database:
@@ -2454,53 +2470,96 @@ public class ModelPost extends AbstractJavaWebScript {
 
         } // Ends if there was constraint nodes found in the database
 
+        // Add all of the Parameter constraints:
+        ClassData cd = getSystemModelAe().getClassData();
+        // Loop through all the listeners:
+        for (ParameterListenerImpl listener : cd.getAeClasses().values()) {
+            // TODO: REVIEW
+            //       Can we get duplicate ParameterListeners in the aeClassses map?
+            constraints.addAll( listener.getConstraints( true, null ) );
+        }
+
+        return constraints;
+    }
+    
+    public Map< EmsScriptNode, Expression > getAeExpressions( Set< EmsScriptNode > elements ) {
+        Map<EmsScriptNode, Expression> expressions = new LinkedHashMap< EmsScriptNode, Expression >();
+        for ( EmsScriptNode node : elements ) {
+            if ( node.hasAspect( Acm.ACM_EXPRESSION ) && !node.isOwnedValueSpec() ) {
+                Expression<?> expression = toAeExpression( node );
+                if ( expression != null ) {
+                    expressions.put( node, expression );
+                }
+            }
+        }
+        return expressions;
+    }
+
+    protected Map<Object, Object> evaluate( Set< EmsScriptNode > elements ) {
+        log(LogLevel.INFO, "Will attempt to fix constraint violations if found!");
+        Collection< Constraint > constraints = getAeConstraints( elements );
+        Map< EmsScriptNode, Expression > expressions = getAeExpressions( elements );
+
+        Map< Object, Object > results = new LinkedHashMap< Object, Object >();
+        if ( !Utils.isNullOrEmpty( constraints ) ) {
+            for ( Constraint c : constraints ) {
+                if ( c != null ) {
+                    results.put( c, c.isSatisfied( true, null ) );
+                }
+            }
+        }
+        if ( !Utils.isNullOrEmpty( expressions ) ) {
+            for ( Entry< EmsScriptNode, Expression > e : expressions.entrySet() ) {
+                if ( e != null && e.getKey() != null && e.getValue() != null ) {
+                    results.put( e.getKey(), e.getValue().evaluate( true ) );
+                }
+            }
+        }
+        return results;
+    }
+
+    protected void fix( Set< EmsScriptNode > elements ) {
+
+        log(LogLevel.INFO, "Will attempt to fix constraint violations if found!");
+
+        SystemModelSolver< EmsScriptNode, EmsScriptNode, EmsScriptNode, EmsScriptNode, String, String, Object, EmsScriptNode, String, String, EmsScriptNode >  solver =
+                new SystemModelSolver< EmsScriptNode, EmsScriptNode, EmsScriptNode, EmsScriptNode, String, String, Object, EmsScriptNode, String, String, EmsScriptNode >(getSystemModel(), new ConstraintLoopSolver() );
+
+        Collection<Constraint> constraints = getAeConstraints( elements );
+
         // Solve the constraints:
         if (!Utils.isNullOrEmpty( constraints )) {
 
-            // Add all of the Parameter constraints:
-            ClassData cd = getSystemModelAe().getClassData();
-
-            //loop x times for now
             Random.reset();
-            for(int i=0; i<10; i++)
-            {
-                // Loop through all the listeners:
-                for (ParameterListenerImpl listener : cd.getAeClasses().values()) {
 
-                    // TODO: REVIEW
-                    //       Can we get duplicate ParameterListeners in the aeClassses map?
-                    constraints.addAll( listener.getConstraints( true, null ) );
+            // Solve!!!!
+            boolean result = false;
+            try {
+                //Debug.turnOn();
+                result = solver.solve(constraints);
+
+            } finally {
+                //Debug.turnOff();
+            }
+            if (!result) {
+                log( LogLevel.ERROR, "Was not able to satisfy all of the constraints!" );
+            }
+            else {
+                log( LogLevel.INFO, "Satisfied all of the constraints!" );
+
+                // Update the values of the nodes after solving the constraints:
+                EmsScriptNode node;
+                Parameter<Object> param;
+                Set<Entry<EmsScriptNode, Parameter<Object>>> entrySet = sysmlToAe.getExprParamMap().entrySet();
+                for (Entry<EmsScriptNode, Parameter<Object>> entry : entrySet) {
+
+                    node = entry.getKey();
+                    param = entry.getValue();
+                    systemModel.setValue(node, (Serializable)param.getValue());
                 }
 
-                // Solve!!!!
-                boolean result = false;
-                try {
-                    //Debug.turnOn();
-                    result = solver.solve(constraints);
+                log( LogLevel.INFO, "Updated all node values to satisfy the constraints!" );
 
-                } finally {
-                    //Debug.turnOff();
-                }
-                if (!result) {
-                    log( LogLevel.ERROR, "Was not able to satisfy all of the constraints!" );
-                }
-                else {
-                    log( LogLevel.INFO, "Satisfied all of the constraints!" );
-
-                    // Update the values of the nodes after solving the constraints:
-                    EmsScriptNode node;
-                    Parameter<Object> param;
-                    Set<Entry<EmsScriptNode, Parameter<Object>>> entrySet = sysmlToAe.getExprParamMap().entrySet();
-                    for (Entry<EmsScriptNode, Parameter<Object>> entry : entrySet) {
-
-                        node = entry.getKey();
-                        param = entry.getValue();
-                        systemModel.setValue(node, (Serializable)param.getValue());
-                    }
-
-                    log( LogLevel.INFO, "Updated all node values to satisfy the constraints!" );
-
-                }
             }
         } // End if constraints list is non-empty
 
@@ -2515,7 +2574,7 @@ public class ModelPost extends AbstractJavaWebScript {
         ModelPost instance = new ModelPost(repository, services);
         instance.setServices( getServices() );
         // Run without transactions since ModePost breaks them up itself.
-        return instance.executeImplImpl(req,  status, cache, true);
+        return instance.executeImplImpl(req, status, cache, true);
     }
 
     WorkspaceNode myWorkspace = null;
@@ -2533,6 +2592,8 @@ public class ModelPost extends AbstractJavaWebScript {
 
         boolean runInBackground = getBooleanArg(req, "background", false);
         boolean fix = getBooleanArg(req, "fix", false);
+        String expressionString = req.getParameter( "expression" );
+        boolean evaluate = getBooleanArg( req, "evaluate", false );
 
         // see if prettyPrint default is overridden and change
         prettyPrint = getBooleanArg(req, "pretty", prettyPrint );
@@ -2571,8 +2632,6 @@ public class ModelPost extends AbstractJavaWebScript {
                                              : HttpServletResponse.SC_INTERNAL_SERVER_ERROR );
         }
 
-        String expressionString = req.getParameter( "expression" );
-
         if (wsFound && validateRequest(req, status)) {
             
             try {
@@ -2594,10 +2653,25 @@ public class ModelPost extends AbstractJavaWebScript {
                     response.append("You will be notified via email when the model load has finished.\n"); 
                 }
                 else {
-                    JSONObject postJson = //JSONObject.make( 
-                            (JSONObject)req.parseContent();// );
-                    JSONArray jarr = postJson.getJSONArray("elements");
-
+                    JSONObject postJson = null;
+                    
+                    // Check if input is K or JSON
+                    String contentType = req.getContentType() == null ?
+                                         "" : req.getContentType().toLowerCase();
+                    if ( contentType.equals( "application/json" ) ) {
+                        postJson = //JSONObject.make(
+                                (JSONObject)req.parseContent();// );
+                    } else if ( contentType.equals( "application/k" ) ) {
+                        String k = req.getContent().getContent();
+                        logger.warn( "k = " + k );
+                        postJson = new JSONObject(KExpParser.parseExpression(k));
+                    }
+                    if ( postJson == null ) postJson = new JSONObject();
+                    JSONArray jarr = postJson.optJSONArray("elements");
+                    if ( jarr == null ) {
+                        jarr = new JSONArray();
+                        postJson.put( "elements", jarr );
+                    }
                     if ( !Utils.isNullOrEmpty( expressionString ) ) {
 
                         JSONObject exprJson = new JSONObject(KExpParser.parseExpression(expressionString));
@@ -2626,7 +2700,7 @@ public class ModelPost extends AbstractJavaWebScript {
                     if (getResponseStatus().getCode() == HttpServletResponse.SC_BAD_REQUEST) {
                         log(LogLevel.WARNING, "No write priveleges", HttpServletResponse.SC_FORBIDDEN);
                     } else if (projectNode != null) {
-                        handleUpdate( postJson, status, myWorkspace, fix, model, true );
+                        handleUpdate( postJson, status, myWorkspace, evaluate, fix, model, true );
                     }
                 }
             } catch (JSONException e) {
@@ -2655,7 +2729,7 @@ public class ModelPost extends AbstractJavaWebScript {
     }
 
     protected Set< EmsScriptNode > handleUpdate(JSONObject postJson, Status status, 
-                                                WorkspaceNode workspace,
+                                                WorkspaceNode workspace, boolean evaluate,
                                                 boolean fix, Map<String, Object> model,
                                                 boolean createCommit) throws Exception {
         JSONObject top = NodeUtil.newJsonObject();
@@ -2665,8 +2739,24 @@ public class ModelPost extends AbstractJavaWebScript {
             sendProgress("Adding relationships to properties", projectId, true);
             addRelationshipsToProperties( elements );
 
-            // Fix constraints if desired:
-            if (fix) {        
+            // Evaluate expressions and constraints if desired.
+            final Map< Object, Object > results = new LinkedHashMap< Object, Object >();
+            if ( evaluate ) {
+                sendProgress("Evaluating constraints and expressions", projectId, true);
+                
+                new EmsTransaction( getServices(), getResponse(), getResponseStatus(),
+                                    runWithoutTransactions) {// || internalRunWithoutTransactions ) {
+                    @Override
+                    public void run() throws Exception {
+                        Map< Object, Object > r = evaluate(elements);
+                        results.putAll( r );
+                    }
+                };
+                
+            }
+            
+            // Fix constraints if desired.
+            if (fix) {
                 sendProgress("Fixing constraints", projectId, true);
                 new EmsTransaction( getServices(), getResponse(), getResponseStatus(),
                                     runWithoutTransactions) {// || internalRunWithoutTransactions ) {
@@ -2685,12 +2775,35 @@ public class ModelPost extends AbstractJavaWebScript {
                 @Override
                 public void run() throws Exception {
                     for ( EmsScriptNode element : elements ) {
-                        elementsJson.put( element.toJSONObject(null) );
+                        JSONObject json = element.toJSONObject(null);
+                        Object result = results.get( element );
+                        if ( result != null ) {
+                            try {
+                                json.putOpt( "evaluationResult", result );
+                                results.remove( element );
+                            } catch ( Throwable e ) {
+                                ModelPost.this.log( LogLevel.WARNING,
+                                                    "Evaluation failed for "
+                                                            + element );
+                            }
+                        }
+                        elementsJson.put( json );
                     }
                 }
             };
+
+            // Put constraint evaluation results in json.
+            JSONArray resultJarr = new JSONArray();
+            for ( Object k : results.keySet() ) {
+                JSONObject r = new JSONObject();
+                r.put( "expression", k.toString() );
+                Object v = results.get( k );
+                r.put( "value", "" + v );
+                resultJarr.put( r );
+            }
             
             top.put( "elements", elementsJson );
+            if ( resultJarr.length() > 0 ) top.put( "evaluations", resultJarr );
         }
         
         if (!Utils.isNullOrEmpty(response.toString())) {

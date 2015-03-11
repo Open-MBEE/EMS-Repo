@@ -678,9 +678,8 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
         }
         String paramVal = req.getParameter(name);
         if ( Utils.isNullOrEmpty( paramVal ) ) return true;
-        paramVal = paramVal.toLowerCase();
-        if ( paramVal.equals( "true" ) ) return true;
-        if ( paramVal.equals( "false" ) ) return false;
+        Boolean b = Utils.isTrue( paramVal, false );
+        if ( b != null ) return b;
         return defaultValue;
     }
 
