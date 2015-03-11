@@ -245,15 +245,13 @@ public class SnapshotPost extends AbstractJavaWebScript {
         setDocumentElementContent( elem1, sb.toString() );
     }
 
-    private String buildInlineImageTag(String nodeId, String imgPath){
+    private String buildInlineImageTag(String nodeId, DBImage dbImage){
     	StringBuffer sb = new StringBuffer();
     	sb.append(String.format("<figure xml:id=\"%s\" pgwide=\"1\">", nodeId));
-    	sb.append("<title></title>");
+    	sb.append(String.format("<title>%s</title>", dbImage.getTitle()));
     	sb.append("<mediaobject>");
         sb.append("<imageobject>");
-        sb.append("<imagedata scalefit=\"1\" width=\"100%\" fileref=\"");
-		sb.append(imgPath);
-		sb.append("\" />");
+        sb.append(String.format("<imagedata scalefit=\"1\" width=\"100%\" fileref=\"%s\" />", dbImage.getFilePath()));
         sb.append("</imageobject>");
         sb.append("</mediaobject>");
         sb.append("</figure>");
@@ -1224,7 +1222,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
                 		String filename = filePath.substring(filePath.lastIndexOf("/") + 1);
                 		try{
                 			DBImage dbImage = retrieveEmbeddedImage(nodeId, filename, null, null);
-	                		String inlineImageTag = buildInlineImageTag(nodeId, dbImage.getFilePath());
+	                		String inlineImageTag = buildInlineImageTag(nodeId, dbImage);
 	                		image.before(inlineImageTag);
 	                		image.remove();
                 		}
@@ -1396,12 +1394,12 @@ public class SnapshotPost extends AbstractJavaWebScript {
     	if(s == null || s.isEmpty()) return s;
 
     	try{
-	    	//s = handleHtmlList(s);
-	    	//s = handleHtmlTable(s);
 	    	Document document = Jsoup.parseBodyFragment(s);
 	    	removeHtmlTags(document.body());
+	    	// removes direct, nested para tags
 	    	Elements paras = document.select("para > para");
 	    	paras.tagName("removalTag");
+	    	
 	    	return document.body().html();
     	}
     	catch(Exception ex){
