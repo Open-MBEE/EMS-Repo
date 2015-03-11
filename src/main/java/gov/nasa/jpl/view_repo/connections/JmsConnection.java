@@ -43,7 +43,6 @@ public class JmsConnection extends AbstractConnection {
         boolean result = false;
         try {
             json.put( "sequence", sequenceId++ );
-            logger.warn( "sequence id = " + sequenceId, new Exception() );
             result = publishTopic(NodeUtil.jsonToString( json, 2 ), topic);
         } catch ( JSONException e ) {
             e.printStackTrace();
