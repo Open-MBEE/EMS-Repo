@@ -1957,17 +1957,18 @@ public class ModelPost extends AbstractJavaWebScript {
             if (false == ShareUtils.constructSiteDashboard( sitePreset, siteName, siteTitle, siteDescription, isPublic )) {
                 // FIXME: add some logging and response here that there were issues creating the site
             }
-            // siteInfo doesnt give the node ref we want, so must search for it:
-            siteNode = getSiteNode( siteName, null, null );
-            if (siteNode != null) {
-                siteNode.createOrUpdateAspect( "cm:taggable" );
-                siteNode.createOrUpdateAspect( Acm.ACM_SITE );
-                siteNode.createOrUpdateProperty( Acm.ACM_SITE_PACKAGE, pkgSiteNode.getNodeRef() );
-                pkgSiteNode.createOrUpdateAspect( Acm.ACM_SITE_CHARACTERIZATION);
-                pkgSiteNode.createOrUpdateProperty( Acm.ACM_SITE_SITE, siteNode.getNodeRef() );
-            }
         }
 
+        // siteInfo doesnt give the node ref we want, so must search for it:
+        siteNode = getSiteNode( siteName, null, null );
+        if (siteNode != null) {
+            siteNode.createOrUpdateAspect( "cm:taggable" );
+            siteNode.createOrUpdateAspect( Acm.ACM_SITE );
+            siteNode.createOrUpdateProperty( Acm.ACM_SITE_PACKAGE, pkgSiteNode.getNodeRef() );
+            pkgSiteNode.createOrUpdateAspect( Acm.ACM_SITE_CHARACTERIZATION);
+            pkgSiteNode.createOrUpdateProperty( Acm.ACM_SITE_SITE, siteNode.getNodeRef() );
+        }
+        
         return siteNode;
     }
 
