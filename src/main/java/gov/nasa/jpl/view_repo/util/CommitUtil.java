@@ -724,7 +724,7 @@ public class CommitUtil {
         }
         if (restConnection != null) {
             try {
-                restStatus = restConnection.publish( deltaJson, new HostnameGet().getAlfrescoUrl() );
+                restStatus = restConnection.publish( deltaJson, new HostnameGet().getAlfrescoHost());
             } catch (Exception e) {
                 logger.warn("REST connection not available");
                 return false;
