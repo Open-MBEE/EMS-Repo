@@ -824,7 +824,7 @@ public class ModelPost extends AbstractJavaWebScript {
         // Check if all the owners that are not being added by this post can be found.
         // If they cant be found then give a error message, store to display to user, and
         // do not continue with the post:
-        Iterator keys = elementHierarchyJson.keys();
+        Iterator<?> keys = elementHierarchyJson.keys();
         while (keys.hasNext()) {
             String id = (String) keys.next();
             if (!newElements.contains( id ) && findScriptNodeById(id, workspace, null, true) == null) {
@@ -925,9 +925,8 @@ public class ModelPost extends AbstractJavaWebScript {
         if ( !runWithoutTransactions ) {//&& !internalRunWithoutTransactions ) {
             log(LogLevel.INFO, "updateOrCreateElement begin transaction {");
         }
-        EmsTransaction et = new EmsTransaction(//this.trx, 
-                                               getServices(), getResponse(), getResponseStatus(),
-                           runWithoutTransactions ) {//|| internalRunWithoutTransactions ) {
+        new EmsTransaction( getServices(), getResponse(), getResponseStatus(),
+                            runWithoutTransactions ) {
             @Override
             public void run() throws Exception {
                 // Check to see if the element has been updated since last read/modified by the
@@ -946,7 +945,7 @@ public class ModelPost extends AbstractJavaWebScript {
             }
         };
         //this.trx = et.trx;
-        if ( !runWithoutTransactions ) {//&& !internalRunWithoutTransactions ) {
+        if ( !runWithoutTransactions ) {
             log(LogLevel.INFO, "} updateOrCreateElement end transaction");
         }            
         if (returnPair.first) {
@@ -1336,7 +1335,7 @@ public class ModelPost extends AbstractJavaWebScript {
                         deleteValueSpec(propValNode, ingest, workspace);
                     }
                     else if (propVal instanceof List){
-                        List<NodeRef> nrList = (ArrayList<NodeRef>) propVal;
+                        List<NodeRef> nrList = Utils.asList( propVal, NodeRef.class );
                         for (NodeRef ref : nrList) {
                             if (ref != null) {
                                 EmsScriptNode propValNode = new EmsScriptNode(ref, services);
@@ -1645,12 +1644,10 @@ public class ModelPost extends AbstractJavaWebScript {
 
         // TODO Need to permission check on new node creation
         String existingNodeType = null;
-        String existingNodeName = null;
         if ( nodeToUpdate != null ) {
             nodeToUpdate.setResponse( getResponse() );
             nodeToUpdate.setStatus( getResponseStatus() );
             existingNodeType = nodeToUpdate.getTypeName();
-            existingNodeName = nodeToUpdate.getSysmlName();
 
             // Resurrect if found node is deleted and is in this exact workspace.
             if ( nodeToUpdate.isDeleted() &&
