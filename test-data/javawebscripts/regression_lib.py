@@ -492,7 +492,7 @@ def run_curl_test(test_num, test_name, test_desc, curl_cmd, use_json_diff=False,
         
     print "TEST DESCRIPTION: "+test_desc
     
-    if setupFcn and not evaluate_only:
+    if setupFcn: #and not evaluate_only:
         print "calling setup function"
         setupFcn()
 
@@ -540,7 +540,7 @@ def run_curl_test(test_num, test_name, test_desc, curl_cmd, use_json_diff=False,
             filter_output = stuffRead
             orig_output = stuffRead
         
-        if postProcessFcn and not evaluate_only:
+        if postProcessFcn: #and not evaluate_only:
             print "calling post-process function"
             postProcessFcn()
             #print("filter_output after post process = " + str(filter_output))
@@ -551,7 +551,7 @@ def run_curl_test(test_num, test_name, test_desc, curl_cmd, use_json_diff=False,
         file.close()
         file_orig.close()
      
-        if teardownFcn and not evaluate_only:
+        if teardownFcn: #and not evaluate_only:
             print "calling teardown function"
             teardownFcn()
         
