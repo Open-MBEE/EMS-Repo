@@ -1,3 +1,3 @@
 <search>
-   <default-query-template>%(view:name view:mdid view:documentation cm:name cm:title cm:description ia:whatEvent ia:descriptionEvent lnk:title lnk:description TEXT TAG)</default-query-template>
+   <default-query-template>%(sysml:name sysml:id sysml:documentation cm:name cm:title cm:description ia:whatEvent ia:descriptionEvent lnk:title lnk:description TEXT TAG)</default-query-template>
 </search>

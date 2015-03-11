@@ -1784,16 +1784,36 @@ public class EmsScriptNode extends ScriptNode implements
             ownerRef = (NodeRef)owner.getProperty( "ems:owner" );
         }
         
-        // get the site, which is two up from the project
-        if ( owner != null ) {
-            EmsScriptNode modelNode = owner.getParent();
+        // Get the site, which is one up from the Models node:
+        // In case the child of the project does not have the owner set to the project,
+        // we will loop until we find the Models node:
+        String ownerName = owner != null ? owner.getName() : null;
+        EmsScriptNode modelNode = owner;
+        while ( owner != null && !ownerName.equals( "Models" )) {
+            owner = owner.getParent();
+            ownerName = owner != null ? owner.getName() : null;
+            if (owner != null) {
+                modelNode = owner;
+            }
+        }
+        
+        if (modelNode != null) {
             EmsScriptNode siteNode = modelNode.getParent();
-//            EmsScriptNode siteNode = owner.getSiteNode();
             if (siteNode != null) {
                 qualifiedName = "/" + siteNode.getName() + qualifiedName;
                 qualifiedId = "/" + siteNode.getName() + qualifiedId;
             }
         }
+      
+//        if ( owner != null ) {
+//            EmsScriptNode modelNode = owner.getParent();
+//            EmsScriptNode siteNode = modelNode.getParent();
+////            EmsScriptNode siteNode = owner.getSiteNode();
+//            if (siteNode != null) {
+//                qualifiedName = "/" + siteNode.getName() + qualifiedName;
+//                qualifiedId = "/" + siteNode.getName() + qualifiedId;
+//            }
+//        }
 
         if (isName) {
             return qualifiedName;
