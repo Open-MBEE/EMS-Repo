@@ -4,6 +4,7 @@ import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.actions.CommitActionExecuter;
 import gov.nasa.jpl.view_repo.connections.JmsConnection;
 import gov.nasa.jpl.view_repo.connections.RestPostConnection;
+import gov.nasa.jpl.view_repo.webscripts.HostnameGet;
 import gov.nasa.jpl.view_repo.webscripts.WebScriptUtil;
 import gov.nasa.jpl.view_repo.webscripts.util.ConfigurationsWebscript;
 
@@ -723,7 +724,7 @@ public class CommitUtil {
         }
         if (restConnection != null) {
             try {
-                restStatus = restConnection.publish( deltaJson, "MMS" );
+                restStatus = restConnection.publish( deltaJson, new HostnameGet().getAlfrescoHost());
             } catch (Exception e) {
                 logger.warn("REST connection not available");
                 return false;
