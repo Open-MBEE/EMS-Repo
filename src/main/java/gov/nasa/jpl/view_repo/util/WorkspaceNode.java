@@ -841,8 +841,7 @@ public class WorkspaceNode extends EmsScriptNode {
         if (ws == null && chkPermissions) {
             // Decided not to do this using the site manger, but rather with the ldap group
             //checkSiteManagerPermissions(json, services);
-            boolean siteMgrPerm = NodeUtil.userHasWorkspaceLdapPermissions();
-            json.put( "siteManagerPermission", siteMgrPerm );
+            json.put( "workspaceOperationsPermission", NodeUtil.userHasWorkspaceLdapPermissions());
         }
     }
 
