@@ -2792,7 +2792,16 @@ public class EmsScriptNode extends ScriptNode implements
 
         EmsScriptNode parent = owner != null ? owner : this;
         String parentName = parent.getName();
-        while ( !parentName.equals( "Models" )) {
+        Set<String> seen = new TreeSet< String >();
+        while ( !parentName.equals( "Models" ) && !seen.contains( parentName ) ) {
+            if ( seen.contains( parentName ) ) {
+                logger.error( "Folder " + parentName + " contains self!", new Exception() );
+                return null;
+//                NodeRef ref = findNodeRefByType( "Sites", SearchType.CM_NAME.prefix,
+//                                                 null, null, false );
+//                if ( ref == null ) return null;
+//                return new EmsScriptNode( ref, getServices() );
+            }
             EmsScriptNode oldparent = parent;
             parent = oldparent.getParent();
             if ( parent == null ) return null; // site not found!
