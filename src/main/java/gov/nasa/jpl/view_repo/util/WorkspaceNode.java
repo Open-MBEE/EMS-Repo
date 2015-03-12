@@ -830,16 +830,18 @@ public class WorkspaceNode extends EmsScriptNode {
      */
     public static void
             addWorkspaceNamesAndIds( JSONObject json, WorkspaceNode ws, 
-                                     ServiceRegistry services, boolean chkMgrSitePermissions ) throws JSONException {
+                                     ServiceRegistry services, boolean chkPermissions ) throws JSONException {
         json.put( "name",  getWorkspaceName(ws) );
         json.put( "id", getId(ws) );
         json.put( "qualifiedName", getQualifiedName( ws ) );
         json.put( "qualifiedId", getQualifiedId( ws ) );
         
-        // If it is the master workspace, then determine if the user is manager with permissions to 
-        // any of the sites, and add a indication to the json:
-        if (ws == null && chkMgrSitePermissions) {
-            checkSiteManagerPermissions(json, services);
+        // If it is the master workspace, then determine if the user has permissions, 
+        // and add a indication to the json:
+        if (ws == null && chkPermissions) {
+            // Decided not to do this using the site manger, but rather with the ldap group
+            //checkSiteManagerPermissions(json, services);
+            json.put( "workspaceOperationsPermission", NodeUtil.userHasWorkspaceLdapPermissions());
         }
     }
 
