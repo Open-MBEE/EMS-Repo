@@ -53,7 +53,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.InputStream;
 import java.net.URL;
-import java.net.URLEncoder;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -86,6 +85,7 @@ import org.alfresco.service.cmr.security.PermissionService;
 import org.alfresco.service.cmr.security.PersonService;
 import org.alfresco.service.cmr.site.SiteInfo;
 import org.alfresco.util.TempFileProvider;
+import org.apache.log4j.Logger;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
@@ -95,14 +95,11 @@ import org.json.JSONObject;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
-import org.jsoup.nodes.Node;
-import org.jsoup.nodes.TextNode;
 import org.jsoup.parser.Tag;
 import org.jsoup.select.Elements;
 import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
-import org.springframework.web.util.UriUtils;
 
 /**
  * Handles (1) creating a snapshot or (2) generating snapshot artifacts -- PDF or HTML zip
@@ -110,6 +107,8 @@ import org.springframework.web.util.UriUtils;
  *
  */
 public class SnapshotPost extends AbstractJavaWebScript {
+    static Logger logger = Logger.getLogger(SnapshotPost.class);
+    
 	protected String snapshotName;
 	private JSONArray view2view;
 	private DocBookWrapper docBookMgr;
@@ -565,12 +564,13 @@ public class SnapshotPost extends AbstractJavaWebScript {
             // TODO error handling
             return image;
         } else {
+            ResultSet resultSet = null;
             try {
                 image.setTitle( (String)imgNode.getProperty( Acm.ACM_NAME ) );
 
                 String fileName = id + ".svg"; 
-                ResultSet resultSet =
-                        NodeUtil.luceneSearch( "@name:" + fileName );
+                
+                resultSet = NodeUtil.luceneSearch( "@name:" + fileName );
                 if ( resultSet != null && resultSet.length() > 0 ) {
                     EmsScriptNode node =
                             new EmsScriptNode( resultSet.getNodeRef( 0 ),
@@ -579,7 +579,14 @@ public class SnapshotPost extends AbstractJavaWebScript {
                 } else {
                     log( LogLevel.WARNING, fileName + " image file not found!" );
                 }
-            } catch ( Exception ex ) {;}
+            } catch ( Exception ex ) {
+                logger.error("Could not get results");
+            } finally {
+                if (resultSet != null) {
+                    resultSet.close();
+                }
+            }
+            
 
             return image;
         }

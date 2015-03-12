@@ -165,12 +165,22 @@ public class DocBookContentTransformer extends AbstractContentTransformer2 {
 				String imgFilename = imageDirName + File.separator + img;
 				File imgFile = new File(imgFilename);
 				if (!imgFile.exists()) {
-					ResultSet rs = findNodeRef(img);
-					ContentReader imgReader;
-					for (NodeRef nr: rs.getNodeRefs()) {
-						imgReader = contentService.getReader(nr, ContentModel.PROP_CONTENT);
-						imgReader.getContent(imgFile);
-						break;
+				    ResultSet rs = null;
+				    try {
+        					rs = findNodeRef(img);
+        					ContentReader imgReader;
+        					for (NodeRef nr: rs.getNodeRefs()) {
+        						imgReader = contentService.getReader(nr, ContentModel.PROP_CONTENT);
+        						imgReader.getContent(imgFile);
+        						break;
+        					}
+				    }
+					catch (Exception e) {
+			            logger.error("Could not get results");
+					} finally {
+					    if (rs != null) {
+					        rs.close();
+					    }
 					}
 				}
 			}

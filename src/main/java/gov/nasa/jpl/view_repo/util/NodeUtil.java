@@ -767,10 +767,21 @@ public class NodeUtil {
     }
 
     public static Collection<EmsScriptNode> luceneSearchElements(String queryPattern ) {
-        ResultSet resultSet = luceneSearch( queryPattern, (SearchService)null );
-        if (Debug.isOn()) System.out.println( "luceneSearch(" + queryPattern + ") returns "
-                            + resultSet.length() + " matches." );
-        return resultSetToList( resultSet );
+        ResultSet resultSet =  null;
+        List<EmsScriptNode> resultList = new ArrayList<EmsScriptNode>();
+        try {
+            resultSet = luceneSearch( queryPattern, (SearchService)null );
+            if (Debug.isOn()) System.out.println( "luceneSearch(" + queryPattern + ") returns "
+                                + resultSet.length() + " matches." );
+            resultList = resultSetToList( resultSet );
+        } catch (Exception e) {
+            logger.error("Could not get results");
+        } finally {
+            if (resultSet != null) {
+                resultSet.close();
+            }
+        }
+        return resultList;
     }
 
     public static ResultSet luceneSearch(String queryPattern ) {
