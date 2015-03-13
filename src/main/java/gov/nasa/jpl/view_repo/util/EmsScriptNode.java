@@ -1255,9 +1255,14 @@ public class EmsScriptNode extends ScriptNode implements
      * @return
      */
     public Object getProperty( String acmType ) {
+
+        return getProperty(acmType, false);
+    }
+    
+    public Object getProperty( String acmType, boolean skipNodeRefCheck ) {
         // FIXME Sometimes we wont want these defaults, ie want to find the deleted elements.
         //       Need to check all calls to getProperty() with properties that are NodeRefs.
-        return getProperty(acmType, false, null, false, false);
+        return getProperty(acmType, false, null, false, skipNodeRefCheck);
     }
 
     public String getVersionLabel() {
@@ -4213,9 +4218,13 @@ public class EmsScriptNode extends ScriptNode implements
         }
         return elements;
     }
+    
+    public EmsScriptNode getPropertyElement( String acmProperty) {
+        return getPropertyElement(acmProperty, false);
+    }
 
-    public EmsScriptNode getPropertyElement( String acmProperty ) {
-        Object e = getProperty( acmProperty );
+    public EmsScriptNode getPropertyElement( String acmProperty, boolean skipNodeRefCheck ) {
+        Object e = getProperty( acmProperty, skipNodeRefCheck );
         if ( e instanceof NodeRef ) {
             return new EmsScriptNode( (NodeRef)e, getServices() );
         } else if ( e == null ) {

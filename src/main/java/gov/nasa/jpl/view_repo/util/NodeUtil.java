@@ -186,7 +186,7 @@ public class NodeUtil {
     // global flag that is enabled once heisenbug is seen, so it will email admins the first time heisenbug is seen
     public static boolean heisenbugSeen = false;
 
-    public static String sitePkgPrefix = "site_";
+    public final static String sitePkgPrefix = "site_";
 
     /**
      * A cache of alfresco nodes stored as a map from cm:name to node for the master branch only.
