@@ -742,15 +742,17 @@ public class CommitUtil {
      * @throws JSONException
      */
     public static boolean sendProgress(String msg, String workspaceId, String projectId) {
-        boolean jmsStatus = false;
-
-        if (jmsConnection != null) {
-            jmsConnection.setWorkspace( workspaceId );
-            jmsConnection.setProjectId( projectId );
-            jmsStatus = jmsConnection.publishTopic( msg, "progress" );
-        }
-
-        return jmsStatus;
+        // FIXME: temporarily remove progress notifications until it's actually ready to be used
+//        boolean jmsStatus = false;
+//
+//        if (jmsConnection != null) {
+//            jmsConnection.setWorkspace( workspaceId );
+//            jmsConnection.setProjectId( projectId );
+//            jmsStatus = jmsConnection.publishTopic( msg, "progress" );
+//        }
+//
+//        return jmsStatus;
+        return true;
     }
 
 
