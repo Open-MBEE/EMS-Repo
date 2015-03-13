@@ -454,6 +454,7 @@ public class DocBookWrapper {
 				Queue<TableCell> rowQueue = new LinkedList<TableCell>();
 				Elements elements = tgroup.select("> thead");
 				elements.addAll(tgroup.select("> tbody"));
+				elements.addAll(tgroup.select("> tfoot"));
 				for(Element row: elements.select("> row")){
 					List<String> csvRow = new ArrayList<String>();
 					
