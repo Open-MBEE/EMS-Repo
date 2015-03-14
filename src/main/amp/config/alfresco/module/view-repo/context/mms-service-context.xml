@@ -10,6 +10,10 @@
         class="gov.nasa.jpl.view_repo.webscripts.HeisenCacheGet"
         parent="webscript">
     </bean>
+    <bean id="webscript.gov.nasa.jpl.utils.runwithtransactions.get"
+        class="gov.nasa.jpl.view_repo.webscripts.RunWithTransactionsGet"
+        parent="webscript">
+    </bean>
     <bean id="webscript.gov.nasa.jpl.utils.simplecache.get"
         class="gov.nasa.jpl.view_repo.webscripts.SimpleCacheGet"
         parent="webscript">
@@ -22,6 +26,26 @@
         class="gov.nasa.jpl.view_repo.webscripts.AlwaysTurnDebugOffGet"
         parent="webscript">
     </bean>
+    <bean id="webscript.gov.nasa.jpl.utils.versioncache.get"
+        class="gov.nasa.jpl.view_repo.webscripts.VersionCacheGet"
+        parent="webscript">
+    </bean>
+    <bean id="webscript.gov.nasa.jpl.utils.versioncachedebug.get"
+        class="gov.nasa.jpl.view_repo.webscripts.VersionCacheDebugGet"
+        parent="webscript">
+    </bean>
+    <bean id="webscript.gov.nasa.jpl.utils.jsoncache.get"
+        class="gov.nasa.jpl.view_repo.webscripts.JsonCacheGet"
+        parent="webscript">
+    </bean>
+    <bean id="webscript.gov.nasa.jpl.utils.jsonstringcache.get"
+        class="gov.nasa.jpl.view_repo.webscripts.JsonStringCacheGet"
+        parent="webscript">
+    </bean>
+    <bean id="webscript.gov.nasa.jpl.utils.synctransactions.get"
+        class="gov.nasa.jpl.view_repo.webscripts.SyncTransactionsGet"
+        parent="webscript">
+    </bean>
     <bean id="webscript.gov.nasa.jpl.utils.timeevents.get"
         class="gov.nasa.jpl.view_repo.webscripts.TimeEventsGet"
         parent="webscript">
@@ -29,6 +53,12 @@
     <bean id="webscript.gov.nasa.jpl.utils.modelposttimeevents.get"
         class="gov.nasa.jpl.view_repo.webscripts.ModelPostTimeEventsGet"
         parent="webscript">
+    </bean>
+    <bean id="webscript.gov.nasa.jpl.utils.updateworkspaceldapgroup.post"
+        class="gov.nasa.jpl.view_repo.webscripts.UpdateWorkspaceLdapGroup" parent="webscript"
+        singleton="false">
+        <property name="repositoryHelper" ref="repositoryHelper" />
+        <property name="services" ref="ServiceRegistry" />
     </bean>
 
     <bean id="webscript.gov.nasa.jpl.mms.workspaces.elements.element.get"
@@ -39,6 +69,13 @@
     </bean>
 
     <bean id="webscript.gov.nasa.jpl.mms.workspaces.elements.element.delete"
+        class="gov.nasa.jpl.view_repo.webscripts.MmsModelDelete" parent="webscript"
+        singleton="false">
+        <property name="repositoryHelper" ref="repositoryHelper" />
+        <property name="services" ref="ServiceRegistry" />
+    </bean>
+
+    <bean id="webscript.gov.nasa.jpl.mms.workspaces.elements.delete"
         class="gov.nasa.jpl.view_repo.webscripts.MmsModelDelete" parent="webscript"
         singleton="false">
         <property name="repositoryHelper" ref="repositoryHelper" />
@@ -82,6 +119,13 @@
     
     <bean id="webscript.gov.nasa.jpl.mms.workspaces.projectonly.get"
         class="gov.nasa.jpl.view_repo.webscripts.ProjectGet" parent="webscript"
+        singleton="false">
+        <property name="repositoryHelper" ref="repositoryHelper" />
+        <property name="services" ref="ServiceRegistry" />
+    </bean>
+    
+    <bean id="webscript.gov.nasa.jpl.mms.workspaces.projects.get"
+        class="gov.nasa.jpl.view_repo.webscripts.ProjectsGet" parent="webscript"
         singleton="false">
         <property name="repositoryHelper" ref="repositoryHelper" />
         <property name="services" ref="ServiceRegistry" />
@@ -320,6 +364,13 @@
     	singleton="false">
     	<property name="repositoryHelper" ref="repositoryHelper" />
     	<property name="services" ref="ServiceRegistry" />
+    </bean>
+    
+     <bean id="webscript.gov.nasa.jpl.mms.workspaces.workspace.post"
+        class="gov.nasa.jpl.view_repo.webscripts.WorkspacesPost" parent="webscript"
+        singleton="false">
+        <property name="repositoryHelper" ref="repositoryHelper" />
+        <property name="services" ref="ServiceRegistry" />
     </bean>
 
 	<bean id="webscript.gov.nasa.jpl.mms.workspaces.workspace.get"

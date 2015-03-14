@@ -1,28 +1,3 @@
-{
-
-    "elements": [{
-
-        "creator": "admin",
-
-        "documentation": "Element to post to a site package",
-
-        "editable": true,
-
-        "name": "elementInPkg",
-
-        "owner": "holding_bin_package_123456",
-
-        "qualifiedId": "/123456/package/holding_bin_package_123456/elementInPkg",
-
-        "qualifiedName": "/JW_TEST2/package/holding_bin/elementInPkg",
-
-        "specialization": {"type": "Product"},
-
-        "sysmlid": "elementInPkg"
-
-    }],
-
-}
-
-200
-
+{'message':'[ERROR]: Site site_package could not be found in workspace null
+'}
+404

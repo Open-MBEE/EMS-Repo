@@ -1,38 +1,21 @@
 {"elements": [{
-
     "creator": "admin",
-
     "documentation": "x is x",
-
     "editable": true,
-
     "owner": "holding_bin_no_site_no_project",
-
-    "qualifiedId": "/no_project/holding_bin_no_site_no_project/newElement",
-
-    "qualifiedName": "/no_project/holding_bin/null",
-
+    "qualifiedId": "/no_site/no_project/holding_bin_no_site_no_project/newElement",
+    "qualifiedName": "/no_site/no_project/holding_bin/null",
     "specialization": {
-
         "isDerived": false,
-
         "isSlot": false,
-
+        "propertyType": null,
         "type": "Property",
-
         "value": [{
-
             "string": "the element added to ws1",
-
-            "type": "LiteralString"
-
+            "type": "LiteralString",
+            "valueExpression": null
         }]
-
     },
-
     "sysmlid": "newElement"
-
 }]}
-
 200
-

@@ -1,6 +1,7 @@
 package gov.nasa.jpl.view_repo.webscripts;
 
 import gov.nasa.jpl.mbee.util.Utils;
+import gov.nasa.jpl.view_repo.util.NodeUtil;
 import gov.nasa.jpl.view_repo.webscripts.util.ProductsWebscript;
 
 import java.util.HashMap;
@@ -20,7 +21,7 @@ public class MmsProductsGet extends AbstractJavaWebScript {
     public MmsProductsGet() {
         super();
     }
-    
+
     public MmsProductsGet( Repository repository, ServiceRegistry services ) {
         this.repository = repository;
         this.services = services;
@@ -34,41 +35,42 @@ public class MmsProductsGet extends AbstractJavaWebScript {
 
     @Override
     protected  Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
-		MmsProductsGet instance = new MmsProductsGet(repository, services);
-    	return instance.executeImplImpl(req, status, cache);
+		MmsProductsGet instance = new MmsProductsGet(repository, getServices());
+		return instance.executeImplImpl(req, status, cache, runWithoutTransactions);
     }
-    
+
+    @Override
     protected  Map<String, Object> executeImplImpl(WebScriptRequest req, Status status, Cache cache) {
         printHeader( req );
-        
-        clearCaches();
+
+        //clearCaches();
 
         Map<String, Object> model = new HashMap<String, Object>();
-        
-        MmsProductsGet instance = new MmsProductsGet(repository, services);
-        
-        JSONObject jsonObject = new JSONObject();
+
+        MmsProductsGet instance = new MmsProductsGet(repository, getServices());
+
+        JSONObject jsonObject = NodeUtil.newJsonObject();
 
         try {
-            ProductsWebscript productWs = new ProductsWebscript(repository, services, instance.response);
+            ProductsWebscript productWs = new ProductsWebscript(repository, getServices(), instance.response);
             jsonObject.put("products", productWs.handleProducts(req));
             appendResponseStatusInfo( instance );
             if (!Utils.isNullOrEmpty(response.toString())) jsonObject.put("message", response.toString());
-            model.put("res", jsonObject.toString(2));
+            model.put("res", NodeUtil.jsonToString( jsonObject, 2 ));
         } catch (Exception e) {
-            model.put("res", response.toString());
+            model.put("res", createResponseJson());
             if (e instanceof JSONException) {
                 log(LogLevel.ERROR, "JSON creation error", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             } else {
                 log(LogLevel.ERROR, "Internal server error", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             }
             e.printStackTrace();
-        } 
-    
+        }
+
         status.setCode(responseStatus.getCode());
-    
+
         printFooter();
-        
+
         return model;
     }
 }

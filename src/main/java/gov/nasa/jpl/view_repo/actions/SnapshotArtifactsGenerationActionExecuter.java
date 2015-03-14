@@ -2,9 +2,12 @@ package gov.nasa.jpl.view_repo.actions;
 
 import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
+import gov.nasa.jpl.view_repo.util.EmsTransaction;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 import gov.nasa.jpl.view_repo.webscripts.AbstractJavaWebScript.LogLevel;
+import gov.nasa.jpl.view_repo.webscripts.DocBookWrapper;
+import gov.nasa.jpl.view_repo.webscripts.HostnameGet;
 import gov.nasa.jpl.view_repo.webscripts.SnapshotPost;
 
 import java.util.ArrayList;
@@ -20,6 +23,7 @@ import org.alfresco.service.cmr.action.Action;
 import org.alfresco.service.cmr.action.ParameterDefinition;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.site.SiteInfo;
+import org.apache.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -30,6 +34,8 @@ import org.springframework.extensions.webscripts.connector.User;
 import org.springframework.web.context.request.WebRequest;
 
 public class SnapshotArtifactsGenerationActionExecuter  extends ActionExecuterAbstractBase {
+    static Logger logger = Logger.getLogger(SnapshotArtifactsGenerationActionExecuter.class);
+    
     /**
      * Injected variables from Spring configuration
      */
@@ -55,8 +61,18 @@ public class SnapshotArtifactsGenerationActionExecuter  extends ActionExecuterAb
     }
     
     @Override
-    protected void executeImpl(Action action, NodeRef nodeRef) {
+    protected void executeImpl(final Action action, final NodeRef nodeRef) {
         clearCache();
+        
+        new EmsTransaction(services, response, new Status()) {
+            @Override
+            public void run() throws Exception {
+                executeImplImpl(action, nodeRef);
+            }
+        };
+    }
+    
+    private void executeImplImpl(Action action, NodeRef nodeRef) {
 
         // Get timestamp if specified. This is for the products, not the
         // snapshots or configuration.
@@ -70,10 +86,12 @@ public class SnapshotArtifactsGenerationActionExecuter  extends ActionExecuterAb
         EmsScriptNode jobNode = new EmsScriptNode(nodeRef, services, response);
         // clear out any existing associated snapshots
         String siteName = (String) action.getParameterValue(PARAM_SITE_NAME);
-        System.out.println("SnapshotArtifactsGenerationActionExecuter started execution of " + siteName);
+        if (logger.isDebugEnabled()) {
+            logger.debug("SnapshotArtifactsGenerationActionExecuter started execution of " + siteName);   
+        };
         SiteInfo siteInfo = services.getSiteService().getSite(siteName);
         if (siteInfo == null) {
-        		System.out.println("[ERROR]: could not find site: " + siteName);
+            logger.error("could not find site: " + siteName);
             return;
         }
         NodeRef siteRef = siteInfo.getNodeRef();
@@ -96,51 +114,112 @@ public class SnapshotArtifactsGenerationActionExecuter  extends ActionExecuterAb
         snapshotService.setServices(services);
         snapshotService.setLogLevel(LogLevel.DEBUG);
         Status status = new Status();
+        EmsScriptNode snapshotNode = null;
         JSONObject snapshot = null;
+        WorkspaceNode workspace = (WorkspaceNode)action.getParameterValue(PARAM_WORKSPACE);
         try{
-        	WorkspaceNode workspace = (WorkspaceNode)action.getParameterValue(PARAM_WORKSPACE);
+    	    // lets check whether or not docbook has been generated
+    	    StringBuffer response = new StringBuffer();
+			// lookup snapshotNode using standard lucene as snapshotId is unique across all workspaces
+			ArrayList<NodeRef> nodeRefs = NodeUtil.findNodeRefsByType( snapshotId, "@cm\\:name:\"", services );
+			if (nodeRefs == null || nodeRefs.size() != 1) {
+				throw new Exception("Failed to find snapshot with Id: " + snapshotId);
+			}
+			snapshotNode = new EmsScriptNode(nodeRefs.get( 0 ), services, response);
+    	    if ( !snapshotNode.hasAspect( "view2:docbook" )) {
+    	    	response.append("[INFO]: Creating docbook.xml...\n");
+	            String snapshotName = snapshotNode.getSysmlId();
+	            Date timestamp = (Date)snapshotNode.getProperty("view2:timestamp");
+	
+	            NodeRef viewRef = (NodeRef)snapshotNode.getProperty( "view2:snapshotProduct" );
+    	        if (viewRef == null) {
+    	            
+    	        }
+    	        EmsScriptNode viewNode = new EmsScriptNode(viewRef, services, response);
+    	        String viewId = viewNode.getSysmlId();
+    	        EmsScriptNode snapshotFolder = SnapshotPost.getSnapshotFolderNode(viewNode);
+    	        String contextPath = "alfresco/service";
+	    	        
+	            DocBookWrapper docBookWrapper = snapshotService.createDocBook( viewNode, viewId, snapshotName, contextPath, snapshotNode, workspace, timestamp, response );
+	            if ( docBookWrapper == null ) {
+	                logger.error("Failed to generate DocBook!" );
+	                snapshotNode = null;
+	            } 
+	            else {
+	                docBookWrapper.save();
+	                docBookWrapper.saveDocBookToRepo( snapshotFolder, timestamp );
+	            }
+    	    }
+    	    else{
+    	    	response.append("[INFO]: docbook.xml already created.\n");
+    	    }
+        	    
 	        for(String format:formats){
 	        	if(format.compareToIgnoreCase("pdf") == 0){
 	        		try{
 	        			snapshot = snapshotService.generatePDF(snapshotId, workspace);
+	        			response.append(snapshotService.getResponse().toString());
 	        		}
 	        		catch(JSONException ex){
 	        			status.setCode(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-	        			System.out.println("Failed to generate PDF for snapshot Id: " + snapshotId);
+	        			logger.error("Failed to generate PDF for snapshot Id: " + snapshotId);
+	        			response.append(String.format("[ERROR]: Failed to generate PDF for snapshot Id: %s.\n%s\n%s\n", snapshotId, ex.getMessage(), ex.getStackTrace()));
 	        		}
 	        	}
 	        	else if(format.compareToIgnoreCase("html") == 0){
 	        		try{
 	        			snapshot = snapshotService.generateHTML(snapshotId, workspace);
+	        			response.append(snapshotService.getResponse().toString());
 	        		}
 	        		catch(JSONException ex){
 	        			status.setCode(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-	        			System.out.println("Failed to generate HTML zip for snapshot Id: " + snapshotId);
+	        			logger.error("Failed to generate zip artifact for snapshot Id: " + snapshotId);
+	        			response.append(String.format("[ERROR]: Failed to generate zip artifact for snapshot Id: %s.\n%s\n%s\n", snapshotId, ex.getMessage(), ex.getStackTrace()));
 	        		}
 	        	}
-	        	
 	        	if (status.getCode() != HttpServletResponse.SC_OK) {
 	            	jobStatus = "Failed";
-	            	response.append("[ERROR]: could not make snapshot for " + snapshotId);
+	            	response.append(String.format("[ERROR]: could not make snapshot for %s.\n", snapshotId));
 	        	} else {
-	            	response.append("[INFO]: Successfully generated artifact for snapshot: " + snapshotId);
+	            	response.append(String.format("[INFO]: Successfully generated artifact(s) for snapshot: %s.\n", snapshotId));
 	        	}
-	        	response.append(snapshot.toString());
+	        	response.append("Snapshot JSON:\n");
+	        	response.append(NodeUtil.jsonToString( snapshot ));
+	        	response.append("\n\n");
 	        }
 	        // Send off notification email
-	        String subject = "[EuropaEMS] Snapshot Generation " + jobStatus;
-	        String msg = buildEmailMessage(snapshot);
-	        String userEmail = (String)action.getParameterValue(PARAM_USER_EMAIL);
-	        if(userEmail == null || userEmail.isEmpty())
-	        	System.out.println("Failed to retrieve user email parameter!");
-	        else
-	        	ActionUtil.sendEmailTo("europaems@jpl.nasa.gov", userEmail, msg, subject, services);
-	        System.out.println("Completed snapshot artifact(s) generation.");
+	        String subject = "Snapshot Generation " + jobStatus;
+	        EmsScriptNode logNode = ActionUtil.saveLogToFile(jobNode, "text/plain", services, response.toString());
+	        String msg = buildEmailMessage(snapshot, logNode);
+    	    ActionUtil.sendEmailToModifier(jobNode, msg, subject, services);
+    	    if (logger.isDebugEnabled()) logger.debug("Completed snapshot artifact(s) generation.");
         }
         catch(Exception ex){
-        	System.out.println("Failed to complete snapshot artifact(s) generation!");
+        	StringBuffer sb = new StringBuffer();
+        	Throwable throwable = ex.getCause();
+        	while(throwable != null){
+        		sb.append(throwable.getMessage());
+        		throwable = throwable.getCause();
+        	}
+        	for(String format:formats){
+        		if(format.compareToIgnoreCase("pdf") == 0) 
+        			snapshotService.setPdfStatus(snapshotNode, "Error");
+        		else if(format.compareToIgnoreCase("html") == 0) 
+        			snapshotService.setHtmlZipStatus(snapshotNode, "Error");
+        	}
+        	
+        	logger.error("Failed to complete snapshot artifact(s) generation!");
+        	logger.error(sb.toString());
         	ex.printStackTrace();
-        	ActionUtil.sendEmailToModifier(jobNode, "An unexpected error occurred and your snapshot artifact generation failed.", "[EuropaEMS] Snapshot Generation Failed", services, response);
+        	ActionUtil.sendEmailToModifier(jobNode, String.format("An unexpected error occurred and your snapshot artifact generation failed.\n%s%s", ex.getMessage(), sb.toString()), "Snapshot Generation Failed", services);
+        	ActionUtil.sendEmailTo("mbee-dev-admin@jpl.nasa.gov", "mbee-dev-admin@jpl.nasa.gov", 
+        			String.format("Server: %s\nSite: %s\nWorkspace: %s\nSnapshot Id: %s\nError: %s%s%s", 
+        					new HostnameGet(this.repository, this.services).getAlfrescoUrl(),
+        					siteName,
+        					workspace,
+        					snapshotId,
+        					ex.getMessage(), sb.toString(), response.toString()), 
+					"Snapshot Generation Failed", services);
         }
     }
 
@@ -149,36 +228,39 @@ public class SnapshotArtifactsGenerationActionExecuter  extends ActionExecuterAb
         // TODO Auto-generated method stub
     }
     
-    private String buildEmailMessage(JSONObject snapshot) throws Exception{
-    	StringBuffer buf = new StringBuffer();
-    	try{
-    		String hostname = ActionUtil.getHostName();
-            if (!hostname.endsWith( ".jpl.nasa.gov" )) {
-                hostname += ".jpl.nasa.gov";
-            }
-            String contextUrl = "https://" + hostname + "/alfresco";
-	    	JSONArray formats = (JSONArray)snapshot.getJSONArray("formats");
-	    	for(int i=0; i < formats.length(); i++){
-				JSONObject format = formats.getJSONObject(i);
-				String formatType = format.getString("type");
-				String formatUrl = format.getString("url");
-				buf.append("Snapshot ");
-				buf.append(formatType.toUpperCase());
-				buf.append(": ");
+    private String buildEmailMessage(JSONObject snapshot, EmsScriptNode logNode) throws Exception{
+        	StringBuffer buf = new StringBuffer();
+        	try{
+    	    	JSONArray formats = (JSONArray)snapshot.getJSONArray("formats");
+    	    	for(int i=0; i < formats.length(); i++){
+    				JSONObject format = formats.getJSONObject(i);
+    				String formatType = format.getString("type");
+    				if(formatType.compareToIgnoreCase("HTML")==0) formatType = "ZIP";
+    				String formatUrl = format.getString("url");
+    				buf.append("Snapshot ");
+    				buf.append(formatType.toUpperCase());
+    				buf.append(": ");
+    				buf.append(formatUrl);
+    				buf.append(System.lineSeparator());
+    				buf.append(System.lineSeparator());
+    			}
+    	    	HostnameGet hostnameGet = new HostnameGet(this.repository, this.services);
+    	    	String contextUrl = hostnameGet.getAlfrescoUrl() + "/alfresco";
+    	    	buf.append("Log: ");
 				buf.append(contextUrl);
-				buf.append(formatUrl);
-				buf.append(System.lineSeparator());
-				buf.append(System.lineSeparator());
-			}
-    	}
-    	catch(JSONException ex){
-    		throw new Exception("Failed to build email message!", ex);
-    	}
-    	return buf.toString();
+				buf.append(logNode.getUrl());
+        	}
+        	catch(JSONException ex){
+        		throw new Exception("Failed to build email message!", ex);
+        	}
+        	return buf.toString();
     }	
     	
     protected void clearCache() {
         response = new StringBuffer();
+        NodeUtil.setBeenInsideTransaction( false );
+        NodeUtil.setBeenOutsideTransaction( false );
+        NodeUtil.setInsideTransactionNow( false );
     }
 
 }

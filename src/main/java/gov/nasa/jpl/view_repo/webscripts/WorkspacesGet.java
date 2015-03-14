@@ -2,8 +2,8 @@ package gov.nasa.jpl.view_repo.webscripts;
 
 import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
-import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
+import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -12,12 +12,12 @@ import java.util.Map;
 import javax.servlet.http.HttpServletResponse;
 
 import org.alfresco.repo.model.Repository;
+import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
@@ -41,21 +41,22 @@ public class WorkspacesGet extends AbstractJavaWebScript{
 	 */
 	@Override
 	protected Map<String, Object> executeImpl (WebScriptRequest req, Status status, Cache cache) {
-	    WorkspacesGet instance = new WorkspacesGet(repository, services);
-        return instance.executeImplImpl( req, status, cache );
+	    WorkspacesGet instance = new WorkspacesGet(repository, getServices());
+        return instance.executeImplImpl( req, status, cache, runWithoutTransactions );
 	}
-	
+
 	/**
-	 * Need wrapper for actual execution to be run in different instance since 
+	 * Need wrapper for actual execution to be run in different instance since
 	 * @param req
 	 * @param status
 	 * @param cache
 	 * @return
 	 */
+    @Override
     protected Map<String, Object> executeImplImpl (WebScriptRequest req, Status status, Cache cache) {
         printHeader( req );
 
-        clearCaches();
+        //clearCaches();
 
         Map<String, Object> model = new HashMap<String, Object>();
         JSONObject json = null;
@@ -74,19 +75,20 @@ public class WorkspacesGet extends AbstractJavaWebScript{
             e.printStackTrace();
         }
         if (json == null) {
-            model.put("res", response.toString());
+            model.put("res", createResponseJson());
         } else {
             try {
                 if (!Utils.isNullOrEmpty(response.toString())) json.put("message", response.toString());
-                model.put("res", json.toString(4));
+                model.put("res", NodeUtil.jsonToString( json, 4 ));
             } catch ( JSONException e ) {
                 e.printStackTrace();
+                model.put("res", createResponseJson());
             }
         }
         status.setCode(responseStatus.getCode());
 
         printFooter();
-        
+
         return model;
     }
 
@@ -96,7 +98,7 @@ public class WorkspacesGet extends AbstractJavaWebScript{
         if (!findDeleted) {
             //This is for the master workspace (not located in the user home folder).
             JSONObject interiorJson = new JSONObject();
-            WorkspaceNode.addWorkspaceNamesAndIds(interiorJson, null );
+            WorkspaceNode.addWorkspaceNamesAndIds(interiorJson, null, services, true );
             jArray.put(interiorJson);
         }
 

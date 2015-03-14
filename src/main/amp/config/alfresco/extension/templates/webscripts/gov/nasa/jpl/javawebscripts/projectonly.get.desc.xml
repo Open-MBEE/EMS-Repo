@@ -14,7 +14,7 @@
   <url>/javawebscripts/projects/{projectId}</url>
   <format default="json">argument</format> 
   <authentication>user</authentication> 
-  <transaction allow="readonly">required</transaction>
+  <transaction>none</transaction>
   <family>EMS Java Webscripts</family>
   <args>
   </args>

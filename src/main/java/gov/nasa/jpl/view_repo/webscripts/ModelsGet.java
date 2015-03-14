@@ -1,29 +1,29 @@
 /*******************************************************************************
- * Copyright (c) <2013>, California Institute of Technology ("Caltech").  
+ * Copyright (c) <2013>, California Institute of Technology ("Caltech").
  * U.S. Government sponsorship acknowledged.
- * 
+ *
  * All rights reserved.
- * 
- * Redistribution and use in source and binary forms, with or without modification, are 
+ *
+ * Redistribution and use in source and binary forms, with or without modification, are
  * permitted provided that the following conditions are met:
- * 
- *  - Redistributions of source code must retain the above copyright notice, this list of 
+ *
+ *  - Redistributions of source code must retain the above copyright notice, this list of
  *    conditions and the following disclaimer.
- *  - Redistributions in binary form must reproduce the above copyright notice, this list 
- *    of conditions and the following disclaimer in the documentation and/or other materials 
+ *  - Redistributions in binary form must reproduce the above copyright notice, this list
+ *    of conditions and the following disclaimer in the documentation and/or other materials
  *    provided with the distribution.
- *  - Neither the name of Caltech nor its operating division, the Jet Propulsion Laboratory, 
- *    nor the names of its contributors may be used to endorse or promote products derived 
+ *  - Neither the name of Caltech nor its operating division, the Jet Propulsion Laboratory,
+ *    nor the names of its contributors may be used to endorse or promote products derived
  *    from this software without specific prior written permission.
- * 
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS 
- * OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY 
- * AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER  
- * OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR 
- * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON 
- * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE 
- * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS
+ * OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY
+ * AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER
+ * OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+ * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
+ * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  ******************************************************************************/
 
@@ -43,9 +43,14 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.alfresco.repo.model.Repository;
 import org.alfresco.service.ServiceRegistry;
+
 import org.json.JSONArray;
+
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import org.json.JSONObject;
+
 import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
@@ -107,11 +112,11 @@ public class ModelsGet extends AbstractJavaWebScript {
     @Override
     protected Map<String, Object> executeImpl(WebScriptRequest req,
                                               Status status, Cache cache) {
-        ModelsGet instance = new ModelsGet(repository, services);
-        instance.setServices( getServices() );
-        return instance.executeImplImpl( req, status, cache );
+        ModelsGet instance = new ModelsGet(repository, getServices());
+        return instance.executeImplImpl( req, status, cache, runWithoutTransactions );
     }
 
+    @Override
     protected Map<String, Object> executeImplImpl(WebScriptRequest req,
                                                   Status status, Cache cache) {
         Map<String, Object> model = new HashMap<String, Object>();
@@ -127,17 +132,17 @@ public class ModelsGet extends AbstractJavaWebScript {
         }
 
 
-        JSONObject top = new JSONObject();
+        JSONObject top = NodeUtil.newJsonObject();
         try {
             if (elementsJson.length() > 0) {
                 top.put("elements", elementsJson);
                 if (!Utils.isNullOrEmpty(response.toString())) top.put("message", response.toString());
-                if ( prettyPrint ) model.put("res", top.toString(4));
-                else model.put("res", top.toString());
+                if ( prettyPrint ) model.put("res", NodeUtil.jsonToString( top, 4 ));
+                else model.put("res", NodeUtil.jsonToString( top ));
             } else {
                 log(LogLevel.WARNING, "No elements found",
                     HttpServletResponse.SC_NOT_FOUND);
-                model.put("res", response.toString());
+                model.put("res", createResponseJson());
             }
         } catch (JSONException e) {
             e.printStackTrace();
@@ -154,12 +159,13 @@ public class ModelsGet extends AbstractJavaWebScript {
      * @return
      */
     private JSONArray handleRequest(WebScriptRequest req) throws JSONException {
-        JSONObject requestJson = (JSONObject)req.parseContent();
+        JSONObject requestJson = //JSONObject.make( 
+                (JSONObject)req.parseContent();// );
         JSONArray elementsFoundJson = new JSONArray();
 
         JSONArray elementsToFindJson;
         elementsToFindJson = requestJson.getJSONArray( "elements" );
-        
+
         for (int ii = 0; ii < elementsToFindJson.length(); ii++) {
             String id = elementsToFindJson.getJSONObject( ii ).getString( "sysmlid" );
             EmsScriptNode node = NodeUtil.findScriptNodeById( id, workspace, dateTime, false, services, response );

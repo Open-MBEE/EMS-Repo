@@ -1,78 +1,40 @@
 {"products": [{
-
-    "creator": "admin",
-
-    "documentation": "else",
-
-    "editable": true,
-
+    "qualifiedId": "/europa/123456/300/301",
+    "qualifiedName": "/europa/JW_TEST/300/301",
     "name": "301",
-
     "owner": "300",
-
-    "qualifiedId": "/123456/300/301",
-
-    "qualifiedName": "/JW_TEST/300/301",
-
+    "documentation": "else",
+    "sysmlid": "301",
     "specialization": {
-
-        "allowedElements": [
-
+    "view2view": [{
+        "childrenViews": [
             "301",
-
-            "302",
-
-            "303"
-
+            "302"
         ],
-
-        "childrenViews": ["304"],
-
-        "contains": [{
-
-            "source": "301",
-
-            "sourceProperty": "documentation",
-
-            "sourceType": "reference",
-
-            "type": "Paragraph"
-
-        }],
-
-        "displayedElements": [
-
-            "301",
-
-            "302",
-
-            "303"
-
-        ],
-
-        "noSections": ["302"],
-
-        "type": "Product",
-
-        "view2view": [{
-
-            "childrenViews": [
-
-                "301",
-
-                "302"
-
-            ],
-
-            "sysmlid": "301"
-
-        }]
-
-    },
-
-    "sysmlid": "301"
-
+        "sysmlid": "301"
+    }],
+    "childrenViews": ["304"],
+    "displayedElements": [
+        "301",
+        "302",
+        "303"
+    ],
+    "contents": null,
+    "allowedElements": [
+        "301",
+        "302",
+        "303"
+    ],
+    "noSections": ["302"],
+    "contains": [{
+        "sourceType": "reference",
+        "source": "301",
+        "sourceProperty": "documentation",
+        "type": "Paragraph"
+    }],
+    "type": "Product"
+},
+    "editable": true,
+    "creator": "admin"
 }]}
-
 200
-

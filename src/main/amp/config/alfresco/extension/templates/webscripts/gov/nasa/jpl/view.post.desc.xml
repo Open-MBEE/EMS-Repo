@@ -4,7 +4,7 @@
   <url>/rest/views/{viewid}?force={force?}&amp;recurse={recurse?}&amp;doc={doc?}&amp;product={product?}&amp;user={user}</url> 
   <format default="json">argument</format> 
   <authentication>user</authentication> 
-  <transaction allow="readwrite">required</transaction>
+  <transaction>none</transaction>
   <family>View Editor</family>
   <args>
   	<arg>

@@ -29,7 +29,6 @@
 
 package gov.nasa.jpl.view_repo.webscripts;
 
-import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.actions.ActionUtil;
 import gov.nasa.jpl.view_repo.actions.ConfigurationGenerationActionExecuter;
@@ -46,10 +45,12 @@ import java.util.Map;
 import javax.servlet.http.HttpServletResponse;
 
 import org.alfresco.repo.model.Repository;
+import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.action.Action;
 import org.alfresco.service.cmr.action.ActionService;
 import org.alfresco.service.cmr.repository.NodeRef;
+import org.apache.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -64,6 +65,7 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
  *
  */
 public class ConfigurationPost extends AbstractJavaWebScript {
+    static Logger logger = Logger.getLogger(ConfigurationPost.class);
 	public ConfigurationPost() {
 		super();
 	}
@@ -82,16 +84,22 @@ public class ConfigurationPost extends AbstractJavaWebScript {
 	@Override
     protected  Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
 		ConfigurationPost instance = new ConfigurationPost(repository, services);
-    	return instance.executeImplImpl(req, status, cache);
+        return instance.executeImplImpl(req, status, cache, runWithoutTransactions);		    
     }
-    
-	protected Map<String, Object> executeImplImpl(WebScriptRequest req,
+
+	@Override
+    protected Map<String, Object> executeImplImpl(WebScriptRequest req,
 			Status status, Cache cache) {
+        if (logger.isInfoEnabled()) {
+            String user = AuthenticationUtil.getRunAsUser();
+            logger.info( user + " " + req.getURL() );
+        }
+
 		Map<String, Object> model = new HashMap<String, Object>();
 
         printHeader( req );
 
-        clearCaches();
+        //clearCaches();
 
 		ConfigurationPost instance = new ConfigurationPost(repository, services);
 
@@ -100,11 +108,11 @@ public class ConfigurationPost extends AbstractJavaWebScript {
 
 		status.setCode(responseStatus.getCode());
 		if (result == null) {
-		    model.put("res", response.toString());
+		    model.put("res", createResponseJson());
 		} else {
 		    try {
 		    	if (!Utils.isNullOrEmpty(response.toString())) result.put("message", response.toString());
-                model.put("res", result.toString(2));
+                model.put("res", NodeUtil.jsonToString( result, 2 ));
             } catch ( JSONException e ) {
                 e.printStackTrace();
             }
@@ -129,7 +137,8 @@ public class ConfigurationPost extends AbstractJavaWebScript {
 
         EmsScriptNode siteNode = getSiteNodeFromRequest( req, false );
 
-		JSONObject reqPostJson = (JSONObject) req.parseContent();
+        JSONObject reqPostJson = //JSONObject.make( 
+                (JSONObject)req.parseContent();// );
 		JSONObject postJson;
 		try {
 		    // for backwards compatibility
@@ -155,17 +164,17 @@ public class ConfigurationPost extends AbstractJavaWebScript {
                              + postJson.getString( "name" ),
                      HttpServletResponse.SC_BAD_REQUEST );
             } else {
-    			if (postJson.has("nodeid") || postJson.has( "id" )) {
-    				jsonObject = handleUpdate(postJson, siteName, context, workspace, status);
-    			} else {
-    				jsonObject = handleCreate(postJson, siteName, context, workspace, status);
-    			}
+        			if (postJson.has("nodeid") || postJson.has( "id" )) {
+        				jsonObject = handleUpdate(postJson, siteName, context, workspace, status);
+        			} else {
+        				jsonObject = handleCreate(postJson, siteName, context, workspace, status);
+        			}
             }
 		} catch (JSONException e) {
 			log(LogLevel.ERROR, "Could not parse JSON", HttpServletResponse.SC_BAD_REQUEST);
 			e.printStackTrace();
 			return null;
-		}
+		} 
 
 		return jsonObject;
 	}
@@ -189,35 +198,46 @@ public class ConfigurationPost extends AbstractJavaWebScript {
 	                                EmsScriptNode context,
                                     WorkspaceNode workspace, Status status)
                                             throws JSONException {
-		EmsScriptNode jobNode = null;
+	    EmsScriptNode jobNode = null;
 
 		if (postJson.has("name")) {
 		    String name = postJson.getString( "name" );
 		    if ( ActionUtil.jobExists( context, name) ) {
 		        return handleUpdate( postJson, siteName, context, workspace, status );
 		    }
-		    
-		    Date date = new Date();
-            jobNode = ActionUtil.getOrCreateJob( context, name, 
+
+            jobNode = ActionUtil.getOrCreateJob( context, name,
                                                  "ems:ConfigurationSet",
-                                                 status, response );
+                                                 status, response, true );
 
 			if (jobNode != null) {
                 ConfigurationsWebscript configWs =
                         new ConfigurationsWebscript( repository, services,
                                                      response );
                 configWs.updateConfiguration( jobNode, postJson, context,
-                                              workspace, date );
+                                              workspace, new Date() );
 
 	            HashSet<String> productList = getProductList(postJson);
-	            
-	            Date datetime = null;
-	            if ( postJson.has( "timestamp" ) ) {
-	                String timestamp = postJson.getString("timestamp");
-	                datetime = TimeUtils.dateFromTimestamp(timestamp);
-	            }
-            	startAction(jobNode, siteName, productList, workspace, datetime);
-	            
+
+	            // update configuration sets the timestamp, so lets grab timestamp from there
+	            Date datetime = (Date) jobNode.getProperty( "view2:timestamp" );
+                if (datetime != null) {
+    	                // Check that the timestamp is before the workspace was branched/created
+    	                // or in the future:
+    	                Date now = new Date();
+    	                if (datetime.after( now )) {
+    	                    log(LogLevel.ERROR, "Timestamp provided in json: "+datetime+" is in the future.  Current time: "+now, 
+    	                        HttpServletResponse.SC_BAD_REQUEST);
+    	                    return null;
+    	                }
+    	                else if (workspace != null && datetime.before( workspace.getCopyOrCreationTime() )) {
+    	                    log(LogLevel.ERROR, "Timestamp provided in json: "+datetime+" is before the workspace branch/creation time: "+workspace.getCopyOrCreationTime(), 
+                                HttpServletResponse.SC_BAD_REQUEST);
+    	                    return null;
+    	                }
+                }
+	            startAction(jobNode, siteName, productList, workspace, datetime);
+
 				return configWs.getConfigJson( jobNode, workspace, null );
 			} else {
 				log(LogLevel.ERROR, "Couldn't create configuration job: " + postJson.getString("name"), HttpServletResponse.SC_BAD_REQUEST);
@@ -264,7 +284,7 @@ public class ConfigurationPost extends AbstractJavaWebScript {
                 configNode = workspace.replicateWithParentFolders( node );
             }
         }
-		
+
 		if ( NodeUtil.exists( configNodeRef ) ) {
 	        ConfigurationsWebscript configWs = new ConfigurationsWebscript( repository, services, response );
             configWs.updateConfiguration( configNode, postJson, context,
@@ -282,7 +302,7 @@ public class ConfigurationPost extends AbstractJavaWebScript {
 	 * @param jobNode
 	 * @param siteName
 	 * @param productList
-	 * @param workspace 
+	 * @param workspace
 	 */
 	public void startAction(EmsScriptNode jobNode, String siteName,
 	                        HashSet<String> productList, WorkspaceNode workspace,

@@ -1,0 +1,19 @@
+<webscript>
+  <shortname>Toggle syncTransactions on or off</shortname>
+  <description>toggle syncTransactions on or off</description>
+  <url>/syncTransactions?on={on?}&amp;off={off?}</url>
+  <authentication>user</authentication>
+  <format default="html">argument</format>
+  <family>EMS Utils</family>
+  <transaction>none</transaction>
+  <args>
+    <arg>
+        <name>on</name>
+        <description>Optional, if specified will turn syncTransactions on</description>
+    </arg>
+    <arg>
+        <name>off</name>
+        <description>Optional, if specified will turn syncTransactions off</description>
+    </arg>
+  </args>
+</webscript>

@@ -1,29 +1,29 @@
 /*******************************************************************************
- * Copyright (c) <2013>, California Institute of Technology ("Caltech").  
+ * Copyright (c) <2013>, California Institute of Technology ("Caltech").
  * U.S. Government sponsorship acknowledged.
- * 
+ *
  * All rights reserved.
- * 
- * Redistribution and use in source and binary forms, with or without modification, are 
+ *
+ * Redistribution and use in source and binary forms, with or without modification, are
  * permitted provided that the following conditions are met:
- * 
- *  - Redistributions of source code must retain the above copyright notice, this list of 
+ *
+ *  - Redistributions of source code must retain the above copyright notice, this list of
  *    conditions and the following disclaimer.
- *  - Redistributions in binary form must reproduce the above copyright notice, this list 
- *    of conditions and the following disclaimer in the documentation and/or other materials 
+ *  - Redistributions in binary form must reproduce the above copyright notice, this list
+ *    of conditions and the following disclaimer in the documentation and/or other materials
  *    provided with the distribution.
- *  - Neither the name of Caltech nor its operating division, the Jet Propulsion Laboratory, 
- *    nor the names of its contributors may be used to endorse or promote products derived 
+ *  - Neither the name of Caltech nor its operating division, the Jet Propulsion Laboratory,
+ *    nor the names of its contributors may be used to endorse or promote products derived
  *    from this software without specific prior written permission.
- * 
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS 
- * OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY 
- * AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER  
- * OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR 
- * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON 
- * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE 
- * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS
+ * OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY
+ * AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER
+ * OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+ * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
+ * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  ******************************************************************************/
 
@@ -50,7 +50,7 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
 
 /**
  * Allows updating of sysml:id for synchronization of Alfresco created elements to MD
- * 
+ *
  * /view-repo/src/main/amp/config/alfresco/extension/templates/webscripts/gov/nasa/jpl/javawebscripts/element.put.desc.xml
  * @author cinyoung
  *
@@ -59,26 +59,27 @@ public class ModelPut extends ModelPost {
     public ModelPut() {
         super();
     }
-    
+
     public ModelPut(Repository repositoryHelper, ServiceRegistry registry) {
         super(repositoryHelper, registry);
     }
 
     @Override
     protected Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
-        ModelPut instance = new ModelPut(repository, services);
-        return instance.executeImplImpl(req,  status, cache);
+        ModelPut instance = new ModelPut(repository, getServices());
+        return instance.executeImplImpl(req,  status, cache, runWithoutTransactions);
     }
-    
+
+    @Override
     protected Map<String, Object> executeImplImpl(WebScriptRequest req,
             Status status, Cache cache) {
         printHeader( req );
-        
-        Map<String, Object> model = new HashMap<String, Object>();
-        clearCaches();
 
-        ModelPut instance = new ModelPut(repository, services);
-        
+        Map<String, Object> model = new HashMap<String, Object>();
+        //clearCaches();
+
+        ModelPut instance = new ModelPut(repository, getServices());
+
         try {
             instance.createOrUpdateModel(req, status);
             appendResponseStatusInfo(instance);
@@ -91,15 +92,15 @@ public class ModelPut extends ModelPost {
         }
 
         status.setCode(responseStatus.getCode());
-        model.put("res", response.toString());
+        model.put("res", createResponseJson());
 
         printFooter();
-        
+
         return model;
     }
-    
+
     /**
-     * Only updates models by changing syml IDs - for synching Alfresco generated to MD generated 
+     * Only updates models by changing syml IDs - for synching Alfresco generated to MD generated
      * @param req
      * @param status
      * @throws Exception
@@ -109,12 +110,12 @@ public class ModelPut extends ModelPost {
         JSONObject postJson = (JSONObject) req.parseContent();
 
         WorkspaceNode workspace = getWorkspace( req );
-        
+
         Iterator<?> oldIds = postJson.keys();
         while(oldIds.hasNext()) {
             String oldId = (String) oldIds.next();
             String newId = postJson.getString(oldId);
-            
+
             if (oldId != null && newId != null && oldId != newId) {
                 EmsScriptNode elementNode = findScriptNodeById(oldId, workspace, null, true);
                 if (checkPermissions(elementNode, PermissionService.WRITE)) {

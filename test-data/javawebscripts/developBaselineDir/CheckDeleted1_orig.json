@@ -6,35 +6,83 @@
         "qualifiedName": "master"
     },
     {
-        "created": "2014-12-10T14:56:25.467-0800",
+        "created": "2015-02-18T14:09:00.953-0800",
         "creator": "admin",
-        "id": "94434b0e-3963-4cce-aed9-65f8b986acd0",
-        "modified": "2014-12-10T14:56:31.238-0800",
+        "description": "modified the workspace name and desc",
+        "id": "c21a4a1d-c3ae-4906-9589-36a97bb626f1",
+        "modified": "2015-02-18T14:09:01.361-0800",
+        "name": "modifiedWorkspaceName",
+        "parent": "master",
+        "qualifiedId": "master/c21a4a1d-c3ae-4906-9589-36a97bb626f1",
+        "qualifiedName": "master/modifiedWorkspaceName"
+    },
+    {
+        "created": "2015-02-18T14:09:00.486-0800",
+        "creator": "admin",
+        "description": "",
+        "id": "2d68482d-66af-4a0a-8b95-8ebdd3a69db7",
+        "modified": "2015-02-18T14:09:02.227-0800",
         "name": "wsB",
-        "parent": "a95590e5-53a0-4e5b-a935-cfc05ca769a5",
-        "qualifiedId": "master/a95590e5-53a0-4e5b-a935-cfc05ca769a5/94434b0e-3963-4cce-aed9-65f8b986acd0",
+        "parent": "dd81a77d-740f-44e6-a26a-32dcff686574",
+        "qualifiedId": "master/dd81a77d-740f-44e6-a26a-32dcff686574/2d68482d-66af-4a0a-8b95-8ebdd3a69db7",
         "qualifiedName": "master/wsA/wsB"
     },
     {
-        "branched": "2014-12-10T14:56:32.470-0800",
-        "created": "2014-12-10T14:56:35.168-0800",
+        "branched": "2015-02-18T14:09:03.120-0800",
+        "created": "2015-02-18T14:09:08.014-0800",
         "creator": "admin",
-        "id": "33e34e74-8b64-4422-b73e-314ec67724a4",
-        "modified": "2014-12-10T14:56:42.398-0800",
+        "description": "",
+        "id": "12ce9e1e-f447-477d-9b2c-67092924dc8d",
+        "modified": "2015-02-18T14:09:08.014-0800",
         "name": "wsT",
-        "parent": "a95590e5-53a0-4e5b-a935-cfc05ca769a5",
-        "qualifiedId": "master/a95590e5-53a0-4e5b-a935-cfc05ca769a5/33e34e74-8b64-4422-b73e-314ec67724a4",
+        "parent": "dd81a77d-740f-44e6-a26a-32dcff686574",
+        "qualifiedId": "master/dd81a77d-740f-44e6-a26a-32dcff686574/12ce9e1e-f447-477d-9b2c-67092924dc8d",
         "qualifiedName": "master/wsA/wsT"
     },
     {
-        "created": "2014-12-10T14:56:23.844-0800",
+        "created": "2015-02-18T14:08:59.881-0800",
         "creator": "admin",
-        "id": "a95590e5-53a0-4e5b-a935-cfc05ca769a5",
-        "modified": "2014-12-10T14:56:35.189-0800",
+        "description": "",
+        "id": "dd81a77d-740f-44e6-a26a-32dcff686574",
+        "modified": "2015-02-18T14:09:51.442-0800",
         "name": "wsA",
         "parent": "master",
-        "qualifiedId": "master/a95590e5-53a0-4e5b-a935-cfc05ca769a5",
+        "qualifiedId": "master/dd81a77d-740f-44e6-a26a-32dcff686574",
         "qualifiedName": "master/wsA"
+    },
+    {
+        "branched": "2015-02-18T14:09:14.000-0800",
+        "created": "2015-02-18T14:09:51.424-0800",
+        "creator": "admin",
+        "description": "",
+        "id": "7e85447e-2168-4e81-a4d8-263ebea57989",
+        "modified": "2015-02-18T14:09:51.424-0800",
+        "name": "wsT2",
+        "parent": "dd81a77d-740f-44e6-a26a-32dcff686574",
+        "qualifiedId": "master/dd81a77d-740f-44e6-a26a-32dcff686574/7e85447e-2168-4e81-a4d8-263ebea57989",
+        "qualifiedName": "master/wsA/wsT2"
+    },
+    {
+        "created": "2015-02-18T14:09:55.027-0800",
+        "creator": "admin",
+        "description": "",
+        "id": "e2f5424f-7aea-4864-990d-d14db0f52045",
+        "modified": "2015-02-18T14:09:55.027-0800",
+        "name": "wsG1",
+        "parent": "master",
+        "qualifiedId": "master/e2f5424f-7aea-4864-990d-d14db0f52045",
+        "qualifiedName": "master/wsG1"
+    },
+    {
+        "created": "2015-02-18T14:09:55.403-0800",
+        "creator": "admin",
+        "description": "",
+        "id": "4a81cfdd-666e-4779-a090-fa0b5a5b2a57",
+        "modified": "2015-02-18T14:09:59.136-0800",
+        "name": "wsG2",
+        "parent": "master",
+        "qualifiedId": "master/4a81cfdd-666e-4779-a090-fa0b5a5b2a57",
+        "qualifiedName": "master/wsG2"
     }
 ]}
 200

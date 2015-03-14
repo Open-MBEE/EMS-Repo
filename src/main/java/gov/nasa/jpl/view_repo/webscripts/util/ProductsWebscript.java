@@ -27,16 +27,17 @@ import org.alfresco.service.cmr.security.PermissionService;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
 
 /**
  * Library class for manipulating products
- * 
+ *
  * Pattern is handle does the retrieval.
- * 
+ *
  * @author cinyoung
- * 
+ *
  */
 public class ProductsWebscript extends AbstractJavaWebScript {
 
@@ -56,12 +57,12 @@ public class ProductsWebscript extends AbstractJavaWebScript {
         EmsScriptNode mySiteNode = getSiteNodeFromRequest( req, false );
         WorkspaceNode workspace = getWorkspace( req );
         String siteName = getSiteName(req);
-        
+
         if (!NodeUtil.exists( mySiteNode )) {
             log(LogLevel.WARNING, "Could not find site", HttpServletResponse.SC_NOT_FOUND);
             return productsJson;
         }
-        
+
         // Find the project site and site package node if applicable:
         Pair<EmsScriptNode,EmsScriptNode> sitePair = findProjectSite(req, siteName, workspace, mySiteNode);
         if (sitePair == null) {
@@ -87,37 +88,37 @@ public class ProductsWebscript extends AbstractJavaWebScript {
             }
         }
     }
-    
-    
+
+
     public JSONArray handleConfigurationProducts( WebScriptRequest req, EmsScriptNode config) throws JSONException {
         String timestamp = req.getParameter( "timestamp" );
         Date dateTime = TimeUtils.dateFromTimestamp( timestamp );
 
         WorkspaceNode workspace = getWorkspace( req );
-        
+
         ConfigurationsWebscript configWs = new ConfigurationsWebscript( repository, services, response );
         return configWs.getProducts( config, workspace, dateTime );
     }
-    
+
     public JSONArray handleContextProducts( WebScriptRequest req, EmsScriptNode siteNode) throws JSONException {
         JSONArray productsJson = new JSONArray();
-        
+
         // get timestamp if specified
         String timestamp = req.getParameter( "timestamp" );
         Date dateTime = TimeUtils.dateFromTimestamp( timestamp );
         WorkspaceNode workspace = getWorkspace( req );
-        
+
         // Search for all products within the project site:
-        Map< String, EmsScriptNode > nodeList = searchForElements(NodeUtil.SearchType.ASPECT.prefix, 
+        Map< String, EmsScriptNode > nodeList = searchForElements(NodeUtil.SearchType.ASPECT.prefix,
                                                                 Acm.ACM_PRODUCT, false,
-                                                                workspace, dateTime, 
+                                                                workspace, dateTime,
                                                                 siteNode.getName());
         if (nodeList != null) {
-            
+
             boolean checkSitePkg = (sitePackageNode != null && sitePackageNode.exists());
             // Get the alfresco Site for the site package node:
             EmsScriptNode pkgSite = checkSitePkg ? getSiteForPkgSite(sitePackageNode, workspace) : null;
-            
+
             Set<EmsScriptNode> nodes = new HashSet<EmsScriptNode>(nodeList.values());
             for ( EmsScriptNode node : nodes) {
                 if (node != null) {
@@ -125,7 +126,7 @@ public class ProductsWebscript extends AbstractJavaWebScript {
                     // that do not have the site package as the first site package parent:
                     if (checkSitePkg) {
                         if (pkgSite != null &&
-                            pkgSite.equals(findParentPkgSite(node, siteNode, null, workspace))) {
+                            pkgSite.equals(findParentPkgSite(node, workspace))) {
                             productsJson.put( node.toJSONObject( null ) );
                         }
                     }
@@ -135,7 +136,7 @@ public class ProductsWebscript extends AbstractJavaWebScript {
                 }
             }
         }
-        
+
         return productsJson;
     }
 
@@ -161,16 +162,16 @@ public class ProductsWebscript extends AbstractJavaWebScript {
         for ( EmsScriptNode snapshot : snapshotsList ) {
             if (!snapshot.isDeleted()) {
                 String id = snapshot.getSysmlId();
-                Date date = (Date)snapshot.getLastModified( dateTime );
-    
+                Date date = snapshot.getLastModified( dateTime );
+
                 JSONObject jsonObject = new JSONObject();
                 jsonObject.put( "id", id );
                 jsonObject.put( "created", EmsScriptNode.getIsoTime( date ) );
                 jsonObject.put( "creator",
-                                (String)snapshot.getProperty( "cm:modifier" ) );
+                                snapshot.getProperty( "cm:modifier" ) );
                 jsonObject.put( "url", contextPath + "/service/snapshots/"
                                        + snapshot.getSysmlId() );
-                jsonObject.put( "tag", (String)SnapshotGet.getConfigurationSet( snapshot,
+                jsonObject.put( "tag", SnapshotGet.getConfigurationSet( snapshot,
                                                                                 workspace,
                                                                                 dateTime ) );
                 snapshotsJson.put( jsonObject );
@@ -235,5 +236,12 @@ public class ProductsWebscript extends AbstractJavaWebScript {
         }
 
         return productsJson;
+    }
+
+    @Override
+    protected Map< String, Object >
+            executeImplImpl( WebScriptRequest req, Status status, Cache cache ) {
+        // TODO Auto-generated method stub
+        return null;
     }
 }

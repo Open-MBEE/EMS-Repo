@@ -17,6 +17,9 @@ import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import org.json.JSONObject;
+
 import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
@@ -25,7 +28,7 @@ public class MmsConfigurationsPost extends AbstractJavaWebScript {
     public MmsConfigurationsPost() {
         super();
     }
-    
+
     public MmsConfigurationsPost( Repository repository, ServiceRegistry services ) {
         this.repository = repository;
         this.services = services;
@@ -39,43 +42,44 @@ public class MmsConfigurationsPost extends AbstractJavaWebScript {
 
     @Override
     protected  Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
-		MmsConfigurationsPost instance = new MmsConfigurationsPost(repository, services);
-    	return instance.executeImplImpl(req, status, cache);
+		MmsConfigurationsPost instance = new MmsConfigurationsPost(repository, getServices());
+		return instance.executeImplImpl(req, status, cache, runWithoutTransactions);
     }
-    
+
+    @Override
     protected  Map<String, Object> executeImplImpl(WebScriptRequest req, Status status, Cache cache) {
         printHeader( req );
-        
-        clearCaches();
+
+        //clearCaches();
 
         Map<String, Object> model = new HashMap<String, Object>();
-        
-        MmsConfigurationsPost instance = new MmsConfigurationsPost(repository, services);
-        
+
+        MmsConfigurationsPost instance = new MmsConfigurationsPost(repository, getServices());
+
         JSONObject jsonObject = new JSONObject();
 
         try {
             jsonObject = instance.handleUpdate( req );
             appendResponseStatusInfo( instance );
             if (!Utils.isNullOrEmpty(response.toString())) jsonObject.put("message", response.toString());
-            model.put("res", jsonObject.toString(2));
+            model.put("res", NodeUtil.jsonToString( jsonObject, 2 ));
         } catch (Exception e) {
-            model.put("res", response.toString());
+            model.put("res", createResponseJson());
             if (e instanceof JSONException) {
                 log(LogLevel.ERROR, "JSON creation error", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             } else {
                 log(LogLevel.ERROR, "Internal server error", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             }
             e.printStackTrace();
-        } 
-    
+        }
+
         status.setCode(responseStatus.getCode());
-        
+
         printFooter();
-    
+
         return model;
     }
-    
+
     private JSONObject handleUpdate(WebScriptRequest req) throws JSONException {
         WorkspaceNode workspace = getWorkspace( req );
 
@@ -86,7 +90,7 @@ public class MmsConfigurationsPost extends AbstractJavaWebScript {
             log(LogLevel.WARNING, "Could not find site", HttpServletResponse.SC_NOT_FOUND);
             return new JSONObject();
         }
-        
+
         String configId = req.getServiceMatch().getTemplateVars().get( "configurationId" );
         NodeRef configNode = NodeUtil.getNodeRefFromNodeId( configId );
         if (configNode == null) {
@@ -94,13 +98,15 @@ public class MmsConfigurationsPost extends AbstractJavaWebScript {
             return new JSONObject();
         }
         EmsScriptNode config = new EmsScriptNode(configNode, services);
-        
+
         ConfigurationsWebscript configWs = new ConfigurationsWebscript( repository, services, response );
-        HashSet<String> productSet = configWs.updateConfiguration( config, (JSONObject)req.parseContent(), siteNode, workspace, null );
+        JSONObject requestJson = //JSONObject.make( 
+                                                  (JSONObject)req.parseContent(); //);
+        HashSet<String> productSet = configWs.updateConfiguration( config, requestJson, siteNode, workspace, null );
         ConfigurationPost configPost = new ConfigurationPost( repository, services );
         String siteName = siteNode == null ? null : siteNode.getName();
         configPost.startAction( config, siteName, productSet, workspace, null );
-        
+
         return configWs.getConfigJson( config, workspace, null );
     }
 }

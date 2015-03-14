@@ -1,5 +1,7 @@
 package gov.nasa.jpl.view_repo.connections;
 
+import gov.nasa.jpl.view_repo.util.NodeUtil;
+
 import javax.jms.Connection;
 import javax.jms.DeliveryMode;
 import javax.jms.Destination;
@@ -36,17 +38,22 @@ public class JmsConnection extends AbstractConnection {
         }
     }
     
+    @Override
     public boolean publish(JSONObject json, String topic) {
         boolean result = false;
         try {
             json.put( "sequence", sequenceId++ );
-            // FIXME: topic is always the same since we're using metadata now
-            result = publishTopic(json.toString( 2 ), "master");
+            result = publishTopic(NodeUtil.jsonToString( json, 2 ), topic);
         } catch ( JSONException e ) {
             e.printStackTrace();
         }
         
         return result;
+    }
+    
+    public boolean publish(JSONObject json) {
+        // topic is always the same since we're using metadata for workspaces now
+        return publish( json, "master" );
     }
     
     public boolean publishTopic(String msg, String topic) {

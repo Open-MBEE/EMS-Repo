@@ -4,6 +4,10 @@
 	"description": "List of workspaces user has access to",
 	"properties": 
 	{
+	    "source": {
+	       "type": "string",
+	       "description": "The client source that originated the delta if provided"
+	    },
 		"workspaces": 
 		{
 			"type": "array",
@@ -74,8 +78,15 @@
 
 				"permissions": 
 				{
-					
+					"type": "string",
+                    "description": "Whether the workspaces has read or write permissions"
 				},
+				
+				"workspaceOperationsPermission": 
+                {
+                    "type": "boolean",
+                    "description": "True if the user belongs to the LDAP group with workspace operation permissions."
+                },
 
 				"timestamp": 
 				{

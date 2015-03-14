@@ -1,29 +1,29 @@
 /*******************************************************************************
- * Copyright (c) <2013>, California Institute of Technology ("Caltech").  
+ * Copyright (c) <2013>, California Institute of Technology ("Caltech").
  * U.S. Government sponsorship acknowledged.
- * 
+ *
  * All rights reserved.
- * 
- * Redistribution and use in source and binary forms, with or without modification, are 
+ *
+ * Redistribution and use in source and binary forms, with or without modification, are
  * permitted provided that the following conditions are met:
- * 
- *  - Redistributions of source code must retain the above copyright notice, this list of 
+ *
+ *  - Redistributions of source code must retain the above copyright notice, this list of
  *    conditions and the following disclaimer.
- *  - Redistributions in binary form must reproduce the above copyright notice, this list 
- *    of conditions and the following disclaimer in the documentation and/or other materials 
+ *  - Redistributions in binary form must reproduce the above copyright notice, this list
+ *    of conditions and the following disclaimer in the documentation and/or other materials
  *    provided with the distribution.
- *  - Neither the name of Caltech nor its operating division, the Jet Propulsion Laboratory, 
- *    nor the names of its contributors may be used to endorse or promote products derived 
+ *  - Neither the name of Caltech nor its operating division, the Jet Propulsion Laboratory,
+ *    nor the names of its contributors may be used to endorse or promote products derived
  *    from this software without specific prior written permission.
- * 
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS 
- * OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY 
- * AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER  
- * OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR 
- * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON 
- * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE 
- * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS
+ * OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY
+ * AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER
+ * OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+ * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
+ * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  ******************************************************************************/
 
@@ -33,6 +33,7 @@ import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
+import gov.nasa.jpl.view_repo.util.NodeUtil;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 
 import java.util.Date;
@@ -54,19 +55,19 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
 
 /**
  * Handler for rendering custom Document landing page
- * 
+ *
  * Looks for the "index.json" inside of the Site directory and renders that.
  * If file isn't found, defaults to ProductListGet.
- * 
+ *
  * @author cinyoung
  *
  */
 @Deprecated
 public class IndexGet extends AbstractJavaWebScript {
     public IndexGet() {
-       super(); 
+       super();
     }
-    
+
     public IndexGet(Repository repositoryHelper, ServiceRegistry registry) {
         super(repositoryHelper, registry);
     }
@@ -84,21 +85,27 @@ public class IndexGet extends AbstractJavaWebScript {
 
     @Override
     protected Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
-        Map<String, Object> model = new HashMap<String, Object>();
-        clearCaches();
+        //clearCaches();
 
         IndexGet instance = new IndexGet(repository, services);
+        return instance.executeImplImpl(req,  status, cache, runWithoutTransactions );
+    }
+    @Override
+    protected Map< String, Object > executeImplImpl( WebScriptRequest req,
+                                                     Status status, Cache cache ) {
+
+        Map<String, Object> model = new HashMap<String, Object>();
 
         // get timestamp if specified
         String timestamp = req.getParameter("timestamp");
         Date dateTime = TimeUtils.dateFromTimestamp( timestamp );
-    
-       
+
+
         String siteName = req.getServiceMatch().getTemplateVars().get("id");
         SiteInfo siteInfo = services.getSiteService().getSite(siteName);
-        
+
         WorkspaceNode workspace = getWorkspace( req );
-        
+
         if (siteInfo == null) {
             log(LogLevel.ERROR, "Could not find site: " + siteName, HttpServletResponse.SC_NOT_FOUND);
         } else {
@@ -106,10 +113,10 @@ public class IndexGet extends AbstractJavaWebScript {
             EmsScriptNode site = getSiteNode( siteName, workspace, dateTime );
             JSONObject json;
             try {
-                json = instance.getIndexJson(site, workspace, dateTime);
-                appendResponseStatusInfo(instance);
+                json = getIndexJson(site, workspace, dateTime);
+                //appendResponseStatusInfo(instance);
                 if (!Utils.isNullOrEmpty(response.toString())) json.put("message",response.toString());
-                model.put("res", json.toString());
+                model.put("res", NodeUtil.jsonToString( json ));
                 model.put("title", siteName);
                 model.put("siteName", site.getProperty(Acm.CM_NAME));
                 model.put("siteTitle", site.getProperty(Acm.CM_TITLE));
@@ -135,7 +142,7 @@ public class IndexGet extends AbstractJavaWebScript {
     /**
      * Retrieve the index.json file if it exists and parse into JSONObject
      * @param site
-     * @param workspace 
+     * @param workspace
      * @return
      * @throws JSONException
      */
@@ -143,7 +150,7 @@ public class IndexGet extends AbstractJavaWebScript {
         EmsScriptNode index = site.childByNamePath("index.json");
         if (index == null) {
             ProductListGet productListService = new ProductListGet(repository, services);
-            return productListService.handleProductList(site, workspace, dateTime); 
+            return productListService.handleProductList(site, workspace, dateTime);
         } else {
             ContentReader reader = services.getContentService().getReader(index.getNodeRef(), ContentModel.PROP_CONTENT);
             return new JSONObject(reader.getContentString());

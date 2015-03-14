@@ -3,8 +3,10 @@ package gov.nasa.jpl.view_repo.webscripts;
 import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
+import gov.nasa.jpl.view_repo.util.NodeUtil;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 import gov.nasa.jpl.view_repo.webscripts.util.ConfigurationsWebscript;
+import gov.nasa.jpl.view_repo.webscripts.util.ConfigurationsWebscript.ConfigurationType;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -28,7 +30,7 @@ public class MmsSnapshotsGet extends AbstractJavaWebScript {
     public MmsSnapshotsGet() {
         super();
     }
-    
+
     public MmsSnapshotsGet( Repository repository, ServiceRegistry services ) {
         this.repository = repository;
         this.services = services;
@@ -39,42 +41,43 @@ public class MmsSnapshotsGet extends AbstractJavaWebScript {
         // TODO Auto-generated method stub
         return false;
     }
-    
+
     @Override
     protected  Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
-		MmsSnapshotsGet instance = new MmsSnapshotsGet(repository, services);
-    	return instance.executeImplImpl(req, status, cache);
+		MmsSnapshotsGet instance = new MmsSnapshotsGet(repository, getServices());
+		return instance.executeImplImpl(req, status, cache, runWithoutTransactions);
     }
-    
+
+    @Override
     protected  Map<String, Object> executeImplImpl(WebScriptRequest req, Status status, Cache cache) {
         printHeader( req );
-        
-        clearCaches();
+
+        //clearCaches();
 
         Map<String, Object> model = new HashMap<String, Object>();
 
-        MmsSnapshotsGet instance = new MmsSnapshotsGet(repository, services);
-        
+        MmsSnapshotsGet instance = new MmsSnapshotsGet(repository, getServices());
+
         JSONObject jsonObject = new JSONObject();
         try {
             jsonObject.put("snapshots", instance.handleRequest(req));
             appendResponseStatusInfo( instance );
             if (!Utils.isNullOrEmpty(response.toString())) jsonObject.put("message", response.toString());
-            model.put("res", jsonObject.toString(2));
+            model.put("res", NodeUtil.jsonToString( jsonObject, 2 ));
         } catch (Exception e) {
-            model.put("res", response.toString());
+            model.put("res", createResponseJson());
             if (e instanceof JSONException) {
                 log(LogLevel.ERROR, "JSON creation error", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             } else {
                 log(LogLevel.ERROR, "Internal server error", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             }
             e.printStackTrace();
-        } 
-    
+        }
+
         status.setCode(responseStatus.getCode());
-        
+
         printFooter();
-        
+
         return model;
     }
 
@@ -97,14 +100,14 @@ public class MmsSnapshotsGet extends AbstractJavaWebScript {
             return new JSONArray();
         }
         ConfigurationsWebscript configWs = new ConfigurationsWebscript(repository, services, response);
-        
+
         WorkspaceNode workspace = getWorkspace( req );
 
         EmsScriptNode config = configWs.getConfiguration( configurationId );
         if (config == null) {
             return new JSONArray();
         }
-        
+
         return configWs.getSnapshots( config, workspace );
     }
 
@@ -112,16 +115,16 @@ public class MmsSnapshotsGet extends AbstractJavaWebScript {
         Date timestamp = TimeUtils.dateFromTimestamp(req.getParameter("timestamp"));
         WorkspaceNode workspace = getWorkspace( req );
         EmsScriptNode product = findScriptNodeById( productId, workspace, timestamp, false);
-        
+
         if (product == null) {
             log(LogLevel.WARNING, "Could not find product", HttpServletResponse.SC_NOT_FOUND);
             return new JSONArray();
         }
 
         ConfigurationsWebscript configWs = new ConfigurationsWebscript(repository, services, response);
-        
+
         JSONArray snapshotsJson = new JSONArray();
-        
+
         // for backwards compatibility, keep deprecated targetAssocsNodesByType
         List< EmsScriptNode > snapshots =
                 product.getTargetAssocsNodesByType( "view2:snapshots",
@@ -132,12 +135,27 @@ public class MmsSnapshotsGet extends AbstractJavaWebScript {
                                                              workspace ) );
             }
         }
-        
+
+        // for backwards compatibility, keep noderefs
         List< NodeRef > productSnapshots = product.getPropertyNodeRefs( "view2:productSnapshots" );
         for (NodeRef productSnapshotNodeRef: productSnapshots) {
             EmsScriptNode productSnapshot = new EmsScriptNode(productSnapshotNodeRef, services, response);
             if ( !productSnapshot.isDeleted() ) {
                 snapshotsJson.put( configWs.getSnapshotJson( productSnapshot, product, workspace ) );
+            }
+        }
+        
+        // all we really need to do is grab all the configurations and place them in as snapshots
+        // looking for all the snapshots without the associations will take too long otherwise
+        ConfigurationsWebscript configService = new ConfigurationsWebscript( repository, services, response );
+        JSONArray configSnapshots = configService.handleConfigurations( req, ConfigurationType.CONFIG_SNAPSHOT );
+        // need to filter out configurations that didn't exist before product existed
+        Date productDate = product.getCreationDate();
+        for (int ii = 0; ii < configSnapshots.length(); ii++) {
+            JSONObject snapshotJson = configSnapshots.getJSONObject(ii);
+            Date snapshotDate = TimeUtils.dateFromTimestamp( snapshotJson.getString( "created" ) );
+            if (snapshotDate.after( productDate )) {
+                snapshotsJson.put( snapshotJson );
             }
         }
         

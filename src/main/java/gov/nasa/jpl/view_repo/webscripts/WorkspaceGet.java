@@ -1,6 +1,7 @@
 package gov.nasa.jpl.view_repo.webscripts;
 
 import gov.nasa.jpl.mbee.util.Utils;
+import gov.nasa.jpl.view_repo.util.NodeUtil;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 
 import java.util.HashMap;
@@ -31,13 +32,14 @@ public class WorkspaceGet extends AbstractJavaWebScript{
 
 	@Override
     protected Map<String, Object> executeImpl (WebScriptRequest req, Status status, Cache cache) {
-	    WorkspaceGet instance = new WorkspaceGet(repository, services);
-	    return instance.executeImplImpl( req, status, cache );
+	    WorkspaceGet instance = new WorkspaceGet(repository, getServices());
+	    return instance.executeImplImpl( req, status, cache, runWithoutTransactions );
 	}
-	
+
+    @Override
     protected Map<String, Object> executeImplImpl (WebScriptRequest req, Status status, Cache cache) {
 		printHeader(req);
-		clearCaches();
+		//clearCaches();
 		Map<String, Object> model = new HashMap<String, Object>();
 		JSONObject object = null;
 
@@ -63,13 +65,14 @@ public class WorkspaceGet extends AbstractJavaWebScript{
 		}
 
 		if(object == null){
-			model.put("res", response.toString());
+			model.put("res", createResponseJson());
 		} else {
 			try{
 				if (!Utils.isNullOrEmpty(response.toString())) object.put("message", response.toString());
-				model.put("res", object.toString(4));
+				model.put("res", NodeUtil.jsonToString( object, 4 ));
 			} catch (JSONException e){
 				e.printStackTrace();
+	            model.put("res", createResponseJson());
 			}
 		}
 		status.setCode(responseStatus.getCode());
@@ -89,7 +92,7 @@ public class WorkspaceGet extends AbstractJavaWebScript{
 		JSONObject interiorJson = new JSONObject();
 		if(ws == null){
 		    if (wsID.equals("master")) {
-		        WorkspaceNode.addWorkspaceNamesAndIds(interiorJson, ws );
+		        WorkspaceNode.addWorkspaceNamesAndIds(interiorJson, ws, services, true );
 		        jsonArray.put(interiorJson);
 		    } else {
 	            log(LogLevel.WARNING, "Workspace not found: " + (ws == null ? null : ws.getSysmlId()), HttpServletResponse.SC_NOT_FOUND);
@@ -104,7 +107,7 @@ public class WorkspaceGet extends AbstractJavaWebScript{
 		json.put("workspace" , jsonArray);
 		return json;
 	}
-	
+
 	@Override
 	protected boolean validateRequest(WebScriptRequest req, Status status) {
 		// TODO Auto-generated method stub

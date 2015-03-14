@@ -13,6 +13,8 @@ import java.util.TreeMap;
 import gov.nasa.jpl.mbee.util.CompareUtils;
 import gov.nasa.jpl.mbee.util.FileUtils;
 
+
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -106,7 +108,7 @@ public class JsonDiff {
     
     public static void main( String[] args ) {
         JSONObject o1=null, o2=null;
-        String usage = "Usage: JsonDiff file1.json file2.json";
+        String usage = "Usage: JSONDiff file1.json file2.json";
         if ( args.length < 2 ) {
             System.err.println(usage);
             return;
@@ -132,8 +134,8 @@ public class JsonDiff {
                             + file1.getName();
             String fName2 = file2.getParent() + File.separator + "sorted_"
                             + file2.getName();
-            FileUtils.stringToFile( so1.toString(4), fName1 );
-            FileUtils.stringToFile( so2.toString(4), fName2 );
+            FileUtils.stringToFile( so1.toString( 4 ), fName1 );
+            FileUtils.stringToFile( so2.toString( 4 ), fName2 );
             runCommand( "diff -b " + fName1 + " " + fName2 );
         } catch ( Throwable e ) {
             e.printStackTrace();

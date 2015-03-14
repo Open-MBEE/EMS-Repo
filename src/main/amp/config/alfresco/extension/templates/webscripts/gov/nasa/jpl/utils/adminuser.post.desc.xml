@@ -5,4 +5,5 @@
   <authentication>admin</authentication>
   <format default="json">argument</format>
   <family>Utils</family>
+  <transaction>none</transaction>
 </webscript>

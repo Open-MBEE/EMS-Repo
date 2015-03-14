@@ -2,12 +2,13 @@
     "elements": [{
         "creator": "admin",
         "editable": true,
-        "modified": "2014-12-10T14:58:27.044-0800",
+        "modified": "2015-02-18T14:10:51.697-0800",
         "owner": "holding_bin_no_site_no_project",
-        "qualifiedId": "/no_project/holding_bin_no_site_no_project/54321",
-        "qualifiedName": "/no_project/holding_bin/null",
-        "read": "2014-12-10T14:58:28.086-0800",
+        "qualifiedId": "/no_site/no_project/holding_bin_no_site_no_project/54321",
+        "qualifiedName": "/no_site/no_project/holding_bin/null",
+        "read": "2015-02-18T14:10:52.113-0800",
         "specialization": {
+            "contents": null,
             "displayedElements": [
                 "301",
                 "302",
@@ -17,6 +18,6 @@
         },
         "sysmlid": "54321"
     }],
-    "message": "[WARNING]: The type supplied View is different than the stored type Product\n[WARNING]: createOrUpdateModel deltas not posted properly\n"
+    "message": "[WARNING]: The type supplied View is different than the stored type Product\n"
 }
 200

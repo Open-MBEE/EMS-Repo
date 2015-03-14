@@ -33,6 +33,7 @@ import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.util.CommitUtil;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
+import gov.nasa.jpl.view_repo.util.NodeUtil;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 
 import java.util.Date;
@@ -40,7 +41,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
-import javax.transaction.UserTransaction;
 
 import org.alfresco.repo.model.Repository;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
@@ -48,6 +48,7 @@ import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 import org.json.JSONObject;
 import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
@@ -71,21 +72,25 @@ public class WorkspacesPost extends AbstractJavaWebScript{
 
     @Override
     protected boolean validateRequest(WebScriptRequest req, Status status) {
-        if(!checkRequestContent ( req )) {
+        if (!checkRequestContent ( req )) {
             return false;
         }
-
-        String workspaceId = req.getServiceMatch().getTemplateVars().get(WORKSPACE_ID);
-        if (!checkRequestVariable(workspaceId, WORKSPACE_ID)) {
+        if (!userHasWorkspaceLdapPermissions()) {
             return false;
         }
         return true;
     }
 
     @Override
-    protected Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache){
+    protected Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
+
+        WorkspacesPost instance = new WorkspacesPost(repository, getServices());
+        return instance.executeImplImpl( req, status, cache, runWithoutTransactions );
+    }
+
+    @Override
+    protected Map<String, Object> executeImplImpl(WebScriptRequest req, Status status, Cache cache){
         printHeader( req );
-        clearCaches();
         Map<String, Object> model = new HashMap<String, Object>();
         int statusCode = HttpServletResponse.SC_OK;
         String user = AuthenticationUtil.getRunAsUser();
@@ -96,25 +101,30 @@ public class WorkspacesPost extends AbstractJavaWebScript{
                 String newName = req.getServiceMatch().getTemplateVars().get(WORKSPACE_ID);
                 String copyTime = req.getParameter("copyTime");
                 Date copyDateTime = TimeUtils.dateFromTimestamp( copyTime );
-                WorkspaceNode ws = createWorkSpace(sourceWorkspaceParam, newName, copyDateTime, (JSONObject)req.parseContent(), user, status);
+                JSONObject reqJson = //JSONObject.make( 
+                        (JSONObject)req.parseContent();// );
+                WorkspaceNode ws = createWorkSpace(sourceWorkspaceParam, newName, copyDateTime, reqJson, user, status);
                 statusCode = status.getCode();
                 json = printObject(ws);
             } else {
                 statusCode = responseStatus.getCode();
             }
+        } catch (JSONException e) {
+            log(LogLevel.ERROR, "JSON malformed\n", HttpServletResponse.SC_BAD_REQUEST);
+            e.printStackTrace();
         } catch (Exception e){
             log(LogLevel.ERROR, "Internal stack trace:\n" + e.getLocalizedMessage() + "\n", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             e.printStackTrace();
         }
         if(json == null)
-            model.put("res", response.toString());
+            model.put( "res", createResponseJson() );
         else
             try {
             	if (!Utils.isNullOrEmpty(response.toString())) json.put("message", response.toString());
-                model.put("res", json.toString(4));
+                model.put("res", NodeUtil.jsonToString( json, 4 ));
             } catch (JSONException e) {
-                // TODO Auto-generated catch block
                 e.printStackTrace();
+                model.put( "res", createResponseJson() );
             }
         status.setCode(statusCode);
         printFooter();
@@ -135,65 +145,121 @@ public class WorkspacesPost extends AbstractJavaWebScript{
         return json;
     }
 
-    public WorkspaceNode createWorkSpace(String sourceWorkId, String newWorkID, Date copyTime,
-                               JSONObject jsonObject, String user, Status status) {
+    public WorkspaceNode createWorkSpace(String sourceWorkId, String newWorkName, Date cpyTime,
+                               JSONObject jsonObject, String user, Status status) throws JSONException {
         status.setCode( HttpServletResponse.SC_OK );
 
-        if(newWorkID.equals( "master" )){
+        String sourceWorkspaceId = null;
+        String newWorkspaceId = null;
+        String workspaceName = null;
+        String desc = null;
+        Date copyTime = null;
+        String permission = "read";  // Default is public read permission
+        WorkspaceNode finalWorkspace = null;
+
+        // If the workspace is supplied in the json object then get all parameters from there
+        // and ignore any URL parameters:
+        if (jsonObject != null) {
+
+            JSONArray jarr = jsonObject.getJSONArray("workspaces");
+            JSONObject wsJson = jarr.getJSONObject( 0 );  // Will only post/update one workspace
+            sourceWorkspaceId = wsJson.optString( "parent", null );
+            newWorkspaceId = wsJson.optString( "id", null ); // alfresco id of workspace node
+            workspaceName = wsJson.optString( "name", null ); // user or auto-generated name, ems:workspace_name
+            copyTime = TimeUtils.dateFromTimestamp( wsJson.optString( "branched", null ) );
+            desc = wsJson.optString( "description", null );
+            permission = wsJson.optString( "permission", "read" );  // "read" or "write"
+        }
+        // If no json object given, this is mainly for backwards compatibility:
+        else {
+            sourceWorkspaceId = sourceWorkId;
+            workspaceName = newWorkName;   // The name is given on the URL typically, not the ID
+            copyTime = cpyTime;
+        }
+
+        if( (newWorkspaceId != null && newWorkspaceId.equals( "master" )) ||
+            (workspaceName != null && workspaceName.equals( "master" )) ) {
             log(LogLevel.WARNING, "Cannot change attributes of the master workspace.", HttpServletResponse.SC_BAD_REQUEST);
             status.setCode( HttpServletResponse.SC_BAD_REQUEST );
             return null;
         }
-        WorkspaceNode existingWs = 
-                WorkspaceNode.getWorkspaceFromId( newWorkID, services,
-                                                  response, status, // false,
-                                                  user );   
-        if ( existingWs != null ) {
-            if (existingWs.isDeleted()) {
-                existingWs.removeAspect( "ems:Deleted" );
-                log(LogLevel.INFO, "Workspace undeleted", HttpServletResponse.SC_OK);
-                return existingWs;
-            } else {
-                log(LogLevel.WARNING, "Workspace already exists.", HttpServletResponse.SC_BAD_REQUEST);
-                status.setCode( HttpServletResponse.SC_BAD_REQUEST );
-                return null;
-            }
-        } else {
+
+        // Only create the workspace if the workspace id was not supplied:
+        if (newWorkspaceId == null) {
+
             WorkspaceNode srcWs =
-                    WorkspaceNode.getWorkspaceFromId( sourceWorkId,
+                    WorkspaceNode.getWorkspaceFromId( sourceWorkspaceId,
                                                       services,
                                                       response, status, // false,
                                                       user );
-            if (!"master".equals( sourceWorkId ) && srcWs == null) {
+            if (!"master".equals( sourceWorkspaceId ) && srcWs == null) {
                 log(LogLevel.WARNING, "Source workspace not found.", HttpServletResponse.SC_NOT_FOUND);
                 status.setCode( HttpServletResponse.SC_NOT_FOUND );
                 return null;
             } else {
                 EmsScriptNode folder = null;
-                WorkspaceNode dstWs = null;
-                UserTransaction trx;
-                trx = services.getTransactionService().getNonPropagatingUserTransaction();
-                try {
-                    trx.begin();
-                    dstWs = WorkspaceNode.createWorkspaceFromSource(newWorkID, user, sourceWorkId, copyTime, folder, getServices(), getResponse(), status);
-                    trx.commit();
-                } catch (Throwable e) {
-                    try {
-                        e.printStackTrace();
-                        trx.rollback();
-                    } catch (Throwable ee) {
-                        ee.printStackTrace();
-                    }
-                }
+                WorkspaceNode dstWs = WorkspaceNode.createWorkspaceFromSource(workspaceName, user, sourceWorkspaceId,
+                                                                              copyTime, folder, getServices(),
+                                                                              getResponse(), status, desc);
 
                 if (dstWs != null) {
                     // keep history of the branch
-                    CommitUtil.branch( srcWs, dstWs,"", false, services, response );
-                    return dstWs;
+                    CommitUtil.branch( srcWs, dstWs,"", true, services, response );                    
+                    finalWorkspace = dstWs;
                 }
+            }
+        }
+        // Otherwise, update the workspace:
+        else {
+
+            // First try and find the workspace by id:
+            WorkspaceNode existingWs =
+                    WorkspaceNode.getWorkspaceFromId( newWorkspaceId, services,
+                                                      response, status, // false,
+                                                      user );
+
+            // Workspace was found, so update it:
+            if ( existingWs != null ) {
+
+                if (existingWs.isDeleted()) {
+                    existingWs.removeAspect( "ems:Deleted" );
+                    log(LogLevel.INFO, "Workspace undeleted and modified", HttpServletResponse.SC_OK);
+                } else {
+                    log(LogLevel.INFO, "Workspace is modified", HttpServletResponse.SC_OK);
+                }
+
+                // Update the name/description:
+                // Note: allowing duplicate workspace names, so no need to check for other
+                //       workspaces with the same name
+                if (workspaceName != null) {
+                    existingWs.createOrUpdateProperty("ems:workspace_name", workspaceName);
+                }
+                if (desc != null) {
+                    existingWs.createOrUpdateProperty("ems:description", desc);
+                }
+                finalWorkspace = existingWs;
+            }
+            else {
+                log(LogLevel.WARNING, "Workspace not found.", HttpServletResponse.SC_NOT_FOUND);
+                status.setCode( HttpServletResponse.SC_NOT_FOUND );
                 return null;
             }
         }
+        
+        // Finally, apply the permissions:
+        if (finalWorkspace != null) {
+            if (permission.equals( "write" )) {
+                finalWorkspace.setPermission( "SiteCollaborator", "GROUP_EVERYONE" );
+            }
+            // Default is read (this handles the empty string case also)
+            else {
+                finalWorkspace.setPermission( "SiteConsumer", "GROUP_EVERYONE" );
+            }
+            finalWorkspace.createOrUpdateProperty( "ems:permission", permission );
+        }
+        
+        return finalWorkspace;
     }
+
 }
 

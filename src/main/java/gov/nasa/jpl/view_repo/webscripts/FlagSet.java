@@ -4,6 +4,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.log4j.Logger;
 import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.DeclarativeWebScript;
 import org.springframework.extensions.webscripts.Status;
@@ -13,6 +14,7 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
  * Allows heisenCache to be turned on/off
  */
 public abstract class FlagSet extends DeclarativeWebScript {
+    static Logger logger = Logger.getLogger(FlagSet.class);
    
     protected abstract void set( boolean val ); 
     protected abstract boolean get();
@@ -41,20 +43,35 @@ public abstract class FlagSet extends DeclarativeWebScript {
         String turnOnStr = req.getParameter( "on" );
         String turnOffStr = req.getParameter( "off" );
 
-        boolean turnOn = !( turnOnStr == null ||
-                            turnOnStr.trim().equalsIgnoreCase( "false" ) ||
+        String isOnStr = null;
+        boolean justAsking = false;
+        if ( turnOnStr == null && turnOffStr == null ) {
+            isOnStr = req.getParameter( "ison" );
+            if ( isOnStr == null ) {
+                isOnStr = req.getParameter( "isOn" );
+            }
+            justAsking = isOnStr != null;
+        }
+        
+        boolean turnOn = !justAsking && 
+                         !( ( turnOnStr != null &&
+                              turnOnStr.trim().equalsIgnoreCase( "false" ) ) ||
                             ( turnOffStr != null &&
-                              turnOffStr.trim().equalsIgnoreCase( "true" ) ) );
+                              !turnOffStr.trim().equalsIgnoreCase( "false" ) ) );
         turnOnStr = turnOn ? "on" : "off";
-        if ( turnOn == get() ) {
-            System.out.println( ( new Date() ) + ": " + flagName()
-                                + " is already " + turnOnStr );
+        String msg = null;
+        if ( justAsking ) {
+            msg = flagName() + " is " + ( get() ? "on" : "off" );
+        } else if ( turnOn == get() ) {
+            msg = flagName() + " is already " + turnOnStr;
         } else {
             set( turnOn );
-            System.out.println( ( new Date() ) + ": " + flagName() + " turned "
-                                + turnOnStr );
+            msg = flagName() + " turned " + turnOnStr;
         }
-        model.put( "res", flagName() + " " + turnOnStr );
+        if (logger.isInfoEnabled()) {
+            logger.info( ( new Date() ) + ": " + msg );
+        }
+        model.put( "res", msg );
 
         return model;
     }

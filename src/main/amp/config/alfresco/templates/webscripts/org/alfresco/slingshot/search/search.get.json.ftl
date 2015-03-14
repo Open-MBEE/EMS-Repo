@@ -17,6 +17,10 @@
 			"modifiedBy": "${item.modifiedBy}",
 			"size": ${item.size?c},
 			"mimetype": "${item.mimetype!''}",
+			<#if item.sysmlId??>
+			"sysmlId": "${item.sysmlId}",
+			"sysmlName": "${item.sysmlName}",
+			</#if>
 			<#if item.site??>
 			"site":
 			{
@@ -34,3 +38,4 @@
 	]
 }
 </#escape>
+

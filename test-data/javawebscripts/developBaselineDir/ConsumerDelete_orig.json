@@ -1,0 +1,24 @@
+{
+  "message": "Warning! No WRITE priveleges to cm_306a992d-efde-4973-872b-133b191f4789.  Warning! No WRITE priveleges to cm_5327d6e4-38ff-4a01-8379-cc351aa0f4e1.  ",
+  "workspace1": {
+    "timestamp": "2015-03-05T15:47:20.238-0800",
+    "qualifiedId": "master",
+    "id": "master",
+    "qualifiedName": "master",
+    "name": "master",
+    "elements": []
+  },
+  "workspace2": {
+    "timestamp": "2015-03-05T15:47:20.243-0800",
+    "qualifiedId": "master",
+    "id": "master",
+    "deletedElements": [],
+    "addedElements": [],
+    "conflictedElements": [],
+    "updatedElements": [],
+    "qualifiedName": "master",
+    "name": "master",
+    "movedElements": []
+  }
+}
+403

@@ -1,25 +1,24 @@
-{
-    "elements": [{
-        "creator": "admin",
-        "documentation": "x is x",
-        "editable": true,
-        "modified": "2014-12-10T14:57:51.613-0800",
-        "name": "300",
-        "owner": "holding_bin_no_site_no_project",
-        "qualifiedId": "/no_project/holding_bin_no_site_no_project/x",
-        "qualifiedName": "/no_project/holding_bin/300",
-        "read": "2014-12-10T14:57:53.139-0800",
-        "specialization": {
-            "isDerived": false,
-            "isSlot": false,
-            "type": "Property",
-            "value": [{
-                "string": "the x value",
-                "type": "LiteralString"
-            }]
-        },
-        "sysmlid": "x"
-    }],
-    "message": "[WARNING]: createOrUpdateModel deltas not posted properly\n"
-}
+{"elements": [{
+    "creator": "admin",
+    "documentation": "x is x",
+    "editable": true,
+    "modified": "2015-02-18T14:10:39.348-0800",
+    "name": "300",
+    "owner": "holding_bin_no_site_no_project",
+    "qualifiedId": "/no_site/no_project/holding_bin_no_site_no_project/x",
+    "qualifiedName": "/no_site/no_project/holding_bin/300",
+    "read": "2015-02-18T14:10:39.958-0800",
+    "specialization": {
+        "isDerived": false,
+        "isSlot": false,
+        "propertyType": null,
+        "type": "Property",
+        "value": [{
+            "string": "the x value",
+            "type": "LiteralString",
+            "valueExpression": null
+        }]
+    },
+    "sysmlid": "x"
+}]}
 200

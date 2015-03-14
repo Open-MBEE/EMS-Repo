@@ -4,7 +4,7 @@
   <url>/rest/projects/volume/{volid}/delete</url> 
   <format default="json">argument</format> 
   <authentication>user</authentication> 
-  <transaction allow="readwrite">required</transaction>
+  <transaction>none</transaction>
   <family>View Editor</family>
   <args>
   	<arg>

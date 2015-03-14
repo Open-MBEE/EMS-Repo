@@ -1,146 +1,45 @@
 {
-
-  "message": "[WARNING]: createOrUpdateModel deltas not posted properly\n",
-
   "sequence": 1,
-
   "workspace1": {
-
-    "elements": [
-
-      {
-
-        "creator": "admin",
-
-        "documentation": "",
-
-        "editable": true,
-
-        "name": "6666_name",
-
-        "owner": "holding_bin_no_site_no_project",
-
-        "qualifiedName": "/no_project/holding_bin/6666_name",
-
-        "specialization": {
-
-          "operand": [
-
-            {
-
-              "element": "300",
-
-              "type": "ElementValue"
-
-            },
-
-            {
-
-              "element": "302",
-
-              "type": "ElementValue"
-
-            }
-
-          ],
-
-          "type": "Expression"
-
-        },
-
-        "sysmlid": "6666",
-
-      },
-
-      {
-
-        "creator": "admin",
-
-        "editable": true,
-
-        "owner": "6666",
-
-        "qualifiedName": "/no_project/holding_bin/6666_name/null",
-
-        "specialization": {
-
-          "element": "300",
-
-          "type": "ElementValue"
-
-        },
-
-      },
-
-      {
-
-        "creator": "admin",
-
-        "editable": true,
-
-        "owner": "6666",
-
-        "qualifiedName": "/no_project/holding_bin/6666_name/null",
-
-        "specialization": {
-
-          "element": "302",
-
-          "type": "ElementValue"
-
-        },
-
-      }
-
-    ],
-
-    "name": "master",
-
-    "qualifiedName": "master",
-
-  },
-
+  "qualifiedName": "master",
+  "name": "master",
+  "elements": [{
+  "name": "6666_name",
+  "qualifiedName": "/no_site/no_project/holding_bin/6666_name",
+  "documentation": "",
+  "owner": "holding_bin_no_site_no_project",
+  "sysmlid": "6666",
+  "specialization": {
+  "valueExpression": null,
+  "operand": [
+    {
+      "element": "300",
+      "valueExpression": null,
+      "type": "ElementValue"
+    },
+    {
+      "element": "302",
+      "valueExpression": null,
+      "type": "ElementValue"
+    }
+  ],
+  "type": "Expression"
+},
+  "editable": true,
+  "creator": "admin"
+}]
+},
   "workspace2": {
-
-    "addedElements": [],
-
-    "conflictedElements": [],
-
-    "deletedElements": [
-
-      {
-
-        "creator": "admin",
-
-        "sysmlid": "6666"
-
-      },
-
-      {
-
-        "creator": "admin",
-
-      },
-
-      {
-
-        "creator": "admin",
-
-      }
-
-    ],
-
-    "movedElements": [],
-
-    "name": "master",
-
-    "qualifiedName": "master",
-
-    "updatedElements": []
-
-  }
-
+  "deletedElements": [{
+  "sysmlid": "6666",
+  "creator": "admin",
+}],
+  "addedElements": [],
+  "conflictedElements": [],
+  "updatedElements": [],
+  "qualifiedName": "master",
+  "name": "master",
+  "movedElements": []
 }
-
+}
 200
-

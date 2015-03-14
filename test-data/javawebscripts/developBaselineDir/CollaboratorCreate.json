@@ -1,0 +1,11 @@
+{"elements": [{
+    "creator": "Collaborator",
+    "documentation": "y child",
+    "editable": true,
+    "owner": "y",
+    "qualifiedId": "/europa/123456/300/301/302/y/ychild",
+    "qualifiedName": "/europa/JW_TEST2/300/301/302/null/null",
+    "specialization": {"type": "Element"},
+    "sysmlid": "ychild"
+}]}
+200

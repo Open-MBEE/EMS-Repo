@@ -24,7 +24,7 @@ public class MmsSnapshotsDelete extends AbstractJavaWebScript {
     public MmsSnapshotsDelete() {
         super();
     }
-    
+
     public MmsSnapshotsDelete( Repository repository, ServiceRegistry services ) {
         this.repository = repository;
         this.services = services;
@@ -35,43 +35,44 @@ public class MmsSnapshotsDelete extends AbstractJavaWebScript {
         // TODO Auto-generated method stub
         return false;
     }
-    
+
     @Override
     protected  Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
-		MmsSnapshotsDelete instance = new MmsSnapshotsDelete(repository, services);
-    	return instance.executeImplImpl(req, status, cache);
+		MmsSnapshotsDelete instance = new MmsSnapshotsDelete(repository, getServices());
+    	    return instance.executeImplImpl(req, status, cache, runWithoutTransactions);
     }
-    
+
+    @Override
     protected  Map<String, Object> executeImplImpl(WebScriptRequest req, Status status, Cache cache) {
-        clearCaches();
+        //clearCaches();
 
         Map<String, Object> model = new HashMap<String, Object>();
 
-        MmsSnapshotsDelete instance = new MmsSnapshotsDelete(repository, services);
-        
+        MmsSnapshotsDelete instance = new MmsSnapshotsDelete(repository, getServices());
+
         JSONObject jsonObject = new JSONObject();
         try {
             instance.handleRequest(req);
             appendResponseStatusInfo( instance );
             if (!Utils.isNullOrEmpty(response.toString())) jsonObject.put("message", response.toString());
-            model.put("res", jsonObject.toString(2));
+            model.put("res", NodeUtil.jsonToString( jsonObject, 2 ));
         } catch (Exception e) {
-            model.put("res", response.toString());
+            model.put("res", createResponseJson());
             if (e instanceof JSONException) {
                 log(LogLevel.ERROR, "JSON creation error", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             } else {
                 log(LogLevel.ERROR, "Internal server error", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             }
             e.printStackTrace();
-        } 
-    
+        }
+
         status.setCode(responseStatus.getCode());
         return model;
     }
 
     private void handleRequest( WebScriptRequest req ) throws JSONException {
         String snapshotId = req.getServiceMatch().getTemplateVars().get("snapshotId");
-        NodeRef snapshotNodeRef = NodeUtil.findNodeRefByType( snapshotId, SearchType.CM_NAME, true, 
+        NodeRef snapshotNodeRef = NodeUtil.findNodeRefByType( snapshotId, SearchType.CM_NAME, true,
                                                            null, null, true, services, false );
         if (snapshotNodeRef == null) {
             log(LogLevel.ERROR, "Could not find snapshot", HttpServletResponse.SC_NOT_FOUND);

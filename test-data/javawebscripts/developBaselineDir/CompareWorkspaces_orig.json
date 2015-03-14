@@ -1,64 +1,65 @@
 {
     "workspace1": {
-        "elements": [
-            {
-                "creator": "admin",
-                "editable": true,
-                "modified": "2014-12-10T14:54:24.113-0800",
-                "name": "holding_bin",
-                "owner": "no_project",
-                "qualifiedId": "/no_project/holding_bin_no_site_no_project",
-                "qualifiedName": "/no_project/holding_bin",
-                "read": "2014-12-10T14:56:34.748-0800",
-                "specialization": {"type": "Package"},
-                "sysmlid": "holding_bin_no_site_no_project"
-            },
-            {
-                "creator": "admin",
-                "documentation": "something",
-                "editable": true,
-                "modified": "2014-12-10T14:54:35.213-0800",
-                "name": "300",
-                "owner": "holding_bin_no_site_no_project",
-                "qualifiedId": "/no_project/holding_bin_no_site_no_project/x",
-                "qualifiedName": "/no_project/holding_bin/300",
-                "read": "2014-12-10T14:56:34.754-0800",
-                "specialization": {
-                    "isDerived": false,
-                    "isSlot": false,
-                    "type": "Property",
-                    "value": [{
-                        "string": "dlam_string",
-                        "type": "LiteralString"
-                    }]
-                },
-                "sysmlid": "x"
-            }
-        ],
-        "id": "a95590e5-53a0-4e5b-a935-cfc05ca769a5",
-        "name": "wsA",
-        "qualifiedId": "master/a95590e5-53a0-4e5b-a935-cfc05ca769a5",
-        "qualifiedName": "master/wsA"
-    },
+    "qualifiedId": "master/6f5108e6-40cf-4c61-b623-f5c11f511c68",
+    "id": "6f5108e6-40cf-4c61-b623-f5c11f511c68",
+    "qualifiedName": "master/wsA",
+    "name": "wsA",
+    "elements": [{
+    "qualifiedId": "/no_site/no_project/holding_bin_no_site_no_project",
+    "qualifiedName": "/no_site/no_project/holding_bin",
+    "name": "holding_bin",
+    "owner": "no_project",
+    "sysmlid": "holding_bin_no_site_no_project",
+    "read": "2015-02-24T11:31:26.335-0800",
+    "specialization": {"type": "Package"},
+    "editable": true,
+    "modified": "2015-02-24T11:31:20.068-0800",
+    "creator": "admin"
+}, {
+    "qualifiedId": "/no_site/no_project/holding_bin_no_site_no_project/x",
+    "qualifiedName": "/no_site/no_project/holding_bin/300",
+    "name": "300",
+    "owner": "holding_bin_no_site_no_project",
+    "documentation": "something",
+    "sysmlid": "x",
+    "read": "2015-02-24T11:29:55.888-0800",
+    "specialization": {
+    "propertyType": null,
+    "isSlot": false,
+    "isDerived": false,
+    "value": [{
+        "valueExpression": null,
+        "string": "dlam_string",
+        "type": "LiteralString"
+    }],
+    "type": "Property"
+},
+    "editable": true,
+    "modified": "2015-02-24T11:29:53.744-0800",
+    "creator": "admin"
+}]
+},
     "workspace2": {
-        "addedElements": [],
-        "conflictedElements": [],
-        "deletedElements": [],
-        "id": "94434b0e-3963-4cce-aed9-65f8b986acd0",
-        "movedElements": [],
-        "name": "wsB",
-        "qualifiedId": "master/a95590e5-53a0-4e5b-a935-cfc05ca769a5/94434b0e-3963-4cce-aed9-65f8b986acd0",
-        "qualifiedName": "master/wsA/wsB",
-        "updatedElements": [{
-            "creator": "admin",
-            "documentation": "x is x",
-            "modified": "2014-12-10T14:56:32.470-0800",
-            "specialization": {"value": [{
-                "string": "the x value",
-                "type": "LiteralString"
-            }]},
-            "sysmlid": "x"
-        }]
-    }
+    "qualifiedId": "master/6f5108e6-40cf-4c61-b623-f5c11f511c68/bfd49be4-c441-408d-a72f-eaaeb397a2dd",
+    "id": "bfd49be4-c441-408d-a72f-eaaeb397a2dd",
+    "deletedElements": [],
+    "addedElements": [],
+    "conflictedElements": [],
+    "updatedElements": [{
+    "sysmlid": "x",
+    "documentation": "x is x",
+    "read": "2015-02-24T11:31:25.998-0800",
+    "specialization": {"value": [{
+    "valueExpression": null,
+    "string": "the x value",
+    "type": "LiteralString"
+}]},
+    "creator": "admin",
+    "modified": "2015-02-24T11:31:25.312-0800"
+}],
+    "qualifiedName": "master/wsA/wsB",
+    "name": "wsB",
+    "movedElements": []
+}
 }
 200

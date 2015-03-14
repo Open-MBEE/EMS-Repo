@@ -1,6 +1,7 @@
 package gov.nasa.jpl.view_repo.webscripts;
 
 import gov.nasa.jpl.mbee.util.Utils;
+import gov.nasa.jpl.view_repo.util.NodeUtil;
 import gov.nasa.jpl.view_repo.webscripts.util.ConfigurationsWebscript;
 
 import java.util.HashMap;
@@ -21,21 +22,21 @@ public class MmsConfigurationsGet extends AbstractJavaWebScript {
         SINGLE,
         MULTIPLE
     }
-    
+
     private Type type;
-    
+
     public void setType(Type type) {
         this.type = type;
     }
-    
+
     public Type getType() {
         return type;
     }
-    
+
     public MmsConfigurationsGet() {
         super();
     }
-    
+
     public MmsConfigurationsGet( Repository repository, ServiceRegistry services ) {
         this.repository = repository;
         this.services = services;
@@ -46,27 +47,28 @@ public class MmsConfigurationsGet extends AbstractJavaWebScript {
         // TODO Auto-generated method stub
         return false;
     }
-    
+
     @Override
     protected  Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
-		MmsConfigurationsGet instance = new MmsConfigurationsGet(repository, services);
+		MmsConfigurationsGet instance = new MmsConfigurationsGet(repository, getServices());
 		instance.setType( type );
-    	    return instance.executeImplImpl(req, status, cache);
+		return instance.executeImplImpl(req, status, cache, runWithoutTransactions);
     }
-    
+
+    @Override
     protected  Map<String, Object> executeImplImpl(WebScriptRequest req, Status status, Cache cache) {
         printHeader( req );
-        
-        clearCaches();
-        
+
+        //clearCaches();
+
         Map<String, Object> model = new HashMap<String, Object>();
-        
-        MmsConfigurationsGet instance = new MmsConfigurationsGet(repository, services);
-        
+
+        MmsConfigurationsGet instance = new MmsConfigurationsGet(repository, getServices());
+
         JSONObject jsonObject = new JSONObject();
 
         try {
-            ConfigurationsWebscript configWs = new ConfigurationsWebscript(repository, services, instance.response);
+            ConfigurationsWebscript configWs = new ConfigurationsWebscript(repository, getServices(), instance.response);
             switch(type) {
                 case SINGLE:
                     jsonObject.put("configurations", configWs.handleConfiguration(req, true));
@@ -80,21 +82,21 @@ public class MmsConfigurationsGet extends AbstractJavaWebScript {
             }
             appendResponseStatusInfo( instance );
             if (!Utils.isNullOrEmpty(response.toString())) jsonObject.put("message", response.toString());
-            model.put("res", jsonObject.toString(2));
+            model.put("res", NodeUtil.jsonToString( jsonObject, 2 ));
         } catch (Exception e) {
-            model.put("res", response.toString());
+            model.put("res", createResponseJson());
             if (e instanceof JSONException) {
                 log(LogLevel.ERROR, "JSON creation error", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             } else {
                 log(LogLevel.ERROR, "Internal server error", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             }
             e.printStackTrace();
-        } 
-    
+        }
+
         status.setCode(responseStatus.getCode());
-    
+
         printFooter();
-        
+
         return model;
     }
 

@@ -336,17 +336,91 @@ public class View extends List implements sysml.view.View< EmsScriptNode >, Comp
         return viewpointMethod;
     }
 
+    
+    /**
+     * Get the last modified time of the element based on whether the view
+     * contains json is generated. If generated, return the current time since
+     * we don't determine when the generated json would have changed, so we
+     * can't assume that it hasn't changed.
+     * 
+     * @param dateTime a timepoint indicating a version of the element
+     * @return
+     */
+    public Date getLastModified( Date dateTime ) {
+        if ( getElement() == null ) return null;
+        if ( !isGeneratedFromViewpoint() ) {
+//            System.out.println("####  ####  Not auto-generated view " + getElement()  );
+            Date date = getElement().getLastModified( dateTime );
+            //return new Date(); 
+            return date;
+        }
+//        System.out.println("####  ####  Auto-generated view " + getElement()  );
+        return new Date(); 
+    }
+
+    /**
+     * Get the last modified time of self, displayed elements, and contained
+     * views, recursively. <br>
+     * NOTE: This is not being called and is not tested.
+     * 
+     * @param dateTime
+     * @return
+     */
+    public Date getLastModifiedRecursive( Date dateTime ) {
+        if ( getElement() == null ) return null;
+        Date date = getElement().getLastModified( dateTime );
+        if ( !isGeneratedFromViewpoint() ) {
+            return date;
+        }
+        //Set<EmsScriptNode> elems = new LinkedHashSet< EmsScriptNode >();
+        Collection<EmsScriptNode> elems =
+                getDisplayedElements( getWorkspace(), dateTime, true, false, null );
+        for ( EmsScriptNode elem : elems ) {
+            Date d = elem.getLastModified( dateTime );
+            if ( d.after( date ) ) date = d;
+        }
+        elems = getContainedViews( false, getWorkspace(), dateTime, null );
+        for ( EmsScriptNode elem : elems ) {
+            View v = new View( elem );
+            Date d = v.getLastModifiedRecursive( dateTime );
+            if ( d.after( date ) ) date = d;
+        }
+        return date;
+    }
+
+    /**
+     * @return whether the contains json is generated from a viewpoint instead
+     *         of stored statically.
+     */
+    public boolean isGeneratedFromViewpoint() {
+        if ( getElement() == null ) {
+//            System.out.println("####  ####  view has no element "  );
+            return false;
+        }
+        String property = (String) viewNode.getProperty("view2:contains");
+        if ( property != null && property.length() > 0 ) {
+//            System.out.println("####  ####  has contains " + getElement()  );
+            return false;
+        }
+        EmsScriptNode viewpointOp = getViewpointOperation();
+        if ( viewpointOp == null ) {
+//            System.out.println("####  ####  no viewpoint " + getElement()  );
+            return false;
+        }
+//        System.out.println("####  ####  got viewpoint " + getElement()  );
+        return true;
+    }
+    
     public boolean generateViewables() {
         // Get the related elements that define the the view.
 
-        Collection<EmsScriptNode> exposed = getExposedElements();
-        // TODO -- need to handle case where viewpoint operation does not exist
-        //         and an external function (e.g., Java) is somehow specified.
         EmsScriptNode viewpointOp = getViewpointOperation();
         if ( viewpointOp == null ) {
             if (Debug.isOn()) System.out.println("*** View.toViewJson(): no viewpoint operation! View = " + toBoringString() );
             return false;
         }
+
+        Collection<EmsScriptNode> exposed = getExposedElements();
 
         // Translate the viewpoint Operation/Expression element into an AE Expression:
         ArrayList<Object> paramValList = new ArrayList<Object>();
@@ -528,11 +602,18 @@ public class View extends List implements sysml.view.View< EmsScriptNode >, Comp
             if ( contains != null ) {
                 if ( contains instanceof JSONArray ) return (JSONArray)contains;
 
-                try {
-                    JSONArray jarr = new JSONArray( "" + contains );
-                    viewablesJson = jarr;
-                } catch ( JSONException e ) {
-                    e.printStackTrace();
+                String containsString = "" + contains;
+                if ( containsString.length() > 1 ) {
+                    try {
+                        JSONArray jarr = new JSONArray( "" + contains );
+                        viewablesJson = jarr;
+                    } catch ( JSONException e ) {
+                        System.out.println( "Tried to parse \"" + contains
+                                            + "\" in element "
+                                            + getElement().getSysmlName() + "("
+                                            + getElement().getSysmlId() + ")" );
+                        e.printStackTrace();
+                    }
                 }
             }
         }

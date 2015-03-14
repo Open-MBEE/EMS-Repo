@@ -151,6 +151,18 @@
                     <multiple>false</multiple>
                     <index enabled="false"/>
                 </property>
+                <property name="ems:description">
+                    <type>d:text</type>
+                    <mandatory>false</mandatory>
+                    <multiple>false</multiple>
+                    <index enabled="false"/>
+                </property>
+                <property name="ems:permission">
+                    <type>d:text</type>
+                    <mandatory>false</mandatory>
+                    <multiple>false</multiple>
+                    <index enabled="false"/>
+                </property>
             </properties>
         </aspect>
         
@@ -296,6 +308,20 @@
         <aspect name="ems:MagicDrawData">
           <properties>
               <property name="ems:mdData">
+                  <type>d:text</type>
+                  <mandatory>false</mandatory>
+                  <multiple>false</multiple>
+                  <index enabled="false">
+                      <atomic>false</atomic>
+                      <stored>false</stored>
+                      <tokenised>false</tokenised>
+                  </index>
+              </property>
+          </properties>
+        </aspect>
+        <aspect name="ems:BranchPerm">
+          <properties>
+              <property name="ems:ldapGroup">
                   <type>d:text</type>
                   <mandatory>false</mandatory>
                   <multiple>false</multiple>

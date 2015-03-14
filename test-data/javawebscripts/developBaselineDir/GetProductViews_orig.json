@@ -3,19 +3,21 @@
         "creator": "admin",
         "documentation": "to",
         "editable": true,
-        "modified": "2014-12-10T14:54:46.387-0800",
+        "modified": "2015-02-18T14:09:58.095-0800",
         "name": "302",
         "owner": "301",
-        "qualifiedId": "/123456/300/301/302",
-        "qualifiedName": "/JW_TEST/300/301/302",
-        "read": "2014-12-10T14:57:50.957-0800",
+        "qualifiedId": "/europa/123456/300/301/302",
+        "qualifiedName": "/europa/JW_TEST/300/301/302",
+        "read": "2015-02-18T14:10:39.052-0800",
         "specialization": {
             "isDerived": false,
             "isSlot": false,
+            "propertyType": null,
             "type": "Property",
             "value": [{
                 "string": "dlam_string",
-                "type": "LiteralString"
+                "type": "LiteralString",
+                "valueExpression": null
             }]
         },
         "sysmlid": "302"
@@ -24,19 +26,21 @@
         "creator": "admin",
         "documentation": "about",
         "editable": true,
-        "modified": "2014-12-10T14:56:20.929-0800",
+        "modified": "2015-02-18T14:08:54.292-0800",
         "name": "304",
         "owner": "303",
-        "qualifiedId": "/123456/300/301/302/303/304",
-        "qualifiedName": "/JW_TEST/300/301/302/303/304",
-        "read": "2014-12-10T14:57:50.970-0800",
+        "qualifiedId": "/europa/123456/300/301/302/303/304",
+        "qualifiedName": "/europa/JW_TEST/300/301/302/303/304",
+        "read": "2015-02-18T14:09:48.715-0800",
         "specialization": {
             "isDerived": false,
             "isSlot": false,
+            "propertyType": null,
             "type": "Property",
             "value": [{
                 "string": "dlam_string",
-                "type": "LiteralString"
+                "type": "LiteralString",
+                "valueExpression": null
             }]
         },
         "sysmlid": "304"
@@ -45,12 +49,12 @@
         "creator": "admin",
         "documentation": "else",
         "editable": true,
-        "modified": "2014-12-10T14:56:53.093-0800",
+        "modified": "2015-02-18T14:07:13.571-0800",
         "name": "301",
         "owner": "300",
-        "qualifiedId": "/123456/300/301",
-        "qualifiedName": "/JW_TEST/300/301",
-        "read": "2014-12-10T14:57:50.987-0800",
+        "qualifiedId": "/europa/123456/300/301",
+        "qualifiedName": "/europa/JW_TEST/300/301",
+        "read": "2015-02-18T14:07:14.453-0800",
         "specialization": {
             "allowedElements": [
                 "301",
@@ -64,6 +68,7 @@
                 "sourceType": "reference",
                 "type": "Paragraph"
             }],
+            "contents": null,
             "displayedElements": [
                 "301",
                 "302",

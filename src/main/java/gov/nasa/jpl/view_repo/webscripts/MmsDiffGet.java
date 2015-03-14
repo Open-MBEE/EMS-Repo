@@ -2,6 +2,7 @@ package gov.nasa.jpl.view_repo.webscripts;
 
 import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.mbee.util.Utils;
+import gov.nasa.jpl.view_repo.util.NodeUtil;
 import gov.nasa.jpl.view_repo.util.WorkspaceDiff;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 
@@ -33,9 +34,14 @@ public class MmsDiffGet extends AbstractJavaWebScript {
 
     @Override
     protected boolean validateRequest( WebScriptRequest req, Status status ) {
+        
+        if (!userHasWorkspaceLdapPermissions()) {
+            return false;
+        }
+        
         workspaceId1 = req.getParameter( "workspace1" );
         workspaceId2 = req.getParameter( "workspace2" );
-        ws1 = WorkspaceNode.getWorkspaceFromId( workspaceId1, getServices(), response, status, //false, 
+        ws1 = WorkspaceNode.getWorkspaceFromId( workspaceId1, getServices(), response, status, //false,
                                   null );
         ws2 = WorkspaceNode.getWorkspaceFromId( workspaceId2, getServices(), response, status, //false,
                                   null );
@@ -61,18 +67,19 @@ public class MmsDiffGet extends AbstractJavaWebScript {
     protected Map< String, Object > executeImpl( WebScriptRequest req,
                                                  Status status, Cache cache ) {
         MmsDiffGet mmsDiffGet = new MmsDiffGet();
-        return mmsDiffGet.myExecuteImpl( req, status, cache );
+        return mmsDiffGet.executeImplImpl( req, status, cache, runWithoutTransactions );
     }
-    
-    protected Map< String, Object > myExecuteImpl( WebScriptRequest req,
+
+    @Override
+    protected Map< String, Object > executeImplImpl( WebScriptRequest req,
                                                    Status status, Cache cache ) {
         printHeader( req );
-        
+
         Map<String, Object> results = new HashMap<String, Object>();
 
         if (!validateRequest(req, status)) {
             status.setCode(responseStatus.getCode());
-            results.put("res", response.toString());
+            results.put("res", createResponseJson());
             return results;
         }
 
@@ -81,7 +88,7 @@ public class MmsDiffGet extends AbstractJavaWebScript {
         String workspace2 = req.getParameter( "workspace2" );
         ws1 = WorkspaceNode.getWorkspaceFromId( workspace1, services, response, status, //false,
                                   null );
-        ws2 = WorkspaceNode.getWorkspaceFromId( workspace2, services, response, status, //false, 
+        ws2 = WorkspaceNode.getWorkspaceFromId( workspace2, services, response, status, //false,
                                   null );
 
         String timestamp1 = req.getParameter( "timestamp1" );
@@ -93,11 +100,13 @@ public class MmsDiffGet extends AbstractJavaWebScript {
         workspaceDiff = new WorkspaceDiff(ws1, ws2, dateTime1, dateTime2);
 
         try {
+            workspaceDiff.forceJsonCacheUpdate = false;
             JSONObject top = workspaceDiff.toJSONObject( dateTime1, dateTime2, false );
             if (!Utils.isNullOrEmpty(response.toString())) top.put("message", response.toString());
-            results.put("res", top.toString(4));
+            results.put("res", NodeUtil.jsonToString( top, 4 ));
         } catch (JSONException e) {
             e.printStackTrace();
+            results.put("res", createResponseJson());
         }
 
         status.setCode(responseStatus.getCode());

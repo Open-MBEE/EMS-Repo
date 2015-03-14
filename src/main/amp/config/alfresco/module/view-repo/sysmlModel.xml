@@ -259,6 +259,12 @@
 					<multiple>false</multiple>
 					<index enabled="false"></index>
 				</property>
+				<property name="view2:pdfStatus">
+					<type>d:text</type> 
+					<mandatory>false</mandatory>
+					<multiple>false</multiple>
+					<index enabled="false"></index>
+				</property>
 			</properties>
 		</aspect>
 		
@@ -267,6 +273,12 @@
 				<property name="view2:htmlZipNode">
 					<type>d:noderef</type> 
 					<mandatory>true</mandatory>
+					<multiple>false</multiple>
+					<index enabled="false"></index>
+				</property>
+				<property name="view2:htmlZipStatus">
+					<type>d:text</type> 
+					<mandatory>false</mandatory>
 					<multiple>false</multiple>
 					<index enabled="false"></index>
 				</property>
@@ -861,6 +873,16 @@
                     </constraints>
 				</property>
 				<property name="sysml:connectorValue">
+                    <type>d:noderef</type>
+                    <mandatory>false</mandatory>
+                    <multiple>false</multiple>
+                    <index enabled="true">
+                        <atomic>false</atomic>
+                        <stored>false</stored>
+                        <tokenised>false</tokenised>
+                    </index>
+                </property>
+                <property name="sysml:connectorType">
                     <type>d:noderef</type>
                     <mandatory>false</mandatory>
                     <multiple>false</multiple>

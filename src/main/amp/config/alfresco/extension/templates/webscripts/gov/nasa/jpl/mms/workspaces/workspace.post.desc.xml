@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<webscript>
+	<shortname>post workspace</shortname>
+	<description>
+	post workspace
+	</description>
+	<url>/workspaces/{workspaceId}?sourceWorkspace={sourceWorkspace}</url>
+	<format default="json">argument</format>
+	<authentication>user</authentication>
+	<transaction>none</transaction>
+	<family>MMS REST API</family>
+</webscript>

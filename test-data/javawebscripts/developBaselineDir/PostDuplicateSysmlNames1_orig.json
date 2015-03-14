@@ -1,20 +1,18 @@
-{
-    "elements": [{
-        "creator": "admin",
-        "editable": true,
-        "modified": "2014-12-10T14:58:22.402-0800",
-        "name": "testName",
-        "owner": "123456",
-        "qualifiedId": "/123456/testCmed416",
-        "qualifiedName": "/JW_TEST2/testName",
-        "read": "2014-12-10T14:58:23.907-0800",
-        "specialization": {
-            "isDerived": false,
-            "isSlot": false,
-            "type": "Property"
-        },
-        "sysmlid": "testCmed416"
-    }],
-    "message": "[WARNING]: createOrUpdateModel deltas not posted properly\n"
-}
+{"elements": [{
+    "creator": "admin",
+    "editable": true,
+    "modified": "2015-02-18T14:10:49.855-0800",
+    "name": "testName",
+    "owner": "123456",
+    "qualifiedId": "/europa/123456/testCmed416",
+    "qualifiedName": "/europa/JW_TEST2/testName",
+    "read": "2015-02-18T14:10:50.180-0800",
+    "specialization": {
+        "isDerived": false,
+        "isSlot": false,
+        "propertyType": null,
+        "type": "Property"
+    },
+    "sysmlid": "testCmed416"
+}]}
 200

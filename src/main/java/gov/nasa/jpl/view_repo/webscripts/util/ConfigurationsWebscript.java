@@ -1,14 +1,13 @@
 package gov.nasa.jpl.view_repo.webscripts.util;
 
-import gov.nasa.jpl.mbee.util.Debug;
 import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.mbee.util.Utils;
-import gov.nasa.jpl.view_repo.actions.ActionUtil;
 import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 import gov.nasa.jpl.view_repo.webscripts.AbstractJavaWebScript;
+import gov.nasa.jpl.view_repo.webscripts.HostnameGet;
 import gov.nasa.jpl.view_repo.webscripts.SnapshotPost;
 
 import java.util.ArrayList;
@@ -19,6 +18,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.servlet.http.HttpServletResponse;
@@ -27,20 +27,23 @@ import org.alfresco.repo.model.Repository;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.json.JSONArray;
+import org.apache.log4j.Logger;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
 
 /**
  * Library class for manipulating configurations
- * 
+ *
  * Pattern is handle does the retrieval.
- * 
+ *
  * @author cinyoung
- * 
+ *
  */
 public class ConfigurationsWebscript extends AbstractJavaWebScript {
+    static Logger logger = Logger.getLogger(ConfigurationsWebscript.class);
 
     public ConfigurationsWebscript( Repository repository, ServiceRegistry services,
                               StringBuffer response ) {
@@ -53,11 +56,11 @@ public class ConfigurationsWebscript extends AbstractJavaWebScript {
         return false;
     }
 
-    
+
     public JSONArray handleConfigurations(WebScriptRequest req) throws JSONException {
         return handleConfigurations( req, false );
     }
-    
+
     public EmsScriptNode getConfiguration(String id) {
         NodeRef configNodeRef = NodeUtil.getNodeRefFromNodeId( id );
         if (configNodeRef != null) {
@@ -68,7 +71,7 @@ public class ConfigurationsWebscript extends AbstractJavaWebScript {
             return null;
         }
     }
-    
+
     /**
      * Method to get Configurations within a specified context
      * @param context
@@ -86,12 +89,12 @@ public class ConfigurationsWebscript extends AbstractJavaWebScript {
         // Note: not using searchForElements() b/c it checks if the return element has a sysml:id, which
         //       configurations do not
         String siteName = siteNode == null ? null : siteNode.getName();
-        ArrayList<NodeRef> resultSet = NodeUtil.findNodeRefsByType( "ems:ConfigurationSet", NodeUtil.SearchType.TYPE.prefix, 
+        ArrayList<NodeRef> resultSet = NodeUtil.findNodeRefsByType( "ems:ConfigurationSet", NodeUtil.SearchType.TYPE.prefix,
                                                                     false, workspace,
                                                                     true, // onlyThisWorkspace
                                                                     dateTime, false, false, services, false,
                                                                     siteName );
-        List< EmsScriptNode > nodeList = EmsScriptNode.toEmsScriptNodeList( resultSet, services, response, 
+        List< EmsScriptNode > nodeList = EmsScriptNode.toEmsScriptNodeList( resultSet, services, response,
                                                                          responseStatus );
         if (nodeList != null) {
             Set<EmsScriptNode> nodes = new HashSet<EmsScriptNode>(nodeList);
@@ -100,17 +103,37 @@ public class ConfigurationsWebscript extends AbstractJavaWebScript {
         if (sort) {
             Collections.sort(configurations, new EmsScriptNodeCreatedAscendingComparator());
         }
-        
+
         return configurations;
+    }
+
+    public enum ConfigurationType {
+        CONFIG_MMS, CONFIG_NO_MMS, CONFIG_SNAPSHOT
     }
     
     /**
-     * Create JSONObject of Configuration sets based on webrequest
+     * Create JSONObject of Configuration sets based on WebScriptRequest
      * @param req
+     * @param isMms For backwards compatibility, support whether old javawebscript or new mms format
      * @return
      * @throws JSONException
      */
     public JSONArray handleConfigurations(WebScriptRequest req, boolean isMms) throws JSONException {
+        ConfigurationType configType = ConfigurationType.CONFIG_NO_MMS;
+        if (isMms) {
+            configType = ConfigurationType.CONFIG_MMS;
+        } 
+        return handleConfigurations( req, configType );
+    }
+
+    /**
+     * 
+     * @param req
+     * @param configType
+     * @return
+     * @throws JSONException
+     */
+    public JSONArray handleConfigurations(WebScriptRequest req, ConfigurationType configType) throws JSONException {
         EmsScriptNode siteNode = getSiteNodeFromRequest(req, false);
         String siteNameFromReq = getSiteName( req );
         if ( siteNode == null && !Utils.isNullOrEmpty( siteNameFromReq )
@@ -118,36 +141,50 @@ public class ConfigurationsWebscript extends AbstractJavaWebScript {
             log(LogLevel.WARNING, "Could not find site " + siteNameFromReq, HttpServletResponse.SC_NOT_FOUND);
             return new JSONArray();
         }
-        JSONArray configJsonArray = new JSONArray();
+        // when we're looking for snapshots, we don't care about site
+        if (ConfigurationType.CONFIG_SNAPSHOT == configType) {
+            siteNode = null;
+        }
         
+        JSONArray configJSONArray = new JSONArray();
+
         // get timestamp if specified
         String timestamp = req.getParameter("timestamp");
         Date dateTime = TimeUtils.dateFromTimestamp( timestamp );
-        
+
         WorkspaceNode workspace = getWorkspace( req );
-        
+
         boolean sort = true;
         List< EmsScriptNode > configurations =
                 getConfigurations( siteNode, workspace, timestamp, sort );
-            
+
         for (EmsScriptNode config: configurations) {
             if (!config.isDeleted()) {
-                if (isMms) {
-                    configJsonArray.put( getMmsConfigJson( config,
-                                                           workspace, dateTime ) );
-                } else {
-                    configJsonArray.put( getConfigJson( config,
+                switch(configType) {
+                    case CONFIG_MMS:
+                        configJSONArray.put( getMmsConfigJson( config,
+                                                               workspace, dateTime ) );
+                        break;
+                    case CONFIG_NO_MMS:
+                        configJSONArray.put( getConfigJson( config,
                                                         workspace, dateTime ) );
+                        break;
+                    case CONFIG_SNAPSHOT:
+                        configJSONArray.put( getConfigSnapshotJson(config,
+                                                                   workspace, dateTime) );
+                        break;
+                    default:
+                        logger.error("No ConfigType specified!");
                 }
             }
         }
 
-        return configJsonArray;
+        return configJSONArray;
     }
+
     
-   
     /**
-     * 
+     *
      * @param req
      * @param isMms
      * @return
@@ -155,22 +192,22 @@ public class ConfigurationsWebscript extends AbstractJavaWebScript {
      */
     public JSONArray handleConfiguration(WebScriptRequest req, boolean isMms) throws JSONException {
         String configId = req.getServiceMatch().getTemplateVars().get("configurationId");
-        
-        JSONArray configsJsonArray = handleConfigurations(req, isMms);
+
+        JSONArray configsJSONArray = handleConfigurations(req, isMms);
         JSONArray result = new JSONArray();
-        
-        for (int ii = 0; ii < configsJsonArray.length(); ii++) {
-            JSONObject configJson = configsJsonArray.getJSONObject( ii );
+
+        for (int ii = 0; ii < configsJSONArray.length(); ii++) {
+            JSONObject configJson = configsJSONArray.getJSONObject( ii );
             if (configJson.getString( "id" ).equals(configId)) {
                 result.put( configJson );
                 break;
             }
         }
-        
+
         return result;
     }
-    
-    
+
+
     /**
      * Retrieve just the MMS API configuration JSON
      * @param config
@@ -180,30 +217,32 @@ public class ConfigurationsWebscript extends AbstractJavaWebScript {
      * @return
      * @throws JSONException
      */
-    public JSONObject getMmsConfigJson(EmsScriptNode config, 
+    public JSONObject getMmsConfigJson(EmsScriptNode config,
                                        WorkspaceNode workspace, Date dateTime)
                                                throws JSONException {
         JSONObject json = getConfigJson( config, workspace, dateTime );
-        
+
         json.remove( "snapshots" );
-        
+
         return json;
     }
-    
+
     /**
      * Given a configuration node, convert to JSON
      * @param config
      * @param contextPath
-     * @param workspace 
-     * @param dateTime 
+     * @param workspace
+     * @param dateTime
+     * @param includeSnapshots  Include snapshots in json if true (this can take a while, so default to false)
      * @return
      * @throws JSONException
      */
     public JSONObject getConfigJson(EmsScriptNode config,
-                                    WorkspaceNode workspace, Date dateTime) throws JSONException {
+                                    WorkspaceNode workspace, 
+                                    Date dateTime) throws JSONException {
         JSONObject json = new JSONObject();
         Date date = (Date)config.getProperty("cm:created");
-        
+
         json.put("modified", EmsScriptNode.getIsoTime(date));
         Object timestampObject = config.getProperty("view2:timestamp");
         Date timestamp = null;
@@ -211,24 +250,72 @@ public class ConfigurationsWebscript extends AbstractJavaWebScript {
             timestamp = (Date)timestampObject;
         } else {
             if ( timestampObject != null ) {
-                Debug.error( "timestamp is not a date! timestamp = " + timestampObject );
+                logger.error( "timestamp is not a date! timestamp = " + timestampObject );
             }
             timestamp = new Date( System.currentTimeMillis() );
         }
         json.put("timestamp", EmsScriptNode.getIsoTime(timestamp));
-        json.put("name", config.getProperty(Acm.CM_NAME));
+        // for back compat with tags, need to used CM_NAME if title isn't being used
+        String title = (String)config.getProperty( Acm.CM_TITLE );
+        if (title == null) {
+            json.put( "name", config.getProperty( Acm.CM_NAME ) );
+        } else {
+            json.put("name", title);
+        }
         json.put("description", config.getProperty("cm:description"));
         // need to unravel id with the storeref, which by default is workspace://SpacesStore/
         json.put("id", config.getNodeRef().getId());
-        
-        json.put("snapshots", getSnapshots(config, workspace));
-        
+
         return json;
     }
- 
+
+    private JSONObject getConfigSnapshotJson( EmsScriptNode config,
+                                             WorkspaceNode workspace,
+                                             Date dateTime ) throws JSONException {
+        // fill in configurations first
+        JSONObject configJson = new JSONObject();
+        String name = (String)config.getProperty( Acm.CM_TITLE );
+        if (null == name) {
+            name = (String)config.getProperty(Acm.CM_NAME);
+        }
+        configJson.put("name", name);
+        configJson.put( "id", config.getNodeRef().getId() );
+        JSONArray configArray = new JSONArray();
+        configArray.put( configJson );
+        
+
+        // fill in the snapshot json
+        JSONObject json = new JSONObject();
+        // need to kludge an ID - takes too long to actually look up snapshot, so just use config id
+        json.put( "id", config.getNodeRef().getId() );
+        
+        // a lot of this repeated from getConfigJson, different keys though
+        Object timestampObject = config.getProperty("view2:timestamp");
+        Date timestamp = null;
+        if ( timestampObject instanceof Date ) {
+            timestamp = (Date)timestampObject;
+        } else {
+            if ( timestampObject != null ) {
+                logger.error( "timestamp is not a date! timestamp = " + timestampObject );
+            }
+            timestamp = new Date( System.currentTimeMillis() );
+        }
+        json.put("created", EmsScriptNode.getIsoTime(timestamp));
+//        Date date = (Date)config.getProperty("cm:created");
+//        json.put("created", EmsScriptNode.getIsoTime(date));
+
+        json.put("creator", config.getProperty("cm:modifier"));
+
+        json.put( "configurations", configArray );
+        
+        return json;
+   }
+
+
+    
     public JSONArray getSnapshots(EmsScriptNode config, WorkspaceNode workspace) throws JSONException {
         JSONArray snapshotsJson = new JSONArray();
-        
+
         // Need to put in null timestamp so we always get latest version of snapshot
         List< EmsScriptNode > snapshots =
                 config.getTargetAssocsNodesByType( "ems:configuredSnapshots",
@@ -244,21 +331,25 @@ public class ConfigurationsWebscript extends AbstractJavaWebScript {
                                                        workspace) );
                 }
             }
-            
+
             NodeRef snapshotProductNodeRef = (NodeRef) snapshot.getProperty( "view2:snapshotProduct" );
             if ( snapshotProductNodeRef != null ) {
+                // this is the unversioned snapshot, so we need to get the versioned one
                 EmsScriptNode snapshotProduct = new EmsScriptNode(snapshotProductNodeRef, services, response);
+                
+                String id = snapshotProduct.getSysmlId();
+                Date dateTime = (Date) snapshot.getProperty("view2:timestamp");
+                
+                EmsScriptNode versionedSnapshotProduct = NodeUtil.findScriptNodeById( id, workspace, dateTime, true, services, response );
                 if (snapshotProduct.exists()) {
-                    if (!snapshotProduct.isDeleted() && !snapshot.isDeleted()) {
-                        snapshotsJson.put( getSnapshotJson(snapshot, snapshotProduct, workspace) );
-                    }
+                    snapshotsJson.put( getSnapshotJson(snapshot, versionedSnapshotProduct, workspace) );
                 }
             }
         }
-        
+
         return snapshotsJson;
     }
-    
+
     /**
      * Based on a specified snapshot node and corresponding view and configuration returns the
      * snapshot JSON - maybe put this in EmsScriptNode?
@@ -276,61 +367,84 @@ public class ConfigurationsWebscript extends AbstractJavaWebScript {
         snapshotJson.put("sysmlid", view.getSysmlId());
         snapshotJson.put("sysmlname", view.getProperty(Acm.ACM_NAME));
         snapshotJson.put("id", snapshot.getProperty(Acm.CM_NAME));
-        snapshotJson.put( "created",  EmsScriptNode.getIsoTime( (Date)snapshot.getProperty( "cm:created" )));
+        Date timestamp = (Date) snapshot.getProperty("view2:timestamp");
+        if (timestamp != null) {
+            snapshotJson.put( "created",  EmsScriptNode.getIsoTime( (Date)snapshot.getProperty( "view2:timestamp" )));
+        } else {
+            snapshotJson.put( "created",  EmsScriptNode.getIsoTime( (Date)snapshot.getProperty( "cm:created" )));
+        }
         snapshotJson.put( "creator", snapshot.getProperty( "cm:modifier" ) );
 
         @SuppressWarnings( "rawtypes" )
         LinkedList<HashMap> list = new LinkedList<HashMap>();
         if(SnapshotPost.hasPdf(snapshot) || SnapshotPost.hasHtmlZip(snapshot)){
-        	String contextUrl = "https://" + ActionUtil.getHostName() + ".jpl.nasa.gov/alfresco";
+        	HostnameGet hostnameGet = new HostnameGet(this.repository, this.services);
+        	String contextUrl = hostnameGet.getAlfrescoUrl() + "/alfresco";
         	HashMap<String, String> transformMap;
             if(SnapshotPost.hasPdf(snapshot)){
-            	EmsScriptNode pdfNode = SnapshotPost.getPdfNode(snapshot);
-            	transformMap = new HashMap<String,String>();
-            	transformMap.put("type", "pdf");
-            	transformMap.put("url", contextUrl + pdfNode.getUrl());
-            	list.add(transformMap);
+            	String pdfStatus = SnapshotPost.getPdfStatus(snapshot);
+            	if(pdfStatus != null && !pdfStatus.isEmpty()){
+	            	EmsScriptNode pdfNode = SnapshotPost.getPdfNode(snapshot);
+	            	transformMap = new HashMap<String,String>();
+	            	transformMap.put("status", pdfStatus);
+	            	transformMap.put("type", "pdf");
+	            	if(pdfNode != null){
+	            		transformMap.put("url", contextUrl + pdfNode.getUrl());
+	            	}
+	            	list.add(transformMap);
+            	}
             }
             if(SnapshotPost.hasHtmlZip(snapshot)){
-            	EmsScriptNode htmlZipNode = SnapshotPost.getHtmlZipNode(snapshot);
-            	transformMap = new HashMap<String,String>();
-            	transformMap.put("type", "html");
-            	transformMap.put("url", contextUrl + htmlZipNode.getUrl());
-            	list.add(transformMap);
+            	String htmlZipStatus = SnapshotPost.getHtmlZipStatus(snapshot);
+            	if(htmlZipStatus != null && !htmlZipStatus.isEmpty()){
+	            	EmsScriptNode htmlZipNode = SnapshotPost.getHtmlZipNode(snapshot);
+	            	transformMap = new HashMap<String,String>();
+	            	transformMap.put("status", htmlZipStatus);
+	            	transformMap.put("type", "html");
+	            	if(htmlZipNode != null){
+	            		transformMap.put("url", contextUrl + htmlZipNode.getUrl());
+	            	}
+	            	list.add(transformMap);
+            	}
             }
         }
         snapshotJson.put("formats", list);
-        
+
         JSONArray configsJson = new JSONArray();
         List< EmsScriptNode > configs =
                 snapshot.getSourceAssocsNodesByType( "ems:configuredSnapshots",
                                                      workspace, null );
         for (EmsScriptNode config: configs) {
             JSONObject jsonObject = new JSONObject();
-            jsonObject.put("name", config.getProperty(Acm.CM_NAME));
-            jsonObject.put("id", config.getNodeRef().getId());
-            configsJson.put( jsonObject );
+            // since configuations are created in workspaces, may not have read permissions
+            // need to filter
+            // TODO: add into regression tests
+            if (config.hasPermission("Read")) {
+                jsonObject.put("name", config.getProperty(Acm.CM_NAME));
+                jsonObject.put("id", config.getNodeRef().getId());
+                configsJson.put( jsonObject );
+            }
         }
-        
+
         snapshotJson.put( "configurations", configsJson );
-            
+
         return snapshotJson;
     }
 
     public JSONArray getProducts(EmsScriptNode config, WorkspaceNode workspace,
                                  Date timestamp) throws JSONException {
         JSONArray productsJson = new JSONArray();
-        
+
         List< EmsScriptNode > products =
                 config.getTargetAssocsNodesByType( "ems:configuredProducts",
                                                    workspace, timestamp );
         for (EmsScriptNode product: products) {
             productsJson.put( product.toJSONObject(timestamp) );
         }
-        
+
         return productsJson;
     }
-    
+
     /**
      * Based on a specified snapshot node and corresponding view and configuration returns the
      * snapshot JSON - maybe put this in EmsScriptNode?
@@ -346,11 +460,11 @@ public class ConfigurationsWebscript extends AbstractJavaWebScript {
         productJson.put("sysmlid", product.getSysmlId());
         productJson.put( "created",  EmsScriptNode.getIsoTime( (Date)product.getProperty( "cm:created" )));
         productJson.put( "creator", product.getProperty( "cm:modifier" ) );
-            
+
         return productJson;
     }
 
-    
+
     /**
      * Updates the specified configuration with the posted JSON. Returns set of products to
      * be generated.
@@ -369,7 +483,8 @@ public class ConfigurationsWebscript extends AbstractJavaWebScript {
                                                           throws JSONException {
         HashSet<String> productSet = new HashSet<String>();
         if (postJson.has("name")) {
-            config.createOrUpdateProperty(Acm.CM_NAME, postJson.getString("name"));
+            // update the title, since title can handle special characters
+            config.createOrUpdateProperty(Acm.CM_TITLE, postJson.getString("name"));
         }
         if (postJson.has("description")) {
             config.createOrUpdateProperty("cm:description", postJson.getString("description"));
@@ -377,11 +492,11 @@ public class ConfigurationsWebscript extends AbstractJavaWebScript {
         if (postJson.has("timestamp")) {
             // if timestamp specified always use
             config.createOrUpdateProperty("view2:timestamp", TimeUtils.dateFromTimestamp(postJson.getString("timestamp")));
-        } else if (date != null && date.before( (Date)config.getProperty("cm:created") )) {
+        } else if (date != null) { // && date.before( (Date)config.getProperty("cm:created") )) {
             // add in timestamp if supplied date is before the created date
             config.createOrUpdateProperty("view2:timestamp", date);
-        } 
-        
+        }
+
         // these should be mutually exclusive
         if (postJson.has( "products")) {
             config.removeAssociations( "ems:configuredProducts" );
@@ -417,10 +532,10 @@ public class ConfigurationsWebscript extends AbstractJavaWebScript {
                 }
             }
         }
-        
+
         return productSet;
     }
-    
+
     /**
      * Comparator sorts by ascending created date
      * @author cinyoung
@@ -431,10 +546,10 @@ public class ConfigurationsWebscript extends AbstractJavaWebScript {
         public int compare(EmsScriptNode x, EmsScriptNode y) {
             Date xModified;
             Date yModified;
-            
+
             xModified = (Date) x.getProperty("cm:created");
             yModified = (Date) y.getProperty("cm:created");
-            
+
             if (xModified == null) {
                 return -1;
             } else if (yModified == null) {
@@ -449,10 +564,18 @@ public class ConfigurationsWebscript extends AbstractJavaWebScript {
         String configId = req.getServiceMatch().getTemplateVars().get("configurationId");
 
         NodeRef configNodeRef = NodeUtil.findNodeRefByAlfrescoId( configId );
-        
+
         if (configNodeRef != null) {
             EmsScriptNode configNode = new EmsScriptNode(configNodeRef, services, response);
+            configNode.makeSureNodeRefIsNotFrozen();
             configNode.addAspect( "ems:Deleted" );
         }
+    }
+
+    @Override
+    protected Map< String, Object >
+            executeImplImpl( WebScriptRequest req, Status status, Cache cache ) {
+        // TODO Auto-generated method stub
+        return null;
     }
 }

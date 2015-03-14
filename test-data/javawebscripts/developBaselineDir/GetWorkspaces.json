@@ -1,34 +1,26 @@
 {"workspaces": [
-
     {
-
-        "name": "master",
-
-        "qualifiedName": "master"
-
+        "workspaceOperationsPermission": true,
+        "qualifiedName": "master",
+        "name": "master"
     },
-
     {
-
-        "creator": "admin",
-
+        "description": "",
+        "qualifiedName": "master/wsA",
         "name": "wsA",
-
-        "qualifiedName": "master/wsA"
-
+        "creator": "admin"
     },
-
     {
-
-        "creator": "admin",
-
+        "description": "",
+        "qualifiedName": "master/wsA/wsB",
         "name": "wsB",
-
-        "qualifiedName": "master/wsA/wsB"
-
+        "creator": "admin"
+    },
+    {
+        "description": "modified the workspace name and desc",
+        "qualifiedName": "master/modifiedWorkspaceName",
+        "name": "modifiedWorkspaceName",
+        "creator": "admin"
     }
-
 ]}
-
 200
-
