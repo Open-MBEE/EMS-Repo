@@ -194,7 +194,6 @@
             <groupId>gov.nasa.jpl.mbee.docbook</groupId>
             <artifactId>docbook</artifactId>
             <version>0.0.4</version>
-            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>junit</groupId>
