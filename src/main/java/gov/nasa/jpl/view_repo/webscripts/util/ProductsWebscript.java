@@ -127,7 +127,7 @@ public class ProductsWebscript extends AbstractJavaWebScript {
                     // that do not have the site package as the first site package parent:
                     if (checkSitePkg) {
                         if (pkgSite != null &&
-                            pkgSite.equals(findParentPkgSite(node, siteNode, null, workspace))) {
+                            pkgSite.equals(findParentPkgSite(node, workspace))) {
                             productsJson.put( node.toJSONObject( null ) );
                         }
                     }

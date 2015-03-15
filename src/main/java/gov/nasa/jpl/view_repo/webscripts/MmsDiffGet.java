@@ -35,6 +35,11 @@ public class MmsDiffGet extends AbstractJavaWebScript {
 
     @Override
     protected boolean validateRequest( WebScriptRequest req, Status status ) {
+        
+        if (!userHasWorkspaceLdapPermissions()) {
+            return false;
+        }
+        
         workspaceId1 = req.getParameter( "workspace1" );
         workspaceId2 = req.getParameter( "workspace2" );
         ws1 = WorkspaceNode.getWorkspaceFromId( workspaceId1, getServices(), response, status, //false,

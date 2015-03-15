@@ -74,8 +74,10 @@ public class MmsWorkspaceDiffPost extends ModelPost {
 
     @Override
 	protected boolean validateRequest(WebScriptRequest req, Status status) {
-		// do nothing
-		return false;
+        if (!userHasWorkspaceLdapPermissions()) {
+            return false;
+        }
+        return true;
 	}
 
 

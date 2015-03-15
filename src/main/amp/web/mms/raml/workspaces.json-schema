@@ -82,10 +82,10 @@
                     "description": "Whether the workspaces has read or write permissions"
 				},
 				
-				"siteManagerPermission": 
+				"workspaceOperationsPermission": 
                 {
                     "type": "boolean",
-                    "description": "True if the user is manager of any site and it is the master workspace"
+                    "description": "True if the user belongs to the LDAP group with workspace operation permissions."
                 },
 
 				"timestamp": 

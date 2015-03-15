@@ -90,7 +90,16 @@ public class ShareUtils {
      * @return
      */
     public static boolean constructSiteDashboard(String sitePreset, String siteId, String siteTitle, String siteDescription, boolean isPublic) {
-        boolean success = true;
+        // only description is allowed to be null
+        if (sitePreset == null || siteId == null || siteTitle == null ) {
+            logger.error(String.format("Fields cannot be null: sitePreset:%s  siteId:%s  siteTitle:%s", 
+                                        sitePreset, siteId, siteTitle));
+            return false;
+        }
+        
+        if (siteDescription == null) {
+            siteDescription = "";
+        }
         
         initializeUrls();
         HttpClient httpClient = new HttpClient();
@@ -98,7 +107,8 @@ public class ShareUtils {
         String loginData = "username=" + username + "&password=" + password;
         
         if (false == makeSharePostCall(httpClient, LOGIN_URL, loginData, CONTENT_TYPE_FORM, "Login to Alfresco Share", HttpStatus.SC_MOVED_TEMPORARILY)) {
-            success = false;
+            logger.error("Could not login to share site");
+            return false;
         }
         
         JSONObject json = new JSONObject();
@@ -110,14 +120,17 @@ public class ShareUtils {
             json.put( "isPublic", isPublic );
         } catch ( JSONException e ) {
             e.printStackTrace();
-            success = false;
+            logger.error( "Could not create JSON for site creation" );
+            return false;
         }
         if (false == makeSharePostCall(httpClient, CREATE_SITE_URL, NodeUtil.jsonToString( json ) , CONTENT_TYPE_JSON, "Create site with name: " + siteId, HttpStatus.SC_OK)) {
-            success = false;
+            logger.error("Could not create site - 1st pass");
+            return false;
         }
         // for some reason need to do this twice unsure why this is the case
         if (false == makeSharePostCall(httpClient, CREATE_SITE_URL, NodeUtil.jsonToString( json ) , CONTENT_TYPE_JSON, "Create site with name: " + siteId, HttpStatus.SC_OK)) {
-            success = false;
+            logger.error("Could not create site -2nd pass");
+            return false;
         }
         
         // make calling user Site manger
@@ -126,10 +139,11 @@ public class ShareUtils {
         String currentUsername = services.getAuthenticationService().getCurrentUserName();
         String groupUrl = String.format("%s/%s/children/%s", UPDATE_GROUP_URL, role, currentUsername);
         if (false == makeRepoPostCall(groupUrl, CONTENT_TYPE_JSON, String.format("add user, %s, as %s site manager", currentUsername, siteId), HttpStatus.SC_OK)) {
-            success = false;
+            logger.error( "Could not set permissions on site" );;
+            return false;
         }
         
-        return success;
+        return true;
     }
     
     private static boolean makeSharePostCall(HttpClient httpClient, String url, String data, String dataType,

@@ -29,9 +29,9 @@
 
 package gov.nasa.jpl.view_repo.webscripts;
 
-import gov.nasa.jpl.mbee.util.Debug;
 import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
+import gov.nasa.jpl.view_repo.util.EmsTransaction;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 
@@ -39,21 +39,16 @@ import java.util.HashMap;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
-import javax.transaction.UserTransaction;
+//import javax.transaction.UserTransaction;
 
 import org.apache.log4j.*;
 import org.alfresco.repo.model.Repository;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.security.PermissionService;
-
 import org.json.JSONArray;
-
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import org.json.JSONObject;
-
 import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
@@ -64,6 +59,7 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
  * @author cinyoung
  *
  */
+@Deprecated
 public class ViewModelPost extends ModelPost {
     public ViewModelPost() {
         super();
@@ -96,36 +92,23 @@ public class ViewModelPost extends ModelPost {
 
         for (String idKey: idKeys) {
             viewid = req.getServiceMatch().getTemplateVars().get(idKey);
+            if ( viewid != null ) break;
         }
-        UserTransaction trx = services.getTransactionService().getUserTransaction();
-        try {
-            WorkspaceNode workspace = getWorkspace( req );
-            trx.begin();
-            EmsScriptNode view = findScriptNodeById(viewid, workspace, null, true);
-            view.createOrUpdateProperty("cm:modifier", AuthenticationUtil.getFullyAuthenticatedUser());
-            trx.commit();
-        } catch (Throwable e) {
-            try {
-                if (e instanceof JSONException) {
-            			log(Level.ERROR, HttpServletResponse.SC_BAD_REQUEST, "ViewModelPost: JSON malformed for: %s", e.getMessage());
-                } else {
-            			log(Level.ERROR, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "ViewModelPost: DB transaction failed: %s", e.getMessage());
-                }
-                e.printStackTrace();
-                if (Debug.isOn()) System.out.println("\t####### ERROR: Needed to ViewModelPost rollback: " + e.getMessage());
-                trx.rollback();
-            } catch (Throwable ee) {
-                log(Level.ERROR, "\tViewModelPost: Rollback failed: %s", ee.getMessage());
-                ee.printStackTrace();
+        final String finalViewId = viewid;
+        final WorkspaceNode workspace = getWorkspace( req );
+        new EmsTransaction(getServices(), getResponse(), status, runWithoutTransactions ) {
+            @Override
+            public void run() throws Exception {
+                EmsScriptNode view = findScriptNodeById(finalViewId, workspace, null, true);
+                view.createOrUpdateProperty("cm:modifier", AuthenticationUtil.getFullyAuthenticatedUser());
             }
-        }
+        };
 
-        ViewModelPost instance = new ViewModelPost(repository, services);
+//        ViewModelPost instance = new ViewModelPost(repository, services);
 
         try {
 //            Set< EmsScriptNode > elements =
-                    instance.createOrUpdateModel(req, status);
-            appendResponseStatusInfo(instance);
+            createOrUpdateModel(req, status);
         } catch (JSONException e) {
             log(Level.ERROR, HttpServletResponse.SC_BAD_REQUEST, "JSON malformed\n");
             e.printStackTrace();

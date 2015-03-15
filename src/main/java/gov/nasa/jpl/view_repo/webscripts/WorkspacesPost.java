@@ -74,7 +74,13 @@ public class WorkspacesPost extends AbstractJavaWebScript{
 
     @Override
     protected boolean validateRequest(WebScriptRequest req, Status status) {
-        return checkRequestContent ( req );
+        if (!checkRequestContent ( req )) {
+            return false;
+        }
+        if (!userHasWorkspaceLdapPermissions()) {
+            return false;
+        }
+        return true;
     }
 
     @Override

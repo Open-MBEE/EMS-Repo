@@ -1255,9 +1255,14 @@ public class EmsScriptNode extends ScriptNode implements
      * @return
      */
     public Object getProperty( String acmType ) {
+
+        return getProperty(acmType, false);
+    }
+    
+    public Object getProperty( String acmType, boolean skipNodeRefCheck ) {
         // FIXME Sometimes we wont want these defaults, ie want to find the deleted elements.
         //       Need to check all calls to getProperty() with properties that are NodeRefs.
-        return getProperty(acmType, false, null, false, false);
+        return getProperty(acmType, false, null, false, skipNodeRefCheck);
     }
 
     public String getVersionLabel() {
@@ -1784,16 +1789,36 @@ public class EmsScriptNode extends ScriptNode implements
             ownerRef = (NodeRef)owner.getProperty( "ems:owner" );
         }
         
-        // get the site, which is two up from the project
-        if ( owner != null ) {
-            EmsScriptNode modelNode = owner.getParent();
+        // Get the site, which is one up from the Models node:
+        // In case the child of the project does not have the owner set to the project,
+        // we will loop until we find the Models node:
+        String ownerName = owner != null ? owner.getName() : null;
+        EmsScriptNode modelNode = owner;
+        while ( owner != null && !ownerName.equals( "Models" )) {
+            owner = owner.getParent();
+            ownerName = owner != null ? owner.getName() : null;
+            if (owner != null) {
+                modelNode = owner;
+            }
+        }
+        
+        if (modelNode != null) {
             EmsScriptNode siteNode = modelNode.getParent();
-//            EmsScriptNode siteNode = owner.getSiteNode();
             if (siteNode != null) {
                 qualifiedName = "/" + siteNode.getName() + qualifiedName;
                 qualifiedId = "/" + siteNode.getName() + qualifiedId;
             }
         }
+      
+//        if ( owner != null ) {
+//            EmsScriptNode modelNode = owner.getParent();
+//            EmsScriptNode siteNode = modelNode.getParent();
+////            EmsScriptNode siteNode = owner.getSiteNode();
+//            if (siteNode != null) {
+//                qualifiedName = "/" + siteNode.getName() + qualifiedName;
+//                qualifiedId = "/" + siteNode.getName() + qualifiedId;
+//            }
+//        }
 
         if (isName) {
             return qualifiedName;
@@ -4193,9 +4218,13 @@ public class EmsScriptNode extends ScriptNode implements
         }
         return elements;
     }
+    
+    public EmsScriptNode getPropertyElement( String acmProperty) {
+        return getPropertyElement(acmProperty, false);
+    }
 
-    public EmsScriptNode getPropertyElement( String acmProperty ) {
-        Object e = getProperty( acmProperty );
+    public EmsScriptNode getPropertyElement( String acmProperty, boolean skipNodeRefCheck ) {
+        Object e = getProperty( acmProperty, skipNodeRefCheck );
         if ( e instanceof NodeRef ) {
             return new EmsScriptNode( (NodeRef)e, getServices() );
         } else if ( e == null ) {

@@ -138,7 +138,17 @@ public class DocBookWrapper {
 			String rawContent = this.dbSerializeVisitor.getOut();
 			rawContent = rawContent.replaceAll("<ulink", "<link");
 			rawContent = rawContent.replaceAll("</ulink", "</link");
+			rawContent = rawContent.replaceAll("<utable", "<table");
+			rawContent = rawContent.replaceAll("</utable", "</table");
+			rawContent = rawContent.replaceAll("<uthead", "<thead");
+			rawContent = rawContent.replaceAll("</uthead", "</thead");
+			rawContent = rawContent.replaceAll("<utbody", "<tbody");
+			rawContent = rawContent.replaceAll("</utbody", "</tbody");
+			rawContent = rawContent.replaceAll("<utfoot", "<tfoot");
+			rawContent = rawContent.replaceAll("</utfoot", "</tfoot");
 			rawContent = rawContent.replaceAll("&nbsp;", " ");
+			rawContent = rawContent.replaceAll("(?i)<removalTag>", "");
+			rawContent = rawContent.replaceAll("(?i)</removalTag>", "");
 			//this.content = formatContent(rawContent);
 			this.content = rawContent;
 		}
@@ -195,6 +205,9 @@ public class DocBookWrapper {
 	}
 
 	private void retrieveDocBook() throws Exception{
+		File file = new File(this.dbFileName.toString());
+		if(file.exists()) return;
+		
 		if(this.snapshotNode.hasAspect("view2:docbook")){
     		NodeRef dbNodeRef = (NodeRef)this.snapshotNode.getProperty("view2:docbookNode");
     		if(dbNodeRef==null) throw new Exception("Failed to retrieve DocBook from repository! NodeRef is null!");
@@ -290,6 +303,11 @@ public class DocBookWrapper {
 	public void saveDocBookToRepo(EmsScriptNode snapshotFolder, Date timestamp) throws Exception{
 		ServiceRegistry services = this.snapshotNode.getServices();
 		try{
+			ArrayList<NodeRef> nodeRefs = NodeUtil.findNodeRefsByType( this.snapshotName + "_docbook", "@cm\\:content:\"", services );
+			if (nodeRefs != null && nodeRefs.size() == 1) {
+				new EmsScriptNode(nodeRefs.get(0), services).remove();
+			}
+
 			EmsScriptNode node = snapshotFolder.createNode(this.snapshotName + "_docbook", "cm:content");
 			ActionUtil.saveStringToFile(node, "application/docbook+xml", services, this.getContent());
 			if(this.snapshotNode.createOrUpdateAspect("view2:docbook")){
@@ -336,7 +354,9 @@ public class DocBookWrapper {
 
 	public void saveHtmlZipToRepo(EmsScriptNode snapshotFolder, WorkspaceNode workspace, Date timestamp) throws Exception{
 		try{
-			this.transformToHTML(workspace, timestamp);
+			//this.transformToHTML(workspace, timestamp);
+			createDocBookDir();
+			retrieveDocBook();
 			tableToCSV();
 			String zipPath = this.zipHtml();
 			if(zipPath == null || zipPath.isEmpty()) throw new Exception("Failed to zip files and resources!");
@@ -357,6 +377,16 @@ public class DocBookWrapper {
 
 	public void savePdfToRepo(EmsScriptNode snapshotFolder, WorkspaceNode workspace, Date timestamp) throws Exception{
 		try{
+			ArrayList<NodeRef> nodesPrev = NodeUtil.findNodeRefsBySysmlName(this.snapshotName + "_PDF", false, workspace, timestamp, snapshotFolder.getServices(), false, true);
+			if(nodesPrev != null && nodesPrev.size() > 0){ 
+				try{
+					new EmsScriptNode(nodesPrev.get(0), snapshotFolder.getServices()).remove();
+				}
+				catch(Exception ex){
+					System.out.println(String.format("problem removing previous artifact node. %s", ex.getMessage()));
+					ex.printStackTrace();
+				}
+			}
 			EmsScriptNode node = snapshotFolder.createNode(this.snapshotName + "_PDF", "cm:content");
 			if(node == null) throw new Exception("Failed to create PDF repository node!");
 
@@ -409,19 +439,23 @@ public class DocBookWrapper {
 			FileInputStream fileStream = new FileInputStream(input);
 			Document document = Jsoup.parse(fileStream, "UTF-8", "http://xml.org", Parser.xmlParser());
 			if(document == null) throw new Exception("Failed to convert tables to CSV! Unabled to load file: " + this.dbFileName.toString());
+//			if(document.body() == null) throw new Exception(String.format("Failed to convert tables to CSV! DocBook file \"%s\" has not content.", this.dbFileName.toString()));
+			
 			int tableIndex = 1;
 			int rowIndex = 1;
 			String filename = "";
 			int cols = 0;
 			for(Element table:document.select("table")){
-				Elements tgroups = table.select("tgroup");
+				Elements tgroups = table.select(" > tgroup");
 				if(tgroups==null || tgroups.size()==0) continue;
 				Element tgroup = tgroups.first();
 				cols = Integer.parseInt(tgroup.attr("cols"));
 				List<List<String>> csv = new ArrayList<List<String>>();
 				Queue<TableCell> rowQueue = new LinkedList<TableCell>();
-				for(Element row: table.select("row")){
-					//TO DO - handle multi rows and columns spanned cell
+				Elements elements = tgroup.select("> thead");
+				elements.addAll(tgroup.select("> tbody"));
+				elements.addAll(tgroup.select("> tfoot"));
+				for(Element row: elements.select("> row")){
 					List<String> csvRow = new ArrayList<String>();
 					
 					for(int i=0; i < cols; i++){
@@ -467,7 +501,7 @@ public class DocBookWrapper {
 				}
 
 				boolean hasTitle = false;
-				Elements title = table.select("title");
+				Elements title = table.select(" > title");
 				if(title != null && title.size() > 0){
 					String titleText = title.first().text();
 					if(titleText != null && !titleText.isEmpty()){

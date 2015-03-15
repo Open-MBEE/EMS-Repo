@@ -51,8 +51,6 @@ import java.util.regex.*;
 import java.util.Arrays;
 
 import javax.servlet.http.HttpServletResponse;
-import javax.transaction.UserTransaction;
-
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.alfresco.repo.jscript.ScriptNode;
@@ -686,6 +684,21 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
         }
         return true;
     }
+    
+    /**
+     * Returns true if the user has permission to do workspace operations, which is determined
+     * by the LDAP group or if the user is admin.
+     * 
+     */
+    protected boolean userHasWorkspaceLdapPermissions() {
+        
+        if (!NodeUtil.userHasWorkspaceLdapPermissions()) {
+            log(Level.ERROR, HttpServletResponse.SC_FORBIDDEN, "User %s does not have LDAP permissions to perform workspace operations.  LDAP group with permissions: %s", 
+            		NodeUtil.getUserName(), NodeUtil.getWorkspaceLdapGroup());
+            return false;
+        }
+        return true;
+    }
 
 
 	protected boolean checkRequestVariable(Object value, String type) {
@@ -913,20 +926,23 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
         // Found the package for the site:
         if (sitePackageNode != null) {
             // Sanity check:
-            NodeRef sitePackageSiteRef = (NodeRef) sitePackageNode.getProperty( Acm.ACM_SITE_SITE );
+            // Note: skipping the noderef check b/c our node searches return the noderefs that correspond
+            //       to the nodes in the surf-config folder.  Also, we dont need the check b/c site nodes
+            //       are always in the master workspace.
+            NodeRef sitePackageSiteRef = (NodeRef) sitePackageNode.getProperty( Acm.ACM_SITE_SITE, true );
             if (sitePackageSiteRef != null && !sitePackageSiteRef.equals( initialSiteNode.getNodeRef() )) {
                 log(Level.ERROR, HttpServletResponse.SC_NOT_FOUND, "Mismatch between site/package for site package name %s",siteName);
                 return null;
             }
 
             // Get the project site by tracing up the parents until the parent is null:
-            NodeRef siteParentRef = (NodeRef) initialSiteNode.getProperty( Acm.ACM_SITE_PARENT );
+            NodeRef siteParentRef = (NodeRef) initialSiteNode.getProperty( Acm.ACM_SITE_PARENT, true );
             EmsScriptNode siteParent = siteParentRef != null ? new EmsScriptNode(siteParentRef, services, response) : null;
             EmsScriptNode oldSiteParent = null;
 
             while (siteParent != null) {
                 oldSiteParent = siteParent;
-                siteParentRef = (NodeRef) siteParent.getProperty( Acm.ACM_SITE_PARENT );
+                siteParentRef = (NodeRef) siteParent.getProperty( Acm.ACM_SITE_PARENT, true );
                 siteParent = siteParentRef != null ? new EmsScriptNode(siteParentRef, services, response) : null;
             }
 
@@ -956,7 +972,10 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
      */
     public EmsScriptNode getSiteForPkgSite(EmsScriptNode pkgNode, WorkspaceNode workspace) {
 
-        NodeRef pkgSiteParentRef = (NodeRef)pkgNode.getProperty( Acm.ACM_SITE_SITE );
+        // Note: skipping the noderef check b/c our node searches return the noderefs that correspond
+        //       to the nodes in the surf-config folder.  Also, we dont need the check b/c site nodes
+        //       are always in the master workspace.
+        NodeRef pkgSiteParentRef = (NodeRef)pkgNode.getProperty( Acm.ACM_SITE_SITE, true );
         EmsScriptNode pkgSiteParentNode = null;
 
         if (pkgSiteParentRef != null) {
@@ -988,8 +1007,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
      * @param workspace
      * @return
      */
-    public EmsScriptNode findParentPkgSite(EmsScriptNode node, EmsScriptNode siteNode,
-                                           EmsScriptNode projectNode, WorkspaceNode workspace) {
+    public EmsScriptNode findParentPkgSite(EmsScriptNode node, WorkspaceNode workspace) {
 
         EmsScriptNode pkgSiteParentNode = null;
         EmsScriptNode siteParent = node.getParent();
@@ -1010,11 +1028,11 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
             }
 
             // If the parent is the project, then the site will be the project Site:
-            if ((siteParentReifNode != null && siteParentReifNode.equals( projectNode )) ||
-                siteParent.equals(projectNode)) {
-                if (siteNode != null) {
-                    pkgSiteParentNode = siteNode;
-                }
+            // Note: that projects are never nested so we just need to check if it is of project type
+            String siteParentType = siteParent.getTypeShort();
+            String siteParentReifType = siteParentReifNode != null ? siteParentReifNode.getTypeShort() : null;
+            if (Acm.ACM_PROJECT.equals( siteParentType ) || Acm.ACM_PROJECT.equals( siteParentReifType )) {
+                pkgSiteParentNode = siteParent.getSiteNode();
                 break;  // break no matter what b/c we have reached the project node
             }
 

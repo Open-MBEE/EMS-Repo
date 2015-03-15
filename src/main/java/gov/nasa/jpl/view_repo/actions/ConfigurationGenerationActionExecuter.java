@@ -86,18 +86,18 @@ public class ConfigurationGenerationActionExecuter extends ActionExecuterAbstrac
     }
     
     @Override
-    protected void executeImpl(final Action action, final NodeRef nodeRef) {
+    protected void executeImpl(Action action, NodeRef nodeRef) {
         clearCache();
 
-        new EmsTransaction(services, response, responseStatus) {
-            @Override
-            public void run() throws Exception {
-                executeImplImpl(action, nodeRef);
-            }
-        };
-    }
-    
-    private void executeImplImpl(Action action, NodeRef nodeRef) {
+//        new EmsTransaction(services, response, responseStatus) {
+//            @Override
+//            public void run() throws Exception {
+//                executeImplImpl(action, nodeRef);
+//            }
+//        };
+//    }
+//    
+//    private void executeImplImpl(Action action, NodeRef nodeRef) {
         
         // Do not get an older version of the node based on the timestamp since
         // new snapshots should be associated with a new configuration. The
