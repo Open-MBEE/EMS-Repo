@@ -1410,13 +1410,30 @@ public class SnapshotPost extends AbstractJavaWebScript {
 	    	Document document = Jsoup.parseBodyFragment(s);
 	    	removeHtmlTags(document.body());
 	    	// removes direct, nested para tags
-	    	Elements paras = document.select("para > para");
-	    	paras.tagName("removalTag");
-	    	
+	    	removeNestedTags(document);
 	    	return document.body().html();
     	}
     	catch(Exception ex){
     		return s;
+    	}
+    }
+    
+    private void removeNestedTags(Document document){
+    	document.select("para > para").tagName("removalTag");
+    	Elements ulist = document.select("itemizedlist > itemizedlist");
+    	for(Element u : ulist){
+    		Element listItem = new Element(Tag.valueOf("listitem"),"");
+    		listItem.html(u.outerHtml());
+    		u.replaceWith(listItem);
+    		u = listItem;
+    	}
+    	
+    	Elements olist = document.select("orderedlist > orderedlist");
+    	for(Element o : olist){
+    		Element listItem = new Element(Tag.valueOf("listitem"),"");
+    		listItem.html(o.outerHtml());
+    		o.replaceWith(listItem);
+    		o = listItem;
     	}
     }
 
