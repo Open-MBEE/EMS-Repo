@@ -250,7 +250,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
     	sb.append(String.format("<title>%s</title>", dbImage.getTitle()));
     	sb.append("<mediaobject>");
         sb.append("<imageobject>");
-        sb.append(String.format("<imagedata scalefit=\"1\" width=\"100%\" fileref=\"%s\" />", dbImage.getFilePath()));
+        sb.append(String.format("<imagedata scalefit='1' width='100%%' fileref='%s' />", dbImage.getFilePath()));
         sb.append("</imageobject>");
         sb.append("</mediaobject>");
         sb.append("</figure>");
@@ -1202,7 +1202,11 @@ public class SnapshotPost extends AbstractJavaWebScript {
     			URL url = null;
     			if(!src.toLowerCase().startsWith("http")){
     				//relative URL; needs to prepend URL protocol
-    				url = new URL("http://" + src);
+    				String protocol = new HostnameGet(this.repository, this.services).getAlfrescoProtocol();
+    				System.out.println(protocol + "://" + src);
+    				src = src.replaceAll("\\.\\./", "");
+    				System.out.println("src: " + src);
+    				url = new URL(String.format("%s://%s", protocol, src));
     			}
     			else{
 	            	url = new URL(src);
@@ -1210,11 +1214,13 @@ public class SnapshotPost extends AbstractJavaWebScript {
     			
     			String hostname = getHostname();
                 try{
+                	src = src.toLowerCase();
                 	String embedHostname = String.format("%s://%s", url.getProtocol(), url.getHost());
+                	String alfrescoContext = "workspace/SpacesStore/";	//this.services.getSysAdminParams().getAlfrescoContext();
+
                 	// is image local or remote resource?
-                	if(embedHostname.compareToIgnoreCase(hostname)==0 || src.toLowerCase().startsWith("/alfresco/")){
+                	if(embedHostname.compareToIgnoreCase(hostname)==0 || src.startsWith("/alfresco/") || src.contains(alfrescoContext.toLowerCase())){
                 		//local server image > generate image tags
-                		String alfrescoContext = "workspace/SpacesStore/";	//this.services.getSysAdminParams().getAlfrescoContext();
                 		String filePath = url.getFile();
                 		if(filePath == null || filePath.isEmpty()) return "";
 
