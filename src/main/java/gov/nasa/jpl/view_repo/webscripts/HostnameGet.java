@@ -16,6 +16,9 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
 
 public class HostnameGet extends AbstractJavaWebScript {
 
+	private final String LOCAL_HOST = "localhost";
+	private final String LOCAL_HOST_IP = "127.0.0.1"; 
+	
 	@Override
     protected Map< String, Object > executeImpl( WebScriptRequest req, Status status, Cache cache ) {
 		printHeader( req );
@@ -87,7 +90,7 @@ public class HostnameGet extends AbstractJavaWebScript {
 	private String alfrescoUrl;
 	public String getAlfrescoUrl(){
 		if(alfrescoUrl==null || alfrescoUrl.isEmpty()){
-			if(this.alfrescoHost.compareToIgnoreCase("localhost")==0){
+			if(this.alfrescoHost.compareToIgnoreCase(LOCAL_HOST)==0 || this.alfrescoHost.compareToIgnoreCase(LOCAL_HOST_IP)==0){
 				alfrescoUrl = this.alfrescoProtocol + "://" + this.alfrescoHost + ":" + alfrescoPort;
 			}
 			else{

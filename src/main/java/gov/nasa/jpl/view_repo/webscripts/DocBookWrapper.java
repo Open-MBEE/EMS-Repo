@@ -409,9 +409,15 @@ public class DocBookWrapper {
 	}
 
 	private void setPaths(){
+//		String tmpDirName	= TempFileProvider.getTempDir().getAbsolutePath();
+//    	this.jobDirName = Paths.get(tmpDirName, this.snapshotName);
+//		this.dbDirName = Paths.get(jobDirName.toString(), "docbook");
+//		this.imageDirName = Paths.get(dbDirName.toString(), "images");
+//		this.dbFileName = Paths.get(this.dbDirName.toString(), this.snapshotName + ".xml");
+		
 		String tmpDirName	= TempFileProvider.getTempDir().getAbsolutePath();
-    	this.jobDirName = Paths.get(tmpDirName, this.snapshotName);
-		this.dbDirName = Paths.get(jobDirName.toString(), "docbook");
+    	this.jobDirName = Paths.get(tmpDirName);
+		this.dbDirName = Paths.get(jobDirName.toString(), this.snapshotName);
 		this.imageDirName = Paths.get(dbDirName.toString(), "images");
 		this.dbFileName = Paths.get(this.dbDirName.toString(), this.snapshotName + ".xml");
 
@@ -669,7 +675,7 @@ public class DocBookWrapper {
 		command.add(zipFile);
 		//command.add("\"*.html\"");
 		//command.add("\"*.css\"");
-		command.add("docbook");
+		command.add(this.snapshotName);
 
 		// not including docbook and pdf files
 		//command.add("-x");

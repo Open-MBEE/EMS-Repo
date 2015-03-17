@@ -10,6 +10,7 @@ public class HtmlTable {
 	private int bodyRowCount;
 	private int header[][];
 	private int body[][];
+	private int footer[][];
 	private String title;
 	private boolean hasHeader;
 	private boolean hasFooter;
@@ -75,6 +76,35 @@ public class HtmlTable {
 		this.colCount = max;
 		this.init();
 	}
+
+	private String buildElementEntry(int row, int col, int startCol, Element cell, boolean isHeader){
+		StringBuffer sb = new StringBuffer();
+
+		int rowspan = 0;
+		int colspan = 0;
+		
+		String rspan = cell.attr("rowspan");
+		String cspan = cell.attr("colspan");
+		
+		if(rspan != null && !rspan.isEmpty()) rowspan = Integer.parseInt(rspan);
+		if(cspan != null && !cspan.isEmpty()) colspan = Integer.parseInt(cspan);
+		
+		int startColTemp = this.getStartCol(row, col, rowspan, colspan, isHeader);
+		if(startColTemp > startCol) startCol = startColTemp;
+		
+		if(rowspan > 1 || colspan > 1){
+			sb.append("<entry");
+			if(rowspan > 1) sb.append(String.format(" morerows=\"%d\"", rowspan-1));
+			if(colspan > 1){ 
+				int end = startCol + colspan - 1;
+        		if(end > this.getColCount()) end = this.getColCount();
+        		sb.append(String.format(" namest=\"%d\" nameend=\"%d\"", startCol, end));
+			}
+			sb.append(String.format(">%s</entry>", cell.html()));
+		}
+		else sb.append(String.format("<entry>%s</entry>", cell.html()));
+		return sb.toString();
+	}
 	
 	private String generateColSpec(int count){
     	StringBuffer sb = new StringBuffer();
@@ -87,18 +117,20 @@ public class HtmlTable {
     }
     
 	private String generateBody(){
-		//TODO need to handle rowspan and colspan
 		StringBuffer sb = new StringBuffer();
 		Elements bodyRows = this.bodyRows;
-		if(!this.hasHeader) bodyRows.remove(0);
+		int startCol = 1;
+		int row = (this.hasHeader) ? 0: 1;
+		
 		sb.append("<utbody>");
-		for(Element tr : bodyRows){
+		for(; row < bodyRows.size(); row++){
+			Element tr = bodyRows.get(row);
 			sb.append("<row>");
 			Elements cells = tr.select(" > td");
 			if(cells == null || cells.size() == 0) cells = tr.select(" > th");
 			if(cells != null && cells.size() > 0){
-				for(Element cell : cells){
-					sb.append(String.format("<entry>%s</entry>", cell.html()));
+				for(int col = 0; col < cells.size(); col++){
+					sb.append(buildElementEntry(row, col, startCol, cells.get(col), false));
 				}
 			}
 			sb.append("</row>");
@@ -108,18 +140,21 @@ public class HtmlTable {
 	}
 	
 	private String generateFooter(){
-		//TODO need to handle rowspan and colspan
 		if(!this.hasFooter) return "";
 		
 		StringBuffer sb = new StringBuffer();		
 		sb.append("<utfoot>");
-		for(Element tr : footerRows){
+		
+		int startCol = 1;
+		
+		for(int row = 0; row < footerRows.size(); row++){
+			Element tr = footerRows.get(row);
 			sb.append("<row>");
 			Elements cells = tr.select(" > th");
 			if(cells == null || cells.size() == 0) cells = tr.select(" > td");
 			if(cells != null && cells.size() > 0){
-				for(Element cell : cells){
-					sb.append(String.format("<entry>%s</entry>", cell.html()));
+				for(int col = 0; col < cells.size(); col++){
+					sb.append(buildElementEntry(row, col, startCol, cells.get(col), false));
 				}
 			}
 			sb.append("</row>");
@@ -129,17 +164,20 @@ public class HtmlTable {
 	}
 	
 	private String generateHeader(){
-		//TODO need to handle rowspan and colspan
 		StringBuffer sb = new StringBuffer();		
 		sb.append("<uthead>");
+		
+		int startCol = 1;
+		
 		if(this.hasHeader){
-			for(Element tr : headerRows){
+			for(int row = 0; row < headerRows.size(); row++ ){
+				Element tr = headerRows.get(row);
 				sb.append("<row>");
 				Elements cells = tr.select(" > th");
 				if(cells == null || cells.size() == 0) cells = tr.select(" > td");
 				if(cells != null && cells.size() > 0){
-					for(Element cell : cells){
-						sb.append(String.format("<entry>%s</entry>", cell.html()));
+					for(int col = 0; col < cells.size(); col++){
+						sb.append(buildElementEntry(row, col, startCol, cells.get(col), true));
 					}
 				}
 				sb.append("</row>");
@@ -151,8 +189,8 @@ public class HtmlTable {
 			if(cells == null || cells.size() == 0) cells = tr.select(" > th");
 			sb.append("<row>");
 			if(cells != null && cells.size() > 0){
-				for(Element cell : cells){
-					sb.append(String.format("<entry>%s</entry>", cell.html()));
+				for(int col = 0; col < cells.size(); col++){
+					sb.append(buildElementEntry(0, col, startCol, cells.get(col), true));
 				}
 			}
 			sb.append("</row>");
@@ -247,6 +285,7 @@ public class HtmlTable {
 	public void init(){
 		header = new int[headerRowCount][colCount];
 		body = new int[bodyRowCount][colCount];
+		footer = new int[footerRowCount][colCount];
 	}
 	
 }
