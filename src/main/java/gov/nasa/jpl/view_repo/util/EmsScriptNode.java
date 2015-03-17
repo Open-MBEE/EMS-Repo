@@ -5098,6 +5098,11 @@ public class EmsScriptNode extends ScriptNode implements
                    Acm.JSON_INSTANCE_SPECIFICATION_SPECIFICATION,
                    addNodeRefIdJSON(specNode),
                    filter );
+        
+        putInJson( json,
+                   Acm.JSON_CLASSIFIER,
+                   node.getProperty( Acm.ACM_CLASSIFIER),
+                   filter );
     }
 
     protected
