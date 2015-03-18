@@ -246,14 +246,14 @@ public class SnapshotPost extends AbstractJavaWebScript {
 
     private String buildInlineImageTag(String nodeId, DBImage dbImage){
     	StringBuffer sb = new StringBuffer();
-    	sb.append(String.format("<figure xml:id=\"%s\" pgwide=\"1\">", nodeId));
-    	sb.append(String.format("<title>%s</title>", dbImage.getTitle()));
-    	sb.append("<mediaobject>");
+//    	sb.append(String.format("<figure xml:id=\"%s\" pgwide=\"1\">", nodeId));
+//    	sb.append(String.format("<title>%s</title>", dbImage.getTitle()));
+    	sb.append("<inlinemediaobject>");
         sb.append("<imageobject>");
         sb.append(String.format("<imagedata scalefit='1' width='100%%' fileref='%s' />", dbImage.getFilePath()));
         sb.append("</imageobject>");
-        sb.append("</mediaobject>");
-        sb.append("</figure>");
+        sb.append("</inlinemediaobject>");
+//        sb.append("</figure>");
     	return sb.toString();
     }
 
