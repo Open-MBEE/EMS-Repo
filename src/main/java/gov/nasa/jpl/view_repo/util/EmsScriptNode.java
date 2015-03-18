@@ -5103,6 +5103,13 @@ public class EmsScriptNode extends ScriptNode implements
                    Acm.JSON_CLASSIFIER,
                    node.getProperty( Acm.ACM_CLASSIFIER),
                    filter );
+        
+        ArrayList< NodeRef > nodeRefs =
+                (ArrayList< NodeRef >)node.getProperty( Acm.ACM_SLOTS );
+        JSONArray ids = addNodeRefIdsJSON( nodeRefs );
+        if ( ids.length() > 0 ) {
+            putInJson( json, Acm.JSON_SLOTS, ids, filter );
+        }
     }
 
     protected

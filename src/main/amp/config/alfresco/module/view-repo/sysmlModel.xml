@@ -748,6 +748,16 @@
                         <tokenised>false</tokenised>
                     </index>
                 </property>
+                <property name="sysml:slots">
+                    <type>d:noderef</type>
+                    <mandatory>false</mandatory>
+                    <multiple>true</multiple>
+                    <index enabled="true">
+                        <atomic>false</atomic>
+                        <stored>false</stored>
+                        <tokenised>false</tokenised>
+                    </index>
+                </property>
 			</properties>
 		</aspect>
 		<aspect name="sysml:Constraint">

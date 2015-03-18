@@ -194,6 +194,7 @@ public class Acm {
 
     public static final String JSON_UNTYPED = "Untyped";
     public static final String JSON_CLASSIFIER = "classifier";
+    public static final String JSON_SLOTS = "slots";
 
     // ACM types with the different name spaces
     public static final String SYSML = "sysml:";
@@ -371,6 +372,7 @@ public class Acm {
 
     public static final String ACM_UNTYPED = SYSML + JSON_UNTYPED;
     public static final String ACM_CLASSIFIER = SYSML + JSON_CLASSIFIER;
+    public static final String ACM_SLOTS = SYSML + JSON_SLOTS;
 
     /**
      *  JSON to Alfresco Content Model mapping

@@ -127,7 +127,14 @@
                     "type": "array",
                     "items": {
                         "type": "string",
-                        "description": "The classifiers
+                        "description": "The classifiers"
+                    }
+                },
+                "slots": {
+                    "type": "array",
+                    "items": {
+                        "type": "string",
+                        "description": "IDs of the slots"
                     }
                 }
             }
