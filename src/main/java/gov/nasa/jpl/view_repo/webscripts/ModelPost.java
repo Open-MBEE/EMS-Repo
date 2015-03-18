@@ -74,8 +74,10 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 
 import javax.servlet.http.HttpServletResponse;
+
 import kexpparser.KExpParser;
 //import k.frontend.Frontend;
+
 
 
 
@@ -282,35 +284,48 @@ public class ModelPost extends AbstractJavaWebScript {
         
     }
     
+    /**
+     * Utility to save off the commit, then send deltas. Send deltas is tied to the projectId,
+     * so MD knows how to filter for it.
+     * @param targetWS
+     * @param elements
+     * @param start
+     * @param end
+     * @throws JSONException
+     */
     private void sendDeltasAndCommit(WorkspaceNode targetWS,  TreeSet<EmsScriptNode> elements,
                                      long start, long end) throws JSONException {
+        JSONObject deltaJson = wsDiff.toJSONObject( new Date(start), new Date(end) );
         
+        // commit is run as admin user already
+        String msg = "model post";
+        String body = deltaJson != null ? NodeUtil.jsonToString(deltaJson) : "{\"model post had no diff\"}";
+        timerCommit = Timer.startTimer(timerCommit, timeEvents);
+        CommitUtil.commit(targetWS, body, msg, runWithoutTransactions, 
+                          services, new StringBuffer());
+        Timer.stopTimer(timerCommit, "!!!!! updateOrCreateElement(): ws metadata time", timeEvents);
+
+
         // FIXME: Need to split elements by project Id - since they won't always be in same project
-        //      CommitUtil.commitAndStartAction( targetWS, wsDiff, start, end, elements.first().getProjectId(), status, true );
-        
-        NodeRef commitRef = CommitUtil.commit(null, targetWS, "", runWithoutTransactions, services, new StringBuffer() );
-        
         String projectId = "";
         if (elements.size() > 0) {
+            // make sure the following are run as admin user, it's possible that the
+            // workspace doesn't have the project and user doesn't have read permissions on
+            // the parent workspace (at that level)
+            String originalUser = NodeUtil.getUserName();
+            AuthenticationUtil.setRunAsUser( "admin" );
             projectId = elements.first().getProjectId();
-        }
+            AuthenticationUtil.setRunAsUser( originalUser );
+       }
         String wsId = "master";
         if (targetWS != null) {
             wsId = targetWS.getId();
         }
 
-        JSONObject deltaJson = wsDiff.toJSONObject( new Date(start), new Date(end) );
-
         // FIXME: Need to split by projectId
         if ( !CommitUtil.sendDeltas(deltaJson, wsId, projectId, source) ) {
             logger.warn("send deltas not posted properly");
         }
-
-        CommitUtil.updateCommitNodeRef( commitRef, NodeUtil.jsonToString( deltaJson ), "", services, response );
-
-        timerCommit = Timer.startTimer(timerCommit, timeEvents);
-        
-        Timer.stopTimer(timerCommit, "!!!!! updateOrCreateElement(): ws metadata time", timeEvents);
     }
     
     private void givePercentProgress(boolean isMetaData) {

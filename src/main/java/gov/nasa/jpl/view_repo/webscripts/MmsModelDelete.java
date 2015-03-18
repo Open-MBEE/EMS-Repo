@@ -162,7 +162,9 @@ public class MmsModelDelete extends AbstractJavaWebScript {
                         logger.warn("deltas not posted properly");
                     }
         
-                    CommitUtil.commit( result, workspace, "", runWithoutTransactions, services, response );
+                    String body = result != null ? result.toString() : "{\"model delete had no diff\"}";
+                    String msg = "model delete";
+                    CommitUtil.commit( workspace, body, msg, runWithoutTransactions, services, response );
                 }                
 
                 // apply aspects after wsDiff JSON has been created since the wsDiff 

@@ -117,10 +117,10 @@
    		<property name="siteService" ref="SiteService" />
   	</bean>
 
-    <bean id="commit" class="gov.nasa.jpl.view_repo.actions.CommitActionExecuter" parent="action-executer">
+<!--     <bean id="commit" class="gov.nasa.jpl.view_repo.actions.CommitActionExecuter" parent="action-executer">
         <property name="services" ref="ServiceRegistry"/>
     </bean> 
-  	
+ -->  	
 	<bean id="extendPermissionModel" parent="permissionModelBootstrap">
    		<property name="model" value="alfresco/extension/permissionDefinitionsExtension.xml" /> 
 	</bean>
@@ -136,11 +136,11 @@
     
     <bean class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
 		<property name="staticMethod" value="gov.nasa.jpl.view_repo.webscripts.util.ShareUtils.setUsername" />
-		<property name="arguments" value="admin"/>
+		<property name="arguments" value="mmsadmin"/>
 	</bean>
     <bean class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
         <property name="staticMethod" value="gov.nasa.jpl.view_repo.webscripts.util.ShareUtils.setPassword" />
-        <property name="arguments" value="admin"/>
+        <property name="arguments" value="letmein"/>
     </bean>
     <bean class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
         <property name="staticMethod" value="gov.nasa.jpl.view_repo.webscripts.util.ShareUtils.setServices" />
