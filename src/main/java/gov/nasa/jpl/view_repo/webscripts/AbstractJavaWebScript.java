@@ -399,11 +399,11 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
     protected void log(Level level, int code, String msg) {
 		if (level.toInt() >= logger.getLevel().toInt()) {
 			// print to response stream if >= existing log level
-			String levelMessage = String.format("[%s]: %s\n",level.toString(),msg);
+			String levelMessage = addLevelInfoToMsg (level,msg); 
 			log(code,levelMessage);
 			// print to console if log level >= Warning (i.e. Error, Fatal, or Off)
 			if (level.toInt() >= Level.WARN.toInt()) {
-				 log (level, msg);
+				 log (level, levelMessage);
 			}
 		}
 	}
@@ -411,20 +411,22 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
     // only logging loglevel and a message (no code)
 	protected void log(Level level, String msg, Object...params) {
 	    if (level.toInt() >= logger.getLevel().toInt()) {
-        	String formattedMsg = formatter.format (msg,params).toString();
-        	response.append(formattedMsg);
-	        log (level, formattedMsg);
+        	String formattedMsg = formatMessage(msg,params); //formatter.format (msg,params).toString();
+        	String levelMessage = addLevelInfoToMsg (level,formattedMsg);
+        	//TODO: unsure if need to call responseStatus.setMessage(...) since there is no code
+        	response.append(levelMessage);
+        	log (level, levelMessage);
 	    }
 	}
 
 	// only logging code and a message (no loglevel, and thus, no check for log level status)
 	protected void log(int code, String msg, Object...params) {
-		String formattedMsg = formatter.format (msg,params).toString();
+		String formattedMsg = formatMessage(msg,params); //formatter.format (msg,params).toString();
 		log (code,formattedMsg);
 	}
 	
 	protected void log(String msg, Object...params) {
-		String formattedMsg = formatter.format (msg,params).toString();
+		String formattedMsg = formatMessage(msg,params); //formatter.format (msg,params).toString();
 		log (formattedMsg);
 	}
 	
@@ -449,7 +451,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 	            logger.error( msg );
 	            break;
 	        case Level.WARN_INT:
-	            logger.warn( msg );
+	            logger.warn(msg);
 	            break;
 	        case Level.INFO_INT:
 	            logger.info( msg );
@@ -462,6 +464,16 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
             	if (Debug.isOn()){ logger.debug( msg ); }
 	            break;
 	    }
+	}
+	
+	protected String addLevelInfoToMsg (Level level, String msg){
+		if (level.toInt() != Level.WARN_INT){
+			return String.format("[%s]: %s\n",level.toString(),msg);
+		}
+		else{
+			return String.format("[WARNING]: %s\n",msg);
+		}
+		
 	}
 	
 	// formatMessage function is used to catch certain objects that must be dealt with individually
