@@ -4719,7 +4719,7 @@ public class EmsScriptNode extends ScriptNode implements
         }
         // TODO: Snapshots?
         NodeRef contentsNode = (NodeRef) node.getProperty( Acm.ACM_CONTENTS );
-        putInJson( json, Acm.JSON_CONTENTS, addNodeRefIdJSON(contentsNode), filter );
+        putInJson( json, Acm.JSON_CONTENTS, addInternalJSON(contentsNode, dateTime), filter );
 
     }
 
@@ -5098,6 +5098,18 @@ public class EmsScriptNode extends ScriptNode implements
                    Acm.JSON_INSTANCE_SPECIFICATION_SPECIFICATION,
                    addNodeRefIdJSON(specNode),
                    filter );
+        
+        putInJson( json,
+                   Acm.JSON_CLASSIFIER,
+                   node.getProperty( Acm.ACM_CLASSIFIER),
+                   filter );
+        
+        ArrayList< NodeRef > nodeRefs =
+                (ArrayList< NodeRef >)node.getProperty( Acm.ACM_SLOTS );
+        JSONArray ids = addNodeRefIdsJSON( nodeRefs );
+        if ( ids.length() > 0 ) {
+            putInJson( json, Acm.JSON_SLOTS, ids, filter );
+        }
     }
 
     protected

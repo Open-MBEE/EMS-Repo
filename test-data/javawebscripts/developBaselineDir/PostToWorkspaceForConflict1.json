@@ -1,12 +1,12 @@
 {"elements": [{
     "qualifiedId": "/europa/123456/conflict",
-    "qualifiedName": "/europa/JW_TEST/conflict",
     "name": "conflict",
-    "owner": "123456",
-    "documentation": "",
+    "qualifiedName": "/europa/JW_TEST/conflict",
     "sysmlid": "conflict",
+    "documentation": "",
+    "owner": "123456",
     "specialization": {"type": "Element"},
     "editable": true,
-    "creator": "admin"
+    "creator": "admin",
 }]}
 200

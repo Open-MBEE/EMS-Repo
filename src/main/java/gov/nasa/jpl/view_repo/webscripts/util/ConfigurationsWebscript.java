@@ -277,7 +277,11 @@ public class ConfigurationsWebscript extends AbstractJavaWebScript {
                                              Date dateTime ) throws JSONException {
         // fill in configurations first
         JSONObject configJson = new JSONObject();
-        configJson.put("name", config.getProperty(Acm.CM_NAME));
+        String name = (String)config.getProperty( Acm.CM_TITLE );
+        if (null == name) {
+            name = (String)config.getProperty(Acm.CM_NAME);
+        }
+        configJson.put("name", name);
         configJson.put( "id", config.getNodeRef().getId() );
         JSONArray configArray = new JSONArray();
         configArray.put( configJson );
