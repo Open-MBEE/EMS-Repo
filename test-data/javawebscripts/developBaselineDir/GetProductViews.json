@@ -1,84 +1,83 @@
 {"views": [
     {
-        "creator": "admin",
-        "documentation": "to",
-        "editable": true,
-        "name": "302",
-        "owner": "301",
         "qualifiedId": "/europa/123456/300/301/302",
+        "name": "302",
         "qualifiedName": "/europa/JW_TEST/300/301/302",
+        "sysmlid": "302",
+        "documentation": "to",
+        "owner": "301",
         "specialization": {
+            "propertyType": null,
             "isDerived": false,
             "isSlot": false,
-            "propertyType": null,
-            "type": "Property",
             "value": [{
+                "valueExpression": null,
                 "string": "dlam_string",
-                "type": "LiteralString",
-                "valueExpression": null
-            }]
+                "type": "LiteralString"
+            }],
+            "type": "Property"
         },
-        "sysmlid": "302"
+        "editable": true,
+        "creator": "admin",
     },
     {
-        "creator": "admin",
-        "documentation": "about",
-        "editable": true,
-        "name": "304",
-        "owner": "303",
         "qualifiedId": "/europa/123456/300/301/302/303/304",
         "qualifiedName": "/europa/JW_TEST/300/301/302/303/304",
+        "name": "304",
+        "owner": "303",
+        "documentation": "about",
+        "sysmlid": "304",
         "specialization": {
-            "isDerived": false,
-            "isSlot": false,
             "propertyType": null,
-            "type": "Property",
+            "isSlot": false,
+            "isDerived": false,
             "value": [{
+                "valueExpression": null,
                 "string": "dlam_string",
-                "type": "LiteralString",
-                "valueExpression": null
-            }]
+                "type": "LiteralString"
+            }],
+            "type": "Property"
         },
-        "sysmlid": "304"
+        "editable": true,
+        "creator": "admin"
     },
     {
-        "creator": "admin",
-        "documentation": "else",
-        "editable": true,
-        "name": "301",
-        "owner": "300",
         "qualifiedId": "/europa/123456/300/301",
         "qualifiedName": "/europa/JW_TEST/300/301",
+        "name": "301",
+        "owner": "300",
+        "documentation": "else",
+        "sysmlid": "301",
         "specialization": {
-            "allowedElements": [
-                "301",
-                "302",
-                "303"
-            ],
-            "childrenViews": ["304"],
-            "contains": [{
-                "source": "301",
-                "sourceProperty": "documentation",
-                "sourceType": "reference",
-                "type": "Paragraph"
-            }],
-            "contents": null,
-            "displayedElements": [
-                "301",
-                "302",
-                "303"
-            ],
-            "noSections": ["302"],
-            "type": "Product",
             "view2view": [{
                 "childrenViews": [
                     "301",
                     "302"
                 ],
                 "sysmlid": "301"
-            }]
+            }],
+            "childrenViews": ["304"],
+            "displayedElements": [
+                "301",
+                "302",
+                "303"
+            ],
+            "allowedElements": [
+                "301",
+                "302",
+                "303"
+            ],
+            "noSections": ["302"],
+            "contains": [{
+                "sourceType": "reference",
+                "source": "301",
+                "sourceProperty": "documentation",
+                "type": "Paragraph"
+            }],
+            "type": "Product"
         },
-        "sysmlid": "301"
+        "editable": true,
+        "creator": "admin"
     }
 ]}
 200
