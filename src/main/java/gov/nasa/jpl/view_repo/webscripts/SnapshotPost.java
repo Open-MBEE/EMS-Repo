@@ -95,6 +95,7 @@ import org.json.JSONObject;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
+import org.jsoup.nodes.Node;
 import org.jsoup.parser.Tag;
 import org.jsoup.select.Elements;
 import org.springframework.extensions.webscripts.Cache;
@@ -1203,9 +1204,9 @@ public class SnapshotPost extends AbstractJavaWebScript {
     			if(!src.toLowerCase().startsWith("http")){
     				//relative URL; needs to prepend URL protocol
     				String protocol = new HostnameGet(this.repository, this.services).getAlfrescoProtocol();
-    				System.out.println(protocol + "://" + src);
+//    				System.out.println(protocol + "://" + src);
     				src = src.replaceAll("\\.\\./", "");
-    				System.out.println("src: " + src);
+//    				System.out.println("src: " + src);
     				url = new URL(String.format("%s://%s", protocol, src));
     			}
     			else{
@@ -1417,26 +1418,6 @@ public class SnapshotPost extends AbstractJavaWebScript {
     		return s;
     	}
     }
-    
-    private void removeNestedTags(Document document){
-    	document.select("para > para").tagName("removalTag");
-    	Elements ulist = document.select("itemizedlist > itemizedlist");
-    	for(Element u : ulist){
-    		Element listItem = new Element(Tag.valueOf("listitem"),"");
-    		listItem.html(u.outerHtml());
-    		u.replaceWith(listItem);
-    		u = listItem;
-    	}
-    	
-    	Elements olist = document.select("orderedlist > orderedlist");
-    	for(Element o : olist){
-    		Element listItem = new Element(Tag.valueOf("listitem"),"");
-    		listItem.html(o.outerHtml());
-    		o.replaceWith(listItem);
-    		o = listItem;
-    	}
-    }
-
     private String HtmlTableToDocbookTable(String table, String tableContent) throws Exception{
     	if(table == null || table.isEmpty()) return "";
     	if(tableContent == null || tableContent.isEmpty()) return table;
@@ -1686,6 +1667,18 @@ public class SnapshotPost extends AbstractJavaWebScript {
         return snapshoturl;
     }
 
+    private void removeComments(Node node) {
+        for (int i = 0; i < node.childNodes().size();) {
+            Node child = node.childNode(i);
+            if (child.nodeName().equals("#comment") || child.nodeName().equals("#style"))
+                child.remove();
+            else {
+                removeComments(child);
+                i++;
+            }
+        }
+    } 
+    
     private void removeHtmlTag(Element elem) throws Exception{
     	if(elem == null) return;
     	Element elemNew = null;
@@ -1729,9 +1722,14 @@ public class SnapshotPost extends AbstractJavaWebScript {
 	    		elem = elemNew;
 	    		break;
 	    	case "B":
+	    	case "EM":
+	    	case "I":
 	    	case "STRONG":
-	    		elemNew = new Element(Tag.valueOf("emphasis"), "");
-	    		elemNew.html(elem.html());
+	    		elemNew = new Element(Tag.valueOf("para"), "");
+	    		Element emphasis = new Element(Tag.valueOf("emphasis"), "");
+	    		if(tagName.compareTo("B")==0 || tagName.compareTo("STRONG")==0) emphasis.attr("role", "bold");
+	    		emphasis.html(elem.html());
+	    		elemNew.appendChild(emphasis);
 	    		elem.replaceWith(elemNew);
 	    		elem = elemNew;
 	    		break;
@@ -1787,6 +1785,11 @@ public class SnapshotPost extends AbstractJavaWebScript {
 	    		elem.replaceWith(elemNew);
 	    		elem = elemNew;
 	    		break;
+	    	case "XML":
+	    	case "#COMMENT":
+	    	case "COMMENT":
+	    		elem.remove();
+	    		break;
 	    	default:
 //	    		TextNode textNode = new TextNode(elem.html(), "");
 //	    		elem.replaceWith(textNode);
@@ -1799,98 +1802,53 @@ public class SnapshotPost extends AbstractJavaWebScript {
     	removeHtmlTags(elem);
     }
 
-    
-    /**
-     * replaces HTML tags to end up with only the HTML text.
-     * @param elem: JSoup Element
-     * @throws Exception 
-     */
-//    private void removeHtmlTag(Element elem){
-//    	if(elem == null) return;
-//    	Element elemNew;
-//    	String tagName = elem.tagName().toUpperCase();
-//    	switch(tagName){
-//	    	case "BODY":
-//	    	case "COLSPEC":
-//	    	case "ENTRY":
-//	    	case "INLINEMEDIAOBJECT":
-//	    	case "IMAGEOBJECT":
-//	    	case "LINK":
-//	    	case "ULINK":
-//	    	case "ORDEREDLIST":
-//	    	case "ITEMIZEDLIST":
-//	    	case "LISTITEM":
-//	    	case "ROW":
-//	    	case "TBODY":
-//	    	case "TFOOT":
-//	    	case "TGROUP":
-//	    	case "THEAD":
-//	    	case "UTABLE":
-//	    		for(Element child:elem.children()){
-//	    			removeHtmlTag(child);
-//	    		}
-//	    		break;
-//	    	case "A":
-//	    		String link = String.format(" <ulink xl:href='%s'><![CDATA[%s]]></ulink> ", elem.attr("href"), elem.text());
-//	    		elem.before(link);
-//				for(Element child:elem.children()){
-//					removeHtmlTag(child);
-//				}
-//	    		elem.remove();
-//	    		break;
-//	    	case "P":
-//	    	case "DIV":
-//	    		//add linebreak then process the children nodes
-//	    		elem.before("<?linebreak?>");
-//	    		for(Element child:elem.children()){
-//	    			removeHtmlTag(child);
-//	    		}
-//	    		break;
-//	    	case "B":
-//	    	case "STRONG":
-//	    		Element emphasis = new Element(Tag.valueOf("emphasis"), "");
-//	    		emphasis.html(elem.html());
-//	    		elem.before(emphasis);
-//	    		elem.remove();
-//	    		break;
-//	    	case "BR":
-//	    		//replaces with linebreak;
-//	    		elem.before("<?linebreak?>");
-//	    		elem.remove();
-//	    		break;
-////	    	case "LI":
-////	    		for(Element child:elem.children()){
-////	    			removeHtmlTag(child);
-////	    		}
-////	    		break;
-////	    	case "OL":
-////	    		Element oList = elem.before("orderedlist");
-////	    		for(Element child:elem.children()){
-////	    			removeHtmlTag(child);
-////	    		}
-////	    		//elem.remove();
-////	    		break;
-////	    	case "UL":
-////	    		elem.before("itemizedlist");
-////	    		for(Element child:elem.children()){
-////	    			removeHtmlTag(child);
-////	    		}
-////	    		//elem.remove();
-////	    		break;
-//	    	default:
-//				elem.before(elem.text());
-//				removeHtmlTags(elem);
-//				elem.remove();
-//    	}
-//    }
-
     private void removeHtmlTags(Element elem) throws Exception{
     	if(elem==null) return;
+    	
+    	removeComments(elem);
     	
     	for(Element child : elem.children()){
     		removeHtmlTag(child);
     	}
 	}
+    
+    private void removeNestedTags(Document document){
+    	// cleans up generated docbook fragment to pass fop validation
+    	
+    	// shifts nested <itemizedlist> and <orderedlist>
+    	Elements list = document.select("itemizedlist > itemizedlist");
+    	list.addAll(document.select("orderedlist > orderedlist"));
+    	list = document.select("itemizedlist > orderedlist");
+    	list.addAll(document.select("orderedlist > itemizedlist"));
+    	for(Element u : list){
+    		Element listItem = new Element(Tag.valueOf("listitem"),"");
+    		listItem.html(u.outerHtml());
+    		u.replaceWith(listItem);
+    		u = listItem;
+    	}
+    	
+    	// removes <itemizedlist>/<orderedlist> without <listitem> children
+    	list = document.select("itemizedlist");
+    	list.addAll(document.select("orderedlist"));
+    	list.addAll(document.select("tbody"));
+		for(Element item : list){
+			if(item.children().size()==0) item.tagName("removalTag");
+		}
+		
+		// shifts chapter > link to chapter > para > link
+		list = document.select(" > ulink");
+		list.addAll(document.select(" > inlinemediaobject"));
+		for(Element u : list){
+			Element para = new Element(Tag.valueOf("para"), "");
+			para.html(u.outerHtml());
+			u.replaceWith(para);
+			u = para;
+		}
+		
+    	// removes nested <para>
+    	document.select("para > para").tagName("removalTag");
+    	
+    }
 
     private DBImage retrieveEmbeddedImage(String nodeId, String imgName, WorkspaceNode workspace, Object timestamp){
 		NodeRef imgNodeRef = NodeUtil.getNodeRefFromNodeId(nodeId);

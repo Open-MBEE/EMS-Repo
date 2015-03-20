@@ -93,7 +93,7 @@ public class DocBookWrapper {
 		String source = srcFile.getAbsolutePath();
 		String target = source.subSequence(0, source.lastIndexOf(".")) + ".pdf";
 		command.add(this.getFobFileName());
-		//command.add("-r");	//relaxed validation
+		command.add("-r");	//relaxed validation
 		command.add("-xml");
 		command.add(source);
 		command.add("-xsl");
@@ -607,6 +607,7 @@ public class DocBookWrapper {
 	    String ESCAPED_QUOTE = "\"\"";
 	    char[] CHARACTERS_THAT_MUST_BE_QUOTED = { ',', '"', '\n' };
 	    
+	    if(filename.length() > 100) filename = filename.substring(0,100);
 		File outputFile = new File(Paths.get(this.dbDirName.toString(), filename+".csv").toString());
 		try {
 			FileWriter fw = new FileWriter(outputFile);
