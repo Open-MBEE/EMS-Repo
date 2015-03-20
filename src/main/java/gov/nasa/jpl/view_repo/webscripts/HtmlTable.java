@@ -33,7 +33,7 @@ public class HtmlTable {
 		if(caption == null || caption.size()==0) this.hasTitle = false;
 		else{
 			this.hasTitle = true;
-			this.title = String.valueOf(caption.first().toString());	//TODO encode HTML
+			this.title = String.valueOf(caption.first().text());	//TODO encode HTML
 		}
 		
 		//looking for table header
@@ -92,9 +92,22 @@ public class HtmlTable {
 		int startColTemp = this.getStartCol(row, col, rowspan, colspan, isHeader);
 		if(startColTemp > startCol) startCol = startColTemp;
 		
+		if(startCol > this.colCount) return "";
+		
 		if(rowspan > 1 || colspan > 1){
 			sb.append("<entry");
-			if(rowspan > 1) sb.append(String.format(" morerows=\"%d\"", rowspan-1));
+			
+			if(rowspan > 1){
+				int endRow = row + rowspan;
+				if(isHeader && this.hasHeader){
+					if(endRow > this.headerRowCount) rowspan = this.headerRowCount - row;
+				}
+				else{
+					if(endRow > this.bodyRowCount) rowspan = this.bodyRowCount - row;
+				}
+				sb.append(String.format(" morerows=\"%d\"", rowspan-1));
+			}
+			
 			if(colspan > 1){ 
 				int end = startCol + colspan - 1;
         		if(end > this.getColCount()) end = this.getColCount();
@@ -239,7 +252,7 @@ public class HtmlTable {
 							isSet = true;
 							header[i][j] = 1;
 						}
-						if(j < colEnd) header[i][j] = 1;
+						if(j <= colEnd) header[i][j] = 1;
 					}
 				}
 				else{
@@ -249,7 +262,7 @@ public class HtmlTable {
 							isSet = true;
 							body[i][j] = 1;
 						}
-						if(j < colEnd) body[i][j] = 1;
+						if(j <= colEnd) body[i][j] = 1;
 					}
 				}
 			}
