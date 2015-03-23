@@ -236,7 +236,7 @@ public class MmsWorkspaceDiffPost extends ModelPost {
 	            top.put( "elements", elements );
 
 	            Set<EmsScriptNode> updatedElements = handleUpdate( top, status, targetWs, false,
-	                                                               new HashMap<String,Object>(), false );
+	                                                               new HashMap<String,Object>(), false, true );
 
 	            // Delete the elements in the target workspace:
 		        WorkspaceDiff deleteWsDiff = null;

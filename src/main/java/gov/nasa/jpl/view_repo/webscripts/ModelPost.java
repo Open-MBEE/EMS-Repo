@@ -2539,6 +2539,7 @@ public class ModelPost extends AbstractJavaWebScript {
 
         boolean runInBackground = getBooleanArg(req, "background", false);
         boolean fix = getBooleanArg(req, "fix", false);
+        boolean suppressElementJson = getBooleanArg( req, "suppressElementJson", false );
 
         // see if prettyPrint default is overridden and change
         prettyPrint = getBooleanArg(req, "pretty", prettyPrint );
@@ -2632,7 +2633,8 @@ public class ModelPost extends AbstractJavaWebScript {
                     if (getResponseStatus().getCode() == HttpServletResponse.SC_BAD_REQUEST) {
                         log(LogLevel.WARNING, "No write priveleges", HttpServletResponse.SC_FORBIDDEN);
                     } else if (projectNode != null) {
-                        handleUpdate( postJson, status, myWorkspace, fix, model, true );
+                        handleUpdate( postJson, status, myWorkspace, fix, model,
+                                      true, suppressElementJson );
                     }
                 }
             } catch (JSONException e) {
@@ -2663,7 +2665,8 @@ public class ModelPost extends AbstractJavaWebScript {
     protected Set< EmsScriptNode > handleUpdate(JSONObject postJson, Status status, 
                                                 WorkspaceNode workspace,
                                                 boolean fix, Map<String, Object> model,
-                                                boolean createCommit) throws Exception {
+                                                boolean createCommit,
+                                                boolean suppressElementJson ) throws Exception {
         JSONObject top = NodeUtil.newJsonObject();
         final Set< EmsScriptNode > elements = createOrUpdateModel( postJson, status, workspace, null, createCommit );
 
@@ -2683,20 +2686,22 @@ public class ModelPost extends AbstractJavaWebScript {
                 };
             }
 
-            // Create JSON object of the elements to return:
-            final JSONArray elementsJson = new JSONArray();
-          
-            new EmsTransaction(getServices(), getResponse(), getResponseStatus(),
-                               runWithoutTransactions) {// || internalRunWithoutTransactions ) {
-                @Override
-                public void run() throws Exception {
-                    for ( EmsScriptNode element : elements ) {
-                        elementsJson.put( element.toJSONObject(null) );
+            if ( !suppressElementJson ) {
+                // Create JSON object of the elements to return:
+                final JSONArray elementsJson = new JSONArray();
+              
+                new EmsTransaction(getServices(), getResponse(), getResponseStatus(),
+                                   runWithoutTransactions) {// || internalRunWithoutTransactions ) {
+                    @Override
+                    public void run() throws Exception {
+                        for ( EmsScriptNode element : elements ) {
+                            elementsJson.put( element.toJSONObject(null) );
+                        }
                     }
-                }
-            };
-            
-            top.put( "elements", elementsJson );
+                };
+                
+                top.put( "elements", elementsJson );
+            }
         }
         
         if (!Utils.isNullOrEmpty(response.toString())) {
