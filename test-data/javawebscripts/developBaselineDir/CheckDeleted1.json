@@ -1,8 +1,8 @@
 {"workspaces": [
     {
+        "workspaceOperationsPermission": true,
         "qualifiedName": "master",
-        "name": "master",
-        "siteManagerPermission": true
+        "name": "master"
     },
     {
         "description": "modified the workspace name and desc",
@@ -14,12 +14,6 @@
         "description": "",
         "qualifiedName": "master/wsG1",
         "name": "wsG1",
-        "creator": "admin"
-    },
-    {
-        "description": "",
-        "qualifiedName": "master/wsG2",
-        "name": "wsG2",
         "creator": "admin"
     },
     {
@@ -44,6 +38,12 @@
         "description": "",
         "qualifiedName": "master/wsA",
         "name": "wsA",
+        "creator": "admin"
+    },
+    {
+        "description": "",
+        "qualifiedName": "master/wsG2",
+        "name": "wsG2",
         "creator": "admin"
     }
 ]}

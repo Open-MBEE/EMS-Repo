@@ -53,6 +53,7 @@ import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
 
+@Deprecated
 public class ProductPost extends AbstractJavaWebScript {
 	public ProductPost() {
 	    super();

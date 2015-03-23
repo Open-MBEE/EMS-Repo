@@ -186,7 +186,7 @@ public class NodeUtil {
     // global flag that is enabled once heisenbug is seen, so it will email admins the first time heisenbug is seen
     public static boolean heisenbugSeen = false;
 
-    public static String sitePkgPrefix = "site_";
+    public final static String sitePkgPrefix = "site_";
 
     /**
      * A cache of alfresco nodes stored as a map from cm:name to node for the master branch only.
@@ -767,10 +767,21 @@ public class NodeUtil {
     }
 
     public static Collection<EmsScriptNode> luceneSearchElements(String queryPattern ) {
-        ResultSet resultSet = luceneSearch( queryPattern, (SearchService)null );
-        if (Debug.isOn()) System.out.println( "luceneSearch(" + queryPattern + ") returns "
-                            + resultSet.length() + " matches." );
-        return resultSetToList( resultSet );
+        ResultSet resultSet =  null;
+        List<EmsScriptNode> resultList = new ArrayList<EmsScriptNode>();
+        try {
+            resultSet = luceneSearch( queryPattern, (SearchService)null );
+            if (Debug.isOn()) System.out.println( "luceneSearch(" + queryPattern + ") returns "
+                                + resultSet.length() + " matches." );
+            resultList = resultSetToList( resultSet );
+        } catch (Exception e) {
+            logger.error("Could not get results");
+        } finally {
+            if (resultSet != null) {
+                resultSet.close();
+            }
+        }
+        return resultList;
     }
 
     public static ResultSet luceneSearch(String queryPattern ) {
@@ -3122,6 +3133,65 @@ public class NodeUtil {
             }
         }
         
+    }
+    
+    /**
+     * Retrieves the LDAP group that is given permision to do workspace operations
+     * Looks in companyhome/MMS/branch_perm.  Returns default LDAP group if no node
+     * is found.
+     * 
+     */
+    public static String getWorkspaceLdapGroup() {
+        
+        String ldapGroup = null;
+        EmsScriptNode context = NodeUtil.getCompanyHome( services );
+        
+        if (context != null) {
+            EmsScriptNode mmsFolder = context.childByNamePath( "MMS" );
+
+            if (mmsFolder != null) {
+                EmsScriptNode branchPermNode = mmsFolder.childByNamePath( "branch_perm" );
+
+                if (branchPermNode != null) {
+                    ldapGroup = (String) branchPermNode.getProperty( "ems:ldapGroup" );
+                }
+            }
+        }
+        
+        return Utils.isNullOrEmpty(ldapGroup) ?  "mbee-dev-admin" : ldapGroup;
+    }
+    
+    /**
+     * Returns true if the user is part of the LDAP group that has permissions to 
+     * perform workspace operations.
+     * 
+     * @return
+     */
+    public static boolean userHasWorkspaceLdapPermissions() {
+        
+        String ldapGroup = getWorkspaceLdapGroup();
+        String user = NodeUtil.getUserName();
+
+        if (!Utils.isNullOrEmpty( user )) {
+
+            // Get all the groups (authorities) for the user:
+            List<String> authorityNames = NodeUtil.getUserGroups( user );
+            
+            for (String group : authorityNames) {                
+                // Check against default alfresco admin group:
+                if (group.equals("GROUP_ALFRESCO_ADMINISTRATORS")) {
+                    return true;
+                }
+                
+                // Check against LDAP group:
+                if (group.equals("GROUP_"+ldapGroup)) {
+                    return true;
+                }
+            }
+            
+        }
+        
+        return false;
     }
 
     

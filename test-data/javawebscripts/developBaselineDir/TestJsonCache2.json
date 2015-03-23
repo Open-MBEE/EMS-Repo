@@ -1,19 +1,19 @@
 {"elements": [{
-    "creator": "admin",
-    "documentation": "",
-    "editable": true,
-    "name": "jsonTest2",
-    "owner": "123456",
     "qualifiedId": "/europa/123456/jsonTest2",
+    "name": "jsonTest2",
     "qualifiedName": "/europa/JW_TEST2/jsonTest2",
+    "sysmlid": "jsonTest2",
+    "documentation": "",
+    "owner": "123456",
     "specialization": {
         "specification": {
+            "valueExpression": null,
             "integer": 2,
-            "type": "LiteralInteger",
-            "valueExpression": null
+            "type": "LiteralInteger"
         },
         "type": "Constraint"
     },
-    "sysmlid": "jsonTest2"
+    "editable": true,
+    "creator": "admin",
 }]}
 200

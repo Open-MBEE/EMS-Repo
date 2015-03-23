@@ -1,236 +1,235 @@
 {"elements": [
     {
-        "creator": "admin",
-        "documentation": "directed_relationship with null values",
-        "editable": true,
-        "name": "directedRelationshipNull",
+        "qualifiedId": "/europa/123456/timeIntervalNull",
+        "name": "timeIntervalNull",
+        "qualifiedName": "/europa/JW_TEST2/timeIntervalNull",
+        "sysmlid": "timeIntervalNull",
+        "documentation": "TimeInterval with null values",
         "owner": "123456",
+        "specialization": {
+            "min": null,
+            "max": null,
+            "valueExpression": null,
+            "type": "TimeInterval"
+        },
+        "editable": true,
+        "creator": "admin",
+    },
+    {
+        "qualifiedId": "/europa/123456/valueSpecificationNull",
+        "name": "valueSpecificationNull",
+        "qualifiedName": "/europa/JW_TEST2/valueSpecificationNull",
+        "sysmlid": "valueSpecificationNull",
+        "documentation": "ValueSpecification with null values",
+        "owner": "123456",
+        "specialization": {
+            "valueExpression": null,
+            "type": "ValueSpecification"
+        },
+        "editable": true,
+        "creator": "admin",
+    },
+    {
+        "qualifiedId": "/europa/123456/connectorNull",
+        "name": "connectorNull",
+        "qualifiedName": "/europa/JW_TEST2/connectorNull",
+        "sysmlid": "connectorNull",
+        "documentation": "Connector with null values",
+        "owner": "123456",
+        "specialization": {
+            "targetPath": [],
+            "connectorType": null,
+            "sourceLower": {
+                "valueExpression": null,
+                "string": "sourceLower!",
+                "type": "LiteralString"
+            },
+            "source": null,
+            "targetLower": {
+                "valueExpression": null,
+                "string": "targetLower!",
+                "type": "LiteralString"
+            },
+            "sourceUpper": {
+                "valueExpression": null,
+                "string": "sourceUpper!",
+                "type": "LiteralString"
+            },
+            "target": null,
+            "sourcePath": [],
+            "targetUpper": {
+                "valueExpression": null,
+                "string": "targetUpper!",
+                "type": "LiteralString"
+            },
+            "connectorValue": {
+                "valueExpression": null,
+                "string": "Ninja Attack!",
+                "type": "LiteralString"
+            },
+            "connectorKind": "BINDING",
+            "type": "Connector"
+        },
+        "editable": true,
+        "creator": "admin",
+    },
+    {
         "qualifiedId": "/europa/123456/directedRelationshipNull",
+        "name": "directedRelationshipNull",
         "qualifiedName": "/europa/JW_TEST2/directedRelationshipNull",
+        "sysmlid": "directedRelationshipNull",
+        "documentation": "directed_relationship with null values",
+        "owner": "123456",
         "specialization": {
             "source": null,
             "target": null,
             "type": "DirectedRelationship"
         },
-        "sysmlid": "directedRelationshipNull"
+        "editable": true,
+        "creator": "admin",
     },
     {
-        "creator": "admin",
-        "documentation": "Property with missing propertyType and null owner",
-        "editable": true,
-        "name": "propertyMissing",
-        "owner": "holding_bin_no_site_no_project",
-        "qualifiedId": "/no_site/no_project/holding_bin_no_site_no_project/propertyMissing",
-        "qualifiedName": "/no_site/no_project/holding_bin/propertyMissing",
-        "specialization": {
-            "isDerived": false,
-            "isSlot": false,
-            "propertyType": null,
-            "type": "Property",
-            "value": [{
-                "string": "dlam_string",
-                "type": "LiteralString",
-                "valueExpression": null
-            }]
-        },
-        "sysmlid": "propertyMissing"
-    },
-    {
-        "creator": "admin",
-        "documentation": "ValueSpecification with null values",
-        "editable": true,
-        "name": "valueSpecificationNull",
-        "owner": "123456",
-        "qualifiedId": "/europa/123456/valueSpecificationNull",
-        "qualifiedName": "/europa/JW_TEST2/valueSpecificationNull",
-        "specialization": {
-            "type": "ValueSpecification",
-            "valueExpression": null
-        },
-        "sysmlid": "valueSpecificationNull"
-    },
-    {
-        "creator": "admin",
-        "documentation": "InstanceSpecification with null values",
-        "editable": true,
-        "name": "instanceSpecificationNull",
-        "owner": "123456",
-        "qualifiedId": "/europa/123456/instanceSpecificationNull",
-        "qualifiedName": "/europa/JW_TEST2/instanceSpecificationNull",
-        "specialization": {
-            "instanceSpecificationSpecification": null,
-            "type": "InstanceSpecification"
-        },
-        "sysmlid": "instanceSpecificationNull"
-    },
-    {
-        "creator": "admin",
-        "documentation": "InstanceValue with null values",
-        "editable": true,
-        "name": "instanceValueNull",
-        "owner": "123456",
         "qualifiedId": "/europa/123456/instanceValueNull",
+        "name": "instanceValueNull",
         "qualifiedName": "/europa/JW_TEST2/instanceValueNull",
+        "sysmlid": "instanceValueNull",
+        "documentation": "InstanceValue with null values",
+        "owner": "123456",
         "specialization": {
-            "instance": null,
+            "valueExpression": null,
             "type": "InstanceValue",
-            "valueExpression": null
+            "instance": null
         },
-        "sysmlid": "instanceValueNull"
+        "editable": true,
+        "creator": "admin",
     },
     {
-        "creator": "admin",
-        "documentation": "View with null values",
-        "editable": true,
-        "name": "viewNull",
-        "owner": "123456",
-        "qualifiedId": "/europa/123456/viewNull",
-        "qualifiedName": "/europa/JW_TEST2/viewNull",
-        "specialization": {
-            "contents": null,
-            "type": "View"
-        },
-        "sysmlid": "viewNull"
-    },
-    {
-        "creator": "admin",
-        "documentation": "Connector with null values",
-        "editable": true,
-        "name": "connectorNull",
-        "owner": "123456",
-        "qualifiedId": "/europa/123456/connectorNull",
-        "qualifiedName": "/europa/JW_TEST2/connectorNull",
-        "specialization": {
-            "connectorKind": "BINDING",
-            "connectorType": null,
-            "connectorValue": {
-                "string": "Ninja Attack!",
-                "type": "LiteralString",
-                "valueExpression": null
-            },
-            "source": null,
-            "sourceLower": {
-                "string": "sourceLower!",
-                "type": "LiteralString",
-                "valueExpression": null
-            },
-            "sourcePath": [],
-            "sourceUpper": {
-                "string": "sourceUpper!",
-                "type": "LiteralString",
-                "valueExpression": null
-            },
-            "target": null,
-            "targetLower": {
-                "string": "targetLower!",
-                "type": "LiteralString",
-                "valueExpression": null
-            },
-            "targetPath": [],
-            "targetUpper": {
-                "string": "targetUpper!",
-                "type": "LiteralString",
-                "valueExpression": null
-            },
-            "type": "Connector"
-        },
-        "sysmlid": "connectorNull"
-    },
-    {
-        "creator": "admin",
-        "documentation": "Property with null values",
-        "editable": true,
-        "name": "propertyNull",
-        "owner": "123456",
         "qualifiedId": "/europa/123456/propertyNull",
+        "name": "propertyNull",
         "qualifiedName": "/europa/JW_TEST2/propertyNull",
+        "sysmlid": "propertyNull",
+        "documentation": "Property with null values",
+        "owner": "123456",
         "specialization": {
+            "propertyType": null,
             "isDerived": false,
             "isSlot": false,
-            "propertyType": null,
-            "type": "Property",
             "value": [{
+                "valueExpression": null,
                 "string": "dlam_string",
-                "type": "LiteralString",
-                "valueExpression": null
-            }]
+                "type": "LiteralString"
+            }],
+            "type": "Property"
         },
-        "sysmlid": "propertyNull"
+        "editable": true,
+        "creator": "admin",
     },
     {
-        "creator": "admin",
-        "documentation": "TimeInterval with null values",
-        "editable": true,
-        "name": "timeIntervalNull",
-        "owner": "123456",
-        "qualifiedId": "/europa/123456/timeIntervalNull",
-        "qualifiedName": "/europa/JW_TEST2/timeIntervalNull",
+        "qualifiedId": "/no_site/no_project/holding_bin_no_site_no_project/propertyMissing",
+        "name": "propertyMissing",
+        "qualifiedName": "/no_site/no_project/holding_bin/propertyMissing",
+        "sysmlid": "propertyMissing",
+        "documentation": "Property with missing propertyType and null owner",
+        "owner": "holding_bin_no_site_no_project",
         "specialization": {
-            "max": null,
-            "min": null,
-            "type": "TimeInterval",
-            "valueExpression": null
+            "propertyType": null,
+            "isDerived": false,
+            "isSlot": false,
+            "value": [{
+                "valueExpression": null,
+                "string": "dlam_string",
+                "type": "LiteralString"
+            }],
+            "type": "Property"
         },
-        "sysmlid": "timeIntervalNull"
+        "editable": true,
+        "creator": "admin",
     },
     {
-        "creator": "admin",
-        "documentation": "Viewpoint with null values",
-        "editable": true,
-        "name": "viewpointNull",
-        "owner": "123456",
         "qualifiedId": "/europa/123456/viewpointNull",
+        "name": "viewpointNull",
         "qualifiedName": "/europa/JW_TEST2/viewpointNull",
+        "sysmlid": "viewpointNull",
+        "documentation": "Viewpoint with null values",
+        "owner": "123456",
         "specialization": {
             "method": null,
             "type": "Viewpoint"
         },
-        "sysmlid": "viewpointNull"
+        "editable": true,
+        "creator": "admin",
     },
     {
-        "creator": "admin",
-        "documentation": "ElementValue with null values",
-        "editable": true,
-        "name": "elementValueNull",
+        "qualifiedId": "/europa/123456/instanceSpecificationNull",
+        "name": "instanceSpecificationNull",
+        "qualifiedName": "/europa/JW_TEST2/instanceSpecificationNull",
+        "sysmlid": "instanceSpecificationNull",
+        "documentation": "InstanceSpecification with null values",
         "owner": "123456",
+        "specialization": {
+            "instanceSpecificationSpecification": null,
+            "slots": ["elementValueNull"],
+            "classifier": ["a"],
+            "type": "InstanceSpecification"
+        },
+        "editable": true,
+        "creator": "admin",
+    },
+    {
+        "qualifiedId": "/europa/123456/viewNull",
+        "name": "viewNull",
+        "qualifiedName": "/europa/JW_TEST2/viewNull",
+        "sysmlid": "viewNull",
+        "documentation": "View with null values",
+        "owner": "123456",
+        "specialization": {"type": "View"},
+        "editable": true,
+        "creator": "admin",
+    },
+    {
+        "qualifiedId": "/europa/123456/durationIntervalNull",
+        "name": "durationIntervalNull",
+        "qualifiedName": "/europa/JW_TEST2/durationIntervalNull",
+        "sysmlid": "durationIntervalNull",
+        "documentation": "DurationInterval with null values",
+        "owner": "123456",
+        "specialization": {
+            "min": null,
+            "max": null,
+            "valueExpression": null,
+            "type": "DurationInterval"
+        },
+        "editable": true,
+        "creator": "admin",
+    },
+    {
         "qualifiedId": "/europa/123456/elementValueNull",
+        "name": "elementValueNull",
         "qualifiedName": "/europa/JW_TEST2/elementValueNull",
+        "sysmlid": "elementValueNull",
+        "documentation": "ElementValue with null values",
+        "owner": "123456",
         "specialization": {
             "element": null,
-            "type": "ElementValue",
-            "valueExpression": null
+            "valueExpression": null,
+            "type": "ElementValue"
         },
-        "sysmlid": "elementValueNull"
+        "editable": true,
+        "creator": "admin",
     },
     {
-        "creator": "admin",
-        "documentation": "DurationInterval with null values",
-        "editable": true,
-        "name": "durationIntervalNull",
-        "owner": "123456",
-        "qualifiedId": "/europa/123456/durationIntervalNull",
-        "qualifiedName": "/europa/JW_TEST2/durationIntervalNull",
-        "specialization": {
-            "max": null,
-            "min": null,
-            "type": "DurationInterval",
-            "valueExpression": null
-        },
-        "sysmlid": "durationIntervalNull"
-    },
-    {
-        "creator": "admin",
-        "documentation": "Parameter with null values",
-        "editable": true,
-        "name": "parameterNull",
-        "owner": "123456",
         "qualifiedId": "/europa/123456/parameterNull",
+        "name": "parameterNull",
         "qualifiedName": "/europa/JW_TEST2/parameterNull",
+        "sysmlid": "parameterNull",
+        "documentation": "Parameter with null values",
+        "owner": "123456",
         "specialization": {
-            "defaultValue": null,
-            "type": "Parameter"
+            "type": "Parameter",
+            "defaultValue": null
         },
-        "sysmlid": "parameterNull"
+        "editable": true,
+        "creator": "admin",
     }
 ]}
 200

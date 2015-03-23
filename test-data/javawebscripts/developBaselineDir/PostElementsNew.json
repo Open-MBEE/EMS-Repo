@@ -1,321 +1,338 @@
 {
     "message": "[WARNING]: Could not find owner with name: holding_bin_no_site_no_project putting 600 into: {type=null, id=no_project_pkg, cm_name=no_project_pkg, sysml_name=no_project, qualified name=/no_project, workspace=null}\n",
-    "elements": [{
-    "qualifiedId": "/europa/123456/300/301",
-    "qualifiedName": "/europa/JW_TEST/300/301",
-    "name": "301",
-    "owner": "300",
-    "documentation": "else",
-    "sysmlid": "301",
-    "specialization": {
-    "propertyType": null,
-    "isSlot": false,
-    "isDerived": false,
-    "value": [{
-        "valueExpression": null,
-        "string": "dlam_string",
-        "type": "LiteralString"
-    }],
-    "type": "Property"
-},
-    "editable": true,
-    "creator": "admin"
-}, {
-    "qualifiedId": "/no_site/no_project/holding_bin_no_site_no_project/305",
-    "qualifiedName": "/no_site/no_project/holding_bin/305",
-    "name": "305",
-    "owner": "holding_bin_no_site_no_project",
-    "documentation": "no owner",
-    "sysmlid": "305",
-    "specialization": {
-    "propertyType": null,
-    "isSlot": false,
-    "isDerived": false,
-    "value": [{
-        "valueExpression": null,
-        "string": "dlam_string",
-        "type": "LiteralString"
-    }],
-    "type": "Property"
-},
-    "editable": true,
-    "creator": "admin"
-}, {
-    "qualifiedId": "/europa/123456/4000/401/402/403/404",
-    "qualifiedName": "/europa/JW_TEST/400/401/402/403/404",
-    "name": "404",
-    "owner": "403",
-    "documentation": "4about",
-    "sysmlid": "404",
-    "specialization": {
-    "propertyType": null,
-    "isSlot": false,
-    "isDerived": false,
-    "value": [{
-        "valueExpression": null,
-        "string": "dlam_string",
-        "type": "LiteralString"
-    }],
-    "type": "Property"
-},
-    "editable": true,
-    "creator": "admin"
-}, {
-    "qualifiedId": "/no_site/no_project/holding_bin_no_site_no_project/x",
-    "qualifiedName": "/no_site/no_project/holding_bin/300",
-    "name": "300",
-    "owner": "holding_bin_no_site_no_project",
-    "documentation": "something",
-    "sysmlid": "x",
-    "specialization": {
-    "propertyType": null,
-    "isSlot": false,
-    "isDerived": false,
-    "value": [{
-        "valueExpression": null,
-        "string": "dlam_string",
-        "type": "LiteralString"
-    }],
-    "type": "Property"
-},
-    "editable": true,
-    "creator": "admin"
-}, {
-    "qualifiedId": "/europa/123456/300/301/302/303",
-    "qualifiedName": "/europa/JW_TEST/300/301/302/303",
-    "name": "303",
-    "owner": "302",
-    "documentation": "talk",
-    "sysmlid": "303",
-    "specialization": {
-    "propertyType": null,
-    "isSlot": false,
-    "isDerived": false,
-    "value": [{
-        "valueExpression": null,
-        "string": "dlam_string",
-        "type": "LiteralString"
-    }],
-    "type": "Property"
-},
-    "editable": true,
-    "creator": "admin"
-}, {
-    "qualifiedId": "/europa/123456/4000",
-    "qualifiedName": "/europa/JW_TEST/400",
-    "name": "400",
-    "owner": "123456",
-    "documentation": "4something",
-    "sysmlid": "4000",
-    "specialization": {
-    "propertyType": null,
-    "isSlot": false,
-    "isDerived": false,
-    "value": [{
-        "valueExpression": null,
-        "string": "dlam_string",
-        "type": "LiteralString"
-    }],
-    "type": "Property"
-},
-    "editable": true,
-    "creator": "admin"
-}, {
-    "qualifiedId": "/europa/123456/dlam",
-    "qualifiedName": "/europa/JW_TEST/dlam",
-    "name": "dlam",
-    "owner": "123456",
-    "documentation": "to make compatible with value specs (this is just a Element)",
-    "sysmlid": "dlam",
-    "specialization": {"type": "Element"},
-    "editable": true,
-    "creator": "admin"
-}, {
-    "qualifiedId": "/europa/123456/4000/401",
-    "qualifiedName": "/europa/JW_TEST/400/401",
-    "name": "401",
-    "owner": "4000",
-    "documentation": "4else",
-    "sysmlid": "401",
-    "specialization": {
-    "propertyType": null,
-    "isSlot": false,
-    "isDerived": false,
-    "value": [{
-        "valueExpression": null,
-        "string": "dlam_string",
-        "type": "LiteralString"
-    }],
-    "type": "Property"
-},
-    "editable": true,
-    "creator": "admin"
-}, {
-    "qualifiedId": "/no_site/no_project/holding_bin_no_site_no_project/600",
-    "qualifiedName": "/no_site/no_project/holding_bin/600",
-    "name": "600",
-    "owner": "holding_bin_no_site_no_project",
-    "documentation": "element values",
-    "sysmlid": "600",
-    "specialization": {
-    "propertyType": null,
-    "isSlot": false,
-    "isDerived": false,
-    "value": [
+    "elements": [
         {
-            "element": "300",
-            "valueExpression": null,
-            "type": "ElementValue"
+            "qualifiedId": "/europa/123456/300",
+            "name": "300",
+            "qualifiedName": "/europa/JW_TEST/300",
+            "sysmlid": "300",
+            "documentation": "something",
+            "owner": "123456",
+            "specialization": {
+                "propertyType": null,
+                "isDerived": false,
+                "isSlot": false,
+                "value": [{
+                    "valueExpression": null,
+                    "string": "dlam_string",
+                    "type": "LiteralString"
+                }],
+                "type": "Property"
+            },
+            "editable": true,
+            "creator": "admin",
         },
         {
-            "element": "302",
-            "valueExpression": null,
-            "type": "ElementValue"
-        }
-    ],
-    "type": "Property"
-},
-    "editable": true,
-    "creator": "admin"
-}, {
-    "qualifiedId": "/no_site/no_project/holding_bin_no_site_no_project/6666",
-    "qualifiedName": "/no_site/no_project/holding_bin/6666_name",
-    "name": "6666_name",
-    "owner": "holding_bin_no_site_no_project",
-    "documentation": "",
-    "sysmlid": "6666",
-    "specialization": {
-    "valueExpression": null,
-    "operand": [
-        {
-            "element": "300",
-            "valueExpression": null,
-            "type": "ElementValue"
+            "qualifiedId": "/no_site/no_project/holding_bin_no_site_no_project/6666",
+            "name": "6666_name",
+            "qualifiedName": "/no_site/no_project/holding_bin/6666_name",
+            "sysmlid": "6666",
+            "documentation": "",
+            "owner": "holding_bin_no_site_no_project",
+            "specialization": {
+                "valueExpression": null,
+                "type": "Expression",
+                "operand": [
+                    {
+                        "element": "300",
+                        "valueExpression": null,
+                        "type": "ElementValue"
+                    },
+                    {
+                        "element": "302",
+                        "valueExpression": null,
+                        "type": "ElementValue"
+                    }
+                ]
+            },
+            "editable": true,
+            "creator": "admin",
         },
         {
-            "element": "302",
-            "valueExpression": null,
-            "type": "ElementValue"
+            "qualifiedId": "/europa/123456/300/301/302/303",
+            "name": "303",
+            "qualifiedName": "/europa/JW_TEST/300/301/302/303",
+            "sysmlid": "303",
+            "documentation": "talk",
+            "owner": "302",
+            "specialization": {
+                "propertyType": null,
+                "isDerived": false,
+                "isSlot": false,
+                "value": [{
+                    "valueExpression": null,
+                    "string": "dlam_string",
+                    "type": "LiteralString"
+                }],
+                "type": "Property"
+            },
+            "editable": true,
+            "creator": "admin",
+        },
+        {
+            "qualifiedId": "/europa/123456/4000/401/402",
+            "name": "402",
+            "qualifiedName": "/europa/JW_TEST/400/401/402",
+            "sysmlid": "402",
+            "documentation": "4to",
+            "owner": "401",
+            "specialization": {
+                "propertyType": null,
+                "isDerived": false,
+                "isSlot": false,
+                "value": [{
+                    "valueExpression": null,
+                    "string": "dlam_string",
+                    "type": "LiteralString"
+                }],
+                "type": "Property"
+            },
+            "editable": true,
+            "creator": "admin",
+        },
+        {
+            "qualifiedId": "/europa/123456/4000/401/402/403",
+            "name": "403",
+            "qualifiedName": "/europa/JW_TEST/400/401/402/403",
+            "sysmlid": "403",
+            "documentation": "4talk",
+            "owner": "402",
+            "specialization": {
+                "propertyType": null,
+                "isDerived": false,
+                "isSlot": false,
+                "value": [{
+                    "valueExpression": null,
+                    "string": "dlam_string",
+                    "type": "LiteralString"
+                }],
+                "type": "Property"
+            },
+            "editable": true,
+            "creator": "admin",
+        },
+        {
+            "qualifiedId": "/no_site/no_project/holding_bin_no_site_no_project/600",
+            "name": "600",
+            "qualifiedName": "/no_site/no_project/holding_bin/600",
+            "sysmlid": "600",
+            "documentation": "element values",
+            "owner": "holding_bin_no_site_no_project",
+            "specialization": {
+                "propertyType": null,
+                "isDerived": false,
+                "isSlot": false,
+                "value": [
+                    {
+                        "element": "300",
+                        "valueExpression": null,
+                        "type": "ElementValue"
+                    },
+                    {
+                        "element": "302",
+                        "valueExpression": null,
+                        "type": "ElementValue"
+                    }
+                ],
+                "type": "Property"
+            },
+            "editable": true,
+            "creator": "admin",
+        },
+        {
+            "qualifiedId": "/no_site/no_project/holding_bin_no_site_no_project/305",
+            "name": "305",
+            "qualifiedName": "/no_site/no_project/holding_bin/305",
+            "sysmlid": "305",
+            "documentation": "no owner",
+            "owner": "holding_bin_no_site_no_project",
+            "specialization": {
+                "propertyType": null,
+                "isDerived": false,
+                "isSlot": false,
+                "value": [{
+                    "valueExpression": null,
+                    "string": "dlam_string",
+                    "type": "LiteralString"
+                }],
+                "type": "Property"
+            },
+            "editable": true,
+            "creator": "admin",
+        },
+        {
+            "qualifiedId": "/no_site/no_project/holding_bin_no_site_no_project/x",
+            "name": "300",
+            "qualifiedName": "/no_site/no_project/holding_bin/300",
+            "sysmlid": "x",
+            "documentation": "something",
+            "owner": "holding_bin_no_site_no_project",
+            "specialization": {
+                "propertyType": null,
+                "isDerived": false,
+                "isSlot": false,
+                "value": [{
+                    "valueExpression": null,
+                    "string": "dlam_string",
+                    "type": "LiteralString"
+                }],
+                "type": "Property"
+            },
+            "editable": true,
+            "creator": "admin",
+        },
+        {
+            "qualifiedId": "/europa/123456/300/301",
+            "name": "301",
+            "qualifiedName": "/europa/JW_TEST/300/301",
+            "sysmlid": "301",
+            "documentation": "else",
+            "owner": "300",
+            "specialization": {
+                "propertyType": null,
+                "isDerived": false,
+                "isSlot": false,
+                "value": [{
+                    "valueExpression": null,
+                    "string": "dlam_string",
+                    "type": "LiteralString"
+                }],
+                "type": "Property"
+            },
+            "editable": true,
+            "creator": "admin",
+        },
+        {
+            "qualifiedId": "/europa/123456/4000/401/402/403/404",
+            "name": "404",
+            "qualifiedName": "/europa/JW_TEST/400/401/402/403/404",
+            "sysmlid": "404",
+            "documentation": "4about",
+            "owner": "403",
+            "specialization": {
+                "propertyType": null,
+                "isDerived": false,
+                "isSlot": false,
+                "value": [{
+                    "valueExpression": null,
+                    "string": "dlam_string",
+                    "type": "LiteralString"
+                }],
+                "type": "Property"
+            },
+            "editable": true,
+            "creator": "admin",
+        },
+        {
+            "qualifiedId": "/europa/123456/dlam",
+            "name": "dlam",
+            "qualifiedName": "/europa/JW_TEST/dlam",
+            "sysmlid": "dlam",
+            "documentation": "to make compatible with value specs (this is just a Element)",
+            "owner": "123456",
+            "specialization": {"type": "Element"},
+            "editable": true,
+            "creator": "admin",
+        },
+        {
+            "qualifiedId": "/europa/123456/300/301/302/303/304",
+            "name": "304",
+            "qualifiedName": "/europa/JW_TEST/300/301/302/303/304",
+            "sysmlid": "304",
+            "documentation": "about",
+            "owner": "303",
+            "specialization": {
+                "propertyType": null,
+                "isDerived": false,
+                "isSlot": false,
+                "value": [{
+                    "valueExpression": null,
+                    "string": "dlam_string",
+                    "type": "LiteralString"
+                }],
+                "type": "Property"
+            },
+            "editable": true,
+            "creator": "admin",
+        },
+        {
+            "qualifiedId": "/europa/123456/4000/401",
+            "name": "401",
+            "qualifiedName": "/europa/JW_TEST/400/401",
+            "sysmlid": "401",
+            "documentation": "4else",
+            "owner": "4000",
+            "specialization": {
+                "propertyType": null,
+                "isDerived": false,
+                "isSlot": false,
+                "value": [{
+                    "valueExpression": null,
+                    "string": "dlam_string",
+                    "type": "LiteralString"
+                }],
+                "type": "Property"
+            },
+            "editable": true,
+            "creator": "admin",
+        },
+        {
+            "qualifiedId": "/europa/123456/300/301/302",
+            "name": "302",
+            "qualifiedName": "/europa/JW_TEST/300/301/302",
+            "sysmlid": "302",
+            "documentation": "to",
+            "owner": "301",
+            "specialization": {
+                "propertyType": null,
+                "isDerived": false,
+                "isSlot": false,
+                "value": [{
+                    "valueExpression": null,
+                    "string": "dlam_string",
+                    "type": "LiteralString"
+                }],
+                "type": "Property"
+            },
+            "editable": true,
+            "creator": "admin",
+        },
+        {
+            "qualifiedId": "/europa/123456/4000",
+            "name": "400",
+            "qualifiedName": "/europa/JW_TEST/400",
+            "sysmlid": "4000",
+            "documentation": "4something",
+            "owner": "123456",
+            "specialization": {
+                "propertyType": null,
+                "isDerived": false,
+                "isSlot": false,
+                "value": [{
+                    "valueExpression": null,
+                    "string": "dlam_string",
+                    "type": "LiteralString"
+                }],
+                "type": "Property"
+            },
+            "editable": true,
+            "creator": "admin",
+        },
+        {
+            "qualifiedId": "/europa/123456/300/500",
+            "name": "500",
+            "qualifiedName": "/europa/JW_TEST/300/500",
+            "sysmlid": "500",
+            "documentation": "directed_relationship",
+            "owner": "300",
+            "specialization": {
+                "source": "302",
+                "target": "303",
+                "type": "DirectedRelationship"
+            },
+            "editable": true,
+            "creator": "admin",
         }
-    ],
-    "type": "Expression"
-},
-    "editable": true,
-    "creator": "admin"
-}, {
-    "qualifiedId": "/europa/123456/300/500",
-    "qualifiedName": "/europa/JW_TEST/300/500",
-    "name": "500",
-    "owner": "300",
-    "documentation": "directed_relationship",
-    "sysmlid": "500",
-    "specialization": {
-    "source": "302",
-    "target": "303",
-    "type": "DirectedRelationship"
-},
-    "editable": true,
-    "creator": "admin"
-}, {
-    "qualifiedId": "/europa/123456/300/301/302",
-    "qualifiedName": "/europa/JW_TEST/300/301/302",
-    "name": "302",
-    "owner": "301",
-    "documentation": "to",
-    "sysmlid": "302",
-    "specialization": {
-    "propertyType": null,
-    "isSlot": false,
-    "isDerived": false,
-    "value": [{
-        "valueExpression": null,
-        "string": "dlam_string",
-        "type": "LiteralString"
-    }],
-    "type": "Property"
-},
-    "editable": true,
-    "creator": "admin"
-}, {
-    "qualifiedId": "/europa/123456/4000/401/402/403",
-    "qualifiedName": "/europa/JW_TEST/400/401/402/403",
-    "name": "403",
-    "owner": "402",
-    "documentation": "4talk",
-    "sysmlid": "403",
-    "specialization": {
-    "propertyType": null,
-    "isSlot": false,
-    "isDerived": false,
-    "value": [{
-        "valueExpression": null,
-        "string": "dlam_string",
-        "type": "LiteralString"
-    }],
-    "type": "Property"
-},
-    "editable": true,
-    "creator": "admin"
-}, {
-    "qualifiedId": "/europa/123456/4000/401/402",
-    "qualifiedName": "/europa/JW_TEST/400/401/402",
-    "name": "402",
-    "owner": "401",
-    "documentation": "4to",
-    "sysmlid": "402",
-    "specialization": {
-    "propertyType": null,
-    "isSlot": false,
-    "isDerived": false,
-    "value": [{
-        "valueExpression": null,
-        "string": "dlam_string",
-        "type": "LiteralString"
-    }],
-    "type": "Property"
-},
-    "editable": true,
-    "creator": "admin"
-}, {
-    "qualifiedId": "/europa/123456/300/301/302/303/304",
-    "qualifiedName": "/europa/JW_TEST/300/301/302/303/304",
-    "name": "304",
-    "owner": "303",
-    "documentation": "about",
-    "sysmlid": "304",
-    "specialization": {
-    "propertyType": null,
-    "isSlot": false,
-    "isDerived": false,
-    "value": [{
-        "valueExpression": null,
-        "string": "dlam_string",
-        "type": "LiteralString"
-    }],
-    "type": "Property"
-},
-    "editable": true,
-    "creator": "admin"
-}, {
-    "qualifiedId": "/europa/123456/300",
-    "qualifiedName": "/europa/JW_TEST/300",
-    "name": "300",
-    "owner": "123456",
-    "documentation": "something",
-    "sysmlid": "300",
-    "specialization": {
-    "propertyType": null,
-    "isSlot": false,
-    "isDerived": false,
-    "value": [{
-        "valueExpression": null,
-        "string": "dlam_string",
-        "type": "LiteralString"
-    }],
-    "type": "Property"
-},
-    "editable": true,
-    "creator": "admin"
-}]
+    ]
 }
 200

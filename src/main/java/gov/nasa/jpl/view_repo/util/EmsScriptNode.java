@@ -118,6 +118,9 @@ public class EmsScriptNode extends ScriptNode implements
     private String qualifiedName = null;
     private String qualifiedId = null;
 
+    public boolean renamed = false;
+    public boolean moved = false;
+    
     /**
      * A set of content model property names that serve as workspace metadata
      * and whose changes are not recorded in a workspace.
@@ -1210,14 +1213,16 @@ public class EmsScriptNode extends ScriptNode implements
      */
     public ArrayList<NodeRef> getOwnedChildren(boolean findDeleted) {
 
-        ArrayList<NodeRef> ownedChildren = new ArrayList<NodeRef>();
+        ArrayList<NodeRef> ownedChildren = null;
 
         ArrayList<NodeRef> oldChildren = this.getPropertyNodeRefs( "ems:ownedChildren",
                                                                    false, null, findDeleted, false);
         if (oldChildren != null) {
             ownedChildren = oldChildren;
+        } else {
+            ownedChildren = new ArrayList<NodeRef>();
         }
-
+        
         return ownedChildren;
 
     }
@@ -1255,9 +1260,14 @@ public class EmsScriptNode extends ScriptNode implements
      * @return
      */
     public Object getProperty( String acmType ) {
+
+        return getProperty(acmType, false);
+    }
+    
+    public Object getProperty( String acmType, boolean skipNodeRefCheck ) {
         // FIXME Sometimes we wont want these defaults, ie want to find the deleted elements.
         //       Need to check all calls to getProperty() with properties that are NodeRefs.
-        return getProperty(acmType, false, null, false, false);
+        return getProperty(acmType, false, null, false, skipNodeRefCheck);
     }
 
     public String getVersionLabel() {
@@ -1640,7 +1650,8 @@ public class EmsScriptNode extends ScriptNode implements
                                                        createQName( acmType ),
                                                        value );
                 if ( acmType.equals( Acm.ACM_NAME ) ) {
-                    removeChildrenFromJsonCache();
+                    renamed = true;
+                    //removeChildrenFromJsonCache();
                 }
             } catch ( Exception e ) {
                 // This should never happen!
@@ -1715,7 +1726,8 @@ public class EmsScriptNode extends ScriptNode implements
             getProperties().put( acmType, value );
             save();
             if ( acmType.equals( Acm.ACM_NAME ) ) {
-                removeChildrenFromJsonCache();
+                renamed = true;
+                //removeChildrenFromJsonCache();
             }
         }
         return success;
@@ -2785,7 +2797,16 @@ public class EmsScriptNode extends ScriptNode implements
 
         EmsScriptNode parent = owner != null ? owner : this;
         String parentName = parent.getName();
-        while ( !parentName.equals( "Models" )) {
+        Set<String> seen = new TreeSet< String >();
+        while ( !parentName.equals( "Models" ) && !seen.contains( parentName ) ) {
+            if ( seen.contains( parentName ) ) {
+                logger.error( "Folder " + parentName + " contains self!", new Exception() );
+                return null;
+//                NodeRef ref = findNodeRefByType( "Sites", SearchType.CM_NAME.prefix,
+//                                                 null, null, false );
+//                if ( ref == null ) return null;
+//                return new EmsScriptNode( ref, getServices() );
+            }
             EmsScriptNode oldparent = parent;
             parent = oldparent.getParent();
             if ( parent == null ) return null; // site not found!
@@ -4038,7 +4059,8 @@ public class EmsScriptNode extends ScriptNode implements
                     reifiedPkg.move( destination );
                 }
                 
-                removeChildrenFromJsonCache();
+                moved = true;
+                //removeChildrenFromJsonCache();
             }
             
         }
@@ -4052,7 +4074,8 @@ public class EmsScriptNode extends ScriptNode implements
                 status = true;
             }
             
-            removeChildrenFromJsonCache();
+            moved = true;
+            //removeChildrenFromJsonCache();
         }
 
         return status;
@@ -4065,7 +4088,7 @@ public class EmsScriptNode extends ScriptNode implements
      * @param map
      * @return leaf values from the nested map
      */
-    public <T> List<T> getValues( Map<?,?> map, Class<T> cls ) {
+    public static <T> List<T> getValues( Map<?,?> map, Class<T> cls ) {
         ArrayList< T > arr = new ArrayList< T >();
         if ( map == null ) return arr;
         for ( Object v : map.values() ) {
@@ -4085,27 +4108,47 @@ public class EmsScriptNode extends ScriptNode implements
         return arr;
     }
 
-    public void removeChildrenFromJsonCache() {
+    public static void removeFromJsonCache( NodeRef ref ) {
+        //NodeRef ref = node.getNodeRef();
+        Map< Long, JSONObject > oldEntries = NodeUtil.jsonCache.remove( ref.getId() );
+        List< JSONObject > removedJson = null;
+        if ( NodeUtil.doJsonStringCaching ) {
+            removedJson = getValues( oldEntries, JSONObject.class );
+        }
+        if ( NodeUtil.doJsonDeepCaching ) {
+            Map< Long, Map< Boolean, Map< Set< String >, Map< String, JSONObject > > > > oldEntriesDeep =
+                    NodeUtil.jsonDeepCache.remove( ref.getId() );
+            if ( NodeUtil.doJsonStringCaching ) {
+                removedJson.addAll( getValues( oldEntriesDeep, JSONObject.class) );
+            }
+        }
+        if ( NodeUtil.doJsonStringCaching ) {
+            Utils.removeAll( NodeUtil.jsonStringCache, removedJson );
+        }
+
+    }
+
+    static boolean delayed = true;
+    
+    public void removeFromJsonCache( boolean recursive ) {
+        removeFromJsonCache( getNodeRef() );
+        if ( recursive ) removeChildrenFromJsonCache( recursive );
+    }
+
+    public void removeChildrenFromJsonCache( boolean recursive ) {
+//        if ( delayed ) {
+//            NodeUtil.removeChildrenFromCache( this );
+//        } else {
+//        }
         if ( !NodeUtil.doJsonCaching ) return;
         ArrayList< NodeRef > childs = getOwnedChildren( true );
+        //Set< EmsScriptNode > childs = getChildNodes();
         for ( NodeRef ref : childs ) {
-            Map< Long, JSONObject > oldEntries = NodeUtil.jsonCache.remove( ref.getId() );
-            List< JSONObject > removedJson = null;
-            if ( NodeUtil.doJsonStringCaching ) {
-                removedJson = getValues( oldEntries, JSONObject.class );
+            removeFromJsonCache( ref );
+            if ( recursive ) {
+                EmsScriptNode n = new EmsScriptNode( ref, getServices() );
+                n.removeChildrenFromJsonCache( true );
             }
-            if ( NodeUtil.doJsonDeepCaching ) {
-                Map< Long, Map< Boolean, Map< Set< String >, Map< String, JSONObject > > > > oldEntriesDeep =
-                        NodeUtil.jsonDeepCache.remove( ref.getId() );
-                if ( NodeUtil.doJsonStringCaching ) {
-                    removedJson.addAll( getValues( oldEntriesDeep, JSONObject.class) );
-                }
-            }
-            if ( NodeUtil.doJsonStringCaching ) {
-                Utils.removeAll( NodeUtil.jsonStringCache, removedJson );
-            }
-            EmsScriptNode n = new EmsScriptNode( ref, getServices() );
-            n.removeChildrenFromJsonCache();
         }
     }
 
@@ -4213,9 +4256,13 @@ public class EmsScriptNode extends ScriptNode implements
         }
         return elements;
     }
+    
+    public EmsScriptNode getPropertyElement( String acmProperty) {
+        return getPropertyElement(acmProperty, false);
+    }
 
-    public EmsScriptNode getPropertyElement( String acmProperty ) {
-        Object e = getProperty( acmProperty );
+    public EmsScriptNode getPropertyElement( String acmProperty, boolean skipNodeRefCheck ) {
+        Object e = getProperty( acmProperty, skipNodeRefCheck );
         if ( e instanceof NodeRef ) {
             return new EmsScriptNode( (NodeRef)e, getServices() );
         } else if ( e == null ) {
@@ -4710,7 +4757,7 @@ public class EmsScriptNode extends ScriptNode implements
         }
         // TODO: Snapshots?
         NodeRef contentsNode = (NodeRef) node.getProperty( Acm.ACM_CONTENTS );
-        putInJson( json, Acm.JSON_CONTENTS, addNodeRefIdJSON(contentsNode), filter );
+        putInJson( json, Acm.JSON_CONTENTS, addInternalJSON(contentsNode, dateTime), filter );
 
     }
 
@@ -5089,6 +5136,18 @@ public class EmsScriptNode extends ScriptNode implements
                    Acm.JSON_INSTANCE_SPECIFICATION_SPECIFICATION,
                    addNodeRefIdJSON(specNode),
                    filter );
+        
+        putInJson( json,
+                   Acm.JSON_CLASSIFIER,
+                   node.getProperty( Acm.ACM_CLASSIFIER),
+                   filter );
+        
+        ArrayList< NodeRef > nodeRefs =
+                (ArrayList< NodeRef >)node.getProperty( Acm.ACM_SLOTS );
+        JSONArray ids = addNodeRefIdsJSON( nodeRefs );
+        if ( ids.length() > 0 ) {
+            putInJson( json, Acm.JSON_SLOTS, ids, filter );
+        }
     }
 
     protected
