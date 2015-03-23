@@ -747,7 +747,7 @@ common_filters+['"id"','"qualifiedId"','"timestamp"'],
 [
 250,
 "SolveConstraint",
-"Post expressions with a constraint and solves for the constraint.",
+"Post expressions with a constraint and solve for the constraint.",
 create_curl_cmd(type="POST",base_url=BASE_URL_JW,
                 data="expressionElementsNew.json",
                 branch="sites/europa/projects/123456/",
@@ -761,8 +761,8 @@ common_filters,
 # Note: this is same as 250 but calls different json for second run in order to avoid resetting variables
 [
 255,
-"SolveConstraint",
-"Post expressions with a constraint and solves for the constraint.",
+"SolveConstraint2",
+"Post expressions with a constraint again and solve for the constraint.",
 create_curl_cmd(type="POST",base_url=BASE_URL_JW,
                 data="expressionElementsFix.json",
                 branch="sites/europa/projects/123456/",
@@ -1196,14 +1196,24 @@ common_filters+['"id"','"qualifiedId"'],
 [
 600,
 "ParseSimpleExpression",
-"Parse \"1 + 1\" and create expression elements",
+"Parse \"1 + 1\" from URL and create expression elements",
 create_curl_cmd(type="POST",data="operation.json",base_url=BASE_URL_WS,
                 post_type="elements?expression=1%2B1",branch="master/"),
-True, 
+True,
 common_filters+['MMS_'],
 ["test","workspaces","develop", "develop2"]
 ],
 
+[
+601,
+"ParseAndEvaluateTextExpressionInFile",
+"Parse text expression in file, create expression elements for it, and then evaluate the expression elements",
+create_curl_cmd(type="POST",data="onePlusOne.k",base_url=BASE_URL_WS,
+                post_type="elements?evaluate",branch="master/"),
+True,
+common_filters+['MMS_'],
+["test","workspaces","develop", "develop2"]
+],
 # PERMISSION TESTING =====================================================
 
 # Creating users for user testing
