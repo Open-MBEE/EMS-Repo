@@ -1,8 +1,8 @@
 {"workspaces": [
     {
+        "workspaceOperationsPermission": true,
         "qualifiedName": "master",
-        "name": "master",
-        "siteManagerPermission": true
+        "name": "master"
     },
     {
         "description": "",

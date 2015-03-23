@@ -1,25 +1,25 @@
 {
+    "message": "[WARNING]: Owner with name: parentToDelete2 was deleted.  Will resurrect it, and put childOfParentToDelete2 into it.\n[WARNING]: Owner with name: parentToDelete2 was deleted.  Will resurrect it\n[WARNING]: Owner with name: parentToDelete1 was deleted.  Will resurrect it\n",
     "elements": [{
-        "creator": "admin",
-        "documentation": "Child",
-        "editable": true,
-        "name": "childOfParentToDelete2",
-        "owner": "parentToDelete2",
         "qualifiedId": "/europa/123456/parentToDelete1/parentToDelete2/childOfParentToDelete2",
+        "name": "childOfParentToDelete2",
         "qualifiedName": "/europa/JW_TEST2/parentToDelete1/parentToDelete2/childOfParentToDelete2",
+        "sysmlid": "childOfParentToDelete2",
+        "documentation": "Child",
+        "owner": "parentToDelete2",
         "specialization": {
+            "propertyType": null,
             "isDerived": false,
             "isSlot": false,
-            "propertyType": null,
-            "type": "Property",
             "value": [{
+                "valueExpression": null,
                 "string": "gg_string3",
-                "type": "LiteralString",
-                "valueExpression": null
-            }]
+                "type": "LiteralString"
+            }],
+            "type": "Property"
         },
-        "sysmlid": "childOfParentToDelete2"
-    }],
-    "message": "[WARNING]: Owner with name: parentToDelete2 was deleted.  Will resurrect it, and put childOfParentToDelete2 into it.\n[WARNING]: Owner with name: parentToDelete2 was deleted.  Will resurrect it\n[WARNING]: Owner with name: parentToDelete1 was deleted.  Will resurrect it\n"
+        "editable": true,
+        "creator": "admin",
+    }]
 }
 200

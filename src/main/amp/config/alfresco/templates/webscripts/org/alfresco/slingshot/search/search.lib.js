@@ -3,7 +3,6 @@
  * 
  * Takes the following object as Input:
  *    params
- *    {
  *       siteId: the site identifier to search into, null for all sites
  *       containerId: the component the search in, null for all components in the site
  *       term: search terms
@@ -116,8 +115,8 @@ function getRepositoryItem(folderPath, node)
             modifiedByUser: node.properties["cm:modifier"],
             createdOn: node.properties["cm:created"],
             createdByUser: node.properties["cm:creator"],
-            viewMdid: node.properties["view:mdid"],
-            viewName: node.properties["view:name"],
+            sysmlId: node.properties["sysml:id"],
+            sysmlName: node.properties["sysml:name"],
             mimetype: node.mimetype,
             path: folderPath.join("/")
          };
@@ -174,8 +173,8 @@ function getDocumentItem(siteId, containerId, pathParts, node)
             modifiedByUser: node.properties["cm:modifier"],
             createdOn: node.properties["cm:created"],
             createdByUser: node.properties["cm:creator"],
-            viewMdid: node.properties["view:mdid"],
-            viewName: node.properties["view:name"],
+            sysmlId: node.properties["sysml:id"],
+            sysmlName: node.properties["sysml:name"],
             mimetype: node.mimetype,
             path: pathParts.join("/")
          };

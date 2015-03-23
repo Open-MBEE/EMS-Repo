@@ -122,6 +122,20 @@
                 "instanceSpecificationSpecification": {
                     "type": "string",
                     "description": "ID of element that provides the instance specification"
+                },
+                "classifier": {
+                    "type": "array",
+                    "items": {
+                        "type": "string",
+                        "description": "The classifiers"
+                    }
+                },
+                "slots": {
+                    "type": "array",
+                    "items": {
+                        "type": "string",
+                        "description": "IDs of the slots"
+                    }
                 }
             }
         },

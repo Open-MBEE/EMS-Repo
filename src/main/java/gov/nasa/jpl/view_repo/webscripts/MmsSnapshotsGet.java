@@ -146,10 +146,17 @@ public class MmsSnapshotsGet extends AbstractJavaWebScript {
         }
         
         // all we really need to do is grab all the configurations and place them in as snapshots
+        // looking for all the snapshots without the associations will take too long otherwise
         ConfigurationsWebscript configService = new ConfigurationsWebscript( repository, services, response );
         JSONArray configSnapshots = configService.handleConfigurations( req, ConfigurationType.CONFIG_SNAPSHOT );
+        // need to filter out configurations that didn't exist before product existed
+        Date productDate = product.getCreationDate();
         for (int ii = 0; ii < configSnapshots.length(); ii++) {
-            snapshotsJson.put( configSnapshots.get( ii ) );
+            JSONObject snapshotJson = configSnapshots.getJSONObject(ii);
+            Date snapshotDate = TimeUtils.dateFromTimestamp( snapshotJson.getString( "created" ) );
+            if (snapshotDate.after( productDate )) {
+                snapshotsJson.put( snapshotJson );
+            }
         }
         
         return snapshotsJson;

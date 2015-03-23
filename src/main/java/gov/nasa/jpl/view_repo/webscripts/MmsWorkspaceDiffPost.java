@@ -71,8 +71,10 @@ public class MmsWorkspaceDiffPost extends ModelPost {
 
     @Override
 	protected boolean validateRequest(WebScriptRequest req, Status status) {
-		// do nothing
-		return false;
+        if (!userHasWorkspaceLdapPermissions()) {
+            return false;
+        }
+        return true;
 	}
 
 
@@ -236,7 +238,7 @@ public class MmsWorkspaceDiffPost extends ModelPost {
 	            top.put( "elements", elements );
 
 	            Set<EmsScriptNode> updatedElements = handleUpdate( top, status, targetWs, false, false,
-	                                                               new HashMap<String,Object>(), false );
+	                                                               new HashMap<String,Object>(), false, true );
 
 	            // Delete the elements in the target workspace:
 		        WorkspaceDiff deleteWsDiff = null;

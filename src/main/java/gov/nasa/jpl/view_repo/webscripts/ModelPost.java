@@ -116,9 +116,11 @@ public class ModelPost extends AbstractJavaWebScript {
     // Set the flag to time events that occur during a model post using the timers
     // below
     public static boolean timeEvents = false;
+    public static boolean timeCleanJsonCache = false;
     private Timer timerCommit = null;
     private Timer timerIngest = null;
     private Timer timerUpdateModel = null;
+    private Timer cleanJsonCacheTimer = null;
 
     private final String ELEMENTS = "elements";
 
@@ -389,6 +391,10 @@ public class ModelPost extends AbstractJavaWebScript {
             final long end = System.currentTimeMillis();
             log(LogLevel.INFO, "createOrUpdateModel completed" + now + " : " +  (end - start) + "ms\n");
 
+            cleanJsonCacheTimer = Timer.startTimer(cleanJsonCacheTimer, timeEvents);
+            cleanJsonCache();
+            Timer.stopTimer( cleanJsonCacheTimer, "cacheClean time", timeEvents );
+            
             timerUpdateModel = Timer.startTimer(timerUpdateModel, timeEvents);
 
             // Send deltas to all listeners
@@ -413,7 +419,6 @@ public class ModelPost extends AbstractJavaWebScript {
 
         return new TreeSet< EmsScriptNode >( nodeMap.values() );
     }
-
 
     protected void ingestMetaData(final WorkspaceNode workspace,
                                   TreeMap<String, EmsScriptNode> nodeMap,
@@ -1905,7 +1910,7 @@ public class ModelPost extends AbstractJavaWebScript {
     private EmsScriptNode createSitePkg(EmsScriptNode pkgSiteNode,
                                             WorkspaceNode workspace) {
         // site packages are only for major site, nothing to do with workspaces
-        String siteName = "site_" + pkgSiteNode.getSysmlId();
+        String siteName = NodeUtil.sitePkgPrefix + pkgSiteNode.getSysmlId();
         EmsScriptNode siteNode = getSiteNode( siteName, workspace, null, false );
 
         SiteInfo siteInfo = services.getSiteService().getSite( siteName );
@@ -1917,17 +1922,18 @@ public class ModelPost extends AbstractJavaWebScript {
             if (false == ShareUtils.constructSiteDashboard( sitePreset, siteName, siteTitle, siteDescription, isPublic )) {
                 // FIXME: add some logging and response here that there were issues creating the site
             }
-            // siteInfo doesnt give the node ref we want, so must search for it:
-            siteNode = getSiteNode( siteName, null, null );
-            if (siteNode != null) {
-                siteNode.createOrUpdateAspect( "cm:taggable" );
-                siteNode.createOrUpdateAspect( Acm.ACM_SITE );
-                siteNode.createOrUpdateProperty( Acm.ACM_SITE_PACKAGE, pkgSiteNode.getNodeRef() );
-                pkgSiteNode.createOrUpdateAspect( Acm.ACM_SITE_CHARACTERIZATION);
-                pkgSiteNode.createOrUpdateProperty( Acm.ACM_SITE_SITE, siteNode.getNodeRef() );
-            }
         }
 
+        // siteInfo doesnt give the node ref we want, so must search for it:
+        siteNode = getSiteNode( siteName, null, null );
+        if (siteNode != null) {
+            siteNode.createOrUpdateAspect( "cm:taggable" );
+            siteNode.createOrUpdateAspect( Acm.ACM_SITE );
+            siteNode.createOrUpdateProperty( Acm.ACM_SITE_PACKAGE, pkgSiteNode.getNodeRef() );
+            pkgSiteNode.createOrUpdateAspect( Acm.ACM_SITE_CHARACTERIZATION);
+            pkgSiteNode.createOrUpdateProperty( Acm.ACM_SITE_SITE, siteNode.getNodeRef() );
+        }
+        
         return siteNode;
     }
 
@@ -1951,20 +1957,67 @@ public class ModelPost extends AbstractJavaWebScript {
                 // Determine the parent package:
                 // Note: will do this everytime, even if the site package node already existed, as the parent site
                 //       could have changed with this post
-                EmsScriptNode pkgSiteParentNode = findParentPkgSite(nodeToUpdate, siteNode,
-                                                                    projectNode, workspace);
+                EmsScriptNode pkgSiteParentNode = findParentPkgSite(nodeToUpdate, workspace);
 
                 // Add the children/parent properties:
                 if (pkgSiteParentNode != null && pkgSiteNode != null) {
+                    
+                    // If there was a old site parent on this node, and it is different than
+                    // the new one, then remove this child from it:
+                    EmsScriptNode oldPkgSiteParentNode = pkgSiteNode.getPropertyElement( Acm.ACM_SITE_PARENT, true );
+                    if (oldPkgSiteParentNode != null && 
+                        !oldPkgSiteParentNode.equals( pkgSiteParentNode )) {
+                        
+                        oldPkgSiteParentNode.removeFromPropertyNodeRefs( Acm.ACM_SITE_CHILDREN, 
+                                                                         pkgSiteNode.getNodeRef() );
+                    }
+                    
+                    // Check that parent site children are children of this package:
+                    // This is for the case that this site package being created is higher up in the
+                    // the hierarchy than children site packages:
+                    if (oldPkgSiteParentNode != null) {
+                        
+                        // Note: skipping the noderef check b/c our node searches return the noderefs that correspond
+                        //       to the nodes in the surf-config folder.  Also, we dont need the check b/c site nodes
+                        //       are always in the master workspace.
+                        List<NodeRef> oldChildren = oldPkgSiteParentNode.getPropertyNodeRefs( Acm.ACM_SITE_CHILDREN, true);
+                    
+                        // Update the children of this package site if needed:
+                        EmsScriptNode childNewParent;
+                        EmsScriptNode child;
+                        for (EmsScriptNode childSite : EmsScriptNode.toEmsScriptNodeList( oldChildren)) {
+                            
+                            child = childSite.getPropertyElement( Acm.ACM_SITE_PACKAGE );
+                            if (child != null) {
+                                childNewParent = findParentPkgSite(child, workspace);
+                                
+                                if (childNewParent != null && childNewParent.equals( pkgSiteNode )) {
+                                    //  Add to the this site package properties:
+                                    childSite.setProperty( Acm.ACM_SITE_PARENT, pkgSiteNode.getNodeRef() );
+                                    pkgSiteNode.appendToPropertyNodeRefs( Acm.ACM_SITE_CHILDREN,
+                                                                          childSite.getNodeRef() );
+                                    
+                                    // Remove from parent site pkg children:
+                                    oldPkgSiteParentNode.removeFromPropertyNodeRefs( Acm.ACM_SITE_CHILDREN, 
+                                                                                     childSite.getNodeRef() );
+                                }
+                            }
+                        }
+                    }
+                    
                     pkgSiteParentNode.appendToPropertyNodeRefs( Acm.ACM_SITE_CHILDREN,
                                                                 pkgSiteNode.getNodeRef() );
                     pkgSiteNode.setProperty( Acm.ACM_SITE_PARENT, pkgSiteParentNode.getNodeRef() );
+                }
+                else {
+                    log( LogLevel.WARNING,
+                         "Site created for site charcterization or parent site are null for node: "+nodeToUpdate );
                 }
 
             } // ends if (isSite)
             else {
                 // Remove the Site aspect from the corresponding site for this pkg:
-                NodeRef sitePackageSiteRef = (NodeRef) nodeToUpdate.getProperty( Acm.ACM_SITE_SITE );
+                NodeRef sitePackageSiteRef = (NodeRef) nodeToUpdate.getProperty( Acm.ACM_SITE_SITE, true );
                 if (sitePackageSiteRef != null) {
                     EmsScriptNode siteNode = new EmsScriptNode(sitePackageSiteRef, services);
                     siteNode.removeAspect( Acm.ACM_SITE );
@@ -2137,6 +2190,7 @@ public class ModelPost extends AbstractJavaWebScript {
         boolean fix = getBooleanArg(req, "fix", false);
         String expressionString = req.getParameter( "expression" );
         boolean evaluate = getBooleanArg( req, "evaluate", false );
+        boolean suppressElementJson = getBooleanArg( req, "suppressElementJson", false );
 
         // see if prettyPrint default is overridden and change
         prettyPrint = getBooleanArg(req, "pretty", prettyPrint );
@@ -2243,7 +2297,8 @@ public class ModelPost extends AbstractJavaWebScript {
                     if (getResponseStatus().getCode() == HttpServletResponse.SC_BAD_REQUEST) {
                         log(LogLevel.WARNING, "No write priveleges", HttpServletResponse.SC_FORBIDDEN);
                     } else if (projectNode != null) {
-                        handleUpdate( postJson, status, myWorkspace, evaluate, fix, model, true );
+                        handleUpdate( postJson, status, myWorkspace, evaluate, fix, model,
+                                      true, suppressElementJson );
                     }
                 }
             } catch (JSONException e) {
@@ -2274,7 +2329,8 @@ public class ModelPost extends AbstractJavaWebScript {
     protected Set< EmsScriptNode > handleUpdate(JSONObject postJson, Status status, 
                                                 WorkspaceNode workspace, boolean evaluate,
                                                 boolean fix, Map<String, Object> model,
-                                                boolean createCommit) throws Exception {
+                                                boolean createCommit,
+                                                boolean suppressElementJson ) throws Exception {
         JSONObject top = NodeUtil.newJsonObject();
         final Set< EmsScriptNode > elements = createOrUpdateModel( postJson, status, workspace, null, createCommit );
 
@@ -2310,43 +2366,45 @@ public class ModelPost extends AbstractJavaWebScript {
                 };
             }
 
-            // Create JSON object of the elements to return:
-            final JSONArray elementsJson = new JSONArray();
-          
-            new EmsTransaction(getServices(), getResponse(), getResponseStatus(),
-                               runWithoutTransactions) {// || internalRunWithoutTransactions ) {
-                @Override
-                public void run() throws Exception {
-                    for ( EmsScriptNode element : elements ) {
-                        JSONObject json = element.toJSONObject(null);
-                        Object result = results.get( element );
-                        if ( result != null ) {
-                            try {
-                                json.putOpt( "evaluationResult", result );
-                                results.remove( element );
-                            } catch ( Throwable e ) {
-                                ModelPost.this.log( LogLevel.WARNING,
-                                                    "Evaluation failed for "
-                                                            + element );
+            if ( !suppressElementJson ) {
+                // Create JSON object of the elements to return:
+                final JSONArray elementsJson = new JSONArray();
+              
+                new EmsTransaction(getServices(), getResponse(), getResponseStatus(),
+                                   runWithoutTransactions) {// || internalRunWithoutTransactions ) {
+                    @Override
+                    public void run() throws Exception {
+                        for ( EmsScriptNode element : elements ) {
+                            JSONObject json = element.toJSONObject(null);
+                            Object result = results.get( element );
+                            if ( result != null ) {
+                                try {
+                                    json.putOpt( "evaluationResult", result );
+                                    results.remove( element );
+                                } catch ( Throwable e ) {
+                                    ModelPost.this.log( LogLevel.WARNING,
+                                                        "Evaluation failed for "
+                                                                + element );
+                                }
                             }
+                            elementsJson.put( json );
                         }
-                        elementsJson.put( json );
                     }
-                }
-            };
+                };
 
-            // Put constraint evaluation results in json.
-            JSONArray resultJarr = new JSONArray();
-            for ( Object k : results.keySet() ) {
-                JSONObject r = new JSONObject();
-                r.put( "expression", k.toString() );
-                Object v = results.get( k );
-                r.put( "value", "" + v );
-                resultJarr.put( r );
+                // Put constraint evaluation results in json.
+                JSONArray resultJarr = new JSONArray();
+                for ( Object k : results.keySet() ) {
+                    JSONObject r = new JSONObject();
+                    r.put( "expression", k.toString() );
+                    Object v = results.get( k );
+                    r.put( "value", "" + v );
+                    resultJarr.put( r );
+                }
+                
+                top.put( "elements", elementsJson );
+                if ( resultJarr.length() > 0 ) top.put( "evaluations", resultJarr );
             }
-            
-            top.put( "elements", elementsJson );
-            if ( resultJarr.length() > 0 ) top.put( "evaluations", resultJarr );
         }
         
         if (!Utils.isNullOrEmpty(response.toString())) {
