@@ -2255,13 +2255,14 @@ public class ModelPost extends AbstractJavaWebScript {
                     // Check if input is K or JSON
                     String contentType = req.getContentType() == null ?
                                          "" : req.getContentType().toLowerCase();
-                    if ( contentType.equals( "application/json" ) ) {
-                        postJson = //JSONObject.make(
-                                (JSONObject)req.parseContent();// );
-                    } else if ( contentType.equals( "application/k" ) ) {
+                    if ( contentType.contains( "application/k" ) ) {
                         String k = req.getContent().getContent();
                         logger.warn( "k = " + k );
                         postJson = new JSONObject(KExpParser.parseExpression(k));
+                    }
+                    else {
+                        postJson = //JSONObject.make(
+                                (JSONObject)req.parseContent();// );
                     }
                     if ( postJson == null ) postJson = new JSONObject();
                     JSONArray jarr = postJson.optJSONArray("elements");
