@@ -63,8 +63,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -864,41 +862,41 @@ public class SnapshotPost extends AbstractJavaWebScript {
         return snapshotNode;
     }
 
-    private String generateHtmlTableHeader(Element table, int columnCount){
-    	if(table == null) return "";
-    	StringBuffer sb = new StringBuffer();
-    	Elements tbody = table.select("table > tbody");
-    	Elements TRs = null;
-    	if(tbody == null || tbody.size() == 0) TRs = table.select("table > tr");
-    	else TRs = tbody.select("tbody > tr");
-    	
-    	if(TRs == null || TRs.size() == 0) return table.html();
-    	Element tr = TRs.first();
-    	Elements TDs = tr.select("tr > td");
-
-    	sb.append("<thead><row>");
-    	if(TDs == null || TDs.size() == 0){
-    		for(int i=0; i < columnCount; i++){
-    			sb.append("<entry></entry>");
-    		}
-    	}
-    	else{
-	    	for(Element td : TDs){
-	    		sb.append(String.format("<entry"));
-	    		if(td.hasAttr("rowspan")){
-	    			sb.append(" ");	//TODO fill in rowspan attr/value
-	    		}
-	    		if(td.hasAttr("colspan")){
-	    			sb.append(String.format(" namest='' nameend=''", 1,1));	//TODO replace values
-	    		}
-	    		sb.append(">");
-	    	}
-    	}
-    	sb.append("</row></thead>");
-    	return sb.toString();
-    }
+//    private String generateHtmlTableHeader(Element table, int columnCount){
+//    	if(table == null) return "";
+//    	StringBuffer sb = new StringBuffer();
+//    	Elements tbody = table.select("table > tbody");
+//    	Elements TRs = null;
+//    	if(tbody == null || tbody.size() == 0) TRs = table.select("table > tr");
+//    	else TRs = tbody.select("tbody > tr");
+//    	
+//    	if(TRs == null || TRs.size() == 0) return table.html();
+//    	Element tr = TRs.first();
+//    	Elements TDs = tr.select("tr > td");
+//
+//    	sb.append("<thead><row>");
+//    	if(TDs == null || TDs.size() == 0){
+//    		for(int i=0; i < columnCount; i++){
+//    			sb.append("<entry></entry>");
+//    		}
+//    	}
+//    	else{
+//	    	for(Element td : TDs){
+//	    		sb.append(String.format("<entry"));
+//	    		if(td.hasAttr("rowspan")){
+//	    			sb.append(" ");	//TODO fill in rowspan attr/value
+//	    		}
+//	    		if(td.hasAttr("colspan")){
+//	    			sb.append(String.format(" namest='' nameend=''", 1,1));	//TODO replace values
+//	    		}
+//	    		sb.append(">");
+//	    	}
+//    	}
+//    	sb.append("</row></thead>");
+//    	return sb.toString();
+//    }
     
-    public JSONObject generatePDF(String snapshotId, WorkspaceNode workspace) throws Exception{
+    public JSONObject generatePDF(String snapshotId, WorkspaceNode workspace, String siteName) throws Exception{
     	clearCaches( false );
         //EmsScriptNode snapshotNode = findScriptNodeById(snapshotId, workspace, null, false);
     	// lookup snapshotNode using standard lucene as snapshotId is unique across all workspaces
@@ -917,7 +915,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
 
         if(!isGenerated){
 	        try{
-		    	snapshotNode = generatePDF(snapshotNode, workspace);
+		    	snapshotNode = generatePDF(snapshotNode, workspace, siteName);
 		    	if(snapshotNode == null) throw new Exception("generatePDF() returned null.");
 		    	else{
 		    		this.setPdfStatus(snapshotNode, "Completed");
@@ -932,7 +930,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
     	return populateSnapshotProperties(snapshotNode);
     }
 
-    public EmsScriptNode generatePDF( EmsScriptNode snapshotNode, WorkspaceNode workspace ) throws Exception {
+    public EmsScriptNode generatePDF( EmsScriptNode snapshotNode, WorkspaceNode workspace, String siteName ) throws Exception {
         this.snapshotName = snapshotNode.getSysmlId();
         if(this.snapshotName == null || this.snapshotName.isEmpty()) throw new Exception("Failed to retrieve snapshot Id!");
 
@@ -951,7 +949,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
 
         if ( !hasPdfNode( snapshotNode ) ) {
             log( LogLevel.INFO, "Generating PDF..." );
-            docBookWrapper.savePdfToRepo(snapshotFolderNode, workspace, timestamp );
+            docBookWrapper.savePdfToRepo(snapshotFolderNode, workspace, timestamp, siteName );
         }
         return snapshotNode;
     }
@@ -1313,28 +1311,28 @@ public class SnapshotPost extends AbstractJavaWebScript {
         return null;
     }
 
-    private String handleHtmlList(String s){
-    	s = s.replaceAll("(?i)<ul>", "<itemizedlist>");
-    	s = s.replaceAll("(?i)</ul>", "</itemizedlist>");
-    	s = s.replaceAll("(?i)<ol>", "<orderedlist>");
-    	s = s.replaceAll("(?i)</ol>", "</orderedlist>");
-    	s = s.replaceAll("(?i)<li>", "<listitem><para>");
-    	s = s.replaceAll("(?i)</li>", "</para></listitem>");
-    	return s;
-    }
+//    private String handleHtmlList(String s){
+//    	s = s.replaceAll("(?i)<ul>", "<itemizedlist>");
+//    	s = s.replaceAll("(?i)</ul>", "</itemizedlist>");
+//    	s = s.replaceAll("(?i)<ol>", "<orderedlist>");
+//    	s = s.replaceAll("(?i)</ol>", "</orderedlist>");
+//    	s = s.replaceAll("(?i)<li>", "<listitem><para>");
+//    	s = s.replaceAll("(?i)</li>", "</para></listitem>");
+//    	return s;
+//    }
     
-    private String handleHtmlTable(String s) throws Exception{
-    	Pattern pattern = Pattern.compile("<table[^>]*>(.*)</table>", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
-    	Matcher matcher = pattern.matcher(s);
-    	StringBuffer result = new StringBuffer();
-    	while(matcher.find()){
-    		String docbookTable = HtmlTableToDocbookTable(matcher.group(0), matcher.group(1));
-    		matcher.appendReplacement(result, docbookTable);
-    	}
-    	matcher.appendTail(result);
-    	return result.toString();
-    	
-    }
+//    private String handleHtmlTable(String s) throws Exception{
+//    	Pattern pattern = Pattern.compile("<table[^>]*>(.*)</table>", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+//    	Matcher matcher = pattern.matcher(s);
+//    	StringBuffer result = new StringBuffer();
+//    	while(matcher.find()){
+//    		String docbookTable = HtmlTableToDocbookTable(matcher.group(0), matcher.group(1));
+//    		matcher.appendReplacement(result, docbookTable);
+//    	}
+//    	matcher.appendTail(result);
+//    	return result.toString();
+//    	
+//    }
     
     /**
      *
@@ -1757,6 +1755,10 @@ public class SnapshotPost extends AbstractJavaWebScript {
 	    		elem.replaceWith(elemNew);
 	    		elem = elemNew;
 	    		break;
+	    	case "SCRIPT":
+	    	case "STYLE":
+	    		elem.remove();
+	    		break;
 	    	case "TABLE":
     			String dbTable = HtmlTableToDocbookTable(elem.outerHtml(), elem.html());
     			Document doc = Jsoup.parseBodyFragment(dbTable);
@@ -1816,10 +1818,10 @@ public class SnapshotPost extends AbstractJavaWebScript {
     	// cleans up generated docbook fragment to pass fop validation
     	
     	// shifts nested <itemizedlist> and <orderedlist>
-    	Elements list = document.select("itemizedlist > itemizedlist");
-    	list.addAll(document.select("orderedlist > orderedlist"));
-    	list = document.select("itemizedlist > orderedlist");
-    	list.addAll(document.select("orderedlist > itemizedlist"));
+    	Elements list = document.body().select("itemizedlist > itemizedlist");
+    	list.addAll(document.body().select("orderedlist > orderedlist"));
+    	list = document.body().select("itemizedlist > orderedlist");
+    	list.addAll(document.body().select("orderedlist > itemizedlist"));
     	for(Element u : list){
     		Element listItem = new Element(Tag.valueOf("listitem"),"");
     		listItem.html(u.outerHtml());
@@ -1828,16 +1830,16 @@ public class SnapshotPost extends AbstractJavaWebScript {
     	}
     	
     	// removes <itemizedlist>/<orderedlist> without <listitem> children
-    	list = document.select("itemizedlist");
-    	list.addAll(document.select("orderedlist"));
-    	list.addAll(document.select("tbody"));
+    	list = document.body().select("itemizedlist");
+    	list.addAll(document.body().select("orderedlist"));
+    	list.addAll(document.body().select("tbody"));
 		for(Element item : list){
 			if(item.children().size()==0) item.tagName("removalTag");
 		}
 		
 		// shifts chapter > link to chapter > para > link
-		list = document.select(" > ulink");
-		list.addAll(document.select(" > inlinemediaobject"));
+		list = document.body().select(" > ulink");
+		list.addAll(document.body().select(" > inlinemediaobject"));
 		for(Element u : list){
 			Element para = new Element(Tag.valueOf("para"), "");
 			para.html(u.outerHtml());
@@ -1846,7 +1848,8 @@ public class SnapshotPost extends AbstractJavaWebScript {
 		}
 		
     	// removes nested <para>
-    	document.select("para > para").tagName("removalTag");
+    	document.body().select("para > para").tagName("removalTag");
+    	document.body().select("emphasis > para").tagName("removalTag");
     	
     }
 
@@ -2073,71 +2076,71 @@ public class SnapshotPost extends AbstractJavaWebScript {
         }
     }
 
-    private void traverseHtml(Element elm, StringBuffer sb){
-    	if(elm == null) return;
-    	if(sb == null) return;
-
-//    	if(!elm.isBlock()){
-//    		sb.append(" ");
+//    private void traverseHtml(Element elm, StringBuffer sb){
+//    	if(elm == null) return;
+//    	if(sb == null) return;
+//
+////    	if(!elm.isBlock()){
+////    		sb.append(" ");
+////    	}
+//
+//    	//TODO does not work when elem.ownText is not contiguous. eg: <div>This is <b>A</b test</div>
+////    	if(elm.ownText().length() > 0){
+////    		sb.append("<![CDATA[");
+////    		sb.append(elm.ownText());
+////        	sb.append("]]>");
+////    	}
+//
+//    	switch(elm.tagName().toLowerCase()){
+//			case "colspec":
+//			case "emphasis":
+//			case "entry":
+//			case "inlinemediaobject":
+//			case "itemizedlist":
+//	    	case "link":
+//			case "listitem":
+//	    	case "orderedlist":
+//	    	case "row":
+//	    	case "tbody":
+//	    	case "tfoot":
+//	    	case "tgroup":
+//	    	case "thead":
+//	    	case "ulink":
+//	    	case "utable":
+//					sb.append(elm.outerHtml());
+//					break;
+//			default:
+////				sb.append
+//				break;
 //    	}
-
-    	//TODO does not work when elem.ownText is not contiguous. eg: <div>This is <b>A</b test</div>
-//    	if(elm.ownText().length() > 0){
-//    		sb.append("<![CDATA[");
-//    		sb.append(elm.ownText());
-//        	sb.append("]]>");
+//    	if(elm.children() != null && elm.children().size() > 0){
+//    		for(Element e: elm.children()){
+//    			String tagName = e.tagName().toLowerCase();
+//    			switch(tagName){
+//    				case "colspec":
+//    				case "emphasis":
+//    				case "entry":
+//	    			case "inlinemediaobject":
+//	    			case "itemizedlist":
+//	    	    	case "link":
+//	    			case "listitem":
+//	    	    	case "orderedlist":
+//	    	    	case "row":
+//	    	    	case "tbody":
+//	    	    	case "tfoot":
+//	    	    	case "tgroup":
+//	    	    	case "thead":
+//	    	    	case "ulink":
+//	    	    	case "utable":
+//		    				sb.append(e.outerHtml());
+//	    				continue;
+//    			}
+//    			traverseHtml(e,sb);
+//    		}
 //    	}
-
-    	switch(elm.tagName().toLowerCase()){
-			case "colspec":
-			case "emphasis":
-			case "entry":
-			case "inlinemediaobject":
-			case "itemizedlist":
-	    	case "link":
-			case "listitem":
-	    	case "orderedlist":
-	    	case "row":
-	    	case "tbody":
-	    	case "tfoot":
-	    	case "tgroup":
-	    	case "thead":
-	    	case "ulink":
-	    	case "utable":
-					sb.append(elm.outerHtml());
-					break;
-			default:
-//				sb.append
-				break;
-    	}
-    	if(elm.children() != null && elm.children().size() > 0){
-    		for(Element e: elm.children()){
-    			String tagName = e.tagName().toLowerCase();
-    			switch(tagName){
-    				case "colspec":
-    				case "emphasis":
-    				case "entry":
-	    			case "inlinemediaobject":
-	    			case "itemizedlist":
-	    	    	case "link":
-	    			case "listitem":
-	    	    	case "orderedlist":
-	    	    	case "row":
-	    	    	case "tbody":
-	    	    	case "tfoot":
-	    	    	case "tgroup":
-	    	    	case "thead":
-	    	    	case "ulink":
-	    	    	case "utable":
-		    				sb.append(e.outerHtml());
-	    				continue;
-    			}
-    			traverseHtml(e,sb);
-    		}
-    	}
-
-    	if(elm.isBlock()) sb.append("<?linebreak?>");
-    }
+//
+//    	if(elm.isBlock()) sb.append("<?linebreak?>");
+//    }
 
     @Override
     protected boolean validateRequest(WebScriptRequest req, Status status) {

@@ -7,6 +7,7 @@ import gov.nasa.jpl.view_repo.actions.ActionUtil;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
+import gov.nasa.jpl.view_repo.util.NodeUtil.SearchType;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -118,18 +119,18 @@ public class DocBookWrapper {
 		return target;
 	}
 
-	private String formatContent(String rawContent){
-		Document document = Jsoup.parseBodyFragment(rawContent);
-		Elements lits = document.getElementsByTag("literallayout");
-		for(Element lit : lits){
-			Elements cirRefs = lit.getElementsByTag("CircularReference");
-			for(Element cirRef : cirRefs){
-				//cirRef.before("</literallayout><font color='red'>Circular Reference!</font><literallayout>");
-				//cirRef.remove();
-			}
-		}
-		return document.body().html();
-	}
+//	private String formatContent(String rawContent){
+//		Document document = Jsoup.parseBodyFragment(rawContent);
+//		Elements lits = document.getElementsByTag("literallayout");
+//		for(Element lit : lits){
+//			Elements cirRefs = lit.getElementsByTag("CircularReference");
+//			for(Element cirRef : cirRefs){
+//				//cirRef.before("</literallayout><font color='red'>Circular Reference!</font><literallayout>");
+//				//cirRef.remove();
+//			}
+//		}
+//		return document.body().html();
+//	}
 
 	public String getContent(){
 		//this.dbBook.accept(this.dbSerializeVisitor);
@@ -354,6 +355,21 @@ public class DocBookWrapper {
 
 	public void saveHtmlZipToRepo(EmsScriptNode snapshotFolder, WorkspaceNode workspace, Date timestamp) throws Exception{
 		try{
+			// removes any previously generated Zip node.
+			ArrayList<NodeRef> nodeRefs = NodeUtil.findNodeRefsByType( this.snapshotName + ".zip", "@cm\\:name:\"", snapshotFolder.getServices() );
+			if (nodeRefs != null && nodeRefs.size() > 0) {
+				EmsScriptNode nodePrev = new EmsScriptNode(nodeRefs.get( 0 ), snapshotFolder.getServices(), new StringBuffer());
+				if(nodePrev != null){ 
+					try{
+						nodePrev.remove();
+					}
+					catch(Exception ex){
+						System.out.println(String.format("problem removing previous artifact node. %s", ex.getMessage()));
+						ex.printStackTrace();
+					}
+				}
+			}
+
 			//this.transformToHTML(workspace, timestamp);
 			createDocBookDir();
 			retrieveDocBook();
@@ -361,7 +377,7 @@ public class DocBookWrapper {
 			String zipPath = this.zipHtml();
 			if(zipPath == null || zipPath.isEmpty()) throw new Exception("Failed to zip files and resources!");
 
-			EmsScriptNode node = snapshotFolder.createNode(this.snapshotName + "_Zip", "cm:content");
+			EmsScriptNode node = snapshotFolder.createNode(this.snapshotName + ".zip", "cm:content");
 			if(node == null) throw new Exception("Failed to create zip repository node!");
 
 			if(!this.saveFileToRepo(node, MimetypeMap.MIMETYPE_ZIP, zipPath)) throw new Exception("Failed to save zip artifact to repository!");
@@ -375,19 +391,24 @@ public class DocBookWrapper {
 		}
 	}
 
-	public void savePdfToRepo(EmsScriptNode snapshotFolder, WorkspaceNode workspace, Date timestamp) throws Exception{
+	public void savePdfToRepo(EmsScriptNode snapshotFolder, WorkspaceNode workspace, Date timestamp, String siteName) throws Exception{
 		try{
-			ArrayList<NodeRef> nodesPrev = NodeUtil.findNodeRefsBySysmlName(this.snapshotName + "_PDF", false, workspace, timestamp, snapshotFolder.getServices(), false, true);
-			if(nodesPrev != null && nodesPrev.size() > 0){ 
-				try{
-					new EmsScriptNode(nodesPrev.get(0), snapshotFolder.getServices()).remove();
-				}
-				catch(Exception ex){
-					System.out.println(String.format("problem removing previous artifact node. %s", ex.getMessage()));
-					ex.printStackTrace();
+			// removes any previously generated PDF node.
+			ArrayList<NodeRef> nodeRefs = NodeUtil.findNodeRefsByType( this.snapshotName + ".pdf", "@cm\\:name:\"", snapshotFolder.getServices() );
+			if (nodeRefs != null && nodeRefs.size() > 0) {
+				EmsScriptNode nodePrev = new EmsScriptNode(nodeRefs.get( 0 ), snapshotFolder.getServices(), new StringBuffer());
+				if(nodePrev != null){ 
+					try{
+						nodePrev.remove();
+					}
+					catch(Exception ex){
+						System.out.println(String.format("problem removing previous artifact node. %s", ex.getMessage()));
+						ex.printStackTrace();
+					}
 				}
 			}
-			EmsScriptNode node = snapshotFolder.createNode(this.snapshotName + "_PDF", "cm:content");
+			
+			EmsScriptNode node = snapshotFolder.createNode(this.snapshotName + ".pdf", "cm:content");
 			if(node == null) throw new Exception("Failed to create PDF repository node!");
 
 			String pdfPath = transformToPDF(workspace, timestamp);

@@ -27,10 +27,7 @@ import org.apache.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.springframework.extensions.surf.RequestContext;
-import org.springframework.extensions.surf.support.ThreadLocalRequestContext;
 import org.springframework.extensions.webscripts.Status;
-import org.springframework.extensions.webscripts.connector.User;
 import org.springframework.web.context.request.WebRequest;
 
 public class SnapshotArtifactsGenerationActionExecuter  extends ActionExecuterAbstractBase {
@@ -125,8 +122,9 @@ public class SnapshotArtifactsGenerationActionExecuter  extends ActionExecuterAb
 			if (nodeRefs == null || nodeRefs.size() != 1) {
 				throw new Exception("Failed to find snapshot with Id: " + snapshotId);
 			}
+			
 			snapshotNode = new EmsScriptNode(nodeRefs.get( 0 ), services, response);
-    	    if ( !snapshotNode.hasAspect( "view2:docbook" )) {
+    	    //if ( !snapshotNode.hasAspect( "view2:docbook" )) {
     	    	response.append("[INFO]: Creating docbook.xml...\n");
 	            String snapshotName = snapshotNode.getSysmlId();
 	            Date timestamp = (Date)snapshotNode.getProperty("view2:timestamp");
@@ -149,44 +147,50 @@ public class SnapshotArtifactsGenerationActionExecuter  extends ActionExecuterAb
 	                docBookWrapper.save();
 	                docBookWrapper.saveDocBookToRepo( snapshotFolder, timestamp );
 	            }
-    	    }
-    	    else{
-    	    	response.append("[INFO]: docbook.xml already created.\n");
-    	    }
-        	    
-	        for(String format:formats){
-	        	if(format.compareToIgnoreCase("pdf") == 0){
+//    	    }
+//    	    else{
+//    	    	response.append("[INFO]: docbook.xml already created.\n");
+//    	    }
+        	
+    	    // at this time, we're generating both artifacts everytime
+//	        for(String format:formats){
+//	        	if(format.compareToIgnoreCase("pdf") == 0){
 	        		try{
-	        			snapshot = snapshotService.generatePDF(snapshotId, workspace);
+	        			snapshot = snapshotService.generatePDF(snapshotId, workspace, siteName);
 	        			response.append(snapshotService.getResponse().toString());
+	        			
+	        			
+	        			snapshotService.setPdfStatus(snapshotNode, "Error");
 	        		}
-	        		catch(JSONException ex){
+	        		catch(Exception ex){
 	        			status.setCode(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 	        			logger.error("Failed to generate PDF for snapshot Id: " + snapshotId);
 	        			response.append(String.format("[ERROR]: Failed to generate PDF for snapshot Id: %s.\n%s\n%s\n", snapshotId, ex.getMessage(), ex.getStackTrace()));
 	        		}
-	        	}
-	        	else if(format.compareToIgnoreCase("html") == 0){
+//	        	}
+//	        	else if(format.compareToIgnoreCase("html") == 0){
 	        		try{
 	        			snapshot = snapshotService.generateHTML(snapshotId, workspace);
 	        			response.append(snapshotService.getResponse().toString());
 	        		}
-	        		catch(JSONException ex){
+	        		catch(Exception ex){
 	        			status.setCode(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 	        			logger.error("Failed to generate zip artifact for snapshot Id: " + snapshotId);
 	        			response.append(String.format("[ERROR]: Failed to generate zip artifact for snapshot Id: %s.\n%s\n%s\n", snapshotId, ex.getMessage(), ex.getStackTrace()));
 	        		}
-	        	}
-	        	if (status.getCode() != HttpServletResponse.SC_OK) {
+//	        	}
+	        	
+	        		if (status.getCode() != HttpServletResponse.SC_OK) {
 	            	jobStatus = "Failed";
 	            	response.append(String.format("[ERROR]: could not make snapshot for %s.\n", snapshotId));
-	        	} else {
+	        	} 
+	        		else {
 	            	response.append(String.format("[INFO]: Successfully generated artifact(s) for snapshot: %s.\n", snapshotId));
 	        	}
 	        	response.append("Snapshot JSON:\n");
 	        	response.append(NodeUtil.jsonToString( snapshot ));
 	        	response.append("\n\n");
-	        }
+//	        }
 	        // Send off notification email
 	        String subject = "Snapshot Generation " + jobStatus;
 	        EmsScriptNode logNode = ActionUtil.saveLogToFile(jobNode, "text/plain", services, response.toString());
@@ -195,17 +199,23 @@ public class SnapshotArtifactsGenerationActionExecuter  extends ActionExecuterAb
     	    if (logger.isDebugEnabled()) logger.debug("Completed snapshot artifact(s) generation.");
         }
         catch(Exception ex){
+        	try{
+	        	for(String format:formats){
+	        		if(format.compareToIgnoreCase("pdf") == 0){ 
+	        			if(SnapshotPost.getPdfNode(snapshotNode)==null) snapshotService.setPdfStatus(snapshotNode, "Error");
+	        		}
+	        		else if(format.compareToIgnoreCase("html") == 0){
+	        			if(SnapshotPost.getHtmlZipNode(snapshotNode)==null) snapshotService.setHtmlZipStatus(snapshotNode, "Error");  
+	        		}
+	        	}
+        	}
+        	catch(Exception e){;}
+
         	StringBuffer sb = new StringBuffer();
         	Throwable throwable = ex.getCause();
         	while(throwable != null){
         		sb.append(throwable.getMessage());
         		throwable = throwable.getCause();
-        	}
-        	for(String format:formats){
-        		if(format.compareToIgnoreCase("pdf") == 0) 
-        			snapshotService.setPdfStatus(snapshotNode, "Error");
-        		else if(format.compareToIgnoreCase("html") == 0) 
-        			snapshotService.setHtmlZipStatus(snapshotNode, "Error");
         	}
         	
         	logger.error("Failed to complete snapshot artifact(s) generation!");
