@@ -916,17 +916,21 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
      * @param workspace
      * @return
      */
-    public EmsScriptNode findParentPkgSite(EmsScriptNode node, WorkspaceNode workspace) {
+    public EmsScriptNode findParentPkgSite(EmsScriptNode node, WorkspaceNode workspace,
+                                           Date dateTime) {
 
         EmsScriptNode pkgSiteParentNode = null;
-        EmsScriptNode siteParent = node.getParent();
-        EmsScriptNode siteParentReifNode;
-        while (siteParent != null && siteParent.exists()) {
+        // Note: must walk up using the getOwningParent() b/c getParent() does not work
+        //       for versioned nodes.  Note, that getOwningParent() will be null for
+        //       the Project node, but we don't need to go farther up than this anyways
+        EmsScriptNode siteParentReifNode = node.getOwningParent(dateTime);
+        EmsScriptNode siteParent;
+        while (siteParentReifNode != null && siteParentReifNode.exists()) {
 
-            siteParentReifNode = siteParent.getReifiedNode();
+            siteParent = siteParentReifNode.getReifiedPkg();
 
             // If the parent is a package and a site, then its the parent site node:
-            if (siteParentReifNode != null && siteParentReifNode.hasAspect(Acm.ACM_PACKAGE) ) {
+            if (siteParentReifNode.hasAspect(Acm.ACM_PACKAGE) ) {
                 Boolean isSiteParent = (Boolean) siteParentReifNode.getProperty( Acm.ACM_IS_SITE );
                 if (isSiteParent != null && isSiteParent) {
 
@@ -938,10 +942,10 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 
             // If the parent is the project, then the site will be the project Site:
             // Note: that projects are never nested so we just need to check if it is of project type
-            String siteParentType = siteParent.getTypeShort();
-            String siteParentReifType = siteParentReifNode != null ? siteParentReifNode.getTypeShort() : null;
+            String siteParentType = siteParent != null ? siteParent.getTypeShort() : null;
+            String siteParentReifType = siteParentReifNode.getTypeShort();
             if (Acm.ACM_PROJECT.equals( siteParentType ) || Acm.ACM_PROJECT.equals( siteParentReifType )) {
-                pkgSiteParentNode = siteParent.getSiteNode();
+                pkgSiteParentNode = siteParentReifNode.getSiteNode();
                 break;  // break no matter what b/c we have reached the project node
             }
 
@@ -949,7 +953,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
                 break;
             }
 
-            siteParent = siteParent.getParent();
+            siteParentReifNode = siteParentReifNode.getOwningParent(dateTime);
         }
 
         return pkgSiteParentNode;
