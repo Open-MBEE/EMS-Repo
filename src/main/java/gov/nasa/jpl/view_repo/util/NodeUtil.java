@@ -92,8 +92,8 @@ public class NodeUtil {
         WORKSPACE("@ems\\:workspace:\"" ),
         WORKSPACE_NAME("@ems\\:workspace_name:\"" ),
         OWNER("@ems\\:owner:\"" ),
-        ASPECT("ASPECT:\""),
-        TYPE("TYPE:\"");
+        ASPECT("ASPECT\\:\""),
+        TYPE("TYPE\\:\"");
 
         public String prefix;
 
@@ -806,11 +806,14 @@ public class NodeUtil {
         }
         ResultSet results = null;
         if ( searchService != null ) {
+            System.out.println( "luceneSearch(" + queryPattern + ")" );//resultSetToList( results ) );
 //            results = searchService.query( getStoreRef(),
 //                                           SearchService.LANGUAGE_LUCENE,
 //                                           queryPattern );
             results = searchService.query( getSearchParameters(queryPattern) );
         }
+        System.out.println( "luceneSearch(" + queryPattern + "): returned "
+                + results.length() + " nodes." );
         if ( Debug.isOn() ) {
             Debug.outln( "luceneSearch(" + queryPattern + "): returned "
                          + results.length() + " nodes." );//resultSetToList( results ) );
@@ -1790,7 +1793,7 @@ public class NodeUtil {
             for ( NodeRef nodeRef : resultSet ) {
                 EmsScriptNode node =
                         new EmsScriptNode( nodeRef, services, response );
-                if ( node.checkPermissions( PermissionService.READ, response, status ) ) {
+//                if ( node.checkPermissions( PermissionService.READ, response, status ) ) {
                     String id = node.getSysmlId();
                     // We assume that order matters and that if two nodes have the
                     // same id, then the first is preferred (for example, because it
@@ -1798,7 +1801,7 @@ public class NodeUtil {
                     if ( id != null && !searchResults.containsKey( id ) ) {
                         searchResults.put( id, node );
                     }
-                }
+//                }
             }
 
         return searchResults;

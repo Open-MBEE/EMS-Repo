@@ -399,18 +399,71 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
         StringBuffer response = new StringBuffer();
         Status status = new Status();
         // TODO -- need to take into account the context!
-        Map< String, EmsScriptNode > elements =
-                NodeUtil.searchForElements( specifier, true, null, dateTime,
-                                            services, response, status );
-        if ( elements != null ) return elements.values();
-        return Collections.emptyList();
+//        Map< String, EmsScriptNode > elements =
+//                NodeUtil.searchForElements( specifier, true, null, dateTime,
+//                                            services, response, status );
+//      if ( elements != null ) return elements.values();
+//      return Collections.emptyList();
+        
+        boolean ignoreWorkspace = false;
+        WorkspaceNode workspace = null;
+        if ( context instanceof NodeRef ) {
+            EmsScriptNode ctxt = new EmsScriptNode( (NodeRef)context, getServices(),
+                                                    response, status );
+            if ( ctxt.hasAspect( "Workspace" ) ) {
+                context = new WorkspaceNode( (NodeRef)context, getServices(),
+                                             response, status );
+            } else {
+                context = ctxt;
+            }
+        }
+        if ( context instanceof WorkspaceNode ) {
+            workspace = (WorkspaceNode)context;
+        } else if ( context instanceof EmsScriptNode ) {
+            workspace = ( (EmsScriptNode)context ).getWorkspace();
+        } else ignoreWorkspace = true;
+        ArrayList< NodeRef > refs =
+            NodeUtil.findNodeRefsBySysmlName( specifier, ignoreWorkspace,
+                                              workspace, dateTime,
+                                              getServices(), false, false );
+        if ( Utils.isNullOrEmpty( refs ) ) {
+            refs =
+                NodeUtil.findNodeRefsById( specifier, ignoreWorkspace,
+                                           workspace, dateTime, getServices(),
+                                           false, false );
+        }
+        if ( Utils.isNullOrEmpty( refs ) ) return Collections.emptyList();
+        if ( refs.size() > 1 && context != null ) {//instanceof EmsScriptNode && !(context instanceof WorkspaceNode) ) {
+            ArrayList< EmsScriptNode > childNodes = new ArrayList< EmsScriptNode >();
+            for ( NodeRef ref : refs ) {
+                EmsScriptNode node = new EmsScriptNode( ref, getServices(), response, status );
+                EmsScriptNode owner = node.getOwningParent( dateTime );
+                if ( context.equals( owner )
+                     || ( context instanceof WorkspaceNode && context.equals( node.getWorkspace() ) ) ) {
+                    childNodes.add( node );
+                }
+            }
+            if ( childNodes.size() > 0 ) return childNodes;
+        }
+        return EmsScriptNode.toEmsScriptNodeList( refs, getServices(), response, status );
     }
 
     @Override
     public Collection< EmsScriptNode >
             getElementWithProperty( Object context, EmsScriptNode specifier ) {
-        // TODO Auto-generated method stub
-        return null;
+        Date date = null;
+        WorkspaceNode ws = null;
+        if ( context instanceof Date ) {
+            date = (Date)context;
+        } else if ( context instanceof WorkspaceNode ) {
+            ws = (WorkspaceNode)context;
+        }
+        EmsScriptNode n = specifier.getOwningParent( date );
+        if ( ws != null ) {
+            n = NodeUtil.findScriptNodeById( n.getSysmlId(), ws, date, false,
+                                             getServices(), null );
+        }
+        return Utils.newList( n );
     }
 
     @Override
@@ -571,10 +624,32 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
         }
 
         // find the specified property inside the context
+        if ( context instanceof Collection && ((Collection<?>)context).size() == 1 ) {
+            context = ((Collection<?>)context).iterator().next();
+        }
         if ( context instanceof EmsScriptNode ) {
 
             EmsScriptNode node = (EmsScriptNode)context;
 
+            // Look for Properties with specifier as name and
+            // context as owner.
+            Collection< EmsScriptNode > elements =
+                    getElementWithName( context, "" + specifier );
+            for ( EmsScriptNode n : new ArrayList<EmsScriptNode>(elements) ) {
+                if ( context instanceof WorkspaceNode ) {
+                    if ( !context.equals( n.getWorkspace() ) ) {
+                        elements.remove( n );
+                    }
+                } else if (!context.equals( n.getOwningParent( null ) ) ) {
+                    elements.remove( n );
+                }
+            }
+            if ( elements.size() > 0 ) {
+                return elements;
+            }
+            
+            // The property is not a separate Property element, so try and get a
+            // meta-data property value.
             if ( mySpecifier == null ) {
                 // if no specifier, return all properties
                 Map< String, Object > props = node.getProperties();
@@ -607,7 +682,7 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
 
         if ( context != null ) {
             // TODO -- error????  Are there any other contexts than an EmsScriptNode that would have a property?
-            Debug.error("context is not an EmsScriptNode!");
+            Debug.error("context is not an EmsScriptNode!  " + context );
             return null;
         }
 
@@ -659,11 +734,43 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
         return null;
     }
 
+    public Collection< EmsScriptNode > getPropertyWithTypeName( Object context, String specifier ) {
+        if ( specifier != null && context instanceof EmsScriptNode ) {
+            Collection< EmsScriptNode > results = getProperty( context, null );
+            ArrayList< EmsScriptNode > nodes = new ArrayList< EmsScriptNode >();
+            if ( results != null ) {
+                for ( EmsScriptNode n : results ) {
+                    Collection< EmsScriptNode > type = getType( n, null );
+                    if ( type.contains( specifier ) ) {//|| type.contains(getElementWithName( context, specifier ))) {
+                        nodes.add( n );
+                    }
+                }
+            }
+            return nodes;
+        }
+        if ( specifier == null ) {
+            return getProperty(context, null);
+        }
+        // Remaining case is specifier != nil && !(context instanceof EmsScriptNode)
+        return null;
+    }
     @Override
     public Collection< EmsScriptNode >
             getPropertyWithType( Object context, EmsScriptNode specifier ) {
-        // TODO Auto-generated method stub
-        return null;
+        ArrayList< EmsScriptNode > nodes = new ArrayList< EmsScriptNode >();
+        if ( specifier != null ) {
+            Collection< String > typeName = getName( specifier );
+            if ( typeName != null ) {
+                for ( String name : typeName ) {
+                    Collection< EmsScriptNode > result =
+                            getPropertyWithTypeName( context, name );
+                    if ( result != null ) nodes.addAll( result );
+                }
+            }
+            return nodes;
+        } else {
+            return getProperty(context, null);
+        }
     }
 
     @Override
@@ -964,6 +1071,21 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
         	 mySpecifier = convertMap.get(specifier);
         }
 
+        ArrayList< Object > resultList = new ArrayList< Object >();
+        // find the specified property inside the context
+        if ( context instanceof Collection ) {
+            Collection< ? > coll = ((Collection<?>)context);
+            if ( coll.size() == 0 ) return resultList;
+            if ( coll.size() == 1 ) {
+                context = coll.iterator().next();
+            } else {
+                for ( Object o : coll ) {
+                    Collection< Object > vals = getValue( o, mySpecifier );
+                    resultList.addAll( vals );
+                }
+                return resultList;
+            }
+        }
     	// Assuming that we can only have EmsScriptNode context:
     	if (context instanceof EmsScriptNode) {
 
@@ -974,11 +1096,32 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
     		if (node.hasAspect(Acm.ACM_PROPERTY)) {
 
 		    	List<EmsScriptNode> returnList = new ArrayList<EmsScriptNode>();
-				Collection<NodeRef> valueNodes =
-				        (Collection< NodeRef >)node.getProperty(Acm.ACM_VALUE);
-				convertToScriptNode(valueNodes, returnList);
+//				Collection<NodeRef> valueNodes =
+//				        (Collection< NodeRef >)node.getProperty(Acm.ACM_VALUE);
+                Object value = node.getProperty(Acm.ACM_VALUE);
+                Boolean isColl = null;
+                Boolean isNonEmptyColl = null;
+                if ( value instanceof NodeRef ) {
+                    convertToScriptNode(value, returnList);
+                    resultList.addAll(returnList);
+                } else {
+                    isColl = ( value instanceof Collection );
+                    Collection<?> coll = isColl ? ((Collection<?>)value) : null;
+                    isNonEmptyColl = isColl && coll.size() > 0;
+                    Object first = isNonEmptyColl ? coll.iterator().next() : null;
+                    if ( first instanceof NodeRef || first instanceof String ) {
+                        convertToScriptNode(value, returnList);
+                        if ( returnList.size() < coll.size() ) {
+                            resultList.addAll( coll );
+                        } else {
+                            resultList = Utils.asList( returnList, Object.class );
+                        }
+                    }
+                    
+                }
 
-	    		return Utils.asList(returnList, Object.class);
+//	    		return Utils.asList(returnList, Object.class);
+                return resultList;
 			}
 
 			// Otherwise, return the Object for the value
