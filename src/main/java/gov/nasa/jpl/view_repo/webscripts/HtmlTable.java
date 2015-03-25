@@ -6,8 +6,11 @@ import org.jsoup.select.Elements;
 public class HtmlTable {
 	private int colCount;
 	private int headerRowCount;
+	private int headerRowspanCount[][];
 	private int footerRowCount;
+	private int footerRowspanCount[][];
 	private int bodyRowCount;
+	private int bodyRowspanCount[][];
 	private int header[][];
 	private int body[][];
 	private int footer[][];
@@ -19,7 +22,13 @@ public class HtmlTable {
 	private Elements headerRows;
 	private Elements footerRows;
 	private Elements bodyRows;
-	
+
+	public enum TablePart{
+		BODY,
+		FOOTER,
+		HEADER
+	}
+
 	public HtmlTable(Element table){
 		if(table == null) return;
 		if(table.tagName().compareToIgnoreCase("table") != 0) return;
@@ -61,12 +70,24 @@ public class HtmlTable {
 		//looking for table tbody
 		Elements tbody = table.select(" > tbody");
 		if(tbody == null || tbody.size()==0){
+			if(!this.hasHeader){
+				this.headerRows = table.select("table > tr").first().select("tr");
+				this.headerRowCount = this.headerRows.size();
+				this.hasHeader = true;
+				table.select("table > tr").first().remove();
+			}
 			this.bodyRows = table.select("table > tr");
 			this.bodyRowCount = this.bodyRows.size();
 			curMax = getColumnMax(this.bodyRows);
 			if(max < curMax) max = curMax;
 		}
 		else{
+			if(!this.hasHeader){
+				this.headerRows = tbody.select(" > tr").first().select("tr");
+				this.headerRowCount = this.headerRows.size();
+				this.hasHeader = true;
+				tbody.select(" > tr").first().remove();
+			}
 			this.bodyRows = tbody.select(" > tr");
 			this.bodyRowCount = this.bodyRows.size();
 			curMax = getColumnMax(this.bodyRows);
@@ -77,7 +98,7 @@ public class HtmlTable {
 		this.init();
 	}
 
-	private String buildElementEntry(int row, int col, int startCol, Element cell, boolean isHeader){
+	private String buildElementEntry(int row, int col, int startCol, Element cell, TablePart tablePart){
 		StringBuffer sb = new StringBuffer();
 
 		int rowspan = 0;
@@ -89,8 +110,7 @@ public class HtmlTable {
 		if(rspan != null && !rspan.isEmpty()) rowspan = Integer.parseInt(rspan);
 		if(cspan != null && !cspan.isEmpty()) colspan = Integer.parseInt(cspan);
 		
-		int startColTemp = this.getStartCol(row, col, rowspan, colspan, isHeader);
-		if(startColTemp > startCol) startCol = startColTemp;
+		startCol = this.getStartCol(row, col, rowspan, colspan, tablePart);
 		
 		if(startCol > this.colCount) return "";
 		
@@ -98,13 +118,6 @@ public class HtmlTable {
 			sb.append("<entry");
 			
 			if(rowspan > 1){
-				int endRow = row + rowspan;
-				if(isHeader && this.hasHeader){
-					if(endRow > this.headerRowCount) rowspan = this.headerRowCount - row;
-				}
-				else{
-					if(endRow > this.bodyRowCount) rowspan = this.bodyRowCount - row;
-				}
 				sb.append(String.format(" morerows=\"%d\"", rowspan-1));
 			}
 			
@@ -115,9 +128,14 @@ public class HtmlTable {
 			}
 			sb.append(String.format(">%s</entry>", cell.html()));
 		}
-		else sb.append(String.format("<entry>%s</entry>", cell.html()));
+		else 
+			sb.append(String.format("<entry>%s</entry>", cell.html()));
+		
+		tracksRowspanCount(rowspan-1, row, col, tablePart);
+		
 		return sb.toString();
 	}
+	
 	
 	private String generateColSpec(int count){
     	StringBuffer sb = new StringBuffer();
@@ -128,7 +146,7 @@ public class HtmlTable {
     	}
     	return sb.toString();
     }
-    
+
 	private String generateBody(){
 		StringBuffer sb = new StringBuffer();
 		Elements bodyRows = this.bodyRows;
@@ -143,14 +161,16 @@ public class HtmlTable {
 			if(cells == null || cells.size() == 0) cells = tr.select(" > th");
 			if(cells != null && cells.size() > 0){
 				for(int col = 0; col < cells.size(); col++){
-					sb.append(buildElementEntry(row, col, startCol, cells.get(col), false));
+					sb.append(buildElementEntry(row, col, startCol, cells.get(col), TablePart.BODY));
 				}
 			}
 			sb.append("</row>");
 		}
+		handleRowsDifferences(this.bodyRowspanCount, this.bodyRowCount, sb);
 		sb.append("</utbody>");
 		return sb.toString();
 	}
+
 	
 	private String generateFooter(){
 		if(!this.hasFooter) return "";
@@ -167,15 +187,16 @@ public class HtmlTable {
 			if(cells == null || cells.size() == 0) cells = tr.select(" > td");
 			if(cells != null && cells.size() > 0){
 				for(int col = 0; col < cells.size(); col++){
-					sb.append(buildElementEntry(row, col, startCol, cells.get(col), false));
+					sb.append(buildElementEntry(row, col, startCol, cells.get(col), TablePart.FOOTER));
 				}
 			}
 			sb.append("</row>");
 		}
+		handleRowsDifferences(this.footerRowspanCount, this.footerRowCount, sb);
 		sb.append("</utfoot>");
 		return sb.toString();
 	}
-	
+
 	private String generateHeader(){
 		StringBuffer sb = new StringBuffer();		
 		sb.append("<uthead>");
@@ -190,11 +211,12 @@ public class HtmlTable {
 				if(cells == null || cells.size() == 0) cells = tr.select(" > td");
 				if(cells != null && cells.size() > 0){
 					for(int col = 0; col < cells.size(); col++){
-						sb.append(buildElementEntry(row, col, startCol, cells.get(col), true));
+						sb.append(buildElementEntry(row, col, startCol, cells.get(col), TablePart.HEADER));
 					}
 				}
 				sb.append("</row>");
 			}
+			handleRowsDifferences(this.headerRowspanCount, this.headerRowCount, sb);
 		}
 		else{
 			Element tr = this.bodyRows.first();
@@ -203,7 +225,7 @@ public class HtmlTable {
 			sb.append("<row>");
 			if(cells != null && cells.size() > 0){
 				for(int col = 0; col < cells.size(); col++){
-					sb.append(buildElementEntry(0, col, startCol, cells.get(col), true));
+					sb.append(buildElementEntry(0, col, startCol, cells.get(col), TablePart.BODY));
 				}
 			}
 			sb.append("</row>");
@@ -211,6 +233,7 @@ public class HtmlTable {
 		sb.append("</uthead>");
 		return sb.toString();
 	}
+	
 	
 	private int getColumnMax(Elements TRs){
 		int max=0;
@@ -230,7 +253,7 @@ public class HtmlTable {
 	
 	public int getBodyRowCount(){return bodyRowCount;}
 	
-	public int getColCount(){ return colCount;}
+	public int getColCount(){ return colCount; }
 	
 	public int getFooterRowCount() { return this.footerRowCount; }
 	
@@ -238,41 +261,104 @@ public class HtmlTable {
 
 	public int getHeaderRowCount(){return headerRowCount;}
 
-	public int getStartCol(int row, int col, int rowspan, int colspan, boolean isHeader){
-		int startCol = 0;
-		boolean isSet = false;
-		int rowEnd = row + rowspan;
-		int colEnd = col + colspan;
-		for(int i = row; i < rowEnd; i++){
-			for(int j = col; j < this.colCount; j++){
-				if(isHeader){
-					if(i < headerRowCount && j < colCount){
-						if(header[i][j] == 0 && !isSet){
-							startCol = j+1;
-							isSet = true;
-							header[i][j] = 1;
-						}
-						if(j <= colEnd) header[i][j] = 1;
-					}
-				}
-				else{
-					if(i < bodyRowCount && j < colCount){
-						if(body[i][j] == 0 && !isSet){
-							startCol = j+1;
-							isSet = true;
-							body[i][j] = 1;
-						}
-						if(j <= colEnd) body[i][j] = 1;
-					}
-				}
+	private int getPrevStartCol(int row, int col, TablePart tablePart){
+		int startCol = 1;
+		int markedRow[] = null;
+		
+		row++;
+		col++;
+		
+		switch(tablePart){
+		case BODY:
+			markedRow = this.body[row];
+			break;
+		case FOOTER:
+			markedRow = this.footer[row];
+			break;
+		case HEADER:
+			if(this.hasHeader)
+				markedRow = this.header[row];
+			else
+				markedRow = this.body[row];
+			break;
+		}
+		
+		for(int i=col; i <= markedRow.length; i++){
+			if(i >= markedRow.length) return markedRow.length;
+			if(markedRow[i]==0){
+				startCol = i;
+				break;
 			}
 		}
 		return startCol;
 	}
 	
+	private int getStartCol(int row, int col, int rowspan, int colspan, TablePart tablePart){
+		int startCol = getPrevStartCol(row, col, tablePart);
+		int moreRows = (rowspan > 0) ? rowspan-1 : 0;
+		int namest = startCol;
+		int nameend = startCol + ((colspan > 0) ? colspan-1 : 0);
+		// header had used body's 1st row
+		if(!this.hasHeader && tablePart==TablePart.BODY) row++;
+		
+		for(int i=moreRows+row+1; i > row; i--){
+			for(int j=nameend; j >= namest; j--){
+				switch(tablePart){
+				case HEADER:
+					if(i <= headerRowCount && j <= colCount){
+						if(header[i][j] == 0){
+							header[i][j] = 1;
+						}
+					}
+					break;
+				case BODY:
+					if(i <= bodyRowCount && j <= colCount){
+						if(body[i][j] == 0){
+							body[i][j] = 1;
+						}
+					}
+					break;
+				case FOOTER:
+					if(i <= footerRowCount && j <= colCount){
+						if(footer[i][j] == 0){
+							footer[i][j] = 1;
+						}
+					}
+					break;
+				}
+			}
+		}
+		return startCol;
+	}
+
+
 	public String getTitle(){
 		if(this.title == null || this.title.isEmpty()) return "";
 		return this.title;
+	}
+
+	/*
+	 * handles a situation where HTML table defines more rowspan than the number of rows it has.
+	 */
+	private void handleRowsDifferences(int[][] rowspan, int rows, StringBuffer sb){
+		// tallies up rowspan
+		int rowspanCount[] = new int[colCount];
+		for(int i=0; i < colCount; i++){
+			int total = 0;
+			for(int j=0; j < rowspan.length; j++){
+				total += rowspan[j][i];
+			}
+			rowspanCount[i] = total;
+		}
+		
+		// adds more row for any discrepancy
+		for(int i=0; i < rowspanCount.length; i++){
+			if(rowspanCount[i] > rows){
+				for(int j=rowspanCount[i]-rows; j>0;j--){
+					sb.append("<row><entry/></row>");
+				}
+			}
+		}
 	}
 	
 	public boolean hasTitle() { return this.hasTitle; }
@@ -281,6 +367,15 @@ public class HtmlTable {
 	
 	public boolean hasFooter() { return this.hasFooter; }
 	
+	public void init(){
+		header = new int[headerRowCount+1][colCount+1];
+		body = new int[bodyRowCount+1][colCount+1];
+		footer = new int[footerRowCount+1][colCount+1];
+		bodyRowspanCount = new int[bodyRowCount][colCount];
+		footerRowspanCount = new int[footerRowCount][colCount];
+		headerRowspanCount = new int[headerRowCount][colCount];
+	}
+
 	public String toDocBook(){
 		StringBuffer sb = new StringBuffer();
 		sb.append("<utable frame=\"all\" pgwide=\"1\" role=\"longtable\" tabstyle=\"normal\">");
@@ -295,10 +390,21 @@ public class HtmlTable {
 		return sb.toString();
 	}
 	
-	public void init(){
-		header = new int[headerRowCount][colCount];
-		body = new int[bodyRowCount][colCount];
-		footer = new int[footerRowCount][colCount];
+	/*
+	 * keeps tab on HTML table rowspan so we can accommodate any discrepancies later
+	 */
+	private void tracksRowspanCount(int rowspan, int row, int col, TablePart tablePart){
+		if(rowspan < 1) rowspan = 1;
+		switch(tablePart){
+		case BODY:
+			this.bodyRowspanCount[row][col] = rowspan;
+			break;
+		case FOOTER:
+			this.footerRowspanCount[row][col] = rowspan;
+			break;
+		case HEADER:
+			this.headerRowspanCount[row][col] = rowspan;
+			break;
+		}
 	}
-	
 }

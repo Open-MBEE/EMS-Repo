@@ -7,6 +7,7 @@ import gov.nasa.jpl.view_repo.actions.ActionUtil;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
+import gov.nasa.jpl.view_repo.util.NodeUtil.SearchType;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -118,18 +119,18 @@ public class DocBookWrapper {
 		return target;
 	}
 
-	private String formatContent(String rawContent){
-		Document document = Jsoup.parseBodyFragment(rawContent);
-		Elements lits = document.getElementsByTag("literallayout");
-		for(Element lit : lits){
-			Elements cirRefs = lit.getElementsByTag("CircularReference");
-			for(Element cirRef : cirRefs){
-				//cirRef.before("</literallayout><font color='red'>Circular Reference!</font><literallayout>");
-				//cirRef.remove();
-			}
-		}
-		return document.body().html();
-	}
+//	private String formatContent(String rawContent){
+//		Document document = Jsoup.parseBodyFragment(rawContent);
+//		Elements lits = document.getElementsByTag("literallayout");
+//		for(Element lit : lits){
+//			Elements cirRefs = lit.getElementsByTag("CircularReference");
+//			for(Element cirRef : cirRefs){
+//				//cirRef.before("</literallayout><font color='red'>Circular Reference!</font><literallayout>");
+//				//cirRef.remove();
+//			}
+//		}
+//		return document.body().html();
+//	}
 
 	public String getContent(){
 		//this.dbBook.accept(this.dbSerializeVisitor);
@@ -303,12 +304,21 @@ public class DocBookWrapper {
 	public void saveDocBookToRepo(EmsScriptNode snapshotFolder, Date timestamp) throws Exception{
 		ServiceRegistry services = this.snapshotNode.getServices();
 		try{
-			ArrayList<NodeRef> nodeRefs = NodeUtil.findNodeRefsByType( this.snapshotName + "_docbook", "@cm\\:content:\"", services );
+			ArrayList<NodeRef> nodeRefs = NodeUtil.findNodeRefsByType( this.snapshotName + "_docbook.xml", "@cm\\:content:\"", services );
 			if (nodeRefs != null && nodeRefs.size() == 1) {
-				new EmsScriptNode(nodeRefs.get(0), services).remove();
+				EmsScriptNode nodePrev = new EmsScriptNode(nodeRefs.get( 0 ), services, new StringBuffer());
+				if(nodePrev != null){ 
+					try{
+						nodePrev.remove();
+					}
+					catch(Exception ex){
+						System.out.println(String.format("problem removing previous docbook node. %s", ex.getMessage()));
+						ex.printStackTrace();
+					}
+				}
 			}
 
-			EmsScriptNode node = snapshotFolder.createNode(this.snapshotName + "_docbook", "cm:content");
+			EmsScriptNode node = snapshotFolder.createNode(this.snapshotName + "_docbook.xml", "cm:content");
 			ActionUtil.saveStringToFile(node, "application/docbook+xml", services, this.getContent());
 			if(this.snapshotNode.createOrUpdateAspect("view2:docbook")){
 				this.snapshotNode.createOrUpdateProperty("view2:docbookNode", node.getNodeRef());
@@ -390,7 +400,7 @@ public class DocBookWrapper {
 		}
 	}
 
-	public void savePdfToRepo(EmsScriptNode snapshotFolder, WorkspaceNode workspace, Date timestamp) throws Exception{
+	public void savePdfToRepo(EmsScriptNode snapshotFolder, WorkspaceNode workspace, Date timestamp, String siteName) throws Exception{
 		try{
 			// removes any previously generated PDF node.
 			ArrayList<NodeRef> nodeRefs = NodeUtil.findNodeRefsByType( this.snapshotName + ".pdf", "@cm\\:name:\"", snapshotFolder.getServices() );
