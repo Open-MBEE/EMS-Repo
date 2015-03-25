@@ -582,16 +582,16 @@ public class WorkspaceDiff implements Serializable {
         JSONObject ws1Json = NodeUtil.newJsonObject();
         JSONObject ws2Json = NodeUtil.newJsonObject();
 
-        addJSONArray(ws1Json, "elements", elements, elementsVersions, time1, true);
+        addJSONArray(ws1Json, "elements", elements, elementsVersions, ws1, time1, true);
         addWorkspaceMetadata( ws1Json, ws1, time1 );
 
-        addJSONArray(ws2Json, "addedElements", addedElements, time2, true);
-        addJSONArray(ws2Json, "movedElements", movedElements, time2, showAll);
+        addJSONArray(ws2Json, "addedElements", addedElements, ws2, time2, true);
+        addJSONArray(ws2Json, "movedElements", movedElements, ws2, time2, showAll);
         // Note: deleteElements should use time1 and not time2, as element was found in ws1
         //       at time1, not ws1 at time2!
-        addJSONArray(ws2Json, "deletedElements", deletedElements, time1, showAll);
-        addJSONArray(ws2Json, "updatedElements", updatedElements, time2, showAll);
-        addJSONArray(ws2Json, "conflictedElements", conflictedElements, time2, showAll);
+        addJSONArray(ws2Json, "deletedElements", deletedElements, ws2, time1, showAll);
+        addJSONArray(ws2Json, "updatedElements", updatedElements, ws2, time2, showAll);
+        addJSONArray(ws2Json, "conflictedElements", conflictedElements, ws2, time2, showAll);
         addWorkspaceMetadata( ws2Json, ws2, time2);
 
         deltaJson.put( "workspace1", ws1Json );
@@ -614,14 +614,16 @@ public class WorkspaceDiff implements Serializable {
         }
     }
 
-    private boolean addJSONArray(JSONObject jsonObject, String key, Map< String, EmsScriptNode > map, Date dateTime, boolean showAll) throws JSONException {
-            return addJSONArray(jsonObject, key, map, null, dateTime, showAll);
+    private boolean addJSONArray(JSONObject jsonObject, String key, Map< String, EmsScriptNode > map,
+                                 WorkspaceNode ws, Date dateTime, boolean showAll) throws JSONException {
+            return addJSONArray(jsonObject, key, map, null, ws, dateTime, showAll);
     }
 
-    private boolean addJSONArray(JSONObject jsonObject, String key, Map< String, EmsScriptNode > map, Map< String, Version> versions, Date dateTime, boolean showAll) throws JSONException {
+    private boolean addJSONArray(JSONObject jsonObject, String key, Map< String, EmsScriptNode > map, 
+                                 Map< String, Version> versions, WorkspaceNode ws, Date dateTime, boolean showAll) throws JSONException {
         boolean emptyArray = true;
         if (map != null && map.size() > 0) {
-            jsonObject.put( key, convertMapToJSONArray( map, versions, dateTime, showAll ) );
+            jsonObject.put( key, convertMapToJSONArray( map, versions, ws, dateTime, showAll ) );
             emptyArray = false;
         } else {
             // add in the empty array
@@ -673,7 +675,8 @@ public class WorkspaceDiff implements Serializable {
     }
 
 
-    private JSONArray convertMapToJSONArray(Map<String, EmsScriptNode> set, Map<String, Version> versions, Date dateTime, boolean showAll) throws JSONException {
+    private JSONArray convertMapToJSONArray(Map<String, EmsScriptNode> set, Map<String, Version> versions, 
+                                            WorkspaceNode workspace, Date dateTime, boolean showAll) throws JSONException {
         Set<String> filter = null;
         if (!showAll) {
             filter = getFilter();
@@ -708,7 +711,7 @@ public class WorkspaceDiff implements Serializable {
 //                filter.add( "version" );
             }
             JSONObject jsonObject =
-                    node.toJSONObject( filter, false, dateTime,
+                    node.toJSONObject( filter, false, workspace, dateTime,
                                        includeQualified, version );
             array.put( jsonObject );
         }

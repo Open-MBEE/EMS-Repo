@@ -2717,7 +2717,7 @@ public class ModelPost extends AbstractJavaWebScript {
     }
 
     protected Set< EmsScriptNode > handleUpdate(JSONObject postJson, Status status, 
-                                                WorkspaceNode workspace,
+                                                final WorkspaceNode workspace,
                                                 boolean fix, Map<String, Object> model,
                                                 boolean createCommit) throws Exception {
         JSONObject top = NodeUtil.newJsonObject();
@@ -2747,7 +2747,7 @@ public class ModelPost extends AbstractJavaWebScript {
                 @Override
                 public void run() throws Exception {
                     for ( EmsScriptNode element : elements ) {
-                        elementsJson.put( element.toJSONObject(null) );
+                        elementsJson.put( element.toJSONObject(workspace, null) );
                     }
                 }
             };

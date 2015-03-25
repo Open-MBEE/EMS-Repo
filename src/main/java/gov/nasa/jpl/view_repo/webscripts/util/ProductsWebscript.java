@@ -127,11 +127,11 @@ public class ProductsWebscript extends AbstractJavaWebScript {
                     if (checkSitePkg) {
                         if (pkgSite != null &&
                             pkgSite.equals(findParentPkgSite(node, workspace, dateTime))) {
-                            productsJson.put( node.toJSONObject( null ) );
+                            productsJson.put( node.toJSONObject( workspace, null ) );
                         }
                     }
                     else {
-                        productsJson.put( node.toJSONObject( null ) );
+                        productsJson.put( node.toJSONObject( workspace, null ) );
                     }
                 }
             }
@@ -209,9 +209,9 @@ public class ProductsWebscript extends AbstractJavaWebScript {
                     elems = NodeUtil.getVersionAtTime( elems, dateTime );
                     for ( EmsScriptNode n : elems ) {
                         if ( simpleJson ) {
-                            productsJson.put( n.toSimpleJSONObject( dateTime ) );
+                            productsJson.put( n.toSimpleJSONObject( workspace,dateTime ) );
                         } else {
-                            productsJson.put( n.toJSONObject( dateTime ) );
+                            productsJson.put( n.toJSONObject( workspace, dateTime ) );
                         }
                     }
                 } else if ( gettingContainedViews ) {
@@ -220,13 +220,13 @@ public class ProductsWebscript extends AbstractJavaWebScript {
                     elems.add( product );
                     for ( EmsScriptNode n : elems ) {
                         if ( simpleJson ) {
-                            productsJson.put( n.toSimpleJSONObject( dateTime ) );
+                            productsJson.put( n.toSimpleJSONObject( workspace, dateTime ) );
                         } else {
-                            productsJson.put( n.toJSONObject( dateTime ) );
+                            productsJson.put( n.toJSONObject( workspace, dateTime ) );
                         }
                     }
                 } else {
-                    productsJson.put( product.toJSONObject( dateTime ) );
+                    productsJson.put( product.toJSONObject( workspace, dateTime ) );
                 }
             } catch ( JSONException e ) {
                 log( LogLevel.ERROR, "Could not create JSON for product",

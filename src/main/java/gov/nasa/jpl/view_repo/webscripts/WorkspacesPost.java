@@ -135,7 +135,7 @@ public class WorkspacesPost extends AbstractJavaWebScript{
         JSONArray jsonArray = new JSONArray();
         if (ws != null) {
             if(checkPermissions(ws, PermissionService.READ)) {
-                jsonArray.put(ws.toJSONObject( null ));
+                jsonArray.put(ws.toJSONObject( ws, null ));
             }
             else {
                 log(LogLevel.WARNING,"No permission to read: "+ ws.getSysmlId(),HttpServletResponse.SC_NOT_FOUND);

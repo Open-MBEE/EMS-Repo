@@ -439,7 +439,7 @@ public class ConfigurationsWebscript extends AbstractJavaWebScript {
                 config.getTargetAssocsNodesByType( "ems:configuredProducts",
                                                    workspace, timestamp );
         for (EmsScriptNode product: products) {
-            productsJson.put( product.toJSONObject(timestamp) );
+            productsJson.put( product.toJSONObject(workspace, timestamp) );
         }
 
         return productsJson;
