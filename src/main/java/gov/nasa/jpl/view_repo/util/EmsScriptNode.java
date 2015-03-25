@@ -115,8 +115,10 @@ public class EmsScriptNode extends ScriptNode implements
 
     public static boolean versionCacheDebugPrint = false;
     
+    // private members to cache qualified names, ids, and site characterizations
     private String qualifiedName = null;
     private String qualifiedId = null;
+    private String siteCharacterizationId = null;
 
     /**
      * A set of content model property names that serve as workspace metadata
@@ -1548,6 +1550,13 @@ public class EmsScriptNode extends ScriptNode implements
         return result;
     }
 
+    
+    /**
+     * Last modified time of a node is the greatest of its last modified or any of its
+     * embedded value specs.
+     * @param dateTime Time to check against
+     * @return
+     */
     public Date getLastModified( Date dateTime ) {
         Set< NodeRef > dependentNodes = new HashSet< NodeRef >();
 
@@ -1754,9 +1763,23 @@ public class EmsScriptNode extends ScriptNode implements
         }
         return getSysmlQPath( false );
     }
+    
+    /**
+     * Returns the closest site characterization to which the element belongs
+     * @return
+     */
+    public String getSiteCharacterizationId() {
+        if (siteCharacterizationId != null) {
+            return siteCharacterizationId;
+        } else {
+            // the following call will get the site characterization if it exists
+            getSysmlQName();
+            return siteCharacterizationId;
+        }
+    }
 
     /**
-     * Gets the SysML qualified name for an object - if not SysML, won't return
+     * Builds the SysML qualified name/id for an object - if not SysML, won't return
      * anything
      *
      * @param isName
@@ -1784,6 +1807,11 @@ public class EmsScriptNode extends ScriptNode implements
             }
             //nameProp = nameProp.endsWith(pkgSuffix) ? nameProp.replace(pkgSuffix, "" ) : nameProp;
             qualifiedName = "/" + nameProp + qualifiedName;
+
+            // stop if we find a site characterization in the path
+            if (owner.hasAspect( "ems:SiteCharacterization" )) {
+                siteCharacterizationId = "site_" + idProp;
+            }
             qualifiedId = "/" + idProp + qualifiedId;
 
             ownerRef = (NodeRef)owner.getProperty( "ems:owner" );
@@ -1807,18 +1835,11 @@ public class EmsScriptNode extends ScriptNode implements
             if (siteNode != null) {
                 qualifiedName = "/" + siteNode.getName() + qualifiedName;
                 qualifiedId = "/" + siteNode.getName() + qualifiedId;
+                if (siteCharacterizationId == null) {
+                    siteCharacterizationId = siteNode.getName();
+                }
             }
         }
-      
-//        if ( owner != null ) {
-//            EmsScriptNode modelNode = owner.getParent();
-//            EmsScriptNode siteNode = modelNode.getParent();
-////            EmsScriptNode siteNode = owner.getSiteNode();
-//            if (siteNode != null) {
-//                qualifiedName = "/" + siteNode.getName() + qualifiedName;
-//                qualifiedId = "/" + siteNode.getName() + qualifiedId;
-//            }
-//        }
 
         if (isName) {
             return qualifiedName;
@@ -1961,35 +1982,48 @@ public class EmsScriptNode extends ScriptNode implements
         return date;
     }
 
+    /**
+     * This method assumes that the node that it's acting on is already found at the correct
+     * time in the correct workspace.
+     * 
+     * Workspace is never needed in this context since there are no node references.
+     * 
+     * @param elementJson           JSON to update with element information
+     * @param filter                List of keys to exclude from the elementJson
+     * @param dateTime              Time of to retrieve information for
+     * @param isIncludeQualified    Toggle to include qualifiedId/Name (since its expensive)
+     * @param version               Deprecated
+     * @throws JSONException
+     */
     protected void addElementJSON( JSONObject elementJson, Set< String > filter,
                                    Date dateTime, boolean isIncludeQualified, 
                                    Version version  ) throws JSONException {
-        EmsScriptNode node = findScriptNodeByName( getSysmlId(), false, getWorkspace(), dateTime );//  findNodeRefByType( getSysmlId(), NodeUtil.SearchType., parentWorkspace, dateTime, findDeleted )getNodeAtAtime( dateTime );
-        if ( node == null || !node.exists() ) return;
+        if ( this == null || !this.exists() ) return;
         // mandatory elements put in directly
-        elementJson.put( Acm.JSON_ID, node.getProperty( Acm.ACM_ID ) );
-        elementJson.put( "creator", node.getProperty( "cm:modifier" ) );
-//        elementJson.put( "modified",
-//                         TimeUtils.toTimestamp( getLastModified( (Date)node.getProperty( "cm:modified" ) ) ) );
+        elementJson.put( Acm.JSON_ID, this.getProperty( Acm.ACM_ID ) );
+        elementJson.put( "creator", this.getProperty( "cm:modifier" ) );
         elementJson.put( Acm.JSON_LAST_MODIFIED,
-                TimeUtils.toTimestamp( node.getLastModified( dateTime) ) );
+                TimeUtils.toTimestamp( this.getLastModified( dateTime) ) );
 
         putInJson( elementJson, Acm.JSON_NAME,
-                   node.getProperty( Acm.ACM_NAME ), filter );
+                   this.getProperty( Acm.ACM_NAME ), filter );
         putInJson( elementJson, Acm.JSON_DOCUMENTATION,
-                   node.getProperty( Acm.ACM_DOCUMENTATION ), filter );
+                   this.getProperty( Acm.ACM_DOCUMENTATION ), filter );
         if (isIncludeQualified) {
             if ( filter == null || filter.isEmpty() || filter.contains( "qualifiedName" ) ) {
-                putInJson( elementJson, "qualifiedName", node.getSysmlQName(), filter );
+                putInJson( elementJson, "qualifiedName", this.getSysmlQName(), filter );
             }
             if ( filter == null || filter.isEmpty() || filter.contains( "qualifiedId" ) ) {
-                putInJson( elementJson, "qualifiedId", node.getSysmlQId(), filter );
+                putInJson( elementJson, "qualifiedId", this.getSysmlQId(), filter );
+            }
+            if (filter == null || filter.isEmpty() || filter.contains( "siteCharacterizationId" )) {
+                putInJson( elementJson, "siteCharacterizationId", this.getSiteCharacterizationId(), filter);
             }
         }
-        //addEditableJson( elementJson );
         if ( filter == null || filter.size() == 0 || filter.contains( "owner" ) ) {
 
-            EmsScriptNode owner = node.getOwningParent(dateTime);
+            // not passing in dateTime since sysml id is immutable
+            EmsScriptNode owner = this.getOwningParent(null);
 
             String ownerId = null;
             Object owernIdObj = null;
@@ -2005,37 +2039,6 @@ public class EmsScriptNode extends ScriptNode implements
             putInJson( elementJson, "owner", owernIdObj, filter );
         }
 
-        // Add version information for reverting.
-        if ( version != null ) {
-            EmsScriptNode vNode = new EmsScriptNode( version.getVersionedNodeRef(),
-                                                     getServices(), getResponse() );
-
-            // for reverting need to keep track of noderef and versionLabel
-//            if ( filter == null || filter.isEmpty() || filter.contains( "id" ) ) {
-                elementJson.put( "id", vNode.getId() );
-//            }
-//            if ( filter == null || filter.isEmpty() || filter.contains( "version" ) ) {
-                elementJson.put( "version", version.getVersionLabel() );
-//            }
-        } else {
-//            // If the passed-in version is null, then use the current version
-//            // and existing id. The "id" and "version" must be explicit in the
-//            // filter to be added.
-//            if ( filter != null && !filter.isEmpty() ) {
-//                if ( filter.contains( "id" ) ) {
-//                    elementJson.put( "id", getId() );
-//                }
-//                if ( filter.contains( "version" ) ) {
-//                    Version v = getCurrentVersion();
-//                    if ( v != null ) {
-//                        String label = v.getVersionLabel();
-//                        if ( label != null ) {
-//                            elementJson.put( "version", label );
-//                        }
-//                    }
-//                }
-//            }
-        }
     }
 
     public enum SpecEnum  {
@@ -2125,10 +2128,13 @@ public class EmsScriptNode extends ScriptNode implements
         }
     };
 
+    
     private void addSpecializationJSON( JSONObject json, Set< String > filter,
                                         Date dateTime ) throws JSONException {
         addSpecializationJSON( json, filter, dateTime, false );
     }
+    
+    
     private void addSpecializationJSON( JSONObject json, Set< String > filter,
                                         Date dateTime, boolean justTheType ) throws JSONException {
         String typeName = getTypeName();
@@ -2147,125 +2153,125 @@ public class EmsScriptNode extends ScriptNode implements
             // reflection is too slow?
             String cappedAspectName =
                     Utils.capitalize( aspectQname.getLocalName() );
-            EmsScriptNode node = getNodeAtAtime( dateTime );
+//            EmsScriptNode node = getNodeAtAtime( dateTime );
             SpecEnum aspect = aspect2Key.get( cappedAspectName );
             if (aspect == null) {// || node == null || !node.scriptNodeExists() ) {
 
             } else {
                 switch (aspect) {
                     case Association:
-                        addAssociationJSON( json, node, filter, dateTime );
+                        addAssociationJSON( json, this, filter, dateTime );
                         break;
                     case Binding:
-                        addBindingJSON( json, node, filter, dateTime );
+                        addBindingJSON( json, this, filter, dateTime );
                         break;
                     case Characterizes:
-                        addCharacterizesJSON( json, node, filter, dateTime );
+                        addCharacterizesJSON( json, this, filter, dateTime );
                         break;
                     case Conform:
-                        addConformJSON( json, node, filter, dateTime );
+                        addConformJSON( json, this, filter, dateTime );
                         break;
                     case Connector:
-                        addConnectorJSON( json, node, filter, dateTime );
+                        addConnectorJSON( json, this, filter, dateTime );
                         break;
                     case Constraint:
-                        addConstraintJSON( json, node, filter, dateTime );
+                        addConstraintJSON( json, this, filter, dateTime );
                         break;
                     case Dependency:
-                        addDependencyJSON( json, node, filter, dateTime );
+                        addDependencyJSON( json, this, filter, dateTime );
                         break;
                     case DirectedRelationship:
-                        addDirectedRelationshipJSON( json, node, filter, dateTime );
+                        addDirectedRelationshipJSON( json, this, filter, dateTime );
                         break;
                     case Duration:
-                        addDurationJSON( json, node, filter, dateTime );
+                        addDurationJSON( json, this, filter, dateTime );
                         break;
                     case DurationInterval:
-                        addDurationIntervalJSON( json, node, filter, dateTime );
+                        addDurationIntervalJSON( json, this, filter, dateTime );
                         break;
                     case ElementValue:
-                        addElementValueJSON( json, node, filter, dateTime );
+                        addElementValueJSON( json, this, filter, dateTime );
                         break;
                     case LiteralSet:
-                        addLiteralSetJSON( json, node, filter, dateTime );
+                        addLiteralSetJSON( json, this, filter, dateTime );
                         break;
                     case Expose:
-                        addExposeJSON( json, node, filter, dateTime );
+                        addExposeJSON( json, this, filter, dateTime );
                         break;
                     case Expression:
-                        addExpressionJSON( json, node, filter, dateTime );
+                        addExpressionJSON( json, this, filter, dateTime );
                         break;
                     case Generalization:
-                        addGeneralizationJSON( json, node, filter, dateTime );
+                        addGeneralizationJSON( json, this, filter, dateTime );
                         break;
                     case InstanceSpecification:
-                        addInstanceSpecificationJSON( json, node, filter, dateTime );
+                        addInstanceSpecificationJSON( json, this, filter, dateTime );
                         break;
                     case InstanceValue:
-                        addInstanceValueJSON( json, node, filter, dateTime );
+                        addInstanceValueJSON( json, this, filter, dateTime );
                         break;
                     case Interval:
-                        addIntervalJSON( json, node, filter, dateTime );
+                        addIntervalJSON( json, this, filter, dateTime );
                         break;
                     case LiteralBoolean:
-                        addLiteralBooleanJSON( json, node, filter, dateTime );
+                        addLiteralBooleanJSON( json, this, filter, dateTime );
                         break;
                     case LiteralInteger:
-                        addLiteralIntegerJSON( json, node, filter, dateTime );
+                        addLiteralIntegerJSON( json, this, filter, dateTime );
                         break;
                     case LiteralNull:
-                        addLiteralNullJSON( json, node, filter, dateTime );
+                        addLiteralNullJSON( json, this, filter, dateTime );
                         break;
                     case LiteralReal:
-                        addLiteralRealJSON( json, node, filter, dateTime );
+                        addLiteralRealJSON( json, this, filter, dateTime );
                         break;
                     case LiteralString:
-                        addLiteralStringJSON( json, node, filter, dateTime );
+                        addLiteralStringJSON( json, this, filter, dateTime );
                         break;
                     case LiteralUnlimitedNatural:
-                        addLiteralUnlimitedNaturalJSON( json, node, filter, dateTime );
+                        addLiteralUnlimitedNaturalJSON( json, this, filter, dateTime );
                         break;
                     case MagicDrawData:
-                        addMagicDrawDataJSON( json, node, filter, dateTime );
+                        addMagicDrawDataJSON( json, this, filter, dateTime );
                         break;
                     case OpaqueExpression:
-                        addOpaqueExpressionJSON( json, node, filter, dateTime );
+                        addOpaqueExpressionJSON( json, this, filter, dateTime );
                         break;
                     case Operation:
-                        addOperationJSON( json, node, filter, dateTime );
+                        addOperationJSON( json, this, filter, dateTime );
                         break;
                     case Package:
-                        addPackageJSON( json, node, filter, dateTime );
+                        addPackageJSON( json, this, filter, dateTime );
                         break;
                     case Parameter:
-                        addParameterJSON( json, node, filter, dateTime );
+                        addParameterJSON( json, this, filter, dateTime );
                         break;
                     case Product:
-                        addProductJSON( json, node, filter, dateTime );
+                        addProductJSON( json, this, filter, dateTime );
                         break;
                     case Property:
-                        addPropertyJSON( json, node, filter, dateTime );
+                        addPropertyJSON( json, this, filter, dateTime );
                         break;
                     case StringExpression:
-                        addStringExpressionJSON( json, node, filter, dateTime );
+                        addStringExpressionJSON( json, this, filter, dateTime );
                         break;
                     case Succession:
-                        addSuccessionJSON( json, node, filter, dateTime );
+                        addSuccessionJSON( json, this, filter, dateTime );
                         break;
                     case TimeExpression:
-                        addTimeExpressionJSON( json, node, filter, dateTime );
+                        addTimeExpressionJSON( json, this, filter, dateTime );
                         break;
                     case TimeInterval:
-                        addTimeIntervalJSON( json, node, filter, dateTime );
+                        addTimeIntervalJSON( json, this, filter, dateTime );
                         break;
                     case ValueSpecification:
-                        addValueSpecificationJSON( json, node, filter, dateTime );
+                        addValueSpecificationJSON( json, this, filter, dateTime );
                         break;
                     case View:
-                        addViewJSON( json, node, filter, dateTime );
+                        addViewJSON( json, this, filter, dateTime );
                         break;
                     case Viewpoint:
-                        addViewpointJSON( json, node, filter, dateTime );
+                        addViewpointJSON( json, this, filter, dateTime );
                         break;
                     default:
 

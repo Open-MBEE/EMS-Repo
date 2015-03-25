@@ -189,7 +189,6 @@ public class ActionUtil {
                                                Status status, StringBuffer response,
                                                boolean generateName) {
         // to make sure no permission issues, run as admin
-        String originalUser = NodeUtil.getUserName();
         AuthenticationUtil.setRunAsUser( "admin" );
 
         EmsScriptNode jobPkgNode = contextFolder.childByNamePath("Jobs");
@@ -243,10 +242,10 @@ public class ActionUtil {
         jobPkgNode.getOrSetCachedVersion();
 
         // set the owner to original user say they can modify
-        jobNode.setOwner( originalUser );
+        jobNode.setOwner( AuthenticationUtil.getFullyAuthenticatedUser() );
 
         // make sure we're running back as the originalUser
-        AuthenticationUtil.setRunAsUser( originalUser );
+        AuthenticationUtil.setRunAsUser( AuthenticationUtil.getFullyAuthenticatedUser() );
         
         return jobNode;
     }

@@ -43,6 +43,7 @@ import java.util.Map;
 import javax.servlet.http.HttpServletResponse;
 
 import org.alfresco.repo.model.Repository;
+import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.site.SiteInfo;
@@ -133,6 +134,7 @@ public class SiteGet extends AbstractJavaWebScript {
         NodeRef parentRef;
         NodeRef siteRef;
 
+        // TODO: Check to see if we need to filter our the sites based on the user
         List<SiteInfo> sites = services.getSiteService().listSites(null);
 
         // Create json array of info for each site in the workspace:

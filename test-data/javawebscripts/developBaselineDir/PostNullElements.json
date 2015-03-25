@@ -20,8 +20,8 @@
         "editable": true,
         "name": "propertyMissing",
         "owner": "holding_bin_no_site_no_project",
-        "qualifiedId": "/no_site/no_project/holding_bin_no_site_no_project/propertyMissing",
-        "qualifiedName": "/no_site/no_project/holding_bin/propertyMissing",
+        "qualifiedId": "/no_site/no_site_no_project/holding_bin_no_site_no_project/propertyMissing",
+        "qualifiedName": "/no_site/no_site_no_project/holding_bin/propertyMissing",
         "specialization": {
             "isDerived": false,
             "isSlot": false,

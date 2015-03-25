@@ -4,8 +4,8 @@
     "editable": true,
     "name": "300",
     "owner": "holding_bin_no_site_no_project",
-    "qualifiedId": "/no_site/no_project/holding_bin_no_site_no_project/x",
-    "qualifiedName": "/no_site/no_project/holding_bin/300",
+    "qualifiedId": "/no_site/no_site_no_project/holding_bin_no_site_no_project/x",
+    "qualifiedName": "/no_site/no_site_no_project/holding_bin/300",
     "specialization": {
         "isDerived": false,
         "isSlot": false,
