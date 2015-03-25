@@ -2861,6 +2861,8 @@ public class ModelPost extends AbstractJavaWebScript {
             // Special case for when the site is not specified in the URL:
             if (siteName.equals( NO_SITE_ID )) {
                 mySiteNode = createSite(siteName, workspace);
+                // need to make sure this site is writable by everyone
+                mySiteNode.setPermission( "SiteCollaborator", "GROUP_EVERYONE" );
             }
 
             if (mySiteNode == null || !mySiteNode.exists()) {
