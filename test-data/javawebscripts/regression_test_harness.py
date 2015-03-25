@@ -505,9 +505,32 @@ common_filters,
 ["test","workspaces","develop", "develop2"]
 ],
         
-# This test case depends on the previous two
+# This test case depends on test 160 thats sets gv1
 [
 225,
+"PostToWorkspaceForWs1Change",
+"Post element to workspace1 so that we dont detect it in the branch workspace.  Changes 303",
+create_curl_cmd(type="POST",data="modified303.json",base_url=BASE_URL_WS,
+                post_type="elements",branch="$gv1/"),
+True, 
+common_filters,
+["test","workspaces","develop", "develop2"]
+],
+        
+[
+226,
+"GetElement303",
+"Get element 303",
+create_curl_cmd(type="GET",data="elements/303",base_url=BASE_URL_WS,
+                branch="$gv5/"),
+True, 
+common_filters+['"MMS_','MMS_'],
+["test","workspaces","develop"]
+],
+        
+# This test case depends on the previous two
+[
+227,
 "CompareWorkspacesWithBranchTime",
 "Compare workspaces",
 create_curl_cmd(type="GET",base_url=SERVICE_URL,
@@ -519,7 +542,7 @@ common_filters+['"id"','"qualifiedId"'],
         
 # This test case depends on previous ones
 [
-226,
+228,
 "PostToWorkspace3",
 "Post element z to workspace",
 create_curl_cmd(type="POST",data="z.json",base_url=BASE_URL_WS,
@@ -531,7 +554,7 @@ common_filters,
         
 # This test case depends on previous ones
 [
-227,
+229,
 "CreateWorkspaceWithBranchTime2",
 "Create workspace with a branch time using the current time for the branch time",
 create_curl_cmd(type="POST",base_url=BASE_URL_WS,
@@ -546,7 +569,7 @@ set_wsid_to_gv6
         
 # This test case depends on the previous ones
 [
-228,
+230,
 "CompareWorkspacesWithBranchTimes",
 "Compare workspaces both which have a branch time and with a modified element on the common parent",
 create_curl_cmd(type="GET",base_url=SERVICE_URL,
@@ -557,7 +580,7 @@ common_filters+['"id"','"qualifiedId"'],
 ],
         
 [
-229,
+231,
 "CreateWorkspaceAgain1",
 "Create workspace for another diff test",
 create_curl_cmd(type="POST",base_url=BASE_URL_WS,
@@ -571,7 +594,7 @@ set_wsid_to_gv1
 ],
         
 [
-230,
+232,
 "CreateWorkspaceAgain2",
 "Create workspace for another diff test",
 create_curl_cmd(type="POST",base_url=BASE_URL_WS,
@@ -586,7 +609,7 @@ set_wsid_to_gv2
         
 # This is to test CMED-533.  Where we post the same elements to two different workspaces and diff.
 [
-231,
+233,
 "PostToWorkspaceG1ForCMED533",
 "Post elements to workspace wsG1 for testing CMED-533",
 create_curl_cmd(type="POST",data="elementsForBothWorkspaces.json",base_url=BASE_URL_WS,
@@ -598,7 +621,7 @@ common_filters,
         
 # This test case depends on test 234
 [
-232,
+234,
 "PostToWorkspaceG1",
 "Post element to workspace wsG1",
 create_curl_cmd(type="POST",data="x.json",base_url=BASE_URL_WS,
@@ -612,7 +635,7 @@ set_read_to_gv3
 ],
 
 [
-233,
+235,
 "PostToMaster",
 "Post element to master for a later diff",
 create_curl_cmd(type="POST",data="y.json",base_url=BASE_URL_WS,
@@ -624,7 +647,7 @@ common_filters,
         
 # This is to test CMED-533.  Where we post the same elements to two different workspaces and diff.
 [
-234,
+236,
 "PostToWorkspaceG2ForCMED533",
 "Post elements to workspace wsG2 for testing CMED-533",
 create_curl_cmd(type="POST",data="elementsForBothWorkspaces.json",base_url=BASE_URL_WS,
@@ -636,7 +659,7 @@ common_filters,
         
 # This test case depends on test 235
 [
-235,
+237,
 "PostToWorkspaceG2",
 "Post element to workspace wsG2",
 create_curl_cmd(type="POST",data="z.json",base_url=BASE_URL_WS,
@@ -651,7 +674,7 @@ set_read_to_gv4
         
 # This test case depends on test 234 and 235
 [
-236,
+238,
 "CompareWorkspacesG1G2",
 "Compare workspaces wsG1 and wsG2 with timestamps",
 create_curl_cmd(type="GET",base_url=SERVICE_URL,
