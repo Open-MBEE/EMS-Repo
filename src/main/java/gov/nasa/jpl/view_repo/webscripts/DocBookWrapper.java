@@ -304,12 +304,21 @@ public class DocBookWrapper {
 	public void saveDocBookToRepo(EmsScriptNode snapshotFolder, Date timestamp) throws Exception{
 		ServiceRegistry services = this.snapshotNode.getServices();
 		try{
-			ArrayList<NodeRef> nodeRefs = NodeUtil.findNodeRefsByType( this.snapshotName + "_docbook", "@cm\\:content:\"", services );
+			ArrayList<NodeRef> nodeRefs = NodeUtil.findNodeRefsByType( this.snapshotName + "_docbook.xml", "@cm\\:content:\"", services );
 			if (nodeRefs != null && nodeRefs.size() == 1) {
-				new EmsScriptNode(nodeRefs.get(0), services).remove();
+				EmsScriptNode nodePrev = new EmsScriptNode(nodeRefs.get( 0 ), services, new StringBuffer());
+				if(nodePrev != null){ 
+					try{
+						nodePrev.remove();
+					}
+					catch(Exception ex){
+						System.out.println(String.format("problem removing previous docbook node. %s", ex.getMessage()));
+						ex.printStackTrace();
+					}
+				}
 			}
 
-			EmsScriptNode node = snapshotFolder.createNode(this.snapshotName + "_docbook", "cm:content");
+			EmsScriptNode node = snapshotFolder.createNode(this.snapshotName + "_docbook.xml", "cm:content");
 			ActionUtil.saveStringToFile(node, "application/docbook+xml", services, this.getContent());
 			if(this.snapshotNode.createOrUpdateAspect("view2:docbook")){
 				this.snapshotNode.createOrUpdateProperty("view2:docbookNode", node.getNodeRef());

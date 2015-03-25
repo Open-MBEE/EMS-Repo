@@ -158,9 +158,6 @@ public class SnapshotArtifactsGenerationActionExecuter  extends ActionExecuterAb
 	        		try{
 	        			snapshot = snapshotService.generatePDF(snapshotId, workspace, siteName);
 	        			response.append(snapshotService.getResponse().toString());
-	        			
-	        			
-	        			snapshotService.setPdfStatus(snapshotNode, "Error");
 	        		}
 	        		catch(Exception ex){
 	        			status.setCode(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
@@ -192,11 +189,11 @@ public class SnapshotArtifactsGenerationActionExecuter  extends ActionExecuterAb
 	        	response.append("\n\n");
 //	        }
 	        // Send off notification email
-	        String subject = "Snapshot Generation " + jobStatus;
-	        EmsScriptNode logNode = ActionUtil.saveLogToFile(jobNode, "text/plain", services, response.toString());
-	        String msg = buildEmailMessage(snapshot, logNode);
-    	    ActionUtil.sendEmailToModifier(jobNode, msg, subject, services);
-    	    if (logger.isDebugEnabled()) logger.debug("Completed snapshot artifact(s) generation.");
+//	        String subject = "Snapshot Generation " + jobStatus;
+//	        EmsScriptNode logNode = ActionUtil.saveLogToFile(jobNode, "text/plain", services, response.toString());
+//	        String msg = buildEmailMessage(snapshot, logNode);
+//    	    ActionUtil.sendEmailToModifier(jobNode, msg, subject, services);
+//    	    if (logger.isDebugEnabled()) logger.debug("Completed snapshot artifact(s) generation.");
         }
         catch(Exception ex){
         	try{

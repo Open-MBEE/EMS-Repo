@@ -1,7 +1,5 @@
 package gov.nasa.jpl.view_repo.webscripts;
 
-import java.util.ArrayList;
-
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
@@ -72,12 +70,24 @@ public class HtmlTable {
 		//looking for table tbody
 		Elements tbody = table.select(" > tbody");
 		if(tbody == null || tbody.size()==0){
+			if(!this.hasHeader){
+				this.headerRows = table.select("table > tr").first().select("tr");
+				this.headerRowCount = this.headerRows.size();
+				this.hasHeader = true;
+				table.select("table > tr").first().remove();
+			}
 			this.bodyRows = table.select("table > tr");
 			this.bodyRowCount = this.bodyRows.size();
 			curMax = getColumnMax(this.bodyRows);
 			if(max < curMax) max = curMax;
 		}
 		else{
+			if(!this.hasHeader){
+				this.headerRows = tbody.select(" > tr").first().select("tr");
+				this.headerRowCount = this.headerRows.size();
+				this.hasHeader = true;
+				tbody.select(" > tr").first().remove();
+			}
 			this.bodyRows = tbody.select(" > tr");
 			this.bodyRowCount = this.bodyRows.size();
 			curMax = getColumnMax(this.bodyRows);
@@ -100,16 +110,14 @@ public class HtmlTable {
 		if(rspan != null && !rspan.isEmpty()) rowspan = Integer.parseInt(rspan);
 		if(cspan != null && !cspan.isEmpty()) colspan = Integer.parseInt(cspan);
 		
-		int startColTemp = this.getStartCol(row, col, rowspan, colspan, tablePart);
-		if(startColTemp > startCol) startCol = startColTemp;
+		startCol = this.getStartCol(row, col, rowspan, colspan, tablePart);
 		
-		if(startCol >= this.colCount) return "";
+		if(startCol > this.colCount) return "";
 		
 		if(rowspan > 1 || colspan > 1){
 			sb.append("<entry");
 			
 			if(rowspan > 1){
-//				int endRow = row + rowspan;
 				sb.append(String.format(" morerows=\"%d\"", rowspan-1));
 			}
 			
@@ -127,6 +135,7 @@ public class HtmlTable {
 		
 		return sb.toString();
 	}
+	
 	
 	private String generateColSpec(int count){
     	StringBuffer sb = new StringBuffer();
@@ -162,6 +171,7 @@ public class HtmlTable {
 		return sb.toString();
 	}
 
+	
 	private String generateFooter(){
 		if(!this.hasFooter) return "";
 		
@@ -215,7 +225,7 @@ public class HtmlTable {
 			sb.append("<row>");
 			if(cells != null && cells.size() > 0){
 				for(int col = 0; col < cells.size(); col++){
-					sb.append(buildElementEntry(0, col, startCol, cells.get(col), TablePart.HEADER));
+					sb.append(buildElementEntry(0, col, startCol, cells.get(col), TablePart.BODY));
 				}
 			}
 			sb.append("</row>");
@@ -223,6 +233,7 @@ public class HtmlTable {
 		sb.append("</uthead>");
 		return sb.toString();
 	}
+	
 	
 	private int getColumnMax(Elements TRs){
 		int max=0;
@@ -251,8 +262,11 @@ public class HtmlTable {
 	public int getHeaderRowCount(){return headerRowCount;}
 
 	private int getPrevStartCol(int row, int col, TablePart tablePart){
-		int startCol = 0;
+		int startCol = 1;
 		int markedRow[] = null;
+		
+		row++;
+		col++;
 		
 		switch(tablePart){
 		case BODY:
@@ -269,9 +283,10 @@ public class HtmlTable {
 			break;
 		}
 		
-		for(int i=col; i < markedRow.length; i++){
+		for(int i=col; i <= markedRow.length; i++){
+			if(i >= markedRow.length) return markedRow.length;
 			if(markedRow[i]==0){
-				startCol = i+1;
+				startCol = i;
 				break;
 			}
 		}
@@ -280,80 +295,34 @@ public class HtmlTable {
 	
 	private int getStartCol(int row, int col, int rowspan, int colspan, TablePart tablePart){
 		int startCol = getPrevStartCol(row, col, tablePart);
-		boolean isSet = false;
+		int moreRows = (rowspan > 0) ? rowspan-1 : 0;
+		int namest = startCol;
+		int nameend = startCol + ((colspan > 0) ? colspan-1 : 0);
+		// header had used body's 1st row
+		if(!this.hasHeader && tablePart==TablePart.BODY) row++;
 		
-		if(rowspan < 2) rowspan = 1;
-		if(colspan < 2) colspan = 1;
-		
-		int rowEnd = (rowspan > 1) ? row + rowspan -1 : row + 1;
-		int colEnd = (colspan > 1) ? col + colspan : col + 1;
-//		for(int i = row; i < rowEnd; i++){
-//			for(int j = col; j < this.colCount; j++){
-//				switch(tablePart){
-//				case HEADER:
-//					if(i < headerRowCount && j < colCount){
-//						if(header[i][j] == 0 && !isSet){
-//							startCol = j+1;
-//							isSet = true;
-//							header[i][j] = 1;
-//						}
-//						if(j < colEnd) header[i][j] = 1;
-//					}
-//					break;
-//				case BODY:
-//					if(i < bodyRowCount && j < colCount){
-//						if(body[i][j] == 0 && !isSet){
-//							startCol = j+1;
-//							isSet = true;
-//							body[i][j] = 1;
-//						}
-//						if(j < colEnd) body[i][j] = 1;
-//					}
-//					break;
-//				case FOOTER:
-//					if(i < footerRowCount && j < colCount){
-//						if(footer[i][j] == 0 && !isSet){
-//							startCol = j+1;
-//							isSet = true;
-//							footer[i][j] = 1;
-//						}
-//						if(j < colEnd) footer[i][j] = 1;
-//					}
-//					break;
-//				}
-//			}
-//		}
-		for(int i = 0; i < rowspan; i++){
-			for(int j = 0; j < colspan; j++){
+		for(int i=moreRows+row+1; i > row; i--){
+			for(int j=nameend; j >= namest; j--){
 				switch(tablePart){
 				case HEADER:
-					if(i < headerRowCount && j < colCount){
-						if(header[row+i][col+j] == 0 && !isSet){
-							if(startCol < col+j+1) startCol = col+j+1;
-							isSet = true;
-							header[row+i][col+j] = 1;
+					if(i <= headerRowCount && j <= colCount){
+						if(header[i][j] == 0){
+							header[i][j] = 1;
 						}
-						if(j < colEnd) header[row+i][col+j] = 1;
 					}
 					break;
 				case BODY:
-					if(i < bodyRowCount && j < colCount){
-						if(body[row+i][col+j] == 0 && !isSet){
-							if(startCol < col+j+1) startCol = col+j+1;
-							isSet = true;
-							body[row+i][col+j] = 1;
+					if(i <= bodyRowCount && j <= colCount){
+						if(body[i][j] == 0){
+							body[i][j] = 1;
 						}
-						if(j < colEnd) body[row+i][col+j] = 1;
 					}
 					break;
 				case FOOTER:
-					if(i < footerRowCount && j < colCount){
-						if(footer[row+i][col+j] == 0 && !isSet){
-							if(startCol < col+j+1) startCol = col+j+1;
-							isSet = true;
-							footer[row+i][col+j] = 1;
+					if(i <= footerRowCount && j <= colCount){
+						if(footer[i][j] == 0){
+							footer[i][j] = 1;
 						}
-						if(j < colEnd) footer[row+i][col+j] = 1;
 					}
 					break;
 				}
@@ -361,6 +330,7 @@ public class HtmlTable {
 		}
 		return startCol;
 	}
+
 
 	public String getTitle(){
 		if(this.title == null || this.title.isEmpty()) return "";
@@ -398,9 +368,9 @@ public class HtmlTable {
 	public boolean hasFooter() { return this.hasFooter; }
 	
 	public void init(){
-		header = new int[headerRowCount][colCount];
-		body = new int[bodyRowCount][colCount];
-		footer = new int[footerRowCount][colCount];
+		header = new int[headerRowCount+1][colCount+1];
+		body = new int[bodyRowCount+1][colCount+1];
+		footer = new int[footerRowCount+1][colCount+1];
 		bodyRowspanCount = new int[bodyRowCount][colCount];
 		footerRowspanCount = new int[footerRowCount][colCount];
 		headerRowspanCount = new int[headerRowCount][colCount];
@@ -424,6 +394,7 @@ public class HtmlTable {
 	 * keeps tab on HTML table rowspan so we can accommodate any discrepancies later
 	 */
 	private void tracksRowspanCount(int rowspan, int row, int col, TablePart tablePart){
+		if(rowspan < 1) rowspan = 1;
 		switch(tablePart){
 		case BODY:
 			this.bodyRowspanCount[row][col] = rowspan;
