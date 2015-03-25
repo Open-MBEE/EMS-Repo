@@ -846,7 +846,7 @@ public class WorkspaceNode extends EmsScriptNode {
     }
 
     @Override
-    public JSONObject toJSONObject( Date dateTime ) throws JSONException {
+    public JSONObject toJSONObject( WorkspaceNode ws, Date dateTime ) throws JSONException {
         JSONObject json = new JSONObject();
 
         addWorkspaceNamesAndIds(json, this, services, false );
