@@ -952,7 +952,9 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
                 break;  // break no matter what b/c we have reached the project node
             }
 
-            if (siteParent.isWorkspaceTop()) {
+            // siteParent could be null because the reified relationships may not have been
+            // created properly (for old models)
+            if (siteParent == null || siteParent.isWorkspaceTop()) {
                 break;
             }
 
