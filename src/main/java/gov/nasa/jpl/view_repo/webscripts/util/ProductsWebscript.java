@@ -127,11 +127,11 @@ public class ProductsWebscript extends AbstractJavaWebScript {
                     if (checkSitePkg) {
                         if (pkgSite != null &&
                             pkgSite.equals(findParentPkgSite(node, workspace, dateTime))) {
-                            productsJson.put( node.toJSONObject( workspace, null ) );
+                            productsJson.put( node.toJSONObject( workspace, dateTime ) );
                         }
                     }
                     else {
-                        productsJson.put( node.toJSONObject( workspace, null ) );
+                        productsJson.put( node.toJSONObject( workspace, dateTime ) );
                     }
                 }
             }

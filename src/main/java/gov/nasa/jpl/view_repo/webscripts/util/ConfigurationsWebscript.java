@@ -431,6 +431,17 @@ public class ConfigurationsWebscript extends AbstractJavaWebScript {
         return snapshotJson;
     }
 
+    /**
+     * Necessary for backwards compatibility with old tags and snapshots in Bender 2.0 release.
+     * Since associations were still used then. Associations have all since been migrated to using
+     * NodeRefs
+     * 
+     * @param config
+     * @param workspace
+     * @param timestamp
+     * @return
+     * @throws JSONException
+     */
     public JSONArray getProducts(EmsScriptNode config, WorkspaceNode workspace,
                                  Date timestamp) throws JSONException {
         JSONArray productsJson = new JSONArray();

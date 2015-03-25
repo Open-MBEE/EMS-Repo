@@ -1482,7 +1482,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
 			}
 			else{
 				try {
-					JSONObject jsObj = nameNode.toJSONObject(workspace, null);
+					JSONObject jsObj = nameNode.toJSONObject(workspace, timestamp);
 					if(jsObj == null){
 						log(LogLevel.WARNING, "JSONObject is null");
 						element.before(transcluded);
@@ -1550,7 +1550,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
 			}
 
 			try {
-				JSONObject jsObj = nameNode.toJSONObject(workspace, null);
+				JSONObject jsObj = nameNode.toJSONObject(workspace, timestamp);
 				if(jsObj == null){
 					log(LogLevel.WARNING, "JSONObject is null");
 					element.before(transcluded);
@@ -1616,7 +1616,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
 			}
 			else{
 				try {
-					JSONObject jsObj = nameNode.toJSONObject(workspace, null);
+					JSONObject jsObj = nameNode.toJSONObject(workspace, timestamp);
 					if(jsObj == null){
 						log(LogLevel.WARNING, "JSONObject is null");
 						element.before(transcluded);
