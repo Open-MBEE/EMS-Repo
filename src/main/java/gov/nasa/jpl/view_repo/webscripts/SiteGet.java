@@ -134,7 +134,8 @@ public class SiteGet extends AbstractJavaWebScript {
         NodeRef parentRef;
         NodeRef siteRef;
 
-        List<SiteInfo> sites = services.getSiteService().listSites(AuthenticationUtil.getFullyAuthenticatedUser());
+        // TODO: Check to see if we need to filter our the sites based on the user
+        List<SiteInfo> sites = services.getSiteService().listSites(null);
 
         // Create json array of info for each site in the workspace:
         //	Note: currently every workspace should contain every site created
