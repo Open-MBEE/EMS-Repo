@@ -735,24 +735,27 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
     }
 
     public Collection< EmsScriptNode > getPropertyWithTypeName( Object context, String specifier ) {
-        if ( specifier != null && context instanceof EmsScriptNode ) {
+        ArrayList< EmsScriptNode > nodes = new ArrayList< EmsScriptNode >();
+        if ( context instanceof Collection ) {
+            Collection<?> coll = (Collection<?>)context;
+            for ( Object o : coll ) {
+                nodes.addAll( getPropertyWithTypeName( o , specifier ) );
+            }
+        } else if ( specifier != null && context instanceof EmsScriptNode ) {
             Collection< EmsScriptNode > results = getProperty( context, null );
-            ArrayList< EmsScriptNode > nodes = new ArrayList< EmsScriptNode >();
             if ( results != null ) {
                 for ( EmsScriptNode n : results ) {
-                    Collection< EmsScriptNode > type = getType( n, null );
-                    if ( type.contains( specifier ) ) {//|| type.contains(getElementWithName( context, specifier ))) {
+                    String type = getTypeString( n, null );
+                    if ( specifier.equals( type ) ) {//|| type.contains(getElementWithName( context, specifier ))) {
                         nodes.add( n );
                     }
                 }
             }
-            return nodes;
-        }
-        if ( specifier == null ) {
+        } else if ( specifier == null ) {
             return getProperty(context, null);
         }
         // Remaining case is specifier != nil && !(context instanceof EmsScriptNode)
-        return null;
+        return nodes;
     }
     @Override
     public Collection< EmsScriptNode >
@@ -931,6 +934,18 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
 
     	// Ignoring context b/c it doesnt make sense
 
+        if ( context != null && specifier == null ) {
+            EmsScriptNode node = (EmsScriptNode)context;
+            String typeName = node.getTypeName();
+            EmsScriptNode typeNode =
+                NodeUtil.findScriptNodeById( typeName, null, null, false,
+                                             getServices(), node.getResponse() );
+            if ( typeNode != null ) {
+                System.out.println( "getType("+ node.getSysmlName() + ") = " + typeNode );
+                return Utils.newList( typeNode );
+            }
+        }
+        
     	// Search for all elements with the specified type name:
     	if (specifier instanceof String) {
 //	        StringBuffer response = new StringBuffer();
