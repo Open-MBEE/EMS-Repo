@@ -1,5 +1,5 @@
 {
-    "message": "[WARNING]: Could not find owner with name: holding_bin_no_site_no_project putting 600 into: {type=null, id=no_project_pkg, cm_name=no_project_pkg, sysml_name=no_project, qualified name=/no_project, workspace=null}\n",
+    "message": "[WARNING]: Could not find owner with name: holding_bin_no_site_no_project putting 600 into: {type=null, id=no_site_no_project_pkg, cm_name=no_site_no_project_pkg, sysml_name=no_site_no_project, qualified name=/no_site_no_project, workspace=null}\n",
     "elements": [{
     "qualifiedId": "/europa/123456/300/301",
     "qualifiedName": "/europa/JW_TEST/300/301",
@@ -21,8 +21,8 @@
     "editable": true,
     "creator": "admin"
 }, {
-    "qualifiedId": "/no_site/no_project/holding_bin_no_site_no_project/305",
-    "qualifiedName": "/no_site/no_project/holding_bin/305",
+    "qualifiedId": "/no_site/no_site_no_project/holding_bin_no_site_no_project/305",
+    "qualifiedName": "/no_site/no_site_no_project/holding_bin/305",
     "name": "305",
     "owner": "holding_bin_no_site_no_project",
     "documentation": "no owner",
@@ -61,8 +61,8 @@
     "editable": true,
     "creator": "admin"
 }, {
-    "qualifiedId": "/no_site/no_project/holding_bin_no_site_no_project/x",
-    "qualifiedName": "/no_site/no_project/holding_bin/300",
+    "qualifiedId": "/no_site/no_site_no_project/holding_bin_no_site_no_project/x",
+    "qualifiedName": "/no_site/no_site_no_project/holding_bin/300",
     "name": "300",
     "owner": "holding_bin_no_site_no_project",
     "documentation": "something",
@@ -151,8 +151,8 @@
     "editable": true,
     "creator": "admin"
 }, {
-    "qualifiedId": "/no_site/no_project/holding_bin_no_site_no_project/600",
-    "qualifiedName": "/no_site/no_project/holding_bin/600",
+    "qualifiedId": "/no_site/no_site_no_project/holding_bin_no_site_no_project/600",
+    "qualifiedName": "/no_site/no_site_no_project/holding_bin/600",
     "name": "600",
     "owner": "holding_bin_no_site_no_project",
     "documentation": "element values",
@@ -178,8 +178,8 @@
     "editable": true,
     "creator": "admin"
 }, {
-    "qualifiedId": "/no_site/no_project/holding_bin_no_site_no_project/6666",
-    "qualifiedName": "/no_site/no_project/holding_bin/6666_name",
+    "qualifiedId": "/no_site/no_site_no_project/holding_bin_no_site_no_project/6666",
+    "qualifiedName": "/no_site/no_site_no_project/holding_bin/6666_name",
     "name": "6666_name",
     "owner": "holding_bin_no_site_no_project",
     "documentation": "",

@@ -3,8 +3,8 @@
         "creator": "admin",
         "editable": true,
         "owner": "holding_bin_no_site_no_project",
-        "qualifiedId": "/no_site/no_project/holding_bin_no_site_no_project/54321",
-        "qualifiedName": "/no_site/no_project/holding_bin/null",
+        "qualifiedId": "/no_site/no_site_no_project/holding_bin_no_site_no_project/54321",
+        "qualifiedName": "/no_site/no_site_no_project/holding_bin/null",
         "specialization": {
             "contents": null,
             "displayedElements": [

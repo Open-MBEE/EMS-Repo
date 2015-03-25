@@ -524,10 +524,13 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
         return siteNode;
     }
 
-    public String getProjectId( WebScriptRequest req ) {
+    public String getProjectId( WebScriptRequest req, String siteName ) {
         String projectId = req.getServiceMatch().getTemplateVars().get(PROJECT_ID);
         if ( projectId == null || projectId.length() <= 0 ) {
-            projectId = NO_PROJECT_ID;
+            if (siteName == null) {
+                siteName = NO_SITE_ID;
+            }
+            projectId = siteName + "_" + NO_PROJECT_ID;
         }
         return projectId;
     }
