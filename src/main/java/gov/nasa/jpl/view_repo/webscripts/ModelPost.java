@@ -2001,7 +2001,7 @@ public class ModelPost extends AbstractJavaWebScript {
                 // Determine the parent package:
                 // Note: will do this everytime, even if the site package node already existed, as the parent site
                 //       could have changed with this post
-                EmsScriptNode pkgSiteParentNode = findParentPkgSite(nodeToUpdate, workspace);
+                EmsScriptNode pkgSiteParentNode = findParentPkgSite(nodeToUpdate, workspace, null);
 
                 // Add the children/parent properties:
                 if (pkgSiteParentNode != null && pkgSiteNode != null) {
@@ -2033,7 +2033,7 @@ public class ModelPost extends AbstractJavaWebScript {
                             
                             child = childSite.getPropertyElement( Acm.ACM_SITE_PACKAGE );
                             if (child != null) {
-                                childNewParent = findParentPkgSite(child, workspace);
+                                childNewParent = findParentPkgSite(child, workspace, null);
                                 
                                 if (childNewParent != null && childNewParent.equals( pkgSiteNode )) {
                                     //  Add to the this site package properties:
