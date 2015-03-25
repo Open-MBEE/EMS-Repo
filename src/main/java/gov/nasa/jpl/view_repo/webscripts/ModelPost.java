@@ -65,12 +65,6 @@ import javax.servlet.http.HttpServletResponse;
 import kexpparser.KExpParser;
 //import k.frontend.Frontend;
 
-
-
-
-
-
-
 import org.alfresco.repo.model.Repository;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
@@ -252,35 +246,47 @@ public class ModelPost extends AbstractJavaWebScript {
         
     }
     
+    /**
+     * Utility to save off the commit, then send deltas. Send deltas is tied to the projectId,
+     * so MD knows how to filter for it.
+     * @param targetWS
+     * @param elements
+     * @param start
+     * @param end
+     * @throws JSONException
+     */
     private void sendDeltasAndCommit(WorkspaceNode targetWS,  TreeSet<EmsScriptNode> elements,
                                      long start, long end) throws JSONException {
+        JSONObject deltaJson = wsDiff.toJSONObject( new Date(start), new Date(end) );
         
+        // commit is run as admin user already
+        String msg = "model post";
+        String body = deltaJson != null ? NodeUtil.jsonToString(deltaJson) : "{\"model post had no diff\"}";
+        timerCommit = Timer.startTimer(timerCommit, timeEvents);
+        CommitUtil.commit(targetWS, body, msg, runWithoutTransactions, 
+                          services, new StringBuffer());
+        Timer.stopTimer(timerCommit, "!!!!! updateOrCreateElement(): ws metadata time", timeEvents);
+
+
         // FIXME: Need to split elements by project Id - since they won't always be in same project
-        //      CommitUtil.commitAndStartAction( targetWS, wsDiff, start, end, elements.first().getProjectId(), status, true );
-        
-        NodeRef commitRef = CommitUtil.commit(null, targetWS, "", runWithoutTransactions, services, new StringBuffer() );
-        
         String projectId = "";
         if (elements.size() > 0) {
+            // make sure the following are run as admin user, it's possible that the
+            // workspace doesn't have the project and user doesn't have read permissions on
+            // the parent workspace (at that level)
+            AuthenticationUtil.setRunAsUser( "admin" );
             projectId = elements.first().getProjectId();
-        }
+            AuthenticationUtil.setRunAsUser( AuthenticationUtil.getFullyAuthenticatedUser() );
+       }
         String wsId = "master";
         if (targetWS != null) {
             wsId = targetWS.getId();
         }
 
-        JSONObject deltaJson = wsDiff.toJSONObject( new Date(start), new Date(end) );
-
         // FIXME: Need to split by projectId
         if ( !CommitUtil.sendDeltas(deltaJson, wsId, projectId, source) ) {
             logger.warn("send deltas not posted properly");
         }
-
-        CommitUtil.updateCommitNodeRef( commitRef, NodeUtil.jsonToString( deltaJson ), "", services, response );
-
-        timerCommit = Timer.startTimer(timerCommit, timeEvents);
-        
-        Timer.stopTimer(timerCommit, "!!!!! updateOrCreateElement(): ws metadata time", timeEvents);
     }
     
     private void givePercentProgress(boolean isMetaData) {
@@ -575,7 +581,6 @@ public class ModelPost extends AbstractJavaWebScript {
             if ( elementNode == null || (!elementNode.exists() && !elementNode.isDeleted()) ) {
 
                 // Place elements with no owner in a holding_bin_<site>_<project> package:
-                String projectNodeId = ((projectNode == null || projectNode.getSysmlId() == null) ? NO_PROJECT_ID : projectNode.getSysmlId());
                 String siteName;
                 // If posting to a site package:
                 if (sitePackageNode != null) {
@@ -584,7 +589,9 @@ public class ModelPost extends AbstractJavaWebScript {
                 else {
                     siteName = (siteNode == null || siteNode.getName() == null) ? NO_SITE_ID : siteNode.getName();
                 }
-                ownerName = "holding_bin_"+siteName+"_"+projectNodeId;
+                // project node should be renamed with site in name to make it unique
+                String projectNodeId = ((projectNode == null || projectNode.getSysmlId() == null) ? siteName + "_" + NO_PROJECT_ID : projectNode.getSysmlId());
+                ownerName = "holding_bin_"+projectNodeId;
                 createdHoldingBin = true;
             } else {
                 // Parent will be a reified package, which we never delete, so no need to
@@ -796,17 +803,16 @@ public class ModelPost extends AbstractJavaWebScript {
                     if ( projectNode != null ) {
                         ownerId = projectNode.getSysmlId();
                     } else {
+                        String siteName = 
+                                (getSiteInfo() == null ? NO_SITE_ID : getSiteInfo().getShortName() );
                         // If project is null, put it in NO_PROJECT.
-
                         // TODO -- REVIEW -- this probably deserves a warning--we should never get here, right?
-                        ownerId = NO_PROJECT_ID;
+                        ownerId = siteName + "_" + NO_PROJECT_ID;
                         EmsScriptNode noProjectNode = findScriptNodeById( ownerId, workspace, null, false );
                         if ( noProjectNode == null ) {
-                            String siteName =
-                                    (getSiteInfo() == null ? NO_SITE_ID : getSiteInfo().getShortName() );
                             ProjectPost pp = new ProjectPost( repository, services );
                             pp.updateOrCreateProject( new JSONObject(),
-                                                      workspace, NO_PROJECT_ID,
+                                                      workspace, ownerId,
                                                       siteName, true, false );
                         }
                     }
@@ -1957,7 +1963,7 @@ public class ModelPost extends AbstractJavaWebScript {
                 // Determine the parent package:
                 // Note: will do this everytime, even if the site package node already existed, as the parent site
                 //       could have changed with this post
-                EmsScriptNode pkgSiteParentNode = findParentPkgSite(nodeToUpdate, workspace);
+                EmsScriptNode pkgSiteParentNode = findParentPkgSite(nodeToUpdate, workspace, null);
 
                 // Add the children/parent properties:
                 if (pkgSiteParentNode != null && pkgSiteNode != null) {
@@ -1989,7 +1995,7 @@ public class ModelPost extends AbstractJavaWebScript {
                             
                             child = childSite.getPropertyElement( Acm.ACM_SITE_PACKAGE );
                             if (child != null) {
-                                childNewParent = findParentPkgSite(child, workspace);
+                                childNewParent = findParentPkgSite(child, workspace, null);
                                 
                                 if (childNewParent != null && childNewParent.equals( pkgSiteNode )) {
                                     //  Add to the this site package properties:
@@ -2504,8 +2510,8 @@ public class ModelPost extends AbstractJavaWebScript {
     protected EmsScriptNode getProjectNodeFromRequest(WebScriptRequest req, boolean createIfNonexistent) {
 
         WorkspaceNode workspace = getWorkspace( req );
-        projectId = getProjectId(req);
         String siteName = getSiteName(req);
+        projectId = getProjectId(req, siteName);
         EmsScriptNode mySiteNode = getSiteNode( siteName, workspace, null, false );
 
         // If the site was not found and site was specified in URL, then return a 404.
@@ -2514,6 +2520,8 @@ public class ModelPost extends AbstractJavaWebScript {
             // Special case for when the site is not specified in the URL:
             if (siteName.equals( NO_SITE_ID )) {
                 mySiteNode = createSite(siteName, workspace);
+                // need to make sure this site is writable by everyone
+                mySiteNode.setPermission( "SiteCollaborator", "GROUP_EVERYONE" );
             }
 
             if (mySiteNode == null || !mySiteNode.exists()) {
@@ -2541,7 +2549,7 @@ public class ModelPost extends AbstractJavaWebScript {
         // If the project was not supplied on the URL, then look for the first project found within
         // the site.  Give a warning if multiple projects are found.  There is a requirement that
         // there should never be more than one project per site on Europa.
-        if (projectId.equals( NO_PROJECT_ID )) {
+        if (projectId.equals( siteName + "_" + NO_PROJECT_ID )) {
 
             Map< String, EmsScriptNode > nodeList = searchForElements(NodeUtil.SearchType.TYPE.prefix,
                                                                     Acm.ACM_PROJECT, false,

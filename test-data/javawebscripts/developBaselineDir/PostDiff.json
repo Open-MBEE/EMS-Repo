@@ -69,7 +69,7 @@
             "creator": "admin",
         }],
         "addedElements": [{
-            "qualifiedName": "/no_site/no_project/holding_bin/null",
+            "qualifiedName": "/no_site/no_site_no_project/holding_bin/null",
             "sysmlid": "newElement",
             "documentation": "x is x",
             "owner": "holding_bin_no_site_no_project",

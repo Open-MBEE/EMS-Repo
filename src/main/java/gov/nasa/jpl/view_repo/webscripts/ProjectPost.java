@@ -95,8 +95,8 @@ public class ProjectPost extends AbstractJavaWebScript {
 
 				// We are now getting the project id form the json object, but leaving the check from the request
 				// for backwards compatibility:
-			    String projectId = projJson.has(Acm.JSON_ID) ? projJson.getString(Acm.JSON_ID) : getProjectId( req );
-			    String siteName = getSiteName( req );
+                String siteName = getSiteName( req );
+			    String projectId = projJson.has(Acm.JSON_ID) ? projJson.getString(Acm.JSON_ID) : getProjectId( req, siteName );
 
 		        boolean delete = getBooleanArg( req, "delete", false );
 		        boolean createSite = getBooleanArg(req, "createSite", false);

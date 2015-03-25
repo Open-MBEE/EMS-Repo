@@ -1779,10 +1779,11 @@ public class EmsScriptNode extends ScriptNode implements
         qualifiedName = "/" + getProperty( "sysml:name" );
         qualifiedId =  "/" + getProperty( "sysml:id" );
 
+        boolean siteCharacterizationFound = false;
         NodeRef ownerRef = (NodeRef)this.getProperty( "ems:owner" );
         EmsScriptNode owner = null;
         // Need to look up based on owners...
-        while ( ownerRef != null ) {
+        while ( ownerRef != null && !siteCharacterizationFound ) {
             owner = new EmsScriptNode( ownerRef, services, response );
             String nameProp = (String)owner.getProperty( "sysml:name" );
             String idProp = (String)owner.getProperty( "sysml:id" );
@@ -1791,41 +1792,41 @@ public class EmsScriptNode extends ScriptNode implements
             }
             //nameProp = nameProp.endsWith(pkgSuffix) ? nameProp.replace(pkgSuffix, "" ) : nameProp;
             qualifiedName = "/" + nameProp + qualifiedName;
+
+            // stop if we find a site characterization in the path
+            if (owner.hasAspect( "ems:SiteCharacterization" )) {
+                siteCharacterizationFound = true;
+                idProp = "site_" + idProp;
+            }
             qualifiedId = "/" + idProp + qualifiedId;
 
             ownerRef = (NodeRef)owner.getProperty( "ems:owner" );
         }
         
-        // Get the site, which is one up from the Models node:
-        // In case the child of the project does not have the owner set to the project,
-        // we will loop until we find the Models node:
-        String ownerName = owner != null ? owner.getName() : null;
-        EmsScriptNode modelNode = owner;
-        while ( owner != null && !ownerName.equals( "Models" )) {
-            owner = owner.getParent();
-            ownerName = owner != null ? owner.getName() : null;
-            if (owner != null) {
-                modelNode = owner;
+        if (siteCharacterizationFound) {
+            // don't need to do anything as the qualified name and id are complete 
+        } else {
+            // Get the site, which is one up from the Models node:
+            // In case the child of the project does not have the owner set to the project,
+            // we will loop until we find the Models node:
+            String ownerName = owner != null ? owner.getName() : null;
+            EmsScriptNode modelNode = owner;
+            while ( owner != null && !ownerName.equals( "Models" )) {
+                owner = owner.getParent();
+                ownerName = owner != null ? owner.getName() : null;
+                if (owner != null) {
+                    modelNode = owner;
+                }
             }
-        }
-        
-        if (modelNode != null) {
-            EmsScriptNode siteNode = modelNode.getParent();
-            if (siteNode != null) {
-                qualifiedName = "/" + siteNode.getName() + qualifiedName;
-                qualifiedId = "/" + siteNode.getName() + qualifiedId;
+            
+            if (modelNode != null) {
+                EmsScriptNode siteNode = modelNode.getParent();
+                if (siteNode != null) {
+                    qualifiedName = "/" + siteNode.getName() + qualifiedName;
+                    qualifiedId = "/" + siteNode.getName() + qualifiedId;
+                }
             }
-        }
-      
-//        if ( owner != null ) {
-//            EmsScriptNode modelNode = owner.getParent();
-//            EmsScriptNode siteNode = modelNode.getParent();
-////            EmsScriptNode siteNode = owner.getSiteNode();
-//            if (siteNode != null) {
-//                qualifiedName = "/" + siteNode.getName() + qualifiedName;
-//                qualifiedId = "/" + siteNode.getName() + qualifiedId;
-//            }
-//        }
+        } // end if siteCharacterizationFound
 
         if (isName) {
             return qualifiedName;

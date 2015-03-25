@@ -31,6 +31,7 @@ package gov.nasa.jpl.view_repo.actions;
 
 import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
+import gov.nasa.jpl.view_repo.util.NodeUtil;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 
 import java.io.BufferedReader;
@@ -42,6 +43,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.action.executer.MailActionExecuter;
+import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.action.Action;
 import org.alfresco.service.cmr.repository.ContentData;
@@ -186,6 +188,9 @@ public class ActionUtil {
                                                String jobName, String jobType,
                                                Status status, StringBuffer response,
                                                boolean generateName) {
+        // to make sure no permission issues, run as admin
+        AuthenticationUtil.setRunAsUser( "admin" );
+
         EmsScriptNode jobPkgNode = contextFolder.childByNamePath("Jobs");
         if (jobPkgNode == null) {
             jobPkgNode = contextFolder.createFolder("Jobs", "cm:folder");
@@ -236,6 +241,12 @@ public class ActionUtil {
         jobNode.getOrSetCachedVersion();
         jobPkgNode.getOrSetCachedVersion();
 
+        // set the owner to original user say they can modify
+        jobNode.setOwner( AuthenticationUtil.getFullyAuthenticatedUser() );
+
+        // make sure we're running back as the originalUser
+        AuthenticationUtil.setRunAsUser( AuthenticationUtil.getFullyAuthenticatedUser() );
+        
         return jobNode;
     }
 
