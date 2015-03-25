@@ -2023,6 +2023,38 @@ public class EmsScriptNode extends ScriptNode implements
             putInJson( elementJson, "owner", owernIdObj, filter );
         }
 
+        // Add version information - can't be used for reverting since things may be in
+        // different workspaces, but informative nonetheless
+        if ( version != null ) {
+            EmsScriptNode vNode = new EmsScriptNode( version.getVersionedNodeRef(),
+                                                     getServices(), getResponse() );
+
+            // for reverting need to keep track of noderef and versionLabel
+//            if ( filter == null || filter.isEmpty() || filter.contains( "id" ) ) {
+                elementJson.put( "id", vNode.getId() );
+//            }
+//            if ( filter == null || filter.isEmpty() || filter.contains( "version" ) ) {
+                elementJson.put( "version", version.getVersionLabel() );
+//            }
+        } else {
+//            // If the passed-in version is null, then use the current version
+//            // and existing id. The "id" and "version" must be explicit in the
+//            // filter to be added.
+//            if ( filter != null && !filter.isEmpty() ) {
+//                if ( filter.contains( "id" ) ) {
+//                    elementJson.put( "id", getId() );
+//                }
+//                if ( filter.contains( "version" ) ) {
+//                    Version v = getCurrentVersion();
+//                    if ( v != null ) {
+//                        String label = v.getVersionLabel();
+//                        if ( label != null ) {
+//                            elementJson.put( "version", label );
+//                        }
+//                    }
+//                }
+//            }
+        }
     }
 
     public enum SpecEnum  {
