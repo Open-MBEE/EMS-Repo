@@ -1,56 +1,60 @@
 {
   "sequence": 32,
   "workspace1": {
-  "qualifiedId": "master",
-  "qualifiedName": "master",
-  "name": "master",
-  "elements": [{
-  "qualifiedId": "/europa/123456/300/301/302/y",
-  "qualifiedName": "/europa/JW_TEST2/300/301/302/null",
-  "owner": "302",
-  "documentation": "y is modified by Collaborator",
-  "sysmlid": "y",
-  "specialization": {
-  "propertyType": null,
-  "isSlot": false,
-  "isDerived": false,
-  "value": [{
-    "valueExpression": null,
-    "string": "the y value",
-    "type": "LiteralString"
-  }],
-  "type": "Property"
-},
-  "editable": true,
-  "version": "1.3",
-  "creator": "Collaborator"
-}, {
-  "qualifiedId": "/europa/123456/300/301/302/y/ychild",
-  "qualifiedName": "/europa/JW_TEST2/300/301/302/null/null",
-  "owner": "y",
-  "documentation": "y child",
-  "sysmlid": "ychild",
-  "specialization": {"type": "Element"},
-  "editable": true,
-  "version": "1.1",
-  "creator": "Collaborator"
-}]
-},
+    "qualifiedId": "master",
+    "qualifiedName": "master",
+    "name": "master",
+    "elements": [
+      {
+        "qualifiedId": "/europa/123456/300/301/302/y",
+        "qualifiedName": "/europa/JW_TEST2/300/301/302/null",
+        "sysmlid": "y",
+        "documentation": "y is modified by Collaborator",
+        "owner": "302",
+        "specialization": {
+          "propertyType": null,
+          "isDerived": false,
+          "isSlot": false,
+          "value": [{
+            "valueExpression": null,
+            "string": "the y value",
+            "type": "LiteralString"
+          }],
+          "type": "Property"
+        },
+        "editable": true,
+        "creator": "Collaborator",
+      },
+      {
+        "qualifiedId": "/europa/123456/300/301/302/y/ychild",
+        "qualifiedName": "/europa/JW_TEST2/300/301/302/null/null",
+        "sysmlid": "ychild",
+        "documentation": "y child",
+        "owner": "y",
+        "specialization": {"type": "Element"},
+        "editable": true,
+        "creator": "Collaborator",
+      }
+    ]
+  },
   "workspace2": {
-  "qualifiedId": "master",
-  "deletedElements": [{
-  "sysmlid": "y",
-  "creator": "Collaborator",
-}, {
-  "sysmlid": "ychild",
-  "creator": "Collaborator",
-}],
-  "addedElements": [],
-  "conflictedElements": [],
-  "updatedElements": [],
-  "qualifiedName": "master",
-  "name": "master",
-  "movedElements": []
-}
+    "qualifiedId": "master",
+    "deletedElements": [
+      {
+        "sysmlid": "y",
+        "creator": "Collaborator",
+      },
+      {
+        "sysmlid": "ychild",
+        "creator": "Collaborator",
+      }
+    ],
+    "addedElements": [],
+    "conflictedElements": [],
+    "updatedElements": [],
+    "qualifiedName": "master",
+    "name": "master",
+    "movedElements": []
+  }
 }
 200

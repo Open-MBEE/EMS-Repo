@@ -115,8 +115,10 @@ public class EmsScriptNode extends ScriptNode implements
 
     public static boolean versionCacheDebugPrint = false;
     
+    // private members to cache qualified names, ids, and site characterizations
     private String qualifiedName = null;
     private String qualifiedId = null;
+    private String siteCharacterizationId = null;
 
     /**
      * A set of content model property names that serve as workspace metadata
@@ -1761,9 +1763,23 @@ public class EmsScriptNode extends ScriptNode implements
         }
         return getSysmlQPath( false );
     }
+    
+    /**
+     * Returns the closest site characterization to which the element belongs
+     * @return
+     */
+    public String getSiteCharacterizationId() {
+        if (siteCharacterizationId != null) {
+            return siteCharacterizationId;
+        } else {
+            // the following call will get the site characterization if it exists
+            getSysmlQName();
+            return siteCharacterizationId;
+        }
+    }
 
     /**
-     * Gets the SysML qualified name for an object - if not SysML, won't return
+     * Builds the SysML qualified name/id for an object - if not SysML, won't return
      * anything
      *
      * @param isName
@@ -1779,11 +1795,10 @@ public class EmsScriptNode extends ScriptNode implements
         qualifiedName = "/" + getProperty( "sysml:name" );
         qualifiedId =  "/" + getProperty( "sysml:id" );
 
-        boolean siteCharacterizationFound = false;
         NodeRef ownerRef = (NodeRef)this.getProperty( "ems:owner" );
         EmsScriptNode owner = null;
         // Need to look up based on owners...
-        while ( ownerRef != null && !siteCharacterizationFound ) {
+        while ( ownerRef != null ) {
             owner = new EmsScriptNode( ownerRef, services, response );
             String nameProp = (String)owner.getProperty( "sysml:name" );
             String idProp = (String)owner.getProperty( "sysml:id" );
@@ -1795,38 +1810,36 @@ public class EmsScriptNode extends ScriptNode implements
 
             // stop if we find a site characterization in the path
             if (owner.hasAspect( "ems:SiteCharacterization" )) {
-                siteCharacterizationFound = true;
-                idProp = "site_" + idProp;
+                siteCharacterizationId = "site_" + idProp;
             }
             qualifiedId = "/" + idProp + qualifiedId;
 
             ownerRef = (NodeRef)owner.getProperty( "ems:owner" );
         }
         
-        if (siteCharacterizationFound) {
-            // don't need to do anything as the qualified name and id are complete 
-        } else {
-            // Get the site, which is one up from the Models node:
-            // In case the child of the project does not have the owner set to the project,
-            // we will loop until we find the Models node:
-            String ownerName = owner != null ? owner.getName() : null;
-            EmsScriptNode modelNode = owner;
-            while ( owner != null && !ownerName.equals( "Models" )) {
-                owner = owner.getParent();
-                ownerName = owner != null ? owner.getName() : null;
-                if (owner != null) {
-                    modelNode = owner;
+        // Get the site, which is one up from the Models node:
+        // In case the child of the project does not have the owner set to the project,
+        // we will loop until we find the Models node:
+        String ownerName = owner != null ? owner.getName() : null;
+        EmsScriptNode modelNode = owner;
+        while ( owner != null && !ownerName.equals( "Models" )) {
+            owner = owner.getParent();
+            ownerName = owner != null ? owner.getName() : null;
+            if (owner != null) {
+                modelNode = owner;
+            }
+        }
+        
+        if (modelNode != null) {
+            EmsScriptNode siteNode = modelNode.getParent();
+            if (siteNode != null) {
+                qualifiedName = "/" + siteNode.getName() + qualifiedName;
+                qualifiedId = "/" + siteNode.getName() + qualifiedId;
+                if (siteCharacterizationId == null) {
+                    siteCharacterizationId = siteNode.getName();
                 }
             }
-            
-            if (modelNode != null) {
-                EmsScriptNode siteNode = modelNode.getParent();
-                if (siteNode != null) {
-                    qualifiedName = "/" + siteNode.getName() + qualifiedName;
-                    qualifiedId = "/" + siteNode.getName() + qualifiedId;
-                }
-            }
-        } // end if siteCharacterizationFound
+        }
 
         if (isName) {
             return qualifiedName;
@@ -2002,6 +2015,9 @@ public class EmsScriptNode extends ScriptNode implements
             }
             if ( filter == null || filter.isEmpty() || filter.contains( "qualifiedId" ) ) {
                 putInJson( elementJson, "qualifiedId", this.getSysmlQId(), filter );
+            }
+            if (filter == null || filter.isEmpty() || filter.contains( "siteCharacterizationId" )) {
+                putInJson( elementJson, "siteCharacterizationId", this.getSiteCharacterizationId(), filter);
             }
         }
         if ( filter == null || filter.size() == 0 || filter.contains( "owner" ) ) {
