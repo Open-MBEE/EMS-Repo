@@ -984,7 +984,7 @@ public class WorkspaceDiff implements Serializable {
             }
         }
 
-        nodeDiff = new NodeDiff( s1, s2 );
+        nodeDiff = new NodeDiff( s1, s2, timestamp1, timestamp2, ws1, ws2 );
         nodeDiff.addPropertyIdsToIgnore( getIgnoredPropIds() );
         populateMembers();
     }
