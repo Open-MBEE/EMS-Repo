@@ -1811,7 +1811,7 @@ public class ModelPost extends AbstractJavaWebScript {
                 // If its owner is changing, need to bring in the old parent
                 // into the new workspace and remove the old child.  Not bringing
                 // in the corresponding reified package--hope that's okay!  REVIEW
-                EmsScriptNode oldParent = nodeToUpdate.getOwningParent( null );
+                EmsScriptNode oldParent = nodeToUpdate.getOwningParent( null, nodeToUpdate.getWorkspace() );
                 EmsScriptNode newOldParent =
                         workspace.replicateWithParentFolders( oldParent );
                 newOldParent.removeFromPropertyNodeRefs( "ems:ownedChildren",
@@ -2142,7 +2142,7 @@ public class ModelPost extends AbstractJavaWebScript {
                                                                                                          reifiedPkgNodeAll : null;
             // Verify the reified pkg and node have the same site.
             // This is needed b/c of CMED-531 as the same pkg can be in multiple sites:
-            reifiedPkgNode = (reifiedPkgNode != null && reifiedPkgNode.getSiteNode().equals( node.getSiteNode() )) ?
+            reifiedPkgNode = (reifiedPkgNode != null && reifiedPkgNode.getSiteNode(workspace).equals( node.getSiteNode(workspace) )) ?
                                                                                               reifiedPkgNode : null;
 
             if (reifiedPkgNode == null || !reifiedPkgNode.exists()) {

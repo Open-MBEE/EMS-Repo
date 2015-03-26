@@ -139,7 +139,7 @@ public class ConfigurationGenerationActionExecuter extends ActionExecuterAbstrac
                 if ( vRef != null ) siteRef = vRef;
             }
            EmsScriptNode site = new EmsScriptNode(siteRef, services, response);
-           fndSiteName = site.getSiteName();
+           fndSiteName = site.getSiteName(workspace);
         }       
        
         Set<EmsScriptNode> productSet = new HashSet<EmsScriptNode>();

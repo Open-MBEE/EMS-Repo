@@ -149,7 +149,7 @@ public class NodeDiff extends AbstractDiff<NodeRef, Object, String> {
     }
 
     public EmsScriptNode getOwner( EmsScriptNode e ) {
-        EmsScriptNode p = e.getOwningParent( null );
+        EmsScriptNode p = e.getOwningParent( null, e.getWorkspace() );
         return p;//.getNodeRef();
     }
     public EmsScriptNode getOwner( NodeRef t ) {
@@ -644,8 +644,8 @@ public class NodeDiff extends AbstractDiff<NodeRef, Object, String> {
         
         for ( NodeRef e : getAdded() ) {
             EmsScriptNode node = new EmsScriptNode( e, getServices() );
-            if ( node.isOwnedValueSpec() ) {
-                EmsScriptNode owningProp = node.getValueSpecOwner();
+            if ( node.isOwnedValueSpec(node.getWorkspace()) ) {
+                EmsScriptNode owningProp = node.getValueSpecOwner(node.getWorkspace());
                 if (owningProp != null) {
                 // TODO -- REVIEW -- Does the if statement below need to be uncommented?
 //                if ( !getRemoved().contains( owningProp ) ) {
@@ -656,8 +656,8 @@ public class NodeDiff extends AbstractDiff<NodeRef, Object, String> {
         }
         for ( NodeRef e : getUpdated() ) {
             EmsScriptNode node = new EmsScriptNode( e, getServices() );
-            if ( node.isOwnedValueSpec() ) { 
-                EmsScriptNode owningProp = node.getValueSpecOwner();
+            if ( node.isOwnedValueSpec(node.getWorkspace()) ) { 
+                EmsScriptNode owningProp = node.getValueSpecOwner(node.getWorkspace());
                 if (owningProp != null) {
                     valueSpecMap.put( node, owningProp );
                 }
@@ -665,8 +665,8 @@ public class NodeDiff extends AbstractDiff<NodeRef, Object, String> {
         }
         for ( NodeRef e : getRemoved() ) {
             EmsScriptNode node = new EmsScriptNode( e, getServices() );
-            if ( node.isOwnedValueSpec() ) {
-                EmsScriptNode owningProp = node.getValueSpecOwner();
+            if ( node.isOwnedValueSpec(node.getWorkspace()) ) {
+                EmsScriptNode owningProp = node.getValueSpecOwner(node.getWorkspace());
                 if (owningProp != null) {
                     valueSpecMap.put( node, owningProp );
                 }

@@ -926,7 +926,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
         // Note: must walk up using the getOwningParent() b/c getParent() does not work
         //       for versioned nodes.  Note, that getOwningParent() will be null for
         //       the Project node, but we don't need to go farther up than this anyways
-        EmsScriptNode siteParentReifNode = node.getOwningParent(dateTime);
+        EmsScriptNode siteParentReifNode = node.getOwningParent(dateTime, workspace);
         EmsScriptNode siteParent;
         while (siteParentReifNode != null && siteParentReifNode.exists()) {
 
@@ -948,7 +948,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
             String siteParentType = siteParent != null ? siteParent.getTypeShort() : null;
             String siteParentReifType = siteParentReifNode.getTypeShort();
             if (Acm.ACM_PROJECT.equals( siteParentType ) || Acm.ACM_PROJECT.equals( siteParentReifType )) {
-                pkgSiteParentNode = siteParentReifNode.getSiteNode();
+                pkgSiteParentNode = siteParentReifNode.getSiteNode(workspace);
                 break;  // break no matter what b/c we have reached the project node
             }
 
@@ -956,7 +956,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
                 break;
             }
 
-            siteParentReifNode = siteParentReifNode.getOwningParent(dateTime);
+            siteParentReifNode = siteParentReifNode.getOwningParent(dateTime, workspace);
         }
 
         return pkgSiteParentNode;

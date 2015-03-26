@@ -238,7 +238,7 @@ public class MmsModelDelete extends AbstractJavaWebScript {
             for (Entry< String, EmsScriptNode > entry: wsDiff.getDeletedElements().entrySet()) {
                 EmsScriptNode node = entry.getValue();
                 String id = entry.getKey();
-                if ( node.isOwnedValueSpec() ) {
+                if ( node.isOwnedValueSpec(workspace) ) {
                     valueSpecs.add( node );
                     idsToRemove.add( id );
                 }
@@ -307,7 +307,7 @@ public class MmsModelDelete extends AbstractJavaWebScript {
             }
 
             if ( node != null && node.exists() ) {
-                addToWsDiff( node );
+                addToWsDiff( node, workspace );
 
                 deleteRelationships(node, "sysml:relationshipsAsSource", "sysml:relAsSource", workspace);
                 deleteRelationships(node, "sysml:relationshipsAsTarget", "sysml:relAsTarget", workspace);
@@ -327,7 +327,7 @@ public class MmsModelDelete extends AbstractJavaWebScript {
             ArrayList<NodeRef> relRefs = node.getPropertyNodeRefs( propertyName, null, workspace );
             for (NodeRef relRef: relRefs) {
                 EmsScriptNode relNode = new EmsScriptNode(relRef, services, response);
-                addToWsDiff( relNode );
+                addToWsDiff( relNode, workspace );
             }
         }
     }
@@ -372,7 +372,7 @@ public class MmsModelDelete extends AbstractJavaWebScript {
      * Add everything to the commit delete
      * @param node
      */
-    private void addToWsDiff( EmsScriptNode node ) {
+    private void addToWsDiff( EmsScriptNode node, WorkspaceNode workspace ) {
         String sysmlId = node.getSysmlId();
         if (!sysmlId.endsWith( "_pkg" )) {
             if(wsDiff.getElementsVersions() != null)
@@ -384,7 +384,7 @@ public class MmsModelDelete extends AbstractJavaWebScript {
             
             // Remove from the ownedChildren of the owner:
             // Note: added this for when we are deleting embedded value specs that are no longer be used
-            EmsScriptNode parent = node.getOwningParent( null );
+            EmsScriptNode parent = node.getOwningParent( null, workspace );
             if (parent != null && parent.exists()) {
                 parent.removeFromPropertyNodeRefs("ems:ownedChildren", node.getNodeRef() );
             }

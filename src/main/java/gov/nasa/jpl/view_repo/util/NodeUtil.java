@@ -1227,7 +1227,7 @@ public class NodeUtil {
                     }
                 }
                 // Check that it from the desired site if desired:
-                if (siteName != null && !siteName.equals( esn.getSiteName() )) {
+                if (siteName != null && !siteName.equals( esn.getSiteName(workspace) )) {
                     match = false;
                 }
                 if ( !match ) {

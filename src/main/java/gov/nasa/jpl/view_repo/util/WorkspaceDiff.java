@@ -193,7 +193,7 @@ public class WorkspaceDiff implements Serializable {
                     movedElements.put( e.getKey(), node);
                     
                     // Add this new owner to element ids, so it can be added to elements:
-                    EmsScriptNode newOwner = node != null ? node.getOwningParent( null ) : null;
+                    EmsScriptNode newOwner = node != null ? node.getOwningParent( null, getWs1() ) : null;
                     if (newOwner != null) {
                         ids.add( newOwner.getSysmlId() );
                     }
@@ -219,7 +219,7 @@ public class WorkspaceDiff implements Serializable {
         for (NodeRef ref : nodeDiff.getAdded()) {
             if (ref != null) {
                 EmsScriptNode node = new EmsScriptNode(ref, getServices());
-                EmsScriptNode parent = node.getOwningParent( null );
+                EmsScriptNode parent = node.getOwningParent( null, getWs1() );
                 if (parent != null) {
                     ids.add( parent.getSysmlId() );
                 }
@@ -234,7 +234,7 @@ public class WorkspaceDiff implements Serializable {
                     String parentId = id;
                     while ( parent != null && parent.isModelElement() ) {
                         elements.put( parentId, parent );
-                        parent = parent.getOwningParent( null );
+                        parent = parent.getOwningParent( null, getWs1() );
                         parentId = parent.getSysmlId();
                     }
                 }
