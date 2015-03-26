@@ -332,13 +332,16 @@ public class ConfigurationsWebscript extends AbstractJavaWebScript {
                 }
             }
 
-            NodeRef snapshotProductNodeRef = (NodeRef) snapshot.getProperty( "view2:snapshotProduct" );
+            Date dateTime = (Date) snapshot.getProperty("view2:timestamp");
+            NodeRef snapshotProductNodeRef = (NodeRef) snapshot.getNodeRefProperty( "view2:snapshotProduct",
+                                                                                    dateTime, workspace);
+            
+            // TODO doing another search below may be redundant b/c getNodeRefProperty() will handle it
             if ( snapshotProductNodeRef != null ) {
                 // this is the unversioned snapshot, so we need to get the versioned one
                 EmsScriptNode snapshotProduct = new EmsScriptNode(snapshotProductNodeRef, services, response);
                 
                 String id = snapshotProduct.getSysmlId();
-                Date dateTime = (Date) snapshot.getProperty("view2:timestamp");
                 
                 EmsScriptNode versionedSnapshotProduct = NodeUtil.findScriptNodeById( id, workspace, dateTime, true, services, response );
                 if (snapshotProduct.exists()) {

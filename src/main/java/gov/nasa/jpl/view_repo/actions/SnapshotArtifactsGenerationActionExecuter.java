@@ -131,7 +131,8 @@ public class SnapshotArtifactsGenerationActionExecuter  extends ActionExecuterAb
 	            String snapshotName = snapshotNode.getSysmlId();
 	            Date timestamp = (Date)snapshotNode.getProperty("view2:timestamp");
 	
-	            NodeRef viewRef = (NodeRef)snapshotNode.getProperty( "view2:snapshotProduct" );
+	            NodeRef viewRef = (NodeRef)snapshotNode.getNodeRefProperty( "view2:snapshotProduct", dateTime,
+	                                                                        workspace);
     	        if (viewRef == null) {
     	            
     	        }

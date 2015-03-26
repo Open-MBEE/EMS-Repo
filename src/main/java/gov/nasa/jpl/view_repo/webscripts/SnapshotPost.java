@@ -274,7 +274,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
             }
             else{
 	            if (srcProp != null && srcProp.compareTo( "value" ) == 0 ) {
-	                List< NodeRef > nodeRefs = (List< NodeRef >)node.getProperty( Acm.SYSML + srcProp );
+	                List< NodeRef > nodeRefs = (List< NodeRef >)node.getNodeRefProperty( Acm.SYSML + srcProp, timestamp, workspace );
 	                if(nodeRefs == null){
 	                	log(LogLevel.WARNING, String.format("Failed to create DBParagraph! Failed to find values node references for %s.", src));
 	                	return null;
@@ -1031,7 +1031,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
     }
 
     public static EmsScriptNode getHtmlZipNode( EmsScriptNode snapshotNode ) {
-        NodeRef node = (NodeRef)snapshotNode.getProperty( "view2:htmlZipNode" );
+        NodeRef node = (NodeRef)snapshotNode.getNodeRefProperty( "view2:htmlZipNode" );
         if(node == null) return null;
         return new EmsScriptNode( node, snapshotNode.getServices() );
     }
@@ -1041,7 +1041,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
     }
 
     public static EmsScriptNode getPdfNode( EmsScriptNode snapshotNode ) {
-        NodeRef node = (NodeRef)snapshotNode.getProperty( "view2:pdfNode" );
+        NodeRef node = (NodeRef)snapshotNode.getNodeRefProperty( "view2:pdfNode" );
         if(node == null) return null;
         return new EmsScriptNode( node, snapshotNode.getServices() );
     }

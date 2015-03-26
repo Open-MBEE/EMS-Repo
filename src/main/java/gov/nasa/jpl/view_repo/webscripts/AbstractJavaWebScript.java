@@ -813,7 +813,8 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
         EmsScriptNode siteNode = null;
 
         // If it is a package site, get the corresponding package for the site:
-        NodeRef sitePackageRef = (NodeRef) initialSiteNode.getProperty( Acm.ACM_SITE_PACKAGE );
+        NodeRef sitePackageRef = (NodeRef) initialSiteNode.getNodeRefProperty( Acm.ACM_SITE_PACKAGE, null,
+                                                                               workspace);
         if (sitePackageRef != null) {
             sitePackageNode = new EmsScriptNode(sitePackageRef, services);
         }

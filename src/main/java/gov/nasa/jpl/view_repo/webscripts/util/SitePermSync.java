@@ -32,6 +32,7 @@ package gov.nasa.jpl.view_repo.webscripts.util;
 import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
+import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 
 import org.json.JSONArray;
 
@@ -97,14 +98,14 @@ public class SitePermSync extends AbstractJavaWebScript{
     @Override
     protected Map<String, Object> executeImplImpl(WebScriptRequest req, Status status, Cache cache) {
         Map<String, Object> model = new HashMap<String, Object>();
-
+        WorkspaceNode ws = this.getWorkspace( req );
         List<SiteInfo> sites = services.getSiteService().listSites(null);
 
         JSONArray msgs = new JSONArray();
 
         for (SiteInfo siteInfo : sites ) {
             EmsScriptNode siteNode = new EmsScriptNode(siteInfo.getNodeRef(), services, response);
-            NodeRef sitePkgNR = (NodeRef) siteNode.getProperty(Acm.ACM_SITE_PACKAGE);
+            NodeRef sitePkgNR = (NodeRef) siteNode.getNodeRefProperty(Acm.ACM_SITE_PACKAGE, null, ws);
             if (sitePkgNR == null) {
                 msgs.put( "Could not find site package for site: " + siteNode.getName() );
             } else {

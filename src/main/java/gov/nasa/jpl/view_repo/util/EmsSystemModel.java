@@ -594,7 +594,7 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
             } // ends if specifies is null
 
             else {
-                Object prop = node.getProperty( "" + mySpecifier );
+                Object prop = node.getNodeRefProperty( "" + mySpecifier );
 
         		// Attempt to converted to a EmsScriptNode and add to the list
         		// to later return if conversion succeeded:
@@ -975,7 +975,7 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
 
 		    	List<EmsScriptNode> returnList = new ArrayList<EmsScriptNode>();
 				Collection<NodeRef> valueNodes =
-				        (Collection< NodeRef >)node.getProperty(Acm.ACM_VALUE);
+				        (Collection< NodeRef >)node.getNodeRefProperty(Acm.ACM_VALUE);
 				convertToScriptNode(valueNodes, returnList);
 
 	    		return Utils.asList(returnList, Object.class);
@@ -990,7 +990,7 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
 	    		}
 				else {
 
-					Object valueNode = node.getProperty("" + mySpecifier);
+					Object valueNode = node.getNodeRefProperty("" + mySpecifier);
 
 					if (valueNode != null) {
 						return Utils.newList(valueNode);

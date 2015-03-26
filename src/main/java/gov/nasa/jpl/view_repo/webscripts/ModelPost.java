@@ -2074,7 +2074,7 @@ public class ModelPost extends AbstractJavaWebScript {
                 services.getPermissionService().deletePermissions(nodeToUpdate.getNodeRef());
                 nodeToUpdate.setInheritsPermissions( true );
 
-                NodeRef reifiedPkg = (NodeRef) nodeToUpdate.getProperty( "ems:reifiedPkg" );
+                NodeRef reifiedPkg = (NodeRef) nodeToUpdate.getNodeRefProperty( "ems:reifiedPkg", null, workspace );
                 if (reifiedPkg != null) {
                     services.getPermissionService().deletePermissions( reifiedPkg );
                     services.getPermissionService().setInheritParentPermissions( reifiedPkg, true );

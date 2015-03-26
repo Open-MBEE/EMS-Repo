@@ -357,7 +357,7 @@ public class NodeDiff extends AbstractDiff<NodeRef, Object, String> {
         
         // Special case for type b/c it is not a property, and actual based on the
         // aspect applied to the node:
-        return id.equals( Acm.JSON_TYPE ) ? node.getTypeName() : node.getProperty( id );
+        return id.equals( Acm.JSON_TYPE ) ? node.getTypeName() : node.getNodeRefProperty( id );
     }
 
     @Override
@@ -700,7 +700,8 @@ public class NodeDiff extends AbstractDiff<NodeRef, Object, String> {
             for ( String acmType : Acm.TYPES_WITH_VALUESPEC.keySet() ) {
                 if ( owningPropNode.hasOrInheritsAspect( acmType ) ) {
                     for ( String acmProp : Acm.TYPES_WITH_VALUESPEC.get(acmType) ) {
-                        Object propVal = owningPropNode.getProperty( acmProp );
+                        Object propVal = owningPropNode.getNodeRefProperty( acmProp, null, 
+                                                                            owningPropNode.getWorkspace());
                         if ( propVal  != null) {
                             // ArrayList of noderefs:
                             if (propVal instanceof List) {
