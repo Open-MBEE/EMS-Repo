@@ -1904,9 +1904,13 @@ public class SnapshotPost extends AbstractJavaWebScript {
 				log(LogLevel.ERROR, "Missing snapshot formats!", HttpServletResponse.SC_BAD_REQUEST);
 			} else {
 				try{
+					EmsScriptNode snapshotNode = getSnapshotNode(postJson);
+					if(snapshotNode != null){
+						if(SnapshotPost.getPdfStatus(snapshotNode)=="Generating") return null;
+					}
 					jsonObject = handleGenerateArtifacts(postJson, siteNode, status, workspace);
 				}
-				catch(JSONException ex){
+				catch(Exception ex){
 					log(LogLevel.ERROR, "Failed to generate snapshot artifact(s)!");
 					ex.printStackTrace();
 				}
@@ -1969,6 +1973,22 @@ public class SnapshotPost extends AbstractJavaWebScript {
         if ( elem instanceof DBParagraph ) ( (DBParagraph)elem ).setText( s );
     }
     
+    private EmsScriptNode getSnapshotNode(JSONObject postJson) throws Exception{
+    	if (!postJson.has( "id" )) {
+	        throw new Exception("No id found in posted JSON.");
+	    }
+    	
+    	EmsScriptNode node = null;
+    	String id = postJson.getString("id");
+	    // do simple lucene search, since snapshotNode ID is unique
+	    ArrayList<NodeRef> nodeRefs = NodeUtil.findNodeRefsByType( id, "@cm\\:name:\"", services );
+	    if (nodeRefs == null || nodeRefs.size() != 1) {
+	    	throw new Exception("Failed to find snapshot with Id: " + postJson.getString("id"));
+	    }
+	    node = new EmsScriptNode(nodeRefs.get( 0 ), services, response);
+    	return node;
+    }
+    
     /**
      * @param workspace
      * @param postJson
@@ -1977,18 +1997,19 @@ public class SnapshotPost extends AbstractJavaWebScript {
      */
     private void setArtifactsGenerationStatus(JSONObject postJson) throws Exception{
     	try{
-    	    if (!postJson.has( "id" )) {
-    	        throw new Exception("No id found");
-    	    }
-
-    	    String id = postJson.getString("id");
-    	    // do simple lucene search, since snapshotNode ID is unique
-    	    ArrayList<NodeRef> nodeRefs = NodeUtil.findNodeRefsByType( id, "@cm\\:name:\"", services );
-    	    if (nodeRefs == null || nodeRefs.size() != 1) {
-    	    	throw new Exception("Failed to find snapshot with Id: " + postJson.getString("id"));
-    	    }
-    	    EmsScriptNode snapshotNode = new EmsScriptNode(nodeRefs.get( 0 ), services, response);
-
+//    	    if (!postJson.has( "id" )) {
+//    	        throw new Exception("No id found");
+//    	    }
+//
+//    	    String id = postJson.getString("id");
+//    	    // do simple lucene search, since snapshotNode ID is unique
+//    	    ArrayList<NodeRef> nodeRefs = NodeUtil.findNodeRefsByType( id, "@cm\\:name:\"", services );
+//    	    if (nodeRefs == null || nodeRefs.size() != 1) {
+//    	    	throw new Exception("Failed to find snapshot with Id: " + postJson.getString("id"));
+//    	    }
+//    	    EmsScriptNode snapshotNode = new EmsScriptNode(nodeRefs.get( 0 ), services, response);
+    		
+    		EmsScriptNode snapshotNode = getSnapshotNode(postJson);
 			ArrayList<String> formats = getSnapshotFormats(postJson);
 			for(String format:formats){
 				if(format.compareToIgnoreCase("pdf") == 0){

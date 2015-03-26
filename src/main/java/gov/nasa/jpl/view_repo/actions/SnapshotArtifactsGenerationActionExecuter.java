@@ -189,11 +189,11 @@ public class SnapshotArtifactsGenerationActionExecuter  extends ActionExecuterAb
 	        	response.append("\n\n");
 //	        }
 	        // Send off notification email
-//	        String subject = "Snapshot Generation " + jobStatus;
-//	        EmsScriptNode logNode = ActionUtil.saveLogToFile(jobNode, "text/plain", services, response.toString());
-//	        String msg = buildEmailMessage(snapshot, logNode);
-//    	    ActionUtil.sendEmailToModifier(jobNode, msg, subject, services);
-//    	    if (logger.isDebugEnabled()) logger.debug("Completed snapshot artifact(s) generation.");
+	        String subject = "PDF Generation " + jobStatus;
+	        EmsScriptNode logNode = ActionUtil.saveLogToFile(jobNode, "text/plain", services, response.toString());
+	        String msg = buildEmailMessage(snapshot, logNode);
+    	    ActionUtil.sendEmailToModifier(jobNode, msg, subject, services);
+    	    if (logger.isDebugEnabled()) logger.debug("Completed snapshot artifact(s) generation.");
         }
         catch(Exception ex){
         	try{
@@ -218,7 +218,7 @@ public class SnapshotArtifactsGenerationActionExecuter  extends ActionExecuterAb
         	logger.error("Failed to complete snapshot artifact(s) generation!");
         	logger.error(sb.toString());
         	ex.printStackTrace();
-        	ActionUtil.sendEmailToModifier(jobNode, String.format("An unexpected error occurred and your snapshot artifact generation failed.\n%s%s", ex.getMessage(), sb.toString()), "Snapshot Generation Failed", services);
+        	ActionUtil.sendEmailToModifier(jobNode, String.format("An unexpected error occurred and your PDF generation failed.\n%s%s", ex.getMessage(), sb.toString()), "PDF Generation Failed", services);
         	ActionUtil.sendEmailTo("lho@jpl.nasa.gov", "lho@jpl.nasa.gov", 
         			String.format("Server: %s\nSite: %s\nWorkspace: %s\nSnapshot Id: %s\nError: %s%s%s", 
         					new HostnameGet(this.repository, this.services).getAlfrescoUrl(),
@@ -226,7 +226,7 @@ public class SnapshotArtifactsGenerationActionExecuter  extends ActionExecuterAb
         					workspace,
         					snapshotId,
         					ex.getMessage(), sb.toString(), response.toString()), 
-					"Snapshot Generation Failed", services);
+					"PDF Generation Failed", services);
         }
     }
 
