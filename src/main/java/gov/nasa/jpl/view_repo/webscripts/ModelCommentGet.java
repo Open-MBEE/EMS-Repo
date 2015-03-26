@@ -139,7 +139,7 @@ public class ModelCommentGet extends ModelGet {
                 }
             }
 
-            handleElements(dateTime, true);
+            handleElements(workspace, dateTime, true);
 
             return elements;
         } catch (JSONException e) {

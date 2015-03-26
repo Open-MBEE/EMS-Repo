@@ -276,7 +276,7 @@ public class ModelGet extends AbstractJavaWebScript {
                 handleElementHierarchy( modelRootNode, workspace, dateTime, depth, new Long(0) );
             }
 
-            handleElements(dateTime, includeQualified);
+            handleElements(workspace, dateTime, includeQualified);
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -423,12 +423,12 @@ public class ModelGet extends AbstractJavaWebScript {
 	 * Build up the element JSONObject
 	 * @throws JSONException
 	 */
-	protected void handleElements(Date dateTime, boolean includeQualified) throws JSONException {
+	protected void handleElements(WorkspaceNode ws, Date dateTime, boolean includeQualified) throws JSONException {
 		for (String id: elementsFound.keySet()) {
 			EmsScriptNode node = elementsFound.get(id);
 
 			if (checkPermissions(node, PermissionService.READ)){
-                elements.put(node.toJSONObject(dateTime, includeQualified));
+                elements.put(node.toJSONObject(ws, dateTime, includeQualified));
 			} // TODO -- REVIEW -- Warning if no permissions?
 		}
 	}

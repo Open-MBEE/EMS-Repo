@@ -1907,12 +1907,12 @@ public class EmsScriptNode extends ScriptNode implements
      *
      * @return JSONObject serialization of node
      */
-    public JSONObject toJSONObject( Date dateTime ) throws JSONException {
-        return toJSONObject( null, dateTime, true );
+    public JSONObject toJSONObject( WorkspaceNode ws, Date dateTime ) throws JSONException {
+        return toJSONObject( null, ws, dateTime, true );
     }
 
-    public JSONObject toJSONObject( Date dateTime, boolean isIncludeQualified ) throws JSONException {
-        return toJSONObject( null, dateTime, isIncludeQualified );
+    public JSONObject toJSONObject( WorkspaceNode ws, Date dateTime, boolean isIncludeQualified ) throws JSONException {
+        return toJSONObject( null, ws, dateTime, isIncludeQualified );
     }
 
     /**
@@ -1924,9 +1924,9 @@ public class EmsScriptNode extends ScriptNode implements
      *            JSONObject
      * @return JSONObject serialization of node
      */
-    public JSONObject toJSONObject( Set< String > filter, Date dateTime,
+    public JSONObject toJSONObject( Set< String > filter, WorkspaceNode ws, Date dateTime,
                                     boolean isIncludeQualified ) throws JSONException {
-        return toJSONObject( filter, false, dateTime, isIncludeQualified, null );
+        return toJSONObject( filter, false, ws, dateTime, isIncludeQualified, null );
     }
 
     public String nodeRefToSysmlId( NodeRef ref ) throws JSONException {
@@ -2039,6 +2039,38 @@ public class EmsScriptNode extends ScriptNode implements
             putInJson( elementJson, "owner", owernIdObj, filter );
         }
 
+        // Add version information - can't be used for reverting since things may be in
+        // different workspaces, but informative nonetheless
+        if ( version != null ) {
+            EmsScriptNode vNode = new EmsScriptNode( version.getVersionedNodeRef(),
+                                                     getServices(), getResponse() );
+
+            // for reverting need to keep track of noderef and versionLabel
+//            if ( filter == null || filter.isEmpty() || filter.contains( "id" ) ) {
+                elementJson.put( "id", vNode.getId() );
+//            }
+//            if ( filter == null || filter.isEmpty() || filter.contains( "version" ) ) {
+                elementJson.put( "version", version.getVersionLabel() );
+//            }
+        } else {
+//            // If the passed-in version is null, then use the current version
+//            // and existing id. The "id" and "version" must be explicit in the
+//            // filter to be added.
+//            if ( filter != null && !filter.isEmpty() ) {
+//                if ( filter.contains( "id" ) ) {
+//                    elementJson.put( "id", getId() );
+//                }
+//                if ( filter.contains( "version" ) ) {
+//                    Version v = getCurrentVersion();
+//                    if ( v != null ) {
+//                        String label = v.getVersionLabel();
+//                        if ( label != null ) {
+//                            elementJson.put( "version", label );
+//                        }
+//                    }
+//                }
+//            }
+        }
     }
 
     public enum SpecEnum  {
@@ -2130,13 +2162,13 @@ public class EmsScriptNode extends ScriptNode implements
 
     
     private void addSpecializationJSON( JSONObject json, Set< String > filter,
-                                        Date dateTime ) throws JSONException {
-        addSpecializationJSON( json, filter, dateTime, false );
+                                        WorkspaceNode ws, Date dateTime ) throws JSONException {
+        addSpecializationJSON( json, filter, ws, dateTime, false );
     }
     
     
     private void addSpecializationJSON( JSONObject json, Set< String > filter,
-                                        Date dateTime, boolean justTheType ) throws JSONException {
+                                        WorkspaceNode ws, Date dateTime, boolean justTheType ) throws JSONException {
         String typeName = getTypeName();
         if ( typeName == null ) {
             // TODO: error logging
@@ -2153,7 +2185,6 @@ public class EmsScriptNode extends ScriptNode implements
             // reflection is too slow?
             String cappedAspectName =
                     Utils.capitalize( aspectQname.getLocalName() );
-//            EmsScriptNode node = getNodeAtAtime( dateTime );
             SpecEnum aspect = aspect2Key.get( cappedAspectName );
             if (aspect == null) {// || node == null || !node.scriptNodeExists() ) {
 
@@ -2163,7 +2194,7 @@ public class EmsScriptNode extends ScriptNode implements
                         addAssociationJSON( json, this, filter, dateTime );
                         break;
                     case Binding:
-                        addBindingJSON( json, this, filter, dateTime );
+                        addBindingJSON( json, this, filter, ws, dateTime );
                         break;
                     case Characterizes:
                         addCharacterizesJSON( json, this, filter, dateTime );
@@ -2172,10 +2203,10 @@ public class EmsScriptNode extends ScriptNode implements
                         addConformJSON( json, this, filter, dateTime );
                         break;
                     case Connector:
-                        addConnectorJSON( json, this, filter, dateTime );
+                        addConnectorJSON( json, this, filter, ws, dateTime );
                         break;
                     case Constraint:
-                        addConstraintJSON( json, this, filter, dateTime );
+                        addConstraintJSON( json, this, filter, ws, dateTime );
                         break;
                     case Dependency:
                         addDependencyJSON( json, this, filter, dateTime );
@@ -2193,13 +2224,13 @@ public class EmsScriptNode extends ScriptNode implements
                         addElementValueJSON( json, this, filter, dateTime );
                         break;
                     case LiteralSet:
-                        addLiteralSetJSON( json, this, filter, dateTime );
+                        addLiteralSetJSON( json, this, filter, ws, dateTime );
                         break;
                     case Expose:
                         addExposeJSON( json, this, filter, dateTime );
                         break;
                     case Expression:
-                        addExpressionJSON( json, this, filter, dateTime );
+                        addExpressionJSON( json, this, filter, ws, dateTime );
                         break;
                     case Generalization:
                         addGeneralizationJSON( json, this, filter, dateTime );
@@ -2238,7 +2269,7 @@ public class EmsScriptNode extends ScriptNode implements
                         addOpaqueExpressionJSON( json, this, filter, dateTime );
                         break;
                     case Operation:
-                        addOperationJSON( json, this, filter, dateTime );
+                        addOperationJSON( json, this, filter, ws, dateTime );
                         break;
                     case Package:
                         addPackageJSON( json, this, filter, dateTime );
@@ -2250,13 +2281,13 @@ public class EmsScriptNode extends ScriptNode implements
                         addProductJSON( json, this, filter, dateTime );
                         break;
                     case Property:
-                        addPropertyJSON( json, this, filter, dateTime );
+                        addPropertyJSON( json, this, filter, ws, dateTime );
                         break;
                     case StringExpression:
                         addStringExpressionJSON( json, this, filter, dateTime );
                         break;
                     case Succession:
-                        addSuccessionJSON( json, this, filter, dateTime );
+                        addSuccessionJSON( json, this, filter, ws, dateTime );
                         break;
                     case TimeExpression:
                         addTimeExpressionJSON( json, this, filter, dateTime );
@@ -2315,9 +2346,9 @@ public class EmsScriptNode extends ScriptNode implements
      * @throws JSONException
      */
     public JSONObject toJSONObject( Set< String > jsonFilter, boolean isExprOrProp,
-                                    Date dateTime, boolean isIncludeQualified,
+                                    WorkspaceNode ws, Date dateTime, boolean isIncludeQualified,
                                     Version version ) throws JSONException {
-        JSONObject json = toJSONObjectImpl( jsonFilter, isExprOrProp, dateTime,
+        JSONObject json = toJSONObjectImpl( jsonFilter, isExprOrProp, ws, dateTime,
                                             isIncludeQualified, version );
         if ( !isExprOrProp ) addEditableJson( json, jsonFilter );
         return json;
@@ -2327,7 +2358,7 @@ public class EmsScriptNode extends ScriptNode implements
                    hasPermission( PermissionService.WRITE ), jsonFilter );
     }
     public JSONObject toJSONObjectImpl( Set< String > jsonFilter, boolean isExprOrProp,
-                                        Date dateTime, boolean isIncludeQualified,
+                                        WorkspaceNode ws, Date dateTime, boolean isIncludeQualified,
                                         Version version ) throws JSONException {
         if ( Debug.isOn() )
             Debug.outln( "$ $ $ $ toJSONObject(jsonFilter=" + jsonFilter
@@ -2353,7 +2384,7 @@ public class EmsScriptNode extends ScriptNode implements
         
         boolean tryCache = NodeUtil.doJsonCaching && !isExprOrProp;
         if ( !tryCache ) {
-            json = toJSONObject2( jsonFilter, isExprOrProp, dateTime,
+            json = toJSONObject2( jsonFilter, isExprOrProp, ws, dateTime,
                                   isIncludeQualified, version );
             if ( Debug.isOn() )
                 Debug.outln( "not trying cache returning json "
@@ -2416,7 +2447,7 @@ public class EmsScriptNode extends ScriptNode implements
             ++NodeUtil.jsonCacheHits;
         } else {
             // get full json without filtering
-            json = toJSONObject2( null, isExprOrProp, dateTime, true, version );
+            json = toJSONObject2( null, isExprOrProp, ws, dateTime, true, version );
             if ( Debug.isOn() )
                 Debug.outln("json = " + (json==null?"null":json.toString( 4 )));
             if ( tryCache &&
@@ -2497,7 +2528,7 @@ public class EmsScriptNode extends ScriptNode implements
 //        return toJSONObject2( filter, isExprOrProp, dateTime, isIncludeQualified, null );
 //    }
     public JSONObject toJSONObject2( Set< String > filter, boolean isExprOrProp,
-                                     Date dateTime, boolean isIncludeQualified,
+                                     WorkspaceNode ws, Date dateTime, boolean isIncludeQualified,
                                      Version version  ) throws JSONException {
         JSONObject element = NodeUtil.newJsonObject();
         if ( !exists() ) return element;
@@ -2506,10 +2537,10 @@ public class EmsScriptNode extends ScriptNode implements
         Long readTime = System.currentTimeMillis();
         
         if ( isExprOrProp ) {
-            addSpecializationJSON( element, filter, dateTime );
+            addSpecializationJSON( element, filter, ws, dateTime );
         } else {
             addElementJSON( element, filter, dateTime, isIncludeQualified, version );
-            addSpecializationJSON( specializationJSON, filter, dateTime );
+            addSpecializationJSON( specializationJSON, filter, ws, dateTime );
             if ( specializationJSON.length() > 0 ) {
                 element.put( Acm.JSON_SPECIALIZATION, specializationJSON );
             }
@@ -2528,7 +2559,7 @@ public class EmsScriptNode extends ScriptNode implements
         return element;
     }
 
-    public JSONObject toSimpleJSONObject( Date dateTime ) throws JSONException {
+    public JSONObject toSimpleJSONObject( WorkspaceNode ws, Date dateTime ) throws JSONException {
         JSONObject element = new JSONObject();
         element.put( "sysmlid", getSysmlId() );
         if ( dateTime == null ) {
@@ -2537,7 +2568,7 @@ public class EmsScriptNode extends ScriptNode implements
             element.put( "name", getSysmlName( dateTime ) );
         }
         JSONObject specializationJSON = new JSONObject();
-        addSpecializationJSON( specializationJSON, null, dateTime, true );
+        addSpecializationJSON( specializationJSON, null, ws, dateTime, true );
         if ( specializationJSON.length() > 0 ) {
             element.put( Acm.JSON_SPECIALIZATION, specializationJSON );
         }
@@ -4596,14 +4627,22 @@ public class EmsScriptNode extends ScriptNode implements
         return ids;
     }
 
-    private void addVersionToArray( NodeRef nRef, Date dateTime,
+    /**
+     * TODO: make this static since it doesn't depend on the node calling it
+     * @param nRef
+     * @param ws
+     * @param dateTime
+     * @param jsonArray
+     * @throws JSONException
+     */
+    private void addVersionToArray( NodeRef nRef, WorkspaceNode ws, Date dateTime,
                                     JSONArray jsonArray ) throws JSONException {
         EmsScriptNode node = new EmsScriptNode( nRef, getServices(), getResponse() );
         if ( dateTime != null ) {
-            node = node.findScriptNodeByName( node.getSysmlId(), false, node.getWorkspace(), dateTime );
+            node = node.findScriptNodeByName( node.getSysmlId(), false, ws, dateTime );
         }
         if ( node != null && node.exists() ) {
-            jsonArray.put( node.toJSONObject( null, true, dateTime, false, null ) );
+            jsonArray.put( node.toJSONObject( null, true, ws, dateTime, false, null ) );
         }
     }
 
@@ -4614,7 +4653,7 @@ public class EmsScriptNode extends ScriptNode implements
      * @return
      * @throws JSONException
      */
-    private Object addInternalJSON( Object nodeRefs, Date dateTime )
+    private Object addInternalJSON( Object nodeRefs, WorkspaceNode ws, Date dateTime )
                                                              throws JSONException {
         if ( nodeRefs == null ) {
             return null;
@@ -4624,11 +4663,11 @@ public class EmsScriptNode extends ScriptNode implements
             Collection< NodeRef > nodeRefColl = (Collection< NodeRef >)nodeRefs;
             for ( NodeRef nRef : nodeRefColl ) {
                 if (nRef != null) {
-                    addVersionToArray( nRef, dateTime, jsonArray );
+                    addVersionToArray( nRef, ws, dateTime, jsonArray );
                 }
             }
         } else if ( nodeRefs instanceof NodeRef ) {
-            addVersionToArray( (NodeRef)nodeRefs, dateTime, jsonArray );
+            addVersionToArray( (NodeRef)nodeRefs, ws, dateTime, jsonArray );
             return jsonArray.length() > 0 ? jsonArray.get( 0 ) : null;
         }
         return jsonArray;
@@ -4788,24 +4827,24 @@ public class EmsScriptNode extends ScriptNode implements
     protected
             void
             addPropertyJSON( JSONObject json, EmsScriptNode node,
-                             Set< String > filter, Date dateTime )
+                             Set< String > filter, WorkspaceNode ws, Date dateTime )
                                                                   throws JSONException {
         putInJson( json, "isDerived", node.getProperty( "sysml:isDerived" ),
                    filter );
         putInJson( json, "isSlot", node.getProperty( "sysml:isSlot" ), filter );
         putInJson( json,
                    "value",
-                   addInternalJSON( node.getProperty( "sysml:value" ), dateTime ),
+                   addInternalJSON( node.getProperty( "sysml:value" ), ws, dateTime ),
                    filter );
         NodeRef propertyType = (NodeRef) node.getProperty( "sysml:propertyType" );
         putInJson( json, "propertyType", addNodeRefIdJSON(propertyType), filter);
 
         putInJson( json, Acm.JSON_LOWER,
-                   addInternalJSON( node.getProperty(Acm.ACM_LOWER), dateTime ),
+                   addInternalJSON( node.getProperty(Acm.ACM_LOWER), ws, dateTime ),
                    filter );
 
         putInJson( json, Acm.JSON_UPPER,
-                   addInternalJSON( node.getProperty(Acm.ACM_LOWER), dateTime ),
+                   addInternalJSON( node.getProperty(Acm.ACM_LOWER), ws, dateTime ),
                    filter );
     }
 
@@ -4902,28 +4941,28 @@ public class EmsScriptNode extends ScriptNode implements
     }
 
     protected void addLiteralSetJSON( JSONObject json, EmsScriptNode node,
-                                        Set< String > filter, Date dateTime )
+                                        Set< String > filter, WorkspaceNode ws, Date dateTime )
                                                               throws JSONException {
         addValueSpecificationJSON( json, node, filter, dateTime );
 
         putInJson( json, Acm.JSON_SET,
-                   addInternalJSON( node.getProperty(Acm.ACM_SET), dateTime ),
+                   addInternalJSON( node.getProperty(Acm.ACM_SET), ws, dateTime ),
                    filter );
 
         putInJson( json, Acm.JSON_SET_OPERAND,
-                   addInternalJSON( node.getProperty(Acm.ACM_SET_OPERAND), dateTime ),
+                   addInternalJSON( node.getProperty(Acm.ACM_SET_OPERAND), ws, dateTime ),
                    filter );
 
     }
 
 
     protected void addExpressionJSON( JSONObject json, EmsScriptNode node,
-                                      Set< String > filter, Date dateTime )
+                                      Set< String > filter, WorkspaceNode ws, Date dateTime )
                                                           throws JSONException {
         addValueSpecificationJSON( json, node, filter, dateTime );
 
         putInJson( json, "operand",
-                   addInternalJSON( node.getProperty( Acm.ACM_OPERAND ), dateTime ),
+                   addInternalJSON( node.getProperty( Acm.ACM_OPERAND ), ws, dateTime ),
                    filter );
         putInJson( json, "display", getExpressionDisplayString(), filter );
         if ( evaluatingExpressions ) {
@@ -5071,7 +5110,7 @@ public class EmsScriptNode extends ScriptNode implements
     protected
             void
             addOperationJSON( JSONObject json, EmsScriptNode node,
-                              Set< String > filter, Date dateTime )
+                              Set< String > filter, WorkspaceNode ws, Date dateTime )
                                                                    throws JSONException {
         ArrayList< NodeRef > nodeRefs =
                 (ArrayList< NodeRef >)node.getProperty( "sysml:operationParameter" );
@@ -5087,7 +5126,7 @@ public class EmsScriptNode extends ScriptNode implements
         } else {
             Object property = node.getProperty( "sysml:operationExpression" );
             if ( property != null ) {
-                putInJson( json, "expression", addInternalJSON( property, dateTime ),
+                putInJson( json, "expression", addInternalJSON( property, ws, dateTime ),
                            filter );
             }
         }
@@ -5109,7 +5148,7 @@ public class EmsScriptNode extends ScriptNode implements
     protected
             void
             addConstraintJSON( JSONObject json, EmsScriptNode node,
-                               Set< String > filter, Date dateTime )
+                               Set< String > filter, WorkspaceNode ws, Date dateTime )
                                                                     throws JSONException {
         if ( !embeddingExpressionInConstraint  ) {
             NodeRef specNode =
@@ -5119,7 +5158,7 @@ public class EmsScriptNode extends ScriptNode implements
         } else {
             Object property = node.getProperty( "sysml:constraintSpecification" );
             if ( property != null ) {
-              putInJson( json, "specification", addInternalJSON( property, dateTime ),
+              putInJson( json, "specification", addInternalJSON( property, ws, dateTime ),
                          filter );
             }
       }
@@ -5142,7 +5181,7 @@ public class EmsScriptNode extends ScriptNode implements
     }
 
     protected void addConnectorJSON( JSONObject json, EmsScriptNode node,
-                                     Set< String > filter, Date dateTime )
+                                     Set< String > filter, WorkspaceNode ws, Date dateTime )
                                                                    throws JSONException {
 
         addDirectedRelationshipJSON(json, node, filter, dateTime);
@@ -5166,23 +5205,23 @@ public class EmsScriptNode extends ScriptNode implements
         putInJson( json, Acm.JSON_CONNECTOR_TYPE, addNodeRefIdJSON(connectorType), filter);
 
         putInJson( json, Acm.JSON_CONNECTOR_VALUE,
-                   addInternalJSON( node.getProperty(Acm.ACM_CONNECTOR_VALUE), dateTime ),
+                   addInternalJSON( node.getProperty(Acm.ACM_CONNECTOR_VALUE), ws, dateTime ),
                    filter );
 
         putInJson( json, Acm.JSON_TARGET_LOWER,
-                   addInternalJSON( node.getProperty(Acm.ACM_TARGET_LOWER), dateTime ),
+                   addInternalJSON( node.getProperty(Acm.ACM_TARGET_LOWER), ws, dateTime ),
                    filter );
 
         putInJson( json, Acm.JSON_TARGET_UPPER,
-                   addInternalJSON( node.getProperty(Acm.ACM_TARGET_UPPER), dateTime ),
+                   addInternalJSON( node.getProperty(Acm.ACM_TARGET_UPPER), ws, dateTime ),
                    filter );
 
         putInJson( json, Acm.JSON_SOURCE_LOWER,
-                   addInternalJSON( node.getProperty(Acm.ACM_SOURCE_LOWER), dateTime ),
+                   addInternalJSON( node.getProperty(Acm.ACM_SOURCE_LOWER), ws, dateTime ),
                    filter );
 
         putInJson( json, Acm.JSON_SOURCE_UPPER,
-                   addInternalJSON( node.getProperty(Acm.ACM_SOURCE_UPPER), dateTime ),
+                   addInternalJSON( node.getProperty(Acm.ACM_SOURCE_UPPER), ws, dateTime ),
                    filter );
 
     }
@@ -5213,17 +5252,17 @@ public class EmsScriptNode extends ScriptNode implements
     }
 
     protected void addSuccessionJSON( JSONObject json, EmsScriptNode node,
-                                         Set< String > filter, Date dateTime )
+                                         Set< String > filter, WorkspaceNode ws, Date dateTime )
                                                                        throws JSONException {
 
-         addConnectorJSON(json, node, filter, dateTime);
+         addConnectorJSON(json, node, filter, ws, dateTime);
     }
 
     protected void addBindingJSON( JSONObject json, EmsScriptNode node,
-                                      Set< String > filter, Date dateTime )
+                                      Set< String > filter, WorkspaceNode ws, Date dateTime )
                                                                     throws JSONException {
 
-         addConnectorJSON(json, node, filter, dateTime);
+         addConnectorJSON(json, node, filter, ws, dateTime);
     }
 
     /**************************

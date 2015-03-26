@@ -196,7 +196,7 @@ public class MoaProductGet extends AbstractJavaWebScript {
 		}
 
 		if (checkPermissions(product, PermissionService.READ)){
-		    JSONObject object = product.toJSONObject(dateTime);
+		    JSONObject object = product.toJSONObject(null, dateTime);
 		    productsJson = new JSONObject(object, JSONObject.getNames(object));
 
 		    if (object.has(Acm.JSON_VIEW_2_VIEW)) {
@@ -293,7 +293,7 @@ public class MoaProductGet extends AbstractJavaWebScript {
 	    for (String viewId: viewIds) {
 	        EmsScriptNode view = findScriptNodeById(viewId, workspace, dateTime, false);
 	        if (view != null && checkPermissions(view, PermissionService.READ)) {
-        	        JSONObject viewJson = view.toJSONObject(dateTime);
+        	        JSONObject viewJson = view.toJSONObject(null, dateTime);
 
         	        // add any related comments as part of the view
         	        JSONArray commentsJson = new JSONArray();
@@ -302,7 +302,7 @@ public class MoaProductGet extends AbstractJavaWebScript {
                                                          workspace, dateTime );// new ArrayList<EmsScriptNode>();
         	        Collections.sort(commentList, new EmsScriptNode.EmsScriptNodeComparator());
         	        for (EmsScriptNode comment: commentList) {
-        	            commentsJson.put(comment.toJSONObject(dateTime));
+        	            commentsJson.put(comment.toJSONObject(null, dateTime));
         	        }
         	        viewJson.put("comments", commentsJson);
 
@@ -328,7 +328,7 @@ public class MoaProductGet extends AbstractJavaWebScript {
 	    for (String elementId: elementIds) {
 	        EmsScriptNode element = findScriptNodeById(elementId, workspace, dateTime, false);
 	        if (element != null && checkPermissions(element, PermissionService.READ)) {
-	            JSONObject elementJson = element.toJSONObject(dateTime);
+	            JSONObject elementJson = element.toJSONObject(null, dateTime);
 	            elementsJson.put(elementJson);
 	        }
 	    }

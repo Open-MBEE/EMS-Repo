@@ -837,7 +837,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
 	        	throw new Exception("Failed to generate zip artifact!", ex);
 	        }
         }
-        return populateSnapshotProperties( snapshotNode );
+        return populateSnapshotProperties( snapshotNode, workspace );
     }
 
     public EmsScriptNode generateHTML( EmsScriptNode snapshotNode, WorkspaceNode workspace ) throws Exception {
@@ -927,7 +927,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
 	    		throw new Exception("Failed to generate PDF artifact!", ex);
 	        }
         }
-    	return populateSnapshotProperties(snapshotNode);
+    	return populateSnapshotProperties(snapshotNode, workspace);
     }
 
     public EmsScriptNode generatePDF( EmsScriptNode snapshotNode, WorkspaceNode workspace, String siteName ) throws Exception {
@@ -1480,7 +1480,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
 			}
 			else{
 				try {
-					JSONObject jsObj = nameNode.toJSONObject(null);
+					JSONObject jsObj = nameNode.toJSONObject(workspace, timestamp);
 					if(jsObj == null){
 						log(LogLevel.WARNING, "JSONObject is null");
 						element.before(transcluded);
@@ -1548,7 +1548,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
 			}
 
 			try {
-				JSONObject jsObj = nameNode.toJSONObject(null);
+				JSONObject jsObj = nameNode.toJSONObject(workspace, timestamp);
 				if(jsObj == null){
 					log(LogLevel.WARNING, "JSONObject is null");
 					element.before(transcluded);
@@ -1614,7 +1614,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
 			}
 			else{
 				try {
-					JSONObject jsObj = nameNode.toJSONObject(null);
+					JSONObject jsObj = nameNode.toJSONObject(workspace, timestamp);
 					if(jsObj == null){
 						log(LogLevel.WARNING, "JSONObject is null");
 						element.before(transcluded);
@@ -1636,9 +1636,9 @@ public class SnapshotPost extends AbstractJavaWebScript {
 		return document.body().html();
 	}
 
-    private JSONObject populateSnapshotProperties( EmsScriptNode snapshotNode )
+    private JSONObject populateSnapshotProperties( EmsScriptNode snapshotNode, WorkspaceNode workspace )
             throws JSONException {
-        JSONObject snapshoturl = snapshotNode.toJSONObject( null );
+        JSONObject snapshoturl = snapshotNode.toJSONObject( workspace, null );
         if ( hasPdf( snapshotNode ) || hasHtmlZip( snapshotNode ) ) {
         	HostnameGet hostnameGet = new HostnameGet(this.repository, this.services);
         	String contextUrl = hostnameGet.getAlfrescoUrl() + "/alfresco";

@@ -72,34 +72,7 @@ public class WorkspacesMerge extends AbstractJavaWebScript{
                                                                   null );
 
 				wsDiff = new WorkspaceDiff(targetWS, sourceWS, null /*time*/, null /*time*/);
-		/*		// Gotta merge here
-				Map<String, EmsScriptNode> elements = workspaceDiff.getElements();
-				Map<String, EmsScriptNode> addedElements = workspaceDiff.getAddedElements();
-				Map<String, EmsScriptNode> updatedElements = workspaceDiff.getUpdatedElements();
-				Map<String, EmsScriptNode> movedElements = workspaceDiff.getMovedElements();
-				Map<String, EmsScriptNode> deletedElements = workspaceDiff.getDeletedElements();
 
-				//Convert Maps into Sets of just values (EmsScriptNodes).
-
-				Collection <EmsScriptNode> elementCollection = elements.values();
-				Collection <EmsScriptNode> addedCollection = addedElements.values();
-				Collection <EmsScriptNode> updatedCollection = updatedElements.values();
-				Collection <EmsScriptNode> movedCollection = movedElements.values();
-
-
-				// Add the collection into a collection of collections.
-				Collection< Collection<EmsScriptNode> > collections = new ArrayList();
-				collections.add(elementCollection);
-				collections.add(addedCollection);
-				collections.add(updatedCollection);
-				collections.add(movedCollection);
-				//Convert the collection of collections to a collection of nodes.
-
-				Collection<EmsScriptNode> postingNodes = setsToCollection(collections);
-
-				//Post em
-
-				*/
 				//For the nodes here, we delete them from the source
 				Map<String, EmsScriptNode> deletedElements = wsDiff.getDeletedElements();
 				final Collection <EmsScriptNode> deletedCollection = deletedElements.values();
@@ -130,7 +103,6 @@ public class WorkspacesMerge extends AbstractJavaWebScript{
 				// Error here, projectNode isn't 123456, but rather no_project.
 				EmsScriptNode projectNode = instance.getProjectNodeFromRequest(req, true);
 				if (projectNode != null) {
-
 				    final Set< EmsScriptNode > elements =
 	                        instance.createOrUpdateModel( top.getJSONObject("workspace2"), status,
 	                                                      targetWS, sourceWS, true );
@@ -147,7 +119,7 @@ public class WorkspacesMerge extends AbstractJavaWebScript{
                                 // Create JSON object of the elements to return:
                                 JSONArray elementsJson = new JSONArray();
                                 for ( EmsScriptNode element : elements ) {
-                                    elementsJson.put( element.toJSONObject(null) );
+                                    elementsJson.put( element.toJSONObject(targetWS, null) );
                                 }
                            //top.put( "elements", elementsJson );
                             //model.put( "res", NodeUtil.jsonToString( top, 4 ) );

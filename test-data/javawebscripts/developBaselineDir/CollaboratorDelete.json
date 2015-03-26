@@ -24,6 +24,7 @@
         },
         "editable": true,
         "creator": "Collaborator",
+        "version": "1.3"
       },
       {
         "qualifiedId": "/europa/123456/300/301/302/y/ychild",
@@ -34,6 +35,7 @@
         "specialization": {"type": "Element"},
         "editable": true,
         "creator": "Collaborator",
+        "version": "1.1"
       }
     ]
   },
