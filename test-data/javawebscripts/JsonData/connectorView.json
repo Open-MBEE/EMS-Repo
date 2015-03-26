@@ -59,7 +59,9 @@
                       "string":"Connector"}]
             },
             {"type":"ElementValue",
-             "element":"op_connector"}
+             "element":"op_connector"},
+            {"integer":1,
+             "type":"LiteralInteger"}
             ]
         }
       }
@@ -149,19 +151,26 @@
                  "type":"Expression",
                  "operand":[
                      {"type":"ElementValue",
-                      "element":"op_map"},
-                     {"type":"Expression",
-                      "operand":[
-                         {"type":"ElementValue",
-                          "element":"getProperty"},
-                         {"type":"ElementValue",
-                          "element":"c1_param"},
-                         {"type":"LiteralString",
-                          "string":"sourcePath"}
-                      ]
+                      "element":"op_list"},
+                      {"type":"Expression",
+                       "operand":[
+                           {"type":"ElementValue",
+                            "element":"op_map"},
+                           {"type":"Expression",
+                            "operand":[
+                                {"type":"ElementValue",
+                                 "element":"getProperty"},
+                                {"type":"ElementValue",
+                                 "element":"c1_param"},
+                                {"type":"LiteralString",
+                                 "string":"sourcePath"}
+                       ]
                      },
                      {"type":"ElementValue",
-                      "element":"op_name_arg"}]}}
+                      "element":"op_name_arg"},
+                     {"integer":1,
+                      "type":"LiteralInteger"}
+                 ]}]}}
     },
     {
         "sysmlid": "op_targetPath",
@@ -173,19 +182,26 @@
                  "type":"Expression",
                  "operand":[
                      {"type":"ElementValue",
-                      "element":"op_map"},
-                     {"type":"Expression",
-                      "operand":[
-                         {"type":"ElementValue",
-                          "element":"getProperty"},
-                         {"type":"ElementValue",
-                          "element":"c2_param"},
-                         {"type":"LiteralString",
-                          "string":"targetPath"}
-                      ]
+                      "element":"op_list"},
+                      {"type":"Expression",
+                       "operand":[
+                           {"type":"ElementValue",
+                            "element":"op_map"},
+                           {"type":"Expression",
+                            "operand":[
+                                {"type":"ElementValue",
+                                 "element":"getProperty"},
+                                {"type":"ElementValue",
+                                 "element":"c2_param"},
+                                {"type":"LiteralString",
+                                 "string":"targetPath"}
+                       ]
                      },
                      {"type":"ElementValue",
-                      "element":"op_name_arg"}]}}
+                      "element":"op_name_arg"},
+                     {"integer":1,
+                      "type":"LiteralInteger"}
+                 ]}]}}
     },
     {
         "sysmlid": "getValue",
@@ -268,6 +284,15 @@
     {
         "sysmlid": "op_name_arg",
         "name": "Name",
+        "documentation": "",
+        "owner": "123456",
+    "specialization" : {
+        "type": "Operation"
+    }
+    },
+    {
+        "sysmlid": "op_list",
+        "name": "List",
         "documentation": "",
         "owner": "123456",
     "specialization" : {

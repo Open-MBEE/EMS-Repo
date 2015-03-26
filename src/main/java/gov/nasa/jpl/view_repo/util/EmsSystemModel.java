@@ -385,7 +385,9 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
         // TODO -- need to take into account the context!
         NodeRef element = NodeUtil.findNodeRefById( specifier, true, null, null, services, false );
         EmsScriptNode emsSN = new EmsScriptNode( element, services );
-        return Utils.newList( emsSN );
+        ArrayList< EmsScriptNode > list = Utils.newList( emsSN );
+        System.out.println("getElementWithIdentifier(" + context + ", " + specifier + ") = " + list);
+        return list;
     }
 
     @Override
@@ -445,7 +447,9 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
             }
             if ( childNodes.size() > 0 ) return childNodes;
         }
-        return EmsScriptNode.toEmsScriptNodeList( refs, getServices(), response, status );
+        List< EmsScriptNode > list = EmsScriptNode.toEmsScriptNodeList( refs, getServices(), response, status );
+        System.out.println("getElementWithName(" + context + ", " + specifier + ", " + dateTime + ") = " + list);
+        return list;
     }
 
     @Override
@@ -645,6 +649,7 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
                 }
             }
             if ( elements.size() > 0 ) {
+                System.out.println("getProperty(" + context + ", " + specifier + ") = " + elements);
                 return elements;
             }
             
@@ -677,18 +682,22 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
 
         	}
 
+            System.out.println("getProperty(" + context + ", " + specifier + ") = allProperties = " + allProperties);
             return allProperties;
         }
 
         if ( context != null ) {
             // TODO -- error????  Are there any other contexts than an EmsScriptNode that would have a property?
             Debug.error("context is not an EmsScriptNode!  " + context );
+            System.out.println("getProperty(" + context + ", " + specifier + ") = null");
             return null;
         }
 
         // context is null; look for nodes of type Property that match the specifier
         if ( mySpecifier != null ) {
-            return getElementWithName( context, "" + mySpecifier );
+            Collection< EmsScriptNode > e =getElementWithName( context, "" + mySpecifier );
+            System.out.println("getProperty(" + context + ", " + specifier + ") = getElementWithName(" + context + ", " + specifier + ") = " + e);
+            return e;
         }
 
         // context and specifier are both be null
@@ -700,8 +709,10 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
             for ( EmsScriptNode prop : propertyTypes ) {
                 allProperties.addAll( getElementWithType( context, prop ) );
             }
+            System.out.println("getProperty(" + context + ", " + specifier + ") = allProperties2 = " + allProperties);
             return allProperties;
         }
+        System.out.println("getProperty(" + context + ", " + specifier + ") = null2");
         return null;
     }
 
@@ -736,6 +747,7 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
 
     public Collection< EmsScriptNode > getPropertyWithTypeName( Object context, String specifier ) {
         ArrayList< EmsScriptNode > nodes = new ArrayList< EmsScriptNode >();
+        Collection< EmsScriptNode > list;
         if ( context instanceof Collection ) {
             Collection<?> coll = (Collection<?>)context;
             for ( Object o : coll ) {
@@ -752,9 +764,12 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
                 }
             }
         } else if ( specifier == null ) {
-            return getProperty(context, null);
+            list = getProperty(context, null);
+            System.out.println("getPropertyWithTypeName(" + context + ", " + specifier  + ") = " + list);
+            return list;
         }
         // Remaining case is specifier != nil && !(context instanceof EmsScriptNode)
+        System.out.println("getPropertyWithTypeName(" + context + ", " + specifier + ") = " + nodes);
         return nodes;
     }
     @Override

@@ -1,11 +1,14 @@
 package gov.nasa.jpl.view_repo.sysml;
 
 import gov.nasa.jpl.ae.event.Expression;
+import gov.nasa.jpl.mbee.util.ClassUtils;
 import gov.nasa.jpl.mbee.util.CompareUtils;
 import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.TreeSet;
@@ -43,6 +46,55 @@ public class List extends ArrayList< Viewable< EmsScriptNode > > implements sysm
      */
     public List( Collection< ? extends Viewable< EmsScriptNode > > c ) {
         super( c );
+    }
+
+    public < V extends Viewable<EmsScriptNode > > List( String viewOperation,
+                                                        Collection< EmsScriptNode > c ) throws ClassNotFoundException {
+        this( ClassUtils.getClassForName( viewOperation, "toViewJson",
+                                          List.class.getPackage().getName(), false ),
+              c );//classForName( viewOperation ), c );
+    }
+    public < V extends Viewable<EmsScriptNode > > List( Class< V > viewOperation,
+                                                        Collection< EmsScriptNode > c ) {
+        this();
+        if ( Utils.isNullOrEmpty( c ) ) return;
+
+        if ( viewOperation == null ) {
+            viewOperation = (Class< V >)Name.class;
+        }
+        @SuppressWarnings( "unchecked" )
+        Constructor< V > ctor = 
+                (Constructor< V >)ClassUtils.getConstructorForArgs( viewOperation,
+                                          new Object[] {c.iterator().next()} );
+        for (EmsScriptNode obj : c) {
+            if ( obj == null ) continue;  // REVIEW -- add null instead?
+            try {
+                this.add( ctor.newInstance( new Object[]{c} ) );
+            } catch ( InstantiationException e ) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            } catch ( IllegalAccessException e ) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            } catch ( IllegalArgumentException e ) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            } catch ( InvocationTargetException e ) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public < V extends Viewable<EmsScriptNode > >List(String viewOperation,
+                                                      EmsScriptNode... c) {
+        this( ClassUtils.getClassForName( viewOperation, "toViewJson",
+                                          List.class.getPackage().getName(), false ),
+              Utils.arrayAsList(c) );
+    }
+    public < V extends Viewable<EmsScriptNode > >List(Class< V > viewOperation,
+                                                      EmsScriptNode... c) {
+        this( viewOperation, Utils.arrayAsList(c) );
     }
     
     // FIXME java reflection is not smart enough to handle this correctly, 

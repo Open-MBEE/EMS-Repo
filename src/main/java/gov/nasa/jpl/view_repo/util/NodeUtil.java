@@ -806,14 +806,14 @@ public class NodeUtil {
         }
         ResultSet results = null;
         if ( searchService != null ) {
-            System.out.println( "luceneSearch(" + queryPattern + ")" );//resultSetToList( results ) );
+//            System.out.println( "luceneSearch(" + queryPattern + ")" );//resultSetToList( results ) );
 //            results = searchService.query( getStoreRef(),
 //                                           SearchService.LANGUAGE_LUCENE,
 //                                           queryPattern );
             results = searchService.query( getSearchParameters(queryPattern) );
         }
-        System.out.println( "luceneSearch(" + queryPattern + "): returned "
-                + results.length() + " nodes." );
+//        System.out.println( "luceneSearch(" + queryPattern + "): returned "
+//                + results.length() + " nodes." );
         if ( Debug.isOn() ) {
             Debug.outln( "luceneSearch(" + queryPattern + "): returned "
                          + results.length() + " nodes." );//resultSetToList( results ) );
