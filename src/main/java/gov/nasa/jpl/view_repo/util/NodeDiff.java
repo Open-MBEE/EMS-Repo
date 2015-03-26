@@ -8,6 +8,7 @@ import gov.nasa.jpl.mbee.util.Utils;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -32,6 +33,11 @@ import org.alfresco.service.namespace.QName;
  */
 public class NodeDiff extends AbstractDiff<NodeRef, Object, String> {
 
+    private WorkspaceNode ws1;
+    private WorkspaceNode ws2;
+    private Date timestamp1;
+    private Date timestamp2;
+    
     public static class NodeNameComparator implements Comparator<NodeRef> {
         public static final NodeNameComparator instance = new NodeNameComparator();
         @Override
@@ -70,9 +76,13 @@ public class NodeDiff extends AbstractDiff<NodeRef, Object, String> {
         // TODO Auto-generated constructor stub
     }
 
-    public NodeDiff( Set< NodeRef > s1, Set< NodeRef > s2 ) {
+    public NodeDiff( Set< NodeRef > s1, Set< NodeRef > s2, Date timestamp1, Date timestamp2,
+                     WorkspaceNode ws1, WorkspaceNode ws2) {
         super( s1, s2, NodeNameComparator.instance );
-        // TODO Auto-generated constructor stub
+        this.timestamp1 = timestamp1;
+        this.timestamp2 = timestamp2;
+        this.ws1 = ws1;
+        this.ws2 = ws2;
     }
 
     public NodeRef node1, node2;
@@ -352,12 +362,14 @@ public class NodeDiff extends AbstractDiff<NodeRef, Object, String> {
     }
 
     @Override
-    public Object getProperty( NodeRef ref, String id ) {
+    public Object getProperty( NodeRef ref, String id, boolean isSet1 ) {
         EmsScriptNode node = new EmsScriptNode( ref, getServices() );
+        Date timestamp = isSet1 ? timestamp1 : timestamp2;
+        WorkspaceNode ws = isSet1 ? ws1 : ws2;
         
         // Special case for type b/c it is not a property, and actual based on the
         // aspect applied to the node:
-        return id.equals( Acm.JSON_TYPE ) ? node.getTypeName() : node.getProperty( id );
+        return id.equals( Acm.JSON_TYPE ) ? node.getTypeName() : node.getNodeRefProperty( id, timestamp, ws );
     }
 
     @Override
@@ -644,8 +656,8 @@ public class NodeDiff extends AbstractDiff<NodeRef, Object, String> {
         
         for ( NodeRef e : getAdded() ) {
             EmsScriptNode node = new EmsScriptNode( e, getServices() );
-            if ( node.isOwnedValueSpec(node.getWorkspace()) ) {
-                EmsScriptNode owningProp = node.getValueSpecOwner(node.getWorkspace());
+            if ( node.isOwnedValueSpec(timestamp2, ws2) ) {
+                EmsScriptNode owningProp = node.getValueSpecOwner(timestamp2, ws2);
                 if (owningProp != null) {
                 // TODO -- REVIEW -- Does the if statement below need to be uncommented?
 //                if ( !getRemoved().contains( owningProp ) ) {
@@ -656,8 +668,8 @@ public class NodeDiff extends AbstractDiff<NodeRef, Object, String> {
         }
         for ( NodeRef e : getUpdated() ) {
             EmsScriptNode node = new EmsScriptNode( e, getServices() );
-            if ( node.isOwnedValueSpec(node.getWorkspace()) ) { 
-                EmsScriptNode owningProp = node.getValueSpecOwner(node.getWorkspace());
+            if ( node.isOwnedValueSpec(timestamp2, ws2) ) { 
+                EmsScriptNode owningProp = node.getValueSpecOwner(timestamp2, ws2);
                 if (owningProp != null) {
                     valueSpecMap.put( node, owningProp );
                 }
@@ -665,8 +677,8 @@ public class NodeDiff extends AbstractDiff<NodeRef, Object, String> {
         }
         for ( NodeRef e : getRemoved() ) {
             EmsScriptNode node = new EmsScriptNode( e, getServices() );
-            if ( node.isOwnedValueSpec(node.getWorkspace()) ) {
-                EmsScriptNode owningProp = node.getValueSpecOwner(node.getWorkspace());
+            if ( node.isOwnedValueSpec(timestamp2, ws2) ) {
+                EmsScriptNode owningProp = node.getValueSpecOwner(timestamp2, ws2);
                 if (owningProp != null) {
                     valueSpecMap.put( node, owningProp );
                 }
@@ -700,7 +712,8 @@ public class NodeDiff extends AbstractDiff<NodeRef, Object, String> {
             for ( String acmType : Acm.TYPES_WITH_VALUESPEC.keySet() ) {
                 if ( owningPropNode.hasOrInheritsAspect( acmType ) ) {
                     for ( String acmProp : Acm.TYPES_WITH_VALUESPEC.get(acmType) ) {
-                        Object propVal = owningPropNode.getProperty( acmProp );
+                        Object propVal = owningPropNode.getNodeRefProperty( acmProp, null, 
+                                                                            owningPropNode.getWorkspace());
                         if ( propVal  != null) {
                             // ArrayList of noderefs:
                             if (propVal instanceof List) {

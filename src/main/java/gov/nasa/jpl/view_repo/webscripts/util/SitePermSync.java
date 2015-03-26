@@ -32,6 +32,7 @@ package gov.nasa.jpl.view_repo.webscripts.util;
 import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
+import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 
 import org.json.JSONArray;
 
@@ -97,19 +98,19 @@ public class SitePermSync extends AbstractJavaWebScript{
     @Override
     protected Map<String, Object> executeImplImpl(WebScriptRequest req, Status status, Cache cache) {
         Map<String, Object> model = new HashMap<String, Object>();
-
+        WorkspaceNode ws = this.getWorkspace( req );
         List<SiteInfo> sites = services.getSiteService().listSites(null);
 
         JSONArray msgs = new JSONArray();
 
         for (SiteInfo siteInfo : sites ) {
             EmsScriptNode siteNode = new EmsScriptNode(siteInfo.getNodeRef(), services, response);
-            NodeRef sitePkgNR = (NodeRef) siteNode.getProperty(Acm.ACM_SITE_PACKAGE);
+            NodeRef sitePkgNR = (NodeRef) siteNode.getNodeRefProperty(Acm.ACM_SITE_PACKAGE, null, ws);
             if (sitePkgNR == null) {
                 msgs.put( "Could not find site package for site: " + siteNode.getName() );
             } else {
                 EmsScriptNode sitePkg = new EmsScriptNode(sitePkgNR, services, response);
-                updatePermissions(siteInfo, sitePkg);
+                updatePermissions(siteInfo, sitePkg, ws);
             }
         }
 
@@ -132,7 +133,7 @@ public class SitePermSync extends AbstractJavaWebScript{
      * @param siteInfo  Site who's permissions should be copied onto the site package
      * @param sitePkg   Site packge to update permissions for
      */
-    private void updatePermissions(SiteInfo siteInfo, EmsScriptNode sitePkg) {
+    private void updatePermissions(SiteInfo siteInfo, EmsScriptNode sitePkg, WorkspaceNode ws) {
         NodeRef nr = sitePkg.getNodeRef();
 
         // remove any previous permissions then override
@@ -142,7 +143,7 @@ public class SitePermSync extends AbstractJavaWebScript{
         List<SiteMemberInfo> members = services.getSiteService().listMembersInfo( siteInfo.getShortName(), null, null, 0, true );
         for ( SiteMemberInfo authorityObj : members ) {
             sitePkg.setPermission( authorityObj.getMemberRole(), authorityObj.getMemberName() );
-            EmsScriptNode reifiedSitePkg = sitePkg.getReifiedPkg();
+            EmsScriptNode reifiedSitePkg = sitePkg.getReifiedPkg(null, ws);
             if (reifiedSitePkg != null) {
                 reifiedSitePkg.setPermission( authorityObj.getMemberRole(), authorityObj.getMemberName() );
             }

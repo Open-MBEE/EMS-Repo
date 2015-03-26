@@ -1221,7 +1221,7 @@ public class NodeUtil {
                     String acmType =
                             Utils.join( prefix.split( "[\\W]+" ), ":" )
                                  .replaceFirst( "^:", "" );
-                    Object o = esn.getProperty( acmType );
+                    Object o = esn.getNodeRefProperty( acmType, dateTime, workspace );
                     if ( !( "" + o ).equals( specifier ) ) {
                         match = false;
                     }
@@ -3099,7 +3099,8 @@ public class NodeUtil {
      * @param services
      */
     public static void addEmbeddedValueSpecs(NodeRef ref,  Set< NodeRef > nodes,
-                                              ServiceRegistry services) {
+                                              ServiceRegistry services,
+                                              Date dateTime, WorkspaceNode ws) {
         
         Object propVal;
         EmsScriptNode node = new EmsScriptNode(ref, services);
@@ -3109,7 +3110,7 @@ public class NodeUtil {
             if ( node.hasOrInheritsAspect( acmType ) ) {
                 
                 for ( String acmProp : Acm.TYPES_WITH_VALUESPEC.get(acmType) ) {
-                    propVal = node.getProperty(acmProp);
+                    propVal = node.getNodeRefProperty(acmProp, dateTime, ws);
                     
                     if (propVal != null) {
                         // Note: We want to include deleted nodes also, so no need to check for that

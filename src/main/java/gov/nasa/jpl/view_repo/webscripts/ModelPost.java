@@ -1349,7 +1349,7 @@ public class ModelPost extends AbstractJavaWebScript {
         
         // If it is a type that has value specs, and at least one of those properties
         // has a value spec mapped to it:
-        if (node.hasValueSpecProperty()) {
+        if (node.hasValueSpecProperty(null, workspace)) {
             
             Set<QName> aspectProps = new HashSet<QName>();
             
@@ -2074,7 +2074,7 @@ public class ModelPost extends AbstractJavaWebScript {
                 services.getPermissionService().deletePermissions(nodeToUpdate.getNodeRef());
                 nodeToUpdate.setInheritsPermissions( true );
 
-                NodeRef reifiedPkg = (NodeRef) nodeToUpdate.getProperty( "ems:reifiedPkg" );
+                NodeRef reifiedPkg = (NodeRef) nodeToUpdate.getNodeRefProperty( "ems:reifiedPkg", null, workspace );
                 if (reifiedPkg != null) {
                     services.getPermissionService().deletePermissions( reifiedPkg );
                     services.getPermissionService().setInheritParentPermissions( reifiedPkg, true );
