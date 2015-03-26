@@ -3533,6 +3533,22 @@ public class EmsScriptNode extends ScriptNode implements
         return equals( obj, true );
     }
 
+	/**
+	 * @return the head or current version of the node ref if it exists;
+	 *         otherwise return the existing node ref
+	 */
+    public NodeRef normalizedNodeRef() {// NodeRef ref, ServiceRegistry services ) {
+        VersionService vs = getServices().getVersionService();
+        Version thisHeadVersion = this.getHeadVersion();
+        NodeRef thisCurrent = thisHeadVersion == null ? null : thisHeadVersion.getVersionedNodeRef();
+        if ( thisCurrent == null ) {
+            Version thisCurrentVersion = vs.getCurrentVersion(this.nodeRef);
+        	thisCurrent = thisCurrentVersion == null ? null : thisCurrentVersion.getVersionedNodeRef();
+        }
+        if ( thisCurrent == null ) return nodeRef;
+        return thisCurrent;
+    }
+    
     /**
      * Check to see if the nodes are the same or (if tryCurrentVersions is true)
      * if their currentVersions are the same.
@@ -3553,8 +3569,8 @@ public class EmsScriptNode extends ScriptNode implements
         boolean isThisV = vs.isAVersion( this.nodeRef );
         boolean isThatV = vs.isAVersion( that.nodeRef );
         if ( !isThisV && !isThatV ) return same;
-        NodeRef thisCurrent = this.getHeadVersion().getVersionedNodeRef();
-        NodeRef thatCurrent = that.getHeadVersion().getVersionedNodeRef();
+        NodeRef thisCurrent = this.normalizedNodeRef();
+        NodeRef thatCurrent = that.normalizedNodeRef();
         if ( thisCurrent == thatCurrent ) return true;
         if ( thisCurrent == null || thatCurrent == null ) return false;
         return thisCurrent.equals( thatCurrent );
