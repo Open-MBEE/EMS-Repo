@@ -663,7 +663,7 @@ public class EmsScriptNode extends ScriptNode implements
         // to update this property when needed.  Otherwise, property may have a noderef in
         // a parent workspace, and this wont detect it; however, all the getProperty() will look
         // for the correct workspace node, so perhaps this is overkill:
-        T oldValue = (T)getNodeRefProperty( acmType, true, null, false, true, null );
+        T oldValue = (T)getProperty( acmType, true, null, false, true );
         if ( oldValue != null && value != null) {
             if ( !value.equals( oldValue ) ) {
                 setProperty( acmType, value );
@@ -899,7 +899,7 @@ public class EmsScriptNode extends ScriptNode implements
     public EmsScriptNode setOwnerToReifiedNode( EmsScriptNode parent, WorkspaceNode ws ) {
         // everything is created in a reified package, so need to make
         // relations to the reified node rather than the package
-        EmsScriptNode reifiedNode = parent.getReifiedNode(ws);
+        EmsScriptNode reifiedNode = parent.getReifiedNode();
         if ( reifiedNode == null ) reifiedNode = parent; // just in case
         if ( reifiedNode != null ) {
             EmsScriptNode nodeInWs =
@@ -969,17 +969,17 @@ public class EmsScriptNode extends ScriptNode implements
         return node;
     }
 
-    public EmsScriptNode getReifiedNode(boolean findDeleted, WorkspaceNode ws) {
-        NodeRef nodeRef = (NodeRef)getNodeRefProperty( "ems:reifiedNode", false, null,
-                                                findDeleted, false, ws );
+    public EmsScriptNode getReifiedNode(boolean findDeleted) {
+        NodeRef nodeRef = (NodeRef)getProperty( "ems:reifiedNode", false, null,
+                                                findDeleted, false );
         if ( nodeRef != null ) {
             return new EmsScriptNode( nodeRef, services, response );
         }
         return null;
     }
 
-    public EmsScriptNode getReifiedNode(WorkspaceNode ws) {
-        return getReifiedNode(false, ws);
+    public EmsScriptNode getReifiedNode() {
+        return getReifiedNode(false);
     }
 
     public EmsScriptNode getReifiedPkg() {
@@ -1205,9 +1205,6 @@ public class EmsScriptNode extends ScriptNode implements
     /**
      * Returns the children for this node.  Uses the ems:ownedChildren property.
      *
-     * Caller must get 
-     *
-     *
      * @param findDeleted Find deleted nodes also
      * @return children of this node
      */
@@ -1216,8 +1213,7 @@ public class EmsScriptNode extends ScriptNode implements
         ArrayList<NodeRef> ownedChildren = new ArrayList<NodeRef>();
 
         ArrayList<NodeRef> oldChildren = this.getPropertyNodeRefs( "ems:ownedChildren",
-                                                                   false, dateTime, findDeleted,
-                                                                   true, ws);
+                                                                   false, null, findDeleted, false);
         if (oldChildren != null) {
             ownedChildren = oldChildren;
         }
@@ -1249,6 +1245,24 @@ public class EmsScriptNode extends ScriptNode implements
             return true;
         }
         return false;
+    }
+
+    /**
+     * Get the property of the specified type
+     *
+     * @param acmType
+     *            Short name of property to get
+     * @return
+     */
+    public Object getProperty( String acmType ) {
+
+        return getProperty(acmType, false);
+    }
+    
+    public Object getProperty( String acmType, boolean skipNodeRefCheck ) {
+        // FIXME Sometimes we wont want these defaults, ie want to find the deleted elements.
+        //       Need to check all calls to getProperty() with properties that are NodeRefs.
+        return getProperty(acmType, false, null, false, skipNodeRefCheck);
     }
 
     public String getVersionLabel() {
@@ -1482,41 +1496,36 @@ public class EmsScriptNode extends ScriptNode implements
        return true;
    }
 
-  
-  
-  public Object getNodeRefProperty( String acmType, Date dateTime, WorkspaceNode ws ) {
-      return getNodeRefProperty(acmType, false, dateTime, ws);
-  }
-
-  public Object getNodeRefProperty( String acmType, boolean skipNodeRefCheck, 
-                                    Date dateTime, WorkspaceNode ws ) {
-      // FIXME Sometimes we wont want these defaults, ie want to find the deleted elements.
-      //       Need to check all calls to getProperty() with properties that are NodeRefs.
-      return getNodeRefProperty(acmType, false, dateTime, false, skipNodeRefCheck, ws);
-  }
-
-  /**
-   * Getting a noderef property needs to be contextualized by the workspace and time
-   * This works for any property type noderef or otherwise, so use this if you want to be safe. 
-   * @param acmType
-   * @param ignoreWorkspace
-   * @param dateTime
-   * @param findDeleted
-   * @param skipNodeRefCheck
-   * @param ws
-   * @return
-   */
-    public Object getNodeRefProperty( String acmType, boolean ignoreWorkspace,
+    /**
+     * Get the property of the specified type
+     *
+     * @param acmType
+     *            Short name of property to get
+     * @return
+     */
+    public Object getProperty( String acmType, boolean ignoreWorkspace,
                                Date dateTime, boolean findDeleted,
-                               boolean skipNodeRefCheck, WorkspaceNode ws ) {
-        Object result = getPropertyImpl( acmType );
+                               boolean skipNodeRefCheck ) {
+
+        if ( Utils.isNullOrEmpty( acmType ) ) return null;
+        Object result = null;
+
+        // Taking this out for now b/c of performance hit:
+        //checkNodeRefVersion(dateTime);
+
+        if ( useFoundationalApi ) {
+            QName typeQName = createQName( acmType );
+            result = services.getNodeService().getProperty( nodeRef, typeQName );
+        } else {
+            result = getProperties().get( acmType );
+        }
 
         // get noderefs from the proper workspace unless the property is a
         // workspace meta-property
         if ( !skipNodeRefCheck && !workspaceMetaProperties.contains( acmType )) {
             if ( result instanceof NodeRef ) {
                 result = NodeUtil.getNodeRefAtTime( (NodeRef)result,
-                                                    ws, dateTime,
+                                                    getWorkspace(), dateTime,
                                                     ignoreWorkspace, findDeleted);
             } else if ( result instanceof Collection ) {
                 Collection< ? > resultColl = (Collection< ? >)result;
@@ -1525,7 +1534,7 @@ public class EmsScriptNode extends ScriptNode implements
                     if ( o instanceof NodeRef ) {
                         NodeRef ref =
                                 NodeUtil.getNodeRefAtTime( (NodeRef)o,
-                                                           ws, dateTime,
+                                                           getWorkspace(), dateTime,
                                                            ignoreWorkspace, findDeleted);
                         arr.add( ref );
                     } else {
@@ -1534,43 +1543,6 @@ public class EmsScriptNode extends ScriptNode implements
                 }
                 result = arr;
             }
-        }
-
-        return result;
-    }
-    
-    
-    /**
-     * Get the property of the specified type for non-noderef properties. Throws unsupported
-     * operation exception otherwise (go and fix the code if that happens).
-     *
-     * @param acmType
-     *            Short name of property to get
-     * @return
-     */
-    public Object getProperty( String acmType ) {
-        Object result = getPropertyImpl(acmType);
-
-        // get noderefs from the proper workspace unless the property is a
-        // workspace meta-property
-        if ( !workspaceMetaProperties.contains( acmType )) {
-            if ( result instanceof NodeRef  || result instanceof Collection ) {
-                throw new UnsupportedOperationException();
-            }
-        }
-
-        return result;
-    }
-    
-    private Object getPropertyImpl(String acmType) {
-        if ( Utils.isNullOrEmpty( acmType ) ) return null;
-        Object result = null;
-
-        if ( useFoundationalApi ) {
-            QName typeQName = createQName( acmType );
-            result = services.getNodeService().getProperty( nodeRef, typeQName );
-        } else {
-            result = getProperties().get( acmType );
         }
 
         return result;
@@ -2854,7 +2826,7 @@ public class EmsScriptNode extends ScriptNode implements
         return siteNode;
     }
 
-    public EmsScriptNode getProjectNode(WorkspaceNode ws) {
+    public EmsScriptNode getProjectNode() {
         EmsScriptNode parent = this;
         EmsScriptNode sites = null;
         EmsScriptNode projectPkg = null;
@@ -2877,7 +2849,7 @@ public class EmsScriptNode extends ScriptNode implements
                 if (projectPkg.isSubType( "sysml:Project" )) {
                     projectNode = projectPkg;
                 } else {
-                    projectNode = projectPkg.getReifiedNode(ws);
+                    projectNode = projectPkg.getReifiedNode();
                     if (projectNode != null) {
                         if ( Debug.isOn() ) Debug.outln( getName()
                                                      + ".getProjectNode() = "
@@ -2902,8 +2874,8 @@ public class EmsScriptNode extends ScriptNode implements
         return projectPkg;
     }
 
-    public String getProjectId(WorkspaceNode ws) {
-        EmsScriptNode projectNode = getProjectNode(ws);
+    public String getProjectId() {
+        EmsScriptNode projectNode = getProjectNode();
         if (projectNode == null || projectNode.getSysmlId() == null) {
             return "null";
         }
@@ -3006,7 +2978,7 @@ public class EmsScriptNode extends ScriptNode implements
             // a parent workspace, and this wont detect it; however, all the getProperty() will look
             // for the correct workspace node, so perhaps this is overkill::
             ArrayList< Serializable > oldValues =
-                    (ArrayList< Serializable >)getNodeRefProperty( acmProperty, true, null, false, true, null );
+                    (ArrayList< Serializable >)getProperty( acmProperty, true, null, false, true );
             if ( !EmsScriptNode.checkIfListsEquivalent( values, oldValues ) ) {
                 setProperty( acmProperty, values );
                 changed = true;
@@ -4025,9 +3997,8 @@ public class EmsScriptNode extends ScriptNode implements
 
     public void appendToPropertyNodeRefs( String acmProperty, NodeRef ref ) {
         if ( checkPermissions( PermissionService.WRITE, response, status ) ) {
-            // when doing set or append, we don't need the contextualized nodeRef, so we can skipNodeRef
             ArrayList< NodeRef > relationships =
-                    getPropertyNodeRefs( acmProperty, true, null, null );
+                    getPropertyNodeRefs( acmProperty, true );
             if ( Utils.isNullOrEmpty( relationships ) ) {
                 relationships = Utils.newList( ref );
             } else if (!relationships.contains(ref )) {
@@ -4044,9 +4015,8 @@ public class EmsScriptNode extends ScriptNode implements
     // the callers of this method.
     public void removeFromPropertyNodeRefs( String acmProperty, NodeRef ref ) {
         if ( checkPermissions( PermissionService.WRITE, response, status ) ) {
-            // when doing set or append, we don't need the contextualized nodeRef, so we can skipNodeRef
             ArrayList< NodeRef > relationships =
-                    getPropertyNodeRefs( acmProperty, true, null, null );
+                    getPropertyNodeRefs( acmProperty, true );
             if ( !Utils.isNullOrEmpty( relationships ) ) {
                 relationships.remove( ref );
                 setProperty( acmProperty, relationships );
@@ -4231,18 +4201,18 @@ public class EmsScriptNode extends ScriptNode implements
 
     }
     
-    public ArrayList< NodeRef > getPropertyNodeRefs( String acmProperty, Date date, WorkspaceNode ws ) {
-        return getPropertyNodeRefs(acmProperty, false, date, ws);
+    public ArrayList< NodeRef > getPropertyNodeRefs( String acmProperty ) {
+        return getPropertyNodeRefs(acmProperty, false);
     }
 
-    public ArrayList< NodeRef > getPropertyNodeRefs(String acmProperty, boolean skipNodeRefCheck, Date date, WorkspaceNode ws) {
-        return getPropertyNodeRefs(acmProperty, false, date, false, skipNodeRefCheck, ws);
+    public ArrayList< NodeRef > getPropertyNodeRefs(String acmProperty, boolean skipNodeRefCheck) {
+        return getPropertyNodeRefs(acmProperty, false, null, false, skipNodeRefCheck);
     }
     
     public ArrayList< NodeRef > getPropertyNodeRefs( String acmProperty, boolean ignoreWorkspace,
                                                      Date dateTime, boolean findDeleted,
-                                                     boolean skipNodeRefCheck, WorkspaceNode ws) {
-        Object o = getNodeRefProperty( acmProperty, ignoreWorkspace, dateTime, findDeleted, skipNodeRefCheck, ws );
+                                                     boolean skipNodeRefCheck) {
+        Object o = getProperty( acmProperty, ignoreWorkspace, dateTime, findDeleted, skipNodeRefCheck );
         ArrayList< NodeRef > refs = null;
         if ( !( o instanceof Collection ) ) {
             if ( o instanceof NodeRef ) {
@@ -4261,6 +4231,15 @@ public class EmsScriptNode extends ScriptNode implements
         return refs;
     }
 
+    public List< EmsScriptNode > getPropertyElements( String acmProperty ) {
+        List< NodeRef > refs = getPropertyNodeRefs( acmProperty );
+        List< EmsScriptNode > elements = new ArrayList< EmsScriptNode >();
+        for ( NodeRef ref : refs ) {
+            elements.add( new EmsScriptNode( ref, services ) );
+        }
+        return elements;
+    }
+    
     public EmsScriptNode getPropertyElement( String acmProperty) {
         return getPropertyElement(acmProperty, false);
     }
@@ -4276,6 +4255,13 @@ public class EmsScriptNode extends ScriptNode implements
         return null;
     }
 
+    public Set< EmsScriptNode > getRelationships() {
+        Set< EmsScriptNode > set = new LinkedHashSet< EmsScriptNode >();
+        for ( Map.Entry< String, String > e : Acm.PROPERTY_FOR_RELATIONSHIP_PROPERTY_ASPECTS.entrySet() ) {
+            set.addAll( getPropertyElements( e.getValue() ) );
+        }
+        return set;
+    }
 
     public Set< EmsScriptNode > getRelationshipsOfType( String typeName ) {
         Set< EmsScriptNode > set = new LinkedHashSet< EmsScriptNode >();
