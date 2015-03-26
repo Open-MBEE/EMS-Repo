@@ -1587,7 +1587,8 @@ public class EmsScriptNode extends ScriptNode implements
 
         // Check to see if any embedded value specs have been modified after
         // the modified time of this node:
-        NodeUtil.addEmbeddedValueSpecs( getNodeRef(), dependentNodes, services, dateTime, );
+        // TODO passing the workspace into this method would require a lot of callers to change
+        NodeUtil.addEmbeddedValueSpecs( getNodeRef(), dependentNodes, services, dateTime, getWorkspace());
         for ( NodeRef nodeRef : dependentNodes ) {
             nodeRef = NodeUtil.getNodeRefAtTime( nodeRef, dateTime );
             if ( nodeRef == null ) continue;
@@ -1773,18 +1774,18 @@ public class EmsScriptNode extends ScriptNode implements
         return NodeUtil.getStoreRef();
     }
 
-    public String getSysmlQName() {
+    public String getSysmlQName(Date dateTime, WorkspaceNode ws) {
         if (qualifiedName != null) {
             return qualifiedName;
         }
-        return getSysmlQPath( true );
+        return getSysmlQPath( true, dateTime, ws );
     }
 
-    public String getSysmlQId() {
+    public String getSysmlQId(Date dateTime, WorkspaceNode ws) {
         if (qualifiedId != null) {
             return qualifiedId;
         }
-        return getSysmlQPath( false );
+        return getSysmlQPath( false, dateTime, ws );
     }
 
     /**
@@ -1796,7 +1797,7 @@ public class EmsScriptNode extends ScriptNode implements
      *
      * @return SysML qualified name (e.g., sysml:name qualified)
      */
-    public String getSysmlQPath( boolean isName ) {
+    public String getSysmlQPath( boolean isName, Date dateTime, WorkspaceNode ws ) {
         // TODO REVIEW
         // This is currently not called on reified packages, so as long as the ems:owner always points
         // to reified nodes, as it should, then we dont need to replace pkgSuffix in the qname.
@@ -1805,7 +1806,7 @@ public class EmsScriptNode extends ScriptNode implements
         qualifiedId =  "/" + getProperty( "sysml:id" );
 
         boolean siteCharacterizationFound = false;
-        NodeRef ownerRef = (NodeRef)this.getNodeRefProperty( "ems:owner" );
+        NodeRef ownerRef = (NodeRef)this.getNodeRefProperty( "ems:owner", dateTime, ws );
         EmsScriptNode owner = null;
         // Need to look up based on owners...
         while ( ownerRef != null && !siteCharacterizationFound ) {
@@ -1825,7 +1826,7 @@ public class EmsScriptNode extends ScriptNode implements
             }
             qualifiedId = "/" + idProp + qualifiedId;
 
-            ownerRef = (NodeRef)owner.getNodeRefProperty( "ems:owner" );
+            ownerRef = (NodeRef)owner.getNodeRefProperty( "ems:owner", dateTime, ws );
         }
         
         if (siteCharacterizationFound) {
@@ -1899,7 +1900,7 @@ public class EmsScriptNode extends ScriptNode implements
         String name = getName();
         String id = getSysmlId();
         String sysmlName = getSysmlName();
-        String qualifiedName = getSysmlQName();
+        String qualifiedName = getSysmlQName(null, getWorkspace());
         String type = getTypeName();
         String workspaceName = getWorkspaceName();
         result = deleted + "{type=" + type + ", id=" + id + ", cm_name=" + name + ", sysml_name=" + sysmlName
@@ -2023,10 +2024,10 @@ public class EmsScriptNode extends ScriptNode implements
                    this.getProperty( Acm.ACM_DOCUMENTATION ), filter );
         if (isIncludeQualified) {
             if ( filter == null || filter.isEmpty() || filter.contains( "qualifiedName" ) ) {
-                putInJson( elementJson, "qualifiedName", this.getSysmlQName(), filter );
+                putInJson( elementJson, "qualifiedName", this.getSysmlQName(dateTime, getWorkspace()), filter );
             }
             if ( filter == null || filter.isEmpty() || filter.contains( "qualifiedId" ) ) {
-                putInJson( elementJson, "qualifiedId", this.getSysmlQId(), filter );
+                putInJson( elementJson, "qualifiedId", this.getSysmlQId(dateTime, getWorkspace()), filter );
             }
         }
         if ( filter == null || filter.size() == 0 || filter.contains( "owner" ) ) {
@@ -2436,7 +2437,7 @@ public class EmsScriptNode extends ScriptNode implements
             Date lastModified;
             if ( isView() ) { 
 //                System.out.println("####  ####  view " + getName()  );
-                lastModified = (new View( this )).getLastModified( dateTime );
+                lastModified = (new View( this )).getLastModified( dateTime, ws );
             } else {
 //                System.out.println("####  ####  not a view " + getName()  );
                 lastModified = getLastModified( dateTime );
@@ -4278,11 +4279,12 @@ public class EmsScriptNode extends ScriptNode implements
     }
 
 
-    public Set< EmsScriptNode > getRelationshipsOfType( String typeName ) {
+    public Set< EmsScriptNode > getRelationshipsOfType( String typeName, Date dateTime,
+                                                        WorkspaceNode ws ) {
         Set< EmsScriptNode > set = new LinkedHashSet< EmsScriptNode >();
         for ( Map.Entry< String, String > e : Acm.PROPERTY_FOR_RELATIONSHIP_PROPERTY_ASPECTS.entrySet() ) {
             ArrayList< EmsScriptNode > relationships =
-                    getRelationshipsOfType( typeName, e.getKey() );
+                    getRelationshipsOfType( typeName, e.getKey(), dateTime, ws );
             if ( !Utils.isNullOrEmpty( relationships ) ) {
                 set.addAll( relationships );
             }
@@ -4291,11 +4293,13 @@ public class EmsScriptNode extends ScriptNode implements
     }
 
     public ArrayList< EmsScriptNode > getRelationshipsOfType( String typeName,
-                                                              String acmAspect) {
+                                                              String acmAspect,
+                                                              Date dateTime,
+                                                              WorkspaceNode ws) {
         if ( !hasAspect( acmAspect ) ) return new ArrayList< EmsScriptNode >();
         String acmProperty =
                 Acm.PROPERTY_FOR_RELATIONSHIP_PROPERTY_ASPECTS.get( acmAspect );
-        ArrayList< NodeRef > relationships = getPropertyNodeRefs( acmProperty );
+        ArrayList< NodeRef > relationships = getPropertyNodeRefs( acmProperty, dateTime, ws );
         // Searching for the beginning of the relationships with this typeName
         // b/c relationships are ordered by typeName. Therefore, the search
         // is expected to not find a matching element.
@@ -4341,7 +4345,8 @@ public class EmsScriptNode extends ScriptNode implements
         String acmProperty =
                 Acm.PROPERTY_FOR_RELATIONSHIP_PROPERTY_ASPECTS.get( acmAspect );
         // TODO why is it skipping node ref check?
-        ArrayList< NodeRef > relationships = getPropertyNodeRefs( acmProperty, true );
+        ArrayList< NodeRef > relationships = getPropertyNodeRefs( acmProperty, true,
+                                                                  null, null);
         int index =
                 Collections.binarySearch( relationships,
                                           // this.getNodeRef(),
@@ -4383,8 +4388,9 @@ public class EmsScriptNode extends ScriptNode implements
 
             // NOTE -- This code assumes that the source and target are from the
             // appropriate workspace!
-            NodeRef source = (NodeRef)getNodeRefProperty( Acm.ACM_SOURCE );
-            NodeRef target = (NodeRef)getNodeRefProperty( Acm.ACM_TARGET );
+            // TODO is the note above valid?
+            NodeRef source = (NodeRef)getNodeRefProperty( Acm.ACM_SOURCE, null, getWorkspace() );
+            NodeRef target = (NodeRef)getNodeRefProperty( Acm.ACM_TARGET, null, getWorkspace() );
 
             if ( source != null ) {
                 EmsScriptNode sNode = new EmsScriptNode( source, services );
@@ -4729,7 +4735,7 @@ public class EmsScriptNode extends ScriptNode implements
         boolean noFilter = filter == null || filter.size() == 0;
         if ( expressionStuff && ( property == null || property.length() <= 0 ) ) {
             if ( noFilter || filter.contains( "contains" ) ) {
-                json.put( "contains", getView().getContainsJson(true) );
+                json.put( "contains", getView().getContainsJson(true,dateTime,ws) );
             }
             JSONArray displayedElements = null;
             if ( noFilter || filter.contains( "displayedElements" ) ) {
@@ -5477,7 +5483,7 @@ public class EmsScriptNode extends ScriptNode implements
      */
     public boolean parentOwnsValueSpec(Date dateTime, WorkspaceNode ws )
     {
-        EmsScriptNode parent = getUnreifiedParent( null, ws );
+        EmsScriptNode parent = getUnreifiedParent( dateTime, ws );
         return parent != null && parent.hasValueSpecProperty( this, dateTime, ws );
     }
 

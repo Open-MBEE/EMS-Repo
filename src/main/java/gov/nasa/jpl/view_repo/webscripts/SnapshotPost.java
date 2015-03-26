@@ -415,7 +415,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
             View productView = product.getView();
             if(productView == null) throw new Exception("Missing document's structure; expected to find product's view but it's not found.");
 
-            JSONArray contains = productView.getContainsJson();
+            JSONArray contains = productView.getContainsJson(timestamp, workspace);
             if(contains == null || contains.length()==0){ throw new Exception("Missing document's structure; expected to find document's 'contains' JSONArray but it's not found."); }
 
             for(int i=0; i < contains.length(); i++){
@@ -2054,7 +2054,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
             throws Exception {
     	if(node == null) return;
     	//1st process the node
-    	JSONArray contains = node.getView().getContainsJson();
+    	JSONArray contains = node.getView().getContainsJson(timestamp, workspace);
         createDBSectionContainment( section, contains, workspace, timestamp );
 
         //then process it's contains:children if any

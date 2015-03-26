@@ -974,6 +974,7 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
     		if (node.hasAspect(Acm.ACM_PROPERTY)) {
 
 		    	List<EmsScriptNode> returnList = new ArrayList<EmsScriptNode>();
+		    	// TODO need the workspace, time
 				Collection<NodeRef> valueNodes =
 				        (Collection< NodeRef >)node.getNodeRefProperty(Acm.ACM_VALUE);
 				convertToScriptNode(valueNodes, returnList);

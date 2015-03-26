@@ -4,6 +4,7 @@ import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 
 import java.util.Collection;
+import java.util.Date;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -66,7 +67,7 @@ public class ElementReference implements Viewable<EmsScriptNode> {
 	 * @see sysml.Viewable#toViewJson()
 	 */
 	@Override
-	public JSONObject toViewJson() {
+	public JSONObject toViewJson(Date dateTime) {
 		
 		if (element == null) return null;
 		
@@ -97,7 +98,7 @@ public class ElementReference implements Viewable<EmsScriptNode> {
 	
     @Override
     public String toString() {
-        return "" + toViewJson();
+        return "" + toViewJson(null);
     }
 
 }

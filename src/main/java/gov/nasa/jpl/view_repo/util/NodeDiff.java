@@ -644,6 +644,7 @@ public class NodeDiff extends AbstractDiff<NodeRef, Object, String> {
         
         for ( NodeRef e : getAdded() ) {
             EmsScriptNode node = new EmsScriptNode( e, getServices() );
+            // TODO need timestamp2
             if ( node.isOwnedValueSpec(node.getWorkspace()) ) {
                 EmsScriptNode owningProp = node.getValueSpecOwner(node.getWorkspace());
                 if (owningProp != null) {
