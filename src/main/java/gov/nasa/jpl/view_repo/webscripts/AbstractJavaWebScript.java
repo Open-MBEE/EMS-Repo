@@ -840,7 +840,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
             // Note: skipping the noderef check b/c our node searches return the noderefs that correspond
             //       to the nodes in the surf-config folder.  Also, we dont need the check b/c site nodes
             //       are always in the master workspace.
-            NodeRef sitePackageSiteRef = (NodeRef) sitePackageNode.getProperty( Acm.ACM_SITE_SITE, true );
+            NodeRef sitePackageSiteRef = (NodeRef) sitePackageNode.getNodeRefProperty( Acm.ACM_SITE_SITE, true, null, null );
             if (sitePackageSiteRef != null && !sitePackageSiteRef.equals( initialSiteNode.getNodeRef() )) {
                 log(LogLevel.ERROR, "Mismatch between site/package for site package name "+siteName,
                     HttpServletResponse.SC_NOT_FOUND);
@@ -848,13 +848,13 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
             }
 
             // Get the project site by tracing up the parents until the parent is null:
-            NodeRef siteParentRef = (NodeRef) initialSiteNode.getProperty( Acm.ACM_SITE_PARENT, true );
+            NodeRef siteParentRef = (NodeRef) initialSiteNode.getNodeRefProperty( Acm.ACM_SITE_PARENT, true, null, null );
             EmsScriptNode siteParent = siteParentRef != null ? new EmsScriptNode(siteParentRef, services, response) : null;
             EmsScriptNode oldSiteParent = null;
 
             while (siteParent != null) {
                 oldSiteParent = siteParent;
-                siteParentRef = (NodeRef) siteParent.getProperty( Acm.ACM_SITE_PARENT, true );
+                siteParentRef = (NodeRef) siteParent.getNodeRefProperty( Acm.ACM_SITE_PARENT, true, null, null );
                 siteParent = siteParentRef != null ? new EmsScriptNode(siteParentRef, services, response) : null;
             }
 
@@ -888,7 +888,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
         // Note: skipping the noderef check b/c our node searches return the noderefs that correspond
         //       to the nodes in the surf-config folder.  Also, we dont need the check b/c site nodes
         //       are always in the master workspace.
-        NodeRef pkgSiteParentRef = (NodeRef)pkgNode.getProperty( Acm.ACM_SITE_SITE, true );
+        NodeRef pkgSiteParentRef = (NodeRef)pkgNode.getNodeRefProperty( Acm.ACM_SITE_SITE, true, null, null );
         EmsScriptNode pkgSiteParentNode = null;
 
         if (pkgSiteParentRef != null) {

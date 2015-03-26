@@ -313,7 +313,7 @@ public class ModelPost extends AbstractJavaWebScript {
             // workspace doesn't have the project and user doesn't have read permissions on
             // the parent workspace (at that level)
             AuthenticationUtil.setRunAsUser( "admin" );
-            projectId = elements.first().getProjectId();
+            projectId = elements.first().getProjectId(targetWS);
             AuthenticationUtil.setRunAsUser( AuthenticationUtil.getFullyAuthenticatedUser() );
        }
         String wsId = "master";
@@ -560,7 +560,7 @@ public class ModelPost extends AbstractJavaWebScript {
 
         EmsScriptNode lastNode = nodeToUpdate;
         EmsScriptNode nodeParent = nodeToUpdate.getParent();
-        EmsScriptNode reifiedNodeParent = nodeParent != null ? nodeParent.getReifiedNode(true) : null;
+        EmsScriptNode reifiedNodeParent = nodeParent != null ? nodeParent.getReifiedNode(true, workspace) : null;
         while (nodeParent != null  && nodeParent.scriptNodeExists()) {
             if (nodeParent.isDeleted()) {
                 resurrectParent(nodeParent, ingest);
@@ -577,7 +577,7 @@ public class ModelPost extends AbstractJavaWebScript {
             }
             lastNode = reifiedNodeParent;
             nodeParent = nodeParent.getParent();
-            reifiedNodeParent = nodeParent != null ? nodeParent.getReifiedNode(true) : null;
+            reifiedNodeParent = nodeParent != null ? nodeParent.getReifiedNode(true, workspace) : null;
         }
 
     }
@@ -2008,7 +2008,7 @@ public class ModelPost extends AbstractJavaWebScript {
                     
                     // If there was a old site parent on this node, and it is different than
                     // the new one, then remove this child from it:
-                    EmsScriptNode oldPkgSiteParentNode = pkgSiteNode.getPropertyElement( Acm.ACM_SITE_PARENT, true );
+                    EmsScriptNode oldPkgSiteParentNode = pkgSiteNode.getPropertyElement( Acm.ACM_SITE_PARENT, true, null, null );
                     if (oldPkgSiteParentNode != null && 
                         !oldPkgSiteParentNode.equals( pkgSiteParentNode )) {
                         
@@ -2024,14 +2024,14 @@ public class ModelPost extends AbstractJavaWebScript {
                         // Note: skipping the noderef check b/c our node searches return the noderefs that correspond
                         //       to the nodes in the surf-config folder.  Also, we dont need the check b/c site nodes
                         //       are always in the master workspace.
-                        List<NodeRef> oldChildren = oldPkgSiteParentNode.getPropertyNodeRefs( Acm.ACM_SITE_CHILDREN, true);
+                        List<NodeRef> oldChildren = oldPkgSiteParentNode.getPropertyNodeRefs( Acm.ACM_SITE_CHILDREN, true, null, null);
                     
                         // Update the children of this package site if needed:
                         EmsScriptNode childNewParent;
                         EmsScriptNode child;
                         for (EmsScriptNode childSite : EmsScriptNode.toEmsScriptNodeList( oldChildren)) {
                             
-                            child = childSite.getPropertyElement( Acm.ACM_SITE_PACKAGE );
+                            child = childSite.getPropertyElement( Acm.ACM_SITE_PACKAGE, null, workspace );
                             if (child != null) {
                                 childNewParent = findParentPkgSite(child, workspace, null);
                                 
@@ -2061,7 +2061,7 @@ public class ModelPost extends AbstractJavaWebScript {
             } // ends if (isSite)
             else {
                 // Remove the Site aspect from the corresponding site for this pkg:
-                NodeRef sitePackageSiteRef = (NodeRef) nodeToUpdate.getProperty( Acm.ACM_SITE_SITE, true );
+                NodeRef sitePackageSiteRef = (NodeRef) nodeToUpdate.getNodeRefProperty( Acm.ACM_SITE_SITE, true, null, null );
                 if (sitePackageSiteRef != null) {
                     EmsScriptNode siteNode = new EmsScriptNode(sitePackageSiteRef, services);
                     siteNode.removeAspect( Acm.ACM_SITE );

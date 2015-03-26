@@ -309,8 +309,8 @@ public class MmsModelDelete extends AbstractJavaWebScript {
             if ( node != null && node.exists() ) {
                 addToWsDiff( node );
 
-                deleteRelationships(node, "sysml:relationshipsAsSource", "sysml:relAsSource");
-                deleteRelationships(node, "sysml:relationshipsAsTarget", "sysml:relAsTarget");
+                deleteRelationships(node, "sysml:relationshipsAsSource", "sysml:relAsSource", workspace);
+                deleteRelationships(node, "sysml:relationshipsAsTarget", "sysml:relAsTarget", workspace);
             }
         }
     }
@@ -321,9 +321,10 @@ public class MmsModelDelete extends AbstractJavaWebScript {
      * @param aspectName    String of the aspect name to look for
      * @param propertyName  String of the property to remove
      */
-    private void deleteRelationships(EmsScriptNode node, String aspectName, String propertyName) {
+    private void deleteRelationships(EmsScriptNode node, String aspectName, String propertyName,
+                                     WorkspaceNode workspace) {
         if (node.hasAspect( aspectName )) {
-            ArrayList<NodeRef> relRefs = node.getPropertyNodeRefs( propertyName );
+            ArrayList<NodeRef> relRefs = node.getPropertyNodeRefs( propertyName, null, workspace );
             for (NodeRef relRef: relRefs) {
                 EmsScriptNode relNode = new EmsScriptNode(relRef, services, response);
                 addToWsDiff( relNode );
@@ -345,7 +346,7 @@ public class MmsModelDelete extends AbstractJavaWebScript {
         }
 
         if (recurse) {
-            for ( NodeRef childRef : root.getOwnedChildren(true) ) {
+            for ( NodeRef childRef : root.getOwnedChildren(true, null, workspace) ) {
                 EmsScriptNode child = new EmsScriptNode(childRef, services, response);
                 handleElementHierarchy(child, workspace, recurse);
             }

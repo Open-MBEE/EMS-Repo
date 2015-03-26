@@ -356,7 +356,7 @@ public class WorkspaceNode extends EmsScriptNode {
 
     public void deleteChildWorkspaces( boolean recursive ) {
         // getting a copy in case it's the same list from which the children will remove themselves
-        ArrayList< NodeRef > children = new ArrayList<NodeRef>(getPropertyNodeRefs( "ems:children" ));
+        ArrayList< NodeRef > children = new ArrayList<NodeRef>(getPropertyNodeRefs( "ems:children", true, null, null ));
         for ( NodeRef ref : children ) {
             WorkspaceNode childWs = new WorkspaceNode( ref, getServices(),
                                                        getResponse(),
@@ -451,7 +451,7 @@ public class WorkspaceNode extends EmsScriptNode {
             if ( nodeGuess == null) {
 
                 // Clone the reified node if possible and not already in the workspace:
-                EmsScriptNode oldReifiedNode = node.getReifiedNode();
+                EmsScriptNode oldReifiedNode = node.getReifiedNode(node.getWorkspace());
                 EmsScriptNode newReifiedNode = null;
                 if (oldReifiedNode != null) {
 

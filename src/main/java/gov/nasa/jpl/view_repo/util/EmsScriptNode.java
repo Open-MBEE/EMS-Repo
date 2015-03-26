@@ -770,7 +770,7 @@ public class EmsScriptNode extends ScriptNode implements
     										   response, status, false);
     }
 
-    public String extractAndReplaceImageData( String value ) {
+    public String extractAndReplaceImageData( String value, WorkspaceNode ws  ) {
         if ( value == null ) return null;
         String v = value;
 //        Document doc = Jsoup.parse( v );
@@ -831,8 +831,8 @@ public class EmsScriptNode extends ScriptNode implements
                 String name = "img_" + System.currentTimeMillis();
                 EmsScriptNode artNode =
                         findOrCreateArtifact( name, extension, content,
-                                              getSiteName(), "images",
-                                              getWorkspace(), null );
+                                              getSiteName(ws), "images",
+                                              ws, null );
                 if ( artNode == null || !artNode.exists() ) {
                     log( "Failed to pull out image data for value! " + value );
                     break;
@@ -850,14 +850,14 @@ public class EmsScriptNode extends ScriptNode implements
         return v;
     }
 
-    public String getSiteTitle() {
-        EmsScriptNode siteNode = getSiteNode();
+    public String getSiteTitle(WorkspaceNode ws ) {
+        EmsScriptNode siteNode = getSiteNode(ws);
         return (String)siteNode.getProperty( Acm.CM_TITLE );
     }
 
-    public String getSiteName() {
+    public String getSiteName(WorkspaceNode ws) {
         if ( siteName == null ) {
-            EmsScriptNode siteNode = getSiteNode();
+            EmsScriptNode siteNode = getSiteNode(ws);
             if ( siteNode != null ) siteName = siteNode.getName();
         }
         return siteName;
@@ -1178,40 +1178,36 @@ public class EmsScriptNode extends ScriptNode implements
     /**
      * Return the version of the parent at a specific time. This uses the
      * ems:owner property instead of getParent() when it returns non-null; else,
-     * it call getParent(). For workspaces, the parent should always be in the
-     * same workspace, so there is no need to specify (or use) the workspace.
+     * it call getParent().
      *
      * @param dateTime
      * @return the parent/owning node
      */
-    public EmsScriptNode getOwningParent( Date dateTime ) {
+    public EmsScriptNode getOwningParent( Date dateTime, WorkspaceNode ws ) {
         EmsScriptNode node = null;
-        NodeRef ref = (NodeRef)getProperty( "ems:owner" );
+        NodeRef ref = (NodeRef)getNodeRefProperty( "ems:owner", dateTime, ws );
         if ( ref == null ) {
             node = getParent();
+            if ( dateTime != null ) {
+                NodeRef vref = NodeUtil.getNodeRefAtTime( node.getNodeRef(), dateTime );
+                if ( vref != null ) {
+                    node = new EmsScriptNode( vref, getServices() );
+                }
+            }
         } else {
             node = new EmsScriptNode( ref, getServices() );
         }
-        if ( node == null ) return null;
-        if ( dateTime != null ) {
-            NodeRef vref = NodeUtil.getNodeRefAtTime( node.getNodeRef(), dateTime );
-            if ( vref != null ) {
-                node = new EmsScriptNode( vref, getServices() );
-            }
-        }
+
         return node;
     }
 
     /**
      * Returns the children for this node.  Uses the ems:ownedChildren property.
      *
-     * Caller must get 
-     *
-     *
      * @param findDeleted Find deleted nodes also
      * @return children of this node
      */
-    public ArrayList<NodeRef> getOwnedChildren(boolean findDeleted) {
+    public ArrayList<NodeRef> getOwnedChildren(boolean findDeleted, Date dateTime, WorkspaceNode ws) {
 
         ArrayList<NodeRef> ownedChildren = new ArrayList<NodeRef>();
 
@@ -1226,8 +1222,8 @@ public class EmsScriptNode extends ScriptNode implements
 
     }
 
-    public EmsScriptNode getUnreifiedParent( Date dateTime ) {
-        EmsScriptNode parent = getOwningParent( dateTime );
+    public EmsScriptNode getUnreifiedParent( Date dateTime, WorkspaceNode ws  ) {
+        EmsScriptNode parent = getOwningParent( dateTime, ws );
         if ( parent != null ) {
             parent = parent.getUnreified( dateTime );
         }
@@ -2034,8 +2030,8 @@ public class EmsScriptNode extends ScriptNode implements
         }
         if ( filter == null || filter.size() == 0 || filter.contains( "owner" ) ) {
 
-            // not passing in dateTime since sysml id is immutable
-            EmsScriptNode owner = this.getOwningParent(null);
+            // not passing in dateTime/workspace since sysml id is immutable
+            EmsScriptNode owner = this.getOwningParent(null, null);
 
             String ownerId = null;
             Object owernIdObj = null;
@@ -2826,7 +2822,7 @@ public class EmsScriptNode extends ScriptNode implements
      *
      * @return the site folder containing this node
      */
-    public EmsScriptNode getSiteNode() {
+    public EmsScriptNode getSiteNode(WorkspaceNode ws) {
         if ( siteNode != null ) return siteNode;
 
         // If it is a node from the version store, then we cant trace up the parents
@@ -2834,7 +2830,7 @@ public class EmsScriptNode extends ScriptNode implements
         VersionService vs = getServices().getVersionService();
         EmsScriptNode owner = this;
         while (owner != null && vs.isAVersion( owner.getNodeRef() )) {
-            owner = owner.getOwningParent( null );
+            owner = owner.getOwningParent( null, ws );
         }
 
         EmsScriptNode parent = owner != null ? owner : this;
@@ -4143,7 +4139,8 @@ public class EmsScriptNode extends ScriptNode implements
 
     public void removeChildrenFromJsonCache() {
         if ( !NodeUtil.doJsonCaching ) return;
-        ArrayList< NodeRef > childs = getOwnedChildren( true );
+        // No need to pass dateTime/workspace b/c Brad says so
+        ArrayList< NodeRef > childs = getOwnedChildren( true, null, null );
         for ( NodeRef ref : childs ) {
             Map< Long, JSONObject > oldEntries = NodeUtil.jsonCache.remove( ref.getId() );
             List< JSONObject > removedJson = null;
@@ -4261,12 +4258,13 @@ public class EmsScriptNode extends ScriptNode implements
         return refs;
     }
 
-    public EmsScriptNode getPropertyElement( String acmProperty) {
-        return getPropertyElement(acmProperty, false);
+    public EmsScriptNode getPropertyElement( String acmProperty, Date date, WorkspaceNode ws) {
+        return getPropertyElement(acmProperty, false, date, ws);
     }
 
-    public EmsScriptNode getPropertyElement( String acmProperty, boolean skipNodeRefCheck ) {
-        Object e = getProperty( acmProperty, skipNodeRefCheck );
+    public EmsScriptNode getPropertyElement( String acmProperty, boolean skipNodeRefCheck,
+                                             Date date, WorkspaceNode ws) {
+        Object e = getNodeRefProperty( acmProperty, skipNodeRefCheck, date, ws );
         if ( e instanceof NodeRef ) {
             return new EmsScriptNode( (NodeRef)e, getServices() );
         } else if ( e == null ) {
@@ -4290,11 +4288,10 @@ public class EmsScriptNode extends ScriptNode implements
     }
 
     public ArrayList< EmsScriptNode > getRelationshipsOfType( String typeName,
-                                                              String acmAspect ) {
+                                                              String acmAspect) {
         if ( !hasAspect( acmAspect ) ) return new ArrayList< EmsScriptNode >();
         String acmProperty =
                 Acm.PROPERTY_FOR_RELATIONSHIP_PROPERTY_ASPECTS.get( acmAspect );
-
         ArrayList< NodeRef > relationships = getPropertyNodeRefs( acmProperty );
         // Searching for the beginning of the relationships with this typeName
         // b/c relationships are ordered by typeName. Therefore, the search
@@ -4340,6 +4337,7 @@ public class EmsScriptNode extends ScriptNode implements
         createOrUpdateAspect( acmAspect );
         String acmProperty =
                 Acm.PROPERTY_FOR_RELATIONSHIP_PROPERTY_ASPECTS.get( acmAspect );
+        // TODO why is it skipping node ref check?
         ArrayList< NodeRef > relationships = getPropertyNodeRefs( acmProperty, true );
         int index =
                 Collections.binarySearch( relationships,
@@ -5447,9 +5445,9 @@ public class EmsScriptNode extends ScriptNode implements
      * points to this node.  Does not trace up the parent tree as getValueSpecOwner()
      * does.
      */
-    public boolean parentOwnsValueSpec()
+    public boolean parentOwnsValueSpec(WorkspaceNode ws )
     {
-        EmsScriptNode parent = getUnreifiedParent( null );
+        EmsScriptNode parent = getUnreifiedParent( null, ws );
         return parent != null && parent.hasValueSpecProperty( this );
     }
 
@@ -5458,7 +5456,7 @@ public class EmsScriptNode extends ScriptNode implements
      *         like Expression) with an aspect that has a property whose value
      *         is a ValueSpecification.
      */
-    public EmsScriptNode getValueSpecOwner() {// boolean valueSpecOwnerOk ) {
+    public EmsScriptNode getValueSpecOwner(WorkspaceNode ws) {// boolean valueSpecOwnerOk ) {
         if (Debug.isOn()) Debug.outln("getValueSpecOwner(" + this + ")");
         EmsScriptNode parent = this;
         EmsScriptNode lastValueSpecParent = null;
@@ -5466,7 +5464,7 @@ public class EmsScriptNode extends ScriptNode implements
         while ( parent != null && ( !parent.hasValueSpecProperty() || parent == this ) ) {
             if (Debug.isOn()) Debug.outln("parent = " + parent );
             lastParent = parent;
-            parent = parent.getUnreifiedParent( null );  // TODO -- REVIEW -- need timestamp??!!
+            parent = parent.getUnreifiedParent( null, ws );  // TODO -- REVIEW -- need timestamp??!!
             if ( parent != null && !parent.hasOrInheritsAspect( "sysml:ValueSpecification" ) ) {
                 lastValueSpecParent = lastParent;
             }
@@ -5476,9 +5474,9 @@ public class EmsScriptNode extends ScriptNode implements
         return parent;
     }
 
-    public boolean isOwnedValueSpec() {
+    public boolean isOwnedValueSpec(WorkspaceNode ws ) {
         if ( hasOrInheritsAspect( "sysml:ValueSpecification" ) ) {
-            return parentOwnsValueSpec();
+            return parentOwnsValueSpec(ws);
         }
         return false;
     }
