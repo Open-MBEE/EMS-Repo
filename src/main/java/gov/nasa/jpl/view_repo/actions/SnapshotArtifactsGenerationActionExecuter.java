@@ -116,6 +116,7 @@ public class SnapshotArtifactsGenerationActionExecuter  extends ActionExecuterAb
         Status status = new Status();
         EmsScriptNode snapshotNode = null;
         JSONObject snapshot = null;
+        Date timestamp = null;
         WorkspaceNode workspace = (WorkspaceNode)action.getParameterValue(PARAM_WORKSPACE);
         try{
     	    // lets check whether or not docbook has been generated
@@ -129,7 +130,7 @@ public class SnapshotArtifactsGenerationActionExecuter  extends ActionExecuterAb
     	    if ( !snapshotNode.hasAspect( "view2:docbook" )) {
     	    	response.append("[INFO]: Creating docbook.xml...\n");
 	            String snapshotName = snapshotNode.getSysmlId();
-	            Date timestamp = (Date)snapshotNode.getProperty("view2:timestamp");
+	            timestamp = (Date)snapshotNode.getProperty("view2:timestamp");
 	
 	            NodeRef viewRef = (NodeRef)snapshotNode.getNodeRefProperty( "view2:snapshotProduct", dateTime,
 	                                                                        workspace);
@@ -158,7 +159,7 @@ public class SnapshotArtifactsGenerationActionExecuter  extends ActionExecuterAb
 	        for(String format:formats){
 	        	if(format.compareToIgnoreCase("pdf") == 0){
 	        		try{
-	        			snapshot = snapshotService.generatePDF(snapshotId, workspace);
+	        			snapshot = snapshotService.generatePDF(snapshotId, timestamp, workspace);
 	        			response.append(snapshotService.getResponse().toString());
 	        		}
 	        		catch(JSONException ex){
@@ -169,7 +170,7 @@ public class SnapshotArtifactsGenerationActionExecuter  extends ActionExecuterAb
 	        	}
 	        	else if(format.compareToIgnoreCase("html") == 0){
 	        		try{
-	        			snapshot = snapshotService.generateHTML(snapshotId, workspace);
+	        			snapshot = snapshotService.generateHTML(snapshotId, timestamp, workspace);
 	        			response.append(snapshotService.getResponse().toString());
 	        		}
 	        		catch(JSONException ex){

@@ -110,7 +110,7 @@ public class SitePermSync extends AbstractJavaWebScript{
                 msgs.put( "Could not find site package for site: " + siteNode.getName() );
             } else {
                 EmsScriptNode sitePkg = new EmsScriptNode(sitePkgNR, services, response);
-                updatePermissions(siteInfo, sitePkg);
+                updatePermissions(siteInfo, sitePkg, ws);
             }
         }
 
@@ -133,7 +133,7 @@ public class SitePermSync extends AbstractJavaWebScript{
      * @param siteInfo  Site who's permissions should be copied onto the site package
      * @param sitePkg   Site packge to update permissions for
      */
-    private void updatePermissions(SiteInfo siteInfo, EmsScriptNode sitePkg) {
+    private void updatePermissions(SiteInfo siteInfo, EmsScriptNode sitePkg, WorkspaceNode ws) {
         NodeRef nr = sitePkg.getNodeRef();
 
         // remove any previous permissions then override
@@ -143,7 +143,7 @@ public class SitePermSync extends AbstractJavaWebScript{
         List<SiteMemberInfo> members = services.getSiteService().listMembersInfo( siteInfo.getShortName(), null, null, 0, true );
         for ( SiteMemberInfo authorityObj : members ) {
             sitePkg.setPermission( authorityObj.getMemberRole(), authorityObj.getMemberName() );
-            EmsScriptNode reifiedSitePkg = sitePkg.getReifiedPkg();
+            EmsScriptNode reifiedSitePkg = sitePkg.getReifiedPkg(null, ws);
             if (reifiedSitePkg != null) {
                 reifiedSitePkg.setPermission( authorityObj.getMemberRole(), authorityObj.getMemberName() );
             }

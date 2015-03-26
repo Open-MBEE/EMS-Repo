@@ -387,7 +387,7 @@ public class ConfigurationsWebscript extends AbstractJavaWebScript {
             if(SnapshotPost.hasPdf(snapshot)){
             	String pdfStatus = SnapshotPost.getPdfStatus(snapshot);
             	if(pdfStatus != null && !pdfStatus.isEmpty()){
-	            	EmsScriptNode pdfNode = SnapshotPost.getPdfNode(snapshot);
+	            	EmsScriptNode pdfNode = SnapshotPost.getPdfNode(snapshot, timestamp, workspace);
 	            	transformMap = new HashMap<String,String>();
 	            	transformMap.put("status", pdfStatus);
 	            	transformMap.put("type", "pdf");
@@ -400,7 +400,7 @@ public class ConfigurationsWebscript extends AbstractJavaWebScript {
             if(SnapshotPost.hasHtmlZip(snapshot)){
             	String htmlZipStatus = SnapshotPost.getHtmlZipStatus(snapshot);
             	if(htmlZipStatus != null && !htmlZipStatus.isEmpty()){
-	            	EmsScriptNode htmlZipNode = SnapshotPost.getHtmlZipNode(snapshot);
+	            	EmsScriptNode htmlZipNode = SnapshotPost.getHtmlZipNode(snapshot, timestamp, workspace);
 	            	transformMap = new HashMap<String,String>();
 	            	transformMap.put("status", htmlZipStatus);
 	            	transformMap.put("type", "html");

@@ -969,7 +969,7 @@ public class WorkspaceDiff implements Serializable {
             if ( ref != null ) {                
                 // Add owned value specs if needed, as we need them to be separated out for
                 // the diff to work correctly.  
-                NodeUtil.addEmbeddedValueSpecs(ref, s1, getServices());
+                NodeUtil.addEmbeddedValueSpecs(ref, s1, getServices(), timestamp1, ws1);
             }
         }
         for ( NodeRef n : tempSet2 ) {
@@ -980,7 +980,7 @@ public class WorkspaceDiff implements Serializable {
             if ( ref != null ) {                
                 // Add owned value specs if needed, as we need them to be separated out for
                 // the diff to work correctly.  
-                NodeUtil.addEmbeddedValueSpecs(ref, s2, getServices());
+                NodeUtil.addEmbeddedValueSpecs(ref, s2, getServices(), timestamp2, node);
             }
         }
 

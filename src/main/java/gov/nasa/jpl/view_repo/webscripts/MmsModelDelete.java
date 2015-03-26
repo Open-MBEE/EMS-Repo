@@ -238,7 +238,7 @@ public class MmsModelDelete extends AbstractJavaWebScript {
             for (Entry< String, EmsScriptNode > entry: wsDiff.getDeletedElements().entrySet()) {
                 EmsScriptNode node = entry.getValue();
                 String id = entry.getKey();
-                if ( node.isOwnedValueSpec(workspace) ) {
+                if ( node.isOwnedValueSpec(null, workspace) ) {
                     valueSpecs.add( node );
                     idsToRemove.add( id );
                 }

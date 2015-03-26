@@ -655,7 +655,7 @@ public class EmsScriptNode extends ScriptNode implements
             createOrUpdateProperty( String acmType, T value ) {
         if ( value instanceof String ) {
             @SuppressWarnings( "unchecked" )
-            T t = (T)extractAndReplaceImageData( (String)value );
+            T t = (T)extractAndReplaceImageData( (String)value, getWorkspace() );
             t = (T) XrefConverter.convertXref((String)t);
             value = t;
         }
@@ -983,8 +983,8 @@ public class EmsScriptNode extends ScriptNode implements
         return getReifiedNode(false, ws);
     }
 
-    public EmsScriptNode getReifiedPkg() {
-        NodeRef nodeRef = (NodeRef)getNodeRefProperty( "ems:reifiedPkg" );
+    public EmsScriptNode getReifiedPkg(Date dateTime, WorkspaceNode ws) {
+        NodeRef nodeRef = (NodeRef)getNodeRefProperty( "ems:reifiedPkg", dateTime, ws );
         if ( nodeRef != null ) {
             return new EmsScriptNode( nodeRef, services, response );
         }
@@ -1587,7 +1587,7 @@ public class EmsScriptNode extends ScriptNode implements
 
         // Check to see if any embedded value specs have been modified after
         // the modified time of this node:
-        NodeUtil.addEmbeddedValueSpecs( getNodeRef(), dependentNodes, services );
+        NodeUtil.addEmbeddedValueSpecs( getNodeRef(), dependentNodes, services, dateTime, );
         for ( NodeRef nodeRef : dependentNodes ) {
             nodeRef = NodeUtil.getNodeRefAtTime( nodeRef, dateTime );
             if ( nodeRef == null ) continue;
@@ -2287,7 +2287,7 @@ public class EmsScriptNode extends ScriptNode implements
                         addParameterJSON( json, this, filter, dateTime );
                         break;
                     case Product:
-                        addProductJSON( json, this, filter, dateTime );
+                        addProductJSON( json, this, filter, ws, dateTime );
                         break;
                     case Property:
                         addPropertyJSON( json, this, filter, ws, dateTime );
@@ -2308,7 +2308,7 @@ public class EmsScriptNode extends ScriptNode implements
                         addValueSpecificationJSON( json, this, filter, dateTime );
                         break;
                     case View:
-                        addViewJSON( json, this, filter, dateTime );
+                        addViewJSON( json, this, filter, ws, dateTime );
                         break;
                     case Viewpoint:
                         addViewpointJSON( json, this, filter, dateTime );
@@ -3917,91 +3917,91 @@ public class EmsScriptNode extends ScriptNode implements
         return nodeDiff;
     }
 
-    /**
-     * Merge the input node into this one. This adds and updates most aspects,
-     * properties, and property values of the input node to this one. It does
-     * not remove aspects or properties not found for the input node. This
-     * ignores workspace metadata (e.g., does not change workspaces or add the
-     * HasWorkspace aspect).
-     *
-     * @param node
-     *            the node whose properties are being merged
-     * @return true if and only if any changes are made
-     */
-    public boolean merge( EmsScriptNode node ) {
-        boolean changed = false;
-        NodeDiff diff = getNodeDiff( node, true, true );
-        return merge( diff );
-    }
-
-    /**
-     * Merge the differences in the input NodeDiff into this node even though
-     * this node may not be one of the nodes use to create the NodeDiff. Added
-     * properties are treated as updates if the properties already exist in this
-     * node. This ignores workspace metadata (e.g., does not change workspaces
-     * or add the HasWorkspace aspect).
-     *
-     * @param diff
-     *            the NodeDiff to apply to this node
-     * @return true if and only if any changes are made
-     */
-    public boolean merge( NodeDiff diff ) {
-        boolean changed = false;
-
-
-        makeSureNodeRefIsNotFrozen();
-        transactionCheck();
-        for ( String aspect : diff.getRemovedAspects(getSysmlId()) ) {
-            NodeService ns = getServices().getNodeService();
-            if ( hasAspect( aspect ) ) {
-                try {
-                    ns.removeAspect( getNodeRef(), createQName( aspect ) );
-                    changed = true;
-                } catch ( Throwable e ) {
-                    // ignore
-                }
-            }
-        }
-
-        for ( String aspect : diff.getAddedAspects(getSysmlId()) ) {
-            if ( !hasAspect( aspect ) ) {
-                try {
-                    createOrUpdateAspect( aspect );
-                    changed = true;
-                } catch ( Throwable e ) {
-                    // ignore
-                }
-            }
-        }
-
-        Map< String, Object > removedProps =
-                diff.getRemovedProperties().get(getSysmlId());
-        if ( removedProps != null )
-        for ( Entry< String, Object > e : removedProps.entrySet() ) {
-            if ( workspaceMetaProperties.contains( e.getKey() ) ) continue;
-            Object myVal = getNodeRefProperty( e.getKey() );
-            if ( myVal != null ) {
-                if ( removeProperty( e.getKey() ) ) changed = true;
-            }
-        }
-        Map< String,  Pair< Object, Object > > propChanges =
-                diff.getPropertyChanges().get(getSysmlId());
-        if ( propChanges != null )
-        for ( Entry< String, Pair< Object, Object > > e : propChanges.entrySet() ) {
-            if ( workspaceMetaProperties.contains( e.getKey() ) ) continue;
-            Object newVal = e.getValue().second;
-            if ( newVal == null ) continue;
-            Object myVal = getNodeRefProperty( e.getKey() );
-            if ( newVal.equals( myVal ) ) continue;
-            if ( newVal instanceof Serializable ) {
-                Serializable sVal = (Serializable)newVal;
-                if ( createOrUpdateProperty( e.getKey(), sVal  ) ) changed = true;
-            } else {
-                Debug.error("Merging bad property value! " + e.getValue() );
-            }
-        }
-        return changed;
-    }
+//    /**
+//     * Merge the input node into this one. This adds and updates most aspects,
+//     * properties, and property values of the input node to this one. It does
+//     * not remove aspects or properties not found for the input node. This
+//     * ignores workspace metadata (e.g., does not change workspaces or add the
+//     * HasWorkspace aspect).
+//     *
+//     * @param node
+//     *            the node whose properties are being merged
+//     * @return true if and only if any changes are made
+//     */
+//    public boolean merge( EmsScriptNode node ) {
+//        boolean changed = false;
+//        NodeDiff diff = getNodeDiff( node, true, true );
+//        return merge( diff );
+//    }
+//
+//    /**
+//     * Merge the differences in the input NodeDiff into this node even though
+//     * this node may not be one of the nodes use to create the NodeDiff. Added
+//     * properties are treated as updates if the properties already exist in this
+//     * node. This ignores workspace metadata (e.g., does not change workspaces
+//     * or add the HasWorkspace aspect).
+//     *
+//     * @param diff
+//     *            the NodeDiff to apply to this node
+//     * @return true if and only if any changes are made
+//     */
+//    public boolean merge( NodeDiff diff ) {
+//        boolean changed = false;
+//
+//
+//        makeSureNodeRefIsNotFrozen();
+//        transactionCheck();
+//        for ( String aspect : diff.getRemovedAspects(getSysmlId()) ) {
+//            NodeService ns = getServices().getNodeService();
+//            if ( hasAspect( aspect ) ) {
+//                try {
+//                    ns.removeAspect( getNodeRef(), createQName( aspect ) );
+//                    changed = true;
+//                } catch ( Throwable e ) {
+//                    // ignore
+//                }
+//            }
+//        }
+//
+//        for ( String aspect : diff.getAddedAspects(getSysmlId()) ) {
+//            if ( !hasAspect( aspect ) ) {
+//                try {
+//                    createOrUpdateAspect( aspect );
+//                    changed = true;
+//                } catch ( Throwable e ) {
+//                    // ignore
+//                }
+//            }
+//        }
+//
+//        Map< String, Object > removedProps =
+//                diff.getRemovedProperties().get(getSysmlId());
+//        if ( removedProps != null )
+//        for ( Entry< String, Object > e : removedProps.entrySet() ) {
+//            if ( workspaceMetaProperties.contains( e.getKey() ) ) continue;
+//            Object myVal = getNodeRefProperty( e.getKey() );
+//            if ( myVal != null ) {
+//                if ( removeProperty( e.getKey() ) ) changed = true;
+//            }
+//        }
+//        Map< String,  Pair< Object, Object > > propChanges =
+//                diff.getPropertyChanges().get(getSysmlId());
+//        if ( propChanges != null )
+//        for ( Entry< String, Pair< Object, Object > > e : propChanges.entrySet() ) {
+//            if ( workspaceMetaProperties.contains( e.getKey() ) ) continue;
+//            Object newVal = e.getValue().second;
+//            if ( newVal == null ) continue;
+//            Object myVal = getNodeRefProperty( e.getKey() );
+//            if ( newVal.equals( myVal ) ) continue;
+//            if ( newVal instanceof Serializable ) {
+//                Serializable sVal = (Serializable)newVal;
+//                if ( createOrUpdateProperty( e.getKey(), sVal  ) ) changed = true;
+//            } else {
+//                Debug.error("Merging bad property value! " + e.getValue() );
+//            }
+//        }
+//        return changed;
+//    }
 
     /**
      * Remove the property with the given name.
@@ -4061,7 +4061,7 @@ public class EmsScriptNode extends ScriptNode implements
         
         boolean status = false;
         EmsScriptNode parent = getParent();
-        EmsScriptNode oldParentReifiedNode = parent.getReifiedNode();
+        EmsScriptNode oldParentReifiedNode = parent.getReifiedNode(parent.getWorkspace());
 
         // Create new parent if the parent is not correct:
         if ( !parent.equals( destination ) ) {
@@ -4088,7 +4088,7 @@ public class EmsScriptNode extends ScriptNode implements
                 }
     
                 // make sure to move package as well
-                EmsScriptNode reifiedPkg = getReifiedPkg();
+                EmsScriptNode reifiedPkg = getReifiedPkg(null, getWorkspace());
                 if ( reifiedPkg != null ) {
                     reifiedPkg.move( destination );
                 }
@@ -4100,7 +4100,7 @@ public class EmsScriptNode extends ScriptNode implements
         // The parent was equal, but may need to update owner/ownedChildren in case the parent was
         // cloned already in this workspace:
         else {
-            EmsScriptNode owningParent = getOwningParent(null);
+            EmsScriptNode owningParent = getOwningParent(null, getWorkspace());
             if ( oldParentReifiedNode != null && !oldParentReifiedNode.equals(owningParent)) {
                 owningParent.removeFromPropertyNodeRefs( "ems:ownedChildren", this.getNodeRef() );
                 setOwnerToReifiedNode( parent, parent.getWorkspace() );
@@ -4722,8 +4722,7 @@ public class EmsScriptNode extends ScriptNode implements
     }
 
     protected void addViewJSON( JSONObject json, EmsScriptNode node,
-                                Set< String > filter, Date dateTime,
-                                WorkspaceNode ws)
+                                Set< String > filter,  WorkspaceNode ws, Date dateTime)
                                         throws JSONException {
         String property;
         property = (String) node.getProperty("view2:contains");
@@ -4806,7 +4805,7 @@ public class EmsScriptNode extends ScriptNode implements
     }
     
     protected void addProductJSON( JSONObject json, EmsScriptNode node,
-                                   Set< String > filter, Date dateTime )
+                                   Set< String > filter, WorkspaceNode ws, Date dateTime)
                                            throws JSONException {
         JSONArray jarr = new JSONArray();
         String v2v = (String)node.getProperty( "view2:view2view" );
@@ -4824,7 +4823,7 @@ public class EmsScriptNode extends ScriptNode implements
                        new JSONArray( (String)node.getProperty( "view2:noSections" ) ),
                        filter );
         }
-        addViewJSON( json, node, filter, dateTime );
+        addViewJSON( json, node, filter, ws, dateTime);
     }
 
     protected
@@ -5423,16 +5422,16 @@ public class EmsScriptNode extends ScriptNode implements
     }
 */
 
-    public boolean hasValueSpecProperty() {
-        return hasValueSpecProperty(null);
+    public boolean hasValueSpecProperty(Date dateTime, WorkspaceNode ws) {
+        return hasValueSpecProperty(null, dateTime, ws);
     }
 
-    public boolean hasValueSpecProperty(EmsScriptNode propVal) {
+    public boolean hasValueSpecProperty(EmsScriptNode propVal, Date dateTime, WorkspaceNode ws) {
         for ( String acmType : Acm.TYPES_WITH_VALUESPEC.keySet() ) {
             if ( hasOrInheritsAspect( acmType ) ) {
                 for ( String acmProp : Acm.TYPES_WITH_VALUESPEC.get(acmType) ) {
                     if (propVal != null) {
-                        Object propValFnd = getNodeRefProperty( acmProp );
+                        Object propValFnd = getNodeRefProperty( acmProp, dateTime, ws );
                         if (propValFnd instanceof NodeRef) {
                             EmsScriptNode node = new EmsScriptNode((NodeRef)propValFnd, services);
                             if ( node.equals( propVal, true ) ) return true;
@@ -5448,7 +5447,7 @@ public class EmsScriptNode extends ScriptNode implements
                         }
                     }
                     else {
-                        if ( getNodeRefProperty( acmProp ) != null ) return true;
+                        if ( getNodeRefProperty( acmProp, dateTime, ws ) != null ) return true;
                     }
                 }
             }
@@ -5476,10 +5475,10 @@ public class EmsScriptNode extends ScriptNode implements
      * points to this node.  Does not trace up the parent tree as getValueSpecOwner()
      * does.
      */
-    public boolean parentOwnsValueSpec(WorkspaceNode ws )
+    public boolean parentOwnsValueSpec(Date dateTime, WorkspaceNode ws )
     {
         EmsScriptNode parent = getUnreifiedParent( null, ws );
-        return parent != null && parent.hasValueSpecProperty( this );
+        return parent != null && parent.hasValueSpecProperty( this, dateTime, ws );
     }
 
     /**
@@ -5487,12 +5486,12 @@ public class EmsScriptNode extends ScriptNode implements
      *         like Expression) with an aspect that has a property whose value
      *         is a ValueSpecification.
      */
-    public EmsScriptNode getValueSpecOwner(WorkspaceNode ws) {// boolean valueSpecOwnerOk ) {
+    public EmsScriptNode getValueSpecOwner(Date dateTime, WorkspaceNode ws) {// boolean valueSpecOwnerOk ) {
         if (Debug.isOn()) Debug.outln("getValueSpecOwner(" + this + ")");
         EmsScriptNode parent = this;
         EmsScriptNode lastValueSpecParent = null;
         EmsScriptNode lastParent = null;
-        while ( parent != null && ( !parent.hasValueSpecProperty() || parent == this ) ) {
+        while ( parent != null && ( !parent.hasValueSpecProperty(dateTime, ws) || parent == this ) ) {
             if (Debug.isOn()) Debug.outln("parent = " + parent );
             lastParent = parent;
             parent = parent.getUnreifiedParent( null, ws );  // TODO -- REVIEW -- need timestamp??!!
@@ -5505,9 +5504,9 @@ public class EmsScriptNode extends ScriptNode implements
         return parent;
     }
 
-    public boolean isOwnedValueSpec(WorkspaceNode ws ) {
+    public boolean isOwnedValueSpec(Date dateTime, WorkspaceNode ws ) {
         if ( hasOrInheritsAspect( "sysml:ValueSpecification" ) ) {
-            return parentOwnsValueSpec(ws);
+            return parentOwnsValueSpec(dateTime, ws);
         }
         return false;
     }

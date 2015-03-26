@@ -931,7 +931,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
         EmsScriptNode siteParent;
         while (siteParentReifNode != null && siteParentReifNode.exists()) {
 
-            siteParent = siteParentReifNode.getReifiedPkg();
+            siteParent = siteParentReifNode.getReifiedPkg(dateTime, workspace);
 
             // If the parent is a package and a site, then its the parent site node:
             if (siteParentReifNode.hasAspect(Acm.ACM_PACKAGE) ) {

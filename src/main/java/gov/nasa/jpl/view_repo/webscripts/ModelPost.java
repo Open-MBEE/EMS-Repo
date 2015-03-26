@@ -1349,7 +1349,7 @@ public class ModelPost extends AbstractJavaWebScript {
         
         // If it is a type that has value specs, and at least one of those properties
         // has a value spec mapped to it:
-        if (node.hasValueSpecProperty()) {
+        if (node.hasValueSpecProperty(null, workspace)) {
             
             Set<QName> aspectProps = new HashSet<QName>();
             

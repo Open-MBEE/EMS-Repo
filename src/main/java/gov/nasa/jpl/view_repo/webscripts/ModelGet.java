@@ -373,7 +373,7 @@ public class ModelGet extends AbstractJavaWebScript {
 		if (!elementsFound.containsKey(sysmlId)) {
 		    // dont add reified packages
 		    if (!rootName.endsWith("_pkg") &&
-		        !root.isOwnedValueSpec(workspace)) { //isPropertyOwnedValueSpecification()) {
+		        !root.isOwnedValueSpec(dateTime, workspace)) { //isPropertyOwnedValueSpecification()) {
 		        elementsFound.put(sysmlId, root);
 		    }
 		}
@@ -404,7 +404,7 @@ public class ModelGet extends AbstractJavaWebScript {
 			    }
                 EmsScriptNode child = new EmsScriptNode( vChildRef, services, response );
                 if ( checkPermissions( child, PermissionService.READ ) ) {
-                    if (child.exists() && !child.isOwnedValueSpec(workspace)) { //isPropertyOwnedValueSpecification()) {
+                    if (child.exists() && !child.isOwnedValueSpec(dateTime, workspace)) { //isPropertyOwnedValueSpecification()) {
 
                         String value = child.getSysmlId();
                         if ( value != null && !value.endsWith( "_pkg" )) {
