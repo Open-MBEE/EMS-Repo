@@ -5,11 +5,14 @@
         "name": "ws2",
         "elements": [
             {
-                "name": "402",
                 "qualifiedName": "/europa/JW_TEST2/400/401/402",
                 "sysmlid": "402",
-                "documentation": "4to",
+                "editable": true,
+                "creator": "admin",
+                "version": "1.2",
+                "name": "402",
                 "owner": "401",
+                "documentation": "4to",
                 "specialization": {
                     "propertyType": null,
                     "isDerived": false,
@@ -20,9 +23,7 @@
                         "type": "LiteralString"
                     }],
                     "type": "Property"
-                },
-                "editable": true,
-                "creator": "admin",
+                }
             },
             {
                 "name": "duration",
