@@ -28,6 +28,7 @@ import org.alfresco.service.namespace.QName;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.springframework.extensions.webscripts.Status;
 
 /**
  * Class for keeping track of differences between two workspaces. WS1 always has the original
@@ -70,6 +71,9 @@ public class WorkspaceDiff implements Serializable {
     private Map< String, EmsScriptNode > updatedElements;
 
     NodeDiff nodeDiff = null;
+    
+    private StringBuffer response = null;
+    private Status status = null;
 
     private WorkspaceDiff() {
         elements = new TreeMap<String, EmsScriptNode>();
@@ -90,15 +94,18 @@ public class WorkspaceDiff implements Serializable {
      * @param ws1
      * @param ws2
      */
-    public WorkspaceDiff(WorkspaceNode ws1, WorkspaceNode ws2) {
+    public WorkspaceDiff(WorkspaceNode ws1, WorkspaceNode ws2, StringBuffer response, Status status) {
         this();
         this.ws1 = ws1;
         this.ws2 = ws2;
+        this.response = response;
+        this.status = status;
     }
 
-    public WorkspaceDiff(WorkspaceNode ws1, WorkspaceNode ws2, Date timestamp1, Date timestamp2 ) {
+    public WorkspaceDiff(WorkspaceNode ws1, WorkspaceNode ws2, Date timestamp1, Date timestamp2,
+                         StringBuffer response, Status status) {
 
-        this(ws1, ws2);
+        this(ws1, ws2, response, status);
         this.timestamp1 = timestamp1;
         this.timestamp2 = timestamp2;
         diff();
@@ -499,22 +506,18 @@ public class WorkspaceDiff implements Serializable {
     }
     
     public static Set< NodeRef > getAllChangedElementsInDiffJson( JSONArray diffJson,
-                                                                        WorkspaceNode ws,
-                                                                        ServiceRegistry services )
+                                                                  WorkspaceNode ws,
+                                                                  ServiceRegistry services,
+                                                                  Date dateTime)
                                                                                 throws JSONException {
-        
-        // TODO REVIEW why dont they searches have time in them?  Why the second search w/ workspace = null?
-        
+                
         Set< NodeRef > nodes = new LinkedHashSet< NodeRef >();
         for ( int i = 0; i < diffJson.length(); ++i ) {
             JSONObject element = diffJson.getJSONObject( i );
             if ( element.has( "sysmlid" ) ) {
                 String sysmlid = element.getString( "sysmlid" );
-                NodeRef ref = NodeUtil.findNodeRefById( sysmlid, false, ws, null,
+                NodeRef ref = NodeUtil.findNodeRefById( sysmlid, false, ws, dateTime,
                                                         services, true );
-                if ( ref == null ) ref = 
-                        NodeUtil.findNodeRefById( sysmlid, true, null, null,
-                                                  services, true );
                 if ( ref != null ) {
                     nodes.add( ref );                    
                 }  
@@ -524,7 +527,8 @@ public class WorkspaceDiff implements Serializable {
     }
 
     public static Set< NodeRef > getAllChangedElementsInDiffJson( JSONObject diffJson,
-                                                                        ServiceRegistry services )
+                                                                        ServiceRegistry services,
+                                                                  Date dateTime)
                                                                                 throws JSONException {
         LinkedHashSet< NodeRef > nodes = new LinkedHashSet< NodeRef >();
         JSONObject jsonObj = diffJson;
@@ -544,17 +548,17 @@ public class WorkspaceDiff implements Serializable {
         Set< NodeRef > elements = null;
         if ( jsonObj.has( "addedElements" ) ) {
             jsonArr = jsonObj.getJSONArray( "addedElements" );
-            elements = getAllChangedElementsInDiffJson( jsonArr, ws, services );
+            elements = getAllChangedElementsInDiffJson( jsonArr, ws, services, dateTime );
             if ( elements != null ) nodes.addAll( elements );
         }
         if ( jsonObj.has( "deletedElements" ) ) {
             jsonArr = jsonObj.getJSONArray( "deletedElements" );
-            elements = getAllChangedElementsInDiffJson( jsonArr, ws, services );
+            elements = getAllChangedElementsInDiffJson( jsonArr, ws, services, dateTime );
             if ( elements != null ) nodes.addAll( elements );
         }
         if ( jsonObj.has( "updatedElements" ) ) {
             jsonArr = jsonObj.getJSONArray( "updatedElements" );
-            elements = getAllChangedElementsInDiffJson( jsonArr, ws, services );
+            elements = getAllChangedElementsInDiffJson( jsonArr, ws, services, dateTime );
             if ( elements != null ) nodes.addAll( elements );
         }
         return nodes;
@@ -901,13 +905,13 @@ public class WorkspaceDiff implements Serializable {
                                                                timestamp1,
                                                                timestamp2,
                                                                getServices(),
-                                                               null, null );
+                                                               response, status );
         Set< NodeRef > s2 =
                 WorkspaceNode.getChangedNodeRefsWithRespectTo( node, ws1,
                                                                timestamp2,
                                                                timestamp1,
                                                                getServices(),
-                                                               null, null );
+                                                               response, status );
         
         // If either of these are null then we caught an exception above, 
         // so just bail

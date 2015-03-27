@@ -728,7 +728,8 @@ public class WorkspaceNode extends EmsScriptNode {
 
                         Set< NodeRef > elements =
                                 WorkspaceDiff.getAllChangedElementsInDiffJson( diff,
-                                                                               services );
+                                                                               services,
+                                                                               dateTime);
                         if ( elements != null )
                             changedNodeRefs.addAll( elements );
                     } catch ( JSONException e ) {
