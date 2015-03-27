@@ -1,18 +1,15 @@
 {
-    "sequence": 28,
+    "sequence": 29,
     "workspace1": {
         "qualifiedName": "master/ws2",
         "name": "ws2",
         "elements": [
             {
+                "name": "402",
                 "qualifiedName": "/europa/JW_TEST2/400/401/402",
                 "sysmlid": "402",
-                "editable": true,
-                "creator": "admin",
-                "version": "1.2",
-                "name": "402",
-                "owner": "401",
                 "documentation": "4to",
+                "owner": "401",
                 "specialization": {
                     "propertyType": null,
                     "isDerived": false,
@@ -23,7 +20,10 @@
                         "type": "LiteralString"
                     }],
                     "type": "Property"
-                }
+                },
+                "editable": true,
+                "creator": "admin",
+                "version": "1.2"
             },
             {
                 "name": "duration",
@@ -49,15 +49,15 @@
     },
     "workspace2": {
         "deletedElements": [{
-            "name": "duration",
             "qualifiedName": "/europa/JW_TEST2/duration",
-            "sysmlid": "arg_ev_38307",
-            "documentation": "",
+            "name": "duration",
             "owner": "123456",
+            "documentation": "",
+            "sysmlid": "arg_ev_38307",
             "specialization": {
                 "propertyType": null,
-                "isDerived": false,
                 "isSlot": false,
+                "isDerived": false,
                 "value": [{
                     "valueExpression": null,
                     "integer": 22,
@@ -66,7 +66,7 @@
                 "type": "Property"
             },
             "editable": true,
-            "creator": "admin",
+            "creator": "admin"
         }],
         "addedElements": [{
             "qualifiedName": "/no_site/no_site_no_project/holding_bin/null",

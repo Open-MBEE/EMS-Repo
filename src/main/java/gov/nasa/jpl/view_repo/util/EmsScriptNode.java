@@ -1548,11 +1548,20 @@ public class EmsScriptNode extends ScriptNode implements
     public Object getProperty( String acmType ) {
         Object result = getPropertyImpl(acmType);
 
-        // get noderefs from the proper workspace unless the property is a
-        // workspace meta-property
+        // Throw an execption of the property value is a NodeRef or 
+        // collection of NodeRefs
         if ( !workspaceMetaProperties.contains( acmType )) {
-            if ( result instanceof NodeRef  || result instanceof Collection ) {
+            if ( result instanceof NodeRef ) {
                 throw new UnsupportedOperationException();
+            }
+            else if (result instanceof Collection) {
+                Collection< ? > resultColl = (Collection< ? >)result;
+                if (!Utils.isNullOrEmpty( resultColl ) ) {
+                    Object firstResult = resultColl.iterator().next();
+                    if ( firstResult instanceof NodeRef ) {
+                        throw new UnsupportedOperationException();
+                    } 
+                }
             }
         }
 
@@ -1628,6 +1637,38 @@ public class EmsScriptNode extends ScriptNode implements
 //                returnMap.put( entry.getKey().toString(), getProperty(keyShort) );
 //            }
 //            return returnMap;
+        } else {
+            return super.getProperties();
+        }
+    }
+    
+    /**
+     * Gets the properties of node making sure to get the correct noderef for properties
+     * whose values are noderefs.
+     * 
+     * @param dateTime
+     * @param ws
+     * @return
+     */
+    public Map< String, Object > getNodeRefProperties(Date dateTime, WorkspaceNode ws) {
+
+        if ( useFoundationalApi ) {
+            
+            Map<String, Object> returnMap = new HashMap<String, Object>();
+            Map< QName, Serializable > map =  services.getNodeService().getProperties( nodeRef );
+            
+            // Need to potentially replace each property with the correct property value for
+            // the workspace.  Remember, that property that points to a node ref may point to
+            // one in a parent workspace, so we must do a search by id to get the correct one:
+            for (Entry< QName, Serializable> entry : map.entrySet()) {
+                String keyShort = NodeUtil.getShortQName( entry.getKey() );
+                // Versioned nodes property maps include properties that map to null, but normal nodes dont,
+                // so filter this out:
+                if (entry.getValue() != null) {
+                    returnMap.put( entry.getKey().toString(), getNodeRefProperty(keyShort,dateTime,ws) );
+                }
+            }
+            return returnMap;
         } else {
             return super.getProperties();
         }
@@ -3561,7 +3602,7 @@ public class EmsScriptNode extends ScriptNode implements
         if ( thisCurrent == null || thatCurrent == null ) return false;
         return thisCurrent.equals( thatCurrent );
     }
-
+    
     /**
      * Override exists for EmsScriptNodes
      *
@@ -5183,7 +5224,7 @@ public class EmsScriptNode extends ScriptNode implements
             putInJson( json, "specification", addNodeRefIdJSON(specNode), filter );
 
         } else {
-            Object property = node.getProperty( "sysml:constraintSpecification" );
+            Object property = node.getNodeRefProperty( "sysml:constraintSpecification", dateTime, ws );
             if ( property != null ) {
               putInJson( json, "specification", addInternalJSON( property, ws, dateTime ),
                          filter );
@@ -5235,23 +5276,23 @@ public class EmsScriptNode extends ScriptNode implements
         putInJson( json, Acm.JSON_CONNECTOR_TYPE, addNodeRefIdJSON(connectorType), filter);
 
         putInJson( json, Acm.JSON_CONNECTOR_VALUE,
-                   addInternalJSON( node.getProperty(Acm.ACM_CONNECTOR_VALUE), ws, dateTime ),
+                   addInternalJSON( node.getNodeRefProperty(Acm.ACM_CONNECTOR_VALUE, dateTime, ws), ws, dateTime ),
                    filter );
 
         putInJson( json, Acm.JSON_TARGET_LOWER,
-                   addInternalJSON( node.getProperty(Acm.ACM_TARGET_LOWER), ws, dateTime ),
+                   addInternalJSON( node.getNodeRefProperty(Acm.ACM_TARGET_LOWER, dateTime, ws), ws, dateTime ),
                    filter );
 
         putInJson( json, Acm.JSON_TARGET_UPPER,
-                   addInternalJSON( node.getProperty(Acm.ACM_TARGET_UPPER), ws, dateTime ),
+                   addInternalJSON( node.getNodeRefProperty(Acm.ACM_TARGET_UPPER, dateTime, ws), ws, dateTime ),
                    filter );
 
         putInJson( json, Acm.JSON_SOURCE_LOWER,
-                   addInternalJSON( node.getProperty(Acm.ACM_SOURCE_LOWER), ws, dateTime ),
+                   addInternalJSON( node.getNodeRefProperty(Acm.ACM_SOURCE_LOWER, dateTime, ws), ws, dateTime ),
                    filter );
 
         putInJson( json, Acm.JSON_SOURCE_UPPER,
-                   addInternalJSON( node.getProperty(Acm.ACM_SOURCE_UPPER), ws, dateTime ),
+                   addInternalJSON( node.getNodeRefProperty(Acm.ACM_SOURCE_UPPER, dateTime, ws), ws, dateTime ),
                    filter );
 
     }

@@ -1,47 +1,50 @@
-{"elements": [{
-    "qualifiedId": "/europa/123456/onBothWorkspaces1",
-    "qualifiedName": "/europa/JW_TEST/onBothWorkspaces1",
-    "name": "onBothWorkspaces1",
-    "owner": "123456",
-    "documentation": "",
-    "sysmlid": "onBothWorkspaces1",
-    "specialization": {
-    "propertyType": null,
-    "isSlot": false,
-    "isDerived": false,
-    "value": [{
-        "valueExpression": null,
-        "string": "gg_string",
-        "type": "LiteralString"
-    }],
-    "type": "Property"
-},
-    "editable": true,
-    "creator": "admin"
-}, {
-    "qualifiedId": "/europa/123456/onBothWorkspaces2",
-    "qualifiedName": "/europa/JW_TEST/onBothWorkspaces2",
-    "name": "onBothWorkspaces2",
-    "owner": "123456",
-    "documentation": "",
-    "sysmlid": "onBothWorkspaces2",
-    "specialization": {
-    "valueExpression": null,
-    "operand": [
-        {
-            "element": "300",
+{"elements": [
+    {
+        "qualifiedId": "/europa/123456/onBothWorkspaces2",
+        "name": "onBothWorkspaces2",
+        "qualifiedName": "/europa/JW_TEST/onBothWorkspaces2",
+        "sysmlid": "onBothWorkspaces2",
+        "documentation": "",
+        "owner": "123456",
+        "specialization": {
             "valueExpression": null,
-            "type": "ElementValue"
+            "type": "Expression",
+            "operand": [
+                {
+                    "element": "300",
+                    "valueExpression": null,
+                    "type": "ElementValue"
+                },
+                {
+                    "element": "302",
+                    "valueExpression": null,
+                    "type": "ElementValue"
+                }
+            ]
         },
-        {
-            "element": "302",
-            "valueExpression": null,
-            "type": "ElementValue"
-        }
-    ],
-    "type": "Expression"
-},
-    "editable": true,
-    "creator": "admin"
-}]}
+        "editable": true,
+        "creator": "admin",
+    },
+    {
+        "qualifiedId": "/europa/123456/onBothWorkspaces1",
+        "name": "onBothWorkspaces1",
+        "qualifiedName": "/europa/JW_TEST/onBothWorkspaces1",
+        "sysmlid": "onBothWorkspaces1",
+        "documentation": "",
+        "owner": "123456",
+        "specialization": {
+            "propertyType": null,
+            "isDerived": false,
+            "isSlot": false,
+            "value": [{
+                "valueExpression": null,
+                "string": "gg_string",
+                "type": "LiteralString"
+            }],
+            "type": "Property"
+        },
+        "editable": true,
+        "creator": "admin",
+    }
+]}
 200

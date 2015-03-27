@@ -2,40 +2,44 @@
     {
         "qualifiedId": "master",
         "id": "master",
+        "workspaceOperationsPermission": true,
         "qualifiedName": "master",
         "name": "master"
     },
     {
-        "qualifiedId": "master/6f5108e6-40cf-4c61-b623-f5c11f511c68",
-        "id": "6f5108e6-40cf-4c61-b623-f5c11f511c68",
-        "created": "2015-02-24T11:31:22.924-0800",
+        "qualifiedId": "master/5d875e01-0f81-47a4-a827-2e083ce6a27f",
+        "id": "5d875e01-0f81-47a4-a827-2e083ce6a27f",
+        "created": "2015-03-27T09:03:32.446-0700",
         "description": "",
         "qualifiedName": "master/wsA",
         "name": "wsA",
         "parent": "master",
-        "modified": "2015-02-24T11:31:23.335-0800",
+        "permission": "read",
+        "modified": "2015-03-27T09:03:32.932-0700",
         "creator": "admin"
     },
     {
-        "qualifiedId": "master/6f5108e6-40cf-4c61-b623-f5c11f511c68/bfd49be4-c441-408d-a72f-eaaeb397a2dd",
-        "id": "bfd49be4-c441-408d-a72f-eaaeb397a2dd",
-        "created": "2015-02-24T11:31:23.313-0800",
+        "qualifiedId": "master/5d875e01-0f81-47a4-a827-2e083ce6a27f/99bf0308-cb01-4a1d-a5b4-15e847e1a75d",
+        "id": "99bf0308-cb01-4a1d-a5b4-15e847e1a75d",
+        "created": "2015-03-27T09:03:32.916-0700",
         "description": "",
         "qualifiedName": "master/wsA/wsB",
         "name": "wsB",
-        "parent": "6f5108e6-40cf-4c61-b623-f5c11f511c68",
-        "modified": "2015-02-24T11:31:23.313-0800",
+        "parent": "5d875e01-0f81-47a4-a827-2e083ce6a27f",
+        "permission": "read",
+        "modified": "2015-03-27T09:03:32.916-0700",
         "creator": "admin"
     },
     {
-        "qualifiedId": "master/107aa79e-bf29-4f20-8f0a-6ed5dc385c8c",
-        "id": "107aa79e-bf29-4f20-8f0a-6ed5dc385c8c",
-        "created": "2015-02-24T11:31:23.733-0800",
+        "qualifiedId": "master/f8aa9d2e-b65f-4b7c-982b-fe22a01b319e",
+        "id": "f8aa9d2e-b65f-4b7c-982b-fe22a01b319e",
+        "created": "2015-03-27T09:03:33.291-0700",
         "description": "modified the workspace name and desc",
         "qualifiedName": "master/modifiedWorkspaceName",
         "name": "modifiedWorkspaceName",
         "parent": "master",
-        "modified": "2015-02-24T11:31:24.082-0800",
+        "permission": "read",
+        "modified": "2015-03-27T09:03:33.652-0700",
         "creator": "admin"
     }
 ]}

@@ -1,8 +1,9 @@
 {"elements": [{
-    "qualifiedId": "/europa/123456/300/301/302/y",
-    "qualifiedName": "/europa/JW_TEST/300/301/302/null",
-    "sysmlid": "y",
-    "documentation": "y is y",
+    "qualifiedId": "/europa/123456/300/301/302/303",
+    "name": "303",
+    "qualifiedName": "/europa/JW_TEST/300/301/302/303",
+    "sysmlid": "303",
+    "documentation": "talk modified",
     "owner": "302",
     "specialization": {
         "propertyType": null,
@@ -10,7 +11,7 @@
         "isSlot": false,
         "value": [{
             "valueExpression": null,
-            "string": "the y value",
+            "string": "dlam_string modified",
             "type": "LiteralString"
         }],
         "type": "Property"

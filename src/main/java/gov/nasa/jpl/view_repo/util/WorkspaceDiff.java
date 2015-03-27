@@ -502,6 +502,9 @@ public class WorkspaceDiff implements Serializable {
                                                                         WorkspaceNode ws,
                                                                         ServiceRegistry services )
                                                                                 throws JSONException {
+        
+        // TODO REVIEW why dont they searches have time in them?  Why the second search w/ workspace = null?
+        
         Set< NodeRef > nodes = new LinkedHashSet< NodeRef >();
         for ( int i = 0; i < diffJson.length(); ++i ) {
             JSONObject element = diffJson.getJSONObject( i );
@@ -531,8 +534,8 @@ public class WorkspaceDiff implements Serializable {
         
         if ( diffJson.has( "workspace2" ) ) {
             jsonObj = jsonObj.getJSONObject( "workspace2" );
-            if ( jsonObj.has( "name" ) ) {
-                String name = jsonObj.getString( "name" );
+            if ( jsonObj.has( "id" ) ) {
+                String name = jsonObj.getString( "id" );
                 ws = WorkspaceNode.getWorkspaceFromId( name, services,
                                                                null, null, //false
                                                                null );
@@ -587,9 +590,9 @@ public class WorkspaceDiff implements Serializable {
 
         addJSONArray(ws2Json, "addedElements", addedElements, ws2, time2, true);
         addJSONArray(ws2Json, "movedElements", movedElements, ws2, time2, showAll);
-        // Note: deleteElements should use time1 and not time2, as element was found in ws1
-        //       at time1, not ws1 at time2!
-        addJSONArray(ws2Json, "deletedElements", deletedElements, ws2, time1, showAll);
+        // Note: deleteElements should use time1 and not time2, and ws1 not ws2, 
+        //       as element was found in ws1 at time1, not ws2 at time2!
+        addJSONArray(ws2Json, "deletedElements", deletedElements, ws1, time1, showAll);
         addJSONArray(ws2Json, "updatedElements", updatedElements, ws2, time2, showAll);
         addJSONArray(ws2Json, "conflictedElements", conflictedElements, ws2, time2, showAll);
         addWorkspaceMetadata( ws2Json, ws2, time2);

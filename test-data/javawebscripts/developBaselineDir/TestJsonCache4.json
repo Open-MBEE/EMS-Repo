@@ -1,22 +1,22 @@
 {"elements": [{
-    "creator": "admin",
-    "documentation": "",
-    "editable": true,
-    "name": "jsonTest4",
-    "owner": "123456",
     "qualifiedId": "/europa/123456/jsonTest4",
+    "name": "jsonTest4",
     "qualifiedName": "/europa/JW_TEST2/jsonTest4",
+    "sysmlid": "jsonTest4",
+    "documentation": "",
+    "owner": "123456",
     "specialization": {
         "specification": {
+            "valueExpression": null,
             "expressionBody": [
                 "hello",
                 "there"
             ],
-            "type": "OpaqueExpression",
-            "valueExpression": null
+            "type": "OpaqueExpression"
         },
         "type": "Constraint"
     },
-    "sysmlid": "jsonTest4"
+    "editable": true,
+    "creator": "admin",
 }]}
 200
