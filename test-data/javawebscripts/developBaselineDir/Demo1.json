@@ -11,12 +11,20 @@
         "allowedElements": ["_17_0_2_4_f3a0363_1394142290412_487571_28478"],
         "contains": [{
             "ordered": false,
-            "list": [[{
-                "sourceType": "reference",
-                "source": "_17_0_2_4_f3a0363_1394142290412_487571_28478",
-                "sourceProperty": "name",
-                "type": "Paragraph"
-            }]],
+            "list": [[
+                {
+                    "sourceType": "reference",
+                    "source": "_17_0_2_4_f3a0363_1394142290412_487571_28478",
+                    "sourceProperty": "name",
+                    "type": "Paragraph"
+                },
+                {
+                    "sourceType": "reference",
+                    "source": "_17_0_2_4_f3a0363_1394142290412_487571_28478",
+                    "sourceProperty": "name",
+                    "type": "Paragraph"
+                }
+            ]],
             "type": "List"
         }],
         "type": "View"
