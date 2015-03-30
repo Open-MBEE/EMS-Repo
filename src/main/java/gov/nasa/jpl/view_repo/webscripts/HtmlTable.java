@@ -1,5 +1,7 @@
 package gov.nasa.jpl.view_repo.webscripts;
 
+import java.util.Arrays;
+
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
@@ -131,11 +133,8 @@ public class HtmlTable {
 		else 
 			sb.append(String.format("<entry>%s</entry>", cell.html()));
 		
-		tracksRowspanCount(rowspan-1, row, col, tablePart);
-		
 		return sb.toString();
 	}
-	
 	
 	private String generateColSpec(int count){
     	StringBuffer sb = new StringBuffer();
@@ -166,11 +165,11 @@ public class HtmlTable {
 			}
 			sb.append("</row>");
 		}
-		handleRowsDifferences(this.bodyRowspanCount, this.bodyRowCount, sb);
+		handleRowsDifferences(this.body, this.bodyRowCount, sb);
 		sb.append("</utbody>");
 		return sb.toString();
-	}
 
+	}
 	
 	private String generateFooter(){
 		if(!this.hasFooter) return "";
@@ -192,7 +191,7 @@ public class HtmlTable {
 			}
 			sb.append("</row>");
 		}
-		handleRowsDifferences(this.footerRowspanCount, this.footerRowCount, sb);
+		handleRowsDifferences(this.footer, this.footerRowCount, sb);
 		sb.append("</utfoot>");
 		return sb.toString();
 	}
@@ -216,7 +215,7 @@ public class HtmlTable {
 				}
 				sb.append("</row>");
 			}
-			handleRowsDifferences(this.headerRowspanCount, this.headerRowCount, sb);
+			handleRowsDifferences(this.header, this.headerRowCount, sb);
 		}
 		else{
 			Element tr = this.bodyRows.first();
@@ -233,7 +232,6 @@ public class HtmlTable {
 		sb.append("</uthead>");
 		return sb.toString();
 	}
-	
 	
 	private int getColumnMax(Elements TRs){
 		int max=0;
@@ -285,7 +283,7 @@ public class HtmlTable {
 		
 		for(int i=col; i <= markedRow.length; i++){
 			if(i >= markedRow.length) return markedRow.length;
-			if(markedRow[i]==0){
+			if(markedRow[i]==-1){
 				startCol = i;
 				break;
 			}
@@ -294,6 +292,7 @@ public class HtmlTable {
 	}
 	
 	private int getStartCol(int row, int col, int rowspan, int colspan, TablePart tablePart){
+		int rows = (rowspan > 0) ? rowspan : 1;
 		int startCol = getPrevStartCol(row, col, tablePart);
 		int moreRows = (rowspan > 0) ? rowspan-1 : 0;
 		int namest = startCol;
@@ -306,22 +305,25 @@ public class HtmlTable {
 				switch(tablePart){
 				case HEADER:
 					if(i <= headerRowCount && j <= colCount){
-						if(header[i][j] == 0){
-							header[i][j] = 1;
+						if(header[i][j] == -1){
+							header[i][j] = rows;
+							rows = 0;
 						}
 					}
 					break;
 				case BODY:
 					if(i <= bodyRowCount && j <= colCount){
-						if(body[i][j] == 0){
-							body[i][j] = 1;
+						if(body[i][j] == -1){
+							body[i][j] = rows;
+							rows=0;
 						}
 					}
 					break;
 				case FOOTER:
 					if(i <= footerRowCount && j <= colCount){
-						if(footer[i][j] == 0){
-							footer[i][j] = 1;
+						if(footer[i][j] == -1){
+							footer[i][j] = rows;
+							rows = 0;
 						}
 					}
 					break;
@@ -330,7 +332,6 @@ public class HtmlTable {
 		}
 		return startCol;
 	}
-
 
 	public String getTitle(){
 		if(this.title == null || this.title.isEmpty()) return "";
@@ -343,17 +344,19 @@ public class HtmlTable {
 	private void handleRowsDifferences(int[][] rowspan, int rows, StringBuffer sb){
 		// tallies up rowspan
 		int rowspanCount[] = new int[colCount];
-		for(int i=0; i < colCount; i++){
+		for(int i=1; i < colCount; i++){
 			int total = 0;
-			for(int j=0; j < rowspan.length; j++){
+			for(int j=1; j < rowspan.length; j++){
 				total += rowspan[j][i];
 			}
 			rowspanCount[i] = total;
 		}
 		
+		int test =0;
+		test = test + 1;
 		// adds more row for any discrepancy
 		for(int i=0; i < rowspanCount.length; i++){
-			if(rowspanCount[i] > rows){
+			if(rowspanCount[i] >= rows){
 				for(int j=rowspanCount[i]-rows; j>0;j--){
 					sb.append("<row><entry/></row>");
 				}
@@ -374,8 +377,19 @@ public class HtmlTable {
 		bodyRowspanCount = new int[bodyRowCount][colCount];
 		footerRowspanCount = new int[footerRowCount][colCount];
 		headerRowspanCount = new int[headerRowCount][colCount];
+		initArray(header);
+		initArray(footer);
+		initArray(body);
 	}
 
+	private void initArray(int[][] array){
+//		Arrays.fill(array, -1);
+		for(int i=0; i < array.length; i++){
+			for(int j=0; j < array[i].length; j++)
+				array[i][j] = -1;
+		}
+	}
+	
 	public String toDocBook(){
 		StringBuffer sb = new StringBuffer();
 		sb.append("<utable frame=\"all\" pgwide=\"1\" role=\"longtable\" tabstyle=\"normal\">");
@@ -388,23 +402,5 @@ public class HtmlTable {
 		sb.append("</tgroup>");
 		sb.append("</utable>");
 		return sb.toString();
-	}
-	
-	/*
-	 * keeps tab on HTML table rowspan so we can accommodate any discrepancies later
-	 */
-	private void tracksRowspanCount(int rowspan, int row, int col, TablePart tablePart){
-		if(rowspan < 1) rowspan = 1;
-		switch(tablePart){
-		case BODY:
-			this.bodyRowspanCount[row][col] = rowspan;
-			break;
-		case FOOTER:
-			this.footerRowspanCount[row][col] = rowspan;
-			break;
-		case HEADER:
-			this.headerRowspanCount[row][col] = rowspan;
-			break;
-		}
 	}
 }
