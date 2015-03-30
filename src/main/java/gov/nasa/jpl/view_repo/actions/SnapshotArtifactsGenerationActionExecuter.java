@@ -163,6 +163,7 @@ public class SnapshotArtifactsGenerationActionExecuter  extends ActionExecuterAb
 	        			status.setCode(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 	        			logger.error("Failed to generate PDF for snapshot Id: " + snapshotId);
 	        			response.append(String.format("[ERROR]: Failed to generate PDF for snapshot Id: %s.\n%s\n%s\n", snapshotId, ex.getMessage(), ex.getStackTrace()));
+	        			snapshot = snapshotService.generatedPDFFailure(snapshotId, workspace, siteName);
 	        		}
 //	        	}
 //	        	else if(format.compareToIgnoreCase("html") == 0){
