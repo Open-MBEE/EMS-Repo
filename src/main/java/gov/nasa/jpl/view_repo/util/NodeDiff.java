@@ -8,6 +8,7 @@ import gov.nasa.jpl.mbee.util.Utils;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -32,6 +33,11 @@ import org.alfresco.service.namespace.QName;
  */
 public class NodeDiff extends AbstractDiff<NodeRef, Object, String> {
 
+    private WorkspaceNode ws1;
+    private WorkspaceNode ws2;
+    private Date timestamp1;
+    private Date timestamp2;
+    
     public static class NodeNameComparator implements Comparator<NodeRef> {
         public static final NodeNameComparator instance = new NodeNameComparator();
         @Override
@@ -70,9 +76,13 @@ public class NodeDiff extends AbstractDiff<NodeRef, Object, String> {
         // TODO Auto-generated constructor stub
     }
 
-    public NodeDiff( Set< NodeRef > s1, Set< NodeRef > s2 ) {
+    public NodeDiff( Set< NodeRef > s1, Set< NodeRef > s2, Date timestamp1, Date timestamp2,
+                     WorkspaceNode ws1, WorkspaceNode ws2) {
         super( s1, s2, NodeNameComparator.instance );
-        // TODO Auto-generated constructor stub
+        this.timestamp1 = timestamp1;
+        this.timestamp2 = timestamp2;
+        this.ws1 = ws1;
+        this.ws2 = ws2;
     }
 
     public NodeRef node1, node2;
@@ -148,13 +158,14 @@ public class NodeDiff extends AbstractDiff<NodeRef, Object, String> {
         return isSame;
     }
 
-    public EmsScriptNode getOwner( EmsScriptNode e ) {
-        EmsScriptNode p = e.getOwningParent( null );
+    public EmsScriptNode getOwner( EmsScriptNode e, boolean isSet1 ) {
+        EmsScriptNode p = e.getOwningParent( isSet1 ? timestamp1 : timestamp2, 
+                                             isSet1 ? ws1 : ws2, false );
         return p;//.getNodeRef();
     }
-    public EmsScriptNode getOwner( NodeRef t ) {
+    public EmsScriptNode getOwner( NodeRef t, boolean isSet1 ) {
         EmsScriptNode e = new EmsScriptNode( t, getServices() );
-        return getOwner( e );
+        return getOwner( e, isSet1 );
     }
 
     public boolean sameOwner( NodeRef t1, NodeRef t2 ) {
@@ -163,8 +174,8 @@ public class NodeDiff extends AbstractDiff<NodeRef, Object, String> {
         return sameOwner( e1, e2 );
     }
     public boolean sameOwner( EmsScriptNode e1, EmsScriptNode e2 ) {
-        EmsScriptNode p1 = getOwner( e1 );
-        EmsScriptNode p2 = getOwner( e2 );
+        EmsScriptNode p1 = getOwner( e1, true );
+        EmsScriptNode p2 = getOwner( e2, false );
         return same( p1, p2 );
     }
 
@@ -345,34 +356,37 @@ public class NodeDiff extends AbstractDiff<NodeRef, Object, String> {
     }
 
     @Override
-    public Set< Object > getProperties( NodeRef t ) {
-        Map< String, Object > map = getPropertyMap( t );
+    public Set< Object > getProperties( NodeRef t, boolean isSet1 ) {
+        Map< String, Object > map = getPropertyMap( t, isSet1 );
         LinkedHashSet< Object > set = new LinkedHashSet< Object >( map.values() );
         return set;
     }
 
     @Override
-    public Object getProperty( NodeRef ref, String id ) {
+    public Object getProperty( NodeRef ref, String id, boolean isSet1 ) {
         EmsScriptNode node = new EmsScriptNode( ref, getServices() );
+        Date timestamp = isSet1 ? timestamp1 : timestamp2;
+        WorkspaceNode ws = isSet1 ? ws1 : ws2;
         
         // Special case for type b/c it is not a property, and actual based on the
         // aspect applied to the node:
-        return id.equals( Acm.JSON_TYPE ) ? node.getTypeName() : node.getProperty( id );
+        return id.equals( Acm.JSON_TYPE ) ? node.getTypeName() : node.getNodeRefProperty( id, timestamp, ws );
     }
 
     @Override
-    public Map<String, Object> getPropertyMap( NodeRef ref ) {
+    public Map<String, Object> getPropertyMap( NodeRef ref, boolean isSet1 ) {
         EmsScriptNode node = new EmsScriptNode( ref, getServices() );
-        Map< String, Object > props = node.getProperties();
+        Map< String, Object > props = node.getNodeRefProperties(isSet1 ? timestamp1 : timestamp2,
+                                                                isSet1 ? ws1 : ws2);
         props.put( Acm.JSON_TYPE, node.getTypeName() );
         Utils.removeAll( props, getPropertyIdsToIgnore() );
         return props;
     }
     
-    public Map<String, Object> getOwnerPropertyMap( NodeRef ref ) {
-        EmsScriptNode owner = getOwner(ref);
+    public Map<String, Object> getOwnerPropertyMap( NodeRef ref, boolean isSet1 ) {
+        EmsScriptNode owner = getOwner(ref, isSet1);
         NodeRef ownerRef = owner != null ? owner.getNodeRef() : null;
-        return ownerRef != null ? getPropertyMap(ownerRef) : null;
+        return ownerRef != null ? getPropertyMap(ownerRef, isSet1) : null;
     }
     
     private Pair<NodeRef,String> filterPropValNodeRef(Object propVal, String propName,
@@ -388,7 +402,7 @@ public class NodeDiff extends AbstractDiff<NodeRef, Object, String> {
                 NodeRef t2 = get2( addedId );
                 
                 if ( same( t1, t2 ) ) {
-                    Map< String, Object > props2 = getOwnerPropertyMap(t2);
+                    Map< String, Object > props2 = getOwnerPropertyMap(t2, false);
                     
                     for (Entry< String, Object > entry2 : props2.entrySet()) {
                         // Same property name
@@ -434,7 +448,7 @@ public class NodeDiff extends AbstractDiff<NodeRef, Object, String> {
                     NodeRef t2 = get2( addedId );
                     
                     if ( same( t1, t2 ) ) {
-                        Map< String, Object > props2 = getOwnerPropertyMap(t2);
+                        Map< String, Object > props2 = getOwnerPropertyMap(t2, false);
                         
                         for (Entry< String, Object > entry2 : props2.entrySet()) {
                             // Same property name
@@ -474,7 +488,7 @@ public class NodeDiff extends AbstractDiff<NodeRef, Object, String> {
         String hasSameOwnerId = null;
         boolean addToRemoved = true;
         Pair<NodeRef,String> res = new Pair<NodeRef,String>(null,null); 
-        Map< String, Object > props = getOwnerPropertyMap(t1);
+        Map< String, Object > props = getOwnerPropertyMap(t1, true);
         
         // Loop through each property of the owner of t1:
         for (Entry< String, Object > entry : props.entrySet()) {
@@ -640,41 +654,43 @@ public class NodeDiff extends AbstractDiff<NodeRef, Object, String> {
         if (Debug.isOn()) Debug.outln("updated properties= " + getUpdatedProperties() );
         if (Debug.isOn()) Debug.outln("property changes = " + getPropertyChanges() );
 
-        LinkedHashMap< EmsScriptNode, EmsScriptNode > valueSpecMap = new LinkedHashMap< EmsScriptNode, EmsScriptNode >();
+        LinkedHashMap< EmsScriptNode, Pair<EmsScriptNode,Boolean > > valueSpecMap = new LinkedHashMap< EmsScriptNode, Pair<EmsScriptNode,Boolean >>();
         
         for ( NodeRef e : getAdded() ) {
             EmsScriptNode node = new EmsScriptNode( e, getServices() );
-            if ( node.isOwnedValueSpec() ) {
-                EmsScriptNode owningProp = node.getValueSpecOwner();
+            if ( node.isOwnedValueSpec(timestamp2, ws2) ) {
+                EmsScriptNode owningProp = node.getValueSpecOwner(timestamp2, ws2);
                 if (owningProp != null) {
                 // TODO -- REVIEW -- Does the if statement below need to be uncommented?
 //                if ( !getRemoved().contains( owningProp ) ) {
-                    valueSpecMap.put( node, owningProp );
+                    valueSpecMap.put( node, new Pair< EmsScriptNode, Boolean >(owningProp,false) );
 //                }
                 }
             }
         }
         for ( NodeRef e : getUpdated() ) {
             EmsScriptNode node = new EmsScriptNode( e, getServices() );
-            if ( node.isOwnedValueSpec() ) { 
-                EmsScriptNode owningProp = node.getValueSpecOwner();
+            if ( node.isOwnedValueSpec(timestamp2, ws2) ) { 
+                EmsScriptNode owningProp = node.getValueSpecOwner(timestamp2, ws2);
                 if (owningProp != null) {
-                    valueSpecMap.put( node, owningProp );
+                    valueSpecMap.put( node, new Pair< EmsScriptNode, Boolean >(owningProp,false) );
                 }
             }
         }
         for ( NodeRef e : getRemoved() ) {
             EmsScriptNode node = new EmsScriptNode( e, getServices() );
-            if ( node.isOwnedValueSpec() ) {
-                EmsScriptNode owningProp = node.getValueSpecOwner();
+            // Note: Removed nodes are in ws1 and timestamp1 and not in ws2 and timestamp2 by definition:
+            if ( node.isOwnedValueSpec(timestamp1, ws1) ) {
+                EmsScriptNode owningProp = node.getValueSpecOwner(timestamp1, ws1);
                 if (owningProp != null) {
-                    valueSpecMap.put( node, owningProp );
+                    valueSpecMap.put( node, new Pair< EmsScriptNode, Boolean >(owningProp,true) );
                 }
             }
         }
 
         // adding the owning Property elements to these element maps if not already there
-        for ( EmsScriptNode node : valueSpecMap.values() ) {
+        for ( Pair< EmsScriptNode, Boolean > pair : valueSpecMap.values() ) {
+            EmsScriptNode node = pair.first;
             if ( !getAdded().contains( node.getNodeRef() ) ) {
                 if ( !getRemoved().contains( node.getNodeRef() ) ) {
                     if ( !getUpdated().contains( node.getNodeRef() ) ) {
@@ -685,9 +701,10 @@ public class NodeDiff extends AbstractDiff<NodeRef, Object, String> {
         }
 
         // Add the owning valuespec properties to the nodeDiff property change maps.
-        for ( Entry<EmsScriptNode,EmsScriptNode> entry : valueSpecMap.entrySet() ) {
+        for ( Entry< EmsScriptNode, Pair< EmsScriptNode, Boolean >> entry : valueSpecMap.entrySet() ) {
             EmsScriptNode valueNode = entry.getKey();
-            EmsScriptNode owningPropNode = entry.getValue();
+            EmsScriptNode owningPropNode = entry.getValue().first;
+            boolean isWs1 = entry.getValue().second;
             Map< String, Pair< Object, Object > > propChanges = getPropertyChanges( owningPropNode.getSysmlId() );
 //            if ( propChanges == null ) {
 //                propChanges = new LinkedHashMap< String, Pair<Object,Object> >();
@@ -700,7 +717,9 @@ public class NodeDiff extends AbstractDiff<NodeRef, Object, String> {
             for ( String acmType : Acm.TYPES_WITH_VALUESPEC.keySet() ) {
                 if ( owningPropNode.hasOrInheritsAspect( acmType ) ) {
                     for ( String acmProp : Acm.TYPES_WITH_VALUESPEC.get(acmType) ) {
-                        Object propVal = owningPropNode.getProperty( acmProp );
+                        Object propVal = owningPropNode.getNodeRefProperty( acmProp, 
+                                                                            isWs1 ? timestamp1 : timestamp2,
+                                                                            isWs1 ? ws1 : ws2);
                         if ( propVal  != null) {
                             // ArrayList of noderefs:
                             if (propVal instanceof List) {

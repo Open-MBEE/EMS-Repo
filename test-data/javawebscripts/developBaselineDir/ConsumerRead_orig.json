@@ -4,7 +4,7 @@
     "owner": "302",
     "documentation": "y is y",
     "sysmlid": "y",
-    "read": "2015-03-05T14:42:39.190-0800",
+    "read": "2015-03-27T09:04:53.345-0700",
     "specialization": {
         "propertyType": null,
         "isSlot": false,
@@ -17,7 +17,7 @@
         "type": "Property"
     },
     "editable": false,
-    "modified": "2015-03-05T14:42:38.698-0800",
+    "modified": "2015-03-27T09:04:53.063-0700",
     "creator": "Collaborator"
 }]}
 200

@@ -139,8 +139,8 @@ public class MoaProductGet extends AbstractJavaWebScript {
             model.put("res", jsonString);
             if (productId != null) {
                 model.put("title", product.getProperty(Acm.ACM_NAME));
-                model.put("siteTitle", product.getSiteTitle());
-                model.put("siteName", product.getSiteName());
+                model.put("siteTitle", product.getSiteTitle(dateTime, workspace));
+                model.put("siteName", product.getSiteName(dateTime, workspace));
             }
         } else {
             model.put("res", createResponseJson());

@@ -113,6 +113,7 @@ public class SnapshotArtifactsGenerationActionExecuter  extends ActionExecuterAb
         Status status = new Status();
         EmsScriptNode snapshotNode = null;
         JSONObject snapshot = null;
+        Date timestamp = null;
         WorkspaceNode workspace = (WorkspaceNode)action.getParameterValue(PARAM_WORKSPACE);
         try{
     	    // lets check whether or not docbook has been generated
@@ -127,9 +128,10 @@ public class SnapshotArtifactsGenerationActionExecuter  extends ActionExecuterAb
     	    //if ( !snapshotNode.hasAspect( "view2:docbook" )) {
     	    	response.append("[INFO]: Creating docbook.xml...\n");
 	            String snapshotName = snapshotNode.getSysmlId();
-	            Date timestamp = (Date)snapshotNode.getProperty("view2:timestamp");
+	            timestamp = (Date)snapshotNode.getProperty("view2:timestamp");
 	
-	            NodeRef viewRef = (NodeRef)snapshotNode.getProperty( "view2:snapshotProduct" );
+	            NodeRef viewRef = (NodeRef)snapshotNode.getNodeRefProperty( "view2:snapshotProduct", dateTime,
+	                                                                        workspace);
     	        if (viewRef == null) {
     	            
     	        }
@@ -156,19 +158,19 @@ public class SnapshotArtifactsGenerationActionExecuter  extends ActionExecuterAb
 //	        for(String format:formats){
 //	        	if(format.compareToIgnoreCase("pdf") == 0){
 	        		try{
-	        			snapshot = snapshotService.generatePDF(snapshotId, workspace, siteName);
+	        			snapshot = snapshotService.generatePDF(snapshotId, dateTime, workspace, siteName);
 	        			response.append(snapshotService.getResponse().toString());
 	        		}
 	        		catch(Exception ex){
 	        			status.setCode(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 	        			logger.error("Failed to generate PDF for snapshot Id: " + snapshotId);
 	        			response.append(String.format("[ERROR]: Failed to generate PDF for snapshot Id: %s.\n%s\n%s\n", snapshotId, ex.getMessage(), ex.getStackTrace()));
-	        			snapshot = snapshotService.generatedPDFFailure(snapshotId, workspace, siteName);
+	        			snapshot = snapshotService.generatedPDFFailure(snapshotId, dateTime, workspace, siteName);
 	        		}
 //	        	}
 //	        	else if(format.compareToIgnoreCase("html") == 0){
 	        		try{
-	        			snapshot = snapshotService.generateHTML(snapshotId, workspace);
+	        			snapshot = snapshotService.generateHTML(snapshotId, timestamp, workspace);
 	        			response.append(snapshotService.getResponse().toString());
 	        		}
 	        		catch(Exception ex){
@@ -200,10 +202,10 @@ public class SnapshotArtifactsGenerationActionExecuter  extends ActionExecuterAb
         	try{
 	        	for(String format:formats){
 	        		if(format.compareToIgnoreCase("pdf") == 0){ 
-	        			if(SnapshotPost.getPdfNode(snapshotNode)==null) snapshotService.setPdfStatus(snapshotNode, "Error");
+	        			if(SnapshotPost.getPdfNode(snapshotNode, dateTime, workspace)==null) snapshotService.setPdfStatus(snapshotNode, "Error");
 	        		}
 	        		else if(format.compareToIgnoreCase("html") == 0){
-	        			if(SnapshotPost.getHtmlZipNode(snapshotNode)==null) snapshotService.setHtmlZipStatus(snapshotNode, "Error");  
+	        			if(SnapshotPost.getHtmlZipNode(snapshotNode, dateTime, workspace)==null) snapshotService.setHtmlZipStatus(snapshotNode, "Error");  
 	        		}
 	        	}
         	}

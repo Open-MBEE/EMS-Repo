@@ -56,6 +56,8 @@ public class ProductsWebscript extends AbstractJavaWebScript {
         EmsScriptNode siteNode = null;
         EmsScriptNode mySiteNode = getSiteNodeFromRequest( req, false );
         WorkspaceNode workspace = getWorkspace( req );
+        String timestamp = req.getParameter( "timestamp" );
+        Date dateTime = TimeUtils.dateFromTimestamp( timestamp );
         String siteName = getSiteName(req);
 
         if (!NodeUtil.exists( mySiteNode )) {
@@ -64,7 +66,7 @@ public class ProductsWebscript extends AbstractJavaWebScript {
         }
 
         // Find the project site and site package node if applicable:
-        Pair<EmsScriptNode,EmsScriptNode> sitePair = findProjectSite(req, siteName, workspace, mySiteNode);
+        Pair<EmsScriptNode,EmsScriptNode> sitePair = findProjectSite(siteName, dateTime, workspace, mySiteNode);
         if (sitePair == null) {
             return productsJson;
         }
@@ -117,7 +119,7 @@ public class ProductsWebscript extends AbstractJavaWebScript {
 
             boolean checkSitePkg = (sitePackageNode != null && sitePackageNode.exists());
             // Get the alfresco Site for the site package node:
-            EmsScriptNode pkgSite = checkSitePkg ? getSiteForPkgSite(sitePackageNode, workspace) : null;
+            EmsScriptNode pkgSite = checkSitePkg ? getSiteForPkgSite(sitePackageNode, dateTime, workspace) : null;
 
             Set<EmsScriptNode> nodes = new HashSet<EmsScriptNode>(nodeList.values());
             for ( EmsScriptNode node : nodes) {
@@ -151,7 +153,7 @@ public class ProductsWebscript extends AbstractJavaWebScript {
                 product.getTargetAssocsNodesByType( "view2:snapshots",
                                                     workspace, null );
         // lets add products from node refs
-        List<NodeRef> productSnapshots = product.getPropertyNodeRefs( "view2:productSnapshots" );
+        List<NodeRef> productSnapshots = product.getPropertyNodeRefs( "view2:productSnapshots", dateTime, workspace );
         for (NodeRef productSnapshotNodeRef: productSnapshots) {
             EmsScriptNode productSnapshot = new EmsScriptNode(productSnapshotNodeRef, services, response);
             snapshotsList.add( productSnapshot );

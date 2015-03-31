@@ -28,6 +28,7 @@ import org.alfresco.service.namespace.QName;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.springframework.extensions.webscripts.Status;
 
 /**
  * Class for keeping track of differences between two workspaces. WS1 always has the original
@@ -70,6 +71,9 @@ public class WorkspaceDiff implements Serializable {
     private Map< String, EmsScriptNode > updatedElements;
 
     NodeDiff nodeDiff = null;
+    
+    private StringBuffer response = null;
+    private Status status = null;
 
     private WorkspaceDiff() {
         elements = new TreeMap<String, EmsScriptNode>();
@@ -90,15 +94,18 @@ public class WorkspaceDiff implements Serializable {
      * @param ws1
      * @param ws2
      */
-    public WorkspaceDiff(WorkspaceNode ws1, WorkspaceNode ws2) {
+    public WorkspaceDiff(WorkspaceNode ws1, WorkspaceNode ws2, StringBuffer response, Status status) {
         this();
         this.ws1 = ws1;
         this.ws2 = ws2;
+        this.response = response;
+        this.status = status;
     }
 
-    public WorkspaceDiff(WorkspaceNode ws1, WorkspaceNode ws2, Date timestamp1, Date timestamp2 ) {
+    public WorkspaceDiff(WorkspaceNode ws1, WorkspaceNode ws2, Date timestamp1, Date timestamp2,
+                         StringBuffer response, Status status) {
 
-        this(ws1, ws2);
+        this(ws1, ws2, response, status);
         this.timestamp1 = timestamp1;
         this.timestamp2 = timestamp2;
         diff();
@@ -193,7 +200,10 @@ public class WorkspaceDiff implements Serializable {
                     movedElements.put( e.getKey(), node);
                     
                     // Add this new owner to element ids, so it can be added to elements:
-                    EmsScriptNode newOwner = node != null ? node.getOwningParent( null ) : null;
+                    EmsScriptNode newOwner =
+                            node != null ?
+                            node.getOwningParent( getTimestamp1(), getWs1(), false ) :
+                            null;
                     if (newOwner != null) {
                         ids.add( newOwner.getSysmlId() );
                     }
@@ -219,7 +229,7 @@ public class WorkspaceDiff implements Serializable {
         for (NodeRef ref : nodeDiff.getAdded()) {
             if (ref != null) {
                 EmsScriptNode node = new EmsScriptNode(ref, getServices());
-                EmsScriptNode parent = node.getOwningParent( null );
+                EmsScriptNode parent = node.getOwningParent( getTimestamp1(), getWs1(), false );
                 if (parent != null) {
                     ids.add( parent.getSysmlId() );
                 }
@@ -234,7 +244,7 @@ public class WorkspaceDiff implements Serializable {
                     String parentId = id;
                     while ( parent != null && parent.isModelElement() ) {
                         elements.put( parentId, parent );
-                        parent = parent.getOwningParent( null );
+                        parent = parent.getOwningParent( getTimestamp1(), getWs1(), false );
                         parentId = parent.getSysmlId();
                     }
                 }
@@ -499,19 +509,18 @@ public class WorkspaceDiff implements Serializable {
     }
     
     public static Set< NodeRef > getAllChangedElementsInDiffJson( JSONArray diffJson,
-                                                                        WorkspaceNode ws,
-                                                                        ServiceRegistry services )
+                                                                  WorkspaceNode ws,
+                                                                  ServiceRegistry services,
+                                                                  Date dateTime)
                                                                                 throws JSONException {
+                
         Set< NodeRef > nodes = new LinkedHashSet< NodeRef >();
         for ( int i = 0; i < diffJson.length(); ++i ) {
             JSONObject element = diffJson.getJSONObject( i );
             if ( element.has( "sysmlid" ) ) {
                 String sysmlid = element.getString( "sysmlid" );
-                NodeRef ref = NodeUtil.findNodeRefById( sysmlid, false, ws, null,
+                NodeRef ref = NodeUtil.findNodeRefById( sysmlid, false, ws, dateTime,
                                                         services, true );
-                if ( ref == null ) ref = 
-                        NodeUtil.findNodeRefById( sysmlid, true, null, null,
-                                                  services, true );
                 if ( ref != null ) {
                     nodes.add( ref );                    
                 }  
@@ -521,7 +530,8 @@ public class WorkspaceDiff implements Serializable {
     }
 
     public static Set< NodeRef > getAllChangedElementsInDiffJson( JSONObject diffJson,
-                                                                        ServiceRegistry services )
+                                                                        ServiceRegistry services,
+                                                                  Date dateTime)
                                                                                 throws JSONException {
         LinkedHashSet< NodeRef > nodes = new LinkedHashSet< NodeRef >();
         JSONObject jsonObj = diffJson;
@@ -531,8 +541,8 @@ public class WorkspaceDiff implements Serializable {
         
         if ( diffJson.has( "workspace2" ) ) {
             jsonObj = jsonObj.getJSONObject( "workspace2" );
-            if ( jsonObj.has( "name" ) ) {
-                String name = jsonObj.getString( "name" );
+            if ( jsonObj.has( "id" ) ) {
+                String name = jsonObj.getString( "id" );
                 ws = WorkspaceNode.getWorkspaceFromId( name, services,
                                                                null, null, //false
                                                                null );
@@ -541,17 +551,17 @@ public class WorkspaceDiff implements Serializable {
         Set< NodeRef > elements = null;
         if ( jsonObj.has( "addedElements" ) ) {
             jsonArr = jsonObj.getJSONArray( "addedElements" );
-            elements = getAllChangedElementsInDiffJson( jsonArr, ws, services );
+            elements = getAllChangedElementsInDiffJson( jsonArr, ws, services, dateTime );
             if ( elements != null ) nodes.addAll( elements );
         }
         if ( jsonObj.has( "deletedElements" ) ) {
             jsonArr = jsonObj.getJSONArray( "deletedElements" );
-            elements = getAllChangedElementsInDiffJson( jsonArr, ws, services );
+            elements = getAllChangedElementsInDiffJson( jsonArr, ws, services, dateTime );
             if ( elements != null ) nodes.addAll( elements );
         }
         if ( jsonObj.has( "updatedElements" ) ) {
             jsonArr = jsonObj.getJSONArray( "updatedElements" );
-            elements = getAllChangedElementsInDiffJson( jsonArr, ws, services );
+            elements = getAllChangedElementsInDiffJson( jsonArr, ws, services, dateTime );
             if ( elements != null ) nodes.addAll( elements );
         }
         return nodes;
@@ -587,9 +597,9 @@ public class WorkspaceDiff implements Serializable {
 
         addJSONArray(ws2Json, "addedElements", addedElements, ws2, time2, true);
         addJSONArray(ws2Json, "movedElements", movedElements, ws2, time2, showAll);
-        // Note: deleteElements should use time1 and not time2, as element was found in ws1
-        //       at time1, not ws1 at time2!
-        addJSONArray(ws2Json, "deletedElements", deletedElements, ws2, time1, showAll);
+        // Note: deleteElements should use time1 and not time2, and ws1 not ws2, 
+        //       as element was found in ws1 at time1, not ws2 at time2!
+        addJSONArray(ws2Json, "deletedElements", deletedElements, ws1, time1, showAll);
         addJSONArray(ws2Json, "updatedElements", updatedElements, ws2, time2, showAll);
         addJSONArray(ws2Json, "conflictedElements", conflictedElements, ws2, time2, showAll);
         addWorkspaceMetadata( ws2Json, ws2, time2);
@@ -722,7 +732,7 @@ public class WorkspaceDiff implements Serializable {
     public boolean diff() {
         boolean status = true;
 
-        captureDeltas(ws2);
+        captureDeltas();
 
         return status;
     }
@@ -892,19 +902,19 @@ public class WorkspaceDiff implements Serializable {
         return ignoredPropIdQnames;
     }
 
-    protected void captureDeltas(WorkspaceNode node) {
+    protected void captureDeltas() {
         Set< NodeRef > s1 =
-                WorkspaceNode.getChangedNodeRefsWithRespectTo( ws1, node,
+                WorkspaceNode.getChangedNodeRefsWithRespectTo( ws1, ws2,
                                                                timestamp1,
                                                                timestamp2,
                                                                getServices(),
-                                                               null, null );
+                                                               response, status );
         Set< NodeRef > s2 =
-                WorkspaceNode.getChangedNodeRefsWithRespectTo( node, ws1,
+                WorkspaceNode.getChangedNodeRefsWithRespectTo( ws2, ws1,
                                                                timestamp2,
                                                                timestamp1,
                                                                getServices(),
-                                                               null, null );
+                                                               response, status );
         
         // If either of these are null then we caught an exception above, 
         // so just bail
@@ -925,7 +935,7 @@ public class WorkspaceDiff implements Serializable {
         for ( NodeRef n : s1 ) {
             String sysmlId = NodeUtil.getSysmlId( n );
             NodeRef ref =
-                    NodeUtil.findNodeRefById( sysmlId, false, node, timestamp2,
+                    NodeUtil.findNodeRefById( sysmlId, false, ws2, timestamp2,
                                               getServices(), false );
             if ( ref != null ) {
                 s2.add( ref );
@@ -969,22 +979,22 @@ public class WorkspaceDiff implements Serializable {
             if ( ref != null ) {                
                 // Add owned value specs if needed, as we need them to be separated out for
                 // the diff to work correctly.  
-                NodeUtil.addEmbeddedValueSpecs(ref, s1, getServices());
+                NodeUtil.addEmbeddedValueSpecs(ref, s1, getServices(), timestamp1, ws1);
             }
         }
         for ( NodeRef n : tempSet2 ) {
             String sysmlId = NodeUtil.getSysmlId( n );
             NodeRef ref =
-                    NodeUtil.findNodeRefById( sysmlId, false, node, timestamp2,
+                    NodeUtil.findNodeRefById( sysmlId, false, ws2, timestamp2,
                                               getServices(), false );
             if ( ref != null ) {                
                 // Add owned value specs if needed, as we need them to be separated out for
                 // the diff to work correctly.  
-                NodeUtil.addEmbeddedValueSpecs(ref, s2, getServices());
+                NodeUtil.addEmbeddedValueSpecs(ref, s2, getServices(), timestamp2, ws2);
             }
         }
 
-        nodeDiff = new NodeDiff( s1, s2 );
+        nodeDiff = new NodeDiff( s1, s2, timestamp1, timestamp2, ws1, ws2 );
         nodeDiff.addPropertyIdsToIgnore( getIgnoredPropIds() );
         populateMembers();
     }

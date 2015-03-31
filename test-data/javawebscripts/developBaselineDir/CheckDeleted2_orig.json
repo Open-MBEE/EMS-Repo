@@ -1,25 +1,27 @@
 {"workspaces": [
     {
-        "created": "2015-02-18T14:10:41.214-0800",
-        "creator": "admin",
+        "qualifiedId": "master/e735c4e9-ef13-4009-b2f3-a66eb9b667c3",
+        "id": "e735c4e9-ef13-4009-b2f3-a66eb9b667c3",
+        "created": "2015-03-27T09:04:33.008-0700",
         "description": "",
-        "id": "7ddf3709-4fd7-4518-a927-92bdc9dbbddb",
-        "modified": "2015-02-18T14:10:41.985-0800",
+        "qualifiedName": "master/AA",
         "name": "AA",
         "parent": "master",
-        "qualifiedId": "master/7ddf3709-4fd7-4518-a927-92bdc9dbbddb",
-        "qualifiedName": "master/AA"
+        "permission": "read",
+        "modified": "2015-03-27T09:04:33.618-0700",
+        "creator": "admin"
     },
     {
-        "created": "2015-02-18T14:10:41.553-0800",
-        "creator": "admin",
+        "qualifiedId": "master/e735c4e9-ef13-4009-b2f3-a66eb9b667c3/578222cd-c261-43f5-87d8-9fe9d5fa708c",
+        "id": "578222cd-c261-43f5-87d8-9fe9d5fa708c",
+        "created": "2015-03-27T09:04:33.299-0700",
         "description": "",
-        "id": "ea9974eb-bdd7-4626-a2d4-82296ba62b5c",
-        "modified": "2015-02-18T14:10:41.987-0800",
+        "qualifiedName": "master/AA/BB",
         "name": "BB",
-        "parent": "7ddf3709-4fd7-4518-a927-92bdc9dbbddb",
-        "qualifiedId": "master/7ddf3709-4fd7-4518-a927-92bdc9dbbddb/ea9974eb-bdd7-4626-a2d4-82296ba62b5c",
-        "qualifiedName": "master/AA/BB"
+        "parent": "e735c4e9-ef13-4009-b2f3-a66eb9b667c3",
+        "permission": "read",
+        "modified": "2015-03-27T09:04:33.619-0700",
+        "creator": "admin"
     }
 ]}
 200

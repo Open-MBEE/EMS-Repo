@@ -208,12 +208,12 @@ public class DocBookWrapper {
 		return Arrays.copyOf(list.toArray(), list.toArray().length, String[].class);
 	}
 
-	private void retrieveDocBook() throws Exception{
+	private void retrieveDocBook(WorkspaceNode ws, Date dateTime) throws Exception{
 		File file = new File(this.dbFileName.toString());
 		if(file.exists()) return;
 		
 		if(this.snapshotNode.hasAspect("view2:docbook")){
-    		NodeRef dbNodeRef = (NodeRef)this.snapshotNode.getProperty("view2:docbookNode");
+    		NodeRef dbNodeRef = (NodeRef)this.snapshotNode.getNodeRefProperty("view2:docbookNode", dateTime, ws);
     		if(dbNodeRef==null) throw new Exception("Failed to retrieve DocBook from repository! NodeRef is null!");
     		try{
     			retrieveStringPropContent(dbNodeRef, this.dbFileName);
@@ -384,7 +384,7 @@ public class DocBookWrapper {
 
 			//this.transformToHTML(workspace, timestamp);
 			createDocBookDir();
-			retrieveDocBook();
+			retrieveDocBook(workspace, timestamp);
 			tableToCSV();
 			String zipPath = this.zipHtml();
 			if(zipPath == null || zipPath.isEmpty()) throw new Exception("Failed to zip files and resources!");
@@ -607,7 +607,7 @@ public class DocBookWrapper {
 	private void transformToHTML(WorkspaceNode workspace, Date timestamp) throws Exception{
 		if(!createDocBookDir()) return;
 //		System.out.println("Retrieving DocBook...");
-		retrieveDocBook();
+		retrieveDocBook(workspace, timestamp);
 		File srcFile = new File(this.getDBFileName());
 //		System.out.println("Retrieving images...");
 		retrieveImages(srcFile, this.snapshotNode.getServices(), workspace, timestamp);
@@ -676,7 +676,7 @@ public class DocBookWrapper {
     		throw new Exception("Failed to create DocBook directory!");
     	}
 //    	System.out.println("Retrieving DocBook...");
-    	retrieveDocBook();
+    	retrieveDocBook(workspace, timestamp);
 		//ContentService contentService = this.snapshotNode.getServices().getContentService();
     	File srcFile = new File(this.getDBFileName());
 //    	System.out.println("Retrieving images...");

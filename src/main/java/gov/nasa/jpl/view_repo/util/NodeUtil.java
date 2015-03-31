@@ -809,7 +809,9 @@ public class NodeUtil {
 //            results = searchService.query( getStoreRef(),
 //                                           SearchService.LANGUAGE_LUCENE,
 //                                           queryPattern );
+            AuthenticationUtil.setRunAsUser( "admin" );
             results = searchService.query( getSearchParameters(queryPattern) );
+            AuthenticationUtil.setRunAsUser( AuthenticationUtil.getFullyAuthenticatedUser() );
         }
         if ( Debug.isOn() ) {
             Debug.outln( "luceneSearch(" + queryPattern + "): returned "
@@ -1221,13 +1223,13 @@ public class NodeUtil {
                     String acmType =
                             Utils.join( prefix.split( "[\\W]+" ), ":" )
                                  .replaceFirst( "^:", "" );
-                    Object o = esn.getProperty( acmType );
+                    Object o = esn.getNodeRefProperty( acmType, dateTime, workspace );
                     if ( !( "" + o ).equals( specifier ) ) {
                         match = false;
                     }
                 }
-                // Check that it from the desired site if desired:
-                if (siteName != null && !siteName.equals( esn.getSiteName() )) {
+                // Check that it is from the desired site:
+                if (siteName != null && !siteName.equals( esn.getSiteName(dateTime, workspace) )) {
                     match = false;
                 }
                 if ( !match ) {
@@ -2276,6 +2278,15 @@ public class NodeUtil {
         return null;
     }
 
+    public static Object getPropertyAtTime( NodeRef nodeRef, String acmType,
+                                            Date dateTime, ServiceRegistry services ) {
+        EmsScriptNode node = new EmsScriptNode( nodeRef, services );
+        Object result = node.getPropertyAtTime(acmType, dateTime);
+        return result;
+    }
+    
+
+    
     public static NodeRef getNodeRefAtTime( NodeRef nodeRef, WorkspaceNode workspace,
                                             Date dateTime ) {
         return getNodeRefAtTime( nodeRef, workspace, dateTime, false, false);
@@ -3099,7 +3110,8 @@ public class NodeUtil {
      * @param services
      */
     public static void addEmbeddedValueSpecs(NodeRef ref,  Set< NodeRef > nodes,
-                                              ServiceRegistry services) {
+                                              ServiceRegistry services,
+                                              Date dateTime, WorkspaceNode ws) {
         
         Object propVal;
         EmsScriptNode node = new EmsScriptNode(ref, services);
@@ -3109,7 +3121,7 @@ public class NodeUtil {
             if ( node.hasOrInheritsAspect( acmType ) ) {
                 
                 for ( String acmProp : Acm.TYPES_WITH_VALUESPEC.get(acmType) ) {
-                    propVal = node.getProperty(acmProp);
+                    propVal = node.getNodeRefProperty(acmProp, dateTime, ws);
                     
                     if (propVal != null) {
                         // Note: We want to include deleted nodes also, so no need to check for that

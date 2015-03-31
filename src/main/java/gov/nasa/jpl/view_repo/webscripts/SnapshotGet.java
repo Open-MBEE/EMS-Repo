@@ -102,8 +102,8 @@ public class SnapshotGet extends AbstractJavaWebScript {
             model.put("res", snapshotString);
             model.put("title", "Snapshot (" + EmsScriptNode.getIsoTime(date) + ")");
             model.put("tag", getConfigurationSet(snapshot, workspace, dateTime));
-            model.put("siteName", snapshot.getSiteName());
-            model.put("siteTitle", snapshot.getSiteTitle());
+            model.put("siteName", snapshot.getSiteName(dateTime, workspace));
+            model.put("siteTitle", snapshot.getSiteTitle(dateTime, workspace));
         } else {
             log(LogLevel.ERROR, "Snapshot not found for id: " + id, HttpServletResponse.SC_NOT_FOUND);
             model.put("res", createResponseJson());

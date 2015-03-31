@@ -6,6 +6,7 @@ import gov.nasa.jpl.mbee.util.Debug;
 import gov.nasa.jpl.mbee.util.HasId;
 import gov.nasa.jpl.mbee.util.Pair;
 import gov.nasa.jpl.mbee.util.Utils;
+import gov.nasa.jpl.view_repo.util.NodeUtil.SearchType;
 
 import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
@@ -577,7 +578,8 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
 
             if ( mySpecifier == null ) {
                 // if no specifier, return all properties
-                Map< String, Object > props = node.getProperties();
+                // TODO need date/workspace
+                Map< String, Object > props = node.getNodeRefProperties(null, node.getWorkspace());
                 if ( props != null ) {
 
                 	// Loop through all of returned properties:
@@ -594,7 +596,8 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
             } // ends if specifies is null
 
             else {
-                Object prop = node.getProperty( "" + mySpecifier );
+                // TODO need date/workspace
+                Object prop = node.getNodeRefProperty( "" + mySpecifier, null, node.getWorkspace() );
 
         		// Attempt to converted to a EmsScriptNode and add to the list
         		// to later return if conversion succeeded:
@@ -822,11 +825,12 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
     	// TODO ScriptNode getType returns a QName or String, why does he want a collection
     	// of EmsScriptNode?  I think we should change T to String.
 
-    	// Ignoring context b/c it doesnt make sense
-
+        WorkspaceNode ws = (context instanceof WorkspaceNode) ? (WorkspaceNode)context : null;
+        Date dateTime = (context instanceof Date) ? (Date)context : null;
+        
     	// Search for all elements with the specified type name:
     	if (specifier instanceof String) {
-//	        StringBuffer response = new StringBuffer();
+//	        StringBuffer response = new StringBuffer();  
 //	        Status status = new Status();
 //	        Map< String, EmsScriptNode > elements =
 //	                NodeUtil.searchForElements( "@sysml\\:type:\"", (String)specifier, services, response,
@@ -840,7 +844,9 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
 
 	        Collection< EmsScriptNode > elementColl = null;
 	        try {
-	        		elementColl = NodeUtil.luceneSearchElements( "ASPECT:\"sysml:" + specifier + "\"" );
+//	        		elementColl = NodeUtil.luceneSearchElements( "ASPECT:\"sysml:" + specifier + "\"" );
+	                ArrayList< NodeRef > refs = NodeUtil.findNodeRefsByType( (String)specifier, SearchType.ASPECT.prefix, false, ws, dateTime, false, true, getServices(), false, null );
+	                elementColl = EmsScriptNode.toEmsScriptNodeList( refs, getServices(), null, null );
 	        } catch (Exception e) {
 	        		// if lucene query fails, most likely due to non-existent aspect, we should look for type now
 	        		try {
@@ -974,8 +980,9 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
     		if (node.hasAspect(Acm.ACM_PROPERTY)) {
 
 		    	List<EmsScriptNode> returnList = new ArrayList<EmsScriptNode>();
+		    	// TODO need the workspace, time
 				Collection<NodeRef> valueNodes =
-				        (Collection< NodeRef >)node.getProperty(Acm.ACM_VALUE);
+				        (Collection< NodeRef >)node.getNodeRefProperty(Acm.ACM_VALUE, null, node.getWorkspace());
 				convertToScriptNode(valueNodes, returnList);
 
 	    		return Utils.asList(returnList, Object.class);
@@ -990,7 +997,7 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
 	    		}
 				else {
 
-					Object valueNode = node.getProperty("" + mySpecifier);
+					Object valueNode = node.getNodeRefProperty("" + mySpecifier, null, node.getWorkspace());
 
 					if (valueNode != null) {
 						return Utils.newList(valueNode);

@@ -1,12 +1,12 @@
 {"elements": [
     {
-        "name": "JW_TEST",
-        "sysmlid": "123456",
+        "name": "no_site_no_project",
+        "sysmlid": "no_site_no_project",
         "specialization": {"type": "Project"}
     },
     {
-        "name": "no_site_no_project",
-        "sysmlid": "no_site_no_project",
+        "name": "JW_TEST",
+        "sysmlid": "123456",
         "specialization": {"type": "Project"}
     }
 ]}

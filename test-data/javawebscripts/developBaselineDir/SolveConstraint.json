@@ -1,76 +1,65 @@
 {"elements": [
     {
-        "creator": "admin",
+        "qualifiedId": "/europa/123456/op_ev_31835/op_param_31868",
+        "name": "x",
+        "qualifiedName": "/europa/JW_TEST/GreaterEquals/x",
+        "sysmlid": "op_param_31868",
         "documentation": "",
-        "editable": true,
-        "name": "result",
         "owner": "op_ev_31835",
-        "qualifiedId": "/europa/123456/op_ev_31835/op_param_31867",
-        "qualifiedName": "/europa/JW_TEST/GreaterEquals/result",
         "specialization": {"type": "Element"},
-        "sysmlid": "op_param_31867"
+        "editable": true,
+        "creator": "admin",
     },
     {
-        "creator": "admin",
+        "qualifiedId": "/europa/123456/arg_ev_33001",
+        "name": "initialDuration",
+        "qualifiedName": "/europa/JW_TEST/initialDuration",
+        "sysmlid": "arg_ev_33001",
         "documentation": "",
-        "editable": true,
-        "name": "duration",
         "owner": "123456",
-        "qualifiedId": "/europa/123456/arg_ev_38307",
-        "qualifiedName": "/europa/JW_TEST/duration",
         "specialization": {
+            "propertyType": null,
             "isDerived": false,
             "isSlot": false,
-            "propertyType": null,
-            "type": "Property",
             "value": [{
-                "integer": 22,
-                "type": "LiteralInteger",
-                "valueExpression": null
-            }]
+                "valueExpression": null,
+                "integer": -1145811380,
+                "type": "LiteralInteger"
+            }],
+            "type": "Property"
         },
-        "sysmlid": "arg_ev_38307"
+        "editable": true,
+        "creator": "admin",
     },
     {
-        "creator": "admin",
-        "documentation": "",
-        "editable": true,
-        "name": "y",
-        "owner": "op_ev_31835",
         "qualifiedId": "/europa/123456/op_ev_31835/op_param_31869",
+        "name": "y",
         "qualifiedName": "/europa/JW_TEST/GreaterEquals/y",
+        "sysmlid": "op_param_31869",
+        "documentation": "",
+        "owner": "op_ev_31835",
         "specialization": {"type": "Element"},
-        "sysmlid": "op_param_31869"
+        "editable": true,
+        "creator": "admin",
     },
     {
-        "creator": "admin",
+        "qualifiedId": "/europa/123456/op_ev_31835/op_param_31867",
+        "name": "result",
+        "qualifiedName": "/europa/JW_TEST/GreaterEquals/result",
+        "sysmlid": "op_param_31867",
         "documentation": "",
+        "owner": "op_ev_31835",
+        "specialization": {"type": "Element"},
         "editable": true,
-        "name": "duration_1",
-        "owner": "123456",
-        "qualifiedId": "/europa/123456/arg_ev_38307_1",
-        "qualifiedName": "/europa/JW_TEST/duration_1",
-        "specialization": {
-            "isDerived": false,
-            "isSlot": false,
-            "propertyType": null,
-            "type": "Property",
-            "value": [{
-                "integer": 10,
-                "type": "LiteralInteger",
-                "valueExpression": null
-            }]
-        },
-        "sysmlid": "arg_ev_38307_1"
+        "creator": "admin",
     },
     {
-        "creator": "admin",
-        "documentation": "",
-        "editable": true,
-        "name": "GreaterEquals",
-        "owner": "123456",
         "qualifiedId": "/europa/123456/op_ev_31835",
+        "name": "GreaterEquals",
         "qualifiedName": "/europa/JW_TEST/GreaterEquals",
+        "sysmlid": "op_ev_31835",
+        "documentation": "",
+        "owner": "123456",
         "specialization": {
             "parameters": [
                 "op_param_31867",
@@ -79,73 +68,84 @@
             ],
             "type": "Operation"
         },
-        "sysmlid": "op_ev_31835"
+        "editable": true,
+        "creator": "admin",
     },
     {
-        "creator": "admin",
-        "documentation": "",
-        "editable": true,
-        "name": "initialDuration",
-        "owner": "123456",
-        "qualifiedId": "/europa/123456/arg_ev_33001",
-        "qualifiedName": "/europa/JW_TEST/initialDuration",
-        "specialization": {
-            "isDerived": false,
-            "isSlot": false,
-            "propertyType": null,
-            "type": "Property",
-            "value": [{
-                "integer": -1145811380,
-                "type": "LiteralInteger",
-                "valueExpression": null
-            }]
-        },
-        "sysmlid": "arg_ev_33001"
-    },
-    {
-        "creator": "admin",
-        "documentation": "",
-        "editable": true,
-        "name": "",
-        "owner": "123456",
         "qualifiedId": "/europa/123456/constraint_32165",
+        "name": "",
         "qualifiedName": "/europa/JW_TEST/",
+        "sysmlid": "constraint_32165",
+        "documentation": "",
+        "owner": "123456",
         "specialization": {
             "specification": {
+                "valueExpression": null,
                 "operand": [
                     {
                         "element": "op_ev_31835",
-                        "type": "ElementValue",
-                        "valueExpression": null
+                        "valueExpression": null,
+                        "type": "ElementValue"
                     },
                     {
                         "element": "arg_ev_38307_1",
-                        "type": "ElementValue",
-                        "valueExpression": null
+                        "valueExpression": null,
+                        "type": "ElementValue"
                     },
                     {
                         "element": "arg_ev_33001",
-                        "type": "ElementValue",
-                        "valueExpression": null
+                        "valueExpression": null,
+                        "type": "ElementValue"
                     }
                 ],
-                "type": "Expression",
-                "valueExpression": null
+                "type": "Expression"
             },
             "type": "Constraint"
         },
-        "sysmlid": "constraint_32165"
+        "editable": true,
+        "creator": "admin",
     },
     {
-        "creator": "admin",
+        "qualifiedId": "/europa/123456/arg_ev_38307_1",
+        "name": "duration_1",
+        "qualifiedName": "/europa/JW_TEST/duration_1",
+        "sysmlid": "arg_ev_38307_1",
         "documentation": "",
+        "owner": "123456",
+        "specialization": {
+            "propertyType": null,
+            "isDerived": false,
+            "isSlot": false,
+            "value": [{
+                "valueExpression": null,
+                "integer": 10,
+                "type": "LiteralInteger"
+            }],
+            "type": "Property"
+        },
         "editable": true,
-        "name": "x",
-        "owner": "op_ev_31835",
-        "qualifiedId": "/europa/123456/op_ev_31835/op_param_31868",
-        "qualifiedName": "/europa/JW_TEST/GreaterEquals/x",
-        "specialization": {"type": "Element"},
-        "sysmlid": "op_param_31868"
+        "creator": "admin",
+    },
+    {
+        "qualifiedId": "/europa/123456/arg_ev_38307",
+        "name": "duration",
+        "qualifiedName": "/europa/JW_TEST/duration",
+        "sysmlid": "arg_ev_38307",
+        "documentation": "",
+        "owner": "123456",
+        "specialization": {
+            "propertyType": null,
+            "isDerived": false,
+            "isSlot": false,
+            "value": [{
+                "valueExpression": null,
+                "integer": 22,
+                "type": "LiteralInteger"
+            }],
+            "type": "Property"
+        },
+        "editable": true,
+        "creator": "admin",
     }
 ]}
 200
