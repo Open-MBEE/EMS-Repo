@@ -578,7 +578,8 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
 
             if ( mySpecifier == null ) {
                 // if no specifier, return all properties
-                Map< String, Object > props = node.getProperties();
+                // TODO need date/workspace
+                Map< String, Object > props = node.getNodeRefProperties(null, node.getWorkspace());
                 if ( props != null ) {
 
                 	// Loop through all of returned properties:

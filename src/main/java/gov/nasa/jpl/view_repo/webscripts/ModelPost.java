@@ -1364,7 +1364,9 @@ public class ModelPost extends AbstractJavaWebScript {
                 aspectProps.addAll( aspectDef.getProperties().keySet() );
             }
             
-            Map<String,Object> oldProps = node.getProperties();
+            // Using the latest time, as we are doing a post and want to delete
+            // the obsolete value specs at the current time
+            Map<String,Object> oldProps = node.getNodeRefProperties(null, workspace);
             
             // Loop through all the old properties and delete the value
             // specs that are no longer being used:
