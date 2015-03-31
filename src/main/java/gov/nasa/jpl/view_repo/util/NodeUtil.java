@@ -809,7 +809,9 @@ public class NodeUtil {
 //            results = searchService.query( getStoreRef(),
 //                                           SearchService.LANGUAGE_LUCENE,
 //                                           queryPattern );
+            AuthenticationUtil.setRunAsUser( "admin" );
             results = searchService.query( getSearchParameters(queryPattern) );
+            AuthenticationUtil.setRunAsUser( AuthenticationUtil.getFullyAuthenticatedUser() );
         }
         if ( Debug.isOn() ) {
             Debug.outln( "luceneSearch(" + queryPattern + "): returned "
