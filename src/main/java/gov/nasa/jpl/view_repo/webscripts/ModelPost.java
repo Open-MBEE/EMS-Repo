@@ -803,7 +803,6 @@ public class ModelPost extends AbstractJavaWebScript {
                                                       WorkspaceNode workspace )
                                                               throws JSONException {
         boolean isValid = true;
-
         for (int ii = 0; ii < jsonArray.length(); ii++) {
             JSONObject elementJson = jsonArray.getJSONObject(ii);
 
@@ -826,8 +825,11 @@ public class ModelPost extends AbstractJavaWebScript {
             }
             elementMap.put(sysmlId, elementJson);
 
-            if (findScriptNodeById(sysmlId, workspace, null, true) == null) {
+            EmsScriptNode node = findScriptNodeById(sysmlId, workspace, null, true);
+            if ( node == null) {
                 newElements.add(sysmlId);
+            } else {
+                foundElements.put( sysmlId, node );
             }
 
             // create the hierarchy
@@ -857,6 +859,14 @@ public class ModelPost extends AbstractJavaWebScript {
                     }
                     rootElements.add(sysmlId);
                 }
+                if ( foundElements.containsKey( ownerId ) || newElements.contains( ownerId ) ) {
+                    // skip -- already got it, or it's new and we don't care
+                } else {
+                    EmsScriptNode ownerNode = findScriptNodeById(ownerId, workspace, null, true);
+                    if ( ownerNode != null ) {
+                        foundElements.put(ownerId, ownerNode);
+                    }
+                }
                 if (!elementHierarchyJson.has(ownerId)) {
                     elementHierarchyJson.put(ownerId, new JSONArray());
                 }
@@ -867,23 +877,34 @@ public class ModelPost extends AbstractJavaWebScript {
             }
         }
 
-        if (isValid) {
-                isValid = fillRootElements(workspace);
+        for ( EmsScriptNode node : foundElements.values() ) {
+            if ( !checkPermissions( node, PermissionService.WRITE ) ) {
+                // bail on whole thing
+                isValid = false;
+                log( LogLevel.WARNING,
+                     "No permission to write to " + node.getSysmlId() + ":"
+                             + node.getSysmlName(),
+                     HttpServletResponse.SC_FORBIDDEN );
+            }
         }
         
         // Check if all the owners that are not being added by this post can be found.
         // If they cant be found then give a error message, store to display to user, and
         // do not continue with the post:
-        Iterator keys = elementHierarchyJson.keys();
+        Iterator<?> keys = elementHierarchyJson.keys();
         while (keys.hasNext()) {
             String id = (String) keys.next();
-            if (!newElements.contains( id ) && findScriptNodeById(id, workspace, null, true) == null) {
+            if (!newElements.contains( id ) && !foundElements.containsKey( id )) {
                 ownersNotFound.add( id );
                 log(LogLevel.ERROR, "Owner was not found: "+id, HttpServletResponse.SC_NOT_FOUND);
                 isValid = false;
             }
         }
 
+        if (isValid) {
+            isValid = fillRootElements(workspace);
+        }
+    
         return isValid;
     }
 

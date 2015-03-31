@@ -1296,45 +1296,45 @@ common_filters+['MMS_', '"url"'],
 ],
 
 # lets do the None permissions
-# [
-# 620,
-# "NoneRead",
-# "Read element with user None",
-# "curl -w '\\n%{http_code}\\n' -u None:password -X GET " + BASE_URL_WS + "master/elements/y",
-# True,
-# common_filters,
-# ["test","workspaces","develop", "develop2"]
-# ],
-#    
-# [
-# 621,
-# "NoneDelete",
-# "Delete element with user None",
-# "curl -w '\\n%{http_code}\\n' -u None:password -X DELETE " + BASE_URL_WS + "master/elements/y",
-# True,
-# common_filters+['"timestamp"', '"id"'],
-# ["test","workspaces","develop", "develop2"]
-# ],
-#    
-# [
-# 622,
-# "NoneUpdate",
-# "Update element with user None",
-# "curl -w '\\n%{http_code}\\n' -u None:password -H Content-Type:application/json " + BASE_URL_WS + "master/elements -d '{\"elements\":[{\"sysmlid\":\"y\",\"documentation\":\"y is modified by None\"}]}'",
-# True,
-# common_filters,
-# ["test","workspaces","develop", "develop2"]
-# ],
-#    
-# [
-# 623,
-# "NoneCreate",
-# "Create element with user None",
-# "curl -w '\\n%{http_code}\\n' -u None:password -H Content-Type:application/json " + BASE_URL_WS + "master/elements -d '{\"elements\":[{\"sysmlid\":\"ychild\",\"documentation\":\"y child\",\"owner\":\"y\"}]}'",
-# True,
-# common_filters,
-# ["test","workspaces","develop", "develop2"]
-# ],
+[
+620,
+"NoneRead",
+"Read element with user None",
+"curl -w '\\n%{http_code}\\n' -u None:password -X GET " + BASE_URL_WS + "master/elements/y",
+True,
+common_filters,
+["test","workspaces","develop", "develop2"]
+],
+    
+[
+621,
+"NoneDelete",
+"Delete element with user None",
+"curl -w '\\n%{http_code}\\n' -u None:password -X DELETE " + BASE_URL_WS + "master/elements/y",
+True,
+common_filters+['"timestamp"', '"id"'],
+["test","workspaces","develop", "develop2"]
+],
+    
+[
+622,
+"NoneUpdate",
+"Update element with user None",
+"curl -w '\\n%{http_code}\\n' -u None:password -H Content-Type:application/json " + BASE_URL_WS + "master/elements -d '{\"elements\":[{\"sysmlid\":\"y\",\"documentation\":\"y is modified by None\"}]}'",
+True,
+common_filters,
+["test","workspaces","develop", "develop2"]
+],
+    
+[
+623,
+"NoneCreate",
+"Create element with user None",
+"curl -w '\\n%{http_code}\\n' -u None:password -H Content-Type:application/json " + BASE_URL_WS + "master/elements -d '{\"elements\":[{\"sysmlid\":\"ychild\",\"documentation\":\"y child\",\"owner\":\"y\"}]}'",
+True,
+common_filters,
+["test","workspaces","develop", "develop2"]
+],
  
 [
 624,
