@@ -27,10 +27,7 @@ import org.apache.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.springframework.extensions.surf.RequestContext;
-import org.springframework.extensions.surf.support.ThreadLocalRequestContext;
 import org.springframework.extensions.webscripts.Status;
-import org.springframework.extensions.webscripts.connector.User;
 import org.springframework.web.context.request.WebRequest;
 
 public class SnapshotArtifactsGenerationActionExecuter  extends ActionExecuterAbstractBase {

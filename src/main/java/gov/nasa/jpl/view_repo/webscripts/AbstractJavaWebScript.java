@@ -800,12 +800,14 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
         return wsDiff;
     }
 
+    
     /**
      * Determines the project site for the passed site node.  Also, determines the
      * site package node if applicable.
      *
      */
-    public Pair<EmsScriptNode,EmsScriptNode> findProjectSite(WebScriptRequest req, String siteName,
+    public Pair<EmsScriptNode,EmsScriptNode> findProjectSite(String siteName,
+                                                             Date dateTime,
                                                              WorkspaceNode workspace,
                                                              EmsScriptNode initialSiteNode) {
 
@@ -813,7 +815,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
         EmsScriptNode siteNode = null;
 
         // If it is a package site, get the corresponding package for the site:
-        NodeRef sitePackageRef = (NodeRef) initialSiteNode.getNodeRefProperty( Acm.ACM_SITE_PACKAGE, null,
+        NodeRef sitePackageRef = (NodeRef) initialSiteNode.getNodeRefProperty( Acm.ACM_SITE_PACKAGE, dateTime,
                                                                                workspace);
         if (sitePackageRef != null) {
             sitePackageNode = new EmsScriptNode(sitePackageRef, services);
@@ -825,7 +827,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
             if (splitArry != null && splitArry.length > 0) {
                 String sitePkgName = splitArry[splitArry.length-1];
 
-                sitePackageNode = findScriptNodeById(sitePkgName,workspace, null, false );
+                sitePackageNode = findScriptNodeById(sitePkgName,workspace, dateTime, false );
 
                 if (sitePackageNode == null) {
                     log(LogLevel.ERROR, "Could not find site package node for site package name "+siteName,
@@ -837,11 +839,8 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 
         // Found the package for the site:
         if (sitePackageNode != null) {
-            // Sanity check:
-            // Note: skipping the noderef check b/c our node searches return the noderefs that correspond
-            //       to the nodes in the surf-config folder.  Also, we dont need the check b/c site nodes
-            //       are always in the master workspace.
-            NodeRef sitePackageSiteRef = (NodeRef) sitePackageNode.getNodeRefProperty( Acm.ACM_SITE_SITE, true, null, null );
+            // Note: not using workspace since sites are all in master.
+            NodeRef sitePackageSiteRef = (NodeRef) sitePackageNode.getPropertyAtTime( Acm.ACM_SITE_SITE, dateTime );
             if (sitePackageSiteRef != null && !sitePackageSiteRef.equals( initialSiteNode.getNodeRef() )) {
                 log(LogLevel.ERROR, "Mismatch between site/package for site package name "+siteName,
                     HttpServletResponse.SC_NOT_FOUND);
@@ -849,13 +848,13 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
             }
 
             // Get the project site by tracing up the parents until the parent is null:
-            NodeRef siteParentRef = (NodeRef) initialSiteNode.getNodeRefProperty( Acm.ACM_SITE_PARENT, true, null, null );
+            NodeRef siteParentRef = (NodeRef) initialSiteNode.getPropertyAtTime( Acm.ACM_SITE_PARENT, dateTime );
             EmsScriptNode siteParent = siteParentRef != null ? new EmsScriptNode(siteParentRef, services, response) : null;
             EmsScriptNode oldSiteParent = null;
 
             while (siteParent != null) {
                 oldSiteParent = siteParent;
-                siteParentRef = (NodeRef) siteParent.getNodeRefProperty( Acm.ACM_SITE_PARENT, true, null, null );
+                siteParentRef = (NodeRef) siteParent.getPropertyAtTime( Acm.ACM_SITE_PARENT, dateTime );
                 siteParent = siteParentRef != null ? new EmsScriptNode(siteParentRef, services, response) : null;
             }
 
@@ -884,12 +883,12 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
      * @param workspace
      * @return
      */
-    public EmsScriptNode getSiteForPkgSite(EmsScriptNode pkgNode, WorkspaceNode workspace) {
+    public EmsScriptNode getSiteForPkgSite(EmsScriptNode pkgNode, Date dateTime, WorkspaceNode workspace) {
 
         // Note: skipping the noderef check b/c our node searches return the noderefs that correspond
         //       to the nodes in the surf-config folder.  Also, we dont need the check b/c site nodes
         //       are always in the master workspace.
-        NodeRef pkgSiteParentRef = (NodeRef)pkgNode.getNodeRefProperty( Acm.ACM_SITE_SITE, true, null, null );
+        NodeRef pkgSiteParentRef = (NodeRef)pkgNode.getPropertyAtTime( Acm.ACM_SITE_SITE, dateTime );
         EmsScriptNode pkgSiteParentNode = null;
 
         if (pkgSiteParentRef != null) {
@@ -900,7 +899,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
             // Search for it. Will have a cm:name = "site_"+sysmlid of site package node:
             String sysmlid = pkgNode.getSysmlId();
             if (sysmlid != null) {
-                pkgSiteParentNode = findScriptNodeById(NodeUtil.sitePkgPrefix+sysmlid, workspace, null, false);
+                pkgSiteParentNode = findScriptNodeById(NodeUtil.sitePkgPrefix+sysmlid, workspace, dateTime, false);
             }
             else {
                 log(LogLevel.WARNING, "Parent package site does not have a sysmlid.  Node "+pkgNode);
@@ -927,7 +926,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
         // Note: must walk up using the getOwningParent() b/c getParent() does not work
         //       for versioned nodes.  Note, that getOwningParent() will be null for
         //       the Project node, but we don't need to go farther up than this anyways
-        EmsScriptNode siteParentReifNode = node.getOwningParent(dateTime, workspace);
+        EmsScriptNode siteParentReifNode = node.getOwningParent(dateTime, workspace, false);
         EmsScriptNode siteParent;
         while (siteParentReifNode != null && siteParentReifNode.exists()) {
 
@@ -939,7 +938,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
                 if (isSiteParent != null && isSiteParent) {
 
                     // Get the alfresco Site for the site package node:
-                    pkgSiteParentNode = getSiteForPkgSite(siteParentReifNode, workspace);
+                    pkgSiteParentNode = getSiteForPkgSite(siteParentReifNode, dateTime, workspace);
                     break;
                 }
             }
@@ -949,7 +948,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
             String siteParentType = siteParent != null ? siteParent.getTypeShort() : null;
             String siteParentReifType = siteParentReifNode.getTypeShort();
             if (Acm.ACM_PROJECT.equals( siteParentType ) || Acm.ACM_PROJECT.equals( siteParentReifType )) {
-                pkgSiteParentNode = siteParentReifNode.getSiteNode(workspace);
+                pkgSiteParentNode = siteParentReifNode.getSiteNode(dateTime, workspace);
                 break;  // break no matter what b/c we have reached the project node
             }
 
@@ -957,7 +956,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
                 break;
             }
 
-            siteParentReifNode = siteParentReifNode.getOwningParent(dateTime, workspace);
+            siteParentReifNode = siteParentReifNode.getOwningParent(dateTime, workspace, false);
         }
 
         return pkgSiteParentNode;

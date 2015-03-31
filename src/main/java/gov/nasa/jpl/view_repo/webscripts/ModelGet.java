@@ -373,7 +373,7 @@ public class ModelGet extends AbstractJavaWebScript {
 		if (!elementsFound.containsKey(sysmlId)) {
 		    // dont add reified packages
 		    if (!rootName.endsWith("_pkg") &&
-		        !root.isOwnedValueSpec(dateTime, workspace)) { //isPropertyOwnedValueSpecification()) {
+		        !root.isOwnedValueSpec(dateTime, workspace)) {
 		        elementsFound.put(sysmlId, root);
 		    }
 		}
@@ -393,18 +393,10 @@ public class ModelGet extends AbstractJavaWebScript {
 
 		    // Handle all the children in this workspace:
 		    for ( NodeRef childRef : root.getOwnedChildren(false, dateTime, workspace) ) {
-		        // TODO no longer need this call if getOwnedChildren() take time/workspace
-			    NodeRef vChildRef = NodeUtil.getNodeRefAtTime( childRef, workspace, dateTime );
-                if ( vChildRef == null ) {
-                    // this doesn't elicit a not found response
-                    log( LogLevel.WARNING,
-                         "Element " + childRef
-                         + ( dateTime == null ? "" : " at " + dateTime ) + " not found");
-			        continue;
-			    }
-                EmsScriptNode child = new EmsScriptNode( vChildRef, services, response );
+                if ( childRef == null ) continue;
+                EmsScriptNode child = new EmsScriptNode( childRef, services, response );
                 if ( checkPermissions( child, PermissionService.READ ) ) {
-                    if (child.exists() && !child.isOwnedValueSpec(dateTime, workspace)) { //isPropertyOwnedValueSpecification()) {
+                    if (child.exists() && !child.isOwnedValueSpec(dateTime, workspace)) {
 
                         String value = child.getSysmlId();
                         if ( value != null && !value.endsWith( "_pkg" )) {

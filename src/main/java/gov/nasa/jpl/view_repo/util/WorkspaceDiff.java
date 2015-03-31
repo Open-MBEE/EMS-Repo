@@ -200,7 +200,10 @@ public class WorkspaceDiff implements Serializable {
                     movedElements.put( e.getKey(), node);
                     
                     // Add this new owner to element ids, so it can be added to elements:
-                    EmsScriptNode newOwner = node != null ? node.getOwningParent( null, getWs1() ) : null;
+                    EmsScriptNode newOwner =
+                            node != null ?
+                            node.getOwningParent( getTimestamp1(), getWs1(), false ) :
+                            null;
                     if (newOwner != null) {
                         ids.add( newOwner.getSysmlId() );
                     }
@@ -226,7 +229,7 @@ public class WorkspaceDiff implements Serializable {
         for (NodeRef ref : nodeDiff.getAdded()) {
             if (ref != null) {
                 EmsScriptNode node = new EmsScriptNode(ref, getServices());
-                EmsScriptNode parent = node.getOwningParent( null, getWs1() );
+                EmsScriptNode parent = node.getOwningParent( getTimestamp1(), getWs1(), false );
                 if (parent != null) {
                     ids.add( parent.getSysmlId() );
                 }
@@ -241,7 +244,7 @@ public class WorkspaceDiff implements Serializable {
                     String parentId = id;
                     while ( parent != null && parent.isModelElement() ) {
                         elements.put( parentId, parent );
-                        parent = parent.getOwningParent( null, getWs1() );
+                        parent = parent.getOwningParent( getTimestamp1(), getWs1(), false );
                         parentId = parent.getSysmlId();
                     }
                 }
@@ -729,7 +732,7 @@ public class WorkspaceDiff implements Serializable {
     public boolean diff() {
         boolean status = true;
 
-        captureDeltas(ws2);
+        captureDeltas();
 
         return status;
     }
@@ -899,15 +902,15 @@ public class WorkspaceDiff implements Serializable {
         return ignoredPropIdQnames;
     }
 
-    protected void captureDeltas(WorkspaceNode node) {
+    protected void captureDeltas() {
         Set< NodeRef > s1 =
-                WorkspaceNode.getChangedNodeRefsWithRespectTo( ws1, node,
+                WorkspaceNode.getChangedNodeRefsWithRespectTo( ws1, ws2,
                                                                timestamp1,
                                                                timestamp2,
                                                                getServices(),
                                                                response, status );
         Set< NodeRef > s2 =
-                WorkspaceNode.getChangedNodeRefsWithRespectTo( node, ws1,
+                WorkspaceNode.getChangedNodeRefsWithRespectTo( ws2, ws1,
                                                                timestamp2,
                                                                timestamp1,
                                                                getServices(),
@@ -932,7 +935,7 @@ public class WorkspaceDiff implements Serializable {
         for ( NodeRef n : s1 ) {
             String sysmlId = NodeUtil.getSysmlId( n );
             NodeRef ref =
-                    NodeUtil.findNodeRefById( sysmlId, false, node, timestamp2,
+                    NodeUtil.findNodeRefById( sysmlId, false, ws2, timestamp2,
                                               getServices(), false );
             if ( ref != null ) {
                 s2.add( ref );
@@ -982,12 +985,12 @@ public class WorkspaceDiff implements Serializable {
         for ( NodeRef n : tempSet2 ) {
             String sysmlId = NodeUtil.getSysmlId( n );
             NodeRef ref =
-                    NodeUtil.findNodeRefById( sysmlId, false, node, timestamp2,
+                    NodeUtil.findNodeRefById( sysmlId, false, ws2, timestamp2,
                                               getServices(), false );
             if ( ref != null ) {                
                 // Add owned value specs if needed, as we need them to be separated out for
                 // the diff to work correctly.  
-                NodeUtil.addEmbeddedValueSpecs(ref, s2, getServices(), timestamp2, node);
+                NodeUtil.addEmbeddedValueSpecs(ref, s2, getServices(), timestamp2, ws2);
             }
         }
 

@@ -107,7 +107,7 @@ public class WorkspacesMerge extends AbstractJavaWebScript{
 	                        instance.createOrUpdateModel( top.getJSONObject("workspace2"), status,
 	                                                      targetWS, sourceWS, true );
                     // REVIEW -- TODO -- shouldn't this be called from instance?
-                    instance.addRelationshipsToProperties( elements );
+                    instance.addRelationshipsToProperties( elements, targetWS );
                     
                     tmpResult = null;
                     new EmsTransaction(services, response, null, runWithoutTransactions ) {

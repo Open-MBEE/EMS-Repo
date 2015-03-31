@@ -384,7 +384,7 @@ public class MmsModelDelete extends AbstractJavaWebScript {
             
             // Remove from the ownedChildren of the owner:
             // Note: added this for when we are deleting embedded value specs that are no longer be used
-            EmsScriptNode parent = node.getOwningParent( null, workspace );
+            EmsScriptNode parent = node.getOwningParent( null, workspace, false );
             if (parent != null && parent.exists()) {
                 parent.removeFromPropertyNodeRefs("ems:ownedChildren", node.getNodeRef() );
             }

@@ -148,9 +148,7 @@ public class SiteGet extends AbstractJavaWebScript {
             if (siteRef != null) {
                 	emsNode = new EmsScriptNode(siteRef, services);
                 	name = emsNode.getName();
-                    // Note: skipping the noderef check b/c our node searches return the noderefs that correspond
-                    //       to the nodes in the surf-config folder. 
-                	parentRef = (NodeRef)emsNode.getNodeRefProperty(Acm.ACM_SITE_PARENT, true, null, null);
+                	parentRef = (NodeRef)emsNode.getPropertyAtTime(Acm.ACM_SITE_PARENT, dateTime);
 
                 	EmsScriptNode parentNode = null;
                 	String parentId = null;

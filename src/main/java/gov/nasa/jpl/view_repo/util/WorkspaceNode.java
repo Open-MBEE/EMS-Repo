@@ -103,7 +103,7 @@ public class WorkspaceNode extends EmsScriptNode {
     // delete later
     @Override
     public WorkspaceNode getSourceWorkspace() {
-        // ems:parent is workspace meta data, so dont need dateTime/workspace args
+        // ems:source is workspace meta data, so dont need dateTime/workspace args
         NodeRef ref = (NodeRef)getNodeRefProperty("ems:source", null, null);
         if ( ref == null ) return null;
         WorkspaceNode sourceWs = new WorkspaceNode( ref, getServices() );
@@ -453,7 +453,7 @@ public class WorkspaceNode extends EmsScriptNode {
             }
             if ( nodeGuess == null) {
 
-                // Clone the reified node if possible and not already in the workspace:
+                // Clone the reified node if possible and if not already in the workspace:
                 EmsScriptNode oldReifiedNode = node.getReifiedNode(node.getWorkspace());
                 EmsScriptNode newReifiedNode = null;
                 if (oldReifiedNode != null) {

@@ -6,6 +6,7 @@ import gov.nasa.jpl.mbee.util.Debug;
 import gov.nasa.jpl.mbee.util.HasId;
 import gov.nasa.jpl.mbee.util.Pair;
 import gov.nasa.jpl.mbee.util.Utils;
+import gov.nasa.jpl.view_repo.util.NodeUtil.SearchType;
 
 import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
@@ -823,11 +824,12 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
     	// TODO ScriptNode getType returns a QName or String, why does he want a collection
     	// of EmsScriptNode?  I think we should change T to String.
 
-    	// Ignoring context b/c it doesnt make sense
-
+        WorkspaceNode ws = (context instanceof WorkspaceNode) ? (WorkspaceNode)context : null;
+        Date dateTime = (context instanceof Date) ? (Date)context : null;
+        
     	// Search for all elements with the specified type name:
     	if (specifier instanceof String) {
-//	        StringBuffer response = new StringBuffer();
+//	        StringBuffer response = new StringBuffer();  
 //	        Status status = new Status();
 //	        Map< String, EmsScriptNode > elements =
 //	                NodeUtil.searchForElements( "@sysml\\:type:\"", (String)specifier, services, response,
@@ -841,7 +843,9 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
 
 	        Collection< EmsScriptNode > elementColl = null;
 	        try {
-	        		elementColl = NodeUtil.luceneSearchElements( "ASPECT:\"sysml:" + specifier + "\"" );
+//	        		elementColl = NodeUtil.luceneSearchElements( "ASPECT:\"sysml:" + specifier + "\"" );
+	                ArrayList< NodeRef > refs = NodeUtil.findNodeRefsByType( (String)specifier, SearchType.ASPECT.prefix, false, ws, dateTime, false, true, getServices(), false, null );
+	                elementColl = EmsScriptNode.toEmsScriptNodeList( refs, getServices(), null, null );
 	        } catch (Exception e) {
 	        		// if lucene query fails, most likely due to non-existent aspect, we should look for type now
 	        		try {

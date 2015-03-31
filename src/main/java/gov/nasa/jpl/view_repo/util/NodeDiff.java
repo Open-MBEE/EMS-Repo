@@ -160,7 +160,7 @@ public class NodeDiff extends AbstractDiff<NodeRef, Object, String> {
 
     public EmsScriptNode getOwner( EmsScriptNode e, boolean isSet1 ) {
         EmsScriptNode p = e.getOwningParent( isSet1 ? timestamp1 : timestamp2, 
-                                             isSet1 ? ws1 : ws2 );
+                                             isSet1 ? ws1 : ws2, false );
         return p;//.getNodeRef();
     }
     public EmsScriptNode getOwner( NodeRef t, boolean isSet1 ) {

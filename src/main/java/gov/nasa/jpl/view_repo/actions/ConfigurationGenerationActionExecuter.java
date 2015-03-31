@@ -139,14 +139,14 @@ public class ConfigurationGenerationActionExecuter extends ActionExecuterAbstrac
                 if ( vRef != null ) siteRef = vRef;
             }
            EmsScriptNode site = new EmsScriptNode(siteRef, services, response);
-           fndSiteName = site.getSiteName(workspace);
+           fndSiteName = site.getSiteName(dateTime, workspace);
         }       
        
         Set<EmsScriptNode> productSet = new HashSet<EmsScriptNode>();
-        // search for products against the latest time so we can put in the snapshot references
+
         Map< String, EmsScriptNode > nodeList = NodeUtil.searchForElements(NodeUtil.SearchType.ASPECT.prefix, 
                                                                           Acm.ACM_PRODUCT, false,
-                                                                          workspace, null, services, response,
+                                                                          workspace, dateTime, services, response,
                                                                           responseStatus, fndSiteName);
         if (nodeList != null) {
             productSet.addAll( nodeList.values() );

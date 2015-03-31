@@ -1226,8 +1226,8 @@ public class NodeUtil {
                         match = false;
                     }
                 }
-                // Check that it from the desired site if desired:
-                if (siteName != null && !siteName.equals( esn.getSiteName(workspace) )) {
+                // Check that it is from the desired site:
+                if (siteName != null && !siteName.equals( esn.getSiteName(dateTime, workspace) )) {
                     match = false;
                 }
                 if ( !match ) {
@@ -2276,6 +2276,15 @@ public class NodeUtil {
         return null;
     }
 
+    public static Object getPropertyAtTime( NodeRef nodeRef, String acmType,
+                                            Date dateTime, ServiceRegistry services ) {
+        EmsScriptNode node = new EmsScriptNode( nodeRef, services );
+        Object result = node.getPropertyAtTime(acmType, dateTime);
+        return result;
+    }
+    
+
+    
     public static NodeRef getNodeRefAtTime( NodeRef nodeRef, WorkspaceNode workspace,
                                             Date dateTime ) {
         return getNodeRefAtTime( nodeRef, workspace, dateTime, false, false);
