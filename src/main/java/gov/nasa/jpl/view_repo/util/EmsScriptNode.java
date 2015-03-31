@@ -115,8 +115,10 @@ public class EmsScriptNode extends ScriptNode implements
 
     public static boolean versionCacheDebugPrint = false;
     
+    // private members to cache qualified names, ids, and site characterizations
     private String qualifiedName = null;
     private String qualifiedId = null;
+    private String siteCharacterizationId = null;
 
     /**
      * A set of content model property names that serve as workspace metadata
@@ -975,7 +977,7 @@ public class EmsScriptNode extends ScriptNode implements
 
     public EmsScriptNode getReifiedNode(boolean findDeleted, WorkspaceNode ws) {
         NodeRef nodeRef = (NodeRef)getNodeRefProperty( "ems:reifiedNode", false, null,
-                                                findDeleted, false, ws );
+                                                       findDeleted, false, ws );
         if ( nodeRef != null ) {
             return new EmsScriptNode( nodeRef, services, response );
         }
@@ -1252,6 +1254,7 @@ public class EmsScriptNode extends ScriptNode implements
         return false;
     }
 
+
     public String getVersionLabel() {
         Version v = getCurrentVersion();
         if ( v != null ) {
@@ -1491,8 +1494,6 @@ public class EmsScriptNode extends ScriptNode implements
 
   public Object getNodeRefProperty( String acmType, boolean skipNodeRefCheck, 
                                     Date dateTime, WorkspaceNode ws ) {
-      // FIXME Sometimes we wont want these defaults, ie want to find the deleted elements.
-      //       Need to check all calls to getProperty() with properties that are NodeRefs.
       return getNodeRefProperty(acmType, false, dateTime, false, skipNodeRefCheck, ws);
   }
 
@@ -1552,7 +1553,7 @@ public class EmsScriptNode extends ScriptNode implements
     public Object getProperty( String acmType ) {
         Object result = getPropertyImpl(acmType);
 
-        // Throw an execption of the property value is a NodeRef or 
+        // Throw an exception of the property value is a NodeRef or 
         // collection of NodeRefs
         if ( !workspaceMetaProperties.contains( acmType )) {
             if ( result instanceof NodeRef ) {
@@ -1571,7 +1572,7 @@ public class EmsScriptNode extends ScriptNode implements
 
         return result;
     }
-    
+   
     private Object getPropertyImpl(String acmType) {
         if ( Utils.isNullOrEmpty( acmType ) ) return null;
         Object result = null;
@@ -1588,9 +1589,6 @@ public class EmsScriptNode extends ScriptNode implements
 
     
     public Object getPropertyAtTime( String acmType, Date dateTime ) {
-//        NodeRef refAtTime = NodeUtil.getNodeRefAtTime( nodeRef, dateTime );
-//        EmsScriptNode node = new EmsScriptNode( refAtTime, services );
-//        Object result = node.getPropertyImpl( acmType );
         Object result = getPropertyImpl( acmType );
         if ( result instanceof NodeRef ) {
             result = NodeUtil.getNodeRefAtTime( (NodeRef)result, dateTime );
@@ -1647,19 +1645,7 @@ public class EmsScriptNode extends ScriptNode implements
         if ( useFoundationalApi ) {
             return Utils.toMap( services.getNodeService()
                                         .getProperties( nodeRef ),
-                                String.class, Object.class );
-            
-//            Map<String, Object> returnMap = new HashMap<String, Object>();
-//            Map< QName, Serializable > map =  services.getNodeService().getProperties( nodeRef );
-//            
-//            // Need to potentially replace each property with the correct property value for
-//            // the workspace.  Remember, that property that points to a node ref may point to
-//            // one in a parent workspace, so we must do a search by id to get the correct one:
-//            for (Entry< QName, Serializable> entry : map.entrySet()) {
-//                String keyShort = NodeUtil.getShortQName( entry.getKey() );
-//                returnMap.put( entry.getKey().toString(), getProperty(keyShort) );
-//            }
-//            return returnMap;
+                                String.class, Object.class );            
         } else {
             return super.getProperties();
         }
@@ -1851,9 +1837,25 @@ public class EmsScriptNode extends ScriptNode implements
         }
         return getSysmlQPath( false, dateTime, ws );
     }
+    
+    /**
+     * Returns the closest site characterization to which the element belongs
+     * @param workspaceNode 
+     * @param dateTime 
+     * @return
+     */
+    public String getSiteCharacterizationId(Date date, WorkspaceNode ws ) {
+        if (siteCharacterizationId != null) {
+            return siteCharacterizationId;
+        } else {
+            // the following call will get the site characterization if it exists
+            getSysmlQName(date, ws);
+            return siteCharacterizationId;
+        }
+    }
 
     /**
-     * Gets the SysML qualified name for an object - if not SysML, won't return
+     * Builds the SysML qualified name/id for an object - if not SysML, won't return
      * anything
      *
      * @param isName
@@ -1869,11 +1871,11 @@ public class EmsScriptNode extends ScriptNode implements
         qualifiedName = "/" + getProperty( "sysml:name" );
         qualifiedId =  "/" + getProperty( "sysml:id" );
 
-        boolean siteCharacterizationFound = false;
         NodeRef ownerRef = (NodeRef)this.getNodeRefProperty( "ems:owner", dateTime, ws );
+
         EmsScriptNode owner = null;
         // Need to look up based on owners...
-        while ( ownerRef != null && !siteCharacterizationFound ) {
+        while ( ownerRef != null ) {
             owner = new EmsScriptNode( ownerRef, services, response );
             String nameProp = (String)owner.getProperty( "sysml:name" );
             String idProp = (String)owner.getProperty( "sysml:id" );
@@ -1885,38 +1887,36 @@ public class EmsScriptNode extends ScriptNode implements
 
             // stop if we find a site characterization in the path
             if (owner.hasAspect( "ems:SiteCharacterization" )) {
-                siteCharacterizationFound = true;
-                idProp = "site_" + idProp;
+                siteCharacterizationId = "site_" + idProp;
             }
             qualifiedId = "/" + idProp + qualifiedId;
 
             ownerRef = (NodeRef)owner.getNodeRefProperty( "ems:owner", dateTime, ws );
         }
         
-        if (siteCharacterizationFound) {
-            // don't need to do anything as the qualified name and id are complete 
-        } else {
-            // Get the site, which is one up from the Models node:
-            // In case the child of the project does not have the owner set to the project,
-            // we will loop until we find the Models node:
-            String ownerName = owner != null ? owner.getName() : null;
-            EmsScriptNode modelNode = owner;
-            while ( owner != null && !ownerName.equals( "Models" )) {
-                owner = owner.getParent();
-                ownerName = owner != null ? owner.getName() : null;
-                if (owner != null) {
-                    modelNode = owner;
+        // Get the site, which is one up from the Models node:
+        // In case the child of the project does not have the owner set to the project,
+        // we will loop until we find the Models node:
+        String ownerName = owner != null ? owner.getName() : null;
+        EmsScriptNode modelNode = owner;
+        while ( owner != null && !ownerName.equals( "Models" )) {
+            owner = owner.getParent();
+            ownerName = owner != null ? owner.getName() : null;
+            if (owner != null) {
+                modelNode = owner;
+            }
+        }
+        
+        if (modelNode != null) {
+            EmsScriptNode siteNode = modelNode.getParent();
+            if (siteNode != null) {
+                qualifiedName = "/" + siteNode.getName() + qualifiedName;
+                qualifiedId = "/" + siteNode.getName() + qualifiedId;
+                if (siteCharacterizationId == null) {
+                    siteCharacterizationId = siteNode.getName();
                 }
             }
-            
-            if (modelNode != null) {
-                EmsScriptNode siteNode = modelNode.getParent();
-                if (siteNode != null) {
-                    qualifiedName = "/" + siteNode.getName() + qualifiedName;
-                    qualifiedId = "/" + siteNode.getName() + qualifiedId;
-                }
-            }
-        } // end if siteCharacterizationFound
+        }
 
         if (isName) {
             return qualifiedName;
@@ -2092,6 +2092,9 @@ public class EmsScriptNode extends ScriptNode implements
             }
             if ( filter == null || filter.isEmpty() || filter.contains( "qualifiedId" ) ) {
                 putInJson( elementJson, "qualifiedId", this.getSysmlQId(dateTime, getWorkspace()), filter );
+            }
+            if (filter == null || filter.isEmpty() || filter.contains( "siteCharacterizationId" )) {
+                putInJson( elementJson, "siteCharacterizationId", this.getSiteCharacterizationId(dateTime, getWorkspace()), filter);
             }
         }
         if ( filter == null || filter.size() == 0 || filter.contains( "owner" ) ) {
@@ -4339,6 +4342,15 @@ public class EmsScriptNode extends ScriptNode implements
         return getPropertyElement(acmProperty, false, date, ws);
     }
 
+    public List< EmsScriptNode > getPropertyElements( String acmProperty, Date date, WorkspaceNode ws ) {
+        List< NodeRef > refs = getPropertyNodeRefs( acmProperty, date, ws );
+        List< EmsScriptNode > elements = new ArrayList< EmsScriptNode >();
+        for ( NodeRef ref : refs ) {
+            elements.add( new EmsScriptNode( ref, services ) );
+        }
+        return elements;
+    }
+    
     public EmsScriptNode getPropertyElement( String acmProperty, boolean skipNodeRefCheck,
                                              Date date, WorkspaceNode ws) {
         Object e = getNodeRefProperty( acmProperty, skipNodeRefCheck, date, ws );
@@ -4351,6 +4363,13 @@ public class EmsScriptNode extends ScriptNode implements
         return null;
     }
 
+    public Set< EmsScriptNode > getRelationships(Date date, WorkspaceNode ws) {
+        Set< EmsScriptNode > set = new LinkedHashSet< EmsScriptNode >();
+        for ( Map.Entry< String, String > e : Acm.PROPERTY_FOR_RELATIONSHIP_PROPERTY_ASPECTS.entrySet() ) {
+            set.addAll( getPropertyElements( e.getValue(), date, ws ) );
+        }
+        return set;
+    }
 
     public Set< EmsScriptNode > getRelationshipsOfType( String typeName, Date dateTime,
                                                         WorkspaceNode ws ) {
