@@ -2534,7 +2534,7 @@ public class ModelPost extends AbstractJavaWebScript {
 
         // Search for all constraints in the database:
         ArrayList< NodeRef > refs = 
-                NodeUtil.findNodeRefsByType( "Constraint", SearchType.ASPECT.prefix,
+                NodeUtil.findNodeRefsByType( "sysml:Constraint", SearchType.ASPECT.prefix,
                                              false, workspace, null, false, true,
                                              getServices(), false, null );
         
