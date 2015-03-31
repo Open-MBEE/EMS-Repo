@@ -678,7 +678,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
     }
 
     private DocumentElement createTable( JSONObject obj, DBSection section, WorkspaceNode workspace, Date timestamp  ) throws JSONException {
-        DBTable table = new DBTable();
+    	DBTable table = new DBTable();
         String title = (String)obj.opt( "title" );
         String style = (String)obj.opt( "style" );
         table.setId( getSymlId( obj ) );
@@ -692,7 +692,6 @@ public class SnapshotPost extends AbstractJavaWebScript {
         table.setCols(cols);
         table.setHeaders( createTableHeader( obj, section, dbTable, workspace, timestamp ));
         table.setBody( createTableBody( obj, section, dbTable, workspace, timestamp ));
-
         // table.setCols(headerCols.length());
         return table;
     }
@@ -763,16 +762,15 @@ public class SnapshotPost extends AbstractJavaWebScript {
                 	te.addElement(text);
                 }
                 rows.add( te );
-                dbTable.tracksRowspanCount(row-1, j, l, (isHeader)? TablePart.HEADER:TablePart.BODY);
             }
             list.add( rows );
         }
         
         if(isHeader){
-        	dbTable.handleRowsDifferences(dbTable.headerRowspanCount, dbTable.headerRowCount, list);
+        	dbTable.handleRowsDifferences(dbTable.header, dbTable.headerRowCount, list);
         }
         else{
-        	dbTable.handleRowsDifferences(dbTable.bodyRowspanCount, dbTable.bodyRowCount, list);
+        	dbTable.handleRowsDifferences(dbTable.body, dbTable.bodyRowCount, list);
         }
         return list;
     }

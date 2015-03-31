@@ -8,11 +8,8 @@ import org.jsoup.select.Elements;
 public class HtmlTable {
 	private int colCount;
 	private int headerRowCount;
-	private int headerRowspanCount[][];
 	private int footerRowCount;
-	private int footerRowspanCount[][];
 	private int bodyRowCount;
-	private int bodyRowspanCount[][];
 	private int header[][];
 	private int body[][];
 	private int footer[][];
@@ -374,9 +371,9 @@ public class HtmlTable {
 		header = new int[headerRowCount+1][colCount+1];
 		body = new int[bodyRowCount+1][colCount+1];
 		footer = new int[footerRowCount+1][colCount+1];
-		bodyRowspanCount = new int[bodyRowCount][colCount];
-		footerRowspanCount = new int[footerRowCount][colCount];
-		headerRowspanCount = new int[headerRowCount][colCount];
+//		bodyRowspanCount = new int[bodyRowCount][colCount];
+//		footerRowspanCount = new int[footerRowCount][colCount];
+//		headerRowspanCount = new int[headerRowCount][colCount];
 		initArray(header);
 		initArray(footer);
 		initArray(body);
