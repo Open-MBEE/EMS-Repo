@@ -649,7 +649,7 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
                 }
             }
             if ( elements.size() > 0 ) {
-                System.out.println("getProperty(" + context + ", " + specifier + ") = " + elements);
+                System.out.println("\ngetProperty(" + context + ", " + specifier + ") = " + elements);
                 return elements;
             }
             
@@ -682,7 +682,7 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
 
         	}
 
-            System.out.println("getProperty(" + context + ", " + specifier + ") = allProperties = " + allProperties);
+            System.out.println("\ngetProperty(" + context + ", " + specifier + ") = allProperties = " + allProperties);
             return allProperties;
         }
 
@@ -696,7 +696,7 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
         // context is null; look for nodes of type Property that match the specifier
         if ( mySpecifier != null ) {
             Collection< EmsScriptNode > e =getElementWithName( context, "" + mySpecifier );
-            System.out.println("getProperty(" + context + ", " + specifier + ") = getElementWithName(" + context + ", " + specifier + ") = " + e);
+            System.out.println("\ngetProperty(" + context + ", " + specifier + ") = getElementWithName(" + context + ", " + specifier + ") = " + e);
             return e;
         }
 
@@ -709,10 +709,10 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
             for ( EmsScriptNode prop : propertyTypes ) {
                 allProperties.addAll( getElementWithType( context, prop ) );
             }
-            System.out.println("getProperty(" + context + ", " + specifier + ") = allProperties2 = " + allProperties);
+            System.out.println("\ngetProperty(" + context + ", " + specifier + ") = allProperties2 = " + allProperties);
             return allProperties;
         }
-        System.out.println("getProperty(" + context + ", " + specifier + ") = null2");
+        System.out.println("\ngetProperty(" + context + ", " + specifier + ") = null2");
         return null;
     }
 
