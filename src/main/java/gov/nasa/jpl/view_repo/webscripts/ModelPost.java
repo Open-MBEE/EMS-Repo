@@ -1995,6 +1995,8 @@ public class ModelPost extends AbstractJavaWebScript {
             }
         }
 
+        // FIXME: this temporary until we find out why there are permission issues with sites
+        AuthenticationUtil.setRunAsUser( "admin" );
         // siteInfo doesnt give the node ref we want, so must search for it:
         siteNode = getSiteNode( siteName, null, null );
         if (siteNode != null) {
@@ -2004,6 +2006,7 @@ public class ModelPost extends AbstractJavaWebScript {
             pkgSiteNode.createOrUpdateAspect( Acm.ACM_SITE_CHARACTERIZATION);
             pkgSiteNode.createOrUpdateProperty( Acm.ACM_SITE_SITE, siteNode.getNodeRef() );
         }
+        AuthenticationUtil.setRunAsUser( AuthenticationUtil.getFullyAuthenticatedUser() );
         
         return siteNode;
     }
