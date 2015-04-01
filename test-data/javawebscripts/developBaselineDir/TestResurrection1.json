@@ -1,5 +1,26 @@
 {"elements": [
     {
+        "qualifiedId": "/europa/123456/parentToDelete1/parentToDelete2",
+        "name": "parentToDelete2",
+        "qualifiedName": "/europa/JW_TEST2/parentToDelete1/parentToDelete2",
+        "sysmlid": "parentToDelete2",
+        "documentation": "Parent 2",
+        "owner": "parentToDelete1",
+        "specialization": {
+            "propertyType": null,
+            "isDerived": false,
+            "isSlot": false,
+            "value": [{
+                "valueExpression": null,
+                "string": "gg_string2",
+                "type": "LiteralString"
+            }],
+            "type": "Property"
+        },
+        "editable": true,
+        "creator": "admin",
+    },
+    {
         "qualifiedId": "/europa/123456/parentToDelete1",
         "name": "parentToDelete1",
         "qualifiedName": "/europa/JW_TEST2/parentToDelete1",
@@ -34,27 +55,6 @@
             "value": [{
                 "valueExpression": null,
                 "string": "gg_string3",
-                "type": "LiteralString"
-            }],
-            "type": "Property"
-        },
-        "editable": true,
-        "creator": "admin",
-    },
-    {
-        "qualifiedId": "/europa/123456/parentToDelete1/parentToDelete2",
-        "name": "parentToDelete2",
-        "qualifiedName": "/europa/JW_TEST2/parentToDelete1/parentToDelete2",
-        "sysmlid": "parentToDelete2",
-        "documentation": "Parent 2",
-        "owner": "parentToDelete1",
-        "specialization": {
-            "propertyType": null,
-            "isDerived": false,
-            "isSlot": false,
-            "value": [{
-                "valueExpression": null,
-                "string": "gg_string2",
                 "type": "LiteralString"
             }],
             "type": "Property"

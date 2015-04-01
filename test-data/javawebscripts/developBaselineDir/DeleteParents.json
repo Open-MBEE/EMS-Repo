@@ -70,15 +70,15 @@
     "deletedElements": [
       {
         "sysmlid": "childOfParentToDelete2",
-        "creator": "admin"
+        "creator": "admin",
       },
       {
         "sysmlid": "parentToDelete1",
-        "creator": "admin"
+        "creator": "admin",
       },
       {
         "sysmlid": "parentToDelete2",
-        "creator": "admin"
+        "creator": "admin",
       }
     ],
     "addedElements": [],

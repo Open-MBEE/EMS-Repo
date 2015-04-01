@@ -332,13 +332,16 @@ public class ConfigurationsWebscript extends AbstractJavaWebScript {
                 }
             }
 
-            NodeRef snapshotProductNodeRef = (NodeRef) snapshot.getProperty( "view2:snapshotProduct" );
+            Date dateTime = (Date) snapshot.getProperty("view2:timestamp");
+            NodeRef snapshotProductNodeRef = (NodeRef) snapshot.getNodeRefProperty( "view2:snapshotProduct",
+                                                                                    dateTime, workspace);
+            
+            // TODO doing another search below may be redundant b/c getNodeRefProperty() will handle it
             if ( snapshotProductNodeRef != null ) {
                 // this is the unversioned snapshot, so we need to get the versioned one
                 EmsScriptNode snapshotProduct = new EmsScriptNode(snapshotProductNodeRef, services, response);
                 
                 String id = snapshotProduct.getSysmlId();
-                Date dateTime = (Date) snapshot.getProperty("view2:timestamp");
                 
                 EmsScriptNode versionedSnapshotProduct = NodeUtil.findScriptNodeById( id, workspace, dateTime, true, services, response );
                 if (snapshotProduct.exists()) {
@@ -384,7 +387,7 @@ public class ConfigurationsWebscript extends AbstractJavaWebScript {
             if(SnapshotPost.hasPdf(snapshot)){
             	String pdfStatus = SnapshotPost.getPdfStatus(snapshot);
             	if(pdfStatus != null && !pdfStatus.isEmpty()){
-	            	EmsScriptNode pdfNode = SnapshotPost.getPdfNode(snapshot);
+	            	EmsScriptNode pdfNode = SnapshotPost.getPdfNode(snapshot, timestamp, workspace);
 	            	transformMap = new HashMap<String,String>();
 	            	transformMap.put("status", pdfStatus);
 	            	transformMap.put("type", "pdf");
@@ -397,7 +400,7 @@ public class ConfigurationsWebscript extends AbstractJavaWebScript {
             if(SnapshotPost.hasHtmlZip(snapshot)){
             	String htmlZipStatus = SnapshotPost.getHtmlZipStatus(snapshot);
             	if(htmlZipStatus != null && !htmlZipStatus.isEmpty()){
-	            	EmsScriptNode htmlZipNode = SnapshotPost.getHtmlZipNode(snapshot);
+	            	EmsScriptNode htmlZipNode = SnapshotPost.getHtmlZipNode(snapshot, timestamp, workspace);
 	            	transformMap = new HashMap<String,String>();
 	            	transformMap.put("status", htmlZipStatus);
 	            	transformMap.put("type", "html");
@@ -431,6 +434,17 @@ public class ConfigurationsWebscript extends AbstractJavaWebScript {
         return snapshotJson;
     }
 
+    /**
+     * Necessary for backwards compatibility with old tags and snapshots in Bender 2.0 release.
+     * Since associations were still used then. Associations have all since been migrated to using
+     * NodeRefs
+     * 
+     * @param config
+     * @param workspace
+     * @param timestamp
+     * @return
+     * @throws JSONException
+     */
     public JSONArray getProducts(EmsScriptNode config, WorkspaceNode workspace,
                                  Date timestamp) throws JSONException {
         JSONArray productsJson = new JSONArray();
@@ -439,7 +453,7 @@ public class ConfigurationsWebscript extends AbstractJavaWebScript {
                 config.getTargetAssocsNodesByType( "ems:configuredProducts",
                                                    workspace, timestamp );
         for (EmsScriptNode product: products) {
-            productsJson.put( product.toJSONObject(timestamp) );
+            productsJson.put( product.toJSONObject(workspace, timestamp) );
         }
 
         return productsJson;

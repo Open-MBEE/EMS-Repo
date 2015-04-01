@@ -176,7 +176,7 @@ public class ViewModelPost extends ModelPost {
                             } else {
                                 if (checkPermissions(commentParent, PermissionService.WRITE)) {
                                     newElements.add(id);
-                                    updateOrCreateElement(elementJson, commentParent.getOwningParent(null), workspace, false);
+                                    updateOrCreateElement(elementJson, commentParent.getOwningParent(null,workspace,false), workspace, false);
                                 }
                             }
                     }

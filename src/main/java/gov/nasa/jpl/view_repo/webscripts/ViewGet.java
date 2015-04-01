@@ -216,7 +216,7 @@ public class ViewGet extends AbstractJavaWebScript {
                                                     generate, recurse, null );
                     elems = NodeUtil.getVersionAtTime( elems, dateTime );
                     for ( EmsScriptNode n : elems ) {
-                        viewsJson.put( n.toJSONObject( dateTime ) );
+                        viewsJson.put( n.toJSONObject( workspace, dateTime ) );
                     }
                 } else if ( gettingContainedViews ) {
                     if (Debug.isOn()) System.out.println("+ + + + + gettingContainedViews");
@@ -225,11 +225,11 @@ public class ViewGet extends AbstractJavaWebScript {
                                                  null );
                     elems.add( view );
                     for ( EmsScriptNode n : elems ) {
-                        viewsJson.put( n.toJSONObject( dateTime ) );
+                        viewsJson.put( n.toJSONObject( workspace,dateTime ) );
                     }
                 } else {
                     if (Debug.isOn()) System.out.println("+ + + + + just the view");
-                    viewsJson.put( view.toJSONObject(  dateTime ) );
+                    viewsJson.put( view.toJSONObject( workspace, dateTime ) );
                 }
                 EmsScriptNode.expressionStuff = false;
             } catch ( JSONException e ) {

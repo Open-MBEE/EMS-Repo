@@ -81,12 +81,13 @@ public class WorkspaceNode extends EmsScriptNode {
 
     @Override
     public WorkspaceNode getParentWorkspace() {
-        NodeRef ref = (NodeRef)getProperty("ems:parent");
+        // ems:parent is workspace meta data, so dont need dateTime/workspace args
+        NodeRef ref = (NodeRef)getNodeRefProperty("ems:parent", null, null);
         if ( ref == null ) {
             // Handle data corrupted by a bug (now fixed)
             if ( checkingForEmsSource ) {
                 try {
-                    ref = (NodeRef)getProperty("ems:source");
+                    ref = (NodeRef)getNodeRefProperty("ems:source", null, null);
                     if ( ref != null ) {
                         // clean up
                         setProperty( "ems:parent", ref );
@@ -102,7 +103,8 @@ public class WorkspaceNode extends EmsScriptNode {
     // delete later
     @Override
     public WorkspaceNode getSourceWorkspace() {
-        NodeRef ref = (NodeRef)getProperty("ems:source");
+        // ems:source is workspace meta data, so dont need dateTime/workspace args
+        NodeRef ref = (NodeRef)getNodeRefProperty("ems:source", null, null);
         if ( ref == null ) return null;
         WorkspaceNode sourceWs = new WorkspaceNode( ref, getServices() );
         return sourceWs;
@@ -248,7 +250,8 @@ public class WorkspaceNode extends EmsScriptNode {
     	for (EmsScriptNode child : childs) {
     	    if ( child != null && child.exists() ) {
     	        String childWsName = (String)child.getProperty("ems:workspace_name");
-    	        NodeRef childWsParentRef = (NodeRef)child.getProperty("ems:parent");
+    	        // ems:parent is workspace meta property, so dateTime/workspace args dont matter
+    	        NodeRef childWsParentRef = (NodeRef)child.getNodeRefProperty("ems:parent", null, null);
     	        EmsScriptNode childWsParent = childWsParentRef != null ? new EmsScriptNode(childWsParentRef, services) : null;
     	        String childWsParentName = childWsParent != null ? childWsParent.getId() : null;
     	        if (childWsName != null && childWsName.equals( wsName ) && 
@@ -356,7 +359,7 @@ public class WorkspaceNode extends EmsScriptNode {
 
     public void deleteChildWorkspaces( boolean recursive ) {
         // getting a copy in case it's the same list from which the children will remove themselves
-        ArrayList< NodeRef > children = new ArrayList<NodeRef>(getPropertyNodeRefs( "ems:children" ));
+        ArrayList< NodeRef > children = new ArrayList<NodeRef>(getPropertyNodeRefs( "ems:children", true, null, null ));
         for ( NodeRef ref : children ) {
             WorkspaceNode childWs = new WorkspaceNode( ref, getServices(),
                                                        getResponse(),
@@ -450,8 +453,8 @@ public class WorkspaceNode extends EmsScriptNode {
             }
             if ( nodeGuess == null) {
 
-                // Clone the reified node if possible and not already in the workspace:
-                EmsScriptNode oldReifiedNode = node.getReifiedNode();
+                // Clone the reified node if possible and if not already in the workspace:
+                EmsScriptNode oldReifiedNode = node.getReifiedNode(node.getWorkspace());
                 EmsScriptNode newReifiedNode = null;
                 if (oldReifiedNode != null) {
 
@@ -725,7 +728,8 @@ public class WorkspaceNode extends EmsScriptNode {
 
                         Set< NodeRef > elements =
                                 WorkspaceDiff.getAllChangedElementsInDiffJson( diff,
-                                                                               services );
+                                                                               services,
+                                                                               dateTime);
                         if ( elements != null )
                             changedNodeRefs.addAll( elements );
                     } catch ( JSONException e ) {
@@ -846,7 +850,7 @@ public class WorkspaceNode extends EmsScriptNode {
     }
 
     @Override
-    public JSONObject toJSONObject( Date dateTime ) throws JSONException {
+    public JSONObject toJSONObject( WorkspaceNode ws, Date dateTime ) throws JSONException {
         JSONObject json = new JSONObject();
 
         addWorkspaceNamesAndIds(json, this, services, false );

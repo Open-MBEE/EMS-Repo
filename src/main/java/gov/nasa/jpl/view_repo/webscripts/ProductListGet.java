@@ -191,7 +191,7 @@ public class ProductListGet extends AbstractJavaWebScript {
                 String name = (String)node.getProperty(Acm.ACM_NAME);
                 documents.put(id, name);
 
-                EmsScriptNode parent = node.getOwningParent(dateTime);
+                EmsScriptNode parent = node.getOwningParent(dateTime, workspace, false);
                 String parentId = parent.getSysmlId();
                 if (parentId.contains("_pkg")) {
                     parentId = parentId.replace("_pkg", "");

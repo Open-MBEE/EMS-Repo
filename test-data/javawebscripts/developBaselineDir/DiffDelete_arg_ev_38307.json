@@ -1,5 +1,5 @@
 {
-  "sequence": 25,
+  "sequence": 26,
   "workspace1": {
     "qualifiedName": "master/ws1",
     "name": "ws1",
@@ -27,7 +27,7 @@
   "workspace2": {
     "deletedElements": [{
       "sysmlid": "arg_ev_38307",
-      "creator": "admin"
+      "creator": "admin",
     }],
     "addedElements": [],
     "conflictedElements": [],
