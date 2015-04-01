@@ -174,16 +174,19 @@ public abstract class EmsTransaction {
             e.printStackTrace();
             trx.rollback();
         } catch ( Throwable ee ) {
-            log( Level.ERROR, "\tryRollback(): rollback failed: " + ee.getMessage(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR );
-            ee.printStackTrace();
-            String addr = null;
-            try {
-                addr = Inet4Address.getLocalHost().getHostAddress();
-            } catch ( UnknownHostException e1 ) {
-                // TODO Auto-generated catch block
-                e1.printStackTrace();
+            log( Level.ERROR, "tryRollback(): rollback failed: " + ee.getMessage(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR );
+            // don't send false positive - e.g. rollback already succeeded
+            if (!ee.getMessage().contains( "The transaction has already been rolled back" )) {
+                ee.printStackTrace();
+                String addr = null;
+                try {
+                    addr = Inet4Address.getLocalHost().getHostAddress();
+                } catch ( UnknownHostException e1 ) {
+                    // TODO Auto-generated catch block
+                    e1.printStackTrace();
+                }
+                NodeUtil.sendNotificationEvent( "Transaction did not roll back properly!", "rollback failed on " + addr , services );
             }
-            NodeUtil.sendNotificationEvent( "Transaction did not roll back properly!", "rollback failed on " + addr , services );
         }
     }
 
