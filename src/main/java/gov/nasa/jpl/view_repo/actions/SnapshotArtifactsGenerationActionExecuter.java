@@ -192,11 +192,21 @@ public class SnapshotArtifactsGenerationActionExecuter  extends ActionExecuterAb
 	        	response.append("\n\n");
 //	        }
 	        // Send off notification email
+	        	try{
 	        String subject = "PDF Generation " + jobStatus;
 	        EmsScriptNode logNode = ActionUtil.saveLogToFile(jobNode, "text/plain", services, response.toString());
 	        String msg = buildEmailMessage(snapshot, logNode);
     	    ActionUtil.sendEmailToModifier(jobNode, msg, subject, services);
     	    if (logger.isDebugEnabled()) logger.debug("Completed snapshot artifact(s) generation.");
+	        	}
+	        	catch(Exception ex){
+	        		System.out.println("Failed to email PDF generation status.");
+	        		Throwable throwable = ex.getCause();
+	            	while(throwable != null){
+	            		System.out.println(throwable.getMessage());
+	            		System.out.println(throwable.getCause());
+	            	}
+	        	}
         }
         catch(Exception ex){
         	try{
