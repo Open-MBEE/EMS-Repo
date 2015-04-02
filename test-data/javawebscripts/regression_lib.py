@@ -208,7 +208,9 @@ def set_wsid_to_gv6():
 def set_read_to_gv(gv):
     '''Get the json output, and sets gvi to the read time'''
     json_output = get_json_output_no_status()
+    print("json_output=" + str(json_output))
     j = json.loads(json_output)
+    print("j=" + str(j))
     
     if j:
         if gv == 1:
