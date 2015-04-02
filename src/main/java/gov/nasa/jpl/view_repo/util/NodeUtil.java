@@ -1307,60 +1307,63 @@ public class NodeUtil {
         // found to see if it is in some parent workspace and last modified
         // after the copy time. If so, then we need to get the element in
         // the parent workspace at the time of the copy.
-        if ( nodeRefs != null && workspace != null && !ignoreWorkspace ) {
-            Date copyTime = workspace.getCopyTime();
-            if ( copyTime != null ) {
-                // loop through each result
-                ArrayList<NodeRef> correctedRefs = new ArrayList<NodeRef>();
-                for ( NodeRef r : nodeRefs) {
-                    if ( r == null ) continue;
-                    WorkspaceNode resultWs = getWorkspace( r );
-                    EmsScriptNode esn;
-                    // If a native member of the workspace, no need to correct.
-                    if ( workspace.equals( resultWs ) ) {
+        if ( nodeRefs == null || workspace == null || ignoreWorkspace ) { 
+            return nodeRefs;
+        }
+        // loop through each result
+        ArrayList<NodeRef> correctedRefs = new ArrayList<NodeRef>();
+        for ( NodeRef r : nodeRefs) {
+            if ( r == null ) continue;
+            WorkspaceNode resultWs = getWorkspace( r );
+            EmsScriptNode esn;
+            // If a native member of the workspace, no need to correct.
+            if ( workspace.equals( resultWs ) ) {
+                correctedRefs.add( r );
+            } else {
+                esn = new EmsScriptNode( r, getServices() );
+                Date copyTime = workspace.getCopyTime( esn.getWorkspace() );
+                if ( copyTime == null || ( dateTime != null && !copyTime.before( dateTime ) ) ) {
+                    correctedRefs.add( r );
+                } else {
+                    Date lastModified = esn.getLastModified( dateTime );
+                    // Check if modified after the copyTime.
+                    if ( lastModified == null ||
+                            !lastModified.after( copyTime ) ) {
+                        if ( lastModified == null ) {
+                            Debug.error( "ERROR!  Should never have null modified date!" );
+                        }
                         correctedRefs.add( r );
                     } else {
-                        esn = new EmsScriptNode( r, getServices() );
-                        Date lastModified = esn.getLastModified( dateTime );
-                        // Check if modified after the copyTime.
-                        if ( lastModified != null &&
-                                lastModified.after( copyTime ) ) {
-                            // Replace with the versioned ref at the copy time
-                            ArrayList< NodeRef > refs =
-                                    findNodeRefsByType( esn.getSysmlId(),
-                                                        SearchType.ID.prefix,
-                                                        ignoreWorkspace,
-                                                        resultWs, copyTime,
-                                                        true, // justOne
-                                                        exactMatch, services,
-                                                        includeDeleted,
-                                                        siteName );
-                            if ( !Utils.isNullOrEmpty( refs ) ) {
-                                // only asked for one
-                                NodeRef newRef = refs.get( 0 );
-                                correctedRefs.add( newRef );
-                            }
+                        // Replace with the versioned ref at the copy time
+                        ArrayList< NodeRef > refs =
+                                findNodeRefsByType( esn.getSysmlId(),
+                                                    SearchType.ID.prefix,
+                                                    ignoreWorkspace,
+                                                    resultWs, copyTime,
+                                                    true, // justOne
+                                                    exactMatch, services,
+                                                    includeDeleted,
+                                                    siteName );
+                        if ( !Utils.isNullOrEmpty( refs ) ) {
+                            // only asked for one
+                            NodeRef newRef = refs.get( 0 );
+                            correctedRefs.add( newRef );
+                        }
 //                            r = getNodeRefAtTime( r, resultWs, copyTime );
 //                            if ( r != null ) {
 //                                esn = new EmsScriptNode( r, getServices() );
 //                            } else {
 //                                esn = null;
 //                            }
-                        } else {
-                            if ( lastModified == null ) {
-                                Debug.error( "ERROR!  Should never have null modified date!" );
-                            }
-                            correctedRefs.add( r );
-                        }
+                    }
 //                        if ( exists( esn ) || ( includeDeleted && esn.isDeleted() &&
 //                                ()!exactMatch ) ) {
 //                            correctedRefs.add( r );
 //                        }
-                    }
                 }
-                nodeRefs = correctedRefs;
             }
         }
+        nodeRefs = correctedRefs;
 
         return nodeRefs;
     }
