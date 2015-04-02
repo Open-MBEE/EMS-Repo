@@ -1,0 +1,90 @@
+{"elements": [
+    {
+        "qualifiedId": "/europa/123456/300/301",
+        "qualifiedName": "/europa/JW_TEST/300/301",
+        "name": "301",
+        "owner": "300",
+        "documentation": "else",
+        "sysmlid": "301",
+        "read": "2015-03-06T09:43:28.548-0800",
+        "specialization": {
+            "view2view": [{
+                "childrenViews": [
+                    "301",
+                    "302"
+                ],
+                "sysmlid": "301"
+            }],
+            "childrenViews": ["304"],
+            "displayedElements": [
+                "301",
+                "302",
+                "303"
+            ],
+            "contents": null,
+            "allowedElements": [
+                "301",
+                "302",
+                "303"
+            ],
+            "noSections": ["302"],
+            "contains": [{
+                "sourceType": "reference",
+                "source": "301",
+                "sourceProperty": "documentation",
+                "type": "Paragraph"
+            }],
+            "type": "Product"
+        },
+        "editable": true,
+        "modified": "2015-03-06T09:43:26.425-0800",
+        "creator": "admin"
+    },
+    {
+        "qualifiedId": "/europa/123456/300/301/302",
+        "qualifiedName": "/europa/JW_TEST/300/301/302",
+        "name": "302",
+        "owner": "301",
+        "documentation": "to",
+        "sysmlid": "302",
+        "read": "2015-03-06T09:43:25.054-0800",
+        "specialization": {
+            "propertyType": null,
+            "isSlot": false,
+            "isDerived": false,
+            "value": [{
+                "valueExpression": null,
+                "string": "dlam_string",
+                "type": "LiteralString"
+            }],
+            "type": "Property"
+        },
+        "editable": true,
+        "modified": "2015-03-06T09:40:54.592-0800",
+        "creator": "admin"
+    },
+    {
+        "qualifiedId": "/europa/123456/300/301/302/303",
+        "qualifiedName": "/europa/JW_TEST/300/301/302/303",
+        "name": "303",
+        "owner": "302",
+        "documentation": "talk",
+        "sysmlid": "303",
+        "read": "2015-03-06T09:43:24.916-0800",
+        "specialization": {
+            "propertyType": null,
+            "isSlot": false,
+            "isDerived": false,
+            "value": [{
+                "valueExpression": null,
+                "string": "dlam_string",
+                "type": "LiteralString"
+            }],
+            "type": "Property"
+        },
+        "editable": true,
+        "modified": "2015-03-06T09:39:42.506-0800",
+        "creator": "admin"
+    }
+]}
+200

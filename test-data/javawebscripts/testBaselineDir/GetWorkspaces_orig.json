@@ -1,0 +1,108 @@
+{"workspaces": [
+    {
+        "qualifiedId": "master",
+        "id": "master",
+        "qualifiedName": "master",
+        "name": "master",
+        "siteManagerPermission": true
+    },
+    {
+        "qualifiedId": "master/861d52f9-5115-4fcf-9848-23ed0dd5e62e",
+        "id": "861d52f9-5115-4fcf-9848-23ed0dd5e62e",
+        "created": "2015-03-06T09:39:49.263-0800",
+        "description": "modified the workspace name and desc",
+        "qualifiedName": "master/modifiedWorkspaceName",
+        "name": "modifiedWorkspaceName",
+        "parent": "master",
+        "permission": "read",
+        "modified": "2015-03-06T09:39:50.860-0800",
+        "creator": "admin"
+    },
+    {
+        "qualifiedId": "master/b7d5d20d-32a8-4804-b68b-07e941dfc3e3/f7ca3740-c526-4f5c-b2a4-b44c1e59e603",
+        "id": "f7ca3740-c526-4f5c-b2a4-b44c1e59e603",
+        "created": "2015-03-06T09:39:47.589-0800",
+        "description": "",
+        "qualifiedName": "master/wsA/wsB",
+        "name": "wsB",
+        "parent": "b7d5d20d-32a8-4804-b68b-07e941dfc3e3",
+        "permission": "read",
+        "modified": "2015-03-06T09:39:54.952-0800",
+        "creator": "admin"
+    },
+    {
+        "qualifiedId": "master/046eae15-c616-41a3-b24f-399f437c8da3",
+        "id": "046eae15-c616-41a3-b24f-399f437c8da3",
+        "created": "2015-03-06T09:40:36.873-0800",
+        "description": "",
+        "qualifiedName": "master/wsG1",
+        "name": "wsG1",
+        "parent": "master",
+        "permission": "read",
+        "modified": "2015-03-06T09:40:42.606-0800",
+        "creator": "admin"
+    },
+    {
+        "qualifiedId": "master/e4977d6b-45a4-4372-9343-8c70db8c11a2",
+        "id": "e4977d6b-45a4-4372-9343-8c70db8c11a2",
+        "created": "2015-03-06T09:40:38.424-0800",
+        "description": "",
+        "qualifiedName": "master/wsG2",
+        "name": "wsG2",
+        "parent": "master",
+        "permission": "read",
+        "modified": "2015-03-06T09:40:59.147-0800",
+        "creator": "admin"
+    },
+    {
+        "qualifiedId": "master/b7d5d20d-32a8-4804-b68b-07e941dfc3e3/da67adbf-3581-4d12-b53f-a6fe13476955",
+        "id": "da67adbf-3581-4d12-b53f-a6fe13476955",
+        "created": "2015-03-06T09:40:33.180-0800",
+        "description": "",
+        "qualifiedName": "master/wsA/wsT2",
+        "name": "wsT2",
+        "parent": "b7d5d20d-32a8-4804-b68b-07e941dfc3e3",
+        "permission": "read",
+        "branched": "2015-03-06T09:40:09.000-0800",
+        "modified": "2015-03-06T09:40:33.180-0800",
+        "creator": "admin"
+    },
+    {
+        "qualifiedId": "master/b7d5d20d-32a8-4804-b68b-07e941dfc3e3/f8e13bba-7244-45e9-9a42-034625b16381",
+        "id": "f8e13bba-7244-45e9-9a42-034625b16381",
+        "created": "2015-03-06T09:39:58.969-0800",
+        "description": "",
+        "qualifiedName": "master/wsA/wsT",
+        "name": "wsT",
+        "parent": "b7d5d20d-32a8-4804-b68b-07e941dfc3e3",
+        "permission": "read",
+        "branched": "2015-03-06T09:39:56.210-0800",
+        "modified": "2015-03-06T09:40:05.094-0800",
+        "creator": "admin"
+    },
+    {
+        "qualifiedId": "master/b7d5d20d-32a8-4804-b68b-07e941dfc3e3",
+        "id": "b7d5d20d-32a8-4804-b68b-07e941dfc3e3",
+        "created": "2015-03-06T09:39:45.888-0800",
+        "description": "",
+        "qualifiedName": "master/wsA",
+        "name": "wsA",
+        "parent": "master",
+        "permission": "read",
+        "modified": "2015-03-06T09:40:33.201-0800",
+        "creator": "admin"
+    },
+    {
+        "qualifiedId": "master/11bbfd80-6834-4842-a8a3-389349c2545a",
+        "id": "11bbfd80-6834-4842-a8a3-389349c2545a",
+        "created": "2015-03-06T09:45:05.225-0800",
+        "description": "modified the workspace name and desc",
+        "qualifiedName": "master/modifiedWorkspaceName",
+        "name": "modifiedWorkspaceName",
+        "parent": "master",
+        "permission": "read",
+        "modified": "2015-03-06T09:45:07.501-0800",
+        "creator": "admin"
+    }
+]}
+200

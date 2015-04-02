@@ -1,0 +1,1458 @@
+{"elements": [
+    {
+        "qualifiedId": "/europa/123456/BLUCamTest/_17_0_2_4_f3a0363_1394146455624_407543_30441/_17_0_2_4_f3a0363_1394141845089_115460_28389",
+        "qualifiedName": "/europa/JW_TEST/BLUCamTest/dont care2/ionosphere",
+        "name": "ionosphere",
+        "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
+        "documentation": "",
+        "sysmlid": "_17_0_2_4_f3a0363_1394141845089_115460_28389",
+        "read": "2015-03-06T09:43:28.340-0800",
+        "specialization": {
+            "propertyType": null,
+            "isSlot": false,
+            "isDerived": false,
+            "type": "Property"
+        },
+        "editable": true,
+        "modified": "2015-03-06T09:42:32.313-0800",
+        "creator": "admin"
+    },
+    {
+        "qualifiedId": "/europa/123456/op_ev_31835/op_param_31869",
+        "qualifiedName": "/europa/JW_TEST/GreaterEquals/y",
+        "name": "y",
+        "owner": "op_ev_31835",
+        "documentation": "",
+        "sysmlid": "op_param_31869",
+        "read": "2015-03-06T09:43:28.350-0800",
+        "specialization": {"type": "Element"},
+        "editable": true,
+        "modified": "2015-03-06T09:41:39.927-0800",
+        "creator": "admin"
+    },
+    {
+        "qualifiedId": "/europa/123456/op_ev_31835/op_param_31868",
+        "qualifiedName": "/europa/JW_TEST/GreaterEquals/x",
+        "name": "x",
+        "owner": "op_ev_31835",
+        "documentation": "",
+        "sysmlid": "op_param_31868",
+        "read": "2015-03-06T09:43:28.357-0800",
+        "specialization": {"type": "Element"},
+        "editable": true,
+        "modified": "2015-03-06T09:41:39.750-0800",
+        "creator": "admin"
+    },
+    {
+        "qualifiedId": "/europa/123456/op_ev_31835/op_param_31867",
+        "qualifiedName": "/europa/JW_TEST/GreaterEquals/result",
+        "name": "result",
+        "owner": "op_ev_31835",
+        "documentation": "",
+        "sysmlid": "op_param_31867",
+        "read": "2015-03-06T09:43:28.365-0800",
+        "specialization": {"type": "Element"},
+        "editable": true,
+        "modified": "2015-03-06T09:41:38.459-0800",
+        "creator": "admin"
+    },
+    {
+        "qualifiedId": "/europa/123456/BLUCamTest/_17_0_2_4_f3a0363_1394146455624_407543_30441/_17_0_2_3_e610336_1394148233838_91795_29332",
+        "name": "Context",
+        "qualifiedName": "/europa/JW_TEST/BLUCamTest/dont care2/Context",
+        "sysmlid": "_17_0_2_3_e610336_1394148233838_91795_29332",
+        "documentation": "",
+        "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
+        "read": "2015-03-06T09:43:31.106-0800",
+        "specialization": {
+            "contents": null,
+            "type": "View"
+        },
+        "editable": true,
+        "creator": "admin",
+        "modified": "2015-03-06T09:42:40.326-0800"
+    },
+    {
+        "qualifiedId": "/europa/123456/BLUCamTest/_17_0_2_4_f3a0363_1394146455624_407543_30441/_17_0_2_4_f3a0363_1394141831980_671275_28387",
+        "qualifiedName": "/europa/JW_TEST/BLUCamTest/dont care2/radiation",
+        "name": "radiation",
+        "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
+        "documentation": "",
+        "sysmlid": "_17_0_2_4_f3a0363_1394141831980_671275_28387",
+        "read": "2015-03-06T09:43:28.381-0800",
+        "specialization": {
+            "propertyType": null,
+            "isSlot": false,
+            "isDerived": false,
+            "type": "Property"
+        },
+        "editable": true,
+        "modified": "2015-03-06T09:42:32.562-0800",
+        "creator": "admin"
+    },
+    {
+        "qualifiedId": "/europa/123456/name_list",
+        "qualifiedName": "/europa/JW_TEST/viewpoint_op",
+        "name": "viewpoint_op",
+        "owner": "123456",
+        "documentation": "",
+        "sysmlid": "name_list",
+        "read": "2015-03-06T09:43:28.391-0800",
+        "specialization": {
+            "expression": {
+                "valueExpression": null,
+                "operand": [
+                    {
+                        "element": "op_list",
+                        "valueExpression": null,
+                        "type": "ElementValue"
+                    },
+                    {
+                        "valueExpression": null,
+                        "type": "Expression",
+                        "operand": [
+                            {
+                                "element": "op_map",
+                                "valueExpression": null,
+                                "type": "ElementValue"
+                            },
+                            {
+                                "element": "exposed_id",
+                                "valueExpression": null,
+                                "type": "ElementValue"
+                            },
+                            {
+                                "element": "op_name_arg",
+                                "valueExpression": null,
+                                "type": "ElementValue"
+                            }
+                        ]
+                    }
+                ],
+                "type": "Expression"
+            },
+            "parameters": ["exposed_id"],
+            "type": "Operation"
+        },
+        "editable": true,
+        "modified": "2015-03-06T09:41:56.884-0800",
+        "creator": "admin"
+    },
+    {
+        "qualifiedId": "/europa/123456/BLUCamTest/_17_0_2_4_f3a0363_1394146455624_407543_30441/vp_expression_2",
+        "qualifiedName": "/europa/JW_TEST/BLUCamTest/dont care2/",
+        "name": "",
+        "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
+        "documentation": "",
+        "sysmlid": "vp_expression_2",
+        "read": "2015-03-06T09:43:28.422-0800",
+        "specialization": {
+            "valueExpression": null,
+            "operand": [
+                {
+                    "element": "op_list",
+                    "valueExpression": null,
+                    "type": "ElementValue"
+                },
+                {
+                    "element": "op_name_arg_1",
+                    "valueExpression": null,
+                    "type": "ElementValue"
+                },
+                {
+                    "element": "op_name_arg_2",
+                    "valueExpression": null,
+                    "type": "ElementValue"
+                }
+            ],
+            "type": "Expression"
+        },
+        "editable": true,
+        "modified": "2015-03-06T09:42:34.766-0800",
+        "creator": "admin"
+    },
+    {
+        "qualifiedId": "/europa/123456/BLUCamTest/_17_0_2_4_f3a0363_1394146455624_407543_30441/s1_param",
+        "qualifiedName": "/europa/JW_TEST/BLUCamTest/dont care2/",
+        "name": "",
+        "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
+        "documentation": "",
+        "sysmlid": "s1_param",
+        "read": "2015-03-06T09:43:28.444-0800",
+        "specialization": {
+            "defaultValue": null,
+            "type": "Parameter"
+        },
+        "editable": true,
+        "modified": "2015-03-06T09:42:33.233-0800",
+        "creator": "admin"
+    },
+    {
+        "qualifiedId": "/europa/123456/4000/401/MMS_1425663483725_6dafcd2c-ed2a-4aa5-8039-be0fc96700a4",
+        "qualifiedName": "/europa/JW_TEST/400/401/null",
+        "owner": "401",
+        "sysmlid": "MMS_1425663483725_6dafcd2c-ed2a-4aa5-8039-be0fc96700a4",
+        "read": "2015-03-06T09:43:28.453-0800",
+        "specialization": {
+            "valueExpression": null,
+            "string": "dlam_string",
+            "type": "LiteralString"
+        },
+        "editable": true,
+        "modified": "2015-03-06T09:38:03.727-0800",
+        "creator": "admin"
+    },
+    {
+        "qualifiedId": "/europa/123456/4000",
+        "qualifiedName": "/europa/JW_TEST/400",
+        "name": "400",
+        "owner": "123456",
+        "documentation": "4something",
+        "sysmlid": "4000",
+        "read": "2015-03-06T09:43:24.986-0800",
+        "specialization": {
+            "propertyType": null,
+            "isSlot": false,
+            "isDerived": false,
+            "value": [{
+                "valueExpression": null,
+                "string": "dlam_string",
+                "type": "LiteralString"
+            }],
+            "type": "Property"
+        },
+        "editable": true,
+        "modified": "2015-03-06T09:38:03.147-0800",
+        "creator": "admin"
+    },
+    {
+        "qualifiedId": "/europa/123456/arg_ev_38307_1",
+        "qualifiedName": "/europa/JW_TEST/duration_1",
+        "name": "duration_1",
+        "owner": "123456",
+        "documentation": "",
+        "sysmlid": "arg_ev_38307_1",
+        "read": "2015-03-06T09:43:28.463-0800",
+        "specialization": {
+            "propertyType": null,
+            "isSlot": false,
+            "isDerived": false,
+            "value": [{
+                "valueExpression": null,
+                "integer": 10,
+                "type": "LiteralInteger"
+            }],
+            "type": "Property"
+        },
+        "editable": true,
+        "modified": "2015-03-06T09:41:36.386-0800",
+        "creator": "admin"
+    },
+    {
+        "qualifiedId": "/europa/123456/BLUCamTest/_17_0_2_4_f3a0363_1394146455624_407543_30441/MMS_1425663736799_3c5e1fcd-19a6-44ce-980d-9aafd4290855",
+        "qualifiedName": "/europa/JW_TEST/BLUCamTest/dont care2/",
+        "name": "",
+        "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
+        "documentation": "",
+        "sysmlid": "MMS_1425663736799_3c5e1fcd-19a6-44ce-980d-9aafd4290855",
+        "read": "2015-03-06T09:43:28.474-0800",
+        "specialization": {
+            "source": "_17_0_2_3_e610336_1394148233838_91795_29332",
+            "target": "_17_0_2_4_f3a0363_1394140326296_809805_27600",
+            "type": "Expose"
+        },
+        "editable": true,
+        "modified": "2015-03-06T09:42:29.649-0800",
+        "creator": "admin"
+    },
+    {
+        "qualifiedId": "/europa/123456/BLUCamTest/_17_0_2_4_f3a0363_1394146455624_407543_30441/get_two_names",
+        "qualifiedName": "/europa/JW_TEST/BLUCamTest/dont care2/get_two_names_op",
+        "name": "get_two_names_op",
+        "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
+        "documentation": "",
+        "sysmlid": "get_two_names",
+        "read": "2015-03-06T09:43:28.487-0800",
+        "specialization": {
+            "expression": {
+                "valueExpression": null,
+                "operand": [
+                    {
+                        "element": "get_names",
+                        "valueExpression": null,
+                        "type": "ElementValue"
+                    },
+                    {
+                        "element": "_17_0_2_4_f3a0363_1394141845089_115460_28389",
+                        "valueExpression": null,
+                        "type": "ElementValue"
+                    },
+                    {
+                        "element": "_17_0_2_4_f3a0363_1394141831980_671275_28387",
+                        "valueExpression": null,
+                        "type": "ElementValue"
+                    }
+                ],
+                "type": "Expression"
+            },
+            "type": "Operation"
+        },
+        "editable": true,
+        "modified": "2015-03-06T09:42:31.834-0800",
+        "creator": "admin"
+    },
+    {
+        "qualifiedId": "/europa/123456/BLUCamTest",
+        "qualifiedName": "/europa/JW_TEST/BLUCamTest",
+        "name": "BLUCamTest",
+        "owner": "123456",
+        "sysmlid": "BLUCamTest",
+        "read": "2015-03-06T09:43:28.512-0800",
+        "specialization": {"type": "Package"},
+        "editable": true,
+        "modified": "2015-03-06T09:42:26.438-0800",
+        "creator": "admin"
+    },
+    {
+        "qualifiedId": "/europa/123456/BLUCamTest/_17_0_2_4_f3a0363_1394146455624_407543_30441/_17_0_2_3_e610336_1394148233838_91795_29332/_17_0_2_3_e610336_1394148461465_93174_29599",
+        "qualifiedName": "/europa/JW_TEST/BLUCamTest/dont care2/Context/",
+        "name": "",
+        "owner": "_17_0_2_3_e610336_1394148233838_91795_29332",
+        "documentation": "",
+        "sysmlid": "_17_0_2_3_e610336_1394148461465_93174_29599",
+        "read": "2015-03-06T09:43:28.519-0800",
+        "specialization": {
+            "source": "_17_0_2_3_e610336_1394148233838_91795_29332",
+            "target": "_17_0_2_3_e610336_1394148443742_79128_29536",
+            "type": "Conform"
+        },
+        "editable": true,
+        "modified": "2015-03-06T09:42:29.152-0800",
+        "creator": "admin"
+    },
+    {
+        "qualifiedId": "/europa/123456/300",
+        "qualifiedName": "/europa/JW_TEST/300",
+        "name": "300",
+        "owner": "123456",
+        "documentation": "something",
+        "sysmlid": "300",
+        "read": "2015-03-06T09:43:25.026-0800",
+        "specialization": {
+            "propertyType": null,
+            "isSlot": false,
+            "isDerived": false,
+            "value": [{
+                "valueExpression": null,
+                "string": "dlam_string",
+                "type": "LiteralString"
+            }],
+            "type": "Property"
+        },
+        "editable": true,
+        "modified": "2015-03-06T09:37:55.968-0800",
+        "creator": "admin"
+    },
+    {
+        "qualifiedId": "/europa/123456/300/301/302",
+        "qualifiedName": "/europa/JW_TEST/300/301/302",
+        "name": "302",
+        "owner": "301",
+        "documentation": "to",
+        "sysmlid": "302",
+        "read": "2015-03-06T09:43:25.054-0800",
+        "specialization": {
+            "propertyType": null,
+            "isSlot": false,
+            "isDerived": false,
+            "value": [{
+                "valueExpression": null,
+                "string": "dlam_string",
+                "type": "LiteralString"
+            }],
+            "type": "Property"
+        },
+        "editable": true,
+        "modified": "2015-03-06T09:40:54.592-0800",
+        "creator": "admin"
+    },
+    {
+        "qualifiedId": "/europa/123456/association",
+        "qualifiedName": "/europa/JW_TEST/association",
+        "name": "association",
+        "owner": "123456",
+        "documentation": "association",
+        "sysmlid": "association",
+        "read": "2015-03-06T09:43:28.536-0800",
+        "specialization": {
+            "targetAggregation": "SHARED",
+            "source": "sourceId",
+            "sourceAggregation": "COMPOSITE",
+            "target": "targetId",
+            "ownedEnd": ["AssocOwnedEnd"],
+            "type": "Association"
+        },
+        "editable": true,
+        "modified": "2015-03-06T09:42:55.696-0800",
+        "creator": "admin"
+    },
+    {
+        "qualifiedId": "/europa/123456/300/301",
+        "qualifiedName": "/europa/JW_TEST/300/301",
+        "name": "301",
+        "owner": "300",
+        "documentation": "else",
+        "sysmlid": "301",
+        "read": "2015-03-06T09:43:28.548-0800",
+        "specialization": {
+            "view2view": [{
+                "childrenViews": [
+                    "301",
+                    "302"
+                ],
+                "sysmlid": "301"
+            }],
+            "childrenViews": ["304"],
+            "displayedElements": [
+                "301",
+                "302",
+                "303"
+            ],
+            "contents": null,
+            "allowedElements": [
+                "301",
+                "302",
+                "303"
+            ],
+            "noSections": ["302"],
+            "contains": [{
+                "sourceType": "reference",
+                "source": "301",
+                "sourceProperty": "documentation",
+                "type": "Paragraph"
+            }],
+            "type": "Product"
+        },
+        "editable": true,
+        "modified": "2015-03-06T09:43:26.425-0800",
+        "creator": "admin"
+    },
+    {
+        "qualifiedId": "/europa/123456/300/301/302/303/304",
+        "qualifiedName": "/europa/JW_TEST/300/301/302/303/304",
+        "name": "304",
+        "owner": "303",
+        "documentation": "about",
+        "sysmlid": "304",
+        "read": "2015-03-06T09:43:25.038-0800",
+        "specialization": {
+            "propertyType": null,
+            "isSlot": false,
+            "isDerived": false,
+            "value": [{
+                "valueExpression": null,
+                "string": "dlam_string",
+                "type": "LiteralString"
+            }],
+            "type": "Property"
+        },
+        "editable": true,
+        "modified": "2015-03-06T09:39:42.515-0800",
+        "creator": "admin"
+    },
+    {
+        "qualifiedId": "/europa/123456/300/301/302/303",
+        "qualifiedName": "/europa/JW_TEST/300/301/302/303",
+        "name": "303",
+        "owner": "302",
+        "documentation": "talk",
+        "sysmlid": "303",
+        "read": "2015-03-06T09:43:24.916-0800",
+        "specialization": {
+            "propertyType": null,
+            "isSlot": false,
+            "isDerived": false,
+            "value": [{
+                "valueExpression": null,
+                "string": "dlam_string",
+                "type": "LiteralString"
+            }],
+            "type": "Property"
+        },
+        "editable": true,
+        "modified": "2015-03-06T09:39:42.506-0800",
+        "creator": "admin"
+    },
+    {
+        "qualifiedId": "/europa/123456/_17_0_2_3_e610336_1394148449252_91190_29556",
+        "qualifiedName": "/europa/JW_TEST/ComponentViewPoint",
+        "name": "ComponentViewPoint",
+        "owner": "123456",
+        "documentation": "",
+        "sysmlid": "_17_0_2_3_e610336_1394148449252_91190_29556",
+        "read": "2015-03-06T09:43:28.563-0800",
+        "specialization": {
+            "method": "name_list",
+            "type": "Viewpoint"
+        },
+        "editable": true,
+        "modified": "2015-03-06T09:42:04.513-0800",
+        "creator": "admin"
+    },
+    {
+        "qualifiedId": "/europa/123456/targetId",
+        "qualifiedName": "/europa/JW_TEST/targetId",
+        "name": "targetId",
+        "owner": "123456",
+        "documentation": "target",
+        "sysmlid": "targetId",
+        "read": "2015-03-06T09:43:28.570-0800",
+        "specialization": {
+            "propertyType": null,
+            "isSlot": false,
+            "isDerived": false,
+            "type": "Property"
+        },
+        "editable": true,
+        "modified": "2015-03-06T09:42:59.813-0800",
+        "creator": "admin"
+    },
+    {
+        "qualifiedId": "/europa/123456/dlam",
+        "qualifiedName": "/europa/JW_TEST/dlam",
+        "name": "dlam",
+        "owner": "123456",
+        "documentation": "to make compatible with value specs (this is just a Element)",
+        "sysmlid": "dlam",
+        "read": "2015-03-06T09:43:24.930-0800",
+        "specialization": {"type": "Element"},
+        "editable": true,
+        "modified": "2015-03-06T09:38:01.062-0800",
+        "creator": "admin"
+    },
+    {
+        "qualifiedId": "/europa/123456/300/500",
+        "qualifiedName": "/europa/JW_TEST/300/500",
+        "name": "500",
+        "owner": "300",
+        "documentation": "directed_relationship",
+        "sysmlid": "500",
+        "read": "2015-03-06T09:43:24.907-0800",
+        "specialization": {
+            "source": "302",
+            "target": "303",
+            "type": "DirectedRelationship"
+        },
+        "editable": true,
+        "modified": "2015-03-06T09:43:20.072-0800",
+        "creator": "admin"
+    },
+    {
+        "qualifiedId": "/europa/123456/op_list",
+        "qualifiedName": "/europa/JW_TEST/List",
+        "name": "List",
+        "owner": "123456",
+        "documentation": "",
+        "sysmlid": "op_list",
+        "read": "2015-03-06T09:43:28.579-0800",
+        "specialization": {"type": "Operation"},
+        "editable": true,
+        "modified": "2015-03-06T09:41:52.959-0800",
+        "creator": "admin"
+    },
+    {
+        "qualifiedId": "/europa/123456/4000/401/402/403/404",
+        "qualifiedName": "/europa/JW_TEST/400/401/402/403/404",
+        "name": "404",
+        "owner": "403",
+        "documentation": "4about",
+        "sysmlid": "404",
+        "read": "2015-03-06T09:43:24.876-0800",
+        "specialization": {
+            "propertyType": null,
+            "isSlot": false,
+            "isDerived": false,
+            "value": [{
+                "valueExpression": null,
+                "string": "dlam_string",
+                "type": "LiteralString"
+            }],
+            "type": "Property"
+        },
+        "editable": true,
+        "modified": "2015-03-06T09:38:05.824-0800",
+        "creator": "admin"
+    },
+    {
+        "qualifiedId": "/europa/123456/4000/401",
+        "qualifiedName": "/europa/JW_TEST/400/401",
+        "name": "401",
+        "owner": "4000",
+        "documentation": "4else",
+        "sysmlid": "401",
+        "read": "2015-03-06T09:43:28.588-0800",
+        "specialization": {
+            "view2view": [{
+                "childrenViews": [
+                    "401",
+                    "402"
+                ],
+                "sysmlid": "401"
+            }],
+            "childrenViews": ["404"],
+            "displayedElements": [
+                "401",
+                "402",
+                "403"
+            ],
+            "contents": null,
+            "allowedElements": [
+                "401",
+                "402",
+                "403"
+            ],
+            "noSections": ["402"],
+            "contains": [{
+                "sourceType": "reference",
+                "source": "401",
+                "sourceProperty": "documentation",
+                "type": "Paragraph"
+            }],
+            "type": "Product"
+        },
+        "editable": true,
+        "modified": "2015-03-06T09:43:26.566-0800",
+        "creator": "admin"
+    },
+    {
+        "qualifiedId": "/europa/123456/connector",
+        "qualifiedName": "/europa/JW_TEST/connector",
+        "name": "connector",
+        "owner": "123456",
+        "documentation": "Connector updates",
+        "sysmlid": "connector",
+        "read": "2015-03-06T09:43:28.598-0800",
+        "specialization": {
+            "connectorType": "association",
+            "targetPath": ["connectorTarget"],
+            "sourceLower": {
+                "valueExpression": null,
+                "string": "sourceLower!",
+                "type": "LiteralString"
+            },
+            "targetLower": {
+                "valueExpression": null,
+                "string": "targetLower!",
+                "type": "LiteralString"
+            },
+            "source": null,
+            "sourceUpper": {
+                "valueExpression": null,
+                "string": "sourceUpper!",
+                "type": "LiteralString"
+            },
+            "targetUpper": {
+                "valueExpression": null,
+                "string": "targetUpper!",
+                "type": "LiteralString"
+            },
+            "sourcePath": ["connectorSource"],
+            "target": null,
+            "connectorValue": {
+                "valueExpression": null,
+                "string": "Ninja Attack!",
+                "type": "LiteralString"
+            },
+            "connectorKind": "BINDING",
+            "type": "Connector"
+        },
+        "editable": true,
+        "modified": "2015-03-06T09:42:58.860-0800",
+        "creator": "admin"
+    },
+    {
+        "qualifiedId": "/europa/123456/notInThePast",
+        "qualifiedName": "/europa/JW_TEST/notInThePast",
+        "name": "notInThePast",
+        "owner": "123456",
+        "documentation": "",
+        "sysmlid": "notInThePast",
+        "read": "2015-03-06T09:43:28.621-0800",
+        "specialization": {
+            "specification": {
+                "valueExpression": null,
+                "expressionBody": ["foo8"],
+                "type": "OpaqueExpression"
+            },
+            "type": "Constraint"
+        },
+        "editable": true,
+        "modified": "2015-03-06T09:41:27.182-0800",
+        "creator": "admin"
+    },
+    {
+        "qualifiedId": "/europa/123456/4000/401/402/403",
+        "qualifiedName": "/europa/JW_TEST/400/401/402/403",
+        "name": "403",
+        "owner": "402",
+        "documentation": "4talk",
+        "sysmlid": "403",
+        "read": "2015-03-06T09:43:24.997-0800",
+        "specialization": {
+            "propertyType": null,
+            "isSlot": false,
+            "isDerived": false,
+            "value": [{
+                "valueExpression": null,
+                "string": "dlam_string",
+                "type": "LiteralString"
+            }],
+            "type": "Property"
+        },
+        "editable": true,
+        "modified": "2015-03-06T09:38:05.010-0800",
+        "creator": "admin"
+    },
+    {
+        "qualifiedId": "/europa/123456/_17_0_2_4_f3a0363_1394142290412_487571_28478",
+        "qualifiedName": "/europa/JW_TEST/BLUCam CubeSat A",
+        "name": "BLUCam CubeSat A",
+        "owner": "123456",
+        "documentation": "",
+        "sysmlid": "_17_0_2_4_f3a0363_1394142290412_487571_28478",
+        "read": "2015-03-06T09:43:28.633-0800",
+        "specialization": {"type": "Package"},
+        "editable": true,
+        "modified": "2015-03-06T09:42:04.304-0800",
+        "creator": "admin"
+    },
+    {
+        "qualifiedId": "/europa/123456/4000/401/402",
+        "qualifiedName": "/europa/JW_TEST/400/401/402",
+        "name": "402",
+        "owner": "401",
+        "documentation": "4to",
+        "sysmlid": "402",
+        "read": "2015-03-06T09:43:24.893-0800",
+        "specialization": {
+            "propertyType": null,
+            "isSlot": false,
+            "isDerived": false,
+            "value": [{
+                "valueExpression": null,
+                "string": "dlam_string",
+                "type": "LiteralString"
+            }],
+            "type": "Property"
+        },
+        "editable": true,
+        "modified": "2015-03-06T09:38:04.346-0800",
+        "creator": "admin"
+    },
+    {
+        "qualifiedId": "/europa/123456/viewContents",
+        "qualifiedName": "/europa/JW_TEST/viewContents",
+        "name": "viewContents",
+        "owner": "123456",
+        "documentation": "View content",
+        "sysmlid": "viewContents",
+        "read": "2015-03-06T09:43:28.642-0800",
+        "specialization": {
+            "valueExpression": null,
+            "type": "Expression"
+        },
+        "editable": true,
+        "modified": "2015-03-06T09:43:00.381-0800",
+        "creator": "admin"
+    },
+    {
+        "qualifiedId": "/europa/123456/op_map",
+        "qualifiedName": "/europa/JW_TEST/map",
+        "name": "map",
+        "owner": "123456",
+        "documentation": "",
+        "sysmlid": "op_map",
+        "read": "2015-03-06T09:43:28.649-0800",
+        "specialization": {"type": "Operation"},
+        "editable": true,
+        "modified": "2015-03-06T09:42:00.456-0800",
+        "creator": "admin"
+    },
+    {
+        "qualifiedId": "/europa/123456/op_map_arg",
+        "qualifiedName": "/europa/JW_TEST/",
+        "name": "",
+        "owner": "123456",
+        "documentation": "",
+        "sysmlid": "op_map_arg",
+        "read": "2015-03-06T09:43:28.656-0800",
+        "specialization": {
+            "valueExpression": null,
+            "operand": [
+                {
+                    "element": "op_map",
+                    "valueExpression": null,
+                    "type": "ElementValue"
+                },
+                {
+                    "element": "exposed_id",
+                    "valueExpression": null,
+                    "type": "ElementValue"
+                },
+                {
+                    "element": "op_name_arg",
+                    "valueExpression": null,
+                    "type": "ElementValue"
+                }
+            ],
+            "type": "Expression"
+        },
+        "editable": true,
+        "modified": "2015-03-06T09:42:02.539-0800",
+        "creator": "admin"
+    },
+    {
+        "qualifiedId": "/europa/123456/_17_0_2_3_e610336_1394148311476_17302_29388/_17_0_2_3_e610336_1394148464681_90735_29608",
+        "qualifiedName": "/europa/JW_TEST/Components/",
+        "name": "",
+        "owner": "_17_0_2_3_e610336_1394148311476_17302_29388",
+        "documentation": "",
+        "sysmlid": "_17_0_2_3_e610336_1394148464681_90735_29608",
+        "read": "2015-03-06T09:43:28.676-0800",
+        "specialization": {
+            "source": "_17_0_2_3_e610336_1394148311476_17302_29388",
+            "target": "_17_0_2_3_e610336_1394148449252_91190_29556",
+            "type": "Conform"
+        },
+        "editable": true,
+        "modified": "2015-03-06T09:41:58.884-0800",
+        "creator": "admin"
+    },
+    {
+        "qualifiedId": "/europa/123456/testCmed416",
+        "qualifiedName": "/europa/JW_TEST/testName",
+        "name": "testName",
+        "owner": "123456",
+        "sysmlid": "testCmed416",
+        "read": "2015-03-06T09:43:28.687-0800",
+        "specialization": {
+            "propertyType": null,
+            "isSlot": false,
+            "isDerived": false,
+            "type": "Property"
+        },
+        "editable": true,
+        "modified": "2015-03-06T09:43:05.044-0800",
+        "creator": "admin"
+    },
+    {
+        "qualifiedId": "/europa/123456/BLUCamTest/_17_0_2_4_f3a0363_1394140452779_641658_27742",
+        "qualifiedName": "/europa/JW_TEST/BLUCamTest/dont care1",
+        "name": "dont care1",
+        "owner": "BLUCamTest",
+        "sysmlid": "_17_0_2_4_f3a0363_1394140452779_641658_27742",
+        "read": "2015-03-06T09:43:28.694-0800",
+        "specialization": {"type": "Package"},
+        "editable": true,
+        "modified": "2015-03-06T09:42:26.865-0800",
+        "creator": "admin"
+    },
+    {
+        "qualifiedId": "/europa/123456/op_name_arg",
+        "qualifiedName": "/europa/JW_TEST/Name",
+        "name": "Name",
+        "owner": "123456",
+        "documentation": "",
+        "sysmlid": "op_name_arg",
+        "read": "2015-03-06T09:43:28.702-0800",
+        "specialization": {"type": "Operation"},
+        "editable": true,
+        "modified": "2015-03-06T09:41:53.455-0800",
+        "creator": "admin"
+    },
+    {
+        "qualifiedId": "/europa/123456/BLUCamTest/_17_0_2_4_f3a0363_1394146455624_407543_30441/get_two_names_expression",
+        "qualifiedName": "/europa/JW_TEST/BLUCamTest/dont care2/",
+        "name": "",
+        "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
+        "documentation": "",
+        "sysmlid": "get_two_names_expression",
+        "read": "2015-03-06T09:43:28.709-0800",
+        "specialization": {
+            "valueExpression": null,
+            "operand": [
+                {
+                    "element": "get_names",
+                    "valueExpression": null,
+                    "type": "ElementValue"
+                },
+                {
+                    "element": "_17_0_2_4_f3a0363_1394141845089_115460_28389",
+                    "valueExpression": null,
+                    "type": "ElementValue"
+                },
+                {
+                    "element": "_17_0_2_4_f3a0363_1394141831980_671275_28387",
+                    "valueExpression": null,
+                    "type": "ElementValue"
+                }
+            ],
+            "type": "Expression"
+        },
+        "editable": true,
+        "modified": "2015-03-06T09:42:31.834-0800",
+        "creator": "admin"
+    },
+    {
+        "qualifiedId": "/europa/123456/BLUCamTest/_17_0_2_4_f3a0363_1394146455624_407543_30441/get_names",
+        "qualifiedName": "/europa/JW_TEST/BLUCamTest/dont care2/get_names_op",
+        "name": "get_names_op",
+        "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
+        "documentation": "",
+        "sysmlid": "get_names",
+        "read": "2015-03-06T09:43:28.730-0800",
+        "specialization": {
+            "expression": {
+                "valueExpression": null,
+                "operand": [
+                    {
+                        "element": "op_list",
+                        "valueExpression": null,
+                        "type": "ElementValue"
+                    },
+                    {
+                        "element": "op_name_arg_1",
+                        "valueExpression": null,
+                        "type": "ElementValue"
+                    },
+                    {
+                        "element": "op_name_arg_2",
+                        "valueExpression": null,
+                        "type": "ElementValue"
+                    }
+                ],
+                "type": "Expression"
+            },
+            "parameters": [
+                "s1_param",
+                "s2_param"
+            ],
+            "type": "Operation"
+        },
+        "editable": true,
+        "modified": "2015-03-06T09:42:34.766-0800",
+        "creator": "admin"
+    },
+    {
+        "qualifiedId": "/europa/123456/BLUCamTest/_17_0_2_4_f3a0363_1394146455624_407543_30441/op_name_arg_1",
+        "qualifiedName": "/europa/JW_TEST/BLUCamTest/dont care2/name_arg_1",
+        "name": "name_arg_1",
+        "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
+        "documentation": "",
+        "sysmlid": "op_name_arg_1",
+        "read": "2015-03-06T09:43:28.757-0800",
+        "specialization": {
+            "valueExpression": null,
+            "operand": [
+                {
+                    "element": "op_name_arg",
+                    "valueExpression": null,
+                    "type": "ElementValue"
+                },
+                {
+                    "element": "s1_param",
+                    "valueExpression": null,
+                    "type": "ElementValue"
+                }
+            ],
+            "type": "Expression"
+        },
+        "editable": true,
+        "modified": "2015-03-06T09:42:35.860-0800",
+        "creator": "admin"
+    },
+    {
+        "qualifiedId": "/europa/123456/op_ev_31835",
+        "qualifiedName": "/europa/JW_TEST/GreaterEquals",
+        "name": "GreaterEquals",
+        "owner": "123456",
+        "documentation": "",
+        "sysmlid": "op_ev_31835",
+        "read": "2015-03-06T09:43:28.774-0800",
+        "specialization": {
+            "parameters": [
+                "op_param_31867",
+                "op_param_31868",
+                "op_param_31869"
+            ],
+            "type": "Operation"
+        },
+        "editable": true,
+        "modified": "2015-03-06T09:41:37.895-0800",
+        "creator": "admin"
+    },
+    {
+        "qualifiedId": "/europa/123456/sourceId",
+        "qualifiedName": "/europa/JW_TEST/sourceId",
+        "name": "sourceId",
+        "owner": "123456",
+        "documentation": "source",
+        "sysmlid": "sourceId",
+        "read": "2015-03-06T09:43:28.784-0800",
+        "specialization": {
+            "propertyType": null,
+            "isSlot": false,
+            "isDerived": false,
+            "type": "Property"
+        },
+        "editable": true,
+        "modified": "2015-03-06T09:43:01.963-0800",
+        "creator": "admin"
+    },
+    {
+        "qualifiedId": "/europa/123456/BLUCamTest/_17_0_2_4_f3a0363_1394146455624_407543_30441/op_name_arg_2",
+        "qualifiedName": "/europa/JW_TEST/BLUCamTest/dont care2/name_arg_2",
+        "name": "name_arg_2",
+        "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
+        "documentation": "",
+        "sysmlid": "op_name_arg_2",
+        "read": "2015-03-06T09:43:28.791-0800",
+        "specialization": {
+            "valueExpression": null,
+            "operand": [
+                {
+                    "element": "op_name_arg",
+                    "valueExpression": null,
+                    "type": "ElementValue"
+                },
+                {
+                    "element": "s2_param",
+                    "valueExpression": null,
+                    "type": "ElementValue"
+                }
+            ],
+            "type": "Expression"
+        },
+        "editable": true,
+        "modified": "2015-03-06T09:42:37.247-0800",
+        "creator": "admin"
+    },
+    {
+        "qualifiedId": "/europa/123456/md",
+        "qualifiedName": "/europa/JW_TEST/md",
+        "name": "md",
+        "owner": "123456",
+        "documentation": "Magic Draw Meta-Data",
+        "sysmlid": "md",
+        "read": "2015-03-06T09:43:28.809-0800",
+        "specialization": {
+            "type": "MagicDrawData",
+            "mdData": "A blob of meta-data"
+        },
+        "editable": true,
+        "modified": "2015-03-06T09:42:56.432-0800",
+        "creator": "admin"
+    },
+    {
+        "qualifiedId": "/europa/123456/characterizes",
+        "qualifiedName": "/europa/JW_TEST/characterizes",
+        "name": "characterizes",
+        "owner": "123456",
+        "documentation": "Characterizes",
+        "sysmlid": "characterizes",
+        "read": "2015-03-06T09:43:28.815-0800",
+        "specialization": {
+            "source": "sourceId",
+            "target": "targetId",
+            "type": "Characterizes"
+        },
+        "editable": true,
+        "modified": "2015-03-06T09:42:55.204-0800",
+        "creator": "admin"
+    },
+    {
+        "qualifiedId": "/europa/123456/300/301/MMS_1425663476616_b44b24df-dbee-4052-9cc7-ab1aa636dab9",
+        "qualifiedName": "/europa/JW_TEST/300/301/null",
+        "owner": "301",
+        "sysmlid": "MMS_1425663476616_b44b24df-dbee-4052-9cc7-ab1aa636dab9",
+        "read": "2015-03-06T09:43:28.826-0800",
+        "specialization": {
+            "valueExpression": null,
+            "string": "dlam_string",
+            "type": "LiteralString"
+        },
+        "editable": true,
+        "modified": "2015-03-06T09:37:56.618-0800",
+        "creator": "admin"
+    },
+    {
+        "qualifiedId": "/europa/123456/4000/401/MMS_1425663801705_fbfc01b9-1952-4426-b9ac-2fbfad8fa53c",
+        "qualifiedName": "/europa/JW_TEST/400/401/null",
+        "owner": "401",
+        "sysmlid": "MMS_1425663801705_fbfc01b9-1952-4426-b9ac-2fbfad8fa53c",
+        "read": "2015-03-06T09:43:28.834-0800",
+        "specialization": {
+            "valueExpression": null,
+            "string": "dlam_string",
+            "type": "LiteralString"
+        },
+        "editable": true,
+        "modified": "2015-03-06T09:43:21.712-0800",
+        "creator": "admin"
+    },
+    {
+        "qualifiedId": "/europa/123456/_17_0_2_3_e610336_1394148311476_17302_29388",
+        "name": "Components",
+        "qualifiedName": "/europa/JW_TEST/Components",
+        "sysmlid": "_17_0_2_3_e610336_1394148311476_17302_29388",
+        "documentation": "",
+        "owner": "123456",
+        "read": "2015-03-06T09:43:31.193-0800",
+        "specialization": {
+            "contents": null,
+            "type": "View"
+        },
+        "editable": true,
+        "creator": "admin",
+        "modified": "2015-03-06T09:42:04.510-0800"
+    },
+    {
+        "qualifiedId": "/europa/123456/viewWithContents",
+        "qualifiedName": "/europa/JW_TEST/viewWithContents",
+        "name": "viewWithContents",
+        "owner": "123456",
+        "documentation": "View updates",
+        "sysmlid": "viewWithContents",
+        "read": "2015-03-06T09:43:28.850-0800",
+        "specialization": {
+            "contents": "viewContents",
+            "type": "View"
+        },
+        "editable": true,
+        "modified": "2015-03-06T09:43:00.381-0800",
+        "creator": "admin"
+    },
+    {
+        "qualifiedId": "/123456",
+        "qualifiedName": "/JW_TEST",
+        "name": "JW_TEST",
+        "owner": null,
+        "sysmlid": "123456",
+        "read": "2015-03-06T09:43:28.860-0800",
+        "editable": true,
+        "modified": "2015-03-06T09:43:16.861-0800",
+        "creator": "admin"
+    },
+    {
+        "qualifiedId": "/europa/123456/MMS_1425663707492_db42e1a8-47d4-42e7-a1c5-18f30537d6d2",
+        "qualifiedName": "/europa/JW_TEST/",
+        "name": "",
+        "owner": "123456",
+        "documentation": "",
+        "sysmlid": "MMS_1425663707492_db42e1a8-47d4-42e7-a1c5-18f30537d6d2",
+        "read": "2015-03-06T09:43:28.864-0800",
+        "specialization": {
+            "source": "_17_0_2_3_e610336_1394148311476_17302_29388",
+            "target": "_17_0_2_4_f3a0363_1394142290412_487571_28478",
+            "type": "Expose"
+        },
+        "editable": true,
+        "modified": "2015-03-06T09:41:59.807-0800",
+        "creator": "admin"
+    },
+    {
+        "qualifiedId": "/europa/123456/BLUCamTest/_17_0_2_4_f3a0363_1394146455624_407543_30441",
+        "qualifiedName": "/europa/JW_TEST/BLUCamTest/dont care2",
+        "name": "dont care2",
+        "owner": "BLUCamTest",
+        "sysmlid": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
+        "read": "2015-03-06T09:43:28.875-0800",
+        "specialization": {"type": "Package"},
+        "editable": true,
+        "modified": "2015-03-06T09:42:27.350-0800",
+        "creator": "admin"
+    },
+    {
+        "qualifiedId": "/europa/123456/arg_ev_38307",
+        "qualifiedName": "/europa/JW_TEST/duration",
+        "name": "duration",
+        "owner": "123456",
+        "documentation": "",
+        "sysmlid": "arg_ev_38307",
+        "read": "2015-03-06T09:43:28.882-0800",
+        "specialization": {
+            "propertyType": null,
+            "isSlot": false,
+            "isDerived": false,
+            "value": [{
+                "valueExpression": null,
+                "integer": 22,
+                "type": "LiteralInteger"
+            }],
+            "type": "Property"
+        },
+        "editable": true,
+        "modified": "2015-03-06T09:41:37.088-0800",
+        "creator": "admin"
+    },
+    {
+        "qualifiedId": "/europa/123456/literalSet",
+        "qualifiedName": "/europa/JW_TEST/literalSet",
+        "name": "literalSet",
+        "owner": "123456",
+        "documentation": "LiteralSet",
+        "sysmlid": "literalSet",
+        "read": "2015-03-06T09:43:28.893-0800",
+        "specialization": {
+            "valueExpression": null,
+            "set": [
+                {
+                    "valueExpression": null,
+                    "string": "I",
+                    "type": "LiteralString"
+                },
+                {
+                    "valueExpression": null,
+                    "string": "Love",
+                    "type": "LiteralString"
+                },
+                {
+                    "valueExpression": null,
+                    "string": "Bears",
+                    "type": "LiteralString"
+                }
+            ],
+            "setOperand": {
+                "valueExpression": null,
+                "string": "Bears",
+                "type": "LiteralString"
+            },
+            "type": "LiteralSet"
+        },
+        "editable": true,
+        "modified": "2015-03-06T09:42:54.496-0800",
+        "creator": "admin"
+    },
+    {
+        "qualifiedId": "/europa/123456/constraint_32165",
+        "qualifiedName": "/europa/JW_TEST/",
+        "name": "",
+        "owner": "123456",
+        "documentation": "",
+        "sysmlid": "constraint_32165",
+        "read": "2015-03-06T09:43:28.913-0800",
+        "specialization": {
+            "specification": {
+                "valueExpression": null,
+                "operand": [
+                    {
+                        "element": "op_ev_31835",
+                        "valueExpression": null,
+                        "type": "ElementValue"
+                    },
+                    {
+                        "element": "arg_ev_38307_1",
+                        "valueExpression": null,
+                        "type": "ElementValue"
+                    },
+                    {
+                        "element": "arg_ev_33001",
+                        "valueExpression": null,
+                        "type": "ElementValue"
+                    }
+                ],
+                "type": "Expression"
+            },
+            "type": "Constraint"
+        },
+        "editable": true,
+        "modified": "2015-03-06T09:41:35.753-0800",
+        "creator": "admin"
+    },
+    {
+        "qualifiedId": "/europa/123456/connectorTarget",
+        "qualifiedName": "/europa/JW_TEST/connectorTarget",
+        "name": "connectorTarget",
+        "owner": "123456",
+        "documentation": "Connector target",
+        "sysmlid": "connectorTarget",
+        "read": "2015-03-06T09:43:28.936-0800",
+        "specialization": {
+            "propertyType": null,
+            "isSlot": false,
+            "isDerived": false,
+            "type": "Property"
+        },
+        "editable": true,
+        "modified": "2015-03-06T09:42:55.022-0800",
+        "creator": "admin"
+    },
+    {
+        "qualifiedId": "/europa/123456/exposed_id",
+        "qualifiedName": "/europa/JW_TEST/exposed",
+        "name": "exposed",
+        "owner": "123456",
+        "documentation": "",
+        "sysmlid": "exposed_id",
+        "read": "2015-03-06T09:43:28.943-0800",
+        "specialization": {
+            "defaultValue": null,
+            "type": "Parameter"
+        },
+        "editable": true,
+        "modified": "2015-03-06T09:41:53.272-0800",
+        "creator": "admin"
+    },
+    {
+        "qualifiedId": "/europa/123456/AssocOwnedEnd",
+        "qualifiedName": "/europa/JW_TEST/AssocOwnedEnd",
+        "name": "AssocOwnedEnd",
+        "owner": "123456",
+        "documentation": "Associations's owned end",
+        "sysmlid": "AssocOwnedEnd",
+        "read": "2015-03-06T09:43:28.950-0800",
+        "specialization": {
+            "propertyType": null,
+            "isSlot": false,
+            "isDerived": false,
+            "type": "Property"
+        },
+        "editable": true,
+        "modified": "2015-03-06T09:42:56.641-0800",
+        "creator": "admin"
+    },
+    {
+        "qualifiedId": "/europa/123456/BLUCamTest/_17_0_2_4_f3a0363_1394146455624_407543_30441/_17_0_2_3_e610336_1394148443742_79128_29536",
+        "qualifiedName": "/europa/JW_TEST/BLUCamTest/dont care2/ContextViewpoint",
+        "name": "ContextViewpoint",
+        "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
+        "documentation": "",
+        "sysmlid": "_17_0_2_3_e610336_1394148443742_79128_29536",
+        "read": "2015-03-06T09:43:28.957-0800",
+        "specialization": {
+            "method": "get_two_names",
+            "type": "Viewpoint"
+        },
+        "editable": true,
+        "modified": "2015-03-06T09:42:40.090-0800",
+        "creator": "admin"
+    },
+    {
+        "qualifiedId": "/europa/123456/300/301/MMS_1425663799032_0368fe3b-c8af-4ae2-9862-efd4ac0932ab",
+        "qualifiedName": "/europa/JW_TEST/300/301/null",
+        "owner": "301",
+        "sysmlid": "MMS_1425663799032_0368fe3b-c8af-4ae2-9862-efd4ac0932ab",
+        "read": "2015-03-06T09:43:28.967-0800",
+        "specialization": {
+            "valueExpression": null,
+            "string": "dlam_string",
+            "type": "LiteralString"
+        },
+        "editable": true,
+        "modified": "2015-03-06T09:43:19.039-0800",
+        "creator": "admin"
+    },
+    {
+        "qualifiedId": "/europa/123456/BLUCamTest/_17_0_2_4_f3a0363_1394140452779_641658_27742/_17_0_2_4_f3a0363_1394140326296_809805_27600",
+        "qualifiedName": "/europa/JW_TEST/BLUCamTest/dont care1/ContextStuffs",
+        "name": "ContextStuffs",
+        "owner": "_17_0_2_4_f3a0363_1394140452779_641658_27742",
+        "documentation": "",
+        "sysmlid": "_17_0_2_4_f3a0363_1394140326296_809805_27600",
+        "read": "2015-03-06T09:43:28.976-0800",
+        "specialization": {"type": "Element"},
+        "editable": true,
+        "modified": "2015-03-06T09:42:40.329-0800",
+        "creator": "admin"
+    },
+    {
+        "qualifiedId": "/europa/123456/connectorSource",
+        "qualifiedName": "/europa/JW_TEST/connectorSource",
+        "name": "connectorSource",
+        "owner": "123456",
+        "documentation": "Connector source",
+        "sysmlid": "connectorSource",
+        "read": "2015-03-06T09:43:28.985-0800",
+        "specialization": {
+            "upper": {
+                "valueExpression": null,
+                "string": "lower!",
+                "type": "LiteralString"
+            },
+            "lower": {
+                "valueExpression": null,
+                "string": "lower!",
+                "type": "LiteralString"
+            },
+            "propertyType": null,
+            "isSlot": false,
+            "isDerived": false,
+            "type": "Property"
+        },
+        "editable": true,
+        "modified": "2015-03-06T09:43:00.722-0800",
+        "creator": "admin"
+    },
+    {
+        "qualifiedId": "/europa/123456/300/301/302/y",
+        "qualifiedName": "/europa/JW_TEST/300/301/302/null",
+        "owner": "302",
+        "documentation": "y is y",
+        "sysmlid": "y",
+        "read": "2015-03-06T09:43:28.999-0800",
+        "specialization": {
+            "propertyType": null,
+            "isSlot": false,
+            "isDerived": false,
+            "value": [{
+                "valueExpression": null,
+                "string": "the y value",
+                "type": "LiteralString"
+            }],
+            "type": "Property"
+        },
+        "editable": true,
+        "modified": "2015-03-06T09:40:55.272-0800",
+        "creator": "admin"
+    },
+    {
+        "qualifiedId": "/europa/123456/BLUCamTest/_17_0_2_4_f3a0363_1394146455624_407543_30441/s2_param",
+        "qualifiedName": "/europa/JW_TEST/BLUCamTest/dont care2/",
+        "name": "",
+        "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
+        "documentation": "",
+        "sysmlid": "s2_param",
+        "read": "2015-03-06T09:43:29.013-0800",
+        "specialization": {
+            "defaultValue": null,
+            "type": "Parameter"
+        },
+        "editable": true,
+        "modified": "2015-03-06T09:42:33.405-0800",
+        "creator": "admin"
+    },
+    {
+        "qualifiedId": "/europa/123456/arg_ev_33001",
+        "qualifiedName": "/europa/JW_TEST/initialDuration",
+        "name": "initialDuration",
+        "owner": "123456",
+        "documentation": "",
+        "sysmlid": "arg_ev_33001",
+        "read": "2015-03-06T09:43:29.022-0800",
+        "specialization": {
+            "propertyType": null,
+            "isSlot": false,
+            "isDerived": false,
+            "value": [{
+                "valueExpression": null,
+                "integer": -1145811380,
+                "type": "LiteralInteger"
+            }],
+            "type": "Property"
+        },
+        "editable": true,
+        "modified": "2015-03-06T09:41:46.745-0800",
+        "creator": "admin"
+    }
+]}
+200

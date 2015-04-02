@@ -1,0 +1,16 @@
+{"elements": [
+    {
+        "name": "JW_TEST",
+        "sysmlid": "123456",
+        "specialization": {
+            "projectVersion": "1",
+            "type": "Project"
+        }
+    },
+    {
+        "name": "no_project",
+        "sysmlid": "no_project",
+        "specialization": {"type": "Project"}
+    }
+]}
+200

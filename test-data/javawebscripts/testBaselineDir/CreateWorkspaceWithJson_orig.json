@@ -1,0 +1,13 @@
+{"workspaces": [{
+    "qualifiedId": "master/11bbfd80-6834-4842-a8a3-389349c2545a",
+    "id": "11bbfd80-6834-4842-a8a3-389349c2545a",
+    "created": "2015-03-06T09:45:05.225-0800",
+    "description": "new workspace description",
+    "qualifiedName": "master/newWorkspace",
+    "name": "newWorkspace",
+    "parent": "master",
+    "permission": "read",
+    "modified": "2015-03-06T09:45:05.225-0800",
+    "creator": "admin"
+}]}
+200
