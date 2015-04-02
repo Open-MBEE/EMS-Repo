@@ -2099,46 +2099,44 @@ public class NodeUtil {
                                              StringBuffer response ) {
         if ( Utils.isNullOrEmpty( siteName ) ) return null;
 
-        // Reverting method back--chilByName doesn't handle workspaces correctly.
-//      // Don't need to lookup sites using findNodeRefs, since we know where they are
-//      EmsScriptNode context = null;
-//      if (workspace == null) {
-//          context = NodeUtil.getCompanyHome( services );
-//      } else {
-//          context = workspace;
-//      }
-//      
-//      EmsScriptNode siteNode = context.childByNamePath( "Sites/" + siteName );
-//      return siteNode;
-
+        EmsScriptNode siteNode = null;
+        
+        // Run this as admin user since there are permission issues popping up 
+        AuthenticationUtil.setRunAsUser( "admin" );
+        
         // Try to find the site in the workspace first.
        ArrayList< NodeRef > refs =
                findNodeRefsByType( siteName, SearchType.CM_NAME.prefix,
                                    ignoreWorkspace, workspace, dateTime, true,
                                    true, getServices(), false );
+       
        for ( NodeRef ref : refs ) {
-           EmsScriptNode siteNode = new EmsScriptNode(ref, services, response);
+           siteNode = new EmsScriptNode(ref, services, response);
            if ( siteNode.isSite() ) {
-               return siteNode;
+               break;
            }
        }
 
-       // Get the site from SiteService.
-       SiteInfo siteInfo = services.getSiteService().getSite(siteName);
-       if (siteInfo != null) {
-           NodeRef siteRef = siteInfo.getNodeRef();
-           if ( dateTime != null ) {
-               siteRef = getNodeRefAtTime( siteRef, dateTime );
-           }
-           if (siteRef != null) {
-               EmsScriptNode siteNode = new EmsScriptNode(siteRef, services, response);
-               if ( siteNode != null
-                    && ( workspace == null || workspace.contains( siteNode ) ) ) {
-                   return siteNode;
+       if ( siteNode == null ) { 
+           // Get the site from SiteService.
+           SiteInfo siteInfo = services.getSiteService().getSite(siteName);
+           if (siteInfo != null) {
+               NodeRef siteRef = siteInfo.getNodeRef();
+               if ( dateTime != null ) {
+                   siteRef = getNodeRefAtTime( siteRef, dateTime );
+               }
+               if (siteRef != null) {
+                   siteNode = new EmsScriptNode(siteRef, services, response);
+                   if ( siteNode != null
+                        && ( workspace == null || workspace.contains( siteNode ) ) ) {
+                       return siteNode;
+                   }
                }
            }
        }
-       return null;
+       
+       AuthenticationUtil.setRunAsUser(AuthenticationUtil.getFullyAuthenticatedUser());
+       return siteNode;
     }
 
     /**
