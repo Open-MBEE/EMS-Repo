@@ -118,6 +118,9 @@ public class EmsScriptNode extends ScriptNode implements
     private String qualifiedName = null;
     private String qualifiedId = null;
 
+    public boolean renamed = false;
+    public boolean moved = false;
+    
     /**
      * A set of content model property names that serve as workspace metadata
      * and whose changes are not recorded in a workspace.
@@ -1210,14 +1213,16 @@ public class EmsScriptNode extends ScriptNode implements
      */
     public ArrayList<NodeRef> getOwnedChildren(boolean findDeleted) {
 
-        ArrayList<NodeRef> ownedChildren = new ArrayList<NodeRef>();
+        ArrayList<NodeRef> ownedChildren = null;
 
         ArrayList<NodeRef> oldChildren = this.getPropertyNodeRefs( "ems:ownedChildren",
                                                                    false, null, findDeleted, false);
         if (oldChildren != null) {
             ownedChildren = oldChildren;
+        } else {
+            ownedChildren = new ArrayList<NodeRef>();
         }
-
+        
         return ownedChildren;
 
     }
@@ -1645,7 +1650,8 @@ public class EmsScriptNode extends ScriptNode implements
                                                        createQName( acmType ),
                                                        value );
                 if ( acmType.equals( Acm.ACM_NAME ) ) {
-                    removeChildrenFromJsonCache();
+                    renamed = true;
+                    //removeChildrenFromJsonCache();
                 }
             } catch ( Exception e ) {
                 // This should never happen!
@@ -1720,7 +1726,8 @@ public class EmsScriptNode extends ScriptNode implements
             getProperties().put( acmType, value );
             save();
             if ( acmType.equals( Acm.ACM_NAME ) ) {
-                removeChildrenFromJsonCache();
+                renamed = true;
+                //removeChildrenFromJsonCache();
             }
         }
         return success;
@@ -1772,10 +1779,11 @@ public class EmsScriptNode extends ScriptNode implements
         qualifiedName = "/" + getProperty( "sysml:name" );
         qualifiedId =  "/" + getProperty( "sysml:id" );
 
+        boolean siteCharacterizationFound = false;
         NodeRef ownerRef = (NodeRef)this.getProperty( "ems:owner" );
         EmsScriptNode owner = null;
         // Need to look up based on owners...
-        while ( ownerRef != null ) {
+        while ( ownerRef != null && !siteCharacterizationFound ) {
             owner = new EmsScriptNode( ownerRef, services, response );
             String nameProp = (String)owner.getProperty( "sysml:name" );
             String idProp = (String)owner.getProperty( "sysml:id" );
@@ -1784,41 +1792,41 @@ public class EmsScriptNode extends ScriptNode implements
             }
             //nameProp = nameProp.endsWith(pkgSuffix) ? nameProp.replace(pkgSuffix, "" ) : nameProp;
             qualifiedName = "/" + nameProp + qualifiedName;
+
+            // stop if we find a site characterization in the path
+            if (owner.hasAspect( "ems:SiteCharacterization" )) {
+                siteCharacterizationFound = true;
+                idProp = "site_" + idProp;
+            }
             qualifiedId = "/" + idProp + qualifiedId;
 
             ownerRef = (NodeRef)owner.getProperty( "ems:owner" );
         }
         
-        // Get the site, which is one up from the Models node:
-        // In case the child of the project does not have the owner set to the project,
-        // we will loop until we find the Models node:
-        String ownerName = owner != null ? owner.getName() : null;
-        EmsScriptNode modelNode = owner;
-        while ( owner != null && !ownerName.equals( "Models" )) {
-            owner = owner.getParent();
-            ownerName = owner != null ? owner.getName() : null;
-            if (owner != null) {
-                modelNode = owner;
+        if (siteCharacterizationFound) {
+            // don't need to do anything as the qualified name and id are complete 
+        } else {
+            // Get the site, which is one up from the Models node:
+            // In case the child of the project does not have the owner set to the project,
+            // we will loop until we find the Models node:
+            String ownerName = owner != null ? owner.getName() : null;
+            EmsScriptNode modelNode = owner;
+            while ( owner != null && !ownerName.equals( "Models" )) {
+                owner = owner.getParent();
+                ownerName = owner != null ? owner.getName() : null;
+                if (owner != null) {
+                    modelNode = owner;
+                }
             }
-        }
-        
-        if (modelNode != null) {
-            EmsScriptNode siteNode = modelNode.getParent();
-            if (siteNode != null) {
-                qualifiedName = "/" + siteNode.getName() + qualifiedName;
-                qualifiedId = "/" + siteNode.getName() + qualifiedId;
+            
+            if (modelNode != null) {
+                EmsScriptNode siteNode = modelNode.getParent();
+                if (siteNode != null) {
+                    qualifiedName = "/" + siteNode.getName() + qualifiedName;
+                    qualifiedId = "/" + siteNode.getName() + qualifiedId;
+                }
             }
-        }
-      
-//        if ( owner != null ) {
-//            EmsScriptNode modelNode = owner.getParent();
-//            EmsScriptNode siteNode = modelNode.getParent();
-////            EmsScriptNode siteNode = owner.getSiteNode();
-//            if (siteNode != null) {
-//                qualifiedName = "/" + siteNode.getName() + qualifiedName;
-//                qualifiedId = "/" + siteNode.getName() + qualifiedId;
-//            }
-//        }
+        } // end if siteCharacterizationFound
 
         if (isName) {
             return qualifiedName;
@@ -2790,7 +2798,16 @@ public class EmsScriptNode extends ScriptNode implements
 
         EmsScriptNode parent = owner != null ? owner : this;
         String parentName = parent.getName();
-        while ( !parentName.equals( "Models" )) {
+        Set<String> seen = new TreeSet< String >();
+        while ( !parentName.equals( "Models" ) && !seen.contains( parentName ) ) {
+            if ( seen.contains( parentName ) ) {
+                logger.error( "Folder " + parentName + " contains self!", new Exception() );
+                return null;
+//                NodeRef ref = findNodeRefByType( "Sites", SearchType.CM_NAME.prefix,
+//                                                 null, null, false );
+//                if ( ref == null ) return null;
+//                return new EmsScriptNode( ref, getServices() );
+            }
             EmsScriptNode oldparent = parent;
             parent = oldparent.getParent();
             if ( parent == null ) return null; // site not found!
@@ -3488,6 +3505,22 @@ public class EmsScriptNode extends ScriptNode implements
         return equals( obj, true );
     }
 
+	/**
+	 * @return the head or current version of the node ref if it exists;
+	 *         otherwise return the existing node ref
+	 */
+    public NodeRef normalizedNodeRef() {// NodeRef ref, ServiceRegistry services ) {
+        VersionService vs = getServices().getVersionService();
+        Version thisHeadVersion = this.getHeadVersion();
+        NodeRef thisCurrent = thisHeadVersion == null ? null : thisHeadVersion.getVersionedNodeRef();
+        if ( thisCurrent == null ) {
+            Version thisCurrentVersion = vs.getCurrentVersion(this.nodeRef);
+        	thisCurrent = thisCurrentVersion == null ? null : thisCurrentVersion.getVersionedNodeRef();
+        }
+        if ( thisCurrent == null ) return nodeRef;
+        return thisCurrent;
+    }
+    
     /**
      * Check to see if the nodes are the same or (if tryCurrentVersions is true)
      * if their currentVersions are the same.
@@ -3508,8 +3541,8 @@ public class EmsScriptNode extends ScriptNode implements
         boolean isThisV = vs.isAVersion( this.nodeRef );
         boolean isThatV = vs.isAVersion( that.nodeRef );
         if ( !isThisV && !isThatV ) return same;
-        NodeRef thisCurrent = this.getHeadVersion().getVersionedNodeRef();
-        NodeRef thatCurrent = that.getHeadVersion().getVersionedNodeRef();
+        NodeRef thisCurrent = this.normalizedNodeRef();
+        NodeRef thatCurrent = that.normalizedNodeRef();
         if ( thisCurrent == thatCurrent ) return true;
         if ( thisCurrent == null || thatCurrent == null ) return false;
         return thisCurrent.equals( thatCurrent );
@@ -4043,7 +4076,8 @@ public class EmsScriptNode extends ScriptNode implements
                     reifiedPkg.move( destination );
                 }
                 
-                removeChildrenFromJsonCache();
+                moved = true;
+                //removeChildrenFromJsonCache();
             }
             
         }
@@ -4057,7 +4091,8 @@ public class EmsScriptNode extends ScriptNode implements
                 status = true;
             }
             
-            removeChildrenFromJsonCache();
+            moved = true;
+            //removeChildrenFromJsonCache();
         }
 
         return status;
@@ -4070,7 +4105,7 @@ public class EmsScriptNode extends ScriptNode implements
      * @param map
      * @return leaf values from the nested map
      */
-    public <T> List<T> getValues( Map<?,?> map, Class<T> cls ) {
+    public static <T> List<T> getValues( Map<?,?> map, Class<T> cls ) {
         ArrayList< T > arr = new ArrayList< T >();
         if ( map == null ) return arr;
         for ( Object v : map.values() ) {
@@ -4090,27 +4125,47 @@ public class EmsScriptNode extends ScriptNode implements
         return arr;
     }
 
-    public void removeChildrenFromJsonCache() {
+    public static void removeFromJsonCache( NodeRef ref ) {
+        //NodeRef ref = node.getNodeRef();
+        Map< Long, JSONObject > oldEntries = NodeUtil.jsonCache.remove( ref.getId() );
+        List< JSONObject > removedJson = null;
+        if ( NodeUtil.doJsonStringCaching ) {
+            removedJson = getValues( oldEntries, JSONObject.class );
+        }
+        if ( NodeUtil.doJsonDeepCaching ) {
+            Map< Long, Map< Boolean, Map< Set< String >, Map< String, JSONObject > > > > oldEntriesDeep =
+                    NodeUtil.jsonDeepCache.remove( ref.getId() );
+            if ( NodeUtil.doJsonStringCaching ) {
+                removedJson.addAll( getValues( oldEntriesDeep, JSONObject.class) );
+            }
+        }
+        if ( NodeUtil.doJsonStringCaching ) {
+            Utils.removeAll( NodeUtil.jsonStringCache, removedJson );
+        }
+
+    }
+
+    static boolean delayed = true;
+    
+    public void removeFromJsonCache( boolean recursive ) {
+        removeFromJsonCache( getNodeRef() );
+        if ( recursive ) removeChildrenFromJsonCache( recursive );
+    }
+
+    public void removeChildrenFromJsonCache( boolean recursive ) {
+//        if ( delayed ) {
+//            NodeUtil.removeChildrenFromCache( this );
+//        } else {
+//        }
         if ( !NodeUtil.doJsonCaching ) return;
         ArrayList< NodeRef > childs = getOwnedChildren( true );
+        //Set< EmsScriptNode > childs = getChildNodes();
         for ( NodeRef ref : childs ) {
-            Map< Long, JSONObject > oldEntries = NodeUtil.jsonCache.remove( ref.getId() );
-            List< JSONObject > removedJson = null;
-            if ( NodeUtil.doJsonStringCaching ) {
-                removedJson = getValues( oldEntries, JSONObject.class );
+            removeFromJsonCache( ref );
+            if ( recursive ) {
+                EmsScriptNode n = new EmsScriptNode( ref, getServices() );
+                n.removeChildrenFromJsonCache( true );
             }
-            if ( NodeUtil.doJsonDeepCaching ) {
-                Map< Long, Map< Boolean, Map< Set< String >, Map< String, JSONObject > > > > oldEntriesDeep =
-                        NodeUtil.jsonDeepCache.remove( ref.getId() );
-                if ( NodeUtil.doJsonStringCaching ) {
-                    removedJson.addAll( getValues( oldEntriesDeep, JSONObject.class) );
-                }
-            }
-            if ( NodeUtil.doJsonStringCaching ) {
-                Utils.removeAll( NodeUtil.jsonStringCache, removedJson );
-            }
-            EmsScriptNode n = new EmsScriptNode( ref, getServices() );
-            n.removeChildrenFromJsonCache();
         }
     }
 

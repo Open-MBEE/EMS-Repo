@@ -213,7 +213,7 @@ public class SnapshotArtifactsGenerationActionExecuter  extends ActionExecuterAb
         	logger.error(sb.toString());
         	ex.printStackTrace();
         	ActionUtil.sendEmailToModifier(jobNode, String.format("An unexpected error occurred and your snapshot artifact generation failed.\n%s%s", ex.getMessage(), sb.toString()), "Snapshot Generation Failed", services);
-        	ActionUtil.sendEmailTo("mbee-dev-admin@jpl.nasa.gov", "mbee-dev-admin@jpl.nasa.gov", 
+        	ActionUtil.sendEmailTo("lho@jpl.nasa.gov", "lho@jpl.nasa.gov", 
         			String.format("Server: %s\nSite: %s\nWorkspace: %s\nSnapshot Id: %s\nError: %s%s%s", 
         					new HostnameGet(this.repository, this.services).getAlfrescoUrl(),
         					siteName,

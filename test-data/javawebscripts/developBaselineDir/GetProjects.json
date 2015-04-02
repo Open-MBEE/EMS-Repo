@@ -5,8 +5,8 @@
         "specialization": {"type": "Project"}
     },
     {
-        "name": "no_project",
-        "sysmlid": "no_project",
+        "name": "no_site_no_project",
+        "sysmlid": "no_site_no_project",
         "specialization": {"type": "Project"}
     }
 ]}

@@ -91,7 +91,7 @@ public class ProjectGet extends AbstractJavaWebScript {
         try {
             if (validateRequest(req, status)) {
                 String siteName = getSiteName( req );
-                String projectId = getProjectId( req );
+                String projectId = getProjectId( req, siteName );
 
                 // get timestamp if specified
                 String timestamp = req.getParameter("timestamp");

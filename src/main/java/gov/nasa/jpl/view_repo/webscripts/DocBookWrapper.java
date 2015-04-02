@@ -93,7 +93,7 @@ public class DocBookWrapper {
 		String source = srcFile.getAbsolutePath();
 		String target = source.subSequence(0, source.lastIndexOf(".")) + ".pdf";
 		command.add(this.getFobFileName());
-		//command.add("-r");	//relaxed validation
+		command.add("-r");	//relaxed validation
 		command.add("-xml");
 		command.add(source);
 		command.add("-xsl");
@@ -354,6 +354,21 @@ public class DocBookWrapper {
 
 	public void saveHtmlZipToRepo(EmsScriptNode snapshotFolder, WorkspaceNode workspace, Date timestamp) throws Exception{
 		try{
+			// removes any previously generated Zip node.
+			ArrayList<NodeRef> nodeRefs = NodeUtil.findNodeRefsByType( this.snapshotName + ".zip", "@cm\\:name:\"", snapshotFolder.getServices() );
+			if (nodeRefs != null && nodeRefs.size() > 0) {
+				EmsScriptNode nodePrev = new EmsScriptNode(nodeRefs.get( 0 ), snapshotFolder.getServices(), new StringBuffer());
+				if(nodePrev != null){ 
+					try{
+						nodePrev.remove();
+					}
+					catch(Exception ex){
+						System.out.println(String.format("problem removing previous artifact node. %s", ex.getMessage()));
+						ex.printStackTrace();
+					}
+				}
+			}
+
 			//this.transformToHTML(workspace, timestamp);
 			createDocBookDir();
 			retrieveDocBook();
@@ -361,7 +376,7 @@ public class DocBookWrapper {
 			String zipPath = this.zipHtml();
 			if(zipPath == null || zipPath.isEmpty()) throw new Exception("Failed to zip files and resources!");
 
-			EmsScriptNode node = snapshotFolder.createNode(this.snapshotName + "_Zip", "cm:content");
+			EmsScriptNode node = snapshotFolder.createNode(this.snapshotName + ".zip", "cm:content");
 			if(node == null) throw new Exception("Failed to create zip repository node!");
 
 			if(!this.saveFileToRepo(node, MimetypeMap.MIMETYPE_ZIP, zipPath)) throw new Exception("Failed to save zip artifact to repository!");
@@ -377,17 +392,22 @@ public class DocBookWrapper {
 
 	public void savePdfToRepo(EmsScriptNode snapshotFolder, WorkspaceNode workspace, Date timestamp) throws Exception{
 		try{
-			ArrayList<NodeRef> nodesPrev = NodeUtil.findNodeRefsBySysmlName(this.snapshotName + "_PDF", false, workspace, timestamp, snapshotFolder.getServices(), false, true);
-			if(nodesPrev != null && nodesPrev.size() > 0){ 
-				try{
-					new EmsScriptNode(nodesPrev.get(0), snapshotFolder.getServices()).remove();
-				}
-				catch(Exception ex){
-					System.out.println(String.format("problem removing previous artifact node. %s", ex.getMessage()));
-					ex.printStackTrace();
+			// removes any previously generated PDF node.
+			ArrayList<NodeRef> nodeRefs = NodeUtil.findNodeRefsByType( this.snapshotName + ".pdf", "@cm\\:name:\"", snapshotFolder.getServices() );
+			if (nodeRefs != null && nodeRefs.size() > 0) {
+				EmsScriptNode nodePrev = new EmsScriptNode(nodeRefs.get( 0 ), snapshotFolder.getServices(), new StringBuffer());
+				if(nodePrev != null){ 
+					try{
+						nodePrev.remove();
+					}
+					catch(Exception ex){
+						System.out.println(String.format("problem removing previous artifact node. %s", ex.getMessage()));
+						ex.printStackTrace();
+					}
 				}
 			}
-			EmsScriptNode node = snapshotFolder.createNode(this.snapshotName + "_PDF", "cm:content");
+			
+			EmsScriptNode node = snapshotFolder.createNode(this.snapshotName + ".pdf", "cm:content");
 			if(node == null) throw new Exception("Failed to create PDF repository node!");
 
 			String pdfPath = transformToPDF(workspace, timestamp);
@@ -409,9 +429,15 @@ public class DocBookWrapper {
 	}
 
 	private void setPaths(){
+//		String tmpDirName	= TempFileProvider.getTempDir().getAbsolutePath();
+//    	this.jobDirName = Paths.get(tmpDirName, this.snapshotName);
+//		this.dbDirName = Paths.get(jobDirName.toString(), "docbook");
+//		this.imageDirName = Paths.get(dbDirName.toString(), "images");
+//		this.dbFileName = Paths.get(this.dbDirName.toString(), this.snapshotName + ".xml");
+		
 		String tmpDirName	= TempFileProvider.getTempDir().getAbsolutePath();
-    	this.jobDirName = Paths.get(tmpDirName, this.snapshotName);
-		this.dbDirName = Paths.get(jobDirName.toString(), "docbook");
+    	this.jobDirName = Paths.get(tmpDirName);
+		this.dbDirName = Paths.get(jobDirName.toString(), this.snapshotName);
 		this.imageDirName = Paths.get(dbDirName.toString(), "images");
 		this.dbFileName = Paths.get(this.dbDirName.toString(), this.snapshotName + ".xml");
 
@@ -601,6 +627,7 @@ public class DocBookWrapper {
 	    String ESCAPED_QUOTE = "\"\"";
 	    char[] CHARACTERS_THAT_MUST_BE_QUOTED = { ',', '"', '\n' };
 	    
+	    if(filename.length() > 100) filename = filename.substring(0,100);
 		File outputFile = new File(Paths.get(this.dbDirName.toString(), filename+".csv").toString());
 		try {
 			FileWriter fw = new FileWriter(outputFile);
@@ -669,7 +696,7 @@ public class DocBookWrapper {
 		command.add(zipFile);
 		//command.add("\"*.html\"");
 		//command.add("\"*.css\"");
-		command.add("docbook");
+		command.add(this.snapshotName);
 
 		// not including docbook and pdf files
 		//command.add("-x");

@@ -44,6 +44,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.log4j.*;
 import org.alfresco.repo.model.Repository;
+import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.site.SiteInfo;
@@ -134,7 +135,7 @@ public class SiteGet extends AbstractJavaWebScript {
         NodeRef parentRef;
         NodeRef siteRef;
 
-        List<SiteInfo> sites = services.getSiteService().listSites(null);
+        List<SiteInfo> sites = services.getSiteService().listSites(AuthenticationUtil.getFullyAuthenticatedUser());
 
         // Create json array of info for each site in the workspace:
         //	Note: currently every workspace should contain every site created

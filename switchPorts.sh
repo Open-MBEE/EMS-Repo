@@ -45,3 +45,4 @@ newMavenOpts=`echo $MAVEN_OPTS | sed "s@\(address=\)[0-9]\+@\1$newDebugPort@"`
 export MAVEN_OPTS=$newMavenOpts
 
 sed -i "s/\(key=\"port\" value=\"\)[0-9]\+/\1$newDebugPort/" view-repo.launch
+

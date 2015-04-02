@@ -3194,4 +3194,15 @@ public class NodeUtil {
         return false;
     }
 
+    
+    /**
+     * This is an experiment to see if deadlock can occur with concurrent
+     * transactions. Launch two threads, each starting a transaction in
+     * parallel. Thread 1 writes to node 1, waits a few seconds, and then writes
+     * to node 2. At the same time, thread 2 writes to node 2, waits a few
+     * seconds, and then writes to node 1.
+     */
+    public static void concurrencyTest() {
+        
+    }
 }

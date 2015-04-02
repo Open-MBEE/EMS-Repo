@@ -1,16 +1,26 @@
 {"elements": [
     {
-        "qualifiedId": "/europa/123456/timeIntervalNull",
-        "name": "timeIntervalNull",
-        "qualifiedName": "/europa/JW_TEST2/timeIntervalNull",
-        "sysmlid": "timeIntervalNull",
-        "documentation": "TimeInterval with null values",
+        "qualifiedId": "/europa/123456/viewNull",
+        "name": "viewNull",
+        "qualifiedName": "/europa/JW_TEST2/viewNull",
+        "sysmlid": "viewNull",
+        "documentation": "View with null values",
+        "owner": "123456",
+        "specialization": {"type": "View"},
+        "editable": true,
+        "creator": "admin",
+    },
+    {
+        "qualifiedId": "/europa/123456/instanceValueNull",
+        "name": "instanceValueNull",
+        "qualifiedName": "/europa/JW_TEST2/instanceValueNull",
+        "sysmlid": "instanceValueNull",
+        "documentation": "InstanceValue with null values",
         "owner": "123456",
         "specialization": {
-            "min": null,
-            "max": null,
             "valueExpression": null,
-            "type": "TimeInterval"
+            "type": "InstanceValue",
+            "instance": null
         },
         "editable": true,
         "creator": "admin",
@@ -25,6 +35,36 @@
         "specialization": {
             "valueExpression": null,
             "type": "ValueSpecification"
+        },
+        "editable": true,
+        "creator": "admin",
+    },
+    {
+        "qualifiedId": "/europa/123456/directedRelationshipNull",
+        "name": "directedRelationshipNull",
+        "qualifiedName": "/europa/JW_TEST2/directedRelationshipNull",
+        "sysmlid": "directedRelationshipNull",
+        "documentation": "directed_relationship with null values",
+        "owner": "123456",
+        "specialization": {
+            "source": null,
+            "target": null,
+            "type": "DirectedRelationship"
+        },
+        "editable": true,
+        "creator": "admin",
+    },
+    {
+        "qualifiedId": "/europa/123456/elementValueNull",
+        "name": "elementValueNull",
+        "qualifiedName": "/europa/JW_TEST2/elementValueNull",
+        "sysmlid": "elementValueNull",
+        "documentation": "ElementValue with null values",
+        "owner": "123456",
+        "specialization": {
+            "element": null,
+            "valueExpression": null,
+            "type": "ElementValue"
         },
         "editable": true,
         "creator": "admin",
@@ -74,36 +114,6 @@
         "creator": "admin",
     },
     {
-        "qualifiedId": "/europa/123456/directedRelationshipNull",
-        "name": "directedRelationshipNull",
-        "qualifiedName": "/europa/JW_TEST2/directedRelationshipNull",
-        "sysmlid": "directedRelationshipNull",
-        "documentation": "directed_relationship with null values",
-        "owner": "123456",
-        "specialization": {
-            "source": null,
-            "target": null,
-            "type": "DirectedRelationship"
-        },
-        "editable": true,
-        "creator": "admin",
-    },
-    {
-        "qualifiedId": "/europa/123456/instanceValueNull",
-        "name": "instanceValueNull",
-        "qualifiedName": "/europa/JW_TEST2/instanceValueNull",
-        "sysmlid": "instanceValueNull",
-        "documentation": "InstanceValue with null values",
-        "owner": "123456",
-        "specialization": {
-            "valueExpression": null,
-            "type": "InstanceValue",
-            "instance": null
-        },
-        "editable": true,
-        "creator": "admin",
-    },
-    {
         "qualifiedId": "/europa/123456/propertyNull",
         "name": "propertyNull",
         "qualifiedName": "/europa/JW_TEST2/propertyNull",
@@ -125,9 +135,23 @@
         "creator": "admin",
     },
     {
-        "qualifiedId": "/no_site/no_project/holding_bin_no_site_no_project/propertyMissing",
+        "qualifiedId": "/europa/123456/parameterNull",
+        "name": "parameterNull",
+        "qualifiedName": "/europa/JW_TEST2/parameterNull",
+        "sysmlid": "parameterNull",
+        "documentation": "Parameter with null values",
+        "owner": "123456",
+        "specialization": {
+            "type": "Parameter",
+            "defaultValue": null
+        },
+        "editable": true,
+        "creator": "admin",
+    },
+    {
+        "qualifiedId": "/no_site/no_site_no_project/holding_bin_no_site_no_project/propertyMissing",
         "name": "propertyMissing",
-        "qualifiedName": "/no_site/no_project/holding_bin/propertyMissing",
+        "qualifiedName": "/no_site/no_site_no_project/holding_bin/propertyMissing",
         "sysmlid": "propertyMissing",
         "documentation": "Property with missing propertyType and null owner",
         "owner": "holding_bin_no_site_no_project",
@@ -160,33 +184,6 @@
         "creator": "admin",
     },
     {
-        "qualifiedId": "/europa/123456/instanceSpecificationNull",
-        "name": "instanceSpecificationNull",
-        "qualifiedName": "/europa/JW_TEST2/instanceSpecificationNull",
-        "sysmlid": "instanceSpecificationNull",
-        "documentation": "InstanceSpecification with null values",
-        "owner": "123456",
-        "specialization": {
-            "instanceSpecificationSpecification": null,
-            "slots": ["elementValueNull"],
-            "classifier": ["a"],
-            "type": "InstanceSpecification"
-        },
-        "editable": true,
-        "creator": "admin",
-    },
-    {
-        "qualifiedId": "/europa/123456/viewNull",
-        "name": "viewNull",
-        "qualifiedName": "/europa/JW_TEST2/viewNull",
-        "sysmlid": "viewNull",
-        "documentation": "View with null values",
-        "owner": "123456",
-        "specialization": {"type": "View"},
-        "editable": true,
-        "creator": "admin",
-    },
-    {
         "qualifiedId": "/europa/123456/durationIntervalNull",
         "name": "durationIntervalNull",
         "qualifiedName": "/europa/JW_TEST2/durationIntervalNull",
@@ -203,30 +200,33 @@
         "creator": "admin",
     },
     {
-        "qualifiedId": "/europa/123456/elementValueNull",
-        "name": "elementValueNull",
-        "qualifiedName": "/europa/JW_TEST2/elementValueNull",
-        "sysmlid": "elementValueNull",
-        "documentation": "ElementValue with null values",
+        "qualifiedId": "/europa/123456/timeIntervalNull",
+        "name": "timeIntervalNull",
+        "qualifiedName": "/europa/JW_TEST2/timeIntervalNull",
+        "sysmlid": "timeIntervalNull",
+        "documentation": "TimeInterval with null values",
         "owner": "123456",
         "specialization": {
-            "element": null,
+            "min": null,
+            "max": null,
             "valueExpression": null,
-            "type": "ElementValue"
+            "type": "TimeInterval"
         },
         "editable": true,
         "creator": "admin",
     },
     {
-        "qualifiedId": "/europa/123456/parameterNull",
-        "name": "parameterNull",
-        "qualifiedName": "/europa/JW_TEST2/parameterNull",
-        "sysmlid": "parameterNull",
-        "documentation": "Parameter with null values",
+        "qualifiedId": "/europa/123456/instanceSpecificationNull",
+        "name": "instanceSpecificationNull",
+        "qualifiedName": "/europa/JW_TEST2/instanceSpecificationNull",
+        "sysmlid": "instanceSpecificationNull",
+        "documentation": "InstanceSpecification with null values",
         "owner": "123456",
         "specialization": {
-            "type": "Parameter",
-            "defaultValue": null
+            "instanceSpecificationSpecification": null,
+            "slots": ["elementValueNull"],
+            "classifier": ["a"],
+            "type": "InstanceSpecification"
         },
         "editable": true,
         "creator": "admin",

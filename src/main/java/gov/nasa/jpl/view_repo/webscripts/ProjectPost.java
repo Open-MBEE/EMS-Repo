@@ -43,14 +43,9 @@ import org.apache.log4j.*;
 import org.alfresco.repo.model.Repository;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.security.PermissionService;
-
 import org.json.JSONArray;
-
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import org.json.JSONObject;
-
 import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
@@ -101,8 +96,8 @@ public class ProjectPost extends AbstractJavaWebScript {
 
 				// We are now getting the project id form the json object, but leaving the check from the request
 				// for backwards compatibility:
-			    String projectId = projJson.has(Acm.JSON_ID) ? projJson.getString(Acm.JSON_ID) : getProjectId( req );
-			    String siteName = getSiteName( req );
+                String siteName = getSiteName( req );
+			    String projectId = projJson.has(Acm.JSON_ID) ? projJson.getString(Acm.JSON_ID) : getProjectId( req, siteName );
 
 		        boolean delete = getBooleanArg( req, "delete", false );
 		        boolean createSite = getBooleanArg(req, "createSite", false);
@@ -156,11 +151,23 @@ public class ProjectPost extends AbstractJavaWebScript {
 			}
 		}
         if (checkPermissions(projectNode, PermissionService.WRITE)){
-            projectNode.createOrUpdateProperty(Acm.ACM_ID, projectId);
+            String oldId = (String)projectNode.getProperty( Acm.ACM_ID );
+            boolean idChanged = !projectId.equals( oldId );
+            if ( idChanged ) {
+                projectNode.createOrUpdateProperty(Acm.ACM_ID, projectId);
+            }
 			projectNode.createOrUpdateProperty(Acm.ACM_TYPE, "Project");
+			boolean nameChanged = false;
             if (projectName != null) {
                 projectNode.createOrUpdateProperty(Acm.CM_TITLE, projectName);
-                projectNode.createOrUpdateProperty(Acm.ACM_NAME, projectName);
+                String oldName = (String)projectNode.getProperty( Acm.ACM_NAME );
+                nameChanged = !projectName.equals( oldName ); 
+                if ( nameChanged ) {
+                    projectNode.createOrUpdateProperty(Acm.ACM_NAME, projectName);
+                }
+            }
+            if ( idChanged || nameChanged ) {
+                projectNode.removeChildrenFromJsonCache( true );
             }
             if (projectVersion != null) {
                 projectNode.createOrUpdateProperty(Acm.ACM_PROJECT_VERSION, projectVersion);
@@ -230,15 +237,25 @@ public class ProjectPost extends AbstractJavaWebScript {
 			}
 		}
 
+		boolean idChanged = false;
+		boolean nameChanged = false;
 		if ( projectNode == null ) {
 			projectNode = modelContainerNode.createFolder(projectId, Acm.ACM_PROJECT,
 			                                              projectNodeAll != null ? projectNodeAll.getNodeRef() : null);
 			modelContainerNode.getOrSetCachedVersion();
-			projectNode.setProperty(Acm.ACM_ID, projectId);
+            String oldId = (String)projectNode.getProperty( Acm.ACM_ID );
+            idChanged = !projectId.equals( oldId );
+            if ( idChanged ) {
+                projectNode.setProperty(Acm.ACM_ID, projectId);
+            }
 			projectNode.setProperty(Acm.ACM_TYPE, "Project");
             if (projectName != null) {
     			projectNode.setProperty(Acm.CM_TITLE, projectName);
-                projectNode.setProperty(Acm.ACM_NAME, projectName);
+                String oldName = (String)projectNode.getProperty( Acm.ACM_NAME );
+                nameChanged = !projectName.equals( oldName ); 
+                if ( nameChanged ) {
+    			    projectNode.setProperty(Acm.ACM_NAME, projectName);
+    			}
             }
 			if (projectVersion != null) {
 			    projectNode.setProperty(Acm.ACM_PROJECT_VERSION, projectVersion);
@@ -251,11 +268,19 @@ public class ProjectPost extends AbstractJavaWebScript {
 				log(Level.INFO, HttpServletResponse.SC_OK,"Project deleted.\n");
 			} else {
 				if (checkPermissions(projectNode, PermissionService.WRITE)){
-					projectNode.createOrUpdateProperty(Acm.ACM_ID, projectId);
+		            String oldId = (String)projectNode.getProperty( Acm.ACM_ID );
+		            idChanged = !projectId.equals( oldId );
+		            if ( idChanged ) {
+		                projectNode.createOrUpdateProperty(Acm.ACM_ID, projectId);
+		            }
 					projectNode.createOrUpdateProperty(Acm.ACM_TYPE, "Project");
 					if (projectName != null) {
                         projectNode.createOrUpdateProperty(Acm.CM_TITLE, projectName);
-                        projectNode.createOrUpdateProperty(Acm.ACM_NAME, projectName);
+                        String oldName = (String)projectNode.getProperty( Acm.ACM_NAME );
+                        nameChanged = !projectName.equals( oldName ); 
+                        if ( nameChanged ) {
+                            projectNode.createOrUpdateProperty(Acm.ACM_NAME, projectName);
+                        }
 					}
 		            if (projectVersion != null) {
 		                projectNode.createOrUpdateProperty(Acm.ACM_PROJECT_VERSION, projectVersion);
@@ -276,6 +301,9 @@ public class ProjectPost extends AbstractJavaWebScript {
 				}
 			}
 		}
+        if ( idChanged || nameChanged ) {
+            projectNode.removeChildrenFromJsonCache( true );
+        }
 		projectNode.getOrSetCachedVersion();
 		return HttpServletResponse.SC_OK;
 	}

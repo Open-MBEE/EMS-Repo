@@ -121,7 +121,6 @@ public class UpdateWorkspaceLdapGroup extends AbstractJavaWebScript {
         }
         
         // to make sure no permission issues, run as admin
-        String originalUser = NodeUtil.getUserName();
         AuthenticationUtil.setRunAsUser( "admin" );
         
         // Place the node (branch_perms) to hold the LDAP group in CompanyHome/MMS:
@@ -182,7 +181,7 @@ public class UpdateWorkspaceLdapGroup extends AbstractJavaWebScript {
         }
         
         // make sure we're running back as the originalUser
-        AuthenticationUtil.setRunAsUser( originalUser );
+        AuthenticationUtil.setRunAsUser( AuthenticationUtil.getFullyAuthenticatedUser() );
         
     }
 
