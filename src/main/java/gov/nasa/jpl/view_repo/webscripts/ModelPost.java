@@ -316,9 +316,10 @@ public class ModelPost extends AbstractJavaWebScript {
             // make sure the following are run as admin user, it's possible that the
             // workspace doesn't have the project and user doesn't have read permissions on
             // the parent workspace (at that level)
+            String origUser = AuthenticationUtil.getRunAsUser();
             AuthenticationUtil.setRunAsUser( "admin" );
             projectId = elements.first().getProjectId(targetWS);
-            AuthenticationUtil.setRunAsUser( AuthenticationUtil.getFullyAuthenticatedUser() );
+            AuthenticationUtil.setRunAsUser( origUser );
        }
         String wsId = "master";
         if (targetWS != null) {
@@ -1996,6 +1997,7 @@ public class ModelPost extends AbstractJavaWebScript {
         }
 
         // FIXME: this temporary until we find out why there are permission issues with sites
+        String origUser = AuthenticationUtil.getRunAsUser();
         AuthenticationUtil.setRunAsUser( "admin" );
         // siteInfo doesnt give the node ref we want, so must search for it:
         siteNode = getSiteNode( siteName, null, null );
@@ -2006,7 +2008,7 @@ public class ModelPost extends AbstractJavaWebScript {
             pkgSiteNode.createOrUpdateAspect( Acm.ACM_SITE_CHARACTERIZATION);
             pkgSiteNode.createOrUpdateProperty( Acm.ACM_SITE_SITE, siteNode.getNodeRef() );
         }
-        AuthenticationUtil.setRunAsUser( AuthenticationUtil.getFullyAuthenticatedUser() );
+        AuthenticationUtil.setRunAsUser( origUser );
         
         return siteNode;
     }
