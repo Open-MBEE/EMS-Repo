@@ -1195,7 +1195,7 @@ public class EmsScriptNode extends ScriptNode implements
         NodeRef ref = (NodeRef)getNodeRefProperty( "ems:owner", skipNodeRefCheck, dateTime, ws );
         if ( ref == null ) {
             node = getParent();
-            if ( !skipNodeRefCheck && dateTime != null ) {
+            if ( !skipNodeRefCheck && dateTime != null && node != null ) {
                 NodeRef vref = NodeUtil.getNodeRefAtTime( node.getNodeRef(), dateTime );
                 if ( vref != null ) {
                     node = new EmsScriptNode( vref, getServices() );
