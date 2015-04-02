@@ -745,6 +745,64 @@ common_filters+['"id"','"qualifiedId"','"timestamp"'],
 ["test","workspaces","develop", "develop2"]
 ],
 
+
+# A series of test cases for workspaces in workspaces
+
+[
+246,
+"CreateParentWorkspace",
+"Create a workspace to be a parent of another",
+create_curl_cmd(type="POST",base_url=BASE_URL_WS,
+                post_type="",branch="parentWorkspace1?sourceWorkspace=master&copyTime="+get_current_time()),
+True, 
+common_filters+['"branched"','"created"','"id"','"qualifiedId"'],
+["test","workspaces","develop", "develop2"],
+None,
+None,
+set_wsid_to_gv1
+],
+
+[
+247,
+"PostToMasterAgain",
+"Post new element to master",
+create_curl_cmd(type="POST",data="a.json",base_url=BASE_URL_WS,
+                post_type="elements",branch="master/"),
+True, 
+common_filters,
+["test","workspaces","develop", "develop2"],
+None,
+None,
+set_read_to_gv2
+],
+        
+[
+248,
+"CreateSubworkspace",
+"Create workspace inside a workspace",
+create_curl_cmd(type="POST",base_url=BASE_URL_WS,
+                post_type="",branch="subworkspace1?sourceWorkspace=$gv1&copyTime="+get_current_time()),
+True, 
+common_filters+['"branched"','"created"','"id"','"qualifiedId"','"parent"'],
+["test","workspaces","develop", "develop2"],
+None,
+None,
+set_wsid_to_gv3
+],
+
+[
+249,
+"GetElementInMasterFromSubworkspace",
+"Get an element that only exists in the master from a subworkspace after its parent branch was created but before the it was created",
+create_curl_cmd(type="GET",data="elements/a",base_url=BASE_URL_WS,
+                branch="$gv3/"),
+True, 
+common_filters,
+["test","workspaces","develop","develop2"]
+],
+
+
+
 # SNAPSHOTS: ==========================    
 
 # This functionality is deprecated:
