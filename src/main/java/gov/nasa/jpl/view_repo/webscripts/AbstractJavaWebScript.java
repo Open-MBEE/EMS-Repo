@@ -66,13 +66,10 @@ import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
-<<<<<<< HEAD
 import java.util.regex.*;
 import java.util.Arrays;
-=======
 import java.util.Map.Entry;
 import java.util.Set;
->>>>>>> refs/remotes/origin/develop
 
 import javax.servlet.http.HttpServletResponse;
 
