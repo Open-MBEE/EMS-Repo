@@ -42,7 +42,7 @@ public class MmsProductsGet extends AbstractJavaWebScript {
 
     @Override
     protected  Map<String, Object> executeImplImpl(WebScriptRequest req, Status status, Cache cache) {
-        AuthenticationUtil.setRunAsUser( "admin" );
+//        AuthenticationUtil.setRunAsUser( "admin" );
         printHeader( req );
 
         //clearCaches();
