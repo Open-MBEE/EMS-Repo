@@ -548,21 +548,16 @@ public class WorkspaceNode extends EmsScriptNode {
     public static WorkspaceNode getCommonParent( WorkspaceNode ws1,
                                                  WorkspaceNode ws2 ) {
         Set<WorkspaceNode> parents = new TreeSet<WorkspaceNode>();
-        while ( ( ws1 != null || ws2 != null )
-                && ( ws1 == null ? !ws2.equals( ws1 ) : !ws1.equals( ws2 ) )
-                && ( ws1 == null || !parents.contains( ws1 ) )
-                && ( ws2 == null || !parents.contains( ws2 ) ) ) {
-            if ( ws1 != null ) {
-                parents.add( ws1 );
-                ws1 = ws1.getParentWorkspace();
-            }
-            if ( ws2 != null ) {
-                parents.add( ws2 );
-                ws2 = ws2.getParentWorkspace();
-            }
+        
+        // brute force walk up one branch, then the other checking for matches along the way
+        while ( ws1 != null ) {
+            parents.add( ws1 );
+            ws1 = ws1.getParentWorkspace();
         }
-        if ( ws1 != null && ( ws1.equals( ws2 ) || parents.contains( ws1 ) ) ) {
-            return ws1;
+        
+        while ( ws2 != null ) {
+            if (parents.contains( ws2 )) break;
+            ws2 = ws2.getParentWorkspace();
         }
         if ( ws2 != null && parents.contains( ws2 ) ) {
             return ws2;
@@ -776,6 +771,7 @@ public class WorkspaceNode extends EmsScriptNode {
                     CommitUtil.getCommitsInDateTimeRange( otherCompareTime,
                                                           thisCompareTime,
                                                           lastParent,
+                                                          targetParent,
                                                           services,
                                                           response);
             
