@@ -134,7 +134,7 @@ public class ModelLoadActionExecuter extends ActionExecuterAbstractBase {
                 // FIXME: make sure this all matches with ModelService handleUpdate
                 Set<EmsScriptNode> elements = 
                         modelService.createOrUpdateModel(content, status, workspace, null, true);
-                modelService.addRelationshipsToProperties( elements );
+                modelService.addRelationshipsToProperties( elements, workspace );
             } catch (Exception e) {
                 status.setCode(HttpServletResponse.SC_BAD_REQUEST);
                 response.append("ERROR: could not parse request\n");

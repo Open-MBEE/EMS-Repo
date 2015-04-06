@@ -1,7 +1,7 @@
 {
-  "message": "Warning! No WRITE priveleges to cm_306a992d-efde-4973-872b-133b191f4789.  Warning! No WRITE priveleges to cm_5327d6e4-38ff-4a01-8379-cc351aa0f4e1.  ",
+  "message": "Warning! No WRITE priveleges to cm_cf1c04ed-942c-442e-9bf6-4ee39965b61f.  Warning! No WRITE priveleges to cm_76dd210f-5913-455b-95aa-3a2292620c00.  ",
   "workspace1": {
-    "timestamp": "2015-03-05T15:47:20.238-0800",
+    "timestamp": "2015-03-27T09:04:53.948-0700",
     "qualifiedId": "master",
     "id": "master",
     "qualifiedName": "master",
@@ -9,7 +9,7 @@
     "elements": []
   },
   "workspace2": {
-    "timestamp": "2015-03-05T15:47:20.243-0800",
+    "timestamp": "2015-03-27T09:04:53.951-0700",
     "qualifiedId": "master",
     "id": "master",
     "deletedElements": [],

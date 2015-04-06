@@ -100,7 +100,7 @@ public class WorkspaceGet extends AbstractJavaWebScript{
 		    }
 		} else {
 		    if(checkPermissions(ws, PermissionService.READ))  {
-		        jsonArray.put(ws.toJSONObject(null));
+		        jsonArray.put(ws.toJSONObject(ws, null));
 		    } else {
                 log(Level.WARN, HttpServletResponse.SC_FORBIDDEN, "No read permissions for workspace: %s", (ws == null ? null : ws.getSysmlId()));
 		    }

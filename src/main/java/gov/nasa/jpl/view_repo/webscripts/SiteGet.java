@@ -135,7 +135,8 @@ public class SiteGet extends AbstractJavaWebScript {
         NodeRef parentRef;
         NodeRef siteRef;
 
-        List<SiteInfo> sites = services.getSiteService().listSites(AuthenticationUtil.getFullyAuthenticatedUser());
+        // TODO: Check to see if we need to filter our the sites based on the user
+        List<SiteInfo> sites = services.getSiteService().listSites(null);
 
         // Create json array of info for each site in the workspace:
         //	Note: currently every workspace should contain every site created
@@ -148,9 +149,7 @@ public class SiteGet extends AbstractJavaWebScript {
             if (siteRef != null) {
                 	emsNode = new EmsScriptNode(siteRef, services);
                 	name = emsNode.getName();
-                    // Note: skipping the noderef check b/c our node searches return the noderefs that correspond
-                    //       to the nodes in the surf-config folder. 
-                	parentRef = (NodeRef)emsNode.getProperty(Acm.ACM_SITE_PARENT, true);
+                	parentRef = (NodeRef)emsNode.getPropertyAtTime(Acm.ACM_SITE_PARENT, dateTime);
 
                 	EmsScriptNode parentNode = null;
                 	String parentId = null;
@@ -168,7 +167,8 @@ public class SiteGet extends AbstractJavaWebScript {
                 		siteJson.put("sysmlid", name);
                 		siteJson.put("name", siteInfo.getTitle());
                 		siteJson.put("parent", parentId );
-                		siteJson.put("isCharacterization", emsNode.getProperty(Acm.ACM_SITE_PACKAGE) != null );
+                		siteJson.put("isCharacterization", 
+                		             emsNode.getNodeRefProperty(Acm.ACM_SITE_PACKAGE, dateTime, workspace) != null );
 
                 		json.put(siteJson);
                 	}

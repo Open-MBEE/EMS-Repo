@@ -274,7 +274,7 @@ public class ModelGet extends AbstractJavaWebScript {
                 handleElementHierarchy( modelRootNode, workspace, dateTime, depth, new Long(0) );
             }
 
-            handleElements(dateTime, includeQualified);
+            handleElements(workspace, dateTime, includeQualified);
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -366,7 +366,7 @@ public class ModelGet extends AbstractJavaWebScript {
 		if (!elementsFound.containsKey(sysmlId)) {
 		    // dont add reified packages
 		    if (!rootName.endsWith("_pkg") &&
-		        !root.isOwnedValueSpec()) { //isPropertyOwnedValueSpecification()) {
+		        !root.isOwnedValueSpec(dateTime, workspace)) {
 		        elementsFound.put(sysmlId, root);
 		    }
 		}
@@ -385,17 +385,12 @@ public class ModelGet extends AbstractJavaWebScript {
 		    }
 
 		    // Handle all the children in this workspace:
-		    for ( NodeRef childRef : root.getOwnedChildren(false) ) {
-			    NodeRef vChildRef = NodeUtil.getNodeRefAtTime( childRef, workspace, dateTime );
-                if ( vChildRef == null ) {
-                    // this doesn't elicit a not found response
-                	// TODO: childRef.toString() and dateTime.toString() or just childRef and dateTime in following line (#356)
-                    log( Level.WARN, "Element %s not found", childRef.toString() + ( dateTime == null ? "" : " at " + dateTime ));
-			        continue;
-			    }
-                EmsScriptNode child = new EmsScriptNode( vChildRef, services, response );
+
+		    for ( NodeRef childRef : root.getOwnedChildren(false, dateTime, workspace) ) {
+                if ( childRef == null ) continue;
+                EmsScriptNode child = new EmsScriptNode( childRef, services, response );
                 if ( checkPermissions( child, PermissionService.READ ) ) {
-                    if (child.exists() && !child.isOwnedValueSpec()) { //isPropertyOwnedValueSpecification()) {
+                    if (child.exists() && !child.isOwnedValueSpec(dateTime, workspace)) {
 
                         String value = child.getSysmlId();
                         if ( value != null && !value.endsWith( "_pkg" )) {
@@ -415,12 +410,12 @@ public class ModelGet extends AbstractJavaWebScript {
 	 * Build up the element JSONObject
 	 * @throws JSONException
 	 */
-	protected void handleElements(Date dateTime, boolean includeQualified) throws JSONException {
+	protected void handleElements(WorkspaceNode ws, Date dateTime, boolean includeQualified) throws JSONException {
 		for (String id: elementsFound.keySet()) {
 			EmsScriptNode node = elementsFound.get(id);
 
 			if (checkPermissions(node, PermissionService.READ)){
-                elements.put(node.toJSONObject(dateTime, includeQualified));
+                elements.put(node.toJSONObject(ws, dateTime, includeQualified));
 			} // TODO -- REVIEW -- Warning if no permissions?
 		}
 	}

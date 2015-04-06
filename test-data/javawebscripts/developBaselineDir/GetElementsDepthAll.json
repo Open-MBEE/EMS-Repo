@@ -1,16 +1,5 @@
 {"elements": [
     {
-        "qualifiedName": "/europa/JW_TEST/400/401/null",
-        "owner": "401",
-        "specialization": {
-            "valueExpression": null,
-            "string": "dlam_string",
-            "type": "LiteralString"
-        },
-        "editable": true,
-        "creator": "admin"
-    },
-    {
         "qualifiedId": "/europa/123456/300",
         "qualifiedName": "/europa/JW_TEST/300",
         "name": "300",
@@ -205,6 +194,17 @@
                 "type": "LiteralString"
             }],
             "type": "Property"
+        },
+        "editable": true,
+        "creator": "admin"
+    },
+    {
+        "qualifiedName": "/europa/JW_TEST/400/401/null",
+        "owner": "401",
+        "specialization": {
+            "valueExpression": null,
+            "string": "dlam_string",
+            "type": "LiteralString"
         },
         "editable": true,
         "creator": "admin"

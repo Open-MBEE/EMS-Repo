@@ -81,15 +81,15 @@
                 "creator": "admin",
             },
             {
-                "name": "303",
                 "qualifiedName": "/europa/JW_TEST/300/301/302/303",
-                "sysmlid": "303",
-                "documentation": "talk",
+                "name": "303",
                 "owner": "302",
+                "documentation": "talk",
+                "sysmlid": "303",
                 "specialization": {
                     "propertyType": null,
-                    "isDerived": false,
                     "isSlot": false,
+                    "isDerived": false,
                     "value": [{
                         "valueExpression": null,
                         "string": "dlam_string",
@@ -98,7 +98,7 @@
                     "type": "Property"
                 },
                 "editable": true,
-                "creator": "admin",
+                "creator": "admin"
             },
             {
                 "qualifiedName": "/europa/JW_TEST/304",
@@ -287,16 +287,43 @@
             "editable": true,
             "creator": "admin"
         }],
-        "conflictedElements": [{
-            "sysmlid": "conflict",
-            "documentation": "",
-            "creator": "admin",
-        }],
+        "conflictedElements": [
+            {
+                "sysmlid": "303",
+                "documentation": "talk modified",
+                "specialization": {"value": [{
+                    "valueExpression": null,
+                    "string": "dlam_string modified",
+                    "type": "LiteralString"
+                }]},
+                "creator": "admin",
+            },
+            {
+                "sysmlid": "conflict",
+                "documentation": "",
+                "creator": "admin",
+            }
+        ],
         "updatedElements": [
+            {
+                "sysmlid": "303",
+                "documentation": "talk modified",
+                "specialization": {"value": [{
+                    "valueExpression": null,
+                    "string": "dlam_string modified",
+                    "type": "LiteralString"
+                }]},
+                "creator": "admin",
+            },
             {
                 "sysmlid": "304",
                 "documentation": "about",
                 "owner": "303",
+                "specialization": {"value": [{
+                    "valueExpression": null,
+                    "string": "dlam_string",
+                    "type": "LiteralString"
+                }]},
                 "creator": "admin",
             },
             {

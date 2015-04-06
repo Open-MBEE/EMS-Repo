@@ -138,7 +138,7 @@ public class MmsSnapshotsGet extends AbstractJavaWebScript {
         }
 
         // for backwards compatibility, keep noderefs
-        List< NodeRef > productSnapshots = product.getPropertyNodeRefs( "view2:productSnapshots" );
+        List< NodeRef > productSnapshots = product.getPropertyNodeRefs( "view2:productSnapshots", timestamp, workspace );
         for (NodeRef productSnapshotNodeRef: productSnapshots) {
             EmsScriptNode productSnapshot = new EmsScriptNode(productSnapshotNodeRef, services, response);
             if ( !productSnapshot.isDeleted() ) {
