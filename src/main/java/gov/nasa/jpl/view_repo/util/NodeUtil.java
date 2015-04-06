@@ -809,9 +809,10 @@ public class NodeUtil {
 //            results = searchService.query( getStoreRef(),
 //                                           SearchService.LANGUAGE_LUCENE,
 //                                           queryPattern );
-            AuthenticationUtil.setRunAsUser( "admin" );
+//            String origUser = AuthenticationUtil.getRunAsUser();
+//            AuthenticationUtil.setRunAsUser( "admin" );
             results = searchService.query( getSearchParameters(queryPattern) );
-            AuthenticationUtil.setRunAsUser( AuthenticationUtil.getFullyAuthenticatedUser() );
+//            AuthenticationUtil.setRunAsUser( origUser );
         }
         if ( Debug.isOn() ) {
             Debug.outln( "luceneSearch(" + queryPattern + "): returned "
@@ -2104,8 +2105,9 @@ public class NodeUtil {
 
         EmsScriptNode siteNode = null;
         
-        // Run this as admin user since there are permission issues popping up 
-        AuthenticationUtil.setRunAsUser( "admin" );
+        // Run this as admin user since there are permission issues popping up
+//        String origUser = AuthenticationUtil.getRunAsUser();
+//        AuthenticationUtil.setRunAsUser( "admin" );
         
         // Try to find the site in the workspace first.
        ArrayList< NodeRef > refs =
@@ -2138,7 +2140,7 @@ public class NodeUtil {
            }
        }
        
-       AuthenticationUtil.setRunAsUser(AuthenticationUtil.getFullyAuthenticatedUser());
+//       AuthenticationUtil.setRunAsUser(origUser);
        return siteNode;
     }
 

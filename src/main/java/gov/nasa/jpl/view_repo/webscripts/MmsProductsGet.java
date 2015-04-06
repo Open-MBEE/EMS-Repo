@@ -10,6 +10,7 @@ import java.util.Map;
 import javax.servlet.http.HttpServletResponse;
 
 import org.alfresco.repo.model.Repository;
+import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -41,6 +42,7 @@ public class MmsProductsGet extends AbstractJavaWebScript {
 
     @Override
     protected  Map<String, Object> executeImplImpl(WebScriptRequest req, Status status, Cache cache) {
+//        AuthenticationUtil.setRunAsUser( "admin" );
         printHeader( req );
 
         //clearCaches();

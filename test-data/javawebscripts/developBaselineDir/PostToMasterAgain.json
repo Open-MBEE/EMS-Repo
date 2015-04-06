@@ -1,13 +1,13 @@
 {"elements": [{
     "qualifiedId": "/no_site/no_site_no_project/holding_bin_no_site_no_project/a",
     "qualifiedName": "/no_site/no_site_no_project/holding_bin/null",
-    "owner": "holding_bin_no_site_no_project",
-    "documentation": "a is a",
     "sysmlid": "a",
+    "documentation": "a is a",
+    "owner": "holding_bin_no_site_no_project",
     "specialization": {
         "propertyType": null,
-        "isSlot": false,
         "isDerived": false,
+        "isSlot": false,
         "value": [{
             "valueExpression": null,
             "string": "the a value",

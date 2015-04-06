@@ -126,6 +126,7 @@ public class CommitUtil {
 	                                           ServiceRegistry services,
 	                                           StringBuffer response) {
         // to make sure no permission issues, run as admin
+	    String origUser = AuthenticationUtil.getRunAsUser();
         AuthenticationUtil.setRunAsUser( "admin" );
 	    
 	    ArrayList<EmsScriptNode> commits = new ArrayList<EmsScriptNode>();
@@ -145,7 +146,7 @@ public class CommitUtil {
             Collections.sort( commits, new ConfigurationsWebscript.EmsScriptNodeCreatedAscendingComparator() );
 	    }
 
-        AuthenticationUtil.setRunAsUser( AuthenticationUtil.getFullyAuthenticatedUser() );
+        AuthenticationUtil.setRunAsUser( origUser );
 
 	    return commits;
 	}
