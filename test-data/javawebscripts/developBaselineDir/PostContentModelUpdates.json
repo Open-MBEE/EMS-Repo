@@ -1,106 +1,5 @@
 {"elements": [
     {
-        "qualifiedId": "/europa/123456/literalSet",
-        "name": "literalSet",
-        "qualifiedName": "/europa/JW_TEST2/literalSet",
-        "sysmlid": "literalSet",
-        "documentation": "LiteralSet",
-        "owner": "123456",
-        "specialization": {
-            "valueExpression": null,
-            "set": [
-                {
-                    "valueExpression": null,
-                    "string": "I",
-                    "type": "LiteralString"
-                },
-                {
-                    "valueExpression": null,
-                    "string": "Love",
-                    "type": "LiteralString"
-                },
-                {
-                    "valueExpression": null,
-                    "string": "Bears",
-                    "type": "LiteralString"
-                }
-            ],
-            "setOperand": {
-                "valueExpression": null,
-                "string": "Bears",
-                "type": "LiteralString"
-            },
-            "type": "LiteralSet"
-        },
-        "editable": true,
-        "creator": "admin",
-    },
-    {
-        "qualifiedId": "/europa/123456/association",
-        "name": "association",
-        "qualifiedName": "/europa/JW_TEST2/association",
-        "sysmlid": "association",
-        "documentation": "association",
-        "owner": "123456",
-        "specialization": {
-            "targetAggregation": "SHARED",
-            "source": "sourceId",
-            "sourceAggregation": "COMPOSITE",
-            "target": "targetId",
-            "type": "Association",
-            "ownedEnd": ["AssocOwnedEnd"]
-        },
-        "editable": true,
-        "creator": "admin",
-    },
-    {
-        "qualifiedId": "/europa/123456/targetId",
-        "name": "targetId",
-        "qualifiedName": "/europa/JW_TEST2/targetId",
-        "sysmlid": "targetId",
-        "documentation": "target",
-        "owner": "123456",
-        "specialization": {
-            "propertyType": null,
-            "isDerived": false,
-            "isSlot": false,
-            "type": "Property"
-        },
-        "editable": true,
-        "creator": "admin",
-    },
-    {
-        "qualifiedId": "/europa/123456/sourceId",
-        "name": "sourceId",
-        "qualifiedName": "/europa/JW_TEST2/sourceId",
-        "sysmlid": "sourceId",
-        "documentation": "source",
-        "owner": "123456",
-        "specialization": {
-            "propertyType": null,
-            "isDerived": false,
-            "isSlot": false,
-            "type": "Property"
-        },
-        "editable": true,
-        "creator": "admin",
-    },
-    {
-        "qualifiedId": "/europa/123456/characterizes",
-        "name": "characterizes",
-        "qualifiedName": "/europa/JW_TEST2/characterizes",
-        "sysmlid": "characterizes",
-        "documentation": "Characterizes",
-        "owner": "123456",
-        "specialization": {
-            "source": "sourceId",
-            "target": "targetId",
-            "type": "Characterizes"
-        },
-        "editable": true,
-        "creator": "admin",
-    },
-    {
         "qualifiedId": "/europa/123456/connector",
         "name": "connector",
         "qualifiedName": "/europa/JW_TEST2/connector",
@@ -145,17 +44,36 @@
         "creator": "admin",
     },
     {
-        "qualifiedId": "/europa/123456/AssocOwnedEnd",
-        "name": "AssocOwnedEnd",
-        "qualifiedName": "/europa/JW_TEST2/AssocOwnedEnd",
-        "sysmlid": "AssocOwnedEnd",
-        "documentation": "Associations's owned end",
+        "qualifiedId": "/europa/123456/viewWithContents",
+        "name": "viewWithContents",
+        "qualifiedName": "/europa/JW_TEST2/viewWithContents",
+        "sysmlid": "viewWithContents",
+        "documentation": "View updates",
         "owner": "123456",
         "specialization": {
-            "propertyType": null,
-            "isDerived": false,
-            "isSlot": false,
-            "type": "Property"
+            "contents": {
+                "valueExpression": null,
+                "type": "Expression"
+            },
+            "type": "View"
+        },
+        "editable": true,
+        "creator": "admin",
+    },
+    {
+        "qualifiedId": "/europa/123456/association",
+        "name": "association",
+        "qualifiedName": "/europa/JW_TEST2/association",
+        "sysmlid": "association",
+        "documentation": "association",
+        "owner": "123456",
+        "specialization": {
+            "targetAggregation": "SHARED",
+            "source": "sourceId",
+            "sourceAggregation": "COMPOSITE",
+            "target": "targetId",
+            "type": "Association",
+            "ownedEnd": ["AssocOwnedEnd"]
         },
         "editable": true,
         "creator": "admin",
@@ -170,6 +88,119 @@
         "specialization": {
             "type": "MagicDrawData",
             "mdData": "A blob of meta-data"
+        },
+        "editable": true,
+        "creator": "admin",
+    },
+    {
+        "qualifiedId": "/europa/123456/sourceId",
+        "name": "sourceId",
+        "qualifiedName": "/europa/JW_TEST2/sourceId",
+        "sysmlid": "sourceId",
+        "documentation": "source",
+        "owner": "123456",
+        "specialization": {
+            "propertyType": null,
+            "isDerived": false,
+            "isSlot": false,
+            "type": "Property"
+        },
+        "editable": true,
+        "creator": "admin",
+    },
+    {
+        "qualifiedId": "/europa/123456/literalSet",
+        "name": "literalSet",
+        "qualifiedName": "/europa/JW_TEST2/literalSet",
+        "sysmlid": "literalSet",
+        "documentation": "LiteralSet",
+        "owner": "123456",
+        "specialization": {
+            "valueExpression": null,
+            "set": [
+                {
+                    "valueExpression": null,
+                    "string": "I",
+                    "type": "LiteralString"
+                },
+                {
+                    "valueExpression": null,
+                    "string": "Love",
+                    "type": "LiteralString"
+                },
+                {
+                    "valueExpression": null,
+                    "string": "Bears",
+                    "type": "LiteralString"
+                }
+            ],
+            "setOperand": {
+                "valueExpression": null,
+                "string": "Bears",
+                "type": "LiteralString"
+            },
+            "type": "LiteralSet"
+        },
+        "editable": true,
+        "creator": "admin",
+    },
+    {
+        "qualifiedId": "/europa/123456/targetId",
+        "name": "targetId",
+        "qualifiedName": "/europa/JW_TEST2/targetId",
+        "sysmlid": "targetId",
+        "documentation": "target",
+        "owner": "123456",
+        "specialization": {
+            "propertyType": null,
+            "isDerived": false,
+            "isSlot": false,
+            "type": "Property"
+        },
+        "editable": true,
+        "creator": "admin",
+    },
+    {
+        "qualifiedId": "/europa/123456/viewContents",
+        "name": "viewContents",
+        "qualifiedName": "/europa/JW_TEST2/viewContents",
+        "sysmlid": "viewContents",
+        "documentation": "View content",
+        "owner": "123456",
+        "specialization": {
+            "valueExpression": null,
+            "type": "Expression"
+        },
+        "editable": true,
+        "creator": "admin",
+    },
+    {
+        "qualifiedId": "/europa/123456/connectorTarget",
+        "name": "connectorTarget",
+        "qualifiedName": "/europa/JW_TEST2/connectorTarget",
+        "sysmlid": "connectorTarget",
+        "documentation": "Connector target",
+        "owner": "123456",
+        "specialization": {
+            "propertyType": null,
+            "isDerived": false,
+            "isSlot": false,
+            "type": "Property"
+        },
+        "editable": true,
+        "creator": "admin",
+    },
+    {
+        "qualifiedId": "/europa/123456/characterizes",
+        "name": "characterizes",
+        "qualifiedName": "/europa/JW_TEST2/characterizes",
+        "sysmlid": "characterizes",
+        "documentation": "Characterizes",
+        "owner": "123456",
+        "specialization": {
+            "source": "sourceId",
+            "target": "targetId",
+            "type": "Characterizes"
         },
         "editable": true,
         "creator": "admin",
@@ -201,48 +232,17 @@
         "creator": "admin",
     },
     {
-        "qualifiedId": "/europa/123456/viewWithContents",
-        "name": "viewWithContents",
-        "qualifiedName": "/europa/JW_TEST2/viewWithContents",
-        "sysmlid": "viewWithContents",
-        "documentation": "View updates",
-        "owner": "123456",
-        "specialization": {
-            "contents": {
-                "valueExpression": null,
-                "type": "Expression"
-            },
-            "type": "View"
-        },
-        "editable": true,
-        "creator": "admin",
-    },
-    {
-        "qualifiedId": "/europa/123456/connectorTarget",
-        "name": "connectorTarget",
-        "qualifiedName": "/europa/JW_TEST2/connectorTarget",
-        "sysmlid": "connectorTarget",
-        "documentation": "Connector target",
+        "qualifiedId": "/europa/123456/AssocOwnedEnd",
+        "name": "AssocOwnedEnd",
+        "qualifiedName": "/europa/JW_TEST2/AssocOwnedEnd",
+        "sysmlid": "AssocOwnedEnd",
+        "documentation": "Associations's owned end",
         "owner": "123456",
         "specialization": {
             "propertyType": null,
             "isDerived": false,
             "isSlot": false,
             "type": "Property"
-        },
-        "editable": true,
-        "creator": "admin",
-    },
-    {
-        "qualifiedId": "/europa/123456/viewContents",
-        "name": "viewContents",
-        "qualifiedName": "/europa/JW_TEST2/viewContents",
-        "sysmlid": "viewContents",
-        "documentation": "View content",
-        "owner": "123456",
-        "specialization": {
-            "valueExpression": null,
-            "type": "Expression"
         },
         "editable": true,
         "creator": "admin",

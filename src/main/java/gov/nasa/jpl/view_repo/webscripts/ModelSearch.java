@@ -141,7 +141,7 @@ public class ModelSearch extends ModelGet {
 //                }
             }
 
-            handleElements(dateTime, true);
+            handleElements(workspace, dateTime, true);
         }
 
         return elements;

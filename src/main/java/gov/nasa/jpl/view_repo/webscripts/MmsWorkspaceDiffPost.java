@@ -274,7 +274,7 @@ public class MmsWorkspaceDiffPost extends ModelPost {
 	            // Send deltas and make merge commit:
 	            // FIXME: Need to split elements by project Id - since they won't always be in same project
 	            String projectId = !updatedElements.isEmpty() ?
-	                                           updatedElements.iterator().next().getProjectId() :
+	                                           updatedElements.iterator().next().getProjectId(targetWs) :
 	                                           NO_PROJECT_ID;
 	            boolean modelPostDiff = wsDiff.isDiff();
 	            boolean modelDeleteDiff = deleteWsDiff != null && deleteWsDiff.isDiff();

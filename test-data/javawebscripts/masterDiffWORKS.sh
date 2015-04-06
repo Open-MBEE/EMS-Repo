@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# takes in optional argument for branch to run against
+
 failTest=0
 soapServer="128.149.16.xxx:8080"
 
@@ -17,6 +19,7 @@ server=0
 serverCount=0
 dotCount=0
 test=0
+
 echo 'POLLING SERVER'
 while [ $server -eq 0 ]; do
         if grep -q "Starting ProtocolHandler" runserver.log;then
@@ -35,7 +38,7 @@ while [ $server -eq 0 ]; do
                 server=2
         fi
 
-	sleep 1s
+    sleep 1s
 done
 
 if [ $server -eq 1 ]; then
@@ -44,7 +47,11 @@ if [ $server -eq 1 ]; then
         # Run regression tests
         # The script will run the desired tests based on the GIT_BRANCH environment variable.
         # Those tests ran can be overwritten by specifying the desired tests using the -t or -n option.
+    if [ -n "$1" ]; then
+        python test-data/javawebscripts/regression_test_harness.py -g $1
+    else
         python test-data/javawebscripts/regression_test_harness.py
+    fi
   	failTest=$?
 
         #connect to soapUI -- WORK STILL NEEDED

@@ -130,9 +130,13 @@ public class JsonDiff {
         try {
             JSONObject so1 = sort( o1 );
             JSONObject so2 = sort( o2 );
-            String fName1 = file1.getParent() + File.separator + "sorted_"
+            String parent1 = file1.getParent();
+            String parent2 = file2.getParent();
+            if ( parent1 == null ) parent1 = ".";
+            if ( parent2 == null ) parent2 = ".";
+            String fName1 = parent1 + File.separator + "sorted_"
                             + file1.getName();
-            String fName2 = file2.getParent() + File.separator + "sorted_"
+            String fName2 = parent2 + File.separator + "sorted_"
                             + file2.getName();
             FileUtils.stringToFile( so1.toString( 4 ), fName1 );
             FileUtils.stringToFile( so2.toString( 4 ), fName2 );

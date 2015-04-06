@@ -23,7 +23,7 @@ CURL_GET_FLAGS = "-X GET"
 CURL_DELETE_FLAGS = "-X DELETE"
 CURL_USER = " -u admin:admin"
 CURL_FLAGS = CURL_STATUS+CURL_USER
-HOST = "localhost:8080" 
+HOST = "localhost:9091" 
 SERVICE_URL = "http://%s/alfresco/service/"%HOST
 BASE_URL_WS_NOBS = SERVICE_URL+"workspaces"
 BASE_URL_WS = BASE_URL_WS_NOBS+"/"
@@ -39,7 +39,7 @@ test_dir_path = "test-data/javawebscripts"
 test_nums = []
 test_names = []
 create_baselines = False
-common_filters = ['"created"','"read"','"lastModified"','"modified"','time_total']
+common_filters = ['"created"','"read"','"lastModified"','"modified"','"siteCharacterizationId"','time_total']
 cmd_git_branch = None
 
 # Some global variables for lambda functions in tests

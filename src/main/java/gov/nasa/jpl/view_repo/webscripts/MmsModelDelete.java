@@ -238,7 +238,7 @@ public class MmsModelDelete extends AbstractJavaWebScript {
             for (Entry< String, EmsScriptNode > entry: wsDiff.getDeletedElements().entrySet()) {
                 EmsScriptNode node = entry.getValue();
                 String id = entry.getKey();
-                if ( node.isOwnedValueSpec() ) {
+                if ( node.isOwnedValueSpec(null, workspace) ) {
                     valueSpecs.add( node );
                     idsToRemove.add( id );
                 }
@@ -307,10 +307,10 @@ public class MmsModelDelete extends AbstractJavaWebScript {
             }
 
             if ( node != null && node.exists() ) {
-                addToWsDiff( node );
+                addToWsDiff( node, workspace );
 
-                deleteRelationships(node, "sysml:relationshipsAsSource", "sysml:relAsSource");
-                deleteRelationships(node, "sysml:relationshipsAsTarget", "sysml:relAsTarget");
+                deleteRelationships(node, "sysml:relationshipsAsSource", "sysml:relAsSource", workspace);
+                deleteRelationships(node, "sysml:relationshipsAsTarget", "sysml:relAsTarget", workspace);
             }
         }
     }
@@ -321,12 +321,13 @@ public class MmsModelDelete extends AbstractJavaWebScript {
      * @param aspectName    String of the aspect name to look for
      * @param propertyName  String of the property to remove
      */
-    private void deleteRelationships(EmsScriptNode node, String aspectName, String propertyName) {
+    private void deleteRelationships(EmsScriptNode node, String aspectName, String propertyName,
+                                     WorkspaceNode workspace) {
         if (node.hasAspect( aspectName )) {
-            ArrayList<NodeRef> relRefs = node.getPropertyNodeRefs( propertyName );
+            ArrayList<NodeRef> relRefs = node.getPropertyNodeRefs( propertyName, null, workspace );
             for (NodeRef relRef: relRefs) {
                 EmsScriptNode relNode = new EmsScriptNode(relRef, services, response);
-                addToWsDiff( relNode );
+                addToWsDiff( relNode, workspace );
             }
         }
     }
@@ -345,7 +346,7 @@ public class MmsModelDelete extends AbstractJavaWebScript {
         }
 
         if (recurse) {
-            for ( NodeRef childRef : root.getOwnedChildren(true) ) {
+            for ( NodeRef childRef : root.getOwnedChildren(true, null, workspace) ) {
                 EmsScriptNode child = new EmsScriptNode(childRef, services, response);
                 handleElementHierarchy(child, workspace, recurse);
             }
@@ -371,7 +372,7 @@ public class MmsModelDelete extends AbstractJavaWebScript {
      * Add everything to the commit delete
      * @param node
      */
-    private void addToWsDiff( EmsScriptNode node ) {
+    private void addToWsDiff( EmsScriptNode node, WorkspaceNode workspace ) {
         String sysmlId = node.getSysmlId();
         if (!sysmlId.endsWith( "_pkg" )) {
             if(wsDiff.getElementsVersions() != null)
@@ -383,7 +384,7 @@ public class MmsModelDelete extends AbstractJavaWebScript {
             
             // Remove from the ownedChildren of the owner:
             // Note: added this for when we are deleting embedded value specs that are no longer be used
-            EmsScriptNode parent = node.getOwningParent( null );
+            EmsScriptNode parent = node.getOwningParent( null, workspace, false );
             if (parent != null && parent.exists()) {
                 parent.removeFromPropertyNodeRefs("ems:ownedChildren", node.getNodeRef() );
             }

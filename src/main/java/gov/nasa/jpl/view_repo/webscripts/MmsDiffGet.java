@@ -97,7 +97,7 @@ public class MmsDiffGet extends AbstractJavaWebScript {
         String timestamp2 = req.getParameter( "timestamp2" );
         dateTime2 = TimeUtils.dateFromTimestamp( timestamp2 );
 
-        workspaceDiff = new WorkspaceDiff(ws1, ws2, dateTime1, dateTime2);
+        workspaceDiff = new WorkspaceDiff(ws1, ws2, dateTime1, dateTime2, response, responseStatus);
 
         try {
             workspaceDiff.forceJsonCacheUpdate = false;

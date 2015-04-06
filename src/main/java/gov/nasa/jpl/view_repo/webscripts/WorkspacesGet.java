@@ -108,11 +108,11 @@ public class WorkspacesGet extends AbstractJavaWebScript{
             	    WorkspaceNode wsNode = new WorkspaceNode(workspaceNode.getNodeRef(), services, response);
             	    if (findDeleted) {
             	        if (wsNode.isDeleted()) {
-            	            jArray.put(wsNode.toJSONObject( null ));
+            	            jArray.put(wsNode.toJSONObject(wsNode, null ));
             	        }
             	    } else {
             	        if (wsNode.exists()) {
-            	            jArray.put(wsNode.toJSONObject( null ));
+            	            jArray.put(wsNode.toJSONObject(wsNode, null ));
             	        }
             	    }
             }

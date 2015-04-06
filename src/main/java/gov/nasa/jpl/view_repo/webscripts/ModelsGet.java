@@ -171,7 +171,7 @@ public class ModelsGet extends AbstractJavaWebScript {
             EmsScriptNode node = NodeUtil.findScriptNodeById( id, workspace, dateTime, false, services, response );
             if (node != null) {
                 try {
-                    elementsFoundJson.put( node.toJSONObject( dateTime ) );
+                    elementsFoundJson.put( node.toJSONObject( workspace, dateTime ) );
                 } catch (JSONException e) {
                     log(LogLevel.ERROR, "Could not create JSON", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
                     e.printStackTrace();

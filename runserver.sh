@@ -22,5 +22,5 @@ fi
 #echo "mvn integration-test -U -f $pom -Pmbee-dev -Pamp-to-war -Dmaven.test.skip=true -Drebel.log=true 2>runserver.err 2>&1 | tee runserver.log | tee runserver.out"
 #mvn integration-test -U -f $pom -Pmbee-dev -Pamp-to-war -Dmaven.test.skip=true -Drebel.log=true 2>runserver.err 2>&1 | tee runserver.log | tee runserver.out
 echo "mvn integration-test -U -f $pom -Pmbee-dev -Pamp-to-war -Dmaven.test.skip=true 2>runserver.err 2>&1 | tee runserver.log | tee runserver.out"
-mvn integration-test -U -f $pom -Pmbee-dev -Pamp-to-war -Dmaven.test.skip=true -Dmaven.tomcat.port=8080 2>runserver.err 2>&1 | tee runserver.log | tee runserver.out
+mvn integration-test -U -f $pom -Pmbee-dev -Pamp-to-war -Dmaven.test.skip=true -Dmaven.tomcat.port=9091 2>runserver.err 2>&1 | tee runserver.log | tee runserver.out
 

@@ -215,7 +215,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
         if ( p.first ) return;
         seen = p.second;
 
-        ArrayList< NodeRef > children = node.getOwnedChildren( true );
+        ArrayList< NodeRef > children = node.getOwnedChildren( true, null, null );
         for ( NodeRef ref : children ) {
             EmsScriptNode childNode = new EmsScriptNode( ref, getServices() );
             String sysmlId = childNode.getSysmlId();
@@ -851,22 +851,24 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 
 
     public void setWsDiff(WorkspaceNode workspace) {
-        wsDiff = new WorkspaceDiff(workspace, workspace);
+        wsDiff = new WorkspaceDiff(workspace, workspace, response, responseStatus);
     }
     public void setWsDiff(WorkspaceNode workspace1, WorkspaceNode workspace2, Date time1, Date time2) {
-        wsDiff = new WorkspaceDiff(workspace1, workspace2, time1, time2);
+        wsDiff = new WorkspaceDiff(workspace1, workspace2, time1, time2, response, responseStatus);
     }
 
     public WorkspaceDiff getWsDiff() {
         return wsDiff;
     }
 
+    
     /**
      * Determines the project site for the passed site node.  Also, determines the
      * site package node if applicable.
      *
      */
-    public Pair<EmsScriptNode,EmsScriptNode> findProjectSite(WebScriptRequest req, String siteName,
+    public Pair<EmsScriptNode,EmsScriptNode> findProjectSite(String siteName,
+                                                             Date dateTime,
                                                              WorkspaceNode workspace,
                                                              EmsScriptNode initialSiteNode) {
 
@@ -874,7 +876,8 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
         EmsScriptNode siteNode = null;
 
         // If it is a package site, get the corresponding package for the site:
-        NodeRef sitePackageRef = (NodeRef) initialSiteNode.getProperty( Acm.ACM_SITE_PACKAGE );
+        NodeRef sitePackageRef = (NodeRef) initialSiteNode.getNodeRefProperty( Acm.ACM_SITE_PACKAGE, dateTime,
+                                                                               workspace);
         if (sitePackageRef != null) {
             sitePackageNode = new EmsScriptNode(sitePackageRef, services);
         }
@@ -885,7 +888,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
             if (splitArry != null && splitArry.length > 0) {
                 String sitePkgName = splitArry[splitArry.length-1];
 
-                sitePackageNode = findScriptNodeById(sitePkgName,workspace, null, false );
+                sitePackageNode = findScriptNodeById(sitePkgName,workspace, dateTime, false );
 
                 if (sitePackageNode == null) {
                     log(LogLevel.ERROR, "Could not find site package node for site package name "+siteName,
@@ -897,11 +900,8 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 
         // Found the package for the site:
         if (sitePackageNode != null) {
-            // Sanity check:
-            // Note: skipping the noderef check b/c our node searches return the noderefs that correspond
-            //       to the nodes in the surf-config folder.  Also, we dont need the check b/c site nodes
-            //       are always in the master workspace.
-            NodeRef sitePackageSiteRef = (NodeRef) sitePackageNode.getProperty( Acm.ACM_SITE_SITE, true );
+            // Note: not using workspace since sites are all in master.
+            NodeRef sitePackageSiteRef = (NodeRef) sitePackageNode.getPropertyAtTime( Acm.ACM_SITE_SITE, dateTime );
             if (sitePackageSiteRef != null && !sitePackageSiteRef.equals( initialSiteNode.getNodeRef() )) {
                 log(LogLevel.ERROR, "Mismatch between site/package for site package name "+siteName,
                     HttpServletResponse.SC_NOT_FOUND);
@@ -909,13 +909,13 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
             }
 
             // Get the project site by tracing up the parents until the parent is null:
-            NodeRef siteParentRef = (NodeRef) initialSiteNode.getProperty( Acm.ACM_SITE_PARENT, true );
+            NodeRef siteParentRef = (NodeRef) initialSiteNode.getPropertyAtTime( Acm.ACM_SITE_PARENT, dateTime );
             EmsScriptNode siteParent = siteParentRef != null ? new EmsScriptNode(siteParentRef, services, response) : null;
             EmsScriptNode oldSiteParent = null;
 
             while (siteParent != null) {
                 oldSiteParent = siteParent;
-                siteParentRef = (NodeRef) siteParent.getProperty( Acm.ACM_SITE_PARENT, true );
+                siteParentRef = (NodeRef) siteParent.getPropertyAtTime( Acm.ACM_SITE_PARENT, dateTime );
                 siteParent = siteParentRef != null ? new EmsScriptNode(siteParentRef, services, response) : null;
             }
 
@@ -944,12 +944,12 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
      * @param workspace
      * @return
      */
-    public EmsScriptNode getSiteForPkgSite(EmsScriptNode pkgNode, WorkspaceNode workspace) {
+    public EmsScriptNode getSiteForPkgSite(EmsScriptNode pkgNode, Date dateTime, WorkspaceNode workspace) {
 
         // Note: skipping the noderef check b/c our node searches return the noderefs that correspond
         //       to the nodes in the surf-config folder.  Also, we dont need the check b/c site nodes
         //       are always in the master workspace.
-        NodeRef pkgSiteParentRef = (NodeRef)pkgNode.getProperty( Acm.ACM_SITE_SITE, true );
+        NodeRef pkgSiteParentRef = (NodeRef)pkgNode.getPropertyAtTime( Acm.ACM_SITE_SITE, dateTime );
         EmsScriptNode pkgSiteParentNode = null;
 
         if (pkgSiteParentRef != null) {
@@ -960,7 +960,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
             // Search for it. Will have a cm:name = "site_"+sysmlid of site package node:
             String sysmlid = pkgNode.getSysmlId();
             if (sysmlid != null) {
-                pkgSiteParentNode = findScriptNodeById(NodeUtil.sitePkgPrefix+sysmlid, workspace, null, false);
+                pkgSiteParentNode = findScriptNodeById(NodeUtil.sitePkgPrefix+sysmlid, workspace, dateTime, false);
             }
             else {
                 log(LogLevel.WARNING, "Parent package site does not have a sysmlid.  Node "+pkgNode);
@@ -987,11 +987,11 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
         // Note: must walk up using the getOwningParent() b/c getParent() does not work
         //       for versioned nodes.  Note, that getOwningParent() will be null for
         //       the Project node, but we don't need to go farther up than this anyways
-        EmsScriptNode siteParentReifNode = node.getOwningParent(dateTime);
+        EmsScriptNode siteParentReifNode = node.getOwningParent(dateTime, workspace, false);
         EmsScriptNode siteParent;
         while (siteParentReifNode != null && siteParentReifNode.exists()) {
 
-            siteParent = siteParentReifNode.getReifiedPkg();
+            siteParent = siteParentReifNode.getReifiedPkg(dateTime, workspace);
 
             // If the parent is a package and a site, then its the parent site node:
             if (siteParentReifNode.hasAspect(Acm.ACM_PACKAGE) ) {
@@ -999,7 +999,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
                 if (isSiteParent != null && isSiteParent) {
 
                     // Get the alfresco Site for the site package node:
-                    pkgSiteParentNode = getSiteForPkgSite(siteParentReifNode, workspace);
+                    pkgSiteParentNode = getSiteForPkgSite(siteParentReifNode, dateTime, workspace);
                     break;
                 }
             }
@@ -1009,15 +1009,17 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
             String siteParentType = siteParent != null ? siteParent.getTypeShort() : null;
             String siteParentReifType = siteParentReifNode.getTypeShort();
             if (Acm.ACM_PROJECT.equals( siteParentType ) || Acm.ACM_PROJECT.equals( siteParentReifType )) {
-                pkgSiteParentNode = siteParentReifNode.getSiteNode();
+                pkgSiteParentNode = siteParentReifNode.getSiteNode(dateTime, workspace);
                 break;  // break no matter what b/c we have reached the project node
             }
 
-            if (siteParent.isWorkspaceTop()) {
+            // siteParent could be null because the reified relationships may not have been
+            // created properly (for old models)
+            if (siteParent == null || siteParent.isWorkspaceTop()) {
                 break;
             }
 
-            siteParentReifNode = siteParentReifNode.getOwningParent(dateTime);
+            siteParentReifNode = siteParentReifNode.getOwningParent(dateTime, workspace, false);
         }
 
         return pkgSiteParentNode;
@@ -1117,11 +1119,11 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
      * @param constraintNode The node to parse and create a ConstraintExpression for
      * @param constraints The list of Constraints to add to
      */
-    public void addConstraintExpression(EmsScriptNode constraintNode, Collection<Constraint> constraints) {
+    public void addConstraintExpression(EmsScriptNode constraintNode, Collection<Constraint> constraints, WorkspaceNode ws) {
     
         if (constraintNode == null || constraints == null) return;
     
-        EmsScriptNode exprNode = getConstraintExpression(constraintNode);
+        EmsScriptNode exprNode = getConstraintExpression(constraintNode, ws);
     
         if (exprNode != null) {
             Expression<Boolean> expression = toAeExpression( exprNode );
@@ -1152,7 +1154,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
         return expression;
     }
 
-    public Collection< Constraint > getAeConstraints( Set< EmsScriptNode > elements ) {
+    public Collection< Constraint > getAeConstraints( Set< EmsScriptNode > elements, WorkspaceNode ws ) {
         //Map<EmsScriptNode, Constraint> constraints = new LinkedHashMap<EmsScriptNode, Constraint>();
         Collection<Constraint> constraints = new ArrayList<Constraint>();
     
@@ -1166,7 +1168,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
             for (EmsScriptNode constraintNode : constraintNodes) {
     
                 // Parse the constraint node for all of the cm:names of the nodes in its expression tree:
-                Set<String> constrElemNames = getConstraintElementNames(constraintNode);
+                Set<String> constrElemNames = getConstraintElementNames(constraintNode, ws);
     
                 // Check if any of the posted elements are in the constraint expression tree, and add
                 // constraint if they are:
@@ -1176,7 +1178,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
     
                     String name = element.getName();
                     if (name != null && constrElemNames.contains(name)) {
-                        addConstraintExpression(constraintNode, constraints);
+                        addConstraintExpression(constraintNode, constraints, ws);
                         break;
                     }
     
@@ -1201,7 +1203,8 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
     public Map< EmsScriptNode, Expression<?> > getAeExpressions( Set< EmsScriptNode > elements ) {
         Map<EmsScriptNode, Expression<?>> expressions = new LinkedHashMap< EmsScriptNode, Expression<?> >();
         for ( EmsScriptNode node : elements ) {
-            if ( node.hasAspect( Acm.ACM_EXPRESSION ) && !node.isOwnedValueSpec() ) {
+            // FIXME -- Don't we need to pass in a date and workspace?
+            if ( node.hasAspect( Acm.ACM_EXPRESSION ) && !node.isOwnedValueSpec(null, node.getWorkspace()) ) {
                 Expression<?> expression = toAeExpression( node );
                 if ( expression != null ) {
                     expressions.put( node, expression );
@@ -1211,9 +1214,9 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
         return expressions;
     }
 
-    public Map<Object, Object> evaluate( Set< EmsScriptNode > elements ) {
+    public Map<Object, Object> evaluate( Set< EmsScriptNode > elements, WorkspaceNode ws ) {
         log(LogLevel.INFO, "Will attempt to fix constraint violations if found!");
-        Collection< Constraint > constraints = getAeConstraints( elements );
+        Collection< Constraint > constraints = getAeConstraints( elements, ws );
         Map< EmsScriptNode, Expression<?> > expressions = getAeExpressions( elements );
     
         Map< Object, Object > results = new LinkedHashMap< Object, Object >();
@@ -1234,14 +1237,14 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
         return results;
     }
 
-    public void fix( Set< EmsScriptNode > elements ) {
+    public void fix( Set< EmsScriptNode > elements, WorkspaceNode ws ) {
     
         log(LogLevel.INFO, "Will attempt to fix constraint violations if found!");
     
         SystemModelSolver< EmsScriptNode, EmsScriptNode, EmsScriptNode, EmsScriptNode, String, String, Object, EmsScriptNode, String, String, EmsScriptNode >  solver =
                 new SystemModelSolver< EmsScriptNode, EmsScriptNode, EmsScriptNode, EmsScriptNode, String, String, Object, EmsScriptNode, String, String, EmsScriptNode >(getSystemModel(), new ConstraintLoopSolver() );
     
-        Collection<Constraint> constraints = getAeConstraints( elements );
+        Collection<Constraint> constraints = getAeConstraints( elements, ws );
     
         // Solve the constraints:
         if (!Utils.isNullOrEmpty( constraints )) {
@@ -1389,9 +1392,11 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
      * in the expression.
      *
      * @param expressionNode The node to parse
+     * @param ws 
+     * @param date 
      * @return Set of cm:name
      */
-    protected Set<String> getExpressionElementNames(EmsScriptNode expressionNode) {
+    protected Set<String> getExpressionElementNames(EmsScriptNode expressionNode, Date date , WorkspaceNode ws ) {
     
         Set<String> names = new HashSet<String>();
     
@@ -1402,6 +1407,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
     
             if (name != null) names.add(name);
     
+            // FIXME -- need to give date/workspace context 
             // Process all of the operand properties:
             Collection< EmsScriptNode > properties =
                     getSystemModel().getProperty( expressionNode, Acm.JSON_OPERAND);
@@ -1416,6 +1422,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
     
                     names.add(operandProp.getName());
     
+                    // FIXME -- need to give date/workspace context 
                     // Get the valueOfElementProperty node:
                     Collection< EmsScriptNode > valueOfElemNodes =
                             getSystemModel().getProperty(operandProp, Acm.JSON_ELEMENT_VALUE_ELEMENT);
@@ -1436,8 +1443,10 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
     
                     if (valueOfElementNode != null) {
     
+                      // FIXME -- need to give date/workspace context 
                       String typeString = getSystemModel().getTypeString(valueOfElementNode, null);
     
+                      // FIXME -- need to give date/workspace context 
                       // If it is a Operation then see if it then process it:
                       if (typeString.equals(Acm.JSON_OPERATION)) {
                           names.addAll(getOperationElementNames(valueOfElementNode));
@@ -1445,14 +1454,16 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
     
                       // If it is a Expression then process it recursively:
                       else if (typeString.equals(Acm.JSON_EXPRESSION)) {
-                          names.addAll(getExpressionElementNames(valueOfElementNode));
+                          names.addAll(getExpressionElementNames(valueOfElementNode, date, ws));
                       }
     
+                      // FIXME -- need to give date/workspace context 
                       // If it is a Parameter then process it:
                       else if (typeString.equals(Acm.JSON_PARAMETER)) {
                           names.addAll(getParameterElementNames(valueOfElementNode));
                       }
     
+                      // FIXME -- need to give date/workspace context 
                       // If it is a Property then process it:
                       else if (typeString.equals(Acm.JSON_PROPERTY)) {
                           names.addAll(getPropertyElementNames(valueOfElementNode));
@@ -1476,9 +1487,10 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
      * names in the expression.
      *
      * @param constraintNode The node to parse
+     * @param ws 
      * @return Set of cm:name
      */
-    protected Set<String> getConstraintElementNames(EmsScriptNode constraintNode) {
+    protected Set<String> getConstraintElementNames(EmsScriptNode constraintNode, WorkspaceNode ws ) {
     
         Set<String> names = new LinkedHashSet<String>();
     
@@ -1490,13 +1502,13 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
             if (name != null) names.add(name);
     
             // Get the Expression for the Constraint:
-            EmsScriptNode exprNode = getConstraintExpression(constraintNode);
+            EmsScriptNode exprNode = getConstraintExpression(constraintNode, ws);
     
             // Add the names of all nodes in the Expression:
             if (exprNode != null) {
     
                 // Get elements names from the Expression:
-                names.addAll(getExpressionElementNames(exprNode));
+                names.addAll(getExpressionElementNames(exprNode, null, ws));
     
                 // REVIEW: Not using the child associations b/c
                 // ElementValue's elementValueOfElement has a different
@@ -1515,10 +1527,11 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
      * @param constraintNode The node to parse
      * @return The Expression node for the constraint
      */
-    private EmsScriptNode getConstraintExpression(EmsScriptNode constraintNode) {
+    private EmsScriptNode getConstraintExpression(EmsScriptNode constraintNode, WorkspaceNode ws) {
     
         if (constraintNode == null) return null;
     
+        // FIXME -- need to give date/workspace context 
         // Get the constraint expression:
         Collection<EmsScriptNode> expressions =
                 getSystemModel().getProperty( constraintNode, Acm.JSON_CONSTRAINT_SPECIFICATION );
