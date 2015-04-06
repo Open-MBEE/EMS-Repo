@@ -821,7 +821,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
         return jobName;
     }
 
-    public JSONObject generateHTML( String snapshotId, Date dateTime, WorkspaceNode workspace ) throws Exception {
+    public EmsScriptNode generateHTML( String snapshotId, Date dateTime, WorkspaceNode workspace ) throws Exception {
     	clearCaches( false );
         //EmsScriptNode snapshotNode = findScriptNodeById( snapshotId, workspace, null, false );
     	// lookup snapshotNode using standard lucene as snapshotId is unique across all workspaces
@@ -852,7 +852,8 @@ public class SnapshotPost extends AbstractJavaWebScript {
 	        	throw new Exception("Failed to generate zip artifact!", ex);
 	        }
         }
-        return populateSnapshotProperties( snapshotNode, dateTime, workspace );
+        //return populateSnapshotProperties( snapshotNode, dateTime, workspace );
+        return snapshotNode;
     }
 
     public EmsScriptNode generateHTML( EmsScriptNode snapshotNode, WorkspaceNode workspace ) throws Exception {
@@ -878,7 +879,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
     }
 
     
-    public JSONObject generatePDF(String snapshotId, Date dateTime, WorkspaceNode workspace, String siteName) throws Exception{
+    public EmsScriptNode generatePDF(String snapshotId, Date dateTime, WorkspaceNode workspace, String siteName) throws Exception{
     	clearCaches( false );
         //EmsScriptNode snapshotNode = findScriptNodeById(snapshotId, workspace, null, false);
     	// lookup snapshotNode using standard lucene as snapshotId is unique across all workspaces
@@ -909,7 +910,8 @@ public class SnapshotPost extends AbstractJavaWebScript {
 	    		throw new Exception("Failed to generate PDF artifact!", ex);
 	        }
         }
-    	return populateSnapshotProperties(snapshotNode, dateTime, workspace);
+    	//return populateSnapshotProperties(snapshotNode, dateTime, workspace);
+        return snapshotNode;
     }
 
     public EmsScriptNode generatePDF( EmsScriptNode snapshotNode, WorkspaceNode workspace, String siteName ) throws Exception {
@@ -1010,7 +1012,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
     }
 
     public static EmsScriptNode getHtmlZipNode( EmsScriptNode snapshotNode, Date dateTime, WorkspaceNode ws ) {
-        NodeRef node = (NodeRef)snapshotNode.getNodeRefProperty( "view2:htmlZipNode", dateTime, ws );
+        NodeRef node = (NodeRef)snapshotNode.getNodeRefProperty( "view2:htmlZipNode", true, null, null );
         if(node == null) return null;
         return new EmsScriptNode( node, snapshotNode.getServices() );
     }
@@ -1020,7 +1022,8 @@ public class SnapshotPost extends AbstractJavaWebScript {
     }
 
     public static EmsScriptNode getPdfNode( EmsScriptNode snapshotNode, Date dateTime, WorkspaceNode ws ) {
-        NodeRef node = (NodeRef)snapshotNode.getNodeRefProperty( "view2:pdfNode", dateTime, ws );
+//        NodeRef node = (NodeRef)snapshotNode.getNodeRefProperty( "view2:pdfNode", true, dateTime, ws );
+    	NodeRef node = (NodeRef)snapshotNode.getNodeRefProperty( "view2:pdfNode", true, null, null );
         if(node == null) return null;
         return new EmsScriptNode( node, snapshotNode.getServices() );
     }
@@ -1636,7 +1639,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
 
     private JSONObject populateSnapshotProperties( EmsScriptNode snapshotNode, Date dateTime, WorkspaceNode workspace )
             throws JSONException {
-        JSONObject snapshoturl = snapshotNode.toJSONObject( workspace, null );
+        JSONObject snapshoturl = snapshotNode.toJSONObject( workspace, dateTime );
         if ( hasPdf( snapshotNode ) || hasHtmlZip( snapshotNode ) ) {
         	HostnameGet hostnameGet = new HostnameGet(this.repository, this.services);
         	String contextUrl = hostnameGet.getAlfrescoUrl() + "/alfresco";
