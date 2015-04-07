@@ -1871,12 +1871,13 @@ public class EmsScriptNode extends ScriptNode implements
         qualifiedName = "/" + getProperty( "sysml:name" );
         qualifiedId =  "/" + getProperty( "sysml:id" );
 
-        NodeRef ownerRef = (NodeRef)this.getNodeRefProperty( "ems:owner", dateTime, ws );
+        EmsScriptNode owner = this.getOwningParent(dateTime, ws, false );
+        String ownerName = owner != null ? owner.getName() : null;
 
-        EmsScriptNode owner = null;
-        // Need to look up based on owners...
-        while ( ownerRef != null ) {
-            owner = new EmsScriptNode( ownerRef, services, response );
+        // Need to look up based on owner b/c the parent associations are not versioned,
+        // but owners only go up to the project node, so the site node must be found
+        // using the parent.  getOwningParent() searches for parent if owner is not found.
+        while ( owner != null && !ownerName.equals( "Models" )) {
             String nameProp = (String)owner.getProperty( "sysml:name" );
             String idProp = (String)owner.getProperty( "sysml:id" );
             if ( idProp == null ) {
@@ -1891,24 +1892,14 @@ public class EmsScriptNode extends ScriptNode implements
             }
             qualifiedId = "/" + idProp + qualifiedId;
 
-            ownerRef = (NodeRef)owner.getNodeRefProperty( "ems:owner", dateTime, ws );
+            owner = owner.getOwningParent(dateTime, ws, false );
+            ownerName = owner != null ? owner.getName() : null;
         }
         
         // Get the site, which is one up from the Models node:
-        // In case the child of the project does not have the owner set to the project,
-        // we will loop until we find the Models node:
-        String ownerName = owner != null ? owner.getName() : null;
-        EmsScriptNode modelNode = owner;
-        while ( owner != null && !ownerName.equals( "Models" )) {
-            owner = owner.getParent();
-            ownerName = owner != null ? owner.getName() : null;
-            if (owner != null) {
-                modelNode = owner;
-            }
-        }
-        
+        EmsScriptNode modelNode = (owner != null && ownerName.equals( "Models" )) ? owner : null;
         if (modelNode != null) {
-            EmsScriptNode siteNode = modelNode.getParent();
+            EmsScriptNode siteNode = modelNode.getOwningParent(dateTime, ws, false );
             if (siteNode != null) {
                 qualifiedName = "/" + siteNode.getName() + qualifiedName;
                 qualifiedId = "/" + siteNode.getName() + qualifiedId;
