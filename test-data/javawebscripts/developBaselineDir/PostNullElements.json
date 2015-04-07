@@ -137,6 +137,8 @@
         "owner": "123456",
         "specialization": {
             "instanceSpecificationSpecification": null,
+            "slots": ["elementValueNull"],
+            "classifier": ["a"],
             "type": "InstanceSpecification"
         },
         "editable": true,

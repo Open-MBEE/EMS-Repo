@@ -777,7 +777,7 @@ create_curl_cmd(type="POST",base_url=BASE_URL_JW,
                 post_type="elements?fix=true"),
 True,
 common_filters,
-["test","workspaces","develop"]
+["test","workspaces"]
 ],
         
 [
@@ -1138,7 +1138,7 @@ create_curl_cmd(type="DELETE",data="elements/arg_ev_38307",base_url=BASE_URL_WS,
                 branch="$gv1/"),
 True, 
 common_filters+['"timestamp"','"MMS_','"id"','"qualifiedId"','"version"', '"modified"'],
-["test","workspaces","develop"]
+["test","workspaces"]
 ], 
 
 [
@@ -1171,7 +1171,7 @@ create_curl_cmd(type="GET",base_url=SERVICE_URL,
                 branch="diff?workspace1=$gv2&workspace2=$gv1"),
 True, 
 common_filters+['"id"','"qualifiedId"'],
-["test","workspaces","develop", "develop2"],
+["test","workspaces"],
 None,
 None,
 set_json_output_to_gv3
@@ -1184,7 +1184,7 @@ set_json_output_to_gv3
 'curl %s %s \'$gv3\' "%sdiff"'%(CURL_FLAGS, CURL_POST_FLAGS, SERVICE_URL),
 True, 
 common_filters+['"id"','"qualifiedId"','"timestamp"'],
-["test","workspaces","develop", "develop2"],
+["test","workspaces"],
 ],         
        
 # Diff again should be empty.  This test depends on the previous one.
@@ -1196,7 +1196,7 @@ create_curl_cmd(type="GET",base_url=SERVICE_URL,
                 branch="diff?workspace1=$gv2&workspace2=$gv1"),
 True, 
 common_filters+['"id"','"qualifiedId"'],
-["test","workspaces","develop", "develop2"],
+["test","workspaces"],
 ], 
  
 # EXPRESSION PARSING =====================================================
