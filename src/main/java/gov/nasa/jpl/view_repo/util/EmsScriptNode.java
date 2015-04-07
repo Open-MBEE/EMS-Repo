@@ -863,8 +863,24 @@ public class EmsScriptNode extends ScriptNode implements
 
     public String getSiteName(Date dateTime, WorkspaceNode ws) {
         if ( siteName == null ) {
-            EmsScriptNode siteNode = getSiteNode(dateTime, ws);
-            if ( siteNode != null ) siteName = siteNode.getName();
+//            EmsScriptNode siteNode = getSiteNode(dateTime, ws);
+//            if ( siteNode != null ) siteName = siteNode.getName();
+
+            // FIXME: need to get back to the above call at some point, but currently it
+            // would require a permission check on every property
+            // Weird issues with permissions, lets just get site from display path
+            // we don't track changes if they move sites...
+            String displayPath = getDisplayPath();
+            boolean sitesFound = false;
+            for ( String path: displayPath.split( "/" ) ) {
+                if ( path.equals( "Sites" ) ) {
+                    sitesFound = true;
+                } else if (sitesFound) {
+                    siteName = path;
+                    break;
+                }
+            }
+            
         }
         return siteName;
     }
