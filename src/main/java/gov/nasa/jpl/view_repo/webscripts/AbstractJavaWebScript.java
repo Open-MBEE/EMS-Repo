@@ -1159,7 +1159,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
         Collection<Constraint> constraints = new ArrayList<Constraint>();
     
         // Search for all constraints in the database:
-        Collection<EmsScriptNode> constraintNodes = getSystemModel().getType(null, Acm.JSON_CONSTRAINT);
+        Collection<EmsScriptNode> constraintNodes = getSystemModel().getType(null, Acm.ACM_CONSTRAINT);
     
         if (!Utils.isNullOrEmpty(constraintNodes)) {
     
