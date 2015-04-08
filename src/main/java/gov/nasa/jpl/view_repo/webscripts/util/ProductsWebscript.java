@@ -111,10 +111,11 @@ public class ProductsWebscript extends AbstractJavaWebScript {
         WorkspaceNode workspace = getWorkspace( req );
 
         // Search for all products within the project site:
+        // don't specify a site, since this is running into issues and filter later
         Map< String, EmsScriptNode > nodeList = searchForElements(NodeUtil.SearchType.ASPECT.prefix,
                                                                 Acm.ACM_PRODUCT, false,
                                                                 workspace, dateTime,
-                                                                siteNode.getName());
+                                                                null);
         if (nodeList != null) {
 
             boolean checkSitePkg = (sitePackageNode != null && sitePackageNode.exists());
@@ -133,7 +134,10 @@ public class ProductsWebscript extends AbstractJavaWebScript {
                         }
                     }
                     else {
-                        productsJson.put( node.toJSONObject( workspace, dateTime ) );
+                        if (siteNode.getName().
+                                indexOf( node.getSiteCharacterizationId( dateTime, workspace ) ) >= 0) {
+                            productsJson.put( node.toJSONObject( workspace, dateTime ) );
+                        }
                     }
                 }
             }
