@@ -1816,6 +1816,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
 	    	case "XML":
 	    	case "#COMMENT":
 	    	case "COMMENT":
+	    	case "MMS-TRANSCLUDE-COM":
 	    		elem.remove();
 	    		break;
 	    	default:
