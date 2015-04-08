@@ -8,6 +8,7 @@ import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 import gov.nasa.jpl.view_repo.webscripts.AbstractJavaWebScript;
+import gov.nasa.jpl.view_repo.webscripts.ModelPost;
 import gov.nasa.jpl.view_repo.webscripts.SnapshotGet;
 
 import java.util.Collection;
@@ -24,6 +25,7 @@ import org.alfresco.repo.model.Repository;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.security.PermissionService;
+import org.apache.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -40,6 +42,7 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
  *
  */
 public class ProductsWebscript extends AbstractJavaWebScript {
+    static Logger logger = Logger.getLogger(ProductsWebscript.class);
 
     public boolean simpleJson = false;
     private EmsScriptNode sitePackageNode = null;
@@ -134,9 +137,14 @@ public class ProductsWebscript extends AbstractJavaWebScript {
                         }
                     }
                     else {
-                        if (siteNode.getName().
-                                indexOf( node.getSiteCharacterizationId( dateTime, workspace ) ) >= 0) {
+                        String nodeSiteName = node.getSiteCharacterizationId(dateTime, workspace);
+                        if (nodeSiteName != null && siteNode.getName().indexOf( nodeSiteName) >= 0) {
                             productsJson.put( node.toJSONObject( workspace, dateTime ) );
+                        } else if (nodeSiteName == null) {
+                            if (logger.isInfoEnabled()) { 
+                                logger.info( String.format("couldn't get node site name for sysmlid[%s] id[%s]",
+                                                           node.getSysmlId(), node.getId()));
+                            }
                         }
                     }
                 }
