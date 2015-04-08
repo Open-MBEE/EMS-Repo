@@ -1064,8 +1064,12 @@ public class NodeUtil {
             if ( ( doSimpleCaching || doFullCaching ) && caching
                  && !Utils.isNullOrEmpty( nodeRefs ) ) {
                 if ( useSimpleCache && doSimpleCaching ) {
-                    NodeRef r = nodeRefs.get( 0 );
-                    simpleCache.put( specifier, r );
+                    // only put in cache if size is 1 (otherwise can be give bad results)
+                    // force the user to filter
+                    if (nodeRefs.size() == 1) {
+                        NodeRef r = nodeRefs.get( 0 );
+                        simpleCache.put( specifier, r );
+                    }
                 } else if ( useFullCache && doFullCaching  ){
                     putInCache( specifier, prefix, ignoreWorkspace, workspace,
                                 onlyThisWorkspace, dateTime, justFirst,

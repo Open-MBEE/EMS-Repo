@@ -863,8 +863,26 @@ public class EmsScriptNode extends ScriptNode implements
 
     public String getSiteName(Date dateTime, WorkspaceNode ws) {
         if ( siteName == null ) {
-            EmsScriptNode siteNode = getSiteNode(dateTime, ws);
-            if ( siteNode != null ) siteName = siteNode.getName();
+            if (dateTime != null || ws != null) {
+                EmsScriptNode siteNode = getSiteNode(dateTime, ws);
+                if ( siteNode != null ) siteName = siteNode.getName();
+            } else {
+                // FIXME: need to get back to the above call at some point, but currently it
+                // would require a permission check on every property
+                // Weird issues with permissions, lets just get site from display path
+                // we don't track changes if they move sites...
+                String displayPath = getDisplayPath();
+                boolean sitesFound = false;
+                for ( String path: displayPath.split( "/" ) ) {
+                    if ( path.equals( "Sites" ) ) {
+                        sitesFound = true;
+                    } else if (sitesFound) {
+                        siteName = path;
+                        break;
+                    }
+                }
+            }
+            
         }
         return siteName;
     }
@@ -1871,12 +1889,13 @@ public class EmsScriptNode extends ScriptNode implements
         qualifiedName = "/" + getProperty( "sysml:name" );
         qualifiedId =  "/" + getProperty( "sysml:id" );
 
-        NodeRef ownerRef = (NodeRef)this.getNodeRefProperty( "ems:owner", dateTime, ws );
+        EmsScriptNode owner = this.getOwningParent(dateTime, ws, false );
+        String ownerName = owner != null ? owner.getName() : null;
 
-        EmsScriptNode owner = null;
-        // Need to look up based on owners...
-        while ( ownerRef != null ) {
-            owner = new EmsScriptNode( ownerRef, services, response );
+        // Need to look up based on owner b/c the parent associations are not versioned,
+        // but owners only go up to the project node, so the site node must be found
+        // using the parent.  getOwningParent() searches for parent if owner is not found.
+        while ( owner != null && !ownerName.equals( "Models" )) {
             String nameProp = (String)owner.getProperty( "sysml:name" );
             String idProp = (String)owner.getProperty( "sysml:id" );
             if ( idProp == null ) {
@@ -1891,24 +1910,14 @@ public class EmsScriptNode extends ScriptNode implements
             }
             qualifiedId = "/" + idProp + qualifiedId;
 
-            ownerRef = (NodeRef)owner.getNodeRefProperty( "ems:owner", dateTime, ws );
+            owner = owner.getOwningParent(dateTime, ws, false );
+            ownerName = owner != null ? owner.getName() : null;
         }
         
         // Get the site, which is one up from the Models node:
-        // In case the child of the project does not have the owner set to the project,
-        // we will loop until we find the Models node:
-        String ownerName = owner != null ? owner.getName() : null;
-        EmsScriptNode modelNode = owner;
-        while ( owner != null && !ownerName.equals( "Models" )) {
-            owner = owner.getParent();
-            ownerName = owner != null ? owner.getName() : null;
-            if (owner != null) {
-                modelNode = owner;
-            }
-        }
-        
+        EmsScriptNode modelNode = (owner != null && ownerName.equals( "Models" )) ? owner : null;
         if (modelNode != null) {
-            EmsScriptNode siteNode = modelNode.getParent();
+            EmsScriptNode siteNode = modelNode.getOwningParent(dateTime, ws, false );
             if (siteNode != null) {
                 qualifiedName = "/" + siteNode.getName() + qualifiedName;
                 qualifiedId = "/" + siteNode.getName() + qualifiedId;

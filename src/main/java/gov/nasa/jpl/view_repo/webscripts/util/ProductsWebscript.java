@@ -8,6 +8,7 @@ import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 import gov.nasa.jpl.view_repo.webscripts.AbstractJavaWebScript;
+import gov.nasa.jpl.view_repo.webscripts.ModelPost;
 import gov.nasa.jpl.view_repo.webscripts.SnapshotGet;
 
 import java.util.Collection;
@@ -24,6 +25,7 @@ import org.alfresco.repo.model.Repository;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.security.PermissionService;
+import org.apache.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -40,6 +42,7 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
  *
  */
 public class ProductsWebscript extends AbstractJavaWebScript {
+    static Logger logger = Logger.getLogger(ProductsWebscript.class);
 
     public boolean simpleJson = false;
     private EmsScriptNode sitePackageNode = null;
@@ -111,10 +114,11 @@ public class ProductsWebscript extends AbstractJavaWebScript {
         WorkspaceNode workspace = getWorkspace( req );
 
         // Search for all products within the project site:
+        // don't specify a site, since this is running into issues and filter later
         Map< String, EmsScriptNode > nodeList = searchForElements(NodeUtil.SearchType.ASPECT.prefix,
                                                                 Acm.ACM_PRODUCT, false,
                                                                 workspace, dateTime,
-                                                                siteNode.getName());
+                                                                null);
         if (nodeList != null) {
 
             boolean checkSitePkg = (sitePackageNode != null && sitePackageNode.exists());
@@ -127,13 +131,26 @@ public class ProductsWebscript extends AbstractJavaWebScript {
                     // If we are just retrieving the products for a site package, then filter out the ones
                     // that do not have the site package as the first site package parent:
                     if (checkSitePkg) {
-                        if (pkgSite != null &&
-                            pkgSite.equals(findParentPkgSite(node, workspace, dateTime))) {
-                            productsJson.put( node.toJSONObject( workspace, dateTime ) );
+                        try {
+                            if (pkgSite != null &&
+                                pkgSite.equals(findParentPkgSite(node, workspace, dateTime))) {
+                                productsJson.put( node.toJSONObject( workspace, dateTime ) );
+                            }
+                        } catch (org.alfresco.repo.security.permissions.AccessDeniedException e) {
+                            // permission issue
+                            continue;
                         }
                     }
                     else {
-                        productsJson.put( node.toJSONObject( workspace, dateTime ) );
+                        String nodeSiteName = node.getSiteCharacterizationId(dateTime, workspace);
+                        if (nodeSiteName != null && siteNode.getName().indexOf( nodeSiteName) >= 0) {
+                            productsJson.put( node.toJSONObject( workspace, dateTime ) );
+                        } else if (nodeSiteName == null) {
+                            if (logger.isInfoEnabled()) { 
+                                logger.info( String.format("couldn't get node site name for sysmlid[%s] id[%s]",
+                                                           node.getSysmlId(), node.getId()));
+                            }
+                        }
                     }
                 }
             }
