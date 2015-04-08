@@ -117,6 +117,8 @@ public abstract class EmsTransaction {
     
     protected void tryBegin( UserTransaction trx ) {
         try {
+//            logger.warn( "begin trx=" + trx.hashCode() );
+//            logger.warn(Debug.stackTrace());
             trx.begin();
             //logger.warn( "begin" );
             //logger.warn(Debug.stackTrace());
@@ -133,14 +135,15 @@ public abstract class EmsTransaction {
     }
     
     protected void transactionWrappedRun( UserTransaction trx ) throws Throwable {
+//        logger.warn( "begin2 trx=" + trx.hashCode() );
+//        logger.warn(Debug.stackTrace());
         trx.begin();
         //logger.warn( "begin" );
         //logger.warn(Debug.stackTrace());
         NodeUtil.setInsideTransactionNow( true );
-        
+
         run();
 
-        
         UserTransaction commitTrx = NodeUtil.getTransaction();
         commit( commitTrx );
     }
@@ -153,8 +156,8 @@ public abstract class EmsTransaction {
                                                 SystemException {
         Timer timerCommit = null;
         timerCommit = Timer.startTimer(timerCommit, NodeUtil.timeEvents);
-        //logger.warn( "commit" );
-        //logger.warn(Debug.stackTrace());
+//        logger.warn( "commit with trx=" + trx.hashCode() );
+//        logger.warn(Debug.stackTrace());
         trx.commit();
         Timer.stopTimer(timerCommit, "!!!!! EmsTransaction commit time", NodeUtil.timeEvents);
 
@@ -172,21 +175,19 @@ public abstract class EmsTransaction {
 //                 msg + "\n\t####### ERROR: Need to rollback: " + e.getMessage(),
 //                 HttpServletResponse.SC_INTERNAL_SERVER_ERROR );
             e.printStackTrace();
+//            logger.warn( "try rollback on trx=" + trx.hashCode() );
             trx.rollback();
         } catch ( Throwable ee ) {
-            log( Level.ERROR, "tryRollback(): rollback failed: " + ee.getMessage(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR );
-            // don't send false positive - e.g. rollback already succeeded
-            if (!ee.getMessage().contains( "The transaction has already been rolled back" )) {
-                ee.printStackTrace();
-                String addr = null;
-                try {
-                    addr = Inet4Address.getLocalHost().getHostAddress();
-                } catch ( UnknownHostException e1 ) {
-                    // TODO Auto-generated catch block
-                    e1.printStackTrace();
-                }
-                NodeUtil.sendNotificationEvent( "Transaction did not roll back properly!", "rollback failed on " + addr , services );
+            log( Level.ERROR, "\tryRollback(): rollback failed: " + ee.getMessage(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR );
+            ee.printStackTrace();
+            String addr = null;
+            try {
+                addr = Inet4Address.getLocalHost().getHostAddress();
+            } catch ( UnknownHostException e1 ) {
+                // TODO Auto-generated catch block
+                e1.printStackTrace();
             }
+            NodeUtil.sendNotificationEvent( "Transaction did not roll back properly!", "rollback failed on " + addr , services );
         }
     }
 
