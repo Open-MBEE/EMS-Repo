@@ -131,9 +131,14 @@ public class ProductsWebscript extends AbstractJavaWebScript {
                     // If we are just retrieving the products for a site package, then filter out the ones
                     // that do not have the site package as the first site package parent:
                     if (checkSitePkg) {
-                        if (pkgSite != null &&
-                            pkgSite.equals(findParentPkgSite(node, workspace, dateTime))) {
-                            productsJson.put( node.toJSONObject( workspace, dateTime ) );
+                        try {
+                            if (pkgSite != null &&
+                                pkgSite.equals(findParentPkgSite(node, workspace, dateTime))) {
+                                productsJson.put( node.toJSONObject( workspace, dateTime ) );
+                            }
+                        } catch (org.alfresco.repo.security.permissions.AccessDeniedException e) {
+                            // permission issue
+                            continue;
                         }
                     }
                     else {
