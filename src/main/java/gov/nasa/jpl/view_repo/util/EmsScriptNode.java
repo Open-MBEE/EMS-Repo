@@ -2980,11 +2980,10 @@ public class EmsScriptNode extends ScriptNode implements
         EmsScriptNode projectPkg = null;
         EmsScriptNode models = null;
         EmsScriptNode oldparent = null;
-        String realUser = AuthenticationUtil.getFullyAuthenticatedUser();
         String runAsUser = AuthenticationUtil.getRunAsUser();
-        boolean changeUser = !realUser.equals( runAsUser );
+        boolean changeUser = !ADMIN_USER_NAME.equals( runAsUser );
         if ( changeUser ) {
-            AuthenticationUtil.setRunAsUser( realUser );
+            AuthenticationUtil.setRunAsUser( ADMIN_USER_NAME );
         }
         Set<EmsScriptNode> seen = new HashSet<EmsScriptNode>();
         while ( parent != null && parent.getSysmlId() != null &&
