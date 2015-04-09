@@ -69,6 +69,7 @@ import org.alfresco.model.ContentModel;
 import org.alfresco.repo.content.MimetypeMap;
 import org.alfresco.repo.jscript.ScriptNode;
 import org.alfresco.repo.jscript.ScriptVersion;
+import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.dictionary.AspectDefinition;
 import org.alfresco.service.cmr.dictionary.DataTypeDefinition;
@@ -104,6 +105,8 @@ public class EmsScriptNode extends ScriptNode implements
                                              Comparator< EmsScriptNode >,
                                              Comparable< EmsScriptNode > {
     private static final long serialVersionUID = 9132455162871185541L;
+    
+    public static final String ADMIN_USER_NAME = "admin";
 
     static Logger logger = Logger.getLogger(ScriptNode.class);
 
@@ -309,6 +312,12 @@ public class EmsScriptNode extends ScriptNode implements
 
     public EmsScriptNode childByNamePath( String path, boolean ignoreWorkspace, WorkspaceNode workspace,
                                           boolean onlyWorkspace) {
+        String runAsUser = AuthenticationUtil.getRunAsUser();
+        boolean changeUser = !ADMIN_USER_NAME.equals( runAsUser );
+        if ( changeUser ) {
+            AuthenticationUtil.setRunAsUser( ADMIN_USER_NAME );
+        }
+
         // Make sure this node is in the target workspace.
         EmsScriptNode node = this;
         if ( !ignoreWorkspace && workspace != null && !workspace.equals( getWorkspace() ) ) {
@@ -317,6 +326,9 @@ public class EmsScriptNode extends ScriptNode implements
         // See if the path/child is in this workspace.
         EmsScriptNode child = node.childByNamePath( path );
         if ( child != null && child.exists() ) {
+            if ( changeUser ) {
+                AuthenticationUtil.setRunAsUser( runAsUser );
+            }
             return child;
         }
 
@@ -329,8 +341,14 @@ public class EmsScriptNode extends ScriptNode implements
                 source = source.getWorkspaceSource();
             }
             if ( child != null && child.exists() ) {
+                if ( changeUser ) {
+                    AuthenticationUtil.setRunAsUser( runAsUser );
+                }
                 return child;
             }
+        }
+        if ( changeUser ) {
+            AuthenticationUtil.setRunAsUser( runAsUser );
         }
         return null;
     }
@@ -419,7 +437,18 @@ public class EmsScriptNode extends ScriptNode implements
      */
     @Override
     public EmsScriptNode childByNamePath( String path ) {
+        String runAsUser = AuthenticationUtil.getRunAsUser();
+        boolean changeUser = !ADMIN_USER_NAME.equals( runAsUser );
+        if ( changeUser ) {
+            AuthenticationUtil.setRunAsUser( ADMIN_USER_NAME );
+        }
+
         ScriptNode child = super.childByNamePath( path );
+
+        if ( changeUser ) {
+            AuthenticationUtil.setRunAsUser( runAsUser );
+        }
+
         if ( child == null || !child.exists() ) {
             return null;
         }
@@ -445,6 +474,12 @@ public class EmsScriptNode extends ScriptNode implements
     }
 
     public Set< EmsScriptNode > getChildNodes() {
+        String runAsUser = AuthenticationUtil.getRunAsUser();
+        boolean changeUser = !ADMIN_USER_NAME.equals( runAsUser );
+        if ( changeUser ) {
+            AuthenticationUtil.setRunAsUser( ADMIN_USER_NAME );
+        }
+
         Set< EmsScriptNode > set = new LinkedHashSet< EmsScriptNode >();
         List< ChildAssociationRef > refs =
                 services.getNodeService().getChildAssocs( nodeRef );
@@ -459,6 +494,11 @@ public class EmsScriptNode extends ScriptNode implements
                 }
             }
         }
+
+        if ( changeUser ) {
+            AuthenticationUtil.setRunAsUser( runAsUser );
+        }
+        
         return set;
     }
 
@@ -1209,6 +1249,12 @@ public class EmsScriptNode extends ScriptNode implements
      */
     public EmsScriptNode getOwningParent( Date dateTime, WorkspaceNode ws,
                                           boolean skipNodeRefCheck ) {
+        String runAsUser = AuthenticationUtil.getRunAsUser();
+        boolean changeUser = !EmsScriptNode.ADMIN_USER_NAME.equals( runAsUser );
+        if ( changeUser ) {
+            AuthenticationUtil.setRunAsUser( EmsScriptNode.ADMIN_USER_NAME );
+        }
+        
         EmsScriptNode node = null;
         NodeRef ref = (NodeRef)getNodeRefProperty( "ems:owner", skipNodeRefCheck, dateTime, ws );
         if ( ref == null ) {
@@ -1221,6 +1267,10 @@ public class EmsScriptNode extends ScriptNode implements
             }
         } else {
             node = new EmsScriptNode( ref, getServices() );
+        }
+
+        if ( changeUser ) {
+            AuthenticationUtil.setRunAsUser( runAsUser );
         }
 
         return node;
@@ -1886,6 +1936,12 @@ public class EmsScriptNode extends ScriptNode implements
         // This is currently not called on reified packages, so as long as the ems:owner always points
         // to reified nodes, as it should, then we dont need to replace pkgSuffix in the qname.
 
+        String runAsUser = AuthenticationUtil.getRunAsUser();
+        boolean changeUser = !ADMIN_USER_NAME.equals( runAsUser );
+        if ( changeUser ) {
+            AuthenticationUtil.setRunAsUser( ADMIN_USER_NAME );
+        }
+
         qualifiedName = "/" + getProperty( "sysml:name" );
         qualifiedId =  "/" + getProperty( "sysml:id" );
 
@@ -1925,6 +1981,10 @@ public class EmsScriptNode extends ScriptNode implements
                     siteCharacterizationId = siteNode.getName();
                 }
             }
+        }
+
+        if ( changeUser ) {
+            AuthenticationUtil.setRunAsUser( runAsUser );
         }
 
         if (isName) {
@@ -2397,23 +2457,9 @@ public class EmsScriptNode extends ScriptNode implements
         }
     }
 
-//    public JSONObject toJSONObject( Set< String > filter, boolean b,
-//                                    Date dateTime, boolean includeQualified,
-//                                    Version version ) {
-//            //Version version = versions.get( node.getSysmlId() );
-//            if ( version != null ) {
-//                // TODO: perhaps add service and response in method call rather than using the nodes?
-//                EmsScriptNode changedNode = new EmsScriptNode(version.getVersionedNodeRef(), getServices(), getResponse());
-//
-//                // for reverting need to keep track of noderef and versionLabel
-//                jsonObject.put( "id", changedNode.getId() );
-//                jsonObject.put( "version", version.getVersionLabel() );
-//            }
-//        return null;
-//    }
     /**
      * Convert node into our custom JSONObject. This calls
-     * {@link #toJSONObject2(Set, boolean, Date, boolean)}.
+     * {@link #toJSONObjectImplImpl(Set, boolean, Date, boolean)}.
      * @param isExprOrProp
      *            If true, does not add specialization key, as it is nested call
      *            to process the Expression operand or Property value
@@ -2470,8 +2516,8 @@ public class EmsScriptNode extends ScriptNode implements
         
         boolean tryCache = NodeUtil.doJsonCaching && !isExprOrProp;
         if ( !tryCache ) {
-            json = toJSONObject2( jsonFilter, isExprOrProp, ws, dateTime,
-                                  isIncludeQualified, version );
+            json = toJSONObjectImplImpl( jsonFilter, isExprOrProp, ws, dateTime,
+                                         isIncludeQualified, version );
             if ( Debug.isOn() )
                 Debug.outln( "not trying cache returning json "
                                 + ( json == null ? "null" : json.toString( 4 ) ) );
@@ -2533,7 +2579,7 @@ public class EmsScriptNode extends ScriptNode implements
             ++NodeUtil.jsonCacheHits;
         } else {
             // get full json without filtering
-            json = toJSONObject2( null, isExprOrProp, ws, dateTime, true, version );
+            json = toJSONObjectImplImpl( null, isExprOrProp, ws, dateTime, true, version );
             if ( Debug.isOn() )
                 Debug.outln("json = " + (json==null?"null":json.toString( 4 )));
             if ( tryCache &&
@@ -2609,13 +2655,9 @@ public class EmsScriptNode extends ScriptNode implements
     * @return JSONObject serialization of node
     * @throws JSONException
     */
-//    public JSONObject toJSONObject2( Set< String > filter, boolean isExprOrProp,
-//                                    Date dateTime, boolean isIncludeQualified ) throws JSONException {
-//        return toJSONObject2( filter, isExprOrProp, dateTime, isIncludeQualified, null );
-//    }
-    public JSONObject toJSONObject2( Set< String > filter, boolean isExprOrProp,
-                                     WorkspaceNode ws, Date dateTime, boolean isIncludeQualified,
-                                     Version version  ) throws JSONException {
+    public JSONObject toJSONObjectImplImpl( Set< String > filter, boolean isExprOrProp,
+                                            WorkspaceNode ws, Date dateTime, boolean isIncludeQualified,
+                                            Version version  ) throws JSONException {
         JSONObject element = NodeUtil.newJsonObject();
         if ( !exists() ) return element;
         JSONObject specializationJSON = new JSONObject();
@@ -2903,6 +2945,12 @@ public class EmsScriptNode extends ScriptNode implements
     public EmsScriptNode getSiteNode(Date dateTime, WorkspaceNode ws) {
         if ( siteNode != null ) return siteNode;
 
+        String runAsUser = AuthenticationUtil.getRunAsUser();
+        boolean changeUser = !ADMIN_USER_NAME.equals( runAsUser );
+        if ( changeUser ) {
+            AuthenticationUtil.setRunAsUser( ADMIN_USER_NAME );
+        }
+
         EmsScriptNode parent = this;
         String parentName = parent.getName();
         while ( !parentName.equals( "Models" )) {
@@ -2912,11 +2960,17 @@ public class EmsScriptNode extends ScriptNode implements
             parentName = parent.getName();
             if ( parentName.toLowerCase().equals( "sites" ) ) {
                 siteNode = oldparent;
+                if ( changeUser ) {
+                    AuthenticationUtil.setRunAsUser( runAsUser );
+                }
                 return siteNode;
             }
         }
         // The site is the folder containing the Models folder!
         siteNode = parent.getOwningParent( dateTime, ws, false );
+        if ( changeUser ) {
+            AuthenticationUtil.setRunAsUser( runAsUser );
+        }
         return siteNode;
     }
 
@@ -2926,6 +2980,11 @@ public class EmsScriptNode extends ScriptNode implements
         EmsScriptNode projectPkg = null;
         EmsScriptNode models = null;
         EmsScriptNode oldparent = null;
+        String runAsUser = AuthenticationUtil.getRunAsUser();
+        boolean changeUser = !ADMIN_USER_NAME.equals( runAsUser );
+        if ( changeUser ) {
+            AuthenticationUtil.setRunAsUser( ADMIN_USER_NAME );
+        }
         Set<EmsScriptNode> seen = new HashSet<EmsScriptNode>();
         while ( parent != null && parent.getSysmlId() != null &&
                 !seen.contains( parent ) ) {
@@ -2950,6 +3009,9 @@ public class EmsScriptNode extends ScriptNode implements
                                                      + projectNode.getName() );
                     }
                 }
+                if ( changeUser ) {
+                    AuthenticationUtil.setRunAsUser( runAsUser );
+                }
                 return projectNode;
             }
             seen.add(parent);
@@ -2964,6 +3026,9 @@ public class EmsScriptNode extends ScriptNode implements
                 getResponse().append( msg );
                 getStatus().setCode( HttpServletResponse.SC_INTERNAL_SERVER_ERROR, msg );
             }
+        }
+        if ( changeUser ) {
+            AuthenticationUtil.setRunAsUser( runAsUser );
         }
         return projectPkg;
     }
@@ -3565,6 +3630,22 @@ public class EmsScriptNode extends ScriptNode implements
         return true;
     }
 
+    @Override
+    public boolean hasPermission( String permission ) {
+        String realUser = AuthenticationUtil.getFullyAuthenticatedUser();
+        String runAsUser = AuthenticationUtil.getRunAsUser();
+        boolean changeUser = !realUser.equals( runAsUser );
+        if ( changeUser ) {
+            AuthenticationUtil.setRunAsUser( realUser );
+        }
+        boolean b = super.hasPermission( permission );
+        if ( changeUser ) {
+            AuthenticationUtil.setRunAsUser( runAsUser );
+        }
+        return b;
+    }
+
+    
     public static class EmsScriptNodeComparator implements
                                                Comparator< EmsScriptNode > {
         @Override
@@ -4669,7 +4750,21 @@ public class EmsScriptNode extends ScriptNode implements
         return retVal;
     }
 
+    @Override
+    public Set<QName> getAspectsSet() {
+        String runAsUser = AuthenticationUtil.getRunAsUser();
+        boolean changeUser = !ADMIN_USER_NAME.equals( runAsUser );
+        if ( changeUser ) {
+            AuthenticationUtil.setRunAsUser( ADMIN_USER_NAME );
+        }
+        Set< QName > set = super.getAspectsSet();
+        if ( changeUser ) {
+            AuthenticationUtil.setRunAsUser( runAsUser );
+        }
+        return set;
+    }
 
+    
     public boolean isWorkspace() {
         return hasAspect( "ems:Workspace" );
     }
@@ -5601,6 +5696,12 @@ public class EmsScriptNode extends ScriptNode implements
         EmsScriptNode parent = this;
         EmsScriptNode lastValueSpecParent = null;
         EmsScriptNode lastParent = null;
+
+        String runAsUser = AuthenticationUtil.getRunAsUser();
+        boolean changeUser = !ADMIN_USER_NAME.equals( runAsUser );
+        if ( changeUser ) {
+            AuthenticationUtil.setRunAsUser( ADMIN_USER_NAME );
+        }
         while ( parent != null && ( !parent.hasValueSpecProperty(dateTime, ws) || parent == this ) ) {
             if (Debug.isOn()) Debug.outln("parent = " + parent );
             lastParent = parent;
@@ -5609,6 +5710,11 @@ public class EmsScriptNode extends ScriptNode implements
                 lastValueSpecParent = lastParent;
             }
         }
+        
+        if ( changeUser ) {
+            AuthenticationUtil.setRunAsUser( runAsUser );
+        }
+        
         if ( parent == null ) parent = lastValueSpecParent;
         if (Debug.isOn()) Debug.outln("returning " + parent );
         return parent;
