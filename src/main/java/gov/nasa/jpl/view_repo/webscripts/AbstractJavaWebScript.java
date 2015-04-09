@@ -48,10 +48,12 @@ import java.util.HashMap;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.alfresco.repo.jscript.ScriptNode;
 import org.alfresco.repo.model.Repository;
+import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
@@ -801,6 +803,8 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
     }
 
     
+
+    
     /**
      * Determines the project site for the passed site node.  Also, determines the
      * site package node if applicable.
@@ -809,7 +813,23 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
     public Pair<EmsScriptNode,EmsScriptNode> findProjectSite(String siteName,
                                                              Date dateTime,
                                                              WorkspaceNode workspace,
-                                                             EmsScriptNode initialSiteNode) {
+                                                             EmsScriptNode initialSiteNode) {        
+        String runAsUser = AuthenticationUtil.getRunAsUser();
+        boolean changeUser = !EmsScriptNode.ADMIN_USER_NAME.equals( runAsUser );
+        if ( changeUser ) {
+            AuthenticationUtil.setRunAsUser( EmsScriptNode.ADMIN_USER_NAME );
+        }
+        Pair< EmsScriptNode, EmsScriptNode > p = 
+                findProjectSite2( siteName, dateTime, workspace, initialSiteNode );
+        if ( changeUser ) {
+            AuthenticationUtil.setRunAsUser( runAsUser );
+        }
+        return p;
+    }
+    public Pair<EmsScriptNode,EmsScriptNode> findProjectSite2(String siteName,
+                                                              Date dateTime,
+                                                              WorkspaceNode workspace,
+                                                              EmsScriptNode initialSiteNode) {
 
         EmsScriptNode sitePackageNode = null;
         EmsScriptNode siteNode = null;
@@ -920,6 +940,19 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
      * @return
      */
     public EmsScriptNode findParentPkgSite(EmsScriptNode node, WorkspaceNode workspace,
+                                           Date dateTime) {
+        String runAsUser = AuthenticationUtil.getRunAsUser();
+        boolean changeUser = !EmsScriptNode.ADMIN_USER_NAME.equals( runAsUser );
+        if ( changeUser ) {
+            AuthenticationUtil.setRunAsUser( EmsScriptNode.ADMIN_USER_NAME );
+        }
+        EmsScriptNode n = findParentPkgSite2( node, workspace, dateTime );
+        if ( changeUser ) {
+            AuthenticationUtil.setRunAsUser( runAsUser );
+        }
+        return n;
+    }
+    public EmsScriptNode findParentPkgSite2(EmsScriptNode node, WorkspaceNode workspace,
                                            Date dateTime) {
 
         EmsScriptNode pkgSiteParentNode = null;
