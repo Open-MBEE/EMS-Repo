@@ -1198,7 +1198,6 @@ public class EmsScriptNode extends ScriptNode implements
         return new EmsScriptNode( myParent.getNodeRef(), services, response );
     }
 
-
     /**
      * Return the version of the parent at a specific time. This uses the
      * ems:owner property instead of getParent() when it returns non-null; else,
@@ -1209,7 +1208,22 @@ public class EmsScriptNode extends ScriptNode implements
      */
     public EmsScriptNode getOwningParent( Date dateTime, WorkspaceNode ws,
                                           boolean skipNodeRefCheck ) {
+        return getOwningParent(dateTime, ws, skipNodeRefCheck, false);
+    }
+
+    /**
+     * Return the version of the parent at a specific time. This uses the
+     * ems:owner property instead of getParent() when it returns non-null; else,
+     * it call getParent().
+     *
+     * @param dateTime
+     * @return the parent/owning node
+     */
+    public EmsScriptNode getOwningParent( Date dateTime, WorkspaceNode ws,
+                                          boolean skipNodeRefCheck,
+                                          boolean checkVersionedNode) {
         EmsScriptNode node = null;
+
         NodeRef ref = (NodeRef)getNodeRefProperty( "ems:owner", skipNodeRefCheck, dateTime, ws );
         if ( ref == null ) {
             node = getParent();
@@ -1223,6 +1237,21 @@ public class EmsScriptNode extends ScriptNode implements
             node = new EmsScriptNode( ref, getServices() );
         }
 
+        // If its a version node, then it doesnt have a parent association, so if it does
+        // not have a owner, then we should return the non-versioned current node:
+        if (checkVersionedNode && !skipNodeRefCheck) {
+            VersionService vs = getServices().getVersionService();
+            
+            if (vs.isAVersion( node.nodeRef ) &&
+                node.getNodeRefProperty( "ems:owner", dateTime, ws ) == null) {
+                
+                logger.warn( "getOwningParent: The node "+node+" is a versioned node and doesn't have a owner.  Returning the current node instead." );
+                NodeRef currentRef = node.normalizedNodeRef();
+                if (currentRef != null) {
+                    node = new EmsScriptNode( currentRef, getServices() );
+                }
+            }
+        }
         return node;
     }
 
@@ -1889,7 +1918,7 @@ public class EmsScriptNode extends ScriptNode implements
         qualifiedName = "/" + getProperty( "sysml:name" );
         qualifiedId =  "/" + getProperty( "sysml:id" );
 
-        EmsScriptNode owner = this.getOwningParent(dateTime, ws, false );
+        EmsScriptNode owner = this.getOwningParent(dateTime, ws, false, true );
         String ownerName = owner != null ? owner.getName() : null;
 
         // Need to look up based on owner b/c the parent associations are not versioned,
@@ -1910,14 +1939,14 @@ public class EmsScriptNode extends ScriptNode implements
             }
             qualifiedId = "/" + idProp + qualifiedId;
 
-            owner = owner.getOwningParent(dateTime, ws, false );
+            owner = owner.getOwningParent(dateTime, ws, false, true );
             ownerName = owner != null ? owner.getName() : null;
         }
         
         // Get the site, which is one up from the Models node:
         EmsScriptNode modelNode = (owner != null && ownerName.equals( "Models" )) ? owner : null;
         if (modelNode != null) {
-            EmsScriptNode siteNode = modelNode.getOwningParent(dateTime, ws, false );
+            EmsScriptNode siteNode = modelNode.getOwningParent(dateTime, ws, false, true );
             if (siteNode != null) {
                 qualifiedName = "/" + siteNode.getName() + qualifiedName;
                 qualifiedId = "/" + siteNode.getName() + qualifiedId;
@@ -2907,7 +2936,7 @@ public class EmsScriptNode extends ScriptNode implements
         String parentName = parent.getName();
         while ( !parentName.equals( "Models" )) {
             EmsScriptNode oldparent = parent;
-            parent = oldparent.getOwningParent( dateTime, ws, false );
+            parent = oldparent.getOwningParent( dateTime, ws, false, true );
             if ( parent == null ) return null; // site not found!
             parentName = parent.getName();
             if ( parentName.toLowerCase().equals( "sites" ) ) {
@@ -2916,7 +2945,7 @@ public class EmsScriptNode extends ScriptNode implements
             }
         }
         // The site is the folder containing the Models folder!
-        siteNode = parent.getOwningParent( dateTime, ws, false );
+        siteNode = parent.getOwningParent( dateTime, ws, false, true );
         return siteNode;
     }
 

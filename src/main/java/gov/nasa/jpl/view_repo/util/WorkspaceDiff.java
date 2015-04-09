@@ -244,7 +244,7 @@ public class WorkspaceDiff implements Serializable {
                     String parentId = id;
                     while ( parent != null && parent.isModelElement() ) {
                         elements.put( parentId, parent );
-                        parent = parent.getOwningParent( getTimestamp1(), getWs1(), false );
+                        parent = parent.getOwningParent( getTimestamp1(), getWs1(), false, true );
                         parentId = parent.getSysmlId();
                     }
                 }
