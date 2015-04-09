@@ -444,6 +444,12 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
         return getSiteName( req, false );
     }
     public String getSiteName( WebScriptRequest req, boolean createIfNonexistent ) {
+        String runAsUser = AuthenticationUtil.getRunAsUser();
+        boolean changeUser = !EmsScriptNode.ADMIN_USER_NAME.equals( runAsUser );
+        if ( changeUser ) {
+            AuthenticationUtil.setRunAsUser( EmsScriptNode.ADMIN_USER_NAME );
+        }
+
         String siteName = req.getServiceMatch().getTemplateVars().get(SITE_NAME);
         if ( siteName == null ) {
             siteName = req.getServiceMatch().getTemplateVars().get(SITE_NAME2);
@@ -451,6 +457,11 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
         if ( siteName == null || siteName.length() <= 0 ) {
             siteName = NO_SITE_ID;
         }
+
+        if ( changeUser ) {
+            AuthenticationUtil.setRunAsUser( runAsUser );
+        }
+
         if ( createIfNonexistent ) {
             WorkspaceNode workspace = getWorkspace( req );
             createSite( siteName, workspace );

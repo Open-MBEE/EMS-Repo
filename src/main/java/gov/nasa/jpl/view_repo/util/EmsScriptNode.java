@@ -437,7 +437,18 @@ public class EmsScriptNode extends ScriptNode implements
      */
     @Override
     public EmsScriptNode childByNamePath( String path ) {
+        String runAsUser = AuthenticationUtil.getRunAsUser();
+        boolean changeUser = !ADMIN_USER_NAME.equals( runAsUser );
+        if ( changeUser ) {
+            AuthenticationUtil.setRunAsUser( ADMIN_USER_NAME );
+        }
+
         ScriptNode child = super.childByNamePath( path );
+
+        if ( changeUser ) {
+            AuthenticationUtil.setRunAsUser( runAsUser );
+        }
+
         if ( child == null || !child.exists() ) {
             return null;
         }
@@ -463,6 +474,12 @@ public class EmsScriptNode extends ScriptNode implements
     }
 
     public Set< EmsScriptNode > getChildNodes() {
+        String runAsUser = AuthenticationUtil.getRunAsUser();
+        boolean changeUser = !ADMIN_USER_NAME.equals( runAsUser );
+        if ( changeUser ) {
+            AuthenticationUtil.setRunAsUser( ADMIN_USER_NAME );
+        }
+
         Set< EmsScriptNode > set = new LinkedHashSet< EmsScriptNode >();
         List< ChildAssociationRef > refs =
                 services.getNodeService().getChildAssocs( nodeRef );
@@ -477,6 +494,11 @@ public class EmsScriptNode extends ScriptNode implements
                 }
             }
         }
+
+        if ( changeUser ) {
+            AuthenticationUtil.setRunAsUser( runAsUser );
+        }
+        
         return set;
     }
 
