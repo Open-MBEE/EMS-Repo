@@ -2980,6 +2980,12 @@ public class EmsScriptNode extends ScriptNode implements
         EmsScriptNode projectPkg = null;
         EmsScriptNode models = null;
         EmsScriptNode oldparent = null;
+        String realUser = AuthenticationUtil.getFullyAuthenticatedUser();
+        String runAsUser = AuthenticationUtil.getRunAsUser();
+        boolean changeUser = !realUser.equals( runAsUser );
+        if ( changeUser ) {
+            AuthenticationUtil.setRunAsUser( realUser );
+        }
         Set<EmsScriptNode> seen = new HashSet<EmsScriptNode>();
         while ( parent != null && parent.getSysmlId() != null &&
                 !seen.contains( parent ) ) {
@@ -3004,6 +3010,9 @@ public class EmsScriptNode extends ScriptNode implements
                                                      + projectNode.getName() );
                     }
                 }
+                if ( changeUser ) {
+                    AuthenticationUtil.setRunAsUser( runAsUser );
+                }
                 return projectNode;
             }
             seen.add(parent);
@@ -3018,6 +3027,9 @@ public class EmsScriptNode extends ScriptNode implements
                 getResponse().append( msg );
                 getStatus().setCode( HttpServletResponse.SC_INTERNAL_SERVER_ERROR, msg );
             }
+        }
+        if ( changeUser ) {
+            AuthenticationUtil.setRunAsUser( runAsUser );
         }
         return projectPkg;
     }
