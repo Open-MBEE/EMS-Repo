@@ -1249,6 +1249,12 @@ public class EmsScriptNode extends ScriptNode implements
      */
     public EmsScriptNode getOwningParent( Date dateTime, WorkspaceNode ws,
                                           boolean skipNodeRefCheck ) {
+        String runAsUser = AuthenticationUtil.getRunAsUser();
+        boolean changeUser = !EmsScriptNode.ADMIN_USER_NAME.equals( runAsUser );
+        if ( changeUser ) {
+            AuthenticationUtil.setRunAsUser( EmsScriptNode.ADMIN_USER_NAME );
+        }
+        
         EmsScriptNode node = null;
         NodeRef ref = (NodeRef)getNodeRefProperty( "ems:owner", skipNodeRefCheck, dateTime, ws );
         if ( ref == null ) {
@@ -1261,6 +1267,10 @@ public class EmsScriptNode extends ScriptNode implements
             }
         } else {
             node = new EmsScriptNode( ref, getServices() );
+        }
+
+        if ( changeUser ) {
+            AuthenticationUtil.setRunAsUser( runAsUser );
         }
 
         return node;
@@ -2447,23 +2457,9 @@ public class EmsScriptNode extends ScriptNode implements
         }
     }
 
-//    public JSONObject toJSONObject( Set< String > filter, boolean b,
-//                                    Date dateTime, boolean includeQualified,
-//                                    Version version ) {
-//            //Version version = versions.get( node.getSysmlId() );
-//            if ( version != null ) {
-//                // TODO: perhaps add service and response in method call rather than using the nodes?
-//                EmsScriptNode changedNode = new EmsScriptNode(version.getVersionedNodeRef(), getServices(), getResponse());
-//
-//                // for reverting need to keep track of noderef and versionLabel
-//                jsonObject.put( "id", changedNode.getId() );
-//                jsonObject.put( "version", version.getVersionLabel() );
-//            }
-//        return null;
-//    }
     /**
      * Convert node into our custom JSONObject. This calls
-     * {@link #toJSONObject2(Set, boolean, Date, boolean)}.
+     * {@link #toJSONObjectImplImpl(Set, boolean, Date, boolean)}.
      * @param isExprOrProp
      *            If true, does not add specialization key, as it is nested call
      *            to process the Expression operand or Property value
@@ -2520,8 +2516,8 @@ public class EmsScriptNode extends ScriptNode implements
         
         boolean tryCache = NodeUtil.doJsonCaching && !isExprOrProp;
         if ( !tryCache ) {
-            json = toJSONObject2( jsonFilter, isExprOrProp, ws, dateTime,
-                                  isIncludeQualified, version );
+            json = toJSONObjectImplImpl( jsonFilter, isExprOrProp, ws, dateTime,
+                                         isIncludeQualified, version );
             if ( Debug.isOn() )
                 Debug.outln( "not trying cache returning json "
                                 + ( json == null ? "null" : json.toString( 4 ) ) );
@@ -2583,7 +2579,7 @@ public class EmsScriptNode extends ScriptNode implements
             ++NodeUtil.jsonCacheHits;
         } else {
             // get full json without filtering
-            json = toJSONObject2( null, isExprOrProp, ws, dateTime, true, version );
+            json = toJSONObjectImplImpl( null, isExprOrProp, ws, dateTime, true, version );
             if ( Debug.isOn() )
                 Debug.outln("json = " + (json==null?"null":json.toString( 4 )));
             if ( tryCache &&
@@ -2659,13 +2655,9 @@ public class EmsScriptNode extends ScriptNode implements
     * @return JSONObject serialization of node
     * @throws JSONException
     */
-//    public JSONObject toJSONObject2( Set< String > filter, boolean isExprOrProp,
-//                                    Date dateTime, boolean isIncludeQualified ) throws JSONException {
-//        return toJSONObject2( filter, isExprOrProp, dateTime, isIncludeQualified, null );
-//    }
-    public JSONObject toJSONObject2( Set< String > filter, boolean isExprOrProp,
-                                     WorkspaceNode ws, Date dateTime, boolean isIncludeQualified,
-                                     Version version  ) throws JSONException {
+    public JSONObject toJSONObjectImplImpl( Set< String > filter, boolean isExprOrProp,
+                                            WorkspaceNode ws, Date dateTime, boolean isIncludeQualified,
+                                            Version version  ) throws JSONException {
         JSONObject element = NodeUtil.newJsonObject();
         if ( !exists() ) return element;
         JSONObject specializationJSON = new JSONObject();

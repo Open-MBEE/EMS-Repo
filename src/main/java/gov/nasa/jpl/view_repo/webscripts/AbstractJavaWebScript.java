@@ -831,16 +831,16 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
             AuthenticationUtil.setRunAsUser( EmsScriptNode.ADMIN_USER_NAME );
         }
         Pair< EmsScriptNode, EmsScriptNode > p = 
-                findProjectSite2( siteName, dateTime, workspace, initialSiteNode );
+                findProjectSiteImpl( siteName, dateTime, workspace, initialSiteNode );
         if ( changeUser ) {
             AuthenticationUtil.setRunAsUser( runAsUser );
         }
         return p;
     }
-    public Pair<EmsScriptNode,EmsScriptNode> findProjectSite2(String siteName,
-                                                              Date dateTime,
-                                                              WorkspaceNode workspace,
-                                                              EmsScriptNode initialSiteNode) {
+    public Pair<EmsScriptNode,EmsScriptNode> findProjectSiteImpl(String siteName,
+                                                                 Date dateTime,
+                                                                 WorkspaceNode workspace,
+                                                                 EmsScriptNode initialSiteNode) {
 
         EmsScriptNode sitePackageNode = null;
         EmsScriptNode siteNode = null;
@@ -950,21 +950,23 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
      * @param workspace
      * @return
      */
-    public EmsScriptNode findParentPkgSite(EmsScriptNode node, WorkspaceNode workspace,
+    public EmsScriptNode findParentPkgSite(EmsScriptNode node,
+                                           WorkspaceNode workspace,
                                            Date dateTime) {
         String runAsUser = AuthenticationUtil.getRunAsUser();
         boolean changeUser = !EmsScriptNode.ADMIN_USER_NAME.equals( runAsUser );
         if ( changeUser ) {
             AuthenticationUtil.setRunAsUser( EmsScriptNode.ADMIN_USER_NAME );
         }
-        EmsScriptNode n = findParentPkgSite2( node, workspace, dateTime );
+        EmsScriptNode n = findParentPkgSiteImpl( node, workspace, dateTime );
         if ( changeUser ) {
             AuthenticationUtil.setRunAsUser( runAsUser );
         }
         return n;
     }
-    public EmsScriptNode findParentPkgSite2(EmsScriptNode node, WorkspaceNode workspace,
-                                           Date dateTime) {
+    public EmsScriptNode findParentPkgSiteImpl(EmsScriptNode node,
+                                               WorkspaceNode workspace,
+                                               Date dateTime) {
 
         EmsScriptNode pkgSiteParentNode = null;
         // Note: must walk up using the getOwningParent() b/c getParent() does not work
