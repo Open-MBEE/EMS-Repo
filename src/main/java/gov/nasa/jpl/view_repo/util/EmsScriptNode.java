@@ -69,6 +69,7 @@ import org.alfresco.model.ContentModel;
 import org.alfresco.repo.content.MimetypeMap;
 import org.alfresco.repo.jscript.ScriptNode;
 import org.alfresco.repo.jscript.ScriptVersion;
+import org.alfresco.repo.version.Version2Model;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.dictionary.AspectDefinition;
 import org.alfresco.service.cmr.dictionary.DataTypeDefinition;
@@ -1210,6 +1211,15 @@ public class EmsScriptNode extends ScriptNode implements
                                           boolean skipNodeRefCheck ) {
         return getOwningParent(dateTime, ws, skipNodeRefCheck, false);
     }
+    
+    public boolean isAVersion() {
+        
+        VersionService vs = services.getVersionService();
+        return vs.isAVersion( nodeRef ) || 
+               nodeRef.getStoreRef().getIdentifier().equals( Version2Model.STORE_ID );
+               
+        
+    }
 
     /**
      * Return the version of the parent at a specific time. This uses the
@@ -1240,9 +1250,7 @@ public class EmsScriptNode extends ScriptNode implements
         // If its a version node, then it doesnt have a parent association, so if it does
         // not have a owner, then we should return the non-versioned current node:
         if (checkVersionedNode && !skipNodeRefCheck) {
-            VersionService vs = getServices().getVersionService();
-            
-            if (vs.isAVersion( node.nodeRef ) &&
+            if (node.isAVersion() &&
                 node.getNodeRefProperty( "ems:owner", dateTime, ws ) == null) {
                 
                 logger.warn( "getOwningParent: The node "+node+" is a versioned node and doesn't have a owner.  Returning the current node instead." );
@@ -1364,11 +1372,6 @@ public class EmsScriptNode extends ScriptNode implements
             }
         }
         return currentVersion;
-    }
-
-    public boolean isAVersion() {
-        VersionService versionService = services.getVersionService();
-        return versionService.isAVersion( getNodeRef() );
     }
 
     public boolean checkNodeRefVersion2( Date dateTime ) {
