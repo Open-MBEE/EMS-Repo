@@ -150,8 +150,8 @@ public class SiteGet extends AbstractJavaWebScript {
                 	emsNode = new EmsScriptNode(siteRef, services);
                 	// skip if doesn't have Models directory or if no site characterization
                 	if (!emsNode.hasPermission( PermissionService.READ )) continue;
-                	if (emsNode.childByNamePath( "Models" ) == null                	        
-                	        && !emsNode.hasAspect(Acm.ACM_SITE) ) continue;
+//                	if (emsNode.childByNamePath( "Models" ) == null                	        
+//                	        && !emsNode.hasAspect(Acm.ACM_SITE) ) continue;
                 	name = emsNode.getName();
                 	try {
                 	    parentRef = (NodeRef)emsNode.getPropertyAtTime(Acm.ACM_SITE_PARENT, dateTime);

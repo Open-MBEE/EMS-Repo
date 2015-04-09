@@ -22,7 +22,7 @@ CURL_GET_FLAGS = "-X GET"
 CURL_DELETE_FLAGS = "-X DELETE"
 CURL_USER = " -u admin:admin"
 CURL_FLAGS = CURL_STATUS+CURL_USER
-HOST = "localhost:8080" 
+HOST = "localhost:9093" 
 SERVICE_URL = "http://%s/alfresco/service/"%HOST
 BASE_URL_WS_NOBS = SERVICE_URL+"workspaces"
 BASE_URL_WS = BASE_URL_WS_NOBS+"/"
@@ -208,9 +208,9 @@ def set_wsid_to_gv6():
 def set_read_to_gv(gv):
     '''Get the json output, and sets gvi to the read time'''
     json_output = get_json_output_no_status()
-    print("json_output=" + str(json_output))
+    #print("json_output=" + str(json_output))
     j = json.loads(json_output)
-    print("j=" + str(j))
+    #print("j=" + str(j))
     
     if j:
         if gv == 1:

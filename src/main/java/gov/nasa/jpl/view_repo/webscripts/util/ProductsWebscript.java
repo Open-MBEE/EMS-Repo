@@ -8,7 +8,6 @@ import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 import gov.nasa.jpl.view_repo.webscripts.AbstractJavaWebScript;
-import gov.nasa.jpl.view_repo.webscripts.ModelPost;
 import gov.nasa.jpl.view_repo.webscripts.SnapshotGet;
 
 import java.util.Collection;
@@ -143,7 +142,7 @@ public class ProductsWebscript extends AbstractJavaWebScript {
                     }
                     else {
                         String nodeSiteName = node.getSiteCharacterizationId(dateTime, workspace);
-                        if (nodeSiteName != null && siteNode.getName().indexOf( nodeSiteName) >= 0) {
+                        if (nodeSiteName != null && siteNode.getName().equals( nodeSiteName)) {
                             productsJson.put( node.toJSONObject( workspace, dateTime ) );
                         } else if (nodeSiteName == null) {
                             if (logger.isInfoEnabled()) { 
