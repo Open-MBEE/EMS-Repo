@@ -2,7 +2,6 @@ package gov.nasa.jpl.view_repo.webscripts.util;
 
 import gov.nasa.jpl.mbee.util.Pair;
 import gov.nasa.jpl.mbee.util.TimeUtils;
-import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.sysml.View;
 import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
@@ -14,7 +13,6 @@ import gov.nasa.jpl.view_repo.webscripts.SnapshotGet;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -47,10 +45,6 @@ public class ProductsWebscript extends AbstractJavaWebScript {
 
     public boolean simpleJson = false;
     private EmsScriptNode sitePackageNode = null;
-    
-    // Cached keyed by Workspace, Timestamp, then Site to the JSON
-    private Map<String, Map<String, Map<String, JSONArray>>> productCache = 
-            new HashMap<String, Map<String, Map<String, JSONArray>>>(); 
 
     public ProductsWebscript( Repository repository, ServiceRegistry services,
                               StringBuffer response ) {
@@ -117,20 +111,7 @@ public class ProductsWebscript extends AbstractJavaWebScript {
         String timestamp = req.getParameter( "timestamp" );
         Date dateTime = TimeUtils.dateFromTimestamp( timestamp );
         WorkspaceNode workspace = getWorkspace( req );
-        String workspaceId = NodeUtil.getWorkspaceId( workspace, false );
 
-        // check if it's already in the cache
-        String siteName = siteNode.getName();
-        if (timestamp != null) {
-            
-            productsJson = Utils.get(productCache, workspaceId, timestamp, siteName);
-            if (productsJson != null) {
-                return productsJson;
-            } else {
-                productsJson = new JSONArray();
-            }
-        }
-        
         // Search for all products within the project site:
         // don't specify a site, since this is running into issues and filter later
         Map< String, EmsScriptNode > nodeList = searchForElements(NodeUtil.SearchType.ASPECT.prefix,
@@ -138,6 +119,7 @@ public class ProductsWebscript extends AbstractJavaWebScript {
                                                                 workspace, dateTime,
                                                                 null);
         if (nodeList != null) {
+
             boolean checkSitePkg = (sitePackageNode != null && sitePackageNode.exists());
             // Get the alfresco Site for the site package node:
             EmsScriptNode pkgSite = checkSitePkg ? getSiteForPkgSite(sitePackageNode, dateTime, workspace) : null;
@@ -147,13 +129,11 @@ public class ProductsWebscript extends AbstractJavaWebScript {
                 if (node != null) {
                     // If we are just retrieving the products for a site package, then filter out the ones
                     // that do not have the site package as the first site package parent:
-                    JSONObject nodeJson = node.toJSONObject(workspace, dateTime);;
-                    String nodeSiteName = node.getSiteCharacterizationId(dateTime, workspace);
                     if (checkSitePkg) {
                         try {
                             if (pkgSite != null &&
                                 pkgSite.equals(findParentPkgSite(node, workspace, dateTime))) {
-                                productsJson.put( nodeJson );
+                                productsJson.put( node.toJSONObject( workspace, dateTime ) );
                             }
                         } catch (org.alfresco.repo.security.permissions.AccessDeniedException e) {
                             // permission issue
@@ -161,8 +141,9 @@ public class ProductsWebscript extends AbstractJavaWebScript {
                         }
                     }
                     else {
-                        if (nodeSiteName != null && siteName.equals( nodeSiteName)) {
-                            productsJson.put( nodeJson );
+                        String nodeSiteName = node.getSiteCharacterizationId(dateTime, workspace);
+                        if (nodeSiteName != null && siteNode.getName().equals( nodeSiteName)) {
+                            productsJson.put( node.toJSONObject( workspace, dateTime ) );
                         } else if (nodeSiteName == null) {
                             if (logger.isInfoEnabled()) { 
                                 logger.info( String.format("couldn't get node site name for sysmlid[%s] id[%s]",
@@ -170,17 +151,6 @@ public class ProductsWebscript extends AbstractJavaWebScript {
                             }
                         }
                     }
-
-                    if (timestamp != null) {
-                        JSONArray siteCache = Utils.get( productCache, workspaceId, timestamp, nodeSiteName );
-                        if (siteCache == null) {
-                            siteCache = new JSONArray();
-                            Utils.put( productCache, workspaceId, timestamp, nodeSiteName, siteCache);
-                        }
-                        
-                        siteCache.put( nodeJson );
-                    }
-                    
                 }
             }
         }
