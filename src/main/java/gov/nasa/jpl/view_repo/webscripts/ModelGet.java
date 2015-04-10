@@ -44,6 +44,7 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.log4j.*;
 import org.alfresco.repo.model.Repository;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
@@ -101,7 +102,7 @@ public class ModelGet extends AbstractJavaWebScript {
 	    }
 
 		if (modelId == null) {
-			log(LogLevel.ERROR, "Element id not specified.\n", HttpServletResponse.SC_BAD_REQUEST);
+			log(Level.ERROR, HttpServletResponse.SC_BAD_REQUEST, "Element id not specified.\n");
 			return false;
 		}
 
@@ -118,10 +119,9 @@ public class ModelGet extends AbstractJavaWebScript {
             if ( wsId != null && wsId.equalsIgnoreCase( "master" ) ) {
                 wsFound = true;
             } else {
-                log( LogLevel.ERROR,
-                     "Workspace with id, " + wsId
-                     + ( dateTime == null ? "" : " at " + dateTime ) + " not found",
-                     HttpServletResponse.SC_NOT_FOUND );
+                log( Level.ERROR, HttpServletResponse.SC_NOT_FOUND, 
+                     "Workspace with id, %s not found", wsId
+                     + ( dateTime == null ? "" : " at " + dateTime ));
                 return false;
             }
         }
@@ -131,10 +131,9 @@ public class ModelGet extends AbstractJavaWebScript {
         if ( wsFound ) modelRootNode = findScriptNodeById(modelId, workspace, dateTime, findDeleted);
 
 		if (modelRootNode == null || modelRootNode.isDeleted() ) {
-            log( LogLevel.WARNING,
-                 "Element with id, " + modelId
-                 + ( dateTime == null ? "" : " at " + dateTime ) + " not found",
-                 HttpServletResponse.SC_NOT_FOUND );
+            log( Level.WARN,  HttpServletResponse.SC_NOT_FOUND,
+                 "Element with id, %s not found", modelId
+                 + ( dateTime == null ? "" : " at " + dateTime ));
 			return false;
 		}
 
@@ -183,15 +182,15 @@ public class ModelGet extends AbstractJavaWebScript {
 		    if (elementsJson.length() > 0) {
 		        top.put("elements", elementsJson);
 		    } else {
-		        log(LogLevel.WARNING, "No elements found",
-		            HttpServletResponse.SC_NOT_FOUND);
+		        log(Level.WARN, HttpServletResponse.SC_NOT_FOUND, "No elements found");
+		        //model.put("res", response.toString());
 		    }
 	        if (!Utils.isNullOrEmpty(response.toString())) top.put("message", response.toString());
 	        if ( prettyPrint ) model.put("res", NodeUtil.jsonToString( top, 4 ));
 	        else model.put("res", NodeUtil.jsonToString( top ));
 		} catch (JSONException e) {
-            log(LogLevel.ERROR, "Could not create JSONObject", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            model.put( "res", createResponseJson() );
+            log(Level.ERROR, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Could not create JSONObject");
+			model.put( "res", createResponseJson() );
 			e.printStackTrace();
 		}
 
@@ -200,7 +199,8 @@ public class ModelGet extends AbstractJavaWebScript {
         printFooter();
 
         if (logger.isInfoEnabled()) {
-            logger.info( "ModelGet: " + timer );
+            log( Level.INFO, "ModelGet: %s", timer );
+            // logger.info( "ModelGet: " + timer );
         }
 
 		return model;
@@ -225,7 +225,7 @@ public class ModelGet extends AbstractJavaWebScript {
             }
 
             if (null == modelId) {
-                log(LogLevel.ERROR, "Could not find element " + modelId, HttpServletResponse.SC_NOT_FOUND );
+                log(Level.ERROR, HttpServletResponse.SC_NOT_FOUND, "Could not find element %s", modelId);
                 return new JSONArray();
             }
 
@@ -243,10 +243,9 @@ public class ModelGet extends AbstractJavaWebScript {
             if (Debug.isOn()) System.out.println("modelRootNode = " + modelRootNode );
 
             if ( modelRootNode == null ) {
-                    log( LogLevel.ERROR,
-                         "Element " + modelId
-                         + ( dateTime == null ? "" : " at " + dateTime ) + " not found",
-                         HttpServletResponse.SC_NOT_FOUND );
+                    log( Level.ERROR, HttpServletResponse.SC_NOT_FOUND,
+                         "Element %s not found", modelId
+                         + ( dateTime == null ? "" : " at " + dateTime ));
                     return new JSONArray();
             }
 
@@ -257,8 +256,7 @@ public class ModelGet extends AbstractJavaWebScript {
                     depth = Long.parseLong( req.getParameter("depth") );
                 } catch (NumberFormatException nfe) {
                     // don't do any recursion, ignore the depth
-                    log(LogLevel.WARNING, "Bad depth specified, returning depth 0",
-                        HttpServletResponse.SC_BAD_REQUEST);
+                    log(Level.WARN, HttpServletResponse.SC_BAD_REQUEST, "Bad depth specified, returning depth 0");
                 }
             }
             // recurse default is false
@@ -308,11 +306,9 @@ public class ModelGet extends AbstractJavaWebScript {
                         elementsFound.put( id, childElement );
                     } // TODO -- REVIEW -- Warning if no permissions?
     				} else {
-                    log( LogLevel.WARNING,
-                         "Element " + id
-                         + ( dateTime == null ? "" : " at " + dateTime )
-                         + " not found",
-                         HttpServletResponse.SC_NOT_FOUND );
+                    log( Level.WARN, HttpServletResponse.SC_NOT_FOUND,
+                         "Element %s not found", id
+                         + ( dateTime == null ? "" : " at " + dateTime ));
     				}
 			}
 			if (maxDepth != null && (maxDepth < 0 || currDepth < maxDepth)) {
@@ -331,11 +327,8 @@ public class ModelGet extends AbstractJavaWebScript {
 					                                 maxDepth, currDepth );
 					        } // TODO -- REVIEW -- Warning if no permissions?
 						} else {
-		                    log( LogLevel.WARNING,
-		                         "Element " + id
-		                         + ( dateTime == null ? "" : " at " + dateTime )
-                                 + " not found",
-                                 HttpServletResponse.SC_NOT_FOUND );
+		                    log( Level.WARN,  HttpServletResponse.SC_NOT_FOUND,
+		                         "Element %s not found", id + ( dateTime == null ? "" : " at " + dateTime ));
 						}
 					}
 				}
@@ -392,6 +385,7 @@ public class ModelGet extends AbstractJavaWebScript {
 		    }
 
 		    // Handle all the children in this workspace:
+
 		    for ( NodeRef childRef : root.getOwnedChildren(false, dateTime, workspace) ) {
                 if ( childRef == null ) continue;
                 EmsScriptNode child = new EmsScriptNode( childRef, services, response );

@@ -39,6 +39,7 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.log4j.*;
 import org.alfresco.repo.model.Repository;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.security.PermissionService;
@@ -84,10 +85,10 @@ public class ModelPut extends ModelPost {
             instance.createOrUpdateModel(req, status);
             appendResponseStatusInfo(instance);
         } catch (JSONException e) {
-            log(LogLevel.ERROR, "JSON malformed\n", HttpServletResponse.SC_BAD_REQUEST);
+            log(Level.ERROR, HttpServletResponse.SC_BAD_REQUEST, "JSON malformed\n");
             e.printStackTrace();
         } catch (Exception e) {
-            log(LogLevel.ERROR, "Internal error stack trace:\n" + e.getLocalizedMessage() + "\n", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            log(Level.ERROR, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Internal error stack trace:\n %s \n", e.getLocalizedMessage() );
             e.printStackTrace();
         }
 
@@ -122,7 +123,7 @@ public class ModelPut extends ModelPost {
                     if (elementNode != null) {
                         elementNode.setProperty(Acm.ACM_ID, newId);
                     } else {
-                        log(LogLevel.WARNING, "Element not found with id: " + oldId, HttpServletResponse.SC_BAD_REQUEST);
+                        log(Level.WARN, HttpServletResponse.SC_BAD_REQUEST,  "Element not found with id: %s", oldId);
                     }
                 }
             }

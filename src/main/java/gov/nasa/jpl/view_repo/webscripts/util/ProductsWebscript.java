@@ -20,6 +20,7 @@ import java.util.Set;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.log4j.*;
 import org.alfresco.repo.model.Repository;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
@@ -63,7 +64,7 @@ public class ProductsWebscript extends AbstractJavaWebScript {
         String siteName = getSiteName(req);
 
         if (!NodeUtil.exists( mySiteNode )) {
-            log(LogLevel.WARNING, "Could not find site", HttpServletResponse.SC_NOT_FOUND);
+            log(Level.WARN, HttpServletResponse.SC_NOT_FOUND, "Could not find site");
             return productsJson;
         }
 
@@ -87,7 +88,7 @@ public class ProductsWebscript extends AbstractJavaWebScript {
                 EmsScriptNode configNode = new EmsScriptNode(configNodeRef, services);
                 return handleConfigurationProducts(req, configNode);
             } else {
-                log(LogLevel.WARNING, "Could not find configuration with id " + configurationId, HttpServletResponse.SC_NOT_FOUND);
+                log(Level.WARN, HttpServletResponse.SC_NOT_FOUND, "Could not find configuration with id %s", configurationId);
                 return productsJson;
             }
         }
@@ -214,8 +215,8 @@ public class ProductsWebscript extends AbstractJavaWebScript {
         EmsScriptNode product = findScriptNodeById( productId, workspace, dateTime, false );
 
         if ( product == null ) {
-            log( LogLevel.ERROR, "Product not found with ID: " + productId,
-                 HttpServletResponse.SC_NOT_FOUND );
+            log( Level.ERROR,
+                 HttpServletResponse.SC_NOT_FOUND, "Product not found with ID: %s", productId);
         }
 
         if ( checkPermissions( product, PermissionService.READ ) ) {
@@ -247,8 +248,8 @@ public class ProductsWebscript extends AbstractJavaWebScript {
                     productsJson.put( product.toJSONObject( workspace, dateTime ) );
                 }
             } catch ( JSONException e ) {
-                log( LogLevel.ERROR, "Could not create JSON for product",
-                     HttpServletResponse.SC_INTERNAL_SERVER_ERROR );
+                log( Level.ERROR,
+                     HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Could not create JSON for product");
                 e.printStackTrace();
             }
         }

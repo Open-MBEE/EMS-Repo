@@ -45,6 +45,8 @@ import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
 
+import org.apache.log4j.*;
+
 /**
  * Updates the LDAP group that is allowed to do workspace operations- create, merge, diff,
  * and delete.
@@ -96,8 +98,8 @@ public class UpdateWorkspaceLdapGroup extends AbstractJavaWebScript {
             }
             
         } catch (Exception e) {
-            log(LogLevel.ERROR, "Internal error stack trace:\n" + e.getLocalizedMessage() + "\n", 
-                HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            log(Level.ERROR, HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+            		"Internal error stack trace:\n %s \n",e.getLocalizedMessage());
             e.printStackTrace();
         }
 
@@ -114,8 +116,7 @@ public class UpdateWorkspaceLdapGroup extends AbstractJavaWebScript {
         EmsScriptNode mmsFolder = null;
         
         if (Utils.isNullOrEmpty( ldapGroup )) {
-            log(LogLevel.ERROR, "Empty or null ldap group", 
-                HttpServletResponse.SC_BAD_REQUEST);
+            log(Level.ERROR, HttpServletResponse.SC_BAD_REQUEST, "Empty or null ldap group");
             return;
         }
         
@@ -144,13 +145,11 @@ public class UpdateWorkspaceLdapGroup extends AbstractJavaWebScript {
                         branchPermNode = mmsFolder.createNode( "branch_perm", "cm:content" );
                        
                         if (branchPermNode == null) {
-                            log(LogLevel.ERROR, "Error creating branch permission node", 
-                                HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                            log(Level.ERROR,HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Error creating branch permission node");
                         }
                     }
                     else {
-                        log(LogLevel.ERROR, "No permissions to write to MMS folder: "+mmsFolder, 
-                            HttpServletResponse.SC_FORBIDDEN);
+                        log(Level.ERROR,HttpServletResponse.SC_FORBIDDEN, "No permissions to write to MMS folder: "+mmsFolder);
                     }
                 }
                 
@@ -163,14 +162,12 @@ public class UpdateWorkspaceLdapGroup extends AbstractJavaWebScript {
             }
             // mmsFolder is null:
             else {
-                log(LogLevel.ERROR, "Error creating MMS folder", 
-                    HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                log(Level.ERROR,HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Error creating MMS folder");
             }
         }
         // company home was not found:
         else {
-            log(LogLevel.ERROR, "Could not find companyhome", 
-                HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            log(Level.ERROR,  HttpServletResponse.SC_INTERNAL_SERVER_ERROR,"Could not find companyhome");
         }
 
         // Save to cache:

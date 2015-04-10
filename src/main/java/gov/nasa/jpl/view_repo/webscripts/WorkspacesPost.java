@@ -35,6 +35,7 @@ import gov.nasa.jpl.view_repo.util.CommitUtil;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
+//import gov.nasa.jpl.view_repo.webscripts.AbstractJavaWebScript.LogLevel;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -42,6 +43,7 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.log4j.*;
 import org.alfresco.repo.model.Repository;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
@@ -110,10 +112,10 @@ public class WorkspacesPost extends AbstractJavaWebScript{
                 statusCode = responseStatus.getCode();
             }
         } catch (JSONException e) {
-            log(LogLevel.ERROR, "JSON malformed\n", HttpServletResponse.SC_BAD_REQUEST);
+            log(Level.ERROR, HttpServletResponse.SC_BAD_REQUEST, "JSON malformed\n");
             e.printStackTrace();
         } catch (Exception e){
-            log(LogLevel.ERROR, "Internal stack trace:\n" + e.getLocalizedMessage() + "\n", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            log(Level.ERROR, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Internal stack trace:\n %s \n", e.getLocalizedMessage());
             e.printStackTrace();
         }
         if(json == null)
@@ -138,7 +140,7 @@ public class WorkspacesPost extends AbstractJavaWebScript{
                 jsonArray.put(ws.toJSONObject( ws, null ));
             }
             else {
-                log(LogLevel.WARNING,"No permission to read: "+ ws.getSysmlId(),HttpServletResponse.SC_NOT_FOUND);
+                log(Level.WARN,HttpServletResponse.SC_NOT_FOUND,"No permission to read: %", ws.getSysmlId());
             }
         }
         json.put("workspaces", jsonArray);
@@ -179,21 +181,21 @@ public class WorkspacesPost extends AbstractJavaWebScript{
 
         if( (newWorkspaceId != null && newWorkspaceId.equals( "master" )) ||
             (workspaceName != null && workspaceName.equals( "master" )) ) {
-            log(LogLevel.WARNING, "Cannot change attributes of the master workspace.", HttpServletResponse.SC_BAD_REQUEST);
+            log(Level.WARN, "Cannot change attributes of the master workspace.", HttpServletResponse.SC_BAD_REQUEST);
             status.setCode( HttpServletResponse.SC_BAD_REQUEST );
             return null;
         }
 
         // Only create the workspace if the workspace id was not supplied:
         if (newWorkspaceId == null) {
-
             WorkspaceNode srcWs =
                     WorkspaceNode.getWorkspaceFromId( sourceWorkspaceId,
                                                       services,
                                                       response, status, // false,
                                                       user );
+
             if (!"master".equals( sourceWorkspaceId ) && srcWs == null) {
-                log(LogLevel.WARNING, "Source workspace not found.", HttpServletResponse.SC_NOT_FOUND);
+                log(Level.WARN, HttpServletResponse.SC_NOT_FOUND,"Source workspace not found.");
                 status.setCode( HttpServletResponse.SC_NOT_FOUND );
                 return null;
             } else {
@@ -222,10 +224,12 @@ public class WorkspacesPost extends AbstractJavaWebScript{
             if ( existingWs != null ) {
 
                 if (existingWs.isDeleted()) {
+
                     existingWs.removeAspect( "ems:Deleted" );
-                    log(LogLevel.INFO, "Workspace undeleted and modified", HttpServletResponse.SC_OK);
+                    log(Level.INFO, HttpServletResponse.SC_OK,"Workspace undeleted and modified");
+
                 } else {
-                    log(LogLevel.INFO, "Workspace is modified", HttpServletResponse.SC_OK);
+                    log(Level.INFO, "Workspace is modified", HttpServletResponse.SC_OK);
                 }
 
                 // Update the name/description:
@@ -240,7 +244,7 @@ public class WorkspacesPost extends AbstractJavaWebScript{
                 finalWorkspace = existingWs;
             }
             else {
-                log(LogLevel.WARNING, "Workspace not found.", HttpServletResponse.SC_NOT_FOUND);
+                log(Level.WARN,HttpServletResponse.SC_NOT_FOUND, "Workspace not found.");
                 status.setCode( HttpServletResponse.SC_NOT_FOUND );
                 return null;
             }

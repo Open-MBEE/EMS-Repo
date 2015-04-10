@@ -43,6 +43,7 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.log4j.*;
 import org.alfresco.repo.model.Repository;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.security.PermissionService;
@@ -86,7 +87,7 @@ public class ProductGet extends AbstractJavaWebScript {
 
 		EmsScriptNode product = findScriptNodeById(productId, workspace, dateTime, false);
 		if (product == null) {
-			log(LogLevel.ERROR, "Product not found with id: " + productId + ".\n", HttpServletResponse.SC_NOT_FOUND);
+			log(Level.ERROR, HttpServletResponse.SC_NOT_FOUND, "Product not found with id: %s .\n", productId);
 			return false;
 		}
 
@@ -153,7 +154,7 @@ public class ProductGet extends AbstractJavaWebScript {
                 if ( prettyPrint ) model.put("res", NodeUtil.jsonToString( json, 4 ));
                 else model.put("res", NodeUtil.jsonToString( json ));
 			} catch (JSONException e) {
-				log(LogLevel.ERROR, "JSON creation error", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+				log(Level.ERROR, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "JSON creation error");
 				model.put("res", createResponseJson());
                 e.printStackTrace();
 			}

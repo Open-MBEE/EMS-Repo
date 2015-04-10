@@ -44,6 +44,7 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.log4j.*;
 import org.alfresco.repo.model.Repository;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
@@ -159,10 +160,9 @@ public class ConfigurationPost extends AbstractJavaWebScript {
                 siteName = siteNode.getName();
             }
             if ( context == null ) {
-                log( LogLevel.ERROR,
-                     "Couldn't find a place to create the configuration: "
-                             + postJson.getString( "name" ),
-                     HttpServletResponse.SC_BAD_REQUEST );
+                log( Level.ERROR,
+                     HttpServletResponse.SC_BAD_REQUEST,
+                     "Couldn't find a place to create the configuration: %s", postJson.getString( "name" ));
             } else {
         			if (postJson.has("nodeid") || postJson.has( "id" )) {
         				jsonObject = handleUpdate(postJson, siteName, context, workspace, status);
@@ -171,7 +171,7 @@ public class ConfigurationPost extends AbstractJavaWebScript {
         			}
             }
 		} catch (JSONException e) {
-			log(LogLevel.ERROR, "Could not parse JSON", HttpServletResponse.SC_BAD_REQUEST);
+			log(Level.ERROR, HttpServletResponse.SC_BAD_REQUEST, "Could not parse JSON");
 			e.printStackTrace();
 			return null;
 		} 
@@ -226,25 +226,26 @@ public class ConfigurationPost extends AbstractJavaWebScript {
     	                // or in the future:
     	                Date now = new Date();
     	                if (datetime.after( now )) {
-    	                    log(LogLevel.ERROR, "Timestamp provided in json: "+datetime+" is in the future.  Current time: "+now, 
+    	                    log(Level.ERROR, "Timestamp provided in json: "+datetime+" is in the future.  Current time: "+now, 
     	                        HttpServletResponse.SC_BAD_REQUEST);
     	                    return null;
     	                }
     	                else if (workspace != null && datetime.before( workspace.getCopyOrCreationTime() )) {
-    	                    log(LogLevel.ERROR, "Timestamp provided in json: "+datetime+" is before the workspace branch/creation time: "+workspace.getCopyOrCreationTime(), 
+    	                    log(Level.ERROR, "Timestamp provided in json: "+datetime+" is before the workspace branch/creation time: "+workspace.getCopyOrCreationTime(), 
                                 HttpServletResponse.SC_BAD_REQUEST);
     	                    return null;
     	                }
                 }
+
 	            startAction(jobNode, siteName, productList, workspace, datetime);
 
 				return configWs.getConfigJson( jobNode, workspace, null );
 			} else {
-				log(LogLevel.ERROR, "Couldn't create configuration job: " + postJson.getString("name"), HttpServletResponse.SC_BAD_REQUEST);
+				log(Level.ERROR, HttpServletResponse.SC_BAD_REQUEST, "Couldn't create configuration job: %s",postJson.getString("name"));
 				return null;
 			}
 		} else {
-			log(LogLevel.ERROR, "Job name not specified", HttpServletResponse.SC_BAD_REQUEST);
+			log(Level.ERROR, HttpServletResponse.SC_BAD_REQUEST, "Job name not specified");
 			return null;
 		}
 	}
@@ -267,7 +268,7 @@ public class ConfigurationPost extends AbstractJavaWebScript {
 		}
 
 		if (nodeId == null) {
-		    log(LogLevel.WARNING, "JSON malformed does not include Alfresco id for configuration", HttpServletResponse.SC_BAD_REQUEST);
+		    log(Level.WARN, HttpServletResponse.SC_BAD_REQUEST, "JSON malformed does not include Alfresco id for configuration");
 		    return null;
 		}
 
@@ -291,7 +292,7 @@ public class ConfigurationPost extends AbstractJavaWebScript {
                                           workspace, null );
             return configWs.getConfigJson( configNode, workspace, null );
 		} else {
-		    log(LogLevel.WARNING, "Could not find configuration with id " + nodeId, HttpServletResponse.SC_NOT_FOUND);
+		    log(Level.WARN, HttpServletResponse.SC_NOT_FOUND, "Could not find configuration with id %s", nodeId );
 		    return null;
 		}
 	}

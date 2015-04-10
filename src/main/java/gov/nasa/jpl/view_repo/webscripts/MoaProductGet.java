@@ -47,6 +47,7 @@ import java.util.Set;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.log4j.*;
 import org.alfresco.repo.model.Repository;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.security.PermissionService;
@@ -88,7 +89,7 @@ public class MoaProductGet extends AbstractJavaWebScript {
 
 		EmsScriptNode product = findScriptNodeById(productId, workspace, dateTime, false);
 		if (product == null) {
-			log(LogLevel.ERROR, "Product not found with id: " + productId + ".\n", HttpServletResponse.SC_NOT_FOUND);
+			log(Level.ERROR, HttpServletResponse.SC_NOT_FOUND, "Product not found with id: %s.\n", productId);
 			return false;
 		}
 
@@ -192,7 +193,7 @@ public class MoaProductGet extends AbstractJavaWebScript {
 		JSONArray viewsJson = new JSONArray();
 		JSONArray elementsJson = new JSONArray();
 		if (product == null) {
-			log(LogLevel.ERROR, "Product not found with ID: " + productId, HttpServletResponse.SC_NOT_FOUND);
+			log(Level.ERROR, HttpServletResponse.SC_NOT_FOUND, "Product not found with ID: %s", productId);
 		}
 
 		if (checkPermissions(product, PermissionService.READ)){
@@ -242,7 +243,8 @@ public class MoaProductGet extends AbstractJavaWebScript {
                 if ( snapshotV != null ) {
                     String msg = "Error! Snapshot " + snapshot + " did not exist at " + dateTime + ".\n";
                     if ( getResponse() == null || this.getResponseStatus() == null ) {
-                        Debug.error( msg );
+                        //Debug.error( msg );
+                    	log(Level.ERROR,msg);
                     } else {
                         getResponse().append( msg );
                         getResponseStatus().setCode( HttpServletResponse.SC_BAD_REQUEST,

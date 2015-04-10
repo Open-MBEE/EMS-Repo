@@ -67,6 +67,7 @@ import java.util.UUID;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.log4j.*;
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.admin.SysAdminParams;
 import org.alfresco.repo.model.Repository;
@@ -153,12 +154,12 @@ public class SnapshotPost extends AbstractJavaWebScript {
         Date timestamp = getTimestamp(req);
 
         Map< String, Object > model = new HashMap< String, Object >();
-        log( LogLevel.INFO, "Starting snapshot creation or snapshot artifact generation..." );
+        log( Level.INFO, "Starting snapshot creation or snapshot artifact generation..." );
         try {
             JSONObject reqPostJson = //JSONObject.make( 
                     (JSONObject)req.parseContent();// );
             if ( reqPostJson != null ) {
-                log( LogLevel.INFO, "Generating snapshot artifact..." );
+                log( Level.INFO, "Generating snapshot artifact..." );
                 //SnapshotPost instance = new SnapshotPost( repository, services );
                 JSONObject result = //instance.
                         saveAndStartAction( req, status, workspace );
@@ -173,7 +174,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
                 printFooter();
                 return model;
             } else {
-                log( LogLevel.INFO, "Creating snapshot..." );
+                log( Level.INFO, "Creating snapshot..." );
                 String viewId = getViewId( req );
                 EmsScriptNode snapshotNode = null;
                 DateTime now = new DateTime();
@@ -183,8 +184,8 @@ public class SnapshotPost extends AbstractJavaWebScript {
                 EmsScriptNode snapshotFolderNode =
                         getSnapshotFolderNode( topview );
                 if ( snapshotFolderNode == null ) {
-                    log( LogLevel.ERROR, "Cannot create folder for snapshot",
-                         HttpServletResponse.SC_BAD_REQUEST );
+                    log( Level.ERROR,
+                         HttpServletResponse.SC_BAD_REQUEST, "Cannot create folder for snapshot" );
                 } else {
                     this.snapshotName = viewId + "_" + now.getMillis();
 
@@ -199,8 +200,8 @@ public class SnapshotPost extends AbstractJavaWebScript {
                 }
 
                 if ( snapshotNode == null ) {
-                    log( LogLevel.ERROR, "Error creating snapshot node",
-                         HttpServletResponse.SC_INTERNAL_SERVER_ERROR );
+                    log( Level.ERROR,
+                         HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Error creating snapshot node" );
                 } else {
                     try {
                         JSONObject snapshoturl = new JSONObject();
@@ -215,9 +216,8 @@ public class SnapshotPost extends AbstractJavaWebScript {
                         model.put( "res", NodeUtil.jsonToString( snapshoturl, 4 ) );
                     } catch ( JSONException e ) {
                         e.printStackTrace();
-                        log( LogLevel.ERROR,
-                             "Error generating JSON for snapshot",
-                             HttpServletResponse.SC_INTERNAL_SERVER_ERROR );
+                        log( Level.ERROR,
+                             HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Error generating JSON for snapshot");
                     }
                 }
                 status.setCode( responseStatus.getCode() );
@@ -227,9 +227,9 @@ public class SnapshotPost extends AbstractJavaWebScript {
             }
         } catch ( Exception ex ) {
         	status.setCode(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            log( LogLevel.ERROR,
-                 "Failed to create snapshot or snapshot artifact! "
-                         + ex.getMessage() );
+            log( Level.ERROR,
+                 "Failed to create snapshot or snapshot artifact! %s",
+                         ex.getMessage() );
             ex.printStackTrace();
         }
         return model;
@@ -269,13 +269,13 @@ public class SnapshotPost extends AbstractJavaWebScript {
         if (srcType != null && srcType.compareTo( "reference" ) == 0 ) {
             EmsScriptNode node = findScriptNodeById( src, workspace, timestamp, false );
             if(node == null){
-            	log(LogLevel.WARNING, String.format("Failed to create DBParagraph! Failed to find EmsScriptNode with Id: %s", src));
+            	log(Level.WARN, String.format("Failed to create DBParagraph! Failed to find EmsScriptNode with Id: %s", src));
             }
             else{
 	            if (srcProp != null && srcProp.compareTo( "value" ) == 0 ) {
 	                List< NodeRef > nodeRefs = (List< NodeRef >)node.getNodeRefProperty( Acm.SYSML + srcProp, timestamp, workspace );
 	                if(nodeRefs == null){
-	                	log(LogLevel.WARNING, String.format("Failed to create DBParagraph! Failed to find values node references for %s.", src));
+	                	log(Level.WARN, String.format("Failed to create DBParagraph! Failed to find values node references for %s.", src));
 	                	return null;
 	                }
 
@@ -284,7 +284,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
 	                for ( int i = 0; i < size; i++ ) {
 	                    NodeRef nodeRef = nodeRefs.get( i );
 	                    if(nodeRef == null){
-	                    	log(LogLevel.WARNING, String.format("Failed to get value for node ref '%s' at index: %d", src, i));
+	                    	log(Level.WARN, String.format("Failed to get value for node ref '%s' at index: %d", src, i));
 	                    	continue;
 	                    }
 
@@ -308,7 +308,8 @@ public class SnapshotPost extends AbstractJavaWebScript {
 	                            else sb.append( valObj );
 	                        }
 	                        catch ( Exception ex ) {
-	                        	log( LogLevel.WARNING, "Problem extracting node value from " + node.toJSON() );
+								log( Level.WARN,"Problem extracting node value from %s",node.toJSON() );
+//	                            log( LogLevel.WARNING, "Problem extracting node value from " + node.toJSON() );
 	                        }
 	                    }
 	                    sb.append(" ");
@@ -401,7 +402,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
                                           EmsScriptNode snapshotNode,
                                           WorkspaceNode workspace, Date timestamp, StringBuffer response) throws Exception {
         if ( product == null ) {
-            log( LogLevel.WARNING, "null [view] input parameter reference." );
+            log( Level.WARN, "null [view] input parameter reference." );
             return null;
         }
 
@@ -460,7 +461,8 @@ public class SnapshotPost extends AbstractJavaWebScript {
             docBookMgr.save();
         }
         catch ( Exception ex ) {
-            log( LogLevel.ERROR, "\nUnable to create DBBook! Failed to parse document.\n" + ex.getMessage() );
+        	log( Level.ERROR, "\nUnable to create DBBook! Failed to parse document.\n%s", ex.getMessage());
+        	//log( LogLevel.ERROR, "\nUnable to create DBBook! Failed to parse document.\n" + ex.getStackTrace() );
             ex.printStackTrace();
 //            setArtifactsGenerationStatus(snapshotNode);
             throw new Exception( "Unable to create DBBook! Failed to parse document.\n", ex );
@@ -537,7 +539,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
                 break;
             default:
                 response.append(String.format("Warning: Unexpected type: %s", getType(obj)));
-            	log( LogLevel.WARNING, String.format("Unexpected type: %s", getType( obj )));
+            	log( Level.WARN, "Unexpected type: %s", getType( obj ));
                 break;
         }
         return e;
@@ -588,7 +590,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
                                                services );
                     saveImage( image, node );
                 } else {
-                    log( LogLevel.WARNING, fileName + " image file not found!" );
+                    log( Level.WARN, "%s image file not found!", fileName );
                 }
             } catch ( Exception ex ) {
                 logger.error("Could not get results");
@@ -614,17 +616,17 @@ public class SnapshotPost extends AbstractJavaWebScript {
     public EmsScriptNode createSnapshot( EmsScriptNode view, String viewId,
                                          WorkspaceNode workspace, Date timestamp ) {
         this.snapshotName = viewId + "_" + System.currentTimeMillis();
-        log(LogLevel.INFO, "Begin creating snapshot: \t" + this.snapshotName);
+        log(Level.INFO, "Begin creating snapshot: \t%s", this.snapshotName);
         
         String contextPath = "alfresco/service/";
         EmsScriptNode snapshotFolder = getSnapshotFolderNode(view);
         if(snapshotFolder == null){
-            log( LogLevel.ERROR, "Failed to get snapshot folder node!",
-                 HttpServletResponse.SC_BAD_REQUEST );
-            log(LogLevel.INFO, "End creating snapshot: \t\t" + this.snapshotName);
-            return null;
+            log( Level.ERROR,
+                 HttpServletResponse.SC_BAD_REQUEST, "Failed to get snapshot folder node!");
+            log(Level.INFO, "End creating snapshot: \t\t%s", this.snapshotName);
+        	return null;
         }
-        log(LogLevel.INFO, "End creating snapshot: \t\t" + this.snapshotName);
+        log(Level.INFO, "End creating snapshot: \t\t%s",this.snapshotName);
         return createSnapshot(view, viewId, snapshotName, contextPath, snapshotFolder, workspace, timestamp);
     }
 
@@ -635,7 +637,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
                                          WorkspaceNode workspace, Date timestamp) {
         EmsScriptNode snapshotNode = snapshotFolder.createNode( snapshotName, "view2:Snapshot" );
         if (snapshotNode == null) {
-            	log(LogLevel.ERROR, "Failed to create view2:Snapshot!");
+            	log(Level.ERROR, "Failed to create view2:Snapshot!");
             	return null;
         }
         snapshotNode.createOrUpdateProperty( "cm:isIndexed", true );
@@ -815,7 +817,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
                 jobName += "_" + s;
             }
         } catch ( JSONException ex ) {
-            log( LogLevel.ERROR, "Failed to gather job name!" );
+            log( Level.ERROR, "Failed to gather job name!" );
             ex.printStackTrace();
         }
         return jobName;
@@ -835,7 +837,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
         boolean isGenerated = false;
         if(status != null && !status.isEmpty() && status.compareToIgnoreCase("Completed")==0){
         	isGenerated = true;
-        	log(LogLevel.INFO, "Zip artifacts were already generated.");
+        	log(Level.INFO, "Zip artifacts were already generated.");
         }
 
         if(!isGenerated){
@@ -871,8 +873,9 @@ public class SnapshotPost extends AbstractJavaWebScript {
         Date timestamp = (Date)snapshotNode.getProperty("view2:timestamp");
         DocBookWrapper docBookWrapper = new DocBookWrapper( this.snapshotName, snapshotNode, false );//need workspace and timestamp
 
+
         if ( !hasHtmlZipNode( snapshotNode, timestamp, workspace ) ) {
-            log( LogLevel.INFO, "Generating zip artifact..." );
+            log( Level.INFO, "Generating zip artifact..." );
             docBookWrapper.saveHtmlZipToRepo( snapshotFolderNode, workspace, timestamp );
         }
         return snapshotNode;
@@ -893,7 +896,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
         boolean isGenerated = false;
         if(status != null && !status.isEmpty() && status.compareToIgnoreCase("Completed")==0){
         	isGenerated = true;
-        	log(LogLevel.INFO, "PDF artifacts were already generated.");
+        	log(Level.INFO, "PDF artifacts were already generated.");
         }
 
         if(!isGenerated){
@@ -932,7 +935,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
         DocBookWrapper docBookWrapper = new DocBookWrapper( this.snapshotName, snapshotNode, false );
 
         if ( !hasPdfNode( snapshotNode, timestamp, workspace ) ) {
-            log( LogLevel.INFO, "Generating PDF..." );
+            log( Level.INFO, "Generating PDF..." );
             docBookWrapper.savePdfToRepo(snapshotFolderNode, workspace, timestamp, siteName );
         }
         return snapshotNode;
@@ -1263,6 +1266,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
 	                		String inlineImageTag = buildInlineImageTag(nodeId, dbImage);
 	                		image.before(inlineImageTag);
 	                		image.remove();
+
                 		}
                 		catch(Exception ex){
                 			//in case it's not a local resource > generate hyperlink instead
@@ -1276,12 +1280,13 @@ public class SnapshotPost extends AbstractJavaWebScript {
                 	}
                 }
                 catch(Exception ex){
-                	log(LogLevel.WARNING, String.format("Failed to retrieve embedded image at %s. %s", src, ex.getMessage()));
+                	log(Level.WARN, "Failed to retrieve embedded image at %s. %s", src, ex.getMessage());
                 	ex.printStackTrace();
                 }
 			}
+
             catch(Exception ex){
-            	log(LogLevel.WARNING, String.format("Failed to process embedded image at %s. %s", src, ex.getMessage()));
+            	log(Level.WARN, "Failed to process embedded image at %s. %s", src, ex.getMessage());
             	ex.printStackTrace();
             }
     	}
@@ -1294,13 +1299,13 @@ public class SnapshotPost extends AbstractJavaWebScript {
         EmsScriptNode jobNode = null;
 
         if ( !postJson.has( "id" ) ) {
-            log( LogLevel.ERROR, "Job name not specified",
-                 HttpServletResponse.SC_BAD_REQUEST );
+            log( Level.ERROR,
+                 HttpServletResponse.SC_BAD_REQUEST, "Job name not specified");
             return null;
         }
         if ( !postJson.has( "formats" ) ) {
-            log( LogLevel.ERROR, "Snapshot formats not specified",
-                 HttpServletResponse.SC_BAD_REQUEST );
+            log( Level.ERROR,
+                 HttpServletResponse.SC_BAD_REQUEST,"Snapshot formats not specified" );
             return null;
         }
 
@@ -1311,23 +1316,24 @@ public class SnapshotPost extends AbstractJavaWebScript {
                                                "cm:content", status,
                                                response );
             if ( jobNode == null ) {
-                log( LogLevel.ERROR, "Couldn't create snapshot job: "
-                                     + postJson.getString( "id" ),
-                     HttpServletResponse.SC_INTERNAL_SERVER_ERROR );
+                log( Level.ERROR, 
+                     HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Couldn't create snapshot job: %s",
+                             postJson.getString( "id" ));
                 return null;
             }
 
             setArtifactsGenerationStatus(postJson, null, workspace);
             startAction( jobNode, siteName, postJson, workspace );
             return postJson;
+
         }
         catch ( JSONException ex ) {
-            log( LogLevel.ERROR, "Failed to create snapshot job!" );
+            log( Level.ERROR, "Failed to create snapshot job!" );
             ex.printStackTrace();
         }
         catch(Exception ex){
         	ex.printStackTrace();
-        	log( LogLevel.ERROR, "Failed to create snapshot job!" );
+        	log( Level.ERROR, "Failed to create snapshot job!" );
         }
         finally {
             if ( jobNode != null ) {
@@ -1363,7 +1369,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
         }
         list = cirRefList.get( index );
         if(list == null){
-        	log(LogLevel.WARNING, String.format("Failed to retrieve circular reference list at index: %d.", index));
+        	log(Level.WARN, "Failed to retrieve circular reference list at index: %d.", index);
         	return inputString;
         }
         list.add( id + transclusionType );
@@ -1449,7 +1455,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
 
 		Document document = Jsoup.parseBodyFragment(inputString);
 		if(document == null || document.body()==null){
-			log(LogLevel.WARNING, String.format("Failed to parse HTML fragment: %s", inputString));
+			log(Level.WARN, "Failed to parse HTML fragment: %s", inputString);
 			return inputString;
 		}
 
@@ -1459,14 +1465,14 @@ public class SnapshotPost extends AbstractJavaWebScript {
 		for(Element element:elements){
 			String id = element.attr("data-mms-eid");
 			if(id == null || id.isEmpty()){
-				log(LogLevel.WARNING, String.format("Failed to parse transclusion doc Id for %s.", element.text()));
+				log(Level.WARN, "Failed to parse transclusion doc Id for %s.", element.text());
 				element.before("[cannot parse Id for " + element.text() + "]");
 				element.remove();
 				continue;
 			}
 
 			if(isCircularReference(id, "documentation", cirRefList, index)){
-				log(LogLevel.WARNING, String.format("Circular reference with Id: %s.", id));
+				log(Level.WARN, "Circular reference with Id: %s.", id);
 				element.before("[Circular reference!]");
 				element.remove();
 				continue;
@@ -1475,7 +1481,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
 			String transcluded = "[cannot find " + element.text() + " with Id: " + id + "]";
 			EmsScriptNode nameNode = findScriptNodeById(id, workspace, timestamp, false);
 			if(nameNode == null){
-				log(LogLevel.WARNING, String.format("Failed to find EmsScriptNode Id: %s.", id));
+				log(Level.WARN, "Failed to find EmsScriptNode Id: %s.", id);
 				element.before(transcluded);
 				element.remove();
 			}
@@ -1483,7 +1489,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
 				try {
 					JSONObject jsObj = nameNode.toJSONObject(workspace, timestamp);
 					if(jsObj == null){
-						log(LogLevel.WARNING, "JSONObject is null");
+						log(Level.WARN, "JSONObject is null");
 						element.before(transcluded);
 						element.remove();
 					}
@@ -1504,7 +1510,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
 					}
 				} catch (JSONException e) {
 					// TODO Auto-generated catch block
-					log(LogLevel.WARNING, String.format("Failed to transclude doc for Id: %s.", id));
+					log(Level.WARN, "Failed to transclude doc for Id: %s.", id);
 					e.printStackTrace();
 				}
 			}
@@ -1516,7 +1522,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
 		if(inputString == null || inputString.isEmpty()) return inputString;
 		Document document = Jsoup.parseBodyFragment(inputString);
 		if(document == null || document.body() == null){
-			log(LogLevel.WARNING, String.format("Failed to parse HTML fragment: %s", inputString));
+			log(Level.WARN, "Failed to parse HTML fragment: %s", inputString);
 			return inputString;
 		}
 
@@ -1526,14 +1532,14 @@ public class SnapshotPost extends AbstractJavaWebScript {
 		for(Element element:elements){
 			String id = element.attr("data-mms-eid");
 			if(id == null || id.isEmpty()){
-				log(LogLevel.WARNING, String.format("Failed to parse transclusion Id for %s.", element.text()));
+				log(Level.WARN, "Failed to parse transclusion Id for %s.", element.text());
 				element.before("[cannot parse Id for " + element.text() + "]");
 				element.remove();
 				continue;
 			}
 
 			if(isCircularReference(id, "name", cirRefList, index)){
-				log(LogLevel.WARNING, String.format("Circular reference with Id: %s.", id));
+				log(Level.WARN, "Circular reference with Id: %s.", id);
 				element.before("[Circular reference!]");
 				element.remove();
 				continue;
@@ -1542,7 +1548,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
 			String transcluded = "[cannot find " + element.text() + " with Id: " + id + "]";
 			EmsScriptNode nameNode = findScriptNodeById(id, workspace, timestamp, false);
 			if(nameNode == null){
-				log(LogLevel.WARNING, String.format("Failed to find EmsScriptNode Id: %s", id));
+				log(Level.WARN, "Failed to find EmsScriptNode Id: %s", id);
 				element.before(transcluded);
 				element.remove();
 				continue;
@@ -1551,7 +1557,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
 			try {
 				JSONObject jsObj = nameNode.toJSONObject(workspace, timestamp);
 				if(jsObj == null){
-					log(LogLevel.WARNING, "JSONObject is null");
+					log(Level.WARN, "JSONObject is null");
 					element.before(transcluded);
 					element.remove();
 				}
@@ -1570,7 +1576,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
 					element.remove();
 				}
 			} catch (JSONException e) {
-				log(LogLevel.WARNING, String.format("Failed to transclude name for Id: %s", id));
+				log(Level.WARN, "Failed to transclude name for Id: %s", id);
 				e.printStackTrace();
 			}
 		}
@@ -1582,7 +1588,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
 
 		Document document = Jsoup.parseBodyFragment(inputString);
 		if(document == null || document.body() == null){
-			log(LogLevel.WARNING, String.format("Failed to parse HTML fragment: %s.", inputString));
+			log(Level.WARN, "Failed to parse HTML fragment: %s.", inputString);
 			return inputString;
 		}
 
@@ -1592,14 +1598,14 @@ public class SnapshotPost extends AbstractJavaWebScript {
 		for(Element element:elements){
 			String id = element.attr("data-mms-eid");
 			if(id == null || id.isEmpty()){
-				log(LogLevel.WARNING, String.format("Failed to parse transclusion Id for %s", element.text()));
+				log(Level.WARN, "Failed to parse transclusion Id for %s", element.text());
 				element.before("[cannot parse Id for " + element.text() + "]");
 				element.remove();
 				continue;
 			}
 
 			if(isCircularReference(id, "value", cirRefList, index)){
-				log(LogLevel.WARNING, String.format("Circular reference with Id: %s", id));
+				log(Level.WARN, "Circular reference with Id: %s", id);
 				element.before("[Circular reference!]");
 				element.remove();
 				continue;
@@ -1608,7 +1614,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
 			String transcluded = "[cannot find " + element.text() + " with Id: " + id + "]";
 			EmsScriptNode nameNode = findScriptNodeById(id, workspace, timestamp, false);
 			if(nameNode == null){
-				log(LogLevel.WARNING, String.format("Failed to find EmsScriptNode Id: %s", id));
+				log(Level.WARN, "Failed to find EmsScriptNode Id: %s", id);
 				element.before(transcluded);
 				element.remove();
 				continue;
@@ -1617,7 +1623,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
 				try {
 					JSONObject jsObj = nameNode.toJSONObject(workspace, timestamp);
 					if(jsObj == null){
-						log(LogLevel.WARNING, "JSONObject is null");
+						log(Level.WARN, "JSONObject is null");
 						element.before(transcluded);
 						element.remove();
 						continue;
@@ -1629,7 +1635,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
 					}
 				} catch (JSONException e) {
 					// TODO Auto-generated catch block
-					log(LogLevel.WARNING, String.format("Failed to transclude Id: %s", id));
+					log(Level.WARN, "Failed to transclude Id: %s", id);
 					e.printStackTrace();
 				}
 			}
@@ -1927,13 +1933,13 @@ public class SnapshotPost extends AbstractJavaWebScript {
 	    JSONObject jsonObject = null;
 	    String siteName = getSiteName(req);
 		if (siteName == null) {
-			log(LogLevel.ERROR, "No sitename provided", HttpServletResponse.SC_BAD_REQUEST);
+			log(Level.ERROR, HttpServletResponse.SC_BAD_REQUEST, "No sitename provided");
 			return null;
 		}
 
 		SiteInfo siteInfo = services.getSiteService().getSite(siteName);
 		if (siteInfo == null) {
-			log(LogLevel.ERROR, "Could not find site: " + siteName, HttpServletResponse.SC_NOT_FOUND);
+			log(Level.ERROR, HttpServletResponse.SC_NOT_FOUND, "Could not find site: %s", siteName);
 			return null;
 		}
 		EmsScriptNode siteNode = new EmsScriptNode(siteInfo.getNodeRef(), services, response);
@@ -1950,7 +1956,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
 		    }
 
 			if (!postJson.has( "formats" )) {
-				log(LogLevel.ERROR, "Missing snapshot formats!", HttpServletResponse.SC_BAD_REQUEST);
+				log(Level.ERROR, HttpServletResponse.SC_BAD_REQUEST, "Missing snapshot formats!");
 			} else {
 				try{
 					EmsScriptNode snapshotNode = getSnapshotNode(postJson);
@@ -1959,13 +1965,14 @@ public class SnapshotPost extends AbstractJavaWebScript {
 					}
 					jsonObject = handleGenerateArtifacts(postJson, siteNode, status, workspace);
 				}
+
 				catch(Exception ex){
-					log(LogLevel.ERROR, "Failed to generate snapshot artifact(s)!");
+					log(Level.ERROR, "Failed to generate snapshot artifact(s)!");
 					ex.printStackTrace();
 				}
 			}
 		} catch (JSONException e) {
-			log(LogLevel.ERROR, "Could not parse JSON", HttpServletResponse.SC_BAD_REQUEST);
+			log(Level.ERROR, HttpServletResponse.SC_BAD_REQUEST, "Could not parse JSON");
 			e.printStackTrace();
 			return null;
 		}
@@ -1981,14 +1988,14 @@ public class SnapshotPost extends AbstractJavaWebScript {
         Path imgDirName = Paths.get( dbDirName.toString(), "images" );
 
         if ( !( new File( jobDirName.toString() ).mkdirs() ) ) {
-            log( LogLevel.ERROR,
+            log( Level.ERROR,
                  "Could not create snapshot job_id temporary directory." );
         }
         if ( !( new File( dbDirName.toString() ).mkdirs() ) ) {
-            log( LogLevel.ERROR, "Could not create Docbook temporary directory" );
+            log( Level.ERROR, "Could not create Docbook temporary directory" );
         }
         if ( !( new File( imgDirName.toString() ).mkdirs() ) ) {
-            log( LogLevel.ERROR, "Could not create image temporary directory." );
+            log( Level.ERROR, "Could not create image temporary directory." );
         }
         ContentService contentService =
                 imageEmsScriptNode.getServices().getContentService();
@@ -2061,7 +2068,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
     	}
     	catch(Exception ex){
     		ex.printStackTrace();
-    		log(LogLevel.ERROR, "Failed to set artifact generation status!");
+    		log(Level.ERROR, "Failed to set artifact generation status!");
     	}
     }
 

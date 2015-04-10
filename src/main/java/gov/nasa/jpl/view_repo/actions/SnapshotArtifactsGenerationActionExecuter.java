@@ -5,7 +5,8 @@ import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.EmsTransaction;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
-import gov.nasa.jpl.view_repo.webscripts.AbstractJavaWebScript.LogLevel;
+//import gov.nasa.jpl.view_repo.webscripts.AbstractJavaWebScript.LogLevel;
+import org.apache.log4j.*;
 import gov.nasa.jpl.view_repo.webscripts.DocBookWrapper;
 import gov.nasa.jpl.view_repo.webscripts.HostnameGet;
 import gov.nasa.jpl.view_repo.webscripts.SnapshotPost;
@@ -15,7 +16,7 @@ import java.util.Date;
 import java.util.List;
 
 import javax.servlet.http.HttpServletResponse;
-
+import org.apache.log4j.*;
 import org.alfresco.repo.action.executer.ActionExecuterAbstractBase;
 import org.alfresco.repo.model.Repository;
 import org.alfresco.service.ServiceRegistry;
@@ -110,7 +111,7 @@ public class SnapshotArtifactsGenerationActionExecuter  extends ActionExecuterAb
         SnapshotPost snapshotService = new SnapshotPost(repository, services);
         snapshotService.setRepositoryHelper(repository);
         snapshotService.setServices(services);
-        snapshotService.setLogLevel(LogLevel.DEBUG);
+        snapshotService.setLogLevel(Level.DEBUG);
         Status status = new Status();
         EmsScriptNode snapshotNode = null;
         JSONObject snapshot = null;
