@@ -964,6 +964,12 @@ public class NodeUtil {
                                 ServiceRegistry services, boolean includeDeleted,
                                 String siteName) {
 
+        String runAsUser = AuthenticationUtil.getRunAsUser();
+        boolean changeUser = !EmsScriptNode.ADMIN_USER_NAME.equals( runAsUser );
+        if ( changeUser ) {
+            AuthenticationUtil.setRunAsUser( EmsScriptNode.ADMIN_USER_NAME );
+        }
+
         ArrayList<NodeRef> results = null;
 
         timerByType = Timer.startTimer(timerByType, timeEvents);
@@ -1097,6 +1103,10 @@ public class NodeUtil {
 //        }
 
         Timer.stopTimer(timerByType, "***** findNodeRefsByType(): time ", timeEvents);
+
+        if ( changeUser ) {
+            AuthenticationUtil.setRunAsUser( runAsUser );
+        }
 
         return nodeRefs;
     }

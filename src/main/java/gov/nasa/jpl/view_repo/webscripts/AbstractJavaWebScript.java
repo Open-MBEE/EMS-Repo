@@ -48,10 +48,12 @@ import java.util.HashMap;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.alfresco.repo.jscript.ScriptNode;
 import org.alfresco.repo.model.Repository;
+import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
@@ -442,6 +444,12 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
         return getSiteName( req, false );
     }
     public String getSiteName( WebScriptRequest req, boolean createIfNonexistent ) {
+        String runAsUser = AuthenticationUtil.getRunAsUser();
+        boolean changeUser = !EmsScriptNode.ADMIN_USER_NAME.equals( runAsUser );
+        if ( changeUser ) {
+            AuthenticationUtil.setRunAsUser( EmsScriptNode.ADMIN_USER_NAME );
+        }
+
         String siteName = req.getServiceMatch().getTemplateVars().get(SITE_NAME);
         if ( siteName == null ) {
             siteName = req.getServiceMatch().getTemplateVars().get(SITE_NAME2);
@@ -449,6 +457,11 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
         if ( siteName == null || siteName.length() <= 0 ) {
             siteName = NO_SITE_ID;
         }
+
+        if ( changeUser ) {
+            AuthenticationUtil.setRunAsUser( runAsUser );
+        }
+
         if ( createIfNonexistent ) {
             WorkspaceNode workspace = getWorkspace( req );
             createSite( siteName, workspace );
@@ -801,6 +814,8 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
     }
 
     
+
+    
     /**
      * Determines the project site for the passed site node.  Also, determines the
      * site package node if applicable.
@@ -809,7 +824,23 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
     public Pair<EmsScriptNode,EmsScriptNode> findProjectSite(String siteName,
                                                              Date dateTime,
                                                              WorkspaceNode workspace,
-                                                             EmsScriptNode initialSiteNode) {
+                                                             EmsScriptNode initialSiteNode) {        
+        String runAsUser = AuthenticationUtil.getRunAsUser();
+        boolean changeUser = !EmsScriptNode.ADMIN_USER_NAME.equals( runAsUser );
+        if ( changeUser ) {
+            AuthenticationUtil.setRunAsUser( EmsScriptNode.ADMIN_USER_NAME );
+        }
+        Pair< EmsScriptNode, EmsScriptNode > p = 
+                findProjectSiteImpl( siteName, dateTime, workspace, initialSiteNode );
+        if ( changeUser ) {
+            AuthenticationUtil.setRunAsUser( runAsUser );
+        }
+        return p;
+    }
+    public Pair<EmsScriptNode,EmsScriptNode> findProjectSiteImpl(String siteName,
+                                                                 Date dateTime,
+                                                                 WorkspaceNode workspace,
+                                                                 EmsScriptNode initialSiteNode) {
 
         EmsScriptNode sitePackageNode = null;
         EmsScriptNode siteNode = null;
@@ -919,8 +950,23 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
      * @param workspace
      * @return
      */
-    public EmsScriptNode findParentPkgSite(EmsScriptNode node, WorkspaceNode workspace,
+    public EmsScriptNode findParentPkgSite(EmsScriptNode node,
+                                           WorkspaceNode workspace,
                                            Date dateTime) {
+        String runAsUser = AuthenticationUtil.getRunAsUser();
+        boolean changeUser = !EmsScriptNode.ADMIN_USER_NAME.equals( runAsUser );
+        if ( changeUser ) {
+            AuthenticationUtil.setRunAsUser( EmsScriptNode.ADMIN_USER_NAME );
+        }
+        EmsScriptNode n = findParentPkgSiteImpl( node, workspace, dateTime );
+        if ( changeUser ) {
+            AuthenticationUtil.setRunAsUser( runAsUser );
+        }
+        return n;
+    }
+    public EmsScriptNode findParentPkgSiteImpl(EmsScriptNode node,
+                                               WorkspaceNode workspace,
+                                               Date dateTime) {
 
         EmsScriptNode pkgSiteParentNode = null;
         // Note: must walk up using the getOwningParent() b/c getParent() does not work
