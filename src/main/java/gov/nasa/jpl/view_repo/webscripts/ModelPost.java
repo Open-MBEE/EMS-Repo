@@ -2658,7 +2658,7 @@ public class ModelPost extends AbstractJavaWebScript {
         // see if prettyPrint default is overridden and change
         prettyPrint = getBooleanArg(req, "pretty", prettyPrint );
 
-        final String user = AuthenticationUtil.getRunAsUser();
+        final String user = AuthenticationUtil.getFullyAuthenticatedUser();
         String wsId = null;
         
         if (logger.isDebugEnabled()) {
