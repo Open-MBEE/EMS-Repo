@@ -1878,16 +1878,23 @@ public class SnapshotPost extends AbstractJavaWebScript {
     	}
     	
     	// removes <itemizedlist>/<orderedlist> without <listitem> children
-    	list = body.select("itemizedlist");
-    	list.addAll(body.select("orderedlist"));
-    	list.addAll(body.select("tbody"));
-    	list.addAll(body.select("listitem"));
-		for(Element item : list){
-			if(item.children().size()==0){
-				if(item.html().trim().length()==0) item.remove();
-				else item.tagName("removalTag"); 
+    	boolean isDone = true;
+    	while(true){
+	    	list = body.select("itemizedlist");
+	    	list.addAll(body.select("orderedlist"));
+	    	list.addAll(body.select("tbody"));
+	    	list.addAll(body.select("listitem"));
+			for(Element item : list){
+				if(item.children().size()==0){
+					if(item.html().trim().length()==0){ 
+						item.remove();
+						isDone = false;
+					}
+					else item.tagName("removalTag"); 
+				}
 			}
-		}
+			if(isDone) break;
+    	}
 		
 		// shifts chapter > link to chapter > para > link
 		while(true){
