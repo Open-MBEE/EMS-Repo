@@ -1247,6 +1247,9 @@ public class EmsScriptNode extends ScriptNode implements
             node = new EmsScriptNode( ref, getServices() );
         }
 
+        // FIXME this seraches below are not always going to return nodes from the
+        //       SpaceStore
+        
         // If its a version node, then it doesnt have a parent association, so if it does
         // not have a owner, then we should return the non-versioned current node:
         if (checkVersionedNode && !skipNodeRefCheck) {
@@ -1254,18 +1257,33 @@ public class EmsScriptNode extends ScriptNode implements
                 node.getNodeRefProperty( "ems:owner", dateTime, ws ) == null) {
                 
                 logger.warn( "getOwningParent: The node "+node+" is a versioned node and doesn't have a owner.  Returning the current node instead." );
-                 
-                // Must do a find with dateTime as null b/c none of the other alfresco methods
-                // work for nodes in workspace://version2store
-                // Note: parents from nodes in versionStore://version2store are in
-                //       workspace://version2store
-                NodeRef currentRef =
+                
+                NodeRef pooRef =
                         findNodeRefByType( node.getName(), SearchType.CM_NAME.prefix,
                                            ws, null, false );
                 
-                if (currentRef != null) {
-                    node = new EmsScriptNode( currentRef, getServices() );
+                if (pooRef != null) {
+                    node = new EmsScriptNode(pooRef, getServices());
                 }
+                else {
+                    // Must do a find with dateTime as null b/c none of the other alfresco methods
+                    // work for nodes in workspace://version2store
+                    // Note: parents from nodes in versionStore://version2store are in
+                    //       workspace://version2store
+                    NodeRef currentRef =
+                            findNodeRefByType( getName(), SearchType.CM_NAME.prefix,
+                                               ws, null, false );
+                    if (currentRef != null) {
+                        EmsScriptNode currentNode = new EmsScriptNode( currentRef, getServices() );
+                        
+                        if (!this.equals( currentNode, false )) {
+                            node = currentNode.getOwningParent( dateTime, ws, 
+                                                                skipNodeRefCheck, checkVersionedNode );
+                        }
+                    }
+                }
+                
+         
             }
         }
         return node;
