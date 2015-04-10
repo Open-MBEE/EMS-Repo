@@ -2019,7 +2019,7 @@ public class EmsScriptNode extends ScriptNode implements
             qualifiedName = "/" + nameProp + qualifiedName;
 
             // stop if we find a site characterization in the path
-            if (owner.hasAspect( "ems:SiteCharacterization" )) {
+            if (owner.hasAspect( "ems:SiteCharacterization" ) && siteCharacterizationId == null) {
                 siteCharacterizationId = "site_" + idProp;
             }
             qualifiedId = "/" + idProp + qualifiedId;
