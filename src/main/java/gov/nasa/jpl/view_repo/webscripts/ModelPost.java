@@ -85,6 +85,8 @@ import kexpparser.KExpParser;
 
 
 
+
+
 import org.alfresco.repo.model.Repository;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
@@ -2656,7 +2658,7 @@ public class ModelPost extends AbstractJavaWebScript {
         // see if prettyPrint default is overridden and change
         prettyPrint = getBooleanArg(req, "pretty", prettyPrint );
 
-        final String user = AuthenticationUtil.getRunAsUser();
+        final String user = AuthenticationUtil.getFullyAuthenticatedUser();
         String wsId = null;
         
         if (logger.isDebugEnabled()) {
@@ -2904,9 +2906,22 @@ public class ModelPost extends AbstractJavaWebScript {
 
         return true;
     }
+    
 
+//    protected EmsScriptNode getProjectNodeFromRequest(WebScriptRequest req, boolean createIfNonexistent) {
+//        String runAsUser = AuthenticationUtil.getRunAsUser();
+//        boolean changeUser = !EmsScriptNode.ADMIN_USER_NAME.equals( runAsUser );
+//        if ( changeUser ) {
+//            AuthenticationUtil.setRunAsUser( EmsScriptNode.ADMIN_USER_NAME );
+//        }
+//        EmsScriptNode n = 
+//        if ( changeUser ) {
+//            AuthenticationUtil.setRunAsUser( runAsUser );
+//        }
+//
+//        
+//    }
     protected EmsScriptNode getProjectNodeFromRequest(WebScriptRequest req, boolean createIfNonexistent) {
-
         WorkspaceNode workspace = getWorkspace( req );
         String timestamp = req.getParameter( "timestamp" );
         Date dateTime = TimeUtils.dateFromTimestamp( timestamp );
@@ -2998,8 +3013,16 @@ public class ModelPost extends AbstractJavaWebScript {
     }
 
     private void setSiteInfoImpl(String siteName) {
+        String runAsUser = AuthenticationUtil.getRunAsUser();
+        boolean changeUser = !EmsScriptNode.ADMIN_USER_NAME.equals( runAsUser );
+        if ( changeUser ) {
+            AuthenticationUtil.setRunAsUser( EmsScriptNode.ADMIN_USER_NAME );
+        }
         if (!siteName.startsWith(NodeUtil.sitePkgPrefix)) {
             siteInfo = services.getSiteService().getSite(siteName);
+        }
+        if ( changeUser ) {
+            AuthenticationUtil.setRunAsUser( runAsUser );
         }
     }
 

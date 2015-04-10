@@ -374,7 +374,7 @@ public class DocBookWrapper {
 			ArrayList<NodeRef> nodeRefs = NodeUtil.findNodeRefsByType( this.snapshotName + "_docbook.xml", "@cm\\:content:\"", services );
 			if (nodeRefs != null && nodeRefs.size() == 1) {
 				EmsScriptNode nodePrev = new EmsScriptNode(nodeRefs.get( 0 ), services, new StringBuffer());
-				if(nodePrev != null){ 
+				if(nodePrev != null && nodePrev.getName()==this.snapshotName + "_docbook.xml"){ 
 					try{
 						nodePrev.remove();
 					}
@@ -433,9 +433,10 @@ public class DocBookWrapper {
 		try{
 			// removes any previously generated Zip node.
 			ArrayList<NodeRef> nodeRefs = NodeUtil.findNodeRefsByType( this.snapshotName + ".zip", "@cm\\:name:\"", snapshotFolder.getServices() );
+			if(nodeRefs==null) nodeRefs = NodeUtil.findNodeRefsByType( this.snapshotName + ".zip", "@sysml\\:id:\"", snapshotFolder.getServices() );
 			if (nodeRefs != null && nodeRefs.size() > 0) {
 				EmsScriptNode nodePrev = new EmsScriptNode(nodeRefs.get( 0 ), snapshotFolder.getServices(), new StringBuffer());
-				if(nodePrev != null){ 
+				if(nodePrev != null && nodePrev.getName()==this.snapshotName + ".zip"){ 
 					try{
 						nodePrev.remove();
 					}
@@ -471,9 +472,10 @@ public class DocBookWrapper {
 		try{
 			// removes any previously generated PDF node.
 			ArrayList<NodeRef> nodeRefs = NodeUtil.findNodeRefsByType( this.snapshotName + ".pdf", "@cm\\:name:\"", snapshotFolder.getServices() );
+			if(nodeRefs==null) nodeRefs = NodeUtil.findNodeRefsByType( this.snapshotName + ".pdf", "@sysml\\:id:\"", snapshotFolder.getServices() );
 			if (nodeRefs != null && nodeRefs.size() > 0) {
 				EmsScriptNode nodePrev = new EmsScriptNode(nodeRefs.get( 0 ), snapshotFolder.getServices(), new StringBuffer());
-				if(nodePrev != null){ 
+				if(nodePrev != null && nodePrev.getName()==this.snapshotName + ".pdf"){ 
 					try{
 						nodePrev.remove();
 					}
@@ -507,9 +509,10 @@ public class DocBookWrapper {
 		try{
 			// removes any previously generated PDF node.
 			ArrayList<NodeRef> nodeRefs = NodeUtil.findNodeRefsByType( this.snapshotName + ".pdf", "@cm\\:name:\"", snapshotFolder.getServices() );
+			if(nodeRefs==null) nodeRefs = NodeUtil.findNodeRefsByType( this.snapshotName + ".pdf", "@sysml\\:id:\"", snapshotFolder.getServices() );
 			if (nodeRefs != null && nodeRefs.size() > 0) {
 				EmsScriptNode nodePrev = new EmsScriptNode(nodeRefs.get( 0 ), snapshotFolder.getServices(), new StringBuffer());
-				if(nodePrev != null){ 
+				if(nodePrev != null && nodePrev.getName()==this.snapshotName + ".pdf"){ 
 					try{
 						nodePrev.remove();
 					}

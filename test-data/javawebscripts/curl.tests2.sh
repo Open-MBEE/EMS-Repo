@@ -10,8 +10,8 @@ export CURL_SECURITY=" -k -3"
 
 export CURL_USER=" -u admin:admin"
 export CURL_FLAGS=$CURL_STATUS$CURL_USER
-export SERVICE_URL="\"http://localhost:8080/alfresco/service/"
-export BASE_URL="\"http://localhost:8080/alfresco/service/workspaces/master/"
+export SERVICE_URL="\"http://localhost:9091/alfresco/service/"
+export BASE_URL="\"http://localhost:9091/alfresco/service/workspaces/master/"
 
 echo POSTS
 
