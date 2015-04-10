@@ -1254,7 +1254,15 @@ public class EmsScriptNode extends ScriptNode implements
                 node.getNodeRefProperty( "ems:owner", dateTime, ws ) == null) {
                 
                 logger.warn( "getOwningParent: The node "+node+" is a versioned node and doesn't have a owner.  Returning the current node instead." );
-                NodeRef currentRef = node.normalizedNodeRef();
+                 
+                // Must do a find with dateTime as null b/c none of the other alfresco methods
+                // work for nodes in workspace://version2store
+                // Note: parents from nodes in versionStore://version2store are in
+                //       workspace://version2store
+                NodeRef currentRef =
+                        findNodeRefByType( node.getName(), SearchType.CM_NAME.prefix,
+                                           ws, null, false );
+                
                 if (currentRef != null) {
                     node = new EmsScriptNode( currentRef, getServices() );
                 }
