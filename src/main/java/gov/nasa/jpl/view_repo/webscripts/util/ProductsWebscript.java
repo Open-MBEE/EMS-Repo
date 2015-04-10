@@ -1,7 +1,7 @@
 package gov.nasa.jpl.view_repo.webscripts.util;
 
-import gov.nasa.jpl.mbee.util.Pair;
 import gov.nasa.jpl.mbee.util.TimeUtils;
+import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.sysml.View;
 import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
@@ -13,6 +13,7 @@ import gov.nasa.jpl.view_repo.webscripts.SnapshotGet;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -44,7 +45,10 @@ public class ProductsWebscript extends AbstractJavaWebScript {
     static Logger logger = Logger.getLogger(ProductsWebscript.class);
 
     public boolean simpleJson = false;
-    private EmsScriptNode sitePackageNode = null;
+    
+    // Cached keyed by Workspace, Timestamp, then Site to the JSON
+    private static Map<String, Map<String, Map<String, JSONArray>>> productCache = 
+            Collections.synchronizedMap( new HashMap<String, Map<String, Map<String, JSONArray>>>() );
 
     public ProductsWebscript( Repository repository, ServiceRegistry services,
                               StringBuffer response ) {
@@ -57,24 +61,11 @@ public class ProductsWebscript extends AbstractJavaWebScript {
 
         EmsScriptNode siteNode = null;
         EmsScriptNode mySiteNode = getSiteNodeFromRequest( req, false );
-        WorkspaceNode workspace = getWorkspace( req );
-        String timestamp = req.getParameter( "timestamp" );
-        Date dateTime = TimeUtils.dateFromTimestamp( timestamp );
-        String siteName = getSiteName(req);
 
         if (!NodeUtil.exists( mySiteNode )) {
             log(LogLevel.WARNING, "Could not find site", HttpServletResponse.SC_NOT_FOUND);
             return productsJson;
         }
-
-        // Find the project site and site package node if applicable:
-        Pair<EmsScriptNode,EmsScriptNode> sitePair = findProjectSite(siteName, dateTime, workspace, mySiteNode);
-        if (sitePair == null) {
-            return productsJson;
-        }
-
-        sitePackageNode = sitePair.first;
-        siteNode = sitePair.second;  // Should be non-null
 
         String configurationId = req.getServiceMatch().getTemplateVars().get( "configurationId" );
         if (configurationId == null) {
@@ -111,47 +102,18 @@ public class ProductsWebscript extends AbstractJavaWebScript {
         String timestamp = req.getParameter( "timestamp" );
         Date dateTime = TimeUtils.dateFromTimestamp( timestamp );
         WorkspaceNode workspace = getWorkspace( req );
+        String workspaceId = NodeUtil.getWorkspaceId( workspace, false );
 
-        // Search for all products within the project site:
-        // don't specify a site, since this is running into issues and filter later
-        Map< String, EmsScriptNode > nodeList = searchForElements(NodeUtil.SearchType.ASPECT.prefix,
-                                                                Acm.ACM_PRODUCT, false,
-                                                                workspace, dateTime,
-                                                                null);
-        if (nodeList != null) {
-
-            boolean checkSitePkg = (sitePackageNode != null && sitePackageNode.exists());
-            // Get the alfresco Site for the site package node:
-            EmsScriptNode pkgSite = checkSitePkg ? getSiteForPkgSite(sitePackageNode, dateTime, workspace) : null;
-
-            Set<EmsScriptNode> nodes = new HashSet<EmsScriptNode>(nodeList.values());
-            for ( EmsScriptNode node : nodes) {
-                if (node != null) {
-                    // If we are just retrieving the products for a site package, then filter out the ones
-                    // that do not have the site package as the first site package parent:
-                    if (checkSitePkg) {
-                        try {
-                            if (pkgSite != null &&
-                                pkgSite.equals(findParentPkgSite(node, workspace, dateTime))) {
-                                productsJson.put( node.toJSONObject( workspace, dateTime ) );
-                            }
-                        } catch (org.alfresco.repo.security.permissions.AccessDeniedException e) {
-                            // permission issue
-                            continue;
-                        }
-                    }
-                    else {
-                        String nodeSiteName = node.getSiteCharacterizationId(dateTime, workspace);
-                        if (nodeSiteName != null && siteNode.getName().equals( nodeSiteName)) {
-                            productsJson.put( node.toJSONObject( workspace, dateTime ) );
-                        } else if (nodeSiteName == null) {
-                            if (logger.isInfoEnabled()) { 
-                                logger.info( String.format("couldn't get node site name for sysmlid[%s] id[%s]",
-                                                           node.getSysmlId(), node.getId()));
-                            }
-                        }
-                    }
-                }
+        // check if it's already in the cache
+        String siteName = getSiteName(req);
+        if (timestamp == null) {
+            productsJson = getLatestProducts( workspace, dateTime, siteName );
+        } else {
+            productsJson = getProductsFromCache( workspace, workspaceId, dateTime, timestamp, siteName );
+            if (productsJson != null) {
+                return productsJson;
+            } else {
+                productsJson = new JSONArray();
             }
         }
 
@@ -261,5 +223,90 @@ public class ProductsWebscript extends AbstractJavaWebScript {
             executeImplImpl( WebScriptRequest req, Status status, Cache cache ) {
         // TODO Auto-generated method stub
         return null;
+    }
+    
+    protected synchronized JSONArray getProductsFromCache(WorkspaceNode workspace, String workspaceId,
+                                                          Date dateTime, String timestamp, String siteName) {
+        Map<String, JSONArray> timestampCheck = Utils.get(productCache, workspaceId, timestamp);
+        JSONArray productsJson = Utils.get(productCache, workspaceId, timestamp, siteName);
+        
+        // it's possible a site has no documents, in that case, need to check that timestamp doesn't exist
+        if (timestampCheck != null) {
+            
+        } else {
+            if (productsJson == null) { 
+                buildCache(workspace, dateTime, timestamp);
+            }
+
+            // now that cache is built can look it up for returning, if not there, return empty
+            productsJson = Utils.get(productCache, workspaceId, timestamp, siteName);
+            
+            if (productsJson == null) {
+                productsJson = new JSONArray();
+            }
+        } 
+        
+        return productsJson;
+    }
+    
+   
+    protected void buildCache(WorkspaceNode workspace, Date dateTime, String timestamp) {
+        String workspaceId = NodeUtil.getWorkspaceId( workspace, false );
+        
+        // Search for all products within the project site:
+        // don't specify a site, since this is running into issues and filter later
+        Map< String, EmsScriptNode > nodeList = searchForElements(NodeUtil.SearchType.ASPECT.prefix,
+                                                                Acm.ACM_PRODUCT, false,
+                                                                workspace, dateTime,
+                                                                null);
+        if (nodeList != null) {
+            Set<EmsScriptNode> nodes = new HashSet<EmsScriptNode>(nodeList.values());
+            for ( EmsScriptNode node : nodes) {
+                if (node != null) {
+                    JSONObject nodeJson = node.toJSONObject(workspace, dateTime);;
+                    String nodeSiteName = node.getSiteCharacterizationId(dateTime, workspace);
+
+                    if (timestamp != null) {
+                        JSONArray siteCache = Utils.get( productCache, workspaceId, timestamp, nodeSiteName );
+                        if (siteCache == null) {
+                            siteCache = new JSONArray();
+                            Utils.put( productCache, workspaceId, timestamp, nodeSiteName, siteCache);
+                        }
+                        
+                        siteCache.put( nodeJson );
+                    }
+                    
+                }
+            }
+        }
+    }
+    
+    protected JSONArray getLatestProducts(WorkspaceNode workspace, Date dateTime, String siteName) {
+        JSONArray productsJson = new JSONArray();
+    
+        // Search for all products within the project site:
+        // don't specify a site, since this is running into issues and filter later
+        Map< String, EmsScriptNode > nodeList = searchForElements(NodeUtil.SearchType.ASPECT.prefix,
+                                                                Acm.ACM_PRODUCT, false,
+                                                                workspace, dateTime,
+                                                                null);
+        if (nodeList != null) {
+            Set<EmsScriptNode> nodes = new HashSet<EmsScriptNode>(nodeList.values());
+            for ( EmsScriptNode node : nodes) {
+                if (node != null) {
+                    String nodeSiteName = node.getSiteCharacterizationId(dateTime, workspace);
+                    if (nodeSiteName != null && siteName.equals( nodeSiteName)) {
+                        productsJson.put( node.toJSONObject( workspace, dateTime ) );
+                    } else if (nodeSiteName == null) {
+                        if (logger.isInfoEnabled()) { 
+                            logger.info( String.format("couldn't get node site name for sysmlid[%s] id[%s]",
+                                                       node.getSysmlId(), node.getId()));
+                        }
+                    }
+                }
+            }
+        }
+        
+        return productsJson;
     }
 }
