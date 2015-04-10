@@ -122,7 +122,10 @@ public class SnapshotArtifactsGenerationActionExecuter  extends ActionExecuterAb
 			// lookup snapshotNode using standard lucene as snapshotId is unique across all workspaces
 			ArrayList<NodeRef> nodeRefs = NodeUtil.findNodeRefsByType( snapshotId, "@cm\\:name:\"", services );
 			if (nodeRefs == null || nodeRefs.size() != 1) {
-				throw new Exception("Failed to find snapshot with Id: " + snapshotId);
+				nodeRefs = NodeUtil.findNodeRefsByType( snapshotId, "@sysml\\:id:\"", services );
+				if (nodeRefs == null || nodeRefs.size() != 1) {
+					throw new Exception("Failed to find snapshot with Id: " + snapshotId);
+				}
 			}
 			
 			snapshotNode = new EmsScriptNode(nodeRefs.get( 0 ), services, response);
@@ -235,14 +238,14 @@ public class SnapshotArtifactsGenerationActionExecuter  extends ActionExecuterAb
         	logger.error(sb.toString());
         	ex.printStackTrace();
         	ActionUtil.sendEmailToModifier(jobNode, String.format("An unexpected error occurred and your PDF generation failed.\n%s%s", ex.getMessage(), sb.toString()), "PDF Generation Failed", services);
-        	ActionUtil.sendEmailTo("mbee-dev-admin@jpl.nasa.gov", "mbee-dev-admin@jpl.nasa.gov", 
-        			String.format("Server: %s\nSite: %s\nWorkspace: %s\nSnapshot Id: %s\nError: %s%s%s", 
-        					new HostnameGet(this.repository, this.services).getAlfrescoUrl(),
-        					siteName,
-        					workspace,
-        					snapshotId,
-        					ex.getMessage(), sb.toString(), response.toString()), 
-					"PDF Generation Failed", services);
+//        	ActionUtil.sendEmailTo("mbee-dev-admin@jpl.nasa.gov", "mbee-dev-admin@jpl.nasa.gov", 
+//        			String.format("Server: %s\nSite: %s\nWorkspace: %s\nSnapshot Id: %s\nError: %s%s%s", 
+//        					new HostnameGet(this.repository, this.services).getAlfrescoUrl(),
+//        					siteName,
+//        					workspace,
+//        					snapshotId,
+//        					ex.getMessage(), sb.toString(), response.toString()), 
+//					"PDF Generation Failed", services);
         }
     }
 
