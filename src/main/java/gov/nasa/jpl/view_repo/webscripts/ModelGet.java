@@ -131,7 +131,7 @@ public class ModelGet extends AbstractJavaWebScript {
         if ( wsFound ) modelRootNode = findScriptNodeById(modelId, workspace, dateTime, findDeleted);
 
 		if (modelRootNode == null || modelRootNode.isDeleted() ) {
-            log( Level.ERROR,  HttpServletResponse.SC_NOT_FOUND,
+            log( Level.WARN,  HttpServletResponse.SC_NOT_FOUND,
                  "Element with id, %s not found", modelId
                  + ( dateTime == null ? "" : " at " + dateTime ));
 			return false;

@@ -5287,13 +5287,15 @@ public class EmsScriptNode extends ScriptNode implements
         }
     }
 
-    protected void addInstanceSpecificationJSON( JSONObject json, EmsScriptNode node,
-                                                 Set< String > filter, WorkspaceNode ws ,
-                                                 Date dateTime  ) throws JSONException {
+    protected
+            void
+            addInstanceSpecificationJSON( JSONObject json, EmsScriptNode node,
+                                          Set< String > filter, WorkspaceNode ws, Date dateTime )
+                                                                               throws JSONException {
         
         // Dont need the correct workspace b/c sysml ids are immutable:
         NodeRef specNode = (NodeRef) node.getNodeRefProperty( Acm.ACM_INSTANCE_SPECIFICATION_SPECIFICATION,
-                                                              true, dateTime, node.getWorkspace());
+                                                              true, dateTime, ws);
         putInJson( json,
                    Acm.JSON_INSTANCE_SPECIFICATION_SPECIFICATION,
                    addNodeRefIdJSON(specNode),
@@ -5301,12 +5303,11 @@ public class EmsScriptNode extends ScriptNode implements
         
         putInJson( json,
                    Acm.JSON_CLASSIFIER,
-                   node.getNodeRefProperty( Acm.ACM_CLASSIFIER, dateTime, ws ),
+                   node.getNodeRefProperty( Acm.ACM_CLASSIFIER, dateTime, ws),
                    filter );
         
         ArrayList< NodeRef > nodeRefs =
-                (ArrayList< NodeRef >)node.getNodeRefProperty( Acm.ACM_SLOTS,
-                                                               dateTime, ws );
+                (ArrayList< NodeRef >)node.getNodeRefProperty( Acm.ACM_SLOTS, dateTime, ws );
         JSONArray ids = addNodeRefIdsJSON( nodeRefs );
         if ( ids.length() > 0 ) {
             putInJson( json, Acm.JSON_SLOTS, ids, filter );

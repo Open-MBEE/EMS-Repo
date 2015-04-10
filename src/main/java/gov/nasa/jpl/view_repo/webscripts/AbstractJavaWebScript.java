@@ -228,8 +228,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
         if ( p.first ) return;
         seen = p.second;
 
-        ArrayList< NodeRef > children = node.getOwnedChildren( true, null,
-                                                               node.getWorkspace() );
+        ArrayList< NodeRef > children = node.getOwnedChildren( true, null, null );
         for ( NodeRef ref : children ) {
             EmsScriptNode childNode = new EmsScriptNode( ref, getServices() );
             String sysmlId = childNode.getSysmlId();
@@ -547,7 +546,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 		Matcher m = p.matcher(formattedMsg);
 		
 		for (Object obj: params){
-			if (obj.getClass().isArray()){
+			if (obj != null && obj.getClass().isArray()){
 				String arrString = "";
 				if (obj instanceof int []) { arrString = Arrays.toString((int [])obj);}
 				else if (obj instanceof double []) { arrString = Arrays.toString((double [])obj);}
@@ -558,7 +557,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 				formattedMsg = m.replaceFirst(arrString);
 			}
 			else { // captures Timer, EmsScriptNode, Date, primitive types, NodeRef, JSONObject type objects; applies toString() on all
-				formattedMsg = m.replaceFirst(obj.toString());
+				formattedMsg = m.replaceFirst(obj == null ? "null" : obj.toString());
 			}
 			m = p.matcher(formattedMsg);
 //			if (obj.getClass().isArray()){	
@@ -1224,18 +1223,13 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
      * @param constraintNode The node to parse and create a ConstraintExpression for
      * @param constraints The list of Constraints to add to
      */
-    public void addConstraintExpression(EmsScriptNode constraintNode,
-                                        Collection<Constraint> constraints,
-                                        Date date, WorkspaceNode ws) {
+    public void addConstraintExpression(EmsScriptNode constraintNode, Collection<Constraint> constraints, WorkspaceNode ws) {
     
         if (constraintNode == null || constraints == null) return;
     
-        EmsScriptNode exprNode = getConstraintExpression(constraintNode, date, ws);
+        EmsScriptNode exprNode = getConstraintExpression(constraintNode, ws);
     
         if (exprNode != null) {
-//            Expression<Call> expressionCall = getSystemModelAe().toAeExpression( exprNode );
-//            Call call = (Call) expressionCall.expression;
-//            Expression<Boolean> expression = new Expression<Boolean>(call.evaluate(true, false));
             Expression<Boolean> expression = toAeExpression( exprNode );
     
             if (expression != null) {
@@ -1264,23 +1258,13 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
         return expression;
     }
 
-    public Collection< Constraint > getAeConstraints( Set< EmsScriptNode > elements, Date dateTime, WorkspaceNode workspace) {
+    public Collection< Constraint > getAeConstraints( Set< EmsScriptNode > elements, WorkspaceNode ws ) {
         //Map<EmsScriptNode, Constraint> constraints = new LinkedHashMap<EmsScriptNode, Constraint>();
         Collection<Constraint> constraints = new ArrayList<Constraint>();
     
         // Search for all constraints in the database:
-//        ArrayList< NodeRef > refs = 
-//                NodeUtil.findNodeRefsByType( "sysml:Constraint", SearchType.ASPECT.prefix,
-//                                             false, workspace, null, false, true,
-//                                             getServices(), false, null );
-//        
-//        Collection<EmsScriptNode> constraintNodes = //getSystemModel().getType(workspace, Acm.JSON_CONSTRAINT);
-//                EmsScriptNode.toEmsScriptNodeList( refs, getServices(), getResponse(), getResponseStatus() );
-
-        Collection<EmsScriptNode> constraintNodes = getSystemModel().getType(null, Acm.JSON_CONSTRAINT);
+        Collection<EmsScriptNode> constraintNodes = getSystemModel().getType(null, Acm.ACM_CONSTRAINT);
     
-        
-        
         if (!Utils.isNullOrEmpty(constraintNodes)) {
     
             // Loop through each found constraint and check if it contains any of the elements
@@ -1288,7 +1272,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
             for (EmsScriptNode constraintNode : constraintNodes) {
     
                 // Parse the constraint node for all of the cm:names of the nodes in its expression tree:
-                Set<String> constrElemNames = getConstraintElementNames(constraintNode, dateTime, workspace);
+                Set<String> constrElemNames = getConstraintElementNames(constraintNode, ws);
     
                 // Check if any of the posted elements are in the constraint expression tree, and add
                 // constraint if they are:
@@ -1298,7 +1282,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
     
                     String name = element.getName();
                     if (name != null && constrElemNames.contains(name)) {
-                        addConstraintExpression(constraintNode, constraints, dateTime, workspace);
+                        addConstraintExpression(constraintNode, constraints, ws);
                         break;
                     }
     
@@ -1320,11 +1304,11 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
         return constraints;
     }
 
-    public Map< EmsScriptNode, Expression<?> > getAeExpressions( Set< EmsScriptNode > elements,
-                                                                 Date date, WorkspaceNode ws) {
+    public Map< EmsScriptNode, Expression<?> > getAeExpressions( Set< EmsScriptNode > elements ) {
         Map<EmsScriptNode, Expression<?>> expressions = new LinkedHashMap< EmsScriptNode, Expression<?> >();
         for ( EmsScriptNode node : elements ) {
-            if ( node.hasAspect( Acm.ACM_EXPRESSION ) && !node.isOwnedValueSpec(date, ws) ) {
+            // FIXME -- Don't we need to pass in a date and workspace?
+            if ( node.hasAspect( Acm.ACM_EXPRESSION ) && !node.isOwnedValueSpec(null, node.getWorkspace()) ) {
                 Expression<?> expression = toAeExpression( node );
                 if ( expression != null ) {
                     expressions.put( node, expression );
@@ -1334,12 +1318,10 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
         return expressions;
     }
 
-
-    public Map<Object, Object> evaluate( Set< EmsScriptNode > elements, Date date,
-                                         WorkspaceNode ws ) {
+    public Map<Object, Object> evaluate( Set< EmsScriptNode > elements, WorkspaceNode ws ) {
         log(Level.INFO, "Will attempt to fix constraint violations if found!");
-        Collection< Constraint > constraints = getAeConstraints( elements, date, ws );
-        Map< EmsScriptNode, Expression<?> > expressions = getAeExpressions( elements, date, ws );
+        Collection< Constraint > constraints = getAeConstraints( elements, ws );
+        Map< EmsScriptNode, Expression<?> > expressions = getAeExpressions( elements );
     
         Map< Object, Object > results = new LinkedHashMap< Object, Object >();
         if ( !Utils.isNullOrEmpty( constraints ) ) {
@@ -1359,14 +1341,14 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
         return results;
     }
 
-    public void fix( Set< EmsScriptNode > elements, WorkspaceNode workspace ) {
+    public void fix( Set< EmsScriptNode > elements, WorkspaceNode ws ) {
     
         log(Level.INFO, "Will attempt to fix constraint violations if found!");
     
         SystemModelSolver< EmsScriptNode, EmsScriptNode, EmsScriptNode, EmsScriptNode, String, String, Object, EmsScriptNode, String, String, EmsScriptNode >  solver =
                 new SystemModelSolver< EmsScriptNode, EmsScriptNode, EmsScriptNode, EmsScriptNode, String, String, Object, EmsScriptNode, String, String, EmsScriptNode >(getSystemModel(), new ConstraintLoopSolver() );
     
-        Collection<Constraint> constraints = getAeConstraints( elements, null, workspace );
+        Collection<Constraint> constraints = getAeConstraints( elements, ws );
     
         // Solve the constraints:
         if (!Utils.isNullOrEmpty( constraints )) {
@@ -1514,9 +1496,11 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
      * in the expression.
      *
      * @param expressionNode The node to parse
+     * @param ws 
+     * @param date 
      * @return Set of cm:name
      */
-    protected Set<String> getExpressionElementNames(EmsScriptNode expressionNode) {
+    protected Set<String> getExpressionElementNames(EmsScriptNode expressionNode, Date date , WorkspaceNode ws ) {
     
         Set<String> names = new HashSet<String>();
     
@@ -1527,6 +1511,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
     
             if (name != null) names.add(name);
     
+            // FIXME -- need to give date/workspace context 
             // Process all of the operand properties:
             Collection< EmsScriptNode > properties =
                     getSystemModel().getProperty( expressionNode, Acm.JSON_OPERAND);
@@ -1541,6 +1526,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
     
                     names.add(operandProp.getName());
     
+                    // FIXME -- need to give date/workspace context 
                     // Get the valueOfElementProperty node:
                     Collection< EmsScriptNode > valueOfElemNodes =
                             getSystemModel().getProperty(operandProp, Acm.JSON_ELEMENT_VALUE_ELEMENT);
@@ -1561,8 +1547,10 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
     
                     if (valueOfElementNode != null) {
     
+                      // FIXME -- need to give date/workspace context 
                       String typeString = getSystemModel().getTypeString(valueOfElementNode, null);
     
+                      // FIXME -- need to give date/workspace context 
                       // If it is a Operation then see if it then process it:
                       if (typeString.equals(Acm.JSON_OPERATION)) {
                           names.addAll(getOperationElementNames(valueOfElementNode));
@@ -1570,14 +1558,16 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
     
                       // If it is a Expression then process it recursively:
                       else if (typeString.equals(Acm.JSON_EXPRESSION)) {
-                          names.addAll(getExpressionElementNames(valueOfElementNode));
+                          names.addAll(getExpressionElementNames(valueOfElementNode, date, ws));
                       }
     
+                      // FIXME -- need to give date/workspace context 
                       // If it is a Parameter then process it:
                       else if (typeString.equals(Acm.JSON_PARAMETER)) {
                           names.addAll(getParameterElementNames(valueOfElementNode));
                       }
     
+                      // FIXME -- need to give date/workspace context 
                       // If it is a Property then process it:
                       else if (typeString.equals(Acm.JSON_PROPERTY)) {
                           names.addAll(getPropertyElementNames(valueOfElementNode));
@@ -1601,10 +1591,10 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
      * names in the expression.
      *
      * @param constraintNode The node to parse
+     * @param ws 
      * @return Set of cm:name
      */
-    protected Set<String> getConstraintElementNames(EmsScriptNode constraintNode,
-                                                    Date dateTime, WorkspaceNode ws) {
+    protected Set<String> getConstraintElementNames(EmsScriptNode constraintNode, WorkspaceNode ws ) {
     
         Set<String> names = new LinkedHashSet<String>();
     
@@ -1616,14 +1606,13 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
             if (name != null) names.add(name);
     
             // Get the Expression for the Constraint:
-            EmsScriptNode exprNode = getConstraintExpression(constraintNode,
-                                                             dateTime, ws);
+            EmsScriptNode exprNode = getConstraintExpression(constraintNode, ws);
     
             // Add the names of all nodes in the Expression:
             if (exprNode != null) {
     
                 // Get elements names from the Expression:
-                names.addAll(getExpressionElementNames(exprNode));
+                names.addAll(getExpressionElementNames(exprNode, null, ws));
     
                 // REVIEW: Not using the child associations b/c
                 // ElementValue's elementValueOfElement has a different
@@ -1642,19 +1631,12 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
      * @param constraintNode The node to parse
      * @return The Expression node for the constraint
      */
-    private EmsScriptNode getConstraintExpression( EmsScriptNode constraintNode,
-                                                   Date dateTime, WorkspaceNode ws ) {
+    private EmsScriptNode getConstraintExpression(EmsScriptNode constraintNode, WorkspaceNode ws) {
     
         if (constraintNode == null) return null;
     
+        // FIXME -- need to give date/workspace context 
         // Get the constraint expression:
-//        ArrayList< NodeRef > refs =
-//                constraintNode.getPropertyNodeRefs( Acm.ACM_CONSTRAINT_SPECIFICATION,
-//                                                    dateTime, ws );
-//            Collection< EmsScriptNode > expressions =
-//                EmsScriptNode.toEmsScriptNodeList( refs, getServices(),
-//                                                   getResponse(),
-//                                                   getResponseStatus() );
         Collection<EmsScriptNode> expressions =
                 getSystemModel().getProperty( constraintNode, Acm.JSON_CONSTRAINT_SPECIFICATION );
     
