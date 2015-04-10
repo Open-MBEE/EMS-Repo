@@ -333,8 +333,14 @@ public class ConfigurationsWebscript extends AbstractJavaWebScript {
             }
 
             Date dateTime = (Date) snapshot.getProperty("view2:timestamp");
-            NodeRef snapshotProductNodeRef = (NodeRef) snapshot.getNodeRefProperty( "view2:snapshotProduct",
+            NodeRef snapshotProductNodeRef;
+            try {
+                snapshotProductNodeRef = (NodeRef) snapshot.getNodeRefProperty( "view2:snapshotProduct",
                                                                                     dateTime, workspace);
+            } catch (org.alfresco.repo.security.permissions.AccessDeniedException e) {
+                // permission issue, so skip
+                continue;
+            }
             
             // TODO doing another search below may be redundant b/c getNodeRefProperty() will handle it
             if ( snapshotProductNodeRef != null ) {

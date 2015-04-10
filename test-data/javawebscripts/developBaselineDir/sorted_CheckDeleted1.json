@@ -1,6 +1,18 @@
 {"workspaces": [
     {
         "description": "",
+        "qualifiedName": "master/parentWorkspace1",
+        "name": "parentWorkspace1",
+        "creator": "admin"
+    },
+    {
+        "description": "",
+        "qualifiedName": "master/parentWorkspace1/subworkspace1",
+        "name": "subworkspace1",
+        "creator": "admin"
+    },
+    {
+        "description": "",
         "qualifiedName": "master/wsA",
         "name": "wsA",
         "creator": "admin"
@@ -42,8 +54,8 @@
         "creator": "admin"
     },
     {
+        "workspaceOperationsPermission": true,
         "qualifiedName": "master",
-        "name": "master",
-        "siteManagerPermission": true
+        "name": "master"
     }
 ]}

@@ -541,30 +541,98 @@ public class WorkspaceNode extends EmsScriptNode {
     public WorkspaceNode getCommonParent(WorkspaceNode other) {
         return getCommonParent( this, other );
     }
+    public Pair< WorkspaceNode, WorkspaceNode > getChildrenOfCommonParent(WorkspaceNode other) {
+        return getChildrenOfCommonParent( this, other );
+    }
 
     public static WorkspaceNode getCommonParent( WorkspaceNode ws1,
                                                  WorkspaceNode ws2 ) {
         Set<WorkspaceNode> parents = new TreeSet<WorkspaceNode>();
-        while ( ( ws1 != null || ws2 != null )
-                && ( ws1 == null ? !ws2.equals( ws1 ) : !ws1.equals( ws2 ) )
-                && ( ws1 == null || !parents.contains( ws1 ) )
-                && ( ws2 == null || !parents.contains( ws2 ) ) ) {
-            if ( ws1 != null ) {
-                parents.add( ws1 );
-                ws1 = ws1.getParentWorkspace();
-            }
-            if ( ws2 != null ) {
-                parents.add( ws2 );
-                ws2 = ws2.getParentWorkspace();
-            }
+        
+        // brute force walk up one branch, then the other checking for matches along the way
+        while ( ws1 != null ) {
+            parents.add( ws1 );
+            ws1 = ws1.getParentWorkspace();
         }
-        if ( ws1 != null && ( ws1.equals( ws2 ) || parents.contains( ws1 ) ) ) {
-            return ws1;
+        
+        while ( ws2 != null ) {
+            if (parents.contains( ws2 )) break;
+            ws2 = ws2.getParentWorkspace();
         }
         if ( ws2 != null && parents.contains( ws2 ) ) {
             return ws2;
         }
         return null;
+    }
+
+    /**
+     * Return the earliest ancestor of each workspace that is the immediate
+     * child of the common parent workspace. If one is the parent of the other,
+     * the child returned for the parent is null. If the workspaces are equal,
+     * return null;
+     * 
+     * @param ws1
+     * @param ws2
+     * @return
+     */
+    public static Pair<WorkspaceNode,WorkspaceNode> getChildrenOfCommonParent( WorkspaceNode ws1,
+                                                                               WorkspaceNode ws2 ) {
+        WorkspaceNode w = getCommonParent(ws1, ws2);
+        WorkspaceNode child1 = null;
+        WorkspaceNode child2 = null;
+        while ( ws1 != null && !ws1.equals( w ) ) {
+            child1 = ws1;
+            ws1 = ws1.getParentWorkspace();
+        }
+        while ( ws2 != null && !ws2.equals( w ) ) {
+            child2 = ws2;
+            ws2 = ws2.getParentWorkspace();
+        }
+        Pair< WorkspaceNode, WorkspaceNode > result = new Pair<WorkspaceNode,WorkspaceNode>(child1, child2);
+        return result;
+//        if ( ws1 == null ) return null;
+//        WorkspaceNode child1 = ws1;
+//        WorkspaceNode child2 = ws2;
+//        Set<WorkspaceNode> parents = new TreeSet<WorkspaceNode>();
+//        List<WorkspaceNode> parents1 = new ArrayList<WorkspaceNode>();
+//        List<WorkspaceNode> parents2 = new ArrayList<WorkspaceNode>();
+//        if ( ws1 != null ) parents1.add( ws1 );
+//        if ( ws2 != null ) parents2.add( ws2 );
+//        while ( ( ws1 != null || ws2 != null )
+//                && ( ws1 == null ? !ws2.equals( ws1 ) : !ws1.equals( ws2 ) )
+//                && ( ws1 == null || !parents.contains( ws1 ) )
+//                && ( ws2 == null || !parents.contains( ws2 ) ) ) {
+//            if ( ws1 != null ) {
+//                parents.add( ws1 );
+//                child1 = ws1;
+//                ws1 = ws1.getParentWorkspace();
+//                if ( ws1 != null ) parents1.add( ws1 );
+//            }
+//            if ( ws2 != null ) {
+//                parents.add( ws2 );
+//                //child2 = ws2;
+//                ws2 = ws2.getParentWorkspace();
+//                if ( ws2 != null ) parents2.add( ws2 );
+//            }
+//        }
+//        if ( ws1 != null && ( ws1.equals( ws2 ) || parents.contains( ws1 ) ) ) {
+//            return child1;
+//        }
+//        if ( ws2 != null && parents.contains( ws2 ) ) {
+//            // find ws2 in parents1 and return the ws below it.
+//            WorkspaceNode child = null;
+//            for ( WorkspaceNode w : parents1 ) {
+//                if ( ws2.equals( w ) ) {
+//                    if ( child == null ) {
+//                        return w;
+//                    }
+//                    return child;
+//                }
+//                child = w;
+//            }
+//            return ws2; // Error?!
+//        }
+//        return null;
     }
 
     public Set< NodeRef > getChangedNodeRefs( Date dateTime ) {
@@ -703,6 +771,7 @@ public class WorkspaceNode extends EmsScriptNode {
                     CommitUtil.getCommitsInDateTimeRange( otherCompareTime,
                                                           thisCompareTime,
                                                           lastParent,
+                                                          targetParent,
                                                           services,
                                                           response);
             
@@ -1018,6 +1087,33 @@ public class WorkspaceNode extends EmsScriptNode {
                          + nameOrId );
         }
         return null;
+    }
+
+    /**
+     * Get the time after which this workspace does not recognize changes in the
+     * input workspace. This the time from which this workspace is
+     * copied/branched with respect to its common parent with the input
+     * relativeWorkspace.
+     * 
+     * @param relativeWorkspace
+     * @return the time from which this and the 
+     */
+    public Date getCopyTime( WorkspaceNode relativeWorkspace ) {
+        
+        // WARNING!  This doesn't work for workspaces that do not have a copyTime!
+        
+        Pair< WorkspaceNode, WorkspaceNode > childrenOfCommonParent =
+                getChildrenOfCommonParent( relativeWorkspace );
+        if ( childrenOfCommonParent == null ) return null;
+        if ( childrenOfCommonParent.first == null ) return null;
+        Date t = childrenOfCommonParent.first.getCopyTime();
+        if ( childrenOfCommonParent.second != null ) {
+            Date t2 = childrenOfCommonParent.second.getCopyTime();
+            if ( t == null || ( t2 != null && t2.before( t ) ) ) {
+                t = t2;
+            }
+        }
+        return t;
     }
 
 }

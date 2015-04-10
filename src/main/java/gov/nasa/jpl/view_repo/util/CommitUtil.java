@@ -126,6 +126,7 @@ public class CommitUtil {
 	                                           ServiceRegistry services,
 	                                           StringBuffer response) {
         // to make sure no permission issues, run as admin
+	    String origUser = AuthenticationUtil.getRunAsUser();
         AuthenticationUtil.setRunAsUser( "admin" );
 	    
 	    ArrayList<EmsScriptNode> commits = new ArrayList<EmsScriptNode>();
@@ -145,7 +146,7 @@ public class CommitUtil {
             Collections.sort( commits, new ConfigurationsWebscript.EmsScriptNodeCreatedAscendingComparator() );
 	    }
 
-        AuthenticationUtil.setRunAsUser( AuthenticationUtil.getFullyAuthenticatedUser() );
+        AuthenticationUtil.setRunAsUser( origUser );
 
 	    return commits;
 	}
@@ -315,9 +316,22 @@ public class CommitUtil {
 	    return null;
 	}
 
+	/**
+	 * Gets all the commits in the specified time range from the startWorkspace to the 
+	 * endWorkspace. If the endWorkspace is not a parent of the startWorkspace, this will
+	 * search to the master.
+	 * @param fromDateTime
+	 * @param toDateTime
+	 * @param startWorkspace
+	 * @param endWorkspace
+	 * @param services
+	 * @param response
+	 * @return
+	 */
 	public static ArrayList<EmsScriptNode> getCommitsInDateTimeRange( Date fromDateTime,
 	                                                                  Date toDateTime,
-	                                                                  WorkspaceNode workspace,
+	                                                                  WorkspaceNode startWorkspace,
+	                                                                  WorkspaceNode endWorkspace,
 	                                                                  ServiceRegistry services,
 	                                                                  StringBuffer response) {
         // to make sure no permission issues, run as admin
@@ -328,18 +342,18 @@ public class CommitUtil {
 	    //             through, rather than using getLastCommit().
 
 	    // skip over too new workspaces
-	    while ( workspace != null ) {
-	        Date created = workspace.getCreationDate();
+	    while ( startWorkspace != null ) {
+	        Date created = startWorkspace.getCreationDate();
 	        if ( toDateTime != null && created.after( toDateTime ) ) {
-	            workspace = workspace.getParentWorkspace();
+	            startWorkspace = startWorkspace.getParentWorkspace();
 	        } else {
 	            break;
 	        }
 	    }
 	    // gather commits between dates while walking up workspace parents
 	    ArrayList<EmsScriptNode> commits = new ArrayList< EmsScriptNode >();
-        while ( true ) { // run until workspace is equal to null and once while it is null (for the master branch)
-            EmsScriptNode commit = getLastCommit( workspace, services, response );
+        while ( true ) { // run until endWorkspace or master
+            EmsScriptNode commit = getLastCommit( startWorkspace, services, response );
             while ( commit != null ) {
                 Date created = commit.getCreationDate();
                 if ( fromDateTime != null && created.before( fromDateTime ) ) break;
@@ -348,8 +362,9 @@ public class CommitUtil {
                 }
                 commit = getPreviousCommit(commit);
             }
-            if ( workspace == null ) break;
-            workspace = workspace.getParentWorkspace();
+            if ( startWorkspace == null ) break;
+            if ( startWorkspace.equals(endWorkspace) ) break;
+            startWorkspace = startWorkspace.getParentWorkspace();
         }
         
         AuthenticationUtil.setRunAsUser( originalUser );

@@ -66,6 +66,8 @@ import javax.servlet.http.HttpServletResponse;
 import kexpparser.KExpParser;
 //import k.frontend.Frontend;
 
+
+
 import org.alfresco.repo.model.Repository;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
@@ -275,9 +277,10 @@ public class ModelPost extends AbstractJavaWebScript {
             // make sure the following are run as admin user, it's possible that the
             // workspace doesn't have the project and user doesn't have read permissions on
             // the parent workspace (at that level)
+            String origUser = AuthenticationUtil.getRunAsUser();
             AuthenticationUtil.setRunAsUser( "admin" );
             projectId = elements.first().getProjectId(targetWS);
-            AuthenticationUtil.setRunAsUser( AuthenticationUtil.getFullyAuthenticatedUser() );
+            AuthenticationUtil.setRunAsUser( origUser );
        }
         String wsId = "master";
         if (targetWS != null) {
@@ -1954,6 +1957,9 @@ public class ModelPost extends AbstractJavaWebScript {
             }
         }
 
+        // FIXME: this temporary until we find out why there are permission issues with sites
+        String origUser = AuthenticationUtil.getRunAsUser();
+        AuthenticationUtil.setRunAsUser( "admin" );
         // siteInfo doesnt give the node ref we want, so must search for it:
         siteNode = getSiteNode( siteName, null, null );
         if (siteNode != null) {
@@ -1963,6 +1969,7 @@ public class ModelPost extends AbstractJavaWebScript {
             pkgSiteNode.createOrUpdateAspect( Acm.ACM_SITE_CHARACTERIZATION);
             pkgSiteNode.createOrUpdateProperty( Acm.ACM_SITE_SITE, siteNode.getNodeRef() );
         }
+        AuthenticationUtil.setRunAsUser( origUser );
         
         return siteNode;
     }
@@ -2920,9 +2927,22 @@ public class ModelPost extends AbstractJavaWebScript {
 
         return true;
     }
+    
 
+//    protected EmsScriptNode getProjectNodeFromRequest(WebScriptRequest req, boolean createIfNonexistent) {
+//        String runAsUser = AuthenticationUtil.getRunAsUser();
+//        boolean changeUser = !EmsScriptNode.ADMIN_USER_NAME.equals( runAsUser );
+//        if ( changeUser ) {
+//            AuthenticationUtil.setRunAsUser( EmsScriptNode.ADMIN_USER_NAME );
+//        }
+//        EmsScriptNode n = 
+//        if ( changeUser ) {
+//            AuthenticationUtil.setRunAsUser( runAsUser );
+//        }
+//
+//        
+//    }
     protected EmsScriptNode getProjectNodeFromRequest(WebScriptRequest req, boolean createIfNonexistent) {
-
         WorkspaceNode workspace = getWorkspace( req );
         String timestamp = req.getParameter( "timestamp" );
         Date dateTime = TimeUtils.dateFromTimestamp( timestamp );
@@ -3014,8 +3034,16 @@ public class ModelPost extends AbstractJavaWebScript {
     }
 
     private void setSiteInfoImpl(String siteName) {
+        String runAsUser = AuthenticationUtil.getRunAsUser();
+        boolean changeUser = !EmsScriptNode.ADMIN_USER_NAME.equals( runAsUser );
+        if ( changeUser ) {
+            AuthenticationUtil.setRunAsUser( EmsScriptNode.ADMIN_USER_NAME );
+        }
         if (!siteName.startsWith(NodeUtil.sitePkgPrefix)) {
             siteInfo = services.getSiteService().getSite(siteName);
+        }
+        if ( changeUser ) {
+            AuthenticationUtil.setRunAsUser( runAsUser );
         }
     }
 

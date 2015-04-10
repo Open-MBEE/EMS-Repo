@@ -40,6 +40,7 @@
 <tr><td>/javawebscripts/views/{modelid}/elements</td><td>javawebscripts/view/element.post.desc.xml</td><td>gov.nasa.jpl.view_repo.webscripts.ViewModelPost</td></tr>
 <tr><td>/javawebscripts/views/{modelid}/elements?recurse={recurse?}</td><td>javawebscripts/view/element.get.desc.xml</td><td>gov.nasa.jpl.view_repo.webscripts.ViewGet</td></tr>
 <tr><td>/jsonCache?on={on?}&amp;off={off?}</td><td>utils/jsoncache.get.desc.xml</td><td>gov.nasa.jpl.view_repo.webscripts.JsonCacheGet</td></tr>
+<tr><td>/jsonStringCache?on={on?}&amp;off={off?}</td><td>utils/jsonstringcache.get.desc.xml</td><td>gov.nasa.jpl.view_repo.webscripts.JsonStringCacheGet</td></tr>
 <tr><td>/logout</td><td>utils/logout.get.desc.xml</td><td>gov.nasa.jpl.view_repo.webscripts.LogoutWebScript</td></tr>
 <tr><td>/logout/info</td><td>utils/logoutlanding.get.desc.xml</td><td>../src/main/amp/config/alfresco/extension/templates/webscripts/gov/nasa/jpl/utils/logoutlanding.get.js</td></tr>
 <tr><td>/merge?target={target}&amp;source={source}</td><td>mms/merge.post.desc.xml</td><td>gov.nasa.jpl.view_repo.webscripts.WorkspacesMerge</td></tr>
@@ -59,6 +60,7 @@
 <tr><td>/runWithTransactions?on={on?}&amp;off={off?}</td><td>utils/runwithtransactions.get.desc.xml</td><td>gov.nasa.jpl.view_repo.webscripts.RunWithTransactionsGet</td></tr>
 <tr><td>/simpleCache?on={on?}&amp;off={off?}</td><td>utils/simplecache.get.desc.xml</td><td>gov.nasa.jpl.view_repo.webscripts.SimpleCacheGet</td></tr>
 <tr><td>/sites/permissions</td><td>mms/utils/site_perm_sync.post.desc.xml</td><td>gov.nasa.jpl.view_repo.webscripts.util.SitePermSync</td></tr>
+<tr><td>/syncTransactions?on={on?}&amp;off={off?}</td><td>utils/synctransactions.get.desc.xml</td><td>gov.nasa.jpl.view_repo.webscripts.SyncTransactionsGet</td></tr>
 <tr><td>/timeEvents?on={on?}&amp;off={off?}</td><td>utils/timeevents.get.desc.xml</td><td>gov.nasa.jpl.view_repo.webscripts.TimeEventsGet</td></tr>
 <tr><td>/ve/configurations/{site}</td><td>javawebscripts/configurationPage.get.desc.xml</td><td>../src/main/amp/config/alfresco/extension/templates/webscripts/gov/nasa/jpl/javawebscripts/configurationPage.get.js</td></tr>
 <tr><td>/ve/documents/{id}</td><td>javawebscripts/home.get.desc.xml</td><td>gov.nasa.jpl.view_repo.webscripts.ProductListGet</td></tr>
@@ -66,14 +68,11 @@
 <tr><td>/ve/products/{id}</td><td>javawebscripts/moaproduct.get.desc.xml</td><td>gov.nasa.jpl.view_repo.webscripts.MoaProductGet</td></tr>
 <tr><td>/versionCache?on={on?}&amp;off={off?}</td><td>utils/versioncache.get.desc.xml</td><td>gov.nasa.jpl.view_repo.webscripts.VersionCacheGet</td></tr>
 <tr><td>/versionCacheDebug?on={on?}&amp;off={off?}</td><td>utils/versioncachedebug.get.desc.xml</td><td>gov.nasa.jpl.view_repo.webscripts.VersionCacheDebugGet</td></tr>
+<tr><td>/workspaceldapgroup?ldapGroup={ldapGroup?}</td><td>utils/updateworkspaceldapgroup.post.desc.xml</td><td>gov.nasa.jpl.view_repo.webscripts.UpdateWorkspaceLdapGroup</td></tr>
 <tr><td>/workspaces</td><td>mms/workspaces.get.desc.xml</td><td>gov.nasa.jpl.view_repo.webscripts.WorkspacesGet</td></tr>
 <tr><td>/workspaces</td><td>mms/workspaces.post.desc.xml</td><td>gov.nasa.jpl.view_repo.webscripts.WorkspacesPost</td></tr>
 <tr><td>/workspaces/{workspaceId}</td><td>mms/workspaces/workspace.get.desc.xml</td><td>gov.nasa.jpl.view_repo.webscripts.WorkspaceGet</td></tr>
 <tr><td>/workspaces/{workspaceId}</td><td>mms/workspaces/workspace.delete.desc.xml</td><td>gov.nasa.jpl.view_repo.webscripts.WorkspaceDelete</td></tr>
-<tr><td>/workspaces/{workspaceId}/artifacts</td><td>mms/workspaces/artifacts.delete.desc.xml</td><td>None</td></tr>
-<tr><td>/workspaces/{workspaceId}/artifacts</td><td>mms/workspaces/artifacts.get.desc.xml</td><td>None</td></tr>
-<tr><td>/workspaces/{workspaceId}/artifacts</td><td>mms/workspaces/artifacts.post.desc.xml</td><td>None</td></tr>
-<tr><td>/workspaces/{workspaceId}/artifacts</td><td>mms/workspaces/artifacts.put.desc.xml</td><td>None</td></tr>
 <tr><td>/workspaces/{workspaceId}/artifacts/{artifactId}</td><td>mms/workspaces/artifacts/artifact.get.desc.xml</td><td>gov.nasa.jpl.view_repo.webscripts.ArtifactGet</td></tr>
 <tr><td>/workspaces/{workspaceId}/changesets</td><td>mms/workspaces/changesets.get.desc.xml</td><td>None</td></tr>
 <tr><td>/workspaces/{workspaceId}/changesets/{changesetId}</td><td>mms/workspaces/changesets/changeset.get.desc.xml</td><td>None</td></tr>
@@ -116,11 +115,9 @@
 <tr><td>/workspaces/{workspaceId}/sites/{siteId}/products/{productId}/snapshots/{snapshotId}</td><td>mms/workspaces/sites/products/snapshots/snapshot.delete.desc.xml</td><td>None</td></tr>
 <tr><td>/workspaces/{workspaceId}/sites/{siteId}/products/{productId}/snapshots/{snapshotId}</td><td>mms/workspaces/sites/products/snapshots/snapshot.get.desc.xml</td><td>None</td></tr>
 <tr><td>/workspaces/{workspaceId}/sites/{siteId}/products/{productId}/snapshots/{snapshotId}</td><td>mms/workspaces/sites/products/snapshots/snapshot.post.desc.xml</td><td>None</td></tr>
-<tr><td>/workspaces/{workspaceId}/sites/{siteId}/products/{productId}/snapshots/{snapshotId}</td><td>mms/workspaces/sites/products/snapshots/snapshot.put.desc.xml</td><td>None</td></tr>
 <tr><td>/workspaces/{workspaceId}/sites/{siteId}/products/{productId}/views</td><td>mms/workspaces/sites/products/views.delete.desc.xml</td><td>None</td></tr>
 <tr><td>/workspaces/{workspaceId}/sites/{siteId}/products/{productId}/views</td><td>mms/workspaces/sites/products/views.get.desc.xml</td><td>None</td></tr>
 <tr><td>/workspaces/{workspaceId}/sites/{siteId}/products/{productId}/views</td><td>mms/workspaces/sites/products/views.post.desc.xml</td><td>None</td></tr>
-<tr><td>/workspaces/{workspaceId}/sites/{siteId}/products/{productId}/views</td><td>mms/workspaces/sites/products/views.put.desc.xml</td><td>None</td></tr>
 <tr><td>/workspaces/{workspaceId}/sites/{siteId}/projects</td><td>mms/workspaces/sites/projects.post.desc.xml</td><td>gov.nasa.jpl.view_repo.webscripts.ProjectPost</td></tr>
 <tr><td>/workspaces/{workspaceId}/sites/{siteId}/projects/{projectId}</td><td>mms/workspaces/sites/projects/project.get.desc.xml</td><td>gov.nasa.jpl.view_repo.webscripts.ProjectGet</td></tr>
 <tr><td>/workspaces/{workspaceId}/views</td><td>mms/workspaces/views.post.desc.xml</td><td>gov.nasa.jpl.view_repo.webscripts.ViewPost</td></tr>
@@ -129,6 +126,5 @@
 <tr><td>/workspaces/{workspaceId}/views/{viewId}/elements/{elementId}</td><td>mms/workspaces/views/elements/element.delete.desc.xml</td><td>None</td></tr>
 <tr><td>/workspaces/{workspaceId}/views/{viewId}/elements/{elementId}</td><td>mms/workspaces/views/elements/element.get.desc.xml</td><td>None</td></tr>
 <tr><td>/workspaces/{workspaceId}/views/{viewId}/elements/{elementId}</td><td>mms/workspaces/views/elements/element.post.desc.xml</td><td>None</td></tr>
-<tr><td>/workspaces/{workspaceId}/views/{viewId}/elements/{elementId}</td><td>mms/workspaces/views/elements/element.put.desc.xml</td><td>None</td></tr>
 <tr><td>/workspaces/{workspaceId}?sourceWorkspace={sourceWorkspace}</td><td>mms/workspaces/workspace.post.desc.xml</td><td>gov.nasa.jpl.view_repo.webscripts.WorkspacesPost</td></tr>
 </body></table></html>

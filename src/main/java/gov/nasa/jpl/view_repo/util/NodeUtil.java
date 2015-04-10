@@ -809,9 +809,10 @@ public class NodeUtil {
 //            results = searchService.query( getStoreRef(),
 //                                           SearchService.LANGUAGE_LUCENE,
 //                                           queryPattern );
-            AuthenticationUtil.setRunAsUser( "admin" );
+//            String origUser = AuthenticationUtil.getRunAsUser();
+//            AuthenticationUtil.setRunAsUser( "admin" );
             results = searchService.query( getSearchParameters(queryPattern) );
-            AuthenticationUtil.setRunAsUser( AuthenticationUtil.getFullyAuthenticatedUser() );
+//            AuthenticationUtil.setRunAsUser( origUser );
         }
         if ( Debug.isOn() ) {
             Debug.outln( "luceneSearch(" + queryPattern + "): returned "
@@ -963,6 +964,12 @@ public class NodeUtil {
                                 ServiceRegistry services, boolean includeDeleted,
                                 String siteName) {
 
+        String runAsUser = AuthenticationUtil.getRunAsUser();
+        boolean changeUser = !EmsScriptNode.ADMIN_USER_NAME.equals( runAsUser );
+        if ( changeUser ) {
+            AuthenticationUtil.setRunAsUser( EmsScriptNode.ADMIN_USER_NAME );
+        }
+
         ArrayList<NodeRef> results = null;
 
         timerByType = Timer.startTimer(timerByType, timeEvents);
@@ -1063,8 +1070,12 @@ public class NodeUtil {
             if ( ( doSimpleCaching || doFullCaching ) && caching
                  && !Utils.isNullOrEmpty( nodeRefs ) ) {
                 if ( useSimpleCache && doSimpleCaching ) {
-                    NodeRef r = nodeRefs.get( 0 );
-                    simpleCache.put( specifier, r );
+                    // only put in cache if size is 1 (otherwise can be give bad results)
+                    // force the user to filter
+                    if (nodeRefs.size() == 1) {
+                        NodeRef r = nodeRefs.get( 0 );
+                        simpleCache.put( specifier, r );
+                    }
                 } else if ( useFullCache && doFullCaching  ){
                     putInCache( specifier, prefix, ignoreWorkspace, workspace,
                                 onlyThisWorkspace, dateTime, justFirst,
@@ -1092,6 +1103,10 @@ public class NodeUtil {
 //        }
 
         Timer.stopTimer(timerByType, "***** findNodeRefsByType(): time ", timeEvents);
+
+        if ( changeUser ) {
+            AuthenticationUtil.setRunAsUser( runAsUser );
+        }
 
         return nodeRefs;
     }
@@ -1307,60 +1322,63 @@ public class NodeUtil {
         // found to see if it is in some parent workspace and last modified
         // after the copy time. If so, then we need to get the element in
         // the parent workspace at the time of the copy.
-        if ( nodeRefs != null && workspace != null && !ignoreWorkspace ) {
-            Date copyTime = workspace.getCopyTime();
-            if ( copyTime != null ) {
-                // loop through each result
-                ArrayList<NodeRef> correctedRefs = new ArrayList<NodeRef>();
-                for ( NodeRef r : nodeRefs) {
-                    if ( r == null ) continue;
-                    WorkspaceNode resultWs = getWorkspace( r );
-                    EmsScriptNode esn;
-                    // If a native member of the workspace, no need to correct.
-                    if ( workspace.equals( resultWs ) ) {
+        if ( nodeRefs == null || workspace == null || ignoreWorkspace ) { 
+            return nodeRefs;
+        }
+        // loop through each result
+        ArrayList<NodeRef> correctedRefs = new ArrayList<NodeRef>();
+        for ( NodeRef r : nodeRefs) {
+            if ( r == null ) continue;
+            WorkspaceNode resultWs = getWorkspace( r );
+            EmsScriptNode esn;
+            // If a native member of the workspace, no need to correct.
+            if ( workspace.equals( resultWs ) ) {
+                correctedRefs.add( r );
+            } else {
+                esn = new EmsScriptNode( r, getServices() );
+                Date copyTime = workspace.getCopyTime( esn.getWorkspace() );
+                if ( copyTime == null || ( dateTime != null && !copyTime.before( dateTime ) ) ) {
+                    correctedRefs.add( r );
+                } else {
+                    Date lastModified = esn.getLastModified( dateTime );
+                    // Check if modified after the copyTime.
+                    if ( lastModified == null ||
+                            !lastModified.after( copyTime ) ) {
+                        if ( lastModified == null ) {
+                            Debug.error( "ERROR!  Should never have null modified date!" );
+                        }
                         correctedRefs.add( r );
                     } else {
-                        esn = new EmsScriptNode( r, getServices() );
-                        Date lastModified = esn.getLastModified( dateTime );
-                        // Check if modified after the copyTime.
-                        if ( lastModified != null &&
-                                lastModified.after( copyTime ) ) {
-                            // Replace with the versioned ref at the copy time
-                            ArrayList< NodeRef > refs =
-                                    findNodeRefsByType( esn.getSysmlId(),
-                                                        SearchType.ID.prefix,
-                                                        ignoreWorkspace,
-                                                        resultWs, copyTime,
-                                                        true, // justOne
-                                                        exactMatch, services,
-                                                        includeDeleted,
-                                                        siteName );
-                            if ( !Utils.isNullOrEmpty( refs ) ) {
-                                // only asked for one
-                                NodeRef newRef = refs.get( 0 );
-                                correctedRefs.add( newRef );
-                            }
+                        // Replace with the versioned ref at the copy time
+                        ArrayList< NodeRef > refs =
+                                findNodeRefsByType( esn.getSysmlId(),
+                                                    SearchType.ID.prefix,
+                                                    ignoreWorkspace,
+                                                    resultWs, copyTime,
+                                                    true, // justOne
+                                                    exactMatch, services,
+                                                    includeDeleted,
+                                                    siteName );
+                        if ( !Utils.isNullOrEmpty( refs ) ) {
+                            // only asked for one
+                            NodeRef newRef = refs.get( 0 );
+                            correctedRefs.add( newRef );
+                        }
 //                            r = getNodeRefAtTime( r, resultWs, copyTime );
 //                            if ( r != null ) {
 //                                esn = new EmsScriptNode( r, getServices() );
 //                            } else {
 //                                esn = null;
 //                            }
-                        } else {
-                            if ( lastModified == null ) {
-                                Debug.error( "ERROR!  Should never have null modified date!" );
-                            }
-                            correctedRefs.add( r );
-                        }
+                    }
 //                        if ( exists( esn ) || ( includeDeleted && esn.isDeleted() &&
 //                                ()!exactMatch ) ) {
 //                            correctedRefs.add( r );
 //                        }
-                    }
                 }
-                nodeRefs = correctedRefs;
             }
         }
+        nodeRefs = correctedRefs;
 
         return nodeRefs;
     }
@@ -2099,46 +2117,45 @@ public class NodeUtil {
                                              StringBuffer response ) {
         if ( Utils.isNullOrEmpty( siteName ) ) return null;
 
-        // Reverting method back--chilByName doesn't handle workspaces correctly.
-//      // Don't need to lookup sites using findNodeRefs, since we know where they are
-//      EmsScriptNode context = null;
-//      if (workspace == null) {
-//          context = NodeUtil.getCompanyHome( services );
-//      } else {
-//          context = workspace;
-//      }
-//      
-//      EmsScriptNode siteNode = context.childByNamePath( "Sites/" + siteName );
-//      return siteNode;
-
+        EmsScriptNode siteNode = null;
+        
+        // Run this as admin user since there are permission issues popping up
+//        String origUser = AuthenticationUtil.getRunAsUser();
+//        AuthenticationUtil.setRunAsUser( "admin" );
+        
         // Try to find the site in the workspace first.
        ArrayList< NodeRef > refs =
                findNodeRefsByType( siteName, SearchType.CM_NAME.prefix,
                                    ignoreWorkspace, workspace, dateTime, true,
                                    true, getServices(), false );
+       
        for ( NodeRef ref : refs ) {
-           EmsScriptNode siteNode = new EmsScriptNode(ref, services, response);
+           siteNode = new EmsScriptNode(ref, services, response);
            if ( siteNode.isSite() ) {
-               return siteNode;
+               break;
            }
        }
 
-       // Get the site from SiteService.
-       SiteInfo siteInfo = services.getSiteService().getSite(siteName);
-       if (siteInfo != null) {
-           NodeRef siteRef = siteInfo.getNodeRef();
-           if ( dateTime != null ) {
-               siteRef = getNodeRefAtTime( siteRef, dateTime );
-           }
-           if (siteRef != null) {
-               EmsScriptNode siteNode = new EmsScriptNode(siteRef, services, response);
-               if ( siteNode != null
-                    && ( workspace == null || workspace.contains( siteNode ) ) ) {
-                   return siteNode;
+       if ( siteNode == null ) { 
+           // Get the site from SiteService.
+           SiteInfo siteInfo = services.getSiteService().getSite(siteName);
+           if (siteInfo != null) {
+               NodeRef siteRef = siteInfo.getNodeRef();
+               if ( dateTime != null ) {
+                   siteRef = getNodeRefAtTime( siteRef, dateTime );
+               }
+               if (siteRef != null) {
+                   siteNode = new EmsScriptNode(siteRef, services, response);
+                   if ( siteNode != null
+                        && ( workspace == null || workspace.contains( siteNode ) ) ) {
+                       return siteNode;
+                   }
                }
            }
        }
-       return null;
+       
+//       AuthenticationUtil.setRunAsUser(origUser);
+       return siteNode;
     }
 
     /**

@@ -821,7 +821,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
         return jobName;
     }
 
-    public JSONObject generateHTML( String snapshotId, Date dateTime, WorkspaceNode workspace ) throws Exception {
+    public EmsScriptNode generateHTML( String snapshotId, Date dateTime, WorkspaceNode workspace ) throws Exception {
     	clearCaches( false );
         //EmsScriptNode snapshotNode = findScriptNodeById( snapshotId, workspace, null, false );
     	// lookup snapshotNode using standard lucene as snapshotId is unique across all workspaces
@@ -852,7 +852,8 @@ public class SnapshotPost extends AbstractJavaWebScript {
 	        	throw new Exception("Failed to generate zip artifact!", ex);
 	        }
         }
-        return populateSnapshotProperties( snapshotNode, dateTime, workspace );
+        //return populateSnapshotProperties( snapshotNode, dateTime, workspace );
+        return snapshotNode;
     }
 
     public EmsScriptNode generateHTML( EmsScriptNode snapshotNode, WorkspaceNode workspace ) throws Exception {
@@ -878,7 +879,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
     }
 
     
-    public JSONObject generatePDF(String snapshotId, Date dateTime, WorkspaceNode workspace, String siteName) throws Exception{
+    public EmsScriptNode generatePDF(String snapshotId, Date dateTime, WorkspaceNode workspace, String siteName) throws Exception{
     	clearCaches( false );
         //EmsScriptNode snapshotNode = findScriptNodeById(snapshotId, workspace, null, false);
     	// lookup snapshotNode using standard lucene as snapshotId is unique across all workspaces
@@ -909,7 +910,8 @@ public class SnapshotPost extends AbstractJavaWebScript {
 	    		throw new Exception("Failed to generate PDF artifact!", ex);
 	        }
         }
-    	return populateSnapshotProperties(snapshotNode, dateTime, workspace);
+    	//return populateSnapshotProperties(snapshotNode, dateTime, workspace);
+        return snapshotNode;
     }
 
     public EmsScriptNode generatePDF( EmsScriptNode snapshotNode, WorkspaceNode workspace, String siteName ) throws Exception {
@@ -1010,7 +1012,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
     }
 
     public static EmsScriptNode getHtmlZipNode( EmsScriptNode snapshotNode, Date dateTime, WorkspaceNode ws ) {
-        NodeRef node = (NodeRef)snapshotNode.getNodeRefProperty( "view2:htmlZipNode", dateTime, ws );
+        NodeRef node = (NodeRef)snapshotNode.getNodeRefProperty( "view2:htmlZipNode", true, null, null );
         if(node == null) return null;
         return new EmsScriptNode( node, snapshotNode.getServices() );
     }
@@ -1020,7 +1022,8 @@ public class SnapshotPost extends AbstractJavaWebScript {
     }
 
     public static EmsScriptNode getPdfNode( EmsScriptNode snapshotNode, Date dateTime, WorkspaceNode ws ) {
-        NodeRef node = (NodeRef)snapshotNode.getNodeRefProperty( "view2:pdfNode", dateTime, ws );
+//        NodeRef node = (NodeRef)snapshotNode.getNodeRefProperty( "view2:pdfNode", true, dateTime, ws );
+    	NodeRef node = (NodeRef)snapshotNode.getNodeRefProperty( "view2:pdfNode", true, null, null );
         if(node == null) return null;
         return new EmsScriptNode( node, snapshotNode.getServices() );
     }
@@ -1636,7 +1639,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
 
     private JSONObject populateSnapshotProperties( EmsScriptNode snapshotNode, Date dateTime, WorkspaceNode workspace )
             throws JSONException {
-        JSONObject snapshoturl = snapshotNode.toJSONObject( workspace, null );
+        JSONObject snapshoturl = snapshotNode.toJSONObject( workspace, dateTime );
         if ( hasPdf( snapshotNode ) || hasHtmlZip( snapshotNode ) ) {
         	HostnameGet hostnameGet = new HostnameGet(this.repository, this.services);
         	String contextUrl = hostnameGet.getAlfrescoUrl() + "/alfresco";
@@ -1685,6 +1688,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
 	    	case "BODY":
 	    	case "COLSPEC":
 	    	case "EMPHASIS":
+	    	case "ENTRY":
 	    	case "FIGURE":
 	    	case "IMAGEDATA":
 	    	case "IMAGEOBJECT":
@@ -1707,11 +1711,21 @@ public class SnapshotPost extends AbstractJavaWebScript {
 	    	case "UTFOOT":
 	    	case "UTHEAD":
 	    		break;
-	    	case "ENTRY":
-	    		int i = 1;
-	    		i = i + 1;
-	    		break;
 	    	case "A":
+	    		String href = elem.attr("href").toLowerCase();
+	    		if(!href.startsWith("http")){
+	    			HostnameGet hng = new HostnameGet(this.repository, this.services);
+	    			String hostname = hng.getAlfrescoUrl();
+	    			String alfrescoUrl = hostname + "/alfresco";
+	    			
+	    			if(href.startsWith("../service")) href = href.replace("../service", alfrescoUrl + "/service");
+	    			else if(href.startsWith("ve.html#") ||
+	    					href.startsWith("mms.html#") ||
+	    					href.startsWith("docweb.html#")){ 
+	    				href = String.format("%s/%s", alfrescoUrl, href);
+	    			}
+	    			else if(href.startsWith("../../share")) href = href.replace("../../share", hostname + "/share");
+	    		}
 	    		elemNew = new Element(Tag.valueOf("ulink"), "");
 	    		elemNew.html(elem.html());
 	    		elemNew.attr("xl:href", elem.attr("href"));
@@ -1802,6 +1816,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
 	    	case "XML":
 	    	case "#COMMENT":
 	    	case "COMMENT":
+	    	case "MMS-TRANSCLUDE-COM":
 	    		elem.remove();
 	    		break;
 	    	default:
@@ -1828,40 +1843,53 @@ public class SnapshotPost extends AbstractJavaWebScript {
     
     private void removeNestedTags(Document document){
     	// cleans up generated docbook fragment to pass fop validation
-    	
+    	Element body = document.body();
     	// shifts nested <itemizedlist> and <orderedlist>
-    	Elements list = document.body().select("itemizedlist > itemizedlist");
-    	list.addAll(document.body().select("orderedlist > orderedlist"));
-    	list = document.body().select("itemizedlist > orderedlist");
-    	list.addAll(document.body().select("orderedlist > itemizedlist"));
-    	for(Element u : list){
-    		Element listItem = new Element(Tag.valueOf("listitem"),"");
-    		listItem.html(u.outerHtml());
-    		u.replaceWith(listItem);
-    		u = listItem;
+    	Elements list = null;
+    	
+    	while(true){
+	    	list = body.select("itemizedlist > itemizedlist");
+	    	list.addAll(body.select("orderedlist > orderedlist"));
+	    	list.addAll(body.select("itemizedlist > orderedlist"));
+	    	list.addAll(body.select("orderedlist > itemizedlist"));
+	    	if(list.size() == 0) break;
+	    	for(Element u : list){
+	    		Element listItem = new Element(Tag.valueOf("listitem"),"");
+	    		listItem.html(u.outerHtml());
+	    		u.replaceWith(listItem);
+	    		u = listItem;
+	    	}
     	}
     	
     	// removes <itemizedlist>/<orderedlist> without <listitem> children
-    	list = document.body().select("itemizedlist");
-    	list.addAll(document.body().select("orderedlist"));
-    	list.addAll(document.body().select("tbody"));
+    	list = body.select("itemizedlist");
+    	list.addAll(body.select("orderedlist"));
+    	list.addAll(body.select("tbody"));
 		for(Element item : list){
-			if(item.children().size()==0) item.tagName("removalTag");
+			if(item.children().size()==0) 
+				item.tagName("removalTag");
 		}
 		
 		// shifts chapter > link to chapter > para > link
-		list = document.body().select(" > ulink");
-		list.addAll(document.body().select(" > inlinemediaobject"));
-		for(Element u : list){
-			Element para = new Element(Tag.valueOf("para"), "");
-			para.html(u.outerHtml());
-			u.replaceWith(para);
-			u = para;
+		while(true){
+			list = body.select(" > ulink");
+			list.addAll(body.select(" > inlinemediaobject"));
+			if(list.size() == 0) break;
+			for(Element u : list){
+				Element para = new Element(Tag.valueOf("para"), "");
+				para.html(u.outerHtml());
+				u.replaceWith(para);
+				u = para;
+			}
 		}
 		
     	// removes nested <para>
-    	document.body().select("para > para").tagName("removalTag");
-    	document.body().select("emphasis > para").tagName("removalTag");
+		while(true){
+	    	list = body.select("para > para").tagName("removalTag");
+	    	list.addAll(body.select("emphasis > para").tagName("removalTag"));
+	    	if(list.size() == 0) break;
+	    	list.tagName("removalTag");
+		}
     	
     }
 

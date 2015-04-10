@@ -122,11 +122,22 @@
         "creator": "admin"
     },
     {
-        "qualifiedId": "/123456",
+        "qualifiedId": "/europa/123456",
         "name": "JW_TEST",
-        "qualifiedName": "/JW_TEST",
+        "qualifiedName": "/europa/JW_TEST",
         "sysmlid": "123456",
         "owner": null,
+        "editable": true,
+        "creator": "admin",
+    },
+    {
+        "qualifiedName": "/europa/JW_TEST/300/301/null",
+        "owner": "301",
+        "specialization": {
+            "valueExpression": null,
+            "string": "dlam_string",
+            "type": "LiteralString"
+        },
         "editable": true,
         "creator": "admin",
     },
@@ -197,17 +208,6 @@
         },
         "editable": true,
         "creator": "admin"
-    },
-    {
-        "qualifiedName": "/europa/JW_TEST/400/401/null",
-        "owner": "401",
-        "specialization": {
-            "valueExpression": null,
-            "string": "dlam_string",
-            "type": "LiteralString"
-        },
-        "editable": true,
-        "creator": "admin",
     },
     {
         "qualifiedId": "/europa/123456/4000/401",
@@ -290,8 +290,8 @@
         "creator": "admin"
     },
     {
-        "qualifiedName": "/europa/JW_TEST/300/301/null",
-        "owner": "301",
+        "qualifiedName": "/europa/JW_TEST/400/401/null",
+        "owner": "401",
         "specialization": {
             "valueExpression": null,
             "string": "dlam_string",
