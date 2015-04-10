@@ -41,6 +41,7 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.parser.Parser;
+import org.jsoup.parser.Tag;
 import org.jsoup.select.Elements;
 
 public class DocBookWrapper {
@@ -216,13 +217,82 @@ public class DocBookWrapper {
 			rawContent = rawContent.replaceAll("(?i)<removalTag>", "");
 			rawContent = rawContent.replaceAll("(?i)</removalTag>", "");
 			rawContent = rawContent.replaceAll("(?i)<entry/>", "<entry><para>&#160;</para></entry>");
+			Document document = Jsoup.parse(rawContent);
+			removeNestedTags(document);
+			this.content = document.body().html();
 //			rawContent = handleSpecialChars(rawContent);
 			//this.content = formatContent(rawContent);
-			this.content = rawContent;
+			//this.content = rawContent;
 		}
 		return this.content;
 	}
 
+	private void removeNestedTags(Document document){
+    	// cleans up generated docbook fragment to pass fop validation
+    	Element body = document.body();
+    	// shifts nested <itemizedlist> and <orderedlist>
+    	Elements list = null;
+    	
+    	while(true){
+	    	list = body.select("itemizedlist > itemizedlist");
+	    	list.addAll(body.select("orderedlist > orderedlist"));
+	    	list.addAll(body.select("itemizedlist > orderedlist"));
+	    	list.addAll(body.select("orderedlist > itemizedlist"));
+	    	if(list.size() == 0) break;
+	    	for(Element u : list){
+	    		if(u.html().trim().length()==0){
+	    			u.remove();
+	    			continue;
+	    		}
+	    		Element listItem = new Element(Tag.valueOf("listitem"),"");
+	    		listItem.html(u.outerHtml());
+	    		u.replaceWith(listItem);
+	    		u = listItem;
+	    	}
+    	}
+    	
+    	// removes <itemizedlist>/<orderedlist> without <listitem> children
+    	boolean isDone;
+    	while(true){
+    		isDone = true;
+	    	list = body.select("itemizedlist");
+	    	list.addAll(body.select("orderedlist"));
+	    	list.addAll(body.select("tbody"));
+	    	list.addAll(body.select("listitem"));
+			for(Element item : list){
+				if(item.children().size()==0){
+					if(item.html().trim().length()==0){ 
+						item.remove();
+						isDone = false;
+					}
+					else item.tagName("removalTag"); 
+				}
+			}
+			if(isDone) break;
+    	}
+		
+		// shifts chapter > link to chapter > para > link
+		while(true){
+			list = body.select(" > ulink");
+			list.addAll(body.select(" > inlinemediaobject"));
+			if(list.size() == 0) break;
+			for(Element u : list){
+				Element para = new Element(Tag.valueOf("para"), "");
+				para.html(u.outerHtml());
+				u.replaceWith(para);
+				u = para;
+			}
+		}
+		
+    	// removes nested <para>
+		while(true){
+	    	list = body.select("para > para").tagName("removalTag");
+	    	list.addAll(body.select("emphasis > para").tagName("removalTag"));
+	    	if(list.size() == 0) break;
+	    	list.tagName("removalTag");
+		}
+    }
+	
 	public String getDBFileName(){
 		return this.dbFileName.toString();
 	}
@@ -472,10 +542,10 @@ public class DocBookWrapper {
 		try{
 			// removes any previously generated PDF node.
 			ArrayList<NodeRef> nodeRefs = NodeUtil.findNodeRefsByType( this.snapshotName + ".pdf", "@cm\\:name:\"", snapshotFolder.getServices() );
-			if(nodeRefs==null) nodeRefs = NodeUtil.findNodeRefsByType( this.snapshotName + ".pdf", "@sysml\\:id:\"", snapshotFolder.getServices() );
+			//if(nodeRefs==null) nodeRefs = NodeUtil.findNodeRefsByType( this.snapshotName + ".pdf", "@sysml\\:id:\"", snapshotFolder.getServices() );
 			if (nodeRefs != null && nodeRefs.size() > 0) {
 				EmsScriptNode nodePrev = new EmsScriptNode(nodeRefs.get( 0 ), snapshotFolder.getServices(), new StringBuffer());
-				if(nodePrev != null && nodePrev.getName()==this.snapshotName + ".pdf"){ 
+				if(nodePrev != null){ 
 					try{
 						nodePrev.remove();
 					}
