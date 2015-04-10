@@ -1841,7 +1841,7 @@ public class ModelPost extends AbstractJavaWebScript {
                 // If its owner is changing, need to bring in the old parent
                 // into the new workspace and remove the old child.  Not bringing
                 // in the corresponding reified package--hope that's okay!  REVIEW
-                EmsScriptNode oldParent = nodeToUpdate.getOwningParent( null, nodeToUpdate.getWorkspace(), false );
+                EmsScriptNode oldParent = nodeToUpdate.getOwningParent( null, nodeToUpdate.getWorkspace(), false, true );
                 EmsScriptNode newOldParent =
                         workspace.replicateWithParentFolders( oldParent );
                 newOldParent.removeFromPropertyNodeRefs( "ems:ownedChildren",
