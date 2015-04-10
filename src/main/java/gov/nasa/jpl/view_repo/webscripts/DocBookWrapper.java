@@ -252,8 +252,9 @@ public class DocBookWrapper {
     	}
     	
     	// removes <itemizedlist>/<orderedlist> without <listitem> children
-    	boolean isDone = true;
+    	boolean isDone;
     	while(true){
+    		isDone = true;
 	    	list = body.select("itemizedlist");
 	    	list.addAll(body.select("orderedlist"));
 	    	list.addAll(body.select("tbody"));
