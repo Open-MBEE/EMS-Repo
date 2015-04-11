@@ -217,12 +217,12 @@ public class DocBookWrapper {
 			rawContent = rawContent.replaceAll("(?i)<removalTag>", "");
 			rawContent = rawContent.replaceAll("(?i)</removalTag>", "");
 			rawContent = rawContent.replaceAll("(?i)<entry/>", "<entry><para>&#160;</para></entry>");
-			Document document = Jsoup.parse(rawContent);
-			removeNestedTags(document);
-			this.content = document.body().html();
+//			Document document = Jsoup.parse(rawContent);
+//			removeNestedTags(document);
+//			this.content = document.body().html();
 //			rawContent = handleSpecialChars(rawContent);
 			//this.content = formatContent(rawContent);
-			//this.content = rawContent;
+			this.content = rawContent;
 		}
 		return this.content;
 	}
