@@ -270,6 +270,7 @@ public class ProductsWebscript extends AbstractJavaWebScript {
                         JSONArray siteCache = Utils.get( productCache, workspaceId, timestamp, nodeSiteName );
                         if (siteCache == null) {
                             siteCache = new JSONArray();
+                            if (nodeSiteName == null) nodeSiteName = "null";
                             Utils.put( productCache, workspaceId, timestamp, nodeSiteName, siteCache);
                         }
                         
