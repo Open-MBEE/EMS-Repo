@@ -114,8 +114,10 @@ public class SnapshotPost extends AbstractJavaWebScript {
 	private DocBookWrapper docBookMgr;
 	protected NodeService nodeService;
 	protected PersonService personService;
+	private WorkspaceNode workspace;
+	private Date timestamp;
 
-    public void setNodeService(NodeService nodeService)
+	public void setNodeService(NodeService nodeService)
     {
        this.nodeService = nodeService;
     }
@@ -406,6 +408,9 @@ public class SnapshotPost extends AbstractJavaWebScript {
         }
 
         this.snapshotName = snapshotName;
+        this.workspace = workspace;
+        this.timestamp = timestamp;
+        
         docBookMgr = new DocBookWrapper( snapshotName, snapshotNode, false );
         try {
             DBBook docBook = createDocBook( product );
@@ -1218,7 +1223,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
     /*
      * process images not originated from MagicDraw; images inserted via VE
      */
-    private String handleEmbeddedImage( String inputString)
+    public String handleEmbeddedImage( String inputString)
     {
     	if(inputString == null || inputString.isEmpty()) return "";
 
@@ -1344,6 +1349,11 @@ public class SnapshotPost extends AbstractJavaWebScript {
         return null;
     }
     
+    public String handleTransclusion(String id, String transclusionType, String inputString){
+    	return handleTransclusion(id, transclusionType, inputString, null, 0, this.workspace, this.timestamp);
+    }
+    
+    
     /**
      *
      * @param id
@@ -1412,7 +1422,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
         return hasNode;
     }
 
-    private String HtmlSanitize( String s ) {
+    public String HtmlSanitize( String s ) {
     	if(s == null || s.isEmpty()) return s;
 
     	try{
@@ -1435,7 +1445,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
     	StringBuffer sb = new StringBuffer();
     	Elements tables = document.select("body > table");
     	for(Element t : tables){
-    		HtmlTable htmlTable = new HtmlTable(t);
+    		HtmlTable htmlTable = new HtmlTable(t, this);
     		sb.append(htmlTable.toDocBook());
     	}
     	return sb.toString();
@@ -1690,6 +1700,9 @@ public class SnapshotPost extends AbstractJavaWebScript {
     	Element elemNew = null;
     	Element para = null;
     	Element emphasis = null;
+    	String style = null;
+    	boolean isEmphasis = false;
+    	
     	String tagName = elem.tagName().toUpperCase();
     	switch(tagName){
 	    	case "BODY":
@@ -1769,7 +1782,22 @@ public class SnapshotPost extends AbstractJavaWebScript {
 	    	case "P":
 	    	case "DIV":
 	    		//replaces with linebreak;
-	    		elemNew = new Element(Tag.valueOf("para"), "");
+	    		isEmphasis = false;
+	    		style = elem.attr("style");
+	    		if(style != null && !style.isEmpty()){ 
+	    			style = style.toLowerCase();
+	    			if(style.contains("underline") ||
+	    					style.contains("line-through")){
+	    				elemNew = new Element(Tag.valueOf("emphasis"), "");
+	    				StringBuffer sb = new StringBuffer();
+	    				if(style.contains("underline")) sb.append("underline");
+	    				if(style.contains("line-through")) sb.append("strikethrough");
+		    			elemNew.attr("role", sb.toString());
+		    			isEmphasis = true;
+	    			}
+	    			elemNew.attr("style", style);
+	    		}
+	    		if(!isEmphasis) elemNew = new Element(Tag.valueOf("para"), "");
 	    		elemNew.html(elem.html());
 	    		elemNew.prepend("<?linebreak?>");
 	    		elem.replaceWith(elemNew);
@@ -1796,6 +1824,18 @@ public class SnapshotPost extends AbstractJavaWebScript {
 	    	case "SCRIPT":
 	    	case "STYLE":
 	    		elem.remove();
+	    		break;
+	    	case "SUB":
+	    		elemNew = new Element(Tag.valueOf("subscript"), "");
+	    		elemNew.html(elem.html());
+	    		elem.replaceWith(elemNew);
+	    		elem = elemNew;
+	    		break;
+	    	case "SUP":
+	    		elemNew = new Element(Tag.valueOf("superscript"), "");
+	    		elemNew.html(elem.html());
+	    		elem.replaceWith(elemNew);
+	    		elem = elemNew;
 	    		break;
 	    	case "TABLE":
     			String dbTable = HtmlTableToDocbookTable(elem.outerHtml(), elem.html());
@@ -1832,9 +1872,23 @@ public class SnapshotPost extends AbstractJavaWebScript {
 	    		elem.remove();
 	    		break;
 	    	default:
-//	    		TextNode textNode = new TextNode(elem.html(), "");
-//	    		elem.replaceWith(textNode);
-	    		elemNew = new Element(Tag.valueOf("removalTag"),"");
+	    		isEmphasis = false;
+	    		style = elem.attr("style");
+	    		if(style !=null && !style.isEmpty()){
+	    			style = style.toLowerCase();
+	    			if(style.contains("underline") ||
+	    					style.contains("line-through")){
+	    				elemNew = new Element(Tag.valueOf("emphasis"), "");
+	    				StringBuffer sb = new StringBuffer();
+	    				if(style.contains("underline")) sb.append("underline");
+	    				if(style.contains("line-through")) sb.append("strikethrough");
+		    			elemNew.attr("role", sb.toString());
+		    			isEmphasis = true;
+	    			}
+	    		}
+	    		if(!isEmphasis){
+	    			elemNew = new Element(Tag.valueOf("removalTag"),"");
+	    		}
 	    		elemNew.html(elem.html());
 	    		elem.replaceWith(elemNew);
 	    		elem = elemNew;
