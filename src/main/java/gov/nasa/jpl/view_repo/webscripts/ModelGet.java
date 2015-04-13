@@ -160,7 +160,7 @@ public class ModelGet extends AbstractJavaWebScript {
     protected Map<String, Object> executeImplImpl(WebScriptRequest req,
 			Status status, Cache cache) {
         if (logger.isInfoEnabled()) {
-            String user = AuthenticationUtil.getRunAsUser();
+            String user = AuthenticationUtil.getFullyAuthenticatedUser();
             logger.info( user + " " + req.getURL() );
         }
 	    Timer timer = new Timer();

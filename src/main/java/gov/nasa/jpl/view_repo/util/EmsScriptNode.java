@@ -69,6 +69,7 @@ import org.alfresco.model.ContentModel;
 import org.alfresco.repo.content.MimetypeMap;
 import org.alfresco.repo.jscript.ScriptNode;
 import org.alfresco.repo.jscript.ScriptVersion;
+import org.alfresco.repo.version.Version2Model;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.dictionary.AspectDefinition;
@@ -1241,7 +1242,6 @@ public class EmsScriptNode extends ScriptNode implements
         return new EmsScriptNode( myParent.getNodeRef(), services, response );
     }
 
-
     /**
      * Return the version of the parent at a specific time. This uses the
      * ems:owner property instead of getParent() when it returns non-null; else,
@@ -1252,6 +1252,29 @@ public class EmsScriptNode extends ScriptNode implements
      */
     public EmsScriptNode getOwningParent( Date dateTime, WorkspaceNode ws,
                                           boolean skipNodeRefCheck ) {
+        return getOwningParent(dateTime, ws, skipNodeRefCheck, false);
+    }
+    
+    public boolean isAVersion() {
+        
+        VersionService vs = services.getVersionService();
+        return vs.isAVersion( nodeRef ) || 
+               nodeRef.getStoreRef().getIdentifier().equals( Version2Model.STORE_ID );
+               
+        
+    }
+
+    /**
+     * Return the version of the parent at a specific time. This uses the
+     * ems:owner property instead of getParent() when it returns non-null; else,
+     * it call getParent().
+     *
+     * @param dateTime
+     * @return the parent/owning node
+     */
+    public EmsScriptNode getOwningParent( Date dateTime, WorkspaceNode ws,
+                                          boolean skipNodeRefCheck,
+                                          boolean checkVersionedNode) {
         String runAsUser = AuthenticationUtil.getRunAsUser();
         boolean changeUser = !EmsScriptNode.ADMIN_USER_NAME.equals( runAsUser );
         if ( changeUser ) {
@@ -1259,6 +1282,7 @@ public class EmsScriptNode extends ScriptNode implements
         }
         
         EmsScriptNode node = null;
+
         NodeRef ref = (NodeRef)getNodeRefProperty( "ems:owner", skipNodeRefCheck, dateTime, ws );
         if ( ref == null ) {
             node = getParent();
@@ -1272,6 +1296,45 @@ public class EmsScriptNode extends ScriptNode implements
             node = new EmsScriptNode( ref, getServices() );
         }
 
+        // FIXME this seraches below are not always going to return nodes from the
+        //       SpaceStore
+        
+        // If its a version node, then it doesnt have a parent association, so if it does
+        // not have a owner, then we should return the non-versioned current node:
+        if (checkVersionedNode && !skipNodeRefCheck) {
+            if (node.isAVersion() &&
+                node.getNodeRefProperty( "ems:owner", dateTime, ws ) == null) {
+                
+                logger.warn( "getOwningParent: The node "+node+" is a versioned node and doesn't have a owner.  Returning the current node instead." );
+                
+                NodeRef pooRef =
+                        findNodeRefByType( node.getName(), SearchType.CM_NAME.prefix,
+                                           ws, null, false );
+                
+                if (pooRef != null) {
+                    node = new EmsScriptNode(pooRef, getServices());
+                }
+                else {
+                    // Must do a find with dateTime as null b/c none of the other alfresco methods
+                    // work for nodes in workspace://version2store
+                    // Note: parents from nodes in versionStore://version2store are in
+                    //       workspace://version2store
+                    NodeRef currentRef =
+                            findNodeRefByType( getName(), SearchType.CM_NAME.prefix,
+                                               ws, null, false );
+                    if (currentRef != null) {
+                        EmsScriptNode currentNode = new EmsScriptNode( currentRef, getServices() );
+                        
+                        if (!this.equals( currentNode, false )) {
+                            node = currentNode.getOwningParent( dateTime, ws, 
+                                                                skipNodeRefCheck, checkVersionedNode );
+                        }
+                    }
+                }
+                
+         
+            }
+        }
         if ( changeUser ) {
             AuthenticationUtil.setRunAsUser( runAsUser );
         }
@@ -1390,11 +1453,6 @@ public class EmsScriptNode extends ScriptNode implements
             }
         }
         return currentVersion;
-    }
-
-    public boolean isAVersion() {
-        VersionService versionService = services.getVersionService();
-        return versionService.isAVersion( getNodeRef() );
     }
 
     public boolean checkNodeRefVersion2( Date dateTime ) {
@@ -1952,7 +2010,7 @@ public class EmsScriptNode extends ScriptNode implements
         qualifiedName = "/" + getProperty( "sysml:name" );
         qualifiedId =  "/" + getProperty( "sysml:id" );
 
-        EmsScriptNode owner = this.getOwningParent(dateTime, ws, false );
+        EmsScriptNode owner = this.getOwningParent(dateTime, ws, false, true );
         String ownerName = owner != null ? owner.getName() : null;
 
         // Need to look up based on owner b/c the parent associations are not versioned,
@@ -1968,19 +2026,19 @@ public class EmsScriptNode extends ScriptNode implements
             qualifiedName = "/" + nameProp + qualifiedName;
 
             // stop if we find a site characterization in the path
-            if (owner.hasAspect( "ems:SiteCharacterization" )) {
+            if (owner.hasAspect( "ems:SiteCharacterization" ) && siteCharacterizationId == null) {
                 siteCharacterizationId = "site_" + idProp;
             }
             qualifiedId = "/" + idProp + qualifiedId;
 
-            owner = owner.getOwningParent(dateTime, ws, false );
+            owner = owner.getOwningParent(dateTime, ws, false, true );
             ownerName = owner != null ? owner.getName() : null;
         }
         
         // Get the site, which is one up from the Models node:
         EmsScriptNode modelNode = (owner != null && ownerName.equals( "Models" )) ? owner : null;
         if (modelNode != null) {
-            EmsScriptNode siteNode = modelNode.getOwningParent(dateTime, ws, false );
+            EmsScriptNode siteNode = modelNode.getOwningParent(dateTime, ws, false, true );
             if (siteNode != null) {
                 qualifiedName = "/" + siteNode.getName() + qualifiedName;
                 qualifiedId = "/" + siteNode.getName() + qualifiedId;
@@ -2971,7 +3029,7 @@ public class EmsScriptNode extends ScriptNode implements
 //                return new EmsScriptNode( ref, getServices() );
             }
             EmsScriptNode oldparent = parent;
-            parent = oldparent.getOwningParent( dateTime, ws, false );
+            parent = oldparent.getOwningParent( dateTime, ws, false, true );
             if ( parent == null ) return null; // site not found!
             parentName = parent.getName();
             if ( parentName.toLowerCase().equals( "sites" ) ) {
@@ -2983,7 +3041,8 @@ public class EmsScriptNode extends ScriptNode implements
             }
         }
         // The site is the folder containing the Models folder!
-        siteNode = parent.getOwningParent( dateTime, ws, false );
+        siteNode = parent.getOwningParent( dateTime, ws, false, true );
+
         if ( changeUser ) {
             AuthenticationUtil.setRunAsUser( runAsUser );
         }

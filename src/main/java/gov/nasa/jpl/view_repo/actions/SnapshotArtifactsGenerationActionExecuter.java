@@ -123,7 +123,10 @@ public class SnapshotArtifactsGenerationActionExecuter  extends ActionExecuterAb
 			// lookup snapshotNode using standard lucene as snapshotId is unique across all workspaces
 			ArrayList<NodeRef> nodeRefs = NodeUtil.findNodeRefsByType( snapshotId, "@cm\\:name:\"", services );
 			if (nodeRefs == null || nodeRefs.size() != 1) {
-				throw new Exception("Failed to find snapshot with Id: " + snapshotId);
+				nodeRefs = NodeUtil.findNodeRefsByType( snapshotId, "@sysml\\:id:\"", services );
+				if (nodeRefs == null || nodeRefs.size() != 1) {
+					throw new Exception("Failed to find snapshot with Id: " + snapshotId);
+				}
 			}
 			
 			snapshotNode = new EmsScriptNode(nodeRefs.get( 0 ), services, response);

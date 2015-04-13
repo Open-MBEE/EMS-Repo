@@ -829,7 +829,10 @@ public class SnapshotPost extends AbstractJavaWebScript {
     	// lookup snapshotNode using standard lucene as snapshotId is unique across all workspaces
 		ArrayList<NodeRef> nodeRefs = NodeUtil.findNodeRefsByType( snapshotId, "@cm\\:name:\"", services );
 		if (nodeRefs == null || nodeRefs.size() != 1) {
-			throw new Exception("Failed to find snapshot with Id: " + snapshotId);
+			nodeRefs = NodeUtil.findNodeRefsByType( snapshotId, "@sysml\\:id:\"", services );
+			if (nodeRefs == null || nodeRefs.size() != 1) {
+				throw new Exception("Failed to find snapshot with Id: " + snapshotId);
+			}
 		}
 		EmsScriptNode snapshotNode = new EmsScriptNode(nodeRefs.get( 0 ), services, response);
         if(snapshotNode == null) throw new Exception("Failed to find snapshot with Id: " + snapshotId);
@@ -881,14 +884,16 @@ public class SnapshotPost extends AbstractJavaWebScript {
         return snapshotNode;
     }
 
-    
     public EmsScriptNode generatePDF(String snapshotId, Date dateTime, WorkspaceNode workspace, String siteName) throws Exception{
     	clearCaches( false );
         //EmsScriptNode snapshotNode = findScriptNodeById(snapshotId, workspace, null, false);
     	// lookup snapshotNode using standard lucene as snapshotId is unique across all workspaces
 		ArrayList<NodeRef> nodeRefs = NodeUtil.findNodeRefsByType( snapshotId, "@cm\\:name:\"", services );
 		if (nodeRefs == null || nodeRefs.size() != 1) {
-			throw new Exception("Failed to find snapshot with Id: " + snapshotId);
+			nodeRefs = NodeUtil.findNodeRefsByType( snapshotId, "@sysml\\:id:\"", services );
+			if (nodeRefs == null || nodeRefs.size() != 1) {
+				throw new Exception("Failed to find snapshot with Id: " + snapshotId);
+			}
 		}
 		EmsScriptNode snapshotNode = new EmsScriptNode(nodeRefs.get( 0 ), services, response);
 		if(snapshotNode == null) throw new Exception("Failed to find snapshot with Id: " + snapshotId);
@@ -1082,6 +1087,8 @@ public class SnapshotPost extends AbstractJavaWebScript {
     private EmsScriptNode getSnapshotNode(String id){
     	EmsScriptNode node = null;
     	ArrayList<NodeRef> nodeRefs = NodeUtil.findNodeRefsByType( id, "@cm\\:name:\"", services );
+    	if(nodeRefs==null || nodeRefs.size() != 1) nodeRefs = NodeUtil.findNodeRefsByType( id, "@sysml\\:id:\"", services );
+    	
 	    if (nodeRefs != null && nodeRefs.size() > 0) {
 		    node = new EmsScriptNode(nodeRefs.get( 0 ), services, response);
 	    }
@@ -1755,11 +1762,12 @@ public class SnapshotPost extends AbstractJavaWebScript {
 	    	case "EM":
 	    	case "I":
 	    	case "STRONG":
-	    		elemNew = new Element(Tag.valueOf("para"), "");
+//	    		elemNew = new Element(Tag.valueOf("para"), "");
 	    		emphasis = new Element(Tag.valueOf("emphasis"), "");
 	    		if(tagName.compareTo("B")==0 || tagName.compareTo("STRONG")==0) emphasis.attr("role", "bold");
 	    		emphasis.html(elem.html());
-	    		elemNew.appendChild(emphasis);
+//	    		elemNew.appendChild(emphasis);
+	    		elemNew = emphasis;
 	    		elem.replaceWith(elemNew);
 	    		elem = elemNew;
 	    		break;
@@ -1774,6 +1782,10 @@ public class SnapshotPost extends AbstractJavaWebScript {
 	    		elem = elemNew;
 	    		break;
 	    	case "LI":
+	    		if(elem.html()!= null && elem.html().trim().length()==0){ 
+	    			elem.remove();
+	    			break;
+	    		}
 	    		elemNew = new Element(Tag.valueOf("listitem"), "");
 	    		para = new Element(Tag.valueOf("para"), "");
 	    		para.html(elem.html());
@@ -1860,6 +1872,10 @@ public class SnapshotPost extends AbstractJavaWebScript {
 	    	list.addAll(body.select("orderedlist > itemizedlist"));
 	    	if(list.size() == 0) break;
 	    	for(Element u : list){
+	    		if(u.html().trim().length()==0){
+	    			u.remove();
+	    			continue;
+	    		}
 	    		Element listItem = new Element(Tag.valueOf("listitem"),"");
 	    		listItem.html(u.outerHtml());
 	    		u.replaceWith(listItem);
@@ -1868,13 +1884,24 @@ public class SnapshotPost extends AbstractJavaWebScript {
     	}
     	
     	// removes <itemizedlist>/<orderedlist> without <listitem> children
-    	list = body.select("itemizedlist");
-    	list.addAll(body.select("orderedlist"));
-    	list.addAll(body.select("tbody"));
-		for(Element item : list){
-			if(item.children().size()==0) 
-				item.tagName("removalTag");
-		}
+    	boolean isDone;
+    	while(true){
+    		isDone = true;
+	    	list = body.select("itemizedlist");
+	    	list.addAll(body.select("orderedlist"));
+	    	list.addAll(body.select("tbody"));
+	    	list.addAll(body.select("listitem"));
+			for(Element item : list){
+				if(item.children().size()==0){
+					if(item.html().trim().length()==0){ 
+						item.remove();
+						isDone = false;
+					}
+					else item.tagName("removalTag"); 
+				}
+			}
+			if(isDone) break;
+    	}
 		
 		// shifts chapter > link to chapter > para > link
 		while(true){
@@ -1896,7 +1923,6 @@ public class SnapshotPost extends AbstractJavaWebScript {
 	    	if(list.size() == 0) break;
 	    	list.tagName("removalTag");
 		}
-    	
     }
 
     protected String replaceXmlEntities(String s) {
