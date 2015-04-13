@@ -1,9 +1,12 @@
 package gov.nasa.jpl.view_repo.webscripts;
 
 import java.util.Arrays;
+import java.util.UUID;
 
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+
+import com.sun.star.util.DateTime;
 
 public class HtmlTable {
 	private int colCount;
@@ -21,6 +24,7 @@ public class HtmlTable {
 	private Elements headerRows;
 	private Elements footerRows;
 	private Elements bodyRows;
+	private SnapshotPost snapshotPostService;
 
 	public enum TablePart{
 		BODY,
@@ -28,10 +32,11 @@ public class HtmlTable {
 		HEADER
 	}
 
-	public HtmlTable(Element table){
+	public HtmlTable(Element table, SnapshotPost snapshotPostService){
 		if(table == null) return;
 		if(table.tagName().compareToIgnoreCase("table") != 0) return;
 		this.table = table;
+		this.snapshotPostService = snapshotPostService;
 		
 		int max = 0;
 		int curMax;
@@ -69,24 +74,24 @@ public class HtmlTable {
 		//looking for table tbody
 		Elements tbody = table.select(" > tbody");
 		if(tbody == null || tbody.size()==0){
-			if(!this.hasHeader){
-				this.headerRows = table.select("table > tr").first().select("tr");
-				this.headerRowCount = this.headerRows.size();
-				this.hasHeader = true;
-				table.select("table > tr").first().remove();
-			}
+//			if(!this.hasHeader){
+//				this.headerRows = table.select("table > tr").first().select("tr");
+//				this.headerRowCount = this.headerRows.size();
+//				this.hasHeader = true;
+//				table.select("table > tr").first().remove();
+//			}
 			this.bodyRows = table.select("table > tr");
 			this.bodyRowCount = this.bodyRows.size();
 			curMax = getColumnMax(this.bodyRows);
 			if(max < curMax) max = curMax;
 		}
 		else{
-			if(!this.hasHeader){
-				this.headerRows = tbody.select(" > tr").first().select("tr");
-				this.headerRowCount = this.headerRows.size();
-				this.hasHeader = true;
-				tbody.select(" > tr").first().remove();
-			}
+//			if(!this.hasHeader){
+//				this.headerRows = tbody.select(" > tr").first().select("tr");
+//				this.headerRowCount = this.headerRows.size();
+//				this.hasHeader = true;
+//				tbody.select(" > tr").first().remove();
+//			}
 			this.bodyRows = tbody.select(" > tr");
 			this.bodyRowCount = this.bodyRows.size();
 			curMax = getColumnMax(this.bodyRows);
@@ -113,6 +118,10 @@ public class HtmlTable {
 		
 		if(startCol > this.colCount) return "";
 		
+		String s = this.snapshotPostService.handleTransclusion(UUID.randomUUID().toString(), "unknown", cell.html());
+		s = this.snapshotPostService.handleEmbeddedImage(s);
+		s = this.snapshotPostService.HtmlSanitize( s );
+		
 		if(rowspan > 1 || colspan > 1){
 			sb.append("<entry");
 			
@@ -125,10 +134,10 @@ public class HtmlTable {
         		if(end > this.getColCount()) end = this.getColCount();
         		sb.append(String.format(" namest=\"%d\" nameend=\"%d\"", startCol, end));
 			}
-			sb.append(String.format(">%s</entry>", cell.html()));
+			sb.append(String.format(">%s</entry>", s));
 		}
 		else 
-			sb.append(String.format("<entry>%s</entry>", cell.html()));
+			sb.append(String.format("<entry>%s</entry>", s));
 		
 		return sb.toString();
 	}
@@ -147,7 +156,8 @@ public class HtmlTable {
 		StringBuffer sb = new StringBuffer();
 		Elements bodyRows = this.bodyRows;
 		int startCol = 1;
-		int row = (this.hasHeader) ? 0: 1;
+//		int row = (this.hasHeader) ? 0: 1;
+		int row = 0;
 		
 		sb.append("<utbody>");
 		for(; row < bodyRows.size(); row++){
@@ -194,6 +204,8 @@ public class HtmlTable {
 	}
 
 	private String generateHeader(){
+		if(!this.hasHeader) return "";
+		
 		StringBuffer sb = new StringBuffer();		
 		sb.append("<uthead>");
 		
