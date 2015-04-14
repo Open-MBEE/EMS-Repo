@@ -5456,12 +5456,10 @@ public class EmsScriptNode extends ScriptNode implements
                                           Set< String > filter, WorkspaceNode ws, Date dateTime )
                                                                                throws JSONException {
         
-        // Dont need the correct workspace b/c sysml ids are immutable:
-        NodeRef specNode = (NodeRef) node.getNodeRefProperty( Acm.ACM_INSTANCE_SPECIFICATION_SPECIFICATION,
-                                                              true, dateTime, ws);
         putInJson( json,
                    Acm.JSON_INSTANCE_SPECIFICATION_SPECIFICATION,
-                   addNodeRefIdJSON(specNode),
+                   addInternalJSON( node.getNodeRefProperty( Acm.ACM_INSTANCE_SPECIFICATION_SPECIFICATION, dateTime, ws ), 
+                                    ws, dateTime ),
                    filter );
         
         putInJson( json,

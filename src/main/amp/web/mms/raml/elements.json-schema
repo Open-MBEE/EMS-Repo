@@ -124,8 +124,27 @@
             "properties": {
                 "type": { "enum": ["InstanceSpecification"] },
                 "instanceSpecificationSpecification": {
-                    "type": "string",
-                    "description": "ID of element that provides the instance specification"
+                        "type": "object",
+                        "description": "The embedded specification",
+                        "oneOf": [
+                            { "$ref": "#/definitions/ValueSpecification"},
+                            { "$ref": "#/definitions/Duration"},
+                            { "$ref": "#/definitions/DurationInterval"},
+                            { "$ref": "#/definitions/ElementValue"},
+                            { "$ref": "#/definitions/Expression"},
+                            { "$ref": "#/definitions/OpaqueExpression"},
+                            { "$ref": "#/definitions/InstanceValue"},
+                            { "$ref": "#/definitions/Interval"},
+                            { "$ref": "#/definitions/StringExpression"},
+                            { "$ref": "#/definitions/LiteralBoolean"},
+                            { "$ref": "#/definitions/LiteralNull"},
+                            { "$ref": "#/definitions/LiteralInteger"},
+                            { "$ref": "#/definitions/LiteralReal"},
+                            { "$ref": "#/definitions/LiteralString"},
+                            { "$ref": "#/definitions/LiteralUnlimitedNatural"},
+                            { "$ref": "#/definitions/TimeExpression"},
+                            { "$ref": "#/definitions/TimeInterval"}
+                        ]
                 },
                 "classifier": {
                     "type": "array",
