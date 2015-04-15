@@ -1181,7 +1181,31 @@ public class EmsScriptNode extends ScriptNode implements
      *            Short name for type to filter on
      * @return
      */
-    public EmsScriptNode getFirstAssociationByType( String type ) {
+    public EmsScriptNode getFirstSourceAssociationByType( String type ) {
+        List< AssociationRef > assocs =
+                services.getNodeService()
+                        .getSourceAssocs( nodeRef, RegexQNamePattern.MATCH_ALL );
+        if ( assocs != null ) {
+            // check all associations to see if there's a matching association
+            for ( AssociationRef ref : assocs ) {
+                if ( ref.getTypeQName().equals( createQName( type ) ) ) {
+                    return new EmsScriptNode( ref.getSourceRef(), services,
+                                              response );
+                }
+            }
+        }
+        return null;
+    }
+
+    
+    /**
+     * Return the first AssociationRef of a particular type
+     *
+     * @param type
+     *            Short name for type to filter on
+     * @return
+     */
+    public EmsScriptNode getFirstTargetAssociationByType( String type ) {
         List< AssociationRef > assocs =
                 services.getNodeService()
                         .getTargetAssocs( nodeRef, RegexQNamePattern.MATCH_ALL );
