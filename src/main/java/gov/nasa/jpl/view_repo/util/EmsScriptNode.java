@@ -2234,8 +2234,17 @@ public class EmsScriptNode extends ScriptNode implements
             if ( owner != null ) {
                 ownerId = (String)owner.getProperty( "sysml:id" );
                 if ( ownerId != null ) {
-                    ownerId = ownerId.replace( "_pkg", "" );
+                    if ( ownerId.endsWith( "_pkg" ) ) {
+                        ownerId = ownerId.replace( "_pkg", "" );
+                        // FIXME: need to make sure the owner exists
+                        NodeRef ref = findNodeRefByType( ownerId, SearchType.ID.prefix, getWorkspace(), dateTime, false );
+                        if ( ref == null ) {
+                            ownerId = null;
+                            // TODO -- create reified node?
+                        }
+                    }
                 }
+                
             }
 
             // No longer using "null".  This works better.
