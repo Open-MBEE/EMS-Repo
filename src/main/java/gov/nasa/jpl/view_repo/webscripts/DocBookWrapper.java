@@ -518,9 +518,9 @@ public class DocBookWrapper {
 				}
 			}
 
-			//this.transformToHTML(workspace, timestamp);
 			createDocBookDir();
 			retrieveDocBook(workspace, timestamp);
+			this.transformToHTML(workspace, timestamp);
 			tableToCSV();
 			String zipPath = this.zipHtml();
 			if(zipPath == null || zipPath.isEmpty()) throw new Exception("Failed to zip files and resources!");
