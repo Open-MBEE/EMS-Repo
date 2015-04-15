@@ -84,6 +84,7 @@ import org.alfresco.service.cmr.security.PermissionService;
 import org.alfresco.service.cmr.security.PersonService;
 import org.alfresco.service.cmr.site.SiteInfo;
 import org.alfresco.util.TempFileProvider;
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormatter;
@@ -95,6 +96,7 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.nodes.Node;
+import org.jsoup.nodes.TextNode;
 import org.jsoup.parser.Tag;
 import org.jsoup.select.Elements;
 import org.springframework.extensions.webscripts.Cache;
@@ -1702,6 +1704,8 @@ public class SnapshotPost extends AbstractJavaWebScript {
     	Element emphasis = null;
     	String style = null;
     	boolean isEmphasis = false;
+    	boolean isPaddingLeft = false;
+    	Integer pixel = new Integer(0); 
     	
     	String tagName = elem.tagName().toUpperCase();
     	switch(tagName){
@@ -1795,9 +1799,22 @@ public class SnapshotPost extends AbstractJavaWebScript {
 		    			elemNew.attr("role", sb.toString());
 		    			isEmphasis = true;
 	    			}
-	    			elemNew.attr("style", style);
+	    			if(style.contains("padding-left:")){
+	    				//extract padding-left value; assuming px unit;
+	    				int beginningIndex = style.indexOf("padding-left:") + 14;
+	    				int endIndex = style.indexOf(";", beginningIndex)-2;
+	    				if(endIndex < beginningIndex) endIndex = style.length()-2;
+	    				String px = style.substring(beginningIndex, endIndex);
+	    				try{
+	    					pixel = new Integer(px);
+	    					if(pixel!= null) isPaddingLeft = true;
+	    				}
+	    				catch(NumberFormatException ex){;}
+	    			}
 	    		}
 	    		if(!isEmphasis) elemNew = new Element(Tag.valueOf("para"), "");
+	    		
+	    		if(isPaddingLeft) elemNew.attr("role", String.format("%s;padding-left-%d", elemNew.attr("role"), pixel));
 	    		elemNew.html(elem.html());
 	    		elemNew.prepend("<?linebreak?>");
 	    		elem.replaceWith(elemNew);
@@ -1876,8 +1893,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
 	    		style = elem.attr("style");
 	    		if(style !=null && !style.isEmpty()){
 	    			style = style.toLowerCase();
-	    			if(style.contains("underline") ||
-	    					style.contains("line-through")){
+	    			if(style.contains("underline") || style.contains("line-through")){
 	    				elemNew = new Element(Tag.valueOf("emphasis"), "");
 	    				StringBuffer sb = new StringBuffer();
 	    				if(style.contains("underline")) sb.append("underline");
@@ -1885,10 +1901,37 @@ public class SnapshotPost extends AbstractJavaWebScript {
 		    			elemNew.attr("role", sb.toString());
 		    			isEmphasis = true;
 	    			}
+	    			if(style.contains("background-color:")){
+	    				//extract color value; assuming color is the only property defined; ex: style="color: #0000ff;"
+	    				if(style.length() == 26){
+	    					String color = style.substring(style.indexOf("#"));
+	    					color = color.replace(";", "");
+	    					if(!isEmphasis){ 
+	    						elemNew = new Element(Tag.valueOf("phrase"), "");
+	    						isEmphasis = true;
+	    					}
+	    					elemNew.attr("background-color", color);
+	    				}
+	    			}
+	    			else if(style.contains("color:")){
+	    				//extract color value; assuming color is the only property defined; ex: style="color: #0000ff;"
+	    				if(style.length() == 15){
+	    					String color = style.substring(style.indexOf("#"));
+	    					color = color.replace(";", "");
+	    					if(!isEmphasis){ 
+	    						elemNew = new Element(Tag.valueOf("phrase"), "");
+	    						isEmphasis = true;
+	    					}
+	    					elemNew.attr("color", color);
+	    				}
+	    			}
+	    			
+	    			//if(isPaddingLeft) elemNew.attr("role", String.format("%s;padding-left-%d", elemNew.attr("role"), pixel));
 	    		}
 	    		if(!isEmphasis){
 	    			elemNew = new Element(Tag.valueOf("removalTag"),"");
 	    		}
+	    		
 	    		elemNew.html(elem.html());
 	    		elem.replaceWith(elemNew);
 	    		elem = elemNew;
@@ -1939,6 +1982,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
 	    	list.addAll(body.select("orderedlist"));
 	    	list.addAll(body.select("tbody"));
 	    	list.addAll(body.select("listitem"));
+	    	list.addAll(body.select("row"));
 			for(Element item : list){
 				if(item.children().size()==0){
 					if(item.html().trim().length()==0){ 
