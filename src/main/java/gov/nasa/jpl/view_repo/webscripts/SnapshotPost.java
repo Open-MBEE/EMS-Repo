@@ -1703,6 +1703,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
     	Element para = null;
     	Element emphasis = null;
     	String style = null;
+    	List<String> styles = null;
     	boolean isEmphasis = false;
     	boolean isPaddingLeft = false;
     	Integer pixel = new Integer(0); 
@@ -1876,7 +1877,15 @@ public class SnapshotPost extends AbstractJavaWebScript {
 //	    		elem.replaceWith(elemNew);
 //	    		elem = elemNew;
 	    		break;
-	    	case "UL":
+	    	case "U":
+	    		emphasis = new Element(Tag.valueOf("emphasis"), "");
+	    		emphasis.attr("role", "underline");
+	    		emphasis.html(elem.html());
+	    		elemNew = emphasis;
+	    		elem.replaceWith(elemNew);
+	    		elem = elemNew;
+	    		break;
+    		case "UL":
 	    		elemNew = new Element(Tag.valueOf("itemizedlist"), "");
 	    		elemNew.html(elem.html());
 	    		elem.replaceWith(elemNew);
@@ -1890,46 +1899,48 @@ public class SnapshotPost extends AbstractJavaWebScript {
 	    		break;
 	    	default:
 	    		isEmphasis = false;
+	    		String backgroundColor = "";
+    			String color = "";
 	    		style = elem.attr("style");
 	    		if(style !=null && !style.isEmpty()){
 	    			style = style.toLowerCase();
-	    			if(style.contains("underline") || style.contains("line-through")){
-	    				elemNew = new Element(Tag.valueOf("emphasis"), "");
-	    				StringBuffer sb = new StringBuffer();
-	    				if(style.contains("underline")) sb.append("underline");
-	    				if(style.contains("line-through")) sb.append("strikethrough");
-		    			elemNew.attr("role", sb.toString());
-		    			isEmphasis = true;
-	    			}
-	    			if(style.contains("background-color:")){
-	    				//extract color value; assuming color is the only property defined; ex: style="color: #0000ff;"
-	    				if(style.length() == 26){
-	    					String color = style.substring(style.indexOf("#"));
-	    					color = color.replace(";", "");
-	    					if(!isEmphasis){ 
-	    						elemNew = new Element(Tag.valueOf("phrase"), "");
-	    						isEmphasis = true;
-	    					}
-	    					elemNew.attr("background-color", color);
-	    				}
-	    			}
-	    			else if(style.contains("color:")){
-	    				//extract color value; assuming color is the only property defined; ex: style="color: #0000ff;"
-	    				if(style.length() == 15){
-	    					String color = style.substring(style.indexOf("#"));
-	    					color = color.replace(";", "");
-	    					if(!isEmphasis){ 
-	    						elemNew = new Element(Tag.valueOf("phrase"), "");
-	    						isEmphasis = true;
-	    					}
-	    					elemNew.attr("color", color);
-	    				}
-	    			}
+	    			styles = Arrays.asList(style.split("\\s*;\\*"));
+	    			boolean isStrikeThrough = false;
 	    			
-	    			//if(isPaddingLeft) elemNew.attr("role", String.format("%s;padding-left-%d", elemNew.attr("role"), pixel));
+	    			for(String styl : styles){
+	    				if(styl.contains("underline") || styl.contains("line-through")){
+		    				elemNew = new Element(Tag.valueOf("emphasis"), "");
+		    				StringBuffer sb = new StringBuffer();
+		    				if(style.contains("line-through")){
+		    					isStrikeThrough = true;
+		    					sb.append("strikethrough");
+		    				}
+			    			if(style.contains("underline") && !isStrikeThrough) sb.append("underline");
+		    				elemNew.attr("role", sb.toString());
+			    			isEmphasis = true;
+		    			}
+	    				if(styl.contains("background-color:")){
+	    					backgroundColor = styl.substring("background-color:".length()).trim().replace(";", "");
+	    					if(!isEmphasis){ 
+	    						elemNew = new Element(Tag.valueOf("phrase"), "");
+	    						isEmphasis = true;
+	    					} 
+	    				}
+	    				if(styl.startsWith("color:")){
+	    					color = style.substring("color:".length()).trim().replace(";", "");
+	    					if(!isEmphasis){ 
+	    						elemNew = new Element(Tag.valueOf("phrase"), "");
+	    						isEmphasis = true;
+	    					}
+	    				}
+	    			}
 	    		}
 	    		if(!isEmphasis){
 	    			elemNew = new Element(Tag.valueOf("removalTag"),"");
+	    		}
+	    		else{
+	    			if(!backgroundColor.isEmpty()) elemNew.attr("background-color", backgroundColor);
+	    			if(!color.isEmpty()) elemNew.attr("color", color);
 	    		}
 	    		
 	    		elemNew.html(elem.html());
