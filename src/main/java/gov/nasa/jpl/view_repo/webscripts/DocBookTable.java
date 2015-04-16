@@ -111,8 +111,10 @@ public class DocBookTable {
 		int rowspanCount[] = new int[colCount];
 		for(int i=0; i < colCount; i++){
 			int total = 0;
+			int row = 0;
 			for(int j=0; j < rowspan.length; j++){
-				total += rowspan[j][i];
+				row = rowspan[j][i];
+				if(row > -1) total += row;
 			}
 			rowspanCount[i] = total;
 		}

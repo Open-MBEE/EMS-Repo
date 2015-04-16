@@ -518,8 +518,8 @@ public class DocBookWrapper {
 				}
 			}
 
-			createDocBookDir();
-			retrieveDocBook(workspace, timestamp);
+			//createDocBookDir();
+			//retrieveDocBook(workspace, timestamp);
 			this.transformToHTML(workspace, timestamp);
 			tableToCSV();
 			String zipPath = this.zipHtml();
