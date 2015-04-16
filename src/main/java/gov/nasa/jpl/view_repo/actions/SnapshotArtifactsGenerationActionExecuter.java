@@ -137,7 +137,12 @@ public class SnapshotArtifactsGenerationActionExecuter  extends ActionExecuterAb
             NodeRef viewRef = (NodeRef)snapshotNode.getNodeRefProperty( "view2:snapshotProduct", dateTime,
                                                                         workspace);
 	        if (viewRef == null) {
-	            
+	            // if missing, then check for backwards compatibility
+	            EmsScriptNode viewNode = 
+	                    snapshotNode.getFirstSourceAssociationByType( "view2:snapshots" );
+	            if (viewNode != null) {
+	                viewRef = viewNode.getNodeRef();
+	            }
 	        }
 	        EmsScriptNode viewNode = new EmsScriptNode(viewRef, services, response);
 	        String viewId = viewNode.getSysmlId();

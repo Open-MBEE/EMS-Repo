@@ -189,7 +189,7 @@ public class ActionUtil {
                                                Status status, StringBuffer response,
                                                boolean generateName) {
         // to make sure no permission issues, run as admin
-        String origUser = AuthenticationUtil.getRunAsUser();
+        String origUser = AuthenticationUtil.getFullyAuthenticatedUser();
         AuthenticationUtil.setRunAsUser( "admin" );
 
         EmsScriptNode jobPkgNode = contextFolder.childByNamePath("Jobs");

@@ -1,0 +1,11 @@
+<webscript>
+	<shortname>configure rest post</shortname>
+    <description>
+    	configure the rest post connection to dea
+	</description>
+  	<url>/restpostconnection</url>
+  	<format default="json">argument</format>
+  	<authentication>user</authentication>
+  	<transaction>required</transaction>
+  	<family>MMS REST API</family>
+ </webscript>
