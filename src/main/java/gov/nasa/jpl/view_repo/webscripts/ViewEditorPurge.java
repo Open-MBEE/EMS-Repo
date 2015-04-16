@@ -36,6 +36,7 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.log4j.*;
 import org.alfresco.repo.model.Repository;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
@@ -79,7 +80,7 @@ public class ViewEditorPurge extends AbstractJavaWebScript {
 		if (siteInfo != null) {
 		    siteNode = new EmsScriptNode(siteInfo.getNodeRef(), services, response);
 		} else {
-			log(LogLevel.ERROR, "Site not found: " + siteName + ".\n", HttpServletResponse.SC_NOT_FOUND);
+			log(Level.ERROR, HttpServletResponse.SC_NOT_FOUND, "Site not found: %s .\n", siteName);
 			return false;
 		}
 
@@ -115,14 +116,14 @@ public class ViewEditorPurge extends AbstractJavaWebScript {
 	        		String projectid = req.getParameter("project");
 	        		if (projectid.startsWith("ViewEditor") || projectid.startsWith("Models")) {
 		        		veNode = siteNode.childByNamePath("/" + projectid);
-		        		log(LogLevel.INFO, "Attempting to delete dir " + projectid);
+		        		log(Level.INFO, "Attempting to delete dir %s", projectid);
 	        		}
 	        }
 
 	        if (veNode != null) {
 	        		handleElementHierarchy(veNode, recurse);
 	        } else {
-	        		log(LogLevel.INFO, "could not find node to delete");
+	        		log(Level.INFO, "could not find node to delete");
 	        }
 		}
 
@@ -147,11 +148,13 @@ public class ViewEditorPurge extends AbstractJavaWebScript {
 //            trx.begin();
 //            NodeUtil.setInsideTransactionNow( true );
             String key = (String)node.getProperty("cm:name");
-            log(LogLevel.INFO, "delete: beginning transaction {" + node.getNodeRef());
+
+            log(Level.INFO, "delete: beginning transaction {%s", node.getNodeRef());
             node.makeSureNodeRefIsNotFrozen();
             node.transactionCheck();
             services.getNodeService().deleteNode(node.getNodeRef());
-            log(LogLevel.INFO, "} delete ending transaction: " + key);
+
+            log(Level.INFO, "} delete ending transaction: %s", key);
 //            trx.commit();
 //            NodeUtil.setInsideTransactionNow( false );
 //        } catch (Throwable e) {

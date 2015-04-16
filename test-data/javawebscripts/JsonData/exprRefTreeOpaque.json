@@ -36,19 +36,13 @@
            "specialization": {
               "type":"InstanceSpecification",
               "classifier":["PE_Opaque_Paragraph"],
-              "instanceSpecificationSpecification":"para"
-           }
-         },
-         
-         {
-             "sysmlid":"para",
-             "owner": "123456",
-             "specialization": {
+              "instanceSpecificationSpecification":{
                   "string":"{\"sourceType\": \"reference\",\"source\": \"gorangPoo\",\"sourceProperty\": \"name\",\"type\": \"Paragraph\"}",
                   "type":"LiteralString"
               }
+           }
          },
-         
+                  
          {
              "sysmlid":"gorangPoo",
              "owner": "123456",
@@ -66,31 +60,28 @@
            "specialization": {
               "type":"InstanceSpecification",
               "classifier":["PE_Opaque_Section"],
-              "instanceSpecificationSpecification":"rootInstanceSpecSpec1"
+              "instanceSpecificationSpecification": {
+                   "operand":[
+                              {
+                               "instance":"rootInstanceSpecSection1",
+                               "type":"InstanceValue"
+                              }
+                             ],
+                   "type":"Expression"
+             }
            }
          },
          
-         {
-           "sysmlid":"rootInstanceSpecSpec1",
-           "owner": "123456",
-           "specialization": {
-              "operand":[
-                         {
-                          "instance":"rootInstanceSpecSection1",
-                          "type":"InstanceValue"
-                         }
-                        ],
-              "type":"Expression"
-           }
-         },
-
          {
            "sysmlid":"rootInstanceSpecSection1",
            "owner": "123456",
            "specialization": {
               "type":"InstanceSpecification",
               "classifier":["PE_Opaque_Paragraph"],
-              "instanceSpecificationSpecification":"para"
+              "instanceSpecificationSpecification":{
+                  "string":"{\"sourceType\": \"reference\",\"source\": \"gorangPoo\",\"sourceProperty\": \"name\",\"type\": \"Paragraph\"}",
+                  "type":"LiteralString"
+              }
            }
          },
          
@@ -100,17 +91,11 @@
            "specialization": {
               "type":"InstanceSpecification",
               "classifier":["PE_Opaque_List"],
-              "instanceSpecificationSpecification":"listey"
-           }
-         },
-
-         {
-             "sysmlid":"listey",
-             "owner": "123456",
-             "specialization": {
+              "instanceSpecificationSpecification":{
                   "string":"{\"ordered\": true,\"bulleted\": true,\"list\": [[{\"sourceType\": \"reference\",\"source\": \"gorangPoo\",\"sourceProperty\": \"name\",\"type\": \"Paragraph\"}]],\"type\": \"List\"}",
                   "type":"LiteralString"
               }
+           }
          },
          
         {
@@ -119,18 +104,12 @@
            "specialization": {
               "type":"InstanceSpecification",
               "classifier":["PE_Opaque_Table"],
-              "instanceSpecificationSpecification":"tabley"
-           }
-         },
-         
-         {
-             "sysmlid":"tabley",
-             "owner": "123456",
-             "specialization": {
+              "instanceSpecificationSpecification":{
                   "string":"{\"body\": [[{\"content\": [{\"sourceType\": \"reference\",\"source\": \"gorangPoo\",\"sourceProperty\": \"name\",\"type\": \"Paragraph\"}],\"colspan\": \"1\",\"rowspan\": \"1\"},{\"content\": [{\"sourceType\": \"reference\",\"source\": \"gorangPoo\",\"sourceProperty\": \"documentation\",\"type\": \"Paragraph\"}],\"colspan\": \"1\",\"rowspan\": \"1\"}]],\"title\": \"Gorang and his poo eating\",\"style\": \"normal\",\"type\": \"Table\",\"header\": [[{\"content\": [{\"sourceType\": \"text\",\"text\": \"<p>name<\/p>\",\"type\": \"Paragraph\"}],\"colspan\": \"1\",\"rowspan\": \"1\"},{\"content\": [{\"sourceType\": \"text\",\"text\": \"<p>doc<\/p>\",\"type\": \"Paragraph\"}],\"colspan\": \"1\",\"rowspan\": \"1\"}]]}",
                   "type":"LiteralString"
               }
+           }
          },
-
+         
     ]
 }

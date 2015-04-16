@@ -35,7 +35,11 @@ import java.util.Map;
 import javax.faces.context.FacesContext;
 import javax.servlet.http.HttpServletResponse;
 
+
+import org.apache.log4j.*;
+//TODO - Fix following import
 //import org.alfresco.web.app.Application;
+
 import org.springframework.extensions.webscripts.AbstractWebScript;
 import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;

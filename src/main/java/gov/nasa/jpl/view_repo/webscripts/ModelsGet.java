@@ -41,6 +41,7 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.log4j.*;
 import org.alfresco.repo.model.Repository;
 import org.alfresco.service.ServiceRegistry;
 
@@ -94,10 +95,10 @@ public class ModelsGet extends AbstractJavaWebScript {
             if ( wsId != null && wsId.equalsIgnoreCase( "master" ) ) {
                 wsFound = true;
             } else {
-                log( LogLevel.ERROR,
-                     "Workspace with id, " + wsId
-                     + ( dateTime == null ? "" : " at " + dateTime ) + " not found",
-                     HttpServletResponse.SC_NOT_FOUND );
+                log( Level.ERROR,
+                     HttpServletResponse.SC_NOT_FOUND,
+                     "Workspace with id, %s not found", wsId
+                     + ( dateTime == null ? "" : " at " + dateTime ));
                 return false;
             }
         }
@@ -126,7 +127,7 @@ public class ModelsGet extends AbstractJavaWebScript {
             try {
                 elementsJson = handleRequest(req);
             } catch ( JSONException e ) {
-                log(LogLevel.ERROR, "Malformed JSON request", HttpServletResponse.SC_BAD_REQUEST);
+                log(Level.ERROR, HttpServletResponse.SC_BAD_REQUEST, "Malformed JSON request");
                 e.printStackTrace();
             }
         }
@@ -140,9 +141,9 @@ public class ModelsGet extends AbstractJavaWebScript {
                 if ( prettyPrint ) model.put("res", NodeUtil.jsonToString( top, 4 ));
                 else model.put("res", NodeUtil.jsonToString( top ));
             } else {
-                log(LogLevel.WARNING, "No elements found",
-                    HttpServletResponse.SC_NOT_FOUND);
-                model.put("res", createResponseJson());
+                log(Level.WARN,
+                    HttpServletResponse.SC_NOT_FOUND, "No elements found");
+				model.put("res", createResponseJson());
             }
         } catch (JSONException e) {
             e.printStackTrace();
@@ -171,9 +172,9 @@ public class ModelsGet extends AbstractJavaWebScript {
             EmsScriptNode node = NodeUtil.findScriptNodeById( id, workspace, dateTime, false, services, response );
             if (node != null) {
                 try {
-                    elementsFoundJson.put( node.toJSONObject( dateTime ) );
+                    elementsFoundJson.put( node.toJSONObject( workspace, dateTime ) );
                 } catch (JSONException e) {
-                    log(LogLevel.ERROR, "Could not create JSON", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                    log(Level.ERROR, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Could not create JSON");
                     e.printStackTrace();
                 }
             }

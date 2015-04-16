@@ -790,10 +790,18 @@ public class Acm {
             add(ACM_CONTENTS);
         }
     };
+    
     private static final Set<String> PRODUCT_VALUESPECS = new HashSet<String>() {
         private static final long serialVersionUID = -5889978723965174381L;
         {
             add(ACM_CONTENTS);
+        }
+    };
+    
+    private static final Set<String> INSTANCE_SPEC_VALUESPECS = new HashSet<String>() {
+        private static final long serialVersionUID = -5889978723965174381L;
+        {
+            add(ACM_INSTANCE_SPECIFICATION_SPECIFICATION);
         }
     };
 
@@ -813,6 +821,7 @@ public class Acm {
             put(ACM_OPERATION, OPERATION_VALUESPECS);
             put(ACM_VIEW, VIEW_VALUESPECS);
             put(ACM_PRODUCT, PRODUCT_VALUESPECS);
+            put(ACM_INSTANCE_SPECIFICATION, INSTANCE_SPEC_VALUESPECS);
         }
     };
 }

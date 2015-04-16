@@ -47,6 +47,7 @@ import java.util.Set;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.log4j.*;
 import org.alfresco.repo.model.Repository;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.security.PermissionService;
@@ -88,7 +89,7 @@ public class MoaProductGet extends AbstractJavaWebScript {
 
 		EmsScriptNode product = findScriptNodeById(productId, workspace, dateTime, false);
 		if (product == null) {
-			log(LogLevel.ERROR, "Product not found with id: " + productId + ".\n", HttpServletResponse.SC_NOT_FOUND);
+			log(Level.ERROR, HttpServletResponse.SC_NOT_FOUND, "Product not found with id: %s.\n", productId);
 			return false;
 		}
 
@@ -139,8 +140,8 @@ public class MoaProductGet extends AbstractJavaWebScript {
             model.put("res", jsonString);
             if (productId != null) {
                 model.put("title", product.getProperty(Acm.ACM_NAME));
-                model.put("siteTitle", product.getSiteTitle());
-                model.put("siteName", product.getSiteName());
+                model.put("siteTitle", product.getSiteTitle(dateTime, workspace));
+                model.put("siteName", product.getSiteName(dateTime, workspace));
             }
         } else {
             model.put("res", createResponseJson());
@@ -192,11 +193,11 @@ public class MoaProductGet extends AbstractJavaWebScript {
 		JSONArray viewsJson = new JSONArray();
 		JSONArray elementsJson = new JSONArray();
 		if (product == null) {
-			log(LogLevel.ERROR, "Product not found with ID: " + productId, HttpServletResponse.SC_NOT_FOUND);
+			log(Level.ERROR, HttpServletResponse.SC_NOT_FOUND, "Product not found with ID: %s", productId);
 		}
 
 		if (checkPermissions(product, PermissionService.READ)){
-		    JSONObject object = product.toJSONObject(dateTime);
+		    JSONObject object = product.toJSONObject(null, dateTime);
 		    productsJson = new JSONObject(object, JSONObject.getNames(object));
 
 		    if (object.has(Acm.JSON_VIEW_2_VIEW)) {
@@ -242,7 +243,8 @@ public class MoaProductGet extends AbstractJavaWebScript {
                 if ( snapshotV != null ) {
                     String msg = "Error! Snapshot " + snapshot + " did not exist at " + dateTime + ".\n";
                     if ( getResponse() == null || this.getResponseStatus() == null ) {
-                        Debug.error( msg );
+                        //Debug.error( msg );
+                    	log(Level.ERROR,msg);
                     } else {
                         getResponse().append( msg );
                         getResponseStatus().setCode( HttpServletResponse.SC_BAD_REQUEST,
@@ -293,7 +295,7 @@ public class MoaProductGet extends AbstractJavaWebScript {
 	    for (String viewId: viewIds) {
 	        EmsScriptNode view = findScriptNodeById(viewId, workspace, dateTime, false);
 	        if (view != null && checkPermissions(view, PermissionService.READ)) {
-        	        JSONObject viewJson = view.toJSONObject(dateTime);
+        	        JSONObject viewJson = view.toJSONObject(null, dateTime);
 
         	        // add any related comments as part of the view
         	        JSONArray commentsJson = new JSONArray();
@@ -302,7 +304,7 @@ public class MoaProductGet extends AbstractJavaWebScript {
                                                          workspace, dateTime );// new ArrayList<EmsScriptNode>();
         	        Collections.sort(commentList, new EmsScriptNode.EmsScriptNodeComparator());
         	        for (EmsScriptNode comment: commentList) {
-        	            commentsJson.put(comment.toJSONObject(dateTime));
+        	            commentsJson.put(comment.toJSONObject(null, dateTime));
         	        }
         	        viewJson.put("comments", commentsJson);
 
@@ -328,7 +330,7 @@ public class MoaProductGet extends AbstractJavaWebScript {
 	    for (String elementId: elementIds) {
 	        EmsScriptNode element = findScriptNodeById(elementId, workspace, dateTime, false);
 	        if (element != null && checkPermissions(element, PermissionService.READ)) {
-	            JSONObject elementJson = element.toJSONObject(dateTime);
+	            JSONObject elementJson = element.toJSONObject(null, dateTime);
 	            elementsJson.put(elementJson);
 	        }
 	    }

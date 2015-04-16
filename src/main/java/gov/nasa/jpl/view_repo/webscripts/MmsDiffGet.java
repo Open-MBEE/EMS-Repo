@@ -12,6 +12,7 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.log4j.*;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.extensions.webscripts.Cache;
@@ -49,15 +50,11 @@ public class MmsDiffGet extends AbstractJavaWebScript {
         boolean wsFound2 = ( ws2 != null || ( workspaceId2 != null && workspaceId2.equalsIgnoreCase( "master" ) ) );
 
         if ( !wsFound1 ) {
-            log( LogLevel.ERROR,
-                 "Workspace 1 id , " + workspaceId1 + ", not found",
-                 HttpServletResponse.SC_NOT_FOUND );
+            log( Level.ERROR, HttpServletResponse.SC_NOT_FOUND, "Workspace 1 id , %s , not found",workspaceId1);
             return false;
         }
         if ( !wsFound2 ) {
-            log( LogLevel.ERROR,
-                 "Workspace 2 id, " + workspaceId2 + ", not found",
-                 HttpServletResponse.SC_NOT_FOUND );
+            log( Level.ERROR, HttpServletResponse.SC_NOT_FOUND , "Workspace 2 id, %s , not found",workspaceId2);
             return false;
         }
         return true;
@@ -97,7 +94,7 @@ public class MmsDiffGet extends AbstractJavaWebScript {
         String timestamp2 = req.getParameter( "timestamp2" );
         dateTime2 = TimeUtils.dateFromTimestamp( timestamp2 );
 
-        workspaceDiff = new WorkspaceDiff(ws1, ws2, dateTime1, dateTime2);
+        workspaceDiff = new WorkspaceDiff(ws1, ws2, dateTime1, dateTime2, response, responseStatus);
 
         try {
             workspaceDiff.forceJsonCacheUpdate = false;

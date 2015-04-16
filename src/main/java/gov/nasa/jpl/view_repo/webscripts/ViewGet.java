@@ -45,6 +45,7 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.log4j.*;
 import org.alfresco.repo.model.Repository;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.security.PermissionService;
@@ -94,7 +95,7 @@ public class ViewGet extends AbstractJavaWebScript {
     
         EmsScriptNode view = findScriptNodeById(viewId, workspace, dateTime, false);
         if (view == null) {
-            log(LogLevel.ERROR, "View not found with id: " + viewId + " at " + dateTime + ".\n", HttpServletResponse.SC_NOT_FOUND);
+            log(Level.ERROR, HttpServletResponse.SC_NOT_FOUND, "View not found with id: %s at %s .\n", viewId, dateTime.toString());
             return false;
         }
 
@@ -172,8 +173,8 @@ public class ViewGet extends AbstractJavaWebScript {
                 else model.put("res", NodeUtil.jsonToString( json )); 
             } catch (JSONException e) {
                 e.printStackTrace();
-                log(LogLevel.ERROR, "JSON creation error", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-                model.put("res", createResponseJson());
+                log(Level.ERROR, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "JSON creation error");
+				model.put("res", createResponseJson());
                 e.printStackTrace();
             }
         } else {
@@ -198,8 +199,8 @@ public class ViewGet extends AbstractJavaWebScript {
         EmsScriptNode view = findScriptNodeById(viewId, workspace, dateTime, false);
 
         if (view == null) {
-            log( LogLevel.ERROR, "View not found with ID: " + viewId,
-                 HttpServletResponse.SC_NOT_FOUND );
+            log( Level.ERROR,
+                 HttpServletResponse.SC_NOT_FOUND, "View not found with ID: %s", viewId);
         }
 
         if (checkPermissions(view, PermissionService.READ)) {
@@ -216,7 +217,7 @@ public class ViewGet extends AbstractJavaWebScript {
                                                     generate, recurse, null );
                     elems = NodeUtil.getVersionAtTime( elems, dateTime );
                     for ( EmsScriptNode n : elems ) {
-                        viewsJson.put( n.toJSONObject( dateTime ) );
+                        viewsJson.put( n.toJSONObject( workspace, dateTime ) );
                     }
                 } else if ( gettingContainedViews ) {
                     if (Debug.isOn()) System.out.println("+ + + + + gettingContainedViews");
@@ -225,16 +226,16 @@ public class ViewGet extends AbstractJavaWebScript {
                                                  null );
                     elems.add( view );
                     for ( EmsScriptNode n : elems ) {
-                        viewsJson.put( n.toJSONObject( dateTime ) );
+                        viewsJson.put( n.toJSONObject( workspace,dateTime ) );
                     }
                 } else {
                     if (Debug.isOn()) System.out.println("+ + + + + just the view");
-                    viewsJson.put( view.toJSONObject(  dateTime ) );
+                    viewsJson.put( view.toJSONObject( workspace, dateTime ) );
                 }
                 EmsScriptNode.expressionStuff = false;
             } catch ( JSONException e ) {
-                log( LogLevel.ERROR, "Could not create views JSON array",
-                     HttpServletResponse.SC_INTERNAL_SERVER_ERROR );
+                log( Level.ERROR,
+                     HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Could not create views JSON array");
                 e.printStackTrace();
             }
         }

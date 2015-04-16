@@ -1,7 +1,6 @@
 package gov.nasa.jpl.view_repo.util;
 
 import gov.nasa.jpl.mbee.util.Utils;
-import gov.nasa.jpl.view_repo.actions.CommitActionExecuter;
 import gov.nasa.jpl.view_repo.connections.JmsConnection;
 import gov.nasa.jpl.view_repo.connections.RestPostConnection;
 import gov.nasa.jpl.view_repo.webscripts.HostnameGet;
@@ -84,6 +83,8 @@ public class CommitUtil {
 
         if (commitPkg == null && create) {
             commitPkg = context.createFolder( "commits" );
+            // commits directory needs global permissions
+            commitPkg.setPermission( "SiteCollaborator", "GROUP_EVERYONE" );
         }
 
         // Create the date folders if needed.  Want to return the "commit" folder
@@ -124,6 +125,10 @@ public class CommitUtil {
 	public static ArrayList<EmsScriptNode> getCommits(WorkspaceNode workspace,
 	                                           ServiceRegistry services,
 	                                           StringBuffer response) {
+        // to make sure no permission issues, run as admin
+	    String origUser = AuthenticationUtil.getRunAsUser();
+        AuthenticationUtil.setRunAsUser( "admin" );
+	    
 	    ArrayList<EmsScriptNode> commits = new ArrayList<EmsScriptNode>();
 
 	    // Note: if workspace is null, then will get the master workspace commits
@@ -140,6 +145,8 @@ public class CommitUtil {
 
             Collections.sort( commits, new ConfigurationsWebscript.EmsScriptNodeCreatedAscendingComparator() );
 	    }
+
+        AuthenticationUtil.setRunAsUser( origUser );
 
 	    return commits;
 	}
@@ -309,28 +316,44 @@ public class CommitUtil {
 	    return null;
 	}
 
+	/**
+	 * Gets all the commits in the specified time range from the startWorkspace to the 
+	 * endWorkspace. If the endWorkspace is not a parent of the startWorkspace, this will
+	 * search to the master.
+	 * @param fromDateTime
+	 * @param toDateTime
+	 * @param startWorkspace
+	 * @param endWorkspace
+	 * @param services
+	 * @param response
+	 * @return
+	 */
 	public static ArrayList<EmsScriptNode> getCommitsInDateTimeRange( Date fromDateTime,
 	                                                                  Date toDateTime,
-	                                                                  WorkspaceNode workspace,
+	                                                                  WorkspaceNode startWorkspace,
+	                                                                  WorkspaceNode endWorkspace,
 	                                                                  ServiceRegistry services,
 	                                                                  StringBuffer response) {
-
+        // to make sure no permission issues, run as admin
+        String originalUser = NodeUtil.getUserName();
+        AuthenticationUtil.setRunAsUser( "admin" );
+	    
 	    // TODO REVIEW consider using date folders to narrow the range of commits to be parsed
 	    //             through, rather than using getLastCommit().
 
 	    // skip over too new workspaces
-	    while ( workspace != null ) {
-	        Date created = workspace.getCreationDate();
+	    while ( startWorkspace != null ) {
+	        Date created = startWorkspace.getCreationDate();
 	        if ( toDateTime != null && created.after( toDateTime ) ) {
-	            workspace = workspace.getParentWorkspace();
+	            startWorkspace = startWorkspace.getParentWorkspace();
 	        } else {
 	            break;
 	        }
 	    }
 	    // gather commits between dates while walking up workspace parents
 	    ArrayList<EmsScriptNode> commits = new ArrayList< EmsScriptNode >();
-        while ( true ) { // run until workspace is equal to null and once while it is null (for the master branch)
-            EmsScriptNode commit = getLastCommit( workspace, services, response );
+        while ( true ) { // run until endWorkspace or master
+            EmsScriptNode commit = getLastCommit( startWorkspace, services, response );
             while ( commit != null ) {
                 Date created = commit.getCreationDate();
                 if ( fromDateTime != null && created.before( fromDateTime ) ) break;
@@ -339,9 +362,12 @@ public class CommitUtil {
                 }
                 commit = getPreviousCommit(commit);
             }
-            if ( workspace == null ) break;
-            workspace = workspace.getParentWorkspace();
+            if ( startWorkspace == null ) break;
+            if ( startWorkspace.equals(endWorkspace) ) break;
+            startWorkspace = startWorkspace.getParentWorkspace();
         }
+        
+        AuthenticationUtil.setRunAsUser( originalUser );
         return commits;
 	}
 
@@ -362,8 +388,8 @@ public class CommitUtil {
     }
 
     private static NodeRef commitRef = null;
-    public synchronized static NodeRef commit(final JSONObject wsDiff,
-                                              final WorkspaceNode workspace,
+    public synchronized static NodeRef commit(final WorkspaceNode workspace,
+                                              final String body,
                                               final String msg,
                                               final boolean runWithoutTransactions,
                                               final ServiceRegistry services,
@@ -374,7 +400,7 @@ public class CommitUtil {
             
             @Override
             public void run() throws Exception {
-                commitRef = commitTransactionable(wsDiff, workspace, msg, services, response);
+                commitRef = commitTransactionable(workspace, body, msg, services, response);
             }
         };
         //logger.warn( "sync commit end" );
@@ -382,16 +408,12 @@ public class CommitUtil {
 	}
 
 
-	private static NodeRef commitTransactionable( JSONObject wsDiff,
+	private static NodeRef commitTransactionable(
 	                                           WorkspaceNode workspace,
+	                                           String body,
 	                                           String msg,
 	                                           ServiceRegistry services,
 	                                           StringBuffer response) throws JSONException {
-
-	    String body = null;
-	    if (wsDiff != null) {
-	        body = wsDiff.toString();
-	    }
 	    return createCommitNode( workspace, null, workspace, null, null, "COMMIT", msg,
 	                             body, services, response );
     }
@@ -625,6 +647,7 @@ public class CommitUtil {
                               StringBuffer response, boolean twoSourceWorkspaces ) {
         NodeRef result = null;
         // to make sure no permission issues, run as admin
+        // the commit histories are updated based on the original user
         String originalUser = NodeUtil.getUserName();
         AuthenticationUtil.setRunAsUser( "admin" );
 
@@ -668,6 +691,7 @@ public class CommitUtil {
                     updateCommitHistory(prevCommit2, currCommit, originalUser);
                 }
     
+                currCommit.setOwner( originalUser );
                 currCommit.getOrSetCachedVersion();
                 result = currCommit.getNodeRef();
             }
@@ -676,29 +700,6 @@ public class CommitUtil {
         // make sure we're running back as the originalUser
         AuthenticationUtil.setRunAsUser( originalUser );
         return result;
-	}
-
-
-	/**
-	 * Update commit node reference with final body
-	 * @param commitRef
-	 * @param body
-	 * @param msg
-	 * @param services
-	 * @param response
-	 */
-	public static void updateCommitNodeRef(NodeRef commitRef, String body, String msg, ServiceRegistry services, StringBuffer response) {
-	    EmsScriptNode commitNode = new EmsScriptNode(commitRef, services, response);
-	    // FIXME: make commitNode read only after updating it, so it can no longer be updated
-	    if (commitNode != null && commitNode.exists()) {
-        	    if (msg != null) {
-        	        commitNode.createOrUpdateProperty("cm:description", msg );
-        	    }
-        	    commitNode.createOrUpdateProperty( "ems:commit", body );
-	    } else {
-	        logger.error("CommitNode doesn't exist for updating, dumping out content");
-	        logger.error(body);
-	    }
 	}
 
 
@@ -753,49 +754,5 @@ public class CommitUtil {
 //
 //        return jmsStatus;
         return true;
-    }
-
-
-    /**
-     *
-     * @param targetWS
-     * @param start
-     * @param end
-     * @param projectId
-     * @param status
-     * @throws Exception
-     */
-    public static void commitAndStartAction( WorkspaceNode targetWS,
-                                             WorkspaceDiff wsDiff,
-                                             long start, long end,
-                                             String projectId,
-                                             Status status,
-                                             boolean useTransactions,
-                                             String source) throws Exception {
-        if (false == wsDiff.isDiff()) {
-            return;
-        }
-
-        String wsId = "master";
-        if (targetWS != null) {
-            wsId = targetWS.getId();
-        }
-
-        // Commit history
-        ActionService actionService = services.getActionService();
-        Action commitAction = actionService.createAction(CommitActionExecuter.NAME);
-        commitAction.setParameterValue(CommitActionExecuter.PARAM_PROJECT_ID, projectId);
-        commitAction.setParameterValue(CommitActionExecuter.PARAM_WS_ID, wsId);
-        commitAction.setParameterValue(CommitActionExecuter.PARAM_WS_DIFF, wsDiff);
-        commitAction.setParameterValue(CommitActionExecuter.PARAM_START, start);
-        commitAction.setParameterValue(CommitActionExecuter.PARAM_END, end);
-        commitAction.setParameterValue( CommitActionExecuter.TRANSACTION, useTransactions );
-        commitAction.setParameterValue( CommitActionExecuter.PARAM_SOURCE, source );
-
-        // create empty commit for now (executing action will fill it in later)
-        NodeRef commitRef = CommitUtil.commit(null, targetWS, "", !useTransactions,
-                                              services, new StringBuffer() );
-
-        services.getActionService().executeAction(commitAction , commitRef, true, true);
     }
 }

@@ -37,6 +37,7 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.log4j.*;
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.model.Repository;
 import org.alfresco.service.ServiceRegistry;
@@ -78,7 +79,7 @@ public class ModelPurge extends AbstractJavaWebScript {
 	protected boolean validateRequest(WebScriptRequest req, Status status) {
 		modelId = req.getServiceMatch().getTemplateVars().get("id");
 		if (!checkRequestVariable(modelId, "id")) {
-			log(LogLevel.ERROR, "Element id not specified.\n", HttpServletResponse.SC_BAD_REQUEST);
+			log(Level.ERROR, HttpServletResponse.SC_BAD_REQUEST, "Element id not specified.\n");
 			return false;
 		}
 
@@ -86,7 +87,7 @@ public class ModelPurge extends AbstractJavaWebScript {
 
 		modelRootNode = findScriptNodeById(modelId, workspace, null, false);
 		if (modelRootNode == null) {
-			log(LogLevel.ERROR, "Element not found with id: " + modelId + ".\n", HttpServletResponse.SC_NOT_FOUND);
+			log(Level.ERROR, HttpServletResponse.SC_NOT_FOUND, "Element not found with id: %s .\n",  modelId);
 			return false;
 		}
 
@@ -146,7 +147,7 @@ public class ModelPurge extends AbstractJavaWebScript {
 	 */
 	private void delete(EmsScriptNode node, WorkspaceNode workspace) {
 	    if ( node == null || !node.exists() ) {
-	        log(LogLevel.ERROR, "Trying to delete a non-existent node! " + node);
+	        log(Level.ERROR, "Trying to delete a non-existent node! %s", node.toString());
 	        return;
 	    }
 
@@ -169,11 +170,13 @@ public class ModelPurge extends AbstractJavaWebScript {
 //            trx.begin();
 //            NodeUtil.setInsideTransactionNow( true );
             String key = node.getSysmlId();
-            log(LogLevel.INFO, "delete: beginning transaction {" + node.getNodeRef());
+			log(Level.INFO, "delete: beginning transaction { %s", node.getNodeRef().toString());
+			//log(LogLevel.INFO, "delete: beginning transaction {" + node.getNodeRef());
             node.makeSureNodeRefIsNotFrozen();
             node.transactionCheck();
             services.getNodeService().deleteNode(node.getNodeRef());
-            log(LogLevel.INFO, "} delete ending transaction: " + key);
+			  log(Level.INFO, "} delete ending transaction: %s",key);
+//            log(LogLevel.INFO, "} delete ending transaction: " + key);
 //            trx.commit();
 //            NodeUtil.setInsideTransactionNow( false );
 //        } catch (Throwable e) {
@@ -182,7 +185,7 @@ public class ModelPurge extends AbstractJavaWebScript {
 //                trx.rollback();
 //                NodeUtil.setInsideTransactionNow( false );
 //            } catch (Throwable ee) {
-//                log(LogLevel.ERROR, "\tRollback failed: " + ee.getMessage());
+//                log(Level.ERROR, "\tRollback failed: %s", ee.getMessage());
 //            }
 //        }
     }

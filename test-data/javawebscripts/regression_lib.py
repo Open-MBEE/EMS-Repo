@@ -39,7 +39,7 @@ test_dir_path = "test-data/javawebscripts"
 test_nums = []
 test_names = []
 create_baselines = False
-common_filters = ['"created"','"read"','"lastModified"','"modified"','time_total']
+common_filters = ['"created"','"read"','"lastModified"','"modified"','"siteCharacterizationId"','time_total']
 cmd_git_branch = None
 
 # Some global variables for lambda functions in tests
@@ -209,7 +209,9 @@ def set_wsid_to_gv6():
 def set_read_to_gv(gv):
     '''Get the json output, and sets gvi to the read time'''
     json_output = get_json_output_no_status()
+    #print("json_output=" + str(json_output))
     j = json.loads(json_output)
+    #print("j=" + str(j))
     
     if j:
         if gv == 1:
@@ -254,7 +256,7 @@ def get_current_time(delay=3):
     a = datetime.datetime.now() + datetime.timedelta(minutes=delay)
     return a.strftime("%Y-%m-%dT%H:%M:%X.000")
 
-def set_read_delta_to_gv1(delta=5):
+def set_read_delta_to_gv1(delta=7):
     '''Get the json output, and sets gv1 to the read time - delta secs'''
     global gv1
     

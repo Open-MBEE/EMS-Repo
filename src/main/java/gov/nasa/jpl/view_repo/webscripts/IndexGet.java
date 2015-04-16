@@ -42,6 +42,7 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.log4j.*;
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.model.Repository;
 import org.alfresco.service.ServiceRegistry;
@@ -107,7 +108,7 @@ public class IndexGet extends AbstractJavaWebScript {
         WorkspaceNode workspace = getWorkspace( req );
 
         if (siteInfo == null) {
-            log(LogLevel.ERROR, "Could not find site: " + siteName, HttpServletResponse.SC_NOT_FOUND);
+            log(Level.ERROR, HttpServletResponse.SC_NOT_FOUND, "Could not find site: %s", siteName);
         } else {
             //EmsScriptNode site = new EmsScriptNode(siteInfo.getNodeRef(), services, response);
             EmsScriptNode site = getSiteNode( siteName, workspace, dateTime );
@@ -121,7 +122,7 @@ public class IndexGet extends AbstractJavaWebScript {
                 model.put("siteName", site.getProperty(Acm.CM_NAME));
                 model.put("siteTitle", site.getProperty(Acm.CM_TITLE));
             } catch (JSONException e) {
-                log(LogLevel.ERROR, "JSON creation error", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                log(Level.ERROR, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "JSON creation error");
                 e.printStackTrace();
             }
         }

@@ -9,7 +9,9 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.log4j.*;
 import org.alfresco.repo.model.Repository;
+import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -36,11 +38,12 @@ public class MmsProductsGet extends AbstractJavaWebScript {
     @Override
     protected  Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
 		MmsProductsGet instance = new MmsProductsGet(repository, getServices());
-		return instance.executeImplImpl(req, status, cache, runWithoutTransactions);
+		return instance.executeImplImpl(req, status, cache);
     }
 
     @Override
     protected  Map<String, Object> executeImplImpl(WebScriptRequest req, Status status, Cache cache) {
+//        AuthenticationUtil.setRunAsUser( "admin" );
         printHeader( req );
 
         //clearCaches();
@@ -60,9 +63,9 @@ public class MmsProductsGet extends AbstractJavaWebScript {
         } catch (Exception e) {
             model.put("res", createResponseJson());
             if (e instanceof JSONException) {
-                log(LogLevel.ERROR, "JSON creation error", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                log(Level.ERROR,  HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "JSON creation error");
             } else {
-                log(LogLevel.ERROR, "Internal server error", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                log(Level.ERROR, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Internal server error" );
             }
             e.printStackTrace();
         }

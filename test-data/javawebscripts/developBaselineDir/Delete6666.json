@@ -4,11 +4,13 @@
     "qualifiedName": "master",
     "name": "master",
     "elements": [{
-      "name": "6666_name",
-      "qualifiedName": "/no_site/no_project/holding_bin/6666_name",
+      "qualifiedName": "/no_site/no_site_no_project/holding_bin/6666_name",
       "sysmlid": "6666",
-      "documentation": "",
+      "editable": true,
+      "creator": "admin",
+      "name": "6666_name",
       "owner": "holding_bin_no_site_no_project",
+      "documentation": "",
       "specialization": {
         "valueExpression": null,
         "type": "Expression",
@@ -24,15 +26,13 @@
             "type": "ElementValue"
           }
         ]
-      },
-      "editable": true,
-      "creator": "admin",
+      }
     }]
   },
   "workspace2": {
     "deletedElements": [{
       "sysmlid": "6666",
-      "creator": "admin"
+      "creator": "admin",
     }],
     "addedElements": [],
     "conflictedElements": [],

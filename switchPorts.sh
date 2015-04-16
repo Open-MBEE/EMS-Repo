@@ -18,12 +18,19 @@ if [ "$#" -lt 1 ]; then
 fi
 #oldPort=$ALFRESCO_PORT
 newPort=$1
+#echo "newPort = $newPort"
+scripts="configdelete configget configpost curl.tests2.sh curl.tests.sh diff2.sh diffWorkspaceDWdev.sh diffWorkspaceDW.sh diffWorkspaceLIMBOdev.sh diffWorkspaceLIMBO.sh diffWorkspace.sh diffWorkspaceWORKSdev.sh diffWorkspaceWORKS.sh expeval exppost fixconstraint localCurlParams mms.curl.tests.sh modeldelete modelget modelmerge modelpost productget productpost productpost.sh projectadd projectget projectpost projectpost.sh regression_lib.py secureCurlParams snapshotdelete snapshotget snapshotpost viewget viewpost viewpost.sh wsdelete wsdiff wsget wspost"
 
-scripts=configdelete configget configpost curl.tests2.sh curl.tests.sh diff2.sh diffWorkspaceDWdev.sh diffWorkspaceDW.sh diffWorkspaceLIMBOdev.sh diffWorkspaceLIMBO.sh diffWorkspace.sh diffWorkspaceWORKSdev.sh diffWorkspaceWORKS.sh expeval exppost fixconstraint localCurlParams mms.curl.tests.sh modeldelete modelget modelmerge modelpost productget productpost productpost.sh projectadd projectget projectpost projectpost.sh regression_lib.py secureCurlParams snapshotdelete snapshotget snapshotpost viewget viewpost viewpost.sh wsdelete wsdiff wsget wspost
+#echo "scripts = ${scripts}"
 
 sed -i "s/\(tomcat.port=\)[0-9]\+/\1$newPort/" runserver.sh
-#sed -i "s/\(localhost:\)[0-9]\+/\1$newPort/" test-data/javawebscripts/regression_lib.py 
-pushd test-data/javawebscripts; sed -i "s/\(localhost:\)[0-9]\+/\1$newPort/" ${scripts}; popd
+#echo runserver
+#sed -i "s/\(localhost:\)[0-9]\+/\1$newPort/" test-data/javawebscripts/regression_lib.py
+pushd test-data/javawebscripts
+#echo "sed -i \"s/\(localhost:\)[0-9]\+/\1$newPort/\" $scripts"
+sed -i "s/\(localhost:\)[0-9]\+/\1$newPort/" $scripts
+popd
+#echo "done with scripts"
 
 # Assign RMI ports
 

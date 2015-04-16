@@ -19,6 +19,7 @@ import java.util.Set;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.log4j.*;
 import org.json.JSONArray;
 import org.alfresco.repo.model.Repository;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
@@ -76,13 +77,14 @@ public class MmsModelDelete extends AbstractJavaWebScript {
                 model.put( "res", NodeUtil.jsonToString( result, 2 ) );
             }
         } catch (JSONException e) {
-           log(LogLevel.ERROR, "Could not create JSON\n", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+           log(Level.ERROR, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Could not create JSON\n");
            e.printStackTrace();
         } catch (Exception e) {
+
            if (e.getCause() instanceof JSONException) {
-               log(LogLevel.WARNING, "Bad JSON body provided\n", HttpServletResponse.SC_BAD_REQUEST); 
+               log(Level.WARN, HttpServletResponse.SC_BAD_REQUEST,"Bad JSON body provided\n"); 
            } else {
-               log(LogLevel.ERROR, "Internal server error\n", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+               log(Level.ERROR,  HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Internal server error\n");
            }
            e.printStackTrace();
         }
@@ -115,10 +117,10 @@ public class MmsModelDelete extends AbstractJavaWebScript {
             }
         }
         if ( !wsFound ) {
-            log( LogLevel.ERROR,
-                 "Could not find or create " + wsId + " workspace.\n",
+            log( Level.ERROR,
                  Utils.isNullOrEmpty( wsId ) ? HttpServletResponse.SC_BAD_REQUEST
-                                             : HttpServletResponse.SC_INTERNAL_SERVER_ERROR );
+                                             : HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+                 "Could not find or create %s workspace.\n",wsId);
             return result;
         }
         setWsDiff(workspace);   // need to initialize the workspace diff
@@ -147,7 +149,7 @@ public class MmsModelDelete extends AbstractJavaWebScript {
         }
         
         if (ids.size() <= 0) {
-            log(LogLevel.WARNING, "no elements specified for deletion", HttpServletResponse.SC_BAD_REQUEST);
+            log(Level.WARN, HttpServletResponse.SC_BAD_REQUEST, "no elements specified for deletion");
         } else {
             try {
                 projectId = deleteNodes(ids, workspace);
@@ -159,10 +161,13 @@ public class MmsModelDelete extends AbstractJavaWebScript {
                 if (wsDiff.isDiff()) {
                     // Send deltas to all listeners
                     if ( !CommitUtil.sendDeltas(result, wsId, projectId, source) ) {
+                        //log(Level.WARN, "createOrUpdateModel deltas not posted properly");
                         logger.warn("deltas not posted properly");
                     }
         
-                    CommitUtil.commit( result, workspace, "", runWithoutTransactions, services, response );
+                    String body = result != null ? result.toString() : "{\"model delete had no diff\"}";
+                    String msg = "model delete";
+                    CommitUtil.commit( workspace, body, msg, runWithoutTransactions, services, response );
                 }                
 
                 // apply aspects after wsDiff JSON has been created since the wsDiff 
@@ -214,7 +219,7 @@ public class MmsModelDelete extends AbstractJavaWebScript {
                     String msg = "Node already deleted.";
                     if (node == null) msg = "Node does not exist.";
                     if (workspace != null) workspaceName = workspace.getSysmlName();
-                    log( LogLevel.ERROR, 
+                    log( Level.ERROR, 
                          String.format( "Could not find node %s in workspace %s. %s",
                                         id, workspaceName, msg), 
                         HttpServletResponse.SC_NOT_FOUND);
@@ -236,7 +241,7 @@ public class MmsModelDelete extends AbstractJavaWebScript {
             for (Entry< String, EmsScriptNode > entry: wsDiff.getDeletedElements().entrySet()) {
                 EmsScriptNode node = entry.getValue();
                 String id = entry.getKey();
-                if ( node.isOwnedValueSpec() ) {
+                if ( node.isOwnedValueSpec(null, workspace) ) {
                     valueSpecs.add( node );
                     idsToRemove.add( id );
                 }
@@ -252,13 +257,17 @@ public class MmsModelDelete extends AbstractJavaWebScript {
         } catch (Throwable e) {
             try {
                 if (e instanceof JSONException) {
-                        log(LogLevel.ERROR, "MmsModelDelete.handleRequest: JSON malformed: " + e.getMessage(), HttpServletResponse.SC_BAD_REQUEST);
+                        log(Level.ERROR, HttpServletResponse.SC_BAD_REQUEST, "MmsModelDelete.handleRequest: JSON malformed: %s", e.getMessage());
                 } else {
-                        log(LogLevel.ERROR, "MmsModelDelete.handleRequest: DB transaction failed: " + e.getMessage(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                        log(Level.ERROR, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "MmsModelDelete.handleRequest: DB transaction failed: %s", e.getMessage());
                 }
+                
+//                trx.rollback();
+//                NodeUtil.setInsideTransactionNow( false );
+//				  log(Level.ERROR, "\t####### ERROR: Needed to rollback: %s", e.getMessage());
                 e.printStackTrace();
             } catch (Throwable ee) {
-                log(LogLevel.ERROR, "\tMmsModelDelete.handleRequest: rollback failed: " + ee.getMessage());
+                log(Level.ERROR, "\tMmsModelDelete.handleRequest: rollback failed: %s", ee.getMessage());
                 ee.printStackTrace();
                 e.printStackTrace();
             }
@@ -269,6 +278,7 @@ public class MmsModelDelete extends AbstractJavaWebScript {
         }
         
         return projectId;
+
     }
     
     
@@ -280,9 +290,10 @@ public class MmsModelDelete extends AbstractJavaWebScript {
     public void delete(EmsScriptNode node, WorkspaceNode workspace, WorkspaceDiff workspaceDiff) {
         if(workspaceDiff != null && wsDiff == null)
             wsDiff = workspaceDiff;
+
         if (checkPermissions(node, PermissionService.WRITE)) {
             if ( node == null || !node.exists() ) {
-                log(LogLevel.ERROR, "Trying to delete a non-existent node! " + node);
+                log(Level.ERROR, "Trying to delete a non-existent node! %s", node.toString());
                 return;
             }
 
@@ -305,10 +316,10 @@ public class MmsModelDelete extends AbstractJavaWebScript {
             }
 
             if ( node != null && node.exists() ) {
-                addToWsDiff( node );
+                addToWsDiff( node, workspace );
 
-                deleteRelationships(node, "sysml:relationshipsAsSource", "sysml:relAsSource");
-                deleteRelationships(node, "sysml:relationshipsAsTarget", "sysml:relAsTarget");
+                deleteRelationships(node, "sysml:relationshipsAsSource", "sysml:relAsSource", workspace);
+                deleteRelationships(node, "sysml:relationshipsAsTarget", "sysml:relAsTarget", workspace);
             }
         }
     }
@@ -319,12 +330,13 @@ public class MmsModelDelete extends AbstractJavaWebScript {
      * @param aspectName    String of the aspect name to look for
      * @param propertyName  String of the property to remove
      */
-    private void deleteRelationships(EmsScriptNode node, String aspectName, String propertyName) {
+    private void deleteRelationships(EmsScriptNode node, String aspectName, String propertyName,
+                                     WorkspaceNode workspace) {
         if (node.hasAspect( aspectName )) {
-            ArrayList<NodeRef> relRefs = node.getPropertyNodeRefs( propertyName );
+            ArrayList<NodeRef> relRefs = node.getPropertyNodeRefs( propertyName, null, workspace );
             for (NodeRef relRef: relRefs) {
                 EmsScriptNode relNode = new EmsScriptNode(relRef, services, response);
-                addToWsDiff( relNode );
+                addToWsDiff( relNode, workspace );
             }
         }
     }
@@ -343,7 +355,7 @@ public class MmsModelDelete extends AbstractJavaWebScript {
         }
 
         if (recurse) {
-            for ( NodeRef childRef : root.getOwnedChildren(true) ) {
+            for ( NodeRef childRef : root.getOwnedChildren(true, null, workspace) ) {
                 EmsScriptNode child = new EmsScriptNode(childRef, services, response);
                 handleElementHierarchy(child, workspace, recurse);
             }
@@ -369,7 +381,7 @@ public class MmsModelDelete extends AbstractJavaWebScript {
      * Add everything to the commit delete
      * @param node
      */
-    private void addToWsDiff( EmsScriptNode node ) {
+    private void addToWsDiff( EmsScriptNode node, WorkspaceNode workspace ) {
         String sysmlId = node.getSysmlId();
         if (!sysmlId.endsWith( "_pkg" )) {
             if(wsDiff.getElementsVersions() != null)
@@ -381,7 +393,7 @@ public class MmsModelDelete extends AbstractJavaWebScript {
             
             // Remove from the ownedChildren of the owner:
             // Note: added this for when we are deleting embedded value specs that are no longer be used
-            EmsScriptNode parent = node.getOwningParent( null );
+            EmsScriptNode parent = node.getOwningParent( null, workspace, false );
             if (parent != null && parent.exists()) {
                 parent.removeFromPropertyNodeRefs("ems:ownedChildren", node.getNodeRef() );
             }

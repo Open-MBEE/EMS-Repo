@@ -42,9 +42,12 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.log4j.*;
 import org.alfresco.repo.model.Repository;
+import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
+import org.alfresco.service.cmr.security.PermissionService;
 import org.alfresco.service.cmr.site.SiteInfo;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -74,7 +77,7 @@ public class SiteGet extends AbstractJavaWebScript {
     @Override
     protected Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
         SiteGet instance = new SiteGet(repository, getServices());
-        return instance.executeImplImpl( req, status, cache, runWithoutTransactions );
+        return instance.executeImplImpl( req, status, cache );
     }
 
     @Override
@@ -98,10 +101,10 @@ public class SiteGet extends AbstractJavaWebScript {
                 json.put("sites", jsonArray);
             }
         } catch (JSONException e) {
-            log(LogLevel.ERROR, "JSON could not be created\n", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            log(Level.ERROR, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "JSON could not be created\n");
             e.printStackTrace();
         } catch (Exception e) {
-            log(LogLevel.ERROR, "Internal error stack trace:\n" + e.getLocalizedMessage() + "\n", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            log(Level.ERROR, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Internal error stack trace:\n %s \n", e.getLocalizedMessage());
             e.printStackTrace();
         }
         if (json == null) {
@@ -133,6 +136,7 @@ public class SiteGet extends AbstractJavaWebScript {
         NodeRef parentRef;
         NodeRef siteRef;
 
+        // TODO: Check to see if we need to filter our the sites based on the user
         List<SiteInfo> sites = services.getSiteService().listSites(null);
 
         // Create json array of info for each site in the workspace:
@@ -145,10 +149,17 @@ public class SiteGet extends AbstractJavaWebScript {
 
             if (siteRef != null) {
                 	emsNode = new EmsScriptNode(siteRef, services);
+                	// skip if doesn't have Models directory or if no site characterization
+                	if (!emsNode.hasPermission( PermissionService.READ )) continue;
+//                	if (emsNode.childByNamePath( "Models" ) == null                	        
+//                	        && !emsNode.hasAspect(Acm.ACM_SITE) ) continue;
                 	name = emsNode.getName();
-                    // Note: skipping the noderef check b/c our node searches return the noderefs that correspond
-                    //       to the nodes in the surf-config folder. 
-                	parentRef = (NodeRef)emsNode.getProperty(Acm.ACM_SITE_PARENT, true);
+                	try {
+                	    parentRef = (NodeRef)emsNode.getPropertyAtTime(Acm.ACM_SITE_PARENT, dateTime);
+                	} catch (org.alfresco.repo.security.permissions.AccessDeniedException e) {
+                	    // permission error, so ignore
+                	    continue;
+                	}
 
                 	EmsScriptNode parentNode = null;
                 	String parentId = null;
@@ -166,7 +177,8 @@ public class SiteGet extends AbstractJavaWebScript {
                 		siteJson.put("sysmlid", name);
                 		siteJson.put("name", siteInfo.getTitle());
                 		siteJson.put("parent", parentId );
-                		siteJson.put("isCharacterization", emsNode.getProperty(Acm.ACM_SITE_PACKAGE) != null );
+                		siteJson.put("isCharacterization", 
+                		             emsNode.getNodeRefProperty(Acm.ACM_SITE_PACKAGE, dateTime, workspace) != null );
 
                 		json.put(siteJson);
                 	}

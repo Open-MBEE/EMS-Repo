@@ -18,6 +18,12 @@
     },
     {
         "description": "",
+        "qualifiedName": "master/wsG2",
+        "name": "wsG2",
+        "creator": "admin"
+    },
+    {
+        "description": "",
         "qualifiedName": "master/wsA/wsB",
         "name": "wsB",
         "creator": "admin"
@@ -42,8 +48,14 @@
     },
     {
         "description": "",
-        "qualifiedName": "master/wsG2",
-        "name": "wsG2",
+        "qualifiedName": "master/parentWorkspace1",
+        "name": "parentWorkspace1",
+        "creator": "admin"
+    },
+    {
+        "description": "",
+        "qualifiedName": "master/parentWorkspace1/subworkspace1",
+        "name": "subworkspace1",
         "creator": "admin"
     }
 ]}

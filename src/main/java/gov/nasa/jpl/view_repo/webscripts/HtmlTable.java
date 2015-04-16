@@ -1,5 +1,7 @@
 package gov.nasa.jpl.view_repo.webscripts;
 
+import java.util.Arrays;
+
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
@@ -10,6 +12,7 @@ public class HtmlTable {
 	private int bodyRowCount;
 	private int header[][];
 	private int body[][];
+	private int footer[][];
 	private String title;
 	private boolean hasHeader;
 	private boolean hasFooter;
@@ -18,7 +21,13 @@ public class HtmlTable {
 	private Elements headerRows;
 	private Elements footerRows;
 	private Elements bodyRows;
-	
+
+	public enum TablePart{
+		BODY,
+		FOOTER,
+		HEADER
+	}
+
 	public HtmlTable(Element table){
 		if(table == null) return;
 		if(table.tagName().compareToIgnoreCase("table") != 0) return;
@@ -32,7 +41,7 @@ public class HtmlTable {
 		if(caption == null || caption.size()==0) this.hasTitle = false;
 		else{
 			this.hasTitle = true;
-			this.title = String.valueOf(caption.first().toString());	//TODO encode HTML
+			this.title = String.valueOf(caption.first().text());	//TODO encode HTML
 		}
 		
 		//looking for table header
@@ -60,12 +69,24 @@ public class HtmlTable {
 		//looking for table tbody
 		Elements tbody = table.select(" > tbody");
 		if(tbody == null || tbody.size()==0){
+			if(!this.hasHeader){
+				this.headerRows = table.select("table > tr").first().select("tr");
+				this.headerRowCount = this.headerRows.size();
+				this.hasHeader = true;
+				table.select("table > tr").first().remove();
+			}
 			this.bodyRows = table.select("table > tr");
 			this.bodyRowCount = this.bodyRows.size();
 			curMax = getColumnMax(this.bodyRows);
 			if(max < curMax) max = curMax;
 		}
 		else{
+			if(!this.hasHeader){
+				this.headerRows = tbody.select(" > tr").first().select("tr");
+				this.headerRowCount = this.headerRows.size();
+				this.hasHeader = true;
+				tbody.select(" > tr").first().remove();
+			}
 			this.bodyRows = tbody.select(" > tr");
 			this.bodyRowCount = this.bodyRows.size();
 			curMax = getColumnMax(this.bodyRows);
@@ -74,6 +95,42 @@ public class HtmlTable {
 		
 		this.colCount = max;
 		this.init();
+	}
+
+	private String buildElementEntry(int row, int col, int startCol, Element cell, TablePart tablePart){
+		StringBuffer sb = new StringBuffer();
+
+		int rowspan = 0;
+		int colspan = 0;
+		
+		String rspan = cell.attr("rowspan");
+		String cspan = cell.attr("colspan");
+		
+		if(rspan != null && !rspan.isEmpty()) rowspan = Integer.parseInt(rspan);
+		if(cspan != null && !cspan.isEmpty()) colspan = Integer.parseInt(cspan);
+		
+		startCol = this.getStartCol(row, col, rowspan, colspan, tablePart);
+		
+		if(startCol > this.colCount) return "";
+		
+		if(rowspan > 1 || colspan > 1){
+			sb.append("<entry");
+			
+			if(rowspan > 1){
+				sb.append(String.format(" morerows=\"%d\"", rowspan-1));
+			}
+			
+			if(colspan > 1){ 
+				int end = startCol + colspan - 1;
+        		if(end > this.getColCount()) end = this.getColCount();
+        		sb.append(String.format(" namest=\"%d\" nameend=\"%d\"", startCol, end));
+			}
+			sb.append(String.format(">%s</entry>", cell.html()));
+		}
+		else 
+			sb.append(String.format("<entry>%s</entry>", cell.html()));
+		
+		return sb.toString();
 	}
 	
 	private String generateColSpec(int count){
@@ -85,65 +142,77 @@ public class HtmlTable {
     	}
     	return sb.toString();
     }
-    
+
 	private String generateBody(){
-		//TODO need to handle rowspan and colspan
 		StringBuffer sb = new StringBuffer();
 		Elements bodyRows = this.bodyRows;
-		if(!this.hasHeader) bodyRows.remove(0);
+		int startCol = 1;
+		int row = (this.hasHeader) ? 0: 1;
+		
 		sb.append("<utbody>");
-		for(Element tr : bodyRows){
+		for(; row < bodyRows.size(); row++){
+			Element tr = bodyRows.get(row);
 			sb.append("<row>");
 			Elements cells = tr.select(" > td");
 			if(cells == null || cells.size() == 0) cells = tr.select(" > th");
 			if(cells != null && cells.size() > 0){
-				for(Element cell : cells){
-					sb.append(String.format("<entry>%s</entry>", cell.html()));
+				for(int col = 0; col < cells.size(); col++){
+					sb.append(buildElementEntry(row, col, startCol, cells.get(col), TablePart.BODY));
 				}
 			}
 			sb.append("</row>");
 		}
+		handleRowsDifferences(this.body, this.bodyRowCount, sb);
 		sb.append("</utbody>");
 		return sb.toString();
+
 	}
 	
 	private String generateFooter(){
-		//TODO need to handle rowspan and colspan
 		if(!this.hasFooter) return "";
 		
 		StringBuffer sb = new StringBuffer();		
 		sb.append("<utfoot>");
-		for(Element tr : footerRows){
+		
+		int startCol = 1;
+		
+		for(int row = 0; row < footerRows.size(); row++){
+			Element tr = footerRows.get(row);
 			sb.append("<row>");
 			Elements cells = tr.select(" > th");
 			if(cells == null || cells.size() == 0) cells = tr.select(" > td");
 			if(cells != null && cells.size() > 0){
-				for(Element cell : cells){
-					sb.append(String.format("<entry>%s</entry>", cell.html()));
+				for(int col = 0; col < cells.size(); col++){
+					sb.append(buildElementEntry(row, col, startCol, cells.get(col), TablePart.FOOTER));
 				}
 			}
 			sb.append("</row>");
 		}
+		handleRowsDifferences(this.footer, this.footerRowCount, sb);
 		sb.append("</utfoot>");
 		return sb.toString();
 	}
-	
+
 	private String generateHeader(){
-		//TODO need to handle rowspan and colspan
 		StringBuffer sb = new StringBuffer();		
 		sb.append("<uthead>");
+		
+		int startCol = 1;
+		
 		if(this.hasHeader){
-			for(Element tr : headerRows){
+			for(int row = 0; row < headerRows.size(); row++ ){
+				Element tr = headerRows.get(row);
 				sb.append("<row>");
 				Elements cells = tr.select(" > th");
 				if(cells == null || cells.size() == 0) cells = tr.select(" > td");
 				if(cells != null && cells.size() > 0){
-					for(Element cell : cells){
-						sb.append(String.format("<entry>%s</entry>", cell.html()));
+					for(int col = 0; col < cells.size(); col++){
+						sb.append(buildElementEntry(row, col, startCol, cells.get(col), TablePart.HEADER));
 					}
 				}
 				sb.append("</row>");
 			}
+			handleRowsDifferences(this.header, this.headerRowCount, sb);
 		}
 		else{
 			Element tr = this.bodyRows.first();
@@ -151,8 +220,8 @@ public class HtmlTable {
 			if(cells == null || cells.size() == 0) cells = tr.select(" > th");
 			sb.append("<row>");
 			if(cells != null && cells.size() > 0){
-				for(Element cell : cells){
-					sb.append(String.format("<entry>%s</entry>", cell.html()));
+				for(int col = 0; col < cells.size(); col++){
+					sb.append(buildElementEntry(0, col, startCol, cells.get(col), TablePart.BODY));
 				}
 			}
 			sb.append("</row>");
@@ -179,7 +248,7 @@ public class HtmlTable {
 	
 	public int getBodyRowCount(){return bodyRowCount;}
 	
-	public int getColCount(){ return colCount;}
+	public int getColCount(){ return colCount; }
 	
 	public int getFooterRowCount() { return this.footerRowCount; }
 	
@@ -187,41 +256,109 @@ public class HtmlTable {
 
 	public int getHeaderRowCount(){return headerRowCount;}
 
-	public int getStartCol(int row, int col, int rowspan, int colspan, boolean isHeader){
-		int startCol = 0;
-		boolean isSet = false;
-		int rowEnd = row + rowspan;
-		int colEnd = col + colspan;
-		for(int i = row; i < rowEnd; i++){
-			for(int j = col; j < this.colCount; j++){
-				if(isHeader){
-					if(i < headerRowCount && j < colCount){
-						if(header[i][j] == 0 && !isSet){
-							startCol = j+1;
-							isSet = true;
-							header[i][j] = 1;
-						}
-						if(j < colEnd) header[i][j] = 1;
-					}
-				}
-				else{
-					if(i < bodyRowCount && j < colCount){
-						if(body[i][j] == 0 && !isSet){
-							startCol = j+1;
-							isSet = true;
-							body[i][j] = 1;
-						}
-						if(j < colEnd) body[i][j] = 1;
-					}
-				}
+	private int getPrevStartCol(int row, int col, TablePart tablePart){
+		int startCol = 1;
+		int markedRow[] = null;
+		
+		row++;
+		col++;
+		
+		switch(tablePart){
+		case BODY:
+			markedRow = this.body[row];
+			break;
+		case FOOTER:
+			markedRow = this.footer[row];
+			break;
+		case HEADER:
+			if(this.hasHeader)
+				markedRow = this.header[row];
+			else
+				markedRow = this.body[row];
+			break;
+		}
+		
+		for(int i=col; i <= markedRow.length; i++){
+			if(i >= markedRow.length) return markedRow.length;
+			if(markedRow[i]==-1){
+				startCol = i;
+				break;
 			}
 		}
 		return startCol;
 	}
 	
+	private int getStartCol(int row, int col, int rowspan, int colspan, TablePart tablePart){
+		int rows = (rowspan > 0) ? rowspan : 1;
+		int startCol = getPrevStartCol(row, col, tablePart);
+		int moreRows = (rowspan > 0) ? rowspan-1 : 0;
+		int namest = startCol;
+		int nameend = startCol + ((colspan > 0) ? colspan-1 : 0);
+		// header had used body's 1st row
+		if(!this.hasHeader && tablePart==TablePart.BODY) row++;
+		
+		for(int i=moreRows+row+1; i > row; i--){
+			for(int j=nameend; j >= namest; j--){
+				switch(tablePart){
+				case HEADER:
+					if(i <= headerRowCount && j <= colCount){
+						if(header[i][j] == -1){
+							header[i][j] = rows;
+							rows = 0;
+						}
+					}
+					break;
+				case BODY:
+					if(i <= bodyRowCount && j <= colCount){
+						if(body[i][j] == -1){
+							body[i][j] = rows;
+							rows=0;
+						}
+					}
+					break;
+				case FOOTER:
+					if(i <= footerRowCount && j <= colCount){
+						if(footer[i][j] == -1){
+							footer[i][j] = rows;
+							rows = 0;
+						}
+					}
+					break;
+				}
+			}
+		}
+		return startCol;
+	}
+
 	public String getTitle(){
 		if(this.title == null || this.title.isEmpty()) return "";
 		return this.title;
+	}
+
+	/*
+	 * handles a situation where HTML table defines more rowspan than the number of rows it has.
+	 */
+	private void handleRowsDifferences(int[][] rowspan, int rows, StringBuffer sb){
+		// tallies up rowspan
+		int rowspanCount[] = new int[colCount];
+		for(int i=1; i < colCount; i++){
+			int total = 0;
+			for(int j=1; j < rowspan.length; j++){
+				total += rowspan[j][i];
+			}
+			rowspanCount[i] = total;
+		}
+		
+		int test =0;
+		test = test + 1;
+		// adds more row for any discrepancy
+		for(int i=0; i < rowspanCount.length; i++){
+			if(rowspanCount[i] >= rows){
+				for(int j=rowspanCount[i]-rows; j>0;j--){
+					sb.append("<row><entry/></row>");
+				}
+			}
+		}
 	}
 	
 	public boolean hasTitle() { return this.hasTitle; }
@@ -229,6 +366,26 @@ public class HtmlTable {
 	public boolean hasHeader() { return this.hasHeader; }
 	
 	public boolean hasFooter() { return this.hasFooter; }
+	
+	public void init(){
+		header = new int[headerRowCount+1][colCount+1];
+		body = new int[bodyRowCount+1][colCount+1];
+		footer = new int[footerRowCount+1][colCount+1];
+//		bodyRowspanCount = new int[bodyRowCount][colCount];
+//		footerRowspanCount = new int[footerRowCount][colCount];
+//		headerRowspanCount = new int[headerRowCount][colCount];
+		initArray(header);
+		initArray(footer);
+		initArray(body);
+	}
+
+	private void initArray(int[][] array){
+//		Arrays.fill(array, -1);
+		for(int i=0; i < array.length; i++){
+			for(int j=0; j < array[i].length; j++)
+				array[i][j] = -1;
+		}
+	}
 	
 	public String toDocBook(){
 		StringBuffer sb = new StringBuffer();
@@ -243,10 +400,4 @@ public class HtmlTable {
 		sb.append("</utable>");
 		return sb.toString();
 	}
-	
-	public void init(){
-		header = new int[headerRowCount][colCount];
-		body = new int[bodyRowCount][colCount];
-	}
-	
 }
