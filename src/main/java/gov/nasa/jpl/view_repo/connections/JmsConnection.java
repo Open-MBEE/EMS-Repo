@@ -32,6 +32,10 @@ public class JmsConnection extends AbstractConnection {
         JmsConnection.uri = uri;
     }
     
+    public String getUri() {
+        return JmsConnection.uri;
+    }
+    
     protected void init() {
         if (connectionFactory == null) {
             connectionFactory = new ActiveMQConnectionFactory( uri );

@@ -33,6 +33,8 @@ schemas:
     
   - diff:        !include diff.json-schema
   - client:      !include client.json-schema
+    
+  - connections: !include connections.json-schema
   
   # include post/ put and delete responses
   #- elementsResponse: !include postResponse.json-schema
@@ -178,6 +180,15 @@ resourceTypes:
 #                         resource)
 #          500:
 #            description: Could not append to <<resourcePathName>> due to internal server error
+  - connection:
+      post:
+        description: Append operation for <<resourcePathName>>
+        body:
+          application/json:
+            schema: connections
+        responses:
+          200:
+  
       delete:
         description: Delete operation for <<resourcePathName>>
         responses:
@@ -405,6 +416,15 @@ resourceTypes:
       ldapGroup:
         description: The LDAP group (string)
         type: string
+/restpostconnection:
+  type: connection
+  post:
+    description: Service for configuring the rest post connection to DEA
+/jmsconnection:
+  type: connection
+  post:
+    description: Service for configuring the JMS connection for event messaging
+        
 #/client:
 #  post:
 #    queryParameters:
