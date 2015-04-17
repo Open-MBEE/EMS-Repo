@@ -1,0 +1,11 @@
+<webscript>
+	<shortname>configure jms get</shortname>
+    <description>
+    	get the jms connection configuration to dea
+	</description>
+  	<url>/jmsconnection</url>
+  	<format default="json">argument</format>
+  	<authentication>user</authentication>
+  	<transaction>required</transaction>
+  	<family>MMS REST API</family>
+ </webscript>

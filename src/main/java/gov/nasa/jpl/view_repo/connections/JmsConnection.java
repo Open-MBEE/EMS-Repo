@@ -44,6 +44,7 @@ public class JmsConnection extends AbstractConnection {
     
     @Override
     public boolean publish(JSONObject json, String topic) {
+        if (uri == null) return false;
         boolean result = false;
         try {
             json.put( "sequence", sequenceId++ );
@@ -56,6 +57,7 @@ public class JmsConnection extends AbstractConnection {
     }
     
     public boolean publish(JSONObject json) {
+        if (uri == null) return false;
         // topic is always the same since we're using metadata for workspaces now
         return publish( json, "master" );
     }
