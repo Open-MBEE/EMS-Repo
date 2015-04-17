@@ -156,11 +156,9 @@ public class HtmlTable {
 		StringBuffer sb = new StringBuffer();
 		Elements bodyRows = this.bodyRows;
 		int startCol = 1;
-//		int row = (this.hasHeader) ? 0: 1;
-		int row = 0;
 		
 		sb.append("<utbody>");
-		for(; row < bodyRows.size(); row++){
+		for(int row=0; row < bodyRows.size(); row++){
 			Element tr = bodyRows.get(row);
 			sb.append("<row>");
 			Elements cells = tr.select(" > td");
@@ -246,10 +244,28 @@ public class HtmlTable {
 		int max=0;
 		int curMax=0;
 		for(Element tr : TRs){
+			curMax=0;
 			Elements TDs = tr.select(" > td");
 			if(TDs != null && TDs.size() > 0){
-				curMax = TDs.size();
-				if(curMax > tr.children().size()) curMax = tr.children().size();
+//				curMax = TDs.size();
+//				if(curMax > tr.children().size()) curMax = tr.children().size();
+//				if(max < curMax) max = curMax;
+				
+				for(Element td : TDs){
+					if(td.hasAttr("colspan")){
+						try{
+							int col = Integer.parseInt(td.attr("colspan"));
+							curMax += col;
+						}
+						catch(NumberFormatException ex){
+							curMax++;
+						}
+					}
+					else{
+						curMax++;
+					}
+				}
+//				if(curMax > tr.children().size()) curMax = tr.children().size();
 				if(max < curMax) max = curMax;
 			}
 		}
@@ -307,7 +323,7 @@ public class HtmlTable {
 		int namest = startCol;
 		int nameend = startCol + ((colspan > 0) ? colspan-1 : 0);
 		// header had used body's 1st row
-		if(!this.hasHeader && tablePart==TablePart.BODY) row++;
+//		if(!this.hasHeader && tablePart==TablePart.BODY) row++;
 		
 		for(int i=moreRows+row+1; i > row; i--){
 			for(int j=nameend; j >= namest; j--){
