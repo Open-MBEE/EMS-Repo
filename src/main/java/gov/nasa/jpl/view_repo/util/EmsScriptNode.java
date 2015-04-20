@@ -2016,6 +2016,8 @@ public class EmsScriptNode extends ScriptNode implements
         EmsScriptNode owner = this.getOwningParent(dateTime, ws, false, true );
         String ownerName = owner != null ? owner.getName() : null;
 
+        String siteCharacterizationId = this.siteCharacterizationId;
+        
         // Need to look up based on owner b/c the parent associations are not versioned,
         // but owners only go up to the project node, so the site node must be found
         // using the parent.  getOwningParent() searches for parent if owner is not found.
@@ -2058,6 +2060,9 @@ public class EmsScriptNode extends ScriptNode implements
         if ( doCache ) {
             this.qualifiedId = qualifiedId;
             this.qualifiedName = qualifiedName;
+            if ( this.siteCharacterizationId == null ) {
+                this.siteCharacterizationId = siteCharacterizationId;
+            }
         }
         
         if (isName) {
