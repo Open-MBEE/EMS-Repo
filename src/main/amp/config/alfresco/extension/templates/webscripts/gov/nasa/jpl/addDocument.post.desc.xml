@@ -2,9 +2,9 @@
   <shortname>Add Document</shortname> 
   <description>organize a document to a volume</description>
   <url>/rest/projects/document/{docid}</url> 
-  <format default="json">any</format> 
+  <format default="json">argument</format> 
   <authentication>user</authentication> 
-  <transaction allow="readwrite">required</transaction>
+  <transaction>none</transaction>
   <family>View Editor</family>
   <args>
   	<arg>

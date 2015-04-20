@@ -1,0 +1,13 @@
+{ "elements" : [
+
+    {"documentation" : "Child",
+     "sysmlid":"childOfParentToDelete2",
+     "name":"childOfParentToDelete2",
+     "owner":"parentToDelete2",
+     "specialization": {"type":"Property",
+                        "isDerived":false,
+                        "value":[{"type":"LiteralString",
+                                  "string":"gg_string3"}]}
+    },
+    
+]}

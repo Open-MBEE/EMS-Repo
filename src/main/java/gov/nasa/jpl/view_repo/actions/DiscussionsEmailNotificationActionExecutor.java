@@ -1,11 +1,14 @@
 package gov.nasa.jpl.view_repo.actions;
 
+import gov.nasa.jpl.view_repo.util.NodeUtil;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+
 import org.alfresco.repo.action.executer.ActionExecuterAbstractBase;
 import org.alfresco.repo.action.executer.MailActionExecuter;
 import org.alfresco.repo.site.SiteModel;
@@ -62,6 +65,7 @@ public class DiscussionsEmailNotificationActionExecutor  extends ActionExecuterA
     @Override
     protected void executeImpl(Action action, NodeRef nodeRef) {
         try{
+            clearCache();
 	        TopicInfo primaryTopic = getPrimaryTopic(nodeRef);
 	        PostInfo primaryPost = discussionService.getPrimaryPost(primaryTopic);
 	    	PostWithReplies postWithReplies = discussionService.listPostReplies(primaryPost, 1);
@@ -195,4 +199,10 @@ public class DiscussionsEmailNotificationActionExecutor  extends ActionExecuterA
     		}
     	}
 	}
+	
+    private void clearCache() {
+        NodeUtil.setBeenInsideTransaction( false );
+        NodeUtil.setBeenOutsideTransaction( false );
+        NodeUtil.setInsideTransactionNow( false );
+    }
 }

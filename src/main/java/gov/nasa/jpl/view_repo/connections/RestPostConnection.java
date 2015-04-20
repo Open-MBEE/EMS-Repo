@@ -1,5 +1,7 @@
 package gov.nasa.jpl.view_repo.connections;
 
+import gov.nasa.jpl.view_repo.util.NodeUtil;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -24,16 +26,26 @@ public class RestPostConnection extends AbstractConnection {
     }
     
     public void setUri(String uri) {
-        if (logger.isDebugEnabled()) {
-            logger.debug("uri set to: " + uri);
+        if (logger.isInfoEnabled()) {
+            logger.info("uri set to: " + uri);
         }
         RestPostConnection.uri = uri;
     }
     
+    public String getUri() {
+        return RestPostConnection.uri;
+    }
+    
     public boolean publish(JSONObject jsonObject, String dst) {
+        if (uri == null) return false;
+        String msg = NodeUtil.jsonToString( jsonObject );
+        return publish(msg, dst);
+    }
+    
+    public boolean publish(String msg, String dst) {
+        if (uri == null) return false;
         boolean status = true;
         Client client = Client.create();
-        String msg = jsonObject.toString( );
     
         if (logger.isDebugEnabled()) {
             logger.debug("sending to: " + uri);

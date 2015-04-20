@@ -1,0 +1,27 @@
+{"workspaces": [
+    {
+        "qualifiedId": "master/e735c4e9-ef13-4009-b2f3-a66eb9b667c3",
+        "id": "e735c4e9-ef13-4009-b2f3-a66eb9b667c3",
+        "created": "2015-03-27T09:04:33.008-0700",
+        "description": "",
+        "qualifiedName": "master/AA",
+        "name": "AA",
+        "parent": "master",
+        "permission": "read",
+        "modified": "2015-03-27T09:04:33.618-0700",
+        "creator": "admin"
+    },
+    {
+        "qualifiedId": "master/e735c4e9-ef13-4009-b2f3-a66eb9b667c3/578222cd-c261-43f5-87d8-9fe9d5fa708c",
+        "id": "578222cd-c261-43f5-87d8-9fe9d5fa708c",
+        "created": "2015-03-27T09:04:33.299-0700",
+        "description": "",
+        "qualifiedName": "master/AA/BB",
+        "name": "BB",
+        "parent": "e735c4e9-ef13-4009-b2f3-a66eb9b667c3",
+        "permission": "read",
+        "modified": "2015-03-27T09:04:33.619-0700",
+        "creator": "admin"
+    }
+]}
+200

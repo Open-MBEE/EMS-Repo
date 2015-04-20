@@ -1,0 +1,68 @@
+{
+    "workspace1": {
+        "qualifiedId": "master/5d875e01-0f81-47a4-a827-2e083ce6a27f",
+        "id": "5d875e01-0f81-47a4-a827-2e083ce6a27f",
+        "qualifiedName": "master/wsA",
+        "name": "wsA",
+        "elements": [
+            {
+                "qualifiedId": "/no_site/no_site_no_project/holding_bin_no_site_no_project",
+                "name": "holding_bin",
+                "qualifiedName": "/no_site/no_site_no_project/holding_bin",
+                "sysmlid": "holding_bin_no_site_no_project",
+                "owner": "no_site_no_project",
+                "read": "2015-03-27T09:03:35.388-0700",
+                "specialization": {"type": "Package"},
+                "editable": true,
+                "creator": "admin",
+                "modified": "2015-03-27T09:03:30.317-0700"
+            },
+            {
+                "qualifiedId": "/no_site/no_site_no_project/holding_bin_no_site_no_project/x",
+                "qualifiedName": "/no_site/no_site_no_project/holding_bin/300",
+                "name": "300",
+                "owner": "holding_bin_no_site_no_project",
+                "documentation": "something",
+                "sysmlid": "x",
+                "read": "2015-03-27T09:03:27.169-0700",
+                "specialization": {
+                    "propertyType": null,
+                    "isSlot": false,
+                    "isDerived": false,
+                    "value": [{
+                        "valueExpression": null,
+                        "string": "dlam_string",
+                        "type": "LiteralString"
+                    }],
+                    "type": "Property"
+                },
+                "editable": true,
+                "modified": "2015-03-27T09:03:25.508-0700",
+                "creator": "admin"
+            }
+        ]
+    },
+    "workspace2": {
+        "qualifiedId": "master/5d875e01-0f81-47a4-a827-2e083ce6a27f/99bf0308-cb01-4a1d-a5b4-15e847e1a75d",
+        "id": "99bf0308-cb01-4a1d-a5b4-15e847e1a75d",
+        "deletedElements": [],
+        "addedElements": [],
+        "conflictedElements": [],
+        "updatedElements": [{
+            "sysmlid": "x",
+            "documentation": "x is x",
+            "read": "2015-03-27T09:03:35.114-0700",
+            "specialization": {"value": [{
+                "valueExpression": null,
+                "string": "the x value",
+                "type": "LiteralString"
+            }]},
+            "creator": "admin",
+            "modified": "2015-03-27T09:03:34.749-0700"
+        }],
+        "qualifiedName": "master/wsA/wsB",
+        "name": "wsB",
+        "movedElements": []
+    }
+}
+200

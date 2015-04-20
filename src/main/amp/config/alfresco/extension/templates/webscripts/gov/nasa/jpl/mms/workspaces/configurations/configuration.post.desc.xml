@@ -1,0 +1,11 @@
+<webscript>
+	<shortname>post configuration with {configurationId}</shortname>
+    <description>
+    	post configuration with {configurationId}
+	</description>
+  	<url>/workspaces/{workspaceId}/configurations/{configurationId}</url>
+  	<format default="json">argument</format>
+  	<authentication>user</authentication>
+  	<transaction>none</transaction>
+  	<family>MMS REST API</family>
+ </webscript>

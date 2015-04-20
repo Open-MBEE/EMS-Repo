@@ -1,13 +1,14 @@
 <webscript> 
-  <shortname>Get Element</shortname> 
+  <shortname>Search all elements for keyword</shortname> 
   <description>
-  	Get element information.
+  	Search all elements for keyword.
   </description>
   <url>/javawebscripts/element/search?keyword={keyword}</url>
-  <format default="json">any</format> 
+  <format default="json">argument</format> 
   <authentication>user</authentication> 
-  <transaction allow="readonly">required</transaction>
+  <transaction>none</transaction>
   <family>EMS Java Webscripts</family>
+  <lifecycle>deprecated</lifecycle>
   <args>
   	<arg>
   		<name>keyword</name>

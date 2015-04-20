@@ -31,11 +31,14 @@ package gov.nasa.jpl.view_repo.webscripts;
 
 import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.mbee.util.Utils;
+import gov.nasa.jpl.view_repo.util.EmsScriptNode;
+import gov.nasa.jpl.view_repo.util.NodeUtil;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -58,9 +61,11 @@ public class ModelSearch extends ModelGet {
 	    super();
 	}
 
+
     public ModelSearch(Repository repositoryHelper, ServiceRegistry registry) {
         super(repositoryHelper, registry);
     }
+
 
     protected final String[] searchTypes = {
 	        "@sysml\\:documentation:\"",
@@ -68,29 +73,33 @@ public class ModelSearch extends ModelGet {
 	        "@sysml\\:id:\"",
 	        "@sysml\\:string:\"",
 	        "@sysml\\:body:\""
-	        };
+    };
+
 
 	@Override
-	protected Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
+    protected Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
+        ModelSearch instance = new ModelSearch(repository, getServices());
+        return instance.executeImplImpl(req,  status, cache, runWithoutTransactions);
+    }
+
+	@Override
+    protected Map<String, Object> executeImplImpl(WebScriptRequest req, Status status, Cache cache) {
         printHeader( req );
 
 		clearCaches();
 
 		Map<String, Object> model = new HashMap<String, Object>();
 
-		ModelSearch instance = new ModelSearch(repository, services);
-
 		try {
-	        JSONArray elementsJson = instance.executeSearchRequest(req);
-	        appendResponseStatusInfo(instance);
+	        JSONArray elementsJson = executeSearchRequest(req);
 
-	        JSONObject top = new JSONObject();
+	        JSONObject top = NodeUtil.newJsonObject();
 			top.put("elements", elementsJson);
 			if (!Utils.isNullOrEmpty(response.toString())) top.put("message", response.toString());
-			model.put("res", top.toString(4));
+			model.put("res", NodeUtil.jsonToString( top, 4 ));
 		} catch (JSONException e) {
 			log(LogLevel.ERROR, "Could not create the JSON response", HttpServletResponse.SC_BAD_REQUEST);
-			model.put("res", response);
+			model.put("res", createResponseJson());
 			e.printStackTrace();
 		}
 
@@ -101,6 +110,7 @@ public class ModelSearch extends ModelGet {
 		return model;
 	}
 
+
 	private JSONArray executeSearchRequest(WebScriptRequest req) throws JSONException {
         String keyword = req.getParameter("keyword");
         if (keyword != null) {
@@ -108,14 +118,30 @@ public class ModelSearch extends ModelGet {
             String timestamp = req.getParameter("timestamp");
             Date dateTime = TimeUtils.dateFromTimestamp( timestamp );
 
+            Map<String, EmsScriptNode> rawResults = new HashMap<String, EmsScriptNode>();
+
             WorkspaceNode workspace = getWorkspace( req );
 
             for (String searchType: searchTypes) {
-                elementsFound.putAll( searchForElements( searchType, keyword, false,
+                rawResults.putAll( searchForElements( searchType, keyword, false,
                                                          workspace, dateTime ) );
             }
 
-            handleElements(dateTime);
+            // need to filter out _pkgs:
+            for (Entry< String, EmsScriptNode > element: rawResults.entrySet()) {
+
+                if (!element.getValue().getSysmlId().endsWith( "_pkg" )) {
+                    elementsFound.put( element.getKey(), element.getValue() );
+                }
+//                NodeRef nodeRef = NodeUtil.findNodeRefById( element.getKey(), false, workspace, dateTime, services, true );
+//                if ( nodeRef.equals( element.getValue().getNodeRef() ) ) {
+//                    if (!element.getValue().getSysmlId().endsWith( "_pkg" )) {
+//                        elementsFound.put( element.getKey(), element.getValue() );
+//                    }
+//                }
+            }
+
+            handleElements(workspace, dateTime, true);
         }
 
         return elements;

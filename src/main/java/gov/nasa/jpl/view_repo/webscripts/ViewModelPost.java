@@ -29,9 +29,9 @@
 
 package gov.nasa.jpl.view_repo.webscripts;
 
-import gov.nasa.jpl.mbee.util.Debug;
 import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
+import gov.nasa.jpl.view_repo.util.EmsTransaction;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 
@@ -39,8 +39,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
-import javax.transaction.UserTransaction;
-
 import org.alfresco.repo.model.Repository;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
@@ -58,6 +56,7 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
  * @author cinyoung
  *
  */
+@Deprecated
 public class ViewModelPost extends ModelPost {
     public ViewModelPost() {
         super();
@@ -69,46 +68,44 @@ public class ViewModelPost extends ModelPost {
 
     @Override
     protected Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
+        ViewModelPost instance = new ViewModelPost(repository, getServices());
+        // Run without transactions since ViewModePost breaks them up itself, and calls
+        // ModelPost methods which also have transactions:
+        return instance.executeImplImpl(req,  status, cache, true);
+    }
+
+    @Override
+    protected Map<String, Object> executeImplImpl(WebScriptRequest req, Status status, Cache cache) {
         printHeader( req );
 
+        // TODO FIXME this does not handle removing obsolete value specs when changing from another
+        //            aspect to this one.  See ModelPost.checkForObsoleteValueSpecs()
+        
         Map<String, Object> model = new HashMap<String, Object>();
-        clearCaches();
+        //clearCaches();
 
         String[] idKeys = {"modelid", "elementId"};
         String viewid = null;
 
         for (String idKey: idKeys) {
             viewid = req.getServiceMatch().getTemplateVars().get(idKey);
+            if ( viewid != null ) break;
         }
-        UserTransaction trx = services.getTransactionService().getUserTransaction();
-        try {
-            WorkspaceNode workspace = getWorkspace( req );
-            trx.begin();
-            EmsScriptNode view = findScriptNodeById(viewid, workspace, null, true);
-            view.createOrUpdateProperty("cm:modifier", AuthenticationUtil.getFullyAuthenticatedUser());
-            trx.commit();
-        } catch (Throwable e) {
-            try {
-                if (e instanceof JSONException) {
-            			log(LogLevel.ERROR, "ViewModelPost: JSON malformed for: " + e.getMessage(), HttpServletResponse.SC_BAD_REQUEST);
-                } else {
-            			log(LogLevel.ERROR, "ViewModelPost: DB transaction failed: " + e.getMessage(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-                }
-                e.printStackTrace();
-                if (Debug.isOn()) System.out.println("\t####### ERROR: Needed to ViewModelPost rollback: " + e.getMessage());
-                trx.rollback();
-            } catch (Throwable ee) {
-                log(LogLevel.ERROR, "\tViewModelPost: Rollback failed: " + ee.getMessage());
-                ee.printStackTrace();
+        final String finalViewId = viewid;
+        final WorkspaceNode workspace = getWorkspace( req );
+        new EmsTransaction(getServices(), getResponse(), status, runWithoutTransactions ) {
+            @Override
+            public void run() throws Exception {
+                EmsScriptNode view = findScriptNodeById(finalViewId, workspace, null, true);
+                view.createOrUpdateProperty("cm:modifier", AuthenticationUtil.getFullyAuthenticatedUser());
             }
-        }
+        };
 
-        ViewModelPost instance = new ViewModelPost(repository, services);
+//        ViewModelPost instance = new ViewModelPost(repository, services);
 
         try {
 //            Set< EmsScriptNode > elements =
-                    instance.createOrUpdateModel(req, status);
-            appendResponseStatusInfo(instance);
+            createOrUpdateModel(req, status);
         } catch (JSONException e) {
             log(LogLevel.ERROR, "JSON malformed\n", HttpServletResponse.SC_BAD_REQUEST);
             e.printStackTrace();
@@ -128,9 +125,11 @@ public class ViewModelPost extends ModelPost {
 //        model.put( "res", top.toString( 4 ) );
 
         status.setCode(responseStatus.getCode());
-        model.put("res", response.toString());
+        model.put("res", createResponseJson());
 
         printFooter();
+        
+        sendProgress( "Load/sync/update request is finished processing.", null, true);
 
         return model;
     }
@@ -138,11 +137,16 @@ public class ViewModelPost extends ModelPost {
     protected void createOrUpdateModel(WebScriptRequest req, Status status) throws Exception {
         clearCaches();
 
-        JSONObject postJson = (JSONObject) req.parseContent();
+        JSONObject postJson = //JSONObject.make( 
+                (JSONObject)req.parseContent();// );
         JSONArray array = postJson.getJSONArray("elements");
 
         WorkspaceNode workspace = getWorkspace( req );
 
+        // Note: Cannot have any sendProgress methods before setting numElementsToPost
+        numElementsToPost = array.length();
+        sendProgress( "Got request - starting", null, true);
+        
         for (int ii = 0; ii < array.length(); ii++) {
             JSONObject elementJson = array.getJSONObject(ii);
 
@@ -172,7 +176,7 @@ public class ViewModelPost extends ModelPost {
                             } else {
                                 if (checkPermissions(commentParent, PermissionService.WRITE)) {
                                     newElements.add(id);
-                                    updateOrCreateElement(elementJson, commentParent.getOwningParent(null), workspace, false);
+                                    updateOrCreateElement(elementJson, commentParent.getOwningParent(null,workspace,false), workspace, false);
                                 }
                             }
                     }
@@ -183,8 +187,6 @@ public class ViewModelPost extends ModelPost {
                 }
             }
         }
-
-        updateOrCreateAllRelationships(relationshipsJson, workspace);
 
         updateNodeReferencesForView( array, workspace );
     }
@@ -225,6 +227,7 @@ public class ViewModelPost extends ModelPost {
                     }
                 }
             }
+
         }
     }
 }

@@ -13,9 +13,9 @@
   ]
   </description>
   <url>/rest/sites</url> 
-  <format default="json">any</format> 
+  <format default="json">argument</format> 
   <authentication>user</authentication> 
-  <transaction allow="readonly">required</transaction>
+  <transaction>none</transaction>
   <family>EMS Java Webscripts</family>
   <args>
 

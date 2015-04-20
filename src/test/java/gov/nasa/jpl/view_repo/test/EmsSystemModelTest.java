@@ -47,8 +47,8 @@ public class EmsSystemModelTest {
     }
     @BeforeClass
     public static void initAppContext() {
-        wasOn = Debug.isOn();
-        if ( !wasOn ) Debug.turnOn();
+//        wasOn = Debug.isOn();
+//        if ( !wasOn ) Debug.turnOn();
 
         model = new EmsSystemModel( services );
         sysmlToAe = new SystemModelToAeExpression< EmsScriptNode, EmsScriptNode, String, Object, EmsSystemModel >( model );
@@ -108,7 +108,7 @@ public class EmsSystemModelTest {
         Collection< EmsScriptNode > nodes = model.getElementWithName( null, "expr_32165" );
 
         System.out.println("\n*testExpressionEvaluation() findNodeRefByType: "+
-        				  NodeUtil.findNodeRefByType("LiteralInteger", "@sysml\\:type:\"", false, false, null, null, true, services, false));
+        				  NodeUtil.findNodeRefByType("LiteralInteger", "@sysml\\:type:\"", false, null, null, true, services, false, null));
 
         System.out.println( "\n*testExpressionEvaluation() nodes: "
                             + MoreToString.Helper.toLongString( nodes ) );

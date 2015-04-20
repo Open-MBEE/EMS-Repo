@@ -20,6 +20,8 @@
 		singleton="false">
 		<property name="repositoryHelper" ref="repositoryHelper" />
 		<property name="services" ref="ServiceRegistry" />
+		<property name="personService" ref="PersonService" />
+		<property name="nodeService" ref="NodeService" />
 	</bean> 
 
 	<bean id="webscript.gov.nasa.jpl.ui.snapshot.get"
@@ -162,16 +164,12 @@
 		singleton="false">
 		<property name="repositoryHelper" ref="repositoryHelper" />
 		<property name="services" ref="ServiceRegistry" />
-        <property name="jmsConnection" ref="jmsConnection" />
-        <property name="restConnection" ref="restConnection" /> 
 	</bean>
 
 	<bean id="webscript.gov.nasa.jpl.javawebscripts.model.post" class="gov.nasa.jpl.view_repo.webscripts.ModelPost"
 		parent="webscript" singleton="false">
 		<property name="repositoryHelper" ref="repositoryHelper" />
 		<property name="services" ref="ServiceRegistry" />
-        <property name="jmsConnection" ref="jmsConnection" />
-        <property name="restConnection" ref="restConnection" /> 
 	</bean>
 
 	<bean id="webscript.gov.nasa.jpl.javawebscripts.configuration.post" class="gov.nasa.jpl.view_repo.webscripts.ConfigurationPost"
@@ -192,20 +190,31 @@
 		<property name="services" ref="ServiceRegistry" />
 	</bean>
 
-    <bean id="webscript.gov.nasa.jpl.javawebscripts.commit.post"
-        class="gov.nasa.jpl.view_repo.webscripts.CommitPost" parent="webscript"
+    <bean id="webscript.gov.nasa.jpl.javawebscripts.hostname.get"
+        class="gov.nasa.jpl.view_repo.webscripts.HostnameGet" parent="webscript"
         singleton="false">
         <property name="repositoryHelper" ref="repositoryHelper" />
         <property name="services" ref="ServiceRegistry" />
     </bean>
+    
+    <!-- Connection configuration services -->
+    <bean id="webscript.gov.nasa.jpl.utils.jmsconnection.get"
+        class="gov.nasa.jpl.view_repo.webscripts.util.JmsConnectionGet" parent="webscript"
+        singleton="false"/>
 
-    <bean id="webscript.gov.nasa.jpl.javawebscripts.commit.get"
-        class="gov.nasa.jpl.view_repo.webscripts.CommitGet" parent="webscript"
-        singleton="false">
-        <property name="repositoryHelper" ref="repositoryHelper" />
-        <property name="services" ref="ServiceRegistry" />
-    </bean>
+    <bean id="webscript.gov.nasa.jpl.utils.jmsconnection.post"
+        class="gov.nasa.jpl.view_repo.webscripts.util.JmsConnectionPost" parent="webscript"
+        singleton="false"/>
 
+    <bean id="webscript.gov.nasa.jpl.utils.restconnection.get"
+        class="gov.nasa.jpl.view_repo.webscripts.util.RestConnectionGet" parent="webscript"
+        singleton="false"/>
+
+    <bean id="webscript.gov.nasa.jpl.utils.restconnection.post"
+        class="gov.nasa.jpl.view_repo.webscripts.util.RestConnectionPost" parent="webscript"
+        singleton="false"/>
+
+    
 	<!-- Create proxies for the service beans: Interceptors don't work... -->
 	<!-- 
 	<bean class="org.springframework.aop.framework.autoproxy.BeanNameAutoProxyCreator">

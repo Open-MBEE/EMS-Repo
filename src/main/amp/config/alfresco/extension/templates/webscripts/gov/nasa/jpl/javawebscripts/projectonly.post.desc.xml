@@ -2,24 +2,24 @@
   <shortname>Update Project with version</shortname> 
   <description>
   </description>
-  <url>/javawebscripts/projects/{projectId}?fix={fix?}</url>
-  <format default="json">any</format> 
+  <url>/javawebscripts/projects</url>
+  <format default="json">argument</format> 
   <authentication>user</authentication> 
-  <transaction allow="readwrite">required</transaction>
+  <transaction>none</transaction>
   <family>EMS Java Webscripts</family>
   <args>
   	<arg>
   		<name>posted content</name>
   		<description>The request body of the post as json:
-  		{
-  			"name": magicdraw-project-name,
-  			"projectVersion": magicdraw-project-version (if available)
-  		}
+        {elements:[{
+            "sysmlid": projectId,
+            "name": projectName,
+            "specialization":{"type":"Project",
+                              "projectVersion": projectVersion if there is a version
+                             }
+                            
+        }]} 
   		</description>
-  	</arg>
-  	<arg>
-  		<name>fix</name>
-  		<description>Force the fix (if true) if there are any discrepancies (e.g., project exists, but has different name).</description>
   	</arg>
   </args>
 </webscript>

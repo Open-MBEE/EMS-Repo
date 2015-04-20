@@ -1,0 +1,41 @@
+{"views": [{
+    "qualifiedId": "/europa/123456/300/301",
+    "qualifiedName": "/europa/JW_TEST/300/301",
+    "name": "301",
+    "owner": "300",
+    "documentation": "else",
+    "sysmlid": "301",
+    "read": "2015-03-27T09:03:28.625-0700",
+    "specialization": {
+        "view2view": [{
+            "childrenViews": [
+                "301",
+                "302"
+            ],
+            "sysmlid": "301"
+        }],
+        "childrenViews": ["304"],
+        "displayedElements": [
+            "301",
+            "302",
+            "303"
+        ],
+        "allowedElements": [
+            "301",
+            "302",
+            "303"
+        ],
+        "noSections": ["302"],
+        "contains": [{
+            "sourceType": "reference",
+            "source": "301",
+            "sourceProperty": "documentation",
+            "type": "Paragraph"
+        }],
+        "type": "Product"
+    },
+    "editable": true,
+    "modified": "2015-03-27T09:03:27.854-0700",
+    "creator": "admin"
+}]}
+200

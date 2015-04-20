@@ -1,29 +1,29 @@
 /*******************************************************************************
- * Copyright (c) <2013>, California Institute of Technology ("Caltech").  
+ * Copyright (c) <2013>, California Institute of Technology ("Caltech").
  * U.S. Government sponsorship acknowledged.
- * 
+ *
  * All rights reserved.
- * 
- * Redistribution and use in source and binary forms, with or without modification, are 
+ *
+ * Redistribution and use in source and binary forms, with or without modification, are
  * permitted provided that the following conditions are met:
- * 
- *  - Redistributions of source code must retain the above copyright notice, this list of 
+ *
+ *  - Redistributions of source code must retain the above copyright notice, this list of
  *    conditions and the following disclaimer.
- *  - Redistributions in binary form must reproduce the above copyright notice, this list 
- *    of conditions and the following disclaimer in the documentation and/or other materials 
+ *  - Redistributions in binary form must reproduce the above copyright notice, this list
+ *    of conditions and the following disclaimer in the documentation and/or other materials
  *    provided with the distribution.
- *  - Neither the name of Caltech nor its operating division, the Jet Propulsion Laboratory, 
- *    nor the names of its contributors may be used to endorse or promote products derived 
+ *  - Neither the name of Caltech nor its operating division, the Jet Propulsion Laboratory,
+ *    nor the names of its contributors may be used to endorse or promote products derived
  *    from this software without specific prior written permission.
- * 
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS 
- * OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY 
- * AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER  
- * OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR 
- * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON 
- * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE 
- * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS
+ * OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY
+ * AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER
+ * OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+ * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
+ * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  ******************************************************************************/
 
@@ -45,11 +45,12 @@ import java.util.Map;
 import javax.servlet.http.HttpServletResponse;
 
 import org.alfresco.repo.model.Repository;
+import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
-import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.json.JSONArray;
+import org.apache.log4j.Logger;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.extensions.webscripts.Cache;
@@ -62,32 +63,32 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
  *
  */
 public class ModelGet extends AbstractJavaWebScript {
+    static Logger logger = Logger.getLogger(ModelGet.class);
+
     public ModelGet() {
         super();
     }
-    
+
     public ModelGet(Repository repositoryHelper, ServiceRegistry registry) {
         super(repositoryHelper, registry);
     }
 
     // injected via spring configuration
     protected boolean isViewRequest = false;
-    
-	private JSONObject elementHierarchy = new JSONObject();
+
 	protected JSONArray elements = new JSONArray();
 	protected Map<String, EmsScriptNode> elementsFound = new HashMap<String, EmsScriptNode>();
 
     protected boolean prettyPrint = true;
-	
+
     @Override
 	protected void clearCaches() {
 		super.clearCaches();
-		elementHierarchy = new JSONObject();
 		elements = new JSONArray();
 		elementsFound = new HashMap<String, EmsScriptNode>();
 	}
 
-	
+
 	@Override
 	protected boolean validateRequest(WebScriptRequest req, Status status) {
 	    String[] idKeys = {"modelid", "elementid", "elementId"};
@@ -98,66 +99,76 @@ public class ModelGet extends AbstractJavaWebScript {
 	            break;
 	        }
 	    }
-		
+
 		if (modelId == null) {
 			log(LogLevel.ERROR, "Element id not specified.\n", HttpServletResponse.SC_BAD_REQUEST);
 			return false;
 		}
-		
+
         // get timestamp if specified
         String timestamp = req.getParameter( "timestamp" );
         Date dateTime = TimeUtils.dateFromTimestamp( timestamp );
-        
+
         EmsScriptNode modelRootNode = null;
-        
+
         WorkspaceNode workspace = getWorkspace( req );
-        boolean wsFound = workspace != null;
+        boolean wsFound = workspace != null && workspace.exists();
         if ( !wsFound ) {
             String wsId = getWorkspaceId( req );
             if ( wsId != null && wsId.equalsIgnoreCase( "master" ) ) {
                 wsFound = true;
+            } else {
+                log( LogLevel.ERROR,
+                     "Workspace with id, " + wsId
+                     + ( dateTime == null ? "" : " at " + dateTime ) + " not found",
+                     HttpServletResponse.SC_NOT_FOUND );
+                return false;
             }
         }
         // need to find deleted elements in workspace, so can return not found rather than
         // the node from parent workspace
         boolean findDeleted = true;
         if ( wsFound ) modelRootNode = findScriptNodeById(modelId, workspace, dateTime, findDeleted);
-        
-		if (modelRootNode == null || modelRootNode.hasAspect( "ems:Deleted" )) {
-            log( LogLevel.ERROR,
+
+		if (modelRootNode == null || modelRootNode.isDeleted() ) {
+            log( LogLevel.WARNING,
                  "Element with id, " + modelId
                  + ( dateTime == null ? "" : " at " + dateTime ) + " not found",
                  HttpServletResponse.SC_NOT_FOUND );
 			return false;
 		}
-		
+
 		// TODO: need to check permissions on every node ref - though it looks like this might throw an error
 		if (!checkPermissions(modelRootNode, PermissionService.READ)) {
 			return false;
 		}
-		
+
 		return true;
 	}
 
-	
+
     /**
      * Entry point
      */
     @Override
     protected Map<String, Object> executeImpl(WebScriptRequest req,
             Status status, Cache cache) {
-        ModelGet instance = new ModelGet(repository, services);
-        instance.setServices( getServices() );
-        return instance.executeImplImpl( req, status, cache );
+        ModelGet instance = new ModelGet(repository, getServices());
+        return instance.executeImplImpl( req, status, cache, runWithoutTransactions );
     }
-    
-	protected Map<String, Object> executeImplImpl(WebScriptRequest req,
+
+	@Override
+    protected Map<String, Object> executeImplImpl(WebScriptRequest req,
 			Status status, Cache cache) {
+        if (logger.isInfoEnabled()) {
+            String user = AuthenticationUtil.getFullyAuthenticatedUser();
+            logger.info( user + " " + req.getURL() );
+        }
 	    Timer timer = new Timer();
 	    printHeader( req );
 
-		clearCaches();
-        
+		//clearCaches();
+
 		Map<String, Object> model = new HashMap<String, Object>();
 		// make sure to pass down view request flag to instance
 		setIsViewRequest(isViewRequest);
@@ -166,38 +177,43 @@ public class ModelGet extends AbstractJavaWebScript {
 		if (validateRequest(req, status)) {
 		    elementsJson = handleRequest(req);
 		}
-		
-		JSONObject top = new JSONObject();
+
+		JSONObject top = NodeUtil.newJsonObject();
 		try {
 		    if (elementsJson.length() > 0) {
 		        top.put("elements", elementsJson);
-		        if (!Utils.isNullOrEmpty(response.toString())) top.put("message", response.toString());
-		        if ( prettyPrint ) model.put("res", top.toString(4));
-		        else model.put("res", top.toString());
 		    } else {
 		        log(LogLevel.WARNING, "No elements found",
 		            HttpServletResponse.SC_NOT_FOUND);
-		        model.put("res", response.toString());
 		    }
+	        if (!Utils.isNullOrEmpty(response.toString())) top.put("message", response.toString());
+	        if ( prettyPrint ) model.put("res", NodeUtil.jsonToString( top, 4 ));
+	        else model.put("res", NodeUtil.jsonToString( top ));
 		} catch (JSONException e) {
+            log(LogLevel.ERROR, "Could not create JSONObject", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            model.put( "res", createResponseJson() );
 			e.printStackTrace();
 		}
 
 		status.setCode(responseStatus.getCode());
-		
+
         printFooter();
-        
-        System.out.println( "ModelGet: " + timer );
+
+        if (logger.isInfoEnabled()) {
+            logger.info( "ModelGet: " + timer );
+        }
 
 		return model;
 	}
-	
+
 	/**
 	 * Wrapper for handling a request and getting the appropriate JSONArray of elements
 	 * @param req
 	 * @return
 	 */
 	private JSONArray handleRequest(WebScriptRequest req) {
+        // REVIEW -- Why check for errors here if validate has already been
+        // called?  Is the error checking code different?  Why?
         try {
             String[] idKeys = {"modelid", "elementid", "elementId"};
             String modelId = null;
@@ -207,16 +223,16 @@ public class ModelGet extends AbstractJavaWebScript {
                     break;
                 }
             }
-            
+
             if (null == modelId) {
                 log(LogLevel.ERROR, "Could not find element " + modelId, HttpServletResponse.SC_NOT_FOUND );
                 return new JSONArray();
             }
-            
+
             // get timestamp if specified
             String timestamp = req.getParameter("timestamp");
             Date dateTime = TimeUtils.dateFromTimestamp( timestamp );
-            
+
             WorkspaceNode workspace = getWorkspace( req );
 
             // see if prettyPrint default is overridden and change
@@ -233,21 +249,38 @@ public class ModelGet extends AbstractJavaWebScript {
                          HttpServletResponse.SC_NOT_FOUND );
                     return new JSONArray();
             }
-            
+
+            String depthParam = req.getParameter( "depth" );
+            Long depth = null;
+            if (depthParam != null) {
+                try {
+                    depth = Long.parseLong( req.getParameter("depth") );
+                } catch (NumberFormatException nfe) {
+                    // don't do any recursion, ignore the depth
+                    log(LogLevel.WARNING, "Bad depth specified, returning depth 0",
+                        HttpServletResponse.SC_BAD_REQUEST);
+                }
+            }
             // recurse default is false
             boolean recurse = getBooleanArg(req, "recurse", false);
-            
-            if (isViewRequest) {
-                handleViewHierarchy(modelRootNode, recurse, workspace, dateTime);
-            } else {
-                handleElementHierarchy(modelRootNode, recurse, workspace, dateTime);
+            // for backwards compatiblity convert recurse to infinite depth (this overrides
+            // any depth setting)
+            if (recurse) {
+                depth = new Long(-1);
             }
-            
-            handleElements(dateTime);
+            boolean includeQualified = getBooleanArg(req, "qualified", true);
+
+            if (isViewRequest) {
+                handleViewHierarchy(modelRootNode, workspace, dateTime, depth, new Long(0));
+            } else {
+                handleElementHierarchy( modelRootNode, workspace, dateTime, depth, new Long(0) );
+            }
+
+            handleElements(workspace, dateTime, includeQualified);
         } catch (JSONException e) {
             e.printStackTrace();
         }
-	    
+
         return elements;
 	}
 
@@ -258,8 +291,9 @@ public class ModelGet extends AbstractJavaWebScript {
 	 * @param recurse	If true, find elements for children views
 	 * @throws JSONException	JSON element creation error
 	 */
-	protected void handleViewHierarchy(EmsScriptNode root, boolean recurse,
-	                                   WorkspaceNode workspace, Date dateTime)
+	protected void handleViewHierarchy(EmsScriptNode root,
+	                                   WorkspaceNode workspace, Date dateTime,
+	                                   final Long maxDepth, Long currDepth)
 	                                           throws JSONException {
 		Object allowedElements = root.getProperty(Acm.ACM_ALLOWED_ELEMENTS);
 		if (allowedElements != null) {
@@ -267,7 +301,7 @@ public class ModelGet extends AbstractJavaWebScript {
 			for (int ii = 0; ii < childElementJson.length(); ii++) {
 				String id = childElementJson.getString(ii);
 				EmsScriptNode childElement = findScriptNodeById(id, workspace, dateTime, false);
-				
+
     				// TODO Need to report that allowedElements can't be found
     				if (childElement != null && childElement.exists()) {
                     if ( checkPermissions( childElement, PermissionService.READ ) ) {
@@ -281,7 +315,8 @@ public class ModelGet extends AbstractJavaWebScript {
                          HttpServletResponse.SC_NOT_FOUND );
     				}
 			}
-			if (recurse) {
+			if (maxDepth != null && (maxDepth < 0 || currDepth < maxDepth)) {
+			    currDepth++;
 				Object childrenViews = root.getProperty(Acm.ACM_CHILDREN_VIEWS);
 				if (childrenViews != null) {
 					JSONArray childViewJson = new JSONArray(childrenViews.toString());
@@ -291,8 +326,9 @@ public class ModelGet extends AbstractJavaWebScript {
                                 findScriptNodeById( id, workspace, dateTime, false );
 						if (childView != null && childView.exists()) {
 					        if (checkPermissions(childView, PermissionService.READ)) {
-					            handleViewHierarchy( childView, recurse,
-					                                 workspace, dateTime );
+					            handleViewHierarchy( childView, 
+					                                 workspace, dateTime,
+					                                 maxDepth, currDepth );
 					        } // TODO -- REVIEW -- Warning if no permissions?
 						} else {
 		                    log( LogLevel.WARNING,
@@ -306,104 +342,91 @@ public class ModelGet extends AbstractJavaWebScript {
 			}
 		}
 	}
-	
-	
-	/**
-	 * Build up the element hierarchy from the specified root
-	 * @param root		Root node to get children for
-	 * @param workspace 
-	 * @param dateTime 
-	 * @throws JSONException
-	 */
-	protected void handleElementHierarchy(EmsScriptNode root, boolean recurse,
-	                                      WorkspaceNode workspace, Date dateTime)
+
+
+    /**
+     * Get all elements in tree from the specified root
+     *
+     * @param root
+     *            Root node to get children for
+     * @param recurse
+     * @param workspace
+     * @param dateTime
+     * @param maxDepth
+     * @param currDepth
+     * @throws JSONException
+     */
+	protected void handleElementHierarchy( EmsScriptNode root,
+	                                       WorkspaceNode workspace, Date dateTime,
+	                                       final Long maxDepth, Long currDepth)
 	                                              throws JSONException {
-		JSONArray array = new JSONArray();
-		
+
 		// don't return any elements
 		if (!root.exists()) {
 		    return;
 		}
-		
-		// add root element to elementsFound if its not already there (if it's there, it's probably because the root is a reified pkg node)
-		String sysmlId = (String)root.getProperty(Acm.ACM_ID);
+
+		// add root element to elementsFound if its not already there
+		// (if it's there, it's probably because the root is a reified pkg node)
+		String sysmlId = root.getSysmlId();
+		String rootName = sysmlId;
 		if (!elementsFound.containsKey(sysmlId)) {
 		    // dont add reified packages
-		    if (!((String)root.getProperty(Acm.CM_NAME)).contains("_pkg")) {
-		        elementsFound.put((String)root.getProperty(Acm.ACM_ID), root);
+		    if (!rootName.endsWith("_pkg") &&
+		        !root.isOwnedValueSpec(dateTime, workspace)) {
+		        elementsFound.put(sysmlId, root);
 		    }
 		}
 
-		if (recurse) {
-			// find all the children, recurse or add to array as needed
-		    // TODO: figure out why the child association creation from the reification isn't being picked up
-		    String rootName = (String)root.getProperty(Acm.CM_NAME);
-		    if (!rootName.contains("_pkg")) {
-                EmsScriptNode reifiedNode =
-                        findScriptNodeById( rootName + "_pkg", workspace,
-                                            dateTime, false );
+		if (maxDepth != null && (maxDepth < 0 || currDepth < maxDepth)) {
+		    ++currDepth;
+			// Find all the children, recurse or add to array as needed.
+		    // If it is a reified package, then need get the reifiedNode
+		    if ( rootName.endsWith("_pkg") ) {
+                EmsScriptNode reifiedNode = findScriptNodeById( rootName.substring( 0, rootName.lastIndexOf("_pkg") ),
+                                                                workspace,
+                                                                dateTime, false );
 		        if (reifiedNode != null) {
-                    handleElementHierarchy( reifiedNode, recurse, workspace,
-                                            dateTime );
+                    handleElementHierarchy( reifiedNode, workspace, dateTime, maxDepth, currDepth );
 		        } // TODO -- REVIEW -- Warning or error?
 		    }
-			for (ChildAssociationRef assoc: root.getChildAssociationRefs()) {
-			    NodeRef childRef = assoc.getChildRef();
-			    NodeRef vChildRef = NodeUtil.getNodeRefAtTime( childRef, workspace, dateTime );
-                if ( vChildRef == null ) {
-                    // this doesn't elicit a not found response
-                    log( LogLevel.WARNING,
-                         "Element " + childRef
-                         + ( dateTime == null ? "" : " at " + dateTime ) + " not found");
-			        continue;
-			    }
-                childRef = vChildRef;
-                EmsScriptNode child =
-                        new EmsScriptNode( childRef, services, response );
+
+		    // Handle all the children in this workspace:
+		    for ( NodeRef childRef : root.getOwnedChildren(false, dateTime, workspace) ) {
+                if ( childRef == null ) continue;
+                EmsScriptNode child = new EmsScriptNode( childRef, services, response );
                 if ( checkPermissions( child, PermissionService.READ ) ) {
-                    if (child.exists()) {
-                        if ( child.getTypeShort().equals( Acm.ACM_ELEMENT_FOLDER ) ) {
-                            handleElementHierarchy( child, recurse, workspace,
-                                                    dateTime );
-                        } else {
-                            String value = (String)child.getProperty( Acm.ACM_ID );
-                            if ( value != null ) {
-                                array.put( value );
-                                elementsFound.put( value, child );
-                                // add empty hierarchies as well
-                                elementHierarchy.put( value, new JSONArray() );
-                            }
+                    if (child.exists() && !child.isOwnedValueSpec(dateTime, workspace)) {
+
+                        String value = child.getSysmlId();
+                        if ( value != null && !value.endsWith( "_pkg" )) {
+                            elementsFound.put( value, child );
                         }
-                    }
-                }
+
+                        handleElementHierarchy( child, workspace, dateTime, maxDepth, currDepth );
+
+                    } // ends if (child.exists() && !child.isOwnedValueSpec())
+                } // ends if ( checkPermissions( child, PermissionService.READ ) )
 			}
-	    	
-			// if there were any children add them to the hierarchy object
-			String key = (String)root.getProperty(Acm.ACM_ID);
-			if (root.getTypeShort().equals(Acm.ACM_ELEMENT_FOLDER) && key == null) {
-				// TODO this is temporary? until we can get sysml:id from Element Folder?
-				key = root.getProperty(Acm.CM_NAME).toString().replace("_pkg", "");
-			}
-			
-			elementHierarchy.put(key, array);
-		}
+
+		}  // ends if (recurse)
 	}
-	
+
 	/**
 	 * Build up the element JSONObject
 	 * @throws JSONException
 	 */
-	protected void handleElements(Date dateTime) throws JSONException {
+	protected void handleElements(WorkspaceNode ws, Date dateTime, boolean includeQualified) throws JSONException {
 		for (String id: elementsFound.keySet()) {
 			EmsScriptNode node = elementsFound.get(id);
 
-			if (checkPermissions(node, PermissionService.READ)){ 
-                elements.put(node.toJSONObject(dateTime));
+			if (checkPermissions(node, PermissionService.READ)){
+                elements.put(node.toJSONObject(ws, dateTime, includeQualified));
 			} // TODO -- REVIEW -- Warning if no permissions?
 		}
 	}
-		
-	
+
+
 	/**
 	 * Need to differentiate between View or Element request - specified during Spring configuration
 	 * @param flag

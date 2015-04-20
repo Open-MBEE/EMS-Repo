@@ -240,12 +240,12 @@ public class View extends List implements sysml.view.View< EmsScriptNode >, Comp
     /**
      * Get the viewpoint to which this view conforms.
      */
-    public EmsScriptNode getViewpoint() {
+    public EmsScriptNode getViewpoint(Date dateTime, WorkspaceNode ws) {
         if ( viewNode == null ) return null;
         EmsScriptNode viewpoint = null;
 
         Set< EmsScriptNode > conformElements =
-                this.getElement().getRelationshipsOfType( Acm.JSON_CONFORM );
+                this.getElement().getRelationshipsOfType( Acm.JSON_CONFORM, dateTime, ws );
         if ( Utils.isNullOrEmpty( conformElements ) ) {
             return null;
         }
@@ -275,11 +275,11 @@ public class View extends List implements sysml.view.View< EmsScriptNode >, Comp
         return viewpoint;
     }
 
-    public Collection< EmsScriptNode > getExposedElements() {
+    public Collection< EmsScriptNode > getExposedElements(Date dateTime, WorkspaceNode ws) {
         if ( viewNode == null ) return null;
 
         Set< EmsScriptNode > exposeElements =
-                this.getElement().getRelationshipsOfType( Acm.JSON_EXPOSE );
+                this.getElement().getRelationshipsOfType( Acm.JSON_EXPOSE, dateTime, ws );
         if ( Utils.isNullOrEmpty( exposeElements ) ) {
             return null;
         }
@@ -316,8 +316,8 @@ public class View extends List implements sysml.view.View< EmsScriptNode >, Comp
     }
 
 
-    public EmsScriptNode getViewpointOperation() {
-        EmsScriptNode viewpoint = getViewpoint();
+    public EmsScriptNode getViewpointOperation(Date dateTime, WorkspaceNode ws) {
+        EmsScriptNode viewpoint = getViewpoint(dateTime, ws);
         if ( viewpoint == null ) return null;
         //if ( viewpoint == null || !viewpoint.exists() ) return null;
 
@@ -336,17 +336,91 @@ public class View extends List implements sysml.view.View< EmsScriptNode >, Comp
         return viewpointMethod;
     }
 
-    public boolean generateViewables() {
+    
+    /**
+     * Get the last modified time of the element based on whether the view
+     * contains json is generated. If generated, return the current time since
+     * we don't determine when the generated json would have changed, so we
+     * can't assume that it hasn't changed.
+     * 
+     * @param dateTime a timepoint indicating a version of the element
+     * @return
+     */
+    public Date getLastModified( Date dateTime, WorkspaceNode ws ) {
+        if ( getElement() == null ) return null;
+        if ( !isGeneratedFromViewpoint(dateTime, ws) ) {
+//            System.out.println("####  ####  Not auto-generated view " + getElement()  );
+            Date date = getElement().getLastModified( dateTime );
+            //return new Date(); 
+            return date;
+        }
+//        System.out.println("####  ####  Auto-generated view " + getElement()  );
+        return new Date(); 
+    }
+
+//    /**
+//     * Get the last modified time of self, displayed elements, and contained
+//     * views, recursively. <br>
+//     * NOTE: This is not being called and is not tested.
+//     * 
+//     * @param dateTime
+//     * @return
+//     */
+//    public Date getLastModifiedRecursive( Date dateTime ) {
+//        if ( getElement() == null ) return null;
+//        Date date = getElement().getLastModified( dateTime );
+//        if ( !isGeneratedFromViewpoint() ) {
+//            return date;
+//        }
+//        //Set<EmsScriptNode> elems = new LinkedHashSet< EmsScriptNode >();
+//        Collection<EmsScriptNode> elems =
+//                getDisplayedElements( getWorkspace(), dateTime, true, false, null );
+//        for ( EmsScriptNode elem : elems ) {
+//            Date d = elem.getLastModified( dateTime );
+//            if ( d.after( date ) ) date = d;
+//        }
+//        elems = getContainedViews( false, getWorkspace(), dateTime, null );
+//        for ( EmsScriptNode elem : elems ) {
+//            View v = new View( elem );
+//            Date d = v.getLastModifiedRecursive( dateTime );
+//            if ( d.after( date ) ) date = d;
+//        }
+//        return date;
+//    }
+
+    /**
+     * @return whether the contains json is generated from a viewpoint instead
+     *         of stored statically.
+     */
+    public boolean isGeneratedFromViewpoint(Date dateTime, WorkspaceNode ws) {
+        if ( getElement() == null ) {
+//            System.out.println("####  ####  view has no element "  );
+            return false;
+        }
+        String property = (String) viewNode.getProperty("view2:contains");
+        if ( property != null && property.length() > 0 ) {
+//            System.out.println("####  ####  has contains " + getElement()  );
+            return false;
+        }
+        EmsScriptNode viewpointOp = getViewpointOperation(dateTime, ws);
+        if ( viewpointOp == null ) {
+//            System.out.println("####  ####  no viewpoint " + getElement()  );
+            return false;
+        }
+//        System.out.println("####  ####  got viewpoint " + getElement()  );
+        return true;
+    }
+    
+    public boolean generateViewables(Date dateTime, WorkspaceNode ws) {
         // Get the related elements that define the the view.
 
-        Collection<EmsScriptNode> exposed = getExposedElements();
-        // TODO -- need to handle case where viewpoint operation does not exist
-        //         and an external function (e.g., Java) is somehow specified.
-        EmsScriptNode viewpointOp = getViewpointOperation();
+        EmsScriptNode viewpointOp = getViewpointOperation(dateTime, ws);
         if ( viewpointOp == null ) {
             if (Debug.isOn()) System.out.println("*** View.toViewJson(): no viewpoint operation! View = " + toBoringString() );
             return false;
         }
+
+        Collection<EmsScriptNode> exposed = getExposedElements(dateTime, ws);
 
         // Translate the viewpoint Operation/Expression element into an AE Expression:
         ArrayList<Object> paramValList = new ArrayList<Object>();
@@ -445,8 +519,8 @@ public class View extends List implements sysml.view.View< EmsScriptNode >, Comp
      * @see gov.nasa.jpl.view_repo.sysml.List#toViewJson()
      */
     @Override
-    public JSONObject toViewJson() {
-        return toViewJson( getWorkspace(), generate, recurse );
+    public JSONObject toViewJson(Date dateTime) {
+        return toViewJson( getWorkspace(), generate, recurse, dateTime );
     }
 
     public WorkspaceNode getWorkspace() {
@@ -457,7 +531,8 @@ public class View extends List implements sysml.view.View< EmsScriptNode >, Comp
     }
 
     public JSONObject toViewJson( WorkspaceNode workspace,
-                                  boolean doGenerate, boolean doRecurse ) {
+                                  boolean doGenerate, boolean doRecurse,
+                                  Date dateTime) {
 
         if ( viewNode == null ) {
             if (Debug.isOn()) System.out.println("*** called View.toViewJson() without a view node! View = " + toBoringString() );
@@ -466,7 +541,7 @@ public class View extends List implements sysml.view.View< EmsScriptNode >, Comp
 
         // Get the related elements that define the the view.
         if ( doGenerate ) {
-            generateViewables();
+            generateViewables(dateTime, workspace);
         }
 
         // Generate the JSON for the view now that the View is populated with
@@ -478,29 +553,29 @@ public class View extends List implements sysml.view.View< EmsScriptNode >, Comp
         try {
             json.put("views", jsonArray);
             jsonArray.put( viewProperties );
-            viewProperties.put("id", viewNode.getName() );
+            viewProperties.put("id", viewNode.getSysmlId() );
 
             JSONArray elements = new JSONArray();
             viewProperties.put("displayedElements", elements );
             for ( EmsScriptNode elem : getDisplayedElements( workspace, null, doGenerate, doRecurse, null ) ) {
-                elements.put( elem.getName() );
+                elements.put( elem.getSysmlId() );
             }
 
             elements = new JSONArray();
             viewProperties.put("allowedElements", elements );
             for ( EmsScriptNode elem : getAllowedElements() ) {
-                elements.put( elem.getName() );
+                elements.put( elem.getSysmlId() );
             }
 
             elements = new JSONArray();
             viewProperties.put("childrenViews", elements );
             for ( sysml.view.View<EmsScriptNode> view : getChildViews() ) {
                 if ( view instanceof View ) {
-                    elements.put( view.getElement().getName() );
+                    elements.put( view.getElement().getSysmlId() );
                 }
             }
 
-            JSONArray viewables = getContainsJson( doGenerate );
+            JSONArray viewables = getContainsJson( doGenerate, dateTime, workspace );
             viewProperties.put("contains", viewables );
 
         } catch ( JSONException e ) {
@@ -510,17 +585,17 @@ public class View extends List implements sysml.view.View< EmsScriptNode >, Comp
         return json;
     }
 
-    public JSONArray getContainsJson() {
-        return getContainsJson( generate );
+    public JSONArray getContainsJson(Date dateTime, WorkspaceNode ws ) {
+        return getContainsJson( generate, dateTime, ws );
     }
-    public JSONArray getContainsJson( boolean doGenerate ) {
+    public JSONArray getContainsJson( boolean doGenerate, Date dateTime, WorkspaceNode ws ) {
         JSONArray viewablesJson = new JSONArray();
 
-        if ( doGenerate && isEmpty() ) generateViewables();
+        if ( doGenerate && isEmpty() ) generateViewables(dateTime, ws);
 
         for ( Viewable< EmsScriptNode > viewable : this ) {
             if ( viewable != null ) {
-                viewablesJson.put( viewable.toViewJson() );
+                viewablesJson.put( viewable.toViewJson(dateTime) );
             }
         }
         if ( viewablesJson.length() == 0 && getElement() != null ) {
@@ -528,11 +603,18 @@ public class View extends List implements sysml.view.View< EmsScriptNode >, Comp
             if ( contains != null ) {
                 if ( contains instanceof JSONArray ) return (JSONArray)contains;
 
-                try {
-                    JSONArray jarr = new JSONArray( "" + contains );
-                    viewablesJson = jarr;
-                } catch ( JSONException e ) {
-                    e.printStackTrace();
+                String containsString = "" + contains;
+                if ( containsString.length() > 1 ) {
+                    try {
+                        JSONArray jarr = new JSONArray( "" + contains );
+                        viewablesJson = jarr;
+                    } catch ( JSONException e ) {
+                        System.out.println( "Tried to parse \"" + contains
+                                            + "\" in element "
+                                            + getElement().getSysmlName() + "("
+                                            + getElement().getSysmlId() + ")" );
+                        e.printStackTrace();
+                    }
                 }
             }
         }
@@ -568,7 +650,7 @@ public class View extends List implements sysml.view.View< EmsScriptNode >, Comp
         // Generate Viewables from Viewpoint method, but don't overwrite cached
         // values.
         if ( doGenerate && isEmpty() ) {
-            generateViewables();
+            generateViewables(dateTime, workspace);
         } else if ( displayedElements != null ) {
             // Return cached value which won't change since it's from hardcoded JSON.
             return displayedElements;

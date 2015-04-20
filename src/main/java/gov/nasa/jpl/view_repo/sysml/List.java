@@ -4,9 +4,11 @@ import gov.nasa.jpl.ae.event.Expression;
 import gov.nasa.jpl.mbee.util.CompareUtils;
 import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
+import gov.nasa.jpl.view_repo.util.NodeUtil;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.TreeSet;
 
 import org.json.JSONArray;
@@ -97,7 +99,7 @@ public class List extends ArrayList< Viewable< EmsScriptNode > > implements sysm
      * @see sysml.Viewable#toViewJson()
      */
     @Override
-    public JSONObject toViewJson() {
+    public JSONObject toViewJson(Date dateTime) {
 
         JSONObject json = new JSONObject();
         JSONArray jsonArray = new JSONArray();
@@ -109,7 +111,7 @@ public class List extends ArrayList< Viewable< EmsScriptNode > > implements sysm
             
             for ( Viewable<EmsScriptNode> viewable : this ) {
                 if ( viewable != null ) {
-                	jsonArray.put( viewable.toViewJson() );
+                	jsonArray.put( viewable.toViewJson(dateTime) );
                 }
             }
             
@@ -146,8 +148,8 @@ public class List extends ArrayList< Viewable< EmsScriptNode > > implements sysm
      */
     @Override
     public String toString() {
-        JSONObject jo = toViewJson();
-        if ( jo != null ) return jo.toString();
+        JSONObject jo = toViewJson(null);
+        if ( jo != null ) return NodeUtil.jsonToString( jo );
         return super.toString();
     }
 }

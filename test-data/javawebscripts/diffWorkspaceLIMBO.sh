@@ -17,8 +17,8 @@ export CURL_GET_FLAGS="-X GET"
 #if [true]; then
        export CURL_USER=" -u admin:admin"
        export CURL_FLAGS=$CURL_STATUS$CURL_USER
-       export SERVICE_URL="http://localhost:8080/alfresco/service/"
-       export BASE_URL="http://localhost:8080/alfresco/service/workspaces/master/"
+       export SERVICE_URL="http://localhost:9091/alfresco/service/"
+       export BASE_URL="http://localhost:9091/alfresco/service/workspaces/master/"
 #else
 #        export CURL_USER=" -u shatkhin"
 #        export CURL_FLAGS=$CURL_STATUS$CURL_USER$CURL_SECURITY
@@ -46,7 +46,7 @@ echo 'testPost 2'
 #post elements to project
 echo curl $CURL_FLAGS $CURL_POST_FLAGS @JsonData/elementsNew.json $BASE_URL"elements" 
 curl $CURL_FLAGS $CURL_POST_FLAGS @JsonData/elements.json $BASE_URL"elements" | grep -v '"read":'| grep -v '"lastModified"' > outputWorkspaces/post2.json
-java -cp .:../../src/main/amp/web/WEB-INF/lib/mbee_util.jar:../../target/view-repo-war/WEB-INF/lib/json-20090211.jar:../../target/classes gov.nasa.jpl.view_repo.util.JsonDiff baselineWorkspaces/post2.json outputWorkspaces/post2.json  | grep -v '"sysmlid"' | grep -v '"author"'| grep -v '}' | grep -ve '---' | egrep -v "[0-9]+[c|a|d][0-9]+" | grep -v '"modified":' | grep -v '"qualifiedId"'
+java -cp .:../../src/main/amp/web/WEB-INF/lib/mbee_util.jar:../../target/mms-repo-war/WEB-INF/lib/json-20090211.jar:../../target/classes gov.nasa.jpl.view_repo.util.JsonDiff baselineWorkspaces/post2.json outputWorkspaces/post2.json  | grep -v '"sysmlid"' | grep -v '"author"'| grep -v '}' | grep -ve '---' | egrep -v "[0-9]+[c|a|d][0-9]+" | grep -v '"modified":' | grep -v '"qualifiedId"'
 echo
 echo
 

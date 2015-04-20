@@ -109,6 +109,10 @@ Eclipse/Maven
     to the build path by adding the projects to build path.  Make sure that in Order and Export tab, that they are
     above the Maven Dependencies.
     
+    ----- If Eclipse closes when trying to commit with a response like:
+    cairo-misc.c:380: _cairo_operator_bounded_by_source: Assertion `NOT_REACHED' failed."
+    try adding:    adding "-Dorg.eclipse.swt.internal.gtk.cairoGraphics=false" to eclipse.ini.
+    
 # building, setting up maven, jrebel
 Make sure to install both the JRebel plug-in for Eclipse and download the Jrebel .jar and store it somewhere like "/Applications/jrebel".  
 The path to the jrebel.jar will be used by mvn via the MAVEN_OPTS environment variable.
@@ -148,9 +152,51 @@ For JUnit tests in a single Java class, for example, in MyJavaJUnitTestClass.jav
 
     mvn -Dmaven.surefire.debug -Dmaven.test.skip=false -Dtest=MyJavaJUnitTestClass test
 
-To update the target/view-repo-war manually
+To update the target/mms-repo-war manually
 
 	mvn package -Pamp-to-war
+
+## Managing Enterprise and Community Builds 
+	
+The default pom.xml builds the community version. To build the enterprise version, use the pom.xml.enterprise, e.g.
+
+    mvn -f pom.enterprise.xml [goal]
+    
+PLEASE keep pom.xml and pom.xml.enterprise in sync!!!
+
+*NOTE:* Since Enterprise and Community need a different set of files, each pom has a
+copy-resource plugin that copies the files in /resources/[community|enterprise] into the
+appropriate /src directory as part of the validation. Make changes to the appropriate files
+in the /resources/[community|enterprise] directory.
+
+### Enterprise settings with Maven
+
+Need to update settings.xml to connect to the Alfresco private repository. Ask Ly or Cin-Young
+for username and password.
+
+'''
+<settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0
+                      http://maven.apache.org/xsd/settings-1.0.0.xsd">
+  <localRepository/>
+  <interactiveMode/>
+  <usePluginRegistry/>
+  <offline/>
+  <pluginGroups/>
+  <servers>
+        <server>
+                <id>alfresco-private-repository</id>
+                <username>username</username>
+                <password>password</password>
+        </server>
+  </servers>
+  <mirrors/>
+  <proxies/>
+  <profiles/>
+  <activeProfiles/>
+</settings>
+'''
 	
 # Debug
 To attach an eclipse debugger, there's a view-repo.launch, you can use it to debug at the 10000 port, or change the debug config port if you didn't use 10000 in the maven opts
@@ -204,7 +250,7 @@ Get comments
 
 To open the javascript debugger: [http://localhost:8080/alfresco/service/api/javascript/debugger](http://localhost:8080/alfresco/service/api/javascript/debugger) (you may have to close and reopen to get it to step through on consecutive script calls)
 
-To refresh changes to scripts (they have to be updated in the "target/view-repo-war/WEB-INF/classes/alfresco/extension/..."): [http://localhost:8080/alfresco/service/index](http://localhost:8080/alfresco/service/index) hit refresh at the botton
+To refresh changes to scripts (they have to be updated in the "target/mms-repo-war/WEB-INF/classes/alfresco/extension/..."): [http://localhost:8080/alfresco/service/index](http://localhost:8080/alfresco/service/index) hit refresh at the botton
 
 Maven archetype from [Alfresco Maven SDK](https://artifacts.alfresco.com/nexus/content/repositories/alfresco-docs/alfresco-lifecycle-aggregator/latest/index.html)
 
@@ -233,9 +279,12 @@ This should speed up the rebuild significantly.
      mv target /mnt/ramdisk
      ln -s /mnt/ramdisk/target .
 
+For an mvn purge on the ramdisk, running this command may be helpful:
+     mvn clean -Ppurge; mkdir /mnt/ramdisk/target; mkdir /mnt/ramdisk/alf_data; ./runserver.sh
+
 THE FOLLOWING DOESN'T WORK: To attempt to turn off indexing (maybe because it slows down junit test runs), change VALIDATE to NONE for index.recovery.mode in
  
-    target/view-repo-war/WEB-INF/classes/alfresco/repository.properties
+    target/mms-repo-war/WEB-INF/classes/alfresco/repository.properties
 
 To evaluate a Java expression from a webpage, go to 
 
@@ -342,3 +391,72 @@ Note: Following shortcuts are mainly for Linux.
 	refresh view-share page
 	the final, integrated content model is displayed in view-share in your dashboard (under sites) and in Repository
 	
+### Running Multiple Alfrescos with Tomcat on Different Ports via Maven
+
+You may be able to run multiple alfresco servers on the same machine by changing ports used and permissions to a file.  
+
+You may have problems opening a file resulting in a lot of exceptions and SEVERE errors when bringing up alfresco.  You may need write access to /tmp/Alfresco.  One way to do this:
+
+    sudo chmod 777 /tmp/Alfresco
+
+There's a way to specify a different file so that permissions are not an issue.  TODO: What is it?
+
+There are port assignments that must be unique.  Remember that these are specified for the alfresco-view-share as well as the alfresco-view-repo.  You may be able to avoid changing ports if you can configure the server to use a different ip address: http://www.appnovation.com/blog/running-multiple-alfresco-server-instances-same-linux-machine.
+
+To change ports to 9091 for Alfresco and 10002 for the debugger, run this from the alfresco-view-repo directory:
+
+    . switchPorts.sh 9091 10002
+
+This script automates the detailed instructions below so that you don't have to read them. 
+
+### Detailed Instructions on Running Multiple Alfrescos
+
+You shouldn't need to read these if the switchPorts.sh described above works.
+
+
+To have the alfresco web server run on a different port add 
+
+    -Dmaven.tomcat.port=9091
+    
+to the command line options (such as in runserver.sh).  To run the regression test on this server, you need to edit test-data/javawebscripts/regression_lib.py and set the host to the new port:
+
+    HOST="localhost:9091"
+
+The port for connecting a debugger must also be unique.  You probably have this specified as 10000 in your MAVEN_OPTS environment variable.  Change it to something like 10002:
+
+    -Xrunjdwp:transport=dt_socket,address=10002
+
+There are instructions elsewhere on this page on how to change MAVEN_OPTS.
+
+You also need to set the RMI ports.  By default, these port numbers start with 50500.  If you don't set these to be different than a running server, you'll see "java.rmi.server.ExportException: Port already in use: 50501," and alfresco won't work.  You can assign the ports to 0 so that the they are chosen randomly from unused ports.  Edit view-repo/src/test/properties/local/alfresco-global.properties and add/edit to include the following assignments: 
+
+    avm.rmi.service.port=0
+    avmsync.rmi.service.port=0
+    attribute.rmi.service.port=0
+    authentication.rmi.service.port=0
+    repo.rmi.service.port=0
+    action.rmi.service.port=0
+    wcm-deployment-receiver.rmi.service.port=0
+    monitor.rmi.service.port=0
+
+view-repo.launch is used by Eclipse to attach its debugger to a running Alfresco.  The debug port is specified in the file.  So, to make sure you attach to port used by Alfresco as specified in $MAVEN_OPTS, edit this line in view-repo.launch:
+
+    <mapEntry key="port" value="10002"/>
+
+The tomcat port (ex. 9091) and the debug port (ex. 10002) may or may not be opened in the firewall.  You may need to open these to access the server locally, and they must be open to access the server remotely.  The instructions vary for different versions of operating systems and are not included here.  For reference, here are some commands that may help you for a linux OS:
+
+
+    # see what ports are open (LISTEN)
+    netstat -anp
+
+    # edit iptables to add ports to open
+    sudo vi /etc/sysconfig/iptables 
+    
+    # restart iptables
+    sudo /etc/init.d/iptables restart
+    
+    # if that didn't open ports, restart network
+    sudo /etc/init.d/network restart
+    
+If on the amazon cloud, the ports may also need to be opened from the AWS console.
+

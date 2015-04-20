@@ -11,8 +11,8 @@ export CURL_SECURITY=" -k -3"
 #if [true]; then
 	export CURL_USER=" -u admin:admin"
 	export CURL_FLAGS=$CURL_STATUS$CURL_USER
-	export SERVICE_URL="\"http://localhost:8080/alfresco/service/"
-	export BASE_URL="\"http://localhost:8080/alfresco/service/javawebscripts/"
+	export SERVICE_URL="\"http://localhost:9091/alfresco/service/"
+	export BASE_URL="\"http://localhost:9091/alfresco/service/javawebscripts/"
 #else
 #	export CURL_USER=" -u cinyoung"
 #	export CURL_FLAGS=$CURL_STATUS$CURL_USER$CURL_SECURITY
@@ -27,10 +27,10 @@ export CURL_SECURITY=" -k -3"
 # TODO: CURL commands aren't executed from bash using environment variables
 echo POSTS
 # create project and site
-echo curl $CURL_FLAGS $CURL_POST_FLAGS \'{\"name\":\"TEST\"}\' $BASE_URL"sites/europa/projects/123456?fix=true&createSite=true\""
+echo curl $CURL_FLAGS $CURL_POST_FLAGS @JsonData/project.json $SERVICE_URL"workspaces/master/sites/europa/projects?createSite=true\""
 
 # post elements to project
-echo curl $CURL_FLAGS $CURL_POST_FLAGS @JsonData/elementsNew.json $BASE_URL"sites/europa/projects/123456/elements\""
+echo curl $CURL_FLAGS $CURL_POST_FLAGS @JsonData/elementsNew.json $SERVICE_URL"workspaces/master/sites/europa/elements\""
 
 # post views
 echo curl $CURL_FLAGS $CURL_POST_FLAGS @JsonData/views.json $BASE_URL"views\""
@@ -66,6 +66,8 @@ echo curl $CURL_FLAGS $CURL_GET_FLAGS $SERVICE_URL"ve/documents/europa?format=js
 # get search
 echo curl $CURL_FLAGS $CURL_GET_FLAGS $BASE_URL"element/search?keyword=some*\""
 
+# get multiple elements
+echo curl $CURL_FLAGS $CURL_GET_FLAGS $SERVICE_URL"workspaces/master/elements\"" -d @JsonData/elementsGet.json -H "\"Content-Type:application/json\""
 
 echo ""
 echo DELETE
@@ -93,16 +95,16 @@ echo SNAPSHOTS
 
 # post snapshot
 echo curl $CURL_FLAGS $CURL_POST_FLAGS_NO_DATA $SERVICE_URL"workspaces/master/sites/europa/products/_17_0_5_1_407019f_1402422683509_36078_16169/snapshots\""
-#echo  curl -w "%{http_code}" -u admin:admin -X POST -H "Content-Type:text/html" --data @JsonData/snapshot.html http://localhost:8080/alfresco/service/ui/views/_17_0_5_1_407019f_1402422683509_36078_16169/snapshot
+#echo  curl -w "%{http_code}" -u admin:admin -X POST -H "Content-Type:text/html" --data @JsonData/snapshot.html http://localhost:9091/alfresco/service/ui/views/_17_0_5_1_407019f_1402422683509_36078_16169/snapshot
 echo curl $CURL_FLAGS $CURL_POST_FLAGS_NO_DATA $SERVICE_URL"workspaces/master/sites/undefined/products/_17_0_5_1_407019f_1402422683509_36078_16169/snapshots\""
-#echo  curl -w "%{http_code}" -u admin:admin -X POST -H "Content-Type:application/json" --data @JsonData/snapshots.json http://localhost:8080/alfresco/service/workspaces/master/sites/europa/configurations/_17_0_5_1_407019f_1402422683509_36078_16169/snapshots
+#echo  curl -w "%{http_code}" -u admin:admin -X POST -H "Content-Type:application/json" --data @JsonData/snapshots.json http://localhost:9091/alfresco/service/workspaces/master/sites/europa/configurations/_17_0_5_1_407019f_1402422683509_36078_16169/snapshots
 echo curl $CURL_FLAGS $CURL_POST_FLAGS_NO_DATA $SERVICE_URL"workspaces/master/sites/europa/products/_17_0_5_1_407019f_1402422683509_36078_16169\""
 echo curl $CURL_FLAGS $CURL_POST_FLAGS @JsonData/configuration.json $SERVICE_URL"workspaces/master/sites/europa/configurations\""
 echo curl $CURL_FLAGS $CURL_POST_FLAGS @JsonData/configuration.products.json $SERVICE_URL"workspaces/master/sites/europa/configurations/[CONFIGURATION_ID]/products\""
 echo curl $CURL_FLAGS $CURL_GET_FLAGS $SERVICE_URL"workspaces/master/sites/europa/configurations/[CONFIGURATION_ID]/snapshots\""
 
 # get snapshots - this currently doesn't work
-#echo  curl -w "%{http_code}" -u admin:admin -X GET http://localhost:8080/alfresco/service/snapshots/301
+#echo  curl -w "%{http_code}" -u admin:admin -X GET http://localhost:9091/alfresco/service/snapshots/301
 
 echo ""
 echo CONFIGURATIONS

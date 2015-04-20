@@ -1,4 +1,7 @@
-{"elements": [{
-    "name" : "XXXXXXXXXXXXXXXXXXXXXXXX",	
-    "sysmlid": "YYYYYYYYYYYYYYYYYYYYYY",
-}]}
+{"elements":[
+    {
+    "sysmlid":"303",
+    "owner":"123456",
+    "documentation":"this will create a moved element",
+    "specialization":{"type":"Property"}}
+]}

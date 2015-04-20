@@ -1,9 +1,13 @@
 package gov.nasa.jpl.view_repo.webscripts;
 
 import gov.nasa.jpl.mbee.util.Utils;
+import gov.nasa.jpl.view_repo.util.CommitUtil;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
+import gov.nasa.jpl.view_repo.util.EmsTransaction;
+import gov.nasa.jpl.view_repo.util.NodeUtil;
 import gov.nasa.jpl.view_repo.util.WorkspaceDiff;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -22,66 +26,58 @@ import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
 
+@Deprecated
 public class WorkspacesMerge extends AbstractJavaWebScript{
 
 	public WorkspacesMerge(){
 		super();
 	}
-	
+
 	public WorkspacesMerge(Repository repositoryHelper, ServiceRegistry registry){
 		super(repositoryHelper, registry);
 	}
-	
+
+	@Override
 	protected Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache){
+	    WorkspacesMerge instance = new WorkspacesMerge(repository, getServices());
+        // Run without transactions since WorkspacesMerge breaks them up itself.
+	    return instance.executeImplImpl( req, status, cache, true );
+	}
+
+	private JSONObject tmpResult;
+    @Override
+    protected Map<String, Object> executeImplImpl(WebScriptRequest req, Status status, Cache cache){
 		printHeader(req);
-		clearCaches();
+		//clearCaches();
 		Map<String, Object> model = new HashMap<String, Object>();
 		JSONObject result = new JSONObject();
 		try{
 			if(validateRequest(req, status)){
-				//String timeSource = req.getParameter("timestampSource");
-				//Date time = TimeUtils.dateFromTimestamp(timeSource);
-				
-				String targetId = req.getParameter("target");
-				WorkspaceNode targetWS = AbstractJavaWebScript.getWorkspaceFromId(targetId, getServices(), getResponse(), status, false, null);
-				
-				String sourceId = req.getParameter("source");
-				WorkspaceNode sourceWS = AbstractJavaWebScript.getWorkspaceFromId(sourceId,  getServices(), getResponse(), status, false, null);
-				
-				wsDiff = new WorkspaceDiff(targetWS, sourceWS, null /*time*/, null /*time*/);
-		/*		// Gotta merge here
-				Map<String, EmsScriptNode> elements = workspaceDiff.getElements();
-				Map<String, EmsScriptNode> addedElements = workspaceDiff.getAddedElements();
-				Map<String, EmsScriptNode> updatedElements = workspaceDiff.getUpdatedElements();
-				Map<String, EmsScriptNode> movedElements = workspaceDiff.getMovedElements();
-				Map<String, EmsScriptNode> deletedElements = workspaceDiff.getDeletedElements();
-				
-				//Convert Maps into Sets of just values (EmsScriptNodes).
-				
-				Collection <EmsScriptNode> elementCollection = elements.values();
-				Collection <EmsScriptNode> addedCollection = addedElements.values();
-				Collection <EmsScriptNode> updatedCollection = updatedElements.values();
-				Collection <EmsScriptNode> movedCollection = movedElements.values();
+				final String targetId = req.getParameter("target");
+                final WorkspaceNode targetWS =
+                        WorkspaceNode.getWorkspaceFromId( targetId,
+                                                                  getServices(),
+                                                                  getResponse(),
+                                                                  status,
+                                                                  //false,
+                                                                  null );
 
-				
-				// Add the collection into a collection of collections.
-				Collection< Collection<EmsScriptNode> > collections = new ArrayList();
-				collections.add(elementCollection);
-				collections.add(addedCollection);
-				collections.add(updatedCollection);
-				collections.add(movedCollection);
-				//Convert the collection of collections to a collection of nodes.
-				
-				Collection<EmsScriptNode> postingNodes = setsToCollection(collections);
-				
-				//Post em
-				
-				*/
+				final String sourceId = req.getParameter("source");
+                WorkspaceNode sourceWS =
+                        WorkspaceNode.getWorkspaceFromId( sourceId,
+                                                                  getServices(),
+                                                                  getResponse(),
+                                                                  status,
+                                                                  //false,
+                                                                  null );
+
+				wsDiff = new WorkspaceDiff(targetWS, sourceWS, null /*time*/, null /*time*/);
+
 				//For the nodes here, we delete them from the source
 				Map<String, EmsScriptNode> deletedElements = wsDiff.getDeletedElements();
-				Collection <EmsScriptNode> deletedCollection = deletedElements.values();
-				
-				
+				final Collection <EmsScriptNode> deletedCollection = deletedElements.values();
+
+
 				// Prints out the differences after merging.
 				JSONObject top = wsDiff.toJSONObject(null, null /*time*/, false);
 		        Iterator< ? > iter = top.keys();
@@ -100,28 +96,52 @@ public class WorkspacesMerge extends AbstractJavaWebScript{
 				        }
 				    }
 				}
-				
+
 				// Retrieving the arrays for all the added elements
 				ModelPost instance = new ModelPost(repository, services);
-				
+
 				// Error here, projectNode isn't 123456, but rather no_project.
 				EmsScriptNode projectNode = instance.getProjectNodeFromRequest(req, true);
-				 Set< EmsScriptNode > elements =
+				if (projectNode != null) {
+				    final Set< EmsScriptNode > elements =
 	                        instance.createOrUpdateModel( top.getJSONObject("workspace2"), status,
-	                                                      projectNode, targetWS, sourceWS );
-	                    // REVIEW -- TODO -- shouldn't this be called from instance?
-	                    instance.addRelationshipsToProperties( elements );
-	                    if ( !Utils.isNullOrEmpty( elements ) ) {
+	                                                      targetWS, sourceWS, true );
+                    // REVIEW -- TODO -- shouldn't this be called from instance?
+                    instance.addRelationshipsToProperties( elements, targetWS );
+                    
+                    tmpResult = null;
+                    new EmsTransaction(services, response, null, runWithoutTransactions ) {
+                        
+                        @Override
+                        public void run() throws Exception {
+                            if ( !Utils.isNullOrEmpty( elements ) ) {
+                                NodeUtil.setInsideTransactionNow( true );
+                                // Create JSON object of the elements to return:
+                                JSONArray elementsJson = new JSONArray();
+                                for ( EmsScriptNode element : elements ) {
+                                    elementsJson.put( element.toJSONObject(targetWS, null) );
+                                }
+                           //top.put( "elements", elementsJson );
+                            //model.put( "res", NodeUtil.jsonToString( top, 4 ) );
+                            }
+                            tmpResult = handleDelete(deletedCollection, targetWS, targetId, null /*time*/, wsDiff);
+                        }
+                    };
+                    if ( tmpResult != null ) result = tmpResult;
 
-	                        // Create JSON object of the elements to return:
-	                        JSONArray elementsJson = new JSONArray();
-	                        for ( EmsScriptNode element : elements ) {
-	                            elementsJson.put( element.toJSONObject(null) );
-	                        }
-	                       //top.put( "elements", elementsJson );
-	                        //model.put( "res", top.toString( 4 ) );
-	                    }
-	            result = handleDelete(deletedCollection, targetWS, targetId, null /*time*/, wsDiff); 
+                    // FIXME!! We can't just leave the changes on the merged
+                    // branch! If an element is changed in the parent, it could
+                    // result in a conflict! But we can't mark them deleted since
+                    // that would be making changes in the workspace. Can we
+                    // purge???!!! Do we need another aspect, ems:Purged? Do we
+                    // check to see if the last commit in the history is before the
+                    // lastTimeSync?
+
+
+    	            // keep history of the branch
+                CommitUtil.merge( sourceWS, targetWS, "", false,
+                                      services, response );
+				}
 			}
 		 } catch (JSONException e) {
 	           log(LogLevel.ERROR, "Could not create JSON\n", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
@@ -131,27 +151,27 @@ public class WorkspacesMerge extends AbstractJavaWebScript{
 	           e.printStackTrace();
 	        }
 		if (result == null) {
-             model.put( "res", response.toString() );
+             model.put( "res", createResponseJson() );
          } else {
              try {
                  result.put("message", response.toString());
-                 model.put("res",  result.toString(2));
+                 model.put("res",  NodeUtil.jsonToString( result, 2 ));
              } catch (JSONException e) {
-                 // TODO Auto-generated catch block
                  e.printStackTrace();
+                 model.put( "res", createResponseJson() );
              }
          }
 		status.setCode(responseStatus.getCode());
 		return model;
 	}
-	
+
 	// Essentially the same executeImpl code from MmsModelDelete
-	
+
 	protected JSONObject handleDelete(Collection <EmsScriptNode> collection, WorkspaceNode workspace, String wsId, Date time, WorkspaceDiff workspaceDiff) {
 		JSONObject result = null;
 		MmsModelDelete deleteInstance = new MmsModelDelete(repository, services);
 		long start = System.currentTimeMillis();
-		Collection <EmsScriptNode> tempCollection = new ArrayList();
+		Collection <EmsScriptNode> tempCollection = new ArrayList< EmsScriptNode >();
 		for( EmsScriptNode node : collection)
 		    tempCollection.add(node);
 		for( EmsScriptNode node : tempCollection){
@@ -169,7 +189,7 @@ public class WorkspacesMerge extends AbstractJavaWebScript{
 		//String siteName = node.getSiteName();
 		long end = System.currentTimeMillis();
 		try{
-			result = workspaceDiff.toJSONObject(new Date(start),new Date(end), false);	
+			result = workspaceDiff.toJSONObject(new Date(start),new Date(end), false);
 			for( EmsScriptNode node: collection) {
 				// editting the JSON
 				node.removeAspect( "ems:Added" );
@@ -181,10 +201,10 @@ public class WorkspacesMerge extends AbstractJavaWebScript{
 			log(LogLevel.ERROR, "Malformed JSON Object", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 			e.printStackTrace();
 		}
-		
+
 		return result;
 	}
-	
+
 	protected Collection<EmsScriptNode> setsToCollection(Collection< Collection <EmsScriptNode> > sets){
 		Collection <EmsScriptNode> collection = new ArrayList<EmsScriptNode>();
 		for(Collection <EmsScriptNode> set : sets){
@@ -192,14 +212,18 @@ public class WorkspacesMerge extends AbstractJavaWebScript{
 			}
 		return collection;
 	}
-	
+
 	@Override
 	protected boolean validateRequest(WebScriptRequest req, Status status) {
 		// TODO Auto-generated method stub
 		String targetId = req.getParameter( "target" );
         String sourceId = req.getParameter( "source" );
-        WorkspaceNode ws1 = getWorkspaceFromId( targetId, getServices(), response, status, false, null );
-        WorkspaceNode ws2 = getWorkspaceFromId( sourceId, getServices(), response, status, false, null );
+        WorkspaceNode ws1 =
+                WorkspaceNode.getWorkspaceFromId( targetId, getServices(), response, status, //false
+                                    null );
+        WorkspaceNode ws2 =
+                WorkspaceNode.getWorkspaceFromId( sourceId, getServices(), response, status, //false
+                                    null );
         boolean wsFound1 = ( ws1 != null || ( targetId != null && targetId.equalsIgnoreCase( "master" ) ) );
         boolean wsFound2 = ( ws2 != null || ( sourceId != null && sourceId.equalsIgnoreCase( "master" ) ) );
 

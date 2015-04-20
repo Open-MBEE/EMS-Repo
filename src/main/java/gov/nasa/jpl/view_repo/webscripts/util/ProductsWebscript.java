@@ -1,20 +1,22 @@
 package gov.nasa.jpl.view_repo.webscripts.util;
 
 import gov.nasa.jpl.mbee.util.TimeUtils;
+import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.sysml.View;
 import gov.nasa.jpl.view_repo.util.Acm;
-import gov.nasa.jpl.view_repo.util.NodeUtil;
-import gov.nasa.jpl.view_repo.util.Acm.JSON_TYPE_FILTER;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
+import gov.nasa.jpl.view_repo.util.NodeUtil;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 import gov.nasa.jpl.view_repo.webscripts.AbstractJavaWebScript;
 import gov.nasa.jpl.view_repo.webscripts.SnapshotGet;
-import gov.nasa.jpl.view_repo.webscripts.WebScriptUtil;
 
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.servlet.http.HttpServletResponse;
@@ -23,23 +25,30 @@ import org.alfresco.repo.model.Repository;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.security.PermissionService;
+import org.apache.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
 
 /**
  * Library class for manipulating products
- * 
+ *
  * Pattern is handle does the retrieval.
- * 
+ *
  * @author cinyoung
- * 
+ *
  */
 public class ProductsWebscript extends AbstractJavaWebScript {
+    static Logger logger = Logger.getLogger(ProductsWebscript.class);
 
     public boolean simpleJson = false;
+    
+    // Cached keyed by Workspace, Timestamp, then Site to the JSON
+    private static Map<String, Map<String, Map<String, JSONArray>>> productCache = 
+            Collections.synchronizedMap( new HashMap<String, Map<String, Map<String, JSONArray>>>() );
 
     public ProductsWebscript( Repository repository, ServiceRegistry services,
                               StringBuffer response ) {
@@ -50,8 +59,10 @@ public class ProductsWebscript extends AbstractJavaWebScript {
                                                            throws JSONException {
         JSONArray productsJson = new JSONArray();
 
-        EmsScriptNode siteNode = getSiteNodeFromRequest( req );
-        if (siteNode == null) {
+        EmsScriptNode siteNode = null;
+        EmsScriptNode mySiteNode = getSiteNodeFromRequest( req, false );
+
+        if (!NodeUtil.exists( mySiteNode )) {
             log(LogLevel.WARNING, "Could not find site", HttpServletResponse.SC_NOT_FOUND);
             return productsJson;
         }
@@ -72,36 +83,40 @@ public class ProductsWebscript extends AbstractJavaWebScript {
             }
         }
     }
-    
-    
+
+
     public JSONArray handleConfigurationProducts( WebScriptRequest req, EmsScriptNode config) throws JSONException {
         String timestamp = req.getParameter( "timestamp" );
         Date dateTime = TimeUtils.dateFromTimestamp( timestamp );
 
         WorkspaceNode workspace = getWorkspace( req );
-        
+
         ConfigurationsWebscript configWs = new ConfigurationsWebscript( repository, services, response );
         return configWs.getProducts( config, workspace, dateTime );
     }
-    
-    public JSONArray handleContextProducts( WebScriptRequest req, EmsScriptNode context) throws JSONException {
+
+    public JSONArray handleContextProducts( WebScriptRequest req, EmsScriptNode siteNode) throws JSONException {
         JSONArray productsJson = new JSONArray();
-        
+
         // get timestamp if specified
         String timestamp = req.getParameter( "timestamp" );
         Date dateTime = TimeUtils.dateFromTimestamp( timestamp );
         WorkspaceNode workspace = getWorkspace( req );
-        
-        Set< EmsScriptNode > productSet =
-                WebScriptUtil.getAllNodesInPath( context.getQnamePath(),
-                                                 "ASPECT", Acm.ACM_PRODUCT,
-                                                 workspace,
-                                                 dateTime, services,
-                                                 response );
-        for ( EmsScriptNode product : productSet ) {
-            productsJson.put( product.toJSONObject( null ) );
+        String workspaceId = NodeUtil.getWorkspaceId( workspace, false );
+
+        // check if it's already in the cache
+        String siteName = getSiteName(req);
+        if (timestamp == null) {
+            productsJson = getLatestProducts( workspace, dateTime, siteName );
+        } else {
+            productsJson = getProductsFromCache( workspace, workspaceId, dateTime, timestamp, siteName );
+            if (productsJson != null) {
+                return productsJson;
+            } else {
+                productsJson = new JSONArray();
+            }
         }
-        
+
         return productsJson;
     }
 
@@ -114,25 +129,33 @@ public class ProductsWebscript extends AbstractJavaWebScript {
         JSONArray snapshotsJson = new JSONArray();
         List< EmsScriptNode > snapshotsList =
                 product.getTargetAssocsNodesByType( "view2:snapshots",
-                                                    workspace, dateTime );
+                                                    workspace, null );
+        // lets add products from node refs
+        List<NodeRef> productSnapshots = product.getPropertyNodeRefs( "view2:productSnapshots", dateTime, workspace );
+        for (NodeRef productSnapshotNodeRef: productSnapshots) {
+            EmsScriptNode productSnapshot = new EmsScriptNode(productSnapshotNodeRef, services, response);
+            snapshotsList.add( productSnapshot );
+        }
 
         Collections.sort( snapshotsList,
                           new EmsScriptNode.EmsScriptNodeComparator() );
         for ( EmsScriptNode snapshot : snapshotsList ) {
-            String id = (String)snapshot.getProperty( Acm.ACM_ID );
-            Date date = (Date)snapshot.getLastModified( dateTime );
+            if (!snapshot.isDeleted()) {
+                String id = snapshot.getSysmlId();
+                Date date = snapshot.getLastModified( dateTime );
 
-            JSONObject jsonObject = new JSONObject();
-            jsonObject.put( "id", id );
-            jsonObject.put( "created", EmsScriptNode.getIsoTime( date ) );
-            jsonObject.put( "creator",
-                            (String)snapshot.getProperty( "cm:modifier" ) );
-            jsonObject.put( "url", contextPath + "/service/snapshots/"
-                                   + snapshot.getProperty( Acm.ACM_ID ) );
-            jsonObject.put( "tag", (String)SnapshotGet.getConfigurationSet( snapshot,
-                                                                            workspace,
-                                                                            dateTime ) );
-            snapshotsJson.put( jsonObject );
+                JSONObject jsonObject = new JSONObject();
+                jsonObject.put( "id", id );
+                jsonObject.put( "created", EmsScriptNode.getIsoTime( date ) );
+                jsonObject.put( "creator",
+                                snapshot.getProperty( "cm:modifier" ) );
+                jsonObject.put( "url", contextPath + "/service/snapshots/"
+                                       + snapshot.getSysmlId() );
+                jsonObject.put( "tag", SnapshotGet.getConfigurationSet( snapshot,
+                                                                                workspace,
+                                                                                dateTime ) );
+                snapshotsJson.put( jsonObject );
+            }
         }
 
         return snapshotsJson;
@@ -166,9 +189,9 @@ public class ProductsWebscript extends AbstractJavaWebScript {
                     elems = NodeUtil.getVersionAtTime( elems, dateTime );
                     for ( EmsScriptNode n : elems ) {
                         if ( simpleJson ) {
-                            productsJson.put( n.toSimpleJSONObject( dateTime ) );
+                            productsJson.put( n.toSimpleJSONObject( workspace,dateTime ) );
                         } else {
-                            productsJson.put( n.toJSONObject( dateTime ) );
+                            productsJson.put( n.toJSONObject( workspace, dateTime ) );
                         }
                     }
                 } else if ( gettingContainedViews ) {
@@ -177,13 +200,13 @@ public class ProductsWebscript extends AbstractJavaWebScript {
                     elems.add( product );
                     for ( EmsScriptNode n : elems ) {
                         if ( simpleJson ) {
-                            productsJson.put( n.toSimpleJSONObject( dateTime ) );
+                            productsJson.put( n.toSimpleJSONObject( workspace, dateTime ) );
                         } else {
-                            productsJson.put( n.toJSONObject( dateTime ) );
+                            productsJson.put( n.toJSONObject( workspace, dateTime ) );
                         }
                     }
                 } else {
-                    productsJson.put( product.toJSONObject( dateTime ) );
+                    productsJson.put( product.toJSONObject( workspace, dateTime ) );
                 }
             } catch ( JSONException e ) {
                 log( LogLevel.ERROR, "Could not create JSON for product",
@@ -192,6 +215,99 @@ public class ProductsWebscript extends AbstractJavaWebScript {
             }
         }
 
+        return productsJson;
+    }
+
+    @Override
+    protected Map< String, Object >
+            executeImplImpl( WebScriptRequest req, Status status, Cache cache ) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+    
+    protected synchronized JSONArray getProductsFromCache(WorkspaceNode workspace, String workspaceId,
+                                                          Date dateTime, String timestamp, String siteName) {
+        Map<String, JSONArray> timestampCheck = Utils.get(productCache, workspaceId, timestamp);
+        JSONArray productsJson = Utils.get(productCache, workspaceId, timestamp, siteName);
+        
+        // it's possible a site has no documents, in that case, need to check that timestamp doesn't exist
+        if (timestampCheck != null) {
+            
+        } else {
+            if (productsJson == null) { 
+                buildCache(workspace, dateTime, timestamp);
+            }
+
+            // now that cache is built can look it up for returning, if not there, return empty
+            productsJson = Utils.get(productCache, workspaceId, timestamp, siteName);
+            
+            if (productsJson == null) {
+                productsJson = new JSONArray();
+            }
+        } 
+        
+        return productsJson;
+    }
+    
+   
+    protected void buildCache(WorkspaceNode workspace, Date dateTime, String timestamp) {
+        String workspaceId = NodeUtil.getWorkspaceId( workspace, false );
+        
+        // Search for all products within the project site:
+        // don't specify a site, since this is running into issues and filter later
+        Map< String, EmsScriptNode > nodeList = searchForElements(NodeUtil.SearchType.ASPECT.prefix,
+                                                                Acm.ACM_PRODUCT, false,
+                                                                workspace, dateTime,
+                                                                null);
+        if (nodeList != null) {
+            Set<EmsScriptNode> nodes = new HashSet<EmsScriptNode>(nodeList.values());
+            for ( EmsScriptNode node : nodes) {
+                if (node != null) {
+                    JSONObject nodeJson = node.toJSONObject(workspace, dateTime);;
+                    String nodeSiteName = node.getSiteCharacterizationId(dateTime, workspace);
+
+                    if (timestamp != null) {
+                        JSONArray siteCache = Utils.get( productCache, workspaceId, timestamp, nodeSiteName );
+                        if (siteCache == null) {
+                            siteCache = new JSONArray();
+                            if (nodeSiteName == null) nodeSiteName = "null";
+                            Utils.put( productCache, workspaceId, timestamp, nodeSiteName, siteCache);
+                        }
+                        
+                        siteCache.put( nodeJson );
+                    }
+                    
+                }
+            }
+        }
+    }
+    
+    protected JSONArray getLatestProducts(WorkspaceNode workspace, Date dateTime, String siteName) {
+        JSONArray productsJson = new JSONArray();
+    
+        // Search for all products within the project site:
+        // don't specify a site, since this is running into issues and filter later
+        Map< String, EmsScriptNode > nodeList = searchForElements(NodeUtil.SearchType.ASPECT.prefix,
+                                                                Acm.ACM_PRODUCT, false,
+                                                                workspace, dateTime,
+                                                                null);
+        if (nodeList != null) {
+            Set<EmsScriptNode> nodes = new HashSet<EmsScriptNode>(nodeList.values());
+            for ( EmsScriptNode node : nodes) {
+                if (node != null) {
+                    String nodeSiteName = node.getSiteCharacterizationId(dateTime, workspace);
+                    if (nodeSiteName != null && siteName.equals( nodeSiteName)) {
+                        productsJson.put( node.toJSONObject( workspace, dateTime ) );
+                    } else if (nodeSiteName == null) {
+                        if (logger.isInfoEnabled()) { 
+                            logger.info( String.format("couldn't get node site name for sysmlid[%s] id[%s]",
+                                                       node.getSysmlId(), node.getId()));
+                        }
+                    }
+                }
+            }
+        }
+        
         return productsJson;
     }
 }

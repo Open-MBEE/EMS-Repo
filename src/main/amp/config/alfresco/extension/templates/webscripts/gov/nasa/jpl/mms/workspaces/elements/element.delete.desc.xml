@@ -4,8 +4,8 @@
     	delete element with {elementId}
 	</description>
   	<url>/workspaces/{workspaceId}/elements/{elementId}</url>
-  	<format default="json">any</format>
+  	<format default="json">argument</format>
   	<authentication>user</authentication>
-  	<transaction>none</transaction>
+    <transaction>none</transaction>
   	<family>MMS REST API</family>
  </webscript>

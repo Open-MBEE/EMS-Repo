@@ -1,0 +1,24 @@
+{ "elements" : [
+
+    {"documentation" : "", 
+     "sysmlid":"onBothWorkspaces1", 
+     "name":"onBothWorkspaces1", 
+     "owner":"123456", 
+     "specialization": {"type":"Property",
+                        "isDerived":false, 
+                        "value":[{"type":"LiteralString",
+                                  "string":"gg_string"}]}
+    },
+
+    {"documentation" : "", 
+     "sysmlid":"onBothWorkspaces2",
+     "owner":"123456",
+     "name":"onBothWorkspaces2", 
+     "specialization": {"type":"Expression",
+                        "operand":[{"type":"ElementValue",
+                                  "element":"300"},
+                                  {"type":"ElementValue",
+                                  "element":"302"}]}
+     },
+     
+]}

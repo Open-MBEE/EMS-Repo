@@ -1,20 +1,20 @@
 {
 
-    "message": "[WARNING]: createOrUpdateModel deltas not posted properly\n",
-
     "elements": [{
 
-        "qualifiedId": "no_project/holding_bin_no_site_no_project/300/500",
-
-        "name": "500",
-
-        "qualifiedName": "/300/500",
-
-        "sysmlid": "500",
+        "creator": "admin",
 
         "documentation": "directed_relationship2",
 
+        "editable": true,
+
+        "name": "500",
+
         "owner": "300",
+
+        "qualifiedId": "no_project/holding_bin_no_site_no_project/300/500",
+
+        "qualifiedName": "/300/500",
 
         "specialization": {
 
@@ -26,11 +26,11 @@
 
         },
 
-        "editable": true,
+        "sysmlid": "500"
 
-        "creator": "admin",
+    }],
 
-    }]
+    "message": "[WARNING]: createOrUpdateModel deltas not posted properly\n"
 
 }
 

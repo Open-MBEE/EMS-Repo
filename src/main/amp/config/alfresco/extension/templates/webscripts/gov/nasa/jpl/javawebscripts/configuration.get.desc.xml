@@ -35,9 +35,9 @@
     }
   	</description>
 		<url>/javawebscripts/configurations/{siteName}</url>
-		<format default="json">any</format>
+		<format default="json">argument</format>
 		<authentication>user</authentication>
-		<transaction allow="readonly">required</transaction>
+        <transaction>none</transaction>
 		<family>EMS Java Read Webscripts</family>
 		<args>
 			<arg>

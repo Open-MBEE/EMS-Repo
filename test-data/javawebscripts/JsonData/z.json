@@ -1,0 +1,12 @@
+{ "elements" : [
+
+{
+ "sysmlid" : "z",
+ "documentation" : "z is z",
+ "owner" : "302",
+ "specialization" : {
+   "type": "Property",
+   "value" : [{ "string" : "the z value",
+                "type" : "LiteralString"}]}
+ }
+]}

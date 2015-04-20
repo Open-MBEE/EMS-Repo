@@ -1,0 +1,19 @@
+<webscript>
+  <shortname>Toggle alwaysTurnDebugOff on or off</shortname>
+  <description>toggle alwaysTurnDebugOff off</description>
+  <url>/alwaysTurnDebugOff?on={on?}&amp;off={off?}</url>
+  <authentication>user</authentication>
+  <format default="html">argument</format>
+  <family>EMS Utils</family>
+  <transaction>none</transaction>
+  <args>
+    <arg>
+        <name>on</name>
+        <description>Optional, if specified will turn alwaysTurnDebugOff on</description>
+    </arg>
+    <arg>
+        <name>off</name>
+        <description>Optional, if specified will turn alwaysTurnDebugOff off</description>
+    </arg>
+  </args>
+</webscript>
