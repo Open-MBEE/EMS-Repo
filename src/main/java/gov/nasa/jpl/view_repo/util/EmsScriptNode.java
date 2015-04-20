@@ -3220,13 +3220,14 @@ public class EmsScriptNode extends ScriptNode implements
 
         // only change if old list is different than new
         if ( checkPermissions( PermissionService.WRITE, response, status ) ) {
-            @SuppressWarnings( "unchecked" )
             // It is important we ignore the workspace when getting the property, so we make sure
             // to update this property when needed.  Otherwise, property may have a noderef in
             // a parent workspace, and this wont detect it; however, all the getProperty() will look
             // for the correct workspace node, so perhaps this is overkill::
-            ArrayList< Serializable > oldValues =
-                    (ArrayList< Serializable >)getNodeRefProperty( acmProperty, true, null, false, true, null );
+            List< Serializable > oldValues =
+                    Utils.asList( getNodeRefProperty( acmProperty, true, null,
+                                                      false, true, null ),
+                                  Serializable.class );
             if ( !EmsScriptNode.checkIfListsEquivalent( values, oldValues ) ) {
                 setProperty( acmProperty, values );
                 changed = true;
