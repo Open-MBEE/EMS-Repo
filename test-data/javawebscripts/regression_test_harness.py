@@ -684,6 +684,20 @@ common_filters+['"id"','"qualifiedId"','"timestamp"'],
 ["test","workspaces","develop", "develop2"]
 ],
 
+# This test case depends on test 220 this makes sure that recursive get on ws gets
+# everything as expected (we should also do something like 225 to make sure a modified element
+# shows up in the recurse properly as well)
+[
+239,
+"RecursiveGetOnWorkspaces",
+"Makes sure that a recursive get on a modified workspace returns the modified elements",
+create_curl_cmd(type="GET", base_url=BASE_URL_WS,
+                branch="$gv1/elements/302?recurse=true"),
+True,
+common_filters,
+["develop"]
+],
+
 [
 240,
 "PostSiteInWorkspace",
