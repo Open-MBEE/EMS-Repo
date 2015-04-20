@@ -197,6 +197,24 @@
         <property name="services" ref="ServiceRegistry" />
     </bean>
     
+    <!-- Connection configuration services -->
+    <bean id="webscript.gov.nasa.jpl.utils.jmsconnection.get"
+        class="gov.nasa.jpl.view_repo.webscripts.util.JmsConnectionGet" parent="webscript"
+        singleton="false"/>
+
+    <bean id="webscript.gov.nasa.jpl.utils.jmsconnection.post"
+        class="gov.nasa.jpl.view_repo.webscripts.util.JmsConnectionPost" parent="webscript"
+        singleton="false"/>
+
+    <bean id="webscript.gov.nasa.jpl.utils.restconnection.get"
+        class="gov.nasa.jpl.view_repo.webscripts.util.RestConnectionGet" parent="webscript"
+        singleton="false"/>
+
+    <bean id="webscript.gov.nasa.jpl.utils.restconnection.post"
+        class="gov.nasa.jpl.view_repo.webscripts.util.RestConnectionPost" parent="webscript"
+        singleton="false"/>
+
+    
 	<!-- Create proxies for the service beans: Interceptors don't work... -->
 	<!-- 
 	<bean class="org.springframework.aop.framework.autoproxy.BeanNameAutoProxyCreator">

@@ -85,6 +85,7 @@ import org.alfresco.service.cmr.security.PermissionService;
 import org.alfresco.service.cmr.security.PersonService;
 import org.alfresco.service.cmr.site.SiteInfo;
 import org.alfresco.util.TempFileProvider;
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormatter;
@@ -96,6 +97,7 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.nodes.Node;
+import org.jsoup.nodes.TextNode;
 import org.jsoup.parser.Tag;
 import org.jsoup.select.Elements;
 import org.springframework.extensions.webscripts.Cache;
@@ -115,8 +117,10 @@ public class SnapshotPost extends AbstractJavaWebScript {
 	private DocBookWrapper docBookMgr;
 	protected NodeService nodeService;
 	protected PersonService personService;
+	private WorkspaceNode workspace;
+	private Date timestamp;
 
-    public void setNodeService(NodeService nodeService)
+	public void setNodeService(NodeService nodeService)
     {
        this.nodeService = nodeService;
     }
@@ -407,6 +411,9 @@ public class SnapshotPost extends AbstractJavaWebScript {
         }
 
         this.snapshotName = snapshotName;
+        this.workspace = workspace;
+        this.timestamp = timestamp;
+        
         docBookMgr = new DocBookWrapper( snapshotName, snapshotNode, false );
         try {
             DBBook docBook = createDocBook( product );
@@ -1221,7 +1228,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
     /*
      * process images not originated from MagicDraw; images inserted via VE
      */
-    private String handleEmbeddedImage( String inputString)
+    public String handleEmbeddedImage( String inputString)
     {
     	if(inputString == null || inputString.isEmpty()) return "";
 
@@ -1350,6 +1357,11 @@ public class SnapshotPost extends AbstractJavaWebScript {
         return null;
     }
     
+    public String handleTransclusion(String id, String transclusionType, String inputString){
+    	return handleTransclusion(id, transclusionType, inputString, null, 0, this.workspace, this.timestamp);
+    }
+    
+    
     /**
      *
      * @param id
@@ -1418,7 +1430,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
         return hasNode;
     }
 
-    private String HtmlSanitize( String s ) {
+    public String HtmlSanitize( String s ) {
     	if(s == null || s.isEmpty()) return s;
 
     	try{
@@ -1441,7 +1453,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
     	StringBuffer sb = new StringBuffer();
     	Elements tables = document.select("body > table");
     	for(Element t : tables){
-    		HtmlTable htmlTable = new HtmlTable(t);
+    		HtmlTable htmlTable = new HtmlTable(t, this);
     		sb.append(htmlTable.toDocBook());
     	}
     	return sb.toString();
@@ -1696,6 +1708,12 @@ public class SnapshotPost extends AbstractJavaWebScript {
     	Element elemNew = null;
     	Element para = null;
     	Element emphasis = null;
+    	String style = null;
+    	List<String> styles = null;
+    	boolean isEmphasis = false;
+    	boolean isPaddingLeft = false;
+    	Integer pixel = new Integer(0); 
+    	
     	String tagName = elem.tagName().toUpperCase();
     	switch(tagName){
 	    	case "BODY":
@@ -1775,7 +1793,35 @@ public class SnapshotPost extends AbstractJavaWebScript {
 	    	case "P":
 	    	case "DIV":
 	    		//replaces with linebreak;
-	    		elemNew = new Element(Tag.valueOf("para"), "");
+	    		isEmphasis = false;
+	    		style = elem.attr("style");
+	    		if(style != null && !style.isEmpty()){ 
+	    			style = style.toLowerCase();
+	    			if(style.contains("underline") ||
+	    					style.contains("line-through")){
+	    				elemNew = new Element(Tag.valueOf("emphasis"), "");
+	    				StringBuffer sb = new StringBuffer();
+	    				if(style.contains("underline")) sb.append("underline");
+	    				if(style.contains("line-through")) sb.append("strikethrough");
+		    			elemNew.attr("role", sb.toString());
+		    			isEmphasis = true;
+	    			}
+	    			if(style.contains("padding-left:")){
+	    				//extract padding-left value; assuming px unit;
+	    				int beginningIndex = style.indexOf("padding-left:") + 14;
+	    				int endIndex = style.indexOf(";", beginningIndex)-2;
+	    				if(endIndex < beginningIndex) endIndex = style.length()-2;
+	    				String px = style.substring(beginningIndex, endIndex);
+	    				try{
+	    					pixel = new Integer(px);
+	    					if(pixel!= null) isPaddingLeft = true;
+	    				}
+	    				catch(NumberFormatException ex){;}
+	    			}
+	    		}
+	    		if(!isEmphasis) elemNew = new Element(Tag.valueOf("para"), "");
+	    		
+	    		if(isPaddingLeft) elemNew.attr("role", String.format("%s;padding-left-%d", elemNew.attr("role"), pixel));
 	    		elemNew.html(elem.html());
 	    		elemNew.prepend("<?linebreak?>");
 	    		elem.replaceWith(elemNew);
@@ -1803,6 +1849,18 @@ public class SnapshotPost extends AbstractJavaWebScript {
 	    	case "STYLE":
 	    		elem.remove();
 	    		break;
+	    	case "SUB":
+	    		elemNew = new Element(Tag.valueOf("subscript"), "");
+	    		elemNew.html(elem.html());
+	    		elem.replaceWith(elemNew);
+	    		elem = elemNew;
+	    		break;
+	    	case "SUP":
+	    		elemNew = new Element(Tag.valueOf("superscript"), "");
+	    		elemNew.html(elem.html());
+	    		elem.replaceWith(elemNew);
+	    		elem = elemNew;
+	    		break;
 	    	case "TABLE":
     			String dbTable = HtmlTableToDocbookTable(elem.outerHtml(), elem.html());
     			Document doc = Jsoup.parseBodyFragment(dbTable);
@@ -1825,7 +1883,15 @@ public class SnapshotPost extends AbstractJavaWebScript {
 //	    		elem.replaceWith(elemNew);
 //	    		elem = elemNew;
 	    		break;
-	    	case "UL":
+	    	case "U":
+	    		emphasis = new Element(Tag.valueOf("emphasis"), "");
+	    		emphasis.attr("role", "underline");
+	    		emphasis.html(elem.html());
+	    		elemNew = emphasis;
+	    		elem.replaceWith(elemNew);
+	    		elem = elemNew;
+	    		break;
+    		case "UL":
 	    		elemNew = new Element(Tag.valueOf("itemizedlist"), "");
 	    		elemNew.html(elem.html());
 	    		elem.replaceWith(elemNew);
@@ -1838,9 +1904,51 @@ public class SnapshotPost extends AbstractJavaWebScript {
 	    		elem.remove();
 	    		break;
 	    	default:
-//	    		TextNode textNode = new TextNode(elem.html(), "");
-//	    		elem.replaceWith(textNode);
-	    		elemNew = new Element(Tag.valueOf("removalTag"),"");
+	    		isEmphasis = false;
+	    		String backgroundColor = "";
+    			String color = "";
+	    		style = elem.attr("style");
+	    		if(style !=null && !style.isEmpty()){
+	    			style = style.toLowerCase();
+	    			styles = Arrays.asList(style.split("\\s*;\\*"));
+	    			boolean isStrikeThrough = false;
+	    			
+	    			for(String styl : styles){
+	    				if(styl.contains("underline") || styl.contains("line-through")){
+		    				elemNew = new Element(Tag.valueOf("emphasis"), "");
+		    				StringBuffer sb = new StringBuffer();
+		    				if(style.contains("line-through")){
+		    					isStrikeThrough = true;
+		    					sb.append("strikethrough");
+		    				}
+			    			if(style.contains("underline") && !isStrikeThrough) sb.append("underline");
+		    				elemNew.attr("role", sb.toString());
+			    			isEmphasis = true;
+		    			}
+	    				if(styl.contains("background-color:")){
+	    					backgroundColor = styl.substring("background-color:".length()).trim().replace(";", "");
+	    					if(!isEmphasis){ 
+	    						elemNew = new Element(Tag.valueOf("phrase"), "");
+	    						isEmphasis = true;
+	    					} 
+	    				}
+	    				if(styl.startsWith("color:")){
+	    					color = style.substring("color:".length()).trim().replace(";", "");
+	    					if(!isEmphasis){ 
+	    						elemNew = new Element(Tag.valueOf("phrase"), "");
+	    						isEmphasis = true;
+	    					}
+	    				}
+	    			}
+	    		}
+	    		if(!isEmphasis){
+	    			elemNew = new Element(Tag.valueOf("removalTag"),"");
+	    		}
+	    		else{
+	    			if(!backgroundColor.isEmpty()) elemNew.attr("background-color", backgroundColor);
+	    			if(!color.isEmpty()) elemNew.attr("color", color);
+	    		}
+	    		
 	    		elemNew.html(elem.html());
 	    		elem.replaceWith(elemNew);
 	    		elem = elemNew;
@@ -1891,6 +1999,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
 	    	list.addAll(body.select("orderedlist"));
 	    	list.addAll(body.select("tbody"));
 	    	list.addAll(body.select("listitem"));
+	    	list.addAll(body.select("row"));
 			for(Element item : list){
 				if(item.children().size()==0){
 					if(item.html().trim().length()==0){ 

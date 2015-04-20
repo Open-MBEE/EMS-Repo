@@ -217,6 +217,7 @@ public class DocBookWrapper {
 			rawContent = rawContent.replaceAll("(?i)<removalTag>", "");
 			rawContent = rawContent.replaceAll("(?i)</removalTag>", "");
 			rawContent = rawContent.replaceAll("(?i)<entry/>", "<entry><para>&#160;</para></entry>");
+			rawContent = rawContent.replaceAll("&amp;amp;amp;amp;lt;p&amp;amp;amp;amp;gt;Your browser does not support iframes. &amp;amp;amp;amp;lt;/p&amp;amp;amp;amp;gt;", "Iframe not supported");
 //			Document document = Jsoup.parse(rawContent);
 //			removeNestedTags(document);
 //			this.content = document.body().html();
@@ -517,9 +518,9 @@ public class DocBookWrapper {
 				}
 			}
 
-			//this.transformToHTML(workspace, timestamp);
-			createDocBookDir();
-			retrieveDocBook(workspace, timestamp);
+			//createDocBookDir();
+			//retrieveDocBook(workspace, timestamp);
+			this.transformToHTML(workspace, timestamp);
 			tableToCSV();
 			String zipPath = this.zipHtml();
 			if(zipPath == null || zipPath.isEmpty()) throw new Exception("Failed to zip files and resources!");
