@@ -2888,6 +2888,13 @@ public class ModelPost extends AbstractJavaWebScript {
             String jobName = "Load Job " + projectId + ".json";
             EmsScriptNode jobNode = ActionUtil.getOrCreateJob(siteNode, jobName, "ems:Job", status, response);
 
+            if (jobNode == null) {
+                String errorMsg = 
+                        String.format("Could not create JSON file for background load: site[%s]  job[%s]",
+                                      siteNode.getName(), jobName);
+                log( Level.ERROR, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, errorMsg );
+                return;
+            }
             // write out the json
             JSONObject json = //JSONObject.make( 
                     (JSONObject)req.parseContent();// );

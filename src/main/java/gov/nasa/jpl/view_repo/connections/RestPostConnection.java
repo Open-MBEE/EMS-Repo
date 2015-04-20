@@ -32,12 +32,18 @@ public class RestPostConnection extends AbstractConnection {
         RestPostConnection.uri = uri;
     }
     
+    public String getUri() {
+        return RestPostConnection.uri;
+    }
+    
     public boolean publish(JSONObject jsonObject, String dst) {
+        if (uri == null) return false;
         String msg = NodeUtil.jsonToString( jsonObject );
         return publish(msg, dst);
     }
     
     public boolean publish(String msg, String dst) {
+        if (uri == null) return false;
         boolean status = true;
         Client client = Client.create();
     
