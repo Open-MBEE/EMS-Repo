@@ -1811,6 +1811,7 @@ public class ModelPost extends AbstractJavaWebScript {
                 EmsScriptNode oldParent = nodeToUpdate.getOwningParent( null, nodeToUpdate.getWorkspace(), false, true );
                 EmsScriptNode newOldParent =
                         workspace.replicateWithParentFolders( oldParent );
+                // reifiedOwner is set below once nodeToUpdate is cloned
                 newOldParent.removeFromPropertyNodeRefs( "ems:ownedChildren",
                                                          nodeToUpdate.getNodeRef() );
 
@@ -1822,6 +1823,7 @@ public class ModelPost extends AbstractJavaWebScript {
                     EmsScriptNode oldNode = nodeToUpdate;
                     nodeToUpdate = nodeToUpdate.clone(parent);
                     nodeToUpdate.setWorkspace( workspace, oldNode.getNodeRef() );
+                    nodeToUpdate.setOwnerToReifiedNode( parent, workspace );
                 }
             }
         }
