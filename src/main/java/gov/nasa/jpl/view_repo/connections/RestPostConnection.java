@@ -105,4 +105,19 @@ public class RestPostConnection implements ConnectionInterface {
     public void setProjectId( String projectId ) {
         this.projectId = projectId;
     }
+
+    @Override
+    public JSONObject toJson() {
+        JSONObject json = new JSONObject();
+        json.put( "uri", uri );
+        return json;
+    }
+    
+    @Override
+    public void ingestJson(JSONObject json) {
+        if (json.has( "uri" )) {
+            uri = json.isNull( "uri" ) ? null : json.getString( "uri" );
+        }
+    }
+
 }

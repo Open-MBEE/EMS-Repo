@@ -1,15 +1,23 @@
 package gov.nasa.jpl.view_repo.connections;
 
+import java.util.Hashtable;
+
 import gov.nasa.jpl.view_repo.util.NodeUtil;
 
 import javax.jms.Connection;
+import javax.jms.ConnectionFactory;
 import javax.jms.DeliveryMode;
 import javax.jms.Destination;
 import javax.jms.MessageProducer;
 import javax.jms.Session;
 import javax.jms.TextMessage;
+import javax.naming.Context;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
 
-import org.apache.activemq.ActiveMQConnectionFactory;
+
+
+//import org.apache.activemq.ActiveMQConnectionFactory;
 import org.apache.log4j.Logger;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -21,17 +29,44 @@ public class JmsConnection implements ConnectionInterface {
     private String workspace = null;
     private String projectId = null;
 
+    private static InitialContext ctx = null;
+    private static String ctxFactory = "org.apache.activemq.jndi.ActiveMQInitialContextFactory";
+    private static String connFactory = "ConnectionFactory";
+    private static String username = null;
+    private static String password = null;
+    private ConnectionFactory connectionFactory = null;
     
-    // static so Spring can configure URI for everything
-    private ActiveMQConnectionFactory connectionFactory = null;
     
     public JmsConnection() {
     }
     
-    protected void init() {
+    protected boolean init() {
         if (connectionFactory == null) {
-            connectionFactory = new ActiveMQConnectionFactory( uri );
+            Hashtable<String, String> properties = new Hashtable<String, String>();
+            properties.put(Context.INITIAL_CONTEXT_FACTORY, ctxFactory);
+            properties.put(Context.PROVIDER_URL, uri);
+            if (username != null && password != null) {
+                properties.put(Context.SECURITY_PRINCIPAL, username);
+                properties.put(Context.SECURITY_CREDENTIALS, password);
+            }
+
+            try {
+                ctx = new InitialContext(properties);
+            } catch (NamingException ne) {
+                ne.printStackTrace(System.err);
+                return false;
+            }
+
+            try {
+                connectionFactory = (ConnectionFactory) ctx.lookup(connFactory);
+            }
+            catch (NamingException ne) {
+                ne.printStackTrace(System.err);
+                return false;
+            }
         }
+        
+        return true;
     }
     
     @Override
@@ -56,7 +91,7 @@ public class JmsConnection implements ConnectionInterface {
     
     public boolean publishTopic(String msg, String topic) {
         if (connectionFactory == null) {
-            init();
+            if (init() == false) return false;
         }
         
         boolean status = true;
@@ -119,6 +154,53 @@ public class JmsConnection implements ConnectionInterface {
     @Override
     public void setProjectId( String projectId ) {
         this.projectId = projectId;
+    }
+
+    public static String getCtxFactory() {
+        return ctxFactory;
+    }
+
+    public static void setCtxFactory( String ctxFactory ) {
+        JmsConnection.ctxFactory = ctxFactory;
+    }
+
+    public static String getConnFactory() {
+        return connFactory;
+    }
+
+    public static void setConnFactory( String connFactory ) {
+        JmsConnection.connFactory = connFactory;
+    }
+    
+    @Override
+    public JSONObject toJson() {
+        JSONObject json = new JSONObject();
+        json.put( "uri", uri );
+        json.put( "connFactory", connFactory );
+        json.put( "ctxFactory", ctxFactory );
+        json.put( "password", password );
+        json.put( "username", username );
+        return json;
+    }
+
+    
+    @Override
+    public void ingestJson(JSONObject json) {
+        if (json.has( "uri" )) {
+            uri = json.isNull( "uri" ) ? null : json.getString( "uri" );
+        }
+        if (json.has( "connFactory" )) {
+            connFactory = json.isNull("connFactory") ? null : json.getString( "connFactory" );
+        }
+        if (json.has( "ctxFactory" )) {
+            ctxFactory = json.isNull("ctxFactory") ? null : json.getString( "ctxFactory" );
+        }
+        if (json.has( "password" )) {
+            password = json.isNull("password") ? null : json.getString( "password" );
+        }
+        if (json.has( "username" )) {
+            username = json.isNull("username") ? null : json.getString( "username" );
+        }
     }
 
 }

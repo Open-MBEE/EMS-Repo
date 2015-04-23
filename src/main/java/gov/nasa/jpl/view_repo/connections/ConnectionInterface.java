@@ -19,4 +19,8 @@ public interface ConnectionInterface {
      * @return
      */
     public boolean publish(JSONObject jsonObject, String destination);
+    
+    public JSONObject toJson();
+    
+    public void ingestJson(JSONObject json);
 }

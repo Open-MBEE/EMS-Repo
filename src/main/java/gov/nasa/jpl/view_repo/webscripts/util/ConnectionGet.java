@@ -10,6 +10,7 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.json.JSONObject;
 import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.DeclarativeWebScript;
 import org.springframework.extensions.webscripts.Status;
@@ -31,16 +32,16 @@ public class ConnectionGet extends DeclarativeWebScript {
             connection = new RestPostConnection();
         }
         
+        JSONObject json = new JSONObject();
         if (connection == null) {
-            model.put( "res", "connection not found" );
+            json.put( "msg", "connection not found" );
             status.setCode( HttpServletResponse.SC_NOT_FOUND );
         } else {
-            String msg = String.format("{\"msg\": \"%s uri is currently to %s.\"}", 
-                                       connection.getClass(), connection.getUri() );
-            model.put("res", msg);
+            json = connection.toJson();
             status.setCode( HttpServletResponse.SC_OK );
         }
 
+        model.put("res", json.toString());
         return model;
     }
 

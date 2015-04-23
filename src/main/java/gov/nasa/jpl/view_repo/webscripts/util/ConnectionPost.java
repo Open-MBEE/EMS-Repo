@@ -34,22 +34,17 @@ public class ConnectionPost extends DeclarativeWebScript {
             connection = new RestPostConnection();
         }
         
+        JSONObject jsonResponse = new JSONObject();
         if (connection == null) {
-            model.put( "res", "connection not found" );
+            jsonResponse.put( "msg", "connection not found" );
             status.setCode( HttpServletResponse.SC_NOT_FOUND );
         } else {
-            if (json.has( "uri" )) {
-                connection.setUri(json.getString( "uri" ));
-            } else {
-                connection.setUri( null );
-            }
-
-            String msg = String.format("{\"msg\": \"%s uri set to %s.\"}", 
-                                       connection.getClass(), connection.getUri() );
-            model.put("res", msg);
+            connection.ingestJson( json );
+            jsonResponse = connection.toJson();
             status.setCode( HttpServletResponse.SC_OK );
         }
-        
+        model.put("res", jsonResponse.toString());
+
         return model;
     }
 
