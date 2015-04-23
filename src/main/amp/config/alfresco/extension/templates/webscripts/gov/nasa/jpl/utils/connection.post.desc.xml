@@ -1,9 +1,11 @@
 <webscript>
-	<shortname>configure jms post</shortname>
+	<shortname>configure connection</shortname>
     <description>
-    	configure the jms connection to dea
+    	configure connection
 	</description>
-  	<url>/jmsconnection</url>
+    <url>/connection/jms</url>
+    <url>/connection/jmswl</url>
+    <url>/connection/rest</url>
   	<format default="json">argument</format>
   	<authentication>user</authentication>
   	<transaction>required</transaction>

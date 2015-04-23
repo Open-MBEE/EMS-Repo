@@ -1,9 +1,11 @@
 <webscript>
-	<shortname>configure rest get</shortname>
+	<shortname>get connection details</shortname>
     <description>
-    	get the rest post connection configuration to dea
+    	get connection details
 	</description>
-  	<url>/restpostconnection</url>
+  	<url>/connection/jms</url>
+  	<url>/connection/jmswl</url>
+  	<url>/connection/rest</url>
   	<format default="json">argument</format>
   	<authentication>user</authentication>
   	<transaction>required</transaction>

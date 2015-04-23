@@ -2,6 +2,7 @@ package gov.nasa.jpl.view_repo.util;
 
 import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.connections.JmsConnection;
+import gov.nasa.jpl.view_repo.connections.JmsWLConnection;
 import gov.nasa.jpl.view_repo.connections.RestPostConnection;
 import gov.nasa.jpl.view_repo.webscripts.HostnameGet;
 import gov.nasa.jpl.view_repo.webscripts.WebScriptUtil;
@@ -16,13 +17,10 @@ import java.util.Set;
 
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
-import org.alfresco.service.cmr.action.Action;
-import org.alfresco.service.cmr.action.ActionService;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.apache.log4j.Logger;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.springframework.extensions.webscripts.Status;
 
 
 /**
@@ -38,6 +36,7 @@ public class CommitUtil {
     }
 
     private static JmsConnection jmsConnection = null;
+    private static JmsWLConnection jmsWLConnection = null;
     private static RestPostConnection restConnection = null;
     private static ServiceRegistry services = null;
 
@@ -46,11 +45,16 @@ public class CommitUtil {
         CommitUtil.jmsConnection = jmsConnection;
     }
 
+    public static void setJmsWLConnection( JmsWLConnection jmsWLConnection ) {
+        if (logger.isInfoEnabled()) logger.info( "Setting jmswl" );
+        CommitUtil.jmsWLConnection = jmsWLConnection;
+    }
+
     public static void setRestConnection(RestPostConnection restConnection) {
         if (logger.isInfoEnabled()) logger.info( "Setting rest" );
         CommitUtil.restConnection = restConnection;
     }
-
+    
     public static void setServices(ServiceRegistry services) {
         if (logger.isInfoEnabled()) logger.info( "Setting services" );
         CommitUtil.services = services;
@@ -723,6 +727,11 @@ public class CommitUtil {
             jmsConnection.setProjectId( projectId );
             jmsStatus = jmsConnection.publish( deltaJson );
         }
+        if (jmsWLConnection != null) { 
+            jmsWLConnection.setWorkspace( workspaceId );
+            jmsWLConnection.setProjectId( projectId );
+            jmsStatus = jmsWLConnection.publish( deltaJson );
+        }
         if (restConnection != null) {
             try {
                 restStatus = restConnection.publish( deltaJson, new HostnameGet().getAlfrescoHost());
@@ -755,4 +764,5 @@ public class CommitUtil {
 //        return jmsStatus;
         return true;
     }
+
 }
