@@ -13,29 +13,17 @@ import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.client.WebResource.Builder;
 
-public class RestPostConnection extends AbstractConnection {
-    static Logger logger = Logger.getLogger(RestPostConnection.class);
-
+public class RestPostConnection implements ConnectionInterface {
+    private static Logger logger = Logger.getLogger(RestPostConnection.class);
     private long sequenceId = 1;
-    
-    // static so Spring can configure URI for everything
-    private static String uri = "https://orasoa-dev07.jpl.nasa.gov:8121/PublishMessageRestful"; // TODO: Springify
-    
+    private static String uri = null;
+    private String workspace = null;
+    private String projectId = null;
+        
     public RestPostConnection() {
         
     }
-    
-    public void setUri(String uri) {
-        if (logger.isInfoEnabled()) {
-            logger.info("uri set to: " + uri);
-        }
-        RestPostConnection.uri = uri;
-    }
-    
-    public String getUri() {
-        return RestPostConnection.uri;
-    }
-    
+        
     public boolean publish(JSONObject jsonObject, String dst) {
         if (uri == null) return false;
         String msg = NodeUtil.jsonToString( jsonObject );
@@ -96,5 +84,25 @@ public class RestPostConnection extends AbstractConnection {
        }
        
        return builder;
+    }
+
+    @Override
+    public String getUri() {
+        return uri;
+    }
+    
+    @Override
+    public void setUri( String newUri ) {
+        uri = newUri;
+    }
+
+    @Override
+    public void setWorkspace( String workspace ) {
+        this.workspace = workspace;
+    }
+
+    @Override
+    public void setProjectId( String projectId ) {
+        this.projectId = projectId;
     }
 }

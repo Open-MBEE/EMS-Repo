@@ -3,6 +3,8 @@ package gov.nasa.jpl.view_repo.connections;
 import org.json.JSONObject;
 
 public interface ConnectionInterface {
+    public String getUri();
+    
     public void setUri(String uri);
     
     public void setWorkspace(String workspace);

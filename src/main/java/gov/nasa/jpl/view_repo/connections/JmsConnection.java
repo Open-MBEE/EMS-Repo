@@ -9,31 +9,23 @@ import javax.jms.MessageProducer;
 import javax.jms.Session;
 import javax.jms.TextMessage;
 
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.apache.activemq.ActiveMQConnectionFactory;
 import org.apache.log4j.Logger;
+import org.json.JSONException;
+import org.json.JSONObject;
 
-public class JmsConnection extends AbstractConnection {
-    static Logger logger = Logger.getLogger(JmsConnection.class);
-    long sequenceId = 0;
+public class JmsConnection implements ConnectionInterface {
+    private static Logger logger = Logger.getLogger(JmsConnection.class);
+    private long sequenceId = 0;
+    private static String uri = null;
+    private String workspace = null;
+    private String projectId = null;
+
     
     // static so Spring can configure URI for everything
-    private static String uri = "tcp://localhost:61616";
     private ActiveMQConnectionFactory connectionFactory = null;
     
     public JmsConnection() {
-    }
-
-    public void setUri(String uri) {
-        if (logger.isInfoEnabled()) {
-            logger.info("uri set to: " + uri);
-        }
-        JmsConnection.uri = uri;
-    }
-    
-    public String getUri() {
-        return JmsConnection.uri;
     }
     
     protected void init() {
@@ -108,4 +100,25 @@ public class JmsConnection extends AbstractConnection {
         
         return status;
     }
+    
+    @Override
+    public String getUri() {
+        return uri;
+    }
+    
+    @Override
+    public void setUri( String newUri ) {
+        uri = newUri;
+    }
+
+    @Override
+    public void setWorkspace( String workspace ) {
+        this.workspace = workspace;
+    }
+
+    @Override
+    public void setProjectId( String projectId ) {
+        this.projectId = projectId;
+    }
+
 }

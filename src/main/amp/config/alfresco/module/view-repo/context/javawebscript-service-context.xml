@@ -198,22 +198,13 @@
     </bean>
     
     <!-- Connection configuration services -->
-    <bean id="webscript.gov.nasa.jpl.utils.jmsconnection.get"
-        class="gov.nasa.jpl.view_repo.webscripts.util.JmsConnectionGet" parent="webscript"
+    <bean id="webscript.gov.nasa.jpl.utils.connection.get"
+        class="gov.nasa.jpl.view_repo.webscripts.util.ConnectionGet" parent="webscript"
         singleton="false"/>
 
-    <bean id="webscript.gov.nasa.jpl.utils.jmsconnection.post"
-        class="gov.nasa.jpl.view_repo.webscripts.util.JmsConnectionPost" parent="webscript"
+    <bean id="webscript.gov.nasa.jpl.utils.connection.post"
+        class="gov.nasa.jpl.view_repo.webscripts.util.ConnectionPost" parent="webscript"
         singleton="false"/>
-
-    <bean id="webscript.gov.nasa.jpl.utils.restconnection.get"
-        class="gov.nasa.jpl.view_repo.webscripts.util.RestConnectionGet" parent="webscript"
-        singleton="false"/>
-
-    <bean id="webscript.gov.nasa.jpl.utils.restconnection.post"
-        class="gov.nasa.jpl.view_repo.webscripts.util.RestConnectionPost" parent="webscript"
-        singleton="false"/>
-
     
 	<!-- Create proxies for the service beans: Interceptors don't work... -->
 	<!-- 
