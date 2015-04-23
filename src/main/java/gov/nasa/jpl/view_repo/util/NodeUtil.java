@@ -174,7 +174,7 @@ public class NodeUtil {
         return outsideTransactionStrackTrace.get( Thread.currentThread().getId() );
     }
 
-    public static boolean doFullCaching = false;
+    public static boolean doFullCaching = true;
     public static boolean doSimpleCaching = true;
     public static boolean doHeisenCheck = true;
     public static boolean doVersionCaching = false; // turn this off by default
@@ -980,6 +980,8 @@ public class NodeUtil {
         // look in cache first
         boolean useSimpleCache = false;
         boolean useFullCache = false;
+        boolean usedSimpleCache = false;
+        boolean usedFullCache = false;
         if ( doSimpleCaching || doFullCaching ) {
 
             boolean idSearch = false;
@@ -1020,6 +1022,7 @@ public class NodeUtil {
                 if (services.getPermissionService().hasPermission( ref, PermissionService.READ ) == AccessStatus.ALLOWED) {
                     if ( exists(ref ) ) {
                         results = Utils.newList( ref );
+                        usedSimpleCache = true;
                     }
                 }
             } else if ( doFullCaching && useFullCache ) {
@@ -1027,6 +1030,7 @@ public class NodeUtil {
                                              workspace, onlyThisWorkspace,
                                              dateTime, justFirst, exactMatch,
                                              includeDeleted, siteName );
+                if ( !Utils.isNullOrEmpty( results ) ) usedFullCache = true;
             }
         }
 
@@ -1049,11 +1053,14 @@ public class NodeUtil {
                     nodeRefs = results;
                 }
                 else {
-                    nodeRefs = filterResults( results, specifier, prefix,
-                                              useSimpleCache, ignoreWorkspace,
-                                              workspace, onlyThisWorkspace,
-                                              dateTime, justFirst, exactMatch,
-                                              services, includeDeleted, siteName );
+                    //if ( !usedFullCache && !usedSimpleCache ) {
+                        nodeRefs = filterResults( results, specifier, prefix,
+                                                  usedFullCache || usedSimpleCache,
+                                                  ignoreWorkspace,
+                                                  workspace, onlyThisWorkspace,
+                                                  dateTime, justFirst, exactMatch,
+                                                  services, includeDeleted, siteName );
+                    //}
                 }
 
                 // Always want to check for deleted nodes, even if using the cache:
@@ -1067,6 +1074,7 @@ public class NodeUtil {
 
 
             // Update cache with results
+            boolean putInFullCache = false;
             if ( ( doSimpleCaching || doFullCaching ) && caching
                  && !Utils.isNullOrEmpty( nodeRefs ) ) {
                 if ( useSimpleCache && doSimpleCaching ) {
@@ -1080,8 +1088,14 @@ public class NodeUtil {
                     putInCache( specifier, prefix, ignoreWorkspace, workspace,
                                 onlyThisWorkspace, dateTime, justFirst,
                                 exactMatch, includeDeleted, siteName, nodeRefs );
+                    putInFullCache = true;
                 }
             }
+            
+            // check permissions on results
+            //boolean hasPermissionsToAll = true;
+            nodeRefs = filterForPermissions(nodeRefs, PermissionService.READ, putInFullCache);
+            
         } finally {
             if ( Debug.isOn() && !Debug.isOn() ) {
                 if (results != null) {
@@ -1111,6 +1125,30 @@ public class NodeUtil {
         return nodeRefs;
     }
 
+    public static ArrayList< NodeRef >
+            filterForPermissions( ArrayList< NodeRef > nodeRefs,
+                                  String permissionType, boolean copyIfModified ) {
+        if (!Utils.isNullOrEmpty( nodeRefs )) {
+            ArrayList<NodeRef> noReadPermissions = null;
+            for ( NodeRef r : nodeRefs ) {
+                EmsScriptNode esn = new EmsScriptNode( r, getServices() );
+                if ( !esn.checkPermissions( PermissionService.READ ) ) {
+                    if ( noReadPermissions == null ) {
+                        noReadPermissions = new ArrayList< NodeRef >();
+                    }
+                    noReadPermissions.add( r );
+                }
+            }
+            if ( !Utils.isNullOrEmpty( noReadPermissions )) {
+                // make a copy if original list should be unaffected
+                if ( copyIfModified ) {
+                    nodeRefs = new ArrayList< NodeRef >( nodeRefs );
+                }
+                nodeRefs.removeAll( noReadPermissions );
+            }
+        }
+        return nodeRefs;
+    }
     public static ArrayList<NodeRef> fixVersions( ArrayList<NodeRef> nodeRefs ) {
         // check for alfresco bug where SpacesStore ref is the wrong version
         //if ( !doVersionCaching ) return nodeRefs;
@@ -1155,9 +1193,27 @@ public class NodeUtil {
         return d1.compareTo( d2 );
     }
 
+    /**
+     * @param results input list of results to be filtered
+     * @param noReadPermission output list of results for which the user has no read permissions
+     * @param specifier
+     * @param prefix
+     * @param usedCache whether the results came out of the cache, which means the results have been pre-filtered
+     * @param ignoreWorkspace
+     * @param workspace
+     * @param onlyThisWorkspace
+     * @param dateTime
+     * @param justFirst
+     * @param exactMatch
+     * @param services
+     * @param includeDeleted
+     * @param siteName
+     * @return the new results filtered except for permissions
+     */
     protected static ArrayList<NodeRef> filterResults(ArrayList<NodeRef> results,
+                                                      //ArrayList<NodeRef> noReadPermission,
                                                       String specifier, String prefix,
-                                                      boolean useSimpleCache,
+                                                      boolean usedCache,
                                                       boolean ignoreWorkspace,
                                                       WorkspaceNode workspace,
                                                       boolean onlyThisWorkspace,
@@ -1175,15 +1231,18 @@ public class NodeUtil {
             EmsScriptNode esn = new EmsScriptNode( nr, getServices() );
 
             if ( Debug.isOn() && !Debug.isOn() ) {
-                Debug.outln( "findNodeRefsByType(" + specifier + ", " + prefix + ", " + workspace + ", " + dateTime + ", justFirst=" + justFirst + ", exactMatch=" + exactMatch + "): candidate " + esn.getWorkspaceName() + "::" + esn.getName() );
+                Debug.outln( "findNodeRefsByType(" + specifier + ", " + prefix +
+                             ", " + workspace + ", " + dateTime + ", justFirst=" +
+                             justFirst + ", exactMatch=" + exactMatch + "): candidate" +
+                             " " + esn.getWorkspaceName() + "::" + esn.getName() );
             }
 
             // Get the version for the date/time if specified.
-            if ( dateTime != null ) {
-                nr = getNodeRefAtTime( nr, dateTime );
+            if ( dateTime != null && !usedCache ) {
+                NodeRef nrNew = getNodeRefAtTime( nr, dateTime );
 
                 // null check
-                if ( nr == null ) {
+                if ( nrNew == null ) {
                     if ( Debug.isOn() ) {
                         Debug.outln( "findNodeRefsByType(): no nodeRef at time " + dateTime );
                     }
@@ -1230,9 +1289,9 @@ public class NodeUtil {
 
             // Make sure we didn't just get a near match.
             try {
-                if ( !esn.checkPermissions( PermissionService.READ ) ) {
-                    continue;
-                }
+//                if ( !esn.checkPermissions( PermissionService.READ ) ) {
+//                    continue;
+//                }
                 boolean match = true;
                 if ( exactMatch ) {
                     String acmType =
