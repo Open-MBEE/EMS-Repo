@@ -1022,18 +1022,15 @@ public class NodeUtil {
 
             if ( useSimpleCache && doSimpleCaching ) {
                 NodeRef ref = simpleCache.get( specifier );
-//                if (services.getPermissionService().hasPermission( ref, PermissionService.READ ) == AccessStatus.ALLOWED) {
                     if ( exists(ref ) ) {
                         results = Utils.newList( ref );
                         usedSimpleCache = true;
                     }
-//                }
             } else if ( doFullCaching && useFullCache ) {
                 results = getCachedElements( specifier, prefix, ignoreWorkspace,
                                              workspace, onlyThisWorkspace,
                                              dateTime, justFirst, exactMatch,
                                              includeDeleted, siteName );
-//                if ( !Utils.isNullOrEmpty( results ) ) usedFullCache = true;
                 if ( results != null && ( addNullEntriesToFullCache || !results.isEmpty() ) ) usedFullCache = true;
             }
         }
@@ -1041,7 +1038,6 @@ public class NodeUtil {
         boolean wasCached = false;
         boolean caching = false;
         try {
-//            if( !Utils.isNullOrEmpty( results ) ) {
             if ( results != null && ( addNullEntriesToFullCache || !results.isEmpty() ) ) {
                 wasCached = true; // doCaching must be true here
             } else {
@@ -1054,18 +1050,20 @@ public class NodeUtil {
                 if ( doHeisenCheck ) {
                     results = fixVersions( results );
                 }
+                // In the case that dateTime is null and there are cache results,
+                // it must be the case that the search is on an id in the master
+                // workspace.  The assumption here is that the results have been
+                // pre-filtered and need not be re-filtered.
                 if ( wasCached && dateTime == null ) {
                     nodeRefs = results;
                 }
                 else {
-                    //if ( !usedFullCache && !usedSimpleCache ) {
-                        nodeRefs = filterResults( results, specifier, prefix,
-                                                  usedFullCache || usedSimpleCache,
-                                                  ignoreWorkspace,
-                                                  workspace, onlyThisWorkspace,
-                                                  dateTime, justFirst, exactMatch,
-                                                  services, includeDeleted, siteName );
-                    //}
+                    nodeRefs = filterResults( results, specifier, prefix,
+                                              usedFullCache || usedSimpleCache,
+                                              ignoreWorkspace,
+                                              workspace, onlyThisWorkspace,
+                                              dateTime, justFirst, exactMatch,
+                                              services, includeDeleted, siteName );
                 }
 
                 // Always want to check for deleted nodes, even if using the cache:
@@ -1081,7 +1079,6 @@ public class NodeUtil {
             // Update cache with results
             boolean putInFullCache = false;
             if ( ( doSimpleCaching || doFullCaching ) && caching
-//                    && !Utils.isNullOrEmpty( nodeRefs ) ) {
                     && nodeRefs != null && (addNullEntriesToFullCache || !nodeRefs.isEmpty() ) ) {
                 if ( useSimpleCache && doSimpleCaching ) {
                     // only put in cache if size is 1 (otherwise can be give bad results)
@@ -1099,8 +1096,11 @@ public class NodeUtil {
                 }
             }
             
-            // check permissions on results
-            nodeRefs = filterForPermissions(nodeRefs, PermissionService.READ, putInFullCache);
+            // Check permissions on results. This is now done after the cache
+            // operations so that different users will get the appropriate
+            // results without having user-specific entries in the cache.
+            nodeRefs = filterForPermissions( nodeRefs, PermissionService.READ,
+                                             putInFullCache );
             
         } finally {
             if ( Debug.isOn() && !Debug.isOn() ) {
@@ -1109,18 +1109,13 @@ public class NodeUtil {
                             EmsScriptNode.toEmsScriptNodeList( nodeRefs,
                                                                services, null,
                                                                null );
-                    Debug.outln( "findNodeRefsByType(" + specifier + ", " + prefix + ", " + workspace + ", " + dateTime + ", justFirst=" + justFirst + ", exactMatch=" + exactMatch + "): returning " + set );
+                    Debug.outln( "findNodeRefsByType(" + specifier + ", "
+                                 + prefix + ", " + workspace + ", " + dateTime
+                                 + ", justFirst=" + justFirst + ", exactMatch="
+                                 + exactMatch + "): returning " + set );
                 }
             }
         }
-//        // If we found a NodeRef but still have null (maybe because a version
-//        // didn't exist at the time), try again for the latest.
-//        if ( nodeRefs.isEmpty()//nodeRef == null
-//                && dateTime != null && gotResults) {
-//            nodeRefs = findNodeRefsByType( specifier, prefix, null, justFirst,
-//                                           exactMatch, services );
-//            //nodeRef = findNodeRefByType( specifier, prefix, null, services );
-//        }
 
         Timer.stopTimer(timerByType, "***** findNodeRefsByType(): time ", timeEvents);
 
@@ -1242,6 +1237,10 @@ public class NodeUtil {
             }
 
             // Get the version for the date/time if specified.
+            // This can be skipped if the results are from the cache by setting
+            // skipGetNodeRefAtTime = true.            
+            // REVIEW -- However, the rest of this method can't be skipped in
+            // this case. Why?
             if ( dateTime != null && (!skipGetNodeRefAtTime || !usedCache ) ) {
                 nr = getNodeRefAtTime( nr, dateTime );
 
@@ -1261,15 +1260,7 @@ public class NodeUtil {
             if ( esn != null && !esn.scriptNodeExists() ) {
                 continue;
             }
-//            if ( !esn.exists() ) {
-//                if ( !(includeDeleted && esn.isDeleted()) ) {
-//                    if ( Debug.isOn() ) {
-//                        System.out.println( "findNodeRefsByType(): element does not exist "
-//                                     + esn );
-//                    }
-//                    continue;
-//                }
-//            }
+
             try {
                 // Make sure it's in the right workspace.
                 if ( !ignoreWorkspace && esn != null ) {
@@ -1293,9 +1284,6 @@ public class NodeUtil {
 
             // Make sure we didn't just get a near match.
             try {
-//                if ( !esn.checkPermissions( PermissionService.READ ) ) {
-//                    continue;
-//                }
                 boolean match = true;
                 if ( exactMatch ) {
                     String acmType =
