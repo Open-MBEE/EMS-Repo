@@ -112,6 +112,39 @@
 				</property>
 			</properties>
 		</aspect>
+        <aspect name="sysml:HasMetatype">
+            <properties>
+                <property name="sysml:isMetatype">
+                    <type>d:boolean</type>
+                    <mandatory>false</mandatory>
+                    <index enabled="true">
+                        <atomic>false</atomic>
+                        <stored>false</stored>
+                        <tokenised>false</tokenised>
+                    </index>
+                </property>
+                <property name="sysml:metaclassTypes">
+                    <type>d:noderef</type>
+                    <mandatory>false</mandatory>
+                    <multiple>true</multiple>                 
+                    <index enabled="true">
+                        <atomic>false</atomic>
+                        <stored>false</stored>
+                        <tokenised>false</tokenised>
+                    </index>
+                </property>
+                <property name="sysml:appliedMetaclasses">
+                    <type>d:noderef</type>
+                    <mandatory>false</mandatory>
+                    <multiple>true</multiple>                 
+                    <index enabled="true">
+                        <atomic>false</atomic>
+                        <stored>false</stored>
+                        <tokenised>false</tokenised>
+                    </index>
+                </property>
+            </properties>
+        </aspect>
         <aspect name="sysml:Package">
             <properties>
                 <property name="sysml:isSite">
@@ -983,6 +1016,10 @@
             <parent>sysml:Connector</parent>
         </aspect>
         <aspect name="sysml:Untyped">
+        </aspect>
+        <aspect name="sysml:Metaclass">
+        </aspect>
+        <aspect name="sysml:Stereotype">
         </aspect>
 	</aspects>
 </model>
