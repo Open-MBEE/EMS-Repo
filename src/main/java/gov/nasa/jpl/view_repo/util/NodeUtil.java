@@ -183,7 +183,7 @@ public class NodeUtil {
     public static boolean doJsonDeepCaching = false;
     public static boolean doJsonStringCaching = false;
     
-    public static boolean addNullEntriesToFullCache = false; // doesn't work
+    public static boolean addEmptyEntriesToFullCache = false;
     public static boolean skipGetNodeRefAtTime = true;
     
     // global flag that is enabled once heisenbug is seen, so it will email admins the first time heisenbug is seen
@@ -985,9 +985,12 @@ public class NodeUtil {
         boolean useFullCache = false;
         boolean usedSimpleCache = false;
         boolean usedFullCache = false;
+        boolean emptyEntriesInFullCacheOk = true;
         if ( doSimpleCaching || doFullCaching ) {
 
             boolean idSearch = false;
+            boolean dateInPast = ( dateTime != null && dateTime.before( new Date() ) );
+            
             // Only use the simple cache if in the master workspace, just getting a single node, not
             // looking for deleted nodes, and searching by cm:name or sysml:id.  Otherwise, we
             // may want multiple nodes in our results, or they could have changed since we added
@@ -1015,11 +1018,13 @@ public class NodeUtil {
             // entries for dateTime == null; a purge of these entries may be
             // necessary.
             useFullCache = doFullCaching && !useSimpleCache &&
-                           ( ( dateTime != null && dateTime.before( new Date() ) ) ||
+                           ( dateInPast ||
                              ( !ignoreWorkspace &&
                                ( workspace == null || onlyThisWorkspace ) &&
                                ( idSearch = isIdSearch(prefix, idSearch) ) ) );
-
+            
+            emptyEntriesInFullCacheOk = addEmptyEntriesToFullCache && useFullCache && dateInPast;
+            
             if ( useSimpleCache && doSimpleCaching ) {
                 NodeRef ref = simpleCache.get( specifier );
                     if ( exists(ref ) ) {
@@ -1031,14 +1036,14 @@ public class NodeUtil {
                                              workspace, onlyThisWorkspace,
                                              dateTime, justFirst, exactMatch,
                                              includeDeleted, siteName );
-                if ( results != null && ( addNullEntriesToFullCache || !results.isEmpty() ) ) usedFullCache = true;
+                if ( results != null && ( emptyEntriesInFullCacheOk || !results.isEmpty() ) ) usedFullCache = true;
             }
         }
 
         boolean wasCached = false;
         boolean caching = false;
         try {
-            if ( results != null && ( addNullEntriesToFullCache || !results.isEmpty() ) ) {
+            if ( results != null && ( emptyEntriesInFullCacheOk || !results.isEmpty() ) ) {
                 wasCached = true; // doCaching must be true here
             } else {
                 results = findNodeRefsByType( specifier, prefix, services );
@@ -1079,7 +1084,7 @@ public class NodeUtil {
             // Update cache with results
             boolean putInFullCache = false;
             if ( ( doSimpleCaching || doFullCaching ) && caching
-                    && nodeRefs != null && (addNullEntriesToFullCache || !nodeRefs.isEmpty() ) ) {
+                    && nodeRefs != null && (emptyEntriesInFullCacheOk || !nodeRefs.isEmpty() ) ) {
                 if ( useSimpleCache && doSimpleCaching ) {
                     // only put in cache if size is 1 (otherwise can be give bad results)
                     // force the user to filter
