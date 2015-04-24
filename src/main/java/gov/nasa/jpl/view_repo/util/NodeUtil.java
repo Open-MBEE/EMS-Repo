@@ -183,8 +183,8 @@ public class NodeUtil {
     public static boolean doJsonDeepCaching = false;
     public static boolean doJsonStringCaching = false;
     
-    public static boolean skipGetNodeRefAtTime = false;
-    
+    public static boolean addNullEntriesToFullCache = false; // doesn't work
+    public static boolean skipGetNodeRefAtTime = true;
     
     // global flag that is enabled once heisenbug is seen, so it will email admins the first time heisenbug is seen
     public static boolean heisenbugSeen = false;
@@ -1033,16 +1033,16 @@ public class NodeUtil {
                                              workspace, onlyThisWorkspace,
                                              dateTime, justFirst, exactMatch,
                                              includeDeleted, siteName );
-                if ( !Utils.isNullOrEmpty( results ) ) usedFullCache = true;
-//                if ( results != null ) usedFullCache = true;
+//                if ( !Utils.isNullOrEmpty( results ) ) usedFullCache = true;
+                if ( results != null && ( addNullEntriesToFullCache || !results.isEmpty() ) ) usedFullCache = true;
             }
         }
 
         boolean wasCached = false;
         boolean caching = false;
         try {
-            if( !Utils.isNullOrEmpty( results ) ) {
-            //if ( results != null ) {
+//            if( !Utils.isNullOrEmpty( results ) ) {
+            if ( results != null && ( addNullEntriesToFullCache || !results.isEmpty() ) ) {
                 wasCached = true; // doCaching must be true here
             } else {
                 results = findNodeRefsByType( specifier, prefix, services );
@@ -1081,12 +1081,12 @@ public class NodeUtil {
             // Update cache with results
             boolean putInFullCache = false;
             if ( ( doSimpleCaching || doFullCaching ) && caching
-                    && !Utils.isNullOrEmpty( nodeRefs ) ) {
-//                    && nodeRefs != null ) {
+//                    && !Utils.isNullOrEmpty( nodeRefs ) ) {
+                    && nodeRefs != null && (addNullEntriesToFullCache || !nodeRefs.isEmpty() ) ) {
                 if ( useSimpleCache && doSimpleCaching ) {
                     // only put in cache if size is 1 (otherwise can be give bad results)
                     // force the user to filter
-                    if (//nodeRefs != null && 
+                    if ( nodeRefs != null && 
                             nodeRefs.size() == 1) {
                         NodeRef r = nodeRefs.get( 0 );
                         simpleCache.put( specifier, r );
@@ -1100,12 +1100,7 @@ public class NodeUtil {
             }
             
             // check permissions on results
-            //boolean hasPermissionsToAll = true;
-//            if ( useSimpleCache && doSimpleCaching ) {
-////                // already checked permissions
-////            } else {
-                nodeRefs = filterForPermissions(nodeRefs, PermissionService.READ, putInFullCache);
-//            }
+            nodeRefs = filterForPermissions(nodeRefs, PermissionService.READ, putInFullCache);
             
         } finally {
             if ( Debug.isOn() && !Debug.isOn() ) {
@@ -1206,7 +1201,6 @@ public class NodeUtil {
 
     /**
      * @param results input list of results to be filtered
-     * @param noReadPermission output list of results for which the user has no read permissions
      * @param specifier
      * @param prefix
      * @param usedCache whether the results came out of the cache, which means the results have been pre-filtered
@@ -1222,7 +1216,6 @@ public class NodeUtil {
      * @return the new results filtered except for permissions
      */
     protected static ArrayList<NodeRef> filterResults(ArrayList<NodeRef> results,
-                                                      //ArrayList<NodeRef> noReadPermission,
                                                       String specifier, String prefix,
                                                       boolean usedCache,
                                                       boolean ignoreWorkspace,
@@ -1250,10 +1243,10 @@ public class NodeUtil {
 
             // Get the version for the date/time if specified.
             if ( dateTime != null && (!skipGetNodeRefAtTime || !usedCache ) ) {
-                NodeRef nrNew = getNodeRefAtTime( nr, dateTime );
+                nr = getNodeRefAtTime( nr, dateTime );
 
                 // null check
-                if ( nrNew == null ) {
+                if ( nr == null ) {
                     if ( Debug.isOn() ) {
                         Debug.outln( "findNodeRefsByType(): no nodeRef at time " + dateTime );
                     }
