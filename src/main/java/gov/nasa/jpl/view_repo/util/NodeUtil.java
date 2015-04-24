@@ -183,6 +183,9 @@ public class NodeUtil {
     public static boolean doJsonDeepCaching = false;
     public static boolean doJsonStringCaching = false;
     
+    public static boolean skipGetNodeRefAtTime = false;
+    
+    
     // global flag that is enabled once heisenbug is seen, so it will email admins the first time heisenbug is seen
     public static boolean heisenbugSeen = false;
 
@@ -1019,25 +1022,27 @@ public class NodeUtil {
 
             if ( useSimpleCache && doSimpleCaching ) {
                 NodeRef ref = simpleCache.get( specifier );
-                if (services.getPermissionService().hasPermission( ref, PermissionService.READ ) == AccessStatus.ALLOWED) {
+//                if (services.getPermissionService().hasPermission( ref, PermissionService.READ ) == AccessStatus.ALLOWED) {
                     if ( exists(ref ) ) {
                         results = Utils.newList( ref );
                         usedSimpleCache = true;
                     }
-                }
+//                }
             } else if ( doFullCaching && useFullCache ) {
                 results = getCachedElements( specifier, prefix, ignoreWorkspace,
                                              workspace, onlyThisWorkspace,
                                              dateTime, justFirst, exactMatch,
                                              includeDeleted, siteName );
                 if ( !Utils.isNullOrEmpty( results ) ) usedFullCache = true;
+//                if ( results != null ) usedFullCache = true;
             }
         }
 
         boolean wasCached = false;
         boolean caching = false;
         try {
-            if ( !Utils.isNullOrEmpty( results ) ) {
+            if( !Utils.isNullOrEmpty( results ) ) {
+            //if ( results != null ) {
                 wasCached = true; // doCaching must be true here
             } else {
                 results = findNodeRefsByType( specifier, prefix, services );
@@ -1076,11 +1081,13 @@ public class NodeUtil {
             // Update cache with results
             boolean putInFullCache = false;
             if ( ( doSimpleCaching || doFullCaching ) && caching
-                 && !Utils.isNullOrEmpty( nodeRefs ) ) {
+                    && !Utils.isNullOrEmpty( nodeRefs ) ) {
+//                    && nodeRefs != null ) {
                 if ( useSimpleCache && doSimpleCaching ) {
                     // only put in cache if size is 1 (otherwise can be give bad results)
                     // force the user to filter
-                    if (nodeRefs.size() == 1) {
+                    if (//nodeRefs != null && 
+                            nodeRefs.size() == 1) {
                         NodeRef r = nodeRefs.get( 0 );
                         simpleCache.put( specifier, r );
                     }
@@ -1094,7 +1101,11 @@ public class NodeUtil {
             
             // check permissions on results
             //boolean hasPermissionsToAll = true;
-            nodeRefs = filterForPermissions(nodeRefs, PermissionService.READ, putInFullCache);
+//            if ( useSimpleCache && doSimpleCaching ) {
+////                // already checked permissions
+////            } else {
+                nodeRefs = filterForPermissions(nodeRefs, PermissionService.READ, putInFullCache);
+//            }
             
         } finally {
             if ( Debug.isOn() && !Debug.isOn() ) {
@@ -1238,7 +1249,7 @@ public class NodeUtil {
             }
 
             // Get the version for the date/time if specified.
-            if ( dateTime != null && !usedCache ) {
+            if ( dateTime != null && (!skipGetNodeRefAtTime || !usedCache ) ) {
                 NodeRef nrNew = getNodeRefAtTime( nr, dateTime );
 
                 // null check
