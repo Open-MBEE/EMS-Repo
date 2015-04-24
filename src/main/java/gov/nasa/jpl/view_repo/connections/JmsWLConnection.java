@@ -199,7 +199,6 @@ public class JmsWLConnection implements ConnectionInterface {
     public void setProjectId( String projectId ) {
         this.projectId = projectId;
     }
-
     
     @Override
     public JSONObject toJson() {

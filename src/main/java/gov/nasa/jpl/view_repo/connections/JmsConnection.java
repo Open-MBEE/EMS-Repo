@@ -15,9 +15,7 @@ import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
-
-
-//import org.apache.activemq.ActiveMQConnectionFactory;
+import org.alfresco.service.ServiceRegistry;
 import org.apache.log4j.Logger;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -34,10 +32,19 @@ public class JmsConnection implements ConnectionInterface {
     private static String connFactory = "ConnectionFactory";
     private static String username = null;
     private static String password = null;
+    private static String topicName = "master";
     private ConnectionFactory connectionFactory = null;
-    
-    
+    private static String hostname = null;
+    private static ServiceRegistry services;
+        
     public JmsConnection() {
+    }
+    
+    protected String getHostname() {
+        if (hostname == null) {
+            hostname = services.getSysAdminParams().getAlfrescoHost();
+        }
+        return hostname;
     }
     
     protected boolean init() {
@@ -86,7 +93,7 @@ public class JmsConnection implements ConnectionInterface {
     public boolean publish(JSONObject json) {
         if (uri == null) return false;
         // topic is always the same since we're using metadata for workspaces now
-        return publish( json, "master" );
+        return publish( json, topicName );
     }
     
     public boolean publishTopic(String msg, String topic) {
@@ -120,6 +127,11 @@ public class JmsConnection implements ConnectionInterface {
             if (projectId != null) {
                 message.setStringProperty( "projectId", projectId );
             }
+            message.setLongProperty( "MessageID", sequenceId++ );
+            message.setStringProperty( "MessageSource", getHostname() );
+            message.setStringProperty( "MessageRecipient", "TMS" );
+            message.setStringProperty( "MessageType", "DELTA" );
+
 
             // Tell the producer to send the message
             producer.send(message);
@@ -175,15 +187,18 @@ public class JmsConnection implements ConnectionInterface {
     @Override
     public JSONObject toJson() {
         JSONObject json = new JSONObject();
+        if (uri.contains( "localhost" )) {
+            uri = uri.replace("localhost", getHostname());
+        }
         json.put( "uri", uri );
         json.put( "connFactory", connFactory );
         json.put( "ctxFactory", ctxFactory );
         json.put( "password", password );
         json.put( "username", username );
+        json.put( "topicName", topicName );
         return json;
     }
 
-    
     @Override
     public void ingestJson(JSONObject json) {
         if (json.has( "uri" )) {
@@ -201,6 +216,13 @@ public class JmsConnection implements ConnectionInterface {
         if (json.has( "username" )) {
             username = json.isNull("username") ? null : json.getString( "username" );
         }
+        if (json.has( "topicName" )) {
+            topicName = json.isNull( "topicName" ) ? null : json.getString( "topicName" );
+        }
+    }
+
+    public void setServices( ServiceRegistry services ) {
+        JmsConnection.services = services;
     }
 
 }
