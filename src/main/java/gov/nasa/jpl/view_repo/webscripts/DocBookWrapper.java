@@ -199,10 +199,12 @@ public class DocBookWrapper {
 //	}
 
 	public String getContent(){
-		//this.dbBook.accept(this.dbSerializeVisitor);
 		if(this.content == null || this.content.isEmpty()){
 			this.dbSerializeVisitor.visit(dbBook);
 			String rawContent = this.dbSerializeVisitor.getOut();
+			Document document = Jsoup.parse(rawContent);
+			document = sanitize(document);
+			rawContent = document.body().html();
 			rawContent = rawContent.replaceAll("<ulink", "<link");
 			rawContent = rawContent.replaceAll("</ulink", "</link");
 			rawContent = rawContent.replaceAll("<utable", "<table");
@@ -218,7 +220,7 @@ public class DocBookWrapper {
 			rawContent = rawContent.replaceAll("(?i)</removalTag>", "");
 			rawContent = rawContent.replaceAll("(?i)<entry/>", "<entry><para>&#160;</para></entry>");
 			rawContent = rawContent.replaceAll("&amp;amp;amp;amp;lt;p&amp;amp;amp;amp;gt;Your browser does not support iframes. &amp;amp;amp;amp;lt;/p&amp;amp;amp;amp;gt;", "Iframe not supported");
-//			Document document = Jsoup.parse(rawContent);
+			
 //			removeNestedTags(document);
 //			this.content = document.body().html();
 //			rawContent = handleSpecialChars(rawContent);
@@ -228,6 +230,50 @@ public class DocBookWrapper {
 		return this.content;
 	}
 
+	private Document sanitize(Document document){
+		Element body = document.body();
+		Elements list = null;
+		boolean isSanitized = false;
+		//removes empty tags
+		while(!isSanitized){
+			isSanitized = true;
+			list = body.select("listitem");
+			list.addAll(body.select("itemizedlist"));
+			list.addAll(body.select("orderedlist"));
+			for(Element elm : list){
+				if(elm.html().trim().length() == 0){
+					elm.remove();
+					isSanitized = false;
+				}
+			}
+		}
+		
+		// removes <itemizedlist>/<orderedlist> without <listitem> children
+		isSanitized = false;
+    	while(!isSanitized){
+    		isSanitized = true;
+	    	list = body.select("itemizedlist");
+	    	list.addAll(body.select("orderedlist"));
+			for(Element item : list){
+				Elements listItems = item.select("> listitem");
+				if(listItems != null && listItems.size()==0){
+					isSanitized = false;
+					item.tagName("removalTag"); 
+				}
+			}
+    	}
+    	
+    	// removes nested <para>
+		while(true){
+	    	list = body.select("para > para").tagName("removalTag");
+	    	list.addAll(body.select("emphasis > para").tagName("removalTag"));
+	    	list.addAll(body.select("emphasis > emphasis").tagName("removalTag"));
+	    	if(list.size() == 0) break;
+		}
+		
+		return document;
+	}
+	
 	private void removeNestedTags(Document document){
     	// cleans up generated docbook fragment to pass fop validation
     	Element body = document.body();
