@@ -123,8 +123,8 @@
                         <tokenised>false</tokenised>
                     </index>
                 </property>
-                <property name="sysml:metaclassTypes">
-                    <type>d:noderef</type>
+                <property name="sysml:metatypes">
+                    <type>d:text</type>
                     <mandatory>false</mandatory>
                     <multiple>true</multiple>                 
                     <index enabled="true">
@@ -133,8 +133,8 @@
                         <tokenised>false</tokenised>
                     </index>
                 </property>
-                <property name="sysml:appliedMetaclasses">
-                    <type>d:noderef</type>
+                <property name="sysml:appliedMetatypes">
+                    <type>d:text</type>
                     <mandatory>false</mandatory>
                     <multiple>true</multiple>                 
                     <index enabled="true">

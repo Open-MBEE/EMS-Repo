@@ -73,6 +73,26 @@
                     "type": "string",
                     "description": "Sysml ID of the site characterization that element belongs to"
                 },
+                "isMetatype": {
+                    "type": "boolean",
+                    "description": "True if element is a metatype (e.g., stereotype or metaclass). If not specified by MMS, assumption is that it is false"
+                },
+                "metatypes": {
+                    "type": "array",
+                    "description": "An array of all the metatypes that this element directly inherits or extends. If this exists, isMetatype must be true",
+                    "items": {
+                        "type": "String",
+                        "description": "Sysml ID of the inherited or extended metatype"
+                    }
+                },
+                "appliedMetatypes": {
+                    "type": "array",
+                    "description": "An array of all the metatypes that are directly applied to this element.",
+                    "items": {
+                        "type": "String",
+                        "description": "Sysml ID of applied metatype"
+                    }
+                },
                 "specialization": {
                     "type": "object",
                     "description": "Properties of the specialized type of the element, if any, adds additional metadata per the references",

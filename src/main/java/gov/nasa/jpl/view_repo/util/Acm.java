@@ -79,18 +79,10 @@ public class Acm {
     public static final String JSON_TARGET = "target";
     public static final String JSON_VALUE_TYPE = "valueType";
     public static final String JSON_VALUE = "value";
-//    public static final String JSON_VALUE_EXPRESSION = "valueExpression";
     public static final String JSON_BODY = "body";
     public static final String JSON_EXPRESSION_BODY = "expressionBody";
     public static final String JSON_ANNOTATED_ELEMENTS = "annotatedElements";
     public static String JSON_PROJECT_VERSION = "projectVersion";
-
-
-//    public static final String JSON_TIME_MAX = "timeMax";
-//    public static final String JSON_TIME_MIN = "timeMin";
-//    public static final String JSON_DURATION_MAX = "durationMax";
-//    public static final String JSON_DURATION_MIN = "durationMin";
-
 
     public static final String JSON_ALLOWED_ELEMENTS = "allowedElements";
     public static final String JSON_CHILDREN_VIEWS = "childrenViews";
@@ -100,14 +92,6 @@ public class Acm {
     public static final String JSON_VIEW_2_VIEW = "view2view";
     public static final String JSON_PRODUCT = "Product";
     public static final String JSON_VIEW = "View";
-
-//    public static final String JSON_EXPRESSION = "Expression";
-//    public static final String JSON_LITERAL_BOOLEAN = "LiteralBoolean";
-//    public static final String JSON_LITERAL_INTEGER = "LiteralInteger";
-//    public static final String JSON_LITERAL_REAL = "LiteralReal";
-//    public static final String JSON_LITERAL_UNLIMITED_NATURAL = "LiteralUnlimitedNatural";
-//    public static final String JSON_LITERAL_STRING = "LiteralString";
-//    public static final String JSON_ELEMENT_VALUE = "ElementValue";
 
     public static final String JSON_BOOLEAN = "boolean";
     public static final String JSON_DOUBLE = "double";
@@ -195,6 +179,11 @@ public class Acm {
     public static final String JSON_UNTYPED = "Untyped";
     public static final String JSON_CLASSIFIER = "classifier";
     public static final String JSON_SLOTS = "slots";
+    
+    // metatype information
+    public static final String JSON_IS_METATYPE = "isMetatype";
+    public static final String JSON_METATYPES = "metatypes";
+    public static final String JSON_APPLIED_METATYPES = "appliedMetatypes";
 
     // ACM types with the different name spaces
     public static final String SYSML = "sysml:";
@@ -214,8 +203,6 @@ public class Acm {
     public static final String ACM_PACKAGE = SYSML + JSON_PACKAGE;
     public static final String ACM_PROPERTY = SYSML + JSON_PROPERTY;
     public static final String ACM_VIEWPOINT = SYSML + JSON_VIEWPOINT;
-//    public static final String ACM_PARAMETER = SYSML + JSON_PARAMETER;
-//    public static final String ACM_OPERATION = SYSML + JSON_OPERATION;
     public static final String ACM_IS_DERIVED = SYSML + JSON_IS_DERIVED;
     public static final String ACM_IS_SLOT = SYSML + JSON_IS_SLOT;
     public static final String ACM_DOCUMENTATION = SYSML + JSON_DOCUMENTATION;
@@ -226,19 +213,12 @@ public class Acm {
     public static final String ACM_TARGET = SYSML + JSON_TARGET;
     public static final String ACM_VALUE_TYPE = SYSML + JSON_VALUE_TYPE;
     public static final String ACM_VALUE = SYSML + JSON_VALUE;
-//    public static final String ACM_VALUE_EXPRESSION = SYSML + JSON_VALUE_EXPRESSION;
-//    public static final String ACM_OWNER = SYSML + JSON_OWNER;
     public static final String ACM_TYPE = SYSML + JSON_TYPE;
     public static final String ACM_REIFIED_CONTAINMENT = SYSML + "reifiedContainment";
     public static final String ACM_BODY = SYSML + JSON_BODY;
     public static final String ACM_EXPRESSION_BODY = SYSML + JSON_EXPRESSION_BODY;
     public static final String ACM_ANNOTATED_ELEMENTS = SYSML + JSON_ANNOTATED_ELEMENTS;
     public static String ACM_PROJECT_VERSION = SYSML + JSON_PROJECT_VERSION;
-
-//    public static final String ACM_TIME_MAX = SYSML + JSON_TIME_MAX;
-//    public static final String ACM_TIME_MIN = SYSML + JSON_TIME_MIN;
-//    public static final String ACM_DURATION_MAX = SYSML + JSON_DURATION_MAX;
-//    public static final String ACM_DURATION_MIN = SYSML + JSON_DURATION_MIN;
 
     public static final String ACM_ALLOWED_ELEMENTS = VIEW + JSON_ALLOWED_ELEMENTS;
     public static final String ACM_CHILDREN_VIEWS = VIEW + JSON_CHILDREN_VIEWS;
@@ -249,13 +229,6 @@ public class Acm {
     public static final String ACM_PRODUCT = VIEW + JSON_PRODUCT;
     public static final String ACM_VIEW = SYSML + JSON_VIEW; // yes, this starts with sysml instead of view2
 
-//    public static final String ACM_EXPRESSION = SYSML + JSON_EXPRESSION;
-//    public static final String ACM_LITERAL_BOOLEAN = SYSML + JSON_LITERAL_BOOLEAN;
-//    public static final String ACM_LITERAL_INTEGER = SYSML + JSON_LITERAL_INTEGER;
-//    public static final String ACM_LITERAL_REAL = SYSML + JSON_LITERAL_REAL;
-//    public static final String ACM_LITERAL_UNLIMITED_NATURAL = SYSML + JSON_LITERAL_UNLIMITED_NATURAL;
-//    public static final String ACM_LITERAL_STRING = SYSML + JSON_LITERAL_STRING;
-
     public static final String ACM_BOOLEAN = SYSML + JSON_BOOLEAN;
     public static final String ACM_DOUBLE = SYSML + JSON_DOUBLE;
     public static final String ACM_INTEGER = SYSML + JSON_INTEGER;
@@ -263,8 +236,6 @@ public class Acm {
     public static final String ACM_NATURAL_VALUE = SYSML + JSON_NATURAL_VALUE;
     public static final String ACM_STRING = SYSML + JSON_STRING;
 
-
-//    public static final String ACM_ELEMENT_VALUE = SYSML + JSON_ELEMENT_VALUE;
     public static final String ACM_PROPERTY_TYPE = SYSML + JSON_PROPERTY_TYPE;
 
     // Value spec additions
@@ -326,14 +297,6 @@ public class Acm {
 
     public static String CM_NAME = CM + "name";
     public static String CM_TITLE = CM + "title";
-//    public static final String ACM_ELEMENT_FOLDER = SYSML + "ElementFolder";
-//    public static final String ACM_PROJECT = SYSML + "Project";
-//
-//    public static final String ACM_LAST_MODIFIED = CM + "modified";
-//    public static final String ACM_AUTHOR = CM + "modifier";
-//
-//    public static final String ACM_CM_NAME = CM + "name";
-//    public static final String ACM_CM_TITLE = CM + "title";
 
     // Sysml 2.0 additions:
     public static final String ACM_CONTENTS = SYSML + JSON_CONTENTS;
@@ -373,6 +336,11 @@ public class Acm {
     public static final String ACM_UNTYPED = SYSML + JSON_UNTYPED;
     public static final String ACM_CLASSIFIER = SYSML + JSON_CLASSIFIER;
     public static final String ACM_SLOTS = SYSML + JSON_SLOTS;
+    
+    public static final String ACM_IS_METATYPE = SYSML + JSON_IS_METATYPE;
+    public static final String ACM_METATYPES = SYSML + JSON_METATYPES;
+    public static final String ACM_APPLIED_METATYPES = SYSML + JSON_APPLIED_METATYPES;
+    public static final String ACM_HAS_METATYPE = SYSML + "HasMetatype";
 
     /**
      *  JSON to Alfresco Content Model mapping
@@ -695,7 +663,8 @@ public class Acm {
         Acm.ACM_DIRECTED_RELATIONSHIP,
         Acm.ACM_VALUE_SPECIFICATION,
         Acm.ACM_MAGICDRAW_DATA,
-        Acm.ACM_UNTYPED
+        Acm.ACM_UNTYPED,
+        Acm.ACM_HAS_METATYPE
     };
 
     public static final String[] ACM_RELATIONSHIP_PROPERTY_ASPECTS = {
