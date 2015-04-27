@@ -143,7 +143,7 @@ resourceTypes:
           200:
             body:
               application/json:
-                schema: <<resourcePathName>>PostResponse
+                schema: <<resourcePathName>>
             description: <<resourcePathName>> append successful
           202:
             description: <<resourcePathName>> append started, but not yet completed
@@ -180,15 +180,6 @@ resourceTypes:
 #                         resource)
 #          500:
 #            description: Could not append to <<resourcePathName>> due to internal server error
-  - connection:
-      post:
-        description: Append operation for <<resourcePathName>>
-        body:
-          application/json:
-            schema: connections
-        responses:
-          200:
-  
       delete:
         description: Delete operation for <<resourcePathName>>
         responses:
@@ -196,7 +187,7 @@ resourceTypes:
             description: <<resourcePathName>> delete successful
             body:
               application/json:
-                schema:  <<resourcePathName>>DeleteResponse
+                schema:  <<resourcePathName>>
           202:
             description: <<resourcePathName>> delete started, but not yet completed
           401:
@@ -205,6 +196,22 @@ resourceTypes:
             description: <<resourcePathName>> not found
           500:
             description: Could not delete <<resourcePathName>> due to internal server error
+  - connection:
+      get:
+        description: Get configuration for <<resourcePathName>>
+        responses:
+          200:
+            body:
+              application/json:
+                schema: connections
+      post:
+        description: Configure <<resourcePathName>>
+        body:
+          application/json:
+            schema: connections
+        responses:
+          200:
+  
 /workspaces:
   description: All resources are "namespaced" by the workspace (aka branch).
   type: readCollection
@@ -223,28 +230,9 @@ resourceTypes:
     get:
       description: Get the specified workspace
     /elements:
-      type: readCollection
-      get:
-        description: Returns the elements specified in the request body if they exist
-        body:
-          application/json:
-            schema: <<resourcePathName>>
-        responses:
-          200:
-            body:
-              application/json:
-                schema: <<resourcePathName>>
-            description: <<resourcePathName>> are returned if they existed
-          500:
-            description: Could not retrieve <<resourcePathName>> due to internal server error   
+      type: collection
       /{elementId}:
-#        post:
-#          is: [constrainable]
-#        put:
-#          is: [constrainable]
-        #type: collection
-        get:
-        delete:
+        type: collection
         uriParameters:
           elementId:
             description: Sysml ID for the element under consideration
@@ -418,12 +406,8 @@ resourceTypes:
         type: string
 /restpostconnection:
   type: connection
-  post:
-    description: Service for configuring the rest post connection to DEA
 /jmsconnection:
   type: connection
-  post:
-    description: Service for configuring the JMS connection for event messaging
         
 #/client:
 #  post:
