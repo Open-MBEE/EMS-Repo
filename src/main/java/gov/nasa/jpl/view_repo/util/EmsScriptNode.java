@@ -2244,6 +2244,15 @@ public class EmsScriptNode extends ScriptNode implements
                    this.getProperty( Acm.ACM_NAME ), filter );
         putInJson( elementJson, Acm.JSON_DOCUMENTATION,
                    this.getProperty( Acm.ACM_DOCUMENTATION ), filter );
+
+        // check properties rather than aspect since aspect may not be applied on creation
+        Object appliedMetatypes = this.getProperty( Acm.ACM_APPLIED_METATYPES );
+        Object isMetatype = this.getProperty( Acm.ACM_IS_METATYPE );
+        Object metatypes = this.getProperty( Acm.ACM_METATYPES );
+        if (appliedMetatypes != null) elementJson.put( Acm.JSON_APPLIED_METATYPES, appliedMetatypes );
+        if (isMetatype != null) elementJson.put( Acm.JSON_IS_METATYPE, isMetatype );
+        if (metatypes != null) elementJson.put( Acm.JSON_METATYPES, metatypes );
+        
         if (isIncludeQualified) {
             if ( filter == null || filter.isEmpty() || filter.contains( "qualifiedName" ) ) {
                 putInJson( elementJson, "qualifiedName", this.getSysmlQName(dateTime, getWorkspace()), filter );
