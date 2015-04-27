@@ -59,7 +59,7 @@ public class JmsWLConnection implements ConnectionInterface {
 
     public boolean publishQueue(String msg) {
         if (qc == null) {
-            initQueueConnection();
+            if (initQueueConnection() == false) return false;
         }
         
         boolean status = true;
@@ -72,7 +72,7 @@ public class JmsWLConnection implements ConnectionInterface {
             jmse.printStackTrace(System.err);
             return false;
         }
-//        if (logger.isInfoEnabled()) logger.info("Got QueueSession " + qsess.toString());
+
         // lookup Queue
         try {
             q = (Queue) ctx.lookup(QUEUE_NAME);
@@ -81,7 +81,7 @@ public class JmsWLConnection implements ConnectionInterface {
             ne.printStackTrace(System.err);
             return false;
         }
-//        if (logger.isInfoEnabled()) logger.info("Got Queue " + q.toString());
+
         // create QueueSender
         try {
             qsndr = qsess.createSender(q);
@@ -90,7 +90,7 @@ public class JmsWLConnection implements ConnectionInterface {
             jmse.printStackTrace(System.err);
             return false;
         }
-//        if (logger.isInfoEnabled()) logger.info("Got QueueSender " + qsndr.toString());
+
         TextMessage message = null;
         // create TextMessage
         try {
@@ -100,7 +100,7 @@ public class JmsWLConnection implements ConnectionInterface {
             jmse.printStackTrace(System.err);
             return false;
         }
-//        if (logger.isInfoEnabled()) logger.info("Got TextMessage " + message.toString());
+
         // set message text in TextMessage
         try {
             if (workspace != null) {
@@ -116,7 +116,7 @@ public class JmsWLConnection implements ConnectionInterface {
             jmse.printStackTrace(System.err);
             return false;
         }
-//        if (logger.isInfoEnabled()) logger.info("Set text in TextMessage " + message.toString());
+
         // send message
         try {
             qsndr.send(message);
@@ -140,12 +140,12 @@ public class JmsWLConnection implements ConnectionInterface {
         catch (JMSException jmse) {
             jmse.printStackTrace(System.err);
         }
-//        if (logger.isInfoEnabled()) logger.info("Cleaned up and done.");
+
         
         return status;
     }
 
-    private void initQueueConnection() {
+    private boolean initQueueConnection() {
         Hashtable<String, String> properties = new Hashtable<String, String>();
         properties.put(Context.INITIAL_CONTEXT_FACTORY,
                        "weblogic.jndi.WLInitialContextFactory");
@@ -157,26 +157,33 @@ public class JmsWLConnection implements ConnectionInterface {
 
         try {
             ctx = new InitialContext(properties);
-        } catch (NamingException ne) {
-            ne.printStackTrace(System.err);
+        } catch (Exception ne) {
+//            ne.printStackTrace(System.err);
+            return false;
         }
-//        if (logger.isInfoEnabled()) logger.info("Got InitialContext " + ctx.toString());
-
+        if (ctx == null) return false;
+        
         // create QueueConnectionFactory
         try {
             qcf = (QueueConnectionFactory)ctx.lookup(QCF_NAME);
         }
-        catch (NamingException ne) {
-            ne.printStackTrace(System.err);
+        catch (Exception ne) {
+//            ne.printStackTrace(System.err);
+            return false;
         }
-//        if (logger.isInfoEnabled()) logger.info("Got QueueConnectionFactory " + qcf.toString());
+        if (qcf == null) return false;
+        
         // create QueueConnection
         try {
             qc = qcf.createQueueConnection();
         }
-        catch (JMSException jmse) {
-            jmse.printStackTrace(System.err);
+        catch (Exception jmse) {
+//            jmse.printStackTrace(System.err);
+            return false;
         }
+        if (qc == null) return false;
+        
+        return true;
     }
 
 
