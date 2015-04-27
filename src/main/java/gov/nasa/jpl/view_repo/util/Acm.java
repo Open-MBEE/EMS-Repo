@@ -663,8 +663,7 @@ public class Acm {
         Acm.ACM_DIRECTED_RELATIONSHIP,
         Acm.ACM_VALUE_SPECIFICATION,
         Acm.ACM_MAGICDRAW_DATA,
-        Acm.ACM_UNTYPED,
-        Acm.ACM_HAS_METATYPE
+        Acm.ACM_UNTYPED
     };
 
     public static final String[] ACM_RELATIONSHIP_PROPERTY_ASPECTS = {
