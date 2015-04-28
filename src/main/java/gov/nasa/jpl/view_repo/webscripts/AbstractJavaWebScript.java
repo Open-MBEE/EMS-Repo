@@ -100,7 +100,7 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
  * @author cinyoung
  *
  */
-public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
+public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
     private static Logger logger = Logger.getLogger(AbstractJavaWebScript.class);
     public Level logLevel = Level.WARN;
     
