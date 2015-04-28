@@ -55,59 +55,6 @@ import org.springframework.extensions.webscripts.WebScriptResponse;
  *
  */
 public class LogoutWebScript extends AbstractWebScript {
-    private boolean logoutBasicAuth = true;
-//	private final String NEXT_PARAM = "next";
-
-	protected Map<String, Object> executeImpl(WebScriptRequest req,
-			Status status, Cache cache) {
-
-	    // No need to do anything for basic authentication since server will handle bad
-	    // credentials being sent by client
-//		logout(req, status);
-//
-//		String next = getServicePath(req.getServiceContextPath()) + "%2Fwcs%2Fui%2F";
-//
-//		if (req.getParameter(NEXT_PARAM) != null) {
-//			next = req.getParameter(NEXT_PARAM);
-//		}
-//
-//		// set redirection parameters
-//		status.setRedirect(true);
-//		if (logoutBasicAuth) {
-//            status.setLocation(req.getServerPath() + getServicePath(req.getServiceContextPath()) + next);
-//		} else {
-//	        status.setLocation(req.getServerPath() + getServicePath(req.getServiceContextPath())
-//	                + "/faces/jsp/login.jsp?_alfRedirect=" + next);
-//		}
-
-		return new HashMap<String, Object>();
-	}
-
-	/**
-	 * Simple utility that logs out the user
-	 * @param wsr
-	 */
-	@SuppressWarnings("unused")
-    private void logout(WebScriptRequest wsr, Status status) {
-	    if (logoutBasicAuth) {
-	        status.setCode(HttpServletResponse.SC_UNAUTHORIZED);
-	    } else {
-	        // logging out for WebClient
-            FacesContext fc = FacesContext.getCurrentInstance();
-            //Application.logOut(fc);
-            //status.setCode(HttpServletResponse.SC_TEMPORARY_REDIRECT);
-	    }
-	}
-
-	/**
-	 * Simple utility to get the service path out of the service context
-	 * @param scpath	Service context path
-	 * @return			service path
-	 */
-	@SuppressWarnings("unused")
-    private String getServicePath(String scpath) {
-		return scpath.replace("/wcservice","").replace("/wcs","").replace("/service","");
-	}
 
     @Override
     /**
@@ -125,11 +72,7 @@ public class LogoutWebScript extends AbstractWebScript {
             // construct model for script / template
             Status status = new Status();
             Cache cache = new Cache(getDescription().getRequiredCache());
-            Map<String, Object> model = executeImpl(req, status, cache);
-            if (model == null)
-            {
-                model = new HashMap<String, Object>(8, 1.0f);
-            }
+            Map<String, Object> model = new HashMap<String, Object>(8, 1.0f);
             model.put("status", status);
             model.put("cache", cache);
 
@@ -138,7 +81,6 @@ public class LogoutWebScript extends AbstractWebScript {
             {
                 res.setStatus(statusCode);
             }
-
 
             res.setCache(cache);
             res.setContentType(mimetype + ";charset=UTF-8");
