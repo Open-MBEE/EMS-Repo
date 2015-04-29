@@ -2,7 +2,6 @@ package gov.nasa.jpl.view_repo.webscripts.util;
 
 import gov.nasa.jpl.view_repo.connections.ConnectionInterface;
 import gov.nasa.jpl.view_repo.connections.JmsConnection;
-import gov.nasa.jpl.view_repo.connections.JmsWLConnection;
 import gov.nasa.jpl.view_repo.connections.RestPostConnection;
 
 import java.util.HashMap;
@@ -26,8 +25,6 @@ public class ConnectionGet extends DeclarativeWebScript {
         
         if (req.getServicePath().endsWith( "jms" )) {
             connection = new JmsConnection();
-        } else if (req.getServicePath().endsWith( "jmswl" )) {
-            connection = new JmsWLConnection();
         } else if (req.getServicePath().endsWith( "rest" )) {
             connection = new RestPostConnection();
         }

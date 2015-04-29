@@ -2,7 +2,6 @@ package gov.nasa.jpl.view_repo.util;
 
 import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.connections.JmsConnection;
-import gov.nasa.jpl.view_repo.connections.JmsWLConnection;
 import gov.nasa.jpl.view_repo.connections.RestPostConnection;
 import gov.nasa.jpl.view_repo.webscripts.HostnameGet;
 import gov.nasa.jpl.view_repo.webscripts.WebScriptUtil;
@@ -36,18 +35,12 @@ public class CommitUtil {
     }
 
     private static JmsConnection jmsConnection = null;
-    private static JmsWLConnection jmsWLConnection = null;
     private static RestPostConnection restConnection = null;
     private static ServiceRegistry services = null;
 
     public static void setJmsConnection(JmsConnection jmsConnection) {
         if (logger.isInfoEnabled()) logger.info( "Setting jms" );
         CommitUtil.jmsConnection = jmsConnection;
-    }
-
-    public static void setJmsWLConnection( JmsWLConnection jmsWLConnection ) {
-        if (logger.isInfoEnabled()) logger.info( "Setting jmswl" );
-        CommitUtil.jmsWLConnection = jmsWLConnection;
     }
 
     public static void setRestConnection(RestPostConnection restConnection) {
@@ -726,11 +719,6 @@ public class CommitUtil {
             jmsConnection.setWorkspace( workspaceId );
             jmsConnection.setProjectId( projectId );
             jmsStatus = jmsConnection.publish( deltaJson );
-        }
-        if (jmsWLConnection != null) { 
-            jmsWLConnection.setWorkspace( workspaceId );
-            jmsWLConnection.setProjectId( projectId );
-            jmsStatus = jmsWLConnection.publish( deltaJson );
         }
         if (restConnection != null) {
             try {
