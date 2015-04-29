@@ -11,8 +11,10 @@ import javax.jms.Destination;
 import javax.jms.MessageProducer;
 import javax.jms.Session;
 import javax.jms.TextMessage;
+import javax.jms.Topic;
 import javax.naming.Context;
 import javax.naming.InitialContext;
+import javax.naming.NameNotFoundException;
 import javax.naming.NamingException;
 
 import org.alfresco.service.ServiceRegistry;
@@ -20,6 +22,13 @@ import org.apache.log4j.Logger;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+/**
+ * curl -u admin:admin -H Content-Type:application/json http://localhost:8080/alfresco/service/connection/jms -d '{"ctxFactory":"weblogic.jndi.WLInitialContextFactory", "username":"mmsjmsuser", "password":"mm$jm$u$3r", "connFactory":"jms/JPLEuropaJMSModuleCF", "topicName":"jms/MMSDistributedTopic", "uri":"t3s://orasoa-dev07.jpl.nasa.gov:8111"}'
+ * curl -u admin:admin -H Content-Type:application/json http://localhost:8080/alfresco/service/connection/jms -d '{"ctxFactory":"weblogic.jndi.WLInitialContextFactory", "username":"mmsjmsuser", "password":"mm$jm$u$3r", "connFactory":"jms/JPLEuropaJMSModuleCF", "topicName":"jms/MMSDistributedTopic", "uri":"t3://orasoa-dev07.jpl.nasa.gov:8011"}'
+ * curl -u admin:admin -H Content-Type:application/json http://localhost:8080/alfresco/service/connection/jms -d '{"ctxFactory":"org.apache.activemq.jndi.ActiveMQInitialContextFactory", "username":null, "password":null, "connFactory":"ConnectionFactory", "topicName":"master", "uri":"tcp://localhost:61616"}'
+ * @author cinyoung
+ *
+ */
 public class JmsConnection implements ConnectionInterface {
     private static Logger logger = Logger.getLogger(JmsConnection.class);
     private long sequenceId = 0;
@@ -48,29 +57,29 @@ public class JmsConnection implements ConnectionInterface {
     }
     
     protected boolean init() {
-        if (connectionFactory == null) {
-            Hashtable<String, String> properties = new Hashtable<String, String>();
-            properties.put(Context.INITIAL_CONTEXT_FACTORY, ctxFactory);
-            properties.put(Context.PROVIDER_URL, uri);
-            if (username != null && password != null) {
-                properties.put(Context.SECURITY_PRINCIPAL, username);
-                properties.put(Context.SECURITY_CREDENTIALS, password);
-            }
+        System.setProperty("weblogic.security.SSL.ignoreHostnameVerification", "true");
+        System.setProperty ("jsse.enableSNIExtension", "false");
+        Hashtable<String, String> properties = new Hashtable<String, String>();
+        properties.put(Context.INITIAL_CONTEXT_FACTORY, ctxFactory);
+        properties.put(Context.PROVIDER_URL, uri);
+        if (username != null && password != null) {
+            properties.put(Context.SECURITY_PRINCIPAL, username);
+            properties.put(Context.SECURITY_CREDENTIALS, password);
+        }
 
-            try {
-                ctx = new InitialContext(properties);
-            } catch (NamingException ne) {
-                ne.printStackTrace(System.err);
-                return false;
-            }
+        try {
+            ctx = new InitialContext(properties);
+        } catch (NamingException ne) {
+            ne.printStackTrace(System.err);
+            return false;
+        }
 
-            try {
-                connectionFactory = (ConnectionFactory) ctx.lookup(connFactory);
-            }
-            catch (NamingException ne) {
-                ne.printStackTrace(System.err);
-                return false;
-            }
+        try {
+            connectionFactory = (ConnectionFactory) ctx.lookup(connFactory);
+        }
+        catch (NamingException ne) {
+            ne.printStackTrace(System.err);
+            return false;
         }
         
         return true;
@@ -97,9 +106,7 @@ public class JmsConnection implements ConnectionInterface {
     }
     
     public boolean publishTopic(String msg, String topic) {
-        if (connectionFactory == null) {
-            if (init() == false) return false;
-        }
+        if (init() == false) return false;
         
         boolean status = true;
         try {
@@ -110,8 +117,14 @@ public class JmsConnection implements ConnectionInterface {
             // Create a Session
             Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
 
-            // Create the destination (Topic or Queue)
-            Destination destination = session.createTopic(topic);
+            // lookup the destination
+            Destination destination;
+            try {
+                destination = (Topic) ctx.lookup( topic );
+            } catch (NameNotFoundException nnfe) {
+                // Create the destination (Topic or Queue)
+                destination = session.createTopic(topic);
+            }
 
             // Create a MessageProducer from the Session to the Topic or Queue
             MessageProducer producer = session.createProducer(destination);

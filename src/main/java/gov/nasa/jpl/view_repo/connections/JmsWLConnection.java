@@ -7,6 +7,7 @@ import gov.nasa.jpl.view_repo.util.NodeUtil;
 import javax.jms.*;
 import javax.naming.Context;
 import javax.naming.InitialContext;
+import javax.naming.NameNotFoundException;
 import javax.naming.NamingException;
 
 import org.json.JSONException;
@@ -15,6 +16,8 @@ import org.apache.log4j.Logger;
 
 /**
  * FIXME: This is only for testing and should be removed in the future
+ * curl -u admin:admin -H Content-Type:application/json http://localhost:8080/alfresco/service/connection/jmswl -d '{"uri":"t3://orasoa-dev07.jpl.nasa.gov:8011"}'
+ * curl -u admin:admin -H Content-Type:application/json http://localhost:8080/alfresco/service/connection/jmswl -d '{"uri":"t3s://orasoa-dev07.jpl.nasa.gov:8111"}'
  * @author cinyoung
  *
  */
@@ -39,7 +42,8 @@ public class JmsWLConnection implements ConnectionInterface {
         boolean result = false;
         try {
             json.put( "sequence", sequenceId++ );
-            result = publishQueue(NodeUtil.jsonToString( json, 2 ));
+//            result = publishQueue(NodeUtil.jsonToString( json, 2 ));
+            result = publishQueueFromConnection( NodeUtil.jsonToString( json, 2 ) );
         } catch ( JSONException e ) {
             e.printStackTrace();
         }
@@ -58,9 +62,7 @@ public class JmsWLConnection implements ConnectionInterface {
     private static final String QUEUE_NAME = "jms/MMSDistributedQueue";
 
     public boolean publishQueue(String msg) {
-        if (qc == null) {
-            if (initQueueConnection() == false) return false;
-        }
+        if (initQueueConnection() == false) return false;
         
         boolean status = true;
 
@@ -145,6 +147,106 @@ public class JmsWLConnection implements ConnectionInterface {
         return status;
     }
 
+    public boolean publishQueueFromConnection(String msg) {
+        Connection c = initConnection();
+        if (c == null) return false;
+        
+        boolean status = true;
+
+     // create QueueSession
+        Session sess = null;
+        try {
+            sess = c.createSession(false, 0);
+        }
+        catch (JMSException jmse) {
+            jmse.printStackTrace(System.err);
+            return false;
+        }
+
+        // lookup Queue
+        Destination destination;
+        try {
+            destination = (Queue) ctx.lookup(QUEUE_NAME);
+        }
+        catch (NamingException ne) {
+            if (ne instanceof NameNotFoundException) {
+                try {
+                    destination = sess.createQueue(QUEUE_NAME);
+                } catch ( JMSException e ) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                    return false;
+                }
+            } else {
+                ne.printStackTrace(System.err);
+                return false;
+            }
+        }
+
+
+        // create QueueSender
+        MessageProducer producer;
+        try {
+            producer = sess.createProducer(destination);
+        }
+        catch (JMSException jmse) {
+            jmse.printStackTrace(System.err);
+            return false;
+        }
+
+        TextMessage message = null;
+        // create TextMessage
+        try {
+            message = sess.createTextMessage(msg);
+        }
+        catch (JMSException jmse) {
+            jmse.printStackTrace(System.err);
+            return false;
+        }
+
+        // set message text in TextMessage
+        try {
+            if (workspace != null) {
+                message.setStringProperty( "workspace", workspace );
+            } else {
+                message.setStringProperty( "workspace", "master" );
+            }
+            if (projectId != null) {
+                message.setStringProperty( "projectId", projectId );
+            }
+        }
+        catch (JMSException jmse) {
+            jmse.printStackTrace(System.err);
+            return false;
+        }
+
+        // send message
+        try {
+            producer.send(message);
+        }
+        catch (JMSException jmse) {
+            jmse.printStackTrace(System.err);
+            return false;
+        }
+        if (logger.isInfoEnabled()) logger.info("Sent message ");
+        // clean up
+        try {
+            message = null;
+            producer.close();
+            producer = null;
+            destination = null;
+            sess.close();
+            sess = null;
+            c.close();
+            c = null;
+        }
+        catch (JMSException jmse) {
+            jmse.printStackTrace(System.err);
+        }
+        
+        return status;
+    }
+    
     private boolean initQueueConnection() {
         Hashtable<String, String> properties = new Hashtable<String, String>();
         properties.put(Context.INITIAL_CONTEXT_FACTORY,
@@ -184,6 +286,50 @@ public class JmsWLConnection implements ConnectionInterface {
         if (qc == null) return false;
         
         return true;
+    }
+
+    
+    private Connection initConnection() {
+        Hashtable<String, String> properties = new Hashtable<String, String>();
+        properties.put(Context.INITIAL_CONTEXT_FACTORY,
+                       "weblogic.jndi.WLInitialContextFactory");
+        // NOTE: The port number of the server is provided in the next line,
+        //       followed by the userid and password on the next two lines.
+        properties.put(Context.PROVIDER_URL, uri);
+        properties.put(Context.SECURITY_PRINCIPAL, "mmsjmsuser");
+        properties.put(Context.SECURITY_CREDENTIALS, "mm$jm$u$3r");
+
+        try {
+            ctx = new InitialContext(properties);
+        } catch (Exception ne) {
+//            ne.printStackTrace(System.err);
+            return null;
+        }
+        if (ctx == null) return null;
+        
+        // create ConnectionFactory
+        ConnectionFactory cf = null;
+        try {
+            cf = (ConnectionFactory)ctx.lookup(QCF_NAME);
+        }
+        catch (Exception ne) {
+//            ne.printStackTrace(System.err);
+            return null;
+        }
+        if (cf == null) return null;
+        
+        // create Connection
+        Connection c = null;
+        try {
+            c = cf.createConnection();
+        }
+        catch (Exception jmse) {
+//            jmse.printStackTrace(System.err);
+            return null;
+        }
+        if (c == null) return null;
+        
+        return c;
     }
 
 
