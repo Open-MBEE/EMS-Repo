@@ -853,11 +853,18 @@ public class DocBookWrapper {
 		return targetFilename;
 	}
 
+	private String getHtmlText(String htmlString){
+		if(htmlString == null || htmlString.isEmpty()) return "";
+		Document document = Jsoup.parseBodyFragment(htmlString);
+		if(document == null || document.body()== null) return "";
+		return document.body().text();
+	}
+	
 	private void writeCSV(List<List<String>> csv, String filename, Queue<TableCell> rowQueue, int cols) throws Exception{
 		String QUOTE = "\"";
 	    String ESCAPED_QUOTE = "\"\"";
 	    char[] CHARACTERS_THAT_MUST_BE_QUOTED = { ',', '"', '\n' };
-	    
+	    filename = getHtmlText(filename);
 	    if(filename.length() > 100) filename = filename.substring(0,100);
 		File outputFile = new File(Paths.get(this.dbDirName.toString(), filename+".csv").toString());
 		try {
