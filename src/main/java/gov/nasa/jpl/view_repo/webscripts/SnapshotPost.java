@@ -1991,7 +1991,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
     		isDone = true;
 	    	list = body.select("itemizedlist");
 	    	list.addAll(body.select("orderedlist"));
-	    	list.addAll(body.select("tbody"));
+	    	list.addAll(body.select("utbody"));
 	    	list.addAll(body.select("listitem"));
 	    	list.addAll(body.select("row"));
 			for(Element item : list){
