@@ -285,20 +285,15 @@ public class DocBookWrapper {
 			}
     	}
     	
-    	// removes nested <para>
-//		while(true){
-//	    	list = body.select("para > para");//.tagName("removalTag");
-//	    	list.addAll(body.select("emphasis > para"));//.tagName("removalTag"));
-//	    	list.addAll(body.select("emphasis > emphasis"));//.tagName("removalTag"));
-//	    	if(list.size() == 0) break;
-//	    	for(Element item : list){
-//	    		Attributes attrs = item.attributes();
-//	    		for(org.jsoup.nodes.Attribute attr : attrs){
-//	    			item.removeAttr(attr.getKey());
-//	    		}
-//	    	}
-//	    	list.tagName("removalTag");
-//		}
+    	// make sure table has tbody child
+    	list = body.select("utable");
+    	for(Element table : list){
+    		Elements tbody = table.select("> tgroup > utbody");
+    		if(tbody.size() == 0){
+    			table.select("> tgroup").first().append("<utbody><row><entry/></row></utbody>");
+    		}
+    	}
+
     	removeNestedTags("para > para", body);
     	removeNestedTags("emphasis > para", body);
     	removeNestedTags("emphasis > emphasis", body);
