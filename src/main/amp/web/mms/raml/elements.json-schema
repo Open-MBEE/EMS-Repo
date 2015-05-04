@@ -170,7 +170,7 @@
                     "type": "array",
                     "items": {
                         "type": "string",
-                        "description": "The classifiers"
+                        "description": "The classifiers IDs"
                     }
                 },
                 "slots": {

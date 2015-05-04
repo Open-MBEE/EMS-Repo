@@ -772,7 +772,7 @@
 					</index>
 				</property>
                 <property name="sysml:classifier">
-                    <type>d:text</type>
+                    <type>d:noderef</type>
                     <mandatory>false</mandatory>
                     <multiple>true</multiple>
                     <index enabled="true">

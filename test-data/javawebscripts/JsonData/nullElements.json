@@ -50,7 +50,7 @@
      "owner":"123456",
      "name":"instanceSpecificationNull",
      "specialization": {"type":"InstanceSpecification",
-                        "classifier":["a"],
+                        "classifier":["propertyNull"],
                         "slots":["elementValueNull"],
                         "instanceSpecificationSpecification":null}
      },
