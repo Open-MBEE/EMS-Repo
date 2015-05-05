@@ -1,0 +1,11 @@
+<webscript>
+	<shortname>get site with {siteId}</shortname>
+    <description>
+    	get site with {siteId}
+	</description>
+  	<url>/workspaces/{workspaceId}/sites/{siteId}</url>
+  	<format default="json">argument</format>
+  	<authentication>user</authentication>
+  	<transaction>required</transaction>
+  	<family>MMS REST API</family>
+ </webscript>

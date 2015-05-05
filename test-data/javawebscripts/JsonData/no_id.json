@@ -1,0 +1,13 @@
+{ "elements" : [
+
+{
+ "documentation" : "auto-gen id",
+ "name":"really_no_id_0",
+ "specialization" : {
+   "isDerived":false,
+   "owner":"403",
+   "type": "Property",
+   "value" : [{ "string" : "dlam",
+                "type" : "LiteralString"}]}
+ }
+]}

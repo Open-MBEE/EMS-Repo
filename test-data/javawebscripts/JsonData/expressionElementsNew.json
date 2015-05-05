@@ -1,0 +1,97 @@
+{ "elements" : [
+
+   {
+        "documentation": "",
+        "sysmlid": "constraint_32165",
+        "name": "",
+        "owner": "123456",
+        "specialization": {"type": "Constraint",
+                          "specification":
+                            {"type": "Expression",
+        				     "symbol": "",
+					         "operand": [{"type":"ElementValue",
+					                      "element":"op_ev_31835"},
+					                     {"type":"ElementValue",
+					                      "element":"arg_ev_38307_1"},
+					                     {"type":"ElementValue",
+					                      "element":"arg_ev_33001"}
+					                     ]}
+					                     }
+    },
+    {
+        "documentation": "",
+        "sysmlid": "op_ev_31835",
+        "name": "GreaterEquals",
+        "owner": "123456",
+        "specialization": { "type": "Operation",
+					        "parameters": [ 
+					            "op_param_31867",
+					            "op_param_31868",
+					            "op_param_31869"
+        					]}
+    },
+    {
+        "documentation": "",
+        "sysmlid": "op_param_31867",
+        "name": "result",
+        "owner": "op_ev_31835",
+        "specialization": { "type": "Element",
+        					"parameterDirection": "return"
+        					}
+    },
+    {
+        "documentation": "",
+        "sysmlid": "op_param_31868",
+        "name": "x",
+        "owner": "op_ev_31835",
+        "specialization": { "type": "Element",
+       						"parameterDirection": "in"
+       						}
+    },
+    {
+        "documentation": "",
+        "sysmlid": "op_param_31869",
+        "name": "y",
+        "owner": "op_ev_31835",
+        "specialization": { "type": "Element",
+        					"parameterDirection": "in"
+        					}
+    },
+    {
+        "documentation": "",
+        "sysmlid": "arg_ev_38307",
+        "name": "duration",
+        "owner": "123456",
+        "specialization": { "type": "Property",
+					        "isDerived": false,
+					        "isSlot": false,
+					        "value": [{"type": "LiteralInteger",
+        					           "integer": 22}]
+					        }
+    },
+    {
+        "documentation": "",
+        "sysmlid": "arg_ev_38307_1",
+        "name": "duration_1",
+        "owner": "123456",
+        "specialization": { "type": "Property",
+					        "isDerived": false,
+					        "isSlot": false,
+					        "value": [{"type": "LiteralInteger",
+        					           "integer": 10}]
+					        }
+    },
+    {
+        "documentation": "",
+        "sysmlid": "arg_ev_33001",
+        "name": "initialDuration",
+        "owner": "123456",
+        "specialization": { "type": "Property",
+					        "isDerived": false,
+					        "isSlot": false,
+					        "value": [{"type": "LiteralInteger",
+        					           "integer": 11}]
+					        }
+    }
+
+]}

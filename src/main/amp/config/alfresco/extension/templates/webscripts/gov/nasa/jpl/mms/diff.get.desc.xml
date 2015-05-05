@@ -1,0 +1,11 @@
+<webscript>
+	<shortname>get diffs</shortname>
+    <description>
+    	get diffs
+	</description>
+  	<url>/diff?workspace1={workspace1}&amp;workspace2={workspace2}</url>
+  	<format default="json">argument</format>
+  	<authentication>user</authentication>
+  	<transaction>none</transaction>
+  	<family>MMS REST API</family>
+ </webscript>

@@ -1,0 +1,40 @@
+<link rel="import" href="../vendor/polymer/polymer/polymer.html">
+<polymer-element name="reference-inspector" attributes="mdid">
+
+  <style>
+    #container
+    {
+      /*
+      border-width: 0px 0px 2px 0px;
+      border-style: dotted;
+      border-bottom-color: orange;
+      */
+    }
+
+  </style>
+
+  <template>
+  	<span id="container" class="">
+      <h3>Name</h3>
+      <trans-reference mdid="{{mdid}}" property="name"></trans-reference>
+      <h3>Id</h3>
+      <trans-reference mdid="{{mdid}}" property="mdid"></trans-reference>
+      <h3>Value</h3>
+      <trans-reference mdid="{{mdid}}" property="value"></trans-reference>
+      <h3>Description</h3>
+      <trans-reference mdid="{{mdid}}" property="description"></trans-reference>
+
+    </span>
+  </template>
+
+  <script>
+    Polymer('reference-inspector', {
+      mdid: null,
+      mdidChanged: function(oldValue, newValue)
+      {
+        console.log("ASDFASD");
+      }
+    });
+  </script>
+
+</polymer-element>

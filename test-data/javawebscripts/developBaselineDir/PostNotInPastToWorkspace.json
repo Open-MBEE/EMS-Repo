@@ -1,0 +1,19 @@
+{"elements": [{
+    "qualifiedId": "/europa/123456/notInThePast",
+    "name": "notInThePast",
+    "qualifiedName": "/europa/JW_TEST/notInThePast",
+    "sysmlid": "notInThePast",
+    "documentation": "",
+    "owner": "123456",
+    "specialization": {
+        "specification": {
+            "valueExpression": null,
+            "expressionBody": ["foo8"],
+            "type": "OpaqueExpression"
+        },
+        "type": "Constraint"
+    },
+    "editable": true,
+    "creator": "admin",
+}]}
+200

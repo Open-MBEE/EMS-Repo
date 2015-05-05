@@ -1,0 +1,127 @@
+{ "elements":[
+    {
+        "sysmlid": "_17_0_2_3_e610336_1394148449252_91190_29556",
+        "name": "ComponentViewPoint",
+        "documentation": "",
+        "owner": "123456",
+        "specialization" : {
+        "method": "name_list",
+        "type": "Viewpoint"
+    }
+    },
+    {
+        "sysmlid": "_17_0_2_3_e610336_1394148311476_17302_29388",
+        "name": "Components",
+        "documentation": "",
+        "owner": "123456",
+    "specialization" : {
+        "type": "View"
+    }
+    },
+    {
+        "sysmlid": "_17_0_2_4_f3a0363_1394142290412_487571_28478",
+        "name": "BLUCam CubeSat A",
+        "documentation": "",
+        "owner": "123456",
+    "specialization" : {
+        "type": "Package"
+    }
+    },
+  {
+        "sysmlid": "name_list",
+        "name": "viewpoint_op",
+        "documentation": "",
+        "owner": "123456",
+      "specialization" : {
+        "parameters": ["exposed_id"],
+        "type": "Operation",
+        "expression":{
+          "operand":[{"type":"ElementValue",
+                      "element":"op_list"},
+                     {"type":"Expression",
+                      "operand":[{"type":"ElementValue",
+                                  "element":"op_map"},
+                                 {"type":"ElementValue",
+                                  "element":"exposed_id"},
+                                 {"type":"ElementValue",
+                                  "element":"op_name_arg"}]}],
+          "type": "Expression"
+        }
+      }
+    },
+    {
+        "sysmlid": "exposed_id",
+        "name": "exposed",
+        "documentation": "",
+        "owner": "123456",
+    "specialization" : {
+        "type": "Parameter"
+    }
+    },
+    {
+        "sysmlid": "op_list",
+        "name": "List",
+        "documentation": "",
+        "owner": "123456",
+    "specialization" : {
+        "type": "Operation"
+    }
+    },
+    {
+        "sysmlid": "op_map_arg",
+        "name": "",
+        "documentation": "",
+        "owner": "123456",
+    "specialization" : {
+        "operand":[{"type":"ElementValue",
+                    "element":"op_map"},
+                   {"type":"ElementValue",
+                    "element":"exposed_id"},
+                   {"type":"ElementValue",
+                    "element":"op_name_arg"}],
+        "type": "Expression"
+    }
+    },    
+   {
+        "sysmlid": "op_map",
+        "name": "map",
+        "documentation": "",
+        "owner": "123456",
+    "specialization" : {
+        "type": "Operation"
+    }
+    },
+    {
+        "sysmlid": "op_name_arg",
+        "name": "Name",
+        "documentation": "",
+        "owner": "123456",
+    "specialization" : {
+        "type": "Operation"
+    }
+    },
+    {
+        "sysmlid": "_17_0_2_3_e610336_1394148464681_90735_29608",
+        "name": "",
+        "documentation": "",
+        "owner": "_17_0_2_3_e610336_1394148311476_17302_29388",
+        "specialization" : {
+            "type": "Conform",
+            "source": "_17_0_2_3_e610336_1394148311476_17302_29388",
+            "target": "_17_0_2_3_e610336_1394148449252_91190_29556"
+        }
+    },
+    {
+        "id": "_17_0_2_3_e610336_1394148759911_783211_29758",
+        "name": "",
+        "documentation": "",
+        "owner": "123456",
+        "specialization" : {
+            "type": "Expose",
+            "source": "_17_0_2_3_e610336_1394148311476_17302_29388",
+            "target": "_17_0_2_4_f3a0363_1394142290412_487571_28478"
+        }
+    }
+]}
+
+

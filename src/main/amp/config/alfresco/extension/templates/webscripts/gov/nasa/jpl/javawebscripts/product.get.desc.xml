@@ -1,0 +1,27 @@
+<webscript>
+<shortname>Get Product</shortname>
+    <description>
+  		{ "products" : [        
+            { 
+              "id": productid
+              "view2view": [
+              {"id": viewid or productid, "childrenViews": [viewid, ..]},
+             
+              ]
+              "noSections": [viewid, ...]
+            },
+            ...
+        ]
+        }</description>
+		<url>/javawebscripts/products/{id}</url>
+		<format default="json">argument</format>
+		<authentication>user</authentication>
+		<transaction>none</transaction>
+		<family>EMS Java Read Webscripts</family>
+		<args>
+			<arg>
+				<name>id</name>
+				<description>ID of the document to be retrieved</description>
+			</arg>
+		</args>  		
+ </webscript>

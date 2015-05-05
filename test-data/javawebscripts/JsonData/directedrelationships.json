@@ -1,0 +1,8 @@
+{ "elements" : [
+	{"documentation" : "directed_relationship2", 
+     "sysmlid":"500",
+     "specialization": {"type":"DirectedRelationship",
+                        "source":"303",
+                        "target":"304"}
+     },
+]}

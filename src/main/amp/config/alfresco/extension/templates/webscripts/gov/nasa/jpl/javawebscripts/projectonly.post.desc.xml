@@ -1,0 +1,25 @@
+<webscript> 
+  <shortname>Update Project with version</shortname> 
+  <description>
+  </description>
+  <url>/javawebscripts/projects</url>
+  <format default="json">argument</format> 
+  <authentication>user</authentication> 
+  <transaction>none</transaction>
+  <family>EMS Java Webscripts</family>
+  <args>
+  	<arg>
+  		<name>posted content</name>
+  		<description>The request body of the post as json:
+        {elements:[{
+            "sysmlid": projectId,
+            "name": projectName,
+            "specialization":{"type":"Project",
+                              "projectVersion": projectVersion if there is a version
+                             }
+                            
+        }]} 
+  		</description>
+  	</arg>
+  </args>
+</webscript>

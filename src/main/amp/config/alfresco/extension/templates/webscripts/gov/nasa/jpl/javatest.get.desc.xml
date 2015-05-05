@@ -1,0 +1,8 @@
+<webscript>
+  <shortname>The World's Simplest Webscript</shortname>
+  <description>Hands back a little bit of JSON</description>
+  <url>/javatest</url>
+  <authentication>user</authentication>
+  <format default="html">argument</format>
+  <family>Alfresco Java-Backed WebScripts Demo</family>
+</webscript>

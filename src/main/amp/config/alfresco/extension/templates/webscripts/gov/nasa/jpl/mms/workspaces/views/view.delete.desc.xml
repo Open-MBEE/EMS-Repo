@@ -1,0 +1,11 @@
+<webscript>
+	<shortname>delete view with {viewId}</shortname>
+    <description>
+    	delete view with {viewId}
+	</description>
+  	<url>/workspaces/{workspaceId}/views/{viewId}</url>
+  	<format default="json">argument</format>
+  	<authentication>user</authentication>
+  	<transaction>none</transaction>
+  	<family>MMS REST API</family>
+ </webscript>

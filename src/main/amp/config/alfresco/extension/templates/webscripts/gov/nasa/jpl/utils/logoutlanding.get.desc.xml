@@ -1,0 +1,8 @@
+<webscript>
+  <shortname>Logout Webscript</shortname>
+  <description>Logs user out and redirects to login page with redirection</description>
+  <url>/logout/info</url>
+  <authentication>user</authentication>
+  <format default="html">argument</format>
+  <family>EMS Utils</family>
+</webscript>

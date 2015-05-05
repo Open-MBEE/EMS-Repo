@@ -1,0 +1,27 @@
+<webscript> 
+  <shortname>Get View Editor home page</shortname> 
+  <description>Return all documents in the specified site in format that shows containment:
+		{
+	 		"name" : projectname,
+	 		"volumes": {mdid: volumename},
+	 		"volume2volumes": {volumeid: [volumeid, ...], ...},
+	 		"documents": {documentid: documentname, ...},
+	 		"volume2documents": {volumeid: [documentid], ...},
+	 		"projectVolumes": [volumeid,...]
+	 	}  	
+  </description>
+  <url>/ve/documents/{id}</url> 
+  <format default="html">argument</format> 
+  <authentication>user</authentication> 
+  <transaction>none</transaction>
+  <family>EMS Java Read Webscripts</family>
+  <args>
+  	<arg>
+  		<name>id</name>
+  		<description>
+  		Name of the site to find all documents in, e.g. /ve/documents/europa gets all the documents in the europa site.
+  		</description>
+  	</arg>
+  </args>
+  
+</webscript>

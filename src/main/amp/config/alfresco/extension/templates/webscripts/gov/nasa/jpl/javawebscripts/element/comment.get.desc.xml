@@ -1,0 +1,10 @@
+<webscript> 
+  <shortname>Get View Comments</shortname> 
+  <description>Retrieves all the comments that annotate a view. Returns same format as getting elements.
+  </description>
+  <url>/javawebscripts/elements/{id}/comments</url>
+  <format default="json">argument</format> 
+  <authentication>user</authentication> 
+  <transaction>none</transaction>
+  <family>EMS Java Webscripts</family>
+</webscript>

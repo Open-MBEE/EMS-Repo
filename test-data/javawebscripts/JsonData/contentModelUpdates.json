@@ -1,0 +1,122 @@
+{ "elements" : [
+
+    {"documentation" : "View updates", 
+     "sysmlid":"viewWithContents", 
+     "name":"viewWithContents", 
+     "owner":"123456", 
+     "specialization": {"type":"View",
+                        "contents":"viewContents"}
+    },
+    
+    {"documentation" : "View content", 
+     "sysmlid":"viewContents", 
+     "name":"viewContents", 
+     "owner":"123456",      
+     "specialization": {"type":"Expression"}
+    },
+    
+    {"documentation" : "LiteralSet", 
+     "sysmlid":"literalSet", 
+     "name":"literalSet", 
+     "owner":"123456", 
+     "specialization": {"type":"LiteralSet",
+                        "set":[{"type":"LiteralString",
+                                "string":"I"},
+                               {"type":"LiteralString",
+                                "string":"Love"},
+                               {"type":"LiteralString",
+                                "string":"Bears"}],
+                        "setOperand":{"type":"LiteralString",
+                                      "string":"Bears"}}
+    },
+        
+    {"documentation" : "Magic Draw Meta-Data", 
+     "sysmlid":"md", 
+     "name":"md", 
+     "owner":"123456", 
+     "specialization": {"type":"MagicDrawData",
+                        "mdData":"A blob of meta-data"}
+    },
+    
+    {"documentation" : "Connector updates", 
+     "sysmlid":"connector", 
+     "name":"connector", 
+     "owner":"123456", 
+     "specialization": {"type":"Connector",
+                        "targetLower":{"type":"LiteralString",
+                                       "string":"targetLower!"},
+                        "targetUpper":{"type":"LiteralString",
+                                       "string":"targetUpper!"},
+                        "sourceLower":{"type":"LiteralString",
+                                       "string":"sourceLower!"},
+                        "sourceUpper":{"type":"LiteralString",
+                                       "string":"sourceUpper!"},
+                        "sourcePath":["connectorSource"],
+                        "targetPath":["connectorTarget"],
+                        "connectorKind":"BINDING",
+                        "connectorType":"association",
+                        "connectorValue":{"type":"LiteralString",
+                                           "string":"Ninja Attack!"}}
+    },
+      
+    {"documentation" : "Connector source", 
+     "sysmlid":"connectorSource", 
+     "name":"connectorSource", 
+     "owner":"123456", 
+     "specialization": {"type":"Property",
+                        "lower":{"type":"LiteralString",
+                                 "string":"lower!"},
+                        "upper":{"type":"LiteralString",
+                                 "string":"upper!"}}
+    },
+    
+    {"documentation" : "Connector target", 
+     "sysmlid":"connectorTarget", 
+     "name":"connectorTarget", 
+     "owner":"123456", 
+     "specialization": {"type":"Property"}
+    },
+    
+    {"documentation" : "association", 
+     "sysmlid":"association", 
+     "name":"association", 
+     "owner":"123456", 
+     "specialization": {"type":"Association",
+                        "ownedEnd":["AssocOwnedEnd"],
+                        "source":"sourceId",
+                        "target":"targetId",
+                        "sourceAggregation":"COMPOSITE",
+                        "targetAggregation":"SHARED"}
+    },
+    
+    {"documentation" : "Associations's owned end", 
+     "sysmlid":"AssocOwnedEnd", 
+     "name":"AssocOwnedEnd", 
+     "owner":"123456", 
+     "specialization": {"type":"Property"}
+    },
+    
+    {"documentation" : "Characterizes", 
+     "sysmlid":"characterizes", 
+     "name":"characterizes", 
+     "owner":"123456", 
+     "specialization": {"type":"Characterizes",
+                        "source":"sourceId",
+                        "target":"targetId"}
+    },
+    
+    {"documentation" : "source", 
+     "sysmlid":"sourceId", 
+     "name":"sourceId", 
+     "owner":"123456", 
+     "specialization": {"type":"Property"}
+    },
+    
+    {"documentation" : "target", 
+     "sysmlid":"targetId", 
+     "name":"targetId", 
+     "owner":"123456", 
+     "specialization": {"type":"Property"}
+    }
+    
+]}

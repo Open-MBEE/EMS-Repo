@@ -1,0 +1,18 @@
+<webscript>
+  <shortname>Toggle timeEvents on or off</shortname>
+  <description>toggle timeEvents off</description>
+  <url>/timeEvents?on={on?}&amp;off={off?}</url>
+  <authentication>user</authentication>
+  <format default="html">argument</format>
+  <family>EMS Utils</family>
+  <args>
+    <arg>
+        <name>on</name>
+        <description>Optional, if specified will turn timeEvents on</description>
+    </arg>
+    <arg>
+        <name>off</name>
+        <description>Optional, if specified will turn timeEvents off</description>
+    </arg>
+  </args>
+</webscript>

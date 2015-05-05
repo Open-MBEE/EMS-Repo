@@ -1,0 +1,11 @@
+<webscript>
+	<shortname>delete configuration with {configurationId}</shortname>
+    <description>
+    	delete configuration with {configurationId}
+	</description>
+  	<url>/workspaces/{workspaceId}/sites/{siteId}/configurations/{configurationId}</url>
+  	<format default="json">argument</format>
+  	<authentication>user</authentication>
+  	<transaction>none</transaction>
+  	<family>MMS REST API</family>
+ </webscript>

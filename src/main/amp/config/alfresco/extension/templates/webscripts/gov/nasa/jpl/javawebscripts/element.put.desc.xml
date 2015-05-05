@@ -1,0 +1,15 @@
+<webscript> 
+  <shortname>Put Element IDs for synchronizing with magicdraw</shortname> 
+  <description>
+  Post element for creation or update.
+  		{
+  			oldId: newId,
+  			...
+  		}
+  </description>
+  <url>/javawebscripts/elements</url>
+  <format default="json">argument</format> 
+  <authentication>user</authentication> 
+  <transaction>none</transaction>
+  <family>EMS Java Webscripts</family>
+</webscript>

@@ -1,0 +1,33 @@
+<webscript> 
+  <shortname>Get View comments</shortname> 
+  <description>Return all comments for the view
+  {
+  	"view2comemnt": {
+  		viewid: [commentid, ...], ...
+  	},
+  	"comments": [
+  		{
+  			"id": commentid,
+  			"body": body,
+  			"author": user,
+  			"modified": datetime,
+  			"deleted": true/false
+  		}, ...
+  	]
+  }
+  
+  - new comments will have id that starts with 'comment'
+  </description>
+  <url>/rest/views/{viewid}/comments?recurse={recurse?}</url> 
+  <format default="json">argument</format> 
+  <authentication>user</authentication> 
+  <transaction>none</transaction>
+  <family>View Editor</family>
+  <args>
+
+  	<arg>
+  		<name>recurse</name>
+  		<description>Whether to get comments for single or also all its children</description>
+  	</arg>
+  </args>
+</webscript>

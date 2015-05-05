@@ -1,0 +1,11 @@
+<webscript>
+	<shortname>post views</shortname>
+    <description>
+    	post views
+	</description>
+  	<url>/workspaces/{workspaceId}/sites/{siteId}/products/{productId}/views</url>
+  	<format default="json">argument</format>
+  	<authentication>user</authentication>
+  	<transaction>none</transaction>
+  	<family>MMS REST API</family>
+ </webscript>

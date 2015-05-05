@@ -1,0 +1,111 @@
+{ "elements":[
+    {
+        "sysmlid": "_17_0_2_3_e610336_1394148449252_91190_29556__6",
+        "name": "ComponentViewPoint",
+        "documentation": "",
+        "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
+        "specialization" : {
+        "method": "name_list__6",
+        "type": "Viewpoint"
+    }
+    },
+    {
+        "sysmlid": "_17_0_2_3_e610336_1394148311476_17302_29388__6",
+        "name": "Components",
+        "documentation": "",
+        "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
+    "specialization" : {
+        "type": "Element"
+    }
+    },
+    {
+        "sysmlid": "_17_0_2_4_f3a0363_1394142290412_487571_28478__6",
+        "name": "BLUCam CubeSat A",
+        "documentation": "",
+        "owner": "_17_0_2_4_f3a0363_1394140430311_23731_27741",
+    "specialization" : {
+        "type": "Package"
+    }
+    },
+  {
+        "sysmlid": "name_list__6",
+        "name": "viewpoint_op",
+        "documentation": "",
+        "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
+    "specialization" : {
+        "parameters": ["exposed_id__6"],
+        "expression":"vp_expression__6",
+        "type": "Operation"
+    }
+    },
+    {
+        "sysmlid": "exposed_id__6",
+        "name": "exposed",
+        "documentation": "",
+        "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
+    "specialization" : {
+        "type": "Parameter"
+    }
+    },
+    {
+        "sysmlid": "vp_expression__6",
+        "name": "",
+        "documentation": "",
+        "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
+    "specialization" : {
+        "operand":[{"type":"ElementValue",
+                    "element":"op_list__6"},
+                   {"type":"Expression",
+                    "operand":[{"type":"ElementValue",
+                                "element":"op_map__6"},
+                               {"type":"ElementValue",
+                                "element":"exposed_id__6"},
+                               {"type":"ElementValue",
+                                "element":"op_name_arg__6"}]}],
+        "type": "Expression"
+    }
+    },
+    {
+        "sysmlid": "op_list__6",
+        "name": "List",
+        "documentation": "",
+        "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
+    "specialization" : {
+        "type": "Operation"
+    }
+    },
+    {
+        "sysmlid": "op_map_arg__6",
+        "name": "",
+        "documentation": "",
+        "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
+    "specialization" : {
+        "operand":[{"type":"ElementValue",
+                    "element":"op_map__6"},
+                   {"type":"ElementValue",
+                    "element":"exposed_id__6"},
+                   {"type":"ElementValue",
+                    "element":"op_name_arg__6"}],
+        "type": "Expression"
+    }
+    },    
+   {
+        "sysmlid": "op_map__6",
+        "name": "map",
+        "documentation": "",
+        "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
+    "specialization" : {
+        "type": "Operation"
+    }
+    },
+    {
+        "sysmlid": "op_name_arg__6",
+        "name": "Name",
+        "documentation": "",
+        "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
+    "specialization" : {
+        "type": "Operation"
+    }
+    }
+]}
+

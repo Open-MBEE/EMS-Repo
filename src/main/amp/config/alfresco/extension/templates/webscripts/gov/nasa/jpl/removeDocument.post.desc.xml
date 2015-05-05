@@ -1,0 +1,16 @@
+<webscript> 
+  <shortname>Remove Document</shortname> 
+  <description>remove a document to a volume</description>
+  <url>/rest/projects/document/{docid}/delete</url> 
+  <format default="json">argument</format> 
+  <authentication>user</authentication> 
+  <transaction>none</transaction>
+  <family>View Editor</family>
+  <args>
+  	<arg>
+  		<name>docid</name>
+  		<description>The document id being deleted</description>
+  	</arg>
+  	
+  </args>
+</webscript>

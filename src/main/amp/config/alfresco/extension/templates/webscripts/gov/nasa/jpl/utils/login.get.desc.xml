@@ -1,0 +1,9 @@
+<webscript>
+  <shortname>Login Webscript</shortname>
+  <description>dummy page to check user login credentials</description>
+  <url>/checklogin</url>
+  <authentication>user</authentication>
+  <format default="json">argument</format>
+  <family>EMS Utils</family>
+  <transaction>none</transaction>
+</webscript>

@@ -1,0 +1,65 @@
+{"elements": [
+    {
+        "qualifiedId": "/europa/123456/300",
+        "qualifiedName": "/europa/JW_TEST/300",
+        "name": "300",
+        "owner": "123456",
+        "documentation": "something",
+        "sysmlid": "300",
+        "specialization": {
+            "propertyType": null,
+            "isSlot": false,
+            "isDerived": false,
+            "value": [{
+                "valueExpression": null,
+                "string": "dlam_string",
+                "type": "LiteralString"
+            }],
+            "type": "Property"
+        },
+        "editable": true,
+        "creator": "admin"
+    },
+    {
+        "qualifiedId": "/europa/123456",
+        "qualifiedName": "/europa/JW_TEST",
+        "name": "JW_TEST",
+        "owner": null,
+        "sysmlid": "123456",
+        "editable": true,
+        "creator": "admin"
+    },
+    {
+        "qualifiedId": "/europa/123456/dlam",
+        "qualifiedName": "/europa/JW_TEST/dlam",
+        "name": "dlam",
+        "owner": "123456",
+        "documentation": "to make compatible with value specs (this is just a Element)",
+        "sysmlid": "dlam",
+        "specialization": {"type": "Element"},
+        "editable": true,
+        "creator": "admin"
+    },
+    {
+        "qualifiedId": "/europa/123456/4000",
+        "qualifiedName": "/europa/JW_TEST/400",
+        "name": "400",
+        "owner": "123456",
+        "documentation": "4something",
+        "sysmlid": "4000",
+        "specialization": {
+            "propertyType": null,
+            "isSlot": false,
+            "isDerived": false,
+            "value": [{
+                "valueExpression": null,
+                "string": "dlam_string",
+                "type": "LiteralString"
+            }],
+            "type": "Property"
+        },
+        "editable": true,
+        "creator": "admin"
+    }
+]}
+200

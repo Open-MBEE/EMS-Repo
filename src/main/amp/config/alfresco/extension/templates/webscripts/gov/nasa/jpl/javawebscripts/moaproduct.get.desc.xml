@@ -1,0 +1,17 @@
+<webscript> 
+  <shortname>Get Mother of All Products</shortname> 
+  <description>
+  Retrieves everything in a product, views, elements, snapshots, etc. - look at element and view get respectively
+  </description>
+  <url>/ve/products/{id}</url>
+  <format default="html">argument</format> 
+  <authentication>user</authentication> 
+  <transaction>none</transaction>
+  <family>EMS Java Read Webscripts</family>
+  <args>
+  	<arg>
+  		<name>id</name>
+  		<description>Product Id to retrieve the entire product information for.</description>
+  	</arg>
+  </args>
+</webscript>

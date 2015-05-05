@@ -1,0 +1,24 @@
+<webscript>
+	<shortname>Post a configuration</shortname>
+    <description>
+		Post a configuration with this format.
+		{  
+			"name": configurationName,
+			"description": configurationDescription,
+			"nodeid": (optional) noderef ID // if provided, server considers this an update,
+			"products": (optional) [ // list of products to be generated (should not be intermingled with snapshots)
+				productId,
+				...
+			],
+			"snapshots": (optional) [  // list of snapshots to be included (should not be intermingled with products)
+				snapshotId,
+				...
+			]
+		}
+  		</description>
+  		<url>/javawebscripts/configurations/{siteName}</url>
+  		<format default="json">argument</format>
+  		<authentication>user</authentication>
+        <transaction>none</transaction>
+  		<family>EMS Java Webscripts</family>
+ </webscript>

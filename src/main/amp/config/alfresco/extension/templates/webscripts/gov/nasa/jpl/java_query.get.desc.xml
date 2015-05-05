@@ -1,0 +1,8 @@
+<webscript>
+  <shortname>Java evaluator</shortname>
+  <description>Evaluates a java expression</description>
+  <url>/java_query</url>
+  <authentication>user</authentication>
+  <format default="html">argument</format>
+  <family>Alfresco Java-Backed WebScripts Demo</family>
+</webscript>

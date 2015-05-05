@@ -1,0 +1,11 @@
+<webscript>
+	<shortname>get projects</shortname>
+    <description>
+    	get projects
+	</description>
+  	<url>/workspaces/{workspaceId}/sites/{siteId}/projects</url>
+  	<format default="json">argument</format>
+  	<authentication>user</authentication>
+  	<transaction>none</transaction>
+  	<family>MMS REST API</family>
+ </webscript>

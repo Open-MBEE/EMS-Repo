@@ -1,0 +1,11 @@
+<webscript>
+	<shortname>get changeset with {changesetId}</shortname>
+    <description>
+    	get changeset with {changesetId}
+	</description>
+  	<url>/workspaces/{workspaceId}/changesets/{changesetId}</url>
+  	<format default="json">argument</format>
+  	<authentication>user</authentication>
+  	<transaction>none</transaction>
+  	<family>MMS REST API</family>
+ </webscript>

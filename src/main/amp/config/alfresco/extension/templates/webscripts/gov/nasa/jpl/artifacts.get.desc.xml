@@ -1,0 +1,20 @@
+<webscript>
+  <shortname>Artifact Check</shortname>
+  <description>Checks if artifact exists. Returns status code 200 if found, 404 if not</description>
+  <url>/artifacts/{path}?cs={cs?}&amp;extension={extension?}</url>
+  <authentication>user</authentication>
+  <args>
+  	<arg>
+  		<name>id</name>
+  		<description>Artifact name minus the extension</description>
+  	</arg>
+  	<arg>
+  		<name>cs</name>
+  		<description>Artifact checksum</description>
+  	</arg>
+  	<arg>
+  		<name>extension</name>
+  		<description>Artifact file type extension (to be added to the name when checked)</description>
+  	</arg>
+  </args>
+</webscript>

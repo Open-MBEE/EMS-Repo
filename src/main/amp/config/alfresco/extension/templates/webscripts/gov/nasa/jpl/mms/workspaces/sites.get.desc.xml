@@ -1,0 +1,17 @@
+<webscript>
+	<shortname>get sites</shortname>
+    <description> Return all sites in the workspace
+	{"sites": [
+	  {
+	      "sysmlid": sysmlid,
+	      "name": name,
+	      "parent": parent
+	  }, ...  
+	]}
+  	</description>
+  	<url>/workspaces/{workspaceId}/sites</url>
+  	<format default="json">argument</format>
+  	<authentication>user</authentication>
+  	<transaction>none</transaction>
+  	<family>MMS REST API</family>
+ </webscript>

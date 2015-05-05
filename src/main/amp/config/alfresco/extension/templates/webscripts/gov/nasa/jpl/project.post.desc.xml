@@ -1,0 +1,28 @@
+<webscript> 
+  <shortname>Post project organization</shortname> 
+  <description>Handles posting of project/volume/doc organization</description>
+  <url>/rest/projects/{projectid}</url> 
+  <format default="json">argument</format> 
+  <authentication>user</authentication> 
+  <transaction>none</transaction>
+  <family>View Editor</family>
+  <args>
+  	<arg>
+  		<name>projectid</name>
+  		<description>The MD ID of the project being posted</description>
+  	</arg>
+  	<arg>
+  		<name>posted content</name>
+  		<description>The request body of the post as json (pairs in parenthesis are conditional):
+  		{
+	 		"name" : projectname,
+	 		"volumes": {mdid: volumename},
+	 		"volume2volumes": {volumeid: [volumeid, ...], ...},
+	 		"documents": [actual documentview id, ...],
+	 		"volume2documents": {volumeid: [documentid], ...},
+	 		"projectVolumes": [volumeid,...]
+	 	}
+  		</description>
+  	</arg>
+  </args>
+</webscript>

@@ -1,0 +1,21 @@
+<webscript> 
+  <shortname>Add Document</shortname> 
+  <description>organize a document to a volume</description>
+  <url>/rest/projects/document/{docid}</url> 
+  <format default="json">argument</format> 
+  <authentication>user</authentication> 
+  <transaction>none</transaction>
+  <family>View Editor</family>
+  <args>
+  	<arg>
+  		<name>docid</name>
+  		<description>The document id being organized</description>
+  	</arg>
+  	<arg>
+  		<name>posted content</name>
+  		<description>The request body of the post is just the volume id to put under
+  	
+  		</description>
+  	</arg>
+  </args>
+</webscript>

@@ -1,0 +1,11 @@
+<webscript>
+	<shortname>delete element with {elementId}</shortname>
+    <description>
+    	delete element with {elementId}
+	</description>
+  	<url>/workspaces/{workspaceId}/elements/{elementId}</url>
+  	<format default="json">argument</format>
+  	<authentication>user</authentication>
+    <transaction>none</transaction>
+  	<family>MMS REST API</family>
+ </webscript>

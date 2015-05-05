@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<link rel="stylesheet" href="vendor/bootstrap/css/bootstrap.min.css">
+</head>
+<body>
+
+	<!-- application template -->
+	<script type="text/x-handlebars">
+		<div class="container">
+			<div class="row">
+		        <div class="col-md-8">
+					{{outlet}}
+				</div>
+			</div>
+		</div>
+	</script>
+
+	<!-- index templates -->
+	<script type="text/x-handlebars" data-template-name="index">
+		This is the index page
+	</script>
+
+	<!-- document templates -->
+	<script type="text/x-handlebars" data-template-name="documents">
+		This is the documents list page
+		<ul>
+		{{#each}}
+			<li> {{#link-to 'document' this}} {{this.id}} {{/link-to}}</li>
+		{{/each}}
+		</ul>
+	</script>
+
+	<script type="text/x-handlebars" data-template-name="document">
+		This is the document view page for id {{id}} and title '{{title}}'
+	</script>
+
+	<!-- view templates -->
+	<script type="text/x-handlebars" data-template-name="views">
+		This is the views list page
+		<ul>
+		{{#each}}
+			<li> {{#link-to 'view' this}} {{this.id}} {{/link-to}}</li>
+		{{/each}}
+		</ul>
+	</script>
+
+	<script type="text/x-handlebars" data-template-name="view">
+		This is the view view page for id {{id}}
+	</script>
+
+	<!-- element templates -->
+	<script type="text/x-handlebars" data-template-name="elements">
+		This is the elements list page
+		<ul>
+		{{#each}}
+			<li> {{#link-to 'element' this}} {{this.id}} {{/link-to}}</li>
+		{{/each}}
+		</ul>
+	</script>
+
+	<script type="text/x-handlebars" data-template-name="element">
+		This is the element view page for id {{id}}
+	</script>
+
+
+
+	<script type="text/javascript" src='vendor/jquery/jquery-1.10.2.js'></script>
+	<script type="text/javascript" src="vendor/handlebars/handlebars-1.0.0.js"></script>
+	<script type="text/javascript" src="vendor/ember/ember.js"></script>
+	<script type="text/javascript" src="vendor/ember/ember-data.js"></script>
+	<script type="text/javascript" src='vendor/bootstrap/js/bootstrap.js'></script>
+	<script type="text/javascript" src='vendor/bootstrap-wysiwyg/bootstrap-wysiwyg.js'></script>
+	<script type="text/javascript" src='vendor/underscore/underscore.js'></script>
+
+	<script src="src/adapters/alfresco_adapter.js"></script>
+	<script src="src/application.js"></script>
+	<script src="src/router.js"></script>
+	<script src="src/models/element.js"></script>
+	<script src="src/models/view.js"></script>
+	<script src="src/models/document.js"></script>
+	<script src="src/controllers/element_controller.js"></script>
+	<script src="src/controllers/view_controller.js"></script>
+	<script src="src/controllers/document_controller.js"></script>
+
+	<!--
+	<script type="text/javascript" src='../vendor/backbone/backbone.js'></script>
+	<script type="text/javascript" src='../vendor/purl/purl.js'></script> 
+	<script type="text/javascript" src='../src/application.min.js'></script>
+	-->
+	
+</body>
+</html>

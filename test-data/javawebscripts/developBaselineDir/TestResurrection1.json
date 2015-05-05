@@ -1,0 +1,66 @@
+{"elements": [
+    {
+        "qualifiedId": "/europa/123456/parentToDelete1/parentToDelete2",
+        "name": "parentToDelete2",
+        "qualifiedName": "/europa/JW_TEST2/parentToDelete1/parentToDelete2",
+        "sysmlid": "parentToDelete2",
+        "documentation": "Parent 2",
+        "owner": "parentToDelete1",
+        "specialization": {
+            "propertyType": null,
+            "isDerived": false,
+            "isSlot": false,
+            "value": [{
+                "valueExpression": null,
+                "string": "gg_string2",
+                "type": "LiteralString"
+            }],
+            "type": "Property"
+        },
+        "editable": true,
+        "creator": "admin",
+    },
+    {
+        "qualifiedId": "/europa/123456/parentToDelete1",
+        "name": "parentToDelete1",
+        "qualifiedName": "/europa/JW_TEST2/parentToDelete1",
+        "sysmlid": "parentToDelete1",
+        "documentation": "Parent 1",
+        "owner": "123456",
+        "specialization": {
+            "propertyType": null,
+            "isDerived": false,
+            "isSlot": false,
+            "value": [{
+                "valueExpression": null,
+                "string": "gg_string",
+                "type": "LiteralString"
+            }],
+            "type": "Property"
+        },
+        "editable": true,
+        "creator": "admin",
+    },
+    {
+        "qualifiedId": "/europa/123456/parentToDelete1/parentToDelete2/childOfParentToDelete2",
+        "name": "childOfParentToDelete2",
+        "qualifiedName": "/europa/JW_TEST2/parentToDelete1/parentToDelete2/childOfParentToDelete2",
+        "sysmlid": "childOfParentToDelete2",
+        "documentation": "Child",
+        "owner": "parentToDelete2",
+        "specialization": {
+            "propertyType": null,
+            "isDerived": false,
+            "isSlot": false,
+            "value": [{
+                "valueExpression": null,
+                "string": "gg_string3",
+                "type": "LiteralString"
+            }],
+            "type": "Property"
+        },
+        "editable": true,
+        "creator": "admin",
+    }
+]}
+200
