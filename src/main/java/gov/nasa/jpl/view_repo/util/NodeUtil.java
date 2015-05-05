@@ -30,7 +30,6 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.UUID;
 import java.util.Vector;
@@ -540,10 +539,6 @@ public class NodeUtil {
         }
         return result;
     }
-    
-    protected static JSONObject simpleJsonObject = new JSONObject( new TreeMap<String,Integer>() {
-        { put("a",0); } 
-    });
     
     public static class CachedJsonObject extends JSONObject {
         static String replacement = "$%%$";
@@ -2130,8 +2125,9 @@ public class NodeUtil {
                                    true, getServices(), false );
        
        for ( NodeRef ref : refs ) {
-           siteNode = new EmsScriptNode(ref, services, response);
-           if ( siteNode.isSite() ) {
+           EmsScriptNode node = new EmsScriptNode(ref, services, response);
+           if ( node.isSite() ) {
+               siteNode = node;
                break;
            }
        }
@@ -3149,6 +3145,7 @@ public class NodeUtil {
                             }
                         }
                         else if (propVal instanceof List){
+                            @SuppressWarnings( "unchecked" )
                             List<NodeRef> nrList = (ArrayList<NodeRef>) propVal;
                             for (NodeRef propValRef : nrList) {
                                 if (propValRef != null && NodeUtil.scriptNodeExists( propValRef )) {
