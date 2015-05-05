@@ -93,6 +93,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.jsoup.Jsoup;
+import org.jsoup.nodes.Attributes;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.nodes.Node;
@@ -1921,16 +1922,22 @@ public class SnapshotPost extends AbstractJavaWebScript {
 		    			}
 	    				if(styl.contains("background-color:")){
 	    					backgroundColor = styl.substring("background-color:".length()).trim().replace(";", "");
-	    					if(!isEmphasis){ 
-	    						elemNew = new Element(Tag.valueOf("phrase"), "");
-	    						isEmphasis = true;
-	    					} 
+	    					if(backgroundColor.contains("rgb(")) backgroundColor = "";
+	    					else{
+		    					if(!isEmphasis){ 
+		    						elemNew = new Element(Tag.valueOf("phrase"), "");
+		    						isEmphasis = true;
+		    					}
+	    					}
 	    				}
 	    				if(styl.startsWith("color:")){
 	    					color = style.substring("color:".length()).trim().replace(";", "");
-	    					if(!isEmphasis){ 
-	    						elemNew = new Element(Tag.valueOf("phrase"), "");
-	    						isEmphasis = true;
+	    					if(color.contains("rgb(")) color = "";
+	    					else{
+		    					if(!isEmphasis){ 
+		    						elemNew = new Element(Tag.valueOf("phrase"), "");
+		    						isEmphasis = true;
+		    					}
 	    					}
 	    				}
 	    			}
@@ -1951,6 +1958,13 @@ public class SnapshotPost extends AbstractJavaWebScript {
     	removeHtmlTags(elem);
     }
 
+    private void removeHtmlAttributes(Element elem){
+    	Attributes attrs = elem.attributes();
+		for(org.jsoup.nodes.Attribute attr : attrs){
+			elem.removeAttr(attr.getKey());
+		}
+    }
+    
     private void removeHtmlTags(Element elem) throws Exception{
     	if(elem==null) return;
     	
@@ -1991,7 +2005,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
     		isDone = true;
 	    	list = body.select("itemizedlist");
 	    	list.addAll(body.select("orderedlist"));
-	    	list.addAll(body.select("tbody"));
+	    	list.addAll(body.select("utbody"));
 	    	list.addAll(body.select("listitem"));
 	    	list.addAll(body.select("row"));
 			for(Element item : list){
@@ -2000,7 +2014,10 @@ public class SnapshotPost extends AbstractJavaWebScript {
 						item.remove();
 						isDone = false;
 					}
-					else item.tagName("removalTag"); 
+					else{
+						removeHtmlAttributes(item);
+						item.tagName("removalTag");
+					}
 				}
 			}
 			if(isDone) break;
@@ -2021,9 +2038,12 @@ public class SnapshotPost extends AbstractJavaWebScript {
 		
     	// removes nested <para>
 		while(true){
-	    	list = body.select("para > para").tagName("removalTag");
-	    	list.addAll(body.select("emphasis > para").tagName("removalTag"));
+	    	list = body.select("para > para");	//.tagName("removalTag");
+	    	list.addAll(body.select("emphasis > para"));	//.tagName("removalTag"));
 	    	if(list.size() == 0) break;
+	    	for(Element elem : list){
+	    		removeHtmlAttributes(elem);
+	    	}
 	    	list.tagName("removalTag");
 		}
     }

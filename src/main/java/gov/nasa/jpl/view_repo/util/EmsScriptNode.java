@@ -1375,7 +1375,7 @@ public class EmsScriptNode extends ScriptNode implements
 
         ArrayList<NodeRef> oldChildren = this.getPropertyNodeRefs( "ems:ownedChildren",
                                                                    false, dateTime, findDeleted,
-                                                                   true, ws);
+                                                                   false, ws);
         if (oldChildren != null) {
             ownedChildren = oldChildren;
         }
