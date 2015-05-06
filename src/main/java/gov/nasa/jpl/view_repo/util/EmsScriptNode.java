@@ -3731,10 +3731,27 @@ public class EmsScriptNode extends ScriptNode implements
                                      Status status ) {
         if ( !hasPermission( permissions ) ) {
             if (response != null) {
+                
+                // Assume admin role to make sure getProperty() doesn't fail
+                // because of permissions.
+                String runAsUser = AuthenticationUtil.getRunAsUser();
+                boolean changeUser = !ADMIN_USER_NAME.equals( runAsUser );
+                if ( changeUser ) {
+                    AuthenticationUtil.setRunAsUser( ADMIN_USER_NAME );
+                }
+
+                // Get name
                 Object property = getProperty( Acm.ACM_NAME );
                 if (property == null) {
                     property = getProperty( Acm.CM_NAME );
                 }
+                
+                // Return to original running user.
+                if ( changeUser ) {
+                    AuthenticationUtil.setRunAsUser( runAsUser );
+                }
+
+                // Log warning for missing permissions.
                 if ( property != null ) {
                     String msg =
                             "Warning! No " + permissions.toUpperCase() + " priveleges to "
