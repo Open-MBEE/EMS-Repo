@@ -29,7 +29,6 @@
 
 package gov.nasa.jpl.view_repo.webscripts;
 
-import gov.nasa.jpl.mbee.util.Debug;
 import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.mbee.util.Timer;
 import gov.nasa.jpl.mbee.util.Utils;
@@ -92,55 +91,56 @@ public class ModelGet extends AbstractJavaWebScript {
 
 	@Override
 	protected boolean validateRequest(WebScriptRequest req, Status status) {
-	    String[] idKeys = {"modelid", "elementid", "elementId"};
-	    String modelId = null;
-	    for (String idKey: idKeys) {
-	        modelId = req.getServiceMatch().getTemplateVars().get( idKey );
-	        if (modelId != null) {
-	            break;
-	        }
-	    }
-
-		if (modelId == null) {
-			log(Level.ERROR, HttpServletResponse.SC_BAD_REQUEST, "Element id not specified.\n");
-			return false;
-		}
-
-        // get timestamp if specified
-        String timestamp = req.getParameter( "timestamp" );
-        Date dateTime = TimeUtils.dateFromTimestamp( timestamp );
-
-        EmsScriptNode modelRootNode = null;
-
-        WorkspaceNode workspace = getWorkspace( req );
-        boolean wsFound = workspace != null && workspace.exists();
-        if ( !wsFound ) {
-            String wsId = getWorkspaceId( req );
-            if ( wsId != null && wsId.equalsIgnoreCase( "master" ) ) {
-                wsFound = true;
-            } else {
-                log( Level.ERROR, HttpServletResponse.SC_NOT_FOUND, 
-                     "Workspace with id, %s not found", wsId
-                     + ( dateTime == null ? "" : " at " + dateTime ));
-                return false;
-            }
-        }
-        // need to find deleted elements in workspace, so can return not found rather than
-        // the node from parent workspace
-        boolean findDeleted = true;
-        if ( wsFound ) modelRootNode = findScriptNodeById(modelId, workspace, dateTime, findDeleted);
-
-		if (modelRootNode == null || modelRootNode.isDeleted() ) {
-            log( Level.WARN,  HttpServletResponse.SC_NOT_FOUND,
-                 "Element with id, %s not found", modelId
-                 + ( dateTime == null ? "" : " at " + dateTime ));
-			return false;
-		}
-
-		// TODO: need to check permissions on every node ref - though it looks like this might throw an error
-		if (!checkPermissions(modelRootNode, PermissionService.READ)) {
-			return false;
-		}
+	    // This is all unnecessary as it's already checked in the handle
+//	    String[] idKeys = {"modelid", "elementid", "elementId"};
+//	    String modelId = null;
+//	    for (String idKey: idKeys) {
+//	        modelId = req.getServiceMatch().getTemplateVars().get( idKey );
+//	        if (modelId != null) {
+//	            break;
+//	        }
+//	    }
+//
+//		if (modelId == null) {
+//			log(Level.ERROR, HttpServletResponse.SC_BAD_REQUEST, "Element id not specified.\n");
+//			return false;
+//		}
+//
+//        // get timestamp if specified
+//        String timestamp = req.getParameter( "timestamp" );
+//        Date dateTime = TimeUtils.dateFromTimestamp( timestamp );
+//
+//        EmsScriptNode modelRootNode = null;
+//
+//        WorkspaceNode workspace = getWorkspace( req );
+//        boolean wsFound = workspace != null && workspace.exists();
+//        if ( !wsFound ) {
+//            String wsId = getWorkspaceId( req );
+//            if ( wsId != null && wsId.equalsIgnoreCase( "master" ) ) {
+//                wsFound = true;
+//            } else {
+//                log( Level.ERROR, HttpServletResponse.SC_NOT_FOUND, 
+//                     "Workspace with id, %s not found", wsId
+//                     + ( dateTime == null ? "" : " at " + dateTime ));
+//                return false;
+//            }
+//        }
+//        // need to find deleted elements in workspace, so can return not found rather than
+//        // the node from parent workspace
+//        boolean findDeleted = true;
+//        if ( wsFound ) modelRootNode = findScriptNodeById(modelId, workspace, dateTime, findDeleted);
+//
+//		if (modelRootNode == null || modelRootNode.isDeleted() ) {
+//            log( Level.WARN,  HttpServletResponse.SC_NOT_FOUND,
+//                 "Element with id, %s not found", modelId
+//                 + ( dateTime == null ? "" : " at " + dateTime ));
+//			return false;
+//		}
+//
+//		// TODO: need to check permissions on every node ref - though it looks like this might throw an error
+//		if (!checkPermissions(modelRootNode, PermissionService.READ)) {
+//			return false;
+//		}
 
 		return true;
 	}
@@ -173,21 +173,19 @@ public class ModelGet extends AbstractJavaWebScript {
 		setIsViewRequest(isViewRequest);
 
 		JSONArray elementsJson = new JSONArray();
-		if (validateRequest(req, status)) {
-		    elementsJson = handleRequest(req);
-		}
+	    elementsJson = handleRequest(req);
 
 		JSONObject top = NodeUtil.newJsonObject();
 		try {
 		    if (elementsJson.length() > 0) {
 		        top.put("elements", elementsJson);
-		    } else {
-		        log(Level.WARN, HttpServletResponse.SC_NOT_FOUND, "No elements found");
-		        //model.put("res", response.toString());
 		    }
 	        if (!Utils.isNullOrEmpty(response.toString())) top.put("message", response.toString());
-	        if ( prettyPrint ) model.put("res", NodeUtil.jsonToString( top, 4 ));
-	        else model.put("res", NodeUtil.jsonToString( top ));
+	        if ( prettyPrint ) { 
+	            model.put("res", NodeUtil.jsonToString( top, 4 ));
+	        } else {
+	            model.put("res", NodeUtil.jsonToString( top ));
+	        }
 		} catch (JSONException e) {
             log(Level.ERROR, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Could not create JSONObject");
 			model.put( "res", createResponseJson() );
@@ -238,35 +236,25 @@ public class ModelGet extends AbstractJavaWebScript {
             // see if prettyPrint default is overridden and change
             prettyPrint = getBooleanArg(req, "pretty", prettyPrint );
 
-            if (Debug.isOn()) System.out.println("modelId = " + modelId );
-            EmsScriptNode modelRootNode = findScriptNodeById(modelId, workspace, dateTime, false);
-            if (Debug.isOn()) System.out.println("modelRootNode = " + modelRootNode );
+            Long depth = getDepthFromRequest(req);
+            boolean includeQualified = getBooleanArg(req, "qualified", true);
+
+            
+            if (logger.isDebugEnabled()) logger.debug("modelId = " + modelId );
+            boolean findDeleted = depth == 0 ? true : false;
+            EmsScriptNode modelRootNode = findScriptNodeById(modelId, workspace, dateTime, findDeleted);
+            if (logger.isDebugEnabled()) logger.debug("modelRootNode = " + modelRootNode );
 
             if ( modelRootNode == null ) {
                     log( Level.ERROR, HttpServletResponse.SC_NOT_FOUND,
                          "Element %s not found", modelId
                          + ( dateTime == null ? "" : " at " + dateTime ));
                     return new JSONArray();
+            } else if ( modelRootNode.isDeleted() ) {
+                log(Level.DEBUG, HttpServletResponse.SC_GONE, "Element exists, but is deleted.");
+                return new JSONArray();
             }
 
-            String depthParam = req.getParameter( "depth" );
-            Long depth = null;
-            if (depthParam != null) {
-                try {
-                    depth = Long.parseLong( req.getParameter("depth") );
-                } catch (NumberFormatException nfe) {
-                    // don't do any recursion, ignore the depth
-                    log(Level.WARN, HttpServletResponse.SC_BAD_REQUEST, "Bad depth specified, returning depth 0");
-                }
-            }
-            // recurse default is false
-            boolean recurse = getBooleanArg(req, "recurse", false);
-            // for backwards compatiblity convert recurse to infinite depth (this overrides
-            // any depth setting)
-            if (recurse) {
-                depth = new Long(-1);
-            }
-            boolean includeQualified = getBooleanArg(req, "qualified", true);
 
             if (isViewRequest) {
                 handleViewHierarchy(modelRootNode, workspace, dateTime, depth, new Long(0));
@@ -284,6 +272,38 @@ public class ModelGet extends AbstractJavaWebScript {
 
 
 	/**
+	 * Get the depth to recurse to from the request parameter.
+	 * @param req
+	 * @return Depth < 0 is infinite recurse, depth = 0 is just the element (if no request parameter)
+	 */
+	private Long getDepthFromRequest( WebScriptRequest req ) {
+	    Long depth = null;
+        String depthParam = req.getParameter( "depth" );
+        if (depthParam != null) {
+            try {
+                depth = Long.parseLong( req.getParameter("depth") );
+            } catch (NumberFormatException nfe) {
+                // don't do any recursion, ignore the depth
+                log(Level.WARN, HttpServletResponse.SC_BAD_REQUEST, "Bad depth specified, returning depth 0");
+            }
+        }
+
+        // recurse default is false
+        boolean recurse = getBooleanArg(req, "recurse", false);
+        // for backwards compatiblity convert recurse to infinite depth (this overrides
+        // any depth setting)
+        if (recurse) {
+            depth = new Long(-1);
+        }
+        
+        if (depth == null) {
+            depth = new Long(0);
+        }
+        
+        return depth;
+    }
+
+    /**
 	 * Recurse a view hierarchy to get all allowed elements
 	 * @param root		Root view to find elements for
 	 * @param recurse	If true, find elements for children views
@@ -428,4 +448,5 @@ public class ModelGet extends AbstractJavaWebScript {
 	public void setIsViewRequest(boolean flag) {
 	    isViewRequest = flag;
 	}
+	
 }
