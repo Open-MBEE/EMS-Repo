@@ -164,7 +164,6 @@ public class ProjectGet extends AbstractJavaWebScript {
         }
 
         if (checkPermissions(projectNode, PermissionService.READ)) {
-            log(Level.INFO, HttpServletResponse.SC_OK, "Found project");
 			json = NodeUtil.newJsonObject();
             JSONArray elements = new JSONArray();
             JSONObject project = new JSONObject();

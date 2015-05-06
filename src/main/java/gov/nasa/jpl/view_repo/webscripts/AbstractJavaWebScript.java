@@ -83,11 +83,8 @@ import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.site.SiteInfo;
 import org.alfresco.service.cmr.site.SiteVisibility;
-//import org.apache.log4j.Level;
 import org.apache.log4j.*;
-//import org.apache.log4j.Logger;
 import org.springframework.extensions.webscripts.Cache;
-import org.springframework.extensions.webscripts.DeclarativeWebScript;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
 
@@ -460,14 +457,11 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
     
     // If no need for string formatting (calls with no string concatenation)
     protected void log(Level level, int code, String msg) {
+        String levelMessage = addLevelInfoToMsg (level,msg); 
+        updateResponse(code, levelMessage);
 		if (level.toInt() >= logger.getLevel().toInt()) {
 			// print to response stream if >= existing log level
-			String levelMessage = addLevelInfoToMsg (level,msg); 
-			log(code,levelMessage);
-			// print to console if log level >= Warning (i.e. Error, Fatal, or Off)
-			if (level.toInt() >= Level.WARN.toInt()) {
-				 log (level, levelMessage);
-			}
+			log (level, levelMessage);
 		}
 	}
 
@@ -485,7 +479,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
 	// only logging code and a message (no loglevel, and thus, no check for log level status)
 	protected void log(int code, String msg, Object...params) {
 		String formattedMsg = formatMessage(msg,params); //formatter.format (msg,params).toString();
-		log (code,formattedMsg);
+		updateResponse (code,formattedMsg);
 	}
 	
 	protected void log(String msg, Object...params) {
@@ -493,7 +487,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
 		log (formattedMsg);
 	}
 	
-	protected void log ( int code, String msg) {
+	protected void updateResponse ( int code, String msg) {
 		response.append(msg);
 		responseStatus.setCode(code);
 		responseStatus.setMessage(msg);
