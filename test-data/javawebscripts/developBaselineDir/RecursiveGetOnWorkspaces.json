@@ -1,11 +1,14 @@
 {"elements": [
     {
         "qualifiedId": "/europa/123456/300/301/302",
-        "name": "302",
         "qualifiedName": "/europa/JW_TEST/300/301/302",
         "sysmlid": "302",
-        "documentation": "to",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "302",
         "owner": "301",
+        "documentation": "to",
         "specialization": {
             "propertyType": null,
             "isDerived": false,
@@ -16,16 +19,15 @@
                 "type": "LiteralString"
             }],
             "type": "Property"
-        },
-        "editable": true,
-        "creator": "admin",
+        }
     },
     {
+        "modifier": "admin",
         "qualifiedId": "/europa/123456/300/301/302/303/304",
-        "qualifiedName": "/europa/JW_TEST/300/301/302/303/304",
         "name": "304",
-        "owner": "303",
+        "qualifiedName": "/europa/JW_TEST/300/301/302/303/304",
         "documentation": "about",
+        "owner": "303",
         "sysmlid": "304",
         "specialization": {
             "propertyType": null,
@@ -43,11 +45,14 @@
     },
     {
         "qualifiedId": "/europa/123456/300/301/302/303",
-        "name": "303",
         "qualifiedName": "/europa/JW_TEST/300/301/302/303",
         "sysmlid": "303",
-        "documentation": "talk",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "303",
         "owner": "302",
+        "documentation": "talk",
         "specialization": {
             "propertyType": null,
             "isDerived": false,
@@ -58,12 +63,11 @@
                 "type": "LiteralString"
             }],
             "type": "Property"
-        },
-        "editable": true,
-        "creator": "admin",
+        }
     },
     {
         "qualifiedId": "/europa/123456/300/301/302/y",
+        "modifier": "admin",
         "qualifiedName": "/europa/JW_TEST/300/301/302/null",
         "owner": "302",
         "documentation": "y is y",

@@ -1,10 +1,13 @@
 {"elements": [{
     "qualifiedId": "/no_site/no_site_no_project/holding_bin_no_site_no_project/x",
-    "name": "300",
     "qualifiedName": "/no_site/no_site_no_project/holding_bin/300",
     "sysmlid": "x",
-    "documentation": "x is x",
+    "editable": true,
+    "creator": "admin",
+    "modifier": "admin",
+    "name": "300",
     "owner": "holding_bin_no_site_no_project",
+    "documentation": "x is x",
     "specialization": {
         "propertyType": null,
         "isDerived": false,
@@ -15,8 +18,6 @@
             "type": "LiteralString"
         }],
         "type": "Property"
-    },
-    "editable": true,
-    "creator": "admin",
+    }
 }]}
 200

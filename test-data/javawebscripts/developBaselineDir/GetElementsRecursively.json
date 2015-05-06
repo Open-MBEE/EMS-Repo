@@ -1,10 +1,11 @@
 {"elements": [
     {
+        "modifier": "admin",
         "qualifiedId": "/europa/123456/300",
-        "qualifiedName": "/europa/JW_TEST/300",
         "name": "300",
-        "owner": "123456",
+        "qualifiedName": "/europa/JW_TEST/300",
         "documentation": "something",
+        "owner": "123456",
         "sysmlid": "300",
         "specialization": {
             "propertyType": null,
@@ -21,11 +22,12 @@
         "creator": "admin"
     },
     {
+        "modifier": "admin",
         "qualifiedId": "/europa/123456/300/301/302",
-        "qualifiedName": "/europa/JW_TEST/300/301/302",
         "name": "302",
-        "owner": "301",
+        "qualifiedName": "/europa/JW_TEST/300/301/302",
         "documentation": "to",
+        "owner": "301",
         "sysmlid": "302",
         "specialization": {
             "propertyType": null,
@@ -43,11 +45,14 @@
     },
     {
         "qualifiedId": "/europa/123456/300/301",
-        "name": "301",
         "qualifiedName": "/europa/JW_TEST/300/301",
         "sysmlid": "301",
-        "documentation": "else",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "301",
         "owner": "300",
+        "documentation": "else",
         "specialization": {
             "displayedElements": [
                 "301",
@@ -75,16 +80,15 @@
             }],
             "noSections": ["302"],
             "type": "Product"
-        },
-        "editable": true,
-        "creator": "admin",
+        }
     },
     {
+        "modifier": "admin",
         "qualifiedId": "/europa/123456/300/301/302/303/304",
-        "qualifiedName": "/europa/JW_TEST/300/301/302/303/304",
         "name": "304",
-        "owner": "303",
+        "qualifiedName": "/europa/JW_TEST/300/301/302/303/304",
         "documentation": "about",
+        "owner": "303",
         "sysmlid": "304",
         "specialization": {
             "propertyType": null,
@@ -101,11 +105,12 @@
         "creator": "admin"
     },
     {
+        "modifier": "admin",
         "qualifiedId": "/europa/123456/300/301/302/303",
-        "qualifiedName": "/europa/JW_TEST/300/301/302/303",
         "name": "303",
-        "owner": "302",
+        "qualifiedName": "/europa/JW_TEST/300/301/302/303",
         "documentation": "talk",
+        "owner": "302",
         "sysmlid": "303",
         "specialization": {
             "propertyType": null,
@@ -122,6 +127,7 @@
         "creator": "admin"
     },
     {
+        "modifier": "admin",
         "qualifiedId": "/europa/123456",
         "name": "JW_TEST",
         "qualifiedName": "/europa/JW_TEST",
@@ -131,33 +137,24 @@
         "creator": "admin",
     },
     {
-        "qualifiedName": "/europa/JW_TEST/300/301/null",
-        "owner": "301",
-        "specialization": {
-            "valueExpression": null,
-            "string": "dlam_string",
-            "type": "LiteralString"
-        },
-        "editable": true,
-        "creator": "admin",
-    },
-    {
+        "modifier": "admin",
         "qualifiedId": "/europa/123456/dlam",
-        "qualifiedName": "/europa/JW_TEST/dlam",
         "name": "dlam",
-        "owner": "123456",
+        "qualifiedName": "/europa/JW_TEST/dlam",
         "documentation": "to make compatible with value specs (this is just a Element)",
+        "owner": "123456",
         "sysmlid": "dlam",
         "specialization": {"type": "Element"},
         "editable": true,
         "creator": "admin"
     },
     {
+        "modifier": "admin",
         "qualifiedId": "/europa/123456/4000",
-        "qualifiedName": "/europa/JW_TEST/400",
         "name": "400",
-        "owner": "123456",
+        "qualifiedName": "/europa/JW_TEST/400",
         "documentation": "4something",
+        "owner": "123456",
         "sysmlid": "4000",
         "specialization": {
             "propertyType": null,
@@ -174,11 +171,12 @@
         "creator": "admin"
     },
     {
+        "modifier": "admin",
         "qualifiedId": "/europa/123456/300/500",
-        "qualifiedName": "/europa/JW_TEST/300/500",
         "name": "500",
-        "owner": "300",
+        "qualifiedName": "/europa/JW_TEST/300/500",
         "documentation": "directed_relationship",
+        "owner": "300",
         "sysmlid": "500",
         "specialization": {
             "source": "302",
@@ -189,11 +187,12 @@
         "creator": "admin"
     },
     {
+        "modifier": "admin",
         "qualifiedId": "/europa/123456/4000/401/402/403/404",
-        "qualifiedName": "/europa/JW_TEST/400/401/402/403/404",
         "name": "404",
-        "owner": "403",
+        "qualifiedName": "/europa/JW_TEST/400/401/402/403/404",
         "documentation": "4about",
+        "owner": "403",
         "sysmlid": "404",
         "specialization": {
             "propertyType": null,
@@ -211,11 +210,14 @@
     },
     {
         "qualifiedId": "/europa/123456/4000/401",
-        "name": "401",
         "qualifiedName": "/europa/JW_TEST/400/401",
         "sysmlid": "401",
-        "documentation": "4else",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "401",
         "owner": "4000",
+        "documentation": "4else",
         "specialization": {
             "displayedElements": [
                 "401",
@@ -243,16 +245,15 @@
             }],
             "noSections": ["402"],
             "type": "Product"
-        },
-        "editable": true,
-        "creator": "admin",
+        }
     },
     {
+        "modifier": "admin",
         "qualifiedId": "/europa/123456/4000/401/402/403",
-        "qualifiedName": "/europa/JW_TEST/400/401/402/403",
         "name": "403",
-        "owner": "402",
+        "qualifiedName": "/europa/JW_TEST/400/401/402/403",
         "documentation": "4talk",
+        "owner": "402",
         "sysmlid": "403",
         "specialization": {
             "propertyType": null,
@@ -269,11 +270,24 @@
         "creator": "admin"
     },
     {
+        "modifier": "admin",
+        "qualifiedName": "/europa/JW_TEST/300/301/null",
+        "owner": "301",
+        "specialization": {
+            "valueExpression": null,
+            "string": "dlam_string",
+            "type": "LiteralString"
+        },
+        "editable": true,
+        "creator": "admin",
+    },
+    {
+        "modifier": "admin",
         "qualifiedId": "/europa/123456/4000/401/402",
-        "qualifiedName": "/europa/JW_TEST/400/401/402",
         "name": "402",
-        "owner": "401",
+        "qualifiedName": "/europa/JW_TEST/400/401/402",
         "documentation": "4to",
+        "owner": "401",
         "sysmlid": "402",
         "specialization": {
             "propertyType": null,
@@ -290,6 +304,7 @@
         "creator": "admin"
     },
     {
+        "modifier": "admin",
         "qualifiedName": "/europa/JW_TEST/400/401/null",
         "owner": "401",
         "specialization": {

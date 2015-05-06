@@ -45,7 +45,16 @@
                 },
                 "creator": {
                     "type": "string",
-                    "description": "Last modifier of the element"
+                    "description": "Creator of the element"
+                },
+                "created": {
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "Creation time of the element"
+                },
+                "modifier": {
+                    "type": "string",
+                    "description": "Modifier of the element"
                 },
                 "modified": {
                     "type": "string",

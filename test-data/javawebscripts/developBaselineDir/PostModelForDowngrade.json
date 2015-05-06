@@ -1,4 +1,5 @@
 {"elements": [{
+    "modifier": "admin",
     "qualifiedId": "/no_site/no_site_no_project/holding_bin_no_site_no_project/54321",
     "qualifiedName": "/no_site/no_site_no_project/holding_bin/null",
     "sysmlid": "54321",

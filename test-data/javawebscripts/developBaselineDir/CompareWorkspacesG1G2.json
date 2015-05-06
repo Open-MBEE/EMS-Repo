@@ -4,11 +4,14 @@
         "name": "wsG1",
         "elements": [
             {
-                "name": "300",
                 "qualifiedName": "/europa/JW_TEST/300",
                 "sysmlid": "300",
-                "documentation": "something",
+                "editable": true,
+                "creator": "admin",
+                "modifier": "admin",
+                "name": "300",
                 "owner": "123456",
+                "documentation": "something",
                 "specialization": {
                     "propertyType": null,
                     "isDerived": false,
@@ -19,16 +22,17 @@
                         "type": "LiteralString"
                     }],
                     "type": "Property"
-                },
-                "editable": true,
-                "creator": "admin",
+                }
             },
             {
-                "name": "301",
                 "qualifiedName": "/europa/JW_TEST/300/301",
                 "sysmlid": "301",
-                "documentation": "else",
+                "editable": true,
+                "creator": "admin",
+                "modifier": "admin",
+                "name": "301",
                 "owner": "300",
+                "documentation": "else",
                 "specialization": {
                     "displayedElements": [
                         "301",
@@ -56,16 +60,17 @@
                     }],
                     "noSections": ["302"],
                     "type": "Product"
-                },
-                "editable": true,
-                "creator": "admin",
+                }
             },
             {
-                "name": "302",
                 "qualifiedName": "/europa/JW_TEST/300/301/302",
                 "sysmlid": "302",
-                "documentation": "to",
+                "editable": true,
+                "creator": "admin",
+                "modifier": "admin",
+                "name": "302",
                 "owner": "301",
+                "documentation": "to",
                 "specialization": {
                     "propertyType": null,
                     "isDerived": false,
@@ -76,11 +81,10 @@
                         "type": "LiteralString"
                     }],
                     "type": "Property"
-                },
-                "editable": true,
-                "creator": "admin",
+                }
             },
             {
+                "modifier": "admin",
                 "name": "holding_bin",
                 "qualifiedName": "/no_site/no_site_no_project/holding_bin",
                 "sysmlid": "holding_bin_no_site_no_project",
@@ -90,11 +94,14 @@
                 "creator": "admin",
             },
             {
-                "name": "300",
                 "qualifiedName": "/no_site/no_site_no_project/holding_bin/300",
                 "sysmlid": "x",
-                "documentation": "x is x",
+                "editable": true,
+                "creator": "admin",
+                "modifier": "admin",
+                "name": "300",
                 "owner": "holding_bin_no_site_no_project",
+                "documentation": "x is x",
                 "specialization": {
                     "propertyType": null,
                     "isDerived": false,
@@ -105,9 +112,7 @@
                         "type": "LiteralString"
                     }],
                     "type": "Property"
-                },
-                "editable": true,
-                "creator": "admin",
+                }
             }
         ]
     },
@@ -115,6 +120,7 @@
         "deletedElements": [],
         "addedElements": [
             {
+                "modifier": "admin",
                 "qualifiedName": "/europa/JW_TEST/300/301/302/null",
                 "sysmlid": "y",
                 "documentation": "y is y",
@@ -134,6 +140,7 @@
                 "creator": "admin",
             },
             {
+                "modifier": "admin",
                 "qualifiedName": "/europa/JW_TEST/300/301/302/null",
                 "sysmlid": "z",
                 "documentation": "z is z",

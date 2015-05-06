@@ -2236,7 +2236,10 @@ public class EmsScriptNode extends ScriptNode implements
         if ( this == null || !this.exists() ) return;
         // mandatory elements put in directly
         elementJson.put( Acm.JSON_ID, this.getProperty( Acm.ACM_ID ) );
-        elementJson.put( "creator", this.getProperty( "cm:modifier" ) );
+        EmsScriptNode originalNode = this.getOriginalNode();
+        elementJson.put( "creator", originalNode.getProperty( "cm:creator" ) );
+        elementJson.put( "created", originalNode.getProperty( "cm:created" ) );
+        elementJson.put( "modifier", this.getProperty( "cm:modifier" ) );
         elementJson.put( Acm.JSON_LAST_MODIFIED,
                 TimeUtils.toTimestamp( this.getLastModified( dateTime) ) );
 
@@ -5876,4 +5879,23 @@ public class EmsScriptNode extends ScriptNode implements
         return false;
     }
 
+    /**
+     * Utility to find the original node - needed for getting creation time
+     * @param node
+     * @return
+     */
+    public EmsScriptNode getOriginalNode() {
+        EmsScriptNode node = this;
+        while (true) {
+            NodeRef ref = (NodeRef) node.getNodeRefProperty( "ems:source", true, null, 
+                                                             true, true, null );
+            if (ref != null) {
+                node = new EmsScriptNode(ref, services, response);
+            } else {
+                break;
+            }
+        }
+        
+        return node;
+    }
 }

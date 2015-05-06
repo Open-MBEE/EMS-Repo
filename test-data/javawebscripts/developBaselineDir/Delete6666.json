@@ -8,6 +8,7 @@
       "sysmlid": "6666",
       "editable": true,
       "creator": "admin",
+      "modifier": "admin",
       "name": "6666_name",
       "owner": "holding_bin_no_site_no_project",
       "documentation": "",
@@ -32,7 +33,7 @@
   "workspace2": {
     "deletedElements": [{
       "sysmlid": "6666",
-      "creator": "admin",
+      "creator": "admin"
     }],
     "addedElements": [],
     "conflictedElements": [],

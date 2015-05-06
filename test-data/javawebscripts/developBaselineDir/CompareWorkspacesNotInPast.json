@@ -3,10 +3,11 @@
         "qualifiedName": "master",
         "name": "master",
         "elements": [{
-            "qualifiedName": "/europa/JW_TEST/notInThePast",
+            "modifier": "admin",
             "name": "notInThePast",
-            "owner": "123456",
+            "qualifiedName": "/europa/JW_TEST/notInThePast",
             "documentation": "",
+            "owner": "123456",
             "sysmlid": "notInThePast",
             "specialization": {
                 "specification": {

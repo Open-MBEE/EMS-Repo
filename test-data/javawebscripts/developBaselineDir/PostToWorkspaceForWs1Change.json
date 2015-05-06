@@ -1,10 +1,13 @@
 {"elements": [{
     "qualifiedId": "/europa/123456/300/301/302/303",
-    "name": "303",
     "qualifiedName": "/europa/JW_TEST/300/301/302/303",
     "sysmlid": "303",
-    "documentation": "talk modified",
+    "editable": true,
+    "creator": "admin",
+    "modifier": "admin",
+    "name": "303",
     "owner": "302",
+    "documentation": "talk modified",
     "specialization": {
         "propertyType": null,
         "isDerived": false,
@@ -15,8 +18,6 @@
             "type": "LiteralString"
         }],
         "type": "Property"
-    },
-    "editable": true,
-    "creator": "admin",
+    }
 }]}
 200

@@ -1,4 +1,5 @@
 {"elements": [{
+    "modifier": "admin",
     "evaluationResult": 2,
     "qualifiedName": "/no_site/no_site_no_project/holding_bin/null",
     "owner": "holding_bin_no_site_no_project",
