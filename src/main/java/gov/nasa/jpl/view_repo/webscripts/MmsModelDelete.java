@@ -1,6 +1,7 @@
 package gov.nasa.jpl.view_repo.webscripts;
 
 import gov.nasa.jpl.mbee.util.Utils;
+import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.CommitUtil;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
@@ -208,6 +209,9 @@ public class MmsModelDelete extends AbstractJavaWebScript {
             // already been deleted in the current workspace.
             EmsScriptNode node = findScriptNodeById(id, workspace, null, true);
             if (node != null && node.exists()) {
+                // remove any site characterization information
+                ModelPost.handleSiteRemoval( node, workspace, services );
+                
                 String tmpProjectId = deleteNodeRecursively(node, workspace);
                 if ( null != tmpProjectId && null == projectId ) {
                     projectId = tmpProjectId;

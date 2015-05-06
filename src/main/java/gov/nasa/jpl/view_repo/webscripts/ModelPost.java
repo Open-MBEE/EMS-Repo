@@ -44,7 +44,6 @@ import gov.nasa.jpl.view_repo.util.ModStatus;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
 import gov.nasa.jpl.view_repo.util.WorkspaceDiff;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
-import gov.nasa.jpl.view_repo.util.NodeUtil.SearchType;
 import gov.nasa.jpl.view_repo.webscripts.util.ShareUtils;
 
 import java.util.ArrayList;
@@ -1993,101 +1992,115 @@ public class ModelPost extends AbstractJavaWebScript {
      * @param workspace
      */
     private void handleSitePackage(EmsScriptNode nodeToUpdate, WorkspaceNode workspace) {
-
         Boolean isSite = (Boolean) nodeToUpdate.getProperty( Acm.ACM_IS_SITE );
 
         if (isSite != null) {
             // Create site/permissions if needed:
             if (isSite) {
-                EmsScriptNode pkgSiteNode = createSitePkg(nodeToUpdate, workspace);
-
-                // Determine the parent package:
-                // Note: will do this everytime, even if the site package node already existed, as the parent site
-                //       could have changed with this post
-                EmsScriptNode pkgSiteParentNode = findParentPkgSite(nodeToUpdate, workspace, null);
-
-                // Add the children/parent properties:
-                if (pkgSiteParentNode != null && pkgSiteNode != null) {
-                    
-                    // If there was a old site parent on this node, and it is different than
-                    // the new one, then remove this child from it:
-                    EmsScriptNode oldPkgSiteParentNode = 
-                            pkgSiteNode.getPropertyElement( Acm.ACM_SITE_PARENT,
-                                                            true, null, null );
-                    if (oldPkgSiteParentNode != null && 
-                        !oldPkgSiteParentNode.equals( pkgSiteParentNode )) {
-                        
-                        oldPkgSiteParentNode.removeFromPropertyNodeRefs( Acm.ACM_SITE_CHILDREN, 
-                                                                         pkgSiteNode.getNodeRef() );
-                    }
-                    
-                    // Check that parent site children are children of this package:
-                    // This is for the case that this site package being created is higher up in the
-                    // the hierarchy than children site packages:
-                    if (oldPkgSiteParentNode != null) {
-                        
-                        // Note: skipping the noderef check b/c sites are all in
-                        // master, and post is to current time.
-                        List<NodeRef> oldChildren = 
-                                oldPkgSiteParentNode.getPropertyNodeRefs( Acm.ACM_SITE_CHILDREN,
-                                                                          true, null, null);
-                    
-                        // Update the children of this package site if needed:
-                        EmsScriptNode childNewParent;
-                        EmsScriptNode child;
-                        for (EmsScriptNode childSite : EmsScriptNode.toEmsScriptNodeList( oldChildren)) {
-                            
-                            child = childSite.getPropertyElement( Acm.ACM_SITE_PACKAGE, null, workspace );
-                            if (child != null) {
-                                childNewParent = findParentPkgSite(child, workspace, null);
-                                
-                                if (childNewParent != null && childNewParent.equals( pkgSiteNode )) {
-                                    //  Add to the this site package properties:
-                                    childSite.setProperty( Acm.ACM_SITE_PARENT, pkgSiteNode.getNodeRef() );
-                                    pkgSiteNode.appendToPropertyNodeRefs( Acm.ACM_SITE_CHILDREN,
-                                                                          childSite.getNodeRef() );
-                                    
-                                    // Remove from parent site pkg children:
-                                    oldPkgSiteParentNode.removeFromPropertyNodeRefs( Acm.ACM_SITE_CHILDREN, 
-                                                                                     childSite.getNodeRef() );
-                                }
-                            }
-                        }
-                    }
-                    
-                    pkgSiteParentNode.appendToPropertyNodeRefs( Acm.ACM_SITE_CHILDREN,
-                                                                pkgSiteNode.getNodeRef() );
-                    pkgSiteNode.setProperty( Acm.ACM_SITE_PARENT, pkgSiteParentNode.getNodeRef() );
-                }
-                else {
-                    log( Level.WARN,
-                         "Site created for site charcterization or parent site are null for node: %s",nodeToUpdate );
-                }
-
+                handleSiteUpdate( nodeToUpdate, workspace );
             } // ends if (isSite)
             else {
-                // Remove the Site aspect from the corresponding site for this pkg:
-                NodeRef sitePackageSiteRef = (NodeRef) nodeToUpdate.getNodeRefProperty( Acm.ACM_SITE_SITE, true, null, null );
-                if (sitePackageSiteRef != null) {
-                    EmsScriptNode siteNode = new EmsScriptNode(sitePackageSiteRef, services);
-                    siteNode.removeAspect( Acm.ACM_SITE );
-                    siteNode.removeAspect( "cm:taggable" );
-                }
-                // Remove the SiteCharacterization aspect from the node:
-                nodeToUpdate.removeAspect( Acm.ACM_SITE_CHARACTERIZATION );
-                
-                // Revert permissions to inherit
-                services.getPermissionService().deletePermissions(nodeToUpdate.getNodeRef());
-                nodeToUpdate.setInheritsPermissions( true );
-
-                NodeRef reifiedPkg = (NodeRef) nodeToUpdate.getNodeRefProperty( "ems:reifiedPkg", null, workspace );
-                if (reifiedPkg != null) {
-                    services.getPermissionService().deletePermissions( reifiedPkg );
-                    services.getPermissionService().setInheritParentPermissions( reifiedPkg, true );
-                }
+                ModelPost.handleSiteRemoval( nodeToUpdate, workspace, services );
             }
         } // ends if (isSite != null)
 
+    }
+    
+    protected void handleSiteUpdate(EmsScriptNode nodeToUpdate, WorkspaceNode workspace) {
+        EmsScriptNode pkgSiteNode = createSitePkg(nodeToUpdate, workspace);
+
+        // Determine the parent package:
+        // Note: will do this everytime, even if the site package node already existed, as the parent site
+        //       could have changed with this post
+        EmsScriptNode pkgSiteParentNode = findParentPkgSite(nodeToUpdate, workspace, null);
+
+        // Add the children/parent properties:
+        if (pkgSiteParentNode != null && pkgSiteNode != null) {
+            
+            // If there was a old site parent on this node, and it is different than
+            // the new one, then remove this child from it:
+            EmsScriptNode oldPkgSiteParentNode = 
+                    pkgSiteNode.getPropertyElement( Acm.ACM_SITE_PARENT,
+                                                    true, null, null );
+            if (oldPkgSiteParentNode != null && 
+                !oldPkgSiteParentNode.equals( pkgSiteParentNode )) {
+                
+                oldPkgSiteParentNode.removeFromPropertyNodeRefs( Acm.ACM_SITE_CHILDREN, 
+                                                                 pkgSiteNode.getNodeRef() );
+            }
+            
+            // Check that parent site children are children of this package:
+            // This is for the case that this site package being created is higher up in the
+            // the hierarchy than children site packages:
+            if (oldPkgSiteParentNode != null) {
+                
+                // Note: skipping the noderef check b/c sites are all in
+                // master, and post is to current time.
+                List<NodeRef> oldChildren = 
+                        oldPkgSiteParentNode.getPropertyNodeRefs( Acm.ACM_SITE_CHILDREN,
+                                                                  true, null, null);
+            
+                // Update the children of this package site if needed:
+                EmsScriptNode childNewParent;
+                EmsScriptNode child;
+                for (EmsScriptNode childSite : EmsScriptNode.toEmsScriptNodeList( oldChildren)) {
+                    
+                    child = childSite.getPropertyElement( Acm.ACM_SITE_PACKAGE, null, workspace );
+                    if (child != null) {
+                        childNewParent = findParentPkgSite(child, workspace, null);
+                        
+                        if (childNewParent != null && childNewParent.equals( pkgSiteNode )) {
+                            //  Add to the this site package properties:
+                            childSite.setProperty( Acm.ACM_SITE_PARENT, pkgSiteNode.getNodeRef() );
+                            pkgSiteNode.appendToPropertyNodeRefs( Acm.ACM_SITE_CHILDREN,
+                                                                  childSite.getNodeRef() );
+                            
+                            // Remove from parent site pkg children:
+                            oldPkgSiteParentNode.removeFromPropertyNodeRefs( Acm.ACM_SITE_CHILDREN, 
+                                                                             childSite.getNodeRef() );
+                        }
+                    }
+                }
+            }
+            
+            pkgSiteParentNode.appendToPropertyNodeRefs( Acm.ACM_SITE_CHILDREN,
+                                                        pkgSiteNode.getNodeRef() );
+            pkgSiteNode.setProperty( Acm.ACM_SITE_PARENT, pkgSiteParentNode.getNodeRef() );
+            pkgSiteNode.removeAspect( "ems:Deleted" );
+        }
+        else {
+            log( Level.WARN,
+                 "Site created for site charcterization or parent site are null for node: %s",nodeToUpdate );
+        }
+    }
+    
+    /**
+     * Static method for removing site characterization relationships
+     */
+    public static void handleSiteRemoval(EmsScriptNode nodeToUpdate, WorkspaceNode workspace, ServiceRegistry sr) {
+        // only clean up if characterized
+        if (!nodeToUpdate.hasAspect( Acm.ACM_SITE_CHARACTERIZATION )) return;
+        
+        // Remove the Site aspect from the corresponding site for this pkg:
+        NodeRef sitePackageSiteRef = (NodeRef) nodeToUpdate.getNodeRefProperty( Acm.ACM_SITE_SITE, true, null, null );
+        if (sitePackageSiteRef != null) {
+            EmsScriptNode siteNode = new EmsScriptNode(sitePackageSiteRef, sr);
+            siteNode.removeAspect( Acm.ACM_SITE );
+            siteNode.removeAspect( "cm:taggable" );
+            siteNode.addAspect( "ems:Deleted" );
+        }
+        // Remove the SiteCharacterization aspect from the node:
+        nodeToUpdate.removeAspect( Acm.ACM_SITE_CHARACTERIZATION );
+        
+        // Revert permissions to inherit
+        sr.getPermissionService().deletePermissions(nodeToUpdate.getNodeRef());
+        nodeToUpdate.setInheritsPermissions( true );
+
+        NodeRef reifiedPkg = (NodeRef) nodeToUpdate.getNodeRefProperty( "ems:reifiedPkg", null, workspace );
+        if (reifiedPkg != null) {
+            sr.getPermissionService().deletePermissions( reifiedPkg );
+            sr.getPermissionService().setInheritParentPermissions( reifiedPkg, true );
+        }
     }
 
     protected EmsScriptNode getOrCreateReifiedPackageNode( EmsScriptNode node,
