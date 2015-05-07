@@ -21,6 +21,7 @@ import javax.naming.NamingException;
 
 import org.alfresco.service.ServiceRegistry;
 import org.apache.log4j.Logger;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -31,7 +32,7 @@ import org.json.JSONObject;
  * @author cinyoung
  *
  */
-public class JmsConnection2 implements ConnectionInterface {
+public class JmsConnection2 {
     private static Logger logger = Logger.getLogger(JmsConnection2.class);
     private long sequenceId = 0;
     private String workspace = null;
@@ -51,7 +52,7 @@ public class JmsConnection2 implements ConnectionInterface {
         public String connFactory = "ConnectionFactory";
         public String username = null;
         public String password = null;
-        public String name = "master";
+        public String destName = "master";
         public String uri = null;
         public ConnectionFactory connectionFactory = null;
         public DestinationType destType = DestinationType.TOPIC;
@@ -67,26 +68,29 @@ public class JmsConnection2 implements ConnectionInterface {
         return hostname;
     }
     
-    protected boolean init() {
+    protected boolean init(String eventType) {
+        ConnectionInfo ci = connectionMap.get( eventType );
+        if (ci == null) return false;
+        
         System.setProperty("weblogic.security.SSL.ignoreHostnameVerification", "true");
         System.setProperty ("jsse.enableSNIExtension", "false");
         Hashtable<String, String> properties = new Hashtable<String, String>();
-        properties.put(Context.INITIAL_CONTEXT_FACTORY, ctxFactory);
-        properties.put(Context.PROVIDER_URL, uri);
-        if (username != null && password != null) {
-            properties.put(Context.SECURITY_PRINCIPAL, username);
-            properties.put(Context.SECURITY_CREDENTIALS, password);
+        properties.put(Context.INITIAL_CONTEXT_FACTORY, ci.ctxFactory);
+        properties.put(Context.PROVIDER_URL, ci.uri);
+        if (ci.username != null && ci.password != null) {
+            properties.put(Context.SECURITY_PRINCIPAL, ci.username);
+            properties.put(Context.SECURITY_CREDENTIALS, ci.password);
         }
 
         try {
-            ctx = new InitialContext(properties);
+            ci.ctx = new InitialContext(properties);
         } catch (NamingException ne) {
             ne.printStackTrace(System.err);
             return false;
         }
 
         try {
-            connectionFactory = (ConnectionFactory) ctx.lookup(connFactory);
+            ci.connectionFactory = (ConnectionFactory) ci.ctx.lookup(ci.connFactory);
         }
         catch (NamingException ne) {
             ne.printStackTrace(System.err);
@@ -96,33 +100,28 @@ public class JmsConnection2 implements ConnectionInterface {
         return true;
     }
     
-    @Override
-    public boolean publish(JSONObject json, String topic) {
-        if (uri == null) return false;
+    public boolean publish(JSONObject json, String eventType) {
         boolean result = false;
         try {
             json.put( "sequence", sequenceId++ );
-            result = publishTopic(NodeUtil.jsonToString( json, 2 ), topic);
+            result = publishMessage(NodeUtil.jsonToString( json, 2 ), eventType);
         } catch ( JSONException e ) {
             e.printStackTrace();
         }
         
         return result;
     }
-    
-    public boolean publish(JSONObject json) {
-        if (uri == null) return false;
-        // topic is always the same since we're using metadata for workspaces now
-        return publish( json, topicName );
-    }
-    
-    public boolean publishTopic(String msg, String topic) {
-        if (init() == false) return false;
+        
+    public boolean publishMessage(String msg, String eventType) {
+        ConnectionInfo ci = connectionMap.get( eventType );
+        if (ci == null || ci.uri == null) return false;
+
+        if (init(eventType) == false) return false;
         
         boolean status = true;
         try {
             // Create a Connection
-            Connection connection = connectionFactory.createConnection();
+            Connection connection = ci.connectionFactory.createConnection();
             connection.start();
 
             // Create a Session
@@ -131,10 +130,16 @@ public class JmsConnection2 implements ConnectionInterface {
             // lookup the destination
             Destination destination;
             try {
-                destination = (Topic) ctx.lookup( topic );
+                destination = (Destination) ci.ctx.lookup( ci.destName );
             } catch (NameNotFoundException nnfe) {
-                // Create the destination (Topic or Queue)
-                destination = session.createTopic(topic);
+                switch (ci.destType) {
+                    case QUEUE:
+                        destination = session.createQueue( ci.destName );
+                        break;
+                    case TOPIC:
+                    default:
+                        destination = session.createTopic( ci.destName );
+                }
             }
 
             // Create a MessageProducer from the Session to the Topic or Queue
@@ -154,8 +159,7 @@ public class JmsConnection2 implements ConnectionInterface {
             message.setLongProperty( "MessageID", sequenceId++ );
             message.setStringProperty( "MessageSource", getHostname() );
             message.setStringProperty( "MessageRecipient", "TMS" );
-            message.setStringProperty( "MessageType", "DELTA" );
-
+            message.setStringProperty( "MessageType", eventType.toUpperCase() );
 
             // Tell the producer to send the message
             producer.send(message);
@@ -172,58 +176,42 @@ public class JmsConnection2 implements ConnectionInterface {
         return status;
     }
     
-    @Override
-    public String getUri() {
-        return uri;
-    }
-    
-    @Override
-    public void setUri( String newUri ) {
-        uri = newUri;
-    }
-
-    @Override
     public void setWorkspace( String workspace ) {
         this.workspace = workspace;
     }
 
-    @Override
     public void setProjectId( String projectId ) {
         this.projectId = projectId;
     }
-
-    public static String getCtxFactory() {
-        return ctxFactory;
-    }
-
-    public static void setCtxFactory( String ctxFactory ) {
-        JmsConnection2.ctxFactory = ctxFactory;
-    }
-
-    public static String getConnFactory() {
-        return connFactory;
-    }
-
-    public static void setConnFactory( String connFactory ) {
-        JmsConnection2.connFactory = connFactory;
-    }
     
-    @Override
     public JSONObject toJson() {
-        JSONObject json = new JSONObject();
-        if (uri.contains( "localhost" )) {
-            uri = uri.replace("localhost", getHostname());
+        JSONArray connections = new JSONArray();
+
+        for (String eventType: connectionMap.keySet()) {
+            ConnectionInfo ci = connectionMap.get( eventType );
+            if (ci.uri.contains( "localhost" )) {
+                ci.uri = ci.uri.replace("localhost", getHostname());
+                connectionMap.put( eventType, ci );
+            }
+
+            JSONObject connJson = new JSONObject();
+            connJson.put( "uri", ci.uri );
+            connJson.put( "connFactory", ci.connFactory );
+            connJson.put( "ctxFactory", ci.ctxFactory );
+            connJson.put( "password", ci.password );
+            connJson.put( "username", ci.username );
+            connJson.put( "destName", ci.destName );
+            connJson.put( "destType", ci.destType.toString() );
+            
+            connections.put( connJson );
         }
-        json.put( "uri", uri );
-        json.put( "connFactory", connFactory );
-        json.put( "ctxFactory", ctxFactory );
-        json.put( "password", password );
-        json.put( "username", username );
-        json.put( "topicName", topicName );
+        
+        JSONObject json = new JSONObject();
+        json.put( "connections", connections );
+
         return json;
     }
 
-    @Override
     public void ingestJson(JSONObject json) {
         String eventType = null;
         if (json.has( "eventType" )) {
@@ -256,11 +244,24 @@ public class JmsConnection2 implements ConnectionInterface {
             ci.username = json.isNull("username") ? null : json.getString( "username" );
         }
         if (json.has( "destName" )) {
-            ci.name = json.isNull( "destName" ) ? null : json.getString( "destName" );
+            ci.destName = json.isNull( "destName" ) ? null : json.getString( "destName" );
         }
         if (json.has( "destType" )) {
-            
+            if (json.isNull( "destType" )) {
+                ci.destType = null;
+            } else {
+                String type = json.getString( "destType" );
+                if (type.equalsIgnoreCase( "topic" )) {
+                    ci.destType = DestinationType.TOPIC;
+                } else if (type.equalsIgnoreCase( "queue" )) {
+                    ci.destType = DestinationType.QUEUE;
+                } else {
+                    ci.destType = DestinationType.TOPIC;
+                }
+            }
         }
+        
+        connectionMap.put( eventType, ci );
     }
 
     public void setServices( ServiceRegistry services ) {
