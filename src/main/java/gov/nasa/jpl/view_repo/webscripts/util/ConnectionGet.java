@@ -41,7 +41,7 @@ public class ConnectionGet extends DeclarativeWebScript {
             status.setCode( HttpServletResponse.SC_OK );
         }
 
-        model.put("res", json.toString());
+        model.put("res", json.toString(2));
         return model;
     }
 
