@@ -1,10 +1,13 @@
 {"elements": [{
     "qualifiedId": "/europa/123456/4000/401/402",
-    "name": "402",
     "qualifiedName": "/europa/JW_TEST2/400/401/402",
     "sysmlid": "402",
-    "documentation": "x is x",
+    "editable": true,
+    "creator": "admin",
+    "modifier": "admin",
+    "name": "402",
     "owner": "401",
+    "documentation": "x is x",
     "specialization": {
         "propertyType": null,
         "isDerived": false,
@@ -15,8 +18,6 @@
             "type": "LiteralString"
         }],
         "type": "Property"
-    },
-    "editable": true,
-    "creator": "admin",
+    }
 }]}
 200

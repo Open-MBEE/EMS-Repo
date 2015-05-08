@@ -1,2 +1,2 @@
-{"message": "[WARNING]: Element with id, y not found\n[WARNING]: No elements found\n"}
-400
+{"message": "[ERROR]: Element y not found\n"}
+404

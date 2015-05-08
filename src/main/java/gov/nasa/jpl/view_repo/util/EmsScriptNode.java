@@ -2236,7 +2236,10 @@ public class EmsScriptNode extends ScriptNode implements
         if ( this == null || !this.exists() ) return;
         // mandatory elements put in directly
         elementJson.put( Acm.JSON_ID, this.getProperty( Acm.ACM_ID ) );
-        elementJson.put( "creator", this.getProperty( "cm:modifier" ) );
+        EmsScriptNode originalNode = this.getOriginalNode();
+        elementJson.put( "creator", originalNode.getProperty( "cm:creator" ) );
+        elementJson.put( "created", originalNode.getProperty( "cm:created" ) );
+        elementJson.put( "modifier", this.getProperty( "cm:modifier" ) );
         elementJson.put( Acm.JSON_LAST_MODIFIED,
                 TimeUtils.toTimestamp( this.getLastModified( dateTime) ) );
 
@@ -3728,10 +3731,27 @@ public class EmsScriptNode extends ScriptNode implements
                                      Status status ) {
         if ( !hasPermission( permissions ) ) {
             if (response != null) {
+                
+                // Assume admin role to make sure getProperty() doesn't fail
+                // because of permissions.
+                String runAsUser = AuthenticationUtil.getRunAsUser();
+                boolean changeUser = !ADMIN_USER_NAME.equals( runAsUser );
+                if ( changeUser ) {
+                    AuthenticationUtil.setRunAsUser( ADMIN_USER_NAME );
+                }
+
+                // Get name
                 Object property = getProperty( Acm.ACM_NAME );
                 if (property == null) {
                     property = getProperty( Acm.CM_NAME );
                 }
+                
+                // Return to original running user.
+                if ( changeUser ) {
+                    AuthenticationUtil.setRunAsUser( runAsUser );
+                }
+
+                // Log warning for missing permissions.
                 if ( property != null ) {
                     String msg =
                             "Warning! No " + permissions.toUpperCase() + " priveleges to "
@@ -5504,14 +5524,15 @@ public class EmsScriptNode extends ScriptNode implements
                                     ws, dateTime ),
                    filter );
         
-        putInJson( json,
-                   Acm.JSON_CLASSIFIER,
-                   node.getNodeRefProperty( Acm.ACM_CLASSIFIER, dateTime, ws),
-                   filter );
-        
         ArrayList< NodeRef > nodeRefs =
-                (ArrayList< NodeRef >)node.getNodeRefProperty( Acm.ACM_SLOTS, dateTime, ws );
+                (ArrayList< NodeRef >)node.getNodeRefProperty( Acm.ACM_CLASSIFIER, dateTime, ws );
         JSONArray ids = addNodeRefIdsJSON( nodeRefs );
+        if ( ids.length() > 0 ) {
+            putInJson( json,Acm.JSON_CLASSIFIER, ids, filter );
+        }
+        
+        nodeRefs = (ArrayList< NodeRef >)node.getNodeRefProperty( Acm.ACM_SLOTS, dateTime, ws );
+        ids = addNodeRefIdsJSON( nodeRefs );
         if ( ids.length() > 0 ) {
             putInJson( json, Acm.JSON_SLOTS, ids, filter );
         }
@@ -5875,4 +5896,23 @@ public class EmsScriptNode extends ScriptNode implements
         return false;
     }
 
+    /**
+     * Utility to find the original node - needed for getting creation time
+     * @param node
+     * @return
+     */
+    public EmsScriptNode getOriginalNode() {
+        EmsScriptNode node = this;
+        while (true) {
+            NodeRef ref = (NodeRef) node.getNodeRefProperty( "ems:source", true, null, 
+                                                             true, true, null );
+            if (ref != null) {
+                node = new EmsScriptNode(ref, services, response);
+            } else {
+                break;
+            }
+        }
+        
+        return node;
+    }
 }

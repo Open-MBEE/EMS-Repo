@@ -220,18 +220,7 @@ True,
 common_filters,
 ["test","workspaces","develop", "develop2"]
 ],
-                   
-[
-100,
-"GetProductList",
-"Get product list",
-create_curl_cmd(type="GET",data="ve/documents/europa?format=json",base_url=SERVICE_URL,
-                branch=""),
-True, 
-common_filters,
-["test","workspaces","develop", "develop2"]
-],
-   
+                      
 # Note: Need a delay before doing this search, b/c it will find "some*" within the
 #       documentation, which does not get indexed by alfresco right away
 [
@@ -284,8 +273,8 @@ common_filters+['"timestamp"','"MMS_','"id"','"qualifiedId"','"version"', '"modi
 130,
 "PostChange",
 "Post changes to directed relationships only (without owners)",
-create_curl_cmd(type="POST",data="directedrelationships.json",base_url=BASE_URL_JW,
-                branch="sites/europa/projects/123456/",post_type="elements"),
+create_curl_cmd(type="POST",data="directedrelationships.json",base_url=BASE_URL_WS,
+                branch="master/",post_type="elements"),
 True, 
 common_filters,
 ["test","workspaces","develop", "develop2"]
@@ -843,9 +832,9 @@ common_filters,
 250,
 "SolveConstraint",
 "Post expressions with a constraint and solve for the constraint.",
-create_curl_cmd(type="POST",base_url=BASE_URL_JW,
+create_curl_cmd(type="POST",base_url=BASE_URL_WS,
                 data="expressionElementsNew.json",
-                branch="sites/europa/projects/123456/",
+                branch="master/",
                 post_type="elements?fix=true"),
 True,
 common_filters,

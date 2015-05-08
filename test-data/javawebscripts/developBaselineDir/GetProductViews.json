@@ -1,15 +1,16 @@
 {"views": [
     {
+        "modifier": "admin",
         "qualifiedId": "/europa/123456/300/301/302",
         "name": "302",
         "qualifiedName": "/europa/JW_TEST/300/301/302",
-        "sysmlid": "302",
         "documentation": "to",
         "owner": "301",
+        "sysmlid": "302",
         "specialization": {
             "propertyType": null,
-            "isDerived": false,
             "isSlot": false,
+            "isDerived": false,
             "value": [{
                 "valueExpression": null,
                 "string": "dlam_string",
@@ -18,14 +19,15 @@
             "type": "Property"
         },
         "editable": true,
-        "creator": "admin",
+        "creator": "admin"
     },
     {
+        "modifier": "admin",
         "qualifiedId": "/europa/123456/300/301/302/303/304",
-        "qualifiedName": "/europa/JW_TEST/300/301/302/303/304",
         "name": "304",
-        "owner": "303",
+        "qualifiedName": "/europa/JW_TEST/300/301/302/303/304",
         "documentation": "about",
+        "owner": "303",
         "sysmlid": "304",
         "specialization": {
             "propertyType": null,
@@ -42,11 +44,12 @@
         "creator": "admin"
     },
     {
+        "modifier": "admin",
         "qualifiedId": "/europa/123456/300/301",
-        "qualifiedName": "/europa/JW_TEST/300/301",
         "name": "301",
-        "owner": "300",
+        "qualifiedName": "/europa/JW_TEST/300/301",
         "documentation": "else",
+        "owner": "300",
         "sysmlid": "301",
         "specialization": {
             "view2view": [{
