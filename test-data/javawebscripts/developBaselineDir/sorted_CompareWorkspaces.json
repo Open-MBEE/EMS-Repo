@@ -4,6 +4,7 @@
         "name": "wsA",
         "elements": [
             {
+                "modifier": "admin",
                 "qualifiedName": "/no_site/no_site_no_project/holding_bin",
                 "name": "holding_bin",
                 "sysmlid": "holding_bin_no_site_no_project",
@@ -13,6 +14,7 @@
                 "creator": "admin"
             },
             {
+                "modifier": "admin",
                 "qualifiedName": "/no_site/no_site_no_project/holding_bin/300",
                 "name": "300",
                 "sysmlid": "x",

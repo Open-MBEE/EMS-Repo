@@ -27,7 +27,6 @@ HOST = "localhost:8080"
 SERVICE_URL = "http://%s/alfresco/service/"%HOST
 BASE_URL_WS_NOBS = SERVICE_URL+"workspaces"
 BASE_URL_WS = BASE_URL_WS_NOBS+"/"
-BASE_URL_JW = SERVICE_URL+"javawebscripts/"
 
 failed_tests = 0
 errs = []

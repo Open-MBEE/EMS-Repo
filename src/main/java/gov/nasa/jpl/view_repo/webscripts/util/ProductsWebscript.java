@@ -8,7 +8,6 @@ import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 import gov.nasa.jpl.view_repo.webscripts.AbstractJavaWebScript;
-import gov.nasa.jpl.view_repo.webscripts.SnapshotGet;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -152,9 +151,7 @@ public class ProductsWebscript extends AbstractJavaWebScript {
                                 snapshot.getProperty( "cm:modifier" ) );
                 jsonObject.put( "url", contextPath + "/service/snapshots/"
                                        + snapshot.getSysmlId() );
-                jsonObject.put( "tag", SnapshotGet.getConfigurationSet( snapshot,
-                                                                                workspace,
-                                                                                dateTime ) );
+                jsonObject.put( "tag", getConfigurationSet( snapshot, workspace, dateTime ) );
                 snapshotsJson.put( jsonObject );
             }
         }
@@ -311,4 +308,29 @@ public class ProductsWebscript extends AbstractJavaWebScript {
         
         return productsJson;
     }
+    
+    
+      /**
+      * Get the configuration set name associated with the snapshot, if available
+      * @param dateTime
+      * @param snapshotId
+      * @return
+      */
+     protected String getConfigurationSet( EmsScriptNode snapshot,
+                                               WorkspaceNode workspace,
+                                               Date dateTime ) {
+       if (snapshot != null) {
+             List< EmsScriptNode > configurationSets =
+                     snapshot.getSourceAssocsNodesByType( "ems:configuredSnapshots",
+                                                          workspace, null );
+           if (!configurationSets.isEmpty()) {
+               EmsScriptNode configurationSet = configurationSets.get(0);
+               String configurationSetName = (String) configurationSet.getProperty(Acm.CM_NAME);
+               return configurationSetName;
+           }
+       }
+    
+       return "";
+     }
+
 }
