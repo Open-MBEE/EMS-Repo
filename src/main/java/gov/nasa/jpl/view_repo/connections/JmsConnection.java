@@ -104,8 +104,8 @@ public class JmsConnection implements ConnectionInterface {
         boolean result = false;
         try {
             json.put( "sequence", sequenceId++ );
-            if (workspaceId != null) json.put( "workspace", workspaceId );
-            if (projectId != null) json.put( "projectId", projectId );
+            if (workspaceId != null) this.workspace = workspaceId;
+            if (projectId != null) this.projectId = projectId;
             result = publishMessage(NodeUtil.jsonToString( json, 2 ), eventType);
         } catch ( JSONException e ) {
             e.printStackTrace();
