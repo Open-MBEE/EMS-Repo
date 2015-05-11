@@ -1,5 +1,6 @@
 package gov.nasa.jpl.view_repo.util;
 
+import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.connections.JmsConnection;
 import gov.nasa.jpl.view_repo.connections.RestPostConnection;
@@ -30,13 +31,17 @@ import org.json.JSONObject;
 public class CommitUtil {
     static Logger logger = Logger.getLogger(CommitUtil.class);
 
+    public static final String TYPE_BRANCH = "BRANCH";
+    public static final String TYPE_COMMIT = "COMMIT";
+    public static final String TYPE_DELTA  = "DELTA";
+    public static final String TYPE_MERGE  = "MERGE";
+    
     private CommitUtil() {
         // defeat instantiation
     }
 
     private static JmsConnection jmsConnection = null;
     private static RestPostConnection restConnection = null;
-    private static ServiceRegistry services = null;
 
     public static void setJmsConnection(JmsConnection jmsConnection) {
         if (logger.isInfoEnabled()) logger.info( "Setting jms" );
@@ -48,11 +53,6 @@ public class CommitUtil {
         CommitUtil.restConnection = restConnection;
     }
     
-    public static void setServices(ServiceRegistry services) {
-        if (logger.isInfoEnabled()) logger.info( "Setting services" );
-        CommitUtil.services = services;
-    }
-
     /**
 	 * Gets the commit package in the specified workspace (creates if possible)
 	 * @param workspace
@@ -411,7 +411,7 @@ public class CommitUtil {
 	                                           String msg,
 	                                           ServiceRegistry services,
 	                                           StringBuffer response) throws JSONException {
-	    return createCommitNode( workspace, null, workspace, null, null, "COMMIT", msg,
+	    return createCommitNode( workspace, null, workspace, null, null, TYPE_COMMIT, msg,
 	                             body, services, response );
     }
 
@@ -452,7 +452,7 @@ public class CommitUtil {
                                               StringBuffer response ) {
 
         return createCommitNode( source1, source2, target, dateTime1, dateTime2,
-                                 "MERGE", msg,
+                                 TYPE_MERGE, msg,
                                  wsDiff.toString(),services, response, true );
     }
 
@@ -533,7 +533,7 @@ public class CommitUtil {
                                                        throws JSONException {
 
 	    return createCommitNode(srcWs, null, dstWs, null, null,
-	                            "BRANCH", msg, "{}", services, response);
+	                            TYPE_BRANCH, msg, "{}", services, response);
 	}
 
     // TODO -- REVIEW -- Just copied branch and search/replaced "branch" with "merge"
@@ -559,7 +559,7 @@ public class CommitUtil {
                                                StringBuffer response )
                                                        throws JSONException {
         createCommitNode(srcWs1, srcWs2, dstWs, null, null,
-                         "MERGE", msg, "{}", services, response, true);
+                         TYPE_MERGE, msg, "{}", services, response, true);
     }
 
 	/**
@@ -696,6 +696,7 @@ public class CommitUtil {
         
         // make sure we're running back as the originalUser
         AuthenticationUtil.setRunAsUser( originalUser );
+        
         return result;
 	}
 
@@ -715,14 +716,12 @@ public class CommitUtil {
         if (source != null) {
             deltaJson.put( "source", source );
         }
-        if (jmsConnection != null) {
-            jmsConnection.setWorkspace( workspaceId );
-            jmsConnection.setProjectId( projectId );
-            jmsStatus = jmsConnection.publish( deltaJson );
-        }
+        
+        jmsStatus = sendJmsMsg( deltaJson, TYPE_DELTA, workspaceId, projectId );
+        
         if (restConnection != null) {
             try {
-                restStatus = restConnection.publish( deltaJson, new HostnameGet().getAlfrescoHost());
+                restStatus = restConnection.publish( deltaJson, new HostnameGet().getAlfrescoHost(), workspaceId, projectId);
             } catch (Exception e) {
                 logger.warn("REST connection not available");
                 return false;
@@ -731,6 +730,46 @@ public class CommitUtil {
 
         return jmsStatus && restStatus;
     }
+    
+    public static boolean sendBranch(WorkspaceNode src, WorkspaceNode created, Date srcDateTime) throws JSONException {
+        JSONObject branchJson = new JSONObject();
+        
+        branchJson.put( "sourceWorkspace", getWorkspaceDetails( src, srcDateTime )); // branch source
+        branchJson.put( "createdWorkspace", getWorkspaceDetails( created, srcDateTime ) ); // created branch
+        
+        return sendJmsMsg(branchJson, TYPE_BRANCH, null, null);
+    }
+    
+    public static JSONObject getWorkspaceDetails(WorkspaceNode ws, Date date) {
+        JSONObject json = new JSONObject();
+        WorkspaceNode.addWorkspaceNamesAndIds(json, ws, false);
+        if (null == date) {
+            date = new Date();
+        }
+        json.put( "time", TimeUtils.toTimestamp( date ) );
+        return json;
+    }
+
+    public static boolean sendMerge(WorkspaceNode src, WorkspaceNode dst, Date srcDateTime) throws JSONException {
+        JSONObject mergeJson = new JSONObject();
+        
+        mergeJson.put( "sourceWorkspace", getWorkspaceDetails( src, srcDateTime) );
+        mergeJson.put( "mergedWorkspace", getWorkspaceDetails( dst, null ) );
+        
+        return sendJmsMsg(mergeJson, TYPE_MERGE, null, null);
+    }
+
+    protected static boolean sendJmsMsg(JSONObject json, String eventType, String workspaceId, String projectId) {
+        boolean status = false;
+        if (jmsConnection != null) {
+            status = jmsConnection.publish( json, eventType, workspaceId, projectId );
+        } else {
+            if (logger.isInfoEnabled()) logger.info( "JMS Connection not avalaible" );
+        }
+        
+        return status;
+    }
+    
     
     /**
      * Send off progress to various endpoints

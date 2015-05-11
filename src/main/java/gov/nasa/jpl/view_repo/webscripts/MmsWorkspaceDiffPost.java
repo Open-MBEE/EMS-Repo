@@ -332,6 +332,7 @@ public class MmsWorkspaceDiffPost extends ModelPost {
 
 	                CommitUtil.merge( finalJsonDiff, srcWs, targetWs, dateTimeSrc, dateTimeTarget,
 	                                  null, runWithoutTransactions, services, response );
+	                CommitUtil.sendMerge( srcWs, targetWs, dateTimeSrc );
 	            }
 	            
 		    }

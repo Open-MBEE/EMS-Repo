@@ -99,7 +99,7 @@ public class WorkspacesGet extends AbstractJavaWebScript{
         if (!findDeleted) {
             //This is for the master workspace (not located in the user home folder).
             JSONObject interiorJson = new JSONObject();
-            WorkspaceNode.addWorkspaceNamesAndIds(interiorJson, null, services, true );
+            WorkspaceNode.addWorkspaceNamesAndIds(interiorJson, null, true );
             jArray.put(interiorJson);
         }
 

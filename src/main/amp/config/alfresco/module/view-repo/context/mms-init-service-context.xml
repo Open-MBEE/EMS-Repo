@@ -104,7 +104,6 @@
 
     <!-- Definitions for sending active sync messages -->
     <bean id="jmsConnection" class="gov.nasa.jpl.view_repo.connections.JmsConnection">
-        <property name="uri" value="tcp://localhost:61616" />
         <property name="services" ref="ServiceRegistry"/>
     </bean>
     <bean id="restConnection" class="gov.nasa.jpl.view_repo.connections.RestPostConnection">
@@ -125,11 +124,6 @@
         <property name="arguments" ref="ServiceRegistry"/>
     </bean>
         
-    <bean class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
-        <property name="staticMethod" value="gov.nasa.jpl.view_repo.util.CommitUtil.setServices" />
-        <property name="arguments" ref="ServiceRegistry"/>
-    </bean>
-
     <bean class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
         <property name="staticMethod" value="gov.nasa.jpl.view_repo.util.CommitUtil.setJmsConnection" />
         <property name="arguments" ref="jmsConnection"/>

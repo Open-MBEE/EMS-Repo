@@ -33,9 +33,12 @@ public class RestPostConnection implements ConnectionInterface, Runnable {
         
     }
         
-    public boolean publish(JSONObject jsonObject, String dst) {
+    @Override
+    public boolean publish(JSONObject jsonObject, String dst, String workspaceId, String projectId) {
         if (uri == null) return false;
         String msg = NodeUtil.jsonToString( jsonObject );
+        this.workspace = workspaceId;
+        this.projectId = projectId;
         return publish(msg, dst);
     }
     
@@ -89,12 +92,10 @@ public class RestPostConnection implements ConnectionInterface, Runnable {
        return builder;
     }
 
-    @Override
     public String getUri() {
         return uri;
     }
     
-    @Override
     public void setUri( String newUri ) {
         uri = newUri;
     }

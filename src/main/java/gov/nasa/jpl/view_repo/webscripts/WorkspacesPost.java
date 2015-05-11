@@ -51,7 +51,6 @@ import org.alfresco.service.cmr.security.PermissionService;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.json.JSONObject;
 import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
@@ -206,7 +205,8 @@ public class WorkspacesPost extends AbstractJavaWebScript{
 
                 if (dstWs != null) {
                     // keep history of the branch
-                    CommitUtil.branch( srcWs, dstWs,"", true, services, response );                    
+                    CommitUtil.branch( srcWs, dstWs,"", true, services, response );
+                    CommitUtil.sendBranch( srcWs, dstWs, copyTime );
                     finalWorkspace = dstWs;
                 }
             }
