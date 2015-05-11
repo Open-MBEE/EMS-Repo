@@ -262,7 +262,7 @@ None,
 create_curl_cmd(type="DELETE",data="elements/6666",base_url=BASE_URL_WS,
                 branch="master/"),
 True, 
-common_filters+['"timestamp"','"MMS_','"id"','"qualifiedId"','"version"', '"modified"'],
+common_filters+['"timestamp"','"MMS_','"id"','"qualifiedId"','"version"', '"modified"', '"sequence"'],
 ["test","workspaces","develop", "develop2"]
 ],
         
@@ -1594,7 +1594,7 @@ common_filters,
 create_curl_cmd(type="DELETE",data="elements/parentToDelete1",base_url=BASE_URL_WS,
                 branch="master/"),
 True, 
-common_filters+['"timestamp"','"MMS_','"id"','"qualifiedId"','"version"', '"modified"'],
+common_filters+['"timestamp"','"MMS_','"id"','"qualifiedId"','"version"', '"modified"', '"sequence"'],
 ["test","workspaces","develop", "develop2"]
 ],
         
