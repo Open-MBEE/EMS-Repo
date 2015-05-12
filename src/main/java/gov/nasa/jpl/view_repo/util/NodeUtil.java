@@ -174,7 +174,7 @@ public class NodeUtil {
         return outsideTransactionStrackTrace.get( Thread.currentThread().getId() );
     }
 
-    public static boolean doFullCaching = true;
+    public static boolean doFullCaching = false;
     public static boolean doSimpleCaching = true;
     public static boolean doHeisenCheck = true;
     public static boolean doVersionCaching = false; // turn this off by default
@@ -182,9 +182,6 @@ public class NodeUtil {
     public static boolean doJsonCaching = true;
     public static boolean doJsonDeepCaching = false;
     public static boolean doJsonStringCaching = false;
-    
-    public static boolean addEmptyEntriesToFullCache = false;
-    public static boolean skipGetNodeRefAtTime = true;
     
     // global flag that is enabled once heisenbug is seen, so it will email admins the first time heisenbug is seen
     public static boolean heisenbugSeen = false;
@@ -822,7 +819,7 @@ public class NodeUtil {
                          + results.length() + " nodes." );//resultSetToList( results ) );
         }
 
-     	Timer.stopTimer(timerLucene, "***** luceneSearch(): time", timeEvents);
+        Timer.stopTimer(timerLucene, "***** luceneSearch(): time", timeEvents);
 
         return results;
     }
@@ -983,14 +980,9 @@ public class NodeUtil {
         // look in cache first
         boolean useSimpleCache = false;
         boolean useFullCache = false;
-        boolean usedSimpleCache = false;
-        boolean usedFullCache = false;
-        boolean emptyEntriesInFullCacheOk = true;
         if ( doSimpleCaching || doFullCaching ) {
 
             boolean idSearch = false;
-            boolean dateInPast = ( dateTime != null && dateTime.before( new Date() ) );
-            
             // Only use the simple cache if in the master workspace, just getting a single node, not
             // looking for deleted nodes, and searching by cm:name or sysml:id.  Otherwise, we
             // may want multiple nodes in our results, or they could have changed since we added
@@ -1018,32 +1010,30 @@ public class NodeUtil {
             // entries for dateTime == null; a purge of these entries may be
             // necessary.
             useFullCache = doFullCaching && !useSimpleCache &&
-                           ( dateInPast ||
+                           ( ( dateTime != null && dateTime.before( new Date() ) ) ||
                              ( !ignoreWorkspace &&
                                ( workspace == null || onlyThisWorkspace ) &&
                                ( idSearch = isIdSearch(prefix, idSearch) ) ) );
-            
-            emptyEntriesInFullCacheOk = addEmptyEntriesToFullCache && useFullCache && dateInPast;
-            
+
             if ( useSimpleCache && doSimpleCaching ) {
                 NodeRef ref = simpleCache.get( specifier );
+                if (services.getPermissionService().hasPermission( ref, PermissionService.READ ) == AccessStatus.ALLOWED) {
                     if ( exists(ref ) ) {
                         results = Utils.newList( ref );
-                        usedSimpleCache = true;
                     }
+                }
             } else if ( doFullCaching && useFullCache ) {
                 results = getCachedElements( specifier, prefix, ignoreWorkspace,
                                              workspace, onlyThisWorkspace,
                                              dateTime, justFirst, exactMatch,
                                              includeDeleted, siteName );
-                if ( results != null && ( emptyEntriesInFullCacheOk || !results.isEmpty() ) ) usedFullCache = true;
             }
         }
 
         boolean wasCached = false;
         boolean caching = false;
         try {
-            if ( results != null && ( emptyEntriesInFullCacheOk || !results.isEmpty() ) ) {
+            if ( !Utils.isNullOrEmpty( results ) ) {
                 wasCached = true; // doCaching must be true here
             } else {
                 results = findNodeRefsByType( specifier, prefix, services );
@@ -1055,17 +1045,12 @@ public class NodeUtil {
                 if ( doHeisenCheck ) {
                     results = fixVersions( results );
                 }
-                // In the case that dateTime is null and there are cache results,
-                // it must be the case that the search is on an id in the master
-                // workspace.  The assumption here is that the results have been
-                // pre-filtered and need not be re-filtered.
                 if ( wasCached && dateTime == null ) {
                     nodeRefs = results;
                 }
                 else {
                     nodeRefs = filterResults( results, specifier, prefix,
-                                              usedFullCache || usedSimpleCache,
-                                              ignoreWorkspace,
+                                              useSimpleCache, ignoreWorkspace,
                                               workspace, onlyThisWorkspace,
                                               dateTime, justFirst, exactMatch,
                                               services, includeDeleted, siteName );
@@ -1082,14 +1067,12 @@ public class NodeUtil {
 
 
             // Update cache with results
-            boolean putInFullCache = false;
             if ( ( doSimpleCaching || doFullCaching ) && caching
-                    && nodeRefs != null && (emptyEntriesInFullCacheOk || !nodeRefs.isEmpty() ) ) {
+                 && !Utils.isNullOrEmpty( nodeRefs ) ) {
                 if ( useSimpleCache && doSimpleCaching ) {
                     // only put in cache if size is 1 (otherwise can be give bad results)
                     // force the user to filter
-                    if ( nodeRefs != null && 
-                            nodeRefs.size() == 1) {
+                    if (nodeRefs.size() == 1) {
                         NodeRef r = nodeRefs.get( 0 );
                         simpleCache.put( specifier, r );
                     }
@@ -1097,16 +1080,8 @@ public class NodeUtil {
                     putInCache( specifier, prefix, ignoreWorkspace, workspace,
                                 onlyThisWorkspace, dateTime, justFirst,
                                 exactMatch, includeDeleted, siteName, nodeRefs );
-                    putInFullCache = true;
                 }
             }
-            
-            // Check permissions on results. This is now done after the cache
-            // operations so that different users will get the appropriate
-            // results without having user-specific entries in the cache.
-            nodeRefs = filterForPermissions( nodeRefs, PermissionService.READ,
-                                             putInFullCache );
-            
         } finally {
             if ( Debug.isOn() && !Debug.isOn() ) {
                 if (results != null) {
@@ -1114,13 +1089,18 @@ public class NodeUtil {
                             EmsScriptNode.toEmsScriptNodeList( nodeRefs,
                                                                services, null,
                                                                null );
-                    Debug.outln( "findNodeRefsByType(" + specifier + ", "
-                                 + prefix + ", " + workspace + ", " + dateTime
-                                 + ", justFirst=" + justFirst + ", exactMatch="
-                                 + exactMatch + "): returning " + set );
+                    Debug.outln( "findNodeRefsByType(" + specifier + ", " + prefix + ", " + workspace + ", " + dateTime + ", justFirst=" + justFirst + ", exactMatch=" + exactMatch + "): returning " + set );
                 }
             }
         }
+//        // If we found a NodeRef but still have null (maybe because a version
+//        // didn't exist at the time), try again for the latest.
+//        if ( nodeRefs.isEmpty()//nodeRef == null
+//                && dateTime != null && gotResults) {
+//            nodeRefs = findNodeRefsByType( specifier, prefix, null, justFirst,
+//                                           exactMatch, services );
+//            //nodeRef = findNodeRefByType( specifier, prefix, null, services );
+//        }
 
         Timer.stopTimer(timerByType, "***** findNodeRefsByType(): time ", timeEvents);
 
@@ -1131,30 +1111,6 @@ public class NodeUtil {
         return nodeRefs;
     }
 
-    public static ArrayList< NodeRef >
-            filterForPermissions( ArrayList< NodeRef > nodeRefs,
-                                  String permissionType, boolean copyIfModified ) {
-        if (!Utils.isNullOrEmpty( nodeRefs )) {
-            ArrayList<NodeRef> noReadPermissions = null;
-            for ( NodeRef r : nodeRefs ) {
-                EmsScriptNode esn = new EmsScriptNode( r, getServices() );
-                if ( !esn.checkPermissions( PermissionService.READ ) ) {
-                    if ( noReadPermissions == null ) {
-                        noReadPermissions = new ArrayList< NodeRef >();
-                    }
-                    noReadPermissions.add( r );
-                }
-            }
-            if ( !Utils.isNullOrEmpty( noReadPermissions )) {
-                // make a copy if original list should be unaffected
-                if ( copyIfModified ) {
-                    nodeRefs = new ArrayList< NodeRef >( nodeRefs );
-                }
-                nodeRefs.removeAll( noReadPermissions );
-            }
-        }
-        return nodeRefs;
-    }
     public static ArrayList<NodeRef> fixVersions( ArrayList<NodeRef> nodeRefs ) {
         // check for alfresco bug where SpacesStore ref is the wrong version
         //if ( !doVersionCaching ) return nodeRefs;
@@ -1199,25 +1155,9 @@ public class NodeUtil {
         return d1.compareTo( d2 );
     }
 
-    /**
-     * @param results input list of results to be filtered
-     * @param specifier
-     * @param prefix
-     * @param usedCache whether the results came out of the cache, which means the results have been pre-filtered
-     * @param ignoreWorkspace
-     * @param workspace
-     * @param onlyThisWorkspace
-     * @param dateTime
-     * @param justFirst
-     * @param exactMatch
-     * @param services
-     * @param includeDeleted
-     * @param siteName
-     * @return the new results filtered except for permissions
-     */
     protected static ArrayList<NodeRef> filterResults(ArrayList<NodeRef> results,
                                                       String specifier, String prefix,
-                                                      boolean usedCache,
+                                                      boolean useSimpleCache,
                                                       boolean ignoreWorkspace,
                                                       WorkspaceNode workspace,
                                                       boolean onlyThisWorkspace,
@@ -1235,18 +1175,11 @@ public class NodeUtil {
             EmsScriptNode esn = new EmsScriptNode( nr, getServices() );
 
             if ( Debug.isOn() && !Debug.isOn() ) {
-                Debug.outln( "findNodeRefsByType(" + specifier + ", " + prefix +
-                             ", " + workspace + ", " + dateTime + ", justFirst=" +
-                             justFirst + ", exactMatch=" + exactMatch + "): candidate" +
-                             " " + esn.getWorkspaceName() + "::" + esn.getName() );
+                Debug.outln( "findNodeRefsByType(" + specifier + ", " + prefix + ", " + workspace + ", " + dateTime + ", justFirst=" + justFirst + ", exactMatch=" + exactMatch + "): candidate " + esn.getWorkspaceName() + "::" + esn.getName() );
             }
 
             // Get the version for the date/time if specified.
-            // This can be skipped if the results are from the cache by setting
-            // skipGetNodeRefAtTime = true.            
-            // REVIEW -- However, the rest of this method can't be skipped in
-            // this case. Why?
-            if ( dateTime != null && (!skipGetNodeRefAtTime || !usedCache ) ) {
+            if ( dateTime != null ) {
                 nr = getNodeRefAtTime( nr, dateTime );
 
                 // null check
@@ -1265,7 +1198,15 @@ public class NodeUtil {
             if ( esn != null && !esn.scriptNodeExists() ) {
                 continue;
             }
-
+//            if ( !esn.exists() ) {
+//                if ( !(includeDeleted && esn.isDeleted()) ) {
+//                    if ( Debug.isOn() ) {
+//                        System.out.println( "findNodeRefsByType(): element does not exist "
+//                                     + esn );
+//                    }
+//                    continue;
+//                }
+//            }
             try {
                 // Make sure it's in the right workspace.
                 if ( !ignoreWorkspace && esn != null ) {
@@ -1289,6 +1230,9 @@ public class NodeUtil {
 
             // Make sure we didn't just get a near match.
             try {
+                if ( !esn.checkPermissions( PermissionService.READ ) ) {
+                    continue;
+                }
                 boolean match = true;
                 if ( exactMatch ) {
                     String acmType =
@@ -2222,15 +2166,15 @@ public class NodeUtil {
      * @return  ScriptNode of site with name siteName
      */
     public static EmsScriptNode getSiteNodeForWorkspace( String siteName,
-			                                             boolean ignoreWorkspace,
-			                                             WorkspaceNode workspace,
-			                                             Date dateTime,
-			                                             ServiceRegistry services,
-			                                             StringBuffer response ) {
+                                                         boolean ignoreWorkspace,
+                                                         WorkspaceNode workspace,
+                                                         Date dateTime,
+                                                         ServiceRegistry services,
+                                                         StringBuffer response ) {
 
-    	EmsScriptNode siteNode = getSiteNode(siteName, ignoreWorkspace, workspace,
-    										 dateTime, services, response);
-		return (siteNode != null && workspacesEqual(siteNode.getWorkspace(),workspace)) ? siteNode : null;
+        EmsScriptNode siteNode = getSiteNode(siteName, ignoreWorkspace, workspace,
+                                             dateTime, services, response);
+        return (siteNode != null && workspacesEqual(siteNode.getWorkspace(),workspace)) ? siteNode : null;
 
     }
 
@@ -2415,16 +2359,16 @@ public class NodeUtil {
         }
         VersionHistory history = getServices().getVersionService().getVersionHistory( ref );
         if ( history == null ) {
-        		// Versioning doesn't make versions until the first save...
-        		EmsScriptNode node = new EmsScriptNode(ref, services);
-        		Date createdTime = (Date)node.getProperty("cm:created");
-        		if ( dateTime != null && createdTime != null && dateTime.compareTo( createdTime ) < 0 ) {
+                // Versioning doesn't make versions until the first save...
+                EmsScriptNode node = new EmsScriptNode(ref, services);
+                Date createdTime = (Date)node.getProperty("cm:created");
+                if ( dateTime != null && createdTime != null && dateTime.compareTo( createdTime ) < 0 ) {
                 if (Debug.isOn())  Debug.outln( "no history! dateTime " + dateTime
                                     + " before created " + createdTime );
-        			return null;
-        		}
+                    return null;
+                }
             if (Debug.isOn() && createdTime != null)  Debug.outln( "no history! created " + createdTime );
-        		return ref;
+                return ref;
         }
 
         Collection< Version > versions = history.getAllVersions();
@@ -2826,17 +2770,17 @@ public class NodeUtil {
         return new EmsScriptNode( nodeRef, services );
     }
 
-	public static EmsScriptNode findScriptNodeByIdForWorkspace(String id,
-															   WorkspaceNode workspace,
-															   Date dateTime, boolean findDeleted,
-															   ServiceRegistry services,
-			                                                   StringBuffer response) {
+    public static EmsScriptNode findScriptNodeByIdForWorkspace(String id,
+                                                               WorkspaceNode workspace,
+                                                               Date dateTime, boolean findDeleted,
+                                                               ServiceRegistry services,
+                                                               StringBuffer response) {
 
-		EmsScriptNode node = findScriptNodeById( id, workspace, dateTime, findDeleted,
-												services, response );
-		return (node != null && workspacesEqual(node.getWorkspace(),workspace)) ? node : null;
+        EmsScriptNode node = findScriptNodeById( id, workspace, dateTime, findDeleted,
+                                                services, response );
+        return (node != null && workspacesEqual(node.getWorkspace(),workspace)) ? node : null;
 
-	}
+    }
 
     /**
      * Returns true if the passed workspaces are equal, checks for master (null) workspaces
@@ -2846,10 +2790,10 @@ public class NodeUtil {
      * @param ws2
      * @return
      */
-	public static boolean workspacesEqual(WorkspaceNode ws1, WorkspaceNode ws2)
-	{
-		return ( (ws1 == null && ws2 == null) || (ws1 != null && ws1.equals(ws2)) );
-	}
+    public static boolean workspacesEqual(WorkspaceNode ws1, WorkspaceNode ws2)
+    {
+        return ( (ws1 == null && ws2 == null) || (ws1 != null && ws1.equals(ws2)) );
+    }
 
     /**
      * Updates or creates a artifact with the passed name/type in the specified site name/workspace
@@ -2870,153 +2814,153 @@ public class NodeUtil {
      * @return
      */
     public static EmsScriptNode updateOrCreateArtifact( String name, String type,
-									            		String base64content,
-									            		String strContent,
-									            		String targetSiteName,
-									            		String subfolderName,
-									            		WorkspaceNode workspace,
-									            		Date dateTime,
-									            		StringBuffer response,
-									            		Status status,
-									            		boolean ignoreName) {
+                                                        String base64content,
+                                                        String strContent,
+                                                        String targetSiteName,
+                                                        String subfolderName,
+                                                        WorkspaceNode workspace,
+                                                        Date dateTime,
+                                                        StringBuffer response,
+                                                        Status status,
+                                                        boolean ignoreName) {
 
-    	EmsScriptNode artifactNode;
-    	String myType = Utils.isNullOrEmpty(type) ? "svg" : type;
-    	String finalType = myType.startsWith(".") ? myType.substring(1) : myType;
-		String artifactId = name + "." + finalType;
+        EmsScriptNode artifactNode;
+        String myType = Utils.isNullOrEmpty(type) ? "svg" : type;
+        String finalType = myType.startsWith(".") ? myType.substring(1) : myType;
+        String artifactId = name + "." + finalType;
 
-		byte[] content =
-		( base64content == null )
-		      ? null
-		      : DatatypeConverter.parseBase64Binary( base64content );
+        byte[] content =
+        ( base64content == null )
+              ? null
+              : DatatypeConverter.parseBase64Binary( base64content );
 
-		if (content == null && strContent != null) {
-			content = strContent.getBytes(Charset.forName("UTF-8"));
-		}
+        if (content == null && strContent != null) {
+            content = strContent.getBytes(Charset.forName("UTF-8"));
+        }
 
-		long cs = EmsScriptNode.getChecksum( content );
+        long cs = EmsScriptNode.getChecksum( content );
 
-		// see if image already exists by looking up by checksum
-		ArrayList< NodeRef > refs =
-				findNodeRefsByType( "" + cs,
-		          SearchType.CHECKSUM.prefix, false,
-		          workspace, dateTime, false, false,
-		          services, false );
-		// ResultSet existingArtifacts =
-		// NodeUtil.findNodeRefsByType( "" + cs, SearchType.CHECKSUM,
-		// services );
-		// Set< EmsScriptNode > nodeSet = toEmsScriptNodeSet( existingArtifacts
-		// );
-		List< EmsScriptNode > nodeList = EmsScriptNode.toEmsScriptNodeList( refs, services, response, status );
-		// existingArtifacts.close();
+        // see if image already exists by looking up by checksum
+        ArrayList< NodeRef > refs =
+                findNodeRefsByType( "" + cs,
+                  SearchType.CHECKSUM.prefix, false,
+                  workspace, dateTime, false, false,
+                  services, false );
+        // ResultSet existingArtifacts =
+        // NodeUtil.findNodeRefsByType( "" + cs, SearchType.CHECKSUM,
+        // services );
+        // Set< EmsScriptNode > nodeSet = toEmsScriptNodeSet( existingArtifacts
+        // );
+        List< EmsScriptNode > nodeList = EmsScriptNode.toEmsScriptNodeList( refs, services, response, status );
+        // existingArtifacts.close();
 
-		EmsScriptNode matchingNode = null;
+        EmsScriptNode matchingNode = null;
 
-		if ( nodeList != null && nodeList.size() > 0 ) {
-			matchingNode = nodeList.iterator().next();
-		}
+        if ( nodeList != null && nodeList.size() > 0 ) {
+            matchingNode = nodeList.iterator().next();
+        }
 
-		// No need to update if the checksum and name match (even if it is in a parent branch):
-		if ( matchingNode != null && (ignoreName || matchingNode.getSysmlId().equals(artifactId)) ) {
-			return matchingNode;
-		}
+        // No need to update if the checksum and name match (even if it is in a parent branch):
+        if ( matchingNode != null && (ignoreName || matchingNode.getSysmlId().equals(artifactId)) ) {
+            return matchingNode;
+        }
 
-		// Create new artifact:
-		// find subfolder in site or create it
-		String artifactFolderName =
-		"Artifacts"
-		+ ( Utils.isNullOrEmpty( subfolderName )
-		                             ? ""
-		                             : "/"
-		                               + subfolderName );
+        // Create new artifact:
+        // find subfolder in site or create it
+        String artifactFolderName =
+        "Artifacts"
+        + ( Utils.isNullOrEmpty( subfolderName )
+                                     ? ""
+                                     : "/"
+                                       + subfolderName );
 
-		EmsScriptNode targetSiteNode = getSiteNodeForWorkspace( targetSiteName, false, workspace, dateTime,
-									  							services, response );
+        EmsScriptNode targetSiteNode = getSiteNodeForWorkspace( targetSiteName, false, workspace, dateTime,
+                                                                services, response );
 
-		// find site; it must exist!
-		if ( targetSiteNode == null || !targetSiteNode.exists() ) {
-			Debug.err( "Can't find node for site: " + targetSiteName + "!\n" );
-			return null;
-		}
+        // find site; it must exist!
+        if ( targetSiteNode == null || !targetSiteNode.exists() ) {
+            Debug.err( "Can't find node for site: " + targetSiteName + "!\n" );
+            return null;
+        }
 
-		// find or create subfolder
-		EmsScriptNode subfolder = mkdir( targetSiteNode, artifactFolderName, services,
-										 response, status );
-		if ( subfolder == null || !subfolder.exists() ) {
-			Debug.err( "Can't create subfolder for site, " + targetSiteName
-			+ ", in artifact folder, " + artifactFolderName + "!\n" );
-			return null;
-		}
+        // find or create subfolder
+        EmsScriptNode subfolder = mkdir( targetSiteNode, artifactFolderName, services,
+                                         response, status );
+        if ( subfolder == null || !subfolder.exists() ) {
+            Debug.err( "Can't create subfolder for site, " + targetSiteName
+            + ", in artifact folder, " + artifactFolderName + "!\n" );
+            return null;
+        }
 
-		// find or create node:
-		artifactNode = findScriptNodeByIdForWorkspace(artifactId, workspace, dateTime, false,
-										  			  services, response);
+        // find or create node:
+        artifactNode = findScriptNodeByIdForWorkspace(artifactId, workspace, dateTime, false,
+                                                      services, response);
 
-		// Node wasnt found, so create one:
-		if (artifactNode == null) {
-			artifactNode = subfolder.createNode( artifactId, "cm:content" );
-			subfolder.getOrSetCachedVersion();
-		}
+        // Node wasnt found, so create one:
+        if (artifactNode == null) {
+            artifactNode = subfolder.createNode( artifactId, "cm:content" );
+            subfolder.getOrSetCachedVersion();
+        }
 
-		if ( artifactNode == null || !artifactNode.exists() ) {
-			Debug.err( "Failed to create new artifact " + artifactId + "!\n" );
-			return null;
-		}
+        if ( artifactNode == null || !artifactNode.exists() ) {
+            Debug.err( "Failed to create new artifact " + artifactId + "!\n" );
+            return null;
+        }
 
         artifactNode.makeSureNodeRefIsNotFrozen();
-		if (!artifactNode.hasAspect( "cm:versionable")) {
-		    artifactNode.addAspect( "cm:versionable" );
-		}
-		if (!artifactNode.hasAspect( "cm:indexControl" )) {
-			artifactNode.addAspect( "cm:indexControl" );
-		}
-		if (!artifactNode.hasAspect( Acm.ACM_IDENTIFIABLE )) {
-			artifactNode.addAspect( Acm.ACM_IDENTIFIABLE );
-		}
-		if (!artifactNode.hasAspect( "view:Checksummable" )) {
-			artifactNode.addAspect( "view:Checksummable" );
-		}
+        if (!artifactNode.hasAspect( "cm:versionable")) {
+            artifactNode.addAspect( "cm:versionable" );
+        }
+        if (!artifactNode.hasAspect( "cm:indexControl" )) {
+            artifactNode.addAspect( "cm:indexControl" );
+        }
+        if (!artifactNode.hasAspect( Acm.ACM_IDENTIFIABLE )) {
+            artifactNode.addAspect( Acm.ACM_IDENTIFIABLE );
+        }
+        if (!artifactNode.hasAspect( "view:Checksummable" )) {
+            artifactNode.addAspect( "view:Checksummable" );
+        }
 
-		artifactNode.createOrUpdateProperty( Acm.CM_TITLE, artifactId );
-		artifactNode.createOrUpdateProperty( "cm:isIndexed", true );
-		artifactNode.createOrUpdateProperty( "cm:isContentIndexed", false );
-		artifactNode.createOrUpdateProperty( Acm.ACM_ID, artifactId );
-		artifactNode.createOrUpdateProperty( "view:cs", cs );
+        artifactNode.createOrUpdateProperty( Acm.CM_TITLE, artifactId );
+        artifactNode.createOrUpdateProperty( "cm:isIndexed", true );
+        artifactNode.createOrUpdateProperty( "cm:isContentIndexed", false );
+        artifactNode.createOrUpdateProperty( Acm.ACM_ID, artifactId );
+        artifactNode.createOrUpdateProperty( "view:cs", cs );
 
-		if ( Debug.isOn() ) {
-			System.out.println( "Creating artifact with indexing: "  + artifactNode.getProperty( "cm:isIndexed" ) );
-		}
+        if ( Debug.isOn() ) {
+            System.out.println( "Creating artifact with indexing: "  + artifactNode.getProperty( "cm:isIndexed" ) );
+        }
 
-		ContentWriter writer =
-		services.getContentService().getWriter( artifactNode.getNodeRef(),
-												ContentModel.PROP_CONTENT, true );
-		InputStream contentStream = new ByteArrayInputStream( content );
-		writer.putContent( contentStream );
+        ContentWriter writer =
+        services.getContentService().getWriter( artifactNode.getNodeRef(),
+                                                ContentModel.PROP_CONTENT, true );
+        InputStream contentStream = new ByteArrayInputStream( content );
+        writer.putContent( contentStream );
 
-		ContentData contentData = writer.getContentData();
-		contentData = ContentData.setMimetype( contentData, EmsScriptNode.getMimeType( finalType ) );
-		if (base64content == null) {
-			contentData = ContentData.setEncoding( contentData, "UTF-8");
-		}
+        ContentData contentData = writer.getContentData();
+        contentData = ContentData.setMimetype( contentData, EmsScriptNode.getMimeType( finalType ) );
+        if (base64content == null) {
+            contentData = ContentData.setEncoding( contentData, "UTF-8");
+        }
         artifactNode.makeSureNodeRefIsNotFrozen();
         artifactNode.transactionCheck();
-		services.getNodeService().setProperty( artifactNode.getNodeRef(),
-		            							ContentModel.PROP_CONTENT,contentData );
+        services.getNodeService().setProperty( artifactNode.getNodeRef(),
+                                                ContentModel.PROP_CONTENT,contentData );
 
         // if only version, save dummy version so snapshots can reference
         // versioned images - need to check against 1 since if someone
         // deleted previously a "dead" version is left in its place
-		Object[] versionHistory = artifactNode.getEmsVersionHistory();
+        Object[] versionHistory = artifactNode.getEmsVersionHistory();
 
         if (versionHistory == null || versionHistory.length <= 1) {
             artifactNode.makeSureNodeRefIsNotFrozen();
-        	artifactNode.createVersion("creating the version history", false);
+            artifactNode.createVersion("creating the version history", false);
         }
 
         artifactNode.getOrSetCachedVersion();
 
-		return artifactNode;
-	}
+        return artifactNode;
+    }
 
 
     /**

@@ -377,7 +377,7 @@ public class EmsScriptNode extends ScriptNode implements
     public Object[] getEmsVersionHistory()
     {
 
-    	if (this.myVersions == null && getIsVersioned())
+        if (this.myVersions == null && getIsVersioned())
         {
             VersionHistory history = this.services.getVersionService().getVersionHistory(this.nodeRef);
             if (history != null)
@@ -407,10 +407,10 @@ public class EmsScriptNode extends ScriptNode implements
     @Override
     public ScriptVersion createVersion(String history, boolean majorVersion)
     {
-    	this.myVersions = null;
+        this.myVersions = null;
         //makeSureNodeRefIsNotFrozen();
         transactionCheck();
-    	return super.createVersion(history, majorVersion);
+        return super.createVersion(history, majorVersion);
     }
 
     /**
@@ -426,7 +426,7 @@ public class EmsScriptNode extends ScriptNode implements
     @Override
     public ScriptNode checkin(String history, boolean majorVersion)
     {
-    	this.myVersions = null;
+        this.myVersions = null;
         transactionCheck();
         return super.checkin(history, majorVersion);
     }
@@ -809,9 +809,9 @@ public class EmsScriptNode extends ScriptNode implements
                                                WorkspaceNode workspace,
                                                Date dateTime ) {
 
-    	return NodeUtil.updateOrCreateArtifact(name, type, base64content, null, targetSiteName,
-    										   subfolderName, workspace, dateTime,
-    										   response, status, false);
+        return NodeUtil.updateOrCreateArtifact(name, type, base64content, null, targetSiteName,
+                                               subfolderName, workspace, dateTime,
+                                               response, status, false);
     }
 
     public String extractAndReplaceImageData( String value, WorkspaceNode ws  ) {
@@ -2752,7 +2752,7 @@ public class EmsScriptNode extends ScriptNode implements
         JSONObject element = NodeUtil.newJsonObject();
         if ( !exists() ) return element;
         JSONObject specializationJSON = new JSONObject();
-    	
+        
         Long readTime = System.currentTimeMillis();
         
         if ( isExprOrProp ) {
@@ -3703,27 +3703,10 @@ public class EmsScriptNode extends ScriptNode implements
                                      Status status ) {
         if ( !hasPermission( permissions ) ) {
             if (response != null) {
-                
-                // Assume admin role to make sure getProperty() doesn't fail
-                // because of permissions.
-                String runAsUser = AuthenticationUtil.getRunAsUser();
-                boolean changeUser = !ADMIN_USER_NAME.equals( runAsUser );
-                if ( changeUser ) {
-                    AuthenticationUtil.setRunAsUser( ADMIN_USER_NAME );
-                }
-
-                // Get name
                 Object property = getProperty( Acm.ACM_NAME );
                 if (property == null) {
                     property = getProperty( Acm.CM_NAME );
                 }
-                
-                // Return to original running user.
-                if ( changeUser ) {
-                    AuthenticationUtil.setRunAsUser( runAsUser );
-                }
-
-                // Log warning for missing permissions.
                 if ( property != null ) {
                     String msg =
                             "Warning! No " + permissions.toUpperCase() + " priveleges to "
@@ -3793,17 +3776,17 @@ public class EmsScriptNode extends ScriptNode implements
         return equals( obj, true );
     }
 
-	/**
-	 * @return the head or current version of the node ref if it exists;
-	 *         otherwise return the existing node ref
-	 */
+    /**
+     * @return the head or current version of the node ref if it exists;
+     *         otherwise return the existing node ref
+     */
     public NodeRef normalizedNodeRef() {// NodeRef ref, ServiceRegistry services ) {
         VersionService vs = getServices().getVersionService();
         Version thisHeadVersion = this.getHeadVersion();
         NodeRef thisCurrent = thisHeadVersion == null ? null : thisHeadVersion.getVersionedNodeRef();
         if ( thisCurrent == null ) {
             Version thisCurrentVersion = vs.getCurrentVersion(this.nodeRef);
-        	thisCurrent = thisCurrentVersion == null ? null : thisCurrentVersion.getVersionedNodeRef();
+            thisCurrent = thisCurrentVersion == null ? null : thisCurrentVersion.getVersionedNodeRef();
         }
         if ( thisCurrent == null ) return nodeRef;
         return thisCurrent;
