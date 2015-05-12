@@ -292,15 +292,10 @@
         -->
     <repositories>
         <repository>
-              <id>artifactory-snapshots</id>
-              <name>snapshots</name>
-              <url>http://europambee-build.jpl.nasa.gov:8082/artifactory/libs-snapshot-local</url>
-        </repository>
-        <repository>
-              <id>artifactory-releases</id>
-              <name>releases</name>
-              <url>http://europambee-build.jpl.nasa.gov:8082/artifactory/libs-release-local</url>
-        </repository>
+	    <id>local-repository</id>
+	    <name>local</name>
+	    <url>file://${user.home}/.m2/repository</url>
+	</repository>
         <repository>
             <id>alfresco-public</id>
             <url>https://artifacts.alfresco.com/nexus/content/groups/public</url>
