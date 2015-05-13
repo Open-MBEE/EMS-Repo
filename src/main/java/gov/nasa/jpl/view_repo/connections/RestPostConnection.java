@@ -13,14 +13,22 @@ import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.client.WebResource.Builder;
 
-public class RestPostConnection extends AbstractConnection {
-    static Logger logger = Logger.getLogger(RestPostConnection.class);
-
+/**
+ * Implements Runnable so can send the post request off in the background so there aren't
+ * any timeout issues when sending deltas.
+ * @author cinyoung
+ *
+ */
+public class RestPostConnection implements ConnectionInterface, Runnable {
+    private static Logger logger = Logger.getLogger(RestPostConnection.class);
     private long sequenceId = 1;
     
     // static so Spring can configure URI for everything
     private static String uri = "https://orasoa-dev07.jpl.nasa.gov:8121/PublishMessageRestful"; // TODO: Springify
     
+    private String message;
+    private String destination;
+
     public RestPostConnection() {
         
     }
@@ -44,19 +52,13 @@ public class RestPostConnection extends AbstractConnection {
     
     public boolean publish(String msg, String dst) {
         if (uri == null) return false;
-        boolean status = true;
-        Client client = Client.create();
     
-        if (logger.isDebugEnabled()) {
-            logger.debug("sending to: " + uri);
-        }
-        WebResource webResource = client.resource(uri);
-        ClientResponse response = getResourceBuilder(webResource, dst).post( ClientResponse.class, msg);
-        if (response.getStatus() != 200) {
-            status = false;
-        }
+        message = msg;
+        destination = dst;
         
-        return status;
+        new Thread(this).start();
+        
+        return true; 
     }
     
     
@@ -97,4 +99,24 @@ public class RestPostConnection extends AbstractConnection {
        
        return builder;
     }
+    @Override
+    public void run() {
+        Client client = Client.create();
+        WebResource webResource = client.resource(uri);
+        ClientResponse response = getResourceBuilder(webResource, destination).post( ClientResponse.class, message);
+        if (response.getStatus() != 200) {
+            if (logger.isDebugEnabled()) {
+                logger.debug( String.format( "Rest connection failed" ) );
+            }
+        }
+    }
+
+    @Override
+    public void setWorkspace( String workspace ) {
+    }
+
+    @Override
+    public void setProjectId( String projectId ) {
+    }
+
 }
