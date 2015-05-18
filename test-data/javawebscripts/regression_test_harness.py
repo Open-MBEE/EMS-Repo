@@ -1608,6 +1608,54 @@ True,
 common_filters,
 ["test","workspaces","develop", "develop2"]
 ],
+
+
+
+# Additional searches after everything is completed
+[
+10000,
+"GetSearchDocumentation",
+"Get search documentation",
+create_curl_cmd(type="GET",data="search?keyword=some*&filters=documentation",base_url=BASE_URL_WS,
+                branch="master/"),
+True, 
+common_filters,
+["develop","workspaces"]
+],
+
+[
+10001,
+"GetSearchAspects",
+"Get search aspects",
+create_curl_cmd(type="GET",data="search?keyword=View&filters=aspect",base_url=BASE_URL_WS,
+                branch="master/"),
+True, 
+common_filters,
+["develop","workspaces"]
+],
+
+[
+10002,
+"GetSearchId",
+"Get search id",
+create_curl_cmd(type="GET",data="search?keyword=300&filters=id",base_url=BASE_URL_WS,
+                branch="master/"),
+True, 
+common_filters,
+["develop","workspaces"]
+],
+
+[
+10003,
+"GetSearchValue",
+"Get search value",
+create_curl_cmd(type="GET",data="search?keyword=dlam_string&filters=value",base_url=BASE_URL_WS,
+                branch="master/"),
+True, 
+common_filters,
+["develop","workspaces"]
+]
+
         
 ]
 

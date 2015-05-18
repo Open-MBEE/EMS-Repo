@@ -31,6 +31,7 @@ package gov.nasa.jpl.view_repo.webscripts;
 
 import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.mbee.util.Utils;
+import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
@@ -38,7 +39,6 @@ import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -58,63 +58,71 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
  *
  */
 public class ModelSearch extends ModelGet {
-	public ModelSearch() {
-	    super();
-	}
+    static Logger logger = Logger.getLogger(ModelSearch.class);
+
+    public ModelSearch() {
+        super();
+    }
 
 
     public ModelSearch(Repository repositoryHelper, ServiceRegistry registry) {
         super(repositoryHelper, registry);
     }
 
-
-    protected final String[] searchTypes = {
-	        "@sysml\\:documentation:\"",
-	        "@sysml\\:name:\"",
-	        "@sysml\\:id:\"",
-	        "@sysml\\:string:\"",
-	        "@sysml\\:body:\""
+    
+    protected final Map<String, String> searchTypesMap = new HashMap<String, String>() {
+        private static final long serialVersionUID = -7336887332666278453L;
+        {
+            put("documentation", "@sysml\\:documentation:\"");
+            put("name", "@sysml\\:name:\"");
+            put("id", "@sysml\\:id:\"");
+            put("aspect", "ASPECT:\"{http://jpl.nasa.gov/model/sysml-lite/1.0}"); 
+            put("appliedMetatypes", "@sysml\\:appliedMetatypes:\"");
+            put("metatypes", "@sysml\\:metatypes:\"");
+        }
     };
+    
 
-
-	@Override
+    @Override
     protected Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
         ModelSearch instance = new ModelSearch(repository, getServices());
         return instance.executeImplImpl(req,  status, cache, runWithoutTransactions);
     }
 
-	@Override
+    @Override
     protected Map<String, Object> executeImplImpl(WebScriptRequest req, Status status, Cache cache) {
         printHeader( req );
 
-		clearCaches();
+        clearCaches();
 
-		Map<String, Object> model = new HashMap<String, Object>();
+        Map<String, Object> model = new HashMap<String, Object>();
 
-		try {
-	        JSONArray elementsJson = executeSearchRequest(req);
+        try {
+            JSONArray elementsJson = executeSearchRequest(req);
 
-	        JSONObject top = NodeUtil.newJsonObject();
-			top.put("elements", elementsJson);
-			if (!Utils.isNullOrEmpty(response.toString())) top.put("message", response.toString());
-			model.put("res", NodeUtil.jsonToString( top, 4 ));
-		} catch (JSONException e) {
-			log(Level.ERROR, HttpServletResponse.SC_BAD_REQUEST, "Could not create the JSON response");
-			model.put("res", createResponseJson());
-			e.printStackTrace();
-		}
+            JSONObject top = NodeUtil.newJsonObject();
+            top.put("elements", elementsJson);
+            if (!Utils.isNullOrEmpty(response.toString())) top.put("message", response.toString());
+            model.put("res", NodeUtil.jsonToString( top, 4 ));
+        } catch (JSONException e) {
+            log(Level.ERROR, HttpServletResponse.SC_BAD_REQUEST, "Could not create the JSON response");
+            model.put("res", createResponseJson());
+            e.printStackTrace();
+        }
 
-		status.setCode(responseStatus.getCode());
+        status.setCode(responseStatus.getCode());
 
-		printFooter();
+        printFooter();
 
-		return model;
-	}
+        return model;
+    }
 
 
-	private JSONArray executeSearchRequest(WebScriptRequest req) throws JSONException {
+    private JSONArray executeSearchRequest(WebScriptRequest req) throws JSONException {
         String keyword = req.getParameter("keyword");
-        if (keyword != null) {
+        String[] filters = req.getParameter("filters") == null ? new String[]{"documentation"} : req.getParameter( "filters" ).split( "," );
+
+        if (keyword != null && keyword.length() > 0) {
             // get timestamp if specified
             String timestamp = req.getParameter("timestamp");
             Date dateTime = TimeUtils.dateFromTimestamp( timestamp );
@@ -123,28 +131,64 @@ public class ModelSearch extends ModelGet {
 
             WorkspaceNode workspace = getWorkspace( req );
 
-            for (String searchType: searchTypes) {
-                rawResults.putAll( searchForElements( searchType, keyword, false,
-                                                         workspace, dateTime ) );
-            }
+            for (String searchType: filters) {
+                if ( !searchType.equals( "value" ) ) {
+                    String lucenePrefix = searchTypesMap.get(searchType);
+                    if (lucenePrefix != null) {
+                        rawResults.putAll( searchForElements( searchTypesMap.get(searchType), keyword, false,
+                                                              workspace, dateTime ) );
+                    } else {
+                        log(Level.INFO, HttpServletResponse.SC_BAD_REQUEST, "Unexpected filter type: " + searchType);
+                        return null;
+                    }
+                } else {
+                    try {
+                        Integer.parseInt(keyword);
+                        rawResults.putAll( searchForElements( "@sysml\\:integer:\"", keyword, false,
+                                                              workspace, dateTime) );
+                        rawResults.putAll( searchForElements( "@sysml\\:naturalValue:\"", keyword, false,
+                                                              workspace, dateTime) );
+                    } catch (NumberFormatException nfe) {
+                        // do nothing
+                    }
+                    
+                    try {
+                        Double.parseDouble(keyword);
+                        rawResults.putAll( searchForElements( "@sysml\\:double:\"", keyword, false,
+                                                              workspace, dateTime) );
+                    } catch (NumberFormatException nfe) {
+                        // do nothing
+                    }
 
-            // need to filter out _pkgs:
-            for (Entry< String, EmsScriptNode > element: rawResults.entrySet()) {
-
-                if (!element.getValue().getSysmlId().endsWith( "_pkg" )) {
-                    elementsFound.put( element.getKey(), element.getValue() );
+                    rawResults.putAll( searchForElements( "@sysml\\:string:\"", keyword, false,
+                                                          workspace, dateTime) );
                 }
-//                NodeRef nodeRef = NodeUtil.findNodeRefById( element.getKey(), false, workspace, dateTime, services, true );
-//                if ( nodeRef.equals( element.getValue().getNodeRef() ) ) {
-//                    if (!element.getValue().getSysmlId().endsWith( "_pkg" )) {
-//                        elementsFound.put( element.getKey(), element.getValue() );
-//                    }
-//                }
             }
 
+            // filter out _pkgs:
+            for (String sysmlid: rawResults.keySet()) {
+                if (!sysmlid.endsWith( "_pkg" )) {
+                    elementsFound.put(sysmlid, rawResults.get( sysmlid ));
+                }
+            }
+//            for (Entry< String, EmsScriptNode > element: rawResults.entrySet()) {
+//                if (!element.getValue().getSysmlId().endsWith( "_pkg" )) {
+//                    elementsFound.put( element.getKey(), element.getValue() );
+//                }
+//            }
+
+            // for values, we really want to return the element that owns it
+            for (EmsScriptNode element: elementsFound.values()) {
+                for (String valueSpecAspect: Acm.VALUESPEC_ASPECTS)
+                if (element.hasAspect( valueSpecAspect )) {
+                    
+                    break;
+                }
+            }
+            
             handleElements(workspace, dateTime, true);
         }
 
         return elements;
-	}
+    }
 }
