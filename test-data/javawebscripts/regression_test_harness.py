@@ -1652,7 +1652,7 @@ common_filters,
 create_curl_cmd(type="GET",data="search?keyword=dlam_string&filters=value",base_url=BASE_URL_WS,
                 branch="master/"),
 True, 
-common_filters,
+common_filters+['"qualifiedId"', '"sysmlid"'],
 ["develop","workspaces"]
 ]
 
