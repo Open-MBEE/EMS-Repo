@@ -386,7 +386,7 @@ public class CommitUtil {
 
     private static NodeRef commitRef = null;
     public synchronized static NodeRef commit(final WorkspaceNode workspace,
-                                              final String body,
+                                              final JSONObject body,
                                               final String msg,
                                               final boolean runWithoutTransactions,
                                               final ServiceRegistry services,
@@ -407,7 +407,7 @@ public class CommitUtil {
 
 	private static NodeRef commitTransactionable(
 	                                           WorkspaceNode workspace,
-	                                           String body,
+	                                           JSONObject body,
 	                                           String msg,
 	                                           ServiceRegistry services,
 	                                           StringBuffer response) throws JSONException {
@@ -453,7 +453,7 @@ public class CommitUtil {
 
         return createCommitNode( source1, source2, target, dateTime1, dateTime2,
                                  TYPE_MERGE, msg,
-                                 wsDiff.toString(),services, response, true );
+                                 wsDiff,services, response, true );
     }
 
     /**
@@ -533,7 +533,7 @@ public class CommitUtil {
                                                        throws JSONException {
 
 	    return createCommitNode(srcWs, null, dstWs, null, null,
-	                            TYPE_BRANCH, msg, "{}", services, response);
+	                            TYPE_BRANCH, msg, new JSONObject(), services, response);
 	}
 
     // TODO -- REVIEW -- Just copied branch and search/replaced "branch" with "merge"
@@ -559,7 +559,7 @@ public class CommitUtil {
                                                StringBuffer response )
                                                        throws JSONException {
         createCommitNode(srcWs1, srcWs2, dstWs, null, null,
-                         TYPE_MERGE, msg, "{}", services, response, true);
+                         TYPE_MERGE, msg, new JSONObject(), services, response, true);
     }
 
 	/**
@@ -624,7 +624,7 @@ public class CommitUtil {
                                               WorkspaceNode dstWs,
                                               Date dateTime1,
                                               Date dateTime2,
-                                              String type, String msg, String body,
+                                              String type, String msg, JSONObject body,
                                               ServiceRegistry services, StringBuffer response) {
 
         return createCommitNode(srcWs1, srcWs2, dstWs, dateTime1, dateTime2, type, msg, body,
@@ -640,7 +640,7 @@ public class CommitUtil {
             createCommitNode( WorkspaceNode srcWs1, WorkspaceNode srcWs2,
                               WorkspaceNode dstWs, Date dateTime1,
                               Date dateTime2, String type, String msg,
-                              String body, ServiceRegistry services,
+                              JSONObject body, ServiceRegistry services,
                               StringBuffer response, boolean twoSourceWorkspaces ) {
         NodeRef result = null;
         // to make sure no permission issues, run as admin
@@ -679,7 +679,11 @@ public class CommitUtil {
                 } else {
                     // TODO throw exception
                 }
-                if (body != null) currCommit.createOrUpdateProperty( "ems:commit", body );
+                if (body != null) {
+                    // clean up JSON for small commits
+                    JSONObject cleanedJson = WorkspaceDiff.cleanWorkspaceJson( body );
+                    currCommit.createOrUpdateProperty( "ems:commit", cleanedJson.toString() );
+                }
                 
                 if (prevCommit1 != null) {
                     updateCommitHistory(prevCommit1, currCommit, originalUser);
