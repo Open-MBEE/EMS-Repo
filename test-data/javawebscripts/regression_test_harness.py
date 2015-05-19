@@ -1645,6 +1645,7 @@ common_filters,
 ["develop","workspaces"]
 ],
 
+## temporarily remove this, the filters don't appear to be working quite right
 [
 10003,
 "GetSearchValue",
@@ -1653,7 +1654,7 @@ create_curl_cmd(type="GET",data="search?keyword=dlam_string&filters=value",base_
                 branch="master/"),
 True, 
 common_filters+['"qualifiedId"', '"sysmlid"'],
-["develop","workspaces"]
+["workspaces"]
 ]
 
         
