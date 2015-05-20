@@ -54,7 +54,7 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
 
 /**
  * Descriptor at
- * /view-repo/src/main/amp/config/alfresco/extension/templates/webscripts/gov/nasa/jpl/javawebscripts/project.get.desc.xml
+ * EMS-Repo/src/main/amp/config/alfresco/extension/templates/webscripts/gov/nasa/jpl/javawebscripts/project.get.desc.xml
  *
  * @author cinyoung
  *

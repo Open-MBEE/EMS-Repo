@@ -61,10 +61,10 @@ public class CmisModelInterfaceImpl
 	public static final String WEBSERVICES_BINDING = BindingType.WEBSERVICES
 			.value();
 	public static final String JSON_BINDING = BindingType.BROWSER.value();
-	public static final String ATOMPUB_URL = "http://localhost:8080/view-repo/cmisatom";
+	public static final String ATOMPUB_URL = "http://localhost:8080/alfresco/cmisatom";
 	// TODO fix these URLs
-	public static final String WEBSERVICES_URL = null; // "http://localhost:8080/view-repo/cmisatom";
-	public static final String JSON_URL = null; // "http://localhost:8080/view-repo/cmisatom";
+	public static final String WEBSERVICES_URL = null; // "http://localhost:8080/alfresco/cmisatom";
+	public static final String JSON_URL = null; // "http://localhost:8080/alfresco/cmisatom";
 
 	public CmisModelInterfaceImpl() {
 		super();
@@ -220,7 +220,7 @@ public class CmisModelInterfaceImpl
 
 			// Specify the connection settings
 			parameter.put(SessionParameter.ATOMPUB_URL,
-					"http://localhost:8080/view-repo/cmisatom");
+					"http://localhost:8080/alfresco/cmisatom");
 			parameter.put(SessionParameter.BINDING_TYPE, bindingType);
 
 			// Set the alfresco object factory

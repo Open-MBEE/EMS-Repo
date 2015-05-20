@@ -51,7 +51,7 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
 /**
  * Allows updating of sysml:id for synchronization of Alfresco created elements to MD
  *
- * /view-repo/src/main/amp/config/alfresco/extension/templates/webscripts/gov/nasa/jpl/javawebscripts/element.put.desc.xml
+ * EMS-Repo/src/main/amp/config/alfresco/extension/templates/webscripts/gov/nasa/jpl/javawebscripts/element.put.desc.xml
  * @author cinyoung
  *
  */

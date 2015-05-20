@@ -340,7 +340,7 @@ public class JavaQuery extends AbstractModuleComponent {
         parameter.put(SessionParameter.PASSWORD, "admin");
 
         // Specify the connection settings
-        parameter.put(SessionParameter.ATOMPUB_URL, "http://localhost:8080/view-repo/cmisatom");
+        parameter.put(SessionParameter.ATOMPUB_URL, "http://localhost:8080/alfresco/cmisatom");
         parameter.put(SessionParameter.BINDING_TYPE, BindingType.ATOMPUB.value());
 
         // Set the alfresco object factory

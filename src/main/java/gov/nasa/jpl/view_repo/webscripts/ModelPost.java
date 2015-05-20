@@ -109,7 +109,7 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
 
 /**
  * Descriptor file:
- * /view-repo/src/main/amp/config/alfresco/extension/templates/webscripts
+ * EMS-Repo/src/main/amp/config/alfresco/extension/templates/webscripts
  * /gov/nasa/jpl/javawebscripts/model.post.desc.xml
  *
  * NOTE: Transactions are independently managed in this Java webscript, so make

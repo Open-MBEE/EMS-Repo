@@ -52,64 +52,6 @@ create_curl_cmd(type="POST",data="elementsNew.json",base_url=BASE_URL_WS,
                 post_type="elements",branch="master/"),
 True, 
 common_filters,
-[
-5,
-"GetProject",
-"Get project",
-create_curl_cmd(type="GET",data="sites/europa/projects/123456",base_url=BASE_URL_JW,
-                branch=""),
-False, 
-None,
-["test","workspaces","develop"]
-],
-        
-[
-6,
-"GetElements",
-"Get elements",
-create_curl_cmd(type="GET",data="elements/123456?recurse=true",base_url=BASE_URL_JW,
-                branch=""),
-True, 
-common_filters,
-["test","workspaces","develop"]
-],
-        
-[
-7,
-"GetViews",
-"Get views",
-create_curl_cmd(type="GET",data="views/301",base_url=BASE_URL_JW,
-                branch=""),
-True, 
-common_filters,
-["test","workspaces","develop"]
-],
-        
-[
-8,
-"GetViewElements",
-"Get view elements",
-create_curl_cmd(type="GET",data="views/301/elements",base_url=BASE_URL_JW,
-                branch=""),
-True, 
-common_filters,
-["test","workspaces","develop"]
-],
-     
-[
-9,
-"GetProducts",
-"Get product",
-create_curl_cmd(type="GET",data="products/301",base_url=BASE_URL_JW,
-                branch=""),
-True, 
-common_filters,
-["test","workspaces","develop"]
-],
-                   
-[
-10,
-=======
 ["test","workspaces","develop", "develop2"]
 ],
         
@@ -293,10 +235,6 @@ common_filters,
 # Note: Need a delay before doing this search, b/c it will find "some*" within the
 #       documentation, which does not get indexed by alfresco right away
 [
-      
-[
-12,
-=======
 110,
 "GetSearch",
 "Get search",
@@ -461,114 +399,6 @@ common_filters+['"branched"','"created"','"id"','"qualifiedId"'],
 "Get workspaces",
 create_curl_cmd(type="GET",base_url=BASE_URL_WS_NOBS,branch=""),
 True, 
-
-[
-21,
-"PostSnapshot",
-"Post snapshot test",
-create_curl_cmd(type="POST",base_url=BASE_URL_WS,
-                branch="master/sites/europa/products/301/",
-                post_type="snapshots"),
-True, 
-common_filters+['"created"','"id"','"url"'],
-["test","workspaces","develop"]
-],
-
-# EXPRESSIONS: ==========================    
-
-[
-22,
-"SolveConstraint",
-"Post expressions with a constraint and solves for the constraint.",
-create_curl_cmd(type="POST",base_url=BASE_URL_JW,
-                data="expressionElementsNew.json",
-                branch="sites/europa/projects/123456/",
-                post_type="elements?fix=true"),
-True, 
-common_filters+['"specification"'],
-["test","workspaces","develop"]
-],
-                
-]    
-
-##########################################################################################    
-#
-# MAIN METHOD 
-#
-##########################################################################################    
-if __name__ == '__main__':
-    
-    # Parse the command line arguments:
-    parse_command_line()
-    
-    # this is not working yet, so assumption for now is that this will be called 
-    # by the bash script which will start up the server
-    #startup_server() 
-    
-    # Change directories to where we are used to sending curl cmds:
-    if not os.path.exists(test_dir_path):
-        print "ERROR: Test directory path '%s' does not exists!\n"%test_dir_path
-        sys.exit(1)
-    
-    os.chdir(test_dir_path)
-
-    # Determine the branch to use based on the command line arg if supplied, otherwise
-    # use the environment variable:
-    if cmd_git_branch:
-        git_branch = cmd_git_branch
-    else:
-        git_branch = os.getenv("GIT_BRANCH", "test")
-    
-    # Make the directories if needed:
-    if "/" in git_branch:
-        git_branch = git_branch.split("/")[1]
-
-    result_dir = "%sResultDir"%git_branch
-    baseline_dir = "%sBaselineDir"%git_branch
-    
-    if not os.path.exists(result_dir):
-        os.makedirs(result_dir)
-        
-    if not os.path.exists(baseline_dir):
-        os.makedirs(baseline_dir)
-        
-    print "\nUSING BASELINE DIR: '%s'\nOUTPUT DIR: '%s'\n"%(baseline_dir, result_dir)
-    
-    # Run tests or create baselines:
-    # If there were test numbers specified:
-    if test_nums:
-        for test_num in test_nums:
-            # If it is a valid test number then run the test:
-            for test in tests:
-                if test_num == test[0]:
-                    run_test(test)
-                     
-    # If there were test names specified:
-    elif test_names:
-        for test_name in test_names:
-                # If it is a valid test number then run the test:
-                for test in tests:
-                    if test_name == test[1]:
-                        run_test(test)
-
-    # Otherwise, run all the tests for the branch:
-    else:
-        for test in tests:            
-            if git_branch in test[6]:
-                run_test(test)
-
-    # uncomment once startup_server() works
-#     print "KILLING SERVER"
-#     kill_server()
-    
-    if not create_baselines:
-        print "\nNUMBER OF PASSED TESTS: "+str(passed_tests)
-        print "NUMBER OF FAILED TESTS: "+str(failed_tests)+"\n"
-    
-    sys.exit(failed_tests)
-    
-    
-=======
 common_filters+['"branched"','"created"','"id"','"qualifiedId"','"parent"'],
 ["test","workspaces","develop", "develop2"]
 ],
