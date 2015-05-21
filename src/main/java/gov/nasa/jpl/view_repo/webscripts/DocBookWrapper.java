@@ -262,6 +262,8 @@ public class DocBookWrapper {
 			list = body.select("listitem");
 			list.addAll(body.select("itemizedlist"));
 			list.addAll(body.select("orderedlist"));
+			list.addAll(body.select("thead"));
+			list.addAll(body.select("uthead"));
 			for(Element elm : list){
 				if(elm.html().trim().length() == 0){
 					elm.remove();
