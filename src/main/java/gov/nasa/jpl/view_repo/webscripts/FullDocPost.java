@@ -1,5 +1,6 @@
 package gov.nasa.jpl.view_repo.webscripts;
 
+import gov.nasa.jpl.view_repo.DocBookContentTransformer;
 import gov.nasa.jpl.view_repo.actions.ActionUtil;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
@@ -26,6 +27,7 @@ import org.alfresco.model.ContentModel;
 import org.alfresco.repo.content.MimetypeMap;
 import org.alfresco.repo.model.Repository;
 import org.alfresco.service.ServiceRegistry;
+import org.alfresco.service.cmr.repository.ContentReader;
 import org.alfresco.service.cmr.repository.ContentService;
 import org.alfresco.service.cmr.repository.ContentWriter;
 import org.alfresco.service.cmr.repository.NodeRef;
@@ -45,8 +47,10 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
 public class FullDocPost extends AbstractJavaWebScript {
 	protected String fullDocDir;
 	protected String fullDocId;
+	protected String parentPath;
 	protected String htmlPath;
 	protected String pdfPath;
+	protected String zipPath;
 	
 	public void setFullDocId(String id){
 		this.fullDocId = id;
@@ -59,8 +63,10 @@ public class FullDocPost extends AbstractJavaWebScript {
 	}
 	
 	private void setPaths(){
+		this.parentPath = Paths.get(this.fullDocDir).getParent().toString();
 		this.htmlPath = Paths.get(TempFileProvider.getTempDir().getAbsolutePath(), fullDocId, String.format("%s_NodeJS.html", fullDocId)).toString();
 		this.pdfPath = Paths.get(TempFileProvider.getTempDir().getAbsolutePath(), fullDocId, String.format("%s_NodeJS.pdf", fullDocId)).toString();
+		this.zipPath = String.format("%s/%s.zip", this.parentPath, this.fullDocId);
 	}
 	
 	public String getHtmlPath(){
@@ -90,23 +96,23 @@ public class FullDocPost extends AbstractJavaWebScript {
                                                  Status status, Cache cache ) {
         printHeader( req );
         Map< String, Object > model = new HashMap< String, Object >();
-        JSONObject snapshotJson = (JSONObject)req.parseContent();
-        JSONObject json = snapshotJson.getJSONObject("snapshot");
-        String ws = json.optString("ws");
-        String docId = json.optString("sysmlid");
-        String time = json.optString("time");
-        String site = json.optString("site");
-        fullDocId = docId;
-//        fullDocDir = Paths.get(TempFileProvider.getTempDir().getAbsolutePath(), fullDocId).toString();
-        this.setFullDocDir();
-        this.setPaths();
-        try{
-        	downloadHtml(ws, site, docId, time);
-        	html2pdf();
-        }
-        catch(Exception ex){
-        	
-        }
+//        JSONObject snapshotJson = (JSONObject)req.parseContent();
+//        JSONObject json = snapshotJson.getJSONObject("snapshot");
+//        String ws = json.optString("ws");
+//        String docId = json.optString("sysmlid");
+//        String time = json.optString("time");
+//        String site = json.optString("site");
+//        fullDocId = docId;
+////        fullDocDir = Paths.get(TempFileProvider.getTempDir().getAbsolutePath(), fullDocId).toString();
+//        this.setFullDocDir();
+//        this.setPaths();
+//        try{
+//        	downloadHtml(ws, site, docId, time);
+//        	html2pdf();
+//        }
+//        catch(Exception ex){
+//        	
+//        }
         model.put("res", "testing");
         return model;
     }
@@ -133,7 +139,7 @@ public class FullDocPost extends AbstractJavaWebScript {
 		}	
     }
     
-    public void downloadHtml(String ws, String site, String docId, String time) throws Exception {
+    public void downloadHtml(WorkspaceNode workspace, String site, String docId, Date time) throws Exception {
     	ProcessBuilder processBuilder = new ProcessBuilder();
 		processBuilder.directory(new File("/Users/lho/git/phantomjs-2.0.0-macosx/examples/"));	//to do : need to config
 		HostnameGet alfresco = new HostnameGet(this.repository, this.services);
@@ -146,7 +152,8 @@ public class FullDocPost extends AbstractJavaWebScript {
 		List<String> command = new ArrayList<String>();
 		command.add("/Users/lho/git/phantomjs-2.0.0-macosx/bin/phantomjs");
 		command.add("fullDoc.js");
-		command.add(String.format("%s:%d/%s://%s@%s:%d/mmsFullDoc.html?ws=%s&site=%s&docId=%s&time=%s",preRendererUrl,preRendererPort, protocol, mmsAdminCredential, hostname,alfrescoPort, ws, site, docId, time));
+		command.add(String.format("%s:%d/%s://%s@%s:%d/mmsFullDoc.html?ws=%s&site=%s&docId=%s&time=%s",
+				preRendererUrl,preRendererPort, protocol, mmsAdminCredential, hostname,alfrescoPort, workspace.getName(), site, docId, time.toString()));
 		command.add(String.format("%s/%s_NodeJS.html", this.fullDocDir, this.fullDocId));
 		processBuilder.command(command);
 		System.out.println("phantomJS command: " + processBuilder.command());
@@ -157,6 +164,13 @@ public class FullDocPost extends AbstractJavaWebScript {
 			System.out.println("exit code: " + exitCode);
 		}
 		
+		//parse HTML
+		//for each IMG tag
+			//get SRC attr
+			//retrieve image from Repo
+			//save image to local Filesystem
+			//update SRC attr to local filesystem path
+//		retrieveImages(this.getHtmlPath(), services, workspace, time);
 		try{
 			tableToCSV();
 		}
@@ -172,6 +186,33 @@ public class FullDocPost extends AbstractJavaWebScript {
 		return document.body().text();
 	}
     
+//    private void retrieveImages(File srcFile, ServiceRegistry services, WorkspaceNode workspace, Date timestamp){
+//		DocBookContentTransformer dbTransf = new DocBookContentTransformer();
+//		//can't use dbTransf.findImages() because it's basing off docbook.xml file and syntax
+//		//need to replace the function with one that extract images file name from HTML file.
+//		for (String img: dbTransf.findImages(srcFile))
+//		{
+//			String imgFilename = this.getDBDirImage() + File.separator + img;
+//			File imgFile = new File(imgFilename);
+//			if (!imgFile.exists())
+//			{
+//				//System.out.println("finding image: " + imgFilename);
+//				NodeRef nr = NodeUtil.findNodeRefById(img, false, workspace, timestamp, services, false);
+//
+//				ContentReader imgReader;
+//				//System.out.println("retrieving image file...");
+//				imgReader = services.getContentService().getReader(nr, ContentModel.PROP_CONTENT);
+//				//System.out.println("saving image file...");
+//				if(!Files.exists(this.imageDirName)){
+//					if(!new File(this.imageDirName.toString()).mkdirs()){
+//						System.out.println("Failed to create directory for " + this.imageDirName);
+//					}
+//				}
+//				imgReader.getContent(imgFile);
+//			}
+//		}
+//	}
+
     public void savePdfToRepo(EmsScriptNode snapshotFolder, EmsScriptNode snapshotNode) throws Exception{
 //		ServiceRegistry services = this.snapshotNode.getServices();
     	String filename = String.format("%s.pdf", this.fullDocId);
@@ -266,7 +307,7 @@ public class FullDocPost extends AbstractJavaWebScript {
 			EmsScriptNode node = snapshotFolder.createNode(filename, "cm:content");
 			if(node == null) throw new Exception("Failed to create zip repository node!");
 
-			if(!this.saveFileToRepo(node, MimetypeMap.MIMETYPE_ZIP, String.format("%s.zip", this.fullDocId))) throw new Exception("Failed to save zip artifact to repository!");
+			if(!this.saveFileToRepo(node, MimetypeMap.MIMETYPE_ZIP, this.zipPath)) throw new Exception("Failed to save zip artifact to repository!");
 			snapshotNode.createOrUpdateAspect("view2:htmlZip");
 			snapshotNode.createOrUpdateProperty("view2:htmlZipNode", node.getNodeRef());
 
@@ -276,7 +317,6 @@ public class FullDocPost extends AbstractJavaWebScript {
 			throw new Exception("Failed to generate zip artifact!", ex);
 		}
 	}
-
 	
     private void tableToCSV() throws Exception{
 		File input = new File(this.getHtmlPath());
@@ -428,7 +468,7 @@ public class FullDocPost extends AbstractJavaWebScript {
 
     public void zipHtml() throws IOException, InterruptedException {
 		ProcessBuilder processBuilder = new ProcessBuilder();
-		processBuilder.directory(new File(this.fullDocDir));
+		processBuilder.directory(new File(Paths.get(this.fullDocDir).getParent().toString()));
 //		System.out.println("zip working directory: " + processBuilder.directory());
 		List<String> command = new ArrayList<String>();
 		String zipFile = this.fullDocId + ".zip";

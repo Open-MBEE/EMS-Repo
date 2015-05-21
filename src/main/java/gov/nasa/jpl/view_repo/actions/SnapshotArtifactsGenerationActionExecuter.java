@@ -161,7 +161,7 @@ public class SnapshotArtifactsGenerationActionExecuter  extends ActionExecuterAb
         	fullDoc.setFullDocId(snapshotId);
         	try{
         		
-        		fullDoc.downloadHtml("master", siteName, sysmlId, "latest");
+        		fullDoc.downloadHtml(workspace, siteName, sysmlId, timestamp);
         	}
         	catch(Exception ex){
         		status.setCode(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
@@ -244,21 +244,21 @@ public class SnapshotArtifactsGenerationActionExecuter  extends ActionExecuterAb
         	response.append("\n\n");
 //	        }
 	        // Send off notification email
-//        	try{
-//		        String subject = "PDF Generation " + jobStatus;
-//		        EmsScriptNode logNode = ActionUtil.saveLogToFile(jobNode, "text/plain", services, response.toString());
-//		        String msg = buildEmailMessage(snapshot, logNode);
-//	    	    ActionUtil.sendEmailToModifier(jobNode, msg, subject, services);
-//	    	    if (logger.isDebugEnabled()) logger.debug("Completed snapshot artifact(s) generation.");
-//        	}
-//        	catch(Exception ex){
-//        		System.out.println("Failed to email PDF generation status.");
-//        		Throwable throwable = ex.getCause();
-//            	while(throwable != null){
-//            		System.out.println(throwable.getMessage());
-//            		System.out.println(throwable.getCause());
-//            	}
-//        	}
+        	try{
+		        String subject = "PDF Generation " + jobStatus;
+		        EmsScriptNode logNode = ActionUtil.saveLogToFile(jobNode, "text/plain", services, response.toString());
+		        String msg = buildEmailMessage(snapshot, logNode);
+	    	    ActionUtil.sendEmailToModifier(jobNode, msg, subject, services);
+	    	    if (logger.isDebugEnabled()) logger.debug("Completed snapshot artifact(s) generation.");
+        	}
+        	catch(Exception ex){
+        		System.out.println("Failed to email PDF generation status.");
+        		Throwable throwable = ex.getCause();
+            	while(throwable != null){
+            		System.out.println(throwable.getMessage());
+            		System.out.println(throwable.getCause());
+            	}
+        	}
         }
         catch(Exception ex){
         	try{
@@ -283,15 +283,15 @@ public class SnapshotArtifactsGenerationActionExecuter  extends ActionExecuterAb
         	logger.error("Failed to complete snapshot artifact(s) generation!");
         	logger.error(sb.toString());
         	ex.printStackTrace();
-        	ActionUtil.sendEmailToModifier(jobNode, String.format("An unexpected error occurred and your PDF generation failed.\n%s%s", ex.getMessage(), sb.toString()), "PDF Generation Failed", services);
-        	ActionUtil.sendEmailTo("mbee-dev-admin@jpl.nasa.gov", "mbee-dev-admin@jpl.nasa.gov", 
-        			String.format("Server: %s\nSite: %s\nWorkspace: %s\nSnapshot Id: %s\nError: %s%s%s", 
-        					new HostnameGet(this.repository, this.services).getAlfrescoUrl(),
-        					siteName,
-        					workspace,
-        					snapshotId,
-        					ex.getMessage(), sb.toString(), response.toString()), 
-					"PDF Generation Failed", services);
+//        	ActionUtil.sendEmailToModifier(jobNode, String.format("An unexpected error occurred and your PDF generation failed.\n%s%s", ex.getMessage(), sb.toString()), "PDF Generation Failed", services);
+//        	ActionUtil.sendEmailTo("mbee-dev-admin@jpl.nasa.gov", "mbee-dev-admin@jpl.nasa.gov", 
+//        			String.format("Server: %s\nSite: %s\nWorkspace: %s\nSnapshot Id: %s\nError: %s%s%s", 
+//        					new HostnameGet(this.repository, this.services).getAlfrescoUrl(),
+//        					siteName,
+//        					workspace,
+//        					snapshotId,
+//        					ex.getMessage(), sb.toString(), response.toString()), 
+//					"PDF Generation Failed", services);
         }
     }
 
