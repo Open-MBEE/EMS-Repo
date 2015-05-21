@@ -14,7 +14,8 @@
 
 if [ "$#" -lt 1 ]; then
   echo "usage> source $0 alfresco_port [debug_port]"
-fi
+else
+
 #oldPort=$ALFRESCO_PORT
 newPort=$1
 #echo "newPort = $newPort"
@@ -54,6 +55,8 @@ if [ "$#" -gt 1 ]; then
   export MAVEN_OPTS=$newMavenOpts
 
   sed -i "s/\(key=\"port\" value=\"\)[0-9]\+/\1$newDebugPort/" view-repo.launch
+
+fi
 
 fi
 
