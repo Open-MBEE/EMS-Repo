@@ -27,6 +27,7 @@ tests =[\
 # Output Filters (ie lines in the .json output with these strings will be filtered out)
 # Branch Names that will run this test by default
 # Set up function (Optional)
+# Post process function (Optional)
 # Tear down function (Optional)
 # Delay in seconds before running the test (Optional)
 # ]
@@ -1609,9 +1610,80 @@ common_filters,
 ["test","workspaces","develop", "develop2"]
 ],
 
+# ELEMENTS PROPERTY SERVICE (CMED-835): ==========================    
+
+[
+670,
+"PostElementsWithProperites",
+"Post elements for the next several tests",
+create_curl_cmd(type="POST",data="elementsWithProperties.json",base_url=BASE_URL_WS,
+                post_type="elements",branch="master/"),
+True, 
+common_filters,
+["test","workspaces","develop", "develop2"]
+],
+        
+[
+671,
+"GetSearchSlotProperty",
+'Searching for the property "real" having value 5.39 (slot property)',
+create_curl_cmd(type="GET",data="search?keyword=5.39&filters=value&propertyName=real",base_url=BASE_URL_WS,
+                branch="master/"),
+True, 
+common_filters,
+["test","workspaces","develop", "develop2"],
+None,
+None,
+None,
+45
+],
+        
+[
+672,
+"GetSearchSlotPropertyOffNom",
+'Searching for the property "foo" having value 5.39 (slot property).  This should fail',
+create_curl_cmd(type="GET",data="search?keyword=5.39&filters=value&propertyName=foo",base_url=BASE_URL_WS,
+                branch="master/"),
+True, 
+common_filters,
+["test","workspaces","develop", "develop2"]
+],
+        
+[
+673,
+"GetSearchNonSlotProperty",
+'Searching for the property "real55" having value 34.5 (non-slot property)',
+create_curl_cmd(type="GET",data="search?keyword=34.5&filters=value&propertyName=real55",base_url=BASE_URL_WS,
+                branch="master/"),
+True, 
+common_filters,
+["test","workspaces","develop", "develop2"]
+],
+        
+[
+674,
+"GetSearchNonSlotPropertyOffNom",
+'Searching for the property "real55" having value 34.5 (non-slot property).  This should fail.',
+create_curl_cmd(type="GET",data="search?keyword=34.5&filters=value&propertyName=poo",base_url=BASE_URL_WS,
+                branch="master/"),
+True, 
+common_filters,
+["test","workspaces","develop", "develop2"]
+],
+        
+[
+675,
+"GetSearchElementWithProperty",
+'Searching for element that owns a Property',
+create_curl_cmd(type="GET",data="search?keyword=steroetyped&filters=name",base_url=BASE_URL_WS,
+                branch="master/"),
+True, 
+common_filters,
+["test","workspaces","develop", "develop2"]
+],
 
 
-# Additional searches after everything is completed
+# Additional searches after everything is completed ==========================   
 [
 10000,
 "GetSearchDocumentation",
@@ -1655,7 +1727,9 @@ create_curl_cmd(type="GET",data="search?keyword=dlam_string&filters=value",base_
 True, 
 common_filters+['"qualifiedId"', '"sysmlid"'],
 ["workspaces"]
-]
+],
+        
+
 
         
 ]
