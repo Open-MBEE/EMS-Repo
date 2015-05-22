@@ -22,6 +22,10 @@
         class="gov.nasa.jpl.view_repo.webscripts.FullCacheGet"
         parent="webscript">
     </bean>
+    <bean id="webscript.gov.nasa.jpl.utils.propertycache.get"
+        class="gov.nasa.jpl.view_repo.webscripts.PropertyCacheGet"
+        parent="webscript">
+    </bean>
     <bean id="webscript.gov.nasa.jpl.utils.alwaysturndebugoff.get"
         class="gov.nasa.jpl.view_repo.webscripts.AlwaysTurnDebugOffGet"
         parent="webscript">

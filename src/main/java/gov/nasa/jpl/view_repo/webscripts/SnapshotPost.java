@@ -1012,7 +1012,9 @@ public class SnapshotPost extends AbstractJavaWebScript {
 
     		NodeRef person = getUserProfile(userName);
 			if(person == null) return "";
-			return (String)nodeService.getProperty(person, ContentModel.PROP_EMAIL);
+            Object o = NodeUtil.getNodeProperty( person, ContentModel.PROP_EMAIL,
+                                                 services, true );
+            if ( o instanceof String ) return (String)o;
     	}
     	catch(Exception ex){
     		System.out.println("Failed to get email address for " + userName);
@@ -2170,8 +2172,10 @@ public class SnapshotPost extends AbstractJavaWebScript {
         originalInputStream.close();
         byte[] binaryData = outputStream.toByteArray();
         String imgFilename =
-                (String)nodeService.getProperty( imgNodeRef,
-                                                 ContentModel.PROP_NAME );
+//                (String)nodeService.getProperty( imgNodeRef,
+//                                                 ContentModel.PROP_NAME );
+                (String)NodeUtil.getNodeProperty( imgNodeRef, ContentModel.PROP_NAME,
+                                                  services, true );
         Path filePath = Paths.get( imgDirName.toString(), imgFilename );
         EmsScriptNode fNode = new EmsScriptNode( imgNodeRef, getServices() );
         fNode.makeSureNodeRefIsNotFrozen();

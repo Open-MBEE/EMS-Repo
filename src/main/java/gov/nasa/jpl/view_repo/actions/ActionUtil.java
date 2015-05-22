@@ -153,6 +153,7 @@ public class ActionUtil {
         node.makeSureNodeRefIsNotFrozen();
         node.transactionCheck();
         sr.getNodeService().setProperty(node.getNodeRef(), ContentModel.PROP_CONTENT, contentData);
+        NodeUtil.propertyCachePut( node.getNodeRef(), NodeUtil.getShortQName( ContentModel.PROP_CONTENT ), contentData );
     }
 
 

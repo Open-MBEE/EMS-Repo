@@ -739,6 +739,8 @@ public class EmsScriptNode extends ScriptNode implements
         
         return false;
     }
+    
+    
 
     public EmsScriptNode getCompanyHome() {
         if ( companyHome == null ) {
@@ -1729,19 +1731,20 @@ public class EmsScriptNode extends ScriptNode implements
     }
    
     private Object getPropertyImpl(String acmType) {
-        if ( Utils.isNullOrEmpty( acmType ) ) return null;
-        Object result = null;
-
-        if ( useFoundationalApi ) {
-            QName typeQName = createQName( acmType );
-            result = services.getNodeService().getProperty( nodeRef, typeQName );
-        } else {
-            result = getProperties().get( acmType );
-        }
-
-        return result;
+        return NodeUtil.getNodeProperty( this, acmType, getServices(),
+                                         useFoundationalApi );
+//        if ( Utils.isNullOrEmpty( acmType ) ) return null;
+//        Object result = null;
+//
+//        if ( useFoundationalApi ) {
+//            QName typeQName = createQName( acmType );
+//            result = services.getNodeService().getProperty( nodeRef, typeQName );
+//        } else {
+//            result = getProperties().get( acmType );
+//        }
+//
+//        return result;
     }
-
     
     public Object getPropertyAtTime( String acmType, Date dateTime ) {
         Object result = getPropertyImpl( acmType );
@@ -1882,6 +1885,7 @@ public class EmsScriptNode extends ScriptNode implements
                 services.getNodeService().setProperty( nodeRef,
                                                        createQName( acmType ),
                                                        value );
+                NodeUtil.propertyCachePut( getNodeRef(), acmType, value );
                 if ( acmType.equals( Acm.ACM_NAME ) ) {
                     renamed = true;
                     //removeChildrenFromJsonCache();
@@ -1935,6 +1939,7 @@ public class EmsScriptNode extends ScriptNode implements
                         if ( comp <= 0 ) {
                             liveRef = null;
                             success = setProperty( acmType, value, count+1 );
+                            NodeUtil.propertyCachePut( getNodeRef(), acmType, value );
                             success = true;
                         }
                     }
@@ -1958,6 +1963,7 @@ public class EmsScriptNode extends ScriptNode implements
             transactionCheck();
             getProperties().put( acmType, value );
             save();
+            NodeUtil.propertyCachePut( getNodeRef(), acmType, value );
             if ( acmType.equals( Acm.ACM_NAME ) ) {
                 renamed = true;
                 //removeChildrenFromJsonCache();
@@ -2890,9 +2896,9 @@ public class EmsScriptNode extends ScriptNode implements
                 } else {
                     targetRef = aref.getTargetRef();
                 }
-                array.put( services.getNodeService()
-                                   .getProperty( targetRef,
-                                                 createQName( Acm.ACM_ID ) ) );
+                Object p = NodeUtil.getNodeProperty( targetRef, Acm.ACM_ID,
+                                                     services, true );
+                array.put( p );
             }
         }
 

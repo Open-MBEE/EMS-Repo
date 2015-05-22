@@ -181,7 +181,8 @@ public class NodeUtil {
     public static boolean doJsonCaching = true;
     public static boolean doJsonDeepCaching = false;
     public static boolean doJsonStringCaching = false;
-    
+    public static boolean doPropertyCaching = true;
+
     public static boolean addEmptyEntriesToFullCache = false;
     public static boolean skipGetNodeRefAtTime = true;
     
@@ -201,6 +202,12 @@ public class NodeUtil {
      */
     public static Map< String, Map< String, Map< String, Map< Boolean, Map< Long, Map< Boolean, Map< Boolean, Map< Boolean, Map<String, ArrayList< NodeRef > > > > > > > > > >
         elementCache = Collections.synchronizedMap( new HashMap< String, Map< String, Map< String, Map< Boolean, Map< Long, Map< Boolean, Map< Boolean, Map< Boolean, Map<String, ArrayList< NodeRef > > > > > > > > > >() );
+
+    /**
+     * A cache of alfresco properties of nodes
+     */
+    public static Map< NodeRef, Map< String, Object > > propertyCache =
+            Collections.synchronizedMap( new HashMap< NodeRef, Map< String, Object > >() );
 
     /**
      * A cache of the most nodeRefs, keyed by the nodes' alfresco ids. This is
@@ -253,6 +260,41 @@ public class NodeUtil {
     // needed for Lucene search
     public static StoreRef SEARCH_STORE = null;
             //new StoreRef( StoreRef.PROTOCOL_WORKSPACE, "SpacesStore" );
+
+    public static Object NULL_OBJECT = new Object();
+    
+    /**
+     * clear or create the cache for correcting bad node refs (that refer to
+     * wrong versions)
+     */
+    public static void initPropertyCache() {
+        // TODO -- the problem with this is that concurrent services could clear
+        // this common cache. It would be better to pass around a context or
+        // something with a service identifier as a key to the cache. So, each
+        // web service invocation would have its own cache.
+        propertyCache.clear();
+    }
+    public static Object propertyCachePut( NodeRef nodeRef, String propertyName,
+                                           Object value ) {
+        if ( !doPropertyCaching ) return null;
+        if ( value == null ) value = NULL_OBJECT;
+        return Utils.put( propertyCache, nodeRef, propertyName, value );
+    }
+    public static boolean propertyCacheHas( NodeRef nodeRef, String propertyName ) {
+        Map< String, Object > props = NodeUtil.propertyCache.get( nodeRef );
+        if ( props != null ) {
+            if ( props.containsKey( propertyName ) ) {
+                return true;
+            }
+        }
+        return false;
+    }
+    public static Object propertyCacheGet( NodeRef nodeRef, String propertyName ) {
+        return Utils.get( propertyCache, nodeRef, propertyName );
+    }
+    public static Map<String, Object> propertyCacheGetProperties( NodeRef nodeRef, String propertyName ) {
+        return propertyCache.get( nodeRef );
+    }
 
     /**
      * clear or create the cache for correcting bad node refs (that refer to
@@ -2338,14 +2380,57 @@ public class NodeUtil {
 
     public static Date getLastModified( NodeRef ref ) {
         try {
-        QName typeQName = createQName( Acm.ACM_LAST_MODIFIED );
-        Date date = (Date)services.getNodeService().getProperty( ref, typeQName );
+        //QName typeQName = createQName( Acm.ACM_LAST_MODIFIED );
+            Date date = (Date)//services.getNodeService().getProperty( ref, typeQName );
+                    NodeUtil.getNodeProperty( ref, Acm.ACM_LAST_MODIFIED,
+                                              services, true );
             return date;
         } catch ( Throwable t ) {
             t.printStackTrace();
         }
         return null;
     }
+
+    public static Object getNodeProperty(ScriptNode node, Object o,
+                                         ServiceRegistry services,
+                                         boolean useFoundationalApi) {
+        return getNodeProperty( node.getNodeRef(), o, services, useFoundationalApi );
+    }
+    public static Object getNodeProperty(NodeRef node, Object key,
+                                         ServiceRegistry services,
+                                         boolean useFoundationalApi) {
+        if ( node == null || key == null ) return null;
+
+        boolean oIsString = key instanceof String;
+        String keyStr = oIsString ? (String)key : NodeUtil.getShortQName( (QName)key );
+        if ( keyStr.isEmpty() ) return null;
+        
+        // Check cache
+        if ( NodeUtil.doPropertyCaching ) {
+            Object result = NodeUtil.propertyCacheGet( node, keyStr );
+            if ( result != null ) { // null means cache miss
+                if ( result == NodeUtil.NULL_OBJECT ) return null;
+                return result;
+            }
+        }
+
+        // Not found in cache -- get normally
+        QName qName = oIsString ? NodeUtil.createQName( keyStr, services ) : (QName)key;
+        Object result;
+        if (useFoundationalApi) {
+            if ( services == null ) services = NodeUtil.getServices();
+            result = services.getNodeService().getProperty( node,
+                    qName );
+        } else {
+            ScriptNode sNode = new ScriptNode( node, services );
+            result = sNode.getProperties().get(keyStr);
+        }
+        if ( NodeUtil.doPropertyCaching ) {
+            NodeUtil.propertyCachePut( node, keyStr, result );
+        }
+        return result;
+    }
+
 
     public static Object getPropertyAtTime( NodeRef nodeRef, String acmType,
                                             Date dateTime, ServiceRegistry services ) {
@@ -2354,7 +2439,6 @@ public class NodeUtil {
         return result;
     }
     
-
     
     public static NodeRef getNodeRefAtTime( NodeRef nodeRef, WorkspaceNode workspace,
                                             Date dateTime ) {
@@ -2669,8 +2753,9 @@ public class NodeUtil {
             NodeService nodeService = getServices().getNodeService();
             NodeRef personNode = personService.getPerson(userName);
             homeFolderNode =
-                    (NodeRef)nodeService.getProperty( personNode,
-                                                      ContentModel.PROP_HOMEFOLDER );
+                    (NodeRef)getNodeProperty( personNode,
+                                              ContentModel.PROP_HOMEFOLDER,
+                                              getServices(), true );
         }
         if ( homeFolderNode == null || !exists(homeFolderNode) ) {
             NodeRef ref = findNodeRefById( "User Homes", true, null, null, getServices(), false );
@@ -2997,7 +3082,10 @@ public class NodeUtil {
         artifactNode.makeSureNodeRefIsNotFrozen();
         artifactNode.transactionCheck();
 		services.getNodeService().setProperty( artifactNode.getNodeRef(),
-		            							ContentModel.PROP_CONTENT,contentData );
+		                                       ContentModel.PROP_CONTENT,contentData );
+        NodeUtil.propertyCachePut( artifactNode.getNodeRef(),
+                                   NodeUtil.getShortQName( ContentModel.PROP_CONTENT ),
+                                   contentData );
 
         // if only version, save dummy version so snapshots can reference
         // versioned images - need to check against 1 since if someone
