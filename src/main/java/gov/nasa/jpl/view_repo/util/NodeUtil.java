@@ -11,6 +11,7 @@ import gov.nasa.jpl.mbee.util.Timer;
 import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.actions.ActionUtil;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode.EmsVersion;
+import gov.nasa.jpl.view_repo.webscripts.AbstractJavaWebScript;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -2383,7 +2384,7 @@ public class NodeUtil {
         //QName typeQName = createQName( Acm.ACM_LAST_MODIFIED );
             Date date = (Date)//services.getNodeService().getProperty( ref, typeQName );
                     NodeUtil.getNodeProperty( ref, Acm.ACM_LAST_MODIFIED,
-                                              services, true );
+                                              services, true, false );
             return date;
         } catch ( Throwable t ) {
             t.printStackTrace();
@@ -2393,12 +2394,32 @@ public class NodeUtil {
 
     public static Object getNodeProperty(ScriptNode node, Object o,
                                          ServiceRegistry services,
-                                         boolean useFoundationalApi) {
-        return getNodeProperty( node.getNodeRef(), o, services, useFoundationalApi );
+                                         boolean useFoundationalApi,
+                                         boolean cacheOkay ) {
+        return getNodeProperty( node.getNodeRef(), o, services, useFoundationalApi,
+                                cacheOkay );
     }
+
+    /**
+     * Gets a specified property of a specified node. Don't use the cache
+     * (cacheOkay should be false) for alfresco-managed properties like
+     * "modified" and "modifier." Handling alfresco-managed properties here
+     * might require a string compare that may be expensive. Thus, it is the
+     * caller's responsibility to make sure the cache is not used for these.
+     * 
+     * @param node
+     * @param key the name of the property, e.g., "cm:name"
+     * @param services
+     * @param useFoundationalApi see {@link EmsScriptNode.useFoundationalApi}
+     * @param cacheOkay
+     *            whether to look in the cache and cache a new value, assuming
+     *            the cache is turned on.
+     * @return
+     */
     public static Object getNodeProperty(NodeRef node, Object key,
                                          ServiceRegistry services,
-                                         boolean useFoundationalApi) {
+                                         boolean useFoundationalApi,
+                                         boolean cacheOkay ) {
         if ( node == null || key == null ) return null;
 
         boolean oIsString = key instanceof String;
@@ -2406,7 +2427,7 @@ public class NodeUtil {
         if ( keyStr.isEmpty() ) return null;
         
         // Check cache
-        if ( NodeUtil.doPropertyCaching ) {
+        if ( NodeUtil.doPropertyCaching && cacheOkay ) {
             Object result = NodeUtil.propertyCacheGet( node, keyStr );
             if ( result != null ) { // null means cache miss
                 if ( result == NodeUtil.NULL_OBJECT ) return null;
@@ -2433,9 +2454,10 @@ public class NodeUtil {
 
 
     public static Object getPropertyAtTime( NodeRef nodeRef, String acmType,
-                                            Date dateTime, ServiceRegistry services ) {
+                                            Date dateTime, ServiceRegistry services,
+                                            boolean cacheOkay ) {
         EmsScriptNode node = new EmsScriptNode( nodeRef, services );
-        Object result = node.getPropertyAtTime(acmType, dateTime);
+        Object result = node.getPropertyAtTime(acmType, dateTime, cacheOkay);
         return result;
     }
     
@@ -2755,7 +2777,7 @@ public class NodeUtil {
             homeFolderNode =
                     (NodeRef)getNodeProperty( personNode,
                                               ContentModel.PROP_HOMEFOLDER,
-                                              getServices(), true );
+                                              getServices(), true, true );
         }
         if ( homeFolderNode == null || !exists(homeFolderNode) ) {
             NodeRef ref = findNodeRefById( "User Homes", true, null, null, getServices(), false );

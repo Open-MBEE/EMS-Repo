@@ -72,7 +72,7 @@ public class ActionUtil {
      * @param response
      */
     public static void sendEmailToModifier(EmsScriptNode node, String msg, String subject, ServiceRegistry services) {
-        String username = (String)node.getProperty("cm:modifier");
+        String username = (String)node.getProperty("cm:modifier", false);
         EmsScriptNode user = new EmsScriptNode(services.getPersonService().getPerson(username), services, new StringBuffer());
         String recipient = (String) user.getProperty("cm:email");
 

@@ -485,7 +485,7 @@ public class JavaQuery extends AbstractModuleComponent {
     //@Override
     public String getName( NodeRef object ) {//, String version ) {
         return (String)NodeUtil.getNodeProperty( object, ContentModel.PROP_NAME,
-                                                 services, true );
+                                                 services, true, true );
     }
 
     //@Override
@@ -527,7 +527,7 @@ public class JavaQuery extends AbstractModuleComponent {
                                      //String version ) {
         Serializable prop =
                 (Serializable)NodeUtil.getNodeProperty( object, propertyName,
-                                                        services, true );
+                                                        services, true, true );
 //                nodeService.getProperty( object,
 //                                         QName.createQName( propertyName ) );
         return prop;
@@ -605,14 +605,14 @@ public class JavaQuery extends AbstractModuleComponent {
         return instance;
     }
 
-    public static Object get(String xpath, QName property) {
+    public static Object get(String xpath, QName property, boolean cacheOkay) {
         if (Debug.isOn()) Debug.outln( "get(" + xpath + ", " + property + ")" );
         List<NodeRef> nodes = get( xpath );
         assertNotNull( nodes );
         NodeRef node = nodes.get( 0 );
         Object nodeName = NodeUtil.getNodeProperty( node, property,
                                                     getInstance().serviceRegistry,
-                                                    true );
+                                                    true, true );
         assertNotNull( nodeName );
         assertEquals( nodeName, nodeName );
         return nodeName;

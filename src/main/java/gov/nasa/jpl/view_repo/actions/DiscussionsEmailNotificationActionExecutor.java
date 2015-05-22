@@ -132,7 +132,7 @@ public class DiscussionsEmailNotificationActionExecutor  extends ActionExecuterA
 			NodeRef person = getUserProfile(userName);
 			if(person == null) return "";
 			Object o = NodeUtil.getNodeProperty( person, ContentModel.PROP_EMAIL,
-			                                     services, true );
+			                                     services, true, true );
 			if ( o instanceof String ) return (String)o;
 			// TODO -- throw error here
 			return "" + o;

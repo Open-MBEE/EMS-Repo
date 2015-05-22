@@ -161,7 +161,7 @@ public class JwsUtil {
 	 * @return Node's specified property value
 	 */
 	public Object getNodeProperty(ScriptNode node, String key) {
-	    return NodeUtil.getNodeProperty( node, key, services, useFoundationalApi );
+	    return NodeUtil.getNodeProperty( node, key, services, useFoundationalApi, true );
 	}
 	
 	/**

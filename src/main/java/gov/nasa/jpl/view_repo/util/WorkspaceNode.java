@@ -923,12 +923,12 @@ public class WorkspaceNode extends EmsScriptNode {
         JSONObject json = new JSONObject();
 
         addWorkspaceNamesAndIds(json, this, false );
-        json.put( "creator", getProperty( "cm:modifier" ) );
+        json.put( "creator", getProperty( "cm:modifier", false ) );
         // REVIEW -- This assumes that the workspace does not changed after it
         // is created, but wouldn't it's ems:lastTimeSyncParent property be
         // expected to change?
         json.put( "created", TimeUtils.toTimestamp( (Date)getProperty("cm:created") ) );
-        json.put( "modified", TimeUtils.toTimestamp( (Date)getProperty("cm:modified") ) );
+        json.put( "modified", TimeUtils.toTimestamp( (Date)getLastModified( null ) ) );  // REVIEW -- should we be passing in the date here?
         Date copyTime = getCopyTime();
         if ( copyTime != null ) {
             json.put( "branched", TimeUtils.toTimestamp( copyTime ) );

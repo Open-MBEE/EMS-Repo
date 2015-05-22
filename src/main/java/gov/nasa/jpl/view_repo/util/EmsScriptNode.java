@@ -269,7 +269,11 @@ public class EmsScriptNode extends ScriptNode implements
     // provide status as necessary
     private Status status = null;
 
-    boolean useFoundationalApi = true; // TODO this will be removed
+    /**
+     * whether to use the foundational Alfresco Java API or ScriptNode class
+     * that uses the JavaScript API
+     */
+    public boolean useFoundationalApi = true; // TODO this will be removed
 
     protected EmsScriptNode companyHome = null;
 
@@ -1668,7 +1672,7 @@ public class EmsScriptNode extends ScriptNode implements
     public Object getNodeRefProperty( String acmType, boolean ignoreWorkspace,
                                Date dateTime, boolean findDeleted,
                                boolean skipNodeRefCheck, WorkspaceNode ws ) {
-        Object result = getPropertyImpl( acmType );
+        Object result = getPropertyImpl( acmType, true );  // TODO -- This should be passing in cacheOkay from the caller instead of true!
 
         // get noderefs from the proper workspace unless the property is a
         // workspace meta-property
@@ -1705,13 +1709,29 @@ public class EmsScriptNode extends ScriptNode implements
      *
      * @param acmType
      *            Short name of property to get
+     * @param cacheOkay
      * @return
      */
     public Object getProperty( String acmType ) {
-        Object result = getPropertyImpl(acmType);
+        return getProperty( acmType, true );
+    }
+
+    /**
+     * Get the property of the specified type for non-noderef properties. Throws unsupported
+     * operation exception otherwise (go and fix the code if that happens).
+     *
+     * @param acmType
+     *            Short name of property to get
+     * @param cacheOkay
+     * @return
+     */
+    public Object getProperty( String acmType, boolean cacheOkay ) {
+        Object result = getPropertyImpl(acmType, cacheOkay);
 
         // Throw an exception of the property value is a NodeRef or 
         // collection of NodeRefs
+        // TODO -- REVIEW -- Can the if-statements be reordered to make this
+        // more efficient?
         if ( !workspaceMetaProperties.contains( acmType )) {
             if ( result instanceof NodeRef ) {
                 throw new UnsupportedOperationException();
@@ -1730,9 +1750,9 @@ public class EmsScriptNode extends ScriptNode implements
         return result;
     }
    
-    private Object getPropertyImpl(String acmType) {
+    private Object getPropertyImpl(String acmType, boolean cacheOkay ) {
         return NodeUtil.getNodeProperty( this, acmType, getServices(),
-                                         useFoundationalApi );
+                                         useFoundationalApi, cacheOkay );
 //        if ( Utils.isNullOrEmpty( acmType ) ) return null;
 //        Object result = null;
 //
@@ -1747,7 +1767,10 @@ public class EmsScriptNode extends ScriptNode implements
     }
     
     public Object getPropertyAtTime( String acmType, Date dateTime ) {
-        Object result = getPropertyImpl( acmType );
+        return getPropertyAtTime( acmType, dateTime, true );
+    }
+    public Object getPropertyAtTime( String acmType, Date dateTime, boolean cacheOkay ) {
+        Object result = getPropertyImpl( acmType, cacheOkay );
         if ( result instanceof NodeRef ) {
             result = NodeUtil.getNodeRefAtTime( (NodeRef)result, dateTime );
         }
@@ -1764,7 +1787,11 @@ public class EmsScriptNode extends ScriptNode implements
     public Date getLastModified( Date dateTime ) {
         Set< NodeRef > dependentNodes = new HashSet< NodeRef >();
 
-        Date lastModifiedDate = (Date)getProperty( Acm.ACM_LAST_MODIFIED );
+        // Can't use normal getProperty because we need to bypass the cache.
+        Date lastModifiedDate = (Date)//getProperty( Acm.ACM_LAST_MODIFIED );
+                NodeUtil.getNodeProperty( this, Acm.ACM_LAST_MODIFIED,
+                                          getServices(), useFoundationalApi,
+                                          false );
 
         // WARNING! TODO -- It should be okay to not pass in the workspace
         // context assuming that a Property is the parent of its value. If a
@@ -2897,7 +2924,7 @@ public class EmsScriptNode extends ScriptNode implements
                     targetRef = aref.getTargetRef();
                 }
                 Object p = NodeUtil.getNodeProperty( targetRef, Acm.ACM_ID,
-                                                     services, true );
+                                                     services, true, true );
                 array.put( p );
             }
         }

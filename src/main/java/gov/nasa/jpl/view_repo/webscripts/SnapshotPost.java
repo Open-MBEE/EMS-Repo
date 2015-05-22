@@ -1013,7 +1013,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
     		NodeRef person = getUserProfile(userName);
 			if(person == null) return "";
             Object o = NodeUtil.getNodeProperty( person, ContentModel.PROP_EMAIL,
-                                                 services, true );
+                                                 services, true, true );
             if ( o instanceof String ) return (String)o;
     	}
     	catch(Exception ex){
@@ -2175,7 +2175,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
 //                (String)nodeService.getProperty( imgNodeRef,
 //                                                 ContentModel.PROP_NAME );
                 (String)NodeUtil.getNodeProperty( imgNodeRef, ContentModel.PROP_NAME,
-                                                  services, true );
+                                                  services, true, true );
         Path filePath = Paths.get( imgDirName.toString(), imgFilename );
         EmsScriptNode fNode = new EmsScriptNode( imgNodeRef, getServices() );
         fNode.makeSureNodeRefIsNotFrozen();
