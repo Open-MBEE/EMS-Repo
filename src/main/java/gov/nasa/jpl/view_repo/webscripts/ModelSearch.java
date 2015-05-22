@@ -160,8 +160,9 @@ public class ModelSearch extends ModelGet {
                     }
                     
                     try {
-                        Double.parseDouble(keyword);
-                        rawResults.putAll( searchForElements( "@sysml\\:double:\"", keyword, false,
+                        // Need to do Double.toString() in case they left out the decimal in something like 5.0
+                        double d = Double.parseDouble(keyword); 
+                        rawResults.putAll( searchForElements( "@sysml\\:double:\"", Double.toString( d ), false,
                                                               workspace, dateTime) );
                     } catch (NumberFormatException nfe) {
                         // do nothing

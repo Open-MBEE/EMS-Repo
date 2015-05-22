@@ -40,9 +40,11 @@ import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -471,10 +473,12 @@ public class ModelGet extends AbstractJavaWebScript {
         // REVIEW do we only want to do this for Property?  Currently for all value specs.
         
         Map<String, EmsScriptNode> elementsToAdd = new HashMap<String, EmsScriptNode>();
-       
+        Set<String> valueSpecsToRemove = new HashSet<String>();
+        
         for (Entry< String, EmsScriptNode > entry: elementsFound.entrySet()) {
             
             EmsScriptNode element = entry.getValue();
+            String valueSpecId = entry.getKey();
             
             // If its a embedded value spec:
             if (element.isOwnedValueSpec( dateTime, ws )) {
@@ -524,6 +528,7 @@ public class ModelGet extends AbstractJavaWebScript {
                         }
                         
                         if (elementFnd) {
+                            valueSpecsToRemove.add(valueSpecId);
                             elementsToAdd.put(elementWithProperty.getSysmlId(),
                                               elementWithProperty);   
                         }
@@ -540,6 +545,7 @@ public class ModelGet extends AbstractJavaWebScript {
         }
         else {
             elementsFound.putAll( elementsToAdd );
+            elementsFound.keySet().removeAll( valueSpecsToRemove );
         }
          
     }
