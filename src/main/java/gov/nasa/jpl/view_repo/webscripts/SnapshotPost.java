@@ -397,7 +397,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
         docBook.setFooterLegalNotice( "Paper copies of this document may not be current and should not be relied on for official purposes. JPL/Caltech proprietary. Not for public release." );
         String author =
                 replaceXmlEntities( getUserProfile( product,
-                                (String)product.getProperty( Acm.ACM_AUTHOR ) ) );
+                                (String)product.getProperty( Acm.ACM_AUTHOR, false ) ) );
         docBook.setAuthor( Arrays.asList( author ) );
         return docBook;
     }
