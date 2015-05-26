@@ -40,6 +40,7 @@ import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.sysml.View;
 import gov.nasa.jpl.view_repo.util.NodeUtil.SearchType;
+import gov.nasa.jpl.view_repo.webscripts.PropertyCacheGet;
 
 import java.io.Serializable;
 import java.lang.reflect.Field;
@@ -1009,6 +1010,8 @@ public class EmsScriptNode extends ScriptNode implements
                                           WorkspaceNode nodeWorkspace) throws Exception {
         String type = NodeUtil.getContentModelTypeName( sysmlAcmType, services );
         EmsScriptNode node = createNode( sysmlId, type );
+        //NodeUtil.propertyCachePut( node.nodeRef, "sysml:id", sysmlId );
+        //NodeUtil.propertyCachePut( node.nodeRef, "ems:owner", this.getNodeRef() );
 
         if ( node != null ) {
             if ( !type.equals( sysmlAcmType )
@@ -1034,6 +1037,8 @@ public class EmsScriptNode extends ScriptNode implements
             if ( nodeWorkspace != null && nodeWorkspace.exists() ) {
                 node.setWorkspace( nodeWorkspace, null );
             }
+
+            NodeUtil.addElementToCache( node );
         }
 
         if ( node == null || !node.exists() ) {
@@ -1085,6 +1090,8 @@ public class EmsScriptNode extends ScriptNode implements
 //            return null;
 //        }
 
+        System.out.println("createNode(" + name + ", " + type + ")\n" + Debug.stackTrace() );
+        
         EmsScriptNode result = null;
         // Date start = new Date(), end;
 

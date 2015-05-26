@@ -22,7 +22,7 @@ public class PropertyCacheGet extends FlagSet {
 
     @Override
     protected String flagName() {
-        return "doFullCaching";
+        return "doPropertyCaching";
     }
  
 }

@@ -418,12 +418,16 @@ public class WorkspaceNode extends EmsScriptNode {
         // Get the parent in this workspace. In case there are multiple nodes
         // with the same cm:name, use the grandparent to disambiguate where it
         // should be.
+        System.out.println("propertyCache before = " + NodeUtil.propertyCache );
+        System.out.println("parent = " + parent);
         if ( parent != null && parent.exists() && !this.equals( parent.getWorkspace() ) ) {
             EmsScriptNode grandParent = parent.getParent();
             ArrayList< NodeRef > arr = NodeUtil.findNodeRefsByType( parentName, SearchType.CM_NAME.prefix, false, this, null, false, true, getServices(), false );
             for ( NodeRef ref : arr ) {
                 EmsScriptNode p = new EmsScriptNode( ref, getServices() );
                 EmsScriptNode gp = p.getParent();
+                System.out.println("p = " + p);
+                System.out.println("gp = " + gp);
                 if ( grandParent == gp || ( grandParent != null && gp != null && grandParent.getName().equals( gp.getName() ) ) ) {
                     parent = p;
                     break;
@@ -462,11 +466,24 @@ public class WorkspaceNode extends EmsScriptNode {
                                                                                               this, null, false,
                                                                                               getServices(), getResponse());
 
-                   newReifiedNode = foundReifiedNode == null ? oldReifiedNode.clone(parent) : foundReifiedNode;
+                    System.out.println("this = " + this);
+                    System.out.println("node = " + node);
+                    System.out.println("parent = " + parent);
+                    System.out.println("oldReifiedNode = " + oldReifiedNode);
+                    System.out.println("foundReifiedNode = " + foundReifiedNode);
+                    
+                    System.out.println("propertyCache before clone = " + NodeUtil.propertyCache );
+                    if ( foundReifiedNode == null ) {
+                        newReifiedNode = oldReifiedNode.clone( parent );
+                        NodeUtil.addElementToCache( newReifiedNode );
+                    } else {
+                        newReifiedNode = foundReifiedNode;
+                    }
                 }
 
                 // Clone the node:
                 newFolder = node.clone(parent);
+                NodeUtil.addElementToCache( newFolder );
                 //newFolder.setWorkspace( this, node.getNodeRef() );  // now done in clone()
 
                 if ( newReifiedNode != null && newFolder != null) {

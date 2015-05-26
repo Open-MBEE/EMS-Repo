@@ -29,6 +29,7 @@
 package gov.nasa.jpl.view_repo.webscripts;
 
 import gov.nasa.jpl.mbee.util.Utils;
+import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
 
 import java.io.Serializable;
@@ -97,6 +98,7 @@ public class JwsUtil {
 	 */
 	protected ScriptNode createModelElement(ScriptNode parent, String name,
 			String type) {
+	    ScriptNode node = null;
 		if (useFoundationalApi) {
 			Map<QName, Serializable> props = new HashMap<QName, Serializable>(
 					1, 1.0f);
@@ -109,10 +111,12 @@ public class JwsUtil {
 					QName.createQName(NamespaceService.CONTENT_MODEL_1_0_URI,
 							QName.createValidLocalName(name)),
 					createQName(type), props);
-			return new ScriptNode(assoc.getChildRef(), services);
+			node = new ScriptNode(assoc.getChildRef(), services);
 		} else {
-			return parent.createNode(name, type);
+			node = parent.createNode(name, type);
 		}
+        NodeUtil.addElementToCache( new EmsScriptNode( node.getNodeRef(), services ) );
+        return node;
 	}
 
 	/**

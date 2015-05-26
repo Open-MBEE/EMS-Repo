@@ -1467,6 +1467,7 @@ public class ModelPost extends AbstractJavaWebScript {
                 }
                 EmsScriptNode newNode = oldValNode.clone(reifiedPkgInWorkspace);
                 newNode.setWorkspace( workspace, oldValNode.getNodeRef() );
+                NodeUtil.addElementToCache( newNode );
 
                 //EmsScriptNode newNode = oldValNode.clone( node );
                 //newNode.setWorkspace( workspace, oldValNode.getNodeRef() );
@@ -1821,6 +1822,7 @@ public class ModelPost extends AbstractJavaWebScript {
                     nodeToUpdate = nodeToUpdate.clone(parent);
                     nodeToUpdate.setWorkspace( workspace, oldNode.getNodeRef() );
                     nodeToUpdate.setOwnerToReifiedNode( parent, workspace );
+                    NodeUtil.addElementToCache( nodeToUpdate );
                 }
             }
         }
@@ -2149,6 +2151,7 @@ public class ModelPost extends AbstractJavaWebScript {
                      "Clone failed for node id = %s", id );
                 return null;
             }
+            NodeUtil.addElementToCache( node );
         }
 
         if (checkPermissions(parent, PermissionService.WRITE)) {
