@@ -2731,7 +2731,7 @@ public class NodeUtil {
             ScriptNode sNode = new ScriptNode( node, services );
             result = sNode.getProperties().get(keyStr);
         }
-        if ( NodeUtil.doPropertyCaching ) {
+        if ( NodeUtil.doPropertyCaching && cacheOkay ) {
             NodeUtil.propertyCachePut( node, keyStr, result );
         }
         System.out.println("getNodeRefProperty(" + node + ", " + key + ", cacheOkay=" + cacheOkay + ") = " + result);

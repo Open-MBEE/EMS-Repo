@@ -733,7 +733,7 @@ public class EmsScriptNode extends ScriptNode implements
             // it was previously null, which is the initial state of the property, but we want
             // the modification time to be altered in this case too:
             if (oldValue == null && value == null) {
-                setProperty( Acm.ACM_LAST_MODIFIED, new Date());
+                setProperty( Acm.ACM_LAST_MODIFIED, new Date(), false, 0 );
             }
             if (!changed) {
                 logger.warn( "Failed to set property for new value in createOrUpdateProperty("
@@ -1905,9 +1905,10 @@ public class EmsScriptNode extends ScriptNode implements
      *            Value to set property to
      */
     public < T extends Serializable > boolean setProperty( String acmType, T value ) {
-        return setProperty( acmType, value, 0 );
+        return setProperty( acmType, value, true, 0 );
     }
     public < T extends Serializable > boolean setProperty( String acmType, T value,
+                                                           boolean cacheOkay,
                                                         // count prevents inf loop
                                                         int count ) {
         logger.debug( "setProperty(acmType=" + acmType + ", value=" + value + ")" );
@@ -1919,7 +1920,7 @@ public class EmsScriptNode extends ScriptNode implements
                 services.getNodeService().setProperty( nodeRef,
                                                        createQName( acmType ),
                                                        value );
-                NodeUtil.propertyCachePut( getNodeRef(), acmType, value );
+                if ( cacheOkay ) NodeUtil.propertyCachePut( getNodeRef(), acmType, value );
                 if ( acmType.equals( Acm.ACM_NAME ) ) {
                     renamed = true;
                     //removeChildrenFromJsonCache();
@@ -1972,8 +1973,8 @@ public class EmsScriptNode extends ScriptNode implements
                         nodeRef = liveRef; // this is
                         if ( comp <= 0 ) {
                             liveRef = null;
-                            success = setProperty( acmType, value, count+1 );
-                            NodeUtil.propertyCachePut( getNodeRef(), acmType, value );
+                            success = setProperty( acmType, value, cacheOkay, count+1 );
+                            if ( cacheOkay ) NodeUtil.propertyCachePut( getNodeRef(), acmType, value );
                             success = true;
                         }
                     }
@@ -1997,7 +1998,7 @@ public class EmsScriptNode extends ScriptNode implements
             transactionCheck();
             getProperties().put( acmType, value );
             save();
-            NodeUtil.propertyCachePut( getNodeRef(), acmType, value );
+            if ( cacheOkay ) NodeUtil.propertyCachePut( getNodeRef(), acmType, value );
             if ( acmType.equals( Acm.ACM_NAME ) ) {
                 renamed = true;
                 //removeChildrenFromJsonCache();
@@ -2279,7 +2280,7 @@ public class EmsScriptNode extends ScriptNode implements
         EmsScriptNode originalNode = this.getOriginalNode();
         elementJson.put( "creator", originalNode.getProperty( "cm:creator" ) );
         elementJson.put( "created", originalNode.getProperty( "cm:created" ) );
-        elementJson.put( "modifier", this.getProperty( "cm:modifier" ) );
+        elementJson.put( "modifier", this.getProperty( "cm:modifier", false ) );
         elementJson.put( Acm.JSON_LAST_MODIFIED,
                 TimeUtils.toTimestamp( this.getLastModified( dateTime) ) );
 
