@@ -342,8 +342,23 @@ None,
 None,
 set_wsid_to_gv1
 ],
+
+# mimic md where a branch requires a project post to sync the project version
+[
+161,
+"PostProjectWorkspace1",
+"Post project to sync branch version for workspace 1",
+create_curl_cmd(type="POST", base_url=BASE_URL_WS, post_type="",
+                data='\'{"elements":[{"sysmlid":"123456","specialization":{"type":"Project", "projectVersion":"0"}}]}\'', 
+                branch="/$gv1/sites/europa/projects?createSite=true",
+                project_post=True),
+True,
+common_filters,
+["develop"]
+],
+
   
-# This test case depends on the previous one and uses gv1 set by the previous test      
+# This test case depends on CreateWorkspace1 and uses gv1 set by the previous test      
 [
 170,
 "CreateWorkspace2",
@@ -357,6 +372,21 @@ None,
 None,
 set_wsid_to_gv2
 ],
+
+# mimic md where a branch requires a project post to sync the project version
+[
+171,
+"PostProjectWorkspace2",
+"Post project to sync branch version for workspace 2 - sub workspace",
+create_curl_cmd(type="POST", base_url=BASE_URL_WS, post_type="",
+                data='\'{"elements":[{"sysmlid":"123456","specialization":{"type":"Project", "projectVersion":"0"}}]}\'', 
+                branch="/$gv2/sites/europa/projects?createSite=true",
+                project_post=True),
+True,
+common_filters,
+["develop"]
+],
+
         
 [
 175,
@@ -1635,7 +1665,7 @@ common_filters,
 None,
 None,
 None,
-45
+60
 ],
         
 [
