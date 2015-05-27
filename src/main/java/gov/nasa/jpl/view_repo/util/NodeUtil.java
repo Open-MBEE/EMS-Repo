@@ -283,16 +283,26 @@ public class NodeUtil {
     }
     public static Object propertyCachePut( NodeRef nodeRef, String propertyName,
                                            Object value ) {
-        if ( !doPropertyCaching ) return null;
+        if ( !doPropertyCaching || nodeRef == null ||
+                Utils.isNullOrEmpty( propertyName ) ) {
+               return null;
+           }
 //        System.out.println("propertyCachePut(" + nodeRef + ", " + propertyName + ", " + value + ")");
         if ( value == null ) value = NULL_OBJECT;
         return Utils.put( propertyCache, nodeRef, propertyName, value );
     }
     
-    public static void propertyCachePut( NodeRef nodeRef, Map<QName, 
-                                         Serializable> properties ) {
+    public static void propertyCachePut( NodeRef nodeRef,
+                                         Map<QName, Serializable> properties ) {
+        if ( !doPropertyCaching || nodeRef == null ||
+             Utils.isNullOrEmpty( properties ) ) {
+            return;
+        }
         Map< String, Object > cachedProps =
                 NodeUtil.propertyCacheGetProperties( nodeRef );
+        if ( cachedProps == null ) {
+            
+        }
         for ( QName qName : properties.keySet() ) {
             String key = getShortQName( qName );
             Serializable value = properties.get( key );
@@ -302,6 +312,10 @@ public class NodeUtil {
     }
     
     public static boolean propertyCacheHas( NodeRef nodeRef, String propertyName ) {
+        if ( !doPropertyCaching || nodeRef == null ||
+                Utils.isNullOrEmpty( propertyName ) ) {
+               return false;
+        }
         Map< String, Object > props = NodeUtil.propertyCache.get( nodeRef );
         if ( props != null ) {
             if ( props.containsKey( propertyName ) ) {
@@ -311,11 +325,16 @@ public class NodeUtil {
         return false;
     }
     public static Object propertyCacheGet( NodeRef nodeRef, String propertyName ) {
+        if ( !doPropertyCaching || nodeRef == null ||
+                Utils.isNullOrEmpty( propertyName ) ) {
+               return null;
+        }
         Object o = Utils.get( propertyCache, nodeRef, propertyName );
 //        System.out.println("propertyCachePut(" + nodeRef + ", " + propertyName + ", " + o + ")");
         return o;
     }
     public static Map<String, Object> propertyCacheGetProperties( NodeRef nodeRef ) {
+        if ( !doPropertyCaching || nodeRef == null ) return null;
         return propertyCache.get( nodeRef );
     }
 
