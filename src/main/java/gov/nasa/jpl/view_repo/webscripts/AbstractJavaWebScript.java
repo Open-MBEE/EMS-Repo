@@ -663,6 +663,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
     public EmsScriptNode createSite( String siteName, WorkspaceNode workspace ) {
 
         EmsScriptNode siteNode = getSiteNode( siteName, workspace, null, false );
+        if (workspace != null) return siteNode; // sites can only be made in master
         boolean validWorkspace = workspace != null && workspace.exists();
         boolean invalidSiteNode = siteNode == null || !siteNode.exists();
 
