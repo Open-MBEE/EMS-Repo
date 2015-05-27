@@ -456,8 +456,7 @@ public class ModelGet extends AbstractJavaWebScript {
 	public void setIsViewRequest(boolean flag) {
 	    isViewRequest = flag;
 	}
-	
-	
+		
     /**
      * Special filtering for embedded value specs.  Adds element that "owns"
      * the value spec.  If propertyName is not null, filters out all the elements 

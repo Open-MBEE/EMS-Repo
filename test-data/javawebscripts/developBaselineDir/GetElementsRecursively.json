@@ -271,18 +271,6 @@
     },
     {
         "modifier": "admin",
-        "qualifiedName": "/europa/JW_TEST/300/301/null",
-        "owner": "301",
-        "specialization": {
-            "valueExpression": null,
-            "string": "dlam_string",
-            "type": "LiteralString"
-        },
-        "editable": true,
-        "creator": "admin",
-    },
-    {
-        "modifier": "admin",
         "qualifiedId": "/europa/123456/4000/401/402",
         "name": "402",
         "qualifiedName": "/europa/JW_TEST/400/401/402",
@@ -302,18 +290,6 @@
         },
         "editable": true,
         "creator": "admin"
-    },
-    {
-        "modifier": "admin",
-        "qualifiedName": "/europa/JW_TEST/400/401/null",
-        "owner": "401",
-        "specialization": {
-            "valueExpression": null,
-            "string": "dlam_string",
-            "type": "LiteralString"
-        },
-        "editable": true,
-        "creator": "admin",
     }
 ]}
 200

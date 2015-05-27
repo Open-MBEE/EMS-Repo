@@ -1635,7 +1635,7 @@ common_filters,
 None,
 None,
 None,
-45
+70
 ],
         
 [

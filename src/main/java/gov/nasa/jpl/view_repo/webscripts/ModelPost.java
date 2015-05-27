@@ -538,7 +538,7 @@ public class ModelPost extends AbstractJavaWebScript {
                 resurrectParent(reifiedNodeParent, ingest);
                 // Now deleted nodes are removed from ownedChildren, so must add them back:
                 if (lastNode != null) {
-                    lastNode.setOwnerToReifiedNode( reifiedNodeParent, workspace );
+                    lastNode.setOwnerToReifiedNode( reifiedNodeParent, workspace, false );
                 }
             }
             if (nodeParent.isWorkspaceTop()) {
@@ -685,7 +685,7 @@ public class ModelPost extends AbstractJavaWebScript {
 
                     // Finally, create the reified node for the owner:
                     EmsScriptNode nodeBin = nodeBinOwner.createSysmlNode(ownerName, type,
-                                                                        modStatus, workspace);
+                                                                        modStatus, workspace, false);
                     if (nodeBin != null) {
                         nodeBin.setProperty( Acm.ACM_NAME, acmName );
                         owner = nodeBin;
@@ -1698,7 +1698,7 @@ public class ModelPost extends AbstractJavaWebScript {
                 // workspace.  This is needed b/c we now remove the child from this set
                 // when deleting it:
                 if (parent != null && NodeUtil.workspacesEqual( parent.getWorkspace(), workspace )) {
-                    nodeToUpdate.setOwnerToReifiedNode( parent, workspace );
+                    nodeToUpdate.setOwnerToReifiedNode( parent, workspace, nestedNode );
                 }
             }
         }
@@ -1820,7 +1820,7 @@ public class ModelPost extends AbstractJavaWebScript {
                     EmsScriptNode oldNode = nodeToUpdate;
                     nodeToUpdate = nodeToUpdate.clone(parent);
                     nodeToUpdate.setWorkspace( workspace, oldNode.getNodeRef() );
-                    nodeToUpdate.setOwnerToReifiedNode( parent, workspace );
+                    nodeToUpdate.setOwnerToReifiedNode( parent, workspace, nestedNode );
                 }
             }
         }
@@ -1833,7 +1833,7 @@ public class ModelPost extends AbstractJavaWebScript {
                 log( Level.INFO, "\tcreating node" );
                 try {
 //                    if ( parent != null && parent.exists() ) {
-                        nodeToUpdate = parent.createSysmlNode( id, acmSysmlType, modStatus, workspace );
+                        nodeToUpdate = parent.createSysmlNode( id, acmSysmlType, modStatus, workspace, nestedNode );
 //                    } else {
 //                        Debug.error( true, true,
 //                                     "Error! Attempt to create node, " + id
@@ -2224,8 +2224,6 @@ public class ModelPost extends AbstractJavaWebScript {
     }
 
 //    /**
-//<<<<<<< HEAD
-//=======
 //     * Parses the Property and returns a set of all the node names
 //     * in the property.
 //     *
