@@ -922,9 +922,8 @@ public class DocBookWrapper {
 	}
 	
 	public String zipHtml() throws IOException, InterruptedException {
-		ProcessBuilder processBuilder = new ProcessBuilder();
-		processBuilder.directory(new File(this.getJobDirName()));
-//		System.out.println("zip working directory: " + processBuilder.directory());
+		RuntimeExec exec = new RuntimeExec();
+		exec.setProcessDirectory(this.getJobDirName());
 		List<String> command = new ArrayList<String>();
 		String zipFile = this.snapshotName + ".zip";
 		command.add("zip");
@@ -939,13 +938,13 @@ public class DocBookWrapper {
 		//command.add("*.db");
 		//command.add("*.pdf");
 
-		processBuilder.command(command);
-		System.out.println("zip command: " + processBuilder.command());
-		Process process = processBuilder.start();
-		int exitCode = process.waitFor();
-		if(exitCode != 0){
+		exec.setCommand(list2Array(command));
+		System.out.println("zip command: " + command);
+		ExecutionResult result = exec.execute();
+
+		if (!result.getSuccess()) {
 			System.out.println("zip failed!");
-			System.out.println("exit code: " + exitCode);
+			System.out.println("exit code: " + result.getExitValue());
 		}
 
 		return Paths.get(this.getJobDirName(), zipFile).toString();
