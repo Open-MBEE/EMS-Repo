@@ -2143,11 +2143,12 @@ public class EmsScriptNode extends ScriptNode implements
      * @return JSONObject serialization of node
      */
     public JSONObject toJSONObject( WorkspaceNode ws, Date dateTime ) throws JSONException {
-        return toJSONObject( null, ws, dateTime, true );
+        return toJSONObject( null, ws, dateTime, true, null );
     }
 
-    public JSONObject toJSONObject( WorkspaceNode ws, Date dateTime, boolean isIncludeQualified ) throws JSONException {
-        return toJSONObject( null, ws, dateTime, isIncludeQualified );
+    public JSONObject toJSONObject( WorkspaceNode ws, Date dateTime, boolean isIncludeQualified,
+                                    List<EmsScriptNode> ownedProperties) throws JSONException {
+        return toJSONObject( null, ws, dateTime, isIncludeQualified, ownedProperties );
     }
 
     /**
@@ -2160,8 +2161,10 @@ public class EmsScriptNode extends ScriptNode implements
      * @return JSONObject serialization of node
      */
     public JSONObject toJSONObject( Set< String > filter, WorkspaceNode ws, Date dateTime,
-                                    boolean isIncludeQualified ) throws JSONException {
-        return toJSONObject( filter, false, ws, dateTime, isIncludeQualified, null );
+                                    boolean isIncludeQualified,
+                                    List<EmsScriptNode> ownedProperties) throws JSONException {
+        return toJSONObject( filter, false, ws, dateTime, isIncludeQualified, null,
+                             ownedProperties);
     }
 
     public String nodeRefToSysmlId( NodeRef ref ) throws JSONException {
@@ -2589,10 +2592,20 @@ public class EmsScriptNode extends ScriptNode implements
      */
     public JSONObject toJSONObject( Set< String > jsonFilter, boolean isExprOrProp,
                                     WorkspaceNode ws, Date dateTime, boolean isIncludeQualified,
-                                    Version version ) throws JSONException {
+                                    Version version, List<EmsScriptNode> ownedProperties) throws JSONException {
         JSONObject json = toJSONObjectImpl( jsonFilter, isExprOrProp, ws, dateTime,
                                             isIncludeQualified, version );
         if ( !isExprOrProp ) addEditableJson( json, jsonFilter );
+        
+        // Add owned Properties to properties key:
+        if (!Utils.isNullOrEmpty( ownedProperties )) {
+            JSONArray props = new JSONArray();
+            for (EmsScriptNode prop : ownedProperties) {
+                props.put( prop.toJSONObject( ws, dateTime, isIncludeQualified, null ) );
+                putInJson( json, "properties", props, jsonFilter );
+            }
+        }
+        
         return json;
     }
     public void addEditableJson( JSONObject json, Set< String > jsonFilter ) throws JSONException {
@@ -2601,7 +2614,7 @@ public class EmsScriptNode extends ScriptNode implements
     }
     public JSONObject toJSONObjectImpl( Set< String > jsonFilter, boolean isExprOrProp,
                                         WorkspaceNode ws, Date dateTime, boolean isIncludeQualified,
-                                        Version version ) throws JSONException {
+                                        Version version) throws JSONException {
         if ( Debug.isOn() )
             Debug.outln( "$ $ $ $ toJSONObject(jsonFilter=" + jsonFilter
                             + ", isExprOrProp=" + isExprOrProp + ", dateTime="
@@ -5001,7 +5014,7 @@ public class EmsScriptNode extends ScriptNode implements
             node = node.findScriptNodeByName( node.getSysmlId(), false, ws, dateTime );
         }
         if ( node != null && node.exists() ) {
-            jsonArray.put( node.toJSONObject( null, true, ws, dateTime, false, null ) );
+            jsonArray.put( node.toJSONObject( null, true, ws, dateTime, false, null, null ) );
         }
     }
 
