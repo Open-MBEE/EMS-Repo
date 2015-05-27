@@ -1973,6 +1973,7 @@ public class ModelPost extends AbstractJavaWebScript {
             siteNode.createOrUpdateAspect( "cm:taggable" );
             siteNode.createOrUpdateAspect( Acm.ACM_SITE );
             siteNode.createOrUpdateProperty( Acm.ACM_SITE_PACKAGE, pkgSiteNode.getNodeRef() );
+            siteNode.createOrUpdateProperty( Acm.CM_TITLE, (String)pkgSiteNode.getProperty("sysml:name") );
             pkgSiteNode.createOrUpdateAspect( Acm.ACM_SITE_CHARACTERIZATION);
             pkgSiteNode.createOrUpdateProperty( Acm.ACM_SITE_SITE, siteNode.getNodeRef() );
         }
