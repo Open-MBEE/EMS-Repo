@@ -1,7 +1,5 @@
 package gov.nasa.jpl.view_repo.webscripts;
 
-import gov.nasa.jpl.view_repo.DocBookContentTransformer;
-import gov.nasa.jpl.view_repo.actions.ActionUtil;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
@@ -12,9 +10,9 @@ import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -27,22 +25,25 @@ import org.alfresco.model.ContentModel;
 import org.alfresco.repo.content.MimetypeMap;
 import org.alfresco.repo.model.Repository;
 import org.alfresco.service.ServiceRegistry;
-import org.alfresco.service.cmr.repository.ContentReader;
 import org.alfresco.service.cmr.repository.ContentService;
 import org.alfresco.service.cmr.repository.ContentWriter;
 import org.alfresco.service.cmr.repository.NodeRef;
-import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.util.TempFileProvider;
+import org.alfresco.util.XMLUtil;
+import org.alfresco.util.exec.RuntimeExec;
+import org.alfresco.util.exec.RuntimeExec.ExecutionResult;
 import org.apache.commons.lang.StringUtils;
-import org.json.JSONObject;
+import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormatter;
+import org.joda.time.format.ISODateTimeFormat;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
-import org.jsoup.parser.Parser;
 import org.jsoup.select.Elements;
 import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
+import org.w3c.dom.NodeList;
 
 public class FullDocPost extends AbstractJavaWebScript {
 	protected String fullDocDir;
@@ -117,28 +118,6 @@ public class FullDocPost extends AbstractJavaWebScript {
         return model;
     }
     
-    public void html2pdf()  throws IOException, InterruptedException {
-    	ProcessBuilder processBuilder = new ProcessBuilder();
-		processBuilder.directory(new File("/Users/lho/git/phantomjs-2.0.0-macosx/examples/target/"));
-
-		List<String> command = new ArrayList<String>();
-		command.add("wkhtmltopdf");
-		command.add("-q");
-		command.add("toc");
-		command.add("xsl/default.xsl");
-		command.add(this.getHtmlPath());
-		command.add(this.getPdfPath());
-
-		processBuilder.command(command);
-		System.out.println("htmltopdf command: " + processBuilder.command());
-		Process process = processBuilder.start();
-		int exitCode = process.waitFor();
-		if(exitCode != 0 && exitCode != 1){
-			System.out.println("failed to convert HTML to PDF!");
-			System.out.println("exit code: " + exitCode);
-		}	
-    }
-    
     public void downloadHtml(WorkspaceNode workspace, String site, String docId, Date time) throws Exception {
     	ProcessBuilder processBuilder = new ProcessBuilder();
 		processBuilder.directory(new File("/Users/lho/git/phantomjs-2.0.0-macosx/examples/"));	//to do : need to config
@@ -148,12 +127,13 @@ public class FullDocPost extends AbstractJavaWebScript {
 		int alfrescoPort = 9000;	//to do: need to config
 		String preRendererUrl = "http://localhost";	//to do: need to config
 		int preRendererPort = 3000;	// to do: need to config
-		String mmsAdminCredential = "admin:admin";	// to do: need to config
+		String mmsAdminCredential = getHeadlessUserCredential();
+		DateTimeFormatter fmt = ISODateTimeFormat.dateTime();
 		List<String> command = new ArrayList<String>();
 		command.add("/Users/lho/git/phantomjs-2.0.0-macosx/bin/phantomjs");
 		command.add("fullDoc.js");
 		command.add(String.format("%s:%d/%s://%s@%s:%d/mmsFullDoc.html?ws=%s&site=%s&docId=%s&time=%s",
-				preRendererUrl,preRendererPort, protocol, mmsAdminCredential, hostname,alfrescoPort, workspace.getName(), site, docId, time.toString()));
+				preRendererUrl,preRendererPort, protocol, mmsAdminCredential, hostname,alfrescoPort, workspace.getName(), site, docId, fmt.print(new DateTime(time))));
 		command.add(String.format("%s/%s_NodeJS.html", this.fullDocDir, this.fullDocId));
 		processBuilder.command(command);
 		System.out.println("phantomJS command: " + processBuilder.command());
@@ -177,6 +157,24 @@ public class FullDocPost extends AbstractJavaWebScript {
 		catch(Exception ex){
 			throw new Exception("Failed to convert tables to CSV files!", ex);
 		}
+    }
+    
+    private String getHeadlessUserCredential(){
+    	String cred = "admin:admin";
+    	String filePath = "../../amp/config/alfresco/module/view-repo/context/mms-init-service-context.xml";
+    	try{
+    		org.w3c.dom.Document xml = XMLUtil.parse(new File(filePath));
+    		NodeList list = xml.getElementsByTagName("property[value='gov.nasa.jpl.view_repo.webscripts.util.ShareUtils.setUsername']");
+    		String usr = list.item(0).getNextSibling().getAttributes().getNamedItem("value").getNodeValue();
+    		list = xml.getElementsByTagName("property[value='gov.nasa.jpl.view_repo.webscripts.util.ShareUtils.setPassword']");
+    		String psswrd= list.item(0).getNextSibling().getAttributes().getNamedItem("value").getNodeValue();
+    		cred = String.format("%s:%s", usr, psswrd);
+    	}
+    	catch(Exception ex){
+    		System.out.println(String.format("problem retrieving headless credential. %s", ex.getMessage()));
+			ex.printStackTrace();
+    	}
+    	return cred;
     }
     
     private String getHtmlText(String htmlString){
@@ -213,6 +211,38 @@ public class FullDocPost extends AbstractJavaWebScript {
 //		}
 //	}
 
+    
+    public void html2pdf()  throws IOException, InterruptedException {
+    	ProcessBuilder processBuilder = new ProcessBuilder();
+		processBuilder.directory(new File("/Users/lho/git/phantomjs-2.0.0-macosx/examples/target/"));
+
+		List<String> command = new ArrayList<String>();
+		command.add("wkhtmltopdf");
+		command.add("-q");
+		command.add("toc");
+		command.add("xsl/default.xsl");
+		command.add(this.getHtmlPath());
+		command.add(this.getPdfPath());
+
+		processBuilder.command(command);
+		System.out.println("htmltopdf command: " + processBuilder.command());
+		Process process = processBuilder.start();
+		int exitCode = process.waitFor();
+		if(exitCode != 0 && exitCode != 1){
+			System.out.println("failed to convert HTML to PDF!");
+			System.out.println("exit code: " + exitCode);
+		}	
+    }
+
+	/**
+	 * Helper method to convert a list to an array of specified type
+	 * @param list
+	 * @return
+	 */
+	private String[] list2Array(List<String> list) {
+		return Arrays.copyOf(list.toArray(), list.toArray().length, String[].class);
+	}
+    
     public void savePdfToRepo(EmsScriptNode snapshotFolder, EmsScriptNode snapshotNode) throws Exception{
 //		ServiceRegistry services = this.snapshotNode.getServices();
     	String filename = String.format("%s.pdf", this.fullDocId);
@@ -467,9 +497,34 @@ public class FullDocPost extends AbstractJavaWebScript {
     }
 
     public void zipHtml() throws IOException, InterruptedException {
-		ProcessBuilder processBuilder = new ProcessBuilder();
-		processBuilder.directory(new File(Paths.get(this.fullDocDir).getParent().toString()));
-//		System.out.println("zip working directory: " + processBuilder.directory());
+//		ProcessBuilder processBuilder = new ProcessBuilder();
+//		processBuilder.directory(new File(Paths.get(this.fullDocDir).getParent().toString()));
+////		System.out.println("zip working directory: " + processBuilder.directory());
+//		List<String> command = new ArrayList<String>();
+//		String zipFile = this.fullDocId + ".zip";
+//		command.add("zip");
+//		command.add("-r");
+//		command.add(zipFile);
+//		//command.add("\"*.html\"");
+//		//command.add("\"*.css\"");
+//		command.add(this.fullDocId);
+//
+//		// not including docbook and pdf files
+//		//command.add("-x");
+//		//command.add("*.db");
+//		//command.add("*.pdf");
+//
+//		processBuilder.command(command);
+//		System.out.println("zip command: " + processBuilder.command());
+//		Process process = processBuilder.start();
+//		int exitCode = process.waitFor();
+//		if(exitCode != 0){
+//			System.out.println("zip failed!");
+//			System.out.println("exit code: " + exitCode);
+//		}
+    	
+		RuntimeExec exec = new RuntimeExec();
+		exec.setProcessDirectory(Paths.get(this.fullDocDir).getParent().toString());
 		List<String> command = new ArrayList<String>();
 		String zipFile = this.fullDocId + ".zip";
 		command.add("zip");
@@ -484,15 +539,13 @@ public class FullDocPost extends AbstractJavaWebScript {
 		//command.add("*.db");
 		//command.add("*.pdf");
 
-		processBuilder.command(command);
-		System.out.println("zip command: " + processBuilder.command());
-		Process process = processBuilder.start();
-		int exitCode = process.waitFor();
-		if(exitCode != 0){
-			System.out.println("zip failed!");
-			System.out.println("exit code: " + exitCode);
-		}
+		exec.setCommand(list2Array(command));
+		System.out.println("zip command: " + command);
+		ExecutionResult result = exec.execute();
 
-//		return Paths.get(this.getJobDirName(), zipFile).toString();
+		if (!result.getSuccess()) {
+			System.out.println("zip failed!");
+			System.out.println("exit code: " + result.getExitValue());
+		}
 	}
 }
