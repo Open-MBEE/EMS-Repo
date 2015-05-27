@@ -4214,7 +4214,9 @@ public class EmsScriptNode extends ScriptNode implements
         }
         //makeSureNodeRefIsNotFrozen();  // Doesnt make sense to always call this on "this"
         transactionCheck();
-        nodeService.setProperties( node.getNodeRef(), properties );
+        NodeRef ref = node.getNodeRef();
+        nodeService.setProperties( ref, properties );
+        NodeUtil.propertyCachePut( ref, properties );
 
         // THIS MUST BE CALLED AFTER setProperties()!
         if ( parent.getWorkspace() != null) {

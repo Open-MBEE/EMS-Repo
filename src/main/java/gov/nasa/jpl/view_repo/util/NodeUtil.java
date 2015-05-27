@@ -15,6 +15,7 @@ import gov.nasa.jpl.view_repo.webscripts.AbstractJavaWebScript;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
@@ -287,6 +288,19 @@ public class NodeUtil {
         if ( value == null ) value = NULL_OBJECT;
         return Utils.put( propertyCache, nodeRef, propertyName, value );
     }
+    
+    public static void propertyCachePut( NodeRef nodeRef, Map<QName, 
+                                         Serializable> properties ) {
+        Map< String, Object > cachedProps =
+                NodeUtil.propertyCacheGetProperties( nodeRef );
+        for ( QName qName : properties.keySet() ) {
+            String key = getShortQName( qName );
+            Serializable value = properties.get( key );
+            cachedProps.put( key, value );
+//          System.out.println("propertyCachePut(" + nodeRef + ", " + key + ", " + value + ")");
+        }
+    }
+    
     public static boolean propertyCacheHas( NodeRef nodeRef, String propertyName ) {
         Map< String, Object > props = NodeUtil.propertyCache.get( nodeRef );
         if ( props != null ) {
@@ -301,7 +315,7 @@ public class NodeUtil {
 //        System.out.println("propertyCachePut(" + nodeRef + ", " + propertyName + ", " + o + ")");
         return o;
     }
-    public static Map<String, Object> propertyCacheGetProperties( NodeRef nodeRef, String propertyName ) {
+    public static Map<String, Object> propertyCacheGetProperties( NodeRef nodeRef ) {
         return propertyCache.get( nodeRef );
     }
 
@@ -1039,6 +1053,7 @@ public class NodeUtil {
         usedSimpleCache = cacheResults.cachedUsed == CacheUsed.SIMPLE;
         usedFullCache = cacheResults.cachedUsed == CacheUsed.FULL;
         emptyEntriesInFullCacheOk = cacheResults.emptyEntriesInFullCacheOk;
+        System.out.println("cache results = " + results );
 
         boolean wasCached = false;
         boolean caching = false;
@@ -1048,6 +1063,7 @@ public class NodeUtil {
             } else {
                 // search using lucene
                 results = findNodeRefsByType( specifier, prefix, services );
+                System.out.println("lucene results = " + results );
                 if ( (doSimpleCaching || doFullCaching) && !Utils.isNullOrEmpty( results ) ) {
                     caching = true;
                 }
@@ -1057,6 +1073,7 @@ public class NodeUtil {
             if ( results != null ) {
                 if ( doHeisenCheck ) {
                     results = fixVersions( results );
+                    System.out.println("fixVersions results = " + results );
                 }
                 // In the case that dateTime is null and there are cache results,
                 // it must be the case that the search is on an id in the master
@@ -1072,6 +1089,7 @@ public class NodeUtil {
                                               workspace, onlyThisWorkspace,
                                               dateTime, justFirst, exactMatch,
                                               services, includeDeleted, siteName );
+                    System.out.println("filterResults = " + nodeRefs );
                 }
 
                 // Always want to check for deleted nodes, even if using the cache:
@@ -1080,6 +1098,7 @@ public class NodeUtil {
                                               workspace, onlyThisWorkspace,
                                               dateTime, justFirst, exactMatch,
                                               services, includeDeleted, siteName );
+                System.out.println("correctForDeleted nodeRefs = " + nodeRefs );
 
             } // ends if (results != null)
 
@@ -1102,6 +1121,7 @@ public class NodeUtil {
             // results without having user-specific entries in the cache.
             nodeRefs = filterForPermissions( nodeRefs, PermissionService.READ,
                                              putInFullCache );
+            System.out.println("filterForPermissions nodeRefs = " + nodeRefs );
             
         } finally {
             // Debug output
@@ -2662,7 +2682,10 @@ public class NodeUtil {
         if ( NodeUtil.doPropertyCaching && cacheOkay ) {
             Object result = NodeUtil.propertyCacheGet( node, keyStr );
             if ( result != null ) { // null means cache miss
-                if ( result == NodeUtil.NULL_OBJECT ) return null;
+                if ( result == NodeUtil.NULL_OBJECT ) {
+                    System.out.println("getNodeRefProperty(" + node + ", " + key + ", cacheOkay=" + cacheOkay + ") = " + null);
+                    return null;
+                }
 //                System.out.println("^ cache hit!  getNodeRefProperty(" + node + ", " + key + ", cacheOkay=" + cacheOkay + ") = " + result);
                 QName qName = oIsString ? NodeUtil.createQName( keyStr, services ) : (QName)key;
                 Object result2 = services.getNodeService().getProperty( node, qName );
