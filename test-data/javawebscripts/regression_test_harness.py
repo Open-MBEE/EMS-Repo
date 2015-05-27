@@ -1665,7 +1665,7 @@ common_filters,
 None,
 None,
 None,
-60
+70
 ],
         
 [

@@ -42,8 +42,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -129,6 +127,7 @@ public class ModelSearch extends ModelGet {
         String[] filters = req.getParameter("filters") == null ? new String[]{"documentation"} : req.getParameter( "filters" ).split( "," );
         
         if (!Utils.isNullOrEmpty( keyword )) {
+
             // get timestamp if specified
             String timestamp = req.getParameter("timestamp");
             Date dateTime = TimeUtils.dateFromTimestamp( timestamp );
@@ -172,7 +171,7 @@ public class ModelSearch extends ModelGet {
                         rawResults.putAll( searchForElements( "@sysml\\:boolean:\"", keyword, false,
                                                               workspace, dateTime) );
                     }
-                    
+
                     rawResults.putAll( searchForElements( "@sysml\\:string:\"", keyword, false,
                                                           workspace, dateTime) );
                 }
