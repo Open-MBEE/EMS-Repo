@@ -1268,12 +1268,14 @@ public class ModelPost extends AbstractJavaWebScript {
         if (newVals != null) {
             for (int i = 0; i < newVals.length(); ++i) {
                 newVal = newVals.optJSONObject(i);
-                boolean myChanged = processValueSpecPropertyImplImpl( jsonToCheck, jsonKey, oldVals,
-                                                                       node, ingest, reifiedPkgNode,
-                                                                       parent, id, nodeWorkspace,
-                                                                       iter, nodeNames, newVal,
-                                                                       nodeWorkspace);
-                changed = changed || myChanged;
+                if (newVal != null) {
+                    boolean myChanged = processValueSpecPropertyImplImpl( jsonToCheck, jsonKey, oldVals,
+                                                                           node, ingest, reifiedPkgNode,
+                                                                           parent, id, nodeWorkspace,
+                                                                           iter, nodeNames, newVal,
+                                                                           nodeWorkspace);
+                    changed = changed || myChanged;
+                }
             }
 
             // Replace the property in the JSON with the sysmlids
