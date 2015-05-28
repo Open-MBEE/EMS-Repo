@@ -1,63 +1,12 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <!DOCTYPE beans PUBLIC '-//SPRING//DTD BEAN//EN' 'http://www.springframework.org/dtd/spring-beans.dtd'>
 <beans>
-    <!--  enable toggling of our debug -->
-    <bean id="webscript.gov.nasa.jpl.utils.debug.get"
-        class="gov.nasa.jpl.view_repo.webscripts.DebugGet"
+    <!--  enable toggling of all flags -->
+    <bean id="webscript.gov.nasa.jpl.utils.allflags.get"
+        class="gov.nasa.jpl.view_repo.webscripts.AllFlagsGet"
         parent="webscript">
     </bean>
-    <bean id="webscript.gov.nasa.jpl.utils.heisencache.get"
-        class="gov.nasa.jpl.view_repo.webscripts.HeisenCacheGet"
-        parent="webscript">
-    </bean>
-    <bean id="webscript.gov.nasa.jpl.utils.runwithtransactions.get"
-        class="gov.nasa.jpl.view_repo.webscripts.RunWithTransactionsGet"
-        parent="webscript">
-    </bean>
-    <bean id="webscript.gov.nasa.jpl.utils.simplecache.get"
-        class="gov.nasa.jpl.view_repo.webscripts.SimpleCacheGet"
-        parent="webscript">
-    </bean>
-    <bean id="webscript.gov.nasa.jpl.utils.fullcache.get"
-        class="gov.nasa.jpl.view_repo.webscripts.FullCacheGet"
-        parent="webscript">
-    </bean>
-    <bean id="webscript.gov.nasa.jpl.utils.propertycache.get"
-        class="gov.nasa.jpl.view_repo.webscripts.PropertyCacheGet"
-        parent="webscript">
-    </bean>
-    <bean id="webscript.gov.nasa.jpl.utils.alwaysturndebugoff.get"
-        class="gov.nasa.jpl.view_repo.webscripts.AlwaysTurnDebugOffGet"
-        parent="webscript">
-    </bean>
-    <bean id="webscript.gov.nasa.jpl.utils.versioncache.get"
-        class="gov.nasa.jpl.view_repo.webscripts.VersionCacheGet"
-        parent="webscript">
-    </bean>
-    <bean id="webscript.gov.nasa.jpl.utils.versioncachedebug.get"
-        class="gov.nasa.jpl.view_repo.webscripts.VersionCacheDebugGet"
-        parent="webscript">
-    </bean>
-    <bean id="webscript.gov.nasa.jpl.utils.jsoncache.get"
-        class="gov.nasa.jpl.view_repo.webscripts.JsonCacheGet"
-        parent="webscript">
-    </bean>
-    <bean id="webscript.gov.nasa.jpl.utils.jsonstringcache.get"
-        class="gov.nasa.jpl.view_repo.webscripts.JsonStringCacheGet"
-        parent="webscript">
-    </bean>
-    <bean id="webscript.gov.nasa.jpl.utils.synctransactions.get"
-        class="gov.nasa.jpl.view_repo.webscripts.SyncTransactionsGet"
-        parent="webscript">
-    </bean>
-    <bean id="webscript.gov.nasa.jpl.utils.timeevents.get"
-        class="gov.nasa.jpl.view_repo.webscripts.TimeEventsGet"
-        parent="webscript">
-    </bean>
-    <bean id="webscript.gov.nasa.jpl.utils.modelposttimeevents.get"
-        class="gov.nasa.jpl.view_repo.webscripts.ModelPostTimeEventsGet"
-        parent="webscript">
-    </bean>
+
     <bean id="webscript.gov.nasa.jpl.utils.updateworkspaceldapgroup.post"
         class="gov.nasa.jpl.view_repo.webscripts.UpdateWorkspaceLdapGroup" parent="webscript"
         singleton="false">
