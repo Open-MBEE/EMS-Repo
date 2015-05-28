@@ -9,7 +9,6 @@ import gov.nasa.jpl.mbee.util.Seen;
 import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.util.NodeUtil.SearchType;
-import gov.nasa.jpl.view_repo.webscripts.WebScriptUtil;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -19,15 +18,11 @@ import java.util.TreeSet;
 
 import javax.servlet.http.HttpServletResponse;
 
-import org.alfresco.repo.security.authority.AuthorityDAO;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.security.AccessPermission;
 import org.alfresco.service.cmr.security.AccessStatus;
-import org.alfresco.service.cmr.security.AuthorityService;
-import org.alfresco.service.cmr.security.AuthorityType;
 import org.alfresco.service.cmr.security.PermissionService;
-import org.alfresco.service.cmr.security.PersonService;
 import org.alfresco.service.cmr.site.SiteInfo;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -1091,26 +1086,17 @@ public class WorkspaceNode extends EmsScriptNode {
             if ( workspace != null ) return workspace;
         }
 
-        // We decided to remove this search:
-//        // Try to match the workspace name
-//        workspace = getWorkspaceFromName( nameOrId, services, response,
-//                                          responseStatus, userName );
-//
-//        if ( workspace != null ) return workspace;
+        // Try to match the workspace name
+        workspace = getWorkspaceFromName( nameOrId, services, response,
+                                          responseStatus, userName );
 
-        // Try the cm:name
-        ref = NodeUtil.findNodeRefById( nameOrId, true, null, null, services, false );
-        if ( ref != null ) {
-            workspace = existingReadableWorkspaceFromNodeRef( ref, services,
-                                                              response,
-                                                              responseStatus );
-            if ( workspace != null ) return workspace;
-        }
+        if ( workspace != null ) return workspace;
 
         if ( Debug.isOn() ) {
             Debug.outln( "workspace does not exist and is not to be created: "
                          + nameOrId );
         }
+        // FIXME: throw exception since nothing is found and null indicates master
         return null;
     }
 

@@ -102,8 +102,11 @@ public class WorkspacesPost extends AbstractJavaWebScript{
                 String newName = req.getServiceMatch().getTemplateVars().get(WORKSPACE_ID);
                 String copyTime = req.getParameter("copyTime");
                 Date copyDateTime = TimeUtils.dateFromTimestamp( copyTime );
-                JSONObject reqJson = //JSONObject.make( 
-                        (JSONObject)req.parseContent();// );
+                if (copyDateTime == null) copyDateTime = new Date();
+                String follow = req.getParameter( "follow" );
+                if (follow != null) copyDateTime = null;
+                JSONObject reqJson = 
+                        (JSONObject)req.parseContent();
                 WorkspaceNode ws = createWorkSpace(sourceWorkspaceParam, newName, copyDateTime, reqJson, user, status);
                 statusCode = status.getCode();
                 json = printObject(ws);
