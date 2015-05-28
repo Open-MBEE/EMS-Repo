@@ -287,7 +287,7 @@ public class NodeUtil {
                 Utils.isNullOrEmpty( propertyName ) ) {
                return null;
            }
-//        System.out.println("propertyCachePut(" + nodeRef + ", " + propertyName + ", " + value + ")");
+        System.out.println("propertyCachePut(" + nodeRef + ", " + propertyName + ", " + value + ")");
         if ( value == null ) value = NULL_OBJECT;
         return Utils.put( propertyCache, nodeRef, propertyName, value );
     }
@@ -307,7 +307,7 @@ public class NodeUtil {
             String key = getShortQName( qName );
             Serializable value = properties.get( key );
             cachedProps.put( key, value );
-//          System.out.println("propertyCachePut(" + nodeRef + ", " + key + ", " + value + ")");
+            System.out.println("propertyCachePut(" + nodeRef + ", " + key + ", " + value + ") from map");
         }
     }
     
@@ -2712,7 +2712,7 @@ public class NodeUtil {
                     //cool
                     //System.out.println("good result = " + result + ", result2 = " + result2);
                 } else  {
-                    Debug.error("bad result = " + result + ", result2 = " + result2);
+                    System.out.println("\nbad result = " + result + ", result2 = " + result2 + "\n");
                 }
                 System.out.println("getNodeRefProperty(" + node + ", " + key + ", cacheOkay=" + cacheOkay + ") = " + result);
                 return result;

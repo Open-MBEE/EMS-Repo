@@ -1090,7 +1090,7 @@ public class EmsScriptNode extends ScriptNode implements
 //            return null;
 //        }
 
-        System.out.println("createNode(" + name + ", " + type + ")\n" + Debug.stackTrace() );
+        System.out.println("createNode(" + name + ", " + type + ")\n" );// + Debug.stackTrace() );
         
         EmsScriptNode result = null;
         // Date start = new Date(), end;

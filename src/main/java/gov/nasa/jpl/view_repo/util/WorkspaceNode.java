@@ -221,6 +221,11 @@ public class WorkspaceNode extends EmsScriptNode {
                                                            StringBuffer response,
                                                            Status status,
                                                            String description) {
+        System.out.println( "createWorkspaceFromSource(wsName=" + wsName
+                            + "userName=" + userName + " sourceNameOrId="
+                            + sourceNameOrId + ", copyTime=" + copyTime
+                            + ", folder=" + (folder==null?"null":folder.getSysmlId()) + ")" );
+
     	if ( Utils.isNullOrEmpty( wsName ) ) {
     		wsName = NodeUtil.createId( services );
     	}
