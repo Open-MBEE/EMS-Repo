@@ -272,10 +272,6 @@ public class NodeUtil {
      * wrong versions)
      */
     public static void initPropertyCache() {
-        // TODO -- the problem with this is that concurrent services could clear
-        // this common cache. It would be better to pass around a context or
-        // something with a service identifier as a key to the cache. So, each
-        // web service invocation would have its own cache.
         propertyCache.clear();
     }
     public static Object propertyCachePut( NodeRef nodeRef, String propertyName,
