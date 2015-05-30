@@ -11,8 +11,6 @@ import gov.nasa.jpl.mbee.util.Timer;
 import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.actions.ActionUtil;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode.EmsVersion;
-import gov.nasa.jpl.view_repo.webscripts.AbstractJavaWebScript;
-
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.Serializable;
@@ -62,7 +60,6 @@ import org.alfresco.service.cmr.search.ResultSet;
 import org.alfresco.service.cmr.search.ResultSetRow;
 import org.alfresco.service.cmr.search.SearchParameters;
 import org.alfresco.service.cmr.search.SearchService;
-import org.alfresco.service.cmr.security.AccessStatus;
 import org.alfresco.service.cmr.security.AuthorityService;
 import org.alfresco.service.cmr.security.AuthorityType;
 import org.alfresco.service.cmr.security.PermissionService;
@@ -287,7 +284,7 @@ public class NodeUtil {
                 Utils.isNullOrEmpty( propertyName ) ) {
                return null;
            }
-        System.out.println("propertyCachePut(" + nodeRef + ", " + propertyName + ", " + value + ")");
+        if (logger.isDebugEnabled()) logger.debug("propertyCachePut(" + nodeRef + ", " + propertyName + ", " + value + ")");
         if ( value == null ) value = NULL_OBJECT;
         return Utils.put( propertyCache, nodeRef, propertyName, value );
     }
@@ -301,13 +298,15 @@ public class NodeUtil {
         Map< String, Object > cachedProps =
                 NodeUtil.propertyCacheGetProperties( nodeRef );
         if ( cachedProps == null ) {
-            
+            cachedProps = new HashMap<String, Object>();
+        } else {
+            cachedProps.clear();
         }
         for ( QName qName : properties.keySet() ) {
             String key = getShortQName( qName );
             Serializable value = properties.get( key );
             cachedProps.put( key, value );
-            System.out.println("propertyCachePut(" + nodeRef + ", " + key + ", " + value + ") from map");
+            if (logger.isTraceEnabled()) logger.trace("propertyCachePut(" + nodeRef + ", " + key + ", " + value + ") from map");
         }
     }
     
@@ -330,7 +329,7 @@ public class NodeUtil {
                return null;
         }
         Object o = Utils.get( propertyCache, nodeRef, propertyName );
-//        System.out.println("propertyCachePut(" + nodeRef + ", " + propertyName + ", " + o + ")");
+        if (logger.isTraceEnabled()) logger.trace("propertyCachePut(" + nodeRef + ", " + propertyName + ", " + o + ")");
         return o;
     }
     public static Map<String, Object> propertyCacheGetProperties( NodeRef nodeRef ) {
@@ -365,8 +364,10 @@ public class NodeUtil {
     public static JSONObject jsonCacheGet( String id, long millis,
                                            boolean noMetadata ) {
         JSONObject json = Utils.get( jsonCache, id, millis );
-        if ( Debug.isOn()) logger.debug( "jsonCacheGet(" + id + ", " + millis + ", "
-                            + noMetadata + ") = " + json );
+        if (logger.isDebugEnabled()) {
+            logger.debug( "jsonCacheGet(" + id + ", " + millis + ", "
+                          + noMetadata + ") = " + json );
+        }
         if ( doJsonStringCaching && noMetadata ) {
             json = clone( json );
             stripJsonMetadata( json );
@@ -382,8 +383,10 @@ public class NodeUtil {
         if ( doJsonStringCaching ) {
             json = addJsonMetadata( json, id, millis, true, null );
         }
-        if ( Debug.isOn()) logger.debug( "jsonCachePut(" + id + ", " + millis + ", " + json
-                            + ")" );
+        if ( logger.isDebugEnabled() ) {
+            logger.debug( "jsonCachePut(" + id + ", " + millis + ", " + json
+                          + ")" );
+        }
         Utils.put( jsonCache, id, millis, json );
         return json;
     }
@@ -476,9 +479,11 @@ public class NodeUtil {
             e.printStackTrace();
             return null;
         }
-        if ( Debug.isOn()) logger.debug( "addJsonMetadata(" + id + ", " + millis + ", "
-                            + isIncludeQualified + ", " + jsonFilter + ") -> "
-                            + json );
+        if ( logger.isDebugEnabled() ) {
+            logger.debug( "addJsonMetadata(" + id + ", " + millis + ", "
+                          + isIncludeQualified + ", " + jsonFilter + ") -> "
+                          + json );
+        }
         return json;
     }
 
@@ -605,7 +610,7 @@ public class NodeUtil {
                         result = p.second;
                         // cache hit
                         ++jsonStringCacheHits;
-                        //System.out.println("string cache hit : " + result );
+                        if (logger.isTraceEnabled()) logger.trace("string cache hit : " + result );
                         return result;
                     }
                 }
@@ -853,8 +858,8 @@ public class NodeUtil {
         List<EmsScriptNode> resultList = new ArrayList<EmsScriptNode>();
         try {
             resultSet = luceneSearch( queryPattern, (SearchService)null );
-            if (Debug.isOn()) System.out.println( "luceneSearch(" + queryPattern + ") returns "
-                                + resultSet.length() + " matches." );
+            if (Debug.isOn()) logger.debug( "luceneSearch(" + queryPattern + ") returns "
+                                            + resultSet.length() + " matches." );
             resultList = resultSetToList( resultSet );
         } catch (Exception e) {
             logger.error("Could not get results");
@@ -1072,7 +1077,7 @@ public class NodeUtil {
         usedSimpleCache = cacheResults.cachedUsed == CacheUsed.SIMPLE;
         usedFullCache = cacheResults.cachedUsed == CacheUsed.FULL;
         emptyEntriesInFullCacheOk = cacheResults.emptyEntriesInFullCacheOk;
-        System.out.println("cache results = " + results );
+        if (logger.isDebugEnabled()) logger.debug("cache results = " + results );
 
         boolean wasCached = false;
         boolean caching = false;
@@ -1082,7 +1087,7 @@ public class NodeUtil {
             } else {
                 // search using lucene
                 results = findNodeRefsByType( specifier, prefix, services );
-                System.out.println("lucene results = " + results );
+                if (logger.isDebugEnabled()) logger.debug("lucene results = " + results );
                 if ( (doSimpleCaching || doFullCaching) && !Utils.isNullOrEmpty( results ) ) {
                     caching = true;
                 }
@@ -1092,7 +1097,7 @@ public class NodeUtil {
             if ( results != null ) {
                 if ( doHeisenCheck ) {
                     results = fixVersions( results );
-                    System.out.println("fixVersions results = " + results );
+                    if (logger.isDebugEnabled()) logger.debug("fixVersions results = " + results );
                 }
                 // In the case that dateTime is null and there are cache results,
                 // it must be the case that the search is on an id in the master
@@ -1108,7 +1113,7 @@ public class NodeUtil {
                                               workspace, onlyThisWorkspace,
                                               dateTime, justFirst, exactMatch,
                                               services, includeDeleted, siteName );
-                    System.out.println("filterResults = " + nodeRefs );
+                    if (logger.isDebugEnabled()) logger.debug("filterResults = " + nodeRefs );
                 }
 
                 // Always want to check for deleted nodes, even if using the cache:
@@ -1117,7 +1122,7 @@ public class NodeUtil {
                                               workspace, onlyThisWorkspace,
                                               dateTime, justFirst, exactMatch,
                                               services, includeDeleted, siteName );
-                System.out.println("correctForDeleted nodeRefs = " + nodeRefs );
+                if (logger.isDebugEnabled()) logger.debug("correctForDeleted nodeRefs = " + nodeRefs );
 
             } // ends if (results != null)
 
@@ -1140,7 +1145,7 @@ public class NodeUtil {
             // results without having user-specific entries in the cache.
             nodeRefs = filterForPermissions( nodeRefs, PermissionService.READ,
                                              putInFullCache );
-            System.out.println("filterForPermissions nodeRefs = " + nodeRefs );
+            if (logger.isDebugEnabled()) logger.debug("filterForPermissions nodeRefs = " + nodeRefs );
             
         } finally {
             // Debug output
@@ -1311,7 +1316,7 @@ public class NodeUtil {
                          ( workspace == null && esnWs != null ) ||
                          ( workspace != null && !workspace.contains( esn ) ) ) {
                         if ( Debug.isOn() && !Debug.isOn()) {
-                            System.out.println( "findNodeRefsByType(): wrong workspace "
+                            if (logger.isTraceEnabled()) logger.trace( "findNodeRefsByType(): wrong workspace "
                                     + workspace );
                         }
                         continue;
@@ -1585,15 +1590,13 @@ public class NodeUtil {
         public ArrayList< NodeRef > results = null;
 
         public CacheResults( boolean useSimpleCache, boolean useFullCache,
-                             CacheUsed cacheUsed,//boolean usedSimpleCache, boolean usedFullCache,
+                             CacheUsed cacheUsed,
                              boolean emptyEntriesInFullCacheOk,
                              ArrayList< NodeRef > results ) {
             super();
             this.useSimpleCache = useSimpleCache;
             this.useFullCache = useFullCache;
             this.cachedUsed = cacheUsed;
-//            this.usedSimpleCache = usedSimpleCache;
-//            this.usedFullCache = usedFullCache;
             this.emptyEntriesInFullCacheOk = emptyEntriesInFullCacheOk;
             this.results = results;
         }
@@ -2290,24 +2293,24 @@ public class NodeUtil {
         if ( qName != null ) {
             AspectDefinition t = dServ.getAspect( qName );
             if ( t != null ) {
-              if (Debug.isOn()) System.out.println("*** getAspect(" + aspectName + ") worked!!!" );
+              if (logger.isTraceEnabled()) logger.trace("*** getAspect(" + aspectName + ") worked!!!" );
               return t;
             }
         }
 
         Collection< QName > aspects = dServ.getAllAspects();
-        if (Debug.isOn()) System.out.println("all aspects: " + aspects);
+        if (logger.isTraceEnabled()) logger.trace("all aspects: " + aspects);
 
         for ( QName aspect : aspects ) {
             if ( aspect.getPrefixString().equals( aspectName ) ) {
                 AspectDefinition t = dServ.getAspect( aspect );
                 if ( t != null ) {
-                    if (Debug.isOn()) System.out.println("*** getAspect(" + aspectName + ") returning " + t + "" );
+                    if (logger.isTraceEnabled()) logger.trace("*** getAspect(" + aspectName + ") returning " + t + "" );
                     return t;
                 }
             }
         }
-        if (Debug.isOn()) System.out.println("*** getAspect(" + aspectName + ") returning null" );
+        if (logger.isTraceEnabled()) logger.trace("*** getAspect(" + aspectName + ") returning null" );
         return null;
 
     }
@@ -2693,7 +2696,7 @@ public class NodeUtil {
         boolean oIsString = key instanceof String;
         String keyStr = oIsString ? (String)key : NodeUtil.getShortQName( (QName)key );
         if ( keyStr.isEmpty() ) {
-            System.out.println("getNodeRefProperty(" + node + ", " + key + ", cacheOkay=" + cacheOkay + ") = null.  No Key!");
+            if (logger.isTraceEnabled()) logger.trace("getNodeProperty(" + node + ", " + key + ", cacheOkay=" + cacheOkay + ") = null.  No Key!");
             return null;
         }
         
@@ -2702,19 +2705,21 @@ public class NodeUtil {
             Object result = NodeUtil.propertyCacheGet( node, keyStr );
             if ( result != null ) { // null means cache miss
                 if ( result == NodeUtil.NULL_OBJECT ) {
-                    System.out.println("getNodeRefProperty(" + node + ", " + key + ", cacheOkay=" + cacheOkay + ") = " + null);
+                    if (logger.isTraceEnabled()) logger.trace("getNodeProperty(" + node + ", " + key + ", cacheOkay=" + cacheOkay + ") = " + null);
                     return null;
                 }
-//                System.out.println("^ cache hit!  getNodeRefProperty(" + node + ", " + key + ", cacheOkay=" + cacheOkay + ") = " + result);
-                QName qName = oIsString ? NodeUtil.createQName( keyStr, services ) : (QName)key;
-                Object result2 = services.getNodeService().getProperty( node, qName );
-                if ( result == result2 || ( result != null && result2 != null && result.equals(result2) ) ) {
-                    //cool
-                    //System.out.println("good result = " + result + ", result2 = " + result2);
-                } else  {
-                    System.out.println("\nbad result = " + result + ", result2 = " + result2 + "\n");
+                if ( logger.isDebugEnabled() ) {
+                    if (logger.isTraceEnabled()) logger.trace("^ cache hit!  getNodeProperty(" + node + ", " + key + ", cacheOkay=" + cacheOkay + ") = " + result);
+                    QName qName = oIsString ? NodeUtil.createQName( keyStr, services ) : (QName)key;
+                    Object result2 = services.getNodeService().getProperty( node, qName );
+                    if ( result == result2 || ( result != null && result2 != null && result.equals(result2) ) ) {
+                        //cool
+                        if (logger.isTraceEnabled()) logger.trace("good result = " + result + ", result2 = " + result2);
+                    } else  {
+                        logger.warn("\nbad result = " + result + ", result2 = " + result2 + "\n");
+                    }
+                    if (logger.isTraceEnabled()) logger.trace("getNodeProperty(" + node + ", " + key + ", cacheOkay=" + cacheOkay + ") = " + result);
                 }
-                System.out.println("getNodeRefProperty(" + node + ", " + key + ", cacheOkay=" + cacheOkay + ") = " + result);
                 return result;
             }
         }
@@ -2726,7 +2731,7 @@ public class NodeUtil {
             if ( services == null ) services = NodeUtil.getServices();
             result = services.getNodeService().getProperty( node,
                     qName );
-            //System.out.println("^ cache miss!  getNodeRefProperty(" + node + ", " + key + ", cacheOkay=" + cacheOkay + ") = " + result);
+            if (logger.isTraceEnabled()) logger.trace("^ cache miss!  getNodeProperty(" + node + ", " + key + ", cacheOkay=" + cacheOkay + ") = " + result);
         } else {
             ScriptNode sNode = new ScriptNode( node, services );
             result = sNode.getProperties().get(keyStr);
@@ -2734,7 +2739,7 @@ public class NodeUtil {
         if ( NodeUtil.doPropertyCaching && cacheOkay ) {
             NodeUtil.propertyCachePut( node, keyStr, result );
         }
-        System.out.println("getNodeRefProperty(" + node + ", " + key + ", cacheOkay=" + cacheOkay + ") = " + result);
+        if (logger.isTraceEnabled()) logger.trace("getNodeProperty(" + node + ", " + key + ", cacheOkay=" + cacheOkay + ") = " + result);
         return result;
     }
 
@@ -3372,8 +3377,9 @@ public class NodeUtil {
 		artifactNode.createOrUpdateProperty( Acm.ACM_ID, artifactId );
 		artifactNode.createOrUpdateProperty( "view:cs", cs );
 
-		if ( Debug.isOn() ) {
-			System.out.println( "Creating artifact with indexing: "  + artifactNode.getProperty( "cm:isIndexed" ) );
+		if (logger.isDebugEnabled()) {
+            logger.debug( "Creating artifact with indexing: "
+                          + artifactNode.getProperty( "cm:isIndexed" ) );
 		}
 
 		ContentWriter writer =

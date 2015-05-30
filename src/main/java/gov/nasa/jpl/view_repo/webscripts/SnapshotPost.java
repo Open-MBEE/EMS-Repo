@@ -655,6 +655,10 @@ public class SnapshotPost extends AbstractJavaWebScript {
         snapshotNode.createOrUpdateAspect( "view2:Snapshotable" );
         snapshotNode.createOrUpdateProperty( "view2:snapshotProduct", view.getNodeRef() );
         snapshotNode.createOrUpdateProperty( "view2:timestamp", timestamp );
+        
+        // Element cache does not support snapshots
+        //NodeUtil.addElementToCache( snapshotNode );
+
         // can't update the view since it may be frozen since it can be in parent branch
 //        view.createOrUpdateAspect( "view2:Snapshotable" );
 //        view.appendToPropertyNodeRefs( "view2:productSnapshots", snapshotNode.getNodeRef() );
@@ -2172,8 +2176,6 @@ public class SnapshotPost extends AbstractJavaWebScript {
         originalInputStream.close();
         byte[] binaryData = outputStream.toByteArray();
         String imgFilename =
-//                (String)nodeService.getProperty( imgNodeRef,
-//                                                 ContentModel.PROP_NAME );
                 (String)NodeUtil.getNodeProperty( imgNodeRef, ContentModel.PROP_NAME,
                                                   services, true, true );
         Path filePath = Paths.get( imgDirName.toString(), imgFilename );

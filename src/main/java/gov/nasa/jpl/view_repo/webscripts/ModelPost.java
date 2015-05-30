@@ -1822,6 +1822,8 @@ public class ModelPost extends AbstractJavaWebScript {
                     nodeToUpdate = nodeToUpdate.clone(parent);
                     nodeToUpdate.setWorkspace( workspace, oldNode.getNodeRef() );
                     nodeToUpdate.setOwnerToReifiedNode( parent, workspace );
+                }
+                if ( nodeWorkspaceWrong ) { // added this unnecessary if to avoid git merge conflict
                     NodeUtil.addElementToCache( nodeToUpdate );
                 }
             }

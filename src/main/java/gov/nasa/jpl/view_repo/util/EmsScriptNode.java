@@ -1009,8 +1009,6 @@ public class EmsScriptNode extends ScriptNode implements
                                           WorkspaceNode nodeWorkspace) throws Exception {
         String type = NodeUtil.getContentModelTypeName( sysmlAcmType, services );
         EmsScriptNode node = createNode( sysmlId, type );
-        //NodeUtil.propertyCachePut( node.nodeRef, "sysml:id", sysmlId );
-        //NodeUtil.propertyCachePut( node.nodeRef, "ems:owner", this.getNodeRef() );
 
         if ( node != null ) {
             if ( !type.equals( sysmlAcmType )
@@ -1089,7 +1087,7 @@ public class EmsScriptNode extends ScriptNode implements
 //            return null;
 //        }
 
-        System.out.println("createNode(" + name + ", " + type + ")\n" );// + Debug.stackTrace() );
+        //System.out.println("createNode(" + name + ", " + type + ")\n" );// + Debug.stackTrace() );
         
         EmsScriptNode result = null;
         // Date start = new Date(), end;
@@ -1759,17 +1757,6 @@ public class EmsScriptNode extends ScriptNode implements
     private Object getPropertyImpl(String acmType, boolean cacheOkay ) {
         return NodeUtil.getNodeProperty( this, acmType, getServices(),
                                          useFoundationalApi, cacheOkay );
-//        if ( Utils.isNullOrEmpty( acmType ) ) return null;
-//        Object result = null;
-//
-//        if ( useFoundationalApi ) {
-//            QName typeQName = createQName( acmType );
-//            result = services.getNodeService().getProperty( nodeRef, typeQName );
-//        } else {
-//            result = getProperties().get( acmType );
-//        }
-//
-//        return result;
     }
     
     public Object getPropertyAtTime( String acmType, Date dateTime ) {
@@ -1910,7 +1897,7 @@ public class EmsScriptNode extends ScriptNode implements
                                                            boolean cacheOkay,
                                                         // count prevents inf loop
                                                         int count ) {
-        logger.debug( "setProperty(acmType=" + acmType + ", value=" + value + ")" );
+        if ( logger.isDebugEnabled() ) logger.debug( "setProperty(acmType=" + acmType + ", value=" + value + ")" );
         boolean success = true;
         if ( useFoundationalApi ) {
             try {
@@ -4128,12 +4115,20 @@ public class EmsScriptNode extends ScriptNode implements
         this.workspace = workspace;
         createOrUpdateAspect( "ems:HasWorkspace" );
         // ems:workspace is workspace meta data so dont need dateTime/workspace args
+//        QName qname = createQName( "ems:workspace" );
+//        Serializable propInAlf = services.getNodeService().getProperty( getNodeRef(), qname );
+//        System.out.println(getNodeRef() + " workspace before setting: " + propInAlf);
         NodeRef ref = (NodeRef)getNodeRefProperty( "ems:workspace", null, null );
         if ( workspace != null && !workspace.getNodeRef().equals( ref ) ) {
             setProperty( "ems:workspace", workspace.getNodeRef() );
+//            System.out.println("set workspace");
         } else if ( workspace == null && ref != null ) {
             removeAspect( "ems:HasWorkspace" );
+//            System.out.println("did not set workspace; removed HasWorkspace aspect");
         }
+//        propInAlf = services.getNodeService().getProperty( getNodeRef(), qname );
+//        System.out.println(getNodeRef() + " workspace after setting: " + propInAlf);
+        
         if ( source == null ) {
             source = findSourceInParentWorkspace();
         }

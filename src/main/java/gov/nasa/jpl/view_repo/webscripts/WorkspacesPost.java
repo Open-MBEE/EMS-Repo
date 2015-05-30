@@ -29,6 +29,7 @@
 
 package gov.nasa.jpl.view_repo.webscripts;
 
+import gov.nasa.jpl.mbee.util.Debug;
 import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.util.CommitUtil;
@@ -36,6 +37,7 @@ import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 //import gov.nasa.jpl.view_repo.webscripts.AbstractJavaWebScript.LogLevel;
+
 
 import java.util.Date;
 import java.util.HashMap;
@@ -149,6 +151,12 @@ public class WorkspacesPost extends AbstractJavaWebScript{
     public WorkspaceNode createWorkSpace(String sourceWorkId, String newWorkName, Date cpyTime,
                                JSONObject jsonObject, String user, Status status) throws JSONException {
         status.setCode( HttpServletResponse.SC_OK );
+        if ( Debug.isOn() ) {
+            Debug.outln( "createWorkSpace(sourceWorkId=" + sourceWorkId
+                         + ", newWorkName=" + newWorkName + ", cpyTime="
+                         + cpyTime + ", jsonObject=" + jsonObject + ", user="
+                         + user + ", status=" + status + ")" );
+        }
 
         String sourceWorkspaceId = null;
         String newWorkspaceId = null;

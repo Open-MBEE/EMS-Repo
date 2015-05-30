@@ -223,6 +223,8 @@ public class ActionUtil {
                 jobNode.createOrUpdateProperty( Acm.CM_NAME, "cm_" + jobNode.getId() );
             }
             jobNode.createOrUpdateProperty("cm:isContentIndexed", false);
+            // Element cache does not support jobs
+            //NodeUtil.addElementToCache( snapshotNode );
         } else if ( jobNode.isDeleted() ) {
             // resurrect
             jobNode.removeAspect( "ems:Deleted" );
