@@ -10,7 +10,9 @@ import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -21,10 +23,14 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Queue;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.content.MimetypeMap;
 import org.alfresco.repo.model.Repository;
 import org.alfresco.service.ServiceRegistry;
+import org.alfresco.service.cmr.repository.ContentReader;
 import org.alfresco.service.cmr.repository.ContentService;
 import org.alfresco.service.cmr.repository.ContentWriter;
 import org.alfresco.service.cmr.repository.NodeRef;
@@ -32,7 +38,10 @@ import org.alfresco.util.TempFileProvider;
 import org.alfresco.util.XMLUtil;
 import org.alfresco.util.exec.RuntimeExec;
 import org.alfresco.util.exec.RuntimeExec.ExecutionResult;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.lucene.store.Directory;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
@@ -40,17 +49,25 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
+import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 public class FullDocPost extends AbstractJavaWebScript {
+	protected String fullDocGenDir;	//dir containing full doc generation resources (prerenderer.io, phantomJS, wkhtmltopdf)
+	protected String phantomJSPath;
+	protected String phantomJSScriptPath;
 	protected String fullDocDir;
 	protected String fullDocId;
-	protected String parentPath;
 	protected String htmlPath;
+	protected String imgPath;
+	protected Path imageDirName;
+	protected String parentPath;
 	protected String pdfPath;
+	protected String veCssDir;
 	protected String zipPath;
 	
 	public void setFullDocId(String id){
@@ -64,11 +81,22 @@ public class FullDocPost extends AbstractJavaWebScript {
 	}
 	
 	private void setPaths(){
-		this.parentPath = Paths.get(this.fullDocDir).getParent().toString();
-		this.htmlPath = Paths.get(TempFileProvider.getTempDir().getAbsolutePath(), fullDocId, String.format("%s_NodeJS.html", fullDocId)).toString();
-		this.pdfPath = Paths.get(TempFileProvider.getTempDir().getAbsolutePath(), fullDocId, String.format("%s_NodeJS.pdf", fullDocId)).toString();
-		this.zipPath = String.format("%s/%s.zip", this.parentPath, this.fullDocId);
-	}
+        this.parentPath = Paths.get(this.fullDocDir).getParent().toString();
+        String tmpDirName    = TempFileProvider.getTempDir().getAbsolutePath();
+        this.htmlPath = Paths.get(tmpDirName, fullDocId, String.format("%s_NodeJS.html", fullDocId)).toString();
+        this.pdfPath = Paths.get(tmpDirName, fullDocId, String.format("%s_NodeJS.pdf", fullDocId)).toString();
+        this.veCssDir = "/opt/local/apache-tomcat/webapps/alfresco/mmsapp/css";
+        this.zipPath = String.format("%s/%s.zip", this.parentPath, this.fullDocId);
+        this.imgPath = Paths.get(tmpDirName,fullDocId).toString();
+        this.imageDirName = Paths.get(imgPath.toString(), "images");
+        this.phantomJSPath = "/opt/local/fullDocGen/prerender/node_modules/phantomjs/bin/phantomjs";
+        this.phantomJSScriptPath = "/opt/local/fullDocGen/fullDoc.js";
+        this.fullDocGenDir = "/opt/local/fullDocGen/";
+        
+        try{
+        	new File(this.imgPath).mkdirs();
+        }catch(Exception ex){;}
+    }
 	
 	public String getHtmlPath(){
 		return this.htmlPath;
@@ -118,30 +146,38 @@ public class FullDocPost extends AbstractJavaWebScript {
         return model;
     }
     
+    private String getAlfrescoHost(){
+    	HostnameGet alfresco = new HostnameGet(this.repository, this.services);
+    	String hostname = alfresco.getAlfrescoHost();
+    	if(hostname.compareToIgnoreCase("localhost")==0){
+    		hostname += ":9000";
+    	}
+    	return hostname;
+    }
+    
     public void downloadHtml(WorkspaceNode workspace, String site, String docId, Date time) throws Exception {
-    	ProcessBuilder processBuilder = new ProcessBuilder();
-		processBuilder.directory(new File("/Users/lho/git/phantomjs-2.0.0-macosx/examples/"));	//to do : need to config
+    	RuntimeExec exec = new RuntimeExec();
+		//exec.setProcessDirectory("/opt/local/prerender/node_modules/phantomjs/bin/");	//to do : need to config
 		HostnameGet alfresco = new HostnameGet(this.repository, this.services);
 		String protocol = alfresco.getAlfrescoProtocol();
 		String hostname = alfresco.getAlfrescoHost();
-		int alfrescoPort = 9000;	//to do: need to config
-		String preRendererUrl = "http://localhost";	//to do: need to config
+		String hostnameAndPort = this.getAlfrescoHost();
+		String preRendererUrl = String.format("%s:%s", protocol, hostname);	// "http://localhost";	//to do: need to config
 		int preRendererPort = 3000;	// to do: need to config
 		String mmsAdminCredential = getHeadlessUserCredential();
 		DateTimeFormatter fmt = ISODateTimeFormat.dateTime();
 		List<String> command = new ArrayList<String>();
-		command.add("/Users/lho/git/phantomjs-2.0.0-macosx/bin/phantomjs");
-		command.add("fullDoc.js");
-		command.add(String.format("%s:%d/%s://%s@%s:%d/mmsFullDoc.html?ws=%s&site=%s&docId=%s&time=%s",
-				preRendererUrl,preRendererPort, protocol, mmsAdminCredential, hostname,alfrescoPort, workspace.getName(), site, docId, fmt.print(new DateTime(time))));
+		command.add(this.phantomJSPath);
+		command.add(this.phantomJSScriptPath);
+		command.add(String.format("%s:%d/%s://%s@%s/mmsFullDoc.html?ws=%s&site=%s&docId=%s&time=%s",
+				preRendererUrl,preRendererPort, protocol, mmsAdminCredential, hostnameAndPort, workspace.getName(), site, docId, fmt.print(new DateTime(time))));
 		command.add(String.format("%s/%s_NodeJS.html", this.fullDocDir, this.fullDocId));
-		processBuilder.command(command);
-		System.out.println("phantomJS command: " + processBuilder.command());
-		Process process = processBuilder.start();
-		int exitCode = process.waitFor();
-		if(exitCode != 0){
+		exec.setCommand(list2Array(command));
+		System.out.println("NodeJS command: " + command);
+		ExecutionResult result = exec.execute();
+		if (!result.getSuccess()) {
 			System.out.println("failed to download full doc HTML!");
-			System.out.println("exit code: " + exitCode);
+			System.out.println("exit code: " + result.getExitValue());
 		}
 		
 		//parse HTML
@@ -150,25 +186,70 @@ public class FullDocPost extends AbstractJavaWebScript {
 			//retrieve image from Repo
 			//save image to local Filesystem
 			//update SRC attr to local filesystem path
-//		retrieveImages(this.getHtmlPath(), services, workspace, time);
-		try{
+//		 
+		File imgSrcFile = new File(this.getHtmlPath());
+        retrieveImages(imgSrcFile, this.getServices(), workspace, time);    
+		
+        try{
 			tableToCSV();
 		}
 		catch(Exception ex){
 			throw new Exception("Failed to convert tables to CSV files!", ex);
 		}
+        FileUtils.copyDirectory(new File(this.veCssDir), new File(Paths.get(this.fullDocDir, "css").toString()));
+    }
+    
+    private List<String> findImages(File htmlFile) throws Exception{
+        List<String> images = new ArrayList<String>();
+        try{
+            Document document = Jsoup.parse(htmlFile, "UTF-8", "http://example.com");
+            if(document == null) throw new Exception("Failed to read HTML file. Unabled to load file: " + this.getHtmlPath());
+            
+            for(Element img:document.select("img")){
+                Elements elements = img.select("src");
+                for(Element imgSrc : elements){
+                    String srcAddress = imgSrc.attr("src");
+                    System.out.println(srcAddress);
+                    images.add(srcAddress);
+                    
+                }
+            }
+        }
+        catch(Exception ex){
+            ex.printStackTrace();
+            throw new Exception("Failed to find Images!", ex);
+        }
+        return images;
     }
     
     private String getHeadlessUserCredential(){
     	String cred = "admin:admin";
-    	String filePath = "../../amp/config/alfresco/module/view-repo/context/mms-init-service-context.xml";
+    	String usr = null;
+    	String psswrd = null;
+    	String filePath = Paths.get("/opt/local/apache-tomcat/webapps/alfresco/WEB-INF/classes/alfresco/module/view-repo/context/mms-init-service-context.xml").toAbsolutePath().normalize().toString();
+    	
     	try{
-    		org.w3c.dom.Document xml = XMLUtil.parse(new File(filePath));
-    		NodeList list = xml.getElementsByTagName("property[value='gov.nasa.jpl.view_repo.webscripts.util.ShareUtils.setUsername']");
-    		String usr = list.item(0).getNextSibling().getAttributes().getNamedItem("value").getNodeValue();
-    		list = xml.getElementsByTagName("property[value='gov.nasa.jpl.view_repo.webscripts.util.ShareUtils.setPassword']");
-    		String psswrd= list.item(0).getNextSibling().getAttributes().getNamedItem("value").getNodeValue();
-    		cred = String.format("%s:%s", usr, psswrd);
+    		File fXmlFile = new File(filePath);
+    		DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+    		DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
+    		org.w3c.dom.Document xml = dBuilder.parse(fXmlFile);
+    		
+    		NodeList list = xml.getElementsByTagName("property");
+    		for(int i=list.getLength()-1; i>=0; i--)
+    		{
+    			Node node = list.item(i);
+    			if(node.hasAttributes()){
+    				Node value = node.getAttributes().getNamedItem("value");
+    				if(value == null) continue;
+    				if(value.getNodeValue().compareToIgnoreCase("gov.nasa.jpl.view_repo.webscripts.util.ShareUtils.setUsername")==0){
+    					usr = node.getNextSibling().getNextSibling().getAttributes().getNamedItem("value").getNodeValue();
+    				}
+    				else if(value.getNodeValue().compareToIgnoreCase("gov.nasa.jpl.view_repo.webscripts.util.ShareUtils.setPassword")==0){
+    					psswrd = node.getNextSibling().getNextSibling().getAttributes().getNamedItem("value").getNodeValue();
+    				}
+    			}
+    			if(usr!=null && psswrd!=null) return String.format("%s:%s", usr, psswrd);
+    		}
     	}
     	catch(Exception ex){
     		System.out.println(String.format("problem retrieving headless credential. %s", ex.getMessage()));
@@ -184,53 +265,28 @@ public class FullDocPost extends AbstractJavaWebScript {
 		return document.body().text();
 	}
     
-//    private void retrieveImages(File srcFile, ServiceRegistry services, WorkspaceNode workspace, Date timestamp){
-//		DocBookContentTransformer dbTransf = new DocBookContentTransformer();
-//		//can't use dbTransf.findImages() because it's basing off docbook.xml file and syntax
-//		//need to replace the function with one that extract images file name from HTML file.
-//		for (String img: dbTransf.findImages(srcFile))
-//		{
-//			String imgFilename = this.getDBDirImage() + File.separator + img;
-//			File imgFile = new File(imgFilename);
-//			if (!imgFile.exists())
-//			{
-//				//System.out.println("finding image: " + imgFilename);
-//				NodeRef nr = NodeUtil.findNodeRefById(img, false, workspace, timestamp, services, false);
-//
-//				ContentReader imgReader;
-//				//System.out.println("retrieving image file...");
-//				imgReader = services.getContentService().getReader(nr, ContentModel.PROP_CONTENT);
-//				//System.out.println("saving image file...");
-//				if(!Files.exists(this.imageDirName)){
-//					if(!new File(this.imageDirName.toString()).mkdirs()){
-//						System.out.println("Failed to create directory for " + this.imageDirName);
-//					}
-//				}
-//				imgReader.getContent(imgFile);
-//			}
-//		}
-//	}
-
+    private String getImgPath(){
+    	return this.imgPath;
+    }
     
     public void html2pdf()  throws IOException, InterruptedException {
-    	ProcessBuilder processBuilder = new ProcessBuilder();
-		processBuilder.directory(new File("/Users/lho/git/phantomjs-2.0.0-macosx/examples/target/"));
+    	RuntimeExec exec = new RuntimeExec();
+		exec.setProcessDirectory(this.fullDocGenDir);
 
 		List<String> command = new ArrayList<String>();
 		command.add("wkhtmltopdf");
 		command.add("-q");
 		command.add("toc");
-		command.add("xsl/default.xsl");
+		command.add("wkhtmltopdf/xsl/default.xsl");
 		command.add(this.getHtmlPath());
 		command.add(this.getPdfPath());
 
-		processBuilder.command(command);
-		System.out.println("htmltopdf command: " + processBuilder.command());
-		Process process = processBuilder.start();
-		int exitCode = process.waitFor();
-		if(exitCode != 0 && exitCode != 1){
+		System.out.println("htmltopdf command: " + command);
+		exec.setCommand(list2Array(command));
+		ExecutionResult result = exec.execute();
+		if(!result.getSuccess()){
 			System.out.println("failed to convert HTML to PDF!");
-			System.out.println("exit code: " + exitCode);
+			System.out.println("exit code: " + result.getExitValue());
 		}	
     }
 
@@ -243,6 +299,40 @@ public class FullDocPost extends AbstractJavaWebScript {
 		return Arrays.copyOf(list.toArray(), list.toArray().length, String[].class);
 	}
     
+	private void retrieveImages(File srcFile, ServiceRegistry services, WorkspaceNode workspace, Date timestamp) throws Exception{
+//      DocBookContentTransformer dbTransf = new DocBookContentTransformer();
+      //can't use dbTransf.findImages() because it's basing off docbook.xml file and syntax
+      //need to replace the function with one that extract images file name from HTML file.
+      try{
+          List<String> imgs = this.findImages(srcFile);
+          for (String img: imgs)
+          {
+              String imgFilename = this.getImgPath() + File.separator + img;
+              File imgFile = new File(imgFilename);
+              if (!imgFile.exists())
+              {
+                  System.out.println("finding image: " + imgFilename);
+                  NodeRef nr = NodeUtil.findNodeRefById(img, false, workspace, timestamp, services, false);
+  
+                  ContentReader imgReader;
+                  System.out.println("retrieving image file...");
+                  imgReader = services.getContentService().getReader(nr, ContentModel.PROP_CONTENT);
+                  System.out.println("saving image file...");
+                  if(!Files.exists(this.imageDirName)){
+                      if(!new File(this.imageDirName.toString()).mkdirs()){
+                          System.out.println("Failed to create directory for " + this.imageDirName);
+                      }
+                  }
+                  imgReader.getContent(imgFile);
+              }
+          }
+      }
+      catch(Exception ex){
+          ex.printStackTrace();
+          throw new Exception("Failed to find Images!", ex);
+      }
+  }
+	
     public void savePdfToRepo(EmsScriptNode snapshotFolder, EmsScriptNode snapshotNode) throws Exception{
 //		ServiceRegistry services = this.snapshotNode.getServices();
     	String filename = String.format("%s.pdf", this.fullDocId);

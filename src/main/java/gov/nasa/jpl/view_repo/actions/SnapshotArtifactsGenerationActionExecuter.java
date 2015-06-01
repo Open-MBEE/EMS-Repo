@@ -229,18 +229,19 @@ public class SnapshotArtifactsGenerationActionExecuter  extends ActionExecuterAb
 //				response.append(String.format("[ERROR]: Failed to generate zip artifact for snapshot Id: %s.\n%s\n%s\n", snapshotId, ex.getMessage(), ex.getStackTrace()));
 //			}
 //			
-//			if(snapshotNode != null) snapshot = populateSnapshotProperties(snapshotNode, timestamp, workspace);
+			if(snapshotNode != null) snapshot = populateSnapshotProperties(snapshotNode, timestamp, workspace);
 ////	        	}
 //	        	
     		if (status.getCode() != HttpServletResponse.SC_OK) {
             	jobStatus = "Failed";
             	response.append(String.format("[ERROR]: could not make snapshot for %s.\n", snapshotId));
         	} 
-        		else {
+    		else {
             	response.append(String.format("[INFO]: Successfully generated artifact(s) for snapshot: %s.\n", snapshotId));
         	}
         	response.append("Snapshot JSON:\n");
-        	response.append(NodeUtil.jsonToString( snapshot ));
+//        	response.append(NodeUtil.jsonToString( snapshot ));
+        	response.append(snapshot);
         	response.append("\n\n");
 //	        }
 	        // Send off notification email
