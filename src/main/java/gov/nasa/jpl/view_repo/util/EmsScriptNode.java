@@ -1832,18 +1832,18 @@ public class EmsScriptNode extends ScriptNode implements
         return result;
     }
 
-    
     /**
      * Last modified time of a node is the greatest of its last modified or any of its
      * embedded value specs.
      * @param dateTime Time to check against
      * @return
      */
-    public Date getLastModified( Date dateTime ) {
+    public Pair<Date,String> getLastModifiedAndModifier( Date dateTime ) {
         Set< NodeRef > dependentNodes = new HashSet< NodeRef >();
 
         Date lastModifiedDate = (Date)getProperty( Acm.ACM_LAST_MODIFIED );
-
+        String lastModifier = (String)getProperty( "cm:modifier" );
+        
         // WARNING! TODO -- It should be okay to not pass in the workspace
         // context assuming that a Property is the parent of its value. If a
         // Property's name changes, pointing to the parent workspace for the
@@ -1860,13 +1860,27 @@ public class EmsScriptNode extends ScriptNode implements
             if ( nodeRef == null ) continue;
             EmsScriptNode oNode = new EmsScriptNode( nodeRef, services );
             if ( !oNode.exists() ) continue;
-            Date modified = oNode.getLastModified( dateTime );
+            Pair<Date,String> pair = oNode.getLastModifiedAndModifier( dateTime );
+            Date modified = pair.first;
+            String modifier = pair.second;
             if ( modified.after( lastModifiedDate ) ) {
                 lastModifiedDate = modified;
+                lastModifier = modifier;
             }
         }
-        return lastModifiedDate;
+        return new Pair<Date,String>(lastModifiedDate, lastModifier);
     }
+    
+    /**
+     * Last modified time of a node is the greatest of its last modified or any of its
+     * embedded value specs.
+     * @param dateTime Time to check against
+     * @return
+     */
+    public Date getLastModified( Date dateTime ) {
+        Pair<Date,String> pair = this.getLastModifiedAndModifier( dateTime );
+        return pair != null ? pair.first : null;
+    }  
     
     /**
      * Get the properties of this node
@@ -2323,9 +2337,11 @@ public class EmsScriptNode extends ScriptNode implements
         EmsScriptNode originalNode = this.getOriginalNode();
         elementJson.put( "creator", originalNode.getProperty( "cm:creator" ) );
         elementJson.put( "created", originalNode.getProperty( "cm:created" ) );
-        elementJson.put( "modifier", this.getProperty( "cm:modifier" ) );
-        elementJson.put( Acm.JSON_LAST_MODIFIED,
-                TimeUtils.toTimestamp( this.getLastModified( dateTime) ) );
+        Pair<Date,String> pair = this.getLastModifiedAndModifier( dateTime );
+        if (pair != null) {
+            elementJson.put( "modifier", pair.second );
+            elementJson.put( Acm.JSON_LAST_MODIFIED, TimeUtils.toTimestamp( pair.first ) );
+        }
 
         putInJson( elementJson, Acm.JSON_NAME,
                    this.getProperty( Acm.ACM_NAME ), filter );
