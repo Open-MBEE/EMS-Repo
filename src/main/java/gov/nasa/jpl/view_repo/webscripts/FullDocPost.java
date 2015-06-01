@@ -1,5 +1,6 @@
 package gov.nasa.jpl.view_repo.webscripts;
 
+import gov.nasa.jpl.docbook.model.DBImage;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
@@ -9,6 +10,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -27,6 +29,7 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.alfresco.model.ContentModel;
+import org.alfresco.repo.admin.SysAdminParams;
 import org.alfresco.repo.content.MimetypeMap;
 import org.alfresco.repo.model.Repository;
 import org.alfresco.service.ServiceRegistry;
@@ -41,6 +44,7 @@ import org.alfresco.util.exec.RuntimeExec.ExecutionResult;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.Level;
 import org.apache.lucene.store.Directory;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormatter;
@@ -70,42 +74,6 @@ public class FullDocPost extends AbstractJavaWebScript {
 	protected String veCssDir;
 	protected String zipPath;
 	
-	public void setFullDocId(String id){
-		this.fullDocId = id;
-		this.setFullDocDir();
-		this.setPaths();
-	}
-	
-	private void setFullDocDir(){
-		fullDocDir = Paths.get(TempFileProvider.getTempDir().getAbsolutePath(), fullDocId).toString();
-	}
-	
-	private void setPaths(){
-        this.parentPath = Paths.get(this.fullDocDir).getParent().toString();
-        String tmpDirName    = TempFileProvider.getTempDir().getAbsolutePath();
-        this.htmlPath = Paths.get(tmpDirName, fullDocId, String.format("%s_NodeJS.html", fullDocId)).toString();
-        this.pdfPath = Paths.get(tmpDirName, fullDocId, String.format("%s_NodeJS.pdf", fullDocId)).toString();
-        this.veCssDir = "/opt/local/apache-tomcat/webapps/alfresco/mmsapp/css";
-        this.zipPath = String.format("%s/%s.zip", this.parentPath, this.fullDocId);
-        this.imgPath = Paths.get(tmpDirName,fullDocId).toString();
-        this.imageDirName = Paths.get(imgPath.toString(), "images");
-        this.phantomJSPath = "/opt/local/fullDocGen/prerender/node_modules/phantomjs/bin/phantomjs";
-        this.phantomJSScriptPath = "/opt/local/fullDocGen/fullDoc.js";
-        this.fullDocGenDir = "/opt/local/fullDocGen/";
-        
-        try{
-        	new File(this.imgPath).mkdirs();
-        }catch(Exception ex){;}
-    }
-	
-	public String getHtmlPath(){
-		return this.htmlPath;
-	}
-	
-	public String getPdfPath(){
-		return this.pdfPath;
-	}
-	
 	public FullDocPost(){
 		super();
 	}
@@ -113,7 +81,7 @@ public class FullDocPost extends AbstractJavaWebScript {
 	public FullDocPost(Repository repositoryHelper, ServiceRegistry registry) {
         super(repositoryHelper, registry);
     }
-	
+
     @Override
     protected Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
     	FullDocPost instance = new FullDocPost(repository, getServices());
@@ -146,15 +114,11 @@ public class FullDocPost extends AbstractJavaWebScript {
         return model;
     }
     
-    private String getAlfrescoHost(){
-    	HostnameGet alfresco = new HostnameGet(this.repository, this.services);
-    	String hostname = alfresco.getAlfrescoHost();
-    	if(hostname.compareToIgnoreCase("localhost")==0){
-    		hostname += ":9000";
-    	}
-    	return hostname;
+    @Override
+    protected boolean validateRequest(WebScriptRequest req, Status status) {
+        return false;
     }
-    
+
     public void downloadHtml(WorkspaceNode workspace, String site, String docId, Date time) throws Exception {
     	RuntimeExec exec = new RuntimeExec();
 		//exec.setProcessDirectory("/opt/local/prerender/node_modules/phantomjs/bin/");	//to do : need to config
@@ -197,6 +161,13 @@ public class FullDocPost extends AbstractJavaWebScript {
 			throw new Exception("Failed to convert tables to CSV files!", ex);
 		}
         FileUtils.copyDirectory(new File(this.veCssDir), new File(Paths.get(this.fullDocDir, "css").toString()));
+        
+        try{
+        	handleEmbeddedImage();
+        }
+        catch(Exception ex){
+        	throw ex;
+        }
     }
     
     private List<String> findImages(File htmlFile) throws Exception{
@@ -221,6 +192,26 @@ public class FullDocPost extends AbstractJavaWebScript {
         }
         return images;
     }
+
+    private String getAlfrescoHost(){
+    	HostnameGet alfresco = new HostnameGet(this.repository, this.services);
+    	String hostname = alfresco.getAlfrescoHost();
+    	if(hostname.compareToIgnoreCase("localhost")==0){
+    		hostname += ":9000";
+    	}
+    	return hostname;
+    }
+
+    private String getHostname(){
+        	SysAdminParams sysAdminParams = this.services.getSysAdminParams();
+        	String hostname = sysAdminParams.getAlfrescoHost();
+        	if(hostname.startsWith("ip-128-149")) hostname = "localhost";
+        	return String.format("%s://%s", sysAdminParams.getAlfrescoProtocol(), hostname);
+    }
+
+	public String getHtmlPath(){
+		return this.htmlPath;
+	}
     
     private String getHeadlessUserCredential(){
     	String cred = "admin:admin";
@@ -269,6 +260,96 @@ public class FullDocPost extends AbstractJavaWebScript {
     	return this.imgPath;
     }
     
+	public String getPdfPath(){
+		return this.pdfPath;
+	}
+    
+    public void handleEmbeddedImage() throws Exception
+    {
+    	if(!Files.exists(Paths.get(this.htmlPath))) return;
+
+    	File htmlFile = new File(this.htmlPath);
+    	Document document = Jsoup.parse(htmlFile, "UTF-8", "");
+    	if(document == null) return;
+
+    	Elements images = document.getElementsByTag("img");
+
+    	for(Element image : images){
+    		String src = image.attr("src");
+    		if(src == null) continue;
+    		try{
+    			URL url = null;
+    			if(!src.toLowerCase().startsWith("http")){
+    				//relative URL; needs to prepend URL protocol
+    				String protocol = new HostnameGet(this.repository, this.services).getAlfrescoProtocol();
+//    				System.out.println(protocol + "://" + src);
+    				src = src.replaceAll("\\.\\./", "");
+//    				System.out.println("src: " + src);
+    				url = new URL(String.format("%s://%s", protocol, src));
+    			}
+    			else{
+	            	url = new URL(src);
+    			}
+    			
+    			String hostname = getHostname();
+                try{
+                	src = src.toLowerCase();
+                	String embedHostname = String.format("%s://%s", url.getProtocol(), url.getHost());
+                	String alfrescoContext = "workspace/SpacesStore/";	//this.services.getSysAdminParams().getAlfrescoContext();
+
+                	// is image local or remote resource?
+                	if(embedHostname.compareToIgnoreCase(hostname)==0 || src.startsWith("/alfresco/") || src.contains(alfrescoContext.toLowerCase())){
+                		//local server image > generate image tags
+                		String filePath = url.getFile();
+                		if(filePath == null || filePath.isEmpty()) continue;
+
+                		String nodeId = null;
+                		if(filePath.contains(alfrescoContext)){
+                			//filePath = "alfresco/d/d/" + filePath.substring(filePath.indexOf(alfrescoContext));
+                			nodeId = filePath.substring(filePath.indexOf(alfrescoContext) + alfrescoContext.length());
+                			nodeId = nodeId.substring(0, nodeId.indexOf("/"));
+                		}
+                		if(nodeId == null || nodeId.isEmpty()) continue;
+
+                		String filename = filePath.substring(filePath.lastIndexOf("/") + 1);
+                		try{
+                			DBImage dbImage = retrieveEmbeddedImage(nodeId, filename, null, null);
+//	                		String inlineImageTag = buildInlineImageTag(nodeId, dbImage);
+//	                		image.before(inlineImageTag);
+//	                		image.remove();
+            				image.attr("src", dbImage.getFilePath());
+                		}
+                		catch(Exception ex){
+                			//in case it's not a local resource > generate hyperlink instead
+//                			image.before(String.format(" <ulink xl:href=\"%s\"><![CDATA[%s]]></ulink> ", src, url.getFile()));
+//                    		image.remove();
+                		}
+                	}
+                	else{	//remote resource > generate a hyperlink
+//                		image.before(String.format(" <ulink xl:href=\"%s\"><![CDATA[%s]]></ulink> ", src, url.getFile()));
+//                		image.remove();
+                	}
+                }
+                catch(Exception ex){
+                	log(Level.WARN, "Failed to retrieve embedded image at %s. %s", src, ex.getMessage());
+                	ex.printStackTrace();
+                }
+			}
+
+            catch(Exception ex){
+            	log(Level.WARN, "Failed to process embedded image at %s. %s", src, ex.getMessage());
+            	ex.printStackTrace();
+            }
+    	}
+    	try{
+    		FileUtils.writeStringToFile(htmlFile, document.outerHtml(), "UTF-8"); //document.body().html().toString();
+    	}
+    	catch(Exception ex){
+    		log(Level.ERROR, "Failed to save modified HTML %s. %s", this.htmlPath, ex.getMessage());
+        	ex.printStackTrace();
+    	}
+    }
+    
     public void html2pdf()  throws IOException, InterruptedException {
     	RuntimeExec exec = new RuntimeExec();
 		exec.setProcessDirectory(this.fullDocGenDir);
@@ -299,6 +380,27 @@ public class FullDocPost extends AbstractJavaWebScript {
 		return Arrays.copyOf(list.toArray(), list.toArray().length, String[].class);
 	}
     
+    private DBImage retrieveEmbeddedImage(String nodeId, String imgName, WorkspaceNode workspace, Object timestamp){
+		NodeRef imgNodeRef = NodeUtil.getNodeRefFromNodeId(nodeId);
+		if(imgNodeRef == null) return null;
+
+		String imgFilename = this.imageDirName + File.separator + imgName;
+		File imgFile = new File(imgFilename);
+		ContentReader imgReader;
+		imgReader = this.services.getContentService().getReader(imgNodeRef, ContentModel.PROP_CONTENT);
+		if(!Files.exists(this.imageDirName)){
+			if(!new File(this.imageDirName.toString()).mkdirs()){
+				System.out.println("Failed to create directory for " + this.imageDirName);
+			}
+		}
+		imgReader.getContent(imgFile);
+
+		DBImage image = new DBImage();
+		image.setId(nodeId);
+		image.setFilePath("images/" + imgName);
+		return image;
+    }
+
 	private void retrieveImages(File srcFile, ServiceRegistry services, WorkspaceNode workspace, Date timestamp) throws Exception{
 //      DocBookContentTransformer dbTransf = new DocBookContentTransformer();
       //can't use dbTransf.findImages() because it's basing off docbook.xml file and syntax
@@ -438,6 +540,34 @@ public class FullDocPost extends AbstractJavaWebScript {
 		}
 	}
 	
+	private void setFullDocDir(){
+		fullDocDir = Paths.get(TempFileProvider.getTempDir().getAbsolutePath(), fullDocId).toString();
+	}
+	
+	public void setFullDocId(String id){
+		this.fullDocId = id;
+		this.setFullDocDir();
+		this.setPaths();
+	}
+
+	private void setPaths(){
+        this.parentPath = Paths.get(this.fullDocDir).getParent().toString();
+        String tmpDirName    = TempFileProvider.getTempDir().getAbsolutePath();
+        this.htmlPath = Paths.get(tmpDirName, fullDocId, String.format("%s_NodeJS.html", fullDocId)).toString();
+        this.pdfPath = Paths.get(tmpDirName, fullDocId, String.format("%s_NodeJS.pdf", fullDocId)).toString();
+        this.veCssDir = "/opt/local/apache-tomcat/webapps/alfresco/mmsapp/css";
+        this.zipPath = String.format("%s/%s.zip", this.parentPath, this.fullDocId);
+        this.imgPath = Paths.get(tmpDirName,fullDocId).toString();
+        this.imageDirName = Paths.get(imgPath.toString(), "images");
+        this.phantomJSPath = "/opt/local/fullDocGen/prerender/node_modules/phantomjs/bin/phantomjs";
+        this.phantomJSScriptPath = "/opt/local/fullDocGen/fullDoc.js";
+        this.fullDocGenDir = "/opt/local/fullDocGen/";
+        
+        try{
+        	new File(this.imgPath).mkdirs();
+        }catch(Exception ex){;}
+    }
+
     private void tableToCSV() throws Exception{
 		File input = new File(this.getHtmlPath());
 		try {
@@ -580,11 +710,6 @@ public class FullDocPost extends AbstractJavaWebScript {
 			throw new Exception("Failed to save table-CSV to file system!");
 		}
 	}
-    
-    @Override
-    protected boolean validateRequest(WebScriptRequest req, Status status) {
-        return false;
-    }
 
     public void zipHtml() throws IOException, InterruptedException {
 //		ProcessBuilder processBuilder = new ProcessBuilder();
