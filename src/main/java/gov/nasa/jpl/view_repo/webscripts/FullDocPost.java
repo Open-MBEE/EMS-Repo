@@ -52,6 +52,7 @@ import org.joda.time.format.ISODateTimeFormat;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
+import org.jsoup.parser.Tag;
 import org.jsoup.select.Elements;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.extensions.webscripts.Cache;
@@ -93,24 +94,7 @@ public class FullDocPost extends AbstractJavaWebScript {
                                                  Status status, Cache cache ) {
         printHeader( req );
         Map< String, Object > model = new HashMap< String, Object >();
-//        JSONObject snapshotJson = (JSONObject)req.parseContent();
-//        JSONObject json = snapshotJson.getJSONObject("snapshot");
-//        String ws = json.optString("ws");
-//        String docId = json.optString("sysmlid");
-//        String time = json.optString("time");
-//        String site = json.optString("site");
-//        fullDocId = docId;
-////        fullDocDir = Paths.get(TempFileProvider.getTempDir().getAbsolutePath(), fullDocId).toString();
-//        this.setFullDocDir();
-//        this.setPaths();
-//        try{
-//        	downloadHtml(ws, site, docId, time);
-//        	html2pdf();
-//        }
-//        catch(Exception ex){
-//        	
-//        }
-        model.put("res", "testing");
+        model.put("res", "fullDocGen");
         return model;
     }
     
@@ -140,19 +124,10 @@ public class FullDocPost extends AbstractJavaWebScript {
 		System.out.println("NodeJS command: " + command);
 		ExecutionResult result = exec.execute();
 		if (!result.getSuccess()) {
-			System.out.println("failed to download full doc HTML!");
-			System.out.println("exit code: " + result.getExitValue());
+			String msg = String.format("Failed to download full doc HTML for %s. Exit code: %d", this.fullDocId, result.getExitValue());
+			log(Level.ERROR, msg);
+			throw new Exception(msg);
 		}
-		
-		//parse HTML
-		//for each IMG tag
-			//get SRC attr
-			//retrieve image from Repo
-			//save image to local Filesystem
-			//update SRC attr to local filesystem path
-//		 
-		File imgSrcFile = new File(this.getHtmlPath());
-        retrieveImages(imgSrcFile, this.getServices(), workspace, time);    
 		
         try{
 			tableToCSV();
@@ -160,10 +135,11 @@ public class FullDocPost extends AbstractJavaWebScript {
 		catch(Exception ex){
 			throw new Exception("Failed to convert tables to CSV files!", ex);
 		}
-        FileUtils.copyDirectory(new File(this.veCssDir), new File(Paths.get(this.fullDocDir, "css").toString()));
         
         try{
+            FileUtils.copyDirectory(new File(this.veCssDir), new File(Paths.get(this.fullDocDir, "css").toString()));
         	handleEmbeddedImage();
+        	handleRelativeHyperlinks();
         }
         catch(Exception ex){
         	throw ex;
@@ -342,7 +318,7 @@ public class FullDocPost extends AbstractJavaWebScript {
             }
     	}
     	try{
-    		FileUtils.writeStringToFile(htmlFile, document.outerHtml(), "UTF-8"); //document.body().html().toString();
+    		FileUtils.writeStringToFile(htmlFile, document.outerHtml(), "UTF-8");
     	}
     	catch(Exception ex){
     		log(Level.ERROR, "Failed to save modified HTML %s. %s", this.htmlPath, ex.getMessage());
@@ -350,7 +326,51 @@ public class FullDocPost extends AbstractJavaWebScript {
     	}
     }
     
-    public void html2pdf()  throws IOException, InterruptedException {
+    protected void handleRelativeHyperlinks() throws Exception{
+    	if(!Files.exists(Paths.get(this.htmlPath))) return;
+
+    	File htmlFile = new File(this.htmlPath);
+    	
+    	Document document;
+    	try{
+    		document = Jsoup.parse(htmlFile, "UTF-8", "");
+    	}
+    	catch(Exception ex){
+    		log(Level.ERROR, "Failed to load HTML file '%s' to handle relative hyperlinks. %s", this.htmlPath, ex.getMessage());
+        	throw ex;
+    	}
+    	
+    	if(document == null) return;
+    	
+    	Elements links = document.getElementsByTag("a");
+    	for(Element elem:links){
+			String href = elem.attr("href").toLowerCase();
+			if(!href.startsWith("http")){
+				HostnameGet hng = new HostnameGet(this.repository, this.services);
+				String hostname = hng.getAlfrescoUrl();
+				String alfrescoUrl = hostname + "/alfresco";
+				
+				if(href.startsWith("service")) href = href.replace("service", alfrescoUrl + "/service");
+				else if(href.startsWith("ve.html#") ||
+						href.startsWith("mms.html#") ||
+						href.startsWith("docweb.html#")){ 
+					href = String.format("%s/%s", alfrescoUrl, href);
+				}
+				else if(href.startsWith("share")) href = href.replace("share", hostname + "/share");
+				elem.attr("href", href);
+			}
+    	}
+
+    	try{
+    		FileUtils.writeStringToFile(htmlFile, document.outerHtml(), "UTF-8");
+    	}
+    	catch(Exception ex){
+    		log(Level.ERROR, "Failed to save HTML file '%s' after handling relative hyperlinks. %s", this.htmlPath, ex.getMessage());
+        	throw ex;
+    	}
+    }
+    
+    public void html2pdf()  throws Exception {
     	RuntimeExec exec = new RuntimeExec();
 		exec.setProcessDirectory(this.fullDocGenDir);
 
@@ -365,9 +385,10 @@ public class FullDocPost extends AbstractJavaWebScript {
 		System.out.println("htmltopdf command: " + command);
 		exec.setCommand(list2Array(command));
 		ExecutionResult result = exec.execute();
-		if(!result.getSuccess()){
-			System.out.println("failed to convert HTML to PDF!");
-			System.out.println("exit code: " + result.getExitValue());
+		if(!result.getSuccess() && result.getExitValue()!=1){
+			String msg = String.format("Failed to transform HTML file '%s' to PDF. Exit value: %d", this.htmlPath, result.getExitValue());
+			log(Level.ERROR, msg);
+			throw new Exception(msg);
 		}	
     }
 
@@ -401,41 +422,7 @@ public class FullDocPost extends AbstractJavaWebScript {
 		return image;
     }
 
-	private void retrieveImages(File srcFile, ServiceRegistry services, WorkspaceNode workspace, Date timestamp) throws Exception{
-//      DocBookContentTransformer dbTransf = new DocBookContentTransformer();
-      //can't use dbTransf.findImages() because it's basing off docbook.xml file and syntax
-      //need to replace the function with one that extract images file name from HTML file.
-      try{
-          List<String> imgs = this.findImages(srcFile);
-          for (String img: imgs)
-          {
-              String imgFilename = this.getImgPath() + File.separator + img;
-              File imgFile = new File(imgFilename);
-              if (!imgFile.exists())
-              {
-                  System.out.println("finding image: " + imgFilename);
-                  NodeRef nr = NodeUtil.findNodeRefById(img, false, workspace, timestamp, services, false);
-  
-                  ContentReader imgReader;
-                  System.out.println("retrieving image file...");
-                  imgReader = services.getContentService().getReader(nr, ContentModel.PROP_CONTENT);
-                  System.out.println("saving image file...");
-                  if(!Files.exists(this.imageDirName)){
-                      if(!new File(this.imageDirName.toString()).mkdirs()){
-                          System.out.println("Failed to create directory for " + this.imageDirName);
-                      }
-                  }
-                  imgReader.getContent(imgFile);
-              }
-          }
-      }
-      catch(Exception ex){
-          ex.printStackTrace();
-          throw new Exception("Failed to find Images!", ex);
-      }
-  }
-	
-    public void savePdfToRepo(EmsScriptNode snapshotFolder, EmsScriptNode snapshotNode) throws Exception{
+	public void savePdfToRepo(EmsScriptNode snapshotFolder, EmsScriptNode snapshotNode) throws Exception{
 //		ServiceRegistry services = this.snapshotNode.getServices();
     	String filename = String.format("%s.pdf", this.fullDocId);
 		try{
@@ -706,38 +693,14 @@ public class FullDocPost extends AbstractJavaWebScript {
 			writer.close();
 			fw.close();
 		} catch (IOException e) {
+			String msg = String.format("Failed to save table to CSV to file system for %s. %s", outputFile.getAbsoluteFile(), e.getMessage());
+			log(Level.ERROR, msg);
 			e.printStackTrace();
-			throw new Exception("Failed to save table-CSV to file system!");
+			throw new Exception(msg);
 		}
 	}
 
-    public void zipHtml() throws IOException, InterruptedException {
-//		ProcessBuilder processBuilder = new ProcessBuilder();
-//		processBuilder.directory(new File(Paths.get(this.fullDocDir).getParent().toString()));
-////		System.out.println("zip working directory: " + processBuilder.directory());
-//		List<String> command = new ArrayList<String>();
-//		String zipFile = this.fullDocId + ".zip";
-//		command.add("zip");
-//		command.add("-r");
-//		command.add(zipFile);
-//		//command.add("\"*.html\"");
-//		//command.add("\"*.css\"");
-//		command.add(this.fullDocId);
-//
-//		// not including docbook and pdf files
-//		//command.add("-x");
-//		//command.add("*.db");
-//		//command.add("*.pdf");
-//
-//		processBuilder.command(command);
-//		System.out.println("zip command: " + processBuilder.command());
-//		Process process = processBuilder.start();
-//		int exitCode = process.waitFor();
-//		if(exitCode != 0){
-//			System.out.println("zip failed!");
-//			System.out.println("exit code: " + exitCode);
-//		}
-    	
+    public void zipHtml() throws Exception {
 		RuntimeExec exec = new RuntimeExec();
 		exec.setProcessDirectory(Paths.get(this.fullDocDir).getParent().toString());
 		List<String> command = new ArrayList<String>();
@@ -749,7 +712,6 @@ public class FullDocPost extends AbstractJavaWebScript {
 		//command.add("\"*.css\"");
 		command.add(this.fullDocId);
 
-		// not including docbook and pdf files
 		//command.add("-x");
 		//command.add("*.db");
 		//command.add("*.pdf");
@@ -759,8 +721,9 @@ public class FullDocPost extends AbstractJavaWebScript {
 		ExecutionResult result = exec.execute();
 
 		if (!result.getSuccess()) {
-			System.out.println("zip failed!");
-			System.out.println("exit code: " + result.getExitValue());
+			String msg = String.format("Failed to zip document generation files for %s. Exit code: %d", this.fullDocId, result.getExitValue());
+			log(Level.ERROR, msg);
+			throw new Exception(msg);
 		}
 	}
 }
