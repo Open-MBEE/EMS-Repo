@@ -103,7 +103,7 @@ public class FullDocPost extends AbstractJavaWebScript {
         return false;
     }
 
-    public void downloadHtml(WorkspaceNode workspace, String site, String docId, Date time) throws Exception {
+    public void downloadHtml(String workspaceName, String site, String docId, String timestamp) throws Exception {
     	RuntimeExec exec = new RuntimeExec();
 		//exec.setProcessDirectory("/opt/local/prerender/node_modules/phantomjs/bin/");	//to do : need to config
 		HostnameGet alfresco = new HostnameGet(this.repository, this.services);
@@ -113,12 +113,12 @@ public class FullDocPost extends AbstractJavaWebScript {
 		String preRendererUrl = String.format("%s:%s", protocol, hostname);	// "http://localhost";	//to do: need to config
 		int preRendererPort = 3000;	// to do: need to config
 		String mmsAdminCredential = getHeadlessUserCredential();
-		DateTimeFormatter fmt = ISODateTimeFormat.dateTime();
+//		DateTimeFormatter fmt = ISODateTimeFormat.dateTime();
 		List<String> command = new ArrayList<String>();
 		command.add(this.phantomJSPath);
 		command.add(this.phantomJSScriptPath);
 		command.add(String.format("%s:%d/%s://%s@%s/mmsFullDoc.html?ws=%s&site=%s&docId=%s&time=%s",
-				preRendererUrl,preRendererPort, protocol, mmsAdminCredential, hostnameAndPort, workspace.getName(), site, docId, fmt.print(new DateTime(time))));
+				preRendererUrl,preRendererPort, protocol, mmsAdminCredential, hostnameAndPort, workspaceName, site, docId, timestamp));
 		command.add(String.format("%s/%s_NodeJS.html", this.fullDocDir, this.fullDocId));
 		exec.setCommand(list2Array(command));
 		System.out.println("NodeJS command: " + command);

@@ -54,6 +54,9 @@ public class SnapshotArtifactsGenerationActionExecuter  extends ActionExecuterAb
     public static final String PARAM_FORMAT_TYPE = "formatType";
     public static final String PARAM_USER_EMAIL = "userEmail";
     public static final String PARAM_WORKSPACE = "workspace";
+    public static final String PARAM_WORKSPACE_NAME = "workspaceName";
+    public static final String PARAM_TIME_STAMP = "timestamp";
+    
     
     public void setRepository(Repository rep) {
         repository = rep;
@@ -123,6 +126,8 @@ public class SnapshotArtifactsGenerationActionExecuter  extends ActionExecuterAb
         JSONObject snapshot = null;
         Date timestamp = null;
         WorkspaceNode workspace = (WorkspaceNode)action.getParameterValue(PARAM_WORKSPACE);
+        String workspaceName = action.getParameterValue(PARAM_WORKSPACE_NAME).toString();
+        String timestampVE = action.getParameterValue(PARAM_TIME_STAMP).toString();
         try{
         	
     	    // lets check whether or not docbook has been generated
@@ -138,7 +143,7 @@ public class SnapshotArtifactsGenerationActionExecuter  extends ActionExecuterAb
 			
 			snapshotNode = new EmsScriptNode(nodeRefs.get( 0 ), services, response);
     	    //if ( !snapshotNode.hasAspect( "view2:docbook" )) {
-	    	response.append("[INFO]: Creating docbook.xml...\n");
+//	    	response.append("[INFO]: Creating docbook.xml...\n");
             String snapshotName = snapshotNode.getSysmlId();
             timestamp = (Date)snapshotNode.getProperty("view2:timestamp");
 
@@ -161,7 +166,7 @@ public class SnapshotArtifactsGenerationActionExecuter  extends ActionExecuterAb
         	fullDoc.setFullDocId(snapshotId);
         	try{
         		
-        		fullDoc.downloadHtml(workspace, siteName, sysmlId, timestamp);
+        		fullDoc.downloadHtml(workspaceName, siteName, sysmlId, timestampVE);
         	}
         	catch(Exception ex){
         		status.setCode(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
