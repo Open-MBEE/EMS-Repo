@@ -435,47 +435,53 @@ public class NodeDiff extends AbstractDiff<NodeRef, Object, String> {
         
         NodeRef hasSameOwner = null;
         String hasSameOwnerId = null;
-        List<NodeRef> propValList = (List<NodeRef>)propVal;
+        List<?> propValList = (List<?>)propVal;
         
         // Loop through the property value noderef list and try to find
         // correlated node:
         for (int i = 0; i < propValList.size(); i++) {
-            NodeRef ref = propValList.get( i );
-            if (t1.equals( ref )) {
+            
+            Object obj = propValList.get( i );
+            if (obj instanceof NodeRef) {
+                NodeRef ref = (NodeRef)obj;
                 
-                // Go through all of the generated ids and look for matches:
-                for ( String addedId : generated ) {
-                    NodeRef t2 = get2( addedId );
+                if (t1.equals( ref )) {
                     
-                    if ( same( t1, t2 ) ) {
-                        Map< String, Object > props2 = getOwnerPropertyMap(t2, false);
+                    // Go through all of the generated ids and look for matches:
+                    for ( String addedId : generated ) {
+                        NodeRef t2 = get2( addedId );
                         
-                        for (Entry< String, Object > entry2 : props2.entrySet()) {
-                            // Same property name
-                            if (entry2.getKey().equals( propName )) {
-                                // This is a matching property for the value
-                                // in the list at the same index:
-                                List<NodeRef> propValList2 = (List<NodeRef>)entry2.getValue();
-                                if (propValList2.size() > i &&
-                                    t2.equals(propValList2.get( i ))) {
-                                    // REVIEW check anything else here? sysml name?
-                                    hasSameOwner = t2;
-                                    hasSameOwnerId = addedId;
-                                }
-                                break; // dont need to check any more properties
-                             }
+                        if ( same( t1, t2 ) ) {
+                            Map< String, Object > props2 = getOwnerPropertyMap(t2, false);
+                            
+                            for (Entry< String, Object > entry2 : props2.entrySet()) {
+                                // Same property name
+                                if (entry2.getKey().equals( propName )) {
+                                    // This is a matching property for the value
+                                    // in the list at the same index:
+                                    List<NodeRef> propValList2 = (List<NodeRef>)entry2.getValue();
+                                    if (propValList2.size() > i &&
+                                        t2.equals(propValList2.get( i ))) {
+                                        // REVIEW check anything else here? sysml name?
+                                        hasSameOwner = t2;
+                                        hasSameOwnerId = addedId;
+                                    }
+                                    break; // dont need to check any more properties
+                                 }
+                            }
                         }
-                    }
-                    
-                    // No need to look for multiple matches b/c it should not be
-                    // possible as we are checking for the same owner, type, and
-                    // property name and the specific index in the node ref array:
-                    if (hasSameOwner != null) {
-                        break;
+                        
+                        // No need to look for multiple matches b/c it should not be
+                        // possible as we are checking for the same owner, type, and
+                        // property name and the specific index in the node ref array:
+                        if (hasSameOwner != null) {
+                            break;
+                        }
                     }
                 }
             }
-        }
+       
+        } // ends for loop
         
         return new Pair<NodeRef,String>(hasSameOwner, hasSameOwnerId);
     }
