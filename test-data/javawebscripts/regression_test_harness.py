@@ -27,6 +27,7 @@ tests =[\
 # Output Filters (ie lines in the .json output with these strings will be filtered out)
 # Branch Names that will run this test by default
 # Set up function (Optional)
+# Post process function (Optional)
 # Tear down function (Optional)
 # Delay in seconds before running the test (Optional)
 # ]
@@ -341,8 +342,23 @@ None,
 None,
 set_wsid_to_gv1
 ],
+
+# mimic md where a branch requires a project post to sync the project version
+[
+161,
+"PostProjectWorkspace1",
+"Post project to sync branch version for workspace 1",
+create_curl_cmd(type="POST", base_url=BASE_URL_WS, post_type="",
+                data='\'{"elements":[{"sysmlid":"123456","specialization":{"type":"Project", "projectVersion":"0"}}]}\'', 
+                branch="/$gv1/sites/europa/projects?createSite=true",
+                project_post=True),
+True,
+common_filters,
+["develop"]
+],
+
   
-# This test case depends on the previous one and uses gv1 set by the previous test      
+# This test case depends on CreateWorkspace1 and uses gv1 set by the previous test      
 [
 170,
 "CreateWorkspace2",
@@ -356,6 +372,21 @@ None,
 None,
 set_wsid_to_gv2
 ],
+
+# mimic md where a branch requires a project post to sync the project version
+[
+171,
+"PostProjectWorkspace2",
+"Post project to sync branch version for workspace 2 - sub workspace",
+create_curl_cmd(type="POST", base_url=BASE_URL_WS, post_type="",
+                data='\'{"elements":[{"sysmlid":"123456","specialization":{"type":"Project", "projectVersion":"0"}}]}\'', 
+                branch="/$gv2/sites/europa/projects?createSite=true",
+                project_post=True),
+True,
+common_filters,
+["develop"]
+],
+
         
 [
 175,
@@ -1608,6 +1639,128 @@ True,
 common_filters,
 ["test","workspaces","develop", "develop2"]
 ],
+
+# ELEMENTS PROPERTY SERVICE (CMED-835): ==========================    
+
+[
+670,
+"PostElementsWithProperites",
+"Post elements for the next several tests",
+create_curl_cmd(type="POST",data="elementsWithProperties.json",base_url=BASE_URL_WS,
+                post_type="elements",branch="master/"),
+True, 
+common_filters,
+["test","workspaces","develop", "develop2"]
+],
+        
+[
+671,
+"GetSearchSlotProperty",
+'Searching for the property "real" having value 5.39 (slot property)',
+create_curl_cmd(type="GET",data="search?keyword=5.39&filters=value&propertyName=real",base_url=BASE_URL_WS,
+                branch="master/"),
+True, 
+common_filters,
+["test","workspaces","develop", "develop2"],
+None,
+None,
+None,
+70
+],
+        
+[
+672,
+"GetSearchSlotPropertyOffNom",
+'Searching for the property "foo" having value 5.39 (slot property).  This should fail',
+create_curl_cmd(type="GET",data="search?keyword=5.39&filters=value&propertyName=foo",base_url=BASE_URL_WS,
+                branch="master/"),
+True, 
+common_filters,
+["test","workspaces","develop", "develop2"]
+],
+        
+[
+673,
+"GetSearchNonSlotProperty",
+'Searching for the property "real55" having value 34.5 (non-slot property)',
+create_curl_cmd(type="GET",data="search?keyword=34.5&filters=value&propertyName=real55",base_url=BASE_URL_WS,
+                branch="master/"),
+True, 
+common_filters,
+["test","workspaces","develop", "develop2"]
+],
+        
+[
+674,
+"GetSearchNonSlotPropertyOffNom",
+'Searching for the property "real55" having value 34.5 (non-slot property).  This should fail.',
+create_curl_cmd(type="GET",data="search?keyword=34.5&filters=value&propertyName=poo",base_url=BASE_URL_WS,
+                branch="master/"),
+True, 
+common_filters,
+["test","workspaces","develop", "develop2"]
+],
+        
+[
+675,
+"GetSearchElementWithProperty",
+'Searching for element that owns a Property',
+create_curl_cmd(type="GET",data="search?keyword=steroetyped&filters=name",base_url=BASE_URL_WS,
+                branch="master/"),
+True, 
+common_filters,
+["test","workspaces","develop", "develop2"]
+],
+
+
+# Additional searches after everything is completed ==========================   
+[
+10000,
+"GetSearchDocumentation",
+"Get search documentation",
+create_curl_cmd(type="GET",data="search?keyword=some*&filters=documentation",base_url=BASE_URL_WS,
+                branch="master/"),
+True, 
+common_filters,
+["develop","workspaces"]
+],
+
+[
+10001,
+"GetSearchAspects",
+"Get search aspects",
+create_curl_cmd(type="GET",data="search?keyword=View&filters=aspect",base_url=BASE_URL_WS,
+                branch="master/"),
+True, 
+common_filters,
+["develop","workspaces"]
+],
+
+[
+10002,
+"GetSearchId",
+"Get search id",
+create_curl_cmd(type="GET",data="search?keyword=300&filters=id",base_url=BASE_URL_WS,
+                branch="master/"),
+True, 
+common_filters,
+["develop","workspaces"]
+],
+
+## temporarily remove this, the filters don't appear to be working quite right
+[
+10003,
+"GetSearchValue",
+"Get search value",
+create_curl_cmd(type="GET",data="search?keyword=dlam_string&filters=value",base_url=BASE_URL_WS,
+                branch="master/"),
+True, 
+common_filters+['"qualifiedId"', '"sysmlid"'],
+["workspaces"]
+],
+        
+
+
         
 ]
 

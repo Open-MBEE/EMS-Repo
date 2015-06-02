@@ -5,7 +5,6 @@ import gov.nasa.jpl.mbee.util.Pair;
 import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.mbee.util.Utils;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.io.Serializable;
 import java.util.Collection;
@@ -609,7 +608,9 @@ public class WorkspaceDiff implements Serializable {
 
         return deltaJson;
     }
+    
 
+    
     /**
      * Add the workspace metadata onto the provided JSONObject
      * @param jsonObject
@@ -722,7 +723,7 @@ public class WorkspaceDiff implements Serializable {
             }
             JSONObject jsonObject =
                     node.toJSONObject( filter, false, workspace, dateTime,
-                                       includeQualified, version );
+                                       includeQualified, version, null );
             array.put( jsonObject );
         }
 
@@ -1026,4 +1027,53 @@ public class WorkspaceDiff implements Serializable {
 //        
 //        return top.toString();
 //    }
+    
+    /**
+     * utility for traversing a WsDiff JSON file that leaves only sysml ids with versioned
+     * node information as well as ids for workspaces
+     * @param json
+     * @return
+     */
+    public static JSONObject cleanWorkspaceJson(JSONObject json) {
+        JSONObject result = new JSONObject();
+        
+        if (json.has( "workspace1" )) {
+            JSONObject ws1 = json.getJSONObject( "workspace1" );
+            JSONObject resultWs1 = new JSONObject();
+            resultWs1.put( "elements", cleanElementsJson(ws1, "elements") );
+            resultWs1.put( "id",  ws1.get( "id" ));
+            result.put( "workspace1", resultWs1 );
+        }
+        
+        if (json.has( "workspace2" )) {
+            JSONObject ws2 = json.getJSONObject( "workspace2" );
+            JSONObject resultWs2 = new JSONObject();
+            String keys[] = {"addedElements", "movedElements", "deletedElements", "updatedElements", "conflictedElements"};
+            for (String key: keys) {
+                resultWs2.put( key, cleanElementsJson(ws2, key) );
+            }
+            resultWs2.put( "id",  ws2.get( "id" ));
+            result.put( "workspace2", resultWs2 );
+        }
+        
+        return result;
+    }
+    
+    private static JSONArray cleanElementsJson(JSONObject json, String key) {
+        JSONArray elements = json.getJSONArray( key );
+        JSONArray results = new JSONArray();
+        for (int ii = 0; ii < elements.length(); ii++) {
+            results.put( cleanElementJson(elements.getJSONObject( ii )) );
+        }
+        return results;
+    }
+    
+    private static JSONObject cleanElementJson(JSONObject json) {
+        JSONObject result = new JSONObject();
+        String keys[] = {"sysmlid", "id", "version"};
+        for (String key: keys) {
+            if (json.has( key )) result.put( key, json.get( key ) );
+        }
+        return result;
+    }
 }

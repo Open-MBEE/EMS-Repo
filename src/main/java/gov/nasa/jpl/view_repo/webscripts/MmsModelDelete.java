@@ -1,7 +1,6 @@
 package gov.nasa.jpl.view_repo.webscripts;
 
 import gov.nasa.jpl.mbee.util.Utils;
-import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.CommitUtil;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
@@ -166,9 +165,8 @@ public class MmsModelDelete extends AbstractJavaWebScript {
                         logger.warn("deltas not posted properly");
                     }
         
-                    String body = result != null ? result.toString() : "{\"model delete had no diff\"}";
                     String msg = "model delete";
-                    CommitUtil.commit( workspace, body, msg, runWithoutTransactions, services, response );
+                    CommitUtil.commit( workspace, result, msg, runWithoutTransactions, services, response );
                 }                
 
                 // apply aspects after wsDiff JSON has been created since the wsDiff 

@@ -3182,39 +3182,56 @@ public class NodeUtil {
                                               ServiceRegistry services,
                                               Date dateTime, WorkspaceNode ws) {
         
-        Object propVal;
-        EmsScriptNode node = new EmsScriptNode(ref, services);
-        
-        for ( String acmType : Acm.TYPES_WITH_VALUESPEC.keySet() ) {
-            // It has a apsect that has properties that map to value specs:
-            if ( node.hasOrInheritsAspect( acmType ) ) {
+        if (ref != null) {
+            
+            EmsScriptNode node = new EmsScriptNode(ref, services);
+            ArrayList<NodeRef> children = node.getValueSpecOwnedChildren( true, dateTime, ws );
+            
+            if (!Utils.isNullOrEmpty( children )) {
+                nodes.addAll( children );
+            }
+            // The following is for backwards compatibility:
+            else {
                 
-                for ( String acmProp : Acm.TYPES_WITH_VALUESPEC.get(acmType) ) {
-                    propVal = node.getNodeRefProperty(acmProp, dateTime, ws);
-                    
-                    if (propVal != null) {
-                        // Note: We want to include deleted nodes also, so no need to check for that
-                        if (propVal instanceof NodeRef){
-                            NodeRef propValRef = (NodeRef)propVal;
-                            if (NodeUtil.scriptNodeExists( propValRef )) {
-                                nodes.add( propValRef );
-                            }
-                        }
-                        else if (propVal instanceof List){
-                            @SuppressWarnings( "unchecked" )
-                            List<NodeRef> nrList = (ArrayList<NodeRef>) propVal;
-                            for (NodeRef propValRef : nrList) {
-                                if (propValRef != null && NodeUtil.scriptNodeExists( propValRef )) {
-                                    nodes.add( propValRef );
+                children = node.getOwnedChildren(true, dateTime, ws);
+                
+                // No point of checking this if there are no children at all:
+                if (!Utils.isNullOrEmpty( children )) {
+                    Object propVal;
+                    for ( String acmType : Acm.TYPES_WITH_VALUESPEC.keySet() ) {
+                        // It has a apsect that has properties that map to value specs:
+                        if ( node.hasOrInheritsAspect( acmType ) ) {
+                            
+                            for ( String acmProp : Acm.TYPES_WITH_VALUESPEC.get(acmType) ) {
+                                propVal = node.getNodeRefProperty(acmProp, dateTime, ws);
+                                
+                                if (propVal != null) {
+                                    // Note: We want to include deleted nodes also, so no need to check for that
+                                    if (propVal instanceof NodeRef){
+                                        NodeRef propValRef = (NodeRef)propVal;
+                                        if (NodeUtil.scriptNodeExists( propValRef )) {
+                                            nodes.add( propValRef );
+                                        }
+                                    }
+                                    else if (propVal instanceof List){
+                                        @SuppressWarnings( "unchecked" )
+                                        List<NodeRef> nrList = (ArrayList<NodeRef>) propVal;
+                                        for (NodeRef propValRef : nrList) {
+                                            if (propValRef != null && NodeUtil.scriptNodeExists( propValRef )) {
+                                                nodes.add( propValRef );
+                                            }
+                                        }
+                                    }
+                                    break;
                                 }
                             }
                         }
-                        break;
                     }
                 }
-            }
-        }
-        
+                
+            } // ends else
+            
+        } // ends if (ref != null)
     }
     
     /**
@@ -3275,7 +3292,7 @@ public class NodeUtil {
         
         return false;
     }
-
+    
     
     /**
      * This is an experiment to see if deadlock can occur with concurrent

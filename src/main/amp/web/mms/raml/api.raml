@@ -382,6 +382,14 @@ resourceTypes:
         uriParameters:
           projectId:
             description: MD project ID for the project under consideration
+    /search:
+      description: Service for searching for elements in a particular workspace
+      get:
+        queryParameters:
+          keyword:
+            description: Mandatory field for specifying what to look for.
+          filters:
+            description: Comma separated list of id, documentation, name, value, aspect, appliedMetatypes, metatypes to search against. If not specified, defaults to documentation. appliedMetatypes and metatypes search using the ID of the metatypes.
 /operations:
   description: Service for executing operations, e.g., like the OCL Execution capabilities in MDK. Details still TBD.
 /diff:
