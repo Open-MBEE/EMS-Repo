@@ -295,6 +295,7 @@ public class NodeUtil {
                 NodeUtil.propertyCacheGetProperties( nodeRef );
         if ( cachedProps == null ) {
             cachedProps = new HashMap<String, Object>();
+            NodeUtil.propertyCache.put( nodeRef, cachedProps );
         } else {
             cachedProps.clear();
         }
