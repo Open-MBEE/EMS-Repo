@@ -9,7 +9,6 @@ import gov.nasa.jpl.mbee.util.Seen;
 import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.util.NodeUtil.SearchType;
-import gov.nasa.jpl.view_repo.webscripts.WebScriptUtil;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -19,15 +18,11 @@ import java.util.TreeSet;
 
 import javax.servlet.http.HttpServletResponse;
 
-import org.alfresco.repo.security.authority.AuthorityDAO;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.security.AccessPermission;
 import org.alfresco.service.cmr.security.AccessStatus;
-import org.alfresco.service.cmr.security.AuthorityService;
-import org.alfresco.service.cmr.security.AuthorityType;
 import org.alfresco.service.cmr.security.PermissionService;
-import org.alfresco.service.cmr.security.PersonService;
 import org.alfresco.service.cmr.site.SiteInfo;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -221,6 +216,15 @@ public class WorkspaceNode extends EmsScriptNode {
                                                            StringBuffer response,
                                                            Status status,
                                                            String description) {
+        if (logger.isDebugEnabled()) {
+            logger.debug( "createWorkspaceFromSource(wsName=" + wsName
+                          + "userName=" + userName + " sourceNameOrId="
+                          + sourceNameOrId + ", copyTime=" + copyTime
+                          + ", folder="
+                          + ( folder == null ? "null" : folder.getSysmlId() )
+                          + ")" );
+        }
+
     	if ( Utils.isNullOrEmpty( wsName ) ) {
     		wsName = NodeUtil.createId( services );
     	}
@@ -418,12 +422,20 @@ public class WorkspaceNode extends EmsScriptNode {
         // Get the parent in this workspace. In case there are multiple nodes
         // with the same cm:name, use the grandparent to disambiguate where it
         // should be.
+        if (logger.isDebugEnabled()) logger.debug("propertyCache before = " + NodeUtil.propertyCache );
+        if (logger.isDebugEnabled()) logger.debug("parent = " + parent);
         if ( parent != null && parent.exists() && !this.equals( parent.getWorkspace() ) ) {
             EmsScriptNode grandParent = parent.getParent();
-            ArrayList< NodeRef > arr = NodeUtil.findNodeRefsByType( parentName, SearchType.CM_NAME.prefix, false, this, null, false, true, getServices(), false );
+            ArrayList< NodeRef > arr =
+                    NodeUtil.findNodeRefsByType( parentName,
+                                                 SearchType.CM_NAME.prefix,
+                                                 false, this, null, false,
+                                                 true, getServices(), false );
             for ( NodeRef ref : arr ) {
                 EmsScriptNode p = new EmsScriptNode( ref, getServices() );
                 EmsScriptNode gp = p.getParent();
+                if (logger.isDebugEnabled()) logger.debug("p = " + p);
+                if (logger.isDebugEnabled()) logger.debug("gp = " + gp);
                 if ( grandParent == gp || ( grandParent != null && gp != null && grandParent.getName().equals( gp.getName() ) ) ) {
                     parent = p;
                     break;
@@ -440,7 +452,11 @@ public class WorkspaceNode extends EmsScriptNode {
         // If the node is not already in this workspace, clone it.
         if ( !this.equals( node.getWorkspace() ) ) {
             EmsScriptNode nodeGuess = null;
-            ArrayList< NodeRef > array = NodeUtil.findNodeRefsByType( nodeName, SearchType.CM_NAME.prefix, false, this, null, false, true, getServices(), false );
+            ArrayList< NodeRef > array =
+                    NodeUtil.findNodeRefsByType( nodeName,
+                                                 SearchType.CM_NAME.prefix,
+                                                 false, this, null, false,
+                                                 true, getServices(), false );
             for ( NodeRef ref : array ) {
                 EmsScriptNode n = new EmsScriptNode( ref, getServices() );
                 EmsScriptNode np = n.getParent();
@@ -462,11 +478,24 @@ public class WorkspaceNode extends EmsScriptNode {
                                                                                               this, null, false,
                                                                                               getServices(), getResponse());
 
-                   newReifiedNode = foundReifiedNode == null ? oldReifiedNode.clone(parent) : foundReifiedNode;
+                    if (logger.isDebugEnabled()) logger.debug("this = " + this);
+                    if (logger.isDebugEnabled()) logger.debug("node = " + node);
+                    if (logger.isDebugEnabled()) logger.debug("parent = " + parent);
+                    if (logger.isDebugEnabled()) logger.debug("oldReifiedNode = " + oldReifiedNode);
+                    if (logger.isDebugEnabled()) logger.debug("foundReifiedNode = " + foundReifiedNode);
+                    
+                    if (logger.isDebugEnabled()) logger.debug("propertyCache before clone = " + NodeUtil.propertyCache );
+                    if ( foundReifiedNode == null ) {
+                        newReifiedNode = oldReifiedNode.clone( parent );
+                        NodeUtil.addElementToCache( newReifiedNode );
+                    } else {
+                        newReifiedNode = foundReifiedNode;
+                    }
                 }
 
                 // Clone the node:
                 newFolder = node.clone(parent);
+                NodeUtil.addElementToCache( newFolder );
                 //newFolder.setWorkspace( this, node.getNodeRef() );  // now done in clone()
 
                 if ( newReifiedNode != null && newFolder != null) {
@@ -923,12 +952,12 @@ public class WorkspaceNode extends EmsScriptNode {
         JSONObject json = new JSONObject();
 
         addWorkspaceNamesAndIds(json, this, false );
-        json.put( "creator", getProperty( "cm:modifier" ) );
+        json.put( "creator", getProperty( "cm:modifier", false ) );
         // REVIEW -- This assumes that the workspace does not changed after it
         // is created, but wouldn't it's ems:lastTimeSyncParent property be
         // expected to change?
         json.put( "created", TimeUtils.toTimestamp( (Date)getProperty("cm:created") ) );
-        json.put( "modified", TimeUtils.toTimestamp( (Date)getProperty("cm:modified") ) );
+        json.put( "modified", TimeUtils.toTimestamp( (Date)getLastModified( null ) ) );  // REVIEW -- should we be passing in the date here?
         Date copyTime = getCopyTime();
         if ( copyTime != null ) {
             json.put( "branched", TimeUtils.toTimestamp( copyTime ) );
@@ -1066,26 +1095,17 @@ public class WorkspaceNode extends EmsScriptNode {
             if ( workspace != null ) return workspace;
         }
 
-        // We decided to remove this search:
-//        // Try to match the workspace name
-//        workspace = getWorkspaceFromName( nameOrId, services, response,
-//                                          responseStatus, userName );
-//
-//        if ( workspace != null ) return workspace;
+        // Try to match the workspace name
+        workspace = getWorkspaceFromName( nameOrId, services, response,
+                                          responseStatus, userName );
 
-        // Try the cm:name
-        ref = NodeUtil.findNodeRefById( nameOrId, true, null, null, services, false );
-        if ( ref != null ) {
-            workspace = existingReadableWorkspaceFromNodeRef( ref, services,
-                                                              response,
-                                                              responseStatus );
-            if ( workspace != null ) return workspace;
-        }
+        if ( workspace != null ) return workspace;
 
         if ( Debug.isOn() ) {
             Debug.outln( "workspace does not exist and is not to be created: "
                          + nameOrId );
         }
+        // FIXME: throw exception since nothing is found and null indicates master
         return null;
     }
 

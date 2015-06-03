@@ -397,7 +397,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
         docBook.setFooterLegalNotice( "Paper copies of this document may not be current and should not be relied on for official purposes. JPL/Caltech proprietary. Not for public release." );
         String author =
                 replaceXmlEntities( getUserProfile( product,
-                                (String)product.getProperty( Acm.ACM_AUTHOR ) ) );
+                                (String)product.getProperty( Acm.ACM_AUTHOR, false ) ) );
         docBook.setAuthor( Arrays.asList( author ) );
         return docBook;
     }
@@ -655,6 +655,10 @@ public class SnapshotPost extends AbstractJavaWebScript {
         snapshotNode.createOrUpdateAspect( "view2:Snapshotable" );
         snapshotNode.createOrUpdateProperty( "view2:snapshotProduct", view.getNodeRef() );
         snapshotNode.createOrUpdateProperty( "view2:timestamp", timestamp );
+        
+        // Element cache does not support snapshots
+        //NodeUtil.addElementToCache( snapshotNode );
+
         // can't update the view since it may be frozen since it can be in parent branch
 //        view.createOrUpdateAspect( "view2:Snapshotable" );
 //        view.appendToPropertyNodeRefs( "view2:productSnapshots", snapshotNode.getNodeRef() );
@@ -1012,7 +1016,9 @@ public class SnapshotPost extends AbstractJavaWebScript {
 
     		NodeRef person = getUserProfile(userName);
 			if(person == null) return "";
-			return (String)nodeService.getProperty(person, ContentModel.PROP_EMAIL);
+            Object o = NodeUtil.getNodeProperty( person, ContentModel.PROP_EMAIL,
+                                                 services, true, true );
+            if ( o instanceof String ) return (String)o;
     	}
     	catch(Exception ex){
     		System.out.println("Failed to get email address for " + userName);
@@ -2170,8 +2176,8 @@ public class SnapshotPost extends AbstractJavaWebScript {
         originalInputStream.close();
         byte[] binaryData = outputStream.toByteArray();
         String imgFilename =
-                (String)nodeService.getProperty( imgNodeRef,
-                                                 ContentModel.PROP_NAME );
+                (String)NodeUtil.getNodeProperty( imgNodeRef, ContentModel.PROP_NAME,
+                                                  services, true, true );
         Path filePath = Paths.get( imgDirName.toString(), imgFilename );
         EmsScriptNode fNode = new EmsScriptNode( imgNodeRef, getServices() );
         fNode.makeSureNodeRefIsNotFrozen();

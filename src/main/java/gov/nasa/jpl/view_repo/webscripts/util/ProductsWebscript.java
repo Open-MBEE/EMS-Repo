@@ -148,7 +148,7 @@ public class ProductsWebscript extends AbstractJavaWebScript {
                 jsonObject.put( "id", id );
                 jsonObject.put( "created", EmsScriptNode.getIsoTime( date ) );
                 jsonObject.put( "creator",
-                                snapshot.getProperty( "cm:modifier" ) );
+                                snapshot.getProperty( "cm:modifier", false ) );
                 jsonObject.put( "url", contextPath + "/service/snapshots/"
                                        + snapshot.getSysmlId() );
                 jsonObject.put( "tag", getConfigurationSet( snapshot, workspace, dateTime ) );
