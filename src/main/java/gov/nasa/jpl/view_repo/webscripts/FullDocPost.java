@@ -108,10 +108,10 @@ public class FullDocPost extends AbstractJavaWebScript {
 		//exec.setProcessDirectory("/opt/local/prerender/node_modules/phantomjs/bin/");	//to do : need to config
 		HostnameGet alfresco = new HostnameGet(this.repository, this.services);
 		String protocol = alfresco.getAlfrescoProtocol();
-		String hostname = alfresco.getAlfrescoHost();
+//		String hostname = alfresco.getAlfrescoHost();
 		String hostnameAndPort = this.getAlfrescoHost();
-		String preRendererUrl = String.format("%s:%s", protocol, hostname);	// "http://localhost";	//to do: need to config
-		int preRendererPort = 3000;	// to do: need to config
+		String preRendererUrl = "http://localhost";
+		int preRendererPort = 3000;
 		String mmsAdminCredential = getHeadlessUserCredential();
 //		DateTimeFormatter fmt = ISODateTimeFormat.dateTime();
 		List<String> command = new ArrayList<String>();
