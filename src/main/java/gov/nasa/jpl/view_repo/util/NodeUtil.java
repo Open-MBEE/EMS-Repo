@@ -184,6 +184,7 @@ public class NodeUtil {
     
     public static boolean addEmptyEntriesToFullCache = false;
     public static boolean skipGetNodeRefAtTime = true;
+    public static boolean skipWorkspacePermissionCheck = true;
     
     // global flag that is enabled once heisenbug is seen, so it will email admins the first time heisenbug is seen
     public static boolean heisenbugSeen = false;
@@ -3267,6 +3268,10 @@ public class NodeUtil {
      * @return
      */
     public static boolean userHasWorkspaceLdapPermissions() {
+        
+        if (skipWorkspacePermissionCheck) {
+            return true;
+        }
         
         String ldapGroup = getWorkspaceLdapGroup();
         String user = NodeUtil.getUserName();
