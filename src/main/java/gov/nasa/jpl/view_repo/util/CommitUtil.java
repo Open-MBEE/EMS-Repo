@@ -609,8 +609,8 @@ public class CommitUtil {
             prevCommit.getOrSetCachedVersion();
             
             // set modifier to original user (since we should be running as admin in here)
-            currCommit.setProperty( "cm:modifier", originalUser );
-            prevCommit.setProperty( "cm:modifier", originalUser );
+            currCommit.setProperty( "cm:modifier", originalUser, false, 0 );
+            prevCommit.setProperty( "cm:modifier", originalUser, false, 0 );
 	    }
         return true;
 	}
@@ -694,6 +694,10 @@ public class CommitUtil {
     
                 currCommit.setOwner( originalUser );
                 currCommit.getOrSetCachedVersion();
+                
+                // Element cache does not support commit nodes.
+                //NodeUtil.addElementToCache( currCommit );
+                
                 result = currCommit.getNodeRef();
             }
         }

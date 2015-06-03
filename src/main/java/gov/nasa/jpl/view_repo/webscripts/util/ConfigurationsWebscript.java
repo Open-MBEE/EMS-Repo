@@ -307,7 +307,7 @@ public class ConfigurationsWebscript extends AbstractJavaWebScript {
 //        Date date = (Date)config.getProperty("cm:created");
 //        json.put("created", EmsScriptNode.getIsoTime(date));
 
-        json.put("creator", config.getProperty("cm:modifier"));
+        json.put("creator", config.getProperty("cm:modifier", false));
 
         json.put( "configurations", configArray );
         
@@ -385,7 +385,7 @@ public class ConfigurationsWebscript extends AbstractJavaWebScript {
         } else {
             snapshotJson.put( "created",  EmsScriptNode.getIsoTime( (Date)snapshot.getProperty( "cm:created" )));
         }
-        snapshotJson.put( "creator", snapshot.getProperty( "cm:modifier" ) );
+        snapshotJson.put( "creator", snapshot.getProperty( "cm:modifier", false ) );
 
         @SuppressWarnings( "rawtypes" )
         LinkedList<HashMap> list = new LinkedList<HashMap>();
@@ -482,7 +482,7 @@ public class ConfigurationsWebscript extends AbstractJavaWebScript {
         JSONObject productJson = new JSONObject();
         productJson.put("sysmlid", product.getSysmlId());
         productJson.put( "created",  EmsScriptNode.getIsoTime( (Date)product.getProperty( "cm:created" )));
-        productJson.put( "creator", product.getProperty( "cm:modifier" ) );
+        productJson.put( "creator", product.getProperty( "cm:modifier", false ) );
 
         return productJson;
     }

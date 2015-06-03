@@ -167,6 +167,11 @@ public abstract class EmsTransaction {
 
 
     protected void tryRollback( UserTransaction trx, Throwable e, String msg ) {
+        // The property cache is invalid if commit fails. Clear it.
+        // TODO -- a better solution would be to just clear the properties for
+        // nodes affected by the transaction
+        NodeUtil.initPropertyCache();
+
         if ( msg == null || msg.length() <= 0 ) {
             msg = "DB transaction failed";
         }

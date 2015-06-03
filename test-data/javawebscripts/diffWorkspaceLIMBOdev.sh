@@ -17,8 +17,8 @@ export CURL_GET_FLAGS="-X GET"
 #if [true]; then
        export CURL_USER=" -u admin:admin"
        export CURL_FLAGS=$CURL_STATUS$CURL_USER
-       export SERVICE_URL="http://localhost:9091/alfresco/service/"
-       export BASE_URL="http://localhost:9091/alfresco/service/workspaces/master/"
+       export SERVICE_URL="http://localhost:8080/alfresco/service/"
+       export BASE_URL="http://localhost:8080/alfresco/service/workspaces/master/"
 #else
 #        export CURL_USER=" -u shatkhin"
 #        export CURL_FLAGS=$CURL_STATUS$CURL_USER$CURL_SECURITY
@@ -143,7 +143,7 @@ echo
 
 # post snapshot
 echo 'testSNAP1'
-echo  curl -w "%{http_code}" -u admin:admin -X POST -H "Content-Type:text/html" --data @JsonData/snapshot.html http://localhost:9091/alfresco/service/ui/views/301/snapshot
+echo  curl -w "%{http_code}" -u admin:admin -X POST -H "Content-Type:text/html" --data @JsonData/snapshot.html http://localhost:8080/alfresco/service/ui/views/301/snapshot
 curl $CURL_FLAGS $CURL_POST_FLAGS @JsonData/snapshot.html $SERVICE_URL"ui/views/301/snapshot" | grep -v '"read":' | grep -v '"lastModified"' > outputWorkspaces/snap.json
 #grep out other key patterns that might cause necessary diffs
 #then diff the grepped files
