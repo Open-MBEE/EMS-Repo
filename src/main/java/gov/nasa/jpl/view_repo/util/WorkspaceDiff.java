@@ -723,7 +723,7 @@ public class WorkspaceDiff implements Serializable {
             }
             JSONObject jsonObject =
                     node.toJSONObject( filter, false, workspace, dateTime,
-                                       includeQualified, version );
+                                       includeQualified, version, null );
             array.put( jsonObject );
         }
 

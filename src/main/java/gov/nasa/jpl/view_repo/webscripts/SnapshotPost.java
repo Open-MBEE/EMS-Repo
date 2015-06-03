@@ -2268,9 +2268,12 @@ public class SnapshotPost extends AbstractJavaWebScript {
         Action snapshotAction = actionService.createAction(SnapshotArtifactsGenerationActionExecuter.NAME);
         snapshotAction.setParameterValue(SnapshotArtifactsGenerationActionExecuter.PARAM_SITE_NAME, siteName);
         snapshotAction.setParameterValue(SnapshotArtifactsGenerationActionExecuter.PARAM_SNAPSHOT_ID, postJson.getString("id"));
+        snapshotAction.setParameterValue(SnapshotArtifactsGenerationActionExecuter.PARAM_SYSML_ID, postJson.getString("sysmlid"));
         snapshotAction.setParameterValue(SnapshotArtifactsGenerationActionExecuter.PARAM_FORMAT_TYPE, formats);
         snapshotAction.setParameterValue(SnapshotArtifactsGenerationActionExecuter.PARAM_USER_EMAIL, userEmail);
         snapshotAction.setParameterValue(SnapshotArtifactsGenerationActionExecuter.PARAM_WORKSPACE, workspace);
+        snapshotAction.setParameterValue(SnapshotArtifactsGenerationActionExecuter.PARAM_WORKSPACE_NAME, postJson.getString("ws"));
+        snapshotAction.setParameterValue(SnapshotArtifactsGenerationActionExecuter.PARAM_TIME_STAMP, postJson.getString("time"));
 
        	services.getActionService().executeAction(snapshotAction, jobNode.getNodeRef(), true, true);
 	}

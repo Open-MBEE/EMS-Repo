@@ -238,6 +238,31 @@
           </properties>
         </aspect>
         
+        <aspect name="ems:ValueSpecOwned">
+          <properties>
+              <property name="ems:valueSpecOwner">
+                  <type>d:noderef</type>
+                  <mandatory>false</mandatory>
+                  <multiple>false</multiple>
+                  <index enabled="false">
+                      <atomic>false</atomic>
+                      <stored>false</stored>
+                      <tokenised>false</tokenised>
+                  </index>
+              </property>
+              <property name="ems:valueSpecOwnedChildren">
+                  <type>d:noderef</type>
+                  <mandatory>false</mandatory>
+                  <multiple>true</multiple>
+                  <index enabled="false">
+                      <atomic>false</atomic>
+                      <stored>false</stored>
+                      <tokenised>false</tokenised>
+                  </index>
+              </property>
+          </properties>
+        </aspect>
+        
         <aspect name="ems:Reified">
           <properties>
               <property name="ems:reifiedNode">

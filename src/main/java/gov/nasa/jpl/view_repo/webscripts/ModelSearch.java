@@ -36,8 +36,11 @@ import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
@@ -45,6 +48,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.log4j.*;
 import org.alfresco.repo.model.Repository;
 import org.alfresco.service.ServiceRegistry;
+import org.alfresco.service.cmr.repository.NodeRef;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -117,12 +121,13 @@ public class ModelSearch extends ModelGet {
         return model;
     }
 
-
     private JSONArray executeSearchRequest(WebScriptRequest req) throws JSONException {
         String keyword = req.getParameter("keyword");
+        String propertyName = req.getParameter("propertyName");
         String[] filters = req.getParameter("filters") == null ? new String[]{"documentation"} : req.getParameter( "filters" ).split( "," );
+        
+        if (!Utils.isNullOrEmpty( keyword )) {
 
-        if (keyword != null && keyword.length() > 0) {
             // get timestamp if specified
             String timestamp = req.getParameter("timestamp");
             Date dateTime = TimeUtils.dateFromTimestamp( timestamp );
@@ -142,6 +147,7 @@ public class ModelSearch extends ModelGet {
                         return null;
                     }
                 } else {
+                    
                     try {
                         Integer.parseInt(keyword);
                         rawResults.putAll( searchForElements( "@sysml\\:integer:\"", keyword, false,
@@ -153,11 +159,17 @@ public class ModelSearch extends ModelGet {
                     }
                     
                     try {
-                        Double.parseDouble(keyword);
-                        rawResults.putAll( searchForElements( "@sysml\\:double:\"", keyword, false,
+                        // Need to do Double.toString() in case they left out the decimal in something like 5.0
+                        double d = Double.parseDouble(keyword); 
+                        rawResults.putAll( searchForElements( "@sysml\\:double:\"", Double.toString( d ), false,
                                                               workspace, dateTime) );
                     } catch (NumberFormatException nfe) {
                         // do nothing
+                    }
+
+                    if (keyword.equalsIgnoreCase( "true" ) || keyword.equalsIgnoreCase( "false" )) {
+                        rawResults.putAll( searchForElements( "@sysml\\:boolean:\"", keyword, false,
+                                                              workspace, dateTime) );
                     }
 
                     rawResults.putAll( searchForElements( "@sysml\\:string:\"", keyword, false,
@@ -171,20 +183,10 @@ public class ModelSearch extends ModelGet {
                     elementsFound.put(sysmlid, rawResults.get( sysmlid ));
                 }
             }
-//            for (Entry< String, EmsScriptNode > element: rawResults.entrySet()) {
-//                if (!element.getValue().getSysmlId().endsWith( "_pkg" )) {
-//                    elementsFound.put( element.getKey(), element.getValue() );
-//                }
-//            }
-
-            // for values, we really want to return the element that owns it
-            for (EmsScriptNode element: elementsFound.values()) {
-                for (String valueSpecAspect: Acm.VALUESPEC_ASPECTS)
-                if (element.hasAspect( valueSpecAspect )) {
-                    
-                    break;
-                }
-            }
+            
+            filterValueSpecs(propertyName, workspace, dateTime);
+            
+            addElementProperties(workspace, dateTime);
             
             handleElements(workspace, dateTime, true);
         }

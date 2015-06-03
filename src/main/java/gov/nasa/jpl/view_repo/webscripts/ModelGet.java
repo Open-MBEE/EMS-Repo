@@ -37,9 +37,14 @@ import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -78,6 +83,7 @@ public class ModelGet extends AbstractJavaWebScript {
 
 	protected JSONArray elements = new JSONArray();
 	protected Map<String, EmsScriptNode> elementsFound = new HashMap<String, EmsScriptNode>();
+    protected Map<String, List<EmsScriptNode>> elementProperties = new HashMap<String, List<EmsScriptNode>>();
 
     protected boolean prettyPrint = true;
 
@@ -86,6 +92,7 @@ public class ModelGet extends AbstractJavaWebScript {
 		super.clearCaches();
 		elements = new JSONArray();
 		elementsFound = new HashMap<String, EmsScriptNode>();
+		elementProperties = new HashMap<String, List<EmsScriptNode>>();
 	}
 
 
@@ -435,7 +442,8 @@ public class ModelGet extends AbstractJavaWebScript {
 			EmsScriptNode node = elementsFound.get(id);
 
 			if (checkPermissions(node, PermissionService.READ)){
-                elements.put(node.toJSONObject(ws, dateTime, includeQualified));
+                elements.put(node.toJSONObject(ws, dateTime, includeQualified, 
+                                               elementProperties.get(id)));
 			} // TODO -- REVIEW -- Warning if no permissions?
 		}
 	}
@@ -448,5 +456,143 @@ public class ModelGet extends AbstractJavaWebScript {
 	public void setIsViewRequest(boolean flag) {
 	    isViewRequest = flag;
 	}
-	
+		
+    /**
+     * Special filtering for embedded value specs.  Adds element that "owns"
+     * the value spec.  If propertyName is not null, filters out all the elements 
+     * that dont "own" properties that have the specified propertyName.
+     * 
+     * @param propertyName
+     * @param ws
+     * @param dateTime
+     */
+    protected void filterValueSpecs(String propertyName, WorkspaceNode ws,
+                                    Date dateTime) {
+                
+        // REVIEW do we only want to do this for Property?  Currently for all value specs.
+        
+        Map<String, EmsScriptNode> elementsToAdd = new HashMap<String, EmsScriptNode>();
+        Set<String> valueSpecsToRemove = new HashSet<String>();
+        
+        for (Entry< String, EmsScriptNode > entry: elementsFound.entrySet()) {
+            
+            EmsScriptNode element = entry.getValue();
+            String valueSpecId = entry.getKey();
+            
+            // If its a embedded value spec:
+            if (element.isOwnedValueSpec( dateTime, ws )) {
+                
+                // Get the value spec owner, ie a Property:
+                EmsScriptNode valueSpecOwner = element.getValueSpecOwner( dateTime, ws );
+
+                if (valueSpecOwner != null) {
+                    EmsScriptNode elementWithProperty = null;
+                    String propertyNameFnd = null;
+
+                    if (valueSpecOwner.hasAspect( Acm.ACM_PROPERTY )) {
+                        
+                        NodeRef propertyTypeRef = (NodeRef) valueSpecOwner.getNodeRefProperty( Acm.ACM_PROPERTY_TYPE, dateTime, ws );
+                        
+                        // The property name is the name of the propertyType (property is a slot):
+                        if (propertyTypeRef != null) {
+                            EmsScriptNode propertyType = new EmsScriptNode(propertyTypeRef, services );
+                            propertyNameFnd = propertyType.getSysmlName();
+                            EmsScriptNode stereotypeInstance = valueSpecOwner.getUnreifiedParent( dateTime, ws );
+
+                            if (stereotypeInstance != null) {
+                                elementWithProperty = stereotypeInstance.getUnreifiedParent( dateTime, ws );
+                            }
+                        }
+                        // The property name is the name of the property:
+                        else {
+                            propertyNameFnd = valueSpecOwner.getSysmlName();
+                            elementWithProperty = valueSpecOwner.getUnreifiedParent( dateTime, ws );
+                        }
+                        
+                    } // Ends if a Property
+                    else {
+                        // We want the owner of the value spec owner:
+                        elementWithProperty = valueSpecOwner.getUnreifiedParent( dateTime, ws );
+                    }
+                    
+                    if (elementWithProperty != null) {
+                        
+                        boolean elementFnd = true;
+                        
+                        // If we are searching for specific propertyName:
+                        if (!Utils.isNullOrEmpty( propertyName )) {
+                                
+                            // The property names match, so add the element with the property:
+                            elementFnd = propertyName.equals( propertyNameFnd );
+                        }
+                        
+                        if (elementFnd) {
+                            valueSpecsToRemove.add(valueSpecId);
+                            elementsToAdd.put(elementWithProperty.getSysmlId(),
+                                              elementWithProperty);   
+                        }
+                    } // ends if (elementWithProperty != null)
+                    
+                } // ends if (valueSpecOwner != null)
+            } // ends if (element.isOwnedValueSpec( dateTime, ws ))
+            
+        } // ends for
+        
+        // Add the found property owners:
+        if (!Utils.isNullOrEmpty( propertyName )) {
+            elementsFound = elementsToAdd;
+        }
+        else {
+            elementsFound.putAll( elementsToAdd );
+            elementsFound.keySet().removeAll( valueSpecsToRemove );
+        }
+         
+    }
+    
+    /**
+     * Adds the owned properties of the found elements to elementProperties
+     * 
+     * @param ws
+     * @param dateTime
+     */
+    protected void addElementProperties(WorkspaceNode ws, Date dateTime) {
+        
+       // For every element, find the owned properties:
+       for (Entry< String, EmsScriptNode > entry: elementsFound.entrySet()) {
+            
+            EmsScriptNode element = entry.getValue();
+            List<EmsScriptNode> props = new ArrayList<EmsScriptNode>();
+            
+            for (NodeRef childRef : element.getOwnedChildren( false, dateTime, ws )) {
+                if (childRef != null) {
+                    EmsScriptNode child = new EmsScriptNode(childRef, services);
+                    
+                    // If it is a property then add it:
+                    if (child.hasAspect( Acm.ACM_PROPERTY )) {
+                        props.add( child );
+                    }
+                    // If it is a applied stereotype, then check its children:
+                    else if (child.hasAspect( Acm.ACM_INSTANCE_SPECIFICATION )) {
+                        
+                        for (NodeRef specChildRef : child.getOwnedChildren( false, dateTime, ws )) {
+                            
+                            if (specChildRef != null) {
+                                
+                                EmsScriptNode specChild = new EmsScriptNode(specChildRef, services);
+                                
+                                if (specChild.hasAspect( Acm.ACM_PROPERTY )) {
+                                    props.add( specChild );
+                                }
+                            }
+                        }  // ends for
+                    }
+                } // ends if (childRef != null) 
+            } // ends for
+            
+            elementProperties.put( element.getSysmlId(), props );
+
+       } // ends for
+       
+    }
+
 }

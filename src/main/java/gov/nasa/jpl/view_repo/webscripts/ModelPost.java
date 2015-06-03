@@ -538,7 +538,7 @@ public class ModelPost extends AbstractJavaWebScript {
                 resurrectParent(reifiedNodeParent, ingest);
                 // Now deleted nodes are removed from ownedChildren, so must add them back:
                 if (lastNode != null) {
-                    lastNode.setOwnerToReifiedNode( reifiedNodeParent, workspace );
+                    lastNode.setOwnerToReifiedNode( reifiedNodeParent, workspace, false );
                 }
             }
             if (nodeParent.isWorkspaceTop()) {
@@ -685,7 +685,7 @@ public class ModelPost extends AbstractJavaWebScript {
 
                     // Finally, create the reified node for the owner:
                     EmsScriptNode nodeBin = nodeBinOwner.createSysmlNode(ownerName, type,
-                                                                        modStatus, workspace);
+                                                                        modStatus, workspace, false);
                     if (nodeBin != null) {
                         nodeBin.setProperty( Acm.ACM_NAME, acmName );
                         owner = nodeBin;
@@ -1268,12 +1268,14 @@ public class ModelPost extends AbstractJavaWebScript {
         if (newVals != null) {
             for (int i = 0; i < newVals.length(); ++i) {
                 newVal = newVals.optJSONObject(i);
-                boolean myChanged = processValueSpecPropertyImplImpl( jsonToCheck, jsonKey, oldVals,
-                                                                       node, ingest, reifiedPkgNode,
-                                                                       parent, id, nodeWorkspace,
-                                                                       iter, nodeNames, newVal,
-                                                                       nodeWorkspace);
-                changed = changed || myChanged;
+                if (newVal != null) {
+                    boolean myChanged = processValueSpecPropertyImplImpl( jsonToCheck, jsonKey, oldVals,
+                                                                           node, ingest, reifiedPkgNode,
+                                                                           parent, id, nodeWorkspace,
+                                                                           iter, nodeNames, newVal,
+                                                                           nodeWorkspace);
+                    changed = changed || myChanged;
+                }
             }
 
             // Replace the property in the JSON with the sysmlids
@@ -1699,7 +1701,7 @@ public class ModelPost extends AbstractJavaWebScript {
                 // workspace.  This is needed b/c we now remove the child from this set
                 // when deleting it:
                 if (parent != null && NodeUtil.workspacesEqual( parent.getWorkspace(), workspace )) {
-                    nodeToUpdate.setOwnerToReifiedNode( parent, workspace );
+                    nodeToUpdate.setOwnerToReifiedNode( parent, workspace, nestedNode );
                 }
             }
         }
@@ -1821,7 +1823,7 @@ public class ModelPost extends AbstractJavaWebScript {
                     EmsScriptNode oldNode = nodeToUpdate;
                     nodeToUpdate = nodeToUpdate.clone(parent);
                     nodeToUpdate.setWorkspace( workspace, oldNode.getNodeRef() );
-                    nodeToUpdate.setOwnerToReifiedNode( parent, workspace );
+                    nodeToUpdate.setOwnerToReifiedNode( parent, workspace, nestedNode );
                 }
                 if ( nodeWorkspaceWrong ) { // added this unnecessary if to avoid git merge conflict
                     NodeUtil.addElementToCache( nodeToUpdate );
@@ -1837,7 +1839,7 @@ public class ModelPost extends AbstractJavaWebScript {
                 log( Level.INFO, "\tcreating node" );
                 try {
 //                    if ( parent != null && parent.exists() ) {
-                        nodeToUpdate = parent.createSysmlNode( id, acmSysmlType, modStatus, workspace );
+                        nodeToUpdate = parent.createSysmlNode( id, acmSysmlType, modStatus, workspace, nestedNode );
 //                    } else {
 //                        Debug.error( true, true,
 //                                     "Error! Attempt to create node, " + id
@@ -1977,6 +1979,7 @@ public class ModelPost extends AbstractJavaWebScript {
             siteNode.createOrUpdateAspect( "cm:taggable" );
             siteNode.createOrUpdateAspect( Acm.ACM_SITE );
             siteNode.createOrUpdateProperty( Acm.ACM_SITE_PACKAGE, pkgSiteNode.getNodeRef() );
+            siteNode.createOrUpdateProperty( Acm.CM_TITLE, (String)pkgSiteNode.getProperty("sysml:name") );
             pkgSiteNode.createOrUpdateAspect( Acm.ACM_SITE_CHARACTERIZATION);
             pkgSiteNode.createOrUpdateProperty( Acm.ACM_SITE_SITE, siteNode.getNodeRef() );
         }
@@ -2228,8 +2231,6 @@ public class ModelPost extends AbstractJavaWebScript {
     }
 
 //    /**
-//<<<<<<< HEAD
-//=======
 //     * Parses the Property and returns a set of all the node names
 //     * in the property.
 //     *
