@@ -269,7 +269,11 @@ public class EmsScriptNode extends ScriptNode implements
     // provide status as necessary
     private Status status = null;
 
-    boolean useFoundationalApi = true; // TODO this will be removed
+    /**
+     * whether to use the foundational Alfresco Java API or ScriptNode class
+     * that uses the JavaScript API
+     */
+    public boolean useFoundationalApi = true; // TODO this will be removed
 
     protected EmsScriptNode companyHome = null;
 
@@ -728,7 +732,7 @@ public class EmsScriptNode extends ScriptNode implements
             // it was previously null, which is the initial state of the property, but we want
             // the modification time to be altered in this case too:
             if (oldValue == null && value == null) {
-                setProperty( Acm.ACM_LAST_MODIFIED, new Date());
+                setProperty( Acm.ACM_LAST_MODIFIED, new Date(), false, 0 );
             }
             if (!changed) {
                 logger.warn( "Failed to set property for new value in createOrUpdateProperty("
@@ -739,6 +743,8 @@ public class EmsScriptNode extends ScriptNode implements
         
         return false;
     }
+    
+    
 
     public EmsScriptNode getCompanyHome() {
         if ( companyHome == null ) {
@@ -1042,6 +1048,8 @@ public class EmsScriptNode extends ScriptNode implements
             if ( nodeWorkspace != null && nodeWorkspace.exists() ) {
                 node.setWorkspace( nodeWorkspace, null );
             }
+
+            NodeUtil.addElementToCache( node );
         }
 
         if ( node == null || !node.exists() ) {
@@ -1093,6 +1101,8 @@ public class EmsScriptNode extends ScriptNode implements
 //            return null;
 //        }
 
+        //System.out.println("createNode(" + name + ", " + type + ")\n" );// + Debug.stackTrace() );
+        
         EmsScriptNode result = null;
         // Date start = new Date(), end;
 
@@ -1747,7 +1757,7 @@ public class EmsScriptNode extends ScriptNode implements
     public Object getNodeRefProperty( String acmType, boolean ignoreWorkspace,
                                Date dateTime, boolean findDeleted,
                                boolean skipNodeRefCheck, WorkspaceNode ws ) {
-        Object result = getPropertyImpl( acmType );
+        Object result = getPropertyImpl( acmType, true );  // TODO -- This should be passing in cacheOkay from the caller instead of true!
 
         // get noderefs from the proper workspace unless the property is a
         // workspace meta-property
@@ -1784,13 +1794,29 @@ public class EmsScriptNode extends ScriptNode implements
      *
      * @param acmType
      *            Short name of property to get
+     * @param cacheOkay
      * @return
      */
     public Object getProperty( String acmType ) {
-        Object result = getPropertyImpl(acmType);
+        return getProperty( acmType, true );
+    }
+
+    /**
+     * Get the property of the specified type for non-noderef properties. Throws unsupported
+     * operation exception otherwise (go and fix the code if that happens).
+     *
+     * @param acmType
+     *            Short name of property to get
+     * @param cacheOkay
+     * @return
+     */
+    public Object getProperty( String acmType, boolean cacheOkay ) {
+        Object result = getPropertyImpl(acmType, cacheOkay);
 
         // Throw an exception of the property value is a NodeRef or 
         // collection of NodeRefs
+        // TODO -- REVIEW -- Can the if-statements be reordered to make this
+        // more efficient?
         if ( !workspaceMetaProperties.contains( acmType )) {
             if ( result instanceof NodeRef ) {
                 throw new UnsupportedOperationException();
@@ -1809,23 +1835,16 @@ public class EmsScriptNode extends ScriptNode implements
         return result;
     }
    
-    private Object getPropertyImpl(String acmType) {
-        if ( Utils.isNullOrEmpty( acmType ) ) return null;
-        Object result = null;
-
-        if ( useFoundationalApi ) {
-            QName typeQName = createQName( acmType );
-            result = services.getNodeService().getProperty( nodeRef, typeQName );
-        } else {
-            result = getProperties().get( acmType );
-        }
-
-        return result;
+    private Object getPropertyImpl(String acmType, boolean cacheOkay ) {
+        return NodeUtil.getNodeProperty( this, acmType, getServices(),
+                                         useFoundationalApi, cacheOkay );
     }
-
     
     public Object getPropertyAtTime( String acmType, Date dateTime ) {
-        Object result = getPropertyImpl( acmType );
+        return getPropertyAtTime( acmType, dateTime, true );
+    }
+    public Object getPropertyAtTime( String acmType, Date dateTime, boolean cacheOkay ) {
+        Object result = getPropertyImpl( acmType, cacheOkay );
         if ( result instanceof NodeRef ) {
             result = NodeUtil.getNodeRefAtTime( (NodeRef)result, dateTime );
         }
@@ -1841,9 +1860,14 @@ public class EmsScriptNode extends ScriptNode implements
     public Pair<Date,String> getLastModifiedAndModifier( Date dateTime ) {
         Set< NodeRef > dependentNodes = new HashSet< NodeRef >();
 
-        Date lastModifiedDate = (Date)getProperty( Acm.ACM_LAST_MODIFIED );
-        String lastModifier = (String)getProperty( "cm:modifier" );
-        
+        // Can't use normal getProperty because we need to bypass the cache.
+        Date lastModifiedDate = (Date)NodeUtil.getNodeProperty( this, Acm.ACM_LAST_MODIFIED,
+                                                                getServices(), useFoundationalApi,
+                                                                false );
+        String lastModifier = (String)NodeUtil.getNodeProperty( this, "cm:modifier",
+                                                                getServices(), useFoundationalApi,
+                                                                false );
+
         // WARNING! TODO -- It should be okay to not pass in the workspace
         // context assuming that a Property is the parent of its value. If a
         // Property's name changes, pointing to the parent workspace for the
@@ -1963,12 +1987,13 @@ public class EmsScriptNode extends ScriptNode implements
      *            Value to set property to
      */
     public < T extends Serializable > boolean setProperty( String acmType, T value ) {
-        return setProperty( acmType, value, 0 );
+        return setProperty( acmType, value, true, 0 );
     }
     public < T extends Serializable > boolean setProperty( String acmType, T value,
+                                                           boolean cacheOkay,
                                                         // count prevents inf loop
                                                         int count ) {
-        logger.debug( "setProperty(acmType=" + acmType + ", value=" + value + ")" );
+        if ( logger.isDebugEnabled() ) logger.debug( "setProperty(acmType=" + acmType + ", value=" + value + ")" );
         boolean success = true;
         if ( useFoundationalApi ) {
             try {
@@ -1977,6 +2002,7 @@ public class EmsScriptNode extends ScriptNode implements
                 services.getNodeService().setProperty( nodeRef,
                                                        createQName( acmType ),
                                                        value );
+                if ( cacheOkay ) NodeUtil.propertyCachePut( getNodeRef(), acmType, value );
                 if ( acmType.equals( Acm.ACM_NAME ) ) {
                     renamed = true;
                     //removeChildrenFromJsonCache();
@@ -2029,7 +2055,8 @@ public class EmsScriptNode extends ScriptNode implements
                         nodeRef = liveRef; // this is
                         if ( comp <= 0 ) {
                             liveRef = null;
-                            success = setProperty( acmType, value, count+1 );
+                            success = setProperty( acmType, value, cacheOkay, count+1 );
+                            if ( cacheOkay ) NodeUtil.propertyCachePut( getNodeRef(), acmType, value );
                             success = true;
                         }
                     }
@@ -2053,6 +2080,7 @@ public class EmsScriptNode extends ScriptNode implements
             transactionCheck();
             getProperties().put( acmType, value );
             save();
+            if ( cacheOkay ) NodeUtil.propertyCachePut( getNodeRef(), acmType, value );
             if ( acmType.equals( Acm.ACM_NAME ) ) {
                 renamed = true;
                 //removeChildrenFromJsonCache();
@@ -3000,9 +3028,9 @@ public class EmsScriptNode extends ScriptNode implements
                 } else {
                     targetRef = aref.getTargetRef();
                 }
-                array.put( services.getNodeService()
-                                   .getProperty( targetRef,
-                                                 createQName( Acm.ACM_ID ) ) );
+                Object p = NodeUtil.getNodeProperty( targetRef, Acm.ACM_ID,
+                                                     services, true, true );
+                array.put( p );
             }
         }
 
@@ -4196,12 +4224,20 @@ public class EmsScriptNode extends ScriptNode implements
         this.workspace = workspace;
         createOrUpdateAspect( "ems:HasWorkspace" );
         // ems:workspace is workspace meta data so dont need dateTime/workspace args
+//        QName qname = createQName( "ems:workspace" );
+//        Serializable propInAlf = services.getNodeService().getProperty( getNodeRef(), qname );
+//        System.out.println(getNodeRef() + " workspace before setting: " + propInAlf);
         NodeRef ref = (NodeRef)getNodeRefProperty( "ems:workspace", null, null );
         if ( workspace != null && !workspace.getNodeRef().equals( ref ) ) {
             setProperty( "ems:workspace", workspace.getNodeRef() );
+//            System.out.println("set workspace");
         } else if ( workspace == null && ref != null ) {
             removeAspect( "ems:HasWorkspace" );
+//            System.out.println("did not set workspace; removed HasWorkspace aspect");
         }
+//        propInAlf = services.getNodeService().getProperty( getNodeRef(), qname );
+//        System.out.println(getNodeRef() + " workspace after setting: " + propInAlf);
+        
         if ( source == null ) {
             source = findSourceInParentWorkspace();
         }
@@ -4282,7 +4318,9 @@ public class EmsScriptNode extends ScriptNode implements
         }
         //makeSureNodeRefIsNotFrozen();  // Doesnt make sense to always call this on "this"
         transactionCheck();
-        nodeService.setProperties( node.getNodeRef(), properties );
+        NodeRef ref = node.getNodeRef();
+        nodeService.setProperties( ref, properties );
+        NodeUtil.propertyCachePut( ref, properties );
 
         // THIS MUST BE CALLED AFTER setProperties()!
         if ( parent.getWorkspace() != null) {
