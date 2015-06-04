@@ -15,6 +15,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -71,9 +72,11 @@ public class FullDocPost extends AbstractJavaWebScript {
 	protected String imgPath;
 	protected Path imageDirName;
 	protected String parentPath;
-	protected String pdfPath;
-	protected String veCssDir;
-	protected String zipPath;
+    protected String pdfPath;
+    protected String coverPath;//NEED FOR COVER
+    protected String veCssDir;//NEED FOR COVER
+    protected String zipPath;
+    protected Date time;
 	
 	public FullDocPost(){
 		super();
@@ -105,6 +108,12 @@ public class FullDocPost extends AbstractJavaWebScript {
 
     public void downloadHtml(String workspaceName, String site, String docId, String timestamp) throws Exception {
     	RuntimeExec exec = new RuntimeExec();
+    	
+    	//NEED FOR COVER
+//    	SimpleDateFormat formatter = new SimpleDateFormat("dd-MMM-yyyy");
+//    	Date d = formatter.parse(timestamp);
+//    	this.setTime(d);
+    	
 		//exec.setProcessDirectory("/opt/local/prerender/node_modules/phantomjs/bin/");	//to do : need to config
 		HostnameGet alfresco = new HostnameGet(this.repository, this.services);
 		String protocol = alfresco.getAlfrescoProtocol();
@@ -175,6 +184,9 @@ public class FullDocPost extends AbstractJavaWebScript {
     	if(hostname.compareToIgnoreCase("localhost")==0){
     		hostname += ":9000";
     	}
+    	else{
+    		hostname += "/alfresco/mmsapp/";
+    	}
     	return hostname;
     }
 
@@ -188,6 +200,64 @@ public class FullDocPost extends AbstractJavaWebScript {
 	public String getHtmlPath(){
 		return this.htmlPath;
 	}
+    //NEED FOR COVER
+    public String getCoverPath(){
+        return this.coverPath;
+    }
+  //NEED FOR COVER
+    private Date getTime(){
+        return this.time;
+    }
+    //NEED FOR COVER
+    public void createCoverPage(String coverDestination) throws IOException{
+        if(!Files.exists(Paths.get(this.htmlPath))) return;
+
+        File htmlFile = new File(this.htmlPath);
+        File coverFile = new File (coverDestination);
+        Document document = Jsoup.parse(htmlFile, "UTF-8", "");
+        if(document == null) return;
+        ArrayList<String> l  = new ArrayList<String>();
+        
+        Elements headers = document.getElementsByTag("mms-transclude-name");
+        for(Element header :headers){
+            l.add(header.text());
+        }
+        String coverHeader = this.fullDocId;
+        if(!l.isEmpty()){
+        coverHeader = l.get(0);
+        }
+        String legalNotice = "Paper copies of this document may not be current and should not be relied on for official purposes. JPL/Caltech proprietary. Not for public release.";
+        String pageLegalNotice = "This Document has not been reviewed for export control. Not for distribution to or access by foreign persons.";
+        String jplName = "Jet Propulsion Laboratory";
+        String caltechName = "California Institute of Technology";
+        Date date = this.getTime();
+                            
+        String coverHtml = "<html>"
+                + "<head><title>" + coverHeader + "</title></head>"
+                + "<body style= \"width:100%; height:100%;\">"
+                    + "<div style=\"top:10%; left:10%; right: 10%; position:absolute;\">"
+                    + "<center><h2>" + coverHeader + "</h2></center>"
+                    +"</div>"
+                    + "<div style=\"top:60%; left:10%; right:10%; position:absolute;\">"
+                    + "<div>" + legalNotice + "<br>"
+                    +   "<i>" + pageLegalNotice + "</i></div>"
+                    +"</div>"                       
+                    + "<div style=\"top:70%; left:10%; position:absolute;\">"
+                    +   "<div>" + date + "</div>"
+                    +"</div>"
+                    +"</div>"
+                    + "<div style=\"top:85%; left:10%; position:absolute;\">"
+                    + "<div>"
+                    + "<img src = \"http://div27.jpl.nasa.gov/2740/files/logos/jpl_logo%28220x67%29.jpg"//http://div27.jpl.nasa.gov/2740/files/logos/JPL-logo_Stacked_Red-Black%28132x64%29.png\" alt=\"JPL Logo\">"
+                    + "<p style= \"color#B6B6B4>" + jplName + "<br><i>" + caltechName + "</i></p>" //did separate jpl/caltech label to always have the stamp on pdf
+                    + "</div>"
+                + "</body>"
+                + "</html>";
+        BufferedWriter bw = new BufferedWriter(new FileWriter(coverFile));
+        bw.write(coverHtml);
+        bw.close();
+    } 
+    
     
     private String getHeadlessUserCredential(){
     	String cred = "admin:admin";
@@ -373,12 +443,18 @@ public class FullDocPost extends AbstractJavaWebScript {
     public void html2pdf()  throws Exception {
     	RuntimeExec exec = new RuntimeExec();
 		exec.setProcessDirectory(this.fullDocGenDir);
+//		createCoverPage(this.coverPath); //NEED FOR COVER
 
 		List<String> command = new ArrayList<String>();
 		command.add("wkhtmltopdf");
 		command.add("-q");
+//        command.add("cover"); //NEED FOR COVER
+//        command.add(this.coverPath); //NEED FOR COVER
+//		command.add("--dump-outline"); 
+//		command.add(Paths.get(this.fullDocDir,"toc.xml").toString());
 		command.add("toc");
-		command.add("wkhtmltopdf/xsl/default.xsl");
+		command.add("--xsl-style-sheet");
+		command.add(Paths.get(this.fullDocGenDir, "wkhtmltopdf/xsl/default.xsl").toString());
 		command.add(this.getHtmlPath());
 		command.add(this.getPdfPath());
 
@@ -554,7 +630,12 @@ public class FullDocPost extends AbstractJavaWebScript {
         	new File(this.imgPath).mkdirs();
         }catch(Exception ex){;}
     }
-
+	
+	//NEED FOR COVER
+    private void setTime(Date t){
+        this.time = t;
+    }
+    
     private void tableToCSV() throws Exception{
 		File input = new File(this.getHtmlPath());
 		try {
