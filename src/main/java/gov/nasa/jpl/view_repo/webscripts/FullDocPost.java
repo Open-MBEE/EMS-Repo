@@ -184,6 +184,9 @@ public class FullDocPost extends AbstractJavaWebScript {
     	if(hostname.compareToIgnoreCase("localhost")==0){
     		hostname += ":9000";
     	}
+    	else{
+    		hostname += "/alfresco/mmsapp/";
+    	}
     	return hostname;
     }
 
@@ -447,8 +450,11 @@ public class FullDocPost extends AbstractJavaWebScript {
 		command.add("-q");
 //        command.add("cover"); //NEED FOR COVER
 //        command.add(this.coverPath); //NEED FOR COVER
+//		command.add("--dump-outline"); 
+//		command.add(Paths.get(this.fullDocDir,"toc.xml").toString());
 		command.add("toc");
-		command.add("wkhtmltopdf/xsl/default.xsl");
+		command.add("--xsl-style-sheet");
+		command.add(Paths.get(this.fullDocGenDir, "wkhtmltopdf/xsl/default.xsl").toString());
 		command.add(this.getHtmlPath());
 		command.add(this.getPdfPath());
 
