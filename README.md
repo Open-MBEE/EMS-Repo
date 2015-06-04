@@ -2,7 +2,7 @@
 
 #AMI environment instructions
 
-import view-repo with git (same instructions as below)
+import EMS-Repo with git (same instructions as below)
 
 update maven project:
 	right click maven project
@@ -17,13 +17,13 @@ this project depends on the BUS projects. To take them out:*
 
 build with maventest in command line
 	
-	cd /home/username/git/alfresco-view-repo
+	cd /home/username/git/EMS-Repo
 	# for those that don't want to load bae/util/sysml projects
 	# also need to remove the src dependencies on those packages in .classpath
-	mvn integration-test -Pamp-to-war -Dmaven.test.skip=true -P mbee-dev
+	mvn integration-test -Pamp-to-war -Dmaven.test.skip=true -Pmbee-dev,community
 	
 	# for those that do want load bae/util/sysml projects
-    mvn integration-test -Pamp-to-war -Dmaven.test.skip=true -P mms-dev
+    mvn integration-test -Pamp-to-war -Dmaven.test.skip=true -Pmms-dev,community
     
 if using the mdk or bae MagicDraw plugins, set up magicdraw path
     Window->Preferences->MagicDraw Installation
@@ -36,7 +36,7 @@ restart eclipse
 
 This project contains the content model and webscripts for accessing and modifying the alfresco repository. 
 
-Location of content model: src/main/amp/config/alfresco/module/view-repo/viewModel.xml
+Location of content model: src/main/amp/config/alfresco/module/mms-repo/viewModel.xml
 
 This is registered by spring config in module-context.xml (which imports another spring config xml)
 
@@ -58,17 +58,17 @@ Eclipse/Maven
 		      & install the first item (Maven Integration for Eclipse WTP (Juno))	
 
     Make sure you have a local checkout of alfresco from git.
-    	- Clone Alfresco-View-Repo from git. To do so: 
+    	- Clone EMS-Repo from git. To do so: 
     	1. Go to Git Repo Perspective in Eclipse
     	2. Click clone a git repository icon in "Git Repositories" menu
-    	3. Copy the Https link from Stash for Alfresco-View-Repo Refractor or Master branch (Use Refractor to set up a working Alfresco; you can switch to other branches later)
+    	3. Copy the Https link from Stash for EMS-Repo Refractor or Master branch (Use Refractor to set up a working Alfresco; you can switch to other branches later)
     	4. Paste into "URI" textbox in Clone Git Repository window in Eclipse
     	5. Change Protocol to HTTPS
     	6. Make sure to enter fields for "User" and "Password" with your username and password
     	7. Click Next, Select the branches you want to clone, and click next again
     	8. Ensure that "Import all existing projects after clone finishes" item is checked & click finish
 
-    Import a maven project from the local ~/git/alfresco-view-repo
+    Import a maven project from the local ~/git/EMS-Repo
         1. Go to Java Perspective in Eclipse
         2. File -> Import ->In dialog window click: Git -> Projects from Git. Click next.
         3. Select Local, Click next.
@@ -83,11 +83,9 @@ Eclipse/Maven
 
         - If errors inhibit the later steps, then delete the project from java perspective, and re-import it from the EGit Perspective as shown above.
         
-    We're using a local libraries that need to be included in your local Maven repository using the following commands.
+    We're using a local libraries that need to be included in your local Maven repository using the following command in each project directory.
     
-    	mvn install:install-file -Dfile=lib/AE.jar -DgroupId=gov.nasa.jpl -DartifactId=AE -Dversion=1.0 -Dpackaging=jar
-        mvn install:install-file -Dfile=lib/mbee_util.jar -DgroupId=gov.nasa.jpl -DartifactId=mbee_util -Dversion=1.0 -Dpackaging=jar
-        mvn install:install-file -Dfile=lib/sysml.jar -DgroupId=gov.nasa.jpl -DartifactId=sysml -Dversion=1.0 -Dpackaging=jar
+    	mvn install
 
     For the bae, sysml, and util projects you will need to update the build.properties file and rebel.xml file with your home directory and folder of where magic draw is installed.  For instance:
         home=/home/gcgandhi
@@ -129,7 +127,7 @@ To run in embedded jetty container and H2 db, (with jrebel and remote debugging!
 
 	export MAVEN_OPTS='-Xms256m -Xmx1G -XX:PermSize=300m -Xdebug -Xrunjdwp:transport=dt_socket,address=10000,server=y,suspend=n -javaagent:/Applications/jrebel/jrebel.jar'
 	
-    mvn integration-test -Pamp-to-war -Dmaven.test.skip=false
+    mvn integration-test -Pamp-to-war -Pmbee-dev,community -Dmaven.test.skip=false
 
 **IMPORTANT:** Check that /etc/hosts has the appropriate IP address for your machine, e.g., the line that starts with 128.149.16.... should match your instance's IP address
     
@@ -154,17 +152,19 @@ For JUnit tests in a single Java class, for example, in MyJavaJUnitTestClass.jav
 
 To update the target/mms-repo-war manually
 
-	mvn package -Pamp-to-war
+	mvn package -P[enterprise|community] -Pamp-to-war
 
 ## Managing Enterprise and Community Builds 
 	
-The default pom.xml builds the community version. To build the enterprise version, use the pom.xml.enterprise, e.g.
+The pom.xml will build both the community and enterprise version. The version is selected by naming the profile of the selected version, for example to choose the enterprise version:
 
-    mvn -f pom.enterprise.xml [goal]
+    mvn -Penterprise [goal]
     
-PLEASE keep pom.xml and pom.xml.enterprise in sync!!!
+To use the mbee-dev and the community profile together use:
 
-*NOTE:* Since Enterprise and Community need a different set of files, each pom has a
+   mvn -Pmbee-dev,community
+
+*NOTE:* Since Enterprise and Community need a different set of files, th pom has a
 copy-resource plugin that copies the files in /resources/[community|enterprise] into the
 appropriate /src directory as part of the validation. Make changes to the appropriate files
 in the /resources/[community|enterprise] directory.
@@ -336,26 +336,26 @@ Note: Following shortcuts are mainly for Linux.
 
 ### Main Files
 
-	[../alfresco-view-repo/src/main/amp/config/alfresco/module/view-repo/context] :
+	[../EMS-Repo/src/main/amp/config/alfresco/module/mms-repo/context] :
 		- mms-service-context.xml : bean scripts used for linking Java or Javascript classes with CRUD requests for various URLs on alfresco
 			* Changes made to mms-service-context.xml can be viewed in class2url.html
 			* Make sure to run class2UrlMapping.py in the same directory to update class2url.html
 	
-	[../alfresco-view-repo/src/main/amp/config/alfresco/extension/templates/webscripts/gov/nasa/jpl/javawebscripts/view/] :
+	[../EMS-Repo/src/main/amp/config/alfresco/extension/templates/webscripts/gov/nasa/jpl/javawebscripts/view/] :
 		- contains descriptor files for various URLs and bean scripts
 			
-	[../alfresco-view-repo/src/main/java/gov/nasa/jpl/view_repo/webscripts/] :
+	[../EMS-Repo/src/main/java/gov/nasa/jpl/view_repo/webscripts/] :
 		- contains Java classes (webscripts) used by the webservice when CRUD requests are made 
 	
-	[../alfresco-view-repo/src/main/amp/config/alfresco/module/view-repo/] 	:
+	[../EMS-Repo/src/main/amp/config/alfresco/module/mms-repo/] 	:
 		- sysmlModel.xml - dictionary/specifications for all SysML types and aspects, and their respective properties; defines content model
 		- emsModel.xml - also defines the content model
 	
-	[../alfresco-view-repo/src/main/java/gov/nasa/jpl/view_repo/util/] :
+	[../EMS-Repo/src/main/java/gov/nasa/jpl/view_repo/util/] :
 		- EmsScriptNode.java : class for model elements 
 			* ingestJson() - for reading from Json object and updating node
 			* toJsonObject () - for writing to Json objects from node
-		- Acm.java : acm = "alfersco content model"; is a static class that has json property names and the alfresco content model types that correspond to them (like DictionaryService)
+		- Acm.java : acm = "alfresco content model"; is a static class that has json property names and the alfresco content model types that correspond to them (like DictionaryService)
 	
 ### Supporting Items:
 	
@@ -401,9 +401,9 @@ You may have problems opening a file resulting in a lot of exceptions and SEVERE
 
 There's a way to specify a different file so that permissions are not an issue.  TODO: What is it?
 
-There are port assignments that must be unique.  Remember that these are specified for the alfresco-view-share as well as the alfresco-view-repo.  You may be able to avoid changing ports if you can configure the server to use a different ip address: http://www.appnovation.com/blog/running-multiple-alfresco-server-instances-same-linux-machine.
+There are port assignments that must be unique.  Remember that these are specified for the EMS-Share as well as the EMS-Repo.  You may be able to avoid changing ports if you can configure the server to use a different ip address: http://www.appnovation.com/blog/running-multiple-alfresco-server-instances-same-linux-machine.
 
-To change ports to 9091 for Alfresco and 10002 for the debugger, run this from the alfresco-view-repo directory:
+To change ports to 9091 for Alfresco and 10002 for the debugger, run this from the EMS-Repo directory:
 
     . switchPorts.sh 9091 10002
 
@@ -428,7 +428,7 @@ The port for connecting a debugger must also be unique.  You probably have this 
 
 There are instructions elsewhere on this page on how to change MAVEN_OPTS.
 
-You also need to set the RMI ports.  By default, these port numbers start with 50500.  If you don't set these to be different than a running server, you'll see "java.rmi.server.ExportException: Port already in use: 50501," and alfresco won't work.  You can assign the ports to 0 so that the they are chosen randomly from unused ports.  Edit view-repo/src/test/properties/local/alfresco-global.properties and add/edit to include the following assignments: 
+You also need to set the RMI ports.  By default, these port numbers start with 50500.  If you don't set these to be different than a running server, you'll see "java.rmi.server.ExportException: Port already in use: 50501," and alfresco won't work.  You can assign the ports to 0 so that the they are chosen randomly from unused ports.  Edit EMS-Repo/src/test/properties/local/alfresco-global.properties and add/edit to include the following assignments: 
 
     avm.rmi.service.port=0
     avmsync.rmi.service.port=0
