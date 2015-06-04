@@ -51,6 +51,8 @@ public class AllFlagsGet extends FlagSet {
             EmsScriptNode.versionCacheDebugPrint = val;
         } else if (path.equalsIgnoreCase("versionCache")) {
             NodeUtil.doVersionCaching = val;
+        } else if (path.equalsIgnoreCase("skipWorkspacePermissionCheck")) {
+            NodeUtil.skipWorkspacePermissionCheck = val;
         } 
     }
 
@@ -86,7 +88,9 @@ public class AllFlagsGet extends FlagSet {
             return EmsScriptNode.versionCacheDebugPrint;
         } else if (path.equalsIgnoreCase("versionCache")) {
             return NodeUtil.doVersionCaching;
-        }
+        } else if (path.equalsIgnoreCase("skipWorkspacePermissionCheck")) {
+            return NodeUtil.skipWorkspacePermissionCheck;
+        } 
         return false;
     }
 
@@ -122,7 +126,9 @@ public class AllFlagsGet extends FlagSet {
             return "versionCacheDebugPrint";
         } else if (path.equalsIgnoreCase("versionCache")) {
             return "doVersionCaching";
-        }
+        } else if (path.equalsIgnoreCase("skipWorkspacePermissionCheck")) {
+            return "skipWorkspacePermissionCheck";
+        } 
         return null;
     }
 
