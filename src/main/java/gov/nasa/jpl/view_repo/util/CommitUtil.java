@@ -8,6 +8,7 @@ import gov.nasa.jpl.view_repo.webscripts.HostnameGet;
 import gov.nasa.jpl.view_repo.webscripts.WebScriptUtil;
 import gov.nasa.jpl.view_repo.webscripts.util.ConfigurationsWebscript;
 
+import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
@@ -729,7 +730,7 @@ public class CommitUtil {
         
         if (restConnection != null) {
             try {
-                restStatus = restConnection.publish( deltaJson, new HostnameGet().getAlfrescoHost(), workspaceId, projectId);
+                restStatus = restConnection.publish( deltaJson, InetAddress.getLocalHost().getHostName(), workspaceId, projectId);
             } catch (Exception e) {
                 logger.warn("REST connection not available");
                 return false;
