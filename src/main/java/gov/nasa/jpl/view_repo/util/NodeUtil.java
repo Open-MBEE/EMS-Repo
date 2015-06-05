@@ -1077,6 +1077,7 @@ public class NodeUtil {
         usedSimpleCache = cacheResults.cachedUsed == CacheUsed.SIMPLE;
         usedFullCache = cacheResults.cachedUsed == CacheUsed.FULL;
         emptyEntriesInFullCacheOk = cacheResults.emptyEntriesInFullCacheOk;
+        exactMatch = cacheResults.exactMatch;
         if (logger.isDebugEnabled()) logger.debug("cache results = " + results );
 
         boolean wasCached = false;
@@ -1588,17 +1589,55 @@ public class NodeUtil {
 //        public boolean usedFullCache = false;
         public boolean emptyEntriesInFullCacheOk = true;
         public ArrayList< NodeRef > results = null;
+        public boolean knowIsIdSearch = false;
+        public boolean knowIsNotIdSearch = false;
+        public boolean exactMatch = true;
+        protected String prefix;
+        public boolean checkIsValidExactMatch = false;
+
+        public CacheResults() {
+        }
 
         public CacheResults( boolean useSimpleCache, boolean useFullCache,
                              CacheUsed cacheUsed,
                              boolean emptyEntriesInFullCacheOk,
-                             ArrayList< NodeRef > results ) {
+                             ArrayList< NodeRef > results,
+                             String prefix,
+                             boolean knowIsIdSearch,
+                             boolean knowIsNotIdSearch,
+                             boolean exactMatch) {
             super();
             this.useSimpleCache = useSimpleCache;
             this.useFullCache = useFullCache;
             this.cachedUsed = cacheUsed;
             this.emptyEntriesInFullCacheOk = emptyEntriesInFullCacheOk;
             this.results = results;
+            this.knowIsIdSearch = knowIsIdSearch;
+            this.knowIsNotIdSearch = knowIsNotIdSearch;
+            this.exactMatch = exactMatch;
+        }
+        
+        public boolean isIdSearch() {
+            if ( knowIsIdSearch ) return true;
+            if ( knowIsNotIdSearch ) return false;
+            if ( Utils.isNullOrEmpty( prefix ) ) return false;
+            if ( NodeUtil.isIdSearch( prefix, false ) ) {
+                knowIsIdSearch = true;
+                return true;
+            }
+            knowIsNotIdSearch = true;
+            return false;
+        }
+        
+        boolean isExactMatch() {
+            if ( checkIsValidExactMatch ) return exactMatch;
+            if ( exactMatch == false ) return false;
+            
+            exactMatch = ( knowIsIdSearch || 
+                           ( !SearchType.ASPECT.prefix.equals( prefix ) &&
+                             !SearchType.TYPE.prefix.equals( prefix ) ) );
+            checkIsValidExactMatch = true;
+            return exactMatch;
         }
     }
 
@@ -1656,16 +1695,17 @@ public class NodeUtil {
      * @param justFirst
      * @param includeDeleted
      * @param siteName
+     * @param cacheResults 
      * @return
      */
     public static boolean simpleCacheOkay( String prefix,
-                                           boolean knowIsIdSearch,
                                            boolean ignoreWorkspace,
                                            WorkspaceNode workspace,
                                            Date dateTime,
                                            boolean justFirst,
                                            boolean includeDeleted,
-                                           String siteName ) {
+                                           String siteName,
+                                           CacheResults cacheResults ) {
         
         // Only use the simple cache if in the master workspace, just getting a single node, not
         // looking for deleted nodes, and searching by cm:name or sysml:id.  Otherwise, we
@@ -1674,7 +1714,7 @@ public class NodeUtil {
         boolean useSimpleCache = doSimpleCaching && !ignoreWorkspace && !includeDeleted
                          && workspace == null && dateTime == null
                          && justFirst && siteName == null
-                         && isIdSearch(prefix, knowIsIdSearch);
+                         && cacheResults.isIdSearch();
         return useSimpleCache;
     }
     
@@ -1696,12 +1736,12 @@ public class NodeUtil {
      */
     public static boolean fullCacheOkay( boolean usingSimpleCache,
                                          String prefix,
-                                         boolean knowIsIdSearch,
                                          boolean ignoreWorkspace,
                                          WorkspaceNode workspace,
                                          boolean onlyThisWorkspace,
                                          boolean dateInPast,
-                                         String siteName ) {
+                                         String siteName,
+                                         CacheResults cacheResults ) {
         
         // Conditions under which the full cache can be used:
         // 1. If dateTime != null and dateTime < now then the cache may be
@@ -1724,7 +1764,7 @@ public class NodeUtil {
                        ( dateInPast ||
                          ( !ignoreWorkspace &&
                            ( workspace == null || onlyThisWorkspace ) &&
-                           isIdSearch(prefix, knowIsIdSearch) ) );
+                             cacheResults.isIdSearch() ) );
         return useFullCache;
     }
 
@@ -1747,20 +1787,24 @@ public class NodeUtil {
 //        boolean usedFullCache = false;
         boolean emptyEntriesInFullCacheOk = false;
         ArrayList< NodeRef > results = null;
+        CacheResults cacheResults = new CacheResults();
+        cacheResults.prefix = prefix;
+        cacheResults.exactMatch = exactMatch;
         if ( doSimpleCaching || doFullCaching ) {
 
-            boolean idSearch = false;
+            //boolean idSearch = false;
             boolean dateInPast = ( dateTime != null && dateTime.before( new Date() ) );
             
             useSimpleCache =
-                    simpleCacheOkay( prefix, idSearch, ignoreWorkspace,
+                    simpleCacheOkay( prefix, ignoreWorkspace,
                                      workspace, dateTime, justFirst,
-                                     includeDeleted, siteName );
+                                     includeDeleted, siteName, cacheResults );
 
             useFullCache =
-                    fullCacheOkay( useSimpleCache, prefix, idSearch,
+                    fullCacheOkay( useSimpleCache, prefix,
                                    ignoreWorkspace, workspace,
-                                   onlyThisWorkspace, dateInPast, siteName );
+                                   onlyThisWorkspace, dateInPast, siteName,
+                                   cacheResults );
             
             emptyEntriesInFullCacheOk = addEmptyEntriesToFullCache && useFullCache && dateInPast;
             
@@ -1774,7 +1818,7 @@ public class NodeUtil {
             } else if ( doFullCaching && useFullCache ) {
                 results = getFullCachedElements( specifier, prefix, ignoreWorkspace,
                                              workspace, onlyThisWorkspace,
-                                             dateTime, justFirst, exactMatch,
+                                             dateTime, justFirst, cacheResults.isExactMatch(),
                                              includeDeleted, siteName );
                 if ( results != null && ( emptyEntriesInFullCacheOk || !results.isEmpty() ) ) {
                     //usedFullCache = true;
@@ -1782,10 +1826,14 @@ public class NodeUtil {
                 }
             }
         }
-        return new CacheResults( useSimpleCache, useFullCache, cacheUsed, //usedSimpleCache,
-                                 //usedFullCache,
-                                 emptyEntriesInFullCacheOk,
-                                 results );
+        cacheResults.cachedUsed = cacheUsed;
+        cacheResults.results = results;
+        cacheResults.useFullCache = useFullCache;
+        cacheResults.useSimpleCache = useSimpleCache;
+        cacheResults.emptyEntriesInFullCacheOk = emptyEntriesInFullCacheOk;
+        //CacheResults newCacheResults = new CacheResults( useSimpleCache, useFullCache, cacheUsed, emptyEntriesInFullCacheOk, results, prefix, cacheResults.knowIsIdSearch, cacheResults.knowIsNotIdSearch, cacheResults.isExactMatch() );
+        //newCacheResults.checkIsValidExactMatch = cacheResults.checkIsValidExactMatch;
+        return cacheResults;
     }
     
     // both simple and full caches
@@ -1855,17 +1903,22 @@ public class NodeUtil {
         boolean includeDeleted = node.isDeleted();
         String siteName = null;        
         boolean emptyEntriesInFullCacheOk = NodeUtil.addEmptyEntriesToFullCache;
-        
+
+        CacheResults cacheResults = new CacheResults();  // just for computing exactMatch in this case
+        cacheResults.prefix = prefix;
+        cacheResults.exactMatch = exactMatch;
+
         boolean useSimpleCache =
-                simpleCacheOkay( prefix, true, ignoreWorkspace, workspace,
-                                 dateTime, justFirst, includeDeleted, siteName );
+                simpleCacheOkay( prefix, ignoreWorkspace, workspace, dateTime,
+                                 justFirst, includeDeleted, siteName, cacheResults );
         boolean useFullCache =
-                fullCacheOkay( useSimpleCache, prefix, true, ignoreWorkspace,
-                               workspace, onlyThisWorkspace, false, siteName );
+                fullCacheOkay( useSimpleCache, prefix, ignoreWorkspace,
+                               workspace, onlyThisWorkspace, false, siteName,
+                               cacheResults );
         cacheUsed =
                 putNodesInCache( nodeRefs, specifier, prefix, ignoreWorkspace,
                                  workspace, onlyThisWorkspace, dateTime,
-                                 justFirst, exactMatch, includeDeleted,
+                                 justFirst, cacheResults.isExactMatch(), includeDeleted,
                                  siteName, emptyEntriesInFullCacheOk,
                                  useSimpleCache, useFullCache );
 //        onlyThisWorkspace = !onlyThisWorkspace;
