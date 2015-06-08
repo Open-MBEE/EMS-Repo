@@ -2988,7 +2988,7 @@ public class ModelPost extends AbstractJavaWebScript {
             }
 
             if (mySiteNode == null || !mySiteNode.exists()) {
-                log(Level.ERROR, HttpServletResponse.SC_NOT_FOUND, "Site %s could not be found in workspace %s", siteName, workspace.toString());
+                log(Level.ERROR, HttpServletResponse.SC_NOT_FOUND, "Site %s could not be found in workspace %s", siteName, WorkspaceNode.getName( workspace) );
                 return null;
             }
         }
