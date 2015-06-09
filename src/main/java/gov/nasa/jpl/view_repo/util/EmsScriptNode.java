@@ -3371,20 +3371,15 @@ public class EmsScriptNode extends ScriptNode implements
 
         // special handling for valueType == ElementValue
         if ( values == null ) {
+            if ( logger.isDebugEnabled()) logger.debug( "null property values for "
+                    + acmProperty );
             if ( Acm.ACM_ELEMENT_VALUE.equals( acmProperty ) ) {
                 values =
                         getPropertyValuesFromJson( PropertyType.NODE_REF,
                                                    array, getWorkspace(), null );
             } else {
-                Debug.error( true, false,
-                             "*$*$*$ null array of property values for "
-                                     + acmProperty );
                 return changed;
             }
-        }
-        if ( values == null ) {
-            if ( logger.isDebugEnabled()) logger.debug( "null property values for "
-                                                    + acmProperty );
         }
 
         // only change if old list is different than new

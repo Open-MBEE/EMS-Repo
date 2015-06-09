@@ -1573,13 +1573,8 @@ public class ModelPost extends AbstractJavaWebScript {
 
             msg = "Error! Tried to post concurrent edit to element, "
                             + element + ".\n";
-            log(Level.WARN,"%s  --> lastModified = %s  --> lastModString = %s  --> elementJson = %s", 
-                    msg, lastModified, lastModString, elementJson);
-            
-//            log( LogLevel.WARNING,
-//                 msg + "  --> lastModified = " + lastModified
-//                 + "  --> lastModString = " + lastModString
-//                 + "  --> elementJson = " + elementJson );
+            log(Level.WARN,"%s  --> lastModified = %s  --> lastModString = %s", 
+                    msg, lastModified, lastModString);
         }
 
         // Compare last modified to last modified time:
@@ -2988,7 +2983,7 @@ public class ModelPost extends AbstractJavaWebScript {
             }
 
             if (mySiteNode == null || !mySiteNode.exists()) {
-                log(Level.ERROR, HttpServletResponse.SC_NOT_FOUND, "Site %s could not be found in workspace %s", siteName, workspace.toString());
+                log(Level.ERROR, HttpServletResponse.SC_NOT_FOUND, "Site %s could not be found in workspace %s", siteName, WorkspaceNode.getName( workspace) );
                 return null;
             }
         }
