@@ -1573,13 +1573,8 @@ public class ModelPost extends AbstractJavaWebScript {
 
             msg = "Error! Tried to post concurrent edit to element, "
                             + element + ".\n";
-            log(Level.WARN,"%s  --> lastModified = %s  --> lastModString = %s  --> elementJson = %s", 
-                    msg, lastModified, lastModString, elementJson);
-            
-//            log( LogLevel.WARNING,
-//                 msg + "  --> lastModified = " + lastModified
-//                 + "  --> lastModString = " + lastModString
-//                 + "  --> elementJson = " + elementJson );
+            log(Level.WARN,"%s  --> lastModified = %s  --> lastModString = %s", 
+                    msg, lastModified, lastModString);
         }
 
         // Compare last modified to last modified time:
