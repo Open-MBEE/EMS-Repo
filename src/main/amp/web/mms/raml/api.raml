@@ -216,7 +216,7 @@ resourceTypes:
   description: All resources are "namespaced" by the workspace (aka branch).
   type: readCollection
   /{workspaceId}:
-    #type: collection   # delete is not implemented yet
+    type: collection
     uriParameters:
       workspaceId:
         description: Workspace ID under consideration. "master" is always defined and is the
@@ -290,8 +290,12 @@ resourceTypes:
 #              post:
 #              get:
         /projects:
-          post: 
-          #type: readCollection
+          post:
+            description: Post a project using the supplied json
+            body:
+              application/json:
+                schema: projects
+          type: readCollection
           #get:
           #  description: Retrieve all projects for which user has read permissions
           #  responses:
@@ -377,6 +381,10 @@ resourceTypes:
                   200:
     /projects:
       post:
+        description: Post a project using the supplied json
+        body:
+          application/json:
+            schema: projects
       /{projectId}:
         type: readCollection
         uriParameters:

@@ -3,7 +3,7 @@
     "type": "object",
     "description": "Projects listing specification",
     "properties": {
-        "projects": {
+        "elements": {
             "type": "array",
             "items": {
                 "type": "object",
@@ -29,9 +29,14 @@
                     "type": "string",
                     "description": "Human readable name of the project"
                 },
-                "projectVersion": {
-                    "type": "string",
-                    "description": "MD project version last exported. TODO: may go away"
+                "specialization": {
+                    "properties": {
+                        "type": { "enum": ["Project"] },
+                        "projectVersion": {
+                            "type": "string"
+                            "description": "MD project version last exported. TODO: may go away"
+                        }
+                    }
                 }
             }
         }
