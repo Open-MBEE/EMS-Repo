@@ -107,6 +107,16 @@ traits:
         timestamp2:
           description: The target workspace timestamp to use in comparison (if not specified, gets latest)
           type: date
+  - workspaceable:
+        queryParameters:
+            sourceWorkspace:
+              description: The source workspace to branch from 
+              type: string
+            copyTime:
+              description: The time to branch this workspace off the source workspace
+              type: date
+            follow:
+              description: Flag to indicate using a following branch.  Will ignore copyTime in this case.
           
 resourceTypes:
   - readCollection:
@@ -114,7 +124,8 @@ resourceTypes:
       usage: Resources with read capabilities and standard responses
       description: Read operations for <<resourcePathName>>
       get:
-          is: [recursable, searchable, sliceable]
+          #is: [recursable, searchable, sliceable]
+          is: [recursable, sliceable] # Not searchable yet
           description: Read operation for <<resourcePathName>>
           responses:
               200:
@@ -214,21 +225,29 @@ resourceTypes:
   
 /workspaces:
   description: All resources are "namespaced" by the workspace (aka branch).
-  type: readCollection
+  #type: readCollection  # doesnt support any of the query parameters
+  get:
+      description: Get all the workspaces
+  post:
+      description: Post a workspace using the query parameters and supplied json
+      body:
+        application/json:
+          schema: workspaces
+      is: [workspaceable]
   /{workspaceId}:
-    type: collection
+    #type: collection  # Doesnt support all the query parameters yet
     uriParameters:
       workspaceId:
         description: Workspace ID under consideration. "master" is always defined and is the
                      "trunk" workspace to which all other workspaces should be merged.
                      "master" is what is contained at the Alfresco sites level.
     post:
-      queryParameters:
-        sourceWorkspace:
-          description: The source workspace to branch from 
-          type: string
+      description: Post a workspace using the query parameters
+      is: [workspaceable]
     get:
       description: Get the specified workspace
+    delete:
+      description: Delete the specified workspace
     /elements:
       type: collection
       /{elementId}:
@@ -258,16 +277,17 @@ resourceTypes:
           post:
           get:
     /sites:
-      type: readCollection
+      #type: readCollection  # Doesnt have all these params yet
+      is: [sliceable]
       get:
         description: Retrieve all sites for which user has read permissions
         responses:
           200:
       /{siteId}:
-        get:
-        uriParameters:
-          siteId:
-            description: Alfresco site identifier for the project under consideration
+#        get:
+#        uriParameters:
+#          siteId:
+#            description: Alfresco site identifier for the project under consideration
 #        /configurations:
 #          #type: collection
 #          get:
@@ -371,7 +391,9 @@ resourceTypes:
         #      description: Successfully reverted the changeset
     /artifacts:
       /{artifactId}:
+        post:
         get:
+          is: [sliceable]
     /products:
         /{productId}:
             /views:
@@ -393,7 +415,10 @@ resourceTypes:
     /search:
       description: Service for searching for elements in a particular workspace
       get:
+        is: [sliceable]
         queryParameters:
+          propertyName:
+            description: The property name to search for
           keyword:
             description: Mandatory field for specifying what to look for.
           filters:

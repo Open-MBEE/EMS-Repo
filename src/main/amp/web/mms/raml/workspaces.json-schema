@@ -76,7 +76,13 @@
 				    "description": "Last modification time of workspace"
 			    },
 
-				"permissions": 
+                "description": 
+                {
+                    "type": "string",
+                    "description": "The workspace description."
+                },
+                
+				"permission": 
 				{
 					"type": "string",
                     "description": "Whether the workspaces has read or write permissions"
