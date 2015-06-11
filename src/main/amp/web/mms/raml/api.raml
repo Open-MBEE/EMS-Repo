@@ -1,7 +1,5 @@
 #%RAML 0.8
----
-# NOTE: to import into SOAPUI, change all the schema references to '|' since it
-#       can't find them and to remove the examples since it can't parse them
+
 title: mms
 version: v1.0
 mediaType: application/json
@@ -19,26 +17,25 @@ securitySchemes:
       type: Basic Authentication
 
 schemas:
-  # these all return elements - search may need to be paged
-  - elements: !include elements.json-schema
-  - views:    !include elements.json-schema
-  - products: !include elements.json-schema
+  - elements: |
+  - views:    |
+  - products: |
 
-  - configurations: !include configurations.json-schema
-  - projects:       !include projects.json-schema
-  - snapshots:      !include snapshots.json-schema
+  - configurations: |
+  - projects:       |
+  - snapshots:      |
     
-  - sites:       !include sites.json-schema
-  - workspaces:  !include workspaces.json-schema
+  - sites:       |
+  - workspaces:  |
     
-  - diff:        !include diff.json-schema
-  - client:      !include client.json-schema
+  - diff:        |
+  - client:      |
     
-  - connections: !include connections.json-schema
+  - connections: |
   
   # include post/ put and delete responses
-  #- elementsResponse: !include postResponse.json-schema
-  #- viewsResponse: !include postResponse.json-schema
+  #- elementsResponse: |
+  #- viewsResponse: |
 traits:
   - backgroundable:
       description: Aspect for resources that can be created/updated in the asynchronously in
@@ -222,6 +219,7 @@ resourceTypes:
             schema: connections
         responses:
           200:
+          	#description
   
 /workspaces:
   description: All resources are "namespaced" by the workspace (aka branch).
@@ -258,11 +256,15 @@ resourceTypes:
     /configurations:
       #type: collection
       get:
+      	description: Get all configuration sets for a specified workspace #in ConfigurationGet it says for site, but should it be for workspace instead
       post:
+      	description: Post a configuration set for a specified #site in ConfigurationGet it says for site, but should it be for workspace instead
       /{configurationId}:
         #type: collection
         delete:
+        	description: Delete the configuration set specified by the configuration ID
         get:
+        	description: Get the configuration using the configuration ID
         uriParameters:
           configurationId:
             description: ID for the configuration under consideration
@@ -270,12 +272,17 @@ resourceTypes:
           description: Get products for the specified configuration
           #type: collection
           post:
+          	description: Post a product for the specified configuration set
           get:
+          	description: Get products for specified configuration set
         /snapshots:
-          description: Get snapshots for the specified configuration
+          description: Handles creation of a snapshot or generation snapshot elements for the specified configuration set
+                  #old description said the following but SnapshotPost.java says the former #Get snapshots for the specified configuration
           #type: collection
           post:
-          get:
+          	description: Post a snapshot or generate artificats for the specified configuration set
+          get: #does this exist #i dont see SnapshotGet.java but there is like snapshot.get.desc.xml and snapshot.get.json.ftl
+          	description: Get snapshots for the specified configuration set 
     /sites:
       #type: readCollection  # Doesnt have all these params yet
       is: [sliceable]
@@ -283,32 +290,19 @@ resourceTypes:
         description: Retrieve all sites for which user has read permissions
         responses:
           200:
+          	#body:
+          		#application/json:
+          			#schema: <<resourcePathName>>
+          	#description: Site retrieval was successful 
+          	
+          401:
+                description: User does not have read permissions to <<resourcePathName>> #User does not have read permissions for retriving sites
       /{siteId}:
-#        get:
-#        uriParameters:
-#          siteId:
+#       uriParameters:
+          siteId:
 #            description: Alfresco site identifier for the project under consideration
-#        /configurations:
-#          #type: collection
-#          get:
-#          post:
-#          /{configurationId}:
-#            #type: collection
-#            delete:
-#            get:
-#            uriParameters:
-#              configurationId:
-#                description: ID for the configuration under consideration
-#            /products:
-#              description: Get products for the specified configuration
-#              #type: collection
-#              post:
-#              get:
-#            /snapshots:
-#              description: Get snapshots for the specified configuration
-#              #type: collection
-#              post:
-#              get:
+		get:
+			description: Retrieve specified site for which user has read permissions
         /projects:
           post:
             description: Post a project using the supplied json
@@ -325,6 +319,14 @@ resourceTypes:
             uriParameters:
               projectId:
                 description: MD project ID for the project under consideration
+            get:
+            	description: Retrieve specified project for which user has read permissions
+            responses:
+            	200: 
+            		description: Retrieval of project was successfully retrieved
+            	401:
+            		description: User does not have read permissions to <<resourcePathName>> #User does not have read permissions for retriving sites
+            	
         /products:
           #type: collection
           post:
