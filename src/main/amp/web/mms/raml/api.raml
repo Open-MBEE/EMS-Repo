@@ -290,11 +290,15 @@ resourceTypes:
     /configurations:
       #type: collection
       get:
+          description: Get all configuration sets for a specified workspace
       post:
+          description: Post a configuration set for a specified workspace
       /{configurationId}:
         #type: collection
         delete:
+            description: Delete the configuration set specified by the configuration ID
         get:
+            description: Get the configuration set using the configuration ID
         uriParameters:
           configurationId:
             description: ID for the configuration under consideration
@@ -302,7 +306,9 @@ resourceTypes:
           description: Get products for the specified configuration
           #type: collection
           post:
+              description: Post a product for the specified configuration set
           get:
+              description: Get products for specified configuration set
         /snapshots:
           description: Get snapshots for the specified configuration
           #type: collection
@@ -355,7 +361,7 @@ resourceTypes:
           /{projectId}:
             #type: readCollection
             get:
-              description: Retrieve the specified project
+              description: Retrieve specified project for which user has read permissions
               is: [sliceable]
             uriParameters:
               projectId:
@@ -370,7 +376,9 @@ resourceTypes:
           /{productId}:
             #type: collection
             post:
+                description: Post products to specified site
             get:
+              description: Retrieve all products for which user has read permissions
               is: [productable, sliceable]
             uriParameters:
               productId:
@@ -381,7 +389,9 @@ resourceTypes:
               description: Scoped under /configurations and /products
               #type: collection
               get:
+                description: Get a snapshot of a specified product
               post:
+                description: Post a snapshot of a specified product
               /{snapshotId}:
                 type: collection
                 uriParameters:
@@ -389,17 +399,20 @@ resourceTypes:
                     description: ID for the snapshot under consideration
         /elements:
             post: 
+             description: Post elements to specified site
              is: [postable]
         /artifacts:
           /{artifactId}:
             post:
-                description: Post artifact with {artifactId}
+                description: Post artifact to specified site
     /views:
       #type: collection
       post:
+          description: Post views to a specified workspace
       /{viewId}:
         #type: collection
         get:
+          description: Get a specified view from a workspace
           is: [sliceable]
         uriParameters:
           viewId:
