@@ -3849,8 +3849,10 @@ public class EmsScriptNode extends ScriptNode implements
     }
 
     /**
-     * Checks whether user has permissions to the node and logs results and
-     * status as appropriate
+     * Checks whether the user making the web request (not the run-as user) has
+     * permissions to the node and logs results and status as appropriate. If a
+     * response object is supplied, a warning is generated when the user does
+     * not have the permission.
      *
      * @param permissions
      *            Permissions to check
@@ -3898,6 +3900,18 @@ public class EmsScriptNode extends ScriptNode implements
         return true;
     }
 
+    /**
+     * Checks whether the user making the web request (not the run-as user) has
+     * permissions to the node and logs results and status as appropriate.
+     *
+     * @param permission
+     *            the permission to check
+     *
+     * @return whether the user has the
+     *            permission for this node
+     *
+     * @see org.alfresco.repo.jscript.ScriptNode#hasPermission(java.lang.String)
+     */
     @Override
     public boolean hasPermission( String permission ) {
         String realUser = AuthenticationUtil.getFullyAuthenticatedUser();

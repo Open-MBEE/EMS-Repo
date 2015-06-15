@@ -12,6 +12,7 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.apache.log4j.*;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -80,6 +81,10 @@ public class MmsDiffGet extends AbstractJavaWebScript {
             return results;
         }
 
+        // to make sure no permission issues, run as admin
+        String originalUser = NodeUtil.getUserName();
+        AuthenticationUtil.setRunAsUser( "admin" );
+
         WorkspaceNode ws1, ws2;
         String workspace1 = req.getParameter( "workspace1" );
         String workspace2 = req.getParameter( "workspace2" );
@@ -105,6 +110,8 @@ public class MmsDiffGet extends AbstractJavaWebScript {
             e.printStackTrace();
             results.put("res", createResponseJson());
         }
+
+        AuthenticationUtil.setRunAsUser( originalUser );
 
         status.setCode(responseStatus.getCode());
 
