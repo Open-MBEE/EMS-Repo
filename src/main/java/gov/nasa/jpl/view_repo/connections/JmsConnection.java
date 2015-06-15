@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Map;
 
+import gov.nasa.jpl.view_repo.util.CommitUtil;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
 
 import javax.jms.Connection;
@@ -58,6 +59,12 @@ public class JmsConnection implements ConnectionInterface {
     }
     
     public JmsConnection() {
+        // create by default
+        if (connectionMap.isEmpty()) {
+            initConnectionInfo( CommitUtil.TYPE_BRANCH );
+            initConnectionInfo( CommitUtil.TYPE_DELTA );
+            initConnectionInfo( CommitUtil.TYPE_MERGE );
+        }
     }
     
     protected String getHostname() {
@@ -123,9 +130,6 @@ public class JmsConnection implements ConnectionInterface {
     
     public boolean publishMessage(String msg, String eventType) {
         ConnectionInfo ci = connectionMap.get( eventType );
-        if (ci == null ) {
-            ci = initConnectionInfo(eventType);
-        }
             
         if ( ci.uri == null) return false;
 
@@ -226,13 +230,28 @@ public class JmsConnection implements ConnectionInterface {
         return json;
     }
 
+    /**
+     * Handle single and multiple connections embedded as connections array or not
+     */
     public void ingestJson(JSONObject json) {
+        if (json.has( "connections" )) {
+            JSONArray connections = json.getJSONArray( "connections" );
+            for (int ii = 0; ii < connections.length(); ii++) {
+                JSONObject connection = connections.getJSONObject( ii );
+                ingestConnectionJson(connection);
+            }
+        } else {
+            ingestConnectionJson(json);
+        }
+    }
+    
+    public void ingestConnectionJson(JSONObject json) {
         String eventType = null;
         if (json.has( "eventType" )) {
             eventType = json.isNull( "eventType" ) ? null : json.getString( "eventType" );
         }
         if (eventType == null) {
-            eventType = "delta";
+            eventType = CommitUtil.TYPE_DELTA;
         }
         
         ConnectionInfo ci;
