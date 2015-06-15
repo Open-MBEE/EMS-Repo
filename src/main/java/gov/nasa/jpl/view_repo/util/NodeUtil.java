@@ -3181,11 +3181,14 @@ public class NodeUtil {
         return newSet1;
     }
 
-    public static List< NodeRef > getNodeRefs( Collection< EmsScriptNode > nodes ) {
+    public static List< NodeRef > getNodeRefs( Collection< EmsScriptNode > nodes,
+                                               boolean checkReadPermissions ) {
         List< NodeRef > refs = new ArrayList< NodeRef >();
         for ( EmsScriptNode node : nodes ) {
-            NodeRef ref = node.getNodeRef();
-            if ( ref != null ) refs.add( ref );
+            if ( !checkReadPermissions || node.checkPermissions( PermissionService.READ ) ) {
+                NodeRef ref = node.getNodeRef();
+                if ( ref != null ) refs.add( ref );
+            }
         }
         return refs;
     }
