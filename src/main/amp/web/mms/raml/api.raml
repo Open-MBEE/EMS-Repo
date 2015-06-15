@@ -117,6 +117,32 @@ traits:
               type: date
             follow:
               description: Flag to indicate using a following branch.  Will ignore copyTime in this case.
+  - postable:
+        queryParameters:
+          evaluate:
+            description: Flag to indicate to evaluate the posted expression
+            type: boolean
+          background:
+            description: Flag to run the post in the background
+            type: boolean
+          fix:
+            description: Flag to indicate to solve the posted constraint
+            type: boolean
+          expression:
+            description: A expression to post
+            type: string
+          suppressElementJson:
+            description: Flag to suppress json being returned by the call
+            type: boolean
+  - productable:
+      queryParameters:
+        recurse:
+          description: If true, finds all elements recursively based on containment hierarchy.
+          type: boolean
+        simple:
+          description: If true, returns a simple json
+          type: boolean
+        
           
 resourceTypes:
   - readCollection:
@@ -246,10 +272,16 @@ resourceTypes:
       is: [workspaceable]
     get:
       description: Get the specified workspace
+      queryParameters:
+          deleted:
+            description: If true, finds deleted workspaces also
+            type: boolean
     delete:
       description: Delete the specified workspace
     /elements:
       type: collection
+      post:
+          is: [postable]
       /{elementId}:
         type: collection
         uriParameters:
@@ -258,11 +290,15 @@ resourceTypes:
     /configurations:
       #type: collection
       get:
+          description: Get all configuration sets for a specified workspace
       post:
+          description: Post a configuration set for a specified workspace
       /{configurationId}:
         #type: collection
         delete:
+            description: Delete the configuration set specified by the configuration ID
         get:
+            description: Get the configuration set using the configuration ID
         uriParameters:
           configurationId:
             description: ID for the configuration under consideration
@@ -270,7 +306,9 @@ resourceTypes:
           description: Get products for the specified configuration
           #type: collection
           post:
+              description: Post a product for the specified configuration set
           get:
+              description: Get products for specified configuration set
         /snapshots:
           description: Get snapshots for the specified configuration
           #type: collection
@@ -321,7 +359,10 @@ resourceTypes:
           #  responses:
           #    200:
           /{projectId}:
-            type: readCollection
+            #type: readCollection
+            get:
+              description: Retrieve specified project for which user has read permissions
+              is: [sliceable]
             uriParameters:
               projectId:
                 description: MD project ID for the project under consideration
@@ -335,7 +376,10 @@ resourceTypes:
           /{productId}:
             #type: collection
             post:
+                description: Post products to specified site
             get:
+              description: Retrieve all products for which user has read permissions
+              is: [productable, sliceable]
             uriParameters:
               productId:
                 description: Sysml ID for the product (document) under consideration
@@ -345,30 +389,38 @@ resourceTypes:
               description: Scoped under /configurations and /products
               #type: collection
               get:
+                description: Get a snapshot of a specified product
               post:
+                description: Post a snapshot of a specified product
               /{snapshotId}:
                 type: collection
                 uriParameters:
                   snapshotId:
                     description: ID for the snapshot under consideration
         /elements:
-            post:   
+            post: 
+             description: Post elements to specified site
+             is: [postable]
         /artifacts:
           /{artifactId}:
             post:
-                description: Post artifact with {artifactId}
+                description: Post artifact to specified site
     /views:
       #type: collection
       post:
+          description: Post views to a specified workspace
       /{viewId}:
         #type: collection
         get:
+          description: Get a specified view from a workspace
+          is: [sliceable]
         uriParameters:
           viewId:
             description: Sysml ID for the view under consideration
         /elements:
           #type: collection
           get:
+            is: [sliceable]
           /{elementId}:
             post:
               is: [constrainable]
@@ -398,6 +450,7 @@ resourceTypes:
         /{productId}:
             /views:
               get:
+                is: [productable, sliceable]
                 description: Retrieve all views for the specified product for which user has read permissions
                 responses:
                   200:
@@ -427,14 +480,17 @@ resourceTypes:
   description: Service for executing operations, e.g., like the OCL Execution capabilities in MDK. Details still TBD.
 /diff:
   description: Service for diffing between two model versions between projects
+  post:
+    is: [diffable]
+    description: workspace diff post, ie merge  
   get:
     is: [diffable]
     description: workspace diff get
-/merge:
-  description: Service for merging two workspaces.  timestamp args are not implemented yet.
-  post:
-    is: [diffable]
-    description: workspace merge post
+#/merge:
+#  description: Service for merging two workspaces.  timestamp args are not implemented yet.
+#  post:
+#    is: [diffable]
+#    description: workspace merge post
 /sites/permissions:
   post:
     description: Service for syncing permissions from Alfresco Share sites to corresponding model packages
