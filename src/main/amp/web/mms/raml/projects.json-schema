@@ -33,7 +33,7 @@
                     "properties": {
                         "type": { "enum": ["Project"] },
                         "projectVersion": {
-                            "type": "string"
+                            "type": "string",
                             "description": "MD project version last exported. TODO: may go away"
                         }
                     }
