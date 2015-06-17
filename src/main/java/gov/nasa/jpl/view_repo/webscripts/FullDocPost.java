@@ -1,6 +1,7 @@
 package gov.nasa.jpl.view_repo.webscripts;
 
 import gov.nasa.jpl.docbook.model.DBImage;
+import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
@@ -110,9 +111,10 @@ public class FullDocPost extends AbstractJavaWebScript {
     	RuntimeExec exec = new RuntimeExec();
     	
     	//NEED FOR COVER
+    	Date d = TimeUtils.dateFromTimestamp( timestamp );
 //    	SimpleDateFormat formatter = new SimpleDateFormat("dd-MMM-yyyy");
 //    	Date d = formatter.parse(timestamp);
-//    	this.setTime(d);
+    	this.setTime(d);
     	
 		//exec.setProcessDirectory("/opt/local/prerender/node_modules/phantomjs/bin/");	//to do : need to config
 		HostnameGet alfresco = new HostnameGet(this.repository, this.services);
@@ -131,9 +133,22 @@ public class FullDocPost extends AbstractJavaWebScript {
 		command.add(String.format("%s/%s_NodeJS.html", this.fullDocDir, this.fullDocId));
 		exec.setCommand(list2Array(command));
 		System.out.println("NodeJS command: " + command);
-		ExecutionResult result = exec.execute();
-		if (!result.getSuccess()) {
-			String msg = String.format("Failed to download full doc HTML for %s. Exit code: %d", this.fullDocId, result.getExitValue());
+		int attempts = 0;
+		boolean isSuccess = false;
+		while(!isSuccess && attempts < 3){
+			ExecutionResult result = exec.execute();
+			if (!result.getSuccess()) {
+				String msg = String.format("Failed to download full doc HTML for %s. Exit code: %d. Attempt #%d.", this.fullDocId, result.getExitValue(), attempts+1);
+				log(Level.WARN, msg);
+			}
+			else{ 
+				if(Files.exists(Paths.get(this.htmlPath))) isSuccess = true;
+			}
+			attempts++;
+		}
+		
+		if(!isSuccess){
+			String msg = String.format("Failed to download full doc HTML for %s.", this.fullDocId);
 			log(Level.ERROR, msg);
 			throw new Exception(msg);
 		}
@@ -248,8 +263,8 @@ public class FullDocPost extends AbstractJavaWebScript {
                     +"</div>"
                     + "<div style=\"top:85%; left:10%; position:absolute;\">"
                     + "<div>"
-                    + "<img src = \"http://div27.jpl.nasa.gov/2740/files/logos/jpl_logo%28220x67%29.jpg"//http://div27.jpl.nasa.gov/2740/files/logos/JPL-logo_Stacked_Red-Black%28132x64%29.png\" alt=\"JPL Logo\">"
-                    + "<p style= \"color#B6B6B4>" + jplName + "<br><i>" + caltechName + "</i></p>" //did separate jpl/caltech label to always have the stamp on pdf
+                    + "<img src=\"http://div27.jpl.nasa.gov/2740/files/logos/jpl_logo%28220x67%29.jpg\" alt=\"JPL Logo\"/>"
+                    + "<p style=\"color:#B6B6B4\">" + jplName + "<br/><i>" + caltechName + "</i></p>" //did separate jpl/caltech label to always have the stamp on pdf
                     + "</div>"
                 + "</body>"
                 + "</html>";
@@ -443,18 +458,31 @@ public class FullDocPost extends AbstractJavaWebScript {
     public void html2pdf()  throws Exception {
     	RuntimeExec exec = new RuntimeExec();
 		exec.setProcessDirectory(this.fullDocGenDir);
-//		createCoverPage(this.coverPath); //NEED FOR COVER
+		createCoverPage(this.coverPath); //NEED FOR COVER
 
 		List<String> command = new ArrayList<String>();
 		command.add("wkhtmltopdf");
 		command.add("-q");
-//        command.add("cover"); //NEED FOR COVER
-//        command.add(this.coverPath); //NEED FOR COVER
+		command.add("--footer-line");
+		command.add("--footer-font-size");
+		command.add("8");
+		command.add("--footer-font-name");
+		command.add("\"Times New Roman\"");
+		command.add("--footer-center");
+		command.add("Paper copies of this document may not be current and should not be relied on for official purposes. JPL/Caltech proprietary. Not for public release.");
+		command.add("--footer-right");
+		command.add("[page]");
+        command.add("cover"); //NEED FOR COVER
+        command.add(this.coverPath); //NEED FOR COVER
 //		command.add("--dump-outline"); 
 //		command.add(Paths.get(this.fullDocDir,"toc.xml").toString());
 		command.add("toc");
-		command.add("--xsl-style-sheet");
+		command.add("--toc-level-indentation");
+		command.add("10");
+//		command.add("--xsl-style-sheet");
 		command.add(Paths.get(this.fullDocGenDir, "wkhtmltopdf/xsl/default.xsl").toString());
+//		command.add("--footer-center");
+//		command.add("Page [page] of [toPage]");
 		command.add(this.getHtmlPath());
 		command.add(this.getPdfPath());
 
@@ -625,7 +653,7 @@ public class FullDocPost extends AbstractJavaWebScript {
         this.phantomJSPath = "/opt/local/fullDocGen/prerender/node_modules/phantomjs/bin/phantomjs";
         this.phantomJSScriptPath = "/opt/local/fullDocGen/fullDoc.js";
         this.fullDocGenDir = "/opt/local/fullDocGen/";
-        
+        this.coverPath = Paths.get(tmpDirName, fullDocId, String.format("%s_cover.html", fullDocId)).toString();
         try{
         	new File(this.imgPath).mkdirs();
         }catch(Exception ex){;}
@@ -638,6 +666,8 @@ public class FullDocPost extends AbstractJavaWebScript {
     
     private void tableToCSV() throws Exception{
 		File input = new File(this.getHtmlPath());
+		if(!input.exists()) return;
+		
 		try {
 			FileInputStream fileStream = new FileInputStream(input);
 //			Document document = Jsoup.parse(fileStream, "UTF-8", "http://xml.org", Parser.xmlParser());

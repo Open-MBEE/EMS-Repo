@@ -289,15 +289,15 @@ public class SnapshotArtifactsGenerationActionExecuter  extends ActionExecuterAb
         	logger.error("Failed to complete snapshot artifact(s) generation!");
         	logger.error(sb.toString());
         	ex.printStackTrace();
-//        	ActionUtil.sendEmailToModifier(jobNode, String.format("An unexpected error occurred and your PDF generation failed.\n%s%s", ex.getMessage(), sb.toString()), "PDF Generation Failed", services);
-//        	ActionUtil.sendEmailTo("mbee-dev-admin@jpl.nasa.gov", "mbee-dev-admin@jpl.nasa.gov", 
-//        			String.format("Server: %s\nSite: %s\nWorkspace: %s\nSnapshot Id: %s\nError: %s%s%s", 
-//        					new HostnameGet(this.repository, this.services).getAlfrescoUrl(),
-//        					siteName,
-//        					workspace,
-//        					snapshotId,
-//        					ex.getMessage(), sb.toString(), response.toString()), 
-//					"PDF Generation Failed", services);
+        	ActionUtil.sendEmailToModifier(jobNode, String.format("An unexpected error occurred and your PDF generation failed.\n%s%s", ex.getMessage(), sb.toString()), "PDF Generation Failed", services);
+        	ActionUtil.sendEmailTo("mbee-dev-admin@jpl.nasa.gov", "mbee-dev-admin@jpl.nasa.gov", 
+        			String.format("Server: %s\nSite: %s\nWorkspace: %s\nSnapshot Id: %s\nError: %s%s%s", 
+        					new HostnameGet(this.repository, this.services).getAlfrescoUrl(),
+        					siteName,
+        					workspace,
+        					snapshotId,
+        					ex.getMessage(), sb.toString(), response.toString()), 
+					"PDF Generation Failed", services);
         }
     }
 
