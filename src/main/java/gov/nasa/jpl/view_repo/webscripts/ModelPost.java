@@ -601,6 +601,8 @@ public class ModelPost extends AbstractJavaWebScript {
                 // check if we need to resurrect it.  If elementNode is deleted, it will
                 // resurrected later when processing that node. 
                 owner = elementNode.getParent();
+                owner = new EmsScriptNode(owner.getLiveNodeRefFromVersion(),
+                                          getServices() );
             }
         }
 
