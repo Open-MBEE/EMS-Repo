@@ -128,10 +128,16 @@ public class RestPostConnection implements ConnectionInterface, Runnable {
     public void run() {
         Client client = Client.create();
         WebResource webResource = client.resource(uri);
-        ClientResponse response = getResourceBuilder(webResource, destination).post( ClientResponse.class, message);
-        if (response.getStatus() != 200) {
+        ClientResponse response = null;
+        try {
+            response = getResourceBuilder(webResource, destination).post( ClientResponse.class, message);
+        } catch (Throwable e) {
+            logger.warn( "Failed to post message in RestPostConnection!  " + e.getLocalizedMessage() );
+        }
+        if (response == null || response.getStatus() != 200) {
             if (logger.isDebugEnabled()) {
                 logger.debug( String.format( "Rest connection failed" ) );
+                if ( response != null ) logger.debug( "response: " + response );
             }
         }
     }

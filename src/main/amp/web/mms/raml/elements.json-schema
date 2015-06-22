@@ -694,10 +694,6 @@
                 "timeIntervalMin": {
                     "type": "string",
                     "description": "ID of the SysML element representing the time interval max"
-                },
-                "timeIntervalMin": {
-                    "type": "string",
-                    "description": "ID of the SysML element representing the time interval min"
                 }
             },
             "allOf": [
