@@ -505,12 +505,22 @@ public class ModelPost extends AbstractJavaWebScript {
         elements.addAll( updatedElements );
     }
 
+    private void setOwningParentChildren(EmsScriptNode owner, WorkspaceNode ws) {
+        
+        // The owner of the parent that was resurrected, needs to add the parent back
+        // to the ownedChildren:
+        EmsScriptNode ownerOfParent = owner.getOwningParent( null, ws, false );
+        if (ownerOfParent != null) {
+            owner.setOwnerToReifiedNode( ownerOfParent, ws, false );
+        }
+    }
+    
     /**
      * Resurrect the parent from the dead
      *
      * @param owner
      */
-    protected void resurrectParent(EmsScriptNode owner, boolean ingest) {
+    protected void resurrectParent(EmsScriptNode owner, boolean ingest, WorkspaceNode ws) {
         
         log( Level.WARN, "Owner with name: %s was deleted.  Will resurrect it", owner.getSysmlId());
         
@@ -518,6 +528,7 @@ public class ModelPost extends AbstractJavaWebScript {
         owner.removeAspect( "ems:Deleted" );
         modStatus.setState( ModStatus.State.ADDED );
         updateTransactionableWsStateImpl(owner, owner.getSysmlId(), modStatus, ingest);
+        
     }
 
     /**
@@ -530,16 +541,18 @@ public class ModelPost extends AbstractJavaWebScript {
         EmsScriptNode lastNode = nodeToUpdate;
         EmsScriptNode nodeParent = nodeToUpdate.getParent();
         EmsScriptNode reifiedNodeParent = nodeParent != null ? nodeParent.getReifiedNode(true, workspace) : null;
+        EmsScriptNode lastDeletedReifiedNodeParent = null;
         while (nodeParent != null  && nodeParent.scriptNodeExists()) {
             if (nodeParent.isDeleted()) {
-                resurrectParent(nodeParent, ingest);
+                resurrectParent(nodeParent, ingest, workspace);
             }
             if (reifiedNodeParent != null && reifiedNodeParent.isDeleted()) {
-                resurrectParent(reifiedNodeParent, ingest);
+                resurrectParent(reifiedNodeParent, ingest, workspace);
                 // Now deleted nodes are removed from ownedChildren, so must add them back:
                 if (lastNode != null) {
                     lastNode.setOwnerToReifiedNode( reifiedNodeParent, workspace, false );
                 }
+                lastDeletedReifiedNodeParent = reifiedNodeParent;
             }
             if (nodeParent.isWorkspaceTop()) {
                 break;
@@ -547,6 +560,10 @@ public class ModelPost extends AbstractJavaWebScript {
             lastNode = reifiedNodeParent;
             nodeParent = nodeParent.getParent();
             reifiedNodeParent = nodeParent != null ? nodeParent.getReifiedNode(true, workspace) : null;
+        }
+        
+        if (lastDeletedReifiedNodeParent != null) {
+            setOwningParentChildren(lastDeletedReifiedNodeParent, workspace);
         }
 
     }
@@ -638,7 +655,8 @@ public class ModelPost extends AbstractJavaWebScript {
                     log( Level.WARN, "Owner with name: %s was deleted.  Will resurrect it, and put %s into it.", 
                             ownerName, elementId);
 
-                    resurrectParent(owner, false);
+                    resurrectParent(owner, false, workspace);
+                    setOwningParentChildren(owner, workspace);
                 }
                 // Otherwise, owner found but doesnt exists, or creating the holding bin:
                 else {

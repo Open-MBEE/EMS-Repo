@@ -1639,6 +1639,17 @@ True,
 common_filters,
 ["test","workspaces","develop", "develop2"]
 ],
+        
+[
+663,
+"TestGetAfterResurrection",
+"Performs a recursive get to make sure the ownedChildren were property set after resurrection.",
+create_curl_cmd(type="GET",data="elements/123456?recurse=true",base_url=BASE_URL_WS,
+                branch="master/"),
+True, 
+common_filters+['"MMS_','MMS_'],
+["test","workspaces","develop"]
+],
 
 # ELEMENTS PROPERTY SERVICE (CMED-835): ==========================    
 
