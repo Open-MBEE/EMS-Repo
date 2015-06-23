@@ -2048,45 +2048,41 @@ public class ModelPost extends AbstractJavaWebScript {
                 oldPkgSiteParentNode.removeFromPropertyNodeRefs( Acm.ACM_SITE_CHILDREN, 
                                                                  pkgSiteNode.getNodeRef() );
             }
-            
-            // Check that parent site children are children of this package:
-            // This is for the case that this site package being created is higher up in the
-            // the hierarchy than children site packages:
-            if (oldPkgSiteParentNode != null) {
-                
-                // Note: skipping the noderef check b/c sites are all in
-                // master, and post is to current time.
-                List<NodeRef> oldChildren = 
-                        oldPkgSiteParentNode.getPropertyNodeRefs( Acm.ACM_SITE_CHILDREN,
-                                                                  true, null, null);
-            
-                // Update the children of this package site if needed:
-                EmsScriptNode childNewParent;
-                EmsScriptNode child;
-                for (EmsScriptNode childSite : EmsScriptNode.toEmsScriptNodeList( oldChildren)) {
-                    
-                    child = childSite.getPropertyElement( Acm.ACM_SITE_PACKAGE, null, workspace );
-                    if (child != null) {
-                        childNewParent = findParentPkgSite(child, workspace, null);
                         
-                        if (childNewParent != null && childNewParent.equals( pkgSiteNode )) {
-                            //  Add to the this site package properties:
-                            childSite.setProperty( Acm.ACM_SITE_PARENT, pkgSiteNode.getNodeRef() );
-                            pkgSiteNode.appendToPropertyNodeRefs( Acm.ACM_SITE_CHILDREN,
-                                                                  childSite.getNodeRef() );
-                            
-                            // Remove from parent site pkg children:
-                            oldPkgSiteParentNode.removeFromPropertyNodeRefs( Acm.ACM_SITE_CHILDREN, 
-                                                                             childSite.getNodeRef() );
-                        }
-                    }
-                }
-            }
-            
             pkgSiteParentNode.appendToPropertyNodeRefs( Acm.ACM_SITE_CHILDREN,
                                                         pkgSiteNode.getNodeRef() );
             pkgSiteNode.setProperty( Acm.ACM_SITE_PARENT, pkgSiteParentNode.getNodeRef() );
             pkgSiteNode.removeAspect( "ems:Deleted" );
+            
+            // Update the children site packages if needed:
+            List<NodeRef> children = 
+                    nodeToUpdate.getOwnedChildren( false, null, workspace);
+            
+            EmsScriptNode childSite;
+            EmsScriptNode oldChildParentSite;
+            for (EmsScriptNode child : EmsScriptNode.toEmsScriptNodeList( children)) {
+                
+                childSite = child.getPropertyElement(Acm.ACM_SITE_SITE , true, null, null );
+                
+                if (childSite != null) {
+                    
+                    oldChildParentSite =  childSite.getPropertyElement( Acm.ACM_SITE_PARENT,
+                                                                          true, null, null );
+                    
+                    // Remove from old parent site pkg children:
+                    if (oldChildParentSite != null && 
+                        !oldChildParentSite.equals(pkgSiteNode)) {
+                        oldChildParentSite.removeFromPropertyNodeRefs( Acm.ACM_SITE_CHILDREN, 
+                                                                         childSite.getNodeRef() );
+                    }
+                    
+                    //  Add to the this site package properties:
+                    childSite.setProperty( Acm.ACM_SITE_PARENT, pkgSiteNode.getNodeRef() );
+                    pkgSiteNode.appendToPropertyNodeRefs( Acm.ACM_SITE_CHILDREN,
+                                                          childSite.getNodeRef() );
+                }
+            }
+            
         }
         else {
             log( Level.WARN,

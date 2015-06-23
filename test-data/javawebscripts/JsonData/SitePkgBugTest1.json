@@ -1,0 +1,25 @@
+{ "elements" : [
+    {"documentation" : "A site package", 
+     "sysmlid":"packageA2", 
+     "name":"packageA2",
+     "owner":"123456",
+     "specialization": {"type":"Package",
+                        "isSite":true}
+    },
+    
+    {"documentation" : "A site package", 
+     "sysmlid":"packageB2", 
+     "name":"packageB2",
+     "owner":"packageA2",
+     "specialization": {"type":"Package",
+                        "isSite":true}
+    },
+    
+    {"documentation" : "A site package", 
+     "sysmlid":"packageC2", 
+     "name":"packageC2",
+     "owner":"packageA2",
+     "specialization": {"type":"Package",
+                        "isSite":false}
+    },
+]}

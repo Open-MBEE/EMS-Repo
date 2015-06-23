@@ -1119,6 +1119,45 @@ common_filters,
 []
 ],
         
+[
+451,
+"SitePackageBugTest1",
+"Create packages A2, B2, and C2, where A2/B2 are site packages for CMED-871 testing",
+create_curl_cmd(type="POST",base_url=BASE_URL_WS,
+                data="SitePkgBugTest1.json",
+                branch="master/sites/europa/",
+                post_type="elements"),
+True, 
+common_filters,
+[]
+],
+        
+[
+452,
+"SitePackageBugTest2",
+"Moves package B2 under package C2 for CMED-871 testing",
+create_curl_cmd(type="POST",base_url=BASE_URL_WS,
+                data="SitePkgBugTest2.json",
+                branch="master/sites/europa/",
+                post_type="elements"),
+True, 
+common_filters,
+[]
+],
+        
+[
+453,
+"SitePackageBugTest3",
+"Makes package C2 a site package for CMED-871 testing",
+create_curl_cmd(type="POST",base_url=BASE_URL_WS,
+                data="SitePkgBugTest3.json",
+                branch="master/sites/europa/",
+                post_type="elements"),
+True, 
+common_filters,
+[]
+],
+        
 # CONTENT MODEL UPDATES: ==========================    
 
 [
