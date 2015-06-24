@@ -37,13 +37,13 @@
 				"creator": 
 				{
 					"type": "string",
-					"description": "Creator of the workspace"
+					"description": "Creator of the workspace (Read-Only)"
 				},
 
 				"created": 
 				{
 					"type": "string",
-					"description": "Time of creation of workspace"
+					"description": "Time of creation of workspace (Read-Only)"
 				},
 
 				"id": 
@@ -73,7 +73,7 @@
 				"modified":
 				{
 				    "type": "date",
-				    "description": "Last modification time of workspace"
+				    "description": "Last modification time of workspace (Read-Only)"
 			    },
 
                 "description": 
@@ -91,19 +91,19 @@
 				"workspaceOperationsPermission": 
                 {
                     "type": "boolean",
-                    "description": "True if the user belongs to the LDAP group with workspace operation permissions."
+                    "description": "True if the user belongs to the LDAP group with workspace operation permissions. (Read-Only)"
                 },
 
 				"timestamp": 
 				{
 					"type": "date",
-					"description": "Version/timestamp of workspace diff"
+					"description": "Version/timestamp of workspace diff (Read-Only)"
 				},
 
 				"elements": 
 				{
 					"type": "array",
-					"description": "List of elements in WS1",
+					"description": "List of elements in WS1 (Read-Only)",
 					"items": 
 					{
 						"type": "object",
@@ -114,7 +114,7 @@
 				"updatedElements": 
 				{
 					"type": "array",
-					"description": "List of elements in changed from WS1 in WS2",
+					"description": "List of elements in changed from WS1 in WS2 (Read-Only)",
 					"items": 
 					{
 						"type": "object",
@@ -125,7 +125,7 @@
 				"deletedElements": 
 				{
 					"type": "array",
-					"description": "List of elements in WS1 and not in WS2, e.g. deleted. only contains ids",
+					"description": "List of elements in WS1 and not in WS2, e.g. deleted. only contains ids (Read-Only)",
 					"items": 
 					{
 						"type": "object",
@@ -136,7 +136,7 @@
 				"addedElements": 
 				{
 					"type": "array",
-					"description": "List of elements in WS2 and not in WS1, e.g. added",
+					"description": "List of elements in WS2 and not in WS1, e.g. added (Read-Only)",
 					"items": 
 					{
 						"type": "object",
@@ -147,7 +147,7 @@
 				"movedElements": 
 				{
 					"type": "array",
-					"description": "List of elements moved in WS2 from WS1",
+					"description": "List of elements moved in WS2 from WS1 (Read-Only)",
 					"items": 
 					{
 						"type": "object",
@@ -158,7 +158,7 @@
 				"graph": 
 				{
 					"type": "array",
-					"description": "A map of the graph for WS1",
+					"description": "A map of the graph for WS1 (Read-Only)",
 					"items": 
 					{
 						"type": "object",
@@ -169,7 +169,7 @@
 				"conflicts":
 				{
 				    "type": "array",
-				    "description": "A list of conflicts between the workspaces",
+				    "description": "A list of conflicts between the workspaces (Read-Only)",
 				    "items":
 				    {
 				        "type": "object",

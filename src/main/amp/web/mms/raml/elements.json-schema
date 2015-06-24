@@ -37,7 +37,7 @@
                 },
                 "editable": {
                     "type": "boolean",
-                    "description": "Indicates whether user has permissions to edit the element (so GUI can toggle, server still checks on save though)"
+                    "description": "Indicates whether user has permissions to edit the element (so GUI can toggle, server still checks on save though) (Read-Only)"
                 },
                 "owner": {
                     "type": "string",
@@ -45,42 +45,42 @@
                 },
                 "creator": {
                     "type": "string",
-                    "description": "Creator of the element"
+                    "description": "Creator of the element (Read-Only)"
                 },
                 "created": {
                     "type": "string",
                     "format": "date-time",
-                    "description": "Creation time of the element"
+                    "description": "Creation time of the element (Read-Only)"
                 },
                 "modifier": {
                     "type": "string",
-                    "description": "Modifier of the element"
+                    "description": "Modifier of the element (Read-Only)"
                 },
                 "modified": {
                     "type": "string",
                     "format": "date-time",
-                    "description": "Last modified time of the element"
+                    "description": "Last modified time of the element (Read-Only)"
                 },
                 "read": {
                     "type": "string",
                     "format": "date-time",
-                    "description": "On updating any element, the time when the data was loaded needs to be provided so conflicts can be detected and handled by the server"
+                    "description": "On updating any element, the time when the data was loaded needs to be provided so conflicts can be detected and handled by the server (Read-Only)"
                 },
                 "qualifiedName": {
                     "type": "string",
-                    "description": "Containment hierarchy of element based off of SysML names, currently provided as a convenience for context"
+                    "description": "Containment hierarchy of element based off of SysML names, currently provided as a convenience for context (Read-Only)"
                 },
                 "qualifiedPath": {
                     "type": "string",
-                    "description": "Containment hierarchy of element based off of SysML ids, provided for systems that can't find by unique id"
+                    "description": "Containment hierarchy of element based off of SysML ids, provided for systems that can't find by unique id (Read-Only)"
                 },
                 "id": {
                     "type": "string",
-                    "description": "Alfresco unique identifier for the element"
+                    "description": "Alfresco unique identifier for the element (Read-Only)"
                 },
                 "siteCharacterizationId": {
                     "type": "string",
-                    "description": "Sysml ID of the site characterization that element belongs to"
+                    "description": "Sysml ID of the site characterization that element belongs to (Read-Only)"
                 },
                 "isMetatype": {
                     "type": "boolean",
