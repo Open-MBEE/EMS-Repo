@@ -708,7 +708,9 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
     public Collection< EmsScriptNode > getRelationship( Object context,
                                                         Object specifier ) {
 
-    	// TODO
+    	// TODO see EmsScriptNode.getConnectedNodes(), as a lot of this code can
+        //      be used for this method.
+        
         return null;
     }
 

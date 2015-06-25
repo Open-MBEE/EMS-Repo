@@ -188,6 +188,28 @@ True,
 common_filters+['"MMS_','MMS_'],
 ["test","workspaces","develop"]
 ],
+        
+[
+66,
+"GetElementsConnected",
+"Get elements that are connected",
+create_curl_cmd(type="GET",data="elements/300?recurse=true&connected=true",base_url=BASE_URL_WS,
+                branch="master/"),
+True, 
+common_filters+['"MMS_','MMS_'],
+["test","workspaces","develop"]
+],
+        
+[
+67,
+"GetElementsRelationship",
+"Get elements that have relationship DirectedRelationship, starting with 302",
+create_curl_cmd(type="GET",data="elements/303?recurse=true&connected=true&relationship=DirectedRelationship",base_url=BASE_URL_WS,
+                branch="master/"),
+True, 
+common_filters+['"MMS_','MMS_'],
+["test","workspaces","develop"]
+],
 
 [
 70,

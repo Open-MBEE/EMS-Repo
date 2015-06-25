@@ -1459,6 +1459,93 @@ public class EmsScriptNode extends ScriptNode implements
     }
     
     /**
+     * Returns all of the "connected" nodes.  If relationshipType is null, then will return all
+     * of the nodes that this node refers to in properties.  Otherwise, only returns nodes that
+     * are in the passed relationshipType and are of the passed relationshipType, 
+     * ie  a DirectedRelationship and its target, source, and owner nodes.
+     * 
+     * @param dateTime
+     * @param ws
+     * @param relationshipType The desired relationship to use for filtering, ie "DirectedRelationship"
+     * @return
+     */
+    public ArrayList<NodeRef> getConnectedNodes(Date dateTime, WorkspaceNode ws,
+                                                String relationshipType) {
+                
+        // REVIEW
+        // This currently does a crude job of filtering, as it will include all properties of
+        // the desired relationship that point to node refs, including the owner and relationship
+        // node itself.  This may not be what is desired.
+        //
+        // Also, may want a way to get all relationships, not just the one type specified.
+        
+        // TODO eventually will want to put some of this in EmsSystemModel.getRelationship(), but
+        //      currently there is no dateTime, unless we use the specifier
+        
+        ArrayList<NodeRef> nodes = new ArrayList<NodeRef>();
+        
+        String relationshipTypeName = relationshipType;
+        if (Acm.getJSON2ACM().containsKey( relationshipType )) {
+            relationshipTypeName = Acm.getJSON2ACM().get( relationshipType );
+        }
+        boolean checkingRelationship = !Utils.isNullOrEmpty(relationshipTypeName);
+        boolean nodeHasRelationship = checkingRelationship ? this.hasAspect( relationshipTypeName ) : false;
+        
+        // Loop through all of the properties of the node:
+        for (Entry<String,Object> entry : this.getNodeRefProperties(dateTime, ws).entrySet()) {
+            
+            String keyShort = NodeUtil.getShortQName( NodeUtil.createQName(entry.getKey()) );
+            Object value = entry.getValue();
+            
+            // If a relationshipType was provided, then see if this property points to a relationship:
+            boolean addNode = true;
+            if (checkingRelationship && !nodeHasRelationship) {
+                addNode = false;
+                for (String relationshipProp : Acm.PROPERTY_FOR_RELATIONSHIP_PROPERTY_ASPECTS.values()) {
+                    if (relationshipProp.equals(keyShort)) {
+                        addNode = true;
+                        break;
+                    }
+                }
+            }
+            
+            // Add the properties that point to node refs, and filter by relationship if needed:
+            if (addNode) {
+                if (value instanceof NodeRef) {
+                    NodeRef ref = (NodeRef) value;
+                    if (checkingRelationship) {
+                        EmsScriptNode node = new EmsScriptNode(ref, services);
+                        if (nodeHasRelationship || node.hasAspect( relationshipTypeName )) {
+                            nodes.add( ref );
+                        }
+                    }
+                    else {
+                        nodes.add( ref );
+                    }
+                }
+                else if (value instanceof List) {
+                    for (Object obj : (List)value) {
+                        if (obj instanceof NodeRef) {
+                            NodeRef ref = (NodeRef) obj;
+                            if (checkingRelationship) {
+                                EmsScriptNode node = new EmsScriptNode(ref, services);
+                                if (nodeHasRelationship|| node.hasAspect( relationshipTypeName )) {
+                                    nodes.add( ref );
+                                }
+                            }
+                            else {
+                                nodes.add( ref );
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        
+        return nodes;
+    }
+    
+    /**
      * Returns the value spec children for this node.  Uses the ems:valueSpecOwnedChildren property.
      *
      * @param findDeleted Find deleted nodes also

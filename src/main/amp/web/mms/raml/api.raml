@@ -452,6 +452,14 @@ resourceTypes:
           /{elementId}:
             post:
               is: [constrainable]
+            get:
+              queryParameters:
+                  connected:
+                    description: Get all of the connected nodes also.  Must also supply recurse=true or depth.
+                    required: false
+                  relationship:
+                    description: Filter the connected nodes for only nodes in the specified relationship, ie DirectedRelationship.  Must supply recurse=true or depth, and connected=true also.
+                    required: false
 #            put:
 #              is: [constrainable]
             type: collection
