@@ -62,9 +62,7 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
         }
         if ( sitesNode == null ) sitesNode = sitesNodes.iterator().next();
 
-        //children = sitesNode.
-                return null;
-
+        return Utils.toArrayOfType( sitesNodes, EmsScriptNode.class );
     }
 
     /**
