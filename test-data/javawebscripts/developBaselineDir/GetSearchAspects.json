@@ -1,5 +1,17 @@
 {"elements": [
     {
+        "qualifiedId": "/demo3site/PROJECT-71724d08-6d79-42b2-b9ec-dc39f20a3660/connectorViewDataFolder/_17_0_2_3_e610336_1394148311476_17302_29388_X",
+        "qualifiedName": "/demo3site/BikeProject/Connector View Data Folder/Components",
+        "sysmlid": "_17_0_2_3_e610336_1394148311476_17302_29388_X",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "Components",
+        "owner": "connectorViewDataFolder",
+        "documentation": "",
+        "specialization": {"type": "View"}
+    },
+    {
         "modifier": "admin",
         "qualifiedId": "/europa/123456/300/301",
         "name": "301",

@@ -451,8 +451,7 @@ public class View extends List implements sysml.view.View< EmsScriptNode >, Comp
                             (Viewable< EmsScriptNode >)o;
                     add( viewable );
                 } catch ( ClassCastException e ) {
-                    System.out.println( "Failed to cast to Viewable: " + o);
-                    e.printStackTrace();
+                    Debug.error( "Failed to cast to Viewable: " + o );
                 }
             }
 //            java.util.List< Viewable<EmsScriptNode> > viewables =

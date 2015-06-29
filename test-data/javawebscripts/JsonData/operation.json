@@ -256,6 +256,24 @@
         "specialization" : {
             "type" : "Operation"
         }
+    },
+    
+    {
+        "sysmlid" : "Min",
+        "name" : "Min",
+        "owner" : "operations",
+        "specialization" : {
+            "type" : "Operation"
+        }
+    },
+    
+    {
+        "sysmlid" : "Max",
+        "name" : "Max",
+        "owner" : "operations",
+        "specialization" : {
+            "type" : "Operation"
+        }
     }
 
 ]}

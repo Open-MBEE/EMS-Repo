@@ -385,7 +385,7 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
         NodeRef element = NodeUtil.findNodeRefById( specifier, true, null, null, services, false );
         EmsScriptNode emsSN = new EmsScriptNode( element, services );
         ArrayList< EmsScriptNode > list = Utils.newList( emsSN );
-        System.out.println("getElementWithIdentifier(" + context + ", " + specifier + ") = " + list);
+        //System.out.println("getElementWithIdentifier(" + context + ", " + specifier + ") = " + list);
         return list;
     }
 
@@ -447,7 +447,7 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
             if ( childNodes.size() > 0 ) return childNodes;
         }
         List< EmsScriptNode > list = EmsScriptNode.toEmsScriptNodeList( refs, getServices(), response, status );
-        System.out.println("getElementWithName(" + context + ", " + specifier + ", " + dateTime + ") = " + list);
+        //System.out.println("getElementWithName(" + context + ", " + specifier + ", " + dateTime + ") = " + list);
         return list;
     }
 
@@ -657,7 +657,7 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
                 }
             }
             if ( elements.size() > 0 ) {
-                System.out.println("\ngetProperty(" + context + ", " + specifier + ") = " + elements);
+                //System.out.println("\ngetProperty(" + context + ", " + specifier + ") = " + elements);
                 return elements;
             }
             
@@ -692,21 +692,21 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
 
         	}
 
-            System.out.println("\ngetProperty(" + context + ", " + specifier + ") = allProperties = " + allProperties);
+            //System.out.println("\ngetProperty(" + context + ", " + specifier + ") = allProperties = " + allProperties);
             return allProperties;
         }
 
         if ( context != null ) {
             // TODO -- error????  Are there any other contexts than an EmsScriptNode that would have a property?
             Debug.error("context is not an EmsScriptNode!  " + context );
-            System.out.println("getProperty(" + context + ", " + specifier + ") = null");
+            //System.out.println("getProperty(" + context + ", " + specifier + ") = null");
             return null;
         }
 
         // context is null; look for nodes of type Property that match the specifier
         if ( mySpecifier != null ) {
             Collection< EmsScriptNode > e =getElementWithName( context, "" + mySpecifier );
-            System.out.println("\ngetProperty(" + context + ", " + specifier + ") = getElementWithName(" + context + ", " + specifier + ") = " + e);
+            //System.out.println("\ngetProperty(" + context + ", " + specifier + ") = getElementWithName(" + context + ", " + specifier + ") = " + e);
             return e;
         }
 
@@ -719,10 +719,10 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
             for ( EmsScriptNode prop : propertyTypes ) {
                 allProperties.addAll( getElementWithType( context, prop ) );
             }
-            System.out.println("\ngetProperty(" + context + ", " + specifier + ") = allProperties2 = " + allProperties);
+            //System.out.println("\ngetProperty(" + context + ", " + specifier + ") = allProperties2 = " + allProperties);
             return allProperties;
         }
-        System.out.println("\ngetProperty(" + context + ", " + specifier + ") = null2");
+        //System.out.println("\ngetProperty(" + context + ", " + specifier + ") = null2");
         return null;
     }
 
@@ -775,11 +775,11 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
             }
         } else if ( specifier == null ) {
             list = getProperty(context, null);
-            System.out.println("getPropertyWithTypeName(" + context + ", " + specifier  + ") = " + list);
+            //System.out.println("getPropertyWithTypeName(" + context + ", " + specifier  + ") = " + list);
             return list;
         }
         // Remaining case is specifier != nil && !(context instanceof EmsScriptNode)
-        System.out.println("getPropertyWithTypeName(" + context + ", " + specifier + ") = " + nodes);
+        //System.out.println("getPropertyWithTypeName(" + context + ", " + specifier + ") = " + nodes);
         return nodes;
     }
     @Override

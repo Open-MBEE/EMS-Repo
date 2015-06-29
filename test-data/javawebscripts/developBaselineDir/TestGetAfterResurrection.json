@@ -539,16 +539,18 @@
         }
     },
     {
-        "qualifiedId": "/europa/123456/op_list",
-        "qualifiedName": "/europa/JW_TEST2/List",
-        "sysmlid": "op_list",
+        "qualifiedName": "/europa/JW_TEST2/BLUCamTest/dont care2/",
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
-        "name": "List",
-        "owner": "123456",
+        "name": "",
+        "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
         "documentation": "",
-        "specialization": {"type": "Operation"}
+        "specialization": {
+            "source": "_17_0_2_3_e610336_1394148233838_91795_29332",
+            "target": "_17_0_2_4_f3a0363_1394140326296_809805_27600",
+            "type": "Expose"
+        }
     },
     {
         "qualifiedId": "/europa/123456/4000/401/402/403/404",
@@ -747,50 +749,6 @@
         "creator": "admin"
     },
     {
-        "qualifiedId": "/europa/123456/op_map",
-        "qualifiedName": "/europa/JW_TEST2/map",
-        "sysmlid": "op_map",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "map",
-        "owner": "123456",
-        "documentation": "",
-        "specialization": {"type": "Operation"}
-    },
-    {
-        "qualifiedId": "/europa/123456/op_map_arg",
-        "qualifiedName": "/europa/JW_TEST2/",
-        "sysmlid": "op_map_arg",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "",
-        "owner": "123456",
-        "documentation": "",
-        "specialization": {
-            "valueExpression": null,
-            "type": "Expression",
-            "operand": [
-                {
-                    "element": "op_map",
-                    "valueExpression": null,
-                    "type": "ElementValue"
-                },
-                {
-                    "element": "exposed_id",
-                    "valueExpression": null,
-                    "type": "ElementValue"
-                },
-                {
-                    "element": "op_name_arg",
-                    "valueExpression": null,
-                    "type": "ElementValue"
-                }
-            ]
-        }
-    },
-    {
         "modifier": "admin",
         "qualifiedId": "/europa/123456/viewNull",
         "name": "viewNull",
@@ -844,18 +802,6 @@
         "specialization": {"type": "Package"},
         "editable": true,
         "creator": "admin",
-    },
-    {
-        "qualifiedId": "/europa/123456/op_name_arg",
-        "qualifiedName": "/europa/JW_TEST2/Name",
-        "sysmlid": "op_name_arg",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "Name",
-        "owner": "123456",
-        "documentation": "",
-        "specialization": {"type": "Operation"}
     },
     {
         "modifier": "admin",
@@ -1093,6 +1039,21 @@
     },
     {
         "modifier": "admin",
+        "qualifiedId": "/europa/123456/md",
+        "name": "md",
+        "qualifiedName": "/europa/JW_TEST2/md",
+        "documentation": "Magic Draw Meta-Data",
+        "owner": "123456",
+        "sysmlid": "md",
+        "specialization": {
+            "type": "MagicDrawData",
+            "mdData": "A blob of meta-data"
+        },
+        "editable": true,
+        "creator": "admin"
+    },
+    {
+        "modifier": "admin",
         "qualifiedId": "/europa/123456/characterizes",
         "name": "characterizes",
         "qualifiedName": "/europa/JW_TEST2/characterizes",
@@ -1103,21 +1064,6 @@
             "source": "sourceId",
             "target": "targetId",
             "type": "Characterizes"
-        },
-        "editable": true,
-        "creator": "admin"
-    },
-    {
-        "modifier": "admin",
-        "qualifiedId": "/europa/123456/md",
-        "name": "md",
-        "qualifiedName": "/europa/JW_TEST2/md",
-        "documentation": "Magic Draw Meta-Data",
-        "owner": "123456",
-        "sysmlid": "md",
-        "specialization": {
-            "type": "MagicDrawData",
-            "mdData": "A blob of meta-data"
         },
         "editable": true,
         "creator": "admin"
@@ -1228,6 +1174,20 @@
         },
         "editable": true,
         "creator": "admin"
+    },
+    {
+        "qualifiedName": "/europa/JW_TEST2/",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "",
+        "owner": "123456",
+        "documentation": "",
+        "specialization": {
+            "source": "_17_0_2_3_e610336_1394148311476_17302_29388",
+            "target": "_17_0_2_4_f3a0363_1394142290412_487571_28478",
+            "type": "Expose"
+        }
     },
     {
         "modifier": "admin",
@@ -1373,35 +1333,6 @@
         "creator": "admin"
     },
     {
-        "qualifiedId": "/europa/123456/exposed_id",
-        "qualifiedName": "/europa/JW_TEST2/exposed",
-        "sysmlid": "exposed_id",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "exposed",
-        "owner": "123456",
-        "documentation": "",
-        "specialization": {
-            "type": "Parameter",
-            "defaultValue": null
-        }
-    },
-    {
-        "qualifiedName": "/europa/JW_TEST2/BLUCamTest/dont care2/",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "",
-        "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
-        "documentation": "",
-        "specialization": {
-            "source": "_17_0_2_3_e610336_1394148233838_91795_29332",
-            "target": "_17_0_2_4_f3a0363_1394140326296_809805_27600",
-            "type": "Expose"
-        }
-    },
-    {
         "modifier": "admin",
         "qualifiedId": "/europa/123456/AssocOwnedEnd",
         "name": "AssocOwnedEnd",
@@ -1508,20 +1439,6 @@
         },
         "editable": true,
         "creator": "admin"
-    },
-    {
-        "qualifiedName": "/europa/JW_TEST2/",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "",
-        "owner": "123456",
-        "documentation": "",
-        "specialization": {
-            "source": "_17_0_2_3_e610336_1394148311476_17302_29388",
-            "target": "_17_0_2_4_f3a0363_1394142290412_487571_28478",
-            "type": "Expose"
-        }
     },
     {
         "modifier": "admin",
