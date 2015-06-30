@@ -976,7 +976,7 @@ common_filters,
 
 [
 300,
-"GetSites",
+"GetSites2",
 "Get all the sites for a workspace",
 create_curl_cmd(type="GET",data="sites",base_url=BASE_URL_WS,
                 branch="master/"),
