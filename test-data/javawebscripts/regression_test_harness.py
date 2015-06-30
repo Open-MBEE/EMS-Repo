@@ -896,7 +896,6 @@ common_filters,
 ["test","workspaces","develop", "develop2"]
 ],
  
-# TODO: not running test 280/290 for now b/c of issues when running it with 260/270    
 [
 280,
 "PostDemo2",
@@ -920,6 +919,58 @@ True,
 common_filters,
 ["test","workspaces","develop", "develop2"]
 ],
+
+[
+292,
+"PostSiteAndProject3",
+"Create a site and a project for demo 3 of server side docgen",
+create_curl_cmd(type="POST",data='\'{"elements":[{"sysmlid":"PROJECT-71724d08-6d79-42b2-b9ec-dc39f20a3660","name":"BikeProject","specialization":{"type":"Project"}}]}\'',
+                base_url=BASE_URL_WS,
+                branch="master/sites/demo3site/projects?createSite=true",project_post=True),
+False, 
+None,
+["test","workspaces","develop", "develop2"]
+],
+ 
+[
+293,
+"PostDemo3",
+"Post data for demo 3 of server side docgen",
+create_curl_cmd(type="POST",base_url=BASE_URL_WS,
+                data="bike.json",
+                branch="master/sites/demo3site/",
+                post_type="elements"),
+True, 
+common_filters+['"MMS_','MMS_'],
+["test","workspaces","develop", "develop2"]
+],
+        
+[
+294,
+"PostViewDemo3",
+"Post view data for demo 3 of server side docgen",
+create_curl_cmd(type="POST",base_url=BASE_URL_WS,
+                data="connectorView.json",
+                branch="master/sites/demo3site/",
+                post_type="elements"),
+True, 
+common_filters+['"MMS_','MMS_'],
+["test","workspaces","develop", "develop2"]
+],
+        
+[
+295,
+"Demo3",
+"Server side docgen demo 3",
+create_curl_cmd(type="GET",data="views/_17_0_2_3_e610336_1394148311476_17302_29388_X",base_url=BASE_URL_WS,
+                branch="master/"),
+True, 
+common_filters,
+["test","workspaces","develop", "develop2"]
+],
+
+
+
 
 # NEW URLS: ==========================    
 
