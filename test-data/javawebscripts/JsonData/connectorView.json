@@ -1,43 +1,52 @@
 { "elements":[
     {
+        "sysmlid": "connectorViewDataFolder",
+        "name": "Connector View Data Folder",
+        "documentation": "",
+        "owner": "PROJECT-71724d08-6d79-42b2-b9ec-dc39f20a3660",
+        "specialization" : {
+            "type": "Package"
+        }
+    },
+    {
         "sysmlid": "_17_0_2_3_e610336_1394148449252_91190_29556_X",
         "name": "ComponentViewPoint",
         "documentation": "",
-        "owner": "123456",
+        "owner": "connectorViewDataFolder",
         "specialization" : {
-        "method": "viewpoint_op",
-        "type": "Viewpoint"
-    }
+            "method": "viewpoint_op",
+            "type": "Viewpoint"
+        }
     },
     {
         "sysmlid": "_17_0_2_3_e610336_1394148311476_17302_29388_X",
         "name": "Components",
         "documentation": "",
-        "owner": "123456",
-    "specialization" : {
-        "type": "View"
-    }
+        "owner": "connectorViewDataFolder",
+        "specialization" : {
+            "type": "View"
+        }
     },
     {
         "sysmlid": "_17_0_2_4_f3a0363_1394142290412_487571_28478_X",
         "name": "BLUCam CubeSat A",
         "documentation": "",
-        "owner": "123456",
-    "specialization" : {
-        "type": "Package"
-    }
+        "owner": "connectorViewDataFolder",
+        "specialization" : {
+            "type": "Package"
+        }
     },
     {
         "sysmlid": "Connector",
         "name": "Connector",
         "documentation": "the Connector type element",
-        "owner": "123456",
+        "owner": "connectorViewDataFolder",
     },
     {
         "sysmlid": "viewpoint_op",
         "name": "viewpoint_op",
         "documentation": "",
-        "owner": "123456",
+        "owner": "connectorViewDataFolder",
         "specialization" : {
             "parameters": ["exposed_id"],
             "type": "Operation",
@@ -70,41 +79,42 @@
         "sysmlid": "exposed_id",
         "name": "exposed",
         "documentation": "",
-        "owner": "123456",
-    "specialization" : {
-        "type": "Parameter"
-    }
+        "owner": "connectorViewDataFolder",
+        "specialization" : {
+            "type": "Parameter"
+        }
     },
     {
         "sysmlid": "c_param",
         "name": "connector",
         "documentation": "",
-        "owner": "123456",
-    "specialization" : {
-        "type": "Parameter"
-    }
+        "owner": "connectorViewDataFolder",
+        "specialization" : {
+            "type": "Parameter"
+        }
     },
     {
         "sysmlid": "c1_param",
         "name": "connector",
         "documentation": "",
-        "owner": "123456",
-    "specialization" : {
-        "type": "Parameter"
-    }
+        "owner": "connectorViewDataFolder",
+        "specialization" : {
+            "type": "Parameter"
+        }
     },
     {
         "sysmlid": "c2_param",
         "name": "connector",
         "documentation": "",
-        "owner": "123456",
-    "specialization" : {
-        "type": "Parameter"
-    }
+        "owner": "connectorViewDataFolder",
+        "specialization" : {
+            "type": "Parameter"
+        }
     },
     {
         "sysmlid": "op_connector",
         "name": "op_connector",
+        "owner": "connectorViewDataFolder",
         "specialization" : {
              "type":"Operation",
              "parameters":["c_param"],
@@ -144,6 +154,7 @@
     {
         "sysmlid": "op_sourcePath",
         "name": "op_sourcePath",
+        "owner": "connectorViewDataFolder",
         "specialization" : {
              "type":"Operation",
              "parameters":["c1_param"],
@@ -175,6 +186,7 @@
     {
         "sysmlid": "op_targetPath",
         "name": "op_targetPath",
+        "owner": "connectorViewDataFolder",
         "specialization" : {
              "type":"Operation",
              "parameters":["c2_param"],
@@ -207,97 +219,97 @@
         "sysmlid": "getValue",
         "name": "getValue",
         "documentation": "",
-        "owner": "123456",
-    "specialization" : {
-        "type": "Operation"
-    }
+        "owner": "connectorViewDataFolder",
+        "specialization" : {
+            "type": "Operation"
+        }
     },
     {
         "sysmlid": "getProperty",
         "name": "getProperty",
         "documentation": "",
-        "owner": "123456",
-    "specialization" : {
-        "type": "Operation"
-    }
+        "owner": "connectorViewDataFolder",
+        "specialization" : {
+            "type": "Operation"
+        }
     },
     {
         "sysmlid": "getElementWithIdentifier",
         "name": "getElementWithIdentifier",
         "documentation": "",
-        "owner": "123456",
-    "specialization" : {
-        "type": "Operation"
-    }
+        "owner": "connectorViewDataFolder",
+        "specialization" : {
+            "type": "Operation"
+        }
     },
     {
         "sysmlid": "getElementWithName",
         "name": "getElementWithName",
         "documentation": "",
-        "owner": "123456",
-    "specialization" : {
-        "type": "Operation"
-    }
+        "owner": "connectorViewDataFolder",
+        "specialization" : {
+            "type": "Operation"
+        }
     },
     {
         "sysmlid": "getPropertyWithType",
         "name": "getPropertyWithType",
         "documentation": "",
-        "owner": "123456",
-    "specialization" : {
-        "type": "Operation"
-    }
+        "owner": "connectorViewDataFolder",
+        "specialization" : {
+            "type": "Operation"
+        }
     },
     {
         "sysmlid": "getPropertyWithTypeName",
         "name": "getPropertyWithTypeName",
         "documentation": "",
-        "owner": "123456",
-    "specialization" : {
-        "type": "Operation"
-    }
+        "owner": "connectorViewDataFolder",
+        "specialization" : {
+            "type": "Operation"
+        }
     },
     {
         "sysmlid": "op_map_arg",
         "name": "",
         "documentation": "",
-        "owner": "123456",
-    "specialization" : {
-        "operand":[{"type":"ElementValue",
-                    "element":"op_map"},
-                   {"type":"ElementValue",
-                    "element":"exposed_id"},
-                   {"type":"ElementValue",
-                    "element":"op_name_arg"}],
-        "type": "Expression"
-    }
+        "owner": "connectorViewDataFolder",
+        "specialization" : {
+            "operand":[{"type":"ElementValue",
+                        "element":"op_map"},
+                       {"type":"ElementValue",
+                        "element":"exposed_id"},
+                       {"type":"ElementValue",
+                        "element":"op_name_arg"}],
+            "type": "Expression"
+        }
     },    
    {
         "sysmlid": "op_map",
         "name": "map",
         "documentation": "",
-        "owner": "123456",
-    "specialization" : {
-        "type": "Operation"
-    }
+        "owner": "connectorViewDataFolder",
+        "specialization" : {
+            "type": "Operation"
+        }
     },
     {
         "sysmlid": "op_name_arg",
         "name": "Name",
         "documentation": "",
-        "owner": "123456",
-    "specialization" : {
-        "type": "Operation"
-    }
+        "owner": "connectorViewDataFolder",
+        "specialization" : {
+            "type": "Operation"
+        }
     },
     {
         "sysmlid": "op_list",
         "name": "List",
         "documentation": "",
-        "owner": "123456",
-    "specialization" : {
-        "type": "Operation"
-    }
+        "owner": "connectorViewDataFolder",
+        "specialization" : {
+            "type": "Operation"
+        }
     },
     {
         "sysmlid": "_17_0_2_3_e610336_1394148464681_90735_29608_X",
@@ -314,7 +326,7 @@
         "sysmlid": "_17_0_2_3_e610336_1394148759911_783211_29758_X",
         "name": "",
         "documentation": "",
-        "owner": "123456",
+        "owner": "connectorViewDataFolder",
         "specialization" : {
             "type": "Expose",
             "source": "_17_0_2_3_e610336_1394148311476_17302_29388_X",
@@ -322,7 +334,5 @@
         }
     }
 ]}
-
-
 
 

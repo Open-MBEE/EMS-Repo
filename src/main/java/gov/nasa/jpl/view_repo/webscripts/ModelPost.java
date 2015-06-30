@@ -46,6 +46,10 @@ import gov.nasa.jpl.view_repo.util.WorkspaceDiff;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 import gov.nasa.jpl.view_repo.webscripts.util.ShareUtils;
 
+//import k.frontend.Frontend;
+//import k.frontend.ModelParser;
+//import k.frontend.ModelParser.ModelContext;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -2718,6 +2722,7 @@ public class ModelPost extends AbstractJavaWebScript {
                         String k = req.getContent().getContent();
                         logger.warn( "k = " + k );
                         postJson = new JSONObject(KExpParser.parseExpression(k));
+                        //postJson = new JSONObject(Frontend.exp2Json2( k ));
                     }
                     else {
                         postJson = //JSONObject.make(
