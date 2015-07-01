@@ -906,7 +906,7 @@ public class NodeUtil {
                          + results.length() + " nodes." );//resultSetToList( results ) );
         }
 
-     	Timer.stopTimer(timerLucene, "***** luceneSearch(): time", timeEvents);
+        Timer.stopTimer(timerLucene, "***** luceneSearch(): time", timeEvents);
 
         return results;
     }
@@ -2175,7 +2175,7 @@ public class NodeUtil {
             for ( NodeRef nodeRef : resultSet ) {
                 EmsScriptNode node =
                         new EmsScriptNode( nodeRef, services, response );
-                if ( node.checkPermissions( PermissionService.READ, response, status ) ) {
+                //if ( node.checkPermissions( PermissionService.READ, response, status ) ) {
                     String id = node.getSysmlId();
                     // We assume that order matters and that if two nodes have the
                     // same id, then the first is preferred (for example, because it
@@ -2183,7 +2183,7 @@ public class NodeUtil {
                     if ( id != null && !searchResults.containsKey( id ) ) {
                         searchResults.put( id, node );
                     }
-                }
+                //}
             }
 
         return searchResults;
@@ -2532,15 +2532,15 @@ public class NodeUtil {
      * @return  ScriptNode of site with name siteName
      */
     public static EmsScriptNode getSiteNodeForWorkspace( String siteName,
-			                                             boolean ignoreWorkspace,
-			                                             WorkspaceNode workspace,
-			                                             Date dateTime,
-			                                             ServiceRegistry services,
-			                                             StringBuffer response ) {
+                                                         boolean ignoreWorkspace,
+                                                         WorkspaceNode workspace,
+                                                         Date dateTime,
+                                                         ServiceRegistry services,
+                                                         StringBuffer response ) {
 
-    	EmsScriptNode siteNode = getSiteNode(siteName, ignoreWorkspace, workspace,
-    										 dateTime, services, response);
-		return (siteNode != null && workspacesEqual(siteNode.getWorkspace(),workspace)) ? siteNode : null;
+        EmsScriptNode siteNode = getSiteNode(siteName, ignoreWorkspace, workspace,
+                                             dateTime, services, response);
+        return (siteNode != null && workspacesEqual(siteNode.getWorkspace(),workspace)) ? siteNode : null;
 
     }
 
@@ -2808,16 +2808,16 @@ public class NodeUtil {
         }
         VersionHistory history = getServices().getVersionService().getVersionHistory( ref );
         if ( history == null ) {
-        		// Versioning doesn't make versions until the first save...
-        		EmsScriptNode node = new EmsScriptNode(ref, services);
-        		Date createdTime = (Date)node.getProperty("cm:created");
-        		if ( dateTime != null && createdTime != null && dateTime.compareTo( createdTime ) < 0 ) {
+                // Versioning doesn't make versions until the first save...
+                EmsScriptNode node = new EmsScriptNode(ref, services);
+                Date createdTime = (Date)node.getProperty("cm:created");
+                if ( dateTime != null && createdTime != null && dateTime.compareTo( createdTime ) < 0 ) {
                 if (Debug.isOn())  Debug.outln( "no history! dateTime " + dateTime
                                     + " before created " + createdTime );
-        			return null;
-        		}
+                    return null;
+                }
             if (Debug.isOn() && createdTime != null)  Debug.outln( "no history! created " + createdTime );
-        		return ref;
+                return ref;
         }
 
         Collection< Version > versions = history.getAllVersions();
@@ -3223,17 +3223,17 @@ public class NodeUtil {
         return new EmsScriptNode( nodeRef, services );
     }
 
-	public static EmsScriptNode findScriptNodeByIdForWorkspace(String id,
-															   WorkspaceNode workspace,
-															   Date dateTime, boolean findDeleted,
-															   ServiceRegistry services,
-			                                                   StringBuffer response) {
+    public static EmsScriptNode findScriptNodeByIdForWorkspace(String id,
+                                                               WorkspaceNode workspace,
+                                                               Date dateTime, boolean findDeleted,
+                                                               ServiceRegistry services,
+                                                               StringBuffer response) {
 
-		EmsScriptNode node = findScriptNodeById( id, workspace, dateTime, findDeleted,
-												services, response );
-		return (node != null && workspacesEqual(node.getWorkspace(),workspace)) ? node : null;
+        EmsScriptNode node = findScriptNodeById( id, workspace, dateTime, findDeleted,
+                                                services, response );
+        return (node != null && workspacesEqual(node.getWorkspace(),workspace)) ? node : null;
 
-	}
+    }
 
     /**
      * Returns true if the passed workspaces are equal, checks for master (null) workspaces
@@ -3243,10 +3243,10 @@ public class NodeUtil {
      * @param ws2
      * @return
      */
-	public static boolean workspacesEqual(WorkspaceNode ws1, WorkspaceNode ws2)
-	{
-		return ( (ws1 == null && ws2 == null) || (ws1 != null && ws1.equals(ws2)) );
-	}
+    public static boolean workspacesEqual(WorkspaceNode ws1, WorkspaceNode ws2)
+    {
+        return ( (ws1 == null && ws2 == null) || (ws1 != null && ws1.equals(ws2)) );
+    }
 
     /**
      * Updates or creates a artifact with the passed name/type in the specified site name/workspace
@@ -3267,139 +3267,139 @@ public class NodeUtil {
      * @return
      */
     public static EmsScriptNode updateOrCreateArtifact( String name, String type,
-									            		String base64content,
-									            		String strContent,
-									            		String targetSiteName,
-									            		String subfolderName,
-									            		WorkspaceNode workspace,
-									            		Date dateTime,
-									            		StringBuffer response,
-									            		Status status,
-									            		boolean ignoreName) {
+                                                        String base64content,
+                                                        String strContent,
+                                                        String targetSiteName,
+                                                        String subfolderName,
+                                                        WorkspaceNode workspace,
+                                                        Date dateTime,
+                                                        StringBuffer response,
+                                                        Status status,
+                                                        boolean ignoreName) {
 
-    	EmsScriptNode artifactNode;
-    	String myType = Utils.isNullOrEmpty(type) ? "svg" : type;
-    	String finalType = myType.startsWith(".") ? myType.substring(1) : myType;
-		String artifactId = name + "." + finalType;
+        EmsScriptNode artifactNode;
+        String myType = Utils.isNullOrEmpty(type) ? "svg" : type;
+        String finalType = myType.startsWith(".") ? myType.substring(1) : myType;
+        String artifactId = name + "." + finalType;
 
-		byte[] content =
-		( base64content == null )
-		      ? null
-		      : DatatypeConverter.parseBase64Binary( base64content );
+        byte[] content =
+        ( base64content == null )
+              ? null
+              : DatatypeConverter.parseBase64Binary( base64content );
 
-		if (content == null && strContent != null) {
-			content = strContent.getBytes(Charset.forName("UTF-8"));
-		}
+        if (content == null && strContent != null) {
+            content = strContent.getBytes(Charset.forName("UTF-8"));
+        }
 
-		long cs = EmsScriptNode.getChecksum( content );
+        long cs = EmsScriptNode.getChecksum( content );
 
-		// see if image already exists by looking up by checksum
-		ArrayList< NodeRef > refs =
-				findNodeRefsByType( "" + cs,
-		          SearchType.CHECKSUM.prefix, false,
-		          workspace, dateTime, false, false,
-		          services, false );
-		// ResultSet existingArtifacts =
-		// NodeUtil.findNodeRefsByType( "" + cs, SearchType.CHECKSUM,
-		// services );
-		// Set< EmsScriptNode > nodeSet = toEmsScriptNodeSet( existingArtifacts
-		// );
-		List< EmsScriptNode > nodeList = EmsScriptNode.toEmsScriptNodeList( refs, services, response, status );
-		// existingArtifacts.close();
+        // see if image already exists by looking up by checksum
+        ArrayList< NodeRef > refs =
+                findNodeRefsByType( "" + cs,
+                  SearchType.CHECKSUM.prefix, false,
+                  workspace, dateTime, false, false,
+                  services, false );
+        // ResultSet existingArtifacts =
+        // NodeUtil.findNodeRefsByType( "" + cs, SearchType.CHECKSUM,
+        // services );
+        // Set< EmsScriptNode > nodeSet = toEmsScriptNodeSet( existingArtifacts
+        // );
+        List< EmsScriptNode > nodeList = EmsScriptNode.toEmsScriptNodeList( refs, services, response, status );
+        // existingArtifacts.close();
 
-		EmsScriptNode matchingNode = null;
+        EmsScriptNode matchingNode = null;
 
-		if ( nodeList != null && nodeList.size() > 0 ) {
-			matchingNode = nodeList.iterator().next();
-		}
+        if ( nodeList != null && nodeList.size() > 0 ) {
+            matchingNode = nodeList.iterator().next();
+        }
 
-		// No need to update if the checksum and name match (even if it is in a parent branch):
-		if ( matchingNode != null && (ignoreName || matchingNode.getSysmlId().equals(artifactId)) ) {
-			return matchingNode;
-		}
+        // No need to update if the checksum and name match (even if it is in a parent branch):
+        if ( matchingNode != null && (ignoreName || matchingNode.getSysmlId().equals(artifactId)) ) {
+            return matchingNode;
+        }
 
-		// Create new artifact:
-		// find subfolder in site or create it
-		String artifactFolderName =
-		"Artifacts"
-		+ ( Utils.isNullOrEmpty( subfolderName )
-		                             ? ""
-		                             : "/"
-		                               + subfolderName );
+        // Create new artifact:
+        // find subfolder in site or create it
+        String artifactFolderName =
+        "Artifacts"
+        + ( Utils.isNullOrEmpty( subfolderName )
+                                     ? ""
+                                     : "/"
+                                       + subfolderName );
 
-		EmsScriptNode targetSiteNode = getSiteNodeForWorkspace( targetSiteName, false, workspace, dateTime,
-									  							services, response );
+        EmsScriptNode targetSiteNode = getSiteNodeForWorkspace( targetSiteName, false, workspace, dateTime,
+                                                                services, response );
 
-		// find site; it must exist!
-		if ( targetSiteNode == null || !targetSiteNode.exists() ) {
-			Debug.err( "Can't find node for site: " + targetSiteName + "!\n" );
-			return null;
-		}
+        // find site; it must exist!
+        if ( targetSiteNode == null || !targetSiteNode.exists() ) {
+            Debug.err( "Can't find node for site: " + targetSiteName + "!\n" );
+            return null;
+        }
 
-		// find or create subfolder
-		EmsScriptNode subfolder = mkdir( targetSiteNode, artifactFolderName, services,
-										 response, status );
-		if ( subfolder == null || !subfolder.exists() ) {
-			Debug.err( "Can't create subfolder for site, " + targetSiteName
-			+ ", in artifact folder, " + artifactFolderName + "!\n" );
-			return null;
-		}
+        // find or create subfolder
+        EmsScriptNode subfolder = mkdir( targetSiteNode, artifactFolderName, services,
+                                         response, status );
+        if ( subfolder == null || !subfolder.exists() ) {
+            Debug.err( "Can't create subfolder for site, " + targetSiteName
+            + ", in artifact folder, " + artifactFolderName + "!\n" );
+            return null;
+        }
 
-		// find or create node:
-		artifactNode = findScriptNodeByIdForWorkspace(artifactId, workspace, dateTime, false,
-										  			  services, response);
+        // find or create node:
+        artifactNode = findScriptNodeByIdForWorkspace(artifactId, workspace, dateTime, false,
+                                                      services, response);
 
-		// Node wasnt found, so create one:
-		if (artifactNode == null) {
-			artifactNode = subfolder.createNode( artifactId, "cm:content" );
-			subfolder.getOrSetCachedVersion();
-		}
+        // Node wasnt found, so create one:
+        if (artifactNode == null) {
+            artifactNode = subfolder.createNode( artifactId, "cm:content" );
+            subfolder.getOrSetCachedVersion();
+        }
 
-		if ( artifactNode == null || !artifactNode.exists() ) {
-			Debug.err( "Failed to create new artifact " + artifactId + "!\n" );
-			return null;
-		}
+        if ( artifactNode == null || !artifactNode.exists() ) {
+            Debug.err( "Failed to create new artifact " + artifactId + "!\n" );
+            return null;
+        }
 
         artifactNode.makeSureNodeRefIsNotFrozen();
-		if (!artifactNode.hasAspect( "cm:versionable")) {
-		    artifactNode.addAspect( "cm:versionable" );
-		}
-		if (!artifactNode.hasAspect( "cm:indexControl" )) {
-			artifactNode.addAspect( "cm:indexControl" );
-		}
-		if (!artifactNode.hasAspect( Acm.ACM_IDENTIFIABLE )) {
-			artifactNode.addAspect( Acm.ACM_IDENTIFIABLE );
-		}
-		if (!artifactNode.hasAspect( "view:Checksummable" )) {
-			artifactNode.addAspect( "view:Checksummable" );
-		}
+        if (!artifactNode.hasAspect( "cm:versionable")) {
+            artifactNode.addAspect( "cm:versionable" );
+        }
+        if (!artifactNode.hasAspect( "cm:indexControl" )) {
+            artifactNode.addAspect( "cm:indexControl" );
+        }
+        if (!artifactNode.hasAspect( Acm.ACM_IDENTIFIABLE )) {
+            artifactNode.addAspect( Acm.ACM_IDENTIFIABLE );
+        }
+        if (!artifactNode.hasAspect( "view:Checksummable" )) {
+            artifactNode.addAspect( "view:Checksummable" );
+        }
 
-		artifactNode.createOrUpdateProperty( Acm.CM_TITLE, artifactId );
-		artifactNode.createOrUpdateProperty( "cm:isIndexed", true );
-		artifactNode.createOrUpdateProperty( "cm:isContentIndexed", false );
-		artifactNode.createOrUpdateProperty( Acm.ACM_ID, artifactId );
-		artifactNode.createOrUpdateProperty( "view:cs", cs );
+        artifactNode.createOrUpdateProperty( Acm.CM_TITLE, artifactId );
+        artifactNode.createOrUpdateProperty( "cm:isIndexed", true );
+        artifactNode.createOrUpdateProperty( "cm:isContentIndexed", false );
+        artifactNode.createOrUpdateProperty( Acm.ACM_ID, artifactId );
+        artifactNode.createOrUpdateProperty( "view:cs", cs );
 
-		if (logger.isDebugEnabled()) {
+        if (logger.isDebugEnabled()) {
             logger.debug( "Creating artifact with indexing: "
                           + artifactNode.getProperty( "cm:isIndexed" ) );
-		}
+        }
 
-		ContentWriter writer =
-		services.getContentService().getWriter( artifactNode.getNodeRef(),
-												ContentModel.PROP_CONTENT, true );
-		InputStream contentStream = new ByteArrayInputStream( content );
-		writer.putContent( contentStream );
+        ContentWriter writer =
+        services.getContentService().getWriter( artifactNode.getNodeRef(),
+                                                ContentModel.PROP_CONTENT, true );
+        InputStream contentStream = new ByteArrayInputStream( content );
+        writer.putContent( contentStream );
 
-		ContentData contentData = writer.getContentData();
-		contentData = ContentData.setMimetype( contentData, EmsScriptNode.getMimeType( finalType ) );
-		if (base64content == null) {
-			contentData = ContentData.setEncoding( contentData, "UTF-8");
-		}
+        ContentData contentData = writer.getContentData();
+        contentData = ContentData.setMimetype( contentData, EmsScriptNode.getMimeType( finalType ) );
+        if (base64content == null) {
+            contentData = ContentData.setEncoding( contentData, "UTF-8");
+        }
         artifactNode.makeSureNodeRefIsNotFrozen();
         artifactNode.transactionCheck();
-		services.getNodeService().setProperty( artifactNode.getNodeRef(),
-		                                       ContentModel.PROP_CONTENT,contentData );
+        services.getNodeService().setProperty( artifactNode.getNodeRef(),
+                                               ContentModel.PROP_CONTENT,contentData );
         NodeUtil.propertyCachePut( artifactNode.getNodeRef(),
                                    NodeUtil.getShortQName( ContentModel.PROP_CONTENT ),
                                    contentData );
@@ -3407,17 +3407,17 @@ public class NodeUtil {
         // if only version, save dummy version so snapshots can reference
         // versioned images - need to check against 1 since if someone
         // deleted previously a "dead" version is left in its place
-		Object[] versionHistory = artifactNode.getEmsVersionHistory();
+        Object[] versionHistory = artifactNode.getEmsVersionHistory();
 
         if (versionHistory == null || versionHistory.length <= 1) {
             artifactNode.makeSureNodeRefIsNotFrozen();
-        	artifactNode.createVersion("creating the version history", false);
+            artifactNode.createVersion("creating the version history", false);
         }
 
         artifactNode.getOrSetCachedVersion();
 
-		return artifactNode;
-	}
+        return artifactNode;
+    }
 
 
     /**

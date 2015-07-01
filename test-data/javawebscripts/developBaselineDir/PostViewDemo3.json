@@ -1,0 +1,577 @@
+{"elements": [
+    {
+        "modifier": "admin",
+        "qualifiedId": "/demo3site/PROJECT-71724d08-6d79-42b2-b9ec-dc39f20a3660/connectorViewDataFolder/getElementWithIdentifier",
+        "name": "getElementWithIdentifier",
+        "qualifiedName": "/demo3site/BikeProject/Connector View Data Folder/getElementWithIdentifier",
+        "documentation": "",
+        "owner": "connectorViewDataFolder",
+        "sysmlid": "getElementWithIdentifier",
+        "specialization": {"type": "Operation"},
+        "editable": true,
+        "creator": "admin"
+    },
+    {
+        "modifier": "admin",
+        "qualifiedId": "/demo3site/PROJECT-71724d08-6d79-42b2-b9ec-dc39f20a3660/connectorViewDataFolder/c_param",
+        "name": "connector",
+        "qualifiedName": "/demo3site/BikeProject/Connector View Data Folder/connector",
+        "documentation": "",
+        "owner": "connectorViewDataFolder",
+        "sysmlid": "c_param",
+        "specialization": {
+            "defaultValue": null,
+            "type": "Parameter"
+        },
+        "editable": true,
+        "creator": "admin"
+    },
+    {
+        "modifier": "admin",
+        "qualifiedId": "/demo3site/PROJECT-71724d08-6d79-42b2-b9ec-dc39f20a3660/connectorViewDataFolder/getValue",
+        "name": "getValue",
+        "qualifiedName": "/demo3site/BikeProject/Connector View Data Folder/getValue",
+        "documentation": "",
+        "owner": "connectorViewDataFolder",
+        "sysmlid": "getValue",
+        "specialization": {"type": "Operation"},
+        "editable": true,
+        "creator": "admin"
+    },
+    {
+        "modifier": "admin",
+        "qualifiedId": "/demo3site/PROJECT-71724d08-6d79-42b2-b9ec-dc39f20a3660/connectorViewDataFolder/_17_0_2_3_e610336_1394148311476_17302_29388_X/_17_0_2_3_e610336_1394148464681_90735_29608_X",
+        "name": "",
+        "qualifiedName": "/demo3site/BikeProject/Connector View Data Folder/Components/",
+        "documentation": "",
+        "owner": "_17_0_2_3_e610336_1394148311476_17302_29388_X",
+        "sysmlid": "_17_0_2_3_e610336_1394148464681_90735_29608_X",
+        "specialization": {
+            "source": "_17_0_2_3_e610336_1394148311476_17302_29388_X",
+            "target": "_17_0_2_3_e610336_1394148449252_91190_29556_X",
+            "type": "Conform"
+        },
+        "editable": true,
+        "creator": "admin"
+    },
+    {
+        "modifier": "admin",
+        "qualifiedId": "/demo3site/PROJECT-71724d08-6d79-42b2-b9ec-dc39f20a3660/connectorViewDataFolder/op_sourcePath",
+        "name": "op_sourcePath",
+        "qualifiedName": "/demo3site/BikeProject/Connector View Data Folder/op_sourcePath",
+        "sysmlid": "op_sourcePath",
+        "owner": "connectorViewDataFolder",
+        "specialization": {
+            "expression": {
+                "valueExpression": null,
+                "operand": [
+                    {
+                        "element": "op_list",
+                        "valueExpression": null,
+                        "type": "ElementValue"
+                    },
+                    {
+                        "valueExpression": null,
+                        "type": "Expression",
+                        "operand": [
+                            {
+                                "element": "op_map",
+                                "valueExpression": null,
+                                "type": "ElementValue"
+                            },
+                            {
+                                "valueExpression": null,
+                                "operand": [
+                                    {
+                                        "element": "getProperty",
+                                        "valueExpression": null,
+                                        "type": "ElementValue"
+                                    },
+                                    {
+                                        "element": "c1_param",
+                                        "valueExpression": null,
+                                        "type": "ElementValue"
+                                    },
+                                    {
+                                        "valueExpression": null,
+                                        "string": "sourcePath",
+                                        "type": "LiteralString"
+                                    }
+                                ],
+                                "type": "Expression"
+                            },
+                            {
+                                "element": "op_name_arg",
+                                "valueExpression": null,
+                                "type": "ElementValue"
+                            },
+                            {
+                                "valueExpression": null,
+                                "integer": 1,
+                                "type": "LiteralInteger"
+                            }
+                        ]
+                    }
+                ],
+                "type": "Expression"
+            },
+            "parameters": ["c1_param"],
+            "type": "Operation"
+        },
+        "editable": true,
+        "creator": "admin",
+    },
+    {
+        "modifier": "admin",
+        "qualifiedId": "/demo3site/PROJECT-71724d08-6d79-42b2-b9ec-dc39f20a3660/connectorViewDataFolder/viewpoint_op",
+        "name": "viewpoint_op",
+        "qualifiedName": "/demo3site/BikeProject/Connector View Data Folder/viewpoint_op",
+        "documentation": "",
+        "owner": "connectorViewDataFolder",
+        "sysmlid": "viewpoint_op",
+        "specialization": {
+            "expression": {
+                "valueExpression": null,
+                "operand": [
+                    {
+                        "element": "op_map",
+                        "valueExpression": null,
+                        "type": "ElementValue"
+                    },
+                    {
+                        "valueExpression": null,
+                        "type": "Expression",
+                        "operand": [
+                            {
+                                "element": "getPropertyWithTypeName",
+                                "valueExpression": null,
+                                "type": "ElementValue"
+                            },
+                            {
+                                "valueExpression": null,
+                                "operand": [
+                                    {
+                                        "element": "getElementWithName",
+                                        "valueExpression": null,
+                                        "type": "ElementValue"
+                                    },
+                                    {
+                                        "valueExpression": null,
+                                        "type": "LiteralNull"
+                                    },
+                                    {
+                                        "valueExpression": null,
+                                        "string": "Bike",
+                                        "type": "LiteralString"
+                                    }
+                                ],
+                                "type": "Expression"
+                            },
+                            {
+                                "valueExpression": null,
+                                "string": "Connector",
+                                "type": "LiteralString"
+                            }
+                        ]
+                    },
+                    {
+                        "element": "op_connector",
+                        "valueExpression": null,
+                        "type": "ElementValue"
+                    },
+                    {
+                        "valueExpression": null,
+                        "integer": 1,
+                        "type": "LiteralInteger"
+                    }
+                ],
+                "type": "Expression"
+            },
+            "parameters": ["exposed_id"],
+            "type": "Operation"
+        },
+        "editable": true,
+        "creator": "admin"
+    },
+    {
+        "modifier": "admin",
+        "qualifiedId": "/demo3site/PROJECT-71724d08-6d79-42b2-b9ec-dc39f20a3660_pkg/connectorViewDataFolder_pkg/op_name_arg",
+        "name": "Name",
+        "qualifiedName": "/demo3site/BikeProject/null/Name",
+        "documentation": "",
+        "owner": "connectorViewDataFolder",
+        "sysmlid": "op_name_arg",
+        "specialization": {"type": "Operation"},
+        "editable": true,
+        "creator": "admin"
+    },
+    {
+        "modifier": "admin",
+        "qualifiedId": "/demo3site/PROJECT-71724d08-6d79-42b2-b9ec-dc39f20a3660/connectorViewDataFolder/Connector",
+        "name": "Connector",
+        "qualifiedName": "/demo3site/BikeProject/Connector View Data Folder/Connector",
+        "documentation": "the Connector type element",
+        "owner": "connectorViewDataFolder",
+        "sysmlid": "Connector",
+        "specialization": {"type": "Element"},
+        "editable": true,
+        "creator": "admin"
+    },
+    {
+        "qualifiedId": "/demo3site/PROJECT-71724d08-6d79-42b2-b9ec-dc39f20a3660/connectorViewDataFolder",
+        "qualifiedName": "/demo3site/BikeProject/Connector View Data Folder",
+        "sysmlid": "connectorViewDataFolder",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "Connector View Data Folder",
+        "owner": "PROJECT-71724d08-6d79-42b2-b9ec-dc39f20a3660",
+        "documentation": "",
+        "specialization": {"type": "Package"}
+    },
+    {
+        "modifier": "admin",
+        "qualifiedId": "/demo3site/PROJECT-71724d08-6d79-42b2-b9ec-dc39f20a3660/connectorViewDataFolder/c2_param",
+        "name": "connector",
+        "qualifiedName": "/demo3site/BikeProject/Connector View Data Folder/connector",
+        "documentation": "",
+        "owner": "connectorViewDataFolder",
+        "sysmlid": "c2_param",
+        "specialization": {
+            "defaultValue": null,
+            "type": "Parameter"
+        },
+        "editable": true,
+        "creator": "admin"
+    },
+    {
+        "modifier": "admin",
+        "qualifiedId": "/demo3site/PROJECT-71724d08-6d79-42b2-b9ec-dc39f20a3660/connectorViewDataFolder/getProperty",
+        "name": "getProperty",
+        "qualifiedName": "/demo3site/BikeProject/Connector View Data Folder/getProperty",
+        "documentation": "",
+        "owner": "connectorViewDataFolder",
+        "sysmlid": "getProperty",
+        "specialization": {"type": "Operation"},
+        "editable": true,
+        "creator": "admin"
+    },
+    {
+        "modifier": "admin",
+        "qualifiedId": "/demo3site/PROJECT-71724d08-6d79-42b2-b9ec-dc39f20a3660_pkg/connectorViewDataFolder_pkg/op_map_arg",
+        "name": "",
+        "qualifiedName": "/demo3site/BikeProject/null/",
+        "documentation": "",
+        "owner": "connectorViewDataFolder",
+        "sysmlid": "op_map_arg",
+        "specialization": {
+            "valueExpression": null,
+            "operand": [
+                {
+                    "element": "op_map",
+                    "valueExpression": null,
+                    "type": "ElementValue"
+                },
+                {
+                    "element": "exposed_id",
+                    "valueExpression": null,
+                    "type": "ElementValue"
+                },
+                {
+                    "element": "op_name_arg",
+                    "valueExpression": null,
+                    "type": "ElementValue"
+                }
+            ],
+            "type": "Expression"
+        },
+        "editable": true,
+        "creator": "admin"
+    },
+    {
+        "modifier": "admin",
+        "qualifiedId": "/demo3site/PROJECT-71724d08-6d79-42b2-b9ec-dc39f20a3660/connectorViewDataFolder/getElementWithName",
+        "name": "getElementWithName",
+        "qualifiedName": "/demo3site/BikeProject/Connector View Data Folder/getElementWithName",
+        "documentation": "",
+        "owner": "connectorViewDataFolder",
+        "sysmlid": "getElementWithName",
+        "specialization": {"type": "Operation"},
+        "editable": true,
+        "creator": "admin"
+    },
+    {
+        "modifier": "admin",
+        "qualifiedId": "/demo3site/PROJECT-71724d08-6d79-42b2-b9ec-dc39f20a3660/connectorViewDataFolder/_17_0_2_3_e610336_1394148759911_783211_29758_X",
+        "name": "",
+        "qualifiedName": "/demo3site/BikeProject/Connector View Data Folder/",
+        "documentation": "",
+        "owner": "connectorViewDataFolder",
+        "sysmlid": "_17_0_2_3_e610336_1394148759911_783211_29758_X",
+        "specialization": {
+            "source": "_17_0_2_3_e610336_1394148311476_17302_29388_X",
+            "target": "_17_0_2_4_f3a0363_1394142290412_487571_28478_X",
+            "type": "Expose"
+        },
+        "editable": true,
+        "creator": "admin"
+    },
+    {
+        "qualifiedId": "/demo3site/PROJECT-71724d08-6d79-42b2-b9ec-dc39f20a3660/connectorViewDataFolder/_17_0_2_3_e610336_1394148311476_17302_29388_X",
+        "qualifiedName": "/demo3site/BikeProject/Connector View Data Folder/Components",
+        "sysmlid": "_17_0_2_3_e610336_1394148311476_17302_29388_X",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "Components",
+        "owner": "connectorViewDataFolder",
+        "documentation": "",
+        "specialization": {"type": "View"}
+    },
+    {
+        "modifier": "admin",
+        "qualifiedId": "/demo3site/PROJECT-71724d08-6d79-42b2-b9ec-dc39f20a3660_pkg/connectorViewDataFolder_pkg/op_list",
+        "name": "List",
+        "qualifiedName": "/demo3site/BikeProject/null/List",
+        "documentation": "",
+        "owner": "connectorViewDataFolder",
+        "sysmlid": "op_list",
+        "specialization": {"type": "Operation"},
+        "editable": true,
+        "creator": "admin"
+    },
+    {
+        "modifier": "admin",
+        "qualifiedId": "/demo3site/PROJECT-71724d08-6d79-42b2-b9ec-dc39f20a3660/connectorViewDataFolder/op_connector",
+        "name": "op_connector",
+        "qualifiedName": "/demo3site/BikeProject/Connector View Data Folder/op_connector",
+        "sysmlid": "op_connector",
+        "owner": "connectorViewDataFolder",
+        "specialization": {
+            "expression": {
+                "valueExpression": null,
+                "operand": [
+                    {
+                        "element": "op_list",
+                        "valueExpression": null,
+                        "type": "ElementValue"
+                    },
+                    {
+                        "valueExpression": null,
+                        "type": "Expression",
+                        "operand": [
+                            {
+                                "element": "op_name_arg",
+                                "valueExpression": null,
+                                "type": "ElementValue"
+                            },
+                            {
+                                "element": "c_param",
+                                "valueExpression": null,
+                                "type": "ElementValue"
+                            }
+                        ]
+                    },
+                    {
+                        "valueExpression": null,
+                        "type": "Expression",
+                        "operand": [
+                            {
+                                "element": "op_sourcePath",
+                                "valueExpression": null,
+                                "type": "ElementValue"
+                            },
+                            {
+                                "element": "c_param",
+                                "valueExpression": null,
+                                "type": "ElementValue"
+                            }
+                        ]
+                    },
+                    {
+                        "valueExpression": null,
+                        "type": "Expression",
+                        "operand": [
+                            {
+                                "element": "op_targetPath",
+                                "valueExpression": null,
+                                "type": "ElementValue"
+                            },
+                            {
+                                "element": "c_param",
+                                "valueExpression": null,
+                                "type": "ElementValue"
+                            }
+                        ]
+                    }
+                ],
+                "type": "Expression"
+            },
+            "parameters": ["c_param"],
+            "type": "Operation"
+        },
+        "editable": true,
+        "creator": "admin",
+    },
+    {
+        "modifier": "admin",
+        "qualifiedId": "/demo3site/PROJECT-71724d08-6d79-42b2-b9ec-dc39f20a3660/connectorViewDataFolder/c1_param",
+        "name": "connector",
+        "qualifiedName": "/demo3site/BikeProject/Connector View Data Folder/connector",
+        "documentation": "",
+        "owner": "connectorViewDataFolder",
+        "sysmlid": "c1_param",
+        "specialization": {
+            "defaultValue": null,
+            "type": "Parameter"
+        },
+        "editable": true,
+        "creator": "admin"
+    },
+    {
+        "modifier": "admin",
+        "qualifiedId": "/demo3site/PROJECT-71724d08-6d79-42b2-b9ec-dc39f20a3660/connectorViewDataFolder/getPropertyWithType",
+        "name": "getPropertyWithType",
+        "qualifiedName": "/demo3site/BikeProject/Connector View Data Folder/getPropertyWithType",
+        "documentation": "",
+        "owner": "connectorViewDataFolder",
+        "sysmlid": "getPropertyWithType",
+        "specialization": {"type": "Operation"},
+        "editable": true,
+        "creator": "admin"
+    },
+    {
+        "modifier": "admin",
+        "qualifiedId": "/demo3site/PROJECT-71724d08-6d79-42b2-b9ec-dc39f20a3660_pkg/connectorViewDataFolder_pkg/op_map",
+        "name": "map",
+        "qualifiedName": "/demo3site/BikeProject/null/map",
+        "documentation": "",
+        "owner": "connectorViewDataFolder",
+        "sysmlid": "op_map",
+        "specialization": {"type": "Operation"},
+        "editable": true,
+        "creator": "admin"
+    },
+    {
+        "modifier": "admin",
+        "qualifiedId": "/demo3site/PROJECT-71724d08-6d79-42b2-b9ec-dc39f20a3660/connectorViewDataFolder/_17_0_2_3_e610336_1394148449252_91190_29556_X",
+        "name": "ComponentViewPoint",
+        "qualifiedName": "/demo3site/BikeProject/Connector View Data Folder/ComponentViewPoint",
+        "documentation": "",
+        "owner": "connectorViewDataFolder",
+        "sysmlid": "_17_0_2_3_e610336_1394148449252_91190_29556_X",
+        "specialization": {
+            "method": "viewpoint_op",
+            "type": "Viewpoint"
+        },
+        "editable": true,
+        "creator": "admin"
+    },
+    {
+        "modifier": "admin",
+        "qualifiedId": "/demo3site/PROJECT-71724d08-6d79-42b2-b9ec-dc39f20a3660_pkg/connectorViewDataFolder_pkg/exposed_id",
+        "name": "exposed",
+        "qualifiedName": "/demo3site/BikeProject/null/exposed",
+        "documentation": "",
+        "owner": "connectorViewDataFolder",
+        "sysmlid": "exposed_id",
+        "specialization": {
+            "defaultValue": null,
+            "type": "Parameter"
+        },
+        "editable": true,
+        "creator": "admin"
+    },
+    {
+        "modifier": "admin",
+        "qualifiedId": "/demo3site/PROJECT-71724d08-6d79-42b2-b9ec-dc39f20a3660/connectorViewDataFolder/_17_0_2_4_f3a0363_1394142290412_487571_28478_X",
+        "name": "BLUCam CubeSat A",
+        "qualifiedName": "/demo3site/BikeProject/Connector View Data Folder/BLUCam CubeSat A",
+        "documentation": "",
+        "owner": "connectorViewDataFolder",
+        "sysmlid": "_17_0_2_4_f3a0363_1394142290412_487571_28478_X",
+        "specialization": {"type": "Package"},
+        "editable": true,
+        "creator": "admin"
+    },
+    {
+        "modifier": "admin",
+        "qualifiedId": "/demo3site/PROJECT-71724d08-6d79-42b2-b9ec-dc39f20a3660/connectorViewDataFolder/getPropertyWithTypeName",
+        "name": "getPropertyWithTypeName",
+        "qualifiedName": "/demo3site/BikeProject/Connector View Data Folder/getPropertyWithTypeName",
+        "documentation": "",
+        "owner": "connectorViewDataFolder",
+        "sysmlid": "getPropertyWithTypeName",
+        "specialization": {"type": "Operation"},
+        "editable": true,
+        "creator": "admin"
+    },
+    {
+        "modifier": "admin",
+        "qualifiedId": "/demo3site/PROJECT-71724d08-6d79-42b2-b9ec-dc39f20a3660/connectorViewDataFolder/op_targetPath",
+        "name": "op_targetPath",
+        "qualifiedName": "/demo3site/BikeProject/Connector View Data Folder/op_targetPath",
+        "sysmlid": "op_targetPath",
+        "owner": "connectorViewDataFolder",
+        "specialization": {
+            "expression": {
+                "valueExpression": null,
+                "operand": [
+                    {
+                        "element": "op_list",
+                        "valueExpression": null,
+                        "type": "ElementValue"
+                    },
+                    {
+                        "valueExpression": null,
+                        "type": "Expression",
+                        "operand": [
+                            {
+                                "element": "op_map",
+                                "valueExpression": null,
+                                "type": "ElementValue"
+                            },
+                            {
+                                "valueExpression": null,
+                                "operand": [
+                                    {
+                                        "element": "getProperty",
+                                        "valueExpression": null,
+                                        "type": "ElementValue"
+                                    },
+                                    {
+                                        "element": "c2_param",
+                                        "valueExpression": null,
+                                        "type": "ElementValue"
+                                    },
+                                    {
+                                        "valueExpression": null,
+                                        "string": "targetPath",
+                                        "type": "LiteralString"
+                                    }
+                                ],
+                                "type": "Expression"
+                            },
+                            {
+                                "element": "op_name_arg",
+                                "valueExpression": null,
+                                "type": "ElementValue"
+                            },
+                            {
+                                "valueExpression": null,
+                                "integer": 1,
+                                "type": "LiteralInteger"
+                            }
+                        ]
+                    }
+                ],
+                "type": "Expression"
+            },
+            "parameters": ["c2_param"],
+            "type": "Operation"
+        },
+        "editable": true,
+        "creator": "admin",
+    }
+]}
+200

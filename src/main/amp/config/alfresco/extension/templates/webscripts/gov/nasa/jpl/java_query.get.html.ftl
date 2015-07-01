@@ -8,7 +8,7 @@
 		    $("#submit").click(function (event) {
 		        var expression = $("#input").val();
 		        $.ajax({
-		        	url: '${url.context}/wcs/java_query',
+		        	url: '${url.context}/service/java_query',
 		        	type: 'POST',
 		        	data: expression,
 		        	contentType: 'text/plain; charset=UTF-8'
