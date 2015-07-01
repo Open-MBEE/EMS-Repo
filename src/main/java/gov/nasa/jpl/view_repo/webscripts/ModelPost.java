@@ -539,7 +539,7 @@ public class ModelPost extends AbstractJavaWebScript {
                                     WorkspaceNode workspace) {
 
         EmsScriptNode lastNode = nodeToUpdate;
-        EmsScriptNode nodeParent = nodeToUpdate.getParent();
+        EmsScriptNode nodeParent = nodeToUpdate.getParent(null, workspace, false, true);
         EmsScriptNode reifiedNodeParent = nodeParent != null ? nodeParent.getReifiedNode(true, workspace) : null;
         EmsScriptNode lastDeletedReifiedNodeParent = null;
         while (nodeParent != null  && nodeParent.scriptNodeExists()) {
@@ -558,7 +558,7 @@ public class ModelPost extends AbstractJavaWebScript {
                 break;
             }
             lastNode = reifiedNodeParent;
-            nodeParent = nodeParent.getParent();
+            nodeParent = nodeParent.getParent(null, workspace, false, true);
             reifiedNodeParent = nodeParent != null ? nodeParent.getReifiedNode(true, workspace) : null;
         }
         
@@ -617,9 +617,7 @@ public class ModelPost extends AbstractJavaWebScript {
                 // Parent will be a reified package, which we never delete, so no need to
                 // check if we need to resurrect it.  If elementNode is deleted, it will
                 // resurrected later when processing that node. 
-                owner = elementNode.getParent();
-                owner = new EmsScriptNode(owner.getLiveNodeRefFromVersion(),
-                                          getServices() );
+                owner = elementNode.getParent( null, workspace, false, true );
             }
         }
 
@@ -2133,7 +2131,7 @@ public class ModelPost extends AbstractJavaWebScript {
         }
         EmsScriptNode parent;
         if (useParent) {
-            parent= node.getParent();
+            parent= node.getParent(null, workspace, false, true);
         } else {
             parent = node;
         }

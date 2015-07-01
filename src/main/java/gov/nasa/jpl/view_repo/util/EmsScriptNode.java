@@ -1289,6 +1289,35 @@ public class EmsScriptNode extends ScriptNode implements
         if ( myParent == null ) return null;
         return new EmsScriptNode( myParent.getNodeRef(), services, response );
     }
+    
+    /**
+     * This version of getParent() handles versioned nodes correctly by calling
+     * getOwningParent() first.
+     * 
+     * @param dateTime
+     * @param ws
+     * @param skipNodeRefCheck
+     * @param checkVersionedNode
+     * @return
+     */
+    public EmsScriptNode getParent( Date dateTime, WorkspaceNode ws,
+                                    boolean skipNodeRefCheck,
+                                    boolean checkVersionedNode) {
+        
+        // We are not using getParent() because elementNode may be from the version
+        // store, which makes getParent() return a node from the workspace://version2store,
+        // and those nodes are equivalent to death.  See CMED-702.
+        EmsScriptNode owningParent = getOwningParent( dateTime, ws, skipNodeRefCheck, checkVersionedNode);
+        
+        if (owningParent != null) {
+            EmsScriptNode parent = owningParent.getReifiedPkg( dateTime, ws );
+            if (parent != null) {
+                return parent;
+            }
+        }
+        
+        return getParent();
+    }
 
     /**
      * Return the version of the parent at a specific time. This uses the
@@ -3267,7 +3296,7 @@ public class EmsScriptNode extends ScriptNode implements
     }
 
     public boolean isSite() {
-        return ( getParent() != null && ( getParent().getName().toLowerCase()
+        return ( getParent(null, getWorkspace(), false, true) != null && ( getParent(null, getWorkspace(), false, true).getName().toLowerCase()
                                                      .equals( "sites" ) || isWorkspaceTop() ) );
     }
 
@@ -3361,7 +3390,7 @@ public class EmsScriptNode extends ScriptNode implements
             }
             seen.add(parent);
             oldparent = parent;
-            parent = parent.getParent();
+            parent = parent.getParent(null, ws, false, true);
         }
         if ( seen.contains(parent) ) {
             String msg ="ERROR! recursive parent hierarchy detected for " + parent.getName() + " having visited " + seen + ".\n";
@@ -4250,8 +4279,8 @@ public class EmsScriptNode extends ScriptNode implements
         NodeRef r = null;
         for ( NodeRef ref : refs ) {
             EmsScriptNode node = new EmsScriptNode( ref, getServices() );
-            EmsScriptNode parent1 = getParent();
-            EmsScriptNode parent2 = node.getParent();
+            EmsScriptNode parent1 = getParent(null, getWorkspace(), false, true);
+            EmsScriptNode parent2 = node.getParent(null, parentWs, false, true);
             boolean failed = false;
             while ( NodeUtil.exists( parent1 ) && NodeUtil.exists( parent2 ) &&
                     !parent1.isWorkspaceTop() && !parent2.isWorkspaceTop() ) {
@@ -4262,8 +4291,8 @@ public class EmsScriptNode extends ScriptNode implements
                 } else {
                     if ( parent1.equals( parent2 ) ) break;
                 }
-                parent1 = parent1.getParent();
-                parent2 = parent2.getParent();
+                parent1 = parent1.getParent(null, getWorkspace(), false, true);
+                parent2 = parent2.getParent(null, parentWs, false, true);
             }
             if ( !failed && ( ( parent1 == null ) == ( parent2 == null ) )
                  && ( parent1.isWorkspaceTop() == parent2.isWorkspaceTop() ) ) {
@@ -4605,14 +4634,14 @@ public class EmsScriptNode extends ScriptNode implements
     public boolean move( ScriptNode destination ) {
         
         boolean status = false;
-        EmsScriptNode parent = getParent();
+        EmsScriptNode parent = getParent(null, getWorkspace(), false, true);
         EmsScriptNode oldParentReifiedNode = parent.getReifiedNode(parent.getWorkspace());
 
         // Create new parent if the parent is not correct:
         if ( !parent.equals( destination ) ) {
             
             // in a move we need to track the parent, the current node, and the destination, just in case
-            getParent().makeSureNodeRefIsNotFrozen();
+            getParent(null, getWorkspace(), false, true).makeSureNodeRefIsNotFrozen();
             makeSureNodeRefIsNotFrozen();
             EmsScriptNode dest = new EmsScriptNode(destination.getNodeRef(), services, response);
             dest.makeSureNodeRefIsNotFrozen();
@@ -5171,7 +5200,7 @@ public class EmsScriptNode extends ScriptNode implements
     }
 
     public boolean isWorkspaceTop() {
-        EmsScriptNode myParent = getParent();
+        EmsScriptNode myParent = getParent(null, getWorkspace(), false, true);
         if ( myParent == null ) {
             if ( Debug.isOn() ) {
                 Debug.outln( "isWorkspaceTop() = true for node with null parent: "
