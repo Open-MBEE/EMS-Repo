@@ -3310,8 +3310,8 @@ public class EmsScriptNode extends ScriptNode implements
     }
 
     public boolean isSite() {
-        return ( getParent(null, getWorkspace(), false, true) != null && ( getParent(null, getWorkspace(), false, true).getName().toLowerCase()
-                                                     .equals( "sites" ) || isWorkspaceTop() ) );
+        EmsScriptNode parent = getParent(null, getWorkspace(), false, true);
+        return ( parent != null && ( parent.getName().toLowerCase().equals( "sites" ) || isWorkspaceTop() ) );
     }
 
     /**
@@ -4656,7 +4656,7 @@ public class EmsScriptNode extends ScriptNode implements
         if ( !parent.equals( destination ) ) {
             
             // in a move we need to track the parent, the current node, and the destination, just in case
-            getParent(null, getWorkspace(), false, true).makeSureNodeRefIsNotFrozen();
+            parent.makeSureNodeRefIsNotFrozen();
             makeSureNodeRefIsNotFrozen();
             EmsScriptNode dest = new EmsScriptNode(destination.getNodeRef(), services, response);
             dest.makeSureNodeRefIsNotFrozen();
