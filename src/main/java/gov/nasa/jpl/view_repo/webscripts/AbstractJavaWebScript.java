@@ -55,8 +55,8 @@ import gov.nasa.jpl.view_repo.util.NodeUtil;
 import gov.nasa.jpl.view_repo.util.NodeUtil.SearchType;
 import gov.nasa.jpl.view_repo.util.WorkspaceDiff;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
-import java.util.Formatter;
 
+import java.util.Formatter;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -139,8 +139,9 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
 
     // keeps track of who made the call to the service
     protected String source = null;
-    private EmsSystemModel systemModel;
-    private SystemModelToAeExpression< EmsScriptNode, EmsScriptNode, String, Object, EmsSystemModel > sysmlToAe;
+    protected EmsSystemModel systemModel;
+    protected SystemModelToAeExpression< EmsScriptNode, EmsScriptNode, String, Object, EmsSystemModel > sysmlToAe;
+    protected static SystemModelToAeExpression< EmsScriptNode, EmsScriptNode, String, Object, EmsSystemModel > globalSysmlToAe;
 
     protected void initMemberVariables(String siteName) {
 		companyhome = new ScriptNode(repository.getCompanyHome(), services);
@@ -499,7 +500,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
 	    //responseStatus.setMessage(msg);
 	}
 
-	protected void log (Level level, String msg){
+	protected static void log(Level level, String msg) {
 	    switch(level.toInt()) {
 	        case Level.FATAL_INT:
 	            logger.fatal(msg);
@@ -1244,11 +1245,26 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         return systemModel;
     }
 
+    public static EmsSystemModel globalSystemModel = null;
+    public static EmsSystemModel getGlobalSystemModel() {
+        if ( globalSystemModel == null ) {
+            globalSystemModel = new EmsSystemModel(NodeUtil.getServices() );
+        }
+        return globalSystemModel;
+    }
+
     public SystemModelToAeExpression< EmsScriptNode, EmsScriptNode, String, Object, EmsSystemModel > getSystemModelAe() {
         if ( sysmlToAe == null ) {
             setSystemModelAe();
         }
         return sysmlToAe;
+    }
+
+    public static SystemModelToAeExpression< EmsScriptNode, EmsScriptNode, String, Object, EmsSystemModel > getGlobalSystemModelAe() {
+        if ( globalSysmlToAe == null ) {
+            setGlobalSystemModelAe();
+        }
+        return globalSysmlToAe;
     }
 
     public void setSystemModelAe() {
@@ -1257,13 +1273,18 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
     
     }
 
+    public static void setGlobalSystemModelAe() {
+        globalSysmlToAe =
+                new SystemModelToAeExpression< EmsScriptNode, EmsScriptNode, String, Object, EmsSystemModel >( getGlobalSystemModel() );    
+    }
+
     /**
      * Creates a ConstraintExpression for the passed constraint node and adds to the passed constraints
      *
      * @param constraintNode The node to parse and create a ConstraintExpression for
      * @param constraints The list of Constraints to add to
      */
-    public void addConstraintExpression(EmsScriptNode constraintNode, Collection<Constraint> constraints, WorkspaceNode ws) {
+    public static void addConstraintExpression(EmsScriptNode constraintNode, Collection<Constraint> constraints, WorkspaceNode ws) {
     
         if (constraintNode == null || constraints == null) return;
     
@@ -1279,12 +1300,12 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         }
     }
 
-    public <T> Expression<T> toAeExpression( EmsScriptNode exprNode ) {
+    public static <T> Expression<T> toAeExpression( EmsScriptNode exprNode ) {
         if ( exprNode == null ) {
             logger.warn( "called toAeExpression() with null argument" );
             return null;
         }
-        Expression<Call> expressionCall = getSystemModelAe().toAeExpression( exprNode );
+        Expression<Call> expressionCall = getGlobalSystemModelAe().toAeExpression( exprNode );
         if ( expressionCall == null ) {
             logger.warn( "toAeExpression("+exprNode+") returned null" );
             return null;
@@ -1298,12 +1319,12 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         return expression;
     }
 
-    public Collection< Constraint > getAeConstraints( Set< EmsScriptNode > elements, WorkspaceNode ws ) {
+    public static Collection< Constraint > getAeConstraints( Set< EmsScriptNode > elements, WorkspaceNode ws ) {
         //Map<EmsScriptNode, Constraint> constraints = new LinkedHashMap<EmsScriptNode, Constraint>();
         Collection<Constraint> constraints = new ArrayList<Constraint>();
     
         // Search for all constraints in the database:
-        Collection<EmsScriptNode> constraintNodes = getSystemModel().getType(null, Acm.ACM_CONSTRAINT);
+        Collection<EmsScriptNode> constraintNodes = getGlobalSystemModel().getType(null, Acm.ACM_CONSTRAINT);
     
         if (!Utils.isNullOrEmpty(constraintNodes)) {
     
@@ -1333,7 +1354,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         } // Ends if there was constraint nodes found in the database
     
         // Add all of the Parameter constraints:
-        ClassData cd = getSystemModelAe().getClassData();
+        ClassData cd = getGlobalSystemModelAe().getClassData();
         // Loop through all the listeners:
         for (ParameterListenerImpl listener : cd.getAeClasses().values()) {
             // TODO: REVIEW
@@ -1344,7 +1365,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         return constraints;
     }
 
-    public Map< EmsScriptNode, Expression<?> > getAeExpressions( Set< EmsScriptNode > elements ) {
+    public static Map< EmsScriptNode, Expression<?> > getAeExpressions( Set< EmsScriptNode > elements ) {
         Map<EmsScriptNode, Expression<?>> expressions = new LinkedHashMap< EmsScriptNode, Expression<?> >();
         for ( EmsScriptNode node : elements ) {
             // FIXME -- Don't we need to pass in a date and workspace?
@@ -1358,7 +1379,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         return expressions;
     }
 
-    public Map<Object, Object> evaluate( Set< EmsScriptNode > elements, WorkspaceNode ws ) {
+    public static Map<Object, Object> evaluate( Set< EmsScriptNode > elements, WorkspaceNode ws ) {
         log(Level.INFO, "Will attempt to fix constraint violations if found!");
         Collection< Constraint > constraints = getAeConstraints( elements, ws );
         Map< EmsScriptNode, Expression<?> > expressions = getAeExpressions( elements );
@@ -1434,7 +1455,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
      * @param propertyNode The node to parse
      * @return Set of cm:name
      */
-    protected Set<String> getPropertyElementNames(EmsScriptNode propertyNode) {
+    protected static Set<String> getPropertyElementNames(EmsScriptNode propertyNode) {
     
         Set<String> names = new HashSet<String>();
     
@@ -1446,7 +1467,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
     
             // See if it has a value property:
             Collection< EmsScriptNode > propertyValues =
-                    getSystemModel().getProperty(propertyNode, Acm.JSON_VALUE);
+                    getGlobalSystemModel().getProperty(propertyNode, Acm.JSON_VALUE);
     
             if (!Utils.isNullOrEmpty(propertyValues)) {
                   for (EmsScriptNode value : propertyValues) {
@@ -1471,7 +1492,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
      * @param paramNode The node to parse
      * @return Set of cm:name
      */
-    protected Set<String> getParameterElementNames(EmsScriptNode paramNode) {
+    protected static Set<String> getParameterElementNames(EmsScriptNode paramNode) {
     
         Set<String> names = new HashSet<String>();
     
@@ -1483,7 +1504,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
     
             // See if it has a defaultParamaterValue property:
             Collection< EmsScriptNode > paramValues =
-                    getSystemModel().getProperty(paramNode, Acm.JSON_PARAMETER_DEFAULT_VALUE);
+                    getGlobalSystemModel().getProperty(paramNode, Acm.JSON_PARAMETER_DEFAULT_VALUE);
     
             if (!Utils.isNullOrEmpty(paramValues)) {
                   names.add(paramValues.iterator().next().getName());
@@ -1500,7 +1521,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
      * @param opNode The node to parse
      * @return Set of cm:name
      */
-    protected Set<String> getOperationElementNames(EmsScriptNode opNode) {
+    protected static Set<String> getOperationElementNames(EmsScriptNode opNode) {
     
         Set<String> names = new HashSet<String>();
     
@@ -1512,7 +1533,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
     
             // See if it has a operationParameter and/or operationExpression property:
             Collection< EmsScriptNode > opParamNodes =
-                    getSystemModel().getProperty(opNode, Acm.JSON_OPERATION_PARAMETER);
+                    getGlobalSystemModel().getProperty(opNode, Acm.JSON_OPERATION_PARAMETER);
     
             if (!Utils.isNullOrEmpty(opParamNodes)) {
               for (EmsScriptNode opParamNode : opParamNodes) {
@@ -1521,7 +1542,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
             }
     
             Collection< EmsScriptNode > opExprNodes =
-                    getSystemModel().getProperty(opNode, Acm.JSON_OPERATION_EXPRESSION);
+                    getGlobalSystemModel().getProperty(opNode, Acm.JSON_OPERATION_EXPRESSION);
     
             if (!Utils.isNullOrEmpty(opExprNodes)) {
                 names.add(opExprNodes.iterator().next().getName());
@@ -1540,7 +1561,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
      * @param date 
      * @return Set of cm:name
      */
-    protected Set<String> getExpressionElementNames(EmsScriptNode expressionNode, Date date , WorkspaceNode ws ) {
+    protected static Set<String> getExpressionElementNames(EmsScriptNode expressionNode, Date date , WorkspaceNode ws ) {
     
         Set<String> names = new HashSet<String>();
     
@@ -1554,7 +1575,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
             // FIXME -- need to give date/workspace context 
             // Process all of the operand properties:
             Collection< EmsScriptNode > properties =
-                    getSystemModel().getProperty( expressionNode, Acm.JSON_OPERAND);
+                    getGlobalSystemModel().getProperty( expressionNode, Acm.JSON_OPERAND);
     
             if (!Utils.isNullOrEmpty(properties)) {
     
@@ -1569,7 +1590,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
                     // FIXME -- need to give date/workspace context 
                     // Get the valueOfElementProperty node:
                     Collection< EmsScriptNode > valueOfElemNodes =
-                            getSystemModel().getProperty(operandProp, Acm.JSON_ELEMENT_VALUE_ELEMENT);
+                            getGlobalSystemModel().getProperty(operandProp, Acm.JSON_ELEMENT_VALUE_ELEMENT);
     
                     // If it is a elementValue, then this will be non-empty:
                     if (!Utils.isNullOrEmpty(valueOfElemNodes)) {
@@ -1588,7 +1609,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
                     if (valueOfElementNode != null) {
     
                       // FIXME -- need to give date/workspace context 
-                      String typeString = getSystemModel().getTypeString(valueOfElementNode, null);
+                      String typeString = getGlobalSystemModel().getTypeString(valueOfElementNode, null);
     
                       // FIXME -- need to give date/workspace context 
                       // If it is a Operation then see if it then process it:
@@ -1634,7 +1655,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
      * @param ws 
      * @return Set of cm:name
      */
-    protected Set<String> getConstraintElementNames(EmsScriptNode constraintNode, WorkspaceNode ws ) {
+    protected static Set<String> getConstraintElementNames(EmsScriptNode constraintNode, WorkspaceNode ws ) {
     
         Set<String> names = new LinkedHashSet<String>();
     
@@ -1671,14 +1692,14 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
      * @param constraintNode The node to parse
      * @return The Expression node for the constraint
      */
-    private EmsScriptNode getConstraintExpression(EmsScriptNode constraintNode, WorkspaceNode ws) {
+    private static EmsScriptNode getConstraintExpression(EmsScriptNode constraintNode, WorkspaceNode ws) {
     
         if (constraintNode == null) return null;
     
         // FIXME -- need to give date/workspace context 
         // Get the constraint expression:
         Collection<EmsScriptNode> expressions =
-                getSystemModel().getProperty( constraintNode, Acm.JSON_CONSTRAINT_SPECIFICATION );
+                getGlobalSystemModel().getProperty( constraintNode, Acm.JSON_CONSTRAINT_SPECIFICATION );
     
         // This should always be of size 1:
         return Utils.isNullOrEmpty( expressions ) ? null :  expressions.iterator().next();
