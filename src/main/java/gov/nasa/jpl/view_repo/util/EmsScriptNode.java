@@ -281,6 +281,7 @@ public class EmsScriptNode extends ScriptNode implements
 
     private View view;
 
+    protected EmsScriptNode projectNode = null;
     protected WorkspaceNode workspace = null;
     protected WorkspaceNode parentWorkspace = null;
 
@@ -3363,6 +3364,8 @@ public class EmsScriptNode extends ScriptNode implements
     }
 
     public EmsScriptNode getProjectNode(WorkspaceNode ws) {
+        if (projectNode != null) return projectNode;
+        
         EmsScriptNode parent = this;
         EmsScriptNode sites = null;
         EmsScriptNode projectPkg = null;
@@ -3375,15 +3378,11 @@ public class EmsScriptNode extends ScriptNode implements
         }
         Set<EmsScriptNode> seen = new HashSet<EmsScriptNode>();
         while ( parent != null && parent.getSysmlId() != null &&
-                !seen.contains( parent ) ) {
+                !seen.contains( parent ) && projectPkg != null) {
             if ( models == null && parent.getName().equals( "Models" ) ) {
                 models = parent;
                 projectPkg = oldparent;
-            } else if ( models != null && sites == null &&
-                        parent.getName().equals( "Sites" ) ) {
-                sites = parent;
-            } else if ( sites != null && parent.isWorkspaceTop() ) {
-                EmsScriptNode projectNode =  null;
+                
                 // IMPORTANT!! DON'T TAKE THIS OUT
                 // EMS was pushed when all model data was in Project reified node, not in
                 // the Project reified project, so need to do both checks
@@ -3397,10 +3396,6 @@ public class EmsScriptNode extends ScriptNode implements
                                                      + projectNode.getName() );
                     }
                 }
-                if ( changeUser ) {
-                    AuthenticationUtil.setRunAsUser( runAsUser );
-                }
-                return projectNode;
             }
             seen.add(parent);
             oldparent = parent;
@@ -3418,7 +3413,7 @@ public class EmsScriptNode extends ScriptNode implements
         if ( changeUser ) {
             AuthenticationUtil.setRunAsUser( runAsUser );
         }
-        return projectPkg;
+        return projectNode;
     }
 
     public String getProjectId(WorkspaceNode ws) {
