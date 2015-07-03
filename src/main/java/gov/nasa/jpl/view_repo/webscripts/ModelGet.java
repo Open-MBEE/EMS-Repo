@@ -191,14 +191,21 @@ public class ModelGet extends AbstractJavaWebScript {
         // make sure to pass down view request flag to instance
         setIsViewRequest( isViewRequest );
 
-        JSONArray elementsJson = new JSONArray();
-        elementsJson = handleRequest( req );
-
         JSONObject top = NodeUtil.newJsonObject();
+        JSONArray elementsJson = handleRequest( req, top );
+
         try {
             if ( elementsJson.length() > 0 ) {
                 top.put( "elements", elementsJson );
             }
+//            boolean evaluate = getBooleanArg( req, "evaluate", false );
+//            WorkspaceNode ws = getWorkspace( req );
+//            if ( evaluate ) {
+//                Set< EmsScriptNode > elementSet = new HashSet<EmsScriptNode>( elementsFound.values() );
+//                Map< Object, Object > r = evaluate(elementSet , ws);
+//                top
+//            }
+
             if ( !Utils.isNullOrEmpty( response.toString() ) ) top.put( "message",
                                                                         response.toString() );
             if ( prettyPrint ) {
@@ -230,9 +237,10 @@ public class ModelGet extends AbstractJavaWebScript {
      * elements
      * 
      * @param req
+     * @param top 
      * @return
      */
-    private JSONArray handleRequest( WebScriptRequest req ) {
+    private JSONArray handleRequest( WebScriptRequest req, final JSONObject top  ) {
         // REVIEW -- Why check for errors here if validate has already been
         // called? Is the error checking code different? Why?
         try {
@@ -296,7 +304,9 @@ public class ModelGet extends AbstractJavaWebScript {
                                         new HashSet<String>() );
             }
 
-            handleElements( workspace, dateTime, includeQualified, evaluate );
+            boolean checkReadPermission = true;  // TODO -- REVIEW -- Shouldn't this be false? 
+            handleElements( workspace, dateTime, includeQualified, evaluate,
+                            top, checkReadPermission );
         } catch ( JSONException e ) {
             e.printStackTrace();
         }
@@ -498,41 +508,31 @@ public class ModelGet extends AbstractJavaWebScript {
 
     /**
      * Build up the element JSONObject
+     * @param top 
+     * @param evaluate 
      * 
      * @throws JSONException
      */
     protected void
             handleElements( WorkspaceNode ws, Date dateTime,
-                            boolean includeQualified, boolean evaluate ) throws JSONException {
+                            boolean includeQualified, boolean evaluate,
+                            JSONObject top, boolean checkPermission ) throws JSONException {
+        final Map<EmsScriptNode, JSONObject> elementsJsonMap =
+                new LinkedHashMap< EmsScriptNode, JSONObject >();
         for ( String id : elementsFound.keySet() ) {
             EmsScriptNode node = elementsFound.get( id );
 
-            if ( checkPermissions( node, PermissionService.READ ) ) {
+            if ( !checkPermission || checkPermissions( node, PermissionService.READ ) ) {
                 JSONObject json = node.toJSONObject( ws, dateTime,
                                                      includeQualified,
                                                      elementProperties.get( id ) );
-                if ( evaluate ) {
-                    json.put( "evaluation", "Hi, Erik!" );
-                }
                 elements.put( json );
+                elementsJsonMap.put( node, json );
             } // TODO -- REVIEW -- Warning if no permissions?
         }
-        // Evaluate expressions and constraints if desired.
-        final Map< Object, Object > results = new LinkedHashMap< Object, Object >();
         if ( evaluate ) {
-                    //            sendProgress("Evaluating constraints and expressions", projectId, true);
-//            
-//            new EmsTransaction( getServices(), getResponse(), getResponseStatus(),
-//                                runWithoutTransactions) {// || internalRunWithoutTransactions ) {
-//                @Override
-//                public void run() throws Exception {
-            Set< EmsScriptNode > elementSet = new HashSet<EmsScriptNode>( elementsFound.values() );
-            Map< Object, Object > r = evaluate(elementSet , ws);
-            results.putAll( r );
-//                }
-//            };
+            evaluate( elementsJsonMap, top, ws );
         }
-        
     }
 
     /**

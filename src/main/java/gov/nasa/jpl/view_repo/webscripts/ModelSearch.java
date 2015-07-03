@@ -102,9 +102,9 @@ public class ModelSearch extends ModelGet {
         Map<String, Object> model = new HashMap<String, Object>();
 
         try {
-            JSONArray elementsJson = executeSearchRequest(req);
-
             JSONObject top = NodeUtil.newJsonObject();
+            JSONArray elementsJson = executeSearchRequest(req, top);
+
             top.put("elements", elementsJson);
             if (!Utils.isNullOrEmpty(response.toString())) top.put("message", response.toString());
             model.put("res", NodeUtil.jsonToString( top, 4 ));
@@ -121,7 +121,7 @@ public class ModelSearch extends ModelGet {
         return model;
     }
 
-    private JSONArray executeSearchRequest(WebScriptRequest req) throws JSONException {
+    private JSONArray executeSearchRequest(WebScriptRequest req, JSONObject top ) throws JSONException {
         String keyword = req.getParameter("keyword");
         String propertyName = req.getParameter("propertyName");
         String[] filters = req.getParameter("filters") == null ? new String[]{"documentation"} : req.getParameter( "filters" ).split( "," );
@@ -189,7 +189,11 @@ public class ModelSearch extends ModelGet {
             
             addElementProperties(workspace, dateTime);
             
-            handleElements(workspace, dateTime, true, evaluate);
+            
+            boolean checkReadPermission = true; //TODO -- REVIEW -- Should this be false?
+            //handleElements(workspace, dateTime, true, evaluate);
+            handleElements( workspace, dateTime, true, evaluate,
+                            top, checkReadPermission  );
         }
 
         return elements;

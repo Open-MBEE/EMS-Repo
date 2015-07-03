@@ -73,6 +73,7 @@ import java.util.Set;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.alfresco.repo.jscript.ScriptNode;
@@ -1401,7 +1402,40 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         }
         return results;
     }
+    
+    public void evaluate( final Map<EmsScriptNode, JSONObject> elementsJsonMap,//Set< EmsScriptNode > elements, final JSONArray elementsJson,
+                          JSONObject top, WorkspaceNode ws ) {
+        //final JSONArray elementsJson = new JSONArray();
+        Set< EmsScriptNode > elements = elementsJsonMap.keySet();
+        Map< Object, Object > results = evaluate( elements, ws );
+        for ( EmsScriptNode element : elements ) {
+            JSONObject json = elementsJsonMap.get( element );//element.toJSONObject(ws, null);
+            Object result = results.get( element );
+            if ( result != null ) {
+                try {
+                    json.putOpt( "evaluationResult", result );
+                    results.remove( element );
+                } catch ( Throwable e ) {
+                    log( Level.WARN, "Evaluation failed for %s", element );
+                }
+            }
+            //elementsJson.put( json );
+        }
+        // Put constraint evaluation results in json.
+        JSONArray resultJarr = new JSONArray();
+        for ( Object k : results.keySet() ) {
+            JSONObject r = new JSONObject();
+            r.put( "expression", k.toString() );
+            Object v = results.get( k );
+            r.put( "value", "" + v );
+            resultJarr.put( r );
+        }
+        
+        //top.put( "elements", elementsJson );
+        if ( resultJarr.length() > 0 ) top.put( "evaluations", resultJarr );
 
+    }
+    
     public void fix( Set< EmsScriptNode > elements, WorkspaceNode ws ) {
     
         log(Level.INFO, "Will attempt to fix constraint violations if found!");

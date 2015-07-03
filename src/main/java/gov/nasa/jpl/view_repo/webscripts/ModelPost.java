@@ -2796,7 +2796,7 @@ public class ModelPost extends AbstractJavaWebScript {
                                                 boolean fix, Map<String, Object> model,
                                                 boolean createCommit,
                                                 boolean suppressElementJson ) throws Exception {
-        JSONObject top = NodeUtil.newJsonObject();
+        final JSONObject top = NodeUtil.newJsonObject();
         final Set< EmsScriptNode > elements = createOrUpdateModel( postJson, status, workspace, null, createCommit );
 
         if ( !Utils.isNullOrEmpty( elements ) ) {
@@ -2811,62 +2811,86 @@ public class ModelPost extends AbstractJavaWebScript {
                     @Override
                     public void run() throws Exception {
                         fix(elements, workspace);
+                        sendProgress("Fixing constraints completed", projectId, true);
                     }
                 };
             }
 
-            // Evaluate expressions and constraints if desired.
             final Map< Object, Object > results = new LinkedHashMap< Object, Object >();
-            if ( evaluate ) {
-                sendProgress("Evaluating constraints and expressions", projectId, true);
-                
-                new EmsTransaction( getServices(), getResponse(), getResponseStatus(),
-                                    runWithoutTransactions) {// || internalRunWithoutTransactions ) {
-                    @Override
-                    public void run() throws Exception {
-                        Map< Object, Object > r = evaluate(elements, workspace);
-                        results.putAll( r );
-                    }
-                };
-            }
-            
+
             if ( !suppressElementJson ) {
+
                 // Create JSON object of the elements to return:
                 final JSONArray elementsJson = new JSONArray();
-              
+                final Map<EmsScriptNode, JSONObject> elementsJsonMap =
+                        new LinkedHashMap< EmsScriptNode, JSONObject >();
+            
+                sendProgress("Getting json for elements", projectId, true);
                 new EmsTransaction(getServices(), getResponse(), getResponseStatus(),
                                    runWithoutTransactions) {
                     @Override
                     public void run() throws Exception {
                         for ( EmsScriptNode element : elements ) {
                             JSONObject json = element.toJSONObject(workspace, null);
-                            Object result = results.get( element );
-                            if ( result != null ) {
-                                try {
-                                    json.putOpt( "evaluationResult", result );
-                                    results.remove( element );
-                                } catch ( Throwable e ) {
-                                    ModelPost.this.log( Level.WARN,
-                                                        "Evaluation failed for %s", element );
-                                }
-                            }
                             elementsJson.put( json );
+                            elementsJsonMap.put( element, json );
                         }
+                        sendProgress("Getting json for elements completed", projectId, true);
                     }
                 };
 
-                // Put constraint evaluation results in json.
-                JSONArray resultJarr = new JSONArray();
-                for ( Object k : results.keySet() ) {
-                    JSONObject r = new JSONObject();
-                    r.put( "expression", k.toString() );
-                    Object v = results.get( k );
-                    r.put( "value", "" + v );
-                    resultJarr.put( r );
+                
+                if ( evaluate ) {
+                    sendProgress("Evaluating constraints and expressions", projectId, true);
+                    
+                    new EmsTransaction( getServices(), getResponse(), getResponseStatus(),
+                                        runWithoutTransactions ) {// || internalRunWithoutTransactions ) {
+                        @Override
+                        public void run() throws Exception {
+                            evaluate( elementsJsonMap, top, workspace );
+//                            Map< Object, Object > r = evaluate(elements, workspace);
+//                            results.putAll( r );
+                            sendProgress("Evaluating constraints and expressions completed", projectId, true);
+                        }
+                    };
                 }
+            
+//                new EmsTransaction(getServices(), getResponse(), getResponseStatus(),
+//                                   runWithoutTransactions) {
+//                    @Override
+//                    public void run() throws Exception {
+//                        for ( int i = 0; i < elementsJson.length(); ++i ) {
+//                            
+//                        }
+//                        for ( EmsScriptNode element : elements ) {
+//                            JSONObject json = element.toJSONObject(workspace, null);
+//                            Object result = results.get( element );
+//                            if ( result != null ) {
+//                                try {
+//                                    json.putOpt( "evaluationResult", result );
+//                                    results.remove( element );
+//                                } catch ( Throwable e ) {
+//                                    ModelPost.this.log( Level.WARN,
+//                                                        "Evaluation failed for %s", element );
+//                                }
+//                            }
+//                            elementsJson.put( json );
+//                        }
+//                    }
+//                };
+//
+//                // Put constraint evaluation results in json.
+//                JSONArray resultJarr = new JSONArray();
+//                for ( Object k : results.keySet() ) {
+//                    JSONObject r = new JSONObject();
+//                    r.put( "expression", k.toString() );
+//                    Object v = results.get( k );
+//                    r.put( "value", "" + v );
+//                    resultJarr.put( r );
+//                }
                 
                 top.put( "elements", elementsJson );
-                if ( resultJarr.length() > 0 ) top.put( "evaluations", resultJarr );
+//                if ( resultJarr.length() > 0 ) top.put( "evaluations", resultJarr );
             }
         }
         
