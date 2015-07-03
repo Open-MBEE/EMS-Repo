@@ -66,6 +66,33 @@ public class ActionUtil {
     /**
      * Send off an email to the modifier of the node
      * @param node      Node whose modifier should be sent an email
+     * @param subject   Subjecto of message
+     * @param services
+     * @param response
+     */
+    public static void sendEmailToModifier(EmsScriptNode node, String subject, ServiceRegistry services,
+                                           String logString) {
+        
+        // Save off the log
+        EmsScriptNode logNode = ActionUtil.saveLogToFile(node, "text/plain", services, logString);
+
+        String hostname = getHostName();
+        if (hostname.endsWith("/" )) {
+            hostname = hostname.substring( 0, hostname.lastIndexOf( "/" ) );
+        } 
+        if (!hostname.contains( "jpl.nasa.gov" )) {
+            hostname += ".jpl.nasa.gov";
+        }
+        String contextUrl = "https://" + hostname + "/alfresco";
+            
+        // Send off the notification email
+        String msg = "Log URL: " + contextUrl + logNode.getUrl();
+        sendEmailToModifier(node, msg, subject, services);
+    }
+    
+    /**
+     * Send off an email to the modifier of the node
+     * @param node      Node whose modifier should be sent an email
      * @param msg       Message to send modifier
      * @param subject   Subjecto of message
      * @param services
@@ -173,37 +200,10 @@ public class ActionUtil {
         return getOrCreateJob(contextFolder, jobName, jobType, status, response, false);
     }
     
-    
-    /**
-     * Create a job inside a particular site
-     * @param contextFolder Folder to create the job node
-     * @param jobName       String of the filename
-     * @param jobType       The type of job being created
-     * @param status        Initial status to put the job node in
-     * @param response      Response buffer to return to client
-     * @param generateName  If true, jobName will be used as cm:title and the uuid will be
-     *                      returned as the cm:name. If false, jobName is cm:name. This is
-     *                      necessary when the jobName can handle special characters.
-     * @return The created job node
-     */
-    public static EmsScriptNode getOrCreateJob(EmsScriptNode contextFolder,
-                                               String jobName, String jobType,
-                                               Status status, StringBuffer response,
-                                               boolean generateName) {
-        // to make sure no permission issues, run as admin
-        String origUser = AuthenticationUtil.getFullyAuthenticatedUser();
-        AuthenticationUtil.setRunAsUser( "admin" );
-
-        EmsScriptNode jobPkgNode = contextFolder.childByNamePath("Jobs");
-        if (jobPkgNode == null) {
-            jobPkgNode = contextFolder.createFolder("Jobs", "cm:folder");
-            jobPkgNode.setPermission( "SiteCollaborator", "GROUP_EVERYONE" );
-            contextFolder.getOrSetCachedVersion();
-            WorkspaceNode ws = contextFolder.getWorkspace();
-            if ( ws != null ) {
-                jobPkgNode.setWorkspace( ws );
-            }
-        }
+    private static EmsScriptNode getOrCreateJobImpl(EmsScriptNode jobPkgNode,
+                                                  String jobName, String jobType,
+                                                  Status status, 
+                                                  boolean generateName) {
         
         EmsScriptNode jobNode = jobPkgNode.childByNamePath(jobName);
         if (jobNode == null) {
@@ -248,6 +248,108 @@ public class ActionUtil {
 
         // set the owner to original user say they can modify
         jobNode.setOwner( AuthenticationUtil.getFullyAuthenticatedUser() );
+        
+        return jobNode;
+    }
+    
+    /**
+     * Create a diff job inside contextFolder/Jobs/ws1Name/ws2Name
+     * 
+     * @param contextFolder Folder to create the job node
+     * @param jobName       String of the filename
+     * @param jobType       The type of job being created
+     * @param status        Initial status to put the job node in
+     * @param response      Response buffer to return to client
+     * @param generateName  If true, jobName will be used as cm:title and the uuid will be
+     *                      returned as the cm:name. If false, jobName is cm:name. This is
+     *                      necessary when the jobName can handle special characters.
+     * @return The created job node
+     */
+    public static EmsScriptNode getOrCreateDiffJob(EmsScriptNode contextFolder,
+                                                   String ws1Name, String ws2Name,
+                                                   String jobName, String jobType,
+                                                   Status status, StringBuffer response,
+                                                   boolean generateName) {
+        
+        EmsScriptNode jobNode = null;
+        
+        // to make sure no permission issues, run as admin
+        String origUser = AuthenticationUtil.getFullyAuthenticatedUser();
+        AuthenticationUtil.setRunAsUser( "admin" );
+
+        EmsScriptNode jobPkgNode = contextFolder.childByNamePath("Jobs");
+        if (jobPkgNode == null) {
+            jobPkgNode = contextFolder.createFolder("Jobs", "cm:folder");
+            jobPkgNode.setPermission( "SiteCollaborator", "GROUP_EVERYONE" );
+            contextFolder.getOrSetCachedVersion();
+        }
+        
+        if (jobPkgNode != null) {
+            // Create workspace folders:
+            EmsScriptNode ws1Folder = jobPkgNode.childByNamePath(ws1Name);
+            if (ws1Folder == null) {
+                ws1Folder = jobPkgNode.createFolder(ws1Name, "cm:folder");
+                ws1Folder.setPermission( "SiteCollaborator", "GROUP_EVERYONE" );
+                ws1Folder.getOrSetCachedVersion();
+            }
+            
+            if (ws1Folder != null) {
+                EmsScriptNode ws2Folder = ws1Folder.childByNamePath(ws2Name);
+                if (ws2Folder == null) {
+                    ws2Folder = ws1Folder.createFolder(ws2Name, "cm:folder");
+                    ws2Folder.setPermission( "SiteCollaborator", "GROUP_EVERYONE" );
+                    ws2Folder.getOrSetCachedVersion();
+                }
+                
+                if (ws2Folder != null) {
+                    jobNode = getOrCreateJobImpl(ws2Folder, jobName, jobType, status, generateName);
+                }
+            }
+        }
+        
+        // make sure we're running back as the originalUser
+        AuthenticationUtil.setRunAsUser( origUser );
+        
+        return jobNode;
+    }
+    
+    /**
+     * Create a job inside a particular site
+     * @param contextFolder Folder to create the job node
+     * @param jobName       String of the filename
+     * @param jobType       The type of job being created
+     * @param status        Initial status to put the job node in
+     * @param response      Response buffer to return to client
+     * @param generateName  If true, jobName will be used as cm:title and the uuid will be
+     *                      returned as the cm:name. If false, jobName is cm:name. This is
+     *                      necessary when the jobName can handle special characters.
+     * @return The created job node
+     */
+    public static EmsScriptNode getOrCreateJob(EmsScriptNode contextFolder,
+                                               String jobName, String jobType,
+                                               Status status, StringBuffer response,
+                                               boolean generateName) {
+        
+        EmsScriptNode jobNode = null;
+        
+        // to make sure no permission issues, run as admin
+        String origUser = AuthenticationUtil.getFullyAuthenticatedUser();
+        AuthenticationUtil.setRunAsUser( "admin" );
+
+        EmsScriptNode jobPkgNode = contextFolder.childByNamePath("Jobs");
+        if (jobPkgNode == null) {
+            jobPkgNode = contextFolder.createFolder("Jobs", "cm:folder");
+            jobPkgNode.setPermission( "SiteCollaborator", "GROUP_EVERYONE" );
+            contextFolder.getOrSetCachedVersion();
+            WorkspaceNode ws = contextFolder.getWorkspace();
+            if ( ws != null ) {
+                jobPkgNode.setWorkspace( ws );
+            }
+        }
+        
+        if (jobPkgNode != null) {
+            jobNode = getOrCreateJobImpl(jobPkgNode, jobName, jobType, status, generateName);
+        }
 
         // make sure we're running back as the originalUser
         AuthenticationUtil.setRunAsUser( origUser );

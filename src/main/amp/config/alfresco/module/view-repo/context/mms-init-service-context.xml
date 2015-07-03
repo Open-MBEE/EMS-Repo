@@ -79,6 +79,11 @@
         <property name="repository" ref="repositoryHelper"/>
     </bean> 
 
+    <bean id="workspaceDiff" class="gov.nasa.jpl.view_repo.actions.WorkspaceDiffActionExecuter" parent="action-executer">
+        <property name="services" ref="ServiceRegistry"/>
+        <property name="repository" ref="repositoryHelper"/>
+    </bean> 
+    
     <bean id="configurationGeneration" class="gov.nasa.jpl.view_repo.actions.ConfigurationGenerationActionExecuter" parent="action-executer">
         <property name="services" ref="ServiceRegistry"/>
         <property name="repository" ref="repositoryHelper"/>
@@ -113,11 +118,11 @@
     <!--  Definitions for static methods -->        
     <bean class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
         <property name="staticMethod" value="gov.nasa.jpl.view_repo.webscripts.util.ShareUtils.setUsername" />
-        <property name="arguments" value="mmsadmin"/>
+        <property name="arguments" value="admin"/>
     </bean>
     <bean class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
         <property name="staticMethod" value="gov.nasa.jpl.view_repo.webscripts.util.ShareUtils.setPassword" />
-        <property name="arguments" value="letmein"/>
+        <property name="arguments" value="admin"/>
     </bean>
     <bean class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
         <property name="staticMethod" value="gov.nasa.jpl.view_repo.webscripts.util.ShareUtils.setServices" />
