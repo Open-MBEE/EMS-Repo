@@ -1641,4 +1641,13 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
 	}
 
 
+    /**
+     * Evaluate the text expression (k, Java?).
+     * @param expression
+     * @return
+     */
+    public Object evaluate( String expression ) {
+        return null;
+    }
+    
 }

@@ -34,7 +34,7 @@ public class Evaluate implements Viewable< EmsScriptNode > {
     Date dateTime = null;
     boolean ignoreWorkspace = true;
     
-    Evaluate( Object object, boolean ignoreWorkspace, WorkspaceNode workspace,
+    public Evaluate( Object object, boolean ignoreWorkspace, WorkspaceNode workspace,
               Date dateTime ) {
         this.object = object;
         this.ignoreWorkspace = ignoreWorkspace;
@@ -43,7 +43,7 @@ public class Evaluate implements Viewable< EmsScriptNode > {
         interpret();
     }
     
-    Evaluate( Object object ) {
+    public Evaluate( Object object ) {
         this.object = object;
         interpret();
     }
@@ -100,7 +100,7 @@ public class Evaluate implements Viewable< EmsScriptNode > {
             } else {
                 ArrayList< NodeRef > c =
                         n.getValueSpecOwnedChildren( false, dateTime, workspace );
-                if ( c != null ) {
+                if ( !Utils.isNullOrEmpty( c ) ) {
                     List< EmsScriptNode > nodes =
                             EmsScriptNode.toEmsScriptNodeList( c, NodeUtil.getServices(),
                                                                null, null);

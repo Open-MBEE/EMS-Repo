@@ -24,7 +24,7 @@
         "documentation": "A view to conform to the EditExpressionViewpoint",
         "owner": "edit_expression_viewpoint",
         "specialization" : {
-            "type": "View"
+            "type": "Product"
         }
     },
     {
@@ -41,7 +41,7 @@
     {
         "sysmlid": "EditExpressionViewpointMethod",
         "name": "viewpoint_op",
-        "documentation": "Passing in a Property with a string value produces a view where the string may be edited and the ",
+        "documentation": "Passing in a Property with a string value produces a view where the string may be edited and evaluated to produce the remaining part of the view",
         "owner": "edit_expression_viewpoint",
         "specialization" : {
             "parameters": ["exposed_id"],
@@ -84,7 +84,7 @@
                           "operand":[{"type":"ElementValue",
                                       "element":"op_name"},
                                      {"type":"ElementValue",
-                                      "element":"example_editable_op_23333"}
+                                      "element":"example_editable_op_23333"}]}
         }
     },
     {
@@ -140,7 +140,7 @@
         "specialization" : {
             "type": "Conform",
             "source": "_17_0_2_3_expression_view_29388",
-            "target": "_17_0_2_3_e610336_1394148449252_91190_29556"
+            "target": "EditExpressionViewpoint"
         }
     },
     {

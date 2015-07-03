@@ -2803,6 +2803,18 @@ public class ModelPost extends AbstractJavaWebScript {
             sendProgress("Adding relationships to properties", projectId, true);
             addRelationshipsToProperties( elements, workspace );
 
+            // Fix constraints if desired.
+            if (fix) {
+                sendProgress("Fixing constraints", projectId, true);
+                new EmsTransaction( getServices(), getResponse(), getResponseStatus(),
+                                    runWithoutTransactions) {// || internalRunWithoutTransactions ) {
+                    @Override
+                    public void run() throws Exception {
+                        fix(elements, workspace);
+                    }
+                };
+            }
+
             // Evaluate expressions and constraints if desired.
             final Map< Object, Object > results = new LinkedHashMap< Object, Object >();
             if ( evaluate ) {
@@ -2816,21 +2828,8 @@ public class ModelPost extends AbstractJavaWebScript {
                         results.putAll( r );
                     }
                 };
-                
             }
             
-            // Fix constraints if desired.
-            if (fix) {
-                sendProgress("Fixing constraints", projectId, true);
-                new EmsTransaction( getServices(), getResponse(), getResponseStatus(),
-                                    runWithoutTransactions) {// || internalRunWithoutTransactions ) {
-                    @Override
-                    public void run() throws Exception {
-                        fix(elements, workspace);
-                    }
-                };
-            }
-
             if ( !suppressElementJson ) {
                 // Create JSON object of the elements to return:
                 final JSONArray elementsJson = new JSONArray();

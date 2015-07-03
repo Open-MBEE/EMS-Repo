@@ -125,7 +125,8 @@ public class ModelSearch extends ModelGet {
         String keyword = req.getParameter("keyword");
         String propertyName = req.getParameter("propertyName");
         String[] filters = req.getParameter("filters") == null ? new String[]{"documentation"} : req.getParameter( "filters" ).split( "," );
-        
+        boolean evaluate = getBooleanArg( req, "evaluate", false );
+
         if (!Utils.isNullOrEmpty( keyword )) {
 
             // get timestamp if specified
@@ -188,7 +189,7 @@ public class ModelSearch extends ModelGet {
             
             addElementProperties(workspace, dateTime);
             
-            handleElements(workspace, dateTime, true);
+            handleElements(workspace, dateTime, true, evaluate);
         }
 
         return elements;

@@ -36,6 +36,7 @@ import gov.nasa.jpl.mbee.util.Timer;
 import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
+import gov.nasa.jpl.view_repo.util.EmsTransaction;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 
@@ -43,6 +44,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -253,8 +255,9 @@ public class ModelGet extends AbstractJavaWebScript {
             String timestamp = req.getParameter( "timestamp" );
             Date dateTime = TimeUtils.dateFromTimestamp( timestamp );
             boolean connected = getBooleanArg( req, "connected", false );
+            boolean evaluate = getBooleanArg( req, "evaluate", false );
             String relationship = req.getParameter( "relationship" );
-
+            
             WorkspaceNode workspace = getWorkspace( req );
 
             // see if prettyPrint default is overridden and change
@@ -293,7 +296,7 @@ public class ModelGet extends AbstractJavaWebScript {
                                         new HashSet<String>() );
             }
 
-            handleElements( workspace, dateTime, includeQualified );
+            handleElements( workspace, dateTime, includeQualified, evaluate );
         } catch ( JSONException e ) {
             e.printStackTrace();
         }
@@ -500,16 +503,36 @@ public class ModelGet extends AbstractJavaWebScript {
      */
     protected void
             handleElements( WorkspaceNode ws, Date dateTime,
-                            boolean includeQualified ) throws JSONException {
+                            boolean includeQualified, boolean evaluate ) throws JSONException {
         for ( String id : elementsFound.keySet() ) {
             EmsScriptNode node = elementsFound.get( id );
 
             if ( checkPermissions( node, PermissionService.READ ) ) {
-                elements.put( node.toJSONObject( ws, dateTime,
-                                                 includeQualified,
-                                                 elementProperties.get( id ) ) );
+                JSONObject json = node.toJSONObject( ws, dateTime,
+                                                     includeQualified,
+                                                     elementProperties.get( id ) );
+                if ( evaluate ) {
+                    json.put( "evaluation", "Hi, Erik!" );
+                }
+                elements.put( json );
             } // TODO -- REVIEW -- Warning if no permissions?
         }
+        // Evaluate expressions and constraints if desired.
+        final Map< Object, Object > results = new LinkedHashMap< Object, Object >();
+        if ( evaluate ) {
+                    //            sendProgress("Evaluating constraints and expressions", projectId, true);
+//            
+//            new EmsTransaction( getServices(), getResponse(), getResponseStatus(),
+//                                runWithoutTransactions) {// || internalRunWithoutTransactions ) {
+//                @Override
+//                public void run() throws Exception {
+            Set< EmsScriptNode > elementSet = new HashSet<EmsScriptNode>( elementsFound.values() );
+            Map< Object, Object > r = evaluate(elementSet , ws);
+            results.putAll( r );
+//                }
+//            };
+        }
+        
     }
 
     /**
