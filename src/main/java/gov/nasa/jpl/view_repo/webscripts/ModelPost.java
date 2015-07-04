@@ -50,6 +50,7 @@ import gov.nasa.jpl.view_repo.webscripts.util.ShareUtils;
 //import k.frontend.ModelParser;
 //import k.frontend.ModelParser.ModelContext;
 
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -65,11 +66,13 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 
 import javax.servlet.http.HttpServletResponse;
+
 //import javax.transaction.UserTransaction;
 import org.apache.log4j.*;
 
 import kexpparser.KExpParser;
 //import k.frontend.Frontend;
+
 
 
 
@@ -543,7 +546,7 @@ public class ModelPost extends AbstractJavaWebScript {
                                     WorkspaceNode workspace) {
 
         EmsScriptNode lastNode = nodeToUpdate;
-        EmsScriptNode nodeParent = nodeToUpdate.getParent();
+        EmsScriptNode nodeParent = nodeToUpdate.getParent(null, workspace, false, true);
         EmsScriptNode reifiedNodeParent = nodeParent != null ? nodeParent.getReifiedNode(true, workspace) : null;
         EmsScriptNode lastDeletedReifiedNodeParent = null;
         while (nodeParent != null  && nodeParent.scriptNodeExists()) {
@@ -562,7 +565,7 @@ public class ModelPost extends AbstractJavaWebScript {
                 break;
             }
             lastNode = reifiedNodeParent;
-            nodeParent = nodeParent.getParent();
+            nodeParent = nodeParent.getParent(null, workspace, false, true);
             reifiedNodeParent = nodeParent != null ? nodeParent.getReifiedNode(true, workspace) : null;
         }
         
@@ -621,9 +624,7 @@ public class ModelPost extends AbstractJavaWebScript {
                 // Parent will be a reified package, which we never delete, so no need to
                 // check if we need to resurrect it.  If elementNode is deleted, it will
                 // resurrected later when processing that node. 
-                owner = elementNode.getParent();
-                owner = new EmsScriptNode(owner.getLiveNodeRefFromVersion(),
-                                          getServices() );
+                owner = elementNode.getParent( null, workspace, false, true );
             }
         }
 
@@ -2137,7 +2138,7 @@ public class ModelPost extends AbstractJavaWebScript {
         }
         EmsScriptNode parent;
         if (useParent) {
-            parent= node.getParent();
+            parent= node.getParent(null, workspace, false, true);
         } else {
             parent = node;
         }
@@ -2713,41 +2714,20 @@ public class ModelPost extends AbstractJavaWebScript {
                     response.append("You will be notified via email when the model load has finished.\n"); 
                 }
                 else {
-                    JSONObject postJson = null;
-                    
                     // Check if input is K or JSON
                     String contentType = req.getContentType() == null ?
                                          "" : req.getContentType().toLowerCase();
-                    if ( contentType.contains( "application/k" ) ) {
-                        String k = req.getContent().getContent();
-                        logger.warn( "k = " + k );
-                        postJson = new JSONObject(KExpParser.parseExpression(k));
-                        //postJson = new JSONObject(Frontend.exp2Json2( k ));
-                    }
-                    else {
-                        postJson = //JSONObject.make(
-                                (JSONObject)req.parseContent();// );
-                    }
-                    if ( postJson == null ) postJson = new JSONObject();
-                    JSONArray jarr = postJson.optJSONArray("elements");
-                    if ( jarr == null ) {
-                        jarr = new JSONArray();
-                        postJson.put( "elements", jarr );
-                    }
-                    if ( !Utils.isNullOrEmpty( expressionString ) ) {
-
-                        JSONObject exprJson = new JSONObject(KExpParser.parseExpression(expressionString));
-                        log(Level.DEBUG, "********************************************************************************");
-                        log(Level.DEBUG, expressionString);
-                        log(Level.DEBUG, NodeUtil.jsonToString( exprJson, 4 ));
-//                        log(LogLevel.DEBUG, NodeUtil.jsonToString( exprJson0, 4 ));
-                        log(Level.DEBUG, "********************************************************************************");
-                        JSONArray expJarr = exprJson.getJSONArray("elements");
-                        for (int i=0; i<expJarr.length(); ++i) {
-                            jarr.put(expJarr.get( i ) );
-                        }
+                    Object content;
+                    boolean jsonNotK = !contentType.contains( "application/k" );
+                    if ( !jsonNotK ) {
+                        content = req.getContent().getContent();
+                    } else {
+                        content = (JSONObject)req.parseContent();
                     }
 
+                    JSONObject postJson =
+                            getPostJson( jsonNotK, content, expressionString );
+                    
                     // Get the project node from the request:
                     new EmsTransaction(getServices(), getResponse(), getResponseStatus(),
                                        runWithoutTransactions) {// || internalRunWithoutTransactions ) {
@@ -2789,6 +2769,55 @@ public class ModelPost extends AbstractJavaWebScript {
         }
 
         return model;
+    }
+    
+    public static JSONObject kToJson( String k ) {
+        JSONObject json = new JSONObject(KExpParser.parseExpression(k));
+        //postJson = new JSONObject(Frontend.exp2Json2( k ));
+
+        log(Level.DEBUG, "********************************************************************************");
+        log(Level.DEBUG, k);
+        if ( logger.isDebugEnabled() ) log(Level.DEBUG, NodeUtil.jsonToString( json, 4 ));
+//        log(LogLevel.DEBUG, NodeUtil.jsonToString( exprJson0, 4 ));
+        log(Level.DEBUG, "********************************************************************************");
+
+        return json;
+    }
+    
+    public JSONObject getPostJson( boolean jsonNotK, Object content ) {
+        return getPostJson( jsonNotK, content, null );
+    }
+    public JSONObject getPostJson( boolean jsonNotK,
+                                   Object content, String expressionString ) throws JSONException {
+        JSONObject postJson = null;
+        
+        if ( !jsonNotK ) {
+            String k = (String)content;
+            logger.warn( "k = " + k );
+            postJson = kToJson( k );
+        }
+        else {
+            if ( content instanceof JSONObject ) {
+                postJson = (JSONObject)content;
+            } else if ( content instanceof String ) {
+                postJson = new JSONObject( (String)content );
+            }
+        }
+        if ( postJson == null ) postJson = new JSONObject();
+        JSONArray jarr = postJson.optJSONArray("elements");
+        if ( jarr == null ) {
+            jarr = new JSONArray();
+            postJson.put( "elements", jarr );
+        }
+        if ( !Utils.isNullOrEmpty( expressionString ) ) {
+            JSONObject exprJson = kToJson(expressionString);
+            JSONArray expJarr = exprJson.getJSONArray("elements");
+            for (int i=0; i<expJarr.length(); ++i) {
+                jarr.put(expJarr.get( i ) );
+            }
+        }
+
+        return postJson;
     }
 
     protected Set< EmsScriptNode > handleUpdate(JSONObject postJson, Status status, 

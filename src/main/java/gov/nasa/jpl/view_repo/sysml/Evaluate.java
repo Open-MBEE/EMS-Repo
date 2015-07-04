@@ -9,49 +9,86 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import org.alfresco.service.cmr.repository.NodeRef;
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
 import org.json.JSONObject;
+
+import gov.nasa.jpl.mbee.util.ClassUtils;
+import gov.nasa.jpl.mbee.util.Pair;
+import gov.nasa.jpl.mbee.util.Seen;
 import gov.nasa.jpl.mbee.util.Utils;
+import gov.nasa.jpl.view_repo.actions.ModelLoadActionExecuter;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
+import gov.nasa.jpl.view_repo.util.ModelContext;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
-import gov.nasa.jpl.view_repo.util.WorkspaceNode;
+import gov.nasa.jpl.view_repo.util.ServiceContext;
 import gov.nasa.jpl.view_repo.webscripts.AbstractJavaWebScript;
+import gov.nasa.jpl.view_repo.webscripts.ModelPost;
 import sysml.view.Viewable;
 
 /**
  * Represent the evaluation of a text expression, UML Expression, or other
- * Object as a Viewable. In general, a non-editable string can be returned in a
- * paragraph.
+ * Object as a Viewable. In general, a non-editable Text element can be returned
+ * if other evaluations are not appropriate.
  */
 public class Evaluate implements Viewable< EmsScriptNode > {
+    private static Logger logger = Logger.getLogger(AbstractJavaWebScript.class);
+    public Level logLevel = Level.WARN;
 
     Object object;
     Viewable<?> interpretation = null;
     
     // TODO -- use workspace and dateTime
-    WorkspaceNode workspace = null;
-    Date dateTime = null;
-    boolean ignoreWorkspace = true;
+    ModelContext modelContext = null;
+    ServiceContext serviceContext = null;
     
-    public Evaluate( Object object, boolean ignoreWorkspace, WorkspaceNode workspace,
-              Date dateTime ) {
+    public Evaluate( Object object, ModelContext modelContext,
+                     ServiceContext serviceContext ) {
+        this( object, modelContext, serviceContext, null );
+    }
+    protected Evaluate( Object object, ModelContext modelContext,
+                        ServiceContext serviceContext, Seen<Object> seen) {
+        super();
         this.object = object;
-        this.ignoreWorkspace = ignoreWorkspace;
-        this.workspace = workspace;
-        this.dateTime = dateTime;
-        interpret();
+        this.modelContext = modelContext;
+        this.serviceContext = serviceContext;
+        interpret(seen);
     }
     
-    public Evaluate( Object object ) {
-        this.object = object;
-        interpret();
-    }
+//    public Evaluate( Object object ) {
+//        this( object, null );
+//    }
+//    protected Evaluate( Object object, Seen<Object> seen ) {
+//        this.object = object; 
+//        interpret( seen );
+//    }
     
-    // TODO - Check for infinite recursion?
-    protected void interpret() {
-        Object resultObj = null;
-        boolean gotResult = false;
+    /**
+     * Interpret the object as a Viewable. If the object is not otherwise
+     * interpreted as a Viewable, simply convert the object to a string and wrap
+     * in a Text element.
+     * 
+     * @param seen
+     *            the Set of Objects encountered up the call stack in recursive
+     *            calls to interpret(), used to avoid infinite recursion.
+     */
+    protected void interpret( Seen< Object > seen ) {
+        Pair< Boolean, Seen< Object > > p = Utils.seen( object, true, seen );
+        if ( p.first ) {
+            // End any cycles in recursion by making a simple Text element.
+            interpretation = new Text( "" + object);
+            return;
+        }
+        seen = p.second;
+        
+        if ( object == null || ClassUtils.isPrimitive( object ) ) {
+            interpretation = new Text( "" + object);
+            return;
+        }
+
         if ( object instanceof Viewable ) {
             interpretation = (Viewable<?>)object;
             return;
@@ -60,29 +97,33 @@ public class Evaluate implements Viewable< EmsScriptNode > {
             Collection<?> c = (Collection< ? >)object;
             if ( c.size() == 1 ) {
                 interpretation =
-                        (new Evaluate(c.iterator().next())).interpretation;
+                        ( new Evaluate( c.iterator().next(), this.modelContext,
+                                        this.serviceContext, seen ) ).interpretation;
             } else {
                 gov.nasa.jpl.view_repo.sysml.List list =
                         new gov.nasa.jpl.view_repo.sysml.List();
                 for ( Object o : c ) {
-                    list.add( new Evaluate( o ) );
+                    list.add( new Evaluate( o, this.modelContext,
+                                            this.serviceContext, seen ) );
                 }
                 interpretation = list;
             }
             return;
         }
+        Object resultObj = null;
+        boolean gotResult = false;
         if ( object instanceof EmsScriptNode ) {
             EmsScriptNode n = (EmsScriptNode)object;
-            if ( ignoreWorkspace && dateTime == null ) {
-                workspace = n.getWorkspace();
+            if ( modelContext.ignoreWorkspaces && modelContext.dateTime == null ) {
+                modelContext.workspace = n.getWorkspace();
             } else {
-                n = n.findScriptNodeByName( n.getName(), ignoreWorkspace,
-                                            workspace, dateTime );
+                n = n.findScriptNodeByName( n.getName(), modelContext.ignoreWorkspaces,
+                                            modelContext.workspace, modelContext.dateTime );
             }
             if ( n.hasOrInheritsAspect( "sysml:Expression" ) ) {
                 Map< Object, Object > result =
                         AbstractJavaWebScript.evaluate( Utils.newSet( n ),
-                                                        workspace );
+                                                        modelContext.workspace );
                 resultObj = result;
                 gotResult = true;
                 if ( result != null ) {
@@ -99,7 +140,8 @@ public class Evaluate implements Viewable< EmsScriptNode > {
                 }
             } else {
                 ArrayList< NodeRef > c =
-                        n.getValueSpecOwnedChildren( false, dateTime, workspace );
+                        n.getValueSpecOwnedChildren( false, modelContext.dateTime,
+                                                     modelContext.workspace );
                 if ( !Utils.isNullOrEmpty( c ) ) {
                     List< EmsScriptNode > nodes =
                             EmsScriptNode.toEmsScriptNodeList( c, NodeUtil.getServices(),
@@ -109,14 +151,88 @@ public class Evaluate implements Viewable< EmsScriptNode > {
                 }
             }
             if ( gotResult ) {
-                Evaluate e = new Evaluate(resultObj);
+                Evaluate e = new Evaluate(resultObj, this.modelContext,
+                                          this.serviceContext, seen);
                 interpretation = e.interpretation;
                 return;
             }
+            if ( n.hasOrInheritsAspect( "sysml:LiteralString" ) ) {
+                String s;
+                try {
+                    s = (String)n.getProperty( "sysml:string" );
+                } catch ( ClassCastException e ) {
+                    s = null;
+                }
+                if ( s != null ) {
+                    // Evaluate as a text expression
+                    resultObj = evaluate( s );
+                    gotResult = true;
+                }
+            }
+        }
+        if ( object instanceof String ) {
+            resultObj = evaluate( (String)object );
+            gotResult = true;
+        }
+        if ( gotResult ) {
+            if ( resultObj instanceof Viewable ) {
+                interpretation = (Viewable<?>)resultObj;
+                return;
+            }
+            interpretation = new Text( "" + resultObj );
+            return;
         }
         interpretation = new Text( "" + object );
     }
     
+    /**
+     * Try to evaluate the string as a K or Java expression.
+     * 
+     * @param expression
+     * @return the evaluation result or, if the evaluation fails, the input
+     *         expression.
+     */
+    public Object evaluate( String expression ) {
+        try {
+            JSONObject json = ModelPost.kToJson( expression );
+            Set< EmsScriptNode > elements = 
+                    ModelLoadActionExecuter.loadJson( json, this.modelContext,
+                                                      this.serviceContext );
+            if ( Utils.isNullOrEmpty( elements ) ) {
+                logger.warn( "Expression \"" + expression + "\" failed to parse!" );
+            } else {
+                if ( elements.size() > 1 ) {
+                    logger.warn( "Expression \"" + expression + "\" generated more than one element!" );
+                }
+                EmsScriptNode exprNode = elements.iterator().next();
+                if ( exprNode == null ) {
+                    logger.warn( "Expression \"" + expression + "\" load returned a null element!" );
+                    return null;
+                }
+                String sysmlid = exprNode.getSysmlId();
+                Map< Object, Object > results =
+                        AbstractJavaWebScript.evaluate( elements, modelContext.workspace );
+                if ( results == null || results.isEmpty() ) {
+                    logger.warn( "Expression \"" + expression + "\" had an empty evaluation!" );
+                } else {
+                    Object result = null;
+                    if ( results.size() == 1 ) {
+                        result = results.values().iterator().next();
+                    } else {
+                        result = results.get( sysmlid );
+                    }
+                    logger.warn( "Success!  Evaluated expression \""
+                                 + expression + "\" and got " + result );
+                    return result;
+                }
+            }
+        } catch (Throwable t) {
+            logger.error( "Failed to parse, load, or evaluate expression, \"" + expression + "\"" );
+            t.printStackTrace();
+        }
+        return null;
+    }
+
     @Override
     public JSONObject toViewJson( Date dateTime ) {
         if ( interpretation != null ) return interpretation.toViewJson( dateTime );

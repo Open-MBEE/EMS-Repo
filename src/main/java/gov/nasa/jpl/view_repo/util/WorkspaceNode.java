@@ -412,7 +412,7 @@ public class WorkspaceNode extends EmsScriptNode {
         String nodeName = node != null && node.exists() ? node.getName() : null;
 
         // make sure the folder's parent is replicated
-        EmsScriptNode parent = node.getParent();
+        EmsScriptNode parent = node.getParent(null, node.getWorkspace(), false, true);
 
         if ( parent == null || parent.isWorkspaceTop() ) {
             parent = this; // put in the workspace
@@ -425,7 +425,7 @@ public class WorkspaceNode extends EmsScriptNode {
         if (logger.isDebugEnabled()) logger.debug("propertyCache before = " + NodeUtil.propertyCache );
         if (logger.isDebugEnabled()) logger.debug("parent = " + parent);
         if ( parent != null && parent.exists() && !this.equals( parent.getWorkspace() ) ) {
-            EmsScriptNode grandParent = parent.getParent();
+            EmsScriptNode grandParent = parent.getParent(null, parent.getWorkspace(), false, true);
             ArrayList< NodeRef > arr =
                     NodeUtil.findNodeRefsByType( parentName,
                                                  SearchType.CM_NAME.prefix,
@@ -433,7 +433,7 @@ public class WorkspaceNode extends EmsScriptNode {
                                                  true, getServices(), false );
             for ( NodeRef ref : arr ) {
                 EmsScriptNode p = new EmsScriptNode( ref, getServices() );
-                EmsScriptNode gp = p.getParent();
+                EmsScriptNode gp = p.getParent(null, p.getWorkspace(), false, true);
                 if (logger.isDebugEnabled()) logger.debug("p = " + p);
                 if (logger.isDebugEnabled()) logger.debug("gp = " + gp);
                 if ( grandParent == gp || ( grandParent != null && gp != null && grandParent.getName().equals( gp.getName() ) ) ) {
@@ -459,7 +459,7 @@ public class WorkspaceNode extends EmsScriptNode {
                                                  true, getServices(), false );
             for ( NodeRef ref : array ) {
                 EmsScriptNode n = new EmsScriptNode( ref, getServices() );
-                EmsScriptNode np = n.getParent();
+                EmsScriptNode np = n.getParent(null, n.getWorkspace(), false, true);
                 // Note: need the last check of the parent's in case the node found was in the workspace, but
                 // under a different site, ie Models folder
                 if (n != null && n.exists() && this.equals( n.getWorkspace() ) && np != null && np.equals( parent )) {
@@ -1042,7 +1042,7 @@ public class WorkspaceNode extends EmsScriptNode {
         boolean multipleNonMatches = false;
         for ( NodeRef nr : refs ) {
             WorkspaceNode ws = new WorkspaceNode( nr, services );
-            EmsScriptNode p = ws.getParent();
+            EmsScriptNode p = ws.getParent(null, ws, false, true);
             boolean matches = p != null && p.getName().equals( userName );
             if ( !matchedUser ) matchedUser = matches;
             else if ( matches ) {

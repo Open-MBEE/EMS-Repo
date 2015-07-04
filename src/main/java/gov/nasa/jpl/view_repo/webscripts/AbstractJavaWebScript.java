@@ -100,6 +100,8 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
  */
 public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
     private static Logger logger = Logger.getLogger(AbstractJavaWebScript.class);
+    // FIXME -- Why is this not static? Concurrent webscripts with different
+    // loglevels will interfere with each other.
     public Level logLevel = Level.WARN;
     
     public Formatter formatter = new Formatter ();
@@ -163,6 +165,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         this.setServices( services );
         this.response = response ;
         // TODO -- set maximum log level; Overrides that specified in log4j.properties (I THINK)
+        // FIXME -- Why is this not static?
         logger.setLevel(logLevel);
     }
 
@@ -170,6 +173,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         this.setRepositoryHelper(repositoryHelper);
         this.setServices(registry);
         // TODO -- set maximum log level; Overrides that specified in log4j.properties (I THINK)
+        // FIXME -- Why is this not static?
         logger.setLevel(logLevel);
     }
 
@@ -177,6 +181,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         // default constructor for spring
         super();
         // TODO -- set maximum log level; Overrides that specified in log4j.properties (I THINK)
+        // FIXME -- Why is this not static?
         logger.setLevel(logLevel);
     }
     
