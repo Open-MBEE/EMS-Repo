@@ -417,7 +417,9 @@ public class FullDocPost extends AbstractJavaWebScript {
         Date date = this.getTime();
         String tag = this.getTimeTagName();
                             
-        String coverHtml = "<html>"
+        String coverHtml = //"<!DOCTYPE html>" //seems to not print formatted if keep the DOCTYPE
+        		//+ 
+        		"<html>"
                 + "<head><title>" + coverHeader + "</title></head>"
                 + "<body style= \"width:100%; height:100%;\">"
                     + "<div style=\"top:10%; left:10%; right: 10%; position:absolute;\">"
@@ -430,11 +432,11 @@ public class FullDocPost extends AbstractJavaWebScript {
                     + "<div style=\"top:70%; left:10%; position:absolute;\">"
                     +   "<div>" + date + "<br/>" + tag +  "</div>" //"<div>" + date + "</div>" 
                     +"</div>"
-                    +"</div>"
                     + "<div style=\"top:85%; left:10%; position:absolute;\">"
                     + "<div>"
                     + "<img src=\"http://div27.jpl.nasa.gov/2740/files/logos/jpl_logo%28220x67%29.jpg\" alt=\"JPL Logo\"/>"
                     + "<p style=\"color:#B6B6B4\">" + jplName + "<br/><i>" + caltechName + "</i></p>" //did separate jpl/caltech label to always have the stamp on pdf
+                    + "</div>"
                     + "</div>"
                 + "</body>"
                 + "</html>";
@@ -633,15 +635,22 @@ public class FullDocPost extends AbstractJavaWebScript {
 		List<String> command = new ArrayList<String>();
 		command.add("wkhtmltopdf");
 		command.add("-q");
+		command.add("--header-line");
+		command.add("--header-font-size");
+		command.add("8");
+		command.add("--header-font-name");
+		command.add("\"Times New Roman\"");
+		command.add("--header-right");
+		command.add(tagName);
 		command.add("--footer-line");
 		command.add("--footer-font-size");
 		command.add("8");
 		command.add("--footer-font-name");
 		command.add("\"Times New Roman\"");
-		command.add("--footer-left");
-		command.add(tagName.substring(0,10));
+//		command.add("--footer-left");
+//		command.add(tagName.substring(0,10));
 		command.add("--footer-center");
-		command.add("|Paper copies of this document may not be current and should not be relied on for official purposes. JPL/Caltech proprietary. Not for public release.|");  
+		command.add("Paper copies of this document may not be current and should not be relied on for official purposes. JPL/Caltech proprietary. Not for public release.");  
 		command.add("--footer-right");
 		command.add("[page]");
         command.add("cover"); //NEED FOR COVER
