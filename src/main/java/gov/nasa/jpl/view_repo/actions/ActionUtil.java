@@ -114,9 +114,10 @@ public class ActionUtil {
         String logName = ((String) node.getProperty("cm:name")) + ".log";
 
         // create logNode if necessary
-        EmsScriptNode logNode = node.getParent().childByNamePath(logName);
+        EmsScriptNode parent = node.getParent(null, node.getWorkspace(), false, true);
+        EmsScriptNode logNode = parent.childByNamePath(logName);
         if (logNode == null) {
-            logNode = node.getParent().createNode(logName, "cm:content");
+            logNode = parent.createNode(logName, "cm:content");
             if (!logNode.hasAspect("cm:versionable")) {
                 logNode.makeSureNodeRefIsNotFrozen();
                 logNode.addAspect("cm:versionable");

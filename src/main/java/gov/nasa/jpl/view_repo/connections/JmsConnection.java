@@ -4,6 +4,8 @@ import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Map;
 
+import gov.nasa.jpl.mbee.util.Utils;
+import gov.nasa.jpl.view_repo.util.CommitUtil;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
 
 import javax.jms.Connection;
@@ -39,13 +41,24 @@ public class JmsConnection implements ConnectionInterface {
 
     private static String hostname = null;
     private static ServiceRegistry services;
-    private static Map<String, ConnectionInfo> connectionMap = new HashMap<String, ConnectionInfo>();
+    private static Map<String, ConnectionInfo> connectionMap = null;
 
+    protected static Map<String, ConnectionInfo> getConnectionMap() {
+        if ( Utils.isNullOrEmpty( connectionMap ) ) {
+            connectionMap = new HashMap<String, ConnectionInfo>();
+            initConnectionInfo( CommitUtil.TYPE_BRANCH );
+            initConnectionInfo( CommitUtil.TYPE_DELTA );
+            initConnectionInfo( CommitUtil.TYPE_MERGE );
+        }
+        return connectionMap;
+    }
+    
+    
     public enum DestinationType {
         TOPIC, QUEUE
     }
 
-    class ConnectionInfo {
+    static class ConnectionInfo {
         public InitialContext ctx = null;
         public String ctxFactory = "org.apache.activemq.jndi.ActiveMQInitialContextFactory";
         public String connFactory = "ConnectionFactory";
@@ -57,9 +70,6 @@ public class JmsConnection implements ConnectionInterface {
         public DestinationType destType = DestinationType.TOPIC;
     }
     
-    public JmsConnection() {
-    }
-    
     protected String getHostname() {
         if (hostname == null) {
             hostname = services.getSysAdminParams().getAlfrescoHost();
@@ -68,7 +78,7 @@ public class JmsConnection implements ConnectionInterface {
     }
     
     protected boolean init(String eventType) {
-        ConnectionInfo ci = connectionMap.get( eventType );
+        ConnectionInfo ci = getConnectionMap().get( eventType );
         if (ci == null) return false;
         
         System.setProperty("weblogic.security.SSL.ignoreHostnameVerification", "true");
@@ -114,18 +124,18 @@ public class JmsConnection implements ConnectionInterface {
         return result;
     }
     
-    protected ConnectionInfo initConnectionInfo(String eventType) {
+    protected static ConnectionInfo initConnectionInfo(String eventType) {
         ConnectionInfo ci = new ConnectionInfo();
+        if ( connectionMap == null ) {
+            connectionMap = new HashMap< String, JmsConnection.ConnectionInfo >();
+        }
         connectionMap.put( eventType, ci );
         return ci;
     }
     
     
     public boolean publishMessage(String msg, String eventType) {
-        ConnectionInfo ci = connectionMap.get( eventType );
-        if (ci == null ) {
-            ci = initConnectionInfo(eventType);
-        }
+        ConnectionInfo ci = getConnectionMap().get( eventType );
             
         if ( ci.uri == null) return false;
 
@@ -200,11 +210,11 @@ public class JmsConnection implements ConnectionInterface {
     public JSONObject toJson() {
         JSONArray connections = new JSONArray();
 
-        for (String eventType: connectionMap.keySet()) {
-            ConnectionInfo ci = connectionMap.get( eventType );
+        for (String eventType: getConnectionMap().keySet()) {
+            ConnectionInfo ci = getConnectionMap().get( eventType );
             if (ci.uri.contains( "localhost" )) {
                 ci.uri = ci.uri.replace("localhost", getHostname());
-                connectionMap.put( eventType, ci );
+                getConnectionMap().put( eventType, ci );
             }
 
             JSONObject connJson = new JSONObject();
@@ -226,18 +236,33 @@ public class JmsConnection implements ConnectionInterface {
         return json;
     }
 
+    /**
+     * Handle single and multiple connections embedded as connections array or not
+     */
     public void ingestJson(JSONObject json) {
+        if (json.has( "connections" )) {
+            JSONArray connections = json.getJSONArray( "connections" );
+            for (int ii = 0; ii < connections.length(); ii++) {
+                JSONObject connection = connections.getJSONObject( ii );
+                ingestConnectionJson(connection);
+            }
+        } else {
+            ingestConnectionJson(json);
+        }
+    }
+    
+    public void ingestConnectionJson(JSONObject json) {
         String eventType = null;
         if (json.has( "eventType" )) {
             eventType = json.isNull( "eventType" ) ? null : json.getString( "eventType" );
         }
         if (eventType == null) {
-            eventType = "delta";
+            eventType = CommitUtil.TYPE_DELTA;
         }
         
         ConnectionInfo ci;
-        if (connectionMap.containsKey( eventType )) {
-            ci = connectionMap.get( eventType );
+        if (getConnectionMap().containsKey( eventType )) {
+            ci = getConnectionMap().get( eventType );
         } else {
             ci = new ConnectionInfo();
         }
@@ -275,7 +300,7 @@ public class JmsConnection implements ConnectionInterface {
             }
         }
         
-        connectionMap.put( eventType, ci );
+        getConnectionMap().put( eventType, ci );
     }
 
     public void setServices( ServiceRegistry services ) {

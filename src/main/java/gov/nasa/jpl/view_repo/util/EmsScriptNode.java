@@ -281,6 +281,7 @@ public class EmsScriptNode extends ScriptNode implements
 
     private View view;
 
+    protected EmsScriptNode projectNode = null;
     protected WorkspaceNode workspace = null;
     protected WorkspaceNode parentWorkspace = null;
 
@@ -1289,6 +1290,35 @@ public class EmsScriptNode extends ScriptNode implements
         if ( myParent == null ) return null;
         return new EmsScriptNode( myParent.getNodeRef(), services, response );
     }
+    
+    /**
+     * This version of getParent() handles versioned nodes correctly by calling
+     * getOwningParent() first.
+     * 
+     * @param dateTime
+     * @param ws
+     * @param skipNodeRefCheck
+     * @param checkVersionedNode
+     * @return
+     */
+    public EmsScriptNode getParent( Date dateTime, WorkspaceNode ws,
+                                    boolean skipNodeRefCheck,
+                                    boolean checkVersionedNode) {
+        
+        // We are not using getParent() because elementNode may be from the version
+        // store, which makes getParent() return a node from the workspace://version2store,
+        // and those nodes are equivalent to death.  See CMED-702.
+        EmsScriptNode owningParent = getOwningParent( dateTime, ws, skipNodeRefCheck, checkVersionedNode);
+        
+        if (owningParent != null) {
+            EmsScriptNode parent = owningParent.getReifiedPkg( dateTime, ws );
+            if (parent != null) {
+                return parent;
+            }
+        }
+        
+        return getParent();
+    }
 
     /**
      * Return the version of the parent at a specific time. This uses the
@@ -1456,6 +1486,93 @@ public class EmsScriptNode extends ScriptNode implements
     public ArrayList<NodeRef> getOwnedChildren(boolean findDeleted,
                                                Date dateTime, WorkspaceNode ws) {
         return getOwnedChildrenImpl("ems:ownedChildren", findDeleted, dateTime, ws);
+    }
+    
+    /**
+     * Returns all of the "connected" nodes.  If relationshipType is null, then will return all
+     * of the nodes that this node refers to in properties.  Otherwise, only returns nodes that
+     * are in the passed relationshipType and are of the passed relationshipType, 
+     * ie  a DirectedRelationship and its target, source, and owner nodes.
+     * 
+     * @param dateTime
+     * @param ws
+     * @param relationshipType The desired relationship to use for filtering, ie "DirectedRelationship"
+     * @return
+     */
+    public ArrayList<NodeRef> getConnectedNodes(Date dateTime, WorkspaceNode ws,
+                                                String relationshipType) {
+                
+        // REVIEW
+        // This currently does a crude job of filtering, as it will include all properties of
+        // the desired relationship that point to node refs, including the owner and relationship
+        // node itself.  This may not be what is desired.
+        //
+        // Also, may want a way to get all relationships, not just the one type specified.
+        
+        // TODO eventually will want to put some of this in EmsSystemModel.getRelationship(), but
+        //      currently there is no dateTime, unless we use the specifier
+        
+        ArrayList<NodeRef> nodes = new ArrayList<NodeRef>();
+        
+        String relationshipTypeName = relationshipType;
+        if (Acm.getJSON2ACM().containsKey( relationshipType )) {
+            relationshipTypeName = Acm.getJSON2ACM().get( relationshipType );
+        }
+        boolean checkingRelationship = !Utils.isNullOrEmpty(relationshipTypeName);
+        boolean nodeHasRelationship = checkingRelationship ? this.hasAspect( relationshipTypeName ) : false;
+        
+        // Loop through all of the properties of the node:
+        for (Entry<String,Object> entry : this.getNodeRefProperties(dateTime, ws).entrySet()) {
+            
+            String keyShort = NodeUtil.getShortQName( NodeUtil.createQName(entry.getKey()) );
+            Object value = entry.getValue();
+            
+            // If a relationshipType was provided, then see if this property points to a relationship:
+            boolean addNode = true;
+            if (checkingRelationship && !nodeHasRelationship) {
+                addNode = false;
+                for (String relationshipProp : Acm.PROPERTY_FOR_RELATIONSHIP_PROPERTY_ASPECTS.values()) {
+                    if (relationshipProp.equals(keyShort)) {
+                        addNode = true;
+                        break;
+                    }
+                }
+            }
+            
+            // Add the properties that point to node refs, and filter by relationship if needed:
+            if (addNode) {
+                if (value instanceof NodeRef) {
+                    NodeRef ref = (NodeRef) value;
+                    if (checkingRelationship) {
+                        EmsScriptNode node = new EmsScriptNode(ref, services);
+                        if (nodeHasRelationship || node.hasAspect( relationshipTypeName )) {
+                            nodes.add( ref );
+                        }
+                    }
+                    else {
+                        nodes.add( ref );
+                    }
+                }
+                else if (value instanceof List) {
+                    for (Object obj : (List)value) {
+                        if (obj instanceof NodeRef) {
+                            NodeRef ref = (NodeRef) obj;
+                            if (checkingRelationship) {
+                                EmsScriptNode node = new EmsScriptNode(ref, services);
+                                if (nodeHasRelationship|| node.hasAspect( relationshipTypeName )) {
+                                    nodes.add( ref );
+                                }
+                            }
+                            else {
+                                nodes.add( ref );
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        
+        return nodes;
     }
     
     /**
@@ -2104,18 +2221,18 @@ public class EmsScriptNode extends ScriptNode implements
         return NodeUtil.getStoreRef();
     }
 
-    public String getSysmlQName(Date dateTime, WorkspaceNode ws) {
+    public String getSysmlQName(Date dateTime, WorkspaceNode ws, boolean doCache) {
         if (qualifiedName != null) {
             return qualifiedName;
         }
-        return getSysmlQPath( true, dateTime, ws );
+        return getSysmlQPath( true, dateTime, ws, doCache );
     }
 
-    public String getSysmlQId(Date dateTime, WorkspaceNode ws) {
+    public String getSysmlQId(Date dateTime, WorkspaceNode ws, boolean doCache) {
         if (qualifiedId != null) {
             return qualifiedId;
         }
-        return getSysmlQPath( false, dateTime, ws );
+        return getSysmlQPath( false, dateTime, ws, doCache );
     }
     
     /**
@@ -2129,7 +2246,7 @@ public class EmsScriptNode extends ScriptNode implements
             return siteCharacterizationId;
         } else {
             // the following call will get the site characterization if it exists
-            getSysmlQName(date, ws);
+            getSysmlQName(date, ws, true);
             return siteCharacterizationId;
         }
     }
@@ -2144,6 +2261,9 @@ public class EmsScriptNode extends ScriptNode implements
      * @return SysML qualified name (e.g., sysml:name qualified)
      */
     public String getSysmlQPath( boolean isName, Date dateTime, WorkspaceNode ws ) {
+        return getSysmlQPath( isName, dateTime, ws, true );
+    }
+    public String getSysmlQPath( boolean isName, Date dateTime, WorkspaceNode ws, boolean doCache ) {
         // TODO REVIEW
         // This is currently not called on reified packages, so as long as the ems:owner always points
         // to reified nodes, as it should, then we dont need to replace pkgSuffix in the qname.
@@ -2154,12 +2274,14 @@ public class EmsScriptNode extends ScriptNode implements
             AuthenticationUtil.setRunAsUser( ADMIN_USER_NAME );
         }
 
-        qualifiedName = "/" + getProperty( "sysml:name" );
-        qualifiedId =  "/" + getProperty( "sysml:id" );
+        String qualifiedName = "/" + getProperty( "sysml:name" );
+        String qualifiedId =  "/" + getProperty( "sysml:id" );
 
         EmsScriptNode owner = this.getOwningParent(dateTime, ws, false, true );
         String ownerName = owner != null ? owner.getName() : null;
 
+        String siteCharacterizationId = this.siteCharacterizationId;
+        
         // Need to look up based on owner b/c the parent associations are not versioned,
         // but owners only go up to the project node, so the site node must be found
         // using the parent.  getOwningParent() searches for parent if owner is not found.
@@ -2199,6 +2321,14 @@ public class EmsScriptNode extends ScriptNode implements
             AuthenticationUtil.setRunAsUser( runAsUser );
         }
 
+        if ( doCache ) {
+            this.qualifiedId = qualifiedId;
+            this.qualifiedName = qualifiedName;
+            if ( this.siteCharacterizationId == null ) {
+                this.siteCharacterizationId = siteCharacterizationId;
+            }
+        }
+        
         if (isName) {
             return qualifiedName;
         } else {
@@ -2245,11 +2375,12 @@ public class EmsScriptNode extends ScriptNode implements
         String name = getName();
         String id = getSysmlId();
         String sysmlName = getSysmlName();
-        String qualifiedName = getSysmlQName(null, getWorkspace());
+        String qualifiedName = getSysmlQName(null, getWorkspace(), false);
         String type = getTypeName();
         String workspaceName = getWorkspaceName();
         result = deleted + "{type=" + type + ", id=" + id + ", cm_name=" + name + ", sysml_name=" + sysmlName
-                         + ", qualified name=" + qualifiedName + ", workspace="
+                         + ", qualified name=" + qualifiedName 
+                         + ", workspace="
                          + workspaceName + "}";
         } catch (Throwable t) {
             // ignore
@@ -2386,10 +2517,10 @@ public class EmsScriptNode extends ScriptNode implements
         
         if (isIncludeQualified) {
             if ( filter == null || filter.isEmpty() || filter.contains( "qualifiedName" ) ) {
-                putInJson( elementJson, "qualifiedName", this.getSysmlQName(dateTime, getWorkspace()), filter );
+                putInJson( elementJson, "qualifiedName", this.getSysmlQName(dateTime, getWorkspace(), true), filter );
             }
             if ( filter == null || filter.isEmpty() || filter.contains( "qualifiedId" ) ) {
-                putInJson( elementJson, "qualifiedId", this.getSysmlQId(dateTime, getWorkspace()), filter );
+                putInJson( elementJson, "qualifiedId", this.getSysmlQId(dateTime, getWorkspace(), true), filter );
             }
             if (filter == null || filter.isEmpty() || filter.contains( "siteCharacterizationId" )) {
                 putInJson( elementJson, "siteCharacterizationId", this.getSiteCharacterizationId(dateTime, getWorkspace()), filter);
@@ -3180,8 +3311,8 @@ public class EmsScriptNode extends ScriptNode implements
     }
 
     public boolean isSite() {
-        return ( getParent() != null && ( getParent().getName().toLowerCase()
-                                                     .equals( "sites" ) || isWorkspaceTop() ) );
+        EmsScriptNode parent = getParent(null, getWorkspace(), false, true);
+        return ( parent != null && ( parent.getName().toLowerCase().equals( "sites" ) || isWorkspaceTop() ) );
     }
 
     /**
@@ -3233,6 +3364,8 @@ public class EmsScriptNode extends ScriptNode implements
     }
 
     public EmsScriptNode getProjectNode(WorkspaceNode ws) {
+        if (projectNode != null) return projectNode;
+        
         EmsScriptNode parent = this;
         EmsScriptNode sites = null;
         EmsScriptNode projectPkg = null;
@@ -3245,15 +3378,11 @@ public class EmsScriptNode extends ScriptNode implements
         }
         Set<EmsScriptNode> seen = new HashSet<EmsScriptNode>();
         while ( parent != null && parent.getSysmlId() != null &&
-                !seen.contains( parent ) ) {
+                !seen.contains( parent ) && projectPkg != null) {
             if ( models == null && parent.getName().equals( "Models" ) ) {
                 models = parent;
                 projectPkg = oldparent;
-            } else if ( models != null && sites == null &&
-                        parent.getName().equals( "Sites" ) ) {
-                sites = parent;
-            } else if ( sites != null && parent.isWorkspaceTop() ) {
-                EmsScriptNode projectNode =  null;
+                
                 // IMPORTANT!! DON'T TAKE THIS OUT
                 // EMS was pushed when all model data was in Project reified node, not in
                 // the Project reified project, so need to do both checks
@@ -3267,14 +3396,10 @@ public class EmsScriptNode extends ScriptNode implements
                                                      + projectNode.getName() );
                     }
                 }
-                if ( changeUser ) {
-                    AuthenticationUtil.setRunAsUser( runAsUser );
-                }
-                return projectNode;
             }
             seen.add(parent);
             oldparent = parent;
-            parent = parent.getParent();
+            parent = parent.getParent(null, ws, false, true);
         }
         if ( seen.contains(parent) ) {
             String msg ="ERROR! recursive parent hierarchy detected for " + parent.getName() + " having visited " + seen + ".\n";
@@ -3288,7 +3413,7 @@ public class EmsScriptNode extends ScriptNode implements
         if ( changeUser ) {
             AuthenticationUtil.setRunAsUser( runAsUser );
         }
-        return projectPkg;
+        return projectNode;
     }
 
     public String getProjectId(WorkspaceNode ws) {
@@ -3371,31 +3496,27 @@ public class EmsScriptNode extends ScriptNode implements
 
         // special handling for valueType == ElementValue
         if ( values == null ) {
+            if ( logger.isDebugEnabled()) logger.debug( "null property values for "
+                    + acmProperty );
             if ( Acm.ACM_ELEMENT_VALUE.equals( acmProperty ) ) {
                 values =
                         getPropertyValuesFromJson( PropertyType.NODE_REF,
                                                    array, getWorkspace(), null );
             } else {
-                Debug.error( true, false,
-                             "*$*$*$ null array of property values for "
-                                     + acmProperty );
                 return changed;
             }
-        }
-        if ( values == null ) {
-            if ( logger.isDebugEnabled()) logger.debug( "null property values for "
-                                                    + acmProperty );
         }
 
         // only change if old list is different than new
         if ( checkPermissions( PermissionService.WRITE, response, status ) ) {
-            @SuppressWarnings( "unchecked" )
             // It is important we ignore the workspace when getting the property, so we make sure
             // to update this property when needed.  Otherwise, property may have a noderef in
             // a parent workspace, and this wont detect it; however, all the getProperty() will look
             // for the correct workspace node, so perhaps this is overkill::
-            ArrayList< Serializable > oldValues =
-                    (ArrayList< Serializable >)getNodeRefProperty( acmProperty, true, null, false, true, null );
+            List< Serializable > oldValues =
+                    Utils.asList( getNodeRefProperty( acmProperty, true, null,
+                                                      false, true, null ),
+                                  Serializable.class );
             if ( !EmsScriptNode.checkIfListsEquivalent( values, oldValues ) ) {
                 setProperty( acmProperty, values );
                 changed = true;
@@ -3854,8 +3975,10 @@ public class EmsScriptNode extends ScriptNode implements
     }
 
     /**
-     * Checks whether user has permissions to the node and logs results and
-     * status as appropriate
+     * Checks whether the user making the web request (not the run-as user) has
+     * permissions to the node and logs results and status as appropriate. If a
+     * response object is supplied, a warning is generated when the user does
+     * not have the permission.
      *
      * @param permissions
      *            Permissions to check
@@ -3903,6 +4026,18 @@ public class EmsScriptNode extends ScriptNode implements
         return true;
     }
 
+    /**
+     * Checks whether the user making the web request (not the run-as user) has
+     * permissions to the node and logs results and status as appropriate.
+     *
+     * @param permission
+     *            the permission to check
+     *
+     * @return whether the user has the
+     *            permission for this node
+     *
+     * @see org.alfresco.repo.jscript.ScriptNode#hasPermission(java.lang.String)
+     */
     @Override
     public boolean hasPermission( String permission ) {
         String realUser = AuthenticationUtil.getFullyAuthenticatedUser();
@@ -4154,8 +4289,8 @@ public class EmsScriptNode extends ScriptNode implements
         NodeRef r = null;
         for ( NodeRef ref : refs ) {
             EmsScriptNode node = new EmsScriptNode( ref, getServices() );
-            EmsScriptNode parent1 = getParent();
-            EmsScriptNode parent2 = node.getParent();
+            EmsScriptNode parent1 = getParent(null, getWorkspace(), false, true);
+            EmsScriptNode parent2 = node.getParent(null, parentWs, false, true);
             boolean failed = false;
             while ( NodeUtil.exists( parent1 ) && NodeUtil.exists( parent2 ) &&
                     !parent1.isWorkspaceTop() && !parent2.isWorkspaceTop() ) {
@@ -4166,8 +4301,8 @@ public class EmsScriptNode extends ScriptNode implements
                 } else {
                     if ( parent1.equals( parent2 ) ) break;
                 }
-                parent1 = parent1.getParent();
-                parent2 = parent2.getParent();
+                parent1 = parent1.getParent(null, getWorkspace(), false, true);
+                parent2 = parent2.getParent(null, parentWs, false, true);
             }
             if ( !failed && ( ( parent1 == null ) == ( parent2 == null ) )
                  && ( parent1.isWorkspaceTop() == parent2.isWorkspaceTop() ) ) {
@@ -4509,14 +4644,14 @@ public class EmsScriptNode extends ScriptNode implements
     public boolean move( ScriptNode destination ) {
         
         boolean status = false;
-        EmsScriptNode parent = getParent();
+        EmsScriptNode parent = getParent(null, getWorkspace(), false, true);
         EmsScriptNode oldParentReifiedNode = parent.getReifiedNode(parent.getWorkspace());
 
         // Create new parent if the parent is not correct:
         if ( !parent.equals( destination ) ) {
             
             // in a move we need to track the parent, the current node, and the destination, just in case
-            getParent().makeSureNodeRefIsNotFrozen();
+            parent.makeSureNodeRefIsNotFrozen();
             makeSureNodeRefIsNotFrozen();
             EmsScriptNode dest = new EmsScriptNode(destination.getNodeRef(), services, response);
             dest.makeSureNodeRefIsNotFrozen();
@@ -5075,7 +5210,7 @@ public class EmsScriptNode extends ScriptNode implements
     }
 
     public boolean isWorkspaceTop() {
-        EmsScriptNode myParent = getParent();
+        EmsScriptNode myParent = getParent(null, getWorkspace(), false, true);
         if ( myParent == null ) {
             if ( Debug.isOn() ) {
                 Debug.outln( "isWorkspaceTop() = true for node with null parent: "

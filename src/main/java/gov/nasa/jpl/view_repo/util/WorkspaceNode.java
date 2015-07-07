@@ -412,7 +412,7 @@ public class WorkspaceNode extends EmsScriptNode {
         String nodeName = node != null && node.exists() ? node.getName() : null;
 
         // make sure the folder's parent is replicated
-        EmsScriptNode parent = node.getParent();
+        EmsScriptNode parent = node.getParent(null, node.getWorkspace(), false, true);
 
         if ( parent == null || parent.isWorkspaceTop() ) {
             parent = this; // put in the workspace
@@ -425,7 +425,7 @@ public class WorkspaceNode extends EmsScriptNode {
         if (logger.isDebugEnabled()) logger.debug("propertyCache before = " + NodeUtil.propertyCache );
         if (logger.isDebugEnabled()) logger.debug("parent = " + parent);
         if ( parent != null && parent.exists() && !this.equals( parent.getWorkspace() ) ) {
-            EmsScriptNode grandParent = parent.getParent();
+            EmsScriptNode grandParent = parent.getParent(null, parent.getWorkspace(), false, true);
             ArrayList< NodeRef > arr =
                     NodeUtil.findNodeRefsByType( parentName,
                                                  SearchType.CM_NAME.prefix,
@@ -433,7 +433,7 @@ public class WorkspaceNode extends EmsScriptNode {
                                                  true, getServices(), false );
             for ( NodeRef ref : arr ) {
                 EmsScriptNode p = new EmsScriptNode( ref, getServices() );
-                EmsScriptNode gp = p.getParent();
+                EmsScriptNode gp = p.getParent(null, p.getWorkspace(), false, true);
                 if (logger.isDebugEnabled()) logger.debug("p = " + p);
                 if (logger.isDebugEnabled()) logger.debug("gp = " + gp);
                 if ( grandParent == gp || ( grandParent != null && gp != null && grandParent.getName().equals( gp.getName() ) ) ) {
@@ -459,7 +459,7 @@ public class WorkspaceNode extends EmsScriptNode {
                                                  true, getServices(), false );
             for ( NodeRef ref : array ) {
                 EmsScriptNode n = new EmsScriptNode( ref, getServices() );
-                EmsScriptNode np = n.getParent();
+                EmsScriptNode np = n.getParent(null, n.getWorkspace(), false, true);
                 // Note: need the last check of the parent's in case the node found was in the workspace, but
                 // under a different site, ie Models folder
                 if (n != null && n.exists() && this.equals( n.getWorkspace() ) && np != null && np.equals( parent )) {
@@ -664,6 +664,15 @@ public class WorkspaceNode extends EmsScriptNode {
 //        return null;
     }
 
+    /**
+     * Return all node refs changed in this workspace before or at the specified
+     * date-time. The node refs returned are checked for permissions by the user
+     * invoking the service irrespective of the run-as user.
+     * 
+     * @param dateTime
+     *            the date-time by which the nodes have changed
+     * @return the changed node refs
+     */
     public Set< NodeRef > getChangedNodeRefs( Date dateTime ) {
         Set< NodeRef > changedNodeRefs = new TreeSet< NodeRef >(NodeUtil.nodeRefComparator);
         if ( dateTime != null && dateTime.before( getCopyOrCreationTime() ) ) {
@@ -680,12 +689,16 @@ public class WorkspaceNode extends EmsScriptNode {
         ArrayList< EmsScriptNode > commits =
                 CommitUtil.getCommits( this, getServices(), getResponse() );
         commits.add( CommitUtil.getCommitPkg( this, getServices(), getResponse() ) );
-        List<NodeRef> commitRefs = NodeUtil.getNodeRefs( commits );
+        List<NodeRef> commitRefs = NodeUtil.getNodeRefs( commits, true );
         changedNodeRefs.removeAll(commitRefs);
 
         return changedNodeRefs;
     }
 
+    /**
+     * @param dateTime
+     * @return the IDs of the elements returned by {@link #getChangedNodeRefs(Date)}.
+     */
     public Set< String > getChangedElementIds( Date dateTime ) {
         Set< String > changedElementIds = new TreeSet< String >();
         Set< NodeRef > refs = getChangedNodeRefs( dateTime );
@@ -716,17 +729,26 @@ public class WorkspaceNode extends EmsScriptNode {
      * Get the NodeRefs of this workspace that have changed with respect to
      * another workspace. This method need not check the actual changes to see
      * if they are different and may be a superset of those actually changed.
+     * Results are filtered according to the nodes' read permissions for the
+     * user making the request (not the run-as user).
      *
      * @param thisWs
+     *            the workspace in which the nodes were changed
      * @param otherWs
+     *            the workspace with which the changed nodes result in a
+     *            difference
      * @param dateTime
+     *            the time by which the nodes were changed (null means now)
      * @param otherTime
-     * @return
+     *            the time at which the nodes result in a diff with the other
+     *            workspace
+     * @return the changed NodeRefs
      */
     public static Set< NodeRef > getChangedNodeRefsWithRespectTo( WorkspaceNode thisWs,
                                                                   WorkspaceNode otherWs,
                                                                   Date dateTime,
                                                                   Date otherTime,
+//                                                                  boolean checkReadPermissions,
                                                                   ServiceRegistry services,
                                                                   StringBuffer response,
                                                                   Status status ) {
@@ -760,6 +782,7 @@ public class WorkspaceNode extends EmsScriptNode {
         // account except to rule out workspaces with changes only after
         // dateTime.
         while ( parent != null && !parent.equals( targetParent ) ) {
+            // These changes are already filtered for read permissions.
             Set< NodeRef > changes = parent.getChangedNodeRefs( dateTime );
             changedNodeRefs.addAll( changes );
             parent = parent.getParentWorkspace();
@@ -1019,7 +1042,7 @@ public class WorkspaceNode extends EmsScriptNode {
         boolean multipleNonMatches = false;
         for ( NodeRef nr : refs ) {
             WorkspaceNode ws = new WorkspaceNode( nr, services );
-            EmsScriptNode p = ws.getParent();
+            EmsScriptNode p = ws.getParent(null, ws, false, true);
             boolean matches = p != null && p.getName().equals( userName );
             if ( !matchedUser ) matchedUser = matches;
             else if ( matches ) {

@@ -188,6 +188,28 @@ True,
 common_filters+['"MMS_','MMS_'],
 ["test","workspaces","develop"]
 ],
+        
+[
+66,
+"GetElementsConnected",
+"Get elements that are connected",
+create_curl_cmd(type="GET",data="elements/300?recurse=true&connected=true",base_url=BASE_URL_WS,
+                branch="master/"),
+True, 
+common_filters+['"MMS_','MMS_'],
+["test","workspaces","develop"]
+],
+        
+[
+67,
+"GetElementsRelationship",
+"Get elements that have relationship DirectedRelationship, starting with 302",
+create_curl_cmd(type="GET",data="elements/303?recurse=true&connected=true&relationship=DirectedRelationship",base_url=BASE_URL_WS,
+                branch="master/"),
+True, 
+common_filters+['"MMS_','MMS_'],
+["test","workspaces","develop"]
+],
 
 [
 70,
@@ -896,7 +918,6 @@ common_filters,
 ["test","workspaces","develop", "develop2"]
 ],
  
-# TODO: not running test 280/290 for now b/c of issues when running it with 260/270    
 [
 280,
 "PostDemo2",
@@ -921,11 +942,63 @@ common_filters,
 ["test","workspaces","develop", "develop2"]
 ],
 
+[
+292,
+"PostSiteAndProject3",
+"Create a site and a project for demo 3 of server side docgen",
+create_curl_cmd(type="POST",data='\'{"elements":[{"sysmlid":"PROJECT-71724d08-6d79-42b2-b9ec-dc39f20a3660","name":"BikeProject","specialization":{"type":"Project"}}]}\'',
+                base_url=BASE_URL_WS,
+                branch="master/sites/demo3site/projects?createSite=true",project_post=True),
+False, 
+None,
+["test","workspaces","develop", "develop2"]
+],
+ 
+[
+293,
+"PostDemo3",
+"Post data for demo 3 of server side docgen",
+create_curl_cmd(type="POST",base_url=BASE_URL_WS,
+                data="bike.json",
+                branch="master/sites/demo3site/",
+                post_type="elements"),
+True, 
+common_filters+['"MMS_','MMS_'],
+["test","workspaces","develop", "develop2"]
+],
+        
+[
+294,
+"PostViewDemo3",
+"Post view data for demo 3 of server side docgen",
+create_curl_cmd(type="POST",base_url=BASE_URL_WS,
+                data="connectorView.json",
+                branch="master/sites/demo3site/",
+                post_type="elements"),
+True, 
+common_filters+['"MMS_','MMS_'],
+["test","workspaces","develop", "develop2"]
+],
+        
+[
+295,
+"Demo3",
+"Server side docgen demo 3",
+create_curl_cmd(type="GET",data="views/_17_0_2_3_e610336_1394148311476_17302_29388_X",base_url=BASE_URL_WS,
+                branch="master/"),
+True, 
+common_filters,
+["test","workspaces","develop", "develop2"]
+],
+
+
+
+
 # NEW URLS: ==========================    
 
 [
 300,
-"GetSites",
+"GetSites2",
 "Get all the sites for a workspace",
 create_curl_cmd(type="GET",data="sites",base_url=BASE_URL_WS,
                 branch="master/"),
@@ -1114,6 +1187,45 @@ common_filters+['"message"'],
 "Get site package products",
 create_curl_cmd(type="GET",data="products",base_url=BASE_URL_WS,
                 branch="master/sites/site_package/"),
+True, 
+common_filters,
+[]
+],
+        
+[
+451,
+"SitePackageBugTest1",
+"Create packages A2, B2, and C2, where A2/B2 are site packages for CMED-871 testing",
+create_curl_cmd(type="POST",base_url=BASE_URL_WS,
+                data="SitePkgBugTest1.json",
+                branch="master/sites/europa/",
+                post_type="elements"),
+True, 
+common_filters,
+[]
+],
+        
+[
+452,
+"SitePackageBugTest2",
+"Moves package B2 under package C2 for CMED-871 testing",
+create_curl_cmd(type="POST",base_url=BASE_URL_WS,
+                data="SitePkgBugTest2.json",
+                branch="master/sites/europa/",
+                post_type="elements"),
+True, 
+common_filters,
+[]
+],
+        
+[
+453,
+"SitePackageBugTest3",
+"Makes package C2 a site package for CMED-871 testing",
+create_curl_cmd(type="POST",base_url=BASE_URL_WS,
+                data="SitePkgBugTest3.json",
+                branch="master/sites/europa/",
+                post_type="elements"),
 True, 
 common_filters,
 []
@@ -1638,6 +1750,17 @@ create_curl_cmd(type="POST",data="resurrectParentsChild.json",base_url=BASE_URL_
 True, 
 common_filters,
 ["test","workspaces","develop", "develop2"]
+],
+        
+[
+663,
+"TestGetAfterResurrection",
+"Performs a recursive get to make sure the ownedChildren were property set after resurrection.",
+create_curl_cmd(type="GET",data="elements/123456?recurse=true",base_url=BASE_URL_WS,
+                branch="master/"),
+True, 
+common_filters+['"MMS_','MMS_'],
+["test","workspaces","develop"]
 ],
 
 # ELEMENTS PROPERTY SERVICE (CMED-835): ==========================    

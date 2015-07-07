@@ -46,6 +46,10 @@ import gov.nasa.jpl.view_repo.util.WorkspaceDiff;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 import gov.nasa.jpl.view_repo.webscripts.util.ShareUtils;
 
+//import k.frontend.Frontend;
+//import k.frontend.ModelParser;
+//import k.frontend.ModelParser.ModelContext;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -505,12 +509,22 @@ public class ModelPost extends AbstractJavaWebScript {
         elements.addAll( updatedElements );
     }
 
+    private void setOwningParentChildren(EmsScriptNode owner, WorkspaceNode ws) {
+        
+        // The owner of the parent that was resurrected, needs to add the parent back
+        // to the ownedChildren:
+        EmsScriptNode ownerOfParent = owner.getOwningParent( null, ws, false );
+        if (ownerOfParent != null) {
+            owner.setOwnerToReifiedNode( ownerOfParent, ws, false );
+        }
+    }
+    
     /**
      * Resurrect the parent from the dead
      *
      * @param owner
      */
-    protected void resurrectParent(EmsScriptNode owner, boolean ingest) {
+    protected void resurrectParent(EmsScriptNode owner, boolean ingest, WorkspaceNode ws) {
         
         log( Level.WARN, "Owner with name: %s was deleted.  Will resurrect it", owner.getSysmlId());
         
@@ -518,6 +532,7 @@ public class ModelPost extends AbstractJavaWebScript {
         owner.removeAspect( "ems:Deleted" );
         modStatus.setState( ModStatus.State.ADDED );
         updateTransactionableWsStateImpl(owner, owner.getSysmlId(), modStatus, ingest);
+        
     }
 
     /**
@@ -528,25 +543,31 @@ public class ModelPost extends AbstractJavaWebScript {
                                     WorkspaceNode workspace) {
 
         EmsScriptNode lastNode = nodeToUpdate;
-        EmsScriptNode nodeParent = nodeToUpdate.getParent();
+        EmsScriptNode nodeParent = nodeToUpdate.getParent(null, workspace, false, true);
         EmsScriptNode reifiedNodeParent = nodeParent != null ? nodeParent.getReifiedNode(true, workspace) : null;
+        EmsScriptNode lastDeletedReifiedNodeParent = null;
         while (nodeParent != null  && nodeParent.scriptNodeExists()) {
             if (nodeParent.isDeleted()) {
-                resurrectParent(nodeParent, ingest);
+                resurrectParent(nodeParent, ingest, workspace);
             }
             if (reifiedNodeParent != null && reifiedNodeParent.isDeleted()) {
-                resurrectParent(reifiedNodeParent, ingest);
+                resurrectParent(reifiedNodeParent, ingest, workspace);
                 // Now deleted nodes are removed from ownedChildren, so must add them back:
                 if (lastNode != null) {
                     lastNode.setOwnerToReifiedNode( reifiedNodeParent, workspace, false );
                 }
+                lastDeletedReifiedNodeParent = reifiedNodeParent;
             }
             if (nodeParent.isWorkspaceTop()) {
                 break;
             }
             lastNode = reifiedNodeParent;
-            nodeParent = nodeParent.getParent();
+            nodeParent = nodeParent.getParent(null, workspace, false, true);
             reifiedNodeParent = nodeParent != null ? nodeParent.getReifiedNode(true, workspace) : null;
+        }
+        
+        if (lastDeletedReifiedNodeParent != null) {
+            setOwningParentChildren(lastDeletedReifiedNodeParent, workspace);
         }
 
     }
@@ -600,7 +621,7 @@ public class ModelPost extends AbstractJavaWebScript {
                 // Parent will be a reified package, which we never delete, so no need to
                 // check if we need to resurrect it.  If elementNode is deleted, it will
                 // resurrected later when processing that node. 
-                owner = elementNode.getParent();
+                owner = elementNode.getParent( null, workspace, false, true );
             }
         }
 
@@ -638,7 +659,8 @@ public class ModelPost extends AbstractJavaWebScript {
                     log( Level.WARN, "Owner with name: %s was deleted.  Will resurrect it, and put %s into it.", 
                             ownerName, elementId);
 
-                    resurrectParent(owner, false);
+                    resurrectParent(owner, false, workspace);
+                    setOwningParentChildren(owner, workspace);
                 }
                 // Otherwise, owner found but doesnt exists, or creating the holding bin:
                 else {
@@ -1573,13 +1595,8 @@ public class ModelPost extends AbstractJavaWebScript {
 
             msg = "Error! Tried to post concurrent edit to element, "
                             + element + ".\n";
-            log(Level.WARN,"%s  --> lastModified = %s  --> lastModString = %s  --> elementJson = %s", 
-                    msg, lastModified, lastModString, elementJson);
-            
-//            log( LogLevel.WARNING,
-//                 msg + "  --> lastModified = " + lastModified
-//                 + "  --> lastModString = " + lastModString
-//                 + "  --> elementJson = " + elementJson );
+            log(Level.WARN,"%s  --> lastModified = %s  --> lastModString = %s", 
+                    msg, lastModified, lastModString);
         }
 
         // Compare last modified to last modified time:
@@ -2033,45 +2050,41 @@ public class ModelPost extends AbstractJavaWebScript {
                 oldPkgSiteParentNode.removeFromPropertyNodeRefs( Acm.ACM_SITE_CHILDREN, 
                                                                  pkgSiteNode.getNodeRef() );
             }
-            
-            // Check that parent site children are children of this package:
-            // This is for the case that this site package being created is higher up in the
-            // the hierarchy than children site packages:
-            if (oldPkgSiteParentNode != null) {
-                
-                // Note: skipping the noderef check b/c sites are all in
-                // master, and post is to current time.
-                List<NodeRef> oldChildren = 
-                        oldPkgSiteParentNode.getPropertyNodeRefs( Acm.ACM_SITE_CHILDREN,
-                                                                  true, null, null);
-            
-                // Update the children of this package site if needed:
-                EmsScriptNode childNewParent;
-                EmsScriptNode child;
-                for (EmsScriptNode childSite : EmsScriptNode.toEmsScriptNodeList( oldChildren)) {
-                    
-                    child = childSite.getPropertyElement( Acm.ACM_SITE_PACKAGE, null, workspace );
-                    if (child != null) {
-                        childNewParent = findParentPkgSite(child, workspace, null);
                         
-                        if (childNewParent != null && childNewParent.equals( pkgSiteNode )) {
-                            //  Add to the this site package properties:
-                            childSite.setProperty( Acm.ACM_SITE_PARENT, pkgSiteNode.getNodeRef() );
-                            pkgSiteNode.appendToPropertyNodeRefs( Acm.ACM_SITE_CHILDREN,
-                                                                  childSite.getNodeRef() );
-                            
-                            // Remove from parent site pkg children:
-                            oldPkgSiteParentNode.removeFromPropertyNodeRefs( Acm.ACM_SITE_CHILDREN, 
-                                                                             childSite.getNodeRef() );
-                        }
-                    }
-                }
-            }
-            
             pkgSiteParentNode.appendToPropertyNodeRefs( Acm.ACM_SITE_CHILDREN,
                                                         pkgSiteNode.getNodeRef() );
             pkgSiteNode.setProperty( Acm.ACM_SITE_PARENT, pkgSiteParentNode.getNodeRef() );
             pkgSiteNode.removeAspect( "ems:Deleted" );
+            
+            // Update the children site packages if needed:
+            List<NodeRef> children = 
+                    nodeToUpdate.getOwnedChildren( false, null, workspace);
+            
+            EmsScriptNode childSite;
+            EmsScriptNode oldChildParentSite;
+            for (EmsScriptNode child : EmsScriptNode.toEmsScriptNodeList( children)) {
+                
+                childSite = child.getPropertyElement(Acm.ACM_SITE_SITE , true, null, null );
+                
+                if (childSite != null) {
+                    
+                    oldChildParentSite =  childSite.getPropertyElement( Acm.ACM_SITE_PARENT,
+                                                                          true, null, null );
+                    
+                    // Remove from old parent site pkg children:
+                    if (oldChildParentSite != null && 
+                        !oldChildParentSite.equals(pkgSiteNode)) {
+                        oldChildParentSite.removeFromPropertyNodeRefs( Acm.ACM_SITE_CHILDREN, 
+                                                                         childSite.getNodeRef() );
+                    }
+                    
+                    //  Add to the this site package properties:
+                    childSite.setProperty( Acm.ACM_SITE_PARENT, pkgSiteNode.getNodeRef() );
+                    pkgSiteNode.appendToPropertyNodeRefs( Acm.ACM_SITE_CHILDREN,
+                                                          childSite.getNodeRef() );
+                }
+            }
+            
         }
         else {
             log( Level.WARN,
@@ -2122,7 +2135,7 @@ public class ModelPost extends AbstractJavaWebScript {
         }
         EmsScriptNode parent;
         if (useParent) {
-            parent= node.getParent();
+            parent= node.getParent(null, workspace, false, true);
         } else {
             parent = node;
         }
@@ -2707,6 +2720,7 @@ public class ModelPost extends AbstractJavaWebScript {
                         String k = req.getContent().getContent();
                         logger.warn( "k = " + k );
                         postJson = new JSONObject(KExpParser.parseExpression(k));
+                        //postJson = new JSONObject(Frontend.exp2Json2( k ));
                     }
                     else {
                         postJson = //JSONObject.make(
@@ -2988,7 +3002,7 @@ public class ModelPost extends AbstractJavaWebScript {
             }
 
             if (mySiteNode == null || !mySiteNode.exists()) {
-                log(Level.ERROR, HttpServletResponse.SC_NOT_FOUND, "Site %s could not be found in workspace %s", siteName, workspace.toString());
+                log(Level.ERROR, HttpServletResponse.SC_NOT_FOUND, "Site %s could not be found in workspace %s", siteName, WorkspaceNode.getName( workspace) );
                 return null;
             }
         }

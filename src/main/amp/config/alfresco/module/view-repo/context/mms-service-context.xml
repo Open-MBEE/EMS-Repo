@@ -411,4 +411,11 @@
         <property name="services" ref="ServiceRegistry" />
     </bean>
     
+    <!-- get module info -->
+    <bean id="webscript.gov.nasa.jpl.utils.moduleinfo.get"
+        class="gov.nasa.jpl.view_repo.webscripts.util.ModuleInfoGet" parent="webscript"
+        singleton="false">
+        <property name="services" ref="ServiceRegistry" />
+    </bean>
+        
 </beans>

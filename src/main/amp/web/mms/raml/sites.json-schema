@@ -27,11 +27,11 @@
               },
               "parent": {
                 "type": "string",
-                "description": "SysML ID of the parent site"
+                "description": "SysML ID of the parent site (Read-Only)"
               },
               "isCharacterization": {
                 "type": "boolean",
-                "description": "Set to true if it is a site characterization"
+                "description": "Set to true if it is a site characterization (Read-Only)"
               }
             }
         }

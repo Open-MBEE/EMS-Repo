@@ -1070,7 +1070,7 @@ public class WorkspaceDiff implements Serializable {
     
     private static JSONObject cleanElementJson(JSONObject json) {
         JSONObject result = new JSONObject();
-        String keys[] = {"sysmlid", "id", "version"};
+        String keys[] = {"sysmlid", "id", "version", "qualifiedId", "qualifiedName", "name"};
         for (String key: keys) {
             if (json.has( key )) result.put( key, json.get( key ) );
         }
