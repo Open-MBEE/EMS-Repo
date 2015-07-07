@@ -105,6 +105,8 @@ import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
 
+import java.util.Iterator;
+
 /**
  * Handles (1) creating a snapshot or (2) generating snapshot artifacts -- PDF or HTML zip
  * @author lho
@@ -1089,6 +1091,20 @@ public class SnapshotPost extends AbstractJavaWebScript {
             if(!list.contains(formatType)) list.add( formatType );
         }
         return list;
+    }
+    
+    private String getConfigId(JSONArray configs) throws Exception{
+    	String configId = "ConfigId";
+        for ( int i = 0; i < configs.length(); i++ ) {
+            JSONObject obj = configs.getJSONObject( i );
+    		if(obj.get("id")!= null){
+    			configId = (String) obj.get("id");
+    		}
+    		else{
+    			throw new Exception("No config id found in posted JSON.");
+    		}
+        }
+        return configId;
     }
 
     private EmsScriptNode getSnapshotNode(JSONObject postJson) throws Exception{
@@ -2264,6 +2280,15 @@ public class SnapshotPost extends AbstractJavaWebScript {
 		if(userEmail == null || userEmail.isEmpty()) System.out.println("Failed to get user email address!");
 
 		ArrayList<String> formats = getSnapshotFormats(postJson);
+		JSONArray configurations = postJson.getJSONArray("configurations");	
+		String configId = "uh oh?";
+		try {
+			configId = getConfigId(configurations);
+		} catch (Exception e) {
+			log(Level.ERROR, "Failed to retrieve configuration id");
+			e.printStackTrace();
+		}
+		
         ActionService actionService = services.getActionService();
         Action snapshotAction = actionService.createAction(SnapshotArtifactsGenerationActionExecuter.NAME);
         snapshotAction.setParameterValue(SnapshotArtifactsGenerationActionExecuter.PARAM_SITE_NAME, siteName);
@@ -2274,7 +2299,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
         snapshotAction.setParameterValue(SnapshotArtifactsGenerationActionExecuter.PARAM_WORKSPACE, workspace);
         snapshotAction.setParameterValue(SnapshotArtifactsGenerationActionExecuter.PARAM_WORKSPACE_NAME, postJson.getString("ws"));
         snapshotAction.setParameterValue(SnapshotArtifactsGenerationActionExecuter.PARAM_TIME_STAMP, postJson.getString("time"));
-
+        snapshotAction.setParameterValue(SnapshotArtifactsGenerationActionExecuter.PARAM_CONFIGURATION_ID, configId);
        	services.getActionService().executeAction(snapshotAction, jobNode.getNodeRef(), true, true);
 	}
 

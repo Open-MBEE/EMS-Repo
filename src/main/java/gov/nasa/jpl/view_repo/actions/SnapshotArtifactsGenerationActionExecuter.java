@@ -6,6 +6,7 @@ import gov.nasa.jpl.view_repo.util.EmsTransaction;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 
+
 //import gov.nasa.jpl.view_repo.webscripts.AbstractJavaWebScript.LogLevel;
 import org.apache.log4j.*;
 
@@ -13,6 +14,7 @@ import gov.nasa.jpl.view_repo.webscripts.DocBookWrapper;
 import gov.nasa.jpl.view_repo.webscripts.FullDocPost;
 import gov.nasa.jpl.view_repo.webscripts.HostnameGet;
 import gov.nasa.jpl.view_repo.webscripts.SnapshotPost;
+import gov.nasa.jpl.view_repo.webscripts.util.ConfigurationsWebscript;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -56,6 +58,7 @@ public class SnapshotArtifactsGenerationActionExecuter  extends ActionExecuterAb
     public static final String PARAM_WORKSPACE = "workspace";
     public static final String PARAM_WORKSPACE_NAME = "workspaceName";
     public static final String PARAM_TIME_STAMP = "timestamp";
+    public static final String PARAM_CONFIGURATION_ID = "configId";
     
     
     public void setRepository(Repository rep) {
@@ -128,6 +131,13 @@ public class SnapshotArtifactsGenerationActionExecuter  extends ActionExecuterAb
         WorkspaceNode workspace = (WorkspaceNode)action.getParameterValue(PARAM_WORKSPACE);
         String workspaceName = action.getParameterValue(PARAM_WORKSPACE_NAME).toString();
         String timestampVE = action.getParameterValue(PARAM_TIME_STAMP).toString();
+        
+        //get tag name from config id
+        String configId = action.getParameterValue(PARAM_CONFIGURATION_ID).toString(); 
+        ConfigurationsWebscript configWs = new ConfigurationsWebscript( repository, services, response );
+        EmsScriptNode configNode = configWs.getConfiguration(configId);
+        String tagTitle = configNode.getProperty("cm:title").toString();
+       
         try{
         	
     	    // lets check whether or not docbook has been generated
@@ -166,7 +176,7 @@ public class SnapshotArtifactsGenerationActionExecuter  extends ActionExecuterAb
         	fullDoc.setFullDocId(snapshotId);
         	try{
         		
-        		fullDoc.downloadHtml(workspaceName, siteName, sysmlId, timestampVE);
+        		fullDoc.downloadHtml(workspaceName, siteName, sysmlId, timestampVE, tagTitle); //configId
         	}
         	catch(Exception ex){
         		status.setCode(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
@@ -290,14 +300,14 @@ public class SnapshotArtifactsGenerationActionExecuter  extends ActionExecuterAb
         	logger.error(sb.toString());
         	ex.printStackTrace();
         	ActionUtil.sendEmailToModifier(jobNode, String.format("An unexpected error occurred and your PDF generation failed.\n%s%s", ex.getMessage(), sb.toString()), "PDF Generation Failed", services);
-        	ActionUtil.sendEmailTo("mbee-dev-admin@jpl.nasa.gov", "mbee-dev-admin@jpl.nasa.gov", 
-        			String.format("Server: %s\nSite: %s\nWorkspace: %s\nSnapshot Id: %s\nError: %s%s%s", 
-        					new HostnameGet(this.repository, this.services).getAlfrescoUrl(),
-        					siteName,
-        					workspace,
-        					snapshotId,
-        					ex.getMessage(), sb.toString(), response.toString()), 
-					"PDF Generation Failed", services);
+//        	ActionUtil.sendEmailTo("mbee-dev-admin@jpl.nasa.gov", "mbee-dev-admin@jpl.nasa.gov", 
+//        			String.format("Server: %s\nSite: %s\nWorkspace: %s\nSnapshot Id: %s\nError: %s%s%s", 
+//        					new HostnameGet(this.repository, this.services).getAlfrescoUrl(),
+//        					siteName,
+//        					workspace,
+//        					snapshotId,
+//        					ex.getMessage(), sb.toString(), response.toString()), 
+//					"PDF Generation Failed", services);
         }
     }
 
