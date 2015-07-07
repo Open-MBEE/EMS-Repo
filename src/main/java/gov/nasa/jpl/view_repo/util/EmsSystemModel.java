@@ -22,6 +22,7 @@ import java.util.Set;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.namespace.QName;
+import org.apache.log4j.Level;
 import org.springframework.extensions.webscripts.Status;
 
 import sysml.AbstractSystemModel;
@@ -992,11 +993,13 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
 	        Collection< EmsScriptNode > elementColl = null;
 	        try {
 //	        		elementColl = NodeUtil.luceneSearchElements( "ASPECT:\"sysml:" + specifier + "\"" );
+//Debug.error( true, false, "NodeUtil.findNodeRefsByType( " + (String)specifier + ", SearchType.ASPECT.prefix, false, ws, dateTime, false, true, getServices(), false, null )");
 	                ArrayList< NodeRef > refs = NodeUtil.findNodeRefsByType( (String)specifier, SearchType.ASPECT.prefix, false, ws, dateTime, false, true, getServices(), false, null );
 	                elementColl = EmsScriptNode.toEmsScriptNodeList( refs, getServices(), null, null );
 	        } catch (Exception e) {
 	        		// if lucene query fails, most likely due to non-existent aspect, we should look for type now
 	        		try {
+//Debug.error( true, false, "NodeUtil.luceneSearchElements( \"TYPE:\\\"sysml:" + specifier + "\\\" )");
 	        			elementColl = NodeUtil.luceneSearchElements( "TYPE:\"sysml:" + specifier + "\"");
 	        		} catch (Exception ee) {
 	        			// do nothing

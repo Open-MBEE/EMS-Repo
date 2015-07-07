@@ -105,7 +105,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
     private static Logger logger = Logger.getLogger(AbstractJavaWebScript.class);
     // FIXME -- Why is this not static? Concurrent webscripts with different
     // loglevels will interfere with each other.
-    public Level logLevel = Level.DEBUG;
+    public Level logLevel = Level.WARN;
     
     public Formatter formatter = new Formatter ();
     /*public enum LogLevel {
