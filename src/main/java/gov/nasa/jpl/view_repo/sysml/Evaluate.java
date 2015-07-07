@@ -35,9 +35,15 @@ import sysml.view.Viewable;
  * if other evaluations are not appropriate.
  */
 public class Evaluate implements Viewable< EmsScriptNode > {
-    private static Logger logger = Logger.getLogger(AbstractJavaWebScript.class);
-    public Level logLevel = Level.WARN;
+    private static Logger logger;
+    public static Level logLevel;
 
+    {
+        logger = Logger.getLogger(AbstractJavaWebScript.class);
+        logLevel = Level.WARN;
+        logger.setLevel( logLevel );
+    }
+    
     Object object;
     Viewable<?> interpretation = null;
     
@@ -54,17 +60,21 @@ public class Evaluate implements Viewable< EmsScriptNode > {
         super();
         this.object = object;
         this.modelContext = modelContext;
+        if ( this.modelContext == null ) this.modelContext = new ModelContext();
         this.serviceContext = serviceContext;
+        if ( this.serviceContext == null ) this.serviceContext = new ServiceContext();
         interpret(seen);
     }
     
-//    public Evaluate( Object object ) {
-//        this( object, null );
-//    }
-//    protected Evaluate( Object object, Seen<Object> seen ) {
-//        this.object = object; 
-//        interpret( seen );
-//    }
+    public Evaluate( Object object ) {
+        this( object, null );
+    }
+    protected Evaluate( Object object, Seen<Object> seen ) {
+        this.object = object; 
+        this.modelContext = new ModelContext();
+        this.serviceContext = new ServiceContext();
+        interpret( seen );
+    }
     
     /**
      * Interpret the object as a Viewable. If the object is not otherwise

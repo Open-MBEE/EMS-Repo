@@ -196,6 +196,8 @@ public class ModelLoadActionExecuter extends ActionExecuterAbstractBase {
     public static Set<EmsScriptNode> loadJson( JSONObject content,
                                                ModelContext modelContext,
                                                ServiceContext serviceContext ) {
+        if ( modelContext == null ) modelContext = new ModelContext();
+        if ( serviceContext == null ) serviceContext = new ServiceContext();
         ModelPost modelService = new ModelPost(serviceContext.repository, serviceContext.services);
         modelService.setLogLevel(Level.DEBUG);
         modelService.setRunWithoutTransactions(false);
@@ -203,6 +205,8 @@ public class ModelLoadActionExecuter extends ActionExecuterAbstractBase {
 //        boolean succeeded = false;
         Set<EmsScriptNode> elements = null;
         try {
+            if ( serviceContext.status == null ) serviceContext.status = new Status();
+            if ( serviceContext.response == null ) serviceContext.response = new StringBuffer();
             // FIXME: make sure this all matches with ModelService handleUpdate
             elements = modelService.createOrUpdateModel( content, serviceContext.status,
                                                          modelContext.workspace, null, true );

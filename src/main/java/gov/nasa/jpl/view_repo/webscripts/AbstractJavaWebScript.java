@@ -58,11 +58,13 @@ import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 
 import java.util.Formatter;
 import java.io.Serializable;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -76,6 +78,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.json.JSONString;
 import org.alfresco.repo.jscript.ScriptNode;
 import org.alfresco.repo.model.Repository;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
@@ -102,7 +105,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
     private static Logger logger = Logger.getLogger(AbstractJavaWebScript.class);
     // FIXME -- Why is this not static? Concurrent webscripts with different
     // loglevels will interfere with each other.
-    public Level logLevel = Level.WARN;
+    public Level logLevel = Level.DEBUG;
     
     public Formatter formatter = new Formatter ();
     /*public enum LogLevel {
@@ -1331,7 +1334,8 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
     
         // Search for all constraints in the database:
         Collection<EmsScriptNode> constraintNodes = getGlobalSystemModel().getType(null, Acm.ACM_CONSTRAINT);
-    
+        log(Level.INFO, "all constraints in database: " + constraintNodes);
+
         if (!Utils.isNullOrEmpty(constraintNodes)) {
     
             // Loop through each found constraint and check if it contains any of the elements
@@ -1348,7 +1352,8 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
                 for (EmsScriptNode element : elements) {
     
                     String name = element.getName();
-                    if (name != null && constrElemNames.contains(name)) {
+                    log(Level.INFO, "element (" + element + ") vs. constraint (" + constraintNode + ")");
+                    if ( element.equals( constraintNode ) || ( name != null && constrElemNames.contains(name) ) ) {
                         addConstraintExpression(constraintNode, constraints, ws);
                         break;
                     }
@@ -1386,9 +1391,11 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
     }
 
     public static Map<Object, Object> evaluate( Set< EmsScriptNode > elements, WorkspaceNode ws ) {
-        log(Level.INFO, "Will attempt to fix constraint violations if found!");
+        log(Level.INFO, "Will attempt to evaluate expressions where found!");
         Collection< Constraint > constraints = getAeConstraints( elements, ws );
+        log(Level.INFO, "constraints: " + constraints);
         Map< EmsScriptNode, Expression<?> > expressions = getAeExpressions( elements );
+        log(Level.INFO, "expressions: " + constraints);
     
         Map< Object, Object > results = new LinkedHashMap< Object, Object >();
         if ( !Utils.isNullOrEmpty( constraints ) ) {
@@ -1408,6 +1415,104 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         return results;
     }
     
+    /**
+     * Construct a JSONArray from a Collection without triggering an infinite loop.
+     *
+     * @param collection
+     *            A Collection.
+     */
+    public static JSONArray makeJSONArray(Collection collection) {
+        JSONArray a = new JSONArray();
+        if (collection != null) {
+            Iterator iter = collection.iterator();
+            while (iter.hasNext()) {
+                a.put(jsonWrap(iter.next()));
+            }
+        }
+        return a;
+    }
+
+    /**
+     * Construct a JSONArray from an array
+     *
+     * @throws JSONException
+     *             If not an array.
+     */
+    public static JSONArray makeJSONArray(Object array) throws JSONException {
+        JSONArray a = new JSONArray();
+        if (array.getClass().isArray()) {
+            int length = Array.getLength(array);
+            for (int i = 0; i < length; i += 1) {
+                a.put(jsonWrap(Array.get(array, i)));
+            }
+        } else {
+            throw new JSONException(
+                    "JSONArray initial value should be a string or collection or array.");
+        }
+        return a;
+    }
+    
+    /**
+     * Fixes bug in JSONObject.wrap() where putting an unexpected object in a
+     * JSONObject results in an infinite loop. The fix is to convert the object
+     * to a string if it's type is not one of the usual suspects.
+     * 
+     * @param object
+     * @return an Object that can be inserted as a value into a JSONObject 
+     */
+    public static Object jsonWrap( Object object ) {
+        try {
+            if (object == null) {
+                return JSONObject.NULL;
+            }
+            if (object instanceof JSONObject || object instanceof JSONArray
+                    || JSONObject.NULL.equals(object) || object instanceof JSONString
+                    || object instanceof Byte || object instanceof Character
+                    || object instanceof Short || object instanceof Integer
+                    || object instanceof Long || object instanceof Boolean
+                    || object instanceof Float || object instanceof Double
+                    || object instanceof String) {
+                return object;
+            }
+
+            if (object instanceof Collection) {
+                return makeJSONArray((Collection) object);
+            }
+            if (object.getClass().isArray()) {
+                return makeJSONArray(object);
+            }
+            if (object instanceof Map) {
+                return makeJSONObject((Map) object);
+            }
+            return "" + object;
+        } catch (Exception exception) {
+            return null;
+        }
+    }
+    
+    /**
+     * Construct a JSONObject from a Map without triggering an infinite loop.
+     *
+     * @param map
+     *            A map object that can be used to initialize the contents of
+     *            the JSONObject.
+     * @throws JSONException
+     */
+    public static JSONObject makeJSONObject(Map map) {
+        JSONObject jo = new JSONObject();
+        if (map != null) {
+            Iterator i = map.entrySet().iterator();
+            while (i.hasNext()) {
+                Map.Entry e = (Map.Entry) i.next();
+                Object value = e.getValue();
+                if (value != null) {
+                    jo.put("" + e.getKey(), jsonWrap(value));
+                }
+            }
+        }
+        return jo;
+    }
+
     public void evaluate( final Map<EmsScriptNode, JSONObject> elementsJsonMap,//Set< EmsScriptNode > elements, final JSONArray elementsJson,
                           JSONObject top, WorkspaceNode ws ) {
         //final JSONArray elementsJson = new JSONArray();
@@ -1418,7 +1523,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
             Object result = results.get( element );
             if ( result != null ) {
                 try {
-                    json.putOpt( "evaluationResult", result );
+                    json.putOpt( "evaluationResult", jsonWrap( result ) );
                     results.remove( element );
                 } catch ( Throwable e ) {
                     log( Level.WARN, "Evaluation failed for %s", element );
