@@ -201,11 +201,8 @@ public class FullDocPost extends AbstractJavaWebScript {
 		List<String> command = new ArrayList<String>();
 		command.add(this.phantomJSPath);
 		command.add(this.phantomJSScriptPath);
-//		command.add(String.format("%s:%d/%s://%s@%s/mmsFullDoc.html?ws=%s&site=%s&docId=%s&time=%s",
-//				preRendererUrl,preRendererPort, protocol, mmsAdminCredential, hostnameAndPort, workspaceName, site, docId, timestamp));
-		
 		command.add(String.format("%s:%d/%s://%s@%s/mmsFullDoc.html?ws=%s&site=%s&docId=%s&time=%s",
-				"http:localhost",preRendererPort, "http", "admin:admin", "localhost:9000", "master", site, docId, timestamp));
+				preRendererUrl,preRendererPort, protocol, mmsAdminCredential, hostnameAndPort, workspaceName, site, docId, timestamp));
 		command.add(String.format("%s/%s_NodeJS.html", this.fullDocDir, this.fullDocId));
 		exec.setCommand(list2Array(command));
 		System.out.println("NodeJS command: " + command);
@@ -290,8 +287,10 @@ public class FullDocPost extends AbstractJavaWebScript {
 		List<String> command = new ArrayList<String>();
 		command.add(this.phantomJSPath);
 		command.add(this.phantomJSScriptPath);
-		command.add(String.format("%s:%d/%s://%s@%s/mmsFullDoc.html#/workspaces/%s/sites/%s/documents/%s/views/%s",
-				preRendererUrl,preRendererPort, protocol, mmsAdminCredential, hostnameAndPort, workspace.getName(), site, docId, viewId));
+		// command.add(String.format("%s:%d/%s://%s@%s/mmsFullDoc.html#/workspaces/%s/sites/%s/documents/%s/views/%s",
+		// preRendererUrl,preRendererPort, protocol, mmsAdminCredential, hostnameAndPort, workspace.getName(), site, docId, viewId));
+		command.add(String.format("%s:%d/%s://%s@%s/mmsFullDoc.html?ws=%s&site=%s&docId=%s&viewId=%s&section=%s&time=%s",
+		preRendererUrl,preRendererPort, protocol, mmsAdminCredential, hostnameAndPort, workspace.getName(), site, docId, viewId, section, timestamp));
 		command.add(filePath);
 		exec.setCommand(list2Array(command));
 		System.out.println("NodeJS command: " + command);

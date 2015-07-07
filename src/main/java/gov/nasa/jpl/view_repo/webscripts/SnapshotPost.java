@@ -2281,7 +2281,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
 
 		ArrayList<String> formats = getSnapshotFormats(postJson);
 		JSONArray configurations = postJson.getJSONArray("configurations");	
-		String configId = "uh oh?";
+		String configId = "";
 		try {
 			configId = getConfigId(configurations);
 		} catch (Exception e) {
