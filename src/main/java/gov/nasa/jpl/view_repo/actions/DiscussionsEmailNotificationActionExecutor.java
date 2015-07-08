@@ -131,7 +131,11 @@ public class DiscussionsEmailNotificationActionExecutor  extends ActionExecuterA
     	try{
 			NodeRef person = getUserProfile(userName);
 			if(person == null) return "";
-			return (String)nodeService.getProperty(person, ContentModel.PROP_EMAIL);
+			Object o = NodeUtil.getNodeProperty( person, ContentModel.PROP_EMAIL,
+			                                     services, true, true );
+			if ( o instanceof String ) return (String)o;
+			// TODO -- throw error here
+			return "" + o;
     	}
     	catch(Exception ex){
     		System.out.println("Failed to get email address for " + userName);

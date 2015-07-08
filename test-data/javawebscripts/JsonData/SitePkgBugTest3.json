@@ -1,0 +1,9 @@
+{ "elements" : [
+    {"documentation" : "A site package", 
+     "sysmlid":"packageC2", 
+     "name":"packageC2",
+     "owner":"packageA2",
+     "specialization": {"type":"Package",
+                        "isSite":true}
+    },
+]}

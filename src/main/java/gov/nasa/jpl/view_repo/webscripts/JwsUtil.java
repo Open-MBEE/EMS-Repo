@@ -28,6 +28,9 @@
  ******************************************************************************/
 package gov.nasa.jpl.view_repo.webscripts;
 
+import gov.nasa.jpl.view_repo.util.EmsScriptNode;
+import gov.nasa.jpl.view_repo.util.NodeUtil;
+
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
@@ -94,6 +97,7 @@ public class JwsUtil {
 	 */
 	protected ScriptNode createModelElement(ScriptNode parent, String name,
 			String type) {
+	    ScriptNode node = null;
 		if (useFoundationalApi) {
 			Map<QName, Serializable> props = new HashMap<QName, Serializable>(
 					1, 1.0f);
@@ -106,10 +110,12 @@ public class JwsUtil {
 					QName.createQName(NamespaceService.CONTENT_MODEL_1_0_URI,
 							QName.createValidLocalName(name)),
 					createQName(type), props);
-			return new ScriptNode(assoc.getChildRef(), services);
+			node = new ScriptNode(assoc.getChildRef(), services);
 		} else {
-			return parent.createNode(name, type);
+			node = parent.createNode(name, type);
 		}
+        NodeUtil.addElementToCache( new EmsScriptNode( node.getNodeRef(), services ) );
+        return node;
 	}
 
 	/**
@@ -121,12 +127,15 @@ public class JwsUtil {
 	 * 
 	 * @return QName
 	 */
-	public QName createQName(String s) {
+    public QName createQName(String s) {
+        return createQName( s, services );
+    }
+	public static QName createQName( String s, ServiceRegistry services ) {
 		QName qname;
 		if (s.indexOf(NAMESPACE_BEGIN) != -1) {
 			qname = QName.createQName(s);
 		} else {
-			qname = QName.createQName(s, this.services.getNamespaceService());
+			qname = QName.createQName(s, services.getNamespaceService());
 		}
 		return qname;
 	}
@@ -154,15 +163,10 @@ public class JwsUtil {
 	 *            Short type for the property to get (e.g., "view:mdid")
 	 * @return Node's specified property value
 	 */
-	protected Object getNodeProperty(ScriptNode node, String key) {
-		if (useFoundationalApi) {
-			return services.getNodeService().getProperty(node.getNodeRef(),
-					createQName(key));
-		} else {
-			return node.getProperties().get(key);
-		}
+	public Object getNodeProperty(ScriptNode node, String key) {
+	    return NodeUtil.getNodeProperty( node, key, services, useFoundationalApi, true );
 	}
-
+	
 	/**
 	 * Simple utility for setting the specialized name and title
 	 * @param node	Node to update
@@ -196,6 +200,7 @@ public class JwsUtil {
 			node.getProperties().put(type, value);
 			node.save();
 		}
+        NodeUtil.propertyCachePut( node.getNodeRef(), type, value );
 	}
 
 	public void setServices(ServiceRegistry sr) {

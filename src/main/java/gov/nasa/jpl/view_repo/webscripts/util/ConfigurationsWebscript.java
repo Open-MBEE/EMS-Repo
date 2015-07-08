@@ -23,6 +23,7 @@ import java.util.Set;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.log4j.*;
 import org.alfresco.repo.model.Repository;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
@@ -67,7 +68,7 @@ public class ConfigurationsWebscript extends AbstractJavaWebScript {
             EmsScriptNode configNode = new EmsScriptNode(configNodeRef, services);
             return configNode;
         } else {
-            log(LogLevel.WARNING, "Could not find configuration with id " + id, HttpServletResponse.SC_NOT_FOUND);
+            log(Level.WARN, HttpServletResponse.SC_NOT_FOUND, "Could not find configuration with id %s", id);
             return null;
         }
     }
@@ -138,7 +139,7 @@ public class ConfigurationsWebscript extends AbstractJavaWebScript {
         String siteNameFromReq = getSiteName( req );
         if ( siteNode == null && !Utils.isNullOrEmpty( siteNameFromReq )
              && !siteNameFromReq.equals( NO_SITE_ID ) ) {
-            log(LogLevel.WARNING, "Could not find site " + siteNameFromReq, HttpServletResponse.SC_NOT_FOUND);
+            log(Level.WARN, HttpServletResponse.SC_NOT_FOUND, "Could not find site %s", siteNameFromReq);
             return new JSONArray();
         }
         // when we're looking for snapshots, we don't care about site
@@ -250,7 +251,9 @@ public class ConfigurationsWebscript extends AbstractJavaWebScript {
             timestamp = (Date)timestampObject;
         } else {
             if ( timestampObject != null ) {
-                logger.error( "timestamp is not a date! timestamp = " + timestampObject );
+                //Debug.error( "timestamp is not a date! timestamp = " + timestampObject );
+            	log(Level.ERROR,"timestamp is not a date! timestamp = %s", timestampObject.toString());
+                //logger.error( "timestamp is not a date! timestamp = " + timestampObject );
             }
             timestamp = new Date( System.currentTimeMillis() );
         }
@@ -304,7 +307,7 @@ public class ConfigurationsWebscript extends AbstractJavaWebScript {
 //        Date date = (Date)config.getProperty("cm:created");
 //        json.put("created", EmsScriptNode.getIsoTime(date));
 
-        json.put("creator", config.getProperty("cm:modifier"));
+        json.put("creator", config.getProperty("cm:modifier", false));
 
         json.put( "configurations", configArray );
         
@@ -382,7 +385,7 @@ public class ConfigurationsWebscript extends AbstractJavaWebScript {
         } else {
             snapshotJson.put( "created",  EmsScriptNode.getIsoTime( (Date)snapshot.getProperty( "cm:created" )));
         }
-        snapshotJson.put( "creator", snapshot.getProperty( "cm:modifier" ) );
+        snapshotJson.put( "creator", snapshot.getProperty( "cm:modifier", false ) );
 
         @SuppressWarnings( "rawtypes" )
         LinkedList<HashMap> list = new LinkedList<HashMap>();
@@ -479,7 +482,7 @@ public class ConfigurationsWebscript extends AbstractJavaWebScript {
         JSONObject productJson = new JSONObject();
         productJson.put("sysmlid", product.getSysmlId());
         productJson.put( "created",  EmsScriptNode.getIsoTime( (Date)product.getProperty( "cm:created" )));
-        productJson.put( "creator", product.getProperty( "cm:modifier" ) );
+        productJson.put( "creator", product.getProperty( "cm:modifier", false ) );
 
         return productJson;
     }

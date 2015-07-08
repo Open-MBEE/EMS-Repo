@@ -11,6 +11,7 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.log4j.*;
 import org.alfresco.repo.model.Repository;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
@@ -68,10 +69,10 @@ public class WorkspacesGet extends AbstractJavaWebScript{
                 json = handleWorkspace (homeFolder, status, userName, req.getParameter( "deleted" ) == null ? false : true);
             }
         } catch (JSONException e) {
-            log(LogLevel.ERROR, "JSON could not be created\n", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            log(Level.ERROR, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "JSON could not be created\n");
             e.printStackTrace();
         } catch (Exception e) {
-            log(LogLevel.ERROR, "Internal error stack trace:\n" + e.getLocalizedMessage() + "\n", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            log(Level.ERROR, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Internal error stack trace:\n %s \n", e.getLocalizedMessage());
             e.printStackTrace();
         }
         if (json == null) {
@@ -98,7 +99,7 @@ public class WorkspacesGet extends AbstractJavaWebScript{
         if (!findDeleted) {
             //This is for the master workspace (not located in the user home folder).
             JSONObject interiorJson = new JSONObject();
-            WorkspaceNode.addWorkspaceNamesAndIds(interiorJson, null, services, true );
+            WorkspaceNode.addWorkspaceNamesAndIds(interiorJson, null, true );
             jArray.put(interiorJson);
         }
 

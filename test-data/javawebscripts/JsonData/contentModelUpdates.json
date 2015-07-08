@@ -117,6 +117,22 @@
      "name":"targetId", 
      "owner":"123456", 
      "specialization": {"type":"Property"}
+    },
+
+    {"documentation": "metatype",
+     "sysmlid":"metatype1",
+     "name": "metatype1",
+     "owner": "123456",
+     "isMetatype": true,
+     "metatypes": ["target", "source"]
+    },
+
+    {"documentation": "hasAppliedMetatype",
+     "sysmlid": "hasAppliedMetatype1",
+     "name": "hasAppliedMetatype1",
+     "owner": "123456",
+     "appliedMetatypes": ["metatype"]
     }
+
     
 ]}

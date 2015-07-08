@@ -96,7 +96,6 @@ public class DocBookWrapper {
 		RuntimeExec re = new RuntimeExec();
 		List<String> command = new ArrayList<String>();
 
-//		System.out.println("srcFile: " + srcFile.getAbsolutePath());
 		String source = srcFile.getAbsolutePath();
 		String target = source.subSequence(0, source.lastIndexOf(".")) + ".pdf";
 		command.add(this.getFobFileName());
@@ -108,8 +107,6 @@ public class DocBookWrapper {
 		command.add("-pdf");
 		command.add(target);
 
-//		System.out.println("DO_TRANSFORM source: " + source);
-//		System.out.println("DO_TRANSFORM target: " + target);
 		System.out.println("DO_TRANSFROM cmd: " + command);
 
 		re.setCommand(list2Array(command));
@@ -124,82 +121,6 @@ public class DocBookWrapper {
 
 		return target;
 	}
-
-//	private String formatContent(String rawContent){
-//		Document document = Jsoup.parseBodyFragment(rawContent);
-//		Elements lits = document.getElementsByTag("literallayout");
-//		for(Element lit : lits){
-//			Elements cirRefs = lit.getElementsByTag("CircularReference");
-//			for(Element cirRef : cirRefs){
-//				//cirRef.before("</literallayout><font color='red'>Circular Reference!</font><literallayout>");
-//				//cirRef.remove();
-//			}
-//		}
-//		return document.body().html();
-//	}
-	
-//	private String handleSpecialChars(String rawContent){
-//		String[][] replacements = {
-//				{"Α", "&#X0391;"},
-//				{"Β", "&#X0392;"},
-//				{"Γ", "&#x0393;"}, 
-//                {"Δ", "&#x0394;"},
-//                {"Ε", "&#x0395;"},
-//                {"Ζ", "&#X0396;"},
-//                {"Η", "&#X0397;"},
-//                {"Θ", "&#x0398;"},
-//                {"Ι", "&#x0399;"},
-//                {"Κ", "&#x039A;"},
-//                {"Λ", "&#x039B;"},
-//                {"Μ", "&#x039C;"},
-//                {"Ν", "&#x039D;"},
-//                {"Ξ", "&#x039E;"},
-//                {"Ο", "&#x039F;"},
-//                {"Π", "&#x03A0;"},
-//                {"Ρ", "&#x03A1;"},
-//                {"Σ", "&#x03A3;"},
-//                {"Τ", "&#x03A4;"},
-//                {"Υ", "&#x03A5;"},
-//                {"Φ", "&#x03A6;"},
-//                {"Χ", "&#x03A7;"},
-//                {"Ψ", "&#x03A8;"},
-//                {"Ω", "&#x03A9;"},
-//                {"α", "&#x03B1;"},
-//                {"β", "&#x03B2;"},
-//                {"γ", "&#x03B3;"},
-//                {"δ", "&#x03B4;"},
-//                {"ε", "&#x03B5;"},
-//                {"ζ", "&#x03B6;"},
-//                {"η", "&#x03B7;"},
-//                {"θ", "&#x03B8;"},
-//                {"ι", "&#x03B9;"},
-//                {"κ", "&#x03BA;"},
-//                {"λ", "&#x03BB;"},
-//                {"μ", "&#x03BC;"},
-//                {"ν", "&#x03BD;"},
-//                {"ξ", "&#x03BE;"},
-//                {"ο", "&#x03BF;"},
-//                {"π", "&#x03C0;"},
-//                {"ρ", "&#x03C1;"},
-//                {"ς", "&#x03C2;"},
-//                {"σ", "&#x03C3;"},
-//                {"τ", "&#x03C4;"},
-//                {"υ", "&#x03C5;"},
-//                {"φ", "&#x03C6;"},
-//                {"χ", "&#x03C7;"},
-//                {"ψ", "&#x03C8;"},
-//                {"ω", "&#x03C9;"},
-//                {"ϑ", "&#x03D1;"},
-//                {"ϒ", "&#x03D2;"},
-//                {"ϖ", "&#x03D6;"}
-//			};
-//
-//		String strOutput = rawContent;
-//		for(String[] replacement: replacements) {
-//			strOutput = strOutput.replace(replacement[0], replacement[1]);
-//		}
-//		return strOutput;
-//	}
 
 	private String toJsoupCompatible(String content){
 		String s = content;

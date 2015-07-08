@@ -1,15 +1,17 @@
 {
-  "sequence": 37,
   "workspace1": {
     "qualifiedName": "master",
     "name": "master",
     "elements": [
       {
-        "name": "childOfParentToDelete2",
         "qualifiedName": "/europa/JW_TEST2/parentToDelete1/parentToDelete2/childOfParentToDelete2",
         "sysmlid": "childOfParentToDelete2",
-        "documentation": "Child",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "childOfParentToDelete2",
         "owner": "parentToDelete2",
+        "documentation": "Child",
         "specialization": {
           "propertyType": null,
           "isDerived": false,
@@ -20,16 +22,17 @@
             "type": "LiteralString"
           }],
           "type": "Property"
-        },
-        "editable": true,
-        "creator": "admin",
+        }
       },
       {
-        "name": "parentToDelete1",
         "qualifiedName": "/europa/JW_TEST2/parentToDelete1",
         "sysmlid": "parentToDelete1",
-        "documentation": "Parent 1",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "parentToDelete1",
         "owner": "123456",
+        "documentation": "Parent 1",
         "specialization": {
           "propertyType": null,
           "isDerived": false,
@@ -40,16 +43,17 @@
             "type": "LiteralString"
           }],
           "type": "Property"
-        },
-        "editable": true,
-        "creator": "admin",
+        }
       },
       {
-        "name": "parentToDelete2",
         "qualifiedName": "/europa/JW_TEST2/parentToDelete1/parentToDelete2",
         "sysmlid": "parentToDelete2",
-        "documentation": "Parent 2",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "parentToDelete2",
         "owner": "parentToDelete1",
+        "documentation": "Parent 2",
         "specialization": {
           "propertyType": null,
           "isDerived": false,
@@ -60,9 +64,7 @@
             "type": "LiteralString"
           }],
           "type": "Property"
-        },
-        "editable": true,
-        "creator": "admin",
+        }
       }
     ]
   },
@@ -70,15 +72,15 @@
     "deletedElements": [
       {
         "sysmlid": "childOfParentToDelete2",
-        "creator": "admin",
+        "creator": "admin"
       },
       {
         "sysmlid": "parentToDelete1",
-        "creator": "admin",
+        "creator": "admin"
       },
       {
         "sysmlid": "parentToDelete2",
-        "creator": "admin",
+        "creator": "admin"
       }
     ],
     "addedElements": [],
