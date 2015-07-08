@@ -104,14 +104,6 @@ traits:
   - diffable:
       description: Aspect for resources that can be diffed or merged
       queryParameters:
-        workspace1:
-          description: The source workspaces to compare against
-          type: string
-          required: true
-        workspace2:
-          description: The target workspaces to compare
-          type: string
-          required: true
         timestamp1:
           description: The source workspace timestamp to use in comparison (if not specified, gets latest)
           type: date
@@ -524,13 +516,32 @@ resourceTypes:
 #/operations:
 #  description: Service for executing operations, e.g., like the OCL Execution capabilities in MDK. Details still TBD.
 /diff:
-  description: Service for diffing between two model versions between projects
   post:
     is: [diffable]
-    description: workspace diff post, ie merge  
-  get:
-    is: [diffable]
-    description: workspace diff get
+    description: workspace diff post, ie merge
+  /{workspace1}:
+    uriParameters:
+      workspace1:
+        description: The source workspaces to compare against
+        type: string
+    /{workspace2}:
+      uriParameters:
+        workspace2:
+          description: The target workspaces to compare
+          type: string
+      /{timestamp1}:
+        uriParameters:
+          timestamp1:
+            description: The source workspace timestamp to use in comparison, supply "latest" to use the current time
+            type: string
+        /{timestamp2}:
+          uriParameters:
+            timestamp2:
+              description: The target workspace timestamp to use in comparison, supply "latest" to use the current time
+              type: string
+          description: Service for diffing between two model versions between projects
+          get:
+            description: workspace diff get
 #/merge:
 #  description: Service for merging two workspaces.  timestamp args are not implemented yet.
 #  post:

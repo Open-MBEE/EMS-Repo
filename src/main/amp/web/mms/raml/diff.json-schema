@@ -13,6 +13,11 @@
             "description": "Specification of WS2. This contains all the deltas, so updated, moved, deleted, and added.",
             "$ref": "file:///../workspaces.json#/definitions/Workspace"
         },
+        "status": 
+        {
+            "type": "string",
+            "description": "Indicates the status of the diff- GENERATING or COMPLETED (Read-Only)"
+        },
         "sequence": {
             "type": "integer",
             "description": "Sequence ID so OSB knows what order messages should appear in"

@@ -314,6 +314,41 @@ public class ActionUtil {
     }
     
     /**
+     * Get a diff job inside contextFolder/Jobs/ws1Name/ws2Name
+     * 
+     * @param contextFolder Folder to create the job node
+     * @param jobName       String of the filename
+     * @return The found diff job node
+     */
+    public static EmsScriptNode getDiffJob(EmsScriptNode contextFolder,
+                                           String ws1Name, String ws2Name,
+                                           String jobName) {
+        
+        EmsScriptNode jobNode = null;
+        
+        // to make sure no permission issues, run as admin
+        String origUser = AuthenticationUtil.getFullyAuthenticatedUser();
+        AuthenticationUtil.setRunAsUser( "admin" );
+
+        EmsScriptNode jobPkgNode = contextFolder.childByNamePath("Jobs");
+
+        if (jobPkgNode != null) {
+            EmsScriptNode ws1Folder = jobPkgNode.childByNamePath(ws1Name);
+            if (ws1Folder != null) {
+                EmsScriptNode ws2Folder = ws1Folder.childByNamePath(ws2Name);
+                if (ws2Folder != null) {
+                    jobNode = ws2Folder.childByNamePath(jobName);
+                }
+            }
+        }
+        
+        // make sure we're running back as the originalUser
+        AuthenticationUtil.setRunAsUser( origUser );
+        
+        return jobNode;
+    }
+    
+    /**
      * Create a job inside a particular site
      * @param contextFolder Folder to create the job node
      * @param jobName       String of the filename

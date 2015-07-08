@@ -599,11 +599,15 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
 	protected static final String ARTIFACT_ID = "artifactId";
     protected static final String SITE_NAME = "siteName";
     protected static final String SITE_NAME2 = "siteId";
+    protected static final String WORKSPACE1 = "workspace1";
+    protected static final String WORKSPACE2 = "workspace2";
+    protected static final String TIMESTAMP1 = "timestamp1";
+    protected static final String TIMESTAMP2 = "timestamp2";
 
     public static final String NO_WORKSPACE_ID = "master"; // default is master if unspecified
     public static final String NO_PROJECT_ID = "no_project";
     public static final String NO_SITE_ID = "no_site";
-
+    public static final String NO_TIMESTAMP = "latest";
 
     public String getSiteName( WebScriptRequest req ) {
         return getSiteName( req, false );
@@ -721,7 +725,41 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         }
         return workspaceId;
     }
+    
+    private static String getWorkspaceNum( WebScriptRequest req, boolean isWs1 ) {
+        String key = isWs1 ? WORKSPACE1 : WORKSPACE2;
+        String workspaceId = req.getServiceMatch().getTemplateVars().get(key);
+        if ( workspaceId == null || workspaceId.length() <= 0 ) {
+            workspaceId = NO_WORKSPACE_ID;
+        }
+        return workspaceId;
+    }
+    
+    private static String getTimestampNum( WebScriptRequest req, boolean isTs1 ) {
+        String key = isTs1 ? TIMESTAMP1 : TIMESTAMP2;
+        String timestamp = req.getServiceMatch().getTemplateVars().get(key);
+        if ( timestamp == null || timestamp.length() <= 0 ) {
+            timestamp = NO_TIMESTAMP;
+        }
+        return timestamp;
+    }
+    
+    public static String getWorkspace1( WebScriptRequest req) {
+        return getWorkspaceNum(req, true);
+    }
 
+    public static String getWorkspace2( WebScriptRequest req) {
+        return getWorkspaceNum(req, false);
+    }
+    
+    public static String getTimestamp1( WebScriptRequest req) {
+        return getTimestampNum(req, true);
+    }
+
+    public static String getTimestamp2( WebScriptRequest req) {
+        return getTimestampNum(req, false);
+    }
+    
     public static String getArtifactId( WebScriptRequest req ) {
         String artifactId = req.getServiceMatch().getTemplateVars().get(ARTIFACT_ID);
         if ( artifactId == null || artifactId.length() <= 0 ) {
