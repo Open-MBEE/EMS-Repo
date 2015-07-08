@@ -39,6 +39,8 @@ import gov.nasa.jpl.view_repo.util.NodeUtil;
 import gov.nasa.jpl.view_repo.util.WorkspaceDiff;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 
+//import gov.nasa.jpl.view_repo.webscripts.AbstractJavaWebScript.LogLevel;
+import org.apache.log4j.*;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -47,6 +49,7 @@ import java.util.Set;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.log4j.*;
 import org.alfresco.repo.model.Repository;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.version.Version;
@@ -99,7 +102,7 @@ public class MmsWorkspaceDiffPost extends ModelPost {
 		            (JSONObject)req.parseContent(); //);
 		    top = handleDiff(req, json, status);
 		} catch ( Exception e ) {
-            log(LogLevel.ERROR, "Internal server error: " + e.getMessage(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            log(Level.ERROR, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Internal server error: %s", e.getMessage());
             e.printStackTrace();
         } finally {
             try {
@@ -108,7 +111,7 @@ public class MmsWorkspaceDiffPost extends ModelPost {
                 }
                 model.put("res", top.toString(4));
             } catch ( JSONException e ) {
-                log(LogLevel.ERROR, "JSON parse exception: " + e.getMessage(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                log(Level.ERROR, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "JSON parse exception: %s", e.getMessage());
                 if (!model.containsKey( "res" )) {
                     model.put( "res", createResponseJson() );
                 }
@@ -159,18 +162,16 @@ public class MmsWorkspaceDiffPost extends ModelPost {
 
             // Give error message if there are not commits found before or at the dateTimeTarget:
             if (prevCommit == null) {
-                log(LogLevel.ERROR,
-                    "Try a later date.  Previous commit could not be found based on date "+dateTimeTarget,
-                    HttpServletResponse.SC_BAD_REQUEST);
+                log(Level.ERROR,  HttpServletResponse.SC_BAD_REQUEST,
+                    "Try a later date.  Previous commit could not be found based on date %s", dateTimeTarget);
                 return false;
             }
 
             // Give error message if the latest commit based on the time is not the latest:
             if (lastCommit != null && prevCommit != null && !lastCommit.equals( prevCommit ) ) {
 
-                log(LogLevel.ERROR,
-                    "Previous commit "+prevCommit+" based on date "+dateTimeTarget+" is not the same as the latest commit "+lastCommit,
-                    HttpServletResponse.SC_CONFLICT);
+                log(Level.ERROR,HttpServletResponse.SC_CONFLICT,
+                    "Previous commit "+prevCommit+" based on date "+dateTimeTarget+" is not the same as the latest commit %s",lastCommit);
                 return false;
             }
         }
@@ -235,10 +236,11 @@ public class MmsWorkspaceDiffPost extends ModelPost {
 		            }
 		        }
 		        
+
 	            top.put( "elements", elements );
 
-	            Set<EmsScriptNode> updatedElements = handleUpdate( top, status, targetWs, false,
-	                                                               new HashMap<String,Object>(), false );
+	            Set<EmsScriptNode> updatedElements = handleUpdate( top, status, targetWs, false, false,
+	                                                               new HashMap<String,Object>(), false, true );
 
 	            // Delete the elements in the target workspace:
 		        WorkspaceDiff deleteWsDiff = null;
@@ -324,11 +326,13 @@ public class MmsWorkspaceDiffPost extends ModelPost {
 	                }
 	                
 	                if ( !CommitUtil.sendDeltas(finalJsonDiff, targetWsId, projectId, source) ) {
+                        //log(Level.WARN, "MmsWorkspaceDiffPost deltas not posted properly");
                         logger.warn( "MmsWorkspaceDiffPost deltas not posted properly");
                     }
 
 	                CommitUtil.merge( finalJsonDiff, srcWs, targetWs, dateTimeSrc, dateTimeTarget,
 	                                  null, runWithoutTransactions, services, response );
+	                CommitUtil.sendMerge( srcWs, targetWs, dateTimeSrc );
 	            }
 	            
 		    }

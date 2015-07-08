@@ -1,12 +1,13 @@
 package gov.nasa.jpl.view_repo.util;
 
+import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.connections.JmsConnection;
 import gov.nasa.jpl.view_repo.connections.RestPostConnection;
-import gov.nasa.jpl.view_repo.webscripts.HostnameGet;
 import gov.nasa.jpl.view_repo.webscripts.WebScriptUtil;
 import gov.nasa.jpl.view_repo.webscripts.util.ConfigurationsWebscript;
 
+import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
@@ -16,13 +17,10 @@ import java.util.Set;
 
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
-import org.alfresco.service.cmr.action.Action;
-import org.alfresco.service.cmr.action.ActionService;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.apache.log4j.Logger;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.springframework.extensions.webscripts.Status;
 
 
 /**
@@ -33,13 +31,17 @@ import org.springframework.extensions.webscripts.Status;
 public class CommitUtil {
     static Logger logger = Logger.getLogger(CommitUtil.class);
 
+    public static final String TYPE_BRANCH = "BRANCH";
+    public static final String TYPE_COMMIT = "COMMIT";
+    public static final String TYPE_DELTA  = "DELTA";
+    public static final String TYPE_MERGE  = "MERGE";
+    
     private CommitUtil() {
         // defeat instantiation
     }
 
     private static JmsConnection jmsConnection = null;
     private static RestPostConnection restConnection = null;
-    private static ServiceRegistry services = null;
 
     public static void setJmsConnection(JmsConnection jmsConnection) {
         if (logger.isInfoEnabled()) logger.info( "Setting jms" );
@@ -50,12 +52,7 @@ public class CommitUtil {
         if (logger.isInfoEnabled()) logger.info( "Setting rest" );
         CommitUtil.restConnection = restConnection;
     }
-
-    public static void setServices(ServiceRegistry services) {
-        if (logger.isInfoEnabled()) logger.info( "Setting services" );
-        CommitUtil.services = services;
-    }
-
+    
     /**
 	 * Gets the commit package in the specified workspace (creates if possible)
 	 * @param workspace
@@ -389,7 +386,7 @@ public class CommitUtil {
 
     private static NodeRef commitRef = null;
     public synchronized static NodeRef commit(final WorkspaceNode workspace,
-                                              final String body,
+                                              final JSONObject body,
                                               final String msg,
                                               final boolean runWithoutTransactions,
                                               final ServiceRegistry services,
@@ -410,11 +407,11 @@ public class CommitUtil {
 
 	private static NodeRef commitTransactionable(
 	                                           WorkspaceNode workspace,
-	                                           String body,
+	                                           JSONObject body,
 	                                           String msg,
 	                                           ServiceRegistry services,
 	                                           StringBuffer response) throws JSONException {
-	    return createCommitNode( workspace, null, workspace, null, null, "COMMIT", msg,
+	    return createCommitNode( workspace, null, workspace, null, null, TYPE_COMMIT, msg,
 	                             body, services, response );
     }
 
@@ -455,8 +452,8 @@ public class CommitUtil {
                                               StringBuffer response ) {
 
         return createCommitNode( source1, source2, target, dateTime1, dateTime2,
-                                 "MERGE", msg,
-                                 wsDiff.toString(),services, response, true );
+                                 TYPE_MERGE, msg,
+                                 wsDiff,services, response, true );
     }
 
     /**
@@ -536,7 +533,7 @@ public class CommitUtil {
                                                        throws JSONException {
 
 	    return createCommitNode(srcWs, null, dstWs, null, null,
-	                            "BRANCH", msg, "{}", services, response);
+	                            TYPE_BRANCH, msg, new JSONObject(), services, response);
 	}
 
     // TODO -- REVIEW -- Just copied branch and search/replaced "branch" with "merge"
@@ -562,7 +559,7 @@ public class CommitUtil {
                                                StringBuffer response )
                                                        throws JSONException {
         createCommitNode(srcWs1, srcWs2, dstWs, null, null,
-                         "MERGE", msg, "{}", services, response, true);
+                         TYPE_MERGE, msg, new JSONObject(), services, response, true);
     }
 
 	/**
@@ -612,8 +609,8 @@ public class CommitUtil {
             prevCommit.getOrSetCachedVersion();
             
             // set modifier to original user (since we should be running as admin in here)
-            currCommit.setProperty( "cm:modifier", originalUser );
-            prevCommit.setProperty( "cm:modifier", originalUser );
+            currCommit.setProperty( "cm:modifier", originalUser, false, 0 );
+            prevCommit.setProperty( "cm:modifier", originalUser, false, 0 );
 	    }
         return true;
 	}
@@ -627,7 +624,7 @@ public class CommitUtil {
                                               WorkspaceNode dstWs,
                                               Date dateTime1,
                                               Date dateTime2,
-                                              String type, String msg, String body,
+                                              String type, String msg, JSONObject body,
                                               ServiceRegistry services, StringBuffer response) {
 
         return createCommitNode(srcWs1, srcWs2, dstWs, dateTime1, dateTime2, type, msg, body,
@@ -643,7 +640,7 @@ public class CommitUtil {
             createCommitNode( WorkspaceNode srcWs1, WorkspaceNode srcWs2,
                               WorkspaceNode dstWs, Date dateTime1,
                               Date dateTime2, String type, String msg,
-                              String body, ServiceRegistry services,
+                              JSONObject body, ServiceRegistry services,
                               StringBuffer response, boolean twoSourceWorkspaces ) {
         NodeRef result = null;
         // to make sure no permission issues, run as admin
@@ -682,7 +679,11 @@ public class CommitUtil {
                 } else {
                     // TODO throw exception
                 }
-                if (body != null) currCommit.createOrUpdateProperty( "ems:commit", body );
+                if (body != null) {
+                    // clean up JSON for small commits
+                    JSONObject cleanedJson = WorkspaceDiff.cleanWorkspaceJson( body );
+                    currCommit.createOrUpdateProperty( "ems:commit", cleanedJson.toString() );
+                }
                 
                 if (prevCommit1 != null) {
                     updateCommitHistory(prevCommit1, currCommit, originalUser);
@@ -693,12 +694,17 @@ public class CommitUtil {
     
                 currCommit.setOwner( originalUser );
                 currCommit.getOrSetCachedVersion();
+                
+                // Element cache does not support commit nodes.
+                //NodeUtil.addElementToCache( currCommit );
+                
                 result = currCommit.getNodeRef();
             }
         }
         
         // make sure we're running back as the originalUser
         AuthenticationUtil.setRunAsUser( originalUser );
+        
         return result;
 	}
 
@@ -718,14 +724,12 @@ public class CommitUtil {
         if (source != null) {
             deltaJson.put( "source", source );
         }
-        if (jmsConnection != null) {
-            jmsConnection.setWorkspace( workspaceId );
-            jmsConnection.setProjectId( projectId );
-            jmsStatus = jmsConnection.publish( deltaJson );
-        }
+        
+        jmsStatus = sendJmsMsg( deltaJson, TYPE_DELTA, workspaceId, projectId );
+        
         if (restConnection != null) {
             try {
-                restStatus = restConnection.publish( deltaJson, new HostnameGet().getAlfrescoHost());
+                restStatus = restConnection.publish( deltaJson, InetAddress.getLocalHost().getHostName(), workspaceId, projectId);
             } catch (Exception e) {
                 logger.warn("REST connection not available");
                 return false;
@@ -734,6 +738,46 @@ public class CommitUtil {
 
         return jmsStatus && restStatus;
     }
+    
+    public static boolean sendBranch(WorkspaceNode src, WorkspaceNode created, Date srcDateTime) throws JSONException {
+        JSONObject branchJson = new JSONObject();
+        
+        branchJson.put( "sourceWorkspace", getWorkspaceDetails( src, srcDateTime )); // branch source
+        branchJson.put( "createdWorkspace", getWorkspaceDetails( created, srcDateTime ) ); // created branch
+        
+        return sendJmsMsg(branchJson, TYPE_BRANCH, null, null);
+    }
+    
+    public static JSONObject getWorkspaceDetails(WorkspaceNode ws, Date date) {
+        JSONObject json = new JSONObject();
+        WorkspaceNode.addWorkspaceNamesAndIds(json, ws, false);
+        if (null == date) {
+            date = new Date();
+        }
+        json.put( "time", TimeUtils.toTimestamp( date ) );
+        return json;
+    }
+
+    public static boolean sendMerge(WorkspaceNode src, WorkspaceNode dst, Date srcDateTime) throws JSONException {
+        JSONObject mergeJson = new JSONObject();
+        
+        mergeJson.put( "sourceWorkspace", getWorkspaceDetails( src, srcDateTime) );
+        mergeJson.put( "mergedWorkspace", getWorkspaceDetails( dst, null ) );
+        
+        return sendJmsMsg(mergeJson, TYPE_MERGE, null, null);
+    }
+
+    protected static boolean sendJmsMsg(JSONObject json, String eventType, String workspaceId, String projectId) {
+        boolean status = false;
+        if (jmsConnection != null) {
+            status = jmsConnection.publish( json, eventType, workspaceId, projectId );
+        } else {
+            if (logger.isInfoEnabled()) logger.info( "JMS Connection not avalaible" );
+        }
+        
+        return status;
+    }
+    
     
     /**
      * Send off progress to various endpoints
@@ -755,4 +799,5 @@ public class CommitUtil {
 //        return jmsStatus;
         return true;
     }
+
 }

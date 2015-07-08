@@ -64,6 +64,8 @@ public class List extends ArrayList< Viewable< EmsScriptNode > > implements sysm
     		if (obj instanceof Expression<?>) {
     			Object eval = ((Expression<?>) obj).evaluate(true);
     			this.add((Viewable<EmsScriptNode>)eval);
+    		} else if ( obj instanceof Viewable ) {
+    		    this.add((Viewable<EmsScriptNode>)obj);
     		}
     	}
     }

@@ -1,4 +1,5 @@
 {"elements": [{
+    "modifier": "admin",
     "qualifiedId": "/europa/123456/testCmed416",
     "name": "testName",
     "qualifiedName": "/europa/JW_TEST2/testName",

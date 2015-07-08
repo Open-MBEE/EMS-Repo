@@ -136,7 +136,9 @@ public class DocBookContentTransformer extends AbstractContentTransformer2 {
 		// actual file to transform
 		File srcFile ;
 
-		String srcPath = (String) nodeService.getProperty(sourceNR, ContentModel.PROP_NAME);
+		String srcPath = //(String) nodeService.getProperty(sourceNR, ContentModel.PROP_NAME);
+		        (String)NodeUtil.getNodeProperty( sourceNR, ContentModel.PROP_NAME,
+		                                          NodeUtil.getServices(), true, true );		
 
 		if (srcPath.indexOf(".zip") > 0) {
 			File zipFile = new File(tmpDirName + File.separator + srcPath);

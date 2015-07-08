@@ -12,6 +12,8 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.alfresco.repo.security.authentication.AuthenticationUtil;
+import org.apache.log4j.*;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.extensions.webscripts.Cache;
@@ -49,15 +51,11 @@ public class MmsDiffGet extends AbstractJavaWebScript {
         boolean wsFound2 = ( ws2 != null || ( workspaceId2 != null && workspaceId2.equalsIgnoreCase( "master" ) ) );
 
         if ( !wsFound1 ) {
-            log( LogLevel.ERROR,
-                 "Workspace 1 id , " + workspaceId1 + ", not found",
-                 HttpServletResponse.SC_NOT_FOUND );
+            log( Level.ERROR, HttpServletResponse.SC_NOT_FOUND, "Workspace 1 id , %s , not found",workspaceId1);
             return false;
         }
         if ( !wsFound2 ) {
-            log( LogLevel.ERROR,
-                 "Workspace 2 id, " + workspaceId2 + ", not found",
-                 HttpServletResponse.SC_NOT_FOUND );
+            log( Level.ERROR, HttpServletResponse.SC_NOT_FOUND , "Workspace 2 id, %s , not found",workspaceId2);
             return false;
         }
         return true;
@@ -82,6 +80,10 @@ public class MmsDiffGet extends AbstractJavaWebScript {
             results.put("res", createResponseJson());
             return results;
         }
+
+        // to make sure no permission issues, run as admin
+        String originalUser = NodeUtil.getUserName();
+        AuthenticationUtil.setRunAsUser( "admin" );
 
         WorkspaceNode ws1, ws2;
         String workspace1 = req.getParameter( "workspace1" );
@@ -108,6 +110,8 @@ public class MmsDiffGet extends AbstractJavaWebScript {
             e.printStackTrace();
             results.put("res", createResponseJson());
         }
+
+        AuthenticationUtil.setRunAsUser( originalUser );
 
         status.setCode(responseStatus.getCode());
 

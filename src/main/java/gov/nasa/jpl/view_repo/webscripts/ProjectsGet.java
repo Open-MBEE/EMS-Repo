@@ -20,6 +20,7 @@ import org.json.JSONObject;
 import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
+import org.apache.log4j.*; 
 
 /**
  * Returns all the projects for a given workspace
@@ -67,10 +68,10 @@ public class ProjectsGet extends AbstractJavaWebScript{
                 json = handleRequest (workspace, status);
             }
         } catch (JSONException e) {
-            log(LogLevel.ERROR, "JSON could not be created\n", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            log(Level.ERROR,HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "JSON could not be created\n");
             e.printStackTrace();
         } catch (Exception e) {
-            log(LogLevel.ERROR, "Internal error stack trace:\n" + e.getLocalizedMessage() + "\n", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            log(Level.ERROR, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Internal error stack trace:\n%s\n", e.getLocalizedMessage());
             e.printStackTrace();
         } finally {
             try {
@@ -79,7 +80,7 @@ public class ProjectsGet extends AbstractJavaWebScript{
                 }
                 model.put("res", NodeUtil.jsonToString( json, 4 ));
             } catch ( JSONException e ) {
-                log(LogLevel.ERROR, "JSON parse exception: " + e.getMessage(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                log(Level.ERROR, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "JSON parse exception: %s",e.getMessage());
                 if (!model.containsKey( "res" )) {
                     model.put( "res", createResponseJson() );
                 }
@@ -130,7 +131,7 @@ public class ProjectsGet extends AbstractJavaWebScript{
                   specialization.put(Acm.JSON_TYPE, node.getProperty(Acm.ACM_TYPE));
               }
               else {
-                  log(LogLevel.ERROR, "No permissions to read node: "+node, HttpServletResponse.SC_UNAUTHORIZED);
+                  log(Level.ERROR, HttpServletResponse.SC_UNAUTHORIZED,"No permissions to read node: %s",node);
               }
           }
               

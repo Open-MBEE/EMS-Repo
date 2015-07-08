@@ -9,6 +9,7 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.log4j.*;
 import org.alfresco.repo.model.Repository;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
@@ -57,10 +58,10 @@ public class WorkspaceGet extends AbstractJavaWebScript{
 				object = getWorkspace(workspace, wsID);
 			}
 		} catch (JSONException e) {
-			log(LogLevel.ERROR, "JSON object could not be created \n", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+			log(Level.ERROR, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "JSON object could not be created \n");
 			e.printStackTrace();
 		} catch (Exception e) {
-			log(LogLevel.ERROR, "Internal error stack trace \n", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+			log(Level.ERROR, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Internal error stack trace \n");
 			e.printStackTrace();
 		}
 
@@ -92,16 +93,16 @@ public class WorkspaceGet extends AbstractJavaWebScript{
 		JSONObject interiorJson = new JSONObject();
 		if(ws == null){
 		    if (wsID.equals("master")) {
-		        WorkspaceNode.addWorkspaceNamesAndIds(interiorJson, ws, services, true );
+		        WorkspaceNode.addWorkspaceNamesAndIds(interiorJson, ws, true );
 		        jsonArray.put(interiorJson);
 		    } else {
-	            log(LogLevel.WARNING, "Workspace not found: " + (ws == null ? null : ws.getSysmlId()), HttpServletResponse.SC_NOT_FOUND);
+	            log(Level.WARN, HttpServletResponse.SC_NOT_FOUND, "Workspace not found: %s", (ws == null ? null : ws.getSysmlId()));
 		    }
 		} else {
 		    if(checkPermissions(ws, PermissionService.READ))  {
 		        jsonArray.put(ws.toJSONObject(ws, null));
 		    } else {
-                log(LogLevel.WARNING, "No read permissions for workspace: " + (ws == null ? null : ws.getSysmlId()), HttpServletResponse.SC_FORBIDDEN);
+                log(Level.WARN, HttpServletResponse.SC_FORBIDDEN, "No read permissions for workspace: %s", (ws == null ? null : ws.getSysmlId()));
 		    }
 		}
 		json.put("workspace" , jsonArray);

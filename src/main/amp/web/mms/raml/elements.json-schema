@@ -37,7 +37,7 @@
                 },
                 "editable": {
                     "type": "boolean",
-                    "description": "Indicates whether user has permissions to edit the element (so GUI can toggle, server still checks on save though)"
+                    "description": "Indicates whether user has permissions to edit the element (so GUI can toggle, server still checks on save though) (Read-Only)"
                 },
                 "owner": {
                     "type": "string",
@@ -45,33 +45,62 @@
                 },
                 "creator": {
                     "type": "string",
-                    "description": "Last modifier of the element"
+                    "description": "Creator of the element (Read-Only)"
+                },
+                "created": {
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "Creation time of the element (Read-Only)"
+                },
+                "modifier": {
+                    "type": "string",
+                    "description": "Modifier of the element (Read-Only)"
                 },
                 "modified": {
                     "type": "string",
                     "format": "date-time",
-                    "description": "Last modified time of the element"
+                    "description": "Last modified time of the element (Read-Only)"
                 },
                 "read": {
                     "type": "string",
                     "format": "date-time",
-                    "description": "On updating any element, the time when the data was loaded needs to be provided so conflicts can be detected and handled by the server"
+                    "description": "On updating any element, the time when the data was loaded needs to be provided so conflicts can be detected and handled by the server (Read-Only)"
                 },
                 "qualifiedName": {
                     "type": "string",
-                    "description": "Containment hierarchy of element based off of SysML names, currently provided as a convenience for context"
+                    "description": "Containment hierarchy of element based off of SysML names, currently provided as a convenience for context (Read-Only)"
                 },
                 "qualifiedPath": {
                     "type": "string",
-                    "description": "Containment hierarchy of element based off of SysML ids, provided for systems that can't find by unique id"
+                    "description": "Containment hierarchy of element based off of SysML ids, provided for systems that can't find by unique id (Read-Only)"
                 },
                 "id": {
                     "type": "string",
-                    "description": "Alfresco unique identifier for the element"
+                    "description": "Alfresco unique identifier for the element (Read-Only)"
                 },
                 "siteCharacterizationId": {
                     "type": "string",
-                    "description": "Sysml ID of the site characterization that element belongs to"
+                    "description": "Sysml ID of the site characterization that element belongs to (Read-Only)"
+                },
+                "isMetatype": {
+                    "type": "boolean",
+                    "description": "True if element is a metatype (e.g., stereotype or metaclass). If not specified by MMS, assumption is that it is false"
+                },
+                "metatypes": {
+                    "type": "array",
+                    "description": "An array of all the metatypes that this element directly inherits or extends. If this exists, isMetatype must be true",
+                    "items": {
+                        "type": "String",
+                        "description": "Sysml ID of the inherited or extended metatype"
+                    }
+                },
+                "appliedMetatypes": {
+                    "type": "array",
+                    "description": "An array of all the metatypes that are directly applied to this element.",
+                    "items": {
+                        "type": "String",
+                        "description": "Sysml ID of applied metatype"
+                    }
                 },
                 "specialization": {
                     "type": "object",
@@ -124,8 +153,41 @@
             "properties": {
                 "type": { "enum": ["InstanceSpecification"] },
                 "instanceSpecificationSpecification": {
-                    "type": "string",
-                    "description": "ID of element that provides the instance specification"
+                        "type": "object",
+                        "description": "The embedded specification",
+                        "oneOf": [
+                            { "$ref": "#/definitions/ValueSpecification"},
+                            { "$ref": "#/definitions/Duration"},
+                            { "$ref": "#/definitions/DurationInterval"},
+                            { "$ref": "#/definitions/ElementValue"},
+                            { "$ref": "#/definitions/Expression"},
+                            { "$ref": "#/definitions/OpaqueExpression"},
+                            { "$ref": "#/definitions/InstanceValue"},
+                            { "$ref": "#/definitions/Interval"},
+                            { "$ref": "#/definitions/StringExpression"},
+                            { "$ref": "#/definitions/LiteralBoolean"},
+                            { "$ref": "#/definitions/LiteralNull"},
+                            { "$ref": "#/definitions/LiteralInteger"},
+                            { "$ref": "#/definitions/LiteralReal"},
+                            { "$ref": "#/definitions/LiteralString"},
+                            { "$ref": "#/definitions/LiteralUnlimitedNatural"},
+                            { "$ref": "#/definitions/TimeExpression"},
+                            { "$ref": "#/definitions/TimeInterval"}
+                        ]
+                },
+                "classifier": {
+                    "type": "array",
+                    "items": {
+                        "type": "string",
+                        "description": "The classifiers IDs"
+                    }
+                },
+                "slots": {
+                    "type": "array",
+                    "items": {
+                        "type": "string",
+                        "description": "IDs of the slots"
+                    }
                 }
             }
         },
@@ -632,10 +694,6 @@
                 "timeIntervalMin": {
                     "type": "string",
                     "description": "ID of the SysML element representing the time interval max"
-                },
-                "timeIntervalMin": {
-                    "type": "string",
-                    "description": "ID of the SysML element representing the time interval min"
                 }
             },
             "allOf": [

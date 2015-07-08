@@ -1,0 +1,115 @@
+{ "elements":
+    [
+        {
+           "sysmlid": "viewElemRefTree1",
+           "name": "viewElemRefTree1",
+           "owner": "123456",
+           "specialization": {
+              "type":"Product",
+              "contents": {
+                  "operand":[
+                      {
+                          "instance":"rootInstanceSpec1",
+                          "type":"InstanceValue"
+                      },
+                      {
+                          "instance":"rootInstanceSpec3",
+                          "type":"InstanceValue"
+                      },
+                      {
+                          "instance":"rootInstanceSpec4",
+                          "type":"InstanceValue"
+                      },
+                      {
+                          "instance":"rootInstanceSpec5",
+                          "type":"InstanceValue"
+                      }
+                  ],
+                  "type":"Expression"
+              }
+           }
+         },
+             
+         {
+           "sysmlid":"rootInstanceSpec1",
+           "owner": "123456",
+           "specialization": {
+              "type":"InstanceSpecification",
+              "classifier":["PE_Opaque_Paragraph"],
+              "instanceSpecificationSpecification":{
+                  "string":"{\"sourceType\": \"reference\",\"source\": \"gorangPoo\",\"sourceProperty\": \"name\",\"type\": \"Paragraph\"}",
+                  "type":"LiteralString"
+              }
+           }
+         },
+                  
+         {
+             "sysmlid":"gorangPoo",
+             "owner": "123456",
+             "documentation": "He really does!",
+             "name": "Gorang eats poo!",
+             "specialization": {
+                  "type":"Element"
+              }
+         },
+         
+        {
+           "sysmlid":"rootInstanceSpec3",
+           "owner": "123456",
+           "name":"sectionName",
+           "specialization": {
+              "type":"InstanceSpecification",
+              "classifier":["PE_Opaque_Section"],
+              "instanceSpecificationSpecification": {
+                   "operand":[
+                              {
+                               "instance":"rootInstanceSpecSection1",
+                               "type":"InstanceValue"
+                              }
+                             ],
+                   "type":"Expression"
+             }
+           }
+         },
+         
+         {
+           "sysmlid":"rootInstanceSpecSection1",
+           "owner": "123456",
+           "specialization": {
+              "type":"InstanceSpecification",
+              "classifier":["PE_Opaque_Paragraph"],
+              "instanceSpecificationSpecification":{
+                  "string":"{\"sourceType\": \"reference\",\"source\": \"gorangPoo\",\"sourceProperty\": \"name\",\"type\": \"Paragraph\"}",
+                  "type":"LiteralString"
+              }
+           }
+         },
+         
+         {
+           "sysmlid":"rootInstanceSpec4",
+           "owner": "123456",
+           "specialization": {
+              "type":"InstanceSpecification",
+              "classifier":["PE_Opaque_List"],
+              "instanceSpecificationSpecification":{
+                  "string":"{\"ordered\": true,\"bulleted\": true,\"list\": [[{\"sourceType\": \"reference\",\"source\": \"gorangPoo\",\"sourceProperty\": \"name\",\"type\": \"Paragraph\"}]],\"type\": \"List\"}",
+                  "type":"LiteralString"
+              }
+           }
+         },
+         
+        {
+           "sysmlid":"rootInstanceSpec5",
+           "owner": "123456",
+           "specialization": {
+              "type":"InstanceSpecification",
+              "classifier":["PE_Opaque_Table"],
+              "instanceSpecificationSpecification":{
+                  "string":"{\"body\": [[{\"content\": [{\"sourceType\": \"reference\",\"source\": \"gorangPoo\",\"sourceProperty\": \"name\",\"type\": \"Paragraph\"}],\"colspan\": \"1\",\"rowspan\": \"1\"},{\"content\": [{\"sourceType\": \"reference\",\"source\": \"gorangPoo\",\"sourceProperty\": \"documentation\",\"type\": \"Paragraph\"}],\"colspan\": \"1\",\"rowspan\": \"1\"}]],\"title\": \"Gorang and his poo eating\",\"style\": \"normal\",\"type\": \"Table\",\"header\": [[{\"content\": [{\"sourceType\": \"text\",\"text\": \"<p>name<\/p>\",\"type\": \"Paragraph\"}],\"colspan\": \"1\",\"rowspan\": \"1\"},{\"content\": [{\"sourceType\": \"text\",\"text\": \"<p>doc<\/p>\",\"type\": \"Paragraph\"}],\"colspan\": \"1\",\"rowspan\": \"1\"}]]}",
+                  "type":"LiteralString"
+              }
+           }
+         },
+         
+    ]
+}

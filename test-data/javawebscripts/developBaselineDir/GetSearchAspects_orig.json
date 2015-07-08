@@ -1,0 +1,159 @@
+{"elements": [
+    {
+        "modifier": "admin",
+        "qualifiedId": "/europa/123456/300/301",
+        "siteCharacterizationId": "europa",
+        "created": "Mon May 18 15:57:12 PDT 2015",
+        "name": "301",
+        "qualifiedName": "/europa/JW_TEST2/300/301",
+        "documentation": "else",
+        "owner": "300",
+        "sysmlid": "301",
+        "read": "2015-05-18T16:07:09.992-0700",
+        "specialization": {
+            "view2view": [{
+                "childrenViews": [
+                    "301",
+                    "302"
+                ],
+                "sysmlid": "301"
+            }],
+            "childrenViews": ["304"],
+            "displayedElements": [
+                "301",
+                "302",
+                "303"
+            ],
+            "allowedElements": [
+                "301",
+                "302",
+                "303"
+            ],
+            "noSections": ["302"],
+            "contains": [{
+                "sourceType": "reference",
+                "source": "301",
+                "sourceProperty": "documentation",
+                "type": "Paragraph"
+            }],
+            "type": "Product"
+        },
+        "editable": true,
+        "modified": "2015-05-18T15:57:17.845-0700",
+        "creator": "admin"
+    },
+    {
+        "siteCharacterizationId": "europa",
+        "qualifiedId": "/europa/123456/BLUCamTest/_17_0_2_4_f3a0363_1394146455624_407543_30441/_17_0_2_3_e610336_1394148233838_91795_29332",
+        "qualifiedName": "/europa/JW_TEST2/BLUCamTest/dont care2/Context",
+        "sysmlid": "_17_0_2_3_e610336_1394148233838_91795_29332",
+        "editable": true,
+        "creator": "admin",
+        "modified": "2015-05-18T15:57:58.474-0700",
+        "modifier": "admin",
+        "created": "Mon May 18 15:57:56 PDT 2015",
+        "name": "Context",
+        "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
+        "documentation": "",
+        "read": "2015-05-18T16:18:30.577-0700",
+        "specialization": {"type": "View"}
+    },
+    {
+        "siteCharacterizationId": "europa",
+        "qualifiedId": "/europa/123456/_17_0_2_3_e610336_1394148311476_17302_29388",
+        "qualifiedName": "/europa/JW_TEST2/Components",
+        "sysmlid": "_17_0_2_3_e610336_1394148311476_17302_29388",
+        "editable": true,
+        "creator": "admin",
+        "modified": "2015-05-18T15:57:51.204-0700",
+        "modifier": "admin",
+        "created": "Mon May 18 15:57:49 PDT 2015",
+        "name": "Components",
+        "owner": "123456",
+        "documentation": "",
+        "read": "2015-05-18T16:18:30.584-0700",
+        "specialization": {"type": "View"}
+    },
+    {
+        "modifier": "admin",
+        "qualifiedId": "/europa/123456/4000/401",
+        "siteCharacterizationId": "europa",
+        "created": "Mon May 18 15:57:13 PDT 2015",
+        "name": "401",
+        "qualifiedName": "/europa/JW_TEST2/400/401",
+        "documentation": "4else",
+        "owner": "4000",
+        "sysmlid": "401",
+        "read": "2015-05-18T16:07:10.005-0700",
+        "specialization": {
+            "view2view": [{
+                "childrenViews": [
+                    "401",
+                    "402"
+                ],
+                "sysmlid": "401"
+            }],
+            "childrenViews": ["404"],
+            "displayedElements": [
+                "401",
+                "402",
+                "403"
+            ],
+            "allowedElements": [
+                "401",
+                "402",
+                "403"
+            ],
+            "noSections": ["402"],
+            "contains": [{
+                "sourceType": "reference",
+                "source": "401",
+                "sourceProperty": "documentation",
+                "type": "Paragraph"
+            }],
+            "type": "Product"
+        },
+        "editable": true,
+        "modified": "2015-05-18T15:57:17.851-0700",
+        "creator": "admin"
+    },
+    {
+        "modifier": "admin",
+        "qualifiedId": "/europa/123456/viewWithContents",
+        "siteCharacterizationId": "europa",
+        "created": "Mon May 18 15:58:00 PDT 2015",
+        "name": "viewWithContents",
+        "qualifiedName": "/europa/JW_TEST2/viewWithContents",
+        "documentation": "View updates",
+        "owner": "123456",
+        "sysmlid": "viewWithContents",
+        "read": "2015-05-18T15:58:02.828-0700",
+        "specialization": {
+            "contents": {
+                "valueExpression": null,
+                "type": "Expression"
+            },
+            "type": "View"
+        },
+        "editable": true,
+        "modified": "2015-05-18T15:58:02.365-0700",
+        "creator": "admin"
+    },
+    {
+        "modifier": "admin",
+        "qualifiedId": "/europa/123456/viewNull",
+        "siteCharacterizationId": "europa",
+        "created": "Mon May 18 15:58:13 PDT 2015",
+        "name": "viewNull",
+        "qualifiedName": "/europa/JW_TEST2/viewNull",
+        "documentation": "View with null values",
+        "owner": "123456",
+        "sysmlid": "viewNull",
+        "read": "2015-05-18T15:58:14.358-0700",
+        "specialization": {"type": "View"},
+        "editable": true,
+        "modified": "2015-05-18T15:58:13.816-0700",
+        "creator": "admin"
+    }
+]}
+200

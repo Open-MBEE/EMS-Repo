@@ -11,8 +11,8 @@ export CURL_SECURITY=" -k -3"
 #if [true]; then
 	export CURL_USER=" -u admin:admin"
 	export CURL_FLAGS=$CURL_STATUS$CURL_USER
-	export SERVICE_URL="\"http://localhost:9091/alfresco/service/"
-	export BASE_URL="\"http://localhost:9091/alfresco/service/javawebscripts/"
+	export SERVICE_URL="\"http://localhost:8080/alfresco/service/"
+	export BASE_URL="\"http://localhost:8080/alfresco/service/javawebscripts/"
 #else
 #	export CURL_USER=" -u cinyoung"
 #	export CURL_FLAGS=$CURL_STATUS$CURL_USER$CURL_SECURITY
@@ -28,7 +28,7 @@ echo SNAPSHOTS
 echo  curl $CURL_FLAGS $CURL_POST_FLAGS @JsonData/snapshot.html $SERVICE_URL"workspaces/master/sites/europa/products/301/snapshots\""
 
 # get snapshots - this currently doesn't work
-#echo  curl -w "%{http_code}" -u admin:admin -X GET http://localhost:9091/alfresco/service/snapshots/301
+#echo  curl -w "%{http_code}" -u admin:admin -X GET http://localhost:8080/alfresco/service/snapshots/301
 
 echo ""
 echo CONFIGURATIONS

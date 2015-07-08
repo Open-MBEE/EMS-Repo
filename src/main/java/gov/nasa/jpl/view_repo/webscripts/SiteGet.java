@@ -42,6 +42,7 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.log4j.*;
 import org.alfresco.repo.model.Repository;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
@@ -100,10 +101,10 @@ public class SiteGet extends AbstractJavaWebScript {
                 json.put("sites", jsonArray);
             }
         } catch (JSONException e) {
-            log(LogLevel.ERROR, "JSON could not be created\n", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            log(Level.ERROR, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "JSON could not be created\n");
             e.printStackTrace();
         } catch (Exception e) {
-            log(LogLevel.ERROR, "Internal error stack trace:\n" + e.getLocalizedMessage() + "\n", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            log(Level.ERROR, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Internal error stack trace:\n %s \n", e.getLocalizedMessage());
             e.printStackTrace();
         }
         if (json == null) {
@@ -148,6 +149,7 @@ public class SiteGet extends AbstractJavaWebScript {
 
             if (siteRef != null) {
                 	emsNode = new EmsScriptNode(siteRef, services);
+                	if (emsNode.hasAspect( "ems:Deleted" )) continue;
                 	// skip if doesn't have Models directory or if no site characterization
                 	if (!emsNode.hasPermission( PermissionService.READ )) continue;
 //                	if (emsNode.childByNamePath( "Models" ) == null                	        

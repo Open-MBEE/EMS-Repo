@@ -29,12 +29,15 @@
 
 package gov.nasa.jpl.view_repo.webscripts;
 
+import gov.nasa.jpl.mbee.util.Debug;
 import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.util.CommitUtil;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
+//import gov.nasa.jpl.view_repo.webscripts.AbstractJavaWebScript.LogLevel;
+
 
 import java.util.Date;
 import java.util.HashMap;
@@ -42,13 +45,13 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.log4j.*;
 import org.alfresco.repo.model.Repository;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.json.JSONArray;
 import org.json.JSONException;
-import org.json.JSONObject;
 import org.json.JSONObject;
 import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
@@ -101,8 +104,11 @@ public class WorkspacesPost extends AbstractJavaWebScript{
                 String newName = req.getServiceMatch().getTemplateVars().get(WORKSPACE_ID);
                 String copyTime = req.getParameter("copyTime");
                 Date copyDateTime = TimeUtils.dateFromTimestamp( copyTime );
-                JSONObject reqJson = //JSONObject.make( 
-                        (JSONObject)req.parseContent();// );
+                if (copyDateTime == null) copyDateTime = new Date();
+                String follow = req.getParameter( "follow" );
+                if (follow != null) copyDateTime = null;
+                JSONObject reqJson = 
+                        (JSONObject)req.parseContent();
                 WorkspaceNode ws = createWorkSpace(sourceWorkspaceParam, newName, copyDateTime, reqJson, user, status);
                 statusCode = status.getCode();
                 json = printObject(ws);
@@ -110,10 +116,10 @@ public class WorkspacesPost extends AbstractJavaWebScript{
                 statusCode = responseStatus.getCode();
             }
         } catch (JSONException e) {
-            log(LogLevel.ERROR, "JSON malformed\n", HttpServletResponse.SC_BAD_REQUEST);
+            log(Level.ERROR, HttpServletResponse.SC_BAD_REQUEST, "JSON malformed\n");
             e.printStackTrace();
         } catch (Exception e){
-            log(LogLevel.ERROR, "Internal stack trace:\n" + e.getLocalizedMessage() + "\n", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            log(Level.ERROR, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Internal stack trace:\n %s \n", e.getLocalizedMessage());
             e.printStackTrace();
         }
         if(json == null)
@@ -138,7 +144,7 @@ public class WorkspacesPost extends AbstractJavaWebScript{
                 jsonArray.put(ws.toJSONObject( ws, null ));
             }
             else {
-                log(LogLevel.WARNING,"No permission to read: "+ ws.getSysmlId(),HttpServletResponse.SC_NOT_FOUND);
+                log(Level.WARN,HttpServletResponse.SC_NOT_FOUND,"No permission to read: %", ws.getSysmlId());
             }
         }
         json.put("workspaces", jsonArray);
@@ -148,6 +154,12 @@ public class WorkspacesPost extends AbstractJavaWebScript{
     public WorkspaceNode createWorkSpace(String sourceWorkId, String newWorkName, Date cpyTime,
                                JSONObject jsonObject, String user, Status status) throws JSONException {
         status.setCode( HttpServletResponse.SC_OK );
+        if ( Debug.isOn() ) {
+            Debug.outln( "createWorkSpace(sourceWorkId=" + sourceWorkId
+                         + ", newWorkName=" + newWorkName + ", cpyTime="
+                         + cpyTime + ", jsonObject=" + jsonObject + ", user="
+                         + user + ", status=" + status + ")" );
+        }
 
         String sourceWorkspaceId = null;
         String newWorkspaceId = null;
@@ -179,21 +191,21 @@ public class WorkspacesPost extends AbstractJavaWebScript{
 
         if( (newWorkspaceId != null && newWorkspaceId.equals( "master" )) ||
             (workspaceName != null && workspaceName.equals( "master" )) ) {
-            log(LogLevel.WARNING, "Cannot change attributes of the master workspace.", HttpServletResponse.SC_BAD_REQUEST);
+            log(Level.WARN, "Cannot change attributes of the master workspace.", HttpServletResponse.SC_BAD_REQUEST);
             status.setCode( HttpServletResponse.SC_BAD_REQUEST );
             return null;
         }
 
         // Only create the workspace if the workspace id was not supplied:
         if (newWorkspaceId == null) {
-
             WorkspaceNode srcWs =
                     WorkspaceNode.getWorkspaceFromId( sourceWorkspaceId,
                                                       services,
                                                       response, status, // false,
                                                       user );
+
             if (!"master".equals( sourceWorkspaceId ) && srcWs == null) {
-                log(LogLevel.WARNING, "Source workspace not found.", HttpServletResponse.SC_NOT_FOUND);
+                log(Level.WARN, HttpServletResponse.SC_NOT_FOUND,"Source workspace not found.");
                 status.setCode( HttpServletResponse.SC_NOT_FOUND );
                 return null;
             } else {
@@ -204,7 +216,8 @@ public class WorkspacesPost extends AbstractJavaWebScript{
 
                 if (dstWs != null) {
                     // keep history of the branch
-                    CommitUtil.branch( srcWs, dstWs,"", true, services, response );                    
+                    CommitUtil.branch( srcWs, dstWs,"", true, services, response );
+                    CommitUtil.sendBranch( srcWs, dstWs, copyTime );
                     finalWorkspace = dstWs;
                 }
             }
@@ -222,10 +235,12 @@ public class WorkspacesPost extends AbstractJavaWebScript{
             if ( existingWs != null ) {
 
                 if (existingWs.isDeleted()) {
+
                     existingWs.removeAspect( "ems:Deleted" );
-                    log(LogLevel.INFO, "Workspace undeleted and modified", HttpServletResponse.SC_OK);
+                    log(Level.INFO, HttpServletResponse.SC_OK,"Workspace undeleted and modified");
+
                 } else {
-                    log(LogLevel.INFO, "Workspace is modified", HttpServletResponse.SC_OK);
+                    log(Level.INFO, "Workspace is modified", HttpServletResponse.SC_OK);
                 }
 
                 // Update the name/description:
@@ -240,7 +255,7 @@ public class WorkspacesPost extends AbstractJavaWebScript{
                 finalWorkspace = existingWs;
             }
             else {
-                log(LogLevel.WARNING, "Workspace not found.", HttpServletResponse.SC_NOT_FOUND);
+                log(Level.WARN,HttpServletResponse.SC_NOT_FOUND, "Workspace not found.");
                 status.setCode( HttpServletResponse.SC_NOT_FOUND );
                 return null;
             }

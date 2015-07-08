@@ -4,6 +4,7 @@
         "name": "wsA",
         "elements": [
             {
+                "modifier": "admin",
                 "name": "holding_bin",
                 "qualifiedName": "/no_site/no_site_no_project/holding_bin",
                 "sysmlid": "holding_bin_no_site_no_project",
@@ -13,10 +14,11 @@
                 "creator": "admin",
             },
             {
-                "qualifiedName": "/no_site/no_site_no_project/holding_bin/300",
+                "modifier": "admin",
                 "name": "300",
-                "owner": "holding_bin_no_site_no_project",
+                "qualifiedName": "/no_site/no_site_no_project/holding_bin/300",
                 "documentation": "something",
+                "owner": "holding_bin_no_site_no_project",
                 "sysmlid": "x",
                 "specialization": {
                     "propertyType": null,

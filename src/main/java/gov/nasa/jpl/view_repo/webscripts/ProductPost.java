@@ -38,6 +38,7 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.log4j.*;
 import org.alfresco.repo.model.Repository;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.security.PermissionService;
@@ -53,6 +54,7 @@ import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
 
+@Deprecated
 public class ProductPost extends AbstractJavaWebScript {
 	public ProductPost() {
 	    super();
@@ -95,7 +97,7 @@ public class ProductPost extends AbstractJavaWebScript {
 	                (JSONObject)req.parseContent();// );
 			updateProducts(json, workspace);
 		} catch (JSONException e) {
-			log(LogLevel.ERROR, "JSON parse exception: " + e.getMessage(), HttpServletResponse.SC_BAD_REQUEST);
+			log(Level.ERROR, HttpServletResponse.SC_BAD_REQUEST, "JSON parse exception: %s", e.getMessage());
 			e.printStackTrace();
 		}
 
@@ -140,14 +142,14 @@ public class ProductPost extends AbstractJavaWebScript {
 	            // ignore
 	        }
 	        if (id == null) {
-			  log(LogLevel.ERROR, "product id not specified.\n", HttpServletResponse.SC_BAD_REQUEST);
+			  log(Level.ERROR, HttpServletResponse.SC_BAD_REQUEST, "product id not specified.\n");
 			  return;
 	        }
 		}
 
 		EmsScriptNode product = findScriptNodeById(id, workspace, null, true);
 		if (product == null) {
-			log(LogLevel.ERROR, "could not find product with id: " + id, HttpServletResponse.SC_NOT_FOUND);
+			log(Level.ERROR, HttpServletResponse.SC_NOT_FOUND, "could not find product with id: %s", id);
 			return;
 		}
 

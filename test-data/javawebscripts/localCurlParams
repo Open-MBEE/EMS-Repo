@@ -15,7 +15,8 @@ export CURL_FLAGS=$CURL_STATUS$CURL_USER$CURL_SECURITY
 
 if [ -z "$ALF_SERVER" ]; then
   export ALF_SERVER=localhost
+  export ALF_SERVER_PORT=localhost:8080
 fi
 
-export SERVICE_URL="http://${ALF_SERVER}:8080/alfresco/service/"
-export BASE_URL="http://${ALF_SERVER}:8080/alfresco/service/workspaces/master/"
+export SERVICE_URL="http://${ALF_SERVER_PORT}/alfresco/service/"
+export BASE_URL="http://${ALF_SERVER_PORT}/alfresco/service/workspaces/master/"

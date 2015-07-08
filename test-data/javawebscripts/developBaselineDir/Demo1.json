@@ -1,10 +1,13 @@
 {"views": [{
     "qualifiedId": "/europa/123456/_17_0_2_3_e610336_1394148311476_17302_29388",
-    "name": "Components",
     "qualifiedName": "/europa/JW_TEST/Components",
     "sysmlid": "_17_0_2_3_e610336_1394148311476_17302_29388",
-    "documentation": "",
+    "editable": true,
+    "creator": "admin",
+    "modifier": "admin",
+    "name": "Components",
     "owner": "123456",
+    "documentation": "",
     "specialization": {
         "displayedElements": ["_17_0_2_4_f3a0363_1394142290412_487571_28478"],
         "childrenViews": [],
@@ -20,8 +23,6 @@
             "type": "List"
         }],
         "type": "View"
-    },
-    "editable": true,
-    "creator": "admin",
+    }
 }]}
 200
