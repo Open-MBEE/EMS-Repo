@@ -626,7 +626,9 @@ public class FullDocPost extends AbstractJavaWebScript {
     	}
     }
     
-    public void html2pdf()  throws Exception {
+    public void html2pdf(EmsScriptNode snapshotFolder, EmsScriptNode snapshotNode)  throws Exception {
+    	if(!Files.exists(Paths.get(this.htmlPath))) throw new Exception(String.format("Failed to transform HTML to PDF. Expected %s HTML file but it does not exist!", this.htmlPath));
+    	
     	RuntimeExec exec = new RuntimeExec();
 		exec.setProcessDirectory(this.fullDocGenDir);
 		createCoverPage(this.coverPath); //NEED FOR COVER
@@ -670,11 +672,14 @@ public class FullDocPost extends AbstractJavaWebScript {
 		System.out.println("htmltopdf command: " + command);
 		exec.setCommand(list2Array(command));
 		ExecutionResult result = exec.execute();
-		if(!result.getSuccess() && result.getExitValue()!=1){
+		if(!Files.exists(Paths.get(this.pdfPath)))
+		{
 			String msg = String.format("Failed to transform HTML file '%s' to PDF. Exit value: %d", this.htmlPath, result.getExitValue());
 			log(Level.ERROR, msg);
 			throw new Exception(msg);
-		}	
+		}
+		
+		this.savePdfToRepo(snapshotFolder, snapshotNode);
     }
 
 	/**
@@ -798,7 +803,11 @@ public class FullDocPost extends AbstractJavaWebScript {
 //			String zipPath = this.zipHtml();
 //			if(zipPath == null || zipPath.isEmpty()) throw new Exception("Failed to zip files and resources!");
 			this.zipHtml();
+			EmsScriptNode nodePrev = snapshotFolder.childByNamePath(filename);
+			if(nodePrev != null && nodePrev.exists()) nodePrev.remove();
+			
 			EmsScriptNode node = snapshotFolder.createNode(filename, "cm:content");
+			
 			if(node == null) throw new Exception("Failed to create zip repository node!");
 
 			if(!this.saveFileToRepo(node, MimetypeMap.MIMETYPE_ZIP, this.zipPath)) throw new Exception("Failed to save zip artifact to repository!");
