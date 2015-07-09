@@ -104,7 +104,7 @@ public class MmsDiffGet extends AbstractJavaWebScript {
         return mmsDiffGet.executeImplImpl( req, status, cache, runWithoutTransactions );
     }
     
-    private String replaceLastestTimeStamp(boolean isTime1, Date date) {
+    private String replaceTimeStampWithCommitTime(boolean isTime1, Date date) {
                 
         WorkspaceNode ws = isTime1 ? ws1 : ws2;
         EmsScriptNode lastCommit = date != null ? CommitUtil.getLatestCommitAtTime( date, ws, services, response ) :
@@ -148,7 +148,7 @@ public class MmsDiffGet extends AbstractJavaWebScript {
         else {
             dateTime1 = TimeUtils.dateFromTimestamp( timestamp1 );
         }
-        String latestTime = replaceLastestTimeStamp(true, dateTime1);
+        String latestTime = replaceTimeStampWithCommitTime(true, dateTime1);
         timestamp1 = latestTime != null ? latestTime : timestamp1;
         
         if (timestamp2.equals( NO_TIMESTAMP )) {
@@ -157,13 +157,14 @@ public class MmsDiffGet extends AbstractJavaWebScript {
         else {
             dateTime2 = TimeUtils.dateFromTimestamp( timestamp2 );
         }
-        latestTime = replaceLastestTimeStamp(false, dateTime2);
+        latestTime = replaceTimeStampWithCommitTime(false, dateTime2);
         timestamp2 = latestTime != null ? latestTime : timestamp2;
         
-        String timeString1 = timestamp1.replace( ":", "-" );
-        String timeString2 = timestamp2.replace( ":", "-" );
+        String timeString1 = timestamp1.replace( ":", "_" );
+        String timeString2 = timestamp2.replace( ":", "_" );
         String timeString = timeString1 + "_" + timeString2;
                 
+        // Doing a background diff:
         if (runInBackground) {
             
             saveAndStartAction(req, timeString, status);
@@ -194,6 +195,7 @@ public class MmsDiffGet extends AbstractJavaWebScript {
             }
             results.put("res", NodeUtil.jsonToString( top, 4 ));
         }
+        // Doing a non-background diff:
         else {
             performDiff(results);
         }

@@ -118,11 +118,11 @@
     <!--  Definitions for static methods -->        
     <bean class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
         <property name="staticMethod" value="gov.nasa.jpl.view_repo.webscripts.util.ShareUtils.setUsername" />
-        <property name="arguments" value="admin"/>
+        <property name="arguments" value="mmsadmin"/>
     </bean>
     <bean class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
         <property name="staticMethod" value="gov.nasa.jpl.view_repo.webscripts.util.ShareUtils.setPassword" />
-        <property name="arguments" value="admin"/>
+        <property name="arguments" value="letmein"/>
     </bean>
     <bean class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
         <property name="staticMethod" value="gov.nasa.jpl.view_repo.webscripts.util.ShareUtils.setServices" />
