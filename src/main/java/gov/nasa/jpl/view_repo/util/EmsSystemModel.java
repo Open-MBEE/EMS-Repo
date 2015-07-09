@@ -1174,6 +1174,7 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
 				Collection<NodeRef> valueNodes =
 				        (Collection< NodeRef >)node.getNodeRefProperty(Acm.ACM_VALUE, null, node.getWorkspace());
 				convertToScriptNode(valueNodes, returnList);
+				resultList.addAll(returnList);
 //>>>>>>> refs/remotes/origin/develop
 
 //	    		return Utils.asList(returnList, Object.class);
