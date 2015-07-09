@@ -469,7 +469,33 @@ common_filters+['"id"','"qualifiedId"'],
 ["test","workspaces","develop", "develop2"],
 None,
 None,
-do20 # lambda : set_gv1(json.loads(orig_json)['workspace2']['updatedElements'][0]['modified'] if (orig_json != None and len(str(orig_json)) > 0) else None)
+do20 
+],
+        
+[
+201,
+"CompareWorkspacesBackground1",
+"Compare workspaces in the background, this will return that it is in process",
+create_curl_cmd(type="GET",base_url=SERVICE_URL,
+                branch="diff/$gv1/$gv2/latest/latest?background"),
+True, 
+common_filters+['"id"','"qualifiedId"'],
+["test","workspaces","develop", "develop2"],
+],
+        
+[
+202,
+"CompareWorkspacesBackground2",
+"Compare workspaces in the background again, this will return the results of the background diff",
+create_curl_cmd(type="GET",base_url=SERVICE_URL,
+                branch="diff/$gv1/$gv2/latest/latest?background"),
+True, 
+common_filters+['"id"','"qualifiedId"'],
+["test","workspaces","develop", "develop2"],
+None,
+None,
+None,
+20
 ],
 
 # This test case depends on the previous one and uses gv4 set by the previous test
@@ -801,6 +827,16 @@ common_filters+['"id"','"qualifiedId"','"timestamp"'],
 ["test","workspaces","develop", "develop2"]
 ],
 
+[
+245,
+"CompareWorkspacesNotInPastBackground",
+"Compare workspace master with itself at the current time and a time in the past in the background",
+create_curl_cmd(type="GET",base_url=SERVICE_URL,
+                branch="diff/master/master/latest/$gv1?background"),
+True, 
+common_filters+['"id"','"qualifiedId"','"timestamp"'],
+["test","workspaces","develop", "develop2"]
+],
 
 # A series of test cases for workspaces in workspaces
 
