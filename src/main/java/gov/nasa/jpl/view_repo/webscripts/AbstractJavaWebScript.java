@@ -67,6 +67,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.*;
 import java.util.Arrays;
@@ -1291,9 +1292,9 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
      * Creates a ConstraintExpression for the passed constraint node and adds to the passed constraints
      *
      * @param constraintNode The node to parse and create a ConstraintExpression for
-     * @param constraints The list of Constraints to add to
+     * @param constraints The list of Constraints to add for tje node
      */
-    public static void addConstraintExpression(EmsScriptNode constraintNode, Collection<Constraint> constraints, WorkspaceNode ws) {
+    public static void addConstraintExpression(EmsScriptNode constraintNode, Map< EmsScriptNode, Collection< Constraint >> constraints, WorkspaceNode ws) {
     
         if (constraintNode == null || constraints == null) return;
     
@@ -1304,7 +1305,12 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
     
             if (expression != null) {
     
-                constraints.add(new ConstraintExpression( expression ));
+                Collection< Constraint > constrs = constraints.get( constraintNode );
+                if ( constrs == null ) {
+                    constrs = new ArrayList< Constraint >();
+                    constraints.put( constraintNode, constrs );
+                }
+                constrs.add(new ConstraintExpression( expression ));
             }
         }
     }
@@ -1328,13 +1334,14 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         return expression;
     }
 
-    public static Collection< Constraint > getAeConstraints( Set< EmsScriptNode > elements, WorkspaceNode ws ) {
+    public static Map< EmsScriptNode, Collection< Constraint > > getAeConstraints( Set< EmsScriptNode > elements, WorkspaceNode ws ) {
         //Map<EmsScriptNode, Constraint> constraints = new LinkedHashMap<EmsScriptNode, Constraint>();
-        Collection<Constraint> constraints = new ArrayList<Constraint>();
+        Map< EmsScriptNode, Collection< Constraint > >  constraints = 
+                new LinkedHashMap< EmsScriptNode, Collection< Constraint > >();
     
         // Search for all constraints in the database:
         Collection<EmsScriptNode> constraintNodes = getGlobalSystemModel().getType(null, Acm.ACM_CONSTRAINT);
-        log(Level.INFO, "all constraints in database: " + constraintNodes);
+log(Level.INFO, "all constraints in database: " + constraintNodes);
 
         if (!Utils.isNullOrEmpty(constraintNodes)) {
     
@@ -1352,7 +1359,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
                 for (EmsScriptNode element : elements) {
     
                     String name = element.getName();
-                    log(Level.INFO, "element (" + element + ") vs. constraint (" + constraintNode + ")");
+log(Level.INFO, "element (" + element + ") vs. constraint (" + constraintNode + ")");
                     if ( element.equals( constraintNode ) || ( name != null && constrElemNames.contains(name) ) ) {
                         addConstraintExpression(constraintNode, constraints, ws);
                         break;
@@ -1363,20 +1370,23 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
             } // Ends loop through constraintNodes
     
         } // Ends if there was constraint nodes found in the database
-    
-        // Add all of the Parameter constraints:
-        ClassData cd = getGlobalSystemModelAe().getClassData();
-        // Loop through all the listeners:
-        for (ParameterListenerImpl listener : cd.getAeClasses().values()) {
-            // TODO: REVIEW
-            //       Can we get duplicate ParameterListeners in the aeClassses map?
-            constraints.addAll( listener.getConstraints( true, null ) );
-        }
+
+        // TODO -- This is temporarily commented out until code is added to tie
+        // the constraints back to the nodes such as a constraint that a
+        // property be grounded.
+//        // Add all of the Parameter constraints:
+//        ClassData cd = getGlobalSystemModelAe().getClassData();
+//        // Loop through all the listeners:
+//        for (ParameterListenerImpl listener : cd.getAeClasses().values()) {
+//            // TODO: REVIEW
+//            //       Can we get duplicate ParameterListeners in the aeClassses map?
+//            constraints.addAll( listener.getConstraints( true, null ) );
+//        }
     
         return constraints;
     }
 
-    public static Map< EmsScriptNode, Expression<?> > getAeExpressions( Set< EmsScriptNode > elements ) {
+    public static Map< EmsScriptNode, Expression<?> > getAeExpressions( Collection< EmsScriptNode > elements ) {
         Map<EmsScriptNode, Expression<?>> expressions = new LinkedHashMap< EmsScriptNode, Expression<?> >();
         for ( EmsScriptNode node : elements ) {
             // FIXME -- Don't we need to pass in a date and workspace?
@@ -1385,6 +1395,30 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
                 if ( expression != null ) {
                     expressions.put( node, expression );
                 }
+            } else if ( node.hasValueSpecProperty( null, node.getWorkspace() ) ) {
+                ArrayList< NodeRef > values = node.getValueSpecOwnedChildren( false, null, node.getWorkspace() );
+                List< EmsScriptNode > valueElements = new ArrayList< EmsScriptNode >();
+                for ( NodeRef value : values ) {
+                    EmsScriptNode n = new EmsScriptNode( value, NodeUtil.getServices() );
+                    if ( n.hasOrInheritsAspect( Acm.ACM_EXPRESSION ) ) {
+                        valueElements.add( n );
+                    }
+                }
+//                List< EmsScriptNode > valueElements =
+//                        EmsScriptNode.toEmsScriptNodeList( values,
+//                                                           NodeUtil.getServices(),
+//                                                           null, null );
+                Map< EmsScriptNode, Expression< ? > > ownedExpressions =
+                       getAeExpressions( valueElements );
+                if ( ownedExpressions != null && ownedExpressions.size() == 1 ) {
+                    expressions.put( node, ownedExpressions.entrySet().iterator().next().getValue() );
+                } else if ( ownedExpressions != null ) {
+                    // TODO -- REVIEW -- is wrapping a collection of Expressions
+                    // in an Expression goign to evaluate properly?
+                    expressions.put( node, new Expression( ownedExpressions ) );
+//                    for ( Expression< ? > ownedExpr : ownedExpressions.values() ) {
+//                    }
+                }
             }
         }
         return expressions;
@@ -1392,16 +1426,27 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
 
     public static Map<Object, Object> evaluate( Set< EmsScriptNode > elements, WorkspaceNode ws ) {
         log(Level.INFO, "Will attempt to evaluate expressions where found!");
-        Collection< Constraint > constraints = getAeConstraints( elements, ws );
-        log(Level.INFO, "constraints: " + constraints);
+        Map< EmsScriptNode, Collection< Constraint > > constraints = getAeConstraints( elements, ws );
+log(Level.INFO, "constraints: " + constraints);
         Map< EmsScriptNode, Expression<?> > expressions = getAeExpressions( elements );
-        log(Level.INFO, "expressions: " + constraints);
+log(Level.INFO, "expressions: " + expressions);
     
         Map< Object, Object > results = new LinkedHashMap< Object, Object >();
         if ( !Utils.isNullOrEmpty( constraints ) ) {
-            for ( Constraint c : constraints ) {
-                if ( c != null ) {
-                    results.put( c, c.isSatisfied( true, null ) );
+            for ( Entry< EmsScriptNode, Collection< Constraint > > e : constraints.entrySet() ) {
+                EmsScriptNode constraintNode = null;
+                if ( e.getKey().hasOrInheritsAspect( Acm.ACM_CONSTRAINT ) ) {
+                    constraintNode = e.getKey();
+                }
+                Collection< Constraint > constraintCollection = e.getValue();
+                for ( Constraint c : constraintCollection ) {
+                    if ( c != null ) {
+                        if ( constraintNode != null && constraintCollection.size() == 1 ) {
+                            results.put( constraintNode, c.isSatisfied( true, null ) );
+                        } else {
+                            results.put( c, c.isSatisfied( true, null ) );
+                        }
+                    }
                 }
             }
         }
@@ -1553,7 +1598,11 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         SystemModelSolver< EmsScriptNode, EmsScriptNode, EmsScriptNode, EmsScriptNode, String, String, Object, EmsScriptNode, String, String, EmsScriptNode >  solver =
                 new SystemModelSolver< EmsScriptNode, EmsScriptNode, EmsScriptNode, EmsScriptNode, String, String, Object, EmsScriptNode, String, String, EmsScriptNode >(getSystemModel(), new ConstraintLoopSolver() );
     
-        Collection<Constraint> constraints = getAeConstraints( elements, ws );
+        Map< EmsScriptNode, Collection< Constraint > > constraintMap = getAeConstraints( elements, ws );
+        ArrayList< Constraint > constraints = new ArrayList< Constraint >();
+        for ( Collection< Constraint > coll : constraintMap.values() ) {
+            constraints.addAll( coll );
+        }
     
         // Solve the constraints:
         if (!Utils.isNullOrEmpty( constraints )) {
@@ -1578,15 +1627,19 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
                 // Update the values of the nodes after solving the constraints:
                 EmsScriptNode node;
                 Parameter<Object> param;
-                Set<Entry<EmsScriptNode, Parameter<Object>>> entrySet = sysmlToAe.getExprParamMap().entrySet();
-                for (Entry<EmsScriptNode, Parameter<Object>> entry : entrySet) {
-                    node = entry.getKey();
-                    param = entry.getValue();
-                    systemModel.setValue(node, (Serializable)param.getValue());
+                Map< EmsScriptNode, Parameter< Object > > params = getGlobalSystemModelAe().getExprParamMap();
+                if ( Utils.isNullOrEmpty( params ) ) {
+                    log( Level.ERROR, "Solver had no parameters in map to assign the solution!" );
+                } else {
+                    Set<Entry<EmsScriptNode, Parameter<Object>>> entrySet = params.entrySet();
+                    for (Entry<EmsScriptNode, Parameter<Object>> entry : entrySet) {
+                        node = entry.getKey();
+                        param = entry.getValue();
+                        systemModel.setValue(node, (Serializable)param.getValue());
+                    }
+        
+                    log( Level.INFO, "Updated all node values to satisfy the constraints!" );
                 }
-    
-                log( Level.INFO, "Updated all node values to satisfy the constraints!" );
-    
             }
         } // End if constraints list is non-empty
     

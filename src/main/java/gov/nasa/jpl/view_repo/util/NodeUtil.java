@@ -1834,6 +1834,8 @@ public class NodeUtil {
                     //usedFullCache = true;
                     cacheUsed = CacheUsed.FULL;
                 }
+            } else {
+                cacheResults.isExactMatch();
             }
         }
         cacheResults.cachedUsed = cacheUsed;

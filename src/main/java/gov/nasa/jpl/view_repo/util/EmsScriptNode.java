@@ -2700,7 +2700,7 @@ public class EmsScriptNode extends ScriptNode implements
 
         if ( justTheType ) return;
 
-        json.put( "evaluation", "Hi, Erik!" );
+        //json.put( "evaluation", "Hi, Erik!" );
 
         for ( QName aspectQname : this.getAspectsSet() ) {
             // reflection is too slow?

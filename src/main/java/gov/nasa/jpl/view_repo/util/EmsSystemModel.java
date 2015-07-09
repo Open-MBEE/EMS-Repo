@@ -1487,7 +1487,41 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
 	            Debug.error("setValue(): type for the passed node is null!");
 	    	}
 	    	else {
-		        if (type.equals(Acm.JSON_LITERAL_INTEGER)) {
+	    	    String acmType = Acm.getJSON2ACM().get( type );
+	    	    if ( acmType == null ) acmType = type;
+	    	    Set< String > valuePropNames = Acm.TYPES_WITH_VALUESPEC.get( acmType );
+	    	    if ( !Utils.isNullOrEmpty( valuePropNames ) ) {
+	    	        boolean found = false;
+	    	        if ( valuePropNames.size() > 1 ) {
+	    	            if ( valuePropNames.contains( Acm.ACM_VALUE ) ) {
+	    	                acmType = Acm.ACM_VALUE;
+	    	                found = true;
+	    	            } else {
+                            Debug.error( "setValue(): unclear which owned value spec property "
+                                         + valuePropNames
+                                         + " is to be set to "
+                                         + value + ". Picking first by default!" );
+	    	            }
+	    	        }
+	    	        if ( !found ) acmType = valuePropNames.iterator().next();
+//                    Object valueSpecRef =
+//                            node.getNodeRefProperty( valuePropNames.iterator().next(),
+//                                                     true, null, node.getWorkspace() );
+//                    EmsScriptNode valueNode = null;
+//                    if ( valueSpecRef instanceof NodeRef ) {
+//                        valueNode = new EmsScriptNode( (NodeRef)valueSpecRef, getServices() );
+//                    } else if ( valueSpecRef instanceof ArrayList ) {
+//                        ArrayList< NodeRef > nodeRefs = (ArrayList< NodeRef >))valueSpecRef;
+//                        if ( !Utils.isNullOrEmpty( nodeRefs ) ) {
+//                            if ( nodeRefs.size() > 1 ) {
+//                                
+//                            }
+//                        }
+//                        
+//                    }
+                    node.createOrUpdateProperty( acmType, value );
+                }
+	    	    else if (type.equals(Acm.JSON_LITERAL_INTEGER)) {
 
 		        	node.createOrUpdateProperty(Acm.ACM_INTEGER, value);
 		        }
