@@ -253,6 +253,247 @@ public class WorkspaceDiff implements Serializable {
         // TODO -- ElementVersions?????
 
     }
+    
+    /**
+     * TODO This has been copied from NodeDiff and slightly altered.  Should
+     * re-factor to use common code b/t the two methods.
+     * 
+     * Remove ValueSpecification elements in diff and include the differences as
+     * value property updates in the owning element.
+     * <p>
+     * If a ValueSpecification (which has many subclasses/subaspects) has
+     * changed, and it is owned by a element, then the property of the
+     * owning element has changed. In the JSON output, we should show the
+     * changed value in the owning element (in its specialization) instead of as
+     * a separate element.
+     * <p>
+     * To do this, this WorkspaceDiff is altered by
+     * <ul>
+     * <li>removing owned ValueSpecifications from the added, removed,
+     * and updatedElements maps,
+     * <li>adding the owning elements to these element maps if not
+     * already there, and
+     * <li>adding the properties to the nodeDiff.propertyChanges as well
+     * as the added, removed, and updatedProperties maps of the nodeDiff.
+     * </ul>
+     * <p>
+     * One tricky part is that an Expression may be owned by another Expression
+     * that is owned by a Property.
+     * <p>
+     * Another tricky part is that an owning Property may be added or deleted,
+     * in which case the ValueSpecification may need to be handled differently.
+     *
+     * @param workspaceDiff
+     *            TODO
+     */
+    protected void fixValueSpecifications() {
+
+        // Identify the elements that own changed ValueSpecifications and add
+        // them to the updatedElements map.
+
+        LinkedHashMap< EmsScriptNode, Pair<EmsScriptNode,Boolean > > valueSpecMap = new LinkedHashMap< EmsScriptNode, Pair<EmsScriptNode,Boolean >>();
+        
+        for ( EmsScriptNode node : addedElements.values() ) {
+    
+            if ( node.isOwnedValueSpec(timestamp2, ws2) ) {
+                EmsScriptNode owningProp = node.getValueSpecOwner(timestamp2, ws2);
+                if (owningProp != null) {
+                // TODO -- REVIEW -- Does the if statement below need to be uncommented?
+//                if ( !getRemoved().contains( owningProp ) ) {
+                    valueSpecMap.put( node, new Pair< EmsScriptNode, Boolean >(owningProp,false) );
+//                }
+                }
+            }
+        }
+        for ( EmsScriptNode node : updatedElements.values()) {
+            if ( node.isOwnedValueSpec(timestamp2, ws2) ) { 
+                EmsScriptNode owningProp = node.getValueSpecOwner(timestamp2, ws2);
+                if (owningProp != null) {
+                    valueSpecMap.put( node, new Pair< EmsScriptNode, Boolean >(owningProp,false) );
+                }
+            }
+        }
+        for ( EmsScriptNode node : deletedElements.values() ) {
+            // Note: Removed nodes are in ws1 and timestamp1 and not in ws2 and timestamp2 by definition:
+            if ( node.isOwnedValueSpec(timestamp1, ws1) ) {
+                EmsScriptNode owningProp = node.getValueSpecOwner(timestamp1, ws1);
+                if (owningProp != null) {
+                    valueSpecMap.put( node, new Pair< EmsScriptNode, Boolean >(owningProp,true) );
+                }
+            }
+        }
+
+        // adding the owning Property elements to these element maps if not already there
+        for ( Pair< EmsScriptNode, Boolean > pair : valueSpecMap.values() ) {
+            EmsScriptNode node = pair.first;
+            if ( !addedElements.containsValue( node ) ) {
+                if ( !deletedElements.containsValue( node ) ) {
+                    if ( !updatedElements.containsValue( node ) ) {
+                        updatedElements.put( node.getSysmlId(), node );
+                    }
+                }
+            }
+        }
+
+        // Add the owning valuespec properties to the nodeDiff property change maps.
+        for ( Entry< EmsScriptNode, Pair< EmsScriptNode, Boolean >> entry : valueSpecMap.entrySet() ) {
+            EmsScriptNode valueNode = entry.getKey();
+            EmsScriptNode owningPropNode = entry.getValue().first;
+            boolean isWs1 = entry.getValue().second;
+//            Map< String, Pair< Object, Object > > propChanges = getPropertyChanges( owningPropNode.getSysmlId() );
+//            if ( propChanges == null ) {
+//                propChanges = new LinkedHashMap< String, Pair<Object,Object> >();
+//                getPropertyChanges().put( owningPropNode.getSysmlId(), propChanges );
+//            }
+
+            // Find the matching property that this valueSpec maps to:
+            String valueName = null;
+            //String valueName = NodeUtil.createQName( "sysml:value", getServices() ).toString();
+            for ( String acmType : Acm.TYPES_WITH_VALUESPEC.keySet() ) {
+                if ( owningPropNode.hasOrInheritsAspect( acmType ) ) {
+                    for ( String acmProp : Acm.TYPES_WITH_VALUESPEC.get(acmType) ) {
+                        Object propVal = owningPropNode.getNodeRefProperty( acmProp, 
+                                                                            isWs1 ? timestamp1 : timestamp2,
+                                                                            isWs1 ? ws1 : ws2);
+                        if ( propVal  != null) {
+                            // ArrayList of noderefs:
+                            if (propVal instanceof List) {
+                                for (Object val : (List<?>) propVal) {
+                                    if (val instanceof NodeRef) {
+                                        NodeRef ref = (NodeRef) val;
+                                        EmsScriptNode propValNode = new EmsScriptNode(ref, getServices());
+                                        if (propValNode.equals(valueNode, true)) {
+                                            valueName = NodeUtil.createQName( acmProp, getServices() ).toString();
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+                            // Single noderef:
+                            else if (propVal instanceof NodeRef) {
+                                EmsScriptNode propValNode = new EmsScriptNode((NodeRef) propVal, getServices());
+                                if (propValNode.equals(valueNode, true)) {
+                                    valueName = NodeUtil.createQName( acmProp, getServices() ).toString();
+                                    break;
+                                }
+                            }
+                        } // ends ( propVal  != null)
+                    }
+                    break;
+                }
+            } // ends for ( String acmType : Acm.TYPES_WITH_VALUESPEC.keySet() )
+                        
+//            if (valueName != null) {
+//                Pair< Object, Object > valueChange = propChanges.get( valueName );
+//                if ( valueChange == null ) {
+//                    valueChange = new Pair< Object, Object >( null, null );
+//                    propChanges.put( valueName, valueChange );
+//                }
+//                if ( getRemoved().contains( valueNode.getNodeRef() ) ) {
+//                    valueChange.first = valueNode;
+//                    getRemovedProperties( owningPropNode.getSysmlId() ).put( valueName, valueNode );
+//                } else {
+//                    valueChange.second = valueNode;
+//                    if ( getAdded().contains( valueNode.getNodeRef() ) ) {
+//                        getAddedProperties( valueNode.getSysmlId() ).put( valueName, valueNode );
+//                    } else {
+//                        getUpdatedProperties( valueNode.getSysmlId() ).put( valueName, valueChange );
+//                    }
+//                }
+//            }
+        }
+
+        // Remove the owned ValueSpecifications from everything.
+        for ( EmsScriptNode node : valueSpecMap.keySet() ) {
+            addedElements.remove( node.getSysmlId() );
+            updatedElements.remove( node.getSysmlId() );
+            deletedElements.remove( node.getSysmlId() );
+        }
+
+
+    }
+    
+    protected void populateMembersSkeleton(Set<NodeRef> allChangedNodes) {
+        addedElements.clear();
+        deletedElements.clear();
+        updatedElements.clear();
+        movedElements.clear();
+        conflictedElements.clear();
+        elements.clear();
+        elementsVersions.clear(); // ??? REVIEW
+        Set< String > ids = new TreeSet< String >( );
+
+        // Compute the diff:
+        addDiffs( allChangedNodes );
+
+        // TODO may not be worth the performance hit to call fixValueSpecifications(), but if 
+        // we dont the front end would have to filter out the value specs
+        fixValueSpecifications();
+        
+        // TODO calculating moved/conflicted requires looking at node properties,
+        //      so not doing it.  Doris is fine with this for now.
+//        // Moved
+//        for ( Entry< String, EmsScriptNode > e : updatedElements.entrySet() ) {
+//            Map< String, Pair< Object, Object >> changes =
+//                    nodeDiff.getPropertyChanges( e.getKey() );
+//            if ( changes != null ) {
+//                Pair< Object, Object > ownerChange = changes.get( NodeUtil.createQName("ems:owner").toString() );
+//                if ( ownerChange != null && ownerChange.first != null
+//                     && ownerChange.second != null
+//                     && !ownerChange.first.equals( ownerChange.second ) ) {
+//                    EmsScriptNode node = e.getValue();
+//                    movedElements.put( e.getKey(), node);
+//                    
+//                    // Add this new owner to element ids, so it can be added to elements:
+//                    EmsScriptNode newOwner =
+//                            node != null ?
+//                            node.getOwningParent( getTimestamp1(), getWs1(), false ) :
+//                            null;
+//                    if (newOwner != null) {
+//                        ids.add( newOwner.getSysmlId() );
+//                    }
+//                    
+//                }
+//            }
+//        }
+//
+//        // Conflicted
+//        computeConflicted();
+
+        // Elements
+        Set< String > removedUpdated = new HashSet< String >(deletedElements.keySet());
+        removedUpdated.addAll( updatedElements.keySet() );
+        // Add all of the removed and updated ids:
+        ids.addAll( removedUpdated );
+
+        // Add all of the parents of the added ids:
+        for (EmsScriptNode node : addedElements.values()) {
+            if (node != null) {
+                EmsScriptNode parent = node.getOwningParent( getTimestamp1(), getWs1(), false );
+                if (parent != null) {
+                    ids.add( parent.getSysmlId() );
+                }
+            }
+        }
+        for ( String id : ids ) {
+            NodeRef ref = NodeUtil.findNodeRefById( id, false, getWs1(), getTimestamp1(), getServices(), true );
+            if ( ref != null ) {
+                EmsScriptNode node = new EmsScriptNode( ref, getServices() );
+                if ( node.exists() ) {
+                    EmsScriptNode parent = node;
+                    String parentId = id;
+                    while ( parent != null && parent.isModelElement() ) {
+                        elements.put( parentId, parent );
+                        parent = parent.getOwningParent( getTimestamp1(), getWs1(), false, true );
+                        parentId = parent.getSysmlId();
+                    }
+                }
+            }
+        }
+
+        // TODO -- ElementVersions?????
+
+    }
 
     /**
      * The intersection of the two workspace change sets are the potential
@@ -714,6 +955,15 @@ public class WorkspaceDiff implements Serializable {
                     }
                 }
             }
+            // This is for the skeleton diff.  Want these additional properties:
+            else if (filter != null) {
+                filter.add(Acm.SYSMLID);
+                filter.add("qualifiedId");
+                filter.add("qualifiedName");
+                filter.add(Acm.JSON_OWNER);
+                filter.add(Acm.JSON_NAME);
+                filter.add(Acm.JSON_TYPE);
+            }
             boolean includeQualified = true;
             Version version = null;
             if ( !Utils.isNullOrEmpty( versions ) ) {
@@ -733,7 +983,8 @@ public class WorkspaceDiff implements Serializable {
     public boolean diff() {
         boolean status = true;
 
-        captureDeltas();
+        //captureDeltas();
+        captureDeltasSkeleton();
 
         return status;
     }
@@ -901,6 +1152,92 @@ public class WorkspaceDiff implements Serializable {
             }
         }
         return ignoredPropIdQnames;
+    }
+    
+    protected void captureDeltasSkeleton() {
+        
+        // TODO
+        // Embedded value specs are not being filtered correctly.  Should the server
+        // do this for the skeleton diff or can the front end?  Doris said the front
+        // end can filter out all value specs from the diff b/c currently magic draw
+        // does not have stand alone value specs; however, having the front end do this
+        // doesn't seem wise if this assumption ever changes.  That being said, if
+        // server does this filtering, it will make the skeleton diff less efficient.
+        // The server filtering has been implement in fixValueSpecifications(), which
+        // is a lot of the same code as NodeDiff version.
+                
+        // Note:
+        // The commit nodes only have the sysmlids of the nodes, so will still need
+        // to get a set of nodes for the other properties that will be displayed
+        // in the skeleton diff, ie name, owner, qualifiedId, type, etc        
+        
+        Set< NodeRef > s1 =
+                WorkspaceNode.getChangedNodeRefsWithRespectTo( ws1, ws2,
+                                                               timestamp1,
+                                                               timestamp2,
+                                                               getServices(),
+                                                               response, status );
+        Set< NodeRef > s2 =
+                WorkspaceNode.getChangedNodeRefsWithRespectTo( ws2, ws1,
+                                                               timestamp2,
+                                                               timestamp1,
+                                                               getServices(),
+                                                               response, status );
+        
+        // If either of these are null then we caught an exception above, 
+        // so just bail
+        if (s1 == null || s2 == null) {
+            return;
+        }
+        
+        if ( onlyModelElements ) {
+            s1 = NodeUtil.getModelElements(s1);
+            s2 = NodeUtil.getModelElements(s2);
+        }
+        
+        // create lists of deleted in s1 and deleted in s2 
+        List< NodeRef > deletedFromS1 = new ArrayList< NodeRef >();
+        List< NodeRef > deletedFromS2 = new ArrayList< NodeRef >();
+        
+        // need to make sure both sets have each others' nodes
+        for ( NodeRef n : s1 ) {
+            String sysmlId = NodeUtil.getSysmlId( n );
+            NodeRef ref =
+                    NodeUtil.findNodeRefById( sysmlId, false, ws2, timestamp2,
+                                              getServices(), false );
+            if ( ref != null ) {
+                s2.add( ref );
+            }
+            if ( NodeUtil.isDeleted(n)) {
+                deletedFromS1.add(n);
+            }
+        }
+        for ( NodeRef n : s2 ) {
+            String sysmlId = NodeUtil.getSysmlId( n );
+            NodeRef ref =
+                    NodeUtil.findNodeRefById( sysmlId, false, ws1, timestamp1,
+                                              getServices(), false );
+            if ( ref != null ) {
+                s1.add( ref );
+            }
+            if ( NodeUtil.isDeleted(n)) {
+                deletedFromS2.add(n);
+            }
+        }
+                
+        // Remove the deleted nodes from s1 and s2  
+        for ( NodeRef n : deletedFromS1 ) {
+            s1.remove(n);
+        }
+        for ( NodeRef n : deletedFromS2 ) {
+            s2.remove(n);
+        }
+        
+        // Create a union of the two sets for the diff skeleton:
+        Set<NodeRef> allChangedNodes = new HashSet<NodeRef>(s1);
+        allChangedNodes.addAll( s2 );
+        
+        populateMembersSkeleton(allChangedNodes);
     }
 
     protected void captureDeltas() {
