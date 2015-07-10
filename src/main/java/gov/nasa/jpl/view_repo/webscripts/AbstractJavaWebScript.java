@@ -1390,7 +1390,7 @@ log(Level.INFO, "element (" + element + ") vs. constraint (" + constraintNode + 
         Map<EmsScriptNode, Expression<?>> expressions = new LinkedHashMap< EmsScriptNode, Expression<?> >();
         for ( EmsScriptNode node : elements ) {
             // FIXME -- Don't we need to pass in a date and workspace?
-            if ( node.hasAspect( Acm.ACM_EXPRESSION ) && !node.isOwnedValueSpec(null, node.getWorkspace()) ) {
+            if ( node.hasAspect( Acm.ACM_EXPRESSION ) ) {
                 Expression<?> expression = toAeExpression( node );
                 if ( expression != null ) {
                     expressions.put( node, expression );
