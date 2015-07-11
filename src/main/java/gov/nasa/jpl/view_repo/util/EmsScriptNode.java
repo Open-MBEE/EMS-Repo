@@ -5781,9 +5781,7 @@ public class EmsScriptNode extends ScriptNode implements
                 (ArrayList< NodeRef >)node.getNodeRefProperty( "sysml:operationParameter",
                                                                dateTime, ws);
         JSONArray ids = addNodeRefIdsJSON( nodeRefs );
-        if ( ids.length() > 0 ) {
-            putInJson( json, "parameters", ids, filter );
-        }
+        putInJson( json, "parameters", ids, filter );
 
         if ( !embeddingExpressionInOperation  ) {
             NodeRef opExpNode = (NodeRef) node.getNodeRefProperty( "sysml:operationExpression",
@@ -5815,15 +5813,11 @@ public class EmsScriptNode extends ScriptNode implements
         ArrayList< NodeRef > nodeRefs =
                 (ArrayList< NodeRef >)node.getNodeRefProperty( Acm.ACM_CLASSIFIER, dateTime, ws );
         JSONArray ids = addNodeRefIdsJSON( nodeRefs );
-        if ( ids.length() > 0 ) {
-            putInJson( json,Acm.JSON_CLASSIFIER, ids, filter );
-        }
+        putInJson( json,Acm.JSON_CLASSIFIER, ids, filter );
         
         nodeRefs = (ArrayList< NodeRef >)node.getNodeRefProperty( Acm.ACM_SLOTS, dateTime, ws );
         ids = addNodeRefIdsJSON( nodeRefs );
-        if ( ids.length() > 0 ) {
-            putInJson( json, Acm.JSON_SLOTS, ids, filter );
-        }
+        putInJson( json, Acm.JSON_SLOTS, ids, filter );
     }
 
     protected
