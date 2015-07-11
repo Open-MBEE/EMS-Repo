@@ -1,9 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry combineaccessrules="false" kind="src" path="/bae"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/sysml"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/util"/>
-	<classpathentry kind="lib" path="src/main/amp/web/WEB-INF/lib/antlr-4.4-complete.jar"/>
 	<classpathentry kind="src" output="target/classes" path="src/main/java">
 		<attributes>
 			<attribute name="optional" value="true"/>
@@ -37,8 +33,5 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry combineaccessrules="false" kind="src" path="/Klang"/>
-	<classpathentry kind="lib" path="src/main/amp/web/WEB-INF/lib/klang.jar"/>
-	<classpathentry kind="lib" path="src/main/amp/web/WEB-INF/lib/scala-library.jar"/>
-	<classpathentry kind="lib" path="src/main/amp/web/WEB-INF/lib/com.microsoft.z3.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>

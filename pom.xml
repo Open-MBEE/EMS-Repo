@@ -125,7 +125,7 @@
                     <version>${mbee.version}</version>
                 </dependency>
                 <dependency>
-                    <groupId>klang</groupId>
+                    <groupId>gov.nasa.jpl.mbee.klang</groupId>
                     <artifactId>klang</artifactId>
                     <version>${mbee.version}</version>
                </dependency>
