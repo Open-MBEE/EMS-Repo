@@ -176,6 +176,11 @@
                     <artifactId>bae</artifactId>
                     <version>${mbee.version}</version>
                 </dependency>
+                <dependency>
+                    <groupId>gov.nasa.jpl.mbee.klang</groupId>
+                    <artifactId>klang</artifactId>
+                    <version>${mbee.version}</version>
+                </dependency>
             </dependencies>
         </profile>
     </profiles>
