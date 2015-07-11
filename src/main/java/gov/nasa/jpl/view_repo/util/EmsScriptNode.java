@@ -2554,6 +2554,10 @@ public class EmsScriptNode extends ScriptNode implements
             putInJson( elementJson, "owner", owernIdObj, filter );
         }
 
+        //putInJson( json, "evaluation", "Hi, Erik!", null );
+        //elementJson.put( "evaluation", "Hi, Erik!" );
+
+        
         // Add version information - can't be used for reverting since things may be in
         // different workspaces, but informative nonetheless
         if ( version != null ) {
@@ -2695,6 +2699,8 @@ public class EmsScriptNode extends ScriptNode implements
         }
 
         if ( justTheType ) return;
+
+        //json.put( "evaluation", "Hi, Erik!" );
 
         for ( QName aspectQname : this.getAspectsSet() ) {
             // reflection is too slow?
