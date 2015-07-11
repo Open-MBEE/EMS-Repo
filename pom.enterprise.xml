@@ -86,6 +86,14 @@
 	            <systemPath>${project.basedir}/src/main/amp/web/WEB-INF/lib/mbee_util.jar</systemPath>
 	        </dependency>
 	        <dependency>
+                <groupId>klang</groupId>
+                <artifactId>klang</artifactId>
+                <version>1.0</version>
+                <scope>system</scope>
+                <type>jar</type>
+                <systemPath>${project.basedir}/src/main/amp/web/WEB-INF/lib/klang.jar</systemPath>
+            </dependency>
+	        <dependency>
 	            <groupId>kexpparser</groupId>
 	            <artifactId>kexpparser</artifactId>
 	            <version>0.0.8</version>
@@ -116,6 +124,19 @@
                     <artifactId>bae</artifactId>
                     <version>${mbee.version}</version>
                 </dependency>
+                <dependency>
+                    <groupId>gov.nasa.jpl.mbee.klang</groupId>
+                    <artifactId>klang</artifactId>
+                    <version>${mbee.version}</version>
+               </dependency>
+<!--                 <dependency>
+                    <groupId>klang</groupId>
+                    <artifactId>klang</artifactId>
+                    <version>0.0.9</version>
+                    <scope>system</scope>
+                    <type>jar</type>
+                    <systemPath>${project.basedir}/src/main/amp/web/WEB-INF/lib/klang.jar</systemPath>
+               </dependency> -->
                 <dependency>
                     <groupId>kexpparser</groupId>
                     <artifactId>kexpparser</artifactId>
@@ -293,6 +314,13 @@
 	        <artifactId>json</artifactId>
 	        <version>20140107</version>
 	    </dependency>
+	    
+	    <dependency>
+            <groupId>org.antlr</groupId>
+            <artifactId>antlr4</artifactId>
+            <version>4.5</version>
+        </dependency>
+	    
     </dependencies>
 
 	
