@@ -11,6 +11,7 @@ import gov.nasa.jpl.mbee.util.Timer;
 import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.actions.ActionUtil;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode.EmsVersion;
+
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.Serializable;
@@ -43,6 +44,7 @@ import org.alfresco.model.ContentModel;
 import org.alfresco.repo.domain.node.NodeDAO;
 import org.alfresco.repo.jscript.ScriptNode;
 import org.alfresco.repo.jscript.ScriptVersion;
+import org.alfresco.repo.model.Repository;
 import org.alfresco.repo.node.db.DbNodeServiceImpl;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
@@ -837,6 +839,11 @@ public class NodeUtil {
                 ApplicationContextHelper.getApplicationContext( contextPath );
         return applicationContext;
     }
+    
+    public static Repository getRepository() {
+        return (Repository)getApplicationContext().getBean( "repositoryHelper" );
+    }
+
 
     public static ServiceRegistry getServices() {
         return getServiceRegistry();
@@ -1107,12 +1114,14 @@ public class NodeUtil {
                     nodeRefs = results;
                 }
                 else {
+//logger.warn("filterResults( results=" + results + ") = ");
                     nodeRefs = filterResults( results, specifier, prefix,
                                               usedFullCache || usedSimpleCache,
                                               ignoreWorkspace,
                                               workspace, onlyThisWorkspace,
                                               dateTime, justFirst, exactMatch,
                                               services, includeDeleted, siteName );
+//logger.warn("" + nodeRefs);
                     if (logger.isDebugEnabled()) logger.debug("filterResults = " + nodeRefs );
                 }
 
@@ -1123,6 +1132,7 @@ public class NodeUtil {
                                               dateTime, justFirst, exactMatch,
                                               services, includeDeleted, siteName );
                 if (logger.isDebugEnabled()) logger.debug("correctForDeleted nodeRefs = " + nodeRefs );
+//logger.warn("correctForDeleted nodeRefs = " + nodeRefs );
 
             } // ends if (results != null)
 
@@ -1146,6 +1156,7 @@ public class NodeUtil {
             nodeRefs = filterForPermissions( nodeRefs, PermissionService.READ,
                                              putInFullCache );
             if (logger.isDebugEnabled()) logger.debug("filterForPermissions nodeRefs = " + nodeRefs );
+//logger.warn("filterForPermissions nodeRefs = " + nodeRefs );
             
         } finally {
             // Debug output
@@ -1823,6 +1834,8 @@ public class NodeUtil {
                     //usedFullCache = true;
                     cacheUsed = CacheUsed.FULL;
                 }
+            } else {
+                cacheResults.isExactMatch();
             }
         }
         cacheResults.cachedUsed = cacheUsed;
