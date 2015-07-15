@@ -410,6 +410,11 @@
                 <property name="sysml:aggregation">
                     <type>d:text</type>
                     <mandatory>false</mandatory>
+                    <index enabled="true">
+                        <atomic>false</atomic>
+                        <stored>false</stored>
+                        <tokenised>true</tokenised>
+                    </index>
                     <constraints>
                         <constraint name="sysml:aggregation_constraint" type="LIST">
                             <parameter name="allowedValues">
@@ -421,11 +426,6 @@
                             </parameter>
                         </constraint>
                     </constraints>
-                    <index enabled="true">
-                        <atomic>false</atomic>
-                        <stored>false</stored>
-                        <tokenised>true</tokenised>
-                    </index>
                 </property>
 			</properties>
 			<associations/>
