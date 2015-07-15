@@ -2519,6 +2519,8 @@ public class EmsScriptNode extends ScriptNode implements
                 (ArrayList< NodeRef >)this.getNodeRefProperty( Acm.ACM_OWNED_ATTRIBUTE, 
                                                                true, dateTime,
                                                                this.getWorkspace());
+        JSONArray ownedAttributeIds = addNodeRefIdsJSON( nodeRefsOwnedAttribute );
+        putInJson( elementJson, Acm.JSON_OWNED_ATTRIBUTE, ownedAttributeIds, filter );
         
         if (isIncludeQualified) {
             if ( filter == null || filter.isEmpty() || filter.contains( "qualifiedName" ) ) {
