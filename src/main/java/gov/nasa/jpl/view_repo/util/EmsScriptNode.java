@@ -2515,6 +2515,11 @@ public class EmsScriptNode extends ScriptNode implements
         if (isMetatype != null) elementJson.put( Acm.JSON_IS_METATYPE, isMetatype );
         if (metatypes != null) elementJson.put( Acm.JSON_METATYPES, metatypes );
         
+        ArrayList< NodeRef > nodeRefsOwnedAttribute =
+                (ArrayList< NodeRef >)this.getNodeRefProperty( Acm.ACM_OWNED_ATTRIBUTE, 
+                                                               true, dateTime,
+                                                               this.getWorkspace());
+        
         if (isIncludeQualified) {
             if ( filter == null || filter.isEmpty() || filter.contains( "qualifiedName" ) ) {
                 putInJson( elementJson, "qualifiedName", this.getSysmlQName(dateTime, getWorkspace(), true), filter );
@@ -5497,6 +5502,9 @@ public class EmsScriptNode extends ScriptNode implements
         putInJson( json, Acm.JSON_UPPER,
                    addInternalJSON( node.getNodeRefProperty(Acm.ACM_LOWER, dateTime, ws), ws, dateTime ),
                    filter );
+
+        putInJson( json, Acm.JSON_AGGREGATION,
+                   node.getProperty( Acm.ACM_AGGREGATION), filter );
     }
 
     protected

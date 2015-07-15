@@ -155,6 +155,7 @@ public class Acm {
     public static final String JSON_CONNECTOR_VALUE = "connectorValue";
     public static final String JSON_ASSOCIATION = "Association";
     public static final String JSON_OWNED_END = "ownedEnd";
+    public static final String JSON_AGGREGATION = "aggregation";
     public static final String JSON_SOURCE_AGGREGATION = "sourceAggregation";
     public static final String JSON_TARGET_AGGREGATION = "targetAggregation";
     public static final String JSON_CHARACTERIZES = "Characterizes";
@@ -185,6 +186,8 @@ public class Acm {
     public static final String JSON_METATYPES = "metatypes";
     public static final String JSON_APPLIED_METATYPES = "appliedMetatypes";
 
+    public static final String JSON_OWNED_ATTRIBUTE = "ownedAttribute";
+    
     // ACM types with the different name spaces
     public static final String SYSML = "sysml:";
     public static final String VIEW = "view2:";
@@ -306,6 +309,7 @@ public class Acm {
     public static final String ACM_CONNECTOR_VALUE = SYSML + JSON_CONNECTOR_VALUE;
     public static final String ACM_ASSOCIATION = SYSML + JSON_ASSOCIATION;
     public static final String ACM_OWNED_END = SYSML + JSON_OWNED_END;
+    public static final String ACM_AGGREGATION = SYSML + JSON_AGGREGATION;
     public static final String ACM_SOURCE_AGGREGATION = SYSML + JSON_SOURCE_AGGREGATION;
     public static final String ACM_TARGET_AGGREGATION = SYSML + JSON_TARGET_AGGREGATION;
     public static final String ACM_CHARACTERIZES = SYSML + JSON_CHARACTERIZES;
@@ -341,6 +345,10 @@ public class Acm {
     public static final String ACM_METATYPES = SYSML + JSON_METATYPES;
     public static final String ACM_APPLIED_METATYPES = SYSML + JSON_APPLIED_METATYPES;
     public static final String ACM_HAS_METATYPE = SYSML + "HasMetatype";
+
+    
+    public static final String ACM_OWNED_ATTRIBUTE = SYSML + JSON_OWNED_ATTRIBUTE;
+    public static final String ACM_OWNS_ATTRIBUTE = SYSML + "OwnsAttribute";
 
     /**
      *  JSON to Alfresco Content Model mapping
@@ -414,6 +422,7 @@ public class Acm {
             add(JSON_VIEW_2_VIEW);
             add(JSON_NO_SECTIONS);
             add(JSON_CONNECTOR_ROLE);
+            add(JSON_OWNED_ATTRIBUTE);
 //            add(JSON_ANNOTATED_ELEMENTS);
         }
     };
@@ -440,6 +449,7 @@ public class Acm {
            add(JSON_OPERATION_EXPRESSION);
            add(JSON_METHOD);
            add(JSON_CONNECTOR_ROLE);
+           add(JSON_OWNED_ATTRIBUTE);
 //           add(JSON_ANNOTATED_ELEMENTS);
        }
    };
@@ -523,6 +533,7 @@ public class Acm {
             add(JSON_OPERATION_EXPRESSION);
             add(JSON_METHOD);
             add(JSON_CONNECTOR_ROLE);
+            // TODO -- Not everything is here (ex, aggregation), but MISC_PROPS_JSON is not used outside Acm.
         }
     };
 
@@ -563,6 +574,7 @@ public class Acm {
 
             add(JSON_SPECIALIZATION);
 
+            add(JSON_OWNED_ATTRIBUTE);
         }
     };
 
@@ -578,6 +590,7 @@ public class Acm {
             add(JSON_NAME);
             add(JSON_DOCUMENTATION);
             add(JSON_OWNER);
+            add(JSON_OWNED_ATTRIBUTE);
         }
     };
 
