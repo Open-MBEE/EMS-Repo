@@ -7,10 +7,10 @@ import commands
 site = 'europa'
 project = '123456'
 folder = 'generated'
-numberOfElements=100
-numberOfElementsToPostAtATime = 3
-numberOfChangesPerElement = 10
-numberOfChangesToPostAtATime = 3
+numberOfElements=5
+numberOfElementsToPostAtATime = 2
+numberOfChangesPerElement = 3
+numberOfChangesToPostAtATime = 2
 folderBranchingFactor=10  # 0 means everything in the same folder
 
 def doIt():
@@ -23,7 +23,7 @@ def doIt():
         jStr = '0'
         name = id + "_" + jStr
         elemJsonStr = '{"sysmlid":"' + id + '","name":"' + name + '"}'
-        if elementsJsonArrayStr == '':
+        if elementsJsonArrayStr != '':
             elementsJsonArrayStr = elementsJsonArrayStr + ',' + elemJsonStr
         else:
             elementsJsonArrayStr = elemJsonStr
@@ -39,12 +39,11 @@ def doIt():
         post(elementsJsonStr)
         elementsJsonArrayStr = ''
     ct = 0
-    for i in range(0,numberOfElements):
-        elementsJsonStr = '\'{"elements":[%s]}\''
-        iStr = "%06d"%i
-        id = "e_" + iStr
-        for j in range(0,numberOfChangesPerElement):
-            jStr = "%06d"%j
+    for j in range(0,numberOfChangesPerElement):
+        jStr = "%06d"%j
+        for i in range(0,numberOfElements):
+            iStr = "%06d"%i
+            id = "e_" + iStr
             name = id + "_" + jStr
             elementJsonStr = '{"sysmlid":"' + id + '","name":"' + name + '"}'
             if elementsJsonArrayStr == '':
@@ -52,7 +51,7 @@ def doIt():
             else:
                 elementsJsonArrayStr = elemJsonStr
             ct = ct + 1
-            if ct % numberOfChangesToPostAtATime == 0:
+            if ct % numberOfChangesToPostAtATime != 0:
                 elementsJsonStr = elementsJsonStrTemplate%elementsJsonArrayStr
                 post(elementsJsonStr)
                 elementsJsonArrayStr = ''
@@ -63,8 +62,19 @@ def doIt():
         elementsJsonArrayStr = ''
 
 def post(elementsJsonStr):
-    curl_cmd = create_curl_cmd(type="POST",data='\'{"elements":[{]}\'', \
+    curl_cmd = create_curl_cmd(type="POST",data=elementsJsonStr, \
                                base_url=BASE_URL_WS, \
-                               branch="master/sites/europa/projects?createSite=true", \
+                               post_type="elements",branch="master/", \
                                project_post=True)
-    (status,output) = commands.getstatusoutput(curl_cmd)
+    print curl_cmd
+    #(status,output) = commands.getstatusoutput(curl_cmd)
+    
+##########################################################################################    
+#
+# MAIN METHOD 
+#
+##########################################################################################    
+if __name__ == '__main__':
+    
+    doIt()
+
