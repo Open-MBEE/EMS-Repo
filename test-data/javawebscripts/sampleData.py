@@ -43,9 +43,6 @@ def doIt():
         elementsJsonStr = '\'{"elements":[%s]}\''
         iStr = "%06d"%i
         id = "e_" + iStr
-        jStr = '0'
-        name = id + "_" + jStr
-        elementJsonStr = '{"sysmlid":"' + id + '","name":"' + name + '"}'
         for j in range(0,numberOfChangesPerElement):
             jStr = "%06d"%j
             name = id + "_" + jStr
@@ -66,7 +63,8 @@ def doIt():
         elementsJsonArrayStr = ''
 
 def post(elementsJsonStr):
-    curl_cmd = create_curl_cmd(type="POST",data='\'{"elements":[{]}\'',
-    base_url=BASE_URL_WS,
-    branch="master/sites/europa/projects?createSite=true",project_post=True),
+    curl_cmd = create_curl_cmd(type="POST",data='\'{"elements":[{]}\'', \
+                               base_url=BASE_URL_WS, \
+                               branch="master/sites/europa/projects?createSite=true", \
+                               project_post=True)
     (status,output) = commands.getstatusoutput(curl_cmd)
