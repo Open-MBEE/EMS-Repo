@@ -256,6 +256,69 @@
         "specialization" : {
             "type" : "Operation"
         }
+    },
+    
+    {
+        "sysmlid" : "Min",
+        "name" : "Min",
+        "owner" : "operations",
+        "specialization" : {
+            "type" : "Operation"
+        }
+    },
+    
+    {
+        "sysmlid" : "Max",
+        "name" : "Max",
+        "owner" : "operations",
+        "specialization" : {
+            "type" : "Operation"
+        }
+    },
+    
+    {
+        "sysmlid" : "Name",
+        "name" : "Name",
+        "owner" : "operations",
+        "specialization" : {
+            "type" : "Operation"
+        }
+    },
+
+    {
+        "sysmlid" : "List",
+        "name" : "List",
+        "owner" : "operations",
+        "specialization" : {
+            "type" : "Operation"
+        }
+    },
+
+    {
+        "sysmlid" : "Text",
+        "name" : "Text",
+        "owner" : "operations",
+        "specialization" : {
+            "type" : "Operation"
+        }
+    },
+
+    {
+        "sysmlid" : "Evaluate",
+        "name" : "Evaluate",
+        "owner" : "operations",
+        "specialization" : {
+            "type" : "Operation"
+        }
+    },
+
+    {
+        "sysmlid" : "Table",
+        "name" : "Table",
+        "owner" : "operations",
+        "specialization" : {
+            "type" : "Operation"
+        }
     }
 
 ]}

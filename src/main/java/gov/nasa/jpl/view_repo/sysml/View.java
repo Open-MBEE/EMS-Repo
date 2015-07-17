@@ -443,12 +443,15 @@ public class View extends List implements sysml.view.View< EmsScriptNode >, Comp
         } else if ( evalResult instanceof Collection ) {
             Collection< ? > c = (Collection< ? >)evalResult;
             for ( Object o : c ) {
+                if (!(o instanceof Viewable) ) {
+                    o = Expression.evaluate( o, Viewable.class, true );
+                }
                 try {
                     Viewable< EmsScriptNode > viewable =
                             (Viewable< EmsScriptNode >)o;
                     add( viewable );
                 } catch ( ClassCastException e ) {
-                    e.printStackTrace();
+                    Debug.error( "Failed to cast to Viewable: " + o );
                 }
             }
 //            java.util.List< Viewable<EmsScriptNode> > viewables =
