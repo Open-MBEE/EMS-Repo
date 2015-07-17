@@ -1,6 +1,7 @@
 package gov.nasa.jpl.view_repo.actions;
 
 import gov.nasa.jpl.mbee.util.Timer;
+import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.EmsTransaction;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
@@ -47,7 +48,9 @@ public class WorkspaceDiffActionExecuter extends ActionExecuterAbstractBase {
     public static final String PARAM_TIME_2 = "time2";
     public static final String PARAM_WS_1 = "ws1";
     public static final String PARAM_WS_2 = "ws2";
-    
+    public static final String PARAM_TS_1 = "ts1";
+    public static final String PARAM_TS_2 = "ts2";
+
     static Logger logger = Logger.getLogger(WorkspaceDiffActionExecuter.class);
     
     public void setRepository(Repository rep) {
@@ -66,6 +69,9 @@ public class WorkspaceDiffActionExecuter extends ActionExecuterAbstractBase {
         final Date dateTime2 = (Date) action.getParameterValue(PARAM_TIME_2);
         final WorkspaceNode ws1 = (WorkspaceNode) action.getParameterValue(PARAM_WS_1);
         final WorkspaceNode ws2 = (WorkspaceNode) action.getParameterValue(PARAM_WS_2);
+        final String ts1 = (String) action.getParameterValue(PARAM_TS_1);
+        final String ts2 = (String) action.getParameterValue(PARAM_TS_2);
+
         final EmsScriptNode jsonNode = new EmsScriptNode(actionedUponNodeRef, services, response);
 
         if (logger.isDebugEnabled()) logger.debug( "started execution of diff for " + WorkspaceNode.getWorkspaceName(ws1) + " and "+ WorkspaceNode.getWorkspaceName(ws2));
@@ -102,7 +108,8 @@ public class WorkspaceDiffActionExecuter extends ActionExecuterAbstractBase {
                 // Send off the notification email
                 String subject =
                         "Workspace diff for " + WorkspaceNode.getWorkspaceName(ws1) + " and " + WorkspaceNode.getWorkspaceName(ws2) + " completed";
-                ActionUtil.sendEmailToModifier(jsonNode, subject, services, response.toString());
+                
+                ActionUtil.sendEmailToModifier(jsonNode, subject, services, response.toString(), ts1, ts2, ws1, ws2);
                 
                 if (logger.isDebugEnabled()) logger.debug( "WorkspaceDiffActionExecuter: " + timer );
             }
