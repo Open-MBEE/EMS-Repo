@@ -13,61 +13,47 @@ numberOfChangesPerElement = 3
 numberOfChangesToPostAtATime = 2
 folderBranchingFactor=10  # 0 means everything in the same folder
 
-def doIt():
-    elementsJsonStrTemplate = '\'{"elements":[%s]}\''
-    elementsJsonArrayStr = ''
-    ct = 0
-    for i in range(0,numberOfElements):
+elementsJsonStrTemplate = '\'{"elements":[%s]}\''
+
+def writeJsonStr(jStr):
+    count = 0
+    jsonArrayStr = ''
+    for i in range(0, numberOfElements):
         iStr = "%06d"%i
         id = "e_" + iStr
-        jStr = '0'
         name = id + "_" + jStr
-        elemJsonStr = '{"sysmlid":"' + id + '","name":"' + name + '"}'
-        if elementsJsonArrayStr != '':
-            elementsJsonArrayStr = elementsJsonArrayStr + ',' + elemJsonStr
+        jsonStr = '{"sysmlid":"' + id + '","name":"' + name + '"}'
+        if jsonArrayStr != '':
+            jsonArrayStr = jsonArrayStr + ',' + jsonStr
         else:
-            elementsJsonArrayStr = elemJsonStr
-            ct = ct + 1
-        if ct % numberOfElementsToPostAtATime == 0:
-            if elementsJsonArrayStr != '':
-                elementsJsonStr = elementsJsonStrTemplate%elementsJsonArrayStr
+            jsonArrayStr = jsonStr
+        count = count + 1
+        
+        if count % numberOfElementsToPostAtATime == 0:
+            if jsonArrayStr != '':
+                elementsJsonStr = elementsJsonStrTemplate%jsonArrayStr
                 post(elementsJsonStr)
-                elementsJsonArrayStr = ''
-    # post any remaining elements
-    if elementsJsonArrayStr != '':
-        elementsJsonStr = elementsJsonStrTemplate%elementsJsonArrayStr
+                jsonArrayStr = ''
+    #post any remaining elements
+    if jsonArrayStr != '':
+        elementsJsonStr = elementsJsonStrTemplate%jsonArrayStr
         post(elementsJsonStr)
-        elementsJsonArrayStr = ''
-    ct = 0
-    for j in range(0,numberOfChangesPerElement):
-        jStr = "%06d"%j
-        for i in range(0,numberOfElements):
-            iStr = "%06d"%i
-            id = "e_" + iStr
-            name = id + "_" + jStr
-            elementJsonStr = '{"sysmlid":"' + id + '","name":"' + name + '"}'
-            if elementsJsonArrayStr == '':
-                elementsJsonArrayStr = elementsJsonArrayStr + ',' + elemJsonStr
-            else:
-                elementsJsonArrayStr = elemJsonStr
-            ct = ct + 1
-            if ct % numberOfChangesToPostAtATime != 0:
-                elementsJsonStr = elementsJsonStrTemplate%elementsJsonArrayStr
-                post(elementsJsonStr)
-                elementsJsonArrayStr = ''
-    # post any remaining elements
-    if elementsJsonArrayStr != '':
-        elementsJsonStr = elementsJsonStrTemplate%elementsJsonArrayStr
-        post(elementsJsonStr)
-        elementsJsonArrayStr = ''
-
+        jsonArrayStr = ''  
+        
 def post(elementsJsonStr):
-    curl_cmd = create_curl_cmd(type="POST",data=elementsJsonStr, \
-                               base_url=BASE_URL_WS, \
-                               post_type="elements",branch="master/", \
+    curl_cmd = create_curl_cmd(type="POST",data=elementsJsonStr,
+                               base_url=BASE_URL_WS,
+                               branch="master/elements",
                                project_post=True)
-    print curl_cmd
-    #(status,output) = commands.getstatusoutput(curl_cmd)
+    print curl_cmd + "\n"
+    #(status,output) = commands.getstatusoutput(curl_cmd)              
+    
+def doIt():
+    writeJsonStr('0')
+
+    for j in range(0,numberOfChangesPerElement): #3
+        jStr = "%06d"%j
+        writeJsonStr(jStr)
     
 ##########################################################################################    
 #
