@@ -257,14 +257,15 @@ public class ProductsWebscript extends AbstractJavaWebScript {
                                                                 Acm.ACM_PRODUCT, false,
                                                                 workspace, dateTime,
                                                                 null);
+        Set<String> visitedNodes = new HashSet<String>();
         if (nodeList != null) {
             Set<EmsScriptNode> nodes = new HashSet<EmsScriptNode>(nodeList.values());
             for ( EmsScriptNode node : nodes) {
                 if (node != null) {
-                    JSONObject nodeJson = node.toJSONObject(workspace, dateTime);;
+                    JSONObject nodeJson = node.toJSONObject(workspace, dateTime);
                     String nodeSiteName = node.getSiteCharacterizationId(dateTime, workspace);
 
-                    if (timestamp != null) {
+                    if (timestamp != null && nodeJson != null) {
                         JSONArray siteCache = Utils.get( productCache, workspaceId, timestamp, nodeSiteName );
                         if (siteCache == null) {
                             siteCache = new JSONArray();
@@ -272,7 +273,13 @@ public class ProductsWebscript extends AbstractJavaWebScript {
                             Utils.put( productCache, workspaceId, timestamp, nodeSiteName, siteCache);
                         }
                         
-                        siteCache.put( nodeJson );
+                        // in case we have duplicates in search result - seems to be some weird
+                        // behavior going on
+                        String sysmlid = nodeJson.getString( "sysmlid" );
+                        if (sysmlid != null && !visitedNodes.contains( sysmlid )) {
+                            siteCache.put( nodeJson );
+                            visitedNodes.add( nodeJson.getString( "sysmlid" ) );
+                        }
                     }
                     
                 }

@@ -1,5 +1,6 @@
 package gov.nasa.jpl.view_repo.webscripts;
 
+import gov.nasa.jpl.mbee.util.Debug;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.EmsTransaction;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
@@ -18,7 +19,8 @@ public class AllFlagsGet extends FlagSet {
         if (path.equalsIgnoreCase( "alwaysTurnDebugOff" )) {
             AbstractJavaWebScript.alwaysTurnOffDebugOut = val;
         } else if (path.equalsIgnoreCase ("debug")) {
-            AbstractJavaWebScript.alwaysTurnOffDebugOut = val;
+            if ( val ) Debug.turnOn();
+            else Debug.turnOff(); 
         } else if (path.equalsIgnoreCase("fullCache")) {
             NodeUtil.doFullCaching = val;
         } else if (path.equalsIgnoreCase("heisenCache")) {
@@ -63,7 +65,7 @@ public class AllFlagsGet extends FlagSet {
         if (path.equalsIgnoreCase( "alwaysTurnDebugOff" )) {
             return AbstractJavaWebScript.alwaysTurnOffDebugOut;
         } else if (path.equalsIgnoreCase ("debug")) {
-            return AbstractJavaWebScript.alwaysTurnOffDebugOut;
+            return Debug.isOn();
         } else if (path.equalsIgnoreCase("fullCache")) {
             return NodeUtil.doFullCaching;
         } else if (path.equalsIgnoreCase("heisenCache")) {
@@ -101,7 +103,7 @@ public class AllFlagsGet extends FlagSet {
         if (path.equalsIgnoreCase( "alwaysTurnDebugOff" )) {
             return "alwaysTurnOffDebugOut";
         } else if (path.equalsIgnoreCase ("debug")) {
-            return "alwaysTurnOffDebugOut";
+            return "debug";
         } else if (path.equalsIgnoreCase("fullCache")) {
             return "doFullCaching";
         } else if (path.equalsIgnoreCase("heisenCache")) {
