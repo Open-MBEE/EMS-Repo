@@ -31,7 +31,7 @@ def createWorkspaces():
         print "\n" + "CREATING WORKSPACES\n"
         
     for workspace in workspaces:
-        workspaceName = workspace + "?sourceWorkspace=master"
+        workspaceName = workspace + "?sourceWorkspace=master&copyTime="+get_current_time(delay=0)
         curl_cmd = create_curl_cmd(type="POST",base_url=BASE_URL_WS,
                                    post_type="",branch=workspaceName)
         
