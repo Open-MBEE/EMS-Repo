@@ -29,6 +29,7 @@
 
 package gov.nasa.jpl.view_repo.actions;
 
+import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
@@ -62,6 +63,47 @@ public class ActionUtil {
     private ActionUtil() {
         // do nothing
     }
+    
+    private static String getContextUrl() {
+        
+        String hostname = getHostName();
+        if (hostname.endsWith("/" )) {
+            hostname = hostname.substring( 0, hostname.lastIndexOf( "/" ) );
+        } 
+        if (!hostname.contains( "jpl.nasa.gov" )) {
+            hostname += ".jpl.nasa.gov";
+        }
+        return "https://" + hostname + "/alfresco"; 
+    }
+    
+    /**
+     * Send off an email to the modifier of the node
+     * @param node      Node whose modifier should be sent an email
+     * @param subject   Subjecto of message
+     * @param services
+     * @param response
+     */
+    public static void sendEmailToModifier(EmsScriptNode node, String subject, ServiceRegistry services,
+                                           String logString, String ts1, String ts2, WorkspaceNode ws1,
+                                           WorkspaceNode ws2) {
+        
+        // Save off the log
+        EmsScriptNode logNode = ActionUtil.saveLogToFile(node, "text/plain", services, logString);
+
+        String contextUrl = getContextUrl();
+        
+        String ws1id = WorkspaceNode.getId( ws1 );
+        String ws2id = WorkspaceNode.getId( ws2 );
+
+        String msg = "Log URL: " + contextUrl + logNode.getUrl();
+        if (!Utils.isNullOrEmpty( contextUrl ) && !Utils.isNullOrEmpty( ws1id ) && !Utils.isNullOrEmpty( ws2id ) && !Utils.isNullOrEmpty( ts1 ) && !Utils.isNullOrEmpty( ts2 )) {
+            String diffPath = "Diff Results: " + contextUrl + "/mmsapp/mms.html#/workspaces/"+ws2id+"/diff/"+ws2id+"/"+ts2+"/"+ws1id+"/"+ts1;
+            msg = msg + "\n\n" + diffPath;
+        }
+
+        // Send off the notification email
+        sendEmailToModifier(node, msg, subject, services);
+    }
 
     /**
      * Send off an email to the modifier of the node
@@ -76,15 +118,8 @@ public class ActionUtil {
         // Save off the log
         EmsScriptNode logNode = ActionUtil.saveLogToFile(node, "text/plain", services, logString);
 
-        String hostname = getHostName();
-        if (hostname.endsWith("/" )) {
-            hostname = hostname.substring( 0, hostname.lastIndexOf( "/" ) );
-        } 
-        if (!hostname.contains( "jpl.nasa.gov" )) {
-            hostname += ".jpl.nasa.gov";
-        }
-        String contextUrl = "https://" + hostname + "/alfresco";
-            
+        String contextUrl = getContextUrl();
+
         // Send off the notification email
         String msg = "Log URL: " + contextUrl + logNode.getUrl();
         sendEmailToModifier(node, msg, subject, services);

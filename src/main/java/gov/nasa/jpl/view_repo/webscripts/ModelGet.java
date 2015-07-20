@@ -36,6 +36,7 @@ import gov.nasa.jpl.mbee.util.Timer;
 import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
+import gov.nasa.jpl.view_repo.util.EmsTransaction;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 
@@ -43,6 +44,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -189,14 +191,21 @@ public class ModelGet extends AbstractJavaWebScript {
         // make sure to pass down view request flag to instance
         setIsViewRequest( isViewRequest );
 
-        JSONArray elementsJson = new JSONArray();
-        elementsJson = handleRequest( req );
-
         JSONObject top = NodeUtil.newJsonObject();
+        JSONArray elementsJson = handleRequest( req, top );
+
         try {
             if ( elementsJson.length() > 0 ) {
                 top.put( "elements", elementsJson );
             }
+//            boolean evaluate = getBooleanArg( req, "evaluate", false );
+//            WorkspaceNode ws = getWorkspace( req );
+//            if ( evaluate ) {
+//                Set< EmsScriptNode > elementSet = new HashSet<EmsScriptNode>( elementsFound.values() );
+//                Map< Object, Object > r = evaluate(elementSet , ws);
+//                top
+//            }
+
             if ( !Utils.isNullOrEmpty( response.toString() ) ) top.put( "message",
                                                                         response.toString() );
             if ( prettyPrint ) {
@@ -228,9 +237,10 @@ public class ModelGet extends AbstractJavaWebScript {
      * elements
      * 
      * @param req
+     * @param top 
      * @return
      */
-    private JSONArray handleRequest( WebScriptRequest req ) {
+    private JSONArray handleRequest( WebScriptRequest req, final JSONObject top  ) {
         // REVIEW -- Why check for errors here if validate has already been
         // called? Is the error checking code different? Why?
         try {
@@ -253,8 +263,9 @@ public class ModelGet extends AbstractJavaWebScript {
             String timestamp = req.getParameter( "timestamp" );
             Date dateTime = TimeUtils.dateFromTimestamp( timestamp );
             boolean connected = getBooleanArg( req, "connected", false );
+            boolean evaluate = getBooleanArg( req, "evaluate", false );
             String relationship = req.getParameter( "relationship" );
-
+            
             WorkspaceNode workspace = getWorkspace( req );
 
             // see if prettyPrint default is overridden and change
@@ -293,7 +304,9 @@ public class ModelGet extends AbstractJavaWebScript {
                                         new HashSet<String>() );
             }
 
-            handleElements( workspace, dateTime, includeQualified );
+            boolean checkReadPermission = true;  // TODO -- REVIEW -- Shouldn't this be false? 
+            handleElements( workspace, dateTime, includeQualified, evaluate,
+                            top, checkReadPermission );
         } catch ( JSONException e ) {
             e.printStackTrace();
         }
@@ -495,20 +508,30 @@ public class ModelGet extends AbstractJavaWebScript {
 
     /**
      * Build up the element JSONObject
+     * @param top 
+     * @param evaluate 
      * 
      * @throws JSONException
      */
     protected void
             handleElements( WorkspaceNode ws, Date dateTime,
-                            boolean includeQualified ) throws JSONException {
+                            boolean includeQualified, boolean evaluate,
+                            JSONObject top, boolean checkPermission ) throws JSONException {
+        final Map<EmsScriptNode, JSONObject> elementsJsonMap =
+                new LinkedHashMap< EmsScriptNode, JSONObject >();
         for ( String id : elementsFound.keySet() ) {
             EmsScriptNode node = elementsFound.get( id );
 
-            if ( checkPermissions( node, PermissionService.READ ) ) {
-                elements.put( node.toJSONObject( ws, dateTime,
-                                                 includeQualified,
-                                                 elementProperties.get( id ) ) );
+            if ( !checkPermission || checkPermissions( node, PermissionService.READ ) ) {
+                JSONObject json = node.toJSONObject( ws, dateTime,
+                                                     includeQualified,
+                                                     elementProperties.get( id ) );
+                elements.put( json );
+                elementsJsonMap.put( node, json );
             } // TODO -- REVIEW -- Warning if no permissions?
+        }
+        if ( evaluate ) {
+            evaluate( elementsJsonMap, top, ws );
         }
     }
 

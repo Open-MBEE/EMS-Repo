@@ -281,6 +281,7 @@ public class EmsScriptNode extends ScriptNode implements
 
     private View view;
 
+    protected EmsScriptNode projectNode = null;
     protected WorkspaceNode workspace = null;
     protected WorkspaceNode parentWorkspace = null;
 
@@ -2514,6 +2515,15 @@ public class EmsScriptNode extends ScriptNode implements
         if (isMetatype != null) elementJson.put( Acm.JSON_IS_METATYPE, isMetatype );
         if (metatypes != null) elementJson.put( Acm.JSON_METATYPES, metatypes );
         
+        ArrayList< NodeRef > nodeRefsOwnedAttribute =
+                (ArrayList< NodeRef >)this.getNodeRefProperty( Acm.ACM_OWNED_ATTRIBUTE, 
+                                                               true, dateTime,
+                                                               this.getWorkspace());
+        if ( !Utils.isNullOrEmpty( nodeRefsOwnedAttribute ) ) { 
+            JSONArray ownedAttributeIds = addNodeRefIdsJSON( nodeRefsOwnedAttribute );
+            putInJson( elementJson, Acm.JSON_OWNED_ATTRIBUTE, ownedAttributeIds, filter );
+        }
+        
         if (isIncludeQualified) {
             if ( filter == null || filter.isEmpty() || filter.contains( "qualifiedName" ) ) {
                 putInJson( elementJson, "qualifiedName", this.getSysmlQName(dateTime, getWorkspace(), true), filter );
@@ -2553,6 +2563,10 @@ public class EmsScriptNode extends ScriptNode implements
             putInJson( elementJson, "owner", owernIdObj, filter );
         }
 
+        //putInJson( json, "evaluation", "Hi, Erik!", null );
+        //elementJson.put( "evaluation", "Hi, Erik!" );
+
+        
         // Add version information - can't be used for reverting since things may be in
         // different workspaces, but informative nonetheless
         if ( version != null ) {
@@ -2694,6 +2708,8 @@ public class EmsScriptNode extends ScriptNode implements
         }
 
         if ( justTheType ) return;
+
+        //json.put( "evaluation", "Hi, Erik!" );
 
         for ( QName aspectQname : this.getAspectsSet() ) {
             // reflection is too slow?
@@ -3363,6 +3379,8 @@ public class EmsScriptNode extends ScriptNode implements
     }
 
     public EmsScriptNode getProjectNode(WorkspaceNode ws) {
+        if (projectNode != null) return projectNode;
+        
         EmsScriptNode parent = this;
         EmsScriptNode sites = null;
         EmsScriptNode projectPkg = null;
@@ -3375,15 +3393,11 @@ public class EmsScriptNode extends ScriptNode implements
         }
         Set<EmsScriptNode> seen = new HashSet<EmsScriptNode>();
         while ( parent != null && parent.getSysmlId() != null &&
-                !seen.contains( parent ) ) {
+                !seen.contains( parent ) && projectPkg != null) {
             if ( models == null && parent.getName().equals( "Models" ) ) {
                 models = parent;
                 projectPkg = oldparent;
-            } else if ( models != null && sites == null &&
-                        parent.getName().equals( "Sites" ) ) {
-                sites = parent;
-            } else if ( sites != null && parent.isWorkspaceTop() ) {
-                EmsScriptNode projectNode =  null;
+                
                 // IMPORTANT!! DON'T TAKE THIS OUT
                 // EMS was pushed when all model data was in Project reified node, not in
                 // the Project reified project, so need to do both checks
@@ -3397,10 +3411,6 @@ public class EmsScriptNode extends ScriptNode implements
                                                      + projectNode.getName() );
                     }
                 }
-                if ( changeUser ) {
-                    AuthenticationUtil.setRunAsUser( runAsUser );
-                }
-                return projectNode;
             }
             seen.add(parent);
             oldparent = parent;
@@ -3418,7 +3428,7 @@ public class EmsScriptNode extends ScriptNode implements
         if ( changeUser ) {
             AuthenticationUtil.setRunAsUser( runAsUser );
         }
-        return projectPkg;
+        return projectNode;
     }
 
     public String getProjectId(WorkspaceNode ws) {
@@ -5041,10 +5051,12 @@ public class EmsScriptNode extends ScriptNode implements
             QName a = queue.get(0);
             queue.remove( 0 );
             AspectDefinition aspect = ds.getAspect( a );
-            QName p = aspect.getParentName();
-            if ( p != null && !aspects.contains( p ) ) {
-                aspects.add( p );
-                queue.add( p );
+            if (aspect != null) {
+                QName p = aspect.getParentName();
+                if ( p != null && !aspects.contains( p ) ) {
+                    aspects.add( p );
+                    queue.add( p );
+                }
             }
         }
         return aspects;
@@ -5496,6 +5508,9 @@ public class EmsScriptNode extends ScriptNode implements
         putInJson( json, Acm.JSON_UPPER,
                    addInternalJSON( node.getNodeRefProperty(Acm.ACM_LOWER, dateTime, ws), ws, dateTime ),
                    filter );
+
+        putInJson( json, Acm.JSON_AGGREGATION,
+                   node.getProperty( Acm.ACM_AGGREGATION), filter );
     }
 
     protected
@@ -5780,9 +5795,7 @@ public class EmsScriptNode extends ScriptNode implements
                 (ArrayList< NodeRef >)node.getNodeRefProperty( "sysml:operationParameter",
                                                                dateTime, ws);
         JSONArray ids = addNodeRefIdsJSON( nodeRefs );
-        if ( ids.length() > 0 ) {
-            putInJson( json, "parameters", ids, filter );
-        }
+        putInJson( json, "parameters", ids, filter );
 
         if ( !embeddingExpressionInOperation  ) {
             NodeRef opExpNode = (NodeRef) node.getNodeRefProperty( "sysml:operationExpression",
@@ -5814,15 +5827,11 @@ public class EmsScriptNode extends ScriptNode implements
         ArrayList< NodeRef > nodeRefs =
                 (ArrayList< NodeRef >)node.getNodeRefProperty( Acm.ACM_CLASSIFIER, dateTime, ws );
         JSONArray ids = addNodeRefIdsJSON( nodeRefs );
-        if ( ids.length() > 0 ) {
-            putInJson( json,Acm.JSON_CLASSIFIER, ids, filter );
-        }
+        putInJson( json,Acm.JSON_CLASSIFIER, ids, filter );
         
         nodeRefs = (ArrayList< NodeRef >)node.getNodeRefProperty( Acm.ACM_SLOTS, dateTime, ws );
         ids = addNodeRefIdsJSON( nodeRefs );
-        if ( ids.length() > 0 ) {
-            putInJson( json, Acm.JSON_SLOTS, ids, filter );
-        }
+        putInJson( json, Acm.JSON_SLOTS, ids, filter );
     }
 
     protected

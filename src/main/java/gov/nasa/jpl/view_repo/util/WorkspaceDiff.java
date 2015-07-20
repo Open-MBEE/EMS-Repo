@@ -335,81 +335,12 @@ public class WorkspaceDiff implements Serializable {
             }
         }
 
-        // Add the owning valuespec properties to the nodeDiff property change maps.
-        for ( Entry< EmsScriptNode, Pair< EmsScriptNode, Boolean >> entry : valueSpecMap.entrySet() ) {
-            EmsScriptNode valueNode = entry.getKey();
-            EmsScriptNode owningPropNode = entry.getValue().first;
-            boolean isWs1 = entry.getValue().second;
-//            Map< String, Pair< Object, Object > > propChanges = getPropertyChanges( owningPropNode.getSysmlId() );
-//            if ( propChanges == null ) {
-//                propChanges = new LinkedHashMap< String, Pair<Object,Object> >();
-//                getPropertyChanges().put( owningPropNode.getSysmlId(), propChanges );
-//            }
-
-            // Find the matching property that this valueSpec maps to:
-            String valueName = null;
-            //String valueName = NodeUtil.createQName( "sysml:value", getServices() ).toString();
-            for ( String acmType : Acm.TYPES_WITH_VALUESPEC.keySet() ) {
-                if ( owningPropNode.hasOrInheritsAspect( acmType ) ) {
-                    for ( String acmProp : Acm.TYPES_WITH_VALUESPEC.get(acmType) ) {
-                        Object propVal = owningPropNode.getNodeRefProperty( acmProp, 
-                                                                            isWs1 ? timestamp1 : timestamp2,
-                                                                            isWs1 ? ws1 : ws2);
-                        if ( propVal  != null) {
-                            // ArrayList of noderefs:
-                            if (propVal instanceof List) {
-                                for (Object val : (List<?>) propVal) {
-                                    if (val instanceof NodeRef) {
-                                        NodeRef ref = (NodeRef) val;
-                                        EmsScriptNode propValNode = new EmsScriptNode(ref, getServices());
-                                        if (propValNode.equals(valueNode, true)) {
-                                            valueName = NodeUtil.createQName( acmProp, getServices() ).toString();
-                                            break;
-                                        }
-                                    }
-                                }
-                            }
-                            // Single noderef:
-                            else if (propVal instanceof NodeRef) {
-                                EmsScriptNode propValNode = new EmsScriptNode((NodeRef) propVal, getServices());
-                                if (propValNode.equals(valueNode, true)) {
-                                    valueName = NodeUtil.createQName( acmProp, getServices() ).toString();
-                                    break;
-                                }
-                            }
-                        } // ends ( propVal  != null)
-                    }
-                    break;
-                }
-            } // ends for ( String acmType : Acm.TYPES_WITH_VALUESPEC.keySet() )
-                        
-//            if (valueName != null) {
-//                Pair< Object, Object > valueChange = propChanges.get( valueName );
-//                if ( valueChange == null ) {
-//                    valueChange = new Pair< Object, Object >( null, null );
-//                    propChanges.put( valueName, valueChange );
-//                }
-//                if ( getRemoved().contains( valueNode.getNodeRef() ) ) {
-//                    valueChange.first = valueNode;
-//                    getRemovedProperties( owningPropNode.getSysmlId() ).put( valueName, valueNode );
-//                } else {
-//                    valueChange.second = valueNode;
-//                    if ( getAdded().contains( valueNode.getNodeRef() ) ) {
-//                        getAddedProperties( valueNode.getSysmlId() ).put( valueName, valueNode );
-//                    } else {
-//                        getUpdatedProperties( valueNode.getSysmlId() ).put( valueName, valueChange );
-//                    }
-//                }
-//            }
-        }
-
         // Remove the owned ValueSpecifications from everything.
         for ( EmsScriptNode node : valueSpecMap.keySet() ) {
             addedElements.remove( node.getSysmlId() );
             updatedElements.remove( node.getSysmlId() );
             deletedElements.remove( node.getSysmlId() );
         }
-
 
     }
     
@@ -983,8 +914,8 @@ public class WorkspaceDiff implements Serializable {
     public boolean diff() {
         boolean status = true;
 
-        //captureDeltas();
-        captureDeltasSkeleton();
+        captureDeltas();
+        //captureDeltasSkeleton();
 
         return status;
     }
@@ -1163,7 +1094,7 @@ public class WorkspaceDiff implements Serializable {
         // does not have stand alone value specs; however, having the front end do this
         // doesn't seem wise if this assumption ever changes.  That being said, if
         // server does this filtering, it will make the skeleton diff less efficient.
-        // The server filtering has been implement in fixValueSpecifications(), which
+        // The server filtering has been implemented in fixValueSpecifications(), which
         // is a lot of the same code as NodeDiff version.
                 
         // Note:
@@ -1407,7 +1338,7 @@ public class WorkspaceDiff implements Serializable {
     
     private static JSONObject cleanElementJson(JSONObject json) {
         JSONObject result = new JSONObject();
-        String keys[] = {"sysmlid", "id", "version"};
+        String keys[] = {"sysmlid", "id", "version", "qualifiedId", "qualifiedName", "name"};
         for (String key: keys) {
             if (json.has( key )) result.put( key, json.get( key ) );
         }

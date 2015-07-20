@@ -74,6 +74,7 @@ public class FullDocPost extends AbstractJavaWebScript {
     protected String zipPath;
     protected Date time;
     protected JSONArray view2view;
+    protected String timeTagName;
 //    protected Queue queue;
 	
 	public FullDocPost(){
@@ -184,10 +185,12 @@ public class FullDocPost extends AbstractJavaWebScript {
         }
     }
     
-    public void downloadHtml(String workspaceName, String site, String docId, String timestamp) throws Exception {
+    public void downloadHtml(String workspaceName, String site, String docId, String timestamp, String tagTitle) throws Exception {
     	RuntimeExec exec = new RuntimeExec();
     	Date d = TimeUtils.dateFromTimestamp( timestamp );
     	this.setTime(d);
+    	
+    	this.setTimeTagName(tagTitle);
     	
 		HostnameGet alfresco = new HostnameGet(this.repository, this.services);
 		String protocol = alfresco.getAlfrescoProtocol();
@@ -284,10 +287,10 @@ public class FullDocPost extends AbstractJavaWebScript {
 		List<String> command = new ArrayList<String>();
 		command.add(this.phantomJSPath);
 		command.add(this.phantomJSScriptPath);
-//		command.add(String.format("%s:%d/%s://%s@%s/mmsFullDoc.html#/workspaces/%s/sites/%s/documents/%s/views/%s",
-//				preRendererUrl,preRendererPort, protocol, mmsAdminCredential, hostnameAndPort, workspace.getName(), site, docId, viewId));
+		// command.add(String.format("%s:%d/%s://%s@%s/mmsFullDoc.html#/workspaces/%s/sites/%s/documents/%s/views/%s",
+		// preRendererUrl,preRendererPort, protocol, mmsAdminCredential, hostnameAndPort, workspace.getName(), site, docId, viewId));
 		command.add(String.format("%s:%d/%s://%s@%s/mmsFullDoc.html?ws=%s&site=%s&docId=%s&viewId=%s&section=%s&time=%s",
-				preRendererUrl,preRendererPort, protocol, mmsAdminCredential, hostnameAndPort, workspace.getName(), site, docId, viewId, section, timestamp));
+		preRendererUrl,preRendererPort, protocol, mmsAdminCredential, hostnameAndPort, workspace.getName(), site, docId, viewId, section, timestamp));
 		command.add(filePath);
 		exec.setCommand(list2Array(command));
 		System.out.println("NodeJS command: " + command);
@@ -386,6 +389,10 @@ public class FullDocPost extends AbstractJavaWebScript {
         return this.time;
     }
     //NEED FOR COVER
+    private String getTimeTagName(){
+        return this.timeTagName;
+    }
+    //NEED FOR COVER
     public void createCoverPage(String coverDestination) throws IOException{
         if(!Files.exists(Paths.get(this.htmlPath))) return;
 
@@ -408,25 +415,28 @@ public class FullDocPost extends AbstractJavaWebScript {
         String jplName = "Jet Propulsion Laboratory";
         String caltechName = "California Institute of Technology";
         Date date = this.getTime();
+        String tag = this.getTimeTagName();
                             
-        String coverHtml = "<html>"
+        String coverHtml = //"<!DOCTYPE html>" //seems to not print formatted if keep the DOCTYPE
+        		//+ 
+        		"<html>"
                 + "<head><title>" + coverHeader + "</title></head>"
                 + "<body style= \"width:100%; height:100%;\">"
                     + "<div style=\"top:10%; left:10%; right: 10%; position:absolute;\">"
                     + "<center><h2>" + coverHeader + "</h2></center>"
                     +"</div>"
                     + "<div style=\"top:60%; left:10%; right:10%; position:absolute;\">"
-                    + "<div>" + legalNotice + "<br>"
+                    + "<div>" + legalNotice + "<br/>"
                     +   "<i>" + pageLegalNotice + "</i></div>"
                     +"</div>"                       
                     + "<div style=\"top:70%; left:10%; position:absolute;\">"
-                    +   "<div>" + date + "</div>"
-                    +"</div>"
+                    +   "<div>" + date + "<br/>" + tag +  "</div>" //"<div>" + date + "</div>" 
                     +"</div>"
                     + "<div style=\"top:85%; left:10%; position:absolute;\">"
                     + "<div>"
                     + "<img src=\"http://div27.jpl.nasa.gov/2740/files/logos/jpl_logo%28220x67%29.jpg\" alt=\"JPL Logo\"/>"
                     + "<p style=\"color:#B6B6B4\">" + jplName + "<br/><i>" + caltechName + "</i></p>" //did separate jpl/caltech label to always have the stamp on pdf
+                    + "</div>"
                     + "</div>"
                 + "</body>"
                 + "</html>";
@@ -616,21 +626,33 @@ public class FullDocPost extends AbstractJavaWebScript {
     	}
     }
     
-    public void html2pdf()  throws Exception {
+    public void html2pdf(EmsScriptNode snapshotFolder, EmsScriptNode snapshotNode)  throws Exception {
+    	if(!Files.exists(Paths.get(this.htmlPath))) throw new Exception(String.format("Failed to transform HTML to PDF. Expected %s HTML file but it does not exist!", this.htmlPath));
+    	
     	RuntimeExec exec = new RuntimeExec();
 		exec.setProcessDirectory(this.fullDocGenDir);
 		createCoverPage(this.coverPath); //NEED FOR COVER
+		String tagName = this.getTimeTagName();
 
 		List<String> command = new ArrayList<String>();
 		command.add("wkhtmltopdf");
 		command.add("-q");
+		command.add("--header-line");
+		command.add("--header-font-size");
+		command.add("8");
+		command.add("--header-font-name");
+		command.add("\"Times New Roman\"");
+		command.add("--header-right");
+		command.add(tagName);
 		command.add("--footer-line");
 		command.add("--footer-font-size");
 		command.add("8");
 		command.add("--footer-font-name");
 		command.add("\"Times New Roman\"");
+//		command.add("--footer-left");
+//		command.add(tagName.substring(0,10));
 		command.add("--footer-center");
-		command.add("Paper copies of this document may not be current and should not be relied on for official purposes. JPL/Caltech proprietary. Not for public release.");
+		command.add("Paper copies of this document may not be current and should not be relied on for official purposes. JPL/Caltech proprietary. Not for public release.");  
 		command.add("--footer-right");
 		command.add("[page]");
         command.add("cover"); //NEED FOR COVER
@@ -650,11 +672,14 @@ public class FullDocPost extends AbstractJavaWebScript {
 		System.out.println("htmltopdf command: " + command);
 		exec.setCommand(list2Array(command));
 		ExecutionResult result = exec.execute();
-		if(!result.getSuccess() && result.getExitValue()!=1){
+		if(!Files.exists(Paths.get(this.pdfPath)))
+		{
 			String msg = String.format("Failed to transform HTML file '%s' to PDF. Exit value: %d", this.htmlPath, result.getExitValue());
 			log(Level.ERROR, msg);
 			throw new Exception(msg);
-		}	
+		}
+		
+		this.savePdfToRepo(snapshotFolder, snapshotNode);
     }
 
 	/**
@@ -778,7 +803,11 @@ public class FullDocPost extends AbstractJavaWebScript {
 //			String zipPath = this.zipHtml();
 //			if(zipPath == null || zipPath.isEmpty()) throw new Exception("Failed to zip files and resources!");
 			this.zipHtml();
+			EmsScriptNode nodePrev = snapshotFolder.childByNamePath(filename);
+			if(nodePrev != null && nodePrev.exists()) nodePrev.remove();
+			
 			EmsScriptNode node = snapshotFolder.createNode(filename, "cm:content");
+			
 			if(node == null) throw new Exception("Failed to create zip repository node!");
 
 			if(!this.saveFileToRepo(node, MimetypeMap.MIMETYPE_ZIP, this.zipPath)) throw new Exception("Failed to save zip artifact to repository!");
@@ -823,6 +852,10 @@ public class FullDocPost extends AbstractJavaWebScript {
 	//NEED FOR COVER
     private void setTime(Date t){
         this.time = t;
+    }
+    
+    private void setTimeTagName(String c){
+        this.timeTagName = c;
     }
     
     private void tableToCSV() throws Exception{

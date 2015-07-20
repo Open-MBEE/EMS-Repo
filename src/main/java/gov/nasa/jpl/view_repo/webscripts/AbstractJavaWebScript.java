@@ -55,16 +55,19 @@ import gov.nasa.jpl.view_repo.util.NodeUtil;
 import gov.nasa.jpl.view_repo.util.NodeUtil.SearchType;
 import gov.nasa.jpl.view_repo.util.WorkspaceDiff;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
-import java.util.Formatter;
 
+import java.util.Formatter;
 import java.io.Serializable;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.*;
 import java.util.Arrays;
@@ -73,8 +76,10 @@ import java.util.Set;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.json.JSONString;
 import org.alfresco.repo.jscript.ScriptNode;
 import org.alfresco.repo.model.Repository;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
@@ -99,6 +104,8 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
  */
 public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
     private static Logger logger = Logger.getLogger(AbstractJavaWebScript.class);
+    // FIXME -- Why is this not static? Concurrent webscripts with different
+    // loglevels will interfere with each other.
     public Level logLevel = Level.WARN;
     
     public Formatter formatter = new Formatter ();
@@ -139,8 +146,9 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
 
     // keeps track of who made the call to the service
     protected String source = null;
-    private EmsSystemModel systemModel;
-    private SystemModelToAeExpression< EmsScriptNode, EmsScriptNode, String, Object, EmsSystemModel > sysmlToAe;
+    protected EmsSystemModel systemModel;
+    protected SystemModelToAeExpression< EmsScriptNode, EmsScriptNode, String, Object, EmsSystemModel > sysmlToAe;
+    protected static SystemModelToAeExpression< EmsScriptNode, EmsScriptNode, String, Object, EmsSystemModel > globalSysmlToAe;
 
     protected void initMemberVariables(String siteName) {
 		companyhome = new ScriptNode(repository.getCompanyHome(), services);
@@ -161,6 +169,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         this.setServices( services );
         this.response = response ;
         // TODO -- set maximum log level; Overrides that specified in log4j.properties (I THINK)
+        // FIXME -- Why is this not static?
         logger.setLevel(logLevel);
     }
 
@@ -168,6 +177,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         this.setRepositoryHelper(repositoryHelper);
         this.setServices(registry);
         // TODO -- set maximum log level; Overrides that specified in log4j.properties (I THINK)
+        // FIXME -- Why is this not static?
         logger.setLevel(logLevel);
     }
 
@@ -175,6 +185,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         // default constructor for spring
         super();
         // TODO -- set maximum log level; Overrides that specified in log4j.properties (I THINK)
+        // FIXME -- Why is this not static?
         logger.setLevel(logLevel);
     }
     
@@ -499,7 +510,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
 	    //responseStatus.setMessage(msg);
 	}
 
-	protected void log (Level level, String msg){
+	protected static void log(Level level, String msg) {
 	    switch(level.toInt()) {
 	        case Level.FATAL_INT:
 	            logger.fatal(msg);
@@ -1282,11 +1293,26 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         return systemModel;
     }
 
+    public static EmsSystemModel globalSystemModel = null;
+    public static EmsSystemModel getGlobalSystemModel() {
+        if ( globalSystemModel == null ) {
+            globalSystemModel = new EmsSystemModel(NodeUtil.getServices() );
+        }
+        return globalSystemModel;
+    }
+
     public SystemModelToAeExpression< EmsScriptNode, EmsScriptNode, String, Object, EmsSystemModel > getSystemModelAe() {
         if ( sysmlToAe == null ) {
             setSystemModelAe();
         }
         return sysmlToAe;
+    }
+
+    public static SystemModelToAeExpression< EmsScriptNode, EmsScriptNode, String, Object, EmsSystemModel > getGlobalSystemModelAe() {
+        if ( globalSysmlToAe == null ) {
+            setGlobalSystemModelAe();
+        }
+        return globalSysmlToAe;
     }
 
     public void setSystemModelAe() {
@@ -1295,13 +1321,18 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
     
     }
 
+    public static void setGlobalSystemModelAe() {
+        globalSysmlToAe =
+                new SystemModelToAeExpression< EmsScriptNode, EmsScriptNode, String, Object, EmsSystemModel >( getGlobalSystemModel() );    
+    }
+
     /**
      * Creates a ConstraintExpression for the passed constraint node and adds to the passed constraints
      *
      * @param constraintNode The node to parse and create a ConstraintExpression for
-     * @param constraints The list of Constraints to add to
+     * @param constraints The list of Constraints to add for tje node
      */
-    public void addConstraintExpression(EmsScriptNode constraintNode, Collection<Constraint> constraints, WorkspaceNode ws) {
+    public static void addConstraintExpression(EmsScriptNode constraintNode, Map< EmsScriptNode, Collection< Constraint >> constraints, WorkspaceNode ws) {
     
         if (constraintNode == null || constraints == null) return;
     
@@ -1312,17 +1343,22 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
     
             if (expression != null) {
     
-                constraints.add(new ConstraintExpression( expression ));
+                Collection< Constraint > constrs = constraints.get( constraintNode );
+                if ( constrs == null ) {
+                    constrs = new ArrayList< Constraint >();
+                    constraints.put( constraintNode, constrs );
+                }
+                constrs.add(new ConstraintExpression( expression ));
             }
         }
     }
 
-    public <T> Expression<T> toAeExpression( EmsScriptNode exprNode ) {
+    public static <T> Expression<T> toAeExpression( EmsScriptNode exprNode ) {
         if ( exprNode == null ) {
             logger.warn( "called toAeExpression() with null argument" );
             return null;
         }
-        Expression<Call> expressionCall = getSystemModelAe().toAeExpression( exprNode );
+        Expression<Call> expressionCall = getGlobalSystemModelAe().toAeExpression( exprNode );
         if ( expressionCall == null ) {
             logger.warn( "toAeExpression("+exprNode+") returned null" );
             return null;
@@ -1336,13 +1372,15 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         return expression;
     }
 
-    public Collection< Constraint > getAeConstraints( Set< EmsScriptNode > elements, WorkspaceNode ws ) {
+    public static Map< EmsScriptNode, Collection< Constraint > > getAeConstraints( Set< EmsScriptNode > elements, WorkspaceNode ws ) {
         //Map<EmsScriptNode, Constraint> constraints = new LinkedHashMap<EmsScriptNode, Constraint>();
-        Collection<Constraint> constraints = new ArrayList<Constraint>();
+        Map< EmsScriptNode, Collection< Constraint > >  constraints = 
+                new LinkedHashMap< EmsScriptNode, Collection< Constraint > >();
     
         // Search for all constraints in the database:
-        Collection<EmsScriptNode> constraintNodes = getSystemModel().getType(null, Acm.ACM_CONSTRAINT);
-    
+        Collection<EmsScriptNode> constraintNodes = getGlobalSystemModel().getType(null, Acm.ACM_CONSTRAINT);
+log(Level.INFO, "all constraints in database: " + constraintNodes);
+
         if (!Utils.isNullOrEmpty(constraintNodes)) {
     
             // Loop through each found constraint and check if it contains any of the elements
@@ -1359,7 +1397,8 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
                 for (EmsScriptNode element : elements) {
     
                     String name = element.getName();
-                    if (name != null && constrElemNames.contains(name)) {
+log(Level.INFO, "element (" + element + ") vs. constraint (" + constraintNode + ")");
+                    if ( element.equals( constraintNode ) || ( name != null && constrElemNames.contains(name) ) ) {
                         addConstraintExpression(constraintNode, constraints, ws);
                         break;
                     }
@@ -1369,43 +1408,83 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
             } // Ends loop through constraintNodes
     
         } // Ends if there was constraint nodes found in the database
-    
-        // Add all of the Parameter constraints:
-        ClassData cd = getSystemModelAe().getClassData();
-        // Loop through all the listeners:
-        for (ParameterListenerImpl listener : cd.getAeClasses().values()) {
-            // TODO: REVIEW
-            //       Can we get duplicate ParameterListeners in the aeClassses map?
-            constraints.addAll( listener.getConstraints( true, null ) );
-        }
+
+        // TODO -- This is temporarily commented out until code is added to tie
+        // the constraints back to the nodes such as a constraint that a
+        // property be grounded.
+//        // Add all of the Parameter constraints:
+//        ClassData cd = getGlobalSystemModelAe().getClassData();
+//        // Loop through all the listeners:
+//        for (ParameterListenerImpl listener : cd.getAeClasses().values()) {
+//            // TODO: REVIEW
+//            //       Can we get duplicate ParameterListeners in the aeClassses map?
+//            constraints.addAll( listener.getConstraints( true, null ) );
+//        }
     
         return constraints;
     }
 
-    public Map< EmsScriptNode, Expression<?> > getAeExpressions( Set< EmsScriptNode > elements ) {
+    public static Map< EmsScriptNode, Expression<?> > getAeExpressions( Collection< EmsScriptNode > elements ) {
         Map<EmsScriptNode, Expression<?>> expressions = new LinkedHashMap< EmsScriptNode, Expression<?> >();
         for ( EmsScriptNode node : elements ) {
             // FIXME -- Don't we need to pass in a date and workspace?
-            if ( node.hasAspect( Acm.ACM_EXPRESSION ) && !node.isOwnedValueSpec(null, node.getWorkspace()) ) {
+            if ( node.hasAspect( Acm.ACM_EXPRESSION ) ) {
                 Expression<?> expression = toAeExpression( node );
                 if ( expression != null ) {
                     expressions.put( node, expression );
+                }
+            } else if ( node.hasValueSpecProperty( null, node.getWorkspace() ) ) {
+                ArrayList< NodeRef > values = node.getValueSpecOwnedChildren( false, null, node.getWorkspace() );
+                List< EmsScriptNode > valueElements = new ArrayList< EmsScriptNode >();
+                for ( NodeRef value : values ) {
+                    EmsScriptNode n = new EmsScriptNode( value, NodeUtil.getServices() );
+                    if ( n.hasOrInheritsAspect( Acm.ACM_EXPRESSION ) ) {
+                        valueElements.add( n );
+                    }
+                }
+//                List< EmsScriptNode > valueElements =
+//                        EmsScriptNode.toEmsScriptNodeList( values,
+//                                                           NodeUtil.getServices(),
+//                                                           null, null );
+                Map< EmsScriptNode, Expression< ? > > ownedExpressions =
+                       getAeExpressions( valueElements );
+                if ( ownedExpressions != null && ownedExpressions.size() == 1 ) {
+                    expressions.put( node, ownedExpressions.entrySet().iterator().next().getValue() );
+                } else if ( ownedExpressions != null ) {
+                    // TODO -- REVIEW -- is wrapping a collection of Expressions
+                    // in an Expression goign to evaluate properly?
+                    expressions.put( node, new Expression( ownedExpressions ) );
+//                    for ( Expression< ? > ownedExpr : ownedExpressions.values() ) {
+//                    }
                 }
             }
         }
         return expressions;
     }
 
-    public Map<Object, Object> evaluate( Set< EmsScriptNode > elements, WorkspaceNode ws ) {
-        log(Level.INFO, "Will attempt to fix constraint violations if found!");
-        Collection< Constraint > constraints = getAeConstraints( elements, ws );
+    public static Map<Object, Object> evaluate( Set< EmsScriptNode > elements, WorkspaceNode ws ) {
+        log(Level.INFO, "Will attempt to evaluate expressions where found!");
+        Map< EmsScriptNode, Collection< Constraint > > constraints = getAeConstraints( elements, ws );
+log(Level.INFO, "constraints: " + constraints);
         Map< EmsScriptNode, Expression<?> > expressions = getAeExpressions( elements );
+log(Level.INFO, "expressions: " + expressions);
     
         Map< Object, Object > results = new LinkedHashMap< Object, Object >();
         if ( !Utils.isNullOrEmpty( constraints ) ) {
-            for ( Constraint c : constraints ) {
-                if ( c != null ) {
-                    results.put( c, c.isSatisfied( true, null ) );
+            for ( Entry< EmsScriptNode, Collection< Constraint > > e : constraints.entrySet() ) {
+                EmsScriptNode constraintNode = null;
+                if ( e.getKey().hasOrInheritsAspect( Acm.ACM_CONSTRAINT ) ) {
+                    constraintNode = e.getKey();
+                }
+                Collection< Constraint > constraintCollection = e.getValue();
+                for ( Constraint c : constraintCollection ) {
+                    if ( c != null ) {
+                        if ( constraintNode != null && constraintCollection.size() == 1 ) {
+                            results.put( constraintNode, c.isSatisfied( true, null ) );
+                        } else {
+                            results.put( c, c.isSatisfied( true, null ) );
+                        }
+                    }
                 }
             }
         }
@@ -1418,7 +1497,138 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         }
         return results;
     }
+    
+    /**
+     * Construct a JSONArray from a Collection without triggering an infinite loop.
+     *
+     * @param collection
+     *            A Collection.
+     */
+    public static JSONArray makeJSONArray(Collection collection) {
+        JSONArray a = new JSONArray();
+        if (collection != null) {
+            Iterator iter = collection.iterator();
+            while (iter.hasNext()) {
+                a.put(jsonWrap(iter.next()));
+            }
+        }
+        return a;
+    }
 
+    /**
+     * Construct a JSONArray from an array
+     *
+     * @throws JSONException
+     *             If not an array.
+     */
+    public static JSONArray makeJSONArray(Object array) throws JSONException {
+        JSONArray a = new JSONArray();
+        if (array.getClass().isArray()) {
+            int length = Array.getLength(array);
+            for (int i = 0; i < length; i += 1) {
+                a.put(jsonWrap(Array.get(array, i)));
+            }
+        } else {
+            throw new JSONException(
+                    "JSONArray initial value should be a string or collection or array.");
+        }
+        return a;
+    }
+    
+    /**
+     * Fixes bug in JSONObject.wrap() where putting an unexpected object in a
+     * JSONObject results in an infinite loop. The fix is to convert the object
+     * to a string if it's type is not one of the usual suspects.
+     * 
+     * @param object
+     * @return an Object that can be inserted as a value into a JSONObject 
+     */
+    public static Object jsonWrap( Object object ) {
+        try {
+            if (object == null) {
+                return JSONObject.NULL;
+            }
+            if (object instanceof JSONObject || object instanceof JSONArray
+                    || JSONObject.NULL.equals(object) || object instanceof JSONString
+                    || object instanceof Byte || object instanceof Character
+                    || object instanceof Short || object instanceof Integer
+                    || object instanceof Long || object instanceof Boolean
+                    || object instanceof Float || object instanceof Double
+                    || object instanceof String) {
+                return object;
+            }
+
+            if (object instanceof Collection) {
+                return makeJSONArray((Collection) object);
+            }
+            if (object.getClass().isArray()) {
+                return makeJSONArray(object);
+            }
+            if (object instanceof Map) {
+                return makeJSONObject((Map) object);
+            }
+            return "" + object;
+        } catch (Exception exception) {
+            return null;
+        }
+    }
+    
+    /**
+     * Construct a JSONObject from a Map without triggering an infinite loop.
+     *
+     * @param map
+     *            A map object that can be used to initialize the contents of
+     *            the JSONObject.
+     * @throws JSONException
+     */
+    public static JSONObject makeJSONObject(Map map) {
+        JSONObject jo = new JSONObject();
+        if (map != null) {
+            Iterator i = map.entrySet().iterator();
+            while (i.hasNext()) {
+                Map.Entry e = (Map.Entry) i.next();
+                Object value = e.getValue();
+                if (value != null) {
+                    jo.put("" + e.getKey(), jsonWrap(value));
+                }
+            }
+        }
+        return jo;
+    }
+
+    public void evaluate( final Map<EmsScriptNode, JSONObject> elementsJsonMap,//Set< EmsScriptNode > elements, final JSONArray elementsJson,
+                          JSONObject top, WorkspaceNode ws ) {
+        //final JSONArray elementsJson = new JSONArray();
+        Set< EmsScriptNode > elements = elementsJsonMap.keySet();
+        Map< Object, Object > results = evaluate( elements, ws );
+        for ( EmsScriptNode element : elements ) {
+            JSONObject json = elementsJsonMap.get( element );//element.toJSONObject(ws, null);
+            Object result = results.get( element );
+            if ( result != null ) {
+                try {
+                    json.putOpt( "evaluationResult", jsonWrap( result ) );
+                    results.remove( element );
+                } catch ( Throwable e ) {
+                    log( Level.WARN, "Evaluation failed for %s", element );
+                }
+            }
+            //elementsJson.put( json );
+        }
+        // Put constraint evaluation results in json.
+        JSONArray resultJarr = new JSONArray();
+        for ( Object k : results.keySet() ) {
+            JSONObject r = new JSONObject();
+            r.put( "expression", k.toString() );
+            Object v = results.get( k );
+            r.put( "value", "" + v );
+            resultJarr.put( r );
+        }
+        
+        //top.put( "elements", elementsJson );
+        if ( resultJarr.length() > 0 ) top.put( "evaluations", resultJarr );
+
+    }
+    
     public void fix( Set< EmsScriptNode > elements, WorkspaceNode ws ) {
     
         log(Level.INFO, "Will attempt to fix constraint violations if found!");
@@ -1426,7 +1636,11 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         SystemModelSolver< EmsScriptNode, EmsScriptNode, EmsScriptNode, EmsScriptNode, String, String, Object, EmsScriptNode, String, String, EmsScriptNode >  solver =
                 new SystemModelSolver< EmsScriptNode, EmsScriptNode, EmsScriptNode, EmsScriptNode, String, String, Object, EmsScriptNode, String, String, EmsScriptNode >(getSystemModel(), new ConstraintLoopSolver() );
     
-        Collection<Constraint> constraints = getAeConstraints( elements, ws );
+        Map< EmsScriptNode, Collection< Constraint > > constraintMap = getAeConstraints( elements, ws );
+        ArrayList< Constraint > constraints = new ArrayList< Constraint >();
+        for ( Collection< Constraint > coll : constraintMap.values() ) {
+            constraints.addAll( coll );
+        }
     
         // Solve the constraints:
         if (!Utils.isNullOrEmpty( constraints )) {
@@ -1451,15 +1665,19 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
                 // Update the values of the nodes after solving the constraints:
                 EmsScriptNode node;
                 Parameter<Object> param;
-                Set<Entry<EmsScriptNode, Parameter<Object>>> entrySet = sysmlToAe.getExprParamMap().entrySet();
-                for (Entry<EmsScriptNode, Parameter<Object>> entry : entrySet) {
-                    node = entry.getKey();
-                    param = entry.getValue();
-                    systemModel.setValue(node, (Serializable)param.getValue());
+                Map< EmsScriptNode, Parameter< Object > > params = getGlobalSystemModelAe().getExprParamMap();
+                if ( Utils.isNullOrEmpty( params ) ) {
+                    log( Level.ERROR, "Solver had no parameters in map to assign the solution!" );
+                } else {
+                    Set<Entry<EmsScriptNode, Parameter<Object>>> entrySet = params.entrySet();
+                    for (Entry<EmsScriptNode, Parameter<Object>> entry : entrySet) {
+                        node = entry.getKey();
+                        param = entry.getValue();
+                        systemModel.setValue(node, (Serializable)param.getValue());
+                    }
+        
+                    log( Level.INFO, "Updated all node values to satisfy the constraints!" );
                 }
-    
-                log( Level.INFO, "Updated all node values to satisfy the constraints!" );
-    
             }
         } // End if constraints list is non-empty
     
@@ -1472,7 +1690,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
      * @param propertyNode The node to parse
      * @return Set of cm:name
      */
-    protected Set<String> getPropertyElementNames(EmsScriptNode propertyNode) {
+    protected static Set<String> getPropertyElementNames(EmsScriptNode propertyNode) {
     
         Set<String> names = new HashSet<String>();
     
@@ -1484,7 +1702,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
     
             // See if it has a value property:
             Collection< EmsScriptNode > propertyValues =
-                    getSystemModel().getProperty(propertyNode, Acm.JSON_VALUE);
+                    getGlobalSystemModel().getProperty(propertyNode, Acm.JSON_VALUE);
     
             if (!Utils.isNullOrEmpty(propertyValues)) {
                   for (EmsScriptNode value : propertyValues) {
@@ -1509,7 +1727,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
      * @param paramNode The node to parse
      * @return Set of cm:name
      */
-    protected Set<String> getParameterElementNames(EmsScriptNode paramNode) {
+    protected static Set<String> getParameterElementNames(EmsScriptNode paramNode) {
     
         Set<String> names = new HashSet<String>();
     
@@ -1521,7 +1739,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
     
             // See if it has a defaultParamaterValue property:
             Collection< EmsScriptNode > paramValues =
-                    getSystemModel().getProperty(paramNode, Acm.JSON_PARAMETER_DEFAULT_VALUE);
+                    getGlobalSystemModel().getProperty(paramNode, Acm.JSON_PARAMETER_DEFAULT_VALUE);
     
             if (!Utils.isNullOrEmpty(paramValues)) {
                   names.add(paramValues.iterator().next().getName());
@@ -1538,7 +1756,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
      * @param opNode The node to parse
      * @return Set of cm:name
      */
-    protected Set<String> getOperationElementNames(EmsScriptNode opNode) {
+    protected static Set<String> getOperationElementNames(EmsScriptNode opNode) {
     
         Set<String> names = new HashSet<String>();
     
@@ -1550,7 +1768,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
     
             // See if it has a operationParameter and/or operationExpression property:
             Collection< EmsScriptNode > opParamNodes =
-                    getSystemModel().getProperty(opNode, Acm.JSON_OPERATION_PARAMETER);
+                    getGlobalSystemModel().getProperty(opNode, Acm.JSON_OPERATION_PARAMETER);
     
             if (!Utils.isNullOrEmpty(opParamNodes)) {
               for (EmsScriptNode opParamNode : opParamNodes) {
@@ -1559,7 +1777,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
             }
     
             Collection< EmsScriptNode > opExprNodes =
-                    getSystemModel().getProperty(opNode, Acm.JSON_OPERATION_EXPRESSION);
+                    getGlobalSystemModel().getProperty(opNode, Acm.JSON_OPERATION_EXPRESSION);
     
             if (!Utils.isNullOrEmpty(opExprNodes)) {
                 names.add(opExprNodes.iterator().next().getName());
@@ -1578,7 +1796,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
      * @param date 
      * @return Set of cm:name
      */
-    protected Set<String> getExpressionElementNames(EmsScriptNode expressionNode, Date date , WorkspaceNode ws ) {
+    protected static Set<String> getExpressionElementNames(EmsScriptNode expressionNode, Date date , WorkspaceNode ws ) {
     
         Set<String> names = new HashSet<String>();
     
@@ -1592,7 +1810,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
             // FIXME -- need to give date/workspace context 
             // Process all of the operand properties:
             Collection< EmsScriptNode > properties =
-                    getSystemModel().getProperty( expressionNode, Acm.JSON_OPERAND);
+                    getGlobalSystemModel().getProperty( expressionNode, Acm.JSON_OPERAND);
     
             if (!Utils.isNullOrEmpty(properties)) {
     
@@ -1607,7 +1825,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
                     // FIXME -- need to give date/workspace context 
                     // Get the valueOfElementProperty node:
                     Collection< EmsScriptNode > valueOfElemNodes =
-                            getSystemModel().getProperty(operandProp, Acm.JSON_ELEMENT_VALUE_ELEMENT);
+                            getGlobalSystemModel().getProperty(operandProp, Acm.JSON_ELEMENT_VALUE_ELEMENT);
     
                     // If it is a elementValue, then this will be non-empty:
                     if (!Utils.isNullOrEmpty(valueOfElemNodes)) {
@@ -1626,7 +1844,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
                     if (valueOfElementNode != null) {
     
                       // FIXME -- need to give date/workspace context 
-                      String typeString = getSystemModel().getTypeString(valueOfElementNode, null);
+                      String typeString = getGlobalSystemModel().getTypeString(valueOfElementNode, null);
     
                       // FIXME -- need to give date/workspace context 
                       // If it is a Operation then see if it then process it:
@@ -1672,7 +1890,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
      * @param ws 
      * @return Set of cm:name
      */
-    protected Set<String> getConstraintElementNames(EmsScriptNode constraintNode, WorkspaceNode ws ) {
+    protected static Set<String> getConstraintElementNames(EmsScriptNode constraintNode, WorkspaceNode ws ) {
     
         Set<String> names = new LinkedHashSet<String>();
     
@@ -1709,14 +1927,14 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
      * @param constraintNode The node to parse
      * @return The Expression node for the constraint
      */
-    private EmsScriptNode getConstraintExpression(EmsScriptNode constraintNode, WorkspaceNode ws) {
+    private static EmsScriptNode getConstraintExpression(EmsScriptNode constraintNode, WorkspaceNode ws) {
     
         if (constraintNode == null) return null;
     
         // FIXME -- need to give date/workspace context 
         // Get the constraint expression:
         Collection<EmsScriptNode> expressions =
-                getSystemModel().getProperty( constraintNode, Acm.JSON_CONSTRAINT_SPECIFICATION );
+                getGlobalSystemModel().getProperty( constraintNode, Acm.JSON_CONSTRAINT_SPECIFICATION );
     
         // This should always be of size 1:
         return Utils.isNullOrEmpty( expressions ) ? null :  expressions.iterator().next();

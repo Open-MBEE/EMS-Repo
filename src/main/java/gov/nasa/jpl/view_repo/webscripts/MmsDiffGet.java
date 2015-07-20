@@ -44,6 +44,7 @@ public class MmsDiffGet extends AbstractJavaWebScript {
     protected WorkspaceNode ws1, ws2;
     protected String workspaceId1;
     protected String workspaceId2;
+    protected String userTimeStamp1, userTimeStamp2;
     protected Date dateTime1, dateTime2;
     protected WorkspaceDiff workspaceDiff;
     protected String originalUser;
@@ -137,28 +138,28 @@ public class MmsDiffGet extends AbstractJavaWebScript {
 
         boolean runInBackground = getBooleanArg(req, "background", false);
 
-        String timestamp1 = getTimestamp1(req);
-        String timestamp2 = getTimestamp2(req);
+        userTimeStamp1 = getTimestamp1(req);
+        userTimeStamp2 = getTimestamp2(req);
 
         // Replace time string with latest commit node time:
         // This time string is used in the job node name
-        if (timestamp1.equals( NO_TIMESTAMP )) {
+        if (userTimeStamp1.equals( NO_TIMESTAMP )) {
             dateTime1 = null;
         }
         else {
-            dateTime1 = TimeUtils.dateFromTimestamp( timestamp1 );
+            dateTime1 = TimeUtils.dateFromTimestamp( userTimeStamp1 );
         }
         String latestTime = replaceTimeStampWithCommitTime(true, dateTime1);
-        timestamp1 = latestTime != null ? latestTime : timestamp1;
+        String timestamp1 = latestTime != null ? latestTime : userTimeStamp1;
         
-        if (timestamp2.equals( NO_TIMESTAMP )) {
+        if (userTimeStamp2.equals( NO_TIMESTAMP )) {
             dateTime2 = null;
         }
         else {
-            dateTime2 = TimeUtils.dateFromTimestamp( timestamp2 );
+            dateTime2 = TimeUtils.dateFromTimestamp( userTimeStamp2 );
         }
         latestTime = replaceTimeStampWithCommitTime(false, dateTime2);
-        timestamp2 = latestTime != null ? latestTime : timestamp2;
+        String timestamp2 = latestTime != null ? latestTime : userTimeStamp2;
         
         String timeString1 = timestamp1.replace( ":", "_" );
         String timeString2 = timestamp2.replace( ":", "_" );
@@ -302,6 +303,8 @@ public class MmsDiffGet extends AbstractJavaWebScript {
                 Action loadAction = actionService.createAction(WorkspaceDiffActionExecuter.NAME);
                 loadAction.setParameterValue(WorkspaceDiffActionExecuter.PARAM_TIME_1, dateTime1);
                 loadAction.setParameterValue(WorkspaceDiffActionExecuter.PARAM_TIME_2, dateTime2);
+                loadAction.setParameterValue(WorkspaceDiffActionExecuter.PARAM_TS_1, userTimeStamp1);
+                loadAction.setParameterValue(WorkspaceDiffActionExecuter.PARAM_TS_2, userTimeStamp2);
                 loadAction.setParameterValue(WorkspaceDiffActionExecuter.PARAM_WS_1, ws1);
                 loadAction.setParameterValue(WorkspaceDiffActionExecuter.PARAM_WS_2, ws2);
 
