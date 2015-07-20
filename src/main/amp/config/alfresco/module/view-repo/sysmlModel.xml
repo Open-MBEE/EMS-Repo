@@ -55,7 +55,7 @@
 			<mandatory-aspects>
 				<aspect>sysml:Identifiable</aspect>
 				<aspect>sysml:Named</aspect>
-                <aspect>sysml:OwnsAttribute</aspect>
+                <!-- <aspect>sysml:OwnsAttribute</aspect> -->
 				<aspect>cm:versionable</aspect>
 				<aspect>cm:taggable</aspect>
 				<aspect>cm:titled</aspect> <!-- this is purely here for showing in ui, should show sysml:name instead -->

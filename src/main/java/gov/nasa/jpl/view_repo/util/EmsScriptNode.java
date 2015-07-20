@@ -1050,6 +1050,10 @@ public class EmsScriptNode extends ScriptNode implements
                 node.setWorkspace( nodeWorkspace, null );
             }
 
+            // This aspect is not a type--just adding to all so that the
+            // property (owndAttribute) does not have to be treated differently.
+            node.createOrUpdateAspect( Acm.ACM_OWNS_ATTRIBUTE );
+            
             NodeUtil.addElementToCache( node );
         }
 
