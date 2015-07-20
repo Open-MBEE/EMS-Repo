@@ -1,6 +1,7 @@
 from regression_lib import *
 import commands
 import optparse
+import time
 
 # default parameters
 site = 'europa'
@@ -79,7 +80,8 @@ def writeJsonStr(jStr, workspaceName, postNumber):
     
 def doIt():
     createWorkspaces()
-    
+    time.sleep(10)
+
     if options.verbose:
         print "\n" + "CREATING OWNER\n"
         
@@ -91,10 +93,12 @@ def doIt():
                                    base_url=BASE_URL_WS,
                                    branch= workspace + "/elements",
                                    project_post=True)
+        
         if options.verbose:
             print curl_cmd
         if options.execute:
             (status, output) = commands.getstatusoutput(curl_cmd)
+            time.sleep(10)
     
     if options.verbose:
         thick_divider()
