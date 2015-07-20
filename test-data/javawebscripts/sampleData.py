@@ -80,6 +80,19 @@ def writeJsonStr(jStr, workspaceName, postNumber):
 def doIt():
     createWorkspaces()
     
+    jsonStr = '{"sysmlid":"' + options.owner + '","name":"' + options.owner + '"}'
+    dataStr = elementsJsonStrTemplate%jsonStr
+    curl_cmd = create_curl_cmd(type="POST", 
+                               data=dataStr,
+                               base_url=BASE_URL_WS,
+                               branch="master/elements",
+                               project_post=True)
+    if options.verbose:
+        print "\n" + "CREATING OWNER\n"
+        print curl_cmd
+    if options.execute:
+        (status, output) = commands.getstatusoutput(curl_cmd)
+    
     if options.verbose:
         thick_divider()
         print "POSTING ELEMENTS IN GROUPS OF " + str(options.postElements)
