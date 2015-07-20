@@ -198,7 +198,7 @@ public class ModelLoadActionExecuter extends ActionExecuterAbstractBase {
                                                ServiceContext serviceContext ) {
         if ( modelContext == null ) modelContext = new ModelContext();
         if ( serviceContext == null ) serviceContext = new ServiceContext();
-        ModelPost modelService = new ModelPost(serviceContext.repository, serviceContext.services);
+        ModelPost modelService = new ModelPost(NodeUtil.getRepository(), serviceContext.services);
         modelService.setLogLevel(Level.DEBUG);
         modelService.setRunWithoutTransactions(false);
         modelService.setProjectNode( modelContext.projectNode );
