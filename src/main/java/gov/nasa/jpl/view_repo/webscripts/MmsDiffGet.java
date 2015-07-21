@@ -50,6 +50,7 @@ public class MmsDiffGet extends AbstractJavaWebScript {
     protected String originalUser;
     protected String diffStatus;
     protected JSONObject diffResults;
+    protected EmsScriptNode diffNode = null;
 
     private final static String DIFF_IN_PROGRESS = "GENERATING";
     private final static String DIFF_COMPLETE = "COMPLETED";
@@ -182,13 +183,29 @@ public class MmsDiffGet extends AbstractJavaWebScript {
             else if (diffStatus.equals( DIFF_COMPLETE )) {
                 if (diffResults != null) {
                     top = diffResults;
-                    top.put( "status", diffStatus );
                 }
                 else {
                     log( Level.ERROR, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, 
                          "Error retreiving completed diff." );
-                    top.put( "status", diffStatus );
                 }
+                top.put( "status", diffStatus );
+            }
+            
+            if (diffNode != null) {
+                
+                String username = (String)NodeUtil.getNodeProperty( diffNode, "cm:modifier",
+                                                                    getServices(), true,
+                                                                    false );
+                EmsScriptNode user = new EmsScriptNode(services.getPersonService().getPerson(username), services, new StringBuffer());
+                String email = (String) user.getProperty("cm:email");
+                Date creationTime = diffNode.getCreationDate();
+                
+                if (username != null)
+                    top.put( "user", username );
+                if (email != null)
+                    top.put( "email", email );
+                if (creationTime != null)
+                    top.put( "diffTime", creationTime );
             }
             
             if (!Utils.isNullOrEmpty( response.toString() )) {
@@ -247,6 +264,7 @@ public class MmsDiffGet extends AbstractJavaWebScript {
             diffStatus = DIFF_IN_PROGRESS;
             boolean reComputeDiff = true;
             if (oldJob != null) {
+                diffNode = oldJob;
                 String jobStatus = (String)oldJob.getProperty("ems:job_status");
                 
                 if (jobStatus != null ) {
@@ -299,6 +317,7 @@ public class MmsDiffGet extends AbstractJavaWebScript {
                 }
                 
                 // kick off the action
+                diffNode = jobNode;
                 ActionService actionService = services.getActionService();
                 Action loadAction = actionService.createAction(WorkspaceDiffActionExecuter.NAME);
                 loadAction.setParameterValue(WorkspaceDiffActionExecuter.PARAM_TIME_1, dateTime1);
