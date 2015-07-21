@@ -1353,7 +1353,8 @@ public class NodeUtil {
                     }
                 }
                 // Check that it is from the desired site:
-                if (siteName != null && !siteName.equals( esn.getSiteName(dateTime, workspace) )) {
+                // MBEE-260: sites are case insensitive per Alfresco file naming conventions, so do comparison ignoring case
+                if (siteName != null && !siteName.equalsIgnoreCase( esn.getSiteName(dateTime, workspace) )) {
                     match = false;
                 }
                 if ( !match ) {
