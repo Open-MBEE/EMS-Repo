@@ -3624,79 +3624,84 @@ public class EmsScriptNode extends ScriptNode implements
 
         ArrayList< Serializable > properties = new ArrayList< Serializable >();
 
-        Serializable property = null;
+        Serializable property;
         for ( int i = 0; i < jsonArray.length(); ++i ) {
-            switch ( type ) {
-                case INT:
-                    property = jsonArray.getInt( i );
-                    break;
-                case LONG:
-                    property = jsonArray.getLong( i );
-                    break;
-                case DOUBLE:
-                    property = jsonArray.getDouble( i );
-                    break;
-                case BOOLEAN:
-                    property = jsonArray.getBoolean( i );
-                    break;
-                case TEXT:
-                case DATE:
-                    try {
-                        property = jsonArray.getString( i );
-                    } catch ( JSONException e ) {
-                        Object val = jsonArray.get( i );
-                        property = val != null ? "" + val : null;
-                    }
-                    break;
-                case NODE_REF:
-                    String sysmlId = null;
-                    try {
-                        sysmlId = jsonArray.getString( i );
-                    } catch ( JSONException e ) {
-                        Object val = jsonArray.get( i );
-                        sysmlId = val != null ? "" + val : null;
-                    }
-                    
-                    if (!Utils.isNullOrEmpty( sysmlId )) {
-                        EmsScriptNode node =
-                                convertIdToEmsScriptNode( sysmlId, false, workspace,
-                                                          dateTime );
-                        if ( node != null ) {
-                            property = node.getNodeRef();
-                        } else {
-                            String msg =
-                                    "Error! No element found for " + sysmlId
-                                            + ".\n";
-                            if ( getResponse() == null || getStatus() == null ) {
-                                Debug.error( msg );
-                            } else {
-                                getResponse().append( msg );
-                                getStatus().setCode( HttpServletResponse.SC_BAD_REQUEST,
-                                                     msg );
-                            }
-                            return null; // REVIEW this may be overkill, can still proceed
+            property = null;
+            // The json object get methods will throw a NPE if the value is null,
+            // so must check for it
+            if (!jsonArray.isNull( i )) {
+                switch ( type ) {
+                    case INT:
+                        property = jsonArray.getInt( i );
+                        break;
+                    case LONG:
+                        property = jsonArray.getLong( i );
+                        break;
+                    case DOUBLE:
+                        property = jsonArray.getDouble( i );
+                        break;
+                    case BOOLEAN:
+                        property = jsonArray.getBoolean( i );
+                        break;
+                    case TEXT:
+                    case DATE:
+                        try {
+                            property = jsonArray.getString( i );
+                        } catch ( JSONException e ) {
+                            Object val = jsonArray.get( i );
+                            property = val != null ? "" + val : null;
                         }
-                    }
-                    // A null sysmId indicates we should store null as the property value
-                    else {
-                        property = null;
-                    }
-                    break;
-                case UNKNOWN:
-                    property = jsonArray.getString( i );
-                    break;
-                default:
-                    String msg = "Error! Bad property type = " + type + ".\n";
-                    if ( getResponse() == null || getStatus() == null ) {
-                        Debug.error( msg );
-                    } else {
-                        getResponse().append( msg );
-                        getStatus().setCode( HttpServletResponse.SC_BAD_REQUEST,
-                                             msg );
-                    }
-                    return null;
-            };
-
+                        break;
+                    case NODE_REF:
+                        String sysmlId = null;
+                        try {
+                            sysmlId = jsonArray.getString( i );
+                        } catch ( JSONException e ) {
+                            Object val = jsonArray.get( i );
+                            sysmlId = val != null ? "" + val : null;
+                        }
+                        
+                        if (!Utils.isNullOrEmpty( sysmlId )) {
+                            EmsScriptNode node =
+                                    convertIdToEmsScriptNode( sysmlId, false, workspace,
+                                                              dateTime );
+                            if ( node != null ) {
+                                property = node.getNodeRef();
+                            } else {
+                                String msg =
+                                        "Error! No element found for " + sysmlId
+                                                + ".\n";
+                                if ( getResponse() == null || getStatus() == null ) {
+                                    Debug.error( msg );
+                                } else {
+                                    getResponse().append( msg );
+                                    getStatus().setCode( HttpServletResponse.SC_BAD_REQUEST,
+                                                         msg );
+                                }
+                                return null; // REVIEW this may be overkill, can still proceed
+                            }
+                        }
+                        // A null sysmId indicates we should store null as the property value
+                        else {
+                            property = null;
+                        }
+                        break;
+                    case UNKNOWN:
+                        property = jsonArray.getString( i );
+                        break;
+                    default:
+                        String msg = "Error! Bad property type = " + type + ".\n";
+                        if ( getResponse() == null || getStatus() == null ) {
+                            Debug.error( msg );
+                        } else {
+                            getResponse().append( msg );
+                            getStatus().setCode( HttpServletResponse.SC_BAD_REQUEST,
+                                                 msg );
+                        }
+                        return null;
+                };
+            }
+            
             // Note: No harm comes from adding null to the array, as alfresco wont store it
             properties.add( property );
         }
@@ -3724,62 +3729,66 @@ public class EmsScriptNode extends ScriptNode implements
             // return "" + o;
         }
 
-        if ( name != null ) {
-            if ( name.equals( DataTypeDefinition.INT ) ) {
-                property = jsonObject.getInt( jsonKey );
-            } else if ( name.equals( DataTypeDefinition.LONG ) ) {
-                property = jsonObject.getLong( jsonKey );
-            } else if ( name.equals( DataTypeDefinition.DOUBLE ) ) {
-                property = jsonObject.getDouble( jsonKey );
-            } else if ( name.equals( DataTypeDefinition.BOOLEAN ) ) {
-                property = jsonObject.getBoolean( jsonKey );
-            } else if ( name.equals( DataTypeDefinition.TEXT ) ) {
-                property = jsonObject.getString( jsonKey );
-                // properties of type date include timestamp and
-                // creation/modified dates and are not stored by MMS
-                // } else if ( name.equals( DataTypeDefinition.DATE ) ) {
-                // property = jsonObject.getString( jsonKey );
-                // } else if ( name.equals( DataTypeDefinition.DATETIME ) ) {
-                // property = jsonObject.getString( jsonKey );
-            } else if ( name.equals( DataTypeDefinition.NODE_REF ) ) {
-                String sysmlId = null;
-                try {
-                    sysmlId = jsonObject.getString( jsonKey );
-                } catch ( JSONException e ) {
-                    Object val = jsonObject.get( jsonKey );
-                    sysmlId = val != null ? "" + val : null;
-                }
-                
-                if (!Utils.isNullOrEmpty( sysmlId )) {
-                    EmsScriptNode node =
-                            convertIdToEmsScriptNode( sysmlId, false, workspace,
-                                                      dateTime );
-                    if ( node != null ) {
-                        property = node.getNodeRef();
-                    } 
-                    else {
-                        String msg =
-                                "Error! Could not find element for sysml id = "
-                                        + sysmlId + ".\n";
-                        if ( getResponse() == null || getStatus() == null ) {
-                            Debug.error( false, msg );
-                        } else {
-                            getResponse().append( msg );
-                            getStatus().setCode( HttpServletResponse.SC_BAD_REQUEST,
-                                                 msg );
+        // The json object get methods will throw a NPE if the value is null,
+        // so must check for it
+        if (!jsonObject.isNull( jsonKey )) {
+            if ( name != null ) {
+                if ( name.equals( DataTypeDefinition.INT ) ) {
+                    property = jsonObject.getInt( jsonKey );
+                } else if ( name.equals( DataTypeDefinition.LONG ) ) {
+                    property = jsonObject.getLong( jsonKey );
+                } else if ( name.equals( DataTypeDefinition.DOUBLE ) ) {
+                    property = jsonObject.getDouble( jsonKey );
+                } else if ( name.equals( DataTypeDefinition.BOOLEAN ) ) {
+                    property = jsonObject.getBoolean( jsonKey );
+                } else if ( name.equals( DataTypeDefinition.TEXT ) ) {
+                    property = jsonObject.getString( jsonKey );
+                    // properties of type date include timestamp and
+                    // creation/modified dates and are not stored by MMS
+                    // } else if ( name.equals( DataTypeDefinition.DATE ) ) {
+                    // property = jsonObject.getString( jsonKey );
+                    // } else if ( name.equals( DataTypeDefinition.DATETIME ) ) {
+                    // property = jsonObject.getString( jsonKey );
+                } else if ( name.equals( DataTypeDefinition.NODE_REF ) ) {
+                    String sysmlId = null;
+                    try {
+                        sysmlId = jsonObject.getString( jsonKey );
+                    } catch ( JSONException e ) {
+                        Object val = jsonObject.get( jsonKey );
+                        sysmlId = val != null ? "" + val : null;
+                    }
+                    
+                    if (!Utils.isNullOrEmpty( sysmlId )) {
+                        EmsScriptNode node =
+                                convertIdToEmsScriptNode( sysmlId, false, workspace,
+                                                          dateTime );
+                        if ( node != null ) {
+                            property = node.getNodeRef();
+                        } 
+                        else {
+                            String msg =
+                                    "Error! Could not find element for sysml id = "
+                                            + sysmlId + ".\n";
+                            if ( getResponse() == null || getStatus() == null ) {
+                                Debug.error( false, msg );
+                            } else {
+                                getResponse().append( msg );
+                                getStatus().setCode( HttpServletResponse.SC_BAD_REQUEST,
+                                                     msg );
+                            }
                         }
                     }
+                    // A null sysmId indicates we should store null as the property value,
+                    else {
+                        property = null;
+                    }
+                    
+                } else {
+                    property = jsonObject.getString( jsonKey );
                 }
-                // A null sysmId indicates we should store null as the property value,
-                else {
-                    property = null;
-                }
-                
             } else {
                 property = jsonObject.getString( jsonKey );
             }
-        } else {
-            property = jsonObject.getString( jsonKey );
         }
 
         // Per CMED-461, we are allowing properties to be set to null
