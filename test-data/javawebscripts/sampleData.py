@@ -7,6 +7,7 @@ import time
 site = 'europa'
 project = '123456'
 folder = 'generated'
+DELAY_TIME = 20
 
 folderBranchingFactor=10  # 0 means everything in the same folder
 
@@ -80,7 +81,7 @@ def writeJsonStr(jStr, workspaceName, postNumber):
     
 def doIt():
     createWorkspaces()
-    time.sleep(10)
+    time.sleep(DELAY_TIME)
 
     if options.verbose:
         print "\n" + "CREATING OWNER\n"
@@ -98,7 +99,7 @@ def doIt():
             print curl_cmd
         if options.execute:
             (status, output) = commands.getstatusoutput(curl_cmd)
-            time.sleep(10)
+            time.sleep(DELAY_TIME)
     
     if options.verbose:
         thick_divider()
