@@ -196,7 +196,20 @@
         <aspect name="ems:Trashed"/>
         
         <aspect name="ems:Added"/>
-        <aspect name="ems:Deleted"/>
+        <aspect name="ems:Deleted">
+            <properties>
+				<!-- This property exists only to ensure that the addition and deletion 
+					of the Deleted aspect is tracked in the version history. Be sure to change 
+					this property when adding the aspect, and be sure to remove the property 
+					when removing the aspect. -->
+                <property name="ems:deleted">
+                    <type>d:int</type>
+                    <mandatory>false</mandatory>
+                    <multiple>false</multiple>
+                    <index enabled="false"/>
+                </property>
+            </properties>
+        </aspect>
         <aspect name="ems:Moved"/>
         <aspect name="ems:Updated"/>
 

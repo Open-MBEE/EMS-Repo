@@ -338,6 +338,26 @@ public class Acm {
     public static final String ACM_IS_SITE = SYSML + JSON_IS_SITE;
 
     public static final String ACM_UNTYPED = SYSML + JSON_UNTYPED;
+    public static final String ACM_UNTYPED_PROPERTY = SYSML + "untyped";
+    public static final String ACM_METACLASS = SYSML + "Metaclass";
+    public static final String ACM_METACLASS_PROPERTY = SYSML + "metaclass";
+    public static final String ACM_STEREOTYPE = SYSML + "Stereotype";
+    public static final String ACM_STEREOTYPE_PROPERTY = SYSML + "stereotype";
+    public static final String ACM_DELETED = "ems:Deleted";
+    public static final String ACM_DELETED_PROPERTY = "ems:deleted";
+    //public static final String ACM_LITERAL_NULL = SYSML + "LiteralNull";
+    public static final String ACM_LITERAL_NULL_PROPERTY = SYSML + "literalNull";
+    //public static final String ACM_CHARACTERIZES = SYSML + "";;
+    public static final String ACM_CHARACTERIZES_PROPERTY = SYSML + "characterizes";
+    //public static final String ACM_SUCCESSION = SYSML + "";;
+    public static final String ACM_SUCCESSION_PROPERTY = SYSML + "succession";
+    //public static final String ACM_BINDING = SYSML + "";;
+    public static final String ACM_BINDING_PROPERTY = SYSML + "binding";
+    public static final String ACM_DEPENDENCY_PROPERTY = SYSML + "dependency";
+    public static final String ACM_EXPOSE_PROPERTY = SYSML + "expose";
+    public static final String ACM_CONFORM_PROPERTY = SYSML + "conform";
+    public static final String ACM_GENERALIZATION_PROPERTY = SYSML + "generalization";
+    
     public static final String ACM_CLASSIFIER = SYSML + JSON_CLASSIFIER;
     public static final String ACM_SLOTS = SYSML + JSON_SLOTS;
     
@@ -803,6 +823,33 @@ public class Acm {
             put(ACM_VIEW, VIEW_VALUESPECS);
             put(ACM_PRODUCT, PRODUCT_VALUESPECS);
             put(ACM_INSTANCE_SPECIFICATION, INSTANCE_SPEC_VALUESPECS);
+        }
+    };
+
+    /**
+     * The addition and removal of aspects is not available from a versioned
+     * node in alfresco unless a property is changed. Thus, aspects that are
+     * important see in older versions of nodes/elements must be accompanied
+     * with a property change. Those aspects are mapped below to an integer
+     * property that may be changed.
+     */
+    public static final HashMap< String, String > ASPECTS_WITH_BOGUS_PROPERTY =
+            new HashMap< String, String >() { 
+
+        private static final long serialVersionUID = 245249712914397853L;
+        {
+            put(ACM_DELETED, ACM_DELETED_PROPERTY);
+            put(ACM_UNTYPED, ACM_UNTYPED_PROPERTY);
+            put(ACM_METACLASS, ACM_METACLASS_PROPERTY);
+            put(ACM_STEREOTYPE, ACM_STEREOTYPE_PROPERTY);
+            put(ACM_LITERAL_NULL, ACM_LITERAL_NULL_PROPERTY);
+            put(ACM_CHARACTERIZES, ACM_CHARACTERIZES_PROPERTY);
+            put(ACM_SUCCESSION, ACM_SUCCESSION_PROPERTY);
+            put(ACM_BINDING, ACM_BINDING_PROPERTY);
+            put(ACM_DEPENDENCY, ACM_DEPENDENCY_PROPERTY);
+            put(ACM_EXPOSE, ACM_EXPOSE_PROPERTY);
+            put(ACM_CONFORM, ACM_CONFORM_PROPERTY);
+            put(ACM_GENERALIZATION, ACM_GENERALIZATION_PROPERTY);
         }
     };
 }
