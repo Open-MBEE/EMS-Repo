@@ -1377,7 +1377,7 @@ public class EmsScriptNode extends ScriptNode implements
         }
         
         EmsScriptNode node = null;
-        NodeRef ref = (NodeRef)getNodeRefProperty( ownerType, skipNodeRefCheck, dateTime, ws );
+        NodeRef ref = (NodeRef)getNodeRefProperty( ownerType, false, dateTime, true, skipNodeRefCheck, ws );
 
         if ( ref == null ) {
             node = getParent();
@@ -5217,7 +5217,7 @@ public class EmsScriptNode extends ScriptNode implements
         if (!hasAspect(aspectName)) {
             // if makeSureNodeRefIsNotFrozen() is called earlier, below is not necessary
             makeSureNodeRefIsNotFrozen();
-            retVal = createOrUpdateAspect(aspectName);
+            retVal = addAspect(aspectName);
         }
 
         // Add the saved properties if needed:
