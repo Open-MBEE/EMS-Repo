@@ -250,10 +250,17 @@ def set_read_to_gv6():
     '''Get the json output, and sets gv6 to the read time'''
     set_read_to_gv(6)
     
+def set_gv1_to_current_time():
+    '''Gets the current time'''
+    global gv1
+    gv1 = get_current_time(0)
+    print "set gv1 to current time " + gv1
+    return gv1
+
 def get_current_time(delay=3):
     '''Gets the current time and adds delay mins b/c it lags behind'''
     a = datetime.datetime.now() + datetime.timedelta(minutes=delay)
-    return a.strftime("%Y-%m-%dT%H:%M:%X.000")
+    return a.strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3]
 
 def set_read_delta_to_gv1(delta=7):
     '''Get the json output, and sets gv1 to the read time - delta secs'''

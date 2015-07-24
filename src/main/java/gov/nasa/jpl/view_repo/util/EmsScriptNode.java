@@ -39,6 +39,7 @@ import gov.nasa.jpl.mbee.util.Pair;
 import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.sysml.View;
+import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.NodeUtil.SearchType;
 
 import java.io.Serializable;
@@ -557,9 +558,40 @@ public class EmsScriptNode extends ScriptNode implements
         if ( Acm.getJSON2ACM().keySet().contains( type ) ) {
             type = Acm.getJSON2ACM().get( type );
         }
+        
+        updateBogusProperty( type );
+        
         transactionCheck();
 
         return changeAspect( type );
+    }
+
+    protected void updateBogusProperty( String type ) {
+        // Make sure the aspect change makes it into the version history by updating a bogus property.
+//        if ( !hasAspect( Acm.ACM_OWNS_ATTRIBUTE ) ) {
+//            System.out.println( "updateBogusProperty(" + type + ") quittin cuz no OwnsAttribute aspect." );
+//            return;
+//        }
+        String bogusPropName = null;
+        if ( Acm.ASPECTS_WITH_BOGUS_PROPERTY.containsKey( type ) ) {
+            bogusPropName = Acm.ASPECTS_WITH_BOGUS_PROPERTY.get( type );
+        }
+        if ( bogusPropName == null ) return;
+        try {
+            // We just need to change the bogus integer property, so find
+            // and increment it.
+            Integer i = 0;
+            try {
+                i = (Integer)getProperty( bogusPropName );
+            } catch ( Throwable e ) {
+                // suppress & ignore
+            }
+            if ( i == null ) i = 0; else i = (i + 1)%1000;
+            setProperty( Acm.ASPECTS_WITH_BOGUS_PROPERTY.get( type ),
+                         i );
+        } catch ( Throwable e ) {
+            // suppress & ignore
+        }
     }
 
     /**
@@ -1345,7 +1377,7 @@ public class EmsScriptNode extends ScriptNode implements
         }
         
         EmsScriptNode node = null;
-        NodeRef ref = (NodeRef)getNodeRefProperty( ownerType, skipNodeRefCheck, dateTime, ws );
+        NodeRef ref = (NodeRef)getNodeRefProperty( ownerType, false, dateTime, true, skipNodeRefCheck, ws );
 
         if ( ref == null ) {
             node = getParent();
@@ -4210,7 +4242,7 @@ public class EmsScriptNode extends ScriptNode implements
     public void delete() {
         if (!isDeleted()) {
             makeSureNodeRefIsNotFrozen();
-            addAspect( "ems:Deleted" );
+            createOrUpdateAspect( "ems:Deleted" );
         }
     }
 
@@ -6032,6 +6064,9 @@ public class EmsScriptNode extends ScriptNode implements
         if (hasAspect(type)) {
             makeSureNodeRefIsNotFrozen();
             transactionCheck();
+            
+            updateBogusProperty( type );
+
             return super.removeAspect( type );
         }
         return true;

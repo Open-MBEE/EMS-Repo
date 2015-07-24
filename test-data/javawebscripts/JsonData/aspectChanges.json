@@ -1,0 +1,14 @@
+{ "elements" : [
+    {
+     "sysmlid" : "element_zzz",
+     "specialization" : {
+       "type": "Untyped"
+     }
+    },
+    {
+     "sysmlid" : "directed_relationship_zzz",
+     "specialization" : {
+       "type": "Conform"
+     }
+    }
+]}
