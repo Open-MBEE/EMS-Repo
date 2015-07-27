@@ -259,6 +259,7 @@ public class NodeUtil {
             GenericComparator.instance();
 
     public static ServiceRegistry services = null;
+    public static Repository repository = null;
 
     // needed for Lucene search
     public static StoreRef SEARCH_STORE = null;
@@ -832,18 +833,18 @@ public class NodeUtil {
         return SEARCH_STORE;
     }
 
-    public static ApplicationContext getApplicationContext() {
-        String[] contextPath =
-                new String[] { "classpath:alfresco/application-context.xml" };
-        ApplicationContext applicationContext =
-                ApplicationContextHelper.getApplicationContext( contextPath );
-        return applicationContext;
-    }
+//    public static ApplicationContext getApplicationContext() {
+//        String[] contextPath =
+//                new String[] { "classpath:alfresco/application-context.xml" };
+//        ApplicationContext applicationContext =
+//                ApplicationContextHelper.getApplicationContext( contextPath );
+//        return applicationContext;
+//    }
     
     public static Repository getRepository() {
-        return (Repository)getApplicationContext().getBean( "repositoryHelper" );
+        return repository;
+        //return (Repository)getApplicationContext().getBean( "repositoryHelper" );
     }
-
 
     public static ServiceRegistry getServices() {
         return getServiceRegistry();
@@ -853,10 +854,11 @@ public class NodeUtil {
     }
 
     public static ServiceRegistry getServiceRegistry() {
-        if ( services == null ) {
-            services = (ServiceRegistry)getApplicationContext().getBean( "ServiceRegistry" );
-        }
         return services;
+//        if ( services == null ) {
+//            services = (ServiceRegistry)getApplicationContext().getBean( "ServiceRegistry" );
+//        }
+//        return services;
     }
 
     public static Collection<EmsScriptNode> luceneSearchElements(String queryPattern ) {
@@ -2872,10 +2874,16 @@ public class NodeUtil {
         if (ref == null || dateTime == null ) {
             return ref;
         }
+        
+        //EmsScriptNode node = new EmsScriptNode(ref, services);
+
+        //CacheResults results = NodeUtil.getNodesInCache( node.getSysmlId(), SearchType.ID.prefix, false, node.getWorkspace, false, dateTime, true, true, getServices(), true, null );
+        
         VersionHistory history = getServices().getVersionService().getVersionHistory( ref );
         if ( history == null ) {
+            EmsScriptNode node = new EmsScriptNode(ref, services);
+
                 // Versioning doesn't make versions until the first save...
-                EmsScriptNode node = new EmsScriptNode(ref, services);
                 Date createdTime = (Date)node.getProperty("cm:created");
                 if ( dateTime != null && createdTime != null && dateTime.compareTo( createdTime ) < 0 ) {
                 if (Debug.isOn())  Debug.outln( "no history! dateTime " + dateTime
@@ -2934,8 +2942,8 @@ public class NodeUtil {
             EmsScriptNode emsNode = new EmsScriptNode( ref, getServices() );
             ScriptVersion scriptVersion = emsNode.getVersion( versionLabel );
             if (Debug.isOn())  Debug.outln( "scriptVersion " + scriptVersion );
-            ScriptNode node = scriptVersion.getNode();
-            if (Debug.isOn())  Debug.outln( "script node " + node );
+            ScriptNode scriptVersionNode = scriptVersion.getNode();
+            if (Debug.isOn())  Debug.outln( "script node " + scriptVersionNode );
             //can't get script node properties--generates exception
             //if (Debug.isOn())  Debug.outln( "script node properties " + node.getProperties() );
             NodeRef scriptVersionNodeRef = scriptVersion.getNodeRef();

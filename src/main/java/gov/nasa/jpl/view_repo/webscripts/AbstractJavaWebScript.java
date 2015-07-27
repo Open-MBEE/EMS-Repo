@@ -155,11 +155,15 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
 	}
 
 	public void setRepositoryHelper(Repository repositoryHelper) {
+	    if ( repositoryHelper == null ) return;
 		this.repository = repositoryHelper;
+		NodeUtil.repository = repositoryHelper; // REVIEW -- this doesn't seem right since it's static in NodeUtil.
 	}
 
 	public void setServices(ServiceRegistry registry) {
+        if ( registry == null ) return;
 		this.services = registry;
+		NodeUtil.services = registry;  // REVIEW -- this doesn't seem right since it's static in NodeUtil.
 	}
 
 	public AbstractJavaWebScript( Repository repository,
