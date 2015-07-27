@@ -201,7 +201,15 @@ public class NodeUtil {
             Collections.synchronizedMap( new HashMap< String, NodeRef >() );
 
     /**
-     * A cache of alfresco nodes stored as a map from sysml:id to a set of nodes
+     * A cache of alfresco nodes stored as a map from NodeRef and time to node
+     * irrespective of workspace or deletion
+     */
+    public static Map< NodeRef, Map< String, NodeRef > > nodeVersionCache =
+            Collections.synchronizedMap( new HashMap< NodeRef, Map< String, NodeRef > >() );
+
+    /**
+     * A cache of alfresco nodes stored as a map from query parameters to a set of nodes.
+     * TODO -- list the parameters here
      */
     public static Map< String, Map< String, Map< String, Map< Boolean, Map< Long, Map< Boolean, Map< Boolean, Map< Boolean, Map<String, ArrayList< NodeRef > > > > > > > > > >
         elementCache = Collections.synchronizedMap( new HashMap< String, Map< String, Map< String, Map< Boolean, Map< Long, Map< Boolean, Map< Boolean, Map< Boolean, Map<String, ArrayList< NodeRef > > > > > > > > > >() );
