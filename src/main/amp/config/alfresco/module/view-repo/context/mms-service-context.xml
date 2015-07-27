@@ -417,5 +417,22 @@
         singleton="false">
         <property name="services" ref="ServiceRegistry" />
     </bean>
+
+    <!-- Set static vars for the ServiceRegistry and Repository in NodeUtil and JavaQuery -->    
+    <bean class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+        <property name="staticMethod" value="gov.nasa.jpl.view_repo.JavaQuery.setServices" />
+        <property name="arguments" ref="ServiceRegistry"/>
+    </bean>
+
+    <bean class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+        <property name="staticMethod" value="gov.nasa.jpl.view_repo.util.NodeUtil.setServices" />
+        <property name="arguments" ref="ServiceRegistry"/>
+    </bean>
+
+    <bean class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+        <property name="staticMethod" value="gov.nasa.jpl.view_repo.util.NodeUtil.setRepository" />
+        <property name="arguments" ref="repositoryHelper"/>
+    </bean>
+    
         
 </beans>

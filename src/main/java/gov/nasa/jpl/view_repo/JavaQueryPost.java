@@ -36,8 +36,6 @@ public class JavaQueryPost extends AbstractJavaWebScript {
     @Override
     public void setServices(ServiceRegistry services) {
         super.setServices( services );
-        JavaQuery.services = services;
-        NodeUtil.setServices( services );
     }
     
 //    public void setNodeService(NodeService nodeService) {

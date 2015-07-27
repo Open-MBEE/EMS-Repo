@@ -845,6 +845,10 @@ public class NodeUtil {
         return repository;
         //return (Repository)getApplicationContext().getBean( "repositoryHelper" );
     }
+    public static void setRepository( Repository repositoryHelper ) {
+        NodeUtil.repository = repositoryHelper;
+    }
+        
 
     public static ServiceRegistry getServices() {
         return getServiceRegistry();
