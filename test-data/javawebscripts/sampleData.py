@@ -8,6 +8,7 @@ from Finder.Containers_and_folders import folder
 site = 'europa'
 project = '123456'
 folder = 'generated'
+DELAY_TIME = 20
 
 
 elementsJsonStrTemplate = '\'{"elements":[%s]}\''
@@ -124,7 +125,7 @@ def writeJsonStr(branch, jStr, workspaceName, count, postNumber, jsonArrayStr):
 
 def doIt():
     createWorkspaces()
-    time.sleep(10)
+    time.sleep(DELAY_TIME)
 
     if options.verbose:
         print "\n" + "CREATING OWNER\n"
@@ -142,7 +143,7 @@ def doIt():
             print curl_cmd
         if options.execute:
             (status, output) = commands.getstatusoutput(curl_cmd)
-            time.sleep(10)
+            time.sleep(DELAY_TIME)
     
     if options.verbose:
         thick_divider()
