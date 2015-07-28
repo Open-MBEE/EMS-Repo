@@ -292,6 +292,7 @@ public class NodeUtil {
         Object value = refAtTime;
         if ( refAtTime == null ) value = NULL_OBJECT;
         Object oldValue = Utils.put( nodeAtTimeCache, nodeRef, millis, value );
+        if ( oldValue == null ) return null;
         if ( oldValue == NULL_OBJECT ) return null;
         if ( oldValue instanceof NodeRef ) {
             return (NodeRef)oldValue;
@@ -2936,11 +2937,14 @@ public class NodeUtil {
             }
         }
 
+        EmsScriptNode esn = new EmsScriptNode(ref, services);
+
+        logger.warn( "getting history for " + esn + " at time " + dateTime );
+        
         VersionHistory history = getServices().getVersionService().getVersionHistory( ref );
         if ( history == null ) {
             // Versioning doesn't make versions until the first save...
-            EmsScriptNode node = new EmsScriptNode(ref, services);
-            Date createdTime = (Date)node.getProperty("cm:created");
+            Date createdTime = (Date)esn.getProperty("cm:created");
             if ( dateTime != null && createdTime != null && dateTime.compareTo( createdTime ) < 0 ) {
             if (Debug.isOn())  Debug.outln( "no history! dateTime " + dateTime
                                 + " before created " + createdTime );
