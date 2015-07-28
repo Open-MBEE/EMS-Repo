@@ -177,6 +177,7 @@ public class NodeUtil {
 
     public static boolean doFullCaching = true;
     public static boolean doSimpleCaching = true;
+    public static boolean doNodeAtTimeCaching = true;
     public static boolean doHeisenCheck = true;
     public static boolean doVersionCaching = false; // turn this off by default
     public static boolean activeVersionCaching = true;
@@ -202,10 +203,10 @@ public class NodeUtil {
 
     /**
      * A cache of alfresco nodes stored as a map from NodeRef and time to node
-     * irrespective of workspace or deletion
+     * as determined by {@link #getNodeRefAtTime(NodeRef, Date)}.
      */
-    public static Map< NodeRef, Map< String, NodeRef > > nodeVersionCache =
-            Collections.synchronizedMap( new HashMap< NodeRef, Map< String, NodeRef > >() );
+    public static Map< NodeRef, Map< Long, Object > > nodeAtTimeCache =
+            Collections.synchronizedMap( new HashMap< NodeRef, Map< Long, Object > >() );
 
     /**
      * A cache of alfresco nodes stored as a map from query parameters to a set of nodes.
@@ -226,26 +227,26 @@ public class NodeUtil {
      * sometimes tied to an old version.
      */
     protected static Map< String, NodeRef > heisenCache =
-            Collections.synchronizedMap( new HashMap<String, NodeRef>() );
+            Collections.synchronizedMap( new HashMap< String, NodeRef >() );
 
-//  public static HashMap<String, String> versionLabelCache =
-//            new HashMap<String, String>();
+    // public static HashMap<String, String> versionLabelCache =
+    // new HashMap<String, String>();
     public static Map< String, EmsVersion > versionCache =
-            Collections.synchronizedMap( new HashMap<String, EmsVersion>() );
+            Collections.synchronizedMap( new HashMap< String, EmsVersion >() );
     public static Map< NodeRef, NodeRef > frozenNodeCache =
-            Collections.synchronizedMap( new HashMap<NodeRef, NodeRef>() );
+            Collections.synchronizedMap( new HashMap< NodeRef, NodeRef >() );
 
     // Set< String > filter, boolean isExprOrProp,Date dateTime, boolean isIncludeQualified
-    public static Map< String, Map< Long, Map< Boolean, Map< Set<String>, Map<String, JSONObject > > > > > jsonDeepCache =
-            Collections.synchronizedMap( new HashMap< String, Map< Long, Map< Boolean, Map< Set<String>, Map<String, JSONObject > > > > >() );
+    public static Map< String, Map< Long, Map< Boolean, Map< Set< String >, Map< String, JSONObject > > > > > jsonDeepCache =
+            Collections.synchronizedMap( new HashMap< String, Map< Long, Map< Boolean, Map< Set< String >, Map< String, JSONObject > > > > >() );
     public static Map< String, Map< Long, JSONObject > > jsonCache =
-        Collections.synchronizedMap( new HashMap< String, Map< Long, JSONObject > >() );
+            Collections.synchronizedMap( new HashMap< String, Map< Long, JSONObject > >() );
     public static long jsonCacheHits = 0;
     public static long jsonCacheMisses = 0;
 
     // The json string cache maps JSONObjects to an integer (date in millis) to
     // a string rendering of itself paired with the date.
-    public static Map<JSONObject, Map< Integer, Pair< Date, String > > > jsonStringCache =
+    public static Map< JSONObject, Map< Integer, Pair< Date, String > > > jsonStringCache =
             Collections.synchronizedMap( new HashMap< JSONObject, Map< Integer, Pair< Date, String > > >() );
     public static long jsonStringCacheHits = 0;
     public static long jsonStringCacheMisses = 0;
@@ -253,9 +254,9 @@ public class NodeUtil {
     
     // REVIEW -- TODO -- Should we try and cache the toString() output of the json, too?    
     // REVIEW -- TODO -- This would mean we'd have to concatenate the json
-    // REVIEW -- TODO -- strings ourselves instead of just one big toString() 
+    // REVIEW -- TODO -- strings ourselves instead of just one big toString()
     // REVIEW -- TODO -- on the collection as done currently.
-    
+
     // Set the flag to time events that occur during a model post using the timers
     // below
     public static boolean timeEvents = false;
@@ -270,7 +271,7 @@ public class NodeUtil {
 
     // needed for Lucene search
     public static StoreRef SEARCH_STORE = null;
-            //new StoreRef( StoreRef.PROTOCOL_WORKSPACE, "SpacesStore" );
+    // new StoreRef( StoreRef.PROTOCOL_WORKSPACE, "SpacesStore" );
 
     public static Object NULL_OBJECT = new Object() {
         @Override
@@ -278,7 +279,47 @@ public class NodeUtil {
             return "NULL_OBJECT";
         }
     };
-    
+
+    public static NodeRef nodeAtTimeCachePut( NodeRef nodeRef, Date date,
+                                              NodeRef refAtTime ) {
+        if ( !doNodeAtTimeCaching || nodeRef == null ) {
+            return null;
+        }
+        Long millis = date == null ? 0 : date.getTime();
+        if ( logger.isDebugEnabled() ) logger.debug( "nodeAtTimeCachePut("
+                                                     + nodeRef + ", " + millis
+                                                     + ", " + refAtTime + ")" );
+        Object value = refAtTime;
+        if ( refAtTime == null ) value = NULL_OBJECT;
+        Object oldValue = Utils.put( nodeAtTimeCache, nodeRef, millis, value );
+        if ( oldValue == NULL_OBJECT ) return null;
+        if ( oldValue instanceof NodeRef ) {
+            return (NodeRef)oldValue;
+        }
+        logger.error( "Bad value stored in nodeAtTimeCache(" + nodeRef + ", "
+                      + millis + "): " + oldValue );
+        return null;
+    }
+
+    public static Object nodeAtTimeCacheGet( NodeRef nodeRef, Date date ) {
+        if ( !doNodeAtTimeCaching || nodeRef == null ) {
+            return null;
+        }
+        Long millis = date == null ? 0 : date.getTime();
+        if ( logger.isDebugEnabled() ) logger.debug( "nodeAtTimeCacheGet("
+                                                     + nodeRef + ", " + millis
+                                                     + ")" );
+        Object o = Utils.get( nodeAtTimeCache, nodeRef, millis );
+        return o;
+        // if ( o == NULL_OBJECT ) return null;
+        // try {
+        // return (NodeRef)o;
+        // } catch (ClassCastException e) {
+        // e.printStackTrace();
+        // }
+        // return null;
+    }
+
     /**
      * clear or create the cache for correcting bad node refs (that refer to
      * wrong versions)
@@ -2869,50 +2910,66 @@ public class NodeUtil {
      *            some version of the NodeRef
      * @param dateTime
      *            the date/time, specifying the version
-     * @return the version of the NodeRef that was the latest version at the specified time, or if before any version
+     * @return the version of the NodeRef that was the latest version at the
+     *         specified time, or if before any version
      */
-    public static NodeRef getNodeRefAtTime( NodeRef ref,
-                                            Date dateTime ) {
-        if (Debug.isOn())  Debug.outln("getNodeRefAtTime( " + ref + ", " + dateTime + " )" );
+    public static NodeRef getNodeRefAtTime( NodeRef ref, Date dateTime ) {
+        if ( Debug.isOn() ) Debug.outln( "getNodeRefAtTime( " + ref + ", "
+                                         + dateTime + " )" );
         if ( !NodeUtil.exists( ref ) && !NodeUtil.isDeleted( ref ) ) {
             return null;
         }
-        if (ref == null || dateTime == null ) {
+        if ( ref == null || dateTime == null ) {
             return ref;
         }
+
+        // check cache
+        if ( doNodeAtTimeCaching ) {
+            Object o = nodeAtTimeCacheGet( ref, dateTime );
+            if ( o == NULL_OBJECT ) return null;
+            if ( o != null ) {
+                try {
+                    return (NodeRef)o;
+                } catch ( ClassCastException e ) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
         VersionHistory history = getServices().getVersionService().getVersionHistory( ref );
         if ( history == null ) {
-                // Versioning doesn't make versions until the first save...
-                EmsScriptNode node = new EmsScriptNode(ref, services);
-                Date createdTime = (Date)node.getProperty("cm:created");
-                if ( dateTime != null && createdTime != null && dateTime.compareTo( createdTime ) < 0 ) {
-                if (Debug.isOn())  Debug.outln( "no history! dateTime " + dateTime
-                                    + " before created " + createdTime );
-                    return null;
+            // Versioning doesn't make versions until the first save...
+            EmsScriptNode node = new EmsScriptNode(ref, services);
+            Date createdTime = (Date)node.getProperty("cm:created");
+            if ( dateTime != null && createdTime != null && dateTime.compareTo( createdTime ) < 0 ) {
+            if (Debug.isOn())  Debug.outln( "no history! dateTime " + dateTime
+                                + " before created " + createdTime );
+                if ( doNodeAtTimeCaching ) {
+                    nodeAtTimeCachePut( ref, dateTime, null );
                 }
-            if (Debug.isOn() && createdTime != null)  Debug.outln( "no history! created " + createdTime );
-                return ref;
+                return null;
+            }
+            if ( Debug.isOn() && createdTime != null ) Debug.outln( "no history! created "
+                                                                    + createdTime );
+            // Can't cache until history is created. :-(
+            return ref;
         }
 
         Collection< Version > versions = history.getAllVersions();
-        Vector<Version> vv = new Vector<Version>( versions );
-        if (Debug.isOn())  Debug.outln("versions = " + vv );
+        Vector< Version > vv = new Vector< Version >( versions );
+        if ( Debug.isOn() ) Debug.outln( "versions = " + vv );
         if ( Utils.isNullOrEmpty( vv ) ) {
             // TODO - throw error?!
+            // Don't cache an error.
             return null;
         }
         int index = Collections.binarySearch( vv, dateTime, versionLowerBoundComparator );
-        if (Debug.isOn())  Debug.outln( "binary search returns index " + index );
+        if ( Debug.isOn() ) Debug.outln( "binary search returns index " + index );
         Version version = null;
         if ( index < 0 ) {
             // search returned index = -(lowerBound+1), so lowerbound = -index-1
             index = -index - 1;
             if (Debug.isOn())  Debug.outln( "index converted to lowerbound " + index );
-//            // But, since the order is newest to oldest, we want the one after the lowerbound
-//            if ( index >= 0 && index < vv.size()-1 ) {
-//                index = index + 1;
-//                if (Debug.isOn())  Debug.outln( "index converted to upperbound " + index );
-//            }
         }
         if ( index < 0 ) {
             version = vv.get( 0 );
@@ -2922,47 +2979,55 @@ public class NodeUtil {
                 if ( d != null && d.after( dateTime ) ) {
                     NodeRef fnr = version.getFrozenStateNodeRef();
                     if (Debug.isOn())  Debug.outln( "returning first frozen node ref " + fnr );
+                    if ( doNodeAtTimeCaching ) {
+                        nodeAtTimeCachePut( ref, dateTime, fnr );
+                    }
                     return fnr;
                 }
             }
             // TODO -- throw error?!
-            if (Debug.isOn())  Debug.outln( "version is null; returning null!" );
+            if ( Debug.isOn() ) Debug.outln( "version is null; returning null!" );
+            // Don't cache an error.
             return null;
         } else if ( index >= vv.size() ) {
-            if (Debug.isOn())  Debug.outln( "index is too large, outside bounds!" );
+            if ( Debug.isOn() ) Debug.outln( "index is too large, outside bounds!" );
             // TODO -- throw error?!
+            // Don't cache an error.
             return null;
         } else {
             version = vv.get( index );
         }
         if ( Debug.isOn() ) {
-            if (Debug.isOn())  Debug.outln( "picking version " + version );
+            if ( Debug.isOn() ) Debug.outln( "picking version " + version );
             if (Debug.isOn())  Debug.outln( "version properties " + version.getVersionProperties() );
             String versionLabel = version.getVersionLabel();
             EmsScriptNode emsNode = new EmsScriptNode( ref, getServices() );
             ScriptVersion scriptVersion = emsNode.getVersion( versionLabel );
-            if (Debug.isOn())  Debug.outln( "scriptVersion " + scriptVersion );
+            if ( Debug.isOn() ) Debug.outln( "scriptVersion " + scriptVersion );
             ScriptNode node = scriptVersion.getNode();
-            if (Debug.isOn())  Debug.outln( "script node " + node );
-            //can't get script node properties--generates exception
+            if ( Debug.isOn() ) Debug.outln( "script node " + node );
+            // can't get script node properties--generates exception
             //if (Debug.isOn())  Debug.outln( "script node properties " + node.getProperties() );
             NodeRef scriptVersionNodeRef = scriptVersion.getNodeRef();
-            if (Debug.isOn())  Debug.outln( "ScriptVersion node ref "
+            if ( Debug.isOn() ) Debug.outln( "ScriptVersion node ref "
                                              + scriptVersionNodeRef );
             NodeRef vnr = version.getVersionedNodeRef();
-            if (Debug.isOn())  Debug.outln( "versioned node ref " + vnr );
+            if ( Debug.isOn() ) Debug.outln( "versioned node ref " + vnr );
         }
         NodeRef fnr = version.getFrozenStateNodeRef();
-        if (Debug.isOn())  Debug.outln( "frozen node ref " + fnr );
-        if (Debug.isOn())  Debug.outln( "frozen node ref properties: "
+        if ( Debug.isOn() ) Debug.outln( "frozen node ref " + fnr );
+        if ( Debug.isOn() ) Debug.outln( "frozen node ref properties: "
                                          + getServices().getNodeService()
                                                         .getProperties( fnr ) );
-        if (Debug.isOn())  Debug.outln( "frozen node ref "
-                + getServices().getNodeService()
-                               .getProperties( fnr ) );
+        if ( Debug.isOn() ) Debug.outln( "frozen node ref "
+                                         + getServices().getNodeService()
+                                                        .getProperties( fnr ) );
 
-        if (Debug.isOn())  Debug.outln( "returning frozen node ref " + fnr );
+        if ( Debug.isOn() ) Debug.outln( "returning frozen node ref " + fnr );
 
+        if ( doNodeAtTimeCaching ) {
+            nodeAtTimeCachePut( ref, dateTime, fnr );
+        }
         return fnr;
     }
 
