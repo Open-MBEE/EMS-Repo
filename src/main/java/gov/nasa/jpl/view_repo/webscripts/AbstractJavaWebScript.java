@@ -155,10 +155,12 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
 	}
 
 	public void setRepositoryHelper(Repository repositoryHelper) {
+	    if ( repositoryHelper == null ) return;
 		this.repository = repositoryHelper;
 	}
 
 	public void setServices(ServiceRegistry registry) {
+        if ( registry == null ) return;
 		this.services = registry;
 	}
 

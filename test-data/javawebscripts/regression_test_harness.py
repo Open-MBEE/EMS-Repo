@@ -1894,6 +1894,76 @@ common_filters,
 ],
 
 
+# Make sure aspect version history is accurate (CMED-939)
+
+[
+700,
+"PostElementsForAspectHistoryCheck",
+'Post elements to check for aspect changes in version history',
+create_curl_cmd(type="POST",data="elementsForAspectHistoryCheck.json",base_url=BASE_URL_WS,
+                post_type="elements",branch="master/"),
+True,
+common_filters,
+["test","workspaces","develop", "develop2"]
+],
+
+[
+701,
+"CheckIfPostedAspectsInHistory",
+"Get the previously posted elements at timestamp=now to see if their type aspects were recorded properly.",
+create_curl_cmd(type="GET",data="elements/aspect_history_zzz?recurse=true&timestamp=$gv1",base_url=BASE_URL_WS,
+                branch="master/"),
+True, 
+common_filters,
+["test","workspaces","develop"],
+set_gv1_to_current_time
+],
+
+[
+702,
+"DeleteElementForAspectHistoryCheck",
+"Delete a property to see if the Delete aspect is recorded in the version history",
+create_curl_cmd(type="DELETE",data="elements/property_zzz",base_url=BASE_URL_WS,
+                branch="master/"),
+True, 
+common_filters+['"timestamp"','"MMS_','"id"','"qualifiedId"','"version"', '"modified"', '"sequence"'],
+["test","workspaces","develop", "develop2"]
+],
+        
+[
+703,
+"UpdateElementsForAspectHistoryCheck",
+'Post updates to element types to check for aspect changes in version history',
+create_curl_cmd(type="POST",data="aspectChanges.json",base_url=BASE_URL_WS,
+                post_type="elements",branch="master/"),
+True,
+common_filters,
+["test","workspaces","develop", "develop2"]
+],
+
+[
+704,
+"CheckIfAspectUpdatesInHistory",
+"Get the previously updated elements at timestamp=now to see if changes to their type aspects were recorded properly.",
+create_curl_cmd(type="GET",data="elements/aspect_history_zzz?recurse=true&timestamp=$gv1",base_url=BASE_URL_WS,
+                branch="master/"),
+True, 
+common_filters,
+["test","workspaces","develop"],
+set_gv1_to_current_time
+],
+
+[
+705,
+"CheckIfAspectDeleteInHistory",
+"Get the previously deleted element at timestamp=now to see if the Deleted aspect was recorded properly.",
+create_curl_cmd(type="GET",data="elements/property_zzz?timestamp=$gv1",base_url=BASE_URL_WS,
+                branch="master/"),
+True,
+common_filters,
+["test","workspaces","develop"]
+],
+
 # Additional searches after everything is completed ==========================   
 [
 10000,

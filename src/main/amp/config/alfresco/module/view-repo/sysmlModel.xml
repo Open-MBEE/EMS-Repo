@@ -55,7 +55,7 @@
 			<mandatory-aspects>
 				<aspect>sysml:Identifiable</aspect>
 				<aspect>sysml:Named</aspect>
-                <aspect>sysml:OwnsAttribute</aspect>
+                <!-- <aspect>sysml:OwnsAttribute</aspect> -->
 				<aspect>cm:versionable</aspect>
 				<aspect>cm:taggable</aspect>
 				<aspect>cm:titled</aspect> <!-- this is purely here for showing in ui, should show sysml:name instead -->
@@ -459,15 +459,63 @@
 		</aspect>
 		<aspect name="sysml:Dependency">
 			<parent>sysml:DirectedRelationship</parent>
+            <properties>
+                <!-- This property exists only to ensure that the addition and removal 
+                    of this aspect is tracked in the version history. Be sure to change 
+                    this property when adding the aspect, and be sure to remove the property 
+                    when removing the aspect. -->
+                <property name="sysml:dependency">
+                    <type>d:int</type>
+                    <mandatory>false</mandatory>
+                    <multiple>false</multiple>
+                    <index enabled="false"/>
+                </property>
+            </properties>
 		</aspect>
 		<aspect name="sysml:Expose">
 			<parent>sysml:Dependency</parent>
+            <properties>
+                <!-- This property exists only to ensure that the addition and removal 
+                    of this aspect is tracked in the version history. Be sure to change 
+                    this property when adding the aspect, and be sure to remove the property 
+                    when removing the aspect. -->
+                <property name="sysml:expose">
+                    <type>d:int</type>
+                    <mandatory>false</mandatory>
+                    <multiple>false</multiple>
+                    <index enabled="false"/>
+                </property>
+            </properties>
 		</aspect>
 		<aspect name="sysml:Conform">
 			<parent>sysml:Dependency</parent>
+            <properties>
+                <!-- This property exists only to ensure that the addition and removal 
+                    of this aspect is tracked in the version history. Be sure to change 
+                    this property when adding the aspect, and be sure to remove the property 
+                    when removing the aspect. -->
+                <property name="sysml:conform">
+                    <type>d:int</type>
+                    <mandatory>false</mandatory>
+                    <multiple>false</multiple>
+                    <index enabled="false"/>
+                </property>
+            </properties>
 		</aspect>
 		<aspect name="sysml:Generalization">
 			<parent>sysml:DirectedRelationship</parent>
+            <properties>
+                <!-- This property exists only to ensure that the addition and removal 
+                    of this aspect is tracked in the version history. Be sure to change 
+                    this property when adding the aspect, and be sure to remove the property 
+                    when removing the aspect. -->
+                <property name="sysml:generalization">
+                    <type>d:int</type>
+                    <mandatory>false</mandatory>
+                    <multiple>false</multiple>
+                    <index enabled="false"/>
+                </property>
+            </properties>
 		</aspect>
 
         <aspect name="sysml:relationshipsAsSource">
@@ -657,6 +705,18 @@
 		</aspect>
 		<aspect name="sysml:LiteralNull">
 			<parent>sysml:ValueSpecification</parent>
+            <properties>
+                <!-- This property exists only to ensure that the addition and removal 
+                    of this aspect is tracked in the version history. Be sure to change 
+                    this property when adding the aspect, and be sure to remove the property 
+                    when removing the aspect. -->
+                <property name="sysml:literalNull">
+                    <type>d:int</type>
+                    <mandatory>false</mandatory>
+                    <multiple>false</multiple>
+                    <index enabled="false"/>
+                </property>
+            </properties>
 		</aspect>
 		<aspect name="sysml:LiteralReal">
 			<parent>sysml:ValueSpecification</parent>
@@ -1032,22 +1092,102 @@
                         <tokenised>false</tokenised>
                     </index>
                 </property>
+				<!-- This property is updated whenever an aspect is added or deleted. We're 
+					putting it here because the OwnsAttribute aspect is added to every element. -->
+                <!-- <property name="sysml:bogusProperty">
+                    <type>d:int</type>
+                    <mandatory>false</mandatory>
+                    <multiple>false</multiple>
+                    <index enabled="false"/>
+                </property> -->
             </properties>
         </aspect>
         <aspect name="sysml:Characterizes">
             <parent>sysml:DirectedRelationship</parent>
+            <properties>
+                <!-- This property exists only to ensure that the addition and removal 
+                    of this aspect is tracked in the version history. Be sure to change 
+                    this property when adding the aspect, and be sure to remove the property 
+                    when removing the aspect. -->
+                <property name="sysml:characterizes">
+                    <type>d:int</type>
+                    <mandatory>false</mandatory>
+                    <multiple>false</multiple>
+                    <index enabled="false"/>
+                </property>
+            </properties>
         </aspect>
         <aspect name="sysml:Succession">
             <parent>sysml:Connector</parent>
+            <properties>
+                <!-- This property exists only to ensure that the addition and removal 
+                    of this aspect is tracked in the version history. Be sure to change 
+                    this property when adding the aspect, and be sure to remove the property 
+                    when removing the aspect. -->
+                <property name="sysml:succession">
+                    <type>d:int</type>
+                    <mandatory>false</mandatory>
+                    <multiple>false</multiple>
+                    <index enabled="false"/>
+                </property>
+            </properties>
         </aspect>
         <aspect name="sysml:Binding">
             <parent>sysml:Connector</parent>
+            <properties>
+                <!-- This property exists only to ensure that the addition and removal 
+                    of this aspect is tracked in the version history. Be sure to change 
+                    this property when adding the aspect, and be sure to remove the property 
+                    when removing the aspect. -->
+                <property name="sysml:binding">
+                    <type>d:int</type>
+                    <mandatory>false</mandatory>
+                    <multiple>false</multiple>
+                    <index enabled="false"/>
+                </property>
+            </properties>
         </aspect>
         <aspect name="sysml:Untyped">
+            <properties>
+                <!-- This property exists only to ensure that the addition and removal 
+                    of this aspect is tracked in the version history. Be sure to change 
+                    this property when adding the aspect, and be sure to remove the property 
+                    when removing the aspect. -->
+                <property name="sysml:untyped">
+                    <type>d:int</type>
+                    <mandatory>false</mandatory>
+                    <multiple>false</multiple>
+                    <index enabled="false"/>
+                </property>
+            </properties>
         </aspect>
         <aspect name="sysml:Metaclass">
+            <properties>
+                <!-- This property exists only to ensure that the addition and removal 
+                    of this aspect is tracked in the version history. Be sure to change 
+                    this property when adding the aspect, and be sure to remove the property 
+                    when removing the aspect. -->
+                <property name="sysml:metaclass">
+                    <type>d:int</type>
+                    <mandatory>false</mandatory>
+                    <multiple>false</multiple>
+                    <index enabled="false"/>
+                </property>
+            </properties>
         </aspect>
         <aspect name="sysml:Stereotype">
+            <properties>
+                <!-- This property exists only to ensure that the addition and removal 
+                    of this aspect is tracked in the version history. Be sure to change 
+                    this property when adding the aspect, and be sure to remove the property 
+                    when removing the aspect. -->
+                <property name="sysml:stereotype">
+                    <type>d:int</type>
+                    <mandatory>false</mandatory>
+                    <multiple>false</multiple>
+                    <index enabled="false"/>
+                </property>
+            </properties>
         </aspect>
 	</aspects>
 </model>

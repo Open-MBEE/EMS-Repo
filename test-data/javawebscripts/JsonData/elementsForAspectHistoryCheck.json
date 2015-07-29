@@ -1,0 +1,54 @@
+{ "elements" : [
+    {
+     "sysmlid" : "aspect_history_zzz",
+     "owner" : "123456",
+     "documentation" : "a place to put stuff for the aspect history tests",
+     "specialization" : {
+       "type": "Package"
+     }
+    },
+    {
+     "sysmlid" : "property_zzz",
+     "owner" : "aspect_history_zzz",
+     "documentation" : "p is p",
+     "specialization" : {
+       "type": "Property",
+       "value" : [{ "string" : "the p value",
+                    "type" : "LiteralString"}]}
+     },
+    {
+     "sysmlid" : "element_zzz",
+     "owner" : "aspect_history_zzz",
+     "documentation" : "e is e",
+    },
+    {
+     "sysmlid" : "untyped_no_doc_zzz",
+     "owner" : "aspect_history_zzz",
+     "specialization" : {
+       "type": "Untyped"
+     }
+    },
+    {
+     "sysmlid" : "untyped_doc_zzz",
+     "owner" : "aspect_history_zzz",
+     "documentation" : "d is d",
+     "specialization" : {
+       "type": "Untyped"
+     }
+    },
+    {
+     "sysmlid" : "directed_relationship_zzz",
+     "owner" : "aspect_history_zzz",
+     "documentation" : "d is d",
+     "specialization" : {
+       "type": "DirectedRelationship"
+     }
+    },
+    {
+     "sysmlid" : "expose_no_doc_zzz",
+     "owner" : "aspect_history_zzz",
+     "specialization" : {
+       "type": "Expose"
+     }
+    }
+]}
