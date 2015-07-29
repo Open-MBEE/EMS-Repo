@@ -57,6 +57,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Random;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.regex.Matcher;
@@ -568,30 +569,14 @@ public class EmsScriptNode extends ScriptNode implements
 
     protected void updateBogusProperty( String type ) {
         // Make sure the aspect change makes it into the version history by updating a bogus property.
-//        if ( !hasAspect( Acm.ACM_OWNS_ATTRIBUTE ) ) {
-//            System.out.println( "updateBogusProperty(" + type + ") quittin cuz no OwnsAttribute aspect." );
-//            return;
-//        }
         String bogusPropName = null;
         if ( Acm.ASPECTS_WITH_BOGUS_PROPERTY.containsKey( type ) ) {
             bogusPropName = Acm.ASPECTS_WITH_BOGUS_PROPERTY.get( type );
         }
         if ( bogusPropName == null ) return;
-        try {
-            // We just need to change the bogus integer property, so find
-            // and increment it.
-            Integer i = 0;
-            try {
-                i = (Integer)getProperty( bogusPropName );
-            } catch ( Throwable e ) {
-                // suppress & ignore
-            }
-            if ( i == null ) i = 0; else i = (i + 1)%1000;
-            setProperty( Acm.ASPECTS_WITH_BOGUS_PROPERTY.get( type ),
-                         i );
-        } catch ( Throwable e ) {
-            // suppress & ignore
-        }
+        Random rand = new Random();
+        int randNum = rand.nextInt(10000000);
+        setProperty( Acm.ASPECTS_WITH_BOGUS_PROPERTY.get( type ), randNum );
     }
 
     /**
