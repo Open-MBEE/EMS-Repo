@@ -2,6 +2,7 @@ from regression_lib import *
 import commands
 import optparse
 import time
+from Finder.Containers_and_folders import folder
 
 # default parameters
 site = 'europa'
@@ -9,7 +10,6 @@ project = '123456'
 folder = 'generated'
 DELAY_TIME = 20
 
-folderBranchingFactor=10  # 0 means everything in the same folder
 
 elementsJsonStrTemplate = '\'{"elements":[%s]}\''
 
@@ -21,6 +21,7 @@ parser.add_option("-c", "--changes", default=10, type="int", help="Number of cha
 parser.add_option("-n", "--postChanges", default=1, type="int", help="Number of changes to post at a time")
 parser.add_option("-o", "--owner", default="testData", help="An owner ID to indicate where all the elements should be gathered")
 parser.add_option("-w", "--workspaces", default="master", help="A string of comma separated workspace names to be used i.e. \"workspace1,workspace2,workspace3...\" (no spaces)")
+parser.add_option("-f", "--folderBranching", default=0, type="int", help="Number of branching folders to create. 0 means everything in the same folder")
 parser.add_option("-x", "--execute", dest="execute", action="store_true", default=False, help="Execute the commands to create workspaces and post the elements")
 parser.add_option("-v", "--verbose", dest="verbose", action="store_true", default=False, help="Print out the curl commands and, if executing, the output from sending the curl commands")
 options, args = parser.parse_args()
@@ -54,31 +55,74 @@ def post(elementsJsonStr, workspaceName):
         if options.verbose:
             print output
         
-def writeJsonStr(jStr, workspaceName, postNumber):
-    count = 0
-    jsonArrayStr = ''
-    for i in range(0, options.elements):
-        iStr = "%06d"%i
-        id = "e_" + iStr
-        name = id + "_" + jStr
-        jsonStr = '{"sysmlid":"' + id + '","name":"' + name + '","owner":"' + options.owner + '"}'
-        if jsonArrayStr != '':
-            jsonArrayStr = jsonArrayStr + ',' + jsonStr
-        else:
-            jsonArrayStr = jsonStr
-        count = count + 1
-        
-        if count % postNumber == 0:
-            if jsonArrayStr != '':
-                elementsJsonStr = elementsJsonStrTemplate%jsonArrayStr
-                post(elementsJsonStr, workspaceName)
-                jsonArrayStr = ''
-    #post any remaining elements
-    if jsonArrayStr != '':
-        elementsJsonStr = elementsJsonStrTemplate%jsonArrayStr
-        post(elementsJsonStr, workspaceName)
-        jsonArrayStr = ''  
+def writeJsonStr(branch, jStr, workspaceName, count, postNumber, jsonArrayStr):
     
+    if branch == 0:
+        folder = 0
+    else:
+        folder = branch
+        
+    branch = branch * options.folderBranching + 1
+    
+    if options.folderBranching == 0:
+        
+        for i in range(1, options.elements + 1):
+            iStr = "%06d"%i
+            id = "e_" + iStr
+            name = id + "_" + jStr
+
+            jsonStr = '{"sysmlid":"' + id + '","name":"' + name + '","owner":"' + options.owner + '"}'
+            if jsonArrayStr != '':
+                jsonArrayStr = jsonArrayStr + ',' + jsonStr
+            else:
+                jsonArrayStr = jsonStr
+            count = count + 1
+        
+            if count % postNumber == 0:
+                if jsonArrayStr != '':
+                    elementsJsonStr = elementsJsonStrTemplate%jsonArrayStr
+                    post(elementsJsonStr, workspaceName)
+                    jsonArrayStr = ''
+    #post any remaining elements
+        if jsonArrayStr != '':
+            elementsJsonStr = elementsJsonStrTemplate%jsonArrayStr
+            post(elementsJsonStr, workspaceName)
+            jsonArrayStr = '' 
+    
+    else:
+        
+        for i in range(branch, branch + options.folderBranching):
+            if i > (options.elements): #amount of folders, change to amount of elements to get all the elements
+                break
+            
+            iStr = "%06d"%i
+            id = "e_" + iStr
+            name = id + "_" + jStr
+            
+            if folder == 0:
+                owner = "testData"
+            else:
+                owner = "e_" + "%06d"%folder
+            
+            jsonStr = '{"sysmlid":"' + id + '","name":"' + name + '","owner":"' + owner + '"}'
+            if jsonArrayStr != '':
+                jsonArrayStr = jsonArrayStr + ',' + jsonStr
+            else:
+                jsonArrayStr = jsonStr
+            count = count + 1
+        
+            if count % postNumber == 0:
+                if jsonArrayStr != '':
+                    elementsJsonStr = elementsJsonStrTemplate%jsonArrayStr
+                    post(elementsJsonStr, workspaceName)
+                    jsonArrayStr = ''
+                    
+            jsonArrayStr, count = writeJsonStr(i, jStr, workspaceName, count, postNumber, jsonArrayStr)
+
+    return jsonArrayStr, count
+                   
+     #################################################################       
+
 def doIt():
     createWorkspaces()
     time.sleep(DELAY_TIME)
@@ -106,7 +150,13 @@ def doIt():
         print "POSTING ELEMENTS IN GROUPS OF " + str(options.postElements)
         thick_divider()
         
-    writeJsonStr('0', "master", options.postElements)
+    jsonArrayStr, count = writeJsonStr(0,'0', "master", 0, options.postElements, '')
+    
+    #post any remaining elements
+    if jsonArrayStr != '':
+        elementsJsonStr = elementsJsonStrTemplate%jsonArrayStr
+        post(elementsJsonStr, "master")
+        jsonArrayStr = ''
     
     if options.verbose:
         thick_divider()
@@ -116,7 +166,13 @@ def doIt():
     for workspace in workspaces:
         for j in range(0, options.changes): #3
             jStr = "%06d"%j
-            writeJsonStr(jStr, workspace, options.postChanges)
+            jsonArrayStr, count = writeJsonStr(0, jStr, workspace, 0, options.postChanges, '')
+            
+            #post any remaining elements
+            if jsonArrayStr != '':
+                elementsJsonStr = elementsJsonStrTemplate%jsonArrayStr
+                post(elementsJsonStr, workspace)
+                jsonArrayStr = '' 
     
 ##########################################################################################    
 #
