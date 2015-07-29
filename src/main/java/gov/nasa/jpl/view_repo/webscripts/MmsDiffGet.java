@@ -51,9 +51,11 @@ public class MmsDiffGet extends AbstractJavaWebScript {
     protected String diffStatus;
     protected JSONObject diffResults;
     protected EmsScriptNode diffNode = null;
+    protected boolean recalculate;
 
     private final static String DIFF_IN_PROGRESS = "GENERATING";
     private final static String DIFF_COMPLETE = "COMPLETED";
+    private final static String DIFF_OUTDATED = "OUTDATED";
 
     public MmsDiffGet() {
         super();
@@ -67,9 +69,8 @@ public class MmsDiffGet extends AbstractJavaWebScript {
         originalUser = NodeUtil.getUserName();
         ws1 = workspace1;
         ws2 = workspace2;
-        time1 = dateTime1;
-        time2 = dateTime2;
-        
+        dateTime1 = time1;
+        dateTime2 = time2;  
     }
     
     @Override
@@ -106,23 +107,7 @@ public class MmsDiffGet extends AbstractJavaWebScript {
         return mmsDiffGet.executeImplImpl( req, status, cache, runWithoutTransactions );
     }
     
-    private String replaceTimeStampWithCommitTime(boolean isTime1, Date date) {
-                
-        WorkspaceNode ws = isTime1 ? ws1 : ws2;
-        EmsScriptNode lastCommit = date != null ? CommitUtil.getLatestCommitAtTime( date, ws, services, response ) :
-                                                  CommitUtil.getLastCommit(ws , services, response );
-        String timestamp = null;
-        
-        if (lastCommit != null) {
-            Date lastCommitTime = lastCommit.getLastModified( null );
-            
-            if (lastCommitTime != null) {
-                timestamp = TimeUtils.toTimestamp(lastCommitTime);
-            }
-        }
-        
-        return timestamp;
-    }
+
 
     @Override
     protected Map< String, Object > executeImplImpl( WebScriptRequest req,
@@ -138,38 +123,44 @@ public class MmsDiffGet extends AbstractJavaWebScript {
         }
 
         boolean runInBackground = getBooleanArg(req, "background", false);
-
+        recalculate = getBooleanArg( req, "recalculate", false );
+        
         userTimeStamp1 = getTimestamp1(req);
         userTimeStamp2 = getTimestamp2(req);
-
-        // Replace time string with latest commit node time:
-        // This time string is used in the job node name
+        String latestTime1 = CommitUtil.replaceTimeStampWithCommitTime(dateTime1, ws1, services, response);
+        String latestTime2 = CommitUtil.replaceTimeStampWithCommitTime(dateTime2, ws2, services, response);
+        String timestamp1 = null;
+        String timestamp2 = null;
+        
+        // Replace time string with latest commit node time if it
+        // is not 'latest'.  If it is 'latest' then we just re-use
+        // the pre-existing node if there is one.
+        // This time string is used in the job node name to facilitate
+        // fast look up and re-use of diff jobs that resolve to the
+        // same commit times.
         if (userTimeStamp1.equals( NO_TIMESTAMP )) {
             dateTime1 = null;
+            timestamp1 = userTimeStamp1;
         }
         else {
             dateTime1 = TimeUtils.dateFromTimestamp( userTimeStamp1 );
+            timestamp1 = latestTime1 != null ? latestTime1 : userTimeStamp1;
         }
-        String latestTime = replaceTimeStampWithCommitTime(true, dateTime1);
-        String timestamp1 = latestTime != null ? latestTime : userTimeStamp1;
         
         if (userTimeStamp2.equals( NO_TIMESTAMP )) {
             dateTime2 = null;
+            timestamp2 = userTimeStamp2;
         }
         else {
             dateTime2 = TimeUtils.dateFromTimestamp( userTimeStamp2 );
+            timestamp2 = latestTime2 != null ? latestTime2 : userTimeStamp2;
         }
-        latestTime = replaceTimeStampWithCommitTime(false, dateTime2);
-        String timestamp2 = latestTime != null ? latestTime : userTimeStamp2;
         
-        String timeString1 = timestamp1.replace( ":", "_" );
-        String timeString2 = timestamp2.replace( ":", "_" );
-        String timeString = timeString1 + "_" + timeString2;
-                
         // Doing a background diff:
         if (runInBackground) {
             
-            saveAndStartAction(req, timeString, status);
+            saveAndStartAction(req, timestamp1, timestamp2, latestTime1,
+                               latestTime2, status);
             
             JSONObject top = new JSONObject();
 
@@ -180,7 +171,9 @@ public class MmsDiffGet extends AbstractJavaWebScript {
                 
                 top.put( "status", diffStatus );
             }
-            else if (diffStatus.equals( DIFF_COMPLETE )) {
+            else if (diffStatus.equals( DIFF_COMPLETE ) ||
+                     diffStatus.equals( DIFF_OUTDATED )) {
+                
                 if (diffResults != null) {
                     top = diffResults;
                 }
@@ -193,10 +186,12 @@ public class MmsDiffGet extends AbstractJavaWebScript {
             
             if (diffNode != null) {
                 
+                // REVIEW: Use the modifier or creator here?
                 String username = (String)NodeUtil.getNodeProperty( diffNode, "cm:modifier",
                                                                     getServices(), true,
                                                                     false );
-                EmsScriptNode user = new EmsScriptNode(services.getPersonService().getPerson(username), services, new StringBuffer());
+                EmsScriptNode user = new EmsScriptNode(services.getPersonService().getPerson(username), 
+                                                       services, new StringBuffer());
                 String email = (String) user.getProperty("cm:email");
                 Date creationTime = diffNode.getCreationDate();
                 
@@ -205,7 +200,7 @@ public class MmsDiffGet extends AbstractJavaWebScript {
                 if (email != null)
                     top.put( "email", email );
                 if (creationTime != null)
-                    top.put( "diffTime", creationTime );
+                    top.put( "diffTime", EmsScriptNode.getIsoTime(creationTime) );
             }
             
             if (!Utils.isNullOrEmpty( response.toString() )) {
@@ -247,23 +242,34 @@ public class MmsDiffGet extends AbstractJavaWebScript {
     }
     
     protected void saveAndStartAction( WebScriptRequest req,
-                                       String timeString,
+                                       String timestamp1,
+                                       String timestamp2,
+                                       String latestCommitTime1,
+                                       String latestCommitTime2,
                                        Status status ) {
 
-        if (timeString != null) {
+        if (timestamp1 != null && timestamp2 != null) {
 
             String ws1Name = WorkspaceNode.getWorkspaceName(ws1);
             String ws2Name = WorkspaceNode.getWorkspaceName(ws2);
-
-            String jobName = "Diff Job " + ws1Name + "_" + ws2Name + "_" + timeString + ".json";
-            
+        
+            String timeString1 = timestamp1.replace( ":", "_" );
+            String timeString2 = timestamp2.replace( ":", "_" );
+            String timeString = timeString1 + "_" + timeString2;
+           
+            String jobName = "Diff_Job_" + timeString + ".json";                      
             EmsScriptNode companyHome = NodeUtil.getCompanyHome( services );
             
-            EmsScriptNode oldJob = ActionUtil.getDiffJob( companyHome, ws1Name, ws2Name, jobName );
+            // Check if there is old diff job using the diffTime if its non-null, otherwise
+            // use the jobName:
+            EmsScriptNode oldJob = ActionUtil.getDiffJob( companyHome, ws1, ws2, 
+                                                          jobName, 
+                                                          services, response);
             
             diffStatus = DIFF_IN_PROGRESS;
             boolean reComputeDiff = true;
             if (oldJob != null) {
+                
                 diffNode = oldJob;
                 String jobStatus = (String)oldJob.getProperty("ems:job_status");
                 
@@ -285,28 +291,54 @@ public class MmsDiffGet extends AbstractJavaWebScript {
                         
                         reComputeDiff = false;
                         diffStatus = DIFF_COMPLETE;
-                        
-                        // Retrieve saved diff json:
-                        ContentReader reader = services.getContentService().getReader(oldJob.getNodeRef(), 
-                                                                                      ContentModel.PROP_CONTENT);
-                        try {
-                            diffResults = new JSONObject(reader.getContentString());
-                        } catch (ContentIOException e) {
-                            e.printStackTrace();
-                        } catch (JSONException e) {
-                            e.printStackTrace();
+
+                        // If either timestamp is latest then check if diff job node is outdated:
+                        if (timestamp1.equals( NO_TIMESTAMP ) || 
+                            timestamp2.equals( NO_TIMESTAMP )) {
+                            
+                            String foundTimeStamp1 = (String) oldJob.getProperty( "ems:timestamp1" );
+                            String foundTimeStamp2 = (String) oldJob.getProperty( "ems:timestamp2" );
+                                                                            
+                            // Diff is not outdated:
+                            if (foundTimeStamp1 != null && foundTimeStamp2 != null
+                                && latestCommitTime1 != null && latestCommitTime2 != null
+                                && foundTimeStamp1.equals(latestCommitTime1) 
+                                && foundTimeStamp2.equals(latestCommitTime2)) {
+                                
+                                errorMsg = 
+                                        String.format("Found up-to-date background diff: job[%s]",
+                                                      jobName);
+                                log( Level.INFO, errorMsg );
+                            }
+                            // Diff is outdated:
+                            else {
+                                if (recalculate) {
+                                    diffStatus = DIFF_IN_PROGRESS;
+                                    reComputeDiff = true;
+                                }
+                                else {
+                                    errorMsg = 
+                                            String.format("Outdated background diff: job[%s]",
+                                                          jobName);
+                                    log( Level.INFO, errorMsg );
+                                    diffStatus = DIFF_OUTDATED;
+                                }
+                            }
                         }
-                        
+                             
                     }
                     // Otherwise a failure, so re-compute diff
                 }
             }
             
+            // Compute diff in the background:
             if (reComputeDiff) {
                 
                 // Store job node in Company Home/Jobs/<ws1 name>/<ws2 name>:
                 EmsScriptNode jobNode = ActionUtil.getOrCreateDiffJob(companyHome, ws1Name, ws2Name,
-                                                                      jobName, "ems:Job", status, response, false);
+                                                                      dateTime1, dateTime2,
+                                                                      latestCommitTime1, latestCommitTime2,
+                                                                      jobName, status, response, false);
 
                 if (jobNode == null) {
                     String errorMsg = 
@@ -328,6 +360,18 @@ public class MmsDiffGet extends AbstractJavaWebScript {
                 loadAction.setParameterValue(WorkspaceDiffActionExecuter.PARAM_WS_2, ws2);
 
                 services.getActionService().executeAction(loadAction, jobNode.getNodeRef(), true, true);
+            }
+            // Otherwise, retrieve saved diff json:
+            else {
+                ContentReader reader = services.getContentService().getReader(oldJob.getNodeRef(), 
+                                                                              ContentModel.PROP_CONTENT);
+                try {
+                    diffResults = new JSONObject(reader.getContentString());
+                } catch (ContentIOException e) {
+                    e.printStackTrace();
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
             }
             
         }

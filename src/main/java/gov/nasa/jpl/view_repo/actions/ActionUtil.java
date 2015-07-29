@@ -29,8 +29,10 @@
 
 package gov.nasa.jpl.view_repo.actions;
 
+import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.util.Acm;
+import gov.nasa.jpl.view_repo.util.CommitUtil;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
@@ -39,6 +41,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -91,13 +95,23 @@ public class ActionUtil {
         EmsScriptNode logNode = ActionUtil.saveLogToFile(node, "text/plain", services, logString);
 
         String contextUrl = getContextUrl();
-        
         String ws1id = WorkspaceNode.getId( ws1 );
         String ws2id = WorkspaceNode.getId( ws2 );
 
         String msg = "Log URL: " + contextUrl + logNode.getUrl();
         if (!Utils.isNullOrEmpty( contextUrl ) && !Utils.isNullOrEmpty( ws1id ) && !Utils.isNullOrEmpty( ws2id ) && !Utils.isNullOrEmpty( ts1 ) && !Utils.isNullOrEmpty( ts2 )) {
             String diffPath = "Diff Results: " + contextUrl + "/mmsapp/mms.html#/workspaces/"+ws2id+"/diff/"+ws2id+"/"+ts2+"/"+ws1id+"/"+ts1;
+            String diffTime = TimeUtils.toTimestamp(node.getCreationDate());
+
+            // Add query parameter for the diffTime if either of the timestamps
+            // are latest, so the front end can use this query parameter
+            // when querying the server:
+            if ((ts1.equals( "latest" ) || ts2.equals( "latest" )) &&
+                !Utils.isNullOrEmpty( diffTime )) {
+                
+                diffPath = diffPath + "?" + diffTime;
+            }
+            
             msg = msg + "\n\n" + diffPath;
         }
 
@@ -302,7 +316,9 @@ public class ActionUtil {
      */
     public static EmsScriptNode getOrCreateDiffJob(EmsScriptNode contextFolder,
                                                    String ws1Name, String ws2Name,
-                                                   String jobName, String jobType,
+                                                   Date timestamp1, Date timestamp2,
+                                                   String timeString1, String timeString2,
+                                                   String jobName, 
                                                    Status status, StringBuffer response,
                                                    boolean generateName) {
         
@@ -337,7 +353,12 @@ public class ActionUtil {
                 }
                 
                 if (ws2Folder != null) {
-                    jobNode = getOrCreateJobImpl(ws2Folder, jobName, jobType, status, generateName);
+                    jobNode = getOrCreateJobImpl(ws2Folder, jobName, "ems:DiffJob", status, generateName);
+                    if (jobNode != null && timeString1 != null && timeString2 != null) {
+                        jobNode.createOrUpdateProperty( "ems:timestamp1", timeString1 );
+                        jobNode.createOrUpdateProperty( "ems:timestamp2", timeString2 );
+
+                    }
                 }
             }
         }
@@ -350,16 +371,23 @@ public class ActionUtil {
     
     /**
      * Get a diff job inside contextFolder/Jobs/ws1Name/ws2Name
+     * Must supply jobName.
      * 
      * @param contextFolder Folder to create the job node
-     * @param jobName       String of the filename
+     * @param jobName       String of the filename 
+     * @param services 
+     * @param response 
      * @return The found diff job node
      */
     public static EmsScriptNode getDiffJob(EmsScriptNode contextFolder,
-                                           String ws1Name, String ws2Name,
-                                           String jobName) {
+                                           WorkspaceNode ws1, WorkspaceNode ws2,
+                                           String jobName,
+                                           ServiceRegistry services, 
+                                           StringBuffer response) {
         
         EmsScriptNode jobNode = null;
+        String ws1Name = WorkspaceNode.getWorkspaceName(ws1);
+        String ws2Name = WorkspaceNode.getWorkspaceName(ws2);
         
         // to make sure no permission issues, run as admin
         String origUser = AuthenticationUtil.getFullyAuthenticatedUser();
@@ -372,6 +400,7 @@ public class ActionUtil {
             if (ws1Folder != null) {
                 EmsScriptNode ws2Folder = ws1Folder.childByNamePath(ws2Name);
                 if (ws2Folder != null) {
+                    // Find the correct diff job node based on the job name:
                     jobNode = ws2Folder.childByNamePath(jobName);
                 }
             }

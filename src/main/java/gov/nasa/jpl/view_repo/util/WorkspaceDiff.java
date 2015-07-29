@@ -914,8 +914,8 @@ public class WorkspaceDiff implements Serializable {
     public boolean diff() {
         boolean status = true;
 
-        //captureDeltas();
-        captureDeltasSkeleton();
+        captureDeltas();
+        //captureDeltasSkeleton();
 
         return status;
     }

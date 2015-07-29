@@ -542,6 +542,11 @@ resourceTypes:
           description: Service for diffing between two model versions between projects
           get:
             description: workspace diff get
+            queryParameters:
+              recalculate:
+                description: Perform a new diff calculation if the current found one is outdated.  Must supply diffTime also.
+                type: boolean
+                required: false 
 #/merge:
 #  description: Service for merging two workspaces.  timestamp args are not implemented yet.
 #  post:

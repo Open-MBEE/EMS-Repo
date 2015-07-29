@@ -85,6 +85,25 @@
                 <aspect>view2:timestamped</aspect>
             </mandatory-aspects>
         </type>
+        
+        <type name="ems:DiffJob">
+            <parent>ems:Job</parent>
+            <properties>
+                <property name="ems:timestamp1">
+                        <type>d:text</type>
+                        <mandatory>false</mandatory>
+                        <multiple>false</multiple>
+                        <index enabled="false"/>
+                </property>
+                <property name="ems:timestamp2">
+                        <type>d:text</type>
+                        <mandatory>false</mandatory>
+                        <multiple>false</multiple>
+                        <index enabled="false"/>
+                </property>
+            </properties>
+        </type>
+        
      </types>
      
      <aspects>
