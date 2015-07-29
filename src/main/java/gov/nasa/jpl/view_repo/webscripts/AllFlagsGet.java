@@ -62,6 +62,8 @@ public class AllFlagsGet extends FlagSet {
             EmsScriptNode.versionCacheDebugPrint = val;
         } else if (path.equalsIgnoreCase("versionCache")) {
             NodeUtil.doVersionCaching = val;
+        } else if (path.equalsIgnoreCase("versionHistoryCache")) {
+            NodeUtil.doVersionHistoryCaching = val;
         } else if (path.equalsIgnoreCase("skipWorkspacePermissionCheck")) {
             NodeUtil.skipWorkspacePermissionCheck = val;
         } else if (path.equalsIgnoreCase("optimisticJustFirst")) {
@@ -105,6 +107,8 @@ public class AllFlagsGet extends FlagSet {
             return EmsScriptNode.versionCacheDebugPrint;
         } else if (path.equalsIgnoreCase("versionCache")) {
             return NodeUtil.doVersionCaching;
+        } else if (path.equalsIgnoreCase("versionHistoryCache")) {
+            return NodeUtil.doVersionHistoryCaching;
         } else if (path.equalsIgnoreCase("skipWorkspacePermissionCheck")) {
             return NodeUtil.skipWorkspacePermissionCheck;
         } else if (path.equalsIgnoreCase("optimisticJustFirst")) {
@@ -149,6 +153,8 @@ public class AllFlagsGet extends FlagSet {
             return "versionCacheDebugPrint";
         } else if (path.equalsIgnoreCase("versionCache")) {
             return "doVersionCaching";
+        } else if (path.equalsIgnoreCase("versionHistoryCache")) {
+            return "doVersionHistoryCaching";
         } else if (path.equalsIgnoreCase("skipWorkspacePermissionCheck")) {
             return "skipWorkspacePermissionCheck";
         } else if (path.equalsIgnoreCase("optimisticJustFirst")) {

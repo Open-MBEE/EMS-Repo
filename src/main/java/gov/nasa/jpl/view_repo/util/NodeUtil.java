@@ -3060,7 +3060,7 @@ public class NodeUtil {
 
         EmsScriptNode esn = new EmsScriptNode(ref, services);
 
-        logger.warn( "getting history for " + esn.getSysmlId() + " - " + esn.getSysmlName() + " at time " + dateTime );
+        //logger.warn( "getting history for " + esn.getSysmlId() + " - " + esn.getSysmlName() + " at time " + dateTime );
         
         // Check cache for version history
         //Collection< Version > history = versionHistoryCache.get( ref );
@@ -3081,7 +3081,7 @@ public class NodeUtil {
             if ( doVersionHistoryCaching ) versionHistoryCache.put( ref, history );
         }
 
-        logger.warn( "got history for " + esn.getSysmlId() + " - " + esn.getSysmlName() + " at time " + dateTime );
+        //logger.warn( "got history for " + esn.getSysmlId() + " - " + esn.getSysmlName() + " at time " + dateTime );
         
         if ( history == null ) {
             // Versioning doesn't make versions until the first save...
