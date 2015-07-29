@@ -268,6 +268,7 @@ public class MmsDiffGet extends AbstractJavaWebScript {
             
             diffStatus = DIFF_IN_PROGRESS;
             boolean reComputeDiff = true;
+            boolean readJson = false;
             if (oldJob != null) {
                 
                 diffNode = oldJob;
@@ -290,6 +291,7 @@ public class MmsDiffGet extends AbstractJavaWebScript {
                         log( Level.INFO, errorMsg );
                         
                         reComputeDiff = false;
+                        readJson = true;
                         diffStatus = DIFF_COMPLETE;
 
                         // If either timestamp is latest then check if diff job node is outdated:
@@ -362,15 +364,18 @@ public class MmsDiffGet extends AbstractJavaWebScript {
                 services.getActionService().executeAction(loadAction, jobNode.getNodeRef(), true, true);
             }
             // Otherwise, retrieve saved diff json:
-            else {
+            else if (readJson){
                 ContentReader reader = services.getContentService().getReader(oldJob.getNodeRef(), 
                                                                               ContentModel.PROP_CONTENT);
-                try {
-                    diffResults = new JSONObject(reader.getContentString());
-                } catch (ContentIOException e) {
-                    e.printStackTrace();
-                } catch (JSONException e) {
-                    e.printStackTrace();
+                
+                if (reader != null) {
+                    try {
+                        diffResults = new JSONObject(reader.getContentString());
+                    } catch (ContentIOException e) {
+                        e.printStackTrace();
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
                 }
             }
             

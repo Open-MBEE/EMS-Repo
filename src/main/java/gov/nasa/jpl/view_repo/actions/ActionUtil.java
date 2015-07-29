@@ -101,17 +101,6 @@ public class ActionUtil {
         String msg = "Log URL: " + contextUrl + logNode.getUrl();
         if (!Utils.isNullOrEmpty( contextUrl ) && !Utils.isNullOrEmpty( ws1id ) && !Utils.isNullOrEmpty( ws2id ) && !Utils.isNullOrEmpty( ts1 ) && !Utils.isNullOrEmpty( ts2 )) {
             String diffPath = "Diff Results: " + contextUrl + "/mmsapp/mms.html#/workspaces/"+ws2id+"/diff/"+ws2id+"/"+ts2+"/"+ws1id+"/"+ts1;
-            String diffTime = TimeUtils.toTimestamp(node.getCreationDate());
-
-            // Add query parameter for the diffTime if either of the timestamps
-            // are latest, so the front end can use this query parameter
-            // when querying the server:
-            if ((ts1.equals( "latest" ) || ts2.equals( "latest" )) &&
-                !Utils.isNullOrEmpty( diffTime )) {
-                
-                diffPath = diffPath + "?" + diffTime;
-            }
-            
             msg = msg + "\n\n" + diffPath;
         }
 
