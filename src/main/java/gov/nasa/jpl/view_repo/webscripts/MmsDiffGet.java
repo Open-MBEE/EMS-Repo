@@ -53,6 +53,7 @@ public class MmsDiffGet extends AbstractJavaWebScript {
     protected EmsScriptNode diffNode = null;
     protected boolean recalculate;
 
+    private final static String DIFF_STARTED = "STARTED";
     private final static String DIFF_IN_PROGRESS = "GENERATING";
     private final static String DIFF_COMPLETE = "COMPLETED";
     private final static String DIFF_OUTDATED = "OUTDATED";
@@ -138,7 +139,7 @@ public class MmsDiffGet extends AbstractJavaWebScript {
         // This time string is used in the job node name to facilitate
         // fast look up and re-use of diff jobs that resolve to the
         // same commit times.
-        if (userTimeStamp1.equals( NO_TIMESTAMP )) {
+        if (userTimeStamp1.equals( NO_TIMESTAMP )) { 
             dateTime1 = null;
             timestamp1 = userTimeStamp1;
         }
@@ -164,7 +165,8 @@ public class MmsDiffGet extends AbstractJavaWebScript {
             
             JSONObject top = new JSONObject();
 
-            if (diffStatus.equals( DIFF_IN_PROGRESS )) {
+            if (diffStatus.equals( DIFF_IN_PROGRESS ) ||
+                diffStatus.equals( DIFF_STARTED )) {
                 
                 response.append("Diff being processed in background.\n");
                 response.append("You will be notified via email when the diff has finished.\n"); 
@@ -315,7 +317,6 @@ public class MmsDiffGet extends AbstractJavaWebScript {
                             // Diff is outdated:
                             else {
                                 if (recalculate) {
-                                    diffStatus = DIFF_IN_PROGRESS;
                                     reComputeDiff = true;
                                 }
                                 else {
@@ -335,6 +336,8 @@ public class MmsDiffGet extends AbstractJavaWebScript {
             
             // Compute diff in the background:
             if (reComputeDiff) {
+                
+                diffStatus = DIFF_STARTED;
                 
                 // Store job node in Company Home/Jobs/<ws1 name>/<ws2 name>:
                 EmsScriptNode jobNode = ActionUtil.getOrCreateDiffJob(companyHome, ws1Name, ws2Name,
