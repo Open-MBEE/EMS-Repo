@@ -3060,7 +3060,7 @@ public class NodeUtil {
 
         EmsScriptNode esn = new EmsScriptNode(ref, services);
 
-        //logger.warn( "getting history for " + esn.getSysmlId() + " - " + esn.getSysmlName() + " at time " + dateTime );
+        logger.warn( "getting history for " + esn.getSysmlId() + " - " + esn.getSysmlName() + " at time " + dateTime );
         
         // Check cache for version history
         //Collection< Version > history = versionHistoryCache.get( ref );
@@ -3081,7 +3081,7 @@ public class NodeUtil {
             if ( doVersionHistoryCaching ) versionHistoryCache.put( ref, history );
         }
 
-        //logger.warn( "got history for " + esn.getSysmlId() + " - " + esn.getSysmlName() + " at time " + dateTime );
+        logger.warn( "got history for " + esn.getSysmlId() + " - " + esn.getSysmlName() + " at time " + dateTime );
         
         if ( history == null ) {
             // Versioning doesn't make versions until the first save...
@@ -3098,11 +3098,11 @@ public class NodeUtil {
                                                                     + createdTime );
             // Can't cache until history is created. :-(
             // On second thought, let's cache if this node is from the version store :-) 
-            if ( doNodeAtTimeCaching ) {
-                if ( ref.getStoreRef() != StoreRef.STORE_REF_WORKSPACE_SPACESSTORE ) {                    
-                    nodeAtTimeCachePut( ref, dateTime, null );
-                }
-            }
+            //if ( doNodeAtTimeCaching ) {
+                //if ( ref.getStoreRef() != StoreRef.STORE_REF_WORKSPACE_SPACESSTORE ) {                    
+                    //nodeAtTimeCachePut( ref, dateTime, null );
+                //}
+            //}
             return ref;
         }
 
