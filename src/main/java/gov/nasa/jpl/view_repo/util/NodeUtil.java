@@ -1535,7 +1535,7 @@ public class NodeUtil {
                     // break out of the loop when we find it. There are many
                     // conditions under which we may not be able to do this.
                     if ( justFirst &&
-                            optimisticJustFirst || (
+                            //(optimisticJustFirst || (
                             
                          // This isn't necessary since we check earlier for
                          // this. Just being robust by re-checking.
@@ -1555,7 +1555,7 @@ public class NodeUtil {
                          // workspace unless we found one that is only in the
                          // target workspace.
                          ( !exists( workspace ) ||
-                                    workspace.equals( getWorkspace( nodeRef ) ) ) ) ) {
+                                    workspace.equals( getWorkspace( nodeRef ) ) ) ) {// ) ) {
                         break;
                     }
                 }
