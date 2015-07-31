@@ -11,6 +11,7 @@ import gov.nasa.jpl.mbee.util.Timer;
 import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.actions.ActionUtil;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode.EmsVersion;
+
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.Serializable;
@@ -43,6 +44,7 @@ import org.alfresco.model.ContentModel;
 import org.alfresco.repo.domain.node.NodeDAO;
 import org.alfresco.repo.jscript.ScriptNode;
 import org.alfresco.repo.jscript.ScriptVersion;
+import org.alfresco.repo.model.Repository;
 import org.alfresco.repo.node.db.DbNodeServiceImpl;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
@@ -257,6 +259,7 @@ public class NodeUtil {
             GenericComparator.instance();
 
     public static ServiceRegistry services = null;
+    public static Repository repository = null;
 
     // needed for Lucene search
     public static StoreRef SEARCH_STORE = null;
@@ -830,13 +833,22 @@ public class NodeUtil {
         return SEARCH_STORE;
     }
 
-    public static ApplicationContext getApplicationContext() {
-        String[] contextPath =
-                new String[] { "classpath:alfresco/application-context.xml" };
-        ApplicationContext applicationContext =
-                ApplicationContextHelper.getApplicationContext( contextPath );
-        return applicationContext;
+//    public static ApplicationContext getApplicationContext() {
+//        String[] contextPath =
+//                new String[] { "classpath:alfresco/application-context.xml" };
+//        ApplicationContext applicationContext =
+//                ApplicationContextHelper.getApplicationContext( contextPath );
+//        return applicationContext;
+//    }
+    
+    public static Repository getRepository() {
+        return repository;
+        //return (Repository)getApplicationContext().getBean( "repositoryHelper" );
     }
+    public static void setRepository( Repository repositoryHelper ) {
+        NodeUtil.repository = repositoryHelper;
+    }
+        
 
     public static ServiceRegistry getServices() {
         return getServiceRegistry();
@@ -846,10 +858,11 @@ public class NodeUtil {
     }
 
     public static ServiceRegistry getServiceRegistry() {
-        if ( services == null ) {
-            services = (ServiceRegistry)getApplicationContext().getBean( "ServiceRegistry" );
-        }
         return services;
+//        if ( services == null ) {
+//            services = (ServiceRegistry)getApplicationContext().getBean( "ServiceRegistry" );
+//        }
+//        return services;
     }
 
     public static Collection<EmsScriptNode> luceneSearchElements(String queryPattern ) {
@@ -1107,12 +1120,14 @@ public class NodeUtil {
                     nodeRefs = results;
                 }
                 else {
+//logger.warn("filterResults( results=" + results + ") = ");
                     nodeRefs = filterResults( results, specifier, prefix,
                                               usedFullCache || usedSimpleCache,
                                               ignoreWorkspace,
                                               workspace, onlyThisWorkspace,
                                               dateTime, justFirst, exactMatch,
                                               services, includeDeleted, siteName );
+//logger.warn("" + nodeRefs);
                     if (logger.isDebugEnabled()) logger.debug("filterResults = " + nodeRefs );
                 }
 
@@ -1123,6 +1138,7 @@ public class NodeUtil {
                                               dateTime, justFirst, exactMatch,
                                               services, includeDeleted, siteName );
                 if (logger.isDebugEnabled()) logger.debug("correctForDeleted nodeRefs = " + nodeRefs );
+//logger.warn("correctForDeleted nodeRefs = " + nodeRefs );
 
             } // ends if (results != null)
 
@@ -1146,6 +1162,7 @@ public class NodeUtil {
             nodeRefs = filterForPermissions( nodeRefs, PermissionService.READ,
                                              putInFullCache );
             if (logger.isDebugEnabled()) logger.debug("filterForPermissions nodeRefs = " + nodeRefs );
+//logger.warn("filterForPermissions nodeRefs = " + nodeRefs );
             
         } finally {
             // Debug output
@@ -1342,7 +1359,8 @@ public class NodeUtil {
                     }
                 }
                 // Check that it is from the desired site:
-                if (siteName != null && !siteName.equals( esn.getSiteName(dateTime, workspace) )) {
+                // MBEE-260: sites are case insensitive per Alfresco file naming conventions, so do comparison ignoring case
+                if (siteName != null && !siteName.equalsIgnoreCase( esn.getSiteName(dateTime, workspace) )) {
                     match = false;
                 }
                 if ( !match ) {
@@ -1823,6 +1841,8 @@ public class NodeUtil {
                     //usedFullCache = true;
                     cacheUsed = CacheUsed.FULL;
                 }
+            } else {
+                cacheResults.isExactMatch();
             }
         }
         cacheResults.cachedUsed = cacheUsed;
@@ -2858,10 +2878,16 @@ public class NodeUtil {
         if (ref == null || dateTime == null ) {
             return ref;
         }
+        
+        //EmsScriptNode node = new EmsScriptNode(ref, services);
+
+        //CacheResults results = NodeUtil.getNodesInCache( node.getSysmlId(), SearchType.ID.prefix, false, node.getWorkspace, false, dateTime, true, true, getServices(), true, null );
+        
         VersionHistory history = getServices().getVersionService().getVersionHistory( ref );
         if ( history == null ) {
+            EmsScriptNode node = new EmsScriptNode(ref, services);
+
                 // Versioning doesn't make versions until the first save...
-                EmsScriptNode node = new EmsScriptNode(ref, services);
                 Date createdTime = (Date)node.getProperty("cm:created");
                 if ( dateTime != null && createdTime != null && dateTime.compareTo( createdTime ) < 0 ) {
                 if (Debug.isOn())  Debug.outln( "no history! dateTime " + dateTime
@@ -2920,8 +2946,8 @@ public class NodeUtil {
             EmsScriptNode emsNode = new EmsScriptNode( ref, getServices() );
             ScriptVersion scriptVersion = emsNode.getVersion( versionLabel );
             if (Debug.isOn())  Debug.outln( "scriptVersion " + scriptVersion );
-            ScriptNode node = scriptVersion.getNode();
-            if (Debug.isOn())  Debug.outln( "script node " + node );
+            ScriptNode scriptVersionNode = scriptVersion.getNode();
+            if (Debug.isOn())  Debug.outln( "script node " + scriptVersionNode );
             //can't get script node properties--generates exception
             //if (Debug.isOn())  Debug.outln( "script node properties " + node.getProperties() );
             NodeRef scriptVersionNodeRef = scriptVersion.getNodeRef();

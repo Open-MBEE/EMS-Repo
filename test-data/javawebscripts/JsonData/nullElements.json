@@ -123,6 +123,14 @@
                         "isDerived":false,
                         "value":[{"type":"LiteralString",
                                   "string":"dlam_string"}]}
+    },
+    
+    {"sysmlid":"too_many_bugs",
+     "specialization":{"value":[{"valueExpression":null,
+                                 "type":"LiteralReal",
+                                 "double":null}],
+                         "type":"Property"
+                       }
     }
-     
+
 ]}

@@ -22,6 +22,7 @@ import java.util.Set;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.namespace.QName;
+import org.apache.log4j.Level;
 import org.springframework.extensions.webscripts.Status;
 
 import sysml.AbstractSystemModel;
@@ -992,11 +993,13 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
 	        Collection< EmsScriptNode > elementColl = null;
 	        try {
 //	        		elementColl = NodeUtil.luceneSearchElements( "ASPECT:\"sysml:" + specifier + "\"" );
+//Debug.error( true, false, "NodeUtil.findNodeRefsByType( " + (String)specifier + ", SearchType.ASPECT.prefix, false, ws, dateTime, false, true, getServices(), false, null )");
 	                ArrayList< NodeRef > refs = NodeUtil.findNodeRefsByType( (String)specifier, SearchType.ASPECT.prefix, false, ws, dateTime, false, true, getServices(), false, null );
 	                elementColl = EmsScriptNode.toEmsScriptNodeList( refs, getServices(), null, null );
 	        } catch (Exception e) {
 	        		// if lucene query fails, most likely due to non-existent aspect, we should look for type now
 	        		try {
+//Debug.error( true, false, "NodeUtil.luceneSearchElements( \"TYPE:\\\"sysml:" + specifier + "\\\" )");
 	        			elementColl = NodeUtil.luceneSearchElements( "TYPE:\"sysml:" + specifier + "\"");
 	        		} catch (Exception ee) {
 	        			// do nothing
@@ -1171,6 +1174,7 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
 				Collection<NodeRef> valueNodes =
 				        (Collection< NodeRef >)node.getNodeRefProperty(Acm.ACM_VALUE, null, node.getWorkspace());
 				convertToScriptNode(valueNodes, returnList);
+				resultList.addAll(returnList);
 //>>>>>>> refs/remotes/origin/develop
 
 //	    		return Utils.asList(returnList, Object.class);
@@ -1484,7 +1488,41 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
 	            Debug.error("setValue(): type for the passed node is null!");
 	    	}
 	    	else {
-		        if (type.equals(Acm.JSON_LITERAL_INTEGER)) {
+	    	    String acmType = Acm.getJSON2ACM().get( type );
+	    	    if ( acmType == null ) acmType = type;
+	    	    Set< String > valuePropNames = Acm.TYPES_WITH_VALUESPEC.get( acmType );
+	    	    if ( !Utils.isNullOrEmpty( valuePropNames ) ) {
+	    	        boolean found = false;
+	    	        if ( valuePropNames.size() > 1 ) {
+	    	            if ( valuePropNames.contains( Acm.ACM_VALUE ) ) {
+	    	                acmType = Acm.ACM_VALUE;
+	    	                found = true;
+	    	            } else {
+                            Debug.error( "setValue(): unclear which owned value spec property "
+                                         + valuePropNames
+                                         + " is to be set to "
+                                         + value + ". Picking first by default!" );
+	    	            }
+	    	        }
+	    	        if ( !found ) acmType = valuePropNames.iterator().next();
+//                    Object valueSpecRef =
+//                            node.getNodeRefProperty( valuePropNames.iterator().next(),
+//                                                     true, null, node.getWorkspace() );
+//                    EmsScriptNode valueNode = null;
+//                    if ( valueSpecRef instanceof NodeRef ) {
+//                        valueNode = new EmsScriptNode( (NodeRef)valueSpecRef, getServices() );
+//                    } else if ( valueSpecRef instanceof ArrayList ) {
+//                        ArrayList< NodeRef > nodeRefs = (ArrayList< NodeRef >))valueSpecRef;
+//                        if ( !Utils.isNullOrEmpty( nodeRefs ) ) {
+//                            if ( nodeRefs.size() > 1 ) {
+//                                
+//                            }
+//                        }
+//                        
+//                    }
+                    node.createOrUpdateProperty( acmType, value );
+                }
+	    	    else if (type.equals(Acm.JSON_LITERAL_INTEGER)) {
 
 		        	node.createOrUpdateProperty(Acm.ACM_INTEGER, value);
 		        }
@@ -1641,4 +1679,13 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
 	}
 
 
+    /**
+     * Evaluate the text expression (k, Java?).
+     * @param expression
+     * @return
+     */
+    public Object evaluate( String expression ) {
+        return null;
+    }
+    
 }
