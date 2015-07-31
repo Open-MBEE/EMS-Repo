@@ -1,11 +1,14 @@
 {"elements": [
     {
         "qualifiedId": "/europa/123456/onBothWorkspaces2",
-        "name": "onBothWorkspaces2",
         "qualifiedName": "/europa/JW_TEST/onBothWorkspaces2",
         "sysmlid": "onBothWorkspaces2",
-        "documentation": "",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "onBothWorkspaces2",
         "owner": "123456",
+        "documentation": "",
         "specialization": {
             "valueExpression": null,
             "type": "Expression",
@@ -21,17 +24,18 @@
                     "type": "ElementValue"
                 }
             ]
-        },
-        "editable": true,
-        "creator": "admin",
+        }
     },
     {
         "qualifiedId": "/europa/123456/onBothWorkspaces1",
-        "name": "onBothWorkspaces1",
         "qualifiedName": "/europa/JW_TEST/onBothWorkspaces1",
         "sysmlid": "onBothWorkspaces1",
-        "documentation": "",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "onBothWorkspaces1",
         "owner": "123456",
+        "documentation": "",
         "specialization": {
             "propertyType": null,
             "isDerived": false,
@@ -42,9 +46,7 @@
                 "type": "LiteralString"
             }],
             "type": "Property"
-        },
-        "editable": true,
-        "creator": "admin",
+        }
     }
 ]}
 200

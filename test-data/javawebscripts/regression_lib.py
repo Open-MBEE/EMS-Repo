@@ -17,6 +17,7 @@ import datetime
 CURL_STATUS = '-w "\\n%{http_code}\\n"'
 CURL_POST_FLAGS_NO_DATA = "-X POST"
 CURL_POST_FLAGS = '-X POST -H "Content-Type:application/json" --data'
+CURL_POST_FLAGS_K = '-X POST -H "Content-Type:application/k" --data'
 CURL_PUT_FLAGS = "-X PUT"
 CURL_GET_FLAGS = "-X GET"
 CURL_DELETE_FLAGS = "-X DELETE"
@@ -26,7 +27,6 @@ HOST = "localhost:8080"
 SERVICE_URL = "http://%s/alfresco/service/"%HOST
 BASE_URL_WS_NOBS = SERVICE_URL+"workspaces"
 BASE_URL_WS = BASE_URL_WS_NOBS+"/"
-BASE_URL_JW = SERVICE_URL+"javawebscripts/"
 
 failed_tests = 0
 errs = []
@@ -250,10 +250,17 @@ def set_read_to_gv6():
     '''Get the json output, and sets gv6 to the read time'''
     set_read_to_gv(6)
     
+def set_gv1_to_current_time():
+    '''Gets the current time'''
+    global gv1
+    gv1 = get_current_time(0)
+    print "set gv1 to current time " + gv1
+    return gv1
+
 def get_current_time(delay=3):
     '''Gets the current time and adds delay mins b/c it lags behind'''
     a = datetime.datetime.now() + datetime.timedelta(minutes=delay)
-    return a.strftime("%Y-%m-%dT%H:%M:%X.000")
+    return a.strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3]
 
 def set_read_delta_to_gv1(delta=7):
     '''Get the json output, and sets gv1 to the read time - delta secs'''
@@ -493,7 +500,7 @@ def run_curl_test(test_num, test_name, test_desc, curl_cmd, use_json_diff=False,
         
     print "TEST DESCRIPTION: "+test_desc
     
-    if setupFcn and not evaluate_only:
+    if setupFcn: #and not evaluate_only:
         print "calling setup function"
         setupFcn()
 
@@ -541,7 +548,7 @@ def run_curl_test(test_num, test_name, test_desc, curl_cmd, use_json_diff=False,
             filter_output = stuffRead
             orig_output = stuffRead
         
-        if postProcessFcn and not evaluate_only:
+        if postProcessFcn: #and not evaluate_only:
             print "calling post-process function"
             postProcessFcn()
             #print("filter_output after post process = " + str(filter_output))
@@ -552,7 +559,7 @@ def run_curl_test(test_num, test_name, test_desc, curl_cmd, use_json_diff=False,
         file.close()
         file_orig.close()
      
-        if teardownFcn and not evaluate_only:
+        if teardownFcn: #and not evaluate_only:
             print "calling teardown function"
             teardownFcn()
         
@@ -611,10 +618,13 @@ def create_curl_cmd(type, data="", base_url=BASE_URL_WS, post_type="elements", b
     cmd = ""
     
     if type == "POST":
+        post_flags = CURL_POST_FLAGS
+        if data and data[-2:] == ".k":
+            post_flags = CURL_POST_FLAGS_K
         if project_post:
-            cmd = 'curl %s %s %s "%s%s"'%(CURL_FLAGS, CURL_POST_FLAGS, data, base_url, branch)
+            cmd = 'curl %s %s %s "%s%s"'%(CURL_FLAGS, post_flags, data, base_url, branch)
         elif data:
-            cmd = 'curl %s %s @JsonData/%s "%s%s%s"'%(CURL_FLAGS, CURL_POST_FLAGS, data, base_url, branch, post_type)
+            cmd = 'curl %s %s @JsonData/%s "%s%s%s"'%(CURL_FLAGS, post_flags, data, base_url, branch, post_type)
         else:
             cmd = 'curl %s %s "%s%s%s"'%(CURL_FLAGS, CURL_POST_FLAGS_NO_DATA, base_url, branch, post_type)
             

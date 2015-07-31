@@ -45,6 +45,7 @@ import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.apache.log4j.*;
 import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
@@ -153,8 +154,8 @@ public class ArtifactPost extends AbstractJavaWebScript {
 		    																		 response, null, false);
 
 		    	        	if (artifact == null) {
-		    	        		 log(LogLevel.ERROR, "Was not able to create the artifact!\n", HttpServletResponse.SC_BAD_REQUEST);
-			    		         model.put("res", createResponseJson());
+		    	        		 log(Level.ERROR, HttpServletResponse.SC_BAD_REQUEST, "Was not able to create the artifact!\n");
+								 model.put("res", createResponseJson());
 		    	        	}
 		    	        	else {
 		    	        		resultJson.put("upload", artifact);
@@ -162,31 +163,31 @@ public class ArtifactPost extends AbstractJavaWebScript {
 		    	        	}
 	    	        	}
 	    	        	else {
-	    		            log(LogLevel.ERROR, "Invalid artifactId or no content!\n", HttpServletResponse.SC_BAD_REQUEST);
-	    		            model.put("res", createResponseJson());
+	    		            log(Level.ERROR, HttpServletResponse.SC_BAD_REQUEST, "Invalid artifactId or no content!\n");
+							model.put("res", createResponseJson());
 	    	        	}
 	        		}
 	        		else {
-	        			  log(LogLevel.ERROR, "Invalid artifactId!\n", HttpServletResponse.SC_BAD_REQUEST);
-	    		          model.put("res", createResponseJson());
+	        			  log(Level.ERROR, HttpServletResponse.SC_BAD_REQUEST, "Invalid artifactId!\n");
+						  model.put("res", createResponseJson());
 	    		    }
 
 	        	}
 	        	else {
-	        		  log(LogLevel.ERROR, "artifactId not supplied!\n", HttpServletResponse.SC_BAD_REQUEST);
-    		          model.put("res", createResponseJson());
+	        		  log(Level.ERROR, HttpServletResponse.SC_BAD_REQUEST, "artifactId not supplied!\n");
+					  model.put("res", createResponseJson());
     		    }
 
         	}
 	        catch (JSONException e) {
-	            log(LogLevel.ERROR, "Issues creating return JSON\n", HttpServletResponse.SC_BAD_REQUEST);
+	            log(Level.ERROR, HttpServletResponse.SC_BAD_REQUEST, "Issues creating return JSON\n");
 	            e.printStackTrace();
 	            model.put("res", createResponseJson());
 	        }
         }
         else {
-        	log(LogLevel.ERROR, "Invalid request, no sitename specified or no content provided!\n", HttpServletResponse.SC_BAD_REQUEST);
-        	model.put("res", createResponseJson());
+        	log(Level.ERROR, HttpServletResponse.SC_BAD_REQUEST, "Invalid request, no sitename specified or no content provided!\n");
+			model.put("res", createResponseJson());
 	    }
 
         status.setCode(responseStatus.getCode());

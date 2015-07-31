@@ -72,7 +72,7 @@ public class ActionUtil {
      * @param response
      */
     public static void sendEmailToModifier(EmsScriptNode node, String msg, String subject, ServiceRegistry services) {
-        String username = (String)node.getProperty("cm:modifier");
+        String username = (String)node.getProperty("cm:modifier", false);
         EmsScriptNode user = new EmsScriptNode(services.getPersonService().getPerson(username), services, new StringBuffer());
         String recipient = (String) user.getProperty("cm:email");
 
@@ -114,9 +114,10 @@ public class ActionUtil {
         String logName = ((String) node.getProperty("cm:name")) + ".log";
 
         // create logNode if necessary
-        EmsScriptNode logNode = node.getParent().childByNamePath(logName);
+        EmsScriptNode parent = node.getParent(null, node.getWorkspace(), false, true);
+        EmsScriptNode logNode = parent.childByNamePath(logName);
         if (logNode == null) {
-            logNode = node.getParent().createNode(logName, "cm:content");
+            logNode = parent.createNode(logName, "cm:content");
             if (!logNode.hasAspect("cm:versionable")) {
                 logNode.makeSureNodeRefIsNotFrozen();
                 logNode.addAspect("cm:versionable");
@@ -153,6 +154,7 @@ public class ActionUtil {
         node.makeSureNodeRefIsNotFrozen();
         node.transactionCheck();
         sr.getNodeService().setProperty(node.getNodeRef(), ContentModel.PROP_CONTENT, contentData);
+        NodeUtil.propertyCachePut( node.getNodeRef(), NodeUtil.getShortQName( ContentModel.PROP_CONTENT ), contentData );
     }
 
 
@@ -222,6 +224,8 @@ public class ActionUtil {
                 jobNode.createOrUpdateProperty( Acm.CM_NAME, "cm_" + jobNode.getId() );
             }
             jobNode.createOrUpdateProperty("cm:isContentIndexed", false);
+            // Element cache does not support jobs
+            //NodeUtil.addElementToCache( snapshotNode );
         } else if ( jobNode.isDeleted() ) {
             // resurrect
             jobNode.removeAspect( "ems:Deleted" );

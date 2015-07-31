@@ -18,13 +18,16 @@ public abstract class FlagSet extends DeclarativeWebScript {
    
     protected abstract void set( boolean val ); 
     protected abstract boolean get();
-    protected abstract String flagName();    
+    protected abstract String flagName();
+    
+    protected WebScriptRequest req = null;
     
     protected Map<String, Object> executeImpl(WebScriptRequest req,
                                               Status status, Cache cache) {
         FlagSet f = null;
         try {
             f = this.getClass().newInstance();
+            f.req = req;
         } catch ( InstantiationException e ) {
             e.printStackTrace();
         } catch ( IllegalAccessException e ) {

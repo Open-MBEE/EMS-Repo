@@ -11,7 +11,7 @@
 <booleanAttribute key="org.eclipse.jdt.launching.ALLOW_TERMINATE" value="false"/>
 <mapAttribute key="org.eclipse.jdt.launching.CONNECT_MAP">
 <mapEntry key="hostname" value="localhost"/>
-<mapEntry key="port" value="10002"/>
+<mapEntry key="port" value="10000"/>
 </mapAttribute>
 <stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="view-repo"/>
 <stringAttribute key="org.eclipse.jdt.launching.VM_CONNECTOR_ID" value="org.eclipse.jdt.launching.socketAttachConnector"/>

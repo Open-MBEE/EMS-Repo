@@ -1,4 +1,5 @@
 {"elements": [{
+    "modifier": "admin",
     "qualifiedId": "/europa/123456/300/301/302/y",
     "qualifiedName": "/europa/JW_TEST/300/301/302/null",
     "sysmlid": "y",

@@ -8,7 +8,6 @@ import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 import gov.nasa.jpl.view_repo.webscripts.AbstractJavaWebScript;
-import gov.nasa.jpl.view_repo.webscripts.SnapshotGet;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -21,6 +20,7 @@ import java.util.Set;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.log4j.*;
 import org.alfresco.repo.model.Repository;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
@@ -63,7 +63,7 @@ public class ProductsWebscript extends AbstractJavaWebScript {
         EmsScriptNode mySiteNode = getSiteNodeFromRequest( req, false );
 
         if (!NodeUtil.exists( mySiteNode )) {
-            log(LogLevel.WARNING, "Could not find site", HttpServletResponse.SC_NOT_FOUND);
+            log(Level.WARN, HttpServletResponse.SC_NOT_FOUND, "Could not find site");
             return productsJson;
         }
 
@@ -78,7 +78,7 @@ public class ProductsWebscript extends AbstractJavaWebScript {
                 EmsScriptNode configNode = new EmsScriptNode(configNodeRef, services);
                 return handleConfigurationProducts(req, configNode);
             } else {
-                log(LogLevel.WARNING, "Could not find configuration with id " + configurationId, HttpServletResponse.SC_NOT_FOUND);
+                log(Level.WARN, HttpServletResponse.SC_NOT_FOUND, "Could not find configuration with id %s", configurationId);
                 return productsJson;
             }
         }
@@ -148,12 +148,10 @@ public class ProductsWebscript extends AbstractJavaWebScript {
                 jsonObject.put( "id", id );
                 jsonObject.put( "created", EmsScriptNode.getIsoTime( date ) );
                 jsonObject.put( "creator",
-                                snapshot.getProperty( "cm:modifier" ) );
+                                snapshot.getProperty( "cm:modifier", false ) );
                 jsonObject.put( "url", contextPath + "/service/snapshots/"
                                        + snapshot.getSysmlId() );
-                jsonObject.put( "tag", SnapshotGet.getConfigurationSet( snapshot,
-                                                                                workspace,
-                                                                                dateTime ) );
+                jsonObject.put( "tag", getConfigurationSet( snapshot, workspace, dateTime ) );
                 snapshotsJson.put( jsonObject );
             }
         }
@@ -176,8 +174,8 @@ public class ProductsWebscript extends AbstractJavaWebScript {
         EmsScriptNode product = findScriptNodeById( productId, workspace, dateTime, false );
 
         if ( product == null ) {
-            log( LogLevel.ERROR, "Product not found with ID: " + productId,
-                 HttpServletResponse.SC_NOT_FOUND );
+            log( Level.ERROR,
+                 HttpServletResponse.SC_NOT_FOUND, "Product not found with ID: %s", productId);
         }
 
         if ( checkPermissions( product, PermissionService.READ ) ) {
@@ -209,8 +207,8 @@ public class ProductsWebscript extends AbstractJavaWebScript {
                     productsJson.put( product.toJSONObject( workspace, dateTime ) );
                 }
             } catch ( JSONException e ) {
-                log( LogLevel.ERROR, "Could not create JSON for product",
-                     HttpServletResponse.SC_INTERNAL_SERVER_ERROR );
+                log( Level.ERROR,
+                     HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Could not create JSON for product");
                 e.printStackTrace();
             }
         }
@@ -259,14 +257,15 @@ public class ProductsWebscript extends AbstractJavaWebScript {
                                                                 Acm.ACM_PRODUCT, false,
                                                                 workspace, dateTime,
                                                                 null);
+        Set<String> visitedNodes = new HashSet<String>();
         if (nodeList != null) {
             Set<EmsScriptNode> nodes = new HashSet<EmsScriptNode>(nodeList.values());
             for ( EmsScriptNode node : nodes) {
                 if (node != null) {
-                    JSONObject nodeJson = node.toJSONObject(workspace, dateTime);;
+                    JSONObject nodeJson = node.toJSONObject(workspace, dateTime);
                     String nodeSiteName = node.getSiteCharacterizationId(dateTime, workspace);
 
-                    if (timestamp != null) {
+                    if (timestamp != null && nodeJson != null) {
                         JSONArray siteCache = Utils.get( productCache, workspaceId, timestamp, nodeSiteName );
                         if (siteCache == null) {
                             siteCache = new JSONArray();
@@ -274,7 +273,13 @@ public class ProductsWebscript extends AbstractJavaWebScript {
                             Utils.put( productCache, workspaceId, timestamp, nodeSiteName, siteCache);
                         }
                         
-                        siteCache.put( nodeJson );
+                        // in case we have duplicates in search result - seems to be some weird
+                        // behavior going on
+                        String sysmlid = nodeJson.getString( "sysmlid" );
+                        if (sysmlid != null && !visitedNodes.contains( sysmlid )) {
+                            siteCache.put( nodeJson );
+                            visitedNodes.add( nodeJson.getString( "sysmlid" ) );
+                        }
                     }
                     
                 }
@@ -310,4 +315,29 @@ public class ProductsWebscript extends AbstractJavaWebScript {
         
         return productsJson;
     }
+    
+    
+      /**
+      * Get the configuration set name associated with the snapshot, if available
+      * @param dateTime
+      * @param snapshotId
+      * @return
+      */
+     protected String getConfigurationSet( EmsScriptNode snapshot,
+                                               WorkspaceNode workspace,
+                                               Date dateTime ) {
+       if (snapshot != null) {
+             List< EmsScriptNode > configurationSets =
+                     snapshot.getSourceAssocsNodesByType( "ems:configuredSnapshots",
+                                                          workspace, null );
+           if (!configurationSets.isEmpty()) {
+               EmsScriptNode configurationSet = configurationSets.get(0);
+               String configurationSetName = (String) configurationSet.getProperty(Acm.CM_NAME);
+               return configurationSetName;
+           }
+       }
+    
+       return "";
+     }
+
 }

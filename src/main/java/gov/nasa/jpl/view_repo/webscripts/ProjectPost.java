@@ -39,17 +39,13 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.log4j.*;
 import org.alfresco.repo.model.Repository;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.security.PermissionService;
-
 import org.json.JSONArray;
-
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import org.json.JSONObject;
-
 import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
@@ -120,10 +116,10 @@ public class ProjectPost extends AbstractJavaWebScript {
 				statusCode = responseStatus.getCode();
 			}
         } catch (JSONException e) {
-            log(LogLevel.ERROR, "JSON could not be created\n", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            log(Level.ERROR, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "JSON could not be created\n");
             e.printStackTrace();
         } catch (Exception e) {
-            log(LogLevel.ERROR, "Internal error stack trace:\n" + e.getLocalizedMessage() + "\n", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            log(Level.ERROR, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Internal error stack trace:\n %s \n", e.getLocalizedMessage());
             e.printStackTrace();
         }
 
@@ -139,7 +135,7 @@ public class ProjectPost extends AbstractJavaWebScript {
 		  EmsScriptNode projectNode = findScriptNodeById(projectId, workspace, null, true);
 
 		  if (projectNode == null) {
-		      log(LogLevel.ERROR, "Could not find project\n", HttpServletResponse.SC_NOT_FOUND);
+		      log(Level.ERROR, HttpServletResponse.SC_NOT_FOUND, "Could not find project\n");
 		      return HttpServletResponse.SC_NOT_FOUND;
 		  }
 
@@ -155,16 +151,28 @@ public class ProjectPost extends AbstractJavaWebScript {
 			}
 		}
         if (checkPermissions(projectNode, PermissionService.WRITE)){
-            projectNode.createOrUpdateProperty(Acm.ACM_ID, projectId);
+            String oldId = (String)projectNode.getProperty( Acm.ACM_ID );
+            boolean idChanged = !projectId.equals( oldId );
+            if ( idChanged ) {
+                projectNode.createOrUpdateProperty(Acm.ACM_ID, projectId);
+            }
 			projectNode.createOrUpdateProperty(Acm.ACM_TYPE, "Project");
+			boolean nameChanged = false;
             if (projectName != null) {
                 projectNode.createOrUpdateProperty(Acm.CM_TITLE, projectName);
-                projectNode.createOrUpdateProperty(Acm.ACM_NAME, projectName);
+                String oldName = (String)projectNode.getProperty( Acm.ACM_NAME );
+                nameChanged = !projectName.equals( oldName ); 
+                if ( nameChanged ) {
+                    projectNode.createOrUpdateProperty(Acm.ACM_NAME, projectName);
+                }
+            }
+            if ( idChanged || nameChanged ) {
+                projectNode.removeChildrenFromJsonCache( true );
             }
             if (projectVersion != null) {
                 projectNode.createOrUpdateProperty(Acm.ACM_PROJECT_VERSION, projectVersion);
             }
-            log(LogLevel.INFO, "Project metadata updated.\n", HttpServletResponse.SC_OK);
+            log(Level.INFO, HttpServletResponse.SC_OK, "Project metadata updated.\n");
         }
 
         return HttpServletResponse.SC_OK;
@@ -182,98 +190,112 @@ public class ProjectPost extends AbstractJavaWebScript {
                                      String projectId, String siteName,
                                      boolean createSite,
                                      boolean delete) throws JSONException {
-		// make sure site exists
-		EmsScriptNode siteNode = getSiteNodeForWorkspace(siteName, workspace, null, false);
+        // see if project exists for workspace
+        EmsScriptNode projectNodeAll = findScriptNodeById(projectId, workspace, null, true, siteName);
+        EmsScriptNode projectNode = (projectNodeAll != null && NodeUtil.workspacesEqual(projectNodeAll.getWorkspace(),workspace)) ?
+                                                                                                                                   projectNodeAll : null;
 
-		if (siteNode == null) {
-		    if (createSite) {
-		        if ( siteName == null || siteName.length() == 0 ) {
-	                siteName="europa";
-		        }
-		        siteNode = createSite( siteName, workspace );
-		    } else {
-		        log(LogLevel.ERROR, "Site not found for " + siteName + ".\n", HttpServletResponse.SC_NOT_FOUND);
-		        return HttpServletResponse.SC_NOT_FOUND;
-		    }
-		}
+        boolean idChanged = false;
+        boolean nameChanged = false;
+        
+        // only create site, models, and projects directory in master workspace
+        if (workspace == null) {
+            EmsScriptNode siteNode = getSiteNodeForWorkspace(siteName, workspace, null, false);
 
-		// make sure Model package under site exists
-        EmsScriptNode modelContainerNode =
-                siteNode.childByNamePath( MODEL_PATH_SEARCH, false, workspace, true );
-        if (!checkPermissions(siteNode, "Write")) {
-            return HttpServletResponse.SC_FORBIDDEN;
-        }
-		if (modelContainerNode == null) {
-			modelContainerNode = siteNode.createFolder("Models");
-			if ( modelContainerNode != null ) modelContainerNode.getOrSetCachedVersion();
-			siteNode.getOrSetCachedVersion();
-			log(LogLevel.INFO, "Model folder created.\n", HttpServletResponse.SC_OK);
-		}
-
-		// create project if doesn't exist or update
-		// Note: Also checking if the workspace for the projectNode differs from the desired workspace,
-		// which will occur if the project is in the master, but not in the workspace yet.
-		EmsScriptNode projectNodeAll = findScriptNodeById(projectId, workspace, null, true, siteName);
-		EmsScriptNode projectNode = (projectNodeAll != null && NodeUtil.workspacesEqual(projectNodeAll.getWorkspace(),workspace)) ?
-		                                                                                                     projectNodeAll : null;
-
-		String projectName = null;
-		if (jsonObject.has(Acm.JSON_NAME)) {
-		    projectName = jsonObject.getString(Acm.JSON_NAME);
-		}
-		String projectVersion = null;
-		if (jsonObject.has(Acm.JSON_SPECIALIZATION)) {
-			JSONObject specialization = jsonObject.getJSONObject(Acm.JSON_SPECIALIZATION);
-			if (specialization != null && specialization.has(Acm.JSON_PROJECT_VERSION)) {
-				projectVersion = specialization.getString(Acm.JSON_PROJECT_VERSION);
-			}
-		}
-
-		if ( projectNode == null ) {
-			projectNode = modelContainerNode.createFolder(projectId, Acm.ACM_PROJECT,
-			                                              projectNodeAll != null ? projectNodeAll.getNodeRef() : null);
-			modelContainerNode.getOrSetCachedVersion();
-			projectNode.setProperty(Acm.ACM_ID, projectId);
-			projectNode.setProperty(Acm.ACM_TYPE, "Project");
-            if (projectName != null) {
-    			projectNode.setProperty(Acm.CM_TITLE, projectName);
-                projectNode.setProperty(Acm.ACM_NAME, projectName);
+            if (siteNode == null) {
+                if (createSite) {
+                    if ( siteName == null || siteName.length() == 0 ) {
+                        siteName="europa";
+                    }
+                    siteNode = createSite( siteName, workspace );
+                } else {
+                    log(Level.ERROR, HttpServletResponse.SC_NOT_FOUND, "Site not found for %s .\n", siteName);
+                    return HttpServletResponse.SC_NOT_FOUND;
+                }
             }
-			if (projectVersion != null) {
-			    projectNode.setProperty(Acm.ACM_PROJECT_VERSION, projectVersion);
-			}
-			log(LogLevel.INFO, "Project created.\n", HttpServletResponse.SC_OK);
-		} else {
-			if (delete) {
-	            projectNode.makeSureNodeRefIsNotFrozen();
-				projectNode.remove();
-				log(LogLevel.INFO, "Project deleted.\n", HttpServletResponse.SC_OK);
-			} else {
-				if (checkPermissions(projectNode, PermissionService.WRITE)){
-					projectNode.createOrUpdateProperty(Acm.ACM_ID, projectId);
-					projectNode.createOrUpdateProperty(Acm.ACM_TYPE, "Project");
-					if (projectName != null) {
-                        projectNode.createOrUpdateProperty(Acm.CM_TITLE, projectName);
-                        projectNode.createOrUpdateProperty(Acm.ACM_NAME, projectName);
-					}
-		            if (projectVersion != null) {
-		                projectNode.createOrUpdateProperty(Acm.ACM_PROJECT_VERSION, projectVersion);
-		            }
-					log(LogLevel.INFO, "Project metadata updated.\n", HttpServletResponse.SC_OK);
 
-					// This move can cause issues if no site and no project was specified in the URL,
-					// but another site has the no_project already.  Then we mistakenly move that
-					// project and all its elements.  See CMED-531:
-//					if (checkPermissions(projectNode.getParent(), PermissionService.WRITE)) {
-//						// move sites if exists under different site
-//						if (!projectNode.getParent().equals(modelContainerNode)) {
-//							projectNode.move(modelContainerNode);
-//							log(LogLevel.INFO, "Project moved to new site.\n", HttpServletResponse.SC_OK);
-//						}
-//					}
-				}
-			}
-		}
+            // make sure Model package under site exists
+            EmsScriptNode modelContainerNode =
+                    siteNode.childByNamePath( MODEL_PATH_SEARCH, false, workspace, true );
+            if (!checkPermissions(siteNode, "Write")) {
+                return HttpServletResponse.SC_FORBIDDEN;
+            }
+            if (modelContainerNode == null) {
+                modelContainerNode = siteNode.createFolder("Models");
+                if ( modelContainerNode != null ) modelContainerNode.getOrSetCachedVersion();
+                siteNode.getOrSetCachedVersion();
+                log(Level.INFO, HttpServletResponse.SC_OK, "Model folder created.\n");
+            }
+
+            if ( projectNode == null ) {
+                projectNode = modelContainerNode.createFolder(projectId, Acm.ACM_PROJECT,
+                                                              projectNodeAll != null ? projectNodeAll.getNodeRef() : null);
+                modelContainerNode.getOrSetCachedVersion();
+            }
+        }
+
+
+        // if project node is still null here, means we're in branch and it doesn't exist in master
+        if ( projectNode == null ) {
+            if (workspace != null) {
+                EmsScriptNode pnode = findScriptNodeById(projectId, workspace.getParentWorkspace(), null, true, siteName);
+                if (pnode != null) {
+                    projectNode = workspace.replicateWithParentFolders( pnode );
+                }
+            }
+        }
+
+        if (projectNode == null) {
+            log(Level.WARN, HttpServletResponse.SC_BAD_REQUEST, "Projects must be created in master workspace.\n");
+            return HttpServletResponse.SC_BAD_REQUEST;
+        }
+
+        if (delete) {
+            projectNode.makeSureNodeRefIsNotFrozen();
+            projectNode.remove();
+            log(Level.INFO, "Project deleted.\n", HttpServletResponse.SC_OK);
+        } else {
+            if (checkPermissions(projectNode, PermissionService.WRITE)){
+                String projectName = null;
+                if (jsonObject.has(Acm.JSON_NAME)) {
+                    projectName = jsonObject.getString(Acm.JSON_NAME);
+                }
+                String projectVersion = null;
+                if (jsonObject.has(Acm.JSON_SPECIALIZATION)) {
+                    JSONObject specialization = jsonObject.getJSONObject(Acm.JSON_SPECIALIZATION);
+                    if (specialization != null && specialization.has(Acm.JSON_PROJECT_VERSION)) {
+                        projectVersion = specialization.getString(Acm.JSON_PROJECT_VERSION);
+                    }
+                }
+
+                idChanged = projectNode.createOrUpdateProperty(Acm.ACM_ID, projectId);
+                projectNode.createOrUpdateProperty(Acm.ACM_TYPE, "Project");
+                if (projectName != null) {
+                    projectNode.createOrUpdateProperty(Acm.CM_TITLE, projectName);
+                    nameChanged = projectNode.createOrUpdateProperty(Acm.ACM_NAME, projectName);
+                }
+                if (projectVersion != null) {
+                    projectNode.createOrUpdateProperty(Acm.ACM_PROJECT_VERSION, projectVersion);
+                }
+                log(Level.INFO, "Project metadata updated.\n", HttpServletResponse.SC_OK);
+
+
+                // This move can cause issues if no site and no project was specified in the URL,
+                // but another site has the no_project already.  Then we mistakenly move that
+                // project and all its elements.  See CMED-531:
+                //					if (checkPermissions(projectNode.getParent(), PermissionService.WRITE)) {
+                //						// move sites if exists under different site
+                //						if (!projectNode.getParent().equals(modelContainerNode)) {
+                //							projectNode.move(modelContainerNode);
+                //							log(LogLevel.INFO, "Project moved to new site.\n", HttpServletResponse.SC_OK);
+                //						}
+                //					}
+            }
+        }
+    
+        if ( idChanged || nameChanged ) {
+            projectNode.removeChildrenFromJsonCache( true );
+        }
 		projectNode.getOrSetCachedVersion();
 		return HttpServletResponse.SC_OK;
 	}

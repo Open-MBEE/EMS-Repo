@@ -24,15 +24,15 @@
 	            "created": {
 	                "type": "string",
 	                "format": "date-time",
-	                "description": "Last modified time of snapshot"
+	                "description": "Last modified time of snapshot (Read-Only)"
 	            },
 	            "creator": {
 	                "type": "string",
-	                "description": "Username of creator of snapshot"
+	                "description": "Username of creator of snapshot (Read-Only)"
 	            },
                 "id": {
                     "type": "string",
-                    "description": "Unique identifier of the snapshot."
+                    "description": "Unique identifier of the snapshot. (Read-Only)"
                 },
 	            "sysmlid": {
 	                "type": "string",

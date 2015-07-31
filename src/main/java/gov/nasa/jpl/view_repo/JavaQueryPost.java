@@ -15,7 +15,11 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import kexpparser.KExpParser;
+
 import org.alfresco.service.ServiceRegistry;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.junit.runner.JUnitCore;
 import org.junit.runner.Result;
 import org.springframework.extensions.surf.util.Content;
@@ -32,8 +36,6 @@ public class JavaQueryPost extends AbstractJavaWebScript {
     @Override
     public void setServices(ServiceRegistry services) {
         super.setServices( services );
-        JavaQuery.services = services;
-        NodeUtil.setServices( services );
     }
     
 //    public void setNodeService(NodeService nodeService) {
@@ -120,7 +122,24 @@ public class JavaQueryPost extends AbstractJavaWebScript {
 		if (Debug.isOn()) System.out.println("\n\n\n" + Timepoint.now().toTimestamp() + "\nEvaluating: \"" + qString + "\"\n\n");
 		Object reply = null;
 		try {
-		    reply = JavaEvaluator.evaluate( qString,  packageName );
+//		    // Create MMS JSON from K query
+//            JSONObject exprJson = new JSONObject(KExpParser.parseExpression(qString));
+//            
+//            // Add an id so that we overwrite the same thing every time -- not
+//            // safe for concurrent calls to this service!
+//            System.out.println( exprJson );
+//            JSONArray expJarr = exprJson.optJSONArray("elements");
+//            if( expJarr != null && expJarr.length() > 0 ) {
+//                JSONObject expression = expJarr.optJSONObject( 0 );
+//                expression.put( "sysmlid", "expression_generated_from_k" );
+//            }
+//            
+//            // Post the json and then evaluate it.
+//            
+//            
+//            
+//            reply = ;
+          reply = JavaEvaluator.evaluate( qString,  packageName );
 		} catch ( Throwable e ) {
 		    System.err.println( e.getClass().getSimpleName() + ": " + e.getLocalizedMessage() );
 		    e.printStackTrace();
@@ -133,6 +152,8 @@ public class JavaQueryPost extends AbstractJavaWebScript {
 		return model;
 	}
 
+	
+	
     @Override
     protected boolean validateRequest( WebScriptRequest req, Status status ) {
         if (!checkRequestContent(req)) {

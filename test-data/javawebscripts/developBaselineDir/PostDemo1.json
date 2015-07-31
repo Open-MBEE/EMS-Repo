@@ -1,60 +1,75 @@
 {"elements": [
     {
-        "name": "Components",
-        "qualifiedName": "/europa/JW_TEST/Components",
-        "documentation": "",
-        "owner": "123456",
-        "specialization": {"type": "View"},
+        "qualifiedName": "/europa/JW_TEST/BLUCam CubeSat A",
         "editable": true,
         "creator": "admin",
+        "modifier": "admin",
+        "name": "BLUCam CubeSat A",
+        "owner": "123456",
+        "documentation": "",
+        "specialization": {"type": "Package"}
     },
     {
-        "name": "exposed",
         "qualifiedName": "/europa/JW_TEST/exposed",
-        "documentation": "",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "exposed",
         "owner": "123456",
+        "documentation": "",
         "specialization": {
             "type": "Parameter",
             "defaultValue": null
-        },
-        "editable": true,
-        "creator": "admin",
+        }
     },
     {
-        "name": "ComponentViewPoint",
-        "qualifiedName": "/europa/JW_TEST/ComponentViewPoint",
-        "documentation": "",
+        "qualifiedName": "/europa/JW_TEST/Name",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "Name",
         "owner": "123456",
+        "documentation": "",
+        "specialization": {
+            "parameters": [],
+            "type": "Operation"
+        }
+    },
+    {
+        "qualifiedName": "/europa/JW_TEST/Components/",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "",
+        "owner": "_17_0_2_3_e610336_1394148311476_17302_29388",
+        "documentation": "",
+        "specialization": {
+            "source": "_17_0_2_3_e610336_1394148311476_17302_29388",
+            "target": "_17_0_2_3_e610336_1394148449252_91190_29556",
+            "type": "Conform"
+        }
+    },
+    {
+        "qualifiedName": "/europa/JW_TEST/ComponentViewPoint",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "ComponentViewPoint",
+        "owner": "123456",
+        "documentation": "",
         "specialization": {
             "method": "name_list",
             "type": "Viewpoint"
-        },
-        "editable": true,
-        "creator": "admin",
+        }
     },
     {
-        "name": "List",
-        "qualifiedName": "/europa/JW_TEST/List",
-        "documentation": "",
-        "owner": "123456",
-        "specialization": {"type": "Operation"},
-        "editable": true,
-        "creator": "admin",
-    },
-    {
-        "name": "Name",
-        "qualifiedName": "/europa/JW_TEST/Name",
-        "documentation": "",
-        "owner": "123456",
-        "specialization": {"type": "Operation"},
-        "editable": true,
-        "creator": "admin",
-    },
-    {
-        "name": "viewpoint_op",
         "qualifiedName": "/europa/JW_TEST/viewpoint_op",
-        "documentation": "",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "viewpoint_op",
         "owner": "123456",
+        "documentation": "",
         "specialization": {
             "expression": {
                 "valueExpression": null,
@@ -90,15 +105,39 @@
             },
             "parameters": ["exposed_id"],
             "type": "Operation"
-        },
-        "editable": true,
-        "creator": "admin",
+        }
     },
     {
-        "name": "",
-        "qualifiedName": "/europa/JW_TEST/",
-        "documentation": "",
+        "qualifiedName": "/europa/JW_TEST/Components",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "Components",
         "owner": "123456",
+        "documentation": "",
+        "specialization": {"type": "View"}
+    },
+    {
+        "qualifiedName": "/europa/JW_TEST/map",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "map",
+        "owner": "123456",
+        "documentation": "",
+        "specialization": {
+            "parameters": [],
+            "type": "Operation"
+        }
+    },
+    {
+        "qualifiedName": "/europa/JW_TEST/",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "",
+        "owner": "123456",
+        "documentation": "",
         "specialization": {
             "valueExpression": null,
             "type": "Expression",
@@ -119,53 +158,34 @@
                     "type": "ElementValue"
                 }
             ]
-        },
-        "editable": true,
-        "creator": "admin",
+        }
     },
     {
-        "name": "",
         "qualifiedName": "/europa/JW_TEST/",
-        "documentation": "",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "",
         "owner": "123456",
+        "documentation": "",
         "specialization": {
             "source": "_17_0_2_3_e610336_1394148311476_17302_29388",
             "target": "_17_0_2_4_f3a0363_1394142290412_487571_28478",
             "type": "Expose"
-        },
-        "editable": true,
-        "creator": "admin",
+        }
     },
     {
-        "name": "BLUCam CubeSat A",
-        "qualifiedName": "/europa/JW_TEST/BLUCam CubeSat A",
-        "documentation": "",
+        "qualifiedName": "/europa/JW_TEST/List",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "List",
         "owner": "123456",
-        "specialization": {"type": "Package"},
-        "editable": true,
-        "creator": "admin",
-    },
-    {
-        "name": "",
-        "qualifiedName": "/europa/JW_TEST/Components/",
         "documentation": "",
-        "owner": "_17_0_2_3_e610336_1394148311476_17302_29388",
         "specialization": {
-            "source": "_17_0_2_3_e610336_1394148311476_17302_29388",
-            "target": "_17_0_2_3_e610336_1394148449252_91190_29556",
-            "type": "Conform"
-        },
-        "editable": true,
-        "creator": "admin",
-    },
-    {
-        "name": "map",
-        "qualifiedName": "/europa/JW_TEST/map",
-        "documentation": "",
-        "owner": "123456",
-        "specialization": {"type": "Operation"},
-        "editable": true,
-        "creator": "admin",
+            "parameters": [],
+            "type": "Operation"
+        }
     }
 ]}
 200

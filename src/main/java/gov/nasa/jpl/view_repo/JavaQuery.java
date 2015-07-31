@@ -33,6 +33,8 @@ import static org.junit.Assert.assertNotNull;
 import gov.nasa.jpl.mbee.util.Debug;
 import gov.nasa.jpl.mbee.util.MoreToString;
 import gov.nasa.jpl.mbee.util.Utils;
+import gov.nasa.jpl.view_repo.util.NodeUtil;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -121,8 +123,8 @@ public class JavaQuery extends AbstractModuleComponent {
         if ( instance == null ) instance = this;
     }
     
-    public void setServices( ServiceRegistry services ) {
-        this.services = services;
+    public static void setServices( ServiceRegistry services ) {
+        JavaQuery.services = services;
     }
 
     public void setContentService( ContentService contentService ) {
@@ -482,7 +484,8 @@ public class JavaQuery extends AbstractModuleComponent {
 
     //@Override
     public String getName( NodeRef object ) {//, String version ) {
-        return (String)nodeService.getProperty( object, ContentModel.PROP_NAME );
+        return (String)NodeUtil.getNodeProperty( object, ContentModel.PROP_NAME,
+                                                 services, true, true );
     }
 
     //@Override
@@ -523,8 +526,10 @@ public class JavaQuery extends AbstractModuleComponent {
     public Serializable getProperty( NodeRef object, String propertyName ) {//,
                                      //String version ) {
         Serializable prop =
-                nodeService.getProperty( object,
-                                         QName.createQName( propertyName ) );
+                (Serializable)NodeUtil.getNodeProperty( object, propertyName,
+                                                        services, true, true );
+//                nodeService.getProperty( object,
+//                                         QName.createQName( propertyName ) );
         return prop;
     }
 
@@ -600,14 +605,14 @@ public class JavaQuery extends AbstractModuleComponent {
         return instance;
     }
 
-    public static Object get(String xpath, QName property) {
+    public static Object get(String xpath, QName property, boolean cacheOkay) {
         if (Debug.isOn()) Debug.outln( "get(" + xpath + ", " + property + ")" );
         List<NodeRef> nodes = get( xpath );
         assertNotNull( nodes );
         NodeRef node = nodes.get( 0 );
-        String nodeName =
-           (String)getInstance().nodeService.getProperty( node,
-                                                          property );
+        Object nodeName = NodeUtil.getNodeProperty( node, property,
+                                                    getInstance().serviceRegistry,
+                                                    true, true );
         assertNotNull( nodeName );
         assertEquals( nodeName, nodeName );
         return nodeName;

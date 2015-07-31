@@ -1,10 +1,11 @@
 {"elements": [
     {
+        "modifier": "admin",
         "qualifiedId": "/europa/123456/300",
-        "qualifiedName": "/europa/JW_TEST/300",
         "name": "300",
-        "owner": "123456",
+        "qualifiedName": "/europa/JW_TEST/300",
         "documentation": "something",
+        "owner": "123456",
         "sysmlid": "300",
         "specialization": {
             "propertyType": null,
@@ -22,6 +23,7 @@
     },
     {
         "qualifiedId": "/europa/123456",
+        "modifier": "admin",
         "qualifiedName": "/europa/JW_TEST",
         "name": "JW_TEST",
         "owner": null,
@@ -30,22 +32,24 @@
         "creator": "admin"
     },
     {
+        "modifier": "admin",
         "qualifiedId": "/europa/123456/dlam",
-        "qualifiedName": "/europa/JW_TEST/dlam",
         "name": "dlam",
-        "owner": "123456",
+        "qualifiedName": "/europa/JW_TEST/dlam",
         "documentation": "to make compatible with value specs (this is just a Element)",
+        "owner": "123456",
         "sysmlid": "dlam",
         "specialization": {"type": "Element"},
         "editable": true,
         "creator": "admin"
     },
     {
+        "modifier": "admin",
         "qualifiedId": "/europa/123456/4000",
-        "qualifiedName": "/europa/JW_TEST/400",
         "name": "400",
-        "owner": "123456",
+        "qualifiedName": "/europa/JW_TEST/400",
         "documentation": "4something",
+        "owner": "123456",
         "sysmlid": "4000",
         "specialization": {
             "propertyType": null,
