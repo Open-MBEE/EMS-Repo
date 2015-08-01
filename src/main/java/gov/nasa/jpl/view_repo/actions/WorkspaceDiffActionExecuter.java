@@ -15,13 +15,18 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.alfresco.model.ContentModel;
 import org.alfresco.repo.action.executer.ActionExecuterAbstractBase;
 import org.alfresco.repo.model.Repository;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.action.Action;
 import org.alfresco.service.cmr.action.ParameterDefinition;
+import org.alfresco.service.cmr.repository.ContentIOException;
+import org.alfresco.service.cmr.repository.ContentReader;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.apache.log4j.Logger;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.springframework.extensions.webscripts.Status;
 
 /**
@@ -50,6 +55,7 @@ public class WorkspaceDiffActionExecuter extends ActionExecuterAbstractBase {
     public static final String PARAM_WS_2 = "ws2";
     public static final String PARAM_TS_1 = "ts1";
     public static final String PARAM_TS_2 = "ts2";
+    public static final String OLD_JOB = "oldJob";
 
     static Logger logger = Logger.getLogger(WorkspaceDiffActionExecuter.class);
     
@@ -71,9 +77,12 @@ public class WorkspaceDiffActionExecuter extends ActionExecuterAbstractBase {
         final WorkspaceNode ws2 = (WorkspaceNode) action.getParameterValue(PARAM_WS_2);
         final String ts1 = (String) action.getParameterValue(PARAM_TS_1);
         final String ts2 = (String) action.getParameterValue(PARAM_TS_2);
+        final EmsScriptNode oldJobNode = (EmsScriptNode) action.getParameterValue(OLD_JOB);
 
         final EmsScriptNode jsonNode = new EmsScriptNode(actionedUponNodeRef, services, response);
 
+        final boolean glom = true;
+        
         if (logger.isDebugEnabled()) logger.debug( "started execution of diff for " + WorkspaceNode.getWorkspaceName(ws1) + " and "+ WorkspaceNode.getWorkspaceName(ws2));
         clearCache();
 
@@ -115,6 +124,23 @@ public class WorkspaceDiffActionExecuter extends ActionExecuterAbstractBase {
             }
         };
                 
+    }
+    
+    protected JSONObject diffJsonFromJobNode( EmsScriptNode jobNode ) {
+        ContentReader reader = services.getContentService().getReader(jobNode.getNodeRef(), 
+                                                                      ContentModel.PROP_CONTENT);
+        
+        if (reader != null) {
+            try {
+                JSONObject diffResults = new JSONObject(reader.getContentString());
+                return diffResults;
+            } catch (ContentIOException e) {
+                e.printStackTrace();
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+        return null;
     }
 
     @Override

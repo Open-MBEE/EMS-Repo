@@ -1,5 +1,6 @@
 package gov.nasa.jpl.view_repo.webscripts;
 
+import gov.nasa.jpl.mbee.util.Pair;
 import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.actions.ActionUtil;
@@ -13,9 +14,16 @@ import gov.nasa.jpl.view_repo.util.NodeUtil;
 import gov.nasa.jpl.view_repo.util.WorkspaceDiff;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -28,6 +36,7 @@ import org.alfresco.service.cmr.action.ActionService;
 import org.alfresco.service.cmr.repository.ContentIOException;
 import org.alfresco.service.cmr.repository.ContentReader;
 import org.apache.log4j.*;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.extensions.webscripts.Cache;
@@ -243,6 +252,301 @@ public class MmsDiffGet extends AbstractJavaWebScript {
         
     }
     
+    /**
+     * Calculate the diff that would result after applying one diff followed by
+     * another, "glomming" them together. This can be done by making a copy of
+     * the first diff and modifying it based on the second.
+     * <p>
+     * In the element diff json, there is a workspace1 to show the original
+     * elements and a workspace2 for the changes to those elements. Only
+     * properties that have changed are included in the added and updated
+     * elements in the workspace2 JSON, so the actual element in workspace 2 is
+     * computed as the element in workspace1 (if it exists) augmented or
+     * overwritten with the properties in the corresponding workspace2 element.
+     * <p>
+     * So, how do we merge two diff JSON objects? The workspace1 in diff2 could
+     * be a modification of the workspace1 in diff1, possibly sa a result of the
+     * workspace2 changes in diff1. In this case, it makes sense to use diff1's
+     * workspace1 as that of the glommed diff since it is the pre-existing state
+     * of the workspace before both diffs are applied. If this is not the case,
+     * then it might make sense to add elements in workspace1 of diff2 that are
+     * not in workspace1 of diff1 and that are not added by workspace2 of diff1.
+     * <p>
+     * To combine the workspace2 changes of the two diffs, the changes in
+     * workspace2 of diff2 should be applied to those of workspace2 of diff1 to
+     * get the glommed workspace2 changes. But, how to do this at the property
+     * level is not obvious. For example, if diff1 and diff2 add the same
+     * element with different properties, should the individual properties of
+     * the add in diff2 be merged with those of diff1 or should the diff2 add
+     * replace the diff1 add? This situation may indicate a conflict in
+     * workspaces that the user should control. If the element were a view, then
+     * merging would not make much sense, especially if it leads to
+     * inconsistency among its properties. So, replacing the add is chosen as
+     * the appropriate behavior. Below is a table showing how workspace2 changes
+     * ore glommed:
+     * 
+     * <table style="width:100%", border="1">
+     *  <tr>
+     *    <th></th>
+     *    <th>add(x2) </th>
+     *    <th>delete(x)</th> 
+     *    <th>update(x2)</th>
+     *  </tr>
+     *  <tr>
+     *    <th>add(x1)</th>
+     *    <td>add(x2) [potential conflict]</td>
+     *    <td>delete(x)</td>
+     *    <td>add(x1 &lt;- x2)</td>
+     *  </tr>
+     *  <tr>
+     *    <th>delete(x)</th>
+     *    <td>add(x2)</td>
+     *    <td>delete(x)</td>
+     *    <td>update(x2) [potential conflict]</td>
+     *  </tr>
+     *  <tr>
+     *    <th>update(x1)</th>
+     *    <td>update(x2) [potential conflict]</td>
+     *    <td>delete(x)</td>
+     *    <td>update(x1 &lt;- x2)</td>
+     *  </tr>
+     * </table>
+     * 
+     * @param diff1
+     *            workspace diff JSON
+     * @param diff2
+     *            workspace diff JSON
+     * @return the combined diff of applying diff1 followed by diff2
+     */
+    public JSONObject glom( JSONObject diff1, JSONObject diff2 ) {
+       JSONObject diff3 = NodeUtil.clone( diff1 ); 
+        return null;
+    }
+
+    enum DiffOp { ADD, UPDATE, DELETE };
+    
+    public JSONObject glom( ArrayList<JSONObject> diffs ) {
+        if ( Utils.isNullOrEmpty( diffs ) ) return null;
+        JSONObject glommedDiff = makeEmptyDiffJson();
+        if ( diffs.size() == 1 ) return glommedDiff;
+        LinkedHashMap<String, Pair<DiffOp, List<JSONObject> > > diffMap1 =
+                new LinkedHashMap< String, Pair<DiffOp,List<JSONObject>> >();
+        LinkedHashMap<String, Pair<DiffOp, List<JSONObject> > > diffMap2 =
+                new LinkedHashMap< String, Pair<DiffOp,List<JSONObject>> >();
+        
+        // Glom workspace 1 changes        
+        // Iterate through each diff in order adding any new elements that were
+        // not in previous diffs.
+        JSONArray elements = glommedDiff.getJSONArray( "elements" );
+        for ( int i = 0; i < diffs.size(); ++i ) {
+            JSONObject diff =  diffs.get( i );
+            JSONObject ws1 = diff.optJSONObject( "workspace1" );            
+            JSONArray dElements = ws1.getJSONArray( "elements" );
+            for ( int j = 0; j < dElements.length(); ++j ) {
+                JSONObject element = dElements.getJSONObject( j );
+                String sysmlid = element.getString( "sysmlid" );
+                if ( !diffMap1.containsKey( sysmlid ) ) {
+                    elements.put( element );
+                }
+            }
+        }
+        
+        // Glom workpace 2 changes
+        for ( JSONObject diff : diffs ) {
+            JSONObject ws2 = diff.optJSONObject( "workspace2" );
+            if ( ws2 == null ) continue;
+            JSONArray added = ws2.optJSONArray( "addedElements" );
+            JSONArray updated = ws2.optJSONArray( "updatedElements" );
+            JSONArray deleted = ws2.optJSONArray( "deletedElements" );
+            // Diffs are applied in the order of add, update, delete
+            glom( DiffOp.ADD, added, diffMap2 );
+            glom( DiffOp.UPDATE, updated, diffMap2 );
+            glom( DiffOp.DELETE, deleted, diffMap2 );
+        }
+
+        // now we need to merge the properties of chained updates
+        JSONObject gws2 = glommedDiff.getJSONObject( "workspace2" );
+        JSONArray added = gws2.getJSONArray( "addedElements" );
+        JSONArray updated = gws2.getJSONArray( "updatedElements" );
+        JSONArray deleted = gws2.getJSONArray( "deletedElements" );
+        for ( Entry< String, Pair< DiffOp, List< JSONObject > > > entry : diffMap2.entrySet() ) {
+            Pair< DiffOp, List< JSONObject > > p = entry.getValue();
+            JSONObject glommedElement = null; //NodeUtil.newJsonObject();
+            for ( JSONObject element : p.second ) {
+                if ( glommedElement == null ) glommedElement = NodeUtil.clone( element );
+                else addProperties( glommedElement, element );
+            }
+            switch ( p.first ) {
+                case ADD:
+                    added.put( glommedElement );
+                    break;
+                case UPDATE:
+                    updated.put( glommedElement );
+                    break;
+                case DELETE:
+                    deleted.put( glommedElement );
+                    break;
+                default:
+                    // BAD! -- TODO
+            }
+            // TODO -- What about moved and conflicted elements?
+        }
+        
+        return glommedDiff;
+     }
+
+    public static JSONObject makeEmptyDiffJson() throws JSONException {
+        JSONObject diffJson = NodeUtil.newJsonObject();
+        JSONObject ws1Json = NodeUtil.newJsonObject();
+        JSONObject ws2Json = NodeUtil.newJsonObject();
+
+        diffJson.put("workspace1", ws1Json);
+        diffJson.put("workspace2", ws2Json);
+        
+        JSONArray ws1Elements = new JSONArray();
+        JSONArray ws2Added = new JSONArray();
+        JSONArray ws2Updated = new JSONArray();
+        JSONArray ws2Deleted = new JSONArray();
+        ws1Json.put( "elements", ws1Elements );
+        ws2Json.put( "addedElements", ws2Added );
+        ws2Json.put( "updatedElements", ws2Updated );
+        ws2Json.put( "deletedElements", ws2Deleted );
+
+        // TODO -- moved and conflicted elements
+
+        return diffJson;
+    }
+
+    
+    /**
+     * Glom the specified elements per the specified operation to the glom map.
+     * The map is used to avoid unnecessary merging of updates. For example,
+     * three updates followed by a delete requires no update merging since the
+     * element is getting deleted anyway. The map tracks the minimum number of
+     * operation to glom all of the diffs.
+     * 
+     * @param op
+     *            the ADD, UPDATE, or DELETE operation to apply to the elements
+     * @param elements
+     *            the elements to which the operation is applied and glommed
+     *            with the glom map
+     * @param glomMap
+     *            a partial computation of a diff glomming as a map from sysmlid
+     *            to an operation and a list of elements whose properties will
+     *            be merged
+     */
+    protected void glom( DiffOp op,
+                         JSONArray elements,
+                         LinkedHashMap<String, Pair<DiffOp, List<JSONObject> > > glomMap ) {
+        if ( glomMap == null || elements == null) return;
+        // Apply the operation on each element to the map of the glommed diff (glomMap) 
+        for ( int i = 0; i < elements.length(); ++i ) {
+            JSONObject element = elements.optJSONObject( i );
+            if ( element == null ) continue;
+            String sysmlId = element.optString( Acm.JSON_ID );
+            if ( sysmlId == null ) continue;
+            Pair< DiffOp, List< JSONObject > > p = glomMap.get( sysmlId );
+            // If there is no entry in the map for the sysmlid, create a new
+            // entry with the operation and element.
+            if ( p == null ) {
+                p = new Pair< DiffOp,List< JSONObject > >( op, Utils.newList( element ) );
+                glomMap.put( sysmlId, p );
+            } else {
+                switch( op ) {
+                    case ADD:
+                        // ADD always fully replaces ADD, UPDATE, and DELETE according to the
+                        // table in the comments for glom( diff1, diff2).
+                        p.second.clear();
+                        p.second.add( element );
+                        // already replaced above--now just update op for DELETE
+                        switch ( p.first ) {
+                            case ADD:
+                                // ADD + ADD = ADD [potential conflict]
+                            case UPDATE:
+                                // UPDATE + ADD = UPDATE [potential conflict]
+                                break;
+                            case DELETE:
+                                // DELETE + ADD = ADD
+                                p.first = DiffOp.ADD;
+                            default:
+                                // BAD! -- TODO
+                        }
+                        break;
+                    case UPDATE:
+                        // UPDATE replaces DELETE but augments UPDATE and ADD
+                        switch ( p.first ) {
+                            case ADD:
+                                // ADD + UPDATE = ADD --> augment
+                            case UPDATE:
+                                // UPDATE + UPDATE = UPDATE --> augment
+                                p.second.add( element );
+                                break;
+                            case DELETE:
+                                // DELETE + UPDATE = UPDATE --> replace [potential conflict]
+                                p.first = DiffOp.UPDATE;
+                                p.second.clear();
+                                p.second.add( element );
+                            default:
+                                // BAD! -- TODO
+                        }
+                        break;
+                    case DELETE:
+                        // DELETE always fully replaces ADD and UPDATE. No
+                        // change to an already deleted element.
+                        switch ( p.first ) {
+                            case ADD:
+                                // ADD + DELETE = DELETE --> replace
+                            case UPDATE:
+                                // UPDATE + DELETE = DELETE --> replace
+                                p.first = DiffOp.DELETE;
+                                p.second.clear();
+                                p.second.add( element );
+                                break;
+                            case DELETE:
+                                // DELETE + DELETE = DELETE (no change)
+                            default:
+                                // BAD! -- TODO
+                        }
+                        break;
+                    default:
+                        // BAD! -- TODO
+                }
+            }
+        }
+    }
+    
+    protected static HashSet<String> ignoredJsonIds = new HashSet<String>() {
+        {
+            add("sysmlid");
+            add("creator");
+            add("modified");
+            add("created");
+            add("modifier");
+        }
+    };
+
+    protected void addProperties( JSONObject element1,
+                                  JSONObject element2 ) {
+        Iterator i = element2.keys();
+        while ( i.hasNext() ) {
+            String k = (String)i.next();
+            if ( ignoredJsonIds.contains( k ) ) continue;
+            element1.put( k, element2.get( k ) );
+        }
+    }
+
+//    private JSONObject glomProperties( JSONObject element1,
+//                                       JSONObject element2 ) { 
+//        JSONObject elementG = NodeUtil.clone( element1 );
+//        Iterator i = element2.keys();
+//        while ( i.hasNext() ) {
+//            String k = (String)i.next();
+//            if ( ignoredJsonIds.contains( k ) ) continue;
+//            elementG.put( k, element2.get( k ) );
+//        }
+//        return elementG;
+//    }
+    
     protected void saveAndStartAction( WebScriptRequest req,
                                        String timestamp1,
                                        String timestamp2,
@@ -363,6 +667,7 @@ public class MmsDiffGet extends AbstractJavaWebScript {
                 loadAction.setParameterValue(WorkspaceDiffActionExecuter.PARAM_TS_2, userTimeStamp2);
                 loadAction.setParameterValue(WorkspaceDiffActionExecuter.PARAM_WS_1, ws1);
                 loadAction.setParameterValue(WorkspaceDiffActionExecuter.PARAM_WS_2, ws2);
+                loadAction.setParameterValue(WorkspaceDiffActionExecuter.OLD_JOB, oldJob );
 
                 services.getActionService().executeAction(loadAction, jobNode.getNodeRef(), true, true);
             }
