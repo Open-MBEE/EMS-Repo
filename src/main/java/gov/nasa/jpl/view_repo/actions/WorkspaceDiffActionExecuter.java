@@ -81,7 +81,7 @@ public class WorkspaceDiffActionExecuter extends ActionExecuterAbstractBase {
 
         final EmsScriptNode jsonNode = new EmsScriptNode(actionedUponNodeRef, services, response);
 
-        final boolean glom = true;
+        final boolean glom = MmsDiffGet.glom;
         
         if (logger.isDebugEnabled()) logger.debug( "started execution of diff for " + WorkspaceNode.getWorkspaceName(ws1) + " and "+ WorkspaceNode.getWorkspaceName(ws2));
         clearCache();
@@ -126,23 +126,6 @@ public class WorkspaceDiffActionExecuter extends ActionExecuterAbstractBase {
                 
     }
     
-    protected JSONObject diffJsonFromJobNode( EmsScriptNode jobNode ) {
-        ContentReader reader = services.getContentService().getReader(jobNode.getNodeRef(), 
-                                                                      ContentModel.PROP_CONTENT);
-        
-        if (reader != null) {
-            try {
-                JSONObject diffResults = new JSONObject(reader.getContentString());
-                return diffResults;
-            } catch (ContentIOException e) {
-                e.printStackTrace();
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-        }
-        return null;
-    }
-
     @Override
     protected void
             addParameterDefinitions( List< ParameterDefinition > paramList ) {

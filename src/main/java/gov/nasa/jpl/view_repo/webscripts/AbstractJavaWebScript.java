@@ -620,7 +620,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
     public static final String NO_WORKSPACE_ID = "master"; // default is master if unspecified
     public static final String NO_PROJECT_ID = "no_project";
     public static final String NO_SITE_ID = "no_site";
-    public static final String NO_TIMESTAMP = "latest";
+    public static final String LATEST_NO_TIMESTAMP = "latest";
 
     public String getSiteName( WebScriptRequest req ) {
         return getSiteName( req, false );
@@ -752,7 +752,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         String key = isTs1 ? TIMESTAMP1 : TIMESTAMP2;
         String timestamp = req.getServiceMatch().getTemplateVars().get(key);
         if ( timestamp == null || timestamp.length() <= 0 ) {
-            timestamp = NO_TIMESTAMP;
+            timestamp = LATEST_NO_TIMESTAMP;
         }
         return timestamp;
     }
