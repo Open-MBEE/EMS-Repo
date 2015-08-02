@@ -1302,7 +1302,7 @@ public class ModelPost extends AbstractJavaWebScript {
 
             // Replace the property in the JSON with the sysmlids
             // before ingesting:
-            JSONArray jsonArry = new JSONArray(nodeNames);
+            JSONArray jsonArry = new JSONArray(Utils.toArrayOfType( nodeNames, String.class ));
             jsonToCheck.put(jsonKey, jsonArry);
         }
         // The property is not multi-valued, so just have one value to process:

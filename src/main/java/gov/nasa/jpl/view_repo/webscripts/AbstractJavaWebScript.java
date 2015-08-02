@@ -1455,7 +1455,8 @@ log(Level.INFO, "expressions: " + expressions);
         if ( !Utils.isNullOrEmpty( expressions ) ) {
             for ( Entry< EmsScriptNode, Expression<?> > e : expressions.entrySet() ) {
                 if ( e != null && e.getKey() != null && e.getValue() != null ) {
-                    results.put( e.getKey(), e.getValue().evaluate( true ) );
+                    Object resultVal = e.getValue().evaluate( true );
+                    results.put( e.getKey(), resultVal );
                 }
             }
         }

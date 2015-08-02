@@ -252,8 +252,10 @@ public class Evaluate implements Viewable< EmsScriptNode > {
     @Override
     public Collection< EmsScriptNode > getDisplayedElements() {
         if ( interpretation != null ) {
-            return Utils.asList( interpretation.getDisplayedElements(),
-                                 EmsScriptNode.class );
+            Collection< ? > elements = interpretation.getDisplayedElements();
+            if ( elements != null ) {
+                return Utils.asList( elements, EmsScriptNode.class );
+            }
         }
         return Utils.getEmptyList();
     }
