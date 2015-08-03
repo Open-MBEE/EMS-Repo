@@ -144,7 +144,7 @@
         }
     },
     {
-        "id": "expose_29758",
+        "sysmlid": "expose_29758",
         "name": "expose relationship",
         "documentation": "",
         "owner": "edit_expression_viewpoint",

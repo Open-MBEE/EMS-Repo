@@ -1429,9 +1429,9 @@ log(Level.INFO, "element (" + element + ") vs. constraint (" + constraintNode + 
     public static Map<Object, Object> evaluate( Set< EmsScriptNode > elements, WorkspaceNode ws ) {
         log(Level.INFO, "Will attempt to evaluate expressions where found!");
         Map< EmsScriptNode, Collection< Constraint > > constraints = getAeConstraints( elements, ws );
-log(Level.INFO, "constraints: " + constraints);
+//log(Level.INFO, "constraints: " + constraints);
         Map< EmsScriptNode, Expression<?> > expressions = getAeExpressions( elements );
-log(Level.INFO, "expressions: " + expressions);
+//log(Level.INFO, "expressions: " + expressions);
     
         Map< Object, Object > results = new LinkedHashMap< Object, Object >();
         if ( !Utils.isNullOrEmpty( constraints ) ) {

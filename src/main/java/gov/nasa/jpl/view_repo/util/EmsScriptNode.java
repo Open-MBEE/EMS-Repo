@@ -35,6 +35,8 @@ import gov.nasa.jpl.mbee.util.ClassUtils;
 import gov.nasa.jpl.mbee.util.CompareUtils;
 import gov.nasa.jpl.mbee.util.Debug;
 import gov.nasa.jpl.mbee.util.Diff;
+import gov.nasa.jpl.mbee.util.HasId;
+import gov.nasa.jpl.mbee.util.HasName;
 import gov.nasa.jpl.mbee.util.Pair;
 import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.mbee.util.Utils;
@@ -106,7 +108,9 @@ import org.springframework.extensions.webscripts.Status;
  */
 public class EmsScriptNode extends ScriptNode implements
                                              Comparator< EmsScriptNode >,
-                                             Comparable< EmsScriptNode > {
+                                             Comparable< EmsScriptNode >,
+                                             HasName<String>,
+                                             HasId<String> {
     private static final long serialVersionUID = 9132455162871185541L;
     
     public static final String ADMIN_USER_NAME = "admin";

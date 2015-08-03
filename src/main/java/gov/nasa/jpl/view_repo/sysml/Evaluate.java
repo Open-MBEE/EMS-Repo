@@ -204,7 +204,11 @@ public class Evaluate implements Viewable< EmsScriptNode > {
      */
     public Object evaluate( String expression ) {
         try {
-            JSONObject json = ModelPost.kToJson( expression );
+            // Generate json for the k expression, specifying expression
+            // element's sysmlid so that we overwrite the one from the previous
+            // call and not pollute as much.
+           JSONObject json = ModelPost.kToJson( expression, "temp_Evaluate_evaluate_expression" );
+            
             Set< EmsScriptNode > elements = 
                     ModelLoadActionExecuter.loadJson( json, this.modelContext,
                                                       this.serviceContext );
@@ -214,6 +218,7 @@ public class Evaluate implements Viewable< EmsScriptNode > {
                 if ( elements.size() > 1 ) {
                     logger.warn( "Expression \"" + expression + "\" generated more than one element!" );
                 }
+                // Assuming that the first element is the expression.
                 EmsScriptNode exprNode = elements.iterator().next();
                 if ( exprNode == null ) {
                     logger.warn( "Expression \"" + expression + "\" load returned a null element!" );
