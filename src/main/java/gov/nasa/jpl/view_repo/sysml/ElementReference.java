@@ -89,7 +89,9 @@ public class ElementReference implements Viewable<EmsScriptNode> {
         
 	    //System.out.println("##### DUDE #######  init( EmsScriptNode " + element + ",  " + attribute + " )  ###############");
 	    Pair< Boolean, Seen< EmsScriptNode > > p = Utils.seen( element, true, seen );
-	    if ( element.getTypeName().equals("ElementValue") && !p.first ) {
+	    String typeName;
+	    if ( element != null && ((typeName = element.getTypeName()) != null) &&
+	         typeName.equals("ElementValue") && !p.first ) {
 	        seen = p.second;
 	        NodeRef ref = (NodeRef)element.getNodeRefProperty( Acm.ACM_ELEMENT_VALUE_ELEMENT, null, element.getWorkspace() );
 	        if ( NodeUtil.exists( ref ) ) {
