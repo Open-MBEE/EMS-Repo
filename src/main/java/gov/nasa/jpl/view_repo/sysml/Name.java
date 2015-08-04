@@ -31,10 +31,11 @@ public class Name extends ElementReference implements sysml.view.Name<EmsScriptN
 //	    super( named, ElementReference.Attribute.NAME );
 //	}
 
-    public Name( String id ) {
-        super( id, ElementReference.Attribute.NAME );
-    }
-//
+//    public Name( String id ) {
+//        super( id, ElementReference.Attribute.NAME );
+//    }
+
+    
 //    public Name( Object object ) {
 //        super( object, ElementReference.Attribute.NAME );
 //    }
@@ -42,6 +43,11 @@ public class Name extends ElementReference implements sysml.view.Name<EmsScriptN
     @Override
     public boolean prefer( List< Class > t1, List< Class > t2 ) {
         return preferences.prefer( t1, t2 );
+    }
+
+    @Override
+    public int rank( List< Class > t ) {
+        return preferences.rank( t );
     }
 
 
