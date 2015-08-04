@@ -528,9 +528,10 @@ public class FullDocPost extends AbstractJavaWebScript {
                 	src = src.toLowerCase();
                 	String embedHostname = String.format("%s://%s", url.getProtocol(), url.getHost());
                 	String alfrescoContext = "workspace/SpacesStore/";	//this.services.getSysAdminParams().getAlfrescoContext();
+                    String versionStore = "versionStore/version2Store/";
 
                 	// is image local or remote resource?
-                	if(embedHostname.compareToIgnoreCase(hostname)==0 || src.startsWith("/alfresco/") || src.contains(alfrescoContext.toLowerCase())){
+                	if(embedHostname.compareToIgnoreCase(hostname)==0 || src.startsWith("/alfresco/") || src.contains(alfrescoContext.toLowerCase()) || src.contains(versionStore.toLowerCase())){
                 		//local server image > generate image tags
                 		String filePath = url.getFile();
                 		if(filePath == null || filePath.isEmpty()) continue;
@@ -541,6 +542,11 @@ public class FullDocPost extends AbstractJavaWebScript {
                 			nodeId = filePath.substring(filePath.indexOf(alfrescoContext) + alfrescoContext.length());
                 			nodeId = nodeId.substring(0, nodeId.indexOf("/"));
                 		}
+                        if(filePath.contains(versionStore)){
+                            //filePath = "alfresco/d/d/" + filePath.substring(filePath.indexOf(alfrescoContext));
+                            nodeId = filePath.substring(filePath.indexOf(versionStore) + versionStore.length());
+                            nodeId = nodeId.substring(0, nodeId.indexOf("/"));
+                        }
                 		if(nodeId == null || nodeId.isEmpty()) continue;
 
                 		String filename = filePath.substring(filePath.lastIndexOf("/") + 1);
