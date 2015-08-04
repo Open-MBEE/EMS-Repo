@@ -1424,12 +1424,12 @@ public class EmsScriptNode extends ScriptNode implements
     
     public EmsScriptNode getOwningParent( Date dateTime, WorkspaceNode ws,
                                           boolean skipNodeRefCheck ) {
-        return getOwningParent(dateTime, ws, skipNodeRefCheck, false);
+        return getOwningParent(dateTime, ws, skipNodeRefCheck, true);
     }
     
     public EmsScriptNode getValueSpecOwningParent( Date dateTime, WorkspaceNode ws,
                                                    boolean skipNodeRefCheck ) {
-        return getValueSpecOwningParent(dateTime, ws, skipNodeRefCheck, false);
+        return getValueSpecOwningParent(dateTime, ws, skipNodeRefCheck, true);
     }
     
     public boolean isAVersion() {
