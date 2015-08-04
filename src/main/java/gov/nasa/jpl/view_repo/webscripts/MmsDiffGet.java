@@ -236,37 +236,82 @@ public class MmsDiffGet extends AbstractJavaWebScript {
         return results;
     }
     
+    public static JSONObject performDiff( WorkspaceNode w1, WorkspaceNode w2,
+                                          Date date1, Date date2,
+                                          StringBuffer aResponse,
+                                          Status aResponseStatus ) {
+        WorkspaceDiff workspaceDiff = null;
+            //String foundTimeStamp2 = (String) oldJob.getProperty( "ems:timestamp2" );
+            //Date date2 = TimeUtils.dateFromTimestamp( foundTimeStamp2 );
+            workspaceDiff =
+                    new WorkspaceDiff(w1, w2, date1, date2, aResponse, aResponseStatus);
+        
+        JSONObject diffJson = null;
+        if ( workspaceDiff != null ) {
+            try {
+                workspaceDiff.forceJsonCacheUpdate = false;
+                diffJson = workspaceDiff.toJSONObject( date1, date2, false );
+                if (!Utils.isNullOrEmpty(aResponse.toString())) diffJson.put("message", aResponse.toString());
+                //results.put("res", NodeUtil.jsonToString( diffJson, 4 ));
+            } catch (JSONException e) {
+                e.printStackTrace();
+                diffJson = null;
+            }
+        }
+        return diffJson;
+    }
+    
+
+    public JSONObject performDiffGlom(Map<String, Object> results) {
+        
+        EmsScriptNode oldJob = getDiffJob();
+        JSONObject oldDiffJson = diffJsonFromJobNode( oldJob );
+        
+        boolean isLatest1 = timestamp1.equals( LATEST_NO_TIMESTAMP ); 
+        boolean isLatest2 = timestamp2.equals( LATEST_NO_TIMESTAMP );
+
+        // HERE!!  Diff each workspace since last diffed and then what?!!!
+
+        JSONObject diff1Json = null;
+        if ( isLatest1 ) {
+            String foundTimeStamp1 = (String) oldJob.getProperty( "ems:timestamp1" );
+            Date date = TimeUtils.dateFromTimestamp( foundTimeStamp1 );
+            diff1Json = performDiff( ws1, ws1, date, null, getResponse(),
+                                     getResponseStatus() );
+        }
+        JSONObject diff2Json = null;
+        if ( isLatest2 ) {
+            String foundTimeStamp2 = (String) oldJob.getProperty( "ems:timestamp2" );
+            Date date = TimeUtils.dateFromTimestamp( foundTimeStamp2 );
+            diff2Json = performDiff( ws2, ws2, date, null, getResponse(),
+                                     getResponseStatus() );
+        }
+        
+        // Now diff the two diffs
+    }
+    
     public void performDiff(Map<String, Object> results) {
        
-        AuthenticationUtil.setRunAsUser( "admin" );
+        boolean switchUser = !originalUser.equals( "admin" );
+        
+        if ( switchUser ) AuthenticationUtil.setRunAsUser( "admin" );
         // to make sure no permission issues, run as admin
+       
+        JSONObject top = null;
         
         if ( glom && diffStatus == DIFF_OUTDATED ) {
-            EmsScriptNode oldJob = getDiffJob();
-            JSONObject oldDiffJson = diffJsonFromJobNode( oldJob );
-            String foundTimeStamp1 = (String) oldJob.getProperty( "ems:timestamp1" );
-            String foundTimeStamp2 = (String) oldJob.getProperty( "ems:timestamp2" );
-            Date date1 = TimeUtils.dateFromTimestamp( foundTimeStamp1 );
-            Date date2 = TimeUtils.dateFromTimestamp( foundTimeStamp2 );
-            // HERE!!!  WTF?!  Diff each workspace since last diffed and then what?!!!
-            workspaceDiff1 = new WorkspaceDiff(ws1, ws2, date1, date2, response, responseStatus);
-            workspaceDiff = new WorkspaceDiff(ws1, ws2, date1, date2, response, responseStatus);
-            
+            top = performDiffGlom( results );
+        } else {
+            top = performDiff( ws1, ws2, dateTime1, dateTime2, response,
+                               responseStatus );
         }
-        
-        workspaceDiff = new WorkspaceDiff(ws1, ws2, dateTime1, dateTime2, response, responseStatus);
+        if ( top == null ) {
+            results.put( "res", createResponseJson() );
+        } else {
+            results.put( "res", NodeUtil.jsonToString( top, 4 ) );
+        }
 
-        try {
-            workspaceDiff.forceJsonCacheUpdate = false;
-            JSONObject top = workspaceDiff.toJSONObject( dateTime1, dateTime2, false );
-            if (!Utils.isNullOrEmpty(response.toString())) top.put("message", response.toString());
-            results.put("res", NodeUtil.jsonToString( top, 4 ));
-        } catch (JSONException e) {
-            e.printStackTrace();
-            results.put("res", createResponseJson());
-        }
-        
-        AuthenticationUtil.setRunAsUser( originalUser );
+        if ( switchUser ) AuthenticationUtil.setRunAsUser( originalUser );
         
     }
     
@@ -285,6 +330,56 @@ public class MmsDiffGet extends AbstractJavaWebScript {
             }
         }
         return null;
+    }
+    
+     
+    /**
+     * Create a diff of two diffs, irrespective of their workspaces or
+     * timepoints. workspace1 in the resulting diff will be the objects from
+     * workspace2 of the first diff. workspace2 in the resulting diff will be
+     * the changes that applied to workspace2 of the first diff will result in
+     * workspace2 of the second.
+     * <p>
+     * If there are any changes to the same element in both diffs, it is a
+     * conflict unless it is exactly the same.
+     * 
+     * <table style="width:100%", border="1">
+     * <tr>
+     * <th></th>
+     * <th>add(x2)</th>
+     * <th>delete(x)</th>
+     * <th>update(x2)</th>
+     * </tr>
+     * <tr>
+     * <th>add(x1)</th>
+     * <td>update(x2 - x1)</td>
+     * <td>delete(x)</td>
+     * <td>update(x2 - x1)</td>
+     * </tr>
+     * <tr>
+     * <th>delete(x)</th>
+     * <td>add(x2)</td>
+     * <td></td>
+     * <td>update(x2 - x1)</td>
+     * </tr>
+     * <tr>
+     * <th>update(x1)</th>
+     * <td>update(x2) [potential conflict]</td>
+     * <td>delete(x)</td>
+     * <td>update(x1 &lt;- x2)</td>
+     * </tr>
+     * </table>
+     * 
+     * 
+     * 
+     * @param diff1
+     * @param diff2
+     * @return
+     */
+    public static JSONObject diff( JSONObject diff1, JSONObject diff2 ) {
+        JSONObject diffdiff = makeEmptyDiffJson();
+        
+        return diffdiff;
     }
 
     /**
@@ -687,8 +782,8 @@ public class MmsDiffGet extends AbstractJavaWebScript {
                         if (timestamp1.equals( LATEST_NO_TIMESTAMP ) || 
                             timestamp2.equals( LATEST_NO_TIMESTAMP )) {
                             
-                           // Diff is not outdated:
                             if ( !diffIsOutDated( oldJob, latestCommitTime1, latestCommitTime2 ) ) {
+                                // Diff is not outdated:
                                 errorMsg = 
                                         String.format("Found up-to-date background diff: job[%s]",
                                                       jobName);
