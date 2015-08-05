@@ -37,6 +37,7 @@ import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.log4j.*;
 
 import javax.servlet.http.HttpServletResponse;
 import org.alfresco.repo.model.Repository;
@@ -107,10 +108,10 @@ public class ViewModelPost extends ModelPost {
 //            Set< EmsScriptNode > elements =
             createOrUpdateModel(req, status);
         } catch (JSONException e) {
-            log(LogLevel.ERROR, "JSON malformed\n", HttpServletResponse.SC_BAD_REQUEST);
+            log(Level.ERROR, "JSON malformed\n", HttpServletResponse.SC_BAD_REQUEST);
             e.printStackTrace();
         } catch (Exception e) {
-            log(LogLevel.ERROR, "Internal error stack trace:\n" + e.getLocalizedMessage() + "\n", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            log(Level.ERROR, "Internal error stack trace:\n" + e.getLocalizedMessage() + "\n", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             e.printStackTrace();
         }
 
@@ -182,7 +183,7 @@ public class ViewModelPost extends ModelPost {
                     }
 
                     if (!parentFound) {
-                        log(LogLevel.WARNING, "Could not find parent for element with id: " + id, HttpServletResponse.SC_BAD_REQUEST);
+                        log(Level.WARN, "Could not find parent for element with id: " + id, HttpServletResponse.SC_BAD_REQUEST);
                     }
                 }
             }
@@ -223,7 +224,7 @@ public class ViewModelPost extends ModelPost {
                     }
 
                     if (!parentFound) {
-                        log(LogLevel.WARNING, "Could not find parent for element with id: " + id, HttpServletResponse.SC_BAD_REQUEST);
+                        log(Level.WARN, "Could not find parent for element with id: " + id, HttpServletResponse.SC_BAD_REQUEST);
                     }
                 }
             }

@@ -69,8 +69,6 @@ import java.util.TreeSet;
 import javax.servlet.http.HttpServletResponse;
 
 
-import k.frontend.Frontend;
-
 //import javax.transaction.UserTransaction;
 import org.apache.log4j.*;
 import org.alfresco.repo.model.Repository;
