@@ -57,6 +57,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Random;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.regex.Matcher;
@@ -568,30 +569,14 @@ public class EmsScriptNode extends ScriptNode implements
 
     protected void updateBogusProperty( String type ) {
         // Make sure the aspect change makes it into the version history by updating a bogus property.
-//        if ( !hasAspect( Acm.ACM_OWNS_ATTRIBUTE ) ) {
-//            System.out.println( "updateBogusProperty(" + type + ") quittin cuz no OwnsAttribute aspect." );
-//            return;
-//        }
         String bogusPropName = null;
         if ( Acm.ASPECTS_WITH_BOGUS_PROPERTY.containsKey( type ) ) {
             bogusPropName = Acm.ASPECTS_WITH_BOGUS_PROPERTY.get( type );
         }
         if ( bogusPropName == null ) return;
-        try {
-            // We just need to change the bogus integer property, so find
-            // and increment it.
-            Integer i = 0;
-            try {
-                i = (Integer)getProperty( bogusPropName );
-            } catch ( Throwable e ) {
-                // suppress & ignore
-            }
-            if ( i == null ) i = 0; else i = (i + 1)%1000;
-            setProperty( Acm.ASPECTS_WITH_BOGUS_PROPERTY.get( type ),
-                         i );
-        } catch ( Throwable e ) {
-            // suppress & ignore
-        }
+        Random rand = new Random();
+        int randNum = rand.nextInt(10000000);
+        setProperty( Acm.ASPECTS_WITH_BOGUS_PROPERTY.get( type ), randNum );
     }
 
     /**
@@ -1439,12 +1424,12 @@ public class EmsScriptNode extends ScriptNode implements
     
     public EmsScriptNode getOwningParent( Date dateTime, WorkspaceNode ws,
                                           boolean skipNodeRefCheck ) {
-        return getOwningParent(dateTime, ws, skipNodeRefCheck, false);
+        return getOwningParent(dateTime, ws, skipNodeRefCheck, true);
     }
     
     public EmsScriptNode getValueSpecOwningParent( Date dateTime, WorkspaceNode ws,
                                                    boolean skipNodeRefCheck ) {
-        return getValueSpecOwningParent(dateTime, ws, skipNodeRefCheck, false);
+        return getValueSpecOwningParent(dateTime, ws, skipNodeRefCheck, true);
     }
     
     public boolean isAVersion() {
@@ -3418,7 +3403,6 @@ public class EmsScriptNode extends ScriptNode implements
         if (projectNode != null) return projectNode;
         
         EmsScriptNode parent = this;
-        EmsScriptNode sites = null;
         EmsScriptNode projectPkg = null;
         EmsScriptNode models = null;
         EmsScriptNode oldparent = null;
@@ -3429,7 +3413,7 @@ public class EmsScriptNode extends ScriptNode implements
         }
         Set<EmsScriptNode> seen = new HashSet<EmsScriptNode>();
         while ( parent != null && parent.getSysmlId() != null &&
-                !seen.contains( parent ) && projectPkg != null) {
+                !seen.contains( parent )) {
             if ( models == null && parent.getName().equals( "Models" ) ) {
                 models = parent;
                 projectPkg = oldparent;
@@ -3441,12 +3425,8 @@ public class EmsScriptNode extends ScriptNode implements
                     projectNode = projectPkg;
                 } else {
                     projectNode = projectPkg.getReifiedNode(ws);
-                    if (projectNode != null) {
-                        if ( Debug.isOn() ) Debug.outln( getName()
-                                                     + ".getProjectNode() = "
-                                                     + projectNode.getName() );
-                    }
                 }
+                break;
             }
             seen.add(parent);
             oldparent = parent;

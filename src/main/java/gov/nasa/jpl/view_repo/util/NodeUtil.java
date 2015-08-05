@@ -275,6 +275,7 @@ public class NodeUtil {
             GenericComparator.instance();
 
     public static ServiceRegistry services = null;
+    public static Repository repository = null;
 
     // needed for Lucene search
     public static StoreRef SEARCH_STORE = null;
@@ -905,18 +906,22 @@ public class NodeUtil {
         return SEARCH_STORE;
     }
 
-    public static ApplicationContext getApplicationContext() {
-        String[] contextPath =
-                new String[] { "classpath:alfresco/application-context.xml" };
-        ApplicationContext applicationContext =
-                ApplicationContextHelper.getApplicationContext( contextPath );
-        return applicationContext;
-    }
+//    public static ApplicationContext getApplicationContext() {
+//        String[] contextPath =
+//                new String[] { "classpath:alfresco/application-context.xml" };
+//        ApplicationContext applicationContext =
+//                ApplicationContextHelper.getApplicationContext( contextPath );
+//        return applicationContext;
+//    }
     
     public static Repository getRepository() {
-        return (Repository)getApplicationContext().getBean( "repositoryHelper" );
+        return repository;
+        //return (Repository)getApplicationContext().getBean( "repositoryHelper" );
     }
-
+    public static void setRepository( Repository repositoryHelper ) {
+        NodeUtil.repository = repositoryHelper;
+    }
+        
 
     public static ServiceRegistry getServices() {
         return getServiceRegistry();
@@ -926,10 +931,11 @@ public class NodeUtil {
     }
 
     public static ServiceRegistry getServiceRegistry() {
-        if ( services == null ) {
-            services = (ServiceRegistry)getApplicationContext().getBean( "ServiceRegistry" );
-        }
         return services;
+//        if ( services == null ) {
+//            services = (ServiceRegistry)getApplicationContext().getBean( "ServiceRegistry" );
+//        }
+//        return services;
     }
 
     public static Collection<EmsScriptNode> luceneSearchElements(String queryPattern ) {
@@ -3060,7 +3066,7 @@ public class NodeUtil {
 
         EmsScriptNode esn = new EmsScriptNode(ref, services);
 
-        logger.warn( "getting history for " + esn.getSysmlId() + " - " + esn.getSysmlName() + " at time " + dateTime );
+        //logger.warn( "getting history for " + esn.getSysmlId() + " - " + esn.getSysmlName() + " at time " + dateTime );
         
         // Check cache for version history
         //Collection< Version > history = versionHistoryCache.get( ref );
@@ -3081,7 +3087,7 @@ public class NodeUtil {
             if ( doVersionHistoryCaching ) versionHistoryCache.put( ref, history );
         }
 
-        logger.warn( "got history for " + esn.getSysmlId() + " - " + esn.getSysmlName() + " at time " + dateTime );
+        //logger.warn( "got history for " + esn.getSysmlId() + " - " + esn.getSysmlName() + " at time " + dateTime );
         
         if ( history == null ) {
             // Versioning doesn't make versions until the first save...
@@ -3157,10 +3163,10 @@ public class NodeUtil {
             String versionLabel = version.getVersionLabel();
             EmsScriptNode emsNode = new EmsScriptNode( ref, getServices() );
             ScriptVersion scriptVersion = emsNode.getVersion( versionLabel );
-            if ( Debug.isOn() ) Debug.outln( "scriptVersion " + scriptVersion );
-            ScriptNode node = scriptVersion.getNode();
-            if ( Debug.isOn() ) Debug.outln( "script node " + node );
-            // can't get script node properties--generates exception
+            if (Debug.isOn())  Debug.outln( "scriptVersion " + scriptVersion );
+            ScriptNode scriptVersionNode = scriptVersion.getNode();
+            if (Debug.isOn())  Debug.outln( "script node " + scriptVersionNode );
+            //can't get script node properties--generates exception
             //if (Debug.isOn())  Debug.outln( "script node properties " + node.getProperties() );
             NodeRef scriptVersionNodeRef = scriptVersion.getNodeRef();
             if ( Debug.isOn() ) Debug.outln( "ScriptVersion node ref "

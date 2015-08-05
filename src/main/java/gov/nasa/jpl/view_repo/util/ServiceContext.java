@@ -10,7 +10,7 @@ public class ServiceContext {
     public int depth = 1;
     public boolean evaluate = false;
     public boolean fix = false;
-    //public Repository repository = null;
+    public Repository repository = null;
     public ServiceRegistry services = null;
     public StringBuffer response = null;
     public Status status = null;
@@ -18,7 +18,7 @@ public class ServiceContext {
     public ServiceContext() {
         super();
         this.services = NodeUtil.getServices();
-        //this.repository = NodeUtil.getRepository();
+        this.repository = NodeUtil.getRepository();
     }
 
     public ServiceContext( boolean recursive, boolean connected, int depth,
@@ -31,8 +31,8 @@ public class ServiceContext {
         this.depth = depth;
         this.evaluate = evaluate;
         this.fix = fix;
-        //if ( repository == null ) this.repository = NodeUtil.getRepository();
-        //else this.repository = repository;
+        if ( repository == null ) this.repository = NodeUtil.getRepository();
+        else this.repository = repository;
         if ( services == null ) this.services = NodeUtil.getServices();
         else this.services = services;
         this.response = response;

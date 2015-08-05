@@ -123,8 +123,8 @@ public class JavaQuery extends AbstractModuleComponent {
         if ( instance == null ) instance = this;
     }
     
-    public void setServices( ServiceRegistry services ) {
-        this.services = services;
+    public static void setServices( ServiceRegistry services ) {
+        JavaQuery.services = services;
     }
 
     public void setContentService( ContentService contentService ) {
