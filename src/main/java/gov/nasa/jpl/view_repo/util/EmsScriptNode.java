@@ -3403,7 +3403,6 @@ public class EmsScriptNode extends ScriptNode implements
         if (projectNode != null) return projectNode;
         
         EmsScriptNode parent = this;
-        EmsScriptNode sites = null;
         EmsScriptNode projectPkg = null;
         EmsScriptNode models = null;
         EmsScriptNode oldparent = null;
@@ -3414,7 +3413,7 @@ public class EmsScriptNode extends ScriptNode implements
         }
         Set<EmsScriptNode> seen = new HashSet<EmsScriptNode>();
         while ( parent != null && parent.getSysmlId() != null &&
-                !seen.contains( parent ) && projectPkg != null) {
+                !seen.contains( parent )) {
             if ( models == null && parent.getName().equals( "Models" ) ) {
                 models = parent;
                 projectPkg = oldparent;
@@ -3426,12 +3425,8 @@ public class EmsScriptNode extends ScriptNode implements
                     projectNode = projectPkg;
                 } else {
                     projectNode = projectPkg.getReifiedNode(ws);
-                    if (projectNode != null) {
-                        if ( Debug.isOn() ) Debug.outln( getName()
-                                                     + ".getProjectNode() = "
-                                                     + projectNode.getName() );
-                    }
                 }
+                break;
             }
             seen.add(parent);
             oldparent = parent;
