@@ -368,8 +368,92 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
     @Override
     public Collection< EmsScriptNode > getElement( Object context,
                                                    Object specifier ) {
-        // TODO Auto-generated method stub
-        return null;
+        return getElement( context, specifier, null );
+    }
+    public Collection< EmsScriptNode > getElement( Object context,
+                                                   Object specifier,
+                                                   Date dateTime ) {
+        // HERE!!!  TODO -- call this from other getElementWith????()
+        StringBuffer response = new StringBuffer();
+        Status status = new Status();
+        // TODO -- need to take into account the context!
+//        Map< String, EmsScriptNode > elements =
+//                NodeUtil.searchForElements( specifier, true, null, dateTime,
+//                                            services, response, status );
+//      if ( elements != null ) return elements.values();
+//      return Collections.emptyList();
+        
+        boolean ignoreWorkspace = false;
+        WorkspaceNode workspace = null;
+        
+        // Convert context from NodeRef to EmsScriptNode or WorkspaceNode
+        if ( context instanceof NodeRef ) {
+            EmsScriptNode ctxt = new EmsScriptNode( (NodeRef)context, getServices(),
+                                                    response, status );
+            if ( ctxt.hasAspect( "Workspace" ) ) {
+                context = new WorkspaceNode( (NodeRef)context, getServices(),
+                                             response, status );
+            } else {
+                context = ctxt;
+            }
+        }
+        
+        // Set workspace from context.
+        if ( context instanceof WorkspaceNode ) {
+            workspace = (WorkspaceNode)context;
+        } else if ( context instanceof EmsScriptNode ) {
+            workspace = ( (EmsScriptNode)context ).getWorkspace();
+        } else ignoreWorkspace = true;
+        
+        // Treat the context as the set to search (or to call getElement() on each).
+        Object[] arr = null;
+        if ( context instanceof Collection ) {
+            arr = ( (Collection<?>)context ).toArray();
+        } else if ( context != null && context.getClass().isArray() ) {
+            arr = (Object[])context;
+        }
+        // HERE!!!  TODO!!!
+        if ( arr != null && arr.length > 0 ) {
+            if ( arr[0] instanceof NodeRef ) {
+                
+            } else if ( arr[0] instanceof EmsScriptNode ) {
+                
+            }
+        }
+        
+        // Try to get elements with specifier as name.
+        ArrayList< NodeRef > refs =
+            NodeUtil.findNodeRefsBySysmlName( "" + specifier, ignoreWorkspace,
+                                              workspace, dateTime,
+                                              getServices(), false, false );
+        if ( Utils.isNullOrEmpty( refs ) ) {
+            // Try to get elements with specifier as id.
+            refs =
+                NodeUtil.findNodeRefsById( "" + specifier, ignoreWorkspace,
+                                           workspace, dateTime, getServices(),
+                                           false, false );
+        }
+        
+        // HERE!!! (Look for HERE above.)
+        // What other kinds of specifier should we look for? property name? ...?
+        
+        
+        if ( Utils.isNullOrEmpty( refs ) ) return Collections.emptyList();
+        if ( refs.size() > 1 && context != null ) {//instanceof EmsScriptNode && !(context instanceof WorkspaceNode) ) {
+            ArrayList< EmsScriptNode > childNodes = new ArrayList< EmsScriptNode >();
+            for ( NodeRef ref : refs ) {
+                EmsScriptNode node = new EmsScriptNode( ref, getServices(), response, status );
+                EmsScriptNode owner = node.getOwningParent( dateTime, workspace, false );
+                if ( context.equals( owner )
+                     || ( context instanceof WorkspaceNode && context.equals( node.getWorkspace() ) ) ) {
+                    childNodes.add( node );
+                }
+            }
+            if ( childNodes.size() > 0 ) return childNodes;
+        }
+        List< EmsScriptNode > list = EmsScriptNode.toEmsScriptNodeList( refs, getServices(), response, status );
+        //System.out.println("getElementWithName(" + context + ", " + specifier + ", " + dateTime + ") = " + list);
+        return list;
     }
 
     @Override
@@ -395,6 +479,7 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
                                                            String specifier ) {
         return getElementWithName(context, specifier, null);
     }
+    
     public Collection< EmsScriptNode > getElementWithName( Object context,
                                                            String specifier,
                                                            Date dateTime ) {
