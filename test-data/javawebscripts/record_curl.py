@@ -72,7 +72,7 @@ elif options.url == "BASE_URL_WS_NOBS":
 else:
     curl_base_url = options.url
 
-if options.data[0] == "{" and options.data[-1] == "}":
+if options.data and options.data[0] == "{" and options.data[-1] == "}":
     curl_data = "'" + options.data + "'"
 else:
     curl_data = options.data
