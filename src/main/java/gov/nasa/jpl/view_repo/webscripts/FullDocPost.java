@@ -537,21 +537,24 @@ public class FullDocPost extends AbstractJavaWebScript {
                 		if(filePath == null || filePath.isEmpty()) continue;
 
                 		String nodeId = null;
+                		String storeName = null;
                 		if(filePath.contains(alfrescoContext)){
                 			//filePath = "alfresco/d/d/" + filePath.substring(filePath.indexOf(alfrescoContext));
                 			nodeId = filePath.substring(filePath.indexOf(alfrescoContext) + alfrescoContext.length());
                 			nodeId = nodeId.substring(0, nodeId.indexOf("/"));
+                			storeName = "workspace://SpacesStore/";
                 		}
-                        if(filePath.contains(versionStore)){
-                            //filePath = "alfresco/d/d/" + filePath.substring(filePath.indexOf(alfrescoContext));
-                            nodeId = filePath.substring(filePath.indexOf(versionStore) + versionStore.length());
-                            nodeId = nodeId.substring(0, nodeId.indexOf("/"));
-                        }
+                    if(filePath.contains(versionStore)){
+                        //filePath = "alfresco/d/d/" + filePath.substring(filePath.indexOf(alfrescoContext));
+                        nodeId = filePath.substring(filePath.indexOf(versionStore) + versionStore.length());
+                        nodeId = nodeId.substring(0, nodeId.indexOf("/"));
+                        storeName = "versionStore://version2Store/";
+                    }
                 		if(nodeId == null || nodeId.isEmpty()) continue;
 
                 		String filename = filePath.substring(filePath.lastIndexOf("/") + 1);
                 		try{
-                			DBImage dbImage = retrieveEmbeddedImage(nodeId, filename, null, null);
+                			DBImage dbImage = retrieveEmbeddedImage(storeName, nodeId, filename, null, null);
 //	                		String inlineImageTag = buildInlineImageTag(nodeId, dbImage);
 //	                		image.before(inlineImageTag);
 //	                		image.remove();
@@ -697,8 +700,8 @@ public class FullDocPost extends AbstractJavaWebScript {
 		return Arrays.copyOf(list.toArray(), list.toArray().length, String[].class);
 	}
     
-    private DBImage retrieveEmbeddedImage(String nodeId, String imgName, WorkspaceNode workspace, Object timestamp){
-		NodeRef imgNodeRef = NodeUtil.getNodeRefFromNodeId(nodeId);
+    private DBImage retrieveEmbeddedImage(String storeName, String nodeId, String imgName, WorkspaceNode workspace, Object timestamp){
+		NodeRef imgNodeRef = NodeUtil.getNodeRefFromNodeId(storeName, nodeId);
 		if(imgNodeRef == null) return null;
 
 		String imgFilename = this.imageDirName + File.separator + imgName;
