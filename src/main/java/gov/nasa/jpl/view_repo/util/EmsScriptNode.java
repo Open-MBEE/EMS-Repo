@@ -5080,10 +5080,12 @@ public class EmsScriptNode extends ScriptNode implements
             QName a = queue.get(0);
             queue.remove( 0 );
             AspectDefinition aspect = ds.getAspect( a );
-            QName p = aspect.getParentName();
-            if ( p != null && !aspects.contains( p ) ) {
-                aspects.add( p );
-                queue.add( p );
+            if (aspect != null) {
+                QName p = aspect.getParentName();
+                if ( p != null && !aspects.contains( p ) ) {
+                    aspects.add( p );
+                    queue.add( p );
+                }
             }
         }
         return aspects;

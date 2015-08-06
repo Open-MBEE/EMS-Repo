@@ -312,6 +312,26 @@ public class CommitUtil {
 
 	    return null;
 	}
+	
+    public static String replaceTimeStampWithCommitTime(Date date,
+                                                        WorkspaceNode ws,
+                                                        ServiceRegistry services, 
+                                                        StringBuffer response) {
+        
+        EmsScriptNode lastCommit = date != null ? getLatestCommitAtTime( date, ws, services, response ) :
+                                                  getLastCommit(ws , services, response );
+        String timestamp = null;
+        
+        if (lastCommit != null) {
+            Date lastCommitTime = lastCommit.getCreationDate();
+            
+            if (lastCommitTime != null) {
+                timestamp = TimeUtils.toTimestamp(lastCommitTime);
+            }
+        }
+        
+        return timestamp;
+    }
 
 	/**
 	 * Gets all the commits in the specified time range from the startWorkspace to the 
