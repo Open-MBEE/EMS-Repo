@@ -94,12 +94,12 @@
     },
     {
         "qualifiedId": "/europa/123456/BLUCamTest/_17_0_2_4_f3a0363_1394146455624_407543_30441/s1_param",
-        "qualifiedName": "/europa/JW_TEST2/BLUCamTest/dont care2/",
+        "qualifiedName": "/europa/JW_TEST2/BLUCamTest/dont care2/s1_param",
         "sysmlid": "s1_param",
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
-        "name": "",
+        "name": "s1_param",
         "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
         "documentation": "",
         "specialization": {
@@ -109,12 +109,12 @@
     },
     {
         "qualifiedId": "/europa/123456/BLUCamTest/_17_0_2_4_f3a0363_1394146455624_407543_30441/vp_expression_2",
-        "qualifiedName": "/europa/JW_TEST2/BLUCamTest/dont care2/",
+        "qualifiedName": "/europa/JW_TEST2/BLUCamTest/dont care2/vp_expression_2",
         "sysmlid": "vp_expression_2",
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
-        "name": "",
+        "name": "vp_expression_2",
         "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
         "documentation": "",
         "specialization": {
@@ -243,12 +243,12 @@
     },
     {
         "qualifiedId": "/europa/123456/BLUCamTest/_17_0_2_4_f3a0363_1394146455624_407543_30441/_17_0_2_3_e610336_1394148233838_91795_29332/_17_0_2_3_e610336_1394148461465_93174_29599",
-        "qualifiedName": "/europa/JW_TEST2/BLUCamTest/dont care2/Context/",
+        "qualifiedName": "/europa/JW_TEST2/BLUCamTest/dont care2/Context/conform relationship",
         "sysmlid": "_17_0_2_3_e610336_1394148461465_93174_29599",
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
-        "name": "",
+        "name": "conform relationship",
         "owner": "_17_0_2_3_e610336_1394148233838_91795_29332",
         "documentation": "",
         "specialization": {
@@ -524,6 +524,20 @@
         "creator": "admin"
     },
     {
+        "qualifiedName": "/europa/JW_TEST2/",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "",
+        "owner": "123456",
+        "documentation": "",
+        "specialization": {
+            "source": "_17_0_2_3_e610336_1394148311476_17302_29388",
+            "target": "_17_0_2_4_f3a0363_1394142290412_487571_28478",
+            "type": "Expose"
+        }
+    },
+    {
         "qualifiedId": "/europa/123456/300/500",
         "qualifiedName": "/europa/JW_TEST2/300/500",
         "sysmlid": "500",
@@ -598,20 +612,6 @@
             }],
             "noSections": ["402"],
             "type": "Product"
-        }
-    },
-    {
-        "qualifiedName": "/europa/JW_TEST2/BLUCamTest/dont care2/",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "",
-        "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
-        "documentation": "",
-        "specialization": {
-            "source": "_17_0_2_3_e610336_1394148233838_91795_29332",
-            "target": "_17_0_2_4_f3a0363_1394140326296_809805_27600",
-            "type": "Expose"
         }
     },
     {
@@ -881,12 +881,12 @@
     },
     {
         "qualifiedId": "/europa/123456/BLUCamTest/_17_0_2_4_f3a0363_1394146455624_407543_30441/get_two_names_expression",
-        "qualifiedName": "/europa/JW_TEST2/BLUCamTest/dont care2/",
+        "qualifiedName": "/europa/JW_TEST2/BLUCamTest/dont care2/get_two_names_expression",
         "sysmlid": "get_two_names_expression",
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
-        "name": "",
+        "name": "get_two_names_expression",
         "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
         "documentation": "",
         "specialization": {
@@ -1177,6 +1177,20 @@
         "creator": "admin"
     },
     {
+        "qualifiedName": "/europa/JW_TEST2/BLUCamTest/dont care2/expose relationship",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "expose relationship",
+        "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
+        "documentation": "",
+        "specialization": {
+            "source": "_17_0_2_3_e610336_1394148233838_91795_29332",
+            "target": "_17_0_2_4_f3a0363_1394140326296_809805_27600",
+            "type": "Expose"
+        }
+    },
+    {
         "modifier": "admin",
         "qualifiedId": "/europa/123456/instanceSpecificationNull",
         "name": "instanceSpecificationNull",
@@ -1191,20 +1205,6 @@
         },
         "editable": true,
         "creator": "admin"
-    },
-    {
-        "qualifiedName": "/europa/JW_TEST2/",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "",
-        "owner": "123456",
-        "documentation": "",
-        "specialization": {
-            "source": "_17_0_2_3_e610336_1394148311476_17302_29388",
-            "target": "_17_0_2_4_f3a0363_1394142290412_487571_28478",
-            "type": "Expose"
-        }
     },
     {
         "qualifiedId": "/europa/123456/_17_0_2_3_e610336_1394148311476_17302_29388",
@@ -1458,12 +1458,12 @@
     },
     {
         "qualifiedId": "/europa/123456/BLUCamTest/_17_0_2_4_f3a0363_1394146455624_407543_30441/s2_param",
-        "qualifiedName": "/europa/JW_TEST2/BLUCamTest/dont care2/",
+        "qualifiedName": "/europa/JW_TEST2/BLUCamTest/dont care2/s2_param",
         "sysmlid": "s2_param",
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
-        "name": "",
+        "name": "s2_param",
         "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
         "documentation": "",
         "specialization": {

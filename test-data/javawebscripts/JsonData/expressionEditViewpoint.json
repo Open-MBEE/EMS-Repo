@@ -100,7 +100,7 @@
         "sysmlid": "op_name",
         "name": "Name",
         "documentation": "",
-        "owner": "123456",
+        "owner": "edit_expression_viewpoint",
         "specialization" : {
             "type": "Operation"
         }
@@ -136,7 +136,7 @@
         "sysmlid": "conform_29608",
         "name": "conform relationship",
         "documentation": "",
-        "owner": "_17_0_2_3_e610336_1394148311476_17302_29388",
+        "owner": "edit_expression_viewpoint",
         "specialization" : {
             "type": "Conform",
             "source": "_17_0_2_3_expression_view_29388",
