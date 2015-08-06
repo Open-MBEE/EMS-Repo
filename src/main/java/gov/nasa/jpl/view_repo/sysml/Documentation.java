@@ -14,4 +14,6 @@ public class Documentation extends ElementReference implements sysml.view.Docume
         super( element, ElementReference.Attribute.DOCUMENTATION );
     }
     
+    // TODO -- add other two constructors
+    
 }

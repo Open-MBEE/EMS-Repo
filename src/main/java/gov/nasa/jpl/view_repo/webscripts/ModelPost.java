@@ -1302,7 +1302,7 @@ public class ModelPost extends AbstractJavaWebScript {
 
             // Replace the property in the JSON with the sysmlids
             // before ingesting:
-            JSONArray jsonArry = new JSONArray(nodeNames);
+            JSONArray jsonArry = new JSONArray(Utils.toArrayOfType( nodeNames, String.class ));
             jsonToCheck.put(jsonKey, jsonArry);
         }
         // The property is not multi-valued, so just have one value to process:
@@ -2390,9 +2390,45 @@ public class ModelPost extends AbstractJavaWebScript {
     }
     
     public static JSONObject kToJson( String k ) {
+        return kToJson(k, null);
+    }
+
+    /**
+     * Add elements' sysmlids in given json. sysmlids are only added where they
+     * do not already exist. If there is more than one element, the prefix is
+     * appended with an underscore followed by a count index. For example, if
+     * there are three elements, and the prefix is "foo", then the sysmlids will
+     * be foo_0, foo_1, and foo_2. This can be useful for temporary generated
+     * elements so that they can overwrite themselves and reduce pollution.
+     * 
+     * @param json
+     * @param sysmlidPrefix
+     */
+    public static void addSysmlIdsToElementJson( JSONObject json, String sysmlidPrefix ) {
+        if ( json == null ) return;
+        if ( sysmlidPrefix == null ) sysmlidPrefix = "generated_sysmlid_";
+        JSONArray elemsJson = json.optJSONArray( "elements" );
+        if ( elemsJson != null ) {
+            for ( int i = 0; i < elemsJson.length(); ++i ) {
+                JSONObject elemJson = elemsJson.getJSONObject( i );
+                if ( elemJson != null && !elemJson.has( "sysmlid" ) ) {
+                    String id = sysmlidPrefix + (elemsJson.length() > 1 ? "_" + i : "" );
+                    elemJson.put( "sysmlid", id );
+                }
+            }
+        }
+    }
+    
+
+    
+    public static JSONObject kToJson( String k, String sysmlidPrefix ) {
         //JSONObject json = new JSONObject(KExpParser.parseExpression(k));
         JSONObject json = new JSONObject(Frontend.exp2Json2( k ));
 
+        if ( sysmlidPrefix != null ) {
+            addSysmlIdsToElementJson( json, sysmlidPrefix );
+        }
+        
         log(Level.DEBUG, "********************************************************************************");
         log(Level.DEBUG, k);
         if ( logger.isDebugEnabled() ) log(Level.DEBUG, NodeUtil.jsonToString( json, 4 ));
