@@ -23,6 +23,10 @@ public class Text implements Viewable< EmsScriptNode > {
     public Text( String text ) {
         this.text = text;
     }
+
+//    public Text( Object o ) {
+//        this.text = "" + o;
+//    }
     
     /* (non-Javadoc)
      * @see sysml.view.Viewable#toViewJson(java.util.Date)

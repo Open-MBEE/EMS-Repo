@@ -13,5 +13,7 @@ public class Value extends ElementReference implements sysml.view.Value<EmsScrip
     public Value(EmsScriptNode element ) {
         super( element, ElementReference.Attribute.VALUE );
     }
+    
+    // TODO -- add other two constructors
 
 }

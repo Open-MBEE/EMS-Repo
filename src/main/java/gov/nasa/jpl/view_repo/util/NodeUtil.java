@@ -3275,12 +3275,16 @@ public class NodeUtil {
 //      }
     }
 
-    public static NodeRef getNodeRefFromNodeId(String id) {
-        List<NodeRef> nodeRefs = NodeRef.getNodeRefs("workspace://SpacesStore/" + id);
+    public static NodeRef getNodeRefFromNodeId(String store, String id) {
+        List<NodeRef> nodeRefs = NodeRef.getNodeRefs(store + id);
         if (nodeRefs.size() > 0) {
             return nodeRefs.get( 0 );
         }
         return null;
+    }
+    
+    public static NodeRef getNodeRefFromNodeId(String id) {
+        return getNodeRefFromNodeId("workspace://SpacesStore/", id);
     }
 
     public static EmsScriptNode getVersionAtTime( EmsScriptNode element,

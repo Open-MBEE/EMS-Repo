@@ -204,7 +204,24 @@ public class Evaluate implements Viewable< EmsScriptNode > {
      */
     public Object evaluate( String expression ) {
         try {
-            JSONObject json = ModelPost.kToJson( expression );
+            // Generate json for the k expression, specifying expression
+            // element's sysmlid so that we overwrite the one from the previous
+            // call and not pollute as much.
+           JSONObject json = null;
+           try {
+               json = ModelPost.kToJson( expression, "temp_Evaluate_evaluate_expression" );
+           } catch (Throwable t) {
+               // ignore -- we'll try to handle this gracefully below.
+           }
+           
+            if ( json == null || json.length() == 0
+                 || json.optJSONArray( "elements" ) == null
+                 || json.optJSONArray( "elements" ).length() == 0 ) {
+                // Failed, so we'll just show the input as a string;
+                // TODO -- might be nice to add an error message!
+                return new Text(expression);
+            }
+            
             Set< EmsScriptNode > elements = 
                     ModelLoadActionExecuter.loadJson( json, this.modelContext,
                                                       this.serviceContext );
@@ -214,10 +231,13 @@ public class Evaluate implements Viewable< EmsScriptNode > {
                 if ( elements.size() > 1 ) {
                     logger.warn( "Expression \"" + expression + "\" generated more than one element!" );
                 }
+                // Assuming that the first element is the expression.
                 EmsScriptNode exprNode = elements.iterator().next();
                 if ( exprNode == null ) {
                     logger.warn( "Expression \"" + expression + "\" load returned a null element!" );
-                    return null;
+                    // Failed, so we'll just show the input as a string;
+                    // TODO -- might be nice to add an error message!
+                    return new Text(expression);
                 }
                 String sysmlid = exprNode.getSysmlId();
                 Map< Object, Object > results =
@@ -240,7 +260,9 @@ public class Evaluate implements Viewable< EmsScriptNode > {
             logger.error( "Failed to parse, load, or evaluate expression, \"" + expression + "\"" );
             t.printStackTrace();
         }
-        return null;
+        // Failed, so we'll just show the input as a string;
+        // TODO -- might be nice to add an error message!
+        return new Text(expression);
     }
 
     @Override
@@ -252,8 +274,10 @@ public class Evaluate implements Viewable< EmsScriptNode > {
     @Override
     public Collection< EmsScriptNode > getDisplayedElements() {
         if ( interpretation != null ) {
-            return Utils.asList( interpretation.getDisplayedElements(),
-                                 EmsScriptNode.class );
+            Collection< ? > elements = interpretation.getDisplayedElements();
+            if ( elements != null ) {
+                return Utils.asList( elements, EmsScriptNode.class );
+            }
         }
         return Utils.getEmptyList();
     }
