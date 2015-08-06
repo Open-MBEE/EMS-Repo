@@ -442,7 +442,7 @@ common_filters+['"branched"','"created"','"id"','"qualifiedId"'],
 create_curl_cmd(type="GET",base_url=BASE_URL_WS_NOBS,branch=""),
 True, 
 common_filters+['"branched"','"created"','"id"','"qualifiedId"','"parent"'],
-["test","workspaces","develop", "develop2"]
+["test","workspaces","follows"]
 ],
 
 # This test case depends on test 160/170 thats sets gv1,gv2
@@ -1127,7 +1127,7 @@ create_curl_cmd(type="GET",base_url=BASE_URL_WS_NOBS,
                 post_type="", branch=""),
 True,
 common_filters + ['"parent"','"id"','"qualifiedId"','"branched"'],
-["develop"]
+["follows"]
 ],
 
 [
