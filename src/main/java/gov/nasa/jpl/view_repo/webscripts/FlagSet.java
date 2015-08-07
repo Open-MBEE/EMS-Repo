@@ -61,15 +61,21 @@ public abstract class FlagSet extends DeclarativeWebScript {
                               turnOnStr.trim().equalsIgnoreCase( "false" ) ) ||
                             ( turnOffStr != null &&
                               !turnOffStr.trim().equalsIgnoreCase( "false" ) ) );
-        turnOnStr = turnOn ? "on" : "off";
+        
+        String onOrOff = turnOn ? "on" : "off";
         String msg = null;
-        if ( justAsking ) {
+        
+        if (turnOnStr == null && turnOffStr == null && isOnStr == null)
+        {
+        	msg = "Parameters are on, off or ison\n" + flagName() + " is " + (get() ? "on" : "off");
+        }
+        else if ( justAsking ) {
             msg = flagName() + " is " + ( get() ? "on" : "off" );
         } else if ( turnOn == get() ) {
-            msg = flagName() + " is already " + turnOnStr;
+            msg = flagName() + " is already " + onOrOff;
         } else {
             set( turnOn );
-            msg = flagName() + " turned " + turnOnStr;
+            msg = flagName() + " turned " + onOrOff;
         }
         if (logger.isInfoEnabled()) {
             logger.info( ( new Date() ) + ": " + msg );

@@ -23,6 +23,8 @@ public class AllFlagsGet extends FlagSet {
             else Debug.turnOff(); 
         } else if (path.equalsIgnoreCase("fullCache")) {
             NodeUtil.doFullCaching = val;
+        } else if (path.equalsIgnoreCase("nodeAtTimeCache")) {
+            NodeUtil.doNodeAtTimeCaching = val;
         } else if (path.equalsIgnoreCase("heisenCache")) {
             NodeUtil.doHeisenCheck = val;
         } else if (path.equalsIgnoreCase("jsonCache")) {
@@ -30,6 +32,13 @@ public class AllFlagsGet extends FlagSet {
             if ( !NodeUtil.doJsonCaching && val ) {
                 NodeUtil.jsonCache.clear();
                 NodeUtil.jsonDeepCache.clear();
+            }
+            NodeUtil.doJsonCaching = val;
+        } else if (path.equalsIgnoreCase("jsonDeepCache")) {
+            // if turning on, flush cache since it might be wrong
+            if ( !NodeUtil.doJsonDeepCaching && val ) {
+                NodeUtil.jsonCache.clear();
+                //NodeUtil.jsonDeepCache.clear(); // simple json cache does not depend on deep cache
             }
             NodeUtil.doJsonCaching = val;
         } else if (path.equalsIgnoreCase("jsonStringCache")) {
@@ -53,8 +62,12 @@ public class AllFlagsGet extends FlagSet {
             EmsScriptNode.versionCacheDebugPrint = val;
         } else if (path.equalsIgnoreCase("versionCache")) {
             NodeUtil.doVersionCaching = val;
+        } else if (path.equalsIgnoreCase("versionHistoryCache")) {
+            NodeUtil.doVersionHistoryCaching = val;
         } else if (path.equalsIgnoreCase("skipWorkspacePermissionCheck")) {
             NodeUtil.skipWorkspacePermissionCheck = val;
+        } else if (path.equalsIgnoreCase("optimisticJustFirst")) {
+            NodeUtil.doOptimisticJustFirst = val;
         } 
     }
 
@@ -68,10 +81,14 @@ public class AllFlagsGet extends FlagSet {
             return Debug.isOn();
         } else if (path.equalsIgnoreCase("fullCache")) {
             return NodeUtil.doFullCaching;
+        } else if (path.equalsIgnoreCase("nodeAtTimeCache")) {
+            return NodeUtil.doNodeAtTimeCaching;
         } else if (path.equalsIgnoreCase("heisenCache")) {
             return NodeUtil.doHeisenCheck;
         } else if (path.equalsIgnoreCase("jsonCache")) {
             return NodeUtil.doJsonCaching;
+        } else if (path.equalsIgnoreCase("jsonDeepCache")) {
+            return NodeUtil.doJsonDeepCaching;
         } else if (path.equalsIgnoreCase("jsonStringCache")) {
             return NodeUtil.doJsonStringCaching;
         } else if (path.equalsIgnoreCase("modelPostTimeEvents")) {
@@ -90,9 +107,13 @@ public class AllFlagsGet extends FlagSet {
             return EmsScriptNode.versionCacheDebugPrint;
         } else if (path.equalsIgnoreCase("versionCache")) {
             return NodeUtil.doVersionCaching;
+        } else if (path.equalsIgnoreCase("versionHistoryCache")) {
+            return NodeUtil.doVersionHistoryCaching;
         } else if (path.equalsIgnoreCase("skipWorkspacePermissionCheck")) {
             return NodeUtil.skipWorkspacePermissionCheck;
-        } 
+        } else if (path.equalsIgnoreCase("optimisticJustFirst")) {
+            return NodeUtil.doOptimisticJustFirst;
+        }
         return false;
     }
 
@@ -106,10 +127,14 @@ public class AllFlagsGet extends FlagSet {
             return "debug";
         } else if (path.equalsIgnoreCase("fullCache")) {
             return "doFullCaching";
+        } else if (path.equalsIgnoreCase("nodeAtTimeCache")) {
+            return "doNodeAtTimeCaching";
         } else if (path.equalsIgnoreCase("heisenCache")) {
             return "doHeisenCheck";
         } else if (path.equalsIgnoreCase("jsonCache")) {
             return "doJsonCaching";
+        } else if (path.equalsIgnoreCase("jsonDeepCache")) {
+            return "doJsonDeepCaching";
         } else if (path.equalsIgnoreCase("jsonStringCache")) {
             return "doJsonStringCaching";
         } else if (path.equalsIgnoreCase("modelPostTimeEvents")) {
@@ -128,8 +153,12 @@ public class AllFlagsGet extends FlagSet {
             return "versionCacheDebugPrint";
         } else if (path.equalsIgnoreCase("versionCache")) {
             return "doVersionCaching";
+        } else if (path.equalsIgnoreCase("versionHistoryCache")) {
+            return "doVersionHistoryCaching";
         } else if (path.equalsIgnoreCase("skipWorkspacePermissionCheck")) {
             return "skipWorkspacePermissionCheck";
+        } else if (path.equalsIgnoreCase("optimisticJustFirst")) {
+            return "doOptimisticJustFirst";
         } 
         return null;
     }
