@@ -164,29 +164,16 @@ public class ModelLoadActionExecuter extends ActionExecuterAbstractBase {
         new EmsTransaction(services, response, responseStatus) {
             @Override
             public void run() throws Exception {
-                // Save off the log
-                EmsScriptNode logNode = ActionUtil.saveLogToFile(jsonNode, "text/plain", services, response.toString());
 
                 // set the status
                 jsonNode.setProperty("ems:job_status", jobStatusFinal);
-
-                String hostname = ActionUtil.getHostName();
-                if (hostname.endsWith("/" )) {
-                    hostname = hostname.substring( 0, hostname.lastIndexOf( "/" ) );
-                } 
-                if (!hostname.contains( "jpl.nasa.gov" )) {
-                    hostname += ".jpl.nasa.gov";
-                }
-                String contextUrl = "https://" + hostname + "/alfresco";
                     
                 // Send off the notification email
                 String subject =
                         "Workspace " + workspaceId + " Project "
                                 + projectName + " load completed";
-                String msg = "Log URL: " + contextUrl + logNode.getUrl();
-                ActionUtil.sendEmailToModifier(jsonNode, msg, subject, services);
+                ActionUtil.sendEmailToModifier(jsonNode, subject, services, response.toString());
                 
-                if (logger.isDebugEnabled()) logger.debug("Email notification sent for " + workspaceId + " - "+ projectName + " [id: " + projectId + "]:\n" + msg);
                 if (logger.isDebugEnabled()) logger.debug( "ModelLoadActionExecuter: " + timer );
             }
         };

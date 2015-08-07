@@ -1,14 +1,14 @@
 #!/bin/bash
 
 if [ "$#" -eq 1 ]; then
-  echo curl -w "%{http_code}\n" -X GET -u admin:admin "http://localhost:8080/alfresco/service/diff?workspace1=master&workspace2=$1"
-  curl -w "%{http_code}\n" -X GET -u admin:admin "http://localhost:8080/alfresco/service/diff?workspace1=master&workspace2=$1"
+  echo curl -w "%{http_code}\n" -X GET -u admin:admin "http://localhost:8080/alfresco/service/diff/master/$1/latest/latest"
+  curl -w "%{http_code}\n" -X GET -u admin:admin "http://localhost:8080/alfresco/service/diff/master/$1/latest/latest"
 elif [ "$#" -eq 2 ]; then
-  echo curl -w "%{http_code}\n" -X GET -u admin:admin "http://localhost:8080/alfresco/service/diff?workspace1=$1&workspace2=$2"
-  curl -w "%{http_code}\n" -X GET -u admin:admin "http://localhost:8080/alfresco/service/diff?workspace1=$1&workspace2=$2"
+  echo curl -w "%{http_code}\n" -X GET -u admin:admin "http://localhost:8080/alfresco/service/diff/$1/$2/latest/latest"
+  curl -w "%{http_code}\n" -X GET -u admin:admin "http://localhost:8080/alfresco/service/diff/$1/$2/latest/latest"
 elif [ "$#" -eq 4 ]; then
-  echo curl -w "%{http_code}\n" -X GET -u admin:admin "http://localhost:8080/alfresco/service/diff?workspace1=$1&workspace2=$2&timestamp1=$3&timestamp2=$4"
-  curl -w "%{http_code}\n" -X GET -u admin:admin "http://localhost:8080/alfresco/service/diff?workspace1=$1&workspace2=$2"
+  echo curl -w "%{http_code}\n" -X GET -u admin:admin "http://localhost:8080/alfresco/service/diff/$1/$2/$3/$4"
+  curl -w "%{http_code}\n" -X GET -u admin:admin "http://localhost:8080/alfresco/service/diff/$1/$2/$3/$4"
 else
   echo "Error!  Expected 1, 2, or 4 args!"
 fi;

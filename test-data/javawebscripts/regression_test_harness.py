@@ -463,13 +463,39 @@ common_filters,
 "CompareWorkspaces",
 "Compare workspaces",
 create_curl_cmd(type="GET",base_url=SERVICE_URL,
-                branch="diff?workspace1=$gv1&workspace2=$gv2"),
+                branch="diff/$gv1/$gv2/latest/latest"),
 True, 
 common_filters+['"id"','"qualifiedId"'],
 ["test","workspaces","follows"],
 None,
 None,
-do20 # lambda : set_gv1(json.loads(orig_json)['workspace2']['updatedElements'][0]['modified'] if (orig_json != None and len(str(orig_json)) > 0) else None)
+do20 
+],
+        
+[
+201,
+"CompareWorkspacesBackground1",
+"Compare workspaces in the background, this will return that it is in process",
+create_curl_cmd(type="GET",base_url=SERVICE_URL,
+                branch="diff/$gv1/$gv2/latest/latest?background"),
+True, 
+common_filters+['"id"','"qualifiedId"','"diffTime"'],
+["test","workspaces","follows"],
+],
+        
+[
+202,
+"CompareWorkspacesBackground2",
+"Compare workspaces in the background again, this will return the results of the background diff",
+create_curl_cmd(type="GET",base_url=SERVICE_URL,
+                branch="diff/$gv1/$gv2/latest/latest?background"),
+True, 
+common_filters+['"id"','"qualifiedId"','"diffTime"'],
+["test","workspaces","follows"],
+None,
+None,
+None,
+20
 ],
 
 # This test case depends on the previous one and uses gv4 set by the previous test
@@ -576,7 +602,7 @@ common_filters+['"MMS_','MMS_'],
 "CompareWorkspacesWithBranchTime",
 "Compare workspaces",
 create_curl_cmd(type="GET",base_url=SERVICE_URL,
-                branch="diff?workspace1=$gv1&workspace2=$gv5"),
+                branch="diff/$gv1/$gv5/latest/latest"),
 True, 
 common_filters+['"id"','"qualifiedId"'],
 ["test","workspaces","follows"]
@@ -615,14 +641,36 @@ set_wsid_to_gv6
 "CompareWorkspacesWithBranchTimes",
 "Compare workspaces both which have a branch time and with a modified element on the common parent",
 create_curl_cmd(type="GET",base_url=SERVICE_URL,
-                branch="diff?workspace1=$gv5&workspace2=$gv6"),
+                branch="diff/$gv5/$gv6/latest/latest"),
 True, 
 common_filters+['"id"','"qualifiedId"'],
 ["test","workspaces","follows"]
 ],
-        
+    
 [
 231,
+"CompareWorkspacesBackgroundOutdated",
+"Compare workspaces in the background, this will return that it is outdated",
+create_curl_cmd(type="GET",base_url=SERVICE_URL,
+                branch="diff/$gv1/$gv2/latest/latest?background"),
+True, 
+common_filters+['"id"','"qualifiedId"','"diffTime"'],
+["test","workspaces","follows"],
+],
+        
+[
+232,
+"CompareWorkspacesBackgroundRecalculate",
+"Compare workspaces in the background, and forces a recalculate on a outdated diff",
+create_curl_cmd(type="GET",base_url=SERVICE_URL,
+                branch="diff/$gv1/$gv2/latest/latest?background=true&recalculate=true"),
+True, 
+common_filters+['"id"','"qualifiedId"','"diffTime"'],
+["test","workspaces","follows"],
+],
+        
+[
+233,
 "CreateWorkspaceAgain1",
 "Create workspace for another diff test",
 create_curl_cmd(type="POST",base_url=BASE_URL_WS,
@@ -636,7 +684,7 @@ set_wsid_to_gv1
 ],
         
 [
-232,
+234,
 "CreateWorkspaceAgain2",
 "Create workspace for another diff test",
 create_curl_cmd(type="POST",base_url=BASE_URL_WS,
@@ -651,7 +699,7 @@ set_wsid_to_gv2
         
 # This is to test CMED-533.  Where we post the same elements to two different workspaces and diff.
 [
-233,
+235,
 "PostToWorkspaceG1ForCMED533",
 "Post elements to workspace wsG1 for testing CMED-533",
 create_curl_cmd(type="POST",data="elementsForBothWorkspaces.json",base_url=BASE_URL_WS,
@@ -663,7 +711,7 @@ common_filters,
         
 # This test case depends on test 234
 [
-234,
+236,
 "PostToWorkspaceG1",
 "Post element to workspace wsG1",
 create_curl_cmd(type="POST",data="x.json",base_url=BASE_URL_WS,
@@ -677,7 +725,7 @@ set_read_to_gv3
 ],
 
 [
-235,
+237,
 "PostToMaster",
 "Post element to master for a later diff",
 create_curl_cmd(type="POST",data="y.json",base_url=BASE_URL_WS,
@@ -689,7 +737,7 @@ common_filters,
         
 # This is to test CMED-533.  Where we post the same elements to two different workspaces and diff.
 [
-236,
+238,
 "PostToWorkspaceG2ForCMED533",
 "Post elements to workspace wsG2 for testing CMED-533",
 create_curl_cmd(type="POST",data="elementsForBothWorkspaces.json",base_url=BASE_URL_WS,
@@ -701,7 +749,7 @@ common_filters,
         
 # This test case depends on test 235
 [
-237,
+239,
 "PostToWorkspaceG2",
 "Post element to workspace wsG2",
 create_curl_cmd(type="POST",data="z.json",base_url=BASE_URL_WS,
@@ -716,11 +764,11 @@ set_read_to_gv4
         
 # This test case depends on test 234 and 235
 [
-238,
+240,
 "CompareWorkspacesG1G2",
 "Compare workspaces wsG1 and wsG2 with timestamps",
 create_curl_cmd(type="GET",base_url=SERVICE_URL,
-                branch="diff?workspace1=$gv1&workspace2=$gv2&timestamp1=$gv3&timestamp2=$gv4"),
+                branch="diff/$gv1/$gv2/$gv3/$gv4"),
 True, 
 common_filters+['"id"','"qualifiedId"','"timestamp"'],
 ["test","workspaces","follows"]
@@ -730,7 +778,7 @@ common_filters+['"id"','"qualifiedId"','"timestamp"'],
 # everything as expected (we should also do something like 225 to make sure a modified element
 # shows up in the recurse properly as well)
 [
-239,
+241,
 "RecursiveGetOnWorkspaces",
 "Makes sure that a recursive get on a modified workspace returns the modified elements",
 create_curl_cmd(type="GET", base_url=BASE_URL_WS,
@@ -741,7 +789,7 @@ common_filters,
 ],
 
 [
-240,
+242,
 "PostSiteInWorkspace",
 "Create a project and site in a workspace",
 create_curl_cmd(type="POST",data='\'{"elements":[{"sysmlid":"proj_id_001","name":"PROJ_1","specialization":{"type":"Project"}}]}\'',
@@ -753,7 +801,7 @@ None,
 ],
  
 [
-241,
+243,
 "GetSiteInWorkspace",
 "Get site in workspace",
 create_curl_cmd(type="GET",data="sites",base_url=BASE_URL_WS, branch="$gv1/"),
@@ -764,7 +812,7 @@ None,
 
 
 [
-242,
+244,
 "GetProductsInSiteInWorkspace",
 "Get products for a site in a workspace",
 create_curl_cmd(type="GET",data="products",base_url=BASE_URL_WS,
@@ -775,7 +823,7 @@ common_filters,
 ],
         
 [
-243,
+245,
 "PostNotInPastToWorkspace",
 "Post element to master workspace for a diff test",
 create_curl_cmd(type="POST",data="notInThePast.json",base_url=BASE_URL_WS,
@@ -791,21 +839,31 @@ set_read_delta_to_gv1,
         
 # This test depends on the previous one:
 [
-244,
+246,
 "CompareWorkspacesNotInPast",
 "Compare workspace master with itself at the current time and a time in the past",
 create_curl_cmd(type="GET",base_url=SERVICE_URL,
-                branch="diff?workspace1=master&workspace2=master&timestamp2=$gv1"),
+                branch="diff/master/master/latest/$gv1"),
 True, 
 common_filters+['"id"','"qualifiedId"','"timestamp"'],
 ["test","workspaces","develop", "develop2"]
 ],
 
+[
+247,
+"CompareWorkspacesNotInPastBackground",
+"Compare workspace master with itself at the current time and a time in the past in the background",
+create_curl_cmd(type="GET",base_url=SERVICE_URL,
+                branch="diff/master/master/latest/$gv1?background"),
+True, 
+common_filters+['"id"','"qualifiedId"','"timestamp"','"diffTime"'],
+["test","workspaces","develop", "develop2"]
+],
 
 # A series of test cases for workspaces in workspaces
 
 [
-246,
+248,
 "CreateParentWorkspace",
 "Create a workspace to be a parent of another",
 create_curl_cmd(type="POST",base_url=BASE_URL_WS,
@@ -819,7 +877,7 @@ set_wsid_to_gv1
 ],
 
 [
-247,
+249,
 "PostToMasterAgain",
 "Post new element to master",
 create_curl_cmd(type="POST",data="a.json",base_url=BASE_URL_WS,
@@ -833,7 +891,7 @@ set_read_to_gv2
 ],
         
 [
-248,
+250,
 "CreateSubworkspace",
 "Create workspace inside a workspace",
 create_curl_cmd(type="POST",base_url=BASE_URL_WS,
@@ -847,7 +905,7 @@ set_wsid_to_gv3
 ],
 
 [
-249,
+251,
 "GetElementInMasterFromSubworkspace",
 "Get an element that only exists in the master from a subworkspace after its parent branch was created but before the it was created",
 create_curl_cmd(type="GET",data="elements/a",base_url=BASE_URL_WS,
@@ -882,7 +940,7 @@ common_filters,
 
 # Note: currently not an equivalent in workspaces for this URL, but we may add it
 [
-250,
+255,
 "SolveConstraint",
 "Post expressions with a constraint and solve for the constraint.",
 create_curl_cmd(type="POST",base_url=BASE_URL_WS,
@@ -1374,7 +1432,7 @@ common_filters,
 "DiffCompareWorkspaces",
 "Diff Workspace Test - Compare workspaces",
 create_curl_cmd(type="GET",base_url=SERVICE_URL,
-                branch="diff?workspace1=$gv2&workspace2=$gv1"),
+                branch="diff/$gv2/$gv1"),
 True, 
 common_filters+['"id"','"qualifiedId"'],
 ["test","workspaces"],
@@ -1401,7 +1459,7 @@ common_filters+['"id"','"qualifiedId"','"timestamp"'],
 "DiffCompareWorkspacesAgain",
 "Diff Workspace Test - Compare workspaces again and make sure the diff is empty now after merging.",
 create_curl_cmd(type="GET",base_url=SERVICE_URL,
-                branch="diff?workspace1=$gv2&workspace2=$gv1"),
+                branch="diff/$gv2/$gv1"),
 True, 
 common_filters+['"id"','"qualifiedId"'],
 ["test","workspaces"],
