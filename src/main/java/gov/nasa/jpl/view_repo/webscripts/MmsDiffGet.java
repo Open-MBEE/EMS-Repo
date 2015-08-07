@@ -241,8 +241,6 @@ public class MmsDiffGet extends AbstractJavaWebScript {
                                           StringBuffer aResponse,
                                           Status aResponseStatus ) {
         WorkspaceDiff workspaceDiff = null;
-            //String foundTimeStamp2 = (String) oldJob.getProperty( "ems:timestamp2" );
-            //Date date2 = TimeUtils.dateFromTimestamp( foundTimeStamp2 );
             workspaceDiff =
                     new WorkspaceDiff(w1, w2, date1, date2, aResponse, aResponseStatus);
         
@@ -262,16 +260,57 @@ public class MmsDiffGet extends AbstractJavaWebScript {
     }
     
 
+    /**
+     * Get a nearest diff to the one requested, find the commits between the
+     * times requested and those of the nearest diff, and calculate the
+     * requested diff with those as input.
+     * <p>
+     * TODO -- Unless we just keep track of the latest diffs, we could search
+     * through the existing diffs to find the nearest. For now, just apply this
+     * to the latest or, if not found, regenerate from scratch. So, this would
+     * allow us to compute diffs with any timepoints, not just the latest.
+     * <p>
+     * Let diff* be the diff that we want to compute, and let diff0 be a diff
+     * prior to diff*. Let diff0 = diff(w1, w2, t1_0, t2_0) and diff* = diff(w1,
+     * w2, t1, t2). Let diff1 = diff(w1, w1, t1_0, t1) and diff2 = diff(w2, w2,
+     * t2_0, t2). This {@link #performDiffGlom(Map)} function computes diff* =
+     * (diff0 + diff2) - diff1.
+     * <p>
+     * The '+' is computed by {@link #glom(JSONObject, JSONObject)}, and the '-'
+     * is computed by {@link #diff(JSONObject, JSONObject)}. We add diff2 to
+     * diff0 first instead of subtracting diff1 from diff2 because we use the
+     * context of diff0 when subtracting diff1.
+     * <p>
+     * For example, suppose diff0 adds element x, diff1 adds the same element x
+     * with different properties (let's call it x1), and diff2 updates x as x2.
+     * If the additions and changes all affect different properties, then diff*
+     * should be update ((x + x2) - x1). If they affect the same property, and
+     * x1 = x2 then there is no net change and diff* should be empty: (x + x2) -
+     * x1 = x2 - x1 = &emptyset;. Subtracting first gives different results.
+     * Doing diff2 - diff1 first results in x + (x2 - x1). If affecting
+     * different properties, the result is the same, x2. If they are the same,
+     * then diff* = x + (x2 - x1) = x, but there should be no change.
+     * 
+     * @param results
+     * @return
+     */
     public JSONObject performDiffGlom(Map<String, Object> results) {
-        
+ 
+        // Check for a job matching the four diff parameters.
+        // TODO -- It would be nice if we could quickly find the "nearest" diff
+        // in the case that the diff has never been computed.
         EmsScriptNode oldJob = getDiffJob();
         JSONObject oldDiffJson = diffJsonFromJobNode( oldJob );
-        
+
+        // If either of the timestamps is "latest," then the diff result may be
+        // out of date.
         boolean isLatest1 = timestamp1.equals( LATEST_NO_TIMESTAMP ); 
         boolean isLatest2 = timestamp2.equals( LATEST_NO_TIMESTAMP );
 
-        // HERE!!  Diff each workspace since last diffed and then what?!!!
-
+        
+        // For each workspace get the diffs between the request timestamp and the
+        // timestamp of the nearest/old diff.
+        
         JSONObject diff1Json = null;
         if ( isLatest1 ) {
             String foundTimeStamp1 = (String) oldJob.getProperty( "ems:timestamp1" );
@@ -287,7 +326,12 @@ public class MmsDiffGet extends AbstractJavaWebScript {
                                      getResponseStatus() );
         }
         
-        // Now diff the two diffs
+        // Now add/glom diff2 to diff0 (oldDiffJson) and then diff with/subtract
+        // diff1.
+        JSONObject diffResult = glom( oldDiffJson, diff2Json );
+        diffResult = diff( diffResult, diff1Json );
+
+        return null;
     }
     
     public void performDiff(Map<String, Object> results) {
@@ -299,7 +343,7 @@ public class MmsDiffGet extends AbstractJavaWebScript {
        
         JSONObject top = null;
         
-        if ( glom && diffStatus == DIFF_OUTDATED ) {
+        if ( glom ) {
             top = performDiffGlom( results );
         } else {
             top = performDiff( ws1, ws2, dateTime1, dateTime2, response,
@@ -334,14 +378,30 @@ public class MmsDiffGet extends AbstractJavaWebScript {
     
      
     /**
-     * Create a diff of two diffs, irrespective of their workspaces or
-     * timepoints. workspace1 in the resulting diff will be the objects from
-     * workspace2 of the first diff. workspace2 in the resulting diff will be
-     * the changes that applied to workspace2 of the first diff will result in
-     * workspace2 of the second.
+     * Create a diff of two diffs/commits, irrespective of their workspaces or
+     * timepoints.
+     * <p>
+     * diff(diff1, diff2) = diff2 - diff1. So, diff1 + diff(diff1, diff2) =
+     * diff2.
+     * <p>
+     * workspace1 in the resulting diff will be the objects from workspace1 in
+     * diff2 that are not in workspace1 of diff1. workspace2 in the resulting
+     * diff will be the changes that if applied after applying the changes in
+     * workspace2 of diff1 would produce the same effect as applying the changes
+     * in workspace2.
      * <p>
      * If there are any changes to the same element in both diffs, it is a
      * conflict unless it is exactly the same.
+     * <p>
+     * In the table below, x1 and x2 are versions of x in add and update
+     * operations of diff1 and diff2, respectively. The heading of each row in
+     * the table is a change in workspace2 of diff1. The heading of each column
+     * is a change in workspace2 of diff2. The interior cells are the diff of
+     * the diff1 and diff2 operations in the headings of the row and column,
+     * respectively. x2 - x1 is the properties of x2 without properties in x1
+     * that are the same as x2 and a reversion of x1 properties not specified in
+     * x2 to those of the version (x0) in workspace1. Thus, x2 - x1 -s really
+     * (x0 + x2) - x1.
      * 
      * <table style="width:100%", border="1">
      * <tr>
@@ -376,16 +436,86 @@ public class MmsDiffGet extends AbstractJavaWebScript {
      * @param diff2
      * @return
      */
-    public static JSONObject diff( JSONObject diff1, JSONObject diff2 ) {
-        JSONObject diffdiff = makeEmptyDiffJson();
-        
-        return diffdiff;
+    public JSONObject diff( JSONObject diff1, JSONObject diff2 ) {
+        ArrayList< JSONObject > list = Utils.newList( diff1, diff2 );
+        JSONObject diff3 = diff( list );
+        return diff3;
+     }
+
+     public JSONObject diff( ArrayList<JSONObject> diffs ) {
+         if ( Utils.isNullOrEmpty( diffs ) ) return null;
+         JSONObject diffDiff = makeEmptyDiffJson();
+         if ( diffs.size() == 1 ) return diffDiff;
+         LinkedHashMap<String, Pair<DiffOp, List<JSONObject> > > diffMap1 =
+                 new LinkedHashMap< String, Pair<DiffOp,List<JSONObject>> >();
+         LinkedHashMap<String, Pair<DiffOp, List<JSONObject> > > diffMap2 =
+                 new LinkedHashMap< String, Pair<DiffOp,List<JSONObject>> >();
+         
+         // Diff workspace 1 changes        
+         // Start with an empty list. Iterate through each diff in order, adding
+         // any elements that did not exist beforehand.
+         JSONArray elements = diffDiff.getJSONArray( "elements" );
+         for ( int i = 0; i < diffs.size(); ++i ) {
+             JSONObject diff =  diffs.get( i );
+             JSONObject ws1 = diff.optJSONObject( "workspace1" );            
+             JSONArray dElements = ws1.getJSONArray( "elements" );
+             for ( int j = 0; j < dElements.length(); ++j ) {
+                 JSONObject element = dElements.getJSONObject( j );
+                 String sysmlid = element.getString( "sysmlid" );
+                 if ( !diffMap1.containsKey( sysmlid ) ) {
+                     elements.put( element );
+                 }
+             }
+         }
+         
+         // Glom workpace 2 changes
+         for ( JSONObject diff : diffs ) {
+             JSONObject ws2 = diff.optJSONObject( "workspace2" );
+             if ( ws2 == null ) continue;
+             JSONArray added = ws2.optJSONArray( "addedElements" );
+             JSONArray updated = ws2.optJSONArray( "updatedElements" );
+             JSONArray deleted = ws2.optJSONArray( "deletedElements" );
+             // Diffs are applied in the order of add, update, delete
+             glom( DiffOp.ADD, added, diffMap2 );
+             glom( DiffOp.UPDATE, updated, diffMap2 );
+             glom( DiffOp.DELETE, deleted, diffMap2 );
+         }
+
+         // now we need to merge the properties of chained updates
+         JSONObject gws2 = diffDiff.getJSONObject( "workspace2" );
+         JSONArray added = gws2.getJSONArray( "addedElements" );
+         JSONArray updated = gws2.getJSONArray( "updatedElements" );
+         JSONArray deleted = gws2.getJSONArray( "deletedElements" );
+         for ( Entry< String, Pair< DiffOp, List< JSONObject > > > entry : diffMap2.entrySet() ) {
+             Pair< DiffOp, List< JSONObject > > p = entry.getValue();
+             JSONObject glommedElement = null; //NodeUtil.newJsonObject();
+             for ( JSONObject element : p.second ) {
+                 if ( glommedElement == null ) glommedElement = NodeUtil.clone( element );
+                 else addProperties( glommedElement, element );
+             }
+             switch ( p.first ) {
+                 case ADD:
+                     added.put( glommedElement );
+                     break;
+                 case UPDATE:
+                     updated.put( glommedElement );
+                     break;
+                 case DELETE:
+                     deleted.put( glommedElement );
+                     break;
+                 default:
+                     // BAD! -- TODO
+             }
+             // TODO -- What about moved and conflicted elements?
+         }
+         
+         return diffDiff;
     }
 
     /**
      * Calculate the diff that would result after applying one diff followed by
-     * another, "glomming" them together. This can be done by making a copy of
-     * the first diff and modifying it based on the second.
+     * another, "glomming" them together. This is the '+' operation described in
+     * {@link #performDiffGlom(Map)}.
      * <p>
      * In the element diff json, there is a workspace1 to show the original
      * elements and a workspace2 for the changes to those elements. Only
@@ -416,30 +546,30 @@ public class MmsDiffGet extends AbstractJavaWebScript {
      * ore glommed:
      * 
      * <table style="width:100%", border="1">
-     *  <tr>
-     *    <th></th>
-     *    <th>add(x2) </th>
-     *    <th>delete(x)</th> 
-     *    <th>update(x2)</th>
-     *  </tr>
-     *  <tr>
-     *    <th>add(x1)</th>
-     *    <td>add(x2) [potential conflict]</td>
-     *    <td>delete(x)</td>
-     *    <td>add(x1 &lt;- x2)</td>
-     *  </tr>
-     *  <tr>
-     *    <th>delete(x)</th>
-     *    <td>add(x2)</td>
-     *    <td>delete(x)</td>
-     *    <td>update(x2) [potential conflict]</td>
-     *  </tr>
-     *  <tr>
-     *    <th>update(x1)</th>
-     *    <td>update(x2) [potential conflict]</td>
-     *    <td>delete(x)</td>
-     *    <td>update(x1 &lt;- x2)</td>
-     *  </tr>
+     * <tr>
+     * <th></th>
+     * <th>add(x2)</th>
+     * <th>delete(x)</th>
+     * <th>update(x2)</th>
+     * </tr>
+     * <tr>
+     * <th>add(x1)</th>
+     * <td>add(x2) [potential conflict]</td>
+     * <td>delete(x)</td>
+     * <td>add(x1 &lt;- x2)</td>
+     * </tr>
+     * <tr>
+     * <th>delete(x)</th>
+     * <td>add(x2)</td>
+     * <td>delete(x)</td>
+     * <td>update(x2) [potential conflict]</td>
+     * </tr>
+     * <tr>
+     * <th>update(x1)</th>
+     * <td>update(x2) [potential conflict]</td>
+     * <td>delete(x)</td>
+     * <td>update(x1 &lt;- x2)</td>
+     * </tr>
      * </table>
      * 
      * @param diff1
