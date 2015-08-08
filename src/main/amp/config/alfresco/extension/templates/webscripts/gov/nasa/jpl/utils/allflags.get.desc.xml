@@ -1,6 +1,7 @@
 <webscript>
   <shortname>Toggle flags on or off</shortname>
   <description>toggle flags on or off</description>
+  <url>/flags/all</url>
   <url>/flags/alwaysTurnDebugOff?on={on?}&amp;off={off?}</url>
   <url>/flags/debug?on={on?}&amp;off={off?}</url>
   <url>/flags/fullCache?on={on?}&amp;off={off?}</url>

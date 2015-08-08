@@ -18,7 +18,10 @@ public abstract class FlagSet extends DeclarativeWebScript {
    
     protected abstract void set( boolean val ); 
     protected abstract boolean get();
+    protected abstract boolean get(String flagName);
     protected abstract String flagName();
+    public abstract String[] getAllFlags();
+    protected abstract boolean clear();
     
     protected WebScriptRequest req = null;
     
@@ -36,13 +39,36 @@ public abstract class FlagSet extends DeclarativeWebScript {
         if ( f != null ) {
             return f.executeImplImpl( req, status, cache );
         } else {
-            return executeImplImpl( req, status, cache );            
+            return executeImplImpl( req, status, cache );
         }
     }
     protected Map<String, Object> executeImplImpl(WebScriptRequest req,
                 Status status, Cache cache) {
         Map< String, Object > model = new HashMap< String, Object >();
 
+        if ( flagName().equalsIgnoreCase( "all" ) ) {
+            // print out all of the flags and their current values
+            StringBuffer msg = new StringBuffer();
+            msg.append( "All flags:\n" );
+            for ( String flag : getAllFlags() ) {
+                msg.append( flag  + " is " + ( get( flag ) ? "on" : "off" ) + "\n" );
+            }
+            model.put( "res", msg );
+            return model;
+        }
+
+        String clear = req.getParameter( "clear" );
+        if ( clear != null && !clear.trim().equalsIgnoreCase( "false" ) ) {
+            boolean didClear = clear();
+            if ( didClear ) {
+                model.put( "res", "cleared " + flagName() );
+            } else {
+                model.put( "res", "cannot clear " + flagName() );
+            }
+            return model;
+        }
+        
+        
         String turnOnStr = req.getParameter( "on" );
         String turnOffStr = req.getParameter( "off" );
 

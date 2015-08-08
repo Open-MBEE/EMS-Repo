@@ -518,8 +518,10 @@ public class WorkspaceDiff implements Serializable {
         //       already are contained within the desired timestamps
         
         String elementName = NodeUtil.getSysmlId( ref1 );
+        Map< String, Pair< Object, Object >> propChanges = nodeDiff.getPropertyChanges( elementName );
+        if ( propChanges == null ) return false;
         Map< String, Pair< Object, Object > > changes =
-                new LinkedHashMap< String, Pair<Object,Object> >( nodeDiff.getPropertyChanges( elementName ) );
+                new LinkedHashMap< String, Pair<Object,Object> >( propChanges );
         Utils.removeAll( changes, WorkspaceNode.workspaceMetaProperties );
         if ( Utils.isNullOrEmpty( changes ) ) return false;
         

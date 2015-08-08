@@ -3128,12 +3128,20 @@ public class NodeUtil {
             index = -index - 1;
             if (Debug.isOn())  Debug.outln( "index converted to lowerbound " + index );
         }
-        if ( index < 0 ) {
+        // This is to work around what looks like a bug in Java's binarysearch.
+        if ( index < 0 ) {//|| index == vv.size() ) {
             version = vv.get( 0 );
             if ( version != null ) {
                 Date d = version.getFrozenModifiedDate();
                 if (Debug.isOn())  Debug.outln( "first frozen modified date " + d );
                 if ( d != null && d.after( dateTime ) ) {
+//                    // The date is before the first version, so return null;
+//                    if ( true ) {
+//                        if ( doNodeAtTimeCaching ) {
+//                            nodeAtTimeCachePut( ref, dateTime, null );
+//                        }
+//                        return null;
+//                    }
                     NodeRef fnr = version.getFrozenStateNodeRef();
                     if (Debug.isOn())  Debug.outln( "returning first frozen node ref " + fnr );
                     if ( doNodeAtTimeCaching ) {
@@ -3142,13 +3150,32 @@ public class NodeUtil {
                     return fnr;
                 }
             }
+            if ( index == vv.size() ) {
+                // In this case the date may be later than all
+                // versions, in which case returning null seems to work at
+                // present.
+                // TODO -- Don't we need to include the current SpacesStore live
+                // node ref with it's modified time since there will be no
+                // version for it?
+                if ( Debug.isOn() ) Debug.outln( "Date is later than all versions--not sure if it makes sense to return the last version or refer to the latest in memory.  Getting the " );
+                // Don't cache an error.
+                return null;
+            }
             // TODO -- throw error?!
             if ( Debug.isOn() ) Debug.outln( "version is null; returning null!" );
             // Don't cache an error.
             return null;
-        } else if ( index == vv.size() ) {
-            // time is later than all versions, so get the latest
-            version = vv.get( index - 1 );
+//        } else if ( index == vv.size() ) {
+//            // Time is later than all versions, so get the latest.
+//            // The line below is commented out because binarysearch returns the
+//            // wrong index for cases where the date is earlier than all
+//            // versions.
+//            //            version = vv.get( index - 1 );
+//            // TODO -- don't we need to include the current SpacesStore live
+//            // node ref with it's modified time since there will be no
+//            // version for it?
+//            // For now, returning null seems to help.
+//            return null;
         } else if ( index >= vv.size() ) {
             if ( Debug.isOn() ) Debug.outln( "index is too large, outside bounds!" );
             // TODO -- throw error?!

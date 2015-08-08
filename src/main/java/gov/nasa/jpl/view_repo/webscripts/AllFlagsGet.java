@@ -6,15 +6,48 @@ import gov.nasa.jpl.view_repo.util.EmsTransaction;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
 
 public class AllFlagsGet extends FlagSet {
+
+    //public static String[][] arr = new String[][] { {, "2"} };
+    public static String[] flags =
+            new String[] { "alwaysTurnDebugOff", 
+                           "debug", 
+                           "fullCache",
+                           "nodeAtTimeCache",
+                           "heisenCache", 
+                           "jsonCache",
+                           "jsonDeepCache",
+                           "jsonStringCache",
+                           "modelPostTimeEvents",
+                           "propertyCache",
+                           "runWithTransactions", 
+                           "simpleCache",
+                           "syncTransactions", 
+                           "timeEvents",
+                           "versionCacheDebug",
+                           "versionCache",
+                           "versionHistoryCache",
+                           "skipWorkspacePermissionCheck", 
+                           "optimisticJustFirst" };
+    
+    public String[] getAllFlags() {
+        return flags;
+    }
+
     protected String getPath() {
         String path = req.getPathInfo();
         System.out.println(path);
-        return path.replace("/flags/","").replace("/","");
+        String result = path.replace("/flags/","").replace("/","");
+        if ( result.equals( "" ) || result.equals( "flags" ) ) result = "all";
+        return result;
     }
     
     @Override
     protected void set( boolean val ) {
         String path = getPath();
+        
+        if (path.equalsIgnoreCase( "all" )) {
+            return;
+        }
         
         if (path.equalsIgnoreCase( "alwaysTurnDebugOff" )) {
             AbstractJavaWebScript.alwaysTurnOffDebugOut = val;
@@ -74,6 +107,13 @@ public class AllFlagsGet extends FlagSet {
     @Override
     protected boolean get() {
         String path = getPath();
+        return get( path );
+    }
+    @Override
+    protected boolean get( String path ) {
+        if (path.equalsIgnoreCase( "all" )) {
+            return true;
+        }
         
         if (path.equalsIgnoreCase( "alwaysTurnDebugOff" )) {
             return AbstractJavaWebScript.alwaysTurnOffDebugOut;
@@ -116,11 +156,73 @@ public class AllFlagsGet extends FlagSet {
         }
         return false;
     }
+    
+    @Override
+    protected boolean clear() {
+        String path = getPath();
+
+        if (path.equalsIgnoreCase( "all" )) {
+            return false;
+        }
+        
+        if (path.equalsIgnoreCase( "alwaysTurnDebugOff" )) {
+        } else if (path.equalsIgnoreCase("fullCache")) {
+            NodeUtil.elementCache.clear();
+            return true;
+        } else if (path.equalsIgnoreCase("nodeAtTimeCache")) {
+            NodeUtil.nodeAtTimeCache.clear();
+            return true;
+        } else if (path.equalsIgnoreCase("jsonCache")) {
+            NodeUtil.jsonCache.clear();
+            return true;
+        } else if (path.equalsIgnoreCase("jsonDeepCache")) {
+            NodeUtil.jsonDeepCache.clear();
+            return true;
+        } else if (path.equalsIgnoreCase("jsonStringCache")) {
+            NodeUtil.jsonStringCache.clear();;
+            return true;
+        } else if (path.equalsIgnoreCase("propertyCache")) {
+            NodeUtil.propertyCache.clear();;
+            return true;
+        } else if (path.equalsIgnoreCase("simpleCache")) {
+            NodeUtil.simpleCache.clear();
+            return true;
+        } else if (path.equalsIgnoreCase("versionCache")) {
+            NodeUtil.versionCache.clear();;
+            return true;
+        } else if (path.equalsIgnoreCase("versionHistoryCache")) {
+            NodeUtil.versionHistoryCache.clear();
+            return true;
+        } else if (path.equalsIgnoreCase ("debug")) {
+            return false;
+        } else if (path.equalsIgnoreCase("heisenCheck")) {
+            return false;
+        } else if (path.equalsIgnoreCase("modelPostTimeEvents")) {
+            return false;
+        } else if (path.equalsIgnoreCase("runWithTransactions")) {
+            return false;
+        } else if (path.equalsIgnoreCase("syncTransactions")) {
+            return false;
+        } else if (path.equalsIgnoreCase("timeEvents")) {
+            return false;
+        } else if (path.equalsIgnoreCase("versionCacheDebug")) {
+            return false;
+        } else if (path.equalsIgnoreCase("skipWorkspacePermissionCheck")) {
+            return false;
+        } else if (path.equalsIgnoreCase("optimisticJustFirst")) {
+            return false;
+        }
+        return false;
+    };
 
     @Override
     protected String flagName() {
         String path = getPath();
         
+        if (path.equalsIgnoreCase( "all" )) {
+            return "all";
+        }
+
         if (path.equalsIgnoreCase( "alwaysTurnDebugOff" )) {
             return "alwaysTurnOffDebugOut";
         } else if (path.equalsIgnoreCase ("debug")) {
