@@ -42,11 +42,11 @@ public class AllFlagsGet extends FlagSet {
     }
     
     @Override
-    protected void set( boolean val ) {
+    protected boolean set( boolean val ) {
         String path = getPath();
         
         if (path.equalsIgnoreCase( "all" )) {
-            return;
+            return false;
         }
         
         if (path.equalsIgnoreCase( "alwaysTurnDebugOff" )) {
@@ -102,6 +102,7 @@ public class AllFlagsGet extends FlagSet {
         } else if (path.equalsIgnoreCase("optimisticJustFirst")) {
             NodeUtil.doOptimisticJustFirst = val;
         } 
+        return true;
     }
 
     @Override
@@ -162,7 +163,16 @@ public class AllFlagsGet extends FlagSet {
         String path = getPath();
 
         if (path.equalsIgnoreCase( "all" )) {
-            return false;
+            NodeUtil.elementCache.clear();
+            NodeUtil.nodeAtTimeCache.clear();
+            NodeUtil.jsonCache.clear();
+            NodeUtil.jsonDeepCache.clear();
+            NodeUtil.jsonStringCache.clear();;
+            NodeUtil.propertyCache.clear();;
+            NodeUtil.simpleCache.clear();
+            NodeUtil.versionCache.clear();;
+            NodeUtil.versionHistoryCache.clear();
+            return true;
         }
         
         if (path.equalsIgnoreCase( "alwaysTurnDebugOff" )) {
@@ -213,6 +223,12 @@ public class AllFlagsGet extends FlagSet {
             return false;
         }
         return false;
+    };
+
+    
+    @Override
+    protected String flag() { 
+        return getPath();
     };
 
     @Override
