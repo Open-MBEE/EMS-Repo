@@ -1381,7 +1381,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
     
         // Search for all constraints in the database:
         Collection<EmsScriptNode> constraintNodes = getGlobalSystemModel().getType(null, Acm.ACM_CONSTRAINT);
-log(Level.INFO, "all constraints in database: " + constraintNodes);
+//log(Level.INFO, "all constraints in database: " + constraintNodes);
 
         if (!Utils.isNullOrEmpty(constraintNodes)) {
     
@@ -1399,7 +1399,7 @@ log(Level.INFO, "all constraints in database: " + constraintNodes);
                 for (EmsScriptNode element : elements) {
     
                     String name = element.getName();
-log(Level.INFO, "element (" + element + ") vs. constraint (" + constraintNode + ")");
+//log(Level.INFO, "element (" + element + ") vs. constraint (" + constraintNode + ")");
                     if ( element.equals( constraintNode ) || ( name != null && constrElemNames.contains(name) ) ) {
                         addConstraintExpression(constraintNode, constraints, ws);
                         break;
