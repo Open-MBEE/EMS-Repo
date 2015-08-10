@@ -106,11 +106,10 @@ if not os.path.exists(baseline_dir):
 
 print "Executing curl command\n"
 #returns the status and output of executing command in a shell
-#(status, output) = commands.getstatusoutput(curl_cmd + "> " + baseline_orig_json)
-#print output + "\n"
+(status, output) = commands.getstatusoutput(curl_cmd + "> " + baseline_orig_json)
+print output + "\n"
 print "Creating baseline %s.json in %s"%(options.testName, baseline_dir)
 
-status = 0
 if status == 0:
     file_orig = open(baseline_orig_json, "r")
 
