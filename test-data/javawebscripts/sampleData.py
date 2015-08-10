@@ -2,18 +2,21 @@ from regression_lib import *
 import commands
 import optparse
 import time
-from Finder.Containers_and_folders import folder
+#from Finder.Containers_and_folders import folder
 
 # default parameters
 site = 'europa'
 project = '123456'
 folder = 'generated'
-DELAY_TIME = 20
+DELAY_TIME = 5
 
 
 elementsJsonStrTemplate = '\'{"elements":[%s]}\''
 
 parser = optparse.OptionParser()
+
+#debug purposes
+parser.add_option("-r", "--prefix", default="e", help="prefix")
 
 parser.add_option("-e", "--elements", default=10, type="int", help="Number of elements to post")
 parser.add_option("-p", "--postElements", default=1, type="int", help="Number of elements to post at a time")
@@ -28,135 +31,149 @@ options, args = parser.parse_args()
 
 workspaces = options.workspaces.split(",")
 
+def verboseExecuteOptions(curl_cmd, timeDelay=False):
+    if options.verbose:
+        print curl_cmd + "\n"
+    
+    if options.execute:
+        (status, output) = commands.getstatusoutput(curl_cmd)
+        if options.verbose:
+            print output
+        if timeDelay:
+            time.sleep(DELAY_TIME)
+
 def createWorkspaces():
     if options.verbose:
         print "\n" + "CREATING WORKSPACES\n"
         
     for workspace in workspaces:
+        #master already exists
+        if workspace == "master":
+            continue
         workspaceName = workspace + "?sourceWorkspace=master&copyTime="+get_current_time(delay=0)
         curl_cmd = create_curl_cmd(type="POST",base_url=BASE_URL_WS,
                                    post_type="",branch=workspaceName)
         
-        if options.verbose:
-            print curl_cmd
-            
-        if options.execute:
-            (status, output) = commands.getstatusoutput(curl_cmd)
+        #make sure the workspace is actually created
+        verboseExecuteOptions(curl_cmd, False)
         
-def post(elementsJsonStr, workspaceName):
-    curl_cmd = create_curl_cmd(type="POST",data=elementsJsonStr,
+def post(entireJsonData, workspaceName):
+    curl_cmd = create_curl_cmd(type="POST",data=entireJsonData,
                                base_url=BASE_URL_WS,
                                branch= workspaceName + "/elements",
                                project_post=True)
-    if options.verbose:
-        print curl_cmd + "\n"
-    if options.execute:
-        (status, output) = commands.getstatusoutput(curl_cmd)
-        if options.verbose:
-            print output
+    #no need for time delay when posting elements or changes to elements
+    verboseExecuteOptions(curl_cmd, False)
         
-def writeJsonStr(branch, jStr, workspaceName, count, postNumber, jsonArrayStr):
+def writeJsonStr(branch, changesToElement, workspaceName, count, postNumber, listOfJsonStrToPost):
     
+    #stores the parent node number in order to set the owner
     if branch == 0:
-        folder = 0
+        parent = 0
     else:
-        folder = branch
+        parent = branch
         
-    branch = branch * options.folderBranching + 1
+    #creates starting number for the child node
+    child = branch * options.folderBranching + 1
     
     if options.folderBranching == 0:
-        
+        #stores everything under options.owner since there is no branching factor
         for i in range(1, options.elements + 1):
-            iStr = "%06d"%i
-            id = "e_" + iStr
-            name = id + "_" + jStr
+            idNumbers = "%06d"%i
+            id = options.prefix + "_" + idNumbers #"e_"
+            name = id + "_" + changesToElement
 
             jsonStr = '{"sysmlid":"' + id + '","name":"' + name + '","owner":"' + options.owner + '"}'
-            if jsonArrayStr != '':
-                jsonArrayStr = jsonArrayStr + ',' + jsonStr
+            #creates the list of elements to post if it doesn't exist, otherwise adds to the existing list
+            if listOfJsonStrToPost != '':
+                listOfJsonStrToPost = listOfJsonStrToPost + ',' + jsonStr
             else:
-                jsonArrayStr = jsonStr
+                listOfJsonStrToPost = jsonStr
             count = count + 1
-        
+            #once it reaches the number of elements to post, creates the json data and posts it
             if count % postNumber == 0:
-                if jsonArrayStr != '':
-                    elementsJsonStr = elementsJsonStrTemplate%jsonArrayStr
-                    post(elementsJsonStr, workspaceName)
-                    jsonArrayStr = ''
-    #post any remaining elements
-        if jsonArrayStr != '':
-            elementsJsonStr = elementsJsonStrTemplate%jsonArrayStr
-            post(elementsJsonStr, workspaceName)
-            jsonArrayStr = '' 
+                if listOfJsonStrToPost != '':
+                    entireJsonData = elementsJsonStrTemplate%listOfJsonStrToPost
+                    post(entireJsonData, workspaceName)
+                    listOfJsonStrToPost = ''
+        #post any remaining elements
+        if listOfJsonStrToPost != '':
+            entireJsonData = elementsJsonStrTemplate%listOfJsonStrToPost
+            post(entireJsonData, workspaceName)
+            listOfJsonStrToPost = '' 
     
     else:
-        
-        for i in range(branch, branch + options.folderBranching):
-            if i > (options.elements): #amount of folders, change to amount of elements to get all the elements
+        #pre-order traversal
+        for i in range(child, child + options.folderBranching):
+            if i > (options.elements): #total amount of branches
                 break
             
-            iStr = "%06d"%i
-            id = "e_" + iStr
-            name = id + "_" + jStr
+            idNumbers = "%06d"%i
+            id = options.prefix + "_" + idNumbers #"e_"
+            name = id + "_" + changesToElement
             
-            if folder == 0:
-                owner = "testData"
+            if parent == 0:
+                owner = options.owner
             else:
-                owner = "e_" + "%06d"%folder
+                owner = options.prefix + "_" + "%06d"%parent #"e_"
             
             jsonStr = '{"sysmlid":"' + id + '","name":"' + name + '","owner":"' + owner + '"}'
-            if jsonArrayStr != '':
-                jsonArrayStr = jsonArrayStr + ',' + jsonStr
+            #creates the list of elements to post if it doesn't exist, otherwise adds to the existing list
+            if listOfJsonStrToPost != '':
+                listOfJsonStrToPost = listOfJsonStrToPost + ',' + jsonStr
             else:
-                jsonArrayStr = jsonStr
+                listOfJsonStrToPost = jsonStr
             count = count + 1
-        
+            #once it reaches the number of elements to post, creates the json data and posts it
             if count % postNumber == 0:
-                if jsonArrayStr != '':
-                    elementsJsonStr = elementsJsonStrTemplate%jsonArrayStr
-                    post(elementsJsonStr, workspaceName)
-                    jsonArrayStr = ''
-                    
-            jsonArrayStr, count = writeJsonStr(i, jStr, workspaceName, count, postNumber, jsonArrayStr)
+                if listOfJsonStrToPost != '':
+                    entireJsonData = elementsJsonStrTemplate%listOfJsonStrToPost
+                    post(entireJsonData, workspaceName)
+                    listOfJsonStrToPost = ''
+            #passes on the existing list of elements and count so next iteration can keep track of previous ones     
+            listOfJsonStrToPost, count = writeJsonStr(i, changesToElement, workspaceName, count, postNumber, listOfJsonStrToPost)
 
-    return jsonArrayStr, count
+    return listOfJsonStrToPost, count
                    
      #################################################################       
 
 def doIt():
+    
+    curl_cmd = create_curl_cmd(type="POST",data='\'{"elements":[{"sysmlid":"123456","name":"JW_TEST","specialization":{"type":"Project"}}]}\'',
+                base_url=BASE_URL_WS,
+                branch="master/sites/europa/projects?createSite=true",project_post=True)
+    verboseExecuteOptions(curl_cmd, False)
+    
     createWorkspaces()
-    time.sleep(DELAY_TIME)
 
     if options.verbose:
-        print "\n" + "CREATING OWNER\n"
+        print "\n" + "CREATING OWNER IN EACH WORKSPACE\n"
         
     for workspace in workspaces:
-        jsonStr = '{"sysmlid":"' + options.owner + '","name":"' + options.owner + '"}'
-        dataStr = elementsJsonStrTemplate%jsonStr
+        jsonStr = '{"sysmlid":"' + options.owner + '","name":"' + options.owner + '","owner":"123456"}'
+        entireJsonData = elementsJsonStrTemplate%jsonStr
         curl_cmd = create_curl_cmd(type="POST", 
-                                   data=dataStr,
+                                   data=entireJsonData,
                                    base_url=BASE_URL_WS,
                                    branch= workspace + "/elements",
                                    project_post=True)
         
-        if options.verbose:
-            print curl_cmd
-        if options.execute:
-            (status, output) = commands.getstatusoutput(curl_cmd)
-            time.sleep(DELAY_TIME)
+        verboseExecuteOptions(curl_cmd, False)
     
     if options.verbose:
         thick_divider()
         print "POSTING ELEMENTS IN GROUPS OF " + str(options.postElements)
         thick_divider()
-        
-    jsonArrayStr, count = writeJsonStr(0,'0', "master", 0, options.postElements, '')
+    
+    #no changes to any elements to parameter is set as constant '0'
+    #only post initial elements to master
+    listOfJsonStrToPost, count = writeJsonStr(0,'0', "master", 0, options.postElements, '')
     
     #post any remaining elements
-    if jsonArrayStr != '':
-        elementsJsonStr = elementsJsonStrTemplate%jsonArrayStr
-        post(elementsJsonStr, "master")
-        jsonArrayStr = ''
+    if listOfJsonStrToPost != '':
+        entireJsonData = elementsJsonStrTemplate%listOfJsonStrToPost
+        post(entireJsonData, "master")
+        listOfJsonStrToPost = ''
     
     if options.verbose:
         thick_divider()
@@ -164,15 +181,15 @@ def doIt():
         thick_divider()
         
     for workspace in workspaces:
-        for j in range(0, options.changes): #3
-            jStr = "%06d"%j
-            jsonArrayStr, count = writeJsonStr(0, jStr, workspace, 0, options.postChanges, '')
+        for j in range(0, options.changes): 
+            changesToElement = "%06d"%j
+            listOfJsonStrToPost, count = writeJsonStr(0, changesToElement, workspace, 0, options.postChanges, '')
             
             #post any remaining elements
-            if jsonArrayStr != '':
-                elementsJsonStr = elementsJsonStrTemplate%jsonArrayStr
-                post(elementsJsonStr, workspace)
-                jsonArrayStr = '' 
+            if listOfJsonStrToPost != '':
+                entireJsonData = elementsJsonStrTemplate%listOfJsonStrToPost
+                post(entireJsonData, workspace)
+                listOfJsonStrToPost = '' 
     
 ##########################################################################################    
 #
@@ -182,4 +199,6 @@ def doIt():
 if __name__ == '__main__':
     
     doIt()
-
+    
+    
+    
