@@ -126,8 +126,12 @@ public class EmsScriptNode extends ScriptNode implements
     public static boolean versionCacheDebugPrint = false;
     
     // private members to cache qualified names, ids, and site characterizations
-    private String qualifiedName = null;
-    private String qualifiedId = null;
+    // These don't work because sendCommitDeltas asks for json at two time
+    // points, so the first one is cached and reused for the second timepoint.
+    // If wanting to cache, cache like the deepJsonCache.
+    //    private String qualifiedName = null;
+    //    private String qualifiedId = null;
+    
     private String siteCharacterizationId = null;
 
     public boolean renamed = false;
@@ -1374,12 +1378,18 @@ public class EmsScriptNode extends ScriptNode implements
                 NodeRef vref = NodeUtil.getNodeRefAtTime( node.getNodeRef(), dateTime );
                 if ( vref != null ) {
                     node = new EmsScriptNode( vref, getServices() );
+                } else {
+                    // Don't want the reified package at the wrong time; null is
+                    // correct.
+                    node = null;
                 }
             }
         } else {
             node = new EmsScriptNode( ref, getServices() );
         }
 
+        if ( node == null ) return null;
+        
         // FIXME this seraches below are not always going to return nodes from the
         //       SpaceStore
         
@@ -1899,6 +1909,27 @@ public class EmsScriptNode extends ScriptNode implements
     public Object getNodeRefProperty( String acmType, boolean ignoreWorkspace,
                                Date dateTime, boolean findDeleted,
                                boolean skipNodeRefCheck, WorkspaceNode ws ) {
+        // Make sure we have the right node ref before getting a property from it.
+        if ( dateTime != null && getNodeRef().getStoreRef() != null && 
+             getNodeRef().getStoreRef().equals( StoreRef.STORE_REF_WORKSPACE_SPACESSTORE ) ) {
+            NodeRef realRef = null;
+            //if ( NodeUtil.workspacesEqual( ws, getWorkspace() ) ) {
+                realRef = NodeUtil.getNodeRefAtTime( getNodeRef(), dateTime );
+            //} else {
+                  // Can't do this--it causes an infinite loop. It's the caller's
+                  // responsibility to have a node in the right workspace.
+            //    realRef = NodeUtil.getNodeRefAtTime( getNodeRef(), ws, dateTime );
+            //}
+            if ( realRef != null && !realRef.equals( getNodeRef() ) ) {
+                if ( realRef.getStoreRef() != StoreRef.STORE_REF_WORKSPACE_SPACESSTORE ) {
+                    EmsScriptNode realNode =  new EmsScriptNode( realRef, getServices() );
+                    return realNode.getNodeRefProperty( acmType,
+                                                        ignoreWorkspace,
+                                                        dateTime, findDeleted,
+                                                        skipNodeRefCheck, ws );
+                }
+            }
+        }
         Object result = getPropertyImpl( acmType, true );  // TODO -- This should be passing in cacheOkay from the caller instead of true!
 
         // get noderefs from the proper workspace unless the property is a
@@ -2247,16 +2278,10 @@ public class EmsScriptNode extends ScriptNode implements
     }
 
     public String getSysmlQName(Date dateTime, WorkspaceNode ws, boolean doCache) {
-        if (qualifiedName != null) {
-            return qualifiedName;
-        }
         return getSysmlQPath( true, dateTime, ws, doCache );
     }
 
     public String getSysmlQId(Date dateTime, WorkspaceNode ws, boolean doCache) {
-        if (qualifiedId != null) {
-            return qualifiedId;
-        }
         return getSysmlQPath( false, dateTime, ws, doCache );
     }
     
@@ -2292,6 +2317,9 @@ public class EmsScriptNode extends ScriptNode implements
         // TODO REVIEW
         // This is currently not called on reified packages, so as long as the ems:owner always points
         // to reified nodes, as it should, then we dont need to replace pkgSuffix in the qname.
+        // Some elements have a name of "" and they appear to be skipped in the
+        // qualified name. Do we want to treat this the same as a null name?
+        // Currently, we do not.
 
         String runAsUser = AuthenticationUtil.getRunAsUser();
         boolean changeUser = !ADMIN_USER_NAME.equals( runAsUser );
@@ -2301,6 +2329,9 @@ public class EmsScriptNode extends ScriptNode implements
 
         String qualifiedName = "/" + getProperty( "sysml:name" );
         String qualifiedId =  "/" + getProperty( "sysml:id" );
+//        if ( qualifiedId.contains( "exposed_id" ) ) {
+//            System.out.println( "Calculating qualified name and id for " + qualifiedId );
+//        }
 
         EmsScriptNode owner = this.getOwningParent(dateTime, ws, false, true );
         String ownerName = owner != null ? owner.getName() : null;
@@ -2347,8 +2378,11 @@ public class EmsScriptNode extends ScriptNode implements
         }
 
         if ( doCache ) {
-            this.qualifiedId = qualifiedId;
-            this.qualifiedName = qualifiedName;
+// if ( qualifiedId.contains( "exposed_id" ) ) {
+//     System.out.println( "Setting qualified id: " + qualifiedId );
+// }
+//            this.qualifiedId = qualifiedId;
+//            this.qualifiedName = qualifiedName;
             if ( this.siteCharacterizationId == null ) {
                 this.siteCharacterizationId = siteCharacterizationId;
             }
@@ -5080,10 +5114,12 @@ public class EmsScriptNode extends ScriptNode implements
             QName a = queue.get(0);
             queue.remove( 0 );
             AspectDefinition aspect = ds.getAspect( a );
-            QName p = aspect.getParentName();
-            if ( p != null && !aspects.contains( p ) ) {
-                aspects.add( p );
-                queue.add( p );
+            if (aspect != null) {
+                QName p = aspect.getParentName();
+                if ( p != null && !aspects.contains( p ) ) {
+                    aspects.add( p );
+                    queue.add( p );
+                }
             }
         }
         return aspects;

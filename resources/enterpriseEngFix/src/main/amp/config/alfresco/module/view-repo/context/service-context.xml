@@ -98,6 +98,11 @@
 	    <property name="repository" ref="repositoryHelper"/>
     </bean>	
 
+    <bean id="workspaceDiff" class="gov.nasa.jpl.view_repo.actions.WorkspaceDiffActionExecuter" parent="action-executer">
+        <property name="services" ref="ServiceRegistry"/>
+        <property name="repository" ref="repositoryHelper"/>
+    </bean> 
+    
     <bean id="configurationGeneration" class="gov.nasa.jpl.view_repo.actions.ConfigurationGenerationActionExecuter" parent="action-executer">
 	    <property name="services" ref="ServiceRegistry"/>
 	    <property name="repository" ref="repositoryHelper"/>

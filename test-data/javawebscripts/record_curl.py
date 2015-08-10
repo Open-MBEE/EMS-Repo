@@ -28,7 +28,7 @@ parser.add_option("-d", "--data", default="", help="Data to post in json")
 parser.add_option("-u", "--url", default=BASE_URL_WS, help="Base URL to use DEFAULT: " + BASE_URL_WS)
 parser.add_option("-p", "--post", default="elements", help="Post-type: elements, views, products DEFAULT: elements")
 parser.add_option("-b", "--branch", default="master/", help="The workspace branch DEFAULT: master/")
-parser.add_option("-o", "--project", default="False", help="Set to True if creating a project DEFAULT: False")
+parser.add_option("-o", "--project", dest="project", action="store_true", default=False, help="Set True if creating a project DEFAULT: False")
 parser.add_option("-f", "--filter", default="", help="A string of comma separated values to be removed from the output i.e. \"filter1,filter2,filter3...\" (no spaces)")
 
 #options to add test to the regression test harness
@@ -185,7 +185,7 @@ if options.runBranches != "":
 value = "[\n" + str(latestTest + 1) + ',\n"' + options.testName + '",\n"' + options.description + \
         '",\n' + 'create_curl_cmd(type="' + options.type + '", data="' + curl_data + '", base_url="' + \
         curl_base_url + '", post_type="' + options.post + '", branch="' + options.branch + '", project_post=' + \
-        options.project + '),\n' + options.jsonDiff + ',\n' + listOfFilters + ',\n' + listOfBranches + '\n],\n'
+        str(options.project) + '),\n' + options.jsonDiff + ',\n' + listOfFilters + ',\n' + listOfBranches + '\n],\n'
 
 #insert the brace and leave room so that the next test can be input
 i = lines.index("]\n")
