@@ -2010,6 +2010,306 @@ common_filters+['"qualifiedId"', '"sysmlid"'],
 ["workspaces"]
 ],
                
+[
+10004,
+"PostAToMaster",
+"Post element a to master.",
+create_curl_cmd(type="POST", data="a.json", base_url="http://localhost:8080/alfresco/service/workspaces/", post_type="elements", branch="master/", project_post=False),
+True,
+common_filters,
+["develop"]
+],
+
+[
+10005,
+"CreateAParentWorkspace",
+"Create a \"parent\" workspace off of master..",
+create_curl_cmd(type="POST", data="", base_url="http://localhost:8080/alfresco/service/workspaces/", post_type="", branch="theParentWorkspace?sourceWorkspace=master", project_post=False),
+True,
+common_filters,
+["develop"]
+],
+
+[
+10006,
+"PostBToMaster",
+"Post element b to master.",
+create_curl_cmd(type="POST", data="b.json", base_url="http://localhost:8080/alfresco/service/workspaces/", post_type="elements", branch="master/", project_post=False),
+True,
+common_filters,
+["develop"]
+],
+
+[
+10007,
+"PostCToParent",
+"Post element c to the parent workspace.",
+create_curl_cmd(type="POST", data="c.json", base_url="http://localhost:8080/alfresco/service/workspaces/", post_type="elements", branch="theParentWorkspace/", project_post=False),
+True,
+common_filters,
+["develop"]
+],
+
+[
+10008,
+"CreateASubWorkspace",
+"Create a \"subworkspace\" workspace off of the parent.",
+create_curl_cmd(type="POST", data="", base_url="http://localhost:8080/alfresco/service/workspaces/", post_type="", branch="theSubworkspace?sourceWorkspace=theParentWorkspace", project_post=False),
+True,
+common_filters,
+["develop"]
+],
+
+[
+10009,
+"PostDToMaster",
+"Post element d to master.",
+create_curl_cmd(type="POST", data="d.json", base_url="http://localhost:8080/alfresco/service/workspaces/", post_type="elements", branch="master/", project_post=False),
+True,
+common_filters,
+["develop"]
+],
+
+[
+10010,
+"PostEToParent",
+"Post element e to the parent workspace.",
+create_curl_cmd(type="POST", data="e.json", base_url="http://localhost:8080/alfresco/service/workspaces/", post_type="elements", branch="theParentWorkspace/", project_post=False),
+True,
+common_filters,
+["develop"]
+],
+
+[
+10011,
+"PostFToSubworkspace",
+"Post element f to the subworkspace.",
+create_curl_cmd(type="POST", data="f.json", base_url="http://localhost:8080/alfresco/service/workspaces/", post_type="elements", branch="theSubworkspace/", project_post=False),
+True,
+common_filters,
+["develop"]
+],
+
+[
+10012,
+"GetAInMaster",
+"Get element a in the master workspace.",
+create_curl_cmd(type="GET", data="elements/a", base_url="http://localhost:8080/alfresco/service/workspaces/", post_type="elements", branch="master/", project_post=False),
+True,
+common_filters,
+["develop"]
+],
+
+[
+10013,
+"GetAInParent",
+"Get element a in the parent workspace.",
+create_curl_cmd(type="GET", data="elements/a", base_url="http://localhost:8080/alfresco/service/workspaces/", post_type="elements", branch="theParentWorkspace/", project_post=False),
+True,
+common_filters,
+["develop"]
+],
+
+[
+10014,
+"GetAInSubworkspace",
+"Get element a in the subworkspace.",
+create_curl_cmd(type="GET", data="elements/a", base_url="http://localhost:8080/alfresco/service/workspaces/", post_type="elements", branch="theSubworkspace/", project_post=False),
+True,
+common_filters,
+["develop"]
+],
+
+[
+10030,
+"GetBInMaster",
+"Get element b in the master workspace.",
+create_curl_cmd(type="GET", data="elements/b", base_url="http://localhost:8080/alfresco/service/workspaces/", post_type="elements", branch="master/", project_post=False),
+True,
+common_filters,
+["develop"]
+],
+
+[
+10031,
+"GetBInParent",
+"Get element b in the parent workspace.",
+create_curl_cmd(type="GET", data="elements/b", base_url="http://localhost:8080/alfresco/service/workspaces/", post_type="elements", branch="theParentWorkspace/", project_post=False),
+True,
+common_filters,
+["develop"]
+],
+
+[
+10032,
+"GetBInSubworkspace",
+"Get element b in the subworkspace.",
+create_curl_cmd(type="GET", data="elements/b", base_url="http://localhost:8080/alfresco/service/workspaces/", post_type="elements", branch="theSubworkspace/", project_post=False),
+True,
+common_filters,
+["develop"]
+],
+
+[
+10033,
+"GetCInMaster",
+"Get element c in the master workspace.",
+create_curl_cmd(type="GET", data="elements/c", base_url="http://localhost:8080/alfresco/service/workspaces/", post_type="elements", branch="master/", project_post=False),
+True,
+common_filters,
+["develop"]
+],
+
+[
+10034,
+"GetCInParent",
+"Get element c in the parent workspace.",
+create_curl_cmd(type="GET", data="elements/c", base_url="http://localhost:8080/alfresco/service/workspaces/", post_type="elements", branch="theParentWorkspace/", project_post=False),
+True,
+common_filters,
+["develop"]
+],
+
+[
+10035,
+"GetCInSubworkspace",
+"Get element c in the subworkspace.",
+create_curl_cmd(type="GET", data="elements/c", base_url="http://localhost:8080/alfresco/service/workspaces/", post_type="elements", branch="theSubworkspace/", project_post=False),
+True,
+common_filters,
+["develop"]
+],
+
+[
+10036,
+"GetDInMaster",
+"Get element d in the master workspace.",
+create_curl_cmd(type="GET", data="elements/d", base_url="http://localhost:8080/alfresco/service/workspaces/", post_type="elements", branch="master/", project_post=False),
+True,
+common_filters,
+["develop"]
+],
+
+[
+10037,
+"GetDInParent",
+"Get element d in the parent workspace.",
+create_curl_cmd(type="GET", data="elements/d", base_url="http://localhost:8080/alfresco/service/workspaces/", post_type="elements", branch="theParentWorkspace/", project_post=False),
+True,
+common_filters,
+["develop"]
+],
+
+[
+10038,
+"GetDInSubworkspace",
+"Get element d in the subworkspace.",
+create_curl_cmd(type="GET", data="elements/d", base_url="http://localhost:8080/alfresco/service/workspaces/", post_type="elements", branch="theSubworkspace/", project_post=False),
+True,
+common_filters,
+["develop"]
+],
+
+[
+10039,
+"GetEInMaster",
+"Get element e in the master workspace.",
+create_curl_cmd(type="GET", data="elements/e", base_url="http://localhost:8080/alfresco/service/workspaces/", post_type="elements", branch="master/", project_post=False),
+True,
+common_filters,
+["develop"]
+],
+
+[
+10040,
+"GetEInParent",
+"Get element e in the parent workspace.",
+create_curl_cmd(type="GET", data="elements/e", base_url="http://localhost:8080/alfresco/service/workspaces/", post_type="elements", branch="theParentWorkspace/", project_post=False),
+True,
+common_filters,
+["develop"]
+],
+
+[
+10041,
+"GetEInSubworkspace",
+"Get element e in the subworkspace.",
+create_curl_cmd(type="GET", data="elements/e", base_url="http://localhost:8080/alfresco/service/workspaces/", post_type="elements", branch="theSubworkspace/", project_post=False),
+True,
+common_filters,
+["develop"]
+],
+
+[
+10042,
+"GetEInMaster",
+"Get element f in the master workspace.",
+create_curl_cmd(type="GET", data="elements/f", base_url="http://localhost:8080/alfresco/service/workspaces/", post_type="elements", branch="master/", project_post=False),
+True,
+common_filters,
+["develop"]
+],
+
+[
+10043,
+"GetEInParent",
+"Get element f in the parent workspace.",
+create_curl_cmd(type="GET", data="elements/f", base_url="http://localhost:8080/alfresco/service/workspaces/", post_type="elements", branch="theParentWorkspace/", project_post=False),
+True,
+common_filters,
+["develop"]
+],
+
+[
+10044,
+"GetEInSubworkspace",
+"Get element f in the subworkspace.",
+create_curl_cmd(type="GET", data="elements/f", base_url="http://localhost:8080/alfresco/service/workspaces/", post_type="elements", branch="theSubworkspace/", project_post=False),
+True,
+common_filters,
+["develop"]
+],
+
+[
+10048,
+"GetFInSubworkspace",
+"Get element f in the subworkspace.",
+create_curl_cmd(type="GET", data="elements/f", base_url="http://localhost:8080/alfresco/service/workspaces/", post_type="elements", branch="theSubworkspace/", project_post=False),
+True,
+common_filters,
+["develop"]
+],
+
+[
+10049,
+"GetFInMaster",
+"Get element f in the master workspace.",
+create_curl_cmd(type="GET", data="elements/f", base_url="http://localhost:8080/alfresco/service/workspaces/", post_type="elements", branch="master/", project_post=False),
+True,
+common_filters,
+["develop"]
+],
+
+[
+10050,
+"GetFInParent",
+"Get element f in the parent workspace.",
+create_curl_cmd(type="GET", data="elements/f", base_url="http://localhost:8080/alfresco/service/workspaces/", post_type="elements", branch="theParentWorkspace/", project_post=False),
+True,
+common_filters,
+["develop"]
+],
+
+[
+10051,
+"GetFInSubworkspace",
+"Get element f in the subworkspace.",
+create_curl_cmd(type="GET", data="elements/f", base_url="http://localhost:8080/alfresco/service/workspaces/", post_type="elements", branch="theSubworkspace/", project_post=False),
+True,
+common_filters,
+["develop"]
+],
+
 ]
 
 ##########################################################################################    
