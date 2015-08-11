@@ -84,7 +84,7 @@ else:
     curl_data = options.data
 
 if options.curl == "":
-     curl_cmd = create_curl_cmd(type=options.type, data=curl_data, base_url=curl_base_url, post_type=options.post, branch=options.branch, project_post=options.project)
+     curl_cmd = create_curl_cmd(type=options.type, data=curl_data, base_url=curl_base_url, post_type=options.post, branch=options.workspace, project_post=options.project)
 else:
      curl_cmd = options.curl
 
@@ -184,7 +184,7 @@ if options.runBranches != "":
        
 value = "[\n" + str(latestTest + 1) + ',\n"' + options.testName + '",\n"' + options.description + \
         '",\n' + 'create_curl_cmd(type="' + options.type + '", data="' + curl_data + '", base_url="' + \
-        curl_base_url + '", post_type="' + options.post + '", branch="' + options.branch + '", project_post=' + \
+        curl_base_url + '", post_type="' + options.post + '", branch="' + options.workspace + '", project_post=' + \
         str(options.project) + '),\n' + options.jsonDiff + ',\n' + listOfFilters + ',\n' + listOfBranches + '\n],\n'
 
 #insert the brace and leave room so that the next test can be input
