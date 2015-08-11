@@ -2241,46 +2241,6 @@ common_filters,
 ],
 
 [
-10042,
-"GetEInMaster",
-"Get element f in the master workspace.",
-create_curl_cmd(type="GET", data="elements/f", base_url="http://localhost:8080/alfresco/service/workspaces/", post_type="elements", branch="master/", project_post=False),
-True,
-common_filters,
-["develop"]
-],
-
-[
-10043,
-"GetEInParent",
-"Get element f in the parent workspace.",
-create_curl_cmd(type="GET", data="elements/f", base_url="http://localhost:8080/alfresco/service/workspaces/", post_type="elements", branch="theParentWorkspace/", project_post=False),
-True,
-common_filters,
-["develop"]
-],
-
-[
-10044,
-"GetEInSubworkspace",
-"Get element f in the subworkspace.",
-create_curl_cmd(type="GET", data="elements/f", base_url="http://localhost:8080/alfresco/service/workspaces/", post_type="elements", branch="theSubworkspace/", project_post=False),
-True,
-common_filters,
-["develop"]
-],
-
-[
-10048,
-"GetFInSubworkspace",
-"Get element f in the subworkspace.",
-create_curl_cmd(type="GET", data="elements/f", base_url="http://localhost:8080/alfresco/service/workspaces/", post_type="elements", branch="theSubworkspace/", project_post=False),
-True,
-common_filters,
-["develop"]
-],
-
-[
 10049,
 "GetFInMaster",
 "Get element f in the master workspace.",
