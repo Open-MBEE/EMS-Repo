@@ -307,12 +307,16 @@ public class JsonDiffDiff extends AbstractDiff< JSONObject, Object, String > {
         }
         return m;
     }
-
-    @Override
-    public boolean same( JSONObject t1, JSONObject t2 ) {
+    
+    public static boolean sameElement( JSONObject t1, JSONObject t2 ) {
         int comp = CompareUtils.compareCollections( toMap( t1 ), toMap( t2 ),
                                                     true, false );
         return comp == 0;
+    }
+
+    @Override
+    public boolean same( JSONObject t1, JSONObject t2 ) {
+        return sameElement(t1, t2);
     }
 
     @Override
@@ -344,6 +348,7 @@ public class JsonDiffDiff extends AbstractDiff< JSONObject, Object, String > {
        JSONObject diff3 = NodeUtil.clone( diff0 );
        
        // Go ahead and combine the changes to the second workspace.
+       // FIXME REVIEW HERE TODO dont want to glom ws1 of diff2 into ws1 of diff3
        glom(diff3, diff2);
        
        // Now integrate the changes to the first workspace.
@@ -384,9 +389,19 @@ public class JsonDiffDiff extends AbstractDiff< JSONObject, Object, String > {
                case ADD:
                    switch ( op3 ) {
                        case ADD: // ADD + ADD = UPDATE
-                           JSONObject undone = undo( element3_1, element1_2, true);
+                           Pair<JSONObject,JSONObject> undonePair = undo( element3_1, element1_2, true);
+                           JSONObject undone = undonePair.first;
+                           JSONObject newElement3_1 = undonePair.second;
                            JSONObject updated = glom( undone, element3_2 );
-                           dDiff3.set( id, DiffOp.UPDATE, updated );
+                           
+                           JSONObject glomElement3_1 = glom(newElement3_1, updated);
+                           
+                           if (sameElement(glomElement3_1,newElement3_1)) {
+                               d
+                           }
+                           else {
+                               dDiff3.set( id, DiffOp.UPDATE, updated );
+                           }
                            // TODO -- REVIEW -- What if the two adds are the same?
                            // If updated (the new element3_2) is the same as
                            // the new element3_1 (the old glommed with
@@ -926,8 +941,7 @@ public class JsonDiffDiff extends AbstractDiff< JSONObject, Object, String > {
                                      JSONObject element1, JSONObject element2 ) {
                                      //boolean something ) {
         // Start with the element change and alter based on the diff. If a
-        // property is not in added or updated, then remove it. All removed
-        // properties are set to null (using JSONObject.NULL).
+        // property is not in added or updated, then remove it.
         JSONObject element = NodeUtil.clone( element2 );
         if ( Utils.isNullOrEmpty( propertyDiff ) ) return element;
         Set< String > addedAndUpdatedIds = null, updatedIds = null, removedIds = null;
@@ -942,6 +956,8 @@ public class JsonDiffDiff extends AbstractDiff< JSONObject, Object, String > {
             element.put( "specialization", spec );
         }
         
+        // Find properties in element that were not added or updated, ie not
+        // changed, and remove them from element:
         for ( String pId : new ArrayList<String>( getPropertyIds( element ) ) ) {
             if ( !addedAndUpdatedIds.contains( pId ) ) {//&& !replace ) {
                 removeProperty( pId, element );
@@ -949,14 +965,14 @@ public class JsonDiffDiff extends AbstractDiff< JSONObject, Object, String > {
         }
         
 //        if ( replace ) {
-            JSONObject spec2 = element2.optJSONObject( "specialization" );
+            JSONObject spec2 = element1.optJSONObject( "specialization" );
             for ( String pId : removedIds ) {
-                if ( element2.has( pId ) ) {
+                if ( element1.has( pId ) ) {
                     element.put( pId, JSONObject.NULL );
+                } else if ( spec2.has( pId ) ) {
+                        spec.put( pId, JSONObject.NULL );           
                 } else {
-                    if ( spec2.has( pId ) ) {
-                        spec.put( pId, JSONObject.NULL );
-                    }
+                    // TODO error
                 }
             }
 //        }
@@ -984,10 +1000,10 @@ public class JsonDiffDiff extends AbstractDiff< JSONObject, Object, String > {
      * @param element0
      * @param element1
      * @param replace whether element1 replaces element0 or just updates it
-     * @return
+     * @return a pair representing X and element0 + element1
      */
-    public static JSONObject undo( JSONObject element0, JSONObject element1,
-                                   boolean replace ) {
+    public static Pair<JSONObject,JSONObject> undo( JSONObject element0, JSONObject element1,
+                                                    boolean replace ) {
         // The undoElement below is X in the equation, element0 + element1 + X =
         // element0.
         //
@@ -1000,7 +1016,7 @@ public class JsonDiffDiff extends AbstractDiff< JSONObject, Object, String > {
         List< Set< String > > propDiff = diffProperties( null, element0plus1, element0 );
         JSONObject undoElement = toJson( propDiff, element0plus1, element0 );
         
-        return undoElement;
+        return new Pair<JSONObject,JSONObject>(undoElement,element0plus1);
     }
 
     public static JSONObject glomElements( JSONObject element0, JSONObject element1,
