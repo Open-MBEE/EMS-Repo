@@ -2328,8 +2328,10 @@ public class ModelPost extends AbstractJavaWebScript {
                             }
                         };
                     }
-                    response.append("JSON uploaded, model load being processed in background.\n");
-                    response.append("You will be notified via email when the model load has finished.\n"); 
+                    if (status.getCode() == HttpServletResponse.SC_OK) {
+                        response.append("JSON uploaded, model load being processed in background.\n");
+                        response.append("You will be notified via email when the model load has finished.\n");
+                    }
                 }
                 else {
                     // Check if input is K or JSON
@@ -2501,8 +2503,6 @@ public class ModelPost extends AbstractJavaWebScript {
                 };
             }
 
-            final Map< Object, Object > results = new LinkedHashMap< Object, Object >();
-
             if ( !suppressElementJson ) {
 
                 // Create JSON object of the elements to return:
@@ -2632,10 +2632,7 @@ public class ModelPost extends AbstractJavaWebScript {
             EmsScriptNode jobNode = ActionUtil.getOrCreateJob(siteNode, jobName, "ems:Job", status, response);
 
             if (jobNode == null) {
-                String errorMsg = 
-                        String.format("Could not create JSON file for background load: site[%s]  job[%s]",
-                                      siteNode.getName(), jobName);
-                log( Level.ERROR, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, errorMsg );
+                log( Level.ERROR, status.getCode(), response.toString() );
                 return;
             }
             // write out the json
@@ -2680,19 +2677,6 @@ public class ModelPost extends AbstractJavaWebScript {
     }
     
 
-//    protected EmsScriptNode getProjectNodeFromRequest(WebScriptRequest req, boolean createIfNonexistent) {
-//        String runAsUser = AuthenticationUtil.getRunAsUser();
-//        boolean changeUser = !EmsScriptNode.ADMIN_USER_NAME.equals( runAsUser );
-//        if ( changeUser ) {
-//            AuthenticationUtil.setRunAsUser( EmsScriptNode.ADMIN_USER_NAME );
-//        }
-//        EmsScriptNode n = 
-//        if ( changeUser ) {
-//            AuthenticationUtil.setRunAsUser( runAsUser );
-//        }
-//
-//        
-//    }
     protected EmsScriptNode getProjectNodeFromRequest(WebScriptRequest req, boolean createIfNonexistent) {
         WorkspaceNode workspace = getWorkspace( req );
         String timestamp = req.getParameter( "timestamp" );
@@ -2736,19 +2720,36 @@ public class ModelPost extends AbstractJavaWebScript {
         // the site.  Give a warning if multiple projects are found.  There is a requirement that
         // there should never be more than one project per site on Europa.
         if (projectId.equals( siteName + "_" + NO_PROJECT_ID )) {
-
-            Map< String, EmsScriptNode > nodeList = searchForElements(NodeUtil.SearchType.TYPE.prefix,
-                                                                    Acm.ACM_PROJECT, false,
-                                                                    workspace, dateTime,
-                                                                    siteName);
-
-            if (nodeList != null && nodeList.size() > 0) {
-                EmsScriptNode projectNodeNew = nodeList.values().iterator().next();
-                String projectIdNew = projectNodeNew != null ? projectNodeNew.getSysmlId() : projectId;
-                projectId = projectIdNew != null ? projectIdNew : projectId;
-
-                if (nodeList.size() > 1) {
-                    log(Level.WARN, "ProjectId not supplied and multiple projects found for site %s using ProjectId %s", siteName, projectId);
+//            // search JSON for owner that is project
+//            JSONObject json = (JSONObject)req.parseContent();
+//            if (json.has( "elements" )) {
+//                JSONArray elementsJson = json.getJSONArray( "elements" );
+//                for (int ii = 0; ii < elementsJson.length(); ii++) {
+//                    JSONObject elementJson = elementsJson.getJSONObject( ii );
+//                    if (elementJson.has( "owner" )) {
+//                        String owner = elementJson.getString( "owner" );
+//                        if (owner.startsWith( "PROJECT-" )) {
+//                            projectId = owner;
+//                            break;
+//                        }
+//                    }
+//                }
+//            }
+            
+            if (!projectId.startsWith("PROJECT-")) {
+                Map< String, EmsScriptNode > nodeList = searchForElements(NodeUtil.SearchType.TYPE.prefix,
+                                                                        Acm.ACM_PROJECT, false,
+                                                                        workspace, dateTime,
+                                                                        siteName);
+    
+                if (nodeList != null && nodeList.size() > 0) {
+                    EmsScriptNode projectNodeNew = nodeList.values().iterator().next();
+                    String projectIdNew = projectNodeNew != null ? projectNodeNew.getSysmlId() : projectId;
+                    projectId = projectIdNew != null ? projectIdNew : projectId;
+    
+                    if (nodeList.size() > 1) {
+                        log(Level.WARN, "ProjectId not supplied and multiple projects found for site %s using ProjectId %s", siteName, projectId);
+                    }
                 }
             }
         }

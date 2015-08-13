@@ -4042,4 +4042,8 @@ public class NodeUtil {
     public static void concurrencyTest() {
         
     }
+    
+    public static String getHostname() {
+        return services.getSysAdminParams().getAlfrescoHost();
+    }
 }

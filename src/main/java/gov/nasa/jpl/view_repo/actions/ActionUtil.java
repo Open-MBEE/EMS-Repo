@@ -29,10 +29,8 @@
 
 package gov.nasa.jpl.view_repo.actions;
 
-import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.util.Acm;
-import gov.nasa.jpl.view_repo.util.CommitUtil;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
@@ -41,8 +39,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Date;
-import java.util.HashSet;
-import java.util.Set;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -141,7 +137,7 @@ public class ActionUtil {
         EmsScriptNode user = new EmsScriptNode(services.getPersonService().getPerson(username), services, new StringBuffer());
         String recipient = (String) user.getProperty("cm:email");
 
-        String sender = services.getSysAdminParams().getAlfrescoHost() + "@jpl.nasa.gov";
+        String sender = NodeUtil.getHostname() + "@jpl.nasa.gov";
         sendEmailTo(sender, recipient, msg, subject, services);
     }
 
@@ -272,10 +268,18 @@ public class ActionUtil {
             jobNode = jobPkgNode.createNode(jobName, jobType);
             jobNode.createOrUpdateProperty("cm:isContentIndexed", false);
         } else {
-            String jobStatus = (String)jobNode.getProperty("ems:job_status");
+            // don't use getProperty since cache isn't outdated for jobs at the moment.
+            String jobStatus = (String)jobNode.getProperties().get("{http://jpl.nasa.gov/model/ems/1.0}job_status");
             if (jobStatus != null && jobStatus.equals("Active")) {
-                status.setCode(HttpServletResponse.SC_CONFLICT, "Previous job is still active.");
-                return null;
+                Date modified = (Date)jobNode.getProperty("cm:modified");
+                status.setCode(HttpServletResponse.SC_CONFLICT, 
+                               String.format( "Background job for project started at %s " +
+                                              "is still active. If job is hung, use share " +
+                                              "to modify state at https://%s" + 
+                                              "/share/page/document-details?nodeRef=%s",
+                                              modified, NodeUtil.getHostname(),
+                                              jobNode.getNodeRef()));
+                return null;    
             }
         }
 
