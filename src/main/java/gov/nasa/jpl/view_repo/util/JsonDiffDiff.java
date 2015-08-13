@@ -217,6 +217,35 @@ public class JsonDiffDiff extends AbstractDiff< JSONObject, Object, String > {
         }
         return null;
     }
+    
+    public static Collection< String > getPropertyIds( JSONObject t ) {
+        Set<String> set = new LinkedHashSet< String >( t.keySet() );
+        set.remove( "specialization" );
+        JSONObject spec = t.optJSONObject( "specialization" );
+        if ( spec != null ) {
+            set.addAll( spec.keySet() );
+        }
+        return set;
+    }
+
+    
+    public static Map<String, Object> getPropertyMap( JSONObject element ) {
+        Map<String, Object> properties = new LinkedHashMap<String, Object>();
+        JSONObject specialization = element.optJSONObject( "specialization" );
+        for ( String k : getPropertyIds( element ) ) {
+            Object v = null;
+            if ( element.has( k ) ) {
+                v = element.opt( k );
+            } else if ( specialization != null && specialization.has( k ) ) {
+                v = specialization.opt( k );
+            } else {
+                continue;
+            }
+            properties.put( k, v );
+        }
+        return properties;
+    }
+
 
     public static Map<String,JSONObject > toElementMap( JSONObject o ) {
         Map< String, Object > map = toMap( o );
@@ -288,6 +317,7 @@ public class JsonDiffDiff extends AbstractDiff< JSONObject, Object, String > {
 
     @Override
     public boolean sameProperty( Object prop1, Object prop2 ) {
+        // REVIEW -- might want to check and see if prop1 is a JSONObject or JSONArray.
         int comp = CompareUtils.compare( prop1, prop2 );
         return comp == 0;
     }
@@ -352,11 +382,16 @@ public class JsonDiffDiff extends AbstractDiff< JSONObject, Object, String > {
            JSONObject element3_1 = dDiff3.getElement1( id );
            switch ( op1 ) {
                case ADD:
-                   switch ( dDiff3.getDiffOp( id ) ) {
-                       case ADD:
-                           JSONObject undone = undo( element3_1, element1_2, false);
+                   switch ( op3 ) {
+                       case ADD: // ADD + ADD = UPDATE
+                           JSONObject undone = undo( element3_1, element1_2, true);
                            JSONObject updated = glom( undone, element3_2 );
-                           dDiff3.set( id, op3, updated );
+                           dDiff3.set( id, DiffOp.UPDATE, updated );
+                           // TODO -- REVIEW -- What if the two adds are the same?
+                           // If updated (the new element3_2) is the same as
+                           // the new element3_1 (the old glommed with
+                           // element1), then remove element3_2 from the diff.
+                           // Should we remove element3_1?
                            break;
                        case UPDATE:
                            break;
@@ -515,6 +550,7 @@ public class JsonDiffDiff extends AbstractDiff< JSONObject, Object, String > {
         // Glom workspace 1 changes
         // Iterate through each diff in order adding any new elements that were
         // not in previous diffs.
+        // TODO -- REVIEW -- Don't you want to overwrite these with any new values?!
         JSONArray elements = glommedDiff.getJSONArray( "elements" );
         for ( int i = 0; i < diffs.size(); ++i ) {
             JSONObject diff =  diffs.get( i );
@@ -878,25 +914,108 @@ public class JsonDiffDiff extends AbstractDiff< JSONObject, Object, String > {
            return diff3;
         }
 
+    protected static List< Set< String > >
+            diffProperties( AbstractDiff< JSONObject, Object, String > aDiff,
+                            JSONObject t1, JSONObject t2 ) {
+        Map< String, Object > properties1 = getPropertyMap( t1 );
+        Map< String, Object > properties2 = getPropertyMap( t2 );
+        return diffProperties( aDiff, properties1, properties2 );
+    }
+
+    public static JSONObject toJson( List< Set< String > > propertyDiff,
+                                     JSONObject element1, JSONObject element2 ) {
+                                     //boolean something ) {
+        // Start with the element change and alter based on the diff. If a
+        // property is not in added or updated, then remove it. All removed
+        // properties are set to null (using JSONObject.NULL).
+        JSONObject element = NodeUtil.clone( element2 );
+        if ( Utils.isNullOrEmpty( propertyDiff ) ) return element;
+        Set< String > addedAndUpdatedIds = null, updatedIds = null, removedIds = null;
+        addedAndUpdatedIds = propertyDiff.get( 0 ); // add added ids
+        if ( propertyDiff.size() > 1 ) updatedIds = propertyDiff.get( 1 );
+        if ( updatedIds != null ) addedAndUpdatedIds.addAll( updatedIds );
+        if ( propertyDiff.size() > 2 ) removedIds = propertyDiff.get( 2 );
+        
+        JSONObject spec = element.optJSONObject( "specialization" );
+        if ( spec == null ) {
+            spec = new JSONObject();
+            element.put( "specialization", spec );
+        }
+        
+        for ( String pId : new ArrayList<String>( getPropertyIds( element ) ) ) {
+            if ( !addedAndUpdatedIds.contains( pId ) ) {//&& !replace ) {
+                removeProperty( pId, element );
+            }
+        }
+        
+//        if ( replace ) {
+            JSONObject spec2 = element2.optJSONObject( "specialization" );
+            for ( String pId : removedIds ) {
+                if ( element2.has( pId ) ) {
+                    element.put( pId, JSONObject.NULL );
+                } else {
+                    if ( spec2.has( pId ) ) {
+                        spec.put( pId, JSONObject.NULL );
+                    }
+                }
+            }
+//        }
+        return element;
+    }
+    
+    public static Object removeProperty( String pId, JSONObject element ) {
+        if ( element.has( pId ) ) {
+            return element.remove( pId );
+        }
+        JSONObject spec = element.optJSONObject( "specialization" );
+        if ( spec != null ) {
+            return spec.remove( pId );
+        }
+        return null;
+    }
+
     /**
      * Undo the changes represented by {@code element1} that would be made to
-     * {@code element0}. In other words, what element changes would need to be
-     * applied to undo the changes that element1 would make to element0 in order
-     * to restore element0 to its original state.
+     * {@code element0}. In other words, return the element change that would
+     * need to be applied to undo the changes that {@code element1} would make
+     * to {@code element0} in order to restore {@code element0} to its original
+     * state. {@code element0 + element1 + X = element0}. Solve for X.
      * 
      * @param element0
      * @param element1
+     * @param replace whether element1 replaces element0 or just updates it
      * @return
      */
-    public JSONObject undo( JSONObject element0, JSONObject element1,
-                                   boolean updateOrReplace ) {
-        // We need to remove properties added, replace updated properties with
-        // those of element0, and if element1 is applied as a replacement, then
-        // restore element0's lost properties.
-        this.diffProperties( tid );
-        return diff3;
+    public static JSONObject undo( JSONObject element0, JSONObject element1,
+                                   boolean replace ) {
+        // The undoElement below is X in the equation, element0 + element1 + X =
+        // element0.
+        //
+        // We compute element0plus1 by applying (glomming) element1 to element0,
+        // taking into account whether element1's properties replace or update
+        // property0's. This diff represents the changes that X needs to make,
+        // so we just need it in the form of an element JSONObject. The toJson()
+        // function does this translation.
+        JSONObject element0plus1 = glomElements(element0, element1, replace);
+        List< Set< String > > propDiff = diffProperties( null, element0plus1, element0 );
+        JSONObject undoElement = toJson( propDiff, element0plus1, element0 );
+        
+        return undoElement;
     }
 
+    public static JSONObject glomElements( JSONObject element0, JSONObject element1,
+                                           boolean replace ) {
+        // TODO -- If replacing element0 with element1 we can return element1, but do we
+        // need to null the properties that element0 has the element1 does not
+        // have?
+        if ( replace ) return NodeUtil.clone( element1 );
+        // If updating, we just add the properties in element1 to element0,
+        // overwriting any those properties that are also in element0.
+        JSONObject glommedElement = NodeUtil.clone( element0 );
+        addProperties( glommedElement, element1 );
+        return glommedElement;
+    }
+    
         public static JSONObject makeEmptyDiffJson() throws JSONException {
             JSONObject diffJson = NodeUtil.newJsonObject();
             JSONObject ws1Json = NodeUtil.newJsonObject();
