@@ -1,16 +1,12 @@
 {"elements": [{
-    "owner": "holding_bin_no_site_no_project",
-    "creator": "admin",
-    "read": "2015-08-10T16:37:17.495-0700",
-    "created": "Mon Aug 10 16:37:17 PDT 2015",
-    "qualifiedName": "/no_site/no_site_no_project/holding_bin/null",
-    "editable": true,
     "modifier": "admin",
-    "documentation": "c is c",
-    "siteCharacterizationId": "no_site",
-    "sysmlid": "c",
     "qualifiedId": "/no_site/no_site_no_project/holding_bin_no_site_no_project/c",
-    "modified": "2015-08-10T16:37:17.343-0700",
-    "specialization": {"type": "Untyped"}
+    "qualifiedName": "/no_site/no_site_no_project/holding_bin/null",
+    "sysmlid": "c",
+    "documentation": "c is c",
+    "owner": "holding_bin_no_site_no_project",
+    "specialization": {"type": "Untyped"},
+    "editable": true,
+    "creator": "admin",
 }]}
 200

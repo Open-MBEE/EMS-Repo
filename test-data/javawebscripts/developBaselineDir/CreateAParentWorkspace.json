@@ -1,14 +1,8 @@
 {"workspaces": [{
-    "parent": "master",
-    "creator": "admin",
-    "qualifiedId": "master/fb6b1c12-1fe5-48b2-b555-98398779845f",
-    "qualifiedName": "master/theParentWorkspace",
-    "created": "2015-08-10T16:31:59.073-0700",
-    "name": "theParentWorkspace",
-    "modified": "2015-08-10T16:31:59.073-0700",
     "description": "",
-    "permission": "read",
-    "id": "fb6b1c12-1fe5-48b2-b555-98398779845f",
-    "branched": "2015-08-10T16:31:58.701-0700"
+    "qualifiedName": "master/theParentWorkspace",
+    "name": "theParentWorkspace",
+    "parent": "master",
+    "creator": "admin"
 }]}
 200

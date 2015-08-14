@@ -1,26 +1,23 @@
 {"elements": [{
-    "owner": "holding_bin_no_site_no_project",
-    "creator": "admin",
-    "read": "2015-08-10T16:23:28.049-0700",
-    "created": "Sat Aug 08 21:25:55 PDT 2015",
-    "qualifiedName": "/no_site/no_site_no_project/holding_bin/null",
-    "editable": true,
-    "modifier": "admin",
-    "documentation": "a is a",
-    "siteCharacterizationId": "no_site",
-    "sysmlid": "a",
     "qualifiedId": "/no_site/no_site_no_project/holding_bin_no_site_no_project/a",
-    "modified": "2015-08-08T21:25:55.721-0700",
+    "modifier": "admin",
+    "qualifiedName": "/no_site/no_site_no_project/holding_bin/null",
+    "owner": "holding_bin_no_site_no_project",
+    "documentation": "a is a",
+    "sysmlid": "a",
     "specialization": {
+        "propertyType": null,
         "isSlot": false,
         "isDerived": false,
-        "propertyType": null,
-        "type": "Property",
         "value": [{
             "valueExpression": null,
             "string": "the a value",
             "type": "LiteralString"
-        }]
-    }
+        }],
+        "type": "Property"
+    },
+    "editable": true,
+    "creator": "admin"
 }]}
 200
+
