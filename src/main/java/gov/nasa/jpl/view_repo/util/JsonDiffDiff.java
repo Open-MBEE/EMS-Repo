@@ -355,8 +355,18 @@ public class JsonDiffDiff extends AbstractDiff< JSONObject, Object, String > {
        JSONObject diff3 = NodeUtil.clone( diff0 );
        
        // Go ahead and combine the changes to the second workspace.
-       // FIXME REVIEW HERE TODO dont want to glom ws1 of diff2 into ws1 of diff3
-       glom(diff3, diff2);
+       // We need to be careful to not affect workspace1 of diff3, so let's
+       // first remove diff2's workspace1 before glomming.
+       JSONObject diff2NoWs1 = NodeUtil.clone( diff2 );
+       JSONObject ws1 = diff2NoWs1.optJSONObject( "workspace1" );
+       if ( ws1 != null ) {
+           JSONArray ws1Elements = ws1.optJSONArray( "elements" );
+           if ( ws1Elements == null || ws1Elements.length() > 0 ) {
+               ws1.put("elements", new JSONArray() );
+           }
+       }
+       // Now add diff2 to diff3.
+       glom(diff3, diff2NoWs1);
        
        // Get all the workpace pieces of the diffs.
        JsonDiffDiff dDiff1 = new JsonDiffDiff( diff1 );
