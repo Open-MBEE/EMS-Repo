@@ -138,10 +138,14 @@ public class MmsDiffGet extends AbstractJavaWebScript {
         
         userTimeStamp1 = getTimestamp1(req);
         userTimeStamp2 = getTimestamp2(req);
-        String latestTime1 = CommitUtil.replaceTimeStampWithCommitTime(dateTime1, ws1, services, response);
-        String latestTime2 = CommitUtil.replaceTimeStampWithCommitTime(dateTime2, ws2, services, response);
-        timestamp1 = null;
-        timestamp2 = null;
+        
+        //String latestTime1 = CommitUtil.replaceTimeStampWithCommitTime(dateTime1, ws1, services, response);
+        //String latestTime2 = CommitUtil.replaceTimeStampWithCommitTime(dateTime2, ws2, services, response);
+
+        String latestTime1 = null;
+        String latestTime2 = null;
+        String timestamp1 = null;
+        String timestamp2 = null;
         
         // Replace time string with latest commit node time if it
         // is not 'latest'.  If it is 'latest' then we just re-use
@@ -151,19 +155,23 @@ public class MmsDiffGet extends AbstractJavaWebScript {
         // same commit times.
         if (userTimeStamp1.equals( LATEST_NO_TIMESTAMP )) { 
             dateTime1 = null;
+            latestTime1 = CommitUtil.replaceTimeStampWithCommitTime(dateTime1, ws1, services, response);
             timestamp1 = userTimeStamp1;
         }
         else {
             dateTime1 = TimeUtils.dateFromTimestamp( userTimeStamp1 );
+            latestTime1 = CommitUtil.replaceTimeStampWithCommitTime(dateTime1, ws1, services, response);
             timestamp1 = latestTime1 != null ? latestTime1 : userTimeStamp1;
         }
         
         if (userTimeStamp2.equals( LATEST_NO_TIMESTAMP )) {
             dateTime2 = null;
+            latestTime2 = CommitUtil.replaceTimeStampWithCommitTime(dateTime2, ws2, services, response);
             timestamp2 = userTimeStamp2;
         }
         else {
             dateTime2 = TimeUtils.dateFromTimestamp( userTimeStamp2 );
+            latestTime2 = CommitUtil.replaceTimeStampWithCommitTime(dateTime2, ws2, services, response);
             timestamp2 = latestTime2 != null ? latestTime2 : userTimeStamp2;
         }
         

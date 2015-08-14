@@ -36,7 +36,6 @@ import gov.nasa.jpl.mbee.util.Timer;
 import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
-import gov.nasa.jpl.view_repo.util.EmsTransaction;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 
@@ -178,9 +177,9 @@ public class ModelGet extends AbstractJavaWebScript {
     @Override
     protected Map< String, Object >
             executeImplImpl( WebScriptRequest req, Status status, Cache cache ) {
-        if ( logger.isInfoEnabled() ) {
+        if ( logger.isDebugEnabled() ) {
             String user = AuthenticationUtil.getFullyAuthenticatedUser();
-            logger.info( user + " " + req.getURL() );
+            logger.debug( user + " " + req.getURL() );
         }
         Timer timer = new Timer();
         printHeader( req );

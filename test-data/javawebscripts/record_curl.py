@@ -6,6 +6,7 @@ import sys
 from regression_lib import create_curl_cmd
 import optparse
 import commands
+from __builtin__ import True, False
 
 #test_dir_path = "git/alfresco-view-repo/test-data/javawebscripts"
 HOST = "localhost:8080"
@@ -26,9 +27,19 @@ parser.add_option("-t", "--type", help="Type of curl command: POST, GET, DELETE"
 parser.add_option("-d", "--data", default="", help="Data to post in json")
 parser.add_option("-u", "--url", default=BASE_URL_WS, help="Base URL to use DEFAULT: " + BASE_URL_WS)
 parser.add_option("-p", "--post", default="elements", help="Post-type: elements, views, products DEFAULT: elements")
-parser.add_option("-b", "--branch", default="master/", help="The workspace branch DEFAULT: master/")
+parser.add_option("-w", "--workspace", default="master/", help="The workspace branch DEFAULT: master/")
 parser.add_option("-o", "--project", dest="project", action="store_true", default=False, help="Set True if creating a project DEFAULT: False")
 parser.add_option("-f", "--filter", default="", help="A string of comma separated values to be removed from the output i.e. \"filter1,filter2,filter3...\" (no spaces)")
+
+#options to add test to the regression test harness
+parser.add_option("--description", help="Test description")
+parser.add_option("--jsonDiff", dest="jsonDiff", action="store_true", default=False, help="Set True if using the json diff DEFAULT: False")
+parser.add_option("--runBranches", default="", help="A string of comma separated branch names that will run this test by default")
+
+parser.add_option("--setup", default=" ", help="Set up function (optional)")
+parser.add_option("--postProcess", default=" ", help="Post process function (optional)")
+parser.add_option("--teardown", default=" ", help="Tear down function (optional)")
+parser.add_option("--timeDelay", default=" ", help="Delay in seconds before running the test (optional)")
 
 options, args = parser.parse_args()
 
@@ -72,13 +83,13 @@ elif options.url == "BASE_URL_WS_NOBS":
 else:
     curl_base_url = options.url
 
-if options.data[0] == "{" and options.data[-1] == "}":
+if options.data and options.data[0] == "{" and options.data[-1] == "}":
     curl_data = "'" + options.data + "'"
 else:
     curl_data = options.data
 
 if options.curl == "":
-     curl_cmd = create_curl_cmd(type=options.type, data=curl_data, base_url=curl_base_url, post_type=options.post, branch=options.branch, project_post=options.project)
+     curl_cmd = create_curl_cmd(type=options.type, data=curl_data, base_url=curl_base_url, post_type=options.post, branch=options.workspace, project_post=options.project)
 else:
      curl_cmd = options.curl
 
@@ -99,11 +110,11 @@ if not os.path.exists(baseline_dir):
 #######################################
 
 print "Executing curl command\n"
+#returns the status and output of executing command in a shell
+(status, output) = commands.getstatusoutput(curl_cmd + "> " + baseline_orig_json)
+print output + "\n"
 print "Creating baseline %s.json in %s"%(options.testName, baseline_dir)
 
-status = 0
-(status, output) = commands.getstatusoutput(curl_cmd + "> " + baseline_orig_json)
-#returns the status and output of executing command in a shell
 if status == 0:
     file_orig = open(baseline_orig_json, "r")
 
@@ -111,10 +122,10 @@ if status == 0:
     orig_output = ""
     filter_output = ""
     if options.filter is not "":
-        options.filter = options.filter.split(",")
+        filters = options.filter.split(",")
         for line in file_orig:
             filterFnd = False
-            for filter in options.filter:
+            for filter in filters:
                 #if the output contains the filter:
                 if re.search(filter, line):
                     filterFnd = True
@@ -131,9 +142,91 @@ if status == 0:
         fileRead = file_orig.read()
         filter_output = fileRead
         orig_output = fileRead
+    #write the baseline file with the output json file with filters
+    file = open(baseline_json, "w")
+    file.write(filter_output)
+    file.close()
+    file_orig.close()
 
-file = open(baseline_json, "w")
-file.write(filter_output)
+def isTestNumber(testNum):
+    try:
+        int(testNum)
+        return True
+    except ValueError:
+        return False
+    
+print "Adding test case into regression test harness"
+file = open("regression_test_harness.py", "r")
+lines = file.readlines()
 file.close()
-file_orig.close()  
+
+latestTest = 0
+#check the file for the latest test case number
+for line in lines:
+    if isTestNumber(line[:-2]):
+        currentNumber = int(line[:-2])
+        if currentNumber > latestTest:
+            latestTest = currentNumber
+
+#creates table for the test harness
+listOfFilters = "common_filters"
+listOfBranches = ""
+
+#splits string up into individual values to concatenate into a string appropriate to the test harness
+def createListOfValues(values):
+    values = values.split(",")
+    listOfValues = '['
+    for value in values:
+        entry = '"' + value + '",'
+        listOfValues += entry
+    listOfValues = listOfValues[:-1] + ']'
+    return listOfValues
+
+if options.filter != "":
+    listOfFilters += '+'
+    listOfFilters += createListOfValues(options.filter)
+if options.runBranches != "":
+    listOfBranches = createListOfValues(options.runBranches)
+    
+optionalArguments = []
+listOfOptionalFunctions = ""
+#look through all of the optional arguments and see if one of them exists
+if options.setup != " " or options.postProcess != " " or options.teardown != " " or options.timeDelay != " ":
+    #compile all optional arguments into one list
+    optionalArguments.append(options.setup)
+    optionalArguments.append(options.postProcess)
+    optionalArguments.append(options.teardown)
+    optionalArguments.append(options.timeDelay)
+    #replace all the default values to None
+    optionalArguments = [argument.replace(" ", "None") for argument in optionalArguments]
+    #reverse list so that all the None strings at the end are removed
+    optionalArguments.reverse()
+    i = 0
+    while i == 0:
+        if optionalArguments.index("None") == 0:
+            optionalArguments.remove("None")
+        else:
+            i += 1
+    #list still has elements so join the list with ,\n to make correct table
+    if len(optionalArguments) != 0:
+        optionalArguments.reverse()
+        listOfOptionalFunctions += ',\n'
+        compiledStringOfArguments = ',\n'.join(optionalArguments)
+        listOfOptionalFunctions += compiledStringOfArguments          
+       
+value = "[\n" + str(latestTest + 1) + ',\n"' + options.testName + '",\n"' + options.description + \
+        '",\n' + 'create_curl_cmd(type="' + options.type + '", data="' + curl_data + '", base_url="' + \
+        curl_base_url + '", post_type="' + options.post + '", branch="' + options.workspace + '", project_post=' + \
+        str(options.project) + '),\n' + str(options.jsonDiff) + ',\n' + listOfFilters + ',\n' + listOfBranches + \
+        listOfOptionalFunctions + '\n],\n'
+
+#insert the brace and leave room so that the next test can be input
+i = lines.index("]\n")
+lines.insert(i, value + "\n")
+lines = "".join(lines)
+
+file = open("regression_test_harness.py", "w")
+file.write(lines)
+file.close()
+
 

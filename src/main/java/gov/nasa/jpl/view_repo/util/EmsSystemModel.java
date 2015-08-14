@@ -1,6 +1,7 @@
 package gov.nasa.jpl.view_repo.util;
 
 import gov.nasa.jpl.ae.event.Call;
+import gov.nasa.jpl.ae.event.FunctionCall;
 import gov.nasa.jpl.mbee.util.ClassUtils;
 import gov.nasa.jpl.mbee.util.Debug;
 import gov.nasa.jpl.mbee.util.HasId;
@@ -18,6 +19,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Vector;
 
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
@@ -26,6 +28,8 @@ import org.apache.log4j.Level;
 import org.springframework.extensions.webscripts.Status;
 
 import sysml.AbstractSystemModel;
+import sysml.SystemModel;
+import sysml.SystemModel.ModelItem;
 
 // <E, C, T, P, N, I, U, R, V, W, CT>
 //public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScriptNode, String, ? extends Serializable, String, String, Object, EmsScriptNode, String, String, EmsScriptNode > {
@@ -368,8 +372,130 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
     @Override
     public Collection< EmsScriptNode > getElement( Object context,
                                                    Object specifier ) {
-        // TODO Auto-generated method stub
-        return null;
+        return getElement( context, specifier, SystemModel.ModelItem.NAME );
+    }
+    public Collection< EmsScriptNode > getElement( Object context,
+                                                   Object specifier,
+                                                   SystemModel.ModelItem itemType) {
+        return getElement( context, specifier, itemType, null );
+        
+    }
+    public Collection< EmsScriptNode > getElement( Object context,
+                                                   Object specifier,
+                                                   ModelItem itemType,
+                                                   Date dateTime ) {
+        // HERE!!!  TODO -- call this from other getElementWith????()
+        StringBuffer response = new StringBuffer();
+        Status status = new Status();
+        // TODO -- need to take into account the context!
+//        Map< String, EmsScriptNode > elements =
+//                NodeUtil.searchForElements( specifier, true, null, dateTime,
+//                                            services, response, status );
+//      if ( elements != null ) return elements.values();
+//      return Collections.emptyList();
+        
+        boolean ignoreWorkspace = false;
+        WorkspaceNode workspace = null;
+        
+        // Convert context from NodeRef to EmsScriptNode or WorkspaceNode
+        if ( context instanceof NodeRef ) {
+            EmsScriptNode ctxt = new EmsScriptNode( (NodeRef)context, getServices(),
+                                                    response, status );
+            if ( ctxt.hasAspect( "Workspace" ) ) {
+                context = new WorkspaceNode( (NodeRef)context, getServices(),
+                                             response, status );
+            } else {
+                context = ctxt;
+            }
+        }
+        
+        // Set workspace from context.
+        if ( context instanceof WorkspaceNode ) {
+            workspace = (WorkspaceNode)context;
+        } else if ( context instanceof EmsScriptNode ) {
+            workspace = ( (EmsScriptNode)context ).getWorkspace();
+        } else ignoreWorkspace = true;
+        
+        // Treat the context as the set to search (or to call getElement() on each).
+        Object[] arr = null;
+        if ( context instanceof Collection ) {
+            arr = ( (Collection<?>)context ).toArray();
+        } else if ( context != null && context.getClass().isArray() ) {
+            arr = (Object[])context;
+        }
+        // HERE!!!  TODO!!!
+        if ( arr != null && arr.length > 0 ) {
+            if ( arr[0] instanceof NodeRef ) {
+                
+            } else if ( arr[0] instanceof EmsScriptNode ) {
+                
+            }
+        }
+        
+        // Try to get elements with specifier as name.
+        ArrayList< NodeRef > refs = null;
+        
+        switch ( itemType ) {
+            case NAME:
+                refs = NodeUtil.findNodeRefsBySysmlName( "" + specifier, ignoreWorkspace,
+                                                         workspace, dateTime,
+                                                         getServices(), false, false );
+                if ( !Utils.isNullOrEmpty( refs ) ) break;
+            case IDENTIFIER:
+                // Try to get elements with specifier as id.
+                refs =
+                    NodeUtil.findNodeRefsById( "" + specifier, ignoreWorkspace,
+                                               workspace, dateTime, getServices(),
+                                               false, false );
+                break;
+            case PROPERTY:
+                if ( specifier instanceof String ) {
+                    refs = NodeUtil.findNodeRefsBySysmlName( "" + specifier, ignoreWorkspace,
+                                                             workspace, dateTime,
+                                                             getServices(), false, false );
+                } else if ( specifier instanceof EmsScriptNode ) {
+                    return getElementWithProperty( context, (EmsScriptNode)specifier );
+                }
+                break;
+            case TYPE:
+            case VALUE:
+            case ELEMENT:
+            case VERSION:
+            case CONSTRAINT:
+            case RELATIONSHIP:
+            case VIEW:
+            case VIEWPOINT:
+            case WORKSPACE:
+            default:
+                Debug.error( true, false,
+                             "ERROR! Not yet supporting query type " + itemType
+                                     + " calling EmsSystemModel.getElement("
+                                     + context + ", " + specifier + ", "
+                                     + itemType + ", " + dateTime + ")" );
+        }
+        
+        // HERE!!! (Look for HERE above.)
+        // What other kinds of specifier should we look for? ...?
+
+        //filter( elements, methodCall, indexOfElementArgument );
+
+        
+        if ( Utils.isNullOrEmpty( refs ) ) return Collections.emptyList();
+        if ( refs.size() > 1 && context != null ) {//instanceof EmsScriptNode && !(context instanceof WorkspaceNode) ) {
+            ArrayList< EmsScriptNode > childNodes = new ArrayList< EmsScriptNode >();
+            for ( NodeRef ref : refs ) {
+                EmsScriptNode node = new EmsScriptNode( ref, getServices(), response, status );
+                EmsScriptNode owner = node.getOwningParent( dateTime, workspace, false );
+                if ( context.equals( owner )
+                     || ( context instanceof WorkspaceNode && context.equals( node.getWorkspace() ) ) ) {
+                    childNodes.add( node );
+                }
+            }
+            if ( childNodes.size() > 0 ) return childNodes;
+        }
+        List< EmsScriptNode > list = EmsScriptNode.toEmsScriptNodeList( refs, getServices(), response, status );
+        //System.out.println("getElementWithName(" + context + ", " + specifier + ", " + dateTime + ") = " + list);
+        return list;
     }
 
     @Override
@@ -395,9 +521,13 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
                                                            String specifier ) {
         return getElementWithName(context, specifier, null);
     }
+    
     public Collection< EmsScriptNode > getElementWithName( Object context,
                                                            String specifier,
                                                            Date dateTime ) {
+        if ( true ) {
+            return getElement( context, specifier, SystemModel.ModelItem.NAME );
+        }
         StringBuffer response = new StringBuffer();
         Status status = new Status();
         // TODO -- need to take into account the context!
@@ -1671,21 +1801,98 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
     }
 
     public Collection< Object >
-			map( Collection< Object > elements,
-				 Call call,
-				 int indexOfObjectArgument) throws InvocationTargetException {
+            map( Collection< Object > elements, Call call,
+                 int indexOfObjectArgument ) throws InvocationTargetException {
 
-		return call.map( elements, indexOfObjectArgument );
-	}
-
-
-    /**
-     * Evaluate the text expression (k, Java?).
-     * @param expression
-     * @return
-     */
-    public Object evaluate( String expression ) {
-        return null;
+        return call.map( elements, indexOfObjectArgument );
     }
     
+    public Collection< Object > map( Collection< Object > elements, Call call,
+                                     int indexOfObjectArgument,
+                                     Vector< Object > otherArguments )
+                                             throws InvocationTargetException {
+        call.getParameterTypes();
+        int argsSize = call.getArgumentVector().size();
+        int otherArgsSize = otherArguments.size();
+        // Make sure there are enough arguments. We assume that one to be
+        // substituted is skipped unless we can determine otherwise. In the case
+        // of a variable number of arguments, otherArguments may not provide
+        // one, which is legal, so otherArguments can be two short.
+        if ( argsSize > otherArgsSize + 1 + ( call.isVarArgs() ? 1 : 0 ) ) {
+            // TODO -- error
+        }
+        // Make sure there are not too many arguments if the call does not have
+        // a variable number of arguments.
+        else if ( argsSize < otherArgsSize && !call.isVarArgs() ) {
+            // TODO -- error
+        }
+        // See if we have strong evidence that the substituted arg is included
+        // in otherArguments.  By default, we assume not.
+        boolean otherArgsIncludesSubstitute =
+                ( argsSize == otherArgsSize && !call.isVarArgs() ) ||
+                ( argsSize - 1 == otherArgsSize );
+
+        // Set otherArguments before invoking
+        for ( int i = 0, j = 0; i < argsSize && j < otherArgsSize; ++i, ++j ) {
+            // skip the one to be substituted unless the otherArguments includes 
+            if ( i != indexOfObjectArgument || otherArgsIncludesSubstitute ) {
+                call.setArgument( i, otherArguments.get( j ) );
+            } else {
+                --j;
+            }
+        }
+        
+        // invoke the map
+        return call.map( elements, 1 );
+    }
+
+    // TODO dont like dependence on BAE for Call here....
+    public Collection< Object >
+            filter( Collection< Object > elements,
+                    FunctionCall call) throws InvocationTargetException {
+
+        return call.filter( elements, 1 );
+    }
+
+    
+    public Collection< Object > filter( Collection< Object > elements,
+                                        FunctionCall call,
+                                        int indexOfObjectArgument,
+                                        Vector< Object > otherArguments )
+                                             throws InvocationTargetException {
+        call.getParameterTypes();
+        int argsSize = call.getArgumentVector().size();
+        int otherArgsSize = otherArguments.size();
+        // Make sure there are enough arguments. We assume that one to be
+        // substituted is skipped unless we can determine otherwise. In the case
+        // of a variable number of arguments, otherArguments may not provide
+        // one, which is legal, so otherArguments can be two short.
+        if ( argsSize > otherArgsSize + 1 + ( call.isVarArgs() ? 1 : 0 ) ) {
+            // TODO -- error
+        }
+        // Make sure there are not too many arguments if the call does not have
+        // a variable number of arguments.
+        else if ( argsSize < otherArgsSize && !call.isVarArgs() ) {
+            // TODO -- error
+        }
+        // See if we have strong evidence that the substituted arg is included
+        // in otherArguments.  By default, we assume not.
+        boolean otherArgsIncludesSubstitute =
+                ( argsSize == otherArgsSize && !call.isVarArgs() ) ||
+                ( argsSize - 1 == otherArgsSize );
+
+        // Set otherArguments before invoking
+        for ( int i = 0, j = 0; i < argsSize && j < otherArgsSize; ++i, ++j ) {
+            // skip the one to be substituted unless the otherArguments includes 
+            if ( i != indexOfObjectArgument || otherArgsIncludesSubstitute ) {
+                call.setArgument( i, otherArguments.get( j ) );
+            } else {
+                --j;
+            }
+        }
+        
+        // invoke the filter
+        return call.filter( elements, 1 );
+    }
+
 }

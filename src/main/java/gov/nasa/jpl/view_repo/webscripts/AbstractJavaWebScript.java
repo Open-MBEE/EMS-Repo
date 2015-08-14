@@ -1258,7 +1258,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         
         // Email the progress (this takes a long time, so only do it for critical events):
         if (sendEmail) {
-            String hostname = services.getSysAdminParams().getAlfrescoHost();
+            String hostname = NodeUtil.getHostname();
             if (!Utils.isNullOrEmpty( hostname )) {
                 String sender = hostname + "@jpl.nasa.gov";
                 String username = NodeUtil.getUserName();
@@ -1381,7 +1381,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
     
         // Search for all constraints in the database:
         Collection<EmsScriptNode> constraintNodes = getGlobalSystemModel().getType(null, Acm.ACM_CONSTRAINT);
-log(Level.INFO, "all constraints in database: " + constraintNodes);
+//log(Level.INFO, "all constraints in database: " + constraintNodes);
 
         if (!Utils.isNullOrEmpty(constraintNodes)) {
     
@@ -1399,7 +1399,7 @@ log(Level.INFO, "all constraints in database: " + constraintNodes);
                 for (EmsScriptNode element : elements) {
     
                     String name = element.getName();
-log(Level.INFO, "element (" + element + ") vs. constraint (" + constraintNode + ")");
+//log(Level.INFO, "element (" + element + ") vs. constraint (" + constraintNode + ")");
                     if ( element.equals( constraintNode ) || ( name != null && constrElemNames.contains(name) ) ) {
                         addConstraintExpression(constraintNode, constraints, ws);
                         break;
@@ -1467,9 +1467,9 @@ log(Level.INFO, "element (" + element + ") vs. constraint (" + constraintNode + 
     public static Map<Object, Object> evaluate( Set< EmsScriptNode > elements, WorkspaceNode ws ) {
         log(Level.INFO, "Will attempt to evaluate expressions where found!");
         Map< EmsScriptNode, Collection< Constraint > > constraints = getAeConstraints( elements, ws );
-log(Level.INFO, "constraints: " + constraints);
+//log(Level.INFO, "constraints: " + constraints);
         Map< EmsScriptNode, Expression<?> > expressions = getAeExpressions( elements );
-log(Level.INFO, "expressions: " + expressions);
+//log(Level.INFO, "expressions: " + expressions);
     
         Map< Object, Object > results = new LinkedHashMap< Object, Object >();
         if ( !Utils.isNullOrEmpty( constraints ) ) {
@@ -1493,7 +1493,8 @@ log(Level.INFO, "expressions: " + expressions);
         if ( !Utils.isNullOrEmpty( expressions ) ) {
             for ( Entry< EmsScriptNode, Expression<?> > e : expressions.entrySet() ) {
                 if ( e != null && e.getKey() != null && e.getValue() != null ) {
-                    results.put( e.getKey(), e.getValue().evaluate( true ) );
+                    Object resultVal = e.getValue().evaluate( true );
+                    results.put( e.getKey(), resultVal );
                 }
             }
         }

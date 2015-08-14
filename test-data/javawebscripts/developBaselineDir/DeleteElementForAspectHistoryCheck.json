@@ -25,7 +25,10 @@
   },
   "workspace2": {
     "deletedElements": [{
+      "qualifiedName": "/europa/JW_TEST2/null/null",
       "sysmlid": "property_zzz",
+      "owner": "aspect_history_zzz",
+      "specialization": {"type": "Property"},
       "creator": "admin",
     }],
     "addedElements": [],

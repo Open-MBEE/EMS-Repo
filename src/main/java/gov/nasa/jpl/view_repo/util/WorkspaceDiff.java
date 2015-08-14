@@ -518,8 +518,10 @@ public class WorkspaceDiff implements Serializable {
         //       already are contained within the desired timestamps
         
         String elementName = NodeUtil.getSysmlId( ref1 );
+        Map< String, Pair< Object, Object >> propChanges = nodeDiff.getPropertyChanges( elementName );
+        if ( propChanges == null ) return false;
         Map< String, Pair< Object, Object > > changes =
-                new LinkedHashMap< String, Pair<Object,Object> >( nodeDiff.getPropertyChanges( elementName ) );
+                new LinkedHashMap< String, Pair<Object,Object> >( propChanges );
         Utils.removeAll( changes, WorkspaceNode.workspaceMetaProperties );
         if ( Utils.isNullOrEmpty( changes ) ) return false;
         
@@ -858,8 +860,10 @@ public class WorkspaceDiff implements Serializable {
     }
 
 
-    private JSONArray convertMapToJSONArray(Map<String, EmsScriptNode> set, Map<String, Version> versions, 
-                                            WorkspaceNode workspace, Date dateTime, boolean showAll) throws JSONException {
+    private JSONArray convertMapToJSONArray(Map<String, EmsScriptNode> map,
+                                            Map<String, Version> versions, 
+                                            WorkspaceNode workspace, Date dateTime,
+                                            boolean showAll) throws JSONException {
         Set<String> filter = null;
         if (!showAll) {
             filter = getFilter();
@@ -868,7 +872,17 @@ public class WorkspaceDiff implements Serializable {
         }
 
         JSONArray array = new JSONArray();
-        for (EmsScriptNode node: set.values()) {
+        for (EmsScriptNode node: map.values()) {
+            // Make sure the element exists at the dateTime.
+            if ( node != null ) {
+                NodeRef r = NodeUtil.getNodeRefAtTime( node.getNodeRef(),
+                                                       workspace, dateTime );
+                if ( r == null ) node = null;
+                //else node = new EmsScriptNode( r, getServices() ); 
+            }
+            if ( node == null ) {
+                continue;
+            }
             // allow the possibility that nodeDiff isn't being used to make the diff call
             if ( nodeDiff != null ) {
                 Map< String, Pair< Object, Object > > propChanges =

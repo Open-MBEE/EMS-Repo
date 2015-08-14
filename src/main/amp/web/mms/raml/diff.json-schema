@@ -16,7 +16,7 @@
         "status": 
         {
             "type": "string",
-            "description": "Indicates the status of the diff- GENERATING or COMPLETED (Read-Only)"
+            "description": "Indicates the status of the diff- STARTED, GENERATING, OUTDATED or COMPLETED (Read-Only)"
         },
         "user": 
         {
@@ -27,11 +27,6 @@
         {
             "type": "string",
             "description": "The email address of the user that started the diff (Read-Only)"
-        },
-        "diffTime": 
-        {
-            "type": "date",
-            "description": "The time the diff was started (Read-Only)"
         },
         "sequence": {
             "type": "integer",
