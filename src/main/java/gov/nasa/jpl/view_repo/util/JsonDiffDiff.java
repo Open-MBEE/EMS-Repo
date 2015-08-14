@@ -89,8 +89,25 @@ public class JsonDiffDiff extends AbstractDiff< JSONObject, Object, String > {
 //    public void setDiffMap2( LinkedHashMap< String, Pair< DiffOp, List< JSONObject > > > diffMap2 ) {
 //        this.diffMap2 = diffMap2;
 //    }
-    public void set( String id, DiffOp op, JSONObject element ) {
-        Pair< DiffOp, List< JSONObject > > p = diffMap2.get( id );
+    public void set1( String id, JSONObject element ) {
+        set( id, DiffOp.ADD, element, true );
+    }
+    public void set1( String id, DiffOp op, JSONObject element ) {
+        set( id, op, element, true );
+    }
+    public void set2( String id, DiffOp op, JSONObject element ) {
+        set( id, op, element, false );
+    }
+    public void set( String id, DiffOp op, JSONObject element, boolean workspace1 ) {
+        LinkedHashMap< String, Pair< DiffOp, List< JSONObject > > > diffMap =
+                workspace1 ? diffMap1 : diffMap2;
+
+        // NONE or deleting the element from workspace1 means removing it.
+        if ( ( workspace1 && op == DiffOp.DELETE ) || op == DiffOp.NONE ) {
+            diffMap.remove( id );
+        }
+        
+        Pair< DiffOp, List< JSONObject > > p = diffMap.get( id );
         
         // If there is no entry in the map for the sysmlid, create a new
         // entry with the operation and element.
@@ -98,7 +115,7 @@ public class JsonDiffDiff extends AbstractDiff< JSONObject, Object, String > {
             ArrayList< JSONObject > list = Utils.newList();
             if ( element != null ) list.add( element );
             p = new Pair< DiffOp,List< JSONObject > >( op, list );
-            diffMap2.put( id, p );
+            diffMap.put( id, p );
         } else {
             //DiffOp oldOp = p.first;
             p.first = op;
@@ -335,6 +352,14 @@ public class JsonDiffDiff extends AbstractDiff< JSONObject, Object, String > {
     public Set< String > filterValues( List< Set< String >> mapDiff ) {
         return super.filterValues(mapDiff);
     }
+    
+    protected void removeFromDiff(String id) {
+        removeFromAdded( id );
+        removeFromUpdated( id );
+        removeFromRemoved( id );
+        diffMap1.remove( id );
+        diffMap2.remove( id );
+    }
 
    /**
     * Update a diff with changes to the two workspaces.
@@ -385,138 +410,123 @@ public class JsonDiffDiff extends AbstractDiff< JSONObject, Object, String > {
            JSONObject element1_1 = dDiff1.getElement1( id );
            JSONObject element3_2 = dDiff3.getElement2( id );
            JSONObject element3_1 = dDiff3.getElement1( id );
+           // Compute the op3 - op1 case.
            switch ( op1 ) {
                case ADD:
                    switch ( op3 ) {
-                       case ADD: // ADD + ADD = UPDATE
-                           Pair<JSONObject,JSONObject> undonePair = undo( element3_1, element1_2, true);
+                       case ADD: // ADD - ADD = UPDATE
+                       case UPDATE: // UPDATE - ADD = UPDATE
+                           Pair< JSONObject, JSONObject > undonePair =
+                                   undo( element3_1, element1_2, true );
                            JSONObject undone = undonePair.first;
                            JSONObject newElement3_1 = undonePair.second;
-                           JSONObject updated = glom( undone, element3_2 );
-                           
-                           JSONObject glomElement3_1 = glom(newElement3_1, updated);
-                           
-                           if (sameElement(glomElement3_1,newElement3_1)) {
-                               d
-                           }
-                           else {
-                               dDiff3.set( id, DiffOp.UPDATE, updated );
-                           }
-                           // TODO -- REVIEW -- What if the two adds are the same?
-                           // If updated (the new element3_2) is the same as
-                           // the new element3_1 (the old glommed with
-                           // element1), then remove element3_2 from the diff.
-                           // Should we remove element3_1?
+                           JSONObject updated =
+                                   glomElements( undone, element3_2, false );
+
+                           dDiff3.updateDiff( id, newElement3_1, updated,
+                                               DiffOp.UPDATE );
                            break;
-                       case UPDATE:
+                       case DELETE:  // DELETE - ADD = DELETE
+                           newElement3_1 = NodeUtil.clone( element1_2 );
+                           dDiff3.set2( id, DiffOp.DELETE, newElement3_1 );
+                           dDiff3.set1( id, newElement3_1 );
                            break;
-                       case DELETE:
-                           break;
-                       case NONE:
+                       case NONE:  // NONE - ADD = DELETE
+                           newElement3_1 = NodeUtil.clone( element1_2 );
+                           dDiff3.set2( id, DiffOp.DELETE, newElement3_1 );
+                           dDiff3.set1( id, newElement3_1 );
                        default:
                           // TODO -- ERROR
                    }
                    break;
                case UPDATE:
+                   switch ( op3 ) {
+                       case ADD: // ADD - UPDATE = UPDATE
+                       case UPDATE: // UPDATE - UPDATE = UPDATE
+                           Pair< JSONObject, JSONObject > undonePair =
+                                   undo( element3_1, element1_2, false );
+                           JSONObject undone = undonePair.first;
+                           JSONObject newElement3_1 = undonePair.second;
+                           JSONObject updated = 
+                                   glomElements( undone, element3_2, false );
+                           
+                           dDiff3.updateDiff( id, newElement3_1, updated,
+                                              DiffOp.UPDATE );
+                           break;
+                       case DELETE:  // DELETE - UPDATE = DELETE
+                           newElement3_1 = NodeUtil.clone( element1_2 );
+                           dDiff3.set2( id, DiffOp.DELETE, newElement3_1 );
+                           dDiff3.set1( id, newElement3_1 );
+                           break;
+                       case NONE:  // NONE - UPDATE = UPDATE
+                            JSONObject oldElement3_1 =
+                                    ( element3_1 == null ? element1_1
+                                                         : element3_1 );
+                           undonePair = undo( oldElement3_1, element1_2, false);
+                           undone = undonePair.first;
+                           newElement3_1 = undonePair.second;
+
+                           dDiff3.updateDiff( id, newElement3_1, undone,
+                                              DiffOp.UPDATE );
+                           break;
+                       default:
+                          // TODO -- ERROR
+                   }
                    break;
                case DELETE:
+                   switch ( op3 ) {
+                       case ADD: // ADD - DELETE = ADD
+                           dDiff3.set1( id, DiffOp.DELETE, element3_1 );
+                           break;
+                       case UPDATE: // UPDATE - DELETE = ADD
+                           dDiff3.set2( id, DiffOp.ADD, element3_2 );
+                           dDiff3.set1( id, DiffOp.DELETE, element3_1 );
+                           break;
+                       case DELETE:  // DELETE - DELETE = NONE
+                           dDiff3.removeFromDiff(id);
+                           break;
+                       case NONE:  // NONE - DELETE = ADD
+                           dDiff3.set2( id, DiffOp.ADD, element3_1 );
+                           dDiff3.set1( id, DiffOp.DELETE, element3_1 );
+                           break;
+                       default:
+                           // TODO -- ERROR
+                   }
+                   break;
+               case NONE:
+                   // Nothing to do for this case
+                   switch ( op3 ) {
+                       case ADD: // ADD - NONE = ADD
+                       case UPDATE: // UPDATE - NONE = UPDATE
+                       case DELETE:  // DELETE - NONE = DELETE
+                       case NONE:  // NONE - NONE = NONE
+                           break;
+                       default:
+                   }
                    break;
                default:
-                   // BAD! -- TODO
+                   // TODO -- ERROR
            }
        }
-
-//       LinkedHashMap<String, Pair<DiffOp, List<JSONObject> > > diffMap1_1 =
-//               new LinkedHashMap< String, Pair<DiffOp,List<JSONObject> > >();
-//       LinkedHashMap<String, Pair<DiffOp, List<JSONObject> > > diffMap1_2 =
-//               new LinkedHashMap< String, Pair<DiffOp,List<JSONObject> > >();
-//       LinkedHashMap<String, Pair<DiffOp, List<JSONObject> > > diffMap3_1 =
-//               new LinkedHashMap< String, Pair<DiffOp,List<JSONObject> > >();
-//       LinkedHashMap<String, Pair<DiffOp, List<JSONObject> > > diffMap3_2 =
-//               new LinkedHashMap< String, Pair<DiffOp,List<JSONObject>> >();
-//       
-//       // Use glom to just add the pieces to maps indexed by element id.
-//       glom( DiffOp.ADD, dDiff1.getElements(), diffMap1_1 );
-//       glom( DiffOp.ADD, dDiff1.getAdded(), diffMap1_2 );
-//       glom( DiffOp.UPDATE, dDiff1.getUpdated(), diffMap1_2 );
-//       glom( DiffOp.DELETE, dDiff1.getRemoved(), diffMap1_2 );
-//       glom( DiffOp.ADD, dDiff3.getElements(), diffMap3_1 );
-//       glom( DiffOp.ADD, dDiff3.getAdded(), diffMap3_2 );
-//       glom( DiffOp.UPDATE, dDiff3.getUpdated(), diffMap3_2 );
-//       glom( DiffOp.DELETE, dDiff3.getRemoved(), diffMap3_2 );
-//       
-//       // Loop through elements in workspace2 of diff1 and update diff3.
-//       for ( Entry< String, Pair< DiffOp, List< JSONObject > > > entry : diffMap1_2.entrySet() ) {
-//           
-//            // Get the corresponding element for this entry from both worskpace1
-//            // and 2 of both diff1 and diff3.
-//
-//           // diff1 workspace2
-//           String id = entry.getKey();
-//           Pair< DiffOp, List< JSONObject > > p1_2 = entry.getValue();
-//           DiffOp op1_2 = p1_2.first;
-//           if ( Utils.isNullOrEmpty( p1_2.second ) ) {
-//               // nothing to do
-//               continue;
-//           }
-//           if ( p1_2.second.size() > 1 ) {
-//               // TODO -- ERROR -- just expecting one
-//           }
-//           JSONObject element1_2 = p1_2.second.get( 0 );
-//           if ( element1_2 == null ) continue;
-//           
-//           // diff1 workspace1
-//           Pair< DiffOp, List< JSONObject > > p1_1 = diffMap1_1.get(id);
-//           DiffOp op1_1 = p1_1.first;
-//           JSONObject element1_1 = null;
-//           if ( !Utils.isNullOrEmpty( p1_1.second ) ) {
-//               if ( p1_1.second.size() > 1 ) {
-//                   // TODO -- ERROR -- just expecting one
-//               }
-//               JSONObject element1 = p1_1.second.get( 0 );
-//           }
-//
-//           // diff3 workspace1
-//           Pair< DiffOp, List< JSONObject > > p3_1 = diffMap3_1.get(id);
-//           DiffOp op3_1 = p3_1.first;
-//           JSONObject element3_1 = null;
-//           if ( !Utils.isNullOrEmpty( p3_1.second ) ) {
-//               if ( p3_1.second.size() > 1 ) {
-//                   // TODO -- ERROR -- just expecting one
-//               }
-//               element3_1 = p3_1.second.get( 0 );
-//           }
-//           
-//           // diff3 workspace2
-//           Pair< DiffOp, List< JSONObject > > p3_2 = diffMap3_2.get(id);
-//           DiffOp op3_2 = p3_2.first;
-//           JSONObject element3_2 = null;
-//           if ( !Utils.isNullOrEmpty( p3_2.second ) ) {
-//               if ( p3_2.second.size() > 1 ) {
-//                   // TODO -- ERROR -- just expecting one
-//               }
-//               element3_2 = p3_2.second.get( 0 );
-//           }
-//
-//           
-//           switch ( p1_2.first ) {
-//               case ADD:
-//                   if ( element3_2 == null ) {
-//                       // 0 - ADD = DELETE
-//                       
-//                   }
-//                   break;
-//               case UPDATE:
-//                   break;
-//               case DELETE:
-//                   break;
-//               default:
-//                   // BAD! -- TODO
-//           }
-//       }
-//       
        
        return diff3;
+    }
+   
+    protected void updateDiff( String id,
+                               JSONObject newElement1, JSONObject newElement2,
+                               DiffOp newOp ) {
+        JSONObject elementWithDiffApplied = glom(newElement1, newElement2);
+        
+        // If there was no change to the element, then remove it from 
+        // the diff:
+        if (sameElement(elementWithDiffApplied, newElement1)) {
+            removeFromDiff(id);
+        }
+        else {
+            // Update workspace1 and workspace2 with the results.
+            set2( id, DiffOp.UPDATE, newElement2 );
+            set1( id, newElement1 );
+        }
     }
 
     public boolean isAffected( String id ) {
