@@ -1258,7 +1258,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         
         // Email the progress (this takes a long time, so only do it for critical events):
         if (sendEmail) {
-            String hostname = services.getSysAdminParams().getAlfrescoHost();
+            String hostname = NodeUtil.getHostname();
             if (!Utils.isNullOrEmpty( hostname )) {
                 String sender = hostname + "@jpl.nasa.gov";
                 String username = NodeUtil.getUserName();
