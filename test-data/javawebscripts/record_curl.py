@@ -37,6 +37,11 @@ parser.add_option("--description", help="Test description")
 parser.add_option("-j", "--jsonDiff", dest="jsonDiff", action="store_true", default=False, help="Set True if using json diff DEFAULT: False")
 parser.add_option("--runBranches", default="", help="A string of comma separated branch names that will run this test by default")
 
+parser.add_option("--setup", default=" ", help="Set up function (optional)")
+parser.add_option("--postProcess", default=" ", help="Post process function (optional)")
+parser.add_option("--teardown", default=" ", help="Tear down function (optional)")
+parser.add_option("--timeDelay", default=" ", help="Delay in seconds before running the test (optional)")
+
 options, args = parser.parse_args()
 
 if options.host != "":
@@ -172,6 +177,7 @@ listOfFilters = "common_filters"
 listOfBranches = ""
 
 def createListOfValues(values, needSingleQuote):
+#splits string up into individual values to concatenate into a string appropriate to the test harness
     values = values.split(",")
     if needSingleQuote and values[0] == "common_filters":
         del values[0]
@@ -189,11 +195,38 @@ if options.filter != "":
     listOfFilters += createListOfValues(options.filter, True)
 if options.runBranches != "":
     listOfBranches = createListOfValues(options.runBranches, False)
+
+optionalArguments = []
+listOfOptionalFunctions = ""
+#look through all of the optional arguments and see if one of them exists
+if options.setup != " " or options.postProcess != " " or options.teardown != " " or options.timeDelay != " ":
+    #compile all optional arguments into one list
+    optionalArguments.append(options.setup)
+    optionalArguments.append(options.postProcess)
+    optionalArguments.append(options.teardown)
+    optionalArguments.append(options.timeDelay)
+    #replace all the default values to None
+    optionalArguments = [argument.replace(" ", "None") for argument in optionalArguments]
+    #reverse list so that all the None strings at the end are removed
+    optionalArguments.reverse()
+    i = 0
+    while i == 0:
+        if optionalArguments.index("None") == 0:
+            optionalArguments.remove("None")
+        else:
+            i += 1
+    #list still has elements so join the list with ,\n to make correct table
+    if len(optionalArguments) != 0:
+        optionalArguments.reverse()
+        listOfOptionalFunctions += ',\n'
+        compiledStringOfArguments = ',\n'.join(optionalArguments)
+        listOfOptionalFunctions += compiledStringOfArguments          
        
 value = "[\n" + str(latestTest + 1) + ',\n"' + options.testName + '",\n"' + options.description + \
         '",\n' + 'create_curl_cmd(type="' + options.type + '", data="' + curl_data + '", base_url="' + \
         curl_base_url + '", post_type="' + options.post + '", branch="' + options.workspace + '", project_post=' + \
-        str(options.project) + '),\n' + str(options.jsonDiff) + ',\n' + listOfFilters + ',\n' + listOfBranches + '\n],\n'
+        str(options.project) + '),\n' + str(options.jsonDiff) + ',\n' + listOfFilters + ',\n' + listOfBranches + \
+        listOfOptionalFunctions + '\n],\n'
 
 #insert the brace and leave room so that the next test can be input
 i = lines.index("]\n")

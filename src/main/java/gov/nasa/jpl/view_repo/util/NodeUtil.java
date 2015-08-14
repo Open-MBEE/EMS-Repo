@@ -3305,7 +3305,13 @@ public class NodeUtil {
     public static NodeRef getNodeRefFromNodeId(String store, String id) {
         List<NodeRef> nodeRefs = NodeRef.getNodeRefs(store + id);
         if (nodeRefs.size() > 0) {
-            return nodeRefs.get( 0 );
+            NodeRef ref = nodeRefs.get( 0 );
+            if (ref != null) {
+                EmsScriptNode node = new EmsScriptNode(ref, services);
+                if (node.scriptNodeExists()) {
+                    return ref;
+                }
+            }
         }
         return null;
     }
@@ -4041,5 +4047,9 @@ public class NodeUtil {
      */
     public static void concurrencyTest() {
         
+    }
+    
+    public static String getHostname() {
+        return services.getSysAdminParams().getAlfrescoHost();
     }
 }
