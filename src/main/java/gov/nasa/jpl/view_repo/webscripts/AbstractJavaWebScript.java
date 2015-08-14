@@ -1466,12 +1466,14 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
 
     public static Map<Object, Object> evaluate( Set< EmsScriptNode > elements, WorkspaceNode ws ) {
         log(Level.INFO, "Will attempt to evaluate expressions where found!");
-        Map< EmsScriptNode, Collection< Constraint > > constraints = getAeConstraints( elements, ws );
-//log(Level.INFO, "constraints: " + constraints);
+        Map< Object, Object > results = new LinkedHashMap< Object, Object >();
+
         Map< EmsScriptNode, Expression<?> > expressions = getAeExpressions( elements );
 //log(Level.INFO, "expressions: " + expressions);
+        if ( elements.size() != expressions.size() ) {
+        Map< EmsScriptNode, Collection< Constraint > > constraints = getAeConstraints( elements, ws );
+//log(Level.INFO, "constraints: " + constraints);
     
-        Map< Object, Object > results = new LinkedHashMap< Object, Object >();
         if ( !Utils.isNullOrEmpty( constraints ) ) {
             for ( Entry< EmsScriptNode, Collection< Constraint > > e : constraints.entrySet() ) {
                 EmsScriptNode constraintNode = null;
@@ -1489,6 +1491,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
                     }
                 }
             }
+        }
         }
         if ( !Utils.isNullOrEmpty( expressions ) ) {
             for ( Entry< EmsScriptNode, Expression<?> > e : expressions.entrySet() ) {
