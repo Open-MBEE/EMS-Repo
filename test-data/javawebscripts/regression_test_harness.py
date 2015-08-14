@@ -382,7 +382,7 @@ common_filters,
   
 # This test case depends on CreateWorkspace1 and uses gv1 set by the previous test      
 [
-170,
+162,
 "CreateWorkspace2",
 "Create workspace test 2",
 create_curl_cmd(type="POST",base_url=BASE_URL_WS,
@@ -397,7 +397,7 @@ set_wsid_to_gv2
 
 # mimic md where a branch requires a project post to sync the project version
 [
-171,
+163,
 "PostProjectWorkspace2",
 "Post project to sync branch version for workspace 2 - sub workspace",
 create_curl_cmd(type="POST", base_url=BASE_URL_WS, post_type="",
@@ -411,7 +411,7 @@ common_filters,
 
         
 [
-175,
+164,
 "CreateWorkspaceWithJson",
 "Create a workspace using a json",
 create_curl_cmd(type="POST",base_url=BASE_URL_WS,
@@ -426,7 +426,7 @@ do176
 
 # This test case depends on the previous one and uses gv3 set by the previous test
 [
-176,
+165,
 "ModifyWorkspaceWithJson",
 "Modifies a workspace name/description",
 '''curl %s %s '$gv3' "%s"'''%(CURL_FLAGS,CURL_POST_FLAGS,BASE_URL_WS),
@@ -436,7 +436,7 @@ common_filters+['"branched"','"created"','"id"','"qualifiedId"'],
 ],
         
 [
-180,
+166,
 "GetWorkspaces",
 "Get workspaces",
 create_curl_cmd(type="GET",base_url=BASE_URL_WS_NOBS,branch=""),
@@ -447,7 +447,7 @@ common_filters+['"branched"','"created"','"id"','"qualifiedId"','"parent"'],
 
 # This test case depends on test 160/170 thats sets gv1,gv2
 [
-190,
+167,
 "PostToWorkspace",
 "Post element to workspace",
 create_curl_cmd(type="POST",data="x.json",base_url=BASE_URL_WS,
@@ -459,7 +459,7 @@ common_filters,
 
 # This test case depends on test 170 thats sets gv2
 [
-200,
+168,
 "CompareWorkspaces",
 "Compare workspaces",
 create_curl_cmd(type="GET",base_url=SERVICE_URL,
@@ -473,7 +473,7 @@ do20
 ],
         
 [
-201,
+169,
 "CompareWorkspacesBackground1",
 "Compare workspaces in the background, this will return that it is in process",
 create_curl_cmd(type="GET",base_url=SERVICE_URL,
@@ -484,7 +484,7 @@ common_filters+['"id"','"qualifiedId"','"diffTime"'],
 ],
         
 [
-202,
+170,
 "CompareWorkspacesBackground2",
 "Compare workspaces in the background again, this will return the results of the background diff",
 create_curl_cmd(type="GET",base_url=SERVICE_URL,
@@ -500,7 +500,7 @@ None,
 
 # This test case depends on the previous one and uses gv4 set by the previous test
 [
-210,
+171,
 "CreateWorkspaceWithBranchTime",
 "Create workspace with a branch time",
 create_curl_cmd(type="POST",base_url=BASE_URL_WS,
@@ -515,7 +515,7 @@ set_wsid_to_gv5
 
 # This test case depends on the previous one
 [
-220,
+172,
 "PostToWorkspaceWithBranchTime",
 "Post element to workspace with a branch time",
 create_curl_cmd(type="POST",data="y.json",base_url=BASE_URL_WS,
@@ -527,7 +527,7 @@ common_filters,
         
 # This test case depends on test 160 thats sets gv1
 [
-221,
+173,
 "PostToWorkspaceForConflict1",
 "Post element to workspace1 so that we get a conflict",
 create_curl_cmd(type="POST",data="conflict1.json",base_url=BASE_URL_WS,
@@ -539,7 +539,7 @@ common_filters,
         
 # This test case depends on test 220 thats sets gv5
 [
-222,
+174,
 "PostToWorkspaceForConflict2",
 "Post element to workspace with a branch time so that we get a conflict",
 create_curl_cmd(type="POST",data="conflict2.json",base_url=BASE_URL_WS,
@@ -551,7 +551,7 @@ common_filters,
         
 # This test case depends on test 220 thats sets gv5
 [
-223,
+175,
 "PostToWorkspaceForMoved",
 "Post element to workspace with a branch time so that we get a moved element",
 create_curl_cmd(type="POST",data="moved.json",base_url=BASE_URL_WS,
@@ -563,7 +563,7 @@ common_filters,
         
 # This test case depends on test 220 thats sets gv5
 [
-224,
+176,
 "PostToWorkspaceForTypeChange",
 "Post element to workspace with a branch time so that we get a type change",
 create_curl_cmd(type="POST",data="typeChange.json",base_url=BASE_URL_WS,
@@ -575,7 +575,7 @@ common_filters,
         
 # This test case depends on test 160 thats sets gv1
 [
-225,
+177,
 "PostToWorkspaceForWs1Change",
 "Post element to workspace1 so that we dont detect it in the branch workspace.  Changes 303",
 create_curl_cmd(type="POST",data="modified303.json",base_url=BASE_URL_WS,
@@ -586,7 +586,7 @@ common_filters,
 ],
         
 [
-226,
+178,
 "GetElement303",
 "Get element 303",
 create_curl_cmd(type="GET",data="elements/303",base_url=BASE_URL_WS,
@@ -598,7 +598,7 @@ common_filters+['"MMS_','MMS_'],
         
 # This test case depends on the previous two
 [
-227,
+179,
 "CompareWorkspacesWithBranchTime",
 "Compare workspaces",
 create_curl_cmd(type="GET",base_url=SERVICE_URL,
@@ -610,7 +610,7 @@ common_filters+['"id"','"qualifiedId"'],
         
 # This test case depends on previous ones
 [
-228,
+180,
 "PostToWorkspace3",
 "Post element z to workspace",
 create_curl_cmd(type="POST",data="z.json",base_url=BASE_URL_WS,
@@ -622,7 +622,7 @@ common_filters,
         
 # This test case depends on previous ones
 [
-229,
+181,
 "CreateWorkspaceWithBranchTime2",
 "Create workspace with a branch time using the current time for the branch time",
 create_curl_cmd(type="POST",base_url=BASE_URL_WS,
@@ -637,7 +637,7 @@ set_wsid_to_gv6
         
 # This test case depends on the previous ones
 [
-230,
+182,
 "CompareWorkspacesWithBranchTimes",
 "Compare workspaces both which have a branch time and with a modified element on the common parent",
 create_curl_cmd(type="GET",base_url=SERVICE_URL,
@@ -648,7 +648,7 @@ common_filters+['"id"','"qualifiedId"'],
 ],
     
 [
-231,
+183,
 "CompareWorkspacesBackgroundOutdated",
 "Compare workspaces in the background, this will return that it is outdated",
 create_curl_cmd(type="GET",base_url=SERVICE_URL,
@@ -659,7 +659,7 @@ common_filters+['"id"','"qualifiedId"','"diffTime"'],
 ],
         
 [
-232,
+184,
 "CompareWorkspacesBackgroundRecalculate",
 "Compare workspaces in the background, and forces a recalculate on a outdated diff",
 create_curl_cmd(type="GET",base_url=SERVICE_URL,
@@ -670,7 +670,7 @@ common_filters+['"id"','"qualifiedId"','"diffTime"'],
 ],
         
 [
-233,
+185,
 "CreateWorkspaceAgain1",
 "Create workspace for another diff test",
 create_curl_cmd(type="POST",base_url=BASE_URL_WS,
@@ -684,7 +684,7 @@ set_wsid_to_gv1
 ],
         
 [
-234,
+186,
 "CreateWorkspaceAgain2",
 "Create workspace for another diff test",
 create_curl_cmd(type="POST",base_url=BASE_URL_WS,
@@ -699,7 +699,7 @@ set_wsid_to_gv2
         
 # This is to test CMED-533.  Where we post the same elements to two different workspaces and diff.
 [
-235,
+187,
 "PostToWorkspaceG1ForCMED533",
 "Post elements to workspace wsG1 for testing CMED-533",
 create_curl_cmd(type="POST",data="elementsForBothWorkspaces.json",base_url=BASE_URL_WS,
@@ -711,7 +711,7 @@ common_filters,
         
 # This test case depends on test 234
 [
-236,
+188,
 "PostToWorkspaceG1",
 "Post element to workspace wsG1",
 create_curl_cmd(type="POST",data="x.json",base_url=BASE_URL_WS,
@@ -725,7 +725,7 @@ set_read_to_gv3
 ],
 
 [
-237,
+189,
 "PostToMaster",
 "Post element to master for a later diff",
 create_curl_cmd(type="POST",data="y.json",base_url=BASE_URL_WS,
@@ -737,7 +737,7 @@ common_filters,
         
 # This is to test CMED-533.  Where we post the same elements to two different workspaces and diff.
 [
-238,
+190,
 "PostToWorkspaceG2ForCMED533",
 "Post elements to workspace wsG2 for testing CMED-533",
 create_curl_cmd(type="POST",data="elementsForBothWorkspaces.json",base_url=BASE_URL_WS,
@@ -749,7 +749,7 @@ common_filters,
         
 # This test case depends on test 235
 [
-239,
+191,
 "PostToWorkspaceG2",
 "Post element to workspace wsG2",
 create_curl_cmd(type="POST",data="z.json",base_url=BASE_URL_WS,
@@ -764,7 +764,7 @@ set_read_to_gv4
         
 # This test case depends on test 234 and 235
 [
-240,
+192,
 "CompareWorkspacesG1G2",
 "Compare workspaces wsG1 and wsG2 with timestamps",
 create_curl_cmd(type="GET",base_url=SERVICE_URL,
@@ -778,7 +778,7 @@ common_filters+['"id"','"qualifiedId"','"timestamp"'],
 # everything as expected (we should also do something like 225 to make sure a modified element
 # shows up in the recurse properly as well)
 [
-241,
+193,
 "RecursiveGetOnWorkspaces",
 "Makes sure that a recursive get on a modified workspace returns the modified elements",
 create_curl_cmd(type="GET", base_url=BASE_URL_WS,
@@ -789,7 +789,7 @@ common_filters,
 ],
 
 [
-242,
+194,
 "PostSiteInWorkspace",
 "Create a project and site in a workspace",
 create_curl_cmd(type="POST",data='\'{"elements":[{"sysmlid":"proj_id_001","name":"PROJ_1","specialization":{"type":"Project"}}]}\'',
@@ -801,7 +801,7 @@ None,
 ],
  
 [
-243,
+195,
 "GetSiteInWorkspace",
 "Get site in workspace",
 create_curl_cmd(type="GET",data="sites",base_url=BASE_URL_WS, branch="$gv1/"),
@@ -812,7 +812,7 @@ None,
 
 
 [
-244,
+196,
 "GetProductsInSiteInWorkspace",
 "Get products for a site in a workspace",
 create_curl_cmd(type="GET",data="products",base_url=BASE_URL_WS,
@@ -823,7 +823,7 @@ common_filters,
 ],
         
 [
-245,
+197,
 "PostNotInPastToWorkspace",
 "Post element to master workspace for a diff test",
 create_curl_cmd(type="POST",data="notInThePast.json",base_url=BASE_URL_WS,
@@ -839,7 +839,7 @@ set_read_delta_to_gv1,
         
 # This test depends on the previous one:
 [
-246,
+198,
 "CompareWorkspacesNotInPast",
 "Compare workspace master with itself at the current time and a time in the past",
 create_curl_cmd(type="GET",base_url=SERVICE_URL,
@@ -850,7 +850,7 @@ common_filters+['"id"','"qualifiedId"','"timestamp"'],
 ],
 
 [
-247,
+199,
 "CompareWorkspacesNotInPastBackground",
 "Compare workspace master with itself at the current time and a time in the past in the background",
 create_curl_cmd(type="GET",base_url=SERVICE_URL,
@@ -863,7 +863,7 @@ common_filters+['"id"','"qualifiedId"','"timestamp"','"diffTime"'],
 # A series of test cases for workspaces in workspaces
 
 [
-248,
+200,
 "CreateParentWorkspace",
 "Create a workspace to be a parent of another",
 create_curl_cmd(type="POST",base_url=BASE_URL_WS,
@@ -877,7 +877,7 @@ set_wsid_to_gv1
 ],
 
 [
-249,
+201,
 "PostToMasterAgain",
 "Post new element to master",
 create_curl_cmd(type="POST",data="a.json",base_url=BASE_URL_WS,
@@ -891,7 +891,7 @@ set_read_to_gv2
 ],
         
 [
-250,
+202,
 "CreateSubworkspace",
 "Create workspace inside a workspace",
 create_curl_cmd(type="POST",base_url=BASE_URL_WS,
@@ -905,7 +905,7 @@ set_wsid_to_gv3
 ],
 
 [
-251,
+203,
 "GetElementInMasterFromSubworkspace",
 "Get an element that only exists in the master from a subworkspace after its parent branch was created but before the it was created",
 create_curl_cmd(type="GET",data="elements/a",base_url=BASE_URL_WS,
@@ -913,6 +913,266 @@ create_curl_cmd(type="GET",data="elements/a",base_url=BASE_URL_WS,
 True, 
 common_filters,
 ["test","workspaces","develop","develop2"]
+],
+        
+[
+204,
+"PostAToMaster",
+"Post element a to master.",
+create_curl_cmd(type="POST", data="a.json", base_url="http://localhost:8080/alfresco/service/workspaces/", post_type="elements", branch="master/", project_post=False),
+True,
+common_filters,
+["develop"]
+],
+
+[
+205,
+"CreateAParentWorkspace",
+"Create a \"parent\" workspace off of master..",
+create_curl_cmd(type="POST", data="", base_url="http://localhost:8080/alfresco/service/workspaces/", post_type="", branch="theParentWorkspace?sourceWorkspace=master", project_post=False),
+True,
+common_filters+['"branched"','"created"','"id"','"qualifiedId"'],
+["develop"]
+],
+
+[
+206,
+"PostBToMaster",
+"Post element b to master.",
+create_curl_cmd(type="POST", data="b.json", base_url="http://localhost:8080/alfresco/service/workspaces/", post_type="elements", branch="master/", project_post=False),
+True,
+common_filters,
+["develop"]
+],
+
+[
+207,
+"PostCToParent",
+"Post element c to the parent workspace.",
+create_curl_cmd(type="POST", data="c.json", base_url="http://localhost:8080/alfresco/service/workspaces/", post_type="elements", branch="theParentWorkspace/", project_post=False),
+True,
+common_filters,
+["develop"]
+],
+
+[
+208,
+"CreateASubWorkspace",
+"Create a \"subworkspace\" workspace off of the parent.",
+create_curl_cmd(type="POST", data="", base_url="http://localhost:8080/alfresco/service/workspaces/", post_type="", branch="theSubworkspace?sourceWorkspace=theParentWorkspace", project_post=False),
+True,
+common_filters+['"branched"','"created"','"id"','"qualifiedId"', '"parent"'],
+["develop"]
+],
+
+[
+209,
+"PostDToMaster",
+"Post element d to master.",
+create_curl_cmd(type="POST", data="d.json", base_url="http://localhost:8080/alfresco/service/workspaces/", post_type="elements", branch="master/", project_post=False),
+True,
+common_filters,
+["develop"]
+],
+
+[
+210,
+"PostEToParent",
+"Post element e to the parent workspace.",
+create_curl_cmd(type="POST", data="e.json", base_url="http://localhost:8080/alfresco/service/workspaces/", post_type="elements", branch="theParentWorkspace/", project_post=False),
+True,
+common_filters,
+["develop"]
+],
+
+[
+211,
+"PostFToSubworkspace",
+"Post element f to the subworkspace.",
+create_curl_cmd(type="POST", data="f.json", base_url="http://localhost:8080/alfresco/service/workspaces/", post_type="elements", branch="theSubworkspace/", project_post=False),
+True,
+common_filters,
+["develop"]
+],
+
+[
+212,
+"GetAInMaster",
+"Get element a in the master workspace.",
+create_curl_cmd(type="GET", data="elements/a", base_url="http://localhost:8080/alfresco/service/workspaces/", post_type="elements", branch="master/", project_post=False),
+True,
+common_filters,
+["develop"]
+],
+
+[
+213,
+"GetAInParent",
+"Get element a in the parent workspace.",
+create_curl_cmd(type="GET", data="elements/a", base_url="http://localhost:8080/alfresco/service/workspaces/", post_type="elements", branch="theParentWorkspace/", project_post=False),
+True,
+common_filters,
+["develop"]
+],
+
+[
+214,
+"GetAInSubworkspace",
+"Get element a in the subworkspace.",
+create_curl_cmd(type="GET", data="elements/a", base_url="http://localhost:8080/alfresco/service/workspaces/", post_type="elements", branch="theSubworkspace/", project_post=False),
+True,
+common_filters,
+["develop"]
+],
+
+[
+215,
+"GetBInMaster",
+"Get element b in the master workspace.",
+create_curl_cmd(type="GET", data="elements/b", base_url="http://localhost:8080/alfresco/service/workspaces/", post_type="elements", branch="master/", project_post=False),
+True,
+common_filters,
+["develop"]
+],
+
+[
+216,
+"GetBInParent",
+"Get element b in the parent workspace.",
+create_curl_cmd(type="GET", data="elements/b", base_url="http://localhost:8080/alfresco/service/workspaces/", post_type="elements", branch="theParentWorkspace/", project_post=False),
+True,
+common_filters,
+["develop"]
+],
+
+[
+217,
+"GetBInSubworkspace",
+"Get element b in the subworkspace.",
+create_curl_cmd(type="GET", data="elements/b", base_url="http://localhost:8080/alfresco/service/workspaces/", post_type="elements", branch="theSubworkspace/", project_post=False),
+True,
+common_filters,
+["develop"]
+],
+
+[
+218,
+"GetCInMaster",
+"Get element c in the master workspace.",
+create_curl_cmd(type="GET", data="elements/c", base_url="http://localhost:8080/alfresco/service/workspaces/", post_type="elements", branch="master/", project_post=False),
+True,
+common_filters,
+["develop"]
+],
+
+[
+219,
+"GetCInParent",
+"Get element c in the parent workspace.",
+create_curl_cmd(type="GET", data="elements/c", base_url="http://localhost:8080/alfresco/service/workspaces/", post_type="elements", branch="theParentWorkspace/", project_post=False),
+True,
+common_filters,
+["develop"]
+],
+
+[
+220,
+"GetCInSubworkspace",
+"Get element c in the subworkspace.",
+create_curl_cmd(type="GET", data="elements/c", base_url="http://localhost:8080/alfresco/service/workspaces/", post_type="elements", branch="theSubworkspace/", project_post=False),
+True,
+common_filters,
+["develop"]
+],
+
+[
+221,
+"GetDInMaster",
+"Get element d in the master workspace.",
+create_curl_cmd(type="GET", data="elements/d", base_url="http://localhost:8080/alfresco/service/workspaces/", post_type="elements", branch="master/", project_post=False),
+True,
+common_filters,
+["develop"]
+],
+
+[
+222,
+"GetDInParent",
+"Get element d in the parent workspace.",
+create_curl_cmd(type="GET", data="elements/d", base_url="http://localhost:8080/alfresco/service/workspaces/", post_type="elements", branch="theParentWorkspace/", project_post=False),
+True,
+common_filters,
+["develop"]
+],
+
+[
+223,
+"GetDInSubworkspace",
+"Get element d in the subworkspace.",
+create_curl_cmd(type="GET", data="elements/d", base_url="http://localhost:8080/alfresco/service/workspaces/", post_type="elements", branch="theSubworkspace/", project_post=False),
+True,
+common_filters,
+["develop"]
+],
+
+[
+224,
+"GetEInMaster",
+"Get element e in the master workspace.",
+create_curl_cmd(type="GET", data="elements/e", base_url="http://localhost:8080/alfresco/service/workspaces/", post_type="elements", branch="master/", project_post=False),
+True,
+common_filters,
+["develop"]
+],
+
+[
+225,
+"GetEInParent",
+"Get element e in the parent workspace.",
+create_curl_cmd(type="GET", data="elements/e", base_url="http://localhost:8080/alfresco/service/workspaces/", post_type="elements", branch="theParentWorkspace/", project_post=False),
+True,
+common_filters,
+["develop"]
+],
+
+[
+226,
+"GetEInSubworkspace",
+"Get element e in the subworkspace.",
+create_curl_cmd(type="GET", data="elements/e", base_url="http://localhost:8080/alfresco/service/workspaces/", post_type="elements", branch="theSubworkspace/", project_post=False),
+True,
+common_filters,
+["develop"]
+],
+
+[
+227,
+"GetFInMaster",
+"Get element f in the master workspace.",
+create_curl_cmd(type="GET", data="elements/f", base_url="http://localhost:8080/alfresco/service/workspaces/", post_type="elements", branch="master/", project_post=False),
+True,
+common_filters,
+["develop"]
+],
+
+[
+228,
+"GetFInParent",
+"Get element f in the parent workspace.",
+create_curl_cmd(type="GET", data="elements/f", base_url="http://localhost:8080/alfresco/service/workspaces/", post_type="elements", branch="theParentWorkspace/", project_post=False),
+True,
+common_filters,
+["develop"]
+],
+
+[
+229,
+"GetFInSubworkspace",
+"Get element f in the subworkspace.",
+create_curl_cmd(type="GET", data="elements/f", base_url="http://localhost:8080/alfresco/service/workspaces/", post_type="elements", branch="theSubworkspace/", project_post=False),
+True,
+common_filters,
+["develop"]
 ],
 
 
@@ -2009,7 +2269,7 @@ True,
 common_filters+['"qualifiedId"', '"sysmlid"'],
 ["workspaces"]
 ],
-               
+
 ]
 
 ##########################################################################################    

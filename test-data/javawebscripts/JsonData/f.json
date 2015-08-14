@@ -1,0 +1,9 @@
+{ "elements" : [
+    {
+     "sysmlid" : "f",
+     "documentation" : "f is f",
+     "specialization" : {
+       "type": "Expose"
+     }
+    }
+]}
