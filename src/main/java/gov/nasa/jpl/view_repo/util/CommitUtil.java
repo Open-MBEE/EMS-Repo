@@ -35,6 +35,7 @@ public class CommitUtil {
     public static final String TYPE_COMMIT = "COMMIT";
     public static final String TYPE_DELTA  = "DELTA";
     public static final String TYPE_MERGE  = "MERGE";
+    public static boolean cleanJson = false;
     
     private CommitUtil() {
         // defeat instantiation
@@ -701,7 +702,10 @@ public class CommitUtil {
                 }
                 if (body != null) {
                     // clean up JSON for small commits
-                    JSONObject cleanedJson = WorkspaceDiff.cleanWorkspaceJson( body );
+                	JSONObject cleanedJson = body;
+                	if (cleanJson) {
+                		cleanedJson = WorkspaceDiff.cleanWorkspaceJson( body );
+                	}
                     currCommit.createOrUpdateProperty( "ems:commit", cleanedJson.toString() );
                 }
                 
