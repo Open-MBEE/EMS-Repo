@@ -7,7 +7,7 @@ cd ../sysml
 ant
 cd ../bae
 ant
-cd ../K
+cd ../KLang
 ant
 #cd ../emsscala
 #ant
