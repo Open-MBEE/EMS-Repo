@@ -335,14 +335,22 @@ public class MmsDiffGet extends AbstractJavaWebScript {
         // workspace1.elements of a diff0.
         JSONObject diff0 = oldDiffJson;
         if ( diff0 == null ) {
-            // TODO diff0 = ...
+            diff0 = JsonDiffDiff.makeEmptyDiffJson();
+            
+            Set< EmsScriptNode > elements = getElements( diff1Json );
+            elements.addAll( getElements( diff2Json ) );
+            
+            JSONArray elementsJson = diff0.getJSONObject( "workspace1" ).getJSONArray( "elements" );
+            // get workspace1 elements
+            addJSONArray( elementsJson , "elements", elements, null, commonParent,
+                          commonBranchTimepoint, true, null );
         }
         
         
         // Now add/glom diff2 to diff0 (oldDiffJson) and then diff with/subtract
         // diff1.
         JSONObject diffResult = null; //glom( oldDiffJson, diff2Json );
-        diffResult = JsonDiffDiff.diff( oldDiffJson, diff1Json, diff2Json );
+        diffResult = JsonDiffDiff.diff( diff0, diff1Json, diff2Json );
 
         return diffResult;
     }

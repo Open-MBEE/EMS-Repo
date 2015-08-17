@@ -806,9 +806,14 @@ public class WorkspaceDiff implements Serializable {
 
     private boolean addJSONArray(JSONObject jsonObject, String key, Map< String, EmsScriptNode > map, 
                                  Map< String, Version> versions, WorkspaceNode ws, Date dateTime, boolean showAll) throws JSONException {
+        return addJSONArray( jsonObject, key, map, versions, ws, dateTime, showAll, nodeDiff );
+    }
+    private static boolean addJSONArray(JSONObject jsonObject, String key, Map< String, EmsScriptNode > map, 
+                                        Map< String, Version> versions, WorkspaceNode ws, Date dateTime, boolean showAll,
+                                        NodeDiff nodeDiff ) throws JSONException {
         boolean emptyArray = true;
         if (map != null && map.size() > 0) {
-            jsonObject.put( key, convertMapToJSONArray( map, versions, ws, dateTime, showAll ) );
+            jsonObject.put( key, convertMapToJSONArray( map, versions, ws, dateTime, showAll, null ) );
             emptyArray = false;
         } else {
             // add in the empty array
@@ -859,11 +864,17 @@ public class WorkspaceDiff implements Serializable {
         return filter;
     }
 
+    protected JSONArray convertMapToJSONArray(Map<String, EmsScriptNode> map,
+                                              Map<String, Version> versions, 
+                                              WorkspaceNode workspace, Date dateTime,
+                                              boolean showAll) throws JSONException {
+        return convertMapToJSONArray( map, versions, workspace, dateTime, showAll, nodeDiff );
+    }
 
-    private JSONArray convertMapToJSONArray(Map<String, EmsScriptNode> map,
-                                            Map<String, Version> versions, 
-                                            WorkspaceNode workspace, Date dateTime,
-                                            boolean showAll) throws JSONException {
+    protected static JSONArray convertMapToJSONArray(Map<String, EmsScriptNode> map,
+                                                     Map<String, Version> versions, 
+                                                     WorkspaceNode workspace, Date dateTime,
+                                                     boolean showAll, NodeDiff nodeDiff) throws JSONException {
         Set<String> filter = null;
         if (!showAll) {
             filter = getFilter();
