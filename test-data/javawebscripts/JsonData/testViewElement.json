@@ -1,0 +1,41 @@
+{
+  "elements": [
+    {
+      "siteCharacterizationId": "server-utils",
+      "qualifiedId": "/server-utils/server-utils_no_project/holding_bin_server-utils_no_project/MMS_1439774810522_0ba947a4-ac47-4d7d-b17b-e0c692243e88/MMS_1439777405160_b49a88d3-0580-4930-abd1-98e00a7b98dc",
+      "qualifiedName": "/server-utils/server-utils_no_project/holding_bin/Test Doc 1/Get create view sequence",
+      "sysmlid": "MMS_1439777405160_b49a88d3-0580-4930-abd1-98e00a7b98dc",
+      "editable": true,
+      "creator": "dank",
+      "modified": "2015-08-16T19:10:09.022-0700",
+      "modifier": "dank",
+      "created": "Sun Aug 16 19:10:05 PDT 2015",
+      "name": "Get create view sequence",
+      "owner": "MMS_1439774810522_0ba947a4-ac47-4d7d-b17b-e0c692243e88",
+      "documentation": "",
+      "read": "2015-08-16T19:10:11.169-0700",
+      "specialization": {
+        "displayedElements": [
+          "MMS_1439777405160_b49a88d3-0580-4930-abd1-98e00a7b98dc"
+        ],
+        "childrenViews": [],
+        "contents": {
+          "valueExpression": null,
+          "operand": [
+            {
+              "valueExpression": null,
+              "type": "InstanceValue",
+              "instance": "MMS_1439777406561_2439ae5f-5334-43f9-8d45-0b63d6b29519"
+            }
+          ],
+          "type": "Expression"
+        },
+        "allowedElements": [
+          "MMS_1439777405160_b49a88d3-0580-4930-abd1-98e00a7b98dc"
+        ],
+        "contains": [],
+        "type": "View"
+      }
+    }
+  ]
+}
