@@ -1470,7 +1470,8 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
 
         Map< EmsScriptNode, Expression<?> > expressions = getAeExpressions( elements );
 //log(Level.INFO, "expressions: " + expressions);
-        if ( elements.size() != expressions.size() ) {
+        if ( elements.size() != expressions.size() &&
+                ( elements.size() != 1 || !elements.iterator().next().hasAspect( Acm.ACM_EXPRESSION ) ) ) {
         Map< EmsScriptNode, Collection< Constraint > > constraints = getAeConstraints( elements, ws );
 //log(Level.INFO, "constraints: " + constraints);
     
