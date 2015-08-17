@@ -330,6 +330,15 @@ public class MmsDiffGet extends AbstractJavaWebScript {
                                      getResponseStatus() );
         }
         
+        // If oldJob is null, collect all nodes in diff1 and diff2, get their
+        // json for the common-branch timepoint, and put that into
+        // workspace1.elements of a diff0.
+        JSONObject diff0 = oldDiffJson;
+        if ( diff0 == null ) {
+            // TODO diff0 = ...
+        }
+        
+        
         // Now add/glom diff2 to diff0 (oldDiffJson) and then diff with/subtract
         // diff1.
         JSONObject diffResult = null; //glom( oldDiffJson, diff2Json );
