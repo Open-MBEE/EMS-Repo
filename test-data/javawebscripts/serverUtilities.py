@@ -1,7 +1,7 @@
 from regression_test_harness import *
 import json
 
-DEBUG = 1
+DEBUG = True
 
 VIEW2VIEW_TEMP = json.dumps({"id": "", "childrenViews": []})
 print '-------------------------------------------------'
@@ -12,7 +12,7 @@ print '-------------------------------------------------'
 
 
 class UtilElement:
-    def __init__(self, inElement=None, base_url=BASE_URL_WS, workspace='master'):
+    def __init__(self, inElement=None, base_url=BASE_URL_WS, workspace='master/'):
         self.data = []
         if (inElement is not None):
             self.jsonObj = loadJson(open(inElement))  # Function that will throw exception if it is not the correct json
@@ -56,6 +56,7 @@ class UtilElement:
                         print self.childViews[index]
                         print '-------------------------------------------------'
                         index += 1
+                    self.childrenViews = self.childViews
 
             self.displayed = self.specialization.get('displayedElements')
             self.contents = self.specialization.get('contents')
@@ -94,13 +95,13 @@ class UtilElement:
         if (len(self.childViews) > 0):
             return self.childViews
         else:
-            if (DEBUG):
+            if DEBUG is True:
                 print ('No child views')
             return []
 
     def getDisplayedElements(self):
         if self.displayed > 0:
-            if (DEBUG):
+            if DEBUG is True:
                 print "Has displayed elements"
 
             return self.displayed
@@ -110,7 +111,7 @@ class UtilElement:
         foundView = False
 
         if (numViews > 0):
-            if (DEBUG):
+            if DEBUG is True:
                 print "Has Child View"
             if index >= 0 and index < numViews:
                 foundView = self.childViews[index]
@@ -157,7 +158,7 @@ class UtilElement:
         parentHasViews = (len(self.childViews) > 0)
         childHasViews = (len(viewUtil.childViews) > 0)
         childHasDisplayed = (viewUtil.displayed is not None and viewUtil.displayed is not '')
-        if (DEBUG):
+        if DEBUG is True:
             if parentHasViews:
                 print '-------------------------------------------------'
                 print 'Parent has views'
@@ -210,18 +211,23 @@ class UtilElement:
     def appendView(self, sysmlid=''):
         if sysmlid is not '':
 
-            self.childViews.get(self.sysmlid)
+            self.childViews[0].get(self.sysmlid)
 
     # ------------------------------------
     #   RESTful Methods
     # ------------------------------------
-
-
     #   POST Method
 
     def POST(self, verbose=True):
         if (self.jsonObj is not None):
-            curl_cmd = create_curl_cmd(type="POST", data=self.jsonObj, base_url=self.base_url, branch=self.workspace)
+            postObject = json.dumps(self.jsonObj)
+            print "Dumping object..."
+            curl_cmd = create_curl_cmd(type="POST")
+            print '-------------------------------------------------'
+            print 'Curl Command'
+            print '-------------------------------------------------'
+            print curl_cmd
+            print '-------------------------------------------------'
         else:
             print '-------------------------------------------------'
             print('No element...Posted nothing...')
@@ -264,7 +270,7 @@ def dumpJson(jsonObject):
         print '-------------------------------------------------'
         raise
     else:
-        if (DEBUG):
+        if DEBUG is True:
             print('Dumped JSON Object')
         return dumpJsonObj
 
@@ -279,7 +285,7 @@ def loadJson(jsonObject):
         raise
     else:
         print '-------------------------------------------------'
-        if (DEBUG):
+        if DEBUG is True:
             print('Loaded JSON Object')
         print '-------------------------------------------------'
 
@@ -318,17 +324,18 @@ def testElement(element):
         return loadJsonObj
 
 
-def getElementInJson(jsonElement=None, index=0):
-    if (jsonElement is not None):
+def getElementInJson(jsonElement=None, key=0):
+    if jsonElement is not None:
         jsonAr = UtilElement(jsonElement)
-        if (index < len(jsonAr.element)):
-            return jsonAr.element[index]
+        key = int(key)
+        if key < len(jsonAr.element):
+            return jsonAr.element[key]
         else:
             print '-------------------------------------------------'
-            if (DEBUG):
-                print("Index: " + str(index)+ "is out of bounds!")
+            if DEBUG is True:
+                print("Index: " + str(key) + "is out of bounds!")
             print '-------------------------------------------------'
-            if (DEBUG):
+            if DEBUG is True:
                 print("There are: " + str(len(jsonAr.element)))
             print '-------------------------------------------------'
 
@@ -343,7 +350,7 @@ def evalElement(jsonFile, url=HOST, workspace='master/'):
 
 def addViewToView(toAdd, addingTo):
     if (toAdd is None or addingTo is None):
-        if (DEBUG):
+        if DEBUG is True:
             print("Elements don't exists")
         return
     addThisView = UtilElement(toAdd)
@@ -368,7 +375,7 @@ def addViewToView(toAdd, addingTo):
         print '-------------------------------------------------'
         print json.dumps(toThisView.childViews)
         print '-------------------------------------------------'
-        for i in range(0,len(toThisView.childViews)):
+        for i in range(0, len(toThisView.childViews)):
             print 'Printing childviews in toThisView'
             print '-------------------------------------------------'
             print 'At index : ' + str(i)
@@ -377,10 +384,10 @@ def addViewToView(toAdd, addingTo):
             print '-------------------------------------------------'
         toThisView.childViews.append(tmpView)
 
-        if(toThisView.childViews[index].get('id')== toThisView.sysmlid):
-            print 'Adding ID to parent\'s children views arrary'
+        if (toThisView.childViews[index].get('id') == toThisView.sysmlid):
+            print 'Adding ID to parent\'s children views array'
             toThisView.childViews[index].get('childrenViews').append(tmpView.get('id'))
-    if(DEBUG):
+    if DEBUG is True:
         print 'Printing toThisView'
         print '-------------------------------------------------'
         index = 0
@@ -389,7 +396,8 @@ def addViewToView(toAdd, addingTo):
             print '-------------------------------------------------'
             print views
             print '-------------------------------------------------'
-    toThisView.POST()
+    return toThisView.POST()
+
 
 def getElementById(sysmlid=''):
     getUrl = 'http://localhost:8080/alfresco/service/workspaces/master/elements/' + str(sysmlid)
