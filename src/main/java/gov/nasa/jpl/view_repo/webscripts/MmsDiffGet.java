@@ -145,8 +145,8 @@ public class MmsDiffGet extends AbstractJavaWebScript {
 
         String latestTime1 = null;
         String latestTime2 = null;
-        String timestamp1 = null;
-        String timestamp2 = null;
+        //String timestamp1 = null;
+        //String timestamp2 = null;
         
         // Replace time string with latest commit node time if it
         // is not 'latest'.  If it is 'latest' then we just re-use
@@ -312,24 +312,21 @@ public class MmsDiffGet extends AbstractJavaWebScript {
         boolean isLatest1 = timestamp1.equals( LATEST_NO_TIMESTAMP ); 
         boolean isLatest2 = timestamp2.equals( LATEST_NO_TIMESTAMP );
 
-        
         // For each workspace get the diffs between the request timestamp and the
         // timestamp of the nearest/old diff.
-        
         JSONObject diff1Json = null;
-        if ( isLatest1 ) {
-            String foundTimeStamp1 = (String) oldJob.getProperty( "ems:timestamp1" );
-            Date date = TimeUtils.dateFromTimestamp( foundTimeStamp1 );
-            diff1Json = performDiff( ws1, ws1, date, null, getResponse(),
+        String foundTimeStamp1 = (String) oldJob.getProperty( "ems:timestamp1" );
+        Date date1 = TimeUtils.dateFromTimestamp( foundTimeStamp1 );
+        Date latestOrTimestamp1 = TimeUtils.dateFromTimestamp(timestamp1);
+        diff1Json = performDiff( ws1, ws1, date1, isLatest1 ? null : latestOrTimestamp1, getResponse(),
                                      getResponseStatus() );
-        }
         JSONObject diff2Json = null;
-        if ( isLatest2 ) {
-            String foundTimeStamp2 = (String) oldJob.getProperty( "ems:timestamp2" );
-            Date date = TimeUtils.dateFromTimestamp( foundTimeStamp2 );
-            diff2Json = performDiff( ws2, ws2, date, null, getResponse(),
+        String foundTimeStamp2 = (String) oldJob.getProperty( "ems:timestamp2" );
+        Date date2 = TimeUtils.dateFromTimestamp( foundTimeStamp2 );
+        Date latestOrTimestamp2 = TimeUtils.dateFromTimestamp(timestamp2);
+        diff2Json = performDiff( ws2, ws2, date2, isLatest2 ? null : latestOrTimestamp2, getResponse(),
                                      getResponseStatus() );
-        }
+
         
         // If oldJob is null, collect all nodes in diff1 and diff2, get their
         // json for the common-branch timepoint, and put that into
@@ -411,6 +408,8 @@ public class MmsDiffGet extends AbstractJavaWebScript {
     }
     
     protected JSONObject diffJsonFromJobNode( EmsScriptNode jobNode ) {
+    	if (jobNode == null)
+    		return null;
         ContentReader reader = services.getContentService().getReader(jobNode.getNodeRef(), 
                                                                       ContentModel.PROP_CONTENT);
 
