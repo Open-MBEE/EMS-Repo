@@ -1,5 +1,6 @@
 package gov.nasa.jpl.view_repo.util;
 
+import gov.nasa.jpl.mbee.util.CompareUtils;
 import gov.nasa.jpl.mbee.util.Debug;
 import gov.nasa.jpl.mbee.util.Pair;
 import gov.nasa.jpl.mbee.util.TimeUtils;
@@ -73,6 +74,8 @@ public class WorkspaceDiff implements Serializable {
     
     private StringBuffer response = null;
     private Status status = null;
+
+    public static final String LATEST_NO_TIMESTAMP = "latest";
 
     private WorkspaceDiff() {
         elements = new TreeMap<String, EmsScriptNode>();
@@ -1196,6 +1199,10 @@ public class WorkspaceDiff implements Serializable {
         populateMembersSkeleton(allChangedNodes);
     }
 
+    protected void captureDeltasFromCommits() {
+        
+    }
+    
     protected void captureDeltas() {
         Set< NodeRef > s1 =
                 WorkspaceNode.getChangedNodeRefsWithRespectTo( ws1, ws2,
@@ -1367,6 +1374,77 @@ public class WorkspaceDiff implements Serializable {
         for (String key: keys) {
             if (json.has( key )) result.put( key, json.get( key ) );
         }
-        return result;
+        return result;  
+    }
+
+    public static Date dateFromWorkspaceTimestamp( String timestamp ) {
+        Date timepoint = ( ( timestamp == null || 
+                             timestamp.equals( LATEST_NO_TIMESTAMP ) ) ?
+                           null : TimeUtils.dateFromTimestamp( timestamp ) );
+        return timepoint;
+    }
+    
+    public static Date earlierWorkspaceDate( Date d1, Date d2 ) {
+        d1 = ( d1 == null ? d2 : ( d2 == null || d1.before( d2 ) ? d1 : d2 ) );
+        return d1;
+    }
+
+    public static Date earlierWorkspaceDate( String timestamp1,
+                                             String timestamp2 ) {
+        // checking for null to avoid converting a timestamp unnecessarily
+        if ( timestamp1 == null ) {
+            return dateFromWorkspaceTimestamp( timestamp2 );
+        }
+        if ( timestamp2 == null ) {
+            return dateFromWorkspaceTimestamp( timestamp1 );
+        } else {
+            Date t1 = dateFromWorkspaceTimestamp( timestamp1 );
+            Date t2 = dateFromWorkspaceTimestamp( timestamp2 );                
+            return earlierWorkspaceDate( t1, t2 );
+        }
+    }
+
+    /**
+     * Get the common branch-time (branch and time) after which the two
+     * branch-times could have differences. If neither workspace is a parent of
+     * the other, then the result getCopyTime() works. If one is a parent of the
+     * other, then the time is the earlier of the timepoint of the parent and
+     * getCopyTime(). If they are the same, then the time is the earlier of
+     * the two.
+     * 
+     * @param ws1
+     * @param ws2
+     * @param timestamp1
+     * @param timestamp2
+     * @return the branch-time pair
+     */
+    public static Pair< WorkspaceNode, Date >
+            getCommonBranchPoint( WorkspaceNode ws1, WorkspaceNode ws2,
+                                  String timestamp1, String timestamp2 ) {
+        Date commonBranchTimePoint = null;
+        Date t1 = null;
+        Date t2 = null;
+        WorkspaceNode commonParent = WorkspaceNode.getCommonParent(ws1, ws2);
+
+        // If the workspaces are the same
+        if ( NodeUtil.workspacesEqual( ws1, ws2 ) ) {
+            return new Pair< WorkspaceNode, Date >( commonParent,
+                                                    earlierWorkspaceDate( timestamp1,
+                                                                          timestamp2 ) );
+        }
+        
+        // Not the same workspace; use relative copyTime.
+        commonBranchTimePoint = ws1 == null ? ws2.getCopyTime(ws1) : ws1.getCopyTime(ws2);
+        
+        if ( commonParent.equals( ws1 ) ) {
+            t1 = dateFromWorkspaceTimestamp( timestamp1 );
+            commonBranchTimePoint = earlierWorkspaceDate( commonBranchTimePoint, t1 );
+        }
+        if ( commonParent.equals( ws2 ) ) {
+            t2 = dateFromWorkspaceTimestamp( timestamp2 );
+            commonBranchTimePoint = earlierWorkspaceDate( commonBranchTimePoint, t2 );
+        }
+
+        return  new Pair< WorkspaceNode, Date >( commonParent, commonBranchTimePoint );
     }
 }

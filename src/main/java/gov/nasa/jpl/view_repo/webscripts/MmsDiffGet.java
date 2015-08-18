@@ -1,5 +1,6 @@
 package gov.nasa.jpl.view_repo.webscripts;
 
+import gov.nasa.jpl.mbee.util.Pair;
 import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.actions.ActionUtil;
@@ -154,7 +155,7 @@ public class MmsDiffGet extends AbstractJavaWebScript {
         // This time string is used in the job node name to facilitate
         // fast look up and re-use of diff jobs that resolve to the
         // same commit times.
-        if (userTimeStamp1.equals( LATEST_NO_TIMESTAMP )) { 
+        if (userTimeStamp1.equals( WorkspaceDiff.LATEST_NO_TIMESTAMP )) { 
             dateTime1 = null;
             latestTime1 = CommitUtil.replaceTimeStampWithCommitTime(dateTime1, ws1, services, response);
             timestamp1 = userTimeStamp1;
@@ -165,7 +166,7 @@ public class MmsDiffGet extends AbstractJavaWebScript {
             timestamp1 = latestTime1 != null ? latestTime1 : userTimeStamp1;
         }
         
-        if (userTimeStamp2.equals( LATEST_NO_TIMESTAMP )) {
+        if (userTimeStamp2.equals( WorkspaceDiff.LATEST_NO_TIMESTAMP )) {
             dateTime2 = null;
             latestTime2 = CommitUtil.replaceTimeStampWithCommitTime(dateTime2, ws2, services, response);
             timestamp2 = userTimeStamp2;
@@ -305,33 +306,49 @@ public class MmsDiffGet extends AbstractJavaWebScript {
         // TODO -- It would be nice if we could quickly find the "nearest" diff
         // in the case that the diff has never been computed.
         EmsScriptNode oldJob = getDiffJob();
-        JSONObject oldDiffJson = diffJsonFromJobNode( oldJob );
+        JSONObject diff0 = diffJsonFromJobNode( oldJob );
 
         // If either of the timestamps is "latest," then the diff result may be
         // out of date.
-        boolean isLatest1 = timestamp1.equals( LATEST_NO_TIMESTAMP ); 
-        boolean isLatest2 = timestamp2.equals( LATEST_NO_TIMESTAMP );
+        boolean isLatest1 = timestamp1 == null ||
+                            timestamp1.equals( WorkspaceDiff.LATEST_NO_TIMESTAMP ); 
+        boolean isLatest2 = timestamp2 == null ||
+                            timestamp2.equals( WorkspaceDiff.LATEST_NO_TIMESTAMP );
 
         // For each workspace get the diffs between the request timestamp and the
         // timestamp of the nearest/old diff.
-        JSONObject diff1Json = null;
-        String foundTimeStamp1 = (String) oldJob.getProperty( "ems:timestamp1" );
-        Date date1 = TimeUtils.dateFromTimestamp( foundTimeStamp1 );
-        Date latestOrTimestamp1 = TimeUtils.dateFromTimestamp(timestamp1);
-        diff1Json = performDiff( ws1, ws1, date1, isLatest1 ? null : latestOrTimestamp1, getResponse(),
-                                     getResponseStatus() );
-        JSONObject diff2Json = null;
-        String foundTimeStamp2 = (String) oldJob.getProperty( "ems:timestamp2" );
-        Date date2 = TimeUtils.dateFromTimestamp( foundTimeStamp2 );
-        Date latestOrTimestamp2 = TimeUtils.dateFromTimestamp(timestamp2);
-        diff2Json = performDiff( ws2, ws2, date2, isLatest2 ? null : latestOrTimestamp2, getResponse(),
-                                     getResponseStatus() );
-
         
-        // If oldJob is null, collect all nodes in diff1 and diff2, get their
-        // json for the common-branch timepoint, and put that into
-        // workspace1.elements of a diff0.
-        JSONObject diff0 = oldDiffJson;
+        Pair< WorkspaceNode, Date > p =
+                WorkspaceDiff.getCommonBranchPoint( ws1, ws2, timestamp1, timestamp2 );
+        WorkspaceNode commonParent = p.first;
+        Date commonBranchTime = p.second;
+        
+        Date date1 = WorkspaceDiff.dateFromWorkspaceTimestamp( timestamp1 );
+        Date date2 = WorkspaceDiff.dateFromWorkspaceTimestamp( timestamp2 );
+        JSONObject diff1Json = null;
+        JSONObject diff2Json = null;
+        Date date0_1 = null;
+        Date date0_2 = null;
+        if ( oldJob == null ) {
+            String foundTimeStamp1 = (String) oldJob.getProperty( "ems:timestamp1" );
+            date0_1 = WorkspaceDiff.dateFromWorkspaceTimestamp( foundTimeStamp1 );
+            String foundTimeStamp2 = (String) oldJob.getProperty( "ems:timestamp2" );
+            date0_2 = WorkspaceDiff.dateFromWorkspaceTimestamp( foundTimeStamp2 );
+        } else {
+            date0_1 = commonBranchTime;
+            date0_2 = commonBranchTime;
+        }
+        
+        // This assumes that the timepoint of the new diff is after the
+        // timepoint of the old for each workspace.
+        diff1Json = performDiff( ws1, ws1, date0_1, date1, getResponse(),
+                                 getResponseStatus() );
+        diff2Json = performDiff( ws2, ws2, date0_2, date2, getResponse(),
+                                 getResponseStatus() );
+        
+        // If oldJob is null, we need to build a diff0 from scratch. Collect all
+        // element ids in diff1 and diff2, get their json for the common-branch
+        // timepoint, and put that into workspace1.elements of a diff0.
         if ( diff0 == null ) {
             diff0 = JsonDiffDiff.makeEmptyDiffJson();
             
@@ -340,37 +357,19 @@ public class MmsDiffGet extends AbstractJavaWebScript {
             
             Set<String> sysmlIds = diff1.getAffectedIds();
             sysmlIds.addAll(diff2.getAffectedIds());
-            
-            Date commonBranchTimePoint = null;
-            Date timepoint1 = null;
-            Date timepoint2 = null;
-            WorkspaceNode commonParent = WorkspaceNode.getCommonParent(ws1, ws2);
-            
-           
-            if (commonParent == ws1)
-            	commonBranchTimePoint = TimeUtils.dateFromTimestamp(timestamp1);
-            else
-            	commonBranchTimePoint = ws1 == null ? ws1.getCopyTime(ws2) : ws2.getCopyTime(ws1);
-            if (commonParent == ws2)
-            	timepoint2 = TimeUtils.dateFromTimestamp(timestamp2);
-            else
-            	timepoint2 = ws2 == null ? ws2.getCopyTime(ws1) : ws1.getCopyTime(ws2);
-            commonBranchTimePoint = timepoint1.before(timepoint2) ? timepoint1 : timepoint2;            
-            
+                        
             Set<EmsScriptNode> elements = Collections.emptySet();
             for (String id : sysmlIds)
             {
             	//create ArrayList of node refs by calling getNodeRefsById
             	//add to set of EmsScriptNodes
-            	elements.add(findScriptNodeById(id, commonParent, commonBranchTimePoint, false));
+            	elements.add(findScriptNodeById(id, commonParent, commonBranchTime, false));
             }
             Map<String, EmsScriptNode> elementsMap = Utils.toMap(elements);
            
             JSONObject elementsJson = diff0.getJSONObject( "workspace1" );
-            //JSONArray elementsJson = diff0.getJSONObject( "workspace1" ).getJSONArray( "elements" );
-            // get workspace1 elements
             WorkspaceDiff.addJSONArray( elementsJson , "elements", elementsMap, null, commonParent,
-                          commonBranchTimePoint, true, null );
+                          commonBranchTime, true, null );
         }
         
         
@@ -683,8 +682,8 @@ public class MmsDiffGet extends AbstractJavaWebScript {
                         diffStatus = DIFF_COMPLETE;
 
                         // If either timestamp is latest then check if diff job node is outdated:
-                        if (timestamp1.equals( LATEST_NO_TIMESTAMP ) || 
-                            timestamp2.equals( LATEST_NO_TIMESTAMP )) {
+                        if (timestamp1.equals( WorkspaceDiff.LATEST_NO_TIMESTAMP ) || 
+                            timestamp2.equals( WorkspaceDiff.LATEST_NO_TIMESTAMP )) {
                             
                             if ( !diffIsOutDated( oldJob, latestCommitTime1, latestCommitTime2 ) ) {
                                 // Diff is not outdated:
