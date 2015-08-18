@@ -16,6 +16,15 @@
     },
     
     {
+        "sysmlid" : "sum",
+        "name" : "sum",
+        "owner" : "operations",
+        "specialization" : {
+            "type" : "Operation"
+        }
+    },
+    
+    {
         "sysmlid" : "Sum",
         "name" : "Sum",
         "owner" : "operations",

@@ -12,6 +12,7 @@ import gov.nasa.jpl.view_repo.util.NodeUtil.SearchType;
 import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -368,6 +369,22 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
         // TODO Auto-generated method stub
         return null;
     }
+    
+    public Collection< EmsScriptNode > getOwnedChildren( Object context ) {
+        return getOwnedElements( context );
+    }
+    public Collection< EmsScriptNode > getOwnedElements( Object context ) {
+        List<EmsScriptNode> list = new ArrayList< EmsScriptNode >();
+        if ( context instanceof EmsScriptNode ) {
+            EmsScriptNode n = (EmsScriptNode)context;
+            List< NodeRef > c = n.getOwnedChildren( false, null, n.getWorkspace() );
+            if ( c != null ) {
+                list = EmsScriptNode.toEmsScriptNodeList( c );
+            }
+        }
+        return list;
+    }
+
 
     @Override
     public Collection< EmsScriptNode > getElement( Object context,
@@ -974,7 +991,41 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
     	// TODO see EmsScriptNode.getConnectedNodes(), as a lot of this code can
         //      be used for this method.
         
-        return null;
+        List< EmsScriptNode > relationships = null;
+        
+        if ( context instanceof EmsScriptNode ) {
+            String relType = null;
+            String relName = null;
+            String relId = null;
+            List<String> typeNames = new ArrayList< String >();
+            if ( specifier instanceof String ) {
+                relType = (String)specifier;
+                if ( !Utils.isNullOrEmpty( relType ) ) typeNames.add(relType);
+            } else {
+                if ( specifier instanceof EmsScriptNode ) {
+                    EmsScriptNode s = (EmsScriptNode)specifier;
+                    relName = s.getSysmlName();
+                    if ( !Utils.isNullOrEmpty( relName ) ) typeNames.add(relName);
+                    relId = s.getSysmlId();
+                    if ( !Utils.isNullOrEmpty( relId ) ) typeNames.add(relId);
+                }
+            }
+            EmsScriptNode n = (EmsScriptNode)context;
+            ArrayList< NodeRef > refs = null;
+            if ( Utils.isNullOrEmpty( typeNames ) ) {
+                refs = n.getConnectedNodes( null, n.getWorkspace(), null );
+            } else {
+                for ( String type : typeNames ) {
+                    refs = n.getConnectedNodes( null, n.getWorkspace(), type );
+                    if ( !Utils.isNullOrEmpty( refs ) ) break;
+                }
+            }
+            if ( !Utils.isNullOrEmpty( refs ) ) {
+                relationships = n.toEmsScriptNodeList( refs );
+            }
+        }
+        
+        return relationships;
     }
 
     @Override
@@ -1854,7 +1905,88 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
         return call.filter( elements, 1 );
     }
 
-    
+    public BigDecimal toBigDecimal( Object o ) {
+        BigDecimal d = null;
+        if ( o instanceof Number ) {
+            d = new BigDecimal( ( (Number)o ).doubleValue() );
+        } else {
+            String s = "" + o;
+            try {
+                d = new BigDecimal( s );
+            } catch (NumberFormatException e) {
+                //ignore
+            }
+        }
+        return d;
+    }
+
+        
+    public Object sum( Object... numbers ) {
+        return sumArr( numbers );
+    }
+    public Object sumArr( Object[] numbers ) {
+        if (numbers == null ) return null;
+        if ( numbers.length == 0 ) return 0;
+        boolean areAllStrings = true;
+        boolean areAllNumbers = true;
+        boolean areNoneNumbers = true;
+        Double sum = 0.0;
+        //BigDecimal sum = new BigDecimal( 0.0 );
+        StringBuffer sb = new StringBuffer();
+        for ( Object obj : numbers ) {
+            Object o = obj;
+            
+            if ( o == null ) continue;
+            if ( o.getClass().isArray() ) {
+                o = sumArr( (Object[])o );
+            }
+            
+            if ( o instanceof String ) {
+                //sb.append( (String)o );
+            } else {
+                areAllStrings = false;
+            }
+            Number n = null;
+            try {
+                n = ClassUtils.evaluate( obj, Number.class, false );
+            } catch (Throwable t) {}
+
+            if ( n != null ) {
+                o = n;
+            }
+            BigDecimal bd = toBigDecimal( o );
+            Double d = bd == null ? null : bd.doubleValue();
+            if ( d == null ) {
+                areAllNumbers = false;
+            } else {
+                areNoneNumbers = false;
+                sum += d;
+            }
+        }
+//        if ( areNoneNumbers ) {
+//            sb = new StringBuffer();
+//            for ( Object obj : numbers ) {
+//                sb.append("" + obj);
+//            }
+//            return sb.toString();
+//        }
+        return round((Double)sum.doubleValue(), 5);
+    }
+
+    public Double round( Double doubleValue, int decimalPlaces ) {
+        double d = doubleValue;
+        System.out.println("d = " + d );
+        double factor = Math.pow( 10, decimalPlaces );
+        System.out.println("factor = " + factor );
+        d *= factor;
+        System.out.println("d *= factor = " + d);
+        long i = Math.round( d );
+        System.out.println("i = Math.round(d) = " + i );
+        d = i / factor;
+        System.out.println("d = i / factor = " + d);
+        return d;
+    }
+
     public Collection< Object > filter( Collection< Object > elements,
                                         FunctionCall call,
                                         int indexOfObjectArgument,

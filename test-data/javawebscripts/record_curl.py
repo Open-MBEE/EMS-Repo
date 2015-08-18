@@ -13,6 +13,7 @@ HOST = "localhost:8080"
 SERVICE_URL = "http://%s/alfresco/service/"%HOST
 BASE_URL_WS_NOBS = SERVICE_URL + "workspaces"
 BASE_URL_WS = BASE_URL_WS_NOBS + "/"
+common_filters = ['"created"','"read"','"lastModified"','"modified"','"siteCharacterizationId"','time_total']
 
 #######################################
 
@@ -29,11 +30,11 @@ parser.add_option("-u", "--url", default=BASE_URL_WS, help="Base URL to use DEFA
 parser.add_option("-p", "--post", default="elements", help="Post-type: elements, views, products DEFAULT: elements")
 parser.add_option("-w", "--workspace", default="master/", help="The workspace branch DEFAULT: master/")
 parser.add_option("-o", "--project", dest="project", action="store_true", default=False, help="Set True if creating a project DEFAULT: False")
-parser.add_option("-f", "--filter", default="", help="A string of comma separated values to be removed from the output i.e. \"filter1,filter2,filter3...\" (no spaces)")
+parser.add_option("-f", "--filter", default="", help="A string of comma separated values to be removed from the output. If common filters are to be used, supply \"common_filters\" as the first value i.e. \"filter1,filter2,filter3...\" (no spaces)")
 
 #options to add test to the regression test harness
 parser.add_option("--description", help="Test description")
-parser.add_option("--jsonDiff", dest="jsonDiff", action="store_true", default=False, help="Set True if using the json diff DEFAULT: False")
+parser.add_option("-j", "--jsonDiff", dest="jsonDiff", action="store_true", default=False, help="Set True if using json diff DEFAULT: False")
 parser.add_option("--runBranches", default="", help="A string of comma separated branch names that will run this test by default")
 
 parser.add_option("--setup", default=" ", help="Set up function (optional)")
@@ -123,11 +124,14 @@ if status == 0:
     filter_output = ""
     if options.filter is not "":
         filters = options.filter.split(",")
+        if filters[0] == "common_filters":
+            filters.extend(common_filters)
+            del filters[0]
         for line in file_orig:
             filterFnd = False
             for filter in filters:
                 #if the output contains the filter:
-                if re.search(filter, line):
+                if re.search('"' + filter + '"', line):
                     filterFnd = True
                     break
 
@@ -172,22 +176,26 @@ for line in lines:
 listOfFilters = "common_filters"
 listOfBranches = ""
 
+def createListOfValues(values, needSingleQuote):
 #splits string up into individual values to concatenate into a string appropriate to the test harness
-def createListOfValues(values):
     values = values.split(",")
+    if needSingleQuote and values[0] == "common_filters":
+        del values[0]
     listOfValues = '['
     for value in values:
         entry = '"' + value + '",'
+        if needSingleQuote:
+            entry = '\'"' + value + '"\','
         listOfValues += entry
     listOfValues = listOfValues[:-1] + ']'
     return listOfValues
 
 if options.filter != "":
     listOfFilters += '+'
-    listOfFilters += createListOfValues(options.filter)
+    listOfFilters += createListOfValues(options.filter, True)
 if options.runBranches != "":
-    listOfBranches = createListOfValues(options.runBranches)
-    
+    listOfBranches = createListOfValues(options.runBranches, False)
+
 optionalArguments = []
 listOfOptionalFunctions = ""
 #look through all of the optional arguments and see if one of them exists
