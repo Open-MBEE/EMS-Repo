@@ -1,0 +1,9 @@
+{ "elements" : [
+    {
+     "sysmlid" : "e",
+     "documentation" : "e is e",
+     "specialization" : {
+       "type": "DirectedRelationship"
+     }
+    }
+]}
