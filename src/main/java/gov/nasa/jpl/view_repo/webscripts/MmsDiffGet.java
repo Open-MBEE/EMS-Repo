@@ -14,6 +14,7 @@ import gov.nasa.jpl.view_repo.util.WorkspaceDiff;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -337,13 +338,42 @@ public class MmsDiffGet extends AbstractJavaWebScript {
         if ( diff0 == null ) {
             diff0 = JsonDiffDiff.makeEmptyDiffJson();
             
-            Set< EmsScriptNode > elements = getElements( diff1Json );
-            elements.addAll( getElements( diff2Json ) );
+            JsonDiffDiff diff1 = new JsonDiffDiff(diff1Json);
+            JsonDiffDiff diff2 = new JsonDiffDiff(diff2Json);
             
-            JSONArray elementsJson = diff0.getJSONObject( "workspace1" ).getJSONArray( "elements" );
+            Set<String> sysmlIds = diff1.getAffectedIds();
+            sysmlIds.addAll(diff2.getAffectedIds());
+            
+            Date commonBranchTimePoint = null;
+            Date timepoint1 = null;
+            Date timepoint2 = null;
+            WorkspaceNode commonParent = WorkspaceNode.getCommonParent(ws1, ws2);
+            
+           
+            if (commonParent == ws1)
+            	commonBranchTimePoint = TimeUtils.dateFromTimestamp(timestamp1);
+            else
+            	commonBranchTimePoint = ws1 == null ? ws1.getCopyTime(ws2) : ws2.getCopyTime(ws1);
+            if (commonParent == ws2)
+            	timepoint2 = TimeUtils.dateFromTimestamp(timestamp2);
+            else
+            	timepoint2 = ws2 == null ? ws2.getCopyTime(ws1) : ws1.getCopyTime(ws2);
+            commonBranchTimePoint = timepoint1.before(timepoint2) ? timepoint1 : timepoint2;            
+            
+            Set<EmsScriptNode> elements = Collections.emptySet();
+            for (String id : sysmlIds)
+            {
+            	//create ArrayList of node refs by calling getNodeRefsById
+            	//add to set of EmsScriptNodes
+            	elements.add(findScriptNodeById(id, commonParent, commonBranchTimePoint, false));
+            }
+            Map<String, EmsScriptNode> elementsMap = Utils.toMap(elements);
+           
+            JSONObject elementsJson = diff0.getJSONObject( "workspace1" );
+            //JSONArray elementsJson = diff0.getJSONObject( "workspace1" ).getJSONArray( "elements" );
             // get workspace1 elements
-            addJSONArray( elementsJson , "elements", elements, null, commonParent,
-                          commonBranchTimepoint, true, null );
+            WorkspaceDiff.addJSONArray( elementsJson , "elements", elementsMap, null, commonParent,
+                          commonBranchTimePoint, true, null );
         }
         
         

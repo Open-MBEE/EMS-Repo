@@ -808,7 +808,7 @@ public class WorkspaceDiff implements Serializable {
                                  Map< String, Version> versions, WorkspaceNode ws, Date dateTime, boolean showAll) throws JSONException {
         return addJSONArray( jsonObject, key, map, versions, ws, dateTime, showAll, nodeDiff );
     }
-    private static boolean addJSONArray(JSONObject jsonObject, String key, Map< String, EmsScriptNode > map, 
+    public static boolean addJSONArray(JSONObject jsonObject, String key, Map< String, EmsScriptNode > map, 
                                         Map< String, Version> versions, WorkspaceNode ws, Date dateTime, boolean showAll,
                                         NodeDiff nodeDiff ) throws JSONException {
         boolean emptyArray = true;
