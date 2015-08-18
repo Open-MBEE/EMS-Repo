@@ -1,0 +1,122 @@
+-------------------------------------------------------------------------------------------------------------------------
+---== Mass test ==---
+-------------------------------------------------------------------------------------------------------------------------
+python -c 'from serverUtilities import *;
+jsonObjFile = open("./JsonData/testProductElement.json");
+jsonObj = json.load(jsonObjFile);print jsonObj.get("elements");
+utilObj = UtilElement("./JsonData/testProductElement.json");
+print utilObj.getId();
+viewObj = UtilElement("./JsonData/testViewElement.json");
+print viewObj;
+utilObj.addView("testViewElement.json");
+print utilObj.getChildrenViews();
+print viewObj.getChildrenViews();viewObj.getDisplayedElements();
+print utilObj.getDisplayedElements()'
+
+-------------------------------------------------------------------------------------------------------------------------
+---== Testing testProductElement.json ==---
+-------------------------------------------------------------------------------------------------------------------------
+python -c 'from serverUtilities import *;
+utilObj = UtilElement("./JsonData/testProductElement.json");
+print utilObj.getId();
+
+==== COMMAND ====
+python -c 'from serverUtilities import *;utilObj = UtilElement("./JsonData/testProductElement.json");print utilObj.getId();'
+-------------------------------------------------------------------------------------------------------------------------
+
+-------------------------------------------------------------------------------------------------------------------------
+---== Testing testProductElement.json ==---
+-------------------------------------------------------------------------------------------------------------------------
+python -c 'from serverUtilities import *;
+viewObj = UtilElement("./JsonData/testViewElement.json");
+print viewObj;
+
+==== COMMAND ====
+python -c 'from serverUtilities import *;viewObj = UtilElement("./JsonData/testViewElement.json");print viewObj;'
+-------------------------------------------------------------------------------------------------------------------------
+
+-------------------------------------------------------------------------------------------------------------------------
+---== Testing ... ==---
+-------------------------------------------------------------------------------------------------------------------------
+'python -c 'from serverUtilities import *;
+viewObject = UtilElement("./JsonData/testViewElement.json");
+print viewObject.getChildrenViews();'
+
+==== COMMAND ====
+python -c 'from serverUtilities import *;viewObject = UtilElement("./JsonData/testViewElement.json");print viewObject.getChildrenViews();'
+-------------------------------------------------------------------------------------------------------------------------
+[{u'qualifiedName': u'/server-utils/server-utils_no_project/holding_bin/Test Doc 1', u'name': u'Test Doc 1', u'created': u'Sun Aug 16 18:26:50 PDT 2015', u'sysmlid': u'MMS_1439774810522_0ba947a4-ac47-4d7d-b17b-e0c692243e88', u'documentation': u'This element is on ems-stg under Server Utilities', u'editable': True, u'modified': u'2015-08-16T19:09:11.973-0700', u'read': u'2015-08-16T19:09:12.373-0700', u'siteCharacterizationId': u'server-utils', u'owner': u'holding_bin_server-utils_no_project', u'qualifiedId': u'/server-utils/server-utils_no_project/holding_bin_server-utils_no_project/MMS_1439774810522_0ba947a4-ac47-4d7d-b17b-e0c692243e88', u'modifier': u'example', u'creator': u'dank', u'specialization': {u'type': u'Product', u'displayedElements': [u'MMS_1439774810522_0ba947a4-ac47-4d7d-b17b-e0c692243e88'], u'allowedElements': [u'MMS_1439774810522_0ba947a4-ac47-4d7d-b17b-e0c692243e88'], u'view2view': [{u'childrenViews': [], u'id': u'MMS_1439774810522_0ba947a4-ac47-4d7d-b17b-e0c692243e88'}], u'contents': {u'operand': [{u'instance': u'MMS_1439774811887_0ecc5284-0e8a-4263-a0f1-51ba51af6ad4', u'valueExpression': None, u'type': u'InstanceValue'}], u'valueExpression': None, u'type': u'Expression'}}}]
+
+======
+JSON string / Element above is equivalent to without it being referenced as elements:
+------
+{
+  "elements": [
+    {
+      "modifier": "example",
+      "qualifiedId": "/server-utils/server-utils_no_project/holding_bin_server-utils_no_project/MMS_1439774810522_0ba947a4-ac47-4d7d-b17b-e0c692243e88",
+      "siteCharacterizationId": "server-utils",
+      "created": "Sun Aug 16 18:26:50 PDT 2015",
+      "name": "Test Doc 1",
+      "qualifiedName": "/server-utils/server-utils_no_project/holding_bin/Test Doc 1",
+      "documentation": "This element is on ems-stg under Server Utilities",
+      "owner": "holding_bin_server-utils_no_project",
+      "sysmlid": "MMS_1439774810522_0ba947a4-ac47-4d7d-b17b-e0c692243e88",
+      "read": "2015-08-16T19:09:12.373-0700",
+      "specialization": {
+        "view2view": [
+          {
+            "childrenViews": [],
+            "id": "MMS_1439774810522_0ba947a4-ac47-4d7d-b17b-e0c692243e88"
+          }
+        ],
+        "displayedElements": [
+          "MMS_1439774810522_0ba947a4-ac47-4d7d-b17b-e0c692243e88"
+        ],
+        "contents": {
+          "valueExpression": null,
+          "operand": [
+            {
+              "valueExpression": null,
+              "type": "InstanceValue",
+              "instance": "MMS_1439774811887_0ecc5284-0e8a-4263-a0f1-51ba51af6ad4"
+            }
+          ],
+          "type": "Expression"
+        },
+        "allowedElements": [
+          "MMS_1439774810522_0ba947a4-ac47-4d7d-b17b-e0c692243e88"
+        ],
+        "type": "Product"
+      },
+      "editable": true,
+      "modified": "2015-08-16T19:09:11.973-0700",
+      "creator": "dank"
+    }
+  ]
+}
+=======
+
+Loaded JSON Object
+Trying to get view2view
+childrenViews
+id
+None
+Loaded JSON Object
+<serverUtilities.UtilElement instance at 0x1019df950>
+Loaded JSON Object
+Parent has views
+{0: u'childrenViews', 1: u'id'}
+Has displayed element
+Adding:
+Parent: Child View : 0
+Adding:
+Parent: Child View : 1
+[0, 1]
+No child views
+[]
+Has dispalyed elements
+Has dispalyed elements
+[u'MMS_1439774810522_0ba947a4-ac47-4d7d-b17b-e0c692243e88']
+
+
