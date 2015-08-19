@@ -45,7 +45,7 @@ public class JsonDiffDiff extends AbstractDiff< JSONObject, Object, String > {
         JSONArray added2 = ws2.optJSONArray( "addedElements" );
         JSONArray updated2 = ws2.optJSONArray( "updatedElements" );
         JSONArray deleted2 = ws2.optJSONArray( "deletedElements" );
-        System.out.println("***********************");
+
         if ( elems1 != null ) getElements().addAll( Utils.asList( toList(elems1, false),
                                                                   JSONObject.class ) );
         if ( added2 != null ) getAdded().addAll(  Utils.asList( toList(added2, false),
