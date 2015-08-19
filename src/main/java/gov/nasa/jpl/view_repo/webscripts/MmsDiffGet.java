@@ -349,7 +349,7 @@ public class MmsDiffGet extends AbstractJavaWebScript {
         Date date2 = WorkspaceDiff.dateFromWorkspaceTimestamp( timestamp2 );
         Date date0_1 = null;
         Date date0_2 = null;
-        if ( oldJob == null ) {
+        if ( oldJob != null ) {
             String foundTimeStamp1 = (String) oldJob.getProperty( "ems:timestamp1" );
             date0_1 = WorkspaceDiff.dateFromWorkspaceTimestamp( foundTimeStamp1 );
             String foundTimeStamp2 = (String) oldJob.getProperty( "ems:timestamp2" );

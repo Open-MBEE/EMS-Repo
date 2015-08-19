@@ -552,6 +552,11 @@ public class JsonDiffDiff extends AbstractDiff< JSONObject, Object, String > {
         // not in previous diffs.
         // TODO -- REVIEW -- Don't you want to overwrite these with any new values?!
         JSONArray elements = glommedDiff.getJSONArray( "elements" );
+        if (elements == null)
+        {
+            elements = new JSONArray();
+            glommedDiff.put("elements",  elements);
+        }
         for ( int k = 0; k < diffs.size(); ++k ) {
             int i = reverse ? diffs.size() - 1 - k : k;
             JSONObject diff =  diffs.get( i );
