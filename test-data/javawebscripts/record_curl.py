@@ -3,9 +3,10 @@
 #must be places in test-data/javawebscripts directory
 import os
 import sys
-from regression_lib import create_curl_cmd
+import re
 import optparse
 import commands
+from regression_lib import create_curl_cmd
 from __builtin__ import True, False
 
 #test_dir_path = "git/alfresco-view-repo/test-data/javawebscripts"
@@ -13,7 +14,7 @@ HOST = "localhost:8080"
 SERVICE_URL = "http://%s/alfresco/service/"%HOST
 BASE_URL_WS_NOBS = SERVICE_URL + "workspaces"
 BASE_URL_WS = BASE_URL_WS_NOBS + "/"
-common_filters = ['"created"','"read"','"lastModified"','"modified"','"siteCharacterizationId"','time_total']
+common_filters = ['created','read','lastModified','modified','siteCharacterizationId','time_total']
 
 #######################################
 
@@ -24,13 +25,13 @@ parser.add_option("-g", "--gitBranch", default=os.getenv("GIT_BRANCH", "test"), 
 parser.add_option("-c", "--curl", default="", help="Input entire desired curl command")
 
 parser.add_option("--host", default=HOST, help="DEFAULT: " + HOST)
-parser.add_option("-t", "--type", help="Type of curl command: POST, GET, DELETE")
+parser.add_option("-t", "--type", default="", help="Type of curl command: POST, GET, DELETE")
 parser.add_option("-d", "--data", default="", help="Data to post in json")
 parser.add_option("-u", "--url", default=BASE_URL_WS, help="Base URL to use DEFAULT: " + BASE_URL_WS)
 parser.add_option("-p", "--post", default="elements", help="Post-type: elements, views, products DEFAULT: elements")
 parser.add_option("-w", "--workspace", default="master/", help="The workspace branch DEFAULT: master/")
 parser.add_option("-o", "--project", dest="project", action="store_true", default=False, help="Set True if creating a project DEFAULT: False")
-parser.add_option("-f", "--filter", default="", help="A string of comma separated values to be removed from the output. If common filters are to be used, supply \"common_filters\" as the first value i.e. \"filter1,filter2,filter3...\" (no spaces)")
+parser.add_option("-f", "--filter", default="", help="A string of comma separated values to be removed from the output i.e. \"filter1,filter2,filter3...\" (no spaces)")
 
 #options to add test to the regression test harness
 parser.add_option("--description", help="Test description")
@@ -116,22 +117,24 @@ print "Executing curl command\n"
 print output + "\n"
 print "Creating baseline %s.json in %s"%(options.testName, baseline_dir)
 
+useCommonFilters = False
 if status == 0:
     file_orig = open(baseline_orig_json, "r")
-
+    useCommonFilters = True
     #apply filters to output of curl cmd (not using output b/c getstatusoutput pipes stderr to stdout):
     orig_output = ""
     filter_output = ""
     if options.filter is not "":
         filters = options.filter.split(",")
-        if filters[0] == "common_filters":
+        if useCommonFilters:
             filters.extend(common_filters)
-            del filters[0]
         for line in file_orig:
             filterFnd = False
             for filter in filters:
+                if filter != "time_total":
+                    filter = '"' + filter + '"'
                 #if the output contains the filter:
-                if re.search('"' + filter + '"', line):
+                if re.search(filter, line):
                     filterFnd = True
                     break
 
@@ -179,8 +182,6 @@ listOfBranches = ""
 def createListOfValues(values, needSingleQuote):
 #splits string up into individual values to concatenate into a string appropriate to the test harness
     values = values.split(",")
-    if needSingleQuote and values[0] == "common_filters":
-        del values[0]
     listOfValues = '['
     for value in values:
         entry = '"' + value + '",'
