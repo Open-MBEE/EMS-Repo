@@ -45,14 +45,14 @@ public class JsonDiffDiff extends AbstractDiff< JSONObject, Object, String > {
         JSONArray added2 = ws2.optJSONArray( "addedElements" );
         JSONArray updated2 = ws2.optJSONArray( "updatedElements" );
         JSONArray deleted2 = ws2.optJSONArray( "deletedElements" );
-        
-        if ( elems1 != null ) getElements().addAll( Utils.asList( toList(elems1),
+        System.out.println("***********************");
+        if ( elems1 != null ) getElements().addAll( Utils.asList( toList(elems1, false),
                                                                   JSONObject.class ) );
-        if ( added2 != null ) getAdded().addAll(  Utils.asList( toList(added2),
+        if ( added2 != null ) getAdded().addAll(  Utils.asList( toList(added2, false),
                                                                 JSONObject.class ) );
-        if ( updated2 != null ) getUpdated().addAll(  Utils.asList( toList(updated2),
+        if ( updated2 != null ) getUpdated().addAll(  Utils.asList( toList(updated2, false),
                                                                     JSONObject.class ) );
-        if ( deleted2 != null ) getRemoved().addAll(  Utils.asList( toList(deleted2),
+        if ( deleted2 != null ) getRemoved().addAll(  Utils.asList( toList(deleted2, false),
                                                                     JSONObject.class ) );
     }
     
@@ -265,20 +265,20 @@ public class JsonDiffDiff extends AbstractDiff< JSONObject, Object, String > {
 
 
     public static Map<String,JSONObject > toElementMap( JSONObject o ) {
-        Map< String, Object > map = toMap( o );
+        Map< String, Object > map = toMap( o, true );
         return Utils.toMap( map, String.class, JSONObject.class );
     }
 
-    public static Map<String, Object> toMap( JSONObject o ) {
+    public static Map<String, Object> toMap( JSONObject o, boolean convertJsonToMapsAndLists ) {
         Map<String, Object> m = Utils.newMap();
         for ( Object k : o.keySet() ) {
             if ( k instanceof String ) {
                 String key = (String)k;
                 Object newObj = o.get( key );
-                if ( newObj instanceof JSONObject ) {
-                    m.put( key, toMap( (JSONObject)newObj ) );
-                } else if ( newObj instanceof JSONArray ) {
-                    m.put( key, toList( (JSONArray)newObj ) );
+                if ( convertJsonToMapsAndLists && newObj instanceof JSONObject ) {
+                    m.put( key, toMap( (JSONObject)newObj, true ) );
+                } else if ( convertJsonToMapsAndLists && newObj instanceof JSONArray ) {
+                    m.put( key, toList( (JSONArray)newObj, true ) );
                 } else {
                     m.put( key, newObj );
                 }
@@ -288,18 +288,18 @@ public class JsonDiffDiff extends AbstractDiff< JSONObject, Object, String > {
     }
     
     public static ArrayList< JSONObject > toElementList( JSONArray arr ) {
-        List< Object > list = toList( arr );
+        List< Object > list = toList( arr, false );
         return Utils.asList( list, JSONObject.class );
     }
     
-    public static List< Object > toList( JSONArray arr ) {
+    public static List< Object > toList( JSONArray arr, boolean convertJsonToMapsAndLists ) {
         List< Object > m = Utils.newList();
         for ( int i = 0; i < arr.length(); ++i ) {
             Object newObj = arr.get( i );
-            if ( newObj instanceof JSONObject ) {
-                m.add( toMap( (JSONObject)newObj ) );
-            } else if ( newObj instanceof JSONArray ) {
-                m.add( toList( (JSONArray)newObj ) );
+            if ( convertJsonToMapsAndLists && newObj instanceof JSONObject ) {
+                m.add( toMap( (JSONObject)newObj, true ) );
+            } else if ( convertJsonToMapsAndLists && newObj instanceof JSONArray ) {
+                m.add( toList( (JSONArray)newObj, true ) );
             } else {
                 m.add( newObj );
             }
@@ -308,7 +308,7 @@ public class JsonDiffDiff extends AbstractDiff< JSONObject, Object, String > {
     }
     
     public static boolean sameElement( JSONObject t1, JSONObject t2 ) {
-        int comp = CompareUtils.compareCollections( toMap( t1 ), toMap( t2 ),
+        int comp = CompareUtils.compareCollections( toMap( t1, true ), toMap( t2, true ),
                                                     true, false );
         return comp == 0;
     }
@@ -366,7 +366,7 @@ public class JsonDiffDiff extends AbstractDiff< JSONObject, Object, String > {
            }
        }
        // Now add diff2 to diff3.
-       glom(diff3, diff2NoWs1);
+       diff3 = glom(diff3, diff2NoWs1);
        
        // Get all the workpace pieces of the diffs.
        JsonDiffDiff dDiff1 = new JsonDiffDiff( diff1 );
@@ -551,7 +551,7 @@ public class JsonDiffDiff extends AbstractDiff< JSONObject, Object, String > {
         // Iterate through each diff in order adding any new elements that were
         // not in previous diffs.
         // TODO -- REVIEW -- Don't you want to overwrite these with any new values?!
-        JSONArray elements = glommedDiff.getJSONArray( "elements" );
+        JSONArray elements = glommedDiff.optJSONArray( "elements" );
         if (elements == null)
         {
             elements = new JSONArray();
