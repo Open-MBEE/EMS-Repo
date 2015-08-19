@@ -12,8 +12,7 @@ import optparse
 import glob
 import json
 import datetime
-
-#CURL_STATUS = '-w "\\n%{http_code}\\ntime_total:%{time_total}\\n"'
+# CURL_STATUS = '-w "\\n%{http_code}\\ntime_total:%{time_total}\\n"'
 CURL_STATUS = '-w "\\n%{http_code}\\n"'
 CURL_POST_FLAGS_NO_DATA = "-X POST"
 CURL_POST_FLAGS = '-X POST -H "Content-Type:application/json" --data'
@@ -22,11 +21,11 @@ CURL_PUT_FLAGS = "-X PUT"
 CURL_GET_FLAGS = "-X GET"
 CURL_DELETE_FLAGS = "-X DELETE"
 CURL_USER = " -u admin:admin"
-CURL_FLAGS = CURL_STATUS+CURL_USER
-HOST = "localhost:8080" 
-SERVICE_URL = "http://%s/alfresco/service/"%HOST
-BASE_URL_WS_NOBS = SERVICE_URL+"workspaces"
-BASE_URL_WS = BASE_URL_WS_NOBS+"/"
+CURL_FLAGS = CURL_STATUS + CURL_USER
+HOST = "localhost:8080"
+SERVICE_URL = "http://%s/alfresco/service/" % HOST
+BASE_URL_WS_NOBS = SERVICE_URL + "workspaces"
+BASE_URL_WS = BASE_URL_WS_NOBS + "/"
 
 failed_tests = 0
 errs = []
@@ -38,7 +37,7 @@ test_dir_path = "test-data/javawebscripts"
 test_nums = []
 test_names = []
 create_baselines = False
-common_filters = ['"created"','"read"','"lastModified"','"modified"','"siteCharacterizationId"','time_total']
+common_filters = ['"created"', '"read"', '"lastModified"', '"modified"', '"siteCharacterizationId"', 'time_total']
 cmd_git_branch = None
 
 # Some global variables for lambda functions in tests
