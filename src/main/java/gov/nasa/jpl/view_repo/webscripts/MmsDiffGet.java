@@ -9,19 +9,16 @@ import gov.nasa.jpl.view_repo.actions.WorkspaceDiffActionExecuter;
 import gov.nasa.jpl.view_repo.util.CommitUtil;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.EmsTransaction;
-import gov.nasa.jpl.view_repo.util.JsonDiffDiff;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
 import gov.nasa.jpl.view_repo.util.WorkspaceDiff;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Set;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -49,6 +46,8 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
 public class MmsDiffGet extends AbstractJavaWebScript {
 
     public static boolean glom = true;
+
+    private static WorkspaceNode workspace;
     
     protected WorkspaceNode ws1, ws2;
     protected String workspaceId1;
@@ -242,6 +241,29 @@ public class MmsDiffGet extends AbstractJavaWebScript {
         return results;
     }
     
+    
+    public static JSONObject performDiffGlom( WorkspaceNode w1, WorkspaceNode w2,
+                                              Date date1, Date date2,
+                                              StringBuffer aResponse,
+                                              Status aResponseStatus ) {
+        WorkspaceDiff workspaceDiff = null;
+            workspaceDiff =
+                    new WorkspaceDiff(w1, w2, date1, date2, aResponse, aResponseStatus);
+        
+        JSONObject diffJson = null;
+        if ( workspaceDiff != null ) {
+            try {
+                workspaceDiff.forceJsonCacheUpdate = false;
+                diffJson = workspaceDiff.toJSONObject( date1, date2, false );
+                if (!Utils.isNullOrEmpty(aResponse.toString())) diffJson.put("message", aResponse.toString());
+                //results.put("res", NodeUtil.jsonToString( diffJson, 4 ));
+            } catch (JSONException e) {
+                e.printStackTrace();
+                diffJson = null;
+            }
+        }
+        return diffJson;
+    }
     public static JSONObject performDiff( WorkspaceNode w1, WorkspaceNode w2,
                                           Date date1, Date date2,
                                           StringBuffer aResponse,
@@ -325,8 +347,6 @@ public class MmsDiffGet extends AbstractJavaWebScript {
         
         Date date1 = WorkspaceDiff.dateFromWorkspaceTimestamp( timestamp1 );
         Date date2 = WorkspaceDiff.dateFromWorkspaceTimestamp( timestamp2 );
-        JSONObject diff1Json = null;
-        JSONObject diff2Json = null;
         Date date0_1 = null;
         Date date0_2 = null;
         if ( oldJob == null ) {
@@ -341,46 +361,48 @@ public class MmsDiffGet extends AbstractJavaWebScript {
         
         // This assumes that the timepoint of the new diff is after the
         // timepoint of the old for each workspace.
-        diff1Json = performDiff( ws1, ws1, date0_1, date1, getResponse(),
-                                 getResponseStatus() );
-        diff2Json = performDiff( ws2, ws2, date0_2, date2, getResponse(),
-                                 getResponseStatus() );
+        JSONObject diff1Json = performDiff( ws1, ws1, date0_1, date1, getResponse(),
+                                            getResponseStatus() );
+        JSONObject diff2Json = performDiff( ws2, ws2, date0_2, date2, getResponse(),
+                                            getResponseStatus() );
         
-        // If oldJob is null, we need to build a diff0 from scratch. Collect all
-        // element ids in diff1 and diff2, get their json for the common-branch
-        // timepoint, and put that into workspace1.elements of a diff0.
-        if ( diff0 == null ) {
-            diff0 = JsonDiffDiff.makeEmptyDiffJson();
-            
-            JsonDiffDiff diff1 = new JsonDiffDiff(diff1Json);
-            JsonDiffDiff diff2 = new JsonDiffDiff(diff2Json);
-            
-            Set<String> sysmlIds = diff1.getAffectedIds();
-            sysmlIds.addAll(diff2.getAffectedIds());
-                        
-            Set<EmsScriptNode> elements = Collections.emptySet();
-            for (String id : sysmlIds)
-            {
-            	//create ArrayList of node refs by calling getNodeRefsById
-            	//add to set of EmsScriptNodes
-            	elements.add(findScriptNodeById(id, commonParent, commonBranchTime, false));
-            }
-            Map<String, EmsScriptNode> elementsMap = Utils.toMap(elements);
-           
-            JSONObject elementsJson = diff0.getJSONObject( "workspace1" );
-            WorkspaceDiff.addJSONArray( elementsJson , "elements", elementsMap, null, commonParent,
-                          commonBranchTime, true, null );
-        }
-        
-        
-        // Now add/glom diff2 to diff0 (oldDiffJson) and then diff with/subtract
-        // diff1.
-        JSONObject diffResult = null; //glom( oldDiffJson, diff2Json );
-        diffResult = JsonDiffDiff.diff( diff0, diff1Json, diff2Json );
-
+//        // If oldJob is null, we need to build a diff0 from scratch. Collect all
+//        // element ids in diff1 and diff2, get their json for the common-branch
+//        // timepoint, and put that into workspace1.elements of a diff0.
+//        if ( diff0 == null ) {
+//            diff0 = JsonDiffDiff.makeEmptyDiffJson();
+//            
+//            JsonDiffDiff diff1 = new JsonDiffDiff(diff1Json);
+//            JsonDiffDiff diff2 = new JsonDiffDiff(diff2Json);
+//            
+//            Set<String> sysmlIds = diff1.getAffectedIds();
+//            sysmlIds.addAll(diff2.getAffectedIds());
+//                        
+//            Set<EmsScriptNode> elements = Collections.emptySet();
+//            for (String id : sysmlIds)
+//            {
+//            	//create ArrayList of node refs by calling getNodeRefsById
+//            	//add to set of EmsScriptNodes
+//            	elements.add(findScriptNodeById(id, commonParent, commonBranchTime, false));
+//            }
+//            Map<String, EmsScriptNode> elementsMap = Utils.toMap(elements);
+//           
+//            JSONObject elementsJson = diff0.getJSONObject( "workspace1" );
+//            WorkspaceDiff.addJSONArray( elementsJson , "elements", elementsMap, null, commonParent,
+//                          commonBranchTime, true, null );
+//        }
+//        
+//        
+//        // Now add/glom diff2 to diff0 (oldDiffJson) and then diff with/subtract
+//        // diff1.
+//        JSONObject diffResult = null; //glom( oldDiffJson, diff2Json );
+//        diffResult = JsonDiffDiff.diff( diff0, diff1Json, diff2Json );
+        JSONObject diffResult =
+                WorkspaceDiff.performDiffGlom( diff0, diff1Json, diff2Json, commonParent,
+                                 commonBranchTime, services, response );
         return diffResult;
     }
-    
+
     public void performDiff(Map<String, Object> results) {
        
         boolean switchUser = !originalUser.equals( "admin" );

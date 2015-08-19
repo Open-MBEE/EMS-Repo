@@ -535,6 +535,10 @@ public class JsonDiffDiff extends AbstractDiff< JSONObject, Object, String > {
     }
 
     public static JSONObject glom( ArrayList<JSONObject> diffs ) {
+        return glom( diffs, false );
+    }
+    
+    public static JSONObject glom( ArrayList<JSONObject> diffs, boolean reverse ) {
         if ( Utils.isNullOrEmpty( diffs ) ) return null;
         JSONObject glommedDiff = makeEmptyDiffJson();
         if ( diffs.size() == 1 ) return glommedDiff;
@@ -548,7 +552,8 @@ public class JsonDiffDiff extends AbstractDiff< JSONObject, Object, String > {
         // not in previous diffs.
         // TODO -- REVIEW -- Don't you want to overwrite these with any new values?!
         JSONArray elements = glommedDiff.getJSONArray( "elements" );
-        for ( int i = 0; i < diffs.size(); ++i ) {
+        for ( int k = 0; k < diffs.size(); ++k ) {
+            int i = reverse ? diffs.size() - 1 - k : k;
             JSONObject diff =  diffs.get( i );
             JSONObject ws1 = diff.optJSONObject( "workspace1" );            
             JSONArray dElements = ws1.getJSONArray( "elements" );
@@ -562,7 +567,9 @@ public class JsonDiffDiff extends AbstractDiff< JSONObject, Object, String > {
         }
         
         // Glom workpace 2 changes
-        for ( JSONObject diff : diffs ) {
+        for ( int k = 0; k < diffs.size(); ++k ) {
+            int i = reverse ? diffs.size() - 1 - k : k;
+            JSONObject diff =  diffs.get( i );
             JSONObject ws2 = diff.optJSONObject( "workspace2" );
             if ( ws2 == null ) continue;
             JSONArray added = ws2.optJSONArray( "addedElements" );
@@ -918,6 +925,9 @@ public class JsonDiffDiff extends AbstractDiff< JSONObject, Object, String > {
         }
     }
 
+    public static void main( String[] args ) {
+        System.out.println( "testing JsonDiffDiff" );
+    }
 }
 
 enum DiffOp { ADD, UPDATE, DELETE, NONE }

@@ -886,6 +886,36 @@ public class WorkspaceNode extends EmsScriptNode {
         }
         return changedNodeRefs;
     }
+    
+    public static JSONObject getChangeJsonWithRespectTo( WorkspaceNode ws1,
+                                                         WorkspaceNode ws2,
+                                                         Date timestamp1,
+                                                         Date timestamp2,
+                                                         ServiceRegistry services,
+                                                         StringBuffer response,
+                                                         Status status ) {
+        ArrayList< EmsScriptNode > commits =
+                CommitUtil.getCommitsInDateTimeRange( timestamp2, timestamp1,
+                                                      ws1, ws2, services,
+                                                      response );
+        ArrayList< JSONObject > commitsJson = new ArrayList< JSONObject >();
+        if ( !Utils.isNullOrEmpty( commits ) ) {
+            for ( EmsScriptNode commitNode : commits ) {
+                String content = (String) commitNode.getProperty( "ems:commit" );
+                try {
+                    JSONObject changeJson = new JSONObject(content);
+                    if ( changeJson != null ) {
+                        commitsJson.add( changeJson );
+                    }
+                } catch ( JSONException e ) {
+                    e.printStackTrace();
+                }
+            }
+            JSONObject glommedCommit = JsonDiffDiff.glom( commitsJson, true );
+            return glommedCommit;
+        }
+        return null;
+    }
 
     public Set< String > getChangedElementIdsWithRespectTo( WorkspaceNode other, Date dateTime ) {
         Set< String > changedElementIds = new TreeSet< String >();//getChangedElementIds());
