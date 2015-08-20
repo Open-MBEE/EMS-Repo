@@ -22,7 +22,6 @@ parser = optparse.OptionParser()
 
 parser.add_option("-n", "--testName", help="Mandatory option: test name to create the baseline json")
 parser.add_option("-g", "--gitBranch", default=os.getenv("GIT_BRANCH", "test"), help="Specify the branch to use or uses the $GIT_BRANCH value using 'test' if it doesn't exist")
-parser.add_option("-c", "--curl", default="", help="Input entire desired curl command")
 
 parser.add_option("--host", default=HOST, help="DEFAULT: " + HOST)
 parser.add_option("-t", "--type", default="", help="Type of curl command: POST, GET, DELETE")
@@ -60,7 +59,7 @@ if options.testName is None:
     parser.error("Test name needed to create baseline")
 
 #if there is no -c input, the other six must be present
-if options.curl is None and options.type is None:
+if options.type is None:
     parser.error("Type of curl command is required to create curl command")
 
 #######################################
@@ -90,10 +89,7 @@ if options.data and options.data[0] == "{" and options.data[-1] == "}":
 else:
     curl_data = options.data
 
-if options.curl == "":
-     curl_cmd = create_curl_cmd(type=options.type, data=curl_data, base_url=curl_base_url, post_type=options.post, branch=options.workspace, project_post=options.project)
-else:
-     curl_cmd = options.curl
+curl_cmd = create_curl_cmd(type=options.type, data=curl_data, base_url=curl_base_url, post_type=options.post, branch=options.workspace, project_post=options.project)
 
 print "\n" + curl_cmd
 user = raw_input("Is this the desired curl command? (y/n) ")
@@ -222,9 +218,13 @@ if options.setup != " " or options.postProcess != " " or options.teardown != " "
         listOfOptionalFunctions += ',\n'
         compiledStringOfArguments = ',\n'.join(optionalArguments)
         listOfOptionalFunctions += compiledStringOfArguments          
-       
+ 
+if curl_data[0] == "'" and curl_data[-1] == "'":
+    curl_data = "'\\\'" + options.data + "\\\''"
+else:
+    curl_data = "\"" + curl_data + "\""      
 value = "[\n" + str(latestTest + 1) + ',\n"' + options.testName + '",\n"' + options.description + \
-        '",\n' + 'create_curl_cmd(type="' + options.type + '", data="' + curl_data + '", base_url="' + \
+        '",\n' + 'create_curl_cmd(type="' + options.type + '", data=' + curl_data + ', base_url="' + \
         curl_base_url + '", post_type="' + options.post + '", branch="' + options.workspace + '", project_post=' + \
         str(options.project) + '),\n' + str(options.jsonDiff) + ',\n' + listOfFilters + ',\n' + listOfBranches + \
         listOfOptionalFunctions + '\n],\n'
