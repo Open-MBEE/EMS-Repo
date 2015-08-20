@@ -18,6 +18,8 @@ class UtilElement:
         if (inElement is not None):
 
             if (str(inElement).endswith('.json')):
+                print 'Constructor - inElement Open and Loads'
+                print inElement
                 self.jsonObj = loadJson(open(inElement))  # Function that will throw exception if it is not the
                 # correct json
             else:
@@ -336,10 +338,22 @@ def GETjson(sysmlid):
 
     return returnObj
 
-
+#  This process Requires 4 POSTs to complete adding a view to another view
 def addViewToView(toAdd, addingTo):
     print '========================'
     print 'Add View'
+    print str(toAdd)
+    # Creates UtilElement
+    toAdd_element = UtilElement(toAdd)
+    print str(toAdd_element.jsonObj)
+
+    # print toAdd
+    print '========================'
+    print 'To add element'
+    print str(toAdd_element)
+    print '========================'
+    # Determine what type view the child view will be added to
+    #   This is for retrieve the sysmlid needed to create the new viewpoint
     if type(addingTo) is not str:
         print '========================'
         print 'Is not string'
@@ -351,25 +365,38 @@ def addViewToView(toAdd, addingTo):
         print 'Is String'
         print '========================'
         ownerSysmlid = addingTo
-    newView = TEMPLATE_NEW_VIEW
-    newView.elements[0].update('sysmlid', ownerSysmlid)
 
-    newView = json.dumps(newView)
-    cmd = create_curl_cmd("POST", data=newView)
-    status, output = execCurlCmd(cmd)
+    # Loads a template of the view
+    newView = json.loads(TEMPLATE_NEW_VIEW)
 
-    response = json.loads(output)
-    childSysmlid = response.elements[0].get('sysmlid')
+    #
+    print newView
+    print 'Print New View Template'
+    print '====================='
+    print 'Print newView attributes elements'
+    print '========================'
 
-    postView = json.loads(TEMPLATE_INSTANCE_SPEC)
-    instanceString = postView.elements[0].specialization.instanceSpecificationSpecification.get('string')
-    instanceString.replace('VIEW_ID', str(childSysmlid))
-    postView.elements[0].specialization.instanceSpecificationSpecification.update('string', instanceString)
+    # Prints the string version of the newView point with update sysmlid
+    newView.get('elements')[0].update(owner=ownerSysmlid)
+    newView.get('elements')[0].update(documentation=toAdd_element.documentation)
+    newView.get('elements')[0].update(name=toAdd_element.name)
+    newView.get('elements')[0].get('specialization').update(type=toAdd_element.type)
+    tempView = newView
 
-    postView = json.dumps(postView)
+    # Debug print tempView
+    print '========================'
+    print 'Print TempView'
+    print tempView.get('elements')[0]
+    print '========================'
 
-    cmd = create_curl_cmd("POST", data=postView)
-    status, output = execCurlCmd(cmd)
+    # Debug print tempView's owner
+    print newView.get('elements')[0].get('owner')
+
+
+    toAdd = json.dumps(toAdd)
+    # newView.get('elements')[0].update(name=toAdd.get('elements')[0].get('name'))
+
+    print newView.get('elements')[0].get('name')
 
 
 # Attempts to serialize the json file
@@ -418,9 +445,9 @@ def testPOST():
 def testAddViewToView():
     addViewToView("./JsonData/testViewElement.json", "./JsonData/testProductElement.json")
 
-
+# This test is to add a view to the view on localhost called 1.1 Create Sub View 1.1
 def testAddViewToViewById():
-    addViewToView("./JsonData/testViewElement.json", "MMS_1439772862289_3ee431bd-b685-437e-929a-83aa335b79be")
+    addViewToView("./JsonData/testViewElement.json", "MMS_1440004708656_2f851026-ff97-4500-b4eb-ef28176dbc11")
 
 
 def testProduct():
