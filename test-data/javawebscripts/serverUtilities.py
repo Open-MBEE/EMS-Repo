@@ -1,155 +1,9 @@
 from regression_test_harness import *
 import commands
-import json
-# import regression_lib
-import globalPythonVar
+from elementTemplates import *
+
 
 DEBUG = True
-# YOU POST THIS FIRST
-NEW_VIEW_TEMP = json.dumps({
-    "elements": [
-        {
-            "specialization": {
-                "type": "View"
-            },
-            "owner": "OWNER ID",
-            "name": "VIEW NAME",
-            "documentation": ""
-        }
-    ]
-})
-# POST THIS SECOND
-NEW_INSTANCE_SPECIFICATION = json.dumps({
-    "elements": [
-        {
-            "name": "View Documentation",
-            "specialization": {
-                "type": "InstanceSpecification",
-                "classifier": [
-                    "_17_0_5_1_407019f_1431903758416_800749_12055"
-                ],
-                "instanceSpecificationSpecification": {
-                    # THIS CONTAINS THE NEW VIEW ID
-                    "string": "{\"type\":\"Paragraph\",\"sourceType\":\"reference\",\"source\":\"NEW VIEW ID\","
-                              "\"sourceProperty\":\"documentation\"}",
-                    "type": "LiteralString"
-                }
-            },
-            "owner": "test-site_no_project"
-        }
-    ]
-})
-
-# GET DOCUMENT OR PARENT VIEW TO REFRESH PAGE ON WEBAPP
-NEW_WEB_PAGE_INSTANCE_SPEC = json.dumps({
-    "elements": [
-        {
-            "name": "View Documentation",
-            "specialization": {
-                "type": "InstanceSpecification",
-                "classifier": [
-                    "_17_0_5_1_407019f_1431903758416_800749_12055"
-                ],
-                "instanceSpecificationSpecification": {
-                    # NEW VIEW ID IS THE SAME AS NEW INSTANCE SPEC ABOVE
-                    "string": "{\"type\":\"Paragraph\",\"sourceType\":\"reference\",\"source\":\"NEW VIEW ID\",\"sourceProperty\":\"documentation\"}",
-                    "type": "LiteralString"
-                }
-            },
-            "owner": "test-site_no_project"
-        }
-    ]
-})
-# POST THIS TO UPDATE THE VIEW ON SERVER AFTER GETTING INSTANCE SPECIFICATION
-NEW_VIEW_ELEMENT = json.dumps({
-    "elements": [
-        {
-            # NEW VIEW ID IS THE SAME AS NEW INSTANCE SPEC ABOVE
-            "sysmlid": "NEW VIEW ID",
-            "specialization": {
-                "type": "View",
-                "allowedElements": [
-                    "MMS_1440004700246_e9451e3f-f060-4af0-a452-9cef660b3fa4"
-                ],
-                "displayedElements": [
-                    "MMS_1440004700246_e9451e3f-f060-4af0-a452-9cef660b3fa4"
-                ],
-                "childrenViews": [],
-                "contents": {
-                    "operand": [
-                        {
-                            "instance": "MMS_1440004700481_0519cab9-ee4f-4846-a9dc-e04510318196",
-                            "type": "InstanceValue"
-                        }
-                    ],
-                    "type": "Expression"
-                }
-            }
-        }
-    ]
-})
-
-# POST THIS TO UPDATE THE PARENT PRODUCT
-NEW_PARENT_PRODUCT = json.dumps({
-    "elements": [
-        {
-            "sysmlid": "MMS_1440004666224_40c9834a-d6d0-47ff-bfe3-54d25e0462d0",
-            "specialization": {
-                "type": "Product",
-                "allowedElements": [
-                    "MMS_1440004666224_40c9834a-d6d0-47ff-bfe3-54d25e0462d0"
-                ],
-                "displayedElements": [
-                    "MMS_1440004666224_40c9834a-d6d0-47ff-bfe3-54d25e0462d0"
-                ],
-                "view2view": [
-                    {
-                        "id": "MMS_1440004666224_40c9834a-d6d0-47ff-bfe3-54d25e0462d0",
-                        "childrenViews": [
-                            "MMS_1440004700246_e9451e3f-f060-4af0-a452-9cef660b3fa4"
-                        ]
-                    },
-                    {
-                        "id": "MMS_1440004700246_e9451e3f-f060-4af0-a452-9cef660b3fa4",
-                        "childrenViews": []
-                    }
-                ]
-            }
-        }
-    ]
-})
-
-# CALL THIS TO GET THE NEW PARENT PRODUCT
-GET_NEW_PRODUCT = json.dumps({
-    "elements": [
-        {
-            "sysmlid": "MMS_1440004666224_40c9834a-d6d0-47ff-bfe3-54d25e0462d0",
-            "specialization": {
-                "type": "Product",
-                "allowedElements": [
-                    "MMS_1440004666224_40c9834a-d6d0-47ff-bfe3-54d25e0462d0"
-                ],
-                "displayedElements": [
-                    "MMS_1440004666224_40c9834a-d6d0-47ff-bfe3-54d25e0462d0"
-                ],
-                "view2view": [
-                    {
-                        "id": "MMS_1440004666224_40c9834a-d6d0-47ff-bfe3-54d25e0462d0",
-                        "childrenViews": [
-                            "MMS_1440004700246_e9451e3f-f060-4af0-a452-9cef660b3fa4"
-                        ]
-                    },
-                    {
-                        "id": "MMS_1440004700246_e9451e3f-f060-4af0-a452-9cef660b3fa4",
-                        "childrenViews": []
-                    }
-                ]
-            }
-        }
-    ]
-})
-
-VIEW2VIEW_TEMP = json.dumps({"id": "", "childrenViews": []})
 
 print '-------------------------------------------------'
 print 'Printing Temp view 2 view'
@@ -163,7 +17,7 @@ class UtilElement:
         self.data = []
         if (inElement is not None):
 
-            if(str(inElement).endswith('.json')):
+            if (str(inElement).endswith('.json')):
                 self.jsonObj = loadJson(open(inElement))  # Function that will throw exception if it is not the
                 # correct json
             else:
@@ -191,7 +45,7 @@ class UtilElement:
                 self.isProduct = True
                 self.childViews = []
                 try:
-                    if(self.specialization.get('view2view')):
+                    if (self.specialization.get('view2view')):
                         self.view2view = self.specialization.get('view2view')
                     else:
                         self.view2view = {}
@@ -203,7 +57,7 @@ class UtilElement:
                 else:
                     print 'Got view2view'
                     index = 0
-                    if(self.specialization.get('view2view')):
+                    if (self.specialization.get('view2view')):
 
                         for each in self.view2view:
                             print '-------------------------------------------------'
@@ -238,27 +92,35 @@ class UtilElement:
     # ------------------------------------
     #   JSON Get Methods
     # ------------------------------------
+    # TODO: Needs Testing!
     def getId(self):
         return self.sysmlid
 
+    # TODO: Needs Testing!
     def getOwner(self):
         return self.owner
 
+    # TODO: Needs Testing!
     def getType(self):
         return self.type
 
+    # TODO: Needs Testing!
     def getName(self):
         return self.name
 
+    # TODO: Needs Testing!
     def getDocs(self):
         return self.documentation
 
+    # TODO: Needs Testing!
     def getQualifiedId(self):
         return self.qualifiedId
 
+    # TODO: Needs Testing!
     def getTimeCreated(self):
         return self.created
 
+    # TODO: Needs Testing!
     def getChildrenViews(self):
         if (len(self.childViews) > 0):
             return self.childViews
@@ -267,6 +129,7 @@ class UtilElement:
                 print ('No child views')
             return []
 
+    # TODO: Needs Testing!
     def getDisplayedElements(self):
         if self.displayed > 0:
             if DEBUG is True:
@@ -274,6 +137,7 @@ class UtilElement:
 
             return self.displayed
 
+    # TODO: Needs Testing!
     def getChildView(self, index=None, sysmlid=''):
         numViews = len(self.childViews)
         foundView = False
@@ -316,22 +180,9 @@ class UtilElement:
     def getStrChildViews(self):
         return str(self.childViews)
 
-
-
     # TODO: REMOVE OWNER FROM ELEMENT
-    def removeOwnership(self):
-        owner = self.owner
-        # curl_cmd = regression_lib.create_curl_cmd("GET")
-        curl_cmd = create_curl_cmd("GET")
+    # def removeOwnership(self):
 
-        # curl_cmd = create_curl_cmd("GET", data=self.jsonObj, base_url=self.baseUrl)
-        # utilElement = commands.getoutput(curl_cmd)
-
-    # TODO: Adds View to itself
-    def appendView(self, sysmlid=''):
-        if sysmlid is not '':
-
-            self.childViews[0].get(self.sysmlid)
 
     # ------------------------------------
     #   RESTful Methods
@@ -345,7 +196,7 @@ class UtilElement:
             print "Dumping object..."
             printObj = json.dumps(self.jsonObj, sort_keys=True, indent=4, separators=(',', ': '))
             print printObj
-            curl_cmd = create_curl_cmd(type="POST",data=postObject)
+            curl_cmd = create_curl_cmd(type="POST", data=postObject)
             # curl_cmd = regression_lib.create_curl_cmd(type="POST", data=postObject)
             print '-------------------------------------------------'
             print 'Curl Command From POST Method'
@@ -365,8 +216,8 @@ class UtilElement:
             return execCurlCmd(curl_cmd)
 
     # TODO: Element calls post, of itself or of the sysmlid that is passed in
-    def GET(self, sysmlid='',verbose=True, asJson=False):
-        if(sysmlid is not ''):
+    def GET(self, sysmlid='', verbose=True, asJson=False):
+        if (sysmlid is not ''):
             print '-------------------------------------------------'
             # curl_cmd = regression_lib.create_curl_cmd(type="GET",data=sysmlid,branch="master/",post_type="elements/")
             curl_cmd = create_curl_cmd(type="GET", data=sysmlid, branch="master/", post_type="elements/")
@@ -374,7 +225,7 @@ class UtilElement:
             print printObj
         elif self.jsonObj is not None:
             # curl_cmd = regression_lib.create_curl_cmd(type="GET", data=self.sysmlid,branch = "master/", post_type ="elements/")
-            curl_cmd = create_curl_cmd(type="GET", data=self.sysmlid, branch="master/",post_type="elements/")
+            curl_cmd = create_curl_cmd(type="GET", data=self.sysmlid, branch="master/", post_type="elements/")
             if verbose:
                 print 'Curl Command'
                 print '-------------------------------------------------'
@@ -406,7 +257,6 @@ class UtilElement:
             return json.loads(getObj)
         else:
             return getObj
-
 
     def evaluate(self):
         # curl_cmd = regression_lib.create_curl_cmd(type="GET", data=self.element)
@@ -475,114 +325,52 @@ def POSTjson(element, verbose=True):
         print '-------------------------------------------------'
     return execCurlCmd(curl_cmd)
 
+
 def GETjson(sysmlid):
-    curl_cmd = create_curl_cmd('GET',data="elements/" + str(sysmlid), branch='master/',post_type='elements/')
+    curl_cmd = create_curl_cmd('GET', data="elements/" + str(sysmlid), branch='master/', post_type='elements/')
     print curl_cmd
-    obj = get_json_output_no_status(execCurlCmd(curl_cmd)).replace("\n", "")
+    obj = get_json_output_no_status(execCurlCmd(curl_cmd)).replace("n", "")
     print str(obj)
-    elementsIndex = str(obj).rfind('{\"elements',0)
-    returnObj = json.loads(obj[elementsIndex:]) #.get('elements')
+    elementsIndex = str(obj).rfind('{"elements', 0)
+    returnObj = json.loads(obj[elementsIndex:])  # .get('elements')
 
     return returnObj
 
-def addViewToView(toAdd, addingTo):
-    
-    if addingTo == '':
 
+def addViewToView(toAdd, addingTo):
+    print '========================'
+    print 'Add View'
+    if type(addingTo) is not str:
+        print '========================'
+        print 'Is not string'
+        print '========================'
         postElement = UtilElement(addingTo)
         ownerSysmlid = postElement.sysmlid
     else:
+        print '========================'
+        print 'Is String'
+        print '========================'
         ownerSysmlid = addingTo
-    newView = NEW_VIEW_TEMP
-    newView.elements[0].update('sysmlid',ownerSysmlid)
+    newView = TEMPLATE_NEW_VIEW
+    newView.elements[0].update('sysmlid', ownerSysmlid)
 
     newView = json.dumps(newView)
-    cmd = create_curl_cmd("POST",data=newView)
-    status,output = execCurlCmd(cmd)
+    cmd = create_curl_cmd("POST", data=newView)
+    status, output = execCurlCmd(cmd)
 
     response = json.loads(output)
     childSysmlid = response.elements[0].get('sysmlid')
 
-    postView = json.loads(NEW_INSTANCE_SPECIFICATION)
+    postView = json.loads(TEMPLATE_INSTANCE_SPEC)
     instanceString = postView.elements[0].specialization.instanceSpecificationSpecification.get('string')
-    instanceString.replace('NEW VIEW ID',str(childSysmlid))
-    postView.elements[0].specialization.instanceSpecificationSpecification.update('string',instanceString)
+    instanceString.replace('VIEW_ID', str(childSysmlid))
+    postView.elements[0].specialization.instanceSpecificationSpecification.update('string', instanceString)
 
     postView = json.dumps(postView)
 
     cmd = create_curl_cmd("POST", data=postView)
     status, output = execCurlCmd(cmd)
 
-
-
-# def old_addViewToView(toAdd, addingTo=None,sysmlid=''):
-#     # Checks to see if both elements exists
-#     if (toAdd is None or sysmlid=='' and addingTo is None):
-#         if DEBUG is True:
-#             print("Elements don't exists")
-#         return
-#
-#
-#     # Creates the Get command to get the view to add to
-#     # cmd = regression_lib.create_curl_cmd()
-#
-#     addThisView = UtilElement(toAdd)
-#     instance = '{"elements":[{"name":"ViewDocumentation","specialization":{"type":"InstanceSpecification","classifier":["_17_0_5_1_407019f_1431903758416_800749_12055"], "instanceSpecificationSpecification":{"string": "{\"type\":\"Paragraph\",\"sourceType\":\"reference\",\"source\":\"MMS_1439777405160_b49a88d3-0580-4930-abd1-98e00a7b98dc\",\"sourceProperty\":\"documentation\"}", "type":"LiteralString"}}, "owner":"server-utils_no_project"}]}'
-#     tmpInstance = json.dumps(instance)
-#     print tmpInstance
-#     instance = json.loads(tmpInstance)
-#
-#     response = POSTjson(json.dumps(postInstance))
-#
-#     print 'Printing response'
-#     print '----------------------------'
-#     print response
-#
-#     response.update(addThisView)
-#     print str(response)
-#     if sysmlid=='' and addingTo is not None:
-#         toThisView = UtilElement(addingTo)
-#         limit = len(toThisView.childViews)
-#         tmpView = VIEW2VIEW_TEMP
-#         tmpView = json.loads(tmpView)
-#         tmpView.update(id=addThisView.sysmlid, childrenViews=addThisView.childrenViews)
-#         for index in range(0, limit):  # 0, limit):
-#             if (toThisView.childViews[index].get('id') == toThisView.sysmlid):
-#                 print 'Adding ID to parent\'s children views array'
-#                 print str(toThisView.specialization.get('view2view')[index].get('childrenViews'))
-#                 toThisView.specialization.get('view2view')[index].get('childrenViews').tmpView.get('id')
-#
-#     else:
-#         toThisView = UtilElement(GETjson(sysmlid))
-#         print toThisView
-#         limit = 1
-#         tmpView = VIEW2VIEW_TEMP
-#         tmpView = json.loads(tmpView)
-#
-#         tmpView.update(id=addThisView.sysmlid, childrenViews=addThisView.childrenViews)
-#         tmpView = json.dumps(tmpView)
-#         print '---- tmp view ----'
-#         print str(tmpView)
-#
-#         print str(toThisView.specialization)
-#         if( (toThisView.specialization.has_key('view2view'))==False):
-#             tmpView = json.loads(tmpView)
-#             toThisView.specialization.setdefault('view2view',[tmpView])
-#
-#             tmpView = VIEW2VIEW_TEMP
-#             tmpView = json.loads(tmpView)
-#             tmpView.update(id=toThisView.sysmlid, childrenViews=[addThisView.sysmlid])
-#             toThisView.specialization.get('view2view').append(tmpView)
-#             print str(toThisView.specialization)
-#             print str(toThisView.specialization.get('view2view'))
-#         else:
-#             tmpView = VIEW2VIEW_TEMP
-#             tmpView = json.loads(tmpView)
-#             toThisView.specialization.view2view.setdefault(tmpView)
-#
-#
-#     # return POSTjson(toThisView)
-#     return POSTjson()
 
 # Attempts to serialize the json file
 def dumpJson(jsonObject):
@@ -632,7 +420,8 @@ def testAddViewToView():
 
 
 def testAddViewToViewById():
-    addViewToView("./JsonData/testViewElement.json", sysmlid="MMS_1439772862289_3ee431bd-b685-437e-929a-83aa335b79be")
+    addViewToView("./JsonData/testViewElement.json", "MMS_1439772862289_3ee431bd-b685-437e-929a-83aa335b79be")
+
 
 def testProduct():
     jsonObj = UtilElement("./JsonData/testProductElement.json")
@@ -653,34 +442,19 @@ def testView():
 
 
 def getViewById(sysmlid=''):
-    getUrl = '\"http://localhost:8080/alfresco/service/rest/views/' + str(sysmlid) + '\"'
-    get_cmd = 'curl -w "%{http_code}\n" -X GET -u admin:admin '
+    getUrl = '"http://localhost:8080/alfresco/service/rest/views/' + str(sysmlid) + '"'
+    get_cmd = 'curl -w "%{http_code}n" -X GET -u admin:admin '
     send_cmd = get_cmd + getUrl
-    view = execCurlCmd(send_cmd)
+    status,view = execCurlCmd(send_cmd)
     print ''
     print '-------------------------------------------------'
     print ''
-    print 'getUrl'
-    print getUrl
-    print ''
-    print '-------------------------------------------------'
-    print ''
-    print 'get_cmd'
-    print get_cmd
-    print ''
-    print '-------------------------------------------------'
-    print ''
-    print 'send_cmd'
-    print send_cmd
-    print ''
-    print '-------------------------------------------------'
-    print 'printing view'
-    print ''
-    print str(view)
+    print status
     print ''
     print '-------------------------------------------------'
     print ''
     return view
+
 
 def testGetViewById():
     test = testProduct()
@@ -699,6 +473,7 @@ def testGetViewById():
     print '-------------------------------------------------'
     print ''
     return getViewById(test.sysmlid)
+
 
 def runTests():
     print 'Testing ===== testProduct()'
@@ -719,3 +494,72 @@ def runTests():
 
     print 'Testing ===== testAddViewToView()'
     testAddViewToView()
+
+# def old_addViewToView(toAdd, addingTo=None,sysmlid=''):
+#     # Checks to see if both elements exists
+#     if (toAdd is None or sysmlid=='' and addingTo is None):
+#         if DEBUG is True:
+#             print("Elements don't exists")
+#         return
+#
+#
+#     # Creates the Get command to get the view to add to
+#     # cmd = regression_lib.create_curl_cmd()
+#
+#     addThisView = UtilElement(toAdd)
+#     instance = '{"elements":[{"name":"ViewDocumentation","specialization":{"type":"InstanceSpecification","classifier":["_17_0_5_1_407019f_1431903758416_800749_12055"], "instanceSpecificationSpecification":{"string": "{"type":"Paragraph","sourceType":"reference","source":"MMS_1439777405160_b49a88d3-0580-4930-abd1-98e00a7b98dc","sourceProperty":"documentation"}", "type":"LiteralString"}}, "owner":"server-utils_no_project"}]}'
+#     tmpInstance = json.dumps(instance)
+#     print tmpInstance
+#     instance = json.loads(tmpInstance)
+#
+#     response = POSTjson(json.dumps(postInstance))
+#
+#     print 'Printing response'
+#     print '----------------------------'
+#     print response
+#
+#     response.update(addThisView)
+#     print str(response)
+#     if sysmlid=='' and addingTo is not None:
+#         toThisView = UtilElement(addingTo)
+#         limit = len(toThisView.childViews)
+#         tmpView = VIEW2VIEW_TEMP
+#         tmpView = json.loads(tmpView)
+#         tmpView.update(id=addThisView.sysmlid, childrenViews=addThisView.childrenViews)
+#         for index in range(0, limit):  # 0, limit):
+#             if (toThisView.childViews[index].get('id') == toThisView.sysmlid):
+#                 print 'Adding ID to parent's children views array'
+#                 print str(toThisView.specialization.get('view2view')[index].get('childrenViews'))
+#                 toThisView.specialization.get('view2view')[index].get('childrenViews').tmpView.get('id')
+#
+#     else:
+#         toThisView = UtilElement(GETjson(sysmlid))
+#         print toThisView
+#         limit = 1
+#         tmpView = VIEW2VIEW_TEMP
+#         tmpView = json.loads(tmpView)
+#
+#         tmpView.update(id=addThisView.sysmlid, childrenViews=addThisView.childrenViews)
+#         tmpView = json.dumps(tmpView)
+#         print '---- tmp view ----'
+#         print str(tmpView)
+#
+#         print str(toThisView.specialization)
+#         if( (toThisView.specialization.has_key('view2view'))==False):
+#             tmpView = json.loads(tmpView)
+#             toThisView.specialization.setdefault('view2view',[tmpView])
+#
+#             tmpView = VIEW2VIEW_TEMP
+#             tmpView = json.loads(tmpView)
+#             tmpView.update(id=toThisView.sysmlid, childrenViews=[addThisView.sysmlid])
+#             toThisView.specialization.get('view2view').append(tmpView)
+#             print str(toThisView.specialization)
+#             print str(toThisView.specialization.get('view2view'))
+#         else:
+#             tmpView = VIEW2VIEW_TEMP
+#             tmpView = json.loads(tmpView)
+#             toThisView.specialization.view2view.setdefault(tmpView)
+#
+#
+#     # return POSTjson(toThisView)
+#     return POSTjson()

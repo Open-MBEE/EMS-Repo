@@ -1,4 +1,3 @@
-
 [
   // ======== GET ======== - Delete.html
   {
@@ -58,10 +57,7 @@
       }
     ]
   },
-
-
-
-//  THIS IS A CLEAN START FROM A SINGLE DOCUMENT
+  //  THIS IS A CLEAN START FROM A SINGLE DOCUMENT
   {
     // ======== POST ========
     "elements": [
@@ -196,7 +192,12 @@
             "_17_0_5_1_407019f_1431903758416_800749_12055"
           ],
           "instanceSpecificationSpecification": {
-            "string": "{\"type\":\"Paragraph\",\"sourceType\":\"reference\",\"source\":\"MMS_1440004700246_e9451e3f-f060-4af0-a452-9cef660b3fa4\",\"sourceProperty\":\"documentation\"}",
+            "string": {
+              "type": "Paragraph",
+              "sourceType": "reference",
+              "source": "MMS_1440004700246_e9451e3f-f060-4af0-a452-9cef660b3fa4",
+              "sourceProperty": "documentation"
+            },
             "type": "LiteralString"
           }
         },
@@ -247,7 +248,12 @@
             "_17_0_5_1_407019f_1431903758416_800749_12055"
           ],
           "instanceSpecificationSpecification": {
-            "string": "{\"type\":\"Paragraph\",\"sourceType\":\"reference\",\"source\":\"MMS_1440004700246_e9451e3f-f060-4af0-a452-9cef660b3fa4\",\"sourceProperty\":\"documentation\"}",
+            "string": {
+              "type": "Paragraph",
+              "sourceType": "reference",
+              "source": "MMS_1440004700246_e9451e3f-f060-4af0-a452-9cef660b3fa4",
+              "sourceProperty": "documentation"
+            },
             "type": "LiteralString"
           }
         },
@@ -470,7 +476,12 @@
             "_17_0_5_1_407019f_1431903758416_800749_12055"
           ],
           "instanceSpecificationSpecification": {
-            "string": "{\"type\":\"Paragraph\",\"sourceType\":\"reference\",\"source\":\"MMS_1440004708656_2f851026-ff97-4500-b4eb-ef28176dbc11\",\"sourceProperty\":\"documentation\"}",
+            "string": {
+              "type": "Paragraph",
+              "sourceType": "reference",
+              "source": "MMS_1440004708656_2f851026-ff97-4500-b4eb-ef28176dbc11",
+              "sourceProperty": "documentation"
+            },
             "type": "LiteralString"
           }
         },
@@ -489,7 +500,12 @@
             "_17_0_5_1_407019f_1431903758416_800749_12055"
           ],
           "instanceSpecificationSpecification": {
-            "string": "{\"type\":\"Paragraph\",\"sourceType\":\"reference\",\"source\":\"MMS_1440004708656_2f851026-ff97-4500-b4eb-ef28176dbc11\",\"sourceProperty\":\"documentation\"}",
+            "string": {
+              "type": "Paragraph",
+              "sourceType": "reference",
+              "source": "MMS_1440004708656_2f851026-ff97-4500-b4eb-ef28176dbc11",
+              "sourceProperty": "documentation"
+            },
             "type": "LiteralString"
           }
         },
@@ -653,7 +669,12 @@
             "_17_0_5_1_407019f_1431903758416_800749_12055"
           ],
           "instanceSpecificationSpecification": {
-            "string": "{\"type\":\"Paragraph\",\"sourceType\":\"reference\",\"source\":\"MMS_1440004719644_9dc40d62-1aab-4eb8-846f-40d8f388fa88\",\"sourceProperty\":\"documentation\"}",
+            "string": {
+              "type": "Paragraph",
+              "sourceType": "reference",
+              "source": "MMS_1440004719644_9dc40d62-1aab-4eb8-846f-40d8f388fa88",
+              "sourceProperty": "documentation"
+            },
             "type": "LiteralString"
           }
         },
@@ -672,7 +693,12 @@
             "_17_0_5_1_407019f_1431903758416_800749_12055"
           ],
           "instanceSpecificationSpecification": {
-            "string": "{\"type\":\"Paragraph\",\"sourceType\":\"reference\",\"source\":\"MMS_1440004719644_9dc40d62-1aab-4eb8-846f-40d8f388fa88\",\"sourceProperty\":\"documentation\"}",
+            "string": {
+              "type": "Paragraph",
+              "sourceType": "reference",
+              "source": "MMS_1440004719644_9dc40d62-1aab-4eb8-846f-40d8f388fa88",
+              "sourceProperty": "documentation"
+            },
             "type": "LiteralString"
           }
         },
@@ -851,7 +877,12 @@
             "_17_0_5_1_407019f_1431903758416_800749_12055"
           ],
           "instanceSpecificationSpecification": {
-            "string": "{\"type\":\"Paragraph\",\"sourceType\":\"reference\",\"source\":\"MMS_1440004726721_285b4f01-5d41-4b93-99e8-13336a5c5970\",\"sourceProperty\":\"documentation\"}",
+            "string": {
+              "type": "Paragraph",
+              "sourceType": "reference",
+              "source": "MMS_1440004726721_285b4f01-5d41-4b93-99e8-13336a5c5970",
+              "sourceProperty": "documentation"
+            },
             "type": "LiteralString"
           }
         },
@@ -870,7 +901,12 @@
             "_17_0_5_1_407019f_1431903758416_800749_12055"
           ],
           "instanceSpecificationSpecification": {
-            "string": "{\"type\":\"Paragraph\",\"sourceType\":\"reference\",\"source\":\"MMS_1440004726721_285b4f01-5d41-4b93-99e8-13336a5c5970\",\"sourceProperty\":\"documentation\"}",
+            "string": {
+              "type": "Paragraph",
+              "sourceType": "reference",
+              "source": "MMS_1440004726721_285b4f01-5d41-4b93-99e8-13336a5c5970",
+              "sourceProperty": "documentation"
+            },
             "type": "LiteralString"
           }
         },
@@ -1067,7 +1103,12 @@
             "_17_0_5_1_407019f_1431903758416_800749_12055"
           ],
           "instanceSpecificationSpecification": {
-            "string": "{\"type\":\"Paragraph\",\"sourceType\":\"reference\",\"source\":\"MMS_1440004738317_6c77f74c-71d3-4342-809d-502d143d3a66\",\"sourceProperty\":\"documentation\"}",
+            "string": {
+              "type": "Paragraph",
+              "sourceType": "reference",
+              "source": "MMS_1440004738317_6c77f74c-71d3-4342-809d-502d143d3a66",
+              "sourceProperty": "documentation"
+            },
             "type": "LiteralString"
           }
         },
@@ -1086,7 +1127,12 @@
             "_17_0_5_1_407019f_1431903758416_800749_12055"
           ],
           "instanceSpecificationSpecification": {
-            "string": "{\"type\":\"Paragraph\",\"sourceType\":\"reference\",\"source\":\"MMS_1440004738317_6c77f74c-71d3-4342-809d-502d143d3a66\",\"sourceProperty\":\"documentation\"}",
+            "string": {
+              "type": "Paragraph",
+              "sourceType": "reference",
+              "source": "MMS_1440004738317_6c77f74c-71d3-4342-809d-502d143d3a66",
+              "sourceProperty": "documentation"
+            },
             "type": "LiteralString"
           }
         },
@@ -1301,7 +1347,12 @@
             "_17_0_5_1_407019f_1431903758416_800749_12055"
           ],
           "instanceSpecificationSpecification": {
-            "string": "{\"type\":\"Paragraph\",\"sourceType\":\"reference\",\"source\":\"MMS_1440004748603_65014c15-980d-4131-a524-957d68091aa0\",\"sourceProperty\":\"documentation\"}",
+            "string": {
+              "type": "Paragraph",
+              "sourceType": "reference",
+              "source": "MMS_1440004748603_65014c15-980d-4131-a524-957d68091aa0",
+              "sourceProperty": "documentation"
+            },
             "type": "LiteralString"
           }
         },
@@ -1320,7 +1371,12 @@
             "_17_0_5_1_407019f_1431903758416_800749_12055"
           ],
           "instanceSpecificationSpecification": {
-            "string": "{\"type\":\"Paragraph\",\"sourceType\":\"reference\",\"source\":\"MMS_1440004748603_65014c15-980d-4131-a524-957d68091aa0\",\"sourceProperty\":\"documentation\"}",
+            "string": {
+              "type": "Paragraph",
+              "sourceType": "reference",
+              "source": "MMS_1440004748603_65014c15-980d-4131-a524-957d68091aa0",
+              "sourceProperty": "documentation"
+            },
             "type": "LiteralString"
           }
         },
