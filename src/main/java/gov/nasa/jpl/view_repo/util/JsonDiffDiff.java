@@ -54,6 +54,12 @@ public class JsonDiffDiff extends AbstractDiff< JSONObject, Object, String > {
                                                                     JSONObject.class ) );
         if ( deleted2 != null ) getRemoved().addAll(  Utils.asList( toList(deleted2, false),
                                                                     JSONObject.class ) );
+        //set diffMap1 and diffMap2
+        glom( DiffOp.ADD, JsonDiffDiff.toElementList( elems1 ), diffMap1 );
+        
+        glom( DiffOp.ADD, JsonDiffDiff.toElementList( added2 ), diffMap2 );
+        glom( DiffOp.UPDATE, JsonDiffDiff.toElementList( updated2 ), diffMap2 );
+        glom( DiffOp.DELETE, JsonDiffDiff.toElementList( deleted2 ), diffMap2 );
     }
     
     public Set< JSONObject > getElements() {
@@ -479,8 +485,7 @@ public class JsonDiffDiff extends AbstractDiff< JSONObject, Object, String > {
                    // TODO -- ERROR
            }
        }
-       
-       return diff3;
+       return dDiff3.toJsonObject();
     }
    
     protected void updateDiff( String id,
@@ -551,12 +556,7 @@ public class JsonDiffDiff extends AbstractDiff< JSONObject, Object, String > {
         // Iterate through each diff in order adding any new elements that were
         // not in previous diffs.
         // TODO -- REVIEW -- Don't you want to overwrite these with any new values?!
-        JSONArray elements = glommedDiff.optJSONArray( "elements" );
-        if (elements == null)
-        {
-            elements = new JSONArray();
-            glommedDiff.put("elements",  elements);
-        }
+       
         for ( int k = 0; k < diffs.size(); ++k ) {
             int i = reverse ? diffs.size() - 1 - k : k;
             JSONObject diff =  diffs.get( i );
@@ -564,12 +564,16 @@ public class JsonDiffDiff extends AbstractDiff< JSONObject, Object, String > {
             JSONArray dElements = ws1.getJSONArray( "elements" );
             for ( int j = 0; j < dElements.length(); ++j ) {
                 JSONObject element = dElements.getJSONObject( j );
+                if (element == null) { continue; }
                 String sysmlid = element.getString( "sysmlid" );
-                if ( !diffMap1.containsKey( sysmlid ) ) {
-                    elements.put( element );
-                }
+                //if ( !diffMap1.containsKey( sysmlid ) ) {
+                    //elements.put( element );
+                    
+                //}
+                if (sysmlid == null) continue;
+                diffMap1.put(sysmlid,  new Pair<DiffOp, List<JSONObject>>(DiffOp.ADD, Utils.newList(element)));
             }
-        }
+        } 
         
         // Glom workpace 2 changes
         for ( int k = 0; k < diffs.size(); ++k ) {
@@ -587,10 +591,52 @@ public class JsonDiffDiff extends AbstractDiff< JSONObject, Object, String > {
         }
     
         // now we need to merge the properties of chained updates
-        JSONObject gws2 = glommedDiff.getJSONObject( "workspace2" );
-        JSONArray added = gws2.getJSONArray( "addedElements" );
-        JSONArray updated = gws2.getJSONArray( "updatedElements" );
-        JSONArray deleted = gws2.getJSONArray( "deletedElements" );
+        toJsonObject(glommedDiff, diffMap1, diffMap2);
+        
+        return glommedDiff;
+     }
+    
+    public JSONObject toJsonObject()
+    {
+        return toJsonObject(null, diffMap1, diffMap2);
+    }
+    
+    public static JSONObject
+           toJsonObject( JSONObject json,
+                         LinkedHashMap< String, Pair< DiffOp, List< JSONObject > > > diffMap1,
+                         LinkedHashMap< String, Pair< DiffOp, List< JSONObject > > > diffMap2 ) 
+    {
+        if (json == null) {
+            json = makeEmptyDiffJson();
+        }
+        
+        JSONArray elements = json.optJSONArray( "elements" );
+        if (elements == null)
+        {
+            elements = new JSONArray();
+            json.put("elements",  elements);
+        }
+        
+        for (Entry<String, Pair<DiffOp, List<JSONObject>>> e : diffMap1.entrySet())
+        {
+            Pair<DiffOp, List<JSONObject>> p = e.getValue();
+            if (p == null || p.second == null) continue;
+            Collection<JSONObject> value = p.second;
+            if (value != null && value.size() == 1) {
+                elements.put(value.iterator().next());
+            }
+            else
+            {
+                //TODO error
+            }
+        }
+        
+        JSONObject ws2 = json.optJSONObject( "workspace2" );
+        if ( ws2 == null ) {}//TODO error
+        JSONArray added = ws2.optJSONArray( "addedElements" );
+        JSONArray updated = ws2.optJSONArray( "updatedElements" );
+        JSONArray deleted = ws2.optJSONArray( "deletedElements" );
+        
         for ( Entry< String, Pair< DiffOp, List< JSONObject > > > entry : diffMap2.entrySet() ) {
             Pair< DiffOp, List< JSONObject > > p = entry.getValue();
             JSONObject glommedElement = null; //NodeUtil.newJsonObject();
@@ -614,8 +660,8 @@ public class JsonDiffDiff extends AbstractDiff< JSONObject, Object, String > {
             // TODO -- What about moved and conflicted elements?
         }
         
-        return glommedDiff;
-     }
+        return json;
+    }
 
     /**
      * Glom the specified elements per the specified operation to the glom map.
