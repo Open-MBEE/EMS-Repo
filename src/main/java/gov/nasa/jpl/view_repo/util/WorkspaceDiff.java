@@ -1,6 +1,5 @@
 package gov.nasa.jpl.view_repo.util;
 
-import gov.nasa.jpl.mbee.util.CompareUtils;
 import gov.nasa.jpl.mbee.util.Debug;
 import gov.nasa.jpl.mbee.util.Pair;
 import gov.nasa.jpl.mbee.util.TimeUtils;
@@ -1404,7 +1403,7 @@ public class WorkspaceDiff implements Serializable {
             Set<String> sysmlIds = diffDiff1.getAffectedIds();
             sysmlIds.addAll(diffDiff2.getAffectedIds());
                         
-            Set<EmsScriptNode> elements = Collections.emptySet();
+            Set<EmsScriptNode> elements = Utils.newSet();
             for (String id : sysmlIds)
             {
                 //create ArrayList of node refs by calling getNodeRefsById
