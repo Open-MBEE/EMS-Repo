@@ -455,7 +455,7 @@ public class JsonDiffDiff extends AbstractDiff< JSONObject, Object, String > {
                                                DiffOp.UPDATE, conflict );
                            break;
                        case DELETE:  // DELETE - ADD = DELETE
-                           conflict = true;
+                           //conflict = true;
                            newElement3_1 = NodeUtil.clone( element1_2 );
                            dDiff3.set2( id, DiffOp.DELETE, newElement3_1, conflict );
                            dDiff3.set1( id, newElement3_1, false );
@@ -675,7 +675,13 @@ public class JsonDiffDiff extends AbstractDiff< JSONObject, Object, String > {
             json = makeEmptyDiffJson();
         }
         
-        JSONArray elements = getOrCreateJsonArray( json, "elements" );
+        JSONObject ws1 = json.optJSONObject( "workspace1" );
+        if (ws1 == null)
+        {
+            //TODO error
+            return null;
+        }
+        JSONArray elements = getOrCreateJsonArray( ws1, "elements" );
 
         for (Entry<String, Pair<DiffOp, List<JSONObject>>> e : diffMap1.entrySet())
         {
@@ -722,11 +728,6 @@ public class JsonDiffDiff extends AbstractDiff< JSONObject, Object, String > {
                     break;
                 default:
                     // BAD! -- TODO
-            }
-            Pair< DiffOp, List< JSONObject > > e = diffMap1.get( id );
-            if ( e != null && e.first != DiffOp.NONE ) {
-                removeFrom( id, conflicted );
-                conflicted.put( glommedElement );
             }
         }
         
