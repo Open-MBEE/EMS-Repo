@@ -39,6 +39,7 @@ import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -530,7 +531,18 @@ public class ModelGet extends AbstractJavaWebScript {
             } // TODO -- REVIEW -- Warning if no permissions?
         }
         if ( evaluate ) {
-            evaluate( elementsJsonMap, top, ws );
+            try {
+                evaluate( elementsJsonMap, top, ws );
+            } catch ( IllegalAccessException e ) {
+                // TODO Auto-generated catch block
+                //e.printStackTrace();
+            } catch ( InvocationTargetException e ) {
+                // TODO Auto-generated catch block
+                //e.printStackTrace();
+            } catch ( InstantiationException e ) {
+                // TODO Auto-generated catch block
+                //e.printStackTrace();
+            }
         }
     }
 

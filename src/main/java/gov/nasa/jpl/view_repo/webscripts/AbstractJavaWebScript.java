@@ -59,6 +59,7 @@ import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 import java.util.Formatter;
 import java.io.Serializable;
 import java.lang.reflect.Array;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -1370,7 +1371,19 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
             logger.warn( "toAeExpression("+exprNode+"): call is null, " + expressionCall );
             return null;
         }
-        Expression<T> expression = new Expression<T>(call.evaluate(true, false));
+        Expression< T > expression = null;
+        try {
+            expression = new Expression<T>(call.evaluate(true, false));
+        } catch ( IllegalAccessException e ) {
+            // TODO Auto-generated catch block
+            //e.printStackTrace();
+        } catch ( InvocationTargetException e ) {
+            // TODO Auto-generated catch block
+            //e.printStackTrace();
+        } catch ( InstantiationException e ) {
+            // TODO Auto-generated catch block
+            //e.printStackTrace();
+        }
         return expression;
     }
 
@@ -1464,7 +1477,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         return expressions;
     }
 
-    public static Map<Object, Object> evaluate( Set< EmsScriptNode > elements, WorkspaceNode ws ) {
+    public static Map<Object, Object> evaluate( Set< EmsScriptNode > elements, WorkspaceNode ws ) throws IllegalAccessException, InvocationTargetException, InstantiationException {
         log(Level.INFO, "Will attempt to evaluate expressions where found!");
         Map< Object, Object > results = new LinkedHashMap< Object, Object >();
 
@@ -1604,7 +1617,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
     }
 
     public void evaluate( final Map<EmsScriptNode, JSONObject> elementsJsonMap,//Set< EmsScriptNode > elements, final JSONArray elementsJson,
-                          JSONObject top, WorkspaceNode ws ) {
+                          JSONObject top, WorkspaceNode ws ) throws IllegalAccessException, InvocationTargetException, InstantiationException {
         //final JSONArray elementsJson = new JSONArray();
         Set< EmsScriptNode > elements = elementsJsonMap.keySet();
         Map< Object, Object > results = evaluate( elements, ws );
