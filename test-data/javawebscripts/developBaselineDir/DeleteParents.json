@@ -71,15 +71,27 @@
   "workspace2": {
     "deletedElements": [
       {
+        "name": "childOfParentToDelete2",
+        "qualifiedName": "/europa/JW_TEST2/parentToDelete1/parentToDelete2/childOfParentToDelete2",
+        "owner": "parentToDelete2",
         "sysmlid": "childOfParentToDelete2",
+        "specialization": {"type": "Property"},
         "creator": "admin"
       },
       {
+        "name": "parentToDelete1",
+        "qualifiedName": "/europa/JW_TEST2/parentToDelete1",
+        "owner": "123456",
         "sysmlid": "parentToDelete1",
+        "specialization": {"type": "Property"},
         "creator": "admin"
       },
       {
+        "name": "parentToDelete2",
+        "qualifiedName": "/europa/JW_TEST2/parentToDelete1/parentToDelete2",
+        "owner": "parentToDelete1",
         "sysmlid": "parentToDelete2",
+        "specialization": {"type": "Property"},
         "creator": "admin"
       }
     ],

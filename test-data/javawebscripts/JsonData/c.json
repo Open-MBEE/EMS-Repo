@@ -1,0 +1,9 @@
+{ "elements" : [
+    {
+     "sysmlid" : "c",
+     "documentation" : "c is c",
+     "specialization" : {
+       "type": "Untyped"
+     }
+    }
+]}

@@ -21,6 +21,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
+import java.util.Vector;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -283,7 +284,7 @@ public class View extends List implements sysml.view.View< EmsScriptNode >, Comp
         if ( Utils.isNullOrEmpty( exposeElements ) ) {
             return null;
         }
-        Collection<EmsScriptNode> exposed = new ArrayList<EmsScriptNode>();
+        LinkedHashSet<EmsScriptNode> exposed = new LinkedHashSet<EmsScriptNode>();
 
 //        // Get all relationship elements of Expose type:
 //        Collection<EmsScriptNode> exposeElements = getModel().getType(null, Acm.JSON_EXPOSE);
@@ -423,7 +424,7 @@ public class View extends List implements sysml.view.View< EmsScriptNode >, Comp
         Collection<EmsScriptNode> exposed = getExposedElements(dateTime, ws);
 
         // Translate the viewpoint Operation/Expression element into an AE Expression:
-        ArrayList<Object> paramValList = new ArrayList<Object>();
+        Vector<Object> paramValList = new Vector<Object>();
         // This is a List of a collection of nodes, where the value of exposed
         // parameter is a collection of nodes:
         paramValList.add( exposed );
@@ -458,6 +459,7 @@ public class View extends List implements sysml.view.View< EmsScriptNode >, Comp
 //                    (java.util.List< Viewable<EmsScriptNode> >)Utils.asList( c );
 //            addAll( viewables );
         }
+        //System.out.println("!!!!!!!!!   done  !!!!!!!!!!");
         return !isEmpty();
     }
 

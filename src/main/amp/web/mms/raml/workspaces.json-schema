@@ -8,6 +8,7 @@
 	       "type": "string",
 	       "description": "The client source that originated the delta if provided"
 	    },
+	    
 		"workspaces": 
 		{
 			"type": "array",
@@ -99,7 +100,7 @@
 					"type": "date",
 					"description": "Version/timestamp of workspace diff (Read-Only)"
 				},
-
+				
 				"elements": 
 				{
 					"type": "array",

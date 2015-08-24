@@ -1,6 +1,7 @@
 package gov.nasa.jpl.view_repo.util;
 
 import gov.nasa.jpl.ae.event.Call;
+import gov.nasa.jpl.ae.event.FunctionCall;
 import gov.nasa.jpl.mbee.util.ClassUtils;
 import gov.nasa.jpl.mbee.util.Debug;
 import gov.nasa.jpl.mbee.util.HasId;
@@ -11,6 +12,7 @@ import gov.nasa.jpl.view_repo.util.NodeUtil.SearchType;
 import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -18,13 +20,17 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Vector;
 
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.namespace.QName;
+import org.apache.log4j.Level;
 import org.springframework.extensions.webscripts.Status;
 
 import sysml.AbstractSystemModel;
+import sysml.SystemModel;
+import sysml.SystemModel.ModelItem;
 
 // <E, C, T, P, N, I, U, R, V, W, CT>
 //public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScriptNode, String, ? extends Serializable, String, String, Object, EmsScriptNode, String, String, EmsScriptNode > {
@@ -363,12 +369,150 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
         // TODO Auto-generated method stub
         return null;
     }
+    
+    public Collection< EmsScriptNode > getOwnedChildren( Object context ) {
+        return getOwnedElements( context );
+    }
+    public Collection< EmsScriptNode > getOwnedElements( Object context ) {
+        List<EmsScriptNode> list = new ArrayList< EmsScriptNode >();
+        if ( context instanceof EmsScriptNode ) {
+            EmsScriptNode n = (EmsScriptNode)context;
+            List< NodeRef > c = n.getOwnedChildren( false, null, n.getWorkspace() );
+            if ( c != null ) {
+                list = EmsScriptNode.toEmsScriptNodeList( c );
+            }
+        }
+        return list;
+    }
+
 
     @Override
     public Collection< EmsScriptNode > getElement( Object context,
                                                    Object specifier ) {
-        // TODO Auto-generated method stub
-        return null;
+        return getElement( context, specifier, SystemModel.ModelItem.NAME );
+    }
+    public Collection< EmsScriptNode > getElement( Object context,
+                                                   Object specifier,
+                                                   SystemModel.ModelItem itemType) {
+        return getElement( context, specifier, itemType, null );
+        
+    }
+    public Collection< EmsScriptNode > getElement( Object context,
+                                                   Object specifier,
+                                                   ModelItem itemType,
+                                                   Date dateTime ) {
+        // HERE!!!  TODO -- call this from other getElementWith????()
+        StringBuffer response = new StringBuffer();
+        Status status = new Status();
+        // TODO -- need to take into account the context!
+//        Map< String, EmsScriptNode > elements =
+//                NodeUtil.searchForElements( specifier, true, null, dateTime,
+//                                            services, response, status );
+//      if ( elements != null ) return elements.values();
+//      return Collections.emptyList();
+        
+        boolean ignoreWorkspace = false;
+        WorkspaceNode workspace = null;
+        
+        // Convert context from NodeRef to EmsScriptNode or WorkspaceNode
+        if ( context instanceof NodeRef ) {
+            EmsScriptNode ctxt = new EmsScriptNode( (NodeRef)context, getServices(),
+                                                    response, status );
+            if ( ctxt.hasAspect( "Workspace" ) ) {
+                context = new WorkspaceNode( (NodeRef)context, getServices(),
+                                             response, status );
+            } else {
+                context = ctxt;
+            }
+        }
+        
+        // Set workspace from context.
+        if ( context instanceof WorkspaceNode ) {
+            workspace = (WorkspaceNode)context;
+        } else if ( context instanceof EmsScriptNode ) {
+            workspace = ( (EmsScriptNode)context ).getWorkspace();
+        } else ignoreWorkspace = true;
+        
+        // Treat the context as the set to search (or to call getElement() on each).
+        Object[] arr = null;
+        if ( context instanceof Collection ) {
+            arr = ( (Collection<?>)context ).toArray();
+        } else if ( context != null && context.getClass().isArray() ) {
+            arr = (Object[])context;
+        }
+        // HERE!!!  TODO!!!
+        if ( arr != null && arr.length > 0 ) {
+            if ( arr[0] instanceof NodeRef ) {
+                
+            } else if ( arr[0] instanceof EmsScriptNode ) {
+                
+            }
+        }
+        
+        // Try to get elements with specifier as name.
+        ArrayList< NodeRef > refs = null;
+        
+        switch ( itemType ) {
+            case NAME:
+                refs = NodeUtil.findNodeRefsBySysmlName( "" + specifier, ignoreWorkspace,
+                                                         workspace, dateTime,
+                                                         getServices(), false, false );
+                if ( !Utils.isNullOrEmpty( refs ) ) break;
+            case IDENTIFIER:
+                // Try to get elements with specifier as id.
+                refs =
+                    NodeUtil.findNodeRefsById( "" + specifier, ignoreWorkspace,
+                                               workspace, dateTime, getServices(),
+                                               false, false );
+                break;
+            case PROPERTY:
+                if ( specifier instanceof String ) {
+                    refs = NodeUtil.findNodeRefsBySysmlName( "" + specifier, ignoreWorkspace,
+                                                             workspace, dateTime,
+                                                             getServices(), false, false );
+                } else if ( specifier instanceof EmsScriptNode ) {
+                    return getElementWithProperty( context, (EmsScriptNode)specifier );
+                }
+                break;
+            case TYPE:
+            case VALUE:
+            case ELEMENT:
+            case VERSION:
+            case CONSTRAINT:
+            case RELATIONSHIP:
+            case VIEW:
+            case VIEWPOINT:
+            case WORKSPACE:
+            default:
+                Debug.error( true, false,
+                             "ERROR! Not yet supporting query type " + itemType
+                                     + " calling EmsSystemModel.getElement("
+                                     + context + ", " + specifier + ", "
+                                     + itemType + ", " + dateTime + ")" );
+        }
+        
+        // HERE!!! (Look for HERE above.)
+        // What other kinds of specifier should we look for? ...?
+
+        //filter( elements, methodCall, indexOfElementArgument );
+
+        
+        if ( Utils.isNullOrEmpty( refs ) ) return Collections.emptyList();
+        if ( refs.size() > 1 && context != null ) {//instanceof EmsScriptNode && !(context instanceof WorkspaceNode) ) {
+            ArrayList< EmsScriptNode > childNodes = new ArrayList< EmsScriptNode >();
+            for ( NodeRef ref : refs ) {
+                EmsScriptNode node = new EmsScriptNode( ref, getServices(), response, status );
+                EmsScriptNode owner = node.getOwningParent( dateTime, workspace, false );
+                if ( context.equals( owner )
+                     || ( context instanceof WorkspaceNode && context.equals( node.getWorkspace() ) ) ) {
+                    childNodes.add( node );
+                }
+            }
+            if ( childNodes.size() > 0 ) return childNodes;
+        }
+        List< EmsScriptNode > list = EmsScriptNode.toEmsScriptNodeList( refs, getServices(), response, status );
+        //System.out.println("getElementWithName(" + context + ", " + specifier + ", " + dateTime + ") = " + list);
+        return list;
     }
 
     @Override
@@ -394,9 +538,13 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
                                                            String specifier ) {
         return getElementWithName(context, specifier, null);
     }
+    
     public Collection< EmsScriptNode > getElementWithName( Object context,
                                                            String specifier,
                                                            Date dateTime ) {
+        if ( true ) {
+            return getElement( context, specifier, SystemModel.ModelItem.NAME );
+        }
         StringBuffer response = new StringBuffer();
         Status status = new Status();
         // TODO -- need to take into account the context!
@@ -843,7 +991,41 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
     	// TODO see EmsScriptNode.getConnectedNodes(), as a lot of this code can
         //      be used for this method.
         
-        return null;
+        List< EmsScriptNode > relationships = null;
+        
+        if ( context instanceof EmsScriptNode ) {
+            String relType = null;
+            String relName = null;
+            String relId = null;
+            List<String> typeNames = new ArrayList< String >();
+            if ( specifier instanceof String ) {
+                relType = (String)specifier;
+                if ( !Utils.isNullOrEmpty( relType ) ) typeNames.add(relType);
+            } else {
+                if ( specifier instanceof EmsScriptNode ) {
+                    EmsScriptNode s = (EmsScriptNode)specifier;
+                    relName = s.getSysmlName();
+                    if ( !Utils.isNullOrEmpty( relName ) ) typeNames.add(relName);
+                    relId = s.getSysmlId();
+                    if ( !Utils.isNullOrEmpty( relId ) ) typeNames.add(relId);
+                }
+            }
+            EmsScriptNode n = (EmsScriptNode)context;
+            ArrayList< NodeRef > refs = null;
+            if ( Utils.isNullOrEmpty( typeNames ) ) {
+                refs = n.getConnectedNodes( null, n.getWorkspace(), null );
+            } else {
+                for ( String type : typeNames ) {
+                    refs = n.getConnectedNodes( null, n.getWorkspace(), type );
+                    if ( !Utils.isNullOrEmpty( refs ) ) break;
+                }
+            }
+            if ( !Utils.isNullOrEmpty( refs ) ) {
+                relationships = n.toEmsScriptNodeList( refs );
+            }
+        }
+        
+        return relationships;
     }
 
     @Override
@@ -992,11 +1174,13 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
 	        Collection< EmsScriptNode > elementColl = null;
 	        try {
 //	        		elementColl = NodeUtil.luceneSearchElements( "ASPECT:\"sysml:" + specifier + "\"" );
+//Debug.error( true, false, "NodeUtil.findNodeRefsByType( " + (String)specifier + ", SearchType.ASPECT.prefix, false, ws, dateTime, false, true, getServices(), false, null )");
 	                ArrayList< NodeRef > refs = NodeUtil.findNodeRefsByType( (String)specifier, SearchType.ASPECT.prefix, false, ws, dateTime, false, true, getServices(), false, null );
 	                elementColl = EmsScriptNode.toEmsScriptNodeList( refs, getServices(), null, null );
 	        } catch (Exception e) {
 	        		// if lucene query fails, most likely due to non-existent aspect, we should look for type now
 	        		try {
+//Debug.error( true, false, "NodeUtil.luceneSearchElements( \"TYPE:\\\"sysml:" + specifier + "\\\" )");
 	        			elementColl = NodeUtil.luceneSearchElements( "TYPE:\"sysml:" + specifier + "\"");
 	        		} catch (Exception ee) {
 	        			// do nothing
@@ -1171,6 +1355,7 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
 				Collection<NodeRef> valueNodes =
 				        (Collection< NodeRef >)node.getNodeRefProperty(Acm.ACM_VALUE, null, node.getWorkspace());
 				convertToScriptNode(valueNodes, returnList);
+				resultList.addAll(returnList);
 //>>>>>>> refs/remotes/origin/develop
 
 //	    		return Utils.asList(returnList, Object.class);
@@ -1484,7 +1669,41 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
 	            Debug.error("setValue(): type for the passed node is null!");
 	    	}
 	    	else {
-		        if (type.equals(Acm.JSON_LITERAL_INTEGER)) {
+	    	    String acmType = Acm.getJSON2ACM().get( type );
+	    	    if ( acmType == null ) acmType = type;
+	    	    Set< String > valuePropNames = Acm.TYPES_WITH_VALUESPEC.get( acmType );
+	    	    if ( !Utils.isNullOrEmpty( valuePropNames ) ) {
+	    	        boolean found = false;
+	    	        if ( valuePropNames.size() > 1 ) {
+	    	            if ( valuePropNames.contains( Acm.ACM_VALUE ) ) {
+	    	                acmType = Acm.ACM_VALUE;
+	    	                found = true;
+	    	            } else {
+                            Debug.error( "setValue(): unclear which owned value spec property "
+                                         + valuePropNames
+                                         + " is to be set to "
+                                         + value + ". Picking first by default!" );
+	    	            }
+	    	        }
+	    	        if ( !found ) acmType = valuePropNames.iterator().next();
+//                    Object valueSpecRef =
+//                            node.getNodeRefProperty( valuePropNames.iterator().next(),
+//                                                     true, null, node.getWorkspace() );
+//                    EmsScriptNode valueNode = null;
+//                    if ( valueSpecRef instanceof NodeRef ) {
+//                        valueNode = new EmsScriptNode( (NodeRef)valueSpecRef, getServices() );
+//                    } else if ( valueSpecRef instanceof ArrayList ) {
+//                        ArrayList< NodeRef > nodeRefs = (ArrayList< NodeRef >))valueSpecRef;
+//                        if ( !Utils.isNullOrEmpty( nodeRefs ) ) {
+//                            if ( nodeRefs.size() > 1 ) {
+//                                
+//                            }
+//                        }
+//                        
+//                    }
+                    node.createOrUpdateProperty( acmType, value );
+                }
+	    	    else if (type.equals(Acm.JSON_LITERAL_INTEGER)) {
 
 		        	node.createOrUpdateProperty(Acm.ACM_INTEGER, value);
 		        }
@@ -1633,12 +1852,179 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
     }
 
     public Collection< Object >
-			map( Collection< Object > elements,
-				 Call call,
-				 int indexOfObjectArgument) throws InvocationTargetException {
+            map( Collection< Object > elements, Call call,
+                 int indexOfObjectArgument ) throws InvocationTargetException {
 
-		return call.map( elements, indexOfObjectArgument );
-	}
+        return call.map( elements, indexOfObjectArgument );
+    }
+    
+    public Collection< Object > map( Collection< Object > elements, Call call,
+                                     int indexOfObjectArgument,
+                                     Vector< Object > otherArguments )
+                                             throws InvocationTargetException {
+        call.getParameterTypes();
+        int argsSize = call.getArgumentVector().size();
+        int otherArgsSize = otherArguments.size();
+        // Make sure there are enough arguments. We assume that one to be
+        // substituted is skipped unless we can determine otherwise. In the case
+        // of a variable number of arguments, otherArguments may not provide
+        // one, which is legal, so otherArguments can be two short.
+        if ( argsSize > otherArgsSize + 1 + ( call.isVarArgs() ? 1 : 0 ) ) {
+            // TODO -- error
+        }
+        // Make sure there are not too many arguments if the call does not have
+        // a variable number of arguments.
+        else if ( argsSize < otherArgsSize && !call.isVarArgs() ) {
+            // TODO -- error
+        }
+        // See if we have strong evidence that the substituted arg is included
+        // in otherArguments.  By default, we assume not.
+        boolean otherArgsIncludesSubstitute =
+                ( argsSize == otherArgsSize && !call.isVarArgs() ) ||
+                ( argsSize - 1 == otherArgsSize );
 
+        // Set otherArguments before invoking
+        for ( int i = 0, j = 0; i < argsSize && j < otherArgsSize; ++i, ++j ) {
+            // skip the one to be substituted unless the otherArguments includes 
+            if ( i != indexOfObjectArgument || otherArgsIncludesSubstitute ) {
+                call.setArgument( i, otherArguments.get( j ) );
+            } else {
+                --j;
+            }
+        }
+        
+        // invoke the map
+        return call.map( elements, 1 );
+    }
+
+    // TODO dont like dependence on BAE for Call here....
+    public Collection< Object >
+            filter( Collection< Object > elements,
+                    FunctionCall call) throws InvocationTargetException {
+
+        return call.filter( elements, 1 );
+    }
+
+    public BigDecimal toBigDecimal( Object o ) {
+        BigDecimal d = null;
+        if ( o instanceof Number ) {
+            d = new BigDecimal( ( (Number)o ).doubleValue() );
+        } else {
+            String s = "" + o;
+            try {
+                d = new BigDecimal( s );
+            } catch (NumberFormatException e) {
+                //ignore
+            }
+        }
+        return d;
+    }
+
+        
+    public Object sum( Object... numbers ) {
+        return sumArr( numbers );
+    }
+    public Object sumArr( Object[] numbers ) {
+        if (numbers == null ) return null;
+        if ( numbers.length == 0 ) return 0;
+        boolean areAllStrings = true;
+        boolean areAllNumbers = true;
+        boolean areNoneNumbers = true;
+        Double sum = 0.0;
+        //BigDecimal sum = new BigDecimal( 0.0 );
+        StringBuffer sb = new StringBuffer();
+        for ( Object obj : numbers ) {
+            Object o = obj;
+            
+            if ( o == null ) continue;
+            if ( o.getClass().isArray() ) {
+                o = sumArr( (Object[])o );
+            }
+            
+            if ( o instanceof String ) {
+                //sb.append( (String)o );
+            } else {
+                areAllStrings = false;
+            }
+            Number n = null;
+            try {
+                n = ClassUtils.evaluate( obj, Number.class, false );
+            } catch (Throwable t) {}
+
+            if ( n != null ) {
+                o = n;
+            }
+            BigDecimal bd = toBigDecimal( o );
+            Double d = bd == null ? null : bd.doubleValue();
+            if ( d == null ) {
+                areAllNumbers = false;
+            } else {
+                areNoneNumbers = false;
+                sum += d;
+            }
+        }
+//        if ( areNoneNumbers ) {
+//            sb = new StringBuffer();
+//            for ( Object obj : numbers ) {
+//                sb.append("" + obj);
+//            }
+//            return sb.toString();
+//        }
+        return round((Double)sum.doubleValue(), 5);
+    }
+
+    public Double round( Double doubleValue, int decimalPlaces ) {
+        double d = doubleValue;
+        System.out.println("d = " + d );
+        double factor = Math.pow( 10, decimalPlaces );
+        System.out.println("factor = " + factor );
+        d *= factor;
+        System.out.println("d *= factor = " + d);
+        long i = Math.round( d );
+        System.out.println("i = Math.round(d) = " + i );
+        d = i / factor;
+        System.out.println("d = i / factor = " + d);
+        return d;
+    }
+
+    public Collection< Object > filter( Collection< Object > elements,
+                                        FunctionCall call,
+                                        int indexOfObjectArgument,
+                                        Vector< Object > otherArguments )
+                                             throws InvocationTargetException {
+        call.getParameterTypes();
+        int argsSize = call.getArgumentVector().size();
+        int otherArgsSize = otherArguments.size();
+        // Make sure there are enough arguments. We assume that one to be
+        // substituted is skipped unless we can determine otherwise. In the case
+        // of a variable number of arguments, otherArguments may not provide
+        // one, which is legal, so otherArguments can be two short.
+        if ( argsSize > otherArgsSize + 1 + ( call.isVarArgs() ? 1 : 0 ) ) {
+            // TODO -- error
+        }
+        // Make sure there are not too many arguments if the call does not have
+        // a variable number of arguments.
+        else if ( argsSize < otherArgsSize && !call.isVarArgs() ) {
+            // TODO -- error
+        }
+        // See if we have strong evidence that the substituted arg is included
+        // in otherArguments.  By default, we assume not.
+        boolean otherArgsIncludesSubstitute =
+                ( argsSize == otherArgsSize && !call.isVarArgs() ) ||
+                ( argsSize - 1 == otherArgsSize );
+
+        // Set otherArguments before invoking
+        for ( int i = 0, j = 0; i < argsSize && j < otherArgsSize; ++i, ++j ) {
+            // skip the one to be substituted unless the otherArguments includes 
+            if ( i != indexOfObjectArgument || otherArgsIncludesSubstitute ) {
+                call.setArgument( i, otherArguments.get( j ) );
+            } else {
+                --j;
+            }
+        }
+        
+        // invoke the filter
+        return call.filter( elements, 1 );
+    }
 
 }

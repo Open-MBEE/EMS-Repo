@@ -31,7 +31,9 @@ package gov.nasa.jpl.view_repo.actions;
 import gov.nasa.jpl.mbee.util.Timer;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.EmsTransaction;
+import gov.nasa.jpl.view_repo.util.ModelContext;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
+import gov.nasa.jpl.view_repo.util.ServiceContext;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 import gov.nasa.jpl.view_repo.webscripts.ModelPost;
 
@@ -125,25 +127,36 @@ public class ModelLoadActionExecuter extends ActionExecuterAbstractBase {
         if (content == null) {
             response.append("ERROR: Could not load JSON file for job\n");
         } else {
-            ModelPost modelService = new ModelPost(repository, services);
-            modelService.setLogLevel(Level.DEBUG);
-            modelService.setRunWithoutTransactions(false);
-            modelService.setProjectNode( projectNode );
             Status status = new Status();
-            try {
-                // FIXME: make sure this all matches with ModelService handleUpdate
-                Set<EmsScriptNode> elements = 
-                        modelService.createOrUpdateModel(content, status, workspace, null, true);
-                modelService.addRelationshipsToProperties( elements, workspace );
-            } catch (Exception e) {
-                status.setCode(HttpServletResponse.SC_BAD_REQUEST);
-                response.append("ERROR: could not parse request\n");
-                e.printStackTrace();
-            }
+            ModelContext modelContext =
+                    new ModelContext( false, workspace, true, null,
+                                      projectName, projectNode, null, null );
+            ServiceContext serviceContext =
+                    new ServiceContext( false, false, 1, false, false,
+                                        repository, services, response, status );
+            loadJson( content, modelContext, serviceContext );
             if (status.getCode() == HttpServletResponse.SC_OK) {
                 jobStatus = "Succeeded";
             }
-            response.append(modelService.getResponse().toString());
+//            ModelPost modelService = new ModelPost(repository, services);
+//            modelService.setLogLevel(Level.DEBUG);
+//            modelService.setRunWithoutTransactions(false);
+//            modelService.setProjectNode( projectNode );
+//            Status status = new Status();
+//            try {
+//                // FIXME: make sure this all matches with ModelService handleUpdate
+//                Set<EmsScriptNode> elements = 
+//                        modelService.createOrUpdateModel(content, status, workspace, null, true);
+//                modelService.addRelationshipsToProperties( elements, workspace );
+//            } catch (Exception e) {
+//                status.setCode(HttpServletResponse.SC_BAD_REQUEST);
+//                response.append("ERROR: could not parse request\n");
+//                e.printStackTrace();
+//            }
+//            if (status.getCode() == HttpServletResponse.SC_OK) {
+//                jobStatus = "Succeeded";
+//            }
+//            response.append(modelService.getResponse().toString());
             if (logger.isDebugEnabled()) logger.debug( "completed model load with status [" + jobStatus + "]");
         }
 
@@ -151,35 +164,54 @@ public class ModelLoadActionExecuter extends ActionExecuterAbstractBase {
         new EmsTransaction(services, response, responseStatus) {
             @Override
             public void run() throws Exception {
-                // Save off the log
-                EmsScriptNode logNode = ActionUtil.saveLogToFile(jsonNode, "text/plain", services, response.toString());
 
                 // set the status
                 jsonNode.setProperty("ems:job_status", jobStatusFinal);
-
-                String hostname = ActionUtil.getHostName();
-                if (hostname.endsWith("/" )) {
-                    hostname = hostname.substring( 0, hostname.lastIndexOf( "/" ) );
-                } 
-                if (!hostname.contains( "jpl.nasa.gov" )) {
-                    hostname += ".jpl.nasa.gov";
-                }
-                String contextUrl = "https://" + hostname + "/alfresco";
                     
                 // Send off the notification email
                 String subject =
                         "Workspace " + workspaceId + " Project "
                                 + projectName + " load completed";
-                String msg = "Log URL: " + contextUrl + logNode.getUrl();
-                ActionUtil.sendEmailToModifier(jsonNode, msg, subject, services);
+                ActionUtil.sendEmailToModifier(jsonNode, subject, services, response.toString());
                 
-                if (logger.isDebugEnabled()) logger.debug("Email notification sent for " + workspaceId + " - "+ projectName + " [id: " + projectId + "]:\n" + msg);
                 if (logger.isDebugEnabled()) logger.debug( "ModelLoadActionExecuter: " + timer );
             }
         };
         
     }
 
+    public static Set<EmsScriptNode> loadJson( JSONObject content,
+                                               ModelContext modelContext,
+                                               ServiceContext serviceContext ) {
+        if ( modelContext == null ) modelContext = new ModelContext();
+        if ( serviceContext == null ) serviceContext = new ServiceContext();
+        ModelPost modelService = new ModelPost(serviceContext.repository,
+                                               serviceContext.services);
+        modelService.setLogLevel(Level.DEBUG);
+        modelService.setRunWithoutTransactions(false);
+        modelService.setProjectNode( modelContext.projectNode );
+//        boolean succeeded = false;
+        Set<EmsScriptNode> elements = null;
+        try {
+            if ( serviceContext.status == null ) serviceContext.status = new Status();
+            if ( serviceContext.response == null ) serviceContext.response = new StringBuffer();
+            // FIXME: make sure this all matches with ModelService handleUpdate
+            elements = modelService.createOrUpdateModel( content, serviceContext.status,
+                                                         modelContext.workspace, null, true );
+            modelService.addRelationshipsToProperties( elements, modelContext.workspace );
+        } catch (Exception e) {
+            serviceContext.status.setCode(HttpServletResponse.SC_BAD_REQUEST);
+            serviceContext.response.append("ERROR: could not parse request\n");
+            e.printStackTrace();
+        }
+//        if (status.getCode() == HttpServletResponse.SC_OK) {
+//            succeeded = true;
+//        }
+        serviceContext.response.append(modelService.getResponse().toString());
+        return elements;
+    }
+    
+    
     protected void clearCache() {
         response = new StringBuffer();
         responseStatus = new Status();

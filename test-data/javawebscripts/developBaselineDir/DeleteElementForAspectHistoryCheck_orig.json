@@ -1,0 +1,56 @@
+{
+  "sequence": 66,
+  "workspace1": {
+    "timestamp": "2015-07-23T20:24:28.516-0700",
+    "qualifiedId": "master",
+    "id": "master",
+    "qualifiedName": "master",
+    "name": "master",
+    "elements": [{
+      "siteCharacterizationId": "europa",
+      "qualifiedId": "/europa/123456/aspect_history_zzz/property_zzz",
+      "qualifiedName": "/europa/JW_TEST2/null/null",
+      "sysmlid": "property_zzz",
+      "editable": true,
+      "creator": "admin",
+      "modified": "2015-07-23T20:24:28.518-0700",
+      "version": "1.1",
+      "id": "8e4f9a81-8f63-4a38-abcf-76fe6434aa52",
+      "modifier": "admin",
+      "created": "Thu Jul 23 20:24:27 PDT 2015",
+      "owner": "aspect_history_zzz",
+      "documentation": "p is p",
+      "read": "2015-07-23T20:24:28.524-0700",
+      "specialization": {
+        "propertyType": null,
+        "isDerived": false,
+        "isSlot": false,
+        "value": [{
+          "valueExpression": null,
+          "string": "the p value",
+          "type": "LiteralString"
+        }],
+        "type": "Property"
+      }
+    }]
+  },
+  "workspace2": {
+    "timestamp": "2015-07-23T20:24:28.524-0700",
+    "qualifiedId": "master",
+    "id": "master",
+    "deletedElements": [{
+      "id": "8e4f9a81-8f63-4a38-abcf-76fe6434aa52",
+      "sysmlid": "property_zzz",
+      "read": "2015-07-23T20:24:28.524-0700",
+      "creator": "admin",
+      "modified": "2015-07-23T20:24:28.518-0700"
+    }],
+    "addedElements": [],
+    "conflictedElements": [],
+    "updatedElements": [],
+    "qualifiedName": "master",
+    "name": "master",
+    "movedElements": []
+  }
+}
+200

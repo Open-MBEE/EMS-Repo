@@ -50,6 +50,8 @@ import gov.nasa.jpl.view_repo.webscripts.util.ShareUtils;
 //import k.frontend.ModelParser;
 //import k.frontend.ModelParser.ModelContext;
 
+
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -65,14 +67,12 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 
 import javax.servlet.http.HttpServletResponse;
+
+
+import k.frontend.Frontend;
+
 //import javax.transaction.UserTransaction;
 import org.apache.log4j.*;
-
-import kexpparser.KExpParser;
-//import k.frontend.Frontend;
-
-
-
 import org.alfresco.repo.model.Repository;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
@@ -1302,7 +1302,7 @@ public class ModelPost extends AbstractJavaWebScript {
 
             // Replace the property in the JSON with the sysmlids
             // before ingesting:
-            JSONArray jsonArry = new JSONArray(nodeNames);
+            JSONArray jsonArry = new JSONArray(Utils.toArrayOfType( nodeNames, String.class ));
             jsonToCheck.put(jsonKey, jsonArry);
         }
         // The property is not multi-valued, so just have one value to process:
@@ -2243,385 +2243,6 @@ public class ModelPost extends AbstractJavaWebScript {
         return reifiedPkgNode;
     }
 
-//    /**
-//     * Parses the Property and returns a set of all the node names
-//     * in the property.
-//     *
-//     * @param propertyNode The node to parse
-//     * @return Set of cm:name
-//     */
-//    private Set<String> getPropertyElementNames(EmsScriptNode propertyNode) {
-//
-//        Set<String> names = new HashSet<String>();
-//
-//        if (propertyNode != null) {
-//
-//            String name = propertyNode.getName();
-//
-//            if (name != null) names.add(name);
-//
-//            // See if it has a value property:
-//            Collection< EmsScriptNode > propertyValues =
-//                    getSystemModel().getProperty(propertyNode, Acm.JSON_VALUE);
-//
-//            if (!Utils.isNullOrEmpty(propertyValues)) {
-//                  for (EmsScriptNode value : propertyValues) {
-//
-//                      names.add(value.getName());
-//
-//                      // TODO REVIEW
-//                      //      need to be able to handle all ValueSpecification types?
-//                      //      some of them have properties that point to nodes, so
-//                      //      would need to process them also
-//                  }
-//            }
-//        }
-//
-//        return names;
-//    }
-//
-//    /**
-//     * Parses the Parameter and returns a set of all the node names
-//     * in the parameter.
-//     *
-//     * @param paramNode The node to parse
-//     * @return Set of cm:name
-//     */
-//    private Set<String> getParameterElementNames(EmsScriptNode paramNode) {
-//
-//        Set<String> names = new HashSet<String>();
-//
-//        if (paramNode != null) {
-//
-//            String name = paramNode.getName();
-//
-//            if (name != null) names.add(name);
-//
-//            // See if it has a defaultParamaterValue property:
-//            Collection< EmsScriptNode > paramValues =
-//                    getSystemModel().getProperty(paramNode, Acm.JSON_PARAMETER_DEFAULT_VALUE);
-//
-//            if (!Utils.isNullOrEmpty(paramValues)) {
-//                  names.add(paramValues.iterator().next().getName());
-//            }
-//        }
-//
-//        return names;
-//    }
-//
-//    /**
-//     * Parses the Operation and returns a set of all the node names
-//     * in the operation.
-//     *
-//     * @param opNode The node to parse
-//     * @return Set of cm:name
-//     */
-//    private Set<String> getOperationElementNames(EmsScriptNode opNode) {
-//
-//        Set<String> names = new HashSet<String>();
-//
-//        if (opNode != null) {
-//
-//            String name = opNode.getName();
-//
-//            if (name != null) names.add(name);
-//
-//            // See if it has a operationParameter and/or operationExpression property:
-//            Collection< EmsScriptNode > opParamNodes =
-//                    getSystemModel().getProperty(opNode, Acm.JSON_OPERATION_PARAMETER);
-//
-//            if (!Utils.isNullOrEmpty(opParamNodes)) {
-//              for (EmsScriptNode opParamNode : opParamNodes) {
-//                  names.addAll(getParameterElementNames(opParamNode));
-//              }
-//            }
-//
-//            Collection< EmsScriptNode > opExprNodes =
-//                    getSystemModel().getProperty(opNode, Acm.JSON_OPERATION_EXPRESSION);
-//
-//            if (!Utils.isNullOrEmpty(opExprNodes)) {
-//                names.add(opExprNodes.iterator().next().getName());
-//            }
-//        }
-//
-//        return names;
-//    }
-//
-//    /**
-//     * Parses the expression and returns a set of all the node names
-//     * in the expression.
-//     *
-//     * @param expressionNode The node to parse
-//     * @return Set of cm:name
-//     */
-//    private Set<String> getExpressionElementNames(EmsScriptNode expressionNode) {
-//
-//        Set<String> names = new HashSet<String>();
-//
-//        if (expressionNode != null) {
-//
-//            // Add the name of the Expression itself:
-//            String name = expressionNode.getName();
-//
-//            if (name != null) names.add(name);
-//
-//            // Process all of the operand properties:
-//            Collection< EmsScriptNode > properties =
-//                    getSystemModel().getProperty( expressionNode, Acm.JSON_OPERAND);
-//
-//            if (!Utils.isNullOrEmpty(properties)) {
-//
-//              EmsScriptNode valueOfElementNode = null;
-//
-//              for (EmsScriptNode operandProp : properties) {
-//
-//                if (operandProp != null) {
-//
-//                    names.add(operandProp.getName());
-//
-//                    // Get the valueOfElementProperty node:
-//                    Collection< EmsScriptNode > valueOfElemNodes =
-//                            getSystemModel().getProperty(operandProp, Acm.JSON_ELEMENT_VALUE_ELEMENT);
-//
-//                    // If it is a elementValue, then this will be non-empty:
-//                    if (!Utils.isNullOrEmpty(valueOfElemNodes)) {
-//
-//                      // valueOfElemNodes should always be size 1 b/c elementValueOfElement
-//                      // is a single NodeRef
-//                      valueOfElementNode = valueOfElemNodes.iterator().next();
-//                    }
-//
-//                    // Otherwise just use the node itself as we are not dealing with
-//                    // elementValue types:
-//                    else {
-//                      valueOfElementNode = operandProp;
-//                    }
-//
-//                    if (valueOfElementNode != null) {
-//
-//                      String typeString = getSystemModel().getTypeString(valueOfElementNode, null);
-//
-//                      // If it is a Operation then see if it then process it:
-//                      if (typeString.equals(Acm.JSON_OPERATION)) {
-//                          names.addAll(getOperationElementNames(valueOfElementNode));
-//                      }
-//
-//                      // If it is a Expression then process it recursively:
-//                      else if (typeString.equals(Acm.JSON_EXPRESSION)) {
-//                          names.addAll(getExpressionElementNames(valueOfElementNode));
-//                      }
-//
-//                      // If it is a Parameter then process it:
-//                      else if (typeString.equals(Acm.JSON_PARAMETER)) {
-//                          names.addAll(getParameterElementNames(valueOfElementNode));
-//                      }
-//
-//                      // If it is a Property then process it:
-//                      else if (typeString.equals(Acm.JSON_PROPERTY)) {
-//                          names.addAll(getPropertyElementNames(valueOfElementNode));
-//                      }
-//
-//                    } // ends if valueOfElementNode != null
-//
-//                } // ends if operandProp != null
-//
-//              } // ends for loop through operand properties
-//
-//            } // ends if operand properties not null or empty
-//
-//        } // ends if expressionNode != null
-//
-//        return names;
-//    }
-//
-//    /**
-//     * Parses the expression for the passed constraint, and returns a set of all the node
-//     * names in the expression.
-//     *
-//     * @param constraintNode The node to parse
-//     * @return Set of cm:name
-//     */
-//    private Set<String> getConstraintElementNames(EmsScriptNode constraintNode,
-//                                                  Date dateTime, WorkspaceNode ws) {
-//
-//        Set<String> names = new LinkedHashSet<String>();
-//
-//        if (constraintNode != null) {
-//
-//            // Add the name of the Constraint:
-//            String name = constraintNode.getName();
-//
-//            if (name != null) names.add(name);
-//
-//            // Get the Expression for the Constraint:
-//            EmsScriptNode exprNode = getConstraintExpression(constraintNode,
-//                                                             dateTime, ws);
-//
-//            // Add the names of all nodes in the Expression:
-//            if (exprNode != null) {
-//
-//                // Get elements names from the Expression:
-//                names.addAll(getExpressionElementNames(exprNode));
-//
-//                // REVIEW: Not using the child associations b/c
-//                // ElementValue's elementValueOfElement has a different
-//                // owner, and wont work for our demo either b/c
-//                // not everything is under one parent
-//            }
-//
-//        }
-//
-//        return names;
-//    }
-//
-//    /**
-//     * Parse out the expression from the passed constraint node
-//     *
-//     * @param constraintNode The node to parse
-//     * @return The Expression node for the constraint
-//     */
-//    private EmsScriptNode getConstraintExpression( EmsScriptNode constraintNode,
-//                                                   Date dateTime, WorkspaceNode ws ) {
-//
-//        if (constraintNode == null) return null;
-//
-//        // Get the constraint expression:
-//        
-//        ArrayList< NodeRef > refs =
-//            constraintNode.getPropertyNodeRefs( Acm.ACM_CONSTRAINT_SPECIFICATION,
-//                                                dateTime, ws );
-//        Collection< EmsScriptNode > expressions =
-//            EmsScriptNode.toEmsScriptNodeList( refs, getServices(),
-//                                               getResponse(),
-//                                               getResponseStatus() );
-//                //getSystemModel().getProperty( constraintNode, Acm.JSON_CONSTRAINT_SPECIFICATION );
-//
-//        // This should always be of size 1:
-//        return Utils.isNullOrEmpty( expressions ) ? null :  expressions.iterator().next();
-//
-//    }
-//
-//    /**
-//     * Creates a ConstraintExpression for the passed constraint node and adds to the passed constraints
-//     *
-//     * @param constraintNode The node to parse and create a ConstraintExpression for
-//     * @param constraints The list of Constraints to add to
-//     */
-//    private void addConstraintExpression(EmsScriptNode constraintNode, Collection<Constraint> constraints,
-//                                         Date dateTime, WorkspaceNode ws) {
-//
-//        if (constraintNode == null || constraints == null) return;
-//
-//        EmsScriptNode exprNode = getConstraintExpression(constraintNode, dateTime, ws);
-//
-//        if (exprNode != null) {
-//            Expression<Call> expressionCall = getSystemModelAe().toAeExpression( exprNode );
-//            Call call = (Call) expressionCall.expression;
-//            Expression<Boolean> expression = new Expression<Boolean>(call.evaluate(true, false));
-//
-//            if (expression != null) {
-//
-//                constraints.add(new ConstraintExpression( expression ));
-//            }
-//        }
-//    }
-//
-//    protected void fix( Set< EmsScriptNode > elements, WorkspaceNode workspace ) {
-//
-//        log(LogLevel.INFO, "Constraint violations will be fixed if found!");
-//
-//        SystemModelSolver< EmsScriptNode, EmsScriptNode, EmsScriptNode, EmsScriptNode, String, String, Object, EmsScriptNode, String, String, EmsScriptNode >  solver =
-//                new SystemModelSolver< EmsScriptNode, EmsScriptNode, EmsScriptNode, EmsScriptNode, String, String, Object, EmsScriptNode, String, String, EmsScriptNode >(getSystemModel(), new ConstraintLoopSolver() );
-//
-//        Collection<Constraint> constraints = new ArrayList<Constraint>();
-//
-//        // Search for all constraints in the database:
-//        ArrayList< NodeRef > refs = 
-//                NodeUtil.findNodeRefsByType( "sysml:Constraint", SearchType.ASPECT.prefix,
-//                                             false, workspace, null, false, true,
-//                                             getServices(), false, null );
-//        
-//        Collection<EmsScriptNode> constraintNodes = //getSystemModel().getType(workspace, Acm.JSON_CONSTRAINT);
-//                EmsScriptNode.toEmsScriptNodeList( refs, getServices(), getResponse(), getResponseStatus() );
-//
-//        if (!Utils.isNullOrEmpty(constraintNodes)) {
-//
-//            // Loop through each found constraint and check if it contains any of the elements
-//            // to be posted:
-//            for (EmsScriptNode constraintNode : constraintNodes) {
-//
-//                // Parse the constraint node for all of the cm:names of the nodes in its expression tree:
-//                Set<String> constrElemNames = getConstraintElementNames(constraintNode, null, workspace);
-//
-//                // Check if any of the posted elements are in the constraint expression tree, and add
-//                // constraint if they are:
-//                // Note: if a Constraint element is in elements then it will also get added here b/c it
-//                //          will be in the database already via createOrUpdateMode()
-//                for (EmsScriptNode element : elements) {
-//
-//                    String name = element.getName();
-//                    if (name != null && constrElemNames.contains(name)) {
-//                        addConstraintExpression(constraintNode, constraints, null, workspace);
-//                        break;
-//                    }
-//
-//                } // Ends loop through elements
-//
-//            } // Ends loop through constraintNodes
-//
-//        } // Ends if there was constraint nodes found in the database
-//
-//        // Solve the constraints:
-//        if (!Utils.isNullOrEmpty( constraints )) {
-//
-//            // Add all of the Parameter constraints:
-//            ClassData cd = getSystemModelAe().getClassData();
-//
-//            //loop x times for now
-//            Random.reset();
-//            for(int i=0; i<10; i++)
-//            {
-//                // Loop through all the listeners:
-//                for (ParameterListenerImpl listener : cd.getAeClasses().values()) {
-//
-//                    // TODO: REVIEW
-//                    //       Can we get duplicate ParameterListeners in the aeClassses map?
-//                    constraints.addAll( listener.getConstraints( true, null ) );
-//                }
-//
-//                // Solve!!!!
-//                boolean result = false;
-//                try {
-//                    //Debug.turnOn();
-//                    result = solver.solve(constraints);
-//
-//                } finally {
-//                    //Debug.turnOff();
-//                }
-//                if (!result) {
-//                    log( LogLevel.ERROR, "Was not able to satisfy all of the constraints!" );
-//                }
-//                else {
-//                    log( LogLevel.INFO, "Satisfied all of the constraints!" );
-//
-//                    // Update the values of the nodes after solving the constraints:
-//                    EmsScriptNode node;
-//                    Parameter<Object> param;
-//                    Set<Entry<EmsScriptNode, Parameter<Object>>> entrySet = sysmlToAe.getExprParamMap().entrySet();
-//                    for (Entry<EmsScriptNode, Parameter<Object>> entry : entrySet) {
-//
-//                        node = entry.getKey();
-//                        param = entry.getValue();
-//                        systemModel.setValue(node, (Serializable)param.getValue());
-//                    }
-//
-//                    log( LogLevel.INFO, "Updated all node values to satisfy the constraints!" );
-//
-//                }
-//            }
-//        } // End if constraints list is non-empty
-//
-//    }
 
     /**
      * Entry point
@@ -2707,45 +2328,26 @@ public class ModelPost extends AbstractJavaWebScript {
                             }
                         };
                     }
-                    response.append("JSON uploaded, model load being processed in background.\n");
-                    response.append("You will be notified via email when the model load has finished.\n"); 
+                    if (status.getCode() == HttpServletResponse.SC_OK) {
+                        response.append("JSON uploaded, model load being processed in background.\n");
+                        response.append("You will be notified via email when the model load has finished.\n");
+                    }
                 }
                 else {
-                    JSONObject postJson = null;
-                    
                     // Check if input is K or JSON
                     String contentType = req.getContentType() == null ?
                                          "" : req.getContentType().toLowerCase();
-                    if ( contentType.contains( "application/k" ) ) {
-                        String k = req.getContent().getContent();
-                        logger.warn( "k = " + k );
-                        postJson = new JSONObject(KExpParser.parseExpression(k));
-                        //postJson = new JSONObject(Frontend.exp2Json2( k ));
-                    }
-                    else {
-                        postJson = //JSONObject.make(
-                                (JSONObject)req.parseContent();// );
-                    }
-                    if ( postJson == null ) postJson = new JSONObject();
-                    JSONArray jarr = postJson.optJSONArray("elements");
-                    if ( jarr == null ) {
-                        jarr = new JSONArray();
-                        postJson.put( "elements", jarr );
-                    }
-                    if ( !Utils.isNullOrEmpty( expressionString ) ) {
-
-                        JSONObject exprJson = new JSONObject(KExpParser.parseExpression(expressionString));
-                        log(Level.DEBUG, "********************************************************************************");
-                        log(Level.DEBUG, expressionString);
-                        log(Level.DEBUG, NodeUtil.jsonToString( exprJson, 4 ));
-//                        log(LogLevel.DEBUG, NodeUtil.jsonToString( exprJson0, 4 ));
-                        log(Level.DEBUG, "********************************************************************************");
-                        JSONArray expJarr = exprJson.getJSONArray("elements");
-                        for (int i=0; i<expJarr.length(); ++i) {
-                            jarr.put(expJarr.get( i ) );
-                        }
+                    Object content;
+                    boolean jsonNotK = !contentType.contains( "application/k" );
+                    if ( !jsonNotK ) {
+                        content = req.getContent().getContent();
+                    } else {
+                        content = (JSONObject)req.parseContent();
                     }
 
+                    JSONObject postJson =
+                            getPostJson( jsonNotK, content, expressionString );
+                    
                     // Get the project node from the request:
                     new EmsTransaction(getServices(), getResponse(), getResponseStatus(),
                                        runWithoutTransactions) {// || internalRunWithoutTransactions ) {
@@ -2788,35 +2390,106 @@ public class ModelPost extends AbstractJavaWebScript {
 
         return model;
     }
+    
+    public static JSONObject kToJson( String k ) {
+        return kToJson(k, null);
+    }
+
+    /**
+     * Add elements' sysmlids in given json. sysmlids are only added where they
+     * do not already exist. If there is more than one element, the prefix is
+     * appended with an underscore followed by a count index. For example, if
+     * there are three elements, and the prefix is "foo", then the sysmlids will
+     * be foo_0, foo_1, and foo_2. This can be useful for temporary generated
+     * elements so that they can overwrite themselves and reduce pollution.
+     * 
+     * @param json
+     * @param sysmlidPrefix
+     */
+    public static void addSysmlIdsToElementJson( JSONObject json, String sysmlidPrefix ) {
+        if ( json == null ) return;
+        if ( sysmlidPrefix == null ) sysmlidPrefix = "generated_sysmlid_";
+        JSONArray elemsJson = json.optJSONArray( "elements" );
+        if ( elemsJson != null ) {
+            for ( int i = 0; i < elemsJson.length(); ++i ) {
+                JSONObject elemJson = elemsJson.getJSONObject( i );
+                if ( elemJson != null && !elemJson.has( "sysmlid" ) ) {
+                    String id = sysmlidPrefix + (elemsJson.length() > 1 ? "_" + i : "" );
+                    elemJson.put( "sysmlid", id );
+                }
+            }
+        }
+    }
+    
+
+    
+    public static JSONObject kToJson( String k, String sysmlidPrefix ) {
+        //JSONObject json = new JSONObject(KExpParser.parseExpression(k));
+        JSONObject json = new JSONObject(Frontend.exp2Json2( k ));
+
+        if ( sysmlidPrefix != null ) {
+            addSysmlIdsToElementJson( json, sysmlidPrefix );
+        }
+        
+        log(Level.DEBUG, "********************************************************************************");
+        log(Level.DEBUG, k);
+        if ( logger.isDebugEnabled() ) log(Level.DEBUG, NodeUtil.jsonToString( json, 4 ));
+//        log(LogLevel.DEBUG, NodeUtil.jsonToString( exprJson0, 4 ));
+        log(Level.DEBUG, "********************************************************************************");
+
+        System.out.println("kToJson(" + k + ") = \n" + json.toString( 4 ) );
+        
+        return json;
+    }
+    
+    public JSONObject getPostJson( boolean jsonNotK, Object content ) {
+        return getPostJson( jsonNotK, content, null );
+    }
+    public JSONObject getPostJson( boolean jsonNotK,
+                                   Object content, String expressionString ) throws JSONException {
+        JSONObject postJson = null;
+        
+        if ( !jsonNotK ) {
+            String k = (String)content;
+            logger.warn( "k = " + k );
+            postJson = kToJson( k );
+        }
+        else {
+            if ( content instanceof JSONObject ) {
+                postJson = (JSONObject)content;
+            } else if ( content instanceof String ) {
+                postJson = new JSONObject( (String)content );
+            }
+        }
+        if ( postJson == null ) postJson = new JSONObject();
+        JSONArray jarr = postJson.optJSONArray("elements");
+        if ( jarr == null ) {
+            jarr = new JSONArray();
+            postJson.put( "elements", jarr );
+        }
+        if ( !Utils.isNullOrEmpty( expressionString ) ) {
+            JSONObject exprJson = kToJson(expressionString);
+            JSONArray expJarr = exprJson.getJSONArray("elements");
+            for (int i=0; i<expJarr.length(); ++i) {
+                jarr.put(expJarr.get( i ) );
+            }
+        }
+
+        return postJson;
+    }
 
     protected Set< EmsScriptNode > handleUpdate(JSONObject postJson, Status status, 
                                                 final WorkspaceNode workspace, boolean evaluate,
                                                 boolean fix, Map<String, Object> model,
                                                 boolean createCommit,
                                                 boolean suppressElementJson ) throws Exception {
-        JSONObject top = NodeUtil.newJsonObject();
+        final JSONObject top = NodeUtil.newJsonObject();
         final Set< EmsScriptNode > elements = createOrUpdateModel( postJson, status, workspace, null, createCommit );
 
         if ( !Utils.isNullOrEmpty( elements ) ) {
             sendProgress("Adding relationships to properties", projectId, true);
             addRelationshipsToProperties( elements, workspace );
 
-            // Evaluate expressions and constraints if desired.
-            final Map< Object, Object > results = new LinkedHashMap< Object, Object >();
-            if ( evaluate ) {
-                sendProgress("Evaluating constraints and expressions", projectId, true);
-                
-                new EmsTransaction( getServices(), getResponse(), getResponseStatus(),
-                                    runWithoutTransactions) {// || internalRunWithoutTransactions ) {
-                    @Override
-                    public void run() throws Exception {
-                        Map< Object, Object > r = evaluate(elements, workspace);
-                        results.putAll( r );
-                    }
-                };
-                
-            }
-            
             // Fix constraints if desired.
             if (fix) {
                 sendProgress("Fixing constraints", projectId, true);
@@ -2825,47 +2498,84 @@ public class ModelPost extends AbstractJavaWebScript {
                     @Override
                     public void run() throws Exception {
                         fix(elements, workspace);
+                        sendProgress("Fixing constraints completed", projectId, true);
                     }
                 };
             }
 
             if ( !suppressElementJson ) {
+
                 // Create JSON object of the elements to return:
                 final JSONArray elementsJson = new JSONArray();
-              
+                final Map<EmsScriptNode, JSONObject> elementsJsonMap =
+                        new LinkedHashMap< EmsScriptNode, JSONObject >();
+            
+                sendProgress("Getting json for elements", projectId, true);
                 new EmsTransaction(getServices(), getResponse(), getResponseStatus(),
                                    runWithoutTransactions) {
                     @Override
                     public void run() throws Exception {
                         for ( EmsScriptNode element : elements ) {
                             JSONObject json = element.toJSONObject(workspace, null);
-                            Object result = results.get( element );
-                            if ( result != null ) {
-                                try {
-                                    json.putOpt( "evaluationResult", result );
-                                    results.remove( element );
-                                } catch ( Throwable e ) {
-                                    ModelPost.this.log( Level.WARN,
-                                                        "Evaluation failed for %s", element );
-                                }
-                            }
                             elementsJson.put( json );
+                            elementsJsonMap.put( element, json );
                         }
+                        sendProgress("Getting json for elements completed", projectId, true);
                     }
                 };
 
-                // Put constraint evaluation results in json.
-                JSONArray resultJarr = new JSONArray();
-                for ( Object k : results.keySet() ) {
-                    JSONObject r = new JSONObject();
-                    r.put( "expression", k.toString() );
-                    Object v = results.get( k );
-                    r.put( "value", "" + v );
-                    resultJarr.put( r );
+                
+                if ( evaluate ) {
+                    sendProgress("Evaluating constraints and expressions", projectId, true);
+                    
+                    new EmsTransaction( getServices(), getResponse(), getResponseStatus(),
+                                        runWithoutTransactions ) {// || internalRunWithoutTransactions ) {
+                        @Override
+                        public void run() throws Exception {
+                            evaluate( elementsJsonMap, top, workspace );
+//                            Map< Object, Object > r = evaluate(elements, workspace);
+//                            results.putAll( r );
+                            sendProgress("Evaluating constraints and expressions completed", projectId, true);
+                        }
+                    };
                 }
+            
+//                new EmsTransaction(getServices(), getResponse(), getResponseStatus(),
+//                                   runWithoutTransactions) {
+//                    @Override
+//                    public void run() throws Exception {
+//                        for ( int i = 0; i < elementsJson.length(); ++i ) {
+//                            
+//                        }
+//                        for ( EmsScriptNode element : elements ) {
+//                            JSONObject json = element.toJSONObject(workspace, null);
+//                            Object result = results.get( element );
+//                            if ( result != null ) {
+//                                try {
+//                                    json.putOpt( "evaluationResult", result );
+//                                    results.remove( element );
+//                                } catch ( Throwable e ) {
+//                                    ModelPost.this.log( Level.WARN,
+//                                                        "Evaluation failed for %s", element );
+//                                }
+//                            }
+//                            elementsJson.put( json );
+//                        }
+//                    }
+//                };
+//
+//                // Put constraint evaluation results in json.
+//                JSONArray resultJarr = new JSONArray();
+//                for ( Object k : results.keySet() ) {
+//                    JSONObject r = new JSONObject();
+//                    r.put( "expression", k.toString() );
+//                    Object v = results.get( k );
+//                    r.put( "value", "" + v );
+//                    resultJarr.put( r );
+//                }
                 
                 top.put( "elements", elementsJson );
-                if ( resultJarr.length() > 0 ) top.put( "evaluations", resultJarr );
+//                if ( resultJarr.length() > 0 ) top.put( "evaluations", resultJarr );
             }
         }
         
@@ -2922,10 +2632,7 @@ public class ModelPost extends AbstractJavaWebScript {
             EmsScriptNode jobNode = ActionUtil.getOrCreateJob(siteNode, jobName, "ems:Job", status, response);
 
             if (jobNode == null) {
-                String errorMsg = 
-                        String.format("Could not create JSON file for background load: site[%s]  job[%s]",
-                                      siteNode.getName(), jobName);
-                log( Level.ERROR, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, errorMsg );
+                log( Level.ERROR, status.getCode(), response.toString() );
                 return;
             }
             // write out the json
@@ -2970,19 +2677,6 @@ public class ModelPost extends AbstractJavaWebScript {
     }
     
 
-//    protected EmsScriptNode getProjectNodeFromRequest(WebScriptRequest req, boolean createIfNonexistent) {
-//        String runAsUser = AuthenticationUtil.getRunAsUser();
-//        boolean changeUser = !EmsScriptNode.ADMIN_USER_NAME.equals( runAsUser );
-//        if ( changeUser ) {
-//            AuthenticationUtil.setRunAsUser( EmsScriptNode.ADMIN_USER_NAME );
-//        }
-//        EmsScriptNode n = 
-//        if ( changeUser ) {
-//            AuthenticationUtil.setRunAsUser( runAsUser );
-//        }
-//
-//        
-//    }
     protected EmsScriptNode getProjectNodeFromRequest(WebScriptRequest req, boolean createIfNonexistent) {
         WorkspaceNode workspace = getWorkspace( req );
         String timestamp = req.getParameter( "timestamp" );
@@ -3026,19 +2720,36 @@ public class ModelPost extends AbstractJavaWebScript {
         // the site.  Give a warning if multiple projects are found.  There is a requirement that
         // there should never be more than one project per site on Europa.
         if (projectId.equals( siteName + "_" + NO_PROJECT_ID )) {
-
-            Map< String, EmsScriptNode > nodeList = searchForElements(NodeUtil.SearchType.TYPE.prefix,
-                                                                    Acm.ACM_PROJECT, false,
-                                                                    workspace, dateTime,
-                                                                    siteName);
-
-            if (nodeList != null && nodeList.size() > 0) {
-                EmsScriptNode projectNodeNew = nodeList.values().iterator().next();
-                String projectIdNew = projectNodeNew != null ? projectNodeNew.getSysmlId() : projectId;
-                projectId = projectIdNew != null ? projectIdNew : projectId;
-
-                if (nodeList.size() > 1) {
-                    log(Level.WARN, "ProjectId not supplied and multiple projects found for site %s using ProjectId %s", siteName, projectId);
+//            // search JSON for owner that is project
+//            JSONObject json = (JSONObject)req.parseContent();
+//            if (json.has( "elements" )) {
+//                JSONArray elementsJson = json.getJSONArray( "elements" );
+//                for (int ii = 0; ii < elementsJson.length(); ii++) {
+//                    JSONObject elementJson = elementsJson.getJSONObject( ii );
+//                    if (elementJson.has( "owner" )) {
+//                        String owner = elementJson.getString( "owner" );
+//                        if (owner.startsWith( "PROJECT-" )) {
+//                            projectId = owner;
+//                            break;
+//                        }
+//                    }
+//                }
+//            }
+            
+            if (!projectId.startsWith("PROJECT-")) {
+                Map< String, EmsScriptNode > nodeList = searchForElements(NodeUtil.SearchType.TYPE.prefix,
+                                                                        Acm.ACM_PROJECT, false,
+                                                                        workspace, dateTime,
+                                                                        siteName);
+    
+                if (nodeList != null && nodeList.size() > 0) {
+                    EmsScriptNode projectNodeNew = nodeList.values().iterator().next();
+                    String projectIdNew = projectNodeNew != null ? projectNodeNew.getSysmlId() : projectId;
+                    projectId = projectIdNew != null ? projectIdNew : projectId;
+    
+                    if (nodeList.size() > 1) {
+                        log(Level.WARN, "ProjectId not supplied and multiple projects found for site %s using ProjectId %s", siteName, projectId);
+                    }
                 }
             }
         }

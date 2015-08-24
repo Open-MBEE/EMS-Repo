@@ -41,13 +41,19 @@
         "addedElements": [],
         "conflictedElements": [],
         "updatedElements": [{
+            "qualifiedName": "/no_site/no_site_no_project/holding_bin/300",
+            "name": "300",
             "sysmlid": "x",
+            "owner": "holding_bin_no_site_no_project",
             "documentation": "x is x",
-            "specialization": {"value": [{
-                "valueExpression": null,
-                "string": "the x value",
-                "type": "LiteralString"
-            }]},
+            "specialization": {
+                "value": [{
+                    "valueExpression": null,
+                    "string": "the x value",
+                    "type": "LiteralString"
+                }],
+                "type": "Property"
+            },
             "creator": "admin",
         }],
         "qualifiedName": "master/wsA/wsB",

@@ -11,6 +11,7 @@ import gov.nasa.jpl.mbee.util.Timer;
 import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.actions.ActionUtil;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode.EmsVersion;
+
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.Serializable;
@@ -43,6 +44,7 @@ import org.alfresco.model.ContentModel;
 import org.alfresco.repo.domain.node.NodeDAO;
 import org.alfresco.repo.jscript.ScriptNode;
 import org.alfresco.repo.jscript.ScriptVersion;
+import org.alfresco.repo.model.Repository;
 import org.alfresco.repo.node.db.DbNodeServiceImpl;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
@@ -175,17 +177,20 @@ public class NodeUtil {
 
     public static boolean doFullCaching = true;
     public static boolean doSimpleCaching = true;
+    public static boolean doNodeAtTimeCaching = true;
     public static boolean doHeisenCheck = true;
     public static boolean doVersionCaching = false; // turn this off by default
     public static boolean activeVersionCaching = true;
+    public static boolean doVersionHistoryCaching = true; // turn this off by default
     public static boolean doJsonCaching = true;
     public static boolean doJsonDeepCaching = false;
     public static boolean doJsonStringCaching = false;
     public static boolean doPropertyCaching = true;
 
-    public static boolean addEmptyEntriesToFullCache = false;
+    public static boolean addEmptyEntriesToFullCache = false; // this was broken last tried
     public static boolean skipGetNodeRefAtTime = true;
     public static boolean skipWorkspacePermissionCheck = true;
+    public static boolean doOptimisticJustFirst = true;
 
     // global flag that is enabled once heisenbug is seen, so it will email admins the first time heisenbug is seen
     public static boolean heisenbugSeen = false;
@@ -199,7 +204,15 @@ public class NodeUtil {
             Collections.synchronizedMap( new HashMap< String, NodeRef >() );
 
     /**
-     * A cache of alfresco nodes stored as a map from sysml:id to a set of nodes
+     * A cache of alfresco nodes stored as a map from NodeRef and time to node
+     * as determined by {@link #getNodeRefAtTime(NodeRef, Date)}.
+     */
+    public static Map< NodeRef, Map< Long, Object > > nodeAtTimeCache =
+            Collections.synchronizedMap( new HashMap< NodeRef, Map< Long, Object > >() );
+
+    /**
+     * A cache of alfresco nodes stored as a map from query parameters to a set of nodes.
+     * TODO -- list the parameters here
      */
     public static Map< String, Map< String, Map< String, Map< Boolean, Map< Long, Map< Boolean, Map< Boolean, Map< Boolean, Map<String, ArrayList< NodeRef > > > > > > > > > >
         elementCache = Collections.synchronizedMap( new HashMap< String, Map< String, Map< String, Map< Boolean, Map< Long, Map< Boolean, Map< Boolean, Map< Boolean, Map<String, ArrayList< NodeRef > > > > > > > > > >() );
@@ -216,26 +229,31 @@ public class NodeUtil {
      * sometimes tied to an old version.
      */
     protected static Map< String, NodeRef > heisenCache =
-            Collections.synchronizedMap( new HashMap<String, NodeRef>() );
+            Collections.synchronizedMap( new HashMap< String, NodeRef >() );
 
-//  public static HashMap<String, String> versionLabelCache =
-//            new HashMap<String, String>();
+    // public static HashMap<String, String> versionLabelCache =
+    // new HashMap<String, String>();
     public static Map< String, EmsVersion > versionCache =
-            Collections.synchronizedMap( new HashMap<String, EmsVersion>() );
+            Collections.synchronizedMap( new HashMap< String, EmsVersion >() );
     public static Map< NodeRef, NodeRef > frozenNodeCache =
-            Collections.synchronizedMap( new HashMap<NodeRef, NodeRef>() );
+            Collections.synchronizedMap( new HashMap< NodeRef, NodeRef >() );
 
+//    public static Map< NodeRef, Collection< Version > > versionHistoryCache =
+//            Collections.synchronizedMap( new HashMap< NodeRef, Collection< Version > >() );
+    public static Map< NodeRef, VersionHistory > versionHistoryCache =
+            Collections.synchronizedMap( new HashMap< NodeRef, VersionHistory >() );
+    
     // Set< String > filter, boolean isExprOrProp,Date dateTime, boolean isIncludeQualified
-    public static Map< String, Map< Long, Map< Boolean, Map< Set<String>, Map<String, JSONObject > > > > > jsonDeepCache =
-            Collections.synchronizedMap( new HashMap< String, Map< Long, Map< Boolean, Map< Set<String>, Map<String, JSONObject > > > > >() );
+    public static Map< String, Map< Long, Map< Boolean, Map< Set< String >, Map< String, JSONObject > > > > > jsonDeepCache =
+            Collections.synchronizedMap( new HashMap< String, Map< Long, Map< Boolean, Map< Set< String >, Map< String, JSONObject > > > > >() );
     public static Map< String, Map< Long, JSONObject > > jsonCache =
-        Collections.synchronizedMap( new HashMap< String, Map< Long, JSONObject > >() );
+            Collections.synchronizedMap( new HashMap< String, Map< Long, JSONObject > >() );
     public static long jsonCacheHits = 0;
     public static long jsonCacheMisses = 0;
 
     // The json string cache maps JSONObjects to an integer (date in millis) to
     // a string rendering of itself paired with the date.
-    public static Map<JSONObject, Map< Integer, Pair< Date, String > > > jsonStringCache =
+    public static Map< JSONObject, Map< Integer, Pair< Date, String > > > jsonStringCache =
             Collections.synchronizedMap( new HashMap< JSONObject, Map< Integer, Pair< Date, String > > >() );
     public static long jsonStringCacheHits = 0;
     public static long jsonStringCacheMisses = 0;
@@ -243,9 +261,9 @@ public class NodeUtil {
     
     // REVIEW -- TODO -- Should we try and cache the toString() output of the json, too?    
     // REVIEW -- TODO -- This would mean we'd have to concatenate the json
-    // REVIEW -- TODO -- strings ourselves instead of just one big toString() 
+    // REVIEW -- TODO -- strings ourselves instead of just one big toString()
     // REVIEW -- TODO -- on the collection as done currently.
-    
+
     // Set the flag to time events that occur during a model post using the timers
     // below
     public static boolean timeEvents = false;
@@ -257,10 +275,11 @@ public class NodeUtil {
             GenericComparator.instance();
 
     public static ServiceRegistry services = null;
+    public static Repository repository = null;
 
     // needed for Lucene search
     public static StoreRef SEARCH_STORE = null;
-            //new StoreRef( StoreRef.PROTOCOL_WORKSPACE, "SpacesStore" );
+    // new StoreRef( StoreRef.PROTOCOL_WORKSPACE, "SpacesStore" );
 
     public static Object NULL_OBJECT = new Object() {
         @Override
@@ -268,7 +287,64 @@ public class NodeUtil {
             return "NULL_OBJECT";
         }
     };
-    
+
+    public static NodeRef nodeAtTimeCachePut( NodeRef nodeRef, Date date,
+                                              NodeRef refAtTime ) {
+        if ( !doNodeAtTimeCaching || nodeRef == null ) {
+            return null;
+        }
+        // Get an integer for the date, the number if milliseconds since
+        // 1/1/1970.  Zero means now.
+        Long millis = date == null ? 0 : date.getTime();
+        // Get the current time to see if the date is in the future.
+        Long now = null;
+        if ( date != null ) {
+            now = (new Date()).getTime();
+        }
+        // If the date is in the future, set to zero, which means now.
+        // TODO -- Do other caches need to check for this?
+        if ( now != null && millis > now ) millis = (Long)0l;
+        if ( logger.isDebugEnabled() ) logger.debug( "nodeAtTimeCachePut("
+                + nodeRef + ", " + millis
+                + ", " + refAtTime + ")" );
+//        logger.warn( "nodeAtTimeCachePut("
+//                                                     + nodeRef + ", " + millis
+//                                                     + ", " + refAtTime + ")" );
+        Object value = refAtTime;
+        if ( refAtTime == null ) value = NULL_OBJECT;
+        Object oldValue = Utils.put( nodeAtTimeCache, nodeRef, millis, value );
+        if ( oldValue == null ) return null;
+        if ( oldValue == NULL_OBJECT ) return null;
+        if ( oldValue instanceof NodeRef ) {
+            return (NodeRef)oldValue;
+        }
+        logger.error( "Bad value stored in nodeAtTimeCache(" + nodeRef + ", "
+                      + millis + "): " + oldValue );
+        return null;
+    }
+
+    public static Object nodeAtTimeCacheGet( NodeRef nodeRef, Date date ) {
+        if ( !doNodeAtTimeCaching || nodeRef == null ) {
+            return null;
+        }
+        Long millis = date == null ? 0 : date.getTime();
+        if ( logger.isDebugEnabled() ) logger.debug( "nodeAtTimeCacheGet("
+                                                     + nodeRef + ", " + millis
+                                                     + ")" );
+        Object o = Utils.get( nodeAtTimeCache, nodeRef, millis );
+//        logger.warn( "nodeAtTimeCacheGet("
+//                + nodeRef + ", " + millis
+//                + ") = " + o );
+        return o;
+        // if ( o == NULL_OBJECT ) return null;
+        // try {
+        // return (NodeRef)o;
+        // } catch (ClassCastException e) {
+        // e.printStackTrace();
+        // }
+        // return null;
+    }
+
     /**
      * clear or create the cache for correcting bad node refs (that refer to
      * wrong versions)
@@ -830,13 +906,22 @@ public class NodeUtil {
         return SEARCH_STORE;
     }
 
-    public static ApplicationContext getApplicationContext() {
-        String[] contextPath =
-                new String[] { "classpath:alfresco/application-context.xml" };
-        ApplicationContext applicationContext =
-                ApplicationContextHelper.getApplicationContext( contextPath );
-        return applicationContext;
+//    public static ApplicationContext getApplicationContext() {
+//        String[] contextPath =
+//                new String[] { "classpath:alfresco/application-context.xml" };
+//        ApplicationContext applicationContext =
+//                ApplicationContextHelper.getApplicationContext( contextPath );
+//        return applicationContext;
+//    }
+    
+    public static Repository getRepository() {
+        return repository;
+        //return (Repository)getApplicationContext().getBean( "repositoryHelper" );
     }
+    public static void setRepository( Repository repositoryHelper ) {
+        NodeUtil.repository = repositoryHelper;
+    }
+        
 
     public static ServiceRegistry getServices() {
         return getServiceRegistry();
@@ -846,10 +931,11 @@ public class NodeUtil {
     }
 
     public static ServiceRegistry getServiceRegistry() {
-        if ( services == null ) {
-            services = (ServiceRegistry)getApplicationContext().getBean( "ServiceRegistry" );
-        }
         return services;
+//        if ( services == null ) {
+//            services = (ServiceRegistry)getApplicationContext().getBean( "ServiceRegistry" );
+//        }
+//        return services;
     }
 
     public static Collection<EmsScriptNode> luceneSearchElements(String queryPattern ) {
@@ -1037,12 +1123,66 @@ public class NodeUtil {
     }
     
     public static ArrayList< NodeRef >
+    findNodeRefsByType( String specifier, String prefix,
+                        boolean ignoreWorkspace,
+                        WorkspaceNode workspace,
+                        Date dateTime,
+                        boolean justFirst, boolean optimisticJustFirst, boolean exactMatch,
+                        ServiceRegistry services, boolean includeDeleted,
+                        String siteName) {
+        return findNodeRefsByType( specifier, prefix,
+                                   ignoreWorkspace, workspace,
+                                   false, // onlyThisWorkspace
+                                   dateTime, justFirst, optimisticJustFirst, exactMatch, services,
+                                   includeDeleted, siteName );
+    }
+    
+    public static ArrayList< NodeRef >
+    findNodeRefsByType( String specifier, String prefix,
+                        boolean ignoreWorkspace,
+                        WorkspaceNode workspace,
+                        boolean onlyThisWorkspace,
+                        Date dateTime,
+                        boolean justFirst, boolean exactMatch,
+                        ServiceRegistry services, boolean includeDeleted,
+                        String siteName) {
+        // If justFirst == true, then we can try to get
+        // lucky by setting optimisticJustFirst=true and
+        // always quit iterating through results after
+        // the first match. If that single result gets
+        // filtered when there are multiple candidates,
+        // return null instead of an empty list to
+        // signal that calling again with
+        // optimisticJustFirst=false may find other
+        // candidates that pass the filter.
+        boolean optimisticJustFirst = doOptimisticJustFirst && justFirst;
+        ArrayList<NodeRef> refs = findNodeRefsByType( specifier, prefix, ignoreWorkspace, workspace, onlyThisWorkspace, dateTime, justFirst, optimisticJustFirst, exactMatch, services, includeDeleted, siteName );
+        if ( !justFirst || !Utils.isNullOrEmpty( refs ) ) return refs;
+        if ( justFirst && refs == null ) {
+            optimisticJustFirst = false;
+            refs = findNodeRefsByType( specifier, prefix, ignoreWorkspace, workspace, onlyThisWorkspace, dateTime, justFirst, optimisticJustFirst, exactMatch, services, includeDeleted, siteName );
+        }
+        return refs;
+    }
+    
+    public static ArrayList< NodeRef >
             findNodeRefsByType( String specifier, String prefix,
                                 boolean ignoreWorkspace,
                                 WorkspaceNode workspace,
                                 boolean onlyThisWorkspace,
                                 Date dateTime,
-                                boolean justFirst, boolean exactMatch,
+                                boolean justFirst, 
+                                // If justFirst == true, then we can try to get
+                                // lucky by setting optimisticJustFirst=true and
+                                // always quit iterating through results after
+                                // the first match. If that single result gets
+                                // filtered when there are multiple candidates,
+                                // return null instead of an empty list to
+                                // signal that calling again with
+                                // optimisticJustFirst=false may find other
+                                // candidates that pass the filter.
+                                boolean optimisticJustFirst,
+                                boolean exactMatch,
                                 ServiceRegistry services, boolean includeDeleted,
                                 String siteName) {
 
@@ -1060,6 +1200,8 @@ public class NodeUtil {
         ArrayList<NodeRef> nodeRefs = new ArrayList<NodeRef>();
         if ( services == null ) services = getServices();
 
+        optimisticJustFirst = optimisticJustFirst && doOptimisticJustFirst;
+        
         // look in cache first
         boolean useSimpleCache = false;
         boolean useFullCache = false;
@@ -1081,6 +1223,7 @@ public class NodeUtil {
 
         boolean wasCached = false;
         boolean caching = false;
+        boolean hadMultipleCandidates = false;  // need to know whether we had any results before filtering 
         try {
             if ( results != null && ( emptyEntriesInFullCacheOk || !results.isEmpty() ) ) {
                 wasCached = true; // doCaching must be true here
@@ -1093,6 +1236,8 @@ public class NodeUtil {
                 }
             }
             
+            hadMultipleCandidates = !Utils.isNullOrEmpty( results ) && results.size() > 1;
+
             // clean up results
             if ( results != null ) {
                 if ( doHeisenCheck ) {
@@ -1107,12 +1252,15 @@ public class NodeUtil {
                     nodeRefs = results;
                 }
                 else {
+                    hadMultipleCandidates = !Utils.isNullOrEmpty( nodeRefs );
+//logger.warn("filterResults( results=" + results + ") = ");
                     nodeRefs = filterResults( results, specifier, prefix,
                                               usedFullCache || usedSimpleCache,
                                               ignoreWorkspace,
                                               workspace, onlyThisWorkspace,
-                                              dateTime, justFirst, exactMatch,
+                                              dateTime, justFirst, optimisticJustFirst, exactMatch,
                                               services, includeDeleted, siteName );
+//logger.warn("" + nodeRefs);
                     if (logger.isDebugEnabled()) logger.debug("filterResults = " + nodeRefs );
                 }
 
@@ -1123,13 +1271,15 @@ public class NodeUtil {
                                               dateTime, justFirst, exactMatch,
                                               services, includeDeleted, siteName );
                 if (logger.isDebugEnabled()) logger.debug("correctForDeleted nodeRefs = " + nodeRefs );
+//logger.warn("correctForDeleted nodeRefs = " + nodeRefs );
 
             } // ends if (results != null)
 
 
             // Update cache with results
             boolean putInFullCache = false;
-            if ( caching ) {
+            // Don't add to cache if failed to get just the first node optimistically.
+            if ( caching && (!justFirst || !optimisticJustFirst || !Utils.isNullOrEmpty( nodeRefs ) ) ) {
                 CacheUsed cacheUsed =
                         putNodesInCache( nodeRefs, specifier, prefix,
                                          ignoreWorkspace, workspace,
@@ -1144,8 +1294,11 @@ public class NodeUtil {
             // operations so that different users will get the appropriate
             // results without having user-specific entries in the cache.
             nodeRefs = filterForPermissions( nodeRefs, PermissionService.READ,
-                                             putInFullCache );
+                                             justFirst,
+                                             putInFullCache  // copy items if they were added to the full cache 
+                                             );
             if (logger.isDebugEnabled()) logger.debug("filterForPermissions nodeRefs = " + nodeRefs );
+//logger.warn("filterForPermissions nodeRefs = " + nodeRefs );
             
         } finally {
             // Debug output
@@ -1169,22 +1322,38 @@ public class NodeUtil {
         if ( changeUser ) {
             AuthenticationUtil.setRunAsUser( runAsUser );
         }
-
+        
+        // If optimisticJustFirst=true and there were no results, set the result
+        // null instead of an empty list if calling again with
+        // optimisticJustFirst=false may produce
+        // results. This is a signal to the caller.
+        if ( justFirst && optimisticJustFirst && Utils.isNullOrEmpty(nodeRefs) && hadMultipleCandidates ) {
+            nodeRefs = null;
+        }
         return nodeRefs;
     }
 
     public static ArrayList< NodeRef >
             filterForPermissions( ArrayList< NodeRef > nodeRefs,
-                                  String permissionType, boolean copyIfModified ) {
+                                  String permissionType, boolean justFirst, boolean copyIfModified ) {
         if (!Utils.isNullOrEmpty( nodeRefs )) {
             ArrayList<NodeRef> noReadPermissions = null;
+            boolean gotOne = false;
             for ( NodeRef r : nodeRefs ) {
                 EmsScriptNode esn = new EmsScriptNode( r, getServices() );
-                if ( !esn.checkPermissions( PermissionService.READ ) ) {
+                // If just getting the first and have already got one, then can go ahead and remove the rest.
+                if ( (justFirst && gotOne) || !esn.checkPermissions( PermissionService.READ ) ) {
                     if ( noReadPermissions == null ) {
                         noReadPermissions = new ArrayList< NodeRef >();
                     }
                     noReadPermissions.add( r );
+                } else {
+                    gotOne = true;
+                    // If not changing the passed in list, and we're just
+                    // getting the first, we can stop here.
+                    if ( justFirst && copyIfModified ) {
+                        return Utils.newList( r );
+                    }
                 }
             }
             if ( !Utils.isNullOrEmpty( noReadPermissions )) {
@@ -1264,7 +1433,9 @@ public class NodeUtil {
                                                       WorkspaceNode workspace,
                                                       boolean onlyThisWorkspace,
                                                       Date dateTime,
-                                                      boolean justFirst, boolean exactMatch,
+                                                      boolean justFirst,
+                                                      boolean optimisticJustFirst,
+                                                      boolean exactMatch,
                                                       ServiceRegistry services, boolean includeDeleted,
                                                       String siteName) {
         ArrayList<NodeRef> nodeRefs = new ArrayList<NodeRef>();
@@ -1342,7 +1513,8 @@ public class NodeUtil {
                     }
                 }
                 // Check that it is from the desired site:
-                if (siteName != null && !siteName.equals( esn.getSiteName(dateTime, workspace) )) {
+                // MBEE-260: sites are case insensitive per Alfresco file naming conventions, so do comparison ignoring case
+                if (siteName != null && !siteName.equalsIgnoreCase( esn.getSiteName(dateTime, workspace) )) {
                     match = false;
                 }
                 if ( !match ) {
@@ -1369,6 +1541,8 @@ public class NodeUtil {
                     // break out of the loop when we find it. There are many
                     // conditions under which we may not be able to do this.
                     if ( justFirst &&
+                            //(optimisticJustFirst || (
+                            
                          // This isn't necessary since we check earlier for
                          // this. Just being robust by re-checking.
                          scriptNodeExists( lowest ) &&
@@ -1387,7 +1561,7 @@ public class NodeUtil {
                          // workspace unless we found one that is only in the
                          // target workspace.
                          ( !exists( workspace ) ||
-                                    workspace.equals( getWorkspace( nodeRef ) ) ) ) {
+                                    workspace.equals( getWorkspace( nodeRef ) ) ) ) {// ) ) {
                         break;
                     }
                 }
@@ -1397,10 +1571,15 @@ public class NodeUtil {
             }
         } // ends else for
 
+        
+        // correctForWorkspaceCopyTime() can be slow when it gets version
+        // history, so we want to try and avoid doing this for more than one
+        // node if justFirst = true.  In the case that we're just getting  . . .
         nodeRefs = correctForWorkspaceCopyTime( nodeRefs, specifier, prefix,
                                                 ignoreWorkspace,
                                                 workspace, onlyThisWorkspace,
-                                                dateTime, justFirst, exactMatch,
+                                                dateTime, justFirst, optimisticJustFirst,
+                                                exactMatch,
                                                 services, includeDeleted, siteName );
 
         return nodeRefs;
@@ -1412,7 +1591,8 @@ public class NodeUtil {
                                                                     WorkspaceNode workspace,
                                                                     boolean onlyThisWorkspace,
                                                                     Date dateTime,
-                                                                    boolean justFirst, boolean exactMatch,
+                                                                    boolean justFirst, boolean optimisticJustFirst,
+                                                                    boolean exactMatch,
                                                                     ServiceRegistry services, boolean includeDeleted,
                                                                     String siteName) {
         // If the workspace is copied at a time point (as opposed to
@@ -1430,13 +1610,16 @@ public class NodeUtil {
             WorkspaceNode resultWs = getWorkspace( r );
             EmsScriptNode esn;
             // If a native member of the workspace, no need to correct.
+            boolean added = false;
             if ( workspace.equals( resultWs ) ) {
                 correctedRefs.add( r );
+                added = true;
             } else {
                 esn = new EmsScriptNode( r, getServices() );
                 Date copyTime = workspace.getCopyTime( esn.getWorkspace() );
                 if ( copyTime == null || ( dateTime != null && !copyTime.before( dateTime ) ) ) {
                     correctedRefs.add( r );
+                    added = true;
                 } else {
                     Date lastModified = esn.getLastModified( dateTime );
                     // Check if modified after the copyTime.
@@ -1446,6 +1629,7 @@ public class NodeUtil {
                             Debug.error( "ERROR!  Should never have null modified date!" );
                         }
                         correctedRefs.add( r );
+                        added = true;
                     } else {
                         // Replace with the versioned ref at the copy time
                         ArrayList< NodeRef > refs =
@@ -1454,6 +1638,7 @@ public class NodeUtil {
                                                     ignoreWorkspace,
                                                     resultWs, copyTime,
                                                     true, // justOne
+                                                    optimisticJustFirst,
                                                     exactMatch, services,
                                                     includeDeleted,
                                                     siteName );
@@ -1461,6 +1646,7 @@ public class NodeUtil {
                             // only asked for one
                             NodeRef newRef = refs.get( 0 );
                             correctedRefs.add( newRef );
+                            added = true;
                         }
 //                            r = getNodeRefAtTime( r, resultWs, copyTime );
 //                            if ( r != null ) {
@@ -1474,6 +1660,9 @@ public class NodeUtil {
 //                            correctedRefs.add( r );
 //                        }
                 }
+            }
+            if ( added && justFirst && optimisticJustFirst ) {
+                break;
             }
         }
         nodeRefs = correctedRefs;
@@ -1823,6 +2012,8 @@ public class NodeUtil {
                     //usedFullCache = true;
                     cacheUsed = CacheUsed.FULL;
                 }
+            } else {
+                cacheResults.isExactMatch();
             }
         }
         cacheResults.cachedUsed = cacheUsed;
@@ -2847,100 +3038,183 @@ public class NodeUtil {
      *            some version of the NodeRef
      * @param dateTime
      *            the date/time, specifying the version
-     * @return the version of the NodeRef that was the latest version at the specified time, or if before any version
+     * @return the version of the NodeRef that was the latest version at the
+     *         specified time, or if before any version
      */
-    public static NodeRef getNodeRefAtTime( NodeRef ref,
-                                            Date dateTime ) {
-        if (Debug.isOn())  Debug.outln("getNodeRefAtTime( " + ref + ", " + dateTime + " )" );
+    public static NodeRef getNodeRefAtTime( NodeRef ref, Date dateTime ) {
+        if ( Debug.isOn() ) Debug.outln( "getNodeRefAtTime( " + ref + ", "
+                                         + dateTime + " )" );
         if ( !NodeUtil.exists( ref ) && !NodeUtil.isDeleted( ref ) ) {
             return null;
         }
-        if (ref == null || dateTime == null ) {
+        if ( ref == null || dateTime == null ) {
             return ref;
         }
-        VersionHistory history = getServices().getVersionService().getVersionHistory( ref );
-        if ( history == null ) {
-                // Versioning doesn't make versions until the first save...
-                EmsScriptNode node = new EmsScriptNode(ref, services);
-                Date createdTime = (Date)node.getProperty("cm:created");
-                if ( dateTime != null && createdTime != null && dateTime.compareTo( createdTime ) < 0 ) {
-                if (Debug.isOn())  Debug.outln( "no history! dateTime " + dateTime
-                                    + " before created " + createdTime );
-                    return null;
+
+        // check cache
+        if ( doNodeAtTimeCaching ) {
+            Object o = nodeAtTimeCacheGet( ref, dateTime );
+            if ( o == NULL_OBJECT ) return null;
+            if ( o != null ) {
+                try {
+                    return (NodeRef)o;
+                } catch ( ClassCastException e ) {
+                    e.printStackTrace();
                 }
-            if (Debug.isOn() && createdTime != null)  Debug.outln( "no history! created " + createdTime );
-                return ref;
+            }
+        }
+
+        EmsScriptNode esn = new EmsScriptNode(ref, services);
+
+        //logger.warn( "getting history for " + esn.getSysmlId() + " - " + esn.getSysmlName() + " at time " + dateTime );
+        
+        // Check cache for version history
+        //Collection< Version > history = versionHistoryCache.get( ref );
+        VersionHistory history = null;
+        if ( doVersionHistoryCaching ) history = versionHistoryCache.get( ref );
+        if ( history != null ) {
+            // Check if the history is potentially out of date with respect to the
+            // date passed in; i.e. check if the date is after the latest in the history.
+            Version latest = history.getHeadVersion();
+            if ( latest == null || latest.getFrozenModifiedDate() == null
+                 || latest.getFrozenModifiedDate().before( dateTime ) ) {
+                history = null;
+            }
+        }
+        if ( history == null ) {
+            //VersionHistory 
+            history = getServices().getVersionService().getVersionHistory( ref );
+            if ( doVersionHistoryCaching ) versionHistoryCache.put( ref, history );
+        }
+
+        //logger.warn( "got history for " + esn.getSysmlId() + " - " + esn.getSysmlName() + " at time " + dateTime );
+        
+        if ( history == null ) {
+            // Versioning doesn't make versions until the first save...
+            Date createdTime = (Date)esn.getProperty("cm:created");
+            if ( dateTime != null && createdTime != null && dateTime.compareTo( createdTime ) < 0 ) {
+                if (Debug.isOn())  Debug.outln( "no history! dateTime " + dateTime
+                                                + " before created " + createdTime );
+                if ( doNodeAtTimeCaching ) {
+                    nodeAtTimeCachePut( ref, dateTime, null );
+                }
+                return null;
+            }
+            if ( Debug.isOn() && createdTime != null ) Debug.outln( "no history! created "
+                                                                    + createdTime );
+            // Can't cache until history is created. :-(
+            // On second thought, let's cache if this node is from the version store :-) 
+            //if ( doNodeAtTimeCaching ) {
+                //if ( ref.getStoreRef() != StoreRef.STORE_REF_WORKSPACE_SPACESSTORE ) {                    
+                    //nodeAtTimeCachePut( ref, dateTime, null );
+                //}
+            //}
+            return ref;
         }
 
         Collection< Version > versions = history.getAllVersions();
-        Vector<Version> vv = new Vector<Version>( versions );
-        if (Debug.isOn())  Debug.outln("versions = " + vv );
+        Vector< Version > vv = new Vector< Version >( versions );
+        if ( Debug.isOn() ) Debug.outln( "versions = " + vv );
         if ( Utils.isNullOrEmpty( vv ) ) {
             // TODO - throw error?!
+            // Don't cache an error.
             return null;
         }
         int index = Collections.binarySearch( vv, dateTime, versionLowerBoundComparator );
-        if (Debug.isOn())  Debug.outln( "binary search returns index " + index );
+        if ( Debug.isOn() ) Debug.outln( "binary search returns index " + index );
         Version version = null;
         if ( index < 0 ) {
             // search returned index = -(lowerBound+1), so lowerbound = -index-1
             index = -index - 1;
             if (Debug.isOn())  Debug.outln( "index converted to lowerbound " + index );
-//            // But, since the order is newest to oldest, we want the one after the lowerbound
-//            if ( index >= 0 && index < vv.size()-1 ) {
-//                index = index + 1;
-//                if (Debug.isOn())  Debug.outln( "index converted to upperbound " + index );
-//            }
         }
-        if ( index < 0 ) {
+        // This is to work around what looks like a bug in Java's binarysearch.
+        if ( index < 0 ) {//|| index == vv.size() ) {
             version = vv.get( 0 );
             if ( version != null ) {
                 Date d = version.getFrozenModifiedDate();
                 if (Debug.isOn())  Debug.outln( "first frozen modified date " + d );
                 if ( d != null && d.after( dateTime ) ) {
+//                    // The date is before the first version, so return null;
+//                    if ( true ) {
+//                        if ( doNodeAtTimeCaching ) {
+//                            nodeAtTimeCachePut( ref, dateTime, null );
+//                        }
+//                        return null;
+//                    }
                     NodeRef fnr = version.getFrozenStateNodeRef();
                     if (Debug.isOn())  Debug.outln( "returning first frozen node ref " + fnr );
+                    if ( doNodeAtTimeCaching ) {
+                        nodeAtTimeCachePut( ref, dateTime, fnr );
+                    }
                     return fnr;
                 }
             }
+            if ( index == vv.size() ) {
+                // In this case the date may be later than all
+                // versions, in which case returning null seems to work at
+                // present.
+                // TODO -- Don't we need to include the current SpacesStore live
+                // node ref with it's modified time since there will be no
+                // version for it?
+                if ( Debug.isOn() ) Debug.outln( "Date is later than all versions--not sure if it makes sense to return the last version or refer to the latest in memory.  Getting the " );
+                // Don't cache an error.
+                return null;
+            }
             // TODO -- throw error?!
-            if (Debug.isOn())  Debug.outln( "version is null; returning null!" );
+            if ( Debug.isOn() ) Debug.outln( "version is null; returning null!" );
+            // Don't cache an error.
             return null;
+//        } else if ( index == vv.size() ) {
+//            // Time is later than all versions, so get the latest.
+//            // The line below is commented out because binarysearch returns the
+//            // wrong index for cases where the date is earlier than all
+//            // versions.
+//            //            version = vv.get( index - 1 );
+//            // TODO -- don't we need to include the current SpacesStore live
+//            // node ref with it's modified time since there will be no
+//            // version for it?
+//            // For now, returning null seems to help.
+//            return null;
         } else if ( index >= vv.size() ) {
-            if (Debug.isOn())  Debug.outln( "index is too large, outside bounds!" );
+            if ( Debug.isOn() ) Debug.outln( "index is too large, outside bounds!" );
             // TODO -- throw error?!
+            // Don't cache an error.
             return null;
         } else {
             version = vv.get( index );
         }
         if ( Debug.isOn() ) {
-            if (Debug.isOn())  Debug.outln( "picking version " + version );
+            if ( Debug.isOn() ) Debug.outln( "picking version " + version );
             if (Debug.isOn())  Debug.outln( "version properties " + version.getVersionProperties() );
             String versionLabel = version.getVersionLabel();
             EmsScriptNode emsNode = new EmsScriptNode( ref, getServices() );
             ScriptVersion scriptVersion = emsNode.getVersion( versionLabel );
             if (Debug.isOn())  Debug.outln( "scriptVersion " + scriptVersion );
-            ScriptNode node = scriptVersion.getNode();
-            if (Debug.isOn())  Debug.outln( "script node " + node );
+            ScriptNode scriptVersionNode = scriptVersion.getNode();
+            if (Debug.isOn())  Debug.outln( "script node " + scriptVersionNode );
             //can't get script node properties--generates exception
             //if (Debug.isOn())  Debug.outln( "script node properties " + node.getProperties() );
             NodeRef scriptVersionNodeRef = scriptVersion.getNodeRef();
-            if (Debug.isOn())  Debug.outln( "ScriptVersion node ref "
+            if ( Debug.isOn() ) Debug.outln( "ScriptVersion node ref "
                                              + scriptVersionNodeRef );
             NodeRef vnr = version.getVersionedNodeRef();
-            if (Debug.isOn())  Debug.outln( "versioned node ref " + vnr );
+            if ( Debug.isOn() ) Debug.outln( "versioned node ref " + vnr );
         }
         NodeRef fnr = version.getFrozenStateNodeRef();
-        if (Debug.isOn())  Debug.outln( "frozen node ref " + fnr );
-        if (Debug.isOn())  Debug.outln( "frozen node ref properties: "
+        if ( Debug.isOn() ) Debug.outln( "frozen node ref " + fnr );
+        if ( Debug.isOn() ) Debug.outln( "frozen node ref properties: "
                                          + getServices().getNodeService()
                                                         .getProperties( fnr ) );
-        if (Debug.isOn())  Debug.outln( "frozen node ref "
-                + getServices().getNodeService()
-                               .getProperties( fnr ) );
+        if ( Debug.isOn() ) Debug.outln( "frozen node ref "
+                                         + getServices().getNodeService()
+                                                        .getProperties( fnr ) );
 
-        if (Debug.isOn())  Debug.outln( "returning frozen node ref " + fnr );
+        if ( Debug.isOn() ) Debug.outln( "returning frozen node ref " + fnr );
 
+        if ( doNodeAtTimeCaching ) {
+            nodeAtTimeCachePut( ref, dateTime, fnr );
+        }
         return fnr;
     }
 
@@ -3028,12 +3302,22 @@ public class NodeUtil {
 //      }
     }
 
-    public static NodeRef getNodeRefFromNodeId(String id) {
-        List<NodeRef> nodeRefs = NodeRef.getNodeRefs("workspace://SpacesStore/" + id);
+    public static NodeRef getNodeRefFromNodeId(String store, String id) {
+        List<NodeRef> nodeRefs = NodeRef.getNodeRefs(store + id);
         if (nodeRefs.size() > 0) {
-            return nodeRefs.get( 0 );
+            NodeRef ref = nodeRefs.get( 0 );
+            if (ref != null) {
+                EmsScriptNode node = new EmsScriptNode(ref, services);
+                if (node.scriptNodeExists()) {
+                    return ref;
+                }
+            }
         }
         return null;
+    }
+    
+    public static NodeRef getNodeRefFromNodeId(String id) {
+        return getNodeRefFromNodeId("workspace://SpacesStore/", id);
     }
 
     public static EmsScriptNode getVersionAtTime( EmsScriptNode element,
@@ -3763,5 +4047,9 @@ public class NodeUtil {
      */
     public static void concurrencyTest() {
         
+    }
+    
+    public static String getHostname() {
+        return services.getSysAdminParams().getAlfrescoHost();
     }
 }

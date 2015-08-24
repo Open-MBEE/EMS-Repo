@@ -5,6 +5,7 @@ import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.view_repo.sysml.View;
 import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
+import gov.nasa.jpl.view_repo.util.EmsTransaction;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 
@@ -13,7 +14,9 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.URL;
+import java.net.URLDecoder;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -74,7 +77,11 @@ public class FullDocPost extends AbstractJavaWebScript {
     protected String zipPath;
     protected Date time;
     protected JSONArray view2view;
+    protected String timeTagName;
 //    protected Queue queue;
+    
+    // For transactions:
+    private String storeName, nodeId, filename;
 	
 	public FullDocPost(){
 		super();
@@ -184,66 +191,81 @@ public class FullDocPost extends AbstractJavaWebScript {
         }
     }
     
-    public void downloadHtml(String workspaceName, String site, String docId, String timestamp) throws Exception {
-    	RuntimeExec exec = new RuntimeExec();
-    	Date d = TimeUtils.dateFromTimestamp( timestamp );
-    	this.setTime(d);
-    	
-		HostnameGet alfresco = new HostnameGet(this.repository, this.services);
-		String protocol = alfresco.getAlfrescoProtocol();
-		String hostnameAndPort = this.getAlfrescoHost();
-		String preRendererUrl = "http://localhost";
-		int preRendererPort = 3000;
-		String mmsAdminCredential = getHeadlessUserCredential();
-		List<String> command = new ArrayList<String>();
-		command.add(this.phantomJSPath);
-		command.add(this.phantomJSScriptPath);
-		command.add(String.format("%s:%d/%s://%s@%s/mmsFullDoc.html?ws=%s&site=%s&docId=%s&time=%s",
-				preRendererUrl,preRendererPort, protocol, mmsAdminCredential, hostnameAndPort, workspaceName, site, docId, timestamp));
-		command.add(String.format("%s/%s_NodeJS.html", this.fullDocDir, this.fullDocId));
-		exec.setCommand(list2Array(command));
-		System.out.println("NodeJS command: " + command);
-		int attempts = 0;
-		boolean isSuccess = false;
-		while(!isSuccess && attempts < 3){
-			ExecutionResult result = exec.execute();
-			if (!result.getSuccess()) {
-				String msg = String.format("Failed to download full doc HTML for %s. Exit code: %d. Attempt #%d.", this.fullDocId, result.getExitValue(), attempts+1);
-				log(Level.WARN, msg);
-			}
-			else{ 
-				if(Files.exists(Paths.get(this.htmlPath))) isSuccess = true;
-			}
-			attempts++;
-		}
-		
-		if(!isSuccess){
-			String msg = String.format("Failed to download full doc HTML for %s.", this.fullDocId);
-			log(Level.WARN, msg);
-			try{
-				log(Level.INFO, "Start downloading HTML views...");
-				buildHtmlFromViews(workspaceName, site, docId, timestamp);
-			}
-			catch(Exception ex){
-				throw ex;
-			}
-		}
-    	
-        try{
-			tableToCSV();
-		}
-		catch(Exception ex){
-			throw new Exception("Failed to convert tables to CSV files!", ex);
-		}
+    private void downloadHtmlImpl(String workspaceName, String site, String docId, String timestamp, String tagTitle) throws Exception {
+        RuntimeExec exec = new RuntimeExec();
+        Date d = TimeUtils.dateFromTimestamp( timestamp );
+        this.setTime(d);
+        
+        this.setTimeTagName(tagTitle);
+        
+        HostnameGet alfresco = new HostnameGet(this.repository, this.services);
+        String protocol = alfresco.getAlfrescoProtocol();
+        String hostnameAndPort = this.getAlfrescoHost();
+        String preRendererUrl = "http://localhost";
+        int preRendererPort = 3000;
+        String mmsAdminCredential = getHeadlessUserCredential();
+        List<String> command = new ArrayList<String>();
+        command.add(this.phantomJSPath);
+        command.add(this.phantomJSScriptPath);
+        command.add(String.format("%s:%d/%s://%s@%s/mmsFullDoc.html?ws=%s&site=%s&docId=%s&time=%s",
+                preRendererUrl,preRendererPort, protocol, mmsAdminCredential, hostnameAndPort, workspaceName, site, docId, timestamp));
+        command.add(String.format("%s/%s_NodeJS.html", this.fullDocDir, this.fullDocId));
+        exec.setCommand(list2Array(command));
+        System.out.println("NodeJS command: " + command);
+        int attempts = 0;
+        boolean isSuccess = false;
+        while(!isSuccess && attempts < 3){
+            ExecutionResult result = exec.execute();
+            if (!result.getSuccess()) {
+                String msg = String.format("Failed to download full doc HTML for %s. Exit code: %d. Attempt #%d.", this.fullDocId, result.getExitValue(), attempts+1);
+                log(Level.WARN, msg);
+            }
+            else{ 
+                if(Files.exists(Paths.get(this.htmlPath))) isSuccess = true;
+            }
+            attempts++;
+        }
+        
+        if(!isSuccess){
+            String msg = String.format("Failed to download full doc HTML for %s.", this.fullDocId);
+            log(Level.WARN, msg);
+            try{
+                log(Level.INFO, "Start downloading HTML views...");
+                buildHtmlFromViews(workspaceName, site, docId, timestamp);
+            }
+            catch(Exception ex){
+                throw ex;
+            }
+        }
         
         try{
-            FileUtils.copyDirectory(new File(this.veCssDir), new File(Paths.get(this.fullDocDir, "css").toString()));
-        	handleEmbeddedImage();
-        	handleRelativeHyperlinks();
+            tableToCSV();
         }
         catch(Exception ex){
-        	throw ex;
+            throw new Exception("Failed to convert tables to CSV files!", ex);
         }
+        
+    }
+    
+    public void downloadHtml(final String workspaceName, final String site, final String docId, final String timestamp, final String tagTitle) throws Exception {
+    	
+        new EmsTransaction(services, response, new Status()) {
+            @Override
+            public void run() throws Exception {
+                downloadHtmlImpl(workspaceName, site, docId, timestamp, tagTitle);
+            }
+        };
+        
+        // handleEmbeddedImage() Will have its own transactions, handleRelativeHyperlinks() doesnt need it:
+        try{
+            FileUtils.copyDirectory(new File(this.veCssDir), new File(Paths.get(this.fullDocDir, "css").toString()));
+            handleEmbeddedImage();
+            handleRelativeHyperlinks();
+        }
+        catch(Exception ex){
+            throw ex;
+        }
+        
     }
     
     private void downloadView(WorkspaceNode workspace, String site, String docId, String viewId, String section, String timestamp) throws Exception{
@@ -284,10 +306,10 @@ public class FullDocPost extends AbstractJavaWebScript {
 		List<String> command = new ArrayList<String>();
 		command.add(this.phantomJSPath);
 		command.add(this.phantomJSScriptPath);
-//		command.add(String.format("%s:%d/%s://%s@%s/mmsFullDoc.html#/workspaces/%s/sites/%s/documents/%s/views/%s",
-//				preRendererUrl,preRendererPort, protocol, mmsAdminCredential, hostnameAndPort, workspace.getName(), site, docId, viewId));
+		// command.add(String.format("%s:%d/%s://%s@%s/mmsFullDoc.html#/workspaces/%s/sites/%s/documents/%s/views/%s",
+		// preRendererUrl,preRendererPort, protocol, mmsAdminCredential, hostnameAndPort, workspace.getName(), site, docId, viewId));
 		command.add(String.format("%s:%d/%s://%s@%s/mmsFullDoc.html?ws=%s&site=%s&docId=%s&viewId=%s&section=%s&time=%s",
-				preRendererUrl,preRendererPort, protocol, mmsAdminCredential, hostnameAndPort, workspace.getName(), site, docId, viewId, section, timestamp));
+		preRendererUrl,preRendererPort, protocol, mmsAdminCredential, hostnameAndPort, workspace.getName(), site, docId, viewId, section, timestamp));
 		command.add(filePath);
 		exec.setCommand(list2Array(command));
 		System.out.println("NodeJS command: " + command);
@@ -386,6 +408,10 @@ public class FullDocPost extends AbstractJavaWebScript {
         return this.time;
     }
     //NEED FOR COVER
+    private String getTimeTagName(){
+        return this.timeTagName;
+    }
+    //NEED FOR COVER
     public void createCoverPage(String coverDestination) throws IOException{
         if(!Files.exists(Paths.get(this.htmlPath))) return;
 
@@ -408,25 +434,28 @@ public class FullDocPost extends AbstractJavaWebScript {
         String jplName = "Jet Propulsion Laboratory";
         String caltechName = "California Institute of Technology";
         Date date = this.getTime();
+        String tag = this.getTimeTagName();
                             
-        String coverHtml = "<html>"
+        String coverHtml = //"<!DOCTYPE html>" //seems to not print formatted if keep the DOCTYPE
+        		//+ 
+        		"<html>"
                 + "<head><title>" + coverHeader + "</title></head>"
                 + "<body style= \"width:100%; height:100%;\">"
                     + "<div style=\"top:10%; left:10%; right: 10%; position:absolute;\">"
                     + "<center><h2>" + coverHeader + "</h2></center>"
                     +"</div>"
                     + "<div style=\"top:60%; left:10%; right:10%; position:absolute;\">"
-                    + "<div>" + legalNotice + "<br>"
+                    + "<div>" + legalNotice + "<br/>"
                     +   "<i>" + pageLegalNotice + "</i></div>"
                     +"</div>"                       
                     + "<div style=\"top:70%; left:10%; position:absolute;\">"
-                    +   "<div>" + date + "</div>"
-                    +"</div>"
+                    +   "<div>" + date + "<br/>" + tag +  "</div>" //"<div>" + date + "</div>" 
                     +"</div>"
                     + "<div style=\"top:85%; left:10%; position:absolute;\">"
                     + "<div>"
                     + "<img src=\"http://div27.jpl.nasa.gov/2740/files/logos/jpl_logo%28220x67%29.jpg\" alt=\"JPL Logo\"/>"
                     + "<p style=\"color:#B6B6B4\">" + jplName + "<br/><i>" + caltechName + "</i></p>" //did separate jpl/caltech label to always have the stamp on pdf
+                    + "</div>"
                     + "</div>"
                 + "</body>"
                 + "</html>";
@@ -496,7 +525,7 @@ public class FullDocPost extends AbstractJavaWebScript {
 
     	Elements images = document.getElementsByTag("img");
 
-    	for(Element image : images){
+    	for(final Element image : images){
     		String src = image.attr("src");
     		if(src == null) continue;
     		try{
@@ -518,28 +547,45 @@ public class FullDocPost extends AbstractJavaWebScript {
                 	src = src.toLowerCase();
                 	String embedHostname = String.format("%s://%s", url.getProtocol(), url.getHost());
                 	String alfrescoContext = "workspace/SpacesStore/";	//this.services.getSysAdminParams().getAlfrescoContext();
+                    String versionStore = "versionStore/version2Store/";
 
                 	// is image local or remote resource?
-                	if(embedHostname.compareToIgnoreCase(hostname)==0 || src.startsWith("/alfresco/") || src.contains(alfrescoContext.toLowerCase())){
+                	if(embedHostname.compareToIgnoreCase(hostname)==0 || src.startsWith("/alfresco/") || src.contains(alfrescoContext.toLowerCase()) || src.contains(versionStore.toLowerCase())){
                 		//local server image > generate image tags
                 		String filePath = url.getFile();
                 		if(filePath == null || filePath.isEmpty()) continue;
 
-                		String nodeId = null;
+                		nodeId = null;
+                		storeName = null;
                 		if(filePath.contains(alfrescoContext)){
                 			//filePath = "alfresco/d/d/" + filePath.substring(filePath.indexOf(alfrescoContext));
                 			nodeId = filePath.substring(filePath.indexOf(alfrescoContext) + alfrescoContext.length());
                 			nodeId = nodeId.substring(0, nodeId.indexOf("/"));
+                			storeName = "workspace://SpacesStore/";
                 		}
+                    if(filePath.contains(versionStore)){
+                        //filePath = "alfresco/d/d/" + filePath.substring(filePath.indexOf(alfrescoContext));
+                        nodeId = filePath.substring(filePath.indexOf(versionStore) + versionStore.length());
+                        nodeId = nodeId.substring(0, nodeId.indexOf("/"));
+                        storeName = "versionStore://version2Store/";
+                    }
                 		if(nodeId == null || nodeId.isEmpty()) continue;
 
-                		String filename = filePath.substring(filePath.lastIndexOf("/") + 1);
+                		filename = filePath.substring(filePath.lastIndexOf("/") + 1);
                 		try{
-                			DBImage dbImage = retrieveEmbeddedImage(nodeId, filename, null, null);
+                		    // This is the trouble area, where each image needs its own transaction:
+                		    new EmsTransaction(services, response, new Status()) {
+                	            @Override
+                	            public void run() throws Exception {
+                                    DBImage dbImage = retrieveEmbeddedImage(storeName, nodeId, filename, null, null);
+                                    if (dbImage != null) {
+                                        image.attr("src", dbImage.getFilePath());
+                                    }
+                	            }
+                	        };
 //	                		String inlineImageTag = buildInlineImageTag(nodeId, dbImage);
 //	                		image.before(inlineImageTag);
 //	                		image.remove();
-            				image.attr("src", dbImage.getFilePath());
                 		}
                 		catch(Exception ex){
                 			//in case it's not a local resource > generate hyperlink instead
@@ -616,21 +662,33 @@ public class FullDocPost extends AbstractJavaWebScript {
     	}
     }
     
-    public void html2pdf()  throws Exception {
+    public void html2pdf(EmsScriptNode snapshotFolder, EmsScriptNode snapshotNode)  throws Exception {
+    	if(!Files.exists(Paths.get(this.htmlPath))) throw new Exception(String.format("Failed to transform HTML to PDF. Expected %s HTML file but it does not exist!", this.htmlPath));
+    	
     	RuntimeExec exec = new RuntimeExec();
 		exec.setProcessDirectory(this.fullDocGenDir);
 		createCoverPage(this.coverPath); //NEED FOR COVER
+		String tagName = this.getTimeTagName();
 
 		List<String> command = new ArrayList<String>();
 		command.add("wkhtmltopdf");
 		command.add("-q");
+		command.add("--header-line");
+		command.add("--header-font-size");
+		command.add("8");
+		command.add("--header-font-name");
+		command.add("\"Times New Roman\"");
+		command.add("--header-right");
+		command.add(tagName);
 		command.add("--footer-line");
 		command.add("--footer-font-size");
 		command.add("8");
 		command.add("--footer-font-name");
 		command.add("\"Times New Roman\"");
+//		command.add("--footer-left");
+//		command.add(tagName.substring(0,10));
 		command.add("--footer-center");
-		command.add("Paper copies of this document may not be current and should not be relied on for official purposes. JPL/Caltech proprietary. Not for public release.");
+		command.add("Paper copies of this document may not be current and should not be relied on for official purposes. JPL/Caltech proprietary. Not for public release.");  
 		command.add("--footer-right");
 		command.add("[page]");
         command.add("cover"); //NEED FOR COVER
@@ -650,11 +708,14 @@ public class FullDocPost extends AbstractJavaWebScript {
 		System.out.println("htmltopdf command: " + command);
 		exec.setCommand(list2Array(command));
 		ExecutionResult result = exec.execute();
-		if(!result.getSuccess() && result.getExitValue()!=1){
+		if(!Files.exists(Paths.get(this.pdfPath)))
+		{
 			String msg = String.format("Failed to transform HTML file '%s' to PDF. Exit value: %d", this.htmlPath, result.getExitValue());
 			log(Level.ERROR, msg);
 			throw new Exception(msg);
-		}	
+		}
+		
+		this.savePdfToRepo(snapshotFolder, snapshotNode);
     }
 
 	/**
@@ -666,11 +727,13 @@ public class FullDocPost extends AbstractJavaWebScript {
 		return Arrays.copyOf(list.toArray(), list.toArray().length, String[].class);
 	}
     
-    private DBImage retrieveEmbeddedImage(String nodeId, String imgName, WorkspaceNode workspace, Object timestamp){
-		NodeRef imgNodeRef = NodeUtil.getNodeRefFromNodeId(nodeId);
+    private DBImage retrieveEmbeddedImage(String storeName, String nodeId, String imgName, WorkspaceNode workspace, Object timestamp) throws UnsupportedEncodingException{
+		NodeRef imgNodeRef = NodeUtil.getNodeRefFromNodeId(storeName, nodeId);
 		if(imgNodeRef == null) return null;
 
+		imgName = URLDecoder.decode(imgName, "UTF-8");
 		String imgFilename = this.imageDirName + File.separator + imgName;
+		
 		File imgFile = new File(imgFilename);
 		ContentReader imgReader;
 		imgReader = this.services.getContentService().getReader(imgNodeRef, ContentModel.PROP_CONTENT);
@@ -778,7 +841,11 @@ public class FullDocPost extends AbstractJavaWebScript {
 //			String zipPath = this.zipHtml();
 //			if(zipPath == null || zipPath.isEmpty()) throw new Exception("Failed to zip files and resources!");
 			this.zipHtml();
+			EmsScriptNode nodePrev = snapshotFolder.childByNamePath(filename);
+			if(nodePrev != null && nodePrev.exists()) nodePrev.remove();
+			
 			EmsScriptNode node = snapshotFolder.createNode(filename, "cm:content");
+			
 			if(node == null) throw new Exception("Failed to create zip repository node!");
 
 			if(!this.saveFileToRepo(node, MimetypeMap.MIMETYPE_ZIP, this.zipPath)) throw new Exception("Failed to save zip artifact to repository!");
@@ -823,6 +890,10 @@ public class FullDocPost extends AbstractJavaWebScript {
 	//NEED FOR COVER
     private void setTime(Date t){
         this.time = t;
+    }
+    
+    private void setTimeTagName(String c){
+        this.timeTagName = c;
     }
     
     private void tableToCSV() throws Exception{

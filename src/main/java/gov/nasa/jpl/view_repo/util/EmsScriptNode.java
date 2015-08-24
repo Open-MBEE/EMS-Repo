@@ -35,10 +35,13 @@ import gov.nasa.jpl.mbee.util.ClassUtils;
 import gov.nasa.jpl.mbee.util.CompareUtils;
 import gov.nasa.jpl.mbee.util.Debug;
 import gov.nasa.jpl.mbee.util.Diff;
+import gov.nasa.jpl.mbee.util.HasId;
+import gov.nasa.jpl.mbee.util.HasName;
 import gov.nasa.jpl.mbee.util.Pair;
 import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.sysml.View;
+import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.NodeUtil.SearchType;
 
 import java.io.Serializable;
@@ -56,6 +59,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Random;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.regex.Matcher;
@@ -104,7 +108,9 @@ import org.springframework.extensions.webscripts.Status;
  */
 public class EmsScriptNode extends ScriptNode implements
                                              Comparator< EmsScriptNode >,
-                                             Comparable< EmsScriptNode > {
+                                             Comparable< EmsScriptNode >,
+                                             HasName<String>,
+                                             HasId<String> {
     private static final long serialVersionUID = 9132455162871185541L;
     
     public static final String ADMIN_USER_NAME = "admin";
@@ -120,8 +126,12 @@ public class EmsScriptNode extends ScriptNode implements
     public static boolean versionCacheDebugPrint = false;
     
     // private members to cache qualified names, ids, and site characterizations
-    private String qualifiedName = null;
-    private String qualifiedId = null;
+    // These don't work because sendCommitDeltas asks for json at two time
+    // points, so the first one is cached and reused for the second timepoint.
+    // If wanting to cache, cache like the deepJsonCache.
+    //    private String qualifiedName = null;
+    //    private String qualifiedId = null;
+    
     private String siteCharacterizationId = null;
 
     public boolean renamed = false;
@@ -557,9 +567,24 @@ public class EmsScriptNode extends ScriptNode implements
         if ( Acm.getJSON2ACM().keySet().contains( type ) ) {
             type = Acm.getJSON2ACM().get( type );
         }
+        
+        updateBogusProperty( type );
+        
         transactionCheck();
 
         return changeAspect( type );
+    }
+
+    protected void updateBogusProperty( String type ) {
+        // Make sure the aspect change makes it into the version history by updating a bogus property.
+        String bogusPropName = null;
+        if ( Acm.ASPECTS_WITH_BOGUS_PROPERTY.containsKey( type ) ) {
+            bogusPropName = Acm.ASPECTS_WITH_BOGUS_PROPERTY.get( type );
+        }
+        if ( bogusPropName == null ) return;
+        Random rand = new Random();
+        int randNum = rand.nextInt(10000000);
+        setProperty( Acm.ASPECTS_WITH_BOGUS_PROPERTY.get( type ), randNum );
     }
 
     /**
@@ -1050,6 +1075,10 @@ public class EmsScriptNode extends ScriptNode implements
                 node.setWorkspace( nodeWorkspace, null );
             }
 
+            // This aspect is not a type--just adding to all so that the
+            // property (owndAttribute) does not have to be treated differently.
+            node.createOrUpdateAspect( Acm.ACM_OWNS_ATTRIBUTE );
+            
             NodeUtil.addElementToCache( node );
         }
 
@@ -1341,7 +1370,7 @@ public class EmsScriptNode extends ScriptNode implements
         }
         
         EmsScriptNode node = null;
-        NodeRef ref = (NodeRef)getNodeRefProperty( ownerType, skipNodeRefCheck, dateTime, ws );
+        NodeRef ref = (NodeRef)getNodeRefProperty( ownerType, false, dateTime, true, skipNodeRefCheck, ws );
 
         if ( ref == null ) {
             node = getParent();
@@ -1349,12 +1378,18 @@ public class EmsScriptNode extends ScriptNode implements
                 NodeRef vref = NodeUtil.getNodeRefAtTime( node.getNodeRef(), dateTime );
                 if ( vref != null ) {
                     node = new EmsScriptNode( vref, getServices() );
+                } else {
+                    // Don't want the reified package at the wrong time; null is
+                    // correct.
+                    node = null;
                 }
             }
         } else {
             node = new EmsScriptNode( ref, getServices() );
         }
 
+        if ( node == null ) return null;
+        
         // FIXME this seraches below are not always going to return nodes from the
         //       SpaceStore
         
@@ -1403,12 +1438,12 @@ public class EmsScriptNode extends ScriptNode implements
     
     public EmsScriptNode getOwningParent( Date dateTime, WorkspaceNode ws,
                                           boolean skipNodeRefCheck ) {
-        return getOwningParent(dateTime, ws, skipNodeRefCheck, false);
+        return getOwningParent(dateTime, ws, skipNodeRefCheck, true);
     }
     
     public EmsScriptNode getValueSpecOwningParent( Date dateTime, WorkspaceNode ws,
                                                    boolean skipNodeRefCheck ) {
-        return getValueSpecOwningParent(dateTime, ws, skipNodeRefCheck, false);
+        return getValueSpecOwningParent(dateTime, ws, skipNodeRefCheck, true);
     }
     
     public boolean isAVersion() {
@@ -1874,6 +1909,27 @@ public class EmsScriptNode extends ScriptNode implements
     public Object getNodeRefProperty( String acmType, boolean ignoreWorkspace,
                                Date dateTime, boolean findDeleted,
                                boolean skipNodeRefCheck, WorkspaceNode ws ) {
+        // Make sure we have the right node ref before getting a property from it.
+        if ( dateTime != null && getNodeRef().getStoreRef() != null && 
+             getNodeRef().getStoreRef().equals( StoreRef.STORE_REF_WORKSPACE_SPACESSTORE ) ) {
+            NodeRef realRef = null;
+            //if ( NodeUtil.workspacesEqual( ws, getWorkspace() ) ) {
+                realRef = NodeUtil.getNodeRefAtTime( getNodeRef(), dateTime );
+            //} else {
+                  // Can't do this--it causes an infinite loop. It's the caller's
+                  // responsibility to have a node in the right workspace.
+            //    realRef = NodeUtil.getNodeRefAtTime( getNodeRef(), ws, dateTime );
+            //}
+            if ( realRef != null && !realRef.equals( getNodeRef() ) ) {
+                if ( realRef.getStoreRef() != StoreRef.STORE_REF_WORKSPACE_SPACESSTORE ) {
+                    EmsScriptNode realNode =  new EmsScriptNode( realRef, getServices() );
+                    return realNode.getNodeRefProperty( acmType,
+                                                        ignoreWorkspace,
+                                                        dateTime, findDeleted,
+                                                        skipNodeRefCheck, ws );
+                }
+            }
+        }
         Object result = getPropertyImpl( acmType, true );  // TODO -- This should be passing in cacheOkay from the caller instead of true!
 
         // get noderefs from the proper workspace unless the property is a
@@ -2222,16 +2278,10 @@ public class EmsScriptNode extends ScriptNode implements
     }
 
     public String getSysmlQName(Date dateTime, WorkspaceNode ws, boolean doCache) {
-        if (qualifiedName != null) {
-            return qualifiedName;
-        }
         return getSysmlQPath( true, dateTime, ws, doCache );
     }
 
     public String getSysmlQId(Date dateTime, WorkspaceNode ws, boolean doCache) {
-        if (qualifiedId != null) {
-            return qualifiedId;
-        }
         return getSysmlQPath( false, dateTime, ws, doCache );
     }
     
@@ -2267,6 +2317,9 @@ public class EmsScriptNode extends ScriptNode implements
         // TODO REVIEW
         // This is currently not called on reified packages, so as long as the ems:owner always points
         // to reified nodes, as it should, then we dont need to replace pkgSuffix in the qname.
+        // Some elements have a name of "" and they appear to be skipped in the
+        // qualified name. Do we want to treat this the same as a null name?
+        // Currently, we do not.
 
         String runAsUser = AuthenticationUtil.getRunAsUser();
         boolean changeUser = !ADMIN_USER_NAME.equals( runAsUser );
@@ -2276,6 +2329,9 @@ public class EmsScriptNode extends ScriptNode implements
 
         String qualifiedName = "/" + getProperty( "sysml:name" );
         String qualifiedId =  "/" + getProperty( "sysml:id" );
+//        if ( qualifiedId.contains( "exposed_id" ) ) {
+//            System.out.println( "Calculating qualified name and id for " + qualifiedId );
+//        }
 
         EmsScriptNode owner = this.getOwningParent(dateTime, ws, false, true );
         String ownerName = owner != null ? owner.getName() : null;
@@ -2322,8 +2378,11 @@ public class EmsScriptNode extends ScriptNode implements
         }
 
         if ( doCache ) {
-            this.qualifiedId = qualifiedId;
-            this.qualifiedName = qualifiedName;
+// if ( qualifiedId.contains( "exposed_id" ) ) {
+//     System.out.println( "Setting qualified id: " + qualifiedId );
+// }
+//            this.qualifiedId = qualifiedId;
+//            this.qualifiedName = qualifiedName;
             if ( this.siteCharacterizationId == null ) {
                 this.siteCharacterizationId = siteCharacterizationId;
             }
@@ -2515,6 +2574,15 @@ public class EmsScriptNode extends ScriptNode implements
         if (isMetatype != null) elementJson.put( Acm.JSON_IS_METATYPE, isMetatype );
         if (metatypes != null) elementJson.put( Acm.JSON_METATYPES, metatypes );
         
+        ArrayList< NodeRef > nodeRefsOwnedAttribute =
+                (ArrayList< NodeRef >)this.getNodeRefProperty( Acm.ACM_OWNED_ATTRIBUTE, 
+                                                               true, dateTime,
+                                                               this.getWorkspace());
+        if ( !Utils.isNullOrEmpty( nodeRefsOwnedAttribute ) ) { 
+            JSONArray ownedAttributeIds = addNodeRefIdsJSON( nodeRefsOwnedAttribute );
+            putInJson( elementJson, Acm.JSON_OWNED_ATTRIBUTE, ownedAttributeIds, filter );
+        }
+        
         if (isIncludeQualified) {
             if ( filter == null || filter.isEmpty() || filter.contains( "qualifiedName" ) ) {
                 putInJson( elementJson, "qualifiedName", this.getSysmlQName(dateTime, getWorkspace(), true), filter );
@@ -2554,6 +2622,10 @@ public class EmsScriptNode extends ScriptNode implements
             putInJson( elementJson, "owner", owernIdObj, filter );
         }
 
+        //putInJson( json, "evaluation", "Hi, Erik!", null );
+        //elementJson.put( "evaluation", "Hi, Erik!" );
+
+        
         // Add version information - can't be used for reverting since things may be in
         // different workspaces, but informative nonetheless
         if ( version != null ) {
@@ -2695,6 +2767,8 @@ public class EmsScriptNode extends ScriptNode implements
         }
 
         if ( justTheType ) return;
+
+        //json.put( "evaluation", "Hi, Erik!" );
 
         for ( QName aspectQname : this.getAspectsSet() ) {
             // reflection is too slow?
@@ -3367,7 +3441,6 @@ public class EmsScriptNode extends ScriptNode implements
         if (projectNode != null) return projectNode;
         
         EmsScriptNode parent = this;
-        EmsScriptNode sites = null;
         EmsScriptNode projectPkg = null;
         EmsScriptNode models = null;
         EmsScriptNode oldparent = null;
@@ -3378,7 +3451,7 @@ public class EmsScriptNode extends ScriptNode implements
         }
         Set<EmsScriptNode> seen = new HashSet<EmsScriptNode>();
         while ( parent != null && parent.getSysmlId() != null &&
-                !seen.contains( parent ) && projectPkg != null) {
+                !seen.contains( parent )) {
             if ( models == null && parent.getName().equals( "Models" ) ) {
                 models = parent;
                 projectPkg = oldparent;
@@ -3390,12 +3463,8 @@ public class EmsScriptNode extends ScriptNode implements
                     projectNode = projectPkg;
                 } else {
                     projectNode = projectPkg.getReifiedNode(ws);
-                    if (projectNode != null) {
-                        if ( Debug.isOn() ) Debug.outln( getName()
-                                                     + ".getProjectNode() = "
-                                                     + projectNode.getName() );
-                    }
                 }
+                break;
             }
             seen.add(parent);
             oldparent = parent;
@@ -3605,79 +3674,84 @@ public class EmsScriptNode extends ScriptNode implements
 
         ArrayList< Serializable > properties = new ArrayList< Serializable >();
 
-        Serializable property = null;
+        Serializable property;
         for ( int i = 0; i < jsonArray.length(); ++i ) {
-            switch ( type ) {
-                case INT:
-                    property = jsonArray.getInt( i );
-                    break;
-                case LONG:
-                    property = jsonArray.getLong( i );
-                    break;
-                case DOUBLE:
-                    property = jsonArray.getDouble( i );
-                    break;
-                case BOOLEAN:
-                    property = jsonArray.getBoolean( i );
-                    break;
-                case TEXT:
-                case DATE:
-                    try {
-                        property = jsonArray.getString( i );
-                    } catch ( JSONException e ) {
-                        Object val = jsonArray.get( i );
-                        property = val != null ? "" + val : null;
-                    }
-                    break;
-                case NODE_REF:
-                    String sysmlId = null;
-                    try {
-                        sysmlId = jsonArray.getString( i );
-                    } catch ( JSONException e ) {
-                        Object val = jsonArray.get( i );
-                        sysmlId = val != null ? "" + val : null;
-                    }
-                    
-                    if (!Utils.isNullOrEmpty( sysmlId )) {
-                        EmsScriptNode node =
-                                convertIdToEmsScriptNode( sysmlId, false, workspace,
-                                                          dateTime );
-                        if ( node != null ) {
-                            property = node.getNodeRef();
-                        } else {
-                            String msg =
-                                    "Error! No element found for " + sysmlId
-                                            + ".\n";
-                            if ( getResponse() == null || getStatus() == null ) {
-                                Debug.error( msg );
-                            } else {
-                                getResponse().append( msg );
-                                getStatus().setCode( HttpServletResponse.SC_BAD_REQUEST,
-                                                     msg );
-                            }
-                            return null; // REVIEW this may be overkill, can still proceed
+            property = null;
+            // The json object get methods will throw a NPE if the value is null,
+            // so must check for it
+            if (!jsonArray.isNull( i )) {
+                switch ( type ) {
+                    case INT:
+                        property = jsonArray.getInt( i );
+                        break;
+                    case LONG:
+                        property = jsonArray.getLong( i );
+                        break;
+                    case DOUBLE:
+                        property = jsonArray.getDouble( i );
+                        break;
+                    case BOOLEAN:
+                        property = jsonArray.getBoolean( i );
+                        break;
+                    case TEXT:
+                    case DATE:
+                        try {
+                            property = jsonArray.getString( i );
+                        } catch ( JSONException e ) {
+                            Object val = jsonArray.get( i );
+                            property = val != null ? "" + val : null;
                         }
-                    }
-                    // A null sysmId indicates we should store null as the property value
-                    else {
-                        property = null;
-                    }
-                    break;
-                case UNKNOWN:
-                    property = jsonArray.getString( i );
-                    break;
-                default:
-                    String msg = "Error! Bad property type = " + type + ".\n";
-                    if ( getResponse() == null || getStatus() == null ) {
-                        Debug.error( msg );
-                    } else {
-                        getResponse().append( msg );
-                        getStatus().setCode( HttpServletResponse.SC_BAD_REQUEST,
-                                             msg );
-                    }
-                    return null;
-            };
-
+                        break;
+                    case NODE_REF:
+                        String sysmlId = null;
+                        try {
+                            sysmlId = jsonArray.getString( i );
+                        } catch ( JSONException e ) {
+                            Object val = jsonArray.get( i );
+                            sysmlId = val != null ? "" + val : null;
+                        }
+                        
+                        if (!Utils.isNullOrEmpty( sysmlId )) {
+                            EmsScriptNode node =
+                                    convertIdToEmsScriptNode( sysmlId, false, workspace,
+                                                              dateTime );
+                            if ( node != null ) {
+                                property = node.getNodeRef();
+                            } else {
+                                String msg =
+                                        "Error! No element found for " + sysmlId
+                                                + ".\n";
+                                if ( getResponse() == null || getStatus() == null ) {
+                                    Debug.error( msg );
+                                } else {
+                                    getResponse().append( msg );
+                                    getStatus().setCode( HttpServletResponse.SC_BAD_REQUEST,
+                                                         msg );
+                                }
+                                return null; // REVIEW this may be overkill, can still proceed
+                            }
+                        }
+                        // A null sysmId indicates we should store null as the property value
+                        else {
+                            property = null;
+                        }
+                        break;
+                    case UNKNOWN:
+                        property = jsonArray.getString( i );
+                        break;
+                    default:
+                        String msg = "Error! Bad property type = " + type + ".\n";
+                        if ( getResponse() == null || getStatus() == null ) {
+                            Debug.error( msg );
+                        } else {
+                            getResponse().append( msg );
+                            getStatus().setCode( HttpServletResponse.SC_BAD_REQUEST,
+                                                 msg );
+                        }
+                        return null;
+                };
+            }
+            
             // Note: No harm comes from adding null to the array, as alfresco wont store it
             properties.add( property );
         }
@@ -3705,62 +3779,66 @@ public class EmsScriptNode extends ScriptNode implements
             // return "" + o;
         }
 
-        if ( name != null ) {
-            if ( name.equals( DataTypeDefinition.INT ) ) {
-                property = jsonObject.getInt( jsonKey );
-            } else if ( name.equals( DataTypeDefinition.LONG ) ) {
-                property = jsonObject.getLong( jsonKey );
-            } else if ( name.equals( DataTypeDefinition.DOUBLE ) ) {
-                property = jsonObject.getDouble( jsonKey );
-            } else if ( name.equals( DataTypeDefinition.BOOLEAN ) ) {
-                property = jsonObject.getBoolean( jsonKey );
-            } else if ( name.equals( DataTypeDefinition.TEXT ) ) {
-                property = jsonObject.getString( jsonKey );
-                // properties of type date include timestamp and
-                // creation/modified dates and are not stored by MMS
-                // } else if ( name.equals( DataTypeDefinition.DATE ) ) {
-                // property = jsonObject.getString( jsonKey );
-                // } else if ( name.equals( DataTypeDefinition.DATETIME ) ) {
-                // property = jsonObject.getString( jsonKey );
-            } else if ( name.equals( DataTypeDefinition.NODE_REF ) ) {
-                String sysmlId = null;
-                try {
-                    sysmlId = jsonObject.getString( jsonKey );
-                } catch ( JSONException e ) {
-                    Object val = jsonObject.get( jsonKey );
-                    sysmlId = val != null ? "" + val : null;
-                }
-                
-                if (!Utils.isNullOrEmpty( sysmlId )) {
-                    EmsScriptNode node =
-                            convertIdToEmsScriptNode( sysmlId, false, workspace,
-                                                      dateTime );
-                    if ( node != null ) {
-                        property = node.getNodeRef();
-                    } 
-                    else {
-                        String msg =
-                                "Error! Could not find element for sysml id = "
-                                        + sysmlId + ".\n";
-                        if ( getResponse() == null || getStatus() == null ) {
-                            Debug.error( false, msg );
-                        } else {
-                            getResponse().append( msg );
-                            getStatus().setCode( HttpServletResponse.SC_BAD_REQUEST,
-                                                 msg );
+        // The json object get methods will throw a NPE if the value is null,
+        // so must check for it
+        if (!jsonObject.isNull( jsonKey )) {
+            if ( name != null ) {
+                if ( name.equals( DataTypeDefinition.INT ) ) {
+                    property = jsonObject.getInt( jsonKey );
+                } else if ( name.equals( DataTypeDefinition.LONG ) ) {
+                    property = jsonObject.getLong( jsonKey );
+                } else if ( name.equals( DataTypeDefinition.DOUBLE ) ) {
+                    property = jsonObject.getDouble( jsonKey );
+                } else if ( name.equals( DataTypeDefinition.BOOLEAN ) ) {
+                    property = jsonObject.getBoolean( jsonKey );
+                } else if ( name.equals( DataTypeDefinition.TEXT ) ) {
+                    property = jsonObject.getString( jsonKey );
+                    // properties of type date include timestamp and
+                    // creation/modified dates and are not stored by MMS
+                    // } else if ( name.equals( DataTypeDefinition.DATE ) ) {
+                    // property = jsonObject.getString( jsonKey );
+                    // } else if ( name.equals( DataTypeDefinition.DATETIME ) ) {
+                    // property = jsonObject.getString( jsonKey );
+                } else if ( name.equals( DataTypeDefinition.NODE_REF ) ) {
+                    String sysmlId = null;
+                    try {
+                        sysmlId = jsonObject.getString( jsonKey );
+                    } catch ( JSONException e ) {
+                        Object val = jsonObject.get( jsonKey );
+                        sysmlId = val != null ? "" + val : null;
+                    }
+                    
+                    if (!Utils.isNullOrEmpty( sysmlId )) {
+                        EmsScriptNode node =
+                                convertIdToEmsScriptNode( sysmlId, false, workspace,
+                                                          dateTime );
+                        if ( node != null ) {
+                            property = node.getNodeRef();
+                        } 
+                        else {
+                            String msg =
+                                    "Error! Could not find element for sysml id = "
+                                            + sysmlId + ".\n";
+                            if ( getResponse() == null || getStatus() == null ) {
+                                Debug.error( false, msg );
+                            } else {
+                                getResponse().append( msg );
+                                getStatus().setCode( HttpServletResponse.SC_BAD_REQUEST,
+                                                     msg );
+                            }
                         }
                     }
+                    // A null sysmId indicates we should store null as the property value,
+                    else {
+                        property = null;
+                    }
+                    
+                } else {
+                    property = jsonObject.getString( jsonKey );
                 }
-                // A null sysmId indicates we should store null as the property value,
-                else {
-                    property = null;
-                }
-                
             } else {
                 property = jsonObject.getString( jsonKey );
             }
-        } else {
-            property = jsonObject.getString( jsonKey );
         }
 
         // Per CMED-461, we are allowing properties to be set to null
@@ -4165,7 +4243,7 @@ public class EmsScriptNode extends ScriptNode implements
     public void delete() {
         if (!isDeleted()) {
             makeSureNodeRefIsNotFrozen();
-            addAspect( "ems:Deleted" );
+            createOrUpdateAspect( "ems:Deleted" );
         }
     }
 
@@ -5019,10 +5097,12 @@ public class EmsScriptNode extends ScriptNode implements
             QName a = queue.get(0);
             queue.remove( 0 );
             AspectDefinition aspect = ds.getAspect( a );
-            QName p = aspect.getParentName();
-            if ( p != null && !aspects.contains( p ) ) {
-                aspects.add( p );
-                queue.add( p );
+            if (aspect != null) {
+                QName p = aspect.getParentName();
+                if ( p != null && !aspects.contains( p ) ) {
+                    aspects.add( p );
+                    queue.add( p );
+                }
             }
         }
         return aspects;
@@ -5474,6 +5554,9 @@ public class EmsScriptNode extends ScriptNode implements
         putInJson( json, Acm.JSON_UPPER,
                    addInternalJSON( node.getNodeRefProperty(Acm.ACM_LOWER, dateTime, ws), ws, dateTime ),
                    filter );
+
+        putInJson( json, Acm.JSON_AGGREGATION,
+                   node.getProperty( Acm.ACM_AGGREGATION), filter );
     }
 
     protected
@@ -5984,6 +6067,9 @@ public class EmsScriptNode extends ScriptNode implements
         if (hasAspect(type)) {
             makeSureNodeRefIsNotFrozen();
             transactionCheck();
+            
+            updateBogusProperty( type );
+
             return super.removeAspect( type );
         }
         return true;

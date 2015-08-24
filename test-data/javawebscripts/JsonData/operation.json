@@ -16,6 +16,15 @@
     },
     
     {
+        "sysmlid" : "sum",
+        "name" : "sum",
+        "owner" : "operations",
+        "specialization" : {
+            "type" : "Operation"
+        }
+    },
+    
+    {
         "sysmlid" : "Sum",
         "name" : "Sum",
         "owner" : "operations",
@@ -270,6 +279,51 @@
     {
         "sysmlid" : "Max",
         "name" : "Max",
+        "owner" : "operations",
+        "specialization" : {
+            "type" : "Operation"
+        }
+    },
+    
+    {
+        "sysmlid" : "Name",
+        "name" : "Name",
+        "owner" : "operations",
+        "specialization" : {
+            "type" : "Operation"
+        }
+    },
+
+    {
+        "sysmlid" : "List",
+        "name" : "List",
+        "owner" : "operations",
+        "specialization" : {
+            "type" : "Operation"
+        }
+    },
+
+    {
+        "sysmlid" : "Text",
+        "name" : "Text",
+        "owner" : "operations",
+        "specialization" : {
+            "type" : "Operation"
+        }
+    },
+
+    {
+        "sysmlid" : "Evaluate",
+        "name" : "Evaluate",
+        "owner" : "operations",
+        "specialization" : {
+            "type" : "Operation"
+        }
+    },
+
+    {
+        "sysmlid" : "Table",
+        "name" : "Table",
         "owner" : "operations",
         "specialization" : {
             "type" : "Operation"
