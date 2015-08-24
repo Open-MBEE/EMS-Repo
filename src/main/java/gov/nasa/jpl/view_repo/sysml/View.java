@@ -14,6 +14,7 @@ import gov.nasa.jpl.view_repo.util.EmsSystemModel;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
@@ -437,27 +438,39 @@ public class View extends List implements sysml.view.View< EmsScriptNode >, Comp
         // Evaluate the expression to get the Viewables and add them to this View.
 
         clear(); // make sure we clear out any old information
-        Object evalResult = aeExpr.evaluate( true );
-        if ( evalResult instanceof Viewable ) {
-            Viewable< EmsScriptNode > v = (Viewable< EmsScriptNode >)evalResult;
-            add( v );
-        } else if ( evalResult instanceof Collection ) {
-            Collection< ? > c = (Collection< ? >)evalResult;
-            for ( Object o : c ) {
-                if (!(o instanceof Viewable) ) {
-                    o = Expression.evaluate( o, Viewable.class, true );
+        Object evalResult;
+        try {
+            evalResult = aeExpr.evaluate( true );
+            if ( evalResult instanceof Viewable ) {
+                Viewable< EmsScriptNode > v = (Viewable< EmsScriptNode >)evalResult;
+                add( v );
+            } else if ( evalResult instanceof Collection ) {
+                Collection< ? > c = (Collection< ? >)evalResult;
+                for ( Object o : c ) {
+                    if (!(o instanceof Viewable) ) {
+                        o = Expression.evaluate( o, Viewable.class, true );
+                    }
+                    try {
+                        Viewable< EmsScriptNode > viewable =
+                                (Viewable< EmsScriptNode >)o;
+                        add( viewable );
+                    } catch ( ClassCastException e ) {
+                        Debug.error( "Failed to cast to Viewable: " + o );
+                    }
                 }
-                try {
-                    Viewable< EmsScriptNode > viewable =
-                            (Viewable< EmsScriptNode >)o;
-                    add( viewable );
-                } catch ( ClassCastException e ) {
-                    Debug.error( "Failed to cast to Viewable: " + o );
-                }
+//                java.util.List< Viewable<EmsScriptNode> > viewables =
+//                        (java.util.List< Viewable<EmsScriptNode> >)Utils.asList( c );
+//                addAll( viewables );
             }
-//            java.util.List< Viewable<EmsScriptNode> > viewables =
-//                    (java.util.List< Viewable<EmsScriptNode> >)Utils.asList( c );
-//            addAll( viewables );
+        } catch ( IllegalAccessException e1 ) {
+            // TODO Auto-generated catch block
+            //e1.printStackTrace();
+        } catch ( InvocationTargetException e1 ) {
+            // TODO Auto-generated catch block
+            //e1.printStackTrace();
+        } catch ( InstantiationException e1 ) {
+            // TODO Auto-generated catch block
+            //e1.printStackTrace();
         }
         //System.out.println("!!!!!!!!!   done  !!!!!!!!!!");
         return !isEmpty();

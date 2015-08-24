@@ -3,6 +3,7 @@
  */
 package gov.nasa.jpl.view_repo.sysml;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -131,9 +132,20 @@ public class Evaluate implements Viewable< EmsScriptNode > {
                                             modelContext.workspace, modelContext.dateTime );
             }
             if ( n.hasOrInheritsAspect( "sysml:Expression" ) ) {
-                Map< Object, Object > result =
-                        AbstractJavaWebScript.evaluate( Utils.newSet( n ),
-                                                        modelContext.workspace );
+                Map< Object, Object > result = null;
+                try {
+                    result = AbstractJavaWebScript.evaluate( Utils.newSet( n ),
+                                                    modelContext.workspace );
+                } catch ( IllegalAccessException e1 ) {
+                    // TODO Auto-generated catch block
+                    //e1.printStackTrace();
+                } catch ( InvocationTargetException e1 ) {
+                    // TODO Auto-generated catch block
+                    //e1.printStackTrace();
+                } catch ( InstantiationException e1 ) {
+                    // TODO Auto-generated catch block
+                    //e1.printStackTrace();
+                }
                 resultObj = result;
                 gotResult = true;
                 if ( result != null ) {
