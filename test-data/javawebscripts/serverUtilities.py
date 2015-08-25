@@ -1,7 +1,5 @@
 from regression_test_harness import *
-import commands
 from elementTemplates import *
-
 
 DEBUG = True
 
@@ -10,7 +8,6 @@ print 'Printing Temp view 2 view'
 print '-------------------------------------------------'
 json.dumps({"id": "", "childrenViews": []}, sort_keys=True, indent=4, separators=(',', ': '))
 print '-------------------------------------------------'
-
 
 class UtilElement:
     def __init__(self, inElement=None):
@@ -21,7 +18,6 @@ class UtilElement:
                 print 'Constructor - inElement Open and Loads'
                 print inElement
                 self.jsonObj = loadJson(open(inElement))  # Function that will throw exception if it is not the
-                # correct json
             else:
                 self.jsonObj = inElement
                 print self.jsonObj
@@ -196,25 +192,13 @@ class UtilElement:
         if (self.jsonObj is not None):
             postObject = json.dumps(self.jsonObj)
             print "Dumping object..."
-            printObj = json.dumps(self.jsonObj, sort_keys=True, indent=4, separators=(',', ': '))
-            print printObj
             curl_cmd = create_curl_cmd(type="POST", data=postObject)
             # curl_cmd = regression_lib.create_curl_cmd(type="POST", data=postObject)
-            print '-------------------------------------------------'
-            print 'Curl Command From POST Method'
-            print '-------------------------------------------------'
-            print str(curl_cmd)
-            print '-------------------------------------------------'
         else:
-            print('No element...Posted nothing...')
-            print '-------------------------------------------------'
             return
 
         if (verbose):
             print 'Posting element:'
-            print '-------------------------------------------------'
-            print str(self.jsonObj)
-            print '-------------------------------------------------'
             return execCurlCmd(curl_cmd)
 
     # TODO: Element calls post, of itself or of the sysmlid that is passed in
@@ -340,18 +324,9 @@ def GETjson(sysmlid):
 
 #  This process Requires 4 POSTs to complete adding a view to another view
 def addViewToView(toAdd, addingTo):
-    print '========================'
-    print 'Add View'
-    print str(toAdd)
-    # Creates UtilElement
-    toAdd_element = UtilElement(toAdd)
-    print str(toAdd_element.jsonObj)
 
-    # print toAdd
-    print '========================'
-    print 'To add element'
-    print str(toAdd_element)
-    print '========================'
+    toAdd_element = UtilElement(toAdd)
+
     # Determine what type view the child view will be added to
     #   This is for retrieve the sysmlid needed to create the new viewpoint
     if type(addingTo) is not str:
@@ -365,39 +340,73 @@ def addViewToView(toAdd, addingTo):
         print 'Is String'
         print '========================'
         ownerSysmlid = addingTo
-
-    # Loads a template of the view
+      # Loads a template of the view
     newView = json.loads(TEMPLATE_NEW_VIEW)
-
-    #
-    print newView
-    print 'Print New View Template'
-    print '====================='
-    print 'Print newView attributes elements'
-    print '========================'
-
-    # Prints the string version of the newView point with update sysmlid
     newView.get('elements')[0].update(owner=ownerSysmlid)
     newView.get('elements')[0].update(documentation=toAdd_element.documentation)
     newView.get('elements')[0].update(name=toAdd_element.name)
     newView.get('elements')[0].get('specialization').update(type=toAdd_element.type)
-    tempView = newView
 
-    # Debug print tempView
-    print '========================'
-    print 'Print TempView'
-    print tempView.get('elements')[0]
-    print '========================'
+    postView = json.dumps(newView, separators=(',', ':'))
+    # Post new view to get instance specification
+    print ''
+    print '---==============================---'
+    print ''
+    postStr = '\'' + str(postView) + '\''
+    print 'Post String'
+    print postStr
+    print ''
+    print '---==============================---'
+    print ''
+    cmd = create_curl_cmd("POST", data=postStr,branch='master/' + 'elements',project_post=True)
+    print ' CURL COMMAND '
+    print cmd
+    print ''
+    print '---==============================---'
+    print '     output      post 1     '
+    print '---==============================---'
+    print ''
+    responseJson = get_json_output_no_status(execCurlCmd(cmd)).replace("\n", "")
+    print 'PRINTING RESPONSE JSON'
+    print str(responseJson).replace('\\', "")
+    print '---==============================---'
 
-    # Debug print tempView's owner
-    print newView.get('elements')[0].get('owner')
 
+    responseJson = json.dumps(str(responseJson))
+    print 'PRINTING RESPONSE JSON After Dump'
+    print str(responseJson)
+    print '---==============================---'
+    print ''
+    responseJson = json.loads(responseJson)
+    print 'PRINTING RESPONSE JSON After Loads'
+    print str(responseJson)
+    print '---==============================---'
+    elementsIndex = str(responseJson).rfind('{\"elements', 0)
 
-    toAdd = json.dumps(toAdd)
-    # newView.get('elements')[0].update(name=toAdd.get('elements')[0].get('name'))
+    print 'printing elements index'
+    print elementsIndex
 
-    print newView.get('elements')[0].get('name')
+    # returnObj = json.loads(responseJson[elementsIndex:])
 
+    responseId = responseJson.get('elements')[0].get('sysmlid')
+    postView = TEMPLATE_INSTANCE_SPEC
+    postView.get('elements')[0].get('specialization').get('instanceSpecificationSpecification').get('string').update(
+        source=responseId)
+
+    postView = json.dumps(newView, separators=(',', ':'))
+    postStr = '\'' + str(postView) + '\''
+
+    cmd = create_curl_cmd("POST", data=postStr, branch='master/' + 'elements', project_post=True)
+    print ' CURL COMMAND '
+    print cmd
+
+    print '---==============================---'
+    print '     output      post 2     '
+    print '---==============================---'
+    print ''
+    responseJson = execCurlCmd(cmd)
+    print responseJson
+    print '---==============================---'
 
 # Attempts to serialize the json file
 def dumpJson(jsonObject):
@@ -433,7 +442,26 @@ def loadJson(jsonObject):
 
 
 def execCurlCmd(cmd):
+
+
+
+
     (status, output) = commands.getstatusoutput(cmd)
+    print '-------------------------------------------------'
+    print 'EXECUTING CURL COMMAND'
+    print '-------------------------------------------------'
+
+    print 'PRINTING STATUS'
+    print status
+    print '-------------------------------------------------'
+    print 'print no output'
+    print get_json_output_no_status(output=output)
+    print '-------------------------------------------------'
+    print 'PRINTING OUTPUT'
+    print output
+    print '-------------------------------------------------'
+    print 'returning output'
+    print '-------------------------------------------------'
     return output
 
 
@@ -446,9 +474,19 @@ def testAddViewToView():
     addViewToView("./JsonData/testViewElement.json", "./JsonData/testProductElement.json")
 
 # This test is to add a view to the view on localhost called 1.1 Create Sub View 1.1
-def testAddViewToViewById():
-    addViewToView("./JsonData/testViewElement.json", "MMS_1440004708656_2f851026-ff97-4500-b4eb-ef28176dbc11")
-
+def testAddViewToViewById(test=1):
+    if test == 1:
+        addViewToView("./JsonData/testViewElement.json", "MMS_1440004666224_40c9834a-d6d0-47ff-bfe3-54d25e0462d0")
+    elif test == 2:
+        addViewToView("./JsonData/testViewElement.json", "MMS_1440004700246_e9451e3f-f060-4af0-a452-9cef660b3fa4")
+    elif test == 3:
+        addViewToView("./JsonData/testViewElement.json", "MMS_1440004708656_2f851026-ff97-4500-b4eb-ef28176dbc11")
+    elif test == 4:
+        addViewToView("./JsonData/testViewElement.json", "MMS_1440004748603_65014c15-980d-4131-a524-957d68091aa0")
+    elif test == 301:
+        addViewToView("./JsonData/testViewElement.json", "301")
+    elif test==401:
+        addViewToView("./JsonData/testViewElement.json", "401")
 
 def testProduct():
     jsonObj = UtilElement("./JsonData/testProductElement.json")
@@ -473,13 +511,6 @@ def getViewById(sysmlid=''):
     get_cmd = 'curl -w "%{http_code}n" -X GET -u admin:admin '
     send_cmd = get_cmd + getUrl
     status,view = execCurlCmd(send_cmd)
-    print ''
-    print '-------------------------------------------------'
-    print ''
-    print status
-    print ''
-    print '-------------------------------------------------'
-    print ''
     return view
 
 
