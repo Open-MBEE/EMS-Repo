@@ -6,6 +6,7 @@ import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -71,7 +72,19 @@ public class List extends ArrayList< Viewable< EmsScriptNode > > implements sysm
 
     	for (Object obj : c) {
     		if (obj instanceof Expression<?>) {
-    			Object eval = ((Expression<?>) obj).evaluate(true);
+    			Object eval = null;
+                try {
+                    eval = ((Expression<?>) obj).evaluate(true);
+                } catch ( IllegalAccessException e ) {
+                    // TODO Auto-generated catch block
+                    //e.printStackTrace();
+                } catch ( InvocationTargetException e ) {
+                    // TODO Auto-generated catch block
+                    //e.printStackTrace();
+                } catch ( InstantiationException e ) {
+                    // TODO Auto-generated catch block
+                    //e.printStackTrace();
+                }
     			if ( eval instanceof Viewable ) {
     			    this.add((Viewable<EmsScriptNode>)eval);
     			} else if ( eval instanceof Viewable ) {
@@ -88,7 +101,19 @@ public class List extends ArrayList< Viewable< EmsScriptNode > > implements sysm
             return (Viewable<EmsScriptNode>)obj;
         }
         if (obj instanceof Expression<?>) {
-            Object eval = ((Expression<?>) obj).evaluate(true);
+            Object eval = null;
+            try {
+                eval = ((Expression<?>) obj).evaluate(true);
+            } catch ( IllegalAccessException e ) {
+                // TODO Auto-generated catch block
+                //e.printStackTrace();
+            } catch ( InvocationTargetException e ) {
+                // TODO Auto-generated catch block
+                //e.printStackTrace();
+            } catch ( InstantiationException e ) {
+                // TODO Auto-generated catch block
+                //e.printStackTrace();
+            }
             return toViewable( eval );
         }
         if ( obj instanceof String ) {

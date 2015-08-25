@@ -192,50 +192,69 @@ public class FullDocPost extends AbstractJavaWebScript {
     }
     
     private void downloadHtmlImpl(String workspaceName, String site, String docId, String timestamp, String tagTitle) throws Exception {
-        RuntimeExec exec = new RuntimeExec();
+//        RuntimeExec exec = new RuntimeExec();
+//        Date d = TimeUtils.dateFromTimestamp( timestamp );
+//        this.setTime(d);
+//        
+//        this.setTimeTagName(tagTitle);
+//        
+//        HostnameGet alfresco = new HostnameGet(this.repository, this.services);
+//        String protocol = alfresco.getAlfrescoProtocol();
+//        String hostnameAndPort = this.getAlfrescoHost();
+//        String preRendererUrl = "http://localhost";
+//        int preRendererPort = 3000;
+//        String mmsAdminCredential = getHeadlessUserCredential();
+//        List<String> command = new ArrayList<String>();
+//        command.add(this.phantomJSPath);
+//        command.add(this.phantomJSScriptPath);
+//        command.add(String.format("%s:%d/%s://%s@%s/mmsFullDoc.html?ws=%s&site=%s&docId=%s&time=%s",
+//                preRendererUrl,preRendererPort, protocol, mmsAdminCredential, hostnameAndPort, workspaceName, site, docId, timestamp));
+//        command.add(String.format("%s/%s_NodeJS.html", this.fullDocDir, this.fullDocId));
+//        exec.setCommand(list2Array(command));
+//        System.out.println("NodeJS command: " + command);
+//        int attempts = 0;
+//        boolean isSuccess = false;
+//        while(!isSuccess && attempts < 3){
+//            ExecutionResult result = exec.execute();
+//            if (!result.getSuccess()) {
+//                String msg = String.format("Failed to download full doc HTML for %s. Exit code: %d. Attempt #%d.", this.fullDocId, result.getExitValue(), attempts+1);
+//                log(Level.WARN, msg);
+//            }
+//            else{ 
+//                if(Files.exists(Paths.get(this.htmlPath))) isSuccess = true;
+//            }
+//            attempts++;
+//        }
+//        
+//        if(!isSuccess){
+//            String msg = String.format("Failed to download full doc HTML for %s.", this.fullDocId);
+//            log(Level.WARN, msg);
+//            try{
+//                log(Level.INFO, "Start downloading HTML views...");
+//                buildHtmlFromViews(workspaceName, site, docId, timestamp);
+//            }
+//            catch(Exception ex){
+//                throw ex;
+//            }
+//        }
+//        
+//        try{
+//            tableToCSV();
+//        }
+//        catch(Exception ex){
+//            throw new Exception("Failed to convert tables to CSV files!", ex);
+//        }
+        
         Date d = TimeUtils.dateFromTimestamp( timestamp );
         this.setTime(d);
-        
         this.setTimeTagName(tagTitle);
-        
-        HostnameGet alfresco = new HostnameGet(this.repository, this.services);
-        String protocol = alfresco.getAlfrescoProtocol();
-        String hostnameAndPort = this.getAlfrescoHost();
-        String preRendererUrl = "http://localhost";
-        int preRendererPort = 3000;
-        String mmsAdminCredential = getHeadlessUserCredential();
-        List<String> command = new ArrayList<String>();
-        command.add(this.phantomJSPath);
-        command.add(this.phantomJSScriptPath);
-        command.add(String.format("%s:%d/%s://%s@%s/mmsFullDoc.html?ws=%s&site=%s&docId=%s&time=%s",
-                preRendererUrl,preRendererPort, protocol, mmsAdminCredential, hostnameAndPort, workspaceName, site, docId, timestamp));
-        command.add(String.format("%s/%s_NodeJS.html", this.fullDocDir, this.fullDocId));
-        exec.setCommand(list2Array(command));
-        System.out.println("NodeJS command: " + command);
-        int attempts = 0;
-        boolean isSuccess = false;
-        while(!isSuccess && attempts < 3){
-            ExecutionResult result = exec.execute();
-            if (!result.getSuccess()) {
-                String msg = String.format("Failed to download full doc HTML for %s. Exit code: %d. Attempt #%d.", this.fullDocId, result.getExitValue(), attempts+1);
-                log(Level.WARN, msg);
-            }
-            else{ 
-                if(Files.exists(Paths.get(this.htmlPath))) isSuccess = true;
-            }
-            attempts++;
+
+        try{
+            log(Level.INFO, "Start downloading HTML views...");
+            buildHtmlFromViews(workspaceName, site, docId, timestamp);
         }
-        
-        if(!isSuccess){
-            String msg = String.format("Failed to download full doc HTML for %s.", this.fullDocId);
-            log(Level.WARN, msg);
-            try{
-                log(Level.INFO, "Start downloading HTML views...");
-                buildHtmlFromViews(workspaceName, site, docId, timestamp);
-            }
-            catch(Exception ex){
-                throw ex;
-            }
+        catch(Exception ex){
+            throw ex;
         }
         
         try{
@@ -244,7 +263,6 @@ public class FullDocPost extends AbstractJavaWebScript {
         catch(Exception ex){
             throw new Exception("Failed to convert tables to CSV files!", ex);
         }
-        
     }
     
     public void downloadHtml(final String workspaceName, final String site, final String docId, final String timestamp, final String tagTitle) throws Exception {
