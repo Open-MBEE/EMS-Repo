@@ -616,8 +616,16 @@ public class JsonDiffDiff extends AbstractDiff< JSONObject, Object, String > {
         for ( int k = 0; k < diffs.size(); ++k ) {
             int i = reverse ? diffs.size() - 1 - k : k;
             JSONObject diff =  diffs.get( i );
-            JSONObject ws1 = diff.optJSONObject( "workspace1" );            
-            JSONArray dElements = ws1.getJSONArray( "elements" );
+            JSONObject ws1 = diff.optJSONObject( "workspace1" );
+            if (ws1 == null)
+            {
+                continue;
+            }
+            JSONArray dElements = ws1.optJSONArray( "elements" );
+            if (dElements == null)
+            {
+                continue;
+            }
             for ( int j = 0; j < dElements.length(); ++j ) {
                 JSONObject element = dElements.getJSONObject( j );
                 if (element == null) { continue; }
