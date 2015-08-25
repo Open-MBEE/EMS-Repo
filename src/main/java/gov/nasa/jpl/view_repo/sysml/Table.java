@@ -55,6 +55,21 @@ public class Table extends gov.nasa.jpl.view_repo.sysml.List implements sysml.vi
 //        //return null;//Utils.asList( columnList, sysml.view.List.class );
     }
 
+    public Table() {
+        super();
+        // TODO Auto-generated constructor stub
+    }
+
+    public Table( Collection< ? > c ) {
+        super( c );
+        // TODO Auto-generated constructor stub
+    }
+
+//    public Table( Object... c ) {
+//        super( c );
+//        // TODO Auto-generated constructor stub
+//    }
+
     @Override
     public sysml.view.List< EmsScriptNode > getColumn( int i ) {
         if ( i < 0 || i > size() ) {
