@@ -1,0 +1,9 @@
+{ "elements" : [
+    {
+     "sysmlid" : "d",
+     "documentation" : "d is d",
+     "specialization" : {
+       "type": "Property"
+     }
+    }
+]}
