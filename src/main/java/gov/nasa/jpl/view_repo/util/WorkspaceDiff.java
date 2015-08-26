@@ -838,7 +838,7 @@ public class WorkspaceDiff implements Serializable {
                                         NodeDiff nodeDiff ) throws JSONException {
         boolean emptyArray = true;
         if (map != null && map.size() > 0) {
-            jsonObject.put( key, convertMapToJSONArray( map, versions, ws, dateTime, showAll, null ) );
+            jsonObject.put( key, convertMapToJSONArray( map, versions, ws, dateTime, showAll, nodeDiff ) );
             emptyArray = false;
         } else {
             // add in the empty array
