@@ -300,7 +300,10 @@ create_curl_cmd(type="POST",data="directedrelationships.json",base_url=BASE_URL_
                 branch="master/",post_type="elements"),
 True, 
 common_filters,
-["test","workspaces","develop", "develop2"]
+["test","workspaces","develop", "develop2"],
+None,
+None,
+set_read_to_gv6
 ],
         
 # CONFIGURATIONS: ==========================    
@@ -346,20 +349,21 @@ create_curl_cmd(type="GET",data="sites/europa/configurations",base_url=BASE_URL_
                 branch="master/"),
 True, 
 common_filters+['"timestamp"','"id"'],
-["test","workspaces","develop"]
+["test","workspaces","develop"],
 ],
         
 # WORKSPACES: ==========================    
 
+# This test relies on test 130
 [
 160,
 "CreateWorkspace1",
 "Create workspace test 1",
 create_curl_cmd(type="POST",base_url=BASE_URL_WS,
-                post_type="",branch="wsA?sourceWorkspace=master&follow"),
+                post_type="",branch="wsA?sourceWorkspace=master&copyTime=$gv6"),
 True, 
 common_filters+['"branched"','"created"','"id"','"qualifiedId"'],
-["test","workspaces","follows"],
+["test","workspaces","develop"],
 None,
 None,
 set_wsid_to_gv1
@@ -376,7 +380,7 @@ create_curl_cmd(type="POST", base_url=BASE_URL_WS, post_type="",
                 project_post=True),
 True,
 common_filters,
-["follows"]
+["test","develop"]
 ],
 
   
@@ -386,13 +390,14 @@ common_filters,
 "CreateWorkspace2",
 "Create workspace test 2",
 create_curl_cmd(type="POST",base_url=BASE_URL_WS,
-                post_type="",branch="wsB?sourceWorkspace=$gv1&follow"),
+                post_type="",branch="wsB?sourceWorkspace=$gv1&copyTime=$gv6"),
 True, 
 common_filters+['"branched"','"created"','"id"','"qualifiedId"','"parent"'],
-["test","workspaces","follows"],
+["test","workspaces","develop"],
 None,
 None,
-set_wsid_to_gv2
+set_wsid_to_gv2,
+#60
 ],
 
 # mimic md where a branch requires a project post to sync the project version
@@ -406,7 +411,7 @@ create_curl_cmd(type="POST", base_url=BASE_URL_WS, post_type="",
                 project_post=True),
 True,
 common_filters,
-["follows"]
+["test","develop"]
 ],
 
         
@@ -442,7 +447,7 @@ common_filters+['"branched"','"created"','"id"','"qualifiedId"'],
 create_curl_cmd(type="GET",base_url=BASE_URL_WS_NOBS,branch=""),
 True, 
 common_filters+['"branched"','"created"','"id"','"qualifiedId"','"parent"'],
-["test","workspaces","follows"]
+["test","workspaces","develop"]
 ],
 
 # This test case depends on test 160/170 thats sets gv1,gv2
@@ -454,7 +459,10 @@ create_curl_cmd(type="POST",data="x.json",base_url=BASE_URL_WS,
                 post_type="elements",branch="$gv2/"),
 True, 
 common_filters,
-["test","workspaces","follows"]
+["test","workspaces","develop"],
+None,
+None,
+set_read_to_gv4
 ],
 
 # This test case depends on test 170 thats sets gv2
@@ -466,7 +474,7 @@ create_curl_cmd(type="GET",base_url=SERVICE_URL,
                 branch="diff/$gv1/$gv2/latest/latest"),
 True, 
 common_filters+['"id"','"qualifiedId"'],
-["test","workspaces","follows"],
+["test","workspaces","develop"],
 None,
 None,
 do20 
@@ -480,7 +488,7 @@ create_curl_cmd(type="GET",base_url=SERVICE_URL,
                 branch="diff/$gv1/$gv2/latest/latest?background"),
 True, 
 common_filters+['"id"','"qualifiedId"','"diffTime"'],
-["test","workspaces","follows"],
+["test","workspaces","develop"],
 ],
         
 [
@@ -491,7 +499,7 @@ create_curl_cmd(type="GET",base_url=SERVICE_URL,
                 branch="diff/$gv1/$gv2/latest/latest?background"),
 True, 
 common_filters+['"id"','"qualifiedId"','"diffTime"'],
-["test","workspaces","follows"],
+["test","workspaces","develop"],
 None,
 None,
 None,
@@ -507,7 +515,7 @@ create_curl_cmd(type="POST",base_url=BASE_URL_WS,
                 post_type="",branch="wsT?sourceWorkspace=$gv1&copyTime=$gv4"),
 True, 
 common_filters+['"branched"','"created"','"id"','"qualifiedId"', '"parent"'],
-["test","workspaces","follows"],
+["test","workspaces","develop"],
 None,
 None,
 set_wsid_to_gv5
@@ -522,7 +530,7 @@ create_curl_cmd(type="POST",data="y.json",base_url=BASE_URL_WS,
                 post_type="elements",branch="$gv5/"),
 True, 
 common_filters,
-["test","workspaces","follows"]
+["test","workspaces","develop"]
 ],
         
 # This test case depends on test 160 thats sets gv1
@@ -534,7 +542,7 @@ create_curl_cmd(type="POST",data="conflict1.json",base_url=BASE_URL_WS,
                 post_type="elements",branch="$gv1/"),
 True, 
 common_filters,
-["test","workspaces","follows"]
+["test","workspaces","develop"]
 ],
         
 # This test case depends on test 220 thats sets gv5
@@ -546,7 +554,7 @@ create_curl_cmd(type="POST",data="conflict2.json",base_url=BASE_URL_WS,
                 post_type="elements",branch="$gv5/"),
 True, 
 common_filters,
-["test","workspaces","follows"]
+["test","workspaces","develop"]
 ],
         
 # This test case depends on test 220 thats sets gv5
@@ -558,7 +566,7 @@ create_curl_cmd(type="POST",data="moved.json",base_url=BASE_URL_WS,
                 post_type="elements",branch="$gv5/"),
 True, 
 common_filters,
-["test","workspaces","follows"]
+["test","workspaces","develop"]
 ],
         
 # This test case depends on test 220 thats sets gv5
@@ -570,7 +578,7 @@ create_curl_cmd(type="POST",data="typeChange.json",base_url=BASE_URL_WS,
                 post_type="elements",branch="$gv5/"),
 True, 
 common_filters,
-["test","workspaces","follows"]
+["test","workspaces","develop"]
 ],
         
 # This test case depends on test 160 thats sets gv1
@@ -582,7 +590,7 @@ create_curl_cmd(type="POST",data="modified303.json",base_url=BASE_URL_WS,
                 post_type="elements",branch="$gv1/"),
 True, 
 common_filters,
-["test","workspaces","follows"]
+["test","workspaces","develop"]
 ],
         
 [
@@ -593,7 +601,7 @@ create_curl_cmd(type="GET",data="elements/303",base_url=BASE_URL_WS,
                 branch="$gv5/"),
 True, 
 common_filters+['"MMS_','MMS_'],
-["test","workspaces","follows"]
+["test","workspaces","develop"]
 ],
         
 # This test case depends on the previous two
@@ -605,7 +613,7 @@ create_curl_cmd(type="GET",base_url=SERVICE_URL,
                 branch="diff/$gv1/$gv5/latest/latest"),
 True, 
 common_filters+['"id"','"qualifiedId"'],
-["test","workspaces","follows"]
+["test","workspaces","develop"]
 ],
         
 # This test case depends on previous ones
@@ -617,7 +625,10 @@ create_curl_cmd(type="POST",data="z.json",base_url=BASE_URL_WS,
                 post_type="elements",branch="$gv1/"),
 True, 
 common_filters,
-["test","workspaces","follows"]
+["test","workspaces","develop"],
+None,
+None,
+set_read_to_gv7
 ],
         
 # This test case depends on previous ones
@@ -626,10 +637,10 @@ common_filters,
 "CreateWorkspaceWithBranchTime2",
 "Create workspace with a branch time using the current time for the branch time",
 create_curl_cmd(type="POST",base_url=BASE_URL_WS,
-                post_type="",branch="wsT2?sourceWorkspace=$gv1&copyTime="+get_current_time()),
+                post_type="",branch="wsT2?sourceWorkspace=$gv1&copyTime=$gv7"),
 True, 
 common_filters+['"branched"','"created"','"id"','"qualifiedId"', '"parent"'],
-["test","workspaces","follows"],
+["test","workspaces","develop"],
 None,
 None,
 set_wsid_to_gv6
@@ -644,7 +655,7 @@ create_curl_cmd(type="GET",base_url=SERVICE_URL,
                 branch="diff/$gv5/$gv6/latest/latest"),
 True, 
 common_filters+['"id"','"qualifiedId"'],
-["test","workspaces","follows"]
+["test","workspaces","develop"]
 ],
     
 [
@@ -655,7 +666,7 @@ create_curl_cmd(type="GET",base_url=SERVICE_URL,
                 branch="diff/$gv1/$gv2/latest/latest?background"),
 True, 
 common_filters+['"id"','"qualifiedId"','"diffTime"'],
-["test","workspaces","follows"],
+["test","workspaces","develop"],
 ],
         
 [
@@ -666,7 +677,7 @@ create_curl_cmd(type="GET",base_url=SERVICE_URL,
                 branch="diff/$gv1/$gv2/latest/latest?background=true&recalculate=true"),
 True, 
 common_filters+['"id"','"qualifiedId"','"diffTime"'],
-["test","workspaces","follows"],
+["test","workspaces","develop"],
 ],
         
 [
@@ -674,10 +685,10 @@ common_filters+['"id"','"qualifiedId"','"diffTime"'],
 "CreateWorkspaceAgain1",
 "Create workspace for another diff test",
 create_curl_cmd(type="POST",base_url=BASE_URL_WS,
-                post_type="",branch="wsG1?sourceWorkspace=master&follow"),
+                post_type="",branch="wsG1?sourceWorkspace=master&copyTime=$gv7"),
 True, 
 common_filters+['"branched"','"created"','"id"','"qualifiedId"'],
-["test","workspaces","follows"],
+["test","workspaces","develop"],
 None,
 None,
 set_wsid_to_gv1
@@ -688,10 +699,10 @@ set_wsid_to_gv1
 "CreateWorkspaceAgain2",
 "Create workspace for another diff test",
 create_curl_cmd(type="POST",base_url=BASE_URL_WS,
-                post_type="",branch="wsG2?sourceWorkspace=master&follow"),
+                post_type="",branch="wsG2?sourceWorkspace=master&copyTime=$gv7"),
 True, 
 common_filters+['"branched"','"created"','"id"','"qualifiedId"'],
-["test","workspaces","follows"],
+["test","workspaces","develop"],
 None,
 None,
 set_wsid_to_gv2
@@ -706,7 +717,7 @@ create_curl_cmd(type="POST",data="elementsForBothWorkspaces.json",base_url=BASE_
                 post_type="elements",branch="$gv1/"),
 True, 
 common_filters,
-["test","workspaces","follows"],
+["test","workspaces","develop"],
 ],
         
 # This test case depends on test 234
@@ -718,7 +729,7 @@ create_curl_cmd(type="POST",data="x.json",base_url=BASE_URL_WS,
                 post_type="elements",branch="$gv1/"),
 True, 
 common_filters,
-["test","workspaces","follows"],
+["test","workspaces","develop"],
 None,
 None,
 set_read_to_gv3
@@ -744,7 +755,7 @@ create_curl_cmd(type="POST",data="elementsForBothWorkspaces.json",base_url=BASE_
                 post_type="elements",branch="$gv2/"),
 True, 
 common_filters,
-["test","workspaces","follows"],
+["test","workspaces","develop"],
 ],
         
 # This test case depends on test 235
@@ -756,7 +767,7 @@ create_curl_cmd(type="POST",data="z.json",base_url=BASE_URL_WS,
                 post_type="elements",branch="$gv2/"),
 True, 
 common_filters,
-["test","workspaces","follows"],
+["test","workspaces","develop"],
 None,
 None,
 set_read_to_gv4
@@ -771,7 +782,7 @@ create_curl_cmd(type="GET",base_url=SERVICE_URL,
                 branch="diff/$gv1/$gv2/$gv3/$gv4"),
 True, 
 common_filters+['"id"','"qualifiedId"','"timestamp"'],
-["test","workspaces","follows"]
+["test","workspaces","develop"]
 ],
 
 # This test case depends on test 220 this makes sure that recursive get on ws gets
@@ -785,7 +796,7 @@ create_curl_cmd(type="GET", base_url=BASE_URL_WS,
                 branch="$gv1/elements/302?recurse=true"),
 True,
 common_filters,
-["follows"]
+["test","develop"]
 ],
 
 [
@@ -797,7 +808,7 @@ create_curl_cmd(type="POST",data='\'{"elements":[{"sysmlid":"proj_id_001","name"
                 branch="$gv1/sites/site_in_ws/projects?createSite=true",project_post=True),
 False, 
 None,
-["test","workspaces","follows"]
+["test","workspaces","develop"]
 ],
  
 [
@@ -807,7 +818,7 @@ None,
 create_curl_cmd(type="GET",data="sites",base_url=BASE_URL_WS, branch="$gv1/"),
 False, 
 None,
-["test","workspaces","follows"]
+["test","workspaces","develop"]
 ],
 
 
@@ -819,7 +830,7 @@ create_curl_cmd(type="GET",data="products",base_url=BASE_URL_WS,
                 branch="$gv1/sites/europa/"),
 True, 
 common_filters,
-["test","workspaces","follows"]
+["test","workspaces","develop"]
 ],
         
 [
@@ -867,7 +878,7 @@ common_filters+['"id"','"qualifiedId"','"timestamp"','"diffTime"'],
 "CreateParentWorkspace",
 "Create a workspace to be a parent of another",
 create_curl_cmd(type="POST",base_url=BASE_URL_WS,
-                post_type="",branch="parentWorkspace1?sourceWorkspace=master&copyTime="+get_current_time()),
+                post_type="",branch="parentWorkspace1?sourceWorkspace=master&copyTime=$gv1"),
 True, 
 common_filters+['"branched"','"created"','"id"','"qualifiedId"'],
 ["test","workspaces","develop", "develop2"],
@@ -887,7 +898,7 @@ common_filters,
 ["test","workspaces","develop", "develop2"],
 None,
 None,
-set_read_to_gv2
+set_read_delta_to_gv2
 ],
         
 [
@@ -895,19 +906,20 @@ set_read_to_gv2
 "CreateSubworkspace",
 "Create workspace inside a workspace",
 create_curl_cmd(type="POST",base_url=BASE_URL_WS,
-                post_type="",branch="subworkspace1?sourceWorkspace=$gv1&copyTime="+get_current_time()),
+                post_type="",branch="subworkspace1?sourceWorkspace=$gv1&copyTime=$gv2"),
 True, 
 common_filters+['"branched"','"created"','"id"','"qualifiedId"','"parent"'],
 ["test","workspaces","develop", "develop2"],
 None,
 None,
-set_wsid_to_gv3
+set_wsid_to_gv3,
+30
 ],
 
 [
 203,
 "GetElementInMasterFromSubworkspace",
-"Get an element that only exists in the master from a subworkspace after its parent branch was created but before the it was created",
+"Get an element that only exists in the master from a subworkspace after its parent branch was created but before the it was created, it wont find the element",
 create_curl_cmd(type="GET",data="elements/a",base_url=BASE_URL_WS,
                 branch="$gv3/"),
 True, 
@@ -922,7 +934,7 @@ common_filters,
 create_curl_cmd(type="POST", data="a.json", base_url="http://localhost:8080/alfresco/service/workspaces/", post_type="elements", branch="master/", project_post=False),
 True,
 common_filters,
-["develop"]
+["test","develop"]
 ],
 
 [
@@ -932,7 +944,7 @@ common_filters,
 create_curl_cmd(type="POST", data="", base_url="http://localhost:8080/alfresco/service/workspaces/", post_type="", branch="theParentWorkspace?sourceWorkspace=master", project_post=False),
 True,
 common_filters+['"branched"','"created"','"id"','"qualifiedId"'],
-["develop"]
+["test","develop"]
 ],
 
 [
@@ -942,7 +954,7 @@ common_filters+['"branched"','"created"','"id"','"qualifiedId"'],
 create_curl_cmd(type="POST", data="b.json", base_url="http://localhost:8080/alfresco/service/workspaces/", post_type="elements", branch="master/", project_post=False),
 True,
 common_filters,
-["develop"]
+["test","develop"]
 ],
 
 [
@@ -952,7 +964,7 @@ common_filters,
 create_curl_cmd(type="POST", data="c.json", base_url="http://localhost:8080/alfresco/service/workspaces/", post_type="elements", branch="theParentWorkspace/", project_post=False),
 True,
 common_filters,
-["develop"]
+["test","develop"]
 ],
 
 [
@@ -962,7 +974,7 @@ common_filters,
 create_curl_cmd(type="POST", data="", base_url="http://localhost:8080/alfresco/service/workspaces/", post_type="", branch="theSubworkspace?sourceWorkspace=theParentWorkspace", project_post=False),
 True,
 common_filters+['"branched"','"created"','"id"','"qualifiedId"', '"parent"'],
-["develop"]
+["test","develop"]
 ],
 
 [
@@ -972,7 +984,7 @@ common_filters+['"branched"','"created"','"id"','"qualifiedId"', '"parent"'],
 create_curl_cmd(type="POST", data="d.json", base_url="http://localhost:8080/alfresco/service/workspaces/", post_type="elements", branch="master/", project_post=False),
 True,
 common_filters,
-["develop"]
+["test","develop"]
 ],
 
 [
@@ -982,7 +994,7 @@ common_filters,
 create_curl_cmd(type="POST", data="e.json", base_url="http://localhost:8080/alfresco/service/workspaces/", post_type="elements", branch="theParentWorkspace/", project_post=False),
 True,
 common_filters,
-["develop"]
+["test","develop"]
 ],
 
 [
@@ -992,7 +1004,7 @@ common_filters,
 create_curl_cmd(type="POST", data="f.json", base_url="http://localhost:8080/alfresco/service/workspaces/", post_type="elements", branch="theSubworkspace/", project_post=False),
 True,
 common_filters,
-["develop"]
+["test","develop"]
 ],
 
 [
@@ -1002,7 +1014,7 @@ common_filters,
 create_curl_cmd(type="GET", data="elements/a", base_url="http://localhost:8080/alfresco/service/workspaces/", post_type="elements", branch="master/", project_post=False),
 True,
 common_filters,
-["develop"]
+["test","develop"]
 ],
 
 [
@@ -1012,7 +1024,7 @@ common_filters,
 create_curl_cmd(type="GET", data="elements/a", base_url="http://localhost:8080/alfresco/service/workspaces/", post_type="elements", branch="theParentWorkspace/", project_post=False),
 True,
 common_filters,
-["develop"]
+["test","develop"]
 ],
 
 [
@@ -1022,7 +1034,7 @@ common_filters,
 create_curl_cmd(type="GET", data="elements/a", base_url="http://localhost:8080/alfresco/service/workspaces/", post_type="elements", branch="theSubworkspace/", project_post=False),
 True,
 common_filters,
-["develop"]
+["test","develop"]
 ],
 
 [
@@ -1032,7 +1044,7 @@ common_filters,
 create_curl_cmd(type="GET", data="elements/b", base_url="http://localhost:8080/alfresco/service/workspaces/", post_type="elements", branch="master/", project_post=False),
 True,
 common_filters,
-["develop"]
+["test","develop"]
 ],
 
 [
@@ -1042,7 +1054,7 @@ common_filters,
 create_curl_cmd(type="GET", data="elements/b", base_url="http://localhost:8080/alfresco/service/workspaces/", post_type="elements", branch="theParentWorkspace/", project_post=False),
 True,
 common_filters,
-["develop"]
+["test","develop"]
 ],
 
 [
@@ -1052,7 +1064,7 @@ common_filters,
 create_curl_cmd(type="GET", data="elements/b", base_url="http://localhost:8080/alfresco/service/workspaces/", post_type="elements", branch="theSubworkspace/", project_post=False),
 True,
 common_filters,
-["develop"]
+["test","develop"]
 ],
 
 [
@@ -1062,7 +1074,7 @@ common_filters,
 create_curl_cmd(type="GET", data="elements/c", base_url="http://localhost:8080/alfresco/service/workspaces/", post_type="elements", branch="master/", project_post=False),
 True,
 common_filters,
-["develop"]
+["test","develop"]
 ],
 
 [
@@ -1072,7 +1084,7 @@ common_filters,
 create_curl_cmd(type="GET", data="elements/c", base_url="http://localhost:8080/alfresco/service/workspaces/", post_type="elements", branch="theParentWorkspace/", project_post=False),
 True,
 common_filters,
-["develop"]
+["test","develop"]
 ],
 
 [
@@ -1082,7 +1094,7 @@ common_filters,
 create_curl_cmd(type="GET", data="elements/c", base_url="http://localhost:8080/alfresco/service/workspaces/", post_type="elements", branch="theSubworkspace/", project_post=False),
 True,
 common_filters,
-["develop"]
+["test","develop"]
 ],
 
 [
@@ -1092,7 +1104,7 @@ common_filters,
 create_curl_cmd(type="GET", data="elements/d", base_url="http://localhost:8080/alfresco/service/workspaces/", post_type="elements", branch="master/", project_post=False),
 True,
 common_filters,
-["develop"]
+["test","develop"]
 ],
 
 [
@@ -1102,7 +1114,7 @@ common_filters,
 create_curl_cmd(type="GET", data="elements/d", base_url="http://localhost:8080/alfresco/service/workspaces/", post_type="elements", branch="theParentWorkspace/", project_post=False),
 True,
 common_filters,
-["develop"]
+["test","develop"]
 ],
 
 [
@@ -1112,7 +1124,7 @@ common_filters,
 create_curl_cmd(type="GET", data="elements/d", base_url="http://localhost:8080/alfresco/service/workspaces/", post_type="elements", branch="theSubworkspace/", project_post=False),
 True,
 common_filters,
-["develop"]
+["test","develop"]
 ],
 
 [
@@ -1122,7 +1134,7 @@ common_filters,
 create_curl_cmd(type="GET", data="elements/e", base_url="http://localhost:8080/alfresco/service/workspaces/", post_type="elements", branch="master/", project_post=False),
 True,
 common_filters,
-["develop"]
+["test","develop"]
 ],
 
 [
@@ -1132,7 +1144,7 @@ common_filters,
 create_curl_cmd(type="GET", data="elements/e", base_url="http://localhost:8080/alfresco/service/workspaces/", post_type="elements", branch="theParentWorkspace/", project_post=False),
 True,
 common_filters,
-["develop"]
+["test","develop"]
 ],
 
 [
@@ -1142,7 +1154,7 @@ common_filters,
 create_curl_cmd(type="GET", data="elements/e", base_url="http://localhost:8080/alfresco/service/workspaces/", post_type="elements", branch="theSubworkspace/", project_post=False),
 True,
 common_filters,
-["develop"]
+["test","develop"]
 ],
 
 [
@@ -1152,7 +1164,7 @@ common_filters,
 create_curl_cmd(type="GET", data="elements/f", base_url="http://localhost:8080/alfresco/service/workspaces/", post_type="elements", branch="master/", project_post=False),
 True,
 common_filters,
-["develop"]
+["test","develop"]
 ],
 
 [
@@ -1162,7 +1174,7 @@ common_filters,
 create_curl_cmd(type="GET", data="elements/f", base_url="http://localhost:8080/alfresco/service/workspaces/", post_type="elements", branch="theParentWorkspace/", project_post=False),
 True,
 common_filters,
-["develop"]
+["test","develop"]
 ],
 
 [
@@ -1172,7 +1184,7 @@ common_filters,
 create_curl_cmd(type="GET", data="elements/f", base_url="http://localhost:8080/alfresco/service/workspaces/", post_type="elements", branch="theSubworkspace/", project_post=False),
 True,
 common_filters,
-["develop"]
+["test","develop"]
 ],
 
 
@@ -1209,7 +1221,7 @@ create_curl_cmd(type="POST",base_url=BASE_URL_WS,
                 post_type="elements?fix=true"),
 True,
 common_filters,
-["test","workspaces"]
+["test","workspaces","develop"]
 ],
         
 [
@@ -1306,7 +1318,7 @@ create_curl_cmd(type="GET",data="views/_17_0_2_3_e610336_1394148311476_17302_293
                 branch="master/"),
 True, 
 common_filters,
-["test","workspaces", "develop2"]
+["test","workspaces", "develop2",]
 ],
 
 
@@ -1346,7 +1358,10 @@ create_curl_cmd(type="POST",data="x.json",base_url=BASE_URL_WS,
                 post_type="elements",branch="master/sites/europa/"),
 True, 
 common_filters,
-["test","workspaces","develop", "develop2"]
+["test","workspaces","develop", "develop2"],
+None,
+None,
+set_read_to_gv7
 ],
         
 # Posting a new project/site tested in PostSite
@@ -1404,10 +1419,10 @@ False,
 "CreateWorkspaceDelete1",
 "Create workspace to be deleted",
 create_curl_cmd(type="POST",base_url=BASE_URL_WS,
-                post_type="",branch="AA?sourceWorkspace=master&follow"),
+                post_type="",branch="AA?sourceWorkspace=master&copyTime=$gv7"),
 True,
-common_filters + ['"parent"','"id"','"qualifiedId"'],
-["develop"],
+common_filters + ['"parent"','"id"','"qualifiedId"','"branched"'],
+["test","develop"],
 None,
 None,
 set_wsid_to_gv1
@@ -1419,10 +1434,10 @@ set_wsid_to_gv1
 "CreateWorkspaceDelete2",
 "Create workspace to be deleted",
 create_curl_cmd(type="POST",base_url=BASE_URL_WS,
-                post_type="",branch="BB?sourceWorkspace=$gv1&follow"),
+                post_type="",branch="BB?sourceWorkspace=$gv1&copyTime=$gv7"),
 True,
-common_filters + ['"parent"','"id"','"qualifiedId"'],
-["develop"]
+common_filters + ['"parent"','"id"','"qualifiedId"','"branched"'],
+["test","develop"]
 ],
 
 # This test depends on 370 for gv1
@@ -1434,7 +1449,7 @@ create_curl_cmd(type="DELETE",base_url=BASE_URL_WS,
                 post_type="",branch="$gv1"),
 True,
 common_filters + ['"parent"','"id"','"qualifiedId"'],
-["develop"]
+["test","develop"]
 ],
 
 [
@@ -1445,7 +1460,7 @@ create_curl_cmd(type="GET",base_url=BASE_URL_WS_NOBS,
                 post_type="", branch=""),
 True,
 common_filters + ['"parent"','"id"','"qualifiedId"','"branched"'],
-["follows"]
+["test","develop"]
 ],
 
 [
@@ -1455,8 +1470,8 @@ common_filters + ['"parent"','"id"','"qualifiedId"','"branched"'],
 create_curl_cmd(type="GET",base_url=BASE_URL_WS_NOBS,
                 post_type="", branch="?deleted"),
 True,
-common_filters + ['"parent"','"id"','"qualifiedId"'],
-["develop"]
+common_filters + ['"parent"','"id"','"qualifiedId"','"branched"'],
+["test","develop"]
 ],
 
 ## TODO: placeholder to put in post to get back workspace A (need the ID from 380)
@@ -1467,7 +1482,7 @@ common_filters + ['"parent"','"id"','"qualifiedId"'],
 'echo "temporary placeholder"',
 False,
 None,
-["develop"]
+["test","develop"]
 ],
 
 # SITE PACKAGES: ==========================    
@@ -1618,7 +1633,10 @@ create_curl_cmd(type="POST",data="elementDowngrade.json",base_url=BASE_URL_WS,
                 post_type="elements",branch="master/"),
 True, 
 common_filters,
-["test","workspaces","develop", "develop2"]
+["test","workspaces","develop", "develop2"],
+None,
+None,
+set_read_to_gv7
 ],
         
 # DiffPost (Merge) (CMED-471) Tests: ==================    
@@ -1628,7 +1646,7 @@ common_filters,
 "DiffWorkspaceCreate1",
 "Diff Workspace Test - Create WS 1",
 create_curl_cmd(type="POST",base_url=BASE_URL_WS,
-                post_type="",branch="ws1?sourceWorkspace=master&follow"),
+                post_type="",branch="ws1?sourceWorkspace=master&copyTime=$gv7"),
 True, 
 common_filters+['"branched"','"created"','"id"','"qualifiedId"'],
 ["test","workspaces","develop"],
@@ -1642,7 +1660,7 @@ set_wsid_to_gv1
 "DiffWorkspaceCreate2",
 "Diff Workspace Test - Create WS 2",
 create_curl_cmd(type="POST",base_url=BASE_URL_WS,
-                post_type="",branch="ws2?sourceWorkspace=master&follow"),
+                post_type="",branch="ws2?sourceWorkspace=master&copyTime=$gv7"),
 True, 
 common_filters+['"branched"','"created"','"id"','"qualifiedId"'],
 ["test","workspaces","develop"],
@@ -1661,7 +1679,7 @@ create_curl_cmd(type="DELETE",data="elements/arg_ev_38307",base_url=BASE_URL_WS,
                 branch="$gv1/"),
 True, 
 common_filters+['"timestamp"','"MMS_','"id"','"qualifiedId"','"version"', '"modified"'],
-["test","workspaces"]
+["test","workspaces","develop"]
 ], 
 
 [
@@ -1695,7 +1713,7 @@ create_curl_cmd(type="GET",base_url=SERVICE_URL,
                 branch="diff/$gv2/$gv1"),
 True, 
 common_filters+['"id"','"qualifiedId"'],
-["test","workspaces"],
+["test","workspaces","develop"],
 None,
 None,
 set_json_output_to_gv3
@@ -1709,7 +1727,7 @@ set_json_output_to_gv3
 'curl %s %s \'$gv3\' "%sdiff"'%(CURL_FLAGS, CURL_POST_FLAGS, SERVICE_URL),
 True, 
 common_filters+['"id"','"qualifiedId"','"timestamp"'],
-["test","workspaces"],
+["test","workspaces","develop"],
 ],         
        
 # Diff again should be empty.  This test depends on the previous one.
@@ -1722,7 +1740,7 @@ create_curl_cmd(type="GET",base_url=SERVICE_URL,
                 branch="diff/$gv2/$gv1"),
 True, 
 common_filters+['"id"','"qualifiedId"'],
-["test","workspaces"],
+["test","workspaces","develop"],
 ], 
  
 # EXPRESSION PARSING =====================================================
@@ -1846,7 +1864,7 @@ common_filters+['"timestamp"', '"id"'],
 "curl -w '\\n%{http_code}\\n' -u None:password -H Content-Type:application/json " + BASE_URL_WS + "master/elements -d '{\"elements\":[{\"sysmlid\":\"y\",\"documentation\":\"y is modified by None\"}]}'",
 True,
 common_filters,
-["test","workspaces"]
+["test","workspaces","develop"]
 ],
     
 [
@@ -1856,7 +1874,7 @@ common_filters,
 "curl -w '\\n%{http_code}\\n' -u None:password -H Content-Type:application/json " + BASE_URL_WS + "master/elements -d '{\"elements\":[{\"sysmlid\":\"ychild\",\"documentation\":\"y child\",\"owner\":\"y\"}]}'",
 True,
 common_filters,
-["test","workspaces"]
+["test","workspaces","develop"]
 ],
  
 [
@@ -1866,7 +1884,7 @@ common_filters,
 "curl -w '\\n%{http_code}\\n' -u Collaborator:password -X GET " + BASE_URL_WS + "master/elements/y",
 True,
 common_filters,
-["test","workspaces"]
+["test","workspaces","develop"]
 ],
    
 [
@@ -1886,7 +1904,7 @@ common_filters,
 "curl -w '\\n%{http_code}\\n' -u Collaborator:password -H Content-Type:application/json " + BASE_URL_WS + "master/elements -d '{\"elements\":[{\"sysmlid\":\"ychild\",\"documentation\":\"y child\",\"owner\":\"y\"}]}'",
 True,
 common_filters,
-["test","workspaces"]
+["test","workspaces","develop"]
 ],
  
 [
@@ -1896,7 +1914,7 @@ common_filters,
 "curl -w '\\n%{http_code}\\n' -u Collaborator:password -X DELETE " + BASE_URL_WS + "master/elements/y",
 True,
 common_filters+['"timestamp"', '"id"'],
-["test","workspaces"]
+["test","workspaces","develop"]
 ],
   
 [
@@ -1918,7 +1936,7 @@ common_filters,
 "curl -w '\\n%{http_code}\\n' -u Consumer:password -X GET " + BASE_URL_WS + "master/elements/y",
 True,
 common_filters,
-["test","workspaces"]
+["test","workspaces","develop"]
 ],
    
 [
@@ -1928,7 +1946,7 @@ common_filters,
 "curl -w '\\n%{http_code}\\n' -u Consumer:password -H Content-Type:application/json " + BASE_URL_WS + "master/elements -d '{\"elements\":[{\"sysmlid\":\"y\",\"documentation\":\"y is modified by Consumer\"}]}'",
 False,
 common_filters,
-["test","workspaces"],
+["test","workspaces","develop"],
 None,
 removeCmNames,
 None
