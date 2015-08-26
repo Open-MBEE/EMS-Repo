@@ -317,7 +317,10 @@ public class CommitUtil {
 	public static String getTimestamp(EmsScriptNode commitNode, String workspace)
 	{
 	    Object commit = commitNode.getProperty("ems:commit");
-	    JSONObject latestCommit = new JSONObject(commit);
+	    if (!(commit instanceof String)) {
+	        return null;
+	    }
+	    JSONObject latestCommit = new JSONObject( (String) commit );
 	    JSONObject workspaceObject = null;
 	    if (workspace.equals("workspace1"))
 	    {

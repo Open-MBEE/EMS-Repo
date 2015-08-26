@@ -219,7 +219,7 @@ if options.setup != " " or options.postProcess != " " or options.teardown != " "
         compiledStringOfArguments = ',\n'.join(optionalArguments)
         listOfOptionalFunctions += compiledStringOfArguments          
  
-if curl_data[0] == "'" and curl_data[-1] == "'":
+if options.data and curl_data[0] == "'" and curl_data[-1] == "'":
     curl_data = "'\\\'" + options.data + "\\\''"
 else:
     curl_data = "\"" + curl_data + "\""      
