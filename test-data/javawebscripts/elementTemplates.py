@@ -1,4 +1,17 @@
 import json
+TEMPLATE_EMPTY_ELEMENT = json.dumps({
+    "elements":[
+        {
+            "sysmlid":"newElement",
+            "specialization": {
+                "type": "",
+
+            },
+            "name": "No Name",
+            "documentation": ""
+        }
+    ]
+})
 
 # YOU POST THIS FIRST
 TEMPLATE_NEW_VIEW = json.dumps({
@@ -98,3 +111,4 @@ TEMPLATE_TYPE_PRODUCT = json.dumps({"type": "Product"})
 TEMPLATE_ALLOWED_ELEMENTS = json.dumps({"allowedElements": []})
 TEMPLATE_DISPLAYED_ELEMENTS = json.dumps({"displayedElements": []})
 TEMPLATE_VIEW2VIEW_NEW_VIEW = json.dumps({"view2view": [{"id": "", "childrenViews": []}]})
+TEMPLATE_V2V_CHILD_VIEW = json.dumps({"id": "", "childrenViews": []}, sort_keys=True, indent=4, separators=(',', ': '))
