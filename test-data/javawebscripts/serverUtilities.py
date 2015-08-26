@@ -255,37 +255,17 @@ class UtilElement:
 
 # Utility functions to be used outside the class
 def POSTjson(element, verbose=True):
-    print str(element)
-    print '-------------------------------------------------'
-    print 'Printing object within post json function'
-    print '-------------------------------------------------'
-    # print json.dumps(element.jsonObj, sort_keys=True, indent=4, separators=(',', ': '))
-    # printObj = json.loads(element.jsonObj.get('element'))
-    # printObj = json.dumps(printObj, sort_keys=True, indent=4, separators=(',', ': '))
-    print '-------------------------------------------------'
-    # print str(printObj)
-    print '-------------------------------------------------'
-    print 'ENDING POSTjson print'
-    print '-------------------------------------------------'
 
-    # if (element is '' and element.jsonObj is not None):
     if (element.jsonObj is not None):
-        # postObject = json.dumps(element.jsonObj)
-        print str(element.jsonObj)
-        # postObject = json.dumps(element.jsonObj)
-        print "Dumping object..."
-        # curl_cmd = regression_lib.create_curl_cmd(type="POST", data=postObject)
+
         curl_cmd = create_curl_cmd(type="POST", data=str(element.jsonObj))
-        print '-------------------------------------------------'
         print 'Curl Command Posting by ELEMENT From POST Function'
         print '-------------------------------------------------'
         print str(curl_cmd)
         print '-------------------------------------------------'
         postByID = False
     elif element is not '':
-        # postObject = str(json.dumps(element))
         postObject = json.dumps(element.jsonObj)
-        # curl_cmd = regression_lib.create_curl_cmd(type="POST", data=postObject)
         postObject = json.loads(postObject)
         curl_cmd = create_curl_cmd(type="POST", data="elements/" + str(postObject), branch='master/')
         print '-------------------------------------------------'
