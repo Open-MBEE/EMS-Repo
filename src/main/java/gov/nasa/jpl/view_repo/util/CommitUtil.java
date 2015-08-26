@@ -314,6 +314,27 @@ public class CommitUtil {
 	    return null;
 	}
 	
+	public static String getTimestamp(EmsScriptNode commitNode, String workspace)
+	{
+	    Object commit = commitNode.getProperty("ems:commit");
+	    JSONObject latestCommit = new JSONObject(commit);
+	    JSONObject workspaceObject = null;
+	    if (workspace.equals("workspace1"))
+	    {
+	        workspaceObject = latestCommit.getJSONObject("workspace1");
+	    }
+	    else if (workspace.equals("workspace2"))
+	    {
+	        workspaceObject = latestCommit.getJSONObject("workspace2");
+	    }
+	    else
+	    {
+	        return null;
+	    }
+	    String timestamp = workspaceObject.getString("timestamp");
+	    return timestamp;
+	}
+	
     public static String replaceTimeStampWithCommitTime(Date date,
                                                         WorkspaceNode ws,
                                                         ServiceRegistry services, 
@@ -324,11 +345,7 @@ public class CommitUtil {
         String timestamp = null;
         
         if (lastCommit != null) {
-            Date lastCommitTime = lastCommit.getCreationDate();
-            
-            if (lastCommitTime != null) {
-                timestamp = TimeUtils.toTimestamp(lastCommitTime);
-            }
+            timestamp = getTimestamp(lastCommit, "workspace2");
         }
         
         return timestamp;
@@ -373,9 +390,12 @@ public class CommitUtil {
         while ( true ) { // run until endWorkspace or master
             EmsScriptNode commit = getLastCommit( startWorkspace, services, response );
             while ( commit != null ) {
-                Date created = commit.getCreationDate();
-                if ( fromDateTime != null && created.before( fromDateTime ) ) break;
-                if ( toDateTime == null || !created.after( toDateTime ) ) {
+                String endOfCommit = getTimestamp(commit, "workspace2");
+                Date endDate = TimeUtils.dateFromTimestamp( endOfCommit );
+                if ( fromDateTime != null && endDate.before( fromDateTime ) ) break;
+                String beginningOfCommit = getTimestamp(commit, "workspace1");
+                Date beginningDate = TimeUtils.dateFromTimestamp( beginningOfCommit );
+                if ( toDateTime == null || beginningDate.before( toDateTime ) ) {
                     commits.add( commit );
                 }
                 commit = getPreviousCommit(commit);

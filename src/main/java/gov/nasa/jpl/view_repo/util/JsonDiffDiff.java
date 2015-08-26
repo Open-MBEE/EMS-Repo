@@ -600,8 +600,8 @@ public class JsonDiffDiff extends AbstractDiff< JSONObject, Object, String > {
     }
     
     public static JSONObject glom( ArrayList<JSONObject> diffs, boolean reverse ) {
-        if ( Utils.isNullOrEmpty( diffs ) ) return null;
         JSONObject glommedDiff = makeEmptyDiffJson();
+        if ( Utils.isNullOrEmpty( diffs ) ) return glommedDiff;
         if ( diffs.size() == 1 ) return glommedDiff;
         LinkedHashMap<String, Pair<DiffOp, List<JSONObject> > > diffMap1 =
                 new LinkedHashMap< String, Pair<DiffOp,List<JSONObject>> >();

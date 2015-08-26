@@ -911,10 +911,9 @@ public class WorkspaceNode extends EmsScriptNode {
                     e.printStackTrace();
                 }
             }
-            JSONObject glommedCommit = JsonDiffDiff.glom( commitsJson, true );
-            return glommedCommit;
         }
-        return null;
+        JSONObject glommedCommit = JsonDiffDiff.glom( commitsJson, true );
+        return glommedCommit;
     }
 
     public Set< String > getChangedElementIdsWithRespectTo( WorkspaceNode other, Date dateTime ) {
