@@ -315,7 +315,7 @@ def POSTjson(element, verbose=True):
 def GETjson(sysmlid):
     curl_cmd = create_curl_cmd('GET', data="elements/" + str(sysmlid), branch='master/', post_type='elements/')
     print curl_cmd
-    obj = get_json_output_no_status(execCurlCmd(curl_cmd)).replace("n", "")
+    obj = get_json_output_no_status(execCurlCmd(curl_cmd)).replace("\n", "")
     print str(obj)
     elementsIndex = str(obj).rfind('{"elements', 0)
     returnObj = json.loads(obj[elementsIndex:])  # .get('elements')
@@ -324,23 +324,34 @@ def GETjson(sysmlid):
 
 #  This process Requires 4 POSTs to complete adding a view to another view
 def addViewToView(toAdd, addingTo):
-
+    postCount = 1
     toAdd_element = UtilElement(toAdd)
 
+    ###################################################################################################################
     # Determine what type view the child view will be added to
     #   This is for retrieve the sysmlid needed to create the new viewpoint
+    ###################################################################################################################
     if type(addingTo) is not str:
         print '========================'
+        print ''
         print 'Is not string'
+        print ''
         print '========================'
+        print ''
         postElement = UtilElement(addingTo)
         ownerSysmlid = postElement.sysmlid
     else:
+        print ''
         print '========================'
+        print ''
         print 'Is String'
+        print ''
         print '========================'
+        print ''
         ownerSysmlid = addingTo
-      # Loads a template of the view
+    ###################################################################################################################
+    # Loads a template of the view
+    ###################################################################################################################
     newView = json.loads(TEMPLATE_NEW_VIEW)
     newView.get('elements')[0].update(owner=ownerSysmlid)
     newView.get('elements')[0].update(documentation=toAdd_element.documentation)
@@ -348,65 +359,412 @@ def addViewToView(toAdd, addingTo):
     newView.get('elements')[0].get('specialization').update(type=toAdd_element.type)
 
     postView = json.dumps(newView, separators=(',', ':'))
+    ###################################################################################################################
     # Post new view to get instance specification
+    ###################################################################################################################
     print ''
     print '---==============================---'
-    print ''
+    print ' - Line 361 - '
     postStr = '\'' + str(postView) + '\''
     print 'Post String'
+    print ''
     print postStr
     print ''
     print '---==============================---'
     print ''
+    ###################################################################################################################
+    # Creates the curl command that will post to the server to retrieve information to create the new view
+    # This post is used to notify the server that a new view will is to be created.
+    ###################################################################################################################
     cmd = create_curl_cmd("POST", data=postStr,branch='master/' + 'elements',project_post=True)
     print ' CURL COMMAND '
     print cmd
     print ''
     print '---==============================---'
-    print '     output      post 1     '
+    print '- Line 377 -'
+    print '     output      post 1    '
+    print ''
     print '---==============================---'
     print ''
-    responseJson = get_json_output_no_status(execCurlCmd(cmd)).replace("\n", "")
+    ###########################################################################################
+    # Executes the curl command and returns the response from the server
+    ###########################################################################################
+    responseJson = get_json_output_no_status(execCurlCmd(cmd,postCount)).replace("\n", "")
+    postCount += 1
     print 'PRINTING RESPONSE JSON'
+    print ''
+    ###################################################################################################################
+    # Prints the response json and removes the \ characters. (Replaces \ with '')
+    ###################################################################################################################
     print str(responseJson).replace('\\', "")
-    print '---==============================---'
-
-
-    responseJson = json.dumps(str(responseJson))
-    print 'PRINTING RESPONSE JSON After Dump'
-    print str(responseJson)
+    print ''
     print '---==============================---'
     print ''
-    responseJson = json.loads(responseJson)
-    print 'PRINTING RESPONSE JSON After Loads'
+    print '- Line 390 - Prints the json with the characters removed from the string'
     print str(responseJson)
+    print ''
     print '---==============================---'
+    ###################################################################################################################
+    # Searches for the pattern {elements and finds the index where it starts. This will be used to slice the string
+    #   then create a python JSON object.
+    ###################################################################################################################
     elementsIndex = str(responseJson).rfind('{\"elements', 0)
-
-    print 'printing elements index'
+    print ''
+    print ' - Line 398'
+    print 'printing elements index '
     print elementsIndex
-
-    # returnObj = json.loads(responseJson[elementsIndex:])
-
-    responseId = responseJson.get('elements')[0].get('sysmlid')
-    postView = TEMPLATE_INSTANCE_SPEC
-    postView.get('elements')[0].get('specialization').get('instanceSpecificationSpecification').get('string').update(
-        source=responseId)
-
-    postView = json.dumps(newView, separators=(',', ':'))
-    postStr = '\'' + str(postView) + '\''
-
-    cmd = create_curl_cmd("POST", data=postStr, branch='master/' + 'elements', project_post=True)
-    print ' CURL COMMAND '
-    print cmd
-
-    print '---==============================---'
-    print '     output      post 2     '
+    print ''
     print '---==============================---'
     print ''
-    responseJson = execCurlCmd(cmd)
-    print responseJson
+    print ''
+    ###################################################################################################################
+    # This will load the json string from the index where it found the pattern as a python object.
+    ###################################################################################################################
+    responseJson = json.loads(responseJson[elementsIndex:])
+
     print '---==============================---'
+    print ' - Line 426 -'
+    print ''
+    print ' Print Return Object after loads from ' + str(elementsIndex) + ' to the end'
+    print ''
+    print responseJson
+    print ''
+    print '---==============================---'
+    print ''
+    responseId = responseJson.get('elements')[0].get('sysmlid')
+    responseSiteCharId = responseJson.get('elements')[0].get('siteCharacterizationId')
+    print '- line 436 - print owner ID'
+    print ''
+    print responseId
+    print ''
+    print '---==============================---'
+    print ''
+    ###################################################################################################################
+    # Loads a template view element to the post view object
+    ###################################################################################################################
+    postView = json.loads(TEMPLATE_INSTANCE_SPEC)
+
+    ###################################################################################################################
+    # Updates the source of the template view element with the sysmlid from the response element when first posting
+    #   to the server
+    ###################################################################################################################
+    postView.get('elements')[0].get('specialization').get('instanceSpecificationSpecification').get('string').update(source=responseId)
+
+    ###################################################################################################################
+    # Updates the owner of the new view element to post with the site characterization id and appends the
+    # suffix '_no_project'
+    ###################################################################################################################
+    postView.get('elements')[0].update(owner=responseSiteCharId + '_no_project')
+
+    ###################################################################################################################
+    # Takes the string attribute and converts it to a proper string format with escape characters for the double quotes
+    ###################################################################################################################
+    stringify = postView.get('elements')[0].get('specialization').get('instanceSpecificationSpecification').get('string')
+
+    ###################################################################################################################
+    # Calling json.dumps on stringify will automatically add the \ character in where ever it is needed to escape any
+    #  special cha
+    ###################################################################################################################
+    stringify = json.dumps(stringify)
+
+    print '---==============================---'
+    print ' - Line 471 - '
+    print 'Print dumped - stringify before adding \\'
+    print ''
+    print stringify
+    print ''
+    print '---==============================---'
+    print ''
+    postView = json.dumps(postView, separators=(',', ':'))
+    print '---==============================---'
+    print ' - Line 480 - '
+    print ''
+    print 'Printing stringified string from the postView element with added \\ '
+    print ''
+    print stringify
+    print ''
+    print '---==============================---'
+    print ''
+    print 'Updating the postView object with the formatted string data member'
+    postView = json.loads(postView)
+    postView.get('elements')[0].get('specialization').get('instanceSpecificationSpecification').update(
+        string=stringify)
+    print ''
+    print postView
+    print ''
+    postView = json.dumps(postView)
+    print '---==============================---'
+    print ' - Line 497 - '
+    print ''
+    postStr = '\'' + str(postView) + '\''
+    print 'Print Post View after updating source to new owner sysmlid'
+    print ''
+    print postView
+    print ''
+    print '---==============================---'
+    print ''
+    cmd = create_curl_cmd("POST", data=postStr, branch='master/' + 'elements', project_post=True)
+    print ''
+    print '---==============================---'
+    print ' - Line 509 -'
+    print ''
+    print ' CURL COMMAND '
+    print ''
+    print '---==============================---'
+    print ''
+    print cmd
+    print ''
+    print '---==============================---'
+    print ' - Line 518 -'
+    print ''
+    print '     output      post 2     '
+    print ''
+    print '- CALL EXEC CURL -'
+    print ''
+    print '---==============================---'
+    responseJson = get_json_output_no_status(execCurlCmd(cmd, postCount)).replace("\n", "")
+    print ' - Line 457 - '
+    print ''
+    print ' Printing response json after the secondary post of the instance specification'
+    print ''
+    print '---==============================---'
+    print ''
+    print responseJson
+    print ''
+    print '---==============================---'
+    print ''
+    str(responseJson).replace('\\', "")
+    elementsIndex = str(responseJson).rfind('{\"elements', 0)
+    responseJson = json.loads(responseJson[elementsIndex:])
+    instanceSysmlid = responseJson.get('elements')[0].get('sysmlid')
+    postCount += 1
+    print''
+    print '---==============================---'
+    print ''
+    print 'Elements Index : ' + str(elementsIndex)
+    print ''
+    print 'Print Response JSON'
+    print responseJson
+    print ''
+    print '---==============================---'
+    postView = json.loads(TEMPLATE_NEW_VIEW_WITH_INSTANCE_SPEC)
+    print 'printing post view'
+    print ''
+    print str(postView)
+    print ''
+    print '---==============================---'
+    postView.get('elements')[0].update(sysmlid=responseId)
+    postView.get('elements')[0].get('specialization').get('allowedElements').append(responseId)
+    postView.get('elements')[0].get('specialization').get('displayedElements').append(responseId)
+    postView.get('elements')[0].get('specialization').get('contents').get('operand')[0].update(instance=instanceSysmlid)
+    postView = json.dumps(postView)
+    print '---==============================---'
+    print ' - Line 561 - '
+    print ''
+    postStr = '\'' + str(postView) + '\''
+    print ''
+    print 'Print Post String'
+    print ''
+    print postStr
+    print ''
+    print '---==============================---'
+    cmd = create_curl_cmd("POST", data=postStr, branch='master/' + 'elements', project_post=True)
+    print ''
+    print '---==============================---'
+    print ' - Line 573 -'
+    print ''
+    print ' CURL COMMAND '
+    print ''
+    print '---==============================---'
+    print ''
+    print cmd
+    print ''
+    print '---==============================---'
+    print ' - Line 582 -'
+    print ''
+    print '     output      post 3     '
+    print ''
+    print '- CALL EXEC CURL -'
+    print ''
+    print '---==============================---'
+    responseJson = get_json_output_no_status(execCurlCmd(cmd, postCount)).replace("\n", "")
+    print ' - Line 590 - '
+    print ''
+    print ' Printing response json after the secondary post of the instance specification'
+    print ''
+    print '---==============================---'
+    print ''
+    print responseJson
+    print ''
+    print '---==============================---'
+    print ''
+    str(responseJson).replace('\\', "")
+    elementsIndex = str(responseJson).rfind('{\"elements', 0)
+    responseJson = json.loads(responseJson[elementsIndex:])
+    postCount += 1
+    print ''
+    print 'Print Response JSON'
+    print responseJson
+    print ''
+    print '---==============================---'
+    print ''
+    ###################################################################################################################
+    # GET CALL
+    ###################################################################################################################
+    postParent = json.loads(TEMPLATE_POST_PARENT_PRODUCT)
+    postParent.get('elements')[0].update(sysmlid=ownerSysmlid)
+    curl_cmd = create_curl_cmd('GET', data="elements/" + str(ownerSysmlid), branch='master/', post_type='elements/')
+    ###################################################################################################################
+    # GET CALL
+    ###################################################################################################################
+    print ''
+    print '---==============================---'
+    print 'Print Curl Command'
+    print ''
+    print curl_cmd
+    print ''
+    print '---==============================---'
+    parentElement = get_json_output_no_status(execCurlCmd(curl_cmd)).replace("\n", "")
+    print str(parentElement)
+    elementsIndex = str(parentElement).rfind('{"elements', 0)
+    parentElement = json.loads(parentElement[elementsIndex:])
+    parentType = parentElement.get('elements')[0].get('specialization').get('type')
+    parentAllowedElements = parentElement.get('elements')[0].get('specialization').get('allowedElements')
+    parentDisplayedElements = parentElement.get('elements')[0].get('specialization').get('displayedElements')
+    postParent.get('elements')[0].get('specialization').update(allowedElements=parentAllowedElements)
+    postParent.get('elements')[0].get('specialization').update(displayedElements=parentDisplayedElements)
+    postParent.get('elements')[0].get('specialization').update(type=parentType)
+    ###################################################################################################################
+    # Print parent Element
+    ###################################################################################################################
+    print ''
+    print '---==============================---'
+    print ''
+    print str(parentElement)
+    print ''
+    print '---==============================---'
+
+    view2view_AR = parentElement.get('elements')[0].get('specialization').get('view2view')
+    arIndex = 1
+    for i in view2view_AR:
+        print ''
+        print 'Array Index at ' + str(arIndex)
+        print ''
+        print i
+        print ''
+        print '---==============================---'
+        arIndex+=1
+
+    postParent.get('elements')[0].get('specialization').update(view2view=view2view_AR)
+    print '---==============================---'
+    print ''
+    print 'Printing post parent with new view2view elements'
+    print ''
+    print str(postParent)
+    print ''
+    print '---==============================---'
+    print ''
+    limit = arIndex
+    view2viewTemp = json.loads(TEMPLATE_VIEW2VIEW_NEW_VIEW)
+    view2viewTemp = view2viewTemp.get('view2view')[0]
+    view2viewTemp.update(id=responseJson.get('elements')[0].get('sysmlid'))
+    view2viewTemp.update(childrenViews=responseJson.get('elements')[0].get('specialization').get('childrenViews'))
+    print ''
+    print '---==============================---'
+    print ''
+    print 'Print view 2 view template'
+    print ''
+    print view2viewTemp
+    print ''
+    print '---==============================---'
+    print ''
+
+
+    for index in range(0, limit-1):
+        if (postParent.get('elements')[0].get('specialization').get('view2view')[index].get('id') ==
+                postParent.get('elements')[0].get('sysmlid')):
+            print ''
+            print 'Adding ID to parent\'s children views array'
+            print ''
+            postParent.get('elements')[0].get('specialization').get('view2view')[index].get('childrenViews').append(
+                responseJson.get('elements')[0].get('sysmlid'))
+            print ''
+            print '---==============================---'
+            print ''
+            print str(postParent.get('elements')[0].get('specialization').get('view2view')[index].get('childrenViews'))
+            print ''
+            print '---==============================---'
+            print ''
+            postParent.get('elements')[0].get('specialization').get('view2view').append(view2viewTemp)
+
+    print ''
+    print '---==============================---'
+    print ''
+    print 'Print post parent'
+    print str(postParent)
+    print ''
+    print '---==============================---'
+    print ''
+    print ''
+    print '---==============================---'
+    print ''
+    print 'Print dump post parent element'
+    print str(json.dumps(postParent, sort_keys=True, indent=4, separators=(',', ': ')))
+    print ''
+    print '---==============================---'
+    print ''
+
+
+    postView = json.dumps(postParent)
+    print '---==============================---'
+    print ' - Line 561 - '
+    print ''
+    postStr = '\'' + str(postView) + '\''
+    print ''
+    print 'Print Post String'
+    print ''
+    print postStr
+    print ''
+    print '---==============================---'
+    cmd = create_curl_cmd("POST", data=postStr, branch='master/' + 'elements', project_post=True)
+    print ''
+    print '---==============================---'
+    print ' - Line 573 -'
+    print ''
+    print ' CURL COMMAND '
+    print ''
+    print '---==============================---'
+    print ''
+    print cmd
+    print ''
+    print '---==============================---'
+    print ' - Line 582 -'
+    print ''
+    print '     output      post 4     '
+    print ''
+    print '- CALL EXEC CURL -'
+    print ''
+    print '---==============================---'
+    responseJson = get_json_output_no_status(execCurlCmd(cmd, postCount)).replace("\n", "")
+    print ' - Line 590 - '
+    print ''
+    print ' Printing response json after the secondary post of the instance specification'
+    print ''
+    print '---==============================---'
+    print ''
+    print responseJson
+    print ''
+    print '---==============================---'
+    print ''
+    postCount += 1
+
+
+
+
+
+
+
+
 
 # Attempts to serialize the json file
 def dumpJson(jsonObject):
@@ -441,27 +799,43 @@ def loadJson(jsonObject):
         return loadJsonObj
 
 
-def execCurlCmd(cmd):
-
-
-
-
+def execCurlCmd(cmd, postCount=1):
     (status, output) = commands.getstatusoutput(cmd)
-    print '-------------------------------------------------'
+    print '---==============================---'
+    print 'Post Count : '
+    print ''
+    print postCount
+    print ''
+    print '---==============================---'
+    print ' - Line 507 -'
+    print ''
     print 'EXECUTING CURL COMMAND'
-    print '-------------------------------------------------'
-
+    print ''
+    print '---==============================---'
+    print ' - Line 512 - '
+    print ''
     print 'PRINTING STATUS'
     print status
-    print '-------------------------------------------------'
+    print ''
+    print '---==============================---'
+    print ' - Line 518 - '
+    print ''
     print 'print no output'
     print get_json_output_no_status(output=output)
-    print '-------------------------------------------------'
+    print ''
+    print '---==============================---'
+    print ' - Line 524 - '
+    print ''
     print 'PRINTING OUTPUT'
     print output
-    print '-------------------------------------------------'
+    print ''
+    print '---==============================---'
+    print ' - Line 530 - '
+    print ''
     print 'returning output'
-    print '-------------------------------------------------'
+    print ''
+    print '---==============================---'
+    print ''
     return output
 
 
@@ -553,7 +927,7 @@ def runTests():
     print 'Testing ===== testAddViewToView()'
     testAddViewToView()
 
-# def old_addViewToView(toAdd, addingTo=None,sysmlid=''):
+'''# def old_addViewToView(toAdd, addingTo=None,sysmlid=''):
 #     # Checks to see if both elements exists
 #     if (toAdd is None or sysmlid=='' and addingTo is None):
 #         if DEBUG is True:
@@ -621,3 +995,4 @@ def runTests():
 #
 #     # return POSTjson(toThisView)
 #     return POSTjson()
+'''

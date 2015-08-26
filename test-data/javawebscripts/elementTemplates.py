@@ -15,51 +15,49 @@ TEMPLATE_NEW_VIEW = json.dumps({
 })
 # POST THIS SECOND
 TEMPLATE_INSTANCE_SPEC = json.dumps({
-    "elements": [
+    "elements":[
         {
             "name": "View Documentation",
-            "specialization": {
-                "type": "InstanceSpecification",
-                "classifier": [
+            "specialization":{
+                "type":"InstanceSpecification",
+                "classifier":[
                     "_17_0_5_1_407019f_1431903758416_800749_12055"
                 ],
-                "instanceSpecificationSpecification": {
-                    # THIS CONTAINS THE NEW VIEW ID
-                    "string": {"type": "Paragraph",
+                "instanceSpecificationSpecification":{
+                    "string":{"type": "Paragraph",
                                "sourceType": "reference",
-                               "source": "VIEW_ID",
-                               "sourceProperty": "documentation"},
+                               "source":"VIEW_ID",
+                               "sourceProperty":"documentation"},
                     "type": "LiteralString"
                 }
             },
-            "owner": "test-site_no_project"
+        "owner":"test-site_no_project"
         }
     ]
 })
 
+
+
+
+
 # POST THIS TO UPDATE THE VIEW ON SERVER AFTER GETTING INSTANCE SPECIFICATION
-NEW_VIEW_ELEMENT = json.dumps({
+TEMPLATE_NEW_VIEW_WITH_INSTANCE_SPEC = json.dumps({
     "elements": [
         {
-            # VIEW_ID IS THE SAME AS NEW INSTANCE SPEC ABOVE
             "sysmlid": "VIEW_ID",
-            "specialization": {
+            "specialization":{
                 "type": "View",
-                "allowedElements": [
-                    "MMS_1440004700246_e9451e3f-f060-4af0-a452-9cef660b3fa4"
-                ],
-                "displayedElements": [
-                    "MMS_1440004700246_e9451e3f-f060-4af0-a452-9cef660b3fa4"
-                ],
+                "allowedElements": [],
+                "displayedElements":[],
                 "childrenViews": [],
                 "contents": {
                     "operand": [
                         {
-                            "instance": "MMS_1440004700481_0519cab9-ee4f-4846-a9dc-e04510318196",
-                            "type": "InstanceValue"
+                            "instance":"SYSMLID_FROM_RESPONSE_JSON",
+                            "type":"InstanceValue"
                         }
                     ],
-                    "type": "Expression"
+                    "type":"Expression"
                 }
             }
         }
@@ -67,28 +65,28 @@ NEW_VIEW_ELEMENT = json.dumps({
 })
 
 # POST THIS TO UPDATE THE PARENT PRODUCT
-TEMPLATE_PRODUCT = json.dumps({
+TEMPLATE_POST_PARENT_PRODUCT = json.dumps({
     "elements": [
         {
-            "sysmlid": "",  # PRODUCT SYSMLID
-            "specialization": {
-                "type": "Product",
-                "allowedElements": [
-                    ""  # PRODUCT SYSMLID
+            "sysmlid": "",
+            "specialization":{
+                "type":"",
+                "allowedElements":[
+                    ""
                 ],
-                "displayedElements": [
-                    ""  # PRODUCT SYSMLID
+                "displayedElements":[
+                    ""
                 ],
-                "view2view": [
+                "view2view":[
                     {
-                        "id": "",  # PRODUCT SYSMLID
-                        "childrenViews": [
-                            ""  # CHILD SYSMLID
+                        "id":"",
+                        "childrenViews":[
+                            ""
                         ]
                     },
                     {
-                        "id": "",  # CHILD SYSMLID
-                        "childrenViews": []
+                        "id":"",
+                        "childrenViews":[]
                     }
                 ]
             }
@@ -99,4 +97,4 @@ TEMPLATE_PRODUCT = json.dumps({
 TEMPLATE_TYPE_PRODUCT = json.dumps({"type": "Product"})
 TEMPLATE_ALLOWED_ELEMENTS = json.dumps({"allowedElements": []})
 TEMPLATE_DISPLAYED_ELEMENTS = json.dumps({"displayedElements": []})
-VIEW2VIEW_TEMP = json.dumps({"view2view": [{"id": "", "childrenViews": []}]})
+TEMPLATE_VIEW2VIEW_NEW_VIEW = json.dumps({"view2view": [{"id": "", "childrenViews": []}]})
