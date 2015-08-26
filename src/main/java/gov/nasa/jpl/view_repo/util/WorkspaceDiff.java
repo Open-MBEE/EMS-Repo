@@ -41,7 +41,7 @@ public class WorkspaceDiff implements Serializable {
 
     public static final String LATEST_NO_TIMESTAMP = "latest";
 
-    public static boolean glomming = false;
+    public static boolean glomming = true;
     public boolean glom = glomming;
 
     /**
@@ -1544,10 +1544,10 @@ public class WorkspaceDiff implements Serializable {
         // Not the same workspace; use relative copyTime.
         commonBranchTimePoint = ws1 == null ? ws2.getCopyTime(ws1) : ws1.getCopyTime(ws2);
         
-        if ( commonParent.equals( ws1 ) ) {
+        if ( commonParent == null ? ws1 == null : commonParent.equals( ws1 ) ) {
             commonBranchTimePoint = earlierWorkspaceDate( commonBranchTimePoint, t1 );
         }
-        if ( commonParent.equals( ws2 ) ) {
+        if ( commonParent == null ? ws2 == null : commonParent.equals( ws2 )) {
             commonBranchTimePoint = earlierWorkspaceDate( commonBranchTimePoint, t2 );
         }
 
