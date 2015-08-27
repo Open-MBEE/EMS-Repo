@@ -330,7 +330,7 @@ public class FullDocPost extends AbstractJavaWebScript {
 		// command.add(String.format("%s:%d/%s://%s@%s/mmsFullDoc.html#/workspaces/%s/sites/%s/documents/%s/views/%s",
 		// preRendererUrl,preRendererPort, protocol, mmsAdminCredential, hostnameAndPort, workspace.getName(), site, docId, viewId));
 		command.add(String.format("%s:%d/%s://%s@%s/mmsFullDoc.html?ws=%s&site=%s&docId=%s&viewId=%s&section=%s&time=%s",
-		preRendererUrl,preRendererPort, protocol, mmsAdminCredential, hostnameAndPort, workspace.getName(), site, docId, viewId, section, timestamp));
+		preRendererUrl,preRendererPort, protocol, mmsAdminCredential, hostnameAndPort, workspace == null ? "master" : workspace.getName(), site, docId, viewId, section, timestamp));
 		command.add(filePath);
 		exec.setCommand(list2Array(command));
 		System.out.println("NodeJS command: " + command);
