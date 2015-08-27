@@ -448,11 +448,11 @@ public class DocBookWrapper {
 	public void saveHtmlZipToRepo(EmsScriptNode snapshotFolder, WorkspaceNode workspace, Date timestamp) throws Exception{
 		try{
 			// removes any previously generated Zip node.
-			ArrayList<NodeRef> nodeRefs = NodeUtil.findNodeRefsByType( this.snapshotName + ".zip", "@cm\\:name:\"", snapshotFolder.getServices() );
-			if(nodeRefs==null) nodeRefs = NodeUtil.findNodeRefsByType( this.snapshotName + ".zip", "@sysml\\:id:\"", snapshotFolder.getServices() );
+			ArrayList<NodeRef> nodeRefs = NodeUtil.findNodeRefsByType( this.snapshotName + "_docbook.zip", "@cm\\:name:\"", snapshotFolder.getServices() );
+			if(nodeRefs==null) nodeRefs = NodeUtil.findNodeRefsByType( this.snapshotName + "_docbook.zip", "@sysml\\:id:\"", snapshotFolder.getServices() );
 			if (nodeRefs != null && nodeRefs.size() > 0) {
 				EmsScriptNode nodePrev = new EmsScriptNode(nodeRefs.get( 0 ), snapshotFolder.getServices(), new StringBuffer());
-				if(nodePrev != null && nodePrev.getName()==this.snapshotName + ".zip"){ 
+				if(nodePrev != null && nodePrev.getName()==this.snapshotName + "_docbook.zip"){ 
 					try{
 						nodePrev.remove();
 					}
@@ -466,16 +466,16 @@ public class DocBookWrapper {
 			//createDocBookDir();
 			//retrieveDocBook(workspace, timestamp);
 			this.transformToHTML(workspace, timestamp);
-			tableToCSV();
+			//?tableToCSV();
 			String zipPath = this.zipHtml();
 			if(zipPath == null || zipPath.isEmpty()) throw new Exception("Failed to zip files and resources!");
 
-			EmsScriptNode node = snapshotFolder.createNode(this.snapshotName + ".zip", "cm:content");
+			EmsScriptNode node = snapshotFolder.createNode(this.snapshotName + "_docbook.zip", "cm:content");
 			if(node == null) throw new Exception("Failed to create zip repository node!");
 
 			if(!this.saveFileToRepo(node, MimetypeMap.MIMETYPE_ZIP, zipPath)) throw new Exception("Failed to save zip artifact to repository!");
-			this.snapshotNode.createOrUpdateAspect("view2:htmlZip");
-			this.snapshotNode.createOrUpdateProperty("view2:htmlZipNode", node.getNodeRef());
+			//this.snapshotNode.createOrUpdateAspect("view2:htmlZip");
+			//this.snapshotNode.createOrUpdateProperty("view2:htmlZipNode", node.getNodeRef());
 
 			if ( node != null ) node.getOrSetCachedVersion();
 		}
@@ -524,11 +524,11 @@ public class DocBookWrapper {
 	public void savePdfToRepo(EmsScriptNode snapshotFolder, WorkspaceNode workspace, Date timestamp, String siteName) throws Exception{
 		try{
 			// removes any previously generated PDF node.
-			ArrayList<NodeRef> nodeRefs = NodeUtil.findNodeRefsByType( this.snapshotName + ".pdf", "@cm\\:name:\"", snapshotFolder.getServices() );
-			if(nodeRefs==null) nodeRefs = NodeUtil.findNodeRefsByType( this.snapshotName + ".pdf", "@sysml\\:id:\"", snapshotFolder.getServices() );
+			ArrayList<NodeRef> nodeRefs = NodeUtil.findNodeRefsByType( this.snapshotName + "_docbook.pdf", "@cm\\:name:\"", snapshotFolder.getServices() );
+			if(nodeRefs==null) nodeRefs = NodeUtil.findNodeRefsByType( this.snapshotName + "_docbook.pdf", "@sysml\\:id:\"", snapshotFolder.getServices() );
 			if (nodeRefs != null && nodeRefs.size() > 0) {
 				EmsScriptNode nodePrev = new EmsScriptNode(nodeRefs.get( 0 ), snapshotFolder.getServices(), new StringBuffer());
-				if(nodePrev != null && nodePrev.getName()==this.snapshotName + ".pdf"){ 
+				if(nodePrev != null && nodePrev.getName()==this.snapshotName + "_docbook.pdf"){ 
 					try{
 						nodePrev.remove();
 					}
@@ -539,15 +539,15 @@ public class DocBookWrapper {
 				}
 			}
 			
-			EmsScriptNode node = snapshotFolder.createNode(this.snapshotName + ".pdf", "cm:content");
+			EmsScriptNode node = snapshotFolder.createNode(this.snapshotName + "_docbook.pdf", "cm:content");
 			if(node == null) throw new Exception("Failed to create PDF repository node!");
 
 			String pdfPath = transformToPDF(workspace, timestamp);
 			if(pdfPath == null || pdfPath.isEmpty()) throw new Exception("Failed to transform from DocBook to PDF!");
 
 			if(!this.saveFileToRepo(node, MimetypeMap.MIMETYPE_PDF, pdfPath)) throw new Exception("Failed to save PDF artifact to repository!");
-			this.snapshotNode.createOrUpdateAspect("view2:pdf");
-			this.snapshotNode.createOrUpdateProperty("view2:pdfNode", node.getNodeRef());
+			//this.snapshotNode.createOrUpdateAspect("view2:pdf");
+			//this.snapshotNode.createOrUpdateProperty("view2:pdfNode", node.getNodeRef());
 
 			if ( node != null ) node.getOrSetCachedVersion();
 		}
@@ -845,7 +845,7 @@ public class DocBookWrapper {
 		processBuilder.directory(new File(this.getJobDirName()));
 //		System.out.println("zip working directory: " + processBuilder.directory());
 		List<String> command = new ArrayList<String>();
-		String zipFile = this.snapshotName + ".zip";
+		String zipFile = this.snapshotName + "_docbook.zip";
 		command.add("zip");
 		command.add("-r");
 		command.add(zipFile);

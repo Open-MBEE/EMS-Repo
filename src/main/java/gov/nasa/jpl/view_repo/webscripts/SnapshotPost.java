@@ -910,27 +910,27 @@ public class SnapshotPost extends AbstractJavaWebScript {
 		}
 		EmsScriptNode snapshotNode = new EmsScriptNode(nodeRefs.get( 0 ), services, response);
         if(snapshotNode == null) throw new Exception("Failed to find snapshot with Id: " + snapshotId);
-        String status = getHtmlZipStatus(snapshotNode);
+        /*String status = getHtmlZipStatus(snapshotNode);
         boolean isGenerated = false;
         if(status != null && !status.isEmpty() && status.compareToIgnoreCase("Completed")==0){
         	isGenerated = true;
         	log(Level.INFO, "Zip artifacts were already generated.");
         }
 
-        if(!isGenerated){
+        if(!isGenerated){*/
 	        try{
 		        snapshotNode = generateHTML( snapshotNode, workspace );
 		        if(snapshotNode == null) throw new Exception("generateHTML() returned null.");
 		        else{
-		        	this.setHtmlZipStatus(snapshotNode, "Completed");
+		        	//this.setHtmlZipStatus(snapshotNode, "Completed");
 		        }
 	        }
 	        catch(Exception ex){
 	        	ex.printStackTrace();
-	        	this.setHtmlZipStatus(snapshotNode, "Error");
+	        	//this.setHtmlZipStatus(snapshotNode, "Error");
 	        	throw new Exception("Failed to generate zip artifact!", ex);
 	        }
-        }
+        //}
         //return populateSnapshotProperties( snapshotNode, dateTime, workspace );
         return snapshotNode;
     }
@@ -951,10 +951,10 @@ public class SnapshotPost extends AbstractJavaWebScript {
         DocBookWrapper docBookWrapper = new DocBookWrapper( this.snapshotName, snapshotNode, false );//need workspace and timestamp
 
 
-        if ( !hasHtmlZipNode( snapshotNode, timestamp, workspace ) ) {
+        //if ( !hasHtmlZipNode( snapshotNode, timestamp, workspace ) ) {
             log( Level.INFO, "Generating zip artifact..." );
             docBookWrapper.saveHtmlZipToRepo( snapshotFolderNode, workspace, timestamp );
-        }
+        //}
         return snapshotNode;
     }
 
@@ -971,27 +971,27 @@ public class SnapshotPost extends AbstractJavaWebScript {
 		}
 		EmsScriptNode snapshotNode = new EmsScriptNode(nodeRefs.get( 0 ), services, response);
 		if(snapshotNode == null) throw new Exception("Failed to find snapshot with Id: " + snapshotId);
-        String status = getPdfStatus(snapshotNode);
+        /*String status = getPdfStatus(snapshotNode);
         boolean isGenerated = false;
         if(status != null && !status.isEmpty() && status.compareToIgnoreCase("Completed")==0){
         	isGenerated = true;
         	log(Level.INFO, "PDF artifacts were already generated.");
         }
 
-        if(!isGenerated){
+        if(!isGenerated){*/
 	        try{
 		    	snapshotNode = generatePDF(snapshotNode, workspace, siteName);
 		    	if(snapshotNode == null) throw new Exception("generatePDF() returned null.");
 		    	else{
-		    		this.setPdfStatus(snapshotNode, "Completed");
+		    		//this.setPdfStatus(snapshotNode, "Completed");
 		    	}
 	        }
 	        catch(Exception ex){
 	        	ex.printStackTrace();
-	        	this.setPdfStatus(snapshotNode, "Error");
+	        	//this.setPdfStatus(snapshotNode, "Error");
 	    		throw new Exception("Failed to generate PDF artifact!", ex);
 	        }
-        }
+        //}
     	//return populateSnapshotProperties(snapshotNode, dateTime, workspace);
         return snapshotNode;
     }
@@ -1013,10 +1013,10 @@ public class SnapshotPost extends AbstractJavaWebScript {
         Date timestamp = (Date)snapshotNode.getProperty("view2:timestamp");
         DocBookWrapper docBookWrapper = new DocBookWrapper( this.snapshotName, snapshotNode, false );
 
-        if ( !hasPdfNode( snapshotNode, timestamp, workspace ) ) {
+        //if ( !hasPdfNode( snapshotNode, timestamp, workspace ) ) {
             log( Level.INFO, "Generating PDF..." );
             docBookWrapper.savePdfToRepo(snapshotFolderNode, workspace, timestamp, siteName );
-        }
+        //}
         return snapshotNode;
     }
 
