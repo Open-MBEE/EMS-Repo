@@ -81,6 +81,11 @@ public class SnapshotArtifactsGenerationActionExecuter  extends ActionExecuterAb
     public static final String PARAM_CONFIGURATION_ID = "configId";
     
     
+    public SnapshotArtifactsGenerationActionExecuter(Repository repositoryHelper, ServiceRegistry registry) {
+        super();
+        setRepository( repositoryHelper );
+        setServices( registry );
+    }
     public void setRepository(Repository rep) {
         repository = rep;
     }
@@ -91,7 +96,7 @@ public class SnapshotArtifactsGenerationActionExecuter  extends ActionExecuterAb
     
     @Override
     protected void executeImpl(final Action action, final NodeRef nodeRef) {
-        SnapshotArtifactsGenerationActionExecuter instance = new SnapshotArtifactsGenerationActionExecuter();
+        SnapshotArtifactsGenerationActionExecuter instance = new SnapshotArtifactsGenerationActionExecuter(repository, services );
         instance.clearCache();
         instance.executeImplImpl(action, nodeRef);
     }
