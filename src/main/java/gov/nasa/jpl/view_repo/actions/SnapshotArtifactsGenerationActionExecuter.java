@@ -40,7 +40,7 @@ import org.springframework.web.context.request.WebRequest;
 
 public class SnapshotArtifactsGenerationActionExecuter  extends ActionExecuterAbstractBase {
     static Logger logger = Logger.getLogger(SnapshotArtifactsGenerationActionExecuter.class);
-    
+    static boolean makeDocBook = false;
     /**
      * Injected variables from Spring configuration
      */
@@ -317,6 +317,7 @@ public class SnapshotArtifactsGenerationActionExecuter  extends ActionExecuterAb
            }
         };
         //make backup docbookxml
+        if (makeDocBook) {
         new EmsTransaction(services, response, new Status()) {
             @Override
             public void run() throws Exception {
@@ -382,6 +383,7 @@ public class SnapshotArtifactsGenerationActionExecuter  extends ActionExecuterAb
                 }
             }
         };
+        }
     }
 
     @Override
