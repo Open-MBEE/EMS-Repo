@@ -91,8 +91,9 @@ public class SnapshotArtifactsGenerationActionExecuter  extends ActionExecuterAb
     
     @Override
     protected void executeImpl(final Action action, final NodeRef nodeRef) {
-        clearCache();
-        executeImplImpl(action, nodeRef);
+        SnapshotArtifactsGenerationActionExecuter instance = new SnapshotArtifactsGenerationActionExecuter();
+        instance.clearCache();
+        instance.executeImplImpl(action, nodeRef);
     }
     
     private void handleException(Exception ex, Action action) {
