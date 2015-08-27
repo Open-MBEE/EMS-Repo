@@ -494,7 +494,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
 	            this.view2view = productView.getViewToViewPropertyJson();
 	            if(view2view == null || view2view.length()==0) throw new Exception ("Missing document's structure; expected to find document's 'view2view' JSONArray but it's not found.");
 
-	            JSONObject v2vChildNode = getChildrenViews(source);
+	            JSONObject v2vChildNode = getChildrenViews(productId);
 	            if(v2vChildNode == null) throw new Exception(String.format("Missing document's structure; expected to find 'view2view' childnode for: %s but it's not found.", source));
 
 	            JSONArray childrenViews = v2vChildNode.getJSONArray("childrenViews");
