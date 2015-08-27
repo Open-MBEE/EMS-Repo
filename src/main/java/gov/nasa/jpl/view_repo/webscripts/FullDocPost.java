@@ -1,6 +1,7 @@
 package gov.nasa.jpl.view_repo.webscripts;
 
 import gov.nasa.jpl.docbook.model.DBImage;
+import gov.nasa.jpl.mbee.util.Debug;
 import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.view_repo.sysml.View;
 import gov.nasa.jpl.view_repo.util.Acm;
@@ -48,6 +49,7 @@ import org.alfresco.util.exec.RuntimeExec.ExecutionResult;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -79,7 +81,8 @@ public class FullDocPost extends AbstractJavaWebScript {
     protected JSONArray view2view;
     protected String timeTagName;
 //    protected Queue queue;
-    
+    static Logger logger = Logger.getLogger(FullDocPost.class);
+
     // For transactions:
     private String storeName, nodeId, filename;
 	
@@ -154,7 +157,10 @@ public class FullDocPost extends AbstractJavaWebScript {
         
         for(int j=0; j< childrenViews.length(); j++){
         	String childId = childrenViews.getString(j);
-        	if(childId == null || childId.isEmpty()) throw new Exception(String.format("Missing document's structure; expected to find childrenViews[%d] Id but it's not found.", j));
+        	if(childId == null || childId.isEmpty()) {
+        	    Debug.error(true, false, String.format("Missing document's structure; expected to find childrenViews[%d] Id but it's not found.", j));
+        	    continue;
+        	}
         	StringBuilder html = new StringBuilder();
         	getViewFromHtmlFile(html, childId);
         	document.body().append(html.toString());
@@ -181,12 +187,19 @@ public class FullDocPost extends AbstractJavaWebScript {
     	file.delete();
     	
     	JSONObject v2vChildNode = getChildrenViews(viewId);
+    	if (v2vChildNode == null) {
+    	    Debug.error(true, false, String.format("Missing document's structure; expected to find 'view2view' childnode for: %s but it's not found.", viewId));
+            return;
+    	}
     	JSONArray childrenViews = v2vChildNode.getJSONArray("childrenViews");
         if(childrenViews == null) throw new Exception("Missing document's structure; expected to find 'view2view' childnode's 'childrenViews' but it's not found.");
         
         for(int j=0; j< childrenViews.length(); j++){
         	String childId = childrenViews.getString(j);
-        	if(childId == null || childId.isEmpty()) throw new Exception(String.format("Missing document's structure; expected to find childrenViews[%d] Id but it's not found.", j));
+        	if(childId == null || childId.isEmpty()) {
+        	    Debug.error(true, false, String.format("Missing document's structure; expected to find childrenViews[%d] Id but it's not found.", j));
+        	    continue;
+        	}
         	getViewFromHtmlFile(html, childId);
         }
     }
@@ -290,14 +303,20 @@ public class FullDocPost extends AbstractJavaWebScript {
     	downloadViewWorker(workspace, site, docId, viewId, section, timestamp);
     	
     	JSONObject v2vChildNode = getChildrenViews(viewId);
-        if(v2vChildNode == null) throw new Exception(String.format("Missing document's structure; expected to find 'view2view' childnode for: %s but it's not found.", source));
+        if(v2vChildNode == null) {
+            Debug.error(true, false, String.format("Missing document's structure; expected to find 'view2view' childnode for: %s but it's not found.", viewId));
+            return;
+        }
 
         JSONArray childrenViews = v2vChildNode.getJSONArray("childrenViews");
         if(childrenViews == null) throw new Exception("Missing document's structure; expected to find 'view2view' childnode's 'childrenViews' but it's not found.");
         
         for(int j=0; j< childrenViews.length(); j++){
         	String childId = childrenViews.getString(j);
-        	if(childId == null || childId.isEmpty()) throw new Exception(String.format("Missing document's structure; expected to find childrenViews[%d] Id but it's not found.", j));
+        	if(childId == null || childId.isEmpty()) {
+        	    Debug.error(true, false, String.format("Missing document's structure; expected to find childrenViews[%d] Id but it's not found.", j));
+        	    continue;
+        	}
 
         	EmsScriptNode childNode = findScriptNodeById(childId, workspace, TimeUtils.dateFromTimestamp( timestamp ), false);
         	if(childNode == null) throw new Exception(String.format("Failed to find EmsScriptNode with Id: %s", childId));
