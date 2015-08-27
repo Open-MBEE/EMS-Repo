@@ -412,6 +412,11 @@ public class SnapshotArtifactsGenerationActionExecuter  extends ActionExecuterAb
     	    	buf.append("Log: ");
 				buf.append(contextUrl);
 				buf.append(logNode.getUrl());
+				if (snapshotFolder != null) {
+				    buf.append(System.lineSeparator());
+				    buf.append("Folder: ");
+				    buf.append(contextUrl + snapshotFolder.getUrl());
+				}
         	}
         	catch(JSONException ex){
         		throw new Exception("Failed to build email message!", ex);
