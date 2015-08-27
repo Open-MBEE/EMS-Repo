@@ -246,7 +246,7 @@ public class SnapshotArtifactsGenerationActionExecuter  extends ActionExecuterAb
             String workspaceName = action.getParameterValue(PARAM_WORKSPACE_NAME).toString();
             String timestampVE = action.getParameterValue(PARAM_TIME_STAMP).toString();
             int attempts = 0;
-            while(attempts < 3 && !fullDoc.isFullDocHtmlExist()){
+            while(attempts++ < 3 && !fullDoc.isFullDocHtmlExist()){
             	fullDoc.downloadHtml(workspaceName, siteName, sysmlId, timestampVE, tagTitle);
             }
         }
