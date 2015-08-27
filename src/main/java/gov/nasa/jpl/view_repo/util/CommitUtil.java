@@ -395,7 +395,7 @@ public class CommitUtil {
             while ( commit != null ) {
                 String endOfCommit = getTimestamp(commit, "workspace2");
                 Date endDate = TimeUtils.dateFromTimestamp( endOfCommit );
-                if ( fromDateTime != null && endDate.before( fromDateTime ) ) break;
+                if ( fromDateTime != null && !endDate.after( fromDateTime ) ) break;
                 String beginningOfCommit = getTimestamp(commit, "workspace1");
                 Date beginningDate = TimeUtils.dateFromTimestamp( beginningOfCommit );
                 if ( toDateTime == null || beginningDate.before( toDateTime ) ) {

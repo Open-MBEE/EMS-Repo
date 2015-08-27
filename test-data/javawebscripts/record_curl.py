@@ -18,7 +18,43 @@ common_filters = ['created','read','lastModified','modified','siteCharacterizati
 
 #######################################
 
-parser = optparse.OptionParser()
+usageText = '''
+    To create a workspace:
+    
+    ./record_curl.py -n CreateParentWorkspaceUnderMaster --description "Create theParentWorkspace under master" -g develop -t POST -p "" -w theParentWorkspace?sourceWorkspace=master --runBranches "develop" -f "branched,created,id,qualifiedId" -j
+    Post parent workspace under master by supplying correct workspace branch
+    Use filters "branched, "created", "id", "qualifiedId"
+    -p is empty string so it doesn't add elements at the end of the URL
+        
+    To post an element to master:
+    
+    ./record_curl.py -n PostAToMaster --description "Post element a to master" -g develop -t POST -d a.json --runBranches "develop" -j --teardown set_read_to_gv1 
+    Creates name of PostAToMaster with description in the developBaselineDir and puts it at the end of the harness
+    Curl command arguments POST, data a.json file, under the workspace master, run regression with develop, compare using json diff
+    Adds set_read_to_gv1 at the end of the table
+    
+    To post an element to workspace1:
+    
+    ./record_curl.py -n CreateTestData1InWorkspace1 --description "Create a parent folder in workspace1" -g develop -t POST -d '{"elements":[{"sysmlid":"testData1","name":"testData1","owner":"123456"}]}' -w "workspace1/" --runBranches "test,develop" -j
+    Creates name and description in developBaselineDir
+    Curl command uses POST and supplies a string of data to post in workspace1, run regression with test and develop, compare with json diff
+    
+    To get an element a from master:
+    
+    ./record_curl.py -n GetAInMaster --description "Get element a in master" -g develop -t GET -d elements/a --runBranches "test,develop" -j 
+    
+    To compare workspaces:
+    
+    ./record_curl.py -n CompareMasterAToLatest --description "Compare master to itself between post time of a and latest" -g develop -t GET -u SERVICE_URL -w "diff/master/master/2015-08-24T08:46:58.156-0700/latest" --runBranches "develop" -f "id,qualifiedId" -j
+    Substitute URL with SERVICE_URL rather than BASE_URL_WS
+    Supply the diff branch and timestamp 
+    Using filters "id" and "qualifiedId" in output json
+    
+    Supplying -n <TESTNAME> and -t <TYPE> are mandatory because a baseline/regression table cannot be created without the name and curl command requires some type of HTTP call
+    Adding setup, post process, teardown, and time delay functions to the regression table is possible but will not be executed when record_curl is run
+    '''
+    
+parser = optparse.OptionParser(usage = usageText)
 
 parser.add_option("-n", "--testName", help="Mandatory option: test name to create the baseline json")
 parser.add_option("-g", "--gitBranch", default=os.getenv("GIT_BRANCH", "test"), help="Specify the branch to use or uses the $GIT_BRANCH value using 'test' if it doesn't exist")
