@@ -81,6 +81,9 @@ public class SnapshotArtifactsGenerationActionExecuter  extends ActionExecuterAb
     public static final String PARAM_CONFIGURATION_ID = "configId";
     
     
+    public SnapshotArtifactsGenerationActionExecuter() {
+        super();
+    }
     public SnapshotArtifactsGenerationActionExecuter(Repository repositoryHelper, ServiceRegistry registry) {
         super();
         setRepository( repositoryHelper );
