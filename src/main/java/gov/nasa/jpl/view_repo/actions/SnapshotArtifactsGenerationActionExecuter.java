@@ -238,8 +238,10 @@ public class SnapshotArtifactsGenerationActionExecuter  extends ActionExecuterAb
             String sysmlId = (String)action.getParameterValue(PARAM_SYSML_ID);
             String workspaceName = action.getParameterValue(PARAM_WORKSPACE_NAME).toString();
             String timestampVE = action.getParameterValue(PARAM_TIME_STAMP).toString();
-            
-            fullDoc.downloadHtml(workspaceName, siteName, sysmlId, timestampVE, tagTitle);
+            int attempts = 0;
+            while(attempts++ < 3 && !fullDoc.isFullDocHtmlExist()){
+            	fullDoc.downloadHtml(workspaceName, siteName, sysmlId, timestampVE, tagTitle);
+            }
         }
         catch(Exception ex){
             status.setCode(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);

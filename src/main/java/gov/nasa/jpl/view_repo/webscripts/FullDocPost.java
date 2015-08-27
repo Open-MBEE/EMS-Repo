@@ -122,21 +122,21 @@ public class FullDocPost extends AbstractJavaWebScript {
     	View documentView = document.getView();
     	if(documentView == null) throw new Exception("Missing document's structure; expected to find product's view but it's not found.");
     	
-    	JSONArray contains = documentView.getContainsJson(dateTime, workspace);
-        if(contains == null || contains.length()==0){ throw new Exception("Missing document's structure; expected to find document's 'contains' JSONArray but it's not found."); }
+//    	JSONArray contains = documentView.getContainsJson(dateTime, workspace);
+//        if(contains == null || contains.length()==0){ throw new Exception("Missing document's structure; expected to find document's 'contains' JSONArray but it's not found."); }
 
-        for(int i=0; i < contains.length(); i++){
-            JSONObject contain = contains.getJSONObject(i);
-            if(contain == null) throw new Exception(String.format("Missing document's structure; expected to find contain JSONObject at index: %d but it's not found.", i));
+//        for(int i=0; i < contains.length(); i++){
+//            JSONObject contain = contains.getJSONObject(i);
+//            if(contain == null) throw new Exception(String.format("Missing document's structure; expected to find contain JSONObject at index: %d but it's not found.", i));
 
-            String source = (String)contain.opt("source");
-            if(source == null || source.isEmpty()) throw new Exception("Missing document's structure; expected to find contain source property but it's not found.");
+//            String source = (String)contain.opt("source");
+//            if(source == null || source.isEmpty()) throw new Exception("Missing document's structure; expected to find contain source property but it's not found.");
 
             this.view2view = documentView.getViewToViewPropertyJson();
             if(view2view == null || view2view.length()==0) throw new Exception ("Missing document's structure; expected to find document's 'view2view' JSONArray but it's not found.");
 
-            downloadView(workspace, site, docId, source, "", timestamp);
-        }
+            downloadView(workspace, site, docId, docId, "", timestamp);
+//        }
 
         joinViews(docId);
     }
@@ -310,6 +310,9 @@ public class FullDocPost extends AbstractJavaWebScript {
     }
     
     private void downloadViewWorker(WorkspaceNode workspace, String site, String docId, String viewId, String section, String timestamp) throws Exception{
+    	String filePath = String.format("%s/%s.html", this.fullDocDir, viewId);
+    	if(Files.exists(Paths.get(filePath))) return;
+    	
     	RuntimeExec exec = new RuntimeExec();
     	HostnameGet alfresco = new HostnameGet(this.repository, this.services);
 		String protocol = alfresco.getAlfrescoProtocol();
@@ -319,7 +322,7 @@ public class FullDocPost extends AbstractJavaWebScript {
 		int preRendererPort = 3000;
 		String mmsAdminCredential = getHeadlessUserCredential();
 //		DateTimeFormatter fmt = ISODateTimeFormat.dateTime();
-		String filePath = String.format("%s/%s.html", this.fullDocDir, viewId);
+//		String filePath = String.format("%s/%s.html", this.fullDocDir, viewId);
 		
 		List<String> command = new ArrayList<String>();
 		command.add(this.phantomJSPath);
@@ -736,6 +739,10 @@ public class FullDocPost extends AbstractJavaWebScript {
 		this.savePdfToRepo(snapshotFolder, snapshotNode);
     }
 
+    public boolean isFullDocHtmlExist(){
+    	return Files.exists(Paths.get(this.htmlPath));
+    }
+    
 	/**
 	 * Helper method to convert a list to an array of specified type
 	 * @param list
