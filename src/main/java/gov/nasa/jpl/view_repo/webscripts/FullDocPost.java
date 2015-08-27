@@ -135,7 +135,7 @@ public class FullDocPost extends AbstractJavaWebScript {
             this.view2view = documentView.getViewToViewPropertyJson();
             if(view2view == null || view2view.length()==0) throw new Exception ("Missing document's structure; expected to find document's 'view2view' JSONArray but it's not found.");
 
-            downloadView(workspace, site, docId, source, "", timestamp);
+            downloadView(workspace, site, docId, docId, "", timestamp);
 //        }
 
         joinViews(docId);
