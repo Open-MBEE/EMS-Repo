@@ -2377,9 +2377,11 @@ public class SnapshotPost extends AbstractJavaWebScript {
     	
     	if (contents != null && !contents.isEmpty()) {
     	    createDBSectionContainmentForContents(section, contents, workspace, timestamp);
-    	} else
+    	} else {
+    	    if (contains == null)
+    	        return;
     	    createDBSectionContainment( section, contains, workspace, timestamp );
-
+    	}
         //then process it's contains:children if any
     	String nodeId = node.getSysmlId();
     	JSONObject viewJson = getChildrenViews(nodeId);
