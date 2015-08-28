@@ -1186,6 +1186,56 @@ True,
 common_filters,
 ["test","develop"]
 ],
+        
+[
+230,
+"CompareMasterAToLatest",
+"Compare master to itself between post time of a and latest",
+create_curl_cmd(type="GET", data="", base_url="http://localhost:8080/alfresco/service/", post_type="elements", branch="diff/master/master/2015-08-24T08:46:58.502-0700/latest", project_post=False),
+True,
+common_filters+['"id"','"qualifiedId"'],
+["develop"]
+],
+        
+[
+231,
+"CompareMasterBToLatest",
+"Compare master to itself between the post times of b and latest",
+create_curl_cmd(type="GET", data="", base_url="http://localhost:8080/alfresco/service/", post_type="elements", branch="diff/master/master/2015-08-27T15:40:26.891-0700/latest", project_post=False),
+True,
+common_filters+['"id"','"qualifiedId"'],
+["develop"]
+],
+        
+[
+232,
+"CompareMasterParentLatestToLatest",
+"Compare master to theParentWorkspace with timepoints latest and latest",
+create_curl_cmd(type="GET", data="", base_url="http://localhost:8080/alfresco/service/", post_type="elements", branch="diff/master/theParentWorkspace/latest/latest", project_post=False),
+True,
+common_filters+['"id"','"qualifiedId"'],
+["develop"]
+],
+
+[
+233,
+"CompareMasterParentBranchTimeToLatest",
+"Compare master to theParentWorkspace with timepoints at creation of parent and latest",
+create_curl_cmd(type="GET", data="", base_url="http://localhost:8080/alfresco/service/", post_type="elements", branch="diff/master/theParentWorkspace/2015-08-24T08:47:10.054-0700/latest", project_post=False),
+True,
+common_filters+['"id"','"qualifiedId"'],
+["develop"]
+],
+        
+[
+234,
+"CompareMasterSubworkspaceLatestToLatest",
+"Compare master to theSubworkspace with timepoints at latest and latest",
+create_curl_cmd(type="GET", data="", base_url="http://localhost:8080/alfresco/service/", post_type="elements", branch="diff/master/theSubworkspace/latest/latest", project_post=False),
+True,
+common_filters+['"id"','"qualifiedId"'],
+["develop"]
+],
 
 
 
