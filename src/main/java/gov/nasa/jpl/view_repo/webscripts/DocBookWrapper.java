@@ -66,8 +66,18 @@ public class DocBookWrapper {
 	private boolean hadFailed;
 	
 	protected static String docbookFileSuffix = "__docbook";
+	private EmsScriptNode pdfNode;
+	private EmsScriptNode zipNode;
 
-	public DocBookWrapper(String snapshotName, EmsScriptNode snapshotNode, boolean hadFailed){
+	public EmsScriptNode getPdfNode() {
+        return pdfNode;
+    }
+
+    public EmsScriptNode getZipNode() {
+        return zipNode;
+    }
+
+    public DocBookWrapper(String snapshotName, EmsScriptNode snapshotNode, boolean hadFailed){
 		this.snapshotName = snapshotName;
 		this.snapshotNode = snapshotNode;
 		this.hadFailed = hadFailed;
@@ -455,6 +465,7 @@ public class DocBookWrapper {
 			//this.snapshotNode.createOrUpdateProperty("view2:htmlZipNode", node.getNodeRef());
 
 			if ( node != null ) node.getOrSetCachedVersion();
+			this.zipNode = node;
 		}
 		catch(Exception ex){
 			throw new Exception("Failed to generate zip artifact!", ex);
@@ -501,6 +512,7 @@ public class DocBookWrapper {
 			//this.snapshotNode.createOrUpdateProperty("view2:pdfNode", node.getNodeRef());
 
 			if ( node != null ) node.getOrSetCachedVersion();
+			this.pdfNode = node;
 		}
 		catch(Exception ex){
 			throw new Exception("Failed to genearate PDF!", ex);

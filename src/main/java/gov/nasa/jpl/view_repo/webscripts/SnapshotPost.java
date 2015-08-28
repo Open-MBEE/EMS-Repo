@@ -410,7 +410,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
                 if (!(string instanceof String))
                     continue;
                 try {
-                    JSONObject obj = new JSONObject(string);
+                    JSONObject obj = new JSONObject((String)string);
                     DocumentElement e = createElement( obj, section, workspace, timestamp );
                     if ( e != null ) section.addElement( e );
                 } catch (JSONException ex) {
@@ -418,7 +418,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
                 }
             } else if ("Expression".equals(spec.getTypeName())) {
                 DBSection s = new DBSection();
-                section.setTitle(spec.getSysmlName(timestamp));
+                section.setTitle(node.getSysmlName(timestamp));
                 java.util.List<EmsScriptNode> instances2 = getInstancesFromExpression((NodeRef)exp, timestamp, workspace);
                 createDBSectionContainmentForContents( s, instances2, workspace, timestamp);
                 section.addElement(s);
@@ -583,7 +583,10 @@ public class SnapshotPost extends AbstractJavaWebScript {
 
     private DocumentElement createElement( JSONObject obj, DBSection section, WorkspaceNode workspace, Date timestamp ) throws JSONException {
         DocumentElement e = null;
-        switch ( getType( obj ) ) {
+        String type = getType(obj);
+        if (type == null)
+            return e;
+        switch ( type ) {
             case "Paragraph":
             case "ParagraphT":
             case "TableT":
