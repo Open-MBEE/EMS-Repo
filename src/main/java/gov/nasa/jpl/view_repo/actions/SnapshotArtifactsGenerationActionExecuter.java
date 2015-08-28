@@ -40,7 +40,7 @@ import org.springframework.web.context.request.WebRequest;
 
 public class SnapshotArtifactsGenerationActionExecuter  extends ActionExecuterAbstractBase {
     static Logger logger = Logger.getLogger(SnapshotArtifactsGenerationActionExecuter.class);
-    static public boolean makeDocBook = false;
+    static public boolean makeDocBook = true;
     /**
      * Injected variables from Spring configuration
      */
