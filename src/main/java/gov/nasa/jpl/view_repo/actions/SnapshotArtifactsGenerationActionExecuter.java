@@ -436,7 +436,7 @@ public class SnapshotArtifactsGenerationActionExecuter  extends ActionExecuterAb
                 statusStr = "completed with errors";
             }
             String subject = "PDF generation " + statusStr.toLowerCase();
-            EmsScriptNode logNode = ActionUtil.saveLogToFile(jobNode, "text/plain", services, response.toString());
+            EmsScriptNode logNode = ActionUtil.saveLogToFile(jobNode, "text/html", services, response.toString());
             String msg = buildEmailMessage(snapshot, logNode);
             ActionUtil.sendEmailToModifier(jobNode, msg, subject, services);
             if (logger.isDebugEnabled()) logger.debug("Completed snapshot artifact(s) generation.");
@@ -462,7 +462,7 @@ public class SnapshotArtifactsGenerationActionExecuter  extends ActionExecuterAb
           String subject = "Docbook PDF generation " + statusOfJob.toLowerCase();
           String sentence = subject + " after PDF generation " + statusStr + ".";
           String msg1 = sentence + System.lineSeparator() + System.lineSeparator() + response.toString();
-          EmsScriptNode logNode = ActionUtil.saveLogToFile(jobNode, "text/plain", services, msg1);
+          EmsScriptNode logNode = ActionUtil.saveLogToFile(jobNode, "text/html", services, msg1);
           String msg = buildEmailMessageForDocbook(snapshotService.getPdfNode(), snapshotService.getZipNode(), snapshot, logNode);
           ActionUtil.sendEmailToModifier(jobNode, msg, subject, services);
           if (logger.isDebugEnabled()) logger.debug("Completed docbook snapshot artifact(s) generation.");
