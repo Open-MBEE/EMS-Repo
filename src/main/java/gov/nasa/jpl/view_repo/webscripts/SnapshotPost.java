@@ -900,7 +900,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
         return jobName;
     }
 
-    public EmsScriptNode generateHTML( String snapshotId, Date dateTime, WorkspaceNode workspace ) throws Exception {
+    public EmsScriptNode generateHTML( EmsScriptNode zipNode, String snapshotId, Date dateTime, WorkspaceNode workspace ) throws Exception {
     	clearCaches( false );
         //EmsScriptNode snapshotNode = findScriptNodeById( snapshotId, workspace, null, false );
     	// lookup snapshotNode using standard lucene as snapshotId is unique across all workspaces
@@ -922,7 +922,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
 
         if(!isGenerated){*/
 	        try{
-		        snapshotNode = generateHTML( snapshotNode, workspace );
+		        snapshotNode = generateHTML( zipNode, snapshotNode, workspace );
 		        if(snapshotNode == null) throw new Exception("generateHTML() returned null.");
 		        else{
 		        	//this.setHtmlZipStatus(snapshotNode, "Completed");
@@ -938,7 +938,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
         return snapshotNode;
     }
 
-    public EmsScriptNode generateHTML( EmsScriptNode snapshotNode, WorkspaceNode workspace ) throws Exception {
+    public EmsScriptNode generateHTML( EmsScriptNode zipNode, EmsScriptNode snapshotNode, WorkspaceNode workspace ) throws Exception {
         this.snapshotName = snapshotNode.getSysmlId();
         if(this.snapshotName == null || this.snapshotName.isEmpty()) throw new Exception("Failed to retrieve snapshot Id!");
 
@@ -956,12 +956,12 @@ public class SnapshotPost extends AbstractJavaWebScript {
 
         //if ( !hasHtmlZipNode( snapshotNode, timestamp, workspace ) ) {
             log( Level.INFO, "Generating zip artifact..." );
-            docBookWrapper.saveHtmlZipToRepo( snapshotFolderNode, workspace, timestamp );
+            docBookWrapper.saveHtmlZipToRepo( zipNode, snapshotFolderNode, workspace, timestamp );
         //}
         return snapshotNode;
     }
 
-    public EmsScriptNode generatePDF(String snapshotId, Date dateTime, WorkspaceNode workspace, String siteName) throws Exception{
+    public EmsScriptNode generatePDF(EmsScriptNode pdfNode, String snapshotId, Date dateTime, WorkspaceNode workspace, String siteName) throws Exception{
     	clearCaches( false );
         //EmsScriptNode snapshotNode = findScriptNodeById(snapshotId, workspace, null, false);
     	// lookup snapshotNode using standard lucene as snapshotId is unique across all workspaces
@@ -983,7 +983,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
 
         if(!isGenerated){*/
 	        try{
-		    	snapshotNode = generatePDF(snapshotNode, workspace, siteName);
+		    	snapshotNode = generatePDF(pdfNode, snapshotNode, workspace, siteName);
 		    	if(snapshotNode == null) throw new Exception("generatePDF() returned null.");
 		    	else{
 		    		//this.setPdfStatus(snapshotNode, "Completed");
@@ -999,7 +999,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
         return snapshotNode;
     }
 
-    public EmsScriptNode generatePDF( EmsScriptNode snapshotNode, WorkspaceNode workspace, String siteName ) throws Exception {
+    public EmsScriptNode generatePDF( EmsScriptNode pdfNode, EmsScriptNode snapshotNode, WorkspaceNode workspace, String siteName ) throws Exception {
         this.snapshotName = snapshotNode.getSysmlId();
         if(this.snapshotName == null || this.snapshotName.isEmpty()) throw new Exception("Failed to retrieve snapshot Id!");
 
@@ -1018,7 +1018,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
 
         //if ( !hasPdfNode( snapshotNode, timestamp, workspace ) ) {
             log( Level.INFO, "Generating PDF..." );
-            docBookWrapper.savePdfToRepo(snapshotFolderNode, workspace, timestamp, siteName );
+            docBookWrapper.savePdfToRepo(pdfNode, snapshotFolderNode, workspace, timestamp, siteName );
         //}
         return snapshotNode;
     }

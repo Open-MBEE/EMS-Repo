@@ -65,7 +65,7 @@ public class DocBookWrapper {
 	private Path xalanDirName;
 	private boolean hadFailed;
 	
-	protected static String docbookFileSuffix = "__docbook";
+	public static String docbookFileSuffix = "__docbook";
 	private EmsScriptNode pdfNode;
 	private EmsScriptNode zipNode;
 
@@ -446,11 +446,12 @@ public class DocBookWrapper {
 		return bSuccess;
 	}
 
-	public void saveHtmlZipToRepo(EmsScriptNode snapshotFolder, WorkspaceNode workspace, Date timestamp) throws Exception{
+	public void saveHtmlZipToRepo(EmsScriptNode zipNode, EmsScriptNode snapshotFolder, WorkspaceNode workspace, Date timestamp) throws Exception{
 		try{
-            EmsScriptNode node = NodeUtil.getOrCreateContentNode( snapshotFolder,
-                                                         this.snapshotName + docbookFileSuffix + ".zip",
-                                                         snapshotFolder.getServices());
+            EmsScriptNode node = zipNode != null ? zipNode :
+                NodeUtil.getOrCreateContentNode( snapshotFolder,
+                                                 this.snapshotName + docbookFileSuffix + ".zip",
+                                                 snapshotFolder.getServices());
 			//createDocBookDir();
 			//retrieveDocBook(workspace, timestamp);
 			this.transformToHTML(workspace, timestamp);
@@ -496,9 +497,9 @@ public class DocBookWrapper {
 		}
 	}
 	
-	public void savePdfToRepo(EmsScriptNode snapshotFolder, WorkspaceNode workspace, Date timestamp, String siteName) throws Exception{
+	public void savePdfToRepo(EmsScriptNode preCreatedNode, EmsScriptNode snapshotFolder, WorkspaceNode workspace, Date timestamp, String siteName) throws Exception{
 		try{
-            EmsScriptNode node =
+            EmsScriptNode node = preCreatedNode != null ? preCreatedNode :
                     NodeUtil.getOrCreateContentNode( snapshotFolder,
                                                      this.snapshotName + docbookFileSuffix + ".pdf",
                                                      snapshotFolder.getServices());
