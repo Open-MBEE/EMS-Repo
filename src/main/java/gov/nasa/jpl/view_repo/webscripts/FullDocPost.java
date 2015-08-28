@@ -373,11 +373,11 @@ public class FullDocPost extends AbstractJavaWebScript {
 		    allViewsFailed  = false;
 		} else {
 		    allViewsSucceeded  = false;
-		    String errorHtml = "<html><body><div>The view, " + viewId + ", failed to generate.</div></body></html>";
-            gov.nasa.jpl.mbee.util.FileUtils.stringToFile( errorHtml , filePath );
+//		    String errorHtml = "<html><body><div>Error: The html for the view with id = " + viewId + " failed to generate.</div></body></html>";
+//            gov.nasa.jpl.mbee.util.FileUtils.stringToFile( errorHtml , filePath );
 			String msg = String.format("Failed to download view for %s.", viewId);
 			log(Level.ERROR, msg);
-//			throw new Exception(msg);
+			throw new Exception(msg);
 		}
     }
     
