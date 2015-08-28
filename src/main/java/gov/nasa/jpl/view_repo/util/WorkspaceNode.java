@@ -894,10 +894,15 @@ public class WorkspaceNode extends EmsScriptNode {
                                                          ServiceRegistry services,
                                                          StringBuffer response,
                                                          Status status ) {
-        ArrayList< EmsScriptNode > commits =
-                CommitUtil.getCommitsInDateTimeRange( timestamp2, timestamp1,
-                                                      ws1, ws2, services,
-                                                      response );
+        //TODO This method is only called when getting changes between two times on the same workspace
+        // Replace this method with a more specific method since this one doesn't work for the general case anyway
+        ArrayList< EmsScriptNode > commits = null;
+        if (timestamp2 != null && (timestamp1 == null ? timestamp1 == null : timestamp1.after(timestamp2)))
+        {
+            commits = CommitUtil.getCommitsInDateTimeRange( timestamp2, timestamp1,
+                                                            ws1, ws2, services,
+                                                            response );
+        }
         ArrayList< JSONObject > commitsJson = new ArrayList< JSONObject >();
         if ( !Utils.isNullOrEmpty( commits ) ) {
             for ( EmsScriptNode commitNode : commits ) {

@@ -322,6 +322,10 @@ public class CommitUtil {
 	    }
 	    JSONObject latestCommit = new JSONObject( (String) commit );
 	    JSONObject workspaceObject = null;
+	    if (latestCommit.length() == 0)
+	    {
+	        return null;
+	    }
 	    if (workspace.equals("workspace1"))
 	    {
 	        workspaceObject = latestCommit.getJSONObject("workspace1");
@@ -395,9 +399,11 @@ public class CommitUtil {
             while ( commit != null ) {
                 String endOfCommit = getTimestamp(commit, "workspace2");
                 Date endDate = TimeUtils.dateFromTimestamp( endOfCommit );
+                if (endDate == null) break;
                 if ( fromDateTime != null && !endDate.after( fromDateTime ) ) break;
                 String beginningOfCommit = getTimestamp(commit, "workspace1");
                 Date beginningDate = TimeUtils.dateFromTimestamp( beginningOfCommit );
+                if (beginningDate == null) break;
                 if ( toDateTime == null || beginningDate.before( toDateTime ) ) {
                     commits.add( commit );
                 }
