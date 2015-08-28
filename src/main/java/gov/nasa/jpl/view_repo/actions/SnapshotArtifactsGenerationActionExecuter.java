@@ -299,7 +299,7 @@ public class SnapshotArtifactsGenerationActionExecuter  extends ActionExecuterAb
                         jobStatus = "Failed";
                         response.append(String.format("[ERROR]: could not make snapshot for %s.\n", snapshotId));
                         snapshot = populateSnapshotProperties(snapshotNode, timestamp, workspace, "Error");
-                    } 
+                    }
                     else {
                         response.append(String.format("[INFO]: Successfully generated artifact(s) for snapshot: %s.\n", snapshotId));
                         snapshot = populateSnapshotProperties(snapshotNode, timestamp, workspace, "Completed");
@@ -408,7 +408,7 @@ public class SnapshotArtifactsGenerationActionExecuter  extends ActionExecuterAb
                     }
                     allResponse.append(response.toString());
                     if ( !sentEmail ) {
-                        sendEmail( docBookWrapper, allResponse, docbookJobStatus );
+                        sendEmail( allResponse, docbookJobStatus );
                     }
                 } catch(Exception ex) {
                
@@ -431,7 +431,11 @@ public class SnapshotArtifactsGenerationActionExecuter  extends ActionExecuterAb
 
     protected void sendEmail( StringBuffer response ) {
         try{
-            String subject = "PDF Generation " + jobStatus;
+            String statusStr = jobStatus;
+            if ( !fullDoc.allViewsFailed || !fullDoc.allViewsSucceeded ) {
+                statusStr = "completed with errors";
+            }
+            String subject = "PDF generation " + statusStr.toLowerCase();
             EmsScriptNode logNode = ActionUtil.saveLogToFile(jobNode, "text/plain", services, response.toString());
             String msg = buildEmailMessage(snapshot, logNode);
             ActionUtil.sendEmailToModifier(jobNode, msg, subject, services);
@@ -448,11 +452,18 @@ public class SnapshotArtifactsGenerationActionExecuter  extends ActionExecuterAb
 
     }
 
-    protected void sendEmail( DocBookWrapper docBookWrapper, StringBuffer response, String statusOfJob ) {
+    protected void sendEmail( StringBuffer response, String statusOfJob ) {
       try{
-          String subject = "Docbook PDF Generation " + statusOfJob;
-          EmsScriptNode logNode = ActionUtil.saveLogToFile(jobNode, "text/plain", services, response.toString());
-          String msg = buildEmailMessageForDocbook(docBookWrapper.getPdfNode(), docBookWrapper.getZipNode(), snapshot, logNode);
+          String statusStr = jobStatus.toLowerCase();
+          if ( !fullDoc.allViewsFailed || !fullDoc.allViewsSucceeded ) {
+              statusStr = "completed with errors";
+          }
+          //String subject = "PDF Generation " + statusStr + "";
+          String subject = "Docbook PDF generation " + statusOfJob.toLowerCase();
+          String sentence = subject + " after PDF generation " + statusStr + ".";
+          String msg1 = sentence + System.lineSeparator() + System.lineSeparator() + response.toString();
+          EmsScriptNode logNode = ActionUtil.saveLogToFile(jobNode, "text/plain", services, msg1);
+          String msg = buildEmailMessageForDocbook(snapshotService.getPdfNode(), snapshotService.getZipNode(), snapshot, logNode);
           ActionUtil.sendEmailToModifier(jobNode, msg, subject, services);
           if (logger.isDebugEnabled()) logger.debug("Completed docbook snapshot artifact(s) generation.");
       }

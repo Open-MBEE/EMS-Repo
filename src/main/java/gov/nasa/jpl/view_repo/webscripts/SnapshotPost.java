@@ -123,8 +123,18 @@ public class SnapshotPost extends AbstractJavaWebScript {
 	protected PersonService personService;
 	private WorkspaceNode workspace;
 	private Date timestamp;
+	private EmsScriptNode zipNode;
+	private EmsScriptNode pdfNode;
+	
+	public EmsScriptNode getZipNode() {
+        return zipNode;
+    }
 
-	public void setNodeService(NodeService nodeService)
+    public EmsScriptNode getPdfNode() {
+        return pdfNode;
+    }
+
+    public void setNodeService(NodeService nodeService)
     {
        this.nodeService = nodeService;
     }
@@ -418,7 +428,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
                 }
             } else if ("Expression".equals(spec.getTypeName())) {
                 DBSection s = new DBSection();
-                section.setTitle(node.getSysmlName(timestamp));
+                section.setTitle((String)node.getProperty( Acm.ACM_NAME ));
                 java.util.List<EmsScriptNode> instances2 = getInstancesFromExpression((NodeRef)exp, timestamp, workspace);
                 createDBSectionContainmentForContents( s, instances2, workspace, timestamp);
                 section.addElement(s);
@@ -958,6 +968,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
             log( Level.INFO, "Generating zip artifact..." );
             docBookWrapper.saveHtmlZipToRepo( zipNode, snapshotFolderNode, workspace, timestamp );
         //}
+            this.zipNode = docBookWrapper.getZipNode();
         return snapshotNode;
     }
 
@@ -1016,10 +1027,10 @@ public class SnapshotPost extends AbstractJavaWebScript {
         Date timestamp = (Date)snapshotNode.getProperty("view2:timestamp");
         DocBookWrapper docBookWrapper = new DocBookWrapper( this.snapshotName, snapshotNode, false );
 
-        //if ( !hasPdfNode( snapshotNode, timestamp, workspace ) ) {
-            log( Level.INFO, "Generating PDF..." );
-            docBookWrapper.savePdfToRepo(pdfNode, snapshotFolderNode, workspace, timestamp, siteName );
-        //}
+        log( Level.INFO, "Generating PDF..." );
+        docBookWrapper.savePdfToRepo(pdfNode, snapshotFolderNode, workspace, timestamp, siteName );
+        this.pdfNode = docBookWrapper.getPdfNode();
+
         return snapshotNode;
     }
 

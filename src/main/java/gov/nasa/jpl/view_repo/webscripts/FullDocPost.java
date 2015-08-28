@@ -85,6 +85,8 @@ public class FullDocPost extends AbstractJavaWebScript {
 
     // For transactions:
     private String storeName, nodeId, filename;
+    public boolean allViewsFailed = true;
+    public boolean allViewsSucceeded = true;
 	
 	public FullDocPost(){
 		super();
@@ -367,10 +369,15 @@ public class FullDocPost extends AbstractJavaWebScript {
 			attempts++;
 		}
 		
-		if(!isSuccess){
+		if(isSuccess){
+		    allViewsFailed  = false;
+		} else {
+		    allViewsSucceeded  = false;
+		    String errorHtml = "<html><body><div>The view, " + viewId + ", failed to generate.</div></body></html>";
+            gov.nasa.jpl.mbee.util.FileUtils.stringToFile( errorHtml , filePath );
 			String msg = String.format("Failed to download view for %s.", viewId);
 			log(Level.ERROR, msg);
-			throw new Exception(msg);
+//			throw new Exception(msg);
 		}
     }
     
