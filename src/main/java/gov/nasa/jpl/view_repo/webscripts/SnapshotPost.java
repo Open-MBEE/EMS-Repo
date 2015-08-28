@@ -123,8 +123,18 @@ public class SnapshotPost extends AbstractJavaWebScript {
 	protected PersonService personService;
 	private WorkspaceNode workspace;
 	private Date timestamp;
+	private EmsScriptNode zipNode;
+	private EmsScriptNode pdfNode;
+	
+	public EmsScriptNode getZipNode() {
+        return zipNode;
+    }
 
-	public void setNodeService(NodeService nodeService)
+    public EmsScriptNode getPdfNode() {
+        return pdfNode;
+    }
+
+    public void setNodeService(NodeService nodeService)
     {
        this.nodeService = nodeService;
     }
@@ -958,6 +968,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
             log( Level.INFO, "Generating zip artifact..." );
             docBookWrapper.saveHtmlZipToRepo( snapshotFolderNode, workspace, timestamp );
         //}
+            this.zipNode = docBookWrapper.getZipNode();
         return snapshotNode;
     }
 
@@ -1019,7 +1030,8 @@ public class SnapshotPost extends AbstractJavaWebScript {
         //if ( !hasPdfNode( snapshotNode, timestamp, workspace ) ) {
             log( Level.INFO, "Generating PDF..." );
             docBookWrapper.savePdfToRepo(snapshotFolderNode, workspace, timestamp, siteName );
-        //}
+        //} 
+            this.pdfNode = docBookWrapper.getPdfNode();
         return snapshotNode;
     }
 

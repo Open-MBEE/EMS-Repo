@@ -383,7 +383,7 @@ public class SnapshotArtifactsGenerationActionExecuter  extends ActionExecuterAb
                     try{
                         String subject = "Docbook PDF Generation " + docbookJobStatus;
                         EmsScriptNode logNode = ActionUtil.saveLogToFile(jobNode, "text/plain", services, allResponse.toString());
-                        String msg = buildEmailMessageForDocbook(docBookWrapper.getPdfNode(), docBookWrapper.getZipNode(), snapshot, logNode);
+                        String msg = buildEmailMessageForDocbook(snapshotService.getPdfNode(), snapshotService.getZipNode(), snapshot, logNode);
                         ActionUtil.sendEmailToModifier(jobNode, msg, subject, services);
                         if (logger.isDebugEnabled()) logger.debug("Completed docbook snapshot artifact(s) generation.");
                     }
