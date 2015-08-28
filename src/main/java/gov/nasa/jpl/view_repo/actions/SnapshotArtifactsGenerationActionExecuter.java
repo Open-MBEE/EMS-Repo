@@ -423,6 +423,7 @@ public class SnapshotArtifactsGenerationActionExecuter  extends ActionExecuterAb
 				buf.append(logNode.getUrl());
 				if (snapshotFolder != null) {
 				    buf.append(System.lineSeparator());
+				    buf.append(System.lineSeparator());
 				    buf.append("Folder: ");
 				    buf.append(contextUrl + snapshotFolder.getUrl());
 				}

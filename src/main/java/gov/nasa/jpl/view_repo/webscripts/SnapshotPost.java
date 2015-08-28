@@ -418,7 +418,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
                 }
             } else if ("Expression".equals(spec.getTypeName())) {
                 DBSection s = new DBSection();
-                section.setTitle(spec.getSysmlName(timestamp));
+                section.setTitle(node.getSysmlName(timestamp));
                 java.util.List<EmsScriptNode> instances2 = getInstancesFromExpression((NodeRef)exp, timestamp, workspace);
                 createDBSectionContainmentForContents( s, instances2, workspace, timestamp);
                 section.addElement(s);
