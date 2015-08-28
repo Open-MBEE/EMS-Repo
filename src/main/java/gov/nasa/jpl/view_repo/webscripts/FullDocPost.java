@@ -798,22 +798,10 @@ public class FullDocPost extends AbstractJavaWebScript {
 //		ServiceRegistry services = this.snapshotNode.getServices();
     	String filename = String.format("%s.pdf", this.fullDocId);
 		try{
-			ArrayList<NodeRef> nodeRefs = NodeUtil.findNodeRefsByType( filename, "@cm\\:name:\"", snapshotFolder.getServices() );
-			if(nodeRefs==null) nodeRefs = NodeUtil.findNodeRefsByType( filename, "@sysml\\:id:\"", snapshotFolder.getServices() );
-			if (nodeRefs != null && nodeRefs.size() > 0) {
-				EmsScriptNode nodePrev = new EmsScriptNode(nodeRefs.get( 0 ), snapshotFolder.getServices(), new StringBuffer());
-				if(nodePrev != null && nodePrev.getName()==filename){ 
-					try{
-						nodePrev.remove();
-					}
-					catch(Exception ex){
-						System.out.println(String.format("problem removing previous artifact node. %s", ex.getMessage()));
-						ex.printStackTrace();
-					}
-				}
-			}
-			
-			EmsScriptNode node = snapshotFolder.createNode(filename, "cm:content");
+            EmsScriptNode node = 
+                    NodeUtil.getOrCreateContentNode( snapshotFolder,
+                                                     filename,
+                                                     snapshotFolder.getServices() );
 			if(node == null) throw new Exception("Failed to create PDF repository node!");
 
 //			String pdfPath = transformToPDF(workspace, timestamp);
@@ -862,21 +850,12 @@ public class FullDocPost extends AbstractJavaWebScript {
 	public void saveZipToRepo(EmsScriptNode snapshotFolder, EmsScriptNode snapshotNode) throws Exception{
 		String filename = String.format("%s.zip", this.fullDocId);
 		try{
-			// removes any previously generated Zip node.
-			ArrayList<NodeRef> nodeRefs = NodeUtil.findNodeRefsByType( filename, "@cm\\:name:\"", snapshotFolder.getServices() );
-			if(nodeRefs==null) nodeRefs = NodeUtil.findNodeRefsByType( filename, "@sysml\\:id:\"", snapshotFolder.getServices() );
-			if (nodeRefs != null && nodeRefs.size() > 0) {
-				EmsScriptNode nodePrev = new EmsScriptNode(nodeRefs.get( 0 ), snapshotFolder.getServices(), new StringBuffer());
-				if(nodePrev != null && nodePrev.getName()==filename){ 
-					try{
-						nodePrev.remove();
-					}
-					catch(Exception ex){
-						System.out.println(String.format("problem removing previous artifact node. %s", ex.getMessage()));
-						ex.printStackTrace();
-					}
-				}
-			}
+            EmsScriptNode node =
+                    NodeUtil.getOrCreateContentNode( snapshotFolder,
+                                                     filename,
+                                                     snapshotFolder.getServices());
+            if(node == null) throw new Exception("Failed to create zip repository node!");
+
 
 			//createDocBookDir();
 			//retrieveDocBook(workspace, timestamp);
@@ -885,13 +864,7 @@ public class FullDocPost extends AbstractJavaWebScript {
 //			String zipPath = this.zipHtml();
 //			if(zipPath == null || zipPath.isEmpty()) throw new Exception("Failed to zip files and resources!");
 			this.zipHtml();
-			EmsScriptNode nodePrev = snapshotFolder.childByNamePath(filename);
-			if(nodePrev != null && nodePrev.exists()) nodePrev.remove();
 			
-			EmsScriptNode node = snapshotFolder.createNode(filename, "cm:content");
-			
-			if(node == null) throw new Exception("Failed to create zip repository node!");
-
 			if(!this.saveFileToRepo(node, MimetypeMap.MIMETYPE_ZIP, this.zipPath)) throw new Exception("Failed to save zip artifact to repository!");
 			snapshotNode.createOrUpdateAspect("view2:htmlZip");
 			snapshotNode.createOrUpdateProperty("view2:htmlZipNode", node.getNodeRef());

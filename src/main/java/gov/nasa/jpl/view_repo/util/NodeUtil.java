@@ -4052,4 +4052,33 @@ public class NodeUtil {
     public static String getHostname() {
         return services.getSysAdminParams().getAlfrescoHost();
     }
+    public static EmsScriptNode getOrCreateContentNode(EmsScriptNode parent,
+                                                       String cmName,
+                                                       ServiceRegistry services ) {
+        // See if node already exists.
+        EmsScriptNode node = parent.childByNamePath(cmName);
+
+        if ( !exists( node ) ) {
+//        ArrayList<NodeRef> nodeRefs = findNodeRefsByType( cmName, SearchType.CM_NAME.prefix, services );
+//        if (nodeRefs != null && nodeRefs.size() == 1) {
+//            node = new EmsScriptNode(nodeRefs.get( 0 ), services, new StringBuffer());
+//        } else if ( Utils.isNullOrEmpty( nodeRefs ) ) {
+            // In case the node is "deleted" or corrupt, rename to something else.
+            if ( node != null ) {
+                Debug.error( true, false,
+                             "Error! tried to create "
+                                     + cmName + " in parent, " + parent
+                                     + ", but a deleted or corrupt node of the same name exists.  Renaming to a_"
+                                     + cmName + "." );
+                cmName = "a_" + cmName;
+                return getOrCreateContentNode(parent, cmName, services);
+            }
+            node = parent.createNode(cmName, "cm:content");
+//        } else {
+//            // TODO -- ERROR!  Multiple matches
+//            Debug.error(true, false, "Found multiple " + cmName + " nodes whe expecting just one: " + nodeRefs );
+//        }
+        }
+        return node;
+    }
 }
