@@ -8,9 +8,11 @@ import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 
 
 
+
 //import gov.nasa.jpl.view_repo.webscripts.AbstractJavaWebScript.LogLevel;
 import org.apache.log4j.*;
 
+import gov.nasa.jpl.view_repo.webscripts.DocBookWrapper;
 import gov.nasa.jpl.view_repo.webscripts.FullDocPost;
 import gov.nasa.jpl.view_repo.webscripts.HostnameGet;
 import gov.nasa.jpl.view_repo.webscripts.SnapshotPost;
@@ -38,7 +40,7 @@ import org.springframework.web.context.request.WebRequest;
 
 public class SnapshotArtifactsGenerationActionExecuter  extends ActionExecuterAbstractBase {
     static Logger logger = Logger.getLogger(SnapshotArtifactsGenerationActionExecuter.class);
-    
+    static public boolean makeDocBook = true;
     /**
      * Injected variables from Spring configuration
      */
@@ -63,6 +65,14 @@ public class SnapshotArtifactsGenerationActionExecuter  extends ActionExecuterAb
     private Date dateTime;
     private String tagTitle;
     
+    protected EmsScriptNode docbookPdfNode = null;
+    protected EmsScriptNode docbookZipNode = null;
+    
+    protected boolean sentEmail = false;
+    
+    //backup docbook gen
+    private SnapshotPost docbook;
+    
     // Parameter values to be passed in when the action is created
     public static final String NAME = "snapshotArtifactsGeneration";
     public static final String PARAM_SITE_NAME = "siteName";
@@ -76,6 +86,14 @@ public class SnapshotArtifactsGenerationActionExecuter  extends ActionExecuterAb
     public static final String PARAM_CONFIGURATION_ID = "configId";
     
     
+    public SnapshotArtifactsGenerationActionExecuter() {
+        super();
+    }
+    public SnapshotArtifactsGenerationActionExecuter(Repository repositoryHelper, ServiceRegistry registry) {
+        super();
+        setRepository( repositoryHelper );
+        setServices( registry );
+    }
     public void setRepository(Repository rep) {
         repository = rep;
     }
@@ -86,8 +104,9 @@ public class SnapshotArtifactsGenerationActionExecuter  extends ActionExecuterAb
     
     @Override
     protected void executeImpl(final Action action, final NodeRef nodeRef) {
-        clearCache();
-        executeImplImpl(action, nodeRef);
+        SnapshotArtifactsGenerationActionExecuter instance = new SnapshotArtifactsGenerationActionExecuter(repository, services );
+        instance.clearCache();
+        instance.executeImplImpl(action, nodeRef);
     }
     
     private void handleException(Exception ex, Action action) {
@@ -177,7 +196,7 @@ public class SnapshotArtifactsGenerationActionExecuter  extends ActionExecuterAb
     }
     
     private void executeImplImpl(final Action action, final NodeRef nodeRef) {
-
+        final StringBuffer allResponse = new StringBuffer();
         new EmsTransaction(services, response, new Status()) {
             @Override
             public void run() throws Exception {
@@ -225,6 +244,8 @@ public class SnapshotArtifactsGenerationActionExecuter  extends ActionExecuterAb
                         
                         fullDoc = new FullDocPost(repository, services);
                         fullDoc.setFullDocId(snapshotId);
+                        
+                        docbook = new SnapshotPost(repository, services);
                 }
                 catch(Exception ex){
                     handleException( ex, action);
@@ -238,8 +259,10 @@ public class SnapshotArtifactsGenerationActionExecuter  extends ActionExecuterAb
             String sysmlId = (String)action.getParameterValue(PARAM_SYSML_ID);
             String workspaceName = action.getParameterValue(PARAM_WORKSPACE_NAME).toString();
             String timestampVE = action.getParameterValue(PARAM_TIME_STAMP).toString();
-            
-            fullDoc.downloadHtml(workspaceName, siteName, sysmlId, timestampVE, tagTitle);
+            int attempts = 0;
+            while(attempts++ < 3 && !fullDoc.isFullDocHtmlExist()){
+            	fullDoc.downloadHtml(workspaceName, siteName, sysmlId, timestampVE, tagTitle);
+            }
         }
         catch(Exception ex){
             status.setCode(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
@@ -276,39 +299,183 @@ public class SnapshotArtifactsGenerationActionExecuter  extends ActionExecuterAb
                         jobStatus = "Failed";
                         response.append(String.format("[ERROR]: could not make snapshot for %s.\n", snapshotId));
                         snapshot = populateSnapshotProperties(snapshotNode, timestamp, workspace, "Error");
-                    } 
+                    }
                     else {
                         response.append(String.format("[INFO]: Successfully generated artifact(s) for snapshot: %s.\n", snapshotId));
                         snapshot = populateSnapshotProperties(snapshotNode, timestamp, workspace, "Completed");
                     }
                     
+                    if ( makeDocBook ) {
+                        // Create placeholder docbook nodes now so that we can
+                        // include URLs for them in the e-mail message.
+                        String snapshotName = snapshotNode.getName();
+                        docbookPdfNode =
+                                NodeUtil.getOrCreateContentNode( snapshotFolder,
+                                                                 snapshotName
+                                                                 + DocBookWrapper.docbookFileSuffix
+                                                                 + ".pdf",
+                                                                 services );                   
+                        
+                        docbookZipNode =
+                                NodeUtil.getOrCreateContentNode( snapshotFolder,
+                                                                 snapshotName
+                                                                 + DocBookWrapper.docbookFileSuffix
+                                                                 + ".zip",
+                                                                 services );                   
+                    }
                     response.append("Snapshot JSON:\n");
                     response.append(snapshot);
                     response.append("\n\n");
-
-                    try{
-                        String subject = "PDF Generation " + jobStatus;
-                        EmsScriptNode logNode = ActionUtil.saveLogToFile(jobNode, "text/plain", services, response.toString());
-                        String msg = buildEmailMessage(snapshot, logNode);
-                        ActionUtil.sendEmailToModifier(jobNode, msg, subject, services);
-                        if (logger.isDebugEnabled()) logger.debug("Completed snapshot artifact(s) generation.");
+                    allResponse.append(response.toString());
+                    if ( jobStatus.equals( "Succeeded" ) ) {
+                        sendEmail( response );
+                        sentEmail = true;
                     }
-                    catch(Exception ex){
-                        System.out.println("Failed to email PDF generation status.");
-                        Throwable throwable = ex.getCause();
-                        while(throwable != null){
-                            System.out.println(throwable.getMessage());
-                            System.out.println(throwable.getCause());
-                        }
-                    }
+//                    try{
+//                        String subject = "PDF Generation " + jobStatus;
+//                        EmsScriptNode logNode = ActionUtil.saveLogToFile(jobNode, "text/plain", services, response.toString());
+//                        String msg = buildEmailMessage(snapshot, logNode);
+//                        ActionUtil.sendEmailToModifier(jobNode, msg, subject, services);
+//                        if (logger.isDebugEnabled()) logger.debug("Completed snapshot artifact(s) generation.");
+//                    }
+//                    catch(Exception ex){
+//                        System.out.println("Failed to email PDF generation status.");
+//                        Throwable throwable = ex.getCause();
+//                        while(throwable != null){
+//                            System.out.println(throwable.getMessage());
+//                            System.out.println(throwable.getCause());
+//                        }
+//                    }
                 }
                 catch(Exception ex){
                     handleException( ex, action);
                 }
            }
         };
-  
+        //make backup docbookxml
+        if (makeDocBook) {
+        new EmsTransaction(services, response, new Status()) {
+            @Override
+            public void run() throws Exception {
+                String docbookJobStatus = "Succeeded";
+                try { //mostly copied from tag 2.1.4's code
+                    response.append("[INFO]: Creating docbook.xml...\n");
+                    NodeRef viewRef = (NodeRef)snapshotNode.getNodeRefProperty( "view2:snapshotProduct", dateTime,
+                            workspace);
+                    if (viewRef == null) {
+                        // if missing, then check for backwards compatibility
+                        EmsScriptNode viewNode = snapshotNode.getFirstSourceAssociationByType( "view2:snapshots" );
+                        if (viewNode != null) {
+                            viewRef = viewNode.getNodeRef();
+                        }
+                    }
+                    EmsScriptNode viewNode = new EmsScriptNode(viewRef, services, response);
+                    String viewId = viewNode.getSysmlId();
+                    String contextPath = "alfresco/service";
+                    
+                    DocBookWrapper docBookWrapper =  docbook.createDocBook(viewNode, viewId, snapshotNode.getSysmlId(), contextPath, snapshotNode, workspace, timestamp, response);
+                    if ( docBookWrapper == null ) {
+                        logger.error("Failed to generate DocBook!" );
+                        snapshotNode = null;
+                    } 
+                    else {
+                        docBookWrapper.save();
+                        docBookWrapper.saveDocBookToRepo( snapshotFolder, timestamp );
+                    }
+//                      
+                    try{
+                        snapshotNode = snapshotService.generatePDF(docbookPdfNode, snapshotId, timestamp, workspace, siteName);
+                        response.append(snapshotService.getResponse().toString());
+                    }
+                    catch(Exception ex){
+                        //status.setCode(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                        logger.error("Failed to generate docbook PDF for snapshot Id: " + snapshotId);
+                        response.append(String.format("[ERROR]: Failed to generate docbook PDF for snapshot Id: %s.\n%s\n%s\n", snapshotId, ex.getMessage(), ex.getStackTrace()));
+                        docbookJobStatus = "Failed";
+                        //snapshot = snapshotService.generatedPDFFailure(snapshotId, timestamp, workspace, siteName);
+                    }
+//                          }
+//                          else if(format.compareToIgnoreCase("html") == 0){
+                    try{
+                        snapshotNode = snapshotService.generateHTML(docbookZipNode, snapshotId, timestamp, workspace);
+                        response.append(snapshotService.getResponse().toString());
+                    }
+                    catch(Exception ex){
+                        //status.setCode(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                        logger.error("Failed to generate zip artifact for snapshot Id: " + snapshotId);
+                        response.append(String.format("[ERROR]: Failed to generate docbook zip artifact for snapshot Id: %s.\n%s\n%s\n", snapshotId, ex.getMessage(), ex.getStackTrace()));
+                        docbookJobStatus = "Failed";
+                    }
+                    allResponse.append(response.toString());
+                    if ( !sentEmail ) {
+                        sendEmail( allResponse, docbookJobStatus );
+                    }
+                } catch(Exception ex) {
+               
+                   StringBuffer sb = new StringBuffer();
+                   Throwable throwable = ex.getCause();
+                   while(throwable != null){
+                       sb.append(throwable.getMessage());
+                       throwable = throwable.getCause();
+                   }
+                   
+                   logger.error("Failed to complete docbook snapshot artifact(s) generation!");
+                   logger.error(sb.toString());
+                   ex.printStackTrace();
+              
+                }
+            }
+        };
+        }
     }
+
+    protected void sendEmail( StringBuffer response ) {
+        try{
+            String statusStr = jobStatus;
+            if ( !fullDoc.allViewsFailed && !fullDoc.allViewsSucceeded ) {
+                statusStr = "completed with errors";
+            }
+            String subject = "PDF generation " + statusStr.toLowerCase();
+            EmsScriptNode logNode = ActionUtil.saveLogToFile(jobNode, "text/plain", services, response.toString());
+            String msg = buildEmailMessage(snapshot, logNode);
+            ActionUtil.sendEmailToModifier(jobNode, msg, subject, services);
+            if (logger.isDebugEnabled()) logger.debug("Completed snapshot artifact(s) generation.");
+        }
+        catch(Exception ex){
+            System.out.println("Failed to email PDF generation status.");
+            Throwable throwable = ex.getCause();
+            while(throwable != null){
+                System.out.println(throwable.getMessage());
+                System.out.println(throwable.getCause());
+            }
+        }
+
+    }
+
+    protected void sendEmail( StringBuffer response, String statusOfJob ) {
+      try{
+          String statusStr = jobStatus.toLowerCase();
+          if ( !fullDoc.allViewsFailed && !fullDoc.allViewsSucceeded ) {
+              statusStr = "completed with errors";
+          }
+          //String subject = "PDF Generation " + statusStr + "";
+          String subject = "Docbook PDF generation " + statusOfJob.toLowerCase();
+          String sentence = subject + " after PDF generation " + statusStr + ".";
+          String msg1 = sentence + System.lineSeparator() + System.lineSeparator() + response.toString();
+          EmsScriptNode logNode = ActionUtil.saveLogToFile(jobNode, "text/plain", services, msg1);
+          String msg = buildEmailMessageForDocbook(snapshotService.getPdfNode(), snapshotService.getZipNode(), snapshot, logNode);
+          ActionUtil.sendEmailToModifier(jobNode, msg, subject, services);
+          if (logger.isDebugEnabled()) logger.debug("Completed docbook snapshot artifact(s) generation.");
+      }
+      catch(Exception ex){
+          System.out.println("Failed to email PDF generation status.");
+          Throwable throwable = ex.getCause();
+          while(throwable != null){
+              System.out.println(throwable.getMessage());
+              System.out.println(throwable.getCause());
+          }
+      }
+}
 
     @Override
     protected void addParameterDefinitions(List<ParameterDefinition> paramList) {
@@ -336,6 +503,37 @@ public class SnapshotArtifactsGenerationActionExecuter  extends ActionExecuterAb
     	    	buf.append("Log: ");
 				buf.append(contextUrl);
 				buf.append(logNode.getUrl());
+				if (snapshotFolder != null) {
+				    buf.append(System.lineSeparator());
+				    buf.append(System.lineSeparator());
+				    buf.append("Folder: ");
+				    buf.append(contextUrl + snapshotFolder.getUrl());
+				}
+				
+				if ( makeDocBook ) {
+                    boolean gotPdfNode = NodeUtil.exists( docbookPdfNode );
+                    boolean gotZipNode = NodeUtil.exists( docbookZipNode );
+                    if ( gotPdfNode || gotZipNode ) {
+                        buf.append(System.lineSeparator());
+                        buf.append(System.lineSeparator());
+                        String pdfHref = "pdf";
+                        String zipHref = "zip";
+                        if ( gotPdfNode ) {
+                            pdfHref = "<a href=\"" + contextUrl + docbookPdfNode.getUrl() + "\">pdf</a>";
+                        }
+                        if ( gotZipNode ) {
+                            zipHref = "<a href=\"" + contextUrl + docbookZipNode.getUrl() + "\">zip</a>";
+                        }
+//                        buf.append("DocBook " + pdfHref + " and " + zipHref + 
+//                                   " are processing and will be available at a later time.");
+                        buf.append("DocBook PDF and ZIP generation is processing and will be available at a later time.");
+                        buf.append(System.lineSeparator());
+                        buf.append("DocBook PDF: " + contextUrl + docbookPdfNode.getUrl());
+                        buf.append(System.lineSeparator() );
+                        buf.append("DocBook zip: " + contextUrl + docbookZipNode.getUrl());
+                        buf.append(System.lineSeparator() );
+                    }
+				}
         	}
         	catch(JSONException ex){
         		throw new Exception("Failed to build email message!", ex);
@@ -343,6 +541,37 @@ public class SnapshotArtifactsGenerationActionExecuter  extends ActionExecuterAb
         	return buf.toString();
     }	
     	
+    private String buildEmailMessageForDocbook(EmsScriptNode pdf, EmsScriptNode zip, JSONObject snapshot, EmsScriptNode logNode) throws Exception{
+        StringBuffer buf = new StringBuffer();
+        try{
+            HostnameGet hostnameGet = new HostnameGet(this.repository, this.services);
+            String contextUrl = hostnameGet.getAlfrescoUrl() + "/alfresco";
+            if (pdf != null) {
+                buf.append("Snapshot PDF: " + contextUrl + pdf.getUrl());
+                buf.append(System.lineSeparator());
+                buf.append(System.lineSeparator());
+            }
+            if (zip != null) {
+                buf.append("Snapshot ZIP: " + contextUrl + zip.getUrl());
+                buf.append(System.lineSeparator());
+                buf.append(System.lineSeparator());
+            }
+            buf.append("Log: ");
+            buf.append(contextUrl);
+            buf.append(logNode.getUrl());
+            if (snapshotFolder != null) {
+                buf.append(System.lineSeparator());
+                buf.append(System.lineSeparator());
+                buf.append("Folder: ");
+                buf.append(contextUrl + snapshotFolder.getUrl());
+            }
+        }
+        catch(JSONException ex){
+            throw new Exception("Failed to build email message!", ex);
+        }
+        return buf.toString();
+    }
+    
     protected void clearCache() {
         response = new StringBuffer();
         NodeUtil.setBeenInsideTransaction( false );

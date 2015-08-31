@@ -1,6 +1,7 @@
 package gov.nasa.jpl.view_repo.webscripts;
 
 import gov.nasa.jpl.docbook.model.DBImage;
+import gov.nasa.jpl.mbee.util.Debug;
 import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.view_repo.sysml.View;
 import gov.nasa.jpl.view_repo.util.Acm;
@@ -48,6 +49,7 @@ import org.alfresco.util.exec.RuntimeExec.ExecutionResult;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -79,9 +81,12 @@ public class FullDocPost extends AbstractJavaWebScript {
     protected JSONArray view2view;
     protected String timeTagName;
 //    protected Queue queue;
-    
+    static Logger logger = Logger.getLogger(FullDocPost.class);
+
     // For transactions:
     private String storeName, nodeId, filename;
+    public boolean allViewsFailed = true;
+    public boolean allViewsSucceeded = true;
 	
 	public FullDocPost(){
 		super();
@@ -122,21 +127,21 @@ public class FullDocPost extends AbstractJavaWebScript {
     	View documentView = document.getView();
     	if(documentView == null) throw new Exception("Missing document's structure; expected to find product's view but it's not found.");
     	
-    	JSONArray contains = documentView.getContainsJson(dateTime, workspace);
-        if(contains == null || contains.length()==0){ throw new Exception("Missing document's structure; expected to find document's 'contains' JSONArray but it's not found."); }
+//    	JSONArray contains = documentView.getContainsJson(dateTime, workspace);
+//        if(contains == null || contains.length()==0){ throw new Exception("Missing document's structure; expected to find document's 'contains' JSONArray but it's not found."); }
 
-        for(int i=0; i < contains.length(); i++){
-            JSONObject contain = contains.getJSONObject(i);
-            if(contain == null) throw new Exception(String.format("Missing document's structure; expected to find contain JSONObject at index: %d but it's not found.", i));
+//        for(int i=0; i < contains.length(); i++){
+//            JSONObject contain = contains.getJSONObject(i);
+//            if(contain == null) throw new Exception(String.format("Missing document's structure; expected to find contain JSONObject at index: %d but it's not found.", i));
 
-            String source = (String)contain.opt("source");
-            if(source == null || source.isEmpty()) throw new Exception("Missing document's structure; expected to find contain source property but it's not found.");
+//            String source = (String)contain.opt("source");
+//            if(source == null || source.isEmpty()) throw new Exception("Missing document's structure; expected to find contain source property but it's not found.");
 
             this.view2view = documentView.getViewToViewPropertyJson();
             if(view2view == null || view2view.length()==0) throw new Exception ("Missing document's structure; expected to find document's 'view2view' JSONArray but it's not found.");
 
-            downloadView(workspace, site, docId, source, "", timestamp);
-        }
+            downloadView(workspace, site, docId, docId, "", timestamp);
+//        }
 
         joinViews(docId);
     }
@@ -154,7 +159,10 @@ public class FullDocPost extends AbstractJavaWebScript {
         
         for(int j=0; j< childrenViews.length(); j++){
         	String childId = childrenViews.getString(j);
-        	if(childId == null || childId.isEmpty()) throw new Exception(String.format("Missing document's structure; expected to find childrenViews[%d] Id but it's not found.", j));
+        	if(childId == null || childId.isEmpty()) {
+        	    Debug.error(true, false, String.format("Missing document's structure; expected to find childrenViews[%d] Id but it's not found.", j));
+        	    continue;
+        	}
         	StringBuilder html = new StringBuilder();
         	getViewFromHtmlFile(html, childId);
         	document.body().append(html.toString());
@@ -181,12 +189,19 @@ public class FullDocPost extends AbstractJavaWebScript {
     	file.delete();
     	
     	JSONObject v2vChildNode = getChildrenViews(viewId);
+    	if (v2vChildNode == null) {
+    	    Debug.error(true, false, String.format("Missing document's structure; expected to find 'view2view' childnode for: %s but it's not found.", viewId));
+            return;
+    	}
     	JSONArray childrenViews = v2vChildNode.getJSONArray("childrenViews");
         if(childrenViews == null) throw new Exception("Missing document's structure; expected to find 'view2view' childnode's 'childrenViews' but it's not found.");
         
         for(int j=0; j< childrenViews.length(); j++){
         	String childId = childrenViews.getString(j);
-        	if(childId == null || childId.isEmpty()) throw new Exception(String.format("Missing document's structure; expected to find childrenViews[%d] Id but it's not found.", j));
+        	if(childId == null || childId.isEmpty()) {
+        	    Debug.error(true, false, String.format("Missing document's structure; expected to find childrenViews[%d] Id but it's not found.", j));
+        	    continue;
+        	}
         	getViewFromHtmlFile(html, childId);
         }
     }
@@ -290,14 +305,20 @@ public class FullDocPost extends AbstractJavaWebScript {
     	downloadViewWorker(workspace, site, docId, viewId, section, timestamp);
     	
     	JSONObject v2vChildNode = getChildrenViews(viewId);
-        if(v2vChildNode == null) throw new Exception(String.format("Missing document's structure; expected to find 'view2view' childnode for: %s but it's not found.", source));
+        if(v2vChildNode == null) {
+            Debug.error(true, false, String.format("Missing document's structure; expected to find 'view2view' childnode for: %s but it's not found.", viewId));
+            return;
+        }
 
         JSONArray childrenViews = v2vChildNode.getJSONArray("childrenViews");
         if(childrenViews == null) throw new Exception("Missing document's structure; expected to find 'view2view' childnode's 'childrenViews' but it's not found.");
         
         for(int j=0; j< childrenViews.length(); j++){
         	String childId = childrenViews.getString(j);
-        	if(childId == null || childId.isEmpty()) throw new Exception(String.format("Missing document's structure; expected to find childrenViews[%d] Id but it's not found.", j));
+        	if(childId == null || childId.isEmpty()) {
+        	    Debug.error(true, false, String.format("Missing document's structure; expected to find childrenViews[%d] Id but it's not found.", j));
+        	    continue;
+        	}
 
         	EmsScriptNode childNode = findScriptNodeById(childId, workspace, TimeUtils.dateFromTimestamp( timestamp ), false);
         	if(childNode == null) throw new Exception(String.format("Failed to find EmsScriptNode with Id: %s", childId));
@@ -310,6 +331,9 @@ public class FullDocPost extends AbstractJavaWebScript {
     }
     
     private void downloadViewWorker(WorkspaceNode workspace, String site, String docId, String viewId, String section, String timestamp) throws Exception{
+    	String filePath = String.format("%s/%s.html", this.fullDocDir, viewId);
+    	if(Files.exists(Paths.get(filePath))) return;
+    	
     	RuntimeExec exec = new RuntimeExec();
     	HostnameGet alfresco = new HostnameGet(this.repository, this.services);
 		String protocol = alfresco.getAlfrescoProtocol();
@@ -319,7 +343,7 @@ public class FullDocPost extends AbstractJavaWebScript {
 		int preRendererPort = 3000;
 		String mmsAdminCredential = getHeadlessUserCredential();
 //		DateTimeFormatter fmt = ISODateTimeFormat.dateTime();
-		String filePath = String.format("%s/%s.html", this.fullDocDir, viewId);
+//		String filePath = String.format("%s/%s.html", this.fullDocDir, viewId);
 		
 		List<String> command = new ArrayList<String>();
 		command.add(this.phantomJSPath);
@@ -327,7 +351,7 @@ public class FullDocPost extends AbstractJavaWebScript {
 		// command.add(String.format("%s:%d/%s://%s@%s/mmsFullDoc.html#/workspaces/%s/sites/%s/documents/%s/views/%s",
 		// preRendererUrl,preRendererPort, protocol, mmsAdminCredential, hostnameAndPort, workspace.getName(), site, docId, viewId));
 		command.add(String.format("%s:%d/%s://%s@%s/mmsFullDoc.html?ws=%s&site=%s&docId=%s&viewId=%s&section=%s&time=%s",
-		preRendererUrl,preRendererPort, protocol, mmsAdminCredential, hostnameAndPort, workspace.getName(), site, docId, viewId, section, timestamp));
+		preRendererUrl,preRendererPort, protocol, mmsAdminCredential, hostnameAndPort, workspace == null ? "master" : workspace.getName(), site, docId, viewId, section, timestamp));
 		command.add(filePath);
 		exec.setCommand(list2Array(command));
 		System.out.println("NodeJS command: " + command);
@@ -345,10 +369,15 @@ public class FullDocPost extends AbstractJavaWebScript {
 			attempts++;
 		}
 		
-		if(!isSuccess){
+		if(isSuccess){
+		    allViewsFailed  = false;
+		} else {
+		    allViewsSucceeded  = false;
+		    String errorHtml = "<html><body><div>Error: The html for the view with id = " + viewId + " failed to generate.</div></body></html>";
+            gov.nasa.jpl.mbee.util.FileUtils.stringToFile( errorHtml , filePath );
 			String msg = String.format("Failed to download view for %s.", viewId);
 			log(Level.ERROR, msg);
-			throw new Exception(msg);
+//			throw new Exception(msg);
 		}
     }
     
@@ -736,6 +765,10 @@ public class FullDocPost extends AbstractJavaWebScript {
 		this.savePdfToRepo(snapshotFolder, snapshotNode);
     }
 
+    public boolean isFullDocHtmlExist(){
+    	return Files.exists(Paths.get(this.htmlPath));
+    }
+    
 	/**
 	 * Helper method to convert a list to an array of specified type
 	 * @param list
@@ -772,22 +805,10 @@ public class FullDocPost extends AbstractJavaWebScript {
 //		ServiceRegistry services = this.snapshotNode.getServices();
     	String filename = String.format("%s.pdf", this.fullDocId);
 		try{
-			ArrayList<NodeRef> nodeRefs = NodeUtil.findNodeRefsByType( filename, "@cm\\:name:\"", snapshotFolder.getServices() );
-			if(nodeRefs==null) nodeRefs = NodeUtil.findNodeRefsByType( filename, "@sysml\\:id:\"", snapshotFolder.getServices() );
-			if (nodeRefs != null && nodeRefs.size() > 0) {
-				EmsScriptNode nodePrev = new EmsScriptNode(nodeRefs.get( 0 ), snapshotFolder.getServices(), new StringBuffer());
-				if(nodePrev != null && nodePrev.getName()==filename){ 
-					try{
-						nodePrev.remove();
-					}
-					catch(Exception ex){
-						System.out.println(String.format("problem removing previous artifact node. %s", ex.getMessage()));
-						ex.printStackTrace();
-					}
-				}
-			}
-			
-			EmsScriptNode node = snapshotFolder.createNode(filename, "cm:content");
+            EmsScriptNode node = 
+                    NodeUtil.getOrCreateContentNode( snapshotFolder,
+                                                     filename,
+                                                     snapshotFolder.getServices() );
 			if(node == null) throw new Exception("Failed to create PDF repository node!");
 
 //			String pdfPath = transformToPDF(workspace, timestamp);
@@ -836,21 +857,12 @@ public class FullDocPost extends AbstractJavaWebScript {
 	public void saveZipToRepo(EmsScriptNode snapshotFolder, EmsScriptNode snapshotNode) throws Exception{
 		String filename = String.format("%s.zip", this.fullDocId);
 		try{
-			// removes any previously generated Zip node.
-			ArrayList<NodeRef> nodeRefs = NodeUtil.findNodeRefsByType( filename, "@cm\\:name:\"", snapshotFolder.getServices() );
-			if(nodeRefs==null) nodeRefs = NodeUtil.findNodeRefsByType( filename, "@sysml\\:id:\"", snapshotFolder.getServices() );
-			if (nodeRefs != null && nodeRefs.size() > 0) {
-				EmsScriptNode nodePrev = new EmsScriptNode(nodeRefs.get( 0 ), snapshotFolder.getServices(), new StringBuffer());
-				if(nodePrev != null && nodePrev.getName()==filename){ 
-					try{
-						nodePrev.remove();
-					}
-					catch(Exception ex){
-						System.out.println(String.format("problem removing previous artifact node. %s", ex.getMessage()));
-						ex.printStackTrace();
-					}
-				}
-			}
+            EmsScriptNode node =
+                    NodeUtil.getOrCreateContentNode( snapshotFolder,
+                                                     filename,
+                                                     snapshotFolder.getServices());
+            if(node == null) throw new Exception("Failed to create zip repository node!");
+
 
 			//createDocBookDir();
 			//retrieveDocBook(workspace, timestamp);
@@ -859,13 +871,7 @@ public class FullDocPost extends AbstractJavaWebScript {
 //			String zipPath = this.zipHtml();
 //			if(zipPath == null || zipPath.isEmpty()) throw new Exception("Failed to zip files and resources!");
 			this.zipHtml();
-			EmsScriptNode nodePrev = snapshotFolder.childByNamePath(filename);
-			if(nodePrev != null && nodePrev.exists()) nodePrev.remove();
 			
-			EmsScriptNode node = snapshotFolder.createNode(filename, "cm:content");
-			
-			if(node == null) throw new Exception("Failed to create zip repository node!");
-
 			if(!this.saveFileToRepo(node, MimetypeMap.MIMETYPE_ZIP, this.zipPath)) throw new Exception("Failed to save zip artifact to repository!");
 			snapshotNode.createOrUpdateAspect("view2:htmlZip");
 			snapshotNode.createOrUpdateProperty("view2:htmlZipNode", node.getNodeRef());

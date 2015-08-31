@@ -4370,7 +4370,9 @@ public class EmsScriptNode extends ScriptNode implements
             EmsScriptNode parent1 = getParent(null, getWorkspace(), false, true);
             EmsScriptNode parent2 = node.getParent(null, parentWs, false, true);
             boolean failed = false;
-            while ( NodeUtil.exists( parent1 ) && NodeUtil.exists( parent2 ) &&
+            boolean e1 = NodeUtil.exists( parent1 );
+            boolean e2 = NodeUtil.exists( parent2 );
+            while ( e1 && e2 &&
                     !parent1.isWorkspaceTop() && !parent2.isWorkspaceTop() ) {
 //                if ( parent1 == parent2 || ( grandParent != null && gp != null && grandParent.getName().equals( gp.getName() ) ) ) {
                 if ( !parent1.getName().equals( parent2.getName() ) ) {
@@ -4381,9 +4383,11 @@ public class EmsScriptNode extends ScriptNode implements
                 }
                 parent1 = parent1.getParent(null, getWorkspace(), false, true);
                 parent2 = parent2.getParent(null, parentWs, false, true);
+                e1 = NodeUtil.exists( parent1 );
+                e2 = NodeUtil.exists( parent2 );
             }
-            if ( !failed && ( ( parent1 == null ) == ( parent2 == null ) )
-                 && ( parent1.isWorkspaceTop() == parent2.isWorkspaceTop() ) ) {
+            if ( !failed && e1 == e2
+                 && ( !e1 || parent1.isWorkspaceTop() == parent2.isWorkspaceTop() ) ) {
                r = ref;
                break;
             }
@@ -5290,33 +5294,41 @@ public class EmsScriptNode extends ScriptNode implements
     }
 
     public boolean isWorkspaceTop() {
+        String runAsUser = AuthenticationUtil.getRunAsUser();
+        boolean changeUser = !ADMIN_USER_NAME.equals( runAsUser );
+        if ( changeUser ) {
+            AuthenticationUtil.setRunAsUser( ADMIN_USER_NAME );
+        }
+        
+        boolean isTop = false;
         EmsScriptNode myParent = getParent(null, getWorkspace(), false, true);
         if ( myParent == null ) {
             if ( Debug.isOn() ) {
                 Debug.outln( "isWorkspaceTop() = true for node with null parent: "
                              + this );
             }
-            return true;
-        }
+            isTop = true;
+        } else
         if ( myParent.isWorkspace() ) {
             if ( Debug.isOn() ) {
                 Debug.outln( "isWorkspaceTop() = true for since node is a workspace: "
                              + this );
             }
-            return true;
-        }
+            isTop = true;
+        } else
         if ( equals( getCompanyHome() ) ) {
             if ( Debug.isOn() ) {
                 Debug.outln( "isWorkspaceTop() = true for company home node: "
                              + this );
             }
-            return true;
-        }
+            isTop = true;
+        } else
         if ( Debug.isOn() ) {
             Debug.outln( "isWorkspaceTop() = false for node " + this );
         }
 
-        return false;
+        if ( changeUser ) { AuthenticationUtil.setRunAsUser( runAsUser ); }
+        return isTop;
     }
 
 //    private String getSysmlIdOfProperty( String propertyName ) {
