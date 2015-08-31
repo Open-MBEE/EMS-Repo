@@ -75,12 +75,15 @@ public class FullDocPost extends AbstractJavaWebScript {
 	protected String parentPath;
     protected String pdfPath;
     protected String coverPath;//NEED FOR COVER
+    protected String footerPath;
+    protected String headerPath;
     protected String veCssDir;//NEED FOR COVER
     protected String zipPath;
     protected Date time;
     protected JSONArray view2view;
     protected String timeTagName;
     protected String siteName;
+    protected String pageLegalNotice = "The technical data in this document is controlled under the U.S. Export Regulations; release to foreign persons may require an export authorization. Pre-Decisional Information --- For Planning and Discussion Purposes Only.";
 //    protected Queue queue;
     static Logger logger = Logger.getLogger(FullDocPost.class);
 
@@ -429,6 +432,25 @@ public class FullDocPost extends AbstractJavaWebScript {
     public String getCoverPath(){
         return this.coverPath;
     }
+    
+    private String getFooterPath(){
+    	return this.footerPath;
+    }
+    
+    private String getTempDir(){
+    	String alfDataDir = Paths.get("/mnt/alf_data").toString();
+    	String tmpDirName = Paths.get(alfDataDir, "temp").toString();
+        if(gov.nasa.jpl.mbee.util.FileUtils.exists(alfDataDir)){ //EMS server
+        	if(!gov.nasa.jpl.mbee.util.FileUtils.exists(tmpDirName)){
+        		new File(tmpDirName).mkdirs();
+        	}
+        }
+        else{//local dev
+        	tmpDirName = TempFileProvider.getTempDir().getAbsolutePath();
+        }
+        return tmpDirName;
+    }
+    
   //NEED FOR COVER
     private Date getTime(){
         return this.time;
@@ -437,6 +459,27 @@ public class FullDocPost extends AbstractJavaWebScript {
     private String getTimeTagName(){
         return this.timeTagName;
     }
+
+    public void cleanupFiles(){
+    	if(gov.nasa.jpl.mbee.util.FileUtils.exists(this.fullDocDir)){
+    		try{
+    			FileUtils.forceDelete(new File(this.fullDocDir));
+    		}
+    		catch(IOException ex){
+				System.out.println(String.format("Failed to cleanup temporary files at %s", this.fullDocDir));
+    		}
+    	}
+
+		if(gov.nasa.jpl.mbee.util.FileUtils.exists(this.zipPath)){
+    		try{
+    			FileUtils.forceDelete(new File(this.zipPath));
+    		}
+    		catch(IOException ex){
+    			System.out.println(String.format("Failed to cleanup temporary file %s", this.zipPath));
+    		}
+		}
+    }
+    
     //NEED FOR COVER
     public void createCoverPage(String coverDestination) throws IOException{
         if(!Files.exists(Paths.get(this.htmlPath))) return;
@@ -596,6 +639,78 @@ public class FullDocPost extends AbstractJavaWebScript {
         bw.write(coverHtml.toString());
         bw.close();
     } 
+    
+    private void createFooterPage(String footerDestination) throws IOException{
+    	File footerFile = new File(footerDestination);
+    	StringBuffer html = new StringBuffer();
+    	html.append("<!DOCTYPE html SYSTEM \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">");
+        html.append("<html><head><title></title>");
+        html.append("<style type=\"text/css\">");
+        html.append("BODY{font-family:\"Times New Roman\";}");
+        html.append(".itar{text-align:center;font-size:8pt;font-style:italic;}");
+        html.append(".page{text-align:center;}");
+        html.append("</style>");
+        html.append("<script type=\"text/javascript\">");
+        html.append("function subst() {");
+        html.append("var vars={};");
+        html.append("var x=document.location.search.substring(1).split('&');");
+        html.append("for(var i in x) {var z=x[i].split('=',2);vars[z[0]] = unescape(z[1]);}");
+        html.append("var x=['frompage','topage','page','webpage','section','subsection','subsubsection'];");
+        html.append("for(var i in x) {");
+        html.append("var y = document.getElementsByClassName(x[i]);");
+        html.append("for(var j=0; j<y.length; ++j) y[j].textContent = vars[x[i]];");
+        html.append("}");
+        html.append("}");
+        html.append("</script>");
+        html.append("</head>");
+     	html.append("<body onload=\"subst()\">");
+ 		html.append("<div class=\"page\"></div>");
+ 		html.append("<div class=\"itar\">");
+ 		html.append(this.pageLegalNotice);
+ 		html.append("</div>");
+ 		html.append("</body></html>");
+ 		BufferedWriter bw = new BufferedWriter(new FileWriter(footerFile));
+        bw.write(html.toString());
+        bw.close();
+    }
+    
+    private void createHeaderPage(String headerDestination) throws IOException{
+    	File headerFile = new File(headerDestination);
+    	StringBuffer html = new StringBuffer();
+    	html.append("<!DOCTYPE html SYSTEM \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">");
+    	html.append("<html xmlns=\"http://www.w3.org/1999/xhtml\">");
+    	html.append("<head>");
+    	html.append("<title></title>");
+    	html.append("<style type=\"text/css\">");
+    	html.append("BODY{");
+    	html.append("font-family:\"Times New Roman\";");
+    	html.append("}");
+    	html.append(".left{");
+    	html.append("overflow:auto;");
+    	html.append("float:left;");
+    	html.append("}");
+    	html.append(".right{");
+    	html.append("overflow:auto;");
+    	html.append("float:right;");
+    	html.append("}");
+    	html.append("</style>");
+    	html.append("</head>");
+    	html.append("<body>");
+    	html.append("<div>");
+    	html.append("<div class=\"left\">");
+    	html.append("<div>JPL D-92259</div>");
+    	html.append("<div>Initial Release</div>");
+    	html.append("</div>");
+    	html.append("<div class=\"right\">");
+    	html.append(this.getTime());
+    	html.append("</div>");
+    	html.append("</div>");
+    	html.append("</body>");
+    	html.append("</html>");
+    	BufferedWriter bw = new BufferedWriter(new FileWriter(headerFile));
+        bw.write(html.toString());
+        bw.close();
+    }
     
     private String getHeadlessUserCredential(){
     	String cred = "admin:admin";
@@ -797,6 +912,8 @@ public class FullDocPost extends AbstractJavaWebScript {
     	RuntimeExec exec = new RuntimeExec();
 		exec.setProcessDirectory(this.fullDocGenDir);
 		createCoverPage(this.coverPath); //NEED FOR COVER
+		createFooterPage(this.footerPath);
+		createHeaderPage(this.headerPath);
 		String tagName = this.getTimeTagName();
 
 		List<String> command = new ArrayList<String>();
@@ -810,19 +927,21 @@ public class FullDocPost extends AbstractJavaWebScript {
 		command.add("--header-right");
 		command.add(tagName);
 		command.add("--footer-line");
-		command.add("--footer-font-size");
-		command.add("8");
-		command.add("--footer-font-name");
-		command.add("\"Times New Roman\"");
+//		command.add("--footer-font-size");
+//		command.add("8");
+//		command.add("--footer-font-name");
+//		command.add("\"Times New Roman\"");
 //		command.add("--footer-left");
 //		command.add(tagName.substring(0,10));
-		command.add("--footer-center");
-		command.add("Paper copies of this document may not be current and should not be relied on for official purposes. JPL/Caltech proprietary. Not for public release.");  
-		command.add("--footer-right");
-		command.add("[page]");
-        command.add("cover"); //NEED FOR COVER
+//		command.add("--footer-center");
+//		command.add("Paper copies of this document may not be current and should not be relied on for official purposes. JPL/Caltech proprietary. Not for public release.");  
+//		command.add("--footer-right");
+//		command.add("[page]");
+		command.add("--footer-html");
+        command.add(this.footerPath);
+		command.add("cover"); //NEED FOR COVER
         command.add(this.coverPath); //NEED FOR COVER
-//		command.add("--dump-outline"); 
+//        command.add("--dump-outline"); 
 //		command.add(Paths.get(this.fullDocDir,"toc.xml").toString());
 		command.add("toc");
 		command.add("--toc-level-indentation");
@@ -966,7 +1085,7 @@ public class FullDocPost extends AbstractJavaWebScript {
 	}
 	
 	private void setFullDocDir(){
-		fullDocDir = Paths.get(TempFileProvider.getTempDir().getAbsolutePath(), fullDocId).toString();
+		fullDocDir = Paths.get(getTempDir(), fullDocId).toString();
 	}
 	
 	public void setFullDocId(String id){
@@ -977,7 +1096,8 @@ public class FullDocPost extends AbstractJavaWebScript {
 
 	private void setPaths(){
         this.parentPath = Paths.get(this.fullDocDir).getParent().toString();
-        String tmpDirName    = TempFileProvider.getTempDir().getAbsolutePath();
+        //String tmpDirName    = TempFileProvider.getTempDir().getAbsolutePath();
+        String tmpDirName = getTempDir();
         this.htmlPath = Paths.get(tmpDirName, fullDocId, String.format("%s_NodeJS.html", fullDocId)).toString();
         this.pdfPath = Paths.get(tmpDirName, fullDocId, String.format("%s_NodeJS.pdf", fullDocId)).toString();
         this.veCssDir = "/opt/local/apache-tomcat/webapps/alfresco/mmsapp/css";
@@ -988,6 +1108,8 @@ public class FullDocPost extends AbstractJavaWebScript {
         this.phantomJSScriptPath = "/opt/local/fullDocGen/fullDoc.js";
         this.fullDocGenDir = "/opt/local/fullDocGen/";
         this.coverPath = Paths.get(tmpDirName, fullDocId, String.format("%s_cover.html", fullDocId)).toString();
+        this.footerPath = Paths.get(tmpDirName, fullDocId, String.format("%s_footer.html", fullDocId)).toString();
+        this.headerPath = Paths.get(tmpDirName, fullDocId, String.format("%s_header.html", fullDocId)).toString();
         try{
         	new File(this.imgPath).mkdirs();
         }catch(Exception ex){;}
