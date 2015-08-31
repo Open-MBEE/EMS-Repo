@@ -80,6 +80,7 @@ public class FullDocPost extends AbstractJavaWebScript {
     protected Date time;
     protected JSONArray view2view;
     protected String timeTagName;
+    protected String siteName;
 //    protected Queue queue;
     static Logger logger = Logger.getLogger(FullDocPost.class);
 
@@ -263,6 +264,7 @@ public class FullDocPost extends AbstractJavaWebScript {
         Date d = TimeUtils.dateFromTimestamp( timestamp );
         this.setTime(d);
         this.setTimeTagName(tagTitle);
+        this.setSiteName(site);
 
         try{
             log(Level.INFO, "Start downloading HTML views...");
@@ -381,29 +383,6 @@ public class FullDocPost extends AbstractJavaWebScript {
 		}
     }
     
-//    private List<String> findImages(File htmlFile) throws Exception{
-//        List<String> images = new ArrayList<String>();
-//        try{
-//            Document document = Jsoup.parse(htmlFile, "UTF-8", "http://example.com");
-//            if(document == null) throw new Exception("Failed to read HTML file. Unabled to load file: " + this.getHtmlPath());
-//            
-//            for(Element img:document.select("img")){
-//                Elements elements = img.select("src");
-//                for(Element imgSrc : elements){
-//                    String srcAddress = imgSrc.attr("src");
-//                    System.out.println(srcAddress);
-//                    images.add(srcAddress);
-//                    
-//                }
-//            }
-//        }
-//        catch(Exception ex){
-//            ex.printStackTrace();
-//            throw new Exception("Failed to find Images!", ex);
-//        }
-//        return images;
-//    }
-
     private String getAlfrescoHost(){
     	HostnameGet alfresco = new HostnameGet(this.repository, this.services);
     	String hostname = alfresco.getAlfrescoHost();
@@ -476,38 +455,145 @@ public class FullDocPost extends AbstractJavaWebScript {
         if(!l.isEmpty()){
         coverHeader = l.get(0);
         }
-        String legalNotice = "Paper copies of this document may not be current and should not be relied on for official purposes. JPL/Caltech proprietary. Not for public release.";
-        String pageLegalNotice = "This Document has not been reviewed for export control. Not for distribution to or access by foreign persons.";
+        String legalNotice = "Paper copies of this document may not be current and should not be relied on for official purposes. The current version is available in PDMS, <a href=\"https://pdms.jpl.nasa.gov\">https://pdms.jpl.nasa.gov</a>.";
+        String pageLegalNotice = "The technical data in this document is controlled under the U.S. Export Regulations; release to foreign persons may require an export authorization. Pre-Decisional Information --- For Planning and Discussion Purposes Only.";
         String jplName = "Jet Propulsion Laboratory";
         String caltechName = "California Institute of Technology";
         Date date = this.getTime();
         String tag = this.getTimeTagName();
+        String site = this.siteName;
+        if(!site.toLowerCase().endsWith("project")) site += " Project";
                             
-        String coverHtml = //"<!DOCTYPE html>" //seems to not print formatted if keep the DOCTYPE
-        		//+ 
-        		"<html>"
-                + "<head><title>" + coverHeader + "</title></head>"
-                + "<body style= \"width:100%; height:100%;\">"
-                    + "<div style=\"top:10%; left:10%; right: 10%; position:absolute;\">"
-                    + "<center><h2>" + coverHeader + "</h2></center>"
-                    +"</div>"
-                    + "<div style=\"top:60%; left:10%; right:10%; position:absolute;\">"
-                    + "<div>" + legalNotice + "<br/>"
-                    +   "<i>" + pageLegalNotice + "</i></div>"
-                    +"</div>"                       
-                    + "<div style=\"top:70%; left:10%; position:absolute;\">"
-                    +   "<div>" + date + "<br/>" + tag +  "</div>" //"<div>" + date + "</div>" 
-                    +"</div>"
-                    + "<div style=\"top:85%; left:10%; position:absolute;\">"
-                    + "<div>"
-                    + "<img src=\"http://div27.jpl.nasa.gov/2740/files/logos/jpl_logo%28220x67%29.jpg\" alt=\"JPL Logo\"/>"
-                    + "<p style=\"color:#B6B6B4\">" + jplName + "<br/><i>" + caltechName + "</i></p>" //did separate jpl/caltech label to always have the stamp on pdf
-                    + "</div>"
-                    + "</div>"
-                + "</body>"
-                + "</html>";
+        StringBuffer coverHtml = new StringBuffer(); //"<!DOCTYPE html>" //seems to not print formatted if keep the DOCTYPE
+        coverHtml.append("<html><head><title>");
+        coverHtml.append(coverHeader);
+        coverHtml.append("</title>");
+        coverHtml.append(System.lineSeparator());
+        coverHtml.append("<style type=\"text/css\">");
+        coverHtml.append(System.lineSeparator());
+        coverHtml.append("body{float:none;}");
+        coverHtml.append(".projLogo{ overflow:auto; margin:100px 0 0 0; text-align:center; font-size:20pt; font-weight:normal;}");
+		coverHtml.append(".projTitle{ overflow:auto; text-align:center; font-size:22pt; margin:80px 0 0 0; }");
+		coverHtml.append(".projVersion{ font-size:18pt; }");
+		coverHtml.append(".repo{ margin:55% 10% 0 10% }");
+		coverHtml.append(".itar{ margin:5% 10% 0 10%; }");
+		coverHtml.append(".snapshotDate{ margin:5% 0 0 10%; }");
+		coverHtml.append(".jplLogo{ margin:5% 0 0 0; }");
+		coverHtml.append(".clearfix{ overflow:auto; }");
+		coverHtml.append(".sigTitle{ text-align:center; font-size:16pt; }");
+		coverHtml.append(".sigBy{ font-size:16pt; margin:50px 0px 0px 0; }");
+		coverHtml.append(".sig{ font-size:16pt; margin:0 0 0 0; }");
+		coverHtml.append(".sigLine{ margin:40px 0 0 0; }");
+		coverHtml.append(".sigUser{ float:left; }");
+		coverHtml.append(".sigDate{ float:right; margin-right:0px; }");
+		coverHtml.append(".pageBreak{ display:block; page-break-after:always; }");
+		coverHtml.append(System.lineSeparator());
+		coverHtml.append("</style>");
+		coverHtml.append(System.lineSeparator());
+		coverHtml.append("</head>");
+		coverHtml.append(System.lineSeparator());
+		coverHtml.append("<body>");
+		coverHtml.append("<div class=\"projLogo\">");
+		coverHtml.append("<img src=\"\" title=\"Logo\" />");
+		coverHtml.append("<div>");
+		coverHtml.append(site);
+		coverHtml.append("</div>");
+		coverHtml.append("</div>");
+		coverHtml.append("<div class=\"projTitle\">");
+		coverHtml.append(coverHeader);
+		coverHtml.append("<div class=\"projVersion\"> Initial Release</div>");
+		coverHtml.append("</div>");
+		coverHtml.append("<div class=\"repo\">");
+		coverHtml.append("<div>");
+		coverHtml.append(legalNotice);
+		coverHtml.append("</div>");
+		coverHtml.append("</div>");
+		coverHtml.append("<div class=\"itar\">");
+		coverHtml.append(pageLegalNotice);
+		coverHtml.append("</div>");
+		coverHtml.append("<div class=\"snapshotDate\">");
+		coverHtml.append(date);
+		coverHtml.append("<div>JPL D-");
+		coverHtml.append("92259");
+		coverHtml.append("</div>");
+		coverHtml.append("<div class=\"jplLogo\">");
+		coverHtml.append("<img src=\"http://div27.jpl.nasa.gov/2740/files/logos/jpl_logo%28220x67%29.jpg\" alt=\"JPL Logo\" />");
+		coverHtml.append("<p style=\"color:#B6B6B4\">Jet Propulsion Laboratory<br />");
+		coverHtml.append("<i>California Institute of Technology</i>");
+		coverHtml.append("</p>");
+		coverHtml.append("</div></div>");
+		coverHtml.append("<div class=\"pageBreak\"></div>");
+		coverHtml.append("<!-- start of signatures page -->");
+		coverHtml.append("<div class=\"sigTitle\">");
+		coverHtml.append("<div class=\"project\">");
+		coverHtml.append(site);
+		coverHtml.append("</div>");
+		coverHtml.append("<div class=\"docTitle\">");
+		coverHtml.append(coverHeader);
+		coverHtml.append("</div>");
+		coverHtml.append("<div class=\"version\">Initial Release</div>");
+		coverHtml.append("</div>");
+		coverHtml.append("<div class=\"sigBy clearfix\">");
+		coverHtml.append("<div class=\"\">PREPARED BY:</div>");
+		coverHtml.append("<div class=\"sigUser\">");
+		coverHtml.append("<div class=\"sigLine\">______________________________</div>");
+		coverHtml.append("<div>B. C. Cooke</div>");
+		coverHtml.append("<div>Project System Engineer</div>");
+		coverHtml.append("</div>");
+		coverHtml.append("<div class=\"sigDate\">");
+		coverHtml.append("<div class=\"sigLine\">___________________</div>");
+		coverHtml.append("<div>Date</div>");
+		coverHtml.append("</div>");
+		coverHtml.append("</div>");
+		coverHtml.append("<div class=\"sigBy clearfix\">");
+		coverHtml.append("<div class=\"\">APPROVED BY:</div>");
+		coverHtml.append("<div class=\"sigUser\">");
+		coverHtml.append("<div class=\"sigLine\">______________________________</div>");
+		coverHtml.append("<div>B. G. Goldstein</div>");
+		coverHtml.append("<div>Project Manager</div>");
+		coverHtml.append("</div>");
+		coverHtml.append("<div class=\"sigDate\">");
+		coverHtml.append("<div class=\"sigLine\">___________________</div>");
+		coverHtml.append("<div>Date</div>");
+		coverHtml.append("</div></div>");
+		coverHtml.append("<div class=\"sigBy clearfix\">");
+		coverHtml.append("<div class=\"\">CONCURRED BY:</div>");
+		coverHtml.append("<div class=\"sigUser\">");
+		coverHtml.append("<div class=\"sigLine\">______________________________</div>");
+		coverHtml.append("<div>L. A. Cangahuala</div>");
+		coverHtml.append("<div>Project Mission System Manager</div>");
+		coverHtml.append("</div>");
+		coverHtml.append("<div class=\"sigDate\">");
+		coverHtml.append("<div class=\"sigLine\">___________________</div>");
+		coverHtml.append("<div>Date</div>");
+		coverHtml.append("</div></div>");
+		coverHtml.append("<div class=\"sig clearfix\">");
+		coverHtml.append("<div class=\"sigUser\">");
+		coverHtml.append("<div class=\"sigLine\">______________________________</div>");
+		coverHtml.append("<div>R. Crum</div>");
+		coverHtml.append("<div>Project Spacecraft Manager</div>");
+		coverHtml.append("</div>");
+		coverHtml.append("<div class=\"sigDate\">");
+		coverHtml.append("<div class=\"sigLine\">___________________</div>");
+		coverHtml.append("<div>Date</div>");
+		coverHtml.append("</div>");
+		coverHtml.append("</div>");
+		coverHtml.append("<div class=\"sig clearfix\">");
+		coverHtml.append("<div class=\"sigUser\">");
+		coverHtml.append("<div class=\"sigLine\">______________________________</div>");
+		coverHtml.append("<div>V. C. Thomas</div>");
+		coverHtml.append("<div>Project Payload Manager</div>");
+		coverHtml.append("</div>");
+		coverHtml.append("<div class=\"sigDate\">");
+		coverHtml.append("<div class=\"sigLine\">___________________</div>");
+		coverHtml.append("<div>Date</div>");
+		coverHtml.append("</div>");
+		coverHtml.append("</div>");
+		coverHtml.append("<!-- end of signatures page -->");
+		coverHtml.append("</body>");
+		coverHtml.append("</html>");
         BufferedWriter bw = new BufferedWriter(new FileWriter(coverFile));
-        bw.write(coverHtml);
+        bw.write(coverHtml.toString());
         bw.close();
     } 
     
@@ -553,10 +639,6 @@ public class FullDocPost extends AbstractJavaWebScript {
 		if(document == null || document.body()== null) return "";
 		return document.body().text();
 	}
-    
-//    private String getImgPath(){
-//    	return this.imgPath;
-//    }
     
 	public String getPdfPath(){
 		return this.pdfPath;
@@ -912,6 +994,10 @@ public class FullDocPost extends AbstractJavaWebScript {
     }
 	
 	//NEED FOR COVER
+	private void setSiteName(String siteName){
+		this.siteName = siteName;
+	}
+	
     private void setTime(Date t){
         this.time = t;
     }
