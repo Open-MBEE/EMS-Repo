@@ -482,7 +482,7 @@ public class FullDocPost extends AbstractJavaWebScript {
     
     //NEED FOR COVER
     public void createCoverPage(String coverDestination) throws IOException{
-        if(!Files.exists(Paths.get(this.htmlPath))) return;
+    	if(!Files.exists(Paths.get(this.htmlPath))) return;
 
         File htmlFile = new File(this.htmlPath);
         File coverFile = new File (coverDestination);
@@ -498,219 +498,112 @@ public class FullDocPost extends AbstractJavaWebScript {
         if(!l.isEmpty()){
         coverHeader = l.get(0);
         }
-        String legalNotice = "Paper copies of this document may not be current and should not be relied on for official purposes. The current version is available in PDMS, <a href=\"https://pdms.jpl.nasa.gov\">https://pdms.jpl.nasa.gov</a>.";
-        String pageLegalNotice = "The technical data in this document is controlled under the U.S. Export Regulations; release to foreign persons may require an export authorization. Pre-Decisional Information --- For Planning and Discussion Purposes Only.";
+        String legalNotice = "Paper copies of this document may not be current and should not be relied on for official purposes. JPL/Caltech proprietary. Not for public release.";
+        String pageLegalNotice = "This Document has not been reviewed for export control. Not for distribution to or access by foreign persons.";
         String jplName = "Jet Propulsion Laboratory";
         String caltechName = "California Institute of Technology";
         Date date = this.getTime();
         String tag = this.getTimeTagName();
-        String site = this.siteName;
-        if(!site.toLowerCase().endsWith("project")) site += " Project";
                             
-        StringBuffer coverHtml = new StringBuffer(); //"<!DOCTYPE html>" //seems to not print formatted if keep the DOCTYPE
-        coverHtml.append("<html><head><title>");
-        coverHtml.append(coverHeader);
-        coverHtml.append("</title>");
-        coverHtml.append(System.lineSeparator());
-        coverHtml.append("<style type=\"text/css\">");
-        coverHtml.append(System.lineSeparator());
-        coverHtml.append("body{float:none;}");
-        coverHtml.append(".projLogo{ overflow:auto; margin:100px 0 0 0; text-align:center; font-size:20pt; font-weight:normal;}");
-		coverHtml.append(".projTitle{ overflow:auto; text-align:center; font-size:22pt; margin:80px 0 0 0; }");
-		coverHtml.append(".projVersion{ font-size:18pt; }");
-		coverHtml.append(".repo{ margin:55% 10% 0 10% }");
-		coverHtml.append(".itar{ margin:5% 10% 0 10%; }");
-		coverHtml.append(".snapshotDate{ margin:5% 0 0 10%; }");
-		coverHtml.append(".jplLogo{ margin:5% 0 0 0; }");
-		coverHtml.append(".clearfix{ overflow:auto; }");
-		coverHtml.append(".sigTitle{ text-align:center; font-size:16pt; }");
-		coverHtml.append(".sigBy{ font-size:16pt; margin:50px 0px 0px 0; }");
-		coverHtml.append(".sig{ font-size:16pt; margin:0 0 0 0; }");
-		coverHtml.append(".sigLine{ margin:40px 0 0 0; }");
-		coverHtml.append(".sigUser{ float:left; }");
-		coverHtml.append(".sigDate{ float:right; margin-right:0px; }");
-		coverHtml.append(".pageBreak{ display:block; page-break-after:always; }");
-		coverHtml.append(System.lineSeparator());
-		coverHtml.append("</style>");
-		coverHtml.append(System.lineSeparator());
-		coverHtml.append("</head>");
-		coverHtml.append(System.lineSeparator());
-		coverHtml.append("<body>");
-		coverHtml.append("<div class=\"projLogo\">");
-		coverHtml.append("<img src=\"\" title=\"Logo\" />");
-		coverHtml.append("<div>");
-		coverHtml.append(site);
-		coverHtml.append("</div>");
-		coverHtml.append("</div>");
-		coverHtml.append("<div class=\"projTitle\">");
-		coverHtml.append(coverHeader);
-		coverHtml.append("<div class=\"projVersion\"> Initial Release</div>");
-		coverHtml.append("</div>");
-		coverHtml.append("<div class=\"repo\">");
-		coverHtml.append("<div>");
-		coverHtml.append(legalNotice);
-		coverHtml.append("</div>");
-		coverHtml.append("</div>");
-		coverHtml.append("<div class=\"itar\">");
-		coverHtml.append(pageLegalNotice);
-		coverHtml.append("</div>");
-		coverHtml.append("<div class=\"snapshotDate\">");
-		coverHtml.append(date);
-		coverHtml.append("<div>JPL D-");
-		coverHtml.append("92259");
-		coverHtml.append("</div>");
-		coverHtml.append("<div class=\"jplLogo\">");
-		coverHtml.append("<img src=\"http://div27.jpl.nasa.gov/2740/files/logos/jpl_logo%28220x67%29.jpg\" alt=\"JPL Logo\" />");
-		coverHtml.append("<p style=\"color:#B6B6B4\">Jet Propulsion Laboratory<br />");
-		coverHtml.append("<i>California Institute of Technology</i>");
-		coverHtml.append("</p>");
-		coverHtml.append("</div></div>");
-		coverHtml.append("<div class=\"pageBreak\"></div>");
-		coverHtml.append("<!-- start of signatures page -->");
-		coverHtml.append("<div class=\"sigTitle\">");
-		coverHtml.append("<div class=\"project\">");
-		coverHtml.append(site);
-		coverHtml.append("</div>");
-		coverHtml.append("<div class=\"docTitle\">");
-		coverHtml.append(coverHeader);
-		coverHtml.append("</div>");
-		coverHtml.append("<div class=\"version\">Initial Release</div>");
-		coverHtml.append("</div>");
-		coverHtml.append("<div class=\"sigBy clearfix\">");
-		coverHtml.append("<div class=\"\">PREPARED BY:</div>");
-		coverHtml.append("<div class=\"sigUser\">");
-		coverHtml.append("<div class=\"sigLine\">______________________________</div>");
-		coverHtml.append("<div>B. C. Cooke</div>");
-		coverHtml.append("<div>Project System Engineer</div>");
-		coverHtml.append("</div>");
-		coverHtml.append("<div class=\"sigDate\">");
-		coverHtml.append("<div class=\"sigLine\">___________________</div>");
-		coverHtml.append("<div>Date</div>");
-		coverHtml.append("</div>");
-		coverHtml.append("</div>");
-		coverHtml.append("<div class=\"sigBy clearfix\">");
-		coverHtml.append("<div class=\"\">APPROVED BY:</div>");
-		coverHtml.append("<div class=\"sigUser\">");
-		coverHtml.append("<div class=\"sigLine\">______________________________</div>");
-		coverHtml.append("<div>B. G. Goldstein</div>");
-		coverHtml.append("<div>Project Manager</div>");
-		coverHtml.append("</div>");
-		coverHtml.append("<div class=\"sigDate\">");
-		coverHtml.append("<div class=\"sigLine\">___________________</div>");
-		coverHtml.append("<div>Date</div>");
-		coverHtml.append("</div></div>");
-		coverHtml.append("<div class=\"sigBy clearfix\">");
-		coverHtml.append("<div class=\"\">CONCURRED BY:</div>");
-		coverHtml.append("<div class=\"sigUser\">");
-		coverHtml.append("<div class=\"sigLine\">______________________________</div>");
-		coverHtml.append("<div>L. A. Cangahuala</div>");
-		coverHtml.append("<div>Project Mission System Manager</div>");
-		coverHtml.append("</div>");
-		coverHtml.append("<div class=\"sigDate\">");
-		coverHtml.append("<div class=\"sigLine\">___________________</div>");
-		coverHtml.append("<div>Date</div>");
-		coverHtml.append("</div></div>");
-		coverHtml.append("<div class=\"sig clearfix\">");
-		coverHtml.append("<div class=\"sigUser\">");
-		coverHtml.append("<div class=\"sigLine\">______________________________</div>");
-		coverHtml.append("<div>R. Crum</div>");
-		coverHtml.append("<div>Project Spacecraft Manager</div>");
-		coverHtml.append("</div>");
-		coverHtml.append("<div class=\"sigDate\">");
-		coverHtml.append("<div class=\"sigLine\">___________________</div>");
-		coverHtml.append("<div>Date</div>");
-		coverHtml.append("</div>");
-		coverHtml.append("</div>");
-		coverHtml.append("<div class=\"sig clearfix\">");
-		coverHtml.append("<div class=\"sigUser\">");
-		coverHtml.append("<div class=\"sigLine\">______________________________</div>");
-		coverHtml.append("<div>V. C. Thomas</div>");
-		coverHtml.append("<div>Project Payload Manager</div>");
-		coverHtml.append("</div>");
-		coverHtml.append("<div class=\"sigDate\">");
-		coverHtml.append("<div class=\"sigLine\">___________________</div>");
-		coverHtml.append("<div>Date</div>");
-		coverHtml.append("</div>");
-		coverHtml.append("</div>");
-		coverHtml.append("<!-- end of signatures page -->");
-		coverHtml.append("</body>");
-		coverHtml.append("</html>");
+        String coverHtml = //"<!DOCTYPE html>" //seems to not print formatted if keep the DOCTYPE
+        		//+ 
+        		"<html>"
+                + "<head><title>" + coverHeader + "</title></head>"
+                + "<body style= \"width:100%; height:100%;\">"
+                    + "<div style=\"top:10%; left:10%; right: 10%; position:absolute;\">"
+                    + "<center><h2>" + coverHeader + "</h2></center>"
+                    +"</div>"
+                    + "<div style=\"top:60%; left:10%; right:10%; position:absolute;\">"
+                    + "<div>" + legalNotice + "<br/>"
+                    +   "<i>" + pageLegalNotice + "</i></div>"
+                    +"</div>"                       
+                    + "<div style=\"top:70%; left:10%; position:absolute;\">"
+                    +   "<div>" + date + "<br/>" + tag +  "</div>" //"<div>" + date + "</div>" 
+                    +"</div>"
+                    + "<div style=\"top:85%; left:10%; position:absolute;\">"
+                    + "<div>"
+                    + "<img src=\"http://div27.jpl.nasa.gov/2740/files/logos/jpl_logo%28220x67%29.jpg\" alt=\"JPL Logo\"/>"
+                    + "<p style=\"color:#B6B6B4\">" + jplName + "<br/><i>" + caltechName + "</i></p>" //did separate jpl/caltech label to always have the stamp on pdf
+                    + "</div>"
+                    + "</div>"
+                + "</body>"
+                + "</html>";
         BufferedWriter bw = new BufferedWriter(new FileWriter(coverFile));
-        bw.write(coverHtml.toString());
+        bw.write(coverHtml);
         bw.close();
     } 
     
-    private void createFooterPage(String footerDestination) throws IOException{
-    	File footerFile = new File(footerDestination);
-    	StringBuffer html = new StringBuffer();
-    	html.append("<!DOCTYPE html SYSTEM \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">");
-        html.append("<html><head><title></title>");
-        html.append("<style type=\"text/css\">");
-        html.append("BODY{font-family:\"Times New Roman\";}");
-        html.append(".itar{text-align:center;font-size:8pt;font-style:italic;}");
-        html.append(".page{text-align:center;}");
-        html.append("</style>");
-        html.append("<script type=\"text/javascript\">");
-        html.append("function subst() {");
-        html.append("var vars={};");
-        html.append("var x=document.location.search.substring(1).split('&');");
-        html.append("for(var i in x) {var z=x[i].split('=',2);vars[z[0]] = unescape(z[1]);}");
-        html.append("var x=['frompage','topage','page','webpage','section','subsection','subsubsection'];");
-        html.append("for(var i in x) {");
-        html.append("var y = document.getElementsByClassName(x[i]);");
-        html.append("for(var j=0; j<y.length; ++j) y[j].textContent = vars[x[i]];");
-        html.append("}");
-        html.append("}");
-        html.append("</script>");
-        html.append("</head>");
-     	html.append("<body onload=\"subst()\">");
- 		html.append("<div class=\"page\"></div>");
- 		html.append("<div class=\"itar\">");
- 		html.append(this.pageLegalNotice);
- 		html.append("</div>");
- 		html.append("</body></html>");
- 		BufferedWriter bw = new BufferedWriter(new FileWriter(footerFile));
-        bw.write(html.toString());
-        bw.close();
-    }
+//    private void createFooterPage(String footerDestination) throws IOException{
+//    	File footerFile = new File(footerDestination);
+//    	StringBuffer html = new StringBuffer();
+//    	html.append("<!DOCTYPE html SYSTEM \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">");
+//        html.append("<html><head><title></title>");
+//        html.append("<style type=\"text/css\">");
+//        html.append("BODY{font-family:\"Times New Roman\";}");
+//        html.append(".itar{text-align:center;font-size:8pt;font-style:italic;}");
+//        html.append(".page{text-align:center;}");
+//        html.append("</style>");
+//        html.append("<script type=\"text/javascript\">");
+//        html.append("function subst() {");
+//        html.append("var vars={};");
+//        html.append("var x=document.location.search.substring(1).split('&');");
+//        html.append("for(var i in x) {var z=x[i].split('=',2);vars[z[0]] = unescape(z[1]);}");
+//        html.append("var x=['frompage','topage','page','webpage','section','subsection','subsubsection'];");
+//        html.append("for(var i in x) {");
+//        html.append("var y = document.getElementsByClassName(x[i]);");
+//        html.append("for(var j=0; j<y.length; ++j) y[j].textContent = vars[x[i]];");
+//        html.append("}");
+//        html.append("}");
+//        html.append("</script>");
+//        html.append("</head>");
+//     	html.append("<body onload=\"subst()\">");
+// 		html.append("<div class=\"page\"></div>");
+// 		html.append("<div class=\"itar\">");
+// 		html.append(this.pageLegalNotice);
+// 		html.append("</div>");
+// 		html.append("</body></html>");
+// 		BufferedWriter bw = new BufferedWriter(new FileWriter(footerFile));
+//        bw.write(html.toString());
+//        bw.close();
+//    }
     
-    private void createHeaderPage(String headerDestination) throws IOException{
-    	File headerFile = new File(headerDestination);
-    	StringBuffer html = new StringBuffer();
-    	html.append("<!DOCTYPE html SYSTEM \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">");
-    	html.append("<html xmlns=\"http://www.w3.org/1999/xhtml\">");
-    	html.append("<head>");
-    	html.append("<title></title>");
-    	html.append("<style type=\"text/css\">");
-    	html.append("BODY{");
-    	html.append("font-family:\"Times New Roman\";");
-    	html.append("}");
-    	html.append(".left{");
-    	html.append("overflow:auto;");
-    	html.append("float:left;");
-    	html.append("}");
-    	html.append(".right{");
-    	html.append("overflow:auto;");
-    	html.append("float:right;");
-    	html.append("}");
-    	html.append("</style>");
-    	html.append("</head>");
-    	html.append("<body>");
-    	html.append("<div>");
-    	html.append("<div class=\"left\">");
-    	html.append("<div>JPL D-92259</div>");
-    	html.append("<div>Initial Release</div>");
-    	html.append("</div>");
-    	html.append("<div class=\"right\">");
-    	html.append(this.getTime());
-    	html.append("</div>");
-    	html.append("</div>");
-    	html.append("</body>");
-    	html.append("</html>");
-    	BufferedWriter bw = new BufferedWriter(new FileWriter(headerFile));
-        bw.write(html.toString());
-        bw.close();
-    }
+//    private void createHeaderPage(String headerDestination) throws IOException{
+//    	File headerFile = new File(headerDestination);
+//    	StringBuffer html = new StringBuffer();
+//    	html.append("<!DOCTYPE html SYSTEM \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">");
+//    	html.append("<html xmlns=\"http://www.w3.org/1999/xhtml\">");
+//    	html.append("<head>");
+//    	html.append("<title></title>");
+//    	html.append("<style type=\"text/css\">");
+//    	html.append("BODY{");
+//    	html.append("font-family:\"Times New Roman\";");
+//    	html.append("}");
+//    	html.append(".left{");
+//    	html.append("overflow:auto;");
+//    	html.append("float:left;");
+//    	html.append("}");
+//    	html.append(".right{");
+//    	html.append("overflow:auto;");
+//    	html.append("float:right;");
+//    	html.append("}");
+//    	html.append("</style>");
+//    	html.append("</head>");
+//    	html.append("<body>");
+//    	html.append("<div>");
+//    	html.append("<div class=\"left\">");
+//    	html.append("<div>JPL D-92259</div>");
+//    	html.append("<div>Initial Release</div>");
+//    	html.append("</div>");
+//    	html.append("<div class=\"right\">");
+//    	html.append(this.getTime());
+//    	html.append("</div>");
+//    	html.append("</div>");
+//    	html.append("</body>");
+//    	html.append("</html>");
+//    	BufferedWriter bw = new BufferedWriter(new FileWriter(headerFile));
+//        bw.write(html.toString());
+//        bw.close();
+//    }
     
     private String getHeadlessUserCredential(){
     	String cred = "admin:admin";
@@ -912,8 +805,8 @@ public class FullDocPost extends AbstractJavaWebScript {
     	RuntimeExec exec = new RuntimeExec();
 		exec.setProcessDirectory(this.fullDocGenDir);
 		createCoverPage(this.coverPath); //NEED FOR COVER
-		createFooterPage(this.footerPath);
-		createHeaderPage(this.headerPath);
+//		createFooterPage(this.footerPath);
+//		createHeaderPage(this.headerPath);
 		String tagName = this.getTimeTagName();
 
 		List<String> command = new ArrayList<String>();
@@ -927,18 +820,18 @@ public class FullDocPost extends AbstractJavaWebScript {
 		command.add("--header-right");
 		command.add(tagName);
 		command.add("--footer-line");
-//		command.add("--footer-font-size");
-//		command.add("8");
-//		command.add("--footer-font-name");
-//		command.add("\"Times New Roman\"");
+		command.add("--footer-font-size");
+		command.add("8");
+		command.add("--footer-font-name");
+		command.add("\"Times New Roman\"");
 //		command.add("--footer-left");
 //		command.add(tagName.substring(0,10));
-//		command.add("--footer-center");
-//		command.add("Paper copies of this document may not be current and should not be relied on for official purposes. JPL/Caltech proprietary. Not for public release.");  
-//		command.add("--footer-right");
-//		command.add("[page]");
-		command.add("--footer-html");
-        command.add(this.footerPath);
+		command.add("--footer-center");
+		command.add("Paper copies of this document may not be current and should not be relied on for official purposes. JPL/Caltech proprietary. Not for public release.");  
+		command.add("--footer-right");
+		command.add("[page]");
+//		command.add("--footer-html");
+//        command.add(this.footerPath);
 		command.add("cover"); //NEED FOR COVER
         command.add(this.coverPath); //NEED FOR COVER
 //        command.add("--dump-outline"); 
