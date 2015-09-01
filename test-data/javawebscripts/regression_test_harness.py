@@ -303,7 +303,7 @@ common_filters,
 ["test","workspaces","develop", "develop2"],
 None,
 None,
-set_read_to_gv6
+set_read_to_gv6_delta_gv7
 ],
         
 # CONFIGURATIONS: ==========================    
@@ -390,7 +390,7 @@ common_filters,
 "CreateWorkspace2",
 "Create workspace test 2",
 create_curl_cmd(type="POST",base_url=BASE_URL_WS,
-                post_type="",branch="wsB?sourceWorkspace=$gv1&copyTime=$gv6"),
+                post_type="",branch="wsB?sourceWorkspace=$gv1&copyTime=$gv7"),
 True, 
 common_filters+['"branched"','"created"','"id"','"qualifiedId"','"parent"'],
 ["test","workspaces","develop"],

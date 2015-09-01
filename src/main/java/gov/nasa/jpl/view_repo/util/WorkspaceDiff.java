@@ -1542,7 +1542,16 @@ public class WorkspaceDiff implements Serializable {
         }
         
         // Not the same workspace; use relative copyTime.
-        commonBranchTimePoint = ws1 == null ? ws2.getCopyTime(ws1) : ws1.getCopyTime(ws2);
+        //commonBranchTimePoint = ws1 == null ? ws2.getCopyTime(ws1) : ws1.getCopyTime(ws2);
+        Date commonBranchTimePoint1 = null;
+        Date commonBranchTimePoint2 = null;
+        if (ws1 != null) {
+            commonBranchTimePoint1 = ws1.getCopyTime(ws2);
+        }
+        if (ws2 != null) {
+            commonBranchTimePoint2 = ws2.getCopyTime(ws1);
+        }
+        commonBranchTimePoint = earlierWorkspaceDate( commonBranchTimePoint1, commonBranchTimePoint2 );
         
         if ( commonParent == null ? ws1 == null : commonParent.equals( ws1 ) ) {
             commonBranchTimePoint = earlierWorkspaceDate( commonBranchTimePoint, t1 );

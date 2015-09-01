@@ -262,6 +262,16 @@ def set_read_to_gv7():
     '''Get the json output, and sets gv6 to the read time'''
     set_read_to_gv(7)
     
+def set_read_to_gv6_delta_gv7(delta=3):
+    '''Get the json output, and sets gv6 to the read time'''
+    global gv6,gv7
+    
+    set_read_to_gv(6)
+    if gv6 and "." in gv6:
+     date = datetime.datetime.strptime(gv6.split(".")[0], "%Y-%m-%dT%H:%M:%S")
+     date = date + datetime.timedelta(seconds=delta)
+     gv7 = date.strftime("%Y-%m-%dT%H:%M:%S.000")
+     
 def set_gv1_to_current_time():
     '''Gets the current time'''
     global gv1
