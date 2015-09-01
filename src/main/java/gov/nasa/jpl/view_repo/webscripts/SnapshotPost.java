@@ -275,6 +275,12 @@ public class SnapshotPost extends AbstractJavaWebScript {
     	return sb.toString();
     }
 
+    public void cleanupFiles(){
+    	if(docBookMgr != null){
+    		docBookMgr.cleanupFiles();
+    	}
+    }
+    
     private DBParagraph createDBParagraph( JSONObject obj, DBSection section, WorkspaceNode workspace, Date timestamp  ) {
     	if(obj == null) return null;
         String srcType = (String)obj.opt( "sourceType" );

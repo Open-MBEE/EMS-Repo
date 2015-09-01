@@ -197,6 +197,7 @@ public class SnapshotArtifactsGenerationActionExecuter  extends ActionExecuterAb
     
     private void executeImplImpl(final Action action, final NodeRef nodeRef) {
         final StringBuffer allResponse = new StringBuffer();
+        try{
         new EmsTransaction(services, response, new Status()) {
             @Override
             public void run() throws Exception {
@@ -385,47 +386,60 @@ public class SnapshotArtifactsGenerationActionExecuter  extends ActionExecuterAb
 //                      
                     try{
                         snapshotNode = snapshotService.generatePDF(docbookPdfNode, snapshotId, timestamp, workspace, siteName);
-                        response.append(snapshotService.getResponse().toString());
-                    }
-                    catch(Exception ex){
-                        //status.setCode(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-                        logger.error("Failed to generate docbook PDF for snapshot Id: " + snapshotId);
-                        response.append(String.format("[ERROR]: Failed to generate docbook PDF for snapshot Id: %s.\n%s\n%s\n", snapshotId, ex.getMessage(), ex.getStackTrace()));
-                        docbookJobStatus = "Failed";
-                        //snapshot = snapshotService.generatedPDFFailure(snapshotId, timestamp, workspace, siteName);
-                    }
-//                          }
-//                          else if(format.compareToIgnoreCase("html") == 0){
-                    try{
-                        snapshotNode = snapshotService.generateHTML(docbookZipNode, snapshotId, timestamp, workspace);
-                        response.append(snapshotService.getResponse().toString());
-                    }
-                    catch(Exception ex){
-                        //status.setCode(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-                        logger.error("Failed to generate zip artifact for snapshot Id: " + snapshotId);
-                        response.append(String.format("[ERROR]: Failed to generate docbook zip artifact for snapshot Id: %s.\n%s\n%s\n", snapshotId, ex.getMessage(), ex.getStackTrace()));
-                        docbookJobStatus = "Failed";
-                    }
-                    allResponse.append(response.toString());
-                    if ( !sentEmail ) {
-                        sendEmail( allResponse, docbookJobStatus );
-                    }
-                } catch(Exception ex) {
-               
-                   StringBuffer sb = new StringBuffer();
-                   Throwable throwable = ex.getCause();
-                   while(throwable != null){
-                       sb.append(throwable.getMessage());
-                       throwable = throwable.getCause();
-                   }
-                   
-                   logger.error("Failed to complete docbook snapshot artifact(s) generation!");
-                   logger.error(sb.toString());
-                   ex.printStackTrace();
-              
-                }
-            }
-        };
+	                        response.append(snapshotService.getResponse().toString());
+	                    }
+	                    catch(Exception ex){
+	                        //status.setCode(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+	                        logger.error("Failed to generate docbook PDF for snapshot Id: " + snapshotId);
+	                        response.append(String.format("[ERROR]: Failed to generate docbook PDF for snapshot Id: %s.\n%s\n%s\n", snapshotId, ex.getMessage(), ex.getStackTrace()));
+	                        docbookJobStatus = "Failed";
+	                        //snapshot = snapshotService.generatedPDFFailure(snapshotId, timestamp, workspace, siteName);
+	                    }
+	//                          }
+	//                          else if(format.compareToIgnoreCase("html") == 0){
+	                    try{
+	                        snapshotNode = snapshotService.generateHTML(docbookZipNode, snapshotId, timestamp, workspace);
+	                        response.append(snapshotService.getResponse().toString());
+	                    }
+	                    catch(Exception ex){
+	                        //status.setCode(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+	                        logger.error("Failed to generate zip artifact for snapshot Id: " + snapshotId);
+	                        response.append(String.format("[ERROR]: Failed to generate docbook zip artifact for snapshot Id: %s.\n%s\n%s\n", snapshotId, ex.getMessage(), ex.getStackTrace()));
+	                        docbookJobStatus = "Failed";
+	                    }
+	                    allResponse.append(response.toString());
+	                    if ( !sentEmail ) {
+	                        sendEmail( allResponse, docbookJobStatus );
+	                    }
+	                } catch(Exception ex) {
+	               
+	                   StringBuffer sb = new StringBuffer();
+	                   Throwable throwable = ex.getCause();
+	                   while(throwable != null){
+	                       sb.append(throwable.getMessage());
+	                       throwable = throwable.getCause();
+	                   }
+	                   
+	                   logger.error("Failed to complete docbook snapshot artifact(s) generation!");
+	                   logger.error(sb.toString());
+	                   ex.printStackTrace();
+	              
+	                }
+	            }
+	        };
+	        }
+        }
+        catch(Throwable ex){
+        	ex.printStackTrace();
+        }
+        finally{
+        	if(fullDoc != null){
+        		fullDoc.cleanupFiles();
+        	}
+        	
+        	if(docbook != null){
+        		docbook.cleanupFiles();
+        	}
         }
     }
 
