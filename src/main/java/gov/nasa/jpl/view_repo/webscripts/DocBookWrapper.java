@@ -35,6 +35,7 @@ import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.util.TempFileProvider;
 import org.alfresco.util.exec.RuntimeExec;
 import org.alfresco.util.exec.RuntimeExec.ExecutionResult;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Attributes;
@@ -85,6 +86,29 @@ public class DocBookWrapper {
 		setPaths();
 	}
 
+    public void cleanupFiles(){
+    	if(gov.nasa.jpl.mbee.util.FileUtils.exists(this.dbDirName.toString())){
+    		try{
+    			FileUtils.forceDelete(new File(this.dbDirName.toString()));
+    		}
+    		catch(IOException ex){
+				System.out.println(String.format("Failed to cleanup temporary files at %s", this.dbDirName.toString()));
+    		}
+    	}
+
+    	String zipName = Paths.get(getTempDir(),this.snapshotName + docbookFileSuffix + ".zip").toString();
+		if(gov.nasa.jpl.mbee.util.FileUtils.exists(zipName)){
+    		try{
+    			FileUtils.forceDelete(new File(zipName));
+    		}
+    		catch(IOException ex){
+    			System.out.println(String.format("Failed to cleanup temporary file %s", zipName));
+    		}
+		}
+
+    }
+    
+    
 	private boolean createDocBookDir(){
 		boolean bSuccess = true;
 		if(!Files.exists(this.dbDirName)){
@@ -284,6 +308,20 @@ public class DocBookWrapper {
 
 	public EmsScriptNode getSnapshotNode(){
 		return this.snapshotNode;
+	}
+	
+	private String getTempDir(){
+    	String alfDataDir = Paths.get("/mnt/alf_data").toString();
+    	String tmpDirName = Paths.get(alfDataDir, "temp").toString();
+    	if(gov.nasa.jpl.mbee.util.FileUtils.exists(alfDataDir)){ //EMS server
+    		if(!gov.nasa.jpl.mbee.util.FileUtils.exists(tmpDirName)){
+    			new File(tmpDirName).mkdirs();
+    		}
+    	}
+    	else{//local dev
+	    	tmpDirName = TempFileProvider.getTempDir().getAbsolutePath();
+	    }
+	    return tmpDirName;
 	}
 
 	public String getXalanDirName(){
@@ -531,7 +569,8 @@ public class DocBookWrapper {
 //		this.imageDirName = Paths.get(dbDirName.toString(), "images");
 //		this.dbFileName = Paths.get(this.dbDirName.toString(), this.snapshotName + ".xml");
 		
-		String tmpDirName	= TempFileProvider.getTempDir().getAbsolutePath();
+//		String tmpDirName	= TempFileProvider.getTempDir().getAbsolutePath();
+		String tmpDirName = getTempDir();
     	this.jobDirName = Paths.get(tmpDirName);
 		this.dbDirName = Paths.get(jobDirName.toString(), this.snapshotName);
 		this.imageDirName = Paths.get(dbDirName.toString(), "images");
