@@ -96,7 +96,7 @@ public class DocBookWrapper {
     		}
     	}
 
-    	String zipName = this.snapshotName + docbookFileSuffix + ".zip";
+    	String zipName = Paths.get(getTempDir(),this.snapshotName + docbookFileSuffix + ".zip").toString();
 		if(gov.nasa.jpl.mbee.util.FileUtils.exists(zipName)){
     		try{
     			FileUtils.forceDelete(new File(zipName));
