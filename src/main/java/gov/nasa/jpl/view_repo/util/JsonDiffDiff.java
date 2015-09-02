@@ -292,6 +292,7 @@ public class JsonDiffDiff extends AbstractDiff< JSONObject, Object, String > {
     
     public static Map<String, Object> getPropertyMap( JSONObject element ) {
         Map<String, Object> properties = new LinkedHashMap<String, Object>();
+        if ( element == null ) return properties;
         JSONObject specialization = element.optJSONObject( "specialization" );
         for ( String k : getPropertyIds( element ) ) {
             Object v = null;
@@ -932,6 +933,14 @@ public class JsonDiffDiff extends AbstractDiff< JSONObject, Object, String > {
     public static JSONObject toJson( List< Set< String > > propertyDiff,
                                      JSONObject element1, JSONObject element2 ) {
                                      //boolean something ) {
+        
+        if (element1 == null ) { 
+            element1 = new JSONObject();
+        }
+        if (element2 == null ) { 
+            element2 = new JSONObject();
+        }
+        
         // Start with the element change and alter based on the diff. If a
         // property is not in added or updated, then remove it.
         JSONObject element = NodeUtil.clone( element2 );
