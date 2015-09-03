@@ -935,6 +935,20 @@ public class WorkspaceNode extends EmsScriptNode {
     }
     
     /**
+     * Add the workspace metadata onto the provided JSONObject
+     * @param jsonObject
+     * @param ws
+     * @param dateTime
+     * @throws JSONException
+     */
+    public static void addWorkspaceMetadata(JSONObject jsonObject, WorkspaceNode ws, Date dateTime) throws JSONException {
+        addWorkspaceNamesAndIds( jsonObject, ws, false );
+        if (dateTime != null) {
+            jsonObject.put( "timestamp", TimeUtils.toTimestamp( dateTime ) );
+        }
+    }
+    
+    /**
      * Checks all the sites and sees if the current user is the manager of any of those sites.
      * If this is the case, set "siteManagerPermission" to true in the json.  Otherwise, sets
      * it to false.

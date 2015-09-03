@@ -400,6 +400,13 @@ public class MmsDiffGet extends AbstractJavaWebScript {
         JSONObject diffResult =
                 WorkspaceDiff.performDiffGlom( diff0, diff1Json, diff2Json, commonParent,
                                  commonBranchTime, services, response );
+        
+        // Add workspace meta-data:
+        JSONObject ws1Json = diffResult.getJSONObject( "workspace1" );
+        JSONObject ws2Json = diffResult.getJSONObject( "workspace2" );
+        WorkspaceNode.addWorkspaceMetadata( ws1Json, ws1, dateTime1 );
+        WorkspaceNode.addWorkspaceMetadata( ws2Json, ws2, dateTime2 );
+
         return diffResult;
     }
 
