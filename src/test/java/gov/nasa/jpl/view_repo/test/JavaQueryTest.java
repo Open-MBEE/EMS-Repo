@@ -7,6 +7,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -313,7 +314,7 @@ public class JavaQueryTest {
     }
     
     @Test
-    public void testJavaEvaluatorSqrt() {
+    public void testJavaEvaluatorSqrt() throws IllegalAccessException, InvocationTargetException, InstantiationException {
         String java = "Math.sqrt( 49 )";
         Object actualObj = JavaEvaluator.evaluate(java);
         Double actual = null;
@@ -324,7 +325,7 @@ public class JavaQueryTest {
     }
     
     @Test
-    public void testJavaEvaluatorGetFields() {
+    public void testJavaEvaluatorGetFields() throws IllegalAccessException, InvocationTargetException, InstantiationException {
         String java = "org.alfresco.model.ContentModel.class.getFields()";
         Object expected = org.alfresco.model.ContentModel.class.getFields();
         Object actualObj = JavaEvaluator.evaluate(java);
@@ -334,7 +335,7 @@ public class JavaQueryTest {
     }
     
     @Test
-    public void testJavaEvaluatorConstant() {
+    public void testJavaEvaluatorConstant() throws IllegalAccessException, InvocationTargetException, InstantiationException {
         String java = "org.alfresco.model.ContentModel.PROP_NAME";
         Object expected = org.alfresco.model.ContentModel.PROP_NAME; 
         Object actualObj = JavaEvaluator.evaluate(java);
@@ -344,7 +345,7 @@ public class JavaQueryTest {
     }
     
     @Test
-    public void testJavaEvaluatorClassRef() {
+    public void testJavaEvaluatorClassRef() throws IllegalAccessException, InvocationTargetException, InstantiationException {
         String clsName = "gov.nasa.jpl.view_repo.JavaQuery";
         Object actualObj = JavaEvaluator.evaluate(clsName);
         System.out.println( "testJavaEvaluatorClassRef() evaluate(" + clsName + ") = " + MoreToString.Helper.toString( actualObj ) );
@@ -353,7 +354,7 @@ public class JavaQueryTest {
     }
     
     @Test
-    public void testJavaEvaluatorGet() {
+    public void testJavaEvaluatorGet() throws IllegalAccessException, InvocationTargetException, InstantiationException {
         String clsName = "gov.nasa.jpl.view_repo.JavaQuery.get(\"*\")";
         Object actualObj = JavaEvaluator.evaluate(clsName);
         System.out.println( "testJavaEvaluatorGet() evaluate(" + clsName + ") = " + MoreToString.Helper.toString( actualObj ) );
@@ -362,7 +363,7 @@ public class JavaQueryTest {
     }
     
     @Test
-    public void testJavaEvaluatorTestClassRef() {
+    public void testJavaEvaluatorTestClassRef() throws IllegalAccessException, InvocationTargetException, InstantiationException {
         String clsName = "gov.nasa.jpl.view_repo.test.JavaQueryTest";
         Object actualObj = JavaEvaluator.evaluate(clsName);
         System.out.println( "testJavaEvaluatorTestClassRef() evaluate(" + clsName + ") = " + MoreToString.Helper.toString( actualObj ) );
