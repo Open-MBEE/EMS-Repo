@@ -19,6 +19,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -30,6 +31,7 @@ import org.alfresco.service.cmr.action.Action;
 import org.alfresco.service.cmr.action.ActionService;
 import org.alfresco.service.cmr.repository.ContentIOException;
 import org.alfresco.service.cmr.repository.ContentReader;
+import org.alfresco.service.cmr.repository.NodeRef;
 import org.apache.log4j.*;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -37,6 +39,7 @@ import org.json.JSONObject;
 import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
+
 
 /**
  * Workspace diffing service
@@ -406,6 +409,44 @@ public class MmsDiffGet extends AbstractJavaWebScript {
         JSONObject ws2Json = diffResult.getJSONObject( "workspace2" );
         WorkspaceNode.addWorkspaceMetadata( ws1Json, ws1, dateTime1 );
         WorkspaceNode.addWorkspaceMetadata( ws2Json, ws2, dateTime2 );
+        
+        
+        
+        JSONArray ws1Elems = new JSONArray(); 
+        ws1Elems = ws1Json.getJSONArray("elements");
+        
+        //create a Map of keys from elements and sysmlId
+        Set<String> sysmlIdMap = new HashSet<String>();
+        for (int i = 0; i< ws1Elems.length(); i++){
+        	JSONObject elem = ws1Elems.getJSONObject(i);
+        	sysmlIdMap.add(elem.getString("sysmlid"));
+        }
+        
+        //Add parents of all the elements if they do not already exist
+		// questions, ask about datetime and ws1 and ws2
+        int l = ws1Elems.length();
+		for (int i = 0; i < l; i++) {
+			JSONObject elem = ws1Elems.getJSONObject(i);
+			if (elem.has("sysmlid")) {
+				if (!sysmlIdMap.contains(elem.optString("owner")) && elem.optString("sysmlId") != null) {
+					NodeRef ref = NodeUtil.findNodeRefById(elem.optString("sysmlid"), false, ws1, dateTime1, services,
+							true);
+					EmsScriptNode node = new EmsScriptNode(ref, getServices());
+					if (node.exists()) {
+						EmsScriptNode parent = node.getOwningParent(dateTime1, ws1, false);
+						while (parent != null && parent.isModelElement()) {
+							// the parent is not in already in the element list
+							// so lets add it
+							ws1Elems.put(parent.toJSONObject(ws1, dateTime1));
+							node = parent; 
+							if(!sysmlIdMap.contains(node.getOwner()) && node.getSysmlId() != null){
+								parent = node.getOwningParent(dateTime1,  ws1,  false);
+							}
+						}
+					}
+				}
+			}
+		}
 
         return diffResult;
     }
