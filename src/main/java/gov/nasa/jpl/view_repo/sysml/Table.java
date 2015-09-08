@@ -60,15 +60,19 @@ public class Table extends gov.nasa.jpl.view_repo.sysml.List implements sysml.vi
         // TODO Auto-generated constructor stub
     }
 
+    public Table( sysml.view.List< EmsScriptNode > c ) {
+        super(c);
+        System.out.println("Table(List), yo!");
+    }
+
     public Table( Collection< ? > c ) {
         super( c );
         // TODO Auto-generated constructor stub
     }
 
-//    public Table( Object... c ) {
-//        super( c );
-//        // TODO Auto-generated constructor stub
-//    }
+    public Table(Object... c) {
+        super(c);
+    }
 
     @Override
     public sysml.view.List< EmsScriptNode > getColumn( int i ) {
@@ -158,7 +162,7 @@ public class Table extends gov.nasa.jpl.view_repo.sysml.List implements sysml.vi
                 json.put("style", getStyle());
             json.put("title", getTitle());
             json.put("type", "Table");
-            json.put("type", "Table");
+            //json.put("type", "Table");
 
 
             JSONArray body = new JSONArray();

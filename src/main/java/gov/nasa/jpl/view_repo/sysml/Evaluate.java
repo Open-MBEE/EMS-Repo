@@ -263,14 +263,15 @@ public class Evaluate implements Viewable< EmsScriptNode > {
                     } else {
                         result = results.get( sysmlid );
                     }
-                    logger.warn( "Success!  Evaluated expression \""
-                                 + expression + "\" and got " + result );
+                    if ( logger.isDebugEnabled() )
+                        logger.warn( "Success!  Evaluated expression \""
+                                     + expression + "\" and got " + result );
                     return result;
                 }
             }
         } catch (Throwable t) {
             logger.error( "Failed to parse, load, or evaluate expression, \"" + expression + "\"" );
-            t.printStackTrace();
+            if (logger.isDebugEnabled() ) t.printStackTrace();
         }
         // Failed, so we'll just show the input as a string;
         // TODO -- might be nice to add an error message!

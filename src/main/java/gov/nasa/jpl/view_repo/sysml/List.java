@@ -2,6 +2,7 @@ package gov.nasa.jpl.view_repo.sysml;
 
 import gov.nasa.jpl.ae.event.Expression;
 import gov.nasa.jpl.mbee.util.CompareUtils;
+import gov.nasa.jpl.mbee.util.HasPreference;
 import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
@@ -25,9 +26,21 @@ import sysml.view.Viewable;
  * @see viewable.List
  * 
  */
-public class List extends ArrayList< Viewable< EmsScriptNode > > implements sysml.view.List< EmsScriptNode > {
+public class List extends ArrayList< Viewable< EmsScriptNode > >
+        implements sysml.view.List< EmsScriptNode > {//, HasPreference< java.util.List< Class > > {
 
     private static final long serialVersionUID = 3954654861037876503L;
+    
+    /**
+     * The preferred constructor arguments.
+     */
+    protected static final HasPreference.Helper< java.util.List< Class > > preferences =
+            new HasPreference.Helper< java.util.List< Class > >( (java.util.List< java.util.List< Class > >)Utils.newList( (java.util.List< Class >)Utils.newList( (Class)EmsScriptNode.class ),
+                                                                           (java.util.List< Class >)Utils.newList( (Class)sysml.view.List.class ),
+                                                                           (java.util.List< Class >)Utils.newList( (Class)Collection.class ),
+                                                                           (java.util.List< Class >)Utils.newList( (Class)Object[].class ) ) );
+    
+    
     protected boolean ordered = false;
     
     /**
@@ -47,6 +60,16 @@ public class List extends ArrayList< Viewable< EmsScriptNode > > implements sysm
 //        super( c );
 //    }
     
+    /**
+     * Create a List and add the {@link Viewable}s in the input {@link Collection}.
+     * @param c
+     * @see java.util.List#List(Collection)
+     */
+    public List( sysml.view.List< EmsScriptNode > c ) {
+        this();
+        add(c);
+    }
+
     /**
      * Create a List and add the {@link Viewable}s in the input {@link Collection}.
      * @param c
@@ -87,7 +110,7 @@ public class List extends ArrayList< Viewable< EmsScriptNode > > implements sysm
                 }
     			if ( eval instanceof Viewable ) {
     			    this.add((Viewable<EmsScriptNode>)eval);
-    			} else if ( eval instanceof Viewable ) {
+    			} else {
     			    this.add(new Text("" + eval));
     			}
     		} else if ( obj instanceof Viewable ) {
@@ -205,5 +228,16 @@ public class List extends ArrayList< Viewable< EmsScriptNode > > implements sysm
         JSONObject jo = toViewJson(null);
         if ( jo != null ) return NodeUtil.jsonToString( jo );
         return super.toString();
+    }
+
+    //@Override
+    public boolean prefer( java.util.List< Class > t1,
+                           java.util.List< Class > t2 ) {
+        return preferences.prefer( t1, t2 );
+    }
+
+    //@Override
+    public int rank( java.util.List< Class > t ) {
+        return preferences.rank( t );
     }
 }
