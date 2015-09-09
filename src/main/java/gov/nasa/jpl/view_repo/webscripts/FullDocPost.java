@@ -274,6 +274,7 @@ public class FullDocPost extends AbstractJavaWebScript {
             buildHtmlFromViews(workspaceName, site, docId, timestamp);
         }
         catch(Exception ex){
+        	logger.error("Failed to build HTML from stiching views! " + ex.getMessage());
             throw ex;
         }
         
@@ -281,6 +282,7 @@ public class FullDocPost extends AbstractJavaWebScript {
             tableToCSV();
         }
         catch(Exception ex){
+        	logger.error("Failed to convert tables to CSV files! " + ex.getMessage());
             throw new Exception("Failed to convert tables to CSV files!", ex);
         }
     }
@@ -296,14 +298,17 @@ public class FullDocPost extends AbstractJavaWebScript {
         
         // handleEmbeddedImage() Will have its own transactions, handleRelativeHyperlinks() doesnt need it:
         try{
+        	response.append("\n[INFO]: Copying CSS files...");
             FileUtils.copyDirectory(new File(this.veCssDir), new File(Paths.get(this.fullDocDir, "css").toString()));
+            response.append("\n[INFO]: Downloading embedded imagess...");
             handleEmbeddedImage();
+            response.append("\n[INFO]: Formatting relative hyper-links...");
             handleRelativeHyperlinks();
         }
         catch(Exception ex){
+        	response.append("\n[ERROR]: Post-HTML download processing failed! " + ex.getMessage());
             throw ex;
         }
-        
     }
     
     private void downloadView(WorkspaceNode workspace, String site, String docId, String viewId, String section, String timestamp) throws Exception{
@@ -382,7 +387,7 @@ public class FullDocPost extends AbstractJavaWebScript {
             gov.nasa.jpl.mbee.util.FileUtils.stringToFile( errorHtml , filePath );
 			String msg = String.format("Failed to download view for %s.", viewId);
 			log(Level.ERROR, msg);
-//			throw new Exception(msg);
+			logger.error(msg);
 		}
     }
     
