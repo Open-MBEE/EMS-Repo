@@ -3,6 +3,7 @@ package gov.nasa.jpl.view_repo.webscripts;
 import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.util.CommitUtil;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
+import gov.nasa.jpl.view_repo.util.EmsTransaction;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
 import gov.nasa.jpl.view_repo.util.WorkspaceDiff;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
@@ -186,12 +187,23 @@ public class MmsModelDelete extends AbstractJavaWebScript {
         Set<EmsScriptNode> nodesToDelete = new HashSet<EmsScriptNode>();
         nodesToDelete.addAll( wsDiff.getDeletedElements().values() );
         nodesToDelete.addAll( valueSpecs );
-        for (EmsScriptNode deletedNode: nodesToDelete) {
+        for (final EmsScriptNode deletedNode: nodesToDelete) {
+            
             if (deletedNode.exists()) {
-                deletedNode.removeAspect( "ems:Added" );
-                deletedNode.removeAspect( "ems:Updated" );
-                deletedNode.removeAspect( "ems:Moved" );
-                deletedNode.createOrUpdateAspect( "ems:Deleted" );
+                
+                boolean noTransaction = false;
+                new EmsTransaction(getServices(), getResponse(), getResponseStatus(), noTransaction) {
+                    
+                    @Override
+                    public void run() throws Exception {
+
+                        deletedNode.removeAspect( "ems:Added" );
+                        deletedNode.removeAspect( "ems:Updated" );
+                        deletedNode.removeAspect( "ems:Moved" );
+                        deletedNode.createOrUpdateAspect( "ems:Deleted" );
+                        
+                    }
+                };
             }
         }
     }
@@ -349,24 +361,42 @@ public class MmsModelDelete extends AbstractJavaWebScript {
      * @param workspace
      * @throws JSONException
      */
-    protected void handleElementHierarchy( EmsScriptNode root,
-                                           WorkspaceNode workspace,
-                                           boolean recurse ) {
+    protected void handleElementHierarchy( final EmsScriptNode root,
+                                           final WorkspaceNode workspace,
+                                           final boolean recurse ) {
         if (root == null) {
             return;
         }
 
+        boolean noRecurseTransaction = true;
         if (recurse) {
-            for ( NodeRef childRef : root.getOwnedChildren(true, null, workspace) ) {
-                EmsScriptNode child = new EmsScriptNode(childRef, services, response);
-                handleElementHierarchy(child, workspace, recurse);
-            }
+            
+            new EmsTransaction(getServices(), getResponse(), getResponseStatus(), noRecurseTransaction) {
+                
+                @Override
+                public void run() throws Exception {
+                    for ( NodeRef childRef : root.getOwnedChildren(true, null, workspace) ) {
+                            EmsScriptNode child = new EmsScriptNode(childRef, services, response);
+                            handleElementHierarchy(child, workspace, recurse);
+                    }
+                }
+                
+            };
+            
         }
 
-        // Delete the node:
-        if (root.exists()) {
-            delete(root, workspace, null);
-        }
+        boolean noTransaction = false;
+        new EmsTransaction(getServices(), getResponse(), getResponseStatus(), noTransaction) {
+            
+            @Override
+            public void run() throws Exception {
+                // Delete the node:
+                if (root.exists()) {
+                    delete(root, workspace, null);
+                }
+                
+            }
+        };
         
         // TODO: REVIEW may not need this b/c addToWsDiff() does not add in reified packages
         //       Also, code in ModelPost assumes we never delete reified packages
