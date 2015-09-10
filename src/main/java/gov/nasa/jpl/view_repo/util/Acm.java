@@ -826,6 +826,54 @@ public class Acm {
         }
     };
 
+
+    
+    /**
+     * Maps a value spec type to a property that specifies the primitive value
+     * for it. Not all value specs have a single primitive value, and those are
+     * not included.
+     */
+    public static final HashMap<String,String> VALUE_Of_VALUESPEC = new HashMap<String,String>() {
+
+        private static final long serialVersionUID = 2157925925273966466L;
+        {
+            //put("sysml:Duration");
+            //put("sysml:DurationInterval");
+            put("sysml:ElementValue", ACM_ELEMENT_VALUE_ELEMENT);
+            //put("sysml:Expression");
+            put("sysml:InstanceValue", ACM_INSTANCE);
+            //put("sysml:Interval");
+            put("sysml:LiteralBoolean", ACM_BOOLEAN);
+            put("sysml:LiteralInteger", ACM_INTEGER);
+            //put("sysml:LiteralNull");
+            put("sysml:LiteralReal", ACM_DOUBLE);
+            put("sysml:LiteralString", ACM_STRING);
+            put("sysml:LiteralUnlimitedNatural", ACM_NATURAL_VALUE);
+            put("sysml:OpaqueExpression", ACM_EXPRESSION_BODY);
+            //put("sysml:StringExpression");
+            //put("sysml:TimeExpression");
+            //put("sysml:TimeInterval");
+        }
+    };
+
+    /**
+     * Maps types that have properties that point to ValueSpecs and a list of those
+     * properties.
+     */
+    public static final HashMap<String,String> VALUE_OF_TYPE = new HashMap<String,String>() {
+
+        {
+            put(ACM_PROPERTY, ACM_VALUE);
+//          put(ACM_LITERAL_SET, ENUMERATION_VALUESPECS);
+            put(ACM_CONNECTOR, ACM_CONNECTOR_VALUE);
+            put(ACM_CONSTRAINT, ACM_CONSTRAINT_SPECIFICATION);
+            put(ACM_OPERATION, ACM_OPERATION_EXPRESSION);
+            put(ACM_VIEW, ACM_CONTENTS);
+            put(ACM_PRODUCT, ACM_CONTENTS);
+            put(ACM_INSTANCE_SPECIFICATION, ACM_INSTANCE_SPECIFICATION_SPECIFICATION);
+        }
+    };
+
     /**
      * The addition and removal of aspects is not available from a versioned
      * node in alfresco unless a property is changed. Thus, aspects that are

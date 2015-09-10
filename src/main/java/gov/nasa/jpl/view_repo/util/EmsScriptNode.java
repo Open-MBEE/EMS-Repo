@@ -3169,6 +3169,9 @@ public class EmsScriptNode extends ScriptNode implements
         return view;
     }
 
+    /**
+     * @return the sysml type name according to the aspect in {@link Acm.ACM_ASPECTS}
+     */
     public String getTypeName() {
         String typeName = null;
 

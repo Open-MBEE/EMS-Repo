@@ -440,6 +440,7 @@ public class View extends List implements sysml.view.View< EmsScriptNode >, Comp
         clear(); // make sure we clear out any old information
         Object evalResult;
         try {
+          System.out.println("aeExpr = " + aeExpr);
             evalResult = aeExpr.evaluate( true );
             if ( evalResult instanceof Viewable ) {
                 Viewable< EmsScriptNode > v = (Viewable< EmsScriptNode >)evalResult;

@@ -2,6 +2,7 @@ package gov.nasa.jpl.view_repo.sysml;
 
 import gov.nasa.jpl.ae.event.Expression;
 import gov.nasa.jpl.mbee.util.CompareUtils;
+import gov.nasa.jpl.mbee.util.Debug;
 import gov.nasa.jpl.mbee.util.HasPreference;
 import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
@@ -27,7 +28,7 @@ import sysml.view.Viewable;
  * 
  */
 public class List extends ArrayList< Viewable< EmsScriptNode > >
-        implements sysml.view.List< EmsScriptNode > {//, HasPreference< java.util.List< Class > > {
+        implements sysml.view.List< EmsScriptNode >, HasPreference< java.util.List< Class<?> > > {
 
     private static final long serialVersionUID = 3954654861037876503L;
     
@@ -115,6 +116,9 @@ public class List extends ArrayList< Viewable< EmsScriptNode > >
     			}
     		} else if ( obj instanceof Viewable ) {
     		    this.add((Viewable<EmsScriptNode>)obj);
+    		} else {
+    		    // ERROR
+    		    Debug.error(true, false, "bad arg to List(Object[]): " + c);
     		}
     	}
     }
@@ -230,14 +234,14 @@ public class List extends ArrayList< Viewable< EmsScriptNode > >
         return super.toString();
     }
 
-    //@Override
-    public boolean prefer( java.util.List< Class > t1,
-                           java.util.List< Class > t2 ) {
+    @Override
+    public boolean prefer( java.util.List< Class<?> > t1,
+                           java.util.List< Class<?> > t2 ) {
         return preferences.prefer( t1, t2 );
     }
 
-    //@Override
-    public int rank( java.util.List< Class > t ) {
+    @Override
+    public int rank( java.util.List< Class<?> > t ) {
         return preferences.rank( t );
     }
 }

@@ -1539,12 +1539,13 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
     
     
     public static void changeMissingOperationElementsToStrings( JSONObject json,
-                                                                WorkspaceNode ws  ) {
-        changeMissingOperationElementsToStrings( json, ws, null );
+                                                                WorkspaceNode ws, Set< String > postSet ) {
+        changeMissingOperationElementsToStrings( json, ws, postSet, null );
     }
     
     public static void changeMissingOperationElementsToStrings( JSONObject json,
                                                                 WorkspaceNode ws,
+                                                                Set< String > postSet,
                                                                 Seen<String> seen ) {
         // Get element value if that's what this is.
         if ( json == null ) return;
@@ -1557,11 +1558,20 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
                         Utils.seen( sysmlId, true, seen );
                 if ( !p.first ) {
                     seen = p.second;
-                    EmsScriptNode n =
+                    
+                    boolean missing = true; // pessimistic; prove it's not missing
+                    // See if we can find the operation in the existing set of
+                    // posted elements.
+                    if ( postSet != null && postSet.contains( sysmlId ) ) {
+                        missing = false;
+                    } else {
+                        // See if it's in the database.
+                        EmsScriptNode n =
                             findScriptNodeById( sysmlId, ws, null, false, null,
                                                 NodeUtil.getServices(), null );
-                    if ( n == null ) {//|| !n.getTypeName().equals("Operation") ) {
-                        // operator doesn't exist -- create one
+                        missing = n == null;
+                    }
+                    if ( missing ) {//|| !n.getTypeName().equals("Operation") ) {
                         // Wait!  no!  just change to a string literal:
                         json.remove("element");
                         json.put("type", "LiteralString");

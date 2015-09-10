@@ -14,6 +14,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -1290,28 +1291,125 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
         return null;
     }
 
+    public Object getAlfrescoProperty( EmsScriptNode node, String acmPropertyName,
+                                       boolean recursiveGetValueOfNodeRefs ) {
+        Object result = null;
+        if ( Acm.JSON_NODEREFS.contains( acmPropertyName ) ) {
+            result = node.getNodeRefProperty(acmPropertyName, null, node.getWorkspace());
+            if ( result instanceof Collection ) {
+                Collection<NodeRef> valueNodes = (Collection<NodeRef>)result;
+                ArrayList< Object > resultList = new ArrayList<Object>();
+                result = resultList;
+                for ( NodeRef v : valueNodes  ) {
+                    EmsScriptNode n = new EmsScriptNode( (NodeRef)v, getServices() );
+                    if ( recursiveGetValueOfNodeRefs ) {
+                        Object val = getValueAsObject( n, null );
+                        resultList.add( val );
+                    } else {
+                        resultList.add( n );
+                    }
+                }
+            } else if ( result instanceof NodeRef ) {
+                result = new EmsScriptNode( (NodeRef)result, getServices() );
+            }
+        } else {
+            result = node.getProperty( acmPropertyName );
+        }
+        return result;
+//
+//        if ( Acm.JSON_NODEREFS.contains( acmPropName ) ) {
+//            value = node.getNodeRefProperty(acmPropName, null, node.getWorkspace());
+//            for ( NodeRef v : valueNodes ) {
+//                EmsScriptNode n = new EmsScriptNode( (NodeRef)v, getServices() );
+//                Collection< Object > vals = getValue( n, mySpecifier );
+//                resultList.add( vals );
+//            }
+//        } else {
+//            value = node.getProperty(valueType);
+//        }
+    }
+    
+    public Object getValueOfValueSpec( EmsScriptNode node,
+                                       boolean recursiveGetValueOfNodeRefs ) {
+        Object result = null;
+        
+        String type = node.getTypeName();
+        if ( Acm.getJSON2ACM().containsKey( type ) ) {
+            type = Acm.getJSON2ACM().get( type );
+        }
+        if ( type == null || !Acm.VALUE_Of_VALUESPEC.containsKey( type ) ) {
+            return null;
+        }
+        String valuePropName = Acm.VALUE_Of_VALUESPEC.get( type );
+        result = getAlfrescoProperty( node, valuePropName, recursiveGetValueOfNodeRefs );
+
+//        if ( node.hasOrInheritsAspect( Acm.ACM_LITERAL_STRING ) ) {
+//            result = node.getProperty( Acm.ACM_STRING );
+//        } else if ( node.hasOrInheritsAspect( Acm.ACM_LITERAL_INTEGER ) ) { 
+//            result = node.getProperty( Acm.ACM_INTEGER );
+//        } else if ( node.hasOrInheritsAspect( Acm.ACM_LITERAL_REAL ) ) { 
+//            result = node.getProperty( Acm.ACM_DOUBLE );
+//        } else if ( node.hasOrInheritsAspect( Acm.ACM_LITERAL_BOOLEAN ) ) { 
+//            result = node.getProperty( Acm.ACM_BOOLEAN );
+//        }
+        return result;
+    }
+    
     @Override
     public Collection< Object > getValue( Object context,
-    									  Object specifier ) {
+                                          Object specifier ) {
+        Object o = getValueAsObject( context, specifier );
+        if ( o == null ) return null;
+        if ( o instanceof Collection ) return (Collection< Object >)o;
+        if ( o.getClass().isArray() ) {
+            Object[] arr = (Object[])o;
+            List< Object > list = Arrays.asList( arr );
+            return list;
+        }
+//        if ( o instanceof Map ) {
+//            return Arrays.asList( ((Map<?,?>)o).entrySet().toArray() );
+//        }
+        return Utils.newList( o );
+    }
+    
+    public Object getValueAsObject( Object context,
+                                    Object specifier ) {
+        // TODO need the workspace, time
 
         Object mySpecifier = specifier;
         // Convert specifier to add ACM type, ie prepend "sysml:":
         Map<String, String> convertMap = Acm.getJSON2ACM();
         if (specifier instanceof String && convertMap.containsKey(specifier)) {
-        	 mySpecifier = convertMap.get(specifier);
+             mySpecifier = convertMap.get(specifier);
         }
+        
+        Object result = getValueAsObject( context );
+
+        if ( specifier != null && context instanceof EmsScriptNode ) {
+            EmsScriptNode node = (EmsScriptNode)context;
+            if ( result == null ) {
+                result = node.getNodeRefProperty("" + mySpecifier, null, node.getWorkspace());
+            }
+        }
+        
+        return result;
+    }
+    public Object getValueAsObject( Object context ) {//,
 
         ArrayList< Object > resultList = new ArrayList< Object >();
-        // find the specified property inside the context
+        
+        // Process the context as a collection of contexts.
         if ( context instanceof Collection ) {
             Collection< ? > coll = ((Collection<?>)context);
             if ( coll.size() == 0 ) return resultList;
+            // replace the context with a single value in its Collection
             if ( coll.size() == 1 ) {
                 context = coll.iterator().next();
             } else {
+                // recursively call getValue() on each element of the context
                 for ( Object o : coll ) {
-                    Collection< Object > vals = getValue( o, mySpecifier );
-                    resultList.addAll( vals );
+                    Object val = getValueAsObject( o );
+                    resultList.add( val );
                 }
                 return resultList;
             }
@@ -1321,62 +1419,73 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
 
     		EmsScriptNode node = (EmsScriptNode) context;
 
+            Collection<Object> returnList = new ArrayList<Object>();
+
 			// If it is a Property type, then the value is a NodeRef, which
 			// we convert to a EmsScriptNode:
-    		if (node.hasAspect(Acm.ACM_PROPERTY)) {
-
-		    	List<EmsScriptNode> returnList = new ArrayList<EmsScriptNode>();
-//<<<<<<< HEAD
-////				Collection<NodeRef> valueNodes =
-////				        (Collection< NodeRef >)node.getProperty(Acm.ACM_VALUE);
-//                Object value = node.getProperty(Acm.ACM_VALUE);
-//                Boolean isColl = null;
-//                Boolean isNonEmptyColl = null;
-//                if ( value instanceof NodeRef ) {
-//                    convertToScriptNode(value, returnList);
-//                    resultList.addAll(returnList);
-//                } else {
-//                    isColl = ( value instanceof Collection );
-//                    Collection<?> coll = isColl ? ((Collection<?>)value) : null;
-//                    isNonEmptyColl = isColl && coll.size() > 0;
-//                    Object first = isNonEmptyColl ? coll.iterator().next() : null;
-//                    if ( first instanceof NodeRef || first instanceof String ) {
-//                        convertToScriptNode(value, returnList);
-//                        if ( returnList.size() < coll.size() ) {
-//                            resultList.addAll( coll );
+            String nodeType = node.getTypeName();
+            if ( Acm.getJSON2ACM().containsKey( nodeType ) ) {
+                nodeType = Acm.getJSON2ACM().get( nodeType );
+            }
+            if ( Acm.VALUE_OF_TYPE.keySet().contains( nodeType ) ) {
+                Object value = getAlfrescoProperty( node, nodeType, true );
+                return value;
+    		}
+            if ( Acm.VALUESPEC_ASPECTS.contains( nodeType ) ) {
+                Object value = getValueOfValueSpec( node, false );
+                return value;
+//                // check to see if all results were of single values
+//                boolean allSingleOrEmpty = true;
+//                for ( Object o : resultList ) {
+//                    if ( o != null ) {
+//                        if ( o instanceof Collection ) {
+//                            if ( ((Collection<?>)o).size() > 1 ) {
+//                                allSingleOrEmpty = false;
+//                                break;
+//                            }
 //                        } else {
-//                            resultList = Utils.asList( returnList, Object.class );
+//                            allSingleOrEmpty = false;
+//                            break;
 //                        }
 //                    }
-//                    
 //                }
-//=======
-		    	// TODO need the workspace, time
-				Collection<NodeRef> valueNodes =
-				        (Collection< NodeRef >)node.getNodeRefProperty(Acm.ACM_VALUE, null, node.getWorkspace());
-				convertToScriptNode(valueNodes, returnList);
-				resultList.addAll(returnList);
-//>>>>>>> refs/remotes/origin/develop
-
-//	    		return Utils.asList(returnList, Object.class);
-                return resultList;
-			}
+//                // if all single values, flatten
+//                if ( allSingleOrEmpty ) {
+//                    ArrayList< Object > oldResults = resultList;
+//                    resultList = new ArrayList< Object >();
+//                    for ( Object o : oldResults ) {
+//                        if ( o == null ) {
+//                            resultList.add( null );
+//                        } else if ( o instanceof Collection ) {
+//                            if ( ((Collection<?>)o).isEmpty() ) {
+//                                resultList.add( null );
+//                } else {
+//                                resultList.add( ((Collection<?>)o).iterator().next() );
+//                            }
+//                        } else {
+//                            // should not be possible to get here
+//                            assert( false );
+//                        }
+//                    }
+//                }
+//				// TODO -- check specifier
+//                return resultList;
 
 			// Otherwise, return the Object for the value
-			else {
+    		} else {
 
 	    		// If no specifier is supplied:
-				if (mySpecifier == null) {
-					// TODO what should we do here?
-	    		}
-				else {
-
-					Object valueNode = node.getNodeRefProperty("" + mySpecifier, null, node.getWorkspace());
-
-					if (valueNode != null) {
-						return Utils.newList(valueNode);
-					}
-				}
+//				if (mySpecifier == null) {
+//					// TODO what should we do here?
+//	    		}
+//				else {
+//
+//					Object valueNode = node.getNodeRefProperty("" + mySpecifier, null, node.getWorkspace());
+//
+//					if (valueNode != null) {
+//						return Utils.newList(valueNode);
+//					}
+//				}
 
 			}
 
@@ -1729,7 +1838,7 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
     	}
 
     }
-
+    
     @Override
     public Object set( Object object, Object specifier, Object value ) {
         // TODO Auto-generated method stub

@@ -53,6 +53,8 @@ import gov.nasa.jpl.view_repo.webscripts.util.ShareUtils;
 
 
 
+
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -70,6 +72,8 @@ import java.util.TreeSet;
 import javax.servlet.http.HttpServletResponse;
 
 import k.frontend.Frontend;
+
+
 
 
 //import javax.transaction.UserTransaction;
@@ -2394,8 +2398,8 @@ public class ModelPost extends AbstractJavaWebScript {
         return model;
     }
     
-    public static JSONObject kToJson( String k, WorkspaceNode ws ) {
-        return kToJson(k, null, ws);
+    public static JSONObject kToJson( String k, WorkspaceNode ws, Set< String > postSet  ) {
+        return kToJson(k, null, ws, postSet);
     }
 
     /**
@@ -2426,7 +2430,7 @@ public class ModelPost extends AbstractJavaWebScript {
     
 
     
-    public static JSONObject kToJson( String k, String sysmlidPrefix, WorkspaceNode ws ) {
+    public static JSONObject kToJson( String k, String sysmlidPrefix, WorkspaceNode ws, Set< String > postSet  ) {
         //JSONObject json = new JSONObject(KExpParser.parseExpression(k));
         JSONObject json = new JSONObject(Frontend.exp2Json2( k ));
 
@@ -2440,7 +2444,7 @@ public class ModelPost extends AbstractJavaWebScript {
 //        log(LogLevel.DEBUG, NodeUtil.jsonToString( exprJson0, 4 ));
         log(Level.DEBUG, "********************************************************************************");
 
-        changeMissingOperationElementsToStrings(json, ws);
+        changeMissingOperationElementsToStrings(json, ws, postSet);
         
         System.out.println("kToJson(" + k + ") = \n" + json.toString( 4 ) );
         
@@ -2458,7 +2462,7 @@ public class ModelPost extends AbstractJavaWebScript {
         if ( !jsonNotK ) {
             String k = (String)content;
             logger.warn( "k = " + k );
-            postJson = kToJson( k, myWorkspace );
+            postJson = kToJson( k, myWorkspace, elementMap.keySet() );
         }
         else {
             if ( content instanceof JSONObject ) {
@@ -2474,7 +2478,8 @@ public class ModelPost extends AbstractJavaWebScript {
             postJson.put( "elements", jarr );
         }
         if ( !Utils.isNullOrEmpty( expressionString ) ) {
-            JSONObject exprJson = kToJson(expressionString, myWorkspace);
+            JSONObject exprJson = 
+                    kToJson(expressionString, myWorkspace, elementMap.keySet());
             JSONArray expJarr = exprJson.getJSONArray("elements");
             for (int i=0; i<expJarr.length(); ++i) {
                 jarr.put(expJarr.get( i ) );
