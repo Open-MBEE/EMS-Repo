@@ -28,7 +28,7 @@ import sysml.view.Viewable;
  * 
  */
 public class List extends ArrayList< Viewable< EmsScriptNode > >
-        implements sysml.view.List< EmsScriptNode >, HasPreference< java.util.List< Class<?> > > {
+        implements sysml.view.List< EmsScriptNode >, HasPreference< java.util.List< Class > > {
 
     private static final long serialVersionUID = 3954654861037876503L;
     
@@ -235,13 +235,13 @@ public class List extends ArrayList< Viewable< EmsScriptNode > >
     }
 
     @Override
-    public boolean prefer( java.util.List< Class<?> > t1,
-                           java.util.List< Class<?> > t2 ) {
+    public boolean prefer( java.util.List< Class > t1,
+                           java.util.List< Class > t2 ) {
         return preferences.prefer( t1, t2 );
     }
 
     @Override
-    public int rank( java.util.List< Class<?> > t ) {
+    public int rank( java.util.List< Class > t ) {
         return preferences.rank( t );
     }
 }
