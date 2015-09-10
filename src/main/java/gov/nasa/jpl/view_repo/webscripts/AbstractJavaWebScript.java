@@ -444,6 +444,25 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
                                                WorkspaceNode workspace,
                                                Date dateTime, boolean findDeleted,
                                                String siteName) {
+        return findScriptNodeById( id, workspace, dateTime, findDeleted,
+                                   siteName, services, response );
+    }
+
+    /**
+     * Find node of specified name (returns first found) - so assume uniquely named ids - this checks sysml:id rather than cm:name
+     * This does caching of found elements so they don't need to be looked up with a different API each time.
+     *
+     * TODO extend so search context can be specified
+     * @param id    Node id to search for
+     * @param workspace
+     * @param dateTime
+     * @return      ScriptNode with name if found, null otherwise
+     */
+    protected static EmsScriptNode
+            findScriptNodeById( String id, WorkspaceNode workspace,
+                                Date dateTime, boolean findDeleted,
+                                String siteName, ServiceRegistry services,
+                                StringBuffer response ) {
         return NodeUtil.findScriptNodeById( id, workspace, dateTime, findDeleted,
                                             services, response, siteName );
     }
@@ -1516,6 +1535,62 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
             }
         }
         return results;
+    }
+    
+    
+    public static void changeMissingOperationElementsToStrings( JSONObject json,
+                                                                WorkspaceNode ws  ) {
+        changeMissingOperationElementsToStrings( json, ws, null );
+    }
+    
+    public static void changeMissingOperationElementsToStrings( JSONObject json,
+                                                                WorkspaceNode ws,
+                                                                Seen<String> seen ) {
+        // Get element value if that's what this is.
+        if ( json == null ) return;
+        String type = json.optString( "type" );
+        if ( type != null && "ElementValue".equals( type ) ) {
+            String sysmlId = json.optString( "element" );
+            if ( !Utils.isNullOrEmpty( sysmlId ) ) {
+                // Make sure we haven't already processed this one.
+                Pair< Boolean, Seen< String > > p =
+                        Utils.seen( sysmlId, true, seen );
+                if ( !p.first ) {
+                    seen = p.second;
+                    EmsScriptNode n =
+                            findScriptNodeById( sysmlId, ws, null, false, null,
+                                                NodeUtil.getServices(), null );
+                    if ( n == null ) {//|| !n.getTypeName().equals("Operation") ) {
+                        // operator doesn't exist -- create one
+                        // Wait!  no!  just change to a string literal:
+                        json.remove("element");
+                        json.put("type", "LiteralString");
+                        json.put("string", sysmlId);
+                    }
+                }
+            }
+        }
+        for ( Object ok : json.keySet() ) {
+            if ( !( ok instanceof String ) ) {
+                Debug.error( "JSONObject key is not a String!!" );
+                continue;
+            }
+            String k = (String)ok;
+            JSONObject v = json.optJSONObject( k );
+            if ( v != null ) {
+                changeMissingOperationElementsToStrings( v, ws, seen );
+            } else {
+                JSONArray arr = json.optJSONArray( k );
+                if ( arr != null ) {
+                    for ( int i = 0; i < arr.length(); ++i ) {
+                        v = arr.optJSONObject( i );
+                        if ( v != null ) {
+                            changeMissingOperationElementsToStrings( v, ws, seen );
+                        }
+                    }
+                }
+            }
+        }
     }
     
     /**

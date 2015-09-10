@@ -339,7 +339,8 @@ public class ModelGet extends AbstractJavaWebScript {
         // for backwards compatiblity convert recurse to infinite depth (this
         // overrides
         // any depth setting)
-        if ( recurse ) {
+        if ( recurse ) { // TODO -- REVIEW -- if depth is already specified,
+                         // shouldn't we use that?
             depth = new Long( -1 );
         }
 
@@ -453,8 +454,9 @@ public class ModelGet extends AbstractJavaWebScript {
         visited.add( sysmlId );
         if ( !elementsFound.containsKey( sysmlId ) ) {
             // dont add reified packages
-            if ( !rootName.endsWith( "_pkg" )
-                 && !root.isOwnedValueSpec( dateTime, workspace ) ) {
+            if ( maxDepth == null || maxDepth == 0 ||
+                 ( !rootName.endsWith( "_pkg" ) &&
+                   !root.isOwnedValueSpec( dateTime, workspace ) ) ) {
                 elementsFound.put( sysmlId, root );
             }
         }

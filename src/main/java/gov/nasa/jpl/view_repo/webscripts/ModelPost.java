@@ -52,6 +52,7 @@ import gov.nasa.jpl.view_repo.webscripts.util.ShareUtils;
 
 
 
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -68,8 +69,8 @@ import java.util.TreeSet;
 
 import javax.servlet.http.HttpServletResponse;
 
-
 import k.frontend.Frontend;
+
 
 //import javax.transaction.UserTransaction;
 import org.apache.log4j.*;
@@ -1894,6 +1895,8 @@ public class ModelPost extends AbstractJavaWebScript {
                         //  don't have to resurrect on second pass
                         if (!nestedNode) {
                             resurrectParents(nodeToUpdate, ingest, workspace);
+                            //resurrectOwnedValueSpecs(nodeToUpdate, ingest, workspace);
+                            //resurrectRelationships(nodeToUpdate, ingest, workspace);
                         }
                     }
                     // Ingesting metadata, ie second pass:
@@ -2391,8 +2394,8 @@ public class ModelPost extends AbstractJavaWebScript {
         return model;
     }
     
-    public static JSONObject kToJson( String k ) {
-        return kToJson(k, null);
+    public static JSONObject kToJson( String k, WorkspaceNode ws ) {
+        return kToJson(k, null, ws);
     }
 
     /**
@@ -2423,7 +2426,7 @@ public class ModelPost extends AbstractJavaWebScript {
     
 
     
-    public static JSONObject kToJson( String k, String sysmlidPrefix ) {
+    public static JSONObject kToJson( String k, String sysmlidPrefix, WorkspaceNode ws ) {
         //JSONObject json = new JSONObject(KExpParser.parseExpression(k));
         JSONObject json = new JSONObject(Frontend.exp2Json2( k ));
 
@@ -2437,22 +2440,25 @@ public class ModelPost extends AbstractJavaWebScript {
 //        log(LogLevel.DEBUG, NodeUtil.jsonToString( exprJson0, 4 ));
         log(Level.DEBUG, "********************************************************************************");
 
+        changeMissingOperationElementsToStrings(json, ws);
+        
         System.out.println("kToJson(" + k + ") = \n" + json.toString( 4 ) );
         
         return json;
     }
-    
+        
     public JSONObject getPostJson( boolean jsonNotK, Object content ) {
         return getPostJson( jsonNotK, content, null );
     }
     public JSONObject getPostJson( boolean jsonNotK,
-                                   Object content, String expressionString ) throws JSONException {
+                                   Object content, String expressionString )
+                                           throws JSONException {
         JSONObject postJson = null;
         
         if ( !jsonNotK ) {
             String k = (String)content;
             logger.warn( "k = " + k );
-            postJson = kToJson( k );
+            postJson = kToJson( k, myWorkspace );
         }
         else {
             if ( content instanceof JSONObject ) {
@@ -2468,7 +2474,7 @@ public class ModelPost extends AbstractJavaWebScript {
             postJson.put( "elements", jarr );
         }
         if ( !Utils.isNullOrEmpty( expressionString ) ) {
-            JSONObject exprJson = kToJson(expressionString);
+            JSONObject exprJson = kToJson(expressionString, myWorkspace);
             JSONArray expJarr = exprJson.getJSONArray("elements");
             for (int i=0; i<expJarr.length(); ++i) {
                 jarr.put(expJarr.get( i ) );
