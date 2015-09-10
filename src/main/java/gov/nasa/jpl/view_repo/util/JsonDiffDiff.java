@@ -316,6 +316,7 @@ public class JsonDiffDiff extends AbstractDiff< JSONObject, Object, String > {
 
     public static Map<String, Object> toMap( JSONObject o, boolean convertJsonToMapsAndLists ) {
         Map<String, Object> m = Utils.newMap();
+        if (o == null) return m; 
         for ( Object k : o.keySet() ) {
             if ( k instanceof String ) {
                 String key = (String)k;
@@ -422,17 +423,29 @@ public class JsonDiffDiff extends AbstractDiff< JSONObject, Object, String > {
         // glom(d0ws1, d1ws1)
         // Wait!  Maybe we don't care about whether d3ws2 and d2ws2 are glommed first.
        
-       // Now add diff2 to diff3.
-       diff3 = glom(diff3, diff2NoWs1);
-       
+		// Now add diff2 to diff3.
+		diff3 = glom(diff3, diff2NoWs1);
+		
+		if (diff3.optJSONObject("workspace2") != null) {
+			diff3.optJSONObject("workspace2").remove("movedElements");
+			diff3.optJSONObject("workspace2").put("movedElements", new JSONArray());
+			diff3.optJSONObject("workspace2").remove("conflictedElements");
+			diff3.optJSONObject("workspace2").put("conflictedElements", new JSONArray());
+		}
+     
        // Get all the workpace pieces of the diffs.
        JsonDiffDiff dDiff1 = new JsonDiffDiff( diff1 );
 
        JsonDiffDiff dDiff3 = new JsonDiffDiff( diff3 );
        
        // Compute the diff for each affected element.
-       for ( String id : dDiff1.getAffectedIds() ) {
-           DiffOp op1 = dDiff1.getDiffOp(id);
+       // TODO: are we collecting more IDs than we need to here? 
+       
+       Set<String> affectedIds = new HashSet<String>();
+       affectedIds.addAll(dDiff1.getAffectedIds());
+       affectedIds.addAll(dDiff3.getAffectedIds());
+       for ( String id : affectedIds) {           
+    	   DiffOp op1 = dDiff1.getDiffOp(id);
            DiffOp op3 = dDiff3.getDiffOp(id);
            JSONObject element1_2 = dDiff1.getElement2( id );
            JSONObject element1_1 = dDiff1.getElement1( id );
@@ -456,7 +469,7 @@ public class JsonDiffDiff extends AbstractDiff< JSONObject, Object, String > {
                                                DiffOp.UPDATE, conflict );
                            break;
                        case DELETE:  // DELETE - ADD = DELETE
-                           //conflict = true;
+                           conflict = true;
                            newElement3_1 = NodeUtil.clone( element1_2 );
                            dDiff3.set2( id, DiffOp.DELETE, newElement3_1, conflict );
                            dDiff3.set1( id, newElement3_1, false );
@@ -534,6 +547,7 @@ public class JsonDiffDiff extends AbstractDiff< JSONObject, Object, String > {
                        case UPDATE: // UPDATE - NONE = UPDATE
                        case DELETE:  // DELETE - NONE = DELETE
                        case NONE:  // NONE - NONE = NONE
+                    	   dDiff3.set2(id, op3, diffProperties(element3_1, element3_2), false);
                            break;
                        default:
                    }
@@ -617,6 +631,9 @@ public class JsonDiffDiff extends AbstractDiff< JSONObject, Object, String > {
         for ( int k = 0; k < diffs.size(); ++k ) {
             int i = reverse ? diffs.size() - 1 - k : k;
             JSONObject diff =  diffs.get( i );
+            if (diff == null) {
+            	continue;
+            }
             JSONObject ws1 = diff.optJSONObject( "workspace1" );
             if (ws1 == null)
             {
@@ -644,6 +661,9 @@ public class JsonDiffDiff extends AbstractDiff< JSONObject, Object, String > {
         for ( int k = 0; k < diffs.size(); ++k ) {
             int i = reverse ? diffs.size() - 1 - k : k;
             JSONObject diff =  diffs.get( i );
+            if (diff == null) {
+            	continue;
+            }
             JSONObject ws2 = diff.optJSONObject( "workspace2" );
             if ( ws2 == null ) continue;
             JSONArray added = ws2.optJSONArray( "addedElements" );
@@ -691,14 +711,16 @@ public class JsonDiffDiff extends AbstractDiff< JSONObject, Object, String > {
             return null;
         }
         JSONArray elements = getOrCreateJsonArray( ws1, "elements" );
-
         for (Entry<String, Pair<DiffOp, List<JSONObject>>> e : diffMap1.entrySet())
         {
             Pair<DiffOp, List<JSONObject>> p = e.getValue();
             if (p == null || p.second == null) continue;
             Collection<JSONObject> value = p.second;
             if (value != null && value.size() == 1) {
-                elements.put(value.iterator().next());
+            	JSONObject element = value.iterator().next();
+            	if (!element.has("sysmlid"))
+            		element.put("sysmlid", e.getKey());
+            	elements.put(element); 
             }
             else
             {
@@ -721,7 +743,9 @@ public class JsonDiffDiff extends AbstractDiff< JSONObject, Object, String > {
             for ( JSONObject element : p.second ) {
                 if ( glommedElement == null ) glommedElement = NodeUtil.clone( element );
                 else addProperties( glommedElement, element );
-            }
+            }            
+            if (!glommedElement.has("sysmlid"))
+        		glommedElement.put("sysmlid", id);
             switch ( p.first ) {
                 case ADD:
                     added.put( glommedElement );
@@ -1017,7 +1041,11 @@ public class JsonDiffDiff extends AbstractDiff< JSONObject, Object, String > {
         
         return new Pair<JSONObject,JSONObject>(undoElement,element0plus1);
     }
-
+    public static JSONObject diffProperties (JSONObject element1, JSONObject element2){
+    	List< Set< String > > propDiff = diffProperties( null, element1, element2 );
+        JSONObject diffElement = toJson( propDiff, element1, element2 );
+        return diffElement; 
+    }
     public static JSONObject glomElements( JSONObject element0, JSONObject element1,
                                            boolean replace ) {
         // TODO -- If replacing element0 with element1 we can return element1, but do we
@@ -1033,6 +1061,7 @@ public class JsonDiffDiff extends AbstractDiff< JSONObject, Object, String > {
     
     public static JSONObject makeEmptyDiffJson() throws JSONException {
         JSONObject diffJson = NodeUtil.newJsonObject();
+        
         JSONObject ws1Json = NodeUtil.newJsonObject();
         JSONObject ws2Json = NodeUtil.newJsonObject();
 
@@ -1049,15 +1078,15 @@ public class JsonDiffDiff extends AbstractDiff< JSONObject, Object, String > {
         ws2Json.put( "addedElements", ws2Added );
         ws2Json.put( "updatedElements", ws2Updated );
         ws2Json.put( "deletedElements", ws2Deleted );
-        ws2Json.put( "conflicted", ws2Conflicted );
-        ws2Json.put( "moved", ws2Moved );
+        ws2Json.put( "conflictedElements", ws2Conflicted );
+        ws2Json.put( "movedElements", ws2Moved );
 
         return diffJson;
     }
 
     protected static HashSet<String> ignoredJsonIds = new HashSet<String>() {
         {
-            add("sysmlid");
+            //add("sysmlid");
             add("creator");
             add("modified");
             add("created");
@@ -1067,9 +1096,11 @@ public class JsonDiffDiff extends AbstractDiff< JSONObject, Object, String > {
 
     protected static void addProperties( JSONObject element1,
                                          JSONObject element2 ) {
-        Iterator<String> i = element2.keys();
+    	if (element1 == null || element2 == null) return;
+    	Iterator<String> i = element2.keys();
         while ( i.hasNext() ) {
             String k = i.next();
+            if (k == null) continue;
             if ( ignoredJsonIds.contains( k ) ) continue;
             element1.put( k, element2.get( k ) );
         }

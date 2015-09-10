@@ -781,7 +781,7 @@ public class WorkspaceDiff implements Serializable {
         JSONObject ws2Json = NodeUtil.newJsonObject();
 
         addJSONArray(ws1Json, "elements", elements, elementsVersions, ws1, time1, true);
-        WorkspaceNode.addWorkspaceMetadata( ws1Json, ws1, time1 );
+        addWorkspaceMetadata( ws1Json, ws1, time1 );
 
         addJSONArray(ws2Json, "addedElements", addedElements, ws2, time2, true);
         addJSONArray(ws2Json, "movedElements", movedElements, ws2, time2, showAll);
@@ -790,7 +790,7 @@ public class WorkspaceDiff implements Serializable {
         addJSONArray(ws2Json, "deletedElements", deletedElements, ws1, time1, showAll);
         addJSONArray(ws2Json, "updatedElements", updatedElements, ws2, time2, showAll);
         addJSONArray(ws2Json, "conflictedElements", conflictedElements, ws2, time2, showAll);
-        WorkspaceNode.addWorkspaceMetadata( ws2Json, ws2, time2);
+        addWorkspaceMetadata( ws2Json, ws2, time2);
 
         deltaJson.put( "workspace1", ws1Json );
         deltaJson.put( "workspace2", ws2Json );
@@ -810,6 +810,20 @@ public class WorkspaceDiff implements Serializable {
         return !diffDiff.getAffectedIds().isEmpty();
     }
     
+    /**
+     * Add the workspace metadata onto the provided JSONObject
+     * @param jsonObject
+     * @param ws
+     * @param dateTime
+     * @throws JSONException
+     */
+    private void addWorkspaceMetadata(JSONObject jsonObject, WorkspaceNode ws, Date dateTime) throws JSONException {
+        WorkspaceNode.addWorkspaceNamesAndIds( jsonObject, ws, false );
+        if (dateTime != null) {
+            jsonObject.put( "timestamp", TimeUtils.toTimestamp( dateTime ) );
+        }
+    }
+
     private boolean addJSONArray(JSONObject jsonObject, String key, Map< String, EmsScriptNode > map,
                                  WorkspaceNode ws, Date dateTime, boolean showAll) throws JSONException {
             return addJSONArray(jsonObject, key, map, null, ws, dateTime, showAll);
