@@ -1049,7 +1049,7 @@ public class JsonDiffDiff extends AbstractDiff< JSONObject, Object, String > {
 	public static Pair<JSONObject, JSONObject> diff(JSONObject element0, JSONObject element1, boolean replace) {
 		JSONObject element0plus1 = glomElements(element0, element1, replace);
 		List<Set<String>> propDiff = diffProperties(null, element0, element0plus1);
-		JSONObject diffElement = toJson(propDiff, element0plus1, element0);
+		JSONObject diffElement = toJson(propDiff, element0, element0plus1);
 		return new Pair<JSONObject, JSONObject>(diffElement, element0plus1);
 	}
     public static JSONObject diffProperties (JSONObject element1, JSONObject element2){
