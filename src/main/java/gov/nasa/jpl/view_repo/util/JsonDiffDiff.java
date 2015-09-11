@@ -781,13 +781,19 @@ public class JsonDiffDiff extends AbstractDiff< JSONObject, Object, String > {
         JSONObject element1Json = opAndJson1.second.get(0);
         if (element1Json == null ) return;
         Object val1 = element1Json.opt(key);
-        if ( val1 == null ) {
-            JSONObject specialization = element1Json.optJSONObject( "specialization" );
-            if ( specialization == null ) return;
-            val1 = specialization.opt( key );
-        }
         if ( val1 != null ) {
             glommedElement.put(key, val1);
+        } else {
+            JSONObject spec1 = element1Json.optJSONObject( "specialization" );
+            if ( spec1 == null ) return;
+            Object specVal = spec1.opt( key );
+            if (specVal == null) return;
+            JSONObject glomSpec = glommedElement.optJSONObject("specialization");
+            if ( glomSpec == null ) {
+            	glomSpec = new JSONObject();
+            	glommedElement.put("specialization", glomSpec);
+            }
+            glomSpec.put(key, specVal);
         }
     }
     

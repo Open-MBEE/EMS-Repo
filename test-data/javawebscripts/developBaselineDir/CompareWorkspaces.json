@@ -54,7 +54,6 @@
                 }],
                 "type": "Property"
             },
-            "creator": "admin",
         }],
         "qualifiedName": "master/wsA/wsB",
         "name": "wsB",
