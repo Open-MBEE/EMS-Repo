@@ -48,7 +48,7 @@ public class JsonDiffDiff extends AbstractDiff< JSONObject, Object, String > {
         JSONArray added2 = ws2.optJSONArray( "addedElements" );
         JSONArray updated2 = ws2.optJSONArray( "updatedElements" );
         JSONArray deleted2 = ws2.optJSONArray( "deletedElements" );
-        JSONArray conflicted2 = ws2.optJSONArray( "conflicted" );
+        JSONArray conflicted2 = ws2.optJSONArray( "conflictedElements" );
 
         if ( elems1 != null ) getElements().addAll( Utils.asList( toList(elems1, false),
                                                                   JSONObject.class ) );
@@ -438,9 +438,10 @@ public class JsonDiffDiff extends AbstractDiff< JSONObject, Object, String > {
 
        JsonDiffDiff dDiff3 = new JsonDiffDiff( diff3 );
        
+       //Matrix Function
        // Compute the diff for each affected element.
        // TODO: are we collecting more IDs than we need to here? 
-       
+
        Set<String> affectedIds = new HashSet<String>();
        affectedIds.addAll(dDiff1.getAffectedIds());
        affectedIds.addAll(dDiff3.getAffectedIds());
@@ -547,7 +548,7 @@ public class JsonDiffDiff extends AbstractDiff< JSONObject, Object, String > {
                        case UPDATE: // UPDATE - NONE = UPDATE
                        case DELETE:  // DELETE - NONE = DELETE
                        case NONE:  // NONE - NONE = NONE
-                    	   dDiff3.set2(id, op3, diffProperties(element3_1, element3_2), false);
+                    	   dDiff3.set2(id, op3, diff(element3_1, element3_2, false).first, false);
                            break;
                        default:
                    }
@@ -721,6 +722,7 @@ public class JsonDiffDiff extends AbstractDiff< JSONObject, Object, String > {
             	if (!element.has("sysmlid"))
             		element.put("sysmlid", e.getKey());
             	elements.put(element); 
+            // owner qualifiedname name type(specialization) creator
             }
             else
             {
@@ -762,6 +764,8 @@ public class JsonDiffDiff extends AbstractDiff< JSONObject, Object, String > {
                 default:
                     // BAD! -- TODO
             }
+            if (!glommedElement.has("owner") && diffMap1.get(id) != null && diffMap1.get(id).second.get(0) != null)
+            	glommedElement.put("owner", diffMap1.get(id).second.get(0).optString("owner"));
         }
         
         return json;
@@ -971,9 +975,9 @@ public class JsonDiffDiff extends AbstractDiff< JSONObject, Object, String > {
         if ( Utils.isNullOrEmpty( propertyDiff ) ) return element;
         Set< String > addedAndUpdatedIds = null, updatedIds = null, removedIds = null;
         addedAndUpdatedIds = propertyDiff.get( 0 ); // add added ids
-        if ( propertyDiff.size() > 1 ) updatedIds = propertyDiff.get( 1 );
+        if ( propertyDiff.size() > 1 ) updatedIds = propertyDiff.get( 2 );
         if ( updatedIds != null ) addedAndUpdatedIds.addAll( updatedIds );
-        if ( propertyDiff.size() > 2 ) removedIds = propertyDiff.get( 2 );
+        if ( propertyDiff.size() > 2 ) removedIds = propertyDiff.get( 1 );
         
         JSONObject spec = element.optJSONObject( "specialization" );
         if ( spec == null ) {
@@ -1041,6 +1045,13 @@ public class JsonDiffDiff extends AbstractDiff< JSONObject, Object, String > {
         
         return new Pair<JSONObject,JSONObject>(undoElement,element0plus1);
     }
+
+	public static Pair<JSONObject, JSONObject> diff(JSONObject element0, JSONObject element1, boolean replace) {
+		JSONObject element0plus1 = glomElements(element0, element1, replace);
+		List<Set<String>> propDiff = diffProperties(null, element0, element0plus1);
+		JSONObject diffElement = toJson(propDiff, element0plus1, element0);
+		return new Pair<JSONObject, JSONObject>(diffElement, element0plus1);
+	}
     public static JSONObject diffProperties (JSONObject element1, JSONObject element2){
     	List< Set< String > > propDiff = diffProperties( null, element1, element2 );
         JSONObject diffElement = toJson( propDiff, element1, element2 );
