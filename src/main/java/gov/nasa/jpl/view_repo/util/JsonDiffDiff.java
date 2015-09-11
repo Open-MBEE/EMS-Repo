@@ -722,7 +722,6 @@ public class JsonDiffDiff extends AbstractDiff< JSONObject, Object, String > {
             	if (!element.has("sysmlid"))
             		element.put("sysmlid", e.getKey());
             	elements.put(element); 
-            // owner qualifiedname name type(specialization) creator
             }
             else
             {
@@ -754,28 +753,27 @@ public class JsonDiffDiff extends AbstractDiff< JSONObject, Object, String > {
                     break;
                 case UPDATE:
                     updated.put( glommedElement );
-                    if ( glommedElement.optString( "owner", null ) != null ) {
+                    if ( glommedElement.optString( "owner", null ) != null )
                         moved.put( glommedElement );
-                    }
+                    if (!glommedElement.has("owner") && diffMap1.get(id) != null && diffMap1.get(id).second.get(0) != null && diffMap1.get(id).second.get(0).optString("owner") != null)
+                    	glommedElement.put("owner", diffMap1.get(id).second.get(0).optString("owner"));
+                    
+                    if (!glommedElement.has("qualifiedId") && diffMap1.get(id) != null && diffMap1.get(id).second.get(0) != null && diffMap1.get(id).second.get(0).optString("qualifiedId") != null)
+                    	glommedElement.put("qualifiedId", diffMap1.get(id).second.get(0).optString("qualifiedId"));
+                    
+                    if (!glommedElement.has("qualifiedName") && diffMap1.get(id) != null && diffMap1.get(id).second.get(0) != null && diffMap1.get(id).second.get(0).optString("qualifiedName") != null)
+                    	glommedElement.put("qualifiedName", diffMap1.get(id).second.get(0).optString("qualifiedName"));
+                    
+                    if (!glommedElement.has("name") && diffMap1.get(id) != null && diffMap1.get(id).second.get(0) != null && diffMap1.get(id).second.get(0).optString("name") != null)
+                    	glommedElement.put("name", diffMap1.get(id).second.get(0).optString("name"));
+                    
                     break;
                 case DELETE:
                     deleted.put( glommedElement );
                     break;
                 default:
                     // BAD! -- TODO
-            }
-            if (!glommedElement.has("owner") && diffMap1.get(id) != null && diffMap1.get(id).second.get(0) != null && diffMap1.get(id).second.get(0).optString("owner") != null)
-            	glommedElement.put("owner", diffMap1.get(id).second.get(0).optString("owner"));
-            
-            if (!glommedElement.has("qualifiedId") && diffMap1.get(id) != null && diffMap1.get(id).second.get(0) != null && diffMap1.get(id).second.get(0).optString("qualifiedId") != null)
-            	glommedElement.put("qualifiedId", diffMap1.get(id).second.get(0).optString("qualifiedId"));
-            
-            if (!glommedElement.has("qualifiedName") && diffMap1.get(id) != null && diffMap1.get(id).second.get(0) != null && diffMap1.get(id).second.get(0).optString("qualifiedName") != null)
-            	glommedElement.put("qualifiedName", diffMap1.get(id).second.get(0).optString("qualifiedName"));
-            
-            if (!glommedElement.has("name") && diffMap1.get(id) != null && diffMap1.get(id).second.get(0) != null && diffMap1.get(id).second.get(0).optString("name") != null)
-            	glommedElement.put("name", diffMap1.get(id).second.get(0).optString("name"));
-            
+            }            
         }
         
         return json;
@@ -1122,8 +1120,24 @@ public class JsonDiffDiff extends AbstractDiff< JSONObject, Object, String > {
         while ( i.hasNext() ) {
             String k = i.next();
             if (k == null) continue;
-            if ( ignoredJsonIds.contains( k ) ) continue;
-            element1.put( k, element2.get( k ) );
+
+			if (ignoredJsonIds.contains(k))
+				continue;
+			if (!k.equals("specialization")) {
+				element1.put(k, element2.get(k));
+			} else {
+				JSONObject spec2 = element2.optJSONObject(k);
+				JSONObject spec1 = element1.optJSONObject(k);
+				if (spec1 == null) {
+					spec1 = new JSONObject();
+					element1.put("specialization", spec1);
+				}
+				if (spec2 != null)
+					addProperties(spec1, spec2);
+				else
+					continue;
+			}
+
         }
     }
 
