@@ -431,18 +431,21 @@ public class MmsDiffGet extends AbstractJavaWebScript {
 				if (!sysmlIdMap.contains(elem.optString("owner")) && elem.optString("sysmlId") != null) {
 					NodeRef ref = NodeUtil.findNodeRefById(elem.optString("sysmlid"), false, ws1, dateTime1, services,
 							true);
-					EmsScriptNode node = new EmsScriptNode(ref, getServices());
-					if (node.exists()) {
-						EmsScriptNode parent = node.getOwningParent(dateTime1, ws1, false);
-						while (parent != null && parent.isModelElement()) {
-							// the parent is not in already in the element list
-							// so lets add it
-							ws1Elems.put(parent.toJSONObject(ws1, dateTime1));
-							node = parent; 
-							if(!sysmlIdMap.contains(node.getOwner()) && node.getSysmlId() != null){
-								parent = node.getOwningParent(dateTime1,  ws1,  false);
-							}
-						}
+					
+					if (ref != null) {
+    					EmsScriptNode node = new EmsScriptNode(ref, getServices());
+    					if (node.exists()) {
+    						EmsScriptNode parent = node.getOwningParent(dateTime1, ws1, false);
+    						while (parent != null && parent.isModelElement()) {
+    							// the parent is not in already in the element list
+    							// so lets add it
+    							ws1Elems.put(parent.toJSONObject(ws1, dateTime1));
+    							node = parent; 
+    							if(!sysmlIdMap.contains(node.getOwner()) && node.getSysmlId() != null){
+    								parent = node.getOwningParent(dateTime1,  ws1,  false);
+    							}
+    						}
+    					}
 					}
 				}
 			}
