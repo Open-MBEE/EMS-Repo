@@ -764,8 +764,18 @@ public class JsonDiffDiff extends AbstractDiff< JSONObject, Object, String > {
                 default:
                     // BAD! -- TODO
             }
-            if (!glommedElement.has("owner") && diffMap1.get(id) != null && diffMap1.get(id).second.get(0) != null)
+            if (!glommedElement.has("owner") && diffMap1.get(id) != null && diffMap1.get(id).second.get(0) != null && diffMap1.get(id).second.get(0).optString("owner") != null)
             	glommedElement.put("owner", diffMap1.get(id).second.get(0).optString("owner"));
+            
+            if (!glommedElement.has("qualifiedId") && diffMap1.get(id) != null && diffMap1.get(id).second.get(0) != null && diffMap1.get(id).second.get(0).optString("qualifiedId") != null)
+            	glommedElement.put("qualifiedId", diffMap1.get(id).second.get(0).optString("qualifiedId"));
+            
+            if (!glommedElement.has("qualifiedName") && diffMap1.get(id) != null && diffMap1.get(id).second.get(0) != null && diffMap1.get(id).second.get(0).optString("qualifiedName") != null)
+            	glommedElement.put("qualifiedName", diffMap1.get(id).second.get(0).optString("qualifiedName"));
+            
+            if (!glommedElement.has("name") && diffMap1.get(id) != null && diffMap1.get(id).second.get(0) != null && diffMap1.get(id).second.get(0).optString("name") != null)
+            	glommedElement.put("name", diffMap1.get(id).second.get(0).optString("name"));
+            
         }
         
         return json;
