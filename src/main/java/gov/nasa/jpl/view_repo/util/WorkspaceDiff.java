@@ -80,7 +80,7 @@ public class WorkspaceDiff implements Serializable {
     private StringBuffer response = null;
     private Status status = null;
 
-    protected JSONObject diffJson;
+    public JSONObject diffJson;
     
     private WorkspaceDiff() {
         elements = new TreeMap<String, EmsScriptNode>();

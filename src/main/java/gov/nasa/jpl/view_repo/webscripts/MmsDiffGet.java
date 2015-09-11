@@ -247,28 +247,28 @@ public class MmsDiffGet extends AbstractJavaWebScript {
     }
     
     
-    public static JSONObject performDiffGlom( WorkspaceNode w1, WorkspaceNode w2,
-                                              Date date1, Date date2,
-                                              StringBuffer aResponse,
-                                              Status aResponseStatus ) {
-        WorkspaceDiff workspaceDiff = null;
-            workspaceDiff =
-                    new WorkspaceDiff(w1, w2, date1, date2, aResponse, aResponseStatus);
-        
-        JSONObject diffJson = null;
-        if ( workspaceDiff != null ) {
-            try {
-                workspaceDiff.forceJsonCacheUpdate = false;
-                diffJson = workspaceDiff.toJSONObject( date1, date2, false );
-                if (!Utils.isNullOrEmpty(aResponse.toString())) diffJson.put("message", aResponse.toString());
-                //results.put("res", NodeUtil.jsonToString( diffJson, 4 ));
-            } catch (JSONException e) {
-                e.printStackTrace();
-                diffJson = null;
-            }
-        }
-        return diffJson;
-    }
+//    public static JSONObject performDiffGlom( WorkspaceNode w1, WorkspaceNode w2,
+//                                              Date date1, Date date2,
+//                                              StringBuffer aResponse,
+//                                              Status aResponseStatus ) {
+//        WorkspaceDiff workspaceDiff = null;
+//            workspaceDiff =
+//                    new WorkspaceDiff(w1, w2, date1, date2, aResponse, aResponseStatus);
+//        
+//        JSONObject diffJson = null;
+//        if ( workspaceDiff != null ) {
+//            try {
+//                workspaceDiff.forceJsonCacheUpdate = false;
+//                diffJson = workspaceDiff.toJSONObject( date1, date2, false );
+//                if (!Utils.isNullOrEmpty(aResponse.toString())) diffJson.put("message", aResponse.toString());
+//                //results.put("res", NodeUtil.jsonToString( diffJson, 4 ));
+//            } catch (JSONException e) {
+//                e.printStackTrace();
+//                diffJson = null;
+//            }
+//        }
+//        return diffJson;
+//    }
     public static JSONObject performDiff( WorkspaceNode w1, WorkspaceNode w2,
                                           Date date1, Date date2,
                                           StringBuffer aResponse,
@@ -280,8 +280,12 @@ public class MmsDiffGet extends AbstractJavaWebScript {
         JSONObject diffJson = null;
         if ( workspaceDiff != null ) {
             try {
-                workspaceDiff.forceJsonCacheUpdate = false;
-                diffJson = workspaceDiff.toJSONObject( date1, date2, false );
+                if ( workspaceDiff.glom ) {
+                    diffJson = workspaceDiff.diffJson;
+                } else {
+                    workspaceDiff.forceJsonCacheUpdate = false;
+                    diffJson = workspaceDiff.toJSONObject( date1, date2, false );
+                }
                 if (!Utils.isNullOrEmpty(aResponse.toString())) diffJson.put("message", aResponse.toString());
                 //results.put("res", NodeUtil.jsonToString( diffJson, 4 ));
             } catch (JSONException e) {
