@@ -755,28 +755,40 @@ public class JsonDiffDiff extends AbstractDiff< JSONObject, Object, String > {
                     updated.put( glommedElement );
                     if ( glommedElement.optString( "owner", null ) != null )
                         moved.put( glommedElement );
-                    if (!glommedElement.has("owner") && diffMap1.get(id) != null && diffMap1.get(id).second.get(0) != null && diffMap1.get(id).second.get(0).optString("owner") != null)
-                    	glommedElement.put("owner", diffMap1.get(id).second.get(0).optString("owner"));
-                    
-                    if (!glommedElement.has("qualifiedId") && diffMap1.get(id) != null && diffMap1.get(id).second.get(0) != null && diffMap1.get(id).second.get(0).optString("qualifiedId") != null)
-                    	glommedElement.put("qualifiedId", diffMap1.get(id).second.get(0).optString("qualifiedId"));
-                    
-                    if (!glommedElement.has("qualifiedName") && diffMap1.get(id) != null && diffMap1.get(id).second.get(0) != null && diffMap1.get(id).second.get(0).optString("qualifiedName") != null)
-                    	glommedElement.put("qualifiedName", diffMap1.get(id).second.get(0).optString("qualifiedName"));
-                    
-                    if (!glommedElement.has("name") && diffMap1.get(id) != null && diffMap1.get(id).second.get(0) != null && diffMap1.get(id).second.get(0).optString("name") != null)
-                    	glommedElement.put("name", diffMap1.get(id).second.get(0).optString("name"));
-                    
                     break;
                 case DELETE:
                     deleted.put( glommedElement );
                     break;
                 default:
                     // BAD! -- TODO
-            }            
+            }
+            addBackToJson( id, glommedElement, "owner", diffMap1 );
+            addBackToJson( id, glommedElement, "qualifiedId", diffMap1 );
+            addBackToJson( id, glommedElement, "qualifiedName", diffMap1 );
+            addBackToJson( id, glommedElement, "name", diffMap1 );
+            addBackToJson( id, glommedElement, "type", diffMap1 );            
         }
         
         return json;
+    }
+    
+    protected static void addBackToJson(String id, JSONObject glommedElement, String key,
+                                        LinkedHashMap< String, Pair< DiffOp, List< JSONObject > > > diffMap1 ) {
+        if (glommedElement.has(key)) return;
+        Pair< DiffOp, List< JSONObject > > opAndJson1 = diffMap1.get(id);
+        if ( opAndJson1 == null ) return;
+        if (Utils.isNullOrEmpty( opAndJson1.second )) return;
+        JSONObject element1Json = opAndJson1.second.get(0);
+        if (element1Json == null ) return;
+        Object val1 = element1Json.opt(key);
+        if ( val1 == null ) {
+            JSONObject specialization = element1Json.optJSONObject( "specialization" );
+            if ( specialization == null ) return;
+            val1 = specialization.opt( key );
+        }
+        if ( val1 != null ) {
+            glommedElement.put(key, val1);
+        }
     }
     
     public static JSONArray getOrCreateJsonArray( JSONObject json, String key ) {
