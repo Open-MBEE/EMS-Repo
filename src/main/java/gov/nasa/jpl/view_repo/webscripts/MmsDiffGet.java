@@ -78,7 +78,7 @@ public class MmsDiffGet extends AbstractJavaWebScript {
     }
     
     public MmsDiffGet(Repository repositoryHelper, ServiceRegistry registry, WorkspaceNode workspace1, 
-                      WorkspaceNode workspace2, Date time1, Date time2) {
+                      WorkspaceNode workspace2, Date time1, Date time2, String ts1, String ts2) {
         
         super(repositoryHelper, registry);
         originalUser = NodeUtil.getUserName();
@@ -86,6 +86,8 @@ public class MmsDiffGet extends AbstractJavaWebScript {
         ws2 = workspace2;
         dateTime1 = time1;
         dateTime2 = time2;
+        timestamp1 = ts1;
+        timestamp2 = ts2;
     }
     
     @Override
@@ -812,6 +814,8 @@ public class MmsDiffGet extends AbstractJavaWebScript {
                 loadAction.setParameterValue(WorkspaceDiffActionExecuter.PARAM_TIME_2, dateTime2);
                 loadAction.setParameterValue(WorkspaceDiffActionExecuter.PARAM_TS_1, userTimeStamp1);
                 loadAction.setParameterValue(WorkspaceDiffActionExecuter.PARAM_TS_2, userTimeStamp2);
+                loadAction.setParameterValue(WorkspaceDiffActionExecuter.PARAM_TIMESTAMP_1, timestamp1);
+                loadAction.setParameterValue(WorkspaceDiffActionExecuter.PARAM_TIMESTAMP_2, timestamp2);
                 loadAction.setParameterValue(WorkspaceDiffActionExecuter.PARAM_WS_1, ws1);
                 loadAction.setParameterValue(WorkspaceDiffActionExecuter.PARAM_WS_2, ws2);
                 loadAction.setParameterValue(WorkspaceDiffActionExecuter.OLD_JOB, oldJob );

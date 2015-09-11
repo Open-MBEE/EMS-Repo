@@ -316,15 +316,36 @@ public class CommitUtil {
 	
 	public static String getTimestamp(EmsScriptNode commitNode, String workspace)
 	{
-	    Object commit = commitNode.getProperty("ems:commit");
-	    if (!(commit instanceof String)) {
+	    String type = null;
+	    
+	    // If the type is branch, must walk backwards to find a non-branch commit:
+	    while (commitNode != null) {
+	        type = (String) commitNode.getProperty("ems:commitType");
+	        if (type != null && !TYPE_BRANCH.equals( type )) {
+	            break;
+	        }
+	        commitNode = getPreviousCommit(commitNode);
+	    }
+	    
+	    if (commitNode == null) {
 	        return null;
+	    }
+	        
+	    Object commit = commitNode.getProperty("ems:commit");
+	    Date creationDate = commitNode.getCreationDate();
+	    String timestamp = null;
+	    if (creationDate != null) {
+	        timestamp = TimeUtils.toTimestamp(creationDate);
+	    }
+	    
+	    if (!(commit instanceof String)) {
+	        return timestamp;
 	    }
 	    JSONObject latestCommit = new JSONObject( (String) commit );
 	    JSONObject workspaceObject = null;
 	    if (latestCommit.length() == 0)
 	    {
-	        return null;
+	        return timestamp;
 	    }
 	    if (workspace.equals("workspace1"))
 	    {
@@ -336,10 +357,9 @@ public class CommitUtil {
 	    }
 	    else
 	    {
-	        return null;
+	        return timestamp;
 	    }
-	    String timestamp = workspaceObject.getString("timestamp");
-	    return timestamp;
+	    return workspaceObject.getString("timestamp");
 	}
 	
     public static String replaceTimeStampWithCommitTime(Date date,
