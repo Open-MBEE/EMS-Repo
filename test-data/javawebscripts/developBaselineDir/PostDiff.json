@@ -1,5 +1,5 @@
 {
-    "sequence": 27,
+    "sequence": 50,
     "workspace1": {
         "qualifiedName": "master/ws2",
         "name": "ws2",
@@ -7,8 +7,9 @@
             "qualifiedName": "/europa/JW_TEST2/400/401/402",
             "sysmlid": "402",
             "editable": true,
-            "creator": "admin",
             "version": "1.2",
+            "creator": "admin",
+            "modifier": "admin",
             "name": "402",
             "owner": "401",
             "documentation": "4to",
@@ -28,6 +29,7 @@
     "workspace2": {
         "deletedElements": [],
         "addedElements": [{
+            "modifier": "admin",
             "qualifiedName": "/no_site/no_site_no_project/holding_bin/null",
             "sysmlid": "newElement",
             "documentation": "x is x",
@@ -48,11 +50,14 @@
         }],
         "conflictedElements": [],
         "updatedElements": [{
-            "name": "402",
             "qualifiedName": "/europa/JW_TEST2/400/401/402",
             "sysmlid": "402",
-            "documentation": "x is x",
+            "editable": true,
+            "creator": "admin",
+            "modifier": "admin",
+            "name": "402",
             "owner": "401",
+            "documentation": "x is x",
             "specialization": {
                 "propertyType": null,
                 "isDerived": false,
@@ -63,9 +68,7 @@
                     "type": "LiteralString"
                 }],
                 "type": "Property"
-            },
-            "editable": true,
-            "creator": "admin",
+            }
         }],
         "qualifiedName": "master/ws2",
         "name": "ws2",
