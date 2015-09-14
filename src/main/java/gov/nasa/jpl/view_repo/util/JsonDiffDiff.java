@@ -528,6 +528,7 @@ public class JsonDiffDiff extends AbstractDiff< JSONObject, Object, String > {
                            dDiff3.set1( id, newElement3_1, false );
                            break;
                        case NONE:  // NONE - ADD = DELETE
+                           conflict = false;
                            newElement3_1 = NodeUtil.clone( element1_2 );
                            dDiff3.set2( id, DiffOp.DELETE, newElement3_1, conflict );
                            dDiff3.set1( id, newElement3_1, false );
@@ -548,7 +549,7 @@ public class JsonDiffDiff extends AbstractDiff< JSONObject, Object, String > {
                                    glomElements( undone, element3_2, false );
                            
                            dDiff3.updateDiff( id, newElement3_1, updated,
-                                              DiffOp.UPDATE, true );
+                                              DiffOp.UPDATE, conflict );
                            break;
                        case DELETE:  // DELETE - UPDATE = DELETE
                            conflict = true;
@@ -557,6 +558,7 @@ public class JsonDiffDiff extends AbstractDiff< JSONObject, Object, String > {
                            dDiff3.set1( id, newElement3_1, false );
                            break;
                        case NONE:  // NONE - UPDATE = UPDATE
+                           conflict = false;
                             JSONObject oldElement3_1 =
                                     ( element3_1 == null ? element1_1
                                                          : element3_1 );
@@ -565,7 +567,7 @@ public class JsonDiffDiff extends AbstractDiff< JSONObject, Object, String > {
                            newElement3_1 = undonePair.second;
 
                            dDiff3.updateDiff( id, newElement3_1, undone,
-                                              DiffOp.UPDATE, true );
+                                              DiffOp.UPDATE, conflict );
                            break;
                        default:
                           // TODO -- ERROR
@@ -586,6 +588,7 @@ public class JsonDiffDiff extends AbstractDiff< JSONObject, Object, String > {
                            dDiff3.removeFromDiff(id);
                            break;
                        case NONE:  // NONE - DELETE = ADD
+                           conflict = false;
                            dDiff3.set2( id, DiffOp.ADD, element3_1, conflict );
                            dDiff3.set1( id, DiffOp.DELETE, element3_1, false );
                            break;
