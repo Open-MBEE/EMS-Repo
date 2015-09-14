@@ -129,6 +129,11 @@ public class JsonDiffDiff extends AbstractDiff< JSONObject, Object, String > {
             diffMap.remove( id );
         }
         
+        // Make sure the element has its sysmlid.
+        if ( !element.has("sysmlid") ) {
+            element.put("sysmlid", id);
+        }
+        
         Pair< DiffOp, List< JSONObject > > p = diffMap.get( id );
         
         // If there is no entry in the map for the sysmlid, create a new
@@ -832,22 +837,18 @@ public class JsonDiffDiff extends AbstractDiff< JSONObject, Object, String > {
                 default:
                     // BAD! -- TODO
             }
-            addBackToJson( id, glommedElement, "owner", diffMap1 );
-            addBackToJson( id, glommedElement, "qualifiedId", diffMap1 );
-            addBackToJson( id, glommedElement, "qualifiedName", diffMap1 );
-            addBackToJson( id, glommedElement, "name", diffMap1 );
-            addBackToJson( id, glommedElement, "type", diffMap1 );            
+            addBackToJson( id, glommedElement, diffMap1 );
         }
         
         // Add passed in conflicted elements; the diff maps don't have any.
-        if ( !Utils.isNullOrEmpty( conflictedToAdd) ) {
+        if ( !Utils.isNullOrEmpty( conflictedToAdd ) ) {
             for ( JSONObject oneConflicted : conflictedToAdd ) {
+                String id = oneConflicted.optString("sysmlid");
+                addBackToJson( id, oneConflicted, diffMap1 );
                 if ( oneConflicted != null) conflicted.put( oneConflicted );
             }
         }
-        
 
-        
         return json;
     }
     
@@ -873,6 +874,24 @@ public class JsonDiffDiff extends AbstractDiff< JSONObject, Object, String > {
             	glommedElement.put("specialization", glomSpec);
             }
             glomSpec.put(key, specVal);
+        }
+    }
+    
+    protected static LinkedHashSet<String> addBackJsonIds = new LinkedHashSet<String>() {
+        private static final long serialVersionUID = 5257766797693241356L;
+        {
+            add("owner");
+            add("qualifiedId");
+            add("qualifiedName");
+            add("name");
+            add("type");
+        }
+    };
+
+    protected static void addBackToJson(String id, JSONObject glommedElement,
+                                        LinkedHashMap< String, Pair< DiffOp, List< JSONObject > > > diffMap1) {
+        for ( String key : addBackJsonIds ) {
+            addBackToJson( id, glommedElement, key, diffMap1 );
         }
     }
     
