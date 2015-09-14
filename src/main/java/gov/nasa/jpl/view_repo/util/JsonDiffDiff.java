@@ -618,7 +618,7 @@ public class JsonDiffDiff extends AbstractDiff< JSONObject, Object, String > {
     protected void updateDiff( String id ,
                                JSONObject newElement1 , JSONObject newElement2 ,
                                DiffOp newOp , boolean conflicted  ) {
-        JSONObject elementWithDiffApplied = glom(newElement1, newElement2);
+        JSONObject elementWithDiffApplied = glomElements(newElement1, newElement2, false);
         
         // If there was no change to the element, then remove it from 
         // the diff:
@@ -1245,6 +1245,7 @@ public class JsonDiffDiff extends AbstractDiff< JSONObject, Object, String > {
             add("modified");
             add("created");
             add("modifier");
+            add("read");
         }
     };
 
