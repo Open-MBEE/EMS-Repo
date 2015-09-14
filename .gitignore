@@ -73,3 +73,5 @@ activemq-data/
 /runserver.last.out
 /runserver.out
 /target
+.idea
+.DS_Store

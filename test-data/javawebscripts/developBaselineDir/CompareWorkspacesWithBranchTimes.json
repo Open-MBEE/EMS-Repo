@@ -272,12 +272,17 @@
     },
     "workspace2": {
         "deletedElements": [{
+            "qualifiedName": "/europa/JW_TEST/300/301/302/null",
             "sysmlid": "y",
-            "specialization": {"value": [{
-                "valueExpression": null,
-                "string": "the y value",
-                "type": "LiteralString"
-            }]},
+            "owner": "302",
+            "specialization": {
+                "value": [{
+                    "valueExpression": null,
+                    "string": "the y value",
+                    "type": "LiteralString"
+                }],
+                "type": "Property"
+            },
             "creator": "admin",
         }],
         "addedElements": [{
@@ -302,44 +307,67 @@
         }],
         "conflictedElements": [
             {
+                "qualifiedName": "/europa/JW_TEST/300/301/302/303",
+                "name": "303",
                 "sysmlid": "303",
+                "owner": "302",
                 "documentation": "talk modified",
-                "specialization": {"value": [{
-                    "valueExpression": null,
-                    "string": "dlam_string modified",
-                    "type": "LiteralString"
-                }]},
+                "specialization": {
+                    "value": [{
+                        "valueExpression": null,
+                        "string": "dlam_string modified",
+                        "type": "LiteralString"
+                    }],
+                    "type": "Property"
+                },
                 "creator": "admin",
             },
             {
+                "qualifiedName": "/europa/JW_TEST/conflict",
+                "name": "conflict",
                 "sysmlid": "conflict",
+                "owner": "123456",
                 "documentation": "",
+                "specialization": {"type": "Element"},
                 "creator": "admin",
             }
         ],
         "updatedElements": [
             {
+                "qualifiedName": "/europa/JW_TEST/300/301/302/303",
+                "name": "303",
                 "sysmlid": "303",
+                "owner": "302",
                 "documentation": "talk modified",
-                "specialization": {"value": [{
-                    "valueExpression": null,
-                    "string": "dlam_string modified",
-                    "type": "LiteralString"
-                }]},
+                "specialization": {
+                    "value": [{
+                        "valueExpression": null,
+                        "string": "dlam_string modified",
+                        "type": "LiteralString"
+                    }],
+                    "type": "Property"
+                },
                 "creator": "admin",
             },
             {
+                "qualifiedName": "/europa/JW_TEST/300/301/302/303/304",
+                "name": "304",
                 "sysmlid": "304",
                 "owner": "303",
                 "documentation": "about",
-                "specialization": {"value": [{
-                    "valueExpression": null,
-                    "string": "dlam_string",
-                    "type": "LiteralString"
-                }]},
+                "specialization": {
+                    "value": [{
+                        "valueExpression": null,
+                        "string": "dlam_string",
+                        "type": "LiteralString"
+                    }],
+                    "type": "Property"
+                },
                 "creator": "admin",
             },
             {
+                "qualifiedName": "/europa/JW_TEST/400/401/402/403/404",
+                "name": "404",
                 "sysmlid": "404",
                 "owner": "403",
                 "documentation": "4about",
@@ -356,6 +384,8 @@
                 "creator": "admin",
             },
             {
+                "qualifiedName": "/europa/JW_TEST/conflict",
+                "name": "conflict",
                 "sysmlid": "conflict",
                 "owner": "123456",
                 "documentation": "",
@@ -366,9 +396,12 @@
         "qualifiedName": "master/wsA/wsT2",
         "name": "wsT2",
         "movedElements": [{
+            "qualifiedName": "/europa/JW_TEST/300/301/302/303/304",
+            "name": "304",
             "sysmlid": "304",
             "owner": "303",
             "documentation": "about",
+            "specialization": {"type": "Property"},
             "creator": "admin",
         }]
     }
