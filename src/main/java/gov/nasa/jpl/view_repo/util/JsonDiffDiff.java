@@ -854,7 +854,13 @@ public class JsonDiffDiff extends AbstractDiff< JSONObject, Object, String > {
     
     protected static void addBackToJson(String id, JSONObject glommedElement, String key,
                                         LinkedHashMap< String, Pair< DiffOp, List< JSONObject > > > diffMap1 ) {
+        // If it's already there, there's nothing to add back.
         if (glommedElement.has(key)) return;
+        // See if the key is in the specialization json object.
+        JSONObject glomSpec = glommedElement.optJSONObject("specialization");
+        if ( glomSpec != null && glomSpec.has( key ) ) return;
+
+        // Copy the value for the key from diffMap1 to add to the glommedElement.
         Pair< DiffOp, List< JSONObject > > opAndJson1 = diffMap1.get(id);
         if ( opAndJson1 == null ) return;
         if (Utils.isNullOrEmpty( opAndJson1.second )) return;
@@ -864,11 +870,11 @@ public class JsonDiffDiff extends AbstractDiff< JSONObject, Object, String > {
         if ( val1 != null ) {
             glommedElement.put(key, val1);
         } else {
+            // See if the key is in the specialization json object.
             JSONObject spec1 = element1Json.optJSONObject( "specialization" );
             if ( spec1 == null ) return;
             Object specVal = spec1.opt( key );
             if (specVal == null) return;
-            JSONObject glomSpec = glommedElement.optJSONObject("specialization");
             if ( glomSpec == null ) {
             	glomSpec = new JSONObject();
             	glommedElement.put("specialization", glomSpec);
