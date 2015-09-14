@@ -7,21 +7,9 @@
         "qualifiedName": "master/wsA",
         "elements": [
             {
-                "qualifiedName": "/no_site/no_site_no_project/holding_bin",
-                "sysmlid": "holding_bin_no_site_no_project",
-                "editable": true,
-                "creator": "admin",
-                "modifier": "admin",
-                "name": "holding_bin",
-                "owner": "no_site_no_project",
-                "specialization": {"type": "Package"}
-            },
-            {
                 "qualifiedName": "/no_site/no_site_no_project/holding_bin/300",
                 "sysmlid": "x",
                 "editable": true,
-                "creator": "admin",
-                "modifier": "admin",
                 "name": "300",
                 "documentation": "something",
                 "owner": "holding_bin_no_site_no_project",
@@ -36,6 +24,14 @@
                     }],
                     "type": "Property"
                 }
+            },
+            {
+                "qualifiedName": "/no_site/no_site_no_project/holding_bin",
+                "sysmlid": "holding_bin_no_site_no_project",
+                "editable": true,
+                "name": "holding_bin",
+                "owner": "no_site_no_project",
+                "specialization": {"type": "Package"}
             }
         ]
     },
@@ -44,11 +40,11 @@
         "addedElements": [],
         "conflictedElements": [],
         "updatedElements": [{
-            "name": "300",
             "qualifiedName": "/no_site/no_site_no_project/holding_bin/300",
+            "name": "300",
+            "sysmlid": "x",
             "documentation": "x is x",
             "owner": "holding_bin_no_site_no_project",
-            "sysmlid": "x",
             "specialization": {
                 "value": [{
                     "valueExpression": null,
@@ -56,8 +52,7 @@
                     "type": "LiteralString"
                 }],
                 "type": "Property"
-            },
-            "creator": "admin"
+            }
         }],
         "name": "wsB",
         "qualifiedName": "master/wsA/wsB",

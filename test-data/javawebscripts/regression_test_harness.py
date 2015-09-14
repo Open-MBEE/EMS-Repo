@@ -1195,7 +1195,7 @@ common_filters,
 create_curl_cmd(type="GET", data="", base_url="http://localhost:8080/alfresco/service/", post_type="elements", branch="diff/master/master/2015-08-24T08:46:58.502-0700/latest", project_post=False),
 True,
 common_filters+['"id"','"qualifiedId"','"creator"','"modifier"'],
-["develop"]
+[]
 ],
         
 [
@@ -1205,7 +1205,7 @@ common_filters+['"id"','"qualifiedId"','"creator"','"modifier"'],
 create_curl_cmd(type="GET", data="", base_url="http://localhost:8080/alfresco/service/", post_type="elements", branch="diff/master/master/2015-08-27T15:40:26.891-0700/latest", project_post=False),
 True,
 common_filters+['"id"','"qualifiedId"','"creator"','"modifier"'],
-["develop"]
+[]
 ],
         
 [
@@ -1215,7 +1215,7 @@ common_filters+['"id"','"qualifiedId"','"creator"','"modifier"'],
 create_curl_cmd(type="GET", data="", base_url="http://localhost:8080/alfresco/service/", post_type="elements", branch="diff/master/theParentWorkspace/latest/latest", project_post=False),
 True,
 common_filters+['"id"','"qualifiedId"','"creator"','"modifier"'],
-["develop"]
+[]
 ],
 
 [
@@ -1225,7 +1225,7 @@ common_filters+['"id"','"qualifiedId"','"creator"','"modifier"'],
 create_curl_cmd(type="GET", data="", base_url="http://localhost:8080/alfresco/service/", post_type="elements", branch="diff/master/theParentWorkspace/2015-08-24T08:47:10.054-0700/latest", project_post=False),
 True,
 common_filters+['"id"','"qualifiedId"','"creator"','"modifier"'],
-["develop"]
+[]
 ],
         
 [
@@ -1235,7 +1235,7 @@ common_filters+['"id"','"qualifiedId"','"creator"','"modifier"'],
 create_curl_cmd(type="GET", data="", base_url="http://localhost:8080/alfresco/service/", post_type="elements", branch="diff/master/theSubworkspace/latest/latest", project_post=False),
 True,
 common_filters+['"id"','"qualifiedId"','"creator"','"modifier"'],
-["develop"]
+[]
 ],
 
 
@@ -1720,7 +1720,7 @@ None,
 set_wsid_to_gv2
 ],
       
-# This test is dependent on 530
+# This test is dependent on 255
 # FIXME -- temporarily removed from "develop"
 [
 550,
@@ -1730,7 +1730,7 @@ create_curl_cmd(type="DELETE",data="elements/arg_ev_38307",base_url=BASE_URL_WS,
                 branch="$gv1/"),
 True, 
 common_filters+['"timestamp"','"MMS_','"id"','"qualifiedId"','"version"', '"modified"'],
-["test","workspaces","develop"]
+["test","workspaces"]
 ], 
 
 [
@@ -1761,7 +1761,7 @@ common_filters,
 "DiffCompareWorkspaces",
 "Diff Workspace Test - Compare workspaces",
 create_curl_cmd(type="GET",base_url=SERVICE_URL,
-                branch="diff/$gv2/$gv1"),
+                branch="diff/$gv2/$gv1/latest/latest"),
 True, 
 common_filters+['"id"','"qualifiedId"','"creator"','"modifier"'],
 ["test","workspaces","develop"],
@@ -1788,7 +1788,7 @@ common_filters+['"id"','"qualifiedId"','"timestamp"'],
 "DiffCompareWorkspacesAgain",
 "Diff Workspace Test - Compare workspaces again and make sure the diff is empty now after merging.",
 create_curl_cmd(type="GET",base_url=SERVICE_URL,
-                branch="diff/$gv2/$gv1"),
+                branch="diff/$gv2/$gv1/latest/latest"),
 True, 
 common_filters+['"id"','"qualifiedId"','"creator"','"modifier"'],
 ["test","workspaces","develop"],
