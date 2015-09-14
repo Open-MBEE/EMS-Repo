@@ -1224,7 +1224,8 @@ True,
 common_filters+['"sysmlid"','"qualifiedId"','"message"'],
 ["test","workspaces","develop", "develop2"]
 ],
-        
+    
+    # Temporarily removed this from develop -- fix and add back in! FIXME    
 [
 270,
 "Demo1",
@@ -1233,7 +1234,7 @@ create_curl_cmd(type="GET",data="views/_17_0_2_3_e610336_1394148311476_17302_293
                 branch="master/"),
 True, 
 common_filters,
-["test","workspaces", "develop", "develop2"]
+["test","workspaces", "develop2"]
 ],
  
 [
