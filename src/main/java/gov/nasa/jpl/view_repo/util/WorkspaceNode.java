@@ -758,8 +758,18 @@ public class WorkspaceNode extends EmsScriptNode {
         WorkspaceNode targetParent = getCommonParent( thisWs, otherWs );
         WorkspaceNode parent = thisWs;
         WorkspaceNode lastParent = parent;
-        Date thisCopyDate = thisWs != null ? thisWs.getCopyTime() : null;
-        Date otherCopyDate = otherWs != null ? otherWs.getCopyTime() : null;
+        
+        Date commonBranchPoint = thisWs != null ? thisWs.getCopyTime(otherWs) : null;
+        if (commonBranchPoint == null && thisWs != null) 
+        {
+        	commonBranchPoint = thisWs.getCopyTime();
+        }
+        Pair<WorkspaceNode, WorkspaceNode> p = getChildrenOfCommonParent(thisWs, otherWs);
+        Date thisChildOfCommonParentCopyTime = p != null && p.first != null ? p.first.getCopyTime() : null;
+        boolean amChildOfCommonParent = thisWs == p.first;
+        
+        //Date thisCopyDate = thisWs != null ? thisWs.getCopyTime() : null;
+        //Date otherCopyDate = otherWs != null ? otherWs.getCopyTime() : null;
         Date thisCopyOrCreateDate = thisWs != null ? thisWs.getCopyOrCreationTime() : null;
         
         // Error if the timestamp is before the copy/creation time of the workspace:
@@ -799,9 +809,13 @@ public class WorkspaceNode extends EmsScriptNode {
 
         // If it is a copy time branch then look at the copy time, otherwise
         // look at the time stamp:
-        Date thisCompareTime = thisCopyDate != null ? thisCopyDate : dateTime;
-        Date otherCompareTime = otherCopyDate != null ? otherCopyDate : otherTime;
         
+        //Date thisCompareTime = thisCopyDate != null ? thisCopyDate : dateTime;
+        //Date otherCompareTime = otherCopyDate != null ? otherCopyDate : otherTime;
+        
+        //This does not work for follow branches
+        Date thisCompareTime = amChildOfCommonParent || thisWs == getCommonParent(thisWs, otherWs) ? dateTime : thisChildOfCommonParentCopyTime;
+        Date otherCompareTime = commonBranchPoint == null || (otherTime != null && commonBranchPoint.before(otherTime)) ? otherTime : commonBranchPoint;
         // If one of the times is null, then interpret it as now:
         if (thisCompareTime == null && otherCompareTime != null) {
             thisCompareTime = new Date();

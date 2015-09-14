@@ -6,6 +6,7 @@ import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -37,13 +38,22 @@ public class List extends ArrayList< Viewable< EmsScriptNode > > implements sysm
         super();
     }
 
+//    /**
+//     * Create a List and add the {@link Viewable}s in the input {@link Collection}.
+//     * @param c
+//     * @see java.util.List#List(Collection)
+//     */
+//    public List( Collection< ? extends Viewable< EmsScriptNode > > c ) {
+//        super( c );
+//    }
+    
     /**
      * Create a List and add the {@link Viewable}s in the input {@link Collection}.
      * @param c
      * @see java.util.List#List(Collection)
      */
-    public List( Collection< ? extends Viewable< EmsScriptNode > > c ) {
-        super( c );
+    public List( Collection< ? > c ) {
+        this(c.toArray() );
     }
     
     // FIXME java reflection is not smart enough to handle this correctly, 
@@ -62,12 +72,54 @@ public class List extends ArrayList< Viewable< EmsScriptNode > > implements sysm
 
     	for (Object obj : c) {
     		if (obj instanceof Expression<?>) {
-    			Object eval = ((Expression<?>) obj).evaluate(true);
-    			this.add((Viewable<EmsScriptNode>)eval);
+    			Object eval = null;
+                try {
+                    eval = ((Expression<?>) obj).evaluate(true);
+                } catch ( IllegalAccessException e ) {
+                    // TODO Auto-generated catch block
+                    //e.printStackTrace();
+                } catch ( InvocationTargetException e ) {
+                    // TODO Auto-generated catch block
+                    //e.printStackTrace();
+                } catch ( InstantiationException e ) {
+                    // TODO Auto-generated catch block
+                    //e.printStackTrace();
+                }
+    			if ( eval instanceof Viewable ) {
+    			    this.add((Viewable<EmsScriptNode>)eval);
+    			} else if ( eval instanceof Viewable ) {
+    			    this.add(new Text("" + eval));
+    			}
     		} else if ( obj instanceof Viewable ) {
     		    this.add((Viewable<EmsScriptNode>)obj);
     		}
     	}
+    }
+
+    public static Viewable<EmsScriptNode> toViewable( Object obj ) {
+        if ( obj instanceof Viewable ) {
+            return (Viewable<EmsScriptNode>)obj;
+        }
+        if (obj instanceof Expression<?>) {
+            Object eval = null;
+            try {
+                eval = ((Expression<?>) obj).evaluate(true);
+            } catch ( IllegalAccessException e ) {
+                // TODO Auto-generated catch block
+                //e.printStackTrace();
+            } catch ( InvocationTargetException e ) {
+                // TODO Auto-generated catch block
+                //e.printStackTrace();
+            } catch ( InstantiationException e ) {
+                // TODO Auto-generated catch block
+                //e.printStackTrace();
+            }
+            return toViewable( eval );
+        }
+        if ( obj instanceof String ) {
+            return new Text( (String)obj );
+        }
+        return new Evaluate( obj );
     }
     
 //    // this works, but is too limited
@@ -75,14 +127,14 @@ public class List extends ArrayList< Viewable< EmsScriptNode > > implements sysm
 //    	this(Utils.newList(item1, item2));
 //    }
     
-    /**
-     * Create a List with a given number of null entries. 
-     * @param initialCapacity
-     * @see java.util.List#List(int)
-     */
-    public List( int initialCapacity ) {
-        super( initialCapacity );
-    }
+//    /**
+//     * Create a List with a given number of null entries. 
+//     * @param initialCapacity
+//     * @see java.util.List#List(int)
+//     */
+//    public List( int initialCapacity ) {
+//        super( initialCapacity );
+//    }
 
     /* 
      * <code>

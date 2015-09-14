@@ -14,6 +14,7 @@ import gov.nasa.jpl.view_repo.util.EmsSystemModel;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
@@ -21,6 +22,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
+import java.util.Vector;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -283,7 +285,7 @@ public class View extends List implements sysml.view.View< EmsScriptNode >, Comp
         if ( Utils.isNullOrEmpty( exposeElements ) ) {
             return null;
         }
-        Collection<EmsScriptNode> exposed = new ArrayList<EmsScriptNode>();
+        LinkedHashSet<EmsScriptNode> exposed = new LinkedHashSet<EmsScriptNode>();
 
 //        // Get all relationship elements of Expose type:
 //        Collection<EmsScriptNode> exposeElements = getModel().getType(null, Acm.JSON_EXPOSE);
@@ -423,7 +425,7 @@ public class View extends List implements sysml.view.View< EmsScriptNode >, Comp
         Collection<EmsScriptNode> exposed = getExposedElements(dateTime, ws);
 
         // Translate the viewpoint Operation/Expression element into an AE Expression:
-        ArrayList<Object> paramValList = new ArrayList<Object>();
+        Vector<Object> paramValList = new Vector<Object>();
         // This is a List of a collection of nodes, where the value of exposed
         // parameter is a collection of nodes:
         paramValList.add( exposed );
@@ -436,28 +438,41 @@ public class View extends List implements sysml.view.View< EmsScriptNode >, Comp
         // Evaluate the expression to get the Viewables and add them to this View.
 
         clear(); // make sure we clear out any old information
-        Object evalResult = aeExpr.evaluate( true );
-        if ( evalResult instanceof Viewable ) {
-            Viewable< EmsScriptNode > v = (Viewable< EmsScriptNode >)evalResult;
-            add( v );
-        } else if ( evalResult instanceof Collection ) {
-            Collection< ? > c = (Collection< ? >)evalResult;
-            for ( Object o : c ) {
-                if (!(o instanceof Viewable) ) {
-                    o = Expression.evaluate( o, Viewable.class, true );
+        Object evalResult;
+        try {
+            evalResult = aeExpr.evaluate( true );
+            if ( evalResult instanceof Viewable ) {
+                Viewable< EmsScriptNode > v = (Viewable< EmsScriptNode >)evalResult;
+                add( v );
+            } else if ( evalResult instanceof Collection ) {
+                Collection< ? > c = (Collection< ? >)evalResult;
+                for ( Object o : c ) {
+                    if (!(o instanceof Viewable) ) {
+                        o = Expression.evaluate( o, Viewable.class, true );
+                    }
+                    try {
+                        Viewable< EmsScriptNode > viewable =
+                                (Viewable< EmsScriptNode >)o;
+                        add( viewable );
+                    } catch ( ClassCastException e ) {
+                        Debug.error( "Failed to cast to Viewable: " + o );
+                    }
                 }
-                try {
-                    Viewable< EmsScriptNode > viewable =
-                            (Viewable< EmsScriptNode >)o;
-                    add( viewable );
-                } catch ( ClassCastException e ) {
-                    Debug.error( "Failed to cast to Viewable: " + o );
-                }
+//                java.util.List< Viewable<EmsScriptNode> > viewables =
+//                        (java.util.List< Viewable<EmsScriptNode> >)Utils.asList( c );
+//                addAll( viewables );
             }
-//            java.util.List< Viewable<EmsScriptNode> > viewables =
-//                    (java.util.List< Viewable<EmsScriptNode> >)Utils.asList( c );
-//            addAll( viewables );
+        } catch ( IllegalAccessException e1 ) {
+            // TODO Auto-generated catch block
+            //e1.printStackTrace();
+        } catch ( InvocationTargetException e1 ) {
+            // TODO Auto-generated catch block
+            //e1.printStackTrace();
+        } catch ( InstantiationException e1 ) {
+            // TODO Auto-generated catch block
+            //e1.printStackTrace();
         }
+        //System.out.println("!!!!!!!!!   done  !!!!!!!!!!");
         return !isEmpty();
     }
 

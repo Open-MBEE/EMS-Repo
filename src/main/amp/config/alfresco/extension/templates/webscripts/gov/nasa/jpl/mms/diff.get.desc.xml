@@ -3,7 +3,7 @@
     <description>
     	get diffs
 	</description>
-  	<url>/diff?workspace1={workspace1}&amp;workspace2={workspace2}</url>
+  	<url>/diff/{workspace1}/{workspace2}/{timestamp1}/{timestamp2}</url>
   	<format default="json">argument</format>
   	<authentication>user</authentication>
   	<transaction>none</transaction>

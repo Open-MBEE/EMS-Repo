@@ -59,6 +59,7 @@ import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 import java.util.Formatter;
 import java.io.Serializable;
 import java.lang.reflect.Array;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -612,11 +613,15 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
 	protected static final String ARTIFACT_ID = "artifactId";
     protected static final String SITE_NAME = "siteName";
     protected static final String SITE_NAME2 = "siteId";
+    protected static final String WORKSPACE1 = "workspace1";
+    protected static final String WORKSPACE2 = "workspace2";
+    protected static final String TIMESTAMP1 = "timestamp1";
+    protected static final String TIMESTAMP2 = "timestamp2";
 
     public static final String NO_WORKSPACE_ID = "master"; // default is master if unspecified
     public static final String NO_PROJECT_ID = "no_project";
     public static final String NO_SITE_ID = "no_site";
-
+    public static final String NO_TIMESTAMP = "latest";
 
     public String getSiteName( WebScriptRequest req ) {
         return getSiteName( req, false );
@@ -734,7 +739,41 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         }
         return workspaceId;
     }
+    
+    private static String getWorkspaceNum( WebScriptRequest req, boolean isWs1 ) {
+        String key = isWs1 ? WORKSPACE1 : WORKSPACE2;
+        String workspaceId = req.getServiceMatch().getTemplateVars().get(key);
+        if ( workspaceId == null || workspaceId.length() <= 0 ) {
+            workspaceId = NO_WORKSPACE_ID;
+        }
+        return workspaceId;
+    }
+    
+    private static String getTimestampNum( WebScriptRequest req, boolean isTs1 ) {
+        String key = isTs1 ? TIMESTAMP1 : TIMESTAMP2;
+        String timestamp = req.getServiceMatch().getTemplateVars().get(key);
+        if ( timestamp == null || timestamp.length() <= 0 ) {
+            timestamp = NO_TIMESTAMP;
+        }
+        return timestamp;
+    }
+    
+    public static String getWorkspace1( WebScriptRequest req) {
+        return getWorkspaceNum(req, true);
+    }
 
+    public static String getWorkspace2( WebScriptRequest req) {
+        return getWorkspaceNum(req, false);
+    }
+    
+    public static String getTimestamp1( WebScriptRequest req) {
+        return getTimestampNum(req, true);
+    }
+
+    public static String getTimestamp2( WebScriptRequest req) {
+        return getTimestampNum(req, false);
+    }
+    
     public static String getArtifactId( WebScriptRequest req ) {
         String artifactId = req.getServiceMatch().getTemplateVars().get(ARTIFACT_ID);
         if ( artifactId == null || artifactId.length() <= 0 ) {
@@ -1220,7 +1259,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         
         // Email the progress (this takes a long time, so only do it for critical events):
         if (sendEmail) {
-            String hostname = services.getSysAdminParams().getAlfrescoHost();
+            String hostname = NodeUtil.getHostname();
             if (!Utils.isNullOrEmpty( hostname )) {
                 String sender = hostname + "@jpl.nasa.gov";
                 String username = NodeUtil.getUserName();
@@ -1332,7 +1371,19 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
             logger.warn( "toAeExpression("+exprNode+"): call is null, " + expressionCall );
             return null;
         }
-        Expression<T> expression = new Expression<T>(call.evaluate(true, false));
+        Expression< T > expression = null;
+        try {
+            expression = new Expression<T>(call.evaluate(true, false));
+        } catch ( IllegalAccessException e ) {
+            // TODO Auto-generated catch block
+            //e.printStackTrace();
+        } catch ( InvocationTargetException e ) {
+            // TODO Auto-generated catch block
+            //e.printStackTrace();
+        } catch ( InstantiationException e ) {
+            // TODO Auto-generated catch block
+            //e.printStackTrace();
+        }
         return expression;
     }
 
@@ -1343,7 +1394,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
     
         // Search for all constraints in the database:
         Collection<EmsScriptNode> constraintNodes = getGlobalSystemModel().getType(null, Acm.ACM_CONSTRAINT);
-log(Level.INFO, "all constraints in database: " + constraintNodes);
+//log(Level.INFO, "all constraints in database: " + constraintNodes);
 
         if (!Utils.isNullOrEmpty(constraintNodes)) {
     
@@ -1361,7 +1412,7 @@ log(Level.INFO, "all constraints in database: " + constraintNodes);
                 for (EmsScriptNode element : elements) {
     
                     String name = element.getName();
-log(Level.INFO, "element (" + element + ") vs. constraint (" + constraintNode + ")");
+//log(Level.INFO, "element (" + element + ") vs. constraint (" + constraintNode + ")");
                     if ( element.equals( constraintNode ) || ( name != null && constrElemNames.contains(name) ) ) {
                         addConstraintExpression(constraintNode, constraints, ws);
                         break;
@@ -1426,14 +1477,17 @@ log(Level.INFO, "element (" + element + ") vs. constraint (" + constraintNode + 
         return expressions;
     }
 
-    public static Map<Object, Object> evaluate( Set< EmsScriptNode > elements, WorkspaceNode ws ) {
+    public static Map<Object, Object> evaluate( Set< EmsScriptNode > elements, WorkspaceNode ws ) throws IllegalAccessException, InvocationTargetException, InstantiationException {
         log(Level.INFO, "Will attempt to evaluate expressions where found!");
-        Map< EmsScriptNode, Collection< Constraint > > constraints = getAeConstraints( elements, ws );
-log(Level.INFO, "constraints: " + constraints);
-        Map< EmsScriptNode, Expression<?> > expressions = getAeExpressions( elements );
-log(Level.INFO, "expressions: " + expressions);
-    
         Map< Object, Object > results = new LinkedHashMap< Object, Object >();
+
+        Map< EmsScriptNode, Expression<?> > expressions = getAeExpressions( elements );
+//log(Level.INFO, "expressions: " + expressions);
+        if ( elements.size() != expressions.size() &&
+                ( elements.size() != 1 || !elements.iterator().next().hasAspect( Acm.ACM_EXPRESSION ) ) ) {
+        Map< EmsScriptNode, Collection< Constraint > > constraints = getAeConstraints( elements, ws );
+//log(Level.INFO, "constraints: " + constraints);
+    
         if ( !Utils.isNullOrEmpty( constraints ) ) {
             for ( Entry< EmsScriptNode, Collection< Constraint > > e : constraints.entrySet() ) {
                 EmsScriptNode constraintNode = null;
@@ -1452,10 +1506,12 @@ log(Level.INFO, "expressions: " + expressions);
                 }
             }
         }
+        }
         if ( !Utils.isNullOrEmpty( expressions ) ) {
             for ( Entry< EmsScriptNode, Expression<?> > e : expressions.entrySet() ) {
                 if ( e != null && e.getKey() != null && e.getValue() != null ) {
-                    results.put( e.getKey(), e.getValue().evaluate( true ) );
+                    Object resultVal = e.getValue().evaluate( true );
+                    results.put( e.getKey(), resultVal );
                 }
             }
         }
@@ -1561,7 +1617,7 @@ log(Level.INFO, "expressions: " + expressions);
     }
 
     public void evaluate( final Map<EmsScriptNode, JSONObject> elementsJsonMap,//Set< EmsScriptNode > elements, final JSONArray elementsJson,
-                          JSONObject top, WorkspaceNode ws ) {
+                          JSONObject top, WorkspaceNode ws ) throws IllegalAccessException, InvocationTargetException, InstantiationException {
         //final JSONArray elementsJson = new JSONArray();
         Set< EmsScriptNode > elements = elementsJsonMap.keySet();
         Map< Object, Object > results = evaluate( elements, ws );

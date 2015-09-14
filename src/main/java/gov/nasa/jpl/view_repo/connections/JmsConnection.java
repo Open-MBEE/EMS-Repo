@@ -70,13 +70,6 @@ public class JmsConnection implements ConnectionInterface {
         public DestinationType destType = DestinationType.TOPIC;
     }
     
-    protected String getHostname() {
-        if (hostname == null) {
-            hostname = services.getSysAdminParams().getAlfrescoHost();
-        }
-        return hostname;
-    }
-    
     protected boolean init(String eventType) {
         ConnectionInfo ci = getConnectionMap().get( eventType );
         if (ci == null) return false;
@@ -180,7 +173,7 @@ public class JmsConnection implements ConnectionInterface {
                 message.setStringProperty( "projectId", projectId );
             }
             message.setLongProperty( "MessageID", sequenceId++ );
-            message.setStringProperty( "MessageSource", getHostname() );
+            message.setStringProperty( "MessageSource", NodeUtil.getHostname() );
             message.setStringProperty( "MessageRecipient", "TMS" );
             message.setStringProperty( "MessageType", eventType.toUpperCase() );
 
@@ -213,7 +206,7 @@ public class JmsConnection implements ConnectionInterface {
         for (String eventType: getConnectionMap().keySet()) {
             ConnectionInfo ci = getConnectionMap().get( eventType );
             if (ci.uri.contains( "localhost" )) {
-                ci.uri = ci.uri.replace("localhost", getHostname());
+                ci.uri = ci.uri.replace("localhost", NodeUtil.getHostname());
                 getConnectionMap().put( eventType, ci );
             }
 
