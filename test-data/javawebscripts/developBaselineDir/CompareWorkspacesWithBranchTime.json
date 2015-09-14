@@ -4,11 +4,11 @@
         "name": "wsA",
         "elements": [
             {
-                "name": "404",
-                "qualifiedName": "/europa/JW_TEST/400/401/402/403/404",
-                "documentation": "4about",
-                "owner": "403",
-                "sysmlid": "404",
+                "name": "304",
+                "qualifiedName": "/europa/JW_TEST/300/301/302/303/304",
+                "documentation": "about",
+                "owner": "303",
+                "sysmlid": "304",
                 "specialization": {
                     "propertyType": null,
                     "isSlot": false,
@@ -23,11 +23,11 @@
                 "editable": true,
             },
             {
-                "name": "304",
-                "qualifiedName": "/europa/JW_TEST/300/301/302/303/304",
-                "documentation": "about",
-                "owner": "303",
-                "sysmlid": "304",
+                "name": "404",
+                "qualifiedName": "/europa/JW_TEST/400/401/402/403/404",
+                "documentation": "4about",
+                "owner": "403",
+                "sysmlid": "404",
                 "specialization": {
                     "propertyType": null,
                     "isSlot": false,
@@ -258,31 +258,14 @@
             },
             "editable": true
         }],
-        "conflictedElements": [
-            {
-                "qualifiedName": "/europa/JW_TEST/300/301/302/303",
-                "sysmlid": "303",
-                "name": "303",
-                "owner": "302",
-                "documentation": "talk",
-                "specialization": {
-                    "value": [{
-                        "valueExpression": null,
-                        "string": "dlam_string",
-                        "type": "LiteralString"
-                    }],
-                    "type": "Property"
-                }
-            },
-            {
-                "name": "conflict",
-                "qualifiedName": "/europa/JW_TEST/conflict",
-                "owner": "123456",
-                "sysmlid": "conflict",
-                "documentation": "this will create a conflict!",
-                "specialization": {"type": "Element"}
-            }
-        ],
+        "conflictedElements": [{
+            "name": "conflict",
+            "qualifiedName": "/europa/JW_TEST/conflict",
+            "owner": "123456",
+            "sysmlid": "conflict",
+            "documentation": "this will create a conflict!",
+            "specialization": {"type": "Element"}
+        }],
         "updatedElements": [
             {
                 "name": "conflict",
