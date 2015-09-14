@@ -418,7 +418,7 @@ public class MmsDiffGet extends AbstractJavaWebScript {
         
         
         
-        JSONArray ws1Elems = new JSONArray(); 
+        JSONArray ws1Elems = new JSONArray();  
         ws1Elems = ws1Json.getJSONArray("elements");
         
         //create a Map of keys from elements and sysmlId
@@ -443,11 +443,12 @@ public class MmsDiffGet extends AbstractJavaWebScript {
     					if (node.exists()) {
     						EmsScriptNode parent = node.getOwningParent(dateTime1, ws1, false);
     						while (parent != null && parent.isModelElement()) {
-    							// the parent is not in already in the element list
-    							// so lets add it
-    							ws1Elems.put(parent.toJSONObject(ws1, dateTime1));
+    							if(!sysmlIdMap.contains(parent.getSysmlId())){
+    								ws1Elems.put(parent.toJSONObject(ws1, dateTime1));
+    								sysmlIdMap.add(parent.getSysmlId());
+    							}
     							node = parent; 
-    							if(!sysmlIdMap.contains(node.getOwner()) && node.getSysmlId() != null){
+    							if(node.exists()){
     								parent = node.getOwningParent(dateTime1,  ws1,  false);
     							}
     						}
@@ -457,7 +458,7 @@ public class MmsDiffGet extends AbstractJavaWebScript {
 			}
 		}
 
-        return diffResult;
+        return diffResult; 
     }
 
     public void performDiff(Map<String, Object> results) {
