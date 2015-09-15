@@ -4,20 +4,20 @@ import gov.nasa.jpl.mbee.util.Pair;
 import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.actions.ActionUtil;
-import gov.nasa.jpl.view_repo.actions.ModelLoadActionExecuter;
 import gov.nasa.jpl.view_repo.actions.WorkspaceDiffActionExecuter;
 import gov.nasa.jpl.view_repo.util.CommitUtil;
+import gov.nasa.jpl.view_repo.util.JsonDiffDiff.DiffOp;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
-import gov.nasa.jpl.view_repo.util.EmsTransaction;
+import gov.nasa.jpl.view_repo.util.JsonDiffDiff;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
 import gov.nasa.jpl.view_repo.util.WorkspaceDiff;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 
-import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -406,9 +406,11 @@ public class MmsDiffGet extends AbstractJavaWebScript {
 //        // diff1.
 //        JSONObject diffResult = null; //glom( oldDiffJson, diff2Json );
 //        diffResult = JsonDiffDiff.diff( diff0, diff1Json, diff2Json );
-        JSONObject diffResult =
+        JsonDiffDiff diffDiffResult =
                 WorkspaceDiff.performDiffGlom( diff0, diff1Json, diff2Json, commonParent,
                                  commonBranchTime, services, response );
+        
+        JSONObject diffResult = diffDiffResult.toJsonObject();
         
         // Add workspace meta-data:
         JSONObject ws1Json = diffResult.getJSONObject( "workspace1" );
@@ -461,36 +463,68 @@ public class MmsDiffGet extends AbstractJavaWebScript {
         	JSONObject elem = addedElems.getJSONObject(i);
         	sysmlIdMap.add(elem.getString("sysmlid"));
         }
+        
         //Add parents of all the elements if they do not already exist
-		// questions, ask about datetime and ws1 and ws2
-
-			int l = ws2Elems.length();
-			for (int i = 0; i < l; i++) {
-				JSONObject elem = ws2Elems.getJSONObject(i);
-				if (elem.has("sysmlid")) {
-					if (!sysmlIdMap.contains(elem.optString("owner")) && elem.optString("sysmlId") != null) {
-						NodeRef ref = NodeUtil.findNodeRefById(elem.optString("owner"), false, ws1, dateTime1,
-								services, true);
-							EmsScriptNode node = new EmsScriptNode(ref, getServices());
-							if (node.exists()) {
-								EmsScriptNode parent = node;
-								while (parent != null && parent.isModelElement()) {
-									if (!sysmlIdMap.contains(parent.getSysmlId())) {
-										ws1Elems.put(parent.toJSONObject(ws1, dateTime1));
-										sysmlIdMap.add(parent.getSysmlId());
-									}
-									node = parent;
-									if (node.exists()) {
-										parent = node.getOwningParent(dateTime1, ws1, false);
-									}
-								
-							}
-						}
-					}
-				}
+		int l = ws2Elems.length();
+		for (int i = 0; i < l; i++) {
+			JSONObject elem = ws2Elems.getJSONObject(i);
+			if (elem == null || !elem.has("sysmlid") ) {
+			    // TODO -- ERROR!
+			    continue;
 			}
+		    String childId = elem.optString("sysmlId");
+		    String parentId = elem.optString("owner");
+		    JSONObject childJson = null;
+		    while ( parentId != null ) {
+		        JSONObject parentJson =
+		                getElementJson(parentId, diffDiffResult,
+		                               ws1, dateTime1, getServices() );
+		        if ( parentJson == null ) {
+		            // TODO -- ERROR!
+		            break;
+		        }
+                // Adding the child instead of the parent so that we do not add
+                // the project, which has no owner.
+		        if ( childJson != null && childId != null &&
+		             !sysmlIdMap.contains( childId ) ) {
+		            ws1Elems.put( childJson );
+		            sysmlIdMap.add( childId );
+		        }
+		        childJson = parentJson;
+		        childId = parentId;
+		        parentId = parentJson.optString( "owner" );
+		    }
+		}
 
         return diffResult; 
+    }
+    
+    /**
+     * Get the JSONObject for the element with the specified id in the
+     * jsonDiffDiff diffMap1 elements or from the database at the specified
+     * workspace and time.
+     * 
+     * @param id
+     * @param jsonDiffDiff
+     * @param ws
+     * @param dateTime
+     * @param services
+     * @return the element JSON
+     */
+    public static JSONObject getElementJson( String id, JsonDiffDiff jsonDiffDiff,
+                                             WorkspaceNode ws, Date dateTime,
+                                             ServiceRegistry services ) {
+        JSONObject elementJson = jsonDiffDiff.getElement1( id );
+        if ( elementJson == null ) {
+            NodeRef ref = NodeUtil.findNodeRefById( id, false, ws, dateTime,
+                                                    services, true );
+            if ( NodeUtil.exists( ref ) ) {
+                EmsScriptNode node = new EmsScriptNode( ref, services );
+                elementJson = node.toJSONObject( ws, dateTime );
+            }
+        }
+        
+        return elementJson;
     }
 
     public void performDiff(Map<String, Object> results) {
@@ -537,161 +571,6 @@ public class MmsDiffGet extends AbstractJavaWebScript {
         return null;
     }
 
-
-   
-
-
-    
-    
-    
-    
-     
-    /**
-     * Create a diff of two diffs/commits, irrespective of their workspaces or
-     * timepoints.
-     * <p>
-     * diff(diff1, diff2) = diff2 - diff1. So, diff1 + diff(diff1, diff2) =
-     * diff2.
-     * <p>
-     * workspace1 in the resulting diff will be the objects from workspace1 in
-     * diff2 that are not in workspace1 of diff1. workspace2 in the resulting
-     * diff will be the changes that if applied after applying the changes in
-     * workspace2 of diff1 would produce the same effect as applying the changes
-     * in workspace2.
-     * <p>
-     * If there are any changes to the same element in both diffs, it is a
-     * conflict unless it is exactly the same.
-     * <p>
-     * In the table below, x1 and x2 are versions of x in add and update
-     * operations of diff1 and diff2, respectively. The heading of each row in
-     * the table is a change in workspace2 of diff1. The heading of each column
-     * is a change in workspace2 of diff2. The interior cells are the diff of
-     * the diff1 and diff2 operations in the headings of the row and column,
-     * respectively. x2 - x1 is the properties of x2 without properties in x1
-     * that are the same as x2 and a reversion of x1 properties not specified in
-     * x2 to those of the version (x0) in workspace1. Thus, x2 - x1 -s really
-     * (x0 + x2) - x1.
-     * 
-     * <table style="width:100%", border="1">
-     * <tr>
-     * <th></th>
-     * <th>add(x2)</th>
-     * <th>delete(x)</th>
-     * <th>update(x2)</th>
-     * </tr>
-     * <tr>
-     * <th>add(x1)</th>
-     * <td>update(x2 - x1)</td>
-     * <td>delete(x)</td>
-     * <td>update(x2 - x1)</td>
-     * </tr>
-     * <tr>
-     * <th>delete(x)</th>
-     * <td>add(x2)</td>
-     * <td></td>
-     * <td>update(x2 - x1)</td>
-     * </tr>
-     * <tr>
-     * <th>update(x1)</th>
-     * <td>update(x2) [potential conflict]</td>
-     * <td>delete(x)</td>
-     * <td>update(x1 &lt;- x2)</td>
-     * </tr>
-     * </table>
-     * 
-     * 
-     * 
-     * @param diff1
-     * @param diff2
-     * @return
-     */
-//    public JSONObject diff( JSONObject diff1, JSONObject diff2 ) {
-//        ArrayList< JSONObject > list = Utils.newList( diff1, diff2 );
-//        JSONObject diff3 = diff( list );
-//        return diff3;
-//     }
-
-//     public JSONObject diff( ArrayList<JSONObject> diffs ) {
-//         if ( Utils.isNullOrEmpty( diffs ) ) return null;
-//         JSONObject diffDiff = makeEmptyDiffJson();
-//         if ( diffs.size() == 1 ) return diffDiff;
-//         LinkedHashMap<String, Pair<DiffOp, List<JSONObject> > > diffMap1 =
-//                 new LinkedHashMap< String, Pair<DiffOp,List<JSONObject>> >();
-//         LinkedHashMap<String, Pair<DiffOp, List<JSONObject> > > diffMap2 =
-//                 new LinkedHashMap< String, Pair<DiffOp,List<JSONObject>> >();
-//         
-//         // Diff workspace 1 changes        
-//         // Start with an empty list. Iterate through each diff in order, adding
-//         // any elements that did not exist beforehand.
-//         JSONArray elements = diffDiff.getJSONArray( "elements" );
-//         for ( int i = 0; i < diffs.size(); ++i ) {
-//             JSONObject diff =  diffs.get( i );
-//             JSONObject ws1 = diff.optJSONObject( "workspace1" );            
-//             JSONArray dElements = ws1.getJSONArray( "elements" );
-//             for ( int j = 0; j < dElements.length(); ++j ) {
-//                 JSONObject element = dElements.getJSONObject( j );
-//                 String sysmlid = element.getString( "sysmlid" );
-//                 if ( !diffMap1.containsKey( sysmlid ) ) {
-//                     elements.put( element );
-//                 }
-//             }
-//         }
-//         
-//         // Glom workpace 2 changes
-//         for ( JSONObject diff : diffs ) {
-//             JSONObject ws2 = diff.optJSONObject( "workspace2" );
-//             if ( ws2 == null ) continue;
-//             JSONArray added = ws2.optJSONArray( "addedElements" );
-//             JSONArray updated = ws2.optJSONArray( "updatedElements" );
-//             JSONArray deleted = ws2.optJSONArray( "deletedElements" );
-//             // Diffs are applied in the order of add, update, delete
-//             glom( DiffOp.ADD, added, diffMap2 );
-//             glom( DiffOp.UPDATE, updated, diffMap2 );
-//             glom( DiffOp.DELETE, deleted, diffMap2 );
-//         }
-//
-//         // now we need to merge the properties of chained updates
-//         JSONObject gws2 = diffDiff.getJSONObject( "workspace2" );
-//         JSONArray added = gws2.getJSONArray( "addedElements" );
-//         JSONArray updated = gws2.getJSONArray( "updatedElements" );
-//         JSONArray deleted = gws2.getJSONArray( "deletedElements" );
-//         for ( Entry< String, Pair< DiffOp, List< JSONObject > > > entry : diffMap2.entrySet() ) {
-//             Pair< DiffOp, List< JSONObject > > p = entry.getValue();
-//             JSONObject glommedElement = null; //NodeUtil.newJsonObject();
-//             for ( JSONObject element : p.second ) {
-//                 if ( glommedElement == null ) glommedElement = NodeUtil.clone( element );
-//                 else addProperties( glommedElement, element );
-//             }
-//             switch ( p.first ) {
-//                 case ADD:
-//                     added.put( glommedElement );
-//                     break;
-//                 case UPDATE:
-//                     updated.put( glommedElement );
-//                     break;
-//                 case DELETE:
-//                     deleted.put( glommedElement );
-//                     break;
-//                 default:
-//                     // BAD! -- TODO
-//             }
-//             // TODO -- What about moved and conflicted elements?
-//         }
-//         
-//         return diffDiff;
-//    }
-
-//    private JSONObject glomProperties( JSONObject element1,
-//                                       JSONObject element2 ) { 
-//        JSONObject elementG = NodeUtil.clone( element1 );
-//        Iterator i = element2.keys();
-//        while ( i.hasNext() ) {
-//            String k = (String)i.next();
-//            if ( ignoredJsonIds.contains( k ) ) continue;
-//            elementG.put( k, element2.get( k ) );
-//        }
-//        return elementG;
-//    }
     
     
     public String getJobName( String timestamp1, String timestamp2 ) {

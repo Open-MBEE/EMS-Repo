@@ -8,7 +8,6 @@ import gov.nasa.jpl.mbee.util.Utils;
 import java.util.ArrayList;
 import java.io.Serializable;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -81,6 +80,8 @@ public class WorkspaceDiff implements Serializable {
     private Status status = null;
 
     public JSONObject diffJson;
+
+    public JsonDiffDiff jsonDiffDiff = null;
     
     private WorkspaceDiff() {
         elements = new TreeMap<String, EmsScriptNode>();
@@ -964,8 +965,9 @@ public class WorkspaceDiff implements Serializable {
     public boolean diff() {
         boolean status = true;
 
-        if ( glom ) { 
-            diffJson = captureDeltasFromCommits();
+        if ( glom ) {
+            jsonDiffDiff  = captureDeltasFromCommits();
+            diffJson = jsonDiffDiff.toJsonObject();
         } else {
             captureDeltas();
         }
@@ -977,7 +979,7 @@ public class WorkspaceDiff implements Serializable {
     protected static Set<String> ignoredPropIds = getIgnoredPropIds();
     protected static Set<QName> ignoredPropIdQnames = getIgnoredPropIdQNames();
 
-    public static boolean noFind = false;
+    public static boolean noFind = true;
     public static Set<String> getIgnoredPropIds() {
         if ( ignoredPropIds == null ) {
             DictionaryService ds = NodeUtil.getServices().getDictionaryService();
@@ -1227,7 +1229,7 @@ public class WorkspaceDiff implements Serializable {
         populateMembersSkeleton(allChangedNodes);
     }
 
-    protected JSONObject captureDeltasFromCommits() {
+    protected JsonDiffDiff captureDeltasFromCommits() {
         JSONObject commitDiff1 =
                 WorkspaceNode.getChangeJsonWithRespectTo( ws1, ws2,
                                                           timestamp1,
@@ -1386,7 +1388,7 @@ public class WorkspaceDiff implements Serializable {
      * @param response
      * @return
      */
-    public static JSONObject performDiffGlom( JSONObject diff0,
+    public static JsonDiffDiff performDiffGlom( JSONObject diff0,
                                               JSONObject diff1,
                                               JSONObject diff2,
                                               WorkspaceNode commonParent,
@@ -1472,7 +1474,7 @@ public class WorkspaceDiff implements Serializable {
         
         // Now add/glom diff2 to diff0 (oldDiffJson) and then diff with/subtract
         // diff1.
-        JSONObject diffResult = null; //glom( oldDiffJson, diff2Json );
+        JsonDiffDiff diffResult = null; //glom( oldDiffJson, diff2Json );
         diffResult = JsonDiffDiff.diff( diff0, diff1, diff2 );
     
         return diffResult;

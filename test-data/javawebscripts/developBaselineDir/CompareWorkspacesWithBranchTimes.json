@@ -4,11 +4,13 @@
         "name": "wsT",
         "elements": [
             {
-                "name": "303",
                 "qualifiedName": "/europa/JW_TEST/300/301/302/303",
+                "sysmlid": "303",
+                "editable": true,
+                "version": "1.4",
+                "name": "303",
                 "documentation": "talk",
                 "owner": "302",
-                "sysmlid": "303",
                 "specialization": {
                     "propertyType": null,
                     "isSlot": false,
@@ -19,16 +21,16 @@
                         "type": "LiteralString"
                     }],
                     "type": "Property"
-                },
-                "editable": true,
+                }
             },
             {
                 "qualifiedName": "/europa/JW_TEST/304",
                 "sysmlid": "304",
                 "editable": true,
+                "version": "1.2",
                 "name": "304",
-                "documentation": "this will create a moved element",
                 "owner": "123456",
+                "documentation": "this will create a moved element",
                 "specialization": {
                     "propertyType": null,
                     "isDerived": false,
@@ -45,9 +47,10 @@
                 "qualifiedName": "/europa/JW_TEST/400/401/402/403/404",
                 "sysmlid": "404",
                 "editable": true,
+                "version": "1.1",
                 "name": "404",
-                "documentation": "4about",
                 "owner": "403",
+                "documentation": "4about",
                 "specialization": {
                     "propertyType": null,
                     "isDerived": false,
@@ -335,8 +338,8 @@
             {
                 "name": "304",
                 "qualifiedName": "/europa/JW_TEST/300/301/302/303/304",
-                "owner": "303",
                 "documentation": "about",
+                "owner": "303",
                 "sysmlid": "304",
                 "specialization": {"type": "Property"}
             }
@@ -346,8 +349,8 @@
         "movedElements": [{
             "name": "304",
             "qualifiedName": "/europa/JW_TEST/300/301/302/303/304",
-            "owner": "303",
             "documentation": "about",
+            "owner": "303",
             "sysmlid": "304",
             "specialization": {"type": "Property"}
         }]

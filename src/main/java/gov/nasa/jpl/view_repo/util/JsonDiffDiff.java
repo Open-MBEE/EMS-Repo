@@ -22,6 +22,8 @@ import gov.nasa.jpl.mbee.util.Utils;
 
 public class JsonDiffDiff extends AbstractDiff< JSONObject, Object, String > {
 
+    public enum DiffOp { ADD, UPDATE, DELETE, NONE }
+
     protected Set<JSONObject> elements = Utils.newSet();
     protected LinkedHashMap<String, Pair<DiffOp, List<JSONObject> > > diffMap1 =
             new LinkedHashMap< String, Pair<DiffOp,List<JSONObject> > >();
@@ -451,7 +453,7 @@ public class JsonDiffDiff extends AbstractDiff< JSONObject, Object, String > {
     * @param diff2 changes to the second workspace of diff0
     * @return
     */
-   public static JSONObject diff( JSONObject diff0, JSONObject diff1, JSONObject diff2 ) {
+   public static JsonDiffDiff diff( JSONObject diff0, JSONObject diff1, JSONObject diff2 ) {
        // Make a copy of the original diff and update the copy to return.
        JSONObject diff3 = NodeUtil.clone( diff0 );
        
@@ -612,7 +614,7 @@ public class JsonDiffDiff extends AbstractDiff< JSONObject, Object, String > {
                    // TODO -- ERROR
            }
        }
-       return dDiff3.toJsonObject();
+       return dDiff3;
     }
    
     protected void updateDiff( String id ,
@@ -1281,5 +1283,3 @@ public class JsonDiffDiff extends AbstractDiff< JSONObject, Object, String > {
         System.out.println( "testing JsonDiffDiff" );
     }
 }
-
-enum DiffOp { ADD, UPDATE, DELETE, NONE }
