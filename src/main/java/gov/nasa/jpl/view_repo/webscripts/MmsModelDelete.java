@@ -1,5 +1,6 @@
 package gov.nasa.jpl.view_repo.webscripts;
 
+import gov.nasa.jpl.mbee.util.Timer;
 import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.util.CommitUtil;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
@@ -65,6 +66,14 @@ public class MmsModelDelete extends AbstractJavaWebScript {
     @Override
     protected Map< String, Object > executeImplImpl( WebScriptRequest req,
                                                  Status status, Cache cache ) {
+
+        if ( logger.isInfoEnabled() ) {
+            String user = AuthenticationUtil.getFullyAuthenticatedUser();
+            logger.info( user + " " + req.getURL() );
+        }
+        
+        Timer timer = new Timer();
+        
         printHeader( req );
 
         Map<String, Object> model = new HashMap<String, Object>();
@@ -96,6 +105,10 @@ public class MmsModelDelete extends AbstractJavaWebScript {
         status.setCode(responseStatus.getCode());
 
         printFooter();
+
+        if ( logger.isInfoEnabled() ) {
+            logger.info( String.format( "ModeDelete: %s", timer ) );
+        }
 
         return model;
     }
