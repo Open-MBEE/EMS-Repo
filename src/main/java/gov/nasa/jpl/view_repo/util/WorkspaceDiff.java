@@ -976,6 +976,8 @@ public class WorkspaceDiff implements Serializable {
 
     protected static Set<String> ignoredPropIds = getIgnoredPropIds();
     protected static Set<QName> ignoredPropIdQnames = getIgnoredPropIdQNames();
+
+    public static boolean noFind = false;
     public static Set<String> getIgnoredPropIds() {
         if ( ignoredPropIds == null ) {
             DictionaryService ds = NodeUtil.getServices().getDictionaryService();
@@ -1400,10 +1402,53 @@ public class WorkspaceDiff implements Serializable {
             JsonDiffDiff diffDiff1 = new JsonDiffDiff(diff1);
             JsonDiffDiff diffDiff2 = new JsonDiffDiff(diff2);
             
+            Set<EmsScriptNode> elements = Utils.newSet();
+            
+            if ( noFind  ) {
+                // Get the previous values of the changed nodes from the
+                // workspace1 elements of each diff
+                JSONArray diff1Elements = null;
+                JSONObject diff1_ws1 = diff1.optJSONObject( "workspace1" );
+                if ( diff1_ws1 != null ) {
+                    diff1Elements = diff1_ws1.optJSONArray("elements");
+                }
+                
+                JSONArray diff2Elements = null;
+                JSONObject diff2_ws1 = diff2.optJSONObject( "workspace1" );
+                if ( diff2_ws1 != null ) {
+                    diff2Elements = diff2_ws1.optJSONArray("elements");
+                }
+
+                JSONObject diff0_ws1 = diff0.getJSONObject( "workspace1" );
+                JSONArray diff0Elements = diff0_ws1.getJSONArray( "elements" );
+
+                // Add only the elements from diff2 that are not in diff1 to the
+                // elements of diff0.
+                if ( diff2Elements != null ) {
+                    for ( int i = 0; i < diff2Elements.length(); ++i ) {
+                        JSONObject element2_1 = diff2Elements.optJSONObject( i );
+                        if ( element2_1 != null ) {
+                            String sysmlId = element2_1.optString( "sysmlid" );
+                            if ( sysmlId != null && !diffDiff1.diffMap1.containsKey( sysmlId ) ) {
+                                diff0Elements.put( element2_1 );
+                            }
+                        }
+                    }
+                }
+                // Add the elements from diff1 to the elements of diff0.
+                if ( diff1Elements != null ) {
+                    for ( int i = 0; i < diff1Elements.length(); ++i ) {
+                        JSONObject element1_1 = diff1Elements.optJSONObject( i );
+                        if ( element1_1 != null ) {
+                            diff0Elements.put( element1_1 );
+                        }
+                    }
+                }
+            } else {
+            
             Set<String> sysmlIds = diffDiff1.getAffectedIds();
             sysmlIds.addAll(diffDiff2.getAffectedIds());
-                        
-            Set<EmsScriptNode> elements = Utils.newSet();
+
             for (String id : sysmlIds)
             {
                 //create ArrayList of node refs by calling getNodeRefsById
@@ -1421,6 +1466,7 @@ public class WorkspaceDiff implements Serializable {
             JSONObject elementsJson = diff0.getJSONObject( "workspace1" );
             addJSONArray( elementsJson , "elements", elementsMap, null, commonParent,
                           commonBranchTime, true, null );
+            }
         }
         
         

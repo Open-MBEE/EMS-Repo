@@ -473,6 +473,7 @@ def print_pass(msg):
     global passed_tests
     passed_tests += 1
     print "\nPASS: "+str(msg)
+    print "\npassed: "+str(passed_tests) + "failed: " + str(failed_tests)
 
 def print_error(msg, outpt):
     global failed_tests
@@ -480,6 +481,7 @@ def print_error(msg, outpt):
     errs.append(msg)
     print "\nFAIL: "+str(msg)
     print str(outpt)
+    print "\npassed: "+str(passed_tests) + "failed: " + str(failed_tests)
     
 def mbee_util_jar_path():
     path = "../../../../.m2/repository/gov/nasa/jpl/mbee/util/mbee_util/"
