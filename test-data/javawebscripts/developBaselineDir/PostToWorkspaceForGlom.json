@@ -1,0 +1,22 @@
+{"elements": [{
+    "modifier": "admin",
+    "qualifiedId": "/no_site/no_site_no_project/holding_bin_no_site_no_project/poo",
+    "qualifiedName": "/no_site/no_site_no_project/holding_bin/null",
+    "sysmlid": "poo",
+    "documentation": "poo is poo",
+    "owner": "holding_bin_no_site_no_project",
+    "specialization": {
+        "propertyType": null,
+        "isDerived": false,
+        "isSlot": false,
+        "value": [{
+            "valueExpression": null,
+            "string": "the poo value",
+            "type": "LiteralString"
+        }],
+        "type": "Property"
+    },
+    "editable": true,
+    "creator": "admin",
+}]}
+200
