@@ -416,10 +416,32 @@ public class MmsDiffGet extends AbstractJavaWebScript {
         WorkspaceNode.addWorkspaceMetadata( ws1Json, ws1, dateTime1 );
         WorkspaceNode.addWorkspaceMetadata( ws2Json, ws2, dateTime2 );
         
+        JSONArray ws1Elems = new JSONArray(); 
+        JSONArray ws2Elems = new JSONArray(); 
         
+        JSONArray addedElems = new JSONArray();
+        JSONArray updatedElems = new JSONArray();
+        JSONArray deletedElems = new JSONArray();
         
-        JSONArray ws1Elems = new JSONArray();  
         ws1Elems = ws1Json.getJSONArray("elements");
+        addedElems = ws2Json.getJSONArray("addedElements");
+        updatedElems = ws2Json.getJSONArray("updatedElements");
+        deletedElems = ws2Json.getJSONArray("deletedElements");
+        
+        for (int i = 0; i < addedElems.length(); i++){
+        	ws2Elems.put(addedElems.getJSONObject(i));
+        }
+        for (int i = 0 ; i < updatedElems.length(); i++){
+        	ws2Elems.put(updatedElems.getJSONObject(i));
+        }
+        for (int i = 0; i < deletedElems.length(); i++){
+        	ws2Elems.put(deletedElems.getJSONObject(i));
+        }
+        
+        /*for (int i = ws2Elems.length() - 1; i < ws1Elems.length(); i++){
+        	ws2Elems.put(ws1Elems.getJSONObject(i));
+        }*/
+        
         
         //create a Map of keys from elements and sysmlId
         Set<String> sysmlIdMap = new HashSet<String>();
@@ -427,36 +449,46 @@ public class MmsDiffGet extends AbstractJavaWebScript {
         	JSONObject elem = ws1Elems.getJSONObject(i);
         	sysmlIdMap.add(elem.getString("sysmlid"));
         }
-        
+        for (int i = 0; i< deletedElems.length(); i++){
+        	JSONObject elem = deletedElems.getJSONObject(i);
+        	sysmlIdMap.add(elem.getString("sysmlid"));
+        }
+        for (int i = 0; i< updatedElems.length(); i++){
+        	JSONObject elem = updatedElems.getJSONObject(i);
+        	sysmlIdMap.add(elem.getString("sysmlid"));
+        }
+        for (int i = 0; i< addedElems.length(); i++){
+        	JSONObject elem = addedElems.getJSONObject(i);
+        	sysmlIdMap.add(elem.getString("sysmlid"));
+        }
         //Add parents of all the elements if they do not already exist
 		// questions, ask about datetime and ws1 and ws2
-        int l = ws1Elems.length();
-		for (int i = 0; i < l; i++) {
-			JSONObject elem = ws1Elems.getJSONObject(i);
-			if (elem.has("sysmlid")) {
-				if (!sysmlIdMap.contains(elem.optString("owner")) && elem.optString("sysmlId") != null) {
-					NodeRef ref = NodeUtil.findNodeRefById(elem.optString("sysmlid"), false, ws1, dateTime1, services,
-							true);
-					
-					if (ref != null) {
-    					EmsScriptNode node = new EmsScriptNode(ref, getServices());
-    					if (node.exists()) {
-    						EmsScriptNode parent = node.getOwningParent(dateTime1, ws1, false);
-    						while (parent != null && parent.isModelElement()) {
-    							if(!sysmlIdMap.contains(parent.getSysmlId())){
-    								ws1Elems.put(parent.toJSONObject(ws1, dateTime1));
-    								sysmlIdMap.add(parent.getSysmlId());
-    							}
-    							node = parent; 
-    							if(node.exists()){
-    								parent = node.getOwningParent(dateTime1,  ws1,  false);
-    							}
-    						}
-    					}
+
+			int l = ws2Elems.length();
+			for (int i = 0; i < l; i++) {
+				JSONObject elem = ws2Elems.getJSONObject(i);
+				if (elem.has("sysmlid")) {
+					if (!sysmlIdMap.contains(elem.optString("owner")) && elem.optString("sysmlId") != null) {
+						NodeRef ref = NodeUtil.findNodeRefById(elem.optString("owner"), false, ws1, dateTime1,
+								services, true);
+							EmsScriptNode node = new EmsScriptNode(ref, getServices());
+							if (node.exists()) {
+								EmsScriptNode parent = node;
+								while (parent != null && parent.isModelElement()) {
+									if (!sysmlIdMap.contains(parent.getSysmlId())) {
+										ws1Elems.put(parent.toJSONObject(ws1, dateTime1));
+										sysmlIdMap.add(parent.getSysmlId());
+									}
+									node = parent;
+									if (node.exists()) {
+										parent = node.getOwningParent(dateTime1, ws1, false);
+									}
+								
+							}
+						}
 					}
 				}
 			}
-		}
 
         return diffResult; 
     }
@@ -686,7 +718,7 @@ public class MmsDiffGet extends AbstractJavaWebScript {
         return diffJob;
     }
 
-    public static EmsScriptNode getDiffJob( WorkspaceNode ws1,
+    public static EmsScriptNode getDiffJob( WorkspaceNode ws1, 
                                             WorkspaceNode ws2,
                                             String jobName,
                                             ServiceRegistry services,
