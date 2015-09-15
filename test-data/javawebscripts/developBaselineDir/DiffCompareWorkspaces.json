@@ -4,11 +4,13 @@
         "name": "ws2",
         "elements": [
             {
-                "name": "402",
                 "qualifiedName": "/europa/JW_TEST2/400/401/402",
+                "sysmlid": "402",
+                "editable": true,
+                "version": "1.2",
+                "name": "402",
                 "documentation": "4to",
                 "owner": "401",
-                "sysmlid": "402",
                 "specialization": {
                     "propertyType": null,
                     "isSlot": false,
@@ -19,8 +21,7 @@
                         "type": "LiteralString"
                     }],
                     "type": "Property"
-                },
-                "editable": true,
+                }
             },
             {
                 "name": "holding_bin",
