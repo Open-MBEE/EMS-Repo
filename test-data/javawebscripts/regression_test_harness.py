@@ -827,12 +827,34 @@ True,
 common_filters+['"id"','"qualifiedId"','"timestamp"','"creator"','"modifier"'],
 ["test","workspaces","develop"]
 ],
+        
+[
+196,
+"CompareWorkspacesG1G2Background",
+"Compare workspaces wsG1 and wsG2 with timestamps in background to set up a initial diff for the next test",
+create_curl_cmd(type="GET",base_url=SERVICE_URL,
+                branch="diff/$gv1/$gv2/$gv3/$gv4?background=true"),
+True, 
+common_filters+['"id"','"qualifiedId"','"timestamp"','"creator"','"modifier"','"diffTime"'],
+["test","workspaces","develop"]
+],
+        
+[
+197,
+"CompareWorkspacesG1G2Glom",
+"Compare workspaces wsG1 and wsG2 with timestamps with a initial diff",
+create_curl_cmd(type="GET",base_url=SERVICE_URL,
+                branch="diff/$gv1/$gv2/$gv3/$gv4"),
+True, 
+common_filters+['"id"','"qualifiedId"','"timestamp"','"creator"','"modifier"'],
+["test","workspaces","develop"]
+],
 
 # This test case depends on test 220 this makes sure that recursive get on ws gets
 # everything as expected (we should also do something like 225 to make sure a modified element
 # shows up in the recurse properly as well)
 [
-196,
+198,
 "RecursiveGetOnWorkspaces",
 "Makes sure that a recursive get on a modified workspace returns the modified elements",
 create_curl_cmd(type="GET", base_url=BASE_URL_WS,
@@ -843,7 +865,7 @@ common_filters,
 ],
 
 [
-197,
+199,
 "PostSiteInWorkspace",
 "Create a project and site in a workspace",
 create_curl_cmd(type="POST",data='\'{"elements":[{"sysmlid":"proj_id_001","name":"PROJ_1","specialization":{"type":"Project"}}]}\'',
@@ -855,7 +877,7 @@ None,
 ],
  
 [
-198,
+200,
 "GetSiteInWorkspace",
 "Get site in workspace",
 create_curl_cmd(type="GET",data="sites",base_url=BASE_URL_WS, branch="$gv1/"),
@@ -866,7 +888,7 @@ None,
 
 
 [
-199,
+201,
 "GetProductsInSiteInWorkspace",
 "Get products for a site in a workspace",
 create_curl_cmd(type="GET",data="products",base_url=BASE_URL_WS,
@@ -877,7 +899,7 @@ common_filters,
 ],
         
 [
-200,
+202,
 "PostNotInPastToWorkspace",
 "Post element to master workspace for a diff test",
 create_curl_cmd(type="POST",data="notInThePast.json",base_url=BASE_URL_WS,
@@ -893,7 +915,7 @@ set_read_delta_to_gv1,
         
 # This test depends on the previous one:
 [
-201,
+203,
 "CompareWorkspacesNotInPast",
 "Compare workspace master with itself at the current time and a time in the past",
 create_curl_cmd(type="GET",base_url=SERVICE_URL,
@@ -904,7 +926,7 @@ common_filters+['"id"','"qualifiedId"','"timestamp"','"creator"','"modifier"'],
 ],
 
 [
-202,
+204,
 "CompareWorkspacesNotInPastBackground",
 "Compare workspace master with itself at the current time and a time in the past in the background",
 create_curl_cmd(type="GET",base_url=SERVICE_URL,
@@ -917,7 +939,7 @@ common_filters+['"id"','"qualifiedId"','"timestamp"','"diffTime"','"creator"','"
 # A series of test cases for workspaces in workspaces
 
 [
-203,
+205,
 "CreateParentWorkspace",
 "Create a workspace to be a parent of another",
 create_curl_cmd(type="POST",base_url=BASE_URL_WS,
@@ -931,7 +953,7 @@ set_wsid_to_gv1
 ],
 
 [
-204,
+206,
 "PostToMasterAgain",
 "Post new element to master",
 create_curl_cmd(type="POST",data="a.json",base_url=BASE_URL_WS,
@@ -945,7 +967,7 @@ set_read_delta_to_gv2
 ],
         
 [
-205,
+207,
 "CreateSubworkspace",
 "Create workspace inside a workspace",
 create_curl_cmd(type="POST",base_url=BASE_URL_WS,
@@ -960,7 +982,7 @@ set_wsid_to_gv3,
 ],
 
 [
-206,
+208,
 "GetElementInMasterFromSubworkspace",
 "Get an element that only exists in the master from a subworkspace after its parent branch was created but before the it was created, it wont find the element",
 create_curl_cmd(type="GET",data="elements/a",base_url=BASE_URL_WS,
@@ -971,7 +993,7 @@ common_filters,
 ],
         
 [
-207,
+209,
 "PostAToMaster",
 "Post element a to master.",
 create_curl_cmd(type="POST", data="a.json", base_url="http://localhost:8080/alfresco/service/workspaces/", post_type="elements", branch="master/", project_post=False),
@@ -981,7 +1003,7 @@ common_filters,
 ],
 
 [
-208,
+210,
 "CreateAParentWorkspace",
 "Create a \"parent\" workspace off of master..",
 create_curl_cmd(type="POST", data="", base_url="http://localhost:8080/alfresco/service/workspaces/", post_type="", branch="theParentWorkspace?sourceWorkspace=master", project_post=False),
@@ -991,7 +1013,7 @@ common_filters+['"branched"','"created"','"id"','"qualifiedId"'],
 ],
 
 [
-209,
+211,
 "PostBToMaster",
 "Post element b to master.",
 create_curl_cmd(type="POST", data="b.json", base_url="http://localhost:8080/alfresco/service/workspaces/", post_type="elements", branch="master/", project_post=False),
@@ -1001,7 +1023,7 @@ common_filters,
 ],
 
 [
-210,
+212,
 "PostCToParent",
 "Post element c to the parent workspace.",
 create_curl_cmd(type="POST", data="c.json", base_url="http://localhost:8080/alfresco/service/workspaces/", post_type="elements", branch="theParentWorkspace/", project_post=False),
@@ -1011,7 +1033,7 @@ common_filters,
 ],
 
 [
-211,
+213,
 "CreateASubWorkspace",
 "Create a \"subworkspace\" workspace off of the parent.",
 create_curl_cmd(type="POST", data="", base_url="http://localhost:8080/alfresco/service/workspaces/", post_type="", branch="theSubworkspace?sourceWorkspace=theParentWorkspace", project_post=False),
@@ -1021,7 +1043,7 @@ common_filters+['"branched"','"created"','"id"','"qualifiedId"', '"parent"'],
 ],
 
 [
-212,
+214,
 "PostDToMaster",
 "Post element d to master.",
 create_curl_cmd(type="POST", data="d.json", base_url="http://localhost:8080/alfresco/service/workspaces/", post_type="elements", branch="master/", project_post=False),
@@ -1031,7 +1053,7 @@ common_filters,
 ],
 
 [
-213,
+215,
 "PostEToParent",
 "Post element e to the parent workspace.",
 create_curl_cmd(type="POST", data="e.json", base_url="http://localhost:8080/alfresco/service/workspaces/", post_type="elements", branch="theParentWorkspace/", project_post=False),
@@ -1041,7 +1063,7 @@ common_filters,
 ],
 
 [
-214,
+216,
 "PostFToSubworkspace",
 "Post element f to the subworkspace.",
 create_curl_cmd(type="POST", data="f.json", base_url="http://localhost:8080/alfresco/service/workspaces/", post_type="elements", branch="theSubworkspace/", project_post=False),
@@ -1051,7 +1073,7 @@ common_filters,
 ],
 
 [
-215,
+217,
 "GetAInMaster",
 "Get element a in the master workspace.",
 create_curl_cmd(type="GET", data="elements/a", base_url="http://localhost:8080/alfresco/service/workspaces/", post_type="elements", branch="master/", project_post=False),
@@ -1061,7 +1083,7 @@ common_filters,
 ],
 
 [
-216,
+218,
 "GetAInParent",
 "Get element a in the parent workspace.",
 create_curl_cmd(type="GET", data="elements/a", base_url="http://localhost:8080/alfresco/service/workspaces/", post_type="elements", branch="theParentWorkspace/", project_post=False),
@@ -1071,7 +1093,7 @@ common_filters,
 ],
 
 [
-217,
+219,
 "GetAInSubworkspace",
 "Get element a in the subworkspace.",
 create_curl_cmd(type="GET", data="elements/a", base_url="http://localhost:8080/alfresco/service/workspaces/", post_type="elements", branch="theSubworkspace/", project_post=False),
@@ -1081,7 +1103,7 @@ common_filters,
 ],
 
 [
-218,
+220,
 "GetBInMaster",
 "Get element b in the master workspace.",
 create_curl_cmd(type="GET", data="elements/b", base_url="http://localhost:8080/alfresco/service/workspaces/", post_type="elements", branch="master/", project_post=False),
@@ -1091,7 +1113,7 @@ common_filters,
 ],
 
 [
-219,
+221,
 "GetBInParent",
 "Get element b in the parent workspace.",
 create_curl_cmd(type="GET", data="elements/b", base_url="http://localhost:8080/alfresco/service/workspaces/", post_type="elements", branch="theParentWorkspace/", project_post=False),
@@ -1101,7 +1123,7 @@ common_filters,
 ],
 
 [
-220,
+222,
 "GetBInSubworkspace",
 "Get element b in the subworkspace.",
 create_curl_cmd(type="GET", data="elements/b", base_url="http://localhost:8080/alfresco/service/workspaces/", post_type="elements", branch="theSubworkspace/", project_post=False),
@@ -1111,7 +1133,7 @@ common_filters,
 ],
 
 [
-221,
+223,
 "GetCInMaster",
 "Get element c in the master workspace.",
 create_curl_cmd(type="GET", data="elements/c", base_url="http://localhost:8080/alfresco/service/workspaces/", post_type="elements", branch="master/", project_post=False),
@@ -1121,7 +1143,7 @@ common_filters,
 ],
 
 [
-222,
+224,
 "GetCInParent",
 "Get element c in the parent workspace.",
 create_curl_cmd(type="GET", data="elements/c", base_url="http://localhost:8080/alfresco/service/workspaces/", post_type="elements", branch="theParentWorkspace/", project_post=False),
@@ -1131,7 +1153,7 @@ common_filters,
 ],
 
 [
-223,
+225,
 "GetCInSubworkspace",
 "Get element c in the subworkspace.",
 create_curl_cmd(type="GET", data="elements/c", base_url="http://localhost:8080/alfresco/service/workspaces/", post_type="elements", branch="theSubworkspace/", project_post=False),
@@ -1141,7 +1163,7 @@ common_filters,
 ],
 
 [
-224,
+226,
 "GetDInMaster",
 "Get element d in the master workspace.",
 create_curl_cmd(type="GET", data="elements/d", base_url="http://localhost:8080/alfresco/service/workspaces/", post_type="elements", branch="master/", project_post=False),
@@ -1151,7 +1173,7 @@ common_filters,
 ],
 
 [
-225,
+227,
 "GetDInParent",
 "Get element d in the parent workspace.",
 create_curl_cmd(type="GET", data="elements/d", base_url="http://localhost:8080/alfresco/service/workspaces/", post_type="elements", branch="theParentWorkspace/", project_post=False),
@@ -1161,7 +1183,7 @@ common_filters,
 ],
 
 [
-226,
+228,
 "GetDInSubworkspace",
 "Get element d in the subworkspace.",
 create_curl_cmd(type="GET", data="elements/d", base_url="http://localhost:8080/alfresco/service/workspaces/", post_type="elements", branch="theSubworkspace/", project_post=False),
@@ -1171,7 +1193,7 @@ common_filters,
 ],
 
 [
-227,
+229,
 "GetEInMaster",
 "Get element e in the master workspace.",
 create_curl_cmd(type="GET", data="elements/e", base_url="http://localhost:8080/alfresco/service/workspaces/", post_type="elements", branch="master/", project_post=False),
@@ -1181,7 +1203,7 @@ common_filters,
 ],
 
 [
-228,
+230,
 "GetEInParent",
 "Get element e in the parent workspace.",
 create_curl_cmd(type="GET", data="elements/e", base_url="http://localhost:8080/alfresco/service/workspaces/", post_type="elements", branch="theParentWorkspace/", project_post=False),
@@ -1191,7 +1213,7 @@ common_filters,
 ],
 
 [
-229,
+231,
 "GetEInSubworkspace",
 "Get element e in the subworkspace.",
 create_curl_cmd(type="GET", data="elements/e", base_url="http://localhost:8080/alfresco/service/workspaces/", post_type="elements", branch="theSubworkspace/", project_post=False),
@@ -1201,7 +1223,7 @@ common_filters,
 ],
 
 [
-230,
+232,
 "GetFInMaster",
 "Get element f in the master workspace.",
 create_curl_cmd(type="GET", data="elements/f", base_url="http://localhost:8080/alfresco/service/workspaces/", post_type="elements", branch="master/", project_post=False),
@@ -1211,7 +1233,7 @@ common_filters,
 ],
 
 [
-231,
+233,
 "GetFInParent",
 "Get element f in the parent workspace.",
 create_curl_cmd(type="GET", data="elements/f", base_url="http://localhost:8080/alfresco/service/workspaces/", post_type="elements", branch="theParentWorkspace/", project_post=False),
@@ -1221,7 +1243,7 @@ common_filters,
 ],
 
 [
-232,
+234,
 "GetFInSubworkspace",
 "Get element f in the subworkspace.",
 create_curl_cmd(type="GET", data="elements/f", base_url="http://localhost:8080/alfresco/service/workspaces/", post_type="elements", branch="theSubworkspace/", project_post=False),
@@ -1231,7 +1253,7 @@ common_filters,
 ],
         
 [
-233,
+235,
 "CompareMasterAToLatest",
 "Compare master to itself between post time of a and latest",
 create_curl_cmd(type="GET", data="", base_url="http://localhost:8080/alfresco/service/", post_type="elements", branch="diff/master/master/2015-08-24T08:46:58.502-0700/latest", project_post=False),
@@ -1241,7 +1263,7 @@ common_filters+['"id"','"qualifiedId"','"creator"','"modifier"'],
 ],
         
 [
-234,
+236,
 "CompareMasterBToLatest",
 "Compare master to itself between the post times of b and latest",
 create_curl_cmd(type="GET", data="", base_url="http://localhost:8080/alfresco/service/", post_type="elements", branch="diff/master/master/2015-08-27T15:40:26.891-0700/latest", project_post=False),
@@ -1251,7 +1273,7 @@ common_filters+['"id"','"qualifiedId"','"creator"','"modifier"'],
 ],
         
 [
-235,
+237,
 "CompareMasterParentLatestToLatest",
 "Compare master to theParentWorkspace with timepoints latest and latest",
 create_curl_cmd(type="GET", data="", base_url="http://localhost:8080/alfresco/service/", post_type="elements", branch="diff/master/theParentWorkspace/latest/latest", project_post=False),
@@ -1261,7 +1283,7 @@ common_filters+['"id"','"qualifiedId"','"creator"','"modifier"'],
 ],
 
 [
-236,
+238,
 "CompareMasterParentBranchTimeToLatest",
 "Compare master to theParentWorkspace with timepoints at creation of parent and latest",
 create_curl_cmd(type="GET", data="", base_url="http://localhost:8080/alfresco/service/", post_type="elements", branch="diff/master/theParentWorkspace/2015-08-24T08:47:10.054-0700/latest", project_post=False),
@@ -1271,7 +1293,7 @@ common_filters+['"id"','"qualifiedId"','"creator"','"modifier"'],
 ],
         
 [
-237,
+239,
 "CompareMasterSubworkspaceLatestToLatest",
 "Compare master to theSubworkspace with timepoints at latest and latest",
 create_curl_cmd(type="GET", data="", base_url="http://localhost:8080/alfresco/service/", post_type="elements", branch="diff/master/theSubworkspace/latest/latest", project_post=False),
