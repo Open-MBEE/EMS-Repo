@@ -189,8 +189,8 @@ public class ViewGet extends AbstractJavaWebScript {
 
         printFooter();
 
-        if (logger.isInfoEnabled()) {
-            logger.info( "ViewGet: " + timer );
+        if (logger.isDebugEnabled()) {
+            logger.debug( "ViewGet: " + timer );
         }
 
         return model;
