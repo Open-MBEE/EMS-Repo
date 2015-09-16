@@ -990,7 +990,7 @@ common_filters+['"id"','"qualifiedId"','"timestamp"','"creator"','"modifier"'],
 "CompareWorkspacesG1G2Glom",
 "Compare workspaces wsG1 and wsG2 with timestamps with a initial diff",
 create_curl_cmd(type="GET",base_url=SERVICE_URL,
-                branch="diff/$gv1/$gv2/$gv3/$gv4&fullCompare"),
+                branch="diff/$gv1/$gv2/$gv3/$gv4?fullCompare"),
 True, 
 common_filters+['"id"','"qualifiedId"','"timestamp"','"creator"','"modifier"'],
 ["test","workspaces","develop"]
