@@ -20,22 +20,7 @@
         }]
     },
     "workspace2": {
-        "deletedElements": [{
-            "qualifiedName": "/europa/JW_TEST/notInThePast",
-            "name": "notInThePast",
-            "sysmlid": "notInThePast",
-            "owner": "123456",
-            "documentation": "",
-            "specialization": {
-                "specification": {
-                    "valueExpression": null,
-                    "expressionBody": ["foo8"],
-                    "type": "OpaqueExpression"
-                },
-                "type": "Constraint"
-            },
-            "editable": true
-        }],
+        "deletedElements": [],
         "addedElements": [],
         "conflictedElements": [],
         "updatedElements": [],

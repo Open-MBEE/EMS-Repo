@@ -44,26 +44,6 @@
                 }
             },
             {
-                "qualifiedName": "/europa/JW_TEST/300/301/302/303",
-                "sysmlid": "303",
-                "editable": true,
-                "version": "1.4",
-                "name": "303",
-                "owner": "302",
-                "documentation": "talk modified",
-                "specialization": {
-                    "propertyType": null,
-                    "isDerived": false,
-                    "isSlot": false,
-                    "value": [{
-                        "valueExpression": null,
-                        "string": "dlam_string modified",
-                        "type": "LiteralString"
-                    }],
-                    "type": "Property"
-                }
-            },
-            {
                 "name": "conflict",
                 "qualifiedName": "/europa/JW_TEST/conflict",
                 "documentation": "",
@@ -292,21 +272,6 @@
                 "owner": "403",
                 "sysmlid": "404",
                 "specialization": {"type": "Package"}
-            },
-            {
-                "name": "303",
-                "qualifiedName": "/europa/JW_TEST/300/301/302/303",
-                "owner": "302",
-                "documentation": "talk",
-                "sysmlid": "303",
-                "specialization": {
-                    "value": [{
-                        "valueExpression": null,
-                        "string": "dlam_string",
-                        "type": "LiteralString"
-                    }],
-                    "type": "Property"
-                }
             }
         ],
         "qualifiedName": "master/wsA/wsT",
