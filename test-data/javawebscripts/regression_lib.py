@@ -48,6 +48,7 @@ gv3 = None
 gv4 = None
 gv5 = None
 gv6 = None
+gv7 = None
 
 # These capture the curl output for any teardown functions
 orig_output = None
@@ -74,6 +75,9 @@ def set_gv5( v ):
 def set_gv6( v ):
     global gv6
     gv6 = v
+def set_gv7( v ):
+    global gv7
+    gv7 = v
 
 import re
 
@@ -180,6 +184,8 @@ def set_wsid_to_gv(gv):
             set_gv5(j["workspaces"][0]["id"])
         elif gv == 6:
             set_gv6(j["workspaces"][0]["id"])
+        elif gv == 7:
+            set_gv7(j["workspaces"][0]["id"])
             
 def set_wsid_to_gv1():
     '''Get the json output, and sets gv1 to the that workspace id'''
@@ -225,6 +231,8 @@ def set_read_to_gv(gv):
             set_gv5(j["elements"][0]["read"])
         elif gv == 6:
             set_gv6(j["elements"][0]["read"])
+        elif gv == 7:
+            set_gv7(j["elements"][0]["read"])
             
 def set_read_to_gv1():
     '''Get the json output, and sets gv1 to the read time'''
@@ -250,6 +258,20 @@ def set_read_to_gv6():
     '''Get the json output, and sets gv6 to the read time'''
     set_read_to_gv(6)
     
+def set_read_to_gv7():
+    '''Get the json output, and sets gv6 to the read time'''
+    set_read_to_gv(7)
+    
+def set_read_to_gv6_delta_gv7(delta=3):
+    '''Get the json output, and sets gv6 to the read time'''
+    global gv6,gv7
+    
+    set_read_to_gv(6)
+    if gv6 and "." in gv6:
+     date = datetime.datetime.strptime(gv6.split(".")[0], "%Y-%m-%dT%H:%M:%S")
+     date = date + datetime.timedelta(seconds=delta)
+     gv7 = date.strftime("%Y-%m-%dT%H:%M:%S.000")
+     
 def set_gv1_to_current_time():
     '''Gets the current time'''
     global gv1
@@ -272,6 +294,16 @@ def set_read_delta_to_gv1(delta=7):
         date = date - datetime.timedelta(seconds=delta)
         gv1 = date.strftime("%Y-%m-%dT%H:%M:%S.000")
     
+def set_read_delta_to_gv2(delta=10):
+    '''Get the json output, and sets gv1 to the read time + delta secs'''
+    global gv2
+    
+    set_read_to_gv2()
+    if gv2 and "." in gv2:
+        date = datetime.datetime.strptime(gv2.split(".")[0], "%Y-%m-%dT%H:%M:%S")
+        date = date + datetime.timedelta(seconds=delta)
+        gv2 = date.strftime("%Y-%m-%dT%H:%M:%S.000")
+        
 def create_command_line_options():
 
     '''Create all the command line options for this application
@@ -441,6 +473,7 @@ def print_pass(msg):
     global passed_tests
     passed_tests += 1
     print "\nPASS: "+str(msg)
+    print "\n# passed: "+ str(passed_tests) + ",  # failed: " + str(failed_tests)
 
 def print_error(msg, outpt):
     global failed_tests
@@ -448,14 +481,27 @@ def print_error(msg, outpt):
     errs.append(msg)
     print "\nFAIL: "+str(msg)
     print str(outpt)
+    print "\n# passed: "+ str(passed_tests) + ",  # failed: " + str(failed_tests)
     
 def mbee_util_jar_path():
-    path = "/Users/dank/.m2/repository/gov/nasa/jpl/mbee/util/mbee_util/"
+    path = "../../../../.m2/repository/gov/nasa/jpl/mbee/util/mbee_util/"
     pathList = glob.glob(path+"*SNAPSHOT/*SNAPSHOT.jar")
     if pathList:
         return pathList[0]
     else:
         return path+"0.0.16/mbee_util-0.0.16.jar"
+
+def mbee_util_jar_path2():
+    path = "../../src/main/amp/web/WEB-INF/lib/mbee-util.jar"
+    return path
+
+def mbee_util_jar_path3():
+    path = "../../../util/mbee_util.jar"
+    return path
+
+def mbee_util_jar_path4():
+    path = "../../target/mms-repo-war/WEB-INF/lib/mbee_util.jar"
+    return path
 
 def run_curl_test(test_num, test_name, test_desc, curl_cmd, use_json_diff=False, filters=None,
                   setupFcn=None, postProcessFcn=None, teardownFcn=None, delay=None):
@@ -477,7 +523,7 @@ def run_curl_test(test_num, test_name, test_desc, curl_cmd, use_json_diff=False,
     global filter_output
     global orig_json
     global filtered_json
-    global gv1, gv2, gv3, gv4, gv5, gv6
+    global gv1, gv2, gv3, gv4, gv5, gv6, gv7
 
     result_json = "%s/%s.json"%(result_dir,test_name)
     result_orig_json = "%s/%s_orig.json"%(result_dir,test_name)
@@ -511,6 +557,7 @@ def run_curl_test(test_num, test_name, test_desc, curl_cmd, use_json_diff=False,
     curl_cmd = str(curl_cmd).replace("$gv4", str(gv4))
     curl_cmd = str(curl_cmd).replace("$gv5", str(gv5))
     curl_cmd = str(curl_cmd).replace("$gv6", str(gv6))
+    curl_cmd = str(curl_cmd).replace("$gv7", str(gv7))
 
     foo=""
     if (evaluate_only):
@@ -570,7 +617,7 @@ def run_curl_test(test_num, test_name, test_desc, curl_cmd, use_json_diff=False,
         else:
             # Perform diff:
             if use_json_diff:
-                cp = ".:%s:../../target/mms-repo-ent-war/WEB-INF/lib/json-20140107.jar:../../target/mms-repo-war/WEB-INF/lib/json-20140107.jar:../../target/mms-repo-war/WEB-INF/lib/json-20090211.jar:../../target/classes:../../target/mms-repo-war/WEB-INF/lib/mbee_util.jar"%mbee_util_jar_path()
+                cp = ".:%s:%s:%s:%s:../../target/mms-repo-ent-war/WEB-INF/lib/json-20140107.jar:../../target/mms-repo-war/WEB-INF/lib/json-20140107.jar:../../target/mms-repo-war/WEB-INF/lib/json-20090211.jar:../../target/classes"%(mbee_util_jar_path(),mbee_util_jar_path2(),mbee_util_jar_path3(),mbee_util_jar_path4())
                 diff_cmd = "java -cp %s gov.nasa.jpl.view_repo.util.JsonDiff"%cp
             else:
                 diff_cmd = "diff"

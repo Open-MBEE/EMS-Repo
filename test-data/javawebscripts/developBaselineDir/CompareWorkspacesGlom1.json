@@ -1,10 +1,7 @@
 {
-    "email": "admin@alfresco.com",
-    "status": "COMPLETED",
-    "user": "admin",
     "workspace1": {
-        "name": "wsA",
         "qualifiedName": "master/wsA",
+        "name": "wsA",
         "elements": [
             {
                 "qualifiedName": "/no_site/no_site_no_project/holding_bin/300",
@@ -41,11 +38,11 @@
         "addedElements": [],
         "conflictedElements": [],
         "updatedElements": [{
-            "qualifiedName": "/no_site/no_site_no_project/holding_bin/300",
             "name": "300",
-            "sysmlid": "x",
-            "documentation": "x is x",
+            "qualifiedName": "/no_site/no_site_no_project/holding_bin/300",
             "owner": "holding_bin_no_site_no_project",
+            "documentation": "x is x",
+            "sysmlid": "x",
             "specialization": {
                 "value": [{
                     "valueExpression": null,
@@ -55,8 +52,8 @@
                 "type": "Property"
             }
         }],
-        "name": "wsB",
         "qualifiedName": "master/wsA/wsB",
+        "name": "wsB",
         "movedElements": []
     }
 }
