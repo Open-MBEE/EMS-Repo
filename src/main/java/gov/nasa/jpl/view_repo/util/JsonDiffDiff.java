@@ -453,7 +453,10 @@ public class JsonDiffDiff extends AbstractDiff< JSONObject, Object, String > {
     * @param diff2 changes to the second workspace of diff0
     * @return
     */
-   public static JsonDiffDiff diff( JSONObject diff0, JSONObject diff1, JSONObject diff2 ) {
+   public static JsonDiffDiff diff( JSONObject diff0,
+                                    JSONObject diff1,
+                                    JSONObject diff2,
+                                    boolean mergeStyleDiff ) {
        // Make a copy of the original diff and update the copy to return.
        JSONObject diff3 = NodeUtil.clone( diff0 );
        
@@ -506,6 +509,7 @@ public class JsonDiffDiff extends AbstractDiff< JSONObject, Object, String > {
            JSONObject element1_1 = dDiff1.getElement1( id );
            JSONObject element3_2 = dDiff3.getElement2( id );
            JSONObject element3_1 = dDiff3.getElement1( id );
+           
            boolean conflict = false;
            // Compute the op3 - op1 case.
            switch ( op1 ) {
@@ -514,10 +518,22 @@ public class JsonDiffDiff extends AbstractDiff< JSONObject, Object, String > {
                        case ADD: // ADD - ADD = UPDATE
                        case UPDATE: // UPDATE - ADD = UPDATE
                            conflict = true;
+                           // If not mergeStyleDiff, we need to undo the change
+                           // made by element1_2 in order for
+                           // element3_1 + element1_2 + newElement3_2 =
+                           // element3_1 + oldElement3_2 + element2_2
+                           // We're solving for newElement3_2.
+                           // If mergeStyleDiff, we fix this later by not using
+                           // the result of the undo.
                            Pair< JSONObject, JSONObject > undonePair =
                                    undo( element3_1, element1_2, true );
                            JSONObject undone = undonePair.first;
                            JSONObject newElement3_1 = undonePair.second;
+                            // If mergeStyleDiff, we don't need to undo the change by
+                            // element1_2, so we make undone null here. Undo was
+                            // useful to compute newElement3_1, so we still call
+                            // it if only to keep the code simple.
+                           if ( mergeStyleDiff ) undone = null;
                            JSONObject updated =
                                    glomElements( undone, element3_2, false );
                            dDiff3.updateDiff( id, newElement3_1, updated,
@@ -525,13 +541,26 @@ public class JsonDiffDiff extends AbstractDiff< JSONObject, Object, String > {
                            break;
                        case DELETE:  // DELETE - ADD = DELETE
                            conflict = true;
+                            // Since op1 is an add (instead of an update), the
+                            // clone here is used to replace element3_1 with
+                            // element1_2 instead of glomming element3_1 with
+                            // element1_2.
                            newElement3_1 = NodeUtil.clone( element1_2 );
+                           // mergeStyleDiff has no effect on delete.
                            dDiff3.set2( id, DiffOp.DELETE, newElement3_1, conflict );
                            dDiff3.set1( id, newElement3_1, false );
                            break;
                        case NONE:  // NONE - ADD = DELETE
                            conflict = false;
+                           // Since op1 is an add (instead of an update), the
+                           // clone here is used to replace element3_1 with
+                           // element1_2 instead of glomming element3_1 with
+                           // element1_2.
                            newElement3_1 = NodeUtil.clone( element1_2 );
+                           // If mergeStyleDiff==false, we need to undo the add
+                           // with a delete.
+                           // If mergeStyleDiff==true, there is no effect to add
+                           // to workspace2 of dDiff3.
                            dDiff3.set2( id, DiffOp.DELETE, newElement3_1, conflict );
                            dDiff3.set1( id, newElement3_1, false );
                        default:
@@ -543,10 +572,22 @@ public class JsonDiffDiff extends AbstractDiff< JSONObject, Object, String > {
                        case ADD: // ADD - UPDATE = UPDATE
                        case UPDATE: // UPDATE - UPDATE = UPDATE
                            conflict = true;
+                           // If not mergeStyleDiff, we need to undo the update
+                           // made by element1_2 in order for
+                           // element3_1 + element1_2 + newElement3_2 =
+                           // element3_1 + oldElement3_2 + element2_2
+                           // We're solving for newElement3_2.
+                            // If mergeStyleDiff, we fix this later by not using
+                            // the result of the undo.
                            Pair< JSONObject, JSONObject > undonePair =
                                    undo( element3_1, element1_2, false );
                            JSONObject undone = undonePair.first;
                            JSONObject newElement3_1 = undonePair.second;
+                           // If mergeStyleDiff, we don't need to undo the change by
+                           // element1_2, so we make undone null here. Undo was
+                           // useful to compute newElement3_1, so we still call
+                           // it if only to keep the code simple.
+                           if ( mergeStyleDiff ) undone = null;
                            JSONObject updated = 
                                    glomElements( undone, element3_2, false );
                            
@@ -555,17 +596,33 @@ public class JsonDiffDiff extends AbstractDiff< JSONObject, Object, String > {
                            break;
                        case DELETE:  // DELETE - UPDATE = DELETE
                            conflict = true;
+                           // Since op1 is an add (instead of an update), the
+                           // clone here is used to replace element3_1 with
+                           // element1_2 instead of glomming element3_1 with
+                           // element1_2.
                            newElement3_1 = NodeUtil.clone( element1_2 );
+                           // mergeStyleDiff has no effect on delete.
                            dDiff3.set2( id, DiffOp.DELETE, newElement3_1, conflict );
                            dDiff3.set1( id, newElement3_1, false );
                            break;
                        case NONE:  // NONE - UPDATE = UPDATE
                            conflict = false;
-                            JSONObject oldElement3_1 =
+                           JSONObject oldElement3_1 =
                                     ( element3_1 == null ? element1_1
                                                          : element3_1 );
+                           // If not mergeStyleDiff, we need to undo the update
+                           // made by element1_2 in order for
+                           // element3_1 + element1_2 + newElement3_2 =
+                           // element3_1 + oldElement3_2 + element2_2
+                           // We're solving for newElement3_2.
                            undonePair = undo( oldElement3_1, element1_2, false);
                            undone = undonePair.first;
+                           // If mergeStyleDiff, we don't need to undo the change by
+                           // element1_2, so we make undone null here. Undo was
+                           // useful to compute newElement3_1, so we still call
+                           // it if only to keep the code simple.
+                           if ( mergeStyleDiff ) undone = null;
+                           // newElement3_1 = element3_1 + element1_2
                            newElement3_1 = undonePair.second;
 
                            dDiff3.updateDiff( id, newElement3_1, undone,
@@ -577,21 +634,50 @@ public class JsonDiffDiff extends AbstractDiff< JSONObject, Object, String > {
                    break;
                case DELETE:
                    switch ( op3 ) {
-                       case ADD: // ADD - DELETE = ADD
+                       case ADD: // ADD - DELETE = ADD or UPDATE
                            conflict = true;
+                           // This case shouldn't be possible since the
+                           // branches disagree on the prior existence of the
+                           // element.  We can check if element3_1 is null or not
+                           // since it should be the prior element.
+                           // No need to change element3_2 since it's an add,
+                           // except it's really an update if element3_1
+                           // exists.
                            dDiff3.set1( id, DiffOp.DELETE, element3_1, conflict );
+                           if ( element3_1 != null ) {
+                               dDiff3.set2( id, DiffOp.UPDATE, element3_2, conflict );
+                           }
                            break;
-                       case UPDATE: // UPDATE - DELETE = ADD
+                       case UPDATE: // UPDATE - DELETE = ADD OR UPDATE
                            conflict = true;
-                           dDiff3.set2( id, DiffOp.ADD, element3_2, conflict );
+                           // This case shouldn't be possible since the
+                           // branches disagree on the prior existence of the
+                           // element.  We can check if element3_1 is null or not
+                           // since it should be the prior element.
+                           // No need to change element3_2 since it's an add,
+                           // except it's really an update if element3_1
+                           // exists.
+                           dDiff3.set2( id, ( element3_1 == null ? DiffOp.ADD
+                                                                 : DiffOp.UPDATE ),
+                                        element3_2, conflict );
                            dDiff3.set1( id, DiffOp.DELETE, element3_1, false );
                            break;
                        case DELETE:  // DELETE - DELETE = NONE
+                            // No change, so nothing to do.
+                            // If this is a mergeStyleDiff, you might argue that
+                            // the delete be included, but it wouldn't change
+                            // anything, so we're not including it.
                            dDiff3.removeFromDiff(id);
                            break;
                        case NONE:  // NONE - DELETE = ADD
                            conflict = false;
-                           dDiff3.set2( id, DiffOp.ADD, element3_1, conflict );
+                           // If a mergeStyleDiff, nothing to do since we
+                           // ignore workspace1 changes that do not conflict.
+                           // If not a mergeStyleDiff, then we undo the delete
+                           // of element3_1 by adding it.
+                           if ( !mergeStyleDiff ) {
+                               dDiff3.set2( id, DiffOp.ADD, element3_1, conflict );
+                           }
                            dDiff3.set1( id, DiffOp.DELETE, element3_1, false );
                            break;
                        default:
@@ -599,12 +685,17 @@ public class JsonDiffDiff extends AbstractDiff< JSONObject, Object, String > {
                    }
                    break;
                case NONE:
-                   // Nothing to do for this case
                    switch ( op3 ) {
                        case ADD: // ADD - NONE = ADD
                        case UPDATE: // UPDATE - NONE = UPDATE
                        case DELETE:  // DELETE - NONE = DELETE
                        case NONE:  // NONE - NONE = NONE
+                           // Nothing to do for this case except that we need
+                           // to get some default properties since element3_2
+                           // might not have some of them. We use diff() to do
+                           // this.
+                           // Since nothing happens in workspace1, we can
+                           // ignore the mergeStyleDiff flag.
                     	   dDiff3.set2(id, op3, diff(element3_1, element3_2, false).first, false);
                            break;
                        default:
