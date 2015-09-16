@@ -404,8 +404,8 @@ def parse_test_nums(option, opt, value, parser):
     
         myList = []
         keyListBounds = str.split('-')
-        bound1 = int(keyListBounds[0])
-        bound2 = int(keyListBounds[1])
+        bound1 = float(keyListBounds[0])
+        bound2 = float(keyListBounds[1])
         
         mult = 1 if bound2 >= bound1 else -1
 
@@ -431,7 +431,7 @@ def parse_test_nums(option, opt, value, parser):
                     
                 # It was a single key:
                 else:
-                    keyList.append(int(keyStr))
+                    keyList.append(float(keyStr))
                     
         # value is just a range ie 1-3:
         elif value.find('-') != -1:
@@ -439,7 +439,7 @@ def parse_test_nums(option, opt, value, parser):
 
         #value was just a single key:
         else:
-            keyList = [int(value)]
+            keyList = [float(value)]
                     
     parser.test_nums = keyList
     

@@ -468,8 +468,8 @@ set_read_to_gv4
 # This test case depends on test 170 thats sets gv2
 [
 168,
-"CompareWorkspaces",
-"Compare workspaces",
+"CompareWorkspacesForMerge",
+"Compare workspaces for a merge of the second into the first",
 create_curl_cmd(type="GET",base_url=SERVICE_URL,
                 branch="diff/$gv1/$gv2/latest/latest"),
 True, 
@@ -482,9 +482,24 @@ None
 ],
         
 [
+168.5,
+"CompareWorkspaces",
+"Compare workspaces",
+create_curl_cmd(type="GET",base_url=SERVICE_URL,
+                branch="diff/$gv1/$gv2/latest/latest?fullCompare"),
+True, 
+common_filters+['"id"','"qualifiedId"','"creator"','"modifier"'],
+["test","workspaces","develop"],
+None,
+None,
+#do20 
+None
+],
+        
+[
 169,
-"CompareWorkspacesBackground1",
-"Compare workspaces in the background, this will return that it is in process",
+"CompareWorkspacesForMergeBackground1",
+"Compare workspaces for a merge in the background, this will return that it is in process",
 create_curl_cmd(type="GET",base_url=SERVICE_URL,
                 branch="diff/$gv1/$gv2/latest/latest?background"),
 True, 
@@ -492,6 +507,17 @@ common_filters+['"id"','"qualifiedId"','"diffTime"','"creator"','"modifier"'],
 ["test","workspaces","develop"],
 ],
         
+[
+169.5,
+"CompareWorkspacesBackground1",
+"Compare workspaces in the background, this will return that it is in process",
+create_curl_cmd(type="GET",base_url=SERVICE_URL,
+                branch="diff/$gv1/$gv2/latest/latest?background&fullCompare"),
+True, 
+common_filters+['"id"','"qualifiedId"','"diffTime"','"creator"','"modifier"'],
+["test","workspaces","develop"],
+],
+
 [
 170,
 "CompareWorkspacesBackground2",
@@ -506,11 +532,26 @@ None,
 None,
 20
 ],
-        
+
+[
+170.5,
+"CompareWorkspacesBackground2",
+"Compare workspaces in the background again, this will return the results of the background diff",
+create_curl_cmd(type="GET",base_url=SERVICE_URL,
+                branch="diff/$gv1/$gv2/latest/latest?background&fullCompare"),
+True, 
+common_filters+['"id"','"qualifiedId"','"diffTime"','"creator"','"modifier"'],
+["test","workspaces","develop"],
+None,
+None,
+None,
+20
+],
+
 [
 171,
-"CompareWorkspacesGlom1",
-"Compare workspaces where there is a initial background diff stored",
+"CompareWorkspacesGlomForMerge1",
+"Compare workspaces for a merge where there is a initial background diff stored",
 create_curl_cmd(type="GET",base_url=SERVICE_URL,
                 branch="diff/$gv1/$gv2/latest/latest"),
 True, 
@@ -520,7 +561,21 @@ None,
 None,
 None,
 ],
-        
+
+[
+171.5,
+"CompareWorkspacesGlom1",
+"Compare workspaces where there is a initial background diff stored",
+create_curl_cmd(type="GET",base_url=SERVICE_URL,
+                branch="diff/$gv1/$gv2/latest/latest?fullCompare"),
+True, 
+common_filters+['"id"','"qualifiedId"','"diffTime"','"creator"','"modifier"'],
+["test","workspaces","develop"],
+None,
+None,
+None,
+],
+
 [
 172,
 "PostToWorkspaceForGlom",
@@ -537,10 +592,24 @@ None,
         
 [
 173,
+"CompareWorkspacesGlomForMerge2",
+"Compare workspaces for a merge where there is a initial background diff stored and a change has been made since then.",
+create_curl_cmd(type="GET",base_url=SERVICE_URL,
+                branch="diff/$gv1/$gv2/latest/latest"),
+True, 
+common_filters+['"id"','"qualifiedId"','"diffTime"','"creator"','"modifier"'],
+["test","workspaces","develop"],
+None,
+None,
+None,
+],
+
+[
+173.5,
 "CompareWorkspacesGlom2",
 "Compare workspaces where there is a initial background diff stored and a change has been made since then.",
 create_curl_cmd(type="GET",base_url=SERVICE_URL,
-                branch="diff/$gv1/$gv2/latest/latest"),
+                branch="diff/$gv1/$gv2/latest/latest?fullCompare"),
 True, 
 common_filters+['"id"','"qualifiedId"','"diffTime"','"creator"','"modifier"'],
 ["test","workspaces","develop"],
@@ -650,15 +719,26 @@ common_filters+['"MMS_','MMS_'],
 # This test case depends on the previous two
 [
 182,
-"CompareWorkspacesWithBranchTime",
-"Compare workspaces",
+"CompareWorkspacesWithBranchTimeForMerge",
+"Compare workspaces with branch times for a merge",
 create_curl_cmd(type="GET",base_url=SERVICE_URL,
                 branch="diff/$gv1/$gv5/latest/latest"),
 True, 
 common_filters+['"id"','"qualifiedId"','"creator"','"modifier"'],
 ["test","workspaces","develop"]
 ],
-        
+
+[
+182.5,
+"CompareWorkspacesWithBranchTime",
+"Compare workspaces",
+create_curl_cmd(type="GET",base_url=SERVICE_URL,
+                branch="diff/$gv1/$gv5/latest/latest?fullCompare"),
+True, 
+common_filters+['"id"','"qualifiedId"','"creator"','"modifier"'],
+["test","workspaces","develop"]
+],
+
 # This test case depends on previous ones
 [
 183,
@@ -692,37 +772,70 @@ set_wsid_to_gv6
 # This test case depends on the previous ones
 [
 185,
-"CompareWorkspacesWithBranchTimes",
-"Compare workspaces both which have a branch time and with a modified element on the common parent",
+"CompareWorkspacesWithBranchTimesForMerge",
+    "Compare workspaces each of which with a branch time and with a modified element on the common parent for a merge",
 create_curl_cmd(type="GET",base_url=SERVICE_URL,
                 branch="diff/$gv5/$gv6/latest/latest"),
 True, 
 common_filters+['"id"','"qualifiedId"','"creator"','"modifier"'],
 ["test","workspaces","develop"]
 ],
-    
+
+[
+185.5,
+"CompareWorkspacesWithBranchTimes",
+"Compare workspaces both which have a branch time and with a modified element on the common parent",
+create_curl_cmd(type="GET",base_url=SERVICE_URL,
+                branch="diff/$gv5/$gv6/latest/latest?fullCompare"),
+True, 
+common_filters+['"id"','"qualifiedId"','"creator"','"modifier"'],
+["test","workspaces","develop"]
+],
+
 [
 186,
-"CompareWorkspacesBackgroundOutdated",
-"Compare workspaces in the background, this will return that it is outdated",
+"CompareWorkspacesForMergeBackgroundOutdated",
+"Compare workspaces for a merge in the background, this will return that it is outdated",
 create_curl_cmd(type="GET",base_url=SERVICE_URL,
                 branch="diff/$gv1/$gv2/latest/latest?background"),
 True, 
 common_filters+['"id"','"qualifiedId"','"diffTime"','"creator"','"modifier"'],
 ["test","workspaces","develop"],
 ],
-        
+
+[
+186.5,
+"CompareWorkspacesBackgroundOutdated",
+"Compare workspaces in the background, this will return that it is outdated",
+create_curl_cmd(type="GET",base_url=SERVICE_URL,
+                branch="diff/$gv1/$gv2/latest/latest?background&fullCompare"),
+True, 
+common_filters+['"id"','"qualifiedId"','"diffTime"','"creator"','"modifier"'],
+["test","workspaces","develop"],
+],
+
 [
 187,
-"CompareWorkspacesBackgroundRecalculate",
-"Compare workspaces in the background, and forces a recalculate on a outdated diff",
+"CompareWorkspacesForMergeBackgroundRecalculate",
+"Compare workspaces for a merge in the background, and forces a recalculate on a outdated diff",
 create_curl_cmd(type="GET",base_url=SERVICE_URL,
                 branch="diff/$gv1/$gv2/latest/latest?background=true&recalculate=true"),
 True, 
 common_filters+['"id"','"qualifiedId"','"diffTime"','"creator"','"modifier"'],
 ["test","workspaces","develop"],
 ],
-        
+
+[
+187.5,
+"CompareWorkspacesBackgroundRecalculate",
+"Compare workspaces in the background, and forces a recalculate on a outdated diff",
+create_curl_cmd(type="GET",base_url=SERVICE_URL,
+                branch="diff/$gv1/$gv2/latest/latest?background=true&recalculate=true&fullCompare"),
+True, 
+common_filters+['"id"','"qualifiedId"','"diffTime"','"creator"','"modifier"'],
+["test","workspaces","develop"],
+],
+
 [
 188,
 "CreateWorkspaceAgain1",
@@ -819,32 +932,65 @@ set_read_to_gv4
 # This test case depends on test 234 and 235
 [
 195,
-"CompareWorkspacesG1G2",
-"Compare workspaces wsG1 and wsG2 with timestamps",
+"CompareWorkspacesG1G2ForMerge",
+"Compare workspaces wsG1 and wsG2 with timestamps for a merge",
 create_curl_cmd(type="GET",base_url=SERVICE_URL,
                 branch="diff/$gv1/$gv2/$gv3/$gv4"),
 True, 
 common_filters+['"id"','"qualifiedId"','"timestamp"','"creator"','"modifier"'],
 ["test","workspaces","develop"]
 ],
-        
+
+[
+195.5,
+"CompareWorkspacesG1G2",
+"Compare workspaces wsG1 and wsG2 with timestamps",
+create_curl_cmd(type="GET",base_url=SERVICE_URL,
+                branch="diff/$gv1/$gv2/$gv3/$gv4?fullCompare"),
+True, 
+common_filters+['"id"','"qualifiedId"','"timestamp"','"creator"','"modifier"'],
+["test","workspaces","develop"]
+],
+
 [
 196,
-"CompareWorkspacesG1G2Background",
-"Compare workspaces wsG1 and wsG2 with timestamps in background to set up a initial diff for the next test",
+"CompareWorkspacesG1G2ForMergeBackground",
+"Compare workspaces wsG1 and wsG2 with timestamps for a merge in the background to set up a initial diff for the next test",
 create_curl_cmd(type="GET",base_url=SERVICE_URL,
                 branch="diff/$gv1/$gv2/$gv3/$gv4?background=true"),
 True, 
 common_filters+['"id"','"qualifiedId"','"timestamp"','"creator"','"modifier"','"diffTime"'],
 ["test","workspaces","develop"]
 ],
-        
+
+[
+196.5,
+"CompareWorkspacesG1G2Background",
+"Compare workspaces wsG1 and wsG2 with timestamps in background to set up a initial diff for the next test",
+create_curl_cmd(type="GET",base_url=SERVICE_URL,
+                branch="diff/$gv1/$gv2/$gv3/$gv4?background=true&fullCompare"),
+True, 
+common_filters+['"id"','"qualifiedId"','"timestamp"','"creator"','"modifier"','"diffTime"'],
+["test","workspaces","develop"]
+],
+
 [
 197,
+"CompareWorkspacesG1G2ForMergeGlom",
+"Compare workspaces wsG1 and wsG2 with timestamps for a merge with an initial diff",
+create_curl_cmd(type="GET",base_url=SERVICE_URL,
+                branch="diff/$gv1/$gv2/$gv3/$gv4"),
+True, 
+common_filters+['"id"','"qualifiedId"','"timestamp"','"creator"','"modifier"'],
+["test","workspaces","develop"]
+],
+
+[
+197.5,
 "CompareWorkspacesG1G2Glom",
 "Compare workspaces wsG1 and wsG2 with timestamps with a initial diff",
 create_curl_cmd(type="GET",base_url=SERVICE_URL,
-                branch="diff/$gv1/$gv2/$gv3/$gv4"),
+                branch="diff/$gv1/$gv2/$gv3/$gv4&fullCompare"),
 True, 
 common_filters+['"id"','"qualifiedId"','"timestamp"','"creator"','"modifier"'],
 ["test","workspaces","develop"]
@@ -916,8 +1062,8 @@ set_read_delta_to_gv1,
 # This test depends on the previous one:
 [
 203,
-"CompareWorkspacesNotInPast",
-"Compare workspace master with itself at the current time and a time in the past",
+"CompareWorkspacesForMergeNotInPast",
+"Compare workspace master with itself for a merge at the current time and a time in the past",
 create_curl_cmd(type="GET",base_url=SERVICE_URL,
                 branch="diff/master/master/latest/$gv1"),
 True, 
@@ -926,11 +1072,33 @@ common_filters+['"id"','"qualifiedId"','"timestamp"','"creator"','"modifier"'],
 ],
 
 [
+203.5,
+"CompareWorkspacesNotInPast",
+"Compare workspace master with itself at the current time and a time in the past",
+create_curl_cmd(type="GET",base_url=SERVICE_URL,
+                branch="diff/master/master/latest/$gv1?fullCompare"),
+True, 
+common_filters+['"id"','"qualifiedId"','"timestamp"','"creator"','"modifier"'],
+["test","workspaces","develop", "develop2"]
+],
+
+[
 204,
+"CompareWorkspacesForMergeNotInPastBackground",
+"Compare workspace master with itself for a merge at the current time and a time in the past in the background",
+create_curl_cmd(type="GET",base_url=SERVICE_URL,
+                branch="diff/master/master/latest/$gv1?background"),
+True, 
+common_filters+['"id"','"qualifiedId"','"timestamp"','"diffTime"','"creator"','"modifier"'],
+["test","workspaces","develop", "develop2"]
+],
+
+[
+204.5,
 "CompareWorkspacesNotInPastBackground",
 "Compare workspace master with itself at the current time and a time in the past in the background",
 create_curl_cmd(type="GET",base_url=SERVICE_URL,
-                branch="diff/master/master/latest/$gv1?background"),
+                branch="diff/master/master/latest/$gv1?background&fullCompare"),
 True, 
 common_filters+['"id"','"qualifiedId"','"timestamp"','"diffTime"','"creator"','"modifier"'],
 ["test","workspaces","develop", "develop2"]
@@ -1254,29 +1422,59 @@ common_filters,
         
 [
 235,
-"CompareMasterAToLatest",
-"Compare master to itself between post time of a and latest",
+"CompareMasterAToLatestForMerge",
+"Compare master to itself for a merge between post time of a and latest",
 create_curl_cmd(type="GET", data="", base_url="http://localhost:8080/alfresco/service/", post_type="elements", branch="diff/master/master/2015-08-24T08:46:58.502-0700/latest", project_post=False),
 True,
 common_filters+['"id"','"qualifiedId"','"creator"','"modifier"'],
 []
 ],
-        
+
+[
+235.5,
+"CompareMasterAToLatest",
+"Compare master to itself between post time of a and latest",
+create_curl_cmd(type="GET", data="", base_url="http://localhost:8080/alfresco/service/", post_type="elements", branch="diff/master/master/2015-08-24T08:46:58.502-0700/latest?fullCompare", project_post=False),
+True,
+common_filters+['"id"','"qualifiedId"','"creator"','"modifier"'],
+[]
+],
+
 [
 236,
-"CompareMasterBToLatest",
-"Compare master to itself between the post times of b and latest",
+"CompareMasterBToLatestForMerge",
+"Compare master to itself for a merge between the post times of b and latest",
 create_curl_cmd(type="GET", data="", base_url="http://localhost:8080/alfresco/service/", post_type="elements", branch="diff/master/master/2015-08-27T15:40:26.891-0700/latest", project_post=False),
 True,
 common_filters+['"id"','"qualifiedId"','"creator"','"modifier"'],
 []
 ],
-        
+
+[
+236.5,
+"CompareMasterBToLatest",
+"Compare master to itself between the post times of b and latest",
+create_curl_cmd(type="GET", data="", base_url="http://localhost:8080/alfresco/service/", post_type="elements", branch="diff/master/master/2015-08-27T15:40:26.891-0700/latest?fullCompare", project_post=False),
+True,
+common_filters+['"id"','"qualifiedId"','"creator"','"modifier"'],
+[]
+],
+
 [
 237,
+"CompareMasterParentLatestToLatestForMerge",
+"Compare master to theParentWorkspace for a merge with timepoints latest and latest",
+create_curl_cmd(type="GET", data="", base_url="http://localhost:8080/alfresco/service/", post_type="elements", branch="diff/master/theParentWorkspace/latest/latest", project_post=False),
+True,
+common_filters+['"id"','"qualifiedId"','"creator"','"modifier"'],
+[]
+],
+
+[
+237.5,
 "CompareMasterParentLatestToLatest",
 "Compare master to theParentWorkspace with timepoints latest and latest",
-create_curl_cmd(type="GET", data="", base_url="http://localhost:8080/alfresco/service/", post_type="elements", branch="diff/master/theParentWorkspace/latest/latest", project_post=False),
+create_curl_cmd(type="GET", data="", base_url="http://localhost:8080/alfresco/service/", post_type="elements", branch="diff/master/theParentWorkspace/latest/latest?fullCompare", project_post=False),
 True,
 common_filters+['"id"','"qualifiedId"','"creator"','"modifier"'],
 []
@@ -1291,12 +1489,32 @@ True,
 common_filters+['"id"','"qualifiedId"','"creator"','"modifier"'],
 []
 ],
-        
+
+[
+238.5,
+"CompareMasterParentBranchTimeToLatestForMerge",
+"Compare master to theParentWorkspace with timepoints for a merge at creation of parent and latest",
+create_curl_cmd(type="GET", data="", base_url="http://localhost:8080/alfresco/service/", post_type="elements", branch="diff/master/theParentWorkspace/2015-08-24T08:47:10.054-0700/latest&fullCompare", project_post=False),
+True,
+common_filters+['"id"','"qualifiedId"','"creator"','"modifier"'],
+[]
+],
+
 [
 239,
+"CompareMasterSubworkspaceLatestToLatestForMerge",
+"Compare master to theSubworkspace for a merge with timepoints at latest and latest",
+create_curl_cmd(type="GET", data="", base_url="http://localhost:8080/alfresco/service/", post_type="elements", branch="diff/master/theSubworkspace/latest/latest", project_post=False),
+True,
+common_filters+['"id"','"qualifiedId"','"creator"','"modifier"'],
+[]
+],
+
+[
+239.5,
 "CompareMasterSubworkspaceLatestToLatest",
 "Compare master to theSubworkspace with timepoints at latest and latest",
-create_curl_cmd(type="GET", data="", base_url="http://localhost:8080/alfresco/service/", post_type="elements", branch="diff/master/theSubworkspace/latest/latest", project_post=False),
+create_curl_cmd(type="GET", data="", base_url="http://localhost:8080/alfresco/service/", post_type="elements", branch="diff/master/theSubworkspace/latest/latest?fullCompare", project_post=False),
 True,
 common_filters+['"id"','"qualifiedId"','"creator"','"modifier"'],
 []
@@ -1823,8 +2041,8 @@ common_filters,
 # FIXME -- temporarily removed from "develop"
 [
 580,
-"DiffCompareWorkspaces",
-"Diff Workspace Test - Compare workspaces",
+"DiffCompareWorkspacesForMerge",
+"Diff Workspace Test - Compare workspaces for a merge",
 create_curl_cmd(type="GET",base_url=SERVICE_URL,
                 branch="diff/$gv2/$gv1/latest/latest"),
 True, 
@@ -1833,9 +2051,23 @@ common_filters+['"id"','"qualifiedId"','"creator"','"modifier"'],
 None,
 None,
 set_json_output_to_gv3
-], 
+],
 
-# FIXME -- temporarily removed from "develop"        
+[
+580.5,
+"DiffCompareWorkspaces",
+"Diff Workspace Test - Compare workspaces",
+create_curl_cmd(type="GET",base_url=SERVICE_URL,
+                branch="diff/$gv2/$gv1/latest/latest?fullCompare"),
+True, 
+common_filters+['"id"','"qualifiedId"','"creator"','"modifier"'],
+["test","workspaces","develop"],
+None,
+None,
+set_json_output_to_gv3
+],
+
+
 [
 581,
 "PostDiff",
@@ -1847,17 +2079,28 @@ common_filters+['"id"','"qualifiedId"','"timestamp"'],
 ],         
        
 # Diff again should be empty.  This test depends on the previous one.
-# FIXME -- temporarily removed from "develop"
 [
 582,
-"DiffCompareWorkspacesAgain",
-"Diff Workspace Test - Compare workspaces again and make sure the diff is empty now after merging.",
+"DiffCompareWorkspacesAgainForMerge",
+"Diff Workspace Test - Compare workspaces again for a merge and make sure the diff is empty now after merging.",
 create_curl_cmd(type="GET",base_url=SERVICE_URL,
                 branch="diff/$gv2/$gv1/latest/latest"),
 True, 
 common_filters+['"id"','"qualifiedId"','"creator"','"modifier"'],
 ["test","workspaces","develop"],
-], 
+],
+
+[
+582.5,
+"DiffCompareWorkspacesAgain",
+"Diff Workspace Test - Compare workspaces again and make sure the diff is empty now after merging.",
+create_curl_cmd(type="GET",base_url=SERVICE_URL,
+                branch="diff/$gv2/$gv1/latest/latest?fullCompare"),
+True, 
+common_filters+['"id"','"qualifiedId"','"creator"','"modifier"'],
+["test","workspaces","develop"],
+],
+
  
 # EXPRESSION PARSING =====================================================
 
