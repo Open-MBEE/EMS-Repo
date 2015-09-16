@@ -23,6 +23,7 @@ import gov.nasa.jpl.mbee.util.Utils;
 public class JsonDiffDiff extends AbstractDiff< JSONObject, Object, String > {
 
     public enum DiffOp { ADD, UPDATE, DELETE, NONE }
+    public enum DiffType { COMPARE, MERGE, BOTH }
 
     protected Set<JSONObject> elements = Utils.newSet();
     protected LinkedHashMap<String, Pair<DiffOp, List<JSONObject> > > diffMap1 =
@@ -461,8 +462,9 @@ public class JsonDiffDiff extends AbstractDiff< JSONObject, Object, String > {
      */
     public static JsonDiffDiff diff( JSONObject diff0,
                                      JSONObject diff1,
-                                     JSONObject diff2 ) {
-        boolean mergeStyleDiff = false; // diffType == MERGE; // FIXME
+                                     JSONObject diff2,
+                                     DiffType diffType) {
+        boolean mergeStyleDiff = diffType == DiffType.MERGE; 
         return diff( diff0, diff1, diff2, mergeStyleDiff );
     }
     
@@ -587,7 +589,9 @@ public class JsonDiffDiff extends AbstractDiff< JSONObject, Object, String > {
                            // with a delete.
                            // If mergeStyleDiff==true, there is no effect to add
                            // to workspace2 of dDiff3.
-                           dDiff3.set2( id, DiffOp.DELETE, newElement3_1, conflict );
+                           if ( !mergeStyleDiff ) {
+                               dDiff3.set2( id, DiffOp.DELETE, newElement3_1, conflict );
+                           }
                            dDiff3.set1( id, newElement3_1, false );
                        default:
                           // TODO -- ERROR
