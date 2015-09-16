@@ -75,6 +75,10 @@ public class List extends ArrayList< Viewable< EmsScriptNode > > implements sysm
     			Object eval = null;
                 try {
                     eval = ((Expression<?>) obj).evaluate(true);
+                    
+                // TODO -- figure out why eclipse gives compile errors for
+                // including the exceptions while mvn gives errors for not
+                // including them.
                 } catch ( IllegalAccessException e ) {
                     // TODO Auto-generated catch block
                     //e.printStackTrace();
@@ -104,6 +108,10 @@ public class List extends ArrayList< Viewable< EmsScriptNode > > implements sysm
             Object eval = null;
             try {
                 eval = ((Expression<?>) obj).evaluate(true);
+                
+            // TODO -- figure out why eclipse gives compile errors for
+            // including the exceptions while mvn gives errors for not
+            // including them.
             } catch ( IllegalAccessException e ) {
                 // TODO Auto-generated catch block
                 //e.printStackTrace();
