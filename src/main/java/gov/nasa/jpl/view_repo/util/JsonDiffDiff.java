@@ -589,7 +589,9 @@ public class JsonDiffDiff extends AbstractDiff< JSONObject, Object, String > {
                            // with a delete.
                            // If mergeStyleDiff==true, there is no effect to add
                            // to workspace2 of dDiff3.
-                           dDiff3.set2( id, DiffOp.DELETE, newElement3_1, conflict );
+                           if ( !mergeStyleDiff ) {
+                               dDiff3.set2( id, DiffOp.DELETE, newElement3_1, conflict );
+                           }
                            dDiff3.set1( id, newElement3_1, false );
                        default:
                           // TODO -- ERROR
