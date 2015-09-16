@@ -1374,6 +1374,10 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         Expression< T > expression = null;
         try {
             expression = new Expression<T>(call.evaluate(true, false));
+            
+        // TODO -- figure out why eclipse gives compile errors for
+        // including the exceptions while mvn gives errors for not
+        // including them.
         } catch ( IllegalAccessException e ) {
             // TODO Auto-generated catch block
             //e.printStackTrace();
