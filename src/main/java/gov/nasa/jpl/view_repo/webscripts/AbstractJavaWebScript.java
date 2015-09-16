@@ -51,6 +51,7 @@ import gov.nasa.jpl.view_repo.util.CommitUtil;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.EmsSystemModel;
 import gov.nasa.jpl.view_repo.util.EmsTransaction;
+import gov.nasa.jpl.view_repo.util.JsonDiffDiff.DiffType;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
 import gov.nasa.jpl.view_repo.util.NodeUtil.SearchType;
 import gov.nasa.jpl.view_repo.util.WorkspaceDiff;
@@ -1017,8 +1018,8 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
     public void setWsDiff(WorkspaceNode workspace) {
         wsDiff = new WorkspaceDiff(workspace, workspace, response, responseStatus);
     }
-    public void setWsDiff(WorkspaceNode workspace1, WorkspaceNode workspace2, Date time1, Date time2) {
-        wsDiff = new WorkspaceDiff(workspace1, workspace2, time1, time2, response, responseStatus);
+    public void setWsDiff(WorkspaceNode workspace1, WorkspaceNode workspace2, Date time1, Date time2, DiffType diffType) {
+        wsDiff = new WorkspaceDiff(workspace1, workspace2, time1, time2, response, responseStatus, diffType);
     }
 
     public WorkspaceDiff getWsDiff() {

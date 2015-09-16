@@ -4,6 +4,7 @@ import gov.nasa.jpl.mbee.util.Timer;
 import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.EmsTransaction;
+import gov.nasa.jpl.view_repo.util.JsonDiffDiff.DiffType;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 import gov.nasa.jpl.view_repo.webscripts.MmsDiffGet;
@@ -57,6 +58,7 @@ public class WorkspaceDiffActionExecuter extends ActionExecuterAbstractBase {
     public static final String PARAM_TS_2 = "ts2";
     public static final String PARAM_TIMESTAMP_1 = "timestamp1";
     public static final String PARAM_TIMESTAMP_2 = "timestamp2";
+    public static final String PARAM_DIFF_TYPE = "diffType";
     public static final String OLD_JOB = "oldJob";
 
     static Logger logger = Logger.getLogger(WorkspaceDiffActionExecuter.class);
@@ -82,6 +84,7 @@ public class WorkspaceDiffActionExecuter extends ActionExecuterAbstractBase {
         final String timestamp1 = (String) action.getParameterValue(PARAM_TIMESTAMP_1);
         final String timestamp2 = (String) action.getParameterValue(PARAM_TIMESTAMP_2);
         final EmsScriptNode oldJobNode = (EmsScriptNode) action.getParameterValue(OLD_JOB);
+        final DiffType diffType = (DiffType) action.getParameterValue(PARAM_DIFF_TYPE);
 
         final EmsScriptNode jsonNode = new EmsScriptNode(actionedUponNodeRef, services, response);
 
@@ -101,7 +104,7 @@ public class WorkspaceDiffActionExecuter extends ActionExecuterAbstractBase {
                 // Perform diff:
                 MmsDiffGet diffService = new MmsDiffGet(repository, services, ws1, ws2, dateTime1, dateTime2,
                                                         timestamp1, timestamp2);
-                diffService.performDiff( results );
+                diffService.performDiff( results, diffType );
                 
                 status.setCode(diffService.getResponseStatus().getCode());
 

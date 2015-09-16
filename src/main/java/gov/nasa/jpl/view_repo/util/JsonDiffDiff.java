@@ -462,8 +462,9 @@ public class JsonDiffDiff extends AbstractDiff< JSONObject, Object, String > {
      */
     public static JsonDiffDiff diff( JSONObject diff0,
                                      JSONObject diff1,
-                                     JSONObject diff2 ) {
-        boolean mergeStyleDiff = false; // diffType == MERGE; // FIXME
+                                     JSONObject diff2,
+                                     DiffType diffType) {
+        boolean mergeStyleDiff = diffType == DiffType.MERGE; 
         return diff( diff0, diff1, diff2, mergeStyleDiff );
     }
     

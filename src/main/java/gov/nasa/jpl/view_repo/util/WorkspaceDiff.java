@@ -4,6 +4,7 @@ import gov.nasa.jpl.mbee.util.Debug;
 import gov.nasa.jpl.mbee.util.Pair;
 import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.mbee.util.Utils;
+import gov.nasa.jpl.view_repo.util.JsonDiffDiff.DiffType;
 
 import java.util.ArrayList;
 import java.io.Serializable;
@@ -73,6 +74,8 @@ public class WorkspaceDiff implements Serializable {
     private Map<String, EmsScriptNode> deletedElements;
     private Map<String, EmsScriptNode> movedElements;
     private Map< String, EmsScriptNode > updatedElements;
+    
+    private DiffType diffType = DiffType.MERGE;
 
     NodeDiff nodeDiff = null;
     
@@ -108,14 +111,16 @@ public class WorkspaceDiff implements Serializable {
         this.ws2 = ws2;
         this.response = response;
         this.status = status;
+        this.diffType = DiffType.MERGE;
     }
 
     public WorkspaceDiff(WorkspaceNode ws1, WorkspaceNode ws2, Date timestamp1, Date timestamp2,
-                         StringBuffer response, Status status) {
+                         StringBuffer response, Status status, DiffType diffType) {
 
         this(ws1, ws2, response, status);
         this.timestamp1 = timestamp1;
         this.timestamp2 = timestamp2;
+        this.diffType = diffType;
         diff();
     }
 
@@ -1249,7 +1254,7 @@ public class WorkspaceDiff implements Serializable {
         Date commonBranchTime = p.second;
 
         return performDiffGlom( null, commitDiff1, commitDiff2, commonParent,
-                                commonBranchTime, getServices(), response );
+                                commonBranchTime, getServices(), response, diffType );
     }
     
     protected void captureDeltas() {
@@ -1394,7 +1399,8 @@ public class WorkspaceDiff implements Serializable {
                                               WorkspaceNode commonParent,
                                               Date commonBranchTime,
                                               ServiceRegistry services,
-                                              StringBuffer response ) {
+                                              StringBuffer response,
+                                              DiffType diffType) {
         // If diff0 is null, we need to build a diff0 from scratch. Collect all
         // element ids in diff1 and diff2, get their json for the common-branch
         // timepoint, and put that into workspace1.elements of a diff0.
@@ -1475,7 +1481,7 @@ public class WorkspaceDiff implements Serializable {
         // Now add/glom diff2 to diff0 (oldDiffJson) and then diff with/subtract
         // diff1.
         JsonDiffDiff diffResult = null; //glom( oldDiffJson, diff2Json );
-        diffResult = JsonDiffDiff.diff( diff0, diff1, diff2 );
+        diffResult = JsonDiffDiff.diff( diff0, diff1, diff2, diffType );
     
         return diffResult;
     }

@@ -252,7 +252,7 @@ public class MmsDiffGet extends AbstractJavaWebScript {
         }
         // Doing a non-background diff:
         else {
-            performDiff(results);
+            performDiff(results, diffType);
         }
 
         status.setCode(responseStatus.getCode());
@@ -288,10 +288,11 @@ public class MmsDiffGet extends AbstractJavaWebScript {
     public static JSONObject performDiff( WorkspaceNode w1, WorkspaceNode w2,
                                           Date date1, Date date2,
                                           StringBuffer aResponse,
-                                          Status aResponseStatus ) {
+                                          Status aResponseStatus,
+                                          DiffType diffType) {
         WorkspaceDiff workspaceDiff = null;
             workspaceDiff =
-                    new WorkspaceDiff(w1, w2, date1, date2, aResponse, aResponseStatus);
+                    new WorkspaceDiff(w1, w2, date1, date2, aResponse, aResponseStatus, diffType);
         
         JSONObject diffJson = null;
         if ( workspaceDiff != null ) {
@@ -347,7 +348,7 @@ public class MmsDiffGet extends AbstractJavaWebScript {
      * @param results
      * @return
      */
-    public JSONObject performDiffGlom(Map<String, Object> results) {
+    public JSONObject performDiffGlom(Map<String, Object> results, DiffType diffType) {
  
         // Check for a job matching the four diff parameters.
         // TODO -- It would be nice if we could quickly find the "nearest" diff
@@ -387,9 +388,9 @@ public class MmsDiffGet extends AbstractJavaWebScript {
         // This assumes that the timepoint of the new diff is after the
         // timepoint of the old for each workspace.
         JSONObject diff1Json = performDiff( ws1, ws1, date0_1, date1, getResponse(),
-                                            getResponseStatus() );
+                                            getResponseStatus(), diffType );
         JSONObject diff2Json = performDiff( ws2, ws2, date0_2, date2, getResponse(),
-                                            getResponseStatus() );
+                                            getResponseStatus(), diffType );
         
 //        // If oldJob is null, we need to build a diff0 from scratch. Collect all
 //        // element ids in diff1 and diff2, get their json for the common-branch
@@ -424,7 +425,7 @@ public class MmsDiffGet extends AbstractJavaWebScript {
 //        diffResult = JsonDiffDiff.diff( diff0, diff1Json, diff2Json );
         JsonDiffDiff diffDiffResult =
                 WorkspaceDiff.performDiffGlom( diff0, diff1Json, diff2Json, commonParent,
-                                 commonBranchTime, services, response );
+                                 commonBranchTime, services, response, diffType );
         
         JSONObject diffResult = diffDiffResult.toJsonObject();
         
@@ -543,7 +544,7 @@ public class MmsDiffGet extends AbstractJavaWebScript {
         return elementJson;
     }
 
-    public void performDiff(Map<String, Object> results) {
+    public void performDiff(Map<String, Object> results, DiffType diffType) {
        
         boolean switchUser = !originalUser.equals( "admin" );
         
@@ -553,10 +554,10 @@ public class MmsDiffGet extends AbstractJavaWebScript {
         JSONObject top = null;
         
         if ( glom ) {
-            top = performDiffGlom( results );
+            top = performDiffGlom( results, diffType );
         } else {
             top = performDiff( ws1, ws2, dateTime1, dateTime2, response,
-                               responseStatus );
+                               responseStatus, diffType );
         }
         if ( top == null ) {
             results.put( "res", createResponseJson() );

@@ -44,11 +44,13 @@ import gov.nasa.jpl.view_repo.util.ModStatus;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
 import gov.nasa.jpl.view_repo.util.WorkspaceDiff;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
+import gov.nasa.jpl.view_repo.util.JsonDiffDiff.DiffType;
 import gov.nasa.jpl.view_repo.webscripts.util.ShareUtils;
 
 //import k.frontend.Frontend;
 //import k.frontend.ModelParser;
 //import k.frontend.ModelParser.ModelContext;
+
 
 
 
@@ -68,8 +70,8 @@ import java.util.TreeSet;
 
 import javax.servlet.http.HttpServletResponse;
 
-
 import k.frontend.Frontend;
+
 
 //import javax.transaction.UserTransaction;
 import org.apache.log4j.*;
@@ -341,10 +343,13 @@ public class ModelPost extends AbstractJavaWebScript {
         log( Level.DEBUG, "****** NodeUtil.doSimpleCaching = %s", NodeUtil.doSimpleCaching );
         log( Level.DEBUG, "****** NodeUtil.doFullCaching = %s", NodeUtil.doFullCaching );
 
-        if(sourceWS == null)
+        if(sourceWS == null) {
             setWsDiff( targetWS );
-        else
-            setWsDiff(targetWS, sourceWS, null, null);
+        }
+        else {
+            // TODO REVIEW should diffType be MERGE?
+            setWsDiff(targetWS, sourceWS, null, null, DiffType.COMPARE);
+        }
 
 
         clearCaches();
