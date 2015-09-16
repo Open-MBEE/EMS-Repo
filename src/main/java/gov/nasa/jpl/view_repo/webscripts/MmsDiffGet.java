@@ -7,6 +7,7 @@ import gov.nasa.jpl.view_repo.actions.ActionUtil;
 import gov.nasa.jpl.view_repo.actions.WorkspaceDiffActionExecuter;
 import gov.nasa.jpl.view_repo.util.CommitUtil;
 import gov.nasa.jpl.view_repo.util.JsonDiffDiff.DiffOp;
+import gov.nasa.jpl.view_repo.util.JsonDiffDiff.DiffType;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.JsonDiffDiff;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
@@ -141,6 +142,21 @@ public class MmsDiffGet extends AbstractJavaWebScript {
 
         boolean runInBackground = getBooleanArg(req, "background", false);
         recalculate = getBooleanArg( req, "recalculate", false );
+        
+        // Determine the diffType.  Default is Merge:
+        DiffType diffType;
+        if (getBooleanArg( req, "changesForMerge", false )) {
+            diffType = DiffType.MERGE;
+        }
+        else if (getBooleanArg( req, "fullCompare", false )) {
+            diffType = DiffType.COMPARE;
+        }
+        else if (getBooleanArg( req, "bothDirections", false )) {
+            diffType = DiffType.BOTH;
+        }
+        else {
+            diffType = DiffType.MERGE;
+        }
         
         userTimeStamp1 = getTimestamp1(req);
         userTimeStamp2 = getTimestamp2(req);

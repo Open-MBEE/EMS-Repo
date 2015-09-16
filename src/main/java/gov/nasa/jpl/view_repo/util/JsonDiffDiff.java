@@ -23,6 +23,7 @@ import gov.nasa.jpl.mbee.util.Utils;
 public class JsonDiffDiff extends AbstractDiff< JSONObject, Object, String > {
 
     public enum DiffOp { ADD, UPDATE, DELETE, NONE }
+    public enum DiffType { COMPARE, MERGE, BOTH }
 
     protected Set<JSONObject> elements = Utils.newSet();
     protected LinkedHashMap<String, Pair<DiffOp, List<JSONObject> > > diffMap1 =
