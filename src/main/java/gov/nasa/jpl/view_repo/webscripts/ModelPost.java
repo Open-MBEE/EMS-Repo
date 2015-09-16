@@ -347,7 +347,6 @@ public class ModelPost extends AbstractJavaWebScript {
             setWsDiff( targetWS );
         }
         else {
-            // TODO REVIEW should diffType be MERGE?
             setWsDiff(targetWS, sourceWS, null, null, DiffType.COMPARE);
         }
 

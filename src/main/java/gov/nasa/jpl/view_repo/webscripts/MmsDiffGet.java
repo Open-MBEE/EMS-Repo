@@ -201,7 +201,7 @@ public class MmsDiffGet extends AbstractJavaWebScript {
         if (runInBackground) {
             
             saveAndStartAction(req, latestTime1,
-                               latestTime2, status);
+                               latestTime2, status, diffType);
             
             JSONObject top = new JSONObject();
 
@@ -353,7 +353,7 @@ public class MmsDiffGet extends AbstractJavaWebScript {
         // Check for a job matching the four diff parameters.
         // TODO -- It would be nice if we could quickly find the "nearest" diff
         // in the case that the diff has never been computed.
-        EmsScriptNode oldJob = getDiffJob();
+        EmsScriptNode oldJob = getDiffJob(diffType);
         JSONObject diff0 = diffJsonFromJobNode( oldJob );
 
         // If either of the timestamps is "latest," then the diff result may be
@@ -590,25 +590,25 @@ public class MmsDiffGet extends AbstractJavaWebScript {
 
     
     
-    public String getJobName( String timestamp1, String timestamp2 ) {
+    public String getJobName( String timestamp1, String timestamp2, DiffType diffType ) {
         if ( diffJobName == null ) {
-            diffJobName = getDiffJobName( timestamp1, timestamp2 );
+            diffJobName = getDiffJobName( timestamp1, timestamp2, diffType );
         }
         return diffJobName;
     }
 
-    public static String getDiffJobName(String timestamp1, String timestamp2) {
+    public static String getDiffJobName(String timestamp1, String timestamp2, DiffType diffType) {
         String timeString1 = timestamp1.replace( ":", "_" );
         String timeString2 = timestamp2.replace( ":", "_" );
         String timeString = timeString1 + "_" + timeString2;
-        String diffJobName = "Diff_Job_" + timeString + ".json";
+        String diffJobName = "Diff_Job_" + timeString + "_" + diffType.name() + ".json";
         return diffJobName;
     }
     
-    public EmsScriptNode getDiffJob() {// String timestamp1,
+    public EmsScriptNode getDiffJob(DiffType diffType) {// String timestamp1,
                                      //String timestamp2 ) {
         if ( diffJob == null ) {
-            diffJob = getDiffJob( ws1, ws2, getDiffJobName(timestamp1, timestamp2),
+            diffJob = getDiffJob( ws1, ws2, getDiffJobName(timestamp1, timestamp2, diffType),
                                   getServices(), getResponse() );
         }
         return diffJob;
@@ -648,7 +648,8 @@ public class MmsDiffGet extends AbstractJavaWebScript {
     protected void saveAndStartAction( WebScriptRequest req,
                                        String latestCommitTime1,
                                        String latestCommitTime2,
-                                       Status status ) {
+                                       Status status,
+                                       DiffType diffType) {
 
         if (timestamp1 != null && timestamp2 != null) {
 
@@ -658,8 +659,8 @@ public class MmsDiffGet extends AbstractJavaWebScript {
 
             // Check if there is old diff job using the diffTime if its non-null, otherwise
             // use the jobName:
-            String jobName = getDiffJobName( timestamp1, timestamp2 );
-            EmsScriptNode oldJob = getDiffJob();
+            String jobName = getDiffJobName( timestamp1, timestamp2, diffType );
+            EmsScriptNode oldJob = getDiffJob(diffType);
 
             diffStatus = DIFF_IN_PROGRESS;
             boolean reComputeDiff = true;
@@ -752,6 +753,7 @@ public class MmsDiffGet extends AbstractJavaWebScript {
                 loadAction.setParameterValue(WorkspaceDiffActionExecuter.PARAM_WS_1, ws1);
                 loadAction.setParameterValue(WorkspaceDiffActionExecuter.PARAM_WS_2, ws2);
                 loadAction.setParameterValue(WorkspaceDiffActionExecuter.OLD_JOB, oldJob );
+                loadAction.setParameterValue(WorkspaceDiffActionExecuter.PARAM_DIFF_TYPE, diffType );
 
                 services.getActionService().executeAction(loadAction, jobNode.getNodeRef(), true, true);
             }
