@@ -181,18 +181,18 @@ public class EmsSystemModelTest {
         Expression< Call > expressionCall = sysmlToAe.toAeExpression( node );
         Call call = (Call) expressionCall.expression;
         Expression< Boolean > expression = null;
-        try {
+//        try {
             expression = new Expression<Boolean>(call.evaluate(true, false));
-        } catch ( IllegalAccessException e ) {
-            // TODO Auto-generated catch block
-            //e.printStackTrace();
-        } catch ( InvocationTargetException e ) {
-            // TODO Auto-generated catch block
-            //e.printStackTrace();
-        } catch ( InstantiationException e ) {
-            // TODO Auto-generated catch block
-            //se.printStackTrace();
-        }
+//        } catch ( IllegalAccessException e ) {
+//            // TODO Auto-generated catch block
+//            //e.printStackTrace();
+//        } catch ( InvocationTargetException e ) {
+//            // TODO Auto-generated catch block
+//            //e.printStackTrace();
+//        } catch ( InstantiationException e ) {
+//            // TODO Auto-generated catch block
+//            //se.printStackTrace();
+//        }
         System.out.println( "\n*testExpressionEvaluation() expression: "
                 + expression );
         assertNotNull( expression );

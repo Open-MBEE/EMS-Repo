@@ -4,31 +4,40 @@
         "name": "ws2",
         "elements": [
             {
-                "name": "400",
-                "qualifiedName": "/europa/JW_TEST2/400",
-                "sysmlid": "4000",
-                "documentation": "4something",
-                "owner": "123456",
+                "qualifiedName": "/europa/JW_TEST2/400/401/402",
+                "sysmlid": "402",
+                "editable": true,
+                "version": "1.2",
+                "name": "402",
+                "documentation": "4to",
+                "owner": "401",
                 "specialization": {
                     "propertyType": null,
-                    "isDerived": false,
                     "isSlot": false,
+                    "isDerived": false,
                     "value": [{
                         "valueExpression": null,
                         "string": "dlam_string",
                         "type": "LiteralString"
                     }],
                     "type": "Property"
-                },
-                "editable": true,
-                "creator": "admin",
+                }
             },
             {
-                "name": "401",
+                "name": "holding_bin",
+                "qualifiedName": "/no_site/no_site_no_project/holding_bin",
+                "sysmlid": "holding_bin_no_site_no_project",
+                "owner": "no_site_no_project",
+                "specialization": {"type": "Package"},
+                "editable": true,
+            },
+            {
                 "qualifiedName": "/europa/JW_TEST2/400/401",
                 "sysmlid": "401",
-                "documentation": "4else",
+                "editable": true,
+                "name": "401",
                 "owner": "4000",
+                "documentation": "4else",
                 "specialization": {
                     "displayedElements": [
                         "401",
@@ -56,16 +65,15 @@
                     }],
                     "noSections": ["402"],
                     "type": "Product"
-                },
-                "editable": true,
-                "creator": "admin",
+                }
             },
             {
-                "name": "402",
-                "qualifiedName": "/europa/JW_TEST2/400/401/402",
-                "sysmlid": "402",
-                "documentation": "4to",
-                "owner": "401",
+                "qualifiedName": "/europa/JW_TEST2/400",
+                "sysmlid": "4000",
+                "editable": true,
+                "name": "400",
+                "owner": "123456",
+                "documentation": "4something",
                 "specialization": {
                     "propertyType": null,
                     "isDerived": false,
@@ -76,51 +84,12 @@
                         "type": "LiteralString"
                     }],
                     "type": "Property"
-                },
-                "editable": true,
-                "creator": "admin",
-            },
-            {
-                "name": "duration",
-                "qualifiedName": "/europa/JW_TEST2/duration",
-                "sysmlid": "arg_ev_38307",
-                "documentation": "",
-                "owner": "123456",
-                "specialization": {
-                    "propertyType": null,
-                    "isDerived": false,
-                    "isSlot": false,
-                    "value": [{
-                        "valueExpression": null,
-                        "integer": 22,
-                        "type": "LiteralInteger"
-                    }],
-                    "type": "Property"
-                },
-                "editable": true,
-                "creator": "admin",
-            },
-            {
-                "name": "holding_bin",
-                "qualifiedName": "/no_site/no_site_no_project/holding_bin",
-                "sysmlid": "holding_bin_no_site_no_project",
-                "owner": "no_site_no_project",
-                "specialization": {"type": "Package"},
-                "editable": true,
-                "creator": "admin",
+                }
             }
         ]
     },
     "workspace2": {
-        "deletedElements": [{
-            "sysmlid": "arg_ev_38307",
-            "specialization": {"value": [{
-                "valueExpression": null,
-                "integer": 22,
-                "type": "LiteralInteger"
-            }]},
-            "creator": "admin",
-        }],
+        "deletedElements": [],
         "addedElements": [{
             "qualifiedName": "/no_site/no_site_no_project/holding_bin/null",
             "owner": "holding_bin_no_site_no_project",
@@ -128,8 +97,8 @@
             "sysmlid": "newElement",
             "specialization": {
                 "propertyType": null,
-                "isSlot": false,
                 "isDerived": false,
+                "isSlot": false,
                 "value": [{
                     "valueExpression": null,
                     "string": "the element added to ws1",
@@ -137,19 +106,23 @@
                 }],
                 "type": "Property"
             },
-            "editable": true,
-            "creator": "admin"
+            "editable": true
         }],
         "conflictedElements": [],
         "updatedElements": [{
-            "sysmlid": "402",
+            "name": "402",
+            "qualifiedName": "/europa/JW_TEST2/400/401/402",
+            "owner": "401",
             "documentation": "x is x",
-            "specialization": {"value": [{
-                "valueExpression": null,
-                "string": "the x value",
-                "type": "LiteralString"
-            }]},
-            "creator": "admin",
+            "sysmlid": "402",
+            "specialization": {
+                "value": [{
+                    "valueExpression": null,
+                    "string": "the x value",
+                    "type": "LiteralString"
+                }],
+                "type": "Property"
+            }
         }],
         "qualifiedName": "master/ws1",
         "name": "ws1",

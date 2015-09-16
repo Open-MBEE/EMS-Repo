@@ -4,22 +4,13 @@
         "name": "wsA",
         "elements": [
             {
-                "modifier": "admin",
-                "name": "holding_bin",
-                "qualifiedName": "/no_site/no_site_no_project/holding_bin",
-                "sysmlid": "holding_bin_no_site_no_project",
-                "owner": "no_site_no_project",
-                "specialization": {"type": "Package"},
-                "editable": true,
-                "creator": "admin",
-            },
-            {
-                "modifier": "admin",
-                "name": "300",
                 "qualifiedName": "/no_site/no_site_no_project/holding_bin/300",
+                "sysmlid": "x",
+                "editable": true,
+                "version": "1.1",
+                "name": "300",
                 "documentation": "something",
                 "owner": "holding_bin_no_site_no_project",
-                "sysmlid": "x",
                 "specialization": {
                     "propertyType": null,
                     "isSlot": false,
@@ -30,9 +21,15 @@
                         "type": "LiteralString"
                     }],
                     "type": "Property"
-                },
+                }
+            },
+            {
+                "name": "holding_bin",
+                "qualifiedName": "/no_site/no_site_no_project/holding_bin",
+                "sysmlid": "holding_bin_no_site_no_project",
+                "owner": "no_site_no_project",
+                "specialization": {"type": "Package"},
                 "editable": true,
-                "creator": "admin"
             }
         ]
     },
@@ -41,11 +38,11 @@
         "addedElements": [],
         "conflictedElements": [],
         "updatedElements": [{
-            "qualifiedName": "/no_site/no_site_no_project/holding_bin/300",
             "name": "300",
-            "sysmlid": "x",
+            "qualifiedName": "/no_site/no_site_no_project/holding_bin/300",
             "owner": "holding_bin_no_site_no_project",
             "documentation": "x is x",
+            "sysmlid": "x",
             "specialization": {
                 "value": [{
                     "valueExpression": null,
@@ -53,8 +50,7 @@
                     "type": "LiteralString"
                 }],
                 "type": "Property"
-            },
-            "creator": "admin",
+            }
         }],
         "qualifiedName": "master/wsA/wsB",
         "name": "wsB",

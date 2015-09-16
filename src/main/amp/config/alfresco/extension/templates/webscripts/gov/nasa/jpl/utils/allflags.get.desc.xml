@@ -22,6 +22,8 @@
   <url>/flags/versionHistoryCache?on={on?}&amp;off={off?}</url>
   <url>/flags/skipWorkspacePermissionCheck?on={on?}&amp;off={off?}</url>
   <url>/flags/makeDocBook?on={on?}&amp;off={off?}</url>
+  <url>/flags/glom?on={on?}&amp;off={off?}</url>
+  <url>/flags/cleanJson?on={on?}&amp;off={off?}</url>
   <authentication>user</authentication>
   <format default="html">argument</format>
   <family>EMS Utils</family>

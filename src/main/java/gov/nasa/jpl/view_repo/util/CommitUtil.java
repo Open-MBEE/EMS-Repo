@@ -35,6 +35,7 @@ public class CommitUtil {
     public static final String TYPE_COMMIT = "COMMIT";
     public static final String TYPE_DELTA  = "DELTA";
     public static final String TYPE_MERGE  = "MERGE";
+    public static boolean cleanJson = false;
     
     private CommitUtil() {
         // defeat instantiation
@@ -313,6 +314,54 @@ public class CommitUtil {
 	    return null;
 	}
 	
+	public static String getTimestamp(EmsScriptNode commitNode, String workspace)
+	{
+	    String type = null;
+	    
+	    // If the type is branch, must walk backwards to find a non-branch commit:
+	    while (commitNode != null) {
+	        type = (String) commitNode.getProperty("ems:commitType");
+	        if (type != null && !TYPE_BRANCH.equals( type )) {
+	            break;
+	        }
+	        commitNode = getPreviousCommit(commitNode);
+	    }
+	    
+	    if (commitNode == null) {
+	        return null;
+	    }
+	        
+	    Object commit = commitNode.getProperty("ems:commit");
+	    Date creationDate = commitNode.getCreationDate();
+	    String timestamp = null;
+	    if (creationDate != null) {
+	        timestamp = TimeUtils.toTimestamp(creationDate);
+	    }
+	    
+	    if (!(commit instanceof String)) {
+	        return timestamp;
+	    }
+	    JSONObject latestCommit = new JSONObject( (String) commit );
+	    JSONObject workspaceObject = null;
+	    if (latestCommit.length() == 0)
+	    {
+	        return timestamp;
+	    }
+	    if (workspace.equals("workspace1"))
+	    {
+	        workspaceObject = latestCommit.getJSONObject("workspace1");
+	    }
+	    else if (workspace.equals("workspace2"))
+	    {
+	        workspaceObject = latestCommit.getJSONObject("workspace2");
+	    }
+	    else
+	    {
+	        return timestamp;
+	    }
+	    return workspaceObject.getString("timestamp");
+	}
+	
     public static String replaceTimeStampWithCommitTime(Date date,
                                                         WorkspaceNode ws,
                                                         ServiceRegistry services, 
@@ -323,11 +372,7 @@ public class CommitUtil {
         String timestamp = null;
         
         if (lastCommit != null) {
-            Date lastCommitTime = lastCommit.getCreationDate();
-            
-            if (lastCommitTime != null) {
-                timestamp = TimeUtils.toTimestamp(lastCommitTime);
-            }
+            timestamp = getTimestamp(lastCommit, "workspace2");
         }
         
         return timestamp;
@@ -372,9 +417,14 @@ public class CommitUtil {
         while ( true ) { // run until endWorkspace or master
             EmsScriptNode commit = getLastCommit( startWorkspace, services, response );
             while ( commit != null ) {
-                Date created = commit.getCreationDate();
-                if ( fromDateTime != null && created.before( fromDateTime ) ) break;
-                if ( toDateTime == null || !created.after( toDateTime ) ) {
+                String endOfCommit = getTimestamp(commit, "workspace2");
+                Date endDate = TimeUtils.dateFromTimestamp( endOfCommit );
+                if (endDate == null) break;
+                if ( fromDateTime != null && !endDate.after( fromDateTime ) ) break;
+                String beginningOfCommit = getTimestamp(commit, "workspace1");
+                Date beginningDate = TimeUtils.dateFromTimestamp( beginningOfCommit );
+                if (beginningDate == null) break;
+                if ( toDateTime == null || beginningDate.before( toDateTime ) ) {
                     commits.add( commit );
                 }
                 commit = getPreviousCommit(commit);
@@ -701,7 +751,10 @@ public class CommitUtil {
                 }
                 if (body != null) {
                     // clean up JSON for small commits
-                    JSONObject cleanedJson = WorkspaceDiff.cleanWorkspaceJson( body );
+                	JSONObject cleanedJson = body;
+                	if (cleanJson) {
+                		cleanedJson = WorkspaceDiff.cleanWorkspaceJson( body );
+                	}
                     currCommit.createOrUpdateProperty( "ems:commit", cleanedJson.toString() );
                 }
                 
