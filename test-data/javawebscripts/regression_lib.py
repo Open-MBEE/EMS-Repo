@@ -450,7 +450,7 @@ def print_error(msg, outpt):
     print str(outpt)
     
 def mbee_util_jar_path():
-    path = "../../../../.m2/repository/gov/nasa/jpl/mbee/util/mbee_util/"
+    path = "/Users/dank/.m2/repository/gov/nasa/jpl/mbee/util/mbee_util/"
     pathList = glob.glob(path+"*SNAPSHOT/*SNAPSHOT.jar")
     if pathList:
         return pathList[0]
