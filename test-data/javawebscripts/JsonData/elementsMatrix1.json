@@ -1,0 +1,103 @@
+{ "elements" : [
+
+    {"documentation" : "delete_add_poo", 
+     "sysmlid":"delete_add_poo", 
+     "name":"delete_add_poo", 
+     "owner":"123456", 
+     "specialization": {"type":"Property",
+                        "isDerived":false, 
+                        "value":[{"type":"LiteralString",
+                                  "string":"on a shoe"}]}
+    },
+
+    {"documentation" : "delete_update_poo", 
+     "sysmlid":"delete_update_poo", 
+     "name":"delete_update_poo", 
+     "owner":"123456", 
+     "specialization": {"type":"Property",
+                        "isDerived":false, 
+                        "value":[{"type":"LiteralString",
+                                  "string":"on a shoe"}]}
+    },
+    
+    {"documentation" : "delete_delete_poo", 
+     "sysmlid":"delete_delete_poo", 
+     "name":"delete_delete_poo", 
+     "owner":"123456", 
+     "specialization": {"type":"Property",
+                        "isDerived":false, 
+                        "value":[{"type":"LiteralString",
+                                  "string":"on a shoe"}]}
+    },
+    
+    {"documentation" : "delete_none_poo", 
+     "sysmlid":"delete_none_poo", 
+     "name":"delete_none_poo", 
+     "owner":"123456", 
+     "specialization": {"type":"Property",
+                        "isDerived":false, 
+                        "value":[{"type":"LiteralString",
+                                  "string":"on a shoe"}]}
+    },
+        
+    {"documentation" : "none_delete_poo", 
+     "sysmlid":"none_delete_poo", 
+     "name":"none_delete_poo", 
+     "owner":"123456", 
+     "specialization": {"type":"Property",
+                        "isDerived":false, 
+                        "value":[{"type":"LiteralString",
+                                  "string":"on a shoe"}]}
+    },
+    
+    
+    {"documentation" : "update_add_poo", 
+     "sysmlid":"update_add_poo", 
+     "name":"update_add_poo", 
+     "owner":"123456", 
+     "specialization": {"type":"Property",
+                        "isDerived":false, 
+                        "value":[{"type":"LiteralString",
+                                  "string":"on a shoe"}]}
+    },
+
+    {"documentation" : "update_update_poo", 
+     "sysmlid":"update_update_poo", 
+     "name":"update_update_poo", 
+     "owner":"123456", 
+     "specialization": {"type":"Property",
+                        "isDerived":false, 
+                        "value":[{"type":"LiteralString",
+                                  "string":"on a shoe"}]}
+    },
+    
+    {"documentation" : "update_delete_poo", 
+     "sysmlid":"update_delete_poo", 
+     "name":"update_delete_poo", 
+     "owner":"123456", 
+     "specialization": {"type":"Property",
+                        "isDerived":false, 
+                        "value":[{"type":"LiteralString",
+                                  "string":"on a shoe"}]}
+    },
+    
+    {"documentation" : "update_none_poo", 
+     "sysmlid":"update_none_poo", 
+     "name":"update_none_poo", 
+     "owner":"123456", 
+     "specialization": {"type":"Property",
+                        "isDerived":false, 
+                        "value":[{"type":"LiteralString",
+                                  "string":"on a shoe"}]}
+    },
+        
+    {"documentation" : "none_update_poo", 
+     "sysmlid":"none_update_poo", 
+     "name":"none_update_poo", 
+     "owner":"123456", 
+     "specialization": {"type":"Property",
+                        "isDerived":false, 
+                        "value":[{"type":"LiteralString",
+                                  "string":"on a shoe"}]}
+    },
+]}

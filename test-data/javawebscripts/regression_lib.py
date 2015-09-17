@@ -214,7 +214,7 @@ def set_wsid_to_gv6():
     '''Get the json output, and sets gv6 to the that workspace id'''
     set_wsid_to_gv(6)
     
-def set_read_to_gv(gv):
+def set_read_to_gv(gv, idx=0):
     '''Get the json output, and sets gvi to the read time'''
     json_output = get_json_output_no_status()
     #print("json_output=" + str(json_output))
@@ -223,19 +223,19 @@ def set_read_to_gv(gv):
     
     if j:
         if gv == 1:
-            set_gv1(j["elements"][0]["read"])
+            set_gv1(j["elements"][idx]["read"])
         elif gv == 2:
-            set_gv2(j["elements"][0]["read"])
+            set_gv2(j["elements"][idx]["read"])
         elif gv == 3:
-            set_gv3(j["elements"][0]["read"])
+            set_gv3(j["elements"][idx]["read"])
         elif gv == 4:
-            set_gv4(j["elements"][0]["read"])
+            set_gv4(j["elements"][idx]["read"])
         elif gv == 5:
-            set_gv5(j["elements"][0]["read"])
+            set_gv5(j["elements"][idx]["read"])
         elif gv == 6:
-            set_gv6(j["elements"][0]["read"])
+            set_gv6(j["elements"][idx]["read"])
         elif gv == 7:
-            set_gv7(j["elements"][0]["read"])
+            set_gv7(j["elements"][idx]["read"])
             
 def set_read_to_gv1():
     '''Get the json output, and sets gv1 to the read time'''
@@ -262,8 +262,36 @@ def set_read_to_gv6():
     set_read_to_gv(6)
     
 def set_read_to_gv7():
-    '''Get the json output, and sets gv6 to the read time'''
+    '''Get the json output, and sets gv7 to the read time'''
     set_read_to_gv(7)
+    
+def set_last_read_to_gv1():
+    '''Get the json output, and sets gv1 to the latest read time'''
+    set_read_to_gv(1,idx=-1)
+    
+def set_last_read_to_gv2():
+    '''Get the json output, and sets gv2 to the latest read time'''
+    set_read_to_gv(2,idx=-1)
+    
+def set_last_read_to_gv3():
+    '''Get the json output, and sets gv3 to the latest read time'''
+    set_read_to_gv(3,idx=-1)
+    
+def set_last_read_to_gv4():
+    '''Get the json output, and sets gv4 to the latest read time'''
+    set_read_to_gv(4,idx=-1)
+    
+def set_last_read_to_gv5():
+    '''Get the json output, and sets gv5 to the latest read time'''
+    set_read_to_gv(5,idx=-1)
+    
+def set_last_read_to_gv6():
+    '''Get the json output, and sets gv6 to the latest read time'''
+    set_read_to_gv(6,idx=-1)
+    
+def set_last_read_to_gv7():
+    '''Get the json output, and sets gv7 to the latest read time'''
+    set_read_to_gv(7,idx=-1)
     
 def set_read_to_gv6_delta_gv7(delta=3):
     '''Get the json output, and sets gv6 to the read time'''

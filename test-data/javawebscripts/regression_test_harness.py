@@ -773,7 +773,7 @@ set_wsid_to_gv6
 [
 185,
 "CompareWorkspacesWithBranchTimesForMerge",
-    "Compare workspaces each of which with a branch time and with a modified element on the common parent for a merge",
+"Compare workspaces each of which with a branch time and with a modified element on the common parent for a merge",
 create_curl_cmd(type="GET",base_url=SERVICE_URL,
                 branch="diff/$gv5/$gv6/latest/latest"),
 True, 
@@ -2600,7 +2600,225 @@ True,
 common_filters,
 ["test","workspaces","develop"]
 ],
+        
+# Testing the diff glom matrix ==========================   
 
+[
+800,
+"PostElementsMatrix1",
+"Post elements to the master branch for glom matrix testing",
+create_curl_cmd(type="POST",data="elementsMatrix1.json",base_url=BASE_URL_WS,
+                post_type="elements",branch="master/"),
+True, 
+common_filters,
+["test","workspaces","develop"],
+None,
+None,
+set_last_read_to_gv3
+],
+        
+[
+801,
+"CreateWorkspaceMatrixTest1",
+"Create workspace1 for glom matrix testing",
+create_curl_cmd(type="POST",base_url=BASE_URL_WS,
+                post_type="",branch="wsMatrix1?sourceWorkspace=master&copyTime=$gv3"),
+True, 
+common_filters+['"branched"','"created"','"id"','"qualifiedId"'],
+["test","workspaces","develop"],
+None,
+None,
+set_wsid_to_gv1
+],
+
+[
+802,
+"DeleteDeleteAddWsMatrix1",
+"Delete delete_add_poo",
+create_curl_cmd(type="DELETE",data="elements/delete_add_poo",base_url=BASE_URL_WS,
+                branch="$gv1/"),
+True, 
+common_filters+['"timestamp"','"MMS_','"id"','"qualifiedId"','"version"', '"modified"', '"sequence"'],
+["test","workspaces","develop"]
+],
+
+[
+803,
+"DeleteDeleteUpdateWsMatrix1",
+"Delete delete_update_poo",
+create_curl_cmd(type="DELETE",data="elements/delete_update_poo",base_url=BASE_URL_WS,
+                branch="$gv1/"),
+True, 
+common_filters+['"timestamp"','"MMS_','"id"','"qualifiedId"','"version"', '"modified"', '"sequence"'],
+["test","workspaces","develop"]
+],
+
+[
+804,
+"DeleteDeleteDeleteWsMatrix1",
+"Delete delete_delete_poo",
+create_curl_cmd(type="DELETE",data="elements/delete_delete_poo",base_url=BASE_URL_WS,
+                branch="$gv1/"),
+True, 
+common_filters+['"timestamp"','"MMS_','"id"','"qualifiedId"','"version"', '"modified"', '"sequence"'],
+["test","workspaces","develop"]
+],
+        
+[
+805,
+"DeleteDeleteNoneWsMatrix1",
+"Delete delete_none_poo",
+create_curl_cmd(type="DELETE",data="elements/delete_none_poo",base_url=BASE_URL_WS,
+                branch="$gv1/"),
+True, 
+common_filters+['"timestamp"','"MMS_','"id"','"qualifiedId"','"version"', '"modified"', '"sequence"'],
+["test","workspaces","develop"]
+],
+        
+[
+806,
+"PostElementsWsMatrix1",
+"Post elements to the wsMatrix1 branch for glom matrix testing",
+create_curl_cmd(type="POST",data="elementsWsMatrix1.json",base_url=BASE_URL_WS,
+                post_type="elements",branch="$gv1/"),
+True, 
+common_filters,
+["test","workspaces","develop"],
+None,
+None,
+set_last_read_to_gv4
+],
+
+[
+807,
+"DeleteUpdateAddMaster",
+"Delete update_add_poo",
+create_curl_cmd(type="DELETE",data="elements/update_add_poo",base_url=BASE_URL_WS,
+                branch="master/"),
+True, 
+common_filters+['"timestamp"','"MMS_','"id"','"qualifiedId"','"version"', '"modified"', '"sequence"'],
+["test","workspaces","develop"]
+],
+        
+[
+808,
+"DeleteDeleteAddMaster",
+"Delete delete_add_poo",
+create_curl_cmd(type="DELETE",data="elements/delete_add_poo",base_url=BASE_URL_WS,
+                branch="master/"),
+True, 
+common_filters+['"timestamp"','"MMS_','"id"','"qualifiedId"','"version"', '"modified"', '"sequence"'],
+["test","workspaces","develop"]
+],
+                     
+[
+809,
+"PostElementsMatrix2",
+"Post elements to the master branch for glom matrix testing",
+create_curl_cmd(type="POST",data="elementsMatrix2.json",base_url=BASE_URL_WS,
+                post_type="elements",branch="master/"),
+True, 
+common_filters,
+["test","workspaces","develop"],
+None,
+None,
+set_last_read_to_gv5
+],
+        
+[
+810,
+"CreateWorkspaceMatrixTest2",
+"Create workspace2 for glom matrix testing",
+create_curl_cmd(type="POST",base_url=BASE_URL_WS,
+                post_type="",branch="wsMatrix2?sourceWorkspace=master&copyTime=$gv5"),
+True, 
+common_filters+['"branched"','"created"','"id"','"qualifiedId"'],
+["test","workspaces","develop"],
+None,
+None,
+set_wsid_to_gv2
+],
+       
+[
+811,
+"DeleteAddDeleteWsMatrix2",
+"Delete add_delete_poo",
+create_curl_cmd(type="DELETE",data="elements/add_delete_poo",base_url=BASE_URL_WS,
+                branch="$gv2/"),
+True, 
+common_filters+['"timestamp"','"MMS_','"id"','"qualifiedId"','"version"', '"modified"', '"sequence"'],
+["test","workspaces","develop"]
+],
+        
+[
+812,
+"DeleteUpdateDeleteWsMatrix2",
+"Delete update_delete_poo",
+create_curl_cmd(type="DELETE",data="elements/update_delete_poo",base_url=BASE_URL_WS,
+                branch="$gv2/"),
+True, 
+common_filters+['"timestamp"','"MMS_','"id"','"qualifiedId"','"version"', '"modified"', '"sequence"'],
+["test","workspaces","develop"]
+],
+        
+[
+813,
+"DeleteDeleteDeleteWsMatrix2",
+"Delete delete_delete_poo",
+create_curl_cmd(type="DELETE",data="elements/delete_delete_poo",base_url=BASE_URL_WS,
+                branch="$gv2/"),
+True, 
+common_filters+['"timestamp"','"MMS_','"id"','"qualifiedId"','"version"', '"modified"', '"sequence"'],
+["test","workspaces","develop"]
+],
+        
+[
+814,
+"DeleteNoneDeleteWsMatrix2",
+"Delete none_delete_poo",
+create_curl_cmd(type="DELETE",data="elements/none_delete_poo",base_url=BASE_URL_WS,
+                branch="$gv2/"),
+True, 
+common_filters+['"timestamp"','"MMS_','"id"','"qualifiedId"','"version"', '"modified"', '"sequence"'],
+["test","workspaces","develop"]
+],
+         
+[
+815,
+"PostElementsWsMatrix2",
+"Post elements to the wsMatrix2 branch for glom matrix testing",
+create_curl_cmd(type="POST",data="elementsWsMatrix2.json",base_url=BASE_URL_WS,
+                post_type="elements",branch="$gv2/"),
+True, 
+common_filters,
+["test","workspaces","develop"],
+None,
+None,
+set_last_read_to_gv6
+],
+        
+[
+816,
+"CompareWorkspacesGlomMatrixForMerge",
+"Compare workspaces at latest times for glom matrix test.  Does merge style diff.",
+create_curl_cmd(type="GET",base_url=SERVICE_URL,
+                branch="diff/$gv1/$gv2/latest/latest"),
+True, 
+common_filters+['"id"','"qualifiedId"','"creator"','"modifier"'],
+["test","workspaces","develop"]
+],
+        
+[
+817,
+"CompareWorkspacesGlomMatrix",
+"Compare workspaces at latest times for glom matrix test.  Does full compare style diff.",
+create_curl_cmd(type="GET",base_url=SERVICE_URL,
+                branch="diff/$gv1/$gv2/latest/latest?fullCompare"),
+True, 
+common_filters+['"id"','"qualifiedId"','"creator"','"modifier"'],
+["test","workspaces","develop"]
+],
+        
 # Additional searches after everything is completed ==========================   
 [
 10000,

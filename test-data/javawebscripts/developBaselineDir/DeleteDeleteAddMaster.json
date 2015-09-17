@@ -1,0 +1,44 @@
+{
+  "workspace1": {
+    "qualifiedName": "master",
+    "name": "master",
+    "elements": [{
+      "qualifiedName": "/europa/JW_TEST/delete_add_poo",
+      "sysmlid": "delete_add_poo",
+      "editable": true,
+      "creator": "admin",
+      "modifier": "admin",
+      "name": "delete_add_poo",
+      "owner": "123456",
+      "documentation": "delete_add_poo",
+      "specialization": {
+        "propertyType": null,
+        "isDerived": false,
+        "isSlot": false,
+        "value": [{
+          "valueExpression": null,
+          "string": "on a shoe",
+          "type": "LiteralString"
+        }],
+        "type": "Property"
+      }
+    }]
+  },
+  "workspace2": {
+    "deletedElements": [{
+      "name": "delete_add_poo",
+      "qualifiedName": "/europa/JW_TEST/delete_add_poo",
+      "owner": "123456",
+      "sysmlid": "delete_add_poo",
+      "specialization": {"type": "Property"},
+      "creator": "admin"
+    }],
+    "addedElements": [],
+    "conflictedElements": [],
+    "updatedElements": [],
+    "qualifiedName": "master",
+    "name": "master",
+    "movedElements": []
+  }
+}
+200
