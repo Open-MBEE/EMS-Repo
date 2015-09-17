@@ -3,7 +3,7 @@
     "qualifiedName": "master",
     "name": "master",
     "elements": [{
-      "qualifiedName": "/europa/JW_TEST/delete_add_poo",
+      "qualifiedName": "/europa/JW_TEST2/delete_add_poo",
       "sysmlid": "delete_add_poo",
       "editable": true,
       "creator": "admin",
@@ -27,7 +27,7 @@
   "workspace2": {
     "deletedElements": [{
       "name": "delete_add_poo",
-      "qualifiedName": "/europa/JW_TEST/delete_add_poo",
+      "qualifiedName": "/europa/JW_TEST2/delete_add_poo",
       "owner": "123456",
       "sysmlid": "delete_add_poo",
       "specialization": {"type": "Property"},

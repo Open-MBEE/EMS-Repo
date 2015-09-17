@@ -1,7 +1,7 @@
 {"elements": [
     {
         "qualifiedId": "/europa/123456/add_delete_poo",
-        "qualifiedName": "/europa/JW_TEST/add_delete_poo",
+        "qualifiedName": "/europa/JW_TEST2/add_delete_poo",
         "sysmlid": "add_delete_poo",
         "editable": true,
         "creator": "admin",
@@ -23,7 +23,7 @@
     },
     {
         "qualifiedId": "/europa/123456/add_update_poo",
-        "qualifiedName": "/europa/JW_TEST/add_update_poo",
+        "qualifiedName": "/europa/JW_TEST2/add_update_poo",
         "sysmlid": "add_update_poo",
         "editable": true,
         "creator": "admin",
