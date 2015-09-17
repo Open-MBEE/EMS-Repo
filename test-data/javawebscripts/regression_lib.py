@@ -41,6 +41,9 @@ create_baselines = False
 common_filters = ['"created"','"read"','"lastModified"','"modified"','"siteCharacterizationId"','time_total']
 cmd_git_branch = None
 
+tests = []
+
+
 # Some global variables for lambda functions in tests
 gv1 = None
 gv2 = None
@@ -408,9 +411,19 @@ def parse_test_nums(option, opt, value, parser):
         bound2 = float(keyListBounds[1])
         
         mult = 1 if bound2 >= bound1 else -1
+        upperBound = (bound2 if mult == 1 else bound1)
+        lowerBound = (bound1 if mult == 1 else bound2)
 
-        for key in range(bound1,bound2+mult,mult):
-            myList.append(key)
+        #testArray = [].extend(tests)#tests if mult == 1 else tests.reverse()
+        #for test in testArray:
+        for i in range(0,len(tests)):
+            j = i if mult == 1 else len(tests) - i - 1
+            test = tests[j]
+            testNum = test[0]
+            if testNum >= lowerBound and testNum <= upperBound:
+                myList.append(testNum)
+#         for key in range(bound1,bound2+mult,mult):
+#             myList.append(key)
             
         return myList
             
@@ -741,12 +754,14 @@ def set_curl_user(user):
     CURL_FLAGS = CURL_STATUS+CURL_USER
     
 
-def run(tests):
+def run(testArray):
     '''
     Main function to run the regression harness
     '''
     
-    global result_dir, baseline_dir
+    global result_dir, baseline_dir, tests
+    
+    tests = testArray
     
     # Parse the command line arguments:
     parse_command_line()
@@ -790,7 +805,7 @@ def run(tests):
         for test_num in test_nums:
             # If it is a valid test number then run the test:
             for test in tests:
-                if test_num == test[0]:
+                if test_num == test[0]: # TODO --  and git_branch in test[6]:
                     run_test(test)
                       
     # If there were test names specified:

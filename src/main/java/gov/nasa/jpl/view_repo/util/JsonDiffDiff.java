@@ -580,19 +580,23 @@ public class JsonDiffDiff extends AbstractDiff< JSONObject, Object, String > {
                            break;
                        case NONE:  // NONE - ADD = DELETE
                            conflict = false;
-                           // Since op1 is an add (instead of an update), the
-                           // clone here is used to replace element3_1 with
-                           // element1_2 instead of glomming element3_1 with
-                           // element1_2.
-                           newElement3_1 = NodeUtil.clone( element1_2 );
                            // If mergeStyleDiff==false, we need to undo the add
                            // with a delete.
                            // If mergeStyleDiff==true, there is no effect to add
                            // to workspace2 of dDiff3.
                            if ( !mergeStyleDiff ) {
+                               // Since op1 is an add (instead of an update), the
+                               // clone here is used to replace element3_1 with
+                               // element1_2 instead of glomming element3_1 with
+                               // element1_2.
+                               newElement3_1 = NodeUtil.clone( element1_2 );
                                dDiff3.set2( id, DiffOp.DELETE, newElement3_1, conflict );
+                                // We are discluding newElement3_1 to make it consistent
+                                // with removeFromDiff() called from
+                                // updateDiffs() with the understanding that we
+                                // will call findNodeRef() if necessary.
+                               dDiff3.set1( id, newElement3_1, false );
                            }
-                           dDiff3.set1( id, newElement3_1, false );
                        default:
                           // TODO -- ERROR
                    }
@@ -707,8 +711,11 @@ public class JsonDiffDiff extends AbstractDiff< JSONObject, Object, String > {
                            // of element3_1 by adding it.
                            if ( !mergeStyleDiff ) {
                                dDiff3.set2( id, DiffOp.ADD, element3_1, conflict );
+                                // We only add a workspace1 of there is a change
+                                // in workspace2 to keep it consistent with
+                                // updateDiff() calling removeFromDiff().
+                               dDiff3.set1( id, DiffOp.DELETE, element3_1, false );
                            }
-                           dDiff3.set1( id, DiffOp.DELETE, element3_1, false );
                            break;
                        default:
                            // TODO -- ERROR
@@ -954,6 +961,7 @@ public class JsonDiffDiff extends AbstractDiff< JSONObject, Object, String > {
                     break;
                 case UPDATE:
                     updated.put( glommedElement );
+                    // TODO BRAD FIXME README REVIEW add a flag to skip for intermediate diffs
                     if ( glommedElement.optString( "owner", null ) != null )
                         moved.put( glommedElement );
                     break;
