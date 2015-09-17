@@ -485,44 +485,62 @@ public class JsonDiffDiff extends AbstractDiff< JSONObject, Object, String > {
                                     JSONObject diff1,
                                     JSONObject diff2,
                                     boolean mergeStyleDiff ) {
-       // Make a copy of the original diff and update the copy to return.
-       JSONObject diff3 = NodeUtil.clone( diff0 );
+        Pair< JsonDiffDiff, JsonDiffDiff > p =
+                prepForMatrixDiff( diff0, diff1, diff2, mergeStyleDiff );
+        return matrixDiff(p.first, p.second, mergeStyleDiff);
+   }
+   
+   public static Pair<JsonDiffDiff, JsonDiffDiff> prepForMatrixDiff( JSONObject diff0,
+                                                                     JSONObject diff1,
+                                                                     JSONObject diff2,
+                                                                     boolean mergeStyleDiff ) {
+       // TODO -- rewrite this to take JsonDiffDiff arguments instead of
+       // JSONObjects since the only caller builds them, and they are rebuilt
+       // here.
+      
+      // Make a copy of the original diff and update the copy to return.
+      JSONObject diff3 = NodeUtil.clone( diff0 );
+      
+      // Go ahead and combine the changes to the second workspace.
+      // We need to be careful to not affect workspace1 of diff3, so let's
+      // first remove diff2's workspace1 before glomming.
+      JSONObject diff2NoWs1 = NodeUtil.clone( diff2 );
+      JSONObject ws1 = diff2NoWs1.optJSONObject( "workspace1" );
+      if ( ws1 != null ) {
+          JSONArray ws1Elements = ws1.optJSONArray( "elements" );
+          if ( ws1Elements == null || ws1Elements.length() > 0 ) {
+              ws1.put("elements", new JSONArray() );
+          }
+      }
+
+       // Check for conflicted before glomming workspace2 of diff2 onto
+       // workspace2 of diff3
+       // Assume diff0 has consistent conflicted elements. The cases for
+       // a conflicted element are combinations of operations in each workspace:
+       // d0ws1, d0ws2, d1ws1, d1ws2, d2ws2
+       // glom(d0ws1, d1ws1)
+       // Wait!  Maybe we don't care about whether d3ws2 and d2ws2 are glommed first.
+      
+       // Now add diff2 to diff3.
+       diff3 = glom(diff3, diff2NoWs1);
        
-       // Go ahead and combine the changes to the second workspace.
-       // We need to be careful to not affect workspace1 of diff3, so let's
-       // first remove diff2's workspace1 before glomming.
-       JSONObject diff2NoWs1 = NodeUtil.clone( diff2 );
-       JSONObject ws1 = diff2NoWs1.optJSONObject( "workspace1" );
-       if ( ws1 != null ) {
-           JSONArray ws1Elements = ws1.optJSONArray( "elements" );
-           if ( ws1Elements == null || ws1Elements.length() > 0 ) {
-               ws1.put("elements", new JSONArray() );
-           }
+       if (diff3.optJSONObject("workspace2") != null) {
+           diff3.optJSONObject("workspace2").remove("movedElements");
+           diff3.optJSONObject("workspace2").put("movedElements", new JSONArray());
+           diff3.optJSONObject("workspace2").remove("conflictedElements");
+           diff3.optJSONObject("workspace2").put("conflictedElements", new JSONArray());
        }
-       
-        // Check for conflicted before glomming workspace2 of diff2 onto
-        // workspace2 of diff3
-        // Assume diff0 has consistent conflicted elements. The cases for
-        // a conflicted element are combinations of operations in each workspace:
-        // d0ws1, d0ws2, d1ws1, d1ws2, d2ws2
-        // glom(d0ws1, d1ws1)
-        // Wait!  Maybe we don't care about whether d3ws2 and d2ws2 are glommed first.
-       
-		// Now add diff2 to diff3.
-		diff3 = glom(diff3, diff2NoWs1);
-		
-		if (diff3.optJSONObject("workspace2") != null) {
-			diff3.optJSONObject("workspace2").remove("movedElements");
-			diff3.optJSONObject("workspace2").put("movedElements", new JSONArray());
-			diff3.optJSONObject("workspace2").remove("conflictedElements");
-			diff3.optJSONObject("workspace2").put("conflictedElements", new JSONArray());
-		}
-     
+
        // Get all the workpace pieces of the diffs.
        JsonDiffDiff dDiff1 = new JsonDiffDiff( diff1 );
 
        JsonDiffDiff dDiff3 = new JsonDiffDiff( diff3 );
-       
+       return new Pair<JsonDiffDiff, JsonDiffDiff>( dDiff3, dDiff1 ); 
+   }
+
+    public static JsonDiffDiff matrixDiff( JsonDiffDiff dDiff3, JsonDiffDiff dDiff1,
+                                           boolean mergeStyleDiff ) {
+
        //Matrix Function
        // Compute the diff for each affected element.
        // TODO: are we collecting more IDs than we need to here? 
