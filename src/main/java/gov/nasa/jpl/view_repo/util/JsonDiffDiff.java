@@ -686,32 +686,18 @@ public class JsonDiffDiff extends AbstractDiff< JSONObject, Object, String > {
                    break;
                case DELETE:
                    switch ( op3 ) {
-                       case ADD: // ADD - DELETE = ADD or UPDATE
+                       case ADD: // ADD - DELETE = ADD
                            conflict = true;
-                           // This case shouldn't be possible since the
-                           // branches disagree on the prior existence of the
-                           // element.  We can check if element3_1 is null or not
-                           // since it should be the prior element.
-                           // No need to change element3_2 since it's an add,
-                           // except it's really an update if element3_1
-                           // exists.
+                           // No need to change element3_2 since it's an add
                            dDiff3.set1( id, DiffOp.DELETE, element3_1, conflict );
-                           if ( element3_1 != null ) {
-                               dDiff3.set2( id, DiffOp.UPDATE, element3_2, conflict );
-                           }
+//                         dDiff3.set2( id, DiffOp.ADD, element3_2, conflict );  // definitely ADD and not UPDATE
                            break;
-                       case UPDATE: // UPDATE - DELETE = ADD OR UPDATE
+                       case UPDATE: // UPDATE - DELETE = ADD
                            conflict = true;
-                           // This case shouldn't be possible since the
-                           // branches disagree on the prior existence of the
-                           // element.  We can check if element3_1 is null or not
+                           // We can check if element3_1 is null or not
                            // since it should be the prior element.
-                           // No need to change element3_2 since it's an add,
-                           // except it's really an update if element3_1
-                           // exists.
-                           dDiff3.set2( id, ( element3_1 == null ? DiffOp.ADD
-                                                                 : DiffOp.UPDATE ),
-                                        element3_2, conflict );
+                           // No need to change element3_2 since it's an add
+                           dDiff3.set2( id, DiffOp.ADD, element3_2, conflict );
                            dDiff3.set1( id, DiffOp.DELETE, element3_1, false );
                            break;
                        case DELETE:  // DELETE - DELETE = NONE
@@ -742,12 +728,14 @@ public class JsonDiffDiff extends AbstractDiff< JSONObject, Object, String > {
                case NONE:
                    switch ( op3 ) {
                        case ADD: // ADD - NONE = ADD
+                           //dDiff3.set2(id, op3, diff(element3_1, element3_2, false).first, false);
+                           break;
                        case UPDATE: // UPDATE - NONE = UPDATE
                        case DELETE:  // DELETE - NONE = DELETE
                        case NONE:  // NONE - NONE = NONE
                            // Nothing to do for this case except that we need
-                           // to get some default properties since element3_2
-                           // might not have some of them. We use diff() to do
+                           // to get strip out properties that didn't actually
+                           // change. We use diff() to do
                            // this.
                            // Since nothing happens in workspace1, we can
                            // ignore the mergeStyleDiff flag.

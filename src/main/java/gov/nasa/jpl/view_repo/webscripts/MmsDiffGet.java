@@ -143,7 +143,8 @@ public class MmsDiffGet extends AbstractJavaWebScript {
         boolean runInBackground = getBooleanArg(req, "background", false);
         recalculate = getBooleanArg( req, "recalculate", false );
         
-        // Determine the diffType.  Default is Merge:
+        // TODO change the default back to MERGE
+        // Determine the diffType.  Default is Compare:
         DiffType diffType;
         if (getBooleanArg( req, "changesForMerge", false )) {
             diffType = DiffType.MERGE;
@@ -155,7 +156,7 @@ public class MmsDiffGet extends AbstractJavaWebScript {
             diffType = DiffType.BOTH;
         }
         else {
-            diffType = DiffType.MERGE;
+            diffType = DiffType.COMPARE;
         }
         
         userTimeStamp1 = getTimestamp1(req);
@@ -388,9 +389,9 @@ public class MmsDiffGet extends AbstractJavaWebScript {
         // This assumes that the timepoint of the new diff is after the
         // timepoint of the old for each workspace.
         JSONObject diff1Json = performDiff( ws1, ws1, date0_1, date1, getResponse(),
-                                            getResponseStatus(), diffType );
+                                            getResponseStatus(), DiffType.COMPARE );
         JSONObject diff2Json = performDiff( ws2, ws2, date0_2, date2, getResponse(),
-                                            getResponseStatus(), diffType );
+                                            getResponseStatus(), DiffType.COMPARE );
         
 //        // If oldJob is null, we need to build a diff0 from scratch. Collect all
 //        // element ids in diff1 and diff2, get their json for the common-branch
