@@ -143,7 +143,8 @@ public class MmsDiffGet extends AbstractJavaWebScript {
         boolean runInBackground = getBooleanArg(req, "background", false);
         recalculate = getBooleanArg( req, "recalculate", false );
         
-        // Determine the diffType.  Default is Merge:
+        // TODO change the default back to MERGE
+        // Determine the diffType.  Default is Compare:
         DiffType diffType;
         if (getBooleanArg( req, "changesForMerge", false )) {
             diffType = DiffType.MERGE;
@@ -155,7 +156,7 @@ public class MmsDiffGet extends AbstractJavaWebScript {
             diffType = DiffType.BOTH;
         }
         else {
-            diffType = DiffType.MERGE;
+            diffType = DiffType.COMPARE;
         }
         
         userTimeStamp1 = getTimestamp1(req);
