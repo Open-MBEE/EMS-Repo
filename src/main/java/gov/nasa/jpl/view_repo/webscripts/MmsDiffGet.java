@@ -6,7 +6,6 @@ import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.actions.ActionUtil;
 import gov.nasa.jpl.view_repo.actions.WorkspaceDiffActionExecuter;
 import gov.nasa.jpl.view_repo.util.CommitUtil;
-import gov.nasa.jpl.view_repo.util.JsonDiffDiff.DiffOp;
 import gov.nasa.jpl.view_repo.util.JsonDiffDiff.DiffType;
 import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
@@ -18,8 +17,6 @@ import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -496,37 +493,6 @@ public class MmsDiffGet extends AbstractJavaWebScript {
         JSONObject diff2Json = performDiff( ws2, ws2, date0_2, date2, getResponse(),
                                             getResponseStatus(), DiffType.COMPARE, false );
         
-//        // If oldJob is null, we need to build a diff0 from scratch. Collect all
-//        // element ids in diff1 and diff2, get their json for the common-branch
-//        // timepoint, and put that into workspace1.elements of a diff0.
-//        if ( diff0 == null ) {
-//            diff0 = JsonDiffDiff.makeEmptyDiffJson();
-//            
-//            JsonDiffDiff diff1 = new JsonDiffDiff(diff1Json);
-//            JsonDiffDiff diff2 = new JsonDiffDiff(diff2Json);
-//            
-//            Set<String> sysmlIds = diff1.getAffectedIds();
-//            sysmlIds.addAll(diff2.getAffectedIds());
-//                        
-//            Set<EmsScriptNode> elements = Collections.emptySet();
-//            for (String id : sysmlIds)
-//            {
-//            	//create ArrayList of node refs by calling getNodeRefsById
-//            	//add to set of EmsScriptNodes
-//            	elements.add(findScriptNodeById(id, commonParent, commonBranchTime, false));
-//            }
-//            Map<String, EmsScriptNode> elementsMap = Utils.toMap(elements);
-//           
-//            JSONObject elementsJson = diff0.getJSONObject( "workspace1" );
-//            WorkspaceDiff.addJSONArray( elementsJson , "elements", elementsMap, null, commonParent,
-//                          commonBranchTime, true, null );
-//        }
-//        
-//        
-//        // Now add/glom diff2 to diff0 (oldDiffJson) and then diff with/subtract
-//        // diff1.
-//        JSONObject diffResult = null; //glom( oldDiffJson, diff2Json );
-//        diffResult = JsonDiffDiff.diff( diff0, diff1Json, diff2Json );
         JsonDiffDiff diffDiffResult =
                 WorkspaceDiff.performDiffGlom( diff0, diff1Json, diff2Json, commonParent,
                                  commonBranchTime, services, response, diffType );
