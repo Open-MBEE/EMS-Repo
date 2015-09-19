@@ -368,44 +368,49 @@ public class MmsDiffGet extends AbstractJavaWebScript {
                     if (dateTime1 != null && dateTime2 != null 
                         && ws1 != null && ws2 != null) {
                         
+                        JSONObject firstElem = null;
                         JSONArray elements = ws1Json.optJSONArray("elements");
                         JSONArray added = ws1Json.optJSONArray("added");
                         JSONArray updated = ws1Json.optJSONArray("updated");
                         JSONArray deleted = ws1Json.optJSONArray("deleted");
                         
-                        if (elements != null) {
-                            JSONObject firstElem = elements.getJSONObject( 0 );
+                        if (added != null && added.length() > 0) {
+                            firstElem = added.getJSONObject( 0 );
+                        }
+                        else if (updated != null && updated.length() > 0) {
+                            firstElem = updated.getJSONObject( 0 );
+                        }
+                        else if (deleted != null && deleted.length() > 0) {
+                            firstElem = deleted.getJSONObject( 0 );
+                        }
+                        else if (elements != null && elements.length() > 0) {
+                            firstElem = elements.getJSONObject( 0 );
+                        }
+                        
+                        if (firstElem != null) {
                             
-                            if (firstElem == null) {
-                                // TODO check the added, updated, deleted sets
-                                //      for a element if the above didnt work.
+                            if (!firstElem.has( Acm.JSON_SPECIALIZATION )) {
                                 
+                                String origUser = NodeUtil.getUserName();
+                                boolean switchUser = !origUser.equals( "admin" );
                                 
-                            }
-                            if (firstElem != null) {
-                                
-                                if (!firstElem.has( Acm.JSON_SPECIALIZATION )) {
-                                    
-                                    String origUser = NodeUtil.getUserName();
-                                    boolean switchUser = !origUser.equals( "admin" );
-                                    
-                                    if ( switchUser ) AuthenticationUtil.setRunAsUser( "admin" );
-                                    // to make sure no permission issues, run as admin
-                                   
-                                    // Perform the diff using the workspaces and timestamps
-                                    // from the commit node:
-                                    JSONObject newCommitJson = performDiff( ws1, ws2, dateTime1, dateTime2, response,
-                                                                            responseStatus, DiffType.COMPARE, true );
-                     
-                                    if ( newCommitJson != null ) {  
-                                        commitNode.createOrUpdateProperty( "ems:commit", 
-                                                                           newCommitJson.toString() );
-                                    }
-
-                                    if ( switchUser ) AuthenticationUtil.setRunAsUser( origUser );
+                                if ( switchUser ) AuthenticationUtil.setRunAsUser( "admin" );
+                                // to make sure no permission issues, run as admin
+                               
+                                // Perform the diff using the workspaces and timestamps
+                                // from the commit node:
+                                JSONObject newCommitJson = performDiff( ws1, ws2, dateTime1, dateTime2, response,
+                                                                        responseStatus, DiffType.COMPARE, true );
+                 
+                                if ( newCommitJson != null ) {  
+                                    commitNode.createOrUpdateProperty( "ems:commit", 
+                                                                       newCommitJson.toString() );
                                 }
+
+                                if ( switchUser ) AuthenticationUtil.setRunAsUser( origUser );
                             }
                         }
+                        
                     }
                 }
             }
