@@ -886,7 +886,7 @@ public class WorkspaceNode extends EmsScriptNode {
         }
         return changedNodeRefs;
     }
-    
+        
     public static JSONObject getChangeJsonWithRespectTo( WorkspaceNode ws1,
                                                          WorkspaceNode ws2,
                                                          Date timestamp1,

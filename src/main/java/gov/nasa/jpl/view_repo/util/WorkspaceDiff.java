@@ -117,10 +117,18 @@ public class WorkspaceDiff implements Serializable {
     public WorkspaceDiff(WorkspaceNode ws1, WorkspaceNode ws2, Date timestamp1, Date timestamp2,
                          StringBuffer response, Status status, DiffType diffType) {
 
+        this(ws1, ws2, timestamp1, timestamp2, response, status, diffType, glomming);
+    }
+    
+    public WorkspaceDiff(WorkspaceNode ws1, WorkspaceNode ws2, Date timestamp1, Date timestamp2,
+                         StringBuffer response, Status status, DiffType diffType,
+                         boolean glom) {
+
         this(ws1, ws2, response, status);
         this.timestamp1 = timestamp1;
         this.timestamp2 = timestamp2;
         this.diffType = diffType;
+        this.glom = glom;
         diff();
     }
 
