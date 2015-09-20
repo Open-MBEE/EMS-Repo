@@ -463,6 +463,10 @@ public class View extends List implements sysml.view.View< EmsScriptNode >, Comp
 //                        (java.util.List< Viewable<EmsScriptNode> >)Utils.asList( c );
 //                addAll( viewables );
             }
+
+        // TODO -- figure out why eclipse gives compile errors for
+        // including the exceptions while mvn gives errors for not
+        // including them.
         } catch ( IllegalAccessException e1 ) {
             // TODO Auto-generated catch block
             //e1.printStackTrace();

@@ -4,14 +4,32 @@
         "name": "wsG1",
         "elements": [
             {
-                "qualifiedName": "/europa/JW_TEST/300",
-                "sysmlid": "300",
+                "qualifiedName": "/no_site/no_site_no_project/holding_bin/300",
+                "sysmlid": "x",
                 "editable": true,
-                "creator": "admin",
-                "modifier": "admin",
+                "version": "1.1",
                 "name": "300",
-                "owner": "123456",
-                "documentation": "something",
+                "owner": "holding_bin_no_site_no_project",
+                "documentation": "x is x",
+                "specialization": {
+                    "propertyType": null,
+                    "isDerived": false,
+                    "isSlot": false,
+                    "value": [{
+                        "valueExpression": null,
+                        "string": "the x value",
+                        "type": "LiteralString"
+                    }],
+                    "type": "Property"
+                }
+            },
+            {
+                "qualifiedName": "/europa/JW_TEST/300/301/302",
+                "sysmlid": "302",
+                "editable": true,
+                "name": "302",
+                "owner": "301",
+                "documentation": "to",
                 "specialization": {
                     "propertyType": null,
                     "isDerived": false,
@@ -28,8 +46,6 @@
                 "qualifiedName": "/europa/JW_TEST/300/301",
                 "sysmlid": "301",
                 "editable": true,
-                "creator": "admin",
-                "modifier": "admin",
                 "name": "301",
                 "owner": "300",
                 "documentation": "else",
@@ -63,14 +79,12 @@
                 }
             },
             {
-                "qualifiedName": "/europa/JW_TEST/300/301/302",
-                "sysmlid": "302",
+                "qualifiedName": "/europa/JW_TEST/300",
+                "sysmlid": "300",
                 "editable": true,
-                "creator": "admin",
-                "modifier": "admin",
-                "name": "302",
-                "owner": "301",
-                "documentation": "to",
+                "name": "300",
+                "owner": "123456",
+                "documentation": "something",
                 "specialization": {
                     "propertyType": null,
                     "isDerived": false,
@@ -84,88 +98,41 @@
                 }
             },
             {
-                "modifier": "admin",
                 "name": "holding_bin",
                 "qualifiedName": "/no_site/no_site_no_project/holding_bin",
                 "sysmlid": "holding_bin_no_site_no_project",
                 "owner": "no_site_no_project",
                 "specialization": {"type": "Package"},
                 "editable": true,
-                "creator": "admin",
-            },
-            {
-                "qualifiedName": "/no_site/no_site_no_project/holding_bin/300",
-                "sysmlid": "x",
-                "editable": true,
-                "creator": "admin",
-                "modifier": "admin",
-                "name": "300",
-                "owner": "holding_bin_no_site_no_project",
-                "documentation": "x is x",
-                "specialization": {
-                    "propertyType": null,
-                    "isDerived": false,
-                    "isSlot": false,
-                    "value": [{
-                        "valueExpression": null,
-                        "string": "the x value",
-                        "type": "LiteralString"
-                    }],
-                    "type": "Property"
-                }
             }
         ]
     },
     "workspace2": {
         "deletedElements": [],
-        "addedElements": [
-            {
-                "modifier": "admin",
-                "qualifiedName": "/europa/JW_TEST/300/301/302/null",
-                "sysmlid": "y",
-                "documentation": "y is y",
-                "owner": "302",
-                "specialization": {
-                    "propertyType": null,
-                    "isDerived": false,
-                    "isSlot": false,
-                    "value": [{
-                        "valueExpression": null,
-                        "string": "the y value",
-                        "type": "LiteralString"
-                    }],
-                    "type": "Property"
-                },
-                "editable": true,
-                "creator": "admin",
+        "addedElements": [{
+            "qualifiedName": "/europa/JW_TEST/300/301/302/null",
+            "owner": "302",
+            "documentation": "z is z",
+            "sysmlid": "z",
+            "specialization": {
+                "propertyType": null,
+                "isDerived": false,
+                "isSlot": false,
+                "value": [{
+                    "valueExpression": null,
+                    "string": "the z value",
+                    "type": "LiteralString"
+                }],
+                "type": "Property"
             },
-            {
-                "modifier": "admin",
-                "qualifiedName": "/europa/JW_TEST/300/301/302/null",
-                "sysmlid": "z",
-                "documentation": "z is z",
-                "owner": "302",
-                "specialization": {
-                    "propertyType": null,
-                    "isDerived": false,
-                    "isSlot": false,
-                    "value": [{
-                        "valueExpression": null,
-                        "string": "the z value",
-                        "type": "LiteralString"
-                    }],
-                    "type": "Property"
-                },
-                "editable": true,
-                "creator": "admin",
-            }
-        ],
+            "editable": true
+        }],
         "conflictedElements": [],
         "updatedElements": [{
             "name": "300",
             "qualifiedName": "/no_site/no_site_no_project/holding_bin/300",
-            "documentation": "something",
             "owner": "holding_bin_no_site_no_project",
+            "documentation": "something",
             "sysmlid": "x",
             "specialization": {
                 "value": [{
@@ -174,8 +141,7 @@
                     "type": "LiteralString"
                 }],
                 "type": "Property"
-            },
-            "creator": "admin"
+            }
         }],
         "qualifiedName": "master/wsG2",
         "name": "wsG2",

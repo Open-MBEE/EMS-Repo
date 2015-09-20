@@ -4,17 +4,14 @@
         "name": "wsA",
         "elements": [
             {
-                "modifier": "admin",
                 "qualifiedName": "/no_site/no_site_no_project/holding_bin",
                 "name": "holding_bin",
                 "sysmlid": "holding_bin_no_site_no_project",
                 "owner": "no_site_no_project",
                 "specialization": {"type": "Package"},
-                "editable": true,
-                "creator": "admin"
+                "editable": true
             },
             {
-                "modifier": "admin",
                 "qualifiedName": "/no_site/no_site_no_project/holding_bin/300",
                 "name": "300",
                 "sysmlid": "x",
@@ -31,8 +28,7 @@
                     }],
                     "type": "Property"
                 },
-                "editable": true,
-                "creator": "admin"
+                "editable": true
             }
         ]
     },
@@ -53,8 +49,7 @@
                     "type": "LiteralString"
                 }],
                 "type": "Property"
-            },
-            "creator": "admin"
+            }
         }],
         "qualifiedName": "master/wsA/wsB",
         "name": "wsB",

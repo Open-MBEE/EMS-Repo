@@ -1,0 +1,10 @@
+{ "elements" : [
+    {
+     "sysmlid" : "poo",
+     "documentation" : "poo is poo",
+     "specialization" : {
+       "type": "Property",
+       "value" : [{ "string" : "the poo value",
+                    "type" : "LiteralString"}]}
+     }
+]}

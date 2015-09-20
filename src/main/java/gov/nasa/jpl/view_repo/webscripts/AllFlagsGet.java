@@ -1,6 +1,8 @@
 package gov.nasa.jpl.view_repo.webscripts;
 
 import gov.nasa.jpl.mbee.util.Debug;
+import gov.nasa.jpl.view_repo.actions.SnapshotArtifactsGenerationActionExecuter;
+import gov.nasa.jpl.view_repo.util.CommitUtil;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.EmsTransaction;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
@@ -27,7 +29,10 @@ public class AllFlagsGet extends FlagSet {
                            "versionCache",
                            "versionHistoryCache",
                            "skipWorkspacePermissionCheck", 
-                           "optimisticJustFirst" };
+                           "optimisticJustFirst",
+                           "makeDocBook",
+                           "glom",
+                           "cleanJson" };
     
     public String[] getAllFlags() {
         return flags;
@@ -101,7 +106,13 @@ public class AllFlagsGet extends FlagSet {
             NodeUtil.skipWorkspacePermissionCheck = val;
         } else if (path.equalsIgnoreCase("optimisticJustFirst")) {
             NodeUtil.doOptimisticJustFirst = val;
-        } 
+        } else if (path.equalsIgnoreCase("makeDocBook")) {
+            SnapshotArtifactsGenerationActionExecuter.makeDocBook = val;
+        } else if (path.equalsIgnoreCase("glom")) {
+        	MmsDiffGet.glom = val;
+        } else if (path.equalsIgnoreCase("cleanJson")) {
+        	CommitUtil.cleanJson = val;
+        }
         return true;
     }
 
@@ -154,7 +165,13 @@ public class AllFlagsGet extends FlagSet {
             return NodeUtil.skipWorkspacePermissionCheck;
         } else if (path.equalsIgnoreCase("optimisticJustFirst")) {
             return NodeUtil.doOptimisticJustFirst;
-        }
+        } else if (path.equalsIgnoreCase("makeDocBook")) {
+            return SnapshotArtifactsGenerationActionExecuter.makeDocBook;
+        }else if (path.equalsIgnoreCase("glom")) {
+        	return MmsDiffGet.glom;
+        } else if (path.equalsIgnoreCase("cleanJson")) {
+        	return CommitUtil.cleanJson;
+        } 
         return false;
     }
     
@@ -221,6 +238,10 @@ public class AllFlagsGet extends FlagSet {
             return false;
         } else if (path.equalsIgnoreCase("optimisticJustFirst")) {
             return false;
+        } else if (path.equalsIgnoreCase("glom")) {
+        	return false;
+        } else if (path.equalsIgnoreCase("cleanJson")) {
+        	return false;
         }
         return false;
     };
@@ -277,7 +298,13 @@ public class AllFlagsGet extends FlagSet {
             return "skipWorkspacePermissionCheck";
         } else if (path.equalsIgnoreCase("optimisticJustFirst")) {
             return "doOptimisticJustFirst";
-        } 
+        } else if (path.equalsIgnoreCase("makeDocBook")) {
+            return "makeDocBook";
+        } else if (path.equalsIgnoreCase("glom")) {
+        	return "glom";
+        } else if (path.equalsIgnoreCase("cleanJson")) {
+        	return "cleanJson";
+        }
         return null;
     }
 

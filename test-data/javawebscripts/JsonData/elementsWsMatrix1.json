@@ -1,0 +1,84 @@
+{ "elements" : [
+
+    {"documentation" : "add_add_poo", 
+     "sysmlid":"add_add_poo", 
+     "name":"add_add_poo", 
+     "owner":"123456", 
+     "specialization": {"type":"Property",
+                        "isDerived":false, 
+                        "value":[{"type":"LiteralString",
+                                  "string":"on a shoe"}]}
+    },
+
+    {"documentation" : "add_update_poo", 
+     "sysmlid":"add_update_poo", 
+     "name":"add_update_poo", 
+     "owner":"123456", 
+     "specialization": {"type":"Property",
+                        "isDerived":false, 
+                        "value":[{"type":"LiteralString",
+                                  "string":"on a shoe"}]}
+    },
+    
+    {"documentation" : "add_delete_poo", 
+     "sysmlid":"add_delete_poo", 
+     "name":"add_delete_poo", 
+     "owner":"123456", 
+     "specialization": {"type":"Property",
+                        "isDerived":false, 
+                        "value":[{"type":"LiteralString",
+                                  "string":"on a shoe"}]}
+    },
+    
+    {"documentation" : "add_none_poo", 
+     "sysmlid":"add_none_poo", 
+     "name":"add_none_poo", 
+     "owner":"123456", 
+     "specialization": {"type":"Property",
+                        "isDerived":false, 
+                        "value":[{"type":"LiteralString",
+                                  "string":"on a shoe"}]}
+    },
+        
+    {"documentation" : "update_add_poo updatedWs1", 
+     "sysmlid":"update_add_poo", 
+     "name":"update_add_poo", 
+     "owner":"123456", 
+     "specialization": {"type":"Property",
+                        "isDerived":false, 
+                        "value":[{"type":"LiteralString",
+                                  "string":"on a shoe"}]}
+    },
+
+    {"documentation" : "update_update_poo updatedWs1", 
+     "sysmlid":"update_update_poo", 
+     "name":"update_update_poo", 
+     "owner":"123456", 
+     "specialization": {"type":"Property",
+                        "isDerived":false, 
+                        "value":[{"type":"LiteralString",
+                                  "string":"on a shoe"}]}
+    },
+    
+    {"documentation" : "update_delete_poo updatedWs1", 
+     "sysmlid":"update_delete_poo", 
+     "name":"update_delete_poo", 
+     "owner":"123456", 
+     "specialization": {"type":"Property",
+                        "isDerived":false, 
+                        "value":[{"type":"LiteralString",
+                                  "string":"on a shoe"}]}
+    },
+    
+    {"documentation" : "update_none_poo updatedWs1", 
+     "sysmlid":"update_none_poo", 
+     "name":"update_none_poo", 
+     "owner":"123456", 
+     "specialization": {"type":"Property",
+                        "isDerived":false, 
+                        "value":[{"type":"LiteralString",
+                                  "string":"on a shoe"}]}
+    },
+    
+
+]}
