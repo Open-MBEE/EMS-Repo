@@ -1549,8 +1549,10 @@ public class EmsScriptNode extends ScriptNode implements
         
         ArrayList<NodeRef> nodes = new ArrayList<NodeRef>();
         
-        String relationshipTypeName = relationshipType.replaceAll( "\"", "" );
-        if (Acm.getJSON2ACM().containsKey( relationshipTypeName )) {
+        String relationshipTypeName =
+                relationshipType == null ? null
+                                         : relationshipType.replaceAll( "\"", "" );
+        if (relationshipTypeName != null && Acm.getJSON2ACM().containsKey( relationshipTypeName )) {
             relationshipTypeName = Acm.getJSON2ACM().get( relationshipTypeName );
         }
         boolean checkingRelationship = !Utils.isNullOrEmpty(relationshipTypeName);
