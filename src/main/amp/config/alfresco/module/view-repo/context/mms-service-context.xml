@@ -434,5 +434,11 @@
         <property name="arguments" ref="repositoryHelper"/>
     </bean>
     
+    <bean id="webscript.gov.nasa.jpl.mms.workspaces.commit.migration"
+        class="gov.nasa.jpl.view_repo.webscripts.CommitNodeMigration" parent="webscript"
+        singleton="false">
+        <property name="repositoryHelper" ref="repositoryHelper" />
+        <property name="services" ref="ServiceRegistry" />
+    </bean>
         
 </beans>
