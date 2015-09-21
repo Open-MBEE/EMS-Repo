@@ -2439,19 +2439,21 @@ public class ModelPost extends AbstractJavaWebScript {
             addSysmlIdsToElementJson( json, sysmlidPrefix );
         }
         
-        log(Level.DEBUG, "********************************************************************************");
-        log(Level.DEBUG, k);
-        if ( logger.isDebugEnabled() ) log(Level.DEBUG, NodeUtil.jsonToString( json, 4 ));
-//        log(LogLevel.DEBUG, NodeUtil.jsonToString( exprJson0, 4 ));
-        log(Level.DEBUG, "********************************************************************************");
-
+        if ( logger.isDebugEnabled() ) {
+            log(Level.DEBUG, "********************************************************************************");
+            log(Level.DEBUG, k);
+            if ( logger.isDebugEnabled() ) log(Level.DEBUG, NodeUtil.jsonToString( json, 4 ));
+    //        log(LogLevel.DEBUG, NodeUtil.jsonToString( exprJson0, 4 ));
+            log(Level.DEBUG, "********************************************************************************");
+        }
+        
         changeMissingOperationElementsToStrings(json, ws, postSet);
         
-        System.out.println("kToJson(" + k + ") = \n" + json.toString( 4 ) );
+        if ( logger.isDebugEnabled() ) log(Level.DEBUG, "kToJson(k) = \n" + json.toString( 4 ) );
         
         return json;
     }
-        
+
     public JSONObject getPostJson( boolean jsonNotK, Object content ) {
         return getPostJson( jsonNotK, content, null );
     }
