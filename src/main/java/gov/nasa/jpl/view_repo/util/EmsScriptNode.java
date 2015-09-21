@@ -4685,6 +4685,8 @@ public class EmsScriptNode extends ScriptNode implements
         try {
             makeSureNodeRefIsNotFrozen();
             ns.removeProperty( getNodeRef(), createQName( acmProperty ) );
+            Map< String, Object > cachedProps = NodeUtil.propertyCacheGetProperties( getNodeRef() );
+            cachedProps.remove( acmProperty );
             return true;
         } catch ( InvalidNodeRefException e ) {
             // ignore
@@ -6102,7 +6104,13 @@ public class EmsScriptNode extends ScriptNode implements
             transactionCheck();
             
             updateBogusProperty( type );
+            
+            // REVIEW -- might make sense to just remove properties for this
+            // specific aspect.
+            NodeUtil.propertyCache.remove( getNodeRef() );
 
+            // We assume that super.removeAspect() removes properties of the
+            // aspect.
             return super.removeAspect( type );
         }
         return true;
