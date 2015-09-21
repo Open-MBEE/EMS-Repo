@@ -1,8 +1,8 @@
 { "elements" : [
 
-    {"documentation" : "delete_add_poo", 
-     "sysmlid":"delete_add_poo", 
-     "name":"delete_add_poo", 
+    {"documentation" : "delete_add_gg", 
+     "sysmlid":"delete_add_gg", 
+     "name":"delete_add_gg", 
      "owner":"123456", 
      "specialization": {"type":"Property",
                         "isDerived":false, 
@@ -10,9 +10,9 @@
                                   "string":"on a shoe"}]}
     },
 
-    {"documentation" : "delete_update_poo", 
-     "sysmlid":"delete_update_poo", 
-     "name":"delete_update_poo", 
+    {"documentation" : "delete_update_gg", 
+     "sysmlid":"delete_update_gg", 
+     "name":"delete_update_gg", 
      "owner":"123456", 
      "specialization": {"type":"Property",
                         "isDerived":false, 
@@ -20,9 +20,9 @@
                                   "string":"on a shoe"}]}
     },
     
-    {"documentation" : "delete_delete_poo", 
-     "sysmlid":"delete_delete_poo", 
-     "name":"delete_delete_poo", 
+    {"documentation" : "delete_delete_gg", 
+     "sysmlid":"delete_delete_gg", 
+     "name":"delete_delete_gg", 
      "owner":"123456", 
      "specialization": {"type":"Property",
                         "isDerived":false, 
@@ -30,9 +30,9 @@
                                   "string":"on a shoe"}]}
     },
     
-    {"documentation" : "delete_none_poo", 
-     "sysmlid":"delete_none_poo", 
-     "name":"delete_none_poo", 
+    {"documentation" : "delete_none_gg", 
+     "sysmlid":"delete_none_gg", 
+     "name":"delete_none_gg", 
      "owner":"123456", 
      "specialization": {"type":"Property",
                         "isDerived":false, 
@@ -40,9 +40,9 @@
                                   "string":"on a shoe"}]}
     },
         
-    {"documentation" : "none_delete_poo", 
-     "sysmlid":"none_delete_poo", 
-     "name":"none_delete_poo", 
+    {"documentation" : "none_delete_gg", 
+     "sysmlid":"none_delete_gg", 
+     "name":"none_delete_gg", 
      "owner":"123456", 
      "specialization": {"type":"Property",
                         "isDerived":false, 
@@ -51,9 +51,9 @@
     },
     
     
-    {"documentation" : "update_add_poo", 
-     "sysmlid":"update_add_poo", 
-     "name":"update_add_poo", 
+    {"documentation" : "update_add_gg", 
+     "sysmlid":"update_add_gg", 
+     "name":"update_add_gg", 
      "owner":"123456", 
      "specialization": {"type":"Property",
                         "isDerived":false, 
@@ -61,9 +61,9 @@
                                   "string":"on a shoe"}]}
     },
 
-    {"documentation" : "update_update_poo", 
-     "sysmlid":"update_update_poo", 
-     "name":"update_update_poo", 
+    {"documentation" : "update_update_gg", 
+     "sysmlid":"update_update_gg", 
+     "name":"update_update_gg", 
      "owner":"123456", 
      "specialization": {"type":"Property",
                         "isDerived":false, 
@@ -71,9 +71,9 @@
                                   "string":"on a shoe"}]}
     },
     
-    {"documentation" : "update_delete_poo", 
-     "sysmlid":"update_delete_poo", 
-     "name":"update_delete_poo", 
+    {"documentation" : "update_delete_gg", 
+     "sysmlid":"update_delete_gg", 
+     "name":"update_delete_gg", 
      "owner":"123456", 
      "specialization": {"type":"Property",
                         "isDerived":false, 
@@ -81,9 +81,9 @@
                                   "string":"on a shoe"}]}
     },
     
-    {"documentation" : "update_none_poo", 
-     "sysmlid":"update_none_poo", 
-     "name":"update_none_poo", 
+    {"documentation" : "update_none_gg", 
+     "sysmlid":"update_none_gg", 
+     "name":"update_none_gg", 
      "owner":"123456", 
      "specialization": {"type":"Property",
                         "isDerived":false, 
@@ -91,9 +91,9 @@
                                   "string":"on a shoe"}]}
     },
         
-    {"documentation" : "none_update_poo", 
-     "sysmlid":"none_update_poo", 
-     "name":"none_update_poo", 
+    {"documentation" : "none_update_gg", 
+     "sysmlid":"none_update_gg", 
+     "name":"none_update_gg", 
      "owner":"123456", 
      "specialization": {"type":"Property",
                         "isDerived":false, 
