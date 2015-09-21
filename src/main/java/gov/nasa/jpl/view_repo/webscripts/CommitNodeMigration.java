@@ -23,19 +23,7 @@ import java.util.Set;
 
 import javax.servlet.http.HttpServletResponse;
 
-import org.alfresco.model.ContentModel;
-import org.alfresco.repo.model.Repository;
-import org.alfresco.repo.security.authentication.AuthenticationUtil;
-import org.alfresco.service.ServiceRegistry;
-import org.alfresco.service.cmr.action.Action;
-import org.alfresco.service.cmr.action.ActionService;
-import org.alfresco.service.cmr.repository.ContentIOException;
-import org.alfresco.service.cmr.repository.ContentReader;
-import org.alfresco.service.cmr.repository.NodeRef;
 import org.apache.log4j.*;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
@@ -90,6 +78,8 @@ public class CommitNodeMigration extends AbstractJavaWebScript {
             results.put("res", createResponseJson());
             return results;
         }
+
+        log( Level.INFO, "Migration commit nodes for workspace: "+ ws);
 
         ArrayList<EmsScriptNode> commits = CommitUtil.getCommits( ws, services, response );
         
