@@ -48,7 +48,7 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
 public class MmsDiffGet extends AbstractJavaWebScript {
 
 	public static boolean glom = true;
-	public static boolean diffDefaultIsMerge = true;
+	public static boolean diffDefaultIsMerge = false;
 
 	private static WorkspaceNode workspace;
 
