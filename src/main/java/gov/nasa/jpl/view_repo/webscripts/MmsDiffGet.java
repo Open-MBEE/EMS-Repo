@@ -7,6 +7,7 @@ import gov.nasa.jpl.view_repo.actions.ActionUtil;
 import gov.nasa.jpl.view_repo.actions.WorkspaceDiffActionExecuter;
 import gov.nasa.jpl.view_repo.util.CommitUtil;
 import gov.nasa.jpl.view_repo.util.JsonDiffDiff.DiffType;
+import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.JsonDiffDiff;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
@@ -287,10 +288,13 @@ public class MmsDiffGet extends AbstractJavaWebScript {
                                           Date date1, Date date2,
                                           StringBuffer aResponse,
                                           Status aResponseStatus,
-                                          DiffType diffType) {
+                                          DiffType diffType,
+                                          boolean forceNonGlom) {
+        
         WorkspaceDiff workspaceDiff = null;
             workspaceDiff =
-                    new WorkspaceDiff(w1, w2, date1, date2, aResponse, aResponseStatus, diffType);
+                    new WorkspaceDiff(w1, w2, date1, date2, aResponse, 
+                                      aResponseStatus, diffType, !forceNonGlom);
         
         JSONObject diffJson = null;
         if ( workspaceDiff != null ) {
@@ -311,7 +315,111 @@ public class MmsDiffGet extends AbstractJavaWebScript {
         return diffJson;
     }
     
+    /**
+     * Migrates the passed commitNode to have all the needed information
+     * for glom diffs to work.
+     * 
+     * @param commitNode
+     */
+    public static void migrateCommitNode( EmsScriptNode commitNode, 
+                                          StringBuffer response,
+                                          Status responseStatus ) {
+        
+        // TODO this needs to be ran its own transaction if calling it from
+        //      the glom code.
+        
+        // TODO REVIEW should we really use a non glom diff to compute the
+        //      new commit node b/c this diff has bugs.  Perhaps, it is better
+        //      to do finds on each element in the json?
+        
+        // Checks if the first element found in the commit json has a specialization.  
+        // If it does not, then the commit node needs to be migrated by re-computing
+        // it using a non-glom diff:
+        String content = (String) commitNode.getProperty( "ems:commit" );
+        try {
+            JSONObject commitJson = new JSONObject(content);
+            if ( commitJson != null ) {
+                
+                JSONObject ws1Json = commitJson.optJSONObject( "workspace1" );
+                JSONObject ws2Json = commitJson.optJSONObject( "workspace2" );
 
+                if ( ws1Json != null && ws2Json != null ) {
+                    
+                    WorkspaceNode ws1 = null;
+                    WorkspaceNode ws2 = null;
+
+                    if ( ws1Json.has( "id" ) ) {
+                        String name = ws1Json.getString( "id" );
+                        ws1 = WorkspaceNode.getWorkspaceFromId( name, NodeUtil.getServices(),
+                                                                null, null, null );
+                    }
+                    if ( ws2Json.has( "id" ) ) {
+                        String name = ws2Json.getString( "id" );
+                        ws2 = WorkspaceNode.getWorkspaceFromId( name, NodeUtil.getServices(),
+                                                                null, null, null );
+                    }
+                    
+                    String timestamp1 = ws1Json.optString( "timestamp" );
+                    String timestamp2 = ws2Json.optString( "timestamp" );
+
+                    Date dateTime1 = TimeUtils.dateFromTimestamp(timestamp1);
+                    Date dateTime2 = TimeUtils.dateFromTimestamp(timestamp2);
+
+                    if (dateTime1 != null && dateTime2 != null 
+                        && ws1 != null && ws2 != null) {
+                        
+                        JSONObject firstElem = null;
+                        JSONArray elements = ws1Json.optJSONArray("elements");
+                        JSONArray added = ws1Json.optJSONArray("added");
+                        JSONArray updated = ws1Json.optJSONArray("updated");
+                        JSONArray deleted = ws1Json.optJSONArray("deleted");
+                        
+                        if (added != null && added.length() > 0) {
+                            firstElem = added.getJSONObject( 0 );
+                        }
+                        else if (updated != null && updated.length() > 0) {
+                            firstElem = updated.getJSONObject( 0 );
+                        }
+                        else if (deleted != null && deleted.length() > 0) {
+                            firstElem = deleted.getJSONObject( 0 );
+                        }
+                        else if (elements != null && elements.length() > 0) {
+                            firstElem = elements.getJSONObject( 0 );
+                        }
+                        
+                        if (firstElem != null) {
+                            
+                            if (!firstElem.has( Acm.JSON_SPECIALIZATION )) {
+                                
+                                String origUser = NodeUtil.getUserName();
+                                boolean switchUser = !origUser.equals( "admin" );
+                                
+                                if ( switchUser ) AuthenticationUtil.setRunAsUser( "admin" );
+                                // to make sure no permission issues, run as admin
+                               
+                                // Perform the diff using the workspaces and timestamps
+                                // from the commit node:
+                                JSONObject newCommitJson = performDiff( ws1, ws2, dateTime1, dateTime2, response,
+                                                                        responseStatus, DiffType.COMPARE, true );
+                 
+                                if ( newCommitJson != null ) {  
+                                    commitNode.createOrUpdateProperty( "ems:commit", 
+                                                                       newCommitJson.toString() );
+                                }
+
+                                if ( switchUser ) AuthenticationUtil.setRunAsUser( origUser );
+                            }
+                        }
+                        
+                    }
+                }
+            }
+        } catch ( JSONException e ) {
+            e.printStackTrace();
+        }
+        
+    }
+    
     /**
      * Get a nearest diff to the one requested, find the commits between the
      * times requested and those of the nearest diff, and calculate the
@@ -386,9 +494,9 @@ public class MmsDiffGet extends AbstractJavaWebScript {
         // This assumes that the timepoint of the new diff is after the
         // timepoint of the old for each workspace.
         JSONObject diff1Json = performDiff( ws1, ws1, date0_1, date1, getResponse(),
-                                            getResponseStatus(), DiffType.COMPARE );
+                                            getResponseStatus(), DiffType.COMPARE, false );
         JSONObject diff2Json = performDiff( ws2, ws2, date0_2, date2, getResponse(),
-                                            getResponseStatus(), DiffType.COMPARE );
+                                            getResponseStatus(), DiffType.COMPARE, false );
         
         JsonDiffDiff diffDiffResult =
                 WorkspaceDiff.performDiffGlom( diff0, diff1Json, diff2Json, commonParent,
@@ -523,8 +631,12 @@ public class MmsDiffGet extends AbstractJavaWebScript {
         if ( glom ) {
             top = performDiffGlom( results, diffType );
         } else {
+            // TODO REVIEW does the static glom flag of this method also
+            //      supposed to control the glom flag of WorkspaceDiff?
+            //      If it is, then we should pass true for forceNonGlom
+            //      in the function call below.
             top = performDiff( ws1, ws2, dateTime1, dateTime2, response,
-                               responseStatus, diffType );
+                               responseStatus, diffType, false );
         }
         if ( top == null ) {
             results.put( "res", createResponseJson() );
