@@ -1,69 +1,191 @@
-{
-    "status" : 
-  {
-    "code" : 500,
-    "name" : "Internal Error",
-    "description" : "An error inside the HTTP server which prevented it from fulfilling the request."
-  },  
-  
-  "message" : "08220004 Wrapped Exception (with status template): 08220014 Error during processing of the template 'Expression res is undefined on line 1, column 3 in gov\/nasa\/jpl\/mms\/workspaces\/search.get.json.ftl.'. Please contact your system administrator.",  
-  "exception" : "org.springframework.extensions.webscripts.WebScriptException - 08220004 Wrapped Exception (with status template): 08220014 Error during processing of the template 'Expression res is undefined on line 1, column 3 in gov\/nasa\/jpl\/mms\/workspaces\/search.get.json.ftl.'. Please contact your system administrator.",
-  
-  "callstack" : 
-  [ 
-  	  ""      ,"freemarker.core.InvalidReferenceException: Expression res is undefined on line 1, column 3 in gov\/nasa\/jpl\/mms\/workspaces\/search.get.json.ftl."
-      ,"freemarker.core.TemplateObject.assertNonNull(TemplateObject.java:125)"
-      ,"freemarker.core.Expression.getStringValue(Expression.java:118)"
-      ,"freemarker.core.Expression.getStringValue(Expression.java:93)"
-      ,"freemarker.core.DollarVariable.accept(DollarVariable.java:76)"
-      ,"freemarker.core.Environment.visit(Environment.java:221)"
-      ,"freemarker.core.Environment.process(Environment.java:199)"
-      ,"org.alfresco.repo.template.FreeMarkerProcessor.process(FreeMarkerProcessor.java:218)"
-      ,"org.springframework.extensions.webscripts.AbstractWebScript.renderTemplate(AbstractWebScript.java:896)"
-      ,"gov.nasa.jpl.view_repo.webscripts.DeclarativeJavaWebScript.renderFormatTemplate(DeclarativeJavaWebScript.java:295)"
-      ,"gov.nasa.jpl.view_repo.webscripts.DeclarativeJavaWebScript.execute(DeclarativeJavaWebScript.java:155)"
-      ,"org.alfresco.repo.web.scripts.RepositoryContainer.transactionedExecute(RepositoryContainer.java:377)"
-      ,"org.alfresco.repo.web.scripts.RepositoryContainer.transactionedExecuteAs(RepositoryContainer.java:529)"
-      ,"org.alfresco.repo.web.scripts.RepositoryContainer.executeScript(RepositoryContainer.java:341)"
-      ,"org.springframework.extensions.webscripts.AbstractRuntime.executeScript(AbstractRuntime.java:378)"
-      ,"org.springframework.extensions.webscripts.AbstractRuntime.executeScript(AbstractRuntime.java:209)"
-      ,"org.springframework.extensions.webscripts.servlet.WebScriptServlet.service(WebScriptServlet.java:132)"
-      ,"javax.servlet.http.HttpServlet.service(HttpServlet.java:728)"
-      ,"org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:305)"
-      ,"org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:210)"
-      ,"net.bull.javamelody.MonitoringFilter.doFilter(MonitoringFilter.java:208)"
-      ,"net.bull.javamelody.MonitoringFilter.doFilter(MonitoringFilter.java:181)"
-      ,"org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:243)"
-      ,"org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:210)"
-      ,"org.alfresco.web.app.servlet.GlobalLocalizationFilter.doFilter(GlobalLocalizationFilter.java:61)"
-      ,"org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:243)"
-      ,"org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:210)"
-      ,"org.apache.catalina.core.StandardWrapperValve.invoke(StandardWrapperValve.java:222)"
-      ,"org.apache.catalina.core.StandardContextValve.__invoke(StandardContextValve.java:123)"
-      ,"org.apache.catalina.core.StandardContextValve.invoke(StandardContextValve.java)"
-      ,"org.apache.catalina.authenticator.AuthenticatorBase.invoke(AuthenticatorBase.java:472)"
-      ,"org.apache.catalina.core.StandardHostValve.__invoke(StandardHostValve.java:171)"
-      ,"org.apache.catalina.core.StandardHostValve.invoke(StandardHostValve.java)"
-      ,"org.apache.catalina.valves.ErrorReportValve.invoke(ErrorReportValve.java:99)"
-      ,"org.apache.catalina.valves.AccessLogValve.invoke(AccessLogValve.java:936)"
-      ,"org.apache.catalina.core.StandardEngineValve.invoke(StandardEngineValve.java:118)"
-      ,"org.apache.catalina.connector.CoyoteAdapter.service(CoyoteAdapter.java:407)"
-      ,"org.apache.coyote.http11.AbstractHttp11Processor.process(AbstractHttp11Processor.java:1004)"
-      ,"org.apache.coyote.AbstractProtocol$AbstractConnectionHandler.process(AbstractProtocol.java:589)"
-      ,"org.apache.tomcat.util.net.JIoEndpoint$SocketProcessor.run(JIoEndpoint.java:310)"
-      ,"java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1145)"
-      ,"java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:615)"
-      ,"java.lang.Thread.run(Thread.java:745)"
-      ,"org.alfresco.service.cmr.repository.TemplateException: 08220014 Error during processing of the template 'Expression res is undefined on line 1, column 3 in gov\/nasa\/jpl\/mms\/workspaces\/search.get.json.ftl.'. Please contact your system administrator."
-      ,"org.alfresco.repo.template.FreeMarkerProcessor.process(FreeMarkerProcessor.java:222)"
-      ,"org.springframework.extensions.webscripts.WebScriptException: 08220004 Wrapped Exception (with status template): 08220014 Error during processing of the template 'Expression res is undefined on line 1, column 3 in gov\/nasa\/jpl\/mms\/workspaces\/search.get.json.ftl.'. Please contact your system administrator."
-      ,"org.springframework.extensions.webscripts.AbstractWebScript.createStatusException(AbstractWebScript.java:1067)"
- 
-  ],
-  
-  "server" : "Community v4.2.0 (r56674-b4848) schema 6,033",
-  "time" : "Sep 22, 2015 9:44:20 AM"
-}
-
-
-500
+{"elements": [
+    {
+        "qualifiedId": "/demo3site/PROJECT-71724d08-6d79-42b2-b9ec-dc39f20a3660/connectorViewDataFolder/_17_0_2_3_e610336_1394148311476_17302_29388_X",
+        "qualifiedName": "/demo3site/BikeProject/Connector View Data Folder/Components",
+        "sysmlid": "_17_0_2_3_e610336_1394148311476_17302_29388_X",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "Components",
+        "owner": "connectorViewDataFolder",
+        "documentation": "",
+        "specialization": {"type": "View"}
+    },
+    {
+        "modifier": "admin",
+        "qualifiedId": "/europa/123456/300/301",
+        "name": "301",
+        "qualifiedName": "/europa/JW_TEST2/300/301",
+        "documentation": "else",
+        "owner": "300",
+        "sysmlid": "301",
+        "properties": [{
+            "modifier": "admin",
+            "qualifiedId": "/europa/123456/300/301/302",
+            "name": "302",
+            "qualifiedName": "/europa/JW_TEST2/300/301/302",
+            "documentation": "to",
+            "owner": "301",
+            "sysmlid": "302",
+            "specialization": {
+                "propertyType": null,
+                "isSlot": false,
+                "isDerived": false,
+                "value": [{
+                    "valueExpression": null,
+                    "string": "dlam_string",
+                    "type": "LiteralString"
+                }],
+                "type": "Property"
+            },
+            "editable": true,
+            "creator": "admin"
+        }],
+        "specialization": {
+            "view2view": [{
+                "childrenViews": [
+                    "301",
+                    "302"
+                ],
+                "sysmlid": "301"
+            }],
+            "childrenViews": ["304"],
+            "displayedElements": [
+                "301",
+                "302",
+                "303"
+            ],
+            "allowedElements": [
+                "301",
+                "302",
+                "303"
+            ],
+            "noSections": ["302"],
+            "contains": [{
+                "sourceType": "reference",
+                "source": "301",
+                "sourceProperty": "documentation",
+                "type": "Paragraph"
+            }],
+            "type": "Product"
+        },
+        "editable": true,
+        "creator": "admin"
+    },
+    {
+        "qualifiedId": "/europa/123456/BLUCamTest/_17_0_2_4_f3a0363_1394146455624_407543_30441/_17_0_2_3_e610336_1394148233838_91795_29332",
+        "qualifiedName": "/europa/JW_TEST2/BLUCamTest/dont care2/Context",
+        "sysmlid": "_17_0_2_3_e610336_1394148233838_91795_29332",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "Context",
+        "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
+        "documentation": "",
+        "specialization": {"type": "View"}
+    },
+    {
+        "qualifiedId": "/europa/123456/_17_0_2_3_e610336_1394148311476_17302_29388",
+        "qualifiedName": "/europa/JW_TEST2/Components",
+        "sysmlid": "_17_0_2_3_e610336_1394148311476_17302_29388",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "Components",
+        "owner": "123456",
+        "documentation": "",
+        "specialization": {"type": "View"}
+    },
+    {
+        "modifier": "admin",
+        "qualifiedId": "/europa/123456/4000/401",
+        "name": "401",
+        "qualifiedName": "/europa/JW_TEST2/400/401",
+        "documentation": "4else",
+        "owner": "4000",
+        "sysmlid": "401",
+        "properties": [{
+            "modifier": "admin",
+            "qualifiedId": "/europa/123456/4000/401/402",
+            "name": "402",
+            "qualifiedName": "/europa/JW_TEST2/400/401/402",
+            "documentation": "4to",
+            "owner": "401",
+            "sysmlid": "402",
+            "specialization": {
+                "propertyType": null,
+                "isSlot": false,
+                "isDerived": false,
+                "value": [{
+                    "valueExpression": null,
+                    "string": "dlam_string",
+                    "type": "LiteralString"
+                }],
+                "type": "Property"
+            },
+            "editable": true,
+            "creator": "admin"
+        }],
+        "specialization": {
+            "view2view": [{
+                "childrenViews": [
+                    "401",
+                    "402"
+                ],
+                "sysmlid": "401"
+            }],
+            "childrenViews": ["404"],
+            "displayedElements": [
+                "401",
+                "402",
+                "403"
+            ],
+            "allowedElements": [
+                "401",
+                "402",
+                "403"
+            ],
+            "noSections": ["402"],
+            "contains": [{
+                "sourceType": "reference",
+                "source": "401",
+                "sourceProperty": "documentation",
+                "type": "Paragraph"
+            }],
+            "type": "Product"
+        },
+        "editable": true,
+        "creator": "admin"
+    },
+    {
+        "modifier": "admin",
+        "qualifiedId": "/europa/123456/viewWithContents",
+        "name": "viewWithContents",
+        "qualifiedName": "/europa/JW_TEST2/viewWithContents",
+        "documentation": "View updates",
+        "owner": "123456",
+        "sysmlid": "viewWithContents",
+        "specialization": {
+            "contents": {
+                "valueExpression": null,
+                "type": "Expression"
+            },
+            "type": "View"
+        },
+        "editable": true,
+        "creator": "admin"
+    },
+    {
+        "modifier": "admin",
+        "qualifiedId": "/europa/123456/viewNull",
+        "name": "viewNull",
+        "qualifiedName": "/europa/JW_TEST2/viewNull",
+        "documentation": "View with null values",
+        "owner": "123456",
+        "sysmlid": "viewNull",
+        "specialization": {"type": "View"},
+        "editable": true,
+        "creator": "admin"
+    }
+]}
+200

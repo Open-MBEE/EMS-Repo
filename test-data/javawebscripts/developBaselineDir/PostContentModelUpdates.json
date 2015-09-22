@@ -1,99 +1,5 @@
 {"elements": [
     {
-        "qualifiedId": "/europa/123456/hasAppliedMetatype1",
-        "qualifiedName": "/europa/JW_TEST2/hasAppliedMetatype1",
-        "sysmlid": "hasAppliedMetatype1",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "hasAppliedMetatype1",
-        "documentation": "hasAppliedMetatype",
-        "owner": "123456",
-        "appliedMetatypes": ["metatype"],
-        "specialization": {"type": "Element"}
-    },
-    {
-        "qualifiedId": "/europa/123456/AssocOwnedEnd",
-        "qualifiedName": "/europa/JW_TEST2/AssocOwnedEnd",
-        "sysmlid": "AssocOwnedEnd",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "AssocOwnedEnd",
-        "owner": "123456",
-        "documentation": "Associations's owned end",
-        "specialization": {
-            "propertyType": null,
-            "isDerived": false,
-            "isSlot": false,
-            "type": "Property"
-        }
-    },
-    {
-        "qualifiedId": "/europa/123456/viewContents",
-        "qualifiedName": "/europa/JW_TEST2/viewContents",
-        "sysmlid": "viewContents",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "viewContents",
-        "owner": "123456",
-        "documentation": "View content",
-        "specialization": {
-            "valueExpression": null,
-            "type": "Expression"
-        }
-    },
-    {
-        "qualifiedId": "/europa/123456/targetId",
-        "qualifiedName": "/europa/JW_TEST2/targetId",
-        "sysmlid": "targetId",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "targetId",
-        "owner": "123456",
-        "documentation": "target",
-        "specialization": {
-            "propertyType": null,
-            "isDerived": false,
-            "isSlot": false,
-            "type": "Property"
-        }
-    },
-    {
-        "qualifiedId": "/europa/123456/md",
-        "qualifiedName": "/europa/JW_TEST2/md",
-        "sysmlid": "md",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "md",
-        "owner": "123456",
-        "documentation": "Magic Draw Meta-Data",
-        "specialization": {
-            "type": "MagicDrawData",
-            "mdData": "A blob of meta-data"
-        }
-    },
-    {
-        "qualifiedId": "/europa/123456/sourceId",
-        "qualifiedName": "/europa/JW_TEST2/sourceId",
-        "sysmlid": "sourceId",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "sourceId",
-        "owner": "123456",
-        "documentation": "source",
-        "specialization": {
-            "propertyType": null,
-            "isDerived": false,
-            "isSlot": false,
-            "type": "Property"
-        }
-    },
-    {
         "qualifiedId": "/europa/123456/connectorSource",
         "qualifiedName": "/europa/JW_TEST2/connectorSource",
         "sysmlid": "connectorSource",
@@ -121,22 +27,6 @@
         }
     },
     {
-        "qualifiedId": "/europa/123456/characterizes",
-        "qualifiedName": "/europa/JW_TEST2/characterizes",
-        "sysmlid": "characterizes",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "characterizes",
-        "owner": "123456",
-        "documentation": "Characterizes",
-        "specialization": {
-            "source": "sourceId",
-            "target": "targetId",
-            "type": "Characterizes"
-        }
-    },
-    {
         "qualifiedId": "/europa/123456/association",
         "qualifiedName": "/europa/JW_TEST2/association",
         "sysmlid": "association",
@@ -153,6 +43,40 @@
             "target": "targetId",
             "type": "Association",
             "ownedEnd": ["AssocOwnedEnd"]
+        }
+    },
+    {
+        "qualifiedId": "/europa/123456/targetId",
+        "qualifiedName": "/europa/JW_TEST2/targetId",
+        "sysmlid": "targetId",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "targetId",
+        "owner": "123456",
+        "documentation": "target",
+        "specialization": {
+            "propertyType": null,
+            "isDerived": false,
+            "isSlot": false,
+            "type": "Property"
+        }
+    },
+    {
+        "qualifiedId": "/europa/123456/connectorTarget",
+        "qualifiedName": "/europa/JW_TEST2/connectorTarget",
+        "sysmlid": "connectorTarget",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "connectorTarget",
+        "owner": "123456",
+        "documentation": "Connector target",
+        "specialization": {
+            "propertyType": null,
+            "isDerived": false,
+            "isSlot": false,
+            "type": "Property"
         }
     },
     {
@@ -190,6 +114,21 @@
                 "type": "LiteralString"
             },
             "type": "LiteralSet"
+        }
+    },
+    {
+        "qualifiedId": "/europa/123456/md",
+        "qualifiedName": "/europa/JW_TEST2/md",
+        "sysmlid": "md",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "md",
+        "owner": "123456",
+        "documentation": "Magic Draw Meta-Data",
+        "specialization": {
+            "type": "MagicDrawData",
+            "mdData": "A blob of meta-data"
         }
     },
     {
@@ -238,20 +177,69 @@
         }
     },
     {
-        "qualifiedId": "/europa/123456/connectorTarget",
-        "qualifiedName": "/europa/JW_TEST2/connectorTarget",
-        "sysmlid": "connectorTarget",
+        "qualifiedId": "/europa/123456/characterizes",
+        "qualifiedName": "/europa/JW_TEST2/characterizes",
+        "sysmlid": "characterizes",
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
-        "name": "connectorTarget",
+        "name": "characterizes",
         "owner": "123456",
-        "documentation": "Connector target",
+        "documentation": "Characterizes",
+        "specialization": {
+            "source": "sourceId",
+            "target": "targetId",
+            "type": "Characterizes"
+        }
+    },
+    {
+        "qualifiedId": "/europa/123456/AssocOwnedEnd",
+        "qualifiedName": "/europa/JW_TEST2/AssocOwnedEnd",
+        "sysmlid": "AssocOwnedEnd",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "AssocOwnedEnd",
+        "owner": "123456",
+        "documentation": "Associations's owned end",
         "specialization": {
             "propertyType": null,
             "isDerived": false,
             "isSlot": false,
             "type": "Property"
+        }
+    },
+    {
+        "qualifiedId": "/europa/123456/viewContents",
+        "qualifiedName": "/europa/JW_TEST2/viewContents",
+        "sysmlid": "viewContents",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "viewContents",
+        "owner": "123456",
+        "documentation": "View content",
+        "specialization": {
+            "valueExpression": null,
+            "type": "Expression"
+        }
+    },
+    {
+        "qualifiedId": "/europa/123456/viewWithContents",
+        "qualifiedName": "/europa/JW_TEST2/viewWithContents",
+        "sysmlid": "viewWithContents",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "viewWithContents",
+        "owner": "123456",
+        "documentation": "View updates",
+        "specialization": {
+            "contents": {
+                "valueExpression": null,
+                "type": "Expression"
+            },
+            "type": "View"
         }
     },
     {
@@ -272,25 +260,33 @@
         "specialization": {"type": "Element"}
     },
     {
-        "qualifiedId": "/europa/123456/viewWithContents",
-        "qualifiedName": "/europa/JW_TEST2/viewWithContents",
-        "sysmlid": "viewWithContents",
+        "qualifiedId": "/europa/123456/hasAppliedMetatype1",
+        "qualifiedName": "/europa/JW_TEST2/hasAppliedMetatype1",
+        "sysmlid": "hasAppliedMetatype1",
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
-        "name": "viewWithContents",
+        "name": "hasAppliedMetatype1",
+        "documentation": "hasAppliedMetatype",
         "owner": "123456",
-        "documentation": "View updates",
+        "appliedMetatypes": ["metatype"],
+        "specialization": {"type": "Element"}
+    },
+    {
+        "qualifiedId": "/europa/123456/sourceId",
+        "qualifiedName": "/europa/JW_TEST2/sourceId",
+        "sysmlid": "sourceId",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "sourceId",
+        "owner": "123456",
+        "documentation": "source",
         "specialization": {
-            "displayedElements": [],
-            "childrenViews": [],
-            "contents": {
-                "valueExpression": null,
-                "type": "Expression"
-            },
-            "allowedElements": [],
-            "contains": [],
-            "type": "View"
+            "propertyType": null,
+            "isDerived": false,
+            "isSlot": false,
+            "type": "Property"
         }
     }
 ]}

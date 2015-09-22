@@ -17,14 +17,7 @@
             "302",
             "303"
         ],
-        "childrenViews": [],
-        "allowedElements": [
-            "301",
-            "302",
-            "303"
-        ],
         "noSections": ["302"],
-        "contains": [],
         "type": "Product"
     },
     "editable": true,
