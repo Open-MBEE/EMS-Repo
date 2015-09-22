@@ -1,25 +1,25 @@
 {"views": [
     {
-        "modifier": "admin",
         "qualifiedId": "/europa/123456/300/301/302",
-        "name": "302",
         "qualifiedName": "/europa/JW_TEST/300/301/302",
-        "documentation": "to",
-        "owner": "301",
         "sysmlid": "302",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "302",
+        "owner": "301",
+        "documentation": "to",
         "specialization": {
             "propertyType": null,
-            "isSlot": false,
             "isDerived": false,
+            "isSlot": false,
             "value": [{
                 "valueExpression": null,
                 "string": "dlam_string",
                 "type": "LiteralString"
             }],
             "type": "Property"
-        },
-        "editable": true,
-        "creator": "admin"
+        }
     },
     {
         "modifier": "admin",

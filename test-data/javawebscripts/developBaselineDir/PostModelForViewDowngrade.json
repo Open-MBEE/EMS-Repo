@@ -12,6 +12,13 @@
                 "302",
                 "303"
             ],
+            "childrenViews": [],
+            "allowedElements": [
+                "301",
+                "302",
+                "303"
+            ],
+            "contains": [],
             "type": "View"
         },
         "editable": true,

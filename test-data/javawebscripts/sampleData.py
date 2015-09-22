@@ -13,18 +13,41 @@ DELAY_TIME = 5
 
 elementsJsonStrTemplate = '\'{"elements":[%s]}\''
 
-parser = optparse.OptionParser()
+
+usageText = '''    
+    To create 50 elements with 2 changes posting 5 at a time under two workspaces:
+    
+    python sampleData.py -e 50 -p 5 -c 2 -n 5 -w "master,workspace1" -x -v
+    Creates a total of 100 elements changing each one 2 times all under one folder
+    Executes and prints out the output of sending curl command
+    
+    To create 500 elements with 4 changes posting 10 at a time under three workspaces with a branching factor of 2:
+    
+    python sampleData.py -e 500 -p 10 -c 4 -n 10 -w "master,workspace1,workspace2" -f 2 -v
+    Creates a total of 1500 elements changing each one 4 times
+    Each parent owns 2 children
+    Only prints out the commands, does not execute
+        
+    To change the prefix for sysmlid and name:
+    
+    python sampleData.py -r f -o parentFolder -w "master,workspace1" -x -v
+    sysmlid and name are now f_000001 instead of e_000001
+    Uses default values posts 10 elements 1 at a time with 3 changes
+    Creates all elements under parentFolder
+    '''
+    
+parser = optparse.OptionParser(usage = usageText)
 
 #debug purposes
 parser.add_option("-r", "--prefix", default="e", help="prefix")
 
-parser.add_option("-e", "--elements", default=10, type="int", help="Number of elements to post")
-parser.add_option("-p", "--postElements", default=1, type="int", help="Number of elements to post at a time")
-parser.add_option("-c", "--changes", default=10, type="int", help="Number of changes per element per workspace")
-parser.add_option("-n", "--postChanges", default=1, type="int", help="Number of changes to post at a time")
-parser.add_option("-o", "--owner", default="testData", help="An owner ID to indicate where all the elements should be gathered")
-parser.add_option("-w", "--workspaces", default="master", help="A string of comma separated workspace names to be used i.e. \"workspace1,workspace2,workspace3...\" (no spaces)")
-parser.add_option("-f", "--folderBranching", default=0, type="int", help="Number of branching folders to create. 0 means everything in the same folder")
+parser.add_option("-e", "--elements", default=10, type="int", help="Number of elements to post DEFAULT: 10")
+parser.add_option("-p", "--postElements", default=1, type="int", help="Number of elements to post at a time DEFAULT: 1")
+parser.add_option("-c", "--changes", default=3, type="int", help="Number of changes per element per workspace DEFAULT: 3")
+parser.add_option("-n", "--postChanges", default=1, type="int", help="Number of changes to post at a time DEFAULT: 1")
+parser.add_option("-o", "--owner", default="testData", help="An owner ID to indicate where all the elements should be gathered DEFAULT: testData")
+parser.add_option("-w", "--workspaces", default="master", help="A string of comma separated workspace names to be used i.e. \"workspace1,workspace2,workspace3...\" (no spaces) DEFAULT: master")
+parser.add_option("-f", "--folderBranching", default=0, type="int", help="Number of branching folders to create. 0 means everything in the same folder DEFAULT: 0")
 parser.add_option("-x", "--execute", dest="execute", action="store_true", default=False, help="Execute the commands to create workspaces and post the elements")
 parser.add_option("-v", "--verbose", dest="verbose", action="store_true", default=False, help="Print out the curl commands and, if executing, the output from sending the curl commands")
 options, args = parser.parse_args()

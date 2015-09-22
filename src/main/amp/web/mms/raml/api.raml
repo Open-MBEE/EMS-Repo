@@ -546,7 +546,19 @@ resourceTypes:
               recalculate:
                 description: Perform a new diff calculation if the current found one is outdated.  Must supply diffTime also.
                 type: boolean
-                required: false 
+                required: false
+              changesForMerge:
+                description: Perform a diff for merging workspace2 into workspace1.  This is the default behavior.
+                type: boolean
+                required: false
+              fullCompare:
+                description: Perform a full diff of workspace1 and workspace2.
+                type: boolean
+                required: false
+              bothDirections:
+                description: Perform a for merging workspace2 into workspace1 and workspace1 into workspace2.
+                type: boolean
+                required: false
 #/merge:
 #  description: Service for merging two workspaces.  timestamp args are not implemented yet.
 #  post:

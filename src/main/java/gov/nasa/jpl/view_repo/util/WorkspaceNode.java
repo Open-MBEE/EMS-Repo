@@ -886,6 +886,40 @@ public class WorkspaceNode extends EmsScriptNode {
         }
         return changedNodeRefs;
     }
+        
+    public static JSONObject getChangeJsonWithRespectTo( WorkspaceNode ws1,
+                                                         WorkspaceNode ws2,
+                                                         Date timestamp1,
+                                                         Date timestamp2,
+                                                         ServiceRegistry services,
+                                                         StringBuffer response,
+                                                         Status status ) {
+        //TODO This method is only called when getting changes between two times on the same workspace
+        // Replace this method with a more specific method since this one doesn't work for the general case anyway
+        ArrayList< EmsScriptNode > commits = null;
+        if (timestamp2 != null && (timestamp1 == null ? timestamp1 == null : timestamp1.after(timestamp2)))
+        {
+            commits = CommitUtil.getCommitsInDateTimeRange( timestamp2, timestamp1,
+                                                            ws1, ws2, services,
+                                                            response );
+        }
+        ArrayList< JSONObject > commitsJson = new ArrayList< JSONObject >();
+        if ( !Utils.isNullOrEmpty( commits ) ) {
+            for ( EmsScriptNode commitNode : commits ) {
+                String content = (String) commitNode.getProperty( "ems:commit" );
+                try {
+                    JSONObject changeJson = new JSONObject(content);
+                    if ( changeJson != null ) {
+                        commitsJson.add( changeJson );
+                    }
+                } catch ( JSONException e ) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        JSONObject glommedCommit = JsonDiffDiff.glom( commitsJson, true );
+        return glommedCommit;
+    }
 
     public Set< String > getChangedElementIdsWithRespectTo( WorkspaceNode other, Date dateTime ) {
         Set< String > changedElementIds = new TreeSet< String >();//getChangedElementIds());
@@ -898,6 +932,20 @@ public class WorkspaceNode extends EmsScriptNode {
             }
         }
         return changedElementIds;
+    }
+    
+    /**
+     * Add the workspace metadata onto the provided JSONObject
+     * @param jsonObject
+     * @param ws
+     * @param dateTime
+     * @throws JSONException
+     */
+    public static void addWorkspaceMetadata(JSONObject jsonObject, WorkspaceNode ws, Date dateTime) throws JSONException {
+        addWorkspaceNamesAndIds( jsonObject, ws, false );
+        if (dateTime != null) {
+            jsonObject.put( "timestamp", TimeUtils.toTimestamp( dateTime ) );
+        }
     }
     
     /**

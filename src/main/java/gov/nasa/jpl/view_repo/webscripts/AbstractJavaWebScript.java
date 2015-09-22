@@ -51,6 +51,7 @@ import gov.nasa.jpl.view_repo.util.CommitUtil;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.EmsSystemModel;
 import gov.nasa.jpl.view_repo.util.EmsTransaction;
+import gov.nasa.jpl.view_repo.util.JsonDiffDiff.DiffType;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
 import gov.nasa.jpl.view_repo.util.NodeUtil.SearchType;
 import gov.nasa.jpl.view_repo.util.WorkspaceDiff;
@@ -621,8 +622,8 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
     public static final String NO_WORKSPACE_ID = "master"; // default is master if unspecified
     public static final String NO_PROJECT_ID = "no_project";
     public static final String NO_SITE_ID = "no_site";
-    public static final String NO_TIMESTAMP = "latest";
-
+    
+    
     public String getSiteName( WebScriptRequest req ) {
         return getSiteName( req, false );
     }
@@ -753,7 +754,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         String key = isTs1 ? TIMESTAMP1 : TIMESTAMP2;
         String timestamp = req.getServiceMatch().getTemplateVars().get(key);
         if ( timestamp == null || timestamp.length() <= 0 ) {
-            timestamp = NO_TIMESTAMP;
+            timestamp = WorkspaceDiff.LATEST_NO_TIMESTAMP;
         }
         return timestamp;
     }
@@ -1017,8 +1018,8 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
     public void setWsDiff(WorkspaceNode workspace) {
         wsDiff = new WorkspaceDiff(workspace, workspace, response, responseStatus);
     }
-    public void setWsDiff(WorkspaceNode workspace1, WorkspaceNode workspace2, Date time1, Date time2) {
-        wsDiff = new WorkspaceDiff(workspace1, workspace2, time1, time2, response, responseStatus);
+    public void setWsDiff(WorkspaceNode workspace1, WorkspaceNode workspace2, Date time1, Date time2, DiffType diffType) {
+        wsDiff = new WorkspaceDiff(workspace1, workspace2, time1, time2, response, responseStatus, diffType);
     }
 
     public WorkspaceDiff getWsDiff() {
@@ -1374,6 +1375,10 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         Expression< T > expression = null;
         try {
             expression = new Expression<T>(call.evaluate(true, false));
+            
+        // TODO -- figure out why eclipse gives compile errors for
+        // including the exceptions while mvn gives errors for not
+        // including them.
         } catch ( IllegalAccessException e ) {
             // TODO Auto-generated catch block
             //e.printStackTrace();
