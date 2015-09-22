@@ -142,8 +142,8 @@ public class ViewGet extends AbstractJavaWebScript {
         Map<String, Object> model = new HashMap<String, Object>();
         // default recurse=false but recurse only applies to displayed elements and contained views
         boolean recurse = getBooleanArg(req, "recurse", false);
-        // default generate=true
-        boolean generate = getBooleanArg( req, "generate", true );
+        // default generate=false - generation with viewpoints takes a long time
+        boolean generate = getBooleanArg( req, "generate", false );
 
         JSONArray viewsJson = new JSONArray();
         if (validateRequest(req, status)) {
@@ -212,6 +212,7 @@ public class ViewGet extends AbstractJavaWebScript {
                 View v = new View(view);
                 v.setGenerate( generate );
                 v.setRecurse( recurse );
+                
                 EmsScriptNode.expressionStuff = true;
                 if ( gettingDisplayedElements ) {
                     if (Debug.isOn()) System.out.println("+ + + + + gettingDisplayedElements");
