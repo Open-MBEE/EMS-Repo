@@ -1083,15 +1083,17 @@ public class CommitUtil {
                     if (dateTime1 == null) {
                         EmsScriptNode prevCommit = getPreviousCommit(commitNode);
                         if (prevCommit != null) {
-                            dateTime1 = prevCommit.getLastModified( null );
+                            //dateTime1 = prevCommit.getLastModified( null );
+                            dateTime1 = prevCommit.getCreationDate();
                         }
                     }
                     
                     if (dateTime2 == null) {
-                        EmsScriptNode nextCommit = getNextCommit(commitNode);
-                        if (nextCommit != null) {
-                            dateTime2 = nextCommit.getCreationDate(); // TODO REVIEW will this time be too late?
-                        }
+                        dateTime2 = commitNode.getCreationDate(); 
+//                        EmsScriptNode nextCommit = getNextCommit(commitNode);
+//                        if (nextCommit != null) {
+//                            dateTime2 = nextCommit.getCreationDate(); // TODO REVIEW will this time be too late?
+//                        }
                     }
 
                     // Check that the times are valid:

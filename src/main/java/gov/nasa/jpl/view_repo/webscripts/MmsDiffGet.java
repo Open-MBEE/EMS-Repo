@@ -7,7 +7,6 @@ import gov.nasa.jpl.view_repo.actions.ActionUtil;
 import gov.nasa.jpl.view_repo.actions.WorkspaceDiffActionExecuter;
 import gov.nasa.jpl.view_repo.util.CommitUtil;
 import gov.nasa.jpl.view_repo.util.JsonDiffDiff.DiffType;
-import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.JsonDiffDiff;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
@@ -48,7 +47,8 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
 public class MmsDiffGet extends AbstractJavaWebScript {
 
     public static boolean glom = true;
-
+    public static boolean diffDefaultIsMerge = true;
+    
     private static WorkspaceNode workspace;
     
     protected WorkspaceNode ws1, ws2;
@@ -141,8 +141,7 @@ public class MmsDiffGet extends AbstractJavaWebScript {
         boolean runInBackground = getBooleanArg(req, "background", false);
         recalculate = getBooleanArg( req, "recalculate", false );
         
-        // TODO change the default back to MERGE
-        // Determine the diffType.  Default is Compare:
+        // Determine the diffType:
         DiffType diffType;
         if (getBooleanArg( req, "changesForMerge", false )) {
             diffType = DiffType.MERGE;
@@ -154,7 +153,12 @@ public class MmsDiffGet extends AbstractJavaWebScript {
             diffType = DiffType.BOTH;
         }
         else {
-            diffType = DiffType.COMPARE;
+            if (diffDefaultIsMerge) {
+                diffType = DiffType.MERGE;
+            } 
+            else {
+                diffType = DiffType.COMPARE;
+            }
         }
         
         userTimeStamp1 = getTimestamp1(req);

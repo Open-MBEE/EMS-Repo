@@ -24,38 +24,31 @@
                 }
             },
             {
-                "qualifiedName": "/europa/JW_TEST/300/301/302",
-                "sysmlid": "302",
-                "editable": true,
                 "name": "302",
-                "owner": "301",
+                "qualifiedName": "/europa/JW_TEST/300/301/302",
                 "documentation": "to",
+                "owner": "301",
+                "sysmlid": "302",
                 "specialization": {
                     "propertyType": null,
-                    "isDerived": false,
                     "isSlot": false,
+                    "isDerived": false,
                     "value": [{
                         "valueExpression": null,
                         "string": "dlam_string",
                         "type": "LiteralString"
                     }],
                     "type": "Property"
-                }
+                },
+                "editable": true,
             },
             {
-                "qualifiedName": "/europa/JW_TEST/300/301",
-                "sysmlid": "301",
-                "editable": true,
                 "name": "301",
-                "owner": "300",
+                "qualifiedName": "/europa/JW_TEST/300/301",
                 "documentation": "else",
+                "owner": "300",
+                "sysmlid": "301",
                 "specialization": {
-                    "displayedElements": [
-                        "301",
-                        "302",
-                        "303"
-                    ],
-                    "childrenViews": ["304"],
                     "view2view": [{
                         "childrenViews": [
                             "301",
@@ -63,39 +56,46 @@
                         ],
                         "sysmlid": "301"
                     }],
+                    "childrenViews": ["304"],
+                    "displayedElements": [
+                        "301",
+                        "302",
+                        "303"
+                    ],
                     "allowedElements": [
                         "301",
                         "302",
                         "303"
                     ],
+                    "noSections": ["302"],
                     "contains": [{
                         "sourceType": "reference",
                         "source": "301",
                         "sourceProperty": "documentation",
                         "type": "Paragraph"
                     }],
-                    "noSections": ["302"],
                     "type": "Product"
-                }
+                },
+                "editable": true,
             },
             {
-                "qualifiedName": "/europa/JW_TEST/300",
-                "sysmlid": "300",
-                "editable": true,
                 "name": "300",
-                "owner": "123456",
+                "qualifiedName": "/europa/JW_TEST/300",
                 "documentation": "something",
+                "owner": "123456",
+                "sysmlid": "300",
                 "specialization": {
                     "propertyType": null,
-                    "isDerived": false,
                     "isSlot": false,
+                    "isDerived": false,
                     "value": [{
                         "valueExpression": null,
                         "string": "dlam_string",
                         "type": "LiteralString"
                     }],
                     "type": "Property"
-                }
+                },
+                "editable": true,
             },
             {
                 "name": "holding_bin",
@@ -125,7 +125,7 @@
                 }],
                 "type": "Property"
             },
-            "editable": true
+            "editable": true,
         }],
         "conflictedElements": [],
         "updatedElements": [{

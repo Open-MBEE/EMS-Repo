@@ -1,42 +1,71 @@
-{"views": [{
-    "qualifiedId": "/europa/123456/BLUCamTest/_17_0_2_4_f3a0363_1394146455624_407543_30441/_17_0_2_3_e610336_1394148233838_91795_29332",
-    "qualifiedName": "/europa/JW_TEST/BLUCamTest/dont care2/Context",
-    "sysmlid": "_17_0_2_3_e610336_1394148233838_91795_29332",
-    "editable": true,
-    "creator": "admin",
-    "modifier": "admin",
-    "name": "Context",
-    "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
-    "documentation": "",
-    "specialization": {
-        "displayedElements": [
-            "_17_0_2_4_f3a0363_1394141845089_115460_28389",
-            "_17_0_2_4_f3a0363_1394141831980_671275_28387"
-        ],
-        "childrenViews": [],
-        "allowedElements": [
-            "_17_0_2_4_f3a0363_1394141845089_115460_28389",
-            "_17_0_2_4_f3a0363_1394141831980_671275_28387"
-        ],
-        "contains": [{
-            "ordered": false,
-            "list": [[
-                {
-                    "sourceType": "reference",
-                    "source": "_17_0_2_4_f3a0363_1394141845089_115460_28389",
-                    "sourceProperty": "name",
-                    "type": "Paragraph"
-                },
-                {
-                    "sourceType": "reference",
-                    "source": "_17_0_2_4_f3a0363_1394141831980_671275_28387",
-                    "sourceProperty": "name",
-                    "type": "Paragraph"
-                }
-            ]],
-            "type": "List"
-        }],
-        "type": "View"
-    }
-}]}
-200
+{
+    "status" : 
+  {
+    "code" : 500,
+    "name" : "Internal Error",
+    "description" : "An error inside the HTTP server which prevented it from fulfilling the request."
+  },  
+  
+  "message" : "08220001 Wrapped Exception (with status template): gov.nasa.jpl.ae.sysml.SystemModelToAeExpression.operationToAeExpression(Ljava\/lang\/Object;Ljava\/util\/Vector;)Lgov\/nasa\/jpl\/ae\/event\/Expression;",  
+  "exception" : "org.springframework.extensions.webscripts.WebScriptException - 08220001 Wrapped Exception (with status template): gov.nasa.jpl.ae.sysml.SystemModelToAeExpression.operationToAeExpression(Ljava\/lang\/Object;Ljava\/util\/Vector;)Lgov\/nasa\/jpl\/ae\/event\/Expression;",
+  
+  "callstack" : 
+  [ 
+  	  ""      ,"java.lang.NoSuchMethodError: gov.nasa.jpl.ae.sysml.SystemModelToAeExpression.operationToAeExpression(Ljava\/lang\/Object;Ljava\/util\/Vector;)Lgov\/nasa\/jpl\/ae\/event\/Expression;"
+      ,"gov.nasa.jpl.view_repo.sysml.View.generateViewables(View.java:434)"
+      ,"gov.nasa.jpl.view_repo.sysml.View.getContainsJson(View.java:616)"
+      ,"gov.nasa.jpl.view_repo.util.EmsScriptNode.addViewJSON(EmsScriptNode.java:5467)"
+      ,"gov.nasa.jpl.view_repo.util.EmsScriptNode.addSpecializationJSON(EmsScriptNode.java:2891)"
+      ,"gov.nasa.jpl.view_repo.util.EmsScriptNode.addSpecializationJSON(EmsScriptNode.java:2753)"
+      ,"gov.nasa.jpl.view_repo.util.EmsScriptNode.toJSONObjectImplImpl(EmsScriptNode.java:3124)"
+      ,"gov.nasa.jpl.view_repo.util.EmsScriptNode.toJSONObjectImpl(EmsScriptNode.java:3035)"
+      ,"gov.nasa.jpl.view_repo.util.EmsScriptNode.toJSONObject(EmsScriptNode.java:2926)"
+      ,"gov.nasa.jpl.view_repo.util.EmsScriptNode.toJSONObject(EmsScriptNode.java:2479)"
+      ,"gov.nasa.jpl.view_repo.util.EmsScriptNode.toJSONObject(EmsScriptNode.java:2459)"
+      ,"gov.nasa.jpl.view_repo.webscripts.ViewGet.handleView(ViewGet.java:237)"
+      ,"gov.nasa.jpl.view_repo.webscripts.ViewGet.executeImplImpl(ViewGet.java:164)"
+      ,"gov.nasa.jpl.view_repo.webscripts.ViewGet.executeImpl(ViewGet.java:133)"
+      ,"gov.nasa.jpl.view_repo.webscripts.DeclarativeJavaWebScript.execute(DeclarativeJavaWebScript.java:69)"
+      ,"org.alfresco.repo.web.scripts.RepositoryContainer.transactionedExecute(RepositoryContainer.java:377)"
+      ,"org.alfresco.repo.web.scripts.RepositoryContainer.transactionedExecuteAs(RepositoryContainer.java:529)"
+      ,"org.alfresco.repo.web.scripts.RepositoryContainer.executeScript(RepositoryContainer.java:341)"
+      ,"org.springframework.extensions.webscripts.AbstractRuntime.executeScript(AbstractRuntime.java:378)"
+      ,"org.springframework.extensions.webscripts.AbstractRuntime.executeScript(AbstractRuntime.java:209)"
+      ,"org.springframework.extensions.webscripts.servlet.WebScriptServlet.service(WebScriptServlet.java:132)"
+      ,"javax.servlet.http.HttpServlet.service(HttpServlet.java:728)"
+      ,"org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:305)"
+      ,"org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:210)"
+      ,"net.bull.javamelody.MonitoringFilter.doFilter(MonitoringFilter.java:208)"
+      ,"net.bull.javamelody.MonitoringFilter.doFilter(MonitoringFilter.java:181)"
+      ,"org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:243)"
+      ,"org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:210)"
+      ,"org.alfresco.web.app.servlet.GlobalLocalizationFilter.doFilter(GlobalLocalizationFilter.java:61)"
+      ,"org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:243)"
+      ,"org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:210)"
+      ,"org.apache.catalina.core.StandardWrapperValve.invoke(StandardWrapperValve.java:222)"
+      ,"org.apache.catalina.core.StandardContextValve.__invoke(StandardContextValve.java:123)"
+      ,"org.apache.catalina.core.StandardContextValve.invoke(StandardContextValve.java)"
+      ,"org.apache.catalina.authenticator.AuthenticatorBase.invoke(AuthenticatorBase.java:472)"
+      ,"org.apache.catalina.core.StandardHostValve.__invoke(StandardHostValve.java:171)"
+      ,"org.apache.catalina.core.StandardHostValve.invoke(StandardHostValve.java)"
+      ,"org.apache.catalina.valves.ErrorReportValve.invoke(ErrorReportValve.java:99)"
+      ,"org.apache.catalina.valves.AccessLogValve.invoke(AccessLogValve.java:936)"
+      ,"org.apache.catalina.core.StandardEngineValve.invoke(StandardEngineValve.java:118)"
+      ,"org.apache.catalina.connector.CoyoteAdapter.service(CoyoteAdapter.java:407)"
+      ,"org.apache.coyote.http11.AbstractHttp11Processor.process(AbstractHttp11Processor.java:1004)"
+      ,"org.apache.coyote.AbstractProtocol$AbstractConnectionHandler.process(AbstractProtocol.java:589)"
+      ,"org.apache.tomcat.util.net.JIoEndpoint$SocketProcessor.run(JIoEndpoint.java:310)"
+      ,"java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1145)"
+      ,"java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:615)"
+      ,"java.lang.Thread.run(Thread.java:745)"
+      ,"org.springframework.extensions.webscripts.WebScriptException: 08220001 Wrapped Exception (with status template): gov.nasa.jpl.ae.sysml.SystemModelToAeExpression.operationToAeExpression(Ljava\/lang\/Object;Ljava\/util\/Vector;)Lgov\/nasa\/jpl\/ae\/event\/Expression;"
+      ,"org.springframework.extensions.webscripts.AbstractWebScript.createStatusException(AbstractWebScript.java:1067)"
+ 
+  ],
+  
+  "server" : "Community v4.2.0 (r56674-b4848) schema 6,033",
+  "time" : "Sep 22, 2015 9:42:05 AM"
+}
+
+
+500
