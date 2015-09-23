@@ -1,10 +1,13 @@
 {"elements": [{
+    "modifier": "admin",
     "qualifiedId": "/europa/123456/300/301/302/y",
+    "siteCharacterizationId": "europa",
+    "created": "Tue Sep 22 09:40:58 PDT 2015",
     "qualifiedName": "/europa/JW_TEST/300/301/302/null",
     "sysmlid": "y",
     "documentation": "y is y",
     "owner": "302",
-    "read": "2015-03-27T09:03:38.579-0700",
+    "read": "2015-09-22T09:40:59.235-0700",
     "specialization": {
         "propertyType": null,
         "isDerived": false,
@@ -18,6 +21,6 @@
     },
     "editable": true,
     "creator": "admin",
-    "modified": "2015-03-27T09:03:38.084-0700"
+    "modified": "2015-09-22T09:40:58.872-0700"
 }]}
 200

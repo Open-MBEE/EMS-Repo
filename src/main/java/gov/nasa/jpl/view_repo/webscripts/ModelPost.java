@@ -938,8 +938,11 @@ public class ModelPost extends AbstractJavaWebScript {
                                                        foundElements.get(jsonId) :
                                                        findScriptNodeById( jsonId, workspace, null, true );
         if ( element != null ) {
+            // Adding to elements for error case to find project id in
+            // sendDeltas() since that is the only place where it is getting
+            // used in ModelPost, at least.
             elements.add( element );
-            nodeMap.put( element.getName(), element );
+//            nodeMap.put( element.getName(), element );
             // only add to original element map if it exists on first pass
             if (!ingest) {
                 if (!wsDiff.getElements().containsKey( jsonId )) {
@@ -1034,6 +1037,8 @@ public class ModelPost extends AbstractJavaWebScript {
 
         fixReadTimeForConflictTransaction(finalElement, elementJson);
 
+        nodeMap.put( finalElement.getName(), finalElement );
+        
         if (ingest) {
             elementMetadataProcessedCnt++;
         }
@@ -2434,14 +2439,16 @@ public class ModelPost extends AbstractJavaWebScript {
         if ( sysmlidPrefix != null ) {
             addSysmlIdsToElementJson( json, sysmlidPrefix );
         }
-        
-        log(Level.DEBUG, "********************************************************************************");
-        log(Level.DEBUG, k);
-        if ( logger.isDebugEnabled() ) log(Level.DEBUG, NodeUtil.jsonToString( json, 4 ));
-//        log(LogLevel.DEBUG, NodeUtil.jsonToString( exprJson0, 4 ));
-        log(Level.DEBUG, "********************************************************************************");
 
-        System.out.println("kToJson(" + k + ") = \n" + json.toString( 4 ) );
+        if ( logger.isDebugEnabled() ) {
+            log(Level.DEBUG, "********************************************************************************");
+            log(Level.DEBUG, k);
+            if ( logger.isDebugEnabled() ) log(Level.DEBUG, NodeUtil.jsonToString( json, 4 ));
+    //        log(LogLevel.DEBUG, NodeUtil.jsonToString( exprJson0, 4 ));
+            log(Level.DEBUG, "********************************************************************************");
+    
+            log(Level.DEBUG, "kToJson(k) = \n" + json.toString( 4 ) );
+        }
         
         return json;
     }

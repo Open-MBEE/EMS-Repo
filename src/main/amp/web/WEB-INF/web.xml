@@ -186,6 +186,8 @@
       <filter-class>org.alfresco.repo.web.filter.beans.SessionSynchronizedFilter</filter-class>
    </filter>
 
+   <!-- DEPLOY CORS -->
+   
    <filter-mapping>
       <filter-name>Global Localization Filter</filter-name>
       <url-pattern>/*</url-pattern>

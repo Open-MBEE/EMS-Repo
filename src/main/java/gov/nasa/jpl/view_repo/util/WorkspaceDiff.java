@@ -1543,11 +1543,13 @@ public class WorkspaceDiff implements Serializable {
      * @return
      */
     public static JSONObject cleanWorkspaceJson(JSONObject json) {
-        JSONObject result = new JSONObject();
-        
+        //JSONObject result = new JSONObject();
+        JSONObject result = new JSONObject(json.toString());
+
         if (json.has( "workspace1" )) {
             JSONObject ws1 = json.getJSONObject( "workspace1" );
-            JSONObject resultWs1 = new JSONObject();
+            //JSONObject resultWs1 = new JSONObject();
+            JSONObject resultWs1 = new JSONObject(ws1.toString());
             resultWs1.put( "elements", cleanElementsJson(ws1, "elements") );
             resultWs1.put( "id",  ws1.get( "id" ));
             result.put( "workspace1", resultWs1 );
@@ -1555,7 +1557,8 @@ public class WorkspaceDiff implements Serializable {
         
         if (json.has( "workspace2" )) {
             JSONObject ws2 = json.getJSONObject( "workspace2" );
-            JSONObject resultWs2 = new JSONObject();
+            //JSONObject resultWs2 = new JSONObject();
+            JSONObject resultWs2 = new JSONObject(ws2.toString());
             String keys[] = {"addedElements", "movedElements", "deletedElements", "updatedElements", "conflictedElements"};
             for (String key: keys) {
                 resultWs2.put( key, cleanElementsJson(ws2, key) );
