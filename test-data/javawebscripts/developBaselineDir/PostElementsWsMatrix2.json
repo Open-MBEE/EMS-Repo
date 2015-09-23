@@ -1,5 +1,27 @@
 {"elements": [
     {
+        "qualifiedId": "/europa/123456/update_update_poo",
+        "qualifiedName": "/europa/JW_TEST2/update_update_poo",
+        "sysmlid": "update_update_poo",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "update_update_poo",
+        "owner": "123456",
+        "documentation": "update_update_poo updatedWs2",
+        "specialization": {
+            "propertyType": null,
+            "isDerived": false,
+            "isSlot": false,
+            "value": [{
+                "valueExpression": null,
+                "string": "on a shoe",
+                "type": "LiteralString"
+            }],
+            "type": "Property"
+        }
+    },
+    {
         "qualifiedId": "/europa/123456/none_update_poo",
         "qualifiedName": "/europa/JW_TEST2/none_update_poo",
         "sysmlid": "none_update_poo",
@@ -22,15 +44,15 @@
         }
     },
     {
-        "qualifiedId": "/europa/123456/update_add_poo",
-        "qualifiedName": "/europa/JW_TEST2/update_add_poo",
-        "sysmlid": "update_add_poo",
+        "qualifiedId": "/europa/123456/none_add_poo",
+        "qualifiedName": "/europa/JW_TEST2/none_add_poo",
+        "sysmlid": "none_add_poo",
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
-        "name": "update_add_poo",
+        "name": "none_add_poo",
         "owner": "123456",
-        "documentation": "update_add_poo",
+        "documentation": "none_add_poo",
         "specialization": {
             "propertyType": null,
             "isDerived": false,
@@ -43,29 +65,6 @@
             "type": "Property"
         }
     },
-    {
-        "qualifiedId": "/europa/123456/update_update_poo",
-        "qualifiedName": "/europa/JW_TEST2/update_update_poo",
-        "sysmlid": "update_update_poo",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "update_update_poo",
-        "owner": "123456",
-        "documentation": "update_update_poo updatedWs2",
-        "specialization": {
-            "propertyType": null,
-            "isDerived": false,
-            "isSlot": false,
-            "value": [{
-                "valueExpression": null,
-                "string": "on a shoe",
-                "type": "LiteralString"
-            }],
-            "type": "Property"
-        }
-    },
-    {"editable": true},
     {
         "qualifiedId": "/europa/123456/add_add_poo",
         "qualifiedName": "/europa/JW_TEST2/add_add_poo",
@@ -76,28 +75,6 @@
         "name": "add_add_poo",
         "owner": "123456",
         "documentation": "add_add_poo",
-        "specialization": {
-            "propertyType": null,
-            "isDerived": false,
-            "isSlot": false,
-            "value": [{
-                "valueExpression": null,
-                "string": "on a shoe",
-                "type": "LiteralString"
-            }],
-            "type": "Property"
-        }
-    },
-    {
-        "qualifiedId": "/europa/123456/none_add_poo",
-        "qualifiedName": "/europa/JW_TEST2/none_add_poo",
-        "sysmlid": "none_add_poo",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "none_add_poo",
-        "owner": "123456",
-        "documentation": "none_add_poo",
         "specialization": {
             "propertyType": null,
             "isDerived": false,
@@ -154,7 +131,28 @@
             "type": "Property"
         }
     },
-    {"editable": true},
+    {
+        "qualifiedId": "/europa/123456/update_add_poo",
+        "qualifiedName": "/europa/JW_TEST2/update_add_poo",
+        "sysmlid": "update_add_poo",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "update_add_poo",
+        "owner": "123456",
+        "documentation": "update_add_poo",
+        "specialization": {
+            "propertyType": null,
+            "isDerived": false,
+            "isSlot": false,
+            "value": [{
+                "valueExpression": null,
+                "string": "on a shoe",
+                "type": "LiteralString"
+            }],
+            "type": "Property"
+        }
+    },
     {
         "qualifiedId": "/europa/123456/add_update_poo",
         "qualifiedName": "/europa/JW_TEST2/add_update_poo",
