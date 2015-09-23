@@ -37,17 +37,17 @@
               "type":"InstanceSpecification",
               "classifier":["PE_Opaque_Paragraph"],
               "instanceSpecificationSpecification":{
-                  "string":"{\"sourceType\": \"reference\",\"source\": \"gorangPoo\",\"sourceProperty\": \"name\",\"type\": \"Paragraph\"}",
+                  "string":"{\"sourceType\": \"reference\",\"source\": \"goranggg\",\"sourceProperty\": \"name\",\"type\": \"Paragraph\"}",
                   "type":"LiteralString"
               }
            }
          },
                   
          {
-             "sysmlid":"gorangPoo",
+             "sysmlid":"goranggg",
              "owner": "123456",
              "documentation": "He really does!",
-             "name": "Gorang eats poo!",
+             "name": "Gorang eats gg!",
              "specialization": {
                   "type":"Element"
               }
@@ -79,7 +79,7 @@
               "type":"InstanceSpecification",
               "classifier":["PE_Opaque_Paragraph"],
               "instanceSpecificationSpecification":{
-                  "string":"{\"sourceType\": \"reference\",\"source\": \"gorangPoo\",\"sourceProperty\": \"name\",\"type\": \"Paragraph\"}",
+                  "string":"{\"sourceType\": \"reference\",\"source\": \"goranggg\",\"sourceProperty\": \"name\",\"type\": \"Paragraph\"}",
                   "type":"LiteralString"
               }
            }
@@ -92,7 +92,7 @@
               "type":"InstanceSpecification",
               "classifier":["PE_Opaque_List"],
               "instanceSpecificationSpecification":{
-                  "string":"{\"ordered\": true,\"bulleted\": true,\"list\": [[{\"sourceType\": \"reference\",\"source\": \"gorangPoo\",\"sourceProperty\": \"name\",\"type\": \"Paragraph\"}]],\"type\": \"List\"}",
+                  "string":"{\"ordered\": true,\"bulleted\": true,\"list\": [[{\"sourceType\": \"reference\",\"source\": \"goranggg\",\"sourceProperty\": \"name\",\"type\": \"Paragraph\"}]],\"type\": \"List\"}",
                   "type":"LiteralString"
               }
            }
@@ -105,7 +105,7 @@
               "type":"InstanceSpecification",
               "classifier":["PE_Opaque_Table"],
               "instanceSpecificationSpecification":{
-                  "string":"{\"body\": [[{\"content\": [{\"sourceType\": \"reference\",\"source\": \"gorangPoo\",\"sourceProperty\": \"name\",\"type\": \"Paragraph\"}],\"colspan\": \"1\",\"rowspan\": \"1\"},{\"content\": [{\"sourceType\": \"reference\",\"source\": \"gorangPoo\",\"sourceProperty\": \"documentation\",\"type\": \"Paragraph\"}],\"colspan\": \"1\",\"rowspan\": \"1\"}]],\"title\": \"Gorang and his poo eating\",\"style\": \"normal\",\"type\": \"Table\",\"header\": [[{\"content\": [{\"sourceType\": \"text\",\"text\": \"<p>name<\/p>\",\"type\": \"Paragraph\"}],\"colspan\": \"1\",\"rowspan\": \"1\"},{\"content\": [{\"sourceType\": \"text\",\"text\": \"<p>doc<\/p>\",\"type\": \"Paragraph\"}],\"colspan\": \"1\",\"rowspan\": \"1\"}]]}",
+                  "string":"{\"body\": [[{\"content\": [{\"sourceType\": \"reference\",\"source\": \"goranggg\",\"sourceProperty\": \"name\",\"type\": \"Paragraph\"}],\"colspan\": \"1\",\"rowspan\": \"1\"},{\"content\": [{\"sourceType\": \"reference\",\"source\": \"goranggg\",\"sourceProperty\": \"documentation\",\"type\": \"Paragraph\"}],\"colspan\": \"1\",\"rowspan\": \"1\"}]],\"title\": \"Gorang and his gg eating\",\"style\": \"normal\",\"type\": \"Table\",\"header\": [[{\"content\": [{\"sourceType\": \"text\",\"text\": \"<p>name<\/p>\",\"type\": \"Paragraph\"}],\"colspan\": \"1\",\"rowspan\": \"1\"},{\"content\": [{\"sourceType\": \"text\",\"text\": \"<p>doc<\/p>\",\"type\": \"Paragraph\"}],\"colspan\": \"1\",\"rowspan\": \"1\"}]]}",
                   "type":"LiteralString"
               }
            }

@@ -3,14 +3,14 @@
     "qualifiedName": "master/wsMatrix2",
     "name": "wsMatrix2",
     "elements": [{
-      "qualifiedName": "/europa/JW_TEST2/update_delete_poo",
-      "sysmlid": "update_delete_poo",
+      "qualifiedName": "/europa/JW_TEST2/update_delete_gg",
+      "sysmlid": "update_delete_gg",
       "editable": true,
       "creator": "admin",
       "modifier": "admin",
-      "name": "update_delete_poo",
+      "name": "update_delete_gg",
       "owner": "123456",
-      "documentation": "update_delete_poo",
+      "documentation": "update_delete_gg",
       "specialization": {
         "propertyType": null,
         "isDerived": false,
@@ -26,9 +26,9 @@
   },
   "workspace2": {
     "deletedElements": [{
-      "qualifiedName": "/europa/JW_TEST2/update_delete_poo",
-      "name": "update_delete_poo",
-      "sysmlid": "update_delete_poo",
+      "qualifiedName": "/europa/JW_TEST2/update_delete_gg",
+      "name": "update_delete_gg",
+      "sysmlid": "update_delete_gg",
       "owner": "123456",
       "specialization": {"type": "Property"},
       "creator": "admin",
