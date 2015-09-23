@@ -64,6 +64,11 @@ public class MmsModelDelete extends AbstractJavaWebScript {
     @Override
     protected Map< String, Object > executeImplImpl( WebScriptRequest req,
                                                  Status status, Cache cache ) {
+        if ( logger.isInfoEnabled() ) {
+            String user = AuthenticationUtil.getFullyAuthenticatedUser();
+            logger.info( user + " " + req.getURL() );
+        }
+
         printHeader( req );
 
         Map<String, Object> model = new HashMap<String, Object>();
@@ -96,6 +101,7 @@ public class MmsModelDelete extends AbstractJavaWebScript {
 
         printFooter();
 
+        if (logger.isInfoEnabled()) logger.info( "Deletion completed" );
         return model;
     }
 
