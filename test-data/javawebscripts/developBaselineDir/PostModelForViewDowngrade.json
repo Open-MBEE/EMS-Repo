@@ -1,5 +1,5 @@
 {
-    "message": "[WARNING]: The type supplied View is different than the stored type Product\n",
+    "message": "[WARNING]: The type supplied View is different than the stored type Element\n",
     "elements": [{
         "modifier": "admin",
         "qualifiedId": "/no_site/no_site_no_project/holding_bin_no_site_no_project/54321",
@@ -12,13 +12,6 @@
                 "302",
                 "303"
             ],
-            "childrenViews": [],
-            "allowedElements": [
-                "301",
-                "302",
-                "303"
-            ],
-            "contains": [],
             "type": "View"
         },
         "editable": true,
