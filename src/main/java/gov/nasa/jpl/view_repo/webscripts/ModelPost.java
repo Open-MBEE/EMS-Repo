@@ -938,8 +938,11 @@ public class ModelPost extends AbstractJavaWebScript {
                                                        foundElements.get(jsonId) :
                                                        findScriptNodeById( jsonId, workspace, null, true );
         if ( element != null ) {
+            // Adding to elements for error case to find project id in
+            // sendDeltas() since that is the only place where it is getting
+            // used in ModelPost, at least.
             elements.add( element );
-            nodeMap.put( element.getName(), element );
+//            nodeMap.put( element.getName(), element );
             // only add to original element map if it exists on first pass
             if (!ingest) {
                 if (!wsDiff.getElements().containsKey( jsonId )) {
@@ -1034,6 +1037,8 @@ public class ModelPost extends AbstractJavaWebScript {
 
         fixReadTimeForConflictTransaction(finalElement, elementJson);
 
+        nodeMap.put( finalElement.getName(), finalElement );
+        
         if (ingest) {
             elementMetadataProcessedCnt++;
         }
