@@ -47,7 +47,7 @@ public class JsonDiffDiff extends AbstractDiff< JSONObject, Object, String > {
         this( null, null );
         JSONObject ws1 = diff.optJSONObject( "workspace1" );            
         JSONArray elems1 = ws1.getJSONArray( "elements" );
-        JSONArray changed1 = ws1.getJSONArray( "changedElements" );
+        JSONArray changed1 = ws1.optJSONArray( "changedElements" );
         JSONObject ws2 = diff.optJSONObject( "workspace2" );
         if ( ws2 == null ) {
             // TODO -- ERROR
@@ -60,8 +60,8 @@ public class JsonDiffDiff extends AbstractDiff< JSONObject, Object, String > {
 
         if ( elems1 != null ) getElements().addAll( Utils.asList( toList(elems1, false),
                                                                   JSONObject.class ) );
-        if ( elems1 != null ) getChanged().addAll( Utils.asList( toList(changed1, false),
-                                                                 String.class ) );
+        if ( changed1 != null ) getChanged().addAll( Utils.asList( toList(changed1, false),
+                                                                   String.class ) );
         if ( added2 != null ) getAdded().addAll(  Utils.asList( toList(added2, false),
                                                                 JSONObject.class ) );
         if ( updated2 != null ) getUpdated().addAll(  Utils.asList( toList(updated2, false),
