@@ -688,7 +688,7 @@ public class JsonDiffDiff extends AbstractDiff< JSONObject, Object, String > {
                            dDiff3.set1( id, newElement3_1, false );
                            break;
                        case NONE:  // NONE - UPDATE = UPDATE
-                           conflict = wasChanged1;
+                           conflict = false;
                            JSONObject oldElement3_1 =
                                     ( element3_1 == null ? element1_1
                                                          : element3_1 );
@@ -759,6 +759,9 @@ public class JsonDiffDiff extends AbstractDiff< JSONObject, Object, String > {
                    switch ( op3 ) {
                        case ADD: // ADD - NONE = ADD
                            //dDiff3.set2(id, op3, diff(element3_1, element3_2, false).first, false);
+                           if ( wasChanged1 ) {
+                               dDiff3.getConflicted().add( element3_2 );
+                           }
                            break;
                        case UPDATE: // UPDATE - NONE = UPDATE
                        case DELETE:  // DELETE - NONE = DELETE
@@ -769,7 +772,9 @@ public class JsonDiffDiff extends AbstractDiff< JSONObject, Object, String > {
                            // this.
                            // Since nothing happens in workspace1, we can
                            // ignore the mergeStyleDiff flag.
-                           dDiff3.set2(id, op3, diff(element3_1, element3_2, false).first, false);
+                           dDiff3.set2(id, op3,
+                                       diff(element3_1, element3_2, false).first,
+                                       wasChanged1);
                            break;
                        default:
                    }
