@@ -768,7 +768,9 @@ public class JsonDiffDiff extends AbstractDiff< JSONObject, Object, String > {
                     // != None, then there is a conflict here.  If the workspace2 change results in the same element as in workspace1, then set2() will not create a conflict.
                        case ADD: // ADD - NONE = ADD
                            //dDiff3.set2(id, op3, diff(element3_1, element3_2, false).first, false);
-                           if ( conflict ) {
+                           if ( sameElement( element3_1, element3_2 ) ) {
+                               dDiff3.removeFromDiff( id );
+                           } else if ( conflict ) {
                                dDiff3.getConflicted().add( element3_2 );
                            }
                            break;
