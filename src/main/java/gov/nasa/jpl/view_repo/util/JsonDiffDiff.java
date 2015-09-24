@@ -756,10 +756,19 @@ public class JsonDiffDiff extends AbstractDiff< JSONObject, Object, String > {
                    }
                    break;
                case NONE:
+                   conflict = wasChanged1 && op3 != DiffOp.NONE;
                    switch ( op3 ) {
+                    // If there is a change to an element in workspace2 and not
+                    // in workspace1, there may still be a conflict if the
+                    // element was changed in workspace1 in a prior diff. In
+                    // this case, since the element was not changed in
+                    // workspace1 since the prior diff, op1 == None, which is
+                    // the set of cases here. wasChanged1 is true if there was a
+                    // change in workspace1, so if wasChanged1 is true and op3
+                    // != None, then there is a conflict here.  If the workspace2 change results in the same element as in workspace1, then set2() will not create a conflict.
                        case ADD: // ADD - NONE = ADD
                            //dDiff3.set2(id, op3, diff(element3_1, element3_2, false).first, false);
-                           if ( wasChanged1 ) {
+                           if ( conflict ) {
                                dDiff3.getConflicted().add( element3_2 );
                            }
                            break;
@@ -774,7 +783,7 @@ public class JsonDiffDiff extends AbstractDiff< JSONObject, Object, String > {
                            // ignore the mergeStyleDiff flag.
                            dDiff3.set2(id, op3,
                                        diff(element3_1, element3_2, false).first,
-                                       wasChanged1);
+                                       conflict);
                            break;
                        default:
                    }
