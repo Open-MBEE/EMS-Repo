@@ -940,7 +940,7 @@ public class JsonDiffDiff extends AbstractDiff<JSONObject, Object, String> {
 				continue;
 			}
 			for (int p = 0; p < cElements.length(); p++) {
-				String elem = cElements.getString(p);
+				JSONObject elem = cElements.optJSONObject(p);
 				if (elem == null)
 					continue;
 				changedElem.put(elem);
