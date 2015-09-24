@@ -36,10 +36,6 @@ public class JsonDiffDiff extends AbstractDiff<JSONObject, Object, String> {
 
 	protected Set<JSONObject> conflicted = new LinkedHashSet<JSONObject>();
 	protected Set<JSONObject> moved = new LinkedHashSet<JSONObject>();
-	/**
-	 * The elements in workspace1 that have changed.
-	 */
-	protected Set<JSONObject> changed = new LinkedHashSet<JSONObject>();
 
 	public JsonDiffDiff(Map<String, JSONObject> map1, Map<String, JSONObject> map2) {
 		super(map1, map2, null);
@@ -49,7 +45,6 @@ public class JsonDiffDiff extends AbstractDiff<JSONObject, Object, String> {
 		this(null, null);
 		JSONObject ws1 = diff.optJSONObject("workspace1");
 		JSONArray elems1 = ws1.getJSONArray("elements");
-		JSONArray changed1 = ws1.optJSONArray("changedElements");
 		JSONObject ws2 = diff.optJSONObject("workspace2");
 		if (ws2 == null) {
 			// TODO -- ERROR
@@ -62,8 +57,6 @@ public class JsonDiffDiff extends AbstractDiff<JSONObject, Object, String> {
 
 		if (elems1 != null)
 			getElements().addAll(Utils.asList(toList(elems1, false), JSONObject.class));
-		if (changed1 != null)
-			getChanged().addAll(Utils.asList(toList(changed1, false), JSONObject.class));
 		if (added2 != null)
 			getAdded().addAll(Utils.asList(toList(added2, false), JSONObject.class));
 		if (updated2 != null)
@@ -79,11 +72,7 @@ public class JsonDiffDiff extends AbstractDiff<JSONObject, Object, String> {
 		glom(DiffOp.UPDATE, JsonDiffDiff.toElementList(updated2), diffMap2);
 		glom(DiffOp.DELETE, JsonDiffDiff.toElementList(deleted2), diffMap2);
 	}
-
-	public Set<JSONObject> getChanged() {
-		return changed;
-	}
-
+	
 	public Set<JSONObject> getConflicted() {
 		return conflicted;
 	}
@@ -147,10 +136,11 @@ public class JsonDiffDiff extends AbstractDiff<JSONObject, Object, String> {
 		}
 
 		// Make sure the element has its sysmlid.
-		if (!element.has("sysmlid")) {
-			element.put("sysmlid", id);
+		if (element != null) {
+			if (!element.has("sysmlid")) {
+				element.put("sysmlid", id);
+			}
 		}
-
 		Pair<DiffOp, List<JSONObject>> p = diffMap.get(id);
 
 		// If there is no entry in the map for the sysmlid, create a new
@@ -485,8 +475,6 @@ public class JsonDiffDiff extends AbstractDiff<JSONObject, Object, String> {
 		removeFromMoved(id);
 		diffMap1.remove(id);
 		diffMap2.remove(id);
-		// Never remove from changed elements.
-		// removeFromChanged( id );
 	}
 
 	/**
@@ -562,21 +550,6 @@ public class JsonDiffDiff extends AbstractDiff<JSONObject, Object, String> {
 		// Get all the workpace pieces of the diffs.
 		JsonDiffDiff dDiff1 = new JsonDiffDiff(diff1);
 
-		// Add the changed elements in diff1 to the changedElements of diff3's
-		// workspace1.
-		// Set< String > affectedIds1 = dDiff1.getAffectedIds();
-		Set<JSONObject> affectedObjs1 = dDiff1.getAffectedObjects();
-		JSONObject diff3ws1 = diff3.optJSONObject("workspace1");
-
-		JSONArray changedElements3 = getOrCreateJsonArray(diff3ws1, "changedElements");
-		Collection<Object> list = toList(changedElements3, false);
-		Set<JSONObject> changedObjs = new LinkedHashSet<JSONObject>(Utils.asList(list, JSONObject.class));
-		for (JSONObject obj : affectedObjs1) {
-			if (!changedObjs.contains(obj)) {
-				changedElements3.put(obj);
-			}
-		}
-
 		if (diff3.optJSONObject("workspace2") != null) {
 			diff3.optJSONObject("workspace2").remove("movedElements");
 			diff3.optJSONObject("workspace2").put("movedElements", new JSONArray());
@@ -606,15 +579,6 @@ public class JsonDiffDiff extends AbstractDiff<JSONObject, Object, String> {
 			JSONObject element3_1 = dDiff3.getElement1(id);
 
 			boolean conflict = false;
-			boolean wasChanged1 = false;
-			JSONObject changedElem1 = null;
-			for (JSONObject obj : dDiff3.getChanged()) {
-				if (id.equals(id(obj))) {
-					wasChanged1 = true;
-					changedElem1 = obj;
-					break;
-				}
-			}
 			// Compute the op3 - op1 case.
 			switch (op1) {
 			case ADD:
@@ -634,6 +598,7 @@ public class JsonDiffDiff extends AbstractDiff<JSONObject, Object, String> {
 					JSONObject newElement3_1 = undonePair.second;
 					// If mergeStyleDiff, we don't need to undo the change by
 					// element1_2, so we make undone null here. Undo was
+					
 					// useful to compute newElement3_1, so we still call
 					// it if only to keep the code simple.
 					if (mergeStyleDiff)
@@ -712,7 +677,7 @@ public class JsonDiffDiff extends AbstractDiff<JSONObject, Object, String> {
 					dDiff3.set1(id, newElement3_1, false);
 					break;
 				case NONE: // NONE - UPDATE = UPDATE
-					conflict = wasChanged1;
+					conflict = false;
 					JSONObject oldElement3_1 = (element3_1 == null ? element1_1 : element3_1);
 					// If not mergeStyleDiff, we need to undo the update
 					// made by element1_2 in order for
@@ -767,11 +732,11 @@ public class JsonDiffDiff extends AbstractDiff<JSONObject, Object, String> {
 					// If not a mergeStyleDiff, then we undo the delete
 					// of element3_1 by adding it.
 					if (!mergeStyleDiff) {
-						dDiff3.set2(id, DiffOp.ADD, element3_1, conflict);
-						// We only add a workspace1 of there is a change
+						dDiff3.set2(id, DiffOp.ADD, element1_1, conflict);
+						// We only add a workspace1 if there is a change
 						// in workspace2 to keep it consistent with
 						// updateDiff() calling removeFromDiff().
-						dDiff3.set1(id, DiffOp.DELETE, element3_1, false);
+						dDiff3.set1(id, DiffOp.DELETE, element1_1, false);
 					}
 					break;
 				default:
@@ -781,25 +746,8 @@ public class JsonDiffDiff extends AbstractDiff<JSONObject, Object, String> {
 			case NONE:
 				switch (op3) {
 				case ADD: // ADD - NONE = ADD
-					// dDiff3.set2(id, op3, diff(element3_1, element3_2,
-					// false).first, false);
-					if (wasChanged1) {
-						Pair<JSONObject, JSONObject> undonePair = undo(element3_1, changedElem1, true);
-						JSONObject undone = undonePair.first;
-						JSONObject newElement3_1 = undonePair.second;
-						if (mergeStyleDiff)
-							undone = null;
-						JSONObject updated = glomElements(undone, element3_2, false);
-						dDiff3.updateDiff(id, newElement3_1, updated, DiffOp.UPDATE, conflict);
-					}
 					break;
 				case DELETE: // DELETE - NONE = DELETE
-					conflict = wasChanged1;
-					if (wasChanged1) {
-						dDiff3.removeFromDiff(id);
-					} else
-						dDiff3.set2(id, op3, diff(element3_1, element3_2, false).first, conflict);
-					break;
 				case UPDATE: // UPDATE - NONE = UPDATE
 				case NONE: // NONE - NONE = NONE
 					// Nothing to do for this case except that we need
@@ -808,7 +756,7 @@ public class JsonDiffDiff extends AbstractDiff<JSONObject, Object, String> {
 					// this.
 					// Since nothing happens in workspace1, we can
 					// ignore the mergeStyleDiff flag.
-					conflict = wasChanged1;
+					conflict = false;
 					dDiff3.set2(id, op3, diff(element3_1, element3_2, false).first, conflict);
 					break;
 				default:
@@ -900,7 +848,6 @@ public class JsonDiffDiff extends AbstractDiff<JSONObject, Object, String> {
 		// if ( diffs.size() == 1 ) return glommedDiff;
 		LinkedHashMap<String, Pair<DiffOp, List<JSONObject>>> diffMap1 = new LinkedHashMap<String, Pair<DiffOp, List<JSONObject>>>();
 		LinkedHashMap<String, Pair<DiffOp, List<JSONObject>>> diffMap2 = new LinkedHashMap<String, Pair<DiffOp, List<JSONObject>>>();
-		JSONArray changedElem = new JSONArray();
 		// Glom workspace 1 changes
 		// Iterate through each diff in order adding any new elements that were
 		// not in previous diffs.
@@ -935,16 +882,6 @@ public class JsonDiffDiff extends AbstractDiff<JSONObject, Object, String> {
 					continue;
 				diffMap1.put(sysmlid, new Pair<DiffOp, List<JSONObject>>(DiffOp.ADD, Utils.newList(element)));
 			}
-			JSONArray cElements = ws1.optJSONArray("changedElements");
-			if (cElements == null) {
-				continue;
-			}
-			for (int p = 0; p < cElements.length(); p++) {
-				JSONObject elem = cElements.optJSONObject(p);
-				if (elem == null)
-					continue;
-				changedElem.put(elem);
-			}
 		}
 
 		// Glom workpace 2 changes
@@ -965,18 +902,14 @@ public class JsonDiffDiff extends AbstractDiff<JSONObject, Object, String> {
 			glom(DiffOp.UPDATE, JsonDiffDiff.toElementList(updated), diffMap2);
 			glom(DiffOp.DELETE, JsonDiffDiff.toElementList(deleted), diffMap2);
 		}
-
-		// now we need to merge the properties of chained updates
-		if (glommedDiff.has("workspace1"))
-			glommedDiff.getJSONObject("workspace1").put("changedElements", changedElem);
-
-		toJsonObject(glommedDiff, null, null, diffMap1, diffMap2);
+		
+		toJsonObject(glommedDiff, null, diffMap1, diffMap2);
 
 		return glommedDiff;
 	}
 
 	public JSONObject toJsonObject() {
-		JSONObject json = toJsonObject(null, getConflicted(), getChanged(), diffMap1, diffMap2);
+		JSONObject json = toJsonObject(null, getConflicted(), diffMap1, diffMap2);
 		return json;
 	}
 
@@ -994,7 +927,7 @@ public class JsonDiffDiff extends AbstractDiff<JSONObject, Object, String> {
 	 *            the diff map for workspace 2
 	 * @return
 	 */
-	public static JSONObject toJsonObject(JSONObject json, Set<JSONObject> conflictedToAdd, Set<JSONObject> changedToAdd,
+	public static JSONObject toJsonObject(JSONObject json, Set<JSONObject> conflictedToAdd,
 			LinkedHashMap<String, Pair<DiffOp, List<JSONObject>>> diffMap1,
 			LinkedHashMap<String, Pair<DiffOp, List<JSONObject>>> diffMap2) {
 		if (json == null) {
@@ -1007,7 +940,6 @@ public class JsonDiffDiff extends AbstractDiff<JSONObject, Object, String> {
 		if (ws1 == null) {
 		} // TODO error
 		JSONArray elements = getOrCreateJsonArray(ws1, "elements");
-		JSONArray changed = getOrCreateJsonArray(ws1, "changedElements");
 		for (Entry<String, Pair<DiffOp, List<JSONObject>>> e : diffMap1.entrySet()) {
 			Pair<DiffOp, List<JSONObject>> p = e.getValue();
 			if (p == null || p.second == null)
@@ -1022,17 +954,6 @@ public class JsonDiffDiff extends AbstractDiff<JSONObject, Object, String> {
 				// TODO error
 			}
 		}
-
-		// Add passed in changed elements; the diff maps don't store this.
-		Set<JSONObject> existingChangedSet = new LinkedHashSet<JSONObject>(Utils.asList(toList(changed, false), JSONObject.class));
-		if (!Utils.isNullOrEmpty(changedToAdd)) {
-			for (JSONObject changedObj : changedToAdd) {
-				if (!existingChangedSet.contains(changedObj)) {
-					changed.put(changedObj);
-				}
-			}
-		}
-
 		// Workspace 2
 
 		// Get the element arrays for workspace2.
@@ -1057,7 +978,7 @@ public class JsonDiffDiff extends AbstractDiff<JSONObject, Object, String> {
 				else
 					addProperties(glommedElement, element);
 			}
-			if (!glommedElement.has("sysmlid"))
+			if (glommedElement != null && !glommedElement.has("sysmlid"))
 				glommedElement.put("sysmlid", id);
 			switch (p.first) {
 			case ADD:
@@ -1095,7 +1016,7 @@ public class JsonDiffDiff extends AbstractDiff<JSONObject, Object, String> {
 	protected static void addBackToJson(String id, JSONObject glommedElement, String key,
 			LinkedHashMap<String, Pair<DiffOp, List<JSONObject>>> diffMap1) {
 		// If it's already there, there's nothing to add back.
-		if (glommedElement.has(key))
+		if (glommedElement == null || glommedElement.has(key))
 			return;
 		// See if the key is in the specialization json object.
 		JSONObject glomSpec = glommedElement.optJSONObject("specialization");

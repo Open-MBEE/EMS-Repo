@@ -2889,7 +2889,7 @@ set_last_read_to_gv4
 create_curl_cmd(type="GET", base_url=SERVICE_URL,
                 branch="diff/master/$gv1/latest/latest?background&changesForMerge"),
 True,
-common_filters + ['"id"', '"qualifiedId"', '"creator"', '"modifier"'],
+common_filters + ['"id"', '"qualifiedId"', '"creator"', '"modifier"', '"diffTime"'],
 ["test", "workspaces", "develop"]
 ],
 [
@@ -2899,7 +2899,7 @@ common_filters + ['"id"', '"qualifiedId"', '"creator"', '"modifier"'],
 create_curl_cmd(type="GET", base_url=SERVICE_URL,
                 branch="diff/master/$gv1/latest/latest?background&fullCompare"),
 True,
-common_filters + ['"id"', '"qualifiedId"', '"creator"', '"modifier"'],
+common_filters + ['"id"', '"qualifiedId"', '"creator"', '"modifier"', '"diffTime"'],
 ["test", "workspaces", "develop"]
 ],
 
@@ -2931,7 +2931,7 @@ common_filters + ['"timestamp"', '"MMS_', '"id"', '"qualifiedId"', '"version"', 
 create_curl_cmd(type="POST", data="elementsWsMerge-style.json", base_url=BASE_URL_WS,
                 post_type="elements", branch="$gv1/"),
 True,
-common_filters,
+common_filters + ['"message"'],
 ["test", "workspaces", "develop"],
 None,
 None,
