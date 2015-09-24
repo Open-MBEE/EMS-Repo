@@ -74,9 +74,6 @@ public class DeclarativeJavaWebScript extends AbstractWebScript
             model.put("status", status);
             model.put("cache", cache);
             
-            // CMED-936
-            res.addHeader( "Access-Control-Allow-Origin", "*" );
-            
             try
             {
                 // execute script if it exists
