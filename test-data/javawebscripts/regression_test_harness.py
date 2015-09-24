@@ -580,7 +580,7 @@ None,
 172,
 "PostToWorkspaceForGlom",
 "Post element to workspace",
-create_curl_cmd(type="POST",data="glomPost.json",base_url=BASE_URL_WS,
+create_curl_cmd(type="POST",data="poo.json",base_url=BASE_URL_WS,
                 post_type="elements",branch="$gv2/"),
 True, 
 common_filters,
@@ -1603,7 +1603,7 @@ create_curl_cmd(type="GET",data="views/_17_0_2_3_e610336_1394148233838_91795_293
                 branch="master/"),
 True, 
 common_filters,
-["test","workspaces", "develop2"]
+["test","workspaces","develop", "develop2"]
 ],
 
 [
@@ -2512,7 +2512,7 @@ common_filters,
 674,
 "GetSearchNonSlotPropertyOffNom",
 'Searching for the property "real55" having value 34.5 (non-slot property).  This should fail.',
-create_curl_cmd(type="GET",data="search?keyword=34.5&filters=value&propertyName=gg",base_url=BASE_URL_WS,
+create_curl_cmd(type="GET",data="search?keyword=34.5&filters=value&propertyName=poo",base_url=BASE_URL_WS,
                 branch="master/"),
 True, 
 common_filters,
@@ -2634,8 +2634,8 @@ set_wsid_to_gv1
 [
 802,
 "DeleteDeleteAddWsMatrix1",
-"Delete delete_add_gg",
-create_curl_cmd(type="DELETE",data="elements/delete_add_gg",base_url=BASE_URL_WS,
+"Delete delete_add_poo",
+create_curl_cmd(type="DELETE",data="elements/delete_add_poo",base_url=BASE_URL_WS,
                 branch="$gv1/"),
 True, 
 common_filters+['"timestamp"','"MMS_','"id"','"qualifiedId"','"version"', '"modified"', '"sequence"'],
@@ -2645,8 +2645,8 @@ common_filters+['"timestamp"','"MMS_','"id"','"qualifiedId"','"version"', '"modi
 [
 803,
 "DeleteDeleteUpdateWsMatrix1",
-"Delete delete_update_gg",
-create_curl_cmd(type="DELETE",data="elements/delete_update_gg",base_url=BASE_URL_WS,
+"Delete delete_update_poo",
+create_curl_cmd(type="DELETE",data="elements/delete_update_poo",base_url=BASE_URL_WS,
                 branch="$gv1/"),
 True, 
 common_filters+['"timestamp"','"MMS_','"id"','"qualifiedId"','"version"', '"modified"', '"sequence"'],
@@ -2656,8 +2656,8 @@ common_filters+['"timestamp"','"MMS_','"id"','"qualifiedId"','"version"', '"modi
 [
 804,
 "DeleteDeleteDeleteWsMatrix1",
-"Delete delete_delete_gg",
-create_curl_cmd(type="DELETE",data="elements/delete_delete_gg",base_url=BASE_URL_WS,
+"Delete delete_delete_poo",
+create_curl_cmd(type="DELETE",data="elements/delete_delete_poo",base_url=BASE_URL_WS,
                 branch="$gv1/"),
 True, 
 common_filters+['"timestamp"','"MMS_','"id"','"qualifiedId"','"version"', '"modified"', '"sequence"'],
@@ -2667,8 +2667,8 @@ common_filters+['"timestamp"','"MMS_','"id"','"qualifiedId"','"version"', '"modi
 [
 805,
 "DeleteDeleteNoneWsMatrix1",
-"Delete delete_none_gg",
-create_curl_cmd(type="DELETE",data="elements/delete_none_gg",base_url=BASE_URL_WS,
+"Delete delete_none_poo",
+create_curl_cmd(type="DELETE",data="elements/delete_none_poo",base_url=BASE_URL_WS,
                 branch="$gv1/"),
 True, 
 common_filters+['"timestamp"','"MMS_','"id"','"qualifiedId"','"version"', '"modified"', '"sequence"'],
@@ -2692,8 +2692,8 @@ set_last_read_to_gv4
 [
 807,
 "DeleteUpdateAddMaster",
-"Delete update_add_gg",
-create_curl_cmd(type="DELETE",data="elements/update_add_gg",base_url=BASE_URL_WS,
+"Delete update_add_poo",
+create_curl_cmd(type="DELETE",data="elements/update_add_poo",base_url=BASE_URL_WS,
                 branch="master/"),
 True, 
 common_filters+['"timestamp"','"MMS_','"id"','"qualifiedId"','"version"', '"modified"', '"sequence"'],
@@ -2703,8 +2703,8 @@ common_filters+['"timestamp"','"MMS_','"id"','"qualifiedId"','"version"', '"modi
 [
 808,
 "DeleteDeleteAddMaster",
-"Delete delete_add_gg",
-create_curl_cmd(type="DELETE",data="elements/delete_add_gg",base_url=BASE_URL_WS,
+"Delete delete_add_poo",
+create_curl_cmd(type="DELETE",data="elements/delete_add_poo",base_url=BASE_URL_WS,
                 branch="master/"),
 True, 
 common_filters+['"timestamp"','"MMS_','"id"','"qualifiedId"','"version"', '"modified"', '"sequence"'],
@@ -2742,8 +2742,8 @@ set_wsid_to_gv2
 [
 811,
 "DeleteAddDeleteWsMatrix2",
-"Delete add_delete_gg",
-create_curl_cmd(type="DELETE",data="elements/add_delete_gg",base_url=BASE_URL_WS,
+"Delete add_delete_poo",
+create_curl_cmd(type="DELETE",data="elements/add_delete_poo",base_url=BASE_URL_WS,
                 branch="$gv2/"),
 True, 
 common_filters+['"timestamp"','"MMS_','"id"','"qualifiedId"','"version"', '"modified"', '"sequence"'],
@@ -2753,8 +2753,8 @@ common_filters+['"timestamp"','"MMS_','"id"','"qualifiedId"','"version"', '"modi
 [
 812,
 "DeleteUpdateDeleteWsMatrix2",
-"Delete update_delete_gg",
-create_curl_cmd(type="DELETE",data="elements/update_delete_gg",base_url=BASE_URL_WS,
+"Delete update_delete_poo",
+create_curl_cmd(type="DELETE",data="elements/update_delete_poo",base_url=BASE_URL_WS,
                 branch="$gv2/"),
 True, 
 common_filters+['"timestamp"','"MMS_','"id"','"qualifiedId"','"version"', '"modified"', '"sequence"'],
@@ -2764,8 +2764,8 @@ common_filters+['"timestamp"','"MMS_','"id"','"qualifiedId"','"version"', '"modi
 [
 813,
 "DeleteDeleteDeleteWsMatrix2",
-"Delete delete_delete_gg",
-create_curl_cmd(type="DELETE",data="elements/delete_delete_gg",base_url=BASE_URL_WS,
+"Delete delete_delete_poo",
+create_curl_cmd(type="DELETE",data="elements/delete_delete_poo",base_url=BASE_URL_WS,
                 branch="$gv2/"),
 True, 
 common_filters+['"timestamp"','"MMS_','"id"','"qualifiedId"','"version"', '"modified"', '"sequence"'],
@@ -2775,8 +2775,8 @@ common_filters+['"timestamp"','"MMS_','"id"','"qualifiedId"','"version"', '"modi
 [
 814,
 "DeleteNoneDeleteWsMatrix2",
-"Delete none_delete_gg",
-create_curl_cmd(type="DELETE",data="elements/none_delete_gg",base_url=BASE_URL_WS,
+"Delete none_delete_poo",
+create_curl_cmd(type="DELETE",data="elements/none_delete_poo",base_url=BASE_URL_WS,
                 branch="$gv2/"),
 True, 
 common_filters+['"timestamp"','"MMS_','"id"','"qualifiedId"','"version"', '"modified"', '"sequence"'],
@@ -2818,6 +2818,125 @@ True,
 common_filters+['"id"','"qualifiedId"','"creator"','"modifier"'],
 ["test","workspaces","develop"]
 ],
+        
+       
+# Testing  the merge-style diff 
+# tests 900-909 create a branch off of master to test conflicts AA, DD, DU, UD, UU 
+[
+900,
+"PostElementsMerge1",
+"Post elements to the master branch for merge-style diff testing",
+create_curl_cmd(type="POST",data="elementsMasterMerge1.json",base_url=BASE_URL_WS,
+                post_type="elements",branch="master/"),
+True, 
+common_filters,
+["test","workspaces"],
+None,
+None,
+set_last_read_to_gv3
+],
+[
+901,
+"CreateWorkspaceMerge-style-Test1",
+"Create workspace1 for merge-style diff testing",
+create_curl_cmd(type="POST",base_url=BASE_URL_WS,
+                post_type="",branch="wsMerge1?sourceWorkspace=master&copyTime=$gv3"),
+True, 
+common_filters+['"branched"','"created"','"id"','"qualifiedId"'],
+["test","workspaces"],
+None,
+None,
+set_wsid_to_gv1
+],        
+[
+902,
+"DeleteDeleteDeleteMasterMerge1",
+"Delete delete_delete_consistent",
+create_curl_cmd(type="DELETE",data="elements/delete_delete_consistent",base_url=BASE_URL_WS,
+                branch="master/"),
+True, 
+common_filters+['"timestamp"','"MMS_','"id"','"qualifiedId"','"version"', '"modified"', '"sequence"'],
+["test","workspaces"]
+],
+
+[
+903,
+"DeleteDeleteUpdateMasterMerge1",
+"Delete delete_update_consistent",
+create_curl_cmd(type="DELETE",data="elements/delete_update_consistent",base_url=BASE_URL_WS,
+                branch="master/"),
+True, 
+common_filters+['"timestamp"','"MMS_','"id"','"qualifiedId"','"version"', '"modified"', '"sequence"'],
+["test","workspaces"],
+],       
+[
+904,
+"PostElementsMasterMerge1",
+"Post elements to the MasterMerge1 branch for merge-style diff testing",
+create_curl_cmd(type="POST",data="elementsMasterMerge2.json",base_url=BASE_URL_WS,
+                post_type="elements",branch="master/"),
+True, 
+common_filters,
+["test","workspaces"],
+None,
+None,
+set_last_read_to_gv4
+],
+[
+905,
+"CompareWorkspacesForMerge-style1",
+"Compare workspaces at latest times for merge-style diff test.",
+create_curl_cmd(type="GET",base_url=SERVICE_URL,
+                branch="diff/master/$gv1/latest/latest?background"),
+True, 
+common_filters+['"id"','"qualifiedId"','"creator"','"modifier"'],
+["test","workspaces"]
+],  
+[
+906,
+"DeleteDeleteDeleteWs1",
+"Delete delete_delete_consistent",
+create_curl_cmd(type="DELETE",data="elements/delete_delete_consistent",base_url=BASE_URL_WS,
+                branch="$gv1/"),
+True, 
+common_filters+['"timestamp"','"MMS_','"id"','"qualifiedId"','"version"', '"modified"', '"sequence"'],
+["test","workspaces"]
+],
+        
+[
+907,
+"DeleteUpdateDeleteWs1",
+"Delete update_delete_consistent",
+create_curl_cmd(type="DELETE",data="elements/update_delete_consistent",base_url=BASE_URL_WS,
+                branch="$gv1/"),
+True, 
+common_filters+['"timestamp"','"MMS_','"id"','"qualifiedId"','"version"', '"modified"', '"sequence"'],
+["test","workspaces"]
+],
+[
+908,
+"PostElementsMerge2",
+"Post elements to the master branch for merge-style diff testing",
+create_curl_cmd(type="POST",data="elementsWsMerge-style.json",base_url=BASE_URL_WS,
+                post_type="elements",branch="master/"),
+True, 
+common_filters,
+["test","workspaces"],
+None,
+None,
+set_last_read_to_gv5
+],
+[
+909,
+"CompareWorkspacesForMerge-style2",
+"Compare workspaces at latest times for merge-style diff test.",
+create_curl_cmd(type="GET",base_url=SERVICE_URL,
+                branch="diff/master/$gv1/latest/latest"),
+True, 
+common_filters+['"id"','"qualifiedId"','"creator"','"modifier"'],
+["test","workspaces"]
+],             
+
         
 # Additional searches after everything is completed ==========================   
 [
