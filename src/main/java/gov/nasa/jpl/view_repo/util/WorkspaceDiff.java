@@ -1409,8 +1409,10 @@ public class WorkspaceDiff implements Serializable {
                                               ServiceRegistry services,
                                               StringBuffer response,
                                               DiffType diffType) {
+        
         JsonDiffDiff diffDiff3 = new JsonDiffDiff(diff2);
         JsonDiffDiff diffDiff1 = new JsonDiffDiff(diff1);
+        
         return JsonDiffDiff.matrixDiff(diffDiff3, diffDiff1, diffType == DiffType.MERGE);
     }
 

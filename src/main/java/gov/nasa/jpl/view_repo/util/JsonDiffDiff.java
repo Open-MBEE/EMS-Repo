@@ -731,6 +731,8 @@ public class JsonDiffDiff extends AbstractDiff<JSONObject, Object, String> {
 					// ignore workspace1 changes that do not conflict.
 					// If not a mergeStyleDiff, then we undo the delete
 					// of element3_1 by adding it.
+					// TODO REVIEW using element3_1 below causes issues as
+					//             it is null.  So using element1_1 instead.
 					if (!mergeStyleDiff) {
 						dDiff3.set2(id, DiffOp.ADD, element1_1, conflict);
 						// We only add a workspace1 if there is a change

@@ -48,9 +48,7 @@ public class MmsDiffGet extends AbstractJavaWebScript {
 
     public static boolean glom = true;
     public static boolean diffDefaultIsMerge = true;
-    
-    private static WorkspaceNode workspace;
-    
+        
     protected WorkspaceNode ws1, ws2;
     protected String workspaceId1;
     protected String workspaceId2;
@@ -355,16 +353,6 @@ public class MmsDiffGet extends AbstractJavaWebScript {
      */
     public JSONObject performDiffGlom(Map<String, Object> results, DiffType diffType) {
  
-        // Check for a job matching the four diff parameters.
-        // TODO -- It would be nice if we could quickly find the "nearest" diff
-        // in the case that the diff has never been computed.
-        // If either of the timestamps is "latest," then the diff result may be
-        // out of date.
-        boolean isLatest1 = timestamp1 == null ||
-                            timestamp1.equals( WorkspaceDiff.LATEST_NO_TIMESTAMP ); 
-        boolean isLatest2 = timestamp2 == null ||
-                            timestamp2.equals( WorkspaceDiff.LATEST_NO_TIMESTAMP );
-
         // For each workspace get the diffs between the request timestamp and the
         // timestamp of the nearest/old diff.
         
