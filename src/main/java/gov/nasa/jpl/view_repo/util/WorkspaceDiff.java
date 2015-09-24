@@ -1261,7 +1261,7 @@ public class WorkspaceDiff implements Serializable {
         WorkspaceNode commonParent = p.first;
         Date commonBranchTime = p.second;
 
-        return performDiffGlom( null, commitDiff1, commitDiff2, commonParent,
+        return performDiffGlom(commitDiff1, commitDiff2, commonParent,
                                 commonBranchTime, getServices(), response, diffType );
     }
     
@@ -1402,138 +1402,18 @@ public class WorkspaceDiff implements Serializable {
      * @param response
      * @return
      */
-    public static JsonDiffDiff performDiffGlom( JSONObject diff0,
-                                              JSONObject diff1,
+    public static JsonDiffDiff performDiffGlom(JSONObject diff1,
                                               JSONObject diff2,
                                               WorkspaceNode commonParent,
                                               Date commonBranchTime,
                                               ServiceRegistry services,
                                               StringBuffer response,
                                               DiffType diffType) {
-        // If diff0 is null, we need to build a diff0 from scratch. Collect all
-        // element ids in diff1 and diff2, get their json for the common-branch
-        // timepoint, and put that into workspace1.elements of a diff0.
-        HashSet<String> diff0ElementIds = new HashSet< String >();
-        HashSet<String> diff1ElementIds = new HashSet< String >();
         
-        //JsonDiffDiff diffDiff1 = new JsonDiffDiff(diff1);
-        //JsonDiffDiff diffDiff2 = new JsonDiffDiff(diff2);
+        JsonDiffDiff diffDiff3 = new JsonDiffDiff(diff2);
+        JsonDiffDiff diffDiff1 = new JsonDiffDiff(diff1);
         
-        if ( diff0 == null ) {
-            diff0 = JsonDiffDiff.makeEmptyDiffJson();
-            
-            //if ( noFind  ) {
-                // Get the previous values of the changed nodes from the
-                // workspace1 elements of each diff
-                JSONArray diff1Elements = null;
-                JSONObject diff1_ws1 = diff1.optJSONObject( "workspace1" );
-                if ( diff1_ws1 != null ) {
-                    diff1Elements = diff1_ws1.optJSONArray("elements");
-                }
-                
-                JSONArray diff2Elements = null;
-                JSONObject diff2_ws1 = diff2.optJSONObject( "workspace1" );
-                if ( diff2_ws1 != null ) {
-                    diff2Elements = diff2_ws1.optJSONArray("elements");
-                }
-
-                JSONObject diff0_ws1 = diff0.getJSONObject( "workspace1" );
-                JSONArray diff0Elements = diff0_ws1.getJSONArray( "elements" );
-
-                // Add the elements from diff1 to the elements of diff0.
-                if ( diff1Elements != null ) {
-                    for ( int i = 0; i < diff1Elements.length(); ++i ) {
-                        JSONObject element1_1 = diff1Elements.optJSONObject( i );
-                        if ( element1_1 != null ) {
-                            String sysmlId = element1_1.optString( "sysmlid" );
-                            if ( sysmlId != null && !diff0ElementIds.contains( sysmlId ) ) {//!diffDiff1.diffMap1.containsKey( sysmlId ) ) {
-                                diff0Elements.put( element1_1 );
-                                diff0ElementIds.add( sysmlId );
-                            }
-                        }
-                    }
-                }
-
-                // Add only the elements from diff2 that are not in diff1 to the
-                // elements of diff0.
-                if ( diff2Elements != null ) {
-                    for ( int i = 0; i < diff2Elements.length(); ++i ) {
-                        JSONObject element2_1 = diff2Elements.optJSONObject( i );
-                        if ( element2_1 != null ) {
-                            String sysmlId = element2_1.optString( "sysmlid" );
-                            if ( sysmlId != null && !diff0ElementIds.contains( sysmlId ) ) {//!diffDiff1.diffMap1.containsKey( sysmlId ) ) {
-                                diff0Elements.put( element2_1 );
-                                diff0ElementIds.add( sysmlId );
-                            }
-                        }
-                    }
-                }
-            //} else {
-            
-            }
-        //}
-        
-        Pair< JsonDiffDiff, JsonDiffDiff > p = 
-                JsonDiffDiff.prepForMatrixDiff( diff0, diff1, diff2,
-                                                diffType == DiffType.MERGE );
-        
-        JsonDiffDiff diffDiff3 = p.first;
-        JsonDiffDiff diffDiff1 = p.second;
-        
-        // Now gather any pre-existing nodes at the common branch that is
-        // not already collected and will be needed based on the diff
-        // operations of diffDiff1 and diffDiff2.
-        Set<String> sysmlIds = diffDiff1.getAffectedIds();
-        sysmlIds.addAll(diffDiff3.getAffectedIds());
-
-        Set<EmsScriptNode> elements = Utils.newSet();
-        
-        for (String id : sysmlIds)
-        {
-            // See if diff0 already has it.
-            if ( diff0ElementIds.contains( id ) ) continue;
-            
-            // See if the diff operations for diff1 and diff2/diff3 require it.
-            DiffOp op1 = diffDiff1.getDiffOp( id );
-            DiffOp op3 = diffDiff3.getDiffOp( id );
-            
-            if ( op1 != DiffOp.NONE || op3 != DiffOp.NONE ) {
-                if ( noFind ) {
-                    
-                } else {
-                    //create ArrayList of node refs by calling getNodeRefsById
-                    //add to set of EmsScriptNodes
-                    EmsScriptNode node =
-                            NodeUtil.findScriptNodeById( id, commonParent,
-                                                         commonBranchTime, false,
-                                                         services, response, null );
-                    if ( node != null ) {
-                        elements.add( node );
-                    }
-                }
-            }
-        }
-        Map<String, EmsScriptNode> elementsMap = Utils.toMap(elements);
-       
-        JSONObject ws1Json = diff0.getJSONObject( "workspace1" );
-        JSONArray oldElementsJson = ws1Json.getJSONArray( "elements" );
-        
-        addJSONArray( ws1Json, "elements", elementsMap, null, commonParent,
-                      commonBranchTime, true, null );
-        
-        JSONArray newElementsJson = ws1Json.getJSONArray( "elements" );
-        
-        // Need to append oldElementsJson since newElementsJson replaced it.
-        for ( int i = 0; i < oldElementsJson.length(); ++i ) {
-            newElementsJson.put( oldElementsJson.get( i ) );
-        }
-        
-        // Now add/glom diff2 to diff0 (oldDiffJson) and then diff with/subtract
-        // diff1.
-        JsonDiffDiff diffResult = null; //glom( oldDiffJson, diff2Json );
-        diffResult = JsonDiffDiff.diff( diff0, diff1, diff2, diffType );
-    
-        return diffResult;
+        return JsonDiffDiff.matrixDiff(diffDiff3, diffDiff1, diffType == DiffType.MERGE);
     }
 
     /**

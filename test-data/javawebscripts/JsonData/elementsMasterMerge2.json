@@ -17,7 +17,7 @@
      "specialization": {"type":"Property",
                         "isDerived":false, 
                         "value":[{"type":"LiteralString",
-                                  "string":"this is it"}]}
+                                  "string":"this is update 1"}]}
     },
     
     {"documentation" : "update_delete_consistent", 
@@ -27,6 +27,6 @@
      "specialization": {"type":"Property",
                         "isDerived":false, 
                         "value":[{"type":"LiteralString",
-                                  "string":"this is it"}]}
+                                  "string":"this is update 1"}]}
     },
 ]}
