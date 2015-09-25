@@ -192,7 +192,7 @@ public class ViewGet extends AbstractJavaWebScript {
 
         if (logger.isInfoEnabled()) {
             final String user = AuthenticationUtil.getFullyAuthenticatedUser();
-            logger.info( user + " " + timer );
+            logger.info( user + " " + timer + " " + req.getURL() );
         }
 
         return model;
