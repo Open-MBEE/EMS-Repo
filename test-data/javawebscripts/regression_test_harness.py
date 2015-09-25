@@ -2935,7 +2935,7 @@ common_filters + ['"message"'],
 ["test", "workspaces", "develop"],
 None,
 None,
-set_last_read_to_gv5
+set_last_read_to_gv5,
 ],
 [
 909,

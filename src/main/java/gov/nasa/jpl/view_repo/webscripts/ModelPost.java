@@ -1471,13 +1471,6 @@ public class ModelPost extends AbstractJavaWebScript {
         if (iter != null && iter.hasNext()) {
             EmsScriptNode oldValNode = iter.next();
 
-            // Modified convertIdToEmsScriptNode() to check for alfresco id also,
-            // so that we can use the alfresco id here instead.  This fixes a bug
-            // found where the lucene search for element based on sysmlid failed, and
-            // also improves performance.
-            nodeNames.add(oldValNode.getId());
-            //nodeNames.add(oldValNode.getSysmlId());
-
             if ( workspace != null && workspace.exists()
                  && !workspace.equals( oldValNode.getWorkspace() ) ) {
 
@@ -1519,6 +1512,17 @@ public class ModelPost extends AbstractJavaWebScript {
             timerIngest = Timer.startTimer(timerIngest, timeEvents);
             processValue( node, id, reifiedPkgNode, parent, nodeWorkspace, newValJson, 
                           ingest, modStatus, oldValNode );
+            
+            // Note: It caused a bug to add the Id of the oldValNode above, 
+            // as it can changed above to put it in the correct worksapce, etc. 
+            //
+            // Modified convertIdToEmsScriptNode() to check for alfresco id also,
+            // so that we can use the alfresco id here instead.  This fixes a bug
+            // found where the lucene search for element based on sysmlid failed, and
+            // also improves performance.
+            nodeNames.add(oldValNode.getId());
+            //nodeNames.add(oldValNode.getSysmlId());
+            
             changed = changed || (modStatus != null && modStatus.getState() != ModStatus.State.NONE );
             //updateOrCreateTransactionableElement
             //boolean didChange = processValueSpecProperty( type, nestedNode, elementJson, specializeJson, oldValNode, ingest, reifiedPkgNode, parent, id, nodeWorkspace );

@@ -356,6 +356,11 @@ public class MmsDiffGet extends AbstractJavaWebScript {
         // For each workspace get the diffs between the request timestamp and the
         // timestamp of the nearest/old diff.
         
+        // TODO: get stored gloms:
+        //       search under company home/<ws> for stored glom closest to the passed time
+        //      this way the name of the node can just use the timestamp, and we dont have to
+        //      worry about resolving time in the name to the latest commit it contains
+
         Pair< WorkspaceNode, Date > p =
                 WorkspaceDiff.getCommonBranchPoint( ws1, ws2, timestamp1, timestamp2 );
         WorkspaceNode commonParent = p.first;
@@ -378,6 +383,9 @@ public class MmsDiffGet extends AbstractJavaWebScript {
         JsonDiffDiff diffDiffResult =
                 WorkspaceDiff.performDiffGlom(diff1Json, diff2Json, commonParent,
                                  commonBranchTime, services, response, diffType );
+        
+        // TODO: Store gloms:
+        //       Store under company home/<ws>/glom_<time>
         
         JSONObject diffResult = diffDiffResult.toJsonObject();
         
