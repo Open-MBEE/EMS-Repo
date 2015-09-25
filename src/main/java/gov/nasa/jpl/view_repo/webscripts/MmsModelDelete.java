@@ -401,6 +401,15 @@ public class MmsModelDelete extends AbstractJavaWebScript {
             
             // Remove from the ownedChildren of the owner:
             // Note: added this for when we are deleting embedded value specs that are no longer be used
+            //
+            // The parent returned may be from the versionStore://version2Store if the node that is being
+            // deleted is on a copy time branch.  This is b/c correctForWorkspaceCopyTime() will return a versioned
+            // node at the copyTime of the branch if the node it found was not in the current workspace.  This will
+            // be the case if the parent was never modified in the current workspace, as clone() does not update
+            // "owner", so even though we replicate what we are deleting in previous code, the "owner" of node will
+            // still point to the parent branch.  Consequently, we will try to update a versioned node, but
+            // makeSureNodeRefIsNotFrozen() will catch this, and hopefully correctly remedy the situation.  This
+            // occurs with regression test DeleteDeleteDeleteWs1
             EmsScriptNode parent = node.getOwningParent( null, workspace, false );
             if (parent != null && parent.exists()) {
                 parent.removeFromPropertyNodeRefs("ems:ownedChildren", node.getNodeRef() );
