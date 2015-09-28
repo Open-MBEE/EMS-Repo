@@ -84,6 +84,7 @@ public class CommitNodeMigration extends AbstractJavaWebScript {
         if (!Utils.isNullOrEmpty( commits )) {
             
             for (EmsScriptNode commitNode : commits ) {
+                if (logger.isInfoEnabled()) logger.info( "Migrating commit node: "+ commitNode);
                 CommitUtil.migrateCommitNode( commitNode, response, status );
             }
         }
@@ -115,6 +116,7 @@ public class CommitNodeMigration extends AbstractJavaWebScript {
         else if (!Utils.isNullOrEmpty( wsList )){
             if (logger.isInfoEnabled()) logger.info("Migrating commit nodes for all workspaces.  Total number of workspaces: "+wsList.size());
             for (WorkspaceNode workspaceNode : wsList) {
+                if (logger.isInfoEnabled()) logger.info( "Migrating commit nodes for workspace: "+ WorkspaceNode.getId( workspaceNode ));
                 migrateWorkspaceCommits(workspaceNode, status);
             }
             
