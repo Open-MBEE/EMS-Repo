@@ -3,6 +3,7 @@ package gov.nasa.jpl.view_repo.util;
 import gov.nasa.jpl.ae.event.Call;
 import gov.nasa.jpl.ae.event.FunctionCall;
 import gov.nasa.jpl.mbee.util.ClassUtils;
+import gov.nasa.jpl.mbee.util.CompareUtils;
 import gov.nasa.jpl.mbee.util.Debug;
 import gov.nasa.jpl.mbee.util.HasId;
 import gov.nasa.jpl.mbee.util.Pair;
@@ -374,6 +375,9 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
     public Collection< EmsScriptNode > getOwnedChildren( Object context ) {
         return getOwnedElements( context );
     }
+    public Collection< EmsScriptNode > getOwnedElement( Object context ) {
+        return getOwnedElements( context );
+    }
     public Collection< EmsScriptNode > getOwnedElements( Object context ) {
         List<EmsScriptNode> list = new ArrayList< EmsScriptNode >();
         if ( context instanceof EmsScriptNode ) {
@@ -384,6 +388,11 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
             }
         }
         return list;
+    }
+    
+    public EmsScriptNode getOwner( EmsScriptNode element ) {
+        if ( !NodeUtil.exists( element ) ) return null;
+        return element.getOwningParent( null, element.getWorkspace(), true );
     }
 
 
@@ -2096,19 +2105,42 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
         return d;
     }
 
+    public boolean Equals( Object o1, Object o2 ) {
+        return CompareUtils.compare(o1, o2) == 0;
+    }
+    
+    public Collection< Object > filter( Collection< Object > elements,
+                                        FunctionCall call,
+                                        int indexOfObjectArgument,
+                                        Object... otherArguments )
+                                             throws InvocationTargetException {
+        Vector<Object> vector = 
+                new Vector< Object >( Arrays.asList( otherArguments ) );
+        return filter( elements, call, indexOfObjectArgument, vector );
+    }
     public Collection< Object > filter( Collection< Object > elements,
                                         FunctionCall call,
                                         int indexOfObjectArgument,
                                         Vector< Object > otherArguments )
                                              throws InvocationTargetException {
-        call.getParameterTypes();
+        Class< ? >[] paramTypes = call.getParameterTypes();
+        int paramSize = paramTypes.length;
         int argsSize = call.getArgumentVector().size();
         int otherArgsSize = otherArguments.size();
         // Make sure there are enough arguments. We assume that one to be
         // substituted is skipped unless we can determine otherwise. In the case
         // of a variable number of arguments, otherArguments may not provide
         // one, which is legal, so otherArguments can be two short.
-        if ( argsSize > otherArgsSize + 1 + ( call.isVarArgs() ? 1 : 0 ) ) {
+        if ( argsSize == 0
+             && ( indexOfObjectArgument > 0 || otherArgsSize > 0 || ( paramSize > 0 && !call.isVarArgs() ) ) ) {
+            Vector< Object > v = new Vector< Object >();
+            int numArgs = Math.max( otherArgsSize + 1, indexOfObjectArgument + 1 );
+            for ( int i = 0; i < numArgs; ++i ) {
+                v.add( null );
+            }
+            call.setArguments( v );
+            argsSize = v.size();
+        } else if ( argsSize > otherArgsSize + 1 + ( call.isVarArgs() ? 1 : 0 ) ) {
             // TODO -- error
         }
         // Make sure there are not too many arguments if the call does not have
@@ -2119,13 +2151,13 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
         // See if we have strong evidence that the substituted arg is included
         // in otherArguments.  By default, we assume not.
         boolean otherArgsIncludesSubstitute =
-                ( argsSize == otherArgsSize && !call.isVarArgs() ) ||
-                ( argsSize - 1 == otherArgsSize );
+                ( argsSize == otherArgsSize && !call.isVarArgs() );// ||
+                //( argsSize - 1 == otherArgsSize );
 
         // Set otherArguments before invoking
         for ( int i = 0, j = 0; i < argsSize && j < otherArgsSize; ++i, ++j ) {
             // skip the one to be substituted unless the otherArguments includes 
-            if ( i != indexOfObjectArgument || otherArgsIncludesSubstitute ) {
+            if ( i != indexOfObjectArgument - 1 || otherArgsIncludesSubstitute ) {
                 call.setArgument( i, otherArguments.get( j ) );
             } else {
                 --j;
