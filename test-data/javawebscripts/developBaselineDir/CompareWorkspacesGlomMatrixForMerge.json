@@ -51,11 +51,13 @@
                 "specialization": {"type": "Property"}
             },
             {
-                "name": "none_delete_gg",
                 "qualifiedName": "/europa/JW_TEST2/none_delete_gg",
+                "sysmlid": "none_delete_gg",
+                "editable": true,
+                "version": "1.0",
+                "name": "none_delete_gg",
                 "documentation": "none_delete_gg",
                 "owner": "123456",
-                "sysmlid": "none_delete_gg",
                 "specialization": {
                     "propertyType": null,
                     "isSlot": false,
@@ -66,8 +68,7 @@
                         "type": "LiteralString"
                     }],
                     "type": "Property"
-                },
-                "editable": true,
+                }
             },
             {
                 "qualifiedName": "/europa/JW_TEST2/add_update_gg",
