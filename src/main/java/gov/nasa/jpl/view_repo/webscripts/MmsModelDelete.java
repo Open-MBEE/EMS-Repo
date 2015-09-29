@@ -322,7 +322,7 @@ public class MmsModelDelete extends AbstractJavaWebScript {
                                 list.add(n);
                             }
                         };
-                        newNodeToDelete = list.get( 0 );
+                        if ( !list.isEmpty() ) newNodeToDelete = list.get( 0 );
                         node = newNodeToDelete;
                     } catch (Exception e) {
                         e.printStackTrace();
