@@ -258,6 +258,10 @@ public class MmsDiffGet extends AbstractJavaWebScript {
 
         status.setCode(responseStatus.getCode());
 
+        if (status.getCode() != HttpServletResponse.SC_OK) {
+            log(Level.ERROR, response.toString());
+        }
+        
         printFooter();
 
         return results;
@@ -307,7 +311,9 @@ public class MmsDiffGet extends AbstractJavaWebScript {
                     workspaceDiff.forceJsonCacheUpdate = false;
                     diffJson = workspaceDiff.toJSONObject( date1, date2, false );
                 }
-                if (!Utils.isNullOrEmpty(aResponse.toString())) diffJson.put("message", aResponse.toString());
+                if (!Utils.isNullOrEmpty(aResponse.toString()) && diffJson != null) {
+                    diffJson.put("message", aResponse.toString());
+                }
                 //results.put("res", NodeUtil.jsonToString( diffJson, 4 ));
             } catch (JSONException e) {
                 e.printStackTrace();
@@ -362,12 +368,12 @@ public class MmsDiffGet extends AbstractJavaWebScript {
         //      worry about resolving time in the name to the latest commit it contains
 
         Pair< WorkspaceNode, Date > p =
-                WorkspaceDiff.getCommonBranchPoint( ws1, ws2, timestamp1, timestamp2 );
+                WorkspaceDiff.getCommonBranchPoint( ws1, ws2, userTimeStamp1, userTimeStamp2 );
         WorkspaceNode commonParent = p.first;
         Date commonBranchTime = p.second;
         
-        Date date1 = WorkspaceDiff.dateFromWorkspaceTimestamp( timestamp1 );
-        Date date2 = WorkspaceDiff.dateFromWorkspaceTimestamp( timestamp2 );
+        Date date1 = WorkspaceDiff.dateFromWorkspaceTimestamp( userTimeStamp1 );
+        Date date2 = WorkspaceDiff.dateFromWorkspaceTimestamp( userTimeStamp2 );
         Date date0_1 = null;
         Date date0_2 = null;
         date0_1 = commonBranchTime;
@@ -377,8 +383,16 @@ public class MmsDiffGet extends AbstractJavaWebScript {
         // timepoint of the old for each workspace.
         JSONObject diff1Json = performDiff( ws1, ws1, date0_1, date1, getResponse(),
                                             getResponseStatus(), DiffType.COMPARE, false );
+        // Error case for commit nodes not being migrated:
+        if (diff1Json == null) {
+            return null;
+        }
         JSONObject diff2Json = performDiff( ws2, ws2, date0_2, date2, getResponse(),
                                             getResponseStatus(), DiffType.COMPARE, false );
+        // Error case for commit nodes not being migrated:
+        if (diff2Json == null) {
+            return null;
+        }
         
         JsonDiffDiff diffDiffResult =
                 WorkspaceDiff.performDiffGlom(diff1Json, diff2Json, commonParent,

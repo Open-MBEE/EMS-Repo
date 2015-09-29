@@ -981,7 +981,8 @@ public class WorkspaceDiff implements Serializable {
 
         if ( glom ) {
             jsonDiffDiff  = captureDeltasFromCommits();
-            diffJson = jsonDiffDiff.toJsonObject();
+            diffJson = jsonDiffDiff != null ? 
+                          jsonDiffDiff.toJsonObject() : null;
         } else {
             captureDeltas();
         }
@@ -1255,6 +1256,11 @@ public class WorkspaceDiff implements Serializable {
                                                           timestamp1,
                                                           getServices(),
                                                           response, status );
+        
+        // This is for the error case that commit nodes were not migrated:
+        if (commitDiff1 == null || commitDiff2 == null) {
+            return null;
+        }
         
         Pair< WorkspaceNode, Date > p =
                 getCommonBranchPoint( ws1, ws2, timestamp1, timestamp2 );

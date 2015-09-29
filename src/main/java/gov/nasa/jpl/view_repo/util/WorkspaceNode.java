@@ -24,6 +24,7 @@ import org.alfresco.service.cmr.security.AccessPermission;
 import org.alfresco.service.cmr.security.AccessStatus;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.alfresco.service.cmr.site.SiteInfo;
+import org.apache.log4j.Level;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.extensions.webscripts.Status;
@@ -906,6 +907,17 @@ public class WorkspaceNode extends EmsScriptNode {
         ArrayList< JSONObject > commitsJson = new ArrayList< JSONObject >();
         if ( !Utils.isNullOrEmpty( commits ) ) {
             for ( EmsScriptNode commitNode : commits ) {
+                
+                // TODO wrap in transaction if we choose to migrate the commit node here
+                //CommitUtil.migrateCommitNode( commitNode, response, status );
+                
+                // If the commit node is not migrated, then return error and stop diff:
+                if (!CommitUtil.checkMigrateCommitNode( commitNode, response, status )) {
+                    status.setCode( HttpServletResponse.SC_INTERNAL_SERVER_ERROR );
+                    response.append("The following commit node has not been migrated.  Aborting the diff! "+commitNode );
+                    return null;
+                }
+
                 String content = (String) commitNode.getProperty( "ems:commit" );
                 try {
                     JSONObject changeJson = new JSONObject(content);
