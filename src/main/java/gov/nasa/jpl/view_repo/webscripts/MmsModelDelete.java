@@ -422,7 +422,7 @@ public class MmsModelDelete extends AbstractJavaWebScript {
             // makeSureNodeRefIsNotFrozen() will catch this, and hopefully correctly remedy the situation.  This
             // occurs with regression test DeleteDeleteDeleteWs1
             EmsScriptNode parent = node.getOwningParent( null, workspace, false );
-            if (parent != null && parent.exists()) {
+            if (parent != null && parent.scriptNodeExists()) {
                 parent.removeFromPropertyNodeRefs("ems:ownedChildren", node.getNodeRef() );
             }
 

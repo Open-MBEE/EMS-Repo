@@ -1103,7 +1103,12 @@ public class EmsScriptNode extends ScriptNode implements
     }
 
     public EmsScriptNode getReifiedPkg(Date dateTime, WorkspaceNode ws) {
-        NodeRef nodeRef = (NodeRef)getNodeRefProperty( "ems:reifiedPkg", dateTime, ws );
+        return getReifiedPkg( dateTime, ws, true );
+    }
+    public EmsScriptNode getReifiedPkg(Date dateTime, WorkspaceNode ws, boolean findDeleted) {
+        NodeRef nodeRef =
+                (NodeRef)getNodeRefProperty( "ems:reifiedPkg", false, dateTime,
+                                             findDeleted, false, ws );
         if ( nodeRef != null ) {
             return new EmsScriptNode( nodeRef, services, response );
         }
