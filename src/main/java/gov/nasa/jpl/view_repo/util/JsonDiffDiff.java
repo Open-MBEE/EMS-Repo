@@ -391,7 +391,17 @@ public class JsonDiffDiff extends AbstractDiff<JSONObject, Object, String> {
 	}
 
 	public static boolean sameElement(JSONObject t1, JSONObject t2) {
-		return equals(t1, t2);
+	    
+	    JSONObject t1Copy = t1 != null ? new JSONObject(t1.toString()) : null;
+	    JSONObject t2Copy = t2 != null ? new JSONObject(t2.toString()) : null;
+
+	    for (String key : ignoredJsonIds) {
+	        if (t1Copy != null) 
+	            t1Copy.remove( key );
+	        if (t2Copy != null)
+	            t2Copy.remove( key );
+	    }
+		return equals(t1Copy, t2Copy);
 		// int comp = CompareUtils.compareCollections( toMap( t1, true ), toMap(
 		// t2, true ),
 		// true, false );
@@ -748,6 +758,12 @@ public class JsonDiffDiff extends AbstractDiff<JSONObject, Object, String> {
 			case NONE:
 				switch (op3) {
 				case ADD: // ADD - NONE = ADD
+				    // This case handles the situation where we delete and then add a element
+				    // on a branch, and that added element was the same as what was already
+				    // on its parent branch.
+	                if ( sameElement( element3_1, element3_2 ) ) {
+                        dDiff3.removeFromDiff( id );
+                    } 
 					break;
 				case DELETE: // DELETE - NONE = DELETE
 				case UPDATE: // UPDATE - NONE = UPDATE
@@ -1434,6 +1450,8 @@ public class JsonDiffDiff extends AbstractDiff<JSONObject, Object, String> {
 			add("created");
 			add("modifier");
 			add("read");
+			add("id");
+			add("version"); // REVIEW
 		}
 	};
 

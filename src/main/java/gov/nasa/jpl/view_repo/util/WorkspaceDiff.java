@@ -1267,6 +1267,13 @@ public class WorkspaceDiff implements Serializable {
         WorkspaceNode commonParent = p.first;
         Date commonBranchTime = p.second;
 
+        // TODO FIXME This causes issues when this is performed for intermediate diffs, for
+        //            the none_add and other cases, where it will take the change out of the diff
+        //            when it should not be removed.  
+        //
+        //            Possible solution would be to not call this method when doing intermediate diffs
+        //            and just return the non-empty diff.  Otherwise we need to fix the none_add
+        //            case to work for this also.  Not a obvious solution for that....
         return performDiffGlom(commitDiff1, commitDiff2, commonParent,
                                 commonBranchTime, getServices(), response, diffType );
     }
