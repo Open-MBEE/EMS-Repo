@@ -1088,14 +1088,18 @@ public class EmsScriptNode extends ScriptNode implements
 
         return node;
     }
-
-    public EmsScriptNode getReifiedNode(boolean findDeleted, WorkspaceNode ws) {
-        NodeRef nodeRef = (NodeRef)getNodeRefProperty( "ems:reifiedNode", false, null,
+    
+    public EmsScriptNode getReifiedNode(boolean findDeleted, WorkspaceNode ws, Date dateTime) {
+        NodeRef nodeRef = (NodeRef)getNodeRefProperty( "ems:reifiedNode", false, dateTime,
                                                        findDeleted, false, ws );
         if ( nodeRef != null ) {
             return new EmsScriptNode( nodeRef, services, response );
         }
         return null;
+    }
+
+    public EmsScriptNode getReifiedNode(boolean findDeleted, WorkspaceNode ws) {
+        return getReifiedNode(findDeleted, ws, null);
     }
 
     public EmsScriptNode getReifiedNode(WorkspaceNode ws) {

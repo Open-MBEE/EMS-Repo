@@ -410,9 +410,13 @@ public class WorkspaceNode extends EmsScriptNode {
 
         //String thisName = exists() ? getName() : null;
         String nodeName = node != null && node.scriptNodeExists() ? node.getName() : null;
-
+        
         // make sure the folder's parent is replicated
-        EmsScriptNode parent = node.getParent(null, node.getWorkspace(), false, true);
+        Pair<WorkspaceNode,Date> commonPair = WorkspaceDiff.getCommonBranchPoint( this, node.getWorkspace(), (Date) null, (Date) null );
+        Date commonBranchTime = commonPair.second;
+        
+        EmsScriptNode parent = node.getParent(commonBranchTime, node.getWorkspace(), false, true);
+        //EmsScriptNode parent = node.getParent(null, node.getWorkspace(), false, true);
 
         if ( parent == null || parent.isWorkspaceTop() ) {
             parent = this; // put in the workspace
@@ -470,7 +474,8 @@ public class WorkspaceNode extends EmsScriptNode {
             if ( nodeGuess == null) {
 
                 // Clone the reified node if possible and if not already in the workspace:
-                EmsScriptNode oldReifiedNode = node.getReifiedNode(true, node.getWorkspace());
+                
+                EmsScriptNode oldReifiedNode = node.getReifiedNode(true, node.getWorkspace(), commonBranchTime);
                 EmsScriptNode newReifiedNode = null;
                 if (oldReifiedNode != null) {
 
