@@ -411,9 +411,10 @@ public class WorkspaceNode extends EmsScriptNode {
         //String thisName = exists() ? getName() : null;
         String nodeName = node != null && node.scriptNodeExists() ? node.getName() : null;
         
-        // Make sure the folder's parent is replicated. We get the parent at the
+        // Make sure the folder's parent is replicated. 
+        // If the node's workspace is not the desired workspace, we get the parent at the
         // common branch point because changes to the parent after the branch
-        // time should be ignored.
+        // time should be ignored
         Pair<WorkspaceNode,Date> commonPair = WorkspaceDiff.getCommonBranchPoint( this, node.getWorkspace(), (Date) null, (Date) null );
         Date commonBranchTime = commonPair.second;
         Date timeToUse = this.equals( node.getWorkspace() ) ? null : commonBranchTime;
