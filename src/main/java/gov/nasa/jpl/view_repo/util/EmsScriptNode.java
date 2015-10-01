@@ -5301,8 +5301,12 @@ public class EmsScriptNode extends ScriptNode implements
     public boolean isWorkspace() {
         return hasAspect( "ems:Workspace" );
     }
-
+    
     public boolean isWorkspaceTop() {
+        return isWorkspaceTop(null);
+    }
+
+    public boolean isWorkspaceTop(Date dateTime) {
         String runAsUser = AuthenticationUtil.getRunAsUser();
         boolean changeUser = !ADMIN_USER_NAME.equals( runAsUser );
         if ( changeUser ) {
@@ -5310,7 +5314,7 @@ public class EmsScriptNode extends ScriptNode implements
         }
         
         boolean isTop = false;
-        EmsScriptNode myParent = getParent(null, getWorkspace(), false, true);
+        EmsScriptNode myParent = getParent(dateTime, getWorkspace(), false, true);
         if ( myParent == null ) {
             if ( Debug.isOn() ) {
                 Debug.outln( "isWorkspaceTop() = true for node with null parent: "
