@@ -2555,6 +2555,8 @@ public class EmsScriptNode extends ScriptNode implements
         EmsScriptNode originalNode = this.getOriginalNode();
         elementJson.put( "creator", originalNode.getProperty( "cm:creator" ) );
         elementJson.put( "created", originalNode.getProperty( "cm:created" ) );
+        elementJson.put("nodeRefId", originalNode.getNodeRef().getId());
+         
         Pair<Date,String> pair = this.getLastModifiedAndModifier( dateTime );
         if (pair != null) {
             elementJson.put( "modifier", pair.second );
