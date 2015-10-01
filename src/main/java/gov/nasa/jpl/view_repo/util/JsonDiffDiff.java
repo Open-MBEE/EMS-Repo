@@ -252,6 +252,11 @@ public class JsonDiffDiff extends AbstractDiff<JSONObject, Object, String> {
 		}
 		return ids;
 	}
+	
+	public boolean isEmpty() {
+	    return getAdded().isEmpty() && getUpdated().isEmpty() 
+	            && getRemoved().isEmpty();
+	}
 
 	public Set<JSONObject> getAffectedObjects() {
 		Set<JSONObject> objs = Utils.newSet();

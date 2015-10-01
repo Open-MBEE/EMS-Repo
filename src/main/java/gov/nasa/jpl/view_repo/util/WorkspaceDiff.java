@@ -77,6 +77,7 @@ public class WorkspaceDiff implements Serializable {
     private Map< String, EmsScriptNode > updatedElements;
     
     private DiffType diffType = DiffType.MERGE;
+    private boolean onlyCollect = false;
 
     NodeDiff nodeDiff = null;
     
@@ -118,18 +119,19 @@ public class WorkspaceDiff implements Serializable {
     public WorkspaceDiff(WorkspaceNode ws1, WorkspaceNode ws2, Date timestamp1, Date timestamp2,
                          StringBuffer response, Status status, DiffType diffType) {
 
-        this(ws1, ws2, timestamp1, timestamp2, response, status, diffType, glomming);
+        this(ws1, ws2, timestamp1, timestamp2, response, status, diffType, glomming, false);
     }
     
     public WorkspaceDiff(WorkspaceNode ws1, WorkspaceNode ws2, Date timestamp1, Date timestamp2,
                          StringBuffer response, Status status, DiffType diffType,
-                         boolean glom) {
+                         boolean glom, boolean onlyCollect) {
 
         this(ws1, ws2, response, status);
         this.timestamp1 = timestamp1;
         this.timestamp2 = timestamp2;
         this.diffType = diffType;
         this.glom = glom;
+        this.onlyCollect = onlyCollect;
         diff();
     }
 
@@ -1274,8 +1276,17 @@ public class WorkspaceDiff implements Serializable {
         //            Possible solution would be to not call this method when doing intermediate diffs
         //            and just return the non-empty diff.  Otherwise we need to fix the none_add
         //            case to work for this also.  Not a obvious solution for that....
-        return performDiffGlom(commitDiff1, commitDiff2, commonParent,
-                                commonBranchTime, getServices(), response, diffType );
+        if (onlyCollect) {
+            // One of the two of these will be non-empty:
+            JsonDiffDiff diff1 = new JsonDiffDiff(commitDiff1);
+            JsonDiffDiff diff2 = new JsonDiffDiff(commitDiff2);
+            
+            return diff1.isEmpty() ? diff2 : diff1;
+        }
+        else {
+            return performDiffGlom(commitDiff1, commitDiff2, commonParent,
+                                    commonBranchTime, getServices(), response, diffType );
+        }
     }
     
     protected void captureDeltas() {
