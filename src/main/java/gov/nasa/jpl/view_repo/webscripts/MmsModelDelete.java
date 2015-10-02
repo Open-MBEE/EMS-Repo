@@ -1,8 +1,10 @@
 package gov.nasa.jpl.view_repo.webscripts;
 
+import gov.nasa.jpl.mbee.util.Timer;
 import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.util.CommitUtil;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
+import gov.nasa.jpl.view_repo.util.EmsTransaction;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
 import gov.nasa.jpl.view_repo.util.WorkspaceDiff;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
@@ -69,6 +71,14 @@ public class MmsModelDelete extends AbstractJavaWebScript {
             logger.info( user + " " + req.getURL() );
         }
 
+
+        if ( logger.isInfoEnabled() ) {
+            String user = AuthenticationUtil.getFullyAuthenticatedUser();
+            logger.info( user + " " + req.getURL() );
+        }
+        
+        Timer timer = new Timer();
+        
         printHeader( req );
 
         Map<String, Object> model = new HashMap<String, Object>();
@@ -102,6 +112,10 @@ public class MmsModelDelete extends AbstractJavaWebScript {
         printFooter();
 
         if (logger.isInfoEnabled()) logger.info( "Deletion completed" );
+        if ( logger.isInfoEnabled() ) {
+            logger.info( String.format( "ModeDelete: %s", timer ) );
+        }
+
         return model;
     }
 
@@ -192,12 +206,23 @@ public class MmsModelDelete extends AbstractJavaWebScript {
         Set<EmsScriptNode> nodesToDelete = new HashSet<EmsScriptNode>();
         nodesToDelete.addAll( wsDiff.getDeletedElements().values() );
         nodesToDelete.addAll( valueSpecs );
-        for (EmsScriptNode deletedNode: nodesToDelete) {
+        for (final EmsScriptNode deletedNode: nodesToDelete) {
+            
             if (deletedNode.exists()) {
-                deletedNode.removeAspect( "ems:Added" );
-                deletedNode.removeAspect( "ems:Updated" );
-                deletedNode.removeAspect( "ems:Moved" );
-                deletedNode.createOrUpdateAspect( "ems:Deleted" );
+                
+                boolean noTransaction = false;
+                new EmsTransaction(getServices(), getResponse(), getResponseStatus(), noTransaction) {
+                    
+                    @Override
+                    public void run() throws Exception {
+
+                        deletedNode.removeAspect( "ems:Added" );
+                        deletedNode.removeAspect( "ems:Updated" );
+                        deletedNode.removeAspect( "ems:Moved" );
+                        deletedNode.createOrUpdateAspect( "ems:Deleted" );
+                        
+                    }
+                };
             }
         }
     }
@@ -272,7 +297,7 @@ public class MmsModelDelete extends AbstractJavaWebScript {
                 
 //                trx.rollback();
 //                NodeUtil.setInsideTransactionNow( false );
-//				  log(Level.ERROR, "\t####### ERROR: Needed to rollback: %s", e.getMessage());
+//                log(Level.ERROR, "\t####### ERROR: Needed to rollback: %s", e.getMessage());
                 e.printStackTrace();
             } catch (Throwable ee) {
                 log(Level.ERROR, "\tMmsModelDelete.handleRequest: rollback failed: %s", ee.getMessage());
@@ -355,24 +380,42 @@ public class MmsModelDelete extends AbstractJavaWebScript {
      * @param workspace
      * @throws JSONException
      */
-    protected void handleElementHierarchy( EmsScriptNode root,
-                                           WorkspaceNode workspace,
-                                           boolean recurse ) {
+    protected void handleElementHierarchy( final EmsScriptNode root,
+                                           final WorkspaceNode workspace,
+                                           final boolean recurse ) {
         if (root == null) {
             return;
         }
 
+        boolean noRecurseTransaction = true;
         if (recurse) {
-            for ( NodeRef childRef : root.getOwnedChildren(true, null, workspace) ) {
-                EmsScriptNode child = new EmsScriptNode(childRef, services, response);
-                handleElementHierarchy(child, workspace, recurse);
-            }
+            
+            new EmsTransaction(getServices(), getResponse(), getResponseStatus(), noRecurseTransaction) {
+                
+                @Override
+                public void run() throws Exception {
+                    for ( NodeRef childRef : root.getOwnedChildren(true, null, workspace) ) {
+                            EmsScriptNode child = new EmsScriptNode(childRef, services, response);
+                            handleElementHierarchy(child, workspace, recurse);
+                    }
+                }
+                
+            };
+            
         }
 
-        // Delete the node:
-        if (root.exists()) {
-            delete(root, workspace, null);
-        }
+        boolean noTransaction = false;
+        new EmsTransaction(getServices(), getResponse(), getResponseStatus(), noTransaction) {
+            
+            @Override
+            public void run() throws Exception {
+                // Delete the node:
+                if (root.exists()) {
+                    delete(root, workspace, null);
+                }
+                
+            }
+        };
         
         // TODO: REVIEW may not need this b/c addToWsDiff() does not add in reified packages
         //       Also, code in ModelPost assumes we never delete reified packages
@@ -389,7 +432,7 @@ public class MmsModelDelete extends AbstractJavaWebScript {
      * Add everything to the commit delete
      * @param node
      */
-    private void addToWsDiff( EmsScriptNode node, WorkspaceNode workspace ) {
+    private void addToWsDiff( final EmsScriptNode node, WorkspaceNode workspace ) {
         String sysmlId = node.getSysmlId();
         if (!sysmlId.endsWith( "_pkg" )) {
             if(wsDiff.getElementsVersions() != null)
@@ -410,10 +453,18 @@ public class MmsModelDelete extends AbstractJavaWebScript {
             // still point to the parent branch.  Consequently, we will try to update a versioned node, but
             // makeSureNodeRefIsNotFrozen() will catch this, and hopefully correctly remedy the situation.  This
             // occurs with regression test DeleteDeleteDeleteWs1
-            EmsScriptNode parent = node.getOwningParent( null, workspace, false );
+            final EmsScriptNode parent = node.getOwningParent( null, workspace, false );
             if (parent != null && parent.exists()) {
-                parent.removeFromPropertyNodeRefs("ems:ownedChildren", node.getNodeRef() );
+                boolean noTransaction = false;
+                new EmsTransaction(getServices(), getResponse(), getResponseStatus(), noTransaction) {
+                    
+                    @Override
+                    public void run() throws Exception {
+                        parent.removeFromPropertyNodeRefs("ems:ownedChildren", node.getNodeRef() );
+                    }
+                };
             }
+            
 
         }
     }
