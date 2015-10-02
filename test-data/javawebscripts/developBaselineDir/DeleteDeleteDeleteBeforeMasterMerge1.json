@@ -1,0 +1,44 @@
+{
+  "workspace1": {
+    "qualifiedName": "master",
+    "name": "master",
+    "elements": [{
+      "qualifiedName": "/europa/JW_TEST2/delete_delete_before",
+      "sysmlid": "delete_delete_before",
+      "editable": true,
+      "creator": "admin",
+      "modifier": "admin",
+      "name": "delete_delete_before",
+      "owner": "123456",
+      "documentation": "delete_delete_before",
+      "specialization": {
+        "propertyType": null,
+        "isDerived": false,
+        "isSlot": false,
+        "value": [{
+          "valueExpression": null,
+          "string": "this is it",
+          "type": "LiteralString"
+        }],
+        "type": "Property"
+      }
+    }]
+  },
+  "workspace2": {
+    "deletedElements": [{
+      "name": "delete_delete_before",
+      "qualifiedName": "/europa/JW_TEST2/delete_delete_before",
+      "owner": "123456",
+      "sysmlid": "delete_delete_before",
+      "specialization": {"type": "Property"},
+      "creator": "admin"
+    }],
+    "addedElements": [],
+    "conflictedElements": [],
+    "updatedElements": [],
+    "qualifiedName": "master",
+    "name": "master",
+    "movedElements": []
+  }
+}
+200
