@@ -320,7 +320,8 @@ public class MmsModelDelete extends AbstractJavaWebScript {
      * @param node
      * @param workspace
      */
-    public void delete(EmsScriptNode node, WorkspaceNode workspace, WorkspaceDiff workspaceDiff) {
+    public void delete(EmsScriptNode node, final WorkspaceNode workspace,
+                       WorkspaceDiff workspaceDiff) {
         if(workspaceDiff != null && wsDiff == null)
             wsDiff = workspaceDiff;
 
@@ -336,7 +337,16 @@ public class MmsModelDelete extends AbstractJavaWebScript {
                 EmsScriptNode newNodeToDelete = null;
                 if ( !workspace.equals( node.getWorkspace() ) ) {
                     try {
-                        newNodeToDelete = workspace.replicateWithParentFolders( node );
+                        final ArrayList<EmsScriptNode> list = new ArrayList< EmsScriptNode >();
+                        final EmsScriptNode fNode = node;
+                        new EmsTransaction( getServices(), getResponse(), getResponseStatus() ) {
+                            @Override
+                            public void run() throws Exception {
+                                EmsScriptNode n = workspace.replicateWithParentFolders( fNode );
+                                list.add(n);
+                            }
+                        };
+                        if ( !list.isEmpty() ) newNodeToDelete = list.get( 0 );
                         node = newNodeToDelete;
                     } catch (Exception e) {
                         e.printStackTrace();
@@ -464,8 +474,6 @@ public class MmsModelDelete extends AbstractJavaWebScript {
                     }
                 };
             }
-            
-
         }
     }
 }

@@ -1088,9 +1088,9 @@ public class EmsScriptNode extends ScriptNode implements
 
         return node;
     }
-
-    public EmsScriptNode getReifiedNode(boolean findDeleted, WorkspaceNode ws) {
-        NodeRef nodeRef = (NodeRef)getNodeRefProperty( "ems:reifiedNode", false, null,
+    
+    public EmsScriptNode getReifiedNode(boolean findDeleted, WorkspaceNode ws, Date dateTime) {
+        NodeRef nodeRef = (NodeRef)getNodeRefProperty( "ems:reifiedNode", false, dateTime,
                                                        findDeleted, false, ws );
         if ( nodeRef != null ) {
             return new EmsScriptNode( nodeRef, services, response );
@@ -1098,12 +1098,21 @@ public class EmsScriptNode extends ScriptNode implements
         return null;
     }
 
+    public EmsScriptNode getReifiedNode(boolean findDeleted, WorkspaceNode ws) {
+        return getReifiedNode(findDeleted, ws, null);
+    }
+
     public EmsScriptNode getReifiedNode(WorkspaceNode ws) {
         return getReifiedNode(false, ws);
     }
 
     public EmsScriptNode getReifiedPkg(Date dateTime, WorkspaceNode ws) {
-        NodeRef nodeRef = (NodeRef)getNodeRefProperty( "ems:reifiedPkg", dateTime, ws );
+        return getReifiedPkg( dateTime, ws, true );
+    }
+    public EmsScriptNode getReifiedPkg(Date dateTime, WorkspaceNode ws, boolean findDeleted) {
+        NodeRef nodeRef =
+                (NodeRef)getNodeRefProperty( "ems:reifiedPkg", false, dateTime,
+                                             findDeleted, false, ws );
         if ( nodeRef != null ) {
             return new EmsScriptNode( nodeRef, services, response );
         }
@@ -5292,8 +5301,12 @@ public class EmsScriptNode extends ScriptNode implements
     public boolean isWorkspace() {
         return hasAspect( "ems:Workspace" );
     }
-
+    
     public boolean isWorkspaceTop() {
+        return isWorkspaceTop(null);
+    }
+
+    public boolean isWorkspaceTop(Date dateTime) {
         String runAsUser = AuthenticationUtil.getRunAsUser();
         boolean changeUser = !ADMIN_USER_NAME.equals( runAsUser );
         if ( changeUser ) {
@@ -5301,7 +5314,7 @@ public class EmsScriptNode extends ScriptNode implements
         }
         
         boolean isTop = false;
-        EmsScriptNode myParent = getParent(null, getWorkspace(), false, true);
+        EmsScriptNode myParent = getParent(dateTime, getWorkspace(), false, true);
         if ( myParent == null ) {
             if ( Debug.isOn() ) {
                 Debug.outln( "isWorkspaceTop() = true for node with null parent: "

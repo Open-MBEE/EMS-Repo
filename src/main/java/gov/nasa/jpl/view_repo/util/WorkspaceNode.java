@@ -410,31 +410,41 @@ public class WorkspaceNode extends EmsScriptNode {
         EmsScriptNode newFolder = node;
 
         //String thisName = exists() ? getName() : null;
-        String nodeName = node != null && node.exists() ? node.getName() : null;
+        String nodeName = node != null && node.scriptNodeExists() ? node.getName() : null;
+        
+        // Make sure the folder's parent is replicated. 
+        // If the node's workspace is not the desired workspace, we get the parent at the
+        // common branch point because changes to the parent after the branch
+        // time should be ignored
+        Pair<WorkspaceNode,Date> commonPair = WorkspaceDiff.getCommonBranchPoint( this, node.getWorkspace(), (Date) null, (Date) null );
+        Date commonBranchTime = commonPair.second;
+        Date timeToUse = this.equals( node.getWorkspace() ) ? null : commonBranchTime;
+        
+        EmsScriptNode parent = node.getParent(timeToUse, node.getWorkspace(), false, true);
+        //EmsScriptNode parent = node.getParent(null, node.getWorkspace(), false, true);
+        Date parentTimeToUse = this.equals( parent.getWorkspace() ) ? null : commonBranchTime;
 
-        // make sure the folder's parent is replicated
-        EmsScriptNode parent = node.getParent(null, node.getWorkspace(), false, true);
-
-        if ( parent == null || parent.isWorkspaceTop() ) {
+        if ( parent == null || parent.isWorkspaceTop(parentTimeToUse) ) {
             parent = this; // put in the workspace
         }
-        String parentName = parent != null && parent.exists() ? parent.getName() : null;
+        String parentName = parent != null && parent.scriptNodeExists() ? parent.getName() : null;
 
         // Get the parent in this workspace. In case there are multiple nodes
         // with the same cm:name, use the grandparent to disambiguate where it
         // should be.
         if (logger.isDebugEnabled()) logger.debug("propertyCache before = " + NodeUtil.propertyCache );
         if (logger.isDebugEnabled()) logger.debug("parent = " + parent);
-        if ( parent != null && parent.exists() && !this.equals( parent.getWorkspace() ) ) {
-            EmsScriptNode grandParent = parent.getParent(null, parent.getWorkspace(), false, true);
+        if ( parent != null && parent.scriptNodeExists() && !this.equals( parent.getWorkspace() ) ) {
+            EmsScriptNode grandParent = parent.getParent(parentTimeToUse, parent.getWorkspace(), false, true);
             ArrayList< NodeRef > arr =
                     NodeUtil.findNodeRefsByType( parentName,
                                                  SearchType.CM_NAME.prefix,
                                                  false, this, null, false,
-                                                 true, getServices(), false );
+                                                 true, getServices(), true );
             for ( NodeRef ref : arr ) {
                 EmsScriptNode p = new EmsScriptNode( ref, getServices() );
-                EmsScriptNode gp = p.getParent(null, p.getWorkspace(), false, true);
+                Date timeToUseP = this.equals( p.getWorkspace() ) ? null : commonBranchTime;
+                EmsScriptNode gp = p.getParent(timeToUseP, p.getWorkspace(), false, true);
                 if (logger.isDebugEnabled()) logger.debug("p = " + p);
                 if (logger.isDebugEnabled()) logger.debug("gp = " + gp);
                 if ( grandParent == gp || ( grandParent != null && gp != null && grandParent.getName().equals( gp.getName() ) ) ) {
@@ -446,7 +456,7 @@ public class WorkspaceNode extends EmsScriptNode {
             if ( !this.equals( parent.getWorkspace() ) ) {
                 parent = replicateWithParentFolders( parent );
             }
-        } else if ( parent == null || !parent.exists() ) {
+        } else if ( parent == null || !parent.scriptNodeExists() ) {
             Debug.error("Error! Bad parent when replicating folder chain! " + parent );
         }
 
@@ -457,13 +467,14 @@ public class WorkspaceNode extends EmsScriptNode {
                     NodeUtil.findNodeRefsByType( nodeName,
                                                  SearchType.CM_NAME.prefix,
                                                  false, this, null, false,
-                                                 true, getServices(), false );
+                                                 true, getServices(), true );
             for ( NodeRef ref : array ) {
                 EmsScriptNode n = new EmsScriptNode( ref, getServices() );
-                EmsScriptNode np = n.getParent(null, n.getWorkspace(), false, true);
+                Date timeToUseN = this.equals( n.getWorkspace() ) ? null : commonBranchTime;
+                EmsScriptNode np = n.getParent(timeToUseN, n.getWorkspace(), false, true);
                 // Note: need the last check of the parent's in case the node found was in the workspace, but
                 // under a different site, ie Models folder
-                if (n != null && n.exists() && this.equals( n.getWorkspace() ) && np != null && np.equals( parent )) {
+                if (n != null && n.scriptNodeExists() && this.equals( n.getWorkspace() ) && np != null && np.equals( parent )) {
                     nodeGuess = n;
                     break;
                 }
@@ -471,12 +482,13 @@ public class WorkspaceNode extends EmsScriptNode {
             if ( nodeGuess == null) {
 
                 // Clone the reified node if possible and if not already in the workspace:
-                EmsScriptNode oldReifiedNode = node.getReifiedNode(node.getWorkspace());
+                
+                EmsScriptNode oldReifiedNode = node.getReifiedNode(true, node.getWorkspace(), timeToUse);
                 EmsScriptNode newReifiedNode = null;
                 if (oldReifiedNode != null) {
 
                     EmsScriptNode foundReifiedNode = NodeUtil.findScriptNodeByIdForWorkspace( oldReifiedNode.getSysmlId(),
-                                                                                              this, null, false,
+                                                                                              this, null, true,
                                                                                               getServices(), getResponse());
 
                     if (logger.isDebugEnabled()) logger.debug("this = " + this);
