@@ -17,6 +17,7 @@
   <url>/flags/simpleCache?on={on?}&amp;off={off?}</url>
   <url>/flags/syncTransactions?on={on?}&amp;off={off?}</url>
   <url>/flags/timeEvents?on={on?}&amp;off={off?}</url>
+  <url>/flags/viewPointExpressions?on={on?}&amp;off={off?}</url>
   <url>/flags/versionCacheDebug?on={on?}&amp;off={off?}</url>
   <url>/flags/versionCache?on={on?}&amp;off={off?}</url>
   <url>/flags/versionHistoryCache?on={on?}&amp;off={off?}</url>

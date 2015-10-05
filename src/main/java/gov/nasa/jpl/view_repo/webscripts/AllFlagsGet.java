@@ -33,7 +33,8 @@ public class AllFlagsGet extends FlagSet {
                            "makeDocBook",
                            "glom",
                            "cleanJson",
-                           "diffDefaultIsMerge"};
+                           "diffDefaultIsMerge", 
+                           "viewPointExpressions"};
     
     public String[] getAllFlags() {
         return flags;
@@ -99,7 +100,10 @@ public class AllFlagsGet extends FlagSet {
             NodeUtil.timeEvents = val;
         } else if (path.equalsIgnoreCase("versionCacheDebug")) {
             EmsScriptNode.versionCacheDebugPrint = val;
-        } else if (path.equalsIgnoreCase("versionCache")) {
+        }  else if (path.equalsIgnoreCase("viewPointExpressions")) {
+            EmsScriptNode.expressionStuff = val;
+        } 
+        else if (path.equalsIgnoreCase("versionCache")) {
             NodeUtil.doVersionCaching = val;
         } else if (path.equalsIgnoreCase("versionHistoryCache")) {
             NodeUtil.doVersionHistoryCaching = val;
@@ -160,7 +164,9 @@ public class AllFlagsGet extends FlagSet {
             return NodeUtil.timeEvents;
         } else if (path.equalsIgnoreCase("versionCacheDebug")) {
             return EmsScriptNode.versionCacheDebugPrint;
-        } else if (path.equalsIgnoreCase("versionCache")) {
+        }  else if (path.equalsIgnoreCase("viewPointExpressions")) {
+            return EmsScriptNode.expressionStuff;
+        }  else if (path.equalsIgnoreCase("versionCache")) {
             return NodeUtil.doVersionCaching;
         } else if (path.equalsIgnoreCase("versionHistoryCache")) {
             return NodeUtil.doVersionHistoryCaching;
@@ -239,6 +245,8 @@ public class AllFlagsGet extends FlagSet {
             return false;
         } else if (path.equalsIgnoreCase("versionCacheDebug")) {
             return false;
+        } else if (path.equalsIgnoreCase("viewPointExpressions")) {
+        	return false;
         } else if (path.equalsIgnoreCase("skipWorkspacePermissionCheck")) {
             return false;
         } else if (path.equalsIgnoreCase("optimisticJustFirst")) {
@@ -297,6 +305,8 @@ public class AllFlagsGet extends FlagSet {
             return "timeEvents";
         } else if (path.equalsIgnoreCase("versionCacheDebug")) {
             return "versionCacheDebugPrint";
+        } else if (path.equalsIgnoreCase("viewPointExpressions")) {
+            return "expressionStuff";
         } else if (path.equalsIgnoreCase("versionCache")) {
             return "doVersionCaching";
         } else if (path.equalsIgnoreCase("versionHistoryCache")) {
