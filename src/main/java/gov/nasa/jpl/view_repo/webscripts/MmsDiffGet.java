@@ -397,7 +397,7 @@ public class MmsDiffGet extends AbstractJavaWebScript {
         
         JsonDiffDiff diffDiffResult =
                 WorkspaceDiff.performDiffGlom(diff1Json, diff2Json, commonParent,
-                                 commonBranchTime, services, response, diffType );
+                                 commonBranchTime, services, response, diffType, false );
         
         // TODO: Store gloms:
         //       Store under company home/<ws>/glom_<time>

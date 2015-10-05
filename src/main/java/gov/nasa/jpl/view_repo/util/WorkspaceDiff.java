@@ -1269,24 +1269,9 @@ public class WorkspaceDiff implements Serializable {
         WorkspaceNode commonParent = p.first;
         Date commonBranchTime = p.second;
 
-        // TODO FIXME This causes issues when this is performed for intermediate diffs, for
-        //            the none_add and other cases, where it will take the change out of the diff
-        //            when it should not be removed.  
-        //
-        //            Possible solution would be to not call this method when doing intermediate diffs
-        //            and just return the non-empty diff.  Otherwise we need to fix the none_add
-        //            case to work for this also.  Not a obvious solution for that....
-        if (onlyCollect) {
-            // One of the two of these will be non-empty:
-            JsonDiffDiff diff1 = new JsonDiffDiff(commitDiff1);
-            JsonDiffDiff diff2 = new JsonDiffDiff(commitDiff2);
-            
-            return diff1.isEmpty() ? diff2 : diff1;
-        }
-        else {
-            return performDiffGlom(commitDiff1, commitDiff2, commonParent,
-                                    commonBranchTime, getServices(), response, diffType );
-        }
+        return performDiffGlom(commitDiff1, commitDiff2, commonParent,
+                               commonBranchTime, getServices(), response, 
+                               diffType, onlyCollect );
     }
     
     protected void captureDeltas() {
@@ -1432,12 +1417,13 @@ public class WorkspaceDiff implements Serializable {
                                               Date commonBranchTime,
                                               ServiceRegistry services,
                                               StringBuffer response,
-                                              DiffType diffType) {
+                                              DiffType diffType,
+                                              boolean onlyCollect) {
         
         JsonDiffDiff diffDiff3 = new JsonDiffDiff(diff2);
         JsonDiffDiff diffDiff1 = new JsonDiffDiff(diff1);
         
-        return JsonDiffDiff.matrixDiff(diffDiff3, diffDiff1, diffType == DiffType.MERGE);
+        return JsonDiffDiff.matrixDiff(diffDiff3, diffDiff1, diffType == DiffType.MERGE, onlyCollect);
     }
 
     /**

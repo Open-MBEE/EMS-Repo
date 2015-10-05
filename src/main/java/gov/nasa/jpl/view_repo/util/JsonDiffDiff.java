@@ -525,7 +525,7 @@ public class JsonDiffDiff extends AbstractDiff<JSONObject, Object, String> {
 	 */
 	public static JsonDiffDiff diff(JSONObject diff0, JSONObject diff1, JSONObject diff2, boolean mergeStyleDiff) {
 		Pair<JsonDiffDiff, JsonDiffDiff> p = prepForMatrixDiff(diff0, diff1, diff2, mergeStyleDiff);
-		return matrixDiff(p.first, p.second, mergeStyleDiff);
+		return matrixDiff(p.first, p.second, mergeStyleDiff, false);
 	}
 
 	public static Pair<JsonDiffDiff, JsonDiffDiff> prepForMatrixDiff(JSONObject diff0, JSONObject diff1,
@@ -576,7 +576,7 @@ public class JsonDiffDiff extends AbstractDiff<JSONObject, Object, String> {
 		return new Pair<JsonDiffDiff, JsonDiffDiff>(dDiff3, dDiff1);
 	}
 
-	public static JsonDiffDiff matrixDiff(JsonDiffDiff dDiff3, JsonDiffDiff dDiff1, boolean mergeStyleDiff) {
+	public static JsonDiffDiff matrixDiff(JsonDiffDiff dDiff3, JsonDiffDiff dDiff1, boolean mergeStyleDiff, boolean onlyCollect) {
 
 		// Matrix Function
 		// Compute the diff for each affected element.
@@ -766,7 +766,7 @@ public class JsonDiffDiff extends AbstractDiff<JSONObject, Object, String> {
 				    // This case handles the situation where we delete and then add a element
 				    // on a branch, and that added element was the same as what was already
 				    // on its parent branch.
-	                if ( sameElement( element3_1, element3_2 ) ) {
+	                if (!onlyCollect && sameElement( element3_1, element3_2 ) ) {
                         dDiff3.removeFromDiff( id );
                     } 
 					break;
