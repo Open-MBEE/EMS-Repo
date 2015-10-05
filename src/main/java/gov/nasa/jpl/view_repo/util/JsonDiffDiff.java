@@ -576,6 +576,15 @@ public class JsonDiffDiff extends AbstractDiff<JSONObject, Object, String> {
 		return new Pair<JsonDiffDiff, JsonDiffDiff>(dDiff3, dDiff1);
 	}
 
+	/**
+	 * Main diff method
+	 * 
+	 * @param dDiff3
+	 * @param dDiff1
+	 * @param mergeStyleDiff True if its a merge diff
+	 * @param onlyCollect True if using this for a intermediate diff, ie collecting commit nodes then diffing.
+	 * @return
+	 */
 	public static JsonDiffDiff matrixDiff(JsonDiffDiff dDiff3, JsonDiffDiff dDiff1, boolean mergeStyleDiff, boolean onlyCollect) {
 
 		// Matrix Function
@@ -1456,7 +1465,8 @@ public class JsonDiffDiff extends AbstractDiff<JSONObject, Object, String> {
 			add("modifier");
 			add("read");
 			add("id");
-			add("version"); // REVIEW
+			add("version"); // REVIEW added this because sometimes the version is not there
+			add("editable");
 		}
 	};
 
