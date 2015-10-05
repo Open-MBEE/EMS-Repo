@@ -295,12 +295,13 @@ public class MmsDiffGet extends AbstractJavaWebScript {
                                           StringBuffer aResponse,
                                           Status aResponseStatus,
                                           DiffType diffType,
-                                          boolean forceNonGlom) {
+                                          boolean forceNonGlom,
+                                          boolean onlyCollect) {
         
         WorkspaceDiff workspaceDiff = null;
             workspaceDiff =
                     new WorkspaceDiff(w1, w2, date1, date2, aResponse, 
-                                      aResponseStatus, diffType, !forceNonGlom);
+                                      aResponseStatus, diffType, !forceNonGlom, onlyCollect);
         
         JSONObject diffJson = null;
         if ( workspaceDiff != null ) {
@@ -382,13 +383,13 @@ public class MmsDiffGet extends AbstractJavaWebScript {
         // This assumes that the timepoint of the new diff is after the
         // timepoint of the old for each workspace.
         JSONObject diff1Json = performDiff( ws1, ws1, date0_1, date1, getResponse(),
-                                            getResponseStatus(), DiffType.COMPARE, false );
+                                            getResponseStatus(), DiffType.COMPARE, false, true );
         // Error case for commit nodes not being migrated:
         if (diff1Json == null) {
             return null;
         }
         JSONObject diff2Json = performDiff( ws2, ws2, date0_2, date2, getResponse(),
-                                            getResponseStatus(), DiffType.COMPARE, false );
+                                            getResponseStatus(), DiffType.COMPARE, false, true );
         // Error case for commit nodes not being migrated:
         if (diff2Json == null) {
             return null;
@@ -396,7 +397,7 @@ public class MmsDiffGet extends AbstractJavaWebScript {
         
         JsonDiffDiff diffDiffResult =
                 WorkspaceDiff.performDiffGlom(diff1Json, diff2Json, commonParent,
-                                 commonBranchTime, services, response, diffType );
+                                 commonBranchTime, services, response, diffType, false );
         
         // TODO: Store gloms:
         //       Store under company home/<ws>/glom_<time>
@@ -535,7 +536,7 @@ public class MmsDiffGet extends AbstractJavaWebScript {
             //      If it is, then we should pass true for forceNonGlom
             //      in the function call below.
             top = performDiff( ws1, ws2, dateTime1, dateTime2, response,
-                               responseStatus, diffType, false );
+                               responseStatus, diffType, false, false );
         }
         if ( top == null ) {
             results.put( "res", createResponseJson() );

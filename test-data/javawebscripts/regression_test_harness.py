@@ -2835,6 +2835,18 @@ None,
 None,
 set_last_read_to_gv3
 ],
+         
+[
+900.5,
+"DeleteDeleteDeleteBeforeMasterMerge1",
+"Delete delete_delete_before",
+create_curl_cmd(type="DELETE", data="elements/delete_delete_before", base_url=BASE_URL_WS,
+                branch="master/"),
+True,
+common_filters + ['"timestamp"', '"MMS_', '"id"', '"qualifiedId"', '"version"', '"modified"', '"sequence"'],
+["test", "workspaces", "develop"]
+],
+
 [
 901,
 "CreateWorkspaceMerge-style-Test1",
@@ -2924,6 +2936,18 @@ True,
 common_filters + ['"timestamp"', '"MMS_', '"id"', '"qualifiedId"', '"version"', '"modified"', '"sequence"'],
 ["test", "workspaces", "develop"]
 ],
+    
+[     
+907.5,
+"DeleteAddAddBeforeWs1",
+"Delete add_add_before",
+create_curl_cmd(type="DELETE", data="elements/add_add_before", base_url=BASE_URL_WS,
+                branch="$gv1/"),
+True,
+common_filters + ['"timestamp"', '"MMS_', '"id"', '"qualifiedId"', '"version"', '"modified"', '"sequence"'],
+["test", "workspaces", "develop"]
+],
+
 [
 908,
 "PostElementsMerge2",
@@ -2937,6 +2961,18 @@ None,
 None,
 set_last_read_to_gv5,
 ],
+         
+[
+908.5,
+"DeleteDeleteDeleteBeforeWs1",
+"Delete delete_delete_before",
+create_curl_cmd(type="DELETE", data="elements/delete_delete_before", base_url=BASE_URL_WS,
+                branch="$gv1/"),
+True,
+common_filters + ['"timestamp"', '"MMS_', '"id"', '"qualifiedId"', '"version"', '"modified"', '"sequence"'],
+["test", "workspaces", "develop"]
+],
+         
 [
 909,
 "CompareWorkspacesForMerge-style3",

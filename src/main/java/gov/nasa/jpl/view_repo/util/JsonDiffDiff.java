@@ -252,6 +252,11 @@ public class JsonDiffDiff extends AbstractDiff<JSONObject, Object, String> {
 		}
 		return ids;
 	}
+	
+	public boolean isEmpty() {
+	    return getAdded().isEmpty() && getUpdated().isEmpty() 
+	            && getRemoved().isEmpty();
+	}
 
 	public Set<JSONObject> getAffectedObjects() {
 		Set<JSONObject> objs = Utils.newSet();
@@ -391,7 +396,17 @@ public class JsonDiffDiff extends AbstractDiff<JSONObject, Object, String> {
 	}
 
 	public static boolean sameElement(JSONObject t1, JSONObject t2) {
-		return equals(t1, t2);
+	    
+	    JSONObject t1Copy = t1 != null ? new JSONObject(t1.toString()) : null;
+	    JSONObject t2Copy = t2 != null ? new JSONObject(t2.toString()) : null;
+
+	    for (String key : ignoredJsonIds) {
+	        if (t1Copy != null) 
+	            t1Copy.remove( key );
+	        if (t2Copy != null)
+	            t2Copy.remove( key );
+	    }
+		return equals(t1Copy, t2Copy);
 		// int comp = CompareUtils.compareCollections( toMap( t1, true ), toMap(
 		// t2, true ),
 		// true, false );
@@ -510,7 +525,7 @@ public class JsonDiffDiff extends AbstractDiff<JSONObject, Object, String> {
 	 */
 	public static JsonDiffDiff diff(JSONObject diff0, JSONObject diff1, JSONObject diff2, boolean mergeStyleDiff) {
 		Pair<JsonDiffDiff, JsonDiffDiff> p = prepForMatrixDiff(diff0, diff1, diff2, mergeStyleDiff);
-		return matrixDiff(p.first, p.second, mergeStyleDiff);
+		return matrixDiff(p.first, p.second, mergeStyleDiff, false);
 	}
 
 	public static Pair<JsonDiffDiff, JsonDiffDiff> prepForMatrixDiff(JSONObject diff0, JSONObject diff1,
@@ -561,7 +576,16 @@ public class JsonDiffDiff extends AbstractDiff<JSONObject, Object, String> {
 		return new Pair<JsonDiffDiff, JsonDiffDiff>(dDiff3, dDiff1);
 	}
 
-	public static JsonDiffDiff matrixDiff(JsonDiffDiff dDiff3, JsonDiffDiff dDiff1, boolean mergeStyleDiff) {
+	/**
+	 * Main diff method
+	 * 
+	 * @param dDiff3
+	 * @param dDiff1
+	 * @param mergeStyleDiff True if its a merge diff
+	 * @param onlyCollect True if using this for a intermediate diff, ie collecting commit nodes then diffing.
+	 * @return
+	 */
+	public static JsonDiffDiff matrixDiff(JsonDiffDiff dDiff3, JsonDiffDiff dDiff1, boolean mergeStyleDiff, boolean onlyCollect) {
 
 		// Matrix Function
 		// Compute the diff for each affected element.
@@ -748,6 +772,12 @@ public class JsonDiffDiff extends AbstractDiff<JSONObject, Object, String> {
 			case NONE:
 				switch (op3) {
 				case ADD: // ADD - NONE = ADD
+				    // This case handles the situation where we delete and then add a element
+				    // on a branch, and that added element was the same as what was already
+				    // on its parent branch.
+	                if (!onlyCollect && sameElement( element3_1, element3_2 ) ) {
+                        dDiff3.removeFromDiff( id );
+                    } 
 					break;
 				case DELETE: // DELETE - NONE = DELETE
 				case UPDATE: // UPDATE - NONE = UPDATE
@@ -1434,6 +1464,9 @@ public class JsonDiffDiff extends AbstractDiff<JSONObject, Object, String> {
 			add("created");
 			add("modifier");
 			add("read");
+			add("id");
+			add("version"); // REVIEW added this because sometimes the version is not there
+			add("editable");
 		}
 	};
 

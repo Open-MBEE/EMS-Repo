@@ -923,7 +923,7 @@ public class CommitUtil {
                 // Perform the diff using the workspaces and timestamps
                 // from the commit node:
                 JSONObject json = MmsDiffGet.performDiff( ws1, ws2, dateTime1, dateTime2, response,
-                                                                      responseStatus, DiffType.COMPARE, true );                
+                                                                      responseStatus, DiffType.COMPARE, true, false );                
                 return json;
             }
         }
