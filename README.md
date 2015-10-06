@@ -25,7 +25,7 @@
 
 ***
 
-## Contents
+## Contents <a name="contents"></a>
 
 ###[AMI environment instructions](#ami)
 ###[typical local environment instructions](#typical)
@@ -42,6 +42,8 @@
 ***
 
 #AMI environment instructions <a name="ami"></a>
+
+#### [return to table of contents](#contents)
 
 import view-repo with git (same instructions as below)
 
@@ -74,6 +76,8 @@ if using the mdk or bae MagicDraw plugins, set up magicdraw path
 restart eclipse
 
 #typical local environment instructions <a name="typical"></a>
+
+#### [return to table of contents](#contents)
 
 This project contains the content model and webscripts for accessing and modifying the alfresco repository. 
 
@@ -155,6 +159,9 @@ Eclipse/Maven
     try adding:    adding "-Dorg.eclipse.swt.internal.gtk.cairoGraphics=false" to eclipse.ini.
     
 # building, setting up maven, jrebel <a name="building"></a>
+
+#### [return to table of contents](#contents)
+
 Make sure to install both the JRebel plug-in for Eclipse and download the Jrebel .jar and store it somewhere like "/Applications/jrebel".  
 The path to the jrebel.jar will be used by mvn via the MAVEN_OPTS environment variable.
 
@@ -198,6 +205,8 @@ To update the target/mms-repo-war manually
 	mvn package -Pamp-to-war
 
 ## Managing Enterprise and Community Builds <a name="manage"></a>
+
+#### [return to table of contents](#contents)
 	
 The default pom.xml builds the community version. To build the enterprise version, use the pom.xml.enterprise, e.g.
 
@@ -238,11 +247,17 @@ for username and password.
 	</settings>
 	
 # Debug <a name="debug"></a>
+
+#### [return to table of contents](#contents)
+
 To attach an eclipse debugger, there's a view-repo.launch, you can use it to debug at the 10000 port, or change the debug config port if you didn't use 10000 in the maven opts
 
 Jrebel is monitoring the target/classes and src/main/amp/config dir for changes, and the src/main/amp/web for static file changes, make sure the eclipse build automatically is on, and usually any changes to java classes or spring configs will be reloaded automagically
 
 # Testing <a name="test-this"></a>
+
+#### [return to table of contents](#contents)
+
 Note: URL has changed for Alfresco 4.2.e to use alfresco instead of view-repo.
 
 Go to [http://localhost:8080/alfresco/](http://localhost:8080/alfresco/) for the alfresco explorer interface (it'll take a while to startup)
@@ -287,6 +302,8 @@ Get comments
 
 # Other debug <a name="other"></a>
 
+#### [return to table of contents](#contents)
+
 To open the javascript debugger: [http://localhost:8080/alfresco/service/api/javascript/debugger](http://localhost:8080/alfresco/service/api/javascript/debugger) (you may have to close and reopen to get it to step through on consecutive script calls)
 
 To refresh changes to scripts (they have to be updated in the "target/mms-repo-war/WEB-INF/classes/alfresco/extension/..."): [http://localhost:8080/alfresco/service/index](http://localhost:8080/alfresco/service/index) hit refresh at the botton
@@ -294,6 +311,8 @@ To refresh changes to scripts (they have to be updated in the "target/mms-repo-w
 Maven archetype from [Alfresco Maven SDK](https://artifacts.alfresco.com/nexus/content/repositories/alfresco-docs/alfresco-lifecycle-aggregator/latest/index.html)
 
 # Documentation links: <a name="doc-links"></a>
+
+#### [return to table of contents](#contents)
 
 * [Web Scripts](http://docs.alfresco.com/4.2/index.jsp?topic=%2Fcom.alfresco.enterprise.doc%2Fconcepts%2Fws-architecture.html)
 * [AMP modules](http://docs.alfresco.com/4.2/index.jsp?topic=%2Fcom.alfresco.enterprise.doc%2Fconcepts%2Fdev-extensions-modules-intro.html)
@@ -307,6 +326,8 @@ Get a directory of available services including the REST API
     https://europaems.jpl.nasa.gov/alfresco/service/index
 
 # Miscellaneous <a name="misc"></a>
+
+#### [return to table of contents](#contents)
 
 Sometimes, eclipse will lock the GUI with a popup saying that the user operation is waiting on other tasks, typically a rebuild.
 If this is annoying because the rebuild takes a long time, you can create a ram disk to store the target directory and create a soft link to it.
@@ -335,6 +356,8 @@ To evaluate a Java expression, in this example, Math.Min(1,2), from the command 
 
 
 #Debugging Overview <a name="debug-overview"></a>
+
+#### [return to table of contents](#contents)
 
 **IMPORTANT:** Push code changes to your own branch. Merge them with workspaces branch at Cin-Young's and Brad's consent.
 
