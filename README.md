@@ -32,7 +32,7 @@
 ###[building, setting up maven, jrebel](#building)
 ###[Managing Enterprise and Community Builds](#manage)
 ###[Debugging](#debug)
-###[Testing](#testing)
+###[Testing](#test-this)
 ###[Other Debug](#other-debug)
 ###[Documentation Links](#documentation-links)
 ###[Miscellaneous](#misc)
@@ -242,7 +242,7 @@ To attach an eclipse debugger, there's a view-repo.launch, you can use it to deb
 
 Jrebel is monitoring the target/classes and src/main/amp/config dir for changes, and the src/main/amp/web for static file changes, make sure the eclipse build automatically is on, and usually any changes to java classes or spring configs will be reloaded automagically
 
-# Testing <a name="testing"></a>
+# Testing <a name="test-this"></a>
 Note: URL has changed for Alfresco 4.2.e to use alfresco instead of view-repo.
 
 Go to [http://localhost:8080/alfresco/](http://localhost:8080/alfresco/) for the alfresco explorer interface (it'll take a while to startup)
