@@ -79,6 +79,7 @@ public class FullDocPost extends AbstractJavaWebScript {
     protected String headerPath;
     protected String veCssDir;//NEED FOR COVER
     protected String zipPath;
+    protected EmsScriptNode pdfNode;
     protected Date time;
     protected JSONArray view2view;
     protected String timeTagName;
@@ -948,6 +949,10 @@ public class FullDocPost extends AbstractJavaWebScript {
 		return this.pdfPath;
 	}
     
+	public EmsScriptNode getPdfNode(){
+		return this.pdfNode;
+	}
+	
     public void handleEmbeddedImage() throws Exception
     {
     	if(!Files.exists(Paths.get(this.htmlPath))) return;
@@ -1098,9 +1103,7 @@ public class FullDocPost extends AbstractJavaWebScript {
     public void html2pdf(EmsScriptNode snapshotFolder, EmsScriptNode snapshotNode)  throws Exception {
     	if(!Files.exists(Paths.get(this.htmlPath))) throw new Exception(String.format("Failed to transform HTML to PDF. Expected %s HTML file but it does not exist!", this.htmlPath));
     	
-    	RuntimeExec exec = new RuntimeExec();
-		exec.setProcessDirectory(this.fullDocGenDir);
-		createCoverPage(this.coverPath); //NEED FOR COVER
+    	createCoverPage(this.coverPath); //NEED FOR COVER
 //		createFooterPage(this.footerPath);
 //		createHeaderPage(this.headerPath);
 		String tagName = this.getTimeTagName();
@@ -1143,9 +1146,26 @@ public class FullDocPost extends AbstractJavaWebScript {
 		command.add(this.getPdfPath());
 
 		System.out.println("htmltopdf command: " + command);
-		exec.setCommand(list2Array(command));
-		ExecutionResult result = exec.execute();
-		if(!Files.exists(Paths.get(this.pdfPath)))
+		
+		int attempts = 0;
+		int ATTEMPTS_MAX = 3;
+		boolean success = false;
+		RuntimeExec exec = null;
+		ExecutionResult result = null;
+		while(attempts++ < ATTEMPTS_MAX && !success){
+			exec = new RuntimeExec();
+			exec.setProcessDirectory(this.fullDocGenDir);
+			exec.setCommand(list2Array(command));
+			result = exec.execute();
+			if(Files.exists(Paths.get(this.pdfPath)))
+			{
+				success = true;
+				break;
+			}
+			Thread.sleep(5000);
+		}
+		
+		if(!success && !Files.exists(Paths.get(this.pdfPath)))
 		{
 			String msg = String.format("Failed to transform HTML file '%s' to PDF. Exit value: %d", this.htmlPath, result.getExitValue());
 			log(Level.ERROR, msg);
@@ -1205,9 +1225,9 @@ public class FullDocPost extends AbstractJavaWebScript {
 //			if(pdfPath == null || pdfPath.isEmpty()) throw new Exception("Failed to transform from DocBook to PDF!");
 
 			if(!this.saveFileToRepo(node, MimetypeMap.MIMETYPE_PDF, this.getPdfPath())) throw new Exception("Failed to save PDF artifact to repository!");
-			snapshotNode.createOrUpdateAspect("view2:pdf");
-			snapshotNode.createOrUpdateProperty("view2:pdfNode", node.getNodeRef());
-
+//			snapshotNode.createOrUpdateAspect("view2:pdf");
+//			snapshotNode.createOrUpdateProperty("view2:pdfNode", node.getNodeRef());
+			this.pdfNode = node;
 			if ( node != null ) node.getOrSetCachedVersion();
 		}
 		catch(Exception ex){
@@ -1216,6 +1236,18 @@ public class FullDocPost extends AbstractJavaWebScript {
 		}
 	}
 
+	public void setPdfAspect(EmsScriptNode snapshotNode){
+		try{
+			snapshotNode.createOrUpdateAspect("view2:pdf");
+			snapshotNode.createOrUpdateProperty("view2:pdfNode", this.pdfNode.getNodeRef());
+			this.pdfNode.getOrSetCachedVersion();
+		}
+		catch(Exception ex){
+			ex.printStackTrace();
+			log(Level.ERROR, "Failed to set PDF aspect! " + ex.getMessage());
+		}
+	}
+	
 	public boolean saveFileToRepo(EmsScriptNode scriptNode, String mimeType, String filePath){
 		boolean bSuccess = false;
 		if(filePath == null || filePath.isEmpty()){
