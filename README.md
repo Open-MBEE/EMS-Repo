@@ -10,7 +10,7 @@
 
 		export MAVEN_OPTS='-Xms256m -Xmx1G -XX:PermSize=300m -Xdebug  -Xrunjdwp:transport=dt_socket,address=10000,server=y,suspend=n -javaagent:/Applications/jrebel/jrebel.jar'
 	
-3. Clone alfresco-view-repo using the Eclipse git tool (anchor)
+3. Clone alfresco-view-repo using the Eclipse git tool. If you need instructions on installing and using git in eclipse see this section: [typical local environment instructions](#typical)
 4. Right click your project and run maven >> Update project
 5. Install jrebel and scala from Eclipse using Help >> Eclipse Marketplace
 6. From the command line navigate to git/alfresco-view-repo  and update the last line sudo vim /etc/hosts to read:
@@ -73,7 +73,7 @@ if using the mdk or bae MagicDraw plugins, set up magicdraw path
 
 restart eclipse
 
-#typical local environment instructions
+#typical local environment instructions <a name="typical"></a>
 
 This project contains the content model and webscripts for accessing and modifying the alfresco repository. 
 
@@ -98,7 +98,7 @@ Eclipse/Maven
     		- If Maven is not installed in Eclipse, go to Help -> Eclipse Marketplace -> type in "m2eclipse" in search box 
 		      & install the first item (Maven Integration for Eclipse WTP (Juno))	
 
-    Make sure you have a local checkout of alfresco from git.
+    Make sure you have a local checkout of alfresco from git. 
     	- Clone Alfresco-View-Repo from git. To do so: 
     	1. Go to Git Repo Perspective in Eclipse
     	2. Click clone a git repository icon in "Git Repositories" menu
