@@ -1,4 +1,4 @@
-# view amp for alfresco repository (overlay on alfresco.war)
+# This repo represents the view amp for alfresco repository (overlay on alfresco.war)
 
 #MAC OSX Yosemite 10.10.5 Quick Install (assuming you've installed Maven and Eclipse)
 
