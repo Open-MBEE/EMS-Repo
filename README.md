@@ -36,7 +36,7 @@
 ###[Other Debug](#other)
 ###[Documentation Links](#doc-links)
 ###[Miscellaneous](#misc)
-###[Debugging Overview](#debugging-overview)
+###[Debugging Overview](#debug-overview)
 
 
 ***
@@ -334,7 +334,7 @@ To evaluate a Java expression, in this example, Math.Min(1,2), from the command 
     curl -w "%{http_code}\n" -u admin:admin -X POST -H "Content-Type:text/plain" "http://localhost:8080/alfresco/service/java_query?verbose=false" --data 'Math.min(1,2)'
 
 
-#Debugging Overview <a name="debugging-overview"></a>
+#Debugging Overview <a name="debug-overview"></a>
 
 **IMPORTANT:** Push code changes to your own branch. Merge them with workspaces branch at Cin-Young's and Brad's consent.
 
