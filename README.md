@@ -1,24 +1,25 @@
 # view amp for alfresco repository (overlay on alfresco.war)
 
 #MAC OSX Yosemite 10.10.5 Quick Install (assuming you've installed Maven and Eclipse)
+
 1. Update your JAVA_HOME to use JDK 1.7.  Check the path using this command /usr/libexec/java_home.
 	
-	export JAVA_HOME="/Library/Java/JavaVirtualMachines/jdk1.7.0_71.jdk/Contents/Home"
+		export JAVA_HOME="/Library/Java/JavaVirtualMachines/jdk1.7.0_71.jdk/Contents/Home"
 
-2.Update your MAVEN_OPTS variable:
+2. Update your MAVEN_OPTS variable:
 
-	export MAVEN_OPTS='-Xms256m -Xmx1G -XX:PermSize=300m -Xdebug  -Xrunjdwp:transport=dt_socket,address=10000,server=y,suspend=n -javaagent:/Applications/jrebel/jrebel.jar'
+		export MAVEN_OPTS='-Xms256m -Xmx1G -XX:PermSize=300m -Xdebug  -Xrunjdwp:transport=dt_socket,address=10000,server=y,suspend=n -javaagent:/Applications/jrebel/jrebel.jar'
 	
 3. Clone alfresco-view-repo using the Eclipse git tool (anchor)
 4. Right click your project and run maven >> Update project
 5. Install jrebel and scala from Eclipse using Help >> Eclipse Marketplace
 6. From the command line navigate to git/alfresco-view-repo  and update the last line sudo vim /etc/hosts to read:
 	
-	127.0.0.1  'your-machine-name'
+		127.0.0.1  'your-machine-name'
 
 7. Run this script from the command line:
 
-	./cpr.sh
+		./cpr.sh
 	
 ###The remaining instructions of the readme will guide you through specific set ups 
 
