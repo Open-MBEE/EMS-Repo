@@ -194,15 +194,14 @@ public class DeclarativeJavaWebScript extends AbstractWebScript
             }
         }
         // check if configuration snapshots and products
-// TODO: Put back in once individual snapshot loads are available so generated links can be displayed
-//        if (!cacheUpdated) {
-//            String url = req.getURL();
-//            if (url.contains( "configurations" )) {
-//                if (url.contains( "snapshots") || url.contains( "products" )) {
-//                    cacheUpdated = updateCache(cache);
-//                }
-//            }
-//        }
+        if (!cacheUpdated) {
+            String url = req.getURL();
+            if (url.contains( "configurations" )) {
+                if (url.contains( "snapshots") || url.contains( "products" )) {
+                    cacheUpdated = updateCache(cache);
+                }
+            }
+        }
         
         return cacheUpdated;
     }

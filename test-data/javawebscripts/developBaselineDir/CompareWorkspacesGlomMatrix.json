@@ -397,8 +397,7 @@
                 "owner": "123456",
                 "sysmlid": "add_update_gg",
                 "documentation": "add_update_gg updatedWs2",
-                "specialization": {"type": "Property"},
-                "version": "1.1"
+                "specialization": {"type": "Property"}
             },
             {
                 "name": "update_update_gg",
@@ -451,8 +450,7 @@
                 "owner": "123456",
                 "documentation": "add_update_gg updatedWs2",
                 "sysmlid": "add_update_gg",
-                "specialization": {"type": "Property"},
-                "version": "1.1"
+                "specialization": {"type": "Property"}
             },
             {
                 "name": "none_update_gg",

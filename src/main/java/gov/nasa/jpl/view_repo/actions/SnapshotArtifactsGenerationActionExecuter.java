@@ -116,12 +116,12 @@ public class SnapshotArtifactsGenerationActionExecuter  extends ActionExecuterAb
 
         for(String format:formats){
             if(format.compareToIgnoreCase("pdf") == 0){ 
-                if(SnapshotPost.getPdfNode(snapshotNode, timestamp, workspace)==null){ 
+                if(SnapshotPost.getPdfNode(snapshotNode, timestamp)==null){ 
                     setPdfStatus(snapshotService, snapshotNode, "Error");
                 }
             }
             else if(format.compareToIgnoreCase("html") == 0){
-                if(SnapshotPost.getHtmlZipNode(snapshotNode, timestamp, workspace)==null){ 
+                if(SnapshotPost.getHtmlZipNode(snapshotNode, timestamp)==null){ 
                     setZipStatus(snapshotService, snapshotNode, "Error");
                 }
             }
@@ -622,16 +622,16 @@ public class SnapshotArtifactsGenerationActionExecuter  extends ActionExecuterAb
         	HostnameGet hostnameGet = new HostnameGet(this.repository, this.services);
         	String contextUrl = hostnameGet.getAlfrescoUrl() + "/alfresco";
         	JSONArray formats = new JSONArray();
-            if ( SnapshotPost.hasPdfNode( snapshotNode, dateTime, workspace ) ) {
-                EmsScriptNode pdfNode = SnapshotPost.getPdfNode( snapshotNode, dateTime, workspace  );
+            if ( SnapshotPost.hasPdfNode( snapshotNode, dateTime ) ) {
+                EmsScriptNode pdfNode = SnapshotPost.getPdfNode( snapshotNode, dateTime );
                 JSONObject pdfJson = new JSONObject();
                 pdfJson.put("status", status);
                 pdfJson.put("type", "pdf");
                 pdfJson.put("url", contextUrl + pdfNode.getUrl());
                 formats.put(pdfJson);
             }
-            if ( SnapshotPost.hasHtmlZipNode( snapshotNode, dateTime, workspace  ) ) {
-                EmsScriptNode htmlZipNode = SnapshotPost.getHtmlZipNode( snapshotNode, dateTime, workspace  );
+            if ( SnapshotPost.hasHtmlZipNode( snapshotNode, dateTime ) ) {
+                EmsScriptNode htmlZipNode = SnapshotPost.getHtmlZipNode( snapshotNode, dateTime );
                 JSONObject htmlJson = new JSONObject();
                 htmlJson.put("status", status);
                 htmlJson.put("type","html");
