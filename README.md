@@ -33,8 +33,8 @@
 ###[Managing Enterprise and Community Builds](#manage)
 ###[Debugging](#debug)
 ###[Testing](#test-this)
-###[Other Debug](#other-debug)
-###[Documentation Links](#documentation-links)
+###[Other Debug](#other)
+###[Documentation Links](#doc-links)
 ###[Miscellaneous](#misc)
 ###[Debugging Overview](#debugging-overview)
 
@@ -285,7 +285,7 @@ Get comments
 
 
 
-# Other debug <a name="other-debug"></a>
+# Other debug <a name="other"></a>
 
 To open the javascript debugger: [http://localhost:8080/alfresco/service/api/javascript/debugger](http://localhost:8080/alfresco/service/api/javascript/debugger) (you may have to close and reopen to get it to step through on consecutive script calls)
 
@@ -293,7 +293,7 @@ To refresh changes to scripts (they have to be updated in the "target/mms-repo-w
 
 Maven archetype from [Alfresco Maven SDK](https://artifacts.alfresco.com/nexus/content/repositories/alfresco-docs/alfresco-lifecycle-aggregator/latest/index.html)
 
-# Documentation links: <a name="documentation links"></a>
+# Documentation links: <a name="doc-links"></a>
 
 * [Web Scripts](http://docs.alfresco.com/4.2/index.jsp?topic=%2Fcom.alfresco.enterprise.doc%2Fconcepts%2Fws-architecture.html)
 * [AMP modules](http://docs.alfresco.com/4.2/index.jsp?topic=%2Fcom.alfresco.enterprise.doc%2Fconcepts%2Fdev-extensions-modules-intro.html)
