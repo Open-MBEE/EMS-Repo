@@ -1003,12 +1003,12 @@ public class SnapshotPost extends AbstractJavaWebScript {
 		    	snapshotNode = generatePDF(pdfNode, snapshotNode, workspace, siteName);
 		    	if(snapshotNode == null) throw new Exception("generatePDF() returned null.");
 		    	else{
-		    		//this.setPdfStatus(snapshotNode, "Completed");
+		    		this.setPdfStatus(snapshotNode, "Completed");
 		    	}
 	        }
 	        catch(Exception ex){
 	        	ex.printStackTrace();
-	        	//this.setPdfStatus(snapshotNode, "Error");
+	        	this.setPdfStatus(snapshotNode, "Error");
 	    		throw new Exception("Failed to generate PDF artifact!", ex);
 	        }
         //}
