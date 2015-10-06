@@ -33,7 +33,8 @@ public class AllFlagsGet extends FlagSet {
                            "makeDocBook",
                            "glom",
                            "cleanJson",
-                           "diffDefaultIsMerge"};
+                           "diffDefaultIsMerge",
+                           "cacheSnapshots"};
     
     public String[] getAllFlags() {
         return flags;
@@ -110,11 +111,13 @@ public class AllFlagsGet extends FlagSet {
         } else if (path.equalsIgnoreCase("makeDocBook")) {
             SnapshotArtifactsGenerationActionExecuter.makeDocBook = val;
         } else if (path.equalsIgnoreCase("glom")) {
-        	MmsDiffGet.glom = val;
+        	    MmsDiffGet.glom = val;
         } else if (path.equalsIgnoreCase("cleanJson")) {
-        	CommitUtil.cleanJson = val;
+        	    CommitUtil.cleanJson = val;
         } else if (path.equalsIgnoreCase("diffDefaultIsMerge")){
-        	MmsDiffGet.diffDefaultIsMerge = val;
+        	    MmsDiffGet.diffDefaultIsMerge = val;
+        } else if (path.equalsIgnoreCase("cacheSnapshots")) {
+            DeclarativeJavaWebScript.cacheSnapshotsFlag = val;
         }
         return true;
     }
@@ -308,11 +311,13 @@ public class AllFlagsGet extends FlagSet {
         } else if (path.equalsIgnoreCase("makeDocBook")) {
             return "makeDocBook";
         } else if (path.equalsIgnoreCase("glom")) {
-        	return "glom";
+        	    return "glom";
         } else if (path.equalsIgnoreCase("cleanJson")) {
-        	return "cleanJson";
+        	    return "cleanJson";
         } else if (path.equalsIgnoreCase("diffDefaultIsMerge")){
-        	return "diffDefaultIsMerge";
+            return "diffDefaultIsMerge";
+        } else if (path.equalsIgnoreCase("cacheSnapshots")) {
+            return "cacheSnapshotsFlag";
         }
         return null;
     }
