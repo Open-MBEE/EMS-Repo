@@ -149,8 +149,8 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
     // keeps track of who made the call to the service
     protected String source = null;
     protected EmsSystemModel systemModel;
-    protected SystemModelToAeExpression< EmsScriptNode, EmsScriptNode, String, Object, EmsSystemModel > sysmlToAe;
-    protected static SystemModelToAeExpression< EmsScriptNode, EmsScriptNode, String, Object, EmsSystemModel > globalSysmlToAe;
+    protected SystemModelToAeExpression< Object, EmsScriptNode, EmsScriptNode, String, Object, EmsSystemModel > sysmlToAe;
+    protected static SystemModelToAeExpression< Object, EmsScriptNode, EmsScriptNode, String, Object, EmsSystemModel > globalSysmlToAe;
 
     protected void initMemberVariables(String siteName) {
 		companyhome = new ScriptNode(repository.getCompanyHome(), services);
@@ -1305,14 +1305,14 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         return globalSystemModel;
     }
 
-    public SystemModelToAeExpression< EmsScriptNode, EmsScriptNode, String, Object, EmsSystemModel > getSystemModelAe() {
+    public SystemModelToAeExpression< Object, EmsScriptNode, EmsScriptNode, String, Object, EmsSystemModel > getSystemModelAe() {
         if ( sysmlToAe == null ) {
             setSystemModelAe();
         }
         return sysmlToAe;
     }
 
-    public static SystemModelToAeExpression< EmsScriptNode, EmsScriptNode, String, Object, EmsSystemModel > getGlobalSystemModelAe() {
+    public static SystemModelToAeExpression< Object, EmsScriptNode, EmsScriptNode, String, Object, EmsSystemModel > getGlobalSystemModelAe() {
         if ( globalSysmlToAe == null ) {
             setGlobalSystemModelAe();
         }
@@ -1321,13 +1321,13 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
 
     public void setSystemModelAe() {
         sysmlToAe =
-                new SystemModelToAeExpression< EmsScriptNode, EmsScriptNode, String, Object, EmsSystemModel >( getSystemModel() );
+                new SystemModelToAeExpression< Object, EmsScriptNode, EmsScriptNode, String, Object, EmsSystemModel >( getSystemModel() );
     
     }
 
     public static void setGlobalSystemModelAe() {
         globalSysmlToAe =
-                new SystemModelToAeExpression< EmsScriptNode, EmsScriptNode, String, Object, EmsSystemModel >( getGlobalSystemModel() );    
+                new SystemModelToAeExpression< Object, EmsScriptNode, EmsScriptNode, String, Object, EmsSystemModel >( getGlobalSystemModel() );    
     }
 
     /**
