@@ -180,15 +180,23 @@ public class PostgresHelper {
 	}
 
 	// returns list of nodeRefIds
-	public List<String> getChildrenNodeRefIds(String nodeRefId, int edgeType) {
+	public List<String> getChildrenNodeRefIds(String sysmlId, DbEdgeTypes et) {
 		List<String> result = new ArrayList<String>();
 		try {
-			Node n = getNodeFromNodeRefId(nodeRefId);
+			Node n = getNodeFromSysmlId(sysmlId);
+			Node n2 = getNodeFromSysmlId(sysmlId + "_pkg");
 			if (n == null)
 				return result;
 
 			ResultSet rs = execQuery("select nodeRefId from nodes" + workspaceName + " where id in (select * from get_children("
-					+ n.getId() + ", " + edgeType + ", " + workspaceName + "))");
+					+ n.getId() + ", " + et.getValue() + ", '" + workspaceName + "'))");
+
+			while (rs.next()) {
+				result.add(rs.getString(1));
+			}
+
+			rs = execQuery("select nodeRefId from nodes" + workspaceName + " where id in (select * from get_children("
+					+ n2.getId() + ", " + et.getValue() + ", '" + workspaceName + "'))");
 
 			while (rs.next()) {
 				result.add(rs.getString(1));
@@ -200,6 +208,32 @@ public class PostgresHelper {
 		return result;
 	}
 
+	public List<String> getImmediateChildren(String sysmlId, DbEdgeTypes edgeType){
+		List<String> result = new ArrayList<String>();
+		try {
+			Node n = getNodeFromSysmlId(sysmlId);
+			Node n2 = getNodeFromSysmlId(sysmlId + "_pkg");
+			if (n == null)
+				return result;
+
+			ResultSet rs = execQuery("select noderefid from nodes" + workspaceName +" where id in (select child from edges where parent = " + n.getId() + " and edgeType = " + edgeType.getValue() + ")");
+
+			while (rs.next()) {
+				result.add(rs.getString(1));
+			}
+
+			rs = execQuery("select noderefid from nodes" + workspaceName +" where id in (select child from edges where parent = " + n2.getId() + " and edgeType = " + edgeType.getValue() + ")");
+
+			while (rs.next()) {
+				result.add(rs.getString(1));
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return result;
+	}
+	
 	public List<Node> getChildren(String nodeRefId, int edgeType) {
 		List<Node> result = new ArrayList<Node>();
 		try {

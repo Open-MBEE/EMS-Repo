@@ -54,6 +54,7 @@ import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.alfresco.service.cmr.site.SiteInfo;
+import org.alfresco.service.cmr.version.Version;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -99,10 +100,11 @@ public class Model2Postgres extends AbstractJavaWebScript {
 		try {
 			if (validateRequest(req, status) || true) {
 				WorkspaceNode workspace = getWorkspace(req);
-				if(workspace == null)
+				if (workspace == null)
 					pgh = new PostgresHelper("");
-				else 
-					pgh = new PostgresHelper(workspace.getName());
+				else
+					pgh = new PostgresHelper(workspace.getId()
+							.replace("-", "_"));
 				String timestamp = req.getParameter("timestamp");
 				Date dateTime = TimeUtils.dateFromTimestamp(timestamp);
 				JSONArray jsonArray = handleSite(workspace, dateTime);
@@ -159,7 +161,8 @@ public class Model2Postgres extends AbstractJavaWebScript {
 								.contains(emsNode)))) {
 					try {
 						pgh.connect();
-						int nodesInserted = insertNodes(emsNode, pgh, edges);
+						int nodesInserted = insertNodes(emsNode, pgh, dateTime,
+								edges);
 						pgh.close();
 
 						siteJson.put("sysmlid", name);
@@ -187,18 +190,26 @@ public class Model2Postgres extends AbstractJavaWebScript {
 		return json;
 	}
 
-	protected int insertNodes(EmsScriptNode n, PostgresHelper pgh,
+	protected int insertNodes(EmsScriptNode n, PostgresHelper pgh, Date dt,
 			Map<String, String> edges) {
 
 		int i = 0;
 
-		pgh.insertNode(n.getNodeRef().getId(), n.getNodeRef().getId(),
-				n.getSysmlId());
+		// TODO: get the version node
+		String versionString = n.getNodeRef().toString();
+		Version headVersionNode = n.getHeadVersion();
+		if(headVersionNode != null){
+			NodeRef versionNode = headVersionNode.getVersionedNodeRef(); 
+			if (versionNode != null)
+				versionString = versionNode.toString();
+			
+		}
+		pgh.insertNode(n.getNodeRef().toString(), versionString, n.getSysmlId());
 		i++;
 
 		for (EmsScriptNode c : n.getChildNodes()) {
-			edges.put(c.getNodeRef().getId(), n.getNodeRef().getId());
-			i += insertNodes(c, pgh, edges);
+			edges.put(c.getNodeRef().toString(), n.getNodeRef().toString());
+			i += insertNodes(c, pgh, dt, edges);
 		}
 		return i;
 	}

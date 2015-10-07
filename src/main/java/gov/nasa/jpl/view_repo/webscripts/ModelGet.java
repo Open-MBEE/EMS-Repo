@@ -35,6 +35,7 @@ import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.mbee.util.Timer;
 import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.db.*;
+import gov.nasa.jpl.view_repo.db.PostgresHelper.DbEdgeTypes;
 import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
@@ -309,6 +310,8 @@ public class ModelGet extends AbstractJavaWebScript {
 					top, checkReadPermission);
 		} catch (JSONException e) {
 			e.printStackTrace();
+		} catch (SQLException e) {
+			e.printStackTrace();
 		}
 
 		return elements;
@@ -423,80 +426,61 @@ public class ModelGet extends AbstractJavaWebScript {
 	 * @param maxDepth
 	 * @param currDepth
 	 * @throws JSONException
+	 * @throws SQLException
 	 */
 	protected void handleElementHierarchy(EmsScriptNode root,
 			WorkspaceNode workspace, Date dateTime, final Long maxDepth,
 			Long currDepth, boolean connected, String relationship,
-			Set<String> visited) throws JSONException {
+			Set<String> visited) throws JSONException, SQLException {
 
-		String sysmlId = root.getSysmlId();
-
-		if (visited.contains(sysmlId)) {
-			return;
-		}
-
+		// Note: root sysmlid will never have _pkg at the end.
 		// don't return any elements
 		if (!root.exists()) {
 			return;
 		}
 
-		// add root element to elementsFound if its not already there
-		// (if it's there, it's probably because the root is a reified pkg node)
-		String rootName = sysmlId;
-		visited.add(sysmlId);
-		if (!elementsFound.containsKey(sysmlId)) {
-			// dont add reified packages
-			if (!rootName.endsWith("_pkg")
-					&& !root.isOwnedValueSpec(dateTime, workspace)) {
-				elementsFound.put(sysmlId, root);
+		// get children for given sysmlId from database
+		PostgresHelper pgh;
+		if (workspace == null)
+			pgh = new PostgresHelper("");
+		else
+			pgh = new PostgresHelper(workspace.getId().replace("-", "_"));
+
+		List<String> childrenNodeRefIds = null;
+		try {
+			pgh.connect();
+			if (maxDepth < 0) {
+				childrenNodeRefIds = pgh.getChildrenNodeRefIds(
+						root.getSysmlId(), DbEdgeTypes.REGULAR);
+			} else if (maxDepth == 0) {
+				childrenNodeRefIds = new ArrayList<String>();
+			} else if (maxDepth == 1) {
+				childrenNodeRefIds = pgh.getImmediateChildren(
+						root.getSysmlId(), DbEdgeTypes.REGULAR);
+			} else if (maxDepth > 1) {
+				return;
 			}
+		} catch (SQLException | ClassNotFoundException e) {
+			e.printStackTrace();
+		} finally {
+			pgh.close();
 		}
 
-		if (maxDepth != null && (maxDepth < 0 || currDepth < maxDepth)) {
-			++currDepth;
-			// Find all the children, recurse or add to array as needed.
-			// If it is a reified package, then need get the reifiedNode
-			if (rootName.endsWith("_pkg")) {
-				EmsScriptNode reifiedNode = findScriptNodeById(
-						rootName.substring(0, rootName.lastIndexOf("_pkg")),
-						workspace, dateTime, false);
-				if (reifiedNode != null) {
-					handleElementHierarchy(reifiedNode, workspace, dateTime,
-							maxDepth, currDepth, connected, relationship,
-							visited);
-				} // TODO -- REVIEW -- Warning or error?
-			}
+		// add root
+		childrenNodeRefIds.add(root.getNodeRef().toString());
 
-			// Handle all the children in this workspace:
-			List<NodeRef> childRefs = connected ? root.getConnectedNodes(
-					dateTime, workspace, relationship) : root.getOwnedChildren(
-					false, dateTime, workspace);
+		for (String c : childrenNodeRefIds) {
 
-			for (NodeRef childRef : childRefs) {
-				if (childRef == null)
-					continue;
-				EmsScriptNode child = new EmsScriptNode(childRef, services,
-						response);
-				if (checkPermissions(child, PermissionService.READ)) {
-					if (child.exists()
-							&& !child.isOwnedValueSpec(dateTime, workspace)) {
+			EmsScriptNode ecn = new EmsScriptNode(new NodeRef(c), services,
+					response);
 
-						String value = child.getSysmlId();
+			if (!ecn.exists() || ecn.getSysmlId().endsWith("_pkg")
+					|| ecn.isOwnedValueSpec(dateTime, workspace)
+					|| !checkPermissions(ecn, PermissionService.READ))
+				continue;
 
-						if (value != null && !value.endsWith("_pkg")) {
-							elementsFound.put(value, child);
-						}
-
-						handleElementHierarchy(child, workspace, dateTime,
-								maxDepth, currDepth, connected, relationship,
-								visited);
-
-					} // ends if (child.exists() && !child.isOwnedValueSpec())
-				} // ends if ( checkPermissions( child, PermissionService.READ )
-					// )
-			}
-
-		} // ends if (recurse)
+			elementsFound.put(c, ecn);
+		}
 	}
 
 	/**
