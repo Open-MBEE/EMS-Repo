@@ -116,12 +116,12 @@ public class SnapshotArtifactsGenerationActionExecuter  extends ActionExecuterAb
 
         for(String format:formats){
             if(format.compareToIgnoreCase("pdf") == 0){ 
-                if(SnapshotPost.getPdfNode(snapshotNode, timestamp, workspace)==null){ 
+                if(SnapshotPost.getPdfNode(snapshotNode, timestamp)==null){ 
                     setPdfStatus(snapshotService, snapshotNode, "Error");
                 }
             }
             else if(format.compareToIgnoreCase("html") == 0){
-                if(SnapshotPost.getHtmlZipNode(snapshotNode, timestamp, workspace)==null){ 
+                if(SnapshotPost.getHtmlZipNode(snapshotNode, timestamp)==null){ 
                     setZipStatus(snapshotService, snapshotNode, "Error");
                 }
             }
@@ -364,7 +364,11 @@ public class SnapshotArtifactsGenerationActionExecuter  extends ActionExecuterAb
 	                try {
 	                    try{
 	                    	response.append("\n[INFO]: Transforming HTML to PDF...");
-	                        fullDoc.html2pdf(snapshotFolder, snapshotNode); //convert html to pdf and saves it to repo 
+	                        fullDoc.html2pdf(snapshotFolder, snapshotNode); //convert html to pdf and saves it to repo
+	                        EmsScriptNode docbookPdf = snapshotService.getPdfNode();
+	                        if(docbookPdf == null || (docbookPdf != null && !docbookPdf.exists())){
+	                        	fullDoc.setPdfAspect(snapshotNode);
+	                        }
 	                    }
 	                    catch(Exception ex){
 	                    	jobStatus = "Failed";
@@ -372,8 +376,8 @@ public class SnapshotArtifactsGenerationActionExecuter  extends ActionExecuterAb
 	                        logger.error("[Prerender] Failed to generate PDF artifact for snapshot Id: " + snapshotId);
 	                        String errMsg = String.format("\n[ERROR]: [Prerender] Failed to generate PDF artifact for snapshot Id: %s.\n%s\n%s\n", snapshotId, ex.getMessage(), ex.getStackTrace());
 	                        response.append(errMsg);
-	                        setPdfStatus(snapshotService, snapshotNode, "Error");
-	                        throw new Exception(errMsg, ex);
+//	                        setPdfStatus(snapshotService, snapshotNode, "Error");
+//	                        throw new Exception(errMsg, ex);
 	                    }
 	                    
 	                    try{
@@ -503,6 +507,9 @@ public class SnapshotArtifactsGenerationActionExecuter  extends ActionExecuterAb
     private String buildEmailMessage(JSONObject snapshot, EmsScriptNode logNode) throws Exception{
         	StringBuffer buf = new StringBuffer();
         	try{
+        		HostnameGet hostnameGet = new HostnameGet(this.repository, this.services);
+    	    	String contextUrl = hostnameGet.getAlfrescoUrl() + "/alfresco";
+    	    	
     	    	JSONArray formats = (JSONArray)snapshot.getJSONArray("formats");
     	    	for(int i=0; i < formats.length(); i++){
     				JSONObject format = formats.getJSONObject(i);
@@ -512,21 +519,17 @@ public class SnapshotArtifactsGenerationActionExecuter  extends ActionExecuterAb
     				buf.append("Snapshot ");
     				buf.append(formatType.toUpperCase());
     				buf.append(": ");
-    				buf.append(formatUrl);
+    				if(formatType.toUpperCase().compareTo("PDF")==0) 
+    					buf.append(contextUrl + fullDoc.getPdfNode().getUrl());
+    				else
+    					buf.append(formatUrl);
+    				
     				buf.append(System.lineSeparator());
     				buf.append(System.lineSeparator());
     			}
-    	    	HostnameGet hostnameGet = new HostnameGet(this.repository, this.services);
-    	    	String contextUrl = hostnameGet.getAlfrescoUrl() + "/alfresco";
     	    	buf.append("Log: ");
 				buf.append(contextUrl);
 				buf.append(logNode.getUrl());
-				if (snapshotFolder != null) {
-				    buf.append(System.lineSeparator());
-				    buf.append(System.lineSeparator());
-				    buf.append("Folder: ");
-				    buf.append(contextUrl + snapshotFolder.getUrl());
-				}
 				
 				if ( makeDocBook ) {
                     boolean gotPdfNode = NodeUtil.exists( docbookPdfNode );
@@ -555,6 +558,14 @@ public class SnapshotArtifactsGenerationActionExecuter  extends ActionExecuterAb
                         buf.append(System.lineSeparator() );
                     }
 				}
+				
+				if (snapshotFolder != null) {
+				    buf.append(System.lineSeparator());
+				    buf.append(System.lineSeparator());
+				    buf.append("Folder: ");
+				    buf.append(contextUrl + snapshotFolder.getUrl());
+				}
+				
         	}
         	catch(JSONException ex){
         		throw new Exception("Failed to build email message!", ex);
@@ -611,16 +622,16 @@ public class SnapshotArtifactsGenerationActionExecuter  extends ActionExecuterAb
         	HostnameGet hostnameGet = new HostnameGet(this.repository, this.services);
         	String contextUrl = hostnameGet.getAlfrescoUrl() + "/alfresco";
         	JSONArray formats = new JSONArray();
-            if ( SnapshotPost.hasPdfNode( snapshotNode, dateTime, workspace ) ) {
-                EmsScriptNode pdfNode = SnapshotPost.getPdfNode( snapshotNode, dateTime, workspace  );
+            if ( SnapshotPost.hasPdfNode( snapshotNode, dateTime ) ) {
+                EmsScriptNode pdfNode = SnapshotPost.getPdfNode( snapshotNode, dateTime );
                 JSONObject pdfJson = new JSONObject();
                 pdfJson.put("status", status);
                 pdfJson.put("type", "pdf");
                 pdfJson.put("url", contextUrl + pdfNode.getUrl());
                 formats.put(pdfJson);
             }
-            if ( SnapshotPost.hasHtmlZipNode( snapshotNode, dateTime, workspace  ) ) {
-                EmsScriptNode htmlZipNode = SnapshotPost.getHtmlZipNode( snapshotNode, dateTime, workspace  );
+            if ( SnapshotPost.hasHtmlZipNode( snapshotNode, dateTime ) ) {
+                EmsScriptNode htmlZipNode = SnapshotPost.getHtmlZipNode( snapshotNode, dateTime );
                 JSONObject htmlJson = new JSONObject();
                 htmlJson.put("status", status);
                 htmlJson.put("type","html");
@@ -652,3 +663,4 @@ public class SnapshotArtifactsGenerationActionExecuter  extends ActionExecuterAb
     }
 
 }
+

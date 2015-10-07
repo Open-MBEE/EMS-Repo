@@ -27,6 +27,8 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
  */
 public class CommitNodeMigration extends AbstractJavaWebScript {
 
+    static Logger logger = Logger.getLogger(CommitNodeMigration.class);
+
     private WorkspaceNode ws;
     private String workspaceId;
     private ArrayList<WorkspaceNode> wsList = new ArrayList<WorkspaceNode>();
@@ -82,6 +84,7 @@ public class CommitNodeMigration extends AbstractJavaWebScript {
         if (!Utils.isNullOrEmpty( commits )) {
             
             for (EmsScriptNode commitNode : commits ) {
+                if (logger.isInfoEnabled()) logger.info( "Migrating commit node: "+ commitNode);
                 CommitUtil.migrateCommitNode( commitNode, response, status );
             }
         }
@@ -102,17 +105,24 @@ public class CommitNodeMigration extends AbstractJavaWebScript {
 
         // Migrate the commit nodes of the single workspace:
         if (!Utils.isNullOrEmpty( workspaceId )) {
-            log( Level.INFO, "Migrating commit nodes for workspace: "+ workspaceId);
+            if (logger.isInfoEnabled()) logger.info( "Migrating commit nodes for workspace: "+ workspaceId);
             migrateWorkspaceCommits(ws, status);
-            results.put("res", "Completed commit node migration for workspace: "+workspaceId);
+            
+            String msg = "Completed commit node migration for workspace: "+workspaceId;
+            if (logger.isInfoEnabled()) logger.info(msg);
+            results.put("res", msg);
         }
         // Migrate the commit nodes of all workspaces:
         else if (!Utils.isNullOrEmpty( wsList )){
-            log( Level.INFO, "Migrating commit nodes for all workspaces.  Total number of workspaces: "+wsList.size());
+            if (logger.isInfoEnabled()) logger.info("Migrating commit nodes for all workspaces.  Total number of workspaces: "+wsList.size());
             for (WorkspaceNode workspaceNode : wsList) {
+                if (logger.isInfoEnabled()) logger.info( "Migrating commit nodes for workspace: "+ WorkspaceNode.getId( workspaceNode ));
                 migrateWorkspaceCommits(workspaceNode, status);
             }
-            results.put("res", "Completed commit node migration for all workspaces.  Total number of workspaces: "+wsList.size());
+            
+            String msg = "Completed commit node migration for all workspaces.  Total number of workspaces: "+wsList.size();
+            if (logger.isInfoEnabled()) logger.info(msg);
+            results.put("res", msg);
         }
         else {
             log( Level.WARN, "No workspaces found to migrate");

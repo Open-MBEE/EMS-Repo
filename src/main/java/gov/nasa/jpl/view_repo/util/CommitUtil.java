@@ -923,7 +923,7 @@ public class CommitUtil {
                 // Perform the diff using the workspaces and timestamps
                 // from the commit node:
                 JSONObject json = MmsDiffGet.performDiff( ws1, ws2, dateTime1, dateTime2, response,
-                                                                      responseStatus, DiffType.COMPARE, true );                
+                                                                      responseStatus, DiffType.COMPARE, true, false );                
                 return json;
             }
         }
@@ -1019,6 +1019,104 @@ public class CommitUtil {
  
               return newJson;
     }
+        
+    /**
+     * Checks if the passed commitNode has all the needed information
+     * for glom diffs to work.  Returns true if the node has been migrated,
+     * otherwise returns false.
+     * 
+     * @param commitNode
+     */
+    public static boolean checkMigrateCommitNode( EmsScriptNode commitNode, 
+                                          StringBuffer response,
+                                          Status responseStatus ) {
+               
+        String origUser = NodeUtil.getUserName();
+        boolean switchUser = !origUser.equals( "admin" );
+        
+        if ( switchUser ) AuthenticationUtil.setRunAsUser( "admin" );
+        // to make sure no permission issues, run as admin
+        
+        String content = (String) commitNode.getProperty( "ems:commit" );
+        try {
+            JSONObject commitJson = new JSONObject(content);
+            if ( commitJson != null ) {
+                
+                JSONObject ws1Json = commitJson.optJSONObject( "workspace1" );
+                JSONObject ws2Json = commitJson.optJSONObject( "workspace2" );
+
+                if ( ws1Json != null && ws2Json != null ) {
+                    
+                    String timestamp1 = ws1Json.optString( "timestamp" );
+                    String timestamp2 = ws2Json.optString( "timestamp" );
+                    
+                    if (timestamp1 == null || timestamp2 == null) {
+                        return false;
+                    }
+                    else {
+                        
+                        JSONArray elements = ws1Json.optJSONArray("elements");
+                        JSONArray added = ws2Json.optJSONArray("addedElements");
+                        JSONArray updated = ws2Json.optJSONArray("updatedElements");
+                        JSONArray deleted = ws2Json.optJSONArray("deletedElements");
+                        JSONArray conflicted = ws2Json.optJSONArray("conflictedElements");
+                        JSONArray moved = ws2Json.optJSONArray("movedElements");
+                        
+                        for (int i = 0; i < elements.length(); i++) {
+                            JSONObject elementJson = elements.getJSONObject( i );
+                            if (elementJson != null && !elementJson.has( Acm.JSON_SPECIALIZATION )) {
+                                return false;
+                            }
+                        }
+                        
+                        for (int i = 0; i < added.length(); i++) {
+                            JSONObject elementJson = added.getJSONObject( i );
+                            if (elementJson != null && !elementJson.has( Acm.JSON_SPECIALIZATION )) {
+                                return false;
+                            }
+                        }
+                        
+                        for (int i = 0; i < updated.length(); i++) {
+                            JSONObject elementJson = updated.getJSONObject( i );
+                            if (elementJson != null && !elementJson.has( Acm.JSON_SPECIALIZATION )) {
+                                return false;
+                            }
+                        }
+                        
+                        for (int i = 0; i < deleted.length(); i++) {
+                            JSONObject elementJson = deleted.getJSONObject( i );
+                            if (elementJson != null && !elementJson.has( Acm.JSON_SPECIALIZATION )) {
+                                return false;
+                            }
+                        }
+                        
+                        for (int i = 0; i < conflicted.length(); i++) {
+                            JSONObject elementJson = conflicted.getJSONObject( i );
+                            if (elementJson != null && !elementJson.has( Acm.JSON_SPECIALIZATION )) {
+                                return false;
+                            }
+                        }
+                        
+                        for (int i = 0; i < moved.length(); i++) {
+                            JSONObject elementJson = moved.getJSONObject( i );
+                            if (elementJson != null && !elementJson.has( Acm.JSON_SPECIALIZATION )) {
+                                return false;
+                            }
+                        }
+                    }
+
+                }
+            }
+        } catch ( JSONException e ) {
+            e.printStackTrace();
+        } finally {
+            if ( switchUser ) AuthenticationUtil.setRunAsUser( origUser );
+        }
+        
+        return true;
+        
+    }
+
     
     /**
      * Migrates the passed commitNode to have all the needed information
@@ -1030,11 +1128,6 @@ public class CommitUtil {
                                           StringBuffer response,
                                           Status responseStatus ) {
         
-        // TODO this needs to be ran its own transaction if calling it from
-        //      the glom code.
-        
-        // TODO add error msg to glom diff if not migrated
-       
         String origUser = NodeUtil.getUserName();
         boolean switchUser = !origUser.equals( "admin" );
         

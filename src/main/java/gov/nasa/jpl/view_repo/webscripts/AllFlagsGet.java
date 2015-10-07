@@ -33,7 +33,10 @@ public class AllFlagsGet extends FlagSet {
                            "makeDocBook",
                            "glom",
                            "cleanJson",
-                           "diffDefaultIsMerge"};
+                           "diffDefaultIsMerge", 
+                           "viewPointExpressions",
+                           "diffDefaultIsMerge",
+                           "cacheSnapshots"};
     
     public String[] getAllFlags() {
         return flags;
@@ -99,6 +102,8 @@ public class AllFlagsGet extends FlagSet {
             NodeUtil.timeEvents = val;
         } else if (path.equalsIgnoreCase("versionCacheDebug")) {
             EmsScriptNode.versionCacheDebugPrint = val;
+        }  else if (path.equalsIgnoreCase("viewPointExpressions")) {
+            EmsScriptNode.expressionStuff = val;
         } else if (path.equalsIgnoreCase("versionCache")) {
             NodeUtil.doVersionCaching = val;
         } else if (path.equalsIgnoreCase("versionHistoryCache")) {
@@ -110,11 +115,13 @@ public class AllFlagsGet extends FlagSet {
         } else if (path.equalsIgnoreCase("makeDocBook")) {
             SnapshotArtifactsGenerationActionExecuter.makeDocBook = val;
         } else if (path.equalsIgnoreCase("glom")) {
-        	MmsDiffGet.glom = val;
+        	    MmsDiffGet.glom = val;
         } else if (path.equalsIgnoreCase("cleanJson")) {
-        	CommitUtil.cleanJson = val;
+        	    CommitUtil.cleanJson = val;
         } else if (path.equalsIgnoreCase("diffDefaultIsMerge")){
-        	MmsDiffGet.diffDefaultIsMerge = val;
+        	    MmsDiffGet.diffDefaultIsMerge = val;
+        } else if (path.equalsIgnoreCase("cacheSnapshots")) {
+            DeclarativeJavaWebScript.cacheSnapshotsFlag = val;
         }
         return true;
     }
@@ -160,7 +167,9 @@ public class AllFlagsGet extends FlagSet {
             return NodeUtil.timeEvents;
         } else if (path.equalsIgnoreCase("versionCacheDebug")) {
             return EmsScriptNode.versionCacheDebugPrint;
-        } else if (path.equalsIgnoreCase("versionCache")) {
+        }  else if (path.equalsIgnoreCase("viewPointExpressions")) {
+            return EmsScriptNode.expressionStuff;
+        }  else if (path.equalsIgnoreCase("versionCache")) {
             return NodeUtil.doVersionCaching;
         } else if (path.equalsIgnoreCase("versionHistoryCache")) {
             return NodeUtil.doVersionHistoryCaching;
@@ -239,6 +248,8 @@ public class AllFlagsGet extends FlagSet {
             return false;
         } else if (path.equalsIgnoreCase("versionCacheDebug")) {
             return false;
+        } else if (path.equalsIgnoreCase("viewPointExpressions")) {
+        	return false;
         } else if (path.equalsIgnoreCase("skipWorkspacePermissionCheck")) {
             return false;
         } else if (path.equalsIgnoreCase("optimisticJustFirst")) {
@@ -297,6 +308,8 @@ public class AllFlagsGet extends FlagSet {
             return "timeEvents";
         } else if (path.equalsIgnoreCase("versionCacheDebug")) {
             return "versionCacheDebugPrint";
+        } else if (path.equalsIgnoreCase("viewPointExpressions")) {
+            return "expressionStuff";
         } else if (path.equalsIgnoreCase("versionCache")) {
             return "doVersionCaching";
         } else if (path.equalsIgnoreCase("versionHistoryCache")) {
@@ -308,11 +321,13 @@ public class AllFlagsGet extends FlagSet {
         } else if (path.equalsIgnoreCase("makeDocBook")) {
             return "makeDocBook";
         } else if (path.equalsIgnoreCase("glom")) {
-        	return "glom";
+        	    return "glom";
         } else if (path.equalsIgnoreCase("cleanJson")) {
-        	return "cleanJson";
+        	    return "cleanJson";
         } else if (path.equalsIgnoreCase("diffDefaultIsMerge")){
-        	return "diffDefaultIsMerge";
+            return "diffDefaultIsMerge";
+        } else if (path.equalsIgnoreCase("cacheSnapshots")) {
+            return "cacheSnapshotsFlag";
         }
         return null;
     }

@@ -47,6 +47,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.log4j.*;
 import org.alfresco.repo.model.Repository;
+import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.json.JSONArray;
@@ -190,7 +191,8 @@ public class ViewGet extends AbstractJavaWebScript {
         printFooter();
 
         if (logger.isInfoEnabled()) {
-            logger.info( "ViewGet: " + timer );
+            final String user = AuthenticationUtil.getFullyAuthenticatedUser();
+            logger.info( user + " " + timer + " " + req.getURL() );
         }
 
         return model;

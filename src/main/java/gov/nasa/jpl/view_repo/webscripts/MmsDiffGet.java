@@ -48,9 +48,7 @@ public class MmsDiffGet extends AbstractJavaWebScript {
 
     public static boolean glom = true;
     public static boolean diffDefaultIsMerge = true;
-    
-    private static WorkspaceNode workspace;
-    
+        
     protected WorkspaceNode ws1, ws2;
     protected String workspaceId1;
     protected String workspaceId2;
@@ -260,6 +258,10 @@ public class MmsDiffGet extends AbstractJavaWebScript {
 
         status.setCode(responseStatus.getCode());
 
+        if (status.getCode() != HttpServletResponse.SC_OK) {
+            log(Level.ERROR, response.toString());
+        }
+        
         printFooter();
 
         return results;
@@ -293,12 +295,13 @@ public class MmsDiffGet extends AbstractJavaWebScript {
                                           StringBuffer aResponse,
                                           Status aResponseStatus,
                                           DiffType diffType,
-                                          boolean forceNonGlom) {
+                                          boolean forceNonGlom,
+                                          boolean onlyCollect) {
         
         WorkspaceDiff workspaceDiff = null;
             workspaceDiff =
                     new WorkspaceDiff(w1, w2, date1, date2, aResponse, 
-                                      aResponseStatus, diffType, !forceNonGlom);
+                                      aResponseStatus, diffType, !forceNonGlom, onlyCollect);
         
         JSONObject diffJson = null;
         if ( workspaceDiff != null ) {
@@ -309,7 +312,9 @@ public class MmsDiffGet extends AbstractJavaWebScript {
                     workspaceDiff.forceJsonCacheUpdate = false;
                     diffJson = workspaceDiff.toJSONObject( date1, date2, false );
                 }
-                if (!Utils.isNullOrEmpty(aResponse.toString())) diffJson.put("message", aResponse.toString());
+                if (!Utils.isNullOrEmpty(aResponse.toString()) && diffJson != null) {
+                    diffJson.put("message", aResponse.toString());
+                }
                 //results.put("res", NodeUtil.jsonToString( diffJson, 4 ));
             } catch (JSONException e) {
                 e.printStackTrace();
@@ -355,51 +360,47 @@ public class MmsDiffGet extends AbstractJavaWebScript {
      */
     public JSONObject performDiffGlom(Map<String, Object> results, DiffType diffType) {
  
-        // Check for a job matching the four diff parameters.
-        // TODO -- It would be nice if we could quickly find the "nearest" diff
-        // in the case that the diff has never been computed.
-        EmsScriptNode oldJob = getDiffJob(diffType);
-        JSONObject diff0 = diffJsonFromJobNode( oldJob );
-
-        // If either of the timestamps is "latest," then the diff result may be
-        // out of date.
-        boolean isLatest1 = timestamp1 == null ||
-                            timestamp1.equals( WorkspaceDiff.LATEST_NO_TIMESTAMP ); 
-        boolean isLatest2 = timestamp2 == null ||
-                            timestamp2.equals( WorkspaceDiff.LATEST_NO_TIMESTAMP );
-
         // For each workspace get the diffs between the request timestamp and the
         // timestamp of the nearest/old diff.
         
+        // TODO: get stored gloms:
+        //       search under company home/<ws> for stored glom closest to the passed time
+        //      this way the name of the node can just use the timestamp, and we dont have to
+        //      worry about resolving time in the name to the latest commit it contains
+
         Pair< WorkspaceNode, Date > p =
-                WorkspaceDiff.getCommonBranchPoint( ws1, ws2, timestamp1, timestamp2 );
+                WorkspaceDiff.getCommonBranchPoint( ws1, ws2, userTimeStamp1, userTimeStamp2 );
         WorkspaceNode commonParent = p.first;
         Date commonBranchTime = p.second;
         
-        Date date1 = WorkspaceDiff.dateFromWorkspaceTimestamp( timestamp1 );
-        Date date2 = WorkspaceDiff.dateFromWorkspaceTimestamp( timestamp2 );
+        Date date1 = WorkspaceDiff.dateFromWorkspaceTimestamp( userTimeStamp1 );
+        Date date2 = WorkspaceDiff.dateFromWorkspaceTimestamp( userTimeStamp2 );
         Date date0_1 = null;
         Date date0_2 = null;
-        if ( diff0 != null ) {
-            String foundTimeStamp1 = (String) oldJob.getProperty( "ems:timestamp1" );
-            date0_1 = WorkspaceDiff.dateFromWorkspaceTimestamp( foundTimeStamp1 );
-            String foundTimeStamp2 = (String) oldJob.getProperty( "ems:timestamp2" );
-            date0_2 = WorkspaceDiff.dateFromWorkspaceTimestamp( foundTimeStamp2 );
-        } else {
-            date0_1 = commonBranchTime;
-            date0_2 = commonBranchTime;
-        }
+        date0_1 = commonBranchTime;
+        date0_2 = commonBranchTime;
         
         // This assumes that the timepoint of the new diff is after the
         // timepoint of the old for each workspace.
         JSONObject diff1Json = performDiff( ws1, ws1, date0_1, date1, getResponse(),
-                                            getResponseStatus(), DiffType.COMPARE, false );
+                                            getResponseStatus(), DiffType.COMPARE, false, true );
+        // Error case for commit nodes not being migrated:
+        if (diff1Json == null) {
+            return null;
+        }
         JSONObject diff2Json = performDiff( ws2, ws2, date0_2, date2, getResponse(),
-                                            getResponseStatus(), DiffType.COMPARE, false );
+                                            getResponseStatus(), DiffType.COMPARE, false, true );
+        // Error case for commit nodes not being migrated:
+        if (diff2Json == null) {
+            return null;
+        }
         
         JsonDiffDiff diffDiffResult =
-                WorkspaceDiff.performDiffGlom( diff0, diff1Json, diff2Json, commonParent,
-                                 commonBranchTime, services, response, diffType );
+                WorkspaceDiff.performDiffGlom(diff1Json, diff2Json, commonParent,
+                                 commonBranchTime, services, response, diffType, false );
+        
+        // TODO: Store gloms:
+        //       Store under company home/<ws>/glom_<time>
         
         JSONObject diffResult = diffDiffResult.toJsonObject();
         
@@ -535,7 +536,7 @@ public class MmsDiffGet extends AbstractJavaWebScript {
             //      If it is, then we should pass true for forceNonGlom
             //      in the function call below.
             top = performDiff( ws1, ws2, dateTime1, dateTime2, response,
-                               responseStatus, diffType, false );
+                               responseStatus, diffType, false, false );
         }
         if ( top == null ) {
             results.put( "res", createResponseJson() );
