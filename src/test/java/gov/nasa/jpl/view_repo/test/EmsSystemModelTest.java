@@ -100,7 +100,7 @@ public class EmsSystemModelTest {
     }
 
     @Test
-    public void testExpressionEvaluation() {
+    public void testExpressionEvaluation() throws IllegalAccessException, InvocationTargetException, InstantiationException {
 
         //NodeRef node = NodeUtil.findNodeRefById( "expr_32165", model.getServices() );
 

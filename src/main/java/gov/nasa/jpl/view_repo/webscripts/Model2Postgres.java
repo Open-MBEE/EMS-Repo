@@ -68,6 +68,8 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
  */
 public class Model2Postgres extends AbstractJavaWebScript {
 
+	PostgresHelper pgh = null;
+
 	public Model2Postgres() {
 		super();
 	}
@@ -90,19 +92,19 @@ public class Model2Postgres extends AbstractJavaWebScript {
 	protected Map<String, Object> executeImplImpl(WebScriptRequest req,
 			Status status, Cache cache) {
 		printHeader(req);
-		System.out.println("here");
 
 		Map<String, Object> model = new HashMap<String, Object>();
 		JSONObject json = null;
 
 		try {
-			System.out.println("here1");
-			if (true || validateRequest(req, status) || true) {
-				System.out.println("here1.1");
+			if (validateRequest(req, status) || true) {
 				WorkspaceNode workspace = getWorkspace(req);
+				if(workspace == null)
+					pgh = new PostgresHelper("");
+				else 
+					pgh = new PostgresHelper(workspace.getName());
 				String timestamp = req.getParameter("timestamp");
 				Date dateTime = TimeUtils.dateFromTimestamp(timestamp);
-				System.out.println("here1.2");
 				JSONArray jsonArray = handleSite(workspace, dateTime);
 				json = new JSONObject();
 				json.put("sites", jsonArray);
@@ -137,8 +139,6 @@ public class Model2Postgres extends AbstractJavaWebScript {
 		String name;
 		NodeRef siteRef;
 		List<SiteInfo> sites = services.getSiteService().listSites(null);
-		PostgresHelper pgh = new PostgresHelper(DbContract.HOST,
-				DbContract.DB_NAME, DbContract.USERNAME, DbContract.PASSWORD);
 		Map<String, String> edges = new HashMap<String, String>();
 
 		for (SiteInfo siteInfo : sites) {
@@ -173,16 +173,16 @@ public class Model2Postgres extends AbstractJavaWebScript {
 			}
 		}
 
-		for (Entry<String, String> entry : edges.entrySet()) {
-			try {
-				pgh.connect();
-				pgh.insertEdge(entry.getValue(), entry.getKey(), 1);
-				pgh.close();
-			} catch (ClassNotFoundException | SQLException e) {
-				e.printStackTrace();
+		try {
+			pgh.connect();
+			for (Entry<String, String> entry : edges.entrySet()) {
+				pgh.insertEdge(entry.getValue(), entry.getKey(),
+						PostgresHelper.DbEdgeTypes.REGULAR);
 			}
+			pgh.close();
+		} catch (ClassNotFoundException | SQLException e) {
+			e.printStackTrace();
 		}
-		System.out.println("Edges: " + edges.size());
 
 		return json;
 	}
@@ -192,15 +192,12 @@ public class Model2Postgres extends AbstractJavaWebScript {
 
 		int i = 0;
 
-		if (!n.getSysmlId().endsWith("_pkg")) {
-			pgh.insertNode(n.getNodeRef().getId(), n.getNodeRef().getId(),
-					n.getSysmlId());
-			i++;
-		}
+		pgh.insertNode(n.getNodeRef().getId(), n.getNodeRef().getId(),
+				n.getSysmlId());
+		i++;
 
 		for (EmsScriptNode c : n.getChildNodes()) {
-			edges.put(c.getNodeRef().getId().replace("_pkg", ""), n
-					.getNodeRef().getId().replace("_pkg", ""));
+			edges.put(c.getNodeRef().getId(), n.getNodeRef().getId());
 			i += insertNodes(c, pgh, edges);
 		}
 		return i;
