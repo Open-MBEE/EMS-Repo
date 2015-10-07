@@ -38,4 +38,24 @@
                         "value":[{"type":"LiteralString",
                                   "string":"this is it"}]}
     },
+    
+    {"documentation" : "delete_delete_before", 
+     "sysmlid":"delete_delete_before", 
+     "name":"delete_delete_before", 
+     "owner":"123456", 
+     "specialization": {"type":"Property",
+                        "isDerived":false, 
+                        "value":[{"type":"LiteralString",
+                                  "string":"this is it"}]}
+    },
+    
+    {"documentation" : "add_add_before", 
+     "sysmlid":"add_add_before", 
+     "name":"add_add_before", 
+     "owner":"123456", 
+     "specialization": {"type":"Property",
+                        "isDerived":false, 
+                        "value":[{"type":"LiteralString",
+                                  "string":"this is it"}]}
+    },
 ]}

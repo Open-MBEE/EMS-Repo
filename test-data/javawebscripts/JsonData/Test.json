@@ -1,9 +1,6 @@
-{ "elements" : [
-
-    {"documentation" : "", 
-     "sysmlid":"d_dg", 
-     "name":"d_dg", 
-     "owner":"123456"
-    }
-
-]}
+{"elements": [{
+    "name": "holding_bin",
+    "owner": "_17_0_5_1_8660276_1410291055211_913229_25118",
+    "sysmlid": "holding_bin_site__17_0_5_1_8660276_1410291055211_913229_25118_no_project",
+    "specialization": {"type": "Package"},
+}]}

@@ -547,8 +547,8 @@ public class DocBookWrapper {
 			if(pdfPath == null || pdfPath.isEmpty()) throw new Exception("Failed to transform from DocBook to PDF!");
 
 			if(!this.saveFileToRepo(node, MimetypeMap.MIMETYPE_PDF, pdfPath)) throw new Exception("Failed to save PDF artifact to repository!");
-			//this.snapshotNode.createOrUpdateAspect("view2:pdf");
-			//this.snapshotNode.createOrUpdateProperty("view2:pdfNode", node.getNodeRef());
+			this.snapshotNode.createOrUpdateAspect("view2:pdf");
+			this.snapshotNode.createOrUpdateProperty("view2:pdfNode", node.getNodeRef());
 
 			if ( node != null ) node.getOrSetCachedVersion();
 			this.pdfNode = node;

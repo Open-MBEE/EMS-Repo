@@ -77,6 +77,7 @@ public class WorkspaceDiff implements Serializable {
     private Map< String, EmsScriptNode > updatedElements;
     
     private DiffType diffType = DiffType.MERGE;
+    private boolean onlyCollect = false;
 
     NodeDiff nodeDiff = null;
     
@@ -118,18 +119,19 @@ public class WorkspaceDiff implements Serializable {
     public WorkspaceDiff(WorkspaceNode ws1, WorkspaceNode ws2, Date timestamp1, Date timestamp2,
                          StringBuffer response, Status status, DiffType diffType) {
 
-        this(ws1, ws2, timestamp1, timestamp2, response, status, diffType, glomming);
+        this(ws1, ws2, timestamp1, timestamp2, response, status, diffType, glomming, false);
     }
     
     public WorkspaceDiff(WorkspaceNode ws1, WorkspaceNode ws2, Date timestamp1, Date timestamp2,
                          StringBuffer response, Status status, DiffType diffType,
-                         boolean glom) {
+                         boolean glom, boolean onlyCollect) {
 
         this(ws1, ws2, response, status);
         this.timestamp1 = timestamp1;
         this.timestamp2 = timestamp2;
         this.diffType = diffType;
         this.glom = glom;
+        this.onlyCollect = onlyCollect;
         diff();
     }
 
@@ -1268,7 +1270,8 @@ public class WorkspaceDiff implements Serializable {
         Date commonBranchTime = p.second;
 
         return performDiffGlom(commitDiff1, commitDiff2, commonParent,
-                                commonBranchTime, getServices(), response, diffType );
+                               commonBranchTime, getServices(), response, 
+                               diffType, onlyCollect );
     }
     
     protected void captureDeltas() {
@@ -1414,12 +1417,13 @@ public class WorkspaceDiff implements Serializable {
                                               Date commonBranchTime,
                                               ServiceRegistry services,
                                               StringBuffer response,
-                                              DiffType diffType) {
+                                              DiffType diffType,
+                                              boolean onlyCollect) {
         
         JsonDiffDiff diffDiff3 = new JsonDiffDiff(diff2);
         JsonDiffDiff diffDiff1 = new JsonDiffDiff(diff1);
         
-        return JsonDiffDiff.matrixDiff(diffDiff3, diffDiff1, diffType == DiffType.MERGE);
+        return JsonDiffDiff.matrixDiff(diffDiff3, diffDiff1, diffType == DiffType.MERGE, onlyCollect);
     }
 
     /**

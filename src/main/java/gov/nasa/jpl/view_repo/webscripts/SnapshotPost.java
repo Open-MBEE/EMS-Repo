@@ -1003,12 +1003,12 @@ public class SnapshotPost extends AbstractJavaWebScript {
 		    	snapshotNode = generatePDF(pdfNode, snapshotNode, workspace, siteName);
 		    	if(snapshotNode == null) throw new Exception("generatePDF() returned null.");
 		    	else{
-		    		//this.setPdfStatus(snapshotNode, "Completed");
+		    		this.setPdfStatus(snapshotNode, "Completed");
 		    	}
 	        }
 	        catch(Exception ex){
 	        	ex.printStackTrace();
-	        	//this.setPdfStatus(snapshotNode, "Error");
+	        	this.setPdfStatus(snapshotNode, "Error");
 	    		throw new Exception("Failed to generate PDF artifact!", ex);
 	        }
         //}
@@ -1115,7 +1115,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
         	return String.format("%s://%s", sysAdminParams.getAlfrescoProtocol(), hostname);
     }
 
-    public static EmsScriptNode getHtmlZipNode( EmsScriptNode snapshotNode, Date dateTime, WorkspaceNode ws ) {
+    public static EmsScriptNode getHtmlZipNode( EmsScriptNode snapshotNode, Date dateTime) {
         NodeRef node = (NodeRef)snapshotNode.getNodeRefProperty( "view2:htmlZipNode", true, null, null );
         if(node == null) return null;
         return new EmsScriptNode( node, snapshotNode.getServices() );
@@ -1125,9 +1125,8 @@ public class SnapshotPost extends AbstractJavaWebScript {
         return (String)snapshotNode.getProperty( "view2:htmlZipStatus" );
     }
 
-    public static EmsScriptNode getPdfNode( EmsScriptNode snapshotNode, Date dateTime, WorkspaceNode ws ) {
-//        NodeRef node = (NodeRef)snapshotNode.getNodeRefProperty( "view2:pdfNode", true, dateTime, ws );
-    	NodeRef node = (NodeRef)snapshotNode.getNodeRefProperty( "view2:pdfNode", true, null, null );
+    public static EmsScriptNode getPdfNode( EmsScriptNode snapshotNode, Date dateTime) {
+        NodeRef node = (NodeRef)snapshotNode.getNodeRefProperty( "view2:pdfNode", true, null, null );
         if(node == null) return null;
         return new EmsScriptNode( node, snapshotNode.getServices() );
     }
@@ -1439,7 +1438,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
                 return null;
             }
 
-            setArtifactsGenerationStatus(postJson, null, workspace);
+            setArtifactsGenerationStatus(postJson, null);
             startAction( jobNode, siteName, postJson, workspace );
             return postJson;
 
@@ -1511,10 +1510,10 @@ public class SnapshotPost extends AbstractJavaWebScript {
      * @param snapshotNode
      * @return
      */
-    public static boolean hasHtmlZipNode( EmsScriptNode snapshotNode, Date dateTime, WorkspaceNode ws ) {
+    public static boolean hasHtmlZipNode( EmsScriptNode snapshotNode, Date dateTime ) {
         boolean hasNode = false;
         if(snapshotNode.hasAspect( "view2:htmlZip" )){
-        	EmsScriptNode node = getHtmlZipNode(snapshotNode, dateTime, ws);
+        	EmsScriptNode node = getHtmlZipNode(snapshotNode, dateTime);
         	if(node != null) hasNode = true;
         }
         return hasNode;
@@ -1524,10 +1523,10 @@ public class SnapshotPost extends AbstractJavaWebScript {
         return snapshotNode.hasAspect( "view2:pdf" );
     }
 
-    public static boolean hasPdfNode( EmsScriptNode snapshotNode, Date dateTime, WorkspaceNode ws ) {
+    public static boolean hasPdfNode( EmsScriptNode snapshotNode, Date dateTime) {
     	boolean hasNode = false;
         if(snapshotNode.hasAspect( "view2:pdf" )){
-        	EmsScriptNode node = getPdfNode(snapshotNode, dateTime, ws);
+        	EmsScriptNode node = getPdfNode(snapshotNode, dateTime);
         	if(node != null) hasNode = true;
         }
         return hasNode;
@@ -1772,16 +1771,16 @@ public class SnapshotPost extends AbstractJavaWebScript {
         	HostnameGet hostnameGet = new HostnameGet(this.repository, this.services);
         	String contextUrl = hostnameGet.getAlfrescoUrl() + "/alfresco";
         	JSONArray formats = new JSONArray();
-            if ( hasPdfNode( snapshotNode, dateTime, workspace ) ) {
-                EmsScriptNode pdfNode = getPdfNode( snapshotNode, dateTime, workspace  );
+            if ( hasPdfNode( snapshotNode, dateTime ) ) {
+                EmsScriptNode pdfNode = getPdfNode( snapshotNode, dateTime );
                 JSONObject pdfJson = new JSONObject();
                 pdfJson.put("status", "Completed");
                 pdfJson.put("type", "pdf");
                 pdfJson.put("url", contextUrl + pdfNode.getUrl());
                 formats.put(pdfJson);
             }
-            if ( hasHtmlZipNode( snapshotNode, dateTime, workspace  ) ) {
-                EmsScriptNode htmlZipNode = getHtmlZipNode( snapshotNode, dateTime, workspace  );
+            if ( hasHtmlZipNode( snapshotNode, dateTime ) ) {
+                EmsScriptNode htmlZipNode = getHtmlZipNode( snapshotNode, dateTime );
                 JSONObject htmlJson = new JSONObject();
                 htmlJson.put("status", "Completed");
                 htmlJson.put("type","html");
@@ -2292,7 +2291,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
      * @throws Exception
      * sets artifacts generation status to "Generating" when firing off the process
      */
-    private void setArtifactsGenerationStatus(JSONObject postJson, Date dateTime, WorkspaceNode ws) throws Exception{
+    private void setArtifactsGenerationStatus(JSONObject postJson, Date dateTime) throws Exception{
     	try{
 //    	    if (!postJson.has( "id" )) {
 //    	        throw new Exception("No id found");
@@ -2310,13 +2309,13 @@ public class SnapshotPost extends AbstractJavaWebScript {
 			ArrayList<String> formats = getSnapshotFormats(postJson);
 			for(String format:formats){
 				if(format.compareToIgnoreCase("pdf") == 0){
-					if(SnapshotPost.getPdfNode(snapshotNode, dateTime, ws)==null){
+					if(SnapshotPost.getPdfNode(snapshotNode, dateTime)==null){
         				snapshotNode.createOrUpdateAspect("view2:pdf");
         	            snapshotNode.createOrUpdateProperty("view2:pdfStatus", "Generating");
 					}
         	    }
         	    else if(format.compareToIgnoreCase("html") == 0){
-        	        if(SnapshotPost.getHtmlZipNode(snapshotNode, dateTime, ws)==null){
+        	        if(SnapshotPost.getHtmlZipNode(snapshotNode, dateTime)==null){
         	            snapshotNode.createOrUpdateAspect("view2:htmlZip");
         	            snapshotNode.createOrUpdateProperty("view2:htmlZipStatus", "Generating");
         	        }

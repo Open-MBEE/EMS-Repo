@@ -26,6 +26,7 @@
   <url>/flags/glom?on={on?}&amp;off={off?}</url>
   <url>/flags/cleanJson?on={on?}&amp;off={off?}</url>
   <url>/flags/diffDefaultIsMerge?on={on?}&amp;off={off?}</url>
+  <url>/flags/cacheSnapshots?on={on?}&amp;off={off?}</url>
   <authentication>user</authentication>
   <format default="html">argument</format>
   <family>EMS Utils</family>
