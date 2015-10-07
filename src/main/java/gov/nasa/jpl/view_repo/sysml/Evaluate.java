@@ -244,6 +244,8 @@ public class Evaluate implements Viewable< EmsScriptNode > {
                 return new Text(expression);
             }
             
+            logger.warn("kToJson(" + expression + ") = \n" + json.toString( 4 ) );
+            
             Set< EmsScriptNode > elements = 
                     ModelLoadActionExecuter.loadJson( json, this.modelContext,
                                                       this.serviceContext );
