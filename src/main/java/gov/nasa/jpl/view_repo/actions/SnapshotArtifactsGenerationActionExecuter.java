@@ -216,16 +216,8 @@ public class SnapshotArtifactsGenerationActionExecuter  extends ActionExecuterAb
                 	try{
                         // lets check whether or not docbook has been generated
                         StringBuffer response = new StringBuffer();
-                        // lookup snapshotNode using standard lucene as snapshotId is unique across all workspaces
-                        ArrayList<NodeRef> nodeRefs = NodeUtil.findNodeRefsByType( snapshotId, "@cm\\:name:\"", services );
-                        if (nodeRefs == null || nodeRefs.size() != 1) {
-                            nodeRefs = NodeUtil.findNodeRefsByType( snapshotId, "@sysml\\:id:\"", services );
-                            if (nodeRefs == null || nodeRefs.size() != 1) {
-                                throw new Exception("Failed to find snapshot with Id: " + snapshotId);
-                            }
-                        }
-                        
-                        snapshotNode = new EmsScriptNode(nodeRefs.get( 0 ), services, response);
+                        snapshotNode = snapshotService.getSnapshotNode(snapshotId);
+                        if(snapshotNode == null) throw new Exception("Failed to find snapshot with alfresco ID: " + snapshotId);
                         timestamp = (Date)snapshotNode.getProperty("view2:timestamp");
                         
                         //get tag name from config id
@@ -279,7 +271,8 @@ public class SnapshotArtifactsGenerationActionExecuter  extends ActionExecuterAb
 		                    String viewId = viewNode.getSysmlId();
 		                    String contextPath = "alfresco/service";
 	                    
-		                    DocBookWrapper docBookWrapper =  docbook.createDocBook(viewNode, viewId, snapshotNode.getSysmlId(), contextPath, snapshotNode, workspace, timestamp, response);
+//		                    DocBookWrapper docBookWrapper =  docbook.createDocBook(viewNode, viewId, snapshotNode.getSysmlId(), contextPath, snapshotNode, workspace, timestamp, response);
+		                    DocBookWrapper docBookWrapper =  docbook.createDocBook(viewNode, viewId, snapshotNode.getId(), contextPath, snapshotNode, workspace, timestamp, response);
 		                    if ( docBookWrapper == null ) {
 		                        logger.error("Failed to generate DocBook!" );
 		                        snapshotNode = null;
