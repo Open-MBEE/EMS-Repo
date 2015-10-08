@@ -24,8 +24,10 @@
 8. Install Postgres DB on your localhost and use the
 src/main/java/gov/nasa/jpl/view_repo/db/mms.sql to initialize the database (as follows):
   - Open a postgres terminal (depends on your OS, but usually Postgres shows up with this shortcut)
-  - In the terminal, use "\i <path to mms.sql>" to create and initialize the database
-  - In a browser, or using curl on the command line, GET "http://127.0.0.1:8080/alfresco/service/model2postgres/".
+  - In the terminal, use the following to create and initialize the database
+      \i <path to mms.sql>
+  - In a browser, or using curl on the command line:
+      GET "http://127.0.0.1:8080/alfresco/service/model2postgres/".
     This will transfer the existing Alfresco graph to Postgres, which is then used for all computations. 
 	
 ###The remaining instructions of the readme will guide you through specific set ups 
