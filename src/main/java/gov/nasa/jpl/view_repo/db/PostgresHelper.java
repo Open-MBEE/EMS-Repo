@@ -107,8 +107,8 @@ public class PostgresHelper {
 
 	public Node getNodeFromNodeRefId(String nodeRefId) {
 		try {
-			ResultSet rs = execQuery("SELECT * FROM nodes" + workspaceName + " where nodeRefId = '"
-					+ nodeRefId + "'");
+			ResultSet rs = execQuery("SELECT * FROM nodes" + workspaceName
+					+ " where nodeRefId = '" + nodeRefId + "'");
 
 			if (rs.first()) {
 				return new Node(rs.getInt(1), rs.getString(2), rs.getString(3),
@@ -123,7 +123,8 @@ public class PostgresHelper {
 
 	public Node getNode(int id) {
 		try {
-			ResultSet rs = execQuery("SELECT * FROM nodes " + workspaceName + " where id = " + id);
+			ResultSet rs = execQuery("SELECT * FROM nodes " + workspaceName
+					+ " where id = " + id);
 			if (rs.next()) {
 				return new Node(rs.getInt(1), rs.getString(2), rs.getString(3),
 						rs.getInt(4), rs.getString(5));
@@ -137,8 +138,8 @@ public class PostgresHelper {
 
 	public Node getNodeFromSysmlId(String sysmlId) {
 		try {
-			ResultSet rs = execQuery("SELECT * FROM nodes" + workspaceName + " where sysmlid = '"
-					+ sysmlId + "'");
+			ResultSet rs = execQuery("SELECT * FROM nodes" + workspaceName
+					+ " where sysmlid = '" + sysmlId + "'");
 
 			if (rs.next()) {
 				return new Node(rs.getInt(1), rs.getString(2), rs.getString(3),
@@ -165,14 +166,37 @@ public class PostgresHelper {
 		}
 	}
 
+	public void updateNodeVersionedRefId(String nodeRefId, String versionedRefId) {
+		try {
+			execQuery("update nodes" + workspaceName
+					+ " set versionedRefId = '" + versionedRefId
+					+ "' where noderefid='" + nodeRefId + "'");
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	public void deleteNode(String nodeRefId) {
+		try {
+			execQuery("delete from nodes" + workspaceName
+					+ " where noderefid = " + nodeRefId);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
 	public void insertEdge(String parentNodeRefId, String childNodeRefId,
 			DbEdgeTypes edgeType) {
 
 		if (parentNodeRefId.isEmpty() || childNodeRefId.isEmpty())
 			return;
 		try {
-			execQuery("insert into edges" + workspaceName + " values((select id from nodes" + workspaceName + " where nodeRefId = '" + parentNodeRefId + "'),"
-					+ "(select id from nodes" + workspaceName + " where nodeRefId = '" + childNodeRefId + "'), " + DbEdgeTypes.REGULAR.getValue() + ")");
+			execQuery("insert into edges" + workspaceName
+					+ " values((select id from nodes" + workspaceName
+					+ " where nodeRefId = '" + parentNodeRefId + "'),"
+					+ "(select id from nodes" + workspaceName
+					+ " where nodeRefId = '" + childNodeRefId + "'), "
+					+ DbEdgeTypes.REGULAR.getValue() + ")");
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -188,15 +212,18 @@ public class PostgresHelper {
 			if (n == null)
 				return result;
 
-			ResultSet rs = execQuery("select nodeRefId from nodes" + workspaceName + " where id in (select * from get_children("
-					+ n.getId() + ", " + et.getValue() + ", '" + workspaceName + "'))");
+			ResultSet rs = execQuery("select nodeRefId from nodes"
+					+ workspaceName
+					+ " where id in (select * from get_children(" + n.getId()
+					+ ", " + et.getValue() + ", '" + workspaceName + "'))");
 
 			while (rs.next()) {
 				result.add(rs.getString(1));
 			}
 
-			rs = execQuery("select nodeRefId from nodes" + workspaceName + " where id in (select * from get_children("
-					+ n2.getId() + ", " + et.getValue() + ", '" + workspaceName + "'))");
+			rs = execQuery("select nodeRefId from nodes" + workspaceName
+					+ " where id in (select * from get_children(" + n2.getId()
+					+ ", " + et.getValue() + ", '" + workspaceName + "'))");
 
 			while (rs.next()) {
 				result.add(rs.getString(1));
@@ -208,7 +235,8 @@ public class PostgresHelper {
 		return result;
 	}
 
-	public List<String> getImmediateChildren(String sysmlId, DbEdgeTypes edgeType){
+	public List<String> getImmediateChildren(String sysmlId,
+			DbEdgeTypes edgeType) {
 		List<String> result = new ArrayList<String>();
 		try {
 			Node n = getNodeFromSysmlId(sysmlId);
@@ -216,13 +244,20 @@ public class PostgresHelper {
 			if (n == null)
 				return result;
 
-			ResultSet rs = execQuery("select noderefid from nodes" + workspaceName +" where id in (select child from edges where parent = " + n.getId() + " and edgeType = " + edgeType.getValue() + ")");
+			ResultSet rs = execQuery("select noderefid from nodes"
+					+ workspaceName
+					+ " where id in (select child from edges where parent = "
+					+ n.getId() + " and edgeType = " + edgeType.getValue()
+					+ ")");
 
 			while (rs.next()) {
 				result.add(rs.getString(1));
 			}
 
-			rs = execQuery("select noderefid from nodes" + workspaceName +" where id in (select child from edges where parent = " + n2.getId() + " and edgeType = " + edgeType.getValue() + ")");
+			rs = execQuery("select noderefid from nodes" + workspaceName
+					+ " where id in (select child from edges where parent = "
+					+ n2.getId() + " and edgeType = " + edgeType.getValue()
+					+ ")");
 
 			while (rs.next()) {
 				result.add(rs.getString(1));
@@ -233,7 +268,7 @@ public class PostgresHelper {
 		}
 		return result;
 	}
-	
+
 	public List<Node> getChildren(String nodeRefId, int edgeType) {
 		List<Node> result = new ArrayList<Node>();
 		try {
@@ -261,23 +296,22 @@ public class PostgresHelper {
 			if (n == null)
 				return;
 
-			execQuery("delete from edges" + workspaceName  + " where parent = " + n.getId()
-					+ " or child = " + n.getId());
+			execQuery("delete from edges" + workspaceName + " where parent = "
+					+ n.getId() + " or child = " + n.getId());
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
 
-	public void deleteEdgesForNode(String nodeRefId, int edgeType) {
+	public void deleteEdgesForChildNode(String nodeRefId, DbEdgeTypes edgeType) {
 		try {
 			Node n = getNodeFromNodeRefId(nodeRefId);
 
 			if (n == null)
 				return;
 
-			execQuery("delete from edges" + workspaceName + " where parent = " + n.getId()
-					+ " or child = " + n.getId() + " and edgeType = "
-					+ edgeType);
+			execQuery("delete from edges" + workspaceName + " where child = "
+					+ n.getId() + " and edgeType = " + edgeType.getValue());
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -307,9 +341,9 @@ public class PostgresHelper {
 			if (pn == null || cn == null)
 				return;
 
-			execQuery("delete from edges" + workspaceName + " where parent = " + pn.getId()
-					+ " and child = " + cn.getId() + " and edgeType = "
-					+ edgeType);
+			execQuery("delete from edges" + workspaceName + " where parent = "
+					+ pn.getId() + " and child = " + cn.getId()
+					+ " and edgeType = " + edgeType);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -322,7 +356,7 @@ public class PostgresHelper {
 
 			execQuery("create table edges" + childWorkspaceName
 					+ " as select * from edges " + workspaceName + ";");
-} catch (SQLException e) {
+		} catch (SQLException e) {
 			e.printStackTrace();
 		}
 	}
