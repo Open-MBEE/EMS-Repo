@@ -3558,6 +3558,17 @@ public class NodeUtil {
 		return elements;
 	}
 
+	public static String getVersionedRefId(EmsScriptNode n){
+		String versionString = n.getNodeRef().toString();
+		Version headVersionNode = n.getHeadVersion();
+		if (headVersionNode != null) {
+			NodeRef versionNode = headVersionNode.getVersionedNodeRef();
+			if (versionNode != null)
+				versionString = versionNode.toString();
+		}
+		return versionString;
+	}
+	
 	public static boolean isDeleted(EmsScriptNode node) {
 		if (node == null)
 			return false;

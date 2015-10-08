@@ -29,6 +29,7 @@
 
 package gov.nasa.jpl.view_repo.webscripts;
 
+import gov.nasa.jpl.mbee.util.Pair;
 import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.view_repo.db.DbContract;
 import gov.nasa.jpl.view_repo.db.Node;
@@ -39,6 +40,7 @@ import gov.nasa.jpl.view_repo.util.NodeUtil;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -141,7 +143,7 @@ public class Model2Postgres extends AbstractJavaWebScript {
 		String name;
 		NodeRef siteRef;
 		List<SiteInfo> sites = services.getSiteService().listSites(null);
-		Map<String, String> edges = new HashMap<String, String>();
+		List<Pair<String, String>> edges = new ArrayList<Pair<String, String>>();
 
 		for (SiteInfo siteInfo : sites) {
 			JSONObject siteJson = new JSONObject();
@@ -161,14 +163,22 @@ public class Model2Postgres extends AbstractJavaWebScript {
 								.contains(emsNode)))) {
 					try {
 						pgh.connect();
-						int nodesInserted = insertNodes(emsNode, pgh, dateTime,
-								edges);
+
+						for (EmsScriptNode n : emsNode.getChildNodes()) {
+							if (n.getName().equals("Models")) {
+								for (EmsScriptNode c : n.getChildNodes()) {
+									int nodesInserted = insertNodes(c,
+											pgh, dateTime, edges, workspace);
+									siteJson.put("sysmlid", name);
+									siteJson.put("name", siteInfo.getTitle());
+									siteJson.put("elementCount", nodesInserted);
+									json.put(siteJson);
+								}
+							}
+						}
+
 						pgh.close();
 
-						siteJson.put("sysmlid", name);
-						siteJson.put("name", siteInfo.getTitle());
-						siteJson.put("elementCount", nodesInserted);
-						json.put(siteJson);
 					} catch (ClassNotFoundException | SQLException e) {
 						e.printStackTrace();
 					}
@@ -178,8 +188,8 @@ public class Model2Postgres extends AbstractJavaWebScript {
 
 		try {
 			pgh.connect();
-			for (Entry<String, String> entry : edges.entrySet()) {
-				pgh.insertEdge(entry.getValue(), entry.getKey(),
+			for (Pair<String, String> entry : edges) {
+				pgh.insertEdge(entry.first, entry.second,
 						PostgresHelper.DbEdgeTypes.REGULAR);
 			}
 			pgh.close();
@@ -191,25 +201,19 @@ public class Model2Postgres extends AbstractJavaWebScript {
 	}
 
 	protected int insertNodes(EmsScriptNode n, PostgresHelper pgh, Date dt,
-			Map<String, String> edges) {
+			List<Pair<String, String>> edges, WorkspaceNode ws) {
 
 		int i = 0;
 
-		// TODO: get the version node
-		String versionString = n.getNodeRef().toString();
-		Version headVersionNode = n.getHeadVersion();
-		if(headVersionNode != null){
-			NodeRef versionNode = headVersionNode.getVersionedNodeRef(); 
-			if (versionNode != null)
-				versionString = versionNode.toString();
-			
-		}
-		pgh.insertNode(n.getNodeRef().toString(), versionString, n.getSysmlId());
+		pgh.insertNode(n.getNodeRef().toString(),
+				NodeUtil.getVersionedRefId(n), n.getSysmlId());
+
 		i++;
 
-		for (EmsScriptNode c : n.getChildNodes()) {
-			edges.put(c.getNodeRef().toString(), n.getNodeRef().toString());
-			i += insertNodes(c, pgh, dt, edges);
+		for (NodeRef c : n.getOwnedChildren(false, dt, ws)) {
+			edges.add(new Pair<String, String>(n.getSysmlId(), (new EmsScriptNode(c, services, response)).getSysmlId()));
+			i += insertNodes(new EmsScriptNode(c, services, response), pgh, dt,
+					edges, ws);
 		}
 		return i;
 	}

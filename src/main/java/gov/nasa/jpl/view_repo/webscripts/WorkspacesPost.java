@@ -32,11 +32,13 @@ package gov.nasa.jpl.view_repo.webscripts;
 import gov.nasa.jpl.mbee.util.Debug;
 import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.mbee.util.Utils;
+import gov.nasa.jpl.view_repo.db.PostgresHelper;
 import gov.nasa.jpl.view_repo.util.CommitUtil;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 //import gov.nasa.jpl.view_repo.webscripts.AbstractJavaWebScript.LogLevel;
+
 
 
 import java.util.Date;
@@ -272,7 +274,8 @@ public class WorkspacesPost extends AbstractJavaWebScript{
             }
             finalWorkspace.createOrUpdateProperty( "ems:permission", permission );
         }
-        
+       
+	
         return finalWorkspace;
     }
 

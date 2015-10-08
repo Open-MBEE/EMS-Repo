@@ -29,6 +29,7 @@
 
 package gov.nasa.jpl.view_repo.webscripts;
 
+import gov.nasa.jpl.view_repo.db.PostgresHelper;
 import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
@@ -49,6 +50,8 @@ import org.json.JSONObject;
 import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
+
+import com.sun.star.sdbc.SQLException;
 
 /**
  * Descriptor at /view-repo/src/main/amp/config/alfresco/extension/templates/webscripts/gov/nasa/jpl/javawebscripts/project.post.desc.xml
@@ -175,6 +178,8 @@ public class ProjectPost extends AbstractJavaWebScript {
             log(Level.INFO, HttpServletResponse.SC_OK, "Project metadata updated.\n");
         }
 
+        sendProjectDelta(workspace, projectNode);
+        
         return HttpServletResponse.SC_OK;
     }
 
@@ -297,9 +302,29 @@ public class ProjectPost extends AbstractJavaWebScript {
             projectNode.removeChildrenFromJsonCache( true );
         }
 		projectNode.getOrSetCachedVersion();
+        sendProjectDelta(workspace, projectNode);
 		return HttpServletResponse.SC_OK;
 	}
 
+    
+    private void sendProjectDelta(WorkspaceNode workspace, EmsScriptNode projectNode){
+    	PostgresHelper pgh = null;
+    	if(workspace == null)
+    		pgh = new PostgresHelper("");
+    	else 
+    		pgh = new PostgresHelper(workspace.getId());
+
+    	try {
+			pgh.connect();
+			pgh.insertNode(projectNode.getNodeRef().toString(), NodeUtil.getVersionedRefId(projectNode), projectNode.getSysmlId());
+			pgh.close();
+		} catch (ClassNotFoundException | java.sql.SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	
+    }
+    
 	/**
 	 * Validate the request and check some permissions
 	 */

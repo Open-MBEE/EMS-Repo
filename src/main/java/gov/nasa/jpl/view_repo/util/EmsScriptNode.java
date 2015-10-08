@@ -2739,16 +2739,7 @@ public class EmsScriptNode extends ScriptNode implements
 		elementJson.put("creator", originalNode.getProperty("cm:creator"));
 		elementJson.put("created", originalNode.getProperty("cm:created"));
 		elementJson.put("nodeRefId", originalNode.getNodeRef().toString());
-
-		String versionString = originalNode.getNodeRef().toString();
-		Version headVersionNode = originalNode.getHeadVersion();
-		if (headVersionNode != null) {
-			NodeRef versionNode = headVersionNode.getVersionedNodeRef();
-			if (versionNode != null)
-				versionString = versionNode.toString();
-
-		}
-		elementJson.put("versionedRefId", versionString);
+		elementJson.put("versionedRefId", NodeUtil.getVersionedRefId(this));
 
 		Pair<Date, String> pair = this.getLastModifiedAndModifier(dateTime);
 		if (pair != null) {
@@ -2807,14 +2798,6 @@ public class EmsScriptNode extends ScriptNode implements
 		}
 		// not passing in dateTime/workspace since sysml id is immutable
 		EmsScriptNode owner = this.getOwningParent(null, null, true);
-		if (owner != null) {
-			if (owner.getReifiedPkg(null, null) != null) {
-				elementJson.put("therealowner", owner.getReifiedPkg(null, null)
-						.getNodeRef().toString());
-			}
-		} else {
-			elementJson.put("therealowner", JSONObject.NULL);
-		}
 
 		if (filter == null || filter.size() == 0 || filter.contains("owner")) {
 

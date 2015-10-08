@@ -325,7 +325,9 @@ public class MmsWorkspaceDiffPost extends ModelPost {
 	                    }
 	                }
 	                
-	                if ( !CommitUtil.sendDeltas(finalJsonDiff, targetWsId, projectId, source) ) {
+	                // TODO: ensure that the last argument contains the list of the new reified packages that
+	                // need to be added. 
+	                if ( !CommitUtil.sendDeltas(finalJsonDiff, targetWsId, projectId, source, new JSONArray()) ) {
                         //log(Level.WARN, "MmsWorkspaceDiffPost deltas not posted properly");
                         logger.warn( "MmsWorkspaceDiffPost deltas not posted properly");
                     }
