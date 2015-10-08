@@ -30,7 +30,7 @@ src/main/java/gov/nasa/jpl/view_repo/db/mms.sql to initialize the database (as f
 
   - In a browser, or using curl on the command line:
 
-       	 GET "http://127.0.0.1:8080/alfresco/service/model2postgres/".
+       	    GET http://127.0.0.1:8080/alfresco/service/model2postgres/
 
     This will transfer the existing Alfresco graph to Postgres, which is then used for all computations. 
 	
