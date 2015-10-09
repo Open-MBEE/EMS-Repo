@@ -1,5 +1,7 @@
 package gov.nasa.jpl.view_repo.db;
 
+import gov.nasa.jpl.mbee.util.Pair;
+
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -171,11 +173,13 @@ public class PostgresHelper {
 		}
 	}
 
-	public void updateNodeVersionedRefId(String sysmlId, String versionedRefId) {
-		if(sysmlId == null || versionedRefId == null) return;
+	public void updateNodeRefIds(String sysmlId, String versionedRefId,
+			String nodeRefId) {
+		if (sysmlId == null || versionedRefId == null)
+			return;
 		try {
-			execUpdate("update nodes" + workspaceName
-					+ " set versionedRefId = '" + versionedRefId
+			execUpdate("update nodes" + workspaceName + " set nodeRefId = '"
+					+ nodeRefId + "'," + " versionedRefId = '" + versionedRefId
 					+ "' where sysmlid='" + sysmlId + "'");
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -211,7 +215,7 @@ public class PostgresHelper {
 					+ " where sysmlId = '" + parentSysmlId + "'),"
 					+ "(select id from nodes" + workspaceName
 					+ " where sysmlId = '" + childSysmlId + "'), "
-					+ DbEdgeTypes.REGULAR.getValue() + ")");
+					+ edgeType.getValue() + ")");
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -219,21 +223,21 @@ public class PostgresHelper {
 	}
 
 	// returns list of nodeRefIds
-	public List<String> getChildrenNodeRefIds(String sysmlId, DbEdgeTypes et) {
-		List<String> result = new ArrayList<String>();
+	public List<Pair<String,String>> getChildren(String sysmlId, DbEdgeTypes et) {
+		List<Pair<String,String>> result = new ArrayList<Pair<String,String>>();
 		try {
 			Node n = getNodeFromSysmlId(sysmlId);
 
 			if (n == null)
 				return result;
 
-			ResultSet rs = execQuery("select nodeRefId from nodes"
+			ResultSet rs = execQuery("select nodeRefId,versionedRefId from nodes"
 					+ workspaceName
 					+ " where id in (select * from get_children(" + n.getId()
 					+ ", " + et.getValue() + ", '" + workspaceName + "'))");
 
 			while (rs.next()) {
-				result.add(rs.getString(1));
+				result.add(new Pair<String,String>(rs.getString(1), rs.getString(2)));
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -241,22 +245,22 @@ public class PostgresHelper {
 		return result;
 	}
 
-	public List<String> getImmediateChildren(String sysmlId,
+	public List<Pair<String,String>> getImmediateChildren(String sysmlId,
 			DbEdgeTypes edgeType) {
-		List<String> result = new ArrayList<String>();
+		List<Pair<String,String>> result = new ArrayList<Pair<String,String>>();
 		try {
 			Node n = getNodeFromSysmlId(sysmlId);
 			if (n == null)
 				return result;
 
-			ResultSet rs = execQuery("select noderefid from nodes"
+			ResultSet rs = execQuery("select noderefid,versionedrefid from nodes"
 					+ workspaceName
 					+ " where id in (select child from edges where parent = "
 					+ n.getId() + " and edgeType = " + edgeType.getValue()
 					+ ")");
 
 			while (rs.next()) {
-				result.add(rs.getString(1));
+				result.add(new Pair<String,String>(rs.getString(1), rs.getString(2)));
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -346,10 +350,13 @@ public class PostgresHelper {
 
 	public void createBranchFromWorkspace(String childWorkspaceName) {
 		try {
-			execUpdate("create table nodes" + childWorkspaceName.replace("-", "_")
+			
+			execUpdate("create table nodes"
+					+ childWorkspaceName.replace("-", "_")
 					+ " as select * from nodes" + workspaceName);
 
-			execUpdate("create table edges" + childWorkspaceName.replace("-", "_")
+			execUpdate("create table edges"
+					+ childWorkspaceName.replace("-", "_")
 					+ " as select * from edges" + workspaceName);
 		} catch (SQLException e) {
 			e.printStackTrace();

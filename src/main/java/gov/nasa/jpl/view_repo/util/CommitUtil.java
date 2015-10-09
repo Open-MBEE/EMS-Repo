@@ -874,8 +874,8 @@ public class CommitUtil {
 
 			for (int i = 0; i < updated.length(); i++) {
 				JSONObject e = updated.getJSONObject(i);
-				pgh.updateNodeVersionedRefId(e.getString("sysmlid"),
-						e.getString("versionedRefId"));
+				pgh.updateNodeRefIds(e.getString("sysmlid"),
+						e.getString("versionedRefId"), e.getString("nodeRefId"));
 			}
 
 			for (int i = 0; i < moved.length(); i++) {
@@ -944,14 +944,13 @@ public class CommitUtil {
 		branchJson.put("createdWorkspace",
 				getWorkspaceDetails(created, srcDateTime)); // created branch
 
-		
-        PostgresHelper pgh = null;
-    	if(src == null)
-    		pgh = new PostgresHelper("");
-    	else 
-    		pgh = new PostgresHelper(src.getId());
+		PostgresHelper pgh = null;
+		if (src == null)
+			pgh = new PostgresHelper("");
+		else
+			pgh = new PostgresHelper(src.getId());
 
-    	try {
+		try {
 			pgh.connect();
 			pgh.createBranchFromWorkspace(created.getId());
 			pgh.close();
@@ -959,7 +958,7 @@ public class CommitUtil {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
+
 		return sendJmsMsg(branchJson, TYPE_BRANCH, null, null);
 	}
 

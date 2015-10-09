@@ -47,6 +47,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -144,6 +146,7 @@ public class Model2Postgres extends AbstractJavaWebScript {
 		NodeRef siteRef;
 		List<SiteInfo> sites = services.getSiteService().listSites(null);
 		List<Pair<String, String>> edges = new ArrayList<Pair<String, String>>();
+		List<Pair<String, String>> documentEdges = new ArrayList<Pair<String, String>>();
 
 		for (SiteInfo siteInfo : sites) {
 			JSONObject siteJson = new JSONObject();
@@ -167,8 +170,9 @@ public class Model2Postgres extends AbstractJavaWebScript {
 						for (EmsScriptNode n : emsNode.getChildNodes()) {
 							if (n.getName().equals("Models")) {
 								for (EmsScriptNode c : n.getChildNodes()) {
-									int nodesInserted = insertNodes(c,
-											pgh, dateTime, edges, workspace);
+									int nodesInserted = insertNodes(c, pgh,
+											dateTime, edges, documentEdges,
+											workspace);
 									siteJson.put("sysmlid", name);
 									siteJson.put("name", siteInfo.getTitle());
 									siteJson.put("elementCount", nodesInserted);
@@ -192,6 +196,10 @@ public class Model2Postgres extends AbstractJavaWebScript {
 				pgh.insertEdge(entry.first, entry.second,
 						PostgresHelper.DbEdgeTypes.REGULAR);
 			}
+			for (Pair<String, String> entry : documentEdges) {
+				pgh.insertEdge(entry.first, entry.second,
+						PostgresHelper.DbEdgeTypes.DOCUMENT);
+			}
 			pgh.close();
 		} catch (ClassNotFoundException | SQLException e) {
 			e.printStackTrace();
@@ -201,7 +209,8 @@ public class Model2Postgres extends AbstractJavaWebScript {
 	}
 
 	protected int insertNodes(EmsScriptNode n, PostgresHelper pgh, Date dt,
-			List<Pair<String, String>> edges, WorkspaceNode ws) {
+			List<Pair<String, String>> edges,
+			List<Pair<String, String>> documentEdges, WorkspaceNode ws) {
 
 		int i = 0;
 
@@ -210,10 +219,46 @@ public class Model2Postgres extends AbstractJavaWebScript {
 
 		i++;
 
+		// process node documentation for transclusion links
+		String doc = (String) n.getProperty(Acm.ACM_DOCUMENTATION);
+		if (doc != null) {
+			String MMS_TRANSCLUDE_PATTERN = "\\s*(?i)mms-transclude-doc\\s*mms-eid\\s*=\\s*(\"([^\"]*\"))";
+			Pattern pattern = Pattern.compile(MMS_TRANSCLUDE_PATTERN);
+			Matcher matcher = pattern.matcher(doc);
+
+			while (matcher.find()) {
+				String mmseid = matcher.group(1).replace("\"", "");
+				if (mmseid != null)
+					documentEdges.add(new Pair<String, String>(n.getSysmlId(),
+							mmseid));
+			}
+		}
+
+		// document edges based on view2view property
+		String view2viewProperty = (String) n.getProperty(Acm.ACM_VIEW_2_VIEW);
+		if (view2viewProperty != null) {
+			JSONArray v2v = new JSONArray(view2viewProperty);
+			if (v2v != null) {
+				for (int i2 = 0; i2 < v2v.length(); i2++) {
+					JSONObject o = v2v.getJSONObject(i2);
+					String id = o.getString("id");
+					JSONArray childViews = o.getJSONArray("childrenViews");
+					for (int j = 0; j < childViews.length(); j++) {
+						documentEdges.add(new Pair<String, String>(id,
+								childViews.getString(j)));
+					}
+				}
+			}
+		}
+
 		for (NodeRef c : n.getOwnedChildren(false, dt, ws)) {
-			edges.add(new Pair<String, String>(n.getSysmlId(), (new EmsScriptNode(c, services, response)).getSysmlId()));
+			EmsScriptNode cn = new EmsScriptNode(c, services, response);
+
+			// containment edges
+			edges.add(new Pair<String, String>(n.getSysmlId(), cn.getSysmlId()));
+
 			i += insertNodes(new EmsScriptNode(c, services, response), pgh, dt,
-					edges, ws);
+					edges, documentEdges, ws);
 		}
 		return i;
 	}

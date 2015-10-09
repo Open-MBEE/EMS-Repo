@@ -3562,7 +3562,7 @@ public class NodeUtil {
 		String versionString = n.getNodeRef().toString();
 		Version headVersionNode = n.getHeadVersion();
 		if (headVersionNode != null) {
-			NodeRef versionNode = headVersionNode.getVersionedNodeRef();
+			NodeRef versionNode = headVersionNode.getFrozenStateNodeRef();
 			if (versionNode != null)
 				versionString = versionNode.toString();
 		}

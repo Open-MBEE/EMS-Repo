@@ -31,6 +31,7 @@
 
 package gov.nasa.jpl.view_repo.webscripts;
 
+import gov.nasa.jpl.mbee.util.Pair;
 import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.mbee.util.Timer;
 import gov.nasa.jpl.mbee.util.Utils;
@@ -444,16 +445,16 @@ public class ModelGet extends AbstractJavaWebScript {
 		if (workspace == null)
 			pgh = new PostgresHelper("");
 		else
-			pgh = new PostgresHelper(workspace.getId().replace("-", "_"));
+			pgh = new PostgresHelper(workspace.getId());
 
-		List<String> childrenNodeRefIds = null;
+		List<Pair<String,String>> childrenNodeRefIds = null;
 		try {
 			pgh.connect();
 			if (maxDepth < 0) {
-				childrenNodeRefIds = pgh.getChildrenNodeRefIds(
+				childrenNodeRefIds = pgh.getChildren(
 						root.getSysmlId(), DbEdgeTypes.REGULAR);
 			} else if (maxDepth == 0) {
-				childrenNodeRefIds = new ArrayList<String>();
+				childrenNodeRefIds = new ArrayList<Pair<String,String>>();
 			} else if (maxDepth == 1) {
 				childrenNodeRefIds = pgh.getImmediateChildren(
 						root.getSysmlId(), DbEdgeTypes.REGULAR);
@@ -467,11 +468,11 @@ public class ModelGet extends AbstractJavaWebScript {
 		}
 
 		// add root
-		childrenNodeRefIds.add(root.getNodeRef().toString());
+		childrenNodeRefIds.add(new Pair<String,String>(root.getNodeRef().toString(), NodeUtil.getVersionedRefId(root)));
 
-		for (String c : childrenNodeRefIds) {
+		for (Pair<String,String> c : childrenNodeRefIds) {
 
-			EmsScriptNode ecn = new EmsScriptNode(new NodeRef(c), services,
+			EmsScriptNode ecn = new EmsScriptNode(new NodeRef(c.second), services,
 					response);
 
 			if (!ecn.exists() || ecn.getSysmlId().endsWith("_pkg")
@@ -479,7 +480,7 @@ public class ModelGet extends AbstractJavaWebScript {
 					|| !checkPermissions(ecn, PermissionService.READ))
 				continue;
 
-			elementsFound.put(c, ecn);
+			elementsFound.put(c.second, ecn);
 		}
 	}
 
