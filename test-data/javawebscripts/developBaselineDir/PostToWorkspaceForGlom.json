@@ -1,22 +1,23 @@
 {"elements": [{
+    "qualifiedId": "/europa/123456/glomPost",
+    "qualifiedName": "/europa/JW_TEST/glomPost",
+    "sysmlid": "glomPost",
+    "editable": true,
+    "creator": "admin",
     "modifier": "admin",
-    "qualifiedId": "/no_site/no_site_no_project/holding_bin_no_site_no_project/poo",
-    "qualifiedName": "/no_site/no_site_no_project/holding_bin/null",
-    "sysmlid": "poo",
-    "documentation": "poo is poo",
-    "owner": "holding_bin_no_site_no_project",
+    "name": "glomPost",
+    "owner": "123456",
+    "documentation": "glomPost",
     "specialization": {
         "propertyType": null,
         "isDerived": false,
         "isSlot": false,
         "value": [{
             "valueExpression": null,
-            "string": "the poo value",
+            "string": "on a shoe",
             "type": "LiteralString"
         }],
         "type": "Property"
-    },
-    "editable": true,
-    "creator": "admin",
+    }
 }]}
 200

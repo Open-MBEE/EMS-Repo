@@ -1,5 +1,27 @@
 {"elements": [
     {
+        "qualifiedId": "/europa/123456/onBothWorkspaces1",
+        "qualifiedName": "/europa/JW_TEST/onBothWorkspaces1",
+        "sysmlid": "onBothWorkspaces1",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "onBothWorkspaces1",
+        "owner": "123456",
+        "documentation": "",
+        "specialization": {
+            "propertyType": null,
+            "isDerived": false,
+            "isSlot": false,
+            "value": [{
+                "valueExpression": null,
+                "string": "gg_string",
+                "type": "LiteralString"
+            }],
+            "type": "Property"
+        }
+    },
+    {
         "qualifiedId": "/europa/123456/onBothWorkspaces2",
         "qualifiedName": "/europa/JW_TEST/onBothWorkspaces2",
         "sysmlid": "onBothWorkspaces2",
@@ -24,28 +46,6 @@
                     "type": "ElementValue"
                 }
             ]
-        }
-    },
-    {
-        "qualifiedId": "/europa/123456/onBothWorkspaces1",
-        "qualifiedName": "/europa/JW_TEST/onBothWorkspaces1",
-        "sysmlid": "onBothWorkspaces1",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "onBothWorkspaces1",
-        "owner": "123456",
-        "documentation": "",
-        "specialization": {
-            "propertyType": null,
-            "isDerived": false,
-            "isSlot": false,
-            "value": [{
-                "valueExpression": null,
-                "string": "gg_string",
-                "type": "LiteralString"
-            }],
-            "type": "Property"
         }
     }
 ]}

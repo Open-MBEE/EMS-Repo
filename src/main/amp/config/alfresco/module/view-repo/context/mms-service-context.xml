@@ -396,6 +396,14 @@
         <property name="services" ref="ServiceRegistry" />
     </bean>
 
+   <bean id="webscript.gov.nasa.jpl.mms.workspaces.snapshot.get"
+        class="gov.nasa.jpl.view_repo.webscripts.MmsSnapshotGet" parent="webscript"
+        singleton="false">
+        <property name="repositoryHelper" ref="repositoryHelper" />
+        <property name="services" ref="ServiceRegistry" />
+    </bean>
+ 
+
     <!-- utilities for synchronizing sites including creating a admin user -->
     <bean id="webscript.gov.nasa.jpl.mms.utils.site_perm_sync.post"
         class="gov.nasa.jpl.view_repo.webscripts.util.SitePermSync" parent="webscript"
@@ -434,7 +442,15 @@
         <property name="arguments" ref="repositoryHelper"/>
     </bean>
     
-    <bean id="webscript.gov.nasa.jpl.mms.workspaces.commit.migration"
+    <!-- migration service to make commits consistent with diff code -->
+    <bean id="webscript.gov.nasa.jpl.mms.workspaces.commitmigration.get"
+        class="gov.nasa.jpl.view_repo.webscripts.CommitNodeMigration" parent="webscript"
+        singleton="false">
+        <property name="repositoryHelper" ref="repositoryHelper" />
+        <property name="services" ref="ServiceRegistry" />
+    </bean>
+    
+    <bean id="webscript.gov.nasa.jpl.mms.commitmigrationall.get"
         class="gov.nasa.jpl.view_repo.webscripts.CommitNodeMigration" parent="webscript"
         singleton="false">
         <property name="repositoryHelper" ref="repositoryHelper" />

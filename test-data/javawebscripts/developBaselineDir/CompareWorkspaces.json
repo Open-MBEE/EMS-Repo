@@ -24,10 +24,10 @@
                 }
             },
             {
-                "name": "holding_bin",
                 "qualifiedName": "/no_site/no_site_no_project/holding_bin",
-                "sysmlid": "holding_bin_no_site_no_project",
+                "name": "holding_bin",
                 "owner": "no_site_no_project",
+                "sysmlid": "holding_bin_no_site_no_project",
                 "specialization": {"type": "Package"},
                 "editable": true,
             }

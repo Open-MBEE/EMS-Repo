@@ -36,7 +36,7 @@ import sysml.SystemModel.ModelItem;
 
 // <E, C, T, P, N, I, U, R, V, W, CT>
 //public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScriptNode, String, ? extends Serializable, String, String, Object, EmsScriptNode, String, String, EmsScriptNode > {
-public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScriptNode, EmsScriptNode, EmsScriptNode, String, String, Object, EmsScriptNode, String, String, EmsScriptNode > {
+public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, Object, EmsScriptNode, EmsScriptNode, String, String, Object, EmsScriptNode, String, String, EmsScriptNode > {
 
     protected ServiceRegistry services;
     protected EmsScriptNode serviceNode;
@@ -105,7 +105,7 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
     }
 
 
-    @Override
+    @Override 
     public boolean isDirected( EmsScriptNode relationship ) {
         if ( relationship == null ) return false;
         return services.getDictionaryService()
@@ -145,8 +145,8 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
     }
 
     @Override
-    public Class< EmsScriptNode > getContextClass() {
-        return EmsScriptNode.class;
+    public   Class<Object> getContextClass() {
+        return Object.class;
     }
 
     @Override
@@ -678,7 +678,7 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
     }
 
     @Override
-    public Collection< String > getName( Object context ) {
+    public String getName( Object context ) {
 
     	// Assuming that we can only have EmsScriptNode context:
     	if (context instanceof EmsScriptNode) {
@@ -687,9 +687,13 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
 
     		// Note: This returns the sysml:name not the cm:name, which is what we
     		//		 want
-    		Object name = node.getProperty(Acm.ACM_NAME);
-
-    		return Utils.asList(name, String.class);
+    		Object tempName = node.getProperty(Acm.ACM_NAME);
+    		List<String> tempList = Utils.asList(tempName, String.class);
+    		String name = null; 
+    		if (tempList != null || !tempList.isEmpty()){
+    			name = tempList.get(0);
+    		}
+    		return name;
     	}
 
     	else {
@@ -945,15 +949,13 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
             getPropertyWithType( Object context, EmsScriptNode specifier ) {
         ArrayList< EmsScriptNode > nodes = new ArrayList< EmsScriptNode >();
         if ( specifier != null ) {
-            Collection< String > typeName = getName( specifier );
-            if ( typeName != null ) {
-                for ( String name : typeName ) {
-                    Collection< EmsScriptNode > result =
-                            getPropertyWithTypeName( context, name );
-                    if ( result != null ) nodes.addAll( result );
-                }
+            String name = getName( specifier );
+            if (name != null){
+            	Collection< EmsScriptNode > result = 
+            			getPropertyWithTypeName(context, name);
+            	if (result != null) nodes.addAll (result);
             }
-            return nodes;
+           return nodes;
         } else {
             return getProperty(context, null);
         }

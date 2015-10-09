@@ -36,22 +36,23 @@
     "workspace2": {
         "deletedElements": [],
         "addedElements": [{
-            "qualifiedName": "/no_site/no_site_no_project/holding_bin/null",
-            "owner": "holding_bin_no_site_no_project",
-            "documentation": "poo is poo",
-            "sysmlid": "poo",
+            "qualifiedName": "/europa/JW_TEST/glomPost",
+            "sysmlid": "glomPost",
+            "editable": true,
+            "name": "glomPost",
+            "documentation": "glomPost",
+            "owner": "123456",
             "specialization": {
                 "propertyType": null,
                 "isDerived": false,
                 "isSlot": false,
                 "value": [{
                     "valueExpression": null,
-                    "string": "the poo value",
+                    "string": "on a shoe",
                     "type": "LiteralString"
                 }],
                 "type": "Property"
-            },
-            "editable": true
+            }
         }],
         "conflictedElements": [],
         "updatedElements": [{
