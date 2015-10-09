@@ -42,14 +42,12 @@ create table edges
   edgeType integer references edgeTypes(id) not null
 );
 
-create type edge_type as (p integer, c integer, t integer);
-
 -- given two nodeRefId, insert an edge between the two
-create or replace function insert_edge(text, text, integer, edge_type)
+create or replace function insert_edge(text, text, text, integer)
   returns void as $$
   begin
-    execute 'insert into ' || (format('edges%s', $4)) || ' values((select id from ' || format('nodes%s',$3) || ' 
-      where nodeRefId = $1), (select id from ' || format('nodes%s', $3) || ' where nodeRefId = $2),  $3)';
+    execute 'insert into ' || (format('edges%s', $3)) || ' values((select id from ' || format('nodes%s',$3) || ' 
+      where sysmlId = || ' $1 || '), (select id from ' || format('nodes%s', $3) 	  || ' where sysmlId = ' || $2 || '),  ' || $4 || ')';
   end;
 $$ language plpgsql;
 
@@ -69,6 +67,24 @@ create or replace function get_children(integer, integer, text)
       select distinct * from children';
   end;
 $$ language plpgsql;
+
+-- TODO (with depth)
+create or replace function gc(integer, integer, text, integer)
+  returns table(id bigint) as $$
+  begin
+    return query
+    execute '
+    with recursive children(nid) as (
+	select node.id from ' || format('nodes%s', $3) || ' node where node.id = ' || $1 || '
+   	union
+        select edge.child from ' || format('edges%s', $3) || ' edge where edge.parent = ' || $1 || ' and edge.edgeType = ' || $2 || ' 
+        union 
+	select edge.child from ' || format('edges%s', $3) || ' edge, children c where edge.parent = nid and edge.edgeType = ' || $2 || ' 
+      )
+      select distinct * from children';
+  end;
+$$ language plpgsql;
+
 
 
 create or replace function get_parents(integer, integer, text)
