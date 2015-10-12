@@ -42,7 +42,7 @@ create_curl_cmd(type="POST", data='\'{"elements":[{"sysmlid":"123456","name":"JW
                 branch="master/sites/europa/projects?createSite=true", project_post=True),
 False,
 None,
-["test", "workspaces", "develop", "develop2"]
+["test", "workspaces", "develop", "develop2", "parsek"]
 ],
  
 [
@@ -53,7 +53,7 @@ create_curl_cmd(type="POST", data="elementsNew.json", base_url=BASE_URL_WS,
                 post_type="elements", branch="master/"),
 True,
 common_filters,
-["test", "workspaces", "develop", "develop2"]
+["test", "workspaces", "develop", "develop2", "parsek"]
 ],
         
 [
@@ -2112,7 +2112,7 @@ create_curl_cmd(type="POST", data="operation.json", base_url=BASE_URL_WS,
                 post_type="elements?expression=1%2B1", branch="master/"),
 True,
 common_filters + ['MMS_'],
-["test", "workspaces", "develop", "develop2"]
+["test", "workspaces", "develop", "develop2", "parsek"]
 ],
 
 [
@@ -2123,7 +2123,7 @@ create_curl_cmd(type="POST", data="onePlusOne.k", base_url=BASE_URL_WS,
                 post_type="elements?evaluate", branch="master/"),
 True,
 common_filters + ['MMS_'],
-["test", "workspaces", "develop", "develop2"]
+["test", "workspaces", "develop", "develop2", "parsek"]
 ],
 # PERMISSION TESTING =====================================================
 

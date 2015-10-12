@@ -144,7 +144,7 @@ public class ViewGet extends AbstractJavaWebScript {
         // default recurse=false but recurse only applies to displayed elements and contained views
         boolean recurse = getBooleanArg(req, "recurse", false);
         // default generate=false - generation with viewpoints takes a long time
-        boolean generate = getBooleanArg( req, "generate", false );
+        boolean generate = getBooleanArg( req, "generate", true );
 
         JSONArray viewsJson = new JSONArray();
         if (validateRequest(req, status)) {

@@ -75,7 +75,7 @@
 	            <version>1.0</version>
 	            <scope>system</scope>
 	            <type>jar</type>
-	            <systemPath>${project.basedir}/src/main/amp/web/WEB-INF/lib/sysml-${mbee.version}.jar</systemPath>
+	            <systemPath>${project.basedir}/src/main/amp/web/WEB-INF/lib/sysml.jar</systemPath>
 	        </dependency>
 	        <dependency>
 	            <groupId>mbee_util</groupId>
