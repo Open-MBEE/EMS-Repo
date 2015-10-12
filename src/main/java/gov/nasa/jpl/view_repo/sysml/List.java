@@ -94,6 +94,9 @@ public class List extends ArrayList< Viewable< EmsScriptNode > >
     	
     	this();
 
+    	addToList( c );
+    }
+    protected void addToList( Object[] c ) {
     	for (Object obj : c) {
     		if (obj instanceof Expression<?>) {
     			Object eval = null;
@@ -113,7 +116,12 @@ public class List extends ArrayList< Viewable< EmsScriptNode > >
                     // TODO Auto-generated catch block
                     //e.printStackTrace();
                 }
-    			if ( eval instanceof Viewable ) {
+          if ( eval instanceof Collection ) {
+            Collection<?> coll = (Collection<?>)eval;
+            this.addToList(coll.toArray());
+          } else if ( eval != null && eval.getClass().isArray() ) {
+            this.addToList((Object[])eval);
+          } else if ( eval instanceof Viewable ) {
     			    this.add((Viewable<EmsScriptNode>)eval);
     			} else {
     			    this.add(new Text("" + eval));

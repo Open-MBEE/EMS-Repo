@@ -309,6 +309,8 @@ public class EmsScriptNode extends ScriptNode implements
     public boolean embeddingExpressionInOperation = true;
     public boolean embeddingExpressionInConnector = true;
 
+    public static boolean addingAffectedIds = true;
+
     //private boolean forceCacheUpdate = false;
 
     public static boolean fixOwnedChildren = false;
@@ -2578,6 +2580,15 @@ public class EmsScriptNode extends ScriptNode implements
         putInJson( elementJson, Acm.JSON_DOCUMENTATION,
                    this.getProperty( Acm.ACM_DOCUMENTATION ), filter );
 
+        // add affected ids
+        if ( addingAffectedIds  ) {
+            if ( filter == null || filter.isEmpty() || filter.contains( "affectedIds" ) ) {
+                ArrayList< NodeRef > refs = this.getAffectedElements( false, false, dateTime, false, false, true, false );
+                JSONArray affectedIds = addNodeRefIdsJSON( refs );
+                putInJson( elementJson, "affectedIds", affectedIds, filter );
+            }
+        }
+        
         // check properties rather than aspect since aspect may not be applied on creation
         Object appliedMetatypes = this.getProperty( Acm.ACM_APPLIED_METATYPES );
         Object isMetatype = this.getProperty( Acm.ACM_IS_METATYPE );
@@ -6215,6 +6226,24 @@ public class EmsScriptNode extends ScriptNode implements
     {
         EmsScriptNode parent = getUnreifiedParent( dateTime, ws );
         return parent != null && parent.hasValueSpecProperty( this, dateTime, ws );
+    }
+    
+    public ArrayList<NodeRef>
+            getAffectedElements( boolean ignoreWorkspace,
+                                 boolean onlyThisWorkspace, Date dateTime,
+                                 boolean justFirst,
+                                 boolean optimisticJustFirst,
+                                 boolean exactMatch, boolean includeDeleted ) {
+//        Collection< EmsScriptNode > elements =
+//                new LinkedHashSet< EmsScriptNode >();
+        ArrayList< NodeRef > refs = NodeUtil.findNodeRefsByType( this.getSysmlId(),
+                                     "@sysml\\:elementValueOfElement:\"",
+                                     ignoreWorkspace, parentWorkspace,
+                                     onlyThisWorkspace, dateTime, justFirst,
+                                     optimisticJustFirst, exactMatch, services,
+                                     includeDeleted, ADMIN_USER_NAME );
+
+        return refs;
     }
 
     /**
