@@ -6234,14 +6234,14 @@ public class EmsScriptNode extends ScriptNode implements
                                  boolean justFirst,
                                  boolean optimisticJustFirst,
                                  boolean exactMatch, boolean includeDeleted ) {
-//        Collection< EmsScriptNode > elements =
-//                new LinkedHashSet< EmsScriptNode >();
-        ArrayList< NodeRef > refs = NodeUtil.findNodeRefsByType( this.getSysmlId(),
-                                     "@sysml\\:elementValueOfElement:\"",
-                                     ignoreWorkspace, parentWorkspace,
-                                     onlyThisWorkspace, dateTime, justFirst,
-                                     optimisticJustFirst, exactMatch, services,
-                                     includeDeleted, ADMIN_USER_NAME );
+        ArrayList< NodeRef > refs =
+                NodeUtil.findNodeRefsByType( this.getNodeRef().toString(),
+                                             "@sysml\\:elementValueOfElement:\"",
+                                             ignoreWorkspace, parentWorkspace,
+                                             onlyThisWorkspace, dateTime,
+                                             justFirst, optimisticJustFirst,
+                                             exactMatch, services,
+                                             includeDeleted, null );
 
         return refs;
     }
