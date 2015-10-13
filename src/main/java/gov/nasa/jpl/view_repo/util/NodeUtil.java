@@ -3558,7 +3558,7 @@ public class NodeUtil {
 		return elements;
 	}
 
-	public static String getVersionedRefId(EmsScriptNode n){
+	public static String getVersionedRefId(EmsScriptNode n) {
 		String versionString = n.getNodeRef().toString();
 		Version headVersionNode = n.getHeadVersion();
 		if (headVersionNode != null) {
@@ -3568,7 +3568,7 @@ public class NodeUtil {
 		}
 		return versionString;
 	}
-	
+
 	public static boolean isDeleted(EmsScriptNode node) {
 		if (node == null)
 			return false;
@@ -4338,5 +4338,36 @@ public class NodeUtil {
 			// }
 		}
 		return node;
+	}
+
+	public static void processDocumentEdges(String sysmlid, String doc,
+			List<Pair<String, String>> documentEdges) {
+		if (doc != null) {
+			String MMS_TRANSCLUDE_PATTERN = "\\s*(?i)mms-transclude-doc\\s*mms-eid\\s*=\\s*(\"([^\"]*\"))";
+			Pattern pattern = Pattern.compile(MMS_TRANSCLUDE_PATTERN);
+			Matcher matcher = pattern.matcher(doc);
+
+			while (matcher.find()) {
+				String mmseid = matcher.group(1).replace("\"", "");
+				if (mmseid != null)
+					documentEdges
+							.add(new Pair<String, String>(sysmlid, mmseid));
+			}
+		}
+	}
+
+	public static void processV2VEdges(JSONArray v2v,
+			List<Pair<String, String>> documentEdges) {
+		if (v2v != null) {
+			for (int i2 = 0; i2 < v2v.length(); i2++) {
+				JSONObject o = v2v.getJSONObject(i2);
+				String id = o.getString("sysmlid");
+				JSONArray childViews = o.getJSONArray("childrenViews");
+				for (int j = 0; j < childViews.length(); j++) {
+					documentEdges.add(new Pair<String, String>(id, childViews
+							.getString(j)));
+				}
+			}
+		}
 	}
 }

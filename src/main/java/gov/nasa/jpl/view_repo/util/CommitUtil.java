@@ -846,6 +846,7 @@ public class CommitUtil {
 		JSONArray deleted = ws2.optJSONArray("deletedElements");
 		JSONArray moved = ws2.optJSONArray("movedElements");
 		List<Pair<String, String>> addEdges = new ArrayList<Pair<String, String>>();
+		List<Pair<String, String>> documentEdges = new ArrayList<Pair<String, String>>();
 
 		try {
 			pgh.connect();
@@ -859,6 +860,19 @@ public class CommitUtil {
 					Pair<String, String> p = new Pair<String, String>(
 							e.getString("owner"), e.getString("sysmlid"));
 					addEdges.add(p);
+				}
+
+				if (e.has("documentation")) {
+					String doc = (String) e.getString("documentation");
+					NodeUtil.processDocumentEdges(e.getString("sysmlid"), doc,
+							documentEdges);
+				}
+				if (e.has("specialization")
+						&& e.getJSONObject("specialization").has("view2view")) {
+					JSONArray view2viewProperty = e
+							.getJSONObject("specialization")
+							.getJSONArray("view2view");
+					NodeUtil.processV2VEdges(view2viewProperty, documentEdges);
 				}
 			}
 
@@ -876,6 +890,19 @@ public class CommitUtil {
 				JSONObject e = updated.getJSONObject(i);
 				pgh.updateNodeRefIds(e.getString("sysmlid"),
 						e.getString("versionedRefId"), e.getString("nodeRefId"));
+
+				if (e.has("documentation")) {
+					String doc = (String) e.getString("documentation");
+					NodeUtil.processDocumentEdges(e.getString("sysmlid"), doc,
+							documentEdges);
+				}
+				if (e.has("specialization")
+						&& e.getJSONObject("specialization").has("view2view")) {
+					JSONArray view2viewProperty = e
+							.getJSONObject("specialization")
+							.getJSONArray("view2view");
+					NodeUtil.processV2VEdges(view2viewProperty, documentEdges);
+				}
 			}
 
 			for (int i = 0; i < moved.length(); i++) {
@@ -885,6 +912,10 @@ public class CommitUtil {
 				if (e.getString("owner") != null)
 					pgh.insertEdge(e.getString("owner"),
 							e.getString("sysmlid"), DbEdgeTypes.REGULAR);
+			}
+
+			for (Pair<String, String> e : documentEdges) {
+				pgh.insertEdge(e.first, e.second, DbEdgeTypes.DOCUMENT);
 			}
 
 			pgh.close();

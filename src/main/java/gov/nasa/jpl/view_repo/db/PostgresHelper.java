@@ -39,7 +39,7 @@ public class PostgresHelper {
 		this.dbName = DbContract.DB_NAME;
 		this.user = DbContract.USERNAME;
 		this.pass = DbContract.PASSWORD;
-		this.workspaceName = workspaceName.replace("-", "_");
+		this.workspaceName = workspaceName.split("_")[0].replace("-", "_");
 	}
 
 	public void close() throws SQLException {
@@ -117,7 +117,7 @@ public class PostgresHelper {
 			ResultSet rs = execQuery("SELECT * FROM nodes" + workspaceName
 					+ " where nodeRefId = '" + nodeRefId + "'");
 
-			if (rs.first()) {
+			if (rs.next()) {
 				return new Node(rs.getInt(1), rs.getString(2), rs.getString(3),
 						rs.getInt(4), rs.getString(5));
 			} else
@@ -130,7 +130,7 @@ public class PostgresHelper {
 
 	public Node getNode(int id) {
 		try {
-			ResultSet rs = execQuery("SELECT * FROM nodes " + workspaceName
+			ResultSet rs = execQuery("SELECT * FROM nodes" + workspaceName
 					+ " where id = " + id);
 			if (rs.next()) {
 				return new Node(rs.getInt(1), rs.getString(2), rs.getString(3),
@@ -162,6 +162,10 @@ public class PostgresHelper {
 	public void insertNode(String nodeRefId, String versionedRefId,
 			String sysmlId) {
 		try {
+			Node n = getNodeFromNodeRefId(nodeRefId);
+			if (n != null)
+				return;
+			
 			Map<String, String> map = new HashMap<String, String>();
 			map.put("nodeRefId", nodeRefId);
 			map.put("versionedRefId", versionedRefId);
