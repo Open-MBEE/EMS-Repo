@@ -119,6 +119,8 @@ public class EmsScriptNode extends ScriptNode implements
 
     public static boolean expressionStuff = true; // The value here is ignored.
 
+    public static boolean addingAffectedIds = expressionStuff;
+
     public static boolean optimisticAndFoolish = false;
 
     public static boolean tryToFlushCache = false;
@@ -308,8 +310,6 @@ public class EmsScriptNode extends ScriptNode implements
     public boolean embeddingExpressionInConstraint = true;
     public boolean embeddingExpressionInOperation = true;
     public boolean embeddingExpressionInConnector = true;
-
-    public static boolean addingAffectedIds = true;
 
     //private boolean forceCacheUpdate = false;
 

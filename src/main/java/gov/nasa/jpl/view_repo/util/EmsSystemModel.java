@@ -2169,5 +2169,15 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, Object, 
         // invoke the filter
         return call.filter( elements, 1 );
     }
+    
+    public boolean nameStartsWithN( Object s ) {
+        System.out.println("NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN");
+        if ( s instanceof EmsScriptNode ) {
+            ( (EmsScriptNode)s ).getSysmlName().startsWith( "N" );
+        } else if ( s instanceof String ) {
+            return ( (String)s ).startsWith( "N" );
+        }
+        return false;
+    }
 
 }
