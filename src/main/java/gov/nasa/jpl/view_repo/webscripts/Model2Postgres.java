@@ -107,8 +107,8 @@ public class Model2Postgres extends AbstractJavaWebScript {
 				if (workspace == null)
 					pgh = new PostgresHelper("");
 				else
-					pgh = new PostgresHelper(workspace.getId()
-							.replace("-", "_"));
+					pgh = new PostgresHelper(workspace.getId());
+
 				String timestamp = req.getParameter("timestamp");
 				Date dateTime = TimeUtils.dateFromTimestamp(timestamp);
 				JSONArray jsonArray = handleSite(workspace, dateTime);
@@ -219,38 +219,15 @@ public class Model2Postgres extends AbstractJavaWebScript {
 
 		i++;
 
-		// process node documentation for transclusion links
+		// documentatino edges 
 		String doc = (String) n.getProperty(Acm.ACM_DOCUMENTATION);
-		if (doc != null) {
-			String MMS_TRANSCLUDE_PATTERN = "\\s*(?i)mms-transclude-doc\\s*mms-eid\\s*=\\s*(\"([^\"]*\"))";
-			Pattern pattern = Pattern.compile(MMS_TRANSCLUDE_PATTERN);
-			Matcher matcher = pattern.matcher(doc);
-
-			while (matcher.find()) {
-				String mmseid = matcher.group(1).replace("\"", "");
-				if (mmseid != null)
-					documentEdges.add(new Pair<String, String>(n.getSysmlId(),
-							mmseid));
-			}
-		}
-
-		// document edges based on view2view property
+		NodeUtil.processDocumentEdges(n.getSysmlId(), doc, documentEdges);
 		String view2viewProperty = (String) n.getProperty(Acm.ACM_VIEW_2_VIEW);
 		if (view2viewProperty != null) {
-			JSONArray v2v = new JSONArray(view2viewProperty);
-			if (v2v != null) {
-				for (int i2 = 0; i2 < v2v.length(); i2++) {
-					JSONObject o = v2v.getJSONObject(i2);
-					String id = o.getString("id");
-					JSONArray childViews = o.getJSONArray("childrenViews");
-					for (int j = 0; j < childViews.length(); j++) {
-						documentEdges.add(new Pair<String, String>(id,
-								childViews.getString(j)));
-					}
-				}
-			}
+			NodeUtil.processV2VEdges(new JSONArray(view2viewProperty),
+					documentEdges);
 		}
-
+		
 		for (NodeRef c : n.getOwnedChildren(false, dt, ws)) {
 			EmsScriptNode cn = new EmsScriptNode(c, services, response);
 
