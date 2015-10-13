@@ -1,14 +1,14 @@
 {"elements": [
     {
-        "qualifiedId": "/europa/123456/add_delete_poo",
-        "qualifiedName": "/europa/JW_TEST2/add_delete_poo",
-        "sysmlid": "add_delete_poo",
+        "qualifiedId": "/europa/123456/add_delete_gg",
+        "qualifiedName": "/europa/JW_TEST2/add_delete_gg",
+        "sysmlid": "add_delete_gg",
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
-        "name": "add_delete_poo",
+        "name": "add_delete_gg",
         "owner": "123456",
-        "documentation": "add_delete_poo",
+        "documentation": "add_delete_gg",
         "specialization": {
             "propertyType": null,
             "isDerived": false,
@@ -22,15 +22,15 @@
         }
     },
     {
-        "qualifiedId": "/europa/123456/add_update_poo",
-        "qualifiedName": "/europa/JW_TEST2/add_update_poo",
-        "sysmlid": "add_update_poo",
+        "qualifiedId": "/europa/123456/add_update_gg",
+        "qualifiedName": "/europa/JW_TEST2/add_update_gg",
+        "sysmlid": "add_update_gg",
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
-        "name": "add_update_poo",
+        "name": "add_update_gg",
         "owner": "123456",
-        "documentation": "add_update_poo",
+        "documentation": "add_update_gg",
         "specialization": {
             "propertyType": null,
             "isDerived": false,

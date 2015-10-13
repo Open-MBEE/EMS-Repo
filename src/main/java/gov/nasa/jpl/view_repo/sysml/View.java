@@ -254,7 +254,7 @@ public class View extends List implements sysml.view.View< EmsScriptNode >, Comp
 
         // Get all elements of Conform type:
         //Collection<EmsScriptNode> conformElements = getModel().getType(null, Acm.JSON_CONFORM);
-        if (Debug.isOn()) System.out.println( "Got "
+        if (Debug.isOn()) Debug.outln( "Got "
                             + ( conformElements == null ? 0
                                                         : conformElements.size() )
                             + " elements of type " + Acm.JSON_CONFORM );
@@ -360,36 +360,6 @@ public class View extends List implements sysml.view.View< EmsScriptNode >, Comp
         return new Date(); 
     }
 
-//    /**
-//     * Get the last modified time of self, displayed elements, and contained
-//     * views, recursively. <br>
-//     * NOTE: This is not being called and is not tested.
-//     * 
-//     * @param dateTime
-//     * @return
-//     */
-//    public Date getLastModifiedRecursive( Date dateTime ) {
-//        if ( getElement() == null ) return null;
-//        Date date = getElement().getLastModified( dateTime );
-//        if ( !isGeneratedFromViewpoint() ) {
-//            return date;
-//        }
-//        //Set<EmsScriptNode> elems = new LinkedHashSet< EmsScriptNode >();
-//        Collection<EmsScriptNode> elems =
-//                getDisplayedElements( getWorkspace(), dateTime, true, false, null );
-//        for ( EmsScriptNode elem : elems ) {
-//            Date d = elem.getLastModified( dateTime );
-//            if ( d.after( date ) ) date = d;
-//        }
-//        elems = getContainedViews( false, getWorkspace(), dateTime, null );
-//        for ( EmsScriptNode elem : elems ) {
-//            View v = new View( elem );
-//            Date d = v.getLastModifiedRecursive( dateTime );
-//            if ( d.after( date ) ) date = d;
-//        }
-//        return date;
-//    }
-
     /**
      * @return whether the contains json is generated from a viewpoint instead
      *         of stored statically.
@@ -418,7 +388,7 @@ public class View extends List implements sysml.view.View< EmsScriptNode >, Comp
 
         EmsScriptNode viewpointOp = getViewpointOperation(dateTime, ws);
         if ( viewpointOp == null ) {
-            if (Debug.isOn()) System.out.println("*** View.toViewJson(): no viewpoint operation! View = " + toBoringString() );
+            if (Debug.isOn()) Debug.outln("*** View.toViewJson(): no viewpoint operation! View = " + toBoringString() );
             return false;
         }
 
@@ -429,8 +399,8 @@ public class View extends List implements sysml.view.View< EmsScriptNode >, Comp
         // This is a List of a collection of nodes, where the value of exposed
         // parameter is a collection of nodes:
         paramValList.add( exposed );
-        SystemModelToAeExpression< EmsScriptNode, EmsScriptNode, String, Object, EmsSystemModel > sysmlToAeExpr =
-                new SystemModelToAeExpression< EmsScriptNode, EmsScriptNode, String, Object, EmsSystemModel >( getModel() );
+        SystemModelToAeExpression< Object, EmsScriptNode, EmsScriptNode, String, Object, EmsSystemModel > sysmlToAeExpr =
+                new SystemModelToAeExpression< Object, EmsScriptNode, EmsScriptNode, String, Object, EmsSystemModel >( getModel() );
         Expression< Object > aeExpr = sysmlToAeExpr.operationToAeExpression(viewpointOp, paramValList);
 
         if ( aeExpr == null ) return false;
@@ -440,7 +410,7 @@ public class View extends List implements sysml.view.View< EmsScriptNode >, Comp
         clear(); // make sure we clear out any old information
         Object evalResult;
         try {
-          System.out.println("aeExpr = " + aeExpr);
+            if (Debug.isOn()) Debug.outln("aeExpr = " + aeExpr);
             evalResult = aeExpr.evaluate( true );
             if ( evalResult instanceof Viewable ) {
                 Viewable< EmsScriptNode > v = (Viewable< EmsScriptNode >)evalResult;
@@ -558,7 +528,7 @@ public class View extends List implements sysml.view.View< EmsScriptNode >, Comp
                                   Date dateTime) {
 
         if ( viewNode == null ) {
-            if (Debug.isOn()) System.out.println("*** called View.toViewJson() without a view node! View = " + toBoringString() );
+            if (Debug.isOn()) Debug.outln("*** called View.toViewJson() without a view node! View = " + toBoringString() );
             return null;
         }
 
@@ -632,7 +602,7 @@ public class View extends List implements sysml.view.View< EmsScriptNode >, Comp
                         JSONArray jarr = new JSONArray( "" + contains );
                         viewablesJson = jarr;
                     } catch ( JSONException e ) {
-                        System.out.println( "Tried to parse \"" + contains
+                        Debug.outln( "Tried to parse \"" + contains
                                             + "\" in element "
                                             + getElement().getSysmlName() + "("
                                             + getElement().getSysmlId() + ")" );

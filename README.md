@@ -1,3 +1,28 @@
+# This repo represents the view amp for alfresco repository (overlay on alfresco.war)
+
+#MAC OSX Yosemite 10.10.5 Quick Install (assuming you've installed Maven and Eclipse)
+
+1. Update your JAVA_HOME to use JDK 1.7.  Check the path using this command /usr/libexec/java_home.
+	
+		export JAVA_HOME="/Library/Java/JavaVirtualMachines/jdk1.7.0_71.jdk/Contents/Home"
+
+2. Update your MAVEN_OPTS variable:
+
+		export MAVEN_OPTS='-Xms256m -Xmx1G -XX:PermSize=300m -Xdebug  -Xrunjdwp:transport=dt_socket,address=10000,server=y,suspend=n -javaagent:/Applications/jrebel/jrebel.jar'
+	
+3. Clone alfresco-view-repo using the Eclipse git tool. If you need instructions on installing and using git in eclipse see this section: [typical local environment instructions](#typical)
+4. Right click your project and run maven >> Update project
+5. Install jrebel and scala from Eclipse using Help >> Eclipse Marketplace
+6. From the command line navigate to git/alfresco-view-repo  and update the last line sudo vim /etc/hosts to read:
+	
+		127.0.0.1  'your-machine-name'
+
+7. Run this script from the command line:
+
+		./cpr.sh
+	
+###The remaining instructions of the readme will guide you through specific set ups 
+
 ***
 
 ## Contents <a name="contents"></a>
@@ -7,15 +32,14 @@
 ###[building, setting up maven, jrebel](#building)
 ###[Managing Enterprise and Community Builds](#manage)
 ###[Debugging](#debug)
-###[Testing](#testing)
-###[Other Debug](#other-debug)
-###[Documentation Links](#documentation-links)
+###[Testing](#test-this)
+###[Other Debug](#other)
+###[Documentation Links](#doc-links)
+###[Miscellaneous](#misc)
+###[Debugging Overview](#debug-overview)
+
 
 ***
-
-2. Update your MAVEN_OPTS variable:
-	export MAVEN_OPTS='-Xms256m -Xmx1G -XX:PermSize=300m -Xdebug  -Xrunjdwp:transport=dt_socket,address=10000,server=y,suspend=n -javaagent:/Applications/jrebel/jrebel.jar'
-# view amp for alfresco repository (overlay on alfresco.war)
 
 #AMI environment instructions <a name="ami"></a>
 
@@ -51,7 +75,9 @@ if using the mdk or bae MagicDraw plugins, set up magicdraw path
 
 restart eclipse
 
-#typical local environment instructions
+#typical local environment instructions <a name="typical"></a>
+
+#### [return to table of contents](#contents)
 
 This project contains the content model and webscripts for accessing and modifying the alfresco repository. 
 
@@ -76,7 +102,7 @@ Eclipse/Maven
     		- If Maven is not installed in Eclipse, go to Help -> Eclipse Marketplace -> type in "m2eclipse" in search box 
 		      & install the first item (Maven Integration for Eclipse WTP (Juno))	
 
-    Make sure you have a local checkout of alfresco from git.
+    Make sure you have a local checkout of alfresco from git. 
     	- Clone Alfresco-View-Repo from git. To do so: 
     	1. Go to Git Repo Perspective in Eclipse
     	2. Click clone a git repository icon in "Git Repositories" menu
@@ -132,7 +158,10 @@ Eclipse/Maven
     cairo-misc.c:380: _cairo_operator_bounded_by_source: Assertion `NOT_REACHED' failed."
     try adding:    adding "-Dorg.eclipse.swt.internal.gtk.cairoGraphics=false" to eclipse.ini.
     
-# building, setting up maven, jrebel
+# building, setting up maven, jrebel <a name="building"></a>
+
+#### [return to table of contents](#contents)
+
 Make sure to install both the JRebel plug-in for Eclipse and download the Jrebel .jar and store it somewhere like "/Applications/jrebel".  
 The path to the jrebel.jar will be used by mvn via the MAVEN_OPTS environment variable.
 
@@ -162,8 +191,8 @@ To execute JUnit tests and attach a debugger
 
     mvn -Dmaven.surefire.debug -Dmaven.test.skip=false test
 
-Put JUnit test java files in src/test/java
-Set a breakpoint in a JUnit test.
+    Put JUnit test java files in src/test/java
+    Set a breakpoint in a JUnit test.
     Run a Remote Java Application configuration with localhost for Host and 5005 for Port. There's a view-repo.launch config in the project directory.  You may need to change the view-repo configuration's argument from 10000 to 5005.  
     Follow DemoComponentTest.java and its entry in service-content.xml
     
@@ -175,7 +204,9 @@ To update the target/mms-repo-war manually
 
 	mvn package -Pamp-to-war
 
-## Managing Enterprise and Community Builds 
+## Managing Enterprise and Community Builds <a name="manage"></a>
+
+#### [return to table of contents](#contents)
 	
 The default pom.xml builds the community version. To build the enterprise version, use the pom.xml.enterprise, e.g.
 
@@ -188,41 +219,45 @@ copy-resource plugin that copies the files in /resources/[community|enterprise] 
 appropriate /src directory as part of the validation. Make changes to the appropriate files
 in the /resources/[community|enterprise] directory.
 
-### Enterprise settings with Maven
+### Enterprise settings with Maven 
 
 Need to update settings.xml to connect to the Alfresco private repository. Ask Ly or Cin-Young
 for username and password.
 
-'''
-<settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
-  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0
-                      http://maven.apache.org/xsd/settings-1.0.0.xsd">
-  <localRepository/>
-  <interactiveMode/>
-  <usePluginRegistry/>
-  <offline/>
-  <pluginGroups/>
-  <servers>
-        <server>
-                <id>alfresco-private-repository</id>
-                <username>username</username>
-                <password>password</password>
-        </server>
-  </servers>
-  <mirrors/>
-  <proxies/>
-  <profiles/>
-  "  	<activeProfiles/>
-</setti
-'''n"'''
+	<settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
+	  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	  xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0
+	                      http://maven.apache.org/xsd/settings-1.0.0.xsd">
+	  <localRepository/>
+	  <interactiveMode/>
+	  <usePluginRegistry/>
+	  <offline/>
+	  <pluginGroups/>
+	  <servers>
+	        <server>
+	                <id>alfresco-private-repository</id>
+	                <username>username</username>
+	                <password>password</password>
+	        </server>
+	  </servers>
+	  <mirrors/>
+	  <proxies/>
+	  <profiles/>
+	  <activeProfiles/>
+	</settings>
 	
-# Debug
+# Debug <a name="debug"></a>
+
+#### [return to table of contents](#contents)
+
 To attach an eclipse debugger, there's a view-repo.launch, you can use it to debug at the 10000 port, or change the debug config port if you didn't use 10000 in the maven opts
 
 Jrebel is monitoring the target/classes and src/main/amp/config dir for changes, and the src/main/amp/web for static file changes, make sure the eclipse build automatically is on, and usually any changes to java classes or spring configs will be reloaded automagically
 
-# Testing
+# Testing <a name="test-this"></a>
+
+#### [return to table of contents](#contents)
+
 Note: URL has changed for Alfresco 4.2.e to use alfresco instead of view-repo.
 
 Go to [http://localhost:8080/alfresco/](http://localhost:8080/alfresco/) for the alfresco explorer interface (it'll take a while to startup)
@@ -265,7 +300,9 @@ Get comments
 
 
 
-# Other debug
+# Other debug <a name="other"></a>
+
+#### [return to table of contents](#contents)
 
 To open the javascript debugger: [http://localhost:8080/alfresco/service/api/javascript/debugger](http://localhost:8080/alfresco/service/api/javascript/debugger) (you may have to close and reopen to get it to step through on consecutive script calls)
 
@@ -273,7 +310,9 @@ To refresh changes to scripts (they have to be updated in the "target/mms-repo-w
 
 Maven archetype from [Alfresco Maven SDK](https://artifacts.alfresco.com/nexus/content/repositories/alfresco-docs/alfresco-lifecycle-aggregator/latest/index.html)
 
-# Documentation links:
+# Documentation links: <a name="doc-links"></a>
+
+#### [return to table of contents](#contents)
 
 * [Web Scripts](http://docs.alfresco.com/4.2/index.jsp?topic=%2Fcom.alfresco.enterprise.doc%2Fconcepts%2Fws-architecture.html)
 * [AMP modules](http://docs.alfresco.com/4.2/index.jsp?topic=%2Fcom.alfresco.enterprise.doc%2Fconcepts%2Fdev-extensions-modules-intro.html)
@@ -286,7 +325,9 @@ Get a directory of available services including the REST API
     https://sheldon.jpl.nasa.gov/alfresco/service/index
     https://europaems.jpl.nasa.gov/alfresco/service/index
 
-# Miscellaneous
+# Miscellaneous <a name="misc"></a>
+
+#### [return to table of contents](#contents)
 
 Sometimes, eclipse will lock the GUI with a popup saying that the user operation is waiting on other tasks, typically a rebuild.
 If this is annoying because the rebuild takes a long time, you can create a ram disk to store the target directory and create a soft link to it.
@@ -314,7 +355,9 @@ To evaluate a Java expression, in this example, Math.Min(1,2), from the command 
     curl -w "%{http_code}\n" -u admin:admin -X POST -H "Content-Type:text/plain" "http://localhost:8080/alfresco/service/java_query?verbose=false" --data 'Math.min(1,2)'
 
 
-#Debugging Overview
+#Debugging Overview <a name="debug-overview"></a>
+
+#### [return to table of contents](#contents)
 
 **IMPORTANT:** Push code changes to your own branch. Merge them with workspaces branch at Cin-Young's and Brad's consent.
 

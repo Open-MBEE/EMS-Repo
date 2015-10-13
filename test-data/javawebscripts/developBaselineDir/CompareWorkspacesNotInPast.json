@@ -16,16 +16,17 @@
                 },
                 "type": "Constraint"
             },
-            "editable": true
+            "editable": true,
         }]
     },
     "workspace2": {
         "deletedElements": [{
             "qualifiedName": "/europa/JW_TEST/notInThePast",
-            "name": "notInThePast",
             "sysmlid": "notInThePast",
-            "owner": "123456",
+            "editable": true,
+            "name": "notInThePast",
             "documentation": "",
+            "owner": "123456",
             "specialization": {
                 "specification": {
                     "valueExpression": null,
@@ -33,8 +34,7 @@
                     "type": "OpaqueExpression"
                 },
                 "type": "Constraint"
-            },
-            "editable": true
+            }
         }],
         "addedElements": [],
         "conflictedElements": [],

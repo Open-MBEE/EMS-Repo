@@ -47,6 +47,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.log4j.*;
 import org.alfresco.repo.model.Repository;
+import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.json.JSONArray;
@@ -122,7 +123,7 @@ public class ViewGet extends AbstractJavaWebScript {
         if ( viewId == null ) {
             viewId = req.getServiceMatch().getTemplateVars().get("elementid");
         }
-        if (Debug.isOn()) System.out.println("Got raw id = " + viewId);
+        if (Debug.isOn()) Debug.outln("Got raw id = " + viewId);
         return viewId;
     }
 
@@ -142,8 +143,8 @@ public class ViewGet extends AbstractJavaWebScript {
         Map<String, Object> model = new HashMap<String, Object>();
         // default recurse=false but recurse only applies to displayed elements and contained views
         boolean recurse = getBooleanArg(req, "recurse", false);
-        // default generate=true
-        boolean generate = getBooleanArg( req, "generate", true );
+        // default generate=false - generation with viewpoints takes a long time
+        boolean generate = getBooleanArg( req, "generate", EmsScriptNode.expressionStuff );
 
         JSONArray viewsJson = new JSONArray();
         if (validateRequest(req, status)) {
@@ -152,7 +153,7 @@ public class ViewGet extends AbstractJavaWebScript {
             if ( !gettingDisplayedElements ) {
                 gettingContainedViews = isContainedViewRequest( req );
             } 
-            if (Debug.isOn()) System.out.println("viewId = " + viewId);
+            if (Debug.isOn()) Debug.outln("viewId = " + viewId);
             
             // get timestamp if specified
             String timestamp = req.getParameter("timestamp");
@@ -190,7 +191,8 @@ public class ViewGet extends AbstractJavaWebScript {
         printFooter();
 
         if (logger.isInfoEnabled()) {
-            logger.info( "ViewGet: " + timer );
+            final String user = AuthenticationUtil.getFullyAuthenticatedUser();
+            logger.info( user + " " + timer + " " + req.getURL() );
         }
 
         return model;
@@ -212,9 +214,10 @@ public class ViewGet extends AbstractJavaWebScript {
                 View v = new View(view);
                 v.setGenerate( generate );
                 v.setRecurse( recurse );
+                
                 EmsScriptNode.expressionStuff = true;
                 if ( gettingDisplayedElements ) {
-                    if (Debug.isOn()) System.out.println("+ + + + + gettingDisplayedElements");
+                    if (Debug.isOn()) Debug.outln("+ + + + + gettingDisplayedElements");
                     // TODO -- need to use recurse flag!
                     Collection< EmsScriptNode > elems =
                             v.getDisplayedElements( workspace, dateTime,
@@ -224,7 +227,7 @@ public class ViewGet extends AbstractJavaWebScript {
                         viewsJson.put( n.toJSONObject( workspace, dateTime ) );
                     }
                 } else if ( gettingContainedViews ) {
-                    if (Debug.isOn()) System.out.println("+ + + + + gettingContainedViews");
+                    if (Debug.isOn()) Debug.outln("+ + + + + gettingContainedViews");
                     Collection< EmsScriptNode > elems =
                             v.getContainedViews( recurse, workspace, dateTime,
                                                  null );
@@ -233,7 +236,7 @@ public class ViewGet extends AbstractJavaWebScript {
                         viewsJson.put( n.toJSONObject( workspace,dateTime ) );
                     }
                 } else {
-                    if (Debug.isOn()) System.out.println("+ + + + + just the view");
+                    if (Debug.isOn()) Debug.outln("+ + + + + just the view");
                     viewsJson.put( view.toJSONObject( workspace, dateTime ) );
                 }
                 EmsScriptNode.expressionStuff = false;

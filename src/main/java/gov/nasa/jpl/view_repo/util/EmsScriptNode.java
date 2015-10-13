@@ -119,6 +119,8 @@ public class EmsScriptNode extends ScriptNode implements
 
     public static boolean expressionStuff = false; // The value here is ignored.
 
+    public static boolean addingAffectedIds = expressionStuff;
+
     public static boolean optimisticAndFoolish = false;
 
     public static boolean tryToFlushCache = false;
@@ -1088,9 +1090,9 @@ public class EmsScriptNode extends ScriptNode implements
 
         return node;
     }
-
-    public EmsScriptNode getReifiedNode(boolean findDeleted, WorkspaceNode ws) {
-        NodeRef nodeRef = (NodeRef)getNodeRefProperty( "ems:reifiedNode", false, null,
+    
+    public EmsScriptNode getReifiedNode(boolean findDeleted, WorkspaceNode ws, Date dateTime) {
+        NodeRef nodeRef = (NodeRef)getNodeRefProperty( "ems:reifiedNode", false, dateTime,
                                                        findDeleted, false, ws );
         if ( nodeRef != null ) {
             return new EmsScriptNode( nodeRef, services, response );
@@ -1098,12 +1100,21 @@ public class EmsScriptNode extends ScriptNode implements
         return null;
     }
 
+    public EmsScriptNode getReifiedNode(boolean findDeleted, WorkspaceNode ws) {
+        return getReifiedNode(findDeleted, ws, null);
+    }
+
     public EmsScriptNode getReifiedNode(WorkspaceNode ws) {
         return getReifiedNode(false, ws);
     }
 
     public EmsScriptNode getReifiedPkg(Date dateTime, WorkspaceNode ws) {
-        NodeRef nodeRef = (NodeRef)getNodeRefProperty( "ems:reifiedPkg", dateTime, ws );
+        return getReifiedPkg( dateTime, ws, true );
+    }
+    public EmsScriptNode getReifiedPkg(Date dateTime, WorkspaceNode ws, boolean findDeleted) {
+        NodeRef nodeRef =
+                (NodeRef)getNodeRefProperty( "ems:reifiedPkg", false, dateTime,
+                                             findDeleted, false, ws );
         if ( nodeRef != null ) {
             return new EmsScriptNode( nodeRef, services, response );
         }
@@ -2569,6 +2580,15 @@ public class EmsScriptNode extends ScriptNode implements
         putInJson( elementJson, Acm.JSON_DOCUMENTATION,
                    this.getProperty( Acm.ACM_DOCUMENTATION ), filter );
 
+        // add affected ids
+        if ( addingAffectedIds  ) {
+            if ( filter == null || filter.isEmpty() || filter.contains( "affectedIds" ) ) {
+                ArrayList< NodeRef > refs = this.getAffectedElements( false, false, dateTime, false, false, true, false );
+                JSONArray affectedIds = addNodeRefIdsJSON( refs );
+                putInJson( elementJson, "affectedIds", affectedIds, filter );
+            }
+        }
+        
         // check properties rather than aspect since aspect may not be applied on creation
         Object appliedMetatypes = this.getProperty( Acm.ACM_APPLIED_METATYPES );
         Object isMetatype = this.getProperty( Acm.ACM_IS_METATYPE );
@@ -5300,8 +5320,12 @@ public class EmsScriptNode extends ScriptNode implements
     public boolean isWorkspace() {
         return hasAspect( "ems:Workspace" );
     }
-
+    
     public boolean isWorkspaceTop() {
+        return isWorkspaceTop(null);
+    }
+
+    public boolean isWorkspaceTop(Date dateTime) {
         String runAsUser = AuthenticationUtil.getRunAsUser();
         boolean changeUser = !ADMIN_USER_NAME.equals( runAsUser );
         if ( changeUser ) {
@@ -5309,7 +5333,7 @@ public class EmsScriptNode extends ScriptNode implements
         }
         
         boolean isTop = false;
-        EmsScriptNode myParent = getParent(null, getWorkspace(), false, true);
+        EmsScriptNode myParent = getParent(dateTime, getWorkspace(), false, true);
         if ( myParent == null ) {
             if ( Debug.isOn() ) {
                 Debug.outln( "isWorkspaceTop() = true for node with null parent: "
@@ -6202,6 +6226,24 @@ public class EmsScriptNode extends ScriptNode implements
     {
         EmsScriptNode parent = getUnreifiedParent( dateTime, ws );
         return parent != null && parent.hasValueSpecProperty( this, dateTime, ws );
+    }
+    
+    public ArrayList<NodeRef>
+            getAffectedElements( boolean ignoreWorkspace,
+                                 boolean onlyThisWorkspace, Date dateTime,
+                                 boolean justFirst,
+                                 boolean optimisticJustFirst,
+                                 boolean exactMatch, boolean includeDeleted ) {
+        ArrayList< NodeRef > refs =
+                NodeUtil.findNodeRefsByType( this.getNodeRef().toString(),
+                                             "@sysml\\:elementValueOfElement:\"",
+                                             ignoreWorkspace, parentWorkspace,
+                                             onlyThisWorkspace, dateTime,
+                                             justFirst, optimisticJustFirst,
+                                             exactMatch, services,
+                                             includeDeleted, null );
+
+        return refs;
     }
 
     /**

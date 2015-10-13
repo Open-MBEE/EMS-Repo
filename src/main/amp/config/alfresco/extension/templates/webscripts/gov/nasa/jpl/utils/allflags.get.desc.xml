@@ -17,6 +17,7 @@
   <url>/flags/simpleCache?on={on?}&amp;off={off?}</url>
   <url>/flags/syncTransactions?on={on?}&amp;off={off?}</url>
   <url>/flags/timeEvents?on={on?}&amp;off={off?}</url>
+  <url>/flags/viewPointExpressions?on={on?}&amp;off={off?}</url>
   <url>/flags/versionCacheDebug?on={on?}&amp;off={off?}</url>
   <url>/flags/versionCache?on={on?}&amp;off={off?}</url>
   <url>/flags/versionHistoryCache?on={on?}&amp;off={off?}</url>
@@ -24,6 +25,8 @@
   <url>/flags/makeDocBook?on={on?}&amp;off={off?}</url>
   <url>/flags/glom?on={on?}&amp;off={off?}</url>
   <url>/flags/cleanJson?on={on?}&amp;off={off?}</url>
+  <url>/flags/diffDefaultIsMerge?on={on?}&amp;off={off?}</url>
+  <url>/flags/cacheSnapshots?on={on?}&amp;off={off?}</url>
   <authentication>user</authentication>
   <format default="html">argument</format>
   <family>EMS Utils</family>

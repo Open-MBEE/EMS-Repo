@@ -50,7 +50,7 @@
                 "owner": "123456",
                 "sysmlid": "conflict",
                 "specialization": {"type": "Element"},
-                "editable": true
+                "editable": true,
             },
             {
                 "qualifiedName": "/europa/JW_TEST/300/301/302",
@@ -239,13 +239,13 @@
                 }],
                 "type": "Property"
             },
-            "editable": true
+            "editable": true,
         }],
         "conflictedElements": [{
-            "name": "conflict",
             "qualifiedName": "/europa/JW_TEST/conflict",
-            "owner": "123456",
             "sysmlid": "conflict",
+            "name": "conflict",
+            "owner": "123456",
             "documentation": "this will create a conflict!",
             "specialization": {"type": "Element"}
         }],
@@ -256,7 +256,7 @@
                 "owner": "123456",
                 "documentation": "this will create a conflict!",
                 "sysmlid": "conflict",
-                "specialization": {"type": "Element"}
+                "specialization": {"type": "Element"},
             },
             {
                 "name": "304",

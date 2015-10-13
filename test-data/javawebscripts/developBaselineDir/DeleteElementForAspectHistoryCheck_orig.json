@@ -1,7 +1,7 @@
 {
-  "sequence": 66,
+  "sequence": 65,
   "workspace1": {
-    "timestamp": "2015-07-23T20:24:28.516-0700",
+    "timestamp": "2015-09-22T09:44:03.151-0700",
     "qualifiedId": "master",
     "id": "master",
     "qualifiedName": "master",
@@ -13,14 +13,14 @@
       "sysmlid": "property_zzz",
       "editable": true,
       "creator": "admin",
-      "modified": "2015-07-23T20:24:28.518-0700",
+      "modified": "2015-09-22T09:44:03.154-0700",
       "version": "1.1",
-      "id": "8e4f9a81-8f63-4a38-abcf-76fe6434aa52",
+      "id": "d31ac3da-506f-477a-95e6-7186a22478bd",
       "modifier": "admin",
-      "created": "Thu Jul 23 20:24:27 PDT 2015",
+      "created": "Tue Sep 22 09:44:01 PDT 2015",
       "owner": "aspect_history_zzz",
       "documentation": "p is p",
-      "read": "2015-07-23T20:24:28.524-0700",
+      "read": "2015-09-22T09:44:03.169-0700",
       "specialization": {
         "propertyType": null,
         "isDerived": false,
@@ -35,15 +35,19 @@
     }]
   },
   "workspace2": {
-    "timestamp": "2015-07-23T20:24:28.524-0700",
+    "timestamp": "2015-09-22T09:44:03.161-0700",
     "qualifiedId": "master",
     "id": "master",
     "deletedElements": [{
-      "id": "8e4f9a81-8f63-4a38-abcf-76fe6434aa52",
+      "qualifiedId": "/europa/123456/aspect_history_zzz/property_zzz",
+      "id": "d31ac3da-506f-477a-95e6-7186a22478bd",
+      "qualifiedName": "/europa/JW_TEST2/null/null",
       "sysmlid": "property_zzz",
-      "read": "2015-07-23T20:24:28.524-0700",
+      "owner": "aspect_history_zzz",
+      "read": "2015-09-22T09:44:03.169-0700",
+      "specialization": {"type": "Property"},
       "creator": "admin",
-      "modified": "2015-07-23T20:24:28.518-0700"
+      "modified": "2015-09-22T09:44:03.154-0700"
     }],
     "addedElements": [],
     "conflictedElements": [],
