@@ -1,6 +1,25 @@
+***
+
+## Contents <a name="contents"></a>
+
+###[AMI environment instructions](#ami)
+###[typical local environment instructions](#typical)
+###[building, setting up maven, jrebel](#building)
+###[Managing Enterprise and Community Builds](#manage)
+###[Debugging](#debug)
+###[Testing](#testing)
+###[Other Debug](#other-debug)
+###[Documentation Links](#documentation-links)
+
+***
+
+2. Update your MAVEN_OPTS variable:
+	export MAVEN_OPTS='-Xms256m -Xmx1G -XX:PermSize=300m -Xdebug  -Xrunjdwp:transport=dt_socket,address=10000,server=y,suspend=n -javaagent:/Applications/jrebel/jrebel.jar'
 # view amp for alfresco repository (overlay on alfresco.war)
 
-#AMI environment instructions
+#AMI environment instructions <a name="ami"></a>
+
+#### [return to table of contents](#contents)
 
 import view-repo with git (same instructions as below)
 
@@ -143,8 +162,8 @@ To execute JUnit tests and attach a debugger
 
     mvn -Dmaven.surefire.debug -Dmaven.test.skip=false test
 
-    Put JUnit test java files in src/test/java
-    Set a breakpoint in a JUnit test.
+Put JUnit test java files in src/test/java
+Set a breakpoint in a JUnit test.
     Run a Remote Java Application configuration with localhost for Host and 5005 for Port. There's a view-repo.launch config in the project directory.  You may need to change the view-repo configuration's argument from 10000 to 5005.  
     Follow DemoComponentTest.java and its entry in service-content.xml
     
@@ -194,9 +213,9 @@ for username and password.
   <mirrors/>
   <proxies/>
   <profiles/>
-  <activeProfiles/>
-</settings>
-'''
+  "  	<activeProfiles/>
+</setti
+'''n"'''
 	
 # Debug
 To attach an eclipse debugger, there's a view-repo.launch, you can use it to debug at the 10000 port, or change the debug config port if you didn't use 10000 in the maven opts
