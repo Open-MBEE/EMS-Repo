@@ -125,7 +125,7 @@ public class ModelPost extends AbstractJavaWebScript {
 
 	private final String ELEMENTS = "elements";
 	
-	public JSONArray reifiedPkgs = new JSONArray();
+//	public JSONArray reifiedPkgs = new JSONArray();
 
 	/**
 	 * JSONObject of element hierarchy { elementId: [childElementId, ...], ...
@@ -296,7 +296,7 @@ public class ModelPost extends AbstractJavaWebScript {
 		}
 
 		// FIXME: Need to split by projectId
-		if (!CommitUtil.sendDeltas(deltaJson, wsId, projectId, source, reifiedPkgs)) {
+		if (!CommitUtil.sendDeltas(deltaJson, wsId, projectId, source)) {
 			logger.warn("send deltas not posted properly");
 		}
 	}
@@ -2463,7 +2463,7 @@ public class ModelPost extends AbstractJavaWebScript {
 			rp.put("versionedRefId", NodeUtil.getVersionedRefId(reifiedPkgNode));
 			rp.put("sysmlId", reifiedPkgNode.getSysmlId());
 
-			reifiedPkgs.put(rp);
+//			reifiedPkgs.put(rp);
 		}
 
 		return reifiedPkgNode;

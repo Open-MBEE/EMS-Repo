@@ -30,9 +30,11 @@
 package gov.nasa.jpl.view_repo.webscripts;
 
 import gov.nasa.jpl.view_repo.util.Acm;
+import gov.nasa.jpl.view_repo.util.CommitUtil;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -40,23 +42,21 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.log4j.*;
 import org.alfresco.repo.model.Repository;
+import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.security.PermissionService;
-
 import org.json.JSONArray;
-
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import org.json.JSONObject;
-
 import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
 
 @Deprecated
 public class ProductPost extends AbstractJavaWebScript {
-	public ProductPost() {
+    Logger logger = Logger.getLogger(ProductPost.class);
+	
+    public ProductPost() {
 	    super();
 	}
 
@@ -111,23 +111,52 @@ public class ProductPost extends AbstractJavaWebScript {
 
 	private void updateProducts(JSONObject jsonObject, WorkspaceNode workspace)
 	        throws JSONException {
+        Date start = new Date();
+        Map<String, EmsScriptNode> elements = new HashMap<String, EmsScriptNode>();
+        
+        // actual business logic, everything else is to handle commits
 		if (jsonObject.has("products")) {
 			JSONArray productsJson = jsonObject.getJSONArray("products");
 
 			for (int ii = 0; ii < productsJson.length(); ii++) {
-			    updateProduct(productsJson, ii, workspace);
+			    updateProduct(productsJson, ii, workspace, elements);
 			}
 		}
+
+	    // commit info
+        setWsDiff(workspace);
+        wsDiff.setUpdatedElements( elements );
+        
+        Date end = new Date();
+        JSONObject deltaJson = wsDiff.toJSONObject( start, end );
+        String wsId = "master";
+        if (workspace != null) wsId = workspace.getId();
+        // FIXME: split elements by project Id - since they may not always be in same project
+        String projectId = "";
+        if (elements.size() > 0) {
+            // make sure the following are run as admin, it's possible that workspace
+            // doesn't have project and user doesn't have read permissions on parent ws
+            String origUser = AuthenticationUtil.getRunAsUser();
+            AuthenticationUtil.setRunAsUser("admin");
+            projectId = elements.get( 0 ).getProjectId(workspace);
+            AuthenticationUtil.setRunAsUser(origUser);
+        }
+
+        CommitUtil.commit(workspace, deltaJson, "Product Post", runWithoutTransactions, services, response);
+        if (!CommitUtil.sendDeltas(deltaJson, wsId, projectId, source)) {
+            logger.warn( "Could not send delta" );
+        }
+
 	}
 
 
 	private void updateProduct(JSONArray productsJson, int index,
-	                           WorkspaceNode workspace) throws JSONException {
+	                           WorkspaceNode workspace, Map<String, EmsScriptNode> elements) throws JSONException {
 		JSONObject productJson = productsJson.getJSONObject(index);
-		updateProduct(productJson, workspace);
+		updateProduct(productJson, workspace, elements);
 	}
 
-	private void updateProduct(JSONObject productJson, WorkspaceNode workspace) throws JSONException {
+	private void updateProduct(JSONObject productJson, WorkspaceNode workspace, Map<String, EmsScriptNode> elements) throws JSONException {
 
 		String id = null;
 		try {
@@ -156,6 +185,7 @@ public class ProductPost extends AbstractJavaWebScript {
 		if (checkPermissions(product, PermissionService.WRITE)) {
 		    product.createOrUpdateAspect(Acm.ACM_PRODUCT);
 		    product.ingestJSON(productJson);
+		    elements.put( id, product );
 		}
 	}
 }

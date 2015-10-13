@@ -30,9 +30,11 @@
 package gov.nasa.jpl.view_repo.webscripts;
 
 import gov.nasa.jpl.view_repo.util.Acm;
+import gov.nasa.jpl.view_repo.util.CommitUtil;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -40,21 +42,19 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.log4j.*;
 import org.alfresco.repo.model.Repository;
+import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.security.PermissionService;
-
 import org.json.JSONArray;
-
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import org.json.JSONObject;
-
 import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
 
 public class ViewPost extends AbstractJavaWebScript {
+    static Logger logger = Logger.getLogger(ViewPost.class);
+    
 	public ViewPost() {
 	    super();
 	}
@@ -103,33 +103,53 @@ public class ViewPost extends AbstractJavaWebScript {
 		return model;
 	}
 
+	
 	private void updateViews(JSONObject jsonObject, WorkspaceNode workspace) throws JSONException {
-		if (jsonObject.has("views")) {
+	    Date start = new Date();
+	    Map<String, EmsScriptNode> elements = new HashMap<String, EmsScriptNode>();
+	    
+	    // actual business logic, everything else is to handle commits
+	    if (jsonObject.has("views")) {
 			JSONArray viewsJson = jsonObject.getJSONArray("views");
 
 			for (int ii = 0; ii < viewsJson.length(); ii++) {
-			    updateView(viewsJson, ii, workspace);
+			    updateView(viewsJson, ii, workspace, elements);
 			}
+		}
 
-//			jwsUtil.splitTransactions(new JwsFunctor() {
-//				@Override
-//				public Object execute(JSONArray jsonArray, int index,
-//						Boolean... flags) throws JSONException {
-//					updateView(jsonArray, index);
-//					return null;
-//				}
-//			}, viewsJson);
+	    // commit info
+        setWsDiff(workspace);
+	    wsDiff.setUpdatedElements( elements );
+		
+		Date end = new Date();
+		JSONObject deltaJson = wsDiff.toJSONObject( start, end );
+		String wsId = "master";
+		if (workspace != null) wsId = workspace.getId();
+        // FIXME: split elements by project Id - since they may not always be in same project
+        String projectId = "";
+        if (elements.size() > 0) {
+            // make sure the following are run as admin, it's possible that workspace
+            // doesn't have project and user doesn't have read permissions on parent ws
+            String origUser = AuthenticationUtil.getRunAsUser();
+            AuthenticationUtil.setRunAsUser("admin");
+            projectId = elements.get( 0 ).getProjectId(workspace);
+            AuthenticationUtil.setRunAsUser(origUser);
+        }
+
+        CommitUtil.commit(workspace, deltaJson, "View Post", runWithoutTransactions, services, response);
+		if (!CommitUtil.sendDeltas(deltaJson, wsId, projectId, source)) {
+		    logger.warn( "Could not send delta" );
 		}
 	}
 
 
 	private void updateView(JSONArray viewsJson, int index,
-	                        WorkspaceNode workspace) throws JSONException {
+	                        WorkspaceNode workspace, Map<String, EmsScriptNode> elements) throws JSONException {
 		JSONObject viewJson = viewsJson.getJSONObject(index);
-		updateView(viewJson, workspace);
+		updateView(viewJson, workspace, elements);
 	}
 
-	private void updateView(JSONObject viewJson, WorkspaceNode workspace) throws JSONException {
+	private void updateView(JSONObject viewJson, WorkspaceNode workspace,  Map<String, EmsScriptNode> elements) throws JSONException {
 		String id = viewJson.getString(Acm.JSON_ID);
 		if (id == null) {
 			log(Level.ERROR, HttpServletResponse.SC_BAD_REQUEST, "view id not specified.\n");
@@ -145,6 +165,7 @@ public class ViewPost extends AbstractJavaWebScript {
 		if (checkPermissions(view, PermissionService.WRITE)) {
 		    view.createOrUpdateAspect(Acm.ACM_VIEW);
 		    view.ingestJSON(viewJson);
+		    elements.put( id, view );
 		}
 	}
 }
