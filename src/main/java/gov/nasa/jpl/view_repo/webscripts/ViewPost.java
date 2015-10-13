@@ -132,7 +132,7 @@ public class ViewPost extends AbstractJavaWebScript {
             // doesn't have project and user doesn't have read permissions on parent ws
             String origUser = AuthenticationUtil.getRunAsUser();
             AuthenticationUtil.setRunAsUser("admin");
-            projectId = elements.get( 0 ).getProjectId(workspace);
+            projectId = elements.get(elements.keySet().iterator().next()).getProjectId(workspace);
             AuthenticationUtil.setRunAsUser(origUser);
         }
 
