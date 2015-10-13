@@ -117,7 +117,7 @@ public class EmsScriptNode extends ScriptNode implements
 
     static Logger logger = Logger.getLogger(ScriptNode.class);
 
-    public static boolean expressionStuff = true; // The value here is ignored.
+    public static boolean expressionStuff = false; // The value here is ignored.
 
     public static boolean addingAffectedIds = expressionStuff;
 
