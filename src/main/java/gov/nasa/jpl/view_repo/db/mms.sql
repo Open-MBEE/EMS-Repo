@@ -1,3 +1,8 @@
+-- TO BE DONE BEFORE RUNNING THIS SCRIPT
+-- createuser first
+-- GRANT ALL PRIVILEGES ON DATABASE mms to mmsuser;
+-- GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO new_user;
+
 -- drop DB at all cost
 SELECT pg_terminate_backend(pg_stat_activity.pid)
 FROM pg_stat_activity
@@ -47,45 +52,26 @@ create or replace function insert_edge(text, text, text, integer)
   returns void as $$
   begin
     execute 'insert into ' || (format('edges%s', $3)) || ' values((select id from ' || format('nodes%s',$3) || ' 
-      where sysmlId = || ' $1 || '), (select id from ' || format('nodes%s', $3) 	  || ' where sysmlId = ' || $2 || '),  ' || $4 || ')';
+      where sysmlId = || ' || $1 || '), (select id from ' || format('nodes%s', $3) 	  || ' where sysmlId = ' || $2 || '),  ' || $4 || ')';
   end;
 $$ language plpgsql;
 
 -- recursively get all children including oneself
-create or replace function get_children(integer, integer, text)
+create or replace function get_children(integer, integer, text, integer)
   returns table(id bigint) as $$
   begin
     return query
     execute '
-    with recursive children(nid) as (
-	select node.id from ' || format('nodes%s', $3) || ' node where node.id = ' || $1 || '
+    with recursive children(depth, nid) as (
+	select 0 as depth, node.id from ' || format('nodes%s', $3) || ' node where node.id = ' || $1 || '
    	union
-        select edge.child from ' || format('edges%s', $3) || ' edge where edge.parent = ' || $1 || ' and edge.edgeType = ' || $2 || ' 
+        select 1 as depth, edge.child from ' || format('edges%s', $3) || ' edge where edge.parent = ' || $1 || ' and edge.edgeType = ' || $2 || '
         union 
-	select edge.child from ' || format('edges%s', $3) || ' edge, children c where edge.parent = nid and edge.edgeType = ' || $2 || ' 
+	select (c.depth + 1) as depth, edge.child from ' || format('edges%s', $3) || ' edge, children c where edge.parent = nid and edge.edgeType = ' || $2 || '
       )
-      select distinct * from children';
+      select distinct nid from children where depth <= ' || $4 || ';';
   end;
 $$ language plpgsql;
-
--- TODO (with depth)
-create or replace function gc(integer, integer, text, integer)
-  returns table(id bigint) as $$
-  begin
-    return query
-    execute '
-    with recursive children(nid) as (
-	select node.id from ' || format('nodes%s', $3) || ' node where node.id = ' || $1 || '
-   	union
-        select edge.child from ' || format('edges%s', $3) || ' edge where edge.parent = ' || $1 || ' and edge.edgeType = ' || $2 || ' 
-        union 
-	select edge.child from ' || format('edges%s', $3) || ' edge, children c where edge.parent = nid and edge.edgeType = ' || $2 || ' 
-      )
-      select distinct * from children';
-  end;
-$$ language plpgsql;
-
-
 
 create or replace function get_parents(integer, integer, text)
   returns table(id integer) as $$
@@ -195,9 +181,13 @@ insert into edgeTypes(name) values ('regular');
 insert into edgeTypes(name) values ('document');
 
 
-/*
+GRANT ALL PRIVILEGES ON DATABASE mms to mmsuser;
+GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO mmsuser;
+GRANT USAGE, SELECT ON SEQUENCE nodes_id_seq TO mmsuser;
+
 -- test data etc. comment out when not in dev mode
 
+/*
 DO
 $do$
 BEGIN 
@@ -223,7 +213,7 @@ insert into nodes(nodeRefId, versionedRefId, nodeType, sysmlId) values(3, 3, (se
 insert into nodes(nodeRefId, versionedRefId, nodeType, sysmlId) values(4, 4, (select nodeTypes.id from nodeTypes where name = 'regular'), '4');
 insert into nodes(nodeRefId, versionedRefId, nodeType, sysmlId) values(5, 5, (select nodeTypes.id from nodeTypes where name = 'regular'), '5');
 insert into nodes(nodeRefId, versionedRefId, nodeType, sysmlId) values(6, 6, (select nodeTypes.id from nodeTypes where name = 'regular'), '6');
-insert into nodes(nodeRefId, versionedRefId, nodeType, sysmlId) values(7, 7, (select nodeTypes.id from nodeTypes where name = 'regular'), '8');
+insert into nodes(nodeRefId, versionedRefId, nodeType, sysmlId) values(7, 7, (select nodeTypes.id from nodeTypes where name = 'regular'), '7');
 insert into nodes(nodeRefId, versionedRefId, nodeType, sysmlId) values(8, 8, (select nodeTypes.id from nodeTypes where name = 'regular'), '8');
 
 insert into edges values(1, 2, (select edgeTypes.id from edgeTypes where name = 'regular'));
@@ -240,12 +230,10 @@ insert into edges values(2, 6, (select edgeTypes.id from edgeTypes where name = 
 insert into edges values(7, 2, (select edgeTypes.id from edgeTypes where name = 'document'));
 insert into edges values(6, 4, (select edgeTypes.id from edgeTypes where name = 'document'));
 
-select * from get_children(1, (select edgeTypes.id from edgeTypes where name = 'regular'));
-select * from get_children(2, (select edgeTypes.id from edgeTypes where name = 'regular'));
-select * from get_children(3, (select edgeTypes.id from edgeTypes where name = 'regular'));
-select * from get_children(5, (select edgeTypes.id from edgeTypes where name = 'regular'));
 
-select * from get_children(1, (select edgeTypes.id from edgeTypes where name = 'document'));
-select * from get_children(2, (select edgeTypes.id from edgeTypes where name = 'document'));
-select * from get_children(3, (select edgeTypes.id from edgeTypes where name = 'document'));
+select * from get_children(1, 1, '', 1);
+select * from get_children(1, 1, '', 2);
+select * from get_children(1, 1, '', 3);
+select * from get_children(1, 1, '', 4);
+
 */

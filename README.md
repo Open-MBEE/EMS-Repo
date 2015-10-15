@@ -26,11 +26,7 @@ src/main/java/gov/nasa/jpl/view_repo/db/mms.sql to initialize the database (as f
   - Create mmsuser using the postgres createuser. Set password to test123 (or whatever you want).
     If you change the password, please change DbContracts.java to use the same.
   - Open a postgres terminal (depends on your OS, but usually Postgres shows up with this shortcut)
-    Grant privileges to mmsuser:
-
-          GRANT ALL PRIVILEGES ON DATABASE mms to mmsuser;
-          GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO new_user;
-
+    This should be done as root user.
   - In the terminal, use the following to create and initialize the database
 
        	   \i <path to mms.sql>
