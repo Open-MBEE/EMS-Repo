@@ -157,7 +157,7 @@ public class FullDocPost extends AbstractJavaWebScript {
     	File file = new File(filePath);
     	//opens the initial document view
     	Document document = Jsoup.parse(file, "UTF-8", "");
-    	document.head().append(getTableVerticalSplitScript());
+//    	document.head().append(getTableVerticalSplitScript());
     	//retrieves its views
     	JSONObject v2vChildNode = getChildrenViews(docId);
     	JSONArray childrenViews = v2vChildNode.getJSONArray("childrenViews");
