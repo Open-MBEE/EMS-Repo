@@ -38,7 +38,7 @@ test_dir_path = "test-data/javawebscripts"
 test_nums = []
 test_names = []
 create_baselines = False
-common_filters = ['"created"','"read"','"lastModified"','"modified"','"siteCharacterizationId"','time_total']
+common_filters = ['"nodeRefId"', '"versionedRefId"', '"created"','"read"','"lastModified"','"modified"','"siteCharacterizationId"','time_total']
 cmd_git_branch = None
 
 tests = []
