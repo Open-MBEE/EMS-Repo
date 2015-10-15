@@ -29,7 +29,7 @@ src/main/java/gov/nasa/jpl/view_repo/db/mms.sql to initialize the database (as f
     This should be done as root user.
   - In the terminal, use the following to create and initialize the database
 
-       	   \i <path to mms.sql>
+       	   <path to pgsql> -f <path to mms.sql>
 
   - In a browser, or using curl on the command line:
 
