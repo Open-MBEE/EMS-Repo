@@ -11,6 +11,7 @@ import gov.nasa.jpl.view_repo.util.JsonDiffDiff.DiffType;
 import gov.nasa.jpl.view_repo.webscripts.MmsDiffGet;
 import gov.nasa.jpl.view_repo.webscripts.WebScriptUtil;
 import gov.nasa.jpl.view_repo.webscripts.util.ConfigurationsWebscript;
+import groovy.lang.Tuple;
 
 import java.net.InetAddress;
 import java.sql.SQLException;
@@ -19,8 +20,10 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
@@ -828,8 +831,7 @@ public class CommitUtil {
 		return result;
 	}
 
-	private static void processDeltasForDb(JSONObject delta,
-			String workspaceId) {
+	private static void processDeltasForDb(JSONObject delta, String workspaceId) {
 
 		PostgresHelper pgh;
 		if (workspaceId.equals("master"))
@@ -866,10 +868,10 @@ public class CommitUtil {
 				}
 				if (e.has("specialization")
 						&& e.getJSONObject("specialization").has("view2view")) {
-					JSONArray view2viewProperty = e
-							.getJSONObject("specialization")
-							.getJSONArray("view2view");
-					NodeUtil.processV2VEdges(view2viewProperty, documentEdges);
+					JSONArray view2viewProperty = e.getJSONObject(
+							"specialization").getJSONArray("view2view");
+					NodeUtil.processV2VEdges(e.getString("sysmlid"),
+							view2viewProperty, documentEdges);
 				}
 			}
 
@@ -895,10 +897,10 @@ public class CommitUtil {
 				}
 				if (e.has("specialization")
 						&& e.getJSONObject("specialization").has("view2view")) {
-					JSONArray view2viewProperty = e
-							.getJSONObject("specialization")
-							.getJSONArray("view2view");
-					NodeUtil.processV2VEdges(view2viewProperty, documentEdges);
+					JSONArray view2viewProperty = e.getJSONObject(
+							"specialization").getJSONArray("view2view");
+					NodeUtil.processV2VEdges(e.getString("sysmlid"),
+							view2viewProperty, documentEdges);
 				}
 			}
 
@@ -936,8 +938,7 @@ public class CommitUtil {
 	 * @throws JSONException
 	 */
 	public static boolean sendDeltas(JSONObject deltaJson, String workspaceId,
-			String projectId, String source)
-			throws JSONException {
+			String projectId, String source) throws JSONException {
 		boolean jmsStatus = false;
 		boolean restStatus = false;
 

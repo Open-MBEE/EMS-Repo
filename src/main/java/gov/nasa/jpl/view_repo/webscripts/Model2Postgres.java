@@ -224,7 +224,7 @@ public class Model2Postgres extends AbstractJavaWebScript {
 		NodeUtil.processDocumentEdges(n.getSysmlId(), doc, documentEdges);
 		String view2viewProperty = (String) n.getProperty(Acm.ACM_VIEW_2_VIEW);
 		if (view2viewProperty != null) {
-			NodeUtil.processV2VEdges(new JSONArray(view2viewProperty),
+			NodeUtil.processV2VEdges(n.getSysmlId(), new JSONArray(view2viewProperty),
 					documentEdges);
 		}
 		

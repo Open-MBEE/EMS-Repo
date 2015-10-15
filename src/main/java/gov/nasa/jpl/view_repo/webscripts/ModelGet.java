@@ -434,7 +434,7 @@ public class ModelGet extends AbstractJavaWebScript {
 			Long currDepth, boolean connected, String relationship,
 			Set<String> visited) throws JSONException, SQLException {
 
-		if (dateTime == null)
+		if (dateTime == null && !connected)
 			handleElementHierarchyPostgres(root, workspace, dateTime, maxDepth,
 					currDepth, connected, relationship, visited);
 		else
@@ -463,26 +463,16 @@ public class ModelGet extends AbstractJavaWebScript {
 		List<Pair<String, String>> childrenNodeRefIds = null;
 		try {
 			pgh.connect();
-			if (maxDepth < 0) {
-				childrenNodeRefIds = pgh.getChildren(root.getSysmlId(),
-						DbEdgeTypes.REGULAR);
-			} else if (maxDepth == 0) {
-				childrenNodeRefIds = new ArrayList<Pair<String, String>>();
-			} else if (maxDepth == 1) {
-				childrenNodeRefIds = pgh.getImmediateChildren(
-						root.getSysmlId(), DbEdgeTypes.REGULAR);
-			} else if (maxDepth > 1) {
-				return;
-			}
+			int depth = 1000000;
+			if (maxDepth >= 0)
+				depth = maxDepth.intValue();
+			childrenNodeRefIds = pgh.getChildren(root.getSysmlId(),
+					DbEdgeTypes.REGULAR, depth);
 		} catch (SQLException | ClassNotFoundException e) {
 			e.printStackTrace();
 		} finally {
 			pgh.close();
 		}
-
-		// add root
-		childrenNodeRefIds.add(new Pair<String, String>(root.getNodeRef()
-				.toString(), NodeUtil.getVersionedRefId(root)));
 
 		for (Pair<String, String> c : childrenNodeRefIds) {
 
@@ -534,9 +524,9 @@ public class ModelGet extends AbstractJavaWebScript {
 						rootName.substring(0, rootName.lastIndexOf("_pkg")),
 						workspace, dateTime, false);
 				if (reifiedNode != null) {
-					handleElementHierarchy(reifiedNode, workspace, dateTime,
-							maxDepth, currDepth, connected, relationship,
-							visited);
+					handleElementHierarchyOriginal(reifiedNode, workspace,
+							dateTime, maxDepth, currDepth, connected,
+							relationship, visited);
 				} // TODO -- REVIEW -- Warning or error?
 			}
 
@@ -560,9 +550,9 @@ public class ModelGet extends AbstractJavaWebScript {
 							elementsFound.put(value, child);
 						}
 
-						handleElementHierarchy(child, workspace, dateTime,
-								maxDepth, currDepth, connected, relationship,
-								visited);
+						handleElementHierarchyOriginal(child, workspace,
+								dateTime, maxDepth, currDepth, connected,
+								relationship, visited);
 
 					} // ends if (child.exists() && !child.isOwnedValueSpec())
 				} // ends if ( checkPermissions( child, PermissionService.READ )

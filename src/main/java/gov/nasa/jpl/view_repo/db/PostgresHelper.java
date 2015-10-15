@@ -227,7 +227,7 @@ public class PostgresHelper {
 	}
 
 	// returns list of nodeRefIds
-	public List<Pair<String,String>> getChildren(String sysmlId, DbEdgeTypes et) {
+	public List<Pair<String,String>> getChildren(String sysmlId, DbEdgeTypes et, int depth) {
 		List<Pair<String,String>> result = new ArrayList<Pair<String,String>>();
 		try {
 			Node n = getNodeFromSysmlId(sysmlId);
@@ -238,7 +238,7 @@ public class PostgresHelper {
 			ResultSet rs = execQuery("select nodeRefId,versionedRefId from nodes"
 					+ workspaceName
 					+ " where id in (select * from get_children(" + n.getId()
-					+ ", " + et.getValue() + ", '" + workspaceName + "'))");
+					+ ", " + et.getValue() + ", '" + workspaceName + "', " + depth + "))");
 
 			while (rs.next()) {
 				result.add(new Pair<String,String>(rs.getString(1), rs.getString(2)));
