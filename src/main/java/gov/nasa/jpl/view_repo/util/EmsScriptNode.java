@@ -5597,6 +5597,13 @@ public class EmsScriptNode extends ScriptNode implements
                    addInternalJSON( node.getNodeRefProperty(Acm.ACM_LOWER, dateTime, ws), ws, dateTime ),
                    filter );
 
+        putInJson( json, Acm.JSON_MULTIPLICITY_MIN,
+                   addInternalJSON( node.getNodeRefProperty(Acm.ACM_MULTIPLICITY_MIN, dateTime, ws), ws, dateTime ),
+                   filter );
+        putInJson( json, Acm.JSON_MULTIPLICITY_MAX,
+                   addInternalJSON( node.getNodeRefProperty(Acm.ACM_MULTIPLICITY_MAX, dateTime, ws), ws, dateTime ),
+                   filter );
+        
         putInJson( json, Acm.JSON_AGGREGATION,
                    node.getProperty( Acm.ACM_AGGREGATION), filter );
     }
