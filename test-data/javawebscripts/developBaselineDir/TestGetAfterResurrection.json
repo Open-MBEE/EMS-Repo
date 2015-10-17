@@ -1,5 +1,17 @@
 {"elements": [
     {
+        "qualifiedId": "/europa/123456/op_ev_31835/op_param_31869",
+        "qualifiedName": "/europa/JW_TEST2/GreaterEquals/y",
+        "sysmlid": "op_param_31869",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "y",
+        "owner": "op_ev_31835",
+        "documentation": "",
+        "specialization": {"type": "Element"}
+    },
+    {
         "qualifiedId": "/europa/123456/BLUCamTest/_17_0_2_4_f3a0363_1394146455624_407543_30441/_17_0_2_4_f3a0363_1394141845089_115460_28389",
         "qualifiedName": "/europa/JW_TEST2/BLUCamTest/dont care2/ionosphere",
         "sysmlid": "_17_0_2_4_f3a0363_1394141845089_115460_28389",
@@ -15,6 +27,30 @@
             "isSlot": false,
             "type": "Property"
         }
+    },
+    {
+        "qualifiedId": "/europa/123456/op_ev_31835/op_param_31868",
+        "qualifiedName": "/europa/JW_TEST2/GreaterEquals/x",
+        "sysmlid": "op_param_31868",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "x",
+        "owner": "op_ev_31835",
+        "documentation": "",
+        "specialization": {"type": "Element"}
+    },
+    {
+        "qualifiedId": "/europa/123456/op_ev_31835/op_param_31867",
+        "qualifiedName": "/europa/JW_TEST2/GreaterEquals/result",
+        "sysmlid": "op_param_31867",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "result",
+        "owner": "op_ev_31835",
+        "documentation": "",
+        "specialization": {"type": "Element"}
     },
     {
         "qualifiedId": "/europa/123456/BLUCamTest/_17_0_2_4_f3a0363_1394146455624_407543_30441/_17_0_2_3_e610336_1394148233838_91795_29332",
@@ -156,26 +192,26 @@
         "creator": "admin"
     },
     {
-        "qualifiedId": "/europa/123456/4000",
-        "qualifiedName": "/europa/JW_TEST2/400",
-        "sysmlid": "4000",
-        "editable": true,
-        "creator": "admin",
         "modifier": "admin",
+        "qualifiedId": "/europa/123456/4000",
         "name": "400",
-        "owner": "123456",
+        "qualifiedName": "/europa/JW_TEST2/400",
         "documentation": "4something",
+        "owner": "123456",
+        "sysmlid": "4000",
         "specialization": {
             "propertyType": null,
-            "isDerived": false,
             "isSlot": false,
+            "isDerived": false,
             "value": [{
                 "valueExpression": null,
                 "string": "dlam_string",
                 "type": "LiteralString"
             }],
             "type": "Property"
-        }
+        },
+        "editable": true,
+        "creator": "admin"
     },
     {
         "qualifiedId": "/europa/123456/metatype1",
@@ -193,6 +229,28 @@
             "source"
         ],
         "specialization": {"type": "Element"}
+    },
+    {
+        "qualifiedId": "/europa/123456/arg_ev_38307_1",
+        "qualifiedName": "/europa/JW_TEST2/duration_1",
+        "sysmlid": "arg_ev_38307_1",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "duration_1",
+        "owner": "123456",
+        "documentation": "",
+        "specialization": {
+            "propertyType": null,
+            "isDerived": false,
+            "isSlot": false,
+            "value": [{
+                "valueExpression": null,
+                "integer": 10,
+                "type": "LiteralInteger"
+            }],
+            "type": "Property"
+        }
     },
     {
         "qualifiedId": "/europa/123456/BLUCamTest/_17_0_2_4_f3a0363_1394146455624_407543_30441/get_two_names",
@@ -524,20 +582,6 @@
         "creator": "admin"
     },
     {
-        "qualifiedName": "/europa/JW_TEST2/",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "",
-        "owner": "123456",
-        "documentation": "",
-        "specialization": {
-            "source": "_17_0_2_3_e610336_1394148311476_17302_29388",
-            "target": "_17_0_2_4_f3a0363_1394142290412_487571_28478",
-            "type": "Expose"
-        }
-    },
-    {
         "qualifiedId": "/europa/123456/300/500",
         "qualifiedName": "/europa/JW_TEST2/300/500",
         "sysmlid": "500",
@@ -576,22 +620,14 @@
         }
     },
     {
-        "qualifiedId": "/europa/123456/4000/401",
-        "qualifiedName": "/europa/JW_TEST2/400/401",
-        "sysmlid": "401",
-        "editable": true,
-        "creator": "admin",
         "modifier": "admin",
+        "qualifiedId": "/europa/123456/4000/401",
         "name": "401",
-        "owner": "4000",
+        "qualifiedName": "/europa/JW_TEST2/400/401",
         "documentation": "4else",
+        "owner": "4000",
+        "sysmlid": "401",
         "specialization": {
-            "displayedElements": [
-                "401",
-                "402",
-                "403"
-            ],
-            "childrenViews": ["404"],
             "view2view": [{
                 "childrenViews": [
                     "401",
@@ -599,19 +635,41 @@
                 ],
                 "sysmlid": "401"
             }],
+            "childrenViews": ["404"],
+            "displayedElements": [
+                "401",
+                "402",
+                "403"
+            ],
             "allowedElements": [
                 "401",
                 "402",
                 "403"
             ],
+            "noSections": ["402"],
             "contains": [{
                 "sourceType": "reference",
                 "source": "401",
                 "sourceProperty": "documentation",
                 "type": "Paragraph"
             }],
-            "noSections": ["402"],
             "type": "Product"
+        },
+        "editable": true,
+        "creator": "admin"
+    },
+    {
+        "qualifiedName": "/europa/JW_TEST2/",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "",
+        "owner": "123456",
+        "documentation": "",
+        "specialization": {
+            "source": "_17_0_2_3_e610336_1394148311476_17302_29388",
+            "target": "_17_0_2_4_f3a0363_1394142290412_487571_28478",
+            "type": "Expose"
         }
     },
     {
@@ -660,18 +718,6 @@
         "creator": "admin"
     },
     {
-        "qualifiedId": "/europa/123456/_17_0_2_4_f3a0363_1394142290412_487571_28478",
-        "qualifiedName": "/europa/JW_TEST2/BLUCam CubeSat A",
-        "sysmlid": "_17_0_2_4_f3a0363_1394142290412_487571_28478",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "BLUCam CubeSat A",
-        "owner": "123456",
-        "documentation": "",
-        "specialization": {"type": "Package"}
-    },
-    {
         "qualifiedId": "/europa/123456/notInThePast",
         "qualifiedName": "/europa/JW_TEST2/notInThePast",
         "sysmlid": "notInThePast",
@@ -711,6 +757,18 @@
             }],
             "type": "Property"
         }
+    },
+    {
+        "qualifiedId": "/europa/123456/_17_0_2_4_f3a0363_1394142290412_487571_28478",
+        "qualifiedName": "/europa/JW_TEST2/BLUCam CubeSat A",
+        "sysmlid": "_17_0_2_4_f3a0363_1394142290412_487571_28478",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "BLUCam CubeSat A",
+        "owner": "123456",
+        "documentation": "",
+        "specialization": {"type": "Package"}
     },
     {
         "qualifiedId": "/europa/123456/4000/401/402",
@@ -951,6 +1009,25 @@
         }
     },
     {
+        "qualifiedId": "/europa/123456/op_ev_31835",
+        "qualifiedName": "/europa/JW_TEST2/GreaterEquals",
+        "sysmlid": "op_ev_31835",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "GreaterEquals",
+        "owner": "123456",
+        "documentation": "",
+        "specialization": {
+            "parameters": [
+                "op_param_31867",
+                "op_param_31868",
+                "op_param_31869"
+            ],
+            "type": "Operation"
+        }
+    },
+    {
         "qualifiedId": "/europa/123456/BLUCamTest/_17_0_2_4_f3a0363_1394146455624_407543_30441/op_name_arg_1",
         "qualifiedName": "/europa/JW_TEST2/BLUCamTest/dont care2/name_arg_1",
         "sysmlid": "op_name_arg_1",
@@ -976,6 +1053,23 @@
                 }
             ]
         }
+    },
+    {
+        "modifier": "admin",
+        "qualifiedId": "/europa/123456/sourceId",
+        "name": "sourceId",
+        "qualifiedName": "/europa/JW_TEST2/sourceId",
+        "documentation": "source",
+        "owner": "123456",
+        "sysmlid": "sourceId",
+        "specialization": {
+            "propertyType": null,
+            "isSlot": false,
+            "isDerived": false,
+            "type": "Property"
+        },
+        "editable": true,
+        "creator": "admin"
     },
     {
         "qualifiedId": "/europa/123456/BLUCamTest/_17_0_2_4_f3a0363_1394146455624_407543_30441/op_name_arg_2",
@@ -1006,23 +1100,6 @@
     },
     {
         "modifier": "admin",
-        "qualifiedId": "/europa/123456/sourceId",
-        "name": "sourceId",
-        "qualifiedName": "/europa/JW_TEST2/sourceId",
-        "documentation": "source",
-        "owner": "123456",
-        "sysmlid": "sourceId",
-        "specialization": {
-            "propertyType": null,
-            "isSlot": false,
-            "isDerived": false,
-            "type": "Property"
-        },
-        "editable": true,
-        "creator": "admin"
-    },
-    {
-        "modifier": "admin",
         "qualifiedId": "/europa/123456/timeIntervalNull",
         "name": "timeIntervalNull",
         "qualifiedName": "/europa/JW_TEST2/timeIntervalNull",
@@ -1040,21 +1117,6 @@
     },
     {
         "modifier": "admin",
-        "qualifiedId": "/europa/123456/md",
-        "name": "md",
-        "qualifiedName": "/europa/JW_TEST2/md",
-        "documentation": "Magic Draw Meta-Data",
-        "owner": "123456",
-        "sysmlid": "md",
-        "specialization": {
-            "type": "MagicDrawData",
-            "mdData": "A blob of meta-data"
-        },
-        "editable": true,
-        "creator": "admin"
-    },
-    {
-        "modifier": "admin",
         "qualifiedId": "/europa/123456/characterizes",
         "name": "characterizes",
         "qualifiedName": "/europa/JW_TEST2/characterizes",
@@ -1065,6 +1127,21 @@
             "source": "sourceId",
             "target": "targetId",
             "type": "Characterizes"
+        },
+        "editable": true,
+        "creator": "admin"
+    },
+    {
+        "modifier": "admin",
+        "qualifiedId": "/europa/123456/md",
+        "name": "md",
+        "qualifiedName": "/europa/JW_TEST2/md",
+        "documentation": "Magic Draw Meta-Data",
+        "owner": "123456",
+        "sysmlid": "md",
+        "specialization": {
+            "type": "MagicDrawData",
+            "mdData": "A blob of meta-data"
         },
         "editable": true,
         "creator": "admin"
@@ -1177,20 +1254,6 @@
         "creator": "admin"
     },
     {
-        "qualifiedName": "/europa/JW_TEST2/BLUCamTest/dont care2/expose relationship",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "expose relationship",
-        "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
-        "documentation": "",
-        "specialization": {
-            "source": "_17_0_2_3_e610336_1394148233838_91795_29332",
-            "target": "_17_0_2_4_f3a0363_1394140326296_809805_27600",
-            "type": "Expose"
-        }
-    },
-    {
         "modifier": "admin",
         "qualifiedId": "/europa/123456/instanceSpecificationNull",
         "name": "instanceSpecificationNull",
@@ -1220,16 +1283,6 @@
     },
     {
         "modifier": "admin",
-        "qualifiedId": "/europa/123456",
-        "name": "JW_TEST2",
-        "qualifiedName": "/europa/JW_TEST2",
-        "sysmlid": "123456",
-        "owner": null,
-        "editable": true,
-        "creator": "admin",
-    },
-    {
-        "modifier": "admin",
         "qualifiedId": "/europa/123456/viewWithContents",
         "name": "viewWithContents",
         "qualifiedName": "/europa/JW_TEST2/viewWithContents",
@@ -1248,6 +1301,16 @@
     },
     {
         "modifier": "admin",
+        "qualifiedId": "/europa/123456",
+        "name": "JW_TEST2",
+        "qualifiedName": "/europa/JW_TEST2",
+        "sysmlid": "123456",
+        "owner": null,
+        "editable": true,
+        "creator": "admin",
+    },
+    {
+        "modifier": "admin",
         "qualifiedId": "/europa/123456/BLUCamTest/_17_0_2_4_f3a0363_1394146455624_407543_30441",
         "name": "dont care2",
         "qualifiedName": "/europa/JW_TEST2/BLUCamTest/dont care2",
@@ -1256,6 +1319,28 @@
         "specialization": {"type": "Package"},
         "editable": true,
         "creator": "admin",
+    },
+    {
+        "qualifiedId": "/europa/123456/arg_ev_38307",
+        "qualifiedName": "/europa/JW_TEST2/duration",
+        "sysmlid": "arg_ev_38307",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "duration",
+        "owner": "123456",
+        "documentation": "",
+        "specialization": {
+            "propertyType": null,
+            "isDerived": false,
+            "isSlot": false,
+            "value": [{
+                "valueExpression": null,
+                "integer": 22,
+                "type": "LiteralInteger"
+            }],
+            "type": "Property"
+        }
     },
     {
         "modifier": "admin",
@@ -1295,6 +1380,41 @@
         "creator": "admin"
     },
     {
+        "qualifiedId": "/europa/123456/constraint_32165",
+        "qualifiedName": "/europa/JW_TEST2/",
+        "sysmlid": "constraint_32165",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "",
+        "owner": "123456",
+        "documentation": "",
+        "specialization": {
+            "specification": {
+                "valueExpression": null,
+                "operand": [
+                    {
+                        "element": "op_ev_31835",
+                        "valueExpression": null,
+                        "type": "ElementValue"
+                    },
+                    {
+                        "element": "arg_ev_38307_1",
+                        "valueExpression": null,
+                        "type": "ElementValue"
+                    },
+                    {
+                        "element": "arg_ev_33001",
+                        "valueExpression": null,
+                        "type": "ElementValue"
+                    }
+                ],
+                "type": "Expression"
+            },
+            "type": "Constraint"
+        }
+    },
+    {
         "modifier": "admin",
         "qualifiedId": "/europa/123456/propertyNull",
         "name": "propertyNull",
@@ -1332,6 +1452,20 @@
         },
         "editable": true,
         "creator": "admin"
+    },
+    {
+        "qualifiedName": "/europa/JW_TEST2/BLUCamTest/dont care2/expose relationship",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "expose relationship",
+        "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
+        "documentation": "",
+        "specialization": {
+            "source": "_17_0_2_3_e610336_1394148233838_91795_29332",
+            "target": "_17_0_2_4_f3a0363_1394140326296_809805_27600",
+            "type": "Expose"
+        }
     },
     {
         "modifier": "admin",
@@ -1455,6 +1589,28 @@
         },
         "editable": true,
         "creator": "admin"
+    },
+    {
+        "qualifiedId": "/europa/123456/arg_ev_33001",
+        "qualifiedName": "/europa/JW_TEST2/initialDuration",
+        "sysmlid": "arg_ev_33001",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "initialDuration",
+        "owner": "123456",
+        "documentation": "",
+        "specialization": {
+            "propertyType": null,
+            "isDerived": false,
+            "isSlot": false,
+            "value": [{
+                "valueExpression": null,
+                "integer": 11,
+                "type": "LiteralInteger"
+            }],
+            "type": "Property"
+        }
     },
     {
         "qualifiedId": "/europa/123456/BLUCamTest/_17_0_2_4_f3a0363_1394146455624_407543_30441/s2_param",

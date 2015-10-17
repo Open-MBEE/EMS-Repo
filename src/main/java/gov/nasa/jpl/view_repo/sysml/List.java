@@ -97,42 +97,47 @@ public class List extends ArrayList< Viewable< EmsScriptNode > >
     	addToList( c );
     }
     protected void addToList( Object[] c ) {
-    	for (Object obj : c) {
-    		if (obj instanceof Expression<?>) {
-    			Object eval = null;
+        System.out.println("addToList");
+        if ( c == null ) return;
+        for (Object obj : c) {
+            Throwable t = null;
+            if ( obj instanceof Viewable ) {
+                this.add( (Viewable< EmsScriptNode >)obj );
+            } else if (obj instanceof Expression<?>) {
+                Object eval = null;
                 try {
-                    eval = ((Expression<?>) obj).evaluate(true);
-                    
-                // TODO -- figure out why eclipse gives compile errors for
-                // including the exceptions while mvn gives errors for not
-                // including them.
+                    eval = ( (Expression< ? >)obj ).evaluate( true );
+                    if ( eval == null || obj == eval ) {
+                        this.add( new Text( "" + obj ) );
+                    } else {
+                        // package new result in an array and try again
+                        if ( !eval.getClass().isArray() ) {
+                            eval = new Object[] { eval };
+                        }
+                        this.addToList( (Object[])eval );
+                    }
                 } catch ( IllegalAccessException e ) {
-                    // TODO Auto-generated catch block
-                    //e.printStackTrace();
+                    t = e;
                 } catch ( InvocationTargetException e ) {
-                    // TODO Auto-generated catch block
-                    //e.printStackTrace();
+                    t = e;
                 } catch ( InstantiationException e ) {
-                    // TODO Auto-generated catch block
-                    //e.printStackTrace();
+                    t = e;
+                } finally {
+                    if ( t != null ) {
+                        Debug.error(true, false, t.getLocalizedMessage() );
+                    }
                 }
-          if ( eval instanceof Collection ) {
-            Collection<?> coll = (Collection<?>)eval;
-            this.addToList(coll.toArray());
-          } else if ( eval != null && eval.getClass().isArray() ) {
-            this.addToList((Object[])eval);
-          } else if ( eval instanceof Viewable ) {
-    			    this.add((Viewable<EmsScriptNode>)eval);
-    			} else {
-    			    this.add(new Text("" + eval));
-    			}
-    		} else if ( obj instanceof Viewable ) {
-    		    this.add((Viewable<EmsScriptNode>)obj);
-    		} else {
-    		    // ERROR
-    		    Debug.error(true, false, "bad arg to List(Object[]): " + c);
-    		}
-    	}
+            } else if ( obj != null && obj.getClass().isArray() ) {
+                this.addToList( (Object[])obj );
+            } else if ( obj instanceof Collection ) {
+                Collection< ? > coll = (Collection< ? >)obj;
+                this.addToList( coll.toArray() );
+            } else {
+                this.add( new Text( "" + obj ) );
+            }
+            // ERROR
+            Debug.error(true, false, "bad arg to List(Object[]): " + c);
+        }
     }
 
     public static Viewable<EmsScriptNode> toViewable( Object obj ) {

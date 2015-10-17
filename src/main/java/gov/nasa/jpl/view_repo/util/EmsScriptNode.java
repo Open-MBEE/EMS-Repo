@@ -5496,22 +5496,31 @@ public class EmsScriptNode extends ScriptNode implements
         boolean noFilter = filter == null || filter.size() == 0;
         if ( expressionStuff && ( property == null || property.length() <= 0 ) ) {
             if ( noFilter || filter.contains( "contains" ) ) {
-                json.put( "contains", getView().getContainsJson(true,dateTime,ws) );
+                JSONArray containsJson = getView().getContainsJson(true,dateTime,ws);
+                if ( containsJson != null && containsJson.length() > 0 ) {
+                    json.put( "contains", containsJson  );
+                }
             }
             JSONArray displayedElements = null;
             if ( noFilter || filter.contains( "displayedElements" ) ) {
-                displayedElements = toJsonArrayOfSysmlIds( getView().getDisplayedElements() );
-                json.put( "displayedElements", displayedElements );
+                Collection< EmsScriptNode > displayedNodes = getView().getDisplayedElements();
+                if ( !Utils.isNullOrEmpty( displayedNodes ) ) {
+                    displayedElements = toJsonArrayOfSysmlIds( displayedNodes );
+                    json.put( "displayedElements", displayedElements );
+                }
             }
             if ( noFilter || filter.contains( "allowedElements" ) ) {
-                if ( displayedElements == null ) {
-                    displayedElements = toJsonArrayOfSysmlIds( getView().getDisplayedElements() );
+                if ( displayedElements != null ) {
+                    json.put( "allowedElements", displayedElements );
                 }
-                json.put( "allowedElements", displayedElements );
             }
             if ( noFilter || filter.contains( "childrenViews" ) ) {
-                JSONArray childViews = toJsonArrayOfSysmlIds( getNodesOfViews( getView().getChildViews() ) );
-                json.put( "childrenViews", childViews );
+                Collection< EmsScriptNode > childNodes =
+                        getNodesOfViews( getView().getChildViews() );
+                if ( !Utils.isNullOrEmpty( childNodes ) ) {
+                    JSONArray childViews = toJsonArrayOfSysmlIds( childNodes );
+                    json.put( "childrenViews", childViews );
+                }
             }
         } else {
             if (!Utils.isNullOrEmpty(property)) {

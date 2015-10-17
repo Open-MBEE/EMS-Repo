@@ -233,7 +233,7 @@ public class Evaluate implements Viewable< EmsScriptNode > {
                                          ws, null );
            } catch (Throwable t) {
                // ignore -- we'll try to handle this gracefully below.
-               t.printStackTrace(); // FIXME -- remove this debug print -- TODO
+               if ( logger.isDebugEnabled() ) t.printStackTrace();
            }
            
             if ( json == null || json.length() == 0

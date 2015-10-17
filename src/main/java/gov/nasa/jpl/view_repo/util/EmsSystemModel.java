@@ -2173,7 +2173,7 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, Object, 
     public boolean nameStartsWithN( Object s ) {
         System.out.println("NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN");
         if ( s instanceof EmsScriptNode ) {
-            ( (EmsScriptNode)s ).getSysmlName().startsWith( "N" );
+            return ( (EmsScriptNode)s ).getSysmlName().startsWith( "N" );
         } else if ( s instanceof String ) {
             return ( (String)s ).startsWith( "N" );
         }
