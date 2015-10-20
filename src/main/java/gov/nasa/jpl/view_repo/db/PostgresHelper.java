@@ -370,7 +370,8 @@ public class PostgresHelper {
 					+ childWorkspaceName.replace("-", "_")
 					+ " (id bigserial primary key, noderefid text not null unique, versionedrefid text not null, "
 					+ "nodetype integer references nodetypes(id) not null, sysmlid text not null unique)");
-			execUpdate("insert into nodes" + childWorkspaceName.replace("-", "_") + "(nodetype, noderefid, versionedrefid, sysmlid) select nodetype,noderefid,versionedrefid,sysmlid from nodes"  + workspaceName);
+			execUpdate("insert into nodes" + childWorkspaceName.replace("-", "_") + "(id, nodetype, noderefid, versionedrefid, sysmlid) select id, nodetype,noderefid,versionedrefid,sysmlid from nodes"  + workspaceName);
+			execQuery("select setval('nodes" + childWorkspaceName.replace("-", "_") + "_id_seq', coalesce((select max(id)+1 from nodes" + childWorkspaceName.replace("-", "_") + "), 1), false)");
 
 			execUpdate("create table edges"
 					+ childWorkspaceName.replace("-", "_")
