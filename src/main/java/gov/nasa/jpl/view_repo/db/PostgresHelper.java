@@ -165,7 +165,7 @@ public class PostgresHelper {
 			Node n = getNodeFromNodeRefId(nodeRefId);
 			if (n != null)
 				return;
-			
+
 			Map<String, String> map = new HashMap<String, String>();
 			map.put("nodeRefId", nodeRefId);
 			map.put("versionedRefId", versionedRefId);
@@ -227,8 +227,9 @@ public class PostgresHelper {
 	}
 
 	// returns list of nodeRefIds
-	public List<Pair<String,String>> getChildren(String sysmlId, DbEdgeTypes et, int depth) {
-		List<Pair<String,String>> result = new ArrayList<Pair<String,String>>();
+	public List<Pair<String, String>> getChildren(String sysmlId,
+			DbEdgeTypes et, int depth) {
+		List<Pair<String, String>> result = new ArrayList<Pair<String, String>>();
 		try {
 			Node n = getNodeFromSysmlId(sysmlId);
 
@@ -237,11 +238,18 @@ public class PostgresHelper {
 
 			ResultSet rs = execQuery("select nodeRefId,versionedRefId from nodes"
 					+ workspaceName
-					+ " where id in (select * from get_children(" + n.getId()
-					+ ", " + et.getValue() + ", '" + workspaceName + "', " + depth + "))");
+					+ " where id in (select * from get_children("
+					+ n.getId()
+					+ ", "
+					+ et.getValue()
+					+ ", '"
+					+ workspaceName
+					+ "', "
+					+ depth + "))");
 
 			while (rs.next()) {
-				result.add(new Pair<String,String>(rs.getString(1), rs.getString(2)));
+				result.add(new Pair<String, String>(rs.getString(1), rs
+						.getString(2)));
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -249,9 +257,9 @@ public class PostgresHelper {
 		return result;
 	}
 
-	public List<Pair<String,String>> getImmediateChildren(String sysmlId,
+	public List<Pair<String, String>> getImmediateChildren(String sysmlId,
 			DbEdgeTypes edgeType) {
-		List<Pair<String,String>> result = new ArrayList<Pair<String,String>>();
+		List<Pair<String, String>> result = new ArrayList<Pair<String, String>>();
 		try {
 			Node n = getNodeFromSysmlId(sysmlId);
 			if (n == null)
@@ -260,11 +268,14 @@ public class PostgresHelper {
 			ResultSet rs = execQuery("select noderefid,versionedrefid from nodes"
 					+ workspaceName
 					+ " where id in (select child from edges where parent = "
-					+ n.getId() + " and edgeType = " + edgeType.getValue()
+					+ n.getId()
+					+ " and edgeType = "
+					+ edgeType.getValue()
 					+ ")");
 
 			while (rs.next()) {
-				result.add(new Pair<String,String>(rs.getString(1), rs.getString(2)));
+				result.add(new Pair<String, String>(rs.getString(1), rs
+						.getString(2)));
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -354,10 +365,12 @@ public class PostgresHelper {
 
 	public void createBranchFromWorkspace(String childWorkspaceName) {
 		try {
-			
+
 			execUpdate("create table nodes"
 					+ childWorkspaceName.replace("-", "_")
-					+ " as select * from nodes" + workspaceName);
+					+ " (id bigserial primary key, noderefid text not null unique, versionedrefid text not null, "
+					+ "nodetype integer references nodetypes(id) not null, sysmlid text not null unique)");
+			execUpdate("insert into nodes" + childWorkspaceName.replace("-", "_") + "(nodetype, noderefid, versionedrefid, sysmlid) select nodetype,noderefid,versionedrefid,sysmlid from nodes"  + workspaceName);
 
 			execUpdate("create table edges"
 					+ childWorkspaceName.replace("-", "_")
