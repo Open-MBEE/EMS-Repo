@@ -1,0 +1,98 @@
+{
+    "elements":[
+        {
+            "sysmlid":"simpleExpressionPackage",
+            "name":"simpleExpressionPackage",
+            "documentation":"the simple expression package",
+            "owner":"123456",
+            "specialization":{
+                "type":"Package"
+            }
+        },
+        {
+            "sysmlid":"pPlusQ",
+            "name":"pPlusQ",
+            "documentation":"the sum of p and q",
+            "owner":"simpleExpressionPackage",
+            "specialization":{
+                "type":"Property",
+                "value":[
+                    {
+                        "type":"Expression",
+                        "operand":[
+                            {
+                                "type":"ElementValue",
+                                "element":"Plus"
+                            },
+                            {
+                                "type":"ElementValue",
+                                "element":"p"
+                            },
+                            {
+                                "type":"ElementValue",
+                                "element":"q"
+                            }
+                        ],
+                        
+                    }
+                ]
+            }
+        },
+        {
+            "sysmlid":"p",
+            "name":"p",
+            "documentation":"the p element",
+            "owner":"simpleExpressionPackage",
+            "specialization":{
+                "type":"Property",
+                "value":[
+                    {
+                        "integer":3,
+                        "type":"LiteralInteger"
+                    }
+                ]
+            }
+        },
+        {
+            "sysmlid":"q",
+            "name":"q",
+            "documentation":"the q element",
+            "owner":"simpleExpressionPackage",
+            "specialization":{
+                "type":"Property",
+                "value":[
+                    {
+                        "integer":4,
+                        "type":"LiteralInteger"
+                    }
+                ]
+            }
+        },
+        {
+            "sysmlid":"pPlusQDoc",
+            "name":"pPlusQDoc",
+            "documentation":"the document with p + q",
+            "owner":"simpleExpressionPackage",
+            "specialization":{
+                "type":"View",
+                "displayedElements":[
+                    "pPlusQ"
+                ],
+                "allowedElements":[
+                    "pPlusQ"
+                ],
+                "childrenViews":[
+                    
+                ],
+                "contains":[
+                    {
+                        "type":"Paragraph",
+                        "sourceType":"reference",
+                        "source":"pPlusQ",
+                        "sourceProperty":"value"
+                    }
+                ]
+            }
+        }
+    ]
+}
