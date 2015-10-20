@@ -1534,6 +1534,7 @@ public class EmsScriptNode extends ScriptNode implements
         return getOwnedChildrenImpl("ems:ownedChildren", findDeleted, dateTime, ws);
     }
     
+    
     /**
      * Returns all of the "connected" nodes.  If relationshipType is null, then will return all
      * of the nodes that this node refers to in properties.  Otherwise, only returns nodes that

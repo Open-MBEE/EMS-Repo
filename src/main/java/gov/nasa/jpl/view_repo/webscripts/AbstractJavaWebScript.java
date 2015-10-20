@@ -1710,7 +1710,15 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
                           JSONObject top, WorkspaceNode ws ) throws IllegalAccessException, InvocationTargetException, InstantiationException {
         //final JSONArray elementsJson = new JSONArray();
         Set< EmsScriptNode > elements = elementsJsonMap.keySet();
-        Map< Object, Object > results = evaluate( elements, ws );
+        Map< Object, Object > results = null;
+        try {
+            results = evaluate( elements, ws );
+        } catch ( Throwable t ) {
+            log( Level.WARN, "Evaluation failed for %s: %s", elements, t.getLocalizedMessage() );
+            // TODO -- wrap this stack trace as debug output
+            t.printStackTrace();
+        }
+        if ( results == null ) return;
         for ( EmsScriptNode element : elements ) {
             JSONObject json = elementsJsonMap.get( element );//element.toJSONObject(ws, null);
             Object result = results.get( element );
