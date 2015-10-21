@@ -1543,6 +1543,16 @@ common_filters + ['"id"', '"qualifiedId"', '"creator"', '"modifier"'],
 
 # EXPRESSIONS: ==========================    
 
+[
+254,
+"TurnOnExpressionStuff",
+"Make sure switch is turned on for handling expressions in viewpoints, etc.",
+create_curl_cmd(type="GET", data="", base_url="http://localhost:8080/alfresco/service/", branch="flags/viewpointExpressions?on"),
+False,
+common_filters,
+["test", "develop", "workspaces"]
+],
+
 # Note: currently not an equivalent in workspaces for this URL, but we may add it
 [
 255,
@@ -1554,7 +1564,7 @@ create_curl_cmd(type="POST", base_url=BASE_URL_WS,
                 post_type="elements?fix=true"),
 True,
 common_filters,
-["test", "workspaces"]
+["test", "develop", "workspaces"]
 ],
         
 [
@@ -1579,7 +1589,7 @@ create_curl_cmd(type="GET", data="views/_17_0_2_3_e610336_1394148311476_17302_29
                 branch="master/"),
 True,
 common_filters,
-["test", "workspaces", "develop2"]
+["test", "workspaces", "develop", "develop2"]
 ],
  
 [
@@ -1652,7 +1662,17 @@ create_curl_cmd(type="GET", data="views/_17_0_2_3_e610336_1394148311476_17302_29
                 branch="master/"),
 True,
 common_filters,
-["test", "workspaces", "develop2", ]
+["test", "workspaces", "develop", "develop2", ]
+],
+
+[
+297,
+"TurnOffExpressionStuff",
+"Make sure switch is turned off for handling expressions in viewpoints, etc.",
+create_curl_cmd(type="GET", data="", base_url="http://localhost:8080/alfresco/service/", branch="flags/viewpointExpressions?off"),
+False,
+common_filters,
+["test", "develop","workspaces"]
 ],
 
 
@@ -2103,6 +2123,16 @@ common_filters + ['"id"', '"qualifiedId"', '"creator"', '"modifier"'],
 
  
 # EXPRESSION PARSING =====================================================
+# [
+# 599.9,
+# "TurnOnExpressionStuff",
+# "Make sure switch is turned on for handling expressions in viewpoints, etc.",
+# create_curl_cmd(type="GET", data="", base_url="http://localhost:8080/alfresco/service/", branch="flags/viewpointExpressions?off"),
+# False,
+# common_filters,
+# ["test", "develop","workspaces"]
+# ],
+
 
 [
 600,
@@ -2125,6 +2155,17 @@ True,
 common_filters + ['MMS_'],
 ["test", "workspaces", "develop", "develop2", "parsek"]
 ],
+
+# [
+# 605,
+# "TurnOffExpressionStuff",
+# "Make sure switch is turned off for handling expressions in viewpoints, etc.",
+# create_curl_cmd(type="GET", data="", base_url="http://localhost:8080/alfresco/service/", branch="flags/viewpointExpressions?off"),
+# False,
+# common_filters,
+# ["test", "develop","workspaces"]
+# ],
+
 # PERMISSION TESTING =====================================================
 
 # Creating users for user testing

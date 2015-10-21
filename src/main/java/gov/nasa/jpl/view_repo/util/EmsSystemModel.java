@@ -7,6 +7,7 @@ import gov.nasa.jpl.mbee.util.CompareUtils;
 import gov.nasa.jpl.mbee.util.Debug;
 import gov.nasa.jpl.mbee.util.HasId;
 import gov.nasa.jpl.mbee.util.Pair;
+import gov.nasa.jpl.mbee.util.Seen;
 import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.util.NodeUtil.SearchType;
 
@@ -690,7 +691,7 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, Object, 
     		Object tempName = node.getProperty(Acm.ACM_NAME);
     		List<String> tempList = Utils.asList(tempName, String.class);
     		String name = null; 
-    		if (tempList != null || !tempList.isEmpty()){
+    		if (tempList != null && !tempList.isEmpty()){
     			name = tempList.get(0);
     		}
     		return name;
@@ -996,13 +997,35 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, Object, 
         return null;
     }
 
+    public ArrayList<EmsScriptNode> getRelationships(EmsScriptNode element,
+                                               Date dateTime, WorkspaceNode ws,
+                                               String relationshipType) {
+        ArrayList<EmsScriptNode> refs = new ArrayList< EmsScriptNode >();
+        if ( Utils.isNullOrEmpty( relationshipType ) ) return refs;
+        for (String relationshipProp : Acm.PROPERTY_FOR_RELATIONSHIP_PROPERTY_ASPECTS.values()) {
+            ArrayList< NodeRef > rels =
+                    element.getPropertyNodeRefs( relationshipProp, false, dateTime, ws );
+            if ( rels == null ) continue;
+            for ( NodeRef ref : rels ) {
+                EmsScriptNode rel = new EmsScriptNode( ref, getServices() );
+                if ( isA( rel, relationshipType ) ) {
+                    refs.add( rel );
+                }
+            }
+        }
+        return refs;
+    }
+
+
+    protected static boolean avoidConnectFcn = true;
+    
     @Override
     public Collection< EmsScriptNode > getRelationship( Object context,
                                                         Object specifier ) {
 
     	// TODO see EmsScriptNode.getConnectedNodes(), as a lot of this code can
         //      be used for this method.
-        
+System.out.println("RRRRRRRRRRRRR");
         List< EmsScriptNode > relationships = null;
         
         if ( context instanceof EmsScriptNode ) {
@@ -1012,13 +1035,27 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, Object, 
             List<String> typeNames = new ArrayList< String >();
             if ( specifier instanceof String ) {
                 relType = (String)specifier;
+
+                if ( avoidConnectFcn ) {
+                    return getRelationships( (EmsScriptNode)context, null, null, relType );
+                }
+                
                 if ( !Utils.isNullOrEmpty( relType ) ) typeNames.add(relType);
             } else {
                 if ( specifier instanceof EmsScriptNode ) {
                     EmsScriptNode s = (EmsScriptNode)specifier;
                     relName = s.getSysmlName();
+                    
+                    if ( avoidConnectFcn && !Utils.isNullOrEmpty( relName ) ) {
+                        return getRelationships( (EmsScriptNode)context, null, null, relName );
+                    }
+
                     if ( !Utils.isNullOrEmpty( relName ) ) typeNames.add(relName);
                     relId = s.getSysmlId();
+                    
+                    if ( avoidConnectFcn && !Utils.isNullOrEmpty( relId ) ) {
+                        return getRelationships( (EmsScriptNode)context, null, null, relId );
+                    }
                     if ( !Utils.isNullOrEmpty( relId ) ) typeNames.add(relId);
                 }
             }
@@ -2014,7 +2051,9 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, Object, 
         }
         
         // invoke the map
-        return call.map( elements, 1 );
+        Collection< Object > result = call.map( elements, 1 );
+        System.out.println("map(" + elements + ", " + call + ", " + indexOfObjectArgument + ", " + otherArguments + ") = " + result);
+        return result;
     }
 
     // TODO dont like dependence on BAE for Call here....
@@ -2167,17 +2206,90 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, Object, 
         }
         
         // invoke the filter
-        return call.filter( elements, 1 );
+        Collection< Object > result = call.filter( elements, 1 );
+        System.out.println("filter(" + elements + ", " + call + ", " + indexOfObjectArgument + ", " + otherArguments + ") = " + result);
+        return result;
     }
     
     public boolean nameStartsWithN( Object s ) {
         System.out.println("NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN");
         if ( s instanceof EmsScriptNode ) {
-            ( (EmsScriptNode)s ).getSysmlName().startsWith( "N" );
+            return ( (EmsScriptNode)s ).getSysmlName().startsWith( "N" );
         } else if ( s instanceof String ) {
             return ( (String)s ).startsWith( "N" );
         }
         return false;
     }
 
+    public boolean sourceIs( EmsScriptNode relationshipNode, EmsScriptNode nodeToMatch ) {
+        Object sourceRef = relationshipNode.getNodeRefProperty( Acm.ACM_SOURCE, true, null, null );
+        if ( sourceRef instanceof NodeRef ) {
+            if ( nodeToMatch.getNodeRef().equals( sourceRef ) ) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    
+    public boolean targetIs( EmsScriptNode relationshipNode, EmsScriptNode nodeToMatch ) {
+        Object targetRef = relationshipNode.getNodeRefProperty( Acm.ACM_TARGET, true, null, null );
+        if ( targetRef instanceof NodeRef ) {
+            if ( nodeToMatch.getNodeRef().equals( targetRef ) ) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    
+    public boolean isA( Object o, String type ) {
+        System.out.println("SSSSSSSSSSSSSSSSSSSSSSSSS");
+        if (o == null || Utils.isNullOrEmpty( type ) ) return false;
+        if ( o instanceof EmsScriptNode ) {
+            EmsScriptNode n = (EmsScriptNode)o;
+            if ( !NodeUtil.scriptNodeExists( n.getNodeRef() ) ) return false;
+            if ( isARecursive( n, type, null ) ) {
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    protected boolean isARecursive( EmsScriptNode element, String type, Seen<EmsScriptNode> seen ) {
+        if ( element == null || Utils.isNullOrEmpty( type ) ) return false;
+        Pair< Boolean, Seen< EmsScriptNode > > p = Utils.seen( element, true, seen );
+        if ( p.first ) return false;
+        seen = p.second;
+        if ( type.equals( element.getSysmlName() ) ) return true;
+        if ( type.equals( element.getTypeName() ) ) return true;
+        if ( type.equals( element.getSysmlId() ) ) return true;
+
+        Object appliedMetatypes = element.getProperty( Acm.ACM_APPLIED_METATYPES );
+        if ( appliedMetatypes instanceof Collection<?> ) {
+            if ( someAre( (Collection< ? >)appliedMetatypes, type, seen ) ) {
+                return true;
+            }
+        }
+
+        Object metatypes = element.getProperty( Acm.ACM_METATYPES );
+        if ( metatypes instanceof Collection<?> ) {
+            if ( someAre( (Collection< ? >)metatypes, type, seen ) ) {
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    public boolean someAre( Collection<?> types, String type, Seen<EmsScriptNode> seen ) {
+        for ( Object o : (Collection<?>)types ) {
+            if ( o instanceof NodeRef ) {
+                EmsScriptNode newType = new EmsScriptNode( (NodeRef)o, getServices() );
+                if ( isARecursive( newType, type, seen ) ) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
 }
