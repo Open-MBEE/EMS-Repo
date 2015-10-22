@@ -852,42 +852,7 @@ public class EmsScriptNode extends ScriptNode implements
     public String extractAndReplaceImageData( String value, WorkspaceNode ws  ) {
         if ( value == null ) return null;
         String v = value;
-//        Document doc = Jsoup.parse( v );
-//        Elements imgs = doc.select( "img.src" );
-//        System.out.println("imgs = " + imgs);
-//        for (Element img: imgs) {
-//            String src = img.attr("src");
-//            int index = src.indexOf( "base64," );
-//            System.out.println("indexOf \"base64,\"" + index);
-//            System.out.println("src = " + src.substring( 0, Math.min( src.length()-1, 100 ) ) + " . . .");
-//            if (src.startsWith( "data" ) && index > 0) {
-//                String mediatype = src.substring( "data:".length(), index );
-//                System.out.println("mediatype = " + mediatype);
-//                if (mediatype.startsWith( "image/" )) {
-//                    String extension = mediatype.replace( "image/", "" );
-//                    index += "base64,".length();
-//                    String content = src.substring( index );
-//                    String name = "img_" + System.currentTimeMillis();
-//                    EmsScriptNode artNode =
-//                            findOrCreateArtifact( name, extension, content,
-//                                                  getSiteName(), "images",
-//                                                  getWorkspace(), null );
-//                    if ( artNode == null || !artNode.exists() ) {
-//                        log( "Failed to pull out image data for value! "
-//                             + value );
-//                        break;
-//                    }
-//
-//                    String url = artNode.getUrl();
-//                    String link = url.replace( "/d/d/", "/alfresco/service/api/node/content/" );
-//                    img.attr( src, link );
-//                }
-//            }
-//            v = doc.select( "body" ).html();
-//        }
-        //Debug.turnOn();
-        if ( Debug.isOn()) Debug.outln("extractAndReplaceImageData(" + v.substring( 0, Math.min( v.length(), 100 ) ) + (v.length()>100 ? " . . ." :"") + ")");
-        Pattern p = Pattern.compile( "(.*)<img[^>]*\\ssrc\\s*=\\s*[\"']data:image/(\\w*);\\s*base64\\s*,([^\"']*)[\"'][^>]*>(.*)",
+        Pattern p = Pattern.compile( "(.*)<img[^>]*\\ssrc\\s*=\\s*[\"']data:image/([^;]*);\\s*base64\\s*,([^\"']*)[\"'][^>]*>(.*)",
                                      Pattern.DOTALL );
         while ( true ) {
             Matcher m = p.matcher( v );
