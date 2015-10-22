@@ -1,0 +1,71 @@
+{
+    "elements":[
+        {
+            "sysmlid":"multRedefPackage",
+            "name":"multRedefPackage",
+            "documentation":"package for testing multiplicity and redefines attributes of Property",
+            "owner":"123456",
+            "specialization":{
+                "type":"Package"
+            }
+        },
+        {
+            "sysmlid":"multDefGeneralization",
+            "name":"multDefGeneralization",
+            "documentation":"generalization for testing the 'redefines' attribute of a Property",
+            "owner":"multRedefPackage",
+            "specialization":{
+                "type":"Generalization",
+                "source":"SomeOtherClass",
+                "target":"SomeClass"
+            }
+        },
+        {
+            "sysmlid":"SomeClass",
+            "name":"SomeClass",
+            "documentation":"class for testing the 'redefines' attribute of a Property",
+            "owner":"multRedefPackage"
+        },
+        {
+            "sysmlid":"propertyOfSomeClass",
+            "name":"propertyOfSomeClass",
+            "documentation":"Property for testing the 'redefines' attribute of a Property",
+            "owner":"SomeClass",
+            "specialization":{
+                "type":"Property",
+                "value":[
+                    {
+                        "string":"a string value",
+                        "type":"LiteralString"
+                    }
+                ]
+            }
+        },
+        {
+            "sysmlid":"SomeOtherClass",
+            "name":"SomeOtherClass",
+            "documentation":"another class for testing the 'redefines' attribute of a Property",
+            "owner":"multRedefPackage"
+        },
+        {
+            "sysmlid":"multRedefProp",
+            "name":"multRedefProp",
+            "documentation":"for testing multiplicity and redefines attributes of Property",
+            "owner":"SomeOtherClass",
+            "specialization":{
+                "type":"Property",
+                "redefines":[
+                    "propertyOfSomeClass"
+                ],
+                "multiplicityMin":1,
+                "multiplicityMax":-1,
+                "value":[
+                    {
+                        "string":"another string value",
+                        "type":"LiteralString"
+                    }
+                ]
+            }
+        }
+    ]
+}
