@@ -1,66 +1,7 @@
 {"elements": [
     {
-        "modifier": "admin",
-        "qualifiedId": "/europa/123456/multRedefPackage/SomeClass/propertyOfSomeClass",
-        "name": "propertyOfSomeClass",
-        "qualifiedName": "/europa/JW_TEST2/multRedefPackage/SomeClass/propertyOfSomeClass",
-        "documentation": "Property for testing the 'redefines' attribute of a Property",
-        "owner": "SomeClass",
-        "sysmlid": "propertyOfSomeClass",
-        "specialization": {
-            "propertyType": null,
-            "isSlot": false,
-            "isDerived": false,
-            "value": [{
-                "valueExpression": null,
-                "string": "a string value",
-                "type": "LiteralString"
-            }],
-            "type": "Property"
-        },
-        "editable": true,
-        "creator": "admin"
-    },
-    {
-        "modifier": "admin",
-        "qualifiedId": "/europa/123456/multRedefPackage",
-        "name": "multRedefPackage",
-        "qualifiedName": "/europa/JW_TEST2/multRedefPackage",
-        "documentation": "package for testing multiplicity and redefines attributes of Property",
-        "owner": "123456",
-        "sysmlid": "multRedefPackage",
-        "specialization": {"type": "Package"},
-        "editable": true,
-        "creator": "admin"
-    },
-    {
-        "modifier": "admin",
-        "qualifiedId": "/europa/123456/multRedefPackage/SomeOtherClass/multRedefProp",
-        "name": "multRedefProp",
-        "qualifiedName": "/europa/JW_TEST2/multRedefPackage/SomeOtherClass/multRedefProp",
-        "documentation": "for testing multiplicity and redefines attributes of Property",
-        "owner": "SomeOtherClass",
-        "sysmlid": "multRedefProp",
-        "specialization": {
-            "multiplicityMax": -1,
-            "propertyType": null,
-            "isSlot": false,
-            "isDerived": false,
-            "value": [{
-                "valueExpression": null,
-                "string": "another string value",
-                "type": "LiteralString"
-            }],
-            "multiplicityMin": 1,
-            "redefines": ["propertyOfSomeClass"],
-            "type": "Property"
-        },
-        "editable": true,
-        "creator": "admin"
-    },
-    {
         "qualifiedId": "/europa/123456/multRedefPackage/multDefGeneralization",
-        "qualifiedName": "/europa/JW_TEST2/multRedefPackage/multDefGeneralization",
+        "qualifiedName": "/europa/JW_TEST/multRedefPackage/multDefGeneralization",
         "sysmlid": "multDefGeneralization",
         "editable": true,
         "creator": "admin",
@@ -75,28 +16,87 @@
         }
     },
     {
-        "modifier": "admin",
-        "qualifiedId": "/europa/123456/multRedefPackage/SomeClass",
-        "name": "SomeClass",
-        "qualifiedName": "/europa/JW_TEST2/multRedefPackage/SomeClass",
-        "documentation": "class for testing the 'redefines' attribute of a Property",
-        "owner": "multRedefPackage",
-        "sysmlid": "SomeClass",
-        "specialization": {"type": "Element"},
+        "qualifiedId": "/europa/123456/multRedefPackage/SomeOtherClass/multRedefProp",
+        "qualifiedName": "/europa/JW_TEST/multRedefPackage/SomeOtherClass/multRedefProp",
+        "sysmlid": "multRedefProp",
         "editable": true,
-        "creator": "admin"
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "multRedefProp",
+        "owner": "SomeOtherClass",
+        "documentation": "for testing multiplicity and redefines attributes of Property",
+        "specialization": {
+            "multiplicityMax": -1,
+            "propertyType": null,
+            "isDerived": false,
+            "isSlot": false,
+            "value": [{
+                "valueExpression": null,
+                "string": "another string value",
+                "type": "LiteralString"
+            }],
+            "multiplicityMin": 1,
+            "type": "Property",
+            "redefines": ["propertyOfSomeClass"]
+        }
     },
     {
-        "modifier": "admin",
-        "qualifiedId": "/europa/123456/multRedefPackage/SomeOtherClass",
-        "name": "SomeOtherClass",
-        "qualifiedName": "/europa/JW_TEST2/multRedefPackage/SomeOtherClass",
-        "documentation": "another class for testing the 'redefines' attribute of a Property",
-        "owner": "multRedefPackage",
-        "sysmlid": "SomeOtherClass",
-        "specialization": {"type": "Element"},
+        "qualifiedId": "/europa/123456/multRedefPackage",
+        "qualifiedName": "/europa/JW_TEST/multRedefPackage",
+        "sysmlid": "multRedefPackage",
         "editable": true,
-        "creator": "admin"
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "multRedefPackage",
+        "owner": "123456",
+        "documentation": "package for testing multiplicity and redefines attributes of Property",
+        "specialization": {"type": "Package"}
+    },
+    {
+        "qualifiedId": "/europa/123456/multRedefPackage/SomeOtherClass",
+        "qualifiedName": "/europa/JW_TEST/multRedefPackage/SomeOtherClass",
+        "sysmlid": "SomeOtherClass",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "SomeOtherClass",
+        "owner": "multRedefPackage",
+        "documentation": "another class for testing the 'redefines' attribute of a Property",
+        "specialization": {"type": "Element"}
+    },
+    {
+        "qualifiedId": "/europa/123456/multRedefPackage/SomeClass",
+        "qualifiedName": "/europa/JW_TEST/multRedefPackage/SomeClass",
+        "sysmlid": "SomeClass",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "SomeClass",
+        "owner": "multRedefPackage",
+        "documentation": "class for testing the 'redefines' attribute of a Property",
+        "specialization": {"type": "Element"}
+    },
+    {
+        "qualifiedId": "/europa/123456/multRedefPackage/SomeClass/propertyOfSomeClass",
+        "qualifiedName": "/europa/JW_TEST/multRedefPackage/SomeClass/propertyOfSomeClass",
+        "sysmlid": "propertyOfSomeClass",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "propertyOfSomeClass",
+        "owner": "SomeClass",
+        "documentation": "Property for testing the 'redefines' attribute of a Property",
+        "specialization": {
+            "propertyType": null,
+            "isDerived": false,
+            "isSlot": false,
+            "value": [{
+                "valueExpression": null,
+                "string": "a string value",
+                "type": "LiteralString"
+            }],
+            "type": "Property"
+        }
     }
 ]}
 200

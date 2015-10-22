@@ -29,6 +29,20 @@
         "specialization": {"type": "View"}
     },
     {
+        "qualifiedName": "/europa/JW_TEST2/BLUCamTest/dont care2/expose relationship",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "expose relationship",
+        "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
+        "documentation": "",
+        "specialization": {
+            "source": "_17_0_2_3_e610336_1394148233838_91795_29332",
+            "target": "_17_0_2_4_f3a0363_1394140326296_809805_27600",
+            "type": "Expose"
+        }
+    },
+    {
         "qualifiedId": "/europa/123456/BLUCamTest/_17_0_2_4_f3a0363_1394146455624_407543_30441/_17_0_2_4_f3a0363_1394141831980_671275_28387",
         "qualifiedName": "/europa/JW_TEST2/BLUCamTest/dont care2/radiation",
         "sysmlid": "_17_0_2_4_f3a0363_1394141831980_671275_28387",
@@ -90,6 +104,22 @@
             },
             "parameters": ["exposed_id"],
             "type": "Operation"
+        }
+    },
+    {
+        "qualifiedId": "/europa/123456/multRedefPackage/multDefGeneralization",
+        "qualifiedName": "/europa/JW_TEST2/multRedefPackage/multDefGeneralization",
+        "sysmlid": "multDefGeneralization",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "multDefGeneralization",
+        "owner": "multRedefPackage",
+        "documentation": "generalization for testing the 'redefines' attribute of a Property",
+        "specialization": {
+            "source": "SomeOtherClass",
+            "target": "SomeClass",
+            "type": "Generalization"
         }
     },
     {
@@ -156,26 +186,26 @@
         "creator": "admin"
     },
     {
-        "qualifiedId": "/europa/123456/4000",
-        "qualifiedName": "/europa/JW_TEST2/400",
-        "sysmlid": "4000",
-        "editable": true,
-        "creator": "admin",
         "modifier": "admin",
+        "qualifiedId": "/europa/123456/4000",
         "name": "400",
-        "owner": "123456",
+        "qualifiedName": "/europa/JW_TEST2/400",
         "documentation": "4something",
+        "owner": "123456",
+        "sysmlid": "4000",
         "specialization": {
             "propertyType": null,
-            "isDerived": false,
             "isSlot": false,
+            "isDerived": false,
             "value": [{
                 "valueExpression": null,
                 "string": "dlam_string",
                 "type": "LiteralString"
             }],
             "type": "Property"
-        }
+        },
+        "editable": true,
+        "creator": "admin"
     },
     {
         "qualifiedId": "/europa/123456/metatype1",
@@ -524,20 +554,6 @@
         "creator": "admin"
     },
     {
-        "qualifiedName": "/europa/JW_TEST2/",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "",
-        "owner": "123456",
-        "documentation": "",
-        "specialization": {
-            "source": "_17_0_2_3_e610336_1394148311476_17302_29388",
-            "target": "_17_0_2_4_f3a0363_1394142290412_487571_28478",
-            "type": "Expose"
-        }
-    },
-    {
         "qualifiedId": "/europa/123456/300/500",
         "qualifiedName": "/europa/JW_TEST2/300/500",
         "sysmlid": "500",
@@ -576,22 +592,14 @@
         }
     },
     {
-        "qualifiedId": "/europa/123456/4000/401",
-        "qualifiedName": "/europa/JW_TEST2/400/401",
-        "sysmlid": "401",
-        "editable": true,
-        "creator": "admin",
         "modifier": "admin",
+        "qualifiedId": "/europa/123456/4000/401",
         "name": "401",
-        "owner": "4000",
+        "qualifiedName": "/europa/JW_TEST2/400/401",
         "documentation": "4else",
+        "owner": "4000",
+        "sysmlid": "401",
         "specialization": {
-            "displayedElements": [
-                "401",
-                "402",
-                "403"
-            ],
-            "childrenViews": ["404"],
             "view2view": [{
                 "childrenViews": [
                     "401",
@@ -599,20 +607,28 @@
                 ],
                 "sysmlid": "401"
             }],
+            "childrenViews": ["404"],
+            "displayedElements": [
+                "401",
+                "402",
+                "403"
+            ],
             "allowedElements": [
                 "401",
                 "402",
                 "403"
             ],
+            "noSections": ["402"],
             "contains": [{
                 "sourceType": "reference",
                 "source": "401",
                 "sourceProperty": "documentation",
                 "type": "Paragraph"
             }],
-            "noSections": ["402"],
             "type": "Product"
-        }
+        },
+        "editable": true,
+        "creator": "admin"
     },
     {
         "modifier": "admin",
@@ -660,18 +676,6 @@
         "creator": "admin"
     },
     {
-        "qualifiedId": "/europa/123456/_17_0_2_4_f3a0363_1394142290412_487571_28478",
-        "qualifiedName": "/europa/JW_TEST2/BLUCam CubeSat A",
-        "sysmlid": "_17_0_2_4_f3a0363_1394142290412_487571_28478",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "BLUCam CubeSat A",
-        "owner": "123456",
-        "documentation": "",
-        "specialization": {"type": "Package"}
-    },
-    {
         "qualifiedId": "/europa/123456/notInThePast",
         "qualifiedName": "/europa/JW_TEST2/notInThePast",
         "sysmlid": "notInThePast",
@@ -711,6 +715,18 @@
             }],
             "type": "Property"
         }
+    },
+    {
+        "qualifiedId": "/europa/123456/_17_0_2_4_f3a0363_1394142290412_487571_28478",
+        "qualifiedName": "/europa/JW_TEST2/BLUCam CubeSat A",
+        "sysmlid": "_17_0_2_4_f3a0363_1394142290412_487571_28478",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "BLUCam CubeSat A",
+        "owner": "123456",
+        "documentation": "",
+        "specialization": {"type": "Package"}
     },
     {
         "qualifiedId": "/europa/123456/4000/401/402",
@@ -951,6 +967,20 @@
         }
     },
     {
+        "qualifiedName": "/europa/JW_TEST2/",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "",
+        "owner": "123456",
+        "documentation": "",
+        "specialization": {
+            "source": "_17_0_2_3_e610336_1394148311476_17302_29388",
+            "target": "_17_0_2_4_f3a0363_1394142290412_487571_28478",
+            "type": "Expose"
+        }
+    },
+    {
         "qualifiedId": "/europa/123456/BLUCamTest/_17_0_2_4_f3a0363_1394146455624_407543_30441/op_name_arg_1",
         "qualifiedName": "/europa/JW_TEST2/BLUCamTest/dont care2/name_arg_1",
         "sysmlid": "op_name_arg_1",
@@ -976,6 +1006,23 @@
                 }
             ]
         }
+    },
+    {
+        "modifier": "admin",
+        "qualifiedId": "/europa/123456/sourceId",
+        "name": "sourceId",
+        "qualifiedName": "/europa/JW_TEST2/sourceId",
+        "documentation": "source",
+        "owner": "123456",
+        "sysmlid": "sourceId",
+        "specialization": {
+            "propertyType": null,
+            "isSlot": false,
+            "isDerived": false,
+            "type": "Property"
+        },
+        "editable": true,
+        "creator": "admin"
     },
     {
         "qualifiedId": "/europa/123456/BLUCamTest/_17_0_2_4_f3a0363_1394146455624_407543_30441/op_name_arg_2",
@@ -1005,21 +1052,38 @@
         }
     },
     {
+        "qualifiedId": "/europa/123456/multRedefPackage/SomeOtherClass",
+        "qualifiedName": "/europa/JW_TEST2/multRedefPackage/SomeOtherClass",
+        "sysmlid": "SomeOtherClass",
+        "editable": true,
+        "creator": "admin",
         "modifier": "admin",
-        "qualifiedId": "/europa/123456/sourceId",
-        "name": "sourceId",
-        "qualifiedName": "/europa/JW_TEST2/sourceId",
-        "documentation": "source",
-        "owner": "123456",
-        "sysmlid": "sourceId",
+        "name": "SomeOtherClass",
+        "owner": "multRedefPackage",
+        "documentation": "another class for testing the 'redefines' attribute of a Property",
+        "specialization": {"type": "Element"}
+    },
+    {
+        "qualifiedId": "/europa/123456/multRedefPackage/SomeClass/propertyOfSomeClass",
+        "qualifiedName": "/europa/JW_TEST2/multRedefPackage/SomeClass/propertyOfSomeClass",
+        "sysmlid": "propertyOfSomeClass",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "propertyOfSomeClass",
+        "owner": "SomeClass",
+        "documentation": "Property for testing the 'redefines' attribute of a Property",
         "specialization": {
             "propertyType": null,
-            "isSlot": false,
             "isDerived": false,
+            "isSlot": false,
+            "value": [{
+                "valueExpression": null,
+                "string": "a string value",
+                "type": "LiteralString"
+            }],
             "type": "Property"
-        },
-        "editable": true,
-        "creator": "admin"
+        }
     },
     {
         "modifier": "admin",
@@ -1040,21 +1104,6 @@
     },
     {
         "modifier": "admin",
-        "qualifiedId": "/europa/123456/md",
-        "name": "md",
-        "qualifiedName": "/europa/JW_TEST2/md",
-        "documentation": "Magic Draw Meta-Data",
-        "owner": "123456",
-        "sysmlid": "md",
-        "specialization": {
-            "type": "MagicDrawData",
-            "mdData": "A blob of meta-data"
-        },
-        "editable": true,
-        "creator": "admin"
-    },
-    {
-        "modifier": "admin",
         "qualifiedId": "/europa/123456/characterizes",
         "name": "characterizes",
         "qualifiedName": "/europa/JW_TEST2/characterizes",
@@ -1065,6 +1114,21 @@
             "source": "sourceId",
             "target": "targetId",
             "type": "Characterizes"
+        },
+        "editable": true,
+        "creator": "admin"
+    },
+    {
+        "modifier": "admin",
+        "qualifiedId": "/europa/123456/md",
+        "name": "md",
+        "qualifiedName": "/europa/JW_TEST2/md",
+        "documentation": "Magic Draw Meta-Data",
+        "owner": "123456",
+        "sysmlid": "md",
+        "specialization": {
+            "type": "MagicDrawData",
+            "mdData": "A blob of meta-data"
         },
         "editable": true,
         "creator": "admin"
@@ -1177,18 +1241,16 @@
         "creator": "admin"
     },
     {
-        "qualifiedName": "/europa/JW_TEST2/BLUCamTest/dont care2/expose relationship",
+        "qualifiedId": "/europa/123456/multRedefPackage",
+        "qualifiedName": "/europa/JW_TEST2/multRedefPackage",
+        "sysmlid": "multRedefPackage",
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
-        "name": "expose relationship",
-        "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
-        "documentation": "",
-        "specialization": {
-            "source": "_17_0_2_3_e610336_1394148233838_91795_29332",
-            "target": "_17_0_2_4_f3a0363_1394140326296_809805_27600",
-            "type": "Expose"
-        }
+        "name": "multRedefPackage",
+        "owner": "123456",
+        "documentation": "package for testing multiplicity and redefines attributes of Property",
+        "specialization": {"type": "Package"}
     },
     {
         "modifier": "admin",
@@ -1205,6 +1267,31 @@
         },
         "editable": true,
         "creator": "admin"
+    },
+    {
+        "qualifiedId": "/europa/123456/multRedefPackage/SomeOtherClass/multRedefProp",
+        "qualifiedName": "/europa/JW_TEST2/multRedefPackage/SomeOtherClass/multRedefProp",
+        "sysmlid": "multRedefProp",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "multRedefProp",
+        "owner": "SomeOtherClass",
+        "documentation": "for testing multiplicity and redefines attributes of Property",
+        "specialization": {
+            "multiplicityMax": -1,
+            "propertyType": null,
+            "isDerived": false,
+            "isSlot": false,
+            "value": [{
+                "valueExpression": null,
+                "string": "another string value",
+                "type": "LiteralString"
+            }],
+            "multiplicityMin": 1,
+            "type": "Property",
+            "redefines": ["propertyOfSomeClass"]
+        }
     },
     {
         "qualifiedId": "/europa/123456/_17_0_2_3_e610336_1394148311476_17302_29388",
@@ -1332,6 +1419,18 @@
         },
         "editable": true,
         "creator": "admin"
+    },
+    {
+        "qualifiedId": "/europa/123456/multRedefPackage/SomeClass",
+        "qualifiedName": "/europa/JW_TEST2/multRedefPackage/SomeClass",
+        "sysmlid": "SomeClass",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "SomeClass",
+        "owner": "multRedefPackage",
+        "documentation": "class for testing the 'redefines' attribute of a Property",
+        "specialization": {"type": "Element"}
     },
     {
         "modifier": "admin",
