@@ -72,6 +72,13 @@ public class HistoryGet extends ModelGet {
 		JSONObject top = NodeUtil.newJsonObject();
 		JSONArray historyJson = handleRequest(req, top);
 
+		if(historyJson != null)
+		{
+			System.out.println(historyJson.toString());
+		}
+			
+
+		
 		// Execute methods in here as if it is main
 		return history;
 	}
@@ -81,7 +88,7 @@ public class HistoryGet extends ModelGet {
 	// HistoryGet instance = new HistoryGet( repository, getServices());
 	//
 	// // Execute methods in here as if it is main
-	// return instance.executeImplImpl(req,
+	// 	return instance.executeImplImpl(req,
 	// status,cache,runWithoutTransactions);
 	// }
 
