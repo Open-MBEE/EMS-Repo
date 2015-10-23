@@ -660,7 +660,7 @@ def run_curl_test(test_num, test_name, test_desc, curl_cmd, use_json_diff=False,
                 # pull from the maven created classpath, if not available, revert to hardcoded search
                 #cmd = 'grep "classes \-classpath" ../../runserver.log | cut -d " " -f5'
                 cmd = 'grep "classes \-classpath" ../../runserver.log | sed -e "s/.*classes \-classpath \\(.*\\) \-sourcepath.*$/\\1/"'
-                print cmd
+                #print cmd
                 p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
                 cp, err = p.communicate()
                 if len(cp) == 0:
@@ -670,7 +670,7 @@ def run_curl_test(test_num, test_name, test_desc, curl_cmd, use_json_diff=False,
                 diff_cmd = "diff"
 
             diff_cmd2 = "%s %s %s"%(diff_cmd,baseline_json,result_json)
-            print diff_cmd2
+            #print diff_cmd2
             (status_diff,output_diff) = commands.getstatusoutput(diff_cmd2)
 
             if output_diff:
