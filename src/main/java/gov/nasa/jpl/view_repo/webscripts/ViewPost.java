@@ -104,7 +104,13 @@ public class ViewPost extends AbstractJavaWebScript {
 	}
 
 	
-	private void updateViews(JSONObject jsonObject, WorkspaceNode workspace) throws JSONException {
+	/**
+	 * Add or update views
+	 * @param jsonObject
+	 * @param workspace
+	 * @throws JSONException
+	 */
+	protected void updateViews(JSONObject jsonObject, WorkspaceNode workspace) throws JSONException {
 	    Date start = new Date();
 	    Map<String, EmsScriptNode> elements = new HashMap<String, EmsScriptNode>();
 	    
