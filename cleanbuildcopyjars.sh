@@ -31,6 +31,7 @@ echo "Changing directory to util...";
 echo " ";
 echo "cd ../util";
 cd ../util;
+echo " ";
 echo "Cleaning util repository...";
 echo " ";
 echo "mvn clean";
@@ -169,6 +170,7 @@ echo "----------<==========================>----------";
 # Copies the jar files from each of the repos into the alfresco-view-repo
 ################################################################################
 echo " ";
+<<<<<<< HEAD
 echo " ";
 echo "Starting copy process...";
 echo " ";
@@ -178,6 +180,13 @@ echo "----------<==========================>----------";
 
 echo " ";
 echo " ";
+=======
+echo "Starting copy process...";
+echo " ";
+echo "----------<==========================>----------";
+
+echo " ";
+>>>>>>> develop
 echo "Copying jar files...";
 echo " ";
 echo 'mv ../bae/target/bae-2.2.0-SNAPSHOT.jar ./src/main/amp/web/WEB-INF/lib/ae.jar';

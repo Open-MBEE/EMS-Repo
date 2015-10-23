@@ -1111,6 +1111,10 @@ public class FullDocPost extends AbstractJavaWebScript {
 		List<String> command = new ArrayList<String>();
 		command.add("wkhtmltopdf");
 		command.add("-q");
+		command.add("--load-error-handling");
+		command.add("ignore");
+		command.add("--load-media-error-handling");
+		command.add("ignore");
 		command.add("--header-line");
 		command.add("--header-font-size");
 		command.add("8");
@@ -1119,16 +1123,16 @@ public class FullDocPost extends AbstractJavaWebScript {
 		command.add("--header-right");
 		command.add(tagName);
 		command.add("--footer-line");
-		command.add("--footer-font-size");
-		command.add("8");
-		command.add("--footer-font-name");
-		command.add("\"Times New Roman\"");
+		//command.add("--footer-font-size");
+		//command.add("8");
+		//command.add("--footer-font-name");
+		//command.add("\"Times New Roman\"");
 //		command.add("--footer-left");
 //		command.add(tagName.substring(0,10));
-		command.add("--footer-center");
-		command.add("Paper copies of this document may not be current and should not be relied on for official purposes. JPL/Caltech proprietary. Not for public release.");  
-		command.add("--footer-right");
-		command.add("[page]");
+		//command.add("--footer-center");
+		//command.add("Paper copies of this document may not be current and should not be relied on for official purposes. JPL/Caltech proprietary. Not for public release.");  
+		//command.add("--footer-right");
+		//command.add("[page]");
 //		command.add("--footer-html");
 //        command.add(this.footerPath);
 		command.add("cover"); //NEED FOR COVER
