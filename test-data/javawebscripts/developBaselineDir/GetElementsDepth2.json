@@ -1,6 +1,18 @@
 {"elements": [
     {
         "modifier": "admin",
+        "qualifiedId": "/europa/123456/multRedefPackage/SomeOtherClass",
+        "name": "SomeOtherClass",
+        "qualifiedName": "/europa/JW_TEST/multRedefPackage/SomeOtherClass",
+        "documentation": "another class for testing the 'redefines' attribute of a Property",
+        "owner": "multRedefPackage",
+        "sysmlid": "SomeOtherClass",
+        "specialization": {"type": "Element"},
+        "editable": true,
+        "creator": "admin"
+    },
+    {
+        "modifier": "admin",
         "qualifiedId": "/europa/123456/300",
         "name": "300",
         "qualifiedName": "/europa/JW_TEST/300",
@@ -18,6 +30,18 @@
             }],
             "type": "Property"
         },
+        "editable": true,
+        "creator": "admin"
+    },
+    {
+        "modifier": "admin",
+        "qualifiedId": "/europa/123456/multRedefPackage/SomeClass",
+        "name": "SomeClass",
+        "qualifiedName": "/europa/JW_TEST/multRedefPackage/SomeClass",
+        "documentation": "class for testing the 'redefines' attribute of a Property",
+        "owner": "multRedefPackage",
+        "sysmlid": "SomeClass",
+        "specialization": {"type": "Element"},
         "editable": true,
         "creator": "admin"
     },
@@ -56,6 +80,22 @@
                 "type": "Paragraph"
             }],
             "type": "Product"
+        },
+        "editable": true,
+        "creator": "admin"
+    },
+    {
+        "modifier": "admin",
+        "qualifiedId": "/europa/123456/multRedefPackage/multDefGeneralization",
+        "name": "multDefGeneralization",
+        "qualifiedName": "/europa/JW_TEST/multRedefPackage/multDefGeneralization",
+        "documentation": "generalization for testing the 'redefines' attribute of a Property",
+        "owner": "multRedefPackage",
+        "sysmlid": "multDefGeneralization",
+        "specialization": {
+            "source": "SomeOtherClass",
+            "target": "SomeClass",
+            "type": "Generalization"
         },
         "editable": true,
         "creator": "admin"
@@ -140,6 +180,18 @@
             }],
             "type": "Property"
         },
+        "editable": true,
+        "creator": "admin"
+    },
+    {
+        "modifier": "admin",
+        "qualifiedId": "/europa/123456/multRedefPackage",
+        "name": "multRedefPackage",
+        "qualifiedName": "/europa/JW_TEST/multRedefPackage",
+        "documentation": "package for testing multiplicity and redefines attributes of Property",
+        "owner": "123456",
+        "sysmlid": "multRedefPackage",
+        "specialization": {"type": "Package"},
         "editable": true,
         "creator": "admin"
     },

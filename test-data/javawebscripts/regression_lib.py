@@ -658,7 +658,8 @@ def run_curl_test(test_num, test_name, test_desc, curl_cmd, use_json_diff=False,
             # Perform diff:
             if use_json_diff:
                 # pull from the maven created classpath, if not available, revert to hardcoded search
-                cmd = 'grep --color "classes \-classpath" ../../runserver.log | cut -d " " -f5'
+                cmd = 'grep "classes \-classpath" ../../runserver.log | cut -d " " -f5'
+                #print cmd
                 p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
                 cp, err = p.communicate()
                 if len(cp) == 0:
@@ -667,7 +668,9 @@ def run_curl_test(test_num, test_name, test_desc, curl_cmd, use_json_diff=False,
             else:
                 diff_cmd = "diff"
 
-            (status_diff,output_diff) = commands.getstatusoutput("%s %s %s"%(diff_cmd,baseline_json,result_json))
+            diff_cmd2 = "%s %s %s"%(diff_cmd,baseline_json,result_json)
+            #print diff_cmd2
+            (status_diff,output_diff) = commands.getstatusoutput(diff_cmd2)
 
             if output_diff:
                 print_error("Test number %s (%s) failed!"%(test_num,test_name), "  Diff returned bad status or diffs found in the filtered .json files (%s,%s), status: %s, output: \n'%s'"%(baseline_json,result_json,status_diff,output_diff))
