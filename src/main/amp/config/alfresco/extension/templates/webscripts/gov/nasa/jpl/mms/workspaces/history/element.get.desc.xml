@@ -1,11 +1,11 @@
 <webscript>
 	<shortname>get element version history with {elementId}</shortname>
-    <description>
-    	get element version history with {elementId}
+	<description>
+		get element version history with {elementId}
 	</description>
-  	<url>/workspaces/{workspaceId}/history/{elementId}</url>
-  	<format default="json">argument</format>
-  	<authentication>user</authentication>
-    <transaction>none</transaction>
-  	<family>MMS REST API</family>
- </webscript>
+	<url>/workspaces/master/history/{elementId}</url>
+	<format default="json">argument</format>
+	<authentication>user</authentication>
+	<transaction>none</transaction>
+	<family>MMS REST API</family>
+</webscript>
