@@ -73,20 +73,23 @@ create or replace function get_children(integer, integer, text, integer)
   end;
 $$ language plpgsql;
 
-create or replace function get_parents(integer, integer, text)
-  returns table(id integer) as $$
+
+-- recursively get all children including oneself
+create or replace function get_parents(integer, integer, text, integer)
+  returns table(id bigint) as $$
   begin
     return query
     execute '
-    with recursive parents(nid) as (
-        select edge.parent from ' || format('edges%s', $3) || ' edge where edge.child = ' || $1 || ' and edge.edgeType = ' || $2 || '
+    with recursive parents(depth, nid) as (
+	select 0 as depth, node.id from ' || format('nodes%s', $3) || ' node where node.id = ' || $1 || '
+   	union
+        select 1 as depth, edge.parent from ' || format('edges%s', $3) || ' edge where edge.child = ' || $1 || ' and edge.edgeType = ' || $2 || '
         union 
-	select edge.parent from ' || format('edges%s', $3) || ' edge, parents p where edge.child = nid and edge.edgeType = ' || $2 || '
+	select (c.depth + 1) as depth, edge.parent from ' || format('edges%s', $3) || ' edge, parents c where edge.child = nid and edge.edgeType = ' || $2 || '
       )
-      select distinct * from parents';
+      select distinct nid from parents where depth <= ' || $4 || ';';
   end;
 $$ language plpgsql;
-
 
 -- get all paths to a node
 create type return_type as (pstart integer, pend integer, path integer[]);
