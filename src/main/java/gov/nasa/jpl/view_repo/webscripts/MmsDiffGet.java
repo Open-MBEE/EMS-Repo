@@ -197,6 +197,12 @@ public class MmsDiffGet extends AbstractJavaWebScript {
             latestTime2 = CommitUtil.replaceTimeStampWithCommitTime(dateTime2, ws2, services, response);
             timestamp2 = latestTime2 != null ? latestTime2 : userTimeStamp2;
         }
+
+        // CAEDVO-1278: check if revert, if so, turn on fullCompare by default
+        if (isRevert( ws1, dateTime1, ws2, dateTime2)) {
+            diffType = DiffType.COMPARE;
+        }
+
         
         // Doing a background diff:
         if (runInBackground) {
@@ -268,6 +274,24 @@ public class MmsDiffGet extends AbstractJavaWebScript {
     }
     
     
+    /**
+     * Checks whether or not the comparison is a revert, e.g. from an older version in the
+     * same time chain.
+     * @param ws1
+     * @param dateTime1
+     * @param ws2
+     * @param dateTime2
+     * @return
+     */
+    private boolean isRevert( WorkspaceNode ws1, Date dateTime1,
+                              WorkspaceNode ws2, Date dateTime2 ) {
+        if (dateTime1.after( dateTime2 )) return false;
+        WorkspaceNode cp = WorkspaceNode.getCommonParent( ws1, ws2 );
+        if (ws1 == null && cp == null) return true;
+        if (ws1.equals( cp )) return true;
+        return false;
+    }
+
 //    public static JSONObject performDiffGlom( WorkspaceNode w1, WorkspaceNode w2,
 //                                              Date date1, Date date2,
 //                                              StringBuffer aResponse,
