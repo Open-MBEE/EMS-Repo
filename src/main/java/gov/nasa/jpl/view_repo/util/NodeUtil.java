@@ -4361,7 +4361,13 @@ public class NodeUtil {
 		if (v2v != null) {
 			for (int i2 = 0; i2 < v2v.length(); i2++) {
 				JSONObject o = v2v.getJSONObject(i2);
-				String id = o.getString("sysmlid");
+				String id = null;
+				if (o.has("sysmlid"))
+					id = o.getString("sysmlid");
+				else if (o.has("id"))
+					id = o.getString("lid");
+				else continue;
+
 				JSONArray childViews = o.getJSONArray("childrenViews");
 				for (int j = 0; j < childViews.length(); j++) {
 					documentEdges.add(new Pair<String, String>(id, childViews
