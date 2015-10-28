@@ -68,6 +68,17 @@ common_filters,
 ],
         
 [
+22,
+"PostMultiplicityRedefines",
+"Post elements to the master branch that exercise the multiplicity and redefines attributes of a Property",
+create_curl_cmd(type="POST", data="multiplicityRedefines.json", base_url=BASE_URL_WS,
+                post_type="elements", branch="master/"),
+True,
+common_filters,
+["test", "workspaces", "develop", "develop2"]
+],
+        
+[
 30,
 "PostViews",
 "Post views",

@@ -170,10 +170,14 @@ echo "----------<==========================>----------";
 # Copies the jar files from each of the repos into the alfresco-view-repo
 ################################################################################
 echo " ";
+echo " ";
 echo "Starting copy process...";
 echo " ";
+echo " ";
+
 echo "----------<==========================>----------";
 
+echo " ";
 echo " ";
 echo "Copying jar files...";
 echo " ";
