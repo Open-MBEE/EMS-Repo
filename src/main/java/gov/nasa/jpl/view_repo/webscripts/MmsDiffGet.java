@@ -152,7 +152,12 @@ public class MmsDiffGet extends AbstractJavaWebScript {
         }
         else {
             if (diffDefaultIsMerge) {
-                diffType = DiffType.MERGE;
+            	// CAEDVO-1278: check if revert, if so, turn on fullCompare by default
+                if (WorkspaceNode.isRevert( ws1, dateTime1, ws2, dateTime2)) {
+                    diffType = DiffType.COMPARE;
+                }
+                else
+                	diffType = DiffType.MERGE;
             } 
             else {
                 diffType = DiffType.COMPARE;
@@ -198,12 +203,6 @@ public class MmsDiffGet extends AbstractJavaWebScript {
             timestamp2 = latestTime2 != null ? latestTime2 : userTimeStamp2;
         }
 
-        // CAEDVO-1278: check if revert, if so, turn on fullCompare by default
-        if (isRevert( ws1, dateTime1, ws2, dateTime2)) {
-            diffType = DiffType.COMPARE;
-        }
-
-        
         // Doing a background diff:
         if (runInBackground) {
             
@@ -283,14 +282,14 @@ public class MmsDiffGet extends AbstractJavaWebScript {
      * @param dateTime2
      * @return
      */
-    private boolean isRevert( WorkspaceNode ws1, Date dateTime1,
-                              WorkspaceNode ws2, Date dateTime2 ) {
-        if (dateTime1.after( dateTime2 )) return false;
-        WorkspaceNode cp = WorkspaceNode.getCommonParent( ws1, ws2 );
-        if (ws1 == null && cp == null) return true;
-        if (ws1.equals( cp )) return true;
-        return false;
-    }
+//    private boolean isRevert( WorkspaceNode ws1, Date dateTime1,
+//                              WorkspaceNode ws2, Date dateTime2 ) {
+//        if (dateTime1.after( dateTime2 )) return false;
+//        WorkspaceNode cp = WorkspaceNode.getCommonParent( ws1, ws2 );
+//        if (ws1 == null && cp == null) return true;
+//        if (ws1.equals( cp )) return true;
+//        return false;
+//    }
 
 //    public static JSONObject performDiffGlom( WorkspaceNode w1, WorkspaceNode w2,
 //                                              Date date1, Date date2,
