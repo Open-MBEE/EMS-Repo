@@ -114,6 +114,20 @@ public class ViewPost extends AbstractJavaWebScript {
 	    Date start = new Date();
 	    Map<String, EmsScriptNode> elements = new HashMap<String, EmsScriptNode>();
 	    
+	    // If there is no json, or the json has a sysml id of a non-existent view, create a new view.
+
+	    // If no id is given in the URL parameters or json, create a new id.
+	    
+        // The parent view is specified as a URL parameter or is the owner in
+        // the view's json if the owner is a view. The json may include the
+        // parent.
+	    
+	    // If a parent view is specified, add the view to the parent; else,
+	    // if the json is specified, and the owner is a view, then use that view
+	    // as the parent.  If the parent is unspecified, that's ok. 
+	    
+	    // If the view 
+	    
 	    // actual business logic, everything else is to handle commits
 	    if (jsonObject.has("views")) {
 			JSONArray viewsJson = jsonObject.getJSONArray("views");
