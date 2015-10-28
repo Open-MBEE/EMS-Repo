@@ -918,44 +918,26 @@ public class SnapshotPost extends AbstractJavaWebScript {
 
     public EmsScriptNode generateHTML( EmsScriptNode zipNode, String snapshotId, Date dateTime, WorkspaceNode workspace ) throws Exception {
     	clearCaches( false );
-        //EmsScriptNode snapshotNode = findScriptNodeById( snapshotId, workspace, null, false );
-    	// lookup snapshotNode using standard lucene as snapshotId is unique across all workspaces
-		ArrayList<NodeRef> nodeRefs = NodeUtil.findNodeRefsByType( snapshotId, "@cm\\:name:\"", services );
-		if (nodeRefs == null || nodeRefs.size() != 1) {
-			nodeRefs = NodeUtil.findNodeRefsByType( snapshotId, "@sysml\\:id:\"", services );
-			if (nodeRefs == null || nodeRefs.size() != 1) {
-				throw new Exception("Failed to find snapshot with Id: " + snapshotId);
-			}
-		}
-		EmsScriptNode snapshotNode = new EmsScriptNode(nodeRefs.get( 0 ), services, response);
+        EmsScriptNode snapshotNode = this.getSnapshotNode(snapshotId);
         if(snapshotNode == null) throw new Exception("Failed to find snapshot with Id: " + snapshotId);
-        /*String status = getHtmlZipStatus(snapshotNode);
-        boolean isGenerated = false;
-        if(status != null && !status.isEmpty() && status.compareToIgnoreCase("Completed")==0){
-        	isGenerated = true;
-        	log(Level.INFO, "Zip artifacts were already generated.");
+        try{
+	        snapshotNode = generateHTML( zipNode, snapshotNode, workspace );
+	        if(snapshotNode == null) throw new Exception("generateHTML() returned null.");
+	        else{
+	        	//this.setHtmlZipStatus(snapshotNode, "Completed");
+	        }
         }
-
-        if(!isGenerated){*/
-	        try{
-		        snapshotNode = generateHTML( zipNode, snapshotNode, workspace );
-		        if(snapshotNode == null) throw new Exception("generateHTML() returned null.");
-		        else{
-		        	//this.setHtmlZipStatus(snapshotNode, "Completed");
-		        }
-	        }
-	        catch(Exception ex){
-	        	ex.printStackTrace();
-	        	//this.setHtmlZipStatus(snapshotNode, "Error");
-	        	throw new Exception("Failed to generate zip artifact!", ex);
-	        }
-        //}
-        //return populateSnapshotProperties( snapshotNode, dateTime, workspace );
+        catch(Exception ex){
+        	ex.printStackTrace();
+        	//this.setHtmlZipStatus(snapshotNode, "Error");
+        	throw new Exception("Failed to generate zip artifact!", ex);
+        }
         return snapshotNode;
     }
 
     public EmsScriptNode generateHTML( EmsScriptNode zipNode, EmsScriptNode snapshotNode, WorkspaceNode workspace ) throws Exception {
-        this.snapshotName = snapshotNode.getSysmlId();
+//        this.snapshotName = snapshotNode.getSysmlId();
+    	this.snapshotName = snapshotNode.getId();
         if(this.snapshotName == null || this.snapshotName.isEmpty()) throw new Exception("Failed to retrieve snapshot Id!");
 
         ChildAssociationRef childAssociationRef =
@@ -980,44 +962,26 @@ public class SnapshotPost extends AbstractJavaWebScript {
 
     public EmsScriptNode generatePDF(EmsScriptNode pdfNode, String snapshotId, Date dateTime, WorkspaceNode workspace, String siteName) throws Exception{
     	clearCaches( false );
-        //EmsScriptNode snapshotNode = findScriptNodeById(snapshotId, workspace, null, false);
-    	// lookup snapshotNode using standard lucene as snapshotId is unique across all workspaces
-		ArrayList<NodeRef> nodeRefs = NodeUtil.findNodeRefsByType( snapshotId, "@cm\\:name:\"", services );
-		if (nodeRefs == null || nodeRefs.size() != 1) {
-			nodeRefs = NodeUtil.findNodeRefsByType( snapshotId, "@sysml\\:id:\"", services );
-			if (nodeRefs == null || nodeRefs.size() != 1) {
-				throw new Exception("Failed to find snapshot with Id: " + snapshotId);
-			}
-		}
-		EmsScriptNode snapshotNode = new EmsScriptNode(nodeRefs.get( 0 ), services, response);
+        EmsScriptNode snapshotNode = this.getSnapshotNode(snapshotId);
 		if(snapshotNode == null) throw new Exception("Failed to find snapshot with Id: " + snapshotId);
-        /*String status = getPdfStatus(snapshotNode);
-        boolean isGenerated = false;
-        if(status != null && !status.isEmpty() && status.compareToIgnoreCase("Completed")==0){
-        	isGenerated = true;
-        	log(Level.INFO, "PDF artifacts were already generated.");
+        try{
+	    	snapshotNode = generatePDF(pdfNode, snapshotNode, workspace, siteName);
+	    	if(snapshotNode == null) throw new Exception("generatePDF() returned null.");
+	    	else{
+	    		this.setPdfStatus(snapshotNode, "Completed");
+	    	}
         }
-
-        if(!isGenerated){*/
-	        try{
-		    	snapshotNode = generatePDF(pdfNode, snapshotNode, workspace, siteName);
-		    	if(snapshotNode == null) throw new Exception("generatePDF() returned null.");
-		    	else{
-		    		this.setPdfStatus(snapshotNode, "Completed");
-		    	}
-	        }
-	        catch(Exception ex){
-	        	ex.printStackTrace();
-	        	this.setPdfStatus(snapshotNode, "Error");
-	    		throw new Exception("Failed to generate PDF artifact!", ex);
-	        }
-        //}
-    	//return populateSnapshotProperties(snapshotNode, dateTime, workspace);
+        catch(Exception ex){
+        	ex.printStackTrace();
+        	this.setPdfStatus(snapshotNode, "Error");
+    		throw new Exception("Failed to generate PDF artifact!", ex);
+        }
         return snapshotNode;
     }
 
     public EmsScriptNode generatePDF( EmsScriptNode pdfNode, EmsScriptNode snapshotNode, WorkspaceNode workspace, String siteName ) throws Exception {
-        this.snapshotName = snapshotNode.getSysmlId();
+//        this.snapshotName = snapshotNode.getSysmlId();
+    	this.snapshotName = snapshotNode.getId();
         if(this.snapshotName == null || this.snapshotName.isEmpty()) throw new Exception("Failed to retrieve snapshot Id!");
 
         ChildAssociationRef childAssociationRef =
@@ -1044,7 +1008,8 @@ public class SnapshotPost extends AbstractJavaWebScript {
     	EmsScriptNode snapshotNode = getSnapshotNode(snapshotId);
     	if(snapshotNode == null) return null;
     	
-    	this.snapshotName = snapshotNode.getSysmlId();
+//    	this.snapshotName = snapshotNode.getSysmlId();
+    	this.snapshotName = snapshotNode.getId();
         if(this.snapshotName == null || this.snapshotName.isEmpty()) throw new Exception("Failed to retrieve snapshot Id!");
 
         ChildAssociationRef childAssociationRef =
@@ -1188,19 +1153,19 @@ public class SnapshotPost extends AbstractJavaWebScript {
 
     private EmsScriptNode getSnapshotNode(JSONObject postJson) throws Exception{
     	if (!postJson.has( "id" )) {
-	        throw new Exception("No id found in posted JSON.");
+	        throw new Exception("No alfresco node Id found in posted JSON.");
 	    }
     	return getSnapshotNode(postJson.getString("id"));
     }
     
-    private EmsScriptNode getSnapshotNode(String id){
+    public EmsScriptNode getSnapshotNode(String id){
     	EmsScriptNode node = null;
-    	ArrayList<NodeRef> nodeRefs = NodeUtil.findNodeRefsByType( id, "@cm\\:name:\"", services );
-    	if(nodeRefs==null || nodeRefs.size() != 1) nodeRefs = NodeUtil.findNodeRefsByType( id, "@sysml\\:id:\"", services );
-    	
-	    if (nodeRefs != null && nodeRefs.size() > 0) {
-		    node = new EmsScriptNode(nodeRefs.get( 0 ), services, response);
-	    }
+    	try {
+	        NodeRef snapshotNr = new NodeRef("workspace://SpacesStore/" + id);
+	        node = new EmsScriptNode(snapshotNr, services, response);
+    	} catch (Exception e) {
+    		// do nothing if not found
+    	}
     	return node;
     }
     

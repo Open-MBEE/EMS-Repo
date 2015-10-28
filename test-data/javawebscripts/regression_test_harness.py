@@ -68,6 +68,17 @@ common_filters,
 ],
         
 [
+22,
+"PostMultiplicityRedefines",
+"Post elements to the master branch that exercise the multiplicity and redefines attributes of a Property",
+create_curl_cmd(type="POST", data="multiplicityRedefines.json", base_url=BASE_URL_WS,
+                post_type="elements", branch="master/"),
+True,
+common_filters,
+["test", "workspaces", "develop", "develop2"]
+],
+        
+[
 30,
 "PostViews",
 "Post views",
@@ -3080,6 +3091,18 @@ create_curl_cmd(type="GET", data="search?keyword=dlam_string&filters=value", bas
 True,
 common_filters + ['"qualifiedId"', '"sysmlid"'],
 ["workspaces"]
+],
+[
+10004,
+"GetNodeRefHistory",
+"Get NodeRef History",
+create_curl_cmd(type="GET", data="history/303", base_url=BASE_URL_WS,
+        branch="master/"),
+True,
+common_filters + ['"timestamp"'],
+["test","workspaces","develop", "develop2"],
+False,
+None
 ],
 
 ]
