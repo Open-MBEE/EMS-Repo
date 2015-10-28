@@ -3051,6 +3051,18 @@ True,
 common_filters + ['"qualifiedId"', '"sysmlid"'],
 ["workspaces"]
 ],
+[
+10004,
+"GetNodeRefHistory",
+"Get NodeRef History",
+create_curl_cmd(type="GET", data="history/303", base_url=BASE_URL_WS,
+        branch="master/"),
+True,
+common_filters + ['"timestamp"'],
+["test","workspaces","develop", "develop2"],
+False,
+None
+],
 
 ]
 
