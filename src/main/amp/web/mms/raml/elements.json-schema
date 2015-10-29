@@ -224,7 +224,7 @@
                     "type": "array",
                     "items": {
                         "type": "object",
-                        "description": "A map of views to views"
+                        "description": "A map of views to views: ids to childrenViews"
                     }
                 },
                 "noSections": {

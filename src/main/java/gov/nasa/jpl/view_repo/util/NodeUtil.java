@@ -4365,13 +4365,15 @@ public class NodeUtil {
 				if (o.has("sysmlid"))
 					id = o.getString("sysmlid");
 				else if (o.has("id"))
-					id = o.getString("lid");
+					id = o.getString("id");
 				else continue;
 
-				JSONArray childViews = o.getJSONArray("childrenViews");
-				for (int j = 0; j < childViews.length(); j++) {
-					documentEdges.add(new Pair<String, String>(id, childViews
-							.getString(j)));
+				if (o.has( "childrenViews" )) {
+        				JSONArray childViews = o.getJSONArray("childrenViews");
+        				for (int j = 0; j < childViews.length(); j++) {
+        					documentEdges.add(new Pair<String, String>(id, childViews
+        							.getString(j)));
+        				}
 				}
 			}
 		}

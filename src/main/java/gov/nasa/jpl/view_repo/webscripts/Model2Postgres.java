@@ -31,8 +31,6 @@ package gov.nasa.jpl.view_repo.webscripts;
 
 import gov.nasa.jpl.mbee.util.Pair;
 import gov.nasa.jpl.mbee.util.TimeUtils;
-import gov.nasa.jpl.view_repo.db.DbContract;
-import gov.nasa.jpl.view_repo.db.Node;
 import gov.nasa.jpl.view_repo.db.PostgresHelper;
 import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
@@ -45,20 +43,15 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.log4j.*;
 import org.alfresco.repo.model.Repository;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
-import org.alfresco.service.cmr.security.PermissionService;
 import org.alfresco.service.cmr.site.SiteInfo;
-import org.alfresco.service.cmr.version.Version;
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -74,6 +67,8 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
 public class Model2Postgres extends AbstractJavaWebScript {
 
 	PostgresHelper pgh = null;
+
+	static Logger logger = Logger.getLogger(Model2Postgres.class);
 
 	public Model2Postgres() {
 		super();
@@ -225,7 +220,7 @@ public class Model2Postgres extends AbstractJavaWebScript {
 
 		i++;
 
-		// documentatino edges
+		// documentation edges 
 		String doc = (String) n.getProperty(Acm.ACM_DOCUMENTATION);
 		NodeUtil.processDocumentEdges(n.getSysmlId(), doc, documentEdges);
 		String view2viewProperty = (String) n.getProperty(Acm.ACM_VIEW_2_VIEW);
@@ -234,14 +229,21 @@ public class Model2Postgres extends AbstractJavaWebScript {
 					view2viewProperty), documentEdges);
 		}
 
-		for (NodeRef c : n.getOwnedChildren(false, dt, ws)) {
-			EmsScriptNode cn = new EmsScriptNode(c, services, response);
 
-			// containment edges
-			edges.add(new Pair<String, String>(n.getSysmlId(), cn.getSysmlId()));
-
-			i += insertNodes(new EmsScriptNode(c, services, response), pgh, dt,
-					edges, documentEdges, ws);
+		try {
+        		for (NodeRef c : n.getOwnedChildren(false, dt, ws)) {
+        			EmsScriptNode cn = new EmsScriptNode(c, services, response);
+        
+        			// containment edges
+        			edges.add(new Pair<String, String>(n.getSysmlId(), cn.getSysmlId()));
+        
+        			i += insertNodes(new EmsScriptNode(c, services, response), pgh, dt,
+        					edges, documentEdges, ws);
+        		}
+		} catch ( org.alfresco.service.cmr.repository.MalformedNodeRefException mnre ) {
+		    // keep going and ignore
+		    logger.error( String.format("could not get children for parent %s:", n.getId()) );
+		    mnre.printStackTrace();
 		}
 		return i;
 	}
