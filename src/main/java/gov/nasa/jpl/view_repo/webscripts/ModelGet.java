@@ -177,6 +177,12 @@ public class ModelGet extends AbstractJavaWebScript {
 				runWithoutTransactions);
 	}
 
+	private boolean getUseDb(WebScriptRequest req){
+		String usedb = req.getParameter("usedb");
+		if (usedb == null) return true;
+		else return Boolean.parseBoolean(usedb);
+	}
+	
 	@Override
 	protected Map<String, Object> executeImplImpl(WebScriptRequest req,
 			Status status, Cache cache) {
@@ -187,6 +193,8 @@ public class ModelGet extends AbstractJavaWebScript {
 		Timer timer = new Timer();
 		printHeader(req);
 
+		boolean useDb = getUseDb(req);
+		
 		// clearCaches();
 
 		Map<String, Object> model = new HashMap<String, Object>();
@@ -194,7 +202,7 @@ public class ModelGet extends AbstractJavaWebScript {
 		setIsViewRequest(isViewRequest);
 
 		JSONObject top = NodeUtil.newJsonObject();
-		JSONArray elementsJson = handleRequest(req, top);
+		JSONArray elementsJson = handleRequest(req, top, useDb);
 
 		try {
 			if (elementsJson.length() > 0) {
@@ -243,7 +251,7 @@ public class ModelGet extends AbstractJavaWebScript {
 	 * @param top
 	 * @return
 	 */
-	private JSONArray handleRequest(WebScriptRequest req, final JSONObject top) {
+	private JSONArray handleRequest(WebScriptRequest req, final JSONObject top, boolean useDb) {
 		// REVIEW -- Why check for errors here if validate has already been
 		// called? Is the error checking code different? Why?
 		try {
@@ -302,7 +310,7 @@ public class ModelGet extends AbstractJavaWebScript {
 			} else {
 				handleElementHierarchy(modelRootNode, workspace, dateTime,
 						depth, new Long(0), connected, relationship,
-						new HashSet<String>());
+						new HashSet<String>(), useDb);
 			}
 
 			boolean checkReadPermission = true; // TODO -- REVIEW -- Shouldn't
@@ -432,9 +440,9 @@ public class ModelGet extends AbstractJavaWebScript {
 	protected void handleElementHierarchy(EmsScriptNode root,
 			WorkspaceNode workspace, Date dateTime, final Long maxDepth,
 			Long currDepth, boolean connected, String relationship,
-			Set<String> visited) throws JSONException, SQLException {
+			Set<String> visited, boolean useDb) throws JSONException, SQLException {
 
-		if (dateTime == null && !connected)
+		if (dateTime == null && !connected && useDb)
 			handleElementHierarchyPostgres(root, workspace, dateTime, maxDepth,
 					currDepth, connected, relationship, visited);
 		else

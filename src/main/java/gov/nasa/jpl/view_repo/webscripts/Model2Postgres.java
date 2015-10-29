@@ -193,12 +193,18 @@ public class Model2Postgres extends AbstractJavaWebScript {
 		try {
 			pgh.connect();
 			for (Pair<String, String> entry : edges) {
-				pgh.insertEdge(entry.first, entry.second,
-						PostgresHelper.DbEdgeTypes.REGULAR);
+				try {
+					pgh.insertEdge(entry.first, entry.second,
+							PostgresHelper.DbEdgeTypes.REGULAR);
+				} catch (Exception e) {
+				}
 			}
 			for (Pair<String, String> entry : documentEdges) {
-				pgh.insertEdge(entry.first, entry.second,
-						PostgresHelper.DbEdgeTypes.DOCUMENT);
+				try {
+					pgh.insertEdge(entry.first, entry.second,
+							PostgresHelper.DbEdgeTypes.DOCUMENT);
+				} catch (Exception e) {
+				}
 			}
 			pgh.close();
 		} catch (ClassNotFoundException | SQLException e) {
@@ -219,15 +225,15 @@ public class Model2Postgres extends AbstractJavaWebScript {
 
 		i++;
 
-		// documentatino edges 
+		// documentatino edges
 		String doc = (String) n.getProperty(Acm.ACM_DOCUMENTATION);
 		NodeUtil.processDocumentEdges(n.getSysmlId(), doc, documentEdges);
 		String view2viewProperty = (String) n.getProperty(Acm.ACM_VIEW_2_VIEW);
 		if (view2viewProperty != null) {
-			NodeUtil.processV2VEdges(n.getSysmlId(), new JSONArray(view2viewProperty),
-					documentEdges);
+			NodeUtil.processV2VEdges(n.getSysmlId(), new JSONArray(
+					view2viewProperty), documentEdges);
 		}
-		
+
 		for (NodeRef c : n.getOwnedChildren(false, dt, ws)) {
 			EmsScriptNode cn = new EmsScriptNode(c, services, response);
 
