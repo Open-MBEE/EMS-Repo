@@ -2547,11 +2547,14 @@ public class EmsScriptNode extends ScriptNode implements
                    this.getProperty( Acm.ACM_DOCUMENTATION ), filter );
 
         // add affected ids
+        logger.warn( "addingAffectedIds = " + addingAffectedIds );
         if ( addingAffectedIds  ) {
             if ( filter == null || filter.isEmpty() || filter.contains( "affectedIds" ) ) {
                 ArrayList< NodeRef > refs = this.getAffectedElements( false, false, dateTime, getWorkspace(), false, false, true, false );
                 JSONArray affectedIds = addNodeRefIdsJSON( refs );
                 putInJson( elementJson, "affectedIds", affectedIds, filter );
+            } else {
+                logger.warn( "affected ids filtered out for " + getSysmlId() );
             }
         }
         
