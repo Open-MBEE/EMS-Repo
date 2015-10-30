@@ -55,9 +55,9 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
 public class ViewPost extends AbstractJavaWebScript {
     static Logger logger = Logger.getLogger(ViewPost.class);
     
-	public ViewPost() {
-	    super();
-	}
+    public ViewPost() {
+        super();
+    }
 
     public ViewPost(Repository repositoryHelper, ServiceRegistry registry) {
         super(repositoryHelper, registry);
@@ -65,86 +65,97 @@ public class ViewPost extends AbstractJavaWebScript {
 
 
     @Override
-	protected boolean validateRequest(WebScriptRequest req, Status status) {
-		// do nothing
-		return false;
-	}
+    protected boolean validateRequest(WebScriptRequest req, Status status) {
+        // do nothing
+        return false;
+    }
 
 
-	@Override
+    @Override
     protected Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
         ViewPost instance = new ViewPost(repository, getServices());
         return instance.executeImplImpl(req,  status, cache, runWithoutTransactions);
     }
 
-	@Override
+    @Override
     protected Map<String, Object> executeImplImpl(WebScriptRequest req, Status status, Cache cache) {
         printHeader( req );
 
-		//clearCaches();
+        //clearCaches();
 
-		Map<String, Object> model = new HashMap<String, Object>();
+        Map<String, Object> model = new HashMap<String, Object>();
 
         WorkspaceNode workspace = getWorkspace( req );
 
         try {
             JSONObject json = //JSONObject.make( 
                     (JSONObject)req.parseContent();// );
-			updateViews(json, workspace);
-		} catch (JSONException e) {
-			log(Level.ERROR, HttpServletResponse.SC_BAD_REQUEST, "JSON parse exception: %s", e.getMessage());
-			e.printStackTrace();
-		}
+            updateViews(json, workspace);
+        } catch (JSONException e) {
+            log(Level.ERROR, HttpServletResponse.SC_BAD_REQUEST, "JSON parse exception: %s", e.getMessage());
+            e.printStackTrace();
+        }
 
         status.setCode(responseStatus.getCode());
-		model.put("res", createResponseJson());
+        model.put("res", createResponseJson());
 
-		printFooter();
-		return model;
-	}
+        printFooter();
+        return model;
+    }
 
-	
-	/**
-	 * Add or update views
-	 * @param jsonObject
-	 * @param workspace
-	 * @throws JSONException
-	 */
-	protected void updateViews(JSONObject jsonObject, WorkspaceNode workspace) throws JSONException {
-	    Date start = new Date();
-	    Map<String, EmsScriptNode> elements = new HashMap<String, EmsScriptNode>();
-	    
-	    // If there is no json, or the json has a sysml id of a non-existent view, create a new view.
+    
+    /**
+     * If the view is being added to a new parent, then this function should be
+     * called. This function will add or update views. If the view pre-exists,
+     * is not changing its parent view, and is only updating other properties or
+     * the order, ModelPost should be fine.
+     * 
+     * Add or update views
+     * 
+     * @param jsonObject
+     * @param workspace
+     * @throws JSONException
+     */
+    protected void updateViews(JSONObject jsonObject, WorkspaceNode workspace) throws JSONException {
+        Date start = new Date();
+        Map<String, EmsScriptNode> elements = new HashMap<String, EmsScriptNode>();
+        
+        
+        // If there is no json, or the json has a sysml id of a non-existent
+        // view, create a new view. Also, create an InstanceSpecification and
+        // place in the first parent of the view that is a Package.
 
-	    // If no id is given in the URL parameters or json, create a new id.
-	    
+        // If no id is given in the URL parameters or json, create a new id.
+        
         // The parent view is specified as a URL parameter or is the owner in
         // the view's json if the owner is a view. The json may include the
-        // parent.
-	    
-	    // If a parent view is specified, add the view to the parent; else,
-	    // if the json is specified, and the owner is a view, then use that view
-	    // as the parent.  If the parent is unspecified, that's ok. 
-	    
-	    // If the view 
-	    
-	    // actual business logic, everything else is to handle commits
-	    if (jsonObject.has("views")) {
-			JSONArray viewsJson = jsonObject.getJSONArray("views");
+        // parent.  The parent need not be specified.
+        
+        // The view is added to the parent if the parent is specified, and the
+        // view was not already added to the parent.
+        
+        // A View, v, is added to a parent, p, by creating 
+        // * a composite Association, a, owning
+        //   * a Property of type p, pp, (also including pp as an ownedEnd) and
+        // * a Property of type v, pv, which is an ownedAttribute of p.
 
-			for (int ii = 0; ii < viewsJson.length(); ii++) {
-			    updateView(viewsJson, ii, workspace, elements);
-			}
-		}
+        // actual business logic, everything else is to handle commits
+        if (jsonObject.has("views")) {
+            JSONArray viewsJson = jsonObject.getJSONArray("views");
 
-	    // commit info
+            for (int ii = 0; ii < viewsJson.length(); ii++) {
+                updateView(viewsJson, ii, workspace, elements);
+            }
+        }
+
+        // commit info
         setWsDiff(workspace);
-	    wsDiff.setUpdatedElements( elements );
-		
-		Date end = new Date();
-		JSONObject deltaJson = wsDiff.toJSONObject( start, end );
-		String wsId = "master";
-		if (workspace != null) wsId = workspace.getId();
+        wsDiff.setUpdatedElements( elements );
+        
+        Date end = new Date();
+        JSONObject deltaJson = wsDiff.toJSONObject( start, end );
+        String wsId = "master";
+        if (workspace != null) wsId = workspace.getId();
         // FIXME: split elements by project Id - since they may not always be in same project
         String projectId = "";
         if (elements.size() > 0) {
@@ -157,35 +168,35 @@ public class ViewPost extends AbstractJavaWebScript {
         }
 
         CommitUtil.commit(workspace, deltaJson, "View Post", runWithoutTransactions, services, response);
-		if (!CommitUtil.sendDeltas(deltaJson, wsId, projectId, source)) {
-		    logger.warn( "Could not send delta" );
-		}
-	}
+        if (!CommitUtil.sendDeltas(deltaJson, wsId, projectId, source)) {
+            logger.warn( "Could not send delta" );
+        }
+    }
 
 
-	private void updateView(JSONArray viewsJson, int index,
-	                        WorkspaceNode workspace, Map<String, EmsScriptNode> elements) throws JSONException {
-		JSONObject viewJson = viewsJson.getJSONObject(index);
-		updateView(viewJson, workspace, elements);
-	}
+    private void updateView(JSONArray viewsJson, int index,
+                            WorkspaceNode workspace, Map<String, EmsScriptNode> elements) throws JSONException {
+        JSONObject viewJson = viewsJson.getJSONObject(index);
+        updateView(viewJson, workspace, elements);
+    }
 
-	private void updateView(JSONObject viewJson, WorkspaceNode workspace,  Map<String, EmsScriptNode> elements) throws JSONException {
-		String id = viewJson.getString(Acm.JSON_ID);
-		if (id == null) {
-			log(Level.ERROR, HttpServletResponse.SC_BAD_REQUEST, "view id not specified.\n");
-			return;
-		}
+    private void updateView(JSONObject viewJson, WorkspaceNode workspace,  Map<String, EmsScriptNode> elements) throws JSONException {
+        String id = viewJson.getString(Acm.JSON_ID);
+        if (id == null) {
+            log(Level.ERROR, HttpServletResponse.SC_BAD_REQUEST, "view id not specified.\n");
+            return;
+        }
 
-		EmsScriptNode view = findScriptNodeById(id, workspace, null, true);
-		if (view == null) {
-			log(Level.ERROR, HttpServletResponse.SC_NOT_FOUND, "could not find view with id: %s", id);
-			return;
-		}
+        EmsScriptNode view = findScriptNodeById(id, workspace, null, true);
+        if (view == null) {
+            log(Level.ERROR, HttpServletResponse.SC_NOT_FOUND, "could not find view with id: %s", id);
+            return;
+        }
 
-		if (checkPermissions(view, PermissionService.WRITE)) {
-		    view.createOrUpdateAspect(Acm.ACM_VIEW);
-		    view.ingestJSON(viewJson);
-		    elements.put( id, view );
-		}
-	}
+        if (checkPermissions(view, PermissionService.WRITE)) {
+            view.createOrUpdateAspect(Acm.ACM_VIEW);
+            view.ingestJSON(viewJson);
+            elements.put( id, view );
+        }
+    }
 }
