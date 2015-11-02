@@ -1,3 +1,4 @@
+
 package gov.nasa.jpl.view_repo.util;
 
 import gov.nasa.jpl.mbee.util.ClassUtils;
@@ -51,6 +52,8 @@ import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.dictionary.AspectDefinition;
 import org.alfresco.service.cmr.dictionary.DictionaryService;
 import org.alfresco.service.cmr.dictionary.PropertyDefinition;
+import org.alfresco.service.cmr.module.ModuleDetails;
+import org.alfresco.service.cmr.module.ModuleService;
 import org.alfresco.service.cmr.repository.ContentData;
 import org.alfresco.service.cmr.repository.ContentWriter;
 import org.alfresco.service.cmr.repository.InvalidNodeRefException;
@@ -70,6 +73,7 @@ import org.alfresco.service.cmr.security.PersonService;
 import org.alfresco.service.cmr.site.SiteInfo;
 import org.alfresco.service.cmr.version.Version;
 import org.alfresco.service.cmr.version.VersionHistory;
+import org.alfresco.service.namespace.NamespaceService;
 import org.alfresco.service.namespace.QName;
 import org.alfresco.util.ApplicationContextHelper;
 import org.apache.commons.logging.Log;
@@ -4080,5 +4084,134 @@ public class NodeUtil {
 //        }
         }
         return node;
+    }
+    /**
+	 * getModuleService
+	 * 	Retrieves the ModuleService of the ServiceRegistry passed in
+	 * @param services ServiceRegistry of that contains the desired ModuleService
+	 * @param moduleService
+	 * @return
+	 */
+    public static ModuleService getModuleService(ServiceRegistry services)
+    {
+    	// Checks to see if the services passed in is null, if so, it will call on class method getServices
+    	if(services == null){
+    		services = getServices();
+    	}
+    	ModuleService moduleService = (ModuleService) services.getService(QName.createQName(NamespaceService.ALFRESCO_URI,"ModuleService"));
+    	return moduleService;
+    }
+    
+    /**
+     * getServiceModules
+     * Returns a list of Module Details from the Service Modules
+     * @param service the service containing modules to be returned
+     * @return List
+     */
+    public static JSONArray getJsonServiceModules(ModuleService service)
+    {
+
+    	JSONArray jsonArray = new JSONArray();
+    	List<ModuleDetails> moduleDetails;
+    	moduleDetails = service.getAllModules();
+    	for(ModuleDetails detail:moduleDetails)
+    	{
+    		jsonArray.put(detail);
+    	}
+    	return jsonArray;
+    }
+    
+    /**
+     * moduleDetailsToJson
+     * 
+     * Takes a module of type ModuleDetails and retrieves all off the module's members 
+     * 	and puts them into a newly instantiated JSONObject.
+     * @param module A single module of type ModuleDetails
+     * @return A new JSONObject which contains all the details of that module 
+     */
+    public static JSONObject moduleDetailsToJson(ModuleDetails module)
+    {
+    	JSONObject jsonModule = new JSONObject();
+    	
+    	jsonModule.put("title", module.getTitle());
+    	jsonModule.put("version", module.getVersion());
+    	jsonModule.put("aliases", module.getAliases());
+		jsonModule.put("class", module.getClass());
+		jsonModule.put("dependencies", module.getDependencies());
+		jsonModule.put("editions", module.getEditions());
+		jsonModule.put("id", module.getId());
+		jsonModule.put("properties", module.getProperties());
+    	
+    	return jsonModule;
+    }
+    
+    
+    
+    /**
+     * Takes a module of type ModuleDetails and retrieves the module members specified in the details array. 
+     * 	This will create a new JSONObject and iterate through the details array for each specified member.
+     * @param module A single module of type ModuleDetails
+     * @param details 
+     * @return JSONObject containing the data members specified by the string arguments passed in the String[] details array.
+     */
+    public static JSONObject moduleDetailsToJson(ModuleDetails module, String[] details)
+    {
+    	JSONObject jsonModule = new JSONObject();
+    	int index;
+    	
+    	
+    	for(index = 0; index < details.length; index++)
+    	{
+    		switch(details[index].toLowerCase())
+    		{
+    			case "title":jsonModule.put("title", module.getTitle());
+    				break;
+    			case "versions":jsonModule.put("version", module.getVersion());
+    				break;
+    			case "aliases":jsonModule.put("aliases", module.getAliases());
+    				break;
+    			case "class":jsonModule.put("class", module.getClass());
+    				break;
+    			case "dependencies":jsonModule.put("dependecies", module.getDependencies());
+    				break;
+    			case "editions":jsonModule.put("editions", module.getEditions());
+    				break;
+    			case "id":jsonModule.put("id", module.getId());
+    				break;
+    			case "properties":jsonModule.put("properties", module.getProperties());
+    				break;
+    		}		
+    	}
+    	return jsonModule;
+    }
+    
+    public static JSONObject getModuleVersion(ModuleDetails module)
+    {
+    	return getModuleDetail(module, "version");
+    }
+   
+    public static JSONObject getModuleDetail(ModuleDetails module, String detail)
+    {
+    	JSONObject jsonDetail = new JSONObject();
+    	switch(detail.toLowerCase())
+		{
+			case "title":jsonDetail.put("title", module.getTitle());
+				break;
+			case "versions":jsonDetail.put("version", module.getVersion());
+				break;
+			case "aliases":jsonDetail.put("aliases", module.getAliases());
+				break;
+			case "class":jsonDetail.put("class", module.getClass());
+				break;
+			case "dependencies":jsonDetail.put("dependencies", module.getDependencies());
+				break;
+			case "editions":jsonDetail.put("editions", module.getEditions());
+				break;
+			case "id":jsonDetail.put("id", module.getId());
+				break;
+			case "properties":jsonDetail.put("properties", module.getProperties());
+				break;
+		}		
+    	return jsonDetail;
     }
 }
