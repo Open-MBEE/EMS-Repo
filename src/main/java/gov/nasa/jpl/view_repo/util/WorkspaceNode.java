@@ -1245,4 +1245,40 @@ public class WorkspaceNode extends EmsScriptNode {
         return t;
     }
 
+    /**
+     * Checks whether or not the comparison is a revert, e.g. from an older version in the
+     * same time chain.
+     * 
+     * TODO: move this to utility class
+     * 
+     * @param ws1
+     * @param dateTime1
+     * @param ws2
+     * @param dateTime2
+     * @return
+     */
+    public static boolean isRevert( WorkspaceNode ws1, Date t1,
+                                    WorkspaceNode ws2, Date t2 ) {
+    	if(t1 != null && t2 != null){
+    		if (t1.after( t2 )) return false;
+    	}
+    	
+        Pair< WorkspaceNode, Date > cbp = WorkspaceDiff.getCommonBranchPoint( ws1, ws2, t1, t2 );
+        if (ws1 == null) {
+            if (cbp.first == null) {
+            	if(t1 != null){
+            		if (cbp.second.after( t1 )) return false;
+            	}
+            }
+        } else {
+            if (!ws1.equals( cbp.first )) return false;
+            if(t1 != null){
+            	if (cbp.second.after( t1 )) return false;
+            }
+        }
+        return true;
+    }
+
 }
+
+    
