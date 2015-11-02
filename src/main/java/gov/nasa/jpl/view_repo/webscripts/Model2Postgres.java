@@ -156,9 +156,8 @@ public class Model2Postgres extends AbstractJavaWebScript {
 				emsNode = new EmsScriptNode(siteRef, services);
 				name = emsNode.getName();
 
-				if (!name.equals("no_site")
-						&& (workspace == null || (workspace != null && workspace
-								.contains(emsNode)))) {
+                if (workspace == null || 
+                        (workspace != null && workspace.contains(emsNode))) {
 					try {
 						pgh.connect();
 
