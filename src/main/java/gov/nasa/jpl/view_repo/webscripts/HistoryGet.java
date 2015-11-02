@@ -121,10 +121,12 @@ public class HistoryGet extends ModelGet {
 			
 			// Searches for each key and value to be appended to the json array.
 			for (index = 0; index < elementsJson.length(); index++) {
+				System.out.println(NodeUtil.jsonToString(top, 4));
+				System.out.println(elementsJson.getJSONObject(index).getJSONObject("versionProperties").toString(4));
 				obj.put("label",
 						elementsJson.getJSONObject(index).getJSONObject("versionProperties").get("versionLabel"));
 				obj.put("timestamp",
-						elementsJson.getJSONObject(index).getJSONObject("versionProperties").get("frozenCreated"));
+						elementsJson.getJSONObject(index).getJSONObject("versionProperties").get("frozenModified"));
 				top.append("versions", obj);
 				obj = new JSONObject();
 			}
