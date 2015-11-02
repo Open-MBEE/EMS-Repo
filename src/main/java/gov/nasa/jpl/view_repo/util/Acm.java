@@ -85,6 +85,7 @@ public class Acm {
     public static String JSON_PROJECT_VERSION = "projectVersion";
 
     public static final String JSON_ALLOWED_ELEMENTS = "allowedElements";
+    public static final String JSON_CHILD_VIEWS = "childViews";
     public static final String JSON_CHILDREN_VIEWS = "childrenViews";
     public static final String JSON_CONTAINS = "contains";
     public static final String JSON_DISPLAYED_ELEMENTS = "displayedElements";

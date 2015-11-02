@@ -29,14 +29,20 @@
 
 package gov.nasa.jpl.view_repo.webscripts;
 
+import gov.nasa.jpl.mbee.util.TimeUtils;
+import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.CommitUtil;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
+import gov.nasa.jpl.view_repo.util.NodeUtil;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Map;
+import java.util.Set;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -86,11 +92,16 @@ public class ViewPost extends AbstractJavaWebScript {
         Map<String, Object> model = new HashMap<String, Object>();
 
         WorkspaceNode workspace = getWorkspace( req );
+        
+        String viewId = req.getServiceMatch().getTemplateVars().get( "viewId" );
+
+        // get timestamp if specified
+        String parentId = req.getParameter( "parent" );
 
         try {
             JSONObject json = //JSONObject.make( 
                     (JSONObject)req.parseContent();// );
-            updateViews(json, workspace);
+            updateViews(viewId, parentId, json, workspace);
         } catch (JSONException e) {
             log(Level.ERROR, HttpServletResponse.SC_BAD_REQUEST, "JSON parse exception: %s", e.getMessage());
             e.printStackTrace();
@@ -111,28 +122,122 @@ public class ViewPost extends AbstractJavaWebScript {
      * the order, ModelPost should be fine.
      * 
      * Add or update views
+     * @param parentId 
+     * @param viewId 
      * 
      * @param jsonObject
      * @param workspace
      * @throws JSONException
      */
-    protected void updateViews(JSONObject jsonObject, WorkspaceNode workspace) throws JSONException {
+    protected void updateViews( String viewId, String parentId, JSONObject jsonObject,
+                                WorkspaceNode workspace ) throws JSONException {
         Date start = new Date();
         Map<String, EmsScriptNode> elements = new HashMap<String, EmsScriptNode>();
         
+        boolean viewIdInUrl = Utils.isNullOrEmpty( viewId );
+        boolean parentIdInUrl = Utils.isNullOrEmpty( parentId );
         
-        // If there is no json, or the json has a sysml id of a non-existent
-        // view, create a new view. Also, create an InstanceSpecification and
-        // place in the first parent of the view that is a Package.
+        Map<String, String> owners = new HashMap< String, String >();
+        Map<String, Set<String> > elementOwnedAttributes = new HashMap< String, Set<String> >();
+        //Map<String, String> viewOwners = new HashMap< String, String >();
+        Map<String, Set<String> > viewOwners = new HashMap< String, Set<String> >();
+        Map<String, Set<String> > viewChildViews = new HashMap< String, Set<String> >();
+        Map<String, JSONObject> viewsInJson = new HashMap< String, JSONObject >();
+        
+        // Pull stuff out of json
+        boolean viewInJson = false;
+        boolean gotJson = false;
+        if ( jsonObject != null ) {
+            gotJson = true;
+            JSONArray elementsJson = jsonObject.optJSONArray( "elements" );
+            if ( elementsJson != null && elementsJson.length() > 0 ) {
+                for ( int i = 0; i < elementsJson.length(); ++i ) {
+                    JSONObject elementJson = elementsJson.optJSONObject( i );
+                    if ( elementJson != null ) {
+                        JSONObject spec = elementJson.optJSONObject( "specialization" );
+                        if ( spec != null ) {
+                            String type = spec.optString( "type" );
+                            if ( "View".equals( type ) || "Product".equals( type ) ) {
+                                viewInJson = true;
+                                
+                                String id = elementJson.optString( "sysmlid" );
+                                if ( Utils.isNullOrEmpty( id ) ) {
+                                    id = NodeUtil.createId( getServices() );
+                                }
+                                viewsInJson.put( id, elementJson );
+                                
+                                String owner = elementJson.optString( "owner" );
+                                if ( !Utils.isNullOrEmpty( owner ) ) {
+                                    owners.put( id, owner );
+                                }
+                                
+                                JSONArray childViewsArray = spec.optJSONArray( Acm.JSON_CHILD_VIEWS );
+                                if ( childViewsArray != null ) {
+                                    Set<String> childViews = new HashSet< String >();
+                                    for ( int j=0; j < childViewsArray.length(); ++j ) {
+                                        String childView = childViewsArray.optString( j );
+                                        childViews.add( childView );
+                                        Set<String> viewOwnerSet = viewOwners.get( childView );
+                                        if ( viewOwnerSet == null ) {
+                                            viewOwnerSet = new LinkedHashSet< String >();
+                                            viewOwners.put( childView, viewOwnerSet );
+                                        }
+                                        viewOwnerSet.add( id );
+                                    }
+                                    viewChildViews.put( id, childViews );
+                                }
+                                
+                                JSONArray ownedAttributesArray = spec.optJSONArray( Acm.JSON_OWNED_ATTRIBUTE );
+                                if ( ownedAttributesArray != null ) {
+                                    Set<String> ownedAttributes = new HashSet< String >();
+                                    for ( int j=0; j < ownedAttributesArray.length(); ++j ) {
+                                        String ownedAttribute = ownedAttributesArray.optString( j );
+                                        ownedAttributes.add( ownedAttribute );
+                                    }
+                                    elementOwnedAttributes.put( id, ownedAttributes );
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
 
+        // Initialize stuff for case where the view id is only in the URL
+        if ( viewIdInUrl ) { //!Utils.isNullOrEmpty( viewIdInUrl ) ) {
+            
+        }
+        
         // If no id is given in the URL parameters or json, create a new id.
         
+        // If there is no json, or the json has a sysml id of a non-existent
+        // view, create a new view.
+        
+        // If the json is not given for the new view, create an
+        // InstanceSpecification and place it in the first parent of the view
+        // that is a Package.  The contents of the new view will be an
+        // InstanceValue in an Expression that references this InstanceSpecification.
+
         // The parent view is specified as a URL parameter or is the owner in
         // the view's json if the owner is a view. The json may include the
         // parent.  The parent need not be specified.
         
         // The view is added to the parent if the parent is specified, and the
         // view was not already added to the parent.
+        
+        // Add a "childViews" to the content model and output JSON: this should interpret the
+        // ownedAttribute of the view/product and give back:
+        //   [ {"id", childViewId, "aggregation": "composite", "shared", or "none"}
+        //   , ...]
+        // where
+        // childViewId is the sysmlid of the propertyType of ownedAttribute
+        // properties, if it's also a view/product, aggregation is the
+        // aggregation of the ownedAttribute property. Ordering matters!
+        
+        // childViews can change if the ownedAttributes or aggregationType of a Property changes. 
+        
+        // Clear out view2view in the Product or keep it consistent with the
+        // childViews/InstanceSpecs.
         
         // A View, v, is added to a parent, p, by creating 
         // * a composite Association, a, owning
@@ -199,4 +304,96 @@ public class ViewPost extends AbstractJavaWebScript {
             elements.put( id, view );
         }
     }
+    
+    
+    protected static final String paragraphClassifierId =
+            "_17_0_5_1_407019f_1431903758416_800749_12055";
+    
+    protected static final String TEMPLATE_NEW_VIEW = "{" +
+            "\"elements\": [" +
+                         "{" +
+                             "\"specialization\": {" +
+                                 "\"type\": \"View\"" +
+                             "}," +
+                             "\"owner\": \"OWNER_ID\"," +
+                             "\"name\": \"VIEW_NAME\"," +
+                             "\"documentation\": \"\"" +
+                         "}" +
+                     "]" +
+                 "}";
+    
+    protected static final String TEMPLATE_INSTANCE_SPEC = "{" +
+        "\"elements\":[" +
+                    "{" +
+                        "\"name\": \"View Documentation\"," +
+                        "\"specialization\":{" +
+                            "\"type\":\"InstanceSpecification\"," +
+                            "\"classifier\":[" +
+                                "\"" + paragraphClassifierId + "\"" +
+                            "]," +
+                            "\"instanceSpecificationSpecification\":{" +
+                                "\"string\":{\"type\": \"Paragraph\"," +
+                                           "\"sourceType\": \"reference\"," +
+                                           "\"source\":\"VIEW_ID\"," +
+                                           "\"sourceProperty\":\"documentation\"}," +
+                                "\"type\": \"LiteralString\"" +
+                            "}" +
+                        "}," +
+                    "\"owner\":\"test-site_no_project\"" +
+                    "}" +
+                "]" +
+            "}";
+    
+    protected static final String TEMPLATE_NEW_VIEW_WITH_INSTANCE_SPEC = "{" +
+        "\"elements\": [" +
+            "{" +
+                "\"sysmlid\": \"VIEW_ID\"," +
+                "\"specialization\":{" +
+                    "\"type\": \"View\"," +
+                    "\"allowedElements\": []," +
+                    "\"displayedElements\":[]," +
+                    "\"childrenViews\": []," +
+                    "\"contents\": {" +
+                        "\"operand\": [" +
+                            "{" +
+                                "\"instance\":\"SYSMLID_FROM_RESPONSE_JSON\"," +
+                                "\"type\":\"InstanceValue\"" +
+                            "}" +
+                        "]," +
+                        "\"type\":\"Expression\"" +
+                    "}" +
+                "}" +
+            "}" +
+        "]" +
+    "}";
+
+    protected static final String TEMPLATE_POST_PARENT_PRODUCT = "{" +
+        "\"elements\": [" +
+                     "{" +
+                         "\"sysmlid\": \"\"," +
+                         "\"specialization\":{" +
+                             "\"type\":\"\"," +
+                             "\"allowedElements\":[" +
+                                 "\"\"" +
+                             "]," +
+                             "\"displayedElements\":[" +
+                                 "\"\"" +
+                             "]," +
+                             "\"view2view\":[" +
+                                 "{" +
+                                     "\"id\":\"\"," +
+                                     "\"childrenViews\":[" +
+                                         "\"\"" +
+                                     "]" +
+                                 "}," +
+                                 "{" +
+                                     "\"id\":\"\"," +
+                                     "\"childrenViews\":[]" +
+                                 "}" +
+                             "]" +
+                         "}" +
+                     "}" +
+                 "]" +
+             "}";
+    
 }
