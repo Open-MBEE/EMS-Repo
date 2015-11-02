@@ -23,21 +23,25 @@
 
 8. Install Postgres DB on your localhost and use the
 src/main/java/gov/nasa/jpl/view_repo/db/mms.sql to initialize the database (as follows):
-  - Create mmsuser using the postgres createuser. Set password to test123 (or whatever you want).
-    If you change the password, please change DbContracts.java to use the same.
-  - From command line: 
-        
-        createuser mmsuser
+  - On Mac, can install postgres using homembrew
   
-  - Setting password of user from command line
+        http://www.moncefbelyamani.com/how-to-install-postgresql-on-a-mac-with-homebrew-and-lunchy/
+  
+  - Create mmsuser using the postgres createuser. Set password to test123 (or whatever you want).
+    If you change the password, please change DbContracts.java to use the same.      
         
-        psql -c "ALTER USER mmsuser PASSWORD 'test123';"
-          
+        createuser mmsuser -d -P
+            
   - Open a postgres terminal (depends on your OS, but usually Postgres shows up with this shortcut)
-    This should be done as root user.
-  - In the terminal, use the following to create and initialize the database
+    This should be done as root user. You may need to create a default DB to connect to
+    initially.
+    
+        createdb mydb
+    
+  - In the terminal, use the following to create and initialize the database (connect to mydb
+    if default wasn't set).
 
-       	   <path to pgsql> -f <path to mms.sql>
+       	   <path to psql> -U mmsuser -f <path to mms.sql> mydb
 
   - In a browser, or using curl on the command line:
 
