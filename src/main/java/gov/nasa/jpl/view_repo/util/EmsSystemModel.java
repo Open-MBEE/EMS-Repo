@@ -1342,7 +1342,11 @@ System.out.println("RRRRRRRRRRRRR");
     public Object getAlfrescoProperty( EmsScriptNode node, String acmPropertyName,
                                        boolean recursiveGetValueOfNodeRefs ) {
         Object result = null;
-        if ( Acm.JSON_NODEREFS.contains( acmPropertyName ) ) {
+        String jsonPropertyName = acmPropertyName;
+        if ( Acm.getACM2JSON().containsKey( acmPropertyName ) ) {
+            jsonPropertyName = Acm.getACM2JSON().get( acmPropertyName );
+        }
+        if ( Acm.JSON_NODEREFS.contains( jsonPropertyName ) ) {
             result = node.getNodeRefProperty(acmPropertyName, null, node.getWorkspace());
             if ( result instanceof Collection ) {
                 Collection<NodeRef> valueNodes = (Collection<NodeRef>)result;
@@ -1476,7 +1480,8 @@ System.out.println("RRRRRRRRRRRRR");
                 nodeType = Acm.getJSON2ACM().get( nodeType );
             }
             if ( Acm.VALUE_OF_TYPE.keySet().contains( nodeType ) ) {
-                Object value = getAlfrescoProperty( node, nodeType, true );
+                String valueKey = Acm.VALUE_OF_TYPE.get( nodeType );
+                Object value = getAlfrescoProperty( node, valueKey, true );
                 return value;
     		}
             if ( Acm.VALUESPEC_ASPECTS.contains( nodeType ) ) {
