@@ -6221,6 +6221,11 @@ public class EmsScriptNode extends ScriptNode implements
 	public ArrayList<NodeRef> getAffectedElements(boolean ignoreWorkspace, boolean onlyThisWorkspace, Date dateTime,
 			WorkspaceNode workspaceNode, boolean justFirst, boolean optimisticJustFirst, boolean exactMatch,
 			boolean includeDeleted) {
+
+	    // setting dateTime to null since the only time we want affected
+        // elements is when something has changed (null = latest time).
+	    dateTime = null;
+
 		ArrayList<NodeRef> refs = NodeUtil.findNodeRefsByType(this.getNodeRef().toString(),
 				"@sysml\\:elementValueOfElement:\"", ignoreWorkspace, workspaceNode, onlyThisWorkspace, dateTime,
 				justFirst, optimisticJustFirst, exactMatch, services, includeDeleted, null);
