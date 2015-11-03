@@ -475,5 +475,13 @@
         <property name="repositoryHelper" ref="repositoryHelper" />
         <property name="services" ref="ServiceRegistry" />
     </bean>
-        
+     
+    
+    <bean id="webscript.gov.nasa.jpl.mms.workspaces.history.element.get"
+    	class="gov.nasa.jpl.view_repo.webscripts.HistoryGet" parent="webscript" 
+
+    	singleton="false">
+    	<property name="repositoryHelper" ref="repositoryHelper"/>
+    	<property name="services" ref="ServiceRegistry"/>
+    </bean>   
 </beans>

@@ -64,6 +64,18 @@
         },
         "editable": true,
         "creator": "admin"
+    },
+    {
+        "modifier": "admin",
+        "qualifiedId": "/europa/123456/multRedefPackage",
+        "name": "multRedefPackage",
+        "qualifiedName": "/europa/JW_TEST/multRedefPackage",
+        "documentation": "package for testing multiplicity and redefines attributes of Property",
+        "owner": "123456",
+        "sysmlid": "multRedefPackage",
+        "specialization": {"type": "Package"},
+        "editable": true,
+        "creator": "admin"
     }
 ]}
 200
