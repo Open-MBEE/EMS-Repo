@@ -40,6 +40,7 @@ public class ModuleInfoGet extends DeclarativeWebScript {
         json.put( "modules", modulesJson );
         status.setCode( HttpServletResponse.SC_OK );
 
+        System.out.println("Modules JSON String within ModuleInfoGet " + json.toString());
         model.put("res", json.toString(2));
         return model;
     }

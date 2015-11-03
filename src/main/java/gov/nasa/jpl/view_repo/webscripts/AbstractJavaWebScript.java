@@ -1966,4 +1966,20 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
     
     }
     
+    private static JSONObject checkMMSversion( WebScriptRequest req){
+    	boolean matchingVersion = getBooleanArg(req,"mmsVersion",false);
+    	NodeUtil node = new NodeUtil();
+    	JSONObject mmsVersion = new JSONObject();
+    	String versionJson = "{"
+    			+ "elements:['mmsVersion':'','element':'']}";
+    	if(matchingVersion){
+    		
+//    		mmsVersion.append(key, value)
+    	}
+    	
+    	
+    	
+    	return mmsVersion;
+    }
+    
 }

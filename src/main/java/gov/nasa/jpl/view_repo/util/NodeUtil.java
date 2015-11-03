@@ -48,6 +48,7 @@ import org.alfresco.repo.jscript.ScriptVersion;
 import org.alfresco.repo.model.Repository;
 import org.alfresco.repo.node.db.DbNodeServiceImpl;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
+import org.alfresco.repo.webdav.ExceptionHandler;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.dictionary.AspectDefinition;
 import org.alfresco.service.cmr.dictionary.DictionaryService;
@@ -4088,9 +4089,8 @@ public class NodeUtil {
     /**
 	 * getModuleService
 	 * 	Retrieves the ModuleService of the ServiceRegistry passed in
-	 * @param services ServiceRegistry of that contains the desired ModuleService
-	 * @param moduleService
-	 * @return
+	 * @param services ServiceRegistry object that contains the desired ModuleService
+	 * @return ModuleService
 	 */
     public static ModuleService getModuleService(ServiceRegistry services)
     {
@@ -4098,23 +4098,25 @@ public class NodeUtil {
     	if(services == null){
     		services = getServices();
     	}
+    	// Takes the ServiceRegistry and calls the ModuleService super method getService(Creates an Alfresco QName using the namespace
+    	//	service and passes in the default URI 
     	ModuleService moduleService = (ModuleService) services.getService(QName.createQName(NamespaceService.ALFRESCO_URI,"ModuleService"));
     	return moduleService;
     }
     
     /**
      * getServiceModules
-     * Returns a list of Module Details from the Service Modules
+     * </br></br>
+     * Returns a JSONArray of Module Details from the Service Modules
      * @param service the service containing modules to be returned
-     * @return List
+     * @return JSONArray of ModuleDetails within the ModuleService object
      */
-    public static JSONArray getJsonServiceModules(ModuleService service)
+    public static JSONArray getServiceModulesJson(ModuleService service)
     {
 
     	JSONArray jsonArray = new JSONArray();
-    	List<ModuleDetails> moduleDetails;
-    	moduleDetails = service.getAllModules();
-    	for(ModuleDetails detail:moduleDetails)
+    	List<ModuleDetails> modules = service.getAllModules();
+    	for(ModuleDetails detail:modules)
     	{
     		jsonArray.put(detail);
     	}
@@ -4123,33 +4125,49 @@ public class NodeUtil {
     
     /**
      * moduleDetailsToJson
-     * 
+     * </br> </br>
      * Takes a module of type ModuleDetails and retrieves all off the module's members 
      * 	and puts them into a newly instantiated JSONObject.
+     * </br></br>
+     * JSONObject will have the details : title, version, aliases, class, dependencies, editions id and properties
      * @param module A single module of type ModuleDetails
-     * @return A new JSONObject which contains all the details of that module 
+     * @return JSONObject which contains all the details of that module 
      */
     public static JSONObject moduleDetailsToJson(ModuleDetails module)
     {
     	JSONObject jsonModule = new JSONObject();
-    	
-    	jsonModule.put("title", module.getTitle());
-    	jsonModule.put("version", module.getVersion());
-    	jsonModule.put("aliases", module.getAliases());
-		jsonModule.put("class", module.getClass());
-		jsonModule.put("dependencies", module.getDependencies());
-		jsonModule.put("editions", module.getEditions());
-		jsonModule.put("id", module.getId());
-		jsonModule.put("properties", module.getProperties());
-    	
+    	try{
+	    	jsonModule.put("title", module.getTitle());
+	    	jsonModule.put("version", module.getVersion());
+	    	jsonModule.put("aliases", module.getAliases());
+			jsonModule.put("class", module.getClass());
+			jsonModule.put("dependencies", module.getDependencies());
+			jsonModule.put("editions", module.getEditions());
+			jsonModule.put("id", module.getId());
+			jsonModule.put("properties", module.getProperties());
+    	}
+    	catch(Exception exception){
+    		exception.printStackTrace();
+    	}
     	return jsonModule;
     }
     
     
     
     /**
+     * moduleDetailsToJson
+     * </br>--------------</br>
      * Takes a module of type ModuleDetails and retrieves the module members specified in the details array. 
-     * 	This will create a new JSONObject and iterate through the details array for each specified member.
+     * 	This will create a new JSONObject and iterate through the details array for each specified member.</br></br>
+     *  Accepted keys (Details) are:</br> </br>
+     * 	1. title </br> 
+     *  2. version </br>
+     *  3. aliases </br>
+     *  4. class </br>
+     *  5. dependencies</br> 
+     *  6. editions </br>
+     *  7. id </br>
+     *  8. properties.</br>
      * @param module A single module of type ModuleDetails
      * @param details 
      * @return JSONObject containing the data members specified by the string arguments passed in the String[] details array.
@@ -4158,8 +4176,7 @@ public class NodeUtil {
     {
     	JSONObject jsonModule = new JSONObject();
     	int index;
-    	
-    	
+
     	for(index = 0; index < details.length; index++)
     	{
     		switch(details[index].toLowerCase())
@@ -4185,33 +4202,135 @@ public class NodeUtil {
     	return jsonModule;
     }
     
-    public static JSONObject getModuleVersion(ModuleDetails module)
+    
+    /**
+     * getModuleVerionsJson
+     * </br>--------------</br>
+     * Overloaded method to return a JSONObject of the module version by passing the 
+     * @param module ModuleDetails 
+     * @return JSONObject
+     */
+    public static JSONObject getModuleVersionJson(ModuleDetails module)
     {
-    	return getModuleDetail(module, "version");
+    	return getSingleModuleDetailJson(module, "version");
     }
-   
-    public static JSONObject getModuleDetail(ModuleDetails module, String detail)
+
+    /**
+     * getSingleModuleDetailJson
+     * </br>------------------------</br>
+     * Accepts a ModuleDetails object and a key of string type, and will return the a 
+     * 	JSON object of a specific detail within the ModuleDetails. Calls on the 
+     * 	ModuleDetails . get*****() methods to retrieve ModuleDetails and the JSONObject's 
+     * 	put("key","value") method.
+     * 	</br>Accepted keys (Details) are:</br> </br>
+     * 	1. title </br> 
+     *  2. version </br>
+     *  3. aliases </br>
+     *  4. class </br>
+     *  5. dependencies</br> 
+     *  6. editions </br>
+     *  7. id </br>
+     *  8. properties.</br>
+     * @param module ModuleDetails 
+     * @param key String
+     * @return JSONObject
+     */
+    public static JSONObject getSingleModuleDetailJson(ModuleDetails module, String key)
     {
     	JSONObject jsonDetail = new JSONObject();
-    	switch(detail.toLowerCase())
-		{
-			case "title":jsonDetail.put("title", module.getTitle());
-				break;
-			case "versions":jsonDetail.put("version", module.getVersion());
-				break;
-			case "aliases":jsonDetail.put("aliases", module.getAliases());
-				break;
-			case "class":jsonDetail.put("class", module.getClass());
-				break;
-			case "dependencies":jsonDetail.put("dependencies", module.getDependencies());
-				break;
-			case "editions":jsonDetail.put("editions", module.getEditions());
-				break;
-			case "id":jsonDetail.put("id", module.getId());
-				break;
-			case "properties":jsonDetail.put("properties", module.getProperties());
-				break;
-		}		
+    	if(module == null){
+    		jsonDetail.put("title", "");
+    		jsonDetail.put("version", "");
+    		jsonDetail.put("aliases", "");
+    		jsonDetail.put("class", "");
+    		jsonDetail.put("dependencies", "");
+    		jsonDetail.put("editions", "");
+    		jsonDetail.put("id", "");
+    		jsonDetail.put("properties", "");
+    	}else{
+	    	switch(key.toLowerCase())
+			{
+				case "title":jsonDetail.put("title", module.getTitle());
+					break;
+				case "versions":jsonDetail.put("version", module.getVersion());
+					break;
+				case "aliases":jsonDetail.put("aliases", module.getAliases());
+					break;
+				case "class":jsonDetail.put("class", module.getClass());
+					break;
+				case "dependencies":jsonDetail.put("dependencies", module.getDependencies());
+					break;
+				case "editions":jsonDetail.put("editions", module.getEditions());
+					break;
+				case "id":jsonDetail.put("id", module.getId());
+					break;
+				case "properties":jsonDetail.put("properties", module.getProperties());
+					break;
+			}
+    	}
     	return jsonDetail;
+    }
+    
+    
+    /**
+     * Compares 2 modules using the key value passed in
+     * @param module1
+     * @param module2
+     * @param key
+     * @return boolean value whether or not the modules have equal values in the field they are comparing against
+     */
+    public static boolean compareModuleDetails(ModuleDetails module1, ModuleDetails module2, String key){
+    	boolean haveEqualDetails = false;
+
+    	//TODO:Need to write a check if either objects have the key field requested.
+    	JSONObject obj1 = getSingleModuleDetailJson(module1, key);
+    	JSONObject obj2 = getSingleModuleDetailJson(module2, key);
+    	if(obj1.get(key) == null || obj2.get(key) == null){
+    		System.out.println("The key + " + key + " does not exist in one of the modules!");
+    		System.out.println("Object 1 value: " + obj1.get(key).toString() );
+    		System.out.println("Object 2 value: " + obj2.get(key).toString() );
+    		return false;
+    	}
+    	//TODO: If correct, they should both be a JSONObject with only 1 key and value field, to which they
+    	//	should compare true or false.
+    	if(obj1 != null && obj2 != null && obj1.equals(obj2) ){
+    		System.out.println("Module1 is " + obj1.toString());
+    		System.out.println("");
+    		System.out.println("Module2 is " + obj2.toString());
+    		haveEqualDetails = true;
+    	}
+    	
+    	return haveEqualDetails;
+    }
+    
+    /**
+     * compareModuleVersions
+     * </br></br>
+     * This will take 2 modules as arguments and compare their versions to each other returning a boolean value
+     * 	of this comparison.
+     * </br>
+     * @param module1
+     * @param module2
+     * @return
+     */
+    public static boolean compareModuleVersions(ModuleDetails module1, ModuleDetails module2){
+    	if(module1 == null || module2 == null){
+    		return false;
+    	}
+    	return compareModuleDetails(module1, module2, "version");
+    }
+    
+    /**
+     * getMMSversion
+     * </br></br>
+     * Gets the version number of a module, returns a JSONObject which calls on getString with 'version' as
+     * 	an argument. This will return a String representing the version of the mms.
+     * </br>
+     * 
+     * @param module
+     * @return Version number of the MMS as type String 
+     */
+    public static String getMMSversion(ModuleDetails module){
+    	return getModuleVersionJson(module).getString("version");
     }
 }
