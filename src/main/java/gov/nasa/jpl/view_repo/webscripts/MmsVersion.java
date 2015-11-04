@@ -25,42 +25,57 @@ public class MmsVersion extends AbstractJavaWebScript {
 
 	private static Logger logger = Logger.getLogger(MmsVersion.class);
 	protected boolean prettyPrint = true;
+    public MmsVersion() {
+        super();
+    }
 
+    public MmsVersion(Repository repositoryHelper, ServiceRegistry registry) {
+        super(repositoryHelper, registry);
+    }
+
+    /**
+     * Webscript entry point
+     */
+    @Override
+    protected Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
+    	MmsVersion instance = new MmsVersion(repository, getServices());
+        return instance.executeImplImpl(req,  status, cache, runWithoutTransactions);
+    }
 	@Override
 	protected Map<String, Object> executeImplImpl(WebScriptRequest req, Status status, Cache cache) {
 		// TODO Auto-generated method stub
 		Map<String, Object> model = new HashMap<String, Object>();
-		if (logger.isDebugEnabled()) {
-			String user = AuthenticationUtil.getFullyAuthenticatedUser();
-			logger.debug(user + " " + req.getURL());
-		}
-		Timer timer = new Timer();
-		printHeader(req);
-		JSONObject mmsVersion = null;
+//		if (logger.isDebugEnabled()) {
+//			String user = AuthenticationUtil.getFullyAuthenticatedUser();
+//			logger.debug(user + " " + req.getURL());
+//		}
+//		Timer timer = new Timer();
+//		printHeader(req);
+		JSONObject mmsVersion = new JSONObject();
 
 		
 		System.out.println("Checking MMS Versions");
-		try {
+//		try {
 			mmsVersion = getMMSversion();
 			if (prettyPrint) {
 				model.put("res", NodeUtil.jsonToString(mmsVersion, 4));
 			} else {
 				model.put("res", NodeUtil.jsonToString(mmsVersion));
 			}
-		} catch (JSONException e) {
-			log(Level.ERROR, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Could not create JSONObject");
-			model.put("res", createResponseJson());
-			e.printStackTrace();
-		}
+//		} catch (JSONException e) {
+//			log(Level.ERROR, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Could not create JSONObject");
+//			model.put("res", createResponseJson());
+//			e.printStackTrace();
+//		}
 
-		status.setCode(responseStatus.getCode());
+//		status.setCode(responseStatus.getCode());
 
-		printFooter();
+//		printFooter();
 
-		if (logger.isInfoEnabled()) {
-			log(Level.INFO, "ModelGet: %s", timer);
+//		if (logger.isInfoEnabled()) {
+//			log(Level.INFO, "MmsVersion: %s", timer);
 			// logger.info( "ModelGet: " + timer );
-		}
+//		}
 
 		return model;
 	}

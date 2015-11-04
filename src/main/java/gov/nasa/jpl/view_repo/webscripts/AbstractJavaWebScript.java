@@ -1984,6 +1984,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
 		// Debugging purposes
 		if (matchVersions) {
 			// Calls NodeUtil's getMMSversion
+			jsonVersion = new JSONObject();
 			jsonVersion = getMMSversion();
 		}
 		return jsonVersion;
