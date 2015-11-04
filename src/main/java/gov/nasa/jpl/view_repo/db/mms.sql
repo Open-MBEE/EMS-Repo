@@ -1,3 +1,4 @@
+
 -- TO BE DONE BEFORE RUNNING THIS SCRIPT
 -- createuser first
 -- GRANT ALL PRIVILEGES ON DATABASE mms to mmsuser;
@@ -44,7 +45,8 @@ create table edges
 (
   parent integer references nodes(id) not null,
   child integer references nodes(id) not null,
-  edgeType integer references edgeTypes(id) not null
+  edgeType integer references edgeTypes(id) not null,
+  constraint unique_edges unique(parent, child, edgeType)
 );
 
 -- given two nodeRefId, insert an edge between the two
@@ -52,7 +54,7 @@ create or replace function insert_edge(text, text, text, integer)
   returns void as $$
   begin
     execute 'insert into ' || (format('edges%s', $3)) || ' values((select id from ' || format('nodes%s',$3) || ' 
-      where sysmlId = || ' || $1 || '), (select id from ' || format('nodes%s', $3) 	  || ' where sysmlId = ' || $2 || '),  ' || $4 || ')';
+      where sysmlId = || ' || $1 || '), (select id from ' || format('nodes%s', $3)   || ' where sysmlId = ' || $2 || '),  ' || $4 || ')';
   end;
 $$ language plpgsql;
 
@@ -62,32 +64,31 @@ create or replace function get_children(integer, integer, text, integer)
   begin
     return query
     execute '
-    with recursive children(depth, nid) as (
-	select 0 as depth, node.id from ' || format('nodes%s', $3) || ' node where node.id = ' || $1 || '
-   	union
-        select 1 as depth, edge.child from ' || format('edges%s', $3) || ' edge where edge.parent = ' || $1 || ' and edge.edgeType = ' || $2 || '
-        union 
-	select (c.depth + 1) as depth, edge.child from ' || format('edges%s', $3) || ' edge, children c where edge.parent = nid and edge.edgeType = ' || $2 || '
+    with recursive children(depth, nid, path, cycle) as (
+      select 0 as depth, node.id from ' || format('nodes%s', $3) || ' node where node.id = ' || $1 || '
+      union
+      select (c.depth + 1) as depth, edge.child, path || cast(edge.child as bigint), edge.child = ANY(path)
+        from ' || format('edges%s', $3) || ' edge, children c where edge.parent = nid and 
+        edge.edgeType = ' || $2 || ' and not cycle
       )
       select distinct nid from children where depth <= ' || $4 || ';';
   end;
 $$ language plpgsql;
 
-
--- recursively get all children including oneself
-create or replace function get_parents(integer, integer, text, integer)
-  returns table(id bigint) as $$
+create or replace function get_parents(integer, integer, text)
+  returns table(id bigint, height integer) as $$
   begin
     return query
     execute '
-    with recursive parents(depth, nid) as (
-	select 0 as depth, node.id from ' || format('nodes%s', $3) || ' node where node.id = ' || $1 || '
-   	union
-        select 1 as depth, edge.parent from ' || format('edges%s', $3) || ' edge where edge.child = ' || $1 || ' and edge.edgeType = ' || $2 || '
-        union 
-	select (c.depth + 1) as depth, edge.parent from ' || format('edges%s', $3) || ' edge, parents c where edge.child = nid and edge.edgeType = ' || $2 || '
+    with recursive parents(height, nid, path, cycle) as (
+    select 0, node.id, ARRAY[node.id], false from ' || format('nodes%s', $3) || ' node where node.id = ' || $1 || '
+    union
+      select (c.height + 1), edge.parent, path || cast(edge.parent as bigint), 
+        edge.parent = ANY(path) from ' || format('edges%s', $3) || '
+        edge, parents c where edge.child = nid and edge.edgeType = ' || $2 || '
+        and not cycle 
       )
-      select distinct nid from parents where depth <= ' || $4 || ';';
+      select nid,height from parents order by height;';
   end;
 $$ language plpgsql;
 
@@ -112,32 +113,6 @@ create or replace function get_paths_to_node(integer, integer, text)
   end;
 $$ language plpgsql;
   
-
--- get all parents of a node
-/*
-  -- OLD METHOD USING QUADRATIC ALGORITHM
-  create or replace function get_parents(integer, integer, text)
-  returns table (id integer) as
-  $$
-  begin
-    return query
-    execute '
-    with recursive node_graph as (
-      (select edge.parent as path_start, edge.child as path_end,
-        array[edge.parent, edge.child] as path 
-        from ' || format('edges%s', $3) || ' edge)
-      union all
-      select ng.path_start, nr.child as path_end,
-             ng.path || nr.child as path
-      from node_graph ng
-      join ' || format('edges%s', $3) || ' nr ON ng.path_end = nr.parent
-    ) 
-    select distinct pstart as ps from get_paths_to_node(' || $1 || ',' || $2 || ',''' || $3 || ''')';
-  end;
-$$
-language plpgsql;
-*/
-
 -- get all root parents of a node
 create aggregate array_agg_mult(anyarray) (
     SFUNC = array_cat,
@@ -155,27 +130,6 @@ create or replace function array_sort_unique (anyarray)
     );
   $body$
 language sql;
-
-create or replace function get_root_parents(integer, integer, text)
-  returns table (id integer) as
-  $$
-  begin
-    return query
-    execute '
-    with recursive node_graph as (    
-    select edge.parent as path_start, edge.child as path_end,
-      array[edge.parent, edge.child] as path 
-    from ' || format('edges%s', $3) || ' edge where edgeType = ' || $2 || ' 
-    union
-    select ng.path_start, nr.child as path_end,
-           ng.path || nr.child as path
-    from node_graph ng
-    join ' || format('edges%s', $3) || ' nr ON ng.path_end = nr.parent where nr.edgeType = ' || $2 || ' 
-    )
-    select distinct path_start from node_graph where path_end = ' || $1 || ' and path_start not in (select path_end from node_graph)';
-  end;
-$$
-language plpgsql;
 
 insert into nodeTypes(name) values ('regular');
 insert into nodeTypes(name) values ('document');
@@ -233,10 +187,5 @@ insert into edges values(2, 6, (select edgeTypes.id from edgeTypes where name = 
 insert into edges values(7, 2, (select edgeTypes.id from edgeTypes where name = 'document'));
 insert into edges values(6, 4, (select edgeTypes.id from edgeTypes where name = 'document'));
 
-
-select * from get_children(1, 1, '', 1);
-select * from get_children(1, 1, '', 2);
-select * from get_children(1, 1, '', 3);
-select * from get_children(1, 1, '', 4);
 
 */
