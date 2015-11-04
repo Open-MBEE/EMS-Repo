@@ -3124,7 +3124,7 @@ public class EmsScriptNode extends ScriptNode implements
             try {
                 pgh.connect();
                 // Need to get parents related to root parents
-                List< String > immediateParentIds =
+                Set< String > immediateParentIds =
                         pgh.getParents( this.getSysmlId(),
                                         DbEdgeTypes.DOCUMENT, 1 );
                 Map<String, Set<String>> root2immediate = new HashMap<String, Set<String>>();
@@ -3134,7 +3134,7 @@ public class EmsScriptNode extends ScriptNode implements
                 // only put the immediateParents into their root documents
                 // TODO: does getRootParents return itself if it is the root?
                 for ( String immediateParentId: immediateParentIds) {
-                    List< String > rootParentIds = pgh.getRootParents( immediateParentId, DbEdgeTypes.DOCUMENT );
+                    Set< String > rootParentIds = pgh.getRootParents( immediateParentId, DbEdgeTypes.DOCUMENT );
                     for ( String rootParentId: rootParentIds ) {
                         if (!root2immediate.containsKey( rootParentId )) {
                             root2immediate.put( rootParentId, new HashSet<String>() );

@@ -8,8 +8,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
 
@@ -231,22 +233,44 @@ public class PostgresHelper {
         }
 
     }
-    
-    public List< String > getRootParents( String sysmlId,
-                                                     DbEdgeTypes et ) {
-        List< String > result = new ArrayList< String >();
+
+    public Set< String > getRootParents( String sysmlId, DbEdgeTypes et ) {
+        Set< String > result = new HashSet< String >();
         try {
             Node n = getNodeFromSysmlId( sysmlId );
 
             if ( n == null ) return result;
 
             String query =
-                    "select sysmlid from nodes%s where id in (select * from get_root_parents(%s, %d, '%s'))";
+                    "select * from get_root_parents(%s, %d, '%s')";
             ResultSet rs =
-                    execQuery( String.format(query, workspaceName, n.getId(), et.getValue(), workspaceName) ); 
+                    execQuery( String.format( query, n.getId(),
+                                              et.getValue(), workspaceName ) );
 
             while ( rs.next() ) {
-                result.add( rs.getString( 1 ));
+                result.add( rs.getString( 1 ) );
+            }
+        } catch ( Exception e ) {
+            e.printStackTrace();
+        }
+        return result;
+    }
+
+    
+    public Set<String> getImmediateParents(String sysmlId, DbEdgeTypes et, int height){
+        Set<String> result = new HashSet<String>();
+        try {
+            Node n = getNodeFromSysmlId( sysmlId );
+
+            if ( n == null ) return result;
+
+            String query = "select * from get_immediate_parents(%s, %d, '%s')";
+            ResultSet rs =
+                    execQuery( String.format( query, workspaceName, n.getId(),
+                                              et.getValue(), workspaceName ) );
+
+            while ( rs.next() ) {
+                result.add(rs.getString( 1 ));
             }
         } catch ( Exception e ) {
             e.printStackTrace();
@@ -254,21 +278,44 @@ public class PostgresHelper {
         return result;
     }
     
-    public List< String > getParents( String sysmlId,
-                                                     DbEdgeTypes et, int depth ) {
-        List< String > result = new ArrayList< String >();
+    public Set<String> getRootParents(String sysmlId, DbEdgeTypes et, int height){
+        Set<String> result = new HashSet<String>();
         try {
             Node n = getNodeFromSysmlId( sysmlId );
 
             if ( n == null ) return result;
 
-            String query = 
-                    "select sysmlid from nodes%s where id in (select * from get_parents(%s, %d, '%s', %d))";
+            String query = "select * from get_root_parents(%s, %d, '%s')";
             ResultSet rs =
-                    execQuery( String.format(query, workspaceName, n.getId(), et.getValue(), workspaceName, depth));
+                    execQuery( String.format( query, workspaceName, n.getId(),
+                                              et.getValue(), workspaceName ) );
 
             while ( rs.next() ) {
-                result.add( rs.getString( 1 ) );
+                result.add(rs.getString( 1 ));
+            }
+        } catch ( Exception e ) {
+            e.printStackTrace();
+        }
+        return result;
+    }
+    
+    public Set< String >
+            getParents( String sysmlId, DbEdgeTypes et, int height ) {
+        Set< String > result = new HashSet< String >();
+        try {
+            Node n = getNodeFromSysmlId( sysmlId );
+
+            if ( n == null ) return result;
+
+            String query =
+                    "select sysmlid from nodes%s where id in "
+                            + "(select id from get_parents(%s, %d, '%s'))";
+            ResultSet rs =
+                    execQuery( String.format( query, workspaceName, n.getId(),
+                                              et.getValue(), workspaceName ) );
+
+            while ( rs.next() ) {
+                result.add(rs.getString( 1 ));
             }
         } catch ( Exception e ) {
             e.printStackTrace();
@@ -309,6 +356,7 @@ public class PostgresHelper {
                 new ArrayList< Pair< String, String >>();
         try {
             Node n = getNodeFromSysmlId( sysmlId );
+
             if ( n == null ) return result;
 
             ResultSet rs =
@@ -436,7 +484,7 @@ public class PostgresHelper {
         String query =
                 "select noderefid from nodes" + workspace
                         + " where noderefid in (";
-        for(int i = 0; i < noderefs.size(); i++) {
+        for ( int i = 0; i < noderefs.size(); i++ ) {
             noderefs.set( i, "'" + noderefs.get( i ) + "'" );
         }
         query += StringUtils.join( noderefs, "," );

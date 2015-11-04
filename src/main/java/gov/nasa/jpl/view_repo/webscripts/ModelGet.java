@@ -315,7 +315,7 @@ public class ModelGet extends AbstractJavaWebScript {
 
 			boolean checkReadPermission = true; // TODO -- REVIEW -- Shouldn't
 												// this be false?
-			handleElements(workspace, dateTime, includeQualified, evaluate,
+			handleElements(workspace, dateTime, includeQualified, false, evaluate,
 					top, checkReadPermission);
 		} catch (JSONException e) {
 			e.printStackTrace();
@@ -579,7 +579,7 @@ public class ModelGet extends AbstractJavaWebScript {
 	 * @throws JSONException
 	 */
 	protected void handleElements(WorkspaceNode ws, Date dateTime,
-			boolean includeQualified, boolean evaluate, JSONObject top,
+			boolean includeQualified, boolean includeIsDocument, boolean evaluate, JSONObject top,
 			boolean checkPermission) throws JSONException {
 		final Map<EmsScriptNode, JSONObject> elementsJsonMap = new LinkedHashMap<EmsScriptNode, JSONObject>();
 		for (String id : elementsFound.keySet()) {

@@ -65,9 +65,10 @@ create or replace function get_children(integer, integer, text, integer)
     return query
     execute '
     with recursive children(depth, nid, path, cycle) as (
-      select 0 as depth, node.id from ' || format('nodes%s', $3) || ' node where node.id = ' || $1 || '
+      select 0 as depth, node.id, ARRAY[node.id], false from ' || format('nodes%s', $3) || ' 
+        node where node.id = ' || $1 || '
       union
-      select (c.depth + 1) as depth, edge.child, path || cast(edge.child as bigint), edge.child = ANY(path)
+      select (c.depth + 1) as depth, edge.child as nid, path || cast(edge.child as bigint) as path, edge.child = ANY(path) as cycle
         from ' || format('edges%s', $3) || ' edge, children c where edge.parent = nid and 
         edge.edgeType = ' || $2 || ' and not cycle
       )
@@ -76,7 +77,7 @@ create or replace function get_children(integer, integer, text, integer)
 $$ language plpgsql;
 
 create or replace function get_parents(integer, integer, text)
-  returns table(id bigint, height integer) as $$
+  returns table(id bigint, height integer, root boolean) as $$
   begin
     return query
     execute '
@@ -88,7 +89,30 @@ create or replace function get_parents(integer, integer, text)
         edge, parents c where edge.child = nid and edge.edgeType = ' || $2 || '
         and not cycle 
       )
-      select nid,height from parents order by height;';
+      select nid,height,(not exists (select true from edges where child = nid and edgetype = ' || $2 || ')) 
+        from parents order by height desc;';
+  end;
+$$ language plpgsql;
+
+create or replace function get_immediate_parents(integer, integer, text)
+  returns table(sysmlid text) as $$
+  begin
+    return query
+    execute '
+    select sysmlid from nodes' || $3 || ' where id in 
+      (select id from get_parents(' || $1 || ',' || $2 || ',''' || format('%s',$3) ||
+      ''') where height = 1);';
+  end;
+$$ language plpgsql;
+
+create or replace function get_root_parents(integer, integer, text)
+  returns table(sysmlid text) as $$
+  begin
+    return query
+    execute '
+    select sysmlid from nodes' || $3 || ' where id in 
+      (select id from get_parents(' || $1 || ',' || $2 || ',''' || format('%s',$3) || 
+      ''') where root = true);';
   end;
 $$ language plpgsql;
 
@@ -164,6 +188,7 @@ END LOOP;
 END
 $do$;
 
+
 insert into nodes(nodeRefId, versionedRefId, nodeType, sysmlId) values('1', 1, (select nodeTypes.id from nodeTypes where name = 'regular'), '1');
 insert into nodes(nodeRefId, versionedRefId, nodeType, sysmlId) values(2, 2, (select nodeTypes.id from nodeTypes where name = 'regular'), '2');
 insert into nodes(nodeRefId, versionedRefId, nodeType, sysmlId) values(3, 3, (select nodeTypes.id from nodeTypes where name = 'regular'), '3');
@@ -186,6 +211,4 @@ insert into edges values(1, 2, (select edgeTypes.id from edgeTypes where name = 
 insert into edges values(2, 6, (select edgeTypes.id from edgeTypes where name = 'document'));
 insert into edges values(7, 2, (select edgeTypes.id from edgeTypes where name = 'document'));
 insert into edges values(6, 4, (select edgeTypes.id from edgeTypes where name = 'document'));
-
-
 */
