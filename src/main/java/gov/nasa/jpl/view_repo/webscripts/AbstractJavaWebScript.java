@@ -260,7 +260,8 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
     protected Map< String, Object > executeImplImpl( final WebScriptRequest req,
                                                      final Status status, final Cache cache,
                                                      boolean withoutTransactions ) {
-        clearCaches( true );
+    	getMMSversion(req);
+    	clearCaches( true );
         clearCaches(); // calling twice for those redefine clearCaches() to
                        // always call clearCaches( false )
         final Map< String, Object > model = new HashMap<String, Object>();
@@ -269,10 +270,12 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
             public void run() throws Exception {
                 Map< String, Object > m = executeImplImpl( req, status, cache );
                 if ( m != null ) {
+                	
                     model.putAll( m );
                 }
             }
         };
+        
 //            UserTransaction trx;
 //            trx = services.getTransactionService().getNonPropagatingUserTransaction();
 //            try {
@@ -1966,20 +1969,39 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
     
     }
     
-    private static JSONObject checkMMSversion( WebScriptRequest req){
-    	boolean matchingVersion = getBooleanArg(req,"mmsVersion",false);
-    	NodeUtil node = new NodeUtil();
-    	JSONObject mmsVersion = new JSONObject();
-    	String versionJson = "{"
-    			+ "elements:['mmsVersion':'','element':'']}";
-    	if(matchingVersion){
-    		
-//    		mmsVersion.append(key, value)
-    	}
-    	
-    	
-    	
-    	return mmsVersion;
-    }
-    
+    /**
+     * getMMSversion
+     * 
+     * @param req
+     * @return
+     */
+	public static JSONObject getMMSversion(WebScriptRequest req) {
+		// Calls getBooleanArg to check if they have request for mms version
+		// TODO: Possibly remove this and implement as an aspect?
+		boolean matchVersions = getBooleanArg(req, "mmsVersion", false);
+		JSONObject jsonVersion = null;
+		// System.out.println("Check versions?" + matchVersions);
+		// Debugging purposes
+		if (matchVersions) {
+			// Calls NodeUtil's getMMSversion
+			jsonVersion = getMMSversion();
+		}
+		return jsonVersion;
+	}
+	
+	/**
+	 * getMMSversion<br>
+	 * Returns a JSONObject representing the mms version being used. It's format will be
+	 * <pre> {
+	 *     "mmsVersion":"2.2"
+	 * }
+	 * </pre>
+	 * @return JSONObject mmsVersion
+	 */
+	public static JSONObject getMMSversion(){
+		JSONObject version = new JSONObject();
+		version.put("mmsVersion", NodeUtil.getMMSversion());
+		return version;
+	}
+
 }
