@@ -36,7 +36,8 @@ public class AllFlagsGet extends FlagSet {
                            "diffDefaultIsMerge", 
                            "viewPointExpressions",
                            "diffDefaultIsMerge",
-                           "cacheSnapshots"};
+                           "cacheSnapshots",
+                           "checkMmsVersions"};
     
     public String[] getAllFlags() {
         return flags;
@@ -122,6 +123,8 @@ public class AllFlagsGet extends FlagSet {
         	    MmsDiffGet.diffDefaultIsMerge = val;
         } else if (path.equalsIgnoreCase("cacheSnapshots")) {
             DeclarativeJavaWebScript.cacheSnapshotsFlag = val;
+        } else if (path.equalsIgnoreCase("checkMmsVersions")){
+        	AbstractJavaWebScript.checkMmsVersions = val;
         }
         return true;
     }
@@ -185,6 +188,8 @@ public class AllFlagsGet extends FlagSet {
         	return CommitUtil.cleanJson;
         } else if (path.equalsIgnoreCase("diffDefaultIsMerge")){
         	return MmsDiffGet.diffDefaultIsMerge;
+        } else if (path.equalsIgnoreCase("checkMmsVersions")){
+        	return AbstractJavaWebScript.checkMmsVersions;
         }
         return false;
     }
@@ -260,6 +265,8 @@ public class AllFlagsGet extends FlagSet {
         	return false;
         } else if (path.equalsIgnoreCase("diffDefaultIsMerge")){
         	return false;
+        } else if (path.equalsIgnoreCase("checkMmsVersions")){
+        	return false;
         }
         return false;
     };
@@ -328,6 +335,8 @@ public class AllFlagsGet extends FlagSet {
             return "diffDefaultIsMerge";
         } else if (path.equalsIgnoreCase("cacheSnapshots")) {
             return "cacheSnapshotsFlag";
+        } else if (path.equalsIgnoreCase("checkMmsVersions")){
+        	return "checkMmsVersions";
         }
         return null;
     }

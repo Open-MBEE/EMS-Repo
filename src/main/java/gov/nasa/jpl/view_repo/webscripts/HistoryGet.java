@@ -59,7 +59,6 @@ public class HistoryGet extends ModelGet {
 	 */
 	public HistoryGet(Repository repositoryHelper, ServiceRegistry registry) {
 		super(repositoryHelper, registry);
-		System.out.println("HistoryGet with Args...");
 	}
 
 	/**

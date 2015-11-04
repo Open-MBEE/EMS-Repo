@@ -120,7 +120,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
 	}*/
 
     public static final int MAX_PRINT = 200;
-
+    public static boolean checkMmsVersions = false;
     public static boolean defaultRunWithoutTransactions = false;
 
     // injected members
@@ -260,18 +260,28 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
     protected Map< String, Object > executeImplImpl( final WebScriptRequest req,
                                                      final Status status, final Cache cache,
                                                      boolean withoutTransactions ) {
-    	getMMSversion(req);
-    	clearCaches( true );
+    	
+    	final Map< String, Object > model = new HashMap<String, Object>();
+    	if (checkMmsVersions) {
+    		if(compareMmsVersions(req, getResponse(), status));
+		    {
+		    	model.put("res", createResponseJson());
+		    	return model;
+		    }
+		    
+		} 
+
+		clearCaches( true );
         clearCaches(); // calling twice for those redefine clearCaches() to
                        // always call clearCaches( false )
-        final Map< String, Object > model = new HashMap<String, Object>();
+        
         new EmsTransaction( getServices(), getResponse(), getResponseStatus(), withoutTransactions ) {
             @Override
             public void run() throws Exception {
                 Map< String, Object > m = executeImplImpl( req, status, cache );
                 if ( m != null ) {
-                	
                     model.putAll( m );
+            
                 }
             }
         };
@@ -288,12 +298,15 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         //Map<String, Object> model = new HashMap<String, Object>();
         if ( !model.containsKey( "res" ) && response != null && response.toString().length() > 0 ) {
             model.put( "res", response.toString() );
+            
         }
         // need to check if the transaction resulted in rollback, if so change the status code
         // TODO: figure out how to get the response message in (response is always empty)
         if (getResponseStatus().getCode() != HttpServletResponse.SC_ACCEPTED) {
             status.setCode( getResponseStatus().getCode() );
+            
         }
+		
         return model;
     }
 
@@ -1970,24 +1983,85 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
     }
     
     /**
-     * getMMSversion
+     * checkMMSversion
      * 
      * @param req
+     * @param response TODO
+     * @param status TODO
      * @return
      */
-	public static JSONObject getMMSversion(WebScriptRequest req) {
+	public boolean compareMmsVersions(WebScriptRequest req, StringBuffer response, Status status) {
 		// Calls getBooleanArg to check if they have request for mms version
 		// TODO: Possibly remove this and implement as an aspect?
-		boolean matchVersions = getBooleanArg(req, "mmsVersion", false);
+		boolean incorrectVersion = true;
+		char logCase = '0';
 		JSONObject jsonVersion = null;
-		// System.out.println("Check versions?" + matchVersions);
-		// Debugging purposes
-		if (matchVersions) {
-			// Calls NodeUtil's getMMSversion
-			jsonVersion = new JSONObject();
-			jsonVersion = getMMSversion();
+		JSONObject jsonRequest = null;
+		String mmsVersion = null;
+		// Checks if the argument is mmsVersion and returns the value specified by the request
+		//	if there is no request it will return 'none'
+		String paramVal = getStringArg(req, "mmsVersion", "none");
+		
+		// Check if request is a json and not a passed in argument
+		// TODO: Make method or find if jsonRequest has been made so we can avoid bad stuff make a member to store the request content
+		//	make global to allow others to access if needed.
+		if(paramVal.equals("none")){
+			try{
+				jsonRequest = (JSONObject)req.parseContent();
+			}
+			catch(Exception e)
+			{
+				e.printStackTrace();
+				log(Level.ERROR, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Could not retrieve JSON" );
+				return true;
+			}
+			if(jsonRequest != null){
+				paramVal = jsonRequest.optString("mmsVersion");
+//				if(paramVal == null){
+//					paramVal = "none";
+//				}
+			}
 		}
-		return jsonVersion;
+		System.out.println("HJKFDHJKDFSHKJLSDFHsDHKLJHFSD");
+		if(paramVal != null && !paramVal.equals("none") && paramVal.length() > 0){
+			
+			// Calls NodeUtil's getMMSversion
+			jsonVersion = getMMSversion();
+			mmsVersion = jsonVersion.get("mmsVersion").toString();
+			
+			log(Level.INFO, HttpServletResponse.SC_OK, "Comparing Versions...." );
+			if(mmsVersion.equals(paramVal))
+			{
+				// Compared versions matches
+				logCase = '1';
+				incorrectVersion = false;
+			}
+			else{
+				// Versions do not match
+				System.out.println("Param Val" + paramVal.length());
+				logCase = '2';
+			}
+		}
+		else if(Utils.isNullOrEmpty(paramVal) || paramVal.equals("none")){
+			// Missing MMS Version parameter
+			logCase = '3';
+		}
+		else{
+			// Wrong MMS Version or Invalid input
+			logCase = '4';
+		}
+		switch(logCase)
+		{
+			case'1':log(Level.INFO, HttpServletResponse.SC_OK, "Correct Versions" );
+				break;
+			case'2':log(Level.WARN, HttpServletResponse.SC_CONFLICT, "Versions do not match! Expected Version " + mmsVersion + ". Instead received " + paramVal);
+				break;
+			case'3':log(Level.ERROR, HttpServletResponse.SC_CONFLICT,"Missing MMS Version. Expected mmsVersion=" + mmsVersion );
+				break;
+			case'4':log(Level.ERROR, HttpServletResponse.SC_CONFLICT,"Wrong MMS Version or invalid input. Expected mmsVersion=" + mmsVersion + ". Instead received " + paramVal);	
+				break;
+		}
+		return incorrectVersion;
 	}
 	
 	/**
@@ -2004,5 +2078,48 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
 		version.put("mmsVersion", NodeUtil.getMMSversion());
 		return version;
 	}
+	   /**
+     * getMMSversion
+     * 
+     * @param req
+     * @return
+     */
+	public static JSONObject getMMSversion(WebScriptRequest req) {
+		// Calls getBooleanArg to check if they have request for mms version
+		// TODO: Possibly remove this and implement as an aspect?
+		JSONObject jsonVersion = null;
+		boolean paramVal = getBooleanArg(req, "mmsVersion", false);
+		if(paramVal){
+			jsonVersion = new JSONObject();
+			jsonVersion = getMMSversion();
+		}
+		
+		return jsonVersion;
+	}
+	
+    /**
+     * Helper utility to get the value of a String request parameter
+     *
+     * @param req
+     *            WebScriptRequest with parameter to be checked
+     * @param name
+     *            String of the request parameter name to check
+     * @param defaultValue
+     *            default value if there is no parameter with the given name
+     * @return 'empty' if the parameter is assigned no value, if it is assigned
+     *         "parameter value" (ignoring case), or if it's default is default value and it is not
+     *         assigned "empty" (ignoring case).
+     */
+    public static String getStringArg(WebScriptRequest req, String name,
+                                        String defaultValue) {
+        if ( !Utils.toSet( req.getParameterNames() ).contains( name ) ) {
+            return defaultValue;
+        }
+        String paramVal = req.getParameter(name);
+        if ( Utils.isNullOrEmpty( paramVal ) ) return "none";
+        Boolean b = Utils.isTrue( paramVal, false );
+        if ( b != null ) return paramVal;
+        return defaultValue;
+    }
 
 }
