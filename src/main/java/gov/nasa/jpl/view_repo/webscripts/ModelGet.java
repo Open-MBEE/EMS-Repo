@@ -588,7 +588,7 @@ public class ModelGet extends AbstractJavaWebScript {
 			if (!checkPermission
 					|| checkPermissions(node, PermissionService.READ)) {
 				JSONObject json = node.toJSONObject(ws, dateTime,
-						includeQualified, elementProperties.get(id));
+						includeQualified, false, elementProperties.get(id));
 				elements.put(json);
 				elementsJsonMap.put(node, json);
 			} // TODO -- REVIEW -- Warning if no permissions?

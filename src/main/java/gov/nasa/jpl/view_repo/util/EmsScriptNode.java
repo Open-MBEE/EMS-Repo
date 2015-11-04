@@ -40,12 +40,15 @@ import gov.nasa.jpl.mbee.util.HasName;
 import gov.nasa.jpl.mbee.util.Pair;
 import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.mbee.util.Utils;
+import gov.nasa.jpl.view_repo.db.PostgresHelper;
+import gov.nasa.jpl.view_repo.db.PostgresHelper.DbEdgeTypes;
 import gov.nasa.jpl.view_repo.sysml.View;
 import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.NodeUtil.SearchType;
 
 import java.io.Serializable;
 import java.lang.reflect.Field;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -2430,12 +2433,13 @@ public class EmsScriptNode extends ScriptNode implements
      * @return JSONObject serialization of node
      */
     public JSONObject toJSONObject( WorkspaceNode ws, Date dateTime ) throws JSONException {
-        return toJSONObject( null, ws, dateTime, true, null );
+        return toJSONObject( null, ws, dateTime, true, false, null );
     }
 
     public JSONObject toJSONObject( WorkspaceNode ws, Date dateTime, boolean isIncludeQualified,
+                                    boolean isIncludeDocument,
                                     List<EmsScriptNode> ownedProperties) throws JSONException {
-        return toJSONObject( null, ws, dateTime, isIncludeQualified, ownedProperties );
+        return toJSONObject( null, ws, dateTime, isIncludeQualified, isIncludeDocument, ownedProperties );
     }
 
     /**
@@ -2448,10 +2452,10 @@ public class EmsScriptNode extends ScriptNode implements
      * @return JSONObject serialization of node
      */
     public JSONObject toJSONObject( Set< String > filter, WorkspaceNode ws, Date dateTime,
-                                    boolean isIncludeQualified,
+                                    boolean isIncludeQualified, boolean isIncludeDocument,
                                     List<EmsScriptNode> ownedProperties) throws JSONException {
-        return toJSONObject( filter, false, ws, dateTime, isIncludeQualified, null,
-                             ownedProperties);
+        return toJSONObject( filter, false, ws, dateTime, isIncludeQualified, isIncludeDocument,
+                             null, ownedProperties);
     }
 
     public String nodeRefToSysmlId( NodeRef ref ) throws JSONException {
@@ -2899,16 +2903,17 @@ public class EmsScriptNode extends ScriptNode implements
      */
     public JSONObject toJSONObject( Set< String > jsonFilter, boolean isExprOrProp,
                                     WorkspaceNode ws, Date dateTime, boolean isIncludeQualified,
+                                    boolean isIncludeDocument,
                                     Version version, List<EmsScriptNode> ownedProperties) throws JSONException {
         JSONObject json = toJSONObjectImpl( jsonFilter, isExprOrProp, ws, dateTime,
-                                            isIncludeQualified, version );
+                                            isIncludeQualified, isIncludeDocument, version );
         if ( !isExprOrProp ) addEditableJson( json, jsonFilter );
         
         // Add owned Properties to properties key:
         if (!Utils.isNullOrEmpty( ownedProperties )) {
             JSONArray props = new JSONArray();
             for (EmsScriptNode prop : ownedProperties) {
-                props.put( prop.toJSONObject( ws, dateTime, isIncludeQualified, null ) );
+                props.put( prop.toJSONObject( ws, dateTime, isIncludeQualified, false, null ) );
                 putInJson( json, "properties", props, jsonFilter );
             }
         }
@@ -2921,6 +2926,7 @@ public class EmsScriptNode extends ScriptNode implements
     }
     public JSONObject toJSONObjectImpl( Set< String > jsonFilter, boolean isExprOrProp,
                                         WorkspaceNode ws, Date dateTime, boolean isIncludeQualified,
+                                        boolean isIncludeDocument,
                                         Version version ) throws JSONException {
         if ( Debug.isOn() )
             Debug.outln( "$ $ $ $ toJSONObject(jsonFilter=" + jsonFilter
@@ -2947,7 +2953,7 @@ public class EmsScriptNode extends ScriptNode implements
         boolean tryCache = NodeUtil.doJsonCaching && !isExprOrProp;
         if ( !tryCache ) {
             json = toJSONObjectImplImpl( jsonFilter, isExprOrProp, ws, dateTime,
-                                         isIncludeQualified, version );
+                                         isIncludeQualified, isIncludeDocument, version );
             if ( Debug.isOn() )
                 Debug.outln( "not trying cache returning json "
                                 + ( json == null ? "null" : json.toString( 4 ) ) );
@@ -3009,7 +3015,7 @@ public class EmsScriptNode extends ScriptNode implements
             ++NodeUtil.jsonCacheHits;
         } else {
             // get full json without filtering
-            json = toJSONObjectImplImpl( null, isExprOrProp, ws, dateTime, true, version );
+            json = toJSONObjectImplImpl( null, isExprOrProp, ws, dateTime, true, true, version );
             if ( Debug.isOn() )
                 Debug.outln("json = " + (json==null?"null":json.toString( 4 )));
             if ( tryCache &&
@@ -3087,6 +3093,7 @@ public class EmsScriptNode extends ScriptNode implements
     */
     public JSONObject toJSONObjectImplImpl( Set< String > filter, boolean isExprOrProp,
                                             WorkspaceNode ws, Date dateTime, boolean isIncludeQualified,
+                                            boolean isIncludeDocument,
                                             Version version  ) throws JSONException {
         JSONObject element = NodeUtil.newJsonObject();
         if ( !exists() ) return element;
@@ -3109,6 +3116,68 @@ public class EmsScriptNode extends ScriptNode implements
             putInJson( element, Acm.JSON_READ, getIsoTime( new Date( readTime ) ), filter );
         }
 
+        // lets add in the document information 
+        if (isIncludeDocument) {
+            PostgresHelper pgh = new PostgresHelper("");
+            if(workspace != null) pgh = new PostgresHelper(workspace.getId());
+            
+            try {
+                pgh.connect();
+                // Need to get parents related to root parents
+                List< String > immediateParentIds =
+                        pgh.getParents( this.getSysmlId(),
+                                        DbEdgeTypes.DOCUMENT, 1 );
+                Map<String, Set<String>> root2immediate = new HashMap<String, Set<String>>();
+                
+                JSONArray relatedDocuments = new JSONArray();
+                
+                // only put the immediateParents into their root documents
+                // TODO: does getRootParents return itself if it is the root?
+                for ( String immediateParentId: immediateParentIds) {
+                    List< String > rootParentIds = pgh.getRootParents( immediateParentId, DbEdgeTypes.DOCUMENT );
+                    for ( String rootParentId: rootParentIds ) {
+                        if (!root2immediate.containsKey( rootParentId )) {
+                            root2immediate.put( rootParentId, new HashSet<String>() );
+                        }
+                        root2immediate.get( rootParentId ).add( immediateParentId );
+                    }
+                }
+                
+                // create the JSON by traversing the root 2 immediate parents map
+                for ( String rootParentId : root2immediate.keySet() ) {
+                    JSONObject relatedDoc = new JSONObject();
+                    relatedDoc.put( "sysmlid", rootParentId );
+
+                    EmsScriptNode rootParentNode =
+                            NodeUtil.getNodeFromPostgresNode( pgh.getNodeFromSysmlId( rootParentId ) );
+                    relatedDoc.put( "name",
+                                    (String)rootParentNode.getProperty( Acm.ACM_NAME ) );
+                    JSONArray parentViews = new JSONArray();
+                    for ( String immediateParentId : root2immediate.get( rootParentId ) ) {
+                        JSONObject parentView = new JSONObject();
+                        parentView.put( "sysmlid", immediateParentId );
+                        EmsScriptNode immediateParentNode =
+                                NodeUtil.getNodeFromPostgresNode( pgh.getNodeFromSysmlId( immediateParentId ) );
+                        parentView.put( "name",
+                                        (String)immediateParentNode.getProperty( Acm.ACM_NAME ) );
+                        parentViews.put( parentView );
+                    }
+
+                    relatedDoc.put( "parentViews", parentViews );
+                    relatedDocuments.put( relatedDoc );
+                }
+                element.put( "relatedDocuments", relatedDocuments );
+
+                pgh.close();
+            } catch ( ClassNotFoundException e ) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            } catch ( SQLException e ) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+         }
+        
         // fix the artifact urls
         String elementString = element.toString();
         elementString = fixArtifactUrls( elementString, true );
@@ -5356,7 +5425,7 @@ public class EmsScriptNode extends ScriptNode implements
             node = node.findScriptNodeByName( node.getSysmlId(), false, ws, dateTime );
         }
         if ( node != null && node.exists() ) {
-            jsonArray.put( node.toJSONObject( null, true, ws, dateTime, false, null, null ) );
+            jsonArray.put( node.toJSONObject( null, true, ws, dateTime, false, false, null, null ) );
         }
     }
 
