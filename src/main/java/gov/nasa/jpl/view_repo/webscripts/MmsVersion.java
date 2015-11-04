@@ -38,8 +38,10 @@ public class MmsVersion extends AbstractJavaWebScript {
 		printHeader(req);
 		JSONObject mmsVersion = null;
 
+		
+		System.out.println("Checking MMS Versions");
 		try {
-			mmsVersion = getMMSversion(req);
+			mmsVersion = getMMSversion();
 			if (prettyPrint) {
 				model.put("res", NodeUtil.jsonToString(mmsVersion, 4));
 			} else {
@@ -66,7 +68,7 @@ public class MmsVersion extends AbstractJavaWebScript {
 	@Override
 	protected boolean validateRequest(WebScriptRequest req, Status status) {
 		// TODO Auto-generated method stub
-
+		getBooleanArg(req, "mmsVersion", false);
 		return false;
 	}
 
