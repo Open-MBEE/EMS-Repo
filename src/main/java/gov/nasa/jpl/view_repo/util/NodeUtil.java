@@ -1066,13 +1066,7 @@ public class NodeUtil {
 		}
 		ResultSet results = null;
 		if (searchService != null) {
-			// results = searchService.query( getStoreRef(),
-			// SearchService.LANGUAGE_LUCENE,
-			// queryPattern );
-			// String origUser = AuthenticationUtil.getRunAsUser();
-			// AuthenticationUtil.setRunAsUser( "admin" );
 			results = searchService.query(getSearchParameters(queryPattern));
-			// AuthenticationUtil.setRunAsUser( origUser );
 		}
 		if (Debug.isOn()) {
 			Debug.outln("luceneSearch(" + queryPattern + "): returned "
@@ -4377,5 +4371,9 @@ public class NodeUtil {
 				}
 			}
 		}
+	}
+	
+	public static EmsScriptNode getNodeFromPostgresNode(Node pgnode) {
+	    return new EmsScriptNode(new NodeRef(pgnode.getNodeRefId()), services, null);
 	}
 }
