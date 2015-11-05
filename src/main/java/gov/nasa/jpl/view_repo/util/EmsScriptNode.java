@@ -2913,7 +2913,7 @@ public class EmsScriptNode extends ScriptNode implements
         if (!Utils.isNullOrEmpty( ownedProperties )) {
             JSONArray props = new JSONArray();
             for (EmsScriptNode prop : ownedProperties) {
-                props.put( prop.toJSONObject( ws, dateTime, isIncludeQualified, false, null ) );
+                props.put( prop.toJSONObject( ws, dateTime, isIncludeQualified, isIncludeDocument, null ) );
                 putInJson( json, "properties", props, jsonFilter );
             }
         }
@@ -3015,7 +3015,7 @@ public class EmsScriptNode extends ScriptNode implements
             ++NodeUtil.jsonCacheHits;
         } else {
             // get full json without filtering
-            json = toJSONObjectImplImpl( null, isExprOrProp, ws, dateTime, true, true, version );
+            json = toJSONObjectImplImpl( null, isExprOrProp, ws, dateTime, isIncludeQualified, isIncludeDocument, version );
             if ( Debug.isOn() )
                 Debug.outln("json = " + (json==null?"null":json.toString( 4 )));
             if ( tryCache &&

@@ -14,9 +14,11 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.Logger;
 
 public class PostgresHelper {
-
+    static Logger logger = Logger.getLogger( PostgresHelper.class );
+    
     private Connection conn;
     private String host;
     private String dbName;
@@ -229,7 +231,11 @@ public class PostgresHelper {
                         + " where sysmlId = '" + childSysmlId + "'), "
                         + edgeType.getValue() + ")" );
         } catch ( Exception e ) {
-            e.printStackTrace();
+            if (e.getMessage().contains("duplicate key")) {
+                if (logger.isInfoEnabled()) e.printStackTrace();              
+            } else {
+                e.printStackTrace();
+            }
         }
 
     }

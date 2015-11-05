@@ -579,7 +579,7 @@ public class ModelGet extends AbstractJavaWebScript {
 	 * @throws JSONException
 	 */
 	protected void handleElements(WorkspaceNode ws, Date dateTime,
-			boolean includeQualified, boolean includeIsDocument, boolean evaluate, JSONObject top,
+			boolean includeQualified, boolean isIncludeDocument, boolean evaluate, JSONObject top,
 			boolean checkPermission) throws JSONException {
 		final Map<EmsScriptNode, JSONObject> elementsJsonMap = new LinkedHashMap<EmsScriptNode, JSONObject>();
 		for (String id : elementsFound.keySet()) {
@@ -588,7 +588,7 @@ public class ModelGet extends AbstractJavaWebScript {
 			if (!checkPermission
 					|| checkPermissions(node, PermissionService.READ)) {
 				JSONObject json = node.toJSONObject(ws, dateTime,
-						includeQualified, false, elementProperties.get(id));
+						includeQualified, isIncludeDocument, elementProperties.get(id));
 				elements.put(json);
 				elementsJsonMap.put(node, json);
 			} // TODO -- REVIEW -- Warning if no permissions?

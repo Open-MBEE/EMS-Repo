@@ -1698,8 +1698,7 @@ public class ModelPost extends AbstractJavaWebScript {
 		// Make sure we have the most recent version of
 		// Get the last modified time from the element:
 		Date lastModified = element.getLastModified(null);
-		if (Debug.isOn())
-			System.out.println("%% %% %% lastModified = " + lastModified);
+		if (logger.isDebugEnabled()) logger.debug("%% %% %% lastModified = " + lastModified);
 
 		String lastModString = TimeUtils.toTimestamp(lastModified);
 		String msg = null;
@@ -1780,16 +1779,14 @@ public class ModelPost extends AbstractJavaWebScript {
 		} catch (JSONException e) {
 			return false;
 		}
-		if (Debug.isOn())
-			System.out.println("%% %% %% time = " + readTime);
+		if (logger.isDebugEnabled()) logger.debug("%% %% %% time = " + readTime);
 		if (readTime == null) {
 			return false;
 		}
 
 		Date readDate = null;
 		readDate = TimeUtils.dateFromTimestamp(readTime);
-		if (Debug.isOn())
-			System.out.println("%% %% %% date = " + readDate);
+		if (logger.isDebugEnabled()) logger.debug("%% %% %% date = " + readDate);
 
 		if (readDate != null) {
 			return readDate.compareTo(lastModified) < 0;
