@@ -665,7 +665,7 @@ def run_curl_test(test_num, test_name, test_desc, curl_cmd, use_json_diff=False,
                 cp, err = p.communicate()
                 if len(cp) == 0:
                     cp = ".:%s:%s:%s:%s:../../target/mms-repo-ent-war/WEB-INF/lib/json-20140107.jar:../../target/mms-repo-war/WEB-INF/lib/json-20140107.jar:../../target/mms-repo-war/WEB-INF/lib/json-20090211.jar:../../target/classes"%(mbee_util_jar_path(),mbee_util_jar_path2(),mbee_util_jar_path3(),mbee_util_jar_path4())
-                diff_cmd = "java -cp %s gov.nasa.jpl.view_repo.util.JsonDiff"%cp.strip()
+                diff_cmd = 'java -cp "%s" gov.nasa.jpl.view_repo.util.JsonDiff' % cp.strip()
             else:
                 diff_cmd = "diff"
 
