@@ -49,7 +49,6 @@ public class HistoryGet extends ModelGet {
 	public HistoryGet() {
 		// TODO Auto-generated constructor stub
 		super();
-		System.out.println("HistoryGet No Args...");
 	}
 
 	/**

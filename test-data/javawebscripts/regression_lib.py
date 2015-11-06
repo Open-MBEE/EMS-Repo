@@ -874,3 +874,24 @@ def run(testArray):
     sys.exit(failed_tests)
         
         
+def toggle_mms_flag(mmsFlag):
+    checkFlagStatus = create_curl_cmd("GET", data="flags/" + mmsFlag + "?ison", base_url=SERVICE_URL, branch="")
+    curlResult = commands.getoutput(checkFlagStatus)
+    flagIndex = str(curlResult).rfind(mmsFlag,0)
+    off = re.compile('is off')
+    on = re.compile('is on')
+    isOff = off.search(curlResult)
+    isOn = on.search(curlResult)
+    if isOn is not None:
+        print "The MMS Flag " + mmsFlag + " is on"
+        toggleParameter = "?off"
+        print "Turning off " + mmsFlag
+    if isOff is not None:
+        print "The MMS Flag " + mmsFlag + " is off"
+        toggleParameter = "?on"
+        print "Turning on " + mmsFlag
+
+    toggleCmd = create_curl_cmd("GET", data="flags/" + mmsFlag + toggleParameter, base_url=SERVICE_URL, branch="") 
+    toggleResult = commands.getoutput(toggleCmd)
+    print str(toggleResult)
+    
