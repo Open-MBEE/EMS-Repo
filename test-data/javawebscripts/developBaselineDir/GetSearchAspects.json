@@ -1,14 +1,7 @@
 {"elements": [
     {
         "qualifiedId": "/demo3site/PROJECT-71724d08-6d79-42b2-b9ec-dc39f20a3660/connectorViewDataFolder/_17_0_2_3_e610336_1394148311476_17302_29388_X",
-        "relatedDocuments": [{
-            "parentViews": [{
-                "name": "Components",
-                "sysmlid": "_17_0_2_3_e610336_1394148311476_17302_29388_X"
-            }],
-            "name": "Components",
-            "sysmlid": "_17_0_2_3_e610336_1394148311476_17302_29388_X"
-        }],
+        "relatedDocuments": [],
         "qualifiedName": "/demo3site/BikeProject/Connector View Data Folder/Components",
         "sysmlid": "_17_0_2_3_e610336_1394148311476_17302_29388_X",
         "editable": true,
@@ -84,14 +77,7 @@
     },
     {
         "qualifiedId": "/europa/123456/BLUCamTest/_17_0_2_4_f3a0363_1394146455624_407543_30441/_17_0_2_3_e610336_1394148233838_91795_29332",
-        "relatedDocuments": [{
-            "parentViews": [{
-                "name": "Context",
-                "sysmlid": "_17_0_2_3_e610336_1394148233838_91795_29332"
-            }],
-            "name": "Context",
-            "sysmlid": "_17_0_2_3_e610336_1394148233838_91795_29332"
-        }],
+        "relatedDocuments": [],
         "qualifiedName": "/europa/JW_TEST2/BLUCamTest/dont care2/Context",
         "sysmlid": "_17_0_2_3_e610336_1394148233838_91795_29332",
         "editable": true,
@@ -104,14 +90,7 @@
     },
     {
         "qualifiedId": "/europa/123456/_17_0_2_3_e610336_1394148311476_17302_29388",
-        "relatedDocuments": [{
-            "parentViews": [{
-                "name": "Components",
-                "sysmlid": "_17_0_2_3_e610336_1394148311476_17302_29388"
-            }],
-            "name": "Components",
-            "sysmlid": "_17_0_2_3_e610336_1394148311476_17302_29388"
-        }],
+        "relatedDocuments": [],
         "qualifiedName": "/europa/JW_TEST2/Components",
         "sysmlid": "_17_0_2_3_e610336_1394148311476_17302_29388",
         "editable": true,

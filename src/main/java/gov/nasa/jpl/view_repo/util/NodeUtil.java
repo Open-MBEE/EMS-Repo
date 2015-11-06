@@ -205,6 +205,7 @@ public class NodeUtil {
 	public static boolean doJsonDeepCaching = false;
 	public static boolean doJsonStringCaching = false;
 	public static boolean doPropertyCaching = true;
+    public static boolean doGraphDb = true;
 
 	public static boolean addEmptyEntriesToFullCache = false; // this was broken
 																// last tried

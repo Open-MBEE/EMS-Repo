@@ -3117,7 +3117,7 @@ public class EmsScriptNode extends ScriptNode implements
         }
 
         // lets add in the document information 
-        if (isIncludeDocument) {
+        if (isIncludeDocument && NodeUtil.doGraphDb) {
             PostgresHelper pgh = new PostgresHelper("");
             if(workspace != null) pgh = new PostgresHelper(workspace.getId());
             

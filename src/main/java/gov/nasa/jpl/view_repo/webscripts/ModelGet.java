@@ -177,6 +177,8 @@ public class ModelGet extends AbstractJavaWebScript {
 				runWithoutTransactions);
 	}
 
+	@Deprecated
+	// deprecated in favor of NodeUtil.doGraphDb
 	private boolean getUseDb(WebScriptRequest req){
 		String usedb = req.getParameter("usedb");
 		if (usedb == null) return true;
@@ -193,16 +195,12 @@ public class ModelGet extends AbstractJavaWebScript {
 		Timer timer = new Timer();
 		printHeader(req);
 
-		boolean useDb = getUseDb(req);
-		
-		// clearCaches();
-
 		Map<String, Object> model = new HashMap<String, Object>();
 		// make sure to pass down view request flag to instance
 		setIsViewRequest(isViewRequest);
 
 		JSONObject top = NodeUtil.newJsonObject();
-		JSONArray elementsJson = handleRequest(req, top, useDb);
+		JSONArray elementsJson = handleRequest(req, top, NodeUtil.doGraphDb);
 
 		try {
 			if (elementsJson.length() > 0) {

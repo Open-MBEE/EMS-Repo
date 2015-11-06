@@ -208,7 +208,7 @@ public class ModelSearch extends ModelGet {
                 }
             }
 
-            // filter out based on postgres
+            // filter out based on postgres graph db
             List<String> noderefs = new ArrayList<String>(rawResults.keySet());
             
             PostgresHelper pgh = null;
