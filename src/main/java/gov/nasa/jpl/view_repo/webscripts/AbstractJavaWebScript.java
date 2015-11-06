@@ -122,7 +122,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
     public static final int MAX_PRINT = 200;
     public static boolean checkMmsVersions = false;
     public static boolean defaultRunWithoutTransactions = false;
-    private JSONObject requestJSON = null;
+    private JSONObject privateRequestJSON;
     // injected members
 	protected ServiceRegistry services;		// get any of the Alfresco services
 	protected Repository repository;		// used for lucene search
@@ -263,26 +263,18 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
     	
     	final Map< String, Object > model = new HashMap<String, Object>();
     	
-    	if(getRequestJSON() == null && checkMmsVersions)
-	    {
-    	    setRequestJSON(req);
-    	    if(compareMmsVersions(req, getResponse(), status));
+    	if(checkMmsVersions)
+        {
+            if(compareMmsVersions(req, getResponse(), status))
             {
                 model.put("res", createResponseJson());
+                System.out.println("Printing Model");
+                System.out.println(model.toString());
                 return model;
             }
-            
-	    }
-    	if (checkMmsVersions)
-	    {
-	        if(compareMmsVersions(req, getResponse(), status));
-            {
-                model.put("res", createResponseJson());
-                return model;
-            }
-	    }
+        }
 
-		clearCaches( true );
+        clearCaches( true );
         clearCaches(); // calling twice for those redefine clearCaches() to
                        // always call clearCaches( false )
         
@@ -292,7 +284,6 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
                 Map< String, Object > m = executeImplImpl( req, status, cache );
                 if ( m != null ) {
                     model.putAll( m );
-            
                 }
             }
         };
@@ -2016,109 +2007,130 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
      * @author EDK
      * @return boolean false if versions match, true if they do not match or if is an incorrect request.
      */
-	public boolean compareMmsVersions(WebScriptRequest req, StringBuffer response, Status status) {
-		// Calls getBooleanArg to check if they have request for mms version
-		// TODO: Possibly remove this and implement as an aspect?
-		boolean incorrectVersion = true;
-		char logCase = '0';
-		JSONObject jsonVersion = null;
-		String mmsVersion = null;
-		
-		
-		// Checks if the argument is mmsVersion and returns the value specified by the request
-		//	if there is no request it will return 'none'
-		String paramVal = getStringArg(req, "mmsVersion", "none");
-		
-		// Checks data member requestJSON to see if it is not null and if paramVal is none
-		if(requestJSON != null && paramVal.equals("none")){
-		    // Attempts to get any value that is associated with mmsVersion out of the object
-			paramVal = requestJSON.optString("mmsVersion");
-		}
-		else if (requestJSON == null){
-		    return false;
-		}
-		
-		if(paramVal != null && !paramVal.equals("none") && paramVal.length() > 0){
-			
-			// Calls NodeUtil's getMMSversion
-			jsonVersion = getMMSversion();
-			mmsVersion = jsonVersion.get("mmsVersion").toString();
-			
-			log(Level.INFO, HttpServletResponse.SC_OK, "Comparing Versions...." );
-			if(mmsVersion.equals(paramVal))
-			{
-				// Compared versions matches
-				logCase = '1';
-				incorrectVersion = false;
-			}
-			else{
-				// Versions do not match
-				logCase = '2';
-			}
-		}
-		else if(Utils.isNullOrEmpty(paramVal) || paramVal.equals("none")){
-			// Missing MMS Version parameter
-			logCase = '3';
-		}
-		else{
-			// Wrong MMS Version or Invalid input
-			logCase = '4';
-		}
-		switch(logCase)
-		{
-			case'1':log(Level.INFO, HttpServletResponse.SC_OK, "Correct Versions" );
-				break;
-			case'2':log(Level.WARN, HttpServletResponse.SC_CONFLICT, "Versions do not match! Expected Version " + mmsVersion + ". Instead received " + paramVal);
-				break;
-			case'3':log(Level.ERROR, HttpServletResponse.SC_CONFLICT,"Missing MMS Version. Expected mmsVersion=" + mmsVersion );
-				break;
-				// TODO: This should be removed but for the moment I am leaving this in as a contingency if anything else may break this.
-			case'4':log(Level.ERROR, HttpServletResponse.SC_CONFLICT,"Wrong MMS Version or invalid input. Expected mmsVersion=" + mmsVersion + ". Instead received " + paramVal);	
-				break;
-		}
-		// Returns true if it is either the wrong version or if it failed to compare it
-		// Returns false if it was successful in retrieving the mmsVersions from both the MMS and the request and
-		return incorrectVersion;
-	}
-	
-	/**
-	 * getMMSversion<br>
-	 * Returns a JSONObject representing the mms version being used. It's format will be
-	 * <pre> {
-	 *     "mmsVersion":"2.2"
-	 * }
-	 * </pre>
-	 * @return JSONObject mmsVersion
-	 */
-	public static JSONObject getMMSversion(){
-		JSONObject version = new JSONObject();
-		version.put("mmsVersion", NodeUtil.getMMSversion());
-		return version;
-	}
-	/**
-     * getMMSversion
-     * <br/>
-     * getMMSversion wraps 
+    public boolean compareMmsVersions(WebScriptRequest req,
+            StringBuffer response, Status status) {
+        // Calls getBooleanArg to check if they have request for mms version
+        // TODO: Possibly remove this and implement as an aspect?
+        boolean incorrectVersion = true;
+        JSONObject jsonRequest = null;
+        char logCase = '0';
+        JSONObject jsonVersion = null;
+        String mmsVersion = null;
+
+        // Checks if the argument is mmsVersion and returns the value specified
+        // by the request
+        // if there is no request it will return 'none'
+        String paramVal = getStringArg(req, "mmsVersion", "none");
+        String paramArg = paramVal;
+        // Checks data member requestJSON to see if it is not null and if
+        // paramVal is none
+        if (paramVal.equals("none")) {
+            try {
+                jsonRequest = (JSONObject)req.parseContent();
+            } catch (Exception e) {
+                e.printStackTrace();
+                log(Level.ERROR, HttpServletResponse.SC_INTERNAL_SERVER_ERROR,"Could not retrieve JSON");
+//                return true;
+            }
+            if (jsonRequest != null) {
+                paramVal = jsonRequest.optString("mmsVersion");
+            }
+        }
+
+        if (paramVal != null && !paramVal.equals("none") && paramVal.length() > 0) {
+            // Calls NodeUtil's getMMSversion
+            jsonVersion = getMMSversion();
+            mmsVersion = jsonVersion.get("mmsVersion").toString();
+
+            log(Level.INFO, HttpServletResponse.SC_OK, "Comparing Versions....");
+            if (mmsVersion.equals(paramVal)) {
+                // Compared versions matches
+                logCase = '1';
+                incorrectVersion = false;
+            } else {
+                // Versions do not match
+                logCase = '2';
+            }
+        } else if (Utils.isNullOrEmpty(paramVal) || paramVal.equals("none")) {
+            // Missing MMS Version parameter
+            logCase = '3';
+        } else {
+            // Wrong MMS Version or Invalid input
+            logCase = '4';
+        }
+        switch (logCase) {
+            case '1' :
+                log(Level.INFO, HttpServletResponse.SC_OK, "Correct Versions");
+                incorrectVersion = false;
+                break;
+            case '2' :
+                log(Level.WARN, HttpServletResponse.SC_CONFLICT,
+                        "Versions do not match! Expected Version " + mmsVersion
+                                + ". Instead received " + paramVal);
+                break;
+            case '3' :
+                log(Level.ERROR, HttpServletResponse.SC_CONFLICT,
+                        "Missing MMS Version or invalid parameter. Received parameter:" + paramArg + " and argument:" + mmsVersion + ". Request was: " + jsonRequest);
+                break;
+            // TODO: This should be removed but for the moment I am leaving this
+            // in as a contingency if anything else may break this.
+            case '4' :
+                log(Level.ERROR, HttpServletResponse.SC_CONFLICT,
+                        "Wrong MMS Version or invalid input. Expected mmsVersion="
+                                + mmsVersion + ". Instead received "
+                                + paramVal);
+                break;
+        }
+        // Returns true if it is either the wrong version or if it failed to
+        // compare it
+        // Returns false if it was successful in retrieving the mmsVersions from
+        // both the MMS and the request and
+        System.out.println("Returning the boolean value" + incorrectVersion);
+        return incorrectVersion;
+    }
+
+    /**
+     * getMMSversion<br>
+     * Returns a JSONObject representing the mms version being used. It's format
+     * will be
+     * 
+     * <pre>
+     *  {
+     *     "mmsVersion":"2.2"
+     * }
+     * </pre>
+     * 
+     * @return JSONObject mmsVersion
+     */
+    public static JSONObject getMMSversion() {
+        JSONObject version = new JSONObject();
+        version.put("mmsVersion", NodeUtil.getMMSversion());
+        return version;
+    }
+    /**
+     * getMMSversion <br/>
+     * getMMSversion wraps
+     * 
      * @param req
      * @return
      */
-	public static JSONObject getMMSversion(WebScriptRequest req) {
-		// Calls getBooleanArg to check if they have request for mms version
-		// TODO: Possibly remove this and implement as an aspect?
-		JSONObject jsonVersion = null;
-		boolean paramVal = getBooleanArg(req, "mmsVersion", false);
-		if(paramVal){
-			jsonVersion = new JSONObject();
-			jsonVersion = getMMSversion();
-		}
-		
-		return jsonVersion;
-	}
-	
+    public static JSONObject getMMSversion(WebScriptRequest req) {
+        // Calls getBooleanArg to check if they have request for mms version
+        // TODO: Possibly remove this and implement as an aspect?
+        JSONObject jsonVersion = null;
+        boolean paramVal = getBooleanArg(req, "mmsVersion", false);
+        if (paramVal) {
+            jsonVersion = new JSONObject();
+            jsonVersion = getMMSversion();
+        }
+
+        return jsonVersion;
+    }
+
     /**
-     * Helper utility to get the String value of a request parameter, calls on 
-     *  getParameterNames from the WebScriptRequest object to compare the parameter name
-     *  passed in that is desired from the header.
+     * Helper utility to get the String value of a request parameter, calls on
+     * getParameterNames from the WebScriptRequest object to compare the
+     * parameter name passed in that is desired from the header.
      *
      * @param req
      *            WebScriptRequest with parameter to be checked
@@ -2128,42 +2140,45 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
      *            default value if there is no parameter with the given name
      * @author dank
      * @return 'empty' if the parameter is assigned no value, if it is assigned
-     *         "parameter value" (ignoring case), or if it's default is default value and it is not
-     *         assigned "empty" (ignoring case).
+     *         "parameter value" (ignoring case), or if it's default is default
+     *         value and it is not assigned "empty" (ignoring case).
      */
     public static String getStringArg(WebScriptRequest req, String name,
-                                        String defaultValue) {
-        if ( !Utils.toSet( req.getParameterNames() ).contains( name ) ) {
+            String defaultValue) {
+        if (!Utils.toSet(req.getParameterNames()).contains(name)) {
             return defaultValue;
         }
         String paramVal = req.getParameter(name);
-        if ( Utils.isNullOrEmpty( paramVal) ) return "none";
-        Boolean b = Utils.isTrue( paramVal, false );
-        if ( b != null ) return paramVal;
+        if (Utils.isNullOrEmpty(paramVal))
+            return "none";
+        Boolean b = Utils.isTrue(paramVal, false);
+        if (b != null)
+            return paramVal;
         return defaultValue;
     }
-    
+
     /**
-     * setRequestJSON
-     * <br>
-     * This will set the AbstractJavaWebScript data member requestJSON. It will make the 
-     *  parsedContent JSONObject remain within the scope of the AbstractJavaWebScript.
-     *  {@link #requestJSON}
-     * @param req WebScriptRequest
+     * setRequestJSON <br>
+     * This will set the AbstractJavaWebScript data member requestJSON. It will
+     * make the parsedContent JSONObject remain within the scope of the
+     * AbstractJavaWebScript. {@link #requestJSON}
+     * 
+     * @param req
+     *            WebScriptRequest
      */
-    public void setRequestJSON(WebScriptRequest req){
-        
-        try{
-            requestJSON = (JSONObject)req.parseContent();
-        }
-        catch(Exception e)
-        {
+    public void setRequestJSON(WebScriptRequest req) {
+
+        try {
+//            privateRequestJSON = new JSONObject();
+            privateRequestJSON = (JSONObject) req.parseContent();
+        } catch (Exception e) {
             e.printStackTrace();
-            log(Level.ERROR, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Could not retrieve JSON" );
+            log(Level.ERROR, HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+                    "Could not retrieve JSON");
         }
     }
-    
-    public JSONObject getRequestJSON(){
-        return requestJSON;
+
+    public JSONObject getRequestJSON() {
+        return privateRequestJSON;
     }
 }
