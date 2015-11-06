@@ -873,25 +873,56 @@ def run(testArray):
      
     sys.exit(failed_tests)
         
-        
-def toggle_mms_flag(mmsFlag):
-    checkFlagStatus = create_curl_cmd("GET", data="flags/" + mmsFlag + "?ison", base_url=SERVICE_URL, branch="")
-    curlResult = commands.getoutput(checkFlagStatus)
-    flagIndex = str(curlResult).rfind(mmsFlag,0)
+# This will attempt to turn a flag -ON- the MMS server  
+def turn_on_mms_flag(mmsFlag, VERBOSE=False):
+    curl_cmd = create_curl_cmd("GET", data="flags/" + mmsFlag + "?on", base_url=SERVICE_URL, branch="")
+    result = commands.getoutput(curl_cmd)
+    if VERBOSE : print result
+
+# This will attempt to turn a flag -OFF- the MMS server
+def turn_off_mms_flag(mmsFlag, VERBOSE=False):
+    curl_cmd = create_curl_cmd("GET", data="flags/" + mmsFlag + "?off", base_url=SERVICE_URL, branch="")
+    result = commands.getoutput(curl_cmd)
+    if VERBOSE : print result
+
+# Retrieves the status of a flag on the MMS server, and will return a boolean value if it is on (true) or off ( false)
+def get_mms_flag_status(mmsFlag, VERBOSE=False):
+    curl_cmd = create_curl_cmd("GET", data="flags/" + mmsFlag + "?ison", base_url=SERVICE_URL, branch="")
+    output = commands.getoutput(curl_cmd)
+    
+    # Regular Expression to check for the patter is off, or is on, Python compiles then searches for it
+    # The variables will contain None if the pattern is not found in the string.
     off = re.compile('is off')
     on = re.compile('is on')
-    isOff = off.search(curlResult)
-    isOn = on.search(curlResult)
-    if isOn is not None:
-        print "The MMS Flag " + mmsFlag + " is on"
-        toggleParameter = "?off"
-        print "Turning off " + mmsFlag
-    if isOff is not None:
-        print "The MMS Flag " + mmsFlag + " is off"
-        toggleParameter = "?on"
-        print "Turning on " + mmsFlag
-
-    toggleCmd = create_curl_cmd("GET", data="flags/" + mmsFlag + toggleParameter, base_url=SERVICE_URL, branch="") 
-    toggleResult = commands.getoutput(toggleCmd)
-    print str(toggleResult)
+    isOff = off.search(output)
+    isOn = on.search(output)
     
+    # Compares the values of isOff and isOn against None to see whether or not they are in the string
+    # Technically if one is true the other must be false so it could be an if else, but I figure it is safer
+    # to check both when dealing with memory locations 
+    if isOn is not None:
+        if VERBOSE : print "The MMS flag : " + mmsFlag + " is on, RETURN : True"
+        flag_status = True
+    if isOff is not None:
+        if VERBOSE : print "The MMS flag : " + mmsFlag + " is off, RETURN : False"
+        flag_status = False
+    return flag_status
+
+# Toggles a flag on the MMS server on or off, based on its current status
+def toggle_mms_flag(mmsFlag, VERBOSE=False):
+    
+    # Gets the current status of the mms flag
+    flag_status = get_mms_flag_status(mmsFlag)
+    # if flag is currently on, turn off flag
+    if flag_status is True:
+        toggleParameter = "?off"
+        if VERBOSE : print "The MMS flag : " + mmsFlag + " is turning off.."
+    # else if off, turn on
+    elif flag_status is False:
+        toggleParameter = "?on"
+        if VERBOSE : print "The MMS flag :" + mmsFlag + " is turning on.."
+    
+    # Create curl command with either ?on or ?off then execute curl command
+    curl_cmd = create_curl_cmd("GET", data="flags/" + mmsFlag + toggleParameter, base_url=SERVICE_URL, branch="") 
+    output = commands.getoutput(curl_cmd)
+    if VERBOSE : print str(output)

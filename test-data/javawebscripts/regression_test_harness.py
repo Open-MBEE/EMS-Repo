@@ -3065,18 +3065,6 @@ None
 ],
 [
 10021,
-"Turn-On-CheckMmsVersion",
-"Turns on flag to have MMS check for the mmsVersion with every REST call that is made.",
-create_curl_cmd(type="GET", data="flags/checkMmsVersions?on", base_url=SERVICE_URL,
-        branch="master/"),
-True,
-common_filters + ['"timestamp"'],
-["test","workspaces","develop", "develop2"],
-False,
-None
-],
-[
-10022,
 "CheckMmsVersion-Correct",
 "Checks the MMS version when requesting an element, versions SHOULD match",
 create_curl_cmd(type="GET", data="elements/303?mmsVersion=2.2", base_url=BASE_URL_WS),
