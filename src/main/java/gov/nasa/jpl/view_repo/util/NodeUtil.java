@@ -20,7 +20,6 @@ import java.io.InputStreamReader;
 import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.nio.charset.Charset;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
@@ -199,10 +198,9 @@ public class NodeUtil {
 	public static boolean doSimpleCaching = true;
 	public static boolean doNodeAtTimeCaching = true;
 	public static boolean doHeisenCheck = true;
-	public static boolean doVersionCaching = false; // turn this off by default
+	public static boolean doVersionCaching = false; 
 	public static boolean activeVersionCaching = true;
-	public static boolean doVersionHistoryCaching = true; // turn this off by
-															// default
+	public static boolean doVersionHistoryCaching = true; 
 	public static boolean doJsonCaching = true;
 	public static boolean doJsonDeepCaching = false;
 	public static boolean doJsonStringCaching = false;
@@ -4337,7 +4335,7 @@ public class NodeUtil {
 	public static void processDocumentEdges(String sysmlid, String doc,
 			List<Pair<String, String>> documentEdges) {
 		if (doc != null) {
-			String MMS_TRANSCLUDE_PATTERN = "\\s*(?i)mms-transclude-doc\\s*mms-eid\\s*=\\s*(\"([^\"]*\"))";
+			String MMS_TRANSCLUDE_PATTERN = ".*<mms-transclude.*eid=\"([^\"]*)\"";
 			Pattern pattern = Pattern.compile(MMS_TRANSCLUDE_PATTERN);
 			Matcher matcher = pattern.matcher(doc);
 

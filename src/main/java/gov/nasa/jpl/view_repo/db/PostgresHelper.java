@@ -263,7 +263,7 @@ public class PostgresHelper {
     }
 
     
-    public Set<String> getImmediateParents(String sysmlId, DbEdgeTypes et, int height){
+    public Set<String> getImmediateParents(String sysmlId, DbEdgeTypes et){
         Set<String> result = new HashSet<String>();
         try {
             Node n = getNodeFromSysmlId( sysmlId );
@@ -272,7 +272,7 @@ public class PostgresHelper {
 
             String query = "select * from get_immediate_parents(%s, %d, '%s')";
             ResultSet rs =
-                    execQuery( String.format( query, workspaceName, n.getId(),
+                    execQuery( String.format( query, n.getId(),
                                               et.getValue(), workspaceName ) );
 
             while ( rs.next() ) {

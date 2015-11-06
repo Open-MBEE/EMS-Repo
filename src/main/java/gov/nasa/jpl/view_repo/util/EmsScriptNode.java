@@ -3125,8 +3125,7 @@ public class EmsScriptNode extends ScriptNode implements
                 pgh.connect();
                 // Need to get parents related to root parents
                 Set< String > immediateParentIds =
-                        pgh.getParents( this.getSysmlId(),
-                                        DbEdgeTypes.DOCUMENT, 1 );
+                        pgh.getImmediateParents( this.getSysmlId(), DbEdgeTypes.DOCUMENT );
                 Map<String, Set<String>> root2immediate = new HashMap<String, Set<String>>();
                 
                 JSONArray relatedDocuments = new JSONArray();

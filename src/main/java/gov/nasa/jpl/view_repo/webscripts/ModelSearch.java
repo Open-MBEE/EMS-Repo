@@ -218,12 +218,14 @@ public class ModelSearch extends ModelGet {
 
             List< String > filteredNoderefs = null;
             try {
-                pgh.connect();
-
-                filteredNoderefs =
-                        pgh.filterNodesByWorkspace( noderefs, workspaceId  );
-
-                pgh.close();
+                if (noderefs.size() > 0) {
+                    pgh.connect();
+                    
+                    filteredNoderefs =
+                            pgh.filterNodesByWorkspace( noderefs, workspaceId  );
+    
+                    pgh.close();
+                }
             } catch ( SQLException e ) {
                 e.printStackTrace();
             } catch ( ClassNotFoundException e ) {
