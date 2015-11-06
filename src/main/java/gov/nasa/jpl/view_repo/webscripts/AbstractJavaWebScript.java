@@ -268,8 +268,6 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
             if(compareMmsVersions(req, getResponse(), status))
             {
                 model.put("res", createResponseJson());
-                System.out.println("Printing Model");
-                System.out.println(model.toString());
                 return model;
             }
         }
@@ -2061,7 +2059,6 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         switch (logCase) {
             case '1' :
                 log(Level.INFO, HttpServletResponse.SC_OK, "Correct Versions");
-                incorrectVersion = false;
                 break;
             case '2' :
                 log(Level.WARN, HttpServletResponse.SC_CONFLICT,
@@ -2085,7 +2082,6 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         // compare it
         // Returns false if it was successful in retrieving the mmsVersions from
         // both the MMS and the request and
-        System.out.println("Returning the boolean value" + incorrectVersion);
         return incorrectVersion;
     }
 
