@@ -295,6 +295,33 @@
     },
 
     {
+        "sysmlid" : "Value",
+        "name" : "Value",
+        "owner" : "operations",
+        "specialization" : {
+            "type" : "Operation"
+        }
+    },
+
+    {
+        "sysmlid" : "Id",
+        "name" : "Id",
+        "owner" : "operations",
+        "specialization" : {
+            "type" : "Operation"
+        }
+    },
+
+    {
+        "sysmlid" : "Type",
+        "name" : "Type",
+        "owner" : "operations",
+        "specialization" : {
+            "type" : "Operation"
+        }
+    },
+
+    {
         "sysmlid" : "List",
         "name" : "List",
         "owner" : "operations",

@@ -2006,26 +2006,44 @@ System.out.println("RRRRRRRRRRRRR");
     }
 
     // TODO dont like dependence on BAE for Call here....
-    public Collection< Object >
-    		map( Collection< Object > elements,
+    public Collection< ? >
+    		map( Collection< ? > elements,
     			 Call call) throws InvocationTargetException {
 
-    	return call.map( elements, 1 );
+        // Flatten the arguments if necessary.
+        elements = flattenSubArgumentsForCall( elements, call,
+                                               1 );
+
+        
+        Collection< ? > result = call.map( elements, 1 );
+        System.out.println("map(" + elements + ", " + call + ", 1) = " + result);
+        return result;
     }
 
     public Collection< Object >
             map( Collection< Object > elements, Call call,
                  int indexOfObjectArgument ) throws InvocationTargetException {
 
-        return call.map( elements, indexOfObjectArgument );
+        Collection< Object > result = call.map( elements, indexOfObjectArgument );
+        System.out.println("map(" + elements + ", " + call + ", " + indexOfObjectArgument + ") = " + result);
+        return result;
     }
     
-    public Collection< Object > map( Collection< Object > elements, Call call,
-                                     int indexOfObjectArgument,
-                                     Vector< Object > otherArguments )
-                                             throws InvocationTargetException {
-        call.getParameterTypes();
-        int argsSize = call.getArgumentVector().size();
+    public Collection< ? > map( Collection< ? > elements,
+                                   FunctionCall call,
+                                   int indexOfObjectArgument,
+                                   Object... otherArguments )
+                                           throws InvocationTargetException {
+        Vector<Object> vector = 
+                new Vector< Object >( Arrays.asList( otherArguments ) );
+        return map( elements, call, indexOfObjectArgument, vector );
+    }
+    
+    protected void initializeCallArgumentsForSub( Call call,
+                                                  int indexOfObjectArgument,
+                                                  Vector< Object > otherArguments ) {
+        int argsSize = call.getParameterTypes().length;
+        //int argsSize = call.getArgumentVector().size();
         int otherArgsSize = otherArguments.size();
         // Make sure there are enough arguments. We assume that one to be
         // substituted is skipped unless we can determine otherwise. In the case
@@ -2041,24 +2059,68 @@ System.out.println("RRRRRRRRRRRRR");
         }
         // See if we have strong evidence that the substituted arg is included
         // in otherArguments.  By default, we assume not.
-        boolean otherArgsIncludesSubstitute =
-                ( argsSize == otherArgsSize && !call.isVarArgs() ) ||
-                ( argsSize - 1 == otherArgsSize );
+        boolean otherArgsIncludesSubstitute = false;
+//                ( argsSize == otherArgsSize && !call.isVarArgs() ) ||
+//                ( argsSize - 1 == otherArgsSize );
 
         // Set otherArguments before invoking
-        for ( int i = 0, j = 0; i < argsSize && j < otherArgsSize; ++i, ++j ) {
+        for ( int i = 1, j = 0; j < otherArgsSize; ++i, ++j ) {
             // skip the one to be substituted unless the otherArguments includes 
             if ( i != indexOfObjectArgument || otherArgsIncludesSubstitute ) {
-                call.setArgument( i, otherArguments.get( j ) );
+                call.setArgument( i-1, otherArguments.get( j ) );
             } else {
                 --j;
+                // Put null in for arg to be substituted.
+                call.setArgument( i-1, null ); //Utils.isNullOrEmpty( elements ) ? null : elements.iterator().next() );
             }
         }
+
+    }
+    
+    public Collection< ? > map( Collection< ? > elements, Call call,
+                                     int indexOfObjectArgument,
+                                     Vector< Object > otherArguments )
+                                             throws InvocationTargetException {
+        if ( Utils.isNullOrEmpty( elements ) ) return Utils.newList();
+        
+        initializeCallArgumentsForSub( call, indexOfObjectArgument, otherArguments );
+        
+        // Flatten the arguments if necessary.
+        elements = flattenSubArgumentsForCall( elements, call,
+                                               indexOfObjectArgument );
         
         // invoke the map
-        Collection< Object > result = call.map( elements, 1 );
+        Collection< ? > result = call.map( elements, indexOfObjectArgument );
         System.out.println("map(" + elements + ", " + call + ", " + indexOfObjectArgument + ", " + otherArguments + ") = " + result);
         return result;
+    }
+    
+    protected static Collection< ? >
+            flattenSubArgumentsForCall( Collection< ? > elements, Call call,
+                                        int indexOfObjectArgument ) {
+        // Check if all arguments are collections.
+        boolean someTypeCollection = false;
+        boolean someNotTypeCollection = false;
+        for ( Object element : elements ) {
+            if ( element instanceof Collection )  {
+                someTypeCollection = true;
+                if ( someNotTypeCollection ) break;
+            } else {
+                someNotTypeCollection = true;
+                if ( someTypeCollection ) break;
+            }
+        }
+        // If all arguments are collections, see if they are supposed to be
+        // Collections.
+        if ( someTypeCollection && !someNotTypeCollection ) {
+            Class< ? > objTypeReqd = call.getTypeForSubstitutionIndex( indexOfObjectArgument );
+            if ( objTypeReqd != null 
+                 && !Collection.class.isAssignableFrom( objTypeReqd ) ) {
+                ArrayList< ? > newElements = Utils.flatten( elements, objTypeReqd );
+                return newElements;
+            }
+        }
+        return elements;
     }
 
     // TODO dont like dependence on BAE for Call here....
@@ -2155,64 +2217,45 @@ System.out.println("RRRRRRRRRRRRR");
         return CompareUtils.compare(o1, o2) == 0;
     }
     
-    public Collection< Object > filter( Collection< Object > elements,
-                                        FunctionCall call,
-                                        int indexOfObjectArgument,
-                                        Object... otherArguments )
-                                             throws InvocationTargetException {
+    public Collection< ? > filter( Collection< ? > elements,
+                                   FunctionCall call,
+                                   int indexOfObjectArgument,
+                                   Object... otherArguments )
+                                           throws InvocationTargetException {
         Vector<Object> vector = 
                 new Vector< Object >( Arrays.asList( otherArguments ) );
         return filter( elements, call, indexOfObjectArgument, vector );
     }
-    public Collection< Object > filter( Collection< Object > elements,
+    public Collection< ? > filter( Collection< ? > elements,
                                         FunctionCall call,
                                         int indexOfObjectArgument,
                                         Vector< Object > otherArguments )
                                              throws InvocationTargetException {
-        Class< ? >[] paramTypes = call.getParameterTypes();
-        int paramSize = paramTypes.length;
-        int argsSize = call.getArgumentVector().size();
-        int otherArgsSize = otherArguments.size();
-        // Make sure there are enough arguments. We assume that one to be
-        // substituted is skipped unless we can determine otherwise. In the case
-        // of a variable number of arguments, otherArguments may not provide
-        // one, which is legal, so otherArguments can be two short.
-        if ( argsSize == 0
-             && ( indexOfObjectArgument > 0 || otherArgsSize > 0 || ( paramSize > 0 && !call.isVarArgs() ) ) ) {
-            Vector< Object > v = new Vector< Object >();
-            int numArgs = Math.max( otherArgsSize + 1, indexOfObjectArgument + 1 );
-            for ( int i = 0; i < numArgs; ++i ) {
-                v.add( null );
-            }
-            call.setArguments( v );
-            argsSize = v.size();
-        } else if ( argsSize > otherArgsSize + 1 + ( call.isVarArgs() ? 1 : 0 ) ) {
-            // TODO -- error
-        }
-        // Make sure there are not too many arguments if the call does not have
-        // a variable number of arguments.
-        else if ( argsSize < otherArgsSize && !call.isVarArgs() ) {
-            // TODO -- error
-        }
-        // See if we have strong evidence that the substituted arg is included
-        // in otherArguments.  By default, we assume not.
-        boolean otherArgsIncludesSubstitute =
-                ( argsSize == otherArgsSize && !call.isVarArgs() );// ||
-                //( argsSize - 1 == otherArgsSize );
 
-        // Set otherArguments before invoking
-        for ( int i = 0, j = 0; i < argsSize && j < otherArgsSize; ++i, ++j ) {
-            // skip the one to be substituted unless the otherArguments includes 
-            if ( i != indexOfObjectArgument - 1 || otherArgsIncludesSubstitute ) {
-                call.setArgument( i, otherArguments.get( j ) );
-            } else {
-                --j;
-            }
-        }
+        initializeCallArgumentsForSub( call, indexOfObjectArgument, otherArguments );
         
+        // Flatten the arguments if necessary.
+        elements = flattenSubArgumentsForCall( elements, call,
+                                               indexOfObjectArgument );
+
         // invoke the filter
-        Collection< Object > result = call.filter( elements, 1 );
+        Collection< ? > result = call.filter( elements, indexOfObjectArgument );
         System.out.println("filter(" + elements + ", " + call + ", " + indexOfObjectArgument + ", " + otherArguments + ") = " + result);
+        return result;
+    }
+    
+    public Object fold( Collection<?> elements, FunctionCall call,
+                        Object initialValue, int indexOfObjectArgument,
+                        int indexOfPriorResultArgument ) {
+        initializeCallArgumentsForSub( call, indexOfObjectArgument, 
+                                       new Vector<Object>() );
+        
+        // Flatten the arguments if necessary.
+        elements = flattenSubArgumentsForCall( elements, call,
+                                               indexOfObjectArgument );
+
+        Object result = call.fold( elements, initialValue, indexOfObjectArgument,
+                                   indexOfPriorResultArgument );
         return result;
     }
     
@@ -2247,16 +2290,45 @@ System.out.println("RRRRRRRRRRRRR");
         return false;
     }
 
+    public boolean isA( Object[] o, String type ) {
+        if ( type.toLowerCase().startsWith( "array" ) ) {
+            return true;
+        }
+        Object arr[] = (Object[])o;
+        for ( Object oo : arr ) {
+            if ( !isA( arr[0], type ) ) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public boolean isA( Collection< ? > o, String type ) {
+        return isA( ((Collection<?>)o).toArray(), type );
+    }
+
+    public boolean isA( EmsScriptNode n, String type ) {
+        if ( !NodeUtil.scriptNodeExists( n.getNodeRef() ) ) return false;
+        if ( isARecursive( n, type, null ) ) {
+            return true;
+        }
+        return false;
+    }
     
     public boolean isA( Object o, String type ) {
         System.out.println("SSSSSSSSSSSSSSSSSSSSSSSSS");
         if (o == null || Utils.isNullOrEmpty( type ) ) return false;
-        if ( o instanceof EmsScriptNode ) {
+        if ( o.getClass().getSimpleName().toLowerCase().startsWith( type.toLowerCase() ) ) {
+            return true;
+        }
+        if ( o.getClass().isArray() ) {
+            Object arr[] = (Object[])o;
+            return isA(arr, type);
+        } else if ( o instanceof Collection ) {
+            return isA( (Collection<?>)o, type );
+        } else if ( o instanceof EmsScriptNode ) {
             EmsScriptNode n = (EmsScriptNode)o;
-            if ( !NodeUtil.scriptNodeExists( n.getNodeRef() ) ) return false;
-            if ( isARecursive( n, type, null ) ) {
-                return true;
-            }
+            return isA( n, type );
         }
         return false;
     }
@@ -2291,6 +2363,10 @@ System.out.println("RRRRRRRRRRRRR");
             if ( o instanceof NodeRef ) {
                 EmsScriptNode newType = new EmsScriptNode( (NodeRef)o, getServices() );
                 if ( isARecursive( newType, type, seen ) ) {
+                    return true;
+                }
+            } else if ( o instanceof String ) {
+                if ( ((String)o).equals( type ) ) {
                     return true;
                 }
             }

@@ -136,7 +136,7 @@ public class List extends ArrayList< Viewable< EmsScriptNode > >
                 this.add( new Text( "" + obj ) );
             }
             // ERROR
-            Debug.error(true, false, "bad arg to List(Object[]): " + c);
+            //Debug.error(true, false, "bad arg to List(Object[]): " + c);
         }
     }
 
