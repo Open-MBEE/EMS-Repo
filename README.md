@@ -14,7 +14,7 @@
 4. Right click your project and run maven >> Update project
 5. Install jrebel and scala from Eclipse using Help >> Eclipse Marketplace
 6. From the command line navigate to git/alfresco-view-repo  and update the last line sudo vim /etc/hosts to read:
-	
+	 
 		127.0.0.1  'your-machine-name'
 
 7. Run this script from the command line:
@@ -98,7 +98,7 @@ Eclipse/Maven
 		
     You might want to avoid yoxos.
 
-    For a fresh Eclipse Indigo for JavaEE installation, install new software: egit and maven (no need to add update site)
+    For a fresh copy of the latest Eclipse for JavaEE installation, install new software: egit and maven (no need to add update site)
     		- If Maven is not installed in Eclipse, go to Help -> Eclipse Marketplace -> type in "m2eclipse" in search box 
 		      & install the first item (Maven Integration for Eclipse WTP (Juno))	
 

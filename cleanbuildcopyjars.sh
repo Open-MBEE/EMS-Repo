@@ -4,24 +4,24 @@
 ################################################################################
 
 
-echo " ";
-echo " ";
+#echo " ";
+#echo " ";
 echo "----------<==========================>----------";
-echo " ";
-echo " ";
+#echo " ";
+#echo " ";
 echo "Changing directory to BAE..."
-echo " ";
+#echo " ";
 echo "cd ../bae";
 cd ../bae;
-echo " ";
+#echo " ";
 echo "Cleaning bae repository...";
-echo " ";
+#echo " ";
 echo "mvn clean";
-echo " ";
+#echo " ";
 mvn clean;
 echo "Clean complete!"
-echo " ";
-echo " ";
+#echo " ";
+#echo " ";
 
 echo "----------<==========================>----------";
 
@@ -92,6 +92,41 @@ echo " ";
 echo "----------<==========================>----------";
 
 ################################################################################
+
+echo " ";
+echo " ";
+echo "Changing directory to util...";
+echo " ";
+echo "cd ../util";
+cd ../util;
+echo " ";
+echo "Building util jar...";
+mvn package;
+echo " ";
+echo "Packaging complete!";
+echo " ";
+echo " ";
+
+echo "----------<==========================>----------";
+
+echo " ";
+echo " ";
+echo "Changing directory to sysml...";
+echo " ";
+echo "cd ../sysml";
+cd ../sysml;
+echo " ";
+echo "Building sysml jar...";
+mvn package;
+echo " ";
+echo "Packaging complete!";
+echo " ";
+echo " ";
+
+echo "----------<==========================>----------";
+
+echo " ";
+echo " ";
 echo " ";
 echo " ";
 echo "Changing directory to BAE...";
@@ -124,38 +159,6 @@ echo " ";
 
 echo "----------<==========================>----------";
 
-echo " ";
-echo " ";
-echo "Changing directory to util...";
-echo " ";
-echo "cd ../util";
-cd ../util;
-echo " ";
-echo "Building util jar...";
-mvn package;
-echo " ";
-echo "Packaging complete!";
-echo " ";
-echo " ";
-
-echo "----------<==========================>----------";
-
-echo " ";
-echo " ";
-echo "Changing directory to sysml...";
-echo " ";
-echo "cd ../sysml";
-cd ../sysml;
-echo " ";
-echo "Building sysml jar...";
-mvn package;
-echo " ";
-echo "Packaging complete!";
-echo " ";
-echo " ";
-echo "----------<==========================>----------";
-echo " ";
-echo " ";
 
 echo "changing to Alfresco-view-repo";
 echo " ";
@@ -181,17 +184,17 @@ echo " ";
 echo " ";
 echo "Copying jar files...";
 echo " ";
-echo 'mv ../bae/target/bae-2.2.0-SNAPSHOT.jar ./src/main/amp/web/WEB-INF/lib/ae.jar';
-mv "../bae/target/bae-2.2.0-SNAPSHOT.jar" "./src/main/amp/web/WEB-INF/lib/ae.jar";
+echo 'mv ../bae/target/bae*[T0-9].jar ./src/main/amp/web/WEB-INF/lib/AE.jar'
+mv ../bae/target/bae*[T0-9].jar ./src/main/amp/web/WEB-INF/lib/AE.jar
 echo " ";
 echo " ";
-echo "mv ../util/target/mbee_util-2.2.0-SNAPSHOT.jar ./src/main/amp/web/WEB-INF/lib/mbee_util.jar";
-mv "../util/target/mbee_util-2.2.0-SNAPSHOT.jar" "./src/main/amp/web/WEB-INF/lib/mbee_util.jar";
+echo "mv ../util/target/mbee_util*[T0-9].jar ./src/main/amp/web/WEB-INF/lib/mbee_util.jar"
+mv ../util/target/mbee_util*[T0-9].jar ./src/main/amp/web/WEB-INF/lib/mbee_util.jar
 echo " ";
 echo " ";
-echo "../sysml/target/sysml-2.2.0-SNAPSHOT.jar ./src/main/amp/web/WEB-INF/lib/sysml.jar";
-mv "../sysml/target/sysml-2.2.0-SNAPSHOT.jar" "./src/main/amp/web/WEB-INF/lib/sysml.jar";
+echo "mv ../sysml/target/sysml*[T0-9].jar ./src/main/amp/web/WEB-INF/lib/sysml.jar"
+mv ../sysml/target/sysml*[T0-9].jar ./src/main/amp/web/WEB-INF/lib/sysml.jar
 echo " ";
 echo " ";
-echo "mv ../klang/target/klang-2.2.0-SNAPSHOT.jar ./src/main/amp/web/WEB-INF/lib/klang.jar";
-mv "../klang/target/klang-2.2.0-SNAPSHOT.jar" "./src/main/amp/web/WEB-INF/lib/klang.jar";
+echo "mv ../klang/target/klang*[T0-9].jar ./src/main/amp/web/WEB-INF/lib/klang.jar";
+mv ../klang/target/klang*[T0-9].jar ./src/main/amp/web/WEB-INF/lib/klang.jar
