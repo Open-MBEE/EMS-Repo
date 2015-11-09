@@ -58,6 +58,8 @@ import gov.nasa.jpl.view_repo.webscripts.util.ShareUtils;
 
 
 
+
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -76,6 +78,8 @@ import java.util.TreeSet;
 import javax.servlet.http.HttpServletResponse;
 
 import k.frontend.Frontend;
+
+
 
 
 
@@ -2084,7 +2088,7 @@ public class ModelPost extends AbstractJavaWebScript {
             
             EmsScriptNode childSite;
             EmsScriptNode oldChildParentSite;
-            for (EmsScriptNode child : EmsScriptNode.toEmsScriptNodeList( children)) {
+            for (EmsScriptNode child : nodeToUpdate.toEmsScriptNodeList( children)) {
                 
                 childSite = child.getPropertyElement(Acm.ACM_SITE_SITE , true, null, null );
                 
@@ -2379,8 +2383,9 @@ public class ModelPost extends AbstractJavaWebScript {
                         }
                     };
                     
+                    UpdateViewHierarchy uvh = new UpdateViewHierarchy( this );
                     // Handle view and association changes
-                    addJsonForViewHierarchyChanges( postJson );
+                    uvh.addJsonForViewHierarchyChanges( postJson );
                     
                     // FIXME: this is a hack to get the right site permissions
                     // if DB rolled back, it's because the no_site node couldn't be created
@@ -2415,245 +2420,6 @@ public class ModelPost extends AbstractJavaWebScript {
         }
 
         return model;
-    }
-    
-    /**
-     * Add json for changes to Associations, Views, and Products based on
-     * changes in the posted json to elements of the same classes.
-     * <p>
-     * 
-     * 
-     * @param postJson
-     * @return
-     */
-    protected void addJsonForViewHierarchyChanges( JSONObject jsonObject ) {
-        if ( jsonObject == null ) return; // null;
-        
-        Map<String, String> owners = new LinkedHashMap< String, String >();
-        Map<String, ArrayList<String> > elementOwnedAttributes = new LinkedHashMap< String, ArrayList<String> >();
-        //Map<String, String> viewOwners = new HashMap< String, String >();
-        Map<String, ArrayList<String> > viewOwners = new LinkedHashMap< String, ArrayList<String> >();
-        Map<String, ArrayList<String> > viewChildViews = new LinkedHashMap< String, ArrayList<String> >();
-        Map<String, JSONObject> viewsInJson = new LinkedHashMap< String, JSONObject >();
-        Map<String, JSONObject> viewAssociationsInJson = new LinkedHashMap< String, JSONObject >();
-        Map<String, JSONObject> viewAssociations = new LinkedHashMap< String, JSONObject >();
-        Map<String, JSONObject> associations = new LinkedHashMap< String, JSONObject >();
-        Map<String, JSONObject> associationSources = new LinkedHashMap< String, JSONObject >();
-        Map<String, JSONObject> associationTargets = new LinkedHashMap< String, JSONObject >();
-        Map<String, JSONObject> elementsInJson = new LinkedHashMap< String, JSONObject >();
-        
-        // Pull stuff out of json
-        JSONArray elementsJson = jsonObject.optJSONArray( "elements" );
-        if ( elementsJson != null && elementsJson.length() > 0 ) {
-            for ( int i = 0; i < elementsJson.length(); ++i ) {
-                JSONObject elementJson = elementsJson.optJSONObject( i );
-                if ( elementJson != null ) {
-
-                    String id = elementJson.optString( "sysmlid" );
-                    if ( Utils.isNullOrEmpty( id ) ) {
-                        id = NodeUtil.createId( getServices() );
-                        elementJson.put( "sysmlid", id );
-                    }
-                    elementsInJson.put( id, elementJson );
-                    
-                    JSONObject spec = elementJson.optJSONObject( "specialization" );
-                    if ( spec != null ) {
-                        String type = spec.optString( "type" );
-                        if ( "View".equals( type ) || "Product".equals( type ) ) {
-                            //viewInJson = true;
-                            
-                            viewsInJson.put( id, elementJson );
-                            
-                            String owner = elementJson.optString( "owner" );
-                            if ( !Utils.isNullOrEmpty( owner ) ) {
-                                owners.put( id, owner );
-                            }
-                            
-                            JSONArray childViewsArray = 
-                                    spec.optJSONArray( Acm.JSON_CHILD_VIEWS );
-                            if ( childViewsArray != null ) {
-                                childViewsArray = 
-                                        elementJson.optJSONArray( Acm.JSON_CHILD_VIEWS );
-                            }
-                            if ( childViewsArray != null ) {
-                                ArrayList<String> childViews = new ArrayList< String >();
-                                for ( int j=0; j < childViewsArray.length(); ++j ) {
-                                    String childView = childViewsArray.optString( j );
-                                    childViews.add( childView );
-                                    ArrayList<String> viewOwnerSet = viewOwners.get( childView );
-                                    if ( viewOwnerSet == null ) {
-                                        viewOwnerSet = new ArrayList< String >();
-                                        viewOwners.put( childView, viewOwnerSet );
-                                    }
-                                    viewOwnerSet.add( id );
-                                }
-                                viewChildViews.put( id, childViews );
-                            }
-                            
-                            JSONArray ownedAttributesArray = 
-                                    spec.optJSONArray( Acm.JSON_OWNED_ATTRIBUTE );
-                            if ( ownedAttributesArray == null ) {
-                                ownedAttributesArray = 
-                                        elementJson.optJSONArray( Acm.JSON_OWNED_ATTRIBUTE );
-                            }
-                            if ( ownedAttributesArray != null ) {
-                                ArrayList<String> ownedAttributes = new ArrayList< String >();
-                                for ( int j=0; j < ownedAttributesArray.length(); ++j ) {
-                                    String ownedAttribute = ownedAttributesArray.optString( j );
-                                    ownedAttributes.add( ownedAttribute );
-                                }
-                                elementOwnedAttributes.put( id, ownedAttributes );
-                            }
-                        } else if ( "Association".equals( type ) ) {
-                            associations.put( id, elementJson );
-                            String sourceId = spec.optString("source");
-                            if ( !Utils.isNullOrEmpty( sourceId ) ) {
-                                associationSources.put( sourceId, elementJson );
-                            }
-                            String targetId = spec.optString("target");
-                            if ( !Utils.isNullOrEmpty( targetId ) ) {
-                                associationSources.put( targetId, elementJson );
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        // Make sure that the ownedAttributes and Associations agree with the childViews.
-        for ( Entry< String, ArrayList< String > > e : viewChildViews.entrySet() ) {
-            String parent = e.getKey();
-            ArrayList< String > childViewsArray = e.getValue();
-            
-            // Set up to iterate over ownedAttributes.
-            ArrayList< String > ownedAttributeIds =
-                    elementOwnedAttributes.get( parent );
-            String ownedAttributeId = null;
-            String viewIdForOwnedAttribute = null;
-            Iterator< String > attrIter = null;
-            if ( !Utils.isNullOrEmpty( ownedAttributeIds ) ) {
-                attrIter = ownedAttributeIds.iterator();
-                ownedAttributeId = attrIter.next();
-                viewIdForOwnedAttribute = 
-                        getViewIdForOwnedAttribute( ownedAttributeId, elementsInJson );
-            }
-            for ( String childId : childViewsArray ) {
-                // First check to see if the ownedAttributes are correct.
-                if ( viewIdForOwnedAttribute != null ) {
-                    // TODO
-                    //if (  ) {
-                    //}
-                }
-                
-                // Now check to see if the Association agrees.
-                // TODO
-            }
-        }
-        
-        
-        for ( Entry<String, JSONObject> e : associationSources.entrySet() ) {
-            String sourceId = e.getKey();
-            
-        }
-
-        // For each new view that does not have one, create an
-        // InstanceSpecification and make the view its parent. The contents of
-        // the new view will be an InstanceValue in an Expression that references this
-        // InstanceSpecification.
-
-        // The ownedAttributes and childViews must agree on ordering. A parent
-        // view's ownedAttributes include Properties, whose propertyTypes are
-        // childViews to its child views. The childViews are the ordered ids of
-        // the child views. Posted childViews override the ownedAttributes.
-
-        // Add a view, v, to a parent, p, by finding the association with its
-        // current parent, and changing it to point to the new one. If there is
-        // no association, generate the json from a template.
-        
-        // Move the new or updated association (change its owner) to the first
-        // Package found walking from the parent up the owner chain. If no
-        // Package is found, place it directly under the project.
-        
-        
-        
-        // The view is added to the parent if the parent is specified, and the
-        // view was not already added to the parent.
-        
-        // Add a "childViews" to the content model and output JSON: this should interpret the
-        // ownedAttribute of the view/product and give back:
-        //   [ {"id", childViewId, "aggregation": "composite", "shared", or "none"}
-        //   , ...]
-        // where
-        // childViewId is the sysmlid of the propertyType of ownedAttribute
-        // properties, if it's also a view/product, aggregation is the
-        // aggregation of the ownedAttribute property. Ordering matters!
-        
-        // childViews can change if the ownedAttributes or aggregationType of a Property changes. 
-        
-        // Clear out view2view in the Product or keep it consistent with the
-        // childViews/InstanceSpecs.
-        
-        // A View, v, is added to a parent, p, by creating 
-        // * a composite Association, a, owning
-        //   * a Property of type p, pp, (also including pp as an ownedEnd) and
-        // * a Property of type v, pv, which is an ownedAttribute of p.
-
-        
-        //return jsonObject;
-    }
-
-    protected String getViewIdForOwnedAttribute( String ownedAttributeId,
-                                                 Map< String, JSONObject > elementsInJson ) {
-        //String viewId = null;
-        JSONObject ownedAttributeJson = elementsInJson.get( ownedAttributeId );
-        if ( ownedAttributeJson != null ) {
-            String propType = ownedAttributeJson.optString( Acm.JSON_PROPERTY_TYPE );
-            if ( !Utils.isNullOrEmpty( propType ) ) {
-                return propType;
-            }
-        }
-        
-        // Find in existing model database.
-        EmsScriptNode ownedAttributeNode = 
-                findScriptNodeById( ownedAttributeId, myWorkspace, null, false );
-        if ( NodeUtil.exists( ownedAttributeNode ) ) {
-            Object propType = 
-                    ownedAttributeNode.getNodeRefProperty( Acm.ACM_PROPERTY_TYPE,
-                                                           null, myWorkspace );
-            Collection<?> propTypes = null;
-            if ( propType instanceof Collection ) {
-                propTypes = (Collection<?>)propType;
-            } else if ( propType instanceof NodeRef ) {
-                propTypes = Utils.newList( propType );                
-            }
-            for ( Object pType : propTypes ) {
-                if ( isView(  pType ) ) {
-                    if ( pType instanceof NodeRef ) {
-                        EmsScriptNode propTypeNode =
-                                new EmsScriptNode( (NodeRef)pType, getServices() );
-                        if ( NodeUtil.exists( propTypeNode )
-                             && propTypeNode.hasOrInheritsAspect( Acm.ACM_VIEW ) ) {
-                            return propTypeNode.getSysmlId();
-                        }
-                    } else if ( pType instanceof String ) {
-                        return (String)pType;
-                    }
-                }
-            }
-        }
-        
-        return null;
-    }
-
-    public boolean isView( Object viewMaybe ) {
-        if ( viewMaybe instanceof EmsScriptNode ) {
-            return ((EmsScriptNode)viewMaybe).hasOrInheritsAspect( Acm.ACM_VIEW );
-        } else if ( viewMaybe instanceof String ) {
-            EmsScriptNode node = 
-                    findScriptNodeById( (String)viewMaybe, myWorkspace, null, false );
-            return isView( node );
-        }
-        return false;
     }
     
     public static JSONObject kToJson( String k ) {

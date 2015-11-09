@@ -814,12 +814,12 @@ public class EmsScriptNode extends ScriptNode implements
     }
 
     public List< EmsScriptNode >
-            toEmsScriptNodeList( ArrayList< NodeRef > resultSet ) {
+            toEmsScriptNodeList( List< NodeRef > resultSet ) {
         return toEmsScriptNodeList( resultSet, services, response, status );
     }
 
     public static List< EmsScriptNode >
-            toEmsScriptNodeList( ArrayList< NodeRef > resultSet,
+            toEmsScriptNodeList( List< NodeRef > resultSet,
                                  // Date dateTime,
                                  ServiceRegistry services,
                                  StringBuffer response, Status status ) {
