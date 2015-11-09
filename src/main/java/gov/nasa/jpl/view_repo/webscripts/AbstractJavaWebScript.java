@@ -898,12 +898,14 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
 	    ResultSet results = null;
         String queryPattern = type + pattern + "\"";
         results = NodeUtil.luceneSearch( queryPattern, services );
-        ArrayList< NodeRef > resultList =
-                NodeUtil.resultSetToNodeRefList( results );
-        results.close();
-        for (NodeRef nr: resultList) {
-            EmsScriptNode node = new EmsScriptNode(nr, services, response);
-            resultsMap.put( node.getNodeRef().toString(), node );
+        if (results != null) {
+            ArrayList< NodeRef > resultList =
+                    NodeUtil.resultSetToNodeRefList( results );
+            results.close();
+            for (NodeRef nr: resultList) {
+                EmsScriptNode node = new EmsScriptNode(nr, services, response);
+                resultsMap.put( node.getNodeRef().toString(), node );
+            }
         }
         return resultsMap;
 	}

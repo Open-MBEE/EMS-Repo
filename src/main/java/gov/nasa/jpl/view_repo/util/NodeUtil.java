@@ -1065,7 +1065,13 @@ public class NodeUtil {
 		}
 		ResultSet results = null;
 		if (searchService != null) {
-			results = searchService.query(getSearchParameters(queryPattern));
+		    try {
+		        results = searchService.query(getSearchParameters(queryPattern));
+		    } catch (Exception e) {
+		        logger.warn( "Lucene exception caught, dumping stack and returning null" );
+		        e.printStackTrace();
+		        results = null;
+		    }
 		}
 		if (Debug.isOn()) {
 			Debug.outln("luceneSearch(" + queryPattern + "): returned "

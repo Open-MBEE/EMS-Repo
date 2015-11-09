@@ -3151,6 +3151,7 @@ public class EmsScriptNode extends ScriptNode implements
                             NodeUtil.getNodeFromPostgresNode( pgh.getNodeFromSysmlId( rootParentId ) );
                     relatedDoc.put( "name",
                                     (String)rootParentNode.getProperty( Acm.ACM_NAME ) );
+                    relatedDoc.put( "siteCharacterization", this.getSiteCharacterizationId( null, ws ));
                     JSONArray parentViews = new JSONArray();
                     for ( String immediateParentId : root2immediate.get( rootParentId ) ) {
                         JSONObject parentView = new JSONObject();

@@ -42,8 +42,10 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -140,6 +142,16 @@ public class ModelSearch extends ModelGet {
                                                      ? new String[] { "documentation" }
                                                      : req.getParameter( "filters" )
                                                           .split( "," );
+        
+        // add all if necessary                                             
+        for (int ii = 0; ii < filters.length; ii++) {
+            if (filters[ii].equalsIgnoreCase( "all" ) || filters[ii].equals( "*" )) {
+                Set<String> allFilterKeys = searchTypesMap.keySet();
+                filters = allFilterKeys.toArray( new String[allFilterKeys.size()] );
+                break;
+            }
+        }
+        
         boolean evaluate = getBooleanArg( req, "evaluate", false );
 
         if ( !Utils.isNullOrEmpty( keyword ) ) {
