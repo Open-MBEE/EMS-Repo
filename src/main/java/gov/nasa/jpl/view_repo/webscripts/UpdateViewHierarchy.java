@@ -289,44 +289,6 @@ public class UpdateViewHierarchy {
                     if ( matched ) break;
                 }
                 
-//                // At this point, either there is a match, or we are finished
-//                // iterating through ownedAttributes.
-//                
-//                // If childView and ownedAttribute match, then
-//                // then make sure that the Association is okay.
-//                if ( viewIdForOwnedAttribute != null &&
-//                        viewIdForOwnedAttribute.equals( childId ) ) {
-//                    // Match!
-//                    // Make sure that the Association is correct.
-//                    updateOrCreateAssociation( parent, ownedAttributeId, childId );
-//                    
-//                } else {
-//                    // There are no more owned attributes.
-//                    // So we have an unmatched child view.  We may have skipped the ownedAttribute for this in the while loop above.
-//                    // So, it's either a reordered view or a new view for the parent.
-//
-//                    // The childView and ownedAttribute for view do not
-//                    // match, so either the views were reordered, or the child
-//                    // view was lost.
-//                    if ( childViewsArray.contains( viewIdForOwnedAttribute ) ) {
-//                        // (1) reordered
-//                        newOwnedAttributes.add( ownedAttributeIdsForViewIds.get( childId ) );
-//                    } else {
-//                        // (3) view lost -- remove Association
-//                        removeAssociation( parent, ownedAttributeId, childId );
-//                    }
-//                }
-                
-//                // Get next ownedAttribute.
-//                if ( attrIter.hasNext() ) {
-//                    ownedAttributeId = attrIter.next();
-//                    viewIdForOwnedAttribute =
-//                            getViewIdForOwnedAttribute( ownedAttributeId,
-//                                                        elementsInJson );
-//                } else {
-//                    ownedAttributeId = null;
-//                    viewIdForOwnedAttribute = null;
-//                }
             }
             
             if ( ownedAttributesChanged ) {
@@ -551,47 +513,8 @@ public class UpdateViewHierarchy {
 
         List< EmsScriptNode > deleteNodes = getAssociationNodes( parentId, propertyId, childId );
         List< String > deleteIds = EmsScriptNode.getSysmlIds( deleteNodes );
-//        // delete in DB
-//        List< String > deleteIds = new ArrayList< String >();
-//        List< EmsScriptNode > deleteNodes = new ArrayList< EmsScriptNode >();
-//        EmsScriptNode parentNode = 
-//                mp.findScriptNodeById( parentId, mp.myWorkspace, null, false );
-//        if ( NodeUtil.exists( parentNode ) ) {
-//            Set< EmsScriptNode > rels =
-//                    parentNode.getRelationships( null, mp.myWorkspace );
-//            for ( EmsScriptNode rel : rels ) {
-//                Object prop = rel.getNodeRefProperty( Acm.ACM_TARGET, null,
-//                                                      mp.myWorkspace );
-//                if ( prop instanceof NodeRef ) {
-//                    EmsScriptNode propNode =
-//                            new EmsScriptNode( (NodeRef)prop, mp.getServices() );
-//                    if ( NodeUtil.exists( propNode ) ) {
-//                        if ( propNode.hasOrInheritsAspect( Acm.ACM_PROPERTY ) ) {
-//                            Object propType =
-//                                    propNode.getNodeRefProperty( Acm.ACM_PROPERTY_TYPE,
-//                                                                 null,
-//                                                                 mp.myWorkspace );
-//                            if ( propType instanceof NodeRef ) {
-//                                EmsScriptNode node =
-//                                        new EmsScriptNode( (NodeRef)propType,
-//                                                           mp.getServices() );
-//                                if ( NodeUtil.exists( node ) ) {
-//                                    if (node.getSysmlId().equals( childId ) ) {
-//                                        deleteIds.add( propNode.getSysmlId() );
-//                                        deleteIds.add( node.getSysmlId() );
-//                                        deleteNodes.add( propNode );
-//                                        deleteNodes.add( node );
-//                                    }
-//                                }
-//                            }
-//                        }
-//                    }
-//                }
-//            }
-//        }
+
         deleteNodes( deleteIds );
-//        MmsModelDelete mmd = new MmsModelDelete( mp.repository, mp.getServices() );
-//        mmd.deleteNodes( deleteIds, mp.myWorkspace );
     }
 
     protected void deleteNodes(final List<String> ids) {
