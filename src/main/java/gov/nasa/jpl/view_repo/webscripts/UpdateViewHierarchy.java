@@ -1,10 +1,15 @@
 package gov.nasa.jpl.view_repo.webscripts;
 
 import gov.nasa.jpl.mbee.util.Debug;
+import gov.nasa.jpl.mbee.util.Pair;
 import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
+import gov.nasa.jpl.view_repo.util.EmsTransaction;
+import gov.nasa.jpl.view_repo.util.ModStatus;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
+import gov.nasa.jpl.view_repo.util.WorkspaceDiff;
+import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -147,8 +152,9 @@ public class UpdateViewHierarchy {
      * 
      * @param postJson
      * @return
+     * @throws Exception 
      */
-    protected void addJsonForViewHierarchyChanges( JSONObject jsonObj ) {
+    protected void addJsonForViewHierarchyChanges( JSONObject jsonObj ) throws Exception {
         if ( jsonObject == null ) return; // null;
         this.jsonObject = jsonObj;
         processJson( jsonObject );
@@ -401,44 +407,298 @@ public class UpdateViewHierarchy {
         }
         return null;
     }
-    
-    protected void removeAssociation( String parentId, String propertyId,
-                                      String childId ) {
 
+    protected void removeElement( String id ) {
+        this.removeElement( id, (Set<String>)null );
+    }
+    protected void removeElement( String id, Set< String > seen ) {
+        Pair< Boolean, Set< String >> p = Utils.seen( id, true, seen );
+        if ( p.first ) return;
+        seen = p.second;
+        
         // remove from JSON
-        Set< JSONObject > assocs = associationSources.get( parentId );
+        elementsInJson.remove( id );
+        elementOwnedAttributes.remove( id );
+        viewOwners.remove( id );
+        viewChildViews.remove( id );
+        viewsInJson.remove( id );
+        viewAssociations.remove( id );
+        viewAssociationsInJson.remove( id );
+        associations.remove( id );
+        associationSources.remove( id );
+        associationTargets.remove( id );
+        removeElement( id, this.jsonObject );
+
+        Set< JSONObject > assocs = associationSources.get( id );
+        assocs.addAll( associationTargets.get( id ) );
         for ( JSONObject assoc : assocs ) {
             String sysmlId = assoc.optString( "sysmlid" );
-            if ( this.elementsInJson.containsKey( sysmlId ) ) {
-                this.elementsInJson.remove( sysmlId );
-                removeElement( sysmlId, jsonObject );
+            if ( !Utils.isNullOrEmpty( sysmlId ) ) {
+                removeElement( sysmlId, seen );
             }
         }
-        associationSources.remove( parentId );
+    }
+    
 
-        // delete in DB
+    
+    /**
+     * Get associations relating the parent and Property with the specified
+     * property type. The parentId must be non-null and is the source of the
+     * associations. One of the propertyId and propertyTypeId may be null, in
+     * which case associations matching the non-null arguments are returned.
+     * 
+     * @param parentId
+     * @param propertyId
+     * @param propertyTypeId
+     * @return
+     */
+    protected List< String > getAssociationIdsFromJson( String parentId,
+                                                        String propertyId,
+                                                        String propertyTypeId ) {
+        if ( parentId == null ) {
+            // TODO -- error
+            return null;
+        }
+        if ( propertyId == null ) {
+            if ( propertyTypeId == null ) {
+                // TODO -- error
+                return null;
+            }
+        }
+        List< String > assocIds = new ArrayList< String >();
+        //String assocId = null;
+        Set< JSONObject > assocs = associationSources.get( parentId );
+        for ( JSONObject assoc : assocs ) {
+            boolean found = false;
+            String targetId = assoc.optString( "target" );
+            if ( propertyId != null && propertyId.equals( targetId ) ) {
+                found = true;
+            } else if ( propertyId == null && targetId != null && propertyTypeId != null ) {
+                String propType = getPropertyType( targetId );
+                if ( propertyTypeId.equals( propType ) ) {
+                    found = true;
+                }
+            }
+            if ( found ) {
+                String assocId = assoc.optString( "sysmlid" );
+                if ( assocId != null ) {
+                    assocIds.add( assocId );
+                }
+            }
+        }
+        return assocIds;
+    }
+
+    protected List< EmsScriptNode > getAssociationNodes( String parentId,
+                                                         String propertyId,
+                                                         String propertyTypeId ) {
+        if ( parentId == null ) {
+            // TODO -- error
+            return null;
+        }
+        if ( propertyId == null ) {
+            if ( propertyTypeId == null ) {
+                // TODO -- error
+                return null;
+            }
+        }
+        List< EmsScriptNode > assocNodes = new ArrayList< EmsScriptNode >();
         EmsScriptNode parentNode = 
                 mp.findScriptNodeById( parentId, mp.myWorkspace, null, false );
         if ( NodeUtil.exists( parentNode ) ) {
-            Set< EmsScriptNode > rels = parentNode.getRelationships( null, mp.myWorkspace );
+            Set< EmsScriptNode > rels =
+                    parentNode.getRelationships( null, mp.myWorkspace );
             for ( EmsScriptNode rel : rels ) {
-                Object prop = rel.getNodeRefProperty( Acm.ACM_TARGET, null, mp.myWorkspace );
+                Object prop = rel.getNodeRefProperty( Acm.ACM_TARGET, null,
+                                                      mp.myWorkspace );
                 if ( prop instanceof NodeRef ) {
-                    EmsScriptNode propNode = new EmsScriptNode( (NodeRef)prop, mp.getServices() );
+                    EmsScriptNode propNode =
+                            new EmsScriptNode( (NodeRef)prop, mp.getServices() );
                     if ( NodeUtil.exists( propNode ) ) {
-                        
+                        if ( propertyId == null || propNode.getSysmlId().equals( propertyId ) ) {
+                        if ( propNode.hasOrInheritsAspect( Acm.ACM_PROPERTY ) ) {
+                            Object propType =
+                                    propNode.getNodeRefProperty( Acm.ACM_PROPERTY_TYPE,
+                                                                 null,
+                                                                 mp.myWorkspace );
+                            if ( propType instanceof NodeRef ) {
+                                EmsScriptNode node =
+                                        new EmsScriptNode( (NodeRef)propType,
+                                                           mp.getServices() );
+                                if ( NodeUtil.exists( node ) ) {
+                                    if (propertyTypeId == null || node.getSysmlId().equals( propertyTypeId ) ) {
+                                        assocNodes.add( rel );
+                                    }
+                                }
+                            }
+                        }
+                        }
                     }
                 }
             }
         }
 
-        // TODO -- be sure to update maps.
-        // TODO Auto-generated method stub
+        return assocNodes;
+    }
+    
+    protected void removeAssociation( String parentId, String propertyId,
+                                      String childId ) throws Exception {
+
+        List< String > assocIds =
+                getAssociationIdsFromJson( parentId, propertyId, childId );
+        // TODO -- HERE!!
+        associationSources.remove( parentId );
+
+        List< EmsScriptNode > deleteNodes = getAssociationNodes( parentId, propertyId, childId );
+        List< String > deleteIds = EmsScriptNode.getSysmlIds( deleteNodes );
+//        // delete in DB
+//        List< String > deleteIds = new ArrayList< String >();
+//        List< EmsScriptNode > deleteNodes = new ArrayList< EmsScriptNode >();
+//        EmsScriptNode parentNode = 
+//                mp.findScriptNodeById( parentId, mp.myWorkspace, null, false );
+//        if ( NodeUtil.exists( parentNode ) ) {
+//            Set< EmsScriptNode > rels =
+//                    parentNode.getRelationships( null, mp.myWorkspace );
+//            for ( EmsScriptNode rel : rels ) {
+//                Object prop = rel.getNodeRefProperty( Acm.ACM_TARGET, null,
+//                                                      mp.myWorkspace );
+//                if ( prop instanceof NodeRef ) {
+//                    EmsScriptNode propNode =
+//                            new EmsScriptNode( (NodeRef)prop, mp.getServices() );
+//                    if ( NodeUtil.exists( propNode ) ) {
+//                        if ( propNode.hasOrInheritsAspect( Acm.ACM_PROPERTY ) ) {
+//                            Object propType =
+//                                    propNode.getNodeRefProperty( Acm.ACM_PROPERTY_TYPE,
+//                                                                 null,
+//                                                                 mp.myWorkspace );
+//                            if ( propType instanceof NodeRef ) {
+//                                EmsScriptNode node =
+//                                        new EmsScriptNode( (NodeRef)propType,
+//                                                           mp.getServices() );
+//                                if ( NodeUtil.exists( node ) ) {
+//                                    if (node.getSysmlId().equals( childId ) ) {
+//                                        deleteIds.add( propNode.getSysmlId() );
+//                                        deleteIds.add( node.getSysmlId() );
+//                                        deleteNodes.add( propNode );
+//                                        deleteNodes.add( node );
+//                                    }
+//                                }
+//                            }
+//                        }
+//                    }
+//                }
+//            }
+//        }
+        deleteNodes( deleteIds );
+//        MmsModelDelete mmd = new MmsModelDelete( mp.repository, mp.getServices() );
+//        mmd.deleteNodes( deleteIds, mp.myWorkspace );
+    }
+
+    protected void deleteNodes(final List<String> ids) {
         
+        MmsModelDelete mmd = new MmsModelDelete( mp.repository, mp.getServices() );
+        mmd.setWsDiff( mp.myWorkspace );
+        try {
+            mmd.deleteNodes( ids, mp.myWorkspace );
+            if ( mp.wsDiff == null ) {
+                mp.setWsDiff( mp.myWorkspace );
+            } else {
+                mp.wsDiff.getDeletedElements().putAll( mmd.wsDiff.getDeletedElements() );
+            }
+        } catch ( Exception e ) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+    }
+    
+    private void deleteNodes2(final List<String> ids,
+                              final boolean ingest,
+                              final WorkspaceNode workspace) throws Exception {
+                
+        // Delete the element and any its children, and remove the element from its
+        // owner's ownedChildren set:
+        final MmsModelDelete deleteService = new MmsModelDelete(mp.repository, mp.services);
+        deleteService.setWsDiff( workspace );
+
+        if (mp.runWithoutTransactions) {// || internalRunWithoutTransactions) {
+            deleteService.deleteNodes( ids, workspace );
+            //deleteService.handleElementHierarchy( valueSpec, workspace, true );
+        }
+        else {
+            new EmsTransaction(mp.getServices(), mp.getResponse(), mp.getResponseStatus()) {
+                @Override
+                public void run() throws Exception {
+                    deleteService.deleteNodes( ids, workspace );
+//                    deleteService.handleElementHierarchy( valueSpec, workspace, true );
+                }
+            };
+        }
+        
+        // Update the needed aspects of the deleted nodes:
+        WorkspaceDiff delWsDiff = deleteService.getWsDiff();
+        if (delWsDiff != null) {
+            for (EmsScriptNode deletedNode: delWsDiff.getDeletedElements().values()) {
+                ModStatus modStatus = new ModStatus();
+                modStatus.setState( ModStatus.State.DELETED );
+                mp.updateTransactionableWsState(deletedNode, deletedNode.getSysmlId(), modStatus, ingest);
+            }
+         }
+        
+    }
+
+    
+    protected String getPropertyType( String propertyId ) {
+        // Try in json
+        JSONObject element = elementsInJson.get( propertyId );
+        if ( element != null ) {
+            JSONObject spec = element.optJSONObject( "specialization" );
+            if ( spec != null ) {
+                String propertyTypeId = spec.optString( Acm.JSON_PROPERTY_TYPE );
+                if ( propertyTypeId != null ) {
+                   return propertyTypeId;
+                }
+            }
+        }
+        
+        // Try in DB
+        EmsScriptNode propNode = 
+                mp.findScriptNodeById( propertyId, mp.myWorkspace, null, false );
+        if ( NodeUtil.exists( propNode ) ) {
+            Object propType = propNode.getNodeRefProperty( Acm.ACM_PROPERTY_TYPE,
+                                                           null, mp.myWorkspace );
+            if ( propType instanceof NodeRef ) {
+                EmsScriptNode propTypeNode = 
+                        new EmsScriptNode( (NodeRef)propType, mp.getServices() );
+                if ( propTypeNode.exists() ) {
+                    return propTypeNode.getSysmlId();
+                }
+            }
+        }
+        return null;
     }
 
     protected void updateOrCreateAssociation( String parentId, String propertyId,
                                               String childId ) {
+        // remove from JSON
+        Set< JSONObject > assocs = associationSources.get( parentId );
+        for ( JSONObject assoc : assocs ) {
+            String sysmlId = assoc.optString( "sysmlid" );
+        }
+        associationSources.remove( parentId );
+
+        // delete in DB
+        List< String > deleteIds = new ArrayList< String >();
+        List< EmsScriptNode > deleteNodes = new ArrayList< EmsScriptNode >();
+        EmsScriptNode parentNode = 
+                mp.findScriptNodeById( parentId, mp.myWorkspace, null, false );
+        if ( NodeUtil.exists( parentNode ) ) {
+            Set< EmsScriptNode > rels =
+                    parentNode.getRelationships( null, mp.myWorkspace );
+            for ( EmsScriptNode rel : rels ) {
+                Object prop = rel.getNodeRefProperty( Acm.ACM_TARGET, null,
+                                                      mp.myWorkspace );
+            }
+        }
         // TODO -- be sure to update maps.
         // TODO Auto-generated method stub
         

@@ -356,13 +356,14 @@ public class ModelPost extends AbstractJavaWebScript {
         log( Level.DEBUG, "****** NodeUtil.doSimpleCaching = %s", NodeUtil.doSimpleCaching );
         log( Level.DEBUG, "****** NodeUtil.doFullCaching = %s", NodeUtil.doFullCaching );
 
-        if(sourceWS == null) {
-            setWsDiff( targetWS );
+        if ( wsDiff == null ) {  // This may have been initialized earlier.
+            if(sourceWS == null) {
+                setWsDiff( targetWS );
+            }
+            else {
+                setWsDiff(targetWS, sourceWS, null, null, DiffType.COMPARE);
+            }
         }
-        else {
-            setWsDiff(targetWS, sourceWS, null, null, DiffType.COMPARE);
-        }
-
 
         clearCaches();
 
@@ -1121,7 +1122,7 @@ public class ModelPost extends AbstractJavaWebScript {
     }
 
 
-    private void updateTransactionableWsState(final EmsScriptNode element, final String jsonId, 
+    public void updateTransactionableWsState(final EmsScriptNode element, final String jsonId, 
                                               final ModStatus modStatus, final boolean ingest) {
 
         if (runWithoutTransactions) {// || internalRunWithoutTransactions) {
