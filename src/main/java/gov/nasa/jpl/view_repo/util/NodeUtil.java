@@ -10,7 +10,7 @@ import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.mbee.util.Timer;
 import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.actions.ActionUtil;
-import gov.nasa.jpl.view_repo.db.*;
+import gov.nasa.jpl.view_repo.db.Node;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode.EmsVersion;
 
 import java.io.BufferedReader;
@@ -65,7 +65,6 @@ import org.alfresco.service.cmr.search.ResultSet;
 import org.alfresco.service.cmr.search.ResultSetRow;
 import org.alfresco.service.cmr.search.SearchParameters;
 import org.alfresco.service.cmr.search.SearchService;
-import org.alfresco.service.cmr.security.AccessStatus;
 import org.alfresco.service.cmr.security.AuthorityService;
 import org.alfresco.service.cmr.security.AuthorityType;
 import org.alfresco.service.cmr.security.PermissionService;
@@ -74,7 +73,6 @@ import org.alfresco.service.cmr.site.SiteInfo;
 import org.alfresco.service.cmr.version.Version;
 import org.alfresco.service.cmr.version.VersionHistory;
 import org.alfresco.service.namespace.QName;
-import org.alfresco.util.ApplicationContextHelper;
 import org.apache.commons.logging.Log;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
@@ -85,10 +83,7 @@ import org.apache.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.springframework.context.ApplicationContext;
 import org.springframework.extensions.webscripts.Status;
-import org.hibernate.Session;
-import org.hibernate.SessionFactory;
 
 public class NodeUtil {
 
@@ -201,7 +196,7 @@ public class NodeUtil {
 	public static boolean doVersionCaching = false; 
 	public static boolean activeVersionCaching = true;
 	public static boolean doVersionHistoryCaching = true; 
-	public static boolean doJsonCaching = true;
+	public static boolean doJsonCaching = false;
 	public static boolean doJsonDeepCaching = false;
 	public static boolean doJsonStringCaching = false;
 	public static boolean doPropertyCaching = true;

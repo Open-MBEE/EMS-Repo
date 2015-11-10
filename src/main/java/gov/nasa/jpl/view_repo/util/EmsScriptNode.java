@@ -4856,16 +4856,25 @@ public class EmsScriptNode extends ScriptNode implements
         return arr;
     }
 
-    public static void removeFromJsonCache( NodeRef ref ) {
-        //NodeRef ref = node.getNodeRef();
-        Map< Long, JSONObject > oldEntries = NodeUtil.jsonCache.remove( ref.getId() );
+    public static void removeFromJsonCache( NodeRef ref, String workspace ) {
+        removeFromJsonCache(ref.getId(), workspace);
+    }
+    
+    public static void removeFromJsonCache( String refString, String workspace ) {
+        PostgresHelper pgh = new PostgresHelper(workspace);
+        
+        String alternateRefString = pgh.getAlternateRefId( refString, workspace );
+        Map< Long, JSONObject > oldEntries;
+        NodeUtil.jsonCache.remove( refString );
+        oldEntries = NodeUtil.jsonCache.remove( alternateRefString );
+        
         List< JSONObject > removedJson = null;
         if ( NodeUtil.doJsonStringCaching ) {
             removedJson = getValues( oldEntries, JSONObject.class );
         }
         if ( NodeUtil.doJsonDeepCaching ) {
             Map< Long, Map< Boolean, Map< Set< String >, Map< String, JSONObject > > > > oldEntriesDeep =
-                    NodeUtil.jsonDeepCache.remove( ref.getId() );
+                    NodeUtil.jsonDeepCache.remove( refString );
             if ( NodeUtil.doJsonStringCaching ) {
                 removedJson.addAll( getValues( oldEntriesDeep, JSONObject.class) );
             }
@@ -4873,13 +4882,12 @@ public class EmsScriptNode extends ScriptNode implements
         if ( NodeUtil.doJsonStringCaching ) {
             Utils.removeAll( NodeUtil.jsonStringCache, removedJson );
         }
-
     }
 
     static boolean delayed = true;
     
     public void removeFromJsonCache( boolean recursive ) {
-        removeFromJsonCache( getNodeRef() );
+        removeFromJsonCache( getNodeRef(), WorkspaceNode.getId( workspace ) );
         if ( recursive ) removeChildrenFromJsonCache( recursive );
     }
 
@@ -4892,7 +4900,7 @@ public class EmsScriptNode extends ScriptNode implements
         // No need to pass dateTime/workspace b/c Brad says so
         ArrayList< NodeRef > childs = getOwnedChildren( true, null, null );
         for ( NodeRef ref : childs ) {
-            removeFromJsonCache( ref );
+            removeFromJsonCache( ref, WorkspaceNode.getId( workspace ) );
             if ( recursive ) {
                 EmsScriptNode n = new EmsScriptNode( ref, getServices() );
                 n.removeChildrenFromJsonCache( true );

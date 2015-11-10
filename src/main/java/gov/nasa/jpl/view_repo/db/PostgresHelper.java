@@ -510,4 +510,34 @@ public class PostgresHelper {
 
         return result;
     }
+    
+    public String getAlternateRefId(String nodeRefId, String workspace) {
+        List< String > result = new ArrayList< String >();
+        String queryFormat = "select %s from nodes%s where %s=%s;";
+        
+        String query = String.format(queryFormat, "versionedrefid", workspace, "noderefid", nodeRefId);
+
+        ResultSet rs;
+        try {
+            rs = execQuery( query );
+
+            while ( rs.next() ) {
+                result.add( rs.getString( 1 ) );
+            }
+            
+            query = String.format(queryFormat, "noderefid", workspace, "versionedrefid", nodeRefId);
+            rs = execQuery(query);
+            while ( rs.next() ) {
+                result.add( rs.getString( 1 ) );
+            }
+        } catch ( SQLException e ) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+
+        if (result.size() == 1) {
+            return result.get( 0 );
+        }
+        return null;
+    }
 }
