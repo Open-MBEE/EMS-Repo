@@ -43,6 +43,7 @@ import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.sysml.View;
 import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.NodeUtil.SearchType;
+import gov.nasa.jpl.view_repo.webscripts.UpdateViewHierarchy;
 
 import java.io.Serializable;
 import java.lang.reflect.Field;
@@ -5442,6 +5443,13 @@ public class EmsScriptNode extends ScriptNode implements
         boolean noFilter = filter == null || filter.size() == 0;
         if ( expressionStuff && ( property == null || property.length() <= 0 ) ) {
             if ( noFilter || filter.contains( "contains" ) ) {
+                
+                
+                
+                // FIXME!!!!!!!!!!
+                // This method passes in a node but doesn't use it! See
+                // getView() calls below.                
+                
                 json.put( "contains", getView().getContainsJson(true,dateTime,ws) );
             }
             JSONArray displayedElements = null;
@@ -5476,11 +5484,24 @@ public class EmsScriptNode extends ScriptNode implements
                 putInJson( json, "childrenViews", new JSONArray( property ), filter );
             }
         }
+        
+        // childViews
+        JSONArray childViewArr = node.computeChildViews();
+        if ( childViewArr != null ) {
+            json.put( "childrenViews", childViewArr );
+        }
+        
         // TODO: Snapshots?
         NodeRef contentsNode = (NodeRef) node.getNodeRefProperty( Acm.ACM_CONTENTS,
                                                                   dateTime, ws);
         putInJson( json, Acm.JSON_CONTENTS, addInternalJSON(contentsNode, ws, dateTime), filter );
 
+    }
+
+    private JSONArray computeChildViews() {
+        List< EmsScriptNode > childViews = UpdateViewHierarchy.getChildViews( this );
+        JSONArray childViewsArr = toJsonArrayOfSysmlIds( childViews );
+        return childViewsArr;
     }
 
     public ArrayList<EmsScriptNode> getNodesOfViews( Collection< sysml.view.View< EmsScriptNode > > views ) {

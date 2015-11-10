@@ -462,6 +462,41 @@ public class UpdateViewHierarchy {
         return assocIds;
     }
 
+    public static List< EmsScriptNode > getChildViews( EmsScriptNode parentNode ) {
+        if ( !NodeUtil.exists( parentNode ) ) {
+            return null;
+        }
+        List<EmsScriptNode> childViews = new ArrayList< EmsScriptNode >();
+        WorkspaceNode ws = parentNode.getWorkspace();
+        Set< EmsScriptNode > rels =
+                parentNode.getRelationships( null, ws );
+        for ( EmsScriptNode rel : rels ) {
+            Object prop = rel.getNodeRefProperty( Acm.ACM_TARGET, null, ws );
+            if ( prop instanceof NodeRef ) {
+                EmsScriptNode propNode =
+                        new EmsScriptNode( (NodeRef)prop, parentNode.getServices() );
+                if ( NodeUtil.exists( propNode ) ) {
+                    if ( propNode.hasOrInheritsAspect( Acm.ACM_PROPERTY ) ) {
+                        Object propType =
+                                propNode.getNodeRefProperty( Acm.ACM_PROPERTY_TYPE,
+                                                             null, ws );
+                        if ( propType instanceof NodeRef ) {
+                            EmsScriptNode node =
+                                    new EmsScriptNode( (NodeRef)propType,
+                                                       parentNode.getServices() );
+                            if ( NodeUtil.exists( node ) ) {
+                                if ( node.hasOrInheritsAspect( Acm.ACM_VIEW ) ) {
+                                    childViews.add( node );
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return childViews;
+    }
+    
     protected List< EmsScriptNode > getAssociationNodes( String parentId,
                                                          String propertyId,
                                                          String propertyTypeId ) {
@@ -630,17 +665,6 @@ public class UpdateViewHierarchy {
                                   String propertyTypeId ) {
         return updateOrCreatePropertyJson( propertyId, parentViewId,
                                            propertyTypeId, null );
-        //        if ( propertyId == null ) {
-//            propertyId = NodeUtil.createId( mp.getServices() );
-//        }
-//        JSONObject propElement = new JSONObject();
-//        propElement.put( "sysmlid", propertyId );
-//        propElement.put( "owner", parentViewId );
-//        JSONObject spec = new JSONObject();
-//        propElement.put( "specialization", spec );
-//        spec.put( "type", "Property" );
-//        spec.put( Acm.JSON_PROPERTY_TYPE, propertyTypeId );
-//        return propertyId;
     }
 
     protected String updateOrCreatePropertyJson( String propertyId,
@@ -796,26 +820,6 @@ public class UpdateViewHierarchy {
         return assocId;
     }
 
-//    protected String updateAssociationJson( String parentViewId, String propertyId, JSONObject element ) {
-//        // Create the Association
-//        if ( element == null ) element = new JSONObject();
-//        String id = element.optString( "sysmlid" );
-//        if ( id == null ) {
-//            id = NodeUtil.createId( mp.getServices() );
-//            element.put( "sysmlid", id );
-//        }
-//        JSONObject spec = element.optJSONObject( Acm.ACM_SPECIALIZATION );
-//        if ( spec == null ) {
-//            spec = new JSONObject();
-//            element.put( Acm.ACM_SPECIALIZATION, spec );
-//        }
-//        spec.put( "type", "Association" );
-//        spec.put( Acm.JSON_SOURCE, parentViewId );
-//        spec.put( Acm.JSON_TARGET, propertyId );
-//        return id;
-//    }
-
-    
     protected String updateOrCreateAssociation( String parentId, String propertyId,
                                                 String childId ) {
         // Find existing associations that match the input.

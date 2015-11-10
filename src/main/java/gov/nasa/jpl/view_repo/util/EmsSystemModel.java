@@ -379,7 +379,7 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, Object, 
             EmsScriptNode n = (EmsScriptNode)context;
             List< NodeRef > c = n.getOwnedChildren( false, null, n.getWorkspace() );
             if ( c != null ) {
-                list = EmsScriptNode.toEmsScriptNodeList( c );
+                list = EmsScriptNode.toEmsScriptNodeList( c, getServices(), null, null );
             }
         }
         return list;
