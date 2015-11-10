@@ -13,6 +13,7 @@ import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -54,77 +55,80 @@ public class UpdateViewHierarchy {
         if ( elementsJson != null && elementsJson.length() > 0 ) {
             for ( int i = 0; i < elementsJson.length(); ++i ) {
                 JSONObject elementJson = elementsJson.optJSONObject( i );
-                if ( elementJson != null ) {
+                processElementJson( elementJson );
+            }
+        }
 
-                    String id = elementJson.optString( "sysmlid" );
-                    if ( Utils.isNullOrEmpty( id ) ) {
-                        id = NodeUtil.createId( mp.getServices() );
-                        elementJson.put( "sysmlid", id );
-                    }
-                    elementsInJson.put( id, elementJson );
-                    
-                    JSONObject spec = elementJson.optJSONObject( "specialization" );
-                    if ( spec != null ) {
-                        String type = spec.optString( "type" );
-                        if ( "View".equals( type ) || "Product".equals( type ) ) {
-                            //viewInJson = true;
-                            
-                            viewsInJson.put( id, elementJson );
-                            
-                            String owner = elementJson.optString( "owner" );
-                            if ( !Utils.isNullOrEmpty( owner ) ) {
-                                owners.put( id, owner );
-                            }
-                            
-                            JSONArray childViewsArray = 
-                                    spec.optJSONArray( Acm.JSON_CHILD_VIEWS );
-                            if ( childViewsArray != null ) {
-                                childViewsArray = 
-                                        elementJson.optJSONArray( Acm.JSON_CHILD_VIEWS );
-                            }
-                            if ( childViewsArray != null ) {
-                                ArrayList<String> childViews = new ArrayList< String >();
-                                for ( int j=0; j < childViewsArray.length(); ++j ) {
-                                    String childView = childViewsArray.optString( j );
-                                    childViews.add( childView );
-                                    ArrayList<String> viewOwnerSet = viewOwners.get( childView );
-                                    if ( viewOwnerSet == null ) {
-                                        viewOwnerSet = new ArrayList< String >();
-                                        viewOwners.put( childView, viewOwnerSet );
-                                    }
-                                    viewOwnerSet.add( id );
-                                }
-                                viewChildViews.put( id, childViews );
-                            }
-                            
-                            JSONArray ownedAttributesArray = 
-                                    spec.optJSONArray( Acm.JSON_OWNED_ATTRIBUTE );
-                            if ( ownedAttributesArray == null ) {
-                                ownedAttributesArray = 
-                                        elementJson.optJSONArray( Acm.JSON_OWNED_ATTRIBUTE );
-                            }
-                            if ( ownedAttributesArray != null ) {
-                                ArrayList<String> ownedAttributes = new ArrayList< String >();
-                                for ( int j=0; j < ownedAttributesArray.length(); ++j ) {
-                                    String ownedAttribute = ownedAttributesArray.optString( j );
-                                    ownedAttributes.add( ownedAttribute );
-                                }
-                                elementOwnedAttributes.put( id, ownedAttributes );
-                            }
-                        } else if ( "Association".equals( type ) ) {
-                            associations.put( id, elementJson );
-                            String sourceId = spec.optString("source");
-                            if ( !Utils.isNullOrEmpty( sourceId ) ) {
-                                
-                                add( associationSources, sourceId, elementJson );
-                                //associationSources.put( sourceId, elementJson );
-                            }
-                            String targetId = spec.optString("target");
-                            if ( !Utils.isNullOrEmpty( targetId ) ) {
-                                add( associationTargets, targetId, elementJson );
-                            }
+    }
+    protected void processElementJson( JSONObject elementJson ) {
+                if ( elementJson == null ) return;
+
+        String id = elementJson.optString( "sysmlid" );
+        if ( Utils.isNullOrEmpty( id ) ) {
+            id = NodeUtil.createId( mp.getServices() );
+            elementJson.put( "sysmlid", id );
+        }
+        elementsInJson.put( id, elementJson );
+        
+        JSONObject spec = elementJson.optJSONObject( "specialization" );
+        if ( spec != null ) {
+            String type = spec.optString( "type" );
+            if ( "View".equals( type ) || "Product".equals( type ) ) {
+                //viewInJson = true;
+                
+                viewsInJson.put( id, elementJson );
+                
+                String owner = elementJson.optString( "owner" );
+                if ( !Utils.isNullOrEmpty( owner ) ) {
+                    owners.put( id, owner );
+                }
+                
+                JSONArray childViewsArray = 
+                        spec.optJSONArray( Acm.JSON_CHILD_VIEWS );
+                if ( childViewsArray != null ) {
+                    childViewsArray = 
+                            elementJson.optJSONArray( Acm.JSON_CHILD_VIEWS );
+                }
+                if ( childViewsArray != null ) {
+                    ArrayList<String> childViews = new ArrayList< String >();
+                    for ( int j=0; j < childViewsArray.length(); ++j ) {
+                        String childView = childViewsArray.optString( j );
+                        childViews.add( childView );
+                        ArrayList<String> viewOwnerSet = viewOwners.get( childView );
+                        if ( viewOwnerSet == null ) {
+                            viewOwnerSet = new ArrayList< String >();
+                            viewOwners.put( childView, viewOwnerSet );
                         }
+                        viewOwnerSet.add( id );
                     }
+                    viewChildViews.put( id, childViews );
+                }
+                
+                JSONArray ownedAttributesArray = 
+                        spec.optJSONArray( Acm.JSON_OWNED_ATTRIBUTE );
+                if ( ownedAttributesArray == null ) {
+                    ownedAttributesArray = 
+                            elementJson.optJSONArray( Acm.JSON_OWNED_ATTRIBUTE );
+                }
+                if ( ownedAttributesArray != null ) {
+                    ArrayList<String> ownedAttributes = new ArrayList< String >();
+                    for ( int j=0; j < ownedAttributesArray.length(); ++j ) {
+                        String ownedAttribute = ownedAttributesArray.optString( j );
+                        ownedAttributes.add( ownedAttribute );
+                    }
+                    elementOwnedAttributes.put( id, ownedAttributes );
+                }
+            } else if ( "Association".equals( type ) ) {
+                associations.put( id, elementJson );
+                String sourceId = spec.optString("source");
+                if ( !Utils.isNullOrEmpty( sourceId ) ) {
+                    
+                    add( associationSources, sourceId, elementJson );
+                    //associationSources.put( sourceId, elementJson );
+                }
+                String targetId = spec.optString("target");
+                if ( !Utils.isNullOrEmpty( targetId ) ) {
+                    add( associationTargets, targetId, elementJson );
                 }
             }
         }
@@ -370,7 +374,7 @@ public class UpdateViewHierarchy {
         return null;
     }
 
-    protected void removeElement( String id ) {
+    protected void removeElementFromJson( String id ) {
         this.removeElement( id, (Set<String>)null );
     }
     protected void removeElement( String id, Set< String > seen ) {
@@ -401,7 +405,14 @@ public class UpdateViewHierarchy {
         }
     }
     
-
+    protected String addElement( JSONObject element ) {
+        if ( element == null ) return null;
+        String id = element.optString( "sysmlid" );
+        if ( id == null ) id = NodeUtil.createId( mp.getServices() );
+        JSONArray elements = jsonObject.optJSONArray("elements");
+        if ( elements != null ) elements.put( element );
+        return id;
+    }
     
     /**
      * Get associations relating the parent and Property with the specified
@@ -508,8 +519,9 @@ public class UpdateViewHierarchy {
 
         List< String > assocIds =
                 getAssociationIdsFromJson( parentId, propertyId, childId );
-        // TODO -- HERE!!
-        associationSources.remove( parentId );
+        for ( String assoc : assocIds ) {
+            removeElementFromJson( assoc );
+        }
 
         List< EmsScriptNode > deleteNodes = getAssociationNodes( parentId, propertyId, childId );
         List< String > deleteIds = EmsScriptNode.getSysmlIds( deleteNodes );
@@ -600,31 +612,239 @@ public class UpdateViewHierarchy {
         return null;
     }
 
-    protected void updateOrCreateAssociation( String parentId, String propertyId,
-                                              String childId ) {
-        // remove from JSON
-        Set< JSONObject > assocs = associationSources.get( parentId );
-        for ( JSONObject assoc : assocs ) {
-            String sysmlId = assoc.optString( "sysmlid" );
-        }
-        associationSources.remove( parentId );
+    protected String addAssociationToProperty( String parentViewId,
+                                               String propertyId ) {
+        // Create the Association
+        JSONObject element = new JSONObject();
+        String id = NodeUtil.createId( mp.getServices() );
+        element.put( "sysmlid", id );
+        JSONObject spec = new JSONObject();
+        element.put( "specialization", spec );
+        spec.put( "type", "Association" );
+        spec.put( Acm.JSON_SOURCE, parentViewId );
+        spec.put( Acm.JSON_TARGET, propertyId );
+        return id;
+    }
 
-        // delete in DB
-        List< String > deleteIds = new ArrayList< String >();
-        List< EmsScriptNode > deleteNodes = new ArrayList< EmsScriptNode >();
-        EmsScriptNode parentNode = 
-                mp.findScriptNodeById( parentId, mp.myWorkspace, null, false );
-        if ( NodeUtil.exists( parentNode ) ) {
-            Set< EmsScriptNode > rels =
-                    parentNode.getRelationships( null, mp.myWorkspace );
-            for ( EmsScriptNode rel : rels ) {
-                Object prop = rel.getNodeRefProperty( Acm.ACM_TARGET, null,
-                                                      mp.myWorkspace );
+    protected String addProperty( String propertyId, String parentViewId,
+                                  String propertyTypeId ) {
+        return updateOrCreatePropertyJson( propertyId, parentViewId,
+                                           propertyTypeId, null );
+        //        if ( propertyId == null ) {
+//            propertyId = NodeUtil.createId( mp.getServices() );
+//        }
+//        JSONObject propElement = new JSONObject();
+//        propElement.put( "sysmlid", propertyId );
+//        propElement.put( "owner", parentViewId );
+//        JSONObject spec = new JSONObject();
+//        propElement.put( "specialization", spec );
+//        spec.put( "type", "Property" );
+//        spec.put( Acm.JSON_PROPERTY_TYPE, propertyTypeId );
+//        return propertyId;
+    }
+
+    protected String updateOrCreatePropertyJson( String propertyId,
+                                                 String parentViewId,
+                                                 String propertyTypeId,
+                                                 JSONObject propElement ) {
+        boolean addedNew = false;
+        if ( propertyId == null ) {
+            propertyId = NodeUtil.createId( mp.getServices() );
+        } else if ( propElement == null ) {
+            propElement = elementsInJson.get( propertyId );
+        }
+        if ( propElement == null ) {
+            propElement = new JSONObject();
+            addedNew = true;
+            propElement.put( "sysmlid", propertyId );
+            addElement( propElement );
+        }
+        propElement.put( "sysmlid", propertyId );
+        propElement.put( "owner", parentViewId );
+        JSONObject spec = propElement.optJSONObject( Acm.ACM_SPECIALIZATION );
+        if ( spec == null ) {
+            spec = new JSONObject();
+            propElement.put( Acm.ACM_SPECIALIZATION, spec );
+        }
+        spec.put( "type", "Property" );
+        spec.put( Acm.JSON_PROPERTY_TYPE, propertyTypeId );
+        if ( addedNew ) {
+            processElementJson( propElement );
+        }
+        return propertyId;
+    }
+    
+    protected String addAssociationToView( String parentViewId, String childViewId ) {
+        // Need a Property of type childView to associate with the parentView.
+        String propertyId = addProperty( null, parentViewId, childViewId );
+        String id = addAssociationToProperty( parentViewId, propertyId );
+        return id;
+    }
+    
+    protected String findAssociationOwner( String parentId ) {
+        String lastId = null;
+        String id = parentId;
+        Set<String> seen = new HashSet<String>();
+        while ( id != null ) {
+            if ( seen.contains( id ) ) {
+                return null;
+            }
+            if ( isPackage( id ) ) {
+                return id;
+            }
+            if ( "Models".equals( id ) ) {
+                return lastId;
+            }
+            seen.add( id );
+            lastId = id;
+            id = getOwnerId( id );
+        }
+        return null;
+    }
+    
+    protected String getOwnerId( String id ) {
+        // Try in JSON first.
+        JSONObject element = elementsInJson.get( id );
+        if ( element != null ) {
+            String owner = element.optString( Acm.JSON_OWNER );
+            if ( owner != null) {
+                return owner;
             }
         }
-        // TODO -- be sure to update maps.
-        // TODO Auto-generated method stub
+        // Try in DB.
+        EmsScriptNode node = 
+                mp.findScriptNodeById( id, mp.myWorkspace, null, false );
+        if ( NodeUtil.exists( node ) ) {
+            EmsScriptNode owner = node.getOwningParent( null, mp.myWorkspace, false );
+            if ( NodeUtil.exists( owner ) ) {
+                return owner.getSysmlId();
+            }
+        }
+        return null;
+    }
+    
+    protected String getType( String id ) {
+        // Try in JSON first.
+        JSONObject element = elementsInJson.get( id );
+        if ( element != null ) {
+            JSONObject spec = element.optJSONObject( Acm.JSON_SPECIALIZATION );
+            if ( spec != null) {
+                String type = spec.optString( "type" );
+                if ( type != null ) {
+                    return type;
+                }
+            }
+        }
+        // Try in DB.
+        EmsScriptNode node = 
+                mp.findScriptNodeById( id, mp.myWorkspace, null, false );
+        if ( NodeUtil.exists( node ) ) {
+            String type = node.getTypeName();
+            return type;
+        }
+        return null;
+    }
+    
+    protected boolean isPackage( String id ) {
+        String type = getType( id );
+        if ( "Package".equals( type ) ) {
+            return true;
+        }
+        return false;
+    }
+
+    protected String updateOrCreateAssociationJson( String assocId,
+                                                    String parentViewId,
+                                                    String propertyId,
+                                                    String childViewId ) {
+        boolean addedNew = false;
         
+        updateOrCreatePropertyJson( propertyId, parentViewId, childViewId, null );
+        
+        JSONObject element = null;
+        if ( assocId == null ) {
+            assocId = NodeUtil.createId( mp.getServices() );
+            element = associations.get( assocId );
+        }
+        if ( element == null ) {
+            element = new JSONObject();
+            element.put( "sysmlid", assocId );
+            addElement( element );
+        }
+
+        String owner = element.getString( Acm.JSON_OWNER );
+        if ( owner == null ) {
+            owner = findAssociationOwner( parentViewId );
+            if ( owner != null ) {
+                element.put( Acm.JSON_OWNER, owner );
+            }
+        }
+        
+        JSONObject spec = element.optJSONObject( Acm.ACM_SPECIALIZATION );
+        if ( spec == null ) {
+            spec = new JSONObject();
+            element.put( Acm.ACM_SPECIALIZATION, spec );
+        }
+        spec.put( "type", "Association" );
+        spec.put( Acm.JSON_SOURCE, parentViewId );
+        spec.put( Acm.JSON_TARGET, propertyId );
+        
+        if ( addedNew ) {
+            processElementJson( element );
+        }
+        
+        return assocId;
+    }
+
+//    protected String updateAssociationJson( String parentViewId, String propertyId, JSONObject element ) {
+//        // Create the Association
+//        if ( element == null ) element = new JSONObject();
+//        String id = element.optString( "sysmlid" );
+//        if ( id == null ) {
+//            id = NodeUtil.createId( mp.getServices() );
+//            element.put( "sysmlid", id );
+//        }
+//        JSONObject spec = element.optJSONObject( Acm.ACM_SPECIALIZATION );
+//        if ( spec == null ) {
+//            spec = new JSONObject();
+//            element.put( Acm.ACM_SPECIALIZATION, spec );
+//        }
+//        spec.put( "type", "Association" );
+//        spec.put( Acm.JSON_SOURCE, parentViewId );
+//        spec.put( Acm.JSON_TARGET, propertyId );
+//        return id;
+//    }
+
+    
+    protected String updateOrCreateAssociation( String parentId, String propertyId,
+                                                String childId ) {
+        // Find existing associations that match the input.
+        String idOfAssocToUpdate = null;
+        List< String > assocIds =
+                getAssociationIdsFromJson( parentId, propertyId, childId );
+        if ( !Utils.isNullOrEmpty( assocIds ) ) {
+            if ( assocIds.size() > 1 ) {
+                // TODO -- WARNING -- ambiguous choice
+            }
+            idOfAssocToUpdate = assocIds.get( 0 );
+        }
+        List< EmsScriptNode > assocNodes = null;
+        if ( idOfAssocToUpdate == null ) {
+            assocNodes = getAssociationNodes( parentId, propertyId, childId );
+            if ( !Utils.isNullOrEmpty( assocNodes ) ) {
+                if ( assocNodes.size() > 1 ) {
+                    // TODO -- WARNING -- ambiguous choice
+                }
+                EmsScriptNode assocNode = assocNodes.get( 0 );
+                idOfAssocToUpdate = assocNode.getSysmlId();
+            }
+        }
+        // Update or create the json.
+        idOfAssocToUpdate =
+                updateOrCreateAssociationJson( idOfAssocToUpdate, parentId,
+                                               propertyId, childId );
+        
+        return idOfAssocToUpdate;        
     }
 
     protected void setOwnedAttributes( String parentId,
