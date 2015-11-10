@@ -3,12 +3,19 @@
  */
 package gov.nasa.jpl.view_repo.webscripts;
 
+import gov.nasa.jpl.mbee.util.TimeUtils;
+import gov.nasa.jpl.mbee.util.Timer;
+import gov.nasa.jpl.mbee.util.Utils;
+import gov.nasa.jpl.view_repo.util.EmsScriptNode;
+import gov.nasa.jpl.view_repo.util.NodeUtil;
+import gov.nasa.jpl.view_repo.util.WorkspaceNode;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Vector;
-import java.util.Collection;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -20,20 +27,12 @@ import org.alfresco.service.cmr.version.Version;
 import org.alfresco.service.cmr.version.VersionHistory;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
-//import org.hibernate.mapping.Collection;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
-import gov.nasa.jpl.view_repo.webscripts.ModelGet;
-import gov.nasa.jpl.mbee.util.TimeUtils;
-import gov.nasa.jpl.mbee.util.Timer;
-import gov.nasa.jpl.mbee.util.Utils;
-import gov.nasa.jpl.view_repo.util.EmsScriptNode;
-import gov.nasa.jpl.view_repo.util.NodeUtil;
-import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 
 /**
  * @author dank
@@ -49,7 +48,7 @@ public class HistoryGet extends ModelGet {
 	public HistoryGet() {
 		// TODO Auto-generated constructor stub
 		super();
-		System.out.println("HistoryGet No Args...");
+		if (logger.isDebugEnabled()) logger.debug("HistoryGet No Args...");
 	}
 
 	/**
@@ -59,7 +58,7 @@ public class HistoryGet extends ModelGet {
 	 */
 	public HistoryGet(Repository repositoryHelper, ServiceRegistry registry) {
 		super(repositoryHelper, registry);
-		System.out.println("HistoryGet with Args...");
+		if (logger.isDebugEnabled()) logger.debug("HistoryGet with Args...");
 	}
 
 	/**
@@ -76,7 +75,7 @@ public class HistoryGet extends ModelGet {
 		try {
 			history = getServices().getVersionService().getVersionHistory(ref);
 		} catch (Exception error) {
-			System.out.println(error.getMessage());
+		    logger.error(error.getMessage());
 		}
 		Collection<Version> versions = history.getAllVersions();
 
@@ -121,12 +120,22 @@ public class HistoryGet extends ModelGet {
 			
 			// Searches for each key and value to be appended to the json array.
 			for (index = 0; index < elementsJson.length(); index++) {
-				System.out.println(NodeUtil.jsonToString(top, 4));
-				System.out.println(elementsJson.getJSONObject(index).getJSONObject("versionProperties").toString(4));
+			    if (logger.isDebugEnabled()) logger.debug(NodeUtil.jsonToString(top, 4));
+			    if (logger.isDebugEnabled()) logger.debug(elementsJson.getJSONObject(index).getJSONObject("versionProperties").toString(4));
 				obj.put("label",
 						elementsJson.getJSONObject(index).getJSONObject("versionProperties").get("versionLabel"));
-				obj.put("timestamp",
-						elementsJson.getJSONObject(index).getJSONObject("versionProperties").get("frozenModified"));
+				//Tue Nov 10 11:25:58 PST 2015
+				SimpleDateFormat sdf = new SimpleDateFormat("EEE MMM dd HH:mm:ss zzz yyyy");
+				try {
+				    String time = (String)elementsJson.getJSONObject(index).getJSONObject("versionProperties").get("frozenModified");
+                    Date timestamp = sdf.parse( time );
+                    obj.put("timestamp",
+                            TimeUtils.toTimestamp( timestamp ));
+                } catch ( ParseException e ) {
+                    e.printStackTrace();
+                }
+                obj.put("modifier",
+                        elementsJson.getJSONObject(index).getJSONObject("versionProperties").get("frozenModifier"));
 				top.append("versions", obj);
 				obj = new JSONObject();
 			}
@@ -185,7 +194,7 @@ public class HistoryGet extends ModelGet {
 			}
 
 			if (null == modelId) {
-				System.out.println("Model ID Null...");
+			    logger.error("Model ID Null...");
 				log(Level.ERROR, HttpServletResponse.SC_NOT_FOUND, "Could not find element %s", modelId);
 				return new JSONArray();
 			}
