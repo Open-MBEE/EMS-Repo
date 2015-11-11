@@ -20,6 +20,34 @@
 7. Run this script from the command line:
 
 		./cpr.sh
+
+8. Install Postgres DB on your localhost and use the
+src/main/java/gov/nasa/jpl/view_repo/db/mms.sql to initialize the database (as follows):
+  - On Mac, can install postgres using homembrew
+  
+        http://www.moncefbelyamani.com/how-to-install-postgresql-on-a-mac-with-homebrew-and-lunchy/
+  
+  - Create mmsuser using the postgres createuser. Set password to test123 (or whatever you want).
+    If you change the password, please change DbContracts.java to use the same.      
+        
+        createuser mmsuser -d -P
+            
+  - Open a postgres terminal (depends on your OS, but usually Postgres shows up with this shortcut)
+    This should be done as root user. You may need to create a default DB to connect to
+    initially.
+    
+        createdb mydb
+    
+  - In the terminal, use the following to create and initialize the database (connect to mydb
+    if default wasn't set).
+
+       	   <path to psql> -U mmsuser -f <path to mms.sql> mydb
+
+  - In a browser, or using curl on the command line:
+
+       	    GET http://127.0.0.1:8080/alfresco/service/model2postgres/
+
+    This will transfer the existing Alfresco graph to Postgres, which is then used for all computations. 
 	
 ###The remaining instructions of the readme will guide you through specific set ups 
 

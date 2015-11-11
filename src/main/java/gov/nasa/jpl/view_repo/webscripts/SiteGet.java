@@ -148,7 +148,7 @@ public class SiteGet extends AbstractJavaWebScript {
             }
 
             if (siteRef != null) {
-                	emsNode = new EmsScriptNode(siteRef, services);
+            	emsNode = new EmsScriptNode(siteRef, services);
                 	if (emsNode.hasAspect( "ems:Deleted" )) continue;
                 	// skip if doesn't have Models directory or if no site characterization
                 	if (!emsNode.hasPermission( PermissionService.READ )) continue;
