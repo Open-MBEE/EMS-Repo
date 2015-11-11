@@ -5264,14 +5264,11 @@ public class EmsScriptNode extends ScriptNode implements
     }
 
     public void removeChildrenFromJsonCache( boolean recursive ) {
-        // if ( delayed ) {
-        // NodeUtil.removeChildrenFromCache( this );
-        // } else {
-        // }
         if ( !NodeUtil.doJsonCaching ) return;
         // No need to pass dateTime/workspace b/c Brad says so
         ArrayList< NodeRef > childs = getOwnedChildren( true, null, null );
         for ( NodeRef ref : childs ) {
+            // FIXME: graph db uses noderef and versioned ref, so need to remove both 
             removeFromJsonCache( ref );
             if ( recursive ) {
                 EmsScriptNode n = new EmsScriptNode( ref, getServices() );
