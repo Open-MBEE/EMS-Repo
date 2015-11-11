@@ -4342,7 +4342,7 @@ public class NodeUtil {
 	public static void processDocumentEdges(String sysmlid, String doc,
 			List<Pair<String, String>> documentEdges) {
 		if (doc != null) {
-			String MMS_TRANSCLUDE_PATTERN = ".*<mms-transclude.*eid=\"([^\"]*)\"";
+			String MMS_TRANSCLUDE_PATTERN = "<mms-transclude.*eid=\"([^\"]*)\"";
 			Pattern pattern = Pattern.compile(MMS_TRANSCLUDE_PATTERN);
 			Matcher matcher = pattern.matcher(doc);
 
