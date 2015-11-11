@@ -274,16 +274,6 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
                 }
             }
         };
-//            UserTransaction trx;
-//            trx = services.getTransactionService().getNonPropagatingUserTransaction();
-//            try {
-//                trx.begin();
-//                NodeUtil.setInsideTransactionNow( true );
-//            } catch ( Throwable e ) {
-//                String msg = null;
-//                tryRollback( trx, e, msg );
-//            }
-        //Map<String, Object> model = new HashMap<String, Object>();
         if ( !model.containsKey( "res" ) && response != null && response.toString().length() > 0 ) {
             model.put( "res", response.toString() );
         }
@@ -593,21 +583,6 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
 	        return false;
 	    }
 	}
-
-
-//	/**
-//	 * Checks whether user has permissions to the nodeRef and logs results and status as appropriate
-//	 * @param nodeRef      NodeRef to check permissions againts
-//	 * @param permissions  Permissions to check
-//	 * @return             true if user has specified permissions to node, false otherwise
-//	 */
-//	protected boolean checkPermissions(NodeRef nodeRef, String permissions) {
-//		if (services.getPermissionService().hasPermission(nodeRef, permissions) != AccessStatus.ALLOWED) {
-//			log(LogLevel.WARNING, "No " + permissions + " priveleges to " + nodeRef.toString() + ".\n", HttpServletResponse.SC_BAD_REQUEST);
-//			return false;
-//		}
-//		return true;
-//	}
 
 
     protected static final String WORKSPACE_ID = "workspaceId";

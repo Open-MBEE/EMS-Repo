@@ -103,6 +103,7 @@
     },
     {
         "qualifiedId": "/europa/123456/4000/401",
+        "relatedDocuments": [],
         "qualifiedName": "/europa/JW_TEST2/400/401",
         "sysmlid": "401",
         "properties": [{
@@ -132,9 +133,15 @@
         "creator": "admin",
         "modifier": "admin",
         "name": "401",
-        "owner": "4000",
         "documentation": "4else",
+        "owner": "4000",
         "specialization": {
+            "displayedElements": [
+                "401",
+                "402",
+                "403"
+            ],
+            "childrenViews": ["404"],
             "view2view": [{
                 "childrenViews": [
                     "401",
@@ -142,37 +149,32 @@
                 ],
                 "sysmlid": "401"
             }],
-            "childrenViews": ["404"],
-            "displayedElements": [
-                "401",
-                "402",
-                "403"
-            ],
             "allowedElements": [
                 "401",
                 "402",
                 "403"
             ],
-            "noSections": ["402"],
             "contains": [{
                 "sourceType": "reference",
                 "source": "401",
                 "sourceProperty": "documentation",
                 "type": "Paragraph"
             }],
+            "noSections": ["402"],
             "type": "Product"
         }
     },
     {
         "qualifiedId": "/europa/123456/viewWithContents",
+        "relatedDocuments": [],
         "qualifiedName": "/europa/JW_TEST2/viewWithContents",
         "sysmlid": "viewWithContents",
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
         "name": "viewWithContents",
-        "owner": "123456",
         "documentation": "View updates",
+        "owner": "123456",
         "specialization": {
             "contents": {
                 "valueExpression": null,
@@ -183,14 +185,15 @@
     },
     {
         "qualifiedId": "/europa/123456/viewNull",
+        "relatedDocuments": [],
         "qualifiedName": "/europa/JW_TEST2/viewNull",
         "sysmlid": "viewNull",
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
         "name": "viewNull",
-        "owner": "123456",
         "documentation": "View with null values",
+        "owner": "123456",
         "specialization": {"type": "View"}
     }
 ]}

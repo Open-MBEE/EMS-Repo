@@ -733,34 +733,40 @@ public class ModelGet extends AbstractJavaWebScript {
 			EmsScriptNode element = entry.getValue();
 			List<EmsScriptNode> props = new ArrayList<EmsScriptNode>();
 
-			for (NodeRef childRef : element.getOwnedChildren(false, dateTime,
-					ws)) {
-				if (childRef != null) {
-					EmsScriptNode child = new EmsScriptNode(childRef, services);
-
-					// If it is a property then add it:
-					if (child.hasAspect(Acm.ACM_PROPERTY)) {
-						props.add(child);
-					}
-					// If it is a applied stereotype, then check its children:
-					else if (child.hasAspect(Acm.ACM_INSTANCE_SPECIFICATION)) {
-
-						for (NodeRef specChildRef : child.getOwnedChildren(
-								false, dateTime, ws)) {
-
-							if (specChildRef != null) {
-
-								EmsScriptNode specChild = new EmsScriptNode(
-										specChildRef, services);
-
-								if (specChild.hasAspect(Acm.ACM_PROPERTY)) {
-									props.add(specChild);
-								}
-							}
-						} // ends for
-					}
-				} // ends if (childRef != null)
-			} // ends for
+			// some issues with results in graph DB throw errors, catch and move on
+			try { 
+        			for (NodeRef childRef : element.getOwnedChildren(false, dateTime,
+        					ws)) {
+        				if (childRef != null) {
+        					EmsScriptNode child = new EmsScriptNode(childRef, services);
+        
+        					// If it is a property then add it:
+        					if (child.hasAspect(Acm.ACM_PROPERTY)) {
+        						props.add(child);
+        					}
+        					// If it is a applied stereotype, then check its children:
+        					else if (child.hasAspect(Acm.ACM_INSTANCE_SPECIFICATION)) {
+        
+        						for (NodeRef specChildRef : child.getOwnedChildren(
+        								false, dateTime, ws)) {
+        
+        							if (specChildRef != null) {
+        
+        								EmsScriptNode specChild = new EmsScriptNode(
+        										specChildRef, services);
+        
+        								if (specChild.hasAspect(Acm.ACM_PROPERTY)) {
+        									props.add(specChild);
+        								}
+        							}
+        						} // ends for
+        					}
+        				} // ends if (childRef != null)
+        			} // ends for
+			} catch (Exception e) {
+			    logger.warn("Could not find owner. Dumping stack trace.");
+			    e.printStackTrace();
+			}
 
 			elementProperties.put(element.getSysmlId(), props);
 

@@ -42,7 +42,6 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -96,6 +95,7 @@ public class ModelSearch extends ModelGet {
     protected Map< String, Object > executeImpl( WebScriptRequest req,
                                                  Status status, Cache cache ) {
         ModelSearch instance = new ModelSearch( repository, getServices() );
+        // bad call shouldn't happen -  so prevent it here
         return instance.executeImplImpl( req, status, cache,
                                          runWithoutTransactions );
     }
