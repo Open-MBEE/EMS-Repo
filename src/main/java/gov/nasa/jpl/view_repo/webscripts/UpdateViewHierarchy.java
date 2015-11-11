@@ -26,6 +26,11 @@ import org.alfresco.service.cmr.repository.NodeRef;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+
+// TODO -- HERE
+// add aggregation in childViews
+// create property owned by the association
+
 public class UpdateViewHierarchy {
     
     protected ModelPost mp;
@@ -159,9 +164,14 @@ public class UpdateViewHierarchy {
      * @throws Exception 
      */
     protected void addJsonForViewHierarchyChanges( JSONObject jsonObj ) throws Exception {
+        System.out.println("%%%%%%%%%%%%%%%%%         start addJsonForViewHierarchyChanges          %%%%%%%%%%%%%%%%%");
         if ( jsonObject == null ) return; // null;
         this.jsonObject = jsonObj;
+        
         processJson( jsonObject );
+        
+        System.out.println("before jsonObject = " + jsonObject );
+        System.out.println("before elementsInJson = " + elementsInJson );
 
         // Make sure that the ownedAttributes and Associations agree with the childViews.
         for ( Entry< String, ArrayList< String > > e : viewChildViews.entrySet() ) {
@@ -300,7 +310,11 @@ public class UpdateViewHierarchy {
                                     elementsInJson, jsonObject,
                                     newOwnedAttributes );
             }
-            
+
+            System.out.println("after jsonObject = " + jsonObject );
+            System.out.println("after elementsInJson = " + elementsInJson );
+            System.out.println("%%%%%%%%%%%%%%%%%         end addJsonForViewHierarchyChanges          %%%%%%%%%%%%%%%%%");
+            System.out.println("%%%%%%%%%%%%%%%%%         end addJsonForViewHierarchyChanges          %%%%%%%%%%%%%%%%%");
         }
         
 

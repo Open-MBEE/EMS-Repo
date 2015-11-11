@@ -2386,7 +2386,11 @@ public class ModelPost extends AbstractJavaWebScript {
                     
                     UpdateViewHierarchy uvh = new UpdateViewHierarchy( this );
                     // Handle view and association changes
-                    uvh.addJsonForViewHierarchyChanges( postJson );
+                    try {
+                        uvh.addJsonForViewHierarchyChanges( postJson );
+                    } catch ( Throwable t ) {
+                        t.printStackTrace();
+                    }
                     
                     // FIXME: this is a hack to get the right site permissions
                     // if DB rolled back, it's because the no_site node couldn't be created

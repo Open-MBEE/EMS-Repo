@@ -5488,13 +5488,15 @@ public class EmsScriptNode extends ScriptNode implements
         // childViews
         JSONArray childViewArr = node.computeChildViews();
         if ( childViewArr != null ) {
-            json.put( "childrenViews", childViewArr );
+            json.put( "childViews", childViewArr );
         }
         
         // TODO: Snapshots?
         NodeRef contentsNode = (NodeRef) node.getNodeRefProperty( Acm.ACM_CONTENTS,
                                                                   dateTime, ws);
         putInJson( json, Acm.JSON_CONTENTS, addInternalJSON(contentsNode, ws, dateTime), filter );
+        
+        System.out.println( json.toString( 4 ) );
 
     }
 
