@@ -1,271 +1,260 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-    <modelVersion>4.0.0</modelVersion>
-    
-    <groupId>gov.nasa.jpl</groupId>
-    <artifactId>mms-repo-ent</artifactId>
-    <version>2.2-SNAPSHOT</version>
-    <name>view-repo AMP project</name>
-    <packaging>amp</packaging>
-    <description>Manages the lifecycle of the view-repo AMP (Alfresco Module Package)</description>
-    
-    <parent>
-        <groupId>org.alfresco.maven</groupId>
-        <artifactId>alfresco-sdk-parent</artifactId>
-        <version>1.1.1</version>
-    </parent>
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
 
-  <distributionManagement>
-      <!-- use mvn -U deploy -DgeneratePom=true -Dpackaging=jar  -->
-      <repository>
-          <id>artifactory</id>
-          <name>releases</name>
-          <url>http://europambee-build.jpl.nasa.gov:8082/artifactory/libs-release-local</url>
-      </repository>
-      <snapshotRepository>
-          <id>artifactory</id>
-          <name>snapshots</name>
-          <url>http://europambee-build.jpl.nasa.gov:8082/artifactory/libs-snapshot-local</url>
-      </snapshotRepository>
-  </distributionManagement>
+	<groupId>gov.nasa.jpl</groupId>
+	<artifactId>mms-repo-ent</artifactId>
+	<version>2.3-SNAPSHOT</version>
+	<name>view-repo AMP project</name>
+	<packaging>amp</packaging>
+	<description>Manages the lifecycle of the view-repo AMP (Alfresco Module Package)</description>
 
-    <!-- 
-       | SDK properties have sensible defaults in the SDK parent,
-       | but you can override the properties below to use another version. 
-       | For more available properties see the alfresco-sdk-parent POM. 
-       -->
-    <properties>
-        <!-- Defines the alfresco edition to compile against. Allowed values are [org.alfresco|org.alfresco.enterprise]--> 
-        <alfresco.groupId>org.alfresco</alfresco.groupId>
-        <!-- Defines the alfresco version to compile against -->
-        <alfresco.version>4.2.3.3</alfresco.version>
-        <app.log.root.level>WARN</app.log.root.level>
-        <alfresco.data.location>alf_data</alfresco.data.location>
-        <!-- Defines the target WAR artifactId to run this amp, only used with the -Pamp-to-war switch
-        .    | Allowed values: alfresco | share. Defaults to a repository AMP, but could point to your foundation WAR -->
-        <alfresco.client.war>alfresco</alfresco.client.war>
-        <!-- Defines the target WAR groupId to run this amp, only used with the -Pamp-to-war switch
-        .    | Could be org.alfresco | org.alfresco.enterprise or your corporate groupId -->
-        <alfresco.client.war.groupId>org.alfresco</alfresco.client.war.groupId>
-        <!-- Defines the target WAR version to run this amp, only used with the -Pamp-to-war switch -->
-        <alfresco.client.war.version>4.2.3.3</alfresco.client.war.version>
-        <!-- This controls which properties will be picked in src/test/properties for embedded run -->
-        <env>local</env>
-        <maven.test.skip>false</maven.test.skip>
-        <mbee.version>2.2.0-SNAPSHOT</mbee.version>
-    </properties>
+	<parent>
+		<groupId>org.alfresco.maven</groupId>
+		<artifactId>alfresco-sdk-parent</artifactId>
+		<version>1.1.1</version>
+	</parent>
 
-    <!-- profiles for specific dependencies for developers or users -->
-    <profiles>
-        <profile>
-            <id>mms-dev</id>
-            <dependencies>
-	        <dependency>
-	            <groupId>gov.nasa.jpl.ae</groupId>
-	            <artifactId>AE</artifactId>
-	            <version>1.0</version>
-	            <scope>system</scope>
-	            <type>jar</type>
-	            <systemPath>${project.basedir}/src/main/amp/web/WEB-INF/lib/AE.jar</systemPath>
-	        </dependency>
-	        <dependency>
-	            <groupId>sysml</groupId>
-	            <artifactId>sysml</artifactId>
-	            <version>1.0</version>
-	            <scope>system</scope>
-	            <type>jar</type>
-	            <systemPath>${project.basedir}/src/main/amp/web/WEB-INF/lib/sysml.jar</systemPath>
-	        </dependency>
-	        <dependency>
-	            <groupId>mbee_util</groupId>
-	            <artifactId>mbee_util</artifactId>
-	            <version>1.0</version>
-	            <scope>system</scope>
-	            <type>jar</type>
-	            <systemPath>${project.basedir}/src/main/amp/web/WEB-INF/lib/mbee_util.jar</systemPath>
-	        </dependency>
-	        <dependency>
-                <groupId>klang</groupId>
-                <artifactId>klang</artifactId>
-                <version>1.0</version>
-                <scope>system</scope>
-                <type>jar</type>
-                <systemPath>${project.basedir}/src/main/amp/web/WEB-INF/lib/klang.jar</systemPath>
-            </dependency>
-	        <dependency>
-	            <groupId>kexpparser</groupId>
-	            <artifactId>kexpparser</artifactId>
-	            <version>0.0.8</version>
-	            <scope>system</scope>
-	            <type>jar</type>
-	            <systemPath>${project.basedir}/src/main/amp/web/WEB-INF/lib/kexpparser.jar</systemPath>
-	        </dependency>
-            </dependencies>
-            <properties>
-                <env.BUILD_NUMBER>1</env.BUILD_NUMBER>
-            </properties>
-        </profile>
-        <profile>
-            <id>mbee-dev</id>
-            <dependencies>
-                <dependency>
-			        <groupId>gov.nasa.jpl.mbee.util</groupId>
-			        <artifactId>mbee_util</artifactId>
-			        <version>${mbee.version}</version>
-			    </dependency>
-                <dependency>
-                    <groupId>gov.nasa.jpl.mbee.sysml</groupId>
-                    <artifactId>sysml</artifactId>
-                    <version>${mbee.version}</version>
-               </dependency>
-                <dependency>
-                    <groupId>gov.nasa.jpl.mbee.bae</groupId>
-                    <artifactId>bae</artifactId>
-                    <version>${mbee.version}</version>
-                </dependency>
-                <dependency>
-                    <groupId>gov.nasa.jpl.mbee.klang</groupId>
-                    <artifactId>klang</artifactId>
-                    <version>${mbee.version}</version>
-               </dependency>
-<!--                 <dependency>
-                    <groupId>klang</groupId>
-                    <artifactId>klang</artifactId>
-                    <version>0.0.9</version>
-                    <scope>system</scope>
-                    <type>jar</type>
-                    <systemPath>${project.basedir}/src/main/amp/web/WEB-INF/lib/klang.jar</systemPath>
-               </dependency> -->
-                <dependency>
-                    <groupId>kexpparser</groupId>
-                    <artifactId>kexpparser</artifactId>
-                    <version>0.0.8</version>
-	                <scope>system</scope>
-	                <type>jar</type>
-	                <systemPath>${project.basedir}/src/main/amp/web/WEB-INF/lib/kexpparser.jar</systemPath>
-               </dependency>
-            </dependencies>
-            <properties>
-                <env.BUILD_NUMBER>1</env.BUILD_NUMBER>
-            </properties>
-        </profile>
-        <profile>
-            <id>jenkins</id>
-            <dependencies>
-                <dependency>
-                    <groupId>gov.nasa.jpl.mbee.util</groupId>
-                    <artifactId>mbee_util</artifactId>
-                    <version>${mbee.version}</version>
-                </dependency>
-                <dependency>
-                    <groupId>gov.nasa.jpl.mbee.sysml</groupId>
-                    <artifactId>sysml</artifactId>
-                    <version>${mbee.version}</version>
-               </dependency>
-                <dependency>
-                    <groupId>kexpparser</groupId>
-                    <artifactId>kexpparser</artifactId>
-                    <version>0.0.8</version>
-                    <scope>system</scope>
-                    <type>jar</type>
-                    <systemPath>${project.basedir}/src/main/amp/web/WEB-INF/lib/kexpparser.jar</systemPath>
-               </dependency>
-                <dependency>
-                    <groupId>gov.nasa.jpl.mbee.bae</groupId>
-                    <artifactId>bae</artifactId>
-                    <version>${mbee.version}</version>
-                </dependency>
-                <dependency>
-                    <groupId>gov.nasa.jpl.mbee.klang</groupId>
-                    <artifactId>klang</artifactId>
-                    <version>${mbee.version}</version>
-                </dependency>
-            </dependencies>
-        </profile>
-    </profiles>
+	<distributionManagement>
+		<!-- use mvn -U deploy -DgeneratePom=true -Dpackaging=jar -->
+		<repository>
+			<id>artifactory</id>
+			<name>releases</name>
+			<url>http://europambee-build.jpl.nasa.gov:8082/artifactory/libs-release-local</url>
+		</repository>
+		<snapshotRepository>
+			<id>artifactory</id>
+			<name>snapshots</name>
+			<url>http://europambee-build.jpl.nasa.gov:8082/artifactory/libs-snapshot-local</url>
+		</snapshotRepository>
+	</distributionManagement>
 
-    <!-- Here we realize the connection with the Alfresco selected platform 
-        (e.g.version and edition) -->
-    <dependencyManagement>
-        <dependencies>
-            <!-- This will import the dependencyManagement for all artifacts in the 
-                selected Alfresco version/edition (see http://maven.apache.org/guides/introduction/introduction-to-dependency-mechanism.html#Importing_Dependencies) 
-                NOTE: You still need to define dependencies in your POM, but you can omit 
-                version as it's enforced by this dependencyManagement. NOTE: It defaults 
-                to the latest version this SDK pom has been tested with, but alfresco version 
-                can/should be overridden in your project's pom -->
-            <dependency>
-                <groupId>${alfresco.groupId}</groupId>
-                <artifactId>alfresco-platform-distribution</artifactId>
-                <version>${alfresco.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
+	<!-- | SDK properties have sensible defaults in the SDK parent, | but you 
+		can override the properties below to use another version. | For more available 
+		properties see the alfresco-sdk-parent POM. -->
+	<properties>
+		<!-- Defines the alfresco edition to compile against. Allowed values are 
+			[org.alfresco|org.alfresco.enterprise] -->
+		<alfresco.groupId>org.alfresco</alfresco.groupId>
+		<!-- Defines the alfresco version to compile against -->
+		<alfresco.version>4.2.3.3</alfresco.version>
+		<app.log.root.level>WARN</app.log.root.level>
+		<alfresco.data.location>alf_data</alfresco.data.location>
+		<!-- Defines the target WAR artifactId to run this amp, only used with 
+			the -Pamp-to-war switch . | Allowed values: alfresco | share. Defaults to 
+			a repository AMP, but could point to your foundation WAR -->
+		<alfresco.client.war>alfresco</alfresco.client.war>
+		<!-- Defines the target WAR groupId to run this amp, only used with the 
+			-Pamp-to-war switch . | Could be org.alfresco | org.alfresco.enterprise or 
+			your corporate groupId -->
+		<alfresco.client.war.groupId>org.alfresco</alfresco.client.war.groupId>
+		<!-- Defines the target WAR version to run this amp, only used with the 
+			-Pamp-to-war switch -->
+		<alfresco.client.war.version>4.2.3.3</alfresco.client.war.version>
+		<!-- This controls which properties will be picked in src/test/properties 
+			for embedded run -->
+		<env>local</env>
+		<maven.test.skip>false</maven.test.skip>
+		<mbee.version>2.2.0-SNAPSHOT</mbee.version>
+	</properties>
 
-    <!-- Following dependencies are needed for compiling Java code in src/main/java; 
+	<!-- profiles for specific dependencies for developers or users -->
+	<profiles>
+		<profile>
+			<id>mms-dev</id>
+			<dependencies>
+				<dependency>
+					<groupId>gov.nasa.jpl.ae</groupId>
+					<artifactId>AE</artifactId>
+					<version>1.0</version>
+					<scope>system</scope>
+					<type>jar</type>
+					<systemPath>${project.basedir}/src/main/amp/web/WEB-INF/lib/AE.jar</systemPath>
+				</dependency>
+				<dependency>
+					<groupId>sysml</groupId>
+					<artifactId>sysml</artifactId>
+					<version>1.0</version>
+					<scope>system</scope>
+					<type>jar</type>
+					<systemPath>${project.basedir}/src/main/amp/web/WEB-INF/lib/sysml-${mbee.version}.jar</systemPath>
+				</dependency>
+				<dependency>
+					<groupId>mbee_util</groupId>
+					<artifactId>mbee_util</artifactId>
+					<version>1.0</version>
+					<scope>system</scope>
+					<type>jar</type>
+					<systemPath>${project.basedir}/src/main/amp/web/WEB-INF/lib/mbee_util.jar</systemPath>
+				</dependency>
+				<dependency>
+					<groupId>klang</groupId>
+					<artifactId>klang</artifactId>
+					<version>1.0</version>
+					<scope>system</scope>
+					<type>jar</type>
+					<systemPath>${project.basedir}/src/main/amp/web/WEB-INF/lib/klang.jar</systemPath>
+				</dependency>
+				<dependency>
+					<groupId>kexpparser</groupId>
+					<artifactId>kexpparser</artifactId>
+					<version>0.0.8</version>
+					<scope>system</scope>
+					<type>jar</type>
+					<systemPath>${project.basedir}/src/main/amp/web/WEB-INF/lib/kexpparser.jar</systemPath>
+				</dependency>
+			</dependencies>
+			<properties>
+				<env.BUILD_NUMBER>1</env.BUILD_NUMBER>
+			</properties>
+		</profile>
+		<profile>
+			<id>mbee-dev</id>
+			<dependencies>
+				<dependency>
+					<groupId>gov.nasa.jpl.mbee.util</groupId>
+					<artifactId>mbee_util</artifactId>
+					<version>${mbee.version}</version>
+				</dependency>
+				<dependency>
+					<groupId>gov.nasa.jpl.mbee.sysml</groupId>
+					<artifactId>sysml</artifactId>
+					<version>${mbee.version}</version>
+				</dependency>
+				<dependency>
+					<groupId>gov.nasa.jpl.mbee.bae</groupId>
+					<artifactId>bae</artifactId>
+					<version>${mbee.version}</version>
+				</dependency>
+				<dependency>
+					<groupId>gov.nasa.jpl.mbee.klang</groupId>
+					<artifactId>klang</artifactId>
+					<version>${mbee.version}</version>
+				</dependency>
+				<!-- <dependency> <groupId>klang</groupId> <artifactId>klang</artifactId> 
+					<version>0.0.9</version> <scope>system</scope> <type>jar</type> <systemPath>${project.basedir}/src/main/amp/web/WEB-INF/lib/klang.jar</systemPath> 
+					</dependency> -->
+				<dependency>
+					<groupId>kexpparser</groupId>
+					<artifactId>kexpparser</artifactId>
+					<version>0.0.8</version>
+					<scope>system</scope>
+					<type>jar</type>
+					<systemPath>${project.basedir}/src/main/amp/web/WEB-INF/lib/kexpparser.jar</systemPath>
+				</dependency>
+			</dependencies>
+			<properties>
+				<env.BUILD_NUMBER>1</env.BUILD_NUMBER>
+			</properties>
+		</profile>
+		<profile>
+			<id>jenkins</id>
+			<dependencies>
+				<dependency>
+					<groupId>gov.nasa.jpl.mbee.util</groupId>
+					<artifactId>mbee_util</artifactId>
+					<version>${mbee.version}</version>
+				</dependency>
+				<dependency>
+					<groupId>gov.nasa.jpl.mbee.sysml</groupId>
+					<artifactId>sysml</artifactId>
+					<version>${mbee.version}</version>
+				</dependency>
+				<dependency>
+					<groupId>kexpparser</groupId>
+					<artifactId>kexpparser</artifactId>
+					<version>0.0.8</version>
+					<scope>system</scope>
+					<type>jar</type>
+					<systemPath>${project.basedir}/src/main/amp/web/WEB-INF/lib/kexpparser.jar</systemPath>
+				</dependency>
+				<dependency>
+					<groupId>gov.nasa.jpl.mbee.bae</groupId>
+					<artifactId>bae</artifactId>
+					<version>${mbee.version}</version>
+				</dependency>
+				<dependency>
+					<groupId>gov.nasa.jpl.mbee.klang</groupId>
+					<artifactId>klang</artifactId>
+					<version>${mbee.version}</version>
+				</dependency>
+			</dependencies>
+		</profile>
+	</profiles>
+
+	<!-- Here we realize the connection with the Alfresco selected platform 
+		(e.g.version and edition) -->
+	<dependencyManagement>
+		<dependencies>
+			<!-- This will import the dependencyManagement for all artifacts in the 
+				selected Alfresco version/edition (see http://maven.apache.org/guides/introduction/introduction-to-dependency-mechanism.html#Importing_Dependencies) 
+				NOTE: You still need to define dependencies in your POM, but you can omit 
+				version as it's enforced by this dependencyManagement. NOTE: It defaults 
+				to the latest version this SDK pom has been tested with, but alfresco version 
+				can/should be overridden in your project's pom -->
+			<dependency>
+				<groupId>${alfresco.groupId}</groupId>
+				<artifactId>alfresco-platform-distribution</artifactId>
+				<version>${alfresco.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
+
+	<!-- Following dependencies are needed for compiling Java code in src/main/java; 
 		<scope>provided</scope> is inherited for each of the following; for more 
 		info, please refer to alfresco-platform-distribution POM -->
-    <dependencies>
-	    <dependency>
-		    <groupId>${alfresco.groupId}</groupId>
-		    <artifactId>alfresco</artifactId>
-		    <version>${alfresco.version}</version>
-		    <type>pom</type>
-		    <scope>provided</scope>
-        </dependency>
-        <!-- 
-        <dependency>
-            <groupId>${alfresco.groupId}</groupId>
-            <artifactId>alfresco-repository</artifactId>
-            <version>${alfresco.version}</version>
-            <scope>provided</scope>
-        </dependency>
-         -->
-        <!-- Test dependencies -->
+	<dependencies>
 		<dependency>
-            <groupId>gov.nasa.jpl.mbee.docbook</groupId>
-            <artifactId>docbook</artifactId>
-            <version>0.0.5</version>
-        </dependency>
- 		<dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>4.8.1</version>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
+			<groupId>${alfresco.groupId}</groupId>
+			<artifactId>alfresco-repository</artifactId>
+			<version>${alfresco.version}</version>
+			<scope>provided</scope>
+		</dependency>
+		<!-- Test dependencies -->
+		<dependency>
+			<groupId>gov.nasa.jpl.mbee.docbook</groupId>
+			<artifactId>docbook</artifactId>
+			<version>0.0.5</version>
+		</dependency>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>4.8.1</version>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
 			<groupId>org.mockito</groupId>
 			<artifactId>mockito-all</artifactId>
 			<version>1.8.4</version>
 			<scope>test</scope>
 		</dependency>
-        <dependency>
-            <groupId>${alfresco.groupId}</groupId>
-            <artifactId>alfresco-web-framework-commons</artifactId>
-            <version>${alfresco.version}</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>${alfresco.groupId}</groupId>
-            <artifactId>alfresco-remote-api</artifactId>
-            <version>${alfresco.version}</version>
-            <scope>provided</scope>
-        </dependency>
-        <!--  required for mapping slf4j to log4j -->
-        <dependency>
+		<dependency>
+			<groupId>${alfresco.groupId}</groupId>
+			<artifactId>alfresco-web-framework-commons</artifactId>
+			<version>${alfresco.version}</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>${alfresco.groupId}</groupId>
+			<artifactId>alfresco-remote-api</artifactId>
+			<version>${alfresco.version}</version>
+			<scope>provided</scope>
+		</dependency>
+		<!-- required for mapping slf4j to log4j -->
+		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>jcl-over-slf4j</artifactId>
 			<version>1.5.11</version>
-            <scope>provided</scope>
+			<scope>provided</scope>
 		</dependency>
-        <dependency>
+		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-context</artifactId>
 			<version>3.0.6.RELEASE</version>
-            <scope>provided</scope>
+			<scope>provided</scope>
 		</dependency>
 		<!-- apache chemistry opencmis CLIENT -->
 		<dependency>
@@ -274,18 +263,18 @@
 			<version>0.8.0</version>
 			<scope>provided</scope>
 		</dependency>
-        <!--  apache chemistry opencmis SERVER -->
+		<!-- apache chemistry opencmis SERVER -->
 		<dependency>
-		    <groupId>org.apache.chemistry.opencmis</groupId>
-		    <artifactId>chemistry-opencmis-server-support</artifactId>
-		    <version>0.8.0</version>
-            <scope>provided</scope>
+			<groupId>org.apache.chemistry.opencmis</groupId>
+			<artifactId>chemistry-opencmis-server-support</artifactId>
+			<version>0.8.0</version>
+			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.chemistry.opencmis</groupId>
 			<artifactId>chemistry-opencmis-commons-impl</artifactId>
 			<version>0.8.0</version>
-            <scope>provided</scope>
+			<scope>provided</scope>
 		</dependency>
 		<!-- Temporary dependencies for connecting directly to JMS -->
 		<dependency>
@@ -295,93 +284,94 @@
 		</dependency>
 		<dependency>
 			<groupId>org.apache.activemq</groupId>
-			<artifactId>activemq-core</artifactId>
-			<version>5.7.0</version>
+			<artifactId>activemq-all</artifactId>
+			<version>5.10.0</version>
 		</dependency>
 		<dependency>
-		    <groupId>com.oracle.weblogic</groupId>
-		    <artifactId>wlthint3client</artifactId>
-		    <version>10.3.6.0</version>
+			<groupId>com.oracle.weblogic</groupId>
+			<artifactId>wlthint3client</artifactId>
+			<version>10.3.6.0</version>
 		</dependency>
 		<!-- REST client dependencies -->
 		<dependency>
-		    <groupId>com.sun.jersey</groupId>
-		    <artifactId>jersey-client</artifactId>
-		    <version>1.18.1</version>
+			<groupId>com.sun.jersey</groupId>
+			<artifactId>jersey-client</artifactId>
+			<version>1.18.1</version>
 		</dependency>
-	    <dependency>
-	        <groupId>org.jsoup</groupId>
-	        <artifactId>jsoup</artifactId>
-	        <version>1.8.1</version>
-        </dependency>
-	    <dependency>
-	        <groupId>org.json</groupId>
-	        <artifactId>json</artifactId>
-	        <version>20140107</version>
-	    </dependency>
-	    
-	    <dependency>
-            <groupId>org.antlr</groupId>
-            <artifactId>antlr4</artifactId>
-            <version>4.5</version>
-        </dependency>
-	    
-    </dependencies>
+		<dependency>
+			<groupId>org.jsoup</groupId>
+			<artifactId>jsoup</artifactId>
+			<version>1.8.1</version>
+		</dependency>
+		<dependency>
+			<groupId>org.json</groupId>
+			<artifactId>json</artifactId>
+			<version>20140107</version>
+		</dependency>
 
-	
-    <!-- This repository is only needed to retrieve Alfresco parent POM. 
-        NOTE: This can be removed when/if Alfresco will be on Maven Central 
-        
-        NOTE: The repository to be used for Alfresco Enterprise artifacts is
-        https://artifacts.alfresco.com/nexus/content/groups/private/. Please check
-        with Alfresco Support to get credentials to add to your ~/.m2/settings.xml
-        if you are a Enterprise customer or Partner  
-        -->
-    <repositories>
-     <repository>
-            <id>alfresco-private-repository</id>
-            <url>https://artifacts.alfresco.com/nexus/content/groups/private</url>
-        </repository>
+		<dependency>
+			<groupId>org.antlr</groupId>
+			<artifactId>antlr4</artifactId>
+			<version>4.5</version>
+		</dependency>
 
-        <repository>
-              <id>artifactory-snapshots</id>
-              <name>snapshots</name>
-              <url>http://europambee-build.jpl.nasa.gov:8082/artifactory/libs-snapshot-local</url>
-        </repository>
-        <repository>
-              <id>artifactory-releases</id>
-              <name>releases</name>
-              <url>http://europambee-build.jpl.nasa.gov:8082/artifactory/libs-release-local</url>
-        </repository>
-        <repository>
-              <id>artifactory-external-releases</id>
-              <name>external-releases</name>
-              <url>http://europambee-build.jpl.nasa.gov:8082/artifactory/ext-release-local</url>
-        </repository>
-                
-        <!-- soap ui plugin -->
-        <repository>
-            <id>smartbear-sweden-plugin-repository</id>
-            <url>http://www.soapui.org/repository/maven2/</url>
-        </repository>
-    </repositories>
+		<dependency>
+			<groupId>org.postgresql</groupId>
+			<artifactId>postgresql</artifactId>
+			<version>9.4-1204-jdbc41</version>
+		</dependency>
+	</dependencies>
+
+
+	<!-- This repository is only needed to retrieve Alfresco parent POM. NOTE: 
+		This can be removed when/if Alfresco will be on Maven Central NOTE: The repository 
+		to be used for Alfresco Enterprise artifacts is https://artifacts.alfresco.com/nexus/content/groups/private/. 
+		Please check with Alfresco Support to get credentials to add to your ~/.m2/settings.xml 
+		if you are a Enterprise customer or Partner -->
+	<repositories>
+		<repository>
+			<id>alfresco-private-repository</id>
+			<url>https://artifacts.alfresco.com/nexus/content/groups/private</url>
+		</repository>
+		<repository>
+			<id>artifactory-snapshots</id>
+			<name>snapshots</name>
+			<url>http://europambee-build.jpl.nasa.gov:8082/artifactory/libs-snapshot-local</url>
+		</repository>
+		<repository>
+			<id>artifactory-releases</id>
+			<name>releases</name>
+			<url>http://europambee-build.jpl.nasa.gov:8082/artifactory/libs-release-local</url>
+		</repository>
+		<repository>
+			<id>artifactory-external-releases</id>
+			<name>external-releases</name>
+			<url>http://europambee-build.jpl.nasa.gov:8082/artifactory/ext-release-local</url>
+		</repository>
+
+		<!-- soap ui plugin -->
+		<repository>
+			<id>smartbear-sweden-plugin-repository</id>
+			<url>http://www.soapui.org/repository/maven2/</url>
+		</repository>
+	</repositories>
 
 	<build>
 		<plugins>
-      		<plugin>
+			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>build-helper-maven-plugin</artifactId>
 				<version>1.8</version>
 			</plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-javadoc-plugin</artifactId>
-                <version>2.10.1</version>
-                <configuration>
-                    <show>private</show>
-                    <nohelp>true</nohelp>
-                </configuration>
-            </plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<version>2.10.1</version>
+				<configuration>
+					<show>private</show>
+					<nohelp>true</nohelp>
+				</configuration>
+			</plugin>
 			<plugin>
 				<groupId>org.zeroturnaround</groupId>
 				<artifactId>jrebel-maven-plugin</artifactId>
@@ -418,12 +408,14 @@
 					</web>
 				</configuration>
 			</plugin>
-			<!--  make sure fonts are copied correctly : alfresco munges woff files maybe because of UTF-8 encoding? -->
+			<!-- make sure fonts are copied correctly : alfresco munges woff files 
+				maybe because of UTF-8 encoding? -->
 			<plugin>
 				<artifactId>maven-resources-plugin</artifactId>
 				<executions>
 					<execution>
-                        <!-- Alfresco Maven plugin corrupts libraries too - so make sure to copy them over -->
+						<!-- Alfresco Maven plugin corrupts libraries too - so make sure to 
+							copy them over -->
 						<id>copy-lib-resources</id>
 						<phase>compile</phase>
 						<goals>
@@ -440,7 +432,8 @@
 						</configuration>
 					</execution>
 					<execution>
-                        <!-- Alfresco Maven plugin corrupts libraries too - so make sure to copy them over -->
+						<!-- Alfresco Maven plugin corrupts libraries too - so make sure to 
+							copy them over -->
 						<id>copy-web-lib-resources</id>
 						<phase>compile</phase>
 						<goals>
@@ -456,47 +449,49 @@
 							</resources>
 						</configuration>
 					</execution>
-                    <execution>
-                        <!-- Copy the RAML API information into the scripts directory so it gets deployed  -->
-                        <id>copy-api-resources</id>
-                        <phase>compile</phase>
-                        <goals>
-                            <goal>copy-resources</goal>
-                        </goals>
-                        <configuration>
-                            <overwrite>true</overwrite>
-                            <outputDirectory>${basedir}/src/main/amp/web/scripts/raml</outputDirectory>
-                            <resources>
-                                <resource>
-                                    <directory>${basedir}/api/html</directory>
-                                </resource>
-                            </resources>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <!-- Copy enterprise specific configurations  -->
-                        <id>copy-enterprise-resources</id>
-                        <phase>compile</phase>
-                        <goals>
-                            <goal>copy-resources</goal>
-                        </goals>
-                        <configuration>
-                            <overwrite>true</overwrite>
-                            <outputDirectory>${project.build.directory}/${project.build.finalName}</outputDirectory>
-                            <resources>
-                                <resource>
-                                    <directory>${basedir}/resources/enterprise/src/main/amp</directory>
-                                </resource>
-                            </resources>
-                        </configuration>
-                    </execution>
-			</executions>
+					<execution>
+						<!-- Copy the RAML API information into the scripts directory so it 
+							gets deployed -->
+						<id>copy-api-resources</id>
+						<phase>compile</phase>
+						<goals>
+							<goal>copy-resources</goal>
+						</goals>
+						<configuration>
+							<overwrite>true</overwrite>
+							<outputDirectory>${basedir}/src/main/amp/web/scripts/raml</outputDirectory>
+							<resources>
+								<resource>
+									<directory>${basedir}/api/html</directory>
+								</resource>
+							</resources>
+						</configuration>
+					</execution>
+					<execution>
+						<!-- Copy enterprise specific configurations -->
+						<id>copy-enterprise-resources</id>
+						<phase>compile</phase>
+						<goals>
+							<goal>copy-resources</goal>
+						</goals>
+						<configuration>
+							<overwrite>true</overwrite>
+							<outputDirectory>${project.build.directory}/${project.build.finalName}</outputDirectory>
+							<resources>
+								<resource>
+									<directory>${basedir}/resources/enterprise/src/main/amp</directory>
+								</resource>
+							</resources>
+						</configuration>
+					</execution>
+				</executions>
 			</plugin>
-			
+
 		</plugins>
 		<pluginManagement>
 			<plugins>
-				<!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself.-->
+				<!--This plugin's configuration is used to store Eclipse m2e settings 
+					only. It has no influence on the Maven build itself. -->
 				<plugin>
 					<groupId>org.eclipse.m2e</groupId>
 					<artifactId>lifecycle-mapping</artifactId>
@@ -551,17 +546,17 @@
 			</plugins>
 		</pluginManagement>
 	</build>
-    <reporting>
-     <plugins>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-javadoc-plugin</artifactId>
-        <version>2.10.1</version>
-        <configuration>
-<!--           <stylesheetfile>${basedir}/src/main/javadoc/stylesheet.css</stylesheetfile>
- -->          <show>public</show>
-        </configuration>
-      </plugin>
-     </plugins>
-    </reporting>
+	<reporting>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<version>2.10.3</version>
+				<configuration>
+					<!-- <stylesheetfile>${basedir}/src/main/javadoc/stylesheet.css</stylesheetfile> -->
+					<show>public</show>
+				</configuration>
+			</plugin>
+		</plugins>
+	</reporting>
 </project>
