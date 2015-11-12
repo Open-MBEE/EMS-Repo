@@ -15,7 +15,7 @@ else
   workspace=$1
 fi
 if [[ ! -e "$file" ]]; then
-  file="JsonData/"$1
+  file="JsonData/"$file
 fi
 if [[ ! -e "$file" ]]; then
   echo "input file $file not found!"

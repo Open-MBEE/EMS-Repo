@@ -8,6 +8,7 @@ import gov.nasa.jpl.mbee.util.Debug;
 import gov.nasa.jpl.mbee.util.HasId;
 import gov.nasa.jpl.mbee.util.Pair;
 import gov.nasa.jpl.mbee.util.Seen;
+import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.util.NodeUtil.SearchType;
 
@@ -2272,6 +2273,8 @@ System.out.println("RRRRRRRRRRRRR");
     public boolean sourceIs( EmsScriptNode relationshipNode, EmsScriptNode nodeToMatch ) {
         Object sourceRef = relationshipNode.getNodeRefProperty( Acm.ACM_SOURCE, true, null, null );
         if ( sourceRef instanceof NodeRef ) {
+            EmsScriptNode n = new EmsScriptNode( (NodeRef)sourceRef, relationshipNode.getServices() );
+            System.out.println("ZZZZZZZZZZZZZZZZZZ    source " + n + ";  nodeToMatch " + nodeToMatch );
             if ( nodeToMatch.getNodeRef().equals( sourceRef ) ) {
                 return true;
             }
@@ -2279,8 +2282,31 @@ System.out.println("RRRRRRRRRRRRR");
         return false;
     }
 
+    public long getTime( EmsScriptNode n ) {
+        Collection<?> c = getValue( n, null );
+        if ( Utils.isNullOrEmpty( c ) ) return 999;
+        Object v = c.iterator().next();
+        try {
+        if ( v instanceof Date ) return getTime((Date)v);
+        if ( v instanceof String ) return getTime((String)v);
+        //Date d = TimeUtils.dateFromTimestamp( timestamp );
+        return getTime("" + v);
+        } catch (Throwable t) {
+            return 1999;
+        }
+    }
+    public long getTime( Date d ) {
+        //Date d = TimeUtils.dateFromTimestamp( timestamp );
+        return d.getTime();
+    }
+    public long getTime( String timestamp ) {
+        Date d = TimeUtils.dateFromTimestamp( timestamp );
+        return d.getTime();
+    }
+    
     
     public boolean targetIs( EmsScriptNode relationshipNode, EmsScriptNode nodeToMatch ) {
+        System.out.println("YYYYYYYYYYYYYYYYYYYYYYYYYYYY");
         Object targetRef = relationshipNode.getNodeRefProperty( Acm.ACM_TARGET, true, null, null );
         if ( targetRef instanceof NodeRef ) {
             if ( nodeToMatch.getNodeRef().equals( targetRef ) ) {
@@ -2372,5 +2398,11 @@ System.out.println("RRRRRRRRRRRRR");
             }
         }
         return false;
+    }
+    
+    public <T> T first( Collection<T> coll ) {
+        if ( Utils.isNullOrEmpty( coll ) ) return null;
+        T t = coll.iterator().next();
+        return t;
     }
 }
