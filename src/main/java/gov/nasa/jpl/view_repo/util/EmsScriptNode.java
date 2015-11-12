@@ -2584,7 +2584,7 @@ public class EmsScriptNode extends ScriptNode implements
         // add affected ids
         if ( addingAffectedIds  ) {
             if ( filter == null || filter.isEmpty() || filter.contains( "affectedIds" ) ) {
-                ArrayList< NodeRef > refs = this.getAffectedElementsRecursive( false, false, dateTime, getWorkspace(), false, false, true, false );
+                ArrayList< NodeRef > refs = this.getAffectedElements( false, false, dateTime, getWorkspace(), false, false, true, false );
                 JSONArray affectedIds = addNodeRefIdsJSON( refs );
                 putInJson( elementJson, "affectedIds", affectedIds, filter );
             }
@@ -6237,18 +6237,7 @@ public class EmsScriptNode extends ScriptNode implements
         EmsScriptNode parent = getUnreifiedParent( dateTime, ws );
         return parent != null && parent.hasValueSpecProperty( this, dateTime, ws );
     }
-    public ArrayList<NodeRef> getAffectedElementsRecursive(boolean ignoreWorkspace, boolean onlyThisWorkspace, Date dateTime,
-			WorkspaceNode workspaceNode, boolean justFirst, boolean optimisticJustFirst, boolean exactMatch,
-			boolean includeDeleted){
-    		ArrayList< NodeRef > allRefs = new ArrayList();
-    		ArrayList< NodeRef > refs = this.getAffectedElements( false, false, dateTime, getWorkspace(), false, false, true, false );
-    		allRefs.addAll(refs);
-	    	for(NodeRef ref: refs){
-	        	EmsScriptNode node = new EmsScriptNode(ref, services);
-	        	allRefs.addAll(node.getAffectedElementsRecursive(false, false, dateTime, getWorkspace(), false, false, true, false));
-	        };
-    	return allRefs;
-    }
+    
 	public ArrayList<NodeRef> getAffectedElements(boolean ignoreWorkspace, boolean onlyThisWorkspace, Date dateTime,
 			WorkspaceNode workspaceNode, boolean justFirst, boolean optimisticJustFirst, boolean exactMatch,
 			boolean includeDeleted) {
