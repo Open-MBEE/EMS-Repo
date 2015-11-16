@@ -9,8 +9,8 @@
       "creator": "admin",
       "modifier": "admin",
       "name": "delete_delete_before",
-      "owner": "123456",
       "documentation": "delete_delete_before",
+      "owner": "123456",
       "specialization": {
         "propertyType": null,
         "isDerived": false,
@@ -26,12 +26,13 @@
   },
   "workspace2": {
     "deletedElements": [{
+      "modifier": "admin",
       "name": "delete_delete_before",
       "qualifiedName": "/europa/JW_TEST2/delete_delete_before",
-      "owner": "123456",
       "sysmlid": "delete_delete_before",
+      "owner": "123456",
       "specialization": {"type": "Property"},
-      "creator": "admin"
+      "creator": "admin",
     }],
     "addedElements": [],
     "conflictedElements": [],

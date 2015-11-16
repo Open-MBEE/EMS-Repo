@@ -1,9 +1,9 @@
 <webscript>
-	<shortname>get element version history with {elementId}</shortname>
+	<shortname>Alfresco 2 Postgres</shortname>
 	<description>
-		get element version history with {elementId}
+		Store alfresco nodes as a graph in Postgres database.
 	</description>
-	<url>/workspaces/{workspaceId}/history/{elementId}</url>
+	<url>/model2postgres/{workspaceId}</url>
 	<format default="json">argument</format>
 	<authentication>user</authentication>
 	<transaction>none</transaction>

@@ -1459,6 +1459,8 @@ public class JsonDiffDiff extends AbstractDiff<JSONObject, Object, String> {
 
 		{
 			// add("sysmlid");
+			add("nodeRefId");
+			add("versionedRefId");
 			add("creator");
 			add("modified");
 			add("created");

@@ -32,12 +32,10 @@ import gov.nasa.jpl.ae.event.Call;
 import gov.nasa.jpl.ae.event.ConstraintExpression;
 import gov.nasa.jpl.ae.event.Expression;
 import gov.nasa.jpl.ae.event.Parameter;
-import gov.nasa.jpl.ae.event.ParameterListenerImpl;
 import gov.nasa.jpl.ae.solver.Constraint;
 import gov.nasa.jpl.ae.solver.ConstraintLoopSolver;
 import gov.nasa.jpl.ae.sysml.SystemModelSolver;
 import gov.nasa.jpl.ae.sysml.SystemModelToAeExpression;
-import gov.nasa.jpl.ae.util.ClassData;
 import gov.nasa.jpl.mbee.util.Debug;
 import gov.nasa.jpl.mbee.util.Pair;
 import gov.nasa.jpl.mbee.util.Random;
@@ -57,40 +55,43 @@ import gov.nasa.jpl.view_repo.util.NodeUtil.SearchType;
 import gov.nasa.jpl.view_repo.util.WorkspaceDiff;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 
-import java.util.Formatter;
 import java.io.Serializable;
 import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
+import java.util.Formatter;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedHashSet;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.*;
-import java.util.Arrays;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.servlet.http.HttpServletResponse;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.json.JSONString;
 import org.alfresco.repo.jscript.ScriptNode;
 import org.alfresco.repo.model.Repository;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
+import org.alfresco.service.cmr.search.ResultSet;
 import org.alfresco.service.cmr.site.SiteInfo;
 import org.alfresco.service.cmr.site.SiteVisibility;
-import org.apache.log4j.*;
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.json.JSONString;
 import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
@@ -285,17 +286,6 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
                 }
             }
         };
-        
-//            UserTransaction trx;
-//            trx = services.getTransactionService().getNonPropagatingUserTransaction();
-//            try {
-//                trx.begin();
-//                NodeUtil.setInsideTransactionNow( true );
-//            } catch ( Throwable e ) {
-//                String msg = null;
-//                tryRollback( trx, e, msg );
-//            }
-        //Map<String, Object> model = new HashMap<String, Object>();
         if ( !model.containsKey( "res" ) && response != null && response.toString().length() > 0 ) {
             model.put( "res", response.toString() );
             
@@ -610,21 +600,6 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
 	}
 
 
-//	/**
-//	 * Checks whether user has permissions to the nodeRef and logs results and status as appropriate
-//	 * @param nodeRef      NodeRef to check permissions againts
-//	 * @param permissions  Permissions to check
-//	 * @return             true if user has specified permissions to node, false otherwise
-//	 */
-//	protected boolean checkPermissions(NodeRef nodeRef, String permissions) {
-//		if (services.getPermissionService().hasPermission(nodeRef, permissions) != AccessStatus.ALLOWED) {
-//			log(LogLevel.WARNING, "No " + permissions + " priveleges to " + nodeRef.toString() + ".\n", HttpServletResponse.SC_BAD_REQUEST);
-//			return false;
-//		}
-//		return true;
-//	}
-
-
     protected static final String WORKSPACE_ID = "workspaceId";
 	protected static final String PROJECT_ID = "projectId";
 	protected static final String ARTIFACT_ID = "artifactId";
@@ -862,13 +837,28 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
 		return true;
 	}
 
+    protected Map< String, EmsScriptNode >
+            searchForElements( String type, String pattern,
+                                       boolean ignoreWorkspace,
+                                       WorkspaceNode workspace, Date dateTime ) {
+        if (NodeUtil.doGraphDb) {
+            if (workspace == null && dateTime == null) {
+                return searchForElementsPostgres( type, pattern, ignoreWorkspace, workspace, dateTime );
+            } else {
+                return searchForElementsOriginal( type, pattern, ignoreWorkspace, workspace, dateTime );
+            }
+        } else {
+            return searchForElementsOriginal( type, pattern, ignoreWorkspace, workspace, dateTime );
+        }
+    }
+
 	/**
 	 * Perform Lucene search for the specified pattern and ACM type
 	 * TODO: Scope Lucene search by adding either parent or path context
 	 * @param type		escaped ACM type for lucene search: e.g. "@sysml\\:documentation:\""
 	 * @param pattern   Pattern to look for
 	 */
-	protected Map<String, EmsScriptNode> searchForElements(String type,
+	protected Map<String, EmsScriptNode> searchForElementsOriginal(String type,
 	                                                       String pattern,
 	                                                       boolean ignoreWorkspace,
 	                                                       WorkspaceNode workspace,
@@ -877,7 +867,40 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
 		                               workspace, dateTime, null );
 	}
 
-	   /**
+	/**
+	 * Perform Lucene search for the specified pattern and ACM type
+	 * As opposed to searchForElementsOriginal, this returns a Map of noderef ids to
+	 * script nodes - since postgres db needs this to look up properly
+	 * 
+	 * @param type
+	 * @param pattern
+	 * @param ignoreWorkspace
+	 * @param workspace
+	 * @param dateTime
+	 * @return
+	 */
+	protected Map<String, EmsScriptNode> searchForElementsPostgres(String type,
+                                                                  String pattern,
+                                                                  boolean ignoreWorkspace,
+                                                                  WorkspaceNode workspace,
+                                                                  Date dateTime) {
+	    Map<String, EmsScriptNode> resultsMap = new HashMap<String, EmsScriptNode>();
+	    ResultSet results = null;
+        String queryPattern = type + pattern + "\"";
+        results = NodeUtil.luceneSearch( queryPattern, services );
+        if (results != null) {
+            ArrayList< NodeRef > resultList =
+                    NodeUtil.resultSetToNodeRefList( results );
+            results.close();
+            for (NodeRef nr: resultList) {
+                EmsScriptNode node = new EmsScriptNode(nr, services, response);
+                resultsMap.put( node.getNodeRef().toString(), node );
+            }
+        }
+        return resultsMap;
+	}
+
+	/**
      * Perform Lucene search for the specified pattern and ACM type for the specified
      * siteName.
      *
@@ -892,16 +915,12 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
                                                                   Date dateTime,
                                                                   String siteName) {
 
-        Map<String, EmsScriptNode> searchResults = new HashMap<String, EmsScriptNode>();
-
-        searchResults.putAll( NodeUtil.searchForElements( type, pattern, ignoreWorkspace,
+        return NodeUtil.searchForElements( type, pattern, ignoreWorkspace,
                                                           workspace,
                                                           dateTime, services,
                                                           response,
                                                           responseStatus,
-                                                          siteName) );
-
-        return searchResults;
+                                                          siteName);
 
     }
 

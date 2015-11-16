@@ -37,7 +37,7 @@ test_dir_path = "test-data/javawebscripts"
 test_nums = []
 test_names = []
 create_baselines = False
-common_filters = ['"created"', '"read"', '"lastModified"', '"modified"', '"siteCharacterizationId"', 'time_total']
+common_filters = ['"nodeRefId"', '"versionedRefId"', '"created"','"read"','"lastModified"','"modified"','"siteCharacterizationId"','time_total']
 cmd_git_branch = None
 
 tests = []
@@ -665,7 +665,7 @@ def run_curl_test(test_num, test_name, test_desc, curl_cmd, use_json_diff=False,
                 cp, err = p.communicate()
                 if len(cp) == 0:
                     cp = ".:%s:%s:%s:%s:../../target/mms-repo-ent-war/WEB-INF/lib/json-20140107.jar:../../target/mms-repo-war/WEB-INF/lib/json-20140107.jar:../../target/mms-repo-war/WEB-INF/lib/json-20090211.jar:../../target/classes"%(mbee_util_jar_path(),mbee_util_jar_path2(),mbee_util_jar_path3(),mbee_util_jar_path4())
-                diff_cmd = "java -cp %s gov.nasa.jpl.view_repo.util.JsonDiff"%cp.strip()
+                diff_cmd = 'java -cp "%s" gov.nasa.jpl.view_repo.util.JsonDiff' % cp.strip()
             else:
                 diff_cmd = "diff"
 

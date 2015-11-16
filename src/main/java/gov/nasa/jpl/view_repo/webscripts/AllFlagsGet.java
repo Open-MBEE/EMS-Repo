@@ -37,7 +37,8 @@ public class AllFlagsGet extends FlagSet {
                            "viewPointExpressions",
                            "diffDefaultIsMerge",
                            "cacheSnapshots",
-                           "checkMmsVersions"};
+                           "checkMmsVersions",
+                           "graphDb"};
     
     public String[] getAllFlags() {
         return flags;
@@ -125,6 +126,8 @@ public class AllFlagsGet extends FlagSet {
             DeclarativeJavaWebScript.cacheSnapshotsFlag = val;
         } else if (path.equalsIgnoreCase("checkMmsVersions")){
         	AbstractJavaWebScript.checkMmsVersions = val;
+        } else if (path.equalsIgnoreCase("graphDb")) {
+            NodeUtil.doGraphDb = val;
         }
         return true;
     }
@@ -183,11 +186,13 @@ public class AllFlagsGet extends FlagSet {
         } else if (path.equalsIgnoreCase("makeDocBook")) {
             return SnapshotArtifactsGenerationActionExecuter.makeDocBook;
         }else if (path.equalsIgnoreCase("glom")) {
-        	return MmsDiffGet.glom;
+            return MmsDiffGet.glom;
         } else if (path.equalsIgnoreCase("cleanJson")) {
-        	return CommitUtil.cleanJson;
+        	    return CommitUtil.cleanJson;
         } else if (path.equalsIgnoreCase("diffDefaultIsMerge")){
         	return MmsDiffGet.diffDefaultIsMerge;
+        } else if (path.equalsIgnoreCase( "graphDb" )) {
+            return NodeUtil.doGraphDb;
         } else if (path.equalsIgnoreCase("checkMmsVersions")){
         	return AbstractJavaWebScript.checkMmsVersions;
         }
@@ -203,10 +208,10 @@ public class AllFlagsGet extends FlagSet {
             NodeUtil.nodeAtTimeCache.clear();
             NodeUtil.jsonCache.clear();
             NodeUtil.jsonDeepCache.clear();
-            NodeUtil.jsonStringCache.clear();;
-            NodeUtil.propertyCache.clear();;
+            NodeUtil.jsonStringCache.clear();
+            NodeUtil.propertyCache.clear();
             NodeUtil.simpleCache.clear();
-            NodeUtil.versionCache.clear();;
+            NodeUtil.versionCache.clear();
             NodeUtil.versionHistoryCache.clear();
             return true;
         }
@@ -254,19 +259,21 @@ public class AllFlagsGet extends FlagSet {
         } else if (path.equalsIgnoreCase("versionCacheDebug")) {
             return false;
         } else if (path.equalsIgnoreCase("viewPointExpressions")) {
-        	return false;
+        	    return false;
         } else if (path.equalsIgnoreCase("skipWorkspacePermissionCheck")) {
             return false;
         } else if (path.equalsIgnoreCase("optimisticJustFirst")) {
             return false;
         } else if (path.equalsIgnoreCase("glom")) {
-        	return false;
+        	    return false;
         } else if (path.equalsIgnoreCase("cleanJson")) {
-        	return false;
+        	    return false;
         } else if (path.equalsIgnoreCase("diffDefaultIsMerge")){
         	return false;
         } else if (path.equalsIgnoreCase("checkMmsVersions")){
         	return false;
+        } else if (path.equalsIgnoreCase( "doGraphDb" )) {
+            return false;
         }
         return false;
     };
@@ -337,6 +344,8 @@ public class AllFlagsGet extends FlagSet {
             return "cacheSnapshotsFlag";
         } else if (path.equalsIgnoreCase("checkMmsVersions")){
         	return "checkMmsVersions";
+        } else if (path.equalsIgnoreCase("graphDb")) {
+            return "graphDb";
         }
         return null;
     }
