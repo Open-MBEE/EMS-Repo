@@ -279,8 +279,8 @@ public class PostgresHelper {
 		return result;
 	}
 	
-	public Set<Pair<String,String>> getImmediateParentRoots(String sysmlId, DbEdgeTypes et) {
-		Set<Pair<String,String>> result = new HashSet<Pair<String,String>>();
+	public Map<String,Set<String>> getImmediateParentRoots(String sysmlId, DbEdgeTypes et) {
+		Map<String, Set<String>> result = new HashMap<String, Set<String>>();
 		try {
 			Node n = getNodeFromSysmlId(sysmlId);
 
@@ -292,7 +292,12 @@ public class PostgresHelper {
 					et.getValue(), workspaceName));
 
 			while (rs.next()) {
-				result.add(new Pair<String,String>(rs.getString(1), rs.getString(2)));
+			    String rootId = rs.getString( 2 );
+			    String immediateID = rs.getString( 1 );
+			    if (!result.containsKey( rootId )) {
+			        result.put( rootId, new HashSet<String>() );
+			    }
+			    result.get( rootId ).add( immediateID );
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
