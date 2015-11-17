@@ -388,11 +388,11 @@ public class CommitUtil {
 	/**
 	 * Gets all the commits in the specified time range from the startWorkspace to the 
 	 * endWorkspace. If the endWorkspace is not a parent of the startWorkspace, this will
-	 * search to the master.
+	 * search to the master.  Commits are returned in reverse chronological order. 
 	 * @param fromDateTime
 	 * @param toDateTime
-	 * @param startWorkspace
-	 * @param endWorkspace
+	 * @param startWorkspace child workspace
+	 * @param endWorkspace parent workspace
 	 * @param services
 	 * @param response
 	 * @return

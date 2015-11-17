@@ -1,6 +1,7 @@
 package gov.nasa.jpl.view_repo.util;
 
 import gov.nasa.jpl.ae.event.Call;
+import gov.nasa.jpl.ae.event.Expression;
 import gov.nasa.jpl.ae.event.FunctionCall;
 import gov.nasa.jpl.mbee.util.ClassUtils;
 import gov.nasa.jpl.mbee.util.CompareUtils;
@@ -208,7 +209,8 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, Object, 
 
     @Override
     public EmsScriptNode createConstraint( Object context ) {
-        if ( context instanceof EmsScriptNode ) {
+        EmsScriptNode node = objectToEmsScriptNode( context );
+        if ( node != null ) {
 
         }
         // TODO Auto-generated method stub
@@ -380,21 +382,31 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, Object, 
     public Collection< EmsScriptNode > getOwnedElement( Object context ) {
         return getOwnedElements( context );
     }
+    public static boolean coerce = false;
     public Collection< EmsScriptNode > getOwnedElements( Object context ) {
         List<EmsScriptNode> list = new ArrayList< EmsScriptNode >();
-        if ( context instanceof EmsScriptNode ) {
-            EmsScriptNode n = (EmsScriptNode)context;
+        if ( coerce || context instanceof EmsScriptNode ) {
+        EmsScriptNode node = coerce ? objectToEmsScriptNode( context ) : (EmsScriptNode)context;
+        if ( node != null ) {
+            EmsScriptNode n = node;//(EmsScriptNode)context;
             List< NodeRef > c = n.getOwnedChildren( false, null, n.getWorkspace() );
             if ( c != null ) {
                 list = EmsScriptNode.toEmsScriptNodeList( c );
             }
         }
+        }
         return list;
     }
     
     public EmsScriptNode getOwner( EmsScriptNode element ) {
-        if ( !NodeUtil.exists( element ) ) return null;
-        return element.getOwningParent( null, element.getWorkspace(), true );
+        
+        if ( !NodeUtil.exists( element ) ) {
+            System.out.println("getOwner() - element does not exist!  " + element);
+            return null;
+        }
+        EmsScriptNode p = element.getOwningParent( null, element.getWorkspace(), true );
+        System.out.println("getOwner(" + element + ") = " + p);
+        return p;
     }
 
 
@@ -427,14 +439,13 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, Object, 
         WorkspaceNode workspace = null;
         
         // Convert context from NodeRef to EmsScriptNode or WorkspaceNode
-        if ( context instanceof NodeRef ) {
-            EmsScriptNode ctxt = new EmsScriptNode( (NodeRef)context, getServices(),
-                                                    response, status );
-            if ( ctxt.hasAspect( "Workspace" ) ) {
-                context = new WorkspaceNode( (NodeRef)context, getServices(),
+        if ( context instanceof NodeRef || coerce ) {
+            EmsScriptNode ctxt = objectToEmsScriptNode( context );
+            if ( ctxt != null && ctxt.hasAspect( "Workspace" ) ) {
+                context = new WorkspaceNode( ctxt.getNodeRef(), getServices(),
                                              response, status );
             } else {
-                context = ctxt;
+                if ( ctxt != null ) context = ctxt;
             }
         }
         
@@ -946,6 +957,25 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, Object, 
         //System.out.println("getPropertyWithTypeName(" + context + ", " + specifier + ") = " + nodes);
         return nodes;
     }
+    
+    public QueryContext getQueryContext( Object context ) {
+        Date dateTime = null;
+        WorkspaceNode workspace = null;
+        if ( context instanceof Date ) {
+            dateTime = (Date)context;
+        } else if (context instanceof WorkspaceNode) {
+            workspace = (WorkspaceNode)context;
+        } else if ( context instanceof EmsScriptNode ) {
+            workspace = ( (EmsScriptNode)context ).getWorkspace();
+        }
+        QueryContext ctx =
+                new QueryContext( false, workspace, false, dateTime, false,
+                                  true, false, null, null, null, null );
+        //        ModelContext ctx = new ModelContext( false, workspace, false, dateTime,
+//                                             null, null, null, null );
+        return ctx;
+    }
+    
     @Override
     public Collection< EmsScriptNode >
             getPropertyWithType( Object context, EmsScriptNode specifier ) {
@@ -957,7 +987,19 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, Object, 
             			getPropertyWithTypeName(context, name);
             	if (result != null) nodes.addAll (result);
             }
-           return nodes;
+            if ( !Utils.isNullOrEmpty( nodes ) ) {
+                return nodes;
+            }
+            // Process context
+            QueryContext ctx = getQueryContext( context );
+            String nodeRefId = specifier.getNodeRef().toString();
+            // Get Properties with propertyType=specifier.
+            ArrayList<NodeRef> refs =
+                    NodeUtil.findNodeRefsByType( nodeRefId,
+                                                 NodeUtil.SearchType.PROPERTY_TYPE.prefix,
+                                                 ctx );
+            convertToScriptNode( refs, nodes );
+            return nodes;
         } else {
             return getProperty(context, null);
         }
@@ -1020,6 +1062,37 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, Object, 
 
     protected static boolean avoidConnectFcn = true;
     
+    public EmsScriptNode objectToEmsScriptNode( Object context ) {
+        EmsScriptNode node = null;
+        if ( context instanceof EmsScriptNode ) {
+            node = (EmsScriptNode)context;
+//        } else if ( true ) {
+//            return null;
+        } else if ( context instanceof NodeRef ) {
+            node = new EmsScriptNode( (NodeRef)context, getServices() );
+        } else {
+            try {
+                node = Expression.evaluate( context, EmsScriptNode.class, true, false );
+            } catch ( ClassCastException e ) {
+            } catch ( IllegalAccessException e ) {
+            } catch ( InvocationTargetException e ) {
+            } catch ( InstantiationException e ) {
+            }
+            if ( node == null ) {
+                try {
+                    NodeRef ref = Expression.evaluate( context, NodeRef.class, true, false );
+                    if ( ref != null ) return objectToEmsScriptNode( ref );
+                } catch ( ClassCastException e ) {
+                } catch ( IllegalAccessException e ) {
+                } catch ( InvocationTargetException e ) {
+                } catch ( InstantiationException e ) {
+                }
+            }
+        }
+        System.out.println("\nobjectToEmsScriptNode(" + context + ") = " + node + "\n");
+        return node;
+    }
+    
     @Override
     public Collection< EmsScriptNode > getRelationship( Object context,
                                                         Object specifier ) {
@@ -1027,52 +1100,53 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, Object, 
     	// TODO see EmsScriptNode.getConnectedNodes(), as a lot of this code can
         //      be used for this method.
 System.out.println("RRRRRRRRRRRRR");
+System.out.println("RRRRRR");
         List< EmsScriptNode > relationships = null;
+        if ( !coerce && !(context instanceof EmsScriptNode) ) return null;
+        EmsScriptNode node = objectToEmsScriptNode( context );
         
-        if ( context instanceof EmsScriptNode ) {
-            String relType = null;
-            String relName = null;
-            String relId = null;
-            List<String> typeNames = new ArrayList< String >();
-            if ( specifier instanceof String ) {
-                relType = (String)specifier;
+        if ( node == null ) return relationships;
+        String relType = null;
+        String relName = null;
+        String relId = null;
+        List<String> typeNames = new ArrayList< String >();
+        if ( specifier instanceof String ) {
+            relType = (String)specifier;
 
-                if ( avoidConnectFcn ) {
-                    return getRelationships( (EmsScriptNode)context, null, null, relType );
-                }
+            if ( avoidConnectFcn ) {
+                return getRelationships( node, null, null, relType );
+            }
+            
+            if ( !Utils.isNullOrEmpty( relType ) ) typeNames.add(relType);
+        } else {
+            if ( specifier instanceof EmsScriptNode ) {
+                EmsScriptNode s = (EmsScriptNode)specifier;
+                relName = s.getSysmlName();
                 
-                if ( !Utils.isNullOrEmpty( relType ) ) typeNames.add(relType);
-            } else {
-                if ( specifier instanceof EmsScriptNode ) {
-                    EmsScriptNode s = (EmsScriptNode)specifier;
-                    relName = s.getSysmlName();
-                    
-                    if ( avoidConnectFcn && !Utils.isNullOrEmpty( relName ) ) {
-                        return getRelationships( (EmsScriptNode)context, null, null, relName );
-                    }
+                if ( avoidConnectFcn && !Utils.isNullOrEmpty( relName ) ) {
+                    return getRelationships( node, null, null, relName );
+                }
 
-                    if ( !Utils.isNullOrEmpty( relName ) ) typeNames.add(relName);
-                    relId = s.getSysmlId();
-                    
-                    if ( avoidConnectFcn && !Utils.isNullOrEmpty( relId ) ) {
-                        return getRelationships( (EmsScriptNode)context, null, null, relId );
-                    }
-                    if ( !Utils.isNullOrEmpty( relId ) ) typeNames.add(relId);
+                if ( !Utils.isNullOrEmpty( relName ) ) typeNames.add(relName);
+                relId = s.getSysmlId();
+                
+                if ( avoidConnectFcn && !Utils.isNullOrEmpty( relId ) ) {
+                    return getRelationships( node, null, null, relId );
                 }
+                if ( !Utils.isNullOrEmpty( relId ) ) typeNames.add(relId);
             }
-            EmsScriptNode n = (EmsScriptNode)context;
-            ArrayList< NodeRef > refs = null;
-            if ( Utils.isNullOrEmpty( typeNames ) ) {
-                refs = n.getConnectedNodes( null, n.getWorkspace(), null );
-            } else {
-                for ( String type : typeNames ) {
-                    refs = n.getConnectedNodes( null, n.getWorkspace(), type );
-                    if ( !Utils.isNullOrEmpty( refs ) ) break;
-                }
+        }
+        ArrayList< NodeRef > refs = null;
+        if ( Utils.isNullOrEmpty( typeNames ) ) {
+            refs = node.getConnectedNodes( null, node.getWorkspace(), null );
+        } else {
+            for ( String type : typeNames ) {
+                refs = node.getConnectedNodes( null, node.getWorkspace(), type );
+                if ( !Utils.isNullOrEmpty( refs ) ) break;
             }
-            if ( !Utils.isNullOrEmpty( refs ) ) {
-                relationships = n.toEmsScriptNodeList( refs );
-            }
+        }
+        if ( !Utils.isNullOrEmpty( refs ) ) {
+            relationships = node.toEmsScriptNodeList( refs );
         }
         
         return relationships;
@@ -1204,8 +1278,9 @@ System.out.println("RRRRRRRRRRRRR");
 //                return Utils.newList( typeNode );
 //            }
 //        }
-        WorkspaceNode ws = (context instanceof WorkspaceNode) ? (WorkspaceNode)context : null;
-        Date dateTime = (context instanceof Date) ? (Date)context : null;
+//        WorkspaceNode ws = (context instanceof WorkspaceNode) ? (WorkspaceNode)context : null;
+//        Date dateTime = (context instanceof Date) ? (Date)context : null;
+        QueryContext ctx = getQueryContext( context );
         
     	// Search for all elements with the specified type name:
     	if (specifier instanceof String) {
@@ -1223,9 +1298,10 @@ System.out.println("RRRRRRRRRRRRR");
 
 	        Collection< EmsScriptNode > elementColl = null;
 	        try {
-//	        		elementColl = NodeUtil.luceneSearchElements( "ASPECT:\"sysml:" + specifier + "\"" );
-//Debug.error( true, false, "NodeUtil.findNodeRefsByType( " + (String)specifier + ", SearchType.ASPECT.prefix, false, ws, dateTime, false, true, getServices(), false, null )");
-	                ArrayList< NodeRef > refs = NodeUtil.findNodeRefsByType( (String)specifier, SearchType.ASPECT.prefix, false, ws, dateTime, false, true, getServices(), false, null );
+////	        		elementColl = NodeUtil.luceneSearchElements( "ASPECT:\"sysml:" + specifier + "\"" );
+////Debug.error( true, false, "NodeUtil.findNodeRefsByType( " + (String)specifier + ", SearchType.ASPECT.prefix, false, ws, dateTime, false, true, getServices(), false, null )");
+//	                ArrayList< NodeRef > refs = NodeUtil.findNodeRefsByType( (String)specifier, SearchType.ASPECT.prefix, false, ws, dateTime, false, true, getServices(), false, null );
+                    ArrayList< NodeRef > refs = NodeUtil.findNodeRefsByType( (String)specifier, SearchType.ASPECT.prefix, ctx );
 	                elementColl = EmsScriptNode.toEmsScriptNodeList( refs, getServices(), null, null );
 	        } catch (Exception e) {
 	        		// if lucene query fails, most likely due to non-existent aspect, we should look for type now
@@ -1366,7 +1442,11 @@ System.out.println("RRRRRRRRRRRRR");
                 result = new EmsScriptNode( (NodeRef)result, getServices() );
             }
         } else {
-            result = node.getProperty( acmPropertyName );
+            try {
+                result = node.getProperty( acmPropertyName );
+            } catch (UnsupportedOperationException e) {
+                result = node.getNodeRefProperty( acmPropertyName, null, node.getWorkspace() );
+            }
         }
         return result;
 //
@@ -2271,6 +2351,7 @@ System.out.println("RRRRRRRRRRRRR");
     }
 
     public boolean sourceIs( EmsScriptNode relationshipNode, EmsScriptNode nodeToMatch ) {
+        System.out.println("ZZZZZZZZZZZZZZZZZZ    sourceIs( " + relationshipNode + ", " + nodeToMatch + " )" );
         Object sourceRef = relationshipNode.getNodeRefProperty( Acm.ACM_SOURCE, true, null, null );
         if ( sourceRef instanceof NodeRef ) {
             EmsScriptNode n = new EmsScriptNode( (NodeRef)sourceRef, relationshipNode.getServices() );
@@ -2404,5 +2485,129 @@ System.out.println("RRRRRRRRRRRRR");
         if ( Utils.isNullOrEmpty( coll ) ) return null;
         T t = coll.iterator().next();
         return t;
+    }
+    
+    public static List< EmsScriptNode > getChildViews( EmsScriptNode parentNode ) {
+        if ( !NodeUtil.exists( parentNode ) ) {
+            return null;
+        }
+        List<EmsScriptNode> childViews = new ArrayList< EmsScriptNode >();
+        WorkspaceNode ws = parentNode.getWorkspace();
+        Set< EmsScriptNode > rels =
+                parentNode.getRelationships( null, ws );
+        for ( EmsScriptNode rel : rels ) {
+            Object prop = rel.getNodeRefProperty( Acm.ACM_TARGET, null, ws );
+            if ( prop instanceof NodeRef ) {
+                EmsScriptNode propNode =
+                        new EmsScriptNode( (NodeRef)prop, parentNode.getServices() );
+                if ( NodeUtil.exists( propNode ) ) {
+                    if ( propNode.hasOrInheritsAspect( Acm.ACM_PROPERTY ) ) {
+                        Object propType =
+                                propNode.getNodeRefProperty( Acm.ACM_PROPERTY_TYPE,
+                                                             null, ws );
+                        if ( propType instanceof NodeRef ) {
+                            EmsScriptNode node =
+                                    new EmsScriptNode( (NodeRef)propType,
+                                                       parentNode.getServices() );
+                            if ( NodeUtil.exists( node ) ) {
+                                if ( node.hasOrInheritsAspect( Acm.ACM_VIEW ) ) {
+                                    childViews.add( node );
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return childViews;
+    }
+    
+    public EmsScriptNode getViewFromProperty( EmsScriptNode propNode, WorkspaceNode ws ) {
+        if ( NodeUtil.exists( propNode ) ) {
+            if ( propNode.hasOrInheritsAspect( Acm.ACM_PROPERTY ) ) {
+                Object propType =
+                        propNode.getNodeRefProperty( Acm.ACM_PROPERTY_TYPE,
+                                                     null, ws );
+                if ( propType instanceof NodeRef ) {
+                    System.out.println("getViewFromProperty(" + propNode + ") 6 propType = " + propType);
+                    EmsScriptNode node =
+                            new EmsScriptNode( (NodeRef)propType,
+                                               propNode.getServices() );
+
+                    if ( NodeUtil.exists( node ) ) {
+                        System.out.println("getViewFromProperty(" + propNode + ") 7 node = " + node);
+                        if ( node.hasOrInheritsAspect( Acm.ACM_VIEW ) ) {
+                            System.out.println("getViewFromProperty(" + propNode + ") 8 node = " + node);
+                            return node;
+                        }
+                    }
+                }
+            }
+        }
+        return null;
+    }
+    
+    public List<EmsScriptNode> getPropertiesWithType( Object context, Object type ) {
+        return null;
+    }
+    
+    public EmsScriptNode getParentView( EmsScriptNode view ) {
+        System.out.println("getParentView(" + view + ") 0");
+        if ( view == null ) return null;
+        String viewId = view.getSysmlId();
+        EmsScriptNode prev = null;
+        WorkspaceNode ws = view.getWorkspace();
+        Set< EmsScriptNode > rels = view.getRelationships( null, ws );
+        for ( EmsScriptNode rel : rels ) {
+            System.out.println("getParentView(" + view + ") 1 rel = " + rel);
+            if ( !rel.hasOrInheritsAspect( Acm.ACM_ASSOCIATION ) ) continue;
+            System.out.println("getParentView(" + view + ") 2");
+            //Object owned = rel.getNodeRefProperty( Acm.ACM_OWNED_END, null, ws );
+            Object prop = rel.getNodeRefProperty( Acm.ACM_SOURCE, null, ws );
+            Object propT = rel.getNodeRefProperty( Acm.ACM_TARGET, null, ws );
+            if ( prop instanceof NodeRef ) {
+                System.out.println("getParentView(" + view + ") 3 prop = " + prop);
+                if ( propT instanceof NodeRef ) {
+                    System.out.println("getParentView(" + view + ") 3 propT = " + propT);
+                }
+                EmsScriptNode propNode =
+                        new EmsScriptNode( (NodeRef)prop, view.getServices() );
+                EmsScriptNode sourceView = getViewFromProperty( propNode, ws );
+                if ( sourceView != null && !sourceView.getSysmlId().equals( view.getSysmlId() ) ) {
+                    return sourceView;
+                }
+                EmsScriptNode propTNode =
+                        new EmsScriptNode( (NodeRef)propT, view.getServices() );
+                EmsScriptNode targetView = getViewFromProperty( propNode, ws );
+                if ( targetView != null && !targetView.getSysmlId().equals( view.getSysmlId() ) ) {
+                    return targetView;
+                }
+            }
+        }
+        return null;
+    }
+
+    public EmsScriptNode getPreviousView( EmsScriptNode view ) {
+        if ( view == null ) return null;
+        
+        EmsScriptNode prev = null;
+        EmsScriptNode parentNode = getParentView( view );
+        if ( parentNode == null ) return null;
+        WorkspaceNode ws = view.getWorkspace();
+        
+        List< EmsScriptNode > children = getChildViews( parentNode );
+        
+        if ( Utils.isNullOrEmpty( children ) ) return null;
+        
+        String id = view.getSysmlId();
+        
+        for ( EmsScriptNode child : children ) {
+            if ( child != null && id.equals( child.getSysmlId() ) ) {
+                break;
+            }
+            prev = child;
+        }
+        
+        return prev;
     }
 }

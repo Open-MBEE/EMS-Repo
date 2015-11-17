@@ -4477,6 +4477,15 @@ public class EmsScriptNode extends ScriptNode implements
 
     public EmsScriptNode( NodeRef nodeRef, ServiceRegistry services ) {
         super( nodeRef, services );
+//        try {
+//        if ( !NodeRef.isNodeRef( nodeRef.toString() ) ) {
+//            Debug.breakpoint();
+//        } else if ( getSysmlId().equals("MMS_1447340399333_b19a181e-b38e-418b-b3c6-886ec16e2a69") ) {
+//            Debug.breakpoint();
+//        }
+//        } catch ( Throwable t ) {
+//            
+//        }
     }
 
     public EmsScriptNode clone( EmsScriptNode parent ) {
@@ -5083,10 +5092,11 @@ public class EmsScriptNode extends ScriptNode implements
     }
 
     public void addRelationshipToPropertiesOfParticipants( WorkspaceNode ws ) {
-        if ( hasAspect( Acm.ACM_DIRECTED_RELATIONSHIP )
+        if ( hasOrInheritsAspect( Acm.ACM_DIRECTED_RELATIONSHIP )
              || hasAspect( Acm.ACM_DEPENDENCY ) || hasAspect( Acm.ACM_EXPOSE )
              || hasAspect( Acm.ACM_CONFORM )
-             || hasAspect( Acm.ACM_GENERALIZATION ) ) {
+             || hasAspect( Acm.ACM_GENERALIZATION )
+             || hasAspect( Acm.ACM_ASSOCIATION )  ) {
 
             // No need to pass a date since this is called in the context of
             // updating a node, so the time is the current time (which is null).

@@ -480,6 +480,7 @@ public class Acm {
            add(JSON_CONNECTOR_ROLE);
            add(JSON_OWNED_ATTRIBUTE);
            add(JSON_REDEFINES);
+           add(JSON_CONTENTS);
 //           add(JSON_ANNOTATED_ELEMENTS);
        }
    };
@@ -878,8 +879,8 @@ public class Acm {
             put(ACM_CONNECTOR, ACM_CONNECTOR_VALUE);
             put(ACM_CONSTRAINT, ACM_CONSTRAINT_SPECIFICATION);
             put(ACM_OPERATION, ACM_OPERATION_EXPRESSION);
-            put(ACM_VIEW, ACM_CONTENTS);
-            put(ACM_PRODUCT, ACM_CONTENTS);
+            //put(ACM_VIEW, ACM_CONTENTS);
+            //put(ACM_PRODUCT, ACM_CONTENTS);
             put(ACM_INSTANCE_SPECIFICATION, ACM_INSTANCE_SPECIFICATION_SPECIFICATION);
         }
     };
