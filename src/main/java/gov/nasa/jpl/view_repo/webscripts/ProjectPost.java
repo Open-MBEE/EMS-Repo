@@ -59,51 +59,51 @@ import com.sun.star.sdbc.SQLException;
  *
  */
 public class ProjectPost extends AbstractJavaWebScript {
-	public ProjectPost() {
-	    super();
-	}
+    public ProjectPost() {
+        super();
+    }
 
     public ProjectPost(Repository repositoryHelper, ServiceRegistry registry) {
         super(repositoryHelper, registry);
     }
 
     private final String MODEL_PATH = "Models";
-	private final String MODEL_PATH_SEARCH = "/" + MODEL_PATH;
+    private final String MODEL_PATH_SEARCH = "/" + MODEL_PATH;
 
 
-	/**
-	 * Webscript entry point
-	 */
-	@Override
+    /**
+     * Webscript entry point
+     */
+    @Override
     protected Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
         ProjectPost instance = new ProjectPost(repository, getServices());
         return instance.executeImplImpl(req,  status, cache, runWithoutTransactions);
     }
 
-	@Override
+    @Override
     protected Map<String, Object> executeImplImpl(WebScriptRequest req, Status status, Cache cache) {
         printHeader( req );
 
-		//clearCaches();
+        //clearCaches();
 
-		Map<String, Object> model = new HashMap<String, Object>();
-		int statusCode = HttpServletResponse.SC_OK;
+        Map<String, Object> model = new HashMap<String, Object>();
+        int statusCode = HttpServletResponse.SC_OK;
 
-		try {
-			if (validateRequest(req, status)) {
+        try {
+            if (validateRequest(req, status)) {
 
-				JSONObject json = //JSONObject.make( 
-				        (JSONObject)req.parseContent();// );
-				JSONArray elementsArray = json != null ? json.optJSONArray("elements") : null;
-				JSONObject projJson = elementsArray != null && elementsArray.length() > 0 ? elementsArray.getJSONObject(0) : new JSONObject();
+                JSONObject json = //JSONObject.make( 
+                        (JSONObject)req.parseContent();// );
+                JSONArray elementsArray = json != null ? json.optJSONArray("elements") : null;
+                JSONObject projJson = elementsArray != null && elementsArray.length() > 0 ? elementsArray.getJSONObject(0) : new JSONObject();
 
-				// We are now getting the project id form the json object, but leaving the check from the request
-				// for backwards compatibility:
+                // We are now getting the project id form the json object, but leaving the check from the request
+                // for backwards compatibility:
                 String siteName = getSiteName( req );
-			    String projectId = projJson.has(Acm.JSON_ID) ? projJson.getString(Acm.JSON_ID) : getProjectId( req, siteName );
+                String projectId = projJson.has(Acm.JSON_ID) ? projJson.getString(Acm.JSON_ID) : getProjectId( req, siteName );
 
-		        boolean delete = getBooleanArg( req, "delete", false );
-		        boolean createSite = getBooleanArg(req, "createSite", false);
+                boolean delete = getBooleanArg( req, "delete", false );
+                boolean createSite = getBooleanArg(req, "createSite", false);
 
                 WorkspaceNode workspace = getWorkspace( req );
                 if ( siteName != null && !siteName.equals( NO_SITE_ID ) ) {
@@ -111,13 +111,13 @@ public class ProjectPost extends AbstractJavaWebScript {
                                                         workspace, projectId,
                                                         siteName, createSite,
                                                         delete );
-			    } else {
+                } else {
                     statusCode = updateOrCreateProject( projJson,
                                                         workspace, projectId);
-			    }
-			} else {
-				statusCode = responseStatus.getCode();
-			}
+                }
+            } else {
+                statusCode = responseStatus.getCode();
+            }
         } catch (JSONException e) {
             log(Level.ERROR, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "JSON could not be created\n");
             e.printStackTrace();
@@ -126,41 +126,41 @@ public class ProjectPost extends AbstractJavaWebScript {
             e.printStackTrace();
         }
 
-		status.setCode(statusCode);
-		model.put("res", createResponseJson());
+        status.setCode(statusCode);
+        model.put("res", createResponseJson());
 
         printFooter();
 
-		return model;
-	}
+        return model;
+    }
 
-	public int updateOrCreateProject(JSONObject jsonObject, WorkspaceNode workspace, String projectId) throws JSONException {
-		  EmsScriptNode projectNode = findScriptNodeById(projectId, workspace, null, true);
+    public int updateOrCreateProject(JSONObject jsonObject, WorkspaceNode workspace, String projectId) throws JSONException {
+          EmsScriptNode projectNode = findScriptNodeById(projectId, workspace, null, true);
 
-		  if (projectNode == null) {
-		      log(Level.ERROR, HttpServletResponse.SC_NOT_FOUND, "Could not find project\n");
-		      return HttpServletResponse.SC_NOT_FOUND;
-		  }
+          if (projectNode == null) {
+              log(Level.ERROR, HttpServletResponse.SC_NOT_FOUND, "Could not find project\n");
+              return HttpServletResponse.SC_NOT_FOUND;
+          }
 
-		String projectName = null;
+        String projectName = null;
         if (jsonObject.has(Acm.JSON_NAME)) {
             projectName = jsonObject.getString(Acm.JSON_NAME);
         }
         String projectVersion = null;
-		if (jsonObject.has(Acm.JSON_SPECIALIZATION)) {
-			JSONObject specialization = jsonObject.getJSONObject(Acm.JSON_SPECIALIZATION);
-			if (specialization != null && specialization.has(Acm.JSON_PROJECT_VERSION)) {
-				projectVersion = specialization.getString(Acm.JSON_PROJECT_VERSION);
-			}
-		}
+        if (jsonObject.has(Acm.JSON_SPECIALIZATION)) {
+            JSONObject specialization = jsonObject.getJSONObject(Acm.JSON_SPECIALIZATION);
+            if (specialization != null && specialization.has(Acm.JSON_PROJECT_VERSION)) {
+                projectVersion = specialization.getString(Acm.JSON_PROJECT_VERSION);
+            }
+        }
         if (checkPermissions(projectNode, PermissionService.WRITE)){
             String oldId = (String)projectNode.getProperty( Acm.ACM_ID );
             boolean idChanged = !projectId.equals( oldId );
             if ( idChanged ) {
                 projectNode.createOrUpdateProperty(Acm.ACM_ID, projectId);
             }
-			projectNode.createOrUpdateProperty(Acm.ACM_TYPE, "Project");
-			boolean nameChanged = false;
+            projectNode.createOrUpdateProperty(Acm.ACM_TYPE, "Project");
+            boolean nameChanged = false;
             if (projectName != null) {
                 projectNode.createOrUpdateProperty(Acm.CM_TITLE, projectName);
                 String oldName = (String)projectNode.getProperty( Acm.ACM_NAME );
@@ -184,13 +184,13 @@ public class ProjectPost extends AbstractJavaWebScript {
     }
 
     /**
-	 * Update or create the project specified by the JSONObject
-	 * @param jsonObject	JSONObject that has the name of the project
-	 * @param projectId		Project ID
-	 * @param siteName		Site project should reside in
-	 * @return				HttpStatusResponse code for success of the POST request
-	 * @throws JSONException
-	 */
+     * Update or create the project specified by the JSONObject
+     * @param jsonObject    JSONObject that has the name of the project
+     * @param projectId        Project ID
+     * @param siteName        Site project should reside in
+     * @return                HttpStatusResponse code for success of the POST request
+     * @throws JSONException
+     */
     public int updateOrCreateProject(JSONObject jsonObject, WorkspaceNode workspace,
                                      String projectId, String siteName,
                                      boolean createSite,
@@ -288,74 +288,74 @@ public class ProjectPost extends AbstractJavaWebScript {
                 // This move can cause issues if no site and no project was specified in the URL,
                 // but another site has the no_project already.  Then we mistakenly move that
                 // project and all its elements.  See CMED-531:
-                //					if (checkPermissions(projectNode.getParent(), PermissionService.WRITE)) {
-                //						// move sites if exists under different site
-                //						if (!projectNode.getParent().equals(modelContainerNode)) {
-                //							projectNode.move(modelContainerNode);
-                //							log(LogLevel.INFO, "Project moved to new site.\n", HttpServletResponse.SC_OK);
-                //						}
-                //					}
+                //                    if (checkPermissions(projectNode.getParent(), PermissionService.WRITE)) {
+                //                        // move sites if exists under different site
+                //                        if (!projectNode.getParent().equals(modelContainerNode)) {
+                //                            projectNode.move(modelContainerNode);
+                //                            log(LogLevel.INFO, "Project moved to new site.\n", HttpServletResponse.SC_OK);
+                //                        }
+                //                    }
             }
         }
     
         if ( idChanged || nameChanged ) {
             projectNode.removeChildrenFromJsonCache( true );
         }
-		projectNode.getOrSetCachedVersion();
+        projectNode.getOrSetCachedVersion();
         sendProjectDelta(workspace, projectNode);
-		return HttpServletResponse.SC_OK;
-	}
+        return HttpServletResponse.SC_OK;
+    }
 
     
     private void sendProjectDelta(WorkspaceNode workspace, EmsScriptNode projectNode){
-    	PostgresHelper pgh = null;
-    	if(workspace == null)
-    		pgh = new PostgresHelper("");
-    	else 
-    		pgh = new PostgresHelper(workspace.getId());
+        PostgresHelper pgh = null;
+        if(workspace == null)
+            pgh = new PostgresHelper("");
+        else 
+            pgh = new PostgresHelper(workspace.getId());
 
-    	try {
-			pgh.connect();
-			pgh.insertNode(projectNode.getNodeRef().toString(), NodeUtil.getVersionedRefId(projectNode), projectNode.getSysmlId());
-			pgh.close();
-		} catch (ClassNotFoundException | java.sql.SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	
+        try {
+            pgh.connect();
+            pgh.insertNode(projectNode.getNodeRef().toString(), NodeUtil.getVersionedRefId(projectNode), projectNode.getSysmlId());
+            pgh.close();
+        } catch (ClassNotFoundException | java.sql.SQLException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+    
     }
     
-	/**
-	 * Validate the request and check some permissions
-	 */
-	@Override
-	protected boolean validateRequest(WebScriptRequest req, Status status) {
-		if (!checkRequestContent(req)) {
-			return false;
-		}
+    /**
+     * Validate the request and check some permissions
+     */
+    @Override
+    protected boolean validateRequest(WebScriptRequest req, Status status) {
+        if (!checkRequestContent(req)) {
+            return false;
+        }
 
-		// check site exists
-//		if (!checkRequestVariable(siteName, SITE_NAME)) {
-//			return false;
-//		}
+        // check site exists
+//        if (!checkRequestVariable(siteName, SITE_NAME)) {
+//            return false;
+//        }
 
-		// get the site
-//		SiteInfo siteInfo = services.getSiteService().getSite(siteName);
-//		if (!checkRequestVariable(siteInfo, "Site")) {
-//			return false;
-//		}
+        // get the site
+//        SiteInfo siteInfo = services.getSiteService().getSite(siteName);
+//        if (!checkRequestVariable(siteInfo, "Site")) {
+//            return false;
+//        }
 
-		// check permissions
-//		if (!checkPermissions(siteInfo.getNodeRef(), PermissionService.WRITE)) {
-//			return false;
-//		}
+        // check permissions
+//        if (!checkPermissions(siteInfo.getNodeRef(), PermissionService.WRITE)) {
+//            return false;
+//        }
 
-//		String projectId = req.getServiceMatch().getTemplateVars().get(PROJECT_ID);
-//		if (!checkRequestVariable(projectId, PROJECT_ID)) {
-//			return false;
-//		}
+//        String projectId = req.getServiceMatch().getTemplateVars().get(PROJECT_ID);
+//        if (!checkRequestVariable(projectId, PROJECT_ID)) {
+//            return false;
+//        }
 
-		return true;
-	}
+        return true;
+    }
 
 }

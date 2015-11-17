@@ -53,10 +53,10 @@ public class MmsSnapshotGet extends AbstractJavaWebScript {
        	if (checkMmsVersions) {
     		if(compareMmsVersions(req, getResponse(), getResponseStatus()));
 		    {
-		    	model.put("res", createResponseJson());
-		    	return model;
-		    }
-		} 
+            	model.put("res", createResponseJson());
+            	return model;
+            }
+        }
 
         MmsSnapshotGet instance = new MmsSnapshotGet(repository, getServices());
 

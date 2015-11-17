@@ -87,33 +87,31 @@ public class SiteGet extends AbstractJavaWebScript {
         //clearCaches();
 
         Map<String, Object> model = new HashMap<String, Object>();
-        
-       	if (checkMmsVersions) {
-    		if(compareMmsVersions(req, getResponse(), getResponseStatus()));
-		    {
-		    	model.put("res", createResponseJson());
-		    	return model;
-		    }
-		} 
-       	JSONObject json = null;
+        if (checkMmsVersions) {
+            if(compareMmsVersions(req, getResponse(), getResponseStatus()));{
+                model.put("res", createResponseJson());
+                return model;
+            }
+        } 
+        JSONObject json = null;
 
-       	try {
-       		if (validateRequest(req, status)) {
+        try {
+            if (validateRequest(req, status)) {
 
-       			WorkspaceNode workspace = getWorkspace( req );
-       			String timestamp = req.getParameter( "timestamp" );
-       			Date dateTime = TimeUtils.dateFromTimestamp( timestamp );
+                WorkspaceNode workspace = getWorkspace( req );
+                String timestamp = req.getParameter( "timestamp" );
+                Date dateTime = TimeUtils.dateFromTimestamp( timestamp );
 
-       			JSONArray jsonArray = handleSite(workspace, dateTime);
-       			json = new JSONObject();
-       			json.put("sites", jsonArray);
-       		}
-       	} catch (JSONException e) {
-       		log(Level.ERROR, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "JSON could not be created\n");
-       		e.printStackTrace();
-       	} catch (Exception e) {
-       		log(Level.ERROR, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Internal error stack trace:\n %s \n", e.getLocalizedMessage());
-       		e.printStackTrace();
+                JSONArray jsonArray = handleSite(workspace, dateTime);
+                json = new JSONObject();
+                json.put("sites", jsonArray);
+            }
+        } catch (JSONException e) {
+            log(Level.ERROR, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "JSON could not be created\n");
+            e.printStackTrace();
+        } catch (Exception e) {
+            log(Level.ERROR, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Internal error stack trace:\n %s \n", e.getLocalizedMessage());
+            e.printStackTrace();
        	}
        	if (json == null) {
        		model.put("res", createResponseJson());

@@ -123,7 +123,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
     public static final int MAX_PRINT = 200;
     public static boolean checkMmsVersions = false;
     public static boolean defaultRunWithoutTransactions = false;
-    private JSONObject privateRequestJSON;
+    private JSONObject privateRequestJSON = null;
     // injected members
 	protected ServiceRegistry services;		// get any of the Alfresco services
 	protected Repository repository;		// used for lucene search
@@ -2041,14 +2041,17 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         String paramArg = paramVal;
         // Checks data member requestJSON to see if it is not null and if
         // paramVal is none
-        if (paramVal.equals("none")) {
-            try {
-                jsonRequest = (JSONObject)req.parseContent();
-            } catch (Exception e) {
-                e.printStackTrace();
-                log(Level.ERROR, HttpServletResponse.SC_INTERNAL_SERVER_ERROR,"Could not retrieve JSON");
-//                return true;
-            }
+        
+//     // Check if input is K or JSON
+        String contentType = req.getContentType() == null ? ""
+                : req.getContentType().toLowerCase();
+
+        boolean jsonNotK = !contentType.contains("application/k");
+
+        
+        if (!jsonNotK && paramVal.equals("none")) {
+                jsonRequest = getRequestJSON(req);
+
             if (jsonRequest != null) {
                 paramVal = jsonRequest.optString("mmsVersion");
             }
@@ -2194,6 +2197,14 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
     }
 
     public JSONObject getRequestJSON() {
+        return privateRequestJSON;
+    }
+    
+    public JSONObject getRequestJSON(WebScriptRequest req) {
+        // Returns immediately if requestJSON has already been set before checking MMS Versions
+        if(privateRequestJSON == null) return privateRequestJSON;
+        // Sets privateRequestJSON
+        setRequestJSON(req);
         return privateRequestJSON;
     }
 }

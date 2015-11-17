@@ -141,58 +141,57 @@ public class ViewGet extends AbstractJavaWebScript {
 
         Map<String, Object> model = new HashMap<String, Object>();
         
-       	if (checkMmsVersions) {
-    		if(compareMmsVersions(req, getResponse(), getResponseStatus()));
-		    {
-		    	model.put("res", createResponseJson());
-		    	return model;
-		    }
-		} 
-       	// default recurse=false but recurse only applies to displayed elements and contained views
-       	boolean recurse = getBooleanArg(req, "recurse", false);
-       	// default generate=false - generation with viewpoints takes a long time
-       	boolean generate = getBooleanArg( req, "generate", false );
+            if (checkMmsVersions) {
+                if(compareMmsVersions(req, getResponse(), getResponseStatus()));{
+                    model.put("res", createResponseJson());
+                    return model;
+                }
+            }
+            // default recurse=false but recurse only applies to displayed elements and contained views
+            boolean recurse = getBooleanArg(req, "recurse", false);
+            // default generate=false - generation with viewpoints takes a long time
+            boolean generate = getBooleanArg( req, "generate", false );
 
-       	JSONArray viewsJson = new JSONArray();
-       	if (validateRequest(req, status)) {
-       		String viewId = getIdFromRequest( req );
-       		gettingDisplayedElements = isDisplayedElementRequest( req );
-       		if ( !gettingDisplayedElements ) {
-       			gettingContainedViews = isContainedViewRequest( req );
-       		} 
-       		if (Debug.isOn()) System.out.println("viewId = " + viewId);
+        JSONArray viewsJson = new JSONArray();
+        if (validateRequest(req, status)) {
+            String viewId = getIdFromRequest( req );
+            gettingDisplayedElements = isDisplayedElementRequest( req );
+            if ( !gettingDisplayedElements ) {
+                gettingContainedViews = isContainedViewRequest( req );
+            } 
+            if (Debug.isOn()) System.out.println("viewId = " + viewId);
 
-       		// get timestamp if specified
-       		String timestamp = req.getParameter("timestamp");
-       		Date dateTime = TimeUtils.dateFromTimestamp( timestamp );
+            // get timestamp if specified
+            String timestamp = req.getParameter("timestamp");
+            Date dateTime = TimeUtils.dateFromTimestamp( timestamp );
 
-       		WorkspaceNode workspace = getWorkspace( req );
+            WorkspaceNode workspace = getWorkspace( req );
 
-       		try {
-       			handleView(viewId, viewsJson, generate, recurse, workspace, dateTime);
-       		} catch ( JSONException e ) {
-       			// TODO Auto-generated catch block
-       			e.printStackTrace();
-       		}
-       	}
+            try {
+                handleView(viewId, viewsJson, generate, recurse, workspace, dateTime);
+            } catch ( JSONException e ) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+        }
 
-       	if (responseStatus.getCode() == HttpServletResponse.SC_OK) {
-       		try {
-       			JSONObject json = NodeUtil.newJsonObject();
-       			json.put(gettingDisplayedElements ? "elements" : "views", viewsJson);
-       			if (!Utils.isNullOrEmpty(response.toString())) json.put("message", response.toString());
-       			if ( prettyPrint ) model.put("res", NodeUtil.jsonToString( json, 4 ));
-       			else model.put("res", NodeUtil.jsonToString( json )); 
-       		} catch (JSONException e) {
-       			e.printStackTrace();
-       			log(Level.ERROR, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "JSON creation error");
-       			model.put("res", createResponseJson());
-       			e.printStackTrace();
-       		}
-       	} else {
-       		model.put("res", createResponseJson());
-       	}
-		
+        if (responseStatus.getCode() == HttpServletResponse.SC_OK) {
+            try {
+                JSONObject json = NodeUtil.newJsonObject();
+                json.put(gettingDisplayedElements ? "elements" : "views", viewsJson);
+                if (!Utils.isNullOrEmpty(response.toString())) json.put("message", response.toString());
+                if ( prettyPrint ) model.put("res", NodeUtil.jsonToString( json, 4 ));
+                else model.put("res", NodeUtil.jsonToString( json )); 
+            } catch (JSONException e) {
+                e.printStackTrace();
+                log(Level.ERROR, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "JSON creation error");
+                model.put("res", createResponseJson());
+                e.printStackTrace();
+            }
+        } else {
+            model.put("res", createResponseJson());
+        }
+
         status.setCode(responseStatus.getCode());
 
         printFooter();
