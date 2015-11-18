@@ -104,41 +104,10 @@ public class ViewPost extends AbstractJavaWebScript {
     }
 
     
-    /**
-     * If the view is being added to a new parent, then this function should be
-     * called. This function will add or update views. If the view pre-exists,
-     * is not changing its parent view, and is only updating other properties or
-     * the order, ModelPost should be fine.
-     * 
-     * Add or update views
-     * 
-     * @param jsonObject
-     * @param workspace
-     * @throws JSONException
-     */
-    protected void updateViews(JSONObject jsonObject, WorkspaceNode workspace) throws JSONException {
+    private void updateViews(JSONObject jsonObject, WorkspaceNode workspace) throws JSONException {
         Date start = new Date();
         Map<String, EmsScriptNode> elements = new HashMap<String, EmsScriptNode>();
         
-        
-        // If there is no json, or the json has a sysml id of a non-existent
-        // view, create a new view. Also, create an InstanceSpecification and
-        // place in the first parent of the view that is a Package.
-
-        // If no id is given in the URL parameters or json, create a new id.
-        
-        // The parent view is specified as a URL parameter or is the owner in
-        // the view's json if the owner is a view. The json may include the
-        // parent.  The parent need not be specified.
-        
-        // The view is added to the parent if the parent is specified, and the
-        // view was not already added to the parent.
-        
-        // A View, v, is added to a parent, p, by creating 
-        // * a composite Association, a, owning
-        //   * a Property of type p, pp, (also including pp as an ownedEnd) and
-        // * a Property of type v, pv, which is an ownedAttribute of p.
-
         // actual business logic, everything else is to handle commits
         if (jsonObject.has("views")) {
             JSONArray viewsJson = jsonObject.getJSONArray("views");
