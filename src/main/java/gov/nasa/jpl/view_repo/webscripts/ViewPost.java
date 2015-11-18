@@ -55,9 +55,9 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
 public class ViewPost extends AbstractJavaWebScript {
     static Logger logger = Logger.getLogger(ViewPost.class);
     
-    public ViewPost() {
-        super();
-    }
+	public ViewPost() {
+	    super();
+	}
 
     public ViewPost(Repository repositoryHelper, ServiceRegistry registry) {
         super(repositoryHelper, registry);
@@ -65,66 +65,66 @@ public class ViewPost extends AbstractJavaWebScript {
 
 
     @Override
-    protected boolean validateRequest(WebScriptRequest req, Status status) {
-        // do nothing
-        return false;
-    }
+	protected boolean validateRequest(WebScriptRequest req, Status status) {
+		// do nothing
+		return false;
+	}
 
 
-    @Override
+	@Override
     protected Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
         ViewPost instance = new ViewPost(repository, getServices());
         return instance.executeImplImpl(req,  status, cache, runWithoutTransactions);
     }
 
-    @Override
+	@Override
     protected Map<String, Object> executeImplImpl(WebScriptRequest req, Status status, Cache cache) {
         printHeader( req );
 
-        //clearCaches();
+		//clearCaches();
 
-        Map<String, Object> model = new HashMap<String, Object>();
+		Map<String, Object> model = new HashMap<String, Object>();
 
         WorkspaceNode workspace = getWorkspace( req );
 
         try {
             JSONObject json = //JSONObject.make( 
                     (JSONObject)req.parseContent();// );
-            updateViews(json, workspace);
-        } catch (JSONException e) {
-            log(Level.ERROR, HttpServletResponse.SC_BAD_REQUEST, "JSON parse exception: %s", e.getMessage());
-            e.printStackTrace();
-        }
+			updateViews(json, workspace);
+		} catch (JSONException e) {
+			log(Level.ERROR, HttpServletResponse.SC_BAD_REQUEST, "JSON parse exception: %s", e.getMessage());
+			e.printStackTrace();
+		}
 
         status.setCode(responseStatus.getCode());
-        model.put("res", createResponseJson());
+		model.put("res", createResponseJson());
 
-        printFooter();
-        return model;
-    }
+		printFooter();
+		return model;
+	}
 
-    
-    private void updateViews(JSONObject jsonObject, WorkspaceNode workspace) throws JSONException {
-        Date start = new Date();
-        Map<String, EmsScriptNode> elements = new HashMap<String, EmsScriptNode>();
-        
-        // actual business logic, everything else is to handle commits
-        if (jsonObject.has("views")) {
-            JSONArray viewsJson = jsonObject.getJSONArray("views");
+	
+	private void updateViews(JSONObject jsonObject, WorkspaceNode workspace) throws JSONException {
+	    Date start = new Date();
+	    Map<String, EmsScriptNode> elements = new HashMap<String, EmsScriptNode>();
+	    
+	    // actual business logic, everything else is to handle commits
+	    if (jsonObject.has("views")) {
+			JSONArray viewsJson = jsonObject.getJSONArray("views");
 
-            for (int ii = 0; ii < viewsJson.length(); ii++) {
-                updateView(viewsJson, ii, workspace, elements);
-            }
-        }
+			for (int ii = 0; ii < viewsJson.length(); ii++) {
+			    updateView(viewsJson, ii, workspace, elements);
+			}
+		}
 
-        // commit info
+	    // commit info
         setWsDiff(workspace);
-        wsDiff.setUpdatedElements( elements );
-        
-        Date end = new Date();
-        JSONObject deltaJson = wsDiff.toJSONObject( start, end );
-        String wsId = "master";
-        if (workspace != null) wsId = workspace.getId();
+	    wsDiff.setUpdatedElements( elements );
+		
+		Date end = new Date();
+		JSONObject deltaJson = wsDiff.toJSONObject( start, end );
+		String wsId = "master";
+		if (workspace != null) wsId = workspace.getId();
         // FIXME: split elements by project Id - since they may not always be in same project
         String projectId = "";
         if (elements.size() > 0) {
@@ -137,35 +137,35 @@ public class ViewPost extends AbstractJavaWebScript {
         }
 
         CommitUtil.commit(workspace, deltaJson, "View Post", runWithoutTransactions, services, response);
-        if (!CommitUtil.sendDeltas(deltaJson, wsId, projectId, source)) {
-            logger.warn( "Could not send delta" );
-        }
-    }
+		if (!CommitUtil.sendDeltas(deltaJson, wsId, projectId, source)) {
+		    logger.warn( "Could not send delta" );
+		}
+	}
 
 
-    private void updateView(JSONArray viewsJson, int index,
-                            WorkspaceNode workspace, Map<String, EmsScriptNode> elements) throws JSONException {
-        JSONObject viewJson = viewsJson.getJSONObject(index);
-        updateView(viewJson, workspace, elements);
-    }
+	private void updateView(JSONArray viewsJson, int index,
+	                        WorkspaceNode workspace, Map<String, EmsScriptNode> elements) throws JSONException {
+		JSONObject viewJson = viewsJson.getJSONObject(index);
+		updateView(viewJson, workspace, elements);
+	}
 
-    private void updateView(JSONObject viewJson, WorkspaceNode workspace,  Map<String, EmsScriptNode> elements) throws JSONException {
-        String id = viewJson.getString(Acm.JSON_ID);
-        if (id == null) {
-            log(Level.ERROR, HttpServletResponse.SC_BAD_REQUEST, "view id not specified.\n");
-            return;
-        }
+	private void updateView(JSONObject viewJson, WorkspaceNode workspace,  Map<String, EmsScriptNode> elements) throws JSONException {
+		String id = viewJson.getString(Acm.JSON_ID);
+		if (id == null) {
+			log(Level.ERROR, HttpServletResponse.SC_BAD_REQUEST, "view id not specified.\n");
+			return;
+		}
 
-        EmsScriptNode view = findScriptNodeById(id, workspace, null, true);
-        if (view == null) {
-            log(Level.ERROR, HttpServletResponse.SC_NOT_FOUND, "could not find view with id: %s", id);
-            return;
-        }
+		EmsScriptNode view = findScriptNodeById(id, workspace, null, true);
+		if (view == null) {
+			log(Level.ERROR, HttpServletResponse.SC_NOT_FOUND, "could not find view with id: %s", id);
+			return;
+		}
 
-        if (checkPermissions(view, PermissionService.WRITE)) {
-            view.createOrUpdateAspect(Acm.ACM_VIEW);
-            view.ingestJSON(viewJson);
-            elements.put( id, view );
-        }
-    }
+		if (checkPermissions(view, PermissionService.WRITE)) {
+		    view.createOrUpdateAspect(Acm.ACM_VIEW);
+		    view.ingestJSON(viewJson);
+		    elements.put( id, view );
+		}
+	}
 }
