@@ -560,6 +560,9 @@ public class JsonDiffDiff extends AbstractDiff<JSONObject, Object, String> {
 		// first.
 
 		// Now add diff2 to diff3.
+        // TODO -- WARNING -- FIXME -- The glom function currently assumes a
+        // glom of commit json, keeping the prior state of workspace1. This may
+        // not be desired for this glom operation.
 		diff3 = glom(diff3, diff2NoWs1);
 
 		// Get all the workpace pieces of the diffs.
@@ -628,7 +631,7 @@ public class JsonDiffDiff extends AbstractDiff<JSONObject, Object, String> {
 					if (mergeStyleDiff)
 						undone = null;
 					JSONObject updated = glomElements(undone, element3_2, false);
-					dDiff3.updateDiff(id, newElement3_1, updated, DiffOp.UPDATE, conflict);
+					dDiff3.updateDiff(id, newElement3_1, updated, DiffOp.UPDATE, conflict, onlyCollect);
 					break;
 				case DELETE: // DELETE - ADD = DELETE
 					conflict = true;
@@ -667,6 +670,13 @@ public class JsonDiffDiff extends AbstractDiff<JSONObject, Object, String> {
 			case UPDATE:
 				switch (op3) {
 				case ADD: // ADD - UPDATE = UPDATE
+                    System.out.println( "UPDATE - " + op3 );
+                    System.out.println("element1_1 = " + element1_1 );
+                    System.out.println("element1_2 = " + element1_2 );
+                    //System.out.println("element2_1 = " + element2_1 );
+                    //System.out.println("element2_2 = " + element2_2 );
+                    System.out.println("element3_1 = " + element3_1 );
+                    System.out.println("element3_2 = " + element3_2 );
 				case UPDATE: // UPDATE - UPDATE = UPDATE
 					conflict = true;
 					// If not mergeStyleDiff, we need to undo the update
@@ -687,7 +697,7 @@ public class JsonDiffDiff extends AbstractDiff<JSONObject, Object, String> {
 						undone = null;
 					JSONObject updated = glomElements(undone, element3_2, false);
 
-					dDiff3.updateDiff(id, newElement3_1, updated, DiffOp.UPDATE, conflict);
+					dDiff3.updateDiff(id, newElement3_1, updated, DiffOp.UPDATE, conflict, onlyCollect);
 					break;
 				case DELETE: // DELETE - UPDATE = DELETE
 					conflict = true;
@@ -719,7 +729,7 @@ public class JsonDiffDiff extends AbstractDiff<JSONObject, Object, String> {
 					// newElement3_1 = element3_1 + element1_2
 					newElement3_1 = undonePair.second;
 
-					dDiff3.updateDiff(id, newElement3_1, undone, DiffOp.UPDATE, conflict);
+					dDiff3.updateDiff(id, newElement3_1, undone, DiffOp.UPDATE, conflict, onlyCollect);
 					break;
 				default:
 					// TODO -- ERROR
@@ -728,6 +738,13 @@ public class JsonDiffDiff extends AbstractDiff<JSONObject, Object, String> {
 			case DELETE:
 				switch (op3) {
 				case ADD: // ADD - DELETE = ADD
+                    System.out.println( "DELETE - ADD " );
+                    System.out.println("element1_1 = " + element1_1 );
+                    System.out.println("element1_2 = " + element1_2 );
+                    //System.out.println("element2_1 = " + element2_1 );
+                    //System.out.println("element2_2 = " + element2_2 );
+                    System.out.println("element3_1 = " + element3_1 );
+                    System.out.println("element3_2 = " + element3_2 );
 					conflict = true;
 					// No need to change element3_2 since it's an add
 					dDiff3.set1(id, DiffOp.DELETE, element3_1, conflict);
@@ -735,6 +752,13 @@ public class JsonDiffDiff extends AbstractDiff<JSONObject, Object, String> {
 					// definitely ADD and not UPDATE
 					break;
 				case UPDATE: // UPDATE - DELETE = ADD
+                    System.out.println( "DELETE - UPDATE" );
+                    System.out.println("element1_1 = " + element1_1 );
+                    System.out.println("element1_2 = " + element1_2 );
+                    //System.out.println("element2_1 = " + element2_1 );
+                    //System.out.println("element2_2 = " + element2_2 );
+                    System.out.println("element3_1 = " + element3_1 );
+                    System.out.println("element3_2 = " + element3_2 );
 					conflict = true;
 					// We can check if element3_1 is null or not
 					// since it should be the prior element.
@@ -785,7 +809,14 @@ public class JsonDiffDiff extends AbstractDiff<JSONObject, Object, String> {
 	                }
 					break;
 				case DELETE: // DELETE - NONE = DELETE
-				    if ( !onlyCollect && element1_1 == null && element1_2 == null ) {
+                    System.out.println( "NONE - DEL" );
+                    System.out.println("element1_1 = " + element1_1 );
+                    System.out.println("element1_2 = " + element1_2 );
+                    //System.out.println("element2_1 = " + element2_1 );
+                    //System.out.println("element2_2 = " + element2_2 );
+                    System.out.println("element3_1 = " + element3_1 );
+                    System.out.println("element3_2 = " + element3_2 );
+				    if ( !onlyCollect && element1_1 == null && element1_2 == null && element3_1 == null) {
 				        // No change - it was never there to delete!
 				        dDiff3.removeFromDiff( id );
 				    } else {
@@ -816,13 +847,13 @@ public class JsonDiffDiff extends AbstractDiff<JSONObject, Object, String> {
 		return dDiff3;
 	}
 
-	protected void updateDiff(String id, JSONObject newElement1, JSONObject newElement2, DiffOp newOp,
-			boolean conflicted) {
+	protected void updateDiff(String id , JSONObject newElement1 , JSONObject newElement2 , DiffOp newOp ,
+			boolean conflicted , boolean onlyCollect ) {
 		JSONObject elementWithDiffApplied = glomElements(newElement1, newElement2, false);
 
 		// If there was no change to the element, then remove it from
 		// the diff:
-		if (sameElement(elementWithDiffApplied, newElement1)) {
+		if (!onlyCollect && sameElement(elementWithDiffApplied, newElement1)) {
 			removeFromDiff(id);
 		} else {
 			// Remove any properties in newElement2 that are the same as
@@ -888,6 +919,7 @@ public class JsonDiffDiff extends AbstractDiff<JSONObject, Object, String> {
 		return glom(diffs, false);
 	}
 
+	// This is for commits, not two alternative workspaces.
 	public static JSONObject glom(ArrayList<JSONObject> diffs, boolean reverse) {
 		JSONObject glommedDiff = makeEmptyDiffJson();
 		if (Utils.isNullOrEmpty(diffs))
@@ -898,6 +930,7 @@ public class JsonDiffDiff extends AbstractDiff<JSONObject, Object, String> {
 		
 		
 	    // Glom workpace 2 changes
+		Set<String> addedFirstIds = new HashSet<String>();
         for (int k = 0; k < diffs.size(); ++k) {
             int i = reverse ? diffs.size() - 1 - k : k;
             JSONObject diff = diffs.get(i);
@@ -908,6 +941,17 @@ public class JsonDiffDiff extends AbstractDiff<JSONObject, Object, String> {
             if (ws2 == null)
                 continue;
             JSONArray added = ws2.optJSONArray("addedElements");
+            if ( added != null ) {
+                for (int j = 0; j < added.length(); ++j) {
+                    JSONObject element = added.optJSONObject( j );
+                    if ( element != null ) {
+                        String sysmlid = element.getString("sysmlid");
+                        if ( sysmlid != null && !diffMap2.containsKey( sysmlid ) ) {
+                            addedFirstIds.add( sysmlid );
+                        }
+                    }
+                }
+            }
             JSONArray updated = ws2.optJSONArray("updatedElements");
             JSONArray deleted = ws2.optJSONArray("deletedElements");
             // Diffs are applied in the order of add, update, delete
@@ -949,7 +993,7 @@ public class JsonDiffDiff extends AbstractDiff<JSONObject, Object, String> {
                 // the first element is the one we want unless the element is
                 // added. If added, there is no pre-existing element, so it
                 // should not appear in workspace1.
-                if ( diffMap1.containsKey( sysmlid ) ) {
+                if ( diffMap1.containsKey( sysmlid ) || addedFirstIds.contains( sysmlid ) ) {
                     continue;
                 }
 				Pair< DiffOp, List< JSONObject >> added2 = diffMap2.get( sysmlid );
@@ -1222,8 +1266,8 @@ public class JsonDiffDiff extends AbstractDiff<JSONObject, Object, String> {
 					switch (p.first) {
 					case ADD:
 						// ADD + DELETE = NONE --> replace
-//					    glomMap.remove( sysmlId );
-//					    break;
+					    glomMap.remove( sysmlId );
+					    break;
 					case UPDATE:
 						// UPDATE + DELETE = DELETE --> replace
 						p.first = DiffOp.DELETE;
@@ -1335,9 +1379,12 @@ public class JsonDiffDiff extends AbstractDiff<JSONObject, Object, String> {
 		// Start with the element change and alter based on the diff. If a
 		// property is not in added or updated, then remove it.
 		JSONObject element = NodeUtil.clone(element2);
-		if (Utils.isNullOrEmpty(propertyDiff) || propertyDiff.size() < 3)
+		if (Utils.isNullOrEmpty(propertyDiff) || propertyDiff.size() < 3 || 
+		    (propertyDiff.get( 0 ).isEmpty() && propertyDiff.get( 1 ).isEmpty() && 
+		     propertyDiff.get( 2 ).isEmpty() ) ) {
 			return element;
-
+		}
+		
 		Set<String> addedAndUpdatedIds = null, updatedIds = null, removedIds = null;
 		addedAndUpdatedIds = new LinkedHashSet<String>(propertyDiff.get(0)); // add
 																				// added

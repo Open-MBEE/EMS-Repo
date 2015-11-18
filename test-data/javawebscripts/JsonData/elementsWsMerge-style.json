@@ -48,4 +48,21 @@
                         "value":[{"type":"LiteralString",
                                   "string":"this is it"}]}
     },
+        {
+            "documentation":"none_add_delete",
+            "sysmlid":"none_add_delete",
+            "name":"none_add_delete",
+            "owner":"123456",
+            "specialization":{
+                "type":"Property",
+                "isDerived":false,
+                "value":[
+                    {
+                        "type":"LiteralString",
+                        "string":"this is it"
+                    }
+                ]
+            }
+        },
+
 ]}
