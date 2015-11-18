@@ -3110,7 +3110,7 @@ create_curl_cmd(type="GET", data="elements/303?mmsVersion=", base_url=BASE_URL_W
         branch="master/"),
 True,
 common_filters + ['"timestamp"'],
-["test","workspaces","develop", "develop2"]
+[] #["test","workspaces","develop", "develop2"]
 ],
 [
 10108,
