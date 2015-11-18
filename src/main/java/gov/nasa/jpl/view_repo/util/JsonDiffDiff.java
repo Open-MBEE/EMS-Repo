@@ -670,13 +670,6 @@ public class JsonDiffDiff extends AbstractDiff<JSONObject, Object, String> {
 			case UPDATE:
 				switch (op3) {
 				case ADD: // ADD - UPDATE = UPDATE
-                    System.out.println( "UPDATE - " + op3 );
-                    System.out.println("element1_1 = " + element1_1 );
-                    System.out.println("element1_2 = " + element1_2 );
-                    //System.out.println("element2_1 = " + element2_1 );
-                    //System.out.println("element2_2 = " + element2_2 );
-                    System.out.println("element3_1 = " + element3_1 );
-                    System.out.println("element3_2 = " + element3_2 );
 				case UPDATE: // UPDATE - UPDATE = UPDATE
 					conflict = true;
 					// If not mergeStyleDiff, we need to undo the update
@@ -738,13 +731,6 @@ public class JsonDiffDiff extends AbstractDiff<JSONObject, Object, String> {
 			case DELETE:
 				switch (op3) {
 				case ADD: // ADD - DELETE = ADD
-                    System.out.println( "DELETE - ADD " );
-                    System.out.println("element1_1 = " + element1_1 );
-                    System.out.println("element1_2 = " + element1_2 );
-                    //System.out.println("element2_1 = " + element2_1 );
-                    //System.out.println("element2_2 = " + element2_2 );
-                    System.out.println("element3_1 = " + element3_1 );
-                    System.out.println("element3_2 = " + element3_2 );
 					conflict = true;
 					// No need to change element3_2 since it's an add
 					dDiff3.set1(id, DiffOp.DELETE, element3_1, conflict);
@@ -752,13 +738,6 @@ public class JsonDiffDiff extends AbstractDiff<JSONObject, Object, String> {
 					// definitely ADD and not UPDATE
 					break;
 				case UPDATE: // UPDATE - DELETE = ADD
-                    System.out.println( "DELETE - UPDATE" );
-                    System.out.println("element1_1 = " + element1_1 );
-                    System.out.println("element1_2 = " + element1_2 );
-                    //System.out.println("element2_1 = " + element2_1 );
-                    //System.out.println("element2_2 = " + element2_2 );
-                    System.out.println("element3_1 = " + element3_1 );
-                    System.out.println("element3_2 = " + element3_2 );
 					conflict = true;
 					// We can check if element3_1 is null or not
 					// since it should be the prior element.
@@ -809,13 +788,6 @@ public class JsonDiffDiff extends AbstractDiff<JSONObject, Object, String> {
 	                }
 					break;
 				case DELETE: // DELETE - NONE = DELETE
-                    System.out.println( "NONE - DEL" );
-                    System.out.println("element1_1 = " + element1_1 );
-                    System.out.println("element1_2 = " + element1_2 );
-                    //System.out.println("element2_1 = " + element2_1 );
-                    //System.out.println("element2_2 = " + element2_2 );
-                    System.out.println("element3_1 = " + element3_1 );
-                    System.out.println("element3_2 = " + element3_2 );
 				    if ( !onlyCollect && element1_1 == null && element1_2 == null && element3_1 == null) {
 				        // No change - it was never there to delete!
 				        dDiff3.removeFromDiff( id );

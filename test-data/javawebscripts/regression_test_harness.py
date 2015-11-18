@@ -2980,7 +2980,7 @@ set_last_read_to_gv5,
 create_curl_cmd(type="DELETE", data="elements/none_add_delete", base_url=BASE_URL_WS,
                 branch="$gv1/"),
 True,
-common_filters + ['"timestamp"', '"MMS_', '"id"', '"qualifiedId"', '"version"', '"modified"', '"sequence"'],
+common_filters + ['"timestamp"', '"MMS_', '"id"', '"qualifiedId"', '"version"', '"modified"', '"sequence"', '"modifier"'],
 ["test", "workspaces", "ws", "develop"]
 ],
 
