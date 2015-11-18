@@ -176,14 +176,6 @@ public class ModelGet extends AbstractJavaWebScript {
 		return instance.executeImplImpl(req, status, cache,
 				runWithoutTransactions);
 	}
-
-	@Deprecated
-	// deprecated in favor of NodeUtil.doGraphDb
-	private boolean getUseDb(WebScriptRequest req){
-		String usedb = req.getParameter("usedb");
-		if (usedb == null) return true;
-		else return Boolean.parseBoolean(usedb);
-	}
 	
 	@Override
 	protected Map<String, Object> executeImplImpl(WebScriptRequest req,
@@ -206,14 +198,6 @@ public class ModelGet extends AbstractJavaWebScript {
 			if (elementsJson.length() > 0) {
 				top.put("elements", elementsJson);
 			}
-			// boolean evaluate = getBooleanArg( req, "evaluate", false );
-			// WorkspaceNode ws = getWorkspace( req );
-			// if ( evaluate ) {
-			// Set< EmsScriptNode > elementSet = new HashSet<EmsScriptNode>(
-			// elementsFound.values() );
-			// Map< Object, Object > r = evaluate(elementSet , ws);
-			// top
-			// }
 
 			if (!Utils.isNullOrEmpty(response.toString()))
 				top.put("message", response.toString());
@@ -235,7 +219,6 @@ public class ModelGet extends AbstractJavaWebScript {
 
 		if (logger.isInfoEnabled()) {
 			log(Level.INFO, "ModelGet: %s", timer);
-			// logger.info( "ModelGet: " + timer );
 		}
 
 		return model;
@@ -286,8 +269,25 @@ public class ModelGet extends AbstractJavaWebScript {
 			if (logger.isDebugEnabled())
 				logger.debug("modelId = " + modelId);
 			boolean findDeleted = depth == 0 ? true : false;
-			EmsScriptNode modelRootNode = findScriptNodeById(modelId,
-					workspace, dateTime, findDeleted);
+			EmsScriptNode modelRootNode = null;
+			
+			// search using db if enabled - if not there revert to modelRootNode
+			if (useDb) {
+			    PostgresHelper pgh = new PostgresHelper(workspace);
+			    try {
+                    pgh.connect();
+                    NodeUtil.getNodeFromPostgresNode(pgh.getNodeFromSysmlId( modelId ));
+                    pgh.close();
+                } catch ( Exception e ) {
+                    logger.warn( "Reverting to alfresco lookup. Could not find element in graph db " + modelId );
+                }
+			}
+			if (modelRootNode == null) {
+			    modelRootNode = findScriptNodeById(modelId,
+			                                       workspace, dateTime, findDeleted);
+			    useDb = false;
+			}
+			
 			if (logger.isDebugEnabled())
 				logger.debug("modelRootNode = " + modelRootNode);
 
@@ -313,6 +313,7 @@ public class ModelGet extends AbstractJavaWebScript {
 
 			boolean checkReadPermission = true; // TODO -- REVIEW -- Shouldn't
 												// this be false?
+			
 			handleElements(workspace, dateTime, includeQualified, false, evaluate,
 					top, checkReadPermission);
 		} catch (JSONException e) {
@@ -378,6 +379,7 @@ public class ModelGet extends AbstractJavaWebScript {
 			JSONArray childElementJson = new JSONArray(
 					allowedElements.toString());
 			for (int ii = 0; ii < childElementJson.length(); ii++) {
+			    // FIXME: Use graph db to find all the nodes
 				String id = childElementJson.getString(ii);
 				EmsScriptNode childElement = findScriptNodeById(id, workspace,
 						dateTime, false);
@@ -440,12 +442,14 @@ public class ModelGet extends AbstractJavaWebScript {
 			Long currDepth, boolean connected, String relationship,
 			Set<String> visited, boolean useDb) throws JSONException, SQLException {
 
-		if (dateTime == null && !connected && useDb)
+		if (dateTime == null && !connected && useDb) {
 			handleElementHierarchyPostgres(root, workspace, dateTime, maxDepth,
 					currDepth, connected, relationship, visited);
-		else
+		}
+		else {
 			handleElementHierarchyOriginal(root, workspace, dateTime, maxDepth,
 					currDepth, connected, relationship, visited);
+		}
 	}
 
 	protected void handleElementHierarchyPostgres(EmsScriptNode root,
@@ -460,11 +464,7 @@ public class ModelGet extends AbstractJavaWebScript {
 		}
 
 		// get children for given sysmlId from database
-		PostgresHelper pgh;
-		if (workspace == null)
-			pgh = new PostgresHelper("");
-		else
-			pgh = new PostgresHelper(workspace.getId());
+		PostgresHelper pgh = new PostgresHelper(workspace);
 
 		List<Pair<String, String>> childrenNodeRefIds = null;
 		try {
@@ -481,7 +481,6 @@ public class ModelGet extends AbstractJavaWebScript {
 		}
 
 		for (Pair<String, String> c : childrenNodeRefIds) {
-
 			EmsScriptNode ecn = new EmsScriptNode(new NodeRef(c.second),
 					services, response);
 

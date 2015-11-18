@@ -3427,10 +3427,7 @@ public class EmsScriptNode extends ScriptNode implements
 
                 relatedDocuments.put( relatedDoc );
             } else {
-                PostgresHelper pgh = new PostgresHelper( "" );
-                if ( workspace != null ) pgh =
-                        new PostgresHelper( workspace.getId() );
-    
+                PostgresHelper pgh = new PostgresHelper(workspace);
                 try {
                     pgh.connect();
                     Map< String, Set< String >> root2immediate = 
@@ -3440,27 +3437,32 @@ public class EmsScriptNode extends ScriptNode implements
                     for ( String rootParentId : root2immediate.keySet() ) {
                         EmsScriptNode rootParentNode =
                                 NodeUtil.getNodeFromPostgresNode( pgh.getNodeFromSysmlId( rootParentId ) );
-
-                        JSONObject relatedDoc = new JSONObject();
-                        relatedDoc.put( "sysmlid", rootParentId );
-                        relatedDoc.put( "name",
-                                        (String)rootParentNode.getProperty( Acm.ACM_NAME ) );
-                        relatedDoc.put( "siteCharacterizationId",
-                                        rootParentNode.getSiteCharacterizationId( null, ws ) );
-                        JSONArray parentViews = new JSONArray();
-                        for ( String immediateParentId : root2immediate.get( rootParentId ) ) {
-                            EmsScriptNode immediateParentNode =
-                                    NodeUtil.getNodeFromPostgresNode( pgh.getNodeFromSysmlId( immediateParentId ) );
-
-                            JSONObject parentView = new JSONObject();
-                            parentView.put( "sysmlid", immediateParentId );
-                            parentView.put( "name",
-                                            (String)immediateParentNode.getProperty( Acm.ACM_NAME ) );
-                            parentViews.put( parentView );
+                        
+                        // transclusions are stored in postgres document graph, but may not 
+                        // actually show up in a document (can just dead end in a transclusion)
+                        // so filter results based on this
+                        if (rootParentNode.hasAspect( Acm.ACM_PRODUCT )) {
+                            JSONObject relatedDoc = new JSONObject();
+                            relatedDoc.put( "sysmlid", rootParentId );
+                            relatedDoc.put( "name",
+                                            (String)rootParentNode.getProperty( Acm.ACM_NAME ) );
+                            relatedDoc.put( "siteCharacterizationId",
+                                            rootParentNode.getSiteCharacterizationId( null, ws ) );
+                            JSONArray parentViews = new JSONArray();
+                            
+                            for ( String immediateParentId : root2immediate.get( rootParentId ) ) {
+                                EmsScriptNode immediateParentNode =
+                                        NodeUtil.getNodeFromPostgresNode( pgh.getNodeFromSysmlId( immediateParentId ) );
+                                JSONObject parentView = new JSONObject();
+                                parentView.put( "sysmlid", immediateParentId );
+                                parentView.put( "name",
+                                                (String)immediateParentNode.getProperty( Acm.ACM_NAME ) );
+                                parentViews.put( parentView );
+                            }
+    
+                            relatedDoc.put( "parentViews", parentViews );
+                            relatedDocuments.put( relatedDoc );
                         }
-
-                        relatedDoc.put( "parentViews", parentViews );
-                        relatedDocuments.put( relatedDoc );
                     }
                     pgh.close();
                 } catch ( ClassNotFoundException e ) {

@@ -1,6 +1,7 @@
 package gov.nasa.jpl.view_repo.db;
 
 import gov.nasa.jpl.mbee.util.Pair;
+import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -40,12 +41,27 @@ public class PostgresHelper {
 		}
 	}
 
+	
+   public PostgresHelper(WorkspaceNode workspace) {
+       String workspaceName = workspace == null ? "" : workspace.getId() ;
+       constructorHelper(workspaceName);
+   }
+
+	
 	public PostgresHelper(String workspaceName) {
-		this.host = DbContract.HOST;
-		this.dbName = DbContract.DB_NAME;
-		this.user = DbContract.USERNAME;
-		this.pass = DbContract.PASSWORD;
-		this.workspaceName = workspaceName.split("_")[0].replace("-", "_");
+	   constructorHelper(workspaceName);
+	}
+	
+	private void constructorHelper(String workspaceName) {
+        this.host = DbContract.HOST;
+        this.dbName = DbContract.DB_NAME;
+        this.user = DbContract.USERNAME;
+        this.pass = DbContract.PASSWORD;
+        if (workspaceName == null || workspaceName == "master") {
+            this.workspaceName = "";
+        } else {
+            this.workspaceName = workspaceName.split("_")[0].replace("-", "_");
+        }
 	}
 
 	public void close() throws SQLException {

@@ -308,13 +308,8 @@ public class ProjectPost extends AbstractJavaWebScript {
 
     
     private void sendProjectDelta(WorkspaceNode workspace, EmsScriptNode projectNode){
-    	PostgresHelper pgh = null;
-    	if(workspace == null)
-    		pgh = new PostgresHelper("");
-    	else 
-    		pgh = new PostgresHelper(workspace.getId());
-
-    	try {
+    	    PostgresHelper pgh = new PostgresHelper(workspace);
+    	    try {
 			pgh.connect();
 			pgh.insertNode(projectNode.getNodeRef().toString(), NodeUtil.getVersionedRefId(projectNode), projectNode.getSysmlId());
 			pgh.close();
@@ -322,7 +317,6 @@ public class ProjectPost extends AbstractJavaWebScript {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-	
     }
     
 	/**

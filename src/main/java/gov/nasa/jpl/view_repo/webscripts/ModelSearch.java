@@ -88,6 +88,7 @@ public class ModelSearch extends ModelGet {
                          "ASPECT:\"{http://jpl.nasa.gov/model/sysml-lite/1.0}" );
                     put( "appliedMetatypes", "@sysml\\:appliedMetatypes:\"" );
                     put( "metatypes", "@sysml\\:metatypes:\"" );
+                    // value is has special handling
                 }
             };
 
@@ -147,6 +148,7 @@ public class ModelSearch extends ModelGet {
         for (int ii = 0; ii < filters.length; ii++) {
             if (filters[ii].equalsIgnoreCase( "all" ) || filters[ii].equals( "*" )) {
                 Set<String> allFilterKeys = searchTypesMap.keySet();
+                allFilterKeys.add( "value" );
                 filters = allFilterKeys.toArray( new String[allFilterKeys.size()] );
                 break;
             }
@@ -179,7 +181,6 @@ public class ModelSearch extends ModelGet {
                         return null;
                     }
                 } else {
-
                     try {
                         Integer.parseInt( keyword );
                         rawResults.putAll( searchForElements( "@sysml\\:integer:\"",
@@ -224,7 +225,7 @@ public class ModelSearch extends ModelGet {
             List<String> noderefs = new ArrayList<String>(rawResults.keySet());
             
             PostgresHelper pgh = null;
-            String workspaceId = "";
+            String workspaceId = ""; // can't use workspace in constructor, since filtering doesn't expect "master" as id
             if ( workspace != null ) workspaceId = workspace.getId();
             pgh = new PostgresHelper( workspaceId );
 

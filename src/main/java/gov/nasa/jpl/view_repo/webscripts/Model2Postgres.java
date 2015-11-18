@@ -99,10 +99,7 @@ public class Model2Postgres extends AbstractJavaWebScript {
 		try {
 			if (validateRequest(req, status) || true) {
 				WorkspaceNode workspace = getWorkspace(req);
-				if (workspace == null)
-					pgh = new PostgresHelper("");
-				else
-					pgh = new PostgresHelper(workspace.getId());
+				pgh = new PostgresHelper(workspace);
 
 				String timestamp = req.getParameter("timestamp");
 				Date dateTime = TimeUtils.dateFromTimestamp(timestamp);
@@ -233,12 +230,21 @@ public class Model2Postgres extends AbstractJavaWebScript {
         		for (NodeRef c : n.getOwnedChildren(false, dt, ws)) {
         			EmsScriptNode cn = new EmsScriptNode(c, services, response);
         
-        			// containment edges
-        			edges.add(new Pair<String, String>(n.getSysmlId(), cn.getSysmlId()));
-        
-        			i += insertNodes(new EmsScriptNode(c, services, response), pgh, dt,
-        					edges, documentEdges, ws);
+        			if (!cn.isDeleted()) {
+            			// containment edges
+            			edges.add(new Pair<String, String>(n.getSysmlId(), cn.getSysmlId()));
+            			i += insertNodes(cn, pgh, dt, edges, documentEdges, ws);
+        			}
         		}
+        		// also traverse alfresco containment since ownedChildren may not be correct
+            for (EmsScriptNode cn : n.getChildNodes()) {
+                if (!cn.isDeleted()) {
+                    // containment edges
+                    edges.add(new Pair<String, String>(n.getSysmlId(), cn.getSysmlId()));
+                    i += insertNodes(cn, pgh, dt, edges, documentEdges, ws);
+                }
+            }
+
 		} catch ( org.alfresco.service.cmr.repository.MalformedNodeRefException mnre ) {
 		    // keep going and ignore
 		    logger.error( String.format("could not get children for parent %s:", n.getId()) );

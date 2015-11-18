@@ -833,11 +833,7 @@ public class CommitUtil {
 
 	private static void processDeltasForDb(JSONObject delta, String workspaceId) {
 
-		PostgresHelper pgh;
-		if (workspaceId.equals("master"))
-			pgh = new PostgresHelper("");
-		else
-			pgh = new PostgresHelper(workspaceId);
+		PostgresHelper pgh = new PostgresHelper(workspaceId);
 
 		JSONObject ws2 = delta.getJSONObject("workspace2");
 		JSONArray added = ws2.optJSONArray("addedElements");
@@ -973,11 +969,7 @@ public class CommitUtil {
 		branchJson.put("createdWorkspace",
 				getWorkspaceDetails(created, srcDateTime)); // created branch
 
-		PostgresHelper pgh = null;
-		if (src == null)
-			pgh = new PostgresHelper("");
-		else
-			pgh = new PostgresHelper(src.getId());
+		PostgresHelper pgh = new PostgresHelper(src);
 
 		try {
 			pgh.connect();
