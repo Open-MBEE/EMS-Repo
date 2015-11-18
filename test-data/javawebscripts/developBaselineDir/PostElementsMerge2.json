@@ -1,7 +1,7 @@
 {"elements": [
     {
         "qualifiedId": "/europa/123456/add_add_before",
-        "qualifiedName": "/europa/JW_TEST/add_add_before",
+        "qualifiedName": "/europa/JW_TEST2/add_add_before",
         "sysmlid": "add_add_before",
         "editable": true,
         "creator": "admin",
@@ -23,7 +23,7 @@
     },
     {
         "qualifiedId": "/europa/123456/delete_delete_before",
-        "qualifiedName": "/europa/JW_TEST/delete_delete_before",
+        "qualifiedName": "/europa/JW_TEST2/delete_delete_before",
         "sysmlid": "delete_delete_before",
         "editable": true,
         "creator": "admin",
@@ -45,7 +45,7 @@
     },
     {
         "qualifiedId": "/europa/123456/delete_update_consistent",
-        "qualifiedName": "/europa/JW_TEST/delete_update_consistent",
+        "qualifiedName": "/europa/JW_TEST2/delete_update_consistent",
         "sysmlid": "delete_update_consistent",
         "editable": true,
         "creator": "admin",
@@ -67,7 +67,7 @@
     },
     {
         "qualifiedId": "/europa/123456/add_add_consistent",
-        "qualifiedName": "/europa/JW_TEST/add_add_consistent",
+        "qualifiedName": "/europa/JW_TEST2/add_add_consistent",
         "sysmlid": "add_add_consistent",
         "editable": true,
         "creator": "admin",
@@ -89,7 +89,7 @@
     },
     {
         "qualifiedId": "/europa/123456/none_add_delete",
-        "qualifiedName": "/europa/JW_TEST/none_add_delete",
+        "qualifiedName": "/europa/JW_TEST2/none_add_delete",
         "sysmlid": "none_add_delete",
         "editable": true,
         "creator": "admin",
@@ -111,7 +111,7 @@
     },
     {
         "qualifiedId": "/europa/123456/update_update_consistent",
-        "qualifiedName": "/europa/JW_TEST/update_update_consistent",
+        "qualifiedName": "/europa/JW_TEST2/update_update_consistent",
         "sysmlid": "update_update_consistent",
         "editable": true,
         "creator": "admin",
