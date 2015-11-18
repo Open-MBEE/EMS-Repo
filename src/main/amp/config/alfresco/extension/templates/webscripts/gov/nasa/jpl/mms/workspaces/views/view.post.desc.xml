@@ -1,9 +1,9 @@
 <webscript>
 	<shortname>post view with {viewId}</shortname>
     <description>
-    	post view with {viewId}
+    	post view with id, {viewId}, and add to the parent view with id, {parent} 
 	</description>
-  	<url>/workspaces/{workspaceId}/views/{viewId}</url>
+  	<url>/workspaces/{workspaceId}/views/{viewId}?parent={parent}</url>
   	<format default="json">argument</format>
   	<authentication>user</authentication>
   	<transaction>none</transaction>

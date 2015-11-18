@@ -34,7 +34,7 @@
 		<property name="services" ref="ServiceRegistry" />
 	</bean>
 
-	<bean
+ 	<bean
 		id="webscript.gov.nasa.jpl.mms.workspaces.sites.projects.project.get"
 		class="gov.nasa.jpl.view_repo.webscripts.ProjectGet" parent="webscript"
 		singleton="false">
@@ -476,12 +476,15 @@
         <property name="services" ref="ServiceRegistry" />
     </bean>
      
-    
     <bean id="webscript.gov.nasa.jpl.mms.workspaces.history.element.get"
-    	class="gov.nasa.jpl.view_repo.webscripts.HistoryGet" parent="webscript" 
-
-    	singleton="false">
+    	class="gov.nasa.jpl.view_repo.webscripts.HistoryGet" parent="webscript" singleton="false">
     	<property name="repositoryHelper" ref="repositoryHelper"/>
     	<property name="services" ref="ServiceRegistry"/>
-    </bean>   
+    </bean>
+    
+    <bean id="webscript.gov.nasa.jpl.mms.mmsversion.get"
+    	class="gov.nasa.jpl.view_repo.webscripts.MmsVersion" parent="webscript" singleton="false">
+    	<property name="repositoryHelper" ref="repositoryHelper"/>
+    	<property name="services" ref="ServiceRegistry"/>
+    </bean>      
 </beans>
