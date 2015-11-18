@@ -116,6 +116,20 @@ create or replace function get_root_parents(integer, integer, text)
   end;
 $$ language plpgsql;
 
+-- get root parents of immediate parents
+create or replace function get_immediate_parent_roots(integer, integer, text)
+  returns table(ip text, rp text) as $$
+  declare 
+    s text; 
+    l text;   
+  begin
+    FOR s in select sysmlid from get_immediate_parents($1,$2,$3) LOOP
+      return query select s,sysmlid from get_root_parents(cast((select id from nodes where sysmlid=s) as int), $2, $3);
+    end Loop;
+    RETURN;
+ end;
+$$ language plpgsql;
+
 -- get all paths to a node
 create type return_type as (pstart integer, pend integer, path integer[]);
 create or replace function get_paths_to_node(integer, integer, text)
@@ -188,7 +202,6 @@ END LOOP;
 END
 $do$;
 
-
 insert into nodes(nodeRefId, versionedRefId, nodeType, sysmlId) values('1', 1, (select nodeTypes.id from nodeTypes where name = 'regular'), '1');
 insert into nodes(nodeRefId, versionedRefId, nodeType, sysmlId) values(2, 2, (select nodeTypes.id from nodeTypes where name = 'regular'), '2');
 insert into nodes(nodeRefId, versionedRefId, nodeType, sysmlId) values(3, 3, (select nodeTypes.id from nodeTypes where name = 'regular'), '3');
@@ -211,4 +224,5 @@ insert into edges values(1, 2, (select edgeTypes.id from edgeTypes where name = 
 insert into edges values(2, 6, (select edgeTypes.id from edgeTypes where name = 'document'));
 insert into edges values(7, 2, (select edgeTypes.id from edgeTypes where name = 'document'));
 insert into edges values(6, 4, (select edgeTypes.id from edgeTypes where name = 'document'));
+
 */

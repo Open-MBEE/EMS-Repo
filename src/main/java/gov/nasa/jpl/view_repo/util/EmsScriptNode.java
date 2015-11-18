@@ -2988,8 +2988,6 @@ public class EmsScriptNode extends ScriptNode implements
 
         if ( justTheType ) return;
 
-        // json.put( "evaluation", "Hi, Erik!" );
-
         for ( QName aspectQname : this.getAspectsSet() ) {
             // reflection is too slow?
             String cappedAspectName =
@@ -3405,74 +3403,76 @@ public class EmsScriptNode extends ScriptNode implements
                        getIsoTime( new Date( readTime ) ), filter );
         }
 
+        
         // lets add in the document information
         if ( isIncludeDocument && NodeUtil.doGraphDb ) {
-            PostgresHelper pgh = new PostgresHelper( "" );
-            if ( workspace != null ) pgh =
-                    new PostgresHelper( workspace.getId() );
+            JSONArray relatedDocuments = new JSONArray();
 
-            try {
-                pgh.connect();
-                // Need to get parents related to root parents
-                Set< String > immediateParentIds =
-                        pgh.getImmediateParents( this.getSysmlId(),
-                                                 DbEdgeTypes.DOCUMENT );
-                Map< String, Set< String >> root2immediate =
-                        new HashMap< String, Set< String >>();
+            // if document, just add itself has related doc, otherwise use postgres helper
+            if (this.hasAspect( Acm.ACM_PRODUCT )) {
+                String sysmlid = this.getSysmlId();
+                JSONObject relatedDoc = new JSONObject();
+                relatedDoc.put( "sysmlid", sysmlid );
+                relatedDoc.put( "name", this.getSysmlName() );
+                relatedDoc.put( "siteCharacterizationId",
+                                this.getSiteCharacterizationId( null, ws ) );
+                JSONObject parentView = new JSONObject();
+                parentView.put( "sysmlid", sysmlid );
+                parentView.put( "name", this.getSysmlName() );
 
-                JSONArray relatedDocuments = new JSONArray();
+                JSONArray parentViews = new JSONArray();
+                parentViews.put( parentView );
 
-                // only put the immediateParents into their root documents
-                // TODO: does getRootParents return itself if it is the root?
-                for ( String immediateParentId : immediateParentIds ) {
-                    Set< String > rootParentIds =
-                            pgh.getRootParents( immediateParentId,
-                                                DbEdgeTypes.DOCUMENT );
-                    for ( String rootParentId : rootParentIds ) {
-                        if ( !root2immediate.containsKey( rootParentId ) ) {
-                            root2immediate.put( rootParentId,
-                                                new HashSet< String >() );
+                relatedDoc.put( "parentViews", parentViews );
+
+                relatedDocuments.put( relatedDoc );
+            } else {
+                PostgresHelper pgh = new PostgresHelper( "" );
+                if ( workspace != null ) pgh =
+                        new PostgresHelper( workspace.getId() );
+    
+                try {
+                    pgh.connect();
+                    Map< String, Set< String >> root2immediate = 
+                            pgh.getImmediateParentRoots( this.getSysmlId(), DbEdgeTypes.DOCUMENT );
+                    
+                    // create JSON by traversing root 2 immediate parents map
+                    for ( String rootParentId : root2immediate.keySet() ) {
+                        EmsScriptNode rootParentNode =
+                                NodeUtil.getNodeFromPostgresNode( pgh.getNodeFromSysmlId( rootParentId ) );
+
+                        JSONObject relatedDoc = new JSONObject();
+                        relatedDoc.put( "sysmlid", rootParentId );
+                        relatedDoc.put( "name",
+                                        (String)rootParentNode.getProperty( Acm.ACM_NAME ) );
+                        relatedDoc.put( "siteCharacterizationId",
+                                        rootParentNode.getSiteCharacterizationId( null, ws ) );
+                        JSONArray parentViews = new JSONArray();
+                        for ( String immediateParentId : root2immediate.get( rootParentId ) ) {
+                            EmsScriptNode immediateParentNode =
+                                    NodeUtil.getNodeFromPostgresNode( pgh.getNodeFromSysmlId( immediateParentId ) );
+
+                            JSONObject parentView = new JSONObject();
+                            parentView.put( "sysmlid", immediateParentId );
+                            parentView.put( "name",
+                                            (String)immediateParentNode.getProperty( Acm.ACM_NAME ) );
+                            parentViews.put( parentView );
                         }
-                        root2immediate.get( rootParentId )
-                                      .add( immediateParentId );
+
+                        relatedDoc.put( "parentViews", parentViews );
+                        relatedDocuments.put( relatedDoc );
                     }
+                    pgh.close();
+                } catch ( ClassNotFoundException e ) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                } catch ( SQLException e ) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
                 }
-
-                // create the JSON by traversing the root 2 immediate parents
-                // map
-                for ( String rootParentId : root2immediate.keySet() ) {
-                    JSONObject relatedDoc = new JSONObject();
-                    relatedDoc.put( "sysmlid", rootParentId );
-
-                    EmsScriptNode rootParentNode =
-                            NodeUtil.getNodeFromPostgresNode( pgh.getNodeFromSysmlId( rootParentId ) );
-                    relatedDoc.put( "name",
-                                    (String)rootParentNode.getProperty( Acm.ACM_NAME ) );
-                    relatedDoc.put( "siteCharacterizationId",
-                                    this.getSiteCharacterizationId( null, ws ) );
-                    JSONArray parentViews = new JSONArray();
-                    for ( String immediateParentId : root2immediate.get( rootParentId ) ) {
-                        JSONObject parentView = new JSONObject();
-                        parentView.put( "sysmlid", immediateParentId );
-                        EmsScriptNode immediateParentNode =
-                                NodeUtil.getNodeFromPostgresNode( pgh.getNodeFromSysmlId( immediateParentId ) );
-                        parentView.put( "name",
-                                        (String)immediateParentNode.getProperty( Acm.ACM_NAME ) );
-                        parentViews.put( parentView );
-                    }
-
-                    relatedDoc.put( "parentViews", parentViews );
-                    relatedDocuments.put( relatedDoc );
-                }
+            }
+            if (relatedDocuments.length()>0) {
                 element.put( "relatedDocuments", relatedDocuments );
-
-                pgh.close();
-            } catch ( ClassNotFoundException e ) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            } catch ( SQLException e ) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
             }
         }
 
