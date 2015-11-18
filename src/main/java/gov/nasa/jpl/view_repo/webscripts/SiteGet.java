@@ -87,6 +87,12 @@ public class SiteGet extends AbstractJavaWebScript {
         //clearCaches();
 
         Map<String, Object> model = new HashMap<String, Object>();
+        if (checkMmsVersions) {
+            if(compareMmsVersions(req, getResponse(), getResponseStatus()));{
+                model.put("res", createResponseJson());
+                return model;
+            }
+        } 
         JSONObject json = null;
 
         try {
@@ -106,12 +112,13 @@ public class SiteGet extends AbstractJavaWebScript {
         } catch (Exception e) {
             log(Level.ERROR, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Internal error stack trace:\n %s \n", e.getLocalizedMessage());
             e.printStackTrace();
-        }
-        if (json == null) {
-            model.put("res", createResponseJson());
-        } else {
-            model.put("res", NodeUtil.jsonToString( json ));
-        }
+       	}
+       	if (json == null) {
+       		model.put("res", createResponseJson());
+       	} else {
+       		model.put("res", NodeUtil.jsonToString( json ));
+       	}
+
         status.setCode(responseStatus.getCode());
 
         printFooter();

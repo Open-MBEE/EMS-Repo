@@ -37,6 +37,7 @@ public class AllFlagsGet extends FlagSet {
                            "viewPointExpressions",
                            "diffDefaultIsMerge",
                            "cacheSnapshots",
+                           "checkMmsVersions",
                            "graphDb"};
     
     public String[] getAllFlags() {
@@ -123,6 +124,8 @@ public class AllFlagsGet extends FlagSet {
         	    MmsDiffGet.diffDefaultIsMerge = val;
         } else if (path.equalsIgnoreCase("cacheSnapshots")) {
             DeclarativeJavaWebScript.cacheSnapshotsFlag = val;
+        } else if (path.equalsIgnoreCase("checkMmsVersions")){
+        	AbstractJavaWebScript.checkMmsVersions = val;
         } else if (path.equalsIgnoreCase("graphDb")) {
             NodeUtil.doGraphDb = val;
         }
@@ -187,9 +190,11 @@ public class AllFlagsGet extends FlagSet {
         } else if (path.equalsIgnoreCase("cleanJson")) {
         	    return CommitUtil.cleanJson;
         } else if (path.equalsIgnoreCase("diffDefaultIsMerge")){
-        	    return MmsDiffGet.diffDefaultIsMerge;
+        	return MmsDiffGet.diffDefaultIsMerge;
         } else if (path.equalsIgnoreCase( "graphDb" )) {
             return NodeUtil.doGraphDb;
+        } else if (path.equalsIgnoreCase("checkMmsVersions")){
+        	return AbstractJavaWebScript.checkMmsVersions;
         }
         return false;
     }
@@ -264,7 +269,9 @@ public class AllFlagsGet extends FlagSet {
         } else if (path.equalsIgnoreCase("cleanJson")) {
         	    return false;
         } else if (path.equalsIgnoreCase("diffDefaultIsMerge")){
-        	    return false;
+        	return false;
+        } else if (path.equalsIgnoreCase("checkMmsVersions")){
+        	return false;
         } else if (path.equalsIgnoreCase( "doGraphDb" )) {
             return false;
         }
@@ -335,6 +342,8 @@ public class AllFlagsGet extends FlagSet {
             return "diffDefaultIsMerge";
         } else if (path.equalsIgnoreCase("cacheSnapshots")) {
             return "cacheSnapshotsFlag";
+        } else if (path.equalsIgnoreCase("checkMmsVersions")){
+        	return "checkMmsVersions";
         } else if (path.equalsIgnoreCase("graphDb")) {
             return "graphDb";
         }

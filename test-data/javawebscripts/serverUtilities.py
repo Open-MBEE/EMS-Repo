@@ -50,6 +50,9 @@ def GETjson(sysmlid):
 #  This process Requires 4 POSTs to complete adding a view to another view
 def addViewToView(toAdd, addingTo):
     # TODO: Test if JSON file, if sysmlid, or name
+    
+    printDebug('addViewToView(' + str(toAdd) + ", " + str(addingTo) + ')');
+    
     postCount = 1
     toAdd_element = utilityElement.UtilElement(toAdd)
     if toAdd_element.isEmptyElement:
@@ -81,6 +84,7 @@ def addViewToView(toAdd, addingTo):
     # This post is used to notify the server that a new view will is to be created.
     # Executes the curl command and returns the response from the server and increments postCount
     cmd = regression_lib.create_curl_cmd("POST", data=postStr, branch='master/' + 'elements', project_post=True)
+    printDebug(str(cmd))
     responseJson = regression_lib.get_json_output_no_status(execCurlCmd(cmd, postCount)).replace("\n", "")
     postCount += 1
 
@@ -273,9 +277,10 @@ def removeOutputHeader(dirtyJson):
     # if is_json(dirtyJson) is False:
     #     return
 
-    str(dirtyJson).replace('\\', "")
-    elementsIndex = str(dirtyJson).rfind('{\"elements', 0)
-    cleanJson = json.loads(dirtyJson[elementsIndex:])
+    diretyJson = str(dirtyJson).replace('\\', "")
+    elementsIndex = dirtyJson.rfind('{\"elements', 0)
+    if elementsIndex != -1:
+        cleanJson = json.loads(dirtyJson[elementsIndex:])
     return cleanJson
 
 

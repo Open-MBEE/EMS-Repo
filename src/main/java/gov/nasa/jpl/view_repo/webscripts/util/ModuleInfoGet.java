@@ -18,6 +18,10 @@ import org.springframework.extensions.webscripts.DeclarativeWebScript;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
 
+import gov.nasa.jpl.view_repo.util.NodeUtil;
+//import gov.nasa.jpl.view_repo.webscripts.WebScriptUtil;
+import gov.nasa.jpl.view_repo.webscripts.AbstractJavaWebScript;
+
 public class ModuleInfoGet extends DeclarativeWebScript {
     private ServiceRegistry services;
 
@@ -43,6 +47,21 @@ public class ModuleInfoGet extends DeclarativeWebScript {
         model.put("res", json.toString(2));
         return model;
     }
+    
+    
+    //Placed within for testing purposes!
+    // TODO: Remove once finished with MmsVersion service
+	public static JSONObject checkMMSversion(WebScriptRequest req) {
+		boolean matchVersions = AbstractJavaWebScript.getBooleanArg(req, "mmsVersion", false);
+		JSONObject jsonVersion = null;
+		String mmsVersion = NodeUtil.getMMSversion();
+		System.out.println("Check versions?" + matchVersions);
+		if (matchVersions) {
+			jsonVersion = new JSONObject();
+			jsonVersion.put("version", mmsVersion);
+		}
+		return jsonVersion;
+	}
 
     public void setServices(ServiceRegistry registry) {
         services = registry;

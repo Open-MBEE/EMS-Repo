@@ -1,0 +1,27 @@
+{"elements": [{
+    "modifier": "admin",
+    "qualifiedId": "/europa/123456/300/301/302/303",
+    "siteCharacterizationId": "europa",
+    "created": "Fri Nov 06 14:03:42 PST 2015",
+    "name": "303",
+    "qualifiedName": "/europa/JW_TEST2/300/301/302/303",
+    "documentation": "talk",
+    "owner": "302",
+    "sysmlid": "303",
+    "read": "2015-11-06T14:06:38.962-0800",
+    "specialization": {
+        "propertyType": null,
+        "isSlot": false,
+        "isDerived": false,
+        "value": [{
+            "valueExpression": null,
+            "string": "dlam_string",
+            "type": "LiteralString"
+        }],
+        "type": "Property"
+    },
+    "editable": true,
+    "modified": "2015-11-06T14:03:53.086-0800",
+    "creator": "admin"
+}]}
+200
