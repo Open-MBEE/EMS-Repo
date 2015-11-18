@@ -42,7 +42,7 @@ create_curl_cmd(type="POST", data='\'{"elements":[{"sysmlid":"123456","name":"JW
                 branch="master/sites/europa/projects?createSite=true", project_post=True),
 False,
 None,
-["test", "workspaces", "develop", "develop2"]
+["test", "workspaces", "ws", "develop", "develop2", "parsek"]
 ],
  
 [
@@ -53,7 +53,7 @@ create_curl_cmd(type="POST", data="elementsNew.json", base_url=BASE_URL_WS,
                 post_type="elements", branch="master/"),
 True,
 common_filters,
-["test", "workspaces", "develop", "develop2"]
+["test", "workspaces", "ws", "develop", "develop2", "parsek"]
 ],
         
 [
@@ -2123,7 +2123,7 @@ create_curl_cmd(type="POST", data="operation.json", base_url=BASE_URL_WS,
                 post_type="elements?expression=1%2B1", branch="master/"),
 True,
 common_filters + ['MMS_'],
-["test", "workspaces", "develop", "develop2"]
+["test", "workspaces", "develop", "develop2", "parsek"]
 ],
 
 [
@@ -2134,7 +2134,7 @@ create_curl_cmd(type="POST", data="onePlusOne.k", base_url=BASE_URL_WS,
                 post_type="elements?evaluate", branch="master/"),
 True,
 common_filters + ['MMS_'],
-["test", "workspaces", "develop", "develop2"]
+["test", "workspaces", "develop", "develop2", "parsek"]
 ],
 # PERMISSION TESTING =====================================================
 
@@ -2622,7 +2622,7 @@ create_curl_cmd(type="POST", data="elementsMatrix1.json", base_url=BASE_URL_WS,
                 post_type="elements", branch="master/"),
 True,
 common_filters,
-["test", "workspaces", "develop"],
+["test", "workspaces", "ws", "develop"],
 None,
 None,
 set_last_read_to_gv3
@@ -2636,7 +2636,7 @@ create_curl_cmd(type="POST", base_url=BASE_URL_WS,
                 post_type="", branch="wsMatrix1?sourceWorkspace=master&copyTime=$gv3"),
 True,
 common_filters + ['"branched"', '"created"', '"id"', '"qualifiedId"'],
-["test", "workspaces", "develop"],
+["test", "workspaces", "ws", "develop"],
 None,
 None,
 set_wsid_to_gv1
@@ -2650,7 +2650,7 @@ create_curl_cmd(type="DELETE",data="elements/delete_add_gg",base_url=BASE_URL_WS
                 branch="$gv1/"),
 True,
 common_filters + ['"timestamp"', '"MMS_', '"id"', '"qualifiedId"', '"version"', '"modified"', '"sequence"'],
-["test", "workspaces", "develop"]
+["test", "workspaces", "ws", "develop"]
 ],
 
 [
@@ -2661,7 +2661,7 @@ create_curl_cmd(type="DELETE",data="elements/delete_update_gg",base_url=BASE_URL
                 branch="$gv1/"),
 True,
 common_filters + ['"timestamp"', '"MMS_', '"id"', '"qualifiedId"', '"version"', '"modified"', '"sequence"'],
-["test", "workspaces", "develop"]
+["test", "workspaces", "ws", "develop"]
 ],
 
 [
@@ -2672,7 +2672,7 @@ create_curl_cmd(type="DELETE",data="elements/delete_delete_gg",base_url=BASE_URL
                 branch="$gv1/"),
 True,
 common_filters + ['"timestamp"', '"MMS_', '"id"', '"qualifiedId"', '"version"', '"modified"', '"sequence"'],
-["test", "workspaces", "develop"]
+["test", "workspaces", "ws", "develop"]
 ],
         
 [
@@ -2683,7 +2683,7 @@ create_curl_cmd(type="DELETE",data="elements/delete_none_gg",base_url=BASE_URL_W
                 branch="$gv1/"),
 True,
 common_filters + ['"timestamp"', '"MMS_', '"id"', '"qualifiedId"', '"version"', '"modified"', '"sequence"'],
-["test", "workspaces", "develop"]
+["test", "workspaces", "ws", "develop"]
 ],
         
 [
@@ -2694,7 +2694,7 @@ create_curl_cmd(type="POST", data="elementsWsMatrix1.json", base_url=BASE_URL_WS
                 post_type="elements", branch="$gv1/"),
 True,
 common_filters,
-["test", "workspaces", "develop"],
+["test", "workspaces", "ws", "develop"],
 None,
 None,
 set_last_read_to_gv4
@@ -2708,7 +2708,7 @@ create_curl_cmd(type="DELETE",data="elements/update_add_gg",base_url=BASE_URL_WS
                 branch="master/"),
 True,
 common_filters + ['"timestamp"', '"MMS_', '"id"', '"qualifiedId"', '"version"', '"modified"', '"sequence"'],
-["test", "workspaces", "develop"]
+["test", "workspaces", "ws", "develop"]
 ],
         
 [
@@ -2719,7 +2719,7 @@ create_curl_cmd(type="DELETE",data="elements/delete_add_gg",base_url=BASE_URL_WS
                 branch="master/"),
 True,
 common_filters + ['"timestamp"', '"MMS_', '"id"', '"qualifiedId"', '"version"', '"modified"', '"sequence"'],
-["test", "workspaces", "develop"]
+["test", "workspaces", "ws", "develop"]
 ],
                      
 [
@@ -2730,7 +2730,7 @@ create_curl_cmd(type="POST", data="elementsMatrix2.json", base_url=BASE_URL_WS,
                 post_type="elements", branch="master/"),
 True,
 common_filters,
-["test", "workspaces", "develop"],
+["test", "workspaces", "ws", "develop"],
 None,
 None,
 set_last_read_to_gv5
@@ -2744,7 +2744,7 @@ create_curl_cmd(type="POST", base_url=BASE_URL_WS,
                 post_type="", branch="wsMatrix2?sourceWorkspace=master&copyTime=$gv5"),
 True,
 common_filters + ['"branched"', '"created"', '"id"', '"qualifiedId"'],
-["test", "workspaces", "develop"],
+["test", "workspaces", "ws", "develop"],
 None,
 None,
 set_wsid_to_gv2
@@ -2758,7 +2758,7 @@ create_curl_cmd(type="DELETE",data="elements/add_delete_gg",base_url=BASE_URL_WS
                 branch="$gv2/"),
 True,
 common_filters + ['"timestamp"', '"MMS_', '"id"', '"qualifiedId"', '"version"', '"modified"', '"sequence"'],
-["test", "workspaces", "develop"]
+["test", "workspaces", "ws", "develop"]
 ],
         
 [
@@ -2769,7 +2769,7 @@ create_curl_cmd(type="DELETE",data="elements/update_delete_gg",base_url=BASE_URL
                 branch="$gv2/"),
 True,
 common_filters + ['"timestamp"', '"MMS_', '"id"', '"qualifiedId"', '"version"', '"modified"', '"sequence"'],
-["test", "workspaces", "develop"]
+["test", "workspaces", "ws", "develop"]
 ],
         
 [
@@ -2780,7 +2780,7 @@ create_curl_cmd(type="DELETE",data="elements/delete_delete_gg",base_url=BASE_URL
                 branch="$gv2/"),
 True,
 common_filters + ['"timestamp"', '"MMS_', '"id"', '"qualifiedId"', '"version"', '"modified"', '"sequence"'],
-["test", "workspaces", "develop"]
+["test", "workspaces", "ws", "develop"]
 ],
         
 [
@@ -2791,7 +2791,7 @@ create_curl_cmd(type="DELETE",data="elements/none_delete_gg",base_url=BASE_URL_W
                 branch="$gv2/"),
 True,
 common_filters + ['"timestamp"', '"MMS_', '"id"', '"qualifiedId"', '"version"', '"modified"', '"sequence"'],
-["test", "workspaces", "develop"]
+["test", "workspaces", "ws", "develop"]
 ],
          
 [
@@ -2802,7 +2802,7 @@ create_curl_cmd(type="POST", data="elementsWsMatrix2.json", base_url=BASE_URL_WS
                 post_type="elements", branch="$gv2/"),
 True,
 common_filters,
-["test", "workspaces", "develop"],
+["test", "workspaces", "ws", "develop"],
 None,
 None,
 set_last_read_to_gv6
@@ -2816,7 +2816,7 @@ create_curl_cmd(type="GET", base_url=SERVICE_URL,
                 branch="diff/$gv1/$gv2/latest/latest?changesForMerge"),
 True,
 common_filters + ['"id"', '"qualifiedId"', '"creator"', '"modifier"'],
-["test", "workspaces", "develop"]
+["test", "workspaces", "ws", "develop"]
 ],
         
 [
@@ -2827,7 +2827,7 @@ create_curl_cmd(type="GET", base_url=SERVICE_URL,
                 branch="diff/$gv1/$gv2/latest/latest?fullCompare"),
 True,
 common_filters + ['"id"', '"qualifiedId"', '"creator"', '"modifier"'],
-["test", "workspaces", "develop"]
+["test", "workspaces", "ws", "develop"]
 ],
         
        
@@ -2841,7 +2841,7 @@ create_curl_cmd(type="POST", data="elementsMasterMerge1.json", base_url=BASE_URL
                 post_type="elements", branch="master/"),
 True,
 common_filters,
-["test", "workspaces", "develop"],
+["test", "workspaces", "ws", "develop"],
 None,
 None,
 set_last_read_to_gv3
@@ -2855,7 +2855,7 @@ create_curl_cmd(type="DELETE", data="elements/delete_delete_before", base_url=BA
                 branch="master/"),
 True,
 common_filters + ['"timestamp"', '"MMS_', '"id"', '"qualifiedId"', '"version"', '"modified"', '"sequence"'],
-["test", "workspaces", "develop"]
+["test", "workspaces", "ws", "develop"]
 ],
 
 [
@@ -2866,7 +2866,7 @@ create_curl_cmd(type="POST", base_url=BASE_URL_WS,
                 post_type="", branch="wsMerge1?sourceWorkspace=master&copyTime=$gv3"),
 True,
 common_filters + ['"branched"', '"created"', '"id"', '"qualifiedId"'],
-["test", "workspaces", "develop"],
+["test", "workspaces", "ws", "develop"],
 None,
 None,
 set_wsid_to_gv1
@@ -2879,7 +2879,7 @@ create_curl_cmd(type="DELETE", data="elements/delete_delete_consistent", base_ur
                 branch="master/"),
 True,
 common_filters + ['"timestamp"', '"MMS_', '"id"', '"qualifiedId"', '"version"', '"modified"', '"sequence"'],
-["test", "workspaces", "develop"]
+["test", "workspaces", "ws", "develop"]
 ],
 
 [
@@ -2890,7 +2890,7 @@ create_curl_cmd(type="DELETE", data="elements/delete_update_consistent", base_ur
                 branch="master/"),
 True,
 common_filters + ['"timestamp"', '"MMS_', '"id"', '"qualifiedId"', '"version"', '"modified"', '"sequence"'],
-["test", "workspaces", "develop"],
+["test", "workspaces", "ws", "develop"],
 ],
 [
 904,
@@ -2900,7 +2900,7 @@ create_curl_cmd(type="POST", data="elementsMasterMerge2.json", base_url=BASE_URL
                 post_type="elements", branch="master/"),
 True,
 common_filters,
-["test", "workspaces", "develop"],
+["test", "workspaces", "ws", "develop"],
 None,
 None,
 set_last_read_to_gv4
@@ -2913,7 +2913,7 @@ create_curl_cmd(type="GET", base_url=SERVICE_URL,
                 branch="diff/master/$gv1/latest/latest?background&changesForMerge"),
 True,
 common_filters + ['"id"', '"qualifiedId"', '"creator"', '"modifier"', '"diffTime"'],
-["test", "workspaces", "develop"]
+["test", "workspaces", "ws", "develop"]
 ],
 [
 905.5,
@@ -2923,7 +2923,7 @@ create_curl_cmd(type="GET", base_url=SERVICE_URL,
                 branch="diff/master/$gv1/latest/latest?background&fullCompare"),
 True,
 common_filters + ['"id"', '"qualifiedId"', '"creator"', '"modifier"', '"diffTime"'],
-["test", "workspaces", "develop"]
+["test", "workspaces", "ws", "develop"]
 ],
 
 [
@@ -2934,7 +2934,7 @@ create_curl_cmd(type="DELETE", data="elements/delete_delete_consistent", base_ur
                 branch="$gv1/"),
 True,
 common_filters + ['"timestamp"', '"MMS_', '"id"', '"qualifiedId"', '"version"', '"modified"', '"sequence"'],
-["test", "workspaces", "develop"]
+["test", "workspaces", "ws", "develop"]
 ],
         
 [
@@ -2945,7 +2945,7 @@ create_curl_cmd(type="DELETE", data="elements/update_delete_consistent", base_ur
                 branch="$gv1/"),
 True,
 common_filters + ['"timestamp"', '"MMS_', '"id"', '"qualifiedId"', '"version"', '"modified"', '"sequence"'],
-["test", "workspaces", "develop"]
+["test", "workspaces", "ws", "develop"]
 ],
     
 [     
@@ -2956,7 +2956,7 @@ create_curl_cmd(type="DELETE", data="elements/add_add_before", base_url=BASE_URL
                 branch="$gv1/"),
 True,
 common_filters + ['"timestamp"', '"MMS_', '"id"', '"qualifiedId"', '"version"', '"modified"', '"sequence"'],
-["test", "workspaces", "develop"]
+["test", "workspaces", "ws", "develop"]
 ],
 
 [
@@ -2967,12 +2967,23 @@ create_curl_cmd(type="POST", data="elementsWsMerge-style.json", base_url=BASE_UR
                 post_type="elements", branch="$gv1/"),
 True,
 common_filters,
-["test", "workspaces", "develop"],
+["test", "workspaces", "ws", "develop"],
 None,
 None,
 set_last_read_to_gv5,
 ],
          
+[     
+908.2,
+"DeleteNoneAddDeleteWs1",
+"Delete none_add_delete",
+create_curl_cmd(type="DELETE", data="elements/none_add_delete", base_url=BASE_URL_WS,
+                branch="$gv1/"),
+True,
+common_filters + ['"timestamp"', '"MMS_', '"id"', '"qualifiedId"', '"version"', '"modified"', '"sequence"'],
+["test", "workspaces", "ws", "develop"]
+],
+
 [
 908.5,
 "DeleteDeleteDeleteBeforeWs1",
@@ -2981,7 +2992,7 @@ create_curl_cmd(type="DELETE", data="elements/delete_delete_before", base_url=BA
                 branch="$gv1/"),
 True,
 common_filters + ['"timestamp"', '"MMS_', '"id"', '"qualifiedId"', '"version"', '"modified"', '"sequence"'],
-["test", "workspaces", "develop"]
+["test", "workspaces", "ws", "develop"]
 ],
          
 [
@@ -2992,7 +3003,7 @@ create_curl_cmd(type="GET", base_url=SERVICE_URL,
                 branch="diff/master/$gv1/latest/latest?fullCompare"),
 True,
 common_filters + ['"id"', '"qualifiedId"', '"creator"', '"modifier"'],
-["test", "workspaces", "develop"]
+["test", "workspaces", "ws", "develop"]
 ],
 [
 910,
@@ -3002,7 +3013,7 @@ create_curl_cmd(type="GET", base_url=SERVICE_URL,
                 branch="diff/master/$gv1/latest/latest?changesForMerge"),
 True,
 common_filters + ['"id"', '"qualifiedId"', '"creator"', '"modifier"'],
-["test", "workspaces", "develop"]
+["test", "workspaces", "ws", "develop"]
 ],
 
         

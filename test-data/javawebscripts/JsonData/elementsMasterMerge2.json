@@ -1,32 +1,52 @@
-{ "elements" : [
-
-    {"documentation" : "add_add_consistent", 
-     "sysmlid":"add_add_consistent", 
-     "name":"add_add_consistent", 
-     "owner":"123456", 
-     "specialization": {"type":"Property",
-                        "isDerived":false, 
-                        "value":[{"type":"LiteralString",
-                                  "string":"this is it"}]}
-    },
-  
-    {"documentation" : "update_update_consistent", 
-     "sysmlid":"update_update_consistent", 
-     "name":"update_update_consistent", 
-     "owner":"123456", 
-     "specialization": {"type":"Property",
-                        "isDerived":false, 
-                        "value":[{"type":"LiteralString",
-                                  "string":"this is update 1"}]}
-    },
-    
-    {"documentation" : "update_delete_consistent", 
-     "sysmlid":"update_delete_consistent", 
-     "name":"update_delete_consistent", 
-     "owner":"123456", 
-     "specialization": {"type":"Property",
-                        "isDerived":false, 
-                        "value":[{"type":"LiteralString",
-                                  "string":"this is update 1"}]}
-    },
-]}
+{
+    "elements":[
+        {
+            "documentation":"add_add_consistent",
+            "sysmlid":"add_add_consistent",
+            "name":"add_add_consistent",
+            "owner":"123456",
+            "specialization":{
+                "type":"Property",
+                "isDerived":false,
+                "value":[
+                    {
+                        "type":"LiteralString",
+                        "string":"this is it"
+                    }
+                ]
+            }
+        },
+        {
+            "documentation":"update_update_consistent",
+            "sysmlid":"update_update_consistent",
+            "name":"update_update_consistent",
+            "owner":"123456",
+            "specialization":{
+                "type":"Property",
+                "isDerived":false,
+                "value":[
+                    {
+                        "type":"LiteralString",
+                        "string":"this is update 1"
+                    }
+                ]
+            }
+        },
+        {
+            "documentation":"update_delete_consistent",
+            "sysmlid":"update_delete_consistent",
+            "name":"update_delete_consistent",
+            "owner":"123456",
+            "specialization":{
+                "type":"Property",
+                "isDerived":false,
+                "value":[
+                    {
+                        "type":"LiteralString",
+                        "string":"this is update 1"
+                    }
+                ]
+            }
+        },
+    ]
+}
