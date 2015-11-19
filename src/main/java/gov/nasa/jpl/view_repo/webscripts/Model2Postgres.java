@@ -239,9 +239,11 @@ public class Model2Postgres extends AbstractJavaWebScript {
         		// also traverse alfresco containment since ownedChildren may not be correct
             for (EmsScriptNode cn : n.getChildNodes()) {
                 if (!cn.isDeleted()) {
-                    // containment edges
-                    edges.add(new Pair<String, String>(n.getSysmlId(), cn.getSysmlId()));
-                    i += insertNodes(cn, pgh, dt, edges, documentEdges, ws);
+                    if (!cn.getSysmlId().endsWith( "_pkg" )) {
+                        // containment edges
+                        edges.add(new Pair<String, String>(n.getSysmlId(), cn.getSysmlId()));
+                        i += insertNodes(cn, pgh, dt, edges, documentEdges, ws);
+                    }
                 }
             }
 
