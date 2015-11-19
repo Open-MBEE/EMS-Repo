@@ -6,6 +6,8 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.log4j.Logger;
+
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.module.ModuleDetails;
 import org.alfresco.service.cmr.module.ModuleService;
@@ -23,6 +25,8 @@ import gov.nasa.jpl.view_repo.util.NodeUtil;
 import gov.nasa.jpl.view_repo.webscripts.AbstractJavaWebScript;
 
 public class ModuleInfoGet extends DeclarativeWebScript {
+    private static Logger logger = Logger.getLogger(ModuleInfoGet.class)
+            ;
     private ServiceRegistry services;
 
     @Override
@@ -55,7 +59,7 @@ public class ModuleInfoGet extends DeclarativeWebScript {
 		boolean matchVersions = AbstractJavaWebScript.getBooleanArg(req, "mmsVersion", false);
 		JSONObject jsonVersion = null;
 		String mmsVersion = NodeUtil.getMMSversion();
-		System.out.println("Check versions?" + matchVersions);
+		if (logger.isDebugEnabled()) logger.debug("Check versions?" + matchVersions);
 		if (matchVersions) {
 			jsonVersion = new JSONObject();
 			jsonVersion.put("version", mmsVersion);

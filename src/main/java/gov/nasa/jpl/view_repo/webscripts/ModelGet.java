@@ -276,7 +276,7 @@ public class ModelGet extends AbstractJavaWebScript {
 			    PostgresHelper pgh = new PostgresHelper(workspace);
 			    try {
                     pgh.connect();
-                    NodeUtil.getNodeFromPostgresNode(pgh.getNodeFromSysmlId( modelId ));
+                    modelRootNode = NodeUtil.getNodeFromPostgresNode(pgh.getNodeFromSysmlId( modelId ));
                     pgh.close();
                 } catch ( Exception e ) {
                     logger.warn( "Reverting to alfresco lookup. Could not find element in graph db " + modelId );
@@ -462,6 +462,11 @@ public class ModelGet extends AbstractJavaWebScript {
 		if (!root.exists()) {
 			return;
 		}
+		
+		// no permissions, return
+		if (!checkPermissions( root, PermissionService.READ )) {
+		    return;
+		}
 
 		// get children for given sysmlId from database
 		PostgresHelper pgh = new PostgresHelper(workspace);
@@ -474,10 +479,9 @@ public class ModelGet extends AbstractJavaWebScript {
 				depth = maxDepth.intValue();
 			childrenNodeRefIds = pgh.getChildren(root.getSysmlId(),
 					DbEdgeTypes.REGULAR, depth);
+			pgh.close();
 		} catch (SQLException | ClassNotFoundException e) {
 			e.printStackTrace();
-		} finally {
-			pgh.close();
 		}
 
 		for (Pair<String, String> c : childrenNodeRefIds) {

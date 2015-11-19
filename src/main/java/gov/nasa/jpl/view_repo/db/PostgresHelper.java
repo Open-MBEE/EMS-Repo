@@ -57,7 +57,7 @@ public class PostgresHelper {
         this.dbName = DbContract.DB_NAME;
         this.user = DbContract.USERNAME;
         this.pass = DbContract.PASSWORD;
-        if (workspaceName == null || workspaceName == "master") {
+        if (workspaceName == null || workspaceName.equals("master")) {
             this.workspaceName = "";
         } else {
             this.workspaceName = workspaceName.split("_")[0].replace("-", "_");
@@ -81,12 +81,12 @@ public class PostgresHelper {
 	}
 
 	public void execUpdate(String query) throws SQLException {
-		System.out.println("Query: " + query);
+		if (logger.isInfoEnabled()) logger.info("Query: " + query);
 		this.conn.createStatement().executeUpdate(query);
 	}
 
 	public ResultSet execQuery(String query) throws SQLException {
-		System.out.println("Query: " + query);
+	    if (logger.isInfoEnabled()) logger.info("Query: " + query);
 		return this.conn.createStatement().executeQuery(query);
 	}
 

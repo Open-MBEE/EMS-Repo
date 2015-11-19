@@ -4457,8 +4457,8 @@ public class EmsScriptNode extends ScriptNode implements
                     AuthenticationUtil.setRunAsUser( ADMIN_USER_NAME );
                 }
 
-                // Get name
-                Object property = getProperty( Acm.ACM_NAME );
+                // Get sysmlid
+                Object property = getProperty( Acm.ACM_ID );
                 if ( property == null ) {
                     property = getProperty( Acm.CM_NAME );
                 }
@@ -4471,9 +4471,8 @@ public class EmsScriptNode extends ScriptNode implements
                 // Log warning for missing permissions.
                 if ( property != null ) {
                     String msg =
-                            "Warning! No " + permissions.toUpperCase()
-                                    + " priveleges to " + property.toString()
-                                    + ".  ";
+                            String.format( "Warning! No %s priveleges to sysmlid: %s.", 
+                                           permissions.toUpperCase(), property.toString());
                     response.append( msg );
                     if ( status != null ) {
                         status.setCode( HttpServletResponse.SC_FORBIDDEN, msg );

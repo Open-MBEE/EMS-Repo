@@ -122,7 +122,7 @@ public class ViewGet extends AbstractJavaWebScript {
         if ( viewId == null ) {
             viewId = req.getServiceMatch().getTemplateVars().get("elementid");
         }
-        if (Debug.isOn()) System.out.println("Got raw id = " + viewId);
+        if (logger.isDebugEnabled()) logger.debug("Got raw id = " + viewId);
         return viewId;
     }
 
@@ -159,7 +159,7 @@ public class ViewGet extends AbstractJavaWebScript {
             if ( !gettingDisplayedElements ) {
                 gettingContainedViews = isContainedViewRequest( req );
             } 
-            if (Debug.isOn()) System.out.println("viewId = " + viewId);
+            if (logger.isDebugEnabled()) logger.debug("viewId = " + viewId);
 
             // get timestamp if specified
             String timestamp = req.getParameter("timestamp");
@@ -223,7 +223,7 @@ public class ViewGet extends AbstractJavaWebScript {
                 
                 EmsScriptNode.expressionStuff = true;
                 if ( gettingDisplayedElements ) {
-                    if (Debug.isOn()) System.out.println("+ + + + + gettingDisplayedElements");
+                    if (logger.isDebugEnabled()) logger.debug("+ + + + + gettingDisplayedElements");
                     // TODO -- need to use recurse flag!
                     Collection< EmsScriptNode > elems =
                             v.getDisplayedElements( workspace, dateTime,
@@ -233,7 +233,7 @@ public class ViewGet extends AbstractJavaWebScript {
                         viewsJson.put( n.toJSONObject( workspace, dateTime ) );
                     }
                 } else if ( gettingContainedViews ) {
-                    if (Debug.isOn()) System.out.println("+ + + + + gettingContainedViews");
+                    if (logger.isDebugEnabled()) logger.debug("+ + + + + gettingContainedViews");
                     Collection< EmsScriptNode > elems =
                             v.getContainedViews( recurse, workspace, dateTime,
                                                  null );
@@ -242,7 +242,7 @@ public class ViewGet extends AbstractJavaWebScript {
                         viewsJson.put( n.toJSONObject( workspace,dateTime ) );
                     }
                 } else {
-                    if (Debug.isOn()) System.out.println("+ + + + + just the view");
+                    if (logger.isDebugEnabled()) logger.debug("+ + + + + just the view");
                     viewsJson.put( view.toJSONObject( workspace, dateTime ) );
                 }
                 EmsScriptNode.expressionStuff = false;

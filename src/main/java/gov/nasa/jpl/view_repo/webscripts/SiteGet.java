@@ -173,6 +173,7 @@ public class SiteGet extends AbstractJavaWebScript {
                 	String parentId = null;
                 	if (parentRef != null) {
                 	    parentNode = new EmsScriptNode(parentRef, services, response);
+                	    // skip parent if you don't have permissions on parent
                 	    if (emsNode.hasPermission( PermissionService.READ )) {
                 	        parentId = parentNode.getSysmlId();
                 	    }

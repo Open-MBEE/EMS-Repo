@@ -1179,28 +1179,13 @@ public class NodeUtil {
 	}
 
 	public static ArrayList<NodeRef> findNodeRefsByType(String name,
-			String prefix, ServiceRegistry services) {
-
-		ArrayList<NodeRef> sresults = null;
-
-		try {
-			// rahulku
-			// sresults = searchInElastic();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-
-		// check if ES succeded
-		if (sresults == null || sresults.size() == 0) {
-			ResultSet results = null;
-			String queryPattern = prefix + name + "\"";
-			results = luceneSearch(queryPattern, services);
-			ArrayList<NodeRef> resultList = resultSetToNodeRefList(results);
-			results.close();
-			return resultList;
-		} else {
-			return sresults;
-		}
+		String prefix, ServiceRegistry services) {
+		ResultSet results = null;
+		String queryPattern = prefix + name + "\"";
+		results = luceneSearch(queryPattern, services);
+		ArrayList<NodeRef> resultList = resultSetToNodeRefList(results);
+		results.close();
+		return resultList;
 	}
 
 	/*
@@ -1380,14 +1365,14 @@ public class NodeUtil {
 					&& (emptyEntriesInFullCacheOk || !results.isEmpty())) {
 				wasCached = true; // doCaching must be true here
 			} else {
-				// search using lucene
-				results = findNodeRefsByType(specifier, prefix, services);
-				if (logger.isDebugEnabled())
-					logger.debug("lucene results = " + results);
-				if ((doSimpleCaching || doFullCaching)
-						&& !Utils.isNullOrEmpty(results)) {
-					caching = true;
-				}
+    				// search using lucene
+    				results = findNodeRefsByType(specifier, prefix, services);
+    				if (logger.isDebugEnabled())
+    					logger.debug("lucene results = " + results);
+    				if ((doSimpleCaching || doFullCaching)
+    						&& !Utils.isNullOrEmpty(results)) {
+    					caching = true;
+    				}
 			}
 
 			hadMultipleCandidates = !Utils.isNullOrEmpty(results)
