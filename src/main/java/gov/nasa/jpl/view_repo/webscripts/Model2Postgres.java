@@ -133,7 +133,7 @@ public class Model2Postgres extends AbstractJavaWebScript {
 			throws JSONException {
 
 		JSONArray json = new JSONArray();
-		EmsScriptNode emsNode;
+		EmsScriptNode siteNode;
 		String name;
 		NodeRef siteRef;
 		List<SiteInfo> sites = services.getSiteService().listSites(null);
@@ -150,20 +150,20 @@ public class Model2Postgres extends AbstractJavaWebScript {
 			}
 
 			if (siteRef != null) {
-				emsNode = new EmsScriptNode(siteRef, services);
-				name = emsNode.getName();
+				siteNode = new EmsScriptNode(siteRef, services);
+				name = siteNode.getName();
 
                 if (workspace == null || 
-                        (workspace != null && workspace.contains(emsNode))) {
+                        (workspace != null && workspace.contains(siteNode))) {
 					try {
 						pgh.connect();
 
-						for (EmsScriptNode n : emsNode.getChildNodes()) {
+						for (EmsScriptNode n : siteNode.getChildNodes()) {
 							if (n.getName().equals("Models")) {
 								for (EmsScriptNode c : n.getChildNodes()) {
 									int nodesInserted = insertNodes(c, pgh,
 											dateTime, edges, documentEdges,
-											workspace);
+											workspace, name);
 									siteJson.put("sysmlid", name);
 									siteJson.put("name", siteInfo.getTitle());
 									siteJson.put("elementCount", nodesInserted);
@@ -207,46 +207,51 @@ public class Model2Postgres extends AbstractJavaWebScript {
 
 	protected int insertNodes(EmsScriptNode n, PostgresHelper pgh, Date dt,
 			List<Pair<String, String>> edges,
-			List<Pair<String, String>> documentEdges, WorkspaceNode ws) {
+			List<Pair<String, String>> documentEdges, WorkspaceNode ws,
+			String parentId) {
 
 		int i = 0;
 
-		pgh.insertNode(n.getNodeRef().toString(),
-				NodeUtil.getVersionedRefId(n), n.getSysmlId());
-
-		i++;
-
-		// documentation edges 
-		String doc = (String) n.getProperty(Acm.ACM_DOCUMENTATION);
-		NodeUtil.processDocumentEdges(n.getSysmlId(), doc, documentEdges);
-		String view2viewProperty = (String) n.getProperty(Acm.ACM_VIEW_2_VIEW);
-		if (view2viewProperty != null) {
-			NodeUtil.processV2VEdges(n.getSysmlId(), new JSONArray(
-					view2viewProperty), documentEdges);
+		if (!n.getSysmlId().endsWith( "_pkg" )) {
+        		pgh.insertNode(n.getNodeRef().toString(),
+        				NodeUtil.getVersionedRefId(n), n.getSysmlId());
+        
+        		i++;
+        
+        		// documentation edges 
+        		String doc = (String) n.getProperty(Acm.ACM_DOCUMENTATION);
+        		NodeUtil.processDocumentEdges(n.getSysmlId(), doc, documentEdges);
+        		String view2viewProperty = (String) n.getProperty(Acm.ACM_VIEW_2_VIEW);
+        		if (view2viewProperty != null) {
+        			NodeUtil.processV2VEdges(n.getSysmlId(), new JSONArray(
+        					view2viewProperty), documentEdges);
+        		}
 		}
 
 
 		try {
-        		for (NodeRef c : n.getOwnedChildren(false, dt, ws)) {
-        			EmsScriptNode cn = new EmsScriptNode(c, services, response);
-        
-        			if (!cn.isDeleted()) {
-            			// containment edges
-            			edges.add(new Pair<String, String>(n.getSysmlId(), cn.getSysmlId()));
-            			i += insertNodes(cn, pgh, dt, edges, documentEdges, ws);
-        			}
-        		}
-        		// also traverse alfresco containment since ownedChildren may not be correct
+//        		for (NodeRef c : n.getOwnedChildren(false, dt, ws)) {
+//        			EmsScriptNode cn = new EmsScriptNode(c, services, response);
+//        
+//        			if (!cn.isDeleted()) {
+//            			// containment edges
+//        			    String cnSysmlId = cn.getSysmlId().replace( "_pkg", "" );
+//            			edges.add(new Pair<String, String>(n.getSysmlId(), cnSysmlId));
+//            			i += insertNodes(cn, pgh, dt, edges, documentEdges, ws, cnSysmlId);
+//        			}
+//        		}
+        		// traverse alfresco containment since ownedChildren may not be accurate
             for (EmsScriptNode cn : n.getChildNodes()) {
                 if (!cn.isDeleted()) {
-                    if (!cn.getSysmlId().endsWith( "_pkg" )) {
-                        // containment edges
-                        edges.add(new Pair<String, String>(n.getSysmlId(), cn.getSysmlId()));
-                        i += insertNodes(cn, pgh, dt, edges, documentEdges, ws);
+                    String nSysmlId = n.getSysmlId().replace( "_pkg", "" );
+                    String cnSysmlId = cn.getSysmlId().replace( "_pkg",  "" );
+                    // add containment edges (don't do with _pkg, results in duplicate edge
+                    if (cn.getSysmlId().endsWith( "_pkg" )) {
+                        edges.add(new Pair<String, String>(nSysmlId, cnSysmlId));
                     }
+                    i += insertNodes(cn, pgh, dt, edges, documentEdges, ws, cnSysmlId);
                 }
             }
-
 		} catch ( org.alfresco.service.cmr.repository.MalformedNodeRefException mnre ) {
 		    // keep going and ignore
 		    logger.error( String.format("could not get children for parent %s:", n.getId()) );

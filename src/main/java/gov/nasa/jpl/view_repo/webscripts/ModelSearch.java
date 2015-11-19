@@ -42,6 +42,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -88,7 +89,7 @@ public class ModelSearch extends ModelGet {
                          "ASPECT:\"{http://jpl.nasa.gov/model/sysml-lite/1.0}" );
                     put( "appliedMetatypes", "@sysml\\:appliedMetatypes:\"" );
                     put( "metatypes", "@sysml\\:metatypes:\"" );
-                    // value is has special handling
+                    // value has special handling
                 }
             };
 
@@ -147,7 +148,8 @@ public class ModelSearch extends ModelGet {
         // add all if necessary                                             
         for (int ii = 0; ii < filters.length; ii++) {
             if (filters[ii].equalsIgnoreCase( "all" ) || filters[ii].equals( "*" )) {
-                Set<String> allFilterKeys = searchTypesMap.keySet();
+                HashSet<String> allFilterKeys = new HashSet<String>();
+                allFilterKeys.addAll( searchTypesMap.keySet() );
                 allFilterKeys.add( "value" );
                 filters = allFilterKeys.toArray( new String[allFilterKeys.size()] );
                 break;

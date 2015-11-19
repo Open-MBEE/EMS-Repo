@@ -11,7 +11,7 @@ import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.mbee.util.Timer;
 import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.actions.ActionUtil;
-import gov.nasa.jpl.view_repo.db.*;
+import gov.nasa.jpl.view_repo.db.Node;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode.EmsVersion;
 
 import java.io.BufferedReader;
@@ -51,7 +51,6 @@ import org.alfresco.repo.jscript.ScriptVersion;
 import org.alfresco.repo.model.Repository;
 import org.alfresco.repo.node.db.DbNodeServiceImpl;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
-import org.alfresco.repo.webdav.ExceptionHandler;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.dictionary.AspectDefinition;
 import org.alfresco.service.cmr.dictionary.DictionaryService;
@@ -69,7 +68,6 @@ import org.alfresco.service.cmr.search.ResultSet;
 import org.alfresco.service.cmr.search.ResultSetRow;
 import org.alfresco.service.cmr.search.SearchParameters;
 import org.alfresco.service.cmr.search.SearchService;
-import org.alfresco.service.cmr.security.AccessStatus;
 import org.alfresco.service.cmr.security.AuthorityService;
 import org.alfresco.service.cmr.security.AuthorityType;
 import org.alfresco.service.cmr.security.PermissionService;
@@ -79,7 +77,6 @@ import org.alfresco.service.cmr.version.Version;
 import org.alfresco.service.cmr.version.VersionHistory;
 import org.alfresco.service.namespace.NamespaceService;
 import org.alfresco.service.namespace.QName;
-import org.alfresco.util.ApplicationContextHelper;
 import org.apache.commons.logging.Log;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
@@ -90,9 +87,7 @@ import org.apache.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.springframework.context.ApplicationContext;
 import org.springframework.extensions.webscripts.Status;
-import org.springframework.extensions.webscripts.WebScriptRequest;
 
 public class NodeUtil {
 
@@ -1072,15 +1067,13 @@ public class NodeUtil {
 		    try {
 		        results = searchService.query(getSearchParameters(queryPattern));
 		    } catch (Exception e) {
-		        logger.warn( "Lucene exception caught, dumping stack and returning null" );
-		        e.printStackTrace();
+		        logger.warn(e.getMessage());
 		        results = null;
 		    }
 		}
-		if (Debug.isOn()) {
-			Debug.outln("luceneSearch(" + queryPattern + "): returned "
-					+ results.length() + " nodes.");// resultSetToList( results
-													// ) );
+		if (logger.isDebugEnabled()) {
+			logger.debug(String.format( "luceneSearch(%s): returned %d nodes.",
+			                            queryPattern, results.length()));
 		}
 
 		Timer.stopTimer(timerLucene, "***** luceneSearch(): time", timeEvents);

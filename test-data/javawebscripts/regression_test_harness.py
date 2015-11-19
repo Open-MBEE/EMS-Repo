@@ -2341,7 +2341,7 @@ None
 "Delete element with user Consumer",
 "curl -w '\\n%{http_code}\\n' -u Consumer:password -X DELETE " + BASE_URL_WS + "master/elements/y",
 True,
-common_filters + ['"timestamp"', '"id"'],
+common_filters + ['"timestamp"', '"id"', '"message"'],
 ["test", "workspaces", "develop", "develop2"],
 None,
 removeCmNames,
