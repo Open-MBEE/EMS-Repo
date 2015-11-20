@@ -101,9 +101,10 @@ public class Model2Postgres extends AbstractJavaWebScript {
 				WorkspaceNode workspace = getWorkspace(req);
 				pgh = new PostgresHelper(workspace);
 
+				String sitesReq = req.getParameter("sites");
 				String timestamp = req.getParameter("timestamp");
 				Date dateTime = TimeUtils.dateFromTimestamp(timestamp);
-				JSONArray jsonArray = handleSite(workspace, dateTime);
+				JSONArray jsonArray = handleSite(workspace, dateTime, sitesReq);
 				json = new JSONObject();
 				json.put("sites", jsonArray);
 			}
@@ -129,9 +130,8 @@ public class Model2Postgres extends AbstractJavaWebScript {
 		return model;
 	}
 
-	private JSONArray handleSite(WorkspaceNode workspace, Date dateTime)
+	private JSONArray handleSite(WorkspaceNode workspace, Date dateTime, String sitesReq)
 			throws JSONException {
-
 		JSONArray json = new JSONArray();
 		EmsScriptNode siteNode;
 		String name;
@@ -242,11 +242,12 @@ public class Model2Postgres extends AbstractJavaWebScript {
 //        		}
         		// traverse alfresco containment since ownedChildren may not be accurate
             for (EmsScriptNode cn : n.getChildNodes()) {
+                String nSysmlId = n.getSysmlId().replace( "_pkg", "" );
+                String cnSysmlId = cn.getSysmlId().replace( "_pkg",  "" );
+
                 if (!cn.isDeleted()) {
-                    String nSysmlId = n.getSysmlId().replace( "_pkg", "" );
-                    String cnSysmlId = cn.getSysmlId().replace( "_pkg",  "" );
-                    // add containment edges (don't do with _pkg, results in duplicate edge
-                    if (cn.getSysmlId().endsWith( "_pkg" )) {
+                    // add containment edges (no _pkg) otherwise results in duplicate edge
+                    if (!cn.getSysmlId().endsWith("_pkg") ) {
                         edges.add(new Pair<String, String>(nSysmlId, cnSysmlId));
                     }
                     i += insertNodes(cn, pgh, dt, edges, documentEdges, ws, cnSysmlId);
