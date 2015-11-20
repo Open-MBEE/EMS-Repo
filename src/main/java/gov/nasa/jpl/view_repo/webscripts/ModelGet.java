@@ -272,7 +272,8 @@ public class ModelGet extends AbstractJavaWebScript {
 			EmsScriptNode modelRootNode = null;
 			
 			// search using db if enabled - if not there revert to modelRootNode
-			if (useDb) {
+			// DB can only be used against latest at the moment
+			if (useDb && dateTime == null) {
 			    PostgresHelper pgh = new PostgresHelper(workspace);
 			    try {
                     pgh.connect();
