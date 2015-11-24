@@ -2806,28 +2806,29 @@ public class EmsScriptNode extends ScriptNode implements
                        ownedAttributeIds, filter );
         }
 
-        if ( isIncludeQualified ) {
-            if ( filter == null || filter.isEmpty()
-                 || filter.contains( "qualifiedName" ) ) {
-                putInJson( elementJson,
-                           "qualifiedName",
-                           this.getSysmlQName( dateTime, getWorkspace(), true ),
-                           filter );
-            }
-            if ( filter == null || filter.isEmpty()
-                 || filter.contains( "qualifiedId" ) ) {
-                putInJson( elementJson, "qualifiedId",
-                           this.getSysmlQId( dateTime, getWorkspace(), true ),
-                           filter );
-            }
-            if ( filter == null || filter.isEmpty()
-                 || filter.contains( "siteCharacterizationId" ) ) {
-                putInJson( elementJson, "siteCharacterizationId",
-                           this.getSiteCharacterizationId( dateTime,
-                                                           getWorkspace() ),
-                           filter );
-            }
-        }
+        // Add this all in at end inside DeclarativeJavaWebScript
+//        if ( isIncludeQualified ) {
+//            if ( filter == null || filter.isEmpty()
+//                 || filter.contains( "qualifiedName" ) ) {
+//                putInJson( elementJson,
+//                           "qualifiedName",
+//                           this.getSysmlQName( dateTime, getWorkspace(), true ),
+//                           filter );
+//            }
+//            if ( filter == null || filter.isEmpty()
+//                 || filter.contains( "qualifiedId" ) ) {
+//                putInJson( elementJson, "qualifiedId",
+//                           this.getSysmlQId( dateTime, getWorkspace(), true ),
+//                           filter );
+//            }
+//            if ( filter == null || filter.isEmpty()
+//                 || filter.contains( "siteCharacterizationId" ) ) {
+//                putInJson( elementJson, "siteCharacterizationId",
+//                           this.getSiteCharacterizationId( dateTime,
+//                                                           getWorkspace() ),
+//                           filter );
+//            }
+//        }
         if ( filter == null || filter.size() == 0 || filter.contains( "owner" ) ) {
 
             // not passing in dateTime/workspace since sysml id is immutable

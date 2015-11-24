@@ -180,6 +180,11 @@ public class PostgresHelper {
 		}
 		return null;
 	}
+	
+	public String getNodeRefIdFromSysmlId(String sysmlId) {
+	    Node node = getNodeFromSysmlId(sysmlId);
+	    return node.getNodeRefId();
+	}
 
 	public void insertNode(String nodeRefId, String versionedRefId,
 			String sysmlId) {
@@ -293,6 +298,21 @@ public class PostgresHelper {
 			e.printStackTrace();
 		}
 		return result;
+	}
+	
+	/**
+	 * Returns set of pairs of sysmlids to noderefids
+	 * @param sysmlId
+	 * @param et
+	 * @return
+	 */
+	public Set<Pair<String, String>> getImmediateParentsRefIds(String sysmlId, DbEdgeTypes et) {
+	    Set< String > sysmlIds = getImmediateParents(sysmlId, et);
+	    Set< Pair< String, String> > result = new HashSet< Pair<String, String> >();
+	    for (String id: sysmlIds) {
+	        result.add( new Pair<String, String>(id, getNodeRefIdFromSysmlId(id)) );
+	    }
+	    return result;
 	}
 	
 	public Map<String,Set<String>> getImmediateParentRoots(String sysmlId, DbEdgeTypes et) {

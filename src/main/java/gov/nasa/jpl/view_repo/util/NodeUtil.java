@@ -12,7 +12,10 @@ import gov.nasa.jpl.mbee.util.Timer;
 import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.actions.ActionUtil;
 import gov.nasa.jpl.view_repo.db.Node;
+import gov.nasa.jpl.view_repo.db.PostgresHelper;
+import gov.nasa.jpl.view_repo.db.PostgresHelper.DbEdgeTypes;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode.EmsVersion;
+import gov.nasa.jpl.view_repo.webscripts.AbstractJavaWebScript;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
@@ -21,6 +24,7 @@ import java.io.InputStreamReader;
 import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.nio.charset.Charset;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
@@ -41,6 +45,7 @@ import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.servlet.http.HttpServletResponse;
 import javax.transaction.UserTransaction;
 import javax.xml.bind.DatatypeConverter;
 
@@ -88,6 +93,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.extensions.webscripts.Status;
+import org.springframework.extensions.webscripts.WebScriptRequest;
 
 public class NodeUtil {
 
@@ -4654,5 +4660,191 @@ public class NodeUtil {
 		
 		return mmsVersion.substring(0, endIndex);
 	}
+
+    public static void addQualifiedNameId2Json( WebScriptRequest req,
+                                                Map< String, Object > model ) {
+        Map< String, String > id2name = new HashMap< String, String >();
+        Map< String, String > id2siteName = new HashMap< String, String >();
+        Map< String, Set< String >> owner2children =
+                new HashMap< String, Set< String >>();
+        Map< String, String > child2owner = new HashMap< String, String >();
+
+        if ( model.containsKey( "res" ) ) {
+            Object res = model.get( "res" );
+            if ( res instanceof JSONObject ) {
+                JSONObject json = (JSONObject)res;
+                if ( json.has( "elements" ) ) {
+                    JSONArray elements = json.getJSONArray( "elements" );
+                    for ( int ii = 0; ii < elements.length(); ii++ ) {
+                        JSONObject element = elements.getJSONObject( ii );
+
+                        parseJsonElement( element, id2name, id2siteName,
+                                          owner2children, child2owner );
+                    }
+                }
+                addQualifiedNameId2Json( req, json, id2name, id2siteName,
+                                         owner2children, child2owner );
+            }
+        }
+    }
+
+    private static
+            void
+            addQualifiedNameId2Json( WebScriptRequest req,
+                                     JSONObject json,
+                                     Map< String, String > id2name,
+                                     Map< String, String > id2siteName,
+                                     Map< String, Set< String >> owner2children,
+                                     Map< String, String > child2owner ) {
+        // lets find all the owners
+        Set< String > owners = new HashSet< String >();
+        for ( String child : child2owner.keySet() ) {
+            String owner = child2owner.get( child );
+            if ( !child2owner.containsKey( owner ) ) {
+                owners.add( owner );
+            }
+        }
+
+        // traverse owners to get qualified names and site characterizations
+        for ( String owner : owners ) {
+            if ( !owner2children.containsKey( owner ) ) {
+                String wsId = AbstractJavaWebScript.getWorkspaceId( req );
+                String timestamp =
+                        req.getServiceMatch().getTemplateVars()
+                           .get( "timestamp" );
+                Date dateTime = TimeUtils.dateFromTimestamp( timestamp );
+                if ( NodeUtil.doGraphDb && wsId == "master" && dateTime == null ) {
+                    PostgresHelper pgh = new PostgresHelper( wsId );
+                    try {
+                        pgh.connect();
+                        recurseOwnersDb( owner, pgh, id2name, id2siteName,
+                                         owner2children, child2owner, wsId,
+                                         dateTime );
+                        pgh.close();
+                    } catch ( ClassNotFoundException e ) {
+                        e.printStackTrace();
+                    } catch ( SQLException e ) {
+                        e.printStackTrace();
+                    }
+                } else {
+                    recurseOwnersOriginal( owner, id2name, id2siteName,
+                                           owner2children, child2owner, wsId,
+                                           dateTime );
+                }
+            }
+        }
+    }
+
+    private static void
+            recurseOwnersOriginal( String childId,
+                                   Map< String, String > id2name,
+                                   Map< String, String > id2siteName,
+                                   Map< String, Set< String >> owner2children,
+                                   Map< String, String > child2owner,
+                                   String wsId, Date dateTime ) {
+        Status status = new Status();
+        WorkspaceNode ws =
+                WorkspaceNode.getWorkspaceFromId( wsId, services, null, null,
+                                                  null );
+        if ( status.getCode() == HttpServletResponse.SC_OK ) {
+            EmsScriptNode childNode =
+                    findScriptNodeById( childId, ws, dateTime, false, services,
+                                        null );
+            String qid = childNode.getSysmlQId( dateTime, ws, true );
+            String qname = childNode.getSysmlQName( dateTime, ws, true );
+            String siteId = childNode.getSiteCharacterizationId( dateTime, ws );
+
+            String[] qids = qid.split( "/" );
+            String[] qnames = qname.split( "/" );
+            boolean foundSite = false;
+            for ( int ii = 0; ii < qids.length - 1; ii++ ) {
+                String id = qids[ ii ];
+                String name = qnames[ ii ];
+                if ( siteId.equals( id ) || foundSite == true ) {
+                    id2siteName.put( id, siteId );
+                    foundSite = true;
+                }
+
+                if ( !owner2children.containsKey( id ) ) {
+                    owner2children.put( id, new HashSet< String >() );
+                }
+                owner2children.get( id ).add( childId );
+
+                child2owner.put( childId, id );
+
+            }
+        }
+    }
+
+    private static void
+            updateOwnerMaps( String childId, String childName, String ownerId,
+                             String ownerName, Map< String, String > id2name,
+                             Map< String, String > id2siteName,
+                             Map< String, Set< String >> owner2children,
+                             Map< String, String > child2owner ) {
+
+    }
+
+    private static void
+            recurseOwnersDb( String childId, PostgresHelper pgh,
+                             Map< String, String > id2name,
+                             Map< String, String > id2siteName,
+                             Map< String, Set< String >> owner2children,
+                             Map< String, String > child2owner, String wsId,
+                             Date dateTime ) {
+        Set< Pair< String, String > > parents =
+                pgh.getImmediateParentsRefIds( childId, DbEdgeTypes.REGULAR );
+        for ( Pair< String, String > parent : parents ) {
+            NodeRef nr = new NodeRef( (String)parent.second );
+            EmsScriptNode parentNode = new EmsScriptNode( nr, services, null );
+            if ( (boolean)parentNode.getProperty( Acm.ACM_IS_SITE ) ) {
+                id2siteName.put( parent.first, parentNode.getSysmlName() );
+            }
+            if ( !owner2children.containsKey( parent.first ) ) {
+                owner2children.put( parent.first, new HashSet< String >() );
+            }
+            owner2children.get( parent.first ).add( childId );
+
+            child2owner.put( childId, parent.first );
+        }
+    }
+
+    private static void
+            parseJsonElement( JSONObject element,
+                              Map< String, String > id2name,
+                              Map< String, String > id2siteName,
+                              Map< String, Set< String >> owner2children,
+                              Map< String, String > child2owner ) {
+        String sysmlid = element.getString( "sysmlid" );
+        String name = element.getString( "name" );
+        id2name.put( sysmlid, name );
+
+        String owner = element.getString( "owner" );
+        child2owner.put( sysmlid, owner );
+        if ( !owner2children.containsKey( owner ) ) {
+            owner2children.put( owner, new HashSet< String >() );
+        }
+        owner2children.get( owner ).add( sysmlid );
+
+        if ( element.has( "specialization" ) ) {
+            JSONObject specialization =
+                    element.getJSONObject( "specialization" );
+            if ( specialization.has( "isSite" ) ) {
+                if ( specialization.getBoolean( "isSite" ) ) {
+                    id2siteName.put( sysmlid, name );
+                }
+            }
+        }
+
+        // handle properties
+        if ( element.has( "properties" ) ) {
+            JSONArray properties = element.getJSONArray( "properties" );
+            for ( int ii = 0; ii < properties.length(); ii++ ) {
+                JSONObject property = properties.getJSONObject( ii );
+                parseJsonElement( property, id2name, id2siteName,
+                                  owner2children, child2owner );
+            }
+        }
+    }
 } 
 		
