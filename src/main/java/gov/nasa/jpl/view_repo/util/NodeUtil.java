@@ -2418,7 +2418,7 @@ public class NodeUtil {
             for ( NodeRef nodeRef : resultSet ) {
                 EmsScriptNode node =
                         new EmsScriptNode( nodeRef, services, response );
-                if ( node.checkPermissions( PermissionService.READ, response, status ) ) {
+//                if ( node.checkPermissions( PermissionService.READ, response, status ) ) {
                     String id = node.getSysmlId();
                     // We assume that order matters and that if two nodes have the
                     // same id, then the first is preferred (for example, because it
@@ -2426,7 +2426,7 @@ public class NodeUtil {
                     if ( id != null && !searchResults.containsKey( id ) ) {
                         searchResults.put( id, node );
                     }
-                }
+//                }
             }
 
         return searchResults;

@@ -43,6 +43,7 @@ import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.sysml.View;
 import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.NodeUtil.SearchType;
+import gov.nasa.jpl.view_repo.webscripts.AbstractJavaWebScript;
 
 import java.io.Serializable;
 import java.lang.reflect.Field;
@@ -308,6 +309,8 @@ public class EmsScriptNode extends ScriptNode implements
     public boolean embeddingExpressionInConstraint = true;
     public boolean embeddingExpressionInOperation = true;
     public boolean embeddingExpressionInConnector = true;
+
+    public AbstractJavaWebScript webscript;
 
     //private boolean forceCacheUpdate = false;
 
@@ -4093,18 +4096,28 @@ public class EmsScriptNode extends ScriptNode implements
     @Override
     public boolean hasPermission( String permission ) {
         String realUser = AuthenticationUtil.getFullyAuthenticatedUser();
+        if ( webscript != null ) {
+            Boolean b = webscript.permCacheGet(realUser, getNodeRef(), permission);
+            if ( b != null ) return b;
+        }
         String runAsUser = AuthenticationUtil.getRunAsUser();
         boolean changeUser = !realUser.equals( runAsUser );
         if ( changeUser ) {
             AuthenticationUtil.setRunAsUser( realUser );
         }
         boolean b = super.hasPermission( permission );
+        if ( webscript != null ) {
+            webscript.permCachePut(realUser, getNodeRef(), permission, b);
+        }
         if ( changeUser ) {
             AuthenticationUtil.setRunAsUser( runAsUser );
         }
         return b;
     }
-
+    
+    public boolean hasPermission( String permission, AbstractJavaWebScript webscript ) {
+        return false;
+    }
     
     public static class EmsScriptNodeComparator implements
                                                Comparator< EmsScriptNode > {
