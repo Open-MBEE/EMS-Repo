@@ -157,7 +157,7 @@ public class FullDocPost extends AbstractJavaWebScript {
     	File file = new File(filePath);
     	//opens the initial document view
     	Document document = Jsoup.parse(file, "UTF-8", "");
-    	document.head().append(getTableVerticalSplitScript());
+//    	document.head().append(getTableVerticalSplitScript());
     	//retrieves its views
     	JSONObject v2vChildNode = getChildrenViews(docId);
     	JSONArray childrenViews = v2vChildNode.getJSONArray("childrenViews");
@@ -1111,6 +1111,10 @@ public class FullDocPost extends AbstractJavaWebScript {
 		List<String> command = new ArrayList<String>();
 		command.add("wkhtmltopdf");
 		command.add("-q");
+		command.add("--load-error-handling");
+		command.add("ignore");
+		command.add("--load-media-error-handling");
+		command.add("ignore");
 		command.add("--header-line");
 		command.add("--header-font-size");
 		command.add("8");

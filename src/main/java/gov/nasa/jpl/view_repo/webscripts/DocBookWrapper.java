@@ -225,6 +225,37 @@ public class DocBookWrapper {
 				}
 			}
 		}
+
+		//sanitize emphasis tags
+		list = body.select("emphasis");
+		String val = "";
+		for(Element elm : list){
+			val = elm.html().trim();
+			if(val.length() == 0 || val.compareToIgnoreCase("&nbsp;") == 0 || val.compareTo("&#160;") == 0){
+				//removes empty emphasis tags
+				elm.remove();
+			}
+			else{
+				//checks wheter or not emphasis tag has para ancestor
+				boolean hasPara = false;
+				Elements parents = elm.parents();
+				for(Element p : parents){
+					if(p.tagName().compareToIgnoreCase("para")==0){
+						hasPara = true;
+						break;
+					}
+				}
+				
+				if(!hasPara){
+					//wraps para tag around emphasis tag that does not have para ancestor
+					Element para = document.createElement("para");
+					elm.replaceWith(para);
+					para.appendChild(elm);
+				}
+			}
+		}
+
+		
 		
 		// removes <itemizedlist>/<orderedlist> without <listitem> children
 		isSanitized = false;

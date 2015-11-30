@@ -103,6 +103,9 @@ public class AllFlagsGet extends FlagSet {
         } else if (path.equalsIgnoreCase("versionCacheDebug")) {
             EmsScriptNode.versionCacheDebugPrint = val;
         }  else if (path.equalsIgnoreCase("viewpointExpressions")) {
+            if ( val && !EmsScriptNode.expressionStuff ) {
+                NodeUtil.jsonCache.clear();
+            }
             EmsScriptNode.expressionStuff = val;
             EmsScriptNode.addingAffectedIds = val;
         } else if (path.equalsIgnoreCase("versionCache")) {

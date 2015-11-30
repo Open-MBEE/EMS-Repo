@@ -854,42 +854,7 @@ public class EmsScriptNode extends ScriptNode implements
     public String extractAndReplaceImageData( String value, WorkspaceNode ws  ) {
         if ( value == null ) return null;
         String v = value;
-//        Document doc = Jsoup.parse( v );
-//        Elements imgs = doc.select( "img.src" );
-//        System.out.println("imgs = " + imgs);
-//        for (Element img: imgs) {
-//            String src = img.attr("src");
-//            int index = src.indexOf( "base64," );
-//            System.out.println("indexOf \"base64,\"" + index);
-//            System.out.println("src = " + src.substring( 0, Math.min( src.length()-1, 100 ) ) + " . . .");
-//            if (src.startsWith( "data" ) && index > 0) {
-//                String mediatype = src.substring( "data:".length(), index );
-//                System.out.println("mediatype = " + mediatype);
-//                if (mediatype.startsWith( "image/" )) {
-//                    String extension = mediatype.replace( "image/", "" );
-//                    index += "base64,".length();
-//                    String content = src.substring( index );
-//                    String name = "img_" + System.currentTimeMillis();
-//                    EmsScriptNode artNode =
-//                            findOrCreateArtifact( name, extension, content,
-//                                                  getSiteName(), "images",
-//                                                  getWorkspace(), null );
-//                    if ( artNode == null || !artNode.exists() ) {
-//                        log( "Failed to pull out image data for value! "
-//                             + value );
-//                        break;
-//                    }
-//
-//                    String url = artNode.getUrl();
-//                    String link = url.replace( "/d/d/", "/alfresco/service/api/node/content/" );
-//                    img.attr( src, link );
-//                }
-//            }
-//            v = doc.select( "body" ).html();
-//        }
-        //Debug.turnOn();
-        if ( Debug.isOn()) Debug.outln("extractAndReplaceImageData(" + v.substring( 0, Math.min( v.length(), 100 ) ) + (v.length()>100 ? " . . ." :"") + ")");
-        Pattern p = Pattern.compile( "(.*)<img[^>]*\\ssrc\\s*=\\s*[\"']data:image/(\\w*);\\s*base64\\s*,([^\"']*)[\"'][^>]*>(.*)",
+        Pattern p = Pattern.compile( "(.*)<img[^>]*\\ssrc\\s*=\\s*[\"']data:image/([^;]*);\\s*base64\\s*,([^\"']*)[\"'][^>]*>(.*)",
                                      Pattern.DOTALL );
         while ( true ) {
             Matcher m = p.matcher( v );
@@ -2582,11 +2547,14 @@ public class EmsScriptNode extends ScriptNode implements
                    this.getProperty( Acm.ACM_DOCUMENTATION ), filter );
 
         // add affected ids
+        logger.warn( "addingAffectedIds = " + addingAffectedIds );
         if ( addingAffectedIds  ) {
             if ( filter == null || filter.isEmpty() || filter.contains( "affectedIds" ) ) {
                 ArrayList< NodeRef > refs = this.getAffectedElementsRecursive( false, false, dateTime, getWorkspace(), false, false, true, false );
                 JSONArray affectedIds = addNodeRefIdsJSON( refs );
                 putInJson( elementJson, "affectedIds", affectedIds, filter );
+            } else {
+                logger.warn( "affected ids filtered out for " + getSysmlId() );
             }
         }
         
@@ -4509,6 +4477,15 @@ public class EmsScriptNode extends ScriptNode implements
 
     public EmsScriptNode( NodeRef nodeRef, ServiceRegistry services ) {
         super( nodeRef, services );
+//        try {
+//        if ( !NodeRef.isNodeRef( nodeRef.toString() ) ) {
+//            Debug.breakpoint();
+//        } else if ( getSysmlId().equals("MMS_1447340399333_b19a181e-b38e-418b-b3c6-886ec16e2a69") ) {
+//            Debug.breakpoint();
+//        }
+//        } catch ( Throwable t ) {
+//            
+//        }
     }
 
     public EmsScriptNode clone( EmsScriptNode parent ) {
@@ -5115,10 +5092,11 @@ public class EmsScriptNode extends ScriptNode implements
     }
 
     public void addRelationshipToPropertiesOfParticipants( WorkspaceNode ws ) {
-        if ( hasAspect( Acm.ACM_DIRECTED_RELATIONSHIP )
+        if ( hasOrInheritsAspect( Acm.ACM_DIRECTED_RELATIONSHIP )
              || hasAspect( Acm.ACM_DEPENDENCY ) || hasAspect( Acm.ACM_EXPOSE )
              || hasAspect( Acm.ACM_CONFORM )
-             || hasAspect( Acm.ACM_GENERALIZATION ) ) {
+             || hasAspect( Acm.ACM_GENERALIZATION )
+             || hasAspect( Acm.ACM_ASSOCIATION )  ) {
 
             // No need to pass a date since this is called in the context of
             // updating a node, so the time is the current time (which is null).
@@ -5625,6 +5603,18 @@ public class EmsScriptNode extends ScriptNode implements
         putInJson( json, Acm.JSON_UPPER,
                    addInternalJSON( node.getNodeRefProperty(Acm.ACM_LOWER, dateTime, ws), ws, dateTime ),
                    filter );
+
+        putInJson( json, Acm.JSON_MULTIPLICITY_MIN, node.getProperty( Acm.ACM_MULTIPLICITY_MIN ), filter );
+        putInJson( json, Acm.JSON_MULTIPLICITY_MAX, node.getProperty( Acm.ACM_MULTIPLICITY_MAX ), filter );
+
+        ArrayList< NodeRef > redefinedNodes =
+                (ArrayList< NodeRef >)this.getNodeRefProperty( Acm.ACM_REDEFINES, 
+                                                               true, dateTime,
+                                                               this.getWorkspace());
+        if ( !Utils.isNullOrEmpty( redefinedNodes ) ) { 
+            JSONArray redefinedIds = addNodeRefIdsJSON( redefinedNodes );
+            putInJson( json, Acm.JSON_REDEFINES, redefinedIds, filter );
+        }
 
         putInJson( json, Acm.JSON_AGGREGATION,
                    node.getProperty( Acm.ACM_AGGREGATION), filter );
@@ -6252,6 +6242,11 @@ public class EmsScriptNode extends ScriptNode implements
 	public ArrayList<NodeRef> getAffectedElements(boolean ignoreWorkspace, boolean onlyThisWorkspace, Date dateTime,
 			WorkspaceNode workspaceNode, boolean justFirst, boolean optimisticJustFirst, boolean exactMatch,
 			boolean includeDeleted) {
+
+	    // setting dateTime to null since the only time we want affected
+        // elements is when something has changed (null = latest time).
+	    dateTime = null;
+
 		ArrayList<NodeRef> refs = NodeUtil.findNodeRefsByType(this.getNodeRef().toString(),
 				"@sysml\\:elementValueOfElement:\"", ignoreWorkspace, workspaceNode, onlyThisWorkspace, dateTime,
 				justFirst, optimisticJustFirst, exactMatch, services, includeDeleted, null);

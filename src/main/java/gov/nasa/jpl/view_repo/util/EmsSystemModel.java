@@ -1,6 +1,7 @@
 package gov.nasa.jpl.view_repo.util;
 
 import gov.nasa.jpl.ae.event.Call;
+import gov.nasa.jpl.ae.event.Expression;
 import gov.nasa.jpl.ae.event.FunctionCall;
 import gov.nasa.jpl.mbee.util.ClassUtils;
 import gov.nasa.jpl.mbee.util.CompareUtils;
@@ -8,6 +9,7 @@ import gov.nasa.jpl.mbee.util.Debug;
 import gov.nasa.jpl.mbee.util.HasId;
 import gov.nasa.jpl.mbee.util.Pair;
 import gov.nasa.jpl.mbee.util.Seen;
+import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.util.NodeUtil.SearchType;
 
@@ -207,7 +209,8 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, Object, 
 
     @Override
     public EmsScriptNode createConstraint( Object context ) {
-        if ( context instanceof EmsScriptNode ) {
+        EmsScriptNode node = objectToEmsScriptNode( context );
+        if ( node != null ) {
 
         }
         // TODO Auto-generated method stub
@@ -379,21 +382,31 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, Object, 
     public Collection< EmsScriptNode > getOwnedElement( Object context ) {
         return getOwnedElements( context );
     }
+    public static boolean coerce = false;
     public Collection< EmsScriptNode > getOwnedElements( Object context ) {
         List<EmsScriptNode> list = new ArrayList< EmsScriptNode >();
-        if ( context instanceof EmsScriptNode ) {
-            EmsScriptNode n = (EmsScriptNode)context;
+        if ( coerce || context instanceof EmsScriptNode ) {
+        EmsScriptNode node = coerce ? objectToEmsScriptNode( context ) : (EmsScriptNode)context;
+        if ( node != null ) {
+            EmsScriptNode n = node;//(EmsScriptNode)context;
             List< NodeRef > c = n.getOwnedChildren( false, null, n.getWorkspace() );
             if ( c != null ) {
                 list = EmsScriptNode.toEmsScriptNodeList( c );
             }
         }
+        }
         return list;
     }
     
     public EmsScriptNode getOwner( EmsScriptNode element ) {
-        if ( !NodeUtil.exists( element ) ) return null;
-        return element.getOwningParent( null, element.getWorkspace(), true );
+        
+        if ( !NodeUtil.exists( element ) ) {
+            System.out.println("getOwner() - element does not exist!  " + element);
+            return null;
+        }
+        EmsScriptNode p = element.getOwningParent( null, element.getWorkspace(), true );
+        System.out.println("getOwner(" + element + ") = " + p);
+        return p;
     }
 
 
@@ -426,14 +439,13 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, Object, 
         WorkspaceNode workspace = null;
         
         // Convert context from NodeRef to EmsScriptNode or WorkspaceNode
-        if ( context instanceof NodeRef ) {
-            EmsScriptNode ctxt = new EmsScriptNode( (NodeRef)context, getServices(),
-                                                    response, status );
-            if ( ctxt.hasAspect( "Workspace" ) ) {
-                context = new WorkspaceNode( (NodeRef)context, getServices(),
+        if ( context instanceof NodeRef || coerce ) {
+            EmsScriptNode ctxt = objectToEmsScriptNode( context );
+            if ( ctxt != null && ctxt.hasAspect( "Workspace" ) ) {
+                context = new WorkspaceNode( ctxt.getNodeRef(), getServices(),
                                              response, status );
             } else {
-                context = ctxt;
+                if ( ctxt != null ) context = ctxt;
             }
         }
         
@@ -945,6 +957,25 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, Object, 
         //System.out.println("getPropertyWithTypeName(" + context + ", " + specifier + ") = " + nodes);
         return nodes;
     }
+    
+    public QueryContext getQueryContext( Object context ) {
+        Date dateTime = null;
+        WorkspaceNode workspace = null;
+        if ( context instanceof Date ) {
+            dateTime = (Date)context;
+        } else if (context instanceof WorkspaceNode) {
+            workspace = (WorkspaceNode)context;
+        } else if ( context instanceof EmsScriptNode ) {
+            workspace = ( (EmsScriptNode)context ).getWorkspace();
+        }
+        QueryContext ctx =
+                new QueryContext( false, workspace, false, dateTime, false,
+                                  true, false, null, null, null, null );
+        //        ModelContext ctx = new ModelContext( false, workspace, false, dateTime,
+//                                             null, null, null, null );
+        return ctx;
+    }
+    
     @Override
     public Collection< EmsScriptNode >
             getPropertyWithType( Object context, EmsScriptNode specifier ) {
@@ -956,7 +987,19 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, Object, 
             			getPropertyWithTypeName(context, name);
             	if (result != null) nodes.addAll (result);
             }
-           return nodes;
+            if ( !Utils.isNullOrEmpty( nodes ) ) {
+                return nodes;
+            }
+            // Process context
+            QueryContext ctx = getQueryContext( context );
+            String nodeRefId = specifier.getNodeRef().toString();
+            // Get Properties with propertyType=specifier.
+            ArrayList<NodeRef> refs =
+                    NodeUtil.findNodeRefsByType( nodeRefId,
+                                                 NodeUtil.SearchType.PROPERTY_TYPE.prefix,
+                                                 ctx );
+            convertToScriptNode( refs, nodes );
+            return nodes;
         } else {
             return getProperty(context, null);
         }
@@ -1019,6 +1062,37 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, Object, 
 
     protected static boolean avoidConnectFcn = true;
     
+    public EmsScriptNode objectToEmsScriptNode( Object context ) {
+        EmsScriptNode node = null;
+        if ( context instanceof EmsScriptNode ) {
+            node = (EmsScriptNode)context;
+//        } else if ( true ) {
+//            return null;
+        } else if ( context instanceof NodeRef ) {
+            node = new EmsScriptNode( (NodeRef)context, getServices() );
+        } else {
+            try {
+                node = Expression.evaluate( context, EmsScriptNode.class, true, false );
+            } catch ( ClassCastException e ) {
+            } catch ( IllegalAccessException e ) {
+            } catch ( InvocationTargetException e ) {
+            } catch ( InstantiationException e ) {
+            }
+            if ( node == null ) {
+                try {
+                    NodeRef ref = Expression.evaluate( context, NodeRef.class, true, false );
+                    if ( ref != null ) return objectToEmsScriptNode( ref );
+                } catch ( ClassCastException e ) {
+                } catch ( IllegalAccessException e ) {
+                } catch ( InvocationTargetException e ) {
+                } catch ( InstantiationException e ) {
+                }
+            }
+        }
+        System.out.println("\nobjectToEmsScriptNode(" + context + ") = " + node + "\n");
+        return node;
+    }
+    
     @Override
     public Collection< EmsScriptNode > getRelationship( Object context,
                                                         Object specifier ) {
@@ -1026,52 +1100,53 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, Object, 
     	// TODO see EmsScriptNode.getConnectedNodes(), as a lot of this code can
         //      be used for this method.
 System.out.println("RRRRRRRRRRRRR");
+System.out.println("RRRRRR");
         List< EmsScriptNode > relationships = null;
+        if ( !coerce && !(context instanceof EmsScriptNode) ) return null;
+        EmsScriptNode node = objectToEmsScriptNode( context );
         
-        if ( context instanceof EmsScriptNode ) {
-            String relType = null;
-            String relName = null;
-            String relId = null;
-            List<String> typeNames = new ArrayList< String >();
-            if ( specifier instanceof String ) {
-                relType = (String)specifier;
+        if ( node == null ) return relationships;
+        String relType = null;
+        String relName = null;
+        String relId = null;
+        List<String> typeNames = new ArrayList< String >();
+        if ( specifier instanceof String ) {
+            relType = (String)specifier;
 
-                if ( avoidConnectFcn ) {
-                    return getRelationships( (EmsScriptNode)context, null, null, relType );
-                }
+            if ( avoidConnectFcn ) {
+                return getRelationships( node, null, null, relType );
+            }
+            
+            if ( !Utils.isNullOrEmpty( relType ) ) typeNames.add(relType);
+        } else {
+            if ( specifier instanceof EmsScriptNode ) {
+                EmsScriptNode s = (EmsScriptNode)specifier;
+                relName = s.getSysmlName();
                 
-                if ( !Utils.isNullOrEmpty( relType ) ) typeNames.add(relType);
-            } else {
-                if ( specifier instanceof EmsScriptNode ) {
-                    EmsScriptNode s = (EmsScriptNode)specifier;
-                    relName = s.getSysmlName();
-                    
-                    if ( avoidConnectFcn && !Utils.isNullOrEmpty( relName ) ) {
-                        return getRelationships( (EmsScriptNode)context, null, null, relName );
-                    }
+                if ( avoidConnectFcn && !Utils.isNullOrEmpty( relName ) ) {
+                    return getRelationships( node, null, null, relName );
+                }
 
-                    if ( !Utils.isNullOrEmpty( relName ) ) typeNames.add(relName);
-                    relId = s.getSysmlId();
-                    
-                    if ( avoidConnectFcn && !Utils.isNullOrEmpty( relId ) ) {
-                        return getRelationships( (EmsScriptNode)context, null, null, relId );
-                    }
-                    if ( !Utils.isNullOrEmpty( relId ) ) typeNames.add(relId);
+                if ( !Utils.isNullOrEmpty( relName ) ) typeNames.add(relName);
+                relId = s.getSysmlId();
+                
+                if ( avoidConnectFcn && !Utils.isNullOrEmpty( relId ) ) {
+                    return getRelationships( node, null, null, relId );
                 }
+                if ( !Utils.isNullOrEmpty( relId ) ) typeNames.add(relId);
             }
-            EmsScriptNode n = (EmsScriptNode)context;
-            ArrayList< NodeRef > refs = null;
-            if ( Utils.isNullOrEmpty( typeNames ) ) {
-                refs = n.getConnectedNodes( null, n.getWorkspace(), null );
-            } else {
-                for ( String type : typeNames ) {
-                    refs = n.getConnectedNodes( null, n.getWorkspace(), type );
-                    if ( !Utils.isNullOrEmpty( refs ) ) break;
-                }
+        }
+        ArrayList< NodeRef > refs = null;
+        if ( Utils.isNullOrEmpty( typeNames ) ) {
+            refs = node.getConnectedNodes( null, node.getWorkspace(), null );
+        } else {
+            for ( String type : typeNames ) {
+                refs = node.getConnectedNodes( null, node.getWorkspace(), type );
+                if ( !Utils.isNullOrEmpty( refs ) ) break;
             }
-            if ( !Utils.isNullOrEmpty( refs ) ) {
-                relationships = n.toEmsScriptNodeList( refs );
-            }
+        }
+        if ( !Utils.isNullOrEmpty( refs ) ) {
+            relationships = node.toEmsScriptNodeList( refs );
         }
         
         return relationships;
@@ -1203,8 +1278,9 @@ System.out.println("RRRRRRRRRRRRR");
 //                return Utils.newList( typeNode );
 //            }
 //        }
-        WorkspaceNode ws = (context instanceof WorkspaceNode) ? (WorkspaceNode)context : null;
-        Date dateTime = (context instanceof Date) ? (Date)context : null;
+//        WorkspaceNode ws = (context instanceof WorkspaceNode) ? (WorkspaceNode)context : null;
+//        Date dateTime = (context instanceof Date) ? (Date)context : null;
+        QueryContext ctx = getQueryContext( context );
         
     	// Search for all elements with the specified type name:
     	if (specifier instanceof String) {
@@ -1222,9 +1298,10 @@ System.out.println("RRRRRRRRRRRRR");
 
 	        Collection< EmsScriptNode > elementColl = null;
 	        try {
-//	        		elementColl = NodeUtil.luceneSearchElements( "ASPECT:\"sysml:" + specifier + "\"" );
-//Debug.error( true, false, "NodeUtil.findNodeRefsByType( " + (String)specifier + ", SearchType.ASPECT.prefix, false, ws, dateTime, false, true, getServices(), false, null )");
-	                ArrayList< NodeRef > refs = NodeUtil.findNodeRefsByType( (String)specifier, SearchType.ASPECT.prefix, false, ws, dateTime, false, true, getServices(), false, null );
+////	        		elementColl = NodeUtil.luceneSearchElements( "ASPECT:\"sysml:" + specifier + "\"" );
+////Debug.error( true, false, "NodeUtil.findNodeRefsByType( " + (String)specifier + ", SearchType.ASPECT.prefix, false, ws, dateTime, false, true, getServices(), false, null )");
+//	                ArrayList< NodeRef > refs = NodeUtil.findNodeRefsByType( (String)specifier, SearchType.ASPECT.prefix, false, ws, dateTime, false, true, getServices(), false, null );
+                    ArrayList< NodeRef > refs = NodeUtil.findNodeRefsByType( (String)specifier, SearchType.ASPECT.prefix, ctx );
 	                elementColl = EmsScriptNode.toEmsScriptNodeList( refs, getServices(), null, null );
 	        } catch (Exception e) {
 	        		// if lucene query fails, most likely due to non-existent aspect, we should look for type now
@@ -1342,7 +1419,11 @@ System.out.println("RRRRRRRRRRRRR");
     public Object getAlfrescoProperty( EmsScriptNode node, String acmPropertyName,
                                        boolean recursiveGetValueOfNodeRefs ) {
         Object result = null;
-        if ( Acm.JSON_NODEREFS.contains( acmPropertyName ) ) {
+        String jsonPropertyName = acmPropertyName;
+        if ( Acm.getACM2JSON().containsKey( acmPropertyName ) ) {
+            jsonPropertyName = Acm.getACM2JSON().get( acmPropertyName );
+        }
+        if ( Acm.JSON_NODEREFS.contains( jsonPropertyName ) ) {
             result = node.getNodeRefProperty(acmPropertyName, null, node.getWorkspace());
             if ( result instanceof Collection ) {
                 Collection<NodeRef> valueNodes = (Collection<NodeRef>)result;
@@ -1361,7 +1442,11 @@ System.out.println("RRRRRRRRRRRRR");
                 result = new EmsScriptNode( (NodeRef)result, getServices() );
             }
         } else {
-            result = node.getProperty( acmPropertyName );
+            try {
+                result = node.getProperty( acmPropertyName );
+            } catch (UnsupportedOperationException e) {
+                result = node.getNodeRefProperty( acmPropertyName, null, node.getWorkspace() );
+            }
         }
         return result;
 //
@@ -1476,7 +1561,8 @@ System.out.println("RRRRRRRRRRRRR");
                 nodeType = Acm.getJSON2ACM().get( nodeType );
             }
             if ( Acm.VALUE_OF_TYPE.keySet().contains( nodeType ) ) {
-                Object value = getAlfrescoProperty( node, nodeType, true );
+                String valueKey = Acm.VALUE_OF_TYPE.get( nodeType );
+                Object value = getAlfrescoProperty( node, valueKey, true );
                 return value;
     		}
             if ( Acm.VALUESPEC_ASPECTS.contains( nodeType ) ) {
@@ -2001,26 +2087,44 @@ System.out.println("RRRRRRRRRRRRR");
     }
 
     // TODO dont like dependence on BAE for Call here....
-    public Collection< Object >
-    		map( Collection< Object > elements,
+    public Collection< ? >
+    		map( Collection< ? > elements,
     			 Call call) throws InvocationTargetException {
 
-    	return call.map( elements, 1 );
+        // Flatten the arguments if necessary.
+        elements = flattenSubArgumentsForCall( elements, call,
+                                               1 );
+
+        
+        Collection< ? > result = call.map( elements, 1 );
+        System.out.println("map(" + elements + ", " + call + ", 1) = " + result);
+        return result;
     }
 
     public Collection< Object >
             map( Collection< Object > elements, Call call,
                  int indexOfObjectArgument ) throws InvocationTargetException {
 
-        return call.map( elements, indexOfObjectArgument );
+        Collection< Object > result = call.map( elements, indexOfObjectArgument );
+        System.out.println("map(" + elements + ", " + call + ", " + indexOfObjectArgument + ") = " + result);
+        return result;
     }
     
-    public Collection< Object > map( Collection< Object > elements, Call call,
-                                     int indexOfObjectArgument,
-                                     Vector< Object > otherArguments )
-                                             throws InvocationTargetException {
-        call.getParameterTypes();
-        int argsSize = call.getArgumentVector().size();
+    public Collection< ? > map( Collection< ? > elements,
+                                   FunctionCall call,
+                                   int indexOfObjectArgument,
+                                   Object... otherArguments )
+                                           throws InvocationTargetException {
+        Vector<Object> vector = 
+                new Vector< Object >( Arrays.asList( otherArguments ) );
+        return map( elements, call, indexOfObjectArgument, vector );
+    }
+    
+    protected void initializeCallArgumentsForSub( Call call,
+                                                  int indexOfObjectArgument,
+                                                  Vector< Object > otherArguments ) {
+        int argsSize = call.getParameterTypes().length;
+        //int argsSize = call.getArgumentVector().size();
         int otherArgsSize = otherArguments.size();
         // Make sure there are enough arguments. We assume that one to be
         // substituted is skipped unless we can determine otherwise. In the case
@@ -2036,24 +2140,68 @@ System.out.println("RRRRRRRRRRRRR");
         }
         // See if we have strong evidence that the substituted arg is included
         // in otherArguments.  By default, we assume not.
-        boolean otherArgsIncludesSubstitute =
-                ( argsSize == otherArgsSize && !call.isVarArgs() ) ||
-                ( argsSize - 1 == otherArgsSize );
+        boolean otherArgsIncludesSubstitute = false;
+//                ( argsSize == otherArgsSize && !call.isVarArgs() ) ||
+//                ( argsSize - 1 == otherArgsSize );
 
         // Set otherArguments before invoking
-        for ( int i = 0, j = 0; i < argsSize && j < otherArgsSize; ++i, ++j ) {
+        for ( int i = 1, j = 0; j < otherArgsSize; ++i, ++j ) {
             // skip the one to be substituted unless the otherArguments includes 
             if ( i != indexOfObjectArgument || otherArgsIncludesSubstitute ) {
-                call.setArgument( i, otherArguments.get( j ) );
+                call.setArgument( i-1, otherArguments.get( j ) );
             } else {
                 --j;
+                // Put null in for arg to be substituted.
+                call.setArgument( i-1, null ); //Utils.isNullOrEmpty( elements ) ? null : elements.iterator().next() );
             }
         }
+
+    }
+    
+    public Collection< ? > map( Collection< ? > elements, Call call,
+                                     int indexOfObjectArgument,
+                                     Vector< Object > otherArguments )
+                                             throws InvocationTargetException {
+        if ( Utils.isNullOrEmpty( elements ) ) return Utils.newList();
+        
+        initializeCallArgumentsForSub( call, indexOfObjectArgument, otherArguments );
+        
+        // Flatten the arguments if necessary.
+        elements = flattenSubArgumentsForCall( elements, call,
+                                               indexOfObjectArgument );
         
         // invoke the map
-        Collection< Object > result = call.map( elements, 1 );
+        Collection< ? > result = call.map( elements, indexOfObjectArgument );
         System.out.println("map(" + elements + ", " + call + ", " + indexOfObjectArgument + ", " + otherArguments + ") = " + result);
         return result;
+    }
+    
+    protected static Collection< ? >
+            flattenSubArgumentsForCall( Collection< ? > elements, Call call,
+                                        int indexOfObjectArgument ) {
+        // Check if all arguments are collections.
+        boolean someTypeCollection = false;
+        boolean someNotTypeCollection = false;
+        for ( Object element : elements ) {
+            if ( element instanceof Collection )  {
+                someTypeCollection = true;
+                if ( someNotTypeCollection ) break;
+            } else {
+                someNotTypeCollection = true;
+                if ( someTypeCollection ) break;
+            }
+        }
+        // If all arguments are collections, see if they are supposed to be
+        // Collections.
+        if ( someTypeCollection && !someNotTypeCollection ) {
+            Class< ? > objTypeReqd = call.getTypeForSubstitutionIndex( indexOfObjectArgument );
+            if ( objTypeReqd != null 
+                 && !Collection.class.isAssignableFrom( objTypeReqd ) ) {
+                ArrayList< ? > newElements = Utils.flatten( elements, objTypeReqd );
+                return newElements;
+            }
+        }
+        return elements;
     }
 
     // TODO dont like dependence on BAE for Call here....
@@ -2150,64 +2298,45 @@ System.out.println("RRRRRRRRRRRRR");
         return CompareUtils.compare(o1, o2) == 0;
     }
     
-    public Collection< Object > filter( Collection< Object > elements,
-                                        FunctionCall call,
-                                        int indexOfObjectArgument,
-                                        Object... otherArguments )
-                                             throws InvocationTargetException {
+    public Collection< ? > filter( Collection< ? > elements,
+                                   FunctionCall call,
+                                   int indexOfObjectArgument,
+                                   Object... otherArguments )
+                                           throws InvocationTargetException {
         Vector<Object> vector = 
                 new Vector< Object >( Arrays.asList( otherArguments ) );
         return filter( elements, call, indexOfObjectArgument, vector );
     }
-    public Collection< Object > filter( Collection< Object > elements,
+    public Collection< ? > filter( Collection< ? > elements,
                                         FunctionCall call,
                                         int indexOfObjectArgument,
                                         Vector< Object > otherArguments )
                                              throws InvocationTargetException {
-        Class< ? >[] paramTypes = call.getParameterTypes();
-        int paramSize = paramTypes.length;
-        int argsSize = call.getArgumentVector().size();
-        int otherArgsSize = otherArguments.size();
-        // Make sure there are enough arguments. We assume that one to be
-        // substituted is skipped unless we can determine otherwise. In the case
-        // of a variable number of arguments, otherArguments may not provide
-        // one, which is legal, so otherArguments can be two short.
-        if ( argsSize == 0
-             && ( indexOfObjectArgument > 0 || otherArgsSize > 0 || ( paramSize > 0 && !call.isVarArgs() ) ) ) {
-            Vector< Object > v = new Vector< Object >();
-            int numArgs = Math.max( otherArgsSize + 1, indexOfObjectArgument + 1 );
-            for ( int i = 0; i < numArgs; ++i ) {
-                v.add( null );
-            }
-            call.setArguments( v );
-            argsSize = v.size();
-        } else if ( argsSize > otherArgsSize + 1 + ( call.isVarArgs() ? 1 : 0 ) ) {
-            // TODO -- error
-        }
-        // Make sure there are not too many arguments if the call does not have
-        // a variable number of arguments.
-        else if ( argsSize < otherArgsSize && !call.isVarArgs() ) {
-            // TODO -- error
-        }
-        // See if we have strong evidence that the substituted arg is included
-        // in otherArguments.  By default, we assume not.
-        boolean otherArgsIncludesSubstitute =
-                ( argsSize == otherArgsSize && !call.isVarArgs() );// ||
-                //( argsSize - 1 == otherArgsSize );
 
-        // Set otherArguments before invoking
-        for ( int i = 0, j = 0; i < argsSize && j < otherArgsSize; ++i, ++j ) {
-            // skip the one to be substituted unless the otherArguments includes 
-            if ( i != indexOfObjectArgument - 1 || otherArgsIncludesSubstitute ) {
-                call.setArgument( i, otherArguments.get( j ) );
-            } else {
-                --j;
-            }
-        }
+        initializeCallArgumentsForSub( call, indexOfObjectArgument, otherArguments );
         
+        // Flatten the arguments if necessary.
+        elements = flattenSubArgumentsForCall( elements, call,
+                                               indexOfObjectArgument );
+
         // invoke the filter
-        Collection< Object > result = call.filter( elements, 1 );
+        Collection< ? > result = call.filter( elements, indexOfObjectArgument );
         System.out.println("filter(" + elements + ", " + call + ", " + indexOfObjectArgument + ", " + otherArguments + ") = " + result);
+        return result;
+    }
+    
+    public Object fold( Collection<?> elements, FunctionCall call,
+                        Object initialValue, int indexOfObjectArgument,
+                        int indexOfPriorResultArgument ) {
+        initializeCallArgumentsForSub( call, indexOfObjectArgument, 
+                                       new Vector<Object>() );
+        
+        // Flatten the arguments if necessary.
+        elements = flattenSubArgumentsForCall( elements, call,
+                                               indexOfObjectArgument );
+
+        Object result = call.fold( elements, initialValue, indexOfObjectArgument,
+                                   indexOfPriorResultArgument );
         return result;
     }
     
@@ -2222,8 +2351,11 @@ System.out.println("RRRRRRRRRRRRR");
     }
 
     public boolean sourceIs( EmsScriptNode relationshipNode, EmsScriptNode nodeToMatch ) {
+        System.out.println("ZZZZZZZZZZZZZZZZZZ    sourceIs( " + relationshipNode + ", " + nodeToMatch + " )" );
         Object sourceRef = relationshipNode.getNodeRefProperty( Acm.ACM_SOURCE, true, null, null );
         if ( sourceRef instanceof NodeRef ) {
+            EmsScriptNode n = new EmsScriptNode( (NodeRef)sourceRef, relationshipNode.getServices() );
+            System.out.println("ZZZZZZZZZZZZZZZZZZ    source " + n + ";  nodeToMatch " + nodeToMatch );
             if ( nodeToMatch.getNodeRef().equals( sourceRef ) ) {
                 return true;
             }
@@ -2231,8 +2363,31 @@ System.out.println("RRRRRRRRRRRRR");
         return false;
     }
 
+    public long getTime( EmsScriptNode n ) {
+        Collection<?> c = getValue( n, null );
+        if ( Utils.isNullOrEmpty( c ) ) return 999;
+        Object v = c.iterator().next();
+        try {
+        if ( v instanceof Date ) return getTime((Date)v);
+        if ( v instanceof String ) return getTime((String)v);
+        //Date d = TimeUtils.dateFromTimestamp( timestamp );
+        return getTime("" + v);
+        } catch (Throwable t) {
+            return 1999;
+        }
+    }
+    public long getTime( Date d ) {
+        //Date d = TimeUtils.dateFromTimestamp( timestamp );
+        return d.getTime();
+    }
+    public long getTime( String timestamp ) {
+        Date d = TimeUtils.dateFromTimestamp( timestamp );
+        return d.getTime();
+    }
+    
     
     public boolean targetIs( EmsScriptNode relationshipNode, EmsScriptNode nodeToMatch ) {
+        System.out.println("YYYYYYYYYYYYYYYYYYYYYYYYYYYY");
         Object targetRef = relationshipNode.getNodeRefProperty( Acm.ACM_TARGET, true, null, null );
         if ( targetRef instanceof NodeRef ) {
             if ( nodeToMatch.getNodeRef().equals( targetRef ) ) {
@@ -2242,16 +2397,45 @@ System.out.println("RRRRRRRRRRRRR");
         return false;
     }
 
+    public boolean isA( Object[] o, String type ) {
+        if ( type.toLowerCase().startsWith( "array" ) ) {
+            return true;
+        }
+        Object arr[] = (Object[])o;
+        for ( Object oo : arr ) {
+            if ( !isA( arr[0], type ) ) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public boolean isA( Collection< ? > o, String type ) {
+        return isA( ((Collection<?>)o).toArray(), type );
+    }
+
+    public boolean isA( EmsScriptNode n, String type ) {
+        if ( !NodeUtil.scriptNodeExists( n.getNodeRef() ) ) return false;
+        if ( isARecursive( n, type, null ) ) {
+            return true;
+        }
+        return false;
+    }
     
     public boolean isA( Object o, String type ) {
         System.out.println("SSSSSSSSSSSSSSSSSSSSSSSSS");
         if (o == null || Utils.isNullOrEmpty( type ) ) return false;
-        if ( o instanceof EmsScriptNode ) {
+        if ( o.getClass().getSimpleName().toLowerCase().startsWith( type.toLowerCase() ) ) {
+            return true;
+        }
+        if ( o.getClass().isArray() ) {
+            Object arr[] = (Object[])o;
+            return isA(arr, type);
+        } else if ( o instanceof Collection ) {
+            return isA( (Collection<?>)o, type );
+        } else if ( o instanceof EmsScriptNode ) {
             EmsScriptNode n = (EmsScriptNode)o;
-            if ( !NodeUtil.scriptNodeExists( n.getNodeRef() ) ) return false;
-            if ( isARecursive( n, type, null ) ) {
-                return true;
-            }
+            return isA( n, type );
         }
         return false;
     }
@@ -2288,8 +2472,142 @@ System.out.println("RRRRRRRRRRRRR");
                 if ( isARecursive( newType, type, seen ) ) {
                     return true;
                 }
+            } else if ( o instanceof String ) {
+                if ( ((String)o).equals( type ) ) {
+                    return true;
+                }
             }
         }
         return false;
+    }
+    
+    public <T> T first( Collection<T> coll ) {
+        if ( Utils.isNullOrEmpty( coll ) ) return null;
+        T t = coll.iterator().next();
+        return t;
+    }
+    
+    public static List< EmsScriptNode > getChildViews( EmsScriptNode parentNode ) {
+        if ( !NodeUtil.exists( parentNode ) ) {
+            return null;
+        }
+        List<EmsScriptNode> childViews = new ArrayList< EmsScriptNode >();
+        WorkspaceNode ws = parentNode.getWorkspace();
+        Set< EmsScriptNode > rels =
+                parentNode.getRelationships( null, ws );
+        for ( EmsScriptNode rel : rels ) {
+            Object prop = rel.getNodeRefProperty( Acm.ACM_TARGET, null, ws );
+            if ( prop instanceof NodeRef ) {
+                EmsScriptNode propNode =
+                        new EmsScriptNode( (NodeRef)prop, parentNode.getServices() );
+                if ( NodeUtil.exists( propNode ) ) {
+                    if ( propNode.hasOrInheritsAspect( Acm.ACM_PROPERTY ) ) {
+                        Object propType =
+                                propNode.getNodeRefProperty( Acm.ACM_PROPERTY_TYPE,
+                                                             null, ws );
+                        if ( propType instanceof NodeRef ) {
+                            EmsScriptNode node =
+                                    new EmsScriptNode( (NodeRef)propType,
+                                                       parentNode.getServices() );
+                            if ( NodeUtil.exists( node ) ) {
+                                if ( node.hasOrInheritsAspect( Acm.ACM_VIEW ) ) {
+                                    childViews.add( node );
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return childViews;
+    }
+    
+    public EmsScriptNode getViewFromProperty( EmsScriptNode propNode, WorkspaceNode ws ) {
+        if ( NodeUtil.exists( propNode ) ) {
+            if ( propNode.hasOrInheritsAspect( Acm.ACM_PROPERTY ) ) {
+                Object propType =
+                        propNode.getNodeRefProperty( Acm.ACM_PROPERTY_TYPE,
+                                                     null, ws );
+                if ( propType instanceof NodeRef ) {
+                    System.out.println("getViewFromProperty(" + propNode + ") 6 propType = " + propType);
+                    EmsScriptNode node =
+                            new EmsScriptNode( (NodeRef)propType,
+                                               propNode.getServices() );
+
+                    if ( NodeUtil.exists( node ) ) {
+                        System.out.println("getViewFromProperty(" + propNode + ") 7 node = " + node);
+                        if ( node.hasOrInheritsAspect( Acm.ACM_VIEW ) ) {
+                            System.out.println("getViewFromProperty(" + propNode + ") 8 node = " + node);
+                            return node;
+                        }
+                    }
+                }
+            }
+        }
+        return null;
+    }
+    
+    public List<EmsScriptNode> getPropertiesWithType( Object context, Object type ) {
+        return null;
+    }
+    
+    public EmsScriptNode getParentView( EmsScriptNode view ) {
+        System.out.println("getParentView(" + view + ") 0");
+        if ( view == null ) return null;
+        String viewId = view.getSysmlId();
+        EmsScriptNode prev = null;
+        WorkspaceNode ws = view.getWorkspace();
+        Set< EmsScriptNode > rels = view.getRelationships( null, ws );
+        for ( EmsScriptNode rel : rels ) {
+            System.out.println("getParentView(" + view + ") 1 rel = " + rel);
+            if ( !rel.hasOrInheritsAspect( Acm.ACM_ASSOCIATION ) ) continue;
+            System.out.println("getParentView(" + view + ") 2");
+            //Object owned = rel.getNodeRefProperty( Acm.ACM_OWNED_END, null, ws );
+            Object prop = rel.getNodeRefProperty( Acm.ACM_SOURCE, null, ws );
+            Object propT = rel.getNodeRefProperty( Acm.ACM_TARGET, null, ws );
+            if ( prop instanceof NodeRef ) {
+                System.out.println("getParentView(" + view + ") 3 prop = " + prop);
+                if ( propT instanceof NodeRef ) {
+                    System.out.println("getParentView(" + view + ") 3 propT = " + propT);
+                }
+                EmsScriptNode propNode =
+                        new EmsScriptNode( (NodeRef)prop, view.getServices() );
+                EmsScriptNode sourceView = getViewFromProperty( propNode, ws );
+                if ( sourceView != null && !sourceView.getSysmlId().equals( view.getSysmlId() ) ) {
+                    return sourceView;
+                }
+                EmsScriptNode propTNode =
+                        new EmsScriptNode( (NodeRef)propT, view.getServices() );
+                EmsScriptNode targetView = getViewFromProperty( propNode, ws );
+                if ( targetView != null && !targetView.getSysmlId().equals( view.getSysmlId() ) ) {
+                    return targetView;
+                }
+            }
+        }
+        return null;
+    }
+
+    public EmsScriptNode getPreviousView( EmsScriptNode view ) {
+        if ( view == null ) return null;
+        
+        EmsScriptNode prev = null;
+        EmsScriptNode parentNode = getParentView( view );
+        if ( parentNode == null ) return null;
+        WorkspaceNode ws = view.getWorkspace();
+        
+        List< EmsScriptNode > children = getChildViews( parentNode );
+        
+        if ( Utils.isNullOrEmpty( children ) ) return null;
+        
+        String id = view.getSysmlId();
+        
+        for ( EmsScriptNode child : children ) {
+            if ( child != null && id.equals( child.getSysmlId() ) ) {
+                break;
+            }
+            prev = child;
+        }
+        
+        return prev;
     }
 }

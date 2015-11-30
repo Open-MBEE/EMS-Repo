@@ -89,6 +89,7 @@ public class NodeUtil {
         ID( "@sysml\\:id:\"" ),
         STRING( "@sysml\\:string:\"" ),
         BODY( "@sysml\\:body:\"" ),
+        PROPERTY_TYPE( "@sysml\\:propertyType:\"" ),
         CHECKSUM( "@view\\:cs:\"" ),
         WORKSPACE("@ems\\:workspace:\"" ),
         WORKSPACE_NAME("@ems\\:workspace_name:\"" ),
@@ -1136,7 +1137,18 @@ public class NodeUtil {
                                    dateTime, justFirst, optimisticJustFirst, exactMatch, services,
                                    includeDeleted, siteName );
     }
-    
+
+    public static ArrayList< NodeRef > findNodeRefsByType( String specifier,
+                                                           String prefix,
+                                                           QueryContext ctxt ) {
+        return findNodeRefsByType( specifier, prefix, ctxt.ignoreWorkspaces,
+                                   ctxt.workspace, ctxt.onlyThisWorkspace,
+                                   ctxt.dateTime, ctxt.justFirst, true,
+                                   ctxt.exactMatch,
+                                   ctxt.serviceContext.services,
+                                   ctxt.includeDeleted, ctxt.siteName );
+    }
+
     public static ArrayList< NodeRef >
     findNodeRefsByType( String specifier, String prefix,
                         boolean ignoreWorkspace,
@@ -2827,6 +2839,8 @@ public class NodeUtil {
 
     public static NodeRef findNodeRefByAlfrescoId(String id, boolean includeDeleted,
                                                   boolean giveError) {
+        if ( id.startsWith( "_" ) ) return null;
+        if ( id.length() < 25 ) return null;
         if ( !id.contains( "://" ) ) {
             id = "workspace://SpacesStore/" + id;
         }
@@ -2969,11 +2983,14 @@ public class NodeUtil {
 
         // Not found in cache -- get normally
         QName qName = oIsString ? NodeUtil.createQName( keyStr, services ) : (QName)key;
-        Object result;
+        Object result = null;
         if (useFoundationalApi) {
             if ( services == null ) services = NodeUtil.getServices();
-            result = services.getNodeService().getProperty( node,
-                    qName );
+            try {
+                result = services.getNodeService().getProperty( node, qName );
+            } catch ( Exception e ) {
+                e.printStackTrace();
+            }
             if (logger.isTraceEnabled()) logger.trace("^ cache miss!  getNodeProperty(" + node + ", " + key + ", cacheOkay=" + cacheOkay + ") = " + result);
         } else {
             ScriptNode sNode = new ScriptNode( node, services );

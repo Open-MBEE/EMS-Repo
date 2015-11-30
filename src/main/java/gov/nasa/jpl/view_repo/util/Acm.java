@@ -168,6 +168,9 @@ public class Acm {
     public static final String JSON_MD_DATA = "mdData";
     public static final String JSON_LOWER = "lower";
     public static final String JSON_UPPER = "upper";
+    public static final String JSON_MULTIPLICITY_MIN = "multiplicityMin";
+    public static final String JSON_MULTIPLICITY_MAX = "multiplicityMax";
+    public static final String JSON_REDEFINES = "redefines";
     public static final String JSON_TARGET_LOWER = "targetLower";
     public static final String JSON_TARGET_UPPER = "targetUpper";
     public static final String JSON_SOURCE_LOWER = "sourceLower";
@@ -322,6 +325,9 @@ public class Acm {
     public static final String ACM_MD_DATA = EMS + JSON_MD_DATA;
     public static final String ACM_LOWER = SYSML + JSON_LOWER;
     public static final String ACM_UPPER = SYSML + JSON_UPPER;
+    public static final String ACM_MULTIPLICITY_MIN = SYSML + JSON_MULTIPLICITY_MIN;
+    public static final String ACM_MULTIPLICITY_MAX = SYSML + JSON_MULTIPLICITY_MAX;
+    public static final String ACM_REDEFINES = SYSML + JSON_REDEFINES;
     public static final String ACM_TARGET_LOWER = SYSML + JSON_TARGET_LOWER;
     public static final String ACM_TARGET_UPPER = SYSML + JSON_TARGET_UPPER;
     public static final String ACM_SOURCE_LOWER = SYSML + JSON_SOURCE_LOWER;
@@ -443,6 +449,7 @@ public class Acm {
             add(JSON_NO_SECTIONS);
             add(JSON_CONNECTOR_ROLE);
             add(JSON_OWNED_ATTRIBUTE);
+            add(JSON_REDEFINES);
 //            add(JSON_ANNOTATED_ELEMENTS);
         }
     };
@@ -455,6 +462,8 @@ public class Acm {
         {
            add(JSON_VALUE);
            add(JSON_VALUE_EXPRESSION);
+           add(JSON_LOWER);
+           add(JSON_UPPER);
            add(JSON_DURATION_MAX);
            add(JSON_DURATION_MIN);
            add(JSON_ELEMENT_VALUE_ELEMENT);
@@ -470,6 +479,8 @@ public class Acm {
            add(JSON_METHOD);
            add(JSON_CONNECTOR_ROLE);
            add(JSON_OWNED_ATTRIBUTE);
+           add(JSON_REDEFINES);
+           add(JSON_CONTENTS);
 //           add(JSON_ANNOTATED_ELEMENTS);
        }
    };
@@ -868,8 +879,8 @@ public class Acm {
             put(ACM_CONNECTOR, ACM_CONNECTOR_VALUE);
             put(ACM_CONSTRAINT, ACM_CONSTRAINT_SPECIFICATION);
             put(ACM_OPERATION, ACM_OPERATION_EXPRESSION);
-            put(ACM_VIEW, ACM_CONTENTS);
-            put(ACM_PRODUCT, ACM_CONTENTS);
+            //put(ACM_VIEW, ACM_CONTENTS);
+            //put(ACM_PRODUCT, ACM_CONTENTS);
             put(ACM_INSTANCE_SPECIFICATION, ACM_INSTANCE_SPECIFICATION_SPECIFICATION);
         }
     };
