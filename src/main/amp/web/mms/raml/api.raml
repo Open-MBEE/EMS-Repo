@@ -299,10 +299,11 @@ resourceTypes:
       post:
           is: [postable]
       /{elementId}:
-        type: collection
-        uriParameters:
-          elementId:
-            description: Sysml ID for the element under consideration
+        #type: collection
+        delete:
+          description: Delete the element specified by the Sysml ID
+        get:
+          description: Sysml ID for the element under consideration
     /configurations:
       #type: collection
       get:
@@ -369,7 +370,7 @@ resourceTypes:
             body:
               application/json:
                 schema: projects
-          type: readCollection
+          #type: readCollection
           #get:
           #  description: Retrieve all projects for which user has read permissions
           #  responses:
@@ -489,6 +490,8 @@ resourceTypes:
                 responses:
                   200:
     /projects:
+      get:
+        description: Get all projects for a workspace
       post:
         description: Post a project using the supplied json
         body:
