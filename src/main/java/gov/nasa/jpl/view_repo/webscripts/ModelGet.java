@@ -264,6 +264,7 @@ public class ModelGet extends AbstractJavaWebScript {
             Date dateTime = TimeUtils.dateFromTimestamp( timestamp );
             boolean connected = getBooleanArg( req, "connected", false );
             boolean evaluate = getBooleanArg( req, "evaluate", false );
+            boolean affected = getBooleanArg(req, "affected", false);
             String relationship = req.getParameter( "relationship" );
             
             WorkspaceNode workspace = getWorkspace( req );
@@ -305,7 +306,7 @@ public class ModelGet extends AbstractJavaWebScript {
             }
 
             boolean checkReadPermission = true;  // TODO -- REVIEW -- Shouldn't this be false? 
-            handleElements( workspace, dateTime, includeQualified, evaluate,
+            handleElements( workspace, dateTime, includeQualified, evaluate, affected,
                             top, checkReadPermission );
         } catch ( JSONException e ) {
             e.printStackTrace();
@@ -523,12 +524,16 @@ public class ModelGet extends AbstractJavaWebScript {
      */
     protected void
             handleElements( WorkspaceNode ws, Date dateTime,
-                            boolean includeQualified, boolean evaluate,
+                            boolean includeQualified, boolean evaluate, boolean affected, 
                             JSONObject top, boolean checkPermission ) throws JSONException {
         final Map<EmsScriptNode, JSONObject> elementsJsonMap =
                 new LinkedHashMap< EmsScriptNode, JSONObject >();
+        if( affected ){
+        	addAffectedElements(ws, dateTime);
+        }
         for ( String id : elementsFound.keySet() ) {
-            EmsScriptNode node = elementsFound.get( id );
+            EmsScriptNode node = elementsFound.get( id ); //add a flag 'affected' and in handle elements (here)
+            // takes group of elements and evaluates them
 
             if ( !checkPermission || checkPermissions( node, PermissionService.READ ) ) {
                 JSONObject json = node.toJSONObject( ws, dateTime,
@@ -553,6 +558,26 @@ public class ModelGet extends AbstractJavaWebScript {
             }
         }
     }
+
+	protected void addAffectedElements(WorkspaceNode ws, Date dateTime) {
+		for(  String id : new ArrayList<String>( elementsFound.keySet() ) ){
+		    EmsScriptNode value= elementsFound.get(id);
+		    if(value != null){
+		    	ArrayList<NodeRef> nodeRefs = 
+		    			value.getAffectedElementsRecursive(false, false, dateTime, ws, false, true, true, false);
+		    	for(NodeRef ref: nodeRefs){
+		    		EmsScriptNode node = new EmsScriptNode(ref, services);
+		    		String nodeId = node.getSysmlId();
+		    		if(elementsFound.containsKey(nodeId) ){
+		    			continue;
+		    		}
+		    		else{
+		    			elementsFound.put(nodeId, node);
+		    		}
+		    	}
+		    }
+		}
+	}
 
     /**
      * Need to differentiate between View or Element request - specified during
