@@ -65,6 +65,13 @@ public class UpdateViewHierarchy {
         }
 
     }
+    
+    
+    // TODO -- TODOS
+    // need to put aggregation in childViews json
+    
+    
+    
     protected void processElementJson( JSONObject elementJson ) {
                 if ( elementJson == null ) return;
 
@@ -84,22 +91,26 @@ public class UpdateViewHierarchy {
                 viewsInJson.put( id, elementJson );
                 
                 String owner = elementJson.optString( "owner" );
+                // TODO -- what if owner is specified as null in json?  null = JSONObject.NULL
                 if ( !Utils.isNullOrEmpty( owner ) ) {
                     owners.put( id, owner );
                 }
                 
                 JSONArray childViewsArray = 
                         spec.optJSONArray( Acm.JSON_CHILD_VIEWS );
+                // In case childViews is not in the specialization part of the json, . . .
                 if ( childViewsArray != null ) {
                     childViewsArray = 
                             elementJson.optJSONArray( Acm.JSON_CHILD_VIEWS );
                 }
+
                 if ( childViewsArray != null ) {
                     ArrayList<String> childViews = new ArrayList< String >();
                     for ( int j=0; j < childViewsArray.length(); ++j ) {
                         String childView = childViewsArray.optString( j );
                         childViews.add( childView );
                         ArrayList<String> viewOwnerSet = viewOwners.get( childView );
+                        // create set if it doesn't yet exist
                         if ( viewOwnerSet == null ) {
                             viewOwnerSet = new ArrayList< String >();
                             viewOwners.put( childView, viewOwnerSet );
@@ -111,6 +122,7 @@ public class UpdateViewHierarchy {
                 
                 JSONArray ownedAttributesArray = 
                         spec.optJSONArray( Acm.JSON_OWNED_ATTRIBUTE );
+                // In case ownedAttributes is not in the specialization part of the json, . . .
                 if ( ownedAttributesArray == null ) {
                     ownedAttributesArray = 
                             elementJson.optJSONArray( Acm.JSON_OWNED_ATTRIBUTE );
@@ -281,6 +293,7 @@ public class UpdateViewHierarchy {
                         if ( !inOwned ) {
                             // (2) case new child -- create or revise Association
                             updateOrCreateAssociation( parent, null, childId );
+                            // REVIEW -- does the above call create the property??!
                             // TODO -- This assumes that previous call updates maps.
                             String newOwnedAttributeId =
                                     ownedAttributeIdsForViewIds.get( childId );
@@ -424,7 +437,7 @@ public class UpdateViewHierarchy {
         String id = element.optString( "sysmlid" );
         if ( id == null ) id = NodeUtil.createId( mp.getServices() );
         JSONArray elements = jsonObject.optJSONArray("elements");
-        if ( elements != null ) elements.put( element );
+        if ( elements != null ) elements.put( element ); //TODO -- else ERROR!
         return id;
     }
     
@@ -798,6 +811,7 @@ public class UpdateViewHierarchy {
         boolean addedNew = false;
         
         updateOrCreatePropertyJson( propertyId, parentViewId, childViewId, null );
+        // FIXME -- Need to find new property ids for source and target? 
         
         JSONObject element = null;
         if ( assocId == null ) {
@@ -824,7 +838,7 @@ public class UpdateViewHierarchy {
             element.put( Acm.ACM_SPECIALIZATION, spec );
         }
         spec.put( "type", "Association" );
-        spec.put( Acm.JSON_SOURCE, parentViewId );
+        spec.put( Acm.JSON_SOURCE, parentViewId ); // FIXME!!  -- This should also be a property id, not a view id!
         spec.put( Acm.JSON_TARGET, propertyId );
         
         if ( addedNew ) {
@@ -834,6 +848,7 @@ public class UpdateViewHierarchy {
         return assocId;
     }
 
+    
     protected String updateOrCreateAssociation( String parentId, String propertyId,
                                                 String childId ) {
         // Find existing associations that match the input.
@@ -917,6 +932,9 @@ public class UpdateViewHierarchy {
         JSONObject ownedAttributeJson = elementsInJson.get( ownedAttributeId );
         if ( ownedAttributeJson != null ) {
             String propType = ownedAttributeJson.optString( Acm.JSON_PROPERTY_TYPE );
+            
+            // TODO -- Return null if not a view?!!
+            
             if ( !Utils.isNullOrEmpty( propType ) ) {
                 return propType;
             }
