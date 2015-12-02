@@ -154,7 +154,10 @@ public class ActionUtil {
             Action mailAction = services.getActionService().createAction(MailActionExecuter.NAME);
             mailAction.setParameterValue(MailActionExecuter.PARAM_SUBJECT, subject);
             mailAction.setParameterValue(MailActionExecuter.PARAM_TO, recipient);
+            // strip out origin from message and sender as necessary, since url won't match
+            sender = sender.replace("-origin", "");
             mailAction.setParameterValue(MailActionExecuter.PARAM_FROM, sender);
+            msg = msg.replace("-origin", "");
             mailAction.setParameterValue(MailActionExecuter.PARAM_TEXT, msg);
             mailAction.setExecuteAsynchronously( true );
             services.getActionService().executeAction(mailAction, null);

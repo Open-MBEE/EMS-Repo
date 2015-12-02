@@ -1,0 +1,17 @@
+{"elements": [{
+    "creator": "admin",
+    "documentation": "A site package",
+    "editable": true,
+    "modified": "2014-11-19T12:57:50.897-0800",
+    "name": "package",
+    "owner": "123456",
+    "qualifiedId": "/123456/package",
+    "qualifiedName": "/JW_TEST2/package",
+    "read": "2014-11-19T13:17:05.170-0800",
+    "specialization": {
+        "isSite": true,
+        "type": "Package"
+    },
+    "sysmlid": "package"
+}]}
+200

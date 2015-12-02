@@ -1,0 +1,84 @@
+{ "elements" : [
+
+    {"documentation" : "add_add_gg", 
+     "sysmlid":"add_add_gg", 
+     "name":"add_add_gg", 
+     "owner":"123456", 
+     "specialization": {"type":"Property",
+                        "isDerived":false, 
+                        "value":[{"type":"LiteralString",
+                                  "string":"on a shoe"}]}
+    },
+
+    {"documentation" : "add_update_gg", 
+     "sysmlid":"add_update_gg", 
+     "name":"add_update_gg", 
+     "owner":"123456", 
+     "specialization": {"type":"Property",
+                        "isDerived":false, 
+                        "value":[{"type":"LiteralString",
+                                  "string":"on a shoe"}]}
+    },
+    
+    {"documentation" : "add_delete_gg", 
+     "sysmlid":"add_delete_gg", 
+     "name":"add_delete_gg", 
+     "owner":"123456", 
+     "specialization": {"type":"Property",
+                        "isDerived":false, 
+                        "value":[{"type":"LiteralString",
+                                  "string":"on a shoe"}]}
+    },
+    
+    {"documentation" : "add_none_gg", 
+     "sysmlid":"add_none_gg", 
+     "name":"add_none_gg", 
+     "owner":"123456", 
+     "specialization": {"type":"Property",
+                        "isDerived":false, 
+                        "value":[{"type":"LiteralString",
+                                  "string":"on a shoe"}]}
+    },
+        
+    {"documentation" : "update_add_gg updatedWs1", 
+     "sysmlid":"update_add_gg", 
+     "name":"update_add_gg", 
+     "owner":"123456", 
+     "specialization": {"type":"Property",
+                        "isDerived":false, 
+                        "value":[{"type":"LiteralString",
+                                  "string":"on a shoe"}]}
+    },
+
+    {"documentation" : "update_update_gg updatedWs1", 
+     "sysmlid":"update_update_gg", 
+     "name":"update_update_gg", 
+     "owner":"123456", 
+     "specialization": {"type":"Property",
+                        "isDerived":false, 
+                        "value":[{"type":"LiteralString",
+                                  "string":"on a shoe"}]}
+    },
+    
+    {"documentation" : "update_delete_gg updatedWs1", 
+     "sysmlid":"update_delete_gg", 
+     "name":"update_delete_gg", 
+     "owner":"123456", 
+     "specialization": {"type":"Property",
+                        "isDerived":false, 
+                        "value":[{"type":"LiteralString",
+                                  "string":"on a shoe"}]}
+    },
+    
+    {"documentation" : "update_none_gg updatedWs1", 
+     "sysmlid":"update_none_gg", 
+     "name":"update_none_gg", 
+     "owner":"123456", 
+     "specialization": {"type":"Property",
+                        "isDerived":false, 
+                        "value":[{"type":"LiteralString",
+                                  "string":"on a shoe"}]}
+    },
+    
+
+]}

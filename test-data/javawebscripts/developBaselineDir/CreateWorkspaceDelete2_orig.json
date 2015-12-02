@@ -1,13 +1,14 @@
 {"workspaces": [{
-    "qualifiedId": "master/e735c4e9-ef13-4009-b2f3-a66eb9b667c3/578222cd-c261-43f5-87d8-9fe9d5fa708c",
-    "id": "578222cd-c261-43f5-87d8-9fe9d5fa708c",
-    "created": "2015-03-27T09:04:33.299-0700",
+    "qualifiedId": "master/d9bc67ca-3d9c-4c85-9e9f-25993268660e/af1c88d4-7083-40bc-b9a3-eef042dc0c13",
+    "id": "af1c88d4-7083-40bc-b9a3-eef042dc0c13",
+    "created": "2015-09-22T09:42:28.609-0700",
     "description": "",
     "qualifiedName": "master/AA/BB",
     "name": "BB",
-    "parent": "e735c4e9-ef13-4009-b2f3-a66eb9b667c3",
+    "parent": "d9bc67ca-3d9c-4c85-9e9f-25993268660e",
     "permission": "read",
-    "modified": "2015-03-27T09:04:33.299-0700",
+    "branched": "2015-09-22T09:42:27.946-0700",
+    "modified": "2015-09-22T09:42:28.609-0700",
     "creator": "admin"
 }]}
 200

@@ -1,0 +1,14 @@
+{"products": [{
+  "creator": "admin",
+  "documentation": "Element to post to a site package",
+  "editable": true,
+  "modified": "2014-11-19T12:57:52.101-0800",
+  "name": "elementInPkg",
+  "owner": "holding_bin_package_123456",
+  "qualifiedId": "/123456/package/holding_bin_package_123456/elementInPkg",
+  "qualifiedName": "/JW_TEST2/package/holding_bin/elementInPkg",
+  "read": "2014-11-19T13:17:05.887-0800",
+  "specialization": {"type": "Product"},
+  "sysmlid": "elementInPkg"
+}]}
+200

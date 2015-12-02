@@ -4,6 +4,8 @@ import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.connections.JmsConnection;
 import gov.nasa.jpl.view_repo.connections.RestPostConnection;
+import gov.nasa.jpl.view_repo.util.JsonDiffDiff.DiffType;
+import gov.nasa.jpl.view_repo.webscripts.MmsDiffGet;
 import gov.nasa.jpl.view_repo.webscripts.WebScriptUtil;
 import gov.nasa.jpl.view_repo.webscripts.util.ConfigurationsWebscript;
 
@@ -12,15 +14,20 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.apache.log4j.Logger;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.springframework.extensions.webscripts.Status;
 
 
 /**
@@ -35,6 +42,7 @@ public class CommitUtil {
     public static final String TYPE_COMMIT = "COMMIT";
     public static final String TYPE_DELTA  = "DELTA";
     public static final String TYPE_MERGE  = "MERGE";
+    public static boolean cleanJson = false;
     
     private CommitUtil() {
         // defeat instantiation
@@ -313,6 +321,54 @@ public class CommitUtil {
 	    return null;
 	}
 	
+	public static String getTimestamp(EmsScriptNode commitNode, String workspace)
+	{
+	    String type = null;
+	    
+	    // If the type is branch, must walk backwards to find a non-branch commit:
+	    while (commitNode != null) {
+	        type = (String) commitNode.getProperty("ems:commitType");
+	        if (type != null && !TYPE_BRANCH.equals( type )) {
+	            break;
+	        }
+	        commitNode = getPreviousCommit(commitNode);
+	    }
+	    
+	    if (commitNode == null) {
+	        return null;
+	    }
+	        
+	    Object commit = commitNode.getProperty("ems:commit");
+	    Date creationDate = commitNode.getCreationDate();
+	    String timestamp = null;
+	    if (creationDate != null) {
+	        timestamp = TimeUtils.toTimestamp(creationDate);
+	    }
+	    
+	    if (!(commit instanceof String)) {
+	        return timestamp;
+	    }
+	    JSONObject latestCommit = new JSONObject( (String) commit );
+	    JSONObject workspaceObject = null;
+	    if (latestCommit.length() == 0)
+	    {
+	        return timestamp;
+	    }
+	    if (workspace.equals("workspace1"))
+	    {
+	        workspaceObject = latestCommit.getJSONObject("workspace1");
+	    }
+	    else if (workspace.equals("workspace2"))
+	    {
+	        workspaceObject = latestCommit.getJSONObject("workspace2");
+	    }
+	    else
+	    {
+	        return timestamp;
+	    }
+	    return workspaceObject.getString("timestamp");
+	}
+	
     public static String replaceTimeStampWithCommitTime(Date date,
                                                         WorkspaceNode ws,
                                                         ServiceRegistry services, 
@@ -323,11 +379,7 @@ public class CommitUtil {
         String timestamp = null;
         
         if (lastCommit != null) {
-            Date lastCommitTime = lastCommit.getCreationDate();
-            
-            if (lastCommitTime != null) {
-                timestamp = TimeUtils.toTimestamp(lastCommitTime);
-            }
+            timestamp = getTimestamp(lastCommit, "workspace2");
         }
         
         return timestamp;
@@ -372,9 +424,14 @@ public class CommitUtil {
         while ( true ) { // run until endWorkspace or master
             EmsScriptNode commit = getLastCommit( startWorkspace, services, response );
             while ( commit != null ) {
-                Date created = commit.getCreationDate();
-                if ( fromDateTime != null && created.before( fromDateTime ) ) break;
-                if ( toDateTime == null || !created.after( toDateTime ) ) {
+                String endOfCommit = getTimestamp(commit, "workspace2");
+                Date endDate = TimeUtils.dateFromTimestamp( endOfCommit );
+                if (endDate == null) break;
+                if ( fromDateTime != null && !endDate.after( fromDateTime ) ) break;
+                String beginningOfCommit = getTimestamp(commit, "workspace1");
+                Date beginningDate = TimeUtils.dateFromTimestamp( beginningOfCommit );
+                if (beginningDate == null) break;
+                if ( toDateTime == null || beginningDate.before( toDateTime ) ) {
                     commits.add( commit );
                 }
                 commit = getPreviousCommit(commit);
@@ -395,6 +452,14 @@ public class CommitUtil {
         }
         return null;
     }
+    
+    public static EmsScriptNode getNextCommit( EmsScriptNode commit ) {
+        List< EmsScriptNode > childRefs = getNextCommits( commit );
+        if ( !Utils.isNullOrEmpty( childRefs ) ) {
+            return childRefs.get( 0 );
+        }
+        return null;
+    }
 
     public static List<EmsScriptNode> getPreviousCommits( EmsScriptNode commit ) {
         @SuppressWarnings( "unchecked" )
@@ -402,6 +467,14 @@ public class CommitUtil {
                 (ArrayList< NodeRef >)commit.getProperties().get( "{http://jpl.nasa.gov/model/ems/1.0}commitParents" );
         List<EmsScriptNode> parentRefs = commit.toEmsScriptNodeList( parentNodes );
         return parentRefs;
+    }
+    
+    public static List<EmsScriptNode> getNextCommits( EmsScriptNode commit ) {
+        @SuppressWarnings( "unchecked" )
+        ArrayList< NodeRef > childrenNodes =
+                (ArrayList< NodeRef >)commit.getProperties().get( "{http://jpl.nasa.gov/model/ems/1.0}commitChildren" );
+        List<EmsScriptNode> childRefs = commit.toEmsScriptNodeList( childrenNodes );
+        return childRefs;
     }
 
     private static NodeRef commitRef = null;
@@ -701,7 +774,10 @@ public class CommitUtil {
                 }
                 if (body != null) {
                     // clean up JSON for small commits
-                    JSONObject cleanedJson = WorkspaceDiff.cleanWorkspaceJson( body );
+                	JSONObject cleanedJson = body;
+                	if (cleanJson) {
+                		cleanedJson = WorkspaceDiff.cleanWorkspaceJson( body );
+                	}
                     currCommit.createOrUpdateProperty( "ems:commit", cleanedJson.toString() );
                 }
                 
@@ -818,6 +894,364 @@ public class CommitUtil {
 //
 //        return jmsStatus;
         return true;
+    }
+    
+    private static JSONObject migrateCommitUsingDiff(JSONArray elements, JSONArray updated, JSONArray added, 
+                                              JSONArray deleted, WorkspaceNode ws1, WorkspaceNode ws2,
+                                              Date dateTime1, Date dateTime2, StringBuffer response,
+                                              Status responseStatus) {
+        
+        JSONObject firstElem = null;
+        
+        if (added != null && added.length() > 0) {
+            firstElem = added.getJSONObject( 0 );
+        }
+        else if (updated != null && updated.length() > 0) {
+            firstElem = updated.getJSONObject( 0 );
+        }
+        else if (deleted != null && deleted.length() > 0) {
+            firstElem = deleted.getJSONObject( 0 );
+        }
+        else if (elements != null && elements.length() > 0) {
+            firstElem = elements.getJSONObject( 0 );
+        }
+        
+        if (firstElem != null) {
+            
+            if (!firstElem.has( Acm.JSON_SPECIALIZATION )) {
+                
+                // Perform the diff using the workspaces and timestamps
+                // from the commit node:
+                JSONObject json = MmsDiffGet.performDiff( ws1, ws2, dateTime1, dateTime2, response,
+                                                                      responseStatus, DiffType.COMPARE, true );                
+                return json;
+            }
+        }
+        
+        return null;
+    }
+    
+    private static void migrateJSONArray(WorkspaceNode workspace, Date dateTime, 
+                                         JSONArray oldJsonArray, JSONArray newJsonArray,
+                                         Map<String,EmsScriptNode> nodeMap,
+                                         StringBuffer response) {
+        
+        for (int i = 0; i < oldJsonArray.length(); i++) {
+            JSONObject elementJson = oldJsonArray.getJSONObject( i );
+            if (elementJson != null && !elementJson.has( Acm.JSON_SPECIALIZATION )) {
+                
+                String sysmlId = elementJson.optString( Acm.JSON_ID );
+                
+                if (sysmlId != null) {
+                    
+                    EmsScriptNode node = null;
+                    if (nodeMap.containsKey( sysmlId )) {
+                        node = nodeMap.get( sysmlId );
+                    }
+                    else {
+                        node = NodeUtil.findScriptNodeById( sysmlId, workspace, dateTime, false,
+                                                            NodeUtil.getServices(), response, null );
+                        if (node != null) {
+                            nodeMap.put( sysmlId, node );
+                        }
+                    }
+
+                    if (node != null) {
+                        newJsonArray.put(node.toJSONObject( workspace, dateTime));
+                    }
+                }
+            }
+        }
+    }
+    
+    private static JSONObject migrateCommitUsingFind(JSONArray elements, JSONArray updated, JSONArray added, 
+                                                    JSONArray deleted, JSONArray conflicted, JSONArray moved,
+                                                    WorkspaceNode ws1, WorkspaceNode ws2,
+                                                    JSONObject commitJson,
+                                                    Date dateTime1, Date dateTime2, StringBuffer response,
+                                                    Status responseStatus) {
+              
+              // Create new json from the old:
+              JSONObject newJson = new JSONObject(commitJson.toString());
+              
+              JSONObject ws1Json = newJson.optJSONObject( "workspace1" );
+              JSONObject ws2Json = newJson.optJSONObject( "workspace2" );
+
+              JSONArray newElements = new JSONArray();
+              JSONArray newUpdated = new JSONArray();
+              JSONArray newAdded = new JSONArray();
+              JSONArray newDeleted = new JSONArray();
+              JSONArray newConflicted = new JSONArray();
+              JSONArray newMoved = new JSONArray();
+              
+              if (ws1Json != null) {
+                  ws1Json.put( "elements", newElements );
+              }
+              if (ws2Json != null) {
+                  ws2Json.put( "addedElements", newAdded );
+                  ws2Json.put( "updatedElements", newUpdated );
+                  ws2Json.put( "deletedElements", newDeleted );
+                  ws2Json.put( "conflictedElements", newConflicted );
+                  ws2Json.put( "movedElements", newMoved );
+              }
+
+              Map<String,EmsScriptNode> ws1NodeMap = new HashMap<String,EmsScriptNode>();
+              Map<String,EmsScriptNode> ws2NodeMap = new HashMap<String,EmsScriptNode>();
+
+              if (elements != null) {
+                  migrateJSONArray( ws1, dateTime1, elements, newElements, ws1NodeMap, response );
+              }
+              if (updated != null) {
+                  migrateJSONArray( ws2, dateTime2, updated, newUpdated, ws2NodeMap, response );
+              }
+              if (added != null) {
+                  migrateJSONArray( ws2, dateTime2, added, newAdded, ws2NodeMap, response );
+              }
+              if (deleted != null) {
+                  migrateJSONArray( ws2, dateTime2, deleted, newDeleted, ws2NodeMap, response );
+              }
+              if (conflicted != null) {
+                  migrateJSONArray( ws2, dateTime2, conflicted, newConflicted, ws2NodeMap, response );
+              }
+              if (moved != null) {
+                  migrateJSONArray( ws2, dateTime2, moved, newMoved, ws2NodeMap, response );
+              }
+ 
+              return newJson;
+    }
+        
+    /**
+     * Checks if the passed commitNode has all the needed information
+     * for glom diffs to work.  Returns true if the node has been migrated,
+     * otherwise returns false.
+     * 
+     * @param commitNode
+     */
+    public static boolean checkMigrateCommitNode( EmsScriptNode commitNode, 
+                                          StringBuffer response,
+                                          Status responseStatus ) {
+               
+        String origUser = NodeUtil.getUserName();
+        boolean switchUser = !origUser.equals( "admin" );
+        
+        if ( switchUser ) AuthenticationUtil.setRunAsUser( "admin" );
+        // to make sure no permission issues, run as admin
+        
+        String content = (String) commitNode.getProperty( "ems:commit" );
+        try {
+            JSONObject commitJson = new JSONObject(content);
+            if ( commitJson != null ) {
+                
+                JSONObject ws1Json = commitJson.optJSONObject( "workspace1" );
+                JSONObject ws2Json = commitJson.optJSONObject( "workspace2" );
+
+                if ( ws1Json != null && ws2Json != null ) {
+                    
+                    String timestamp1 = ws1Json.optString( "timestamp" );
+                    String timestamp2 = ws2Json.optString( "timestamp" );
+                    
+                    if (timestamp1 == null || timestamp2 == null) {
+                        return false;
+                    }
+                    else {
+                        
+                        JSONArray elements = ws1Json.optJSONArray("elements");
+                        JSONArray added = ws2Json.optJSONArray("addedElements");
+                        JSONArray updated = ws2Json.optJSONArray("updatedElements");
+                        JSONArray deleted = ws2Json.optJSONArray("deletedElements");
+                        JSONArray conflicted = ws2Json.optJSONArray("conflictedElements");
+                        JSONArray moved = ws2Json.optJSONArray("movedElements");
+                        
+                        for (int i = 0; i < elements.length(); i++) {
+                            JSONObject elementJson = elements.getJSONObject( i );
+                            if (elementJson != null && !elementJson.has( Acm.JSON_SPECIALIZATION )) {
+                                return false;
+                            }
+                        }
+                        
+                        for (int i = 0; i < added.length(); i++) {
+                            JSONObject elementJson = added.getJSONObject( i );
+                            if (elementJson != null && !elementJson.has( Acm.JSON_SPECIALIZATION )) {
+                                return false;
+                            }
+                        }
+                        
+                        for (int i = 0; i < updated.length(); i++) {
+                            JSONObject elementJson = updated.getJSONObject( i );
+                            if (elementJson != null && !elementJson.has( Acm.JSON_SPECIALIZATION )) {
+                                return false;
+                            }
+                        }
+                        
+                        for (int i = 0; i < deleted.length(); i++) {
+                            JSONObject elementJson = deleted.getJSONObject( i );
+                            if (elementJson != null && !elementJson.has( Acm.JSON_SPECIALIZATION )) {
+                                return false;
+                            }
+                        }
+                        
+                        for (int i = 0; i < conflicted.length(); i++) {
+                            JSONObject elementJson = conflicted.getJSONObject( i );
+                            if (elementJson != null && !elementJson.has( Acm.JSON_SPECIALIZATION )) {
+                                return false;
+                            }
+                        }
+                        
+                        for (int i = 0; i < moved.length(); i++) {
+                            JSONObject elementJson = moved.getJSONObject( i );
+                            if (elementJson != null && !elementJson.has( Acm.JSON_SPECIALIZATION )) {
+                                return false;
+                            }
+                        }
+                    }
+
+                }
+            }
+        } catch ( JSONException e ) {
+            e.printStackTrace();
+        } finally {
+            if ( switchUser ) AuthenticationUtil.setRunAsUser( origUser );
+        }
+        
+        return true;
+        
+    }
+
+    
+    /**
+     * Migrates the passed commitNode to have all the needed information
+     * for glom diffs to work.
+     * 
+     * @param commitNode
+     */
+    public static void migrateCommitNode( EmsScriptNode commitNode, 
+                                          StringBuffer response,
+                                          Status responseStatus ) {
+        
+        String origUser = NodeUtil.getUserName();
+        boolean switchUser = !origUser.equals( "admin" );
+        
+        if ( switchUser ) AuthenticationUtil.setRunAsUser( "admin" );
+        // to make sure no permission issues, run as admin
+        
+        // Checks if the first element found in the commit json has a specialization.  
+        // If it does not, then the commit node needs to be migrated by re-computing
+        // it using a non-glom diff:
+        String content = (String) commitNode.getProperty( "ems:commit" );
+        try {
+            JSONObject commitJson = new JSONObject(content);
+            if ( commitJson != null ) {
+                
+                JSONObject ws1Json = commitJson.optJSONObject( "workspace1" );
+                JSONObject ws2Json = commitJson.optJSONObject( "workspace2" );
+
+                if ( ws1Json != null && ws2Json != null ) {
+                    
+                    WorkspaceNode ws1 = null;
+                    WorkspaceNode ws2 = null;
+                    String ws1Name = null;
+                    String ws2Name = null;
+                    
+                    if ( ws1Json.has( "id" ) ) {
+                        ws1Name = ws1Json.getString( "id" );
+                        ws1 = WorkspaceNode.getWorkspaceFromId( ws1Name, NodeUtil.getServices(),
+                                                                null, null, null );
+                    }
+                    if ( ws2Json.has( "id" ) ) {
+                        ws2Name = ws2Json.getString( "id" );
+                        ws2 = WorkspaceNode.getWorkspaceFromId( ws2Name, NodeUtil.getServices(),
+                                                                null, null, null );
+                    }
+                    
+                    String timestamp1 = ws1Json.optString( "timestamp" );
+                    String timestamp2 = ws2Json.optString( "timestamp" );
+
+                    Date dateTime1 = TimeUtils.dateFromTimestamp(timestamp1);
+                    Date dateTime2 = TimeUtils.dateFromTimestamp(timestamp2);
+                    
+                    // If there is no timestamps (due to a previous bug with cleaning the commit
+                    // nodes), then figure out reasonable ones using the past and next commit nodes:
+                    boolean timesValid = false;
+                    
+                    if (dateTime1 == null) {
+                        EmsScriptNode prevCommit = getPreviousCommit(commitNode);
+                        if (prevCommit != null) {
+                            //dateTime1 = prevCommit.getLastModified( null );
+                            dateTime1 = prevCommit.getCreationDate();
+                        }
+                    }
+                    
+                    if (dateTime2 == null) {
+                        dateTime2 = commitNode.getCreationDate(); 
+//                        EmsScriptNode nextCommit = getNextCommit(commitNode);
+//                        if (nextCommit != null) {
+//                            dateTime2 = nextCommit.getCreationDate(); // TODO REVIEW will this time be too late?
+//                        }
+                    }
+
+                    // Check that the times are valid:
+                    if (dateTime1 != null && dateTime2 != null) {
+                        timesValid = !dateTime1.after(dateTime2);
+                    }
+                    else {
+                        timesValid = dateTime1 != null || (dateTime1 == null && dateTime2 == null);
+                    }
+                    
+                    if (timesValid
+                        && (ws1 != null || "master".equals( ws1Name ))
+                        && (ws2 != null || "master".equals( ws2Name )) ) {
+                        
+                        // Add the timestamps back into original json if they werent there:
+                        if (Utils.isNullOrEmpty( timestamp1 )) {
+                            Date newTime1 = dateTime1 == null ? new Date() : dateTime1;
+                            ws1Json.put( "timestamp", TimeUtils.toTimestamp(newTime1 ) );
+                        }
+                        if (Utils.isNullOrEmpty( timestamp2 )) {
+                            Date newTime2 = dateTime2 == null ? new Date() : dateTime2;
+                            ws2Json.put( "timestamp", TimeUtils.toTimestamp(newTime2 ) );
+                        }
+                        
+                        JSONArray elements = ws1Json.optJSONArray("elements");
+                        JSONArray added = ws2Json.optJSONArray("addedElements");
+                        JSONArray updated = ws2Json.optJSONArray("updatedElements");
+                        JSONArray deleted = ws2Json.optJSONArray("deletedElements");
+                        JSONArray conflicted = ws2Json.optJSONArray("conflictedElements");
+                        JSONArray moved = ws2Json.optJSONArray("movedElements");
+
+                        /*
+                        // Not using the diff to compute the correct commit node b/c of bugs with the code,
+                        // and the performance hit
+                        JSONObject newCommitJson = migrateCommitUsingDiff( elements, updated, added, deleted, 
+                                                                           ws1, ws2, dateTime1, dateTime2, 
+                                                                           response, responseStatus );
+                        */
+                        
+                        JSONObject newCommitJson = migrateCommitUsingFind( elements, updated, added, 
+                                                                           deleted, conflicted, moved, 
+                                                                           ws1, ws2, commitJson, 
+                                                                           dateTime1, dateTime2, 
+                                                                           response, responseStatus );
+                        
+                        // Update the commit node with the new json:
+                        if ( newCommitJson != null ) {  
+                            // Can't use normal getProperty because we need to bypass the cache.
+                            String lastModifier = (String)NodeUtil.getNodeProperty( commitNode, "cm:modifier",
+                                                                                    NodeUtil.getServices(), true,
+                                                                                    false );
+                            commitNode.createOrUpdateProperty( "ems:commit", 
+                                                               newCommitJson.toString() );
+                            commitNode.createOrUpdateProperty( "cm:modifier", lastModifier );
+                        }
+
+                    }
+                }
+            }
+        } catch ( JSONException e ) {
+            e.printStackTrace();
+        } finally {
+            if ( switchUser ) AuthenticationUtil.setRunAsUser( origUser );
+        }
+        
     }
 
 }

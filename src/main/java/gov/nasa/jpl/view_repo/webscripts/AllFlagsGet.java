@@ -2,6 +2,7 @@ package gov.nasa.jpl.view_repo.webscripts;
 
 import gov.nasa.jpl.mbee.util.Debug;
 import gov.nasa.jpl.view_repo.actions.SnapshotArtifactsGenerationActionExecuter;
+import gov.nasa.jpl.view_repo.util.CommitUtil;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.EmsTransaction;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
@@ -29,7 +30,10 @@ public class AllFlagsGet extends FlagSet {
                            "versionHistoryCache",
                            "skipWorkspacePermissionCheck", 
                            "optimisticJustFirst",
-                           "makeDocBook" };
+                           "makeDocBook",
+                           "glom",
+                           "cleanJson",
+                           "diffDefaultIsMerge"};
     
     public String[] getAllFlags() {
         return flags;
@@ -105,7 +109,13 @@ public class AllFlagsGet extends FlagSet {
             NodeUtil.doOptimisticJustFirst = val;
         } else if (path.equalsIgnoreCase("makeDocBook")) {
             SnapshotArtifactsGenerationActionExecuter.makeDocBook = val;
-        } 
+        } else if (path.equalsIgnoreCase("glom")) {
+        	MmsDiffGet.glom = val;
+        } else if (path.equalsIgnoreCase("cleanJson")) {
+        	CommitUtil.cleanJson = val;
+        } else if (path.equalsIgnoreCase("diffDefaultIsMerge")){
+        	MmsDiffGet.diffDefaultIsMerge = val;
+        }
         return true;
     }
 
@@ -160,6 +170,12 @@ public class AllFlagsGet extends FlagSet {
             return NodeUtil.doOptimisticJustFirst;
         } else if (path.equalsIgnoreCase("makeDocBook")) {
             return SnapshotArtifactsGenerationActionExecuter.makeDocBook;
+        }else if (path.equalsIgnoreCase("glom")) {
+        	return MmsDiffGet.glom;
+        } else if (path.equalsIgnoreCase("cleanJson")) {
+        	return CommitUtil.cleanJson;
+        } else if (path.equalsIgnoreCase("diffDefaultIsMerge")){
+        	return MmsDiffGet.diffDefaultIsMerge;
         }
         return false;
     }
@@ -227,6 +243,12 @@ public class AllFlagsGet extends FlagSet {
             return false;
         } else if (path.equalsIgnoreCase("optimisticJustFirst")) {
             return false;
+        } else if (path.equalsIgnoreCase("glom")) {
+        	return false;
+        } else if (path.equalsIgnoreCase("cleanJson")) {
+        	return false;
+        } else if (path.equalsIgnoreCase("diffDefaultIsMerge")){
+        	return false;
         }
         return false;
     };
@@ -285,7 +307,13 @@ public class AllFlagsGet extends FlagSet {
             return "doOptimisticJustFirst";
         } else if (path.equalsIgnoreCase("makeDocBook")) {
             return "makeDocBook";
-        } 
+        } else if (path.equalsIgnoreCase("glom")) {
+        	return "glom";
+        } else if (path.equalsIgnoreCase("cleanJson")) {
+        	return "cleanJson";
+        } else if (path.equalsIgnoreCase("diffDefaultIsMerge")){
+        	return "diffDefaultIsMerge";
+        }
         return null;
     }
 

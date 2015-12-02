@@ -1,35 +1,41 @@
 {"views": [
     {
+        "siteCharacterizationId": "europa",
         "qualifiedId": "/europa/123456/300/301/302",
-        "name": "302",
         "qualifiedName": "/europa/JW_TEST/300/301/302",
         "sysmlid": "302",
-        "documentation": "to",
-        "owner": "301",
-        "read": "2015-03-27T09:04:31.629-0700",
-        "specialization": {
-            "propertyType": null,
-            "isDerived": false,
-            "isSlot": false,
-            "value": [{
-                "valueExpression": null,
-                "string": "dlam_string",
-                "type": "LiteralString"
-            }],
-            "type": "Property"
-        },
         "editable": true,
         "creator": "admin",
-        "modified": "2015-03-27T09:03:52.055-0700"
+        "modified": "2015-09-22T09:41:08.459-0700",
+        "modifier": "admin",
+        "created": "Tue Sep 22 09:40:01 PDT 2015",
+        "name": "302",
+        "owner": "301",
+        "documentation": "to",
+        "read": "2015-09-22T09:42:27.443-0700",
+        "specialization": {
+            "propertyType": null,
+            "isDerived": false,
+            "isSlot": false,
+            "value": [{
+                "valueExpression": null,
+                "string": "dlam_string",
+                "type": "LiteralString"
+            }],
+            "type": "Property"
+        }
     },
     {
+        "modifier": "admin",
         "qualifiedId": "/europa/123456/300/301/302/303/304",
-        "qualifiedName": "/europa/JW_TEST/300/301/302/303/304",
+        "siteCharacterizationId": "europa",
+        "created": "Tue Sep 22 09:40:02 PDT 2015",
         "name": "304",
-        "owner": "303",
+        "qualifiedName": "/europa/JW_TEST/300/301/302/303/304",
         "documentation": "about",
+        "owner": "303",
         "sysmlid": "304",
-        "read": "2015-03-27T09:03:45.536-0700",
+        "read": "2015-09-22T09:41:11.966-0700",
         "specialization": {
             "propertyType": null,
             "isSlot": false,
@@ -42,17 +48,20 @@
             "type": "Property"
         },
         "editable": true,
-        "modified": "2015-03-27T09:03:31.242-0700",
+        "modified": "2015-09-22T09:40:11.861-0700",
         "creator": "admin"
     },
     {
+        "modifier": "admin",
         "qualifiedId": "/europa/123456/300/301",
-        "qualifiedName": "/europa/JW_TEST/300/301",
+        "siteCharacterizationId": "europa",
+        "created": "Tue Sep 22 09:40:01 PDT 2015",
         "name": "301",
-        "owner": "300",
+        "qualifiedName": "/europa/JW_TEST/300/301",
         "documentation": "else",
+        "owner": "300",
         "sysmlid": "301",
-        "read": "2015-03-27T09:03:28.625-0700",
+        "read": "2015-09-22T09:40:09.751-0700",
         "specialization": {
             "view2view": [{
                 "childrenViews": [
@@ -82,7 +91,7 @@
             "type": "Product"
         },
         "editable": true,
-        "modified": "2015-03-27T09:03:27.854-0700",
+        "modified": "2015-09-22T09:40:09.455-0700",
         "creator": "admin"
     }
 ]}

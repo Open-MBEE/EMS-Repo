@@ -74,9 +74,6 @@ public class DeclarativeJavaWebScript extends AbstractWebScript
             model.put("status", status);
             model.put("cache", cache);
             
-            // CMED-936
-            res.addHeader( "Access-Control-Allow-Origin", "*" );
-            
             try
             {
                 // execute script if it exists
@@ -186,18 +183,39 @@ public class DeclarativeJavaWebScript extends AbstractWebScript
      * @param req
      * @param cache
      */
-    private void setCacheHeaders( WebScriptRequest req, Cache cache ) {
+    private boolean setCacheHeaders( WebScriptRequest req, Cache cache ) {
         String[] names = req.getParameterNames();
+        boolean cacheUpdated = false;
+        // check if timestamp
         for (String name: names) {
             if (name.equals( "timestamp" )) {
-                cache.setIsPublic( true );
-                cache.setMaxAge( new Long(31556926) );
-                // following are true by default, so need to set them to false
-                cache.setNeverCache( false ); 
-                cache.setMustRevalidate( false );
+                cacheUpdated = updateCache(cache);
                 break;
             }
         }
+        // check if configuration snapshots and products
+// TODO: Put back in once individual snapshot loads are available so generated links can be displayed
+//        if (!cacheUpdated) {
+//            String url = req.getURL();
+//            if (url.contains( "configurations" )) {
+//                if (url.contains( "snapshots") || url.contains( "products" )) {
+//                    cacheUpdated = updateCache(cache);
+//                }
+//            }
+//        }
+        
+        return cacheUpdated;
+    }
+    
+    private boolean updateCache(Cache cache) {
+        if (!cache.getIsPublic()) {
+            cache.setIsPublic( true );
+            cache.setMaxAge( new Long(31557000) );
+            // following are true by default, so need to set them to false
+            cache.setNeverCache( false ); 
+            cache.setMustRevalidate( false );
+        }
+        return true;
     }
 
     /**

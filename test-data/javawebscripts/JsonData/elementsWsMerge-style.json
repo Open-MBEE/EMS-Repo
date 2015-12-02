@@ -1,0 +1,31 @@
+{ "elements" : [
+
+    {"documentation" : "add_add_consistent", 
+     "sysmlid":"add_add_consistent", 
+     "name":"add_add_consistent", 
+     "owner":"123456", 
+     "specialization": {"type":"Property",
+                        "isDerived":false, 
+                        "value":[{"type":"LiteralString",
+                                  "string":"this is it"}]}
+    },
+    {"documentation" : "delete_update_consistent", 
+     "sysmlid":"delete_update_consistent", 
+     "name":"delete_update_consistent", 
+     "owner":"123456", 
+     "specialization": {"type":"Property",
+                        "isDerived":false, 
+                        "value":[{"type":"LiteralString",
+                                  "string":"this is updated in conflict"}]}
+    },
+
+    {"documentation" : "update_update_consistent", 
+     "sysmlid":"update_update_consistent", 
+     "name":"update_update_consistent", 
+     "owner":"123456", 
+     "specialization": {"type":"Property",
+                        "isDerived":false, 
+                        "value":[{"type":"LiteralString",
+                                  "string":"this is updated in conflict"}]}
+    },
+]}

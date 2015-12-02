@@ -5,12 +5,12 @@
             "modifier": "admin",
             "qualifiedId": "/europa/123456/aspect_history_zzz/directed_relationship_zzz",
             "siteCharacterizationId": "europa",
-            "created": "Thu Jul 23 20:24:27 PDT 2015",
+            "created": "Tue Sep 22 09:44:02 PDT 2015",
             "qualifiedName": "/europa/JW_TEST2/null/null",
             "sysmlid": "directed_relationship_zzz",
             "documentation": "d is d",
             "owner": "aspect_history_zzz",
-            "read": "2015-07-23T20:24:28.823-0700",
+            "read": "2015-09-22T09:44:03.581-0700",
             "specialization": {
                 "source": null,
                 "target": null,
@@ -18,22 +18,22 @@
             },
             "editable": true,
             "creator": "admin",
-            "modified": "2015-07-23T20:24:28.730-0700"
+            "modified": "2015-09-22T09:44:03.412-0700"
         },
         {
             "modifier": "admin",
             "qualifiedId": "/europa/123456/aspect_history_zzz/element_zzz",
             "siteCharacterizationId": "europa",
-            "created": "Thu Jul 23 20:24:27 PDT 2015",
+            "created": "Tue Sep 22 09:44:02 PDT 2015",
             "qualifiedName": "/europa/JW_TEST2/null/null",
             "sysmlid": "element_zzz",
             "documentation": "e is e",
             "owner": "aspect_history_zzz",
-            "read": "2015-07-23T20:24:28.823-0700",
+            "read": "2015-09-22T09:44:03.586-0700",
             "specialization": {"type": "Untyped"},
             "editable": true,
             "creator": "admin",
-            "modified": "2015-07-23T20:24:28.766-0700"
+            "modified": "2015-09-22T09:44:03.451-0700"
         }
     ]
 }

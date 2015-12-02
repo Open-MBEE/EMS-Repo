@@ -1,11 +1,17 @@
 {"elements": [{
+    "siteCharacterizationId": "no_site",
     "qualifiedId": "/no_site/no_site_no_project/holding_bin_no_site_no_project/x",
-    "name": "300",
     "qualifiedName": "/no_site/no_site_no_project/holding_bin/300",
     "sysmlid": "x",
-    "documentation": "x is x",
+    "editable": true,
+    "creator": "admin",
+    "modified": "2015-09-22T09:42:27.643-0700",
+    "modifier": "admin",
+    "created": "Tue Sep 22 09:40:04 PDT 2015",
+    "name": "300",
     "owner": "holding_bin_no_site_no_project",
-    "read": "2015-03-27T09:04:32.079-0700",
+    "documentation": "x is x",
+    "read": "2015-09-22T09:42:27.946-0700",
     "specialization": {
         "propertyType": null,
         "isDerived": false,
@@ -16,9 +22,6 @@
             "type": "LiteralString"
         }],
         "type": "Property"
-    },
-    "editable": true,
-    "creator": "admin",
-    "modified": "2015-03-27T09:04:31.836-0700"
+    }
 }]}
 200

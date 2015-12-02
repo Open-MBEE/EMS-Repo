@@ -1,0 +1,496 @@
+{"elements": [
+    {
+        "qualifiedId": "123456/cdelp/MMS_1410557565764_d7c58e42-9802-41f7-b057-ff47f86e5570",
+        "name": "dlam",
+        "qualifiedName": "/dlam",
+        "sysmlid": "MMS_1410557565764_d7c58e42-9802-41f7-b057-ff47f86e5570",
+        "documentation": "to make compatible with value specs",
+        "owner": "cdelp",
+        "specialization": {
+            "isDerived": false,
+            "isSlot": false,
+            "type": "Property"
+        },
+        "editable": true,
+        "creator": "admin",
+        "modified": "2014-09-12T14:32:48.691-0700"
+    },
+    {
+        "qualifiedId": "123456/403/MMS_1410557565754_70180515-20a9-4ddf-8619-52f8ad77d691",
+        "name": "404",
+        "qualifiedName": "/404",
+        "sysmlid": "MMS_1410557565754_70180515-20a9-4ddf-8619-52f8ad77d691",
+        "documentation": "4about",
+        "owner": "403",
+        "specialization": {
+            "isDerived": false,
+            "isSlot": false,
+            "type": "Property"
+        },
+        "editable": true,
+        "creator": "admin",
+        "modified": "2014-09-12T14:32:49.102-0700"
+    },
+    {
+        "qualifiedId": "123456/999/MMS_1410557565739_a5ddf075-710c-42e9-ae29-94f1ee15f240",
+        "name": "305",
+        "qualifiedName": "/305",
+        "sysmlid": "MMS_1410557565739_a5ddf075-710c-42e9-ae29-94f1ee15f240",
+        "documentation": "no owner",
+        "owner": "999",
+        "specialization": {
+            "isDerived": false,
+            "isSlot": false,
+            "type": "Property"
+        },
+        "editable": true,
+        "creator": "admin",
+        "modified": "2014-09-12T14:32:49.691-0700"
+    },
+    {
+        "qualifiedId": "123456/4000/MMS_1410557565745_b3791ad6-2139-46cb-bbb9-9cd0eb808b52",
+        "name": "401",
+        "qualifiedName": "/401",
+        "sysmlid": "MMS_1410557565745_b3791ad6-2139-46cb-bbb9-9cd0eb808b52",
+        "documentation": "4else",
+        "owner": "4000",
+        "specialization": {
+            "isDerived": false,
+            "isSlot": false,
+            "type": "Property"
+        },
+        "editable": true,
+        "creator": "admin",
+        "modified": "2014-09-12T14:32:49.921-0700"
+    },
+    {
+        "qualifiedId": "123456/300/301/302/303/304/MMS_1410468751779_3016b325-454b-46a3-986e-fc0b08fe4cc7",
+        "qualifiedName": "/CY Test/300/301/302/303/304/null",
+        "sysmlid": "MMS_1410468751779_3016b325-454b-46a3-986e-fc0b08fe4cc7",
+        "owner": "304",
+        "specialization": {
+            "string": "dlam_string",
+            "type": "LiteralString"
+        },
+        "editable": true,
+        "creator": "admin",
+        "modified": "2014-09-11T13:52:31.783-0700"
+    },
+    {
+        "qualifiedId": "123456/300",
+        "name": "300",
+        "qualifiedName": "/CY Test/300",
+        "sysmlid": "300",
+        "documentation": "something",
+        "owner": "123456",
+        "specialization": {
+            "isDerived": false,
+            "isSlot": false,
+            "value": [{
+                "string": "dlam_string",
+                "type": "LiteralString"
+            }],
+            "type": "Property"
+        },
+        "editable": true,
+        "creator": "admin",
+        "modified": "2014-09-12T14:32:53.165-0700"
+    },
+    {
+        "qualifiedId": "123456/401/MMS_1410557565749_e2421142-3bf1-48b6-8b95-d4cb7c4ba5fe",
+        "name": "402",
+        "qualifiedName": "/402",
+        "sysmlid": "MMS_1410557565749_e2421142-3bf1-48b6-8b95-d4cb7c4ba5fe",
+        "documentation": "4to",
+        "owner": "401",
+        "specialization": {
+            "isDerived": false,
+            "isSlot": false,
+            "type": "Property"
+        },
+        "editable": true,
+        "creator": "admin",
+        "modified": "2014-09-12T14:32:48.802-0700"
+    },
+    {
+        "qualifiedId": "123456/300/301/302",
+        "name": "302",
+        "qualifiedName": "/CY Test/300/301/302",
+        "sysmlid": "302",
+        "documentation": "to",
+        "owner": "301",
+        "specialization": {
+            "isDerived": false,
+            "isSlot": false,
+            "value": [{
+                "string": "dlam_string",
+                "type": "LiteralString"
+            }],
+            "type": "Property"
+        },
+        "editable": true,
+        "creator": "admin",
+        "modified": "2014-09-12T14:32:47.939-0700"
+    },
+    {
+        "qualifiedId": "123456/300/301/MMS_1410557565729_730e0a46-4972-4a8c-ae3c-329913bf2f03",
+        "name": "302",
+        "qualifiedName": "/CY Test/300/301/302",
+        "sysmlid": "MMS_1410557565729_730e0a46-4972-4a8c-ae3c-329913bf2f03",
+        "documentation": "to",
+        "owner": "301",
+        "specialization": {
+            "isDerived": false,
+            "isSlot": false,
+            "type": "Property"
+        },
+        "editable": true,
+        "creator": "admin",
+        "modified": "2014-09-12T14:32:48.912-0700"
+    },
+    {
+        "qualifiedId": "123456/300/301",
+        "name": "301",
+        "qualifiedName": "/CY Test/300/301",
+        "sysmlid": "301",
+        "documentation": "else",
+        "owner": "300",
+        "specialization": {
+            "displayedElements": [
+                "301",
+                "302",
+                "303"
+            ],
+            "childrenViews": ["304"],
+            "view2view": [{
+                "childrenViews": [
+                    "301",
+                    "302"
+                ],
+                "sysmlid": "301"
+            }],
+            "isDerived": false,
+            "isSlot": false,
+            "allowedElements": [
+                "301",
+                "302",
+                "303"
+            ],
+            "value": [{
+                "string": "dlam_string",
+                "type": "LiteralString"
+            }],
+            "contains": [{
+                "sourceType": "reference",
+                "source": "301",
+                "sourceProperty": "documentation",
+                "type": "Paragraph"
+            }],
+            "noSections": ["302"],
+            "type": "Product"
+        },
+        "editable": true,
+        "creator": "admin",
+        "modified": "2014-09-12T14:32:54.013-0700"
+    },
+    {
+        "qualifiedId": "123456/300/301/302/303/MMS_1410557565736_7bb9ef86-632f-4561-89e6-b3a25e75fa29",
+        "name": "304",
+        "qualifiedName": "/CY Test/300/301/302/303/304",
+        "sysmlid": "MMS_1410557565736_7bb9ef86-632f-4561-89e6-b3a25e75fa29",
+        "documentation": "about",
+        "owner": "303",
+        "specialization": {
+            "isDerived": false,
+            "isSlot": false,
+            "type": "Property"
+        },
+        "editable": true,
+        "creator": "admin",
+        "modified": "2014-09-12T14:32:49.405-0700"
+    },
+    {
+        "qualifiedId": "123456/300/301/302/303/304",
+        "name": "304",
+        "qualifiedName": "/CY Test/300/301/302/303/304",
+        "sysmlid": "304",
+        "documentation": "about",
+        "owner": "303",
+        "specialization": {
+            "isDerived": false,
+            "isSlot": false,
+            "value": [{
+                "string": "dlam_string",
+                "type": "LiteralString"
+            }],
+            "type": "Property"
+        },
+        "editable": true,
+        "creator": "admin",
+        "modified": "2014-09-11T13:52:31.810-0700"
+    },
+    {
+        "qualifiedId": "123456/holding_bin_europa_123456/MMS_1410557565741_6b25c012-0f54-48fa-8099-e4ae69a08da2",
+        "name": "400",
+        "qualifiedName": "/400",
+        "sysmlid": "MMS_1410557565741_6b25c012-0f54-48fa-8099-e4ae69a08da2",
+        "documentation": "4something",
+        "owner": "holding_bin_europa_123456",
+        "specialization": {
+            "isDerived": false,
+            "isSlot": false,
+            "type": "Property"
+        },
+        "editable": true,
+        "creator": "admin",
+        "modified": "2014-09-12T14:32:49.306-0700"
+    },
+    {
+        "qualifiedId": "123456/300/301/302/303",
+        "name": "303",
+        "qualifiedName": "/CY Test/300/301/302/303",
+        "sysmlid": "303",
+        "documentation": "talk",
+        "owner": "302",
+        "specialization": {
+            "isDerived": false,
+            "isSlot": false,
+            "value": [{
+                "string": "dlam_string",
+                "type": "LiteralString"
+            }],
+            "type": "Property"
+        },
+        "editable": true,
+        "creator": "admin",
+        "modified": "2014-09-12T14:32:46.842-0700"
+    },
+    {
+        "qualifiedId": "123456/300/301/MMS_1410468751231_ffc71443-cf82-43d9-b906-e34767cc5baa",
+        "qualifiedName": "/CY Test/300/301/null",
+        "sysmlid": "MMS_1410468751231_ffc71443-cf82-43d9-b906-e34767cc5baa",
+        "owner": "301",
+        "specialization": {
+            "string": "dlam_string",
+            "type": "LiteralString"
+        },
+        "editable": true,
+        "creator": "admin",
+        "modified": "2014-09-11T13:52:31.234-0700"
+    },
+    {
+        "qualifiedId": "123456/300/301/302/MMS_1410468751479_4a4e7c37-0f92-48c7-9e73-96885482fa61",
+        "qualifiedName": "/CY Test/300/301/302/null",
+        "sysmlid": "MMS_1410468751479_4a4e7c37-0f92-48c7-9e73-96885482fa61",
+        "owner": "302",
+        "specialization": {
+            "string": "dlam_string",
+            "type": "LiteralString"
+        },
+        "editable": true,
+        "creator": "admin",
+        "modified": "2014-09-11T13:52:31.482-0700"
+    },
+    {
+        "qualifiedId": "123456/300/_comment_300",
+        "name": "New test",
+        "qualifiedName": "/CY Test/300/New test",
+        "sysmlid": "_comment_300",
+        "documentation": "change testing commnets",
+        "owner": "300",
+        "specialization": {"type": "Comment"},
+        "editable": true,
+        "creator": "admin",
+        "modified": "2014-09-12T14:32:53.281-0700"
+    },
+    {
+        "qualifiedId": "123456/300/301/302/303/304/305",
+        "name": "305",
+        "qualifiedName": "/CY Test/300/301/302/303/304/305",
+        "sysmlid": "305",
+        "documentation": "no owner",
+        "owner": "304",
+        "specialization": {
+            "isDerived": false,
+            "isSlot": false,
+            "value": [{
+                "string": "dlam_string",
+                "type": "LiteralString"
+            }],
+            "type": "Property"
+        },
+        "editable": true,
+        "creator": "admin",
+        "modified": "2014-09-11T13:52:31.959-0700"
+    },
+    {
+        "qualifiedId": "123456/holding_bin_europa_123456/MMS_1410557565760_a3875c9e-299d-4ba9-b9e2-b33a7c61cc22",
+        "name": "600",
+        "qualifiedName": "/600",
+        "sysmlid": "MMS_1410557565760_a3875c9e-299d-4ba9-b9e2-b33a7c61cc22",
+        "documentation": "element values",
+        "owner": "holding_bin_europa_123456",
+        "specialization": {
+            "propertyType": "304",
+            "isDerived": false,
+            "isSlot": false,
+            "value": [
+                {
+                    "isSlot": false,
+                    "isDerived": false,
+                    "value": [{
+                        "string": "dlam_string",
+                        "type": "LiteralString"
+                    }],
+                    "type": "Property"
+                },
+                {
+                    "isSlot": false,
+                    "isDerived": false,
+                    "value": [{
+                        "string": "dlam_string",
+                        "type": "LiteralString"
+                    }],
+                    "type": "Property"
+                }
+            ],
+            "type": "Property"
+        },
+        "editable": true,
+        "creator": "admin",
+        "modified": "2014-09-12T14:32:49.504-0700"
+    },
+    {
+        "qualifiedId": "123456",
+        "name": "CY Test",
+        "qualifiedName": "/CY Test",
+        "sysmlid": "123456",
+        "owner": "null",
+        "editable": true,
+        "creator": "admin",
+        "modified": "2014-09-12T14:32:47.327-0700"
+    },
+    {
+        "qualifiedId": "123456/holding_bin_europa_123456/MMS_1410557565721_5be07b8d-0cc5-4060-891d-41c34bb09bcf",
+        "name": "300",
+        "qualifiedName": "/300",
+        "sysmlid": "MMS_1410557565721_5be07b8d-0cc5-4060-891d-41c34bb09bcf",
+        "documentation": "something",
+        "owner": "holding_bin_europa_123456",
+        "specialization": {
+            "isDerived": false,
+            "isSlot": false,
+            "type": "Property"
+        },
+        "editable": true,
+        "creator": "admin",
+        "modified": "2014-09-12T14:32:49.590-0700"
+    },
+    {
+        "qualifiedId": "123456/300/301/302/303/304/305/MMS_1410468751967_d41e87c9-ef6b-4a12-b27d-c86ba105f8f1",
+        "qualifiedName": "/CY Test/300/301/302/303/304/305/null",
+        "sysmlid": "MMS_1410468751967_d41e87c9-ef6b-4a12-b27d-c86ba105f8f1",
+        "owner": "305",
+        "specialization": {
+            "string": "dlam_string",
+            "type": "LiteralString"
+        },
+        "editable": true,
+        "creator": "admin",
+        "modified": "2014-09-11T13:52:31.983-0700"
+    },
+    {
+        "qualifiedId": "123456/402/MMS_1410557565751_719d0b47-53dd-490f-adf4-1c4dd3dbed14",
+        "name": "403",
+        "qualifiedName": "/403",
+        "sysmlid": "MMS_1410557565751_719d0b47-53dd-490f-adf4-1c4dd3dbed14",
+        "documentation": "4talk",
+        "owner": "402",
+        "specialization": {
+            "isDerived": false,
+            "isSlot": false,
+            "type": "Property"
+        },
+        "editable": true,
+        "creator": "admin",
+        "modified": "2014-09-12T14:32:49.801-0700"
+    },
+    {
+        "qualifiedId": "123456/300/301/302/MMS_1410557565733_e1835c7c-93dd-467a-87c4-0963cb1333f6",
+        "name": "303",
+        "qualifiedName": "/CY Test/300/301/302/303",
+        "sysmlid": "MMS_1410557565733_e1835c7c-93dd-467a-87c4-0963cb1333f6",
+        "documentation": "talk",
+        "owner": "302",
+        "specialization": {
+            "isDerived": false,
+            "isSlot": false,
+            "type": "Property"
+        },
+        "editable": true,
+        "creator": "admin",
+        "modified": "2014-09-12T14:32:50.019-0700"
+    },
+    {
+        "qualifiedId": "123456/300/MMS_1410557565757_39404319-78ac-4fbf-8c9d-7c97118a9c7c",
+        "name": "500",
+        "qualifiedName": "/CY Test/300/500",
+        "sysmlid": "MMS_1410557565757_39404319-78ac-4fbf-8c9d-7c97118a9c7c",
+        "documentation": "directed_relationship",
+        "owner": "300",
+        "specialization": {
+            "source": "302",
+            "isDerived": false,
+            "isSlot": false,
+            "target": "303",
+            "type": "Property"
+        },
+        "editable": true,
+        "creator": "admin",
+        "modified": "2014-09-12T14:32:50.106-0700"
+    },
+    {
+        "qualifiedId": "123456/300/MMS_1410468750915_c80bcf15-25a6-4e46-a8f9-488d408c3823",
+        "qualifiedName": "/CY Test/300/null",
+        "sysmlid": "MMS_1410468750915_c80bcf15-25a6-4e46-a8f9-488d408c3823",
+        "owner": "300",
+        "specialization": {
+            "string": "dlam_string",
+            "type": "LiteralString"
+        },
+        "editable": true,
+        "creator": "admin",
+        "modified": "2014-09-11T13:52:30.920-0700"
+    },
+    {
+        "qualifiedId": "123456/300/MMS_1410557565725_ea9cc06d-65ea-4841-a56b-b730ba1c3da9",
+        "name": "301",
+        "qualifiedName": "/CY Test/300/301",
+        "sysmlid": "MMS_1410557565725_ea9cc06d-65ea-4841-a56b-b730ba1c3da9",
+        "documentation": "else",
+        "owner": "300",
+        "specialization": {
+            "isDerived": false,
+            "isSlot": false,
+            "type": "Property"
+        },
+        "editable": true,
+        "creator": "admin",
+        "modified": "2014-09-12T14:32:50.221-0700"
+    },
+    {
+        "qualifiedId": "123456/300/301/302/303/MMS_1410468751619_3ac96cc8-8e31-423a-8e5d-803c39225b23",
+        "qualifiedName": "/CY Test/300/301/302/303/null",
+        "sysmlid": "MMS_1410468751619_3ac96cc8-8e31-423a-8e5d-803c39225b23",
+        "owner": "303",
+        "specialization": {
+            "string": "dlam_string",
+            "type": "LiteralString"
+        },
+        "editable": true,
+        "creator": "admin",
+        "modified": "2014-09-11T13:52:31.624-0700"
+    }
+]}
+
+200

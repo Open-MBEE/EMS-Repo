@@ -1,0 +1,41 @@
+{ "elements" : [
+
+    {"documentation" : "delete_update_consistent", 
+     "sysmlid":"delete_update_consistent", 
+     "name":"delete_update_consistent", 
+     "owner":"123456", 
+     "specialization": {"type":"Property",
+                        "isDerived":false, 
+                        "value":[{"type":"LiteralString",
+                                  "string":"this is it"}]}
+    },
+    
+    {"documentation" : "delete_delete_consistent", 
+     "sysmlid":"delete_delete_consistent", 
+     "name":"delete_delete_consistent", 
+     "owner":"123456", 
+     "specialization": {"type":"Property",
+                        "isDerived":false, 
+                        "value":[{"type":"LiteralString",
+                                  "string":"this is it"}]}
+    },
+    {"documentation" : "update_update_consistent", 
+     "sysmlid":"update_update_consistent", 
+     "name":"update_update_consistent", 
+     "owner":"123456", 
+     "specialization": {"type":"Property",
+                        "isDerived":false, 
+                        "value":[{"type":"LiteralString",
+                                  "string":"this is it"}]}
+    },
+    
+    {"documentation" : "update_delete_consistent", 
+     "sysmlid":"update_delete_consistent", 
+     "name":"update_delete_consistent", 
+     "owner":"123456", 
+     "specialization": {"type":"Property",
+                        "isDerived":false, 
+                        "value":[{"type":"LiteralString",
+                                  "string":"this is it"}]}
+    },
+]}

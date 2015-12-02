@@ -4,6 +4,7 @@ import gov.nasa.jpl.mbee.util.Timer;
 import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.EmsTransaction;
+import gov.nasa.jpl.view_repo.util.JsonDiffDiff.DiffType;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 import gov.nasa.jpl.view_repo.webscripts.MmsDiffGet;
@@ -15,13 +16,18 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.alfresco.model.ContentModel;
 import org.alfresco.repo.action.executer.ActionExecuterAbstractBase;
 import org.alfresco.repo.model.Repository;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.action.Action;
 import org.alfresco.service.cmr.action.ParameterDefinition;
+import org.alfresco.service.cmr.repository.ContentIOException;
+import org.alfresco.service.cmr.repository.ContentReader;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.apache.log4j.Logger;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.springframework.extensions.webscripts.Status;
 
 /**
@@ -50,6 +56,10 @@ public class WorkspaceDiffActionExecuter extends ActionExecuterAbstractBase {
     public static final String PARAM_WS_2 = "ws2";
     public static final String PARAM_TS_1 = "ts1";
     public static final String PARAM_TS_2 = "ts2";
+    public static final String PARAM_TIMESTAMP_1 = "timestamp1";
+    public static final String PARAM_TIMESTAMP_2 = "timestamp2";
+    public static final String PARAM_DIFF_TYPE = "diffType";
+    public static final String OLD_JOB = "oldJob";
 
     static Logger logger = Logger.getLogger(WorkspaceDiffActionExecuter.class);
     
@@ -71,9 +81,15 @@ public class WorkspaceDiffActionExecuter extends ActionExecuterAbstractBase {
         final WorkspaceNode ws2 = (WorkspaceNode) action.getParameterValue(PARAM_WS_2);
         final String ts1 = (String) action.getParameterValue(PARAM_TS_1);
         final String ts2 = (String) action.getParameterValue(PARAM_TS_2);
+        final String timestamp1 = (String) action.getParameterValue(PARAM_TIMESTAMP_1);
+        final String timestamp2 = (String) action.getParameterValue(PARAM_TIMESTAMP_2);
+        final EmsScriptNode oldJobNode = (EmsScriptNode) action.getParameterValue(OLD_JOB);
+        final DiffType diffType = (DiffType) action.getParameterValue(PARAM_DIFF_TYPE);
 
         final EmsScriptNode jsonNode = new EmsScriptNode(actionedUponNodeRef, services, response);
 
+        final boolean glom = MmsDiffGet.glom;
+        
         if (logger.isDebugEnabled()) logger.debug( "started execution of diff for " + WorkspaceNode.getWorkspaceName(ws1) + " and "+ WorkspaceNode.getWorkspaceName(ws2));
         clearCache();
 
@@ -86,8 +102,9 @@ public class WorkspaceDiffActionExecuter extends ActionExecuterAbstractBase {
                 Map<String, Object> results = new HashMap<String, Object>();
                 
                 // Perform diff:
-                MmsDiffGet diffService = new MmsDiffGet(repository, services, ws1, ws2, dateTime1, dateTime2);
-                diffService.performDiff( results );
+                MmsDiffGet diffService = new MmsDiffGet(repository, services, ws1, ws2, dateTime1, dateTime2,
+                                                        timestamp1, timestamp2);
+                diffService.performDiff( results, diffType );
                 
                 status.setCode(diffService.getResponseStatus().getCode());
 
@@ -116,7 +133,7 @@ public class WorkspaceDiffActionExecuter extends ActionExecuterAbstractBase {
         };
                 
     }
-
+    
     @Override
     protected void
             addParameterDefinitions( List< ParameterDefinition > paramList ) {
