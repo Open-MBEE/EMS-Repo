@@ -2968,7 +2968,7 @@ public class EmsScriptNode extends ScriptNode implements
             if ( cachedJson != null && cachedJson.length() > 0 ) {
                 deepMatch = true;
             } else {
-                cachedJson = NodeUtil.jsonCacheGet( id, millis, false ); 
+                cachedJson = NodeUtil.jsonCacheGet( id, millis, false );
             }
             if ( Debug.isOn() )
                 Debug.outln( "cachedJson = "
@@ -4733,9 +4733,8 @@ public class EmsScriptNode extends ScriptNode implements
                                                                      this.getNodeRef() );
                 }
     
-                EmsScriptNode newParent =
-                        new EmsScriptNode( destination.getNodeRef(), services,
-                                           response );
+                EmsScriptNode newParent = dest;
+
                 if (newParent != null) {
 
                     setOwnerToReifiedNode( newParent, newParent.getWorkspace(), false );
@@ -4763,7 +4762,8 @@ public class EmsScriptNode extends ScriptNode implements
                 status = true;
             }
             
-            moved = true;
+            //moved = true;
+            
             //removeChildrenFromJsonCache();
         }
 

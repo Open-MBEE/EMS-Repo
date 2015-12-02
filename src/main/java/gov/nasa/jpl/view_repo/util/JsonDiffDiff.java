@@ -1406,6 +1406,25 @@ public class JsonDiffDiff extends AbstractDiff<JSONObject, Object, String> {
 		return diffElement;
 	}
 
+	/**
+	 * Returns whether the element is changed by the application of the delta.
+	 * @param element
+	 * @param delta
+	 * @return
+	 */
+	public static boolean doesChange( JSONObject element, JSONObject delta ) {
+        JSONObject elementPlusDelta = glomElements(element, delta, false);
+        List<Set<String>> propDiff = diffProperties(null, element, elementPlusDelta);
+        if ( Utils.isNullOrEmpty( propDiff ) ) return false;
+        for ( Set<String> s : propDiff ) {
+            if ( !s.isEmpty() ) {
+                s.removeAll( ignoredJsonIds );
+            }
+            if ( !s.isEmpty() ) return true;
+        }
+        return false;
+	}
+	
 	public static JSONObject glomElements(JSONObject element0, JSONObject element1, boolean replace) {
 		// TODO -- If replacing element0 with element1 we can return element1,
 		// but do we
