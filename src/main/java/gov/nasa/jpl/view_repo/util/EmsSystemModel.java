@@ -2578,7 +2578,7 @@ System.out.println("RRRRRR");
                 }
                 EmsScriptNode propTNode =
                         new EmsScriptNode( (NodeRef)propT, view.getServices() );
-                EmsScriptNode targetView = getViewFromProperty( propNode, ws );
+                EmsScriptNode targetView = getViewFromProperty( propTNode, ws );
                 if ( targetView != null && !targetView.getSysmlId().equals( view.getSysmlId() ) ) {
                     return targetView;
                 }
