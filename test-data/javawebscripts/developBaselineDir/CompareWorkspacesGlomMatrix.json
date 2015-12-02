@@ -90,13 +90,11 @@
                 }
             },
             {
-                "qualifiedName": "/europa/JW_TEST2/none_update_gg",
-                "sysmlid": "none_update_gg",
-                "editable": true,
-                "version": "1.1",
                 "name": "none_update_gg",
+                "qualifiedName": "/europa/JW_TEST2/none_update_gg",
                 "documentation": "none_update_gg",
                 "owner": "123456",
+                "sysmlid": "none_update_gg",
                 "specialization": {
                     "propertyType": null,
                     "isSlot": false,
@@ -107,16 +105,16 @@
                         "type": "LiteralString"
                     }],
                     "type": "Property"
-                }
+                },
+                "editable": true,
             },
             {
                 "qualifiedName": "/europa/JW_TEST2/update_update_gg",
                 "sysmlid": "update_update_gg",
                 "editable": true,
-                "version": "1.1",
                 "name": "update_update_gg",
-                "owner": "123456",
                 "documentation": "update_update_gg updatedWs1",
+                "owner": "123456",
                 "specialization": {
                     "propertyType": null,
                     "isDerived": false,
@@ -153,10 +151,9 @@
                 "qualifiedName": "/europa/JW_TEST2/update_none_gg",
                 "sysmlid": "update_none_gg",
                 "editable": true,
-                "version": "1.1",
                 "name": "update_none_gg",
-                "owner": "123456",
                 "documentation": "update_none_gg updatedWs1",
+                "owner": "123456",
                 "specialization": {
                     "propertyType": null,
                     "isDerived": false,
@@ -190,13 +187,11 @@
                 }
             },
             {
-                "qualifiedName": "/europa/JW_TEST2/delete_update_gg",
-                "sysmlid": "delete_update_gg",
-                "editable": true,
-                "version": "1.1",
                 "name": "delete_update_gg",
+                "qualifiedName": "/europa/JW_TEST2/delete_update_gg",
                 "documentation": "delete_update_gg",
                 "owner": "123456",
+                "sysmlid": "delete_update_gg",
                 "specialization": {
                     "propertyType": null,
                     "isSlot": false,
@@ -207,7 +202,8 @@
                         "type": "LiteralString"
                     }],
                     "type": "Property"
-                }
+                },
+                "editable": true,
             },
             {
                 "qualifiedName": "/europa/JW_TEST2/add_none_gg",

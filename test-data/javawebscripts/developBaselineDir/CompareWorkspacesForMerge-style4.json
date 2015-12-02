@@ -21,10 +21,9 @@
                 "qualifiedName": "/europa/JW_TEST2/update_update_consistent",
                 "sysmlid": "update_update_consistent",
                 "editable": true,
-                "version": "1.1",
                 "name": "update_update_consistent",
-                "owner": "123456",
                 "documentation": "update_update_consistent",
+                "owner": "123456",
                 "specialization": {
                     "propertyType": null,
                     "isDerived": false,
@@ -38,13 +37,11 @@
                 }
             },
             {
-                "qualifiedName": "/europa/JW_TEST2/delete_update_consistent",
-                "sysmlid": "delete_update_consistent",
-                "editable": true,
-                "version": "1.3",
                 "name": "delete_update_consistent",
+                "qualifiedName": "/europa/JW_TEST2/delete_update_consistent",
                 "documentation": "delete_update_consistent",
                 "owner": "123456",
+                "sysmlid": "delete_update_consistent",
                 "specialization": {
                     "propertyType": null,
                     "isSlot": false,
@@ -55,7 +52,8 @@
                         "type": "LiteralString"
                     }],
                     "type": "Property"
-                }
+                },
+                "editable": true,
             }
         ]
     },
