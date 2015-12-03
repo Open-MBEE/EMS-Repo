@@ -95,11 +95,11 @@ create or replace function get_parents(integer, integer, text)
 $$ language plpgsql;
 
 create or replace function get_immediate_parents(integer, integer, text)
-  returns table(sysmlid text) as $$
+  returns table(sysmlid text, versionedrefid text) as $$
   begin
     return query
     execute '
-    select sysmlid from nodes' || $3 || ' where id in 
+    select sysmlid, versionedrefid from nodes' || $3 || ' where id in 
       (select id from get_parents(' || $1 || ',' || $2 || ',''' || format('%s',$3) ||
       ''') where height = 1);';
   end;

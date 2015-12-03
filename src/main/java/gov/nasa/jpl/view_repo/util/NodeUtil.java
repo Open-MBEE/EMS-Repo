@@ -5086,7 +5086,7 @@ public class NodeUtil {
         }
 
         Set< Pair< String, String > > parents =
-                pgh.getImmediateParentsRefIds( sysmlId, DbEdgeTypes.REGULAR );
+                pgh.getImmediateParents( sysmlId, DbEdgeTypes.REGULAR );
         if ( parents.size() > 0 ) {
             for ( Pair< String, String > parent : parents ) {
                 String parentId = parent.first;
@@ -5139,6 +5139,7 @@ public class NodeUtil {
                               Map< String, String > id2siteName,
                               Map< String, Set< String >> owner2children,
                               Map< String, String > child2owner ) {
+        if (!element.has( "sysmlid" )) return;
         String sysmlid = element.getString( "sysmlid" );
         
         String name = null;
