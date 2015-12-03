@@ -52,9 +52,6 @@ import gov.nasa.jpl.view_repo.webscripts.util.ShareUtils;
 //import k.frontend.ModelParser;
 //import k.frontend.ModelParser.ModelContext;
 
-
-
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -612,13 +609,9 @@ public class ModelPost extends AbstractJavaWebScript {
 	 */
   protected void resurrectParents(EmsScriptNode nodeToUpdate, EmsScriptNode parent, boolean ingest,
                                   WorkspaceNode workspace) {
-//	protected void resurrectParents(EmsScriptNode nodeToUpdate, boolean ingest,
-//			WorkspaceNode workspace) {
 
 		EmsScriptNode lastNode = nodeToUpdate;
-      EmsScriptNode nodeParent = parent != null ? parent : nodeToUpdate.getParent(null, workspace, false, true);
-//		EmsScriptNode nodeParent = nodeToUpdate.getParent(null, workspace,
-//				false, true);
+		EmsScriptNode nodeParent = parent != null ? parent : nodeToUpdate.getParent(null, workspace, false, true);
 		EmsScriptNode reifiedNodeParent = nodeParent != null ? nodeParent
 				.getReifiedNode(true, workspace) : null;
 		EmsScriptNode lastDeletedReifiedNodeParent = null;
@@ -1059,23 +1052,23 @@ public class ModelPost extends AbstractJavaWebScript {
         final EmsScriptNode element = foundElements.containsKey( jsonId ) ?
                                       foundElements.get(jsonId) :
                                       findScriptNodeById( jsonId, workspace, null, true );
-		if (element != null) {
-			// Adding to elements for error case to find project id in
-			// sendDeltas() since that is the only place where it is getting
-			// used in ModelPost, at least.
-			elements.add(element);
-			// nodeMap.put( element.getName(), element );
-			// only add to original element map if it exists on first pass
-			if (!ingest && !elementNotChanging) {
-				if (!wsDiff.getElements().containsKey(jsonId)) {
-					wsDiff.getElements().put(jsonId, element);
-					if ( recordingVersions ) {
-                        wsDiff.getElementsVersions().put( jsonId,
-                                                          element.getHeadVersion() );
-					}
-				}
-			}
-		}
+        if ( element != null ) {
+            // Adding to elements for error case to find project id in
+            // sendDeltas() since that is the only place where it is getting
+            // used in ModelPost, at least.
+            elements.add( element );
+            // nodeMap.put( element.getName(), element );
+            // only add to original element map if it exists on first pass
+            if ( !ingest && !elementNotChanging ) {
+                if ( !wsDiff.getElements().containsKey( jsonId ) ) {
+                    wsDiff.getElements().put( jsonId, element );
+                    if ( recordingVersions ) {
+                        wsDiff.getElementsVersions()
+                              .put( jsonId, element.getHeadVersion() );
+                    }
+                }
+            }
+        }
 
         // If it's been determined that there is no net change to this element,
         // go ahead and return.
@@ -2511,7 +2504,6 @@ public class ModelPost extends AbstractJavaWebScript {
 			}
 			if (checkPermissions(reifiedPkgNode, PermissionService.WRITE)) {
 				foundElements.put(pkgName, reifiedPkgNode);
-//>>>>>>> refs/remotes/origin/develop
 
 				// check for the case where the id isn't the same as the node
 				// reference - this happens when creating a root level package
@@ -2853,10 +2845,8 @@ public class ModelPost extends AbstractJavaWebScript {
                             JSONObject json = null;
                             if ( NodeUtil.doJsonCaching && !fix
                                  && notChanging.contains( element.getSysmlId() ) ) {
-                                json =
-                                        NodeUtil.jsonCacheGet( element.getNodeRef()
-                                                                      .toString(),
-                                                               0, false );
+                                json = NodeUtil.jsonCacheGet( element.getNodeRef().toString(),
+                                                              0, false );
                             }
                             if ( json == null ) {
                                 json = element.toJSONObject( workspace, null );
