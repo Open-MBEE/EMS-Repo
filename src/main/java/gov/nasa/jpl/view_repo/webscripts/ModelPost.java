@@ -2226,7 +2226,12 @@ public class ModelPost extends AbstractJavaWebScript {
 
 		// Add the children/parent properties:
 		if (pkgSiteParentNode != null && pkgSiteNode != null) {
-
+			//executing the below code block as admin 
+			//to prevent permission/access denied. 
+			//CAEDVO-1271
+			String origUser = AuthenticationUtil.getRunAsUser();
+			AuthenticationUtil.setRunAsUser("admin");
+			
 			// If there was a old site parent on this node, and it is different
 			// than
 			// the new one, then remove this child from it:
@@ -2276,6 +2281,7 @@ public class ModelPost extends AbstractJavaWebScript {
 							childSite.getNodeRef());
 				}
 			}
+			AuthenticationUtil.setRunAsUser(origUser);
 
 		} else {
 			log(Level.WARN,
