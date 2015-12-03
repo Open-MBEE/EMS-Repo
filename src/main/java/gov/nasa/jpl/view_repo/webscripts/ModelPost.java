@@ -178,48 +178,45 @@ public class ModelPost extends AbstractJavaWebScript {
 		this.projectNode = projectNode;
 	}
 
+	/**
+	 * Create or update the model as necessary based on the request
+	 *
+	 * @param content
+	 *            JSONObject used to create/update the model
+	 * @param status
+	 *            Status to be updated
+	 * @param workspaceId
+	 * @return the created elements
+	 * @throws JSONException
+	 *             Parse error
+	 */
+	public Set<EmsScriptNode> createOrUpdateModel(Object content,
+			Status status, WorkspaceNode targetWS, WorkspaceNode sourceWS,
+			boolean createCommit) throws Exception {
 
+		JSONObject postJson = (JSONObject) content;
+		populateSourceFromJson(postJson);
 
+		JSONArray updatedArray = postJson.optJSONArray("updatedElements");
+		JSONArray movedArray = postJson.optJSONArray("movedElements");
+		JSONArray addedArray = postJson.optJSONArray("addedElements");
+		JSONArray elementsArray = postJson.optJSONArray("elements");
 
-/**
- * Create or update the model as necessary based on the request
- *
- * @param content
- *            JSONObject used to create/update the model
- * @param status
- *            Status to be updated
- * @param workspaceId
- * @return the created elements
- * @throws JSONException
- *             Parse error
- */
-public Set<EmsScriptNode> createOrUpdateModel(Object content,
-        Status status, WorkspaceNode targetWS, WorkspaceNode sourceWS,
-        boolean createCommit) throws Exception {
+		Collection<JSONArray> collections = new ArrayList<JSONArray>();
+		if (updatedArray != null) {
+			if (!(updatedArray.length() == 0))
+				collections.add(updatedArray);
+		}
 
-    JSONObject postJson = (JSONObject) content;
-    populateSourceFromJson(postJson);
+		if (movedArray != null) {
+			if (!(movedArray.length() == 0))
+				collections.add(movedArray);
+		}
 
-    JSONArray updatedArray = postJson.optJSONArray("updatedElements");
-    JSONArray movedArray = postJson.optJSONArray("movedElements");
-    JSONArray addedArray = postJson.optJSONArray("addedElements");
-    JSONArray elementsArray = postJson.optJSONArray("elements");
-
-    Collection<JSONArray> collections = new ArrayList<JSONArray>();
-    if (updatedArray != null) {
-        if (!(updatedArray.length() == 0))
-            collections.add(updatedArray);
-    }
-
-    if (movedArray != null) {
-        if (!(movedArray.length() == 0))
-            collections.add(movedArray);
-    }
-
-    if (addedArray != null) {
-        if (!(addedArray.length() == 0))
-            collections.add(addedArray);
-    }
+		if (addedArray != null) {
+			if (!(addedArray.length() == 0))
+				collections.add(addedArray);
+		}
 
 		if (!(elementsArray == null))
 			collections.add(elementsArray);
@@ -240,64 +237,65 @@ public Set<EmsScriptNode> createOrUpdateModel(Object content,
 		return elements;
 	}
 
-private void processRootElement(String rootElement, WorkspaceNode targetWS,
-                                TreeMap<String, EmsScriptNode> nodeMap,
-                                TreeSet<EmsScriptNode> elements,
-                                Set<String> elementsToRemove) throws Exception {
-    PermissionService psrvc = getServices().getPermissionService();
-    JSONObject rootElementJson = elementMap.get( rootElement );
-    if ( rootElementJson == null ) return;  // TODO -- ERROR
-    
-    // See if posted json changes cached json and, if not, add to the
-    // notChanging list and go ahead and return.
-    if ( NodeUtil.doJsonCaching ) {
-        String sysmlId = rootElementJson.optString( "sysmlid" );
-        if ( sysmlId != null ) {
-            EmsScriptNode node = foundElements.get( sysmlId );
-            if ( node == null ) {
-                node = findScriptNodeById( sysmlId, targetWS, null, false );
+    private void processRootElement(String rootElement, WorkspaceNode targetWS,
+                                    TreeMap<String, EmsScriptNode> nodeMap,
+                                    TreeSet<EmsScriptNode> elements,
+                                    Set<String> elementsToRemove) throws Exception {
+        PermissionService psrvc = getServices().getPermissionService();
+        JSONObject rootElementJson = elementMap.get( rootElement );
+        if ( rootElementJson == null ) return;  // TODO -- ERROR
+        
+        // See if posted json changes cached json and, if not, add to the
+        // notChanging list and go ahead and return.
+        if ( NodeUtil.doJsonCaching ) {
+            String sysmlId = rootElementJson.optString( "sysmlid" );
+            if ( sysmlId != null ) {
+                EmsScriptNode node = foundElements.get( sysmlId );
+                if ( node == null ) {
+                    node = findScriptNodeById( sysmlId, targetWS, null, false );
+                }
+                if ( node != null ) {
+                    String id = node.getNodeRef().toString();
+                    JSONObject cachedElement = NodeUtil.jsonCacheGet( id, 0, true );
+                    if ( cachedElement != null ) {
+                        if ( !JsonDiffDiff.doesChange( cachedElement, rootElementJson ) ) {
+                            notChanging.add( rootElement );
+                            return;
+                        } else {
+                            changing.add( rootElement );
+                        }
+                    }
+                }
             }
-            if ( node != null ) {
-                String id = node.getNodeRef().toString();
-                JSONObject cachedElement = NodeUtil.jsonCacheGet( id, 0, true );
-                if ( cachedElement != null ) {
-                    if ( !JsonDiffDiff.doesChange( cachedElement, rootElementJson ) ) {
-                        notChanging.add( rootElement );
-                        return;
+        }
+        
+        if (projectNode == null ||
+            !rootElement.equals(projectNode.getProperty(Acm.CM_NAME))) {
+            EmsScriptNode owner = getOwner(rootElement,targetWS, true);
+            
+            // Create element, owner, and reified package folder as
+            // necessary and place element with owner; don't update
+            // properties on this first pass.
+            if (owner != null && owner.exists()) {
+                if (checkPermissions(owner, "Write")) {
+                    Set< EmsScriptNode > updatedElements =
+                            updateOrCreateElement( rootElementJson,
+                                                   owner, targetWS, false );
+                    for ( EmsScriptNode node : updatedElements ) {
+                        nodeMap.put(node.getName(), node);
+                    }
+                    elements.addAll( updatedElements );
+                } else {
+                    if (elementsToRemove != null) {
+                        elementsToRemove.add( rootElement );
                     } else {
-                        changing.add( rootElement );
+                        logger.warn( "could not remove elements due to permissions" );
                     }
                 }
             }
         }
     }
-    
-    if (projectNode == null ||
-        !rootElement.equals(projectNode.getProperty(Acm.CM_NAME))) {
-        EmsScriptNode owner = getOwner(rootElement,targetWS, true);
-        
-        // Create element, owner, and reified package folder as
-        // necessary and place element with owner; don't update
-        // properties on this first pass.
-        if (owner != null && owner.exists()) {
-            if (checkPermissions(owner, "Write")) {
-                Set< EmsScriptNode > updatedElements =
-                        updateOrCreateElement( rootElementJson,
-                                               owner, targetWS, false );
-                for ( EmsScriptNode node : updatedElements ) {
-                    nodeMap.put(node.getName(), node);
-                }
-                elements.addAll( updatedElements );
-            } else {
-                if (elementsToRemove != null) {
-                    elementsToRemove.add( rootElement );
-                } else {
-                    logger.warn( "could not remove elements due to permissions" );
-                }
-            }
-        }
-    }
-}
+
 	/**
 	 * Utility to save off the commit, then send deltas. Send deltas is tied to
 	 * the projectId, so MD knows how to filter for it.
