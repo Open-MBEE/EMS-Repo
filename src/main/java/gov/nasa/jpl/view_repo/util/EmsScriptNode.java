@@ -327,7 +327,7 @@ public class EmsScriptNode extends ScriptNode implements
     public boolean embeddingExpressionInOperation = true;
     public boolean embeddingExpressionInConnector = true;
 
-    public AbstractJavaWebScript webscript;
+    public AbstractJavaWebScript webscript = null;
 
     // private boolean forceCacheUpdate = false;
 
@@ -4518,10 +4518,6 @@ public class EmsScriptNode extends ScriptNode implements
             AuthenticationUtil.setRunAsUser( runAsUser );
         }
         return b;
-    }
-    
-    public boolean hasPermission( String permission, AbstractJavaWebScript webscript ) {
-        return false;
     }
     
     public static class EmsScriptNodeComparator implements

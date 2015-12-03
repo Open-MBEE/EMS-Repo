@@ -2546,15 +2546,13 @@ public class NodeUtil {
 				getServices(), false, siteName);
 		for (NodeRef nodeRef : resultSet) {
 			EmsScriptNode node = new EmsScriptNode(nodeRef, services, response);
-//			if (node.checkPermissions(PermissionService.READ, response, status)) {
-				String id = node.getSysmlId();
-				// We assume that order matters and that if two nodes have the
-				// same id, then the first is preferred (for example, because it
-				// is in the closest workspace).
-				if (id != null && !searchResults.containsKey(id)) {
-					searchResults.put(id, node);
-				}
-//			}
+			String id = node.getSysmlId();
+			// We assume that order matters and that if two nodes have the
+			// same id, then the first is preferred (for example, because it
+			// is in the closest workspace).
+			if (id != null && !searchResults.containsKey(id)) {
+				searchResults.put(id, node);
+			}
 		}
 
 		return searchResults;

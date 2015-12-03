@@ -245,6 +245,7 @@ public class ModelPost extends AbstractJavaWebScript {
         // See if posted json changes cached json and, if not, add to the
         // notChanging list and go ahead and return.
         if ( NodeUtil.doJsonCaching ) {
+            // TODO -- Need to fix and turn on JsonCache for this to work.
             String sysmlId = rootElementJson.optString( "sysmlid" );
             if ( sysmlId != null ) {
                 EmsScriptNode node = foundElements.get( sysmlId );
