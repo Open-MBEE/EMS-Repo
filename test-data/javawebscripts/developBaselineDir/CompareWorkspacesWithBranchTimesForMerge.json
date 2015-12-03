@@ -4,13 +4,11 @@
         "name": "wsT",
         "elements": [
             {
-                "qualifiedName": "/europa/JW_TEST/300/301/302/303",
-                "sysmlid": "303",
-                "editable": true,
-                "version": "1.4",
                 "name": "303",
+                "qualifiedName": "/europa/JW_TEST/300/301/302/303",
                 "documentation": "talk",
                 "owner": "302",
+                "sysmlid": "303",
                 "specialization": {
                     "propertyType": null,
                     "isSlot": false,
@@ -21,16 +19,17 @@
                         "type": "LiteralString"
                     }],
                     "type": "Property"
-                }
+                },
+                "editable": true,
             },
             {
-                "name": "conflict",
                 "qualifiedName": "/europa/JW_TEST/conflict",
-                "documentation": "this will create a conflict!",
-                "owner": "123456",
                 "sysmlid": "conflict",
-                "specialization": {"type": "Element"},
                 "editable": true,
+                "name": "conflict",
+                "owner": "123456",
+                "documentation": "this will create a conflict!",
+                "specialization": {"type": "Element"}
             },
             {
                 "qualifiedName": "/europa/JW_TEST/300/301/302",
@@ -112,8 +111,8 @@
         "deletedElements": [],
         "addedElements": [{
             "qualifiedName": "/europa/JW_TEST/300/301/302/null",
-            "owner": "302",
             "documentation": "z is z",
+            "owner": "302",
             "sysmlid": "z",
             "specialization": {
                 "propertyType": null,
