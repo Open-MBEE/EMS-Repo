@@ -2817,9 +2817,7 @@ public class ModelPost extends AbstractJavaWebScript {
 			if (fix) {
 				sendProgress("Fixing constraints", projectId, true);
 				new EmsTransaction(getServices(), getResponse(),
-						getResponseStatus(), runWithoutTransactions) {// ||
-																		// internalRunWithoutTransactions
-																		// ) {
+						getResponseStatus(), runWithoutTransactions) {
 					@Override
 					public void run() throws Exception {
 						fix(elements, workspace);
@@ -2865,61 +2863,17 @@ public class ModelPost extends AbstractJavaWebScript {
 							projectId, true);
 
 					new EmsTransaction(getServices(), getResponse(),
-							getResponseStatus(), runWithoutTransactions) {// ||
-																			// internalRunWithoutTransactions
-																			// )
-																			// {
+							getResponseStatus(), runWithoutTransactions) {
 						@Override
 						public void run() throws Exception {
 							evaluate(elementsJsonMap, top, workspace);
-							// Map< Object, Object > r = evaluate(elements,
-							// workspace);
-							// results.putAll( r );
-							sendProgress(
-									"Evaluating constraints and expressions completed",
-									projectId, true);
+							sendProgress( "Evaluating constraints and expressions completed",
+							              projectId, true);
 						}
 					};
 				}
 
-				// new EmsTransaction(getServices(), getResponse(),
-				// getResponseStatus(),
-				// runWithoutTransactions) {
-				// @Override
-				// public void run() throws Exception {
-				// for ( int i = 0; i < elementsJson.length(); ++i ) {
-				//
-				// }
-				// for ( EmsScriptNode element : elements ) {
-				// JSONObject json = element.toJSONObject(workspace, null);
-				// Object result = results.get( element );
-				// if ( result != null ) {
-				// try {
-				// json.putOpt( "evaluationResult", result );
-				// results.remove( element );
-				// } catch ( Throwable e ) {
-				// ModelPost.this.log( Level.WARN,
-				// "Evaluation failed for %s", element );
-				// }
-				// }
-				// elementsJson.put( json );
-				// }
-				// }
-				// };
-				//
-				// // Put constraint evaluation results in json.
-				// JSONArray resultJarr = new JSONArray();
-				// for ( Object k : results.keySet() ) {
-				// JSONObject r = new JSONObject();
-				// r.put( "expression", k.toString() );
-				// Object v = results.get( k );
-				// r.put( "value", "" + v );
-				// resultJarr.put( r );
-				// }
-
 				top.put("elements", elementsJson);
-				// if ( resultJarr.length() > 0 ) top.put( "evaluations",
-				// resultJarr );
 			}
 		}
 
@@ -2953,9 +2907,7 @@ public class ModelPost extends AbstractJavaWebScript {
 
 		for (final EmsScriptNode element : elems) {
 			new EmsTransaction(getServices(), getResponse(),
-					getResponseStatus(), runWithoutTransactions) {// ||
-																	// internalRunWithoutTransactions)
-																	// {
+					getResponseStatus(), runWithoutTransactions) {
 				@Override
 				public void run() throws Exception {
 					element.addRelationshipToPropertiesOfParticipants(ws);
