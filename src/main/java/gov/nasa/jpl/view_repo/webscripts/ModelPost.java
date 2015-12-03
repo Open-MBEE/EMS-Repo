@@ -2505,9 +2505,9 @@ public class ModelPost extends AbstractJavaWebScript {
 		final String user = AuthenticationUtil.getFullyAuthenticatedUser();
 		String wsId = null;
 
-		if (logger.isDebugEnabled()) {
-			logger.debug(user + " " + req.getURL());
-			logger.debug(req.parseContent());
+		if (logger.isInfoEnabled()) {
+			logger.info(user + " " + req.getURL());
+			logger.info(req.parseContent());
 		}
 
 		if (runWithoutTransactions) {// || internalRunWithoutTransactions) {
