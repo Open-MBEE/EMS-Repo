@@ -81,12 +81,12 @@ public class PostgresHelper {
 	}
 
 	public void execUpdate(String query) throws SQLException {
-		if (logger.isInfoEnabled()) logger.info("Query: " + query);
+		if (logger.isDebugEnabled()) logger.debug("Query: " + query);
 		this.conn.createStatement().executeUpdate(query);
 	}
 
 	public ResultSet execQuery(String query) throws SQLException {
-	    if (logger.isInfoEnabled()) logger.info("Query: " + query);
+	    if (logger.isDebugEnabled()) logger.debug("Query: " + query);
 		return this.conn.createStatement().executeQuery(query);
 	}
 
@@ -249,8 +249,9 @@ public class PostgresHelper {
 					+ edgeType.getValue() + ")");
 		} catch (Exception e) {
 			if (e.getMessage().contains("duplicate key")) {
-				if (logger.isInfoEnabled())
+				if (logger.isInfoEnabled()) {
 					e.printStackTrace();
+				}
 			} else {
 				e.printStackTrace();
 			}
