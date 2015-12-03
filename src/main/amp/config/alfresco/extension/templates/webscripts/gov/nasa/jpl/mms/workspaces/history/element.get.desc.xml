@@ -3,7 +3,7 @@
 	<description>
 		get element version history with {elementId}
 	</description>
-	<url>/workspaces/master/history/{elementId}</url>
+	<url>/workspaces/{workspaceId}/history/{elementId}</url>
 	<format default="json">argument</format>
 	<authentication>user</authentication>
 	<transaction>none</transaction>

@@ -22,15 +22,15 @@
         }
     },
     {
-        "qualifiedId": "/europa/123456/add_add_consistent",
-        "qualifiedName": "/europa/JW_TEST2/add_add_consistent",
-        "sysmlid": "add_add_consistent",
+        "qualifiedId": "/europa/123456/delete_delete_before",
+        "qualifiedName": "/europa/JW_TEST2/delete_delete_before",
+        "sysmlid": "delete_delete_before",
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
-        "name": "add_add_consistent",
+        "name": "delete_delete_before",
         "owner": "123456",
-        "documentation": "add_add_consistent",
+        "documentation": "delete_delete_before",
         "specialization": {
             "propertyType": null,
             "isDerived": false,
@@ -66,6 +66,50 @@
         }
     },
     {
+        "qualifiedId": "/europa/123456/add_add_consistent",
+        "qualifiedName": "/europa/JW_TEST2/add_add_consistent",
+        "sysmlid": "add_add_consistent",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "add_add_consistent",
+        "owner": "123456",
+        "documentation": "add_add_consistent",
+        "specialization": {
+            "propertyType": null,
+            "isDerived": false,
+            "isSlot": false,
+            "value": [{
+                "valueExpression": null,
+                "string": "this is it",
+                "type": "LiteralString"
+            }],
+            "type": "Property"
+        }
+    },
+    {
+        "qualifiedId": "/europa/123456/none_add_delete",
+        "qualifiedName": "/europa/JW_TEST2/none_add_delete",
+        "sysmlid": "none_add_delete",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "none_add_delete",
+        "owner": "123456",
+        "documentation": "none_add_delete",
+        "specialization": {
+            "propertyType": null,
+            "isDerived": false,
+            "isSlot": false,
+            "value": [{
+                "valueExpression": null,
+                "string": "this is it",
+                "type": "LiteralString"
+            }],
+            "type": "Property"
+        }
+    },
+    {
         "qualifiedId": "/europa/123456/update_update_consistent",
         "qualifiedName": "/europa/JW_TEST2/update_update_consistent",
         "sysmlid": "update_update_consistent",
@@ -82,28 +126,6 @@
             "value": [{
                 "valueExpression": null,
                 "string": "this is updated in conflict",
-                "type": "LiteralString"
-            }],
-            "type": "Property"
-        }
-    },
-    {
-        "qualifiedId": "/europa/123456/delete_delete_before",
-        "qualifiedName": "/europa/JW_TEST2/delete_delete_before",
-        "sysmlid": "delete_delete_before",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "delete_delete_before",
-        "owner": "123456",
-        "documentation": "delete_delete_before",
-        "specialization": {
-            "propertyType": null,
-            "isDerived": false,
-            "isSlot": false,
-            "value": [{
-                "valueExpression": null,
-                "string": "this is it",
                 "type": "LiteralString"
             }],
             "type": "Property"

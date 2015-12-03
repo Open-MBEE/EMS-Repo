@@ -10,8 +10,8 @@
             "creator": "admin",
             "modifier": "admin",
             "name": "402",
-            "owner": "401",
             "documentation": "4to",
+            "owner": "401",
             "specialization": {
                 "propertyType": null,
                 "isDerived": false,
@@ -28,11 +28,13 @@
     "workspace2": {
         "deletedElements": [],
         "addedElements": [{
-            "modifier": "admin",
             "qualifiedName": "/no_site/no_site_no_project/holding_bin/null",
             "sysmlid": "newElement",
-            "documentation": "x is x",
+            "editable": true,
+            "creator": "admin",
+            "modifier": "admin",
             "owner": "holding_bin_no_site_no_project",
+            "documentation": "x is x",
             "specialization": {
                 "propertyType": null,
                 "isDerived": false,
@@ -43,9 +45,7 @@
                     "type": "LiteralString"
                 }],
                 "type": "Property"
-            },
-            "editable": true,
-            "creator": "admin",
+            }
         }],
         "conflictedElements": [],
         "updatedElements": [{
@@ -55,8 +55,8 @@
             "creator": "admin",
             "modifier": "admin",
             "name": "402",
-            "owner": "401",
             "documentation": "x is x",
+            "owner": "401",
             "specialization": {
                 "propertyType": null,
                 "isDerived": false,

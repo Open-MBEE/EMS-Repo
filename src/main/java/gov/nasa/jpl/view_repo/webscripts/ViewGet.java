@@ -51,7 +51,6 @@ import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.json.JSONArray;
-import org.apache.log4j.Logger;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.extensions.webscripts.Cache;
@@ -123,7 +122,7 @@ public class ViewGet extends AbstractJavaWebScript {
         if ( viewId == null ) {
             viewId = req.getServiceMatch().getTemplateVars().get("elementid");
         }
-        if (Debug.isOn()) System.out.println("Got raw id = " + viewId);
+        if (logger.isDebugEnabled()) logger.debug("Got raw id = " + viewId);
         return viewId;
     }
 
@@ -141,10 +140,17 @@ public class ViewGet extends AbstractJavaWebScript {
         //clearCaches();
 
         Map<String, Object> model = new HashMap<String, Object>();
-        // default recurse=false but recurse only applies to displayed elements and contained views
-        boolean recurse = getBooleanArg(req, "recurse", false);
-        // default generate=false - generation with viewpoints takes a long time
-        boolean generate = getBooleanArg( req, "generate", false );
+        
+            if (checkMmsVersions) {
+                if(compareMmsVersions(req, getResponse(), getResponseStatus()));{
+                    model.put("res", createResponseJson());
+                    return model;
+                }
+            }
+            // default recurse=false but recurse only applies to displayed elements and contained views
+            boolean recurse = getBooleanArg(req, "recurse", false);
+            // default generate=false - generation with viewpoints takes a long time
+            boolean generate = getBooleanArg( req, "generate", false );
 
         JSONArray viewsJson = new JSONArray();
         if (validateRequest(req, status)) {
@@ -153,12 +159,12 @@ public class ViewGet extends AbstractJavaWebScript {
             if ( !gettingDisplayedElements ) {
                 gettingContainedViews = isContainedViewRequest( req );
             } 
-            if (Debug.isOn()) System.out.println("viewId = " + viewId);
-            
+            if (logger.isDebugEnabled()) logger.debug("viewId = " + viewId);
+
             // get timestamp if specified
             String timestamp = req.getParameter("timestamp");
             Date dateTime = TimeUtils.dateFromTimestamp( timestamp );
-        
+
             WorkspaceNode workspace = getWorkspace( req );
 
             try {
@@ -179,7 +185,7 @@ public class ViewGet extends AbstractJavaWebScript {
             } catch (JSONException e) {
                 e.printStackTrace();
                 log(Level.ERROR, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "JSON creation error");
-				model.put("res", createResponseJson());
+                model.put("res", createResponseJson());
                 e.printStackTrace();
             }
         } else {
@@ -217,7 +223,7 @@ public class ViewGet extends AbstractJavaWebScript {
                 
                 EmsScriptNode.expressionStuff = true;
                 if ( gettingDisplayedElements ) {
-                    if (Debug.isOn()) System.out.println("+ + + + + gettingDisplayedElements");
+                    if (logger.isDebugEnabled()) logger.debug("+ + + + + gettingDisplayedElements");
                     // TODO -- need to use recurse flag!
                     Collection< EmsScriptNode > elems =
                             v.getDisplayedElements( workspace, dateTime,
@@ -227,7 +233,7 @@ public class ViewGet extends AbstractJavaWebScript {
                         viewsJson.put( n.toJSONObject( workspace, dateTime ) );
                     }
                 } else if ( gettingContainedViews ) {
-                    if (Debug.isOn()) System.out.println("+ + + + + gettingContainedViews");
+                    if (logger.isDebugEnabled()) logger.debug("+ + + + + gettingContainedViews");
                     Collection< EmsScriptNode > elems =
                             v.getContainedViews( recurse, workspace, dateTime,
                                                  null );
@@ -236,7 +242,7 @@ public class ViewGet extends AbstractJavaWebScript {
                         viewsJson.put( n.toJSONObject( workspace,dateTime ) );
                     }
                 } else {
-                    if (Debug.isOn()) System.out.println("+ + + + + just the view");
+                    if (logger.isDebugEnabled()) logger.debug("+ + + + + just the view");
                     viewsJson.put( view.toJSONObject( workspace, dateTime ) );
                 }
                 EmsScriptNode.expressionStuff = false;

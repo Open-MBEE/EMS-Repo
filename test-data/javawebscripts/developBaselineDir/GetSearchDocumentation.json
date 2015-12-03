@@ -6,8 +6,8 @@
     "creator": "admin",
     "modifier": "admin",
     "name": "300",
-    "owner": "123456",
     "documentation": "something",
+    "owner": "123456",
     "specialization": {
         "propertyType": null,
         "isDerived": false,

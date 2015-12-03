@@ -28,8 +28,7 @@
                     }],
                     "type": "Property"
                 },
-                "editable": true,
-                "version": "1.1"
+                "editable": true
             }
         ]
     },

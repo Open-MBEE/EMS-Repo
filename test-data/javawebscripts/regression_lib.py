@@ -37,11 +37,11 @@ test_dir_path = "test-data/javawebscripts"
 test_nums = []
 test_names = []
 create_baselines = False
-common_filters = ['"created"', '"read"', '"lastModified"', '"modified"', '"siteCharacterizationId"', 'time_total']
+common_filters = ['"nodeRefId"', '"versionedRefId"', '"created"','"read"','"lastModified"','"modified"','"siteCharacterizationId"','time_total']
 cmd_git_branch = None
 
 tests = []
-
+service_flags = []
 
 # Some global variables for lambda functions in tests
 gv1 = None
@@ -665,7 +665,7 @@ def run_curl_test(test_num, test_name, test_desc, curl_cmd, use_json_diff=False,
                 cp, err = p.communicate()
                 if len(cp) == 0:
                     cp = ".:%s:%s:%s:%s:../../target/mms-repo-ent-war/WEB-INF/lib/json-20140107.jar:../../target/mms-repo-war/WEB-INF/lib/json-20140107.jar:../../target/mms-repo-war/WEB-INF/lib/json-20090211.jar:../../target/classes"%(mbee_util_jar_path(),mbee_util_jar_path2(),mbee_util_jar_path3(),mbee_util_jar_path4())
-                diff_cmd = "java -cp %s gov.nasa.jpl.view_repo.util.JsonDiff"%cp.strip()
+                diff_cmd = 'java -cp "%s" gov.nasa.jpl.view_repo.util.JsonDiff' % cp.strip()
             else:
                 diff_cmd = "diff"
 
@@ -873,4 +873,78 @@ def run(testArray):
      
     sys.exit(failed_tests)
         
+# This will attempt to turn a flag -ON- the MMS server  
+def turn_on_mms_flag(mmsFlag, VERBOSE=True):
+    curl_cmd = create_curl_cmd("GET", data="flags/" + mmsFlag + "?on", base_url=SERVICE_URL, branch="")
+    result = commands.getoutput(curl_cmd)
+    if VERBOSE : print result
+
+# This will attempt to turn a flag -OFF- the MMS server
+def turn_off_mms_flag(mmsFlag, VERBOSE=True):
+    curl_cmd = create_curl_cmd("GET", data="flags/" + mmsFlag + "?off", base_url=SERVICE_URL, branch="")
+    result = commands.getoutput(curl_cmd)
+    if VERBOSE : print result
+
+# Retrieves the status of a flag on the MMS server, and will return a boolean value if it is on (true) or off ( false)
+def get_mms_flag_status(mmsFlag, VERBOSE=True):
+    curl_cmd = create_curl_cmd("GET", data="flags/" + mmsFlag + "?ison", base_url=SERVICE_URL, branch="")
+    output = commands.getoutput(curl_cmd)
+    
+    # Regular Expression to check for the patter is off, or is on, Python compiles then searches for it
+    # The variables will contain None if the pattern is not found in the string.
+    off = re.compile('is off')
+    on = re.compile('is on')
+    isOff = off.search(output)
+    isOn = on.search(output)
+    
+    # Compares the values of isOff and isOn against None to see whether or not they are in the string
+    # Technically if one is true the other must be false so it could be an if else, but I figure it is safer
+    # to check both when dealing with memory locations 
+    if isOn is not None:
+        if VERBOSE : print "The MMS flag : " + mmsFlag + " is on, RETURN : True"
+        return True
+    if isOff is not None:
+        if VERBOSE : print "The MMS flag : " + mmsFlag + " is off, RETURN : False"
+        return False
+
+# Toggles a flag on the MMS server on or off, based on its current status
+def toggle_mms_flag(mmsFlag, VERBOSE=True):
+    
+    # Gets the current status of the mms flag
+    flag_status = get_mms_flag_status(mmsFlag)
+    # if flag is currently on, turn off flag
+    if flag_status is True:
+        toggleParameter = "?off"
+        if VERBOSE : print "The MMS flag : " + mmsFlag + " is turning off.."
+    # else if off, turn on
+    elif flag_status is False:
+        toggleParameter = "?on"
+        if VERBOSE : print "The MMS flag :" + mmsFlag + " is turning on.."
+    
+    # Create curl command with either ?on or ?off then execute curl command
+    curl_cmd = create_curl_cmd("GET", data="flags/" + mmsFlag + toggleParameter, base_url=SERVICE_URL, branch="") 
+    output = commands.getoutput(curl_cmd)
+    if VERBOSE : print str(output)
+    
+# Turns on the MMS Service Flag Testing for checking MMS Versions
+def turn_on_check_mms_version_flag():  
+    isOn = get_mms_flag_status("checkMmsVersion")
+    if not isOn:
+       turn_on_mms_flag("checkMmsVersion") 
+       
+       
+def turn_off_check_mms_version_flag():  
+    isOn = get_mms_flag_status("checkMmsVersion")
+    if isOn:
+       turn_off_mms_flag("checkMmsVersion") 
+
+
+def turn_on_service_flags(): 
+    for flag in service_flags:
+        print "Turning on : " + flag
+        turn_on_mms_flag(flag)
         
+def turn_off_service_flags(): 
+    for flag in service_flags:
+        print "Turning off : " + flag
+        turn_off_mms_flag(flag)
