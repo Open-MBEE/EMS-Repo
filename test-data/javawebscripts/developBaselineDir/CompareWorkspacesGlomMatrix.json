@@ -83,10 +83,8 @@
                 "sysmlid":"none_update_gg",
                 "editable":true,
                 "name":"none_update_gg",
-                "qualifiedName":"/europa/JW_TEST2/none_update_gg",
                 "documentation":"none_update_gg",
                 "owner":"123456",
-                "sysmlid":"none_update_gg",
                 "specialization":{
                     "propertyType":null,
                     "isSlot":false,
@@ -99,9 +97,7 @@
                         }
                     ],
                     "type":"Property"
-                },
-                "editable":true,
-                
+                }
             },
             {
                 "qualifiedName":"/europa/JW_TEST2/update_update_gg",
