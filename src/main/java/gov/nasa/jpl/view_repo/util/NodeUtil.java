@@ -4850,32 +4850,83 @@ public class NodeUtil {
                 new HashMap< String, Set< String >>();
         Map< String, String > child2owner = new HashMap< String, String >();
 
-        if ( json.has( "elements" ) ) {
-            JSONArray elements = json.getJSONArray( "elements" );
-            for ( int ii = 0; ii < elements.length(); ii++ ) {
-                JSONObject element = elements.getJSONObject( ii );
-
-                parseJsonElement( element, id2name, id2siteName,
-                                  owner2children, child2owner );
-            }
-
-            buildOwnerTrees( req, json, id2name, id2siteName, owner2children,
-                             child2owner );
-
-            for ( int ii = 0; ii < elements.length(); ii++ ) {
-                JSONObject element = elements.getJSONObject( ii );
-                String sysmlid = element.getString( "sysmlid" );
-                Map< String, String > qpathMap =
-                        new HashMap< String, String >();
-
-                buildQualifiedPath( qpathMap, sysmlid, id2name, id2siteName,
-                                    owner2children, child2owner );
-                element.put( "qualifiedId", qpathMap.get( "qid" ) );
-                element.put( "qualifiedName", qpathMap.get( "qname" ) );
-                element.put( "siteCharacterizationId", qpathMap.get( "site" ) );
+        String topLevelKeys[] = {"elements", "products", "views", "workspace1"};
+        for (int ii = 0; ii < topLevelKeys.length; ii++) {
+            String key = topLevelKeys[ii];
+            if (json.has(key)) {
+                if (!key.equals( "workspace1" )) {
+                    JSONArray elementsJson = json.getJSONArray( key );
+                    handleElements(req, elementsJson, id2name, id2siteName, owner2children, child2owner);
+                } else {
+                    // FIXME: enable later since difficult to track qualifiedIds in time, let
+                    // EmsScriptNode do the job
+//                    JSONObject ws1Json = json.getJSONObject( "workspace1" );
+//                    JSONArray elementsJson = ws1Json.getJSONArray( "elements" );
+//                    handleElements( req, elementsJson, id2name, id2siteName,
+//                                    owner2children, child2owner );
+//
+//                    JSONObject ws2Json = json.getJSONObject( "workspace2" );
+//                    // deleted doesn't require any qualified ids, so ignore for now
+//                    String innerKeys[] =
+//                            { "elements", "updatedElements", /* "deletedElements", */
+//                              "conflictedElements", "addedElements", "movedElements" };
+//                    for ( int jj = 0; jj < innerKeys.length; jj++ ) {
+//                        if ( ws2Json.has( innerKeys[ jj ] ) ) {
+//                            JSONArray keyArrayJson = ws2Json.getJSONArray( innerKeys[ jj ] );
+//                            handleElements( req, keyArrayJson, id2name, id2siteName,
+//                                            owner2children, child2owner );
+//                        }
+//                    }
+                }
             }
         }
         model.put( "res", json.toString( 4 ) );
+    }
+
+    private static void
+            handleElements( WebScriptRequest req, JSONArray elementsJson,
+                            Map< String, String > id2name,
+                            Map< String, String > id2siteName,
+                            Map< String, Set< String >> owner2children,
+                            Map< String, String > child2owner ) {
+        for ( int ii = 0; ii < elementsJson.length(); ii++ ) {
+            JSONObject elementJson = elementsJson.getJSONObject( ii );
+
+            parseJsonElement( elementJson, id2name, id2siteName,
+                              owner2children, child2owner );
+        }
+
+        buildOwnerTrees( req, id2name, id2siteName, owner2children, child2owner );
+
+        for ( int ii = 0; ii < elementsJson.length(); ii++ ) {
+            JSONObject elementJson = elementsJson.getJSONObject( ii );
+            updateElementJson( elementJson, id2name, id2siteName,
+                               owner2children, child2owner );
+        }
+    }
+
+    private static void
+            updateElementJson( JSONObject elementJson,
+                               Map< String, String > id2name,
+                               Map< String, String > id2siteName,
+                               Map< String, Set< String >> owner2children,
+                               Map< String, String > child2owner ) {
+        String sysmlid = elementJson.getString( "sysmlid" );
+        Map< String, String > qpathMap = new HashMap< String, String >();
+
+        buildQualifiedPath( qpathMap, sysmlid, id2name, id2siteName,
+                            owner2children, child2owner );
+        elementJson.put( "qualifiedId", qpathMap.get( "qid" ) );
+        elementJson.put( "qualifiedName", qpathMap.get( "qname" ) );
+        elementJson.put( "siteCharacterizationId", qpathMap.get( "site" ) );
+
+        if ( elementJson.has( "properties" ) ) {
+            JSONArray propsJson = elementJson.getJSONArray( "properties" );
+            for ( int jj = 0; jj < propsJson.length(); jj++ ) {
+                updateElementJson( propsJson.getJSONObject( jj ), id2name,
+                                   id2siteName, owner2children, child2owner );
+            }
+        }
     }
 
     private static void
@@ -4904,7 +4955,7 @@ public class NodeUtil {
     }
 
     private static void
-            buildOwnerTrees( WebScriptRequest req, JSONObject json,
+            buildOwnerTrees( WebScriptRequest req,
                              Map< String, String > id2name,
                              Map< String, String > id2siteName,
                              Map< String, Set< String >> owner2children,
@@ -4913,16 +4964,44 @@ public class NodeUtil {
         Set< String > owners = new HashSet< String >();
         owners.addAll( owner2children.keySet() );
 
+        // traverse owners to get qualified names and site characterizations
         Set< String > visitedOwners = new HashSet< String >();
 
-        // traverse owners to get qualified names and site characterizations
+        String wsId = AbstractJavaWebScript.getWorkspaceId( req );
+        String timestamp =
+                req.getServiceMatch().getTemplateVars().get( "timestamp" );
+        Date dateTime = TimeUtils.dateFromTimestamp( timestamp );
+
+        if ( owners.size() <= 0 ) {
+            Set<String> ids = new HashSet<String>();
+            ids.addAll( id2name.keySet() );
+            for ( String id : ids ) {
+                EmsScriptNode node = null;
+                if ( NodeUtil.doGraphDb && wsId.equals( "master" )
+                     && dateTime == null ) {
+                    PostgresHelper pgh = new PostgresHelper( wsId );
+                    try {
+                        pgh.connect();
+                        node =NodeUtil.getNodeFromPostgresNode( pgh.getNodeFromSysmlId( id )  );
+                        pgh.close();
+                    } catch ( ClassNotFoundException e ) {
+                        e.printStackTrace();
+                    } catch ( SQLException e ) {
+                        e.printStackTrace();
+                    }
+                } else {
+                    WorkspaceNode ws =
+                            WorkspaceNode.getWorkspaceFromId( wsId, services, null, null,
+                                                              null );                    
+                    node = findScriptNodeById( id, ws, dateTime, false, services, null );
+                }
+                addSiteOwnerInfo( id, node, id2name, id2siteName,
+                                  owner2children, child2owner, visitedOwners );
+            }
+        }
+
         for ( String owner : owners ) {
             if ( !visitedOwners.contains( owner ) ) {
-                String wsId = AbstractJavaWebScript.getWorkspaceId( req );
-                String timestamp =
-                        req.getServiceMatch().getTemplateVars()
-                           .get( "timestamp" );
-                Date dateTime = TimeUtils.dateFromTimestamp( timestamp );
                 if ( NodeUtil.doGraphDb && wsId.equals( "master" )
                      && dateTime == null ) {
                     PostgresHelper pgh = new PostgresHelper( wsId );
@@ -5025,22 +5104,33 @@ public class NodeUtil {
             }
         } else {
             // no parent, so lets look for top level site
-            EmsScriptNode parent = node.getParent();
-            while ( !parent.getName().equals( "Sites" ) || parent == null ) {
-                node = parent;
-                parent = node.getParent();
-            }
-            String parentId = node.getName();
-            if ( !owner2children.containsKey( parentId ) ) {
-                owner2children.put( parentId, new HashSet< String >() );
-            }
-            owner2children.get( parentId ).add( sysmlId );
-            child2owner.put( sysmlId, parentId );
-            visitedOwners.add( parentId );
-            id2name.put( parentId, parentId );
-            id2siteName.put( sysmlId, parentId );
+            addSiteOwnerInfo( sysmlId, node, id2name, id2siteName,
+                              owner2children, child2owner, visitedOwners );
         }
+    }
 
+    private static void
+            addSiteOwnerInfo( String sysmlId, EmsScriptNode node,
+                              Map< String, String > id2name,
+                              Map< String, String > id2siteName,
+                              Map< String, Set< String >> owner2children,
+                              Map< String, String > child2owner,
+                              Set< String > visitedOwners ) {
+        if ( node == null ) return;
+        EmsScriptNode parent = node.getParent();
+        while ( !parent.getName().equals( "Sites" ) || parent == null ) {
+            node = parent;
+            parent = node.getParent();
+        }
+        String parentId = node.getName();
+        if ( !owner2children.containsKey( parentId ) ) {
+            owner2children.put( parentId, new HashSet< String >() );
+        }
+        owner2children.get( parentId ).add( sysmlId );
+        child2owner.put( sysmlId, parentId );
+        visitedOwners.add( parentId );
+        id2name.put( parentId, parentId );
+        id2siteName.put( sysmlId, parentId );
     }
 
     private static void
@@ -5050,6 +5140,7 @@ public class NodeUtil {
                               Map< String, Set< String >> owner2children,
                               Map< String, String > child2owner ) {
         String sysmlid = element.getString( "sysmlid" );
+        
         String name = null;
         if ( element.has( "name" ) ) {
             name = element.getString( "name" );

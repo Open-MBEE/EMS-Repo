@@ -264,7 +264,8 @@ public class ModelGet extends AbstractJavaWebScript {
 			prettyPrint = getBooleanArg(req, "pretty", prettyPrint);
 
 			Long depth = getDepthFromRequest(req);
-			boolean includeQualified = getBooleanArg(req, "qualified", true);
+			// force qualified to be false so DeclarativeWebscripts can inject it later
+			boolean includeQualified = false; //getBooleanArg(req, "qualified", true);
 
 			if (logger.isDebugEnabled())
 				logger.debug("modelId = " + modelId);

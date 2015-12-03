@@ -2652,7 +2652,8 @@ public class EmsScriptNode extends ScriptNode implements
     public JSONObject
             toJSONObject( WorkspaceNode ws, Date dateTime )
                                                            throws JSONException {
-        return toJSONObject( null, ws, dateTime, true, false, null );
+        // don't include qualified except for diffs, as added by DeclarativeJavaWebScript
+        return toJSONObject( null, ws, dateTime, false, false, null );
     }
 
     public
@@ -2806,29 +2807,30 @@ public class EmsScriptNode extends ScriptNode implements
                        ownedAttributeIds, filter );
         }
 
-        // Add this all in at end inside DeclarativeJavaWebScript
-//        if ( isIncludeQualified ) {
-//            if ( filter == null || filter.isEmpty()
-//                 || filter.contains( "qualifiedName" ) ) {
-//                putInJson( elementJson,
-//                           "qualifiedName",
-//                           this.getSysmlQName( dateTime, getWorkspace(), true ),
-//                           filter );
-//            }
-//            if ( filter == null || filter.isEmpty()
-//                 || filter.contains( "qualifiedId" ) ) {
-//                putInJson( elementJson, "qualifiedId",
-//                           this.getSysmlQId( dateTime, getWorkspace(), true ),
-//                           filter );
-//            }
-//            if ( filter == null || filter.isEmpty()
-//                 || filter.contains( "siteCharacterizationId" ) ) {
-//                putInJson( elementJson, "siteCharacterizationId",
-//                           this.getSiteCharacterizationId( dateTime,
-//                                                           getWorkspace() ),
-//                           filter );
-//            }
-//        }
+        // NOTE: DeclarativeJavaWebScript does this when isIncludeQualified is false
+        // isIncludeQualified should only be called for diffs 
+        if ( isIncludeQualified ) {
+            if ( filter == null || filter.isEmpty()
+                 || filter.contains( "qualifiedName" ) ) {
+                putInJson( elementJson,
+                           "qualifiedName",
+                           this.getSysmlQName( dateTime, getWorkspace(), true ),
+                           filter );
+            }
+            if ( filter == null || filter.isEmpty()
+                 || filter.contains( "qualifiedId" ) ) {
+                putInJson( elementJson, "qualifiedId",
+                           this.getSysmlQId( dateTime, getWorkspace(), true ),
+                           filter );
+            }
+            if ( filter == null || filter.isEmpty()
+                 || filter.contains( "siteCharacterizationId" ) ) {
+                putInJson( elementJson, "siteCharacterizationId",
+                           this.getSiteCharacterizationId( dateTime,
+                                                           getWorkspace() ),
+                           filter );
+            }
+        }
         if ( filter == null || filter.size() == 0 || filter.contains( "owner" ) ) {
 
             // not passing in dateTime/workspace since sysml id is immutable

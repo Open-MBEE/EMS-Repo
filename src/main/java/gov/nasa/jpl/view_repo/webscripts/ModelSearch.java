@@ -272,7 +272,8 @@ public class ModelSearch extends ModelGet {
 
             boolean checkReadPermission = true; // TODO -- REVIEW -- Should this
                                                 // be false?
-            handleElements( workspace, dateTime, true, true, evaluate, top,
+            boolean includeQualified = false;
+            handleElements( workspace, dateTime, includeQualified, true, evaluate, top,
                             checkReadPermission );
         }
 

@@ -535,7 +535,8 @@ public class MmsDiffGet extends AbstractJavaWebScript {
                                                     services, true );
             if ( NodeUtil.exists( ref ) ) {
                 EmsScriptNode node = new EmsScriptNode( ref, services );
-                elementJson = node.toJSONObject( ws, dateTime );
+                // make sure to includeQualified as DeclarativeWebscripts can't add qualified Ids to diffs
+                elementJson = node.toJSONObject( null, ws, dateTime, true, false, null );
             }
         }
         
