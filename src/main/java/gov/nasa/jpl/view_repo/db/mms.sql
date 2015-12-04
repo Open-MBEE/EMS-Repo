@@ -53,6 +53,13 @@ create table edges
 create index childIndex on edges (child);
 create index parentIndex on edges (parent);
 
+create table doors
+(
+  sysmlId text references nodes(sysmlId) not null,
+  resourceUrl text not null unique,
+  constraint unique_edges unique(sysmlId, resourceUrl)
+);
+
 -- given two nodeRefId, insert an edge between the two
 create or replace function insert_edge(text, text, text, integer)
   returns void as $$
