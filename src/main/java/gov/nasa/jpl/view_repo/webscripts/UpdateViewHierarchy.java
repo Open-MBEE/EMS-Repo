@@ -99,7 +99,7 @@ public class UpdateViewHierarchy {
                 JSONArray childViewsArray = 
                         spec.optJSONArray( Acm.JSON_CHILD_VIEWS );
                 // In case childViews is not in the specialization part of the json, . . .
-                if ( childViewsArray != null ) {
+                if ( childViewsArray == null ) {
                     childViewsArray = 
                             elementJson.optJSONArray( Acm.JSON_CHILD_VIEWS );
                 }
@@ -177,7 +177,7 @@ public class UpdateViewHierarchy {
      */
     protected void addJsonForViewHierarchyChanges( JSONObject jsonObj ) throws Exception {
         System.out.println("%%%%%%%%%%%%%%%%%         start addJsonForViewHierarchyChanges          %%%%%%%%%%%%%%%%%");
-        if ( jsonObject == null ) return; // null;
+        if ( jsonObj == null ) return; // null;
         this.jsonObject = jsonObj;
         
         processJson( jsonObject );
@@ -208,15 +208,17 @@ public class UpdateViewHierarchy {
                     new LinkedHashMap< String, String >();
             Map< String, String > ownedAttributeIdsForViewIds =
                     new LinkedHashMap< String, String >();
-            for ( String ownedAttributeId : ownedAttributeIds ) {
-                String viewIdForOwnedAttribute =
-                        getViewIdForOwnedAttribute( ownedAttributeId, elementsInJson );
-                if ( !Utils.isNullOrEmpty( viewIdForOwnedAttribute ) ) {
-                    viewIdsForOwnedAttributeIds.put( ownedAttributeId, 
-                                                     viewIdForOwnedAttribute );
-                    ownedAttributeIdsForViewIds.put( viewIdForOwnedAttribute, 
-                                                     ownedAttributeId );
-                }
+            if(ownedAttributeIds != null){
+	            for ( String ownedAttributeId : ownedAttributeIds ) {
+	                String viewIdForOwnedAttribute =
+	                        getViewIdForOwnedAttribute( ownedAttributeId, elementsInJson );
+	                if ( !Utils.isNullOrEmpty( viewIdForOwnedAttribute ) ) {
+	                    viewIdsForOwnedAttributeIds.put( ownedAttributeId, 
+	                                                     viewIdForOwnedAttribute );
+	                    ownedAttributeIdsForViewIds.put( viewIdForOwnedAttribute, 
+	                                                     ownedAttributeId );
+	                }
+	            }
             }
 
             // Initialize loop variables.
