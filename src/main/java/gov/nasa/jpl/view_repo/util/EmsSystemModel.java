@@ -11,6 +11,7 @@ import gov.nasa.jpl.mbee.util.Pair;
 import gov.nasa.jpl.mbee.util.Seen;
 import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.mbee.util.Utils;
+import gov.nasa.jpl.view_repo.sysml.View;
 import gov.nasa.jpl.view_repo.util.NodeUtil.SearchType;
 
 import java.io.Serializable;
@@ -22,8 +23,11 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.Vector;
 
@@ -31,6 +35,7 @@ import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.namespace.QName;
 import org.apache.log4j.Level;
+import org.json.JSONArray;
 import org.springframework.extensions.webscripts.Status;
 
 import sysml.AbstractSystemModel;
@@ -2487,7 +2492,44 @@ System.out.println("RRRRRR");
         return t;
     }
     
-    public static List< EmsScriptNode > getChildViews( EmsScriptNode parentNode ) {
+    public List< String > getChildViewIds( EmsScriptNode parentNode,
+                                           EmsScriptNode product,
+                                           WorkspaceNode workspace,
+                                           Date dateTime ) {
+        return getChildViewIdsFromViewToView( parentNode, product, workspace,
+                                              dateTime );
+    }
+
+    public List< String >
+            getChildViewIdsFromViewToView( EmsScriptNode parentNode,
+                                           EmsScriptNode product,
+                                           WorkspaceNode workspace,
+                                           Date dateTime ) {
+        List< String > childViews = new ArrayList< String >();
+        Map< EmsScriptNode, JSONArray > map = getViewToViews( parentNode, product, workspace, dateTime );
+        String parentId = parentNode.getSysmlId();
+        for ( Entry< EmsScriptNode, JSONArray > e : map.entrySet() ) {
+            EmsScriptNode prod = e.getKey();
+            JSONArray view2view = e.getValue();
+            if ( view2view == null ) continue;
+            for ( int i = 0; i < view2view.length(); ++i ) {
+                org.json.JSONObject obj = view2view.optJSONObject(i);
+                if ( obj == null ) continue;
+                    String id = obj.optString( "id" );
+                    if ( id == null || !id.equals( parentId ) ) continue;
+                    JSONArray arr = obj.optJSONArray("childViews");
+                    JSONArray childrenViews = obj.optJSONArray("childrenViews");
+                    if ( childrenViews == null ) continue;
+                    for ( int j = 0; j < childrenViews.length(); ++j ) {
+                        String childViewId = childrenViews.optString( j );
+                        childViews.add( childViewId );
+                    }
+                }
+            }
+        return childViews;
+    }
+    
+    public static List< EmsScriptNode > getChildViewsFromAssociations( EmsScriptNode parentNode ) {
         if ( !NodeUtil.exists( parentNode ) ) {
             return null;
         }
@@ -2551,7 +2593,126 @@ System.out.println("RRRRRR");
         return null;
     }
     
-    public EmsScriptNode getParentView( EmsScriptNode view ) {
+    /**
+     * Get the parent views of the input view, optionally within the context of
+     * a product. View parent-child relationships may available through the
+     * graph interface being used for containment (in the develop git branch).
+     * They may also be specified in the view-to-view of the Product. They may
+     * also be determined from Associations between source and target
+     * Properties, whose propertyTypes are the parent and child, respectively.
+     * They also may be determined from the ownedAttributes of the parent view,
+     * which contains the target Property of the Association.
+     * 
+     * For now, use the view-to-view.
+     * 
+     * @param view
+     * @param workspace 
+     * @param dateTime 
+     * @return a map from products to parents of the view
+     */
+    public Map<String, Set< String > > getParentViews( EmsScriptNode view, EmsScriptNode product ) {
+        return getParentViewsFromViewToView( view, product, view.getWorkspace(), null );
+    }
+    public Map<String, Set< String > > getParentViewsFromViewToView( EmsScriptNode view,
+                                                                     EmsScriptNode product,
+                                                                     WorkspaceNode workspace,
+                                                                     Date dateTime ) {
+        System.out.println( "============>> getParentViewsFromViewToView(" + view +", " + product + ")" );
+        if ( view == null ) return null;
+        Map<String, Set< String > > productParentMap =
+                new LinkedHashMap<String, Set< String > >();
+        String viewId = view.getSysmlId();
+        
+        Map< EmsScriptNode, JSONArray > view2views =
+                getViewToViews( view, product, workspace, dateTime );
+        System.out.println( "============>> getParentViewsFromViewToView(" + view.getSysmlName()
+                            + "): getViewToViews("+ view.getSysmlName() +") = " + view2views );
+
+        for ( Entry< EmsScriptNode, JSONArray > e : view2views.entrySet() ) {
+            EmsScriptNode prod = e.getKey();
+            String prodId = prod.getSysmlId();
+            JSONArray view2viewJsonArray = e.getValue();
+            if ( view2viewJsonArray == null ) continue;
+            for ( int i = 0; i < view2viewJsonArray.length(); ++i ) {
+                org.json.JSONObject o = view2viewJsonArray.optJSONObject( i );
+                if ( o == null ) continue;
+                String parentId = o.optString( "id" );
+                if ( Utils.isNullOrEmpty( parentId ) ) continue; // ERROR?
+                JSONArray childrenViews = o.optJSONArray("childrenViews");
+                System.out.println( "============>> getParentViewsFromViewToView(" + view.getSysmlName()
+                                    + "): id = "+ parentId  +",  childrenViews = " + childrenViews );
+                if ( childrenViews == null ) continue;
+                for ( int j = 0; j < childrenViews.length(); ++j ) {
+                    String childViewId = childrenViews.optString( j );
+                    if ( viewId.equals( childViewId ) ) {
+                        Utils.add( productParentMap, prodId, parentId );
+                        break;
+                    }
+                }
+            }
+        }
+        return productParentMap;
+    }
+    
+    public List< EmsScriptNode > getProductsForView( EmsScriptNode view,
+                                                     WorkspaceNode workspace,
+                                                     Date dateTime ) {
+        List< NodeRef > refs = getProductRefsForView( view, workspace, dateTime );
+        List< EmsScriptNode > products =
+                EmsScriptNode.toEmsScriptNodeList( (Collection<NodeRef>)refs );
+        return products;
+    }
+    
+    public List< NodeRef > getProductRefsForView( EmsScriptNode view,
+                                                  WorkspaceNode workspace,
+                                                  Date dateTime ) {
+        List< NodeRef > refs = null;
+        refs = NodeUtil.findNodeRefsByType( "*" + view.getSysmlId() + "*",
+                                            SearchType.VIEW2VIEW.prefix,
+                                            false, workspace, dateTime, false,
+                                            false, services, false, null );
+        return refs;
+    }
+    
+    public Map< EmsScriptNode, JSONArray >
+            getViewToViews( EmsScriptNode view, EmsScriptNode product,
+                            WorkspaceNode workspace, Date dateTime ) {
+        Map< EmsScriptNode, JSONArray > viewToViews =
+                new LinkedHashMap< EmsScriptNode, JSONArray >();
+        if ( view == null ) return null;
+        Map<String, Set< String > > productParentMap =
+                new LinkedHashMap<String, Set< String > >();
+        // Do a string search on the id to find it in the view2views of Products.
+        List< NodeRef > refs = null;
+        if ( product != null ) {
+            refs = Utils.newList( product.getNodeRef() );
+        } else {
+            refs = getProductRefsForView( view, workspace, dateTime );
+            System.out.println( "============>> getViewToViews(" + view.getSysmlName()
+                                + "): getProductRefsForView("+ view.getSysmlName() +") = " + refs );
+        }
+        String productId = product == null ? null : product.getSysmlId();
+        String viewId = view.getSysmlId();
+        for ( NodeRef ref : refs ) {
+            EmsScriptNode node = new EmsScriptNode(ref, getServices());
+            String prodId = node.getSysmlId();
+            if ( Utils.isNullOrEmpty( prodId ) ) continue; // ERROR?
+            View prod = new View( node );
+            System.out.println( "============>> getViewToViews(" + view.getSysmlName()
+                                + "): productId = "+ productId +", prodId = " + prodId + ", prod = " + prod );
+            if ( productId != null ) {
+                if ( !productId.equals( prodId ) ) {
+                    continue;
+                }
+            }
+            JSONArray view2viewJsonArray = prod.getViewToViewPropertyJson();
+            if ( view2viewJsonArray == null ) continue;
+            viewToViews.put( prod.getElement(), view2viewJsonArray );
+        }
+        return viewToViews;
+    }
+    
+    public EmsScriptNode getParentViewFromAssociations( EmsScriptNode view ) {//, EmsScriptNode product ) {
         System.out.println("getParentView(" + view + ") 0");
         if ( view == null ) return null;
         String viewId = view.getSysmlId();
@@ -2586,26 +2747,85 @@ System.out.println("RRRRRR");
         }
         return null;
     }
+    
+    
+    public EmsScriptNode getParentView( EmsScriptNode view, EmsScriptNode product ) {
+        if ( view == null ) return null;
+        
+        Map< String, Set< String > > parentViews = getParentViews( view, product );
+        String parentNodeId = null;
+        EmsScriptNode parentNode = null;
+        if ( !Utils.isNullOrEmpty( parentViews ) ) {
+            Collection< Set< String > > values = parentViews.values();
+            if ( !Utils.isNullOrEmpty( values ) ) {
+                Iterator< Set< String > > iter = values.iterator();
+                while ( iter.hasNext() ) {
+                    Set< String > ids = iter.next();
+                    if ( !Utils.isNullOrEmpty( ids ) ) {
+                        String id = ids.iterator().next();
+                        if ( !Utils.isNullOrEmpty( id ) ) {
+                            parentNodeId = id;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+        if ( parentNodeId == null ) return null;
+        WorkspaceNode ws = view.getWorkspace();
+        Collection< EmsScriptNode > parentNodes = getElementWithIdentifier( null, parentNodeId ); // need workspace? time?
+        if ( Utils.isNullOrEmpty( parentNodes ) ) return null;
+        parentNode = parentNodes.iterator().next();
+        return parentNode;
+    }
+
 
     public EmsScriptNode getPreviousView( EmsScriptNode view ) {
         if ( view == null ) return null;
-        
         EmsScriptNode prev = null;
-        EmsScriptNode parentNode = getParentView( view );
+        EmsScriptNode parentNode = getParentView( view, null );
+        System.out.println( "============>> getPreviousView(" + view.getSysmlName()
+                            + "): getParentView("+ view.getSysmlName() +") = " + parentNode );
         if ( parentNode == null ) return null;
-        WorkspaceNode ws = view.getWorkspace();
         
-        List< EmsScriptNode > children = getChildViews( parentNode );
-        
+        List< String > children = getChildViewIds( parentNode, null, null, null );
+        System.out.println( "============>> getPreviousView(" + view.getSysmlName()
+                            + "): getChildViewIds("+ parentNode.getSysmlName() +") = " + children );
         if ( Utils.isNullOrEmpty( children ) ) return null;
-        
-        String id = view.getSysmlId();
-        
-        for ( EmsScriptNode child : children ) {
-            if ( child != null && id.equals( child.getSysmlId() ) ) {
+
+        String viewId = view.getSysmlId();
+        String prevId = null;
+        for ( String id : children ) {
+            if ( viewId.equals( id ) ) {
                 break;
             }
-            prev = child;
+            prevId = id;
+        }
+        if ( prevId == null ) return null;
+        
+        System.out.println( "============>> getPreviousView(" + view.getSysmlName()
+                            + "): prevId = "+ prevId );
+
+        
+        Collection< EmsScriptNode > elements = getElementWithIdentifier( null, prevId );
+        if ( Utils.isNullOrEmpty( elements ) ) return null;
+        prev = elements.iterator().next();
+        
+//        for ( EmsScriptNode child : children ) {
+//            if ( child != null && id.equals( child.getSysmlId() ) ) {
+//                break;
+//            }
+//            prev = child;
+//        }
+        
+        System.out.println( "============>> getPreviousView(" + view.getSysmlName()
+                            + "): prev = "+ prev );
+
+        // if there is no previous sibling, use the parent view as the previous
+        if ( prev == null ) {
+            prev = parentNode;
+            System.out.println( "============>> getPreviousView(" + view.getSysmlName()
+                                + "): prev = parentNode = "+ prev );
         }
         
         return prev;

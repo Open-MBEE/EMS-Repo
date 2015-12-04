@@ -90,6 +90,7 @@ public class NodeUtil {
         STRING( "@sysml\\:string:\"" ),
         BODY( "@sysml\\:body:\"" ),
         PROPERTY_TYPE( "@sysml\\:propertyType:\"" ),
+        VIEW2VIEW( "@view2\\:view2view:\"" ),
         CHECKSUM( "@view\\:cs:\"" ),
         WORKSPACE("@ems\\:workspace:\"" ),
         WORKSPACE_NAME("@ems\\:workspace_name:\"" ),
