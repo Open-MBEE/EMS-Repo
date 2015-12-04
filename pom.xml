@@ -196,6 +196,11 @@
 			<version>0.0.5</version>
 		</dependency>
 		<dependency>
+			<groupId>gov.nasa.jpl.mbee.doorsng</groupId>
+			<artifactId>doorsng</artifactId>
+			<version>0.1.1-20151204.225132-1</version>
+		</dependency>
+		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 			<version>4.8.1</version>
@@ -372,6 +377,11 @@
 			<id>artifactory-external-releases</id>
 			<name>external-releases</name>
 			<url>http://europambee-build.jpl.nasa.gov:8082/artifactory/ext-release-local</url>
+		</repository>
+		<repository>
+			<id>artifactory-external-snapshot</id>
+			<name>external-releases</name>
+			<url>http://europambee-build.jpl.nasa.gov:8082/artifactory/ext-snapshot-local</url>
 		</repository>
 		<repository>
 			<id>alfresco-public</id>
