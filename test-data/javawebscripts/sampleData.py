@@ -52,6 +52,10 @@ parser.add_option("-x", "--execute", dest="execute", action="store_true", defaul
 parser.add_option("-v", "--verbose", dest="verbose", action="store_true", default=False, help="Print out the curl commands and, if executing, the output from sending the curl commands")
 options, args = parser.parse_args()
 
+if options.verbose:
+    print "options = " + str(options)
+    print "args = " + str(args)
+
 workspaces = options.workspaces.split(",")
 
 def verboseExecuteOptions(curl_cmd, timeDelay=False):

@@ -45,6 +45,7 @@ import gov.nasa.jpl.view_repo.db.PostgresHelper.DbEdgeTypes;
 import gov.nasa.jpl.view_repo.sysml.View;
 import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.NodeUtil.SearchType;
+import gov.nasa.jpl.view_repo.webscripts.AbstractJavaWebScript;
 
 import java.io.Serializable;
 import java.lang.reflect.Field;
@@ -325,6 +326,8 @@ public class EmsScriptNode extends ScriptNode implements
     public boolean embeddingExpressionInConstraint = true;
     public boolean embeddingExpressionInOperation = true;
     public boolean embeddingExpressionInConnector = true;
+
+    public AbstractJavaWebScript webscript = null;
 
     // private boolean forceCacheUpdate = false;
 
@@ -3411,7 +3414,7 @@ public class EmsScriptNode extends ScriptNode implements
         if ( isIncludeDocument && NodeUtil.doGraphDb ) {
             JSONArray relatedDocuments = new JSONArray();
 
-            // if document, just add itself has related doc, otherwise use postgres helper
+            // if document, just add itself as related doc, otherwise use postgres helper
             if (this.hasAspect( Acm.ACM_PRODUCT )) {
                 String sysmlid = this.getSysmlId();
                 JSONObject relatedDoc = new JSONObject();
@@ -3451,16 +3454,23 @@ public class EmsScriptNode extends ScriptNode implements
                                             (String)rootParentNode.getProperty( Acm.ACM_NAME ) );
                             relatedDoc.put( "siteCharacterizationId",
                                             rootParentNode.getSiteCharacterizationId( null, ws ) );
+
                             JSONArray parentViews = new JSONArray();
-                            
-                            for ( String immediateParentId : root2immediate.get( rootParentId ) ) {
-                                EmsScriptNode immediateParentNode =
-                                        NodeUtil.getNodeFromPostgresNode( pgh.getNodeFromSysmlId( immediateParentId ) );
+                            if ( this.hasAspect( Acm.ACM_VIEW ) ) {
                                 JSONObject parentView = new JSONObject();
-                                parentView.put( "sysmlid", immediateParentId );
-                                parentView.put( "name",
-                                                (String)immediateParentNode.getProperty( Acm.ACM_NAME ) );
+                                parentView.put( "sysmlid", this.getSysmlId() );
+                                parentView.put( "name", this.getSysmlName() );
                                 parentViews.put( parentView );
+                            } else {
+                                for ( String immediateParentId : root2immediate.get( rootParentId ) ) {
+                                    EmsScriptNode immediateParentNode =
+                                            NodeUtil.getNodeFromPostgresNode( pgh.getNodeFromSysmlId( immediateParentId ) );
+                                    JSONObject parentView = new JSONObject();
+                                    parentView.put( "sysmlid", immediateParentId );
+                                    parentView.put( "name",
+                                                    (String)immediateParentNode.getProperty( Acm.ACM_NAME ) );
+                                    parentViews.put( parentView );
+                                }
                             }
     
                             relatedDoc.put( "parentViews", parentViews );
@@ -4501,18 +4511,25 @@ public class EmsScriptNode extends ScriptNode implements
     @Override
     public boolean hasPermission( String permission ) {
         String realUser = AuthenticationUtil.getFullyAuthenticatedUser();
+        if ( webscript != null ) {
+            Boolean b = webscript.permCacheGet(realUser, getNodeRef(), permission);
+            if ( b != null ) return b;
+        }
         String runAsUser = AuthenticationUtil.getRunAsUser();
         boolean changeUser = !realUser.equals( runAsUser );
         if ( changeUser ) {
             AuthenticationUtil.setRunAsUser( realUser );
         }
         boolean b = super.hasPermission( permission );
+        if ( webscript != null ) {
+            webscript.permCachePut(realUser, getNodeRef(), permission, b);
+        }
         if ( changeUser ) {
             AuthenticationUtil.setRunAsUser( runAsUser );
         }
         return b;
     }
-
+    
     public static class EmsScriptNodeComparator implements
                                                Comparator< EmsScriptNode > {
         @Override
@@ -5169,11 +5186,9 @@ public class EmsScriptNode extends ScriptNode implements
                                                                      this.getNodeRef() );
                 }
 
-                EmsScriptNode newParent =
-                        new EmsScriptNode( destination.getNodeRef(), services,
-                                           response );
-                if ( newParent != null ) {
+                EmsScriptNode newParent = dest;
 
+                if (newParent != null) {
                     setOwnerToReifiedNode( newParent, newParent.getWorkspace(),
                                            false );
                 }
@@ -5203,9 +5218,10 @@ public class EmsScriptNode extends ScriptNode implements
                 setOwnerToReifiedNode( parent, parent.getWorkspace(), false );
                 status = true;
             }
-
-            moved = true;
-            // removeChildrenFromJsonCache();
+            
+            //moved = true;
+            
+            //removeChildrenFromJsonCache();
         }
 
         return status;

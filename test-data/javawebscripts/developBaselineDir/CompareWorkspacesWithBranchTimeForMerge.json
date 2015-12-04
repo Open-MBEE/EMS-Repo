@@ -4,13 +4,11 @@
         "name": "wsA",
         "elements": [
             {
-                "qualifiedName": "/europa/JW_TEST/300/301/302/303/304",
-                "sysmlid": "304",
-                "editable": true,
-                "version": "1.2",
                 "name": "304",
+                "qualifiedName": "/europa/JW_TEST/300/301/302/303/304",
                 "documentation": "about",
                 "owner": "303",
+                "sysmlid": "304",
                 "specialization": {
                     "propertyType": null,
                     "isSlot": false,
@@ -21,16 +19,15 @@
                         "type": "LiteralString"
                     }],
                     "type": "Property"
-                }
+                },
+                "editable": true,
             },
             {
-                "qualifiedName": "/europa/JW_TEST/400/401/402/403/404",
-                "sysmlid": "404",
-                "editable": true,
-                "version": "1.1",
                 "name": "404",
+                "qualifiedName": "/europa/JW_TEST/400/401/402/403/404",
                 "documentation": "4about",
                 "owner": "403",
+                "sysmlid": "404",
                 "specialization": {
                     "propertyType": null,
                     "isSlot": false,
@@ -41,16 +38,17 @@
                         "type": "LiteralString"
                     }],
                     "type": "Property"
-                }
+                },
+                "editable": true,
             },
             {
-                "name": "conflict",
                 "qualifiedName": "/europa/JW_TEST/conflict",
-                "documentation": "",
-                "owner": "123456",
                 "sysmlid": "conflict",
-                "specialization": {"type": "Element"},
                 "editable": true,
+                "name": "conflict",
+                "owner": "123456",
+                "documentation": "",
+                "specialization": {"type": "Element"}
             },
             {
                 "qualifiedName": "/europa/JW_TEST/300/301/302",
@@ -225,8 +223,8 @@
         "deletedElements": [],
         "addedElements": [{
             "qualifiedName": "/europa/JW_TEST/300/301/302/null",
-            "owner": "302",
             "documentation": "y is y",
+            "owner": "302",
             "sysmlid": "y",
             "specialization": {
                 "propertyType": null,
@@ -261,8 +259,8 @@
             {
                 "name": "304",
                 "qualifiedName": "/europa/JW_TEST/304",
-                "owner": "123456",
                 "documentation": "this will create a moved element",
+                "owner": "123456",
                 "sysmlid": "304",
                 "specialization": {"type": "Property"}
             },
@@ -279,8 +277,8 @@
         "movedElements": [{
             "name": "304",
             "qualifiedName": "/europa/JW_TEST/304",
-            "owner": "123456",
             "documentation": "this will create a moved element",
+            "owner": "123456",
             "sysmlid": "304",
             "specialization": {"type": "Property"}
         }]

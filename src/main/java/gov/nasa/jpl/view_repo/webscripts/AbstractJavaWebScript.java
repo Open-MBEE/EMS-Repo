@@ -153,6 +153,39 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
     protected SystemModelToAeExpression< Object, EmsScriptNode, EmsScriptNode, String, Object, EmsSystemModel > sysmlToAe;
     protected static SystemModelToAeExpression< Object, EmsScriptNode, EmsScriptNode, String, Object, EmsSystemModel > globalSysmlToAe;
 
+    public boolean usingPermCache = true;
+    enum PermType { READ, WRITE };
+    public static PermType getPermType(String permission) {
+        PermType permType = permission.charAt( 0 ) == 'W' ? PermType.WRITE : PermType.READ;
+        return permType;
+    }
+    // Permission map:  username -> node -> permission_type -> true|false
+    public Map< String, Map< NodeRef, Map< PermType, Boolean > > > permissionCache =
+            new HashMap< String, Map< NodeRef, Map< PermType, Boolean > > >();
+
+    public Boolean permCacheGet( String realUser, NodeRef nodeRef, String permission ) {
+        Map< PermType, Boolean > innerMap = Utils.get( permissionCache, realUser, nodeRef );
+        if ( innerMap == null ) return null;
+        PermType permType = getPermType(permission);
+        return innerMap.get( permType );
+    }
+    public void permCachePut( String realUser, NodeRef nodeRef,
+                                 String permission, boolean b ) {
+        Utils.put( permissionCache, realUser, nodeRef, getPermType(permission), b );
+    }
+    
+    
+    public boolean usingExistsCache = false; // not yet implemented
+    enum ExistType { InAlfresco, InModel };
+    // Cache for whether node exists: node -> exist_type -> true|false
+    public Map< NodeRef, Map< ExistType, Boolean > > existsCache =
+            new HashMap< NodeRef, Map< ExistType, Boolean > >();
+    
+    public boolean usingAspectsCache = false; // not yet implemented
+    // Cache for whether node exists: node -> aspect -> true|false
+    public Map< NodeRef, Map< ExistType, Boolean > > hasAspectCache =
+            new HashMap< NodeRef, Map< ExistType, Boolean > >();
+
     protected void initMemberVariables(String siteName) {
 		companyhome = new ScriptNode(repository.getCompanyHome(), services);
 	}
@@ -593,7 +626,17 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
 	 */
 	protected boolean checkPermissions(EmsScriptNode node, String permissions) {
 	    if (node != null) {
-	        return node.checkPermissions( permissions, response, responseStatus );
+	        Boolean b = null;
+	        if ( usingPermCache ) {
+	            b = permCacheGet( "u", node.getNodeRef(), permissions );
+	        }
+	        if ( b == null ) {
+    	        b = node.checkPermissions( permissions, response, responseStatus );
+                if ( usingPermCache ) {
+                    permCachePut( "u", node.getNodeRef(), permissions, b );
+                }
+	        }
+	        return b;
 	    } else {
 	        return false;
 	    }

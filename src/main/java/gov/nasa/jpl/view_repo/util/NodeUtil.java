@@ -3053,7 +3053,6 @@ public class NodeUtil {
         return ( siteNode != null && workspacesEqual( siteNode.getWorkspace(),
                                                       workspace ) ) ? siteNode
                                                                    : null;
-
     }
 
     public static EmsScriptNode getCompanyHome( ServiceRegistry services ) {
