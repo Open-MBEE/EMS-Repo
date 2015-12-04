@@ -490,7 +490,7 @@ public class MmsDiffGet extends AbstractJavaWebScript {
 		    String childId = elem.optString("sysmlId");
 		    String parentId = elem.optString("owner");
 		    JSONObject childJson = null;
-		    while ( parentId != null ) {
+		    while ( !Utils.isNullOrEmpty(parentId) ) {
 		        JSONObject parentJson =
 		                getElementJson(parentId, diffDiffResult,
 		                               ws1, dateTime1, getServices() );
@@ -500,7 +500,7 @@ public class MmsDiffGet extends AbstractJavaWebScript {
 		        }
                 // Adding the child instead of the parent so that we do not add
                 // the project, which has no owner.
-		        if ( childJson != null && childId != null &&
+		        if ( childJson != null && !Utils.isNullOrEmpty(childId) &&
 		             !sysmlIdMap.contains( childId ) ) {
 		            ws1Elems.put( childJson );
 		            sysmlIdMap.add( childId );

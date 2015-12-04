@@ -942,7 +942,7 @@ public class CommitUtil {
                 
                 String sysmlId = elementJson.optString( Acm.JSON_ID );
                 
-                if (sysmlId != null) {
+                if (!Utils.isNullOrEmpty(sysmlId)) {
                     
                     EmsScriptNode node = null;
                     if (nodeMap.containsKey( sysmlId )) {
@@ -1050,7 +1050,7 @@ public class CommitUtil {
                     String timestamp1 = ws1Json.optString( "timestamp" );
                     String timestamp2 = ws2Json.optString( "timestamp" );
                     
-                    if (timestamp1 == null || timestamp2 == null) {
+                    if (Utils.isNullOrEmpty(timestamp1) || Utils.isNullOrEmpty(timestamp2)) {
                         return false;
                     }
                     else {
