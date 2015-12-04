@@ -57,7 +57,7 @@ create table doors
 (
   sysmlId text references nodes(sysmlId) not null,
   resourceUrl text not null unique,
-  constraint unique_edges unique(sysmlId, resourceUrl)
+  unique(sysmlId, resourceUrl)
 );
 
 -- given two nodeRefId, insert an edge between the two
