@@ -18,13 +18,14 @@ while [ $server -eq 0 ]; do
                 dotCount=$(($dotCount+1))
                 if [ $dotCount -gt 20 ];then
                      echo '...'
+                     sleep 1
                      dotCount=0
                 fi
         fi
 
         #time-out condition
         serverCount=$(($serverCount+1))
-        if [ $serverCount -gt 50000 ];then
+        if [ $serverCount -gt 500 ];then
                 server=2
         fi
 done

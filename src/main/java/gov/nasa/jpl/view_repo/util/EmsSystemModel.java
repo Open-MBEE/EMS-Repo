@@ -793,6 +793,26 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, Object, 
 
     }
 
+    public Collection< EmsScriptNode > getProperties( EmsScriptNode element ) {
+        System.out.println("==========================>>> getProperties(" + element.getSysmlName() + ")" );
+        if ( element == null ) return null;
+        return getProperties( element, element.getWorkspace(), null );
+    }
+    
+    public Collection< EmsScriptNode > getProperties( EmsScriptNode element,
+                                                      WorkspaceNode workspace,
+                                                      Date dateTime   ) {
+        List< EmsScriptNode > elements = null;//new ArrayList< EmsScriptNode >();
+        ArrayList< NodeRef > refs =
+                NodeUtil.findNodeRefsByType( element.getNodeRef().toString(),
+                                             SearchType.OWNER.prefix, false,
+                                             workspace, dateTime, false, true,
+                                             services, false );
+        elements = EmsScriptNode.toEmsScriptNodeList( (Collection<NodeRef>)refs );
+        System.out.println("==========================>>> getProperties(" + element.getSysmlName() + ") = " + elements );
+        return elements;
+    }
+    
     @Override
     public Collection< EmsScriptNode > getProperty( Object context,
                                                     Object specifier ) {
@@ -816,7 +836,7 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, Object, 
 
             // Look for Properties with specifier as name and
             // context as owner.
-            Collection< EmsScriptNode > elements =
+            Collection< EmsScriptNode > elements = specifier == null ? null : //(List< EmsScriptNode >)Utils.newList() :
                     getElementWithName( context, "" + specifier );
             
             Date date = null;
@@ -826,27 +846,41 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, Object, 
             } else if ( context instanceof WorkspaceNode ) {
                 ws = (WorkspaceNode)context;
             }
-            
-            for ( EmsScriptNode n : new ArrayList<EmsScriptNode>(elements) ) {
-                if ( context instanceof WorkspaceNode ) {
-                    if ( !context.equals( n.getWorkspace() ) ) {
-                        elements.remove( n );
-                    }
-                } else if (!context.equals( n.getOwningParent( date, ws, false ) ) ) {
-                    elements.remove( n );
-                }
+
+            if ( specifier == null ) {
+                // Find all properties owned by the element.
+                elements = getProperties( node, ws, date );
             }
-            if ( elements.size() > 0 ) {
-                //System.out.println("\ngetProperty(" + context + ", " + specifier + ") = " + elements);
-                return elements;
+
+            System.out.println("==========================>>> getProperty(" + node.getSysmlName() + ", " + specifier + ") = " + elements );
+
+            // No need to resolve ws and date in else case since
+            // getElementWithName() does that.
+            //else if ( elements != null && ( ws != null || date != null ) ) {
+            //    // 
+            //    List< NodeRef > refs = NodeUtil.getNodeRefs( elements, false );
+            //    elements.clear();
+            //    for ( NodeRef nodeRef : refs ) {
+            //        NodeRef ref = NodeUtil.getNodeRefAtTime( nodeRef, ws, date );
+            //        if ( NodeUtil.exists( ref ) ) {
+            //            EmsScriptNode n = new EmsScriptNode( ref, services );
+            //            elements.add( n );
+            //        }
+            //    }
+            //} 
+            
+            if ( elements != null ) {
+                if ( elements.size() > 0 ) {
+                    //System.out.println("\ngetProperty(" + context + ", " + specifier + ") = " + elements);
+                    return elements;
+                }
             }
             
             // The property is not a separate Property element, so try and get a
             // meta-data property value.
             if ( mySpecifier == null ) {
                 // if no specifier, return all properties
-                // TODO need date/workspace
-                Map< String, Object > props = node.getNodeRefProperties(null, node.getWorkspace());
+                Map< String, Object > props = node.getNodeRefProperties(date, ws);
                 if ( props != null ) {
 
                 	// Loop through all of returned properties:
@@ -2791,17 +2825,26 @@ System.out.println("RRRRRR");
         List< String > children = getChildViewIds( parentNode, null, null, null );
         System.out.println( "============>> getPreviousView(" + view.getSysmlName()
                             + "): getChildViewIds("+ parentNode.getSysmlName() +") = " + children );
-        if ( Utils.isNullOrEmpty( children ) ) return null;
 
         String viewId = view.getSysmlId();
         String prevId = null;
-        for ( String id : children ) {
-            if ( viewId.equals( id ) ) {
-                break;
+        if ( !Utils.isNullOrEmpty( children ) ) {
+            for ( String id : children ) {
+                if ( viewId.equals( id ) ) {
+                    break;
+                }
+                prevId = id;
             }
-            prevId = id;
         }
-        if ( prevId == null ) return null;
+        System.out.println( "============================================================>>");
+        System.out.println( "============================================================>>");
+        System.out.println( "============================================================>>");
+        if ( prevId == null ) {
+            prev = parentNode;
+            System.out.println( "============>> getPreviousView(" + view.getSysmlName()
+                                + "): prevId = null; prev = parentNode = "+ prev );
+            return prev;
+        }
         
         System.out.println( "============>> getPreviousView(" + view.getSysmlName()
                             + "): prevId = "+ prevId );
