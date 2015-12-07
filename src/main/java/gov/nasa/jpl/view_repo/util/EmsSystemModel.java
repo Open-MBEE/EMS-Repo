@@ -13,6 +13,7 @@ import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.sysml.View;
 import gov.nasa.jpl.view_repo.util.NodeUtil.SearchType;
+import gov.nasa.jpl.view_repo.webscripts.AbstractJavaWebScript;
 
 import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
@@ -1510,6 +1511,25 @@ System.out.println("RRRRRR");
             type = Acm.getJSON2ACM().get( type );
         }
         if ( type == null || !Acm.VALUE_Of_VALUESPEC.containsKey( type ) ) {
+            if ( type.equals( Acm.ACM_EXPRESSION ) ) {
+                Expression< Object > expr = AbstractJavaWebScript.toAeExpression( node );
+                if ( expr != null ) {
+                    try {
+                        result = expr.evaluate( true );
+                        return result;
+                    } catch ( IllegalAccessException e ) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                    } catch ( InvocationTargetException e ) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                    } catch ( InstantiationException e ) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                    }
+                }
+                return node;
+            }
             return null;
         }
         String valuePropName = Acm.VALUE_Of_VALUESPEC.get( type );
@@ -2403,24 +2423,39 @@ System.out.println("RRRRRR");
     }
 
     public long getTime( EmsScriptNode n ) {
+        System.out.println("ZZZZZZZZZZZZZZZZZZ    getTime( " + n + " )" );        
         Collection<?> c = getValue( n, null );
         if ( Utils.isNullOrEmpty( c ) ) return 999;
         Object v = c.iterator().next();
         try {
-        if ( v instanceof Date ) return getTime((Date)v);
-        if ( v instanceof String ) return getTime((String)v);
-        //Date d = TimeUtils.dateFromTimestamp( timestamp );
-        return getTime("" + v);
+            System.out.println( "VVVVVVVVVVVVVVVVVV    getTime( "
+                                + n
+                                + " ): v = "
+                                + v
+                                + "; type = "
+                                + ( v == null ? "null" : v.getClass()
+                                                          .getSimpleName() ) );
+
+            if ( v == null ) return 7777;
+            if ( v instanceof Date ) return getTimeFromDate((Date)v);
+            if ( v instanceof String ) return getTimeFromTimestamp((String)v);
+            //Date d = TimeUtils.dateFromTimestamp( timestamp );
+            return getTimeFromTimestamp("" + v);
         } catch (Throwable t) {
+            t.printStackTrace();
             return 1999;
         }
     }
-    public long getTime( Date d ) {
+    public long getTimeFromDate( Date d ) {
+        System.out.println("DDDDDDDDDDDDDDDDDDDD    getTime( " + d + " )" );        
         //Date d = TimeUtils.dateFromTimestamp( timestamp );
         return d.getTime();
     }
-    public long getTime( String timestamp ) {
+    public long getTimeFromTimestamp( String timestamp ) {
         Date d = TimeUtils.dateFromTimestamp( timestamp );
+        if ( d == null ) {
+            return 2999;
+        }
         return d.getTime();
     }
     
