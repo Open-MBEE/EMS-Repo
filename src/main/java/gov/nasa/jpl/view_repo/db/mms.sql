@@ -56,7 +56,7 @@ create index parentIndex on edges (parent);
 create table doors
 (
   sysmlId text references nodes(sysmlId) not null,
-  resourceUrl text not null unique,
+  resourceUrl text not null,
   constraint unique_doors unique(sysmlId, resourceUrl)
 );
 
