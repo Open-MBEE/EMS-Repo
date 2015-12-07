@@ -198,7 +198,7 @@
 		<dependency>
 			<groupId>gov.nasa.jpl.mbee.doorsng</groupId>
 			<artifactId>doorsng</artifactId>
-			<version>0.1.1-20151204.225132-1</version>
+			<version>0.1.4-20151207.190829-1</version>
 		</dependency>
 		<dependency>
 			<groupId>junit</groupId>
