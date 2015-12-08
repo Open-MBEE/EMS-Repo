@@ -2655,7 +2655,8 @@ public class EmsScriptNode extends ScriptNode implements
     public JSONObject
             toJSONObject( WorkspaceNode ws, Date dateTime )
                                                            throws JSONException {
-        return toJSONObject( null, ws, dateTime, true, false, null );
+        // don't include qualified except for diffs, as added by DeclarativeJavaWebScript
+        return toJSONObject( null, ws, dateTime, false, false, null );
     }
 
     public
@@ -2809,6 +2810,8 @@ public class EmsScriptNode extends ScriptNode implements
                        ownedAttributeIds, filter );
         }
 
+        // NOTE: DeclarativeJavaWebScript does this when isIncludeQualified is false
+        // isIncludeQualified should only be called for diffs 
         if ( isIncludeQualified ) {
             if ( filter == null || filter.isEmpty()
                  || filter.contains( "qualifiedName" ) ) {
@@ -3411,7 +3414,7 @@ public class EmsScriptNode extends ScriptNode implements
         if ( isIncludeDocument && NodeUtil.doGraphDb ) {
             JSONArray relatedDocuments = new JSONArray();
 
-            // if document, just add itself has related doc, otherwise use postgres helper
+            // if document, just add itself as related doc, otherwise use postgres helper
             if (this.hasAspect( Acm.ACM_PRODUCT )) {
                 String sysmlid = this.getSysmlId();
                 JSONObject relatedDoc = new JSONObject();
@@ -3451,16 +3454,23 @@ public class EmsScriptNode extends ScriptNode implements
                                             (String)rootParentNode.getProperty( Acm.ACM_NAME ) );
                             relatedDoc.put( "siteCharacterizationId",
                                             rootParentNode.getSiteCharacterizationId( null, ws ) );
+
                             JSONArray parentViews = new JSONArray();
-                            
-                            for ( String immediateParentId : root2immediate.get( rootParentId ) ) {
-                                EmsScriptNode immediateParentNode =
-                                        NodeUtil.getNodeFromPostgresNode( pgh.getNodeFromSysmlId( immediateParentId ) );
+                            if ( this.hasAspect( Acm.ACM_VIEW ) ) {
                                 JSONObject parentView = new JSONObject();
-                                parentView.put( "sysmlid", immediateParentId );
-                                parentView.put( "name",
-                                                (String)immediateParentNode.getProperty( Acm.ACM_NAME ) );
+                                parentView.put( "sysmlid", this.getSysmlId() );
+                                parentView.put( "name", this.getSysmlName() );
                                 parentViews.put( parentView );
+                            } else {
+                                for ( String immediateParentId : root2immediate.get( rootParentId ) ) {
+                                    EmsScriptNode immediateParentNode =
+                                            NodeUtil.getNodeFromPostgresNode( pgh.getNodeFromSysmlId( immediateParentId ) );
+                                    JSONObject parentView = new JSONObject();
+                                    parentView.put( "sysmlid", immediateParentId );
+                                    parentView.put( "name",
+                                                    (String)immediateParentNode.getProperty( Acm.ACM_NAME ) );
+                                    parentViews.put( parentView );
+                                }
                             }
     
                             relatedDoc.put( "parentViews", parentViews );

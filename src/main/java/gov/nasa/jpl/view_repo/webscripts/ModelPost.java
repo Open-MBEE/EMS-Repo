@@ -2592,9 +2592,9 @@ public class ModelPost extends AbstractJavaWebScript {
 		final String user = AuthenticationUtil.getFullyAuthenticatedUser();
 		String wsId = null;
 
-		if (logger.isDebugEnabled()) {
-			logger.debug(user + " " + req.getURL());
-			logger.debug(req.parseContent());
+		if (logger.isInfoEnabled()) {
+			logger.info(user + " " + req.getURL());
+			logger.info(req.parseContent());
 		}
 
 		if (runWithoutTransactions) {// || internalRunWithoutTransactions) {
@@ -2624,7 +2624,6 @@ public class ModelPost extends AbstractJavaWebScript {
 		}
 
 		if (wsFound && validateRequest(req, status)) {
-
 			try {
 				if (runInBackground) {
 					// Get the project node from the request:

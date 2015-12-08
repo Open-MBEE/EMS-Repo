@@ -5,9 +5,10 @@
     "editable": true,
     "creator": "admin",
     "modifier": "admin",
+    "searchTypes": "id",
     "name": "300",
-    "owner": "123456",
     "documentation": "something",
+    "owner": "123456",
     "specialization": {
         "propertyType": null,
         "isSlot": false,

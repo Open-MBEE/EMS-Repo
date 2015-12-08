@@ -45,6 +45,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -167,31 +168,40 @@ public class ModelSearch extends ModelGet {
                     new HashMap< String, EmsScriptNode >();
 
             WorkspaceNode workspace = getWorkspace( req );
-
+            
+            Map<String, Set<String>> id2SearchTypes = new HashMap<String, Set<String>>();
             for ( String searchType : filters ) {
                 if ( !searchType.equals( "value" ) ) {
                     String lucenePrefix = searchTypesMap.get( searchType );
                     if ( lucenePrefix != null ) {
-                        rawResults.putAll( searchForElements( searchTypesMap.get( searchType ),
-                                                              keyword, false,
-                                                              workspace,
-                                                              dateTime ) );
+                        Map<String, EmsScriptNode> results = searchForElements( searchTypesMap.get( searchType ),
+                                                                                keyword, false,
+                                                                                workspace,
+                                                                                dateTime);
+                        rawResults.putAll( results );
+                        updateId2SearchType( searchType, results, id2SearchTypes );
                     } else {
                         log( Level.INFO, HttpServletResponse.SC_BAD_REQUEST,
                              "Unexpected filter type: " + searchType );
                         return null;
                     }
                 } else {
+                    Map<String, EmsScriptNode> results;
                     try {
                         Integer.parseInt( keyword );
-                        rawResults.putAll( searchForElements( "@sysml\\:integer:\"",
-                                                              keyword, false,
-                                                              workspace,
-                                                              dateTime ) );
-                        rawResults.putAll( searchForElements( "@sysml\\:naturalValue:\"",
-                                                              keyword, false,
-                                                              workspace,
-                                                              dateTime ) );
+                        results = searchForElements( "@sysml\\:integer:\"",
+                                                     keyword, false,
+                                                     workspace,
+                                                     dateTime );
+                        rawResults.putAll( results );
+                        updateId2SearchType( searchType, results, id2SearchTypes );
+
+                        results = searchForElements( "@sysml\\:naturalValue:\"",
+                                                     keyword, false,
+                                                     workspace,
+                                                     dateTime );
+                        rawResults.putAll( results);
+                        updateId2SearchType( searchType, results, id2SearchTypes );
                     } catch ( NumberFormatException nfe ) {
                         // do nothing
                     }
@@ -200,25 +210,31 @@ public class ModelSearch extends ModelGet {
                         // Need to do Double.toString() in case they left out
                         // the decimal in something like 5.0
                         double d = Double.parseDouble( keyword );
-                        rawResults.putAll( searchForElements( "@sysml\\:double:\"",
-                                                              Double.toString( d ),
-                                                              false, workspace,
-                                                              dateTime ) );
+                        results = searchForElements( "@sysml\\:double:\"",
+                                                     Double.toString( d ),
+                                                     false, workspace,
+                                                     dateTime );
+                        rawResults.putAll( results );
+                        updateId2SearchType( searchType, results, id2SearchTypes );
                     } catch ( NumberFormatException nfe ) {
                         // do nothing
                     }
 
                     if ( keyword.equalsIgnoreCase( "true" )
                          || keyword.equalsIgnoreCase( "false" ) ) {
-                        rawResults.putAll( searchForElements( "@sysml\\:boolean:\"",
-                                                              keyword, false,
-                                                              workspace,
-                                                              dateTime ) );
+                        results = searchForElements( "@sysml\\:boolean:\"",
+                                                     keyword, false,
+                                                     workspace,
+                                                     dateTime );
+                        rawResults.putAll( results );
+                        updateId2SearchType( searchType, results, id2SearchTypes );
                     }
 
-                    rawResults.putAll( searchForElements( "@sysml\\:string:\"",
-                                                          keyword, false,
-                                                          workspace, dateTime ) );
+                    results = searchForElements( "@sysml\\:string:\"",
+                                                 keyword, false,
+                                                 workspace, dateTime );
+                    rawResults.putAll( results );
+                    updateId2SearchType( searchType, results, id2SearchTypes );
                 }
             }
 
@@ -272,10 +288,42 @@ public class ModelSearch extends ModelGet {
 
             boolean checkReadPermission = true; // TODO -- REVIEW -- Should this
                                                 // be false?
-            handleElements( workspace, dateTime, true, true, evaluate, top,
+            boolean includeQualified = false;
+            handleElements( workspace, dateTime, includeQualified, true, evaluate, top,
                             checkReadPermission );
+            
+            for (int ii = 0; ii < elements.length(); ii++) {
+                JSONObject elementJson = elements.getJSONObject( ii );
+                String sysmlid = elementJson.getString( "sysmlid" );
+                if (!id2SearchTypes.containsKey( sysmlid )) {
+                    logger.warn( "could not find " + sysmlid + " in id2SearchTypes map" );
+                } else {
+                    String searchTypes = null;
+                    for (String stype: id2SearchTypes.get( sysmlid )) {
+                        if (searchTypes == null) { 
+                            searchTypes = stype;
+                        } else {
+                            searchTypes += "," + stype;
+                        }
+                    }
+                    elementJson.put( "searchTypes", searchTypes );
+                }
+            }
         }
 
         return elements;
+    }
+    
+    private void updateId2SearchType(String searchType, 
+                                     Map<String, EmsScriptNode> results, 
+                                     Map<String, Set<String>> id2SearchTypes) {
+        for (String id: results.keySet()) {
+            EmsScriptNode node = results.get( id );
+            String sysmlid = node.getSysmlId();
+            if (!id2SearchTypes.containsKey( sysmlid )) {
+                id2SearchTypes.put( sysmlid, new HashSet<String>() );
+            }
+            id2SearchTypes.get( sysmlid ).add( searchType );
+        }
     }
 }

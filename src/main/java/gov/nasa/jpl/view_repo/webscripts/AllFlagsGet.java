@@ -9,7 +9,6 @@ import gov.nasa.jpl.view_repo.util.NodeUtil;
 
 public class AllFlagsGet extends FlagSet {
 
-    //public static String[][] arr = new String[][] { {, "2"} };
     public static String[] flags =
             new String[] { "alwaysTurnDebugOff", 
                            "debug", 
@@ -46,7 +45,7 @@ public class AllFlagsGet extends FlagSet {
 
     protected String getPath() {
         String path = req.getPathInfo();
-        System.out.println(path);
+        if (logger.isDebugEnabled()) logger.debug(path);
         String result = path.replace("/flags/","").replace("/","");
         if ( result.equals( "" ) || result.equals( "flags" ) ) result = "all";
         return result;
@@ -190,11 +189,11 @@ public class AllFlagsGet extends FlagSet {
         } else if (path.equalsIgnoreCase("cleanJson")) {
         	    return CommitUtil.cleanJson;
         } else if (path.equalsIgnoreCase("diffDefaultIsMerge")){
-        	return MmsDiffGet.diffDefaultIsMerge;
+            return MmsDiffGet.diffDefaultIsMerge;
         } else if (path.equalsIgnoreCase( "graphDb" )) {
             return NodeUtil.doGraphDb;
         } else if (path.equalsIgnoreCase("checkMmsVersions")){
-        	return AbstractJavaWebScript.checkMmsVersions;
+        	    return AbstractJavaWebScript.checkMmsVersions;
         }
         return false;
     }
@@ -269,9 +268,9 @@ public class AllFlagsGet extends FlagSet {
         } else if (path.equalsIgnoreCase("cleanJson")) {
         	    return false;
         } else if (path.equalsIgnoreCase("diffDefaultIsMerge")){
-        	return false;
+        	    return false;
         } else if (path.equalsIgnoreCase("checkMmsVersions")){
-        	return false;
+        	    return false;
         } else if (path.equalsIgnoreCase( "doGraphDb" )) {
             return false;
         }
@@ -343,7 +342,7 @@ public class AllFlagsGet extends FlagSet {
         } else if (path.equalsIgnoreCase("cacheSnapshots")) {
             return "cacheSnapshotsFlag";
         } else if (path.equalsIgnoreCase("checkMmsVersions")){
-        	return "checkMmsVersions";
+        	    return "checkMmsVersions";
         } else if (path.equalsIgnoreCase("graphDb")) {
             return "graphDb";
         }
