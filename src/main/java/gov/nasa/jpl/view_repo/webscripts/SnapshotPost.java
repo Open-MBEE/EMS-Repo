@@ -48,7 +48,6 @@ import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
-import gov.nasa.jpl.view_repo.webscripts.HtmlTable.TablePart;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -99,14 +98,12 @@ import org.jsoup.nodes.Attributes;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.nodes.Node;
-import org.jsoup.nodes.TextNode;
 import org.jsoup.parser.Tag;
 import org.jsoup.select.Elements;
 import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
 
-import java.util.Iterator;
 
 /**
  * Handles (1) creating a snapshot or (2) generating snapshot artifacts -- PDF or HTML zip
@@ -590,7 +587,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
     		}
     	}
     	catch(Exception ex){
-    		System.out.println("Failed to setup DocBookTable!");
+    		logger.warn("Failed to setup DocBookTable!");
     	}
     	dbTable.setColCount(maxColCount);
     	dbTable.init();
@@ -1044,7 +1041,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
 	        		break;
 	        	}
 			} catch (JSONException e) {
-				System.out.println("Failed to retrieve view2view children views for: " + nodeId);
+				logger.warn("Failed to retrieve view2view children views for: " + nodeId);
 			}
         }
     	return childNode;
@@ -1059,7 +1056,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
     private String getEmail(String userName) {
     	try{
     		if(nodeService == null) nodeService = this.services.getNodeService();
-    		if(nodeService == null) System.out.println("NodeService is not instantiated!");
+    		if(nodeService == null) logger.warn("NodeService is not instantiated!");
 
     		NodeRef person = getUserProfile(userName);
 			if(person == null) return "";
@@ -1068,7 +1065,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
             if ( o instanceof String ) return (String)o;
     	}
     	catch(Exception ex){
-    		System.out.println("Failed to get email address for " + userName);
+    		logger.warn("Failed to get email address for " + userName);
     	}
     	return "";
 	}
@@ -1197,10 +1194,10 @@ public class SnapshotPost extends AbstractJavaWebScript {
 	            if ( content != null && !content.isEmpty() ) return content;
             }
         } catch ( JSONException ex ) {
-            System.out.println( "Failed to retrieve transcluded content!" );
+            logger.warn( "Failed to retrieve transcluded content!" );
         }
-        System.out.println( "Unable to find transclude content for JSONObject:" );
-        System.out.println( NodeUtil.jsonToString( jsonObj ) );
+        logger.warn( "Unable to find transclude content for JSONObject:" );
+        logger.warn( NodeUtil.jsonToString( jsonObj ) );
         return "";
     }
 
@@ -1233,10 +1230,10 @@ public class SnapshotPost extends AbstractJavaWebScript {
             }
             return sb.toString();
         } catch ( JSONException ex ) {
-            System.out.println( "Failed to retrieve transcluded value!" );
+            logger.warn( "Failed to retrieve transcluded value!" );
         }
-        System.out.println( "Unable to find transcluded val for JSONObject:" );
-        System.out.println( NodeUtil.jsonToString( jsonObj ) );
+        logger.warn( "Unable to find transcluded val for JSONObject:" );
+        logger.warn( NodeUtil.jsonToString( jsonObj ) );
         return "";
     }
 
@@ -1249,7 +1246,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
             if ( type != null && !type.isEmpty() ) return type;
 
         } catch ( JSONException ex ) {
-            System.out.println( "Failed to retrieve document element type!" );
+            logger.warn( "Failed to retrieve document element type!" );
         }
         return null;
     }
@@ -1257,7 +1254,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
     private NodeRef getUserProfile(String userName){
     	if(personService == null) personService = this.services.getPersonService();
     	if(personService == null){
-    		System.out.println("PersonService is not instantiated.");
+    	    logger.warn("PersonService is not instantiated.");
     		return null;
     	}
     	return personService.getPerson(userName, false);
@@ -1312,9 +1309,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
     			if(!src.toLowerCase().startsWith("http")){
     				//relative URL; needs to prepend URL protocol
     				String protocol = new HostnameGet(this.repository, this.services).getAlfrescoProtocol();
-//    				System.out.println(protocol + "://" + src);
     				src = src.replaceAll("\\.\\./", "");
-//    				System.out.println("src: " + src);
     				url = new URL(String.format("%s://%s", protocol, src));
     			}
     			else{
@@ -2139,7 +2134,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
 		imgReader = this.services.getContentService().getReader(imgNodeRef, ContentModel.PROP_CONTENT);
 		if(!Files.exists(Paths.get(this.docBookMgr.getDBDirImage()))){
 			if(!new File(this.docBookMgr.getDBDirImage()).mkdirs()){
-				System.out.println("Failed to create directory for " + this.docBookMgr.getDBDirImage());
+			    logger.warn("Failed to create directory for " + this.docBookMgr.getDBDirImage());
 			}
 		}
 		imgReader.getContent(imgFile);
@@ -2317,11 +2312,11 @@ public class SnapshotPost extends AbstractJavaWebScript {
 		String userEmail = null;
 		String userName = AuthenticationUtil.getFullyAuthenticatedUser();
 		if(userName == null || userName.isEmpty())
-			System.out.println("Failed to get authentiated user name!");
+		    logger.warn("Failed to get authentiated user name!");
 		else
 			userEmail = getEmail(userName);
 
-		if(userEmail == null || userEmail.isEmpty()) System.out.println("Failed to get user email address!");
+		if(userEmail == null || userEmail.isEmpty()) logger.warn("Failed to get user email address!");
 
 		ArrayList<String> formats = getSnapshotFormats(postJson);
 		JSONArray configurations = postJson.getJSONArray("configurations");	

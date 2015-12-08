@@ -69,8 +69,8 @@
             }
         },
         {
-            "sysmlid":"pPlusQView",
-            "name":"pPlusQView",
+            "sysmlid":"pPlusQDoc",
+            "name":"pPlusQDoc",
             "documentation":"the document with p + q",
             "owner":"simpleExpressionPackage",
             "specialization":{

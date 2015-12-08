@@ -9,6 +9,7 @@
         },
         "elements": {
             "type": "array",
+            "description": "An array of elements",
             "items": {
                 "type": "object",
                 "$ref": "#/definitions/Element"
@@ -130,7 +131,15 @@
                         { "$ref": "#/definitions/MagicDrawData"}
                         
                     ]
-                }
+                },
+                "relatedDocuments": {
+                    "type": "array",
+                    "description": "Array of documents that the element appears in. Typically only returned as part of search results.",
+                    "items": {
+		                "type": "object",
+		                "$ref": "#/definitions/RelatedDocument"
+	                }
+	            }
             }
         },
 
@@ -224,7 +233,7 @@
                     "type": "array",
                     "items": {
                         "type": "object",
-                        "description": "A map of views to views"
+                        "description": "A map of views to views: ids to childrenViews"
                     }
                 },
                 "noSections": {
@@ -991,6 +1000,22 @@
                             {"$ref": "#/definitions/Image"},
                             {"$ref": "#/definitions/Section"}
                         ]
+                    }
+                }
+            }
+        },
+        
+        "RelatedDocument": {
+            "description": "Object to hold the document that element might be referenced from",
+            "properties": {
+                "sysmlid": { "type": "string" },
+                "name": { "type": "string" },
+                "parentViews": {
+                    "type": "array",
+                    "description": "Array of the direct parent views the element appears in",
+                    "items": {
+                        "type": "object",
+                        "$ref": "#/definitions/Element"
                     }
                 }
             }

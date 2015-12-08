@@ -182,7 +182,7 @@ echo " ";
 echo "Copying jar files...";
 echo " ";
 echo 'mv ../bae/target/bae-2.2.0-SNAPSHOT.jar ./src/main/amp/web/WEB-INF/lib/ae.jar';
-mv "../bae/target/bae-2.2.0-SNAPSHOT.jar" "./src/main/amp/web/WEB-INF/lib/ae.jar";
+mv "../bae/target/bae-2.2.0-SNAPSHOT.jar" "./src/main/amp/web/WEB-INF/lib/AE.jar";
 echo " ";
 echo " ";
 echo "mv ../util/target/mbee_util-2.2.0-SNAPSHOT.jar ./src/main/amp/web/WEB-INF/lib/mbee_util.jar";

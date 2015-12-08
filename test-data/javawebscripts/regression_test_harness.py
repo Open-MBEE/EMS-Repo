@@ -1751,7 +1751,7 @@ None,
 "Get project w/o specifying the site",
 create_curl_cmd(type="GET", data="projects/123456", base_url=BASE_URL_WS,
                 branch="master/"),
-False,
+True,
 None,
 ["test", "workspaces", "develop", "develop2"]
 ],
@@ -2381,8 +2381,8 @@ None
 "ConsumerDelete",
 "Delete element with user Consumer",
 "curl -w '\\n%{http_code}\\n' -u Consumer:password -X DELETE " + BASE_URL_WS + "master/elements/y",
-False,
-common_filters + ['"timestamp"', '"id"'],
+True,
+common_filters + ['"timestamp"', '"id"', '"message"'],
 ["test", "workspaces", "develop", "develop2"],
 None,
 removeCmNames,
@@ -3014,6 +3014,17 @@ None,
 set_last_read_to_gv5,
 ],
          
+[     
+908.2,
+"DeleteNoneAddDeleteWs1",
+"Delete none_add_delete",
+create_curl_cmd(type="DELETE", data="elements/none_add_delete", base_url=BASE_URL_WS,
+                branch="$gv1/"),
+True,
+common_filters + ['"timestamp"', '"MMS_', '"id"', '"qualifiedId"', '"version"', '"modified"', '"sequence"', '"modifier"'],
+["test", "workspaces", "ws", "develop"]
+],
+
 [
 908.5,
 "DeleteDeleteDeleteBeforeWs1",
@@ -3101,11 +3112,68 @@ create_curl_cmd(type="GET", data="history/303", base_url=BASE_URL_WS,
 True,
 common_filters + ['"timestamp"'],
 ["test","workspaces","develop", "develop2"],
-False,
-None
 ],
-
+ 
+# Tests for Checking the MmsVersion, these will turn on and off the flag for the service checkMmsVersions
+[
+10101,
+"TurnOnCheckMmsVersionFlag",
+"Turns on a service flag on the mms for comparing mms versions",
+create_curl_cmd("GET", data="flags/checkMmsVersions?on", base_url=SERVICE_URL, branch=""),
+False,
+common_filters + ['"timestamp"'],
+["test","workspaces","develop", "develop2"]
+],
+[
+10105,
+"CheckMmsVersion-Correct",
+"Checks the MMS version when requesting an element, versions SHOULD match",
+create_curl_cmd(type="GET", data="elements/303?mmsVersion=2.3", base_url=BASE_URL_WS),
+True,
+common_filters + ['"timestamp"'],
+["test","workspaces","develop", "develop2"]
+],
+[
+10106,
+"CheckMmsVersion-Incorrect",
+"Checks the MMS version when requesting an element, versions should NOT match",
+create_curl_cmd(type="GET", data="elements/303?mmsVersion=2.0", base_url=BASE_URL_WS,
+        branch="master/"),
+True,
+common_filters + ['"timestamp"'],
+["test","workspaces","develop", "develop2"]
+],
+[
+10107,
+"CheckMmsVersion-Invalid-Argument",
+"Checks the MMS version when requesting an element, request was made with the parameter but is missing an argument, or containing an invalid argument.",
+create_curl_cmd(type="GET", data="elements/303?mmsVersion=", base_url=BASE_URL_WS,
+        branch="master/"),
+True,
+common_filters + ['"timestamp"'],
+[] #["test","workspaces","develop", "develop2"]
+],
+[
+10108,
+"CheckMmsVersion-Missing-Argument",
+"Checks the MMS version when requesting an element, request was made  but the REST call was missing the parameter '?mmsVersion=2.3'.",
+create_curl_cmd(type="GET", data="elements/303", base_url=BASE_URL_WS,
+        branch="master/"),
+True,
+common_filters + ['"timestamp"'],
+["test","workspaces","develop", "develop2"]
+],
+[
+10120,
+"TurnOffCheckMmsVersionFlag",
+"Turns off a service flag on the mms",
+create_curl_cmd("GET", data="flags/checkMmsVersions?off", base_url=SERVICE_URL, branch=""),
+False,
+common_filters + ['"timestamp"'],
+["test","workspaces","develop", "develop2"]
 ]
+]
+
 
 ##########################################################################################    
 #

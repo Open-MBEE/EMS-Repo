@@ -9,8 +9,8 @@
       "creator": "admin",
       "modifier": "admin",
       "name": "delete_add_gg",
-      "owner": "123456",
       "documentation": "delete_add_gg",
+      "owner": "123456",
       "specialization": {
         "propertyType": null,
         "isDerived": false,
@@ -26,8 +26,9 @@
   },
   "workspace2": {
     "deletedElements": [{
-      "qualifiedName": "/europa/JW_TEST2/delete_add_gg",
+      "modifier": "admin",
       "name": "delete_add_gg",
+      "qualifiedName": "/europa/JW_TEST2/delete_add_gg",
       "sysmlid": "delete_add_gg",
       "owner": "123456",
       "specialization": {"type": "Property"},
