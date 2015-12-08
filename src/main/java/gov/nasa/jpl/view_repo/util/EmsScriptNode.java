@@ -38,6 +38,7 @@ import gov.nasa.jpl.mbee.util.Diff;
 import gov.nasa.jpl.mbee.util.HasId;
 import gov.nasa.jpl.mbee.util.HasName;
 import gov.nasa.jpl.mbee.util.Pair;
+import gov.nasa.jpl.mbee.util.Seen;
 import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.sysml.View;
@@ -2550,7 +2551,7 @@ public class EmsScriptNode extends ScriptNode implements
         logger.warn( "addingAffectedIds = " + addingAffectedIds );
         if ( addingAffectedIds  ) {
             if ( filter == null || filter.isEmpty() || filter.contains( "affectedIds" ) ) {
-                ArrayList< NodeRef > refs = this.getAffectedElementsRecursive( false, false, dateTime, getWorkspace(), false, false, true, false );
+                ArrayList< NodeRef > refs = this.getAffectedElementsRecursive( false, false, dateTime, getWorkspace(), false, false, true, false, null );
                 JSONArray affectedIds = addNodeRefIdsJSON( refs );
                 putInJson( elementJson, "affectedIds", affectedIds, filter );
             } else {
@@ -6229,13 +6230,16 @@ public class EmsScriptNode extends ScriptNode implements
     }
     public ArrayList<NodeRef> getAffectedElementsRecursive(boolean ignoreWorkspace, boolean onlyThisWorkspace, Date dateTime,
 			WorkspaceNode workspaceNode, boolean justFirst, boolean optimisticJustFirst, boolean exactMatch,
-			boolean includeDeleted){
-    		ArrayList< NodeRef > allRefs = new ArrayList();
-    		ArrayList< NodeRef > refs = this.getAffectedElements( false, false, dateTime, getWorkspace(), false, false, true, false );
+			boolean includeDeleted, Seen<EmsScriptNode> seen){
+        ArrayList< NodeRef > allRefs = new ArrayList();
+        Pair< Boolean, Seen< EmsScriptNode >> p = Utils.seen( this, true, seen );
+        if ( p.first ) return allRefs;
+        seen = p.second;
+        ArrayList< NodeRef > refs = this.getAffectedElements( false, false, dateTime, getWorkspace(), false, false, true, false );
     		allRefs.addAll(refs);
 	    	for(NodeRef ref: refs){
 	        	EmsScriptNode node = new EmsScriptNode(ref, services);
-	        	allRefs.addAll(node.getAffectedElementsRecursive(false, false, dateTime, getWorkspace(), false, false, true, false));
+	        	allRefs.addAll(node.getAffectedElementsRecursive(false, false, dateTime, getWorkspace(), false, false, true, false, seen));
 	        };
     	return allRefs;
     }

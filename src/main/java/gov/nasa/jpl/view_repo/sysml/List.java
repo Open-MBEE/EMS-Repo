@@ -1,5 +1,6 @@
 package gov.nasa.jpl.view_repo.sysml;
 
+import gov.nasa.jpl.ae.event.Call;
 import gov.nasa.jpl.ae.event.Expression;
 import gov.nasa.jpl.mbee.util.CompareUtils;
 import gov.nasa.jpl.mbee.util.Debug;
@@ -110,6 +111,9 @@ public class List extends ArrayList< Viewable< EmsScriptNode > >
                     if ( eval == null || obj == eval ) {
                         this.add( new Text( "" + obj ) );
                     } else {
+                        if ( eval instanceof Call ) {
+                          eval = ((Call)eval).evaluate( true );
+                        }
                         // package new result in an array and try again
                         if ( !eval.getClass().isArray() ) {
                             eval = new Object[] { eval };

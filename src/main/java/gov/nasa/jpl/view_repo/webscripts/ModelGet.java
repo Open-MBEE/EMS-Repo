@@ -563,8 +563,11 @@ public class ModelGet extends AbstractJavaWebScript {
 		for(  String id : new ArrayList<String>( elementsFound.keySet() ) ){
 		    EmsScriptNode value= elementsFound.get(id);
 		    if(value != null){
-		    	ArrayList<NodeRef> nodeRefs = 
-		    			value.getAffectedElementsRecursive(false, false, dateTime, ws, false, true, true, false);
+                ArrayList< NodeRef > nodeRefs =
+                        value.getAffectedElementsRecursive( false, false,
+                                                            dateTime, ws,
+                                                            false, true, true,
+                                                            false, null );
 		    	for(NodeRef ref: nodeRefs){
 		    		EmsScriptNode node = new EmsScriptNode(ref, services);
 		    		String nodeId = node.getSysmlId();

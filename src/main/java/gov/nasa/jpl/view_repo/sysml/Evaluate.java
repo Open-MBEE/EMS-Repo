@@ -202,6 +202,10 @@ public class Evaluate implements Viewable< EmsScriptNode > {
                 interpretation = (Viewable<?>)resultObj;
                 return;
             }
+            if ( resultObj instanceof Collection ) {
+                interpretation = new Evaluate( resultObj );
+                return;
+            }
             interpretation = new Text( "" + resultObj );
             return;
         }

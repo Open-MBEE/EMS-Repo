@@ -2561,6 +2561,32 @@ System.out.println("RRRRRR");
         return t;
     }
     
+    public List< EmsScriptNode > getChildViews( EmsScriptNode parentNode ) {
+        return getChildViews( parentNode, null, parentNode.getWorkspace(), null );
+    }
+    public List< EmsScriptNode > getChildViews( EmsScriptNode parentNode,
+                                                EmsScriptNode product,
+                                                WorkspaceNode workspace,
+                                                Date dateTime ) {
+        List< String > ids = getChildViewIds( parentNode, product, workspace,
+                                              dateTime );
+        List< EmsScriptNode > elements = getElementsWithIdentifiers( null, ids );
+        return elements;
+    }
+    
+    public List< EmsScriptNode >
+            getElementsWithIdentifiers( Object context, Collection<String> ids ) {
+        List< EmsScriptNode > elements = new ArrayList< EmsScriptNode >();
+        for ( String id : ids ) {
+            Collection< EmsScriptNode > elems = 
+                    getElementWithIdentifier( context, id );
+            if ( elems != null ) {
+                elements.addAll( elems );
+            }
+        }
+        return elements;
+    }
+
     public List< String > getChildViewIds( EmsScriptNode parentNode,
                                            EmsScriptNode product,
                                            WorkspaceNode workspace,
