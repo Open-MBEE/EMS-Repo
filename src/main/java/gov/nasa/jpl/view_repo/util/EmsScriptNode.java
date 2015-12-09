@@ -123,7 +123,7 @@ public class EmsScriptNode extends ScriptNode implements
 
     public static boolean expressionStuff = false; // The value here is ignored.
 
-    public static boolean addingAffectedIds = expressionStuff;
+    public static boolean addingAffectedIds = false;
 
     public static boolean optimisticAndFoolish = false;
 
@@ -2792,8 +2792,8 @@ public class EmsScriptNode extends ScriptNode implements
                    this.getProperty( Acm.ACM_DOCUMENTATION ), filter );
 
         // add affected ids
-        logger.warn( "addingAffectedIds = " + addingAffectedIds );
         if ( addingAffectedIds  ) {
+            logger.debug( "addingAffectedIds = " + addingAffectedIds );
             if ( filter == null || filter.isEmpty() || filter.contains( "affectedIds" ) ) {
                 ArrayList< NodeRef > refs = this.getAffectedElementsRecursive( false, false, dateTime, getWorkspace(), false, false, true, false, null );
                 JSONArray affectedIds = addNodeRefIdsJSON( refs );

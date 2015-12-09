@@ -108,7 +108,7 @@ public class AllFlagsGet extends FlagSet {
                 NodeUtil.jsonCache.clear();
             }
             EmsScriptNode.expressionStuff = val;
-            EmsScriptNode.addingAffectedIds = val;
+            //EmsScriptNode.addingAffectedIds = val;
         } else if (path.equalsIgnoreCase("versionCache")) {
             NodeUtil.doVersionCaching = val;
         } else if (path.equalsIgnoreCase("versionHistoryCache")) {
