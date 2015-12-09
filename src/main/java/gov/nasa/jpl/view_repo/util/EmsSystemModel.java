@@ -35,13 +35,11 @@ import java.util.Vector;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.namespace.QName;
-import org.apache.log4j.Level;
 import org.json.JSONArray;
 import org.springframework.extensions.webscripts.Status;
 
 import sysml.AbstractSystemModel;
 import sysml.SystemModel;
-import sysml.SystemModel.ModelItem;
 
 // <E, C, T, P, N, I, U, R, V, W, CT>
 //public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScriptNode, String, ? extends Serializable, String, String, Object, EmsScriptNode, String, String, EmsScriptNode > {
@@ -1001,6 +999,7 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, Object, 
     public QueryContext getQueryContext( Object context ) {
         Date dateTime = null;
         WorkspaceNode workspace = null;
+        if ( context instanceof QueryContext ) return (QueryContext)context;
         if ( context instanceof Date ) {
             dateTime = (Date)context;
         } else if (context instanceof WorkspaceNode) {

@@ -41,6 +41,7 @@ import gov.nasa.jpl.view_repo.util.CommitUtil;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.EmsTransaction;
 import gov.nasa.jpl.view_repo.util.JsonDiffDiff;
+import gov.nasa.jpl.view_repo.util.K;
 import gov.nasa.jpl.view_repo.util.ModStatus;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
 import gov.nasa.jpl.view_repo.util.WorkspaceDiff;
@@ -51,6 +52,8 @@ import gov.nasa.jpl.view_repo.webscripts.util.ShareUtils;
 //import k.frontend.Frontend;
 //import k.frontend.ModelParser;
 //import k.frontend.ModelParser.ModelContext;
+
+
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -68,7 +71,8 @@ import java.util.TreeSet;
 
 import javax.servlet.http.HttpServletResponse;
 
-import k.frontend.Frontend;
+
+
 
 //import javax.transaction.UserTransaction;
 import org.apache.log4j.*;
@@ -2711,69 +2715,7 @@ public class ModelPost extends AbstractJavaWebScript {
 		return model;
 	}
 
-    public static JSONObject kToJson( String k, WorkspaceNode ws, Set< String > postSet  ) {
-        return kToJson(k, null, ws, postSet);
-    }
-
-	/**
-	 * Add elements' sysmlids in given json. sysmlids are only added where they
-	 * do not already exist. If there is more than one element, the prefix is
-	 * appended with an underscore followed by a count index. For example, if
-	 * there are three elements, and the prefix is "foo", then the sysmlids will
-	 * be foo_0, foo_1, and foo_2. This can be useful for temporary generated
-	 * elements so that they can overwrite themselves and reduce pollution.
-	 * 
-	 * @param json
-	 * @param sysmlidPrefix
-	 */
-	public static void addSysmlIdsToElementJson(JSONObject json,
-			String sysmlidPrefix) {
-		if (json == null)
-			return;
-		if (sysmlidPrefix == null)
-			sysmlidPrefix = "generated_sysmlid_";
-		JSONArray elemsJson = json.optJSONArray("elements");
-		if (elemsJson != null) {
-			for (int i = 0; i < elemsJson.length(); ++i) {
-				JSONObject elemJson = elemsJson.getJSONObject(i);
-				if (elemJson != null && !elemJson.has("sysmlid")) {
-					String id = sysmlidPrefix
-							+ (elemsJson.length() > 1 ? "_" + i : "");
-					elemJson.put("sysmlid", id);
-				}
-			}
-		}
-	}
-
-    public static JSONObject kToJson( String k, String sysmlidPrefix, WorkspaceNode ws, Set< String > postSet  ) {
-		// JSONObject json = new JSONObject(KExpParser.parseExpression(k));
-		JSONObject json = new JSONObject(Frontend.exp2Json2(k));
-
-		if (sysmlidPrefix != null) {
-			addSysmlIdsToElementJson(json, sysmlidPrefix);
-		}
-
-		if (logger.isDebugEnabled()) {
-			log(Level.DEBUG,
-					"********************************************************************************");
-			log(Level.DEBUG, k);
-			if (logger.isDebugEnabled())
-				log(Level.DEBUG, NodeUtil.jsonToString(json, 4));
-			// log(LogLevel.DEBUG, NodeUtil.jsonToString( exprJson0, 4 ));
-			log(Level.DEBUG,
-					"********************************************************************************");
-
-			log(Level.DEBUG, "kToJson(k) = \n" + json.toString(4));
-		}
-
-        changeMissingOperationElementsToStrings(json, ws, postSet);
-
-        if ( logger.isDebugEnabled() ) log(Level.DEBUG, "kToJson(k) = \n" + json.toString( 4 ) );
-        
-		return json;
-	}
-
-	public JSONObject getPostJson(boolean jsonNotK, Object content) {
+    public JSONObject getPostJson(boolean jsonNotK, Object content) {
 		return getPostJson(jsonNotK, content, null);
 	}
 
@@ -2784,7 +2726,7 @@ public class ModelPost extends AbstractJavaWebScript {
 		if (!jsonNotK) {
 			String k = (String) content;
 			logger.warn("k = " + k);
-            postJson = kToJson( k, myWorkspace, elementMap.keySet() );
+            postJson = K.kToJson( k, myWorkspace, elementMap.keySet() );
         }
         else {
 			if (content instanceof JSONObject) {
@@ -2802,7 +2744,7 @@ public class ModelPost extends AbstractJavaWebScript {
 		}
 		if (!Utils.isNullOrEmpty(expressionString)) {
             JSONObject exprJson = 
-                    kToJson(expressionString, myWorkspace, elementMap.keySet());
+                    K.kToJson(expressionString, myWorkspace, elementMap.keySet());
 			JSONArray expJarr = exprJson.getJSONArray("elements");
 			for (int i = 0; i < expJarr.length(); ++i) {
 				jarr.put(expJarr.get(i));

@@ -23,12 +23,12 @@ import gov.nasa.jpl.mbee.util.Seen;
 import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.actions.ModelLoadActionExecuter;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
+import gov.nasa.jpl.view_repo.util.K;
 import gov.nasa.jpl.view_repo.util.ModelContext;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
 import gov.nasa.jpl.view_repo.util.ServiceContext;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 import gov.nasa.jpl.view_repo.webscripts.AbstractJavaWebScript;
-import gov.nasa.jpl.view_repo.webscripts.ModelPost;
 import sysml.view.Viewable;
 
 /**
@@ -232,7 +232,7 @@ public class Evaluate implements Viewable< EmsScriptNode > {
                } else {
                    ws = modelContext.workspace;
                }
-               json = ModelPost.kToJson( expression, 
+               json = K.kToJson( expression, 
                                          "temp_Evaluate_evaluate_expression",
                                          ws, null );
            } catch (Throwable t) {

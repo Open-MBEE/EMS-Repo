@@ -22,6 +22,12 @@ if [[ ! -e "$file" ]]; then
   exit 1
 fi
 
+dataType=json
+if [[ $file == *".k" ]]
+then
+    dataType=k
+fi
+
 # Import the file
-echo  curl -w "\"\n%{http_code}\n\"" -u admin:admin -X POST -H "Content-Type:application/json" --data @$file "\"http://localhost:8080/alfresco/service/workspaces/${workspace}/elements\""
-curl -w "\n%{http_code}\n" -u admin:admin -X POST -H "Content-Type:application/json" --data @$file "http://localhost:8080/alfresco/service/workspaces/${workspace}/elements"
+echo  curl -w "\"\n%{http_code}\n\"" -u admin:admin -X POST -H "Content-Type:application/$dataType" --data @$file "\"http://localhost:8080/alfresco/service/workspaces/${workspace}/elements\""
+curl -w "\n%{http_code}\n" -u admin:admin -X POST -H "Content-Type:application/$dataType" --data @$file "http://localhost:8080/alfresco/service/workspaces/${workspace}/elements"
