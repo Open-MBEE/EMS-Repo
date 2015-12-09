@@ -1,10 +1,14 @@
 {"elements": [
     {
+        "qualifiedId": "/no_site/no_site_no_project",
+        "qualifiedName": "/no_site/no_site_no_project",
         "name": "no_site_no_project",
         "sysmlid": "no_site_no_project",
         "specialization": {"type": "Project"}
     },
     {
+        "qualifiedId": "/europa/123456",
+        "qualifiedName": "/europa/JW_TEST",
         "name": "JW_TEST",
         "sysmlid": "123456",
         "specialization": {"type": "Project"}

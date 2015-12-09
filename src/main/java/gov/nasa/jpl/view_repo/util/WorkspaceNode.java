@@ -1187,6 +1187,9 @@ public class WorkspaceNode extends EmsScriptNode {
             if ( Debug.isOn() ) {
                 Debug.outln( "no workspace for bad id: " + nameOrId );
             }
+            if (responseStatus != null) {
+                responseStatus.setCode( HttpServletResponse.SC_BAD_REQUEST, "Workspace not found" );
+            }
             return null;
         }
         // Use null to indicate master workspace

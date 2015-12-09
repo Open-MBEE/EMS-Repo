@@ -4,11 +4,19 @@
         "name": "wsA",
         "elements": [
             {
-                "name": "300",
+                "qualifiedName": "/no_site/no_site_no_project/holding_bin",
+                "name": "holding_bin",
+                "sysmlid": "holding_bin_no_site_no_project",
+                "owner": "no_site_no_project",
+                "specialization": {"type": "Package"},
+                "editable": true
+            },
+            {
                 "qualifiedName": "/no_site/no_site_no_project/holding_bin/300",
-                "documentation": "something",
-                "owner": "holding_bin_no_site_no_project",
+                "name": "300",
                 "sysmlid": "x",
+                "owner": "holding_bin_no_site_no_project",
+                "documentation": "something",
                 "specialization": {
                     "propertyType": null,
                     "isSlot": false,
@@ -20,15 +28,7 @@
                     }],
                     "type": "Property"
                 },
-                "editable": true,
-            },
-            {
-                "name": "holding_bin",
-                "qualifiedName": "/no_site/no_site_no_project/holding_bin",
-                "sysmlid": "holding_bin_no_site_no_project",
-                "owner": "no_site_no_project",
-                "specialization": {"type": "Package"},
-                "editable": true,
+                "editable": true
             }
         ]
     },
@@ -37,11 +37,11 @@
         "addedElements": [],
         "conflictedElements": [],
         "updatedElements": [{
-            "name": "300",
             "qualifiedName": "/no_site/no_site_no_project/holding_bin/300",
+            "name": "300",
+            "sysmlid": "x",
             "owner": "holding_bin_no_site_no_project",
             "documentation": "x is x",
-            "sysmlid": "x",
             "specialization": {
                 "value": [{
                     "valueExpression": null,
@@ -56,4 +56,3 @@
         "movedElements": []
     }
 }
-200

@@ -81,12 +81,12 @@ public class PostgresHelper {
 	}
 
 	public void execUpdate(String query) throws SQLException {
-		if (logger.isInfoEnabled()) logger.info("Query: " + query);
+		if (logger.isDebugEnabled()) logger.debug("Query: " + query);
 		this.conn.createStatement().executeUpdate(query);
 	}
 
 	public ResultSet execQuery(String query) throws SQLException {
-	    if (logger.isInfoEnabled()) logger.info("Query: " + query);
+	    if (logger.isDebugEnabled()) logger.debug("Query: " + query);
 		return this.conn.createStatement().executeQuery(query);
 	}
 
@@ -180,6 +180,11 @@ public class PostgresHelper {
 		}
 		return null;
 	}
+	
+	public String getNodeRefIdFromSysmlId(String sysmlId) {
+	    Node node = getNodeFromSysmlId(sysmlId);
+	    return node.getNodeRefId();
+	}
 
 	public void insertNode(String nodeRefId, String versionedRefId,
 			String sysmlId) {
@@ -244,8 +249,9 @@ public class PostgresHelper {
 					+ edgeType.getValue() + ")");
 		} catch (Exception e) {
 			if (e.getMessage().contains("duplicate key")) {
-				if (logger.isInfoEnabled())
+				if (logger.isInfoEnabled()) {
 					e.printStackTrace();
+				}
 			} else {
 				e.printStackTrace();
 			}
@@ -274,8 +280,8 @@ public class PostgresHelper {
 		return result;
 	}
 
-	public Set<String> getImmediateParents(String sysmlId, DbEdgeTypes et) {
-		Set<String> result = new HashSet<String>();
+	public Set<Pair<String, String>> getImmediateParents(String sysmlId, DbEdgeTypes et) {
+		Set<Pair<String, String>> result = new HashSet<Pair<String,String>>();
 		try {
 			Node n = getNodeFromSysmlId(sysmlId);
 
@@ -287,13 +293,14 @@ public class PostgresHelper {
 					et.getValue(), workspaceName));
 
 			while (rs.next()) {
-				result.add(rs.getString(1));
+				result.add(new Pair<String, String>(rs.getString( 1 ), rs.getString( 2 )));
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		return result;
 	}
+	
 	
 	public Map<String,Set<String>> getImmediateParentRoots(String sysmlId, DbEdgeTypes et) {
 		Map<String, Set<String>> result = new HashMap<String, Set<String>>();

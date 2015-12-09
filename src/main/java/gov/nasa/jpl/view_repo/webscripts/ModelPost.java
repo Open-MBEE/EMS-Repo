@@ -40,6 +40,7 @@ import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.CommitUtil;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.EmsTransaction;
+import gov.nasa.jpl.view_repo.util.JsonDiffDiff;
 import gov.nasa.jpl.view_repo.util.ModStatus;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
 import gov.nasa.jpl.view_repo.util.WorkspaceDiff;
@@ -142,6 +143,20 @@ public class ModelPost extends AbstractJavaWebScript {
 	private double elementProcessedCnt = 0;
 	private double elementMetadataProcessedCnt = 0;
 
+    /**
+     * Keep track of update elements
+     */
+    //Set<Version> changeSet = new HashSet<Version>();
+    
+    /**
+     * IDs of posted elements that have been determined to have no effect.
+     */
+    protected Set< String > notChanging = new HashSet< String >();
+    /**
+     * IDs of posted elements that have been determined to have an effect.
+     */
+    protected Set< String > changing = new HashSet< String >();
+
 	protected int numElementsToPost = 0;
 	protected Set<String> newElements;
 	protected SiteInfo siteInfo;
@@ -219,38 +234,65 @@ public class ModelPost extends AbstractJavaWebScript {
 		return elements;
 	}
 
-	private void processRootElement(String rootElement, WorkspaceNode targetWS,
-			TreeMap<String, EmsScriptNode> nodeMap,
-			TreeSet<EmsScriptNode> elements, Set<String> elementsToRemove)
-			throws Exception {
-
-		if (projectNode == null
-				|| !rootElement.equals(projectNode.getProperty(Acm.CM_NAME))) {
-			EmsScriptNode owner = getOwner(rootElement, targetWS, true);
-
-			// Create element, owner, and reified package folder as
-			// necessary and place element with owner; don't update
-			// properties on this first pass.
-			if (owner != null && owner.exists()) {
-				if (checkPermissions(owner, "Write")) {
-					Set<EmsScriptNode> updatedElements = updateOrCreateElement(
-							elementMap.get(rootElement), owner, targetWS, false);
-					for (EmsScriptNode node : updatedElements) {
-						nodeMap.put(node.getName(), node);
-					}
-					elements.addAll(updatedElements);
-				} else {
-					if (elementsToRemove != null) {
-						elementsToRemove.add(rootElement);
-					} else {
-						logger.warn("could not remove elements due to permissions");
-					}
-
-				}
-			}
-		}
-
-	}
+    private void processRootElement(String rootElement, WorkspaceNode targetWS,
+                                    TreeMap<String, EmsScriptNode> nodeMap,
+                                    TreeSet<EmsScriptNode> elements,
+                                    Set<String> elementsToRemove) throws Exception {
+        PermissionService psrvc = getServices().getPermissionService();
+        JSONObject rootElementJson = elementMap.get( rootElement );
+        if ( rootElementJson == null ) return;  // TODO -- ERROR
+        
+        // See if posted json changes cached json and, if not, add to the
+        // notChanging list and go ahead and return.
+        if ( NodeUtil.doJsonCaching ) {
+            // TODO -- Need to fix and turn on JsonCache for this to work.
+            String sysmlId = rootElementJson.optString( "sysmlid" );
+            if ( sysmlId != null ) {
+                EmsScriptNode node = foundElements.get( sysmlId );
+                if ( node == null ) {
+                    node = findScriptNodeById( sysmlId, targetWS, null, false );
+                }
+                if ( node != null ) {
+                    String id = node.getNodeRef().toString();
+                    JSONObject cachedElement = NodeUtil.jsonCacheGet( id, 0, true );
+                    if ( cachedElement != null ) {
+                        if ( !JsonDiffDiff.doesChange( cachedElement, rootElementJson ) ) {
+                            notChanging.add( rootElement );
+                            return;
+                        } else {
+                            changing.add( rootElement );
+                        }
+                    }
+                }
+            }
+        }
+        
+        if (projectNode == null ||
+            !rootElement.equals(projectNode.getProperty(Acm.CM_NAME))) {
+            EmsScriptNode owner = getOwner(rootElement,targetWS, true);
+            
+            // Create element, owner, and reified package folder as
+            // necessary and place element with owner; don't update
+            // properties on this first pass.
+            if (owner != null && owner.exists()) {
+                if (checkPermissions(owner, "Write")) {
+                    Set< EmsScriptNode > updatedElements =
+                            updateOrCreateElement( rootElementJson,
+                                                   owner, targetWS, false );
+                    for ( EmsScriptNode node : updatedElements ) {
+                        nodeMap.put(node.getName(), node);
+                    }
+                    elements.addAll( updatedElements );
+                } else {
+                    if (elementsToRemove != null) {
+                        elementsToRemove.add( rootElement );
+                    } else {
+                        logger.warn( "could not remove elements due to permissions" );
+                    }
+                }
+            }
+        }
+    }
 
 	/**
 	 * Utility to save off the commit, then send deltas. Send deltas is tied to
@@ -566,12 +608,11 @@ public class ModelPost extends AbstractJavaWebScript {
 	 * Resurrect the parents of the node from the dead if needed
 	 *
 	 */
-	protected void resurrectParents(EmsScriptNode nodeToUpdate, boolean ingest,
-			WorkspaceNode workspace) {
+  protected void resurrectParents(EmsScriptNode nodeToUpdate, EmsScriptNode parent, boolean ingest,
+                                  WorkspaceNode workspace) {
 
 		EmsScriptNode lastNode = nodeToUpdate;
-		EmsScriptNode nodeParent = nodeToUpdate.getParent(null, workspace,
-				false, true);
+		EmsScriptNode nodeParent = parent != null ? parent : nodeToUpdate.getParent(null, workspace, false, true);
 		EmsScriptNode reifiedNodeParent = nodeParent != null ? nodeParent
 				.getReifiedNode(true, workspace) : null;
 		EmsScriptNode lastDeletedReifiedNodeParent = null;
@@ -675,6 +716,7 @@ public class ModelPost extends AbstractJavaWebScript {
 			if (ownersNotFound.contains(ownerName)) {
 				return null;
 			}
+
 
 			owner = findScriptNodeById(ownerName, workspace, null, true);
 
@@ -817,6 +859,7 @@ public class ModelPost extends AbstractJavaWebScript {
 	Set<String> rootElements = new HashSet<String>();
 
 	protected WebScriptRequest lastReq = null;
+	public boolean recordingVersions = false;
 
 	/**
 	 * Builds up the element map and hierarchy and returns true if valid
@@ -1005,28 +1048,39 @@ public class ModelPost extends AbstractJavaWebScript {
 		}
 		String jsonId = elementJson.getString(Acm.JSON_ID);
 
-		// Only try a node search on the first pass, on the second pass it
-		// should be in the
-		// fondElements, but may not be if there was errors with the initial
-		// pass:
-		final EmsScriptNode element = (ingest && foundElements
-				.containsKey(jsonId)) ? foundElements.get(jsonId)
-				: findScriptNodeById(jsonId, workspace, null, true);
-		if (element != null) {
-			// Adding to elements for error case to find project id in
-			// sendDeltas() since that is the only place where it is getting
-			// used in ModelPost, at least.
-			elements.add(element);
-			// nodeMap.put( element.getName(), element );
-			// only add to original element map if it exists on first pass
-			if (!ingest) {
-				if (!wsDiff.getElements().containsKey(jsonId)) {
-					wsDiff.getElements().put(jsonId, element);
-					wsDiff.getElementsVersions().put(jsonId,
-							element.getHeadVersion());
-				}
-			}
-		}
+        boolean elementNotChanging = notChanging.contains( jsonId ); 
+        
+        final EmsScriptNode element = foundElements.containsKey( jsonId ) ?
+                                      foundElements.get(jsonId) :
+                                      findScriptNodeById( jsonId, workspace, null, true );
+        if ( element != null ) {
+            // Adding to elements for error case to find project id in
+            // sendDeltas() since that is the only place where it is getting
+            // used in ModelPost, at least.
+            elements.add( element );
+            // nodeMap.put( element.getName(), element );
+            // only add to original element map if it exists on first pass
+            if ( !ingest && !elementNotChanging ) {
+                if ( !wsDiff.getElements().containsKey( jsonId ) ) {
+                    wsDiff.getElements().put( jsonId, element );
+                    if ( recordingVersions ) {
+                        wsDiff.getElementsVersions()
+                              .put( jsonId, element.getHeadVersion() );
+                    }
+                }
+            }
+        }
+
+        // If it's been determined that there is no net change to this element,
+        // go ahead and return.
+        if ( elementNotChanging ) {
+            return elements;
+        }
+        // If the element could not be found, then it will need to be created,
+        // so there is a net effect.
+        else if ( element == null ) {
+            changing.add( jsonId );
+        }
 
 		// check that parent is of folder type
 		if (parent == null) {
@@ -1095,6 +1149,11 @@ public class ModelPost extends AbstractJavaWebScript {
 		}
 		reifiedNode = returnPair.second;
 
+        // The call to updateOrCreateTransactionableElement() above may have
+        // determined that there is no change to this element, adding it to
+        // notChanging.
+        elementNotChanging = elementNotChanging || notChanging.contains( jsonId );
+
 		// create the children elements
 		if (reifiedNode != null && reifiedNode.exists()) {
 			// elements.add( reifiedNode );
@@ -1111,14 +1170,18 @@ public class ModelPost extends AbstractJavaWebScript {
 			}
 		}
 
-		// Note: foundElements is populated with the updated or newly created
-		// node in
-		// updateOrCreateTransactionableElement()
-		EmsScriptNode finalElement = foundElements.get(jsonId);
-		updateTransactionableWsState(finalElement, jsonId, modStatus, ingest);
+        // Note: foundElements is populated with the updated or newly created
+        // node in updateOrCreateTransactionableElement()
+        EmsScriptNode finalElement = foundElements.get( jsonId );
+        if ( !elementNotChanging ) {
+            updateTransactionableWsState( finalElement, jsonId, modStatus,
+                                          ingest );
+        }
 
-		fixReadTimeForConflictTransaction(finalElement, elementJson);
-
+        if ( !elementNotChanging ) {
+            fixReadTimeForConflictTransaction(finalElement, elementJson);
+        }
+        
 		nodeMap.put(finalElement.getName(), finalElement);
 
 		if (ingest) {
@@ -1143,9 +1206,23 @@ public class ModelPost extends AbstractJavaWebScript {
 	protected void fixReadTimeForConflict(EmsScriptNode element,
 			JSONObject elementJson) throws JSONException {
 
-		if (elementJson == null)
-			return;
-		Date modTime = (element == null ? null : element.getLastModified(null));
+        if ( elementJson == null ) return;
+
+        // TODO -- Can we just do this below and just delete the rest of the method?
+        if ( true ) {
+            elementJson.remove( Acm.JSON_READ );
+            elementJson.remove( Acm.JSON_LAST_MODIFIED );
+            return;
+        }
+
+        // If the json includes no read or modified time, don't do anything.
+        if ( !elementJson.has( Acm.JSON_READ ) && !elementJson.has( Acm.JSON_LAST_MODIFIED ) ) {
+            return;
+        }
+
+        // REVIEW -- why bother with the last modified time? Why not use now
+        // (below) or just remove the read and modified times?
+        Date modTime = ( element == null ? null : element.getLastModified( null ) );
 
 		Date now = new Date();
 		if (modTime == null || now.after(modTime)) {
@@ -1305,25 +1382,18 @@ public class ModelPost extends AbstractJavaWebScript {
 			EmsScriptNode node, boolean ingest, EmsScriptNode reifiedPkgNode,
 			EmsScriptNode parent, String id, WorkspaceNode workspace)
 			throws Exception {
-		// TODO REVIEW
-		// Wanted to do a lot of processing in buildTransactionElementMap(), so
-		// that we make the
-		// node a owner and in the elementHierachyJson, so that the children
-		// will be processed
-		// normally instead of having the code below. That solution was not a
-		// neat as desired either
-		// b/c you need the node itself to retrieve its properties, to see if it
-		// already has value or
-		// operand property values stored. This would involve duplicating a lot
-		// of the above code to
-		// create a node if needed, etc.
+	    // TODO REVIEW
+	    //      Wanted to do a lot of processing in buildTransactionElementMap(), so that we make the
+	    //      node a owner and in the elementHierachyJson, so that the children will be processed
+	    //      normally instead of having the code below.  That solution was not a neat as desired either
+	    //      b/c you need the node itself to retrieve its properties, to see if it already has value or
+	    //      operand property values stored.  This would involve duplicating a lot of the above code to
+	    //      create a node if needed, etc.
 
 		// If it is a property that points to a ValueSpecification then need to
-		// convert
-		// the elementJson to just contain the sysmlid for the nodes,
+		// convert the elementJson to just contain the sysmlid for the nodes,
 		// instead of the nodes themselves. Also, need to create or modify nodes
-		// the
-		// properties map to.
+		// the properties map to.
 		boolean changed = false;
 
 		// If it is a nested node then it doesnt have a specialize property
@@ -1695,6 +1765,14 @@ public class ModelPost extends AbstractJavaWebScript {
 			return false;
 		}
 
+        String readTime = elementJson.optString( Acm.JSON_READ );
+        String modified = elementJson.optString( Acm.JSON_LAST_MODIFIED );
+        boolean readNull = Utils.isNullOrEmpty( readTime );
+        boolean modifiedNull = Utils.isNullOrEmpty( modified );
+        if ( readNull && modifiedNull ) {
+            return false;
+        }
+
 		// Make sure we have the most recent version of
 		// Get the last modified time from the element:
 		Date lastModified = element.getLastModified(null);
@@ -1704,9 +1782,8 @@ public class ModelPost extends AbstractJavaWebScript {
 		String msg = null;
 
 		// Compare read time to last modified time:
-		if (inConflictImpl(element, elementJson, lastModified, lastModString,
-				true)) {
-
+        if (!readNull && inConflictImpl( element, elementJson, lastModified,
+                                         lastModString, true ) ) {
 			msg = "Error! Tried to post concurrent edit to element, " + element
 					+ ".\n";
 			log(Level.WARN,
@@ -1715,9 +1792,9 @@ public class ModelPost extends AbstractJavaWebScript {
 		}
 
 		// Compare last modified to last modified time:
-		if (msg == null
-				&& inConflictImpl(element, elementJson, lastModified,
-						lastModString, false)) {
+        if ( msg == null && !modifiedNull && 
+             inConflictImpl( element, elementJson, lastModified, lastModString,
+                             false ) ) {
 
 			msg = "Error! Tried to post overwrite to element, " + element
 					+ ".\n";
@@ -1772,13 +1849,9 @@ public class ModelPost extends AbstractJavaWebScript {
 		// date to allow concurrent edits to different properties of the same
 		// element.
 
-		String readTime = null;
-		try {
-			readTime = elementJson.getString(checkRead ? Acm.JSON_READ
-					: Acm.JSON_LAST_MODIFIED);
-		} catch (JSONException e) {
-			return false;
-		}
+        String readTime =
+                elementJson.optString( checkRead ? Acm.JSON_READ
+                                                 : Acm.JSON_LAST_MODIFIED );
 		if (logger.isDebugEnabled()) logger.debug("%% %% %% time = " + readTime);
 		if (readTime == null) {
 			return false;
@@ -1831,6 +1904,7 @@ public class ModelPost extends AbstractJavaWebScript {
 			if (nodeToUpdate.isDeleted()
 					&& NodeUtil.workspacesEqual(nodeToUpdate.getWorkspace(),
 							workspace)) {
+			    changing.add( id );
 				nodeToUpdate.removeAspect("ems:Deleted");
 				modStatus.setState(ModStatus.State.ADDED);
 
@@ -1887,15 +1961,17 @@ public class ModelPost extends AbstractJavaWebScript {
 			jsonType = (existingNodeType == null ? "Element" : existingNodeType);
 		}
 
-		if (ingest && existingNodeType != null
-				&& !jsonType.equals(existingNodeType)) {
-			log(Level.WARN,
-					"The type supplied %s is different than the stored type %s",
-					jsonType, existingNodeType);
-			// log(LogLevel.WARNING,
-			// "The type supplied "+jsonType+" is different than the stored type "+existingNodeType);
-		}
-
+        boolean sysmlTypeIsChanging =
+                existingNodeType != null && !jsonType.equals( existingNodeType );
+        if ( sysmlTypeIsChanging ) {
+            changing.add( id );
+            if ( ingest ) {
+                log( Level.WARN,
+                     "The type supplied %s is different than the stored type %s",
+                     jsonType, existingNodeType );
+            }
+        }
+      
 		String acmSysmlType = null;
 		String type = null;
 		if (jsonType != null) {
@@ -1911,8 +1987,6 @@ public class ModelPost extends AbstractJavaWebScript {
 				&& elementJson.has(Acm.JSON_SPECIALIZATION)) {
 			log(Level.ERROR, HttpServletResponse.SC_BAD_REQUEST,
 					"Type was not supplied and no existing node to query for the type");
-			// log(LogLevel.ERROR,"Type was not supplied and no existing node to query for the type",
-			// HttpServletResponse.SC_BAD_REQUEST);
 			return null;
 		}
 
@@ -2006,6 +2080,7 @@ public class ModelPost extends AbstractJavaWebScript {
 							.println("PREFIX: type not found for " + jsonType);
 				return null;
 			} else {
+			    changing.add( id );
 				log(Level.INFO, "\tcreating node");
 				try {
 					// if ( parent != null && parent.exists() ) {
@@ -2044,6 +2119,7 @@ public class ModelPost extends AbstractJavaWebScript {
 					if (!ingest) {
 						// don't have to move on second pass
 						if (nodeToUpdate.move(parent)) {
+			                changing.add( id );
 							modStatus.setState(ModStatus.State.MOVED);
 						}
 
@@ -2054,7 +2130,7 @@ public class ModelPost extends AbstractJavaWebScript {
 						// processValueSpecProperty().
 						// don't have to resurrect on second pass
 						if (!nestedNode) {
-							resurrectParents(nodeToUpdate, ingest, workspace);
+							resurrectParents(nodeToUpdate, parent, ingest, workspace);
 						}
 					}
 					// Ingesting metadata, ie second pass:
@@ -2064,14 +2140,12 @@ public class ModelPost extends AbstractJavaWebScript {
 						// being changed to an Element. Need to call this for
 						// Elements for downgrading,
 						// which will remove all of the needed aspects.
-						if ((!type.equals(acmSysmlType) && NodeUtil
-								.isAspect(acmSysmlType))
-								|| acmSysmlType.equals(Acm.ACM_ELEMENT)) {
-
+                        if ( sysmlTypeIsChanging ) {
 							checkForObsoleteValueSpecs(acmSysmlType,
 									nodeToUpdate, workspace, ingest);
 
 							if (nodeToUpdate.createOrUpdateAspect(acmSysmlType)) {
+                                changing.add( id );
 								modStatus.setState(ModStatus.State.UPDATED);
 							}
 						}
@@ -2113,6 +2187,7 @@ public class ModelPost extends AbstractJavaWebScript {
 			if (processValueSpecProperty(acmSysmlType, nestedNode, elementJson,
 					specializeJson, nodeToUpdate, ingest, reifiedPkgNode,
 					parent, id, workspace)) {
+                changing.add( id );
 				modStatus.setState(ModStatus.State.UPDATED);
 			}
 
@@ -2122,6 +2197,7 @@ public class ModelPost extends AbstractJavaWebScript {
 			}
 			timerIngest = Timer.startTimer(timerIngest, timeEvents);
 			if (nodeToUpdate.ingestJSON(elementJson)) {
+                changing.add( id );
 				Timer.stopTimer(
 						timerIngest,
 						"!!!!! updateOrCreateTransactionableElement(): ingestJSON",
@@ -2141,10 +2217,15 @@ public class ModelPost extends AbstractJavaWebScript {
 		end = System.currentTimeMillis();
 		log(Level.INFO, "\tTotal: %s ms", end - start);
 
-		if (nodeToUpdate != null)
-			nodeToUpdate.getOrSetCachedVersion();
+        if ( nodeToUpdate != null && changing.contains( id ) ) {
+            nodeToUpdate.getOrSetCachedVersion();
+        }
+      
+        if ( ingest && !changing.contains( id ) ) {
+            notChanging.add( id );
+        }
 
-		return nestedNode ? nodeToUpdate : reifiedPkgNode;
+        return nestedNode ? nodeToUpdate : reifiedPkgNode;
 	}
 
 	private EmsScriptNode createSitePkg(EmsScriptNode pkgSiteNode,
@@ -2510,9 +2591,9 @@ public class ModelPost extends AbstractJavaWebScript {
 		final String user = AuthenticationUtil.getFullyAuthenticatedUser();
 		String wsId = null;
 
-		if (logger.isDebugEnabled()) {
-			logger.debug(user + " " + req.getURL());
-			logger.debug(req.parseContent());
+		if (logger.isInfoEnabled()) {
+			logger.info(user + " " + req.getURL());
+			logger.info(req.parseContent());
 		}
 
 		if (runWithoutTransactions) {// || internalRunWithoutTransactions) {
@@ -2542,7 +2623,6 @@ public class ModelPost extends AbstractJavaWebScript {
 		}
 
 		if (wsFound && validateRequest(req, status)) {
-
 			try {
 				if (runInBackground) {
 					// Get the project node from the request:
@@ -2734,7 +2814,7 @@ public class ModelPost extends AbstractJavaWebScript {
 
 	protected Set<EmsScriptNode> handleUpdate(JSONObject postJson,
 			Status status, final WorkspaceNode workspace, boolean evaluate,
-			boolean fix, Map<String, Object> model, boolean createCommit,
+			final boolean fix, Map<String, Object> model, boolean createCommit,
 			boolean suppressElementJson) throws Exception {
 		final JSONObject top = NodeUtil.newJsonObject();
 		final Set<EmsScriptNode> elements = createOrUpdateModel(postJson,
@@ -2748,9 +2828,7 @@ public class ModelPost extends AbstractJavaWebScript {
 			if (fix) {
 				sendProgress("Fixing constraints", projectId, true);
 				new EmsTransaction(getServices(), getResponse(),
-						getResponseStatus(), runWithoutTransactions) {// ||
-																		// internalRunWithoutTransactions
-																		// ) {
+						getResponseStatus(), runWithoutTransactions) {
 					@Override
 					public void run() throws Exception {
 						fix(elements, workspace);
@@ -2772,8 +2850,17 @@ public class ModelPost extends AbstractJavaWebScript {
 					@Override
 					public void run() throws Exception {
 						for (EmsScriptNode element : elements) {
-							JSONObject json = element.toJSONObject(workspace,
-									null);
+
+                            JSONObject json = null;
+                            if ( NodeUtil.doJsonCaching && !fix
+                                 && notChanging.contains( element.getSysmlId() ) ) {
+                                json = NodeUtil.jsonCacheGet( element.getNodeRef().toString(),
+                                                              0, false );
+                            }
+                            if ( json == null ) {
+                                json = element.toJSONObject( workspace, null );
+                            }						    
+						    
 							elementsJson.put(json);
 							elementsJsonMap.put(element, json);
 						}
@@ -2787,61 +2874,17 @@ public class ModelPost extends AbstractJavaWebScript {
 							projectId, true);
 
 					new EmsTransaction(getServices(), getResponse(),
-							getResponseStatus(), runWithoutTransactions) {// ||
-																			// internalRunWithoutTransactions
-																			// )
-																			// {
+							getResponseStatus(), runWithoutTransactions) {
 						@Override
 						public void run() throws Exception {
 							evaluate(elementsJsonMap, top, workspace);
-							// Map< Object, Object > r = evaluate(elements,
-							// workspace);
-							// results.putAll( r );
-							sendProgress(
-									"Evaluating constraints and expressions completed",
-									projectId, true);
+							sendProgress( "Evaluating constraints and expressions completed",
+							              projectId, true);
 						}
 					};
 				}
 
-				// new EmsTransaction(getServices(), getResponse(),
-				// getResponseStatus(),
-				// runWithoutTransactions) {
-				// @Override
-				// public void run() throws Exception {
-				// for ( int i = 0; i < elementsJson.length(); ++i ) {
-				//
-				// }
-				// for ( EmsScriptNode element : elements ) {
-				// JSONObject json = element.toJSONObject(workspace, null);
-				// Object result = results.get( element );
-				// if ( result != null ) {
-				// try {
-				// json.putOpt( "evaluationResult", result );
-				// results.remove( element );
-				// } catch ( Throwable e ) {
-				// ModelPost.this.log( Level.WARN,
-				// "Evaluation failed for %s", element );
-				// }
-				// }
-				// elementsJson.put( json );
-				// }
-				// }
-				// };
-				//
-				// // Put constraint evaluation results in json.
-				// JSONArray resultJarr = new JSONArray();
-				// for ( Object k : results.keySet() ) {
-				// JSONObject r = new JSONObject();
-				// r.put( "expression", k.toString() );
-				// Object v = results.get( k );
-				// r.put( "value", "" + v );
-				// resultJarr.put( r );
-				// }
-
 				top.put("elements", elementsJson);
-				// if ( resultJarr.length() > 0 ) top.put( "evaluations",
-				// resultJarr );
 			}
 		}
 
@@ -2875,9 +2918,7 @@ public class ModelPost extends AbstractJavaWebScript {
 
 		for (final EmsScriptNode element : elems) {
 			new EmsTransaction(getServices(), getResponse(),
-					getResponseStatus(), runWithoutTransactions) {// ||
-																	// internalRunWithoutTransactions)
-																	// {
+					getResponseStatus(), runWithoutTransactions) {
 				@Override
 				public void run() throws Exception {
 					element.addRelationshipToPropertiesOfParticipants(ws);

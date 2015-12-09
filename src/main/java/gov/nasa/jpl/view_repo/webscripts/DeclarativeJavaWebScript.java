@@ -18,6 +18,8 @@ package gov.nasa.jpl.view_repo.webscripts;
  * limitations under the License.
  */
 
+import gov.nasa.jpl.view_repo.util.NodeUtil;
+
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -67,14 +69,17 @@ public class DeclarativeJavaWebScript extends AbstractWebScript
             // construct model for script / template
             Status status = new Status();
             Cache cache = new Cache(getDescription().getRequiredCache());
-            setCacheHeaders(req, cache);
+            setCacheHeaders(req, cache); // add in custom headers for nginx caching
+
             Map<String, Object> model = executeImpl(req, status, cache);
+            
             if (model == null)
             {
                 model = new HashMap<String, Object>(8, 1.0f);
             }
             model.put("status", status);
             model.put("cache", cache);
+            NodeUtil.ppAddQualifiedNameId2Json(req, model); // TODO: weave in as aspect
             
             try
             {

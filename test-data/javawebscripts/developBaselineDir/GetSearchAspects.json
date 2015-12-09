@@ -6,6 +6,7 @@
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
+        "searchTypes": "aspect",
         "name": "Components",
         "documentation": "",
         "owner": "connectorViewDataFolder",
@@ -13,14 +14,14 @@
     },
     {
         "qualifiedId": "/europa/123456/300/301",
-         "relatedDocuments": [{
-             "parentViews": [{
-                 "name": "301",
-                 "sysmlid": "301"
-             }],
-             "name": "301",
-             "sysmlid": "301"
-         }],
+        "relatedDocuments": [{
+            "parentViews": [{
+                "name": "301",
+                "sysmlid": "301"
+            }],
+            "name": "301",
+            "sysmlid": "301"
+        }],
         "qualifiedName": "/europa/JW_TEST2/300/301",
         "sysmlid": "301",
         "properties": [{
@@ -35,8 +36,8 @@
             "owner": "301",
             "specialization": {
                 "propertyType": null,
-                "isDerived": false,
                 "isSlot": false,
+                "isDerived": false,
                 "value": [{
                     "valueExpression": null,
                     "string": "dlam_string",
@@ -48,16 +49,11 @@
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
+        "searchTypes": "aspect",
         "name": "301",
         "documentation": "else",
         "owner": "300",
         "specialization": {
-            "displayedElements": [
-                "301",
-                "302",
-                "303"
-            ],
-            "childrenViews": ["304"],
             "view2view": [{
                 "childrenViews": [
                     "301",
@@ -65,18 +61,24 @@
                 ],
                 "sysmlid": "301"
             }],
+            "childrenViews": ["304"],
+            "displayedElements": [
+                "301",
+                "302",
+                "303"
+            ],
             "allowedElements": [
                 "301",
                 "302",
                 "303"
             ],
+            "noSections": ["302"],
             "contains": [{
                 "sourceType": "reference",
                 "source": "301",
                 "sourceProperty": "documentation",
                 "type": "Paragraph"
             }],
-            "noSections": ["302"],
             "type": "Product"
         }
     },
@@ -87,6 +89,7 @@
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
+        "searchTypes": "aspect",
         "name": "Context",
         "documentation": "",
         "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
@@ -99,6 +102,7 @@
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
+        "searchTypes": "aspect",
         "name": "Components",
         "documentation": "",
         "owner": "123456",
@@ -106,14 +110,14 @@
     },
     {
         "qualifiedId": "/europa/123456/4000/401",
-         "relatedDocuments": [{
-             "parentViews": [{
-                 "name": "401",
-                 "sysmlid": "401"
-             }],
-             "name": "401",
-             "sysmlid": "401"
-         }],
+        "relatedDocuments": [{
+            "parentViews": [{
+                "name": "401",
+                "sysmlid": "401"
+            }],
+            "name": "401",
+            "sysmlid": "401"
+        }],
         "qualifiedName": "/europa/JW_TEST2/400/401",
         "sysmlid": "401",
         "properties": [{
@@ -128,8 +132,8 @@
             "owner": "401",
             "specialization": {
                 "propertyType": null,
-                "isDerived": false,
                 "isSlot": false,
+                "isDerived": false,
                 "value": [{
                     "valueExpression": null,
                     "string": "dlam_string",
@@ -141,16 +145,11 @@
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
+        "searchTypes": "aspect",
         "name": "401",
         "documentation": "4else",
         "owner": "4000",
         "specialization": {
-            "displayedElements": [
-                "401",
-                "402",
-                "403"
-            ],
-            "childrenViews": ["404"],
             "view2view": [{
                 "childrenViews": [
                     "401",
@@ -158,18 +157,24 @@
                 ],
                 "sysmlid": "401"
             }],
+            "childrenViews": ["404"],
+            "displayedElements": [
+                "401",
+                "402",
+                "403"
+            ],
             "allowedElements": [
                 "401",
                 "402",
                 "403"
             ],
+            "noSections": ["402"],
             "contains": [{
                 "sourceType": "reference",
                 "source": "401",
                 "sourceProperty": "documentation",
                 "type": "Paragraph"
             }],
-            "noSections": ["402"],
             "type": "Product"
         }
     },
@@ -180,6 +185,7 @@
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
+        "searchTypes": "aspect",
         "name": "viewWithContents",
         "documentation": "View updates",
         "owner": "123456",
@@ -198,6 +204,7 @@
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
+        "searchTypes": "aspect",
         "name": "viewNull",
         "documentation": "View with null values",
         "owner": "123456",

@@ -4,32 +4,31 @@
         "name": "wsA",
         "elements": [
             {
-                "qualifiedName": "/no_site/no_site_no_project/holding_bin/300",
-                "sysmlid": "x",
-                "editable": true,
-                "version": "1.1",
                 "name": "300",
-                "owner": "holding_bin_no_site_no_project",
+                "qualifiedName": "/no_site/no_site_no_project/holding_bin/300",
                 "documentation": "something",
+                "owner": "holding_bin_no_site_no_project",
+                "sysmlid": "x",
                 "specialization": {
                     "propertyType": null,
-                    "isDerived": false,
                     "isSlot": false,
+                    "isDerived": false,
                     "value": [{
                         "valueExpression": null,
                         "string": "dlam_string",
                         "type": "LiteralString"
                     }],
                     "type": "Property"
-                }
+                },
+                "editable": true,
             },
             {
                 "qualifiedName": "/no_site/no_site_no_project/holding_bin",
-                "sysmlid": "holding_bin_no_site_no_project",
-                "editable": true,
                 "name": "holding_bin",
                 "owner": "no_site_no_project",
-                "specialization": {"type": "Package"}
+                "sysmlid": "holding_bin_no_site_no_project",
+                "specialization": {"type": "Package"},
+                "editable": true,
             }
         ]
     },
