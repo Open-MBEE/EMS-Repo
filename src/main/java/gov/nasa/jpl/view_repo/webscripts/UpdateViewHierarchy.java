@@ -87,7 +87,6 @@ public class UpdateViewHierarchy {
 			elementJson.put("sysmlid", id);
 		}
 		elementsInJson.put(id, elementJson);
-
 		JSONObject spec = elementJson.optJSONObject("specialization");
 		if (spec != null) {
 			preprocessSpecializationJSONObject(id, elementJson, spec);
