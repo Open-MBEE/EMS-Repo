@@ -160,7 +160,7 @@
 
 	<!-- adding new bean -->
 	<bean id="webscript.gov.nasa.jpl.mms.doors.get"
-		class="gov.nasa.jpl.view_repo.webscripts.DoorsGet" parent="webscript"
+		class="gov.nasa.jpl.view_repo.webscripts.DoorsSync" parent="webscript"
 		singleton="false">
 		<property name="repositoryHelper" ref="repositoryHelper" />
 		<property name="services" ref="ServiceRegistry" />
