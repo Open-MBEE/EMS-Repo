@@ -3,7 +3,7 @@
 	<description>
 		Sync alfresco nodes to DoorsNG.
 	</description>
-	<url>/doors</url>
+	<url>/doors/{workspaceId}</url>
 	<format default="json">argument</format>
 	<authentication>user</authentication>
 	<transaction>none</transaction>

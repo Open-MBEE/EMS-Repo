@@ -57,6 +57,7 @@ create table doors
 (
   sysmlId text references nodes(sysmlId) not null,
   resourceUrl text not null,
+  lastSync timestamp default current_timestamp,
   constraint unique_doors unique(sysmlId, resourceUrl)
 );
 
