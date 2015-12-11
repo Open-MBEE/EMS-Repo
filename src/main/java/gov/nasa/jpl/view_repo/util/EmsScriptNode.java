@@ -5061,10 +5061,7 @@ public class EmsScriptNode extends ScriptNode implements
     }
 
     public void addRelationshipToPropertiesOfParticipants( WorkspaceNode ws ) {
-        if ( hasAspect( Acm.ACM_DIRECTED_RELATIONSHIP )
-             || hasAspect( Acm.ACM_DEPENDENCY ) || hasAspect( Acm.ACM_EXPOSE )
-             || hasAspect( Acm.ACM_CONFORM )
-             || hasAspect( Acm.ACM_GENERALIZATION ) ) {
+        if ( hasOrInheritsAspect( Acm.ACM_DIRECTED_RELATIONSHIP ) ) {
 
             // No need to pass a date since this is called in the context of
             // updating a node, so the time is the current time (which is null).

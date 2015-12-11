@@ -22,6 +22,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import org.alfresco.repo.node.NodeUtils;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -294,34 +295,55 @@ public class UpdateViewHierarchy {
 		// return jsonObject;
 	}
 
+	protected void removeOwnedAttributeIds(String parentId,
+			List<String> ownedAttributeIds) throws Exception {
+		for (String oaId : ownedAttributeIds) {
+			try {
+				removeAssociation(parentId, oaId, null);
+			} catch (Exception ex) {
+				throw new Exception(
+						String.format(
+								"Failed to remove association from view [%s] with property [%s]!",
+								parentId, oaId));
+			}
+		}
+	}
+
 	protected void processViewChildView(Entry<String, ArrayList<String>> e)
 			throws Exception {
+
+		boolean ownedAttributesChanged = false;
 		String parent = e.getKey();
 		ArrayList<String> childViewsArray = e.getValue();
-
-		// Can't quit if empty, because views may have been deleted.
-		// if ( Utils.isNullOrEmpty( childViewsArray ) ) continue;
-		// But if null, we assume that there is nothing asserted about the
-		// children, and we can skip.
-		if (childViewsArray == null)
-			return;
-
-		ArrayList<String> newOwnedAttributes = new ArrayList<String>();
-
-		// Set up to iterate over childViews and ownedAttributes together.
 		List<String> ownedAttributeIds = getOwnedAttributes(parent,
 				elementOwnedAttributes, elementsInJson);
+
+		if (Utils.isNullOrEmpty(childViewsArray)
+				&& Utils.isNullOrEmpty(ownedAttributeIds))
+			// nothing to do here...both viewChilds[] and ownedAttribute[] are
+			// empty
+			return;
+		else if (!Utils.isNullOrEmpty(ownedAttributeIds)) {
+			// viewChilds[] is empty so need to remove ownedAttribute[] from
+			// repo
+			ownedAttributesChanged = true;
+			setOwnedAttributes(parent, elementOwnedAttributes, elementsInJson,
+					jsonObject, new ArrayList<String>());
+			removeOwnedAttributeIds(parent, ownedAttributeIds);
+			return;
+		}
+
+		ArrayList<String> newOwnedAttributes = new ArrayList<String>();
 
 		// Go ahead and find the view ids for the ownedAttributes.
 		Map<String, String> viewIdsForOwnedAttributeIds = new LinkedHashMap<String, String>();
 		Map<String, String> ownedAttributeIdsForViewIds = new LinkedHashMap<String, String>();
 		if (ownedAttributeIds != null) {
-			mapViewAndOwnedAttributeIds(ownedAttributeIds,
+			translateOwnedAttributeIdsToViewIds(ownedAttributeIds,
 					viewIdsForOwnedAttributeIds, ownedAttributeIdsForViewIds);
 		}
 
 		// Initialize loop variables.
-		boolean ownedAttributesChanged = false;
 		String ownedAttributeId = null;
 		String viewIdForOwnedAttribute = null;
 		Iterator<String> attrIter = null;
@@ -387,10 +409,12 @@ public class UpdateViewHierarchy {
 					// (1) reordered
 					String newOwnedAttributeId = ownedAttributeIdsForViewIds
 							.get(childId);
-					newOwnedAttributes.add(newOwnedAttributeId);
+					if (!newOwnedAttributes.contains(newOwnedAttributeId)) {
+						newOwnedAttributes.add(newOwnedAttributeId);
+					}
 					// Check for the association in case it wasn't added.
-					updateOrCreateAssociation(parent, newOwnedAttributeId,
-							childId);
+					// updateOrCreateAssociation(parent, newOwnedAttributeId,
+					// childId);
 				} else {
 					if (!inChildViews) {
 						// (3) view lost -- remove Association
@@ -604,11 +628,12 @@ public class UpdateViewHierarchy {
 				return null;
 			}
 		}
+
 		List<EmsScriptNode> assocNodes = new ArrayList<EmsScriptNode>();
-		EmsScriptNode parentNode = mp.findScriptNodeById(parentId,
+		EmsScriptNode targetPropNode = mp.findScriptNodeById(propertyId,
 				mp.myWorkspace, null, false);
-		if (NodeUtil.exists(parentNode)) {
-			Set<EmsScriptNode> rels = parentNode.getRelationships(null,
+		if (NodeUtil.exists(targetPropNode)) {
+			Set<EmsScriptNode> rels = targetPropNode.getRelationships(null,
 					mp.myWorkspace);
 			for (EmsScriptNode rel : rels) {
 				Object prop = rel.getNodeRefProperty(Acm.ACM_TARGET, null,
@@ -641,6 +666,43 @@ public class UpdateViewHierarchy {
 				}
 			}
 		}
+
+		// EmsScriptNode parentNode = mp.findScriptNodeById(parentId,
+		// mp.myWorkspace, null, false);
+		// if (NodeUtil.exists(parentNode)) {
+		// Set<EmsScriptNode> rels = parentNode.getRelationships(null,
+		// mp.myWorkspace);
+		// for (EmsScriptNode rel : rels) {
+		// Object prop = rel.getNodeRefProperty(Acm.ACM_TARGET, null,
+		// mp.myWorkspace);
+		// if (prop instanceof NodeRef) {
+		// EmsScriptNode propNode = new EmsScriptNode((NodeRef) prop,
+		// mp.getServices());
+		// if (NodeUtil.exists(propNode)) {
+		// if (propertyId == null
+		// || propNode.getSysmlId().equals(propertyId)) {
+		// if (propNode.hasOrInheritsAspect(Acm.ACM_PROPERTY)) {
+		// Object propType = propNode.getNodeRefProperty(
+		// Acm.ACM_PROPERTY_TYPE, null,
+		// mp.myWorkspace);
+		// if (propType instanceof NodeRef) {
+		// EmsScriptNode node = new EmsScriptNode(
+		// (NodeRef) propType,
+		// mp.getServices());
+		// if (NodeUtil.exists(node)) {
+		// if (propertyTypeId == null
+		// || node.getSysmlId().equals(
+		// propertyTypeId)) {
+		// assocNodes.add(rel);
+		// }
+		// }
+		// }
+		// }
+		// }
+		// }
+		// }
+		// }
+		// }
 
 		return assocNodes;
 	}
@@ -785,16 +847,17 @@ public class UpdateViewHierarchy {
 		}
 		propElement.put("sysmlid", propertyId);
 		propElement.put("owner", parentViewId);
-		JSONObject spec = propElement.optJSONObject(Acm.ACM_SPECIALIZATION);
+		JSONObject spec = propElement.optJSONObject("specialization");
 		if (spec == null) {
 			spec = new JSONObject();
-			propElement.put(Acm.ACM_SPECIALIZATION, spec);
+			propElement.put("specialization", spec);
 		}
 		spec.put("type", "Property");
 		spec.put(Acm.JSON_PROPERTY_TYPE, propertyTypeId);
 		if (addedNew) {
 			preprocessElementJson(propElement);
 		}
+		// TODO add spec.aggregration = "COMPOSITE"
 		return propertyId;
 	}
 
@@ -949,10 +1012,10 @@ public class UpdateViewHierarchy {
 			element.put(Acm.JSON_OWNED_ATTRIBUTE, jsonList);
 		}
 
-		JSONObject spec = element.optJSONObject(Acm.ACM_SPECIALIZATION);
+		JSONObject spec = element.optJSONObject("specialization");
 		if (spec == null) {
 			spec = new JSONObject();
-			element.put(Acm.ACM_SPECIALIZATION, spec);
+			element.put("specialization", spec);
 		}
 		spec.put("type", "Association");
 		spec.put(Acm.JSON_SOURCE, propA);
@@ -997,10 +1060,10 @@ public class UpdateViewHierarchy {
 			Map<String, ArrayList<String>> elementOwnedAttributes,
 			Map<String, JSONObject> elementsInJson, JSONObject jsonObject,
 			ArrayList<String> newOwnedAttributes) {
-		if (Utils.isNullOrEmpty(parentId)
-				|| Utils.isNullOrEmpty(newOwnedAttributes)) {
+		if (Utils.isNullOrEmpty(parentId)) {
 			return;
 		}
+
 		elementOwnedAttributes.put(parentId, newOwnedAttributes);
 		JSONArray newOwnedAttribuesArray = new JSONArray(newOwnedAttributes);
 		JSONObject elementJson = elementsInJson.get(parentId);
@@ -1103,6 +1166,10 @@ public class UpdateViewHierarchy {
 		if (viewMaybe instanceof EmsScriptNode) {
 			return ((EmsScriptNode) viewMaybe)
 					.hasOrInheritsAspect(Acm.ACM_VIEW);
+		} else if (viewMaybe instanceof NodeRef) {
+			EmsScriptNode view = new EmsScriptNode((NodeRef) viewMaybe,
+					mp.getServices());
+			return view.hasOrInheritsAspect(Acm.ACM_VIEW);
 		} else if (viewMaybe instanceof String) {
 			EmsScriptNode node = mp.findScriptNodeById((String) viewMaybe,
 					mp.myWorkspace, null, false);
@@ -1156,7 +1223,8 @@ public class UpdateViewHierarchy {
 		return ownedAttributesArray;
 	}
 
-	protected void mapViewAndOwnedAttributeIds(List<String> ownedAttributeIds,
+	protected void translateOwnedAttributeIdsToViewIds(
+			List<String> ownedAttributeIds,
 			Map<String, String> viewIdsForOwnedAttributeIds,
 			Map<String, String> ownedAttributeIdsForViewIds) {
 		if (!Utils.isNullOrEmpty(ownedAttributeIds)) {
@@ -1171,14 +1239,5 @@ public class UpdateViewHierarchy {
 				}
 			}
 		}
-		// else {
-		// for (Entry<String, ArrayList<String>> e : viewChildViews.entrySet())
-		// {
-		// for (String v : e.getValue()) {
-		// viewIdsForOwnedAttributeIds.put(v, e.getKey());
-		// ownedAttributeIdsForViewIds.put(e.getKey(), v);
-		// }
-		// }
-		// }
 	}
 }
