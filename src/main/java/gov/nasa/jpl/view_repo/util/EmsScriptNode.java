@@ -2656,7 +2656,9 @@ public class EmsScriptNode extends ScriptNode implements
             toJSONObject( WorkspaceNode ws, Date dateTime )
                                                            throws JSONException {
         // don't include qualified except for diffs, as added by DeclarativeJavaWebScript
-        return toJSONObject( null, ws, dateTime, false, false, null );
+        boolean isQualified = true;
+        if (NodeUtil.doPostProcessQualified) isQualified = false;
+        return toJSONObject( null, ws, dateTime, isQualified, false, null );
     }
 
     public

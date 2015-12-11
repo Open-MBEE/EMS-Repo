@@ -288,7 +288,8 @@ public class ModelSearch extends ModelGet {
 
             boolean checkReadPermission = true; // TODO -- REVIEW -- Should this
                                                 // be false?
-            boolean includeQualified = false;
+            boolean includeQualified = true;
+            if (NodeUtil.doPostProcessQualified) includeQualified = false;
             handleElements( workspace, dateTime, includeQualified, true, evaluate, top,
                             checkReadPermission );
             

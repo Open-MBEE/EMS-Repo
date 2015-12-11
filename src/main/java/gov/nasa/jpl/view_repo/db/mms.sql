@@ -40,6 +40,7 @@ create table nodes
   nodeType integer references nodeTypes(id) not null,
   sysmlId text not null unique
 );
+create index sysmlIndex on nodes(sysmlId);
 
 create table edges
 (
@@ -48,6 +49,9 @@ create table edges
   edgeType integer references edgeTypes(id) not null,
   constraint unique_edges unique(parent, child, edgeType)
 );
+
+create index childIndex on edges (child);
+create index parentIndex on edges (parent);
 
 -- given two nodeRefId, insert an edge between the two
 create or replace function insert_edge(text, text, text, integer)
@@ -226,3 +230,12 @@ insert into edges values(7, 2, (select edgeTypes.id from edgeTypes where name = 
 insert into edges values(6, 4, (select edgeTypes.id from edgeTypes where name = 'document'));
 
 */
+
+--WITH RECURSIVE parents(parent, child) AS (
+--    SELECT parent, child FROM edges WHERE child = 8
+--  UNION ALL
+--    SELECT p.parent, p.child
+--    FROM parents pr, edges p
+--    WHERE p.child = pr.parent
+--  )
+--SELECT parent, child FROM parents;

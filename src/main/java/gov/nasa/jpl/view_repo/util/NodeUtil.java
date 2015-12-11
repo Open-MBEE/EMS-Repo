@@ -217,6 +217,7 @@ public class NodeUtil {
     public static boolean doJsonStringCaching = false;
     public static boolean doPropertyCaching = true;
     public static boolean doGraphDb = true;
+    public static boolean doPostProcessQualified = true;
 
     public static boolean addEmptyEntriesToFullCache = false; // this was broken
                                                               // last tried
@@ -4832,6 +4833,10 @@ public class NodeUtil {
      */
     public static void ppAddQualifiedNameId2Json( WebScriptRequest req,
                                                   Map< String, Object > model ) {
+        // FLAG it off - calls to getting parent tree in postgres with a million elements is
+        // roughly 90 ms per
+        if (!doPostProcessQualified) return;
+        
         if ( !model.containsKey( "res" ) ) return;
         Object res = model.get( "res" );
         if ( !( res instanceof String ) ) return;
@@ -5118,28 +5123,37 @@ public class NodeUtil {
             id2siteName.put( sysmlId, sysmlName );
         }
 
-        Set< Pair< String, String > > parents =
-                pgh.getImmediateParents( sysmlId, DbEdgeTypes.REGULAR );
-        if ( parents.size() > 0 ) {
-            for ( Pair< String, String > parent : parents ) {
-                String parentId = parent.first;
+        String parentId = sysmlId;
+        EmsScriptNode parentNode = node;
+        List< Pair< String, String > > parentTree =
+                pgh.getParents( sysmlId, DbEdgeTypes.REGULAR, 10000 );
+        if ( parentTree.size() > 0 ) {
+            for (int ii=0; ii < parentTree.size()-1; ii++) {
+                String childId = parentTree.get(ii).first;
+                parentId = parentTree.get( ii+1 ).first;
+                String parentRef = parentTree.get( ii+1 ).second;
+                
+                // update id2name maps
+                parentNode = new EmsScriptNode(new NodeRef(parentRef), services, null);
+                String parentName = parentNode.getSysmlName();
+                id2name.put( parentId,  parentName );
+                Boolean isParentSite = (Boolean)node.getProperty( Acm.ACM_IS_SITE);
+                if (isParentSite != null && isParentSite ) {
+                    id2siteName.put( parentId, parentName);
+                }
+
+                // update trees
                 if ( !owner2children.containsKey( parentId ) ) {
                     owner2children.put( parentId, new HashSet< String >() );
                 }
-                owner2children.get( parentId ).add( sysmlId );
-                child2owner.put( sysmlId, parentId );
-                if ( !visitedOwners.contains( parentId ) ) {
-                    ppRecurseOwnersDb( parentId, pgh, id2name, id2siteName,
-                                       owner2children, child2owner,
-                                       visitedOwners, wsId, dateTime );
-                }
+                owner2children.get( parentId ).add( childId );
+                child2owner.put( childId, parentId );
                 visitedOwners.add( parentId );
             }
-        } else {
-            // no parent, so lets look for top level site
-            ppAddSiteOwnerInfo( sysmlId, node, id2name, id2siteName,
-                                owner2children, child2owner, visitedOwners );
-        }
+        } 
+
+        ppAddSiteOwnerInfo( parentId, parentNode, id2name, id2siteName,
+                            owner2children, child2owner, visitedOwners );
     }
 
     /**

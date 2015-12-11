@@ -349,21 +349,28 @@ public class PostgresHelper {
 		return result;
 	}
 
-	public Set<String> getParents(String sysmlId, DbEdgeTypes et, int height) {
-		Set<String> result = new HashSet<String>();
+	/**
+	 * Returns in order of height from sysmlID up
+	 * @param sysmlId
+	 * @param et
+	 * @param height
+	 * @return
+	 */
+	public List<Pair<String, String>> getParents(String sysmlId, DbEdgeTypes et, int height) {
+		List<Pair<String, String>> result = new ArrayList<Pair<String, String>>();
 		try {
 			Node n = getNodeFromSysmlId(sysmlId);
 
 			if (n == null)
 				return result;
 
-			String query = "select sysmlid from nodes%s where id in "
-					+ "(select id from get_parents(%s, %d, '%s'))";
+			String query = "SELECT N.sysmlid, N.versionedrefid FROM nodes%s N JOIN "
+					+ "(SELECT * FROM get_parents(%s, %d, '%s')) P ON N.id=P.id ORDER BY P.height";
 			ResultSet rs = execQuery(String.format(query, workspaceName,
 					n.getId(), et.getValue(), workspaceName));
 
 			while (rs.next()) {
-				result.add(rs.getString(1));
+				result.add(new Pair<String, String>(rs.getString(1), rs.getString(2)));
 			}
 		} catch (Exception e) {
 			e.printStackTrace();

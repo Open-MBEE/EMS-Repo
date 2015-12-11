@@ -265,7 +265,9 @@ public class ModelGet extends AbstractJavaWebScript {
 
 			Long depth = getDepthFromRequest(req);
 			// force qualified to be false so DeclarativeWebscripts can inject it later
-			boolean includeQualified = false; //getBooleanArg(req, "qualified", true);
+			
+			boolean includeQualified = getBooleanArg(req, "qualified", true);
+			if (NodeUtil.doPostProcessQualified) includeQualified = false;
 
 			if (logger.isDebugEnabled())
 				logger.debug("modelId = " + modelId);
