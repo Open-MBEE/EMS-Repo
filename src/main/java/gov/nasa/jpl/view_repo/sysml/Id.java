@@ -16,4 +16,11 @@ public class Id extends ElementReference implements sysml.view.Id<EmsScriptNode>
     
     // TODO -- add other two constructors
 
+//  @Override
+//  public JSONObject toViewJson( Date dateTime ) {
+//      if ( element == null && object instanceof Expression ) {
+//          
+//      }
+//  }
+  
 }

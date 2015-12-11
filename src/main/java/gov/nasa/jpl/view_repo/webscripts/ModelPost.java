@@ -2773,7 +2773,7 @@ public class ModelPost extends AbstractJavaWebScript {
 						getResponseStatus(), runWithoutTransactions) {
 					@Override
 					public void run() throws Exception {
-						fix(elements, workspace);
+						fixWithTransactions(elements, workspace);
 						sendProgress("Fixing constraints completed", projectId,
 								true);
 					}

@@ -144,11 +144,12 @@ public class ElementReference implements Viewable<EmsScriptNode> {
 	@Override
 	public JSONObject toViewJson(Date dateTime) {
 		
+	    String sourceType = "reference";
+        String text = null;
 		if (element == null) {
 	        if (object == null) {
 	            return null;
 	        }
-	        String text = null;
 	        switch ( attribute ) {
 	            case NAME:
 	                text = "" + ClassUtils.getName( object );
@@ -157,10 +158,24 @@ public class ElementReference implements Viewable<EmsScriptNode> {
                     text = "" + ClassUtils.getValue( object );
                     break;
 	            case TYPE:
-                    text = "" + ClassUtils.getType( object );
+                    System.out.println("TTTTTTTTTTTTTTTTTTTTTTTTTT  " + object);
+                    sourceType = "text";
+                    if ( object instanceof EmsScriptNode ) {
+                        text = ((EmsScriptNode)object).getTypeName();
+                    }
+                    if ( text == null ) {
+                        text = "" + ClassUtils.getType( object );
+                    }
                     break;
                 case ID:
-                    text = "" + ClassUtils.getId( object );
+                    System.out.println("IIIIIIIIIIIIIIIIIIIIIIIIIIII  " + object);
+                    sourceType = "text";
+                    if ( object instanceof EmsScriptNode ) {
+                        text = ((EmsScriptNode)object).getSysmlId();
+                    }
+                    if ( text == null ) {
+                        text = "" + ClassUtils.getId( object );
+                    }
                     break;
 	            case DOCUMENTATION:
 	                // TODO
@@ -170,15 +185,59 @@ public class ElementReference implements Viewable<EmsScriptNode> {
 	                // TODO -- error!
 	        }
 	        return (new Text( text )).toViewJson( null );
-		}
-		
+		} else {
+            switch ( attribute ) {
+                case NAME:
+                    break;
+                case VALUE:
+                    break;
+                case TYPE:
+                    System.out.println("TTTTTTTTTTTTTTTTTTTTTTTTTT  " + element);
+                    sourceType = "text";
+                    text = element.getTypeName();
+                    if ( text == null ) {
+                        Object typ = ClassUtils.getType( element );
+                        if ( typ != null ) {
+                            text = "" + typ;
+                        }
+                    }
+                    if ( text == null ) {//&& object != null ) {
+                        text = "" + ClassUtils.getType( object );
+                    }
+                    break;
+                case ID:
+                    System.out.println("IIIIIIIIIIIIIIIIIIIIIIIIIIII  " + object);
+                    sourceType = "text";
+                    text = element.getSysmlId();
+                    if ( text == null ) {
+                        Object id = ClassUtils.getId( element );
+                        if ( id != null ) text = "" + id;
+                    }
+                    if ( text == null ) {
+                        text = "" + ClassUtils.getId( object );
+                    }
+                    break;
+                case DOCUMENTATION:
+                    break;
+                default:
+                    // TODO -- error!
+            }
+    	}
+
         JSONObject json = new JSONObject();
 
         try {
             json.put("type", "Paragraph");
-            json.put("sourceType", "reference");
-            json.put("source", element.getSysmlId()); 
-            json.put("sourceProperty", attribute.toString().toLowerCase() );
+            json.put("sourceType", sourceType);
+            if ( sourceType.equals("reference") ) {
+                json.put("source", element.getSysmlId());
+                json.put("sourceProperty", attribute.toString().toLowerCase() );
+            } else {
+                if ( text == null ) {
+                    text = "" + object;
+                }
+                json.put("text", text );
+            }
 
         } catch ( JSONException e ) {
             // TODO Auto-generated catch block

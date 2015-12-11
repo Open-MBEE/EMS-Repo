@@ -407,6 +407,10 @@ public class NodeUtil {
                                                      + nodeRef + ", "
                                                      + propertyName + ", "
                                                      + value + ")" );
+        if ( propertyName.contains( "roperty" ) ) {
+            System.out.println( "propertyCachePut(" + nodeRef + ", " + propertyName
+                                + ", " + value + ")" );
+        }
         if ( value == null ) value = NULL_OBJECT;
         return Utils.put( propertyCache, nodeRef, propertyName, value );
     }
@@ -433,6 +437,8 @@ public class NodeUtil {
                                                          + nodeRef + ", " + key
                                                          + ", " + value
                                                          + ") from map" );
+            System.out.println( "propertyCachePut(" + nodeRef + ", " + key
+                                + ", " + value + ") from map" );
         }
     }
 
@@ -458,10 +464,14 @@ public class NodeUtil {
             return null;
         }
         Object o = Utils.get( propertyCache, nodeRef, propertyName );
-        if ( logger.isTraceEnabled() ) logger.trace( "propertyCachePut("
+        if ( logger.isTraceEnabled() ) logger.trace( "propertyCacheGet("
                                                      + nodeRef + ", "
                                                      + propertyName + ", " + o
                                                      + ")" );
+        if ( propertyName.contains("roperty") ) {
+            System.out.println( "propertyCacheGet(" + nodeRef + ", "
+                                + propertyName + ") = " + o );
+        }
         return o;
     }
 

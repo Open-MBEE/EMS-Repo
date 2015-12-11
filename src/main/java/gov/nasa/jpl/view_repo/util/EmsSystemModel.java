@@ -33,6 +33,7 @@ import java.util.Set;
 import java.util.Vector;
 
 import org.alfresco.service.ServiceRegistry;
+import org.alfresco.service.cmr.dictionary.PropertyDefinition;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.namespace.QName;
 import org.json.JSONArray;
@@ -1374,7 +1375,7 @@ System.out.println("RRRRRR");
         	return node.getTypeName();
         }
 
-        return null;
+        return "" + ClassUtils.getType( context );
 
     }
 
@@ -1952,83 +1953,167 @@ System.out.println("RRRRRR");
         return null;
     }
 
+    
+    
     /**
      * Set the value for the passed node to the passed value
      *
      * @param node
      * @param value
      */
-    public < T extends Serializable > void setValue(EmsScriptNode node, T value) {
+    public < T extends Serializable > boolean setValue(EmsScriptNode node, T val, WorkspaceNode ws ) {
 
-    	if (node == null || value == null) {
+    	if (node == null || val == null) {
             Debug.error("setValue(): passed node or value is null!");
+            return false;
     	}
-    	else {
-	    	String type = getTypeString(node, null);
+    	String type = getTypeString(node, null);
 
-	    	if (type == null) {
-	            Debug.error("setValue(): type for the passed node is null!");
-	    	}
-	    	else {
-	    	    String acmType = Acm.getJSON2ACM().get( type );
-	    	    if ( acmType == null ) acmType = type;
-	    	    Set< String > valuePropNames = Acm.TYPES_WITH_VALUESPEC.get( acmType );
-	    	    if ( !Utils.isNullOrEmpty( valuePropNames ) ) {
-	    	        boolean found = false;
-	    	        if ( valuePropNames.size() > 1 ) {
-	    	            if ( valuePropNames.contains( Acm.ACM_VALUE ) ) {
-	    	                acmType = Acm.ACM_VALUE;
-	    	                found = true;
-	    	            } else {
-                            Debug.error( "setValue(): unclear which owned value spec property "
-                                         + valuePropNames
-                                         + " is to be set to "
-                                         + value + ". Picking first by default!" );
-	    	            }
-	    	        }
-	    	        if ( !found ) acmType = valuePropNames.iterator().next();
-//                    Object valueSpecRef =
-//                            node.getNodeRefProperty( valuePropNames.iterator().next(),
-//                                                     true, null, node.getWorkspace() );
-//                    EmsScriptNode valueNode = null;
-//                    if ( valueSpecRef instanceof NodeRef ) {
-//                        valueNode = new EmsScriptNode( (NodeRef)valueSpecRef, getServices() );
-//                    } else if ( valueSpecRef instanceof ArrayList ) {
-//                        ArrayList< NodeRef > nodeRefs = (ArrayList< NodeRef >))valueSpecRef;
-//                        if ( !Utils.isNullOrEmpty( nodeRefs ) ) {
-//                            if ( nodeRefs.size() > 1 ) {
-//                                
-//                            }
-//                        }
-//                        
-//                    }
-                    node.createOrUpdateProperty( acmType, value );
+    	if (type == null) {
+            Debug.error("setValue(): type for the passed node is null!");
+            return false;
+    	}
+    	
+    	boolean wasSet = false;
+
+    	// If the node owns a value spec instead of being a value itself, then
+    	// get the value type.
+        String acmType = Acm.getJSON2ACM().get( type );
+        if ( acmType == null ) acmType = type;
+        String acmValueType = Acm.VALUE_OF_TYPE.get( acmType );
+        if ( !Utils.isNullOrEmpty( acmValueType ) ) {
+            acmType = acmValueType;
+        }
+
+        // check if property is multi-valued
+        Pair< Boolean, PropertyDefinition > p =
+                EmsScriptNode.isMultiValuedAlfrescoProperty( acmType,
+                                                             getServices() );
+        boolean multiValued = p.first;
+        PropertyDefinition propDef = p.second;
+        multiValued = p.first;
+        
+        // fix the value based on multi-valued
+        Serializable value = val;
+        if ( !multiValued && val instanceof JSONArray ) {
+            value = ((JSONArray)val).toString(4);
+        } else if ( !multiValued && val instanceof Collection ) {
+            Collection<?> c = (Collection<?>)val;
+            if ( c.size() == 0 ) value = null;
+            else {
+                if ( c.size() > 1 ) {
+                    Debug.error( "setValue(): unclear which value "
+                                 + c + " to use to set " + node
+                                 + ". Picking first by default!" );   
                 }
-	    	    else if (type.equals(Acm.JSON_LITERAL_INTEGER)) {
+                Object o = c.iterator().next();
+                if ( o instanceof Serializable ) value = (Serializable)o;
+                else value = "" + val;
+            }
+            value = val.toString();
+        } else if ( multiValued && !( val instanceof Collection ) ) {
+            value = Utils.newList(val);
+        }
+        System.out.println( "setting value of " + type + " to " + value );
 
-		        	node.createOrUpdateProperty(Acm.ACM_INTEGER, value);
-		        }
-		        else if (type.equals(Acm.JSON_LITERAL_REAL)) {
+        // Handle case where setting the value of a value spec owner.
+	    if ( !Utils.isNullOrEmpty( acmValueType ) ) {
+	        // Get the value spec node or list of value spec nodes.
+            Object valSpecObj = node.getNodeRefProperty( acmValueType, false, null, ws );
+            // If it's an array of value spec nodes, there should only be one
+            // since this code currently doesn't support setting multiple
+            // value specs.
+            if ( multiValued && valSpecObj instanceof Collection ) {
+                Collection<?> valueNodes = (Collection<?>)valSpecObj;
+                if ( !Utils.isNullOrEmpty( valueNodes ) ) {
+                    Object valueNode = valueNodes.iterator().next();
+                    if ( valueNodes.size() > 1 ) {
+                        Debug.error( "setValue(): unclear which owned value spec node "
+                                + valueNodes + " is to be set to "
+                                + value + ". Picking first by default!" );   
+                    }
+                    if ( valueNode instanceof NodeRef ||
+                         valueNode instanceof EmsScriptNode ) {
+                        valSpecObj = valueNode;
+                    }
+                }
+            }
+            //Object valSpecObj = getAlfrescoProperty( node, acmValueType, true );
+            System.out.println("valSpecObj = " + valSpecObj );
+            // Convert the value spec node into an EmsScriptNode.
+            if ( valSpecObj instanceof NodeRef ) {
+                valSpecObj = new EmsScriptNode( (NodeRef)valSpecObj, getServices() );
+            }
+            // If we got a value spec node, then set its value instead unless
+            // the value is a ValueSpecification.
+            if ( valSpecObj instanceof EmsScriptNode
+                 && ( !( value instanceof NodeRef ) ||
+                      (new EmsScriptNode( (NodeRef)value, getServices() ))
+                          .hasOrInheritsAspect( Acm.ACM_VALUE_SPECIFICATION ) ) ) {
+                EmsScriptNode valSpecNode = (EmsScriptNode)valSpecObj;
+                if ( NodeUtil.exists( valSpecNode ) ) {
+                    System.out.println( "setting value of " + node
+                                        + " of type " + type
+                                        + " by setting value spec node, "
+                                        + valSpecNode + " of type "
+                                        + acmValueType + " to " + value );
+                    wasSet = setValue(valSpecNode, val, ws);
+                }
+            } else {
+                // Else, if the value is a value spec, then we just need to replace
+                // the one that's there. This means deleting the existing one.
+                System.out.println( "setting value of " + node + " of type "
+                                    + type + ":" + acmValueType + " to "
+                                    + value );
+                wasSet = node.createOrUpdateProperty( acmValueType, value );
+            }
+	    }
+	    // Handle cases where the value of the value spec itself is set.
+	    else if (type.equals(Acm.JSON_LITERAL_INTEGER)) {
 
-		        	node.createOrUpdateProperty(Acm.ACM_DOUBLE, value);
-		        }
-		        else if (type.equals(Acm.JSON_LITERAL_BOOLEAN)) {
+	        wasSet = node.createOrUpdateProperty(Acm.ACM_INTEGER, value);
+        }
+        else if (type.equals(Acm.JSON_LITERAL_REAL)) {
 
-		        	node.createOrUpdateProperty(Acm.ACM_BOOLEAN, value);
-		        }
-		        else if (type.equals(Acm.JSON_LITERAL_UNLIMITED_NATURAL)) {
+            wasSet = node.createOrUpdateProperty(Acm.ACM_DOUBLE, value);
+        }
+        else if (type.equals(Acm.JSON_LITERAL_BOOLEAN)) {
 
-		        	node.createOrUpdateProperty(Acm.ACM_NATURAL_VALUE, value);
-		        }
-		        else if (type.equals(Acm.JSON_LITERAL_STRING)) {
-		        	node.createOrUpdateProperty(Acm.ACM_STRING, value);
-		        }
-		        else {
-		            Debug.error("setValue(): unrecognized type: "+type);
-		        }
-	    	}
-    	}
+            wasSet = node.createOrUpdateProperty(Acm.ACM_BOOLEAN, value);
+        }
+        else if (type.equals(Acm.JSON_LITERAL_UNLIMITED_NATURAL)) {
 
+            wasSet = node.createOrUpdateProperty(Acm.ACM_NATURAL_VALUE, value);
+        }
+        else if (type.equals(Acm.JSON_LITERAL_STRING)) {
+            wasSet = node.createOrUpdateProperty(Acm.ACM_STRING, value);
+        }
+        else {
+            // Old code for finding the value property of a type. 
+            // Only keeping it since this used to work but was broken at some point.
+            Set< String > valuePropNames = Acm.TYPES_WITH_VALUESPEC.get( acmType );
+            if ( !Utils.isNullOrEmpty( valuePropNames ) ) {
+                boolean found = false;
+                if ( valuePropNames.size() > 1 ) {
+                    if ( valuePropNames.contains( Acm.ACM_VALUE ) ) {
+                        acmType = Acm.ACM_VALUE;
+                        found = true;
+                    } else {
+                        Debug.error( "setValue(): unclear which owned value spec property "
+                                     + valuePropNames
+                                     + " is to be set to "
+                                     + value + ". Picking first by default!" );
+                    }
+                }
+                if ( !found ) acmType = valuePropNames.iterator().next();
+                wasSet = node.createOrUpdateProperty( acmType, value );
+            } else {
+                Debug.error("setValue(): unrecognized type: "+type);
+            }
+        }
+        System.out.println( "wasSet = " + wasSet );
+        System.out.println( "value of " + node + " of type " + type + ":" + acmValueType + " = " + getValue( node, null ) );
+        return wasSet;
     }
     
     @Override

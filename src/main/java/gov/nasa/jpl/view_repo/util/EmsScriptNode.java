@@ -784,6 +784,9 @@ public class EmsScriptNode extends ScriptNode implements
         // for the correct workspace node, so perhaps this is overkill:
         T oldValue =
                 (T)getNodeRefProperty( acmType, true, null, false, true, null );
+        log("UUUUUUUUUUUU  NODEREF = " + getId());
+        log("UUUUUUUUUUUU  old value("+ acmType + ") = " + oldValue);
+        log("UUUUUUUUUUUU  new value("+ acmType + ") = " + value);
         if ( oldValue != null && value != null ) {
             if ( !value.equals( oldValue ) ) {
                 setProperty( acmType, value );
@@ -2294,6 +2297,7 @@ public class EmsScriptNode extends ScriptNode implements
      *            EmsScriptNode
      */
     public void log( String msg ) {
+System.out.println(msg);
         // if (response != null) {
         // response.append(msg + "\n");
         // }
@@ -3927,6 +3931,33 @@ public class EmsScriptNode extends ScriptNode implements
         return value;
     }
 
+    
+    /**
+     * Determine whether the specified property is stored as an array or a
+     * single value. Also return the PropertyDefinition for reuse.
+     * 
+     * @param acmProperty
+     * @param services
+     * @return
+     */
+    public static Pair< Boolean, PropertyDefinition >
+            isMultiValuedAlfrescoProperty( String acmProperty,
+                                           ServiceRegistry services ) {
+        DictionaryService dServ = services.getDictionaryService();
+        QName qName = NodeUtil.createQName( acmProperty, services );
+        PropertyDefinition propDef = dServ.getProperty( qName );
+        boolean multiValued = false;
+        if ( propDef == null ) {
+            String jsonKey = Acm.getACM2JSON().get(acmProperty);
+            if ( jsonKey != null && Acm.JSON_ARRAYS.contains( jsonKey ) ) {
+                multiValued = true;
+            }
+        } else {
+            multiValued = propDef.isMultiValued();
+        }
+        return new Pair< Boolean, PropertyDefinition >( multiValued, propDef );
+    }
+    
     /**
      * Update or create element values (multiple noderefs ordered in a list)
      * 
@@ -3944,11 +3975,13 @@ public class EmsScriptNode extends ScriptNode implements
         // Need to check if we're trying to stuff an array into a single-valued
         // property. This happens with the contains and other properties of
         // view.
-        DictionaryService dServ = services.getDictionaryService();
-        PropertyDefinition propDef =
-                dServ.getProperty( createQName( acmProperty ) );
-        boolean singleValued = propDef != null && !propDef.isMultiValued();
 
+        Pair< Boolean, PropertyDefinition > p =
+                isMultiValuedAlfrescoProperty( acmProperty, getServices() );
+        boolean singleValued = !p.first;
+        
+        PropertyDefinition propDef = p.second;
+        
         if ( singleValued ) {
             return createOrUpdateProperty( acmProperty, array.toString( 4 ) );
         }

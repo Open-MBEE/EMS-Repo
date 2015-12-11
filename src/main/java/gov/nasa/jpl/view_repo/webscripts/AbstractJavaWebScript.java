@@ -251,6 +251,10 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
 	}
 	
     protected void cleanJsonCache() {
+        if ( !NodeUtil.doJsonCaching && !NodeUtil.doJsonDeepCaching &&
+             !NodeUtil.doJsonStringCaching ) {
+            return;
+        }
         Map< String, EmsScriptNode > nodesToClean = new LinkedHashMap< String, EmsScriptNode >();
         
         Seen< String > seen = new SeenHashSet< String >();
@@ -1489,6 +1493,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         return expression;
     }
 
+    // TODO -- look at getAffectedIds()
     public static Map< EmsScriptNode, Collection< Constraint > > getAeConstraints( Set< EmsScriptNode > elements, WorkspaceNode ws ) {
         //Map<EmsScriptNode, Constraint> constraints = new LinkedHashMap<EmsScriptNode, Constraint>();
         Map< EmsScriptNode, Collection< Constraint > >  constraints = 
@@ -1760,7 +1765,16 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
 
     }
     
-    public void fix( Set< EmsScriptNode > elements, WorkspaceNode ws ) {
+    public void fixWithTransactions( final Set< EmsScriptNode > elements, final WorkspaceNode ws ) {
+        new EmsTransaction(getServices(), getResponse(),
+                           getResponseStatus()) {
+            @Override
+            public void run() throws Exception {
+                fix( elements, ws );
+            }
+        };
+    }
+    public void fix( Set< EmsScriptNode > elements, final WorkspaceNode ws ) {
     
         log(Level.INFO, "Will attempt to fix constraint violations if found!");
     
@@ -1794,20 +1808,32 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
                 log( Level.INFO, "Satisfied all of the constraints!" );
     
                 // Update the values of the nodes after solving the constraints:
-                EmsScriptNode node;
-                Parameter<Object> param;
-                Map< EmsScriptNode, Parameter< Object > > params = getGlobalSystemModelAe().getExprParamMap();
+                final Map< EmsScriptNode, Parameter< Object > > params = getGlobalSystemModelAe().getExprParamMap();
                 if ( Utils.isNullOrEmpty( params ) ) {
                     log( Level.ERROR, "Solver had no parameters in map to assign the solution!" );
                 } else {
-                    Set<Entry<EmsScriptNode, Parameter<Object>>> entrySet = params.entrySet();
-                    for (Entry<EmsScriptNode, Parameter<Object>> entry : entrySet) {
-                        node = entry.getKey();
-                        param = entry.getValue();
-                        systemModel.setValue(node, (Serializable)param.getValue());
-                    }
-        
-                    log( Level.INFO, "Updated all node values to satisfy the constraints!" );
+                    new EmsTransaction(getServices(), getResponse(),
+                                       getResponseStatus()) {
+                        @Override
+                        public void run() throws Exception {
+                            Set<Entry<EmsScriptNode, Parameter<Object>>> entrySet = params.entrySet();
+                            for (Entry<EmsScriptNode, Parameter<Object>> entry : entrySet) {
+                                EmsScriptNode node;
+                                Parameter<Object> param;
+                                node = entry.getKey();
+                                param = entry.getValue();
+                                Object v = systemModel.getValue( node, null );
+                                System.out.println("XXXXXXXXXXXXXXX  NODEREF = " + node.getId());
+                                System.out.println("XXXXXXXXXXXXXXXXXXXXXXXX value before setting = " + v);
+                                systemModel.setValue(node, (Serializable)param.getValue(), ws);
+                                v = systemModel.getValue( node, null );
+                                System.out.println("XXXXXXXXXXXXXXXXXXXXXXXX value after setting = " + v);
+                            }
+                            log( Level.ERROR, "XXXXXXXXXXXXXXXXXXXXXXXX Updated all node values to satisfy the constraints!" );
+                
+                            log( Level.INFO, "Updated all node values to satisfy the constraints!" );
+                        }
+                    };
                 }
             }
         } // End if constraints list is non-empty
