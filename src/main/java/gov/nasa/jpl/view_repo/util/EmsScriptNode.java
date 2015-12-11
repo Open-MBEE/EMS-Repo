@@ -1565,9 +1565,33 @@ public class EmsScriptNode extends ScriptNode implements
 
         ArrayList< NodeRef > ownedChildren = null;
 
-        ArrayList< NodeRef > oldChildren =
-                this.getPropertyNodeRefs( childrenType, false, dateTime,
-                                          findDeleted, false, ws );
+        ArrayList< NodeRef > oldChildren = null;
+
+        // FIXME: use DB, for some DB is slow
+        //        if (!(NodeUtil.doGraphDb && dateTime == null && ws == null)) {
+            oldChildren = this.getPropertyNodeRefs( childrenType, false, dateTime,
+                                                    findDeleted, false, ws );
+//        } else {
+//            PostgresHelper pgh = new PostgresHelper( ws );
+//            try {
+//                pgh.connect();
+//                List< Pair< String, Pair<String, String>>> dbChildren = pgh.getChildren( this.getSysmlId(), DbEdgeTypes.REGULAR, 1 );
+//                oldChildren = new ArrayList< NodeRef >();
+//                for (int ii = 0; ii < dbChildren.size(); ii++) {
+//                    if (!dbChildren.get(ii).first.equals( this.getSysmlId() )) {
+//                        String childNodeRefString = dbChildren.get( ii ).second.first;
+//                        oldChildren.add( new NodeRef(childNodeRefString) );
+//                    }
+//                }
+//                pgh.close();
+//            } catch ( ClassNotFoundException e ) {
+//                // TODO Auto-generated catch block
+//                e.printStackTrace();
+//            } catch ( SQLException e ) {
+//                // TODO Auto-generated catch block
+//                e.printStackTrace();
+//            }
+//        }
 
         if ( oldChildren != null ) {
             ownedChildren = oldChildren;
@@ -3413,7 +3437,7 @@ public class EmsScriptNode extends ScriptNode implements
 
         
         // lets add in the document information
-        if ( isIncludeDocument && NodeUtil.doGraphDb ) {
+        if ( isIncludeDocument ) { // && NodeUtil.doGraphDb ) { // always use graph database for documents
             JSONArray relatedDocuments = new JSONArray();
 
             // if document, just add itself as related doc, otherwise use postgres helper

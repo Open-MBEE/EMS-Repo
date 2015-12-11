@@ -475,7 +475,7 @@ public class ModelGet extends AbstractJavaWebScript {
 		// get children for given sysmlId from database
 		PostgresHelper pgh = new PostgresHelper(workspace);
 
-		List<Pair<String, String>> childrenNodeRefIds = null;
+		List<Pair<String, Pair<String, String>>> childrenNodeRefIds = null;
 		try {
 			pgh.connect();
 			int depth = 1000000;
@@ -488,8 +488,8 @@ public class ModelGet extends AbstractJavaWebScript {
 			e.printStackTrace();
 		}
 
-		for (Pair<String, String> c : childrenNodeRefIds) {
-			EmsScriptNode ecn = new EmsScriptNode(new NodeRef(c.second),
+		for (Pair<String, Pair<String, String>> c : childrenNodeRefIds) {
+			EmsScriptNode ecn = new EmsScriptNode(new NodeRef(c.second.second),
 					services, response);
 
 			if (!ecn.exists() || ecn.getSysmlId().endsWith("_pkg")
@@ -497,7 +497,7 @@ public class ModelGet extends AbstractJavaWebScript {
 					|| !checkPermissions(ecn, PermissionService.READ))
 				continue;
 
-			elementsFound.put(c.second, ecn);
+			elementsFound.put(c.second.second, ecn);
 		}
 	}
 

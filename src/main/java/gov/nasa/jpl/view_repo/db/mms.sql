@@ -230,12 +230,3 @@ insert into edges values(7, 2, (select edgeTypes.id from edgeTypes where name = 
 insert into edges values(6, 4, (select edgeTypes.id from edgeTypes where name = 'document'));
 
 */
-
---WITH RECURSIVE parents(parent, child) AS (
---    SELECT parent, child FROM edges WHERE child = 8
---  UNION ALL
---    SELECT p.parent, p.child
---    FROM parents pr, edges p
---    WHERE p.child = pr.parent
---  )
---SELECT parent, child FROM parents;

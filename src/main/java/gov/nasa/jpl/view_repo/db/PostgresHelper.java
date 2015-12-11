@@ -379,16 +379,16 @@ public class PostgresHelper {
 	}
 
 	// returns list of nodeRefIds
-	public List<Pair<String, String>> getChildren(String sysmlId,
+	public List<Pair<String, Pair<String, String>>> getChildren(String sysmlId,
 			DbEdgeTypes et, int depth) {
-		List<Pair<String, String>> result = new ArrayList<Pair<String, String>>();
+		List<Pair<String, Pair<String, String>>> result = new ArrayList<Pair<String, Pair<String, String>>>();
 		try {
 			Node n = getNodeFromSysmlId(sysmlId);
 
 			if (n == null)
 				return result;
 
-			ResultSet rs = execQuery("select nodeRefId,versionedRefId from nodes"
+			ResultSet rs = execQuery("select sysmlId, nodeRefId,versionedRefId from nodes"
 					+ workspaceName
 					+ " where id in (select * from get_children("
 					+ n.getId()
@@ -400,8 +400,8 @@ public class PostgresHelper {
 					+ depth + "))");
 
 			while (rs.next()) {
-				result.add(new Pair<String, String>(rs.getString(1), rs
-						.getString(2)));
+			    Pair<String, String> refids = new Pair<String, String>(rs.getString(2), rs.getString( 3 ));
+				result.add(new Pair<String, Pair<String,String>>(rs.getString(1), refids));
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
