@@ -253,7 +253,7 @@ in the /resources/[community|enterprise] directory.
 ### Enterprise settings with Maven 
 
 Need to update settings.xml to connect to the Alfresco private repository. Ask Ly or Cin-Young
-for username and password.
+for username and password.  On a Mac the path for this file is: /Users/[USER_NAME]/.m2/settings.xml.
 
 	<settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
 	  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
