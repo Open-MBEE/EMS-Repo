@@ -22,7 +22,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import org.alfresco.repo.node.NodeUtils;
+import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -583,33 +583,76 @@ public class UpdateViewHierarchy {
 		return assocIds;
 	}
 
+	/**
+	 * Given a View node, retrieves its childViews[] based on ownedAttribute
+	 * properties Ids
+	 * 
+	 * @param parentNode
+	 * @return
+	 */
 	public static List<EmsScriptNode> getChildViews(EmsScriptNode parentNode) {
-		if (!NodeUtil.exists(parentNode)) {
+		if (parentNode == null || !NodeUtil.exists(parentNode)) {
 			return null;
 		}
+
 		List<EmsScriptNode> childViews = new ArrayList<EmsScriptNode>();
 		WorkspaceNode ws = parentNode.getWorkspace();
-		Set<EmsScriptNode> rels = parentNode.getRelationships(null, ws);
-		for (EmsScriptNode rel : rels) {
-			Object prop = rel.getNodeRefProperty(Acm.ACM_TARGET, null, ws);
-			if (prop instanceof NodeRef) {
-				EmsScriptNode propNode = new EmsScriptNode((NodeRef) prop,
-						parentNode.getServices());
-				if (NodeUtil.exists(propNode)) {
-					if (propNode.hasOrInheritsAspect(Acm.ACM_PROPERTY)) {
-						Object propType = propNode.getNodeRefProperty(
-								Acm.ACM_PROPERTY_TYPE, null, ws);
-						if (propType instanceof NodeRef) {
-							EmsScriptNode node = new EmsScriptNode(
-									(NodeRef) propType,
-									parentNode.getServices());
-							if (NodeUtil.exists(node)) {
-								if (node.hasOrInheritsAspect(Acm.ACM_VIEW)) {
-									childViews.add(node);
-								}
+		ServiceRegistry services = parentNode.getServices();
+
+		// get ownedAttributes
+		//TODO reuse instance getOwnedAttributes()
+		List<String> ownedAttributeIds = new ArrayList<String>();
+		Object ownedAttRefs = parentNode.getNodeRefProperty(
+				Acm.ACM_OWNED_ATTRIBUTE, null, ws);
+		if (ownedAttRefs instanceof Collection) {
+			List<NodeRef> refs = Utils.asList((Collection<?>) ownedAttRefs,
+					NodeRef.class);
+			ownedAttributeIds = EmsScriptNode.getSysmlIds(parentNode
+					.toEmsScriptNodeList(refs));
+		}
+		if (Utils.isNullOrEmpty(ownedAttributeIds))
+			return null;
+
+		// translate ownedAttributes to View Ids
+		//TODO reuse instance translateOwnedAttributeIds()
+		String viewId = null;
+		for (String ownedAttributeId : ownedAttributeIds) {
+			EmsScriptNode ownedAttributeNode = NodeUtil.findScriptNodeById(
+					ownedAttributeId, ws, null, false, services, null);
+			if (NodeUtil.exists(ownedAttributeNode)) {
+				Object propType = ownedAttributeNode.getNodeRefProperty(
+						Acm.ACM_PROPERTY_TYPE, true, null, ws);
+				Collection<?> propTypes = null;
+				if (propType instanceof Collection) {
+					propTypes = (Collection<?>) propType;
+				} else if (propType instanceof NodeRef) {
+					propTypes = Utils.newList(propType);
+				}
+				if (Utils.isNullOrEmpty(propTypes))
+					return null;
+
+				for (Object pType : propTypes) {
+					if (UpdateViewHierarchy.isView(pType, services, ws)) {
+						if (pType instanceof NodeRef) {
+							EmsScriptNode propTypeNode = new EmsScriptNode(
+									(NodeRef) pType, services);
+							if (NodeUtil.exists(propTypeNode)
+									&& propTypeNode
+											.hasOrInheritsAspect(Acm.ACM_VIEW)) {
+								viewId = propTypeNode.getSysmlId();
 							}
+						} else if (pType instanceof String) {
+							viewId = (String) pType;
 						}
 					}
+				}
+			}
+
+			if (!Utils.isNullOrEmpty(viewId)) {
+				EmsScriptNode viewNode = NodeUtil.findScriptNodeById(viewId,
+						ws, null, false, parentNode.getServices(), null);
+				if (viewNode.exists()) {
+					childViews.add(viewNode);
 				}
 			}
 		}
@@ -1174,6 +1217,23 @@ public class UpdateViewHierarchy {
 			EmsScriptNode node = mp.findScriptNodeById((String) viewMaybe,
 					mp.myWorkspace, null, false);
 			return isView(node);
+		}
+		return false;
+	}
+
+	public static boolean isView(Object viewMaybe, ServiceRegistry services,
+			WorkspaceNode workspace) {
+		if (viewMaybe instanceof EmsScriptNode) {
+			return ((EmsScriptNode) viewMaybe)
+					.hasOrInheritsAspect(Acm.ACM_VIEW);
+		} else if (viewMaybe instanceof NodeRef) {
+			EmsScriptNode view = new EmsScriptNode((NodeRef) viewMaybe,
+					services);
+			return view.hasOrInheritsAspect(Acm.ACM_VIEW);
+		} else if (viewMaybe instanceof String) {
+			EmsScriptNode node = NodeUtil.findScriptNodeById(
+					(String) viewMaybe, workspace, null, false, services, null);
+			return UpdateViewHierarchy.isView(node, services, workspace);
 		}
 		return false;
 	}
