@@ -907,6 +907,9 @@ public class CommitUtil {
 				if (e.getString("owner") != null)
 					pgh.insertEdge(e.getString("owner"),
 							e.getString("sysmlid"), DbEdgeTypes.REGULAR);
+				// need to update the reference for the node
+                pgh.updateNodeRefIds(e.getString("sysmlid"),
+                                     e.getString("versionedRefId"), e.getString("nodeRefId"));
 			}
 
 			for (Pair<String, String> e : documentEdges) {
