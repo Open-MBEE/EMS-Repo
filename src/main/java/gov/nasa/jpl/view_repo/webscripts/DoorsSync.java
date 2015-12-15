@@ -101,8 +101,6 @@ public class DoorsSync extends AbstractJavaWebScript {
     @Override
     protected Map<String, Object> executeImplImpl(WebScriptRequest req, Status status, Cache cache) {
 
-        String projectArea = "Test Project";
-
         Map<String, Object> model = new HashMap<String, Object>();
         JSONObject json = null;
 
@@ -110,8 +108,6 @@ public class DoorsSync extends AbstractJavaWebScript {
             if (validateRequest(req, status) || true) {
                 WorkspaceNode workspace = getWorkspace(req);
                 pgh = new PostgresHelper(workspace);
-
-                doors = new DoorsClient(projectArea);
 
                 String sitesReq = req.getParameter("sites");
                 String timestamp = req.getParameter("timestamp");
@@ -159,6 +155,7 @@ public class DoorsSync extends AbstractJavaWebScript {
             if (siteRef != null) {
                 siteNode = new EmsScriptNode(siteRef, services);
                 name = siteNode.getName();
+                doors = new DoorsClient("Test Project");
 
                 if (workspace == null || (workspace != null && workspace.contains(siteNode))) {
                     try {
@@ -166,8 +163,8 @@ public class DoorsSync extends AbstractJavaWebScript {
 
                         for (EmsScriptNode n : siteNode.getChildNodes()) {
 
-                            int nodesInserted = sendToDoors(n, dateTime, name);
-                            siteJson.put("sysmlid", name);
+                            int nodesInserted = syncToDoors(n, dateTime, name);
+                            siteJson.put("sysmlId", name);
                             siteJson.put("name", siteInfo.getTitle());
                             siteJson.put("elementCount", nodesInserted);
                             json.put(siteJson);
@@ -186,11 +183,11 @@ public class DoorsSync extends AbstractJavaWebScript {
         return json;
     }
 
-    protected Integer sendToDoors(EmsScriptNode n, Date dt, String parentId) {
-        return sendToDoors(n, dt, parentId, false);
+    protected Integer syncToDoors(EmsScriptNode n, Date dt, String parentId) {
+        return syncToDoors(n, dt, parentId, false);
     }
 
-    protected Integer sendToDoors(EmsScriptNode n, Date dt, String parentId, Boolean single) {
+    protected Integer syncToDoors(EmsScriptNode n, Date dt, String parentId, Boolean single) {
 
         int i = 0;
 
@@ -214,7 +211,7 @@ public class DoorsSync extends AbstractJavaWebScript {
                     String cnSysmlId = cn.getSysmlId().replace( "_pkg",  "" );
 
                     if (!cn.isDeleted()) {
-                        i += sendToDoors(cn, dt, cnSysmlId);
+                        i += syncToDoors(cn, dt, cnSysmlId);
                     }
                 }
             }
@@ -226,48 +223,62 @@ public class DoorsSync extends AbstractJavaWebScript {
         return i;
     }
 
+    protected Requirement getRequirementFromDoors(EmsScriptNode n) {
+        String sysmlId = n.getSysmlId();
+        String resourceUrl = getResourceUrl(sysmlId);
+        Date lastSync = getLastSynced(sysmlId);
+
+        System.out.println(resourceUrl);
+
+        Requirement doorsReq = doors.getRequirement(resourceUrl);
+
+        return doorsReq;
+    }
+
     protected Integer createUpdateRequirement(EmsScriptNode n, Date dt) {
 
         String resourceUrl = getResourceUrl(n.getSysmlId());
 
         System.out.println(resourceUrl);
 
-        String sysmlid = (String) n.getProperty(Acm.ACM_ID);
-        String name = (String) n.getProperty(Acm.CM_NAME);
+        String sysmlId = (String) n.getProperty(Acm.ACM_ID);
         String title = (String) n.getSysmlName();
         String description = (String) n.getProperty(Acm.ACM_DOCUMENTATION);
+        String name = (String) n.getProperty(Acm.CM_NAME);
 
         Requirement doorsReq = new Requirement();
 
         doorsReq.setTitle(title);
-        doorsReq.setSysmlid(sysmlid);
+        doorsReq.setSysmlid(sysmlId);
         doorsReq.setDescription(description);
 
-        if(n.getParent() != null) {
+        if (n.getParent() != null) {
             String parentResourceUrl = getResourceUrl(n.getParent().getSysmlId());
-            if(parentResourceUrl == null) {
-                //sendToDoors(n, dt, null, true);
-            } else {
-                doorsReq.setParent(URI.create(parentResourceUrl));
+            if (parentResourceUrl == null) {
+                parentResourceUrl = createFolder(n.getParent().getSysmlName());
+                setResourceUrl(parentResourceUrl, n.getParent().getSysmlId());
             }
+            doorsReq.setParent(URI.create(parentResourceUrl));
         }
 
-        if(resourceUrl != null) {
+        if (resourceUrl != null) {
             doorsReq.setResourceUrl(resourceUrl);
             doors.update(doorsReq);
         } else {
             resourceUrl = doors.create(doorsReq);
         }
 
-        if (setResourceUrl(resourceUrl, n.getSysmlId())) {
+        if (setResourceUrl(resourceUrl, sysmlId)) {
             return 1;
         }
 
         return 0;
     }
 
-    protected Integer createFolder(EmsScriptNode n, Date dt) {
-        return 1;
+    protected String createFolder(String title) {
+        Folder folder = new Folder();
+        folder.setTitle(title);
+        return doors.create(folder);
     }
 
     protected String getResourceUrl(String sysmlId) {
@@ -291,14 +302,34 @@ public class DoorsSync extends AbstractJavaWebScript {
             values.put("sysmlid", sysmlId);
             values.put("resourceUrl", resourceUrl);
 
-            if (pgh.insert("doors", values) > 0)  {
+            if (getResourceUrl(sysmlId) != null) {
+                pgh.execUpdate(String.format("UPDATE doors SET lastSync = current_timestamp WHERE sysmlid = '%s'", sysmlId));
                 return true;
+            } else {
+                if (pgh.insert("doors", values) > 0)  {
+                    return true;
+                }
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
 
         return false;
+    }
+
+    protected Date getLastSynced(String sysmlId) {
+        try {
+            String query = String.format("SELECT lastSync FROM doors WHERE sysmlid = '%s'", sysmlId);
+            ResultSet rs = pgh.execQuery(query);
+            if (rs.next()) {
+                return rs.getDate(1);
+            } else {
+                return null;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
     protected Boolean deleteResourceUrl(String resourceUrl) {
