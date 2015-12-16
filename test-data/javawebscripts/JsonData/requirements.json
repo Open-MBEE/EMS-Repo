@@ -21,6 +21,66 @@
 				"type": "InstanceSpecification"
 			},
 			"isMetatype": false
+		},
+		{
+			"name": "Requirement 2",
+			"sysmlid": "_18_0_2_f4e036d_1449277435123_316989_16369",
+			"documentation": "",
+			"owner": "_18_0_2_f4e036d_1449277435123_52727_16367",
+			"appliedMetatypes":
+				[
+				"_11_5EAPbeta_be00301_1147873190330_159934_2220",
+				"_9_0_62a020a_1105704885251_933969_7897"
+			],
+			"specialization":
+			{
+				"classifier":
+					[
+					"_11_5EAPbeta_be00301_1147873190330_159934_2220"
+				],
+				"type": "InstanceSpecification"
+			},
+			"isMetatype": false
+		},
+		{
+			"name": "Requirement 3",
+			"sysmlid": "_18_0_2_f4e036d_1449277435123_316989_16370",
+			"documentation": "",
+			"owner": "_18_0_2_f4e036d_1449277435123_52727_16367",
+			"appliedMetatypes":
+				[
+				"_11_5EAPbeta_be00301_1147873190330_159934_2220",
+				"_9_0_62a020a_1105704885251_933969_7897"
+			],
+			"specialization":
+			{
+				"classifier":
+					[
+					"_11_5EAPbeta_be00301_1147873190330_159934_2220"
+				],
+				"type": "InstanceSpecification"
+			},
+			"isMetatype": false
+		},
+		{
+			"name": "Requirement 4",
+			"sysmlid": "_18_0_2_f4e036d_1449277435123_316989_16371",
+			"documentation": "",
+			"owner": "_18_0_2_f4e036d_1449277435123_52727_16367",
+			"appliedMetatypes":
+				[
+				"_11_5EAPbeta_be00301_1147873190330_159934_2220",
+				"_9_0_62a020a_1105704885251_933969_7897"
+			],
+			"specialization":
+			{
+				"classifier":
+					[
+					"_11_5EAPbeta_be00301_1147873190330_159934_2220"
+				],
+				"type": "InstanceSpecification"
+			},
+			"isMetatype": false
 		}
 	]
 }

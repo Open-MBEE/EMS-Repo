@@ -53,6 +53,8 @@ import java.util.List;
 import java.util.Map;
 
 import java.net.URI;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -77,6 +79,7 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
 public class DoorsSync extends AbstractJavaWebScript {
 
     PostgresHelper pgh = null;
+
     DoorsClient doors = null;
 
     static Logger logger = Logger.getLogger(DoorsSync.class);
@@ -108,6 +111,7 @@ public class DoorsSync extends AbstractJavaWebScript {
             if (validateRequest(req, status) || true) {
                 WorkspaceNode workspace = getWorkspace(req);
                 pgh = new PostgresHelper(workspace);
+                doors = new DoorsClient("Test Project");
 
                 String sitesReq = req.getParameter("sites");
                 String timestamp = req.getParameter("timestamp");
@@ -155,15 +159,13 @@ public class DoorsSync extends AbstractJavaWebScript {
             if (siteRef != null) {
                 siteNode = new EmsScriptNode(siteRef, services);
                 name = siteNode.getName();
-                doors = new DoorsClient("Test Project");
 
                 if (workspace == null || (workspace != null && workspace.contains(siteNode))) {
                     try {
                         pgh.connect();
 
                         for (EmsScriptNode n : siteNode.getChildNodes()) {
-
-                            int nodesInserted = syncToDoors(n, dateTime, name);
+                            int nodesInserted = syncToDoors(n, dateTime);
                             siteJson.put("sysmlId", name);
                             siteJson.put("name", siteInfo.getTitle());
                             siteJson.put("elementCount", nodesInserted);
@@ -183,11 +185,11 @@ public class DoorsSync extends AbstractJavaWebScript {
         return json;
     }
 
-    protected Integer syncToDoors(EmsScriptNode n, Date dt, String parentId) {
-        return syncToDoors(n, dt, parentId, false);
+    protected Integer syncToDoors(EmsScriptNode n, Date dt) {
+        return syncToDoors(n, dt, false);
     }
 
-    protected Integer syncToDoors(EmsScriptNode n, Date dt, String parentId, Boolean single) {
+    protected Integer syncToDoors(EmsScriptNode n, Date dt, Boolean single) {
 
         int i = 0;
 
@@ -203,15 +205,14 @@ public class DoorsSync extends AbstractJavaWebScript {
 
         if (appliedMetatype != null && appliedMetatype.contains( "_11_5EAPbeta_be00301_1147873190330_159934_2220" )) {
             i += createUpdateRequirement(n, dt);
+            //getRequirementFromDoors(n);
         }
 
         try {
             if(!single) {
                 for (EmsScriptNode cn : n.getChildNodes()) {
-                    String cnSysmlId = cn.getSysmlId().replace( "_pkg",  "" );
-
                     if (!cn.isDeleted()) {
-                        i += syncToDoors(cn, dt, cnSysmlId);
+                        i += syncToDoors(cn, dt);
                     }
                 }
             }
@@ -224,39 +225,55 @@ public class DoorsSync extends AbstractJavaWebScript {
     }
 
     protected Requirement getRequirementFromDoors(EmsScriptNode n) {
+
         String sysmlId = n.getSysmlId();
-        String resourceUrl = getResourceUrl(sysmlId);
+        String resourceUrl = mapResourceUrl(sysmlId);
         Date lastSync = getLastSynced(sysmlId);
 
-        System.out.println(resourceUrl);
-
         Requirement doorsReq = doors.getRequirement(resourceUrl);
+
+        DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
+        System.out.println();
+        System.out.println("=-=-=-=-=-=-=-=-=-=-=");
+        System.out.println("Sysmlid: " + sysmlId);
+        System.out.println("lastSync in MMS: " + df.format(lastSync));
+        System.out.println("Modified in Doors: " + df.format(doorsReq.getModified()));
+        System.out.println("=-=-=-=-=-=-=-=-=-=-=");
+        System.out.println();
 
         return doorsReq;
     }
 
     protected Integer createUpdateRequirement(EmsScriptNode n, Date dt) {
 
-        String resourceUrl = getResourceUrl(n.getSysmlId());
-
-        System.out.println(resourceUrl);
-
+        String resourceUrl = mapResourceUrl(n.getSysmlId());
         String sysmlId = (String) n.getProperty(Acm.ACM_ID);
         String title = (String) n.getSysmlName();
         String description = (String) n.getProperty(Acm.ACM_DOCUMENTATION);
         String name = (String) n.getProperty(Acm.CM_NAME);
 
+        System.out.println();
+        System.out.println("=-=-=-=-=-=-=-=-=-=-=");
+        System.out.println("Title: " + title);
+        System.out.println("Sysmlid: " + sysmlId);
+        System.out.println("ResourceURL: " + resourceUrl);
+        System.out.println("=-=-=-=-=-=-=-=-=-=-=");
+        System.out.println();
+
         Requirement doorsReq = new Requirement();
 
         doorsReq.setTitle(title);
-        doorsReq.setSysmlid(sysmlId);
+        doorsReq.setCustomField(doors.getField("sysmlid"), sysmlId);
         doorsReq.setDescription(description);
 
-        if (n.getParent() != null) {
-            String parentResourceUrl = getResourceUrl(n.getParent().getSysmlId());
+        if (n.getParent().getSysmlName() != null) {
+            String parentResourceUrl = mapResourceUrl(n.getParent().getSysmlId());
             if (parentResourceUrl == null) {
-                parentResourceUrl = createFolder(n.getParent().getSysmlName());
-                setResourceUrl(parentResourceUrl, n.getParent().getSysmlId());
+                Folder folder = new Folder();
+                folder.setTitle(n.getParent().getSysmlName());
+                parentResourceUrl = doors.create(folder);
+                mapResourceUrl(n.getParent().getSysmlId(), parentResourceUrl);
             }
             doorsReq.setParent(URI.create(parentResourceUrl));
         }
@@ -268,20 +285,14 @@ public class DoorsSync extends AbstractJavaWebScript {
             resourceUrl = doors.create(doorsReq);
         }
 
-        if (setResourceUrl(resourceUrl, sysmlId)) {
+        if (mapResourceUrl(sysmlId, resourceUrl)) {
             return 1;
         }
 
         return 0;
     }
 
-    protected String createFolder(String title) {
-        Folder folder = new Folder();
-        folder.setTitle(title);
-        return doors.create(folder);
-    }
-
-    protected String getResourceUrl(String sysmlId) {
+    protected String mapResourceUrl(String sysmlId) {
         try {
             String query = String.format("SELECT resourceUrl FROM doors WHERE sysmlid = '%s'", sysmlId);
             ResultSet rs = pgh.execQuery(query);
@@ -296,13 +307,12 @@ public class DoorsSync extends AbstractJavaWebScript {
         return null;
     }
 
-    protected Boolean setResourceUrl(String resourceUrl, String sysmlId) {
+    protected Boolean mapResourceUrl(String sysmlId, String resourceUrl) {
         try {
             Map<String, String> values = new HashMap<String, String>();
             values.put("sysmlid", sysmlId);
             values.put("resourceUrl", resourceUrl);
-
-            if (getResourceUrl(sysmlId) != null) {
+            if (mapResourceUrl(sysmlId) != null) {
                 pgh.execUpdate(String.format("UPDATE doors SET lastSync = current_timestamp WHERE sysmlid = '%s'", sysmlId));
                 return true;
             } else {
