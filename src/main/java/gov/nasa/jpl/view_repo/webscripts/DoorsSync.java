@@ -294,7 +294,7 @@ public class DoorsSync extends AbstractJavaWebScript {
     protected Boolean createFolder(EmsScriptNode n) {
         Folder folder = new Folder();
         folder.setTitle(n.getParent().getSysmlName());
-        parentResourceUrl = doors.create(folder);
+        String parentResourceUrl = doors.create(folder);
         if (mapResourceUrl(n.getParent().getSysmlId(), parentResourceUrl)) {
             return true;
         }
