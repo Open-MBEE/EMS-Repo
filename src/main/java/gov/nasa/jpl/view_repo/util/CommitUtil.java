@@ -809,12 +809,107 @@ public class CommitUtil {
 							cleanedJson.toString());
 				}
 
+//<<<<<<< HEAD
 				if (prevCommit1 != null) {
 					updateCommitHistory(prevCommit1, currCommit, originalUser);
 				}
 				if (prevCommit2 != null) {
 					updateCommitHistory(prevCommit2, currCommit, originalUser);
 				}
+//=======
+//    protected static boolean sendJmsMsg(JSONObject json, String eventType, String workspaceId, String projectId) {
+//        boolean status = false;
+//        if (jmsConnection != null) {
+//            status = jmsConnection.publish( json, eventType, workspaceId, projectId );
+//        } else {
+//            if (logger.isInfoEnabled()) logger.info( "JMS Connection not avalaible" );
+//        }
+//        
+//        return status;
+//    }
+//    
+//    
+//    /**
+//     * Send off progress to various endpoints
+//     * @param msg       String message to be published
+//     * @param projectId String of the project Id to post to
+//     * @return          true if publish completed
+//     * @throws JSONException
+//     */
+//    public static boolean sendProgress(String msg, String workspaceId, String projectId) {
+//        // FIXME: temporarily remove progress notifications until it's actually ready to be used
+////        boolean jmsStatus = false;
+////
+////        if (jmsConnection != null) {
+////            jmsConnection.setWorkspace( workspaceId );
+////            jmsConnection.setProjectId( projectId );
+////            jmsStatus = jmsConnection.publishTopic( msg, "progress" );
+////        }
+////
+////        return jmsStatus;
+//        return true;
+//    }
+//    
+//    private static JSONObject migrateCommitUsingDiff(JSONArray elements, JSONArray updated, JSONArray added, 
+//                                              JSONArray deleted, WorkspaceNode ws1, WorkspaceNode ws2,
+//                                              Date dateTime1, Date dateTime2, StringBuffer response,
+//                                              Status responseStatus) {
+//        
+//        JSONObject firstElem = null;
+//        
+//        if (added != null && added.length() > 0) {
+//            firstElem = added.getJSONObject( 0 );
+//        }
+//        else if (updated != null && updated.length() > 0) {
+//            firstElem = updated.getJSONObject( 0 );
+//        }
+//        else if (deleted != null && deleted.length() > 0) {
+//            firstElem = deleted.getJSONObject( 0 );
+//        }
+//        else if (elements != null && elements.length() > 0) {
+//            firstElem = elements.getJSONObject( 0 );
+//        }
+//        
+//        if (firstElem != null) {
+//            
+//            if (!firstElem.has( Acm.JSON_SPECIALIZATION )) {
+//                
+//                // Perform the diff using the workspaces and timestamps
+//                // from the commit node:
+//                JSONObject json = MmsDiffGet.performDiff( ws1, ws2, dateTime1, dateTime2, response,
+//                                                                      responseStatus, DiffType.COMPARE, true, false );                
+//                return json;
+//            }
+//        }
+//        
+//        return null;
+//    }
+//    
+//    private static void migrateJSONArray(WorkspaceNode workspace, Date dateTime, 
+//                                         JSONArray oldJsonArray, JSONArray newJsonArray,
+//                                         Map<String,EmsScriptNode> nodeMap,
+//                                         StringBuffer response) {
+//        
+//        for (int i = 0; i < oldJsonArray.length(); i++) {
+//            JSONObject elementJson = oldJsonArray.getJSONObject( i );
+//            if (elementJson != null && !elementJson.has( Acm.JSON_SPECIALIZATION )) {
+//                
+//                String sysmlId = elementJson.optString( Acm.JSON_ID );
+//                
+//                if (!Utils.isNullOrEmpty(sysmlId)) {
+//                    
+//                    EmsScriptNode node = null;
+//                    if (nodeMap.containsKey( sysmlId )) {
+//                        node = nodeMap.get( sysmlId );
+//                    }
+//                    else {
+//                        node = NodeUtil.findScriptNodeById( sysmlId, workspace, dateTime, false,
+//                                                            NodeUtil.getServices(), response, null );
+//                        if (node != null) {
+//                            nodeMap.put( sysmlId, node );
+//                        }
+//                    }
+//>>>>>>> refs/heads/viewOrdering
 
 				currCommit.setOwner(originalUser);
 				currCommit.getOrSetCachedVersion();
@@ -829,8 +924,70 @@ public class CommitUtil {
 		// make sure we're running back as the originalUser
 		AuthenticationUtil.setRunAsUser(originalUser);
 
+//<<<<<<< HEAD
 		return result;
 	}
+//=======
+//                if ( ws1Json != null && ws2Json != null ) {
+//                    
+//                    String timestamp1 = ws1Json.optString( "timestamp" );
+//                    String timestamp2 = ws2Json.optString( "timestamp" );
+//                    
+//                    if (Utils.isNullOrEmpty(timestamp1) || Utils.isNullOrEmpty(timestamp2)) {
+//                        return false;
+//                    }
+//                    else {
+//                        
+//                        JSONArray elements = ws1Json.optJSONArray("elements");
+//                        JSONArray added = ws2Json.optJSONArray("addedElements");
+//                        JSONArray updated = ws2Json.optJSONArray("updatedElements");
+//                        JSONArray deleted = ws2Json.optJSONArray("deletedElements");
+//                        JSONArray conflicted = ws2Json.optJSONArray("conflictedElements");
+//                        JSONArray moved = ws2Json.optJSONArray("movedElements");
+//                        
+//                        for (int i = 0; i < elements.length(); i++) {
+//                            JSONObject elementJson = elements.getJSONObject( i );
+//                            if (elementJson != null && !elementJson.has( Acm.JSON_SPECIALIZATION )) {
+//                                return false;
+//                            }
+//                        }
+//                        
+//                        for (int i = 0; i < added.length(); i++) {
+//                            JSONObject elementJson = added.getJSONObject( i );
+//                            if (elementJson != null && !elementJson.has( Acm.JSON_SPECIALIZATION )) {
+//                                return false;
+//                            }
+//                        }
+//                        
+//                        for (int i = 0; i < updated.length(); i++) {
+//                            JSONObject elementJson = updated.getJSONObject( i );
+//                            if (elementJson != null && !elementJson.has( Acm.JSON_SPECIALIZATION )) {
+//                                return false;
+//                            }
+//                        }
+//                        
+//                        for (int i = 0; i < deleted.length(); i++) {
+//                            JSONObject elementJson = deleted.getJSONObject( i );
+//                            if (elementJson != null && !elementJson.has( Acm.JSON_SPECIALIZATION )) {
+//                                return false;
+//                            }
+//                        }
+//                        
+//                        for (int i = 0; i < conflicted.length(); i++) {
+//                            JSONObject elementJson = conflicted.getJSONObject( i );
+//                            if (elementJson != null && !elementJson.has( Acm.JSON_SPECIALIZATION )) {
+//                                return false;
+//                            }
+//                        }
+//                        
+//                        for (int i = 0; i < moved.length(); i++) {
+//                            JSONObject elementJson = moved.getJSONObject( i );
+//                            if (elementJson != null && !elementJson.has( Acm.JSON_SPECIALIZATION )) {
+//                                return false;
+//                            }
+//                        }
+//                    }
+//>>>>>>> refs/heads/viewOrdering
 
 	private static void processDeltasForDb(JSONObject delta, String workspaceId) {
 

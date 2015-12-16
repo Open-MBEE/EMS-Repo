@@ -26,70 +26,70 @@
             "properties": {
                 "sysmlid": {
                     "type": "string",
-                    "description": "[xmi:id] Unique identifier of the element. Equivalent to MDID unless element is a slot. If a slot, id is constructed using the pattern [instanceSpecId]-slot-[definingFeatureId]."
+                    "description": "Unique identifier of the element. Equivalent to MDID unless element is a slot. If a slot, id is constructed using the pattern [instanceSpecId]-slot-[definingFeatureId]."
                 },
                 "name": {
                     "type": "string",
-                    "description": "[UML:name for named element] Name of the element"
+                    "description": "Name of the element"
                 },
                 "documentation": {
                     "type": "string",
-                    "description": "[MD:documentation] Documentation of the element"
+                    "description": "Documentation of the element"
                 },
                 "editable": {
                     "type": "boolean",
-                    "description": "[MMS specific] Indicates whether user has permissions to edit the element (so GUI can toggle, server still checks on save though) (Read-Only)"
+                    "description": "Indicates whether user has permissions to edit the element (so GUI can toggle, server still checks on save though) (Read-Only)"
                 },
                 "owner": {
                     "type": "string",
-                    "description": "[UML:owner] Owner of the element - this indicates containment"
+                    "description": "Owner of the element - this indicates containment"
                 },
                 "creator": {
                     "type": "string",
-                    "description": "[MMS specific] Creator of the element (Read-Only)"
+                    "description": "Creator of the element (Read-Only)"
                 },
                 "created": {
                     "type": "string",
                     "format": "date-time",
-                    "description": "[MMS specific] Creation time of the element on server (Read-Only)"
+                    "description": "Creation time of the element (Read-Only)"
                 },
                 "modifier": {
                     "type": "string",
-                    "description": "[MMS specific] Last modifier of the element (Read-Only)"
+                    "description": "Modifier of the element (Read-Only)"
                 },
                 "modified": {
                     "type": "string",
                     "format": "date-time",
-                    "description": "[MMS specific] Last modified time of the element (Read-Only)"
+                    "description": "Last modified time of the element (Read-Only)"
                 },
                 "read": {
                     "type": "string",
                     "format": "date-time",
-                    "description": "[MMS specific] On updating any element, the time when the data was loaded needs to be provided so conflicts can be detected and handled by the server (Read-Only)"
+                    "description": "On updating any element, the time when the data was loaded needs to be provided so conflicts can be detected and handled by the server (Read-Only)"
                 },
                 "qualifiedName": {
                     "type": "string",
-                    "description": "[Derived property] Containment hierarchy of element based off of SysML names, currently provided as a convenience for context (Read-Only)"
+                    "description": "Containment hierarchy of element based off of SysML names, currently provided as a convenience for context (Read-Only)"
                 },
                 "qualifiedPath": {
                     "type": "string",
-                    "description": "[Derived property] Containment hierarchy of element based off of SysML ids, provided for systems that can't find by unique id (Read-Only)"
+                    "description": "Containment hierarchy of element based off of SysML ids, provided for systems that can't find by unique id (Read-Only)"
                 },
                 "id": {
                     "type": "string",
-                    "description": "[MMS specific] Alfresco unique identifier for the element (Read-Only)"
+                    "description": "Alfresco unique identifier for the element (Read-Only)"
                 },
                 "siteCharacterizationId": {
                     "type": "string",
-                    "description": "[MMS specific] Sysml ID of the site characterization that element belongs to (Read-Only). Enables categorization of sites."
+                    "description": "Sysml ID of the site characterization that element belongs to (Read-Only)"
                 },
                 "isMetatype": {
                     "type": "boolean",
-                    "description": "[UML is metatype] True if element is a metatype (e.g., stereotype or metaclass). If not specified by MMS, assumption is that it is false"
+                    "description": "True if element is a metatype (e.g., stereotype or metaclass). If not specified by MMS, assumption is that it is false"
                 },
                 "metatypes": {
                     "type": "array",
-                    "description": "[UML inherited metatypes] An array of all the metatypes that this element directly inherits or extends. If this exists, isMetatype must be true",
+                    "description": "An array of all the metatypes that this element directly inherits or extends. If this exists, isMetatype must be true",
                     "items": {
                         "type": "String",
                         "description": "Sysml ID of the inherited or extended metatype"
@@ -97,7 +97,7 @@
                 },
                 "appliedMetatypes": {
                     "type": "array",
-                    "description": "[UML applied metatypes] An array of all the metatypes that are directly applied to this element.",
+                    "description": "An array of all the metatypes that are directly applied to this element.",
                     "items": {
                         "type": "String",
                         "description": "Sysml ID of applied metatype"
@@ -134,28 +134,22 @@
                 },
                 "relatedDocuments": {
                     "type": "array",
-                    "description": "[MMS specific] Array of documents that the element appears in. Typically only returned as part of search results. (Read Only)",
+                    "description": "Array of documents that the element appears in. Typically only returned as part of search results.",
                     "items": {
 		                "type": "object",
 		                "$ref": "#/definitions/RelatedDocument"
 	                }
-	            },
-	            "searchTypes": {
-	               "type": "text",
-	               "description": "[MMS specific] If results are for a search, returns a comma separated list of the searchTypes were matches were found. Aspect, documentation, id, etc. (Read Only)"
-                }
+	            }
             }
         },
 
 
         "Comment": {
-            "description": "[UML::Comment]",
             "properties": {
                 "type": { "enum": ["Comment"] }
             }
         },
         "Constraint": {
-            "description": "[UML::Constraint]",
             "properties": {
                 "type": { "enum": ["Constraint"] },
                 "specification": {
@@ -165,7 +159,6 @@
             }
         },
         "InstanceSpecification": {
-            "description": "[UML::InstanceSpecification]",
             "properties": {
                 "type": { "enum": ["InstanceSpecification"] },
                 "instanceSpecificationSpecification": {
@@ -208,7 +201,6 @@
             }
         },
         "Operation": {
-            "description": "[UML::Operation]",
             "properties": {
                 "type": { "enum": ["Operation"] },
                 "parameters": {
@@ -226,7 +218,6 @@
             }
         },
         "Package": {
-            "description": "[UML::Package]",
             "properties": {
                 "type": { "enum": ["Package"] },
                 "isSite": {
@@ -236,14 +227,13 @@
             }
         },
         "Product": {
-            "description": "[MDK Profile <<Document>>]",
             "properties": {
                 "type": { "enum": ["Product"] },
                 "view2view": {
                     "type": "array",
                     "items": {
                         "type": "object",
-                        "description": "A map of views to views: ids to childrenViews"
+                        "description": "A map of views to views"
                     }
                 },
                 "noSections": {
@@ -256,7 +246,6 @@
             }
         },
         "Project": {
-            "description": "[MD::Project]",
             "properties": {
                 "type": { "enum": ["Project"] },
                 "projectVersion": {
@@ -265,7 +254,6 @@
             }
         },
         "Property": {
-            "description": "[UML::Property]",
             "properties": {
                 "type": { "enum": ["Property"] },
                 "lower": {
@@ -316,22 +304,22 @@
                 },
                 "isDerived": {
                     "type": "boolean",
-                    "description": "[UML::Property.isDerived] Indicates whether the property is a free variable (if true) or not (if false)"
+                    "description": "Indicates whether the property is a free variable (if true) or not (if false)"
                 },
                 "isSlot": {
                     "type": "boolean",
-                    "description": "[UML] Indicates whther or not the property refers to a slot value"
+                    "description": "Indicates whther or not the property refers to a slot value"
                 },
                 "propertyType": {
                     "type": "string",
-                    "description": "[UML::Property.dataType] ID for the property type element"
+                    "description": "ID for the property type element"
                 },
                 
                 "value": {
                     "type": "array",
                     "items": {
                         "type": "object",
-                        "description": "[UML] The value of the property",
+                        "description": "The value of the property",
                         "oneOf": [
                             { "$ref": "#/definitions/ValueSpecification"},
                             { "$ref": "#/definitions/Duration"},
@@ -356,7 +344,6 @@
             }
         },
         "Parameter": {
-            "description": "[UML::Parameter]",
             "properties": {
                 "type": { "enum": ["Parameter"] },
                 "direction": {
@@ -372,7 +359,6 @@
             }
         },
         "View": {
-            "description": "[sysml::View]",
             	"properties": {
             	    "type": { "enum": ["View"] },
                 "contains": {
@@ -389,7 +375,6 @@
                     }
                 },
                 "displayedElements": {
-                    "description": "[MMS specific]: array of any elements displayed in view",
                     "type": "array",
                     "items": {
                         "type": "string",
@@ -397,7 +382,6 @@
                     }
                 },
                 "allowedElements": {
-                    "description": "[MMS specific]: array of any elements allowed in view",
                     "type": "array",
                     "items": {
                         "type": "string",
@@ -405,7 +389,6 @@
                     }
                 },
                 "childrenViews": {
-                    "description": "[MMS specific]: array of children views",
                     "type": "array",
                     "items": {
                         "type": "string",
@@ -413,13 +396,12 @@
                     }
                 },
                 "contents": {
-                    "description": "[MMS specific]: contents of view in JSON blob. Node ID",
-                    "type": "string"
+                    "type": "string",
+                    "description": "Node ID"
                 }
             }
         },
         "Viewpoint": {
-            "description": "[sysml::Viewpoint]",
             "properties": {
                 "type": { "enum": ["Viewpoint"] },
                 "method": {
@@ -430,7 +412,6 @@
         },
 
         "DirectedRelationship": {
-            "description": "[UML:DirectedRelationship]",
             "properties": {
                 "type": { "enum": ["DirectedRelationship"] },
                 "source": {
@@ -444,7 +425,6 @@
             }
         },
         "Conform": {
-            "description": "[sysml::Conforms]",
             "properties": {
                 "type": { "enum": ["Conform"] }
             },
@@ -453,7 +433,6 @@
             ]
         },
         "Dependency": {
-            "description": "[UML::Dependency]",
             "properties": {
                 "type": { "enum": ["Dependency"] }
             },
@@ -462,7 +441,6 @@
             ]
         },
         "Expose": {
-            "description": "[sysml::Expose]",
             "properties": {
                 "type": { "enum": ["Expose"] }
             },
@@ -473,7 +451,6 @@
 
 
         "ValueSpecification": {
-            "description": "[UML::ValueSpecification]",
             "properties": {
                 "type": { "enum": ["ValueSpecification"] },
                 "expression": {
@@ -483,7 +460,6 @@
             }
         },
         "Duration": {
-            "description": "[UML::Duration]",
             "properties": {
                 "type": { "enum": ["Duration"] }
             },
@@ -492,7 +468,6 @@
             ]
         },
         "DurationInterval": {
-            "description": "[UML::DurationInterval]",
             "properties": {
                 "type": { "enum": ["DurationInterval"] },
                 "durationMax": {
@@ -509,7 +484,6 @@
             ]
         },
         "ElementValue": {
-            "description": "[UML::ElementValue]",
             "properties": {
                 "type": { "enum": ["ElementValue"] },
                 "element": {
@@ -522,7 +496,6 @@
             ]
         },
         "LiteralSet": {
-            "description": "[UML::LiteralSet]",
             "properties": {
                 "type": { "enum": ["LiteralSet"] },
                 "set": {
@@ -580,7 +553,6 @@
             ]
         },
         "Expression": {
-            "description": "[UML::Expression]",
             "properties": {
                 "type": { "enum": ["Expression"] },
                 "operand": {
@@ -615,7 +587,6 @@
             ]
         },
         "OpaqueExpression": {
-            "description": "[UML::OpaqueExpression]",
             "properties": {
                 "type": { "enum": ["OpaqueExpression"] },
                 "expressionBody": {
@@ -628,7 +599,6 @@
             ]
         },
         "InstanceValue": {
-            "description": "[UML::InstanceValue]",
             "properties": {
                 "type": { "enum": ["InstanceValue"] },
                 "instance": {
@@ -641,7 +611,6 @@
             ]
         },
         "Interval": {
-            "description": "[UML::Interval]",
             "properties": {
                 "type": { "enum": ["Interval"] }
             },
@@ -650,7 +619,6 @@
             ]
         },
         "StringExpression": {
-            "description": "[UML::StringExpression]",
             "properties": {
                 "type": { "enum ": ["StringExpression"] }
             },
@@ -659,7 +627,6 @@
             ]
         },
         "LiteralBoolean": {
-            "description": "[UML::LiteralBoolean]",
             "properties": {
                 "type": { "enum": ["LiteralBoolean"] },
                 "boolean": {
@@ -671,7 +638,6 @@
             ]
         },
         "LiteralNull": {
-            "description": "[UML::LiterallNull]",
             "properties": {
                 "type": { "enum": ["LiteralNull"] }
             },
@@ -680,7 +646,6 @@
             ]
         },
         "LiteralInteger": {
-            "description": "[UML::LiteralInteger]",
             "properties": {
                 "type": { "enum": ["LiteralInteger"] },
                 "integer": {
@@ -692,7 +657,6 @@
             ]
         },
         "LiteralReal": {
-            "description": "[UML::LiteralReal]",
             "properties": {
                 "type": { "enum": ["LiteralReal"] },
                 "double": {
@@ -704,7 +668,6 @@
             ]
         },
         "LiteralString": {
-            "description": "[UML::LiteralString]",
             "properties": {
                 "type": { "enum": ["LiteralString"] },
                 "string": {
@@ -716,7 +679,6 @@
             ]
         },
         "LiteralUnlimitedNatural": {
-            "description": "[UML::LiteralUnlimitedNatural]",
             "properties": {
                 "type": { "enum": ["LiteralUnlimitedNatural"] },
                 "naturalValue": {
@@ -728,7 +690,6 @@
             ]
         },
         "TimeExpression": {
-            "description": "[UML::TimeExpression]",
             "properties": {
                 "type": { "enum": ["TimeExpression"] }
             },
@@ -737,7 +698,6 @@
             ]
         },
         "TimeInterval": {
-            "description": "[UML::TimeInterval]",
             "properties": {
                 "type": { "enum": ["TimeInterval"] },
                 "timeIntervalMin": {
@@ -750,7 +710,6 @@
             ]
         },
         "Connector": {
-            "description": "[UML::Connector]",
             "properties": {
                 "type": { "enum": ["Connector"] },
                 "targetLower": {
@@ -896,7 +855,6 @@
             ]
         },
         "Association": {
-            "description": "[UML::Association]",
             "properties": {
                 "type": { "enum": ["Association"] },
                 "ownedEnd": {
@@ -920,7 +878,6 @@
             ]
         },
         "Characterizes": {
-            "description": "[IMCE Characterizes]",
             "properties": {
                 "type": { "enum": ["Characterizes"] }
             },
@@ -929,7 +886,6 @@
             ]
         },
         "MagicDrawData": {
-            "description": "[MD] blob to hold serialization of MD data that isn't included in model",
             "properties": {
                 "type": { "enum": ["MagicDrawData"] },
                 "mdData": {
@@ -938,13 +894,11 @@
             }
         },
         "Succession": {
-            "description": "[UML::Succession]",
             "allOf": [
                 {"$ref": "#/definitions/Connector"}
             ]
         },
         "Binding": {
-            "description": "[UML::Binding]",
             "allOf": [
                 {"$ref": "#/definitions/Connector"}
             ]

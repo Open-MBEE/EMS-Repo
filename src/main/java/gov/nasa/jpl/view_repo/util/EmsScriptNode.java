@@ -47,6 +47,7 @@ import gov.nasa.jpl.view_repo.sysml.View;
 import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.NodeUtil.SearchType;
 import gov.nasa.jpl.view_repo.webscripts.AbstractJavaWebScript;
+import gov.nasa.jpl.view_repo.webscripts.UpdateViewHierarchy;
 
 import java.io.Serializable;
 import java.lang.reflect.Field;
@@ -5607,11 +5608,7 @@ System.out.println(msg);
     }
 
     public void addRelationshipToPropertiesOfParticipants( WorkspaceNode ws ) {
-        if ( hasOrInheritsAspect( Acm.ACM_DIRECTED_RELATIONSHIP )
-             || hasAspect( Acm.ACM_DEPENDENCY ) || hasAspect( Acm.ACM_EXPOSE )
-             || hasAspect( Acm.ACM_CONFORM )
-             || hasAspect( Acm.ACM_GENERALIZATION )
-             || hasAspect( Acm.ACM_ASSOCIATION )  ) {
+        if ( hasOrInheritsAspect( Acm.ACM_DIRECTED_RELATIONSHIP ) ) {
 
             // No need to pass a date since this is called in the context of
             // updating a node, so the time is the current time (which is null).
@@ -6009,7 +6006,7 @@ System.out.println(msg);
         boolean noFilter = filter == null || filter.size() == 0;
         if ( expressionStuff && ( property == null || property.length() <= 0 ) ) {
             if ( noFilter || filter.contains( "contains" ) ) {
-                JSONArray containsJson = getView().getContainsJson(true,dateTime,ws);
+            	JSONArray containsJson = getView().getContainsJson(true,dateTime,ws);
                 if ( containsJson != null && containsJson.length() > 0 ) {
                     json.put( "contains", containsJson  );
                 }
@@ -6055,19 +6052,34 @@ System.out.println(msg);
                            filter );
             }
         }
+        
+        // childViews
+        JSONArray childViewArr = node.computeChildViews();
+        if ( childViewArr != null ) {
+            json.put( "childViews", childViewArr );
+        }
+        
         // TODO: Snapshots?
-        NodeRef contentsNode =
-                (NodeRef)node.getNodeRefProperty( Acm.ACM_CONTENTS, dateTime,
-                                                  ws );
-        putInJson( json, Acm.JSON_CONTENTS,
-                   addInternalJSON( contentsNode, ws, dateTime ), filter );
+        NodeRef contentsNode = (NodeRef) node.getNodeRefProperty( Acm.ACM_CONTENTS,
+                                                                  dateTime, ws);
+        putInJson( json, Acm.JSON_CONTENTS, addInternalJSON(contentsNode, ws, dateTime), filter );
+        
+        System.out.println( json.toString( 4 ) );
 
     }
 
-    public
-            ArrayList< EmsScriptNode >
-            getNodesOfViews( Collection< sysml.view.View< EmsScriptNode > > views ) {
-        ArrayList< EmsScriptNode > nodes = new ArrayList< EmsScriptNode >();
+    private JSONArray computeChildViews() {
+        List< EmsScriptNode > childViews = UpdateViewHierarchy.getChildViews( this );
+        if(Utils.isNullOrEmpty(childViews)){
+        	EmsSystemModel esm = new EmsSystemModel(this.services);
+        	childViews = esm.getChildViews(this);
+        }
+        JSONArray childViewsArr = toJsonArrayOfSysmlIds( childViews );
+        return childViewsArr;
+    }
+
+    public ArrayList<EmsScriptNode> getNodesOfViews( Collection< sysml.view.View< EmsScriptNode > > views ) {
+        ArrayList<EmsScriptNode> nodes = new ArrayList< EmsScriptNode >();
         if ( views == null ) return nodes;
         for ( sysml.view.View< EmsScriptNode > view : views ) {
             if ( view == null ) {
