@@ -356,7 +356,9 @@ public class UpdateViewHierarchy {
 			// );
 		}
 		// See if the ownedAttributes are correct.
-		for (String childId : childViewsArray) {
+		for (String childViewStr : childViewsArray) {
+			JSONObject childViewJSONObject = new JSONObject(childViewStr);
+			String childViewId = childViewJSONObject.optString("id");
 
 			// Walk through non-view typed attributes
 			while (viewIdForOwnedAttribute == null && ownedAttributeId != null) {
@@ -397,10 +399,10 @@ public class UpdateViewHierarchy {
 			while (first || viewIdForOwnedAttribute != null) {
 				first = false;
 				matched = viewIdForOwnedAttribute != null
-						&& viewIdForOwnedAttribute.equals(childId);
+						&& viewIdForOwnedAttribute.equals(childViewId);
 				ownedAttributesChanged = true;
 				boolean inOwned = ownedAttributeIdsForViewIds.keySet()
-						.contains(childId);
+						.contains(childViewId);
 				boolean inChildViews = viewIdForOwnedAttribute == null
 						|| childViewsArray.contains(viewIdForOwnedAttribute);
 				String propId = null;
@@ -408,7 +410,7 @@ public class UpdateViewHierarchy {
 				if (inOwned && inChildViews) {
 					// (1) reordered
 					String newOwnedAttributeId = ownedAttributeIdsForViewIds
-							.get(childId);
+							.get(childViewId);
 					if (!newOwnedAttributes.contains(newOwnedAttributeId)) {
 						newOwnedAttributes.add(newOwnedAttributeId);
 					}
@@ -425,7 +427,7 @@ public class UpdateViewHierarchy {
 						// (2) case new child -- create or revise
 						// Association
 						propId = updateOrCreateAssociation(parent, null,
-								childId);
+								childViewJSONObject);
 						if (!Utils.isNullOrEmpty(propId)) {
 							newOwnedAttributes.add(propId);
 						}
@@ -590,17 +592,17 @@ public class UpdateViewHierarchy {
 	 * @param parentNode
 	 * @return
 	 */
-	public static List<EmsScriptNode> getChildViews(EmsScriptNode parentNode) {
+	public static JSONArray getChildViews(EmsScriptNode parentNode) {
 		if (parentNode == null || !NodeUtil.exists(parentNode)) {
 			return null;
 		}
 
-		List<EmsScriptNode> childViews = new ArrayList<EmsScriptNode>();
+		JSONArray childViews = new JSONArray();
 		WorkspaceNode ws = parentNode.getWorkspace();
 		ServiceRegistry services = parentNode.getServices();
 
 		// get ownedAttributes
-		//TODO reuse instance getOwnedAttributes()
+		// TODO reuse instance getOwnedAttributes()
 		List<String> ownedAttributeIds = new ArrayList<String>();
 		Object ownedAttRefs = parentNode.getNodeRefProperty(
 				Acm.ACM_OWNED_ATTRIBUTE, null, ws);
@@ -614,7 +616,7 @@ public class UpdateViewHierarchy {
 			return null;
 
 		// translate ownedAttributes to View Ids
-		//TODO reuse instance translateOwnedAttributeIds()
+		// TODO reuse instance translateOwnedAttributeIds()
 		String viewId = null;
 		for (String ownedAttributeId : ownedAttributeIds) {
 			EmsScriptNode ownedAttributeNode = NodeUtil.findScriptNodeById(
@@ -646,17 +648,84 @@ public class UpdateViewHierarchy {
 						}
 					}
 				}
-			}
 
-			if (!Utils.isNullOrEmpty(viewId)) {
-				EmsScriptNode viewNode = NodeUtil.findScriptNodeById(viewId,
-						ws, null, false, parentNode.getServices(), null);
-				if (viewNode.exists()) {
-					childViews.add(viewNode);
+				if (!Utils.isNullOrEmpty(viewId)) {
+					JSONObject jsonObj = new JSONObject();
+					jsonObj.put("id", viewId);
+					String aggregation = (String) ownedAttributeNode
+							.getProperty(Acm.ACM_AGGREGATION);
+					if (Utils.isNullOrEmpty(aggregation))
+						jsonObj.put(Acm.JSON_AGGREGATION, "NONE");
+					else
+						jsonObj.put(Acm.JSON_AGGREGATION, aggregation);
+					childViews.put(jsonObj);
 				}
 			}
 		}
 		return childViews;
+
+		// List<EmsScriptNode> childViews = new ArrayList<EmsScriptNode>();
+		// WorkspaceNode ws = parentNode.getWorkspace();
+		// ServiceRegistry services = parentNode.getServices();
+		//
+		// // get ownedAttributes
+		// //TODO reuse instance getOwnedAttributes()
+		// List<String> ownedAttributeIds = new ArrayList<String>();
+		// Object ownedAttRefs = parentNode.getNodeRefProperty(
+		// Acm.ACM_OWNED_ATTRIBUTE, null, ws);
+		// if (ownedAttRefs instanceof Collection) {
+		// List<NodeRef> refs = Utils.asList((Collection<?>) ownedAttRefs,
+		// NodeRef.class);
+		// ownedAttributeIds = EmsScriptNode.getSysmlIds(EmsScriptNode
+		// .toEmsScriptNodeList(refs));
+		// }
+		// if (Utils.isNullOrEmpty(ownedAttributeIds))
+		// return null;
+		//
+		// // translate ownedAttributes to View Ids
+		// //TODO reuse instance translateOwnedAttributeIds()
+		// String viewId = null;
+		// for (String ownedAttributeId : ownedAttributeIds) {
+		// EmsScriptNode ownedAttributeNode = NodeUtil.findScriptNodeById(
+		// ownedAttributeId, ws, null, false, services, null);
+		// if (NodeUtil.exists(ownedAttributeNode)) {
+		// Object propType = ownedAttributeNode.getNodeRefProperty(
+		// Acm.ACM_PROPERTY_TYPE, true, null, ws);
+		// Collection<?> propTypes = null;
+		// if (propType instanceof Collection) {
+		// propTypes = (Collection<?>) propType;
+		// } else if (propType instanceof NodeRef) {
+		// propTypes = Utils.newList(propType);
+		// }
+		// if (Utils.isNullOrEmpty(propTypes))
+		// continue;
+		//
+		// for (Object pType : propTypes) {
+		// if (UpdateViewHierarchy.isView(pType, services, ws)) {
+		// if (pType instanceof NodeRef) {
+		// EmsScriptNode propTypeNode = new EmsScriptNode(
+		// (NodeRef) pType, services);
+		// if (NodeUtil.exists(propTypeNode)
+		// && propTypeNode
+		// .hasOrInheritsAspect(Acm.ACM_VIEW)) {
+		// viewId = propTypeNode.getSysmlId();
+		// }
+		// } else if (pType instanceof String) {
+		// viewId = (String) pType;
+		// }
+		// }
+		// }
+		// }
+		//
+		// if (!Utils.isNullOrEmpty(viewId)) {
+		// EmsScriptNode viewNode = NodeUtil.findScriptNodeById(viewId,
+		// ws, null, false, parentNode.getServices(), null);
+		// if (viewNode.exists()) {
+		// childViews.add(viewNode);
+		// }
+		// }
+		// }
+		// return childViews;
 	}
 
 	protected List<EmsScriptNode> getAssociationNodes(String parentId,
@@ -871,11 +940,12 @@ public class UpdateViewHierarchy {
 	protected String addProperty(String propertyId, String parentViewId,
 			String propertyTypeId) {
 		return updateOrCreatePropertyJson(propertyId, parentViewId,
-				propertyTypeId, null);
+				propertyTypeId, null, null);
 	}
 
 	protected String updateOrCreatePropertyJson(String propertyId,
-			String parentViewId, String propertyTypeId, JSONObject propElement) {
+			String parentViewId, String propertyTypeId, JSONObject propElement,
+			String aggregation) {
 		boolean addedNew = false;
 		if (propertyId == null) {
 			propertyId = NodeUtil.createId(mp.getServices());
@@ -897,6 +967,9 @@ public class UpdateViewHierarchy {
 		}
 		spec.put("type", "Property");
 		spec.put(Acm.JSON_PROPERTY_TYPE, propertyTypeId);
+		if (!Utils.isNullOrEmpty(aggregation)) {
+			spec.put(Acm.JSON_AGGREGATION, aggregation);
+		}
 		if (addedNew) {
 			preprocessElementJson(propElement);
 		}
@@ -1015,7 +1088,8 @@ public class UpdateViewHierarchy {
 	}
 
 	protected String updateOrCreateAssociationJson(String assocId,
-			String parentViewId, String propertyId, String childViewId) {
+			String parentViewId, String propertyId,
+			JSONObject childViewJSONObject) {
 		boolean addedNew = false;
 
 		// updateOrCreatePropertyJson(propertyId, parentViewId, childViewId,
@@ -1035,10 +1109,16 @@ public class UpdateViewHierarchy {
 			addElement(element);
 		}
 
+		String childViewId = childViewJSONObject.optString("id");
+		String aggregation = childViewJSONObject
+				.optString(Acm.JSON_AGGREGATION);
+		if (Utils.isNullOrEmpty(aggregation))
+			aggregation = "COMPOSITE";
+
 		String propA = updateOrCreatePropertyJson(propertyId, assocId,
-				parentViewId, null);
+				parentViewId, null, null);
 		String propB = updateOrCreatePropertyJson(propertyId, parentViewId,
-				childViewId, null);
+				childViewId, null, aggregation);
 
 		// String owner = element.getString(Acm.JSON_OWNER);
 		String owner = element.optString(Acm.JSON_OWNER);
@@ -1072,11 +1152,12 @@ public class UpdateViewHierarchy {
 	}
 
 	protected String updateOrCreateAssociation(String parentId,
-			String propertyId, String childId) {
+			String propertyId, JSONObject childJSONObject) {
 		// Find existing associations that match the input.
 		String idOfAssocToUpdate = null;
+		String childViewId = childJSONObject.optString("id");
 		List<String> assocIds = getAssociationIdsFromJson(parentId, propertyId,
-				childId);
+				childViewId);
 		if (!Utils.isNullOrEmpty(assocIds)) {
 			if (assocIds.size() > 1) {
 				// TODO -- WARNING -- ambiguous choice
@@ -1085,7 +1166,7 @@ public class UpdateViewHierarchy {
 		}
 		List<EmsScriptNode> assocNodes = null;
 		if (idOfAssocToUpdate == null) {
-			assocNodes = getAssociationNodes(parentId, propertyId, childId);
+			assocNodes = getAssociationNodes(parentId, propertyId, childViewId);
 			if (!Utils.isNullOrEmpty(assocNodes)) {
 				if (assocNodes.size() > 1) {
 					// TODO -- WARNING -- ambiguous choice
@@ -1096,7 +1177,7 @@ public class UpdateViewHierarchy {
 		}
 		// Update or create the json.
 		return updateOrCreateAssociationJson(idOfAssocToUpdate, parentId,
-				propertyId, childId);
+				propertyId, childJSONObject);
 	}
 
 	protected void setOwnedAttributes(String parentId,

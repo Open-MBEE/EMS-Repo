@@ -6069,13 +6069,13 @@ System.out.println(msg);
     }
 
     private JSONArray computeChildViews() {
-        List< EmsScriptNode > childViews = UpdateViewHierarchy.getChildViews( this );
-        if(Utils.isNullOrEmpty(childViews)){
-        	EmsSystemModel esm = new EmsSystemModel(this.services);
-        	childViews = esm.getChildViews(this);
+        JSONArray childViews = UpdateViewHierarchy.getChildViews( this );
+        if(childViews != null && childViews.length() > 0){
+//        	EmsSystemModel esm = new EmsSystemModel(this.services);
+//        	childViews = esm.getChildViews(this);
         }
-        JSONArray childViewsArr = toJsonArrayOfSysmlIds( childViews );
-        return childViewsArr;
+//        JSONArray childViewsArr = toJsonArrayOfSysmlIds( childViews );
+        return childViews;
     }
 
     public ArrayList<EmsScriptNode> getNodesOfViews( Collection< sysml.view.View< EmsScriptNode > > views ) {
