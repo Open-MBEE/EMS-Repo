@@ -2695,7 +2695,7 @@ System.out.println("RRRRRR");
             for ( int i = 0; i < view2view.length(); ++i ) {
                 org.json.JSONObject obj = view2view.optJSONObject(i);
                 if ( obj == null ) continue;
-                    String id = obj.optString( Acm.JSON_ID );
+                    String id = obj.optString( "id" );
                     if ( id == null || !id.equals( parentId ) ) continue;
                     JSONArray arr = obj.optJSONArray(Acm.JSON_CHILD_VIEWS);
                     JSONArray childrenViews = obj.optJSONArray(Acm.JSON_CHILDREN_VIEWS);

@@ -41,6 +41,7 @@ import gov.nasa.jpl.mbee.util.Pair;
 import gov.nasa.jpl.mbee.util.Seen;
 import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.mbee.util.Utils;
+import gov.nasa.jpl.view_repo.db.Node;
 import gov.nasa.jpl.view_repo.db.PostgresHelper;
 import gov.nasa.jpl.view_repo.db.PostgresHelper.DbEdgeTypes;
 import gov.nasa.jpl.view_repo.sysml.View;
@@ -6068,14 +6069,53 @@ System.out.println(msg);
 
     }
 
+    private JSONObject buildJSONObjectToUpdateViewHierarchy(EmsScriptNode parentNode, List<EmsScriptNode> views){
+    	JSONObject jsonObj = new JSONObject();
+    	jsonObj.put(Acm.JSON_ID, parentNode.getSysmlId());
+    	
+    	return jsonObj;
+    }
+    
+    private void updateViewHierarchy(EmsScriptNode parentNode, List<EmsScriptNode> views){
+    	JSONObject jsonObj = buildJSONObjectToUpdateViewHierarchy(parentNode, views);
+    	
+    }
+    
+    private JSONArray getChildViewsByOwnedAttributes(EmsScriptNode parentNode){
+    	return UpdateViewHierarchy.getChildViews( this );
+    }
+    
+    private JSONArray buildJSONArrayFromView2View(List<EmsScriptNode> views){
+    	JSONArray childViews = new JSONArray();
+    	JSONObject jsonObj = null;
+    	for(EmsScriptNode node : views){
+    		jsonObj = new JSONObject();
+    		jsonObj.put("id", node.getSysmlId());
+    		jsonObj.put(Acm.JSON_AGGREGATION, "COMPOSITE");
+    		childViews.put(jsonObj);
+    	}
+    	return childViews;
+    }
+    
+    private JSONArray getChildViewsByView2View(EmsScriptNode parentNode){
+    	JSONArray childViews = null;
+    	EmsSystemModel esm = new EmsSystemModel(this.services);
+    	List<EmsScriptNode> views = esm.getChildViews(this);
+    	updateViewHierarchy(this, views);
+    	
+    	childViews = buildJSONArrayFromView2View(views);
+    	return childViews;
+    }
+    
     private JSONArray computeChildViews() {
-        List< EmsScriptNode > childViews = UpdateViewHierarchy.getChildViews( this );
-        if(Utils.isNullOrEmpty(childViews)){
-        	EmsSystemModel esm = new EmsSystemModel(this.services);
-        	childViews = esm.getChildViews(this);
-        }
-        JSONArray childViewsArr = toJsonArrayOfSysmlIds( childViews );
-        return childViewsArr;
+        JSONArray childViews = getChildViewsByOwnedAttributes(this);
+        //handling backward compatibility with View/Product using view2view
+//        if(childViews == null || childViews.length() == 0){
+//        	childViews = getChildViewsByView2View(this);
+//        }
+        
+//        JSONArray childViewsArr = toJsonArrayOfSysmlIds( childViews );
+        return childViews;
     }
 
     public ArrayList<EmsScriptNode> getNodesOfViews( Collection< sysml.view.View< EmsScriptNode > > views ) {
