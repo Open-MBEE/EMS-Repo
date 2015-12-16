@@ -203,8 +203,10 @@ public class DoorsSync extends AbstractJavaWebScript {
         }
         */
 
-        if (appliedMetatype != null && appliedMetatype.contains( "_11_5EAPbeta_be00301_1147873190330_159934_2220" )) {
-            i += createUpdateRequirement(n, dt);
+        if(n.isFolder()) {
+            createFolder(n);
+        } else if (appliedMetatype != null && appliedMetatype.contains( "_11_5EAPbeta_be00301_1147873190330_159934_2220" )) {
+            i += createUpdateRequirement(n);
             //getRequirementFromDoors(n);
         }
 
@@ -245,7 +247,7 @@ public class DoorsSync extends AbstractJavaWebScript {
         return doorsReq;
     }
 
-    protected Integer createUpdateRequirement(EmsScriptNode n, Date dt) {
+    protected Integer createUpdateRequirement(EmsScriptNode n) {
 
         String resourceUrl = mapResourceUrl(n.getSysmlId());
         String sysmlId = (String) n.getProperty(Acm.ACM_ID);
@@ -270,10 +272,7 @@ public class DoorsSync extends AbstractJavaWebScript {
         if (n.getParent().getSysmlName() != null) {
             String parentResourceUrl = mapResourceUrl(n.getParent().getSysmlId());
             if (parentResourceUrl == null) {
-                Folder folder = new Folder();
-                folder.setTitle(n.getParent().getSysmlName());
-                parentResourceUrl = doors.create(folder);
-                mapResourceUrl(n.getParent().getSysmlId(), parentResourceUrl);
+                createFolder(n.getParent());
             }
             doorsReq.setParent(URI.create(parentResourceUrl));
         }
@@ -290,6 +289,16 @@ public class DoorsSync extends AbstractJavaWebScript {
         }
 
         return 0;
+    }
+
+    protected Boolean createFolder(EmsScriptNode n) {
+        Folder folder = new Folder();
+        folder.setTitle(n.getParent().getSysmlName());
+        parentResourceUrl = doors.create(folder);
+        if (mapResourceUrl(n.getParent().getSysmlId(), parentResourceUrl)) {
+            return true;
+        }
+        return false;
     }
 
     protected String mapResourceUrl(String sysmlId) {
