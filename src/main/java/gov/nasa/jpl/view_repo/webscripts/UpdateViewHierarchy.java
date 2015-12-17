@@ -673,6 +673,69 @@ public class UpdateViewHierarchy {
 			}
 		}
 		return childViews;
+
+		// List<EmsScriptNode> childViews = new ArrayList<EmsScriptNode>();
+		// WorkspaceNode ws = parentNode.getWorkspace();
+		// ServiceRegistry services = parentNode.getServices();
+		//
+		// // get ownedAttributes
+		// //TODO reuse instance getOwnedAttributes()
+		// List<String> ownedAttributeIds = new ArrayList<String>();
+		// Object ownedAttRefs = parentNode.getNodeRefProperty(
+		// Acm.ACM_OWNED_ATTRIBUTE, null, ws);
+		// if (ownedAttRefs instanceof Collection) {
+		// List<NodeRef> refs = Utils.asList((Collection<?>) ownedAttRefs,
+		// NodeRef.class);
+		// ownedAttributeIds = EmsScriptNode.getSysmlIds(EmsScriptNode
+		// .toEmsScriptNodeList(refs));
+		// }
+		// if (Utils.isNullOrEmpty(ownedAttributeIds))
+		// return null;
+		//
+		// // translate ownedAttributes to View Ids
+		// //TODO reuse instance translateOwnedAttributeIds()
+		// String viewId = null;
+		// for (String ownedAttributeId : ownedAttributeIds) {
+		// EmsScriptNode ownedAttributeNode = NodeUtil.findScriptNodeById(
+		// ownedAttributeId, ws, null, false, services, null);
+		// if (NodeUtil.exists(ownedAttributeNode)) {
+		// Object propType = ownedAttributeNode.getNodeRefProperty(
+		// Acm.ACM_PROPERTY_TYPE, true, null, ws);
+		// Collection<?> propTypes = null;
+		// if (propType instanceof Collection) {
+		// propTypes = (Collection<?>) propType;
+		// } else if (propType instanceof NodeRef) {
+		// propTypes = Utils.newList(propType);
+		// }
+		// if (Utils.isNullOrEmpty(propTypes))
+		// continue;
+		//
+		// for (Object pType : propTypes) {
+		// if (UpdateViewHierarchy.isView(pType, services, ws)) {
+		// if (pType instanceof NodeRef) {
+		// EmsScriptNode propTypeNode = new EmsScriptNode(
+		// (NodeRef) pType, services);
+		// if (NodeUtil.exists(propTypeNode)
+		// && propTypeNode
+		// .hasOrInheritsAspect(Acm.ACM_VIEW)) {
+		// viewId = propTypeNode.getSysmlId();
+		// }
+		// } else if (pType instanceof String) {
+		// viewId = (String) pType;
+		// }
+		// }
+		// }
+		// }
+		//
+		// if (!Utils.isNullOrEmpty(viewId)) {
+		// EmsScriptNode viewNode = NodeUtil.findScriptNodeById(viewId,
+		// ws, null, false, parentNode.getServices(), null);
+		// if (viewNode.exists()) {
+		// childViews.add(viewNode);
+		// }
+		// }
+		// }
+		// return childViews;
 	}
 
 	protected List<EmsScriptNode> getAssociationNodes(String parentId,
