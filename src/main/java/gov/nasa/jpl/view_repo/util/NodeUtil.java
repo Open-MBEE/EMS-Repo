@@ -4979,8 +4979,13 @@ public class NodeUtil {
             if ( json.has( key ) ) {
                 if ( !key.equals( "workspace1" ) ) {
                     JSONArray elementsJson = json.getJSONArray( key );
-                    ppHandleElements( req, elementsJson, id2name, id2siteName,
+                    try {
+                        ppHandleElements( req, elementsJson, id2name, id2siteName,
                                       owner2children, child2owner );
+                    } catch (Exception e) {
+                        logger.error( "Could not get qualified path" );
+                        e.printStackTrace();
+                    }
                 } else {
                     // FIXME: enable later since difficult to track qualifiedIds
                     // in time, let EmsScriptNode do the job
