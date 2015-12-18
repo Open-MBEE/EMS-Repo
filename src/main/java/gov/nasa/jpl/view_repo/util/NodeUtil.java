@@ -1142,6 +1142,7 @@ public class NodeUtil {
     public static ArrayList< NodeRef >
             resultSetToNodeRefList( ResultSet results ) {
         ArrayList< NodeRef > nodes = new ArrayList< NodeRef >();
+        if ( results == null ) return nodes;
         for ( ResultSetRow row : results ) {
             if ( row.getNodeRef() != null ) {
                 nodes.add( row.getNodeRef() );
@@ -1215,7 +1216,7 @@ public class NodeUtil {
         String queryPattern = prefix + name + "\"";
         results = luceneSearch( queryPattern, services );
         ArrayList< NodeRef > resultList = resultSetToNodeRefList( results );
-        results.close();
+        if ( results != null ) results.close();
         return resultList;
     }
 
@@ -4992,7 +4993,9 @@ public class NodeUtil {
         String qname = "/" + childName;
         String qid = "/" + childId;
         String site = null;
-        while ( child2owner.containsKey( childId ) ) {
+        Set<String> seen = new HashSet<String>();
+        while ( child2owner.containsKey( childId ) && !seen.contains( childId ) ) {
+            seen.add( childId );
             childId = child2owner.get( childId );
             childName = id2name.get( childId );
             qname = "/" + childName + qname;
@@ -5077,11 +5080,70 @@ public class NodeUtil {
                         e.printStackTrace();
                     }
                 } else {
-                    ppRecurseOwnersOriginal( owner, id2name, id2siteName,
+                    //ppRecurseOwnersOriginal
+                    ppRecurseOwnersNew( owner, id2name, id2siteName,
                                              owner2children, child2owner,
                                              visitedOwners, wsId, dateTime );
                 }
             }
+        }
+    }
+
+    /**
+     * Post processing utility for traversing owners using graphDb
+     */
+    private static void
+           ppRecurseOwnersNew( String sysmlId, //PostgresHelper pgh,
+                               Map< String, String > id2name,
+                               Map< String, String > id2siteName,
+                               Map< String, Set< String >> owner2children,
+                               Map< String, String > child2owner,
+                               Set< String > visitedOwners, String wsId,
+                               Date dateTime ) {
+        Status status = new Status();
+        WorkspaceNode ws =
+                WorkspaceNode.getWorkspaceFromId( wsId, services, null, null,
+                                                  null );
+        if ( status.getCode() != HttpServletResponse.SC_OK ) { return; }
+        EmsScriptNode node =
+                findScriptNodeById( sysmlId, ws, dateTime, false, services,
+                                    null );
+//        EmsScriptNode node = 
+//                NodeUtil.getNodeFromPostgresNode( pgh.getNodeFromSysmlId( sysmlId ) );
+        String sysmlName = node.getSysmlName();
+
+        id2name.put( sysmlId, sysmlName );
+        Boolean isSite = (Boolean)node.getProperty( Acm.ACM_IS_SITE );
+        if ( isSite != null && isSite ) {
+            id2siteName.put( sysmlId, sysmlName );
+        }
+
+        EmsScriptNode owner = node.getOwningParent( dateTime, ws, true, false );
+
+        if ( exists( owner ) && !"Models".equals(owner.getSysmlId()) ) {
+//        Set< Pair< String, String > > parents =
+//                pgh.getImmediateParents( sysmlId, DbEdgeTypes.REGULAR );
+//        if ( parents.size() > 0 ) {
+//            for ( Pair< String, String > parent : parents ) {
+//                String parentId = parent.first;
+            String parentId = owner.getSysmlId();
+                if ( !owner2children.containsKey( parentId ) ) {
+                    owner2children.put( parentId, new HashSet< String >() );
+                }
+                owner2children.get( parentId ).add( sysmlId );
+                child2owner.put( sysmlId, parentId );
+                if ( !visitedOwners.contains( parentId ) ) {
+                    ppRecurseOwnersNew( parentId, //pgh,
+                                        id2name, id2siteName,
+                                       owner2children, child2owner,
+                                       visitedOwners, wsId, dateTime );
+                }
+                visitedOwners.add( parentId );
+//            }
+        } else {
+            // no parent, so lets look for top level site
+            ppAddSiteOwnerInfo( sysmlId, node, id2name, id2siteName,
+                                owner2children, child2owner, visitedOwners );
         }
     }
 
@@ -5189,7 +5251,7 @@ public class NodeUtil {
                                 Set< String > visitedOwners ) {
         if ( node == null ) return;
         EmsScriptNode parent = node.getParent();
-        while ( !parent.getName().equals( "Sites" ) || parent == null ) {
+        while ( parent != null && !parent.getName().equals( "Sites" ) ) {
             node = parent;
             parent = node.getParent();
         }

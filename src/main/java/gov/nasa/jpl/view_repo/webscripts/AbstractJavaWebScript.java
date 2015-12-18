@@ -34,8 +34,11 @@ import gov.nasa.jpl.ae.event.Expression;
 import gov.nasa.jpl.ae.event.Parameter;
 import gov.nasa.jpl.ae.solver.Constraint;
 import gov.nasa.jpl.ae.solver.ConstraintLoopSolver;
+import gov.nasa.jpl.ae.solver.SingleValueDomain;
+import gov.nasa.jpl.ae.solver.Variable;
 import gov.nasa.jpl.ae.sysml.SystemModelSolver;
 import gov.nasa.jpl.ae.sysml.SystemModelToAeExpression;
+import gov.nasa.jpl.ae.util.ClassData.Param;
 import gov.nasa.jpl.mbee.util.Debug;
 import gov.nasa.jpl.mbee.util.Pair;
 import gov.nasa.jpl.mbee.util.Random;
@@ -1459,6 +1462,9 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
     }
 
     public static <T> Expression<T> toAeExpression( EmsScriptNode exprNode ) {
+        return toAeExpression( exprNode, true );
+    }
+    public static <T> Expression<T> toAeExpression( EmsScriptNode exprNode, boolean evaluate ) {
         if ( exprNode == null ) {
             logger.warn( "called toAeExpression() with null argument" );
             return null;
@@ -1474,6 +1480,9 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
             return null;
         }
         Expression< T > expression = null;
+        if ( !evaluate ) {
+            expression = new Expression<T>(call);
+        } else {
         try {
             expression = new Expression<T>(call.evaluate(true, false));
             
@@ -1489,6 +1498,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         } catch ( InstantiationException e ) {
             // TODO Auto-generated catch block
             //e.printStackTrace();
+        }
         }
         return expression;
     }
@@ -1774,6 +1784,48 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
             }
         };
     }
+    
+    public void lock( Variable<?> v ) {
+        Object val = v.getValue( true );
+        if ( val != null ) {
+            v.setDomain( new SingleValueDomain( val ) );
+        }
+    }
+    
+    protected void lockOtherParameters( Set< EmsScriptNode > elements, ArrayList< Constraint > constraints ) {
+//        // get all Variables from Constraints
+//        Set<Variable<?>> vars = new LinkedHashSet<Variable<?>>();
+//        for ( Constraint c : constraints ) {
+//            vars.addAll( c.getVariables() ); 
+//        }
+//        
+//        // get all cm:names of nodes that we don't want to lock
+//        Set<String> unlockedCmNames = new HashSet<String>();
+//        for ( EmsScriptNode element : elements ) {
+//           unlockedCmNames.add(element.getName() );
+//        }
+        
+        // lock all Variables that are not in unlockedCmNames by getting all variables from the paramMap in classData that are keyed by cm:name.
+        Map< EmsScriptNode, Parameter< Object > > paramMap = getSystemModelAe().getExprParamMap();
+        for ( Entry< EmsScriptNode, Parameter< Object > > e : paramMap.entrySet() ) {
+            if ( !elements.contains( e.getKey() ) ) {
+                lock( e.getValue() );
+            }
+        }
+//        for ( element : Element)
+//
+//        for  ( Entry< String, Map< String, Param > > e : getSystemModelAe().getClassData().getParamTable().entrySet() )
+//        {
+//            String cmName = e.getKey();
+//            if ( !unlockedCmNames.contains( cmName ) ) {
+//                Map< String, Param > v = e.getValue();
+//                for ( Param p : v.values() ) {
+//                    getSystemModelAe().getExprParamMap()
+//                }
+//            }
+//        }
+    }
+    
     public void fix( Set< EmsScriptNode > elements, final WorkspaceNode ws ) {
     
         log(Level.INFO, "Will attempt to fix constraint violations if found!");
@@ -1783,23 +1835,40 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
     
         Map< EmsScriptNode, Collection< Constraint > > constraintMap = getAeConstraints( elements, ws );
         ArrayList< Constraint > constraints = new ArrayList< Constraint >();
+//        Set< EmsScriptNode > v
+//        for ( Entry< EmsScriptNode, Collection< Constraint >> e : constraintMap.entrySet() ) {
+//            
+//            EmsScriptNode constraintNode = e.getKey();
+//            Set<String> constrElemNames = getConstraintElementNames(constraintNode , ws);
+            
+
         for ( Collection< Constraint > coll : constraintMap.values() ) {
             constraints.addAll( coll );
         }
+//        }
     
         // Solve the constraints:
         if (!Utils.isNullOrEmpty( constraints )) {
+            lockOtherParameters( elements, constraints );
     
             Random.reset();
     
             // Solve!!!!
             boolean result = false;
             try {
-                //Debug.turnOn();
+                Debug.turnOn();
+//                for ( Constraint c : constraints ) {
+//                    Set< Variable< ? >> vars = c.getFreeVariables();
+//                    for ( Variable<?> v : vars ) {
+//                        this.
+//                        getSystemModelAe().getClassData().getParamTable();
+//                        lock( v );
+//                    }
+//                }
                 result = solver.solve(constraints);
     
             } finally {
-                //Debug.turnOff();
+                Debug.turnOff();
             }
             if (!result) {
                 log( Level.ERROR, "Was not able to satisfy all of the constraints!" );
@@ -1829,8 +1898,6 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
                                 v = systemModel.getValue( node, null );
                                 System.out.println("XXXXXXXXXXXXXXXXXXXXXXXX value after setting = " + v);
                             }
-                            log( Level.ERROR, "XXXXXXXXXXXXXXXXXXXXXXXX Updated all node values to satisfy the constraints!" );
-                
                             log( Level.INFO, "Updated all node values to satisfy the constraints!" );
                         }
                     };

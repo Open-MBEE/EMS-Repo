@@ -11,6 +11,7 @@ import gov.nasa.jpl.mbee.util.Pair;
 import gov.nasa.jpl.mbee.util.Seen;
 import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.mbee.util.Utils;
+import gov.nasa.jpl.mbee.util.Wraps;
 import gov.nasa.jpl.view_repo.sysml.View;
 import gov.nasa.jpl.view_repo.util.NodeUtil.SearchType;
 import gov.nasa.jpl.view_repo.webscripts.AbstractJavaWebScript;
@@ -794,7 +795,7 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, Object, 
     }
 
     public Collection< EmsScriptNode > getProperties( EmsScriptNode element ) {
-        System.out.println("==========================>>> getProperties(" + element.getSysmlName() + ")" );
+        //System.out.println("==========================>>> getProperties(" + element.getSysmlName() + ")" );
         if ( element == null ) return null;
         return getProperties( element, element.getWorkspace(), null );
     }
@@ -809,7 +810,7 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, Object, 
                                              workspace, dateTime, false, true,
                                              services, false );
         elements = EmsScriptNode.toEmsScriptNodeList( (Collection<NodeRef>)refs );
-        System.out.println("==========================>>> getProperties(" + element.getSysmlName() + ") = " + elements );
+        //System.out.println("==========================>>> getProperties(" + element.getSysmlName() + ") = " + elements );
         return elements;
     }
     
@@ -852,7 +853,7 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, Object, 
                 elements = getProperties( node, ws, date );
             }
 
-            System.out.println("==========================>>> getProperty(" + node.getSysmlName() + ", " + specifier + ") = " + elements );
+            //System.out.println("==========================>>> getProperty(" + node.getSysmlName() + ", " + specifier + ") = " + elements );
 
             // No need to resolve ws and date in else case since
             // getElementWithName() does that.
@@ -1547,6 +1548,10 @@ System.out.println("RRRRRR");
         return result;
     }
     
+    public Collection< Object > getValue( Object context ) {
+        return getValue( context, null );
+    }
+    
     @Override
     public Collection< Object > getValue( Object context,
                                           Object specifier ) {
@@ -1606,8 +1611,18 @@ System.out.println("RRRRRR");
                 return resultList;
             }
         }
+        
     	// Assuming that we can only have EmsScriptNode context:
-    	if (context instanceof EmsScriptNode) {
+        Pair< Boolean, EmsScriptNode > p = ClassUtils.coerce( context, EmsScriptNode.class, false );
+        if ( p.first ) {
+            context = p.second;
+        }
+        
+    	if ( !( context instanceof EmsScriptNode ) ) {
+    	    // TODO -- error????  Are there any other contexts than an EmsScriptNode that would have a property?
+    	    Debug.error("context (" + context + ") is not an EmsScriptNode!");
+    	    return null;
+    	} else {
 
     		EmsScriptNode node = (EmsScriptNode) context;
 
@@ -1683,12 +1698,6 @@ System.out.println("RRRRRR");
 			}
 
     	}
-
-    	else {
-            // TODO -- error????  Are there any other contexts than an EmsScriptNode that would have a property?
-            Debug.error("context is not an EmsScriptNode!");
-            return null;
-        }
 
     	return null;
 
@@ -2437,7 +2446,52 @@ System.out.println("RRRRRR");
         return d;
     }
 
-    public boolean Equals( Object o1, Object o2 ) {
+    public boolean Equals1( Object o1, Object o2 ) {
+        System.out.println("Equals(" + o1 + ", " + o2 + ")");
+        if ( o1 == o2 ) return true;
+        if ( o1 == null || o2 == null ) return false;
+        if ( o1.equals( o2 ) ) return true;
+        if ( o2.equals( o1 ) ) return true;
+        Class<?> c1 = o1.getClass();
+        Class<?> c2 = o2.getClass();
+        Class<?> c11 = c1;
+        Class<?> c22 = c2;
+        boolean c1same = false;
+        boolean c2same = false;
+        if ( o1 instanceof Wraps ) {
+            c1same = false;
+            c11 = ( (Wraps)o1 ).getType();
+            if ( c11 == null ) c11 = c1;
+        }
+        if ( o2 instanceof Wraps ) { 
+            c2same = false;
+            c22 = ( (Wraps)o1 ).getType();
+            if ( c22 == null ) c22 = c2;
+        }
+//        boolean c1same = c1.equals( c11 );
+//        boolean c2same = c2.equals( c22 );
+        
+//        boolean c12same = c1.equals( c2 );
+//        boolean c122same = c1.equals( c22 );
+//        boolean c211same = c2.equals( c11 );
+        
+        Boolean fcnEquals = null;
+        if ( c1same ) {
+            if ( c2same ) {
+                // nothing to do here
+            } else {
+                Object o22 = ( (Wraps)o2 ).getValue( true );
+                if ( Equals1( o1, o22 ) ) return true;
+            }
+        } else {
+            Object o11 = ( (Wraps)o1 ).getValue( true );
+            if ( c2same ) {
+                if ( Equals1( o11, o2 ) ) return true;
+            } else {
+                Object o22 = ( (Wraps)o2 ).getValue( true );
+                if ( Equals1( o11, o22 ) ) return true;
+           }
+        }
         return CompareUtils.compare(o1, o2) == 0;
     }
     
@@ -2506,7 +2560,7 @@ System.out.println("RRRRRR");
         return false;
     }
 
-    public long getTime( EmsScriptNode n ) {
+    public double getTime( EmsScriptNode n ) {
         System.out.println("ZZZZZZZZZZZZZZZZZZ    getTime( " + n + " )" );        
         Collection<?> c = getValue( n, null );
         if ( Utils.isNullOrEmpty( c ) ) return 999;
@@ -2535,12 +2589,12 @@ System.out.println("RRRRRR");
         //Date d = TimeUtils.dateFromTimestamp( timestamp );
         return d.getTime();
     }
-    public long getTimeFromTimestamp( String timestamp ) {
+    public double getTimeFromTimestamp( String timestamp ) {
         Date d = TimeUtils.dateFromTimestamp( timestamp );
         if ( d == null ) {
             return 2999;
         }
-        return d.getTime();
+        return ((Long)d.getTime()).doubleValue();
     }
     
     
@@ -2796,7 +2850,7 @@ System.out.println("RRRRRR");
                                                                      EmsScriptNode product,
                                                                      WorkspaceNode workspace,
                                                                      Date dateTime ) {
-        System.out.println( "============>> getParentViewsFromViewToView(" + view +", " + product + ")" );
+        //System.out.println( "============>> getParentViewsFromViewToView(" + view +", " + product + ")" );
         if ( view == null ) return null;
         Map<String, Set< String > > productParentMap =
                 new LinkedHashMap<String, Set< String > >();
@@ -2804,8 +2858,8 @@ System.out.println("RRRRRR");
         
         Map< EmsScriptNode, JSONArray > view2views =
                 getViewToViews( view, product, workspace, dateTime );
-        System.out.println( "============>> getParentViewsFromViewToView(" + view.getSysmlName()
-                            + "): getViewToViews("+ view.getSysmlName() +") = " + view2views );
+        //System.out.println( "============>> getParentViewsFromViewToView(" + view.getSysmlName()
+        //                    + "): getViewToViews("+ view.getSysmlName() +") = " + view2views );
 
         for ( Entry< EmsScriptNode, JSONArray > e : view2views.entrySet() ) {
             EmsScriptNode prod = e.getKey();
@@ -2818,8 +2872,8 @@ System.out.println("RRRRRR");
                 String parentId = o.optString( "id" );
                 if ( Utils.isNullOrEmpty( parentId ) ) continue; // ERROR?
                 JSONArray childrenViews = o.optJSONArray("childrenViews");
-                System.out.println( "============>> getParentViewsFromViewToView(" + view.getSysmlName()
-                                    + "): id = "+ parentId  +",  childrenViews = " + childrenViews );
+                //System.out.println( "============>> getParentViewsFromViewToView(" + view.getSysmlName()
+                //                    + "): id = "+ parentId  +",  childrenViews = " + childrenViews );
                 if ( childrenViews == null ) continue;
                 for ( int j = 0; j < childrenViews.length(); ++j ) {
                     String childViewId = childrenViews.optString( j );
@@ -2867,8 +2921,8 @@ System.out.println("RRRRRR");
             refs = Utils.newList( product.getNodeRef() );
         } else {
             refs = getProductRefsForView( view, workspace, dateTime );
-            System.out.println( "============>> getViewToViews(" + view.getSysmlName()
-                                + "): getProductRefsForView("+ view.getSysmlName() +") = " + refs );
+            //System.out.println( "============>> getViewToViews(" + view.getSysmlName()
+            //                    + "): getProductRefsForView("+ view.getSysmlName() +") = " + refs );
         }
         String productId = product == null ? null : product.getSysmlId();
         String viewId = view.getSysmlId();
@@ -2877,8 +2931,8 @@ System.out.println("RRRRRR");
             String prodId = node.getSysmlId();
             if ( Utils.isNullOrEmpty( prodId ) ) continue; // ERROR?
             View prod = new View( node );
-            System.out.println( "============>> getViewToViews(" + view.getSysmlName()
-                                + "): productId = "+ productId +", prodId = " + prodId + ", prod = " + prod );
+            //System.out.println( "============>> getViewToViews(" + view.getSysmlName()
+            //                    + "): productId = "+ productId +", prodId = " + prodId + ", prod = " + prod );
             if ( productId != null ) {
                 if ( !productId.equals( prodId ) ) {
                     continue;
@@ -2892,24 +2946,24 @@ System.out.println("RRRRRR");
     }
     
     public EmsScriptNode getParentViewFromAssociations( EmsScriptNode view ) {//, EmsScriptNode product ) {
-        System.out.println("getParentView(" + view + ") 0");
+        //System.out.println("getParentView(" + view + ") 0");
         if ( view == null ) return null;
         String viewId = view.getSysmlId();
         EmsScriptNode prev = null;
         WorkspaceNode ws = view.getWorkspace();
         Set< EmsScriptNode > rels = view.getRelationships( null, ws );
         for ( EmsScriptNode rel : rels ) {
-            System.out.println("getParentView(" + view + ") 1 rel = " + rel);
+            //System.out.println("getParentView(" + view + ") 1 rel = " + rel);
             if ( !rel.hasOrInheritsAspect( Acm.ACM_ASSOCIATION ) ) continue;
-            System.out.println("getParentView(" + view + ") 2");
-            //Object owned = rel.getNodeRefProperty( Acm.ACM_OWNED_END, null, ws );
+            //System.out.println("getParentView(" + view + ") 2");
+            ////Object owned = rel.getNodeRefProperty( Acm.ACM_OWNED_END, null, ws );
             Object prop = rel.getNodeRefProperty( Acm.ACM_SOURCE, null, ws );
             Object propT = rel.getNodeRefProperty( Acm.ACM_TARGET, null, ws );
             if ( prop instanceof NodeRef ) {
-                System.out.println("getParentView(" + view + ") 3 prop = " + prop);
-                if ( propT instanceof NodeRef ) {
-                    System.out.println("getParentView(" + view + ") 3 propT = " + propT);
-                }
+                //System.out.println("getParentView(" + view + ") 3 prop = " + prop);
+                //if ( propT instanceof NodeRef ) {
+                //    System.out.println("getParentView(" + view + ") 3 propT = " + propT);
+                //}
                 EmsScriptNode propNode =
                         new EmsScriptNode( (NodeRef)prop, view.getServices() );
                 EmsScriptNode sourceView = getViewFromProperty( propNode, ws );
@@ -2963,13 +3017,13 @@ System.out.println("RRRRRR");
         if ( view == null ) return null;
         EmsScriptNode prev = null;
         EmsScriptNode parentNode = getParentView( view, null );
-        System.out.println( "============>> getPreviousView(" + view.getSysmlName()
-                            + "): getParentView("+ view.getSysmlName() +") = " + parentNode );
+        //System.out.println( "============>> getPreviousView(" + view.getSysmlName()
+        //                    + "): getParentView("+ view.getSysmlName() +") = " + parentNode );
         if ( parentNode == null ) return null;
         
         List< String > children = getChildViewIds( parentNode, null, null, null );
-        System.out.println( "============>> getPreviousView(" + view.getSysmlName()
-                            + "): getChildViewIds("+ parentNode.getSysmlName() +") = " + children );
+        //System.out.println( "============>> getPreviousView(" + view.getSysmlName()
+        //                    + "): getChildViewIds("+ parentNode.getSysmlName() +") = " + children );
 
         String viewId = view.getSysmlId();
         String prevId = null;
@@ -2981,18 +3035,18 @@ System.out.println("RRRRRR");
                 prevId = id;
             }
         }
-        System.out.println( "============================================================>>");
-        System.out.println( "============================================================>>");
-        System.out.println( "============================================================>>");
+        //System.out.println( "============================================================>>");
+        //System.out.println( "============================================================>>");
+        //System.out.println( "============================================================>>");
         if ( prevId == null ) {
             prev = parentNode;
-            System.out.println( "============>> getPreviousView(" + view.getSysmlName()
-                                + "): prevId = null; prev = parentNode = "+ prev );
+            //System.out.println( "============>> getPreviousView(" + view.getSysmlName()
+            //                    + "): prevId = null; prev = parentNode = "+ prev );
             return prev;
         }
         
-        System.out.println( "============>> getPreviousView(" + view.getSysmlName()
-                            + "): prevId = "+ prevId );
+        //System.out.println( "============>> getPreviousView(" + view.getSysmlName()
+        //                    + "): prevId = "+ prevId );
 
         
         Collection< EmsScriptNode > elements = getElementWithIdentifier( null, prevId );
@@ -3006,14 +3060,14 @@ System.out.println("RRRRRR");
 //            prev = child;
 //        }
         
-        System.out.println( "============>> getPreviousView(" + view.getSysmlName()
-                            + "): prev = "+ prev );
+        //System.out.println( "============>> getPreviousView(" + view.getSysmlName()
+        //                    + "): prev = "+ prev );
 
         // if there is no previous sibling, use the parent view as the previous
         if ( prev == null ) {
             prev = parentNode;
-            System.out.println( "============>> getPreviousView(" + view.getSysmlName()
-                                + "): prev = parentNode = "+ prev );
+            //System.out.println( "============>> getPreviousView(" + view.getSysmlName()
+            //                    + "): prev = parentNode = "+ prev );
         }
         
         return prev;
