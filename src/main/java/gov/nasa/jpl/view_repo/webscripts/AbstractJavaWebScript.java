@@ -1825,7 +1825,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
 //        }
     }
     
-    public void fix( Set< EmsScriptNode > elements, final WorkspaceNode ws ) {
+    public void fix( final Set< EmsScriptNode > elements, final WorkspaceNode ws ) {
     
         log(Level.INFO, "Will attempt to fix constraint violations if found!");
     
@@ -1889,13 +1889,25 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
                                 EmsScriptNode node;
                                 Parameter<Object> param;
                                 node = entry.getKey();
+                                // screen out elements that weren't part of the post
+                                if ( !elements.contains( node ) ) {
+                                    continue;
+                                }
                                 param = entry.getValue();
+                                Serializable newVal = (Serializable)param.getValue();
+                                if ( node.equals( newVal ) ) {
+                                    // This may just be a parameter referencing
+                                    // the element instead of its value. So,
+                                    // (TODO) this will not work if the value is
+                                    // an ElementValue of itself.
+                                } else {
                                 Object v = systemModel.getValue( node, null );
                                 System.out.println("XXXXXXXXXXXXXXX  NODEREF = " + node.getId());
                                 System.out.println("XXXXXXXXXXXXXXXXXXXXXXXX value before setting = " + v);
-                                systemModel.setValue(node, (Serializable)param.getValue(), ws);
+                                systemModel.setValue(node, newVal, ws);
                                 v = systemModel.getValue( node, null );
                                 System.out.println("XXXXXXXXXXXXXXXXXXXXXXXX value after setting = " + v);
+                                }
                             }
                             log( Level.INFO, "Updated all node values to satisfy the constraints!" );
                         }
