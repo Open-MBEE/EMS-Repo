@@ -146,7 +146,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
     protected StringBuffer response = new StringBuffer();
     protected Status responseStatus = new Status();
 
-    protected WorkspaceDiff wsDiff;
+    protected WorkspaceDiff wsDiff = null;
 
     public static boolean alwaysTurnOffDebugOut = true;
 

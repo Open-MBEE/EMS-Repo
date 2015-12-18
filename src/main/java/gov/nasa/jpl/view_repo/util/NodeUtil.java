@@ -776,7 +776,7 @@ public class NodeUtil {
         Date mod = null;
         // Only cache json with a modified date so that we know when to update
         // it.
-        if ( modString != null ) {
+        if ( !Utils.isNullOrEmpty(modString)) {
             mod = TimeUtils.dateFromTimestamp( modString );
             if ( mod != null && jsonStringCache.containsKey( json ) ) {
                 Pair< Date, String > p =

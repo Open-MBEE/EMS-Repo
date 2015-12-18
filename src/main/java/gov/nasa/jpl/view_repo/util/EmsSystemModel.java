@@ -397,7 +397,8 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, Object, 
             EmsScriptNode n = node;//(EmsScriptNode)context;
             List< NodeRef > c = n.getOwnedChildren( false, null, n.getWorkspace() );
             if ( c != null ) {
-                list = EmsScriptNode.toEmsScriptNodeList( c );
+//                list = EmsScriptNode.toEmsScriptNodeList( c, getServices(), null, null );
+            	list = EmsScriptNode.toEmsScriptNodeList( c );
             }
         }
         }
@@ -2750,8 +2751,8 @@ System.out.println("RRRRRR");
                 if ( obj == null ) continue;
                     String id = obj.optString( "id" );
                     if ( id == null || !id.equals( parentId ) ) continue;
-                    JSONArray arr = obj.optJSONArray("childViews");
-                    JSONArray childrenViews = obj.optJSONArray("childrenViews");
+                    JSONArray arr = obj.optJSONArray(Acm.JSON_CHILD_VIEWS);
+                    JSONArray childrenViews = obj.optJSONArray(Acm.JSON_CHILDREN_VIEWS);
                     if ( childrenViews == null ) continue;
                     for ( int j = 0; j < childrenViews.length(); ++j ) {
                         String childViewId = childrenViews.optString( j );

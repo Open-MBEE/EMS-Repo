@@ -62,6 +62,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -71,8 +72,7 @@ import java.util.TreeSet;
 
 import javax.servlet.http.HttpServletResponse;
 
-
-
+import k.frontend.Frontend;
 
 //import javax.transaction.UserTransaction;
 import org.apache.log4j.*;
@@ -314,6 +314,7 @@ public class ModelPost extends AbstractJavaWebScript {
 		JSONObject deltaJson = wsDiff.toJSONObject(new Date(start), new Date(
 				end));
 
+//<<<<<<< HEAD
 		// commit is run as admin user already
 		String msg = "model post";
 		timerCommit = Timer.startTimer(timerCommit, timeEvents);
@@ -721,6 +722,16 @@ public class ModelPost extends AbstractJavaWebScript {
 				return null;
 			}
 
+//=======
+//        if ( wsDiff == null ) {  // This may have been initialized earlier.
+//            if(sourceWS == null) {
+//                setWsDiff( targetWS );
+//            }
+//            else {
+//                setWsDiff(targetWS, sourceWS, null, null, DiffType.COMPARE);
+//            }
+//        }
+//>>>>>>> refs/heads/viewOrdering
 
 			owner = findScriptNodeById(ownerName, workspace, null, true);
 
@@ -1212,10 +1223,309 @@ public class ModelPost extends AbstractJavaWebScript {
 
         if ( elementJson == null ) return;
 
+//<<<<<<< HEAD
         // TODO -- Can we just do this below and just delete the rest of the method?
         if ( true ) {
             elementJson.remove( Acm.JSON_READ );
             elementJson.remove( Acm.JSON_LAST_MODIFIED );
+//=======
+//        Date now = new Date();
+//        if ( modTime == null || now.after( modTime ) ) {
+//            modTime = now;
+//        }
+//        String currentTime = EmsScriptNode.getIsoTime( modTime );
+//        if ( elementJson.has( Acm.JSON_READ) ) {
+//            elementJson.put( Acm.JSON_READ, currentTime );
+//        }
+//        if ( elementJson.has( Acm.JSON_LAST_MODIFIED ) ) {
+//            elementJson.put( Acm.JSON_LAST_MODIFIED, currentTime );
+//        }
+//    }
+//
+//    /**
+//     * Update the read/modified time in the json, so that we do not get any
+//     * conflicts on the second pass, as we may modify the node on the first
+//     * pass. Make sure this is after any modifications to the node.
+//     *
+//     * @param element
+//     * @param elementJson
+//     * @param withoutTransactions
+//     */
+//    protected void fixReadTimeForConflictTransaction( final EmsScriptNode element,
+//                                                      final JSONObject elementJson ) {
+//        
+//        if (runWithoutTransactions) {// || internalRunWithoutTransactions) {
+//            try {
+//                fixReadTimeForConflict( element, elementJson );
+//            } catch ( JSONException e ) {
+//                e.printStackTrace();
+//            }
+//        }
+//        else {
+//            new EmsTransaction(getServices(), getResponse(), getResponseStatus() ) {
+//                @Override
+//                public void run() throws Exception {
+//                    fixReadTimeForConflict( element, elementJson );
+//                }
+//            };
+//        }
+//        
+//    }
+//
+//
+//    public void updateTransactionableWsState(final EmsScriptNode element, final String jsonId, 
+//                                              final ModStatus modStatus, final boolean ingest) {
+//
+//        if (runWithoutTransactions) {// || internalRunWithoutTransactions) {
+//            updateTransactionableWsStateImpl(element, jsonId, modStatus, ingest);
+//        } else {
+//            new EmsTransaction(getServices(), getResponse(), getResponseStatus() ) {
+//                @Override
+//                public void run() throws Exception {
+//                    updateTransactionableWsStateImpl(element, jsonId, modStatus, ingest);
+//                }
+//            };
+//        }
+//    }
+//
+//    private void updateTransactionableWsStateImpl(EmsScriptNode element, String jsonId, ModStatus modStatus, boolean ingest) {
+//        if (element != null && (element.exists() || element.isDeleted())) {
+//            // can't add the node JSON yet since properties haven't been tied in yet
+//            switch (modStatus.getState()) {
+//                case ADDED:
+//                    if (!ingest) {
+//                        wsDiff.getAddedElements().put( jsonId, element );
+//                        element.createOrUpdateAspect( "ems:Added" );
+//                    }
+//                    break;
+//                case UPDATED:
+//                    if (ingest && !wsDiff.getAddedElements().containsKey( jsonId )) {
+//                        element.removeAspect( "ems:Moved" );
+//
+//                        if (element.hasAspect( "ems:Deleted" )) {
+//                            wsDiff.getAddedElements().put( jsonId,  element );
+//                            element.removeAspect( "ems:Deleted" );
+//                            element.removeAspect( "ems:Updated" );
+//                            element.createOrUpdateAspect( "ems:Added" );
+//                        } else {
+//                            element.removeAspect( "ems:Added" );
+//                            wsDiff.getUpdatedElements().put( jsonId, element );
+//                            element.createOrUpdateAspect( "ems:Updated" );
+//                        }
+//                    }
+//                    break;
+//                case MOVED:
+//                    if (!ingest && !wsDiff.getAddedElements().containsKey( jsonId )) {
+//                        element.removeAspect( "ems:Updated" );
+//                        if (element.hasAspect( "ems:Deleted" )) {
+//                            wsDiff.getAddedElements().put( jsonId,  element );
+//                            element.removeAspect( "ems:Deleted" );
+//                            element.removeAspect( "ems:Moved" );
+//                            element.createOrUpdateAspect( "ems:Added" );
+//                        } else {
+//                            element.removeAspect( "ems:Added" );
+//                            wsDiff.getMovedElements().put( jsonId, element );
+//                            element.createOrUpdateAspect( "ems:Moved" );
+//                        }
+//                    }
+//                    break;
+//                case UPDATED_AND_MOVED:
+//                    if (ingest && !wsDiff.getAddedElements().containsKey( jsonId )) {
+//                        if (element.hasAspect( "ems:Deleted" )) {
+//                            wsDiff.getAddedElements().put( jsonId,  element );
+//                            element.removeAspect( "ems:Deleted" );
+//                            element.removeAspect( "ems:Moved" );
+//                            element.removeAspect( "ems:Updated" );
+//                            element.createOrUpdateAspect( "ems:Added" );
+//                        } else {
+//                            element.removeAspect( "ems:Added" );
+//                            wsDiff.getUpdatedElements().put( jsonId, element );
+//                            element.createOrUpdateAspect( "ems:Updated" );
+//
+//                            wsDiff.getMovedElements().put( jsonId, element );
+//                            element.createOrUpdateAspect( "ems:Moved" );
+//                        }
+//                    }
+//                    break;
+//                case DELETED:
+//                    if (!ingest && !wsDiff.getDeletedElements().containsKey( jsonId )) {
+//                        wsDiff.getDeletedElements().put( jsonId,  element );
+//                        if (element.exists()) {
+//                            element.removeAspect( "ems:Added" );
+//                            element.removeAspect( "ems:Updated" );
+//                            element.removeAspect( "ems:Moved" );
+//                            element.createOrUpdateAspect( "ems:Deleted" );
+//                        }
+//                    }
+//                    break;
+//                default:
+//                    // do nothing
+//            }
+//        }
+//    }
+//
+//    /**
+//     * Special processing for elements with properties that point to ValueSpecifications.
+//     * Modifies the passed elementJson or specializeJson.
+//     *
+//     * @param type
+//     * @param nestedNode
+//     * @param elementJson
+//     * @param specializeJson
+//     * @param node
+//     * @param ingest
+//     * @param reifiedPkgNode
+//     * @param parent
+//     * @param id
+//     * @throws Exception
+//     */
+//    private boolean processValueSpecProperty(String type, boolean nestedNode, JSONObject elementJson,
+//                                             JSONObject specializeJson, EmsScriptNode node,
+//                                             boolean ingest, EmsScriptNode reifiedPkgNode,
+//                                             EmsScriptNode parent, String id,
+//                                             WorkspaceNode workspace) throws Exception {
+//        // TODO REVIEW
+//        //      Wanted to do a lot of processing in buildTransactionElementMap(), so that we make the
+//        //      node a owner and in the elementHierachyJson, so that the children will be processed
+//        //      normally instead of having the code below.  That solution was not a neat as desired either
+//        //      b/c you need the node itself to retrieve its properties, to see if it already has value or
+//        //      operand property values stored.  This would involve duplicating a lot of the above code to
+//        //      create a node if needed, etc.
+//
+//        // If it is a property that points to a ValueSpecification then need to convert
+//        // the elementJson to just contain the sysmlid for the nodes,
+//        // instead of the nodes themselves.  Also, need to create or modify nodes the
+//        // properties map to.
+//        boolean changed = false;
+//
+//        // If it is a nested node then it doesnt have a specialize property
+//        JSONObject jsonToCheck = nestedNode ? elementJson : specializeJson;
+//
+//        // If the json has the type/properties of interest:
+//        if (Acm.TYPES_WITH_VALUESPEC.containsKey(type) && jsonToCheck != null) {
+//
+//            // Loop through all the properties that need to be processed:
+//            for (String acmType : Acm.TYPES_WITH_VALUESPEC.get(type)) {
+//                String jsonType = Acm.getACM2JSON().get( acmType );
+//                if (jsonType != null && jsonToCheck.has(jsonType)) {
+//                    Collection< EmsScriptNode > oldVals = getSystemModel().getProperty( node, acmType);
+//
+//                    boolean myChanged = processValueSpecPropertyImpl( jsonToCheck, jsonType, oldVals, node,
+//                                                                      ingest, reifiedPkgNode, parent, id,
+//                                                                      workspace );
+//                    changed = changed || myChanged;
+//                }
+//            }
+//
+//        }
+//
+//        return changed;
+//    }
+//
+//    /**
+//     * Special processing for elements with properties that point to ValueSpecifications.
+//     * Modifies the passed jsonToCheck.
+//     *
+//     * @throws Exception
+//     */
+//    private boolean processValueSpecPropertyImpl(JSONObject jsonToCheck,
+//                                                 String jsonKey,
+//                                                 Collection< EmsScriptNode > oldVals,
+//                                                 EmsScriptNode node,
+//                                                 boolean ingest,
+//                                                 EmsScriptNode reifiedPkgNode,
+//                                                 EmsScriptNode parent,
+//                                                 String id,
+//                                                 WorkspaceNode workspace) throws Exception {
+//
+//        boolean changed = false;
+//        JSONArray newVals = jsonToCheck.optJSONArray(jsonKey);
+//        JSONObject newVal = newVals != null ? null : jsonToCheck.optJSONObject(jsonKey);
+//        Iterator<EmsScriptNode> iter = !Utils.isNullOrEmpty(oldVals) ?
+//                                            oldVals.iterator() : null;
+//        ArrayList<String> nodeNames = new ArrayList<String>();
+//
+//        // Check for workspace disagreement in arguments.
+//        WorkspaceNode nodeWorkspace = node.getWorkspace();
+//        if (nodeWorkspace != null && !nodeWorkspace.equals(workspace)) {
+//            if ( workspace == null ) {
+//                workspace = node.getWorkspace();
+//            } else {
+//                log( Level.WARN,
+//                     "Property owner's workspace (%s) and specified workspace for property (%s) are different!", 
+//                     node.getWorkspaceName(),workspace.getName() );
+//            }
+//        }
+//
+//        // Compare the existing values to the new ones
+//        // in the JSON element.  Assume that they maintain the
+//        // same ordering.  If there are more values in the
+//        // JSON element, then make new nodes for them.
+//        if (newVals != null) {
+//            for (int i = 0; i < newVals.length(); ++i) {
+//                newVal = newVals.optJSONObject(i);
+//                if (newVal != null) {
+//                    boolean myChanged = processValueSpecPropertyImplImpl( jsonToCheck, jsonKey, oldVals,
+//                                                                           node, ingest, reifiedPkgNode,
+//                                                                           parent, id, nodeWorkspace,
+//                                                                           iter, nodeNames, newVal,
+//                                                                           nodeWorkspace);
+//                    changed = changed || myChanged;
+//                }
+//            }
+//
+//            // Replace the property in the JSON with the sysmlids
+//            // before ingesting:
+//            JSONArray jsonArry = new JSONArray(Utils.toArrayOfType( nodeNames, String.class ));
+//            jsonToCheck.put(jsonKey, jsonArry);
+//        }
+//        // The property is not multi-valued, so just have one value to process:
+//        else if (newVal != null){
+//            changed = processValueSpecPropertyImplImpl( jsonToCheck, jsonKey, oldVals,
+//                                                        node, ingest, reifiedPkgNode,
+//                                                        parent, id, nodeWorkspace,
+//                                                        iter, nodeNames, newVal,
+//                                                        nodeWorkspace);
+//
+//            // Replace the property in the JSON with the sysmlids
+//            // before ingesting:
+//            jsonToCheck.put(jsonKey, nodeNames.get(0));
+//        }
+//        
+//        // If old values are no longer used, then delete them:
+//        if (newVals != null && oldVals != null ) {
+//            int newValsSize = newVals.length();
+//            int oldValsSize = oldVals.size();
+//            
+//            if (newValsSize < oldValsSize) {
+//                Iterator<EmsScriptNode> iterOld = oldVals.iterator();
+//                int i = 0;
+//                while (iterOld.hasNext()) {
+//                    EmsScriptNode oldNode = iterOld.next();
+//                    if (i >= newValsSize) {
+//                        deleteValueSpec(oldNode, ingest, workspace);
+//                    }
+//                    i++;
+//                }
+//            }
+//            
+//        }
+//
+//        return changed;
+//    }
+//    
+//    /**
+//     * See if any of the properties of the passed node point to a value spec
+//     * and will be lost when changing to aspectName.  In that case, delete
+//     * the value specs.
+//     *
+//     * Note: make sure what calls this is wrapped in a transaction!
+//     */
+//    private void checkForObsoleteValueSpecs(String aspectName, EmsScriptNode node,
+//                                            WorkspaceNode workspace, boolean ingest) {
+//        
+//        if (aspectName == null || node == null) {
+//>>>>>>> refs/heads/viewOrdering
             return;
         }
 
@@ -1271,7 +1581,7 @@ public class ModelPost extends AbstractJavaWebScript {
 
 	}
 
-	private void updateTransactionableWsState(final EmsScriptNode element,
+	public void updateTransactionableWsState(final EmsScriptNode element,
 			final String jsonId, final ModStatus modStatus, final boolean ingest) {
 
 		if (runWithoutTransactions) {// || internalRunWithoutTransactions) {
@@ -2298,6 +2608,7 @@ public class ModelPost extends AbstractJavaWebScript {
 
 	}
 
+//<<<<<<< HEAD
 	protected void handleSiteUpdate(EmsScriptNode nodeToUpdate,
 			WorkspaceNode workspace) {
 		EmsScriptNode pkgSiteNode = createSitePkg(nodeToUpdate, workspace);
@@ -2341,7 +2652,7 @@ public class ModelPost extends AbstractJavaWebScript {
 
 			EmsScriptNode childSite;
 			EmsScriptNode oldChildParentSite;
-			for (EmsScriptNode child : EmsScriptNode
+			for (EmsScriptNode child : nodeToUpdate
 					.toEmsScriptNodeList(children)) {
 
 				childSite = child.getPropertyElement(Acm.ACM_SITE_SITE, true,
@@ -2673,6 +2984,15 @@ public class ModelPost extends AbstractJavaWebScript {
 							getProjectNodeFromRequest(req, true);
 						}
 					};
+					
+					UpdateViewHierarchy uvh = new UpdateViewHierarchy( this );
+                    // Handle view and association changes
+                    try {
+                        uvh.addJsonForViewHierarchyChanges( postJson );
+                    } catch ( Throwable t ) {
+                        t.printStackTrace();
+                    }
+                    
 					// FIXME: this is a hack to get the right site permissions
 					// if DB rolled back, it's because the no_site node couldn't
 					// be created
@@ -2727,6 +3047,61 @@ public class ModelPost extends AbstractJavaWebScript {
 			String k = (String) content;
 			logger.warn("k = " + k);
             postJson = K.kToJson( k, myWorkspace, elementMap.keySet() );
+            
+            
+            
+            
+//=======
+//        // Add the children/parent properties:
+//        if (pkgSiteParentNode != null && pkgSiteNode != null) {
+//            
+//            // If there was a old site parent on this node, and it is different than
+//            // the new one, then remove this child from it:
+//            EmsScriptNode oldPkgSiteParentNode = 
+//                    pkgSiteNode.getPropertyElement( Acm.ACM_SITE_PARENT,
+//                                                    true, null, null );
+//            if (oldPkgSiteParentNode != null && 
+//                !oldPkgSiteParentNode.equals( pkgSiteParentNode )) {
+//                
+//                oldPkgSiteParentNode.removeFromPropertyNodeRefs( Acm.ACM_SITE_CHILDREN, 
+//                                                                 pkgSiteNode.getNodeRef() );
+//            }
+//                        
+//            pkgSiteParentNode.appendToPropertyNodeRefs( Acm.ACM_SITE_CHILDREN,
+//                                                        pkgSiteNode.getNodeRef() );
+//            pkgSiteNode.setProperty( Acm.ACM_SITE_PARENT, pkgSiteParentNode.getNodeRef() );
+//            pkgSiteNode.removeAspect( "ems:Deleted" );
+//            
+//            // Update the children site packages if needed:
+//            List<NodeRef> children = 
+//                    nodeToUpdate.getOwnedChildren( false, null, workspace);
+//            
+//            EmsScriptNode childSite;
+//            EmsScriptNode oldChildParentSite;
+//            for (EmsScriptNode child : nodeToUpdate.toEmsScriptNodeList( children)) {
+//                
+//                childSite = child.getPropertyElement(Acm.ACM_SITE_SITE , true, null, null );
+//                
+//                if (childSite != null) {
+//                    
+//                    oldChildParentSite =  childSite.getPropertyElement( Acm.ACM_SITE_PARENT,
+//                                                                          true, null, null );
+//                    
+//                    // Remove from old parent site pkg children:
+//                    if (oldChildParentSite != null && 
+//                        !oldChildParentSite.equals(pkgSiteNode)) {
+//                        oldChildParentSite.removeFromPropertyNodeRefs( Acm.ACM_SITE_CHILDREN, 
+//                                                                         childSite.getNodeRef() );
+//                    }
+//                    
+//                    //  Add to the this site package properties:
+//                    childSite.setProperty( Acm.ACM_SITE_PARENT, pkgSiteNode.getNodeRef() );
+//                    pkgSiteNode.appendToPropertyNodeRefs( Acm.ACM_SITE_CHILDREN,
+//                                                          childSite.getNodeRef() );
+//                }
+//            }
+//            
+//>>>>>>> refs/heads/viewOrdering
         }
         else {
 			if (content instanceof JSONObject) {
@@ -2811,9 +3186,53 @@ public class ModelPost extends AbstractJavaWebScript {
 					}
 				};
 
+//<<<<<<< HEAD
 				if (evaluate) {
 					sendProgress("Evaluating constraints and expressions",
 							projectId, true);
+//=======
+//                    JSONObject postJson =
+//                            getPostJson( jsonNotK, content, expressionString );
+//                    
+//                    // Get the project node from the request:
+//                    new EmsTransaction(getServices(), getResponse(), getResponseStatus(),
+//                                       runWithoutTransactions) {// || internalRunWithoutTransactions ) {
+//                        @Override
+//                        public void run() throws Exception {
+//                            getProjectNodeFromRequest( req, true );
+//                        }
+//                    };
+//                    
+//                    UpdateViewHierarchy uvh = new UpdateViewHierarchy( this );
+//                    // Handle view and association changes
+//                    try {
+//                        uvh.addJsonForViewHierarchyChanges( postJson );
+//                    } catch ( Throwable t ) {
+//                        t.printStackTrace();
+//                    }
+//                    
+//                    // FIXME: this is a hack to get the right site permissions
+//                    // if DB rolled back, it's because the no_site node couldn't be created
+//                    // this is indicative of no permissions (inside the DB transaction)
+//                    if (getResponseStatus().getCode() == HttpServletResponse.SC_BAD_REQUEST) {
+//                        log(Level.WARN, HttpServletResponse.SC_FORBIDDEN, "No write priveleges");
+//                    } else if (projectNode != null) {
+//                        handleUpdate( postJson, status, myWorkspace, evaluate, fix, model,
+//                                      true, suppressElementJson );
+//                    }
+//                }
+//            } catch (JSONException e) {
+//                log(Level.ERROR, HttpServletResponse.SC_BAD_REQUEST, "JSON malformed\n");
+//                e.printStackTrace();
+//            } catch (Exception e) {
+//                log(Level.ERROR,HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Internal error stack trace:\n%s\n", e.getLocalizedMessage());
+//                e.printStackTrace();
+//            }
+//        }
+//        if ( !model.containsKey( "res" ) ) {
+//            model.put( "res", createResponseJson());
+//        }
+//>>>>>>> refs/heads/viewOrdering
 
 					new EmsTransaction(getServices(), getResponse(),
 							getResponseStatus(), runWithoutTransactions) {

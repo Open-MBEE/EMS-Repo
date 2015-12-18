@@ -3172,8 +3172,50 @@ False,
 common_filters + ['"timestamp"'],
 ["test","workspaces","develop", "develop2"]
 ]
-]
+,
+[
+10130,
+"TestCase10130_PostElements",
+"Post elements",
+create_curl_cmd(type="POST", data="TestCase10130_elements.json", base_url=BASE_URL_WS,
+                post_type="elements", branch="master/"),
+False,
+common_filters + ['"timestamp"'],
+["test", "workspaces", "develop", "develop2"]
+],
+[
+10131,
+"TestCase10131_PostViewV",
+"Post view V",
+create_curl_cmd(type="POST", data="TestCase10131_postViewV.json", base_url=BASE_URL_WS,
+                post_type="elements", branch="master/"),
+False,
+common_filters + ['"timestamp"'],
+["test", "workspaces", "develop", "develop2"]
+],
+[
+10132,
+"TestCase10132_PostViewVRemove",
+"Post view V",
+create_curl_cmd(type="POST", data="TestCase10132_postViewVRemove.json", base_url=BASE_URL_WS,
+                post_type="elements", branch="master/"),
+False,
+common_filters + ['"timestamp"'],
+["test", "workspaces", "develop", "develop2"]
+],
+[
+10133,
+"TestCase10133_PostViewVUpdate",
+"Post view V",
+create_curl_cmd(type="POST", data="TestCase10133_postViewVUpdate.json", base_url=BASE_URL_WS,
+                post_type="elements", branch="master/"),
+False,
+common_filters + ['"timestamp"'],
+["test", "workspaces", "develop", "develop2"]
+],
 
+
+]
 
 ##########################################################################################    
 #
