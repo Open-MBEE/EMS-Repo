@@ -352,11 +352,10 @@ public class PostgresHelper {
 	/**
 	 * Returns in order of height from sysmlID up for containment only
 	 * @param sysmlId
-	 * @param et
 	 * @param height
 	 * @return
 	 */
-	public List<Pair<String, String>> getContainmentParents(String sysmlId, DbEdgeTypes et, int height) {
+	public List<Pair<String, String>> getContainmentParents(String sysmlId, int height) {
 		List<Pair<String, String>> result = new ArrayList<Pair<String, String>>();
 		try {
 			Node n = getNodeFromSysmlId(sysmlId);
@@ -367,7 +366,7 @@ public class PostgresHelper {
 			String query = "SELECT N.sysmlid, N.versionedrefid FROM nodes%s N JOIN "
 					+ "(SELECT * FROM get_parents(%s, %d, '%s')) P ON N.id=P.id ORDER BY P.height";
 			ResultSet rs = execQuery(String.format(query, workspaceName,
-					n.getId(), et.getValue(), workspaceName));
+					n.getId(), DbEdgeTypes.REGULAR, workspaceName));
 
 			while (rs.next()) {
 				result.add(new Pair<String, String>(rs.getString(1), rs.getString(2)));

@@ -5249,7 +5249,7 @@ public class NodeUtil {
         String parentId = sysmlId;
         EmsScriptNode parentNode = node;
         List< Pair< String, String > > parentTree =
-                pgh.getContainmentParents( sysmlId, DbEdgeTypes.REGULAR, 10000 );
+                pgh.getContainmentParents( sysmlId, 10000 );
         if ( parentTree.size() > 0 ) {
             for ( int ii = 0; ii < parentTree.size() - 1; ii++ ) {
                 String childId = parentTree.get( ii ).first;
