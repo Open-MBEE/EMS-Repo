@@ -4549,6 +4549,126 @@ public class NodeUtil {
         }
     }
 
+    public static void processContentsJson(String sysmlId, JSONObject contents,
+                                           List< Pair< String, String >> documentEdges) {
+        if (contents != null) {
+            if (contents.has( "operand" )) {
+                JSONArray operand = contents.getJSONArray( "operand" );
+                for (int ii = 0; ii < operand.length(); ii++) {
+                    JSONObject value = operand.getJSONObject( ii );
+                    if (value.has( "instance" )) {
+                        documentEdges.add( new Pair<String, String>(sysmlId, value.getString("instance") ));
+                    }
+                }
+            }
+        }
+    }
+    
+    /**
+     * Contents -> expression -> operand -> instance specification -> instance
+     */
+    public static void
+            processContentsNodeRef( String sysmlId, NodeRef contents,
+                             List< Pair< String, String >> documentEdges ) {
+        if ( contents != null ) {
+            EmsScriptNode node = new EmsScriptNode( contents, services, null );
+            ArrayList< NodeRef > operands =
+                    (ArrayList< NodeRef >)node.getNodeRefProperty( Acm.ACM_OPERAND,
+                                                                   true, null,
+                                                                   null );
+            if ( operands != null ) {
+                for ( int ii = 0; ii < operands.size(); ii++ ) {
+                    EmsScriptNode operand =
+                            new EmsScriptNode( operands.get( ii ), services,
+                                               null );
+                    NodeRef instanceNr =
+                            (NodeRef)operand.getNodeRefProperty( Acm.ACM_INSTANCE,
+                                                                 true, null,
+                                                                 null );
+                    if ( instanceNr != null ) {
+                        EmsScriptNode instance =
+                                new EmsScriptNode( instanceNr, services, null );
+                        documentEdges.add( new Pair< String, String >(
+                                                                       sysmlId,
+                                                                       instance.getSysmlId() ) );
+                    }
+                }
+            }
+        }
+    }
+
+    public static void processInstanceSpecificationSpecificationJson( String sysmlId, JSONObject iss, List<Pair<String, String>> documentEdges) {
+        if (iss != null) {
+            if (iss.has( "string" )) {
+                String string = iss.getString( "string" );
+                JSONObject json = new JSONObject(string);
+                Set<Object> sources = findKeyValueInJsonObject(json, "source");
+                for (Object source: sources) {
+                    if (source instanceof String) {
+                        documentEdges.add( new Pair<String, String>(sysmlId, (String) source));
+                    }
+                }
+            }
+        }
+    }
+    
+    /**
+     * InstanceSpecificationSpecification -> string -> any source key
+     * @param sysmlId
+     * @param iss
+     * @param documentEdges
+     */
+    public static
+            void
+            processInstanceSpecificationSpecificationNodeRef( String sysmlId,
+                                                       NodeRef iss,
+                                                       List< Pair< String, String >> documentEdges ) {
+        if (iss != null) {
+            EmsScriptNode issNode = new EmsScriptNode(iss, services, null);
+            String string = (String) issNode.getProperty( Acm.ACM_STRING );
+            if (string != null) {
+                JSONObject json = new JSONObject(string);
+                Set<Object> sources = findKeyValueInJsonObject(json, "source");
+                for (Object source: sources) {
+                    if (source instanceof String) {
+                        documentEdges.add( new Pair<String, String>(sysmlId, (String)source) );
+                    }
+                }
+            }
+        }
+    }
+    
+    public static Set<Object> findKeyValueInJsonObject(JSONObject json, String keyMatch) {
+        Set<Object> result = new HashSet<Object>();
+        Iterator<?> keys = json.keys();
+        while (keys.hasNext()) {
+            String key = (String)keys.next();
+            Object value = json.get(key);
+            if (key.equals( keyMatch )) {
+                result.add( value );
+            } else if ( value instanceof JSONObject ) {
+                result.addAll( findKeyValueInJsonObject((JSONObject)value, keyMatch) );
+            } else if ( value instanceof JSONArray ) {
+                result.addAll(  findKeyValueInJsonArray( (JSONArray)value, keyMatch ) );
+            }
+        }
+        return result;
+    }
+
+    public static Set<Object> findKeyValueInJsonArray(JSONArray jsonArray, String keyMatch) {
+        Set<Object> result = new HashSet<Object>();
+        
+        for (int ii = 0; ii < jsonArray.length(); ii++ ) {
+            if (jsonArray.get( ii ) instanceof JSONObject) {
+                result.addAll( findKeyValueInJsonObject((JSONObject)jsonArray.get( ii ), keyMatch));
+            } else if(jsonArray.get(ii) instanceof JSONArray ) {
+                result.addAll( findKeyValueInJsonArray((JSONArray)jsonArray.get(ii), keyMatch) );
+            }
+        }
+        
+        return result;
+    }
+    
     public static EmsScriptNode getNodeFromPostgresNode( Node pgnode ) {
         return new EmsScriptNode( new NodeRef( pgnode.getNodeRefId() ),
                                   services, null );
@@ -4833,10 +4953,8 @@ public class NodeUtil {
      */
     public static void ppAddQualifiedNameId2Json( WebScriptRequest req,
                                                   Map< String, Object > model ) {
-        // FLAG it off - calls to getting parent tree in postgres with a million elements is
-        // roughly 90 ms per
-        if (!doPostProcessQualified) return;
-        
+        if ( !doPostProcessQualified ) return;
+
         if ( !model.containsKey( "res" ) ) return;
         Object res = model.get( "res" );
         if ( !( res instanceof String ) ) return;
@@ -5126,20 +5244,23 @@ public class NodeUtil {
         String parentId = sysmlId;
         EmsScriptNode parentNode = node;
         List< Pair< String, String > > parentTree =
-                pgh.getParents( sysmlId, DbEdgeTypes.REGULAR, 10000 );
+                pgh.getContainmentParents( sysmlId, DbEdgeTypes.REGULAR, 10000 );
         if ( parentTree.size() > 0 ) {
-            for (int ii=0; ii < parentTree.size()-1; ii++) {
-                String childId = parentTree.get(ii).first;
-                parentId = parentTree.get( ii+1 ).first;
-                String parentRef = parentTree.get( ii+1 ).second;
-                
+            for ( int ii = 0; ii < parentTree.size() - 1; ii++ ) {
+                String childId = parentTree.get( ii ).first;
+                parentId = parentTree.get( ii + 1 ).first;
+                String parentRef = parentTree.get( ii + 1 ).second;
+
                 // update id2name maps
-                parentNode = new EmsScriptNode(new NodeRef(parentRef), services, null);
+                parentNode =
+                        new EmsScriptNode( new NodeRef( parentRef ), services,
+                                           null );
                 String parentName = parentNode.getSysmlName();
-                id2name.put( parentId,  parentName );
-                Boolean isParentSite = (Boolean)node.getProperty( Acm.ACM_IS_SITE);
-                if (isParentSite != null && isParentSite ) {
-                    id2siteName.put( parentId, parentName);
+                id2name.put( parentId, parentName );
+                Boolean isParentSite =
+                        (Boolean)node.getProperty( Acm.ACM_IS_SITE );
+                if ( isParentSite != null && isParentSite ) {
+                    id2siteName.put( parentId, parentName );
                 }
 
                 // update trees
@@ -5150,7 +5271,7 @@ public class NodeUtil {
                 child2owner.put( childId, parentId );
                 visitedOwners.add( parentId );
             }
-        } 
+        }
 
         ppAddSiteOwnerInfo( parentId, parentNode, id2name, id2siteName,
                             owner2children, child2owner, visitedOwners );
@@ -5232,4 +5353,5 @@ public class NodeUtil {
             }
         }
     }
+
 }

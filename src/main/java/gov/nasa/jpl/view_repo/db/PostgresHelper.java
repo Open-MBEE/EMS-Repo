@@ -350,13 +350,13 @@ public class PostgresHelper {
 	}
 
 	/**
-	 * Returns in order of height from sysmlID up
+	 * Returns in order of height from sysmlID up for containment only
 	 * @param sysmlId
 	 * @param et
 	 * @param height
 	 * @return
 	 */
-	public List<Pair<String, String>> getParents(String sysmlId, DbEdgeTypes et, int height) {
+	public List<Pair<String, String>> getContainmentParents(String sysmlId, DbEdgeTypes et, int height) {
 		List<Pair<String, String>> result = new ArrayList<Pair<String, String>>();
 		try {
 			Node n = getNodeFromSysmlId(sysmlId);
@@ -377,6 +377,7 @@ public class PostgresHelper {
 		}
 		return result;
 	}
+	
 
 	// returns list of nodeRefIds
 	public List<Pair<String, Pair<String, String>>> getChildren(String sysmlId,

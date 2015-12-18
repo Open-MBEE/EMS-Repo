@@ -3462,9 +3462,27 @@ public class EmsScriptNode extends ScriptNode implements
                 PostgresHelper pgh = new PostgresHelper(workspace);
                 try {
                     pgh.connect();
-                    Map< String, Set< String >> root2immediate = 
-                            pgh.getImmediateParentRoots( this.getSysmlId(), DbEdgeTypes.DOCUMENT );
                     
+                    // need to recurse of getImmediateParents recursively, since root parent
+                    // may not be a document.
+                    
+                    Map<String, Set<String>> root2immediate = new HashMap<String, Set<String>>();
+                    
+                    Set< Pair< String, String >> immediateParents = pgh.getImmediateParents( this.getSysmlId(), DbEdgeTypes.DOCUMENT );
+                    Set< Pair<String, String>> viewImmediateParents = new HashSet<Pair<String, String>>();
+                    for (Pair<String, String> immediateParent: immediateParents) {
+                        viewImmediateParents.addAll( getDbGraphDoc( immediateParent, Acm.ACM_VIEW, pgh, null ) );
+                    }
+                    for (Pair<String, String> immediateParent: viewImmediateParents) {
+                        Set<Pair<String, String>> rootIds = getDbGraphDoc(immediateParent, Acm.ACM_PRODUCT, pgh, null);
+                        for (Pair<String, String> rootId: rootIds) {
+                            if ( !root2immediate.containsKey( rootId.first  )) {
+                                root2immediate.put(rootId.first, new HashSet<String>());
+                            }
+                            root2immediate.get(rootId.first).add(immediateParent.first);
+                        }
+                    }
+                                        
                     // create JSON by traversing root 2 immediate parents map
                     for ( String rootParentId : root2immediate.keySet() ) {
                         EmsScriptNode rootParentNode =
@@ -3523,6 +3541,31 @@ public class EmsScriptNode extends ScriptNode implements
         element = NodeUtil.newJsonObject( elementString );
 
         return element;
+    }
+
+    private Set<Pair<String, String>> getDbGraphDoc( Pair< String, String > child,
+                                       String acmType, PostgresHelper pgh, Set<String> visited ) {
+        Set<Pair<String, String>> result = new HashSet<Pair<String, String>>();
+        if (visited == null) {
+            visited = new HashSet<String>();
+        }
+        
+        Set< Pair< String, String >> immediateParents = pgh.getImmediateParents( child.first, DbEdgeTypes.DOCUMENT );
+        
+        for (Pair<String, String> immediateParent: immediateParents) {
+            EmsScriptNode parentNode = new EmsScriptNode(new NodeRef(immediateParent.second), services, null);
+            if ( parentNode.hasAspect( acmType ) ) {
+                result.add( immediateParent );
+            } else {
+                // break if we hit cycle, e.g. result already has the immediateParent
+                if (!visited.contains( immediateParent.first )) {
+                    visited.add( immediateParent.first );
+                    result.addAll( getDbGraphDoc(immediateParent, acmType, pgh, visited) );
+                }
+            }
+        }
+        
+        return result;
     }
 
     public
