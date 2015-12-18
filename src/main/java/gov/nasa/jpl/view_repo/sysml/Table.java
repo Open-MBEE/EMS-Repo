@@ -8,6 +8,7 @@ package gov.nasa.jpl.view_repo.sysml;
 import java.util.Collection;
 import java.util.Date;
 
+import org.apache.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -15,6 +16,7 @@ import org.json.JSONObject;
 import sysml.view.List;
 import sysml.view.Viewable;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
+import gov.nasa.jpl.view_repo.webscripts.MmsVersion;
 
 
 /**
@@ -22,6 +24,8 @@ import gov.nasa.jpl.view_repo.util.EmsScriptNode;
  */
 public class Table extends gov.nasa.jpl.view_repo.sysml.List implements sysml.view.Table<EmsScriptNode> {//, java.util.List<List> {
 
+    private static Logger logger = Logger.getLogger(MmsVersion.class);
+    protected boolean prettyPrint = true;
     private static final long serialVersionUID = 5980032062088714766L;
     
     protected String title = "";
@@ -62,7 +66,7 @@ public class Table extends gov.nasa.jpl.view_repo.sysml.List implements sysml.vi
 
     public Table( sysml.view.List< EmsScriptNode > c ) {
         super(c);
-        System.out.println("Table(List), yo!");
+        if(logger.isDebugEnabled()) logger.warn("Table(List), yo!");
     }
 
     public Table( Collection< ? > c ) {
