@@ -786,9 +786,6 @@ public class EmsScriptNode extends ScriptNode implements
         // for the correct workspace node, so perhaps this is overkill:
         T oldValue =
                 (T)getNodeRefProperty( acmType, true, null, false, true, null );
-//        log("UUUUUUUUUUUU  NODEREF = " + getId());
-//        log("UUUUUUUUUUUU  old value("+ acmType + ") = " + oldValue);
-//        log("UUUUUUUUUUUU  new value("+ acmType + ") = " + value);
         if ( oldValue != null && value != null ) {
             if ( !value.equals( oldValue ) ) {
                 setProperty( acmType, value );
@@ -2299,7 +2296,7 @@ public class EmsScriptNode extends ScriptNode implements
      *            EmsScriptNode
      */
     public void log( String msg ) {
-System.out.println(msg);
+//System.out.println(msg);
         // if (response != null) {
         // response.append(msg + "\n");
         // }
@@ -3433,7 +3430,7 @@ System.out.println(msg);
 
         
         // lets add in the document information
-        if ( isIncludeDocument && NodeUtil.doGraphDb ) {
+        if ( isIncludeDocument ) { // && NodeUtil.doGraphDb ) {
             JSONArray relatedDocuments = new JSONArray();
 
             // if document, just add itself as related doc, otherwise use postgres helper
@@ -6065,7 +6062,7 @@ System.out.println(msg);
                                                                   dateTime, ws);
         putInJson( json, Acm.JSON_CONTENTS, addInternalJSON(contentsNode, ws, dateTime), filter );
         
-        System.out.println( json.toString( 4 ) );
+        //System.out.println( json.toString( 4 ) );
 
     }
 
