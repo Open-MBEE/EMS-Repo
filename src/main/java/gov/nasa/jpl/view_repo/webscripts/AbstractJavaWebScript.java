@@ -1902,11 +1902,12 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
                                     // an ElementValue of itself.
                                 } else {
                                 Object v = systemModel.getValue( node, null );
-                                System.out.println("XXXXXXXXXXXXXXX  NODEREF = " + node.getId());
-                                System.out.println("XXXXXXXXXXXXXXXXXXXXXXXX value before setting = " + v);
+                              System.out.println("AAAAAAAAAAA  NODEREF = " + node.getId());
+//                                System.out.println("XXXXXXXXXXXXXXX  NODEREF = " + node.getId());
+//                                System.out.println("XXXXXXXXXXXXXXXXXXXXXXXX value before setting = " + v);
                                 systemModel.setValue(node, newVal, ws);
                                 v = systemModel.getValue( node, null );
-                                System.out.println("XXXXXXXXXXXXXXXXXXXXXXXX value after setting = " + v);
+//                                System.out.println("XXXXXXXXXXXXXXXXXXXXXXXX value after setting = " + v);
                                 }
                             }
                             log( Level.INFO, "Updated all node values to satisfy the constraints!" );

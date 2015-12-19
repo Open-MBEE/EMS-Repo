@@ -786,9 +786,9 @@ public class EmsScriptNode extends ScriptNode implements
         // for the correct workspace node, so perhaps this is overkill:
         T oldValue =
                 (T)getNodeRefProperty( acmType, true, null, false, true, null );
-        log("UUUUUUUUUUUU  NODEREF = " + getId());
-        log("UUUUUUUUUUUU  old value("+ acmType + ") = " + oldValue);
-        log("UUUUUUUUUUUU  new value("+ acmType + ") = " + value);
+//        log("UUUUUUUUUUUU  NODEREF = " + getId());
+//        log("UUUUUUUUUUUU  old value("+ acmType + ") = " + oldValue);
+//        log("UUUUUUUUUUUU  new value("+ acmType + ") = " + value);
         if ( oldValue != null && value != null ) {
             if ( !value.equals( oldValue ) ) {
                 setProperty( acmType, value );
