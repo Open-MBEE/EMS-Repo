@@ -4965,7 +4965,7 @@ public class NodeUtil {
             // not json, return
             return;
         }
-
+        
         Map< String, String > id2name = new HashMap< String, String >();
         Map< String, String > id2siteName = new HashMap< String, String >();
         Map< String, Set< String >> owner2children =
@@ -4983,7 +4983,8 @@ public class NodeUtil {
                         ppHandleElements( req, elementsJson, id2name, id2siteName,
                                       owner2children, child2owner );
                     } catch (Exception e) {
-                        logger.error( "Could not get qualified path" );
+                        logger.error( "Post process qname not working. Setting postProcessQualified to false" );
+                        NodeUtil.doPostProcessQualified = false;
                         e.printStackTrace();
                     }
                 } else {

@@ -366,7 +366,7 @@ public class PostgresHelper {
 			String query = "SELECT N.sysmlid, N.versionedrefid FROM nodes%s N JOIN "
 					+ "(SELECT * FROM get_parents(%s, %d, '%s')) P ON N.id=P.id ORDER BY P.height";
 			ResultSet rs = execQuery(String.format(query, workspaceName,
-					n.getId(), DbEdgeTypes.REGULAR, workspaceName));
+					n.getId(), DbEdgeTypes.REGULAR.getValue(), workspaceName));
 
 			while (rs.next()) {
 				result.add(new Pair<String, String>(rs.getString(1), rs.getString(2)));

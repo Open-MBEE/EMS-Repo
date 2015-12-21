@@ -26,14 +26,22 @@
         "sysmlid": "301",
         "properties": [{
             "qualifiedId": "/europa/123456/300/301/302",
+            "relatedDocuments": [{
+                "parentViews": [{
+                    "name": "301",
+                    "sysmlid": "301"
+                }],
+                "name": "301",
+                "sysmlid": "301"
+            }],
             "qualifiedName": "/europa/JW_TEST2/300/301/302",
             "sysmlid": "302",
             "editable": true,
             "creator": "admin",
             "modifier": "admin",
             "name": "302",
-            "documentation": "to",
             "owner": "301",
+            "documentation": "to",
             "specialization": {
                 "propertyType": null,
                 "isSlot": false,
@@ -122,14 +130,22 @@
         "sysmlid": "401",
         "properties": [{
             "qualifiedId": "/europa/123456/4000/401/402",
+            "relatedDocuments": [{
+                "parentViews": [{
+                    "name": "401",
+                    "sysmlid": "401"
+                }],
+                "name": "401",
+                "sysmlid": "401"
+            }],
             "qualifiedName": "/europa/JW_TEST2/400/401/402",
             "sysmlid": "402",
             "editable": true,
             "creator": "admin",
             "modifier": "admin",
             "name": "402",
-            "documentation": "4to",
             "owner": "401",
+            "documentation": "4to",
             "specialization": {
                 "propertyType": null,
                 "isSlot": false,
