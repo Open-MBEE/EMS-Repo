@@ -27,7 +27,6 @@
                 "type": "Expression"
             }
         },
-        "owner": "123456",
         "name": "View X",
         "documentation": "",
         "appliedMetatypes": [
@@ -49,7 +48,6 @@
                 "type": "Expression"
             }
         },
-        "owner": "123456",
         "name": "View Y",
         "documentation": "",
         "appliedMetatypes": [
@@ -71,7 +69,6 @@
                 "type": "Expression"
             }
         },
-        "owner": "123456",
         "name": "View Z",
         "documentation": "",
         "appliedMetatypes": [
