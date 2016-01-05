@@ -5,6 +5,7 @@ import gov.nasa.jpl.ae.event.Expression;
 import gov.nasa.jpl.mbee.util.CompareUtils;
 import gov.nasa.jpl.mbee.util.Debug;
 import gov.nasa.jpl.mbee.util.HasPreference;
+import gov.nasa.jpl.mbee.util.MoreToString;
 import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
@@ -98,18 +99,21 @@ public class List extends ArrayList< Viewable< EmsScriptNode > >
     	addToList( c );
     }
     protected void addToList( Object[] c ) {
-        System.out.println("addToList");
+        System.out.println("addToList( " + MoreToString.Helper.toShortString( c ) + " )");
         if ( c == null ) return;
         for (Object obj : c) {
             Throwable t = null;
             if ( obj instanceof Viewable ) {
+                System.out.println("addToList viewable: " + obj);
                 this.add( (Viewable< EmsScriptNode >)obj );
             } else if (obj instanceof Expression<?>) {
                 Object eval = null;
                 try {
                     eval = ( (Expression< ? >)obj ).evaluate( true );
                     if ( eval == null || obj == eval ) {
-                        this.add( new Text( "" + obj ) );
+                        Text text = new Text( "" + obj );
+                        System.out.println("addToList expression evaluation: " + text);
+                        this.add( text );
                     } else {
                         if ( eval instanceof Call ) {
                           eval = ((Call)eval).evaluate( true );
@@ -136,7 +140,27 @@ public class List extends ArrayList< Viewable< EmsScriptNode > >
             } else if ( obj instanceof Collection ) {
                 Collection< ? > coll = (Collection< ? >)obj;
                 this.addToList( coll.toArray() );
+            } else if ( obj instanceof Call ) {
+                try {
+                    Object eval = ((Call)obj).evaluate( true );
+                    if ( eval.getClass().isArray() ) {
+                        this.addToList( (Object[])eval );
+                    } else {
+                        this.addToList( new Object[]{ eval } );
+                    }
+                } catch ( IllegalAccessException e ) {
+                    t = e;
+                } catch ( InvocationTargetException e ) {
+                    t = e;
+                } catch ( InstantiationException e ) {
+                    t = e;
+                } finally {
+                    if ( t != null ) {
+                        Debug.error(true, false, t.getLocalizedMessage() );
+                    }
+                }
             } else {
+                System.out.println("addToList object: " + obj);
                 this.add( new Text( "" + obj ) );
             }
             // ERROR
