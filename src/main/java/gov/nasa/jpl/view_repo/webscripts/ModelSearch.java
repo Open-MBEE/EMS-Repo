@@ -67,6 +67,15 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
  * 
  */
 public class ModelSearch extends ModelGet {
+    public class UnsupportedSearchException extends Exception {
+        private static final long serialVersionUID = 1L;
+        String msg = "";
+        
+        public UnsupportedSearchException(String message) {
+            this.msg = message;
+        }
+    }
+
     static Logger logger = Logger.getLogger( ModelSearch.class );
 
     public ModelSearch() {
@@ -119,6 +128,9 @@ public class ModelSearch extends ModelGet {
             if ( !Utils.isNullOrEmpty( response.toString() ) ) top.put( "message",
                                                                         response.toString() );
             model.put( "res", NodeUtil.jsonToString( top, 4 ) );
+        } catch ( UnsupportedSearchException use ) {
+            log( Level.WARN, HttpServletResponse.SC_BAD_REQUEST, use.msg );
+            model.put( "res", createResponseJson() );
         } catch ( JSONException e ) {
             log( Level.ERROR, HttpServletResponse.SC_BAD_REQUEST,
                  "Could not create the JSON response" );
@@ -136,9 +148,11 @@ public class ModelSearch extends ModelGet {
     private
             JSONArray
             executeSearchRequest( WebScriptRequest req, JSONObject top )
-                                                                        throws JSONException {
+                                                                        throws JSONException, UnsupportedSearchException {
         String keyword = req.getParameter( "keyword" );
         String propertyName = req.getParameter( "propertyName" );
+        Integer maxItems = Utils.parseInt( req.getParameter( "maxItems" ) );
+        Integer skipCount = Utils.parseInt( req.getParameter( "skipCount" ) );
         String[] filters =
                 req.getParameter( "filters" ) == null
                                                      ? new String[] { "documentation" }
@@ -164,6 +178,8 @@ public class ModelSearch extends ModelGet {
             String timestamp = req.getParameter( "timestamp" );
             Date dateTime = TimeUtils.dateFromTimestamp( timestamp );
 
+            if (dateTime != null) throw new UnsupportedSearchException("Cannot search against timestamp.");
+            
             Map< String, EmsScriptNode > rawResults =
                     new HashMap< String, EmsScriptNode >();
 
@@ -177,7 +193,9 @@ public class ModelSearch extends ModelGet {
                         Map<String, EmsScriptNode> results = searchForElements( searchTypesMap.get( searchType ),
                                                                                 keyword, false,
                                                                                 workspace,
-                                                                                dateTime);
+                                                                                dateTime,
+                                                                                maxItems,
+                                                                                skipCount);
                         rawResults.putAll( results );
                         updateId2SearchType( searchType, results, id2SearchTypes );
                     } else {
@@ -192,14 +210,14 @@ public class ModelSearch extends ModelGet {
                         results = searchForElements( "@sysml\\:integer:\"",
                                                      keyword, false,
                                                      workspace,
-                                                     dateTime );
+                                                     dateTime, maxItems, skipCount );
                         rawResults.putAll( results );
                         updateId2SearchType( searchType, results, id2SearchTypes );
 
                         results = searchForElements( "@sysml\\:naturalValue:\"",
                                                      keyword, false,
                                                      workspace,
-                                                     dateTime );
+                                                     dateTime, maxItems, skipCount );
                         rawResults.putAll( results);
                         updateId2SearchType( searchType, results, id2SearchTypes );
                     } catch ( NumberFormatException nfe ) {
@@ -213,7 +231,7 @@ public class ModelSearch extends ModelGet {
                         results = searchForElements( "@sysml\\:double:\"",
                                                      Double.toString( d ),
                                                      false, workspace,
-                                                     dateTime );
+                                                     dateTime, maxItems, skipCount);
                         rawResults.putAll( results );
                         updateId2SearchType( searchType, results, id2SearchTypes );
                     } catch ( NumberFormatException nfe ) {
@@ -225,54 +243,61 @@ public class ModelSearch extends ModelGet {
                         results = searchForElements( "@sysml\\:boolean:\"",
                                                      keyword, false,
                                                      workspace,
-                                                     dateTime );
+                                                     dateTime, maxItems, skipCount );
                         rawResults.putAll( results );
                         updateId2SearchType( searchType, results, id2SearchTypes );
                     }
 
                     results = searchForElements( "@sysml\\:string:\"",
                                                  keyword, false,
-                                                 workspace, dateTime );
+                                                 workspace, dateTime, maxItems, skipCount );
                     rawResults.putAll( results );
                     updateId2SearchType( searchType, results, id2SearchTypes );
                 }
             }
 
-            // filter out based on postgres graph db
-            List<String> noderefs = new ArrayList<String>(rawResults.keySet());
-            
-            PostgresHelper pgh = null;
-            String workspaceId = ""; // can't use workspace in constructor, since filtering doesn't expect "master" as id
-            if ( workspace != null ) workspaceId = workspace.getId();
-            pgh = new PostgresHelper( workspaceId );
-
-            List< String > filteredNoderefs = null;
-            try {
-                if (noderefs.size() > 0) {
-                    pgh.connect();
-                    
-                    filteredNoderefs =
-                            pgh.filterNodesByWorkspace( noderefs, workspaceId  );
-    
-                    pgh.close();
-                }
-            } catch ( SQLException e ) {
-                e.printStackTrace();
-            } catch ( ClassNotFoundException e ) {
-                e.printStackTrace();
-            }
-            
-            if (filteredNoderefs != null && filteredNoderefs.size() > 0) {
-                Map<String, EmsScriptNode> filteredResults = new HashMap<String, EmsScriptNode>();
-                for (String filteredNoderef: filteredNoderefs) {
-                    EmsScriptNode filteredNode = rawResults.get(filteredNoderef);
-                    if (filteredNode != null) {
-                        filteredResults.put( filteredNode.getSysmlId(), filteredNode );
-                    }
-                }
-                rawResults = filteredResults;
+            if (NodeUtil.doGraphDb) {
+                // filter out based on postgres graph db
+                List<String> noderefs = new ArrayList<String>(rawResults.keySet());
                 
-                // TODO: Add getting document results
+                PostgresHelper pgh = null;
+                String workspaceId = ""; // can't use workspace in constructor, since filtering doesn't expect "master" as id
+                if ( workspace != null ) workspaceId = workspace.getId();
+                pgh = new PostgresHelper( workspaceId );
+    
+                List< String > filteredNoderefs = null;
+                try {
+                    // make sure workspace exists
+                    pgh.connect();
+                    if (!pgh.checkWorkspaceExists()) throw new UnsupportedSearchException("Workspace is not search compatible");
+                    pgh.close();
+                    
+                    if (noderefs.size() > 0) {
+                        pgh.connect();
+                        
+                        filteredNoderefs =
+                                pgh.filterNodesByWorkspace( noderefs, workspaceId  );
+        
+                        pgh.close();
+                    }
+                } catch ( SQLException e ) {
+                    e.printStackTrace();
+                } catch ( ClassNotFoundException e ) {
+                    e.printStackTrace();
+                }
+            
+                if (filteredNoderefs != null && filteredNoderefs.size() > 0) {
+                    Map<String, EmsScriptNode> filteredResults = new HashMap<String, EmsScriptNode>();
+                    for (String filteredNoderef: filteredNoderefs) {
+                        EmsScriptNode filteredNode = rawResults.get(filteredNoderef);
+                        if (filteredNode != null) {
+                            filteredResults.put( filteredNode.getSysmlId(), filteredNode );
+                        }
+                    }
+                    rawResults = filteredResults;
+                    
+                    // TODO: Add getting document results
+                }
             }
 
             // filter out _pkgs:

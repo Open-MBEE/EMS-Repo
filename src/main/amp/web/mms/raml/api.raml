@@ -503,19 +503,22 @@ resourceTypes:
           projectId:
             description: MD project ID for the project under consideration
     /search:
-      description: Service for searching for elements in a particular workspace
+      description: Service for searching for elements in a particular workspace. Works only on latest for workspace
       get:
-        is: [sliceable]
+        #is: [sliceable]
         queryParameters:
-          propertyName:
-            description: The property name to search for
-            required: false
           keyword:
             description: Mandatory field for specifying what to look for.
             required: true
           filters:
             description: Comma separated list of id, documentation, name, value, aspect, appliedMetatypes, metatypes to search against. If not specified, defaults to documentation. appliedMetatypes and metatypes search using the ID of the metatypes.
             required: true
+          maxItems:
+            description: Maximum items to display per filter specified, default is -1 (e.g., returns all results)
+            required: false
+          skipCount:
+            description: Page number to display, default is 0 (first page)
+            required: false
 #/operations:
 #  description: Service for executing operations, e.g., like the OCL Execution capabilities in MDK. Details still TBD.
 /diff:

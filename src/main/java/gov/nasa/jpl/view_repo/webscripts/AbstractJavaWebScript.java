@@ -883,18 +883,15 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
     protected Map< String, EmsScriptNode >
             searchForElements( String type, String pattern,
                                        boolean ignoreWorkspace,
-                                       WorkspaceNode workspace, Date dateTime ) {
-
-        // always use DB for search on latest
-        //if (NodeUtil.doGraphDb) { 
-            if (workspace == null && dateTime == null) {
-                return searchForElementsPostgres( type, pattern, ignoreWorkspace, workspace, dateTime );
-            } else {
-                return searchForElementsOriginal( type, pattern, ignoreWorkspace, workspace, dateTime );
-            }
-//        } else {
-//            return searchForElementsOriginal( type, pattern, ignoreWorkspace, workspace, dateTime );
-//        }
+                                       WorkspaceNode workspace, Date dateTime,
+                                       Integer maxItems,
+                                       Integer skipCount ) {
+        // TODO: can't search against snapshots - non-null date time is caught upstream
+        if (NodeUtil.doGraphDb) { 
+            return searchForElementsPostgres( type, pattern, ignoreWorkspace, workspace, dateTime, maxItems, skipCount );
+        } else {
+            return searchForElementsOriginal( type, pattern, ignoreWorkspace, workspace, dateTime );
+        }
     }
 
 	/**
@@ -928,11 +925,13 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
                                                                   String pattern,
                                                                   boolean ignoreWorkspace,
                                                                   WorkspaceNode workspace,
-                                                                  Date dateTime) {
+                                                                  Date dateTime,
+                                                                  Integer maxItems,
+                                                                  Integer skipCount) {
 	    Map<String, EmsScriptNode> resultsMap = new HashMap<String, EmsScriptNode>();
 	    ResultSet results = null;
         String queryPattern = type + pattern + "\"";
-        results = NodeUtil.luceneSearch( queryPattern, services );
+        results = NodeUtil.luceneSearch( queryPattern, services, maxItems, skipCount );
         if (results != null) {
             ArrayList< NodeRef > resultList =
                     NodeUtil.resultSetToNodeRefList( results );
@@ -945,6 +944,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         return resultsMap;
 	}
 
+	
 	/**
      * Perform Lucene search for the specified pattern and ACM type for the specified
      * siteName.
@@ -959,14 +959,12 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
                                                                   WorkspaceNode workspace,
                                                                   Date dateTime,
                                                                   String siteName) {
-
         return NodeUtil.searchForElements( type, pattern, ignoreWorkspace,
                                                           workspace,
                                                           dateTime, services,
                                                           response,
                                                           responseStatus,
                                                           siteName);
-
     }
 
 	/**
