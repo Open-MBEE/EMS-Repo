@@ -98,6 +98,8 @@ import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
 
+import sysml.SystemModel;
+
 
 /**
  * Base class for all EMS Java backed webscripts. Provides helper functions and
@@ -1786,7 +1788,10 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         };
     }
     
-    public void lock( Variable<?> v ) {
+//    public void lock( Variable<?> v ) {
+//        
+//    }
+    public static void lock( Variable<?> v ) {
         Object val = v.getValue( true );
         if ( val != null ) {
             v.setDomain( new SingleValueDomain( val ) );
@@ -1794,6 +1799,9 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
     }
     
     protected void lockOtherParameters( Set< EmsScriptNode > elements, ArrayList< Constraint > constraints ) {
+        lockOtherParameters( elements, constraints, getSystemModelAe() );
+    }
+    protected static void lockOtherParameters( Set< EmsScriptNode > elements, ArrayList< Constraint > constraints, SystemModelToAeExpression< Object, EmsScriptNode, EmsScriptNode, String, Object, EmsSystemModel > systemModelToAe ) {
 //        // get all Variables from Constraints
 //        Set<Variable<?>> vars = new LinkedHashSet<Variable<?>>();
 //        for ( Constraint c : constraints ) {
@@ -1807,7 +1815,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
 //        }
         
         // lock all Variables that are not in unlockedCmNames by getting all variables from the paramMap in classData that are keyed by cm:name.
-        Map< EmsScriptNode, Parameter< Object > > paramMap = getSystemModelAe().getExprParamMap();
+        Map< EmsScriptNode, Parameter< Object > > paramMap = systemModelToAe.getExprParamMap();
         for ( Entry< EmsScriptNode, Parameter< Object > > e : paramMap.entrySet() ) {
             if ( !elements.contains( e.getKey() ) ) {
                 lock( e.getValue() );
@@ -1827,12 +1835,17 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
 //        }
     }
     
+        
     public void fix( final Set< EmsScriptNode > elements, final WorkspaceNode ws ) {
+        fix(elements, ws, getServices(), getResponse(), getResponseStatus(), getSystemModel(), getSystemModelAe() );
+    }
+
+    public static void fix( final Set< EmsScriptNode > elements, final WorkspaceNode ws, ServiceRegistry services, StringBuffer response, Status status, final EmsSystemModel systemModel, SystemModelToAeExpression< Object, EmsScriptNode, EmsScriptNode, String, Object, EmsSystemModel > systemModelToAe ) {
     
         log(Level.INFO, "Will attempt to fix constraint violations if found!");
     
         SystemModelSolver< EmsScriptNode, Object, EmsScriptNode, EmsScriptNode, String, String, Object, EmsScriptNode, String, String, EmsScriptNode >  solver =
-                new SystemModelSolver< EmsScriptNode, Object, EmsScriptNode, EmsScriptNode, String, String, Object, EmsScriptNode, String, String, EmsScriptNode >(getSystemModel(), new ConstraintLoopSolver() );
+                new SystemModelSolver< EmsScriptNode, Object, EmsScriptNode, EmsScriptNode, String, String, Object, EmsScriptNode, String, String, EmsScriptNode >(systemModel, new ConstraintLoopSolver() );
     
         Map< EmsScriptNode, Collection< Constraint > > constraintMap = getAeConstraints( elements, ws );
         ArrayList< Constraint > constraints = new ArrayList< Constraint >();
@@ -1849,8 +1862,12 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
 //        }
     
         // Solve the constraints:
-        if (!Utils.isNullOrEmpty( constraints )) {
-            lockOtherParameters( elements, constraints );
+        if (Utils.isNullOrEmpty( constraints )) {
+            logger.warn( "fix"
+                         + EmsScriptNode.getSysmlIds( Utils.asList( elements, EmsScriptNode.class ) )
+                         + ": No constraints to solve!" );
+        } else {
+            lockOtherParameters( elements, constraints, systemModelToAe );
     
             Random.reset();
     
@@ -1875,15 +1892,16 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
                 log( Level.ERROR, "Was not able to satisfy all of the constraints!" );
             }
             else {
-                log( Level.INFO, "Satisfied all of the constraints!" );
+                log( Level.WARN, "Satisfied all of the constraints!" );
     
                 // Update the values of the nodes after solving the constraints:
                 final Map< EmsScriptNode, Parameter< Object > > params = getGlobalSystemModelAe().getExprParamMap();
                 if ( Utils.isNullOrEmpty( params ) ) {
                     log( Level.ERROR, "Solver had no parameters in map to assign the solution!" );
                 } else {
-                    new EmsTransaction(getServices(), getResponse(),
-                                       getResponseStatus()) {
+//                    new EmsTransaction(getServices(), getResponse(),
+//                                       getResponseStatus()) {
+                    new EmsTransaction(services, response, status) {
                         @Override
                         public void run() throws Exception {
                             Set<Entry<EmsScriptNode, Parameter<Object>>> entrySet = params.entrySet();
@@ -1903,12 +1921,23 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
                                     // (TODO) this will not work if the value is
                                     // an ElementValue of itself.
                                 } else {
-                                Object v = systemModel.getValue( node, null );
-                                System.out.println("XXXXXXXXXXXXXXX  NODEREF = " + node.getId());
-                                System.out.println("XXXXXXXXXXXXXXXXXXXXXXXX value before setting = " + v);
-                                systemModel.setValue(node, newVal, ws);
-                                v = systemModel.getValue( node, null );
-                                System.out.println("XXXXXXXXXXXXXXXXXXXXXXXX value after setting = " + v);
+//                                Object v = systemModel.getValue( node, null );
+                                    //if (Debug.isOn())
+                                    if ( logger.isEnabledFor( Level.WARN ) ) {
+                                        log( Level.WARN,
+                                             "setting node id="
+                                                     + node.getSysmlId()
+                                                     + " name="
+                                                     + node.getSysmlName()
+                                                     + " to value of Parameter: "
+                                                     + param );
+                                    }
+                                    //                              System.out.println("AAAAAAAAAAA  NODEREF = " + node.getId());
+//                                System.out.println("XXXXXXXXXXXXXXX  NODEREF = " + node.getId());
+//                                System.out.println("XXXXXXXXXXXXXXXXXXXXXXXX value before setting = " + v);
+                                    systemModel.setValue(node, newVal, ws);
+//                                v = systemModel.getValue( node, null );
+//                                System.out.println("XXXXXXXXXXXXXXXXXXXXXXXX value after setting = " + v);
                                 }
                             }
                             log( Level.INFO, "Updated all node values to satisfy the constraints!" );

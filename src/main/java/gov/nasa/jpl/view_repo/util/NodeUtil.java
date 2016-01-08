@@ -469,10 +469,6 @@ public class NodeUtil {
                                                      + nodeRef + ", "
                                                      + propertyName + ", " + o
                                                      + ")" );
-        if ( propertyName.contains("roperty") ) {
-            System.out.println( "propertyCacheGet(" + nodeRef + ", "
-                                + propertyName + ") = " + o );
-        }
         return o;
     }
 

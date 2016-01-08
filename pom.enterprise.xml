@@ -56,7 +56,7 @@
 			for embedded run -->
 		<env>local</env>
 		<maven.test.skip>false</maven.test.skip>
-		<mbee.version>2.2.0-SNAPSHOT</mbee.version>
+		<mbee.version>2.3.0-SNAPSHOT</mbee.version>
 	</properties>
 
 	<!-- profiles for specific dependencies for developers or users -->

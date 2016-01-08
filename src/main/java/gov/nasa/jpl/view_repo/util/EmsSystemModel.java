@@ -3,11 +3,16 @@ package gov.nasa.jpl.view_repo.util;
 import gov.nasa.jpl.ae.event.Call;
 import gov.nasa.jpl.ae.event.Expression;
 import gov.nasa.jpl.ae.event.FunctionCall;
+import gov.nasa.jpl.ae.event.Parameter;
+import gov.nasa.jpl.ae.solver.Constraint;
+import gov.nasa.jpl.ae.solver.ConstraintLoopSolver;
+import gov.nasa.jpl.ae.sysml.SystemModelSolver;
 import gov.nasa.jpl.mbee.util.ClassUtils;
 import gov.nasa.jpl.mbee.util.CompareUtils;
 import gov.nasa.jpl.mbee.util.Debug;
 import gov.nasa.jpl.mbee.util.HasId;
 import gov.nasa.jpl.mbee.util.Pair;
+import gov.nasa.jpl.mbee.util.Random;
 import gov.nasa.jpl.mbee.util.Seen;
 import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.mbee.util.Utils;
@@ -20,15 +25,19 @@ import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TimeZone;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.Vector;
@@ -37,6 +46,9 @@ import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.dictionary.PropertyDefinition;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.namespace.QName;
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
+import org.eclipse.jetty.util.log.Log;
 import org.json.JSONArray;
 import org.springframework.extensions.webscripts.Status;
 
@@ -47,6 +59,9 @@ import sysml.SystemModel;
 //public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScriptNode, String, ? extends Serializable, String, String, Object, EmsScriptNode, String, String, EmsScriptNode > {
 public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, Object, EmsScriptNode, EmsScriptNode, String, String, Object, EmsScriptNode, String, String, EmsScriptNode > {
 
+    private static Logger logger = Logger.getLogger(EmsSystemModel.class);
+    public Level logLevel = Level.WARN;
+    
     protected ServiceRegistry services;
     protected EmsScriptNode serviceNode;
 
@@ -2235,10 +2250,23 @@ System.out.println("RRRRRR");
     @Override
     public boolean fixConstraintViolations( EmsScriptNode element,
                                             String version ) {
-        // TODO Auto-generated method stub
-        return false;
+        return fixConstraintViolations( Utils.newSet( element ) );
     }
 
+    public boolean fixConstraintViolations( Set<EmsScriptNode> elements ) {
+        fix( elements, null );
+        return true;
+    }
+
+    public boolean fixConstraintViolations( EmsScriptNode... elements ) {
+        logger.warn( "\n\n\n\ncalling fixConstraintViolations()\n\n\n\n\n" );
+        return fixConstraintViolations( Utils.toSet( elements ) );
+    }
+    
+    public void fix( final Set< EmsScriptNode > elements, final WorkspaceNode ws ) {
+        AbstractJavaWebScript.fix( elements, ws, services, null, null, this, null);
+    }
+    
     // TODO dont like dependence on BAE for Call here....
     public Collection< ? >
     		map( Collection< ? > elements,
@@ -2598,6 +2626,46 @@ System.out.println("RRRRRR");
         return ((Long)d.getTime()).doubleValue();
     }
     
+    public Date getDateFromLong( long t ) {
+        Date d = new Date( t );
+        return d;
+    }
+    
+//    public String getTimeOfDayStringFromMillis( EmsScriptNode node ) {
+//        Collection< Object > vals = getValue(node,null);
+//        if ( Utils.isNullOrEmpty( vals ) ) return null;
+//        Object val = first(vals);
+//        if ( val instanceof Number ) {
+//            return getTimeOfDayStringFromDoubleMillis( ( (Number)val ).doubleValue() );
+//        }
+//        return null;
+//    }
+    public String getTimeOfDayStringFromMillis( double millis ) {
+        long millisLong = ((Double)millis).longValue();
+        String s = formatDate( millisLong, "HH:mm", "PST" );
+        System.out.println("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@   getTimeOfDayStringFromMillis(" + millis + ") = " + s);
+        return s;
+    }
+    public String getTimeOfDayString( long millis ) {
+        String s = formatDate( millis, "HH:mm", "PST" );
+        return s;
+    }
+    public static String formatDate( long millis, String format, String timeZone ) {
+        if ( format == null ) return null;
+        Calendar cal = Calendar.getInstance();
+        cal.setTimeZone( TimeZone.getTimeZone( timeZone ) );
+        cal.setTimeInMillis( millis );
+        String timeString =
+                new SimpleDateFormat( format ).format( cal.getTime() );
+        return timeString;
+    }
+    
+    
+    public Object getValueSimple( Object context ) {
+        Collection< Object > c = getValue( context, null );
+        if ( Utils.isNullOrEmpty( c ) ) return null;
+        return first(c);
+    }
     
     public boolean targetIs( EmsScriptNode relationshipNode, EmsScriptNode nodeToMatch ) {
         System.out.println("YYYYYYYYYYYYYYYYYYYYYYYYYYYY");
