@@ -224,6 +224,7 @@ public class NodeUtil {
     public static boolean doJsonStringCaching = false;
     public static boolean doPropertyCaching = true;
     public static boolean doGraphDb = true;
+    public static boolean doPostProcessQualified = true;
 
     public static boolean addEmptyEntriesToFullCache = false; // this was broken
                                                               // last tried
@@ -4583,6 +4584,126 @@ public class NodeUtil {
         }
     }
 
+    public static void processContentsJson(String sysmlId, JSONObject contents,
+                                           List< Pair< String, String >> documentEdges) {
+        if (contents != null) {
+            if (contents.has( "operand" )) {
+                JSONArray operand = contents.getJSONArray( "operand" );
+                for (int ii = 0; ii < operand.length(); ii++) {
+                    JSONObject value = operand.getJSONObject( ii );
+                    if (value.has( "instance" )) {
+                        documentEdges.add( new Pair<String, String>(sysmlId, value.getString("instance") ));
+                    }
+                }
+            }
+        }
+    }
+    
+    /**
+     * Contents -> expression -> operand -> instance specification -> instance
+     */
+    public static void
+            processContentsNodeRef( String sysmlId, NodeRef contents,
+                             List< Pair< String, String >> documentEdges ) {
+        if ( contents != null ) {
+            EmsScriptNode node = new EmsScriptNode( contents, services, null );
+            ArrayList< NodeRef > operands =
+                    (ArrayList< NodeRef >)node.getNodeRefProperty( Acm.ACM_OPERAND,
+                                                                   true, null,
+                                                                   null );
+            if ( operands != null ) {
+                for ( int ii = 0; ii < operands.size(); ii++ ) {
+                    EmsScriptNode operand =
+                            new EmsScriptNode( operands.get( ii ), services,
+                                               null );
+                    NodeRef instanceNr =
+                            (NodeRef)operand.getNodeRefProperty( Acm.ACM_INSTANCE,
+                                                                 true, null,
+                                                                 null );
+                    if ( instanceNr != null ) {
+                        EmsScriptNode instance =
+                                new EmsScriptNode( instanceNr, services, null );
+                        documentEdges.add( new Pair< String, String >(
+                                                                       sysmlId,
+                                                                       instance.getSysmlId() ) );
+                    }
+                }
+            }
+        }
+    }
+
+    public static void processInstanceSpecificationSpecificationJson( String sysmlId, JSONObject iss, List<Pair<String, String>> documentEdges) {
+        if (iss != null) {
+            if (iss.has( "string" )) {
+                String string = iss.getString( "string" );
+                JSONObject json = new JSONObject(string);
+                Set<Object> sources = findKeyValueInJsonObject(json, "source");
+                for (Object source: sources) {
+                    if (source instanceof String) {
+                        documentEdges.add( new Pair<String, String>(sysmlId, (String) source));
+                    }
+                }
+            }
+        }
+    }
+    
+    /**
+     * InstanceSpecificationSpecification -> string -> any source key
+     * @param sysmlId
+     * @param iss
+     * @param documentEdges
+     */
+    public static
+            void
+            processInstanceSpecificationSpecificationNodeRef( String sysmlId,
+                                                       NodeRef iss,
+                                                       List< Pair< String, String >> documentEdges ) {
+        if (iss != null) {
+            EmsScriptNode issNode = new EmsScriptNode(iss, services, null);
+            String string = (String) issNode.getProperty( Acm.ACM_STRING );
+            if (string != null) {
+                JSONObject json = new JSONObject(string);
+                Set<Object> sources = findKeyValueInJsonObject(json, "source");
+                for (Object source: sources) {
+                    if (source instanceof String) {
+                        documentEdges.add( new Pair<String, String>(sysmlId, (String)source) );
+                    }
+                }
+            }
+        }
+    }
+    
+    public static Set<Object> findKeyValueInJsonObject(JSONObject json, String keyMatch) {
+        Set<Object> result = new HashSet<Object>();
+        Iterator<?> keys = json.keys();
+        while (keys.hasNext()) {
+            String key = (String)keys.next();
+            Object value = json.get(key);
+            if (key.equals( keyMatch )) {
+                result.add( value );
+            } else if ( value instanceof JSONObject ) {
+                result.addAll( findKeyValueInJsonObject((JSONObject)value, keyMatch) );
+            } else if ( value instanceof JSONArray ) {
+                result.addAll(  findKeyValueInJsonArray( (JSONArray)value, keyMatch ) );
+            }
+        }
+        return result;
+    }
+
+    public static Set<Object> findKeyValueInJsonArray(JSONArray jsonArray, String keyMatch) {
+        Set<Object> result = new HashSet<Object>();
+        
+        for (int ii = 0; ii < jsonArray.length(); ii++ ) {
+            if (jsonArray.get( ii ) instanceof JSONObject) {
+                result.addAll( findKeyValueInJsonObject((JSONObject)jsonArray.get( ii ), keyMatch));
+            } else if(jsonArray.get(ii) instanceof JSONArray ) {
+                result.addAll( findKeyValueInJsonArray((JSONArray)jsonArray.get(ii), keyMatch) );
+            }
+        }
+        
+        return result;
+    }
+    
     public static EmsScriptNode getNodeFromPostgresNode( Node pgnode ) {
         return new EmsScriptNode( new NodeRef( pgnode.getNodeRefId() ),
                                   services, null );
@@ -4867,6 +4988,8 @@ public class NodeUtil {
      */
     public static void ppAddQualifiedNameId2Json( WebScriptRequest req,
                                                   Map< String, Object > model ) {
+        if ( !doPostProcessQualified ) return;
+
         if ( !model.containsKey( "res" ) ) return;
         Object res = model.get( "res" );
         if ( !( res instanceof String ) ) return;
@@ -4877,7 +5000,7 @@ public class NodeUtil {
             // not json, return
             return;
         }
-
+        
         Map< String, String > id2name = new HashMap< String, String >();
         Map< String, String > id2siteName = new HashMap< String, String >();
         Map< String, Set< String >> owner2children =
@@ -4891,8 +5014,14 @@ public class NodeUtil {
             if ( json.has( key ) ) {
                 if ( !key.equals( "workspace1" ) ) {
                     JSONArray elementsJson = json.getJSONArray( key );
-                    ppHandleElements( req, elementsJson, id2name, id2siteName,
+                    try {
+                        ppHandleElements( req, elementsJson, id2name, id2siteName,
                                       owner2children, child2owner );
+                    } catch (Exception e) {
+                        logger.error( "Post process qname not working. Setting postProcessQualified to false" );
+                        NodeUtil.doPostProcessQualified = false;
+                        e.printStackTrace();
+                    }
                 } else {
                     // FIXME: enable later since difficult to track qualifiedIds
                     // in time, let EmsScriptNode do the job
@@ -5036,6 +5165,7 @@ public class NodeUtil {
             ids.addAll( id2name.keySet() );
             for ( String id : ids ) {
                 EmsScriptNode node = null;
+                boolean useDb = false;
                 if ( NodeUtil.doGraphDb && wsId.equals( "master" )
                      && dateTime == null ) {
                     PostgresHelper pgh = new PostgresHelper( wsId );
@@ -5044,12 +5174,14 @@ public class NodeUtil {
                         node =
                                 NodeUtil.getNodeFromPostgresNode( pgh.getNodeFromSysmlId( id ) );
                         pgh.close();
+                        useDb = true;
                     } catch ( ClassNotFoundException e ) {
                         e.printStackTrace();
                     } catch ( SQLException e ) {
-                        e.printStackTrace();
+                    	e.printStackTrace();
                     }
-                } else {
+                } 
+                if(!useDb) {
                     WorkspaceNode ws =
                             WorkspaceNode.getWorkspaceFromId( wsId, services,
                                                               null, null, null );
@@ -5065,6 +5197,7 @@ public class NodeUtil {
         // for all owners, recurse to build up all the owner paths
         for ( String owner : owners ) {
             if ( !visitedOwners.contains( owner ) ) {
+            	boolean useDb = false;
                 if ( NodeUtil.doGraphDb && wsId.equals( "master" )
                      && dateTime == null ) {
                     PostgresHelper pgh = new PostgresHelper( wsId );
@@ -5074,16 +5207,21 @@ public class NodeUtil {
                                            owner2children, child2owner,
                                            visitedOwners, wsId, dateTime );
                         pgh.close();
+                        useDb = true;
                     } catch ( ClassNotFoundException e ) {
                         e.printStackTrace();
                     } catch ( SQLException e ) {
                         e.printStackTrace();
                     }
-                } else {
+                } 
+                if(!useDb) {
                     //ppRecurseOwnersOriginal
-                    ppRecurseOwnersNew( owner, id2name, id2siteName,
-                                             owner2children, child2owner,
-                                             visitedOwners, wsId, dateTime );
+//                    ppRecurseOwnersNew( owner, id2name, id2siteName,
+//                                             owner2children, child2owner,
+//                                             visitedOwners, wsId, dateTime );
+                    ppRecurseOwnersOriginal( owner, id2name, id2siteName,
+                            owner2children, child2owner,
+                            visitedOwners, wsId, dateTime );
                 }
             }
         }
@@ -5214,28 +5352,40 @@ public class NodeUtil {
             id2siteName.put( sysmlId, sysmlName );
         }
 
-        Set< Pair< String, String > > parents =
-                pgh.getImmediateParents( sysmlId, DbEdgeTypes.REGULAR );
-        if ( parents.size() > 0 ) {
-            for ( Pair< String, String > parent : parents ) {
-                String parentId = parent.first;
+        String parentId = sysmlId;
+        EmsScriptNode parentNode = node;
+        List< Pair< String, String > > parentTree =
+                pgh.getContainmentParents( sysmlId, 10000 );
+        if ( parentTree.size() > 0 ) {
+            for ( int ii = 0; ii < parentTree.size() - 1; ii++ ) {
+                String childId = parentTree.get( ii ).first;
+                parentId = parentTree.get( ii + 1 ).first;
+                String parentRef = parentTree.get( ii + 1 ).second;
+
+                // update id2name maps
+                parentNode =
+                        new EmsScriptNode( new NodeRef( parentRef ), services,
+                                           null );
+                String parentName = parentNode.getSysmlName();
+                id2name.put( parentId, parentName );
+                Boolean isParentSite =
+                        (Boolean)node.getProperty( Acm.ACM_IS_SITE );
+                if ( isParentSite != null && isParentSite ) {
+                    id2siteName.put( parentId, parentName );
+                }
+
+                // update trees
                 if ( !owner2children.containsKey( parentId ) ) {
                     owner2children.put( parentId, new HashSet< String >() );
                 }
-                owner2children.get( parentId ).add( sysmlId );
-                child2owner.put( sysmlId, parentId );
-                if ( !visitedOwners.contains( parentId ) ) {
-                    ppRecurseOwnersDb( parentId, pgh, id2name, id2siteName,
-                                       owner2children, child2owner,
-                                       visitedOwners, wsId, dateTime );
-                }
+                owner2children.get( parentId ).add( childId );
+                child2owner.put( childId, parentId );
                 visitedOwners.add( parentId );
             }
-        } else {
-            // no parent, so lets look for top level site
-            ppAddSiteOwnerInfo( sysmlId, node, id2name, id2siteName,
-                                owner2children, child2owner, visitedOwners );
         }
+
+        ppAddSiteOwnerInfo( parentId, parentNode, id2name, id2siteName,
+                            owner2children, child2owner, visitedOwners );
     }
 
     /**
@@ -5314,4 +5464,5 @@ public class NodeUtil {
             }
         }
     }
+
 }

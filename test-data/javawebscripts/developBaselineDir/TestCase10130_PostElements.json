@@ -1,0 +1,105 @@
+{"elements": [
+    {
+        "owner": "holding_bin_no_site_no_project",
+        "creator": "admin",
+        "isMetatype": false,
+        "editable": true,
+        "qualifiedName": "/no_site/no_site_no_project/holding_bin/View Z",
+        "modifier": "admin",
+        "documentation": "",
+        "sysmlid": "MMS_1450390431247_8a4b76d2-394c-4569-9abe-5c51dc4b0813",
+        "appliedMetatypes": [
+            "_17_0_1_232f03dc_1325612611695_581988_21583",
+            "_9_0_62a020a_1105704885343_144138_7929"
+        ],
+        "qualifiedId": "/no_site/no_site_no_project/holding_bin_no_site_no_project/MMS_1450390431247_8a4b76d2-394c-4569-9abe-5c51dc4b0813",
+        "name": "View Z",
+        "specialization": {
+            "contents": {
+                "valueExpression": null,
+                "type": "Expression",
+                "operand": []
+            },
+            "childrenViews": [],
+            "type": "View",
+            "displayedElements": [],
+            "allowedElements": []
+        }
+    },
+    {
+        "owner": "holding_bin_no_site_no_project",
+        "creator": "admin",
+        "isMetatype": false,
+        "editable": true,
+        "qualifiedName": "/no_site/no_site_no_project/holding_bin/View X",
+        "modifier": "admin",
+        "documentation": "",
+        "sysmlid": "MMS_1450390431247_8a4b76d2-394c-4569-9abe-5c51dc4b0811",
+        "appliedMetatypes": [
+            "_17_0_1_232f03dc_1325612611695_581988_21583",
+            "_9_0_62a020a_1105704885343_144138_7929"
+        ],
+        "qualifiedId": "/no_site/no_site_no_project/holding_bin_no_site_no_project/MMS_1450390431247_8a4b76d2-394c-4569-9abe-5c51dc4b0811",
+        "name": "View X",
+        "specialization": {
+            "contents": {
+                "valueExpression": null,
+                "type": "Expression",
+                "operand": []
+            },
+            "childrenViews": [],
+            "type": "View",
+            "displayedElements": [],
+            "allowedElements": []
+        }
+    },
+    {
+        "owner": "holding_bin_no_site_no_project",
+        "creator": "admin",
+        "isMetatype": false,
+        "editable": true,
+        "qualifiedName": "/no_site/no_site_no_project/holding_bin/Product X",
+        "modifier": "admin",
+        "sysmlid": "MMS_1450390431247_8a4b76d2-394c-4569-9abe-5c51dc4b0711",
+        "qualifiedId": "/no_site/no_site_no_project/holding_bin_no_site_no_project/MMS_1450390431247_8a4b76d2-394c-4569-9abe-5c51dc4b0711",
+        "name": "Product X",
+        "specialization": {
+            "contents": {
+                "valueExpression": null,
+                "type": "Expression",
+                "operand": []
+            },
+            "type": "Product",
+            "displayedElements": [],
+            "allowedElements": []
+        }
+    },
+    {
+        "owner": "holding_bin_no_site_no_project",
+        "creator": "admin",
+        "isMetatype": false,
+        "editable": true,
+        "qualifiedName": "/no_site/no_site_no_project/holding_bin/View Y",
+        "modifier": "admin",
+        "documentation": "",
+        "sysmlid": "MMS_1450390431247_8a4b76d2-394c-4569-9abe-5c51dc4b0812",
+        "appliedMetatypes": [
+            "_17_0_1_232f03dc_1325612611695_581988_21583",
+            "_9_0_62a020a_1105704885343_144138_7929"
+        ],
+        "qualifiedId": "/no_site/no_site_no_project/holding_bin_no_site_no_project/MMS_1450390431247_8a4b76d2-394c-4569-9abe-5c51dc4b0812",
+        "name": "View Y",
+        "specialization": {
+            "contents": {
+                "valueExpression": null,
+                "type": "Expression",
+                "operand": []
+            },
+            "childrenViews": [],
+            "type": "View",
+            "displayedElements": [],
+            "allowedElements": []
+        }
+    }
+]}
+200

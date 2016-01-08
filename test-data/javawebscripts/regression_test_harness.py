@@ -1574,7 +1574,7 @@ create_curl_cmd(type="POST", base_url=BASE_URL_WS,
                 branch="master/",
                 post_type="elements?fix=true"),
 True,
-common_filters,
+common_filters + ['"modifier"', '"integer"', '"message"'],
 ["test", "develop", "workspaces"]
 ],
         
@@ -2105,7 +2105,7 @@ set_json_output_to_gv3
 "Post a diff to merge workspaces",
 'curl %s %s \'$gv3\' "%sdiff"' % (CURL_FLAGS, CURL_POST_FLAGS, SERVICE_URL),
 True,
-common_filters + ['"id"', '"qualifiedId"', '"timestamp"'],
+common_filters + ['"id"', '"qualifiedId"', '"timestamp"', '"sequence"'],
 ["test", "workspaces", "develop"],
 ],
        
@@ -2163,7 +2163,7 @@ common_filters + ['MMS_'],
 create_curl_cmd(type="POST", data="onePlusOne.k", base_url=BASE_URL_WS,
                 post_type="elements?evaluate", branch="master/"),
 True,
-common_filters + ['MMS_'],
+common_filters + ['MMS_', '"evaluationResult"'],
 ["test", "workspaces", "develop", "develop2", "parsek"]
 ],
 
@@ -2506,7 +2506,7 @@ common_filters,
 create_curl_cmd(type="GET", data="elements/123456?recurse=true", base_url=BASE_URL_WS,
                 branch="master/"),
 True,
-common_filters + ['"MMS_', 'MMS_'],
+common_filters + ['MMS_'],
 ["test", "workspaces", "develop"]
 ],
 
@@ -2626,7 +2626,7 @@ common_filters + ['"timestamp"', '"MMS_', '"id"', '"qualifiedId"', '"version"', 
 create_curl_cmd(type="POST", data="aspectChanges.json", base_url=BASE_URL_WS,
                 post_type="elements", branch="master/"),
 True,
-common_filters,
+common_filters + ['"message"'],
 ["test", "workspaces", "develop", "develop2"]
 ],
 
@@ -3174,12 +3174,52 @@ common_filters + ['"timestamp"'],
 ]
 ,
 [
-10130,
-"TestCase10130_PostElements",
-"Post elements",
-create_curl_cmd(type="POST", data="TestCase10130_elements.json", base_url=BASE_URL_WS,
-                post_type="elements", branch="master/"),
-False,
+    10130,
+    "TestCase10130_PostElements",
+    "Post elements",
+    create_curl_cmd(type="POST", data="TestCase10130_elements.json", base_url=BASE_URL_WS,
+                    post_type="elements", branch="master/"),
+    True,
+    common_filters,
+    ["test", "workspaces", "develop", "develop2"]
+],
+[
+10130.1,
+"TestCase10130.1_VerifyProductX",
+"Verify elements for ProductX",
+create_curl_cmd(type="GET", data="sites/europa/elements/MMS_1450390431247_8a4b76d2-394c-4569-9abe-5c51dc4b0711", base_url=BASE_URL_WS,
+                branch="master/"),
+True,
+common_filters + ['"timestamp"'],
+["test", "workspaces", "develop", "develop2"]
+],
+[
+10130.2,
+"TestCase10130.2_VerifyViewX",
+"Verify elements for View X",
+create_curl_cmd(type="GET", data="sites/europa/elements/MMS_1450390431247_8a4b76d2-394c-4569-9abe-5c51dc4b0811", base_url=BASE_URL_WS,
+                branch="master/"),
+True,
+common_filters + ['"timestamp"'],
+["test", "workspaces", "develop", "develop2"]
+],
+[
+10130.3,
+"TestCase10130.3_VerifyViewY",
+"Verify elements for View Y",
+create_curl_cmd(type="GET", data="sites/europa/elements/MMS_1450390431247_8a4b76d2-394c-4569-9abe-5c51dc4b0812", base_url=BASE_URL_WS,
+                branch="master/"),
+True,
+common_filters + ['"timestamp"'],
+["test", "workspaces", "develop", "develop2"]
+],
+[
+10130.4,
+"TestCase10130.4_VerifyViewZ",
+"Verify elements for View Z",
+create_curl_cmd(type="GET", data="sites/europa/elements/MMS_1450390431247_8a4b76d2-394c-4569-9abe-5c51dc4b0813", base_url=BASE_URL_WS,
+                branch="master/"),
+True,
 common_filters + ['"timestamp"'],
 ["test", "workspaces", "develop", "develop2"]
 ],
@@ -3189,8 +3229,8 @@ common_filters + ['"timestamp"'],
 "Post view V",
 create_curl_cmd(type="POST", data="TestCase10131_postViewV.json", base_url=BASE_URL_WS,
                 post_type="elements", branch="master/"),
-False,
-common_filters + ['"timestamp"'],
+True,
+common_filters + ['MMS_', '"timestamp"'],
 ["test", "workspaces", "develop", "develop2"]
 ],
 [
@@ -3199,8 +3239,8 @@ common_filters + ['"timestamp"'],
 "Post view V",
 create_curl_cmd(type="POST", data="TestCase10132_postViewVRemove.json", base_url=BASE_URL_WS,
                 post_type="elements", branch="master/"),
-False,
-common_filters + ['"timestamp"'],
+True,
+common_filters + ['MMS_', '"timestamp"'],
 ["test", "workspaces", "develop", "develop2"]
 ],
 [
@@ -3209,8 +3249,8 @@ common_filters + ['"timestamp"'],
 "Post view V",
 create_curl_cmd(type="POST", data="TestCase10133_postViewVUpdate.json", base_url=BASE_URL_WS,
                 post_type="elements", branch="master/"),
-False,
-common_filters + ['"timestamp"'],
+True,
+common_filters + ['MMS_', '"timestamp"'],
 ["test", "workspaces", "develop", "develop2"]
 ],
 

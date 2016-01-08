@@ -221,25 +221,26 @@ public class Model2Postgres extends AbstractJavaWebScript {
         		// documentation edges 
         		String doc = (String) n.getProperty(Acm.ACM_DOCUMENTATION);
         		NodeUtil.processDocumentEdges(n.getSysmlId(), doc, documentEdges);
+
         		String view2viewProperty = (String) n.getProperty(Acm.ACM_VIEW_2_VIEW);
         		if (view2viewProperty != null) {
-        			NodeUtil.processV2VEdges(n.getSysmlId(), new JSONArray(
-        					view2viewProperty), documentEdges);
+        		    NodeUtil.processV2VEdges(n.getSysmlId(), new JSONArray(
+    					view2viewProperty), documentEdges);
         		}
+    			
+    			NodeRef contents = (NodeRef) n.getNodeRefProperty( Acm.ACM_CONTENTS, true, null, null );
+    			if (contents != null) {
+    			    NodeUtil.processContentsNodeRef(n.getSysmlId(), contents, documentEdges);
+    			}
+    			
+    			NodeRef iss = (NodeRef) n.getNodeRefProperty( Acm.ACM_INSTANCE_SPECIFICATION_SPECIFICATION, null, null );
+    			if (iss != null) {
+    			    NodeUtil.processInstanceSpecificationSpecificationNodeRef(n.getSysmlId(), iss, documentEdges);
+    			}
 		}
 
 
 		try {
-//        		for (NodeRef c : n.getOwnedChildren(false, dt, ws)) {
-//        			EmsScriptNode cn = new EmsScriptNode(c, services, response);
-//        
-//        			if (!cn.isDeleted()) {
-//            			// containment edges
-//        			    String cnSysmlId = cn.getSysmlId().replace( "_pkg", "" );
-//            			edges.add(new Pair<String, String>(n.getSysmlId(), cnSysmlId));
-//            			i += insertNodes(cn, pgh, dt, edges, documentEdges, ws, cnSysmlId);
-//        			}
-//        		}
         		// traverse alfresco containment since ownedChildren may not be accurate
             for (EmsScriptNode cn : n.getChildNodes()) {
                 String nSysmlId = n.getSysmlId().replace( "_pkg", "" );

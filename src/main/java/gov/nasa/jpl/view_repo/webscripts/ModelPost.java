@@ -384,6 +384,7 @@ public class ModelPost extends AbstractJavaWebScript {
 	protected void sendProgress(String msg, String projectSysmlId,
 			boolean sendEmail) {
 		if (numElementsToPost >= minElementsForProgress) {
+		    if (logger.isDebugEnabled()) logger.debug(msg);
 			sendProgress(msg, projectSysmlId,
 					WorkspaceNode.getWorkspaceName(myWorkspace), sendEmail);
 		}

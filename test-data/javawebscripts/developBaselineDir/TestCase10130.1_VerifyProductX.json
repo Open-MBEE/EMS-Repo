@@ -1,0 +1,22 @@
+{"elements": [{
+    "owner": "holding_bin_no_site_no_project",
+    "creator": "admin",
+    "isMetatype": false,
+    "editable": true,
+    "qualifiedName": "/no_site/no_site_no_project/holding_bin/Product X",
+    "modifier": "admin",
+    "sysmlid": "MMS_1450390431247_8a4b76d2-394c-4569-9abe-5c51dc4b0711",
+    "qualifiedId": "/no_site/no_site_no_project/holding_bin_no_site_no_project/MMS_1450390431247_8a4b76d2-394c-4569-9abe-5c51dc4b0711",
+    "name": "Product X",
+    "specialization": {
+        "contents": {
+            "valueExpression": null,
+            "type": "Expression",
+            "operand": []
+        },
+        "type": "Product",
+        "displayedElements": [],
+        "allowedElements": []
+    }
+}]}
+200
