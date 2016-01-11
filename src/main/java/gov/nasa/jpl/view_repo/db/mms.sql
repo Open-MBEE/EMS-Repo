@@ -61,6 +61,16 @@ create table doors
   constraint unique_doors unique(sysmlId, resourceUrl)
 );
 
+create index on doors(sysmlId);
+
+create table doorsFields
+(
+    project text not null,
+    propertyName text not null,
+    doorsAttrName text not null,
+    constraint unique_fields unique(project, propertyName)
+);
+
 -- given two nodeRefId, insert an edge between the two
 create or replace function insert_edge(text, text, text, integer)
   returns void as $$
