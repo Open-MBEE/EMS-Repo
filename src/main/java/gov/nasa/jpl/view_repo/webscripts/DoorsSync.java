@@ -205,34 +205,35 @@ public class DoorsSync extends AbstractJavaWebScript {
                 siteNode = new EmsScriptNode( siteRef, services );
                 name = siteNode.getName();
 
+                siteJson.put( "sysmlId", name );
+                siteJson.put( "name", siteInfo.getTitle() );
+
                 if (workspace == null || (workspace != null && workspace.contains( siteNode ))) {
                     try {
                         doors = new DoorsClient( name );
                         pgh.connect();
                         for (EmsScriptNode n : siteNode.getChildNodes()) {
-                            int nodesInserted = syncToDoors( n );
-                            siteJson.put( "sysmlId", name );
-                            siteJson.put( "name", siteInfo.getTitle() );
-                            siteJson.put( "elementCount", nodesInserted );
-                            json.put( siteJson );
-
+                            syncToDoors( n );
                         }
                         syncFromDoors();
                         pgh.close();
+
+                        siteJson.put( "status", "complete" );
                     } catch (ClassNotFoundException | SQLException e) {
                         e.printStackTrace();
                     } catch (Exception e) {
                         //e.printStackTrace();
+                        siteJson.put( "status", "Project is not in Doors" );
                     }
                 }
+                json.put( siteJson );
             }
         }
 
         return json;
     }
 
-    protected Integer syncToDoors(EmsScriptNode n) {
-        int i = 0;
+    protected void syncToDoors(EmsScriptNode n) {
         String resourceUrl = null;
 
         if( !n.isDeleted() ) {
@@ -241,19 +242,22 @@ public class DoorsSync extends AbstractJavaWebScript {
             }
 
             if (n.hasAspect( Acm.ACM_PACKAGE ) && !n.getSysmlId().endsWith( "_pkg" )) {
-                createFolder( n );
+                if(n.getSysmlName() != null) {
+                    logger.debug( String.format( "Updating/Creating Folder in Doors: %s", n.getSysmlName() ) );
+                    createFolder( n );
+                }
             }
 
             ArrayList appliedMetatype = (ArrayList) n.getProperty( Acm.ACM_APPLIED_METATYPES );
             if (appliedMetatype != null && appliedMetatype.contains( "_11_5EAPbeta_be00301_1147873190330_159934_2220" )) {
+                logger.debug( String.format( "Updating/Creating Requirement in Doors: %s", n.getSysmlId() ) );
                 compRequirement( n, null );
-                i++;
             }
         }
         try {
             for (EmsScriptNode cn : n.getChildNodes()) {
                 if (!cn.isDeleted()) {
-                    i += syncToDoors( cn );
+                    syncToDoors( cn );
                 }
             }
         } catch ( org.alfresco.service.cmr.repository.MalformedNodeRefException mnre ) {
@@ -262,7 +266,6 @@ public class DoorsSync extends AbstractJavaWebScript {
                 mnre.printStackTrace();
             }
         }
-        return i;
     }
 
     protected void syncFromDoors() {
@@ -274,14 +277,14 @@ public class DoorsSync extends AbstractJavaWebScript {
                 //Use SysmlId from Doors
                 if (!processed.contains( sysmlId )) {
                     createUpdateRequirementFromDoors( req );
-                    System.out.println("Adding/Updating from Doors: " + req.getTitle() + ":" + sysmlId);
+                    logger.debug( String.format( "Adding/Updating from Doors: %s : %s", req.getTitle(), sysmlId ) );
                 } else {
-                    System.out.println("Already processed: " + req.getTitle() + ":" + sysmlId);
+                    logger.debug( String.format( "Already processed: %s : %s", req.getTitle(), sysmlId ) );
                 }
             } else {
                 //No SysmlId
                 createUpdateRequirementFromDoors( req );
-                System.out.println("Adding from Doors: " + req.getTitle());
+                logger.debug( String.format( "Adding from Doors: %s", req.getTitle() ) );
             }
         }
 
@@ -303,47 +306,42 @@ public class DoorsSync extends AbstractJavaWebScript {
 
                 if ((lastSync.compareTo( lastModifiedDoors ) < 0) && (lastSync.compareTo( lastModifiedMMS ) >= 0)) {
                     //Modified in Doors, Not Modified in MMS
-                    System.out.println("Modified in Doors, Not Modified in MMS");
-                    System.out.println("lastSync Date: " + lastSync);
-                    System.out.println("Doors Date: " + lastModifiedDoors);
-                    System.out.println("MMS Date: " + lastModifiedMMS);
-                    System.out.println();
+                    logger.debug( "Modified in Doors, Not Modified in MMS" );
+                    logger.debug( String.format( "lastSync Date: %s", lastSync ) );
+                    logger.debug( String.format( "Doors Date: %s", lastModifiedDoors ) );
+                    logger.debug( String.format( "MMS Date: %s", lastModifiedMMS ) );
 
                     //resourceUrl = createUpdateRequirementFromDoors( r, doors );
                 } else if ((lastSync.compareTo( lastModifiedDoors ) >= 0) && (lastSync.compareTo( lastModifiedMMS ) >= 0)) {
                     //Not Modified in Doors, Not Modified in MMS
-                    System.out.println("Not Modified in Doors, Not Modified in MMS");
-                    System.out.println("lastSync Date: " + lastSync);
-                    System.out.println("Doors Date: " + lastModifiedDoors);
-                    System.out.println("MMS Date: " + lastModifiedMMS);
-                    System.out.println();
+                    logger.debug( "Not Modified in Doors, Not Modified in MMS" );
+                    logger.debug( String.format( "lastSync Date: %s", lastSync ) );
+                    logger.debug( String.format( "Doors Date: %s", lastModifiedDoors ) );
+                    logger.debug( String.format( "MMS Date: %s", lastModifiedMMS ) );
 
                     //processed.add( sysmlId );
                     resourceUrl = createUpdateRequirementFromMMS( n );
                 } else if ((lastSync.compareTo( lastModifiedDoors ) >= 0) && (lastSync.compareTo( lastModifiedMMS ) < 0)) {
                     //Not Modified in Doors, Modified in MMS
-                    System.out.println("Not Modified in Doors, Modified in MMS");
-                    System.out.println("lastSync Date: " + lastSync);
-                    System.out.println("Doors Date: " + lastModifiedDoors);
-                    System.out.println("MMS Date: " + lastModifiedMMS);
-                    System.out.println();
+                    logger.debug( "Not Modified in Doors, Modified in MMS" );
+                    logger.debug( String.format( "lastSync Date: %s", lastSync ) );
+                    logger.debug( String.format( "Doors Date: %s", lastModifiedDoors ) );
+                    logger.debug( String.format( "MMS Date: %s", lastModifiedMMS ) );
 
                     resourceUrl = createUpdateRequirementFromMMS( n );
                 } else if ((lastSync.compareTo( lastModifiedDoors ) < 0) && (lastSync.compareTo( lastModifiedMMS ) < 0)) {
                     //Modified in Doors, Modified in MMS
-                    System.out.println("Modified in Doors, Modified in MMS");
-                    System.out.println("lastSync Date: " + lastSync);
-                    System.out.println("Doors Date: " + lastModifiedDoors);
-                    System.out.println("MMS Date: " + lastModifiedMMS);
-                    System.out.println();
+                    logger.debug( "Modified in Doors, Modified in MMS" );
+                    logger.debug( String.format( "lastSync Date: %s", lastSync ) );
+                    logger.debug( String.format( "Doors Date: %s", lastModifiedDoors ) );
+                    logger.debug( String.format( "MMS Date: %s", lastModifiedMMS ) );
 
                     processed.add( sysmlId );
                 }
 
             } else {
                 //Not in Doors
-                System.out.println("Not in Doors");
-                System.out.println();
+                logger.debug( "Not in Doors" );
                 resourceUrl = createUpdateRequirementFromMMS( n );
             }
         }
@@ -427,14 +425,7 @@ public class DoorsSync extends AbstractJavaWebScript {
             Folder[] folderArray = folders.toArray(new Folder[folders.size()]);
             for (Integer i = folderArray.length - 1; i >= 0; i--) {
                 Folder folder = folderArray[i];
-
                 String folderSysmlId = createFolderFromDoors( folder.getTitle(), reqParent, folder.getResourceUrl() );
-
-                System.out.println("Folder Title: " + folder.getTitle());
-                System.out.println("Folder ResourceUrl: " + folder.getResourceUrl());
-                System.out.println("FolderNode sysmlId: " + folderSysmlId);
-                System.out.println("FolderNode parent: " + reqParent);
-
                 reqParent = folderSysmlId;
             }
         }
@@ -527,8 +518,6 @@ public class DoorsSync extends AbstractJavaWebScript {
 
         elements.put(specElement);
         postJson.put("elements", elements);
-
-        System.out.println("SysmlId + ResourceURL: " + specSysmlId + " , " + resourceUrl);
 
         if(handleElementUpdate( postJson )) {
             if (mapResourceUrl( specSysmlId, resourceUrl )) {
