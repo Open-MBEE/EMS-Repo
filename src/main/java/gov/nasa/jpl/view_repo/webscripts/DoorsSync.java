@@ -305,35 +305,35 @@ public class DoorsSync extends AbstractJavaWebScript {
 
                 if ((lastSync.compareTo( lastModifiedDoors ) < 0) && (lastSync.compareTo( lastModifiedMMS ) >= 0)) {
                     //Modified in Doors, Not Modified in MMS
-                    logger.info( "Modified in Doors, Not Modified in MMS" );
-                    logger.info( String.format( "lastSync Date: %s", lastSync ) );
-                    logger.info( String.format( "Doors Date: %s", lastModifiedDoors ) );
-                    logger.info( String.format( "MMS Date: %s", lastModifiedMMS ) );
+                    logger.debug( "Modified in Doors, Not Modified in MMS" );
+                    logger.debug( String.format( "lastSync Date: %s", lastSync ) );
+                    logger.debug( String.format( "Doors Date: %s", lastModifiedDoors ) );
+                    logger.debug( String.format( "MMS Date: %s", lastModifiedMMS ) );
 
                     //resourceUrl = createUpdateRequirementFromDoors( r, doors );
                 } else if ((lastSync.compareTo( lastModifiedDoors ) >= 0) && (lastSync.compareTo( lastModifiedMMS ) >= 0)) {
                     //Not Modified in Doors, Not Modified in MMS
-                    logger.info( "Not Modified in Doors, Not Modified in MMS" );
-                    logger.info( String.format( "lastSync Date: %s", lastSync ) );
-                    logger.info( String.format( "Doors Date: %s", lastModifiedDoors ) );
-                    logger.info( String.format( "MMS Date: %s", lastModifiedMMS ) );
+                    logger.debug( "Not Modified in Doors, Not Modified in MMS" );
+                    logger.debug( String.format( "lastSync Date: %s", lastSync ) );
+                    logger.debug( String.format( "Doors Date: %s", lastModifiedDoors ) );
+                    logger.debug( String.format( "MMS Date: %s", lastModifiedMMS ) );
 
                     processed.add( sysmlId );
                     //resourceUrl = createUpdateRequirementFromMMS( n );
                 } else if ((lastSync.compareTo( lastModifiedDoors ) >= 0) && (lastSync.compareTo( lastModifiedMMS ) < 0)) {
                     //Not Modified in Doors, Modified in MMS
-                    logger.info( "Not Modified in Doors, Modified in MMS" );
-                    logger.info( String.format( "lastSync Date: %s", lastSync ) );
-                    logger.info( String.format( "Doors Date: %s", lastModifiedDoors ) );
-                    logger.info( String.format( "MMS Date: %s", lastModifiedMMS ) );
+                    logger.debug( "Not Modified in Doors, Modified in MMS" );
+                    logger.debug( String.format( "lastSync Date: %s", lastSync ) );
+                    logger.debug( String.format( "Doors Date: %s", lastModifiedDoors ) );
+                    logger.debug( String.format( "MMS Date: %s", lastModifiedMMS ) );
 
                     resourceUrl = createUpdateRequirementFromMMS( n );
                 } else if ((lastSync.compareTo( lastModifiedDoors ) < 0) && (lastSync.compareTo( lastModifiedMMS ) < 0)) {
                     //Modified in Doors, Modified in MMS
-                    logger.info( "Modified in Doors, Modified in MMS" );
-                    logger.info( String.format( "lastSync Date: %s", lastSync ) );
-                    logger.info( String.format( "Doors Date: %s", lastModifiedDoors ) );
-                    logger.info( String.format( "MMS Date: %s", lastModifiedMMS ) );
+                    logger.debug( "Modified in Doors, Modified in MMS" );
+                    logger.debug( String.format( "lastSync Date: %s", lastSync ) );
+                    logger.debug( String.format( "Doors Date: %s", lastModifiedDoors ) );
+                    logger.debug( String.format( "MMS Date: %s", lastModifiedMMS ) );
 
                     processed.add( sysmlId );
                 }
