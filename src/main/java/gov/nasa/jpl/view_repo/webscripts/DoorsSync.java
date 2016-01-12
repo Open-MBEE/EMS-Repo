@@ -413,7 +413,7 @@ public class DoorsSync extends AbstractJavaWebScript {
         JSONObject specElement = new JSONObject();
         JSONArray specAppliedMetatypes = new JSONArray();
         JSONObject specSpecialization = new JSONObject();
-        JSONArray specClassifer = new JSONArray();
+        JSONArray specClassifier = new JSONArray();
 
         JSONObject reqElement = new JSONObject();
         JSONArray reqAppliedMetatypes = new JSONArray();
@@ -449,7 +449,7 @@ public class DoorsSync extends AbstractJavaWebScript {
         specElement.put("documentation", "");
         specAppliedMetatypes.put("_9_0_62a020a_1105704885251_933969_7897");
         specElement.put("appliedMetatypes", specAppliedMetatypes);
-        specClassifer.put("_11_5EAPbeta_be00301_1147873190330_159934_2220");
+        specClassifier.put("_11_5EAPbeta_be00301_1147873190330_159934_2220");
         specSpecialization.put("classifier", specClassifer);
         specSpecialization.put("type", "InstanceSpecification");
         specElement.put("specialization", specSpecialization);
