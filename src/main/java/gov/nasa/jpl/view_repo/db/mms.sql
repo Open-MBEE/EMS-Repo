@@ -57,18 +57,19 @@ create table doors
 (
   sysmlId text not null,
   resourceUrl text not null,
+  workspaceId text default 'master',
   lastSync timestamp default current_timestamp,
-  constraint unique_doors unique(sysmlId, resourceUrl)
+  constraint unique_doors unique(sysmlId, workspaceId, resourceUrl)
 );
 
 create index on doors(sysmlId);
 
 create table doorsFields
 (
-    project text not null,
-    propertyName text not null,
-    doorsAttrName text not null,
-    constraint unique_fields unique(project, propertyName)
+  project text not null,
+  propertyName text not null,
+  doorsAttrName text not null,
+  constraint unique_fields unique(project, propertyName)
 );
 
 -- given two nodeRefId, insert an edge between the two
