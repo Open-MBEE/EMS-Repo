@@ -1597,7 +1597,7 @@ System.out.println("RRRRRR");
         }
         
         Object result = getValueAsObject( context );
-
+        
         if ( specifier != null && context instanceof EmsScriptNode ) {
             EmsScriptNode node = (EmsScriptNode)context;
             if ( result == null ) {
@@ -1630,14 +1630,17 @@ System.out.println("RRRRRR");
         
     	// Assuming that we can only have EmsScriptNode context:
         Pair< Boolean, EmsScriptNode > p = ClassUtils.coerce( context, EmsScriptNode.class, false );
-        if ( p.first ) {
+        if ( p != null && p.first ) {
             context = p.second;
         }
         
     	if ( !( context instanceof EmsScriptNode ) ) {
+    	    if ( context instanceof Wraps ) {
+    	        return ( (Wraps<?>)context ).getValue( false );
+    	    }
     	    // TODO -- error????  Are there any other contexts than an EmsScriptNode that would have a property?
     	    Debug.error("context (" + context + ") is not an EmsScriptNode!");
-    	    return null;
+    	    return context;
     	} else {
 
     		EmsScriptNode node = (EmsScriptNode) context;
@@ -2250,17 +2253,18 @@ System.out.println("RRRRRR");
     @Override
     public boolean fixConstraintViolations( EmsScriptNode element,
                                             String version ) {
-        return fixConstraintViolations( Utils.newSet( element ) );
+        //return fixConstraintViolations( Utils.newSet( element ) );
+        return false;
     }
 
-    public boolean fixConstraintViolations( Set<EmsScriptNode> elements ) {
+    private boolean fixConstraintViolationsForSet( Set<EmsScriptNode> elements ) {
         fix( elements, null );
         return true;
     }
 
     public boolean fixConstraintViolations( EmsScriptNode... elements ) {
         logger.warn( "\n\n\n\ncalling fixConstraintViolations()\n\n\n\n\n" );
-        return fixConstraintViolations( Utils.toSet( elements ) );
+        return fixConstraintViolationsForSet( Utils.toSet( elements ) );
     }
     
     public void fix( final Set< EmsScriptNode > elements, final WorkspaceNode ws ) {
@@ -3086,8 +3090,8 @@ System.out.println("RRRRRR");
         if ( view == null ) return null;
         EmsScriptNode prev = null;
         EmsScriptNode parentNode = getParentView( view, null );
-        //System.out.println( "============>> getPreviousView(" + view.getSysmlName()
-        //                    + "): getParentView("+ view.getSysmlName() +") = " + parentNode );
+        System.out.println( "============>> getPreviousView(" + view.getSysmlName()
+                            + "): getParentView("+ view.getSysmlName() +") = " + parentNode );
         if ( parentNode == null ) return null;
         
         List< String > children = getChildViewIds( parentNode, null, null, null );
@@ -3109,8 +3113,8 @@ System.out.println("RRRRRR");
         //System.out.println( "============================================================>>");
         if ( prevId == null ) {
             prev = parentNode;
-            //System.out.println( "============>> getPreviousView(" + view.getSysmlName()
-            //                    + "): prevId = null; prev = parentNode = "+ prev );
+            System.out.println( "============>> getPreviousView(" + view.getSysmlName()
+                                + "): prevId = null; prev = parentNode = "+ prev );
             return prev;
         }
         
@@ -3129,14 +3133,15 @@ System.out.println("RRRRRR");
 //            prev = child;
 //        }
         
-        //System.out.println( "============>> getPreviousView(" + view.getSysmlName()
-        //                    + "): prev = "+ prev );
 
         // if there is no previous sibling, use the parent view as the previous
         if ( prev == null ) {
             prev = parentNode;
-            //System.out.println( "============>> getPreviousView(" + view.getSysmlName()
-            //                    + "): prev = parentNode = "+ prev );
+            System.out.println( "============>> getPreviousView(" + view.getSysmlName()
+                                + "): prev = parentNode = "+ prev );
+        } else {
+            System.out.println( "============>> getPreviousView(" + view.getSysmlName()
+                                + "): prev = "+ prev );
         }
         
         return prev;

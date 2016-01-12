@@ -99,7 +99,7 @@ public class List extends ArrayList< Viewable< EmsScriptNode > >
     	addToList( c );
     }
     protected void addToList( Object[] c ) {
-        System.out.println("addToList( " + MoreToString.Helper.toShortString( c ) + " )");
+        System.out.println("addToList( " + MoreToString.Helper.toString( c ) + " )");
         if ( c == null ) return;
         for (Object obj : c) {
             Throwable t = null;

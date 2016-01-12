@@ -32,6 +32,7 @@ import gov.nasa.jpl.ae.event.Call;
 import gov.nasa.jpl.ae.event.ConstraintExpression;
 import gov.nasa.jpl.ae.event.Expression;
 import gov.nasa.jpl.ae.event.Parameter;
+import gov.nasa.jpl.ae.event.ParameterListenerImpl;
 import gov.nasa.jpl.ae.solver.Constraint;
 import gov.nasa.jpl.ae.solver.ConstraintLoopSolver;
 import gov.nasa.jpl.ae.solver.SingleValueDomain;
@@ -1838,12 +1839,20 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         fix(elements, ws, getServices(), getResponse(), getResponseStatus(), getSystemModel(), getSystemModelAe() );
     }
 
+    public static void fixBetter( final Set< EmsScriptNode > elements, final WorkspaceNode ws, ServiceRegistry services, StringBuffer response, Status status, final EmsSystemModel systemModel, SystemModelToAeExpression< Object, EmsScriptNode, EmsScriptNode, String, Object, EmsSystemModel > systemModelToAe ) {
+        Map< String, ParameterListenerImpl > classes = getGlobalSystemModelAe().getClassData().getAeClasses();
+        for ( ParameterListenerImpl aeClass : classes.values() ) {
+            aeClass.satisfy( true, null );
+        }
+    }
+
     public static void fix( final Set< EmsScriptNode > elements, final WorkspaceNode ws, ServiceRegistry services, StringBuffer response, Status status, final EmsSystemModel systemModel, SystemModelToAeExpression< Object, EmsScriptNode, EmsScriptNode, String, Object, EmsSystemModel > systemModelToAe ) {
     
         log(Level.INFO, "Will attempt to fix constraint violations if found!");
     
-        SystemModelSolver< EmsScriptNode, Object, EmsScriptNode, EmsScriptNode, String, String, Object, EmsScriptNode, String, String, EmsScriptNode >  solver =
-                new SystemModelSolver< EmsScriptNode, Object, EmsScriptNode, EmsScriptNode, String, String, Object, EmsScriptNode, String, String, EmsScriptNode >(systemModel, new ConstraintLoopSolver() );
+        SystemModelSolver// < EmsScriptNode, Object, EmsScriptNode, EmsScriptNode, String, String, Object, EmsScriptNode, String, String, EmsScriptNode >  
+            solver = new SystemModelSolver( //< EmsScriptNode, Object, EmsScriptNode, EmsScriptNode, String, String, Object, EmsScriptNode, String, String, EmsScriptNode >(systemModel, 
+                                            new ConstraintLoopSolver() );
     
         Map< EmsScriptNode, Collection< Constraint > > constraintMap = getAeConstraints( elements, ws );
         ArrayList< Constraint > constraints = new ArrayList< Constraint >();

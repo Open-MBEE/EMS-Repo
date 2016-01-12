@@ -215,6 +215,8 @@ public class ViewGet extends AbstractJavaWebScript {
                  HttpServletResponse.SC_NOT_FOUND, "View not found with ID: %s", viewId);
         }
 
+        boolean oldExpressionStuff = EmsScriptNode.expressionStuff; 
+        EmsScriptNode.expressionStuff = true;
         if (checkPermissions(view, PermissionService.READ)) {
             try {
                 View v = new View(view);
@@ -225,8 +227,6 @@ public class ViewGet extends AbstractJavaWebScript {
                 // Temporarily turn expressionStuff on for reasons forgotten
                 // since this was added on Oct 21, 2014 with commit,
                 // dd7b11c63e9a603802d2ed492ef737e81eb3db87.
-                boolean oldExpressionStuff = EmsScriptNode.expressionStuff; 
-                EmsScriptNode.expressionStuff = true;
                 if ( gettingDisplayedElements ) {
                     if (logger.isDebugEnabled()) logger.debug("+ + + + + gettingDisplayedElements");
                     // TODO -- need to use recurse flag!
@@ -250,11 +250,12 @@ public class ViewGet extends AbstractJavaWebScript {
                     if (logger.isDebugEnabled()) logger.debug("+ + + + + just the view");
                     viewsJson.put( view.toJSONObject( workspace, dateTime ) );
                 }
-                EmsScriptNode.expressionStuff = oldExpressionStuff;
             } catch ( JSONException e ) {
                 log( Level.ERROR,
                      HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Could not create views JSON array");
                 e.printStackTrace();
+            } finally {
+                EmsScriptNode.expressionStuff = oldExpressionStuff;
             }
         }
     }
