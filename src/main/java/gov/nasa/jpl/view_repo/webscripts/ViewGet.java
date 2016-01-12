@@ -29,7 +29,6 @@
 
 package gov.nasa.jpl.view_repo.webscripts;
 
-import gov.nasa.jpl.mbee.util.Debug;
 import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.mbee.util.Timer;
 import gov.nasa.jpl.mbee.util.Utils;
@@ -215,8 +214,8 @@ public class ViewGet extends AbstractJavaWebScript {
                  HttpServletResponse.SC_NOT_FOUND, "View not found with ID: %s", viewId);
         }
 
-        boolean oldExpressionStuff = EmsScriptNode.expressionStuff; 
-        EmsScriptNode.expressionStuff = true;
+//        boolean oldExpressionStuff = EmsScriptNode.expressionStuff; 
+//        EmsScriptNode.expressionStuff = true;
         if (checkPermissions(view, PermissionService.READ)) {
             try {
                 View v = new View(view);
@@ -255,7 +254,7 @@ public class ViewGet extends AbstractJavaWebScript {
                      HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Could not create views JSON array");
                 e.printStackTrace();
             } finally {
-                EmsScriptNode.expressionStuff = oldExpressionStuff;
+//                EmsScriptNode.expressionStuff = oldExpressionStuff;
             }
         }
     }
