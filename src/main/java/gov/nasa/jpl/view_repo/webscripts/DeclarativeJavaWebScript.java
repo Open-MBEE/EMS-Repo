@@ -29,6 +29,7 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.extensions.webscripts.*;
@@ -79,7 +80,11 @@ public class DeclarativeJavaWebScript extends AbstractWebScript
             }
             model.put("status", status);
             model.put("cache", cache);
+
+            String origUser = AuthenticationUtil.getRunAsUser();
+			AuthenticationUtil.setRunAsUser("admin");
             NodeUtil.ppAddQualifiedNameId2Json(req, model); // TODO: weave in as aspect
+			AuthenticationUtil.setRunAsUser(origUser);
             
             try
             {
