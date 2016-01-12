@@ -508,24 +508,28 @@ public class DoorsSync extends AbstractJavaWebScript {
         JSONArray specAppliedMetatypes = new JSONArray();
         JSONObject specSpecialization = new JSONObject();
         JSONArray specClassifer = new JSONArray();
-        String specSysmlId = generateSysmlId();
+        String sysmlId = mapResourceUrl( resourceUrl );
 
-        specElement.put("name", name);
-        specElement.put("sysmlid", specSysmlId);
-        specElement.put("owner", parent);
-        specSpecialization.put("type", "Package");
-        specElement.put("specialization", specSpecialization);
+        if (sysmlId == null) {
+            sysmlId = generateSysmlId();
 
-        elements.put(specElement);
-        postJson.put("elements", elements);
+            specElement.put("name", name);
+            specElement.put("sysmlid", sysmlId);
+            specElement.put("owner", parent);
+            specSpecialization.put("type", "Package");
+            specElement.put("specialization", specSpecialization);
 
-        if(handleElementUpdate( postJson )) {
-            if (mapResourceUrl( specSysmlId, resourceUrl )) {
-                return specSysmlId;
+            elements.put(specElement);
+            postJson.put("elements", elements);
+
+            if(handleElementUpdate( postJson )) {
+                if (mapResourceUrl( sysmlId, resourceUrl )) {
+                    return sysmlId;
+                }
             }
         }
 
-        return null;
+        return sysmlId;
     }
 
     protected Set<Folder> getFolderHierarchyFromDoors(String resourceUrl) {
