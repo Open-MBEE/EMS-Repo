@@ -157,7 +157,18 @@ traits:
           description: If true, returns a simple json
           type: boolean
           required: false
-        
+  - formattable:
+      queryParameters:
+        format:
+          description: May be passed k or json.
+          type: string
+          required: false
+  - affectable:
+      queryParameters:
+        affectedIds:
+          description: If true, the request returns ids of elements affected by an element, E, in E's json.
+          type: boolean
+          required: false
           
 resourceTypes:
   - readCollection:
@@ -166,7 +177,7 @@ resourceTypes:
       description: Read operations for <<resourcePathName>>
       get:
           #is: [recursable, searchable, sliceable]
-          is: [recursable, sliceable] # Not searchable yet
+          is: [recursable, sliceable] # Not searchable or formattable, yet
           description: Read operation for <<resourcePathName>>
           responses:
               200:
@@ -304,12 +315,12 @@ resourceTypes:
           description: Delete the element specified by the Sysml ID
         get:
           description: Sysml ID for the element under consideration
-    /k:
-      type: collection
-      /{elementId}:
-        #type: collection
-        get:
-          description: get K text for the element specified by the Sysml ID 
+#    /k:
+#      type: collection
+#      /{elementId}:
+#        #type: collection
+#        get:
+#          description: get K text for the element specified by the Sysml ID 
     /configurations:
       #type: collection
       get:
@@ -509,19 +520,22 @@ resourceTypes:
           projectId:
             description: MD project ID for the project under consideration
     /search:
-      description: Service for searching for elements in a particular workspace
+      description: Service for searching for elements in a particular workspace. Works only on latest for workspace
       get:
-        is: [sliceable]
+        #is: [sliceable]
         queryParameters:
-          propertyName:
-            description: The property name to search for
-            required: false
           keyword:
             description: Mandatory field for specifying what to look for.
             required: true
           filters:
             description: Comma separated list of id, documentation, name, value, aspect, appliedMetatypes, metatypes to search against. If not specified, defaults to documentation. appliedMetatypes and metatypes search using the ID of the metatypes.
             required: true
+          maxItems:
+            description: Maximum items to display per filter specified, default is -1 (e.g., returns all results)
+            required: false
+          skipCount:
+            description: Page number to display, default is 0 (first page)
+            required: false
 #/operations:
 #  description: Service for executing operations, e.g., like the OCL Execution capabilities in MDK. Details still TBD.
 /diff:

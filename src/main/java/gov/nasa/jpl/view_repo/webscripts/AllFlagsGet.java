@@ -105,10 +105,10 @@ public class AllFlagsGet extends FlagSet {
         } else if (path.equalsIgnoreCase("versionCacheDebug")) {
             EmsScriptNode.versionCacheDebugPrint = val;
         }  else if (path.equalsIgnoreCase("viewpointExpressions")) {
-            if ( val && !EmsScriptNode.expressionStuff ) {
+            if ( val && !EmsScriptNode.expressionStuffDefault ) {
                 NodeUtil.jsonCache.clear();
             }
-            EmsScriptNode.expressionStuff = val;
+            EmsScriptNode.expressionStuffDefault = val;
             //EmsScriptNode.addingAffectedIds = val;
         } else if (path.equalsIgnoreCase("versionCache")) {
             NodeUtil.doVersionCaching = val;
@@ -180,7 +180,7 @@ public class AllFlagsGet extends FlagSet {
         } else if (path.equalsIgnoreCase("versionCacheDebug")) {
             return EmsScriptNode.versionCacheDebugPrint;
         }  else if (path.equalsIgnoreCase("viewpointExpressions")) {
-            return EmsScriptNode.expressionStuff;
+            return EmsScriptNode.expressionStuffDefault;
         }  else if (path.equalsIgnoreCase("versionCache")) {
             return NodeUtil.doVersionCaching;
         } else if (path.equalsIgnoreCase("versionHistoryCache")) {

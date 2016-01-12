@@ -41,7 +41,6 @@ import gov.nasa.jpl.mbee.util.Pair;
 import gov.nasa.jpl.mbee.util.Seen;
 import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.mbee.util.Utils;
-import gov.nasa.jpl.view_repo.db.Node;
 import gov.nasa.jpl.view_repo.db.PostgresHelper;
 import gov.nasa.jpl.view_repo.db.PostgresHelper.DbEdgeTypes;
 import gov.nasa.jpl.view_repo.sysml.View;
@@ -123,7 +122,8 @@ public class EmsScriptNode extends ScriptNode implements
 
     static Logger logger = Logger.getLogger( ScriptNode.class );
 
-    public static boolean expressionStuff = false; // The value here is ignored.
+    public static boolean expressionStuffDefault = false; // The value here is ignored.
+    public boolean expressionStuff = expressionStuffDefault; // The value here is ignored.
 
     public static boolean addingAffectedIds = false;
 
@@ -411,7 +411,7 @@ public class EmsScriptNode extends ScriptNode implements
             return new EmsScriptNode( ref, getServices() );
         }
         String msg = "Error! Node has HasWorkspace aspect but no source node!";
-        log( msg );
+        logDebug( msg );
         // Debug.error( msg );
         return null;
     }
@@ -789,14 +789,14 @@ public class EmsScriptNode extends ScriptNode implements
         if ( oldValue != null && value != null ) {
             if ( !value.equals( oldValue ) ) {
                 setProperty( acmType, value );
-                log( getName() + ": " + acmType
+                if ( logger.isDebugEnabled() ) logDebug( getName() + ": " + acmType
                      + " property updated to value = " + value );
                 return true;
             }
         }
         // Note: Per CMED-461, we are allowing properties to be set to null
         else {
-            log( getName() + ": " + acmType + " property created with value = "
+            logDebug( getName() + ": " + acmType + " property created with value = "
                  + value );
             boolean changed = setProperty( acmType, value );
             // If setting the property to null, the modified time is not changed
@@ -918,7 +918,7 @@ public class EmsScriptNode extends ScriptNode implements
                                  + ( v.length() > 100 ? " . . ." : "" ) + ")" );
                 }
                 if ( m.groupCount() != 4 ) {
-                    log( "Expected 4 match groups, got " + m.groupCount()
+                    if ( logger.isDebugEnabled() ) logDebug( "Expected 4 match groups, got " + m.groupCount()
                          + "! " + m );
                     break;
                 }
@@ -934,7 +934,7 @@ public class EmsScriptNode extends ScriptNode implements
                                               getSiteName( null, ws ),
                                               "images", ws, null );
                 if ( artNode == null || !artNode.exists() ) {
-                    log( "Failed to pull out image data for value! " + value );
+                    logDebug( "Failed to pull out image data for value! " + value );
                     break;
                 }
 
@@ -1221,7 +1221,7 @@ public class EmsScriptNode extends ScriptNode implements
                 }
 
             } else {
-                log( "Could not find type " + type );
+                if ( logger.isDebugEnabled() ) logDebug( "Could not find type " + type );
             }
         }
 
@@ -2313,17 +2313,19 @@ public class EmsScriptNode extends ScriptNode implements
     }
 
     /**
-     * Append onto the response for logging purposes
+     * Log a debug message
      * 
      * @param msg
-     *            Message to be appened to response TODO: fix logger for
-     *            EmsScriptNode
+     *            Debug message
      */
-    public void log( String msg ) {
-//System.out.println(msg);
-        // if (response != null) {
-        // response.append(msg + "\n");
-        // }
+    public void logDebug( String msg ) {
+        // TODO -- REVIEW -- This call used to append warnings/errors to the
+        // response but then was commented out (likely because they were
+        // repeated too much for different elements), so consider doing that
+        // again, maybe keeping track of duplicates; for example, 
+        //  debugLog(String msg,
+        //           StringBuffer response, Map<String, Pair< String, Integer > >responsesAndCountsByResponseId).
+        logger.debug( msg );
     }
 
     /**
@@ -2386,7 +2388,7 @@ public class EmsScriptNode extends ScriptNode implements
                                   + value
                                   + ")" );
                     if ( count > 0 ) {
-                        this.log( "ERROR! Potential infinite recursion!" );
+                        this.logDebug( "ERROR! Potential infinite recursion!" );
                         return false;
                     }
                     liveRef = getLiveNodeRefFromVersion();
@@ -2824,7 +2826,7 @@ public class EmsScriptNode extends ScriptNode implements
         if ( addingAffectedIds  ) {
             logger.debug( "addingAffectedIds = " + addingAffectedIds );
             if ( filter == null || filter.isEmpty() || filter.contains( "affectedIds" ) ) {
-                ArrayList< NodeRef > refs = this.getAffectedElementsRecursive( false, false, dateTime, getWorkspace(), false, false, true, false, null );
+                List< NodeRef > refs = this.getAffectedElementsRecursive( false, false, dateTime, getWorkspace(), false, false, true, false, null );
                 JSONArray affectedIds = addNodeRefIdsJSON( refs );
                 putInJson( elementJson, "affectedIds", affectedIds, filter );
             } else {
@@ -4088,7 +4090,7 @@ public class EmsScriptNode extends ScriptNode implements
                 changed = true;
             }
         } else {
-            log( "no write permissions " + id + "\n" );
+            if ( logger.isDebugEnabled() ) logDebug( "no write permissions " + id + "\n" );
         }
 
         return changed;
@@ -4929,44 +4931,6 @@ public class EmsScriptNode extends ScriptNode implements
         return r;
     }
 
-    // public NodeRef findSourceInParentWorkspace() {
-    // EmsScriptNode node = this;
-    // // make sure the folder's parent is replicated
-    // EmsScriptNode parent = node.getParent();
-    //
-    // if ( parent == null || parent.isWorkspaceTop() ) {
-    // parent = this; // put in the workspace
-    // }
-    // String parentName = parent != null && parent.exists() ? parent.getName()
-    // : null;
-    //
-    // // Get the parent in this workspace. In case there are multiple nodes
-    // // with the same cm:name, use the grandparent to disambiguate where it
-    // // should be.
-    // if ( parent != null && parent.exists() && !this.equals(
-    // parent.getWorkspace() ) ) {
-    // EmsScriptNode grandParent = parent.getParent();
-    // ArrayList< NodeRef > arr = NodeUtil.findNodeRefsByType( parentName,
-    // SearchType.CM_NAME.prefix, false, false, this, null, false, true,
-    // getServices(), false );
-    // for ( NodeRef ref : arr ) {
-    // EmsScriptNode p = new EmsScriptNode( ref, getServices() );
-    // EmsScriptNode gp = p.getParent();
-    // if ( grandParent == gp || ( grandParent != null && gp != null &&
-    // grandParent.getName().equals( gp.getName() ) ) ) {
-    // parent = p;
-    // break;
-    // }
-    // }
-    //
-    // if ( !this.equals( parent.getWorkspace() ) ) {
-    // parent = replicateWithParentFolders( parent );
-    // }
-    // } else if ( parent == null || !parent.exists() ) {
-    // Debug.error("Error! Bad parent when replicating folder chain! " + parent
-    // );
-    // }
-    // }
 
     /**
      * @param workspace
@@ -5266,7 +5230,7 @@ public class EmsScriptNode extends ScriptNode implements
             }
             setProperty( acmProperty, relationships );
         } else {
-            log( "no write permissions to append " + acmProperty + " to " + id
+            if ( logger.isDebugEnabled() ) logDebug( "no write permissions to append " + acmProperty + " to " + id
                  + "\n" );
         }
     }
@@ -5284,7 +5248,7 @@ public class EmsScriptNode extends ScriptNode implements
                 setProperty( acmProperty, relationships );
             }
         } else {
-            log( "no write permissions to remove " + acmProperty + " from "
+            if ( logger.isDebugEnabled() ) logDebug( "no write permissions to remove " + acmProperty + " from "
                  + id + "\n" );
         }
     }
@@ -5946,8 +5910,8 @@ public class EmsScriptNode extends ScriptNode implements
         return null;
     }
 
-    private ArrayList< String >
-            getSysmlIdsFromNodeRefs( ArrayList< NodeRef > nodeRefs ) {
+    private List< String >
+            getSysmlIdsFromNodeRefs( List< NodeRef > nodeRefs ) {
         ArrayList< String > ids = new ArrayList< String >();
         if ( nodeRefs != null ) {
             for ( NodeRef nodeRef : nodeRefs ) {
@@ -6012,8 +5976,8 @@ public class EmsScriptNode extends ScriptNode implements
         return jsonArray;
     }
 
-    private JSONArray addNodeRefIdsJSON( ArrayList< NodeRef > nodeRefs ) {
-        ArrayList< String > nodeIds = getSysmlIdsFromNodeRefs( nodeRefs );
+    private JSONArray addNodeRefIdsJSON( List< NodeRef > nodeRefs ) {
+        List< String > nodeIds = getSysmlIdsFromNodeRefs( nodeRefs );
         JSONArray ids = new JSONArray();
         for ( String nodeId : nodeIds ) {
             // Per CMED-461, allowing null; however, alfresco will never store
@@ -6121,7 +6085,7 @@ public class EmsScriptNode extends ScriptNode implements
         }
         
         // childViews
-        JSONArray childViewArr = node.computeChildViews();
+        JSONArray childViewArr = UpdateViewHierarchy.getChildViews( node );
         if ( childViewArr != null ) {
             json.put( "childViews", childViewArr );
         }
@@ -6130,58 +6094,7 @@ public class EmsScriptNode extends ScriptNode implements
         NodeRef contentsNode = (NodeRef) node.getNodeRefProperty( Acm.ACM_CONTENTS,
                                                                   dateTime, ws);
         putInJson( json, Acm.JSON_CONTENTS, addInternalJSON(contentsNode, ws, dateTime), filter );
-        
-        //System.out.println( json.toString( 4 ) );
 
-    }
-
-    private JSONObject buildJSONObjectToUpdateViewHierarchy(EmsScriptNode parentNode, List<EmsScriptNode> views){
-    	JSONObject jsonObj = new JSONObject();
-    	jsonObj.put(Acm.JSON_ID, parentNode.getSysmlId());
-    	
-    	return jsonObj;
-    }
-    
-    private void updateViewHierarchy(EmsScriptNode parentNode, List<EmsScriptNode> views){
-    	JSONObject jsonObj = buildJSONObjectToUpdateViewHierarchy(parentNode, views);
-    	
-    }
-    
-    private JSONArray getChildViewsByOwnedAttributes(EmsScriptNode parentNode){
-    	return UpdateViewHierarchy.getChildViews( this );
-    }
-    
-    private JSONArray buildJSONArrayFromView2View(List<EmsScriptNode> views){
-    	JSONArray childViews = new JSONArray();
-    	JSONObject jsonObj = null;
-    	for(EmsScriptNode node : views){
-    		jsonObj = new JSONObject();
-    		jsonObj.put("id", node.getSysmlId());
-    		jsonObj.put(Acm.JSON_AGGREGATION, "COMPOSITE");
-    		childViews.put(jsonObj);
-    	}
-    	return childViews;
-    }
-    
-    private JSONArray getChildViewsByView2View(EmsScriptNode parentNode){
-    	JSONArray childViews = null;
-    	EmsSystemModel esm = new EmsSystemModel(this.services);
-    	List<EmsScriptNode> views = esm.getChildViews(this);
-    	updateViewHierarchy(this, views);
-    	
-    	childViews = buildJSONArrayFromView2View(views);
-    	return childViews;
-    }
-    
-    private JSONArray computeChildViews() {
-        JSONArray childViews = getChildViewsByOwnedAttributes(this);
-        //handling backward compatibility with View/Product using view2view
-//        if(childViews == null || childViews.length() == 0){
-//        	childViews = getChildViewsByView2View(this);
-//        }
-        
-//        JSONArray childViewsArr = toJsonArrayOfSysmlIds( childViews );
-        return childViews;
     }
 
     public ArrayList<EmsScriptNode> getNodesOfViews( Collection< sysml.view.View< EmsScriptNode > > views ) {
@@ -6953,47 +6866,70 @@ public class EmsScriptNode extends ScriptNode implements
         return parent != null
                && parent.hasValueSpecProperty( this, dateTime, ws );
     }
-    public ArrayList<NodeRef> getAffectedElementsRecursive(boolean ignoreWorkspace, boolean onlyThisWorkspace, Date dateTime,
-			WorkspaceNode workspaceNode, boolean justFirst, boolean optimisticJustFirst, boolean exactMatch,
-			boolean includeDeleted, Seen<EmsScriptNode> seen){
-        ArrayList< NodeRef > allRefs = new ArrayList();
+    public List<NodeRef> getAffectedElementsRecursive(boolean ignoreWorkspace,
+                                                      boolean onlyThisWorkspace,
+                                                      Date dateTime,
+                                                      WorkspaceNode workspaceNode,
+                                                      boolean justFirst,
+                                                      boolean optimisticJustFirst,
+                                                      boolean exactMatch,
+                                                      boolean includeDeleted,
+                                                      Seen< EmsScriptNode > seen ) {
+        ArrayList< NodeRef > allRefs = new ArrayList< NodeRef >();
         Pair< Boolean, Seen< EmsScriptNode >> p = Utils.seen( this, true, seen );
         if ( p.first ) return allRefs;
         seen = p.second;
-        ArrayList< NodeRef > refs = this.getAffectedElements( false, false, dateTime, getWorkspace(), false, false, true, false );
-    		allRefs.addAll(refs);
-	    	for(NodeRef ref: refs){
-	        	EmsScriptNode node = new EmsScriptNode(ref, services);
-	        	allRefs.addAll(node.getAffectedElementsRecursive(false, false, dateTime, getWorkspace(), false, false, true, false, seen));
-	        };
+        ArrayList< NodeRef > refs =
+                this.getAffectedElements( false, false, dateTime,
+                                          getWorkspace(), false, false, true,
+                                          false );
+        allRefs.addAll( refs );
+        for ( NodeRef ref : refs ) {
+            EmsScriptNode node = new EmsScriptNode( ref, services );
+            List< NodeRef > moreRefs =
+                    node.getAffectedElementsRecursive( false, false, dateTime,
+                                                       getWorkspace(), false,
+                                                       false, true, false, seen );
+            allRefs.addAll( moreRefs );
+        };
     	return allRefs;
     }
-	public ArrayList<NodeRef> getAffectedElements(boolean ignoreWorkspace, boolean onlyThisWorkspace, Date dateTime,
-			WorkspaceNode workspaceNode, boolean justFirst, boolean optimisticJustFirst, boolean exactMatch,
-			boolean includeDeleted) {
 
-	    // setting dateTime to null since the only time we want affected
+    public ArrayList< NodeRef >
+            getAffectedElements( boolean ignoreWorkspace,
+                                 boolean onlyThisWorkspace, Date dateTime,
+                                 WorkspaceNode workspaceNode,
+                                 boolean justFirst,
+                                 boolean optimisticJustFirst,
+                                 boolean exactMatch, boolean includeDeleted ) {
+
+        // setting dateTime to null since the only time we want affected
         // elements is when something has changed (null = latest time).
-	    dateTime = null;
+        dateTime = null;
 
-		ArrayList<NodeRef> refs = NodeUtil.findNodeRefsByType(this.getNodeRef().toString(),
-				"@sysml\\:elementValueOfElement:\"", ignoreWorkspace, workspaceNode, onlyThisWorkspace, dateTime,
-				justFirst, optimisticJustFirst, exactMatch, services, includeDeleted, null);
-		ArrayList<NodeRef> newRefs = new ArrayList<NodeRef>();
-		for (NodeRef ref : refs) {
-			if (ref == null)
-				continue;
-			EmsScriptNode n = new EmsScriptNode(ref, getServices());
-			EmsScriptNode parent = n.getValueSpecOwner(dateTime, workspaceNode);
-			if (parent == null) {
-				newRefs.add(n.getNodeRef());
-			} else {
-				newRefs.add(parent.getNodeRef());
-			}
-		}
+        ArrayList< NodeRef > refs =
+                NodeUtil.findNodeRefsByType( this.getNodeRef().toString(),
+                                             "@sysml\\:elementValueOfElement:\"",
+                                             ignoreWorkspace, workspaceNode,
+                                             onlyThisWorkspace, dateTime,
+                                             justFirst, optimisticJustFirst,
+                                             exactMatch, services,
+                                             includeDeleted, null );
+        ArrayList< NodeRef > newRefs = new ArrayList< NodeRef >();
+        for ( NodeRef ref : refs ) {
+            if ( ref == null ) continue;
+            EmsScriptNode n = new EmsScriptNode( ref, getServices() );
+            EmsScriptNode parent =
+                    n.getValueSpecOwner( dateTime, workspaceNode );
+            if ( parent == null ) {
+                newRefs.add( n.getNodeRef() );
+            } else {
+                newRefs.add( parent.getNodeRef() );
+            }
+        }
 
-		return newRefs;
-	}
+        return newRefs;
+    }
 
     /**
      * @return the parent/owner (preferably not a ValueSpecification itself,
