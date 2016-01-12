@@ -40,6 +40,7 @@ create table nodes
   nodeType integer references nodeTypes(id) not null,
   sysmlId text not null unique
 );
+create index sysmlIndex on nodes(sysmlId);
 
 create table edges
 (
@@ -48,6 +49,9 @@ create table edges
   edgeType integer references edgeTypes(id) not null,
   constraint unique_edges unique(parent, child, edgeType)
 );
+
+create index childIndex on edges (child);
+create index parentIndex on edges (parent);
 
 -- given two nodeRefId, insert an edge between the two
 create or replace function insert_edge(text, text, text, integer)

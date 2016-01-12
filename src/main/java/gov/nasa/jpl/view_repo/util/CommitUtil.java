@@ -1020,13 +1020,20 @@ public class CommitUtil {
 					NodeUtil.processDocumentEdges(e.getString("sysmlid"), doc,
 							documentEdges);
 				}
-				if (e.has("specialization")
-						&& e.getJSONObject("specialization").has("view2view")) {
-					JSONArray view2viewProperty = e.getJSONObject(
-							"specialization").getJSONArray("view2view");
-					NodeUtil.processV2VEdges(e.getString("sysmlid"),
-							view2viewProperty, documentEdges);
-				}
+				if (e.has("specialization")) {
+				    JSONObject specialization = e.getJSONObject("specialization");
+        				if (specialization.has("view2view")) {
+        					JSONArray view2viewProperty = specialization.getJSONArray("view2view");
+        					NodeUtil.processV2VEdges(e.getString("sysmlid"),
+        							view2viewProperty, documentEdges);
+        				} else if (specialization.has( "contents" )) {
+        				    JSONObject contents = specialization.getJSONObject( "contents" );
+        				    NodeUtil.processContentsJson( e.getString("sysmlid"), contents, documentEdges );
+        				} else if (specialization.has( "instanceSpecificationSpecification" )) {
+        				    JSONObject iss = specialization.getJSONObject( "instanceSpecificationSpecification" );
+        				    NodeUtil.processInstanceSpecificationSpecificationJson( e.getString("sysmlid"), iss, documentEdges );
+        				}
+    				}
 			}
 
 			for (Pair<String, String> e : addEdges) {
@@ -1065,6 +1072,9 @@ public class CommitUtil {
 				if (e.getString("owner") != null)
 					pgh.insertEdge(e.getString("owner"),
 							e.getString("sysmlid"), DbEdgeTypes.REGULAR);
+				// need to update the reference for the node
+                pgh.updateNodeRefIds(e.getString("sysmlid"),
+                                     e.getString("versionedRefId"), e.getString("nodeRefId"));
 			}
 
 			for (Pair<String, String> e : documentEdges) {
@@ -1072,7 +1082,8 @@ public class CommitUtil {
 			}
 
 			pgh.close();
-		} catch (SQLException | ClassNotFoundException e1) {
+		} catch (Exception e1) {
+		    logger.warn( "Could not complete graph storage" );
 			e1.printStackTrace();
 		}
 

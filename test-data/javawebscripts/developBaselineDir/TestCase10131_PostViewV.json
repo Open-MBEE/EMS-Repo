@@ -1,0 +1,133 @@
+{"elements": [
+    {
+        "creator": "admin",
+        "isMetatype": false,
+        "editable": true,
+        "qualifiedName": "/no_site/no_site_no_project/holding_bin/Product X/VIEW V",
+        "modifier": "admin",
+        "name": "VIEW V",
+        "specialization": {
+            "childViews": [
+                {
+                    "aggregation": "COMPOSITE",
+                },
+                {
+                    "aggregation": "COMPOSITE",
+                },
+                {
+                    "aggregation": "COMPOSITE",
+                }
+            ],
+            "contents": {
+                "valueExpression": null,
+                "type": "Expression"
+            },
+            "type": "View"
+        },
+        "ownedAttribute": [
+        ]
+    },
+    {
+        "creator": "admin",
+        "editable": true,
+        "qualifiedName": "/no_site/no_site_no_project/holding_bin/Product X/VIEW V/null",
+        "modifier": "admin",
+        "specialization": {
+            "isSlot": false,
+            "isDerived": false,
+            "aggregation": "COMPOSITE",
+            "type": "Property"
+        }
+    },
+    {
+        "creator": "admin",
+        "editable": true,
+        "qualifiedName": "/no_site/no_site_no_project/holding_bin/null/null",
+        "modifier": "admin",
+        "specialization": {
+            "isSlot": false,
+            "isDerived": false,
+            "type": "Property"
+        }
+    },
+    {
+        "owner": "holding_bin_no_site_no_project",
+        "creator": "admin",
+        "editable": true,
+        "qualifiedName": "/no_site/no_site_no_project/holding_bin/null",
+        "modifier": "admin",
+        "specialization": {
+            "type": "Association",
+            "ownedEnd": [],
+        },
+    },
+    {
+        "owner": "holding_bin_no_site_no_project",
+        "creator": "admin",
+        "editable": true,
+        "qualifiedName": "/no_site/no_site_no_project/holding_bin/null",
+        "modifier": "admin",
+        "specialization": {
+            "type": "Association",
+            "ownedEnd": [],
+        },
+    },
+    {
+        "creator": "admin",
+        "editable": true,
+        "qualifiedName": "/no_site/no_site_no_project/holding_bin/null/null",
+        "modifier": "admin",
+        "specialization": {
+            "isSlot": false,
+            "isDerived": false,
+            "type": "Property"
+        }
+    },
+    {
+        "creator": "admin",
+        "editable": true,
+        "qualifiedName": "/no_site/no_site_no_project/holding_bin/Product X/VIEW V/null",
+        "modifier": "admin",
+        "specialization": {
+            "isSlot": false,
+            "isDerived": false,
+            "aggregation": "COMPOSITE",
+            "type": "Property"
+        }
+    },
+    {
+        "owner": "holding_bin_no_site_no_project",
+        "creator": "admin",
+        "editable": true,
+        "qualifiedName": "/no_site/no_site_no_project/holding_bin/null",
+        "modifier": "admin",
+        "specialization": {
+            "type": "Association",
+            "ownedEnd": [],
+        },
+    },
+    {
+        "creator": "admin",
+        "editable": true,
+        "qualifiedName": "/no_site/no_site_no_project/holding_bin/Product X/VIEW V/null",
+        "modifier": "admin",
+        "specialization": {
+            "isSlot": false,
+            "isDerived": false,
+            "aggregation": "COMPOSITE",
+            "type": "Property"
+        }
+    },
+    {
+        "creator": "admin",
+        "editable": true,
+        "qualifiedName": "/no_site/no_site_no_project/holding_bin/null/null",
+        "modifier": "admin",
+        "specialization": {
+            "isSlot": false,
+            "isDerived": false,
+            "type": "Property"
+        }
+    }
+]}
+200

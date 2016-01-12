@@ -1,0 +1,26 @@
+{"elements": [{
+    "creator": "admin",
+    "isMetatype": false,
+    "editable": true,
+    "qualifiedName": "/no_site/no_site_no_project/holding_bin/Product X/VIEW V",
+    "modifier": "admin",
+    "name": "VIEW V",
+    "specialization": {
+        "childViews": [
+            {
+                "aggregation": "COMPOSITE",
+            },
+            {
+                "aggregation": "COMPOSITE",
+            }
+        ],
+        "contents": {
+            "valueExpression": null,
+            "type": "Expression"
+        },
+        "type": "View"
+    },
+    "ownedAttribute": [
+    ]
+}]}
+200

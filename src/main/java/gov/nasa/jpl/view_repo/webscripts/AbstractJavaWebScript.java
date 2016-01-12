@@ -912,15 +912,17 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
             searchForElements( String type, String pattern,
                                        boolean ignoreWorkspace,
                                        WorkspaceNode workspace, Date dateTime ) {
-        if (NodeUtil.doGraphDb) {
+
+        // always use DB for search on latest
+        //if (NodeUtil.doGraphDb) { 
             if (workspace == null && dateTime == null) {
                 return searchForElementsPostgres( type, pattern, ignoreWorkspace, workspace, dateTime );
             } else {
                 return searchForElementsOriginal( type, pattern, ignoreWorkspace, workspace, dateTime );
             }
-        } else {
-            return searchForElementsOriginal( type, pattern, ignoreWorkspace, workspace, dateTime );
-        }
+//        } else {
+//            return searchForElementsOriginal( type, pattern, ignoreWorkspace, workspace, dateTime );
+//        }
     }
 
 	/**

@@ -535,8 +535,9 @@ public class MmsDiffGet extends AbstractJavaWebScript {
                                                     services, true );
             if ( NodeUtil.exists( ref ) ) {
                 EmsScriptNode node = new EmsScriptNode( ref, services );
-             // make sure to includeQualified as DeclarativeWebscripts can't add qualified Ids to diffs
+                // always includeQualifed as DeclarativeWebscripts can't add qualified Ids to diffs (from point in time)
                 boolean isQualified = true;
+                if (NodeUtil.doPostProcessQualified) isQualified = true; // enforce sine diff always needs it
                 elementJson = node.toJSONObject( null, ws, dateTime, isQualified, false, null );
             }
         }

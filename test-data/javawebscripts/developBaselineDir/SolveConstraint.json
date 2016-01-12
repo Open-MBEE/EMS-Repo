@@ -23,7 +23,6 @@
             "isSlot": false,
             "value": [{
                 "valueExpression": null,
-                "integer": -1145811380,
                 "type": "LiteralInteger"
             }],
             "type": "Property"
@@ -118,7 +117,6 @@
             "isSlot": false,
             "value": [{
                 "valueExpression": null,
-                "integer": 10,
                 "type": "LiteralInteger"
             }],
             "type": "Property"
@@ -139,7 +137,6 @@
             "isSlot": false,
             "value": [{
                 "valueExpression": null,
-                "integer": 22,
                 "type": "LiteralInteger"
             }],
             "type": "Property"

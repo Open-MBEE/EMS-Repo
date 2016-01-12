@@ -1570,9 +1570,33 @@ public class EmsScriptNode extends ScriptNode implements
 
         ArrayList< NodeRef > ownedChildren = null;
 
-        ArrayList< NodeRef > oldChildren =
-                this.getPropertyNodeRefs( childrenType, false, dateTime,
-                                          findDeleted, false, ws );
+        ArrayList< NodeRef > oldChildren = null;
+
+        // FIXME: use DB, for some DB is slow
+        //        if (!(NodeUtil.doGraphDb && dateTime == null && ws == null)) {
+            oldChildren = this.getPropertyNodeRefs( childrenType, false, dateTime,
+                                                    findDeleted, false, ws );
+//        } else {
+//            PostgresHelper pgh = new PostgresHelper( ws );
+//            try {
+//                pgh.connect();
+//                List< Pair< String, Pair<String, String>>> dbChildren = pgh.getChildren( this.getSysmlId(), DbEdgeTypes.REGULAR, 1 );
+//                oldChildren = new ArrayList< NodeRef >();
+//                for (int ii = 0; ii < dbChildren.size(); ii++) {
+//                    if (!dbChildren.get(ii).first.equals( this.getSysmlId() )) {
+//                        String childNodeRefString = dbChildren.get( ii ).second.first;
+//                        oldChildren.add( new NodeRef(childNodeRefString) );
+//                    }
+//                }
+//                pgh.close();
+//            } catch ( ClassNotFoundException e ) {
+//                // TODO Auto-generated catch block
+//                e.printStackTrace();
+//            } catch ( SQLException e ) {
+//                // TODO Auto-generated catch block
+//                e.printStackTrace();
+//            }
+//        }
 
         if ( oldChildren != null ) {
             ownedChildren = oldChildren;
@@ -2663,7 +2687,9 @@ public class EmsScriptNode extends ScriptNode implements
             toJSONObject( WorkspaceNode ws, Date dateTime )
                                                            throws JSONException {
         // don't include qualified except for diffs, as added by DeclarativeJavaWebScript
-        return toJSONObject( null, ws, dateTime, false, false, null );
+        boolean isQualified = true;
+        if (NodeUtil.doPostProcessQualified) isQualified = false;
+        return toJSONObject( null, ws, dateTime, isQualified, false, null );
     }
 
     public
@@ -3430,7 +3456,7 @@ public class EmsScriptNode extends ScriptNode implements
 
         
         // lets add in the document information
-        if ( isIncludeDocument ) { // && NodeUtil.doGraphDb ) {
+        if ( isIncludeDocument ) { // && NodeUtil.doGraphDb ) { // always use graph database for documents
             JSONArray relatedDocuments = new JSONArray();
 
             // if document, just add itself as related doc, otherwise use postgres helper
@@ -3455,9 +3481,27 @@ public class EmsScriptNode extends ScriptNode implements
                 PostgresHelper pgh = new PostgresHelper(workspace);
                 try {
                     pgh.connect();
-                    Map< String, Set< String >> root2immediate = 
-                            pgh.getImmediateParentRoots( this.getSysmlId(), DbEdgeTypes.DOCUMENT );
                     
+                    // need to recurse of getImmediateParents recursively, since root parent
+                    // may not be a document.
+                    
+                    Map<String, Set<String>> root2immediate = new HashMap<String, Set<String>>();
+                    
+                    Set< Pair< String, String >> immediateParents = pgh.getImmediateParents( this.getSysmlId(), DbEdgeTypes.DOCUMENT );
+                    Set< Pair<String, String>> viewImmediateParents = new HashSet<Pair<String, String>>();
+                    for (Pair<String, String> immediateParent: immediateParents) {
+                        viewImmediateParents.addAll( getDbGraphDoc( immediateParent, Acm.ACM_VIEW, pgh, null ) );
+                    }
+                    for (Pair<String, String> immediateParent: viewImmediateParents) {
+                        Set<Pair<String, String>> rootIds = getDbGraphDoc(immediateParent, Acm.ACM_PRODUCT, pgh, null);
+                        for (Pair<String, String> rootId: rootIds) {
+                            if ( !root2immediate.containsKey( rootId.first  )) {
+                                root2immediate.put(rootId.first, new HashSet<String>());
+                            }
+                            root2immediate.get(rootId.first).add(immediateParent.first);
+                        }
+                    }
+                                        
                     // create JSON by traversing root 2 immediate parents map
                     for ( String rootParentId : root2immediate.keySet() ) {
                         EmsScriptNode rootParentNode =
@@ -3516,6 +3560,31 @@ public class EmsScriptNode extends ScriptNode implements
         element = NodeUtil.newJsonObject( elementString );
 
         return element;
+    }
+
+    private Set<Pair<String, String>> getDbGraphDoc( Pair< String, String > child,
+                                       String acmType, PostgresHelper pgh, Set<String> visited ) {
+        Set<Pair<String, String>> result = new HashSet<Pair<String, String>>();
+        if (visited == null) {
+            visited = new HashSet<String>();
+        }
+        
+        Set< Pair< String, String >> immediateParents = pgh.getImmediateParents( child.first, DbEdgeTypes.DOCUMENT );
+        
+        for (Pair<String, String> immediateParent: immediateParents) {
+            EmsScriptNode parentNode = new EmsScriptNode(new NodeRef(immediateParent.second), services, null);
+            if ( parentNode.hasAspect( acmType ) ) {
+                result.add( immediateParent );
+            } else {
+                // break if we hit cycle, e.g. result already has the immediateParent
+                if (!visited.contains( immediateParent.first )) {
+                    visited.add( immediateParent.first );
+                    result.addAll( getDbGraphDoc(immediateParent, acmType, pgh, visited) );
+                }
+            }
+        }
+        
+        return result;
     }
 
     public

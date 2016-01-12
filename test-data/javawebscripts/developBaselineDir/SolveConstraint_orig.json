@@ -1,167 +1,210 @@
-{"elements": [
-    {
-        "qualifiedId": "/europa/123456/op_ev_31835/op_param_31868",
-        "name": "x",
-        "qualifiedName": "/europa/JW_TEST/GreaterEquals/x",
-        "sysmlid": "op_param_31868",
-        "documentation": "",
-        "owner": "op_ev_31835",
-        "read": "2015-03-27T09:04:14.423-0700",
-        "specialization": {"type": "Element"},
-        "editable": true,
-        "creator": "admin",
-        "modified": "2015-03-27T09:04:09.688-0700"
-    },
-    {
-        "qualifiedId": "/europa/123456/arg_ev_33001",
-        "name": "initialDuration",
-        "qualifiedName": "/europa/JW_TEST/initialDuration",
-        "sysmlid": "arg_ev_33001",
-        "documentation": "",
-        "owner": "123456",
-        "read": "2015-03-27T09:04:14.424-0700",
-        "specialization": {
-            "propertyType": null,
-            "isDerived": false,
-            "isSlot": false,
-            "value": [{
-                "valueExpression": null,
-                "integer": -1145811380,
-                "type": "LiteralInteger"
-            }],
-            "type": "Property"
+{
+    "elements": [
+        {
+            "owner": "123456",
+            "creator": "admin",
+            "read": "2016-01-07T13:14:38.728-0800",
+            "created": "Thu Jan 07 13:02:03 PST 2016",
+            "qualifiedName": "/europa/JW_TEST2/duration",
+            "editable": true,
+            "modifier": "admin",
+            "documentation": "",
+            "siteCharacterizationId": "europa",
+            "sysmlid": "arg_ev_38307",
+            "nodeRefId": "workspace://SpacesStore/0e5b7105-94d2-4a2a-87d6-a9465140200f",
+            "versionedRefId": "versionStore://version2Store/c4cfd11d-59e7-47f9-84de-48a124b8ea3c",
+            "qualifiedId": "/europa/123456/arg_ev_38307",
+            "name": "duration",
+            "modified": "2016-01-07T13:02:03.928-0800",
+            "specialization": {
+                "isSlot": false,
+                "isDerived": false,
+                "propertyType": null,
+                "type": "Property",
+                "value": [{
+                    "valueExpression": null,
+                    "integer": 22,
+                    "type": "LiteralInteger"
+                }]
+            }
         },
-        "editable": true,
-        "creator": "admin",
-        "modified": "2015-03-27T09:04:14.394-0700"
-    },
-    {
-        "qualifiedId": "/europa/123456/op_ev_31835/op_param_31869",
-        "name": "y",
-        "qualifiedName": "/europa/JW_TEST/GreaterEquals/y",
-        "sysmlid": "op_param_31869",
-        "documentation": "",
-        "owner": "op_ev_31835",
-        "read": "2015-03-27T09:04:14.428-0700",
-        "specialization": {"type": "Element"},
-        "editable": true,
-        "creator": "admin",
-        "modified": "2015-03-27T09:04:09.720-0700"
-    },
-    {
-        "qualifiedId": "/europa/123456/op_ev_31835/op_param_31867",
-        "name": "result",
-        "qualifiedName": "/europa/JW_TEST/GreaterEquals/result",
-        "sysmlid": "op_param_31867",
-        "documentation": "",
-        "owner": "op_ev_31835",
-        "read": "2015-03-27T09:04:14.430-0700",
-        "specialization": {"type": "Element"},
-        "editable": true,
-        "creator": "admin",
-        "modified": "2015-03-27T09:04:09.658-0700"
-    },
-    {
-        "qualifiedId": "/europa/123456/op_ev_31835",
-        "name": "GreaterEquals",
-        "qualifiedName": "/europa/JW_TEST/GreaterEquals",
-        "sysmlid": "op_ev_31835",
-        "documentation": "",
-        "owner": "123456",
-        "read": "2015-03-27T09:04:14.431-0700",
-        "specialization": {
-            "parameters": [
-                "op_param_31867",
-                "op_param_31868",
-                "op_param_31869"
-            ],
-            "type": "Operation"
+        {
+            "owner": "123456",
+            "creator": "admin",
+            "read": "2016-01-07T13:14:38.735-0800",
+            "created": "Thu Jan 07 13:02:02 PST 2016",
+            "qualifiedName": "/europa/JW_TEST2/GreaterEquals",
+            "editable": true,
+            "modifier": "admin",
+            "documentation": "",
+            "siteCharacterizationId": "europa",
+            "sysmlid": "op_ev_31835",
+            "nodeRefId": "workspace://SpacesStore/12397b3a-df79-41c3-96f9-445e7436200e",
+            "versionedRefId": "versionStore://version2Store/edaa6449-27b6-478b-ad87-17deaa06a5d3",
+            "qualifiedId": "/europa/123456/op_ev_31835",
+            "name": "GreaterEquals",
+            "modified": "2016-01-07T13:02:03.649-0800",
+            "specialization": {
+                "type": "Operation",
+                "parameters": [
+                    "op_param_31867",
+                    "op_param_31868",
+                    "op_param_31869"
+                ]
+            }
         },
-        "editable": true,
-        "creator": "admin",
-        "modified": "2015-03-27T09:04:09.608-0700"
-    },
-    {
-        "qualifiedId": "/europa/123456/constraint_32165",
-        "name": "",
-        "qualifiedName": "/europa/JW_TEST/",
-        "sysmlid": "constraint_32165",
-        "documentation": "",
-        "owner": "123456",
-        "read": "2015-03-27T09:04:14.435-0700",
-        "specialization": {
-            "specification": {
-                "valueExpression": null,
-                "operand": [
-                    {
-                        "element": "op_ev_31835",
-                        "valueExpression": null,
-                        "type": "ElementValue"
-                    },
-                    {
-                        "element": "arg_ev_38307_1",
-                        "valueExpression": null,
-                        "type": "ElementValue"
-                    },
-                    {
-                        "element": "arg_ev_33001",
-                        "valueExpression": null,
-                        "type": "ElementValue"
-                    }
-                ],
-                "type": "Expression"
-            },
-            "type": "Constraint"
+        {
+            "owner": "op_ev_31835",
+            "creator": "admin",
+            "read": "2016-01-07T13:14:38.742-0800",
+            "created": "Thu Jan 07 13:02:03 PST 2016",
+            "qualifiedName": "/europa/JW_TEST2/GreaterEquals/y",
+            "editable": true,
+            "modifier": "admin",
+            "documentation": "",
+            "siteCharacterizationId": "europa",
+            "sysmlid": "op_param_31869",
+            "nodeRefId": "workspace://SpacesStore/251cbbea-93db-4445-a192-187a811a79e6",
+            "versionedRefId": "versionStore://version2Store/141351ec-597f-4e1e-825f-3dcdb5c99caa",
+            "qualifiedId": "/europa/123456/op_ev_31835/op_param_31869",
+            "name": "y",
+            "modified": "2016-01-07T13:02:03.829-0800",
+            "specialization": {"type": "Element"}
         },
-        "editable": true,
-        "creator": "admin",
-        "modified": "2015-03-27T09:04:09.180-0700"
-    },
-    {
-        "qualifiedId": "/europa/123456/arg_ev_38307_1",
-        "name": "duration_1",
-        "qualifiedName": "/europa/JW_TEST/duration_1",
-        "sysmlid": "arg_ev_38307_1",
-        "documentation": "",
-        "owner": "123456",
-        "read": "2015-03-27T09:04:14.444-0700",
-        "specialization": {
-            "propertyType": null,
-            "isDerived": false,
-            "isSlot": false,
-            "value": [{
-                "valueExpression": null,
-                "integer": 10,
-                "type": "LiteralInteger"
-            }],
-            "type": "Property"
+        {
+            "owner": "123456",
+            "creator": "admin",
+            "read": "2016-01-07T13:14:38.748-0800",
+            "created": "Thu Jan 07 13:02:02 PST 2016",
+            "qualifiedName": "/europa/JW_TEST2/duration_1",
+            "editable": true,
+            "modifier": "admin",
+            "documentation": "",
+            "siteCharacterizationId": "europa",
+            "sysmlid": "arg_ev_38307_1",
+            "nodeRefId": "workspace://SpacesStore/42ed6913-0a3b-45bc-8494-8966ab20acbb",
+            "versionedRefId": "versionStore://version2Store/4d91d56c-52ca-46d8-b1fb-97d58e6a66f3",
+            "qualifiedId": "/europa/123456/arg_ev_38307_1",
+            "name": "duration_1",
+            "modified": "2016-01-07T13:02:03.533-0800",
+            "specialization": {
+                "isSlot": false,
+                "isDerived": false,
+                "propertyType": null,
+                "type": "Property",
+                "value": [{
+                    "valueExpression": null,
+                    "integer": 10,
+                    "type": "LiteralInteger"
+                }]
+            }
         },
-        "editable": true,
-        "creator": "admin",
-        "modified": "2015-03-27T09:04:09.399-0700"
-    },
-    {
-        "qualifiedId": "/europa/123456/arg_ev_38307",
-        "name": "duration",
-        "qualifiedName": "/europa/JW_TEST/duration",
-        "sysmlid": "arg_ev_38307",
-        "documentation": "",
-        "owner": "123456",
-        "read": "2015-03-27T09:04:14.448-0700",
-        "specialization": {
-            "propertyType": null,
-            "isDerived": false,
-            "isSlot": false,
-            "value": [{
-                "valueExpression": null,
-                "integer": 22,
-                "type": "LiteralInteger"
-            }],
-            "type": "Property"
+        {
+            "owner": "op_ev_31835",
+            "creator": "admin",
+            "read": "2016-01-07T13:14:38.754-0800",
+            "created": "Thu Jan 07 13:02:02 PST 2016",
+            "qualifiedName": "/europa/JW_TEST2/GreaterEquals/result",
+            "editable": true,
+            "modifier": "admin",
+            "documentation": "",
+            "siteCharacterizationId": "europa",
+            "sysmlid": "op_param_31867",
+            "nodeRefId": "workspace://SpacesStore/7cbc1eb4-032d-4208-a6c2-dc3d32f029ca",
+            "versionedRefId": "versionStore://version2Store/11836afa-9cba-463e-b61a-a4ff804abae2",
+            "qualifiedId": "/europa/123456/op_ev_31835/op_param_31867",
+            "name": "result",
+            "modified": "2016-01-07T13:02:03.725-0800",
+            "specialization": {"type": "Element"}
         },
-        "editable": true,
-        "creator": "admin",
-        "modified": "2015-03-27T09:04:09.511-0700"
-    }
-]}
-200
+        {
+            "owner": "123456",
+            "creator": "admin",
+            "read": "2016-01-07T13:14:38.760-0800",
+            "created": "Thu Jan 07 13:02:03 PST 2016",
+            "qualifiedName": "/europa/JW_TEST2/",
+            "editable": true,
+            "modifier": "admin",
+            "documentation": "",
+            "siteCharacterizationId": "europa",
+            "sysmlid": "constraint_32165",
+            "nodeRefId": "workspace://SpacesStore/b2efc8f8-efd7-4928-8a36-4824385c8848",
+            "versionedRefId": "versionStore://version2Store/d2b766e7-2521-4733-9247-4100c7cd2d3c",
+            "qualifiedId": "/europa/123456/constraint_32165",
+            "name": "",
+            "modified": "2016-01-07T13:02:04.344-0800",
+            "specialization": {
+                "specification": {
+                    "valueExpression": null,
+                    "type": "Expression",
+                    "operand": [
+                        {
+                            "valueExpression": null,
+                            "type": "ElementValue",
+                            "element": "op_ev_31835"
+                        },
+                        {
+                            "valueExpression": null,
+                            "type": "ElementValue",
+                            "element": "arg_ev_38307_1"
+                        },
+                        {
+                            "valueExpression": null,
+                            "type": "ElementValue",
+                            "element": "arg_ev_33001"
+                        }
+                    ]
+                },
+                "type": "Constraint"
+            }
+        },
+        {
+            "owner": "op_ev_31835",
+            "creator": "admin",
+            "read": "2016-01-07T13:14:38.770-0800",
+            "created": "Thu Jan 07 13:02:03 PST 2016",
+            "qualifiedName": "/europa/JW_TEST2/GreaterEquals/x",
+            "editable": true,
+            "modifier": "admin",
+            "documentation": "",
+            "siteCharacterizationId": "europa",
+            "sysmlid": "op_param_31868",
+            "nodeRefId": "workspace://SpacesStore/b7f2c466-85a3-428a-a57c-5232b0ad79da",
+            "versionedRefId": "versionStore://version2Store/4c0a9ff3-a08a-4f2e-91e3-690d796890d0",
+            "qualifiedId": "/europa/123456/op_ev_31835/op_param_31868",
+            "name": "x",
+            "modified": "2016-01-07T13:02:03.778-0800",
+            "specialization": {"type": "Element"}
+        },
+        {
+            "owner": "123456",
+            "creator": "admin",
+            "read": "2016-01-07T13:14:38.775-0800",
+            "created": "Thu Jan 07 13:02:03 PST 2016",
+            "qualifiedName": "/europa/JW_TEST2/initialDuration",
+            "editable": true,
+            "modifier": "admin",
+            "documentation": "",
+            "siteCharacterizationId": "europa",
+            "sysmlid": "arg_ev_33001",
+            "nodeRefId": "workspace://SpacesStore/e705bb88-d504-4374-9d3d-ee5548d059b9",
+            "versionedRefId": "versionStore://version2Store/6e8ed5d7-c9f4-4cb5-886f-9b9f6244602a",
+            "qualifiedId": "/europa/123456/arg_ev_33001",
+            "name": "initialDuration",
+            "modified": "2016-01-07T13:02:04.604-0800",
+            "specialization": {
+                "isSlot": false,
+                "isDerived": false,
+                "propertyType": null,
+                "type": "Property",
+                "value": [{
+                    "valueExpression": null,
+                    "integer": 11,
+                    "type": "LiteralInteger"
+                }]
+            }
+        }
+    ],
+    "message": "Could not complete DB transaction, see Alfresco logs for details"
+}
+400

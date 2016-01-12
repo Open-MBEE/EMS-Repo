@@ -29,6 +29,7 @@
   <url>/flags/cacheSnapshots?on={on?}&amp;off={off?}</url>
   <url>/flags/checkMmsVersions?on={on?}&amp;off={off?}</url>
   <url>/flags/graphDb?on={on?}&amp;off={off?}</url>
+  <url>/flags/postProcessQualified?on={on?}&amp;off={off?}</url>
   <authentication>user</authentication>
   <format default="html">argument</format>
   <family>EMS Utils</family>

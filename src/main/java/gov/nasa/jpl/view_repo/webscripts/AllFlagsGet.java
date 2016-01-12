@@ -37,7 +37,8 @@ public class AllFlagsGet extends FlagSet {
                            "diffDefaultIsMerge",
                            "cacheSnapshots",
                            "checkMmsVersions",
-                           "graphDb"};
+                           "graphDb",
+                           "postProcessQualified"};
     
     public String[] getAllFlags() {
         return flags;
@@ -131,6 +132,8 @@ public class AllFlagsGet extends FlagSet {
         	AbstractJavaWebScript.checkMmsVersions = val;
         } else if (path.equalsIgnoreCase("graphDb")) {
             NodeUtil.doGraphDb = val;
+        } else if (path.equalsIgnoreCase("postProcessQualified")) {
+            NodeUtil.doPostProcessQualified = val;
         }
         return true;
     }
@@ -198,6 +201,8 @@ public class AllFlagsGet extends FlagSet {
             return NodeUtil.doGraphDb;
         } else if (path.equalsIgnoreCase("checkMmsVersions")){
         	    return AbstractJavaWebScript.checkMmsVersions;
+        } else if (path.equalsIgnoreCase( "postProcessQualified" )) {
+            return NodeUtil.doPostProcessQualified;
         }
         return false;
     }
@@ -277,6 +282,8 @@ public class AllFlagsGet extends FlagSet {
         	    return false;
         } else if (path.equalsIgnoreCase( "doGraphDb" )) {
             return false;
+        } else if (path.equalsIgnoreCase( "doPostProcessQualified" )) {
+            return false;
         }
         return false;
     };
@@ -349,6 +356,8 @@ public class AllFlagsGet extends FlagSet {
         	    return "checkMmsVersions";
         } else if (path.equalsIgnoreCase("graphDb")) {
             return "graphDb";
+        } else if (path.equalsIgnoreCase("postProcessQualified")) {
+            return "postProcessQualified";
         }
         return null;
     }

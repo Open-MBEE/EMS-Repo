@@ -1,32 +1,29 @@
-{
-    "message": "[WARNING]: The type supplied Conform is different than the stored type DirectedRelationship\n[WARNING]: The type supplied Untyped is different than the stored type Element\n",
-    "elements": [
-        {
-            "modifier": "admin",
-            "qualifiedId": "/europa/123456/aspect_history_zzz/directed_relationship_zzz",
-            "qualifiedName": "/europa/JW_TEST2/null/null",
-            "sysmlid": "directed_relationship_zzz",
-            "documentation": "d is d",
-            "owner": "aspect_history_zzz",
-            "specialization": {
-                "source": null,
-                "target": null,
-                "type": "Conform"
-            },
-            "editable": true,
-            "creator": "admin",
-        },
-        {
-            "modifier": "admin",
-            "qualifiedId": "/europa/123456/aspect_history_zzz/element_zzz",
-            "qualifiedName": "/europa/JW_TEST2/null/null",
-            "sysmlid": "element_zzz",
-            "documentation": "e is e",
-            "owner": "aspect_history_zzz",
-            "specialization": {"type": "Untyped"},
-            "editable": true,
-            "creator": "admin",
+{"elements": [
+    {
+        "owner": "aspect_history_zzz",
+        "creator": "admin",
+        "editable": true,
+        "qualifiedName": "/europa/JW_TEST2/null/null",
+        "modifier": "admin",
+        "documentation": "d is d",
+        "sysmlid": "directed_relationship_zzz",
+        "qualifiedId": "/europa/123456/aspect_history_zzz/directed_relationship_zzz",
+        "specialization": {
+            "source": null,
+            "type": "Conform",
+            "target": null
         }
-    ]
-}
+    },
+    {
+        "owner": "aspect_history_zzz",
+        "creator": "admin",
+        "editable": true,
+        "qualifiedName": "/europa/JW_TEST2/null/null",
+        "modifier": "admin",
+        "documentation": "e is e",
+        "sysmlid": "element_zzz",
+        "qualifiedId": "/europa/123456/aspect_history_zzz/element_zzz",
+        "specialization": {"type": "Untyped"}
+    }
+]}
 200
