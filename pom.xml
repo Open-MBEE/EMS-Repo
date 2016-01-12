@@ -236,7 +236,6 @@
 			<version>1.5.11</version>
 			<scope>provided</scope>
 		</dependency>
-
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-context</artifactId>
@@ -383,11 +382,6 @@
 			<id>artifactory-external-releases</id>
 			<name>external-releases</name>
 			<url>http://europambee-build.jpl.nasa.gov:8082/artifactory/ext-release-local</url>
-		</repository>
-		<repository>
-			<id>artifactory-external-snapshot</id>
-			<name>external-releases</name>
-			<url>http://europambee-build.jpl.nasa.gov:8082/artifactory/ext-snapshot-local</url>
 		</repository>
 		<repository>
 			<id>alfresco-public</id>
