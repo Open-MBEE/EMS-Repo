@@ -450,7 +450,7 @@ public class DoorsSync extends AbstractJavaWebScript {
         specAppliedMetatypes.put("_9_0_62a020a_1105704885251_933969_7897");
         specElement.put("appliedMetatypes", specAppliedMetatypes);
         specClassifier.put("_11_5EAPbeta_be00301_1147873190330_159934_2220");
-        specSpecialization.put("classifier", specClassifer);
+        specSpecialization.put("classifier", specClassifier);
         specSpecialization.put("type", "InstanceSpecification");
         specElement.put("specialization", specSpecialization);
         specElement.put("isMetatype", false);
