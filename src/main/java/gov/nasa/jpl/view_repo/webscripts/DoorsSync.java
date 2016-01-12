@@ -624,7 +624,7 @@ public class DoorsSync extends AbstractJavaWebScript {
     protected void setLastSynced(String sysmlId, Date lastSync) {
         try {
             Timestamp ts = new Timestamp(lastSync.getTime() + 1000);
-            
+
             String query = String.format( "UPDATE doors SET lastSync = '%1$TD %1$TT' WHERE sysmlid = '%2$s'", ts, sysmlId );
             pgh.execUpdate( query );
         } catch (SQLException e) {
