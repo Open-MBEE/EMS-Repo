@@ -81,10 +81,7 @@ public class DeclarativeJavaWebScript extends AbstractWebScript
             model.put("status", status);
             model.put("cache", cache);
 
-            String origUser = AuthenticationUtil.getRunAsUser();
-			AuthenticationUtil.setRunAsUser("admin");
             NodeUtil.ppAddQualifiedNameId2Json(req, model); // TODO: weave in as aspect
-			AuthenticationUtil.setRunAsUser(origUser);
             
             try
             {

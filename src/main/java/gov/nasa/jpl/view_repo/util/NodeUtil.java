@@ -4984,6 +4984,13 @@ public class NodeUtil {
      */
     public static void ppAddQualifiedNameId2Json( WebScriptRequest req,
                                                   Map< String, Object > model ) {
+        String origUser = AuthenticationUtil.getRunAsUser();
+        AuthenticationUtil.setRunAsUser("admin");
+        ppAddQualifiedNameId2JsonImpl( req, model );
+        AuthenticationUtil.setRunAsUser(origUser);
+    }
+    public static void ppAddQualifiedNameId2JsonImpl( WebScriptRequest req,
+                                                      Map< String, Object > model ) {
         if ( !doPostProcessQualified ) return;
 
         if ( !model.containsKey( "res" ) ) return;

@@ -416,7 +416,7 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, Object, 
     public EmsScriptNode getOwner( EmsScriptNode element ) {
         
         if ( !NodeUtil.exists( element ) ) {
-            System.out.println("getOwner() - element does not exist!  " + element);
+            logger.error("getOwner() - element does not exist!  " + element);
             return null;
         }
         EmsScriptNode p = element.getOwningParent( null, element.getWorkspace(), true );
