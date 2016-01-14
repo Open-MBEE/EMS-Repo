@@ -98,10 +98,8 @@ public class NodeUtil {
 
     public enum SearchType {
         DOCUMENTATION( "@sysml\\:documentation:\"" ),
-        NAME( "@sysml\\:name:\"" ),
-        CM_NAME( "@cm\\:name:\"" ),
-        ID( "@sysml\\:id:\"" ),
-        STRING( "@sysml\\:string:\"" ),
+        NAME( "@sysml\\:name:\"" ), CM_NAME( "@cm\\:name:\"" ),
+        ID( "@sysml\\:id:\"" ), STRING( "@sysml\\:string:\"" ),
         BODY( "@sysml\\:body:\"" ),
         PROPERTY_TYPE( "@sysml\\:propertyType:\"" ),
         VIEW2VIEW( "@view2\\:view2view:\"" ),
@@ -408,9 +406,11 @@ public class NodeUtil {
                                                      + nodeRef + ", "
                                                      + propertyName + ", "
                                                      + value + ")" );
-        if ( propertyName.contains( "roperty" ) ) {
-            System.out.println( "propertyCachePut(" + nodeRef + ", " + propertyName
-                                + ", " + value + ")" );
+        if ( logger.isDebugEnabled() ) {
+            if ( propertyName.contains( "roperty" ) ) {
+                logger.debug( "propertyCachePut(" + nodeRef + ", " + propertyName
+                                    + ", " + value + ")" );
+            }
         }
         if ( value == null ) value = NULL_OBJECT;
         return Utils.put( propertyCache, nodeRef, propertyName, value );
@@ -438,8 +438,6 @@ public class NodeUtil {
                                                          + nodeRef + ", " + key
                                                          + ", " + value
                                                          + ") from map" );
-            System.out.println( "propertyCachePut(" + nodeRef + ", " + key
-                                + ", " + value + ") from map" );
         }
     }
 
@@ -3123,6 +3121,8 @@ public class NodeUtil {
     public static NodeRef findNodeRefByAlfrescoId( String id,
                                                    boolean includeDeleted,
                                                    boolean giveError ) {
+        // Protect the lucene search from some of the common bad input since
+        // lucene can fail with an exception.
         if ( id.startsWith( "_" ) ) return null;
         if ( id.length() < 25 ) return null;
         if ( !id.contains( "://" ) ) {
