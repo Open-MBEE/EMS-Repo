@@ -66,6 +66,7 @@ import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.site.SiteInfo;
 import org.apache.log4j.Logger;
+import org.apache.log4j.Level;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -113,7 +114,7 @@ public class DoorsSync extends AbstractJavaWebScript {
         JSONObject json = null;
 
         try {
-        	//TODO: Actually use this for single requirement push/pulls
+
             String[] idKeys = { "modelid", "elementid", "elementId" };
             String modelId = null;
             for (String idKey : idKeys) {
@@ -159,7 +160,15 @@ public class DoorsSync extends AbstractJavaWebScript {
                         }
                         return model;
                     }
-                    //handleElements( workspace, dateTime, sitesReq );
+                    doors = new DoorsClient( modelRootNode.getSiteName(dateTime, workspace) );
+                    pgh.connect();
+                    syncSingleRequirement( modelRootNode );
+                    pgh.close();
+
+                    JSONArray jsonArray = new JSONArray();
+                    jsonArray.put( modelRootNode.getSysmlId() );
+                    json = new JSONObject();
+                    json.put( "element", jsonArray);
                 }
             }
 
@@ -297,6 +306,16 @@ public class DoorsSync extends AbstractJavaWebScript {
 
     }
 
+    protected void syncSingleRequirement(EmsScriptNode n) {
+        String sysmlId = n.getSysmlId();
+        String resourceUrl = mapResourceUrl( sysmlId );
+        Requirement req = null;
+        if (resourceUrl != null && !processed.contains( sysmlId )) {
+            req = doors.getRequirement( resourceUrl );
+        }
+        compRequirement( n, req );
+    }
+
     protected String compRequirement(EmsScriptNode n, Requirement r) {
         String resourceUrl = null;
 
@@ -306,7 +325,9 @@ public class DoorsSync extends AbstractJavaWebScript {
             resourceUrl = mapResourceUrl( sysmlId );
 
             if (resourceUrl != null) {
-                r = doors.getRequirement( resourceUrl );
+                if (r == null) {
+                    r = doors.getRequirement( resourceUrl );
+                }
                 Date lastSync = getLastSynced( sysmlId );
                 Date lastModifiedMMS = (Date) n.getProperty( Acm.ACM_LAST_MODIFIED );
                 Date lastModifiedDoors = r.getModified();
@@ -314,16 +335,16 @@ public class DoorsSync extends AbstractJavaWebScript {
                 if ((lastSync.compareTo( lastModifiedDoors ) < 0) && (lastSync.compareTo( lastModifiedMMS ) >= 0)) {
                     //Modified in Doors, Not Modified in MMS
                     if (logger.isDebugEnabled()) {
-                        logger.debug( "Modified in Doors, Not Modified in MMS" );
+                        logger.debug( sysmlId + " - Modified in Doors, Not Modified in MMS" );
                         logger.debug( String.format( "lastSync Date: %s", lastSync ) );
                         logger.debug( String.format( "Doors Date: %s", lastModifiedDoors ) );
                         logger.debug( String.format( "MMS Date: %s", lastModifiedMMS ) );
                     }
-                    //resourceUrl = createUpdateRequirementFromDoors( r, doors );
+                    resourceUrl = createUpdateRequirementFromDoors( r );
                 } else if ((lastSync.compareTo( lastModifiedDoors ) >= 0) && (lastSync.compareTo( lastModifiedMMS ) >= 0)) {
                     //Not Modified in Doors, Not Modified in MMS
                     if (logger.isDebugEnabled()) {
-                        logger.debug( "Not Modified in Doors, Not Modified in MMS" );
+                        logger.debug( sysmlId + " - Not Modified in Doors, Not Modified in MMS" );
                         logger.debug( String.format( "lastSync Date: %s", lastSync ) );
                         logger.debug( String.format( "Doors Date: %s", lastModifiedDoors ) );
                         logger.debug( String.format( "MMS Date: %s", lastModifiedMMS ) );
@@ -333,7 +354,7 @@ public class DoorsSync extends AbstractJavaWebScript {
                 } else if ((lastSync.compareTo( lastModifiedDoors ) >= 0) && (lastSync.compareTo( lastModifiedMMS ) < 0)) {
                     //Not Modified in Doors, Modified in MMS
                     if (logger.isDebugEnabled()) {
-                        logger.debug( "Not Modified in Doors, Modified in MMS" );
+                        logger.debug( sysmlId + " - Not Modified in Doors, Modified in MMS" );
                         logger.debug( String.format( "lastSync Date: %s", lastSync ) );
                         logger.debug( String.format( "Doors Date: %s", lastModifiedDoors ) );
                         logger.debug( String.format( "MMS Date: %s", lastModifiedMMS ) );
@@ -342,7 +363,7 @@ public class DoorsSync extends AbstractJavaWebScript {
                 } else if ((lastSync.compareTo( lastModifiedDoors ) < 0) && (lastSync.compareTo( lastModifiedMMS ) < 0)) {
                     //Modified in Doors, Modified in MMS
                     if (logger.isDebugEnabled()) {
-                        logger.debug( "Modified in Doors, Modified in MMS" );
+                        logger.debug( sysmlId + " - Modified in Doors, Modified in MMS" );
                         logger.debug( String.format( "lastSync Date: %s", lastSync ) );
                         logger.debug( String.format( "Doors Date: %s", lastModifiedDoors ) );
                         logger.debug( String.format( "MMS Date: %s", lastModifiedMMS ) );
@@ -353,7 +374,7 @@ public class DoorsSync extends AbstractJavaWebScript {
             } else {
                 //Not in Doors
                 if (logger.isDebugEnabled()) {
-                    logger.debug( "Not in Doors" );
+                    logger.debug( sysmlId + " - Not in Doors" );
                 }
                 resourceUrl = createUpdateRequirementFromMMS( n );
             }
@@ -480,6 +501,7 @@ public class DoorsSync extends AbstractJavaWebScript {
         if(handleElementUpdate( postJson )) {
             if (mapResourceUrl( sysmlId, r.getResourceUrl() )) {
                 setLastSynced( sysmlId, r.getModified() );
+                processed.add( sysmlId );
                 return sysmlId;
             }
         }
