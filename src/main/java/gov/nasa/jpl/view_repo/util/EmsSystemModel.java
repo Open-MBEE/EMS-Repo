@@ -3,16 +3,11 @@ package gov.nasa.jpl.view_repo.util;
 import gov.nasa.jpl.ae.event.Call;
 import gov.nasa.jpl.ae.event.Expression;
 import gov.nasa.jpl.ae.event.FunctionCall;
-import gov.nasa.jpl.ae.event.Parameter;
-import gov.nasa.jpl.ae.solver.Constraint;
-import gov.nasa.jpl.ae.solver.ConstraintLoopSolver;
-import gov.nasa.jpl.ae.sysml.SystemModelSolver;
 import gov.nasa.jpl.mbee.util.ClassUtils;
 import gov.nasa.jpl.mbee.util.CompareUtils;
 import gov.nasa.jpl.mbee.util.Debug;
 import gov.nasa.jpl.mbee.util.HasId;
 import gov.nasa.jpl.mbee.util.Pair;
-import gov.nasa.jpl.mbee.util.Random;
 import gov.nasa.jpl.mbee.util.Seen;
 import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.mbee.util.Utils;
@@ -32,7 +27,6 @@ import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -48,7 +42,6 @@ import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.namespace.QName;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
-import org.eclipse.jetty.util.log.Log;
 import org.json.JSONArray;
 import org.springframework.extensions.webscripts.Status;
 
@@ -60,7 +53,6 @@ import sysml.SystemModel;
 public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, Object, EmsScriptNode, EmsScriptNode, String, String, Object, EmsScriptNode, String, String, EmsScriptNode > {
 
     private static Logger logger = Logger.getLogger(EmsSystemModel.class);
-    public Level logLevel = Level.WARN;
     
     protected ServiceRegistry services;
     protected EmsScriptNode serviceNode;
@@ -230,10 +222,6 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, Object, 
 
     @Override
     public EmsScriptNode createConstraint( Object context ) {
-        EmsScriptNode node = objectToEmsScriptNode( context );
-        if ( node != null ) {
-
-        }
         // TODO Auto-generated method stub
         return null;
     }
@@ -403,6 +391,11 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, Object, 
     public Collection< EmsScriptNode > getOwnedElement( Object context ) {
         return getOwnedElements( context );
     }
+    
+    // The coerce flag is used to try and actively unwrap, package, or transform
+    // an object to try and get an EmsScriptValue. If the flag is false, and the
+    // object is not already an EmsScriptNode, the code aborts or fails. This
+    // makes the code more efficient but less robust.
     public static boolean coerce = false;
     public Collection< EmsScriptNode > getOwnedElements( Object context ) {
         List<EmsScriptNode> list = new ArrayList< EmsScriptNode >();
@@ -423,11 +416,11 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, Object, 
     public EmsScriptNode getOwner( EmsScriptNode element ) {
         
         if ( !NodeUtil.exists( element ) ) {
-            System.out.println("getOwner() - element does not exist!  " + element);
+            logger.error("getOwner() - element does not exist!  " + element);
             return null;
         }
         EmsScriptNode p = element.getOwningParent( null, element.getWorkspace(), true );
-        System.out.println("getOwner(" + element + ") = " + p);
+        if (logger.isDebugEnabled()) logger.debug("getOwner(" + element + ") = " + p);
         return p;
     }
 

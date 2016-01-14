@@ -674,68 +674,6 @@ public class UpdateViewHierarchy {
 		}
 		return childViews;
 
-		// List<EmsScriptNode> childViews = new ArrayList<EmsScriptNode>();
-		// WorkspaceNode ws = parentNode.getWorkspace();
-		// ServiceRegistry services = parentNode.getServices();
-		//
-		// // get ownedAttributes
-		// //TODO reuse instance getOwnedAttributes()
-		// List<String> ownedAttributeIds = new ArrayList<String>();
-		// Object ownedAttRefs = parentNode.getNodeRefProperty(
-		// Acm.ACM_OWNED_ATTRIBUTE, null, ws);
-		// if (ownedAttRefs instanceof Collection) {
-		// List<NodeRef> refs = Utils.asList((Collection<?>) ownedAttRefs,
-		// NodeRef.class);
-		// ownedAttributeIds = EmsScriptNode.getSysmlIds(EmsScriptNode
-		// .toEmsScriptNodeList(refs));
-		// }
-		// if (Utils.isNullOrEmpty(ownedAttributeIds))
-		// return null;
-		//
-		// // translate ownedAttributes to View Ids
-		// //TODO reuse instance translateOwnedAttributeIds()
-		// String viewId = null;
-		// for (String ownedAttributeId : ownedAttributeIds) {
-		// EmsScriptNode ownedAttributeNode = NodeUtil.findScriptNodeById(
-		// ownedAttributeId, ws, null, false, services, null);
-		// if (NodeUtil.exists(ownedAttributeNode)) {
-		// Object propType = ownedAttributeNode.getNodeRefProperty(
-		// Acm.ACM_PROPERTY_TYPE, true, null, ws);
-		// Collection<?> propTypes = null;
-		// if (propType instanceof Collection) {
-		// propTypes = (Collection<?>) propType;
-		// } else if (propType instanceof NodeRef) {
-		// propTypes = Utils.newList(propType);
-		// }
-		// if (Utils.isNullOrEmpty(propTypes))
-		// continue;
-		//
-		// for (Object pType : propTypes) {
-		// if (UpdateViewHierarchy.isView(pType, services, ws)) {
-		// if (pType instanceof NodeRef) {
-		// EmsScriptNode propTypeNode = new EmsScriptNode(
-		// (NodeRef) pType, services);
-		// if (NodeUtil.exists(propTypeNode)
-		// && propTypeNode
-		// .hasOrInheritsAspect(Acm.ACM_VIEW)) {
-		// viewId = propTypeNode.getSysmlId();
-		// }
-		// } else if (pType instanceof String) {
-		// viewId = (String) pType;
-		// }
-		// }
-		// }
-		// }
-		//
-		// if (!Utils.isNullOrEmpty(viewId)) {
-		// EmsScriptNode viewNode = NodeUtil.findScriptNodeById(viewId,
-		// ws, null, false, parentNode.getServices(), null);
-		// if (viewNode.exists()) {
-		// childViews.add(viewNode);
-		// }
-		// }
-		// }
-		// return childViews;
 	}
 
 	protected List<EmsScriptNode> getAssociationNodes(String parentId,
@@ -788,43 +726,6 @@ public class UpdateViewHierarchy {
 				}
 			}
 		}
-
-		// EmsScriptNode parentNode = mp.findScriptNodeById(parentId,
-		// mp.myWorkspace, null, false);
-		// if (NodeUtil.exists(parentNode)) {
-		// Set<EmsScriptNode> rels = parentNode.getRelationships(null,
-		// mp.myWorkspace);
-		// for (EmsScriptNode rel : rels) {
-		// Object prop = rel.getNodeRefProperty(Acm.ACM_TARGET, null,
-		// mp.myWorkspace);
-		// if (prop instanceof NodeRef) {
-		// EmsScriptNode propNode = new EmsScriptNode((NodeRef) prop,
-		// mp.getServices());
-		// if (NodeUtil.exists(propNode)) {
-		// if (propertyId == null
-		// || propNode.getSysmlId().equals(propertyId)) {
-		// if (propNode.hasOrInheritsAspect(Acm.ACM_PROPERTY)) {
-		// Object propType = propNode.getNodeRefProperty(
-		// Acm.ACM_PROPERTY_TYPE, null,
-		// mp.myWorkspace);
-		// if (propType instanceof NodeRef) {
-		// EmsScriptNode node = new EmsScriptNode(
-		// (NodeRef) propType,
-		// mp.getServices());
-		// if (NodeUtil.exists(node)) {
-		// if (propertyTypeId == null
-		// || node.getSysmlId().equals(
-		// propertyTypeId)) {
-		// assocNodes.add(rel);
-		// }
-		// }
-		// }
-		// }
-		// }
-		// }
-		// }
-		// }
-		// }
 
 		return assocNodes;
 	}
@@ -945,35 +846,6 @@ public class UpdateViewHierarchy {
 		}
 		return propertyId;
 	}
-
-	// protected String updateOrCreatePropertyJson(String propertyId,
-	// String parentViewId, String propertyTypeId, JSONObject propElement) {
-	// boolean addedNew = false;
-	// if (propertyId == null) {
-	// propertyId = NodeUtil.createId(mp.getServices());
-	// } else if (propElement == null) {
-	// propElement = elementsInJson.get(propertyId);
-	// }
-	// if (propElement == null) {
-	// propElement = new JSONObject();
-	// addedNew = true;
-	// propElement.put("sysmlid", propertyId);
-	// addElement(propElement);
-	// }
-	// propElement.put("sysmlid", propertyId);
-	// propElement.put("owner", parentViewId);
-	// JSONObject spec = propElement.optJSONObject(Acm.ACM_SPECIALIZATION);
-	// if (spec == null) {
-	// spec = new JSONObject();
-	// propElement.put(Acm.ACM_SPECIALIZATION, spec);
-	// }
-	// spec.put("type", "Property");
-	// spec.put(Acm.JSON_PROPERTY_TYPE, propertyTypeId);
-	// if (addedNew) {
-	// preprocessElementJson(propElement);
-	// }
-	// return propertyId;
-	// }
 
 	protected String addAssociationToView(String parentViewId,
 			String childViewId) {

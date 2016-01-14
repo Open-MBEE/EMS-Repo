@@ -45,7 +45,6 @@ public class ElementReference implements Viewable<EmsScriptNode> {
     }
     
     protected void init( Object object, Attribute attribute ) {
-        //System.out.println("############  init( Object " + object + ",  " + attribute + " )  ###############");
         if ( object instanceof EmsScriptNode ) {
             init( (EmsScriptNode)object, attribute );
         } else if ( object instanceof String ) {
@@ -61,7 +60,6 @@ public class ElementReference implements Viewable<EmsScriptNode> {
     }
 
     protected void init( String id, Attribute attribute) {
-        //System.out.println("############  init( String " + id + ",  " + attribute + " )  ###############");
         NodeRef ref =
                 NodeUtil.findNodeRefById( id, false, null, null,
                                           NodeUtil.getServices(), false );
@@ -87,7 +85,6 @@ public class ElementReference implements Viewable<EmsScriptNode> {
     protected void init( EmsScriptNode element, Attribute attribute,
                          Seen< EmsScriptNode > seen ) {
         
-	    //System.out.println("##### DUDE #######  init( EmsScriptNode " + element + ",  " + attribute + " )  ###############");
 	    Pair< Boolean, Seen< EmsScriptNode > > p = Utils.seen( element, true, seen );
 	    String typeName;
 	    if ( element != null && ((typeName = element.getTypeName()) != null) &&
@@ -158,7 +155,6 @@ public class ElementReference implements Viewable<EmsScriptNode> {
                     text = "" + ClassUtils.getValue( object );
                     break;
 	            case TYPE:
-                    System.out.println("TTTTTTTTTTTTTTTTTTTTTTTTTT  " + object);
                     sourceType = "text";
                     if ( object instanceof EmsScriptNode ) {
                         text = ((EmsScriptNode)object).getTypeName();
@@ -168,7 +164,6 @@ public class ElementReference implements Viewable<EmsScriptNode> {
                     }
                     break;
                 case ID:
-                    System.out.println("IIIIIIIIIIIIIIIIIIIIIIIIIIII  " + object);
                     sourceType = "text";
                     if ( object instanceof EmsScriptNode ) {
                         text = ((EmsScriptNode)object).getSysmlId();
@@ -192,7 +187,6 @@ public class ElementReference implements Viewable<EmsScriptNode> {
                 case VALUE:
                     break;
                 case TYPE:
-                    System.out.println("TTTTTTTTTTTTTTTTTTTTTTTTTT  " + element);
                     sourceType = "text";
                     text = element.getTypeName();
                     if ( text == null ) {
@@ -206,7 +200,6 @@ public class ElementReference implements Viewable<EmsScriptNode> {
                     }
                     break;
                 case ID:
-                    System.out.println("IIIIIIIIIIIIIIIIIIIIIIIIIIII  " + object);
                     sourceType = "text";
                     text = element.getSysmlId();
                     if ( text == null ) {
