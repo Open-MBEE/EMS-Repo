@@ -1574,7 +1574,7 @@ create_curl_cmd(type="POST", base_url=BASE_URL_WS,
                 branch="master/",
                 post_type="elements?fix=true"),
 True,
-common_filters + ['"modifier"', '"integer"', '"message"'],
+common_filters + ['"modifier"', '"message"', '"qualifiedId"'],
 ["test", "develop", "workspaces"]
 ],
         
