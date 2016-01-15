@@ -6,27 +6,42 @@
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
+        "searchTypes": "aspect",
         "name": "Components",
-        "owner": "connectorViewDataFolder",
         "documentation": "",
+        "owner": "connectorViewDataFolder",
         "specialization": {"type": "View"}
     },
     {
-        "modifier": "admin",
         "qualifiedId": "/europa/123456/300/301",
-        "name": "301",
+        "relatedDocuments": [{
+            "parentViews": [{
+                "name": "301",
+                "sysmlid": "301"
+            }],
+            "name": "301",
+            "sysmlid": "301"
+        }],
         "qualifiedName": "/europa/JW_TEST2/300/301",
-        "documentation": "else",
-        "owner": "300",
         "sysmlid": "301",
         "properties": [{
-            "modifier": "admin",
             "qualifiedId": "/europa/123456/300/301/302",
-            "name": "302",
+            "relatedDocuments": [{
+                "parentViews": [{
+                    "name": "301",
+                    "sysmlid": "301"
+                }],
+                "name": "301",
+                "sysmlid": "301"
+            }],
             "qualifiedName": "/europa/JW_TEST2/300/301/302",
-            "documentation": "to",
-            "owner": "301",
             "sysmlid": "302",
+            "editable": true,
+            "creator": "admin",
+            "modifier": "admin",
+            "name": "302",
+            "owner": "301",
+            "documentation": "to",
             "specialization": {
                 "propertyType": null,
                 "isSlot": false,
@@ -37,10 +52,15 @@
                     "type": "LiteralString"
                 }],
                 "type": "Property"
-            },
-            "editable": true,
-            "creator": "admin"
+            }
         }],
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "searchTypes": "aspect",
+        "name": "301",
+        "documentation": "else",
+        "owner": "300",
         "specialization": {
             "view2view": [{
                 "childrenViews": [
@@ -68,9 +88,7 @@
                 "type": "Paragraph"
             }],
             "type": "Product"
-        },
-        "editable": true,
-        "creator": "admin"
+        }
     },
     {
         "qualifiedId": "/europa/123456/BLUCamTest/_17_0_2_4_f3a0363_1394146455624_407543_30441/_17_0_2_3_e610336_1394148233838_91795_29332",
@@ -79,9 +97,10 @@
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
+        "searchTypes": "aspect",
         "name": "Context",
-        "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
         "documentation": "",
+        "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
         "specialization": {"type": "View"}
     },
     {
@@ -91,27 +110,42 @@
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
+        "searchTypes": "aspect",
         "name": "Components",
-        "owner": "123456",
         "documentation": "",
+        "owner": "123456",
         "specialization": {"type": "View"}
     },
     {
-        "modifier": "admin",
         "qualifiedId": "/europa/123456/4000/401",
-        "name": "401",
+        "relatedDocuments": [{
+            "parentViews": [{
+                "name": "401",
+                "sysmlid": "401"
+            }],
+            "name": "401",
+            "sysmlid": "401"
+        }],
         "qualifiedName": "/europa/JW_TEST2/400/401",
-        "documentation": "4else",
-        "owner": "4000",
         "sysmlid": "401",
         "properties": [{
-            "modifier": "admin",
             "qualifiedId": "/europa/123456/4000/401/402",
-            "name": "402",
+            "relatedDocuments": [{
+                "parentViews": [{
+                    "name": "401",
+                    "sysmlid": "401"
+                }],
+                "name": "401",
+                "sysmlid": "401"
+            }],
             "qualifiedName": "/europa/JW_TEST2/400/401/402",
-            "documentation": "4to",
-            "owner": "401",
             "sysmlid": "402",
+            "editable": true,
+            "creator": "admin",
+            "modifier": "admin",
+            "name": "402",
+            "owner": "401",
+            "documentation": "4to",
             "specialization": {
                 "propertyType": null,
                 "isSlot": false,
@@ -122,10 +156,15 @@
                     "type": "LiteralString"
                 }],
                 "type": "Property"
-            },
-            "editable": true,
-            "creator": "admin"
+            }
         }],
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "searchTypes": "aspect",
+        "name": "401",
+        "documentation": "4else",
+        "owner": "4000",
         "specialization": {
             "view2view": [{
                 "childrenViews": [
@@ -153,39 +192,39 @@
                 "type": "Paragraph"
             }],
             "type": "Product"
-        },
-        "editable": true,
-        "creator": "admin"
+        }
     },
     {
-        "modifier": "admin",
         "qualifiedId": "/europa/123456/viewWithContents",
-        "name": "viewWithContents",
         "qualifiedName": "/europa/JW_TEST2/viewWithContents",
+        "sysmlid": "viewWithContents",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "searchTypes": "aspect",
+        "name": "viewWithContents",
         "documentation": "View updates",
         "owner": "123456",
-        "sysmlid": "viewWithContents",
         "specialization": {
             "contents": {
                 "valueExpression": null,
                 "type": "Expression"
             },
             "type": "View"
-        },
-        "editable": true,
-        "creator": "admin"
+        }
     },
     {
-        "modifier": "admin",
         "qualifiedId": "/europa/123456/viewNull",
-        "name": "viewNull",
         "qualifiedName": "/europa/JW_TEST2/viewNull",
+        "sysmlid": "viewNull",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "searchTypes": "aspect",
+        "name": "viewNull",
         "documentation": "View with null values",
         "owner": "123456",
-        "sysmlid": "viewNull",
-        "specialization": {"type": "View"},
-        "editable": true,
-        "creator": "admin"
+        "specialization": {"type": "View"}
     }
 ]}
 200

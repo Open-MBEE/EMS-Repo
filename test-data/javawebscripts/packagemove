@@ -1,0 +1,11 @@
+#!/bin/bash
+
+# This script moves a package to a new parent
+# It accepts 2 arguments: 1) the package sysmlId and 2) the new parent sysmlId
+
+if [ "$#" -eq 2 ]; then
+	echo curl -w "\n%{http_code}\n" -u admin:admin -X POST -H "Content-Type:application/json" -d '{ "elements" : [{"sysmlid":"'$1'", "owner":"'$2'","specialization": {"type":"Package"}},]}' "http://localhost:8080/alfresco/service/workspaces/master/sites/europa/elements"
+	curl -w "\n%{http_code}\n" -u admin:admin -X POST -H "Content-Type:application/json" -d '{ "elements" : [{"sysmlid":"'$1'", "owner":"'$2'","specialization": {"type":"Package"}},]}' "http://localhost:8080/alfresco/service/workspaces/master/sites/europa/elements"
+else 
+	echo please enter 2 arguments: target and parent
+fi;

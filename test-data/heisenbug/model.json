@@ -489,7 +489,7 @@
 			"name": "_24_ Concise View Editor Demo Blocks",
 			"sysmlid": "_24_0_5_1_8660276_1411498411597_434540_15911",
 			"owner": "_24_0_5_1_8660276_1411498411581_951419_15889",
-			"documentation": "",
+			"documentation": "<mms-transclude-doc mms-eid=\"_24_0_5_1_8660276_1411498438773_755710_16623\"></mms-transclude-doc>",
 			"specialization": 
 			{
 				"type": "Package",

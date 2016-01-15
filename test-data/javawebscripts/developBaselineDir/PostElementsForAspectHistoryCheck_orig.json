@@ -1,28 +1,29 @@
 {"elements": [
     {
         "modifier": "admin",
-        "qualifiedId": "/europa/123456/aspect_history_zzz/untyped_no_doc_zzz",
+        "qualifiedId": "/europa/123456/aspect_history_zzz/untyped_doc_zzz",
         "siteCharacterizationId": "europa",
-        "created": "Thu Jul 23 20:24:27 PDT 2015",
+        "created": "Tue Sep 22 09:44:02 PDT 2015",
         "qualifiedName": "/europa/JW_TEST2/null/null",
-        "sysmlid": "untyped_no_doc_zzz",
+        "sysmlid": "untyped_doc_zzz",
+        "documentation": "d is d",
         "owner": "aspect_history_zzz",
-        "read": "2015-07-23T20:24:28.388-0700",
+        "read": "2015-09-22T09:44:02.956-0700",
         "specialization": {"type": "Untyped"},
         "editable": true,
         "creator": "admin",
-        "modified": "2015-07-23T20:24:28.193-0700"
+        "modified": "2015-09-22T09:44:02.603-0700"
     },
     {
         "modifier": "admin",
         "qualifiedId": "/europa/123456/aspect_history_zzz/directed_relationship_zzz",
         "siteCharacterizationId": "europa",
-        "created": "Thu Jul 23 20:24:27 PDT 2015",
+        "created": "Tue Sep 22 09:44:02 PDT 2015",
         "qualifiedName": "/europa/JW_TEST2/null/null",
         "sysmlid": "directed_relationship_zzz",
         "documentation": "d is d",
         "owner": "aspect_history_zzz",
-        "read": "2015-07-23T20:24:28.388-0700",
+        "read": "2015-09-22T09:44:02.960-0700",
         "specialization": {
             "source": null,
             "target": null,
@@ -30,32 +31,32 @@
         },
         "editable": true,
         "creator": "admin",
-        "modified": "2015-07-23T20:24:28.240-0700"
+        "modified": "2015-09-22T09:44:02.630-0700"
     },
     {
         "modifier": "admin",
-        "qualifiedId": "/europa/123456/aspect_history_zzz/untyped_doc_zzz",
+        "qualifiedId": "/europa/123456/aspect_history_zzz",
         "siteCharacterizationId": "europa",
-        "created": "Thu Jul 23 20:24:27 PDT 2015",
-        "qualifiedName": "/europa/JW_TEST2/null/null",
-        "sysmlid": "untyped_doc_zzz",
-        "documentation": "d is d",
-        "owner": "aspect_history_zzz",
-        "read": "2015-07-23T20:24:28.389-0700",
-        "specialization": {"type": "Untyped"},
+        "created": "Tue Sep 22 09:44:01 PDT 2015",
+        "qualifiedName": "/europa/JW_TEST2/null",
+        "sysmlid": "aspect_history_zzz",
+        "documentation": "a place to put stuff for the aspect history tests",
+        "owner": "123456",
+        "read": "2015-09-22T09:44:02.965-0700",
+        "specialization": {"type": "Package"},
         "editable": true,
         "creator": "admin",
-        "modified": "2015-07-23T20:24:28.216-0700"
+        "modified": "2015-09-22T09:44:02.417-0700"
     },
     {
         "modifier": "admin",
         "qualifiedId": "/europa/123456/aspect_history_zzz/expose_no_doc_zzz",
         "siteCharacterizationId": "europa",
-        "created": "Thu Jul 23 20:24:27 PDT 2015",
+        "created": "Tue Sep 22 09:44:02 PDT 2015",
         "qualifiedName": "/europa/JW_TEST2/null/null",
         "sysmlid": "expose_no_doc_zzz",
         "owner": "aspect_history_zzz",
-        "read": "2015-07-23T20:24:28.389-0700",
+        "read": "2015-09-22T09:44:02.969-0700",
         "specialization": {
             "source": null,
             "target": null,
@@ -63,18 +64,32 @@
         },
         "editable": true,
         "creator": "admin",
-        "modified": "2015-07-23T20:24:28.264-0700"
+        "modified": "2015-09-22T09:44:02.678-0700"
+    },
+    {
+        "modifier": "admin",
+        "qualifiedId": "/europa/123456/aspect_history_zzz/untyped_no_doc_zzz",
+        "siteCharacterizationId": "europa",
+        "created": "Tue Sep 22 09:44:02 PDT 2015",
+        "qualifiedName": "/europa/JW_TEST2/null/null",
+        "sysmlid": "untyped_no_doc_zzz",
+        "owner": "aspect_history_zzz",
+        "read": "2015-09-22T09:44:02.974-0700",
+        "specialization": {"type": "Untyped"},
+        "editable": true,
+        "creator": "admin",
+        "modified": "2015-09-22T09:44:02.576-0700"
     },
     {
         "modifier": "admin",
         "qualifiedId": "/europa/123456/aspect_history_zzz/property_zzz",
         "siteCharacterizationId": "europa",
-        "created": "Thu Jul 23 20:24:27 PDT 2015",
+        "created": "Tue Sep 22 09:44:01 PDT 2015",
         "qualifiedName": "/europa/JW_TEST2/null/null",
         "sysmlid": "property_zzz",
         "documentation": "p is p",
         "owner": "aspect_history_zzz",
-        "read": "2015-07-23T20:24:28.389-0700",
+        "read": "2015-09-22T09:44:02.978-0700",
         "specialization": {
             "propertyType": null,
             "isDerived": false,
@@ -88,37 +103,22 @@
         },
         "editable": true,
         "creator": "admin",
-        "modified": "2015-07-23T20:24:28.107-0700"
-    },
-    {
-        "modifier": "admin",
-        "qualifiedId": "/europa/123456/aspect_history_zzz",
-        "siteCharacterizationId": "europa",
-        "created": "Thu Jul 23 20:24:27 PDT 2015",
-        "qualifiedName": "/europa/JW_TEST2/null",
-        "sysmlid": "aspect_history_zzz",
-        "documentation": "a place to put stuff for the aspect history tests",
-        "owner": "123456",
-        "read": "2015-07-23T20:24:28.391-0700",
-        "specialization": {"type": "Package"},
-        "editable": true,
-        "creator": "admin",
-        "modified": "2015-07-23T20:24:28.056-0700"
+        "modified": "2015-09-22T09:44:02.471-0700"
     },
     {
         "modifier": "admin",
         "qualifiedId": "/europa/123456/aspect_history_zzz/element_zzz",
         "siteCharacterizationId": "europa",
-        "created": "Thu Jul 23 20:24:27 PDT 2015",
+        "created": "Tue Sep 22 09:44:02 PDT 2015",
         "qualifiedName": "/europa/JW_TEST2/null/null",
         "sysmlid": "element_zzz",
         "documentation": "e is e",
         "owner": "aspect_history_zzz",
-        "read": "2015-07-23T20:24:28.393-0700",
+        "read": "2015-09-22T09:44:02.984-0700",
         "specialization": {"type": "Element"},
         "editable": true,
         "creator": "admin",
-        "modified": "2015-07-23T20:24:28.173-0700"
+        "modified": "2015-09-22T09:44:02.551-0700"
     }
 ]}
 200

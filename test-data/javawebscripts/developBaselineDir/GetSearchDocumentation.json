@@ -1,11 +1,14 @@
 {"elements": [{
-    "modifier": "admin",
     "qualifiedId": "/europa/123456/300",
-    "name": "300",
     "qualifiedName": "/europa/JW_TEST2/300",
+    "sysmlid": "300",
+    "editable": true,
+    "creator": "admin",
+    "modifier": "admin",
+    "searchTypes": "documentation",
+    "name": "300",
     "documentation": "something",
     "owner": "123456",
-    "sysmlid": "300",
     "specialization": {
         "propertyType": null,
         "isSlot": false,
@@ -16,8 +19,6 @@
             "type": "LiteralString"
         }],
         "type": "Property"
-    },
-    "editable": true,
-    "creator": "admin"
+    }
 }]}
 200

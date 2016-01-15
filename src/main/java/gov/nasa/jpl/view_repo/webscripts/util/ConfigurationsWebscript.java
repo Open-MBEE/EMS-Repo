@@ -375,10 +375,16 @@ public class ConfigurationsWebscript extends AbstractJavaWebScript {
             getSnapshotJson( EmsScriptNode snapshot, EmsScriptNode view,
                              WorkspaceNode workspace ) throws JSONException {
         JSONObject snapshotJson = new JSONObject();
-        //snapshotJson.put("url", contextPath + "/service/snapshots/" + snapshot.getSysmlId());
-        snapshotJson.put("sysmlid", view.getSysmlId());
-        snapshotJson.put("sysmlname", view.getProperty(Acm.ACM_NAME));
-        snapshotJson.put("id", snapshot.getProperty(Acm.CM_NAME));
+        if (view != null) {
+            snapshotJson.put("sysmlid", view.getSysmlId());
+            snapshotJson.put("sysmlname", view.getProperty(Acm.ACM_NAME));
+        } else {
+            // if view isn't provided, just strip off the timestamp
+            String sysmlid = (String)snapshot.getProperty(Acm.CM_NAME);
+            sysmlid = sysmlid.substring( 0, sysmlid.lastIndexOf( "_" ) );
+            snapshotJson.put( "sysmlid", snapshot.getProperty( sysmlid ) );
+        }
+        snapshotJson.put("id", snapshot.getNodeRef().getId());
         Date timestamp = (Date) snapshot.getProperty("view2:timestamp");
         if (timestamp != null) {
             snapshotJson.put( "created",  EmsScriptNode.getIsoTime( (Date)snapshot.getProperty( "view2:timestamp" )));
@@ -396,7 +402,7 @@ public class ConfigurationsWebscript extends AbstractJavaWebScript {
             if(SnapshotPost.hasPdf(snapshot)){
             	String pdfStatus = SnapshotPost.getPdfStatus(snapshot);
             	if(pdfStatus != null && !pdfStatus.isEmpty()){
-	            	EmsScriptNode pdfNode = SnapshotPost.getPdfNode(snapshot, timestamp, workspace);
+	            	EmsScriptNode pdfNode = SnapshotPost.getPdfNode(snapshot, timestamp);
 	            	transformMap = new HashMap<String,String>();
 	            	transformMap.put("status", pdfStatus);
 	            	transformMap.put("type", "pdf");
@@ -409,7 +415,7 @@ public class ConfigurationsWebscript extends AbstractJavaWebScript {
             if(SnapshotPost.hasHtmlZip(snapshot)){
             	String htmlZipStatus = SnapshotPost.getHtmlZipStatus(snapshot);
             	if(htmlZipStatus != null && !htmlZipStatus.isEmpty()){
-	            	EmsScriptNode htmlZipNode = SnapshotPost.getHtmlZipNode(snapshot, timestamp, workspace);
+	            	EmsScriptNode htmlZipNode = SnapshotPost.getHtmlZipNode(snapshot, timestamp);
 	            	transformMap = new HashMap<String,String>();
 	            	transformMap.put("status", htmlZipStatus);
 	            	transformMap.put("type", "html");

@@ -18,6 +18,8 @@ package gov.nasa.jpl.view_repo.webscripts;
  * limitations under the License.
  */
 
+import gov.nasa.jpl.view_repo.util.NodeUtil;
+
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -44,6 +46,8 @@ public class DeclarativeJavaWebScript extends AbstractWebScript
 {
     // Logger
     private static final Log logger = LogFactory.getLog(DeclarativeJavaWebScript.class);  
+
+    public static boolean cacheSnapshotsFlag = false;
     
     /* (non-Javadoc)
      * @see org.alfresco.web.scripts.WebScript#execute(org.alfresco.web.scripts.WebScriptRequest, org.alfresco.web.scripts.WebScriptResponse)
@@ -65,17 +69,17 @@ public class DeclarativeJavaWebScript extends AbstractWebScript
             // construct model for script / template
             Status status = new Status();
             Cache cache = new Cache(getDescription().getRequiredCache());
-            setCacheHeaders(req, cache);
+            setCacheHeaders(req, cache); // add in custom headers for nginx caching
+
             Map<String, Object> model = executeImpl(req, status, cache);
+            
             if (model == null)
             {
                 model = new HashMap<String, Object>(8, 1.0f);
             }
             model.put("status", status);
             model.put("cache", cache);
-            
-            // CMED-936
-            res.addHeader( "Access-Control-Allow-Origin", "*" );
+            NodeUtil.ppAddQualifiedNameId2Json(req, model); // TODO: weave in as aspect
             
             try
             {
@@ -186,18 +190,40 @@ public class DeclarativeJavaWebScript extends AbstractWebScript
      * @param req
      * @param cache
      */
-    private void setCacheHeaders( WebScriptRequest req, Cache cache ) {
+    private boolean setCacheHeaders( WebScriptRequest req, Cache cache ) {
         String[] names = req.getParameterNames();
+        boolean cacheUpdated = false;
+        // check if timestamp
         for (String name: names) {
             if (name.equals( "timestamp" )) {
-                cache.setIsPublic( true );
-                cache.setMaxAge( new Long(31556926) );
-                // following are true by default, so need to set them to false
-                cache.setNeverCache( false ); 
-                cache.setMustRevalidate( false );
+                cacheUpdated = updateCache(cache);
                 break;
             }
         }
+        // check if configuration snapshots and products
+        if (!cacheUpdated) {
+            if (cacheSnapshotsFlag) {
+                String url = req.getURL();
+                if (url.contains( "configurations" )) {
+                    if (url.contains( "snapshots") || url.contains( "products" )) {
+                        cacheUpdated = updateCache(cache);
+                    }
+                }
+            }
+        }
+        
+        return cacheUpdated;
+    }
+    
+    private boolean updateCache(Cache cache) {
+        if (!cache.getIsPublic()) {
+            cache.setIsPublic( true );
+            cache.setMaxAge( new Long(31557000) );
+            // following are true by default, so need to set them to false
+            cache.setNeverCache( false ); 
+            cache.setMustRevalidate( false );
+        }
+        return true;
     }
 
     /**

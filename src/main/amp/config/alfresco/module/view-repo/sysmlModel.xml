@@ -9,7 +9,8 @@
 		<import uri="http://www.alfresco.org/model/content/1.0" prefix="cm" />
 	</imports>
 	<namespaces>
-		<namespace uri="http://jpl.nasa.gov/model/sysml-lite/1.0" prefix="sysml" />
+		<namespace uri="http://jpl.nasa.gov/model/sysml-lite/1.0"
+			prefix="sysml" />
 		<namespace uri="http://jpl.nasa.gov/model/view/2.0" prefix="view2" />
 	</namespaces>
 	<data-types />
@@ -50,12 +51,12 @@
 					</index>
 				</property>
 			</properties>
- 			<associations/>
+			<associations />
 			<overrides />
 			<mandatory-aspects>
 				<aspect>sysml:Identifiable</aspect>
 				<aspect>sysml:Named</aspect>
-                <!-- <aspect>sysml:OwnsAttribute</aspect> -->
+				<!-- <aspect>sysml:OwnsAttribute</aspect> -->
 				<aspect>cm:versionable</aspect>
 				<aspect>cm:taggable</aspect>
 				<aspect>cm:titled</aspect> <!-- this is purely here for showing in ui, should show sysml:name instead -->
@@ -71,7 +72,7 @@
 		</type>
 		<type name="view2:Snapshot">
 			<parent>cm:content</parent>
-			<properties/>
+			<properties />
 			<associations />
 			<overrides />
 			<mandatory-aspects>
@@ -113,65 +114,65 @@
 				</property>
 			</properties>
 		</aspect>
-        <aspect name="sysml:HasMetatype">
-            <properties>
-                <property name="sysml:isMetatype">
-                    <type>d:boolean</type>
-                    <mandatory>false</mandatory>
-                    <index enabled="true">
-                        <atomic>false</atomic>
-                        <stored>false</stored>
-                        <tokenised>false</tokenised>
-                    </index>
-                </property>
-                <property name="sysml:metatypes">
-                    <type>d:text</type>
-                    <mandatory>false</mandatory>
-                    <multiple>true</multiple>                 
-                    <index enabled="true">
-                        <atomic>false</atomic>
-                        <stored>false</stored>
-                        <tokenised>false</tokenised>
-                    </index>
-                </property>
-                <property name="sysml:appliedMetatypes">
-                    <type>d:text</type>
-                    <mandatory>false</mandatory>
-                    <multiple>true</multiple>                 
-                    <index enabled="true">
-                        <atomic>false</atomic>
-                        <stored>false</stored>
-                        <tokenised>false</tokenised>
-                    </index>
-                </property>
-            </properties>
-        </aspect>
-        <aspect name="sysml:Package">
-            <properties>
-                <property name="sysml:isSite">
-                    <type>d:boolean</type>
-                    <mandatory>false</mandatory>
-                    <index enabled="true">
-                        <atomic>false</atomic>
-                        <stored>false</stored>
-                        <tokenised>false</tokenised>
-                    </index>
-                </property>
-            </properties>
-        </aspect>
-        <aspect name="sysml:Viewpoint">
-            <properties>
-                <property name="sysml:method">
-                    <type>d:noderef</type>
-                    <mandatory>false</mandatory>
-                    <index enabled="true">
-                        <atomic>false</atomic>
-                        <stored>false</stored>
-                        <tokenised>false</tokenised>
-                    </index>
-                </property>
-            </properties>
-        </aspect>
+		<aspect name="sysml:HasMetatype">
+			<properties>
+				<property name="sysml:isMetatype">
+					<type>d:boolean</type>
+					<mandatory>false</mandatory>
+					<index enabled="true">
+						<atomic>false</atomic>
+						<stored>false</stored>
+						<tokenised>false</tokenised>
+					</index>
+				</property>
+				<property name="sysml:metatypes">
+					<type>d:text</type>
+					<mandatory>false</mandatory>
+					<multiple>true</multiple>
+					<index enabled="true">
+						<atomic>false</atomic>
+						<stored>false</stored>
+						<tokenised>false</tokenised>
+					</index>
+				</property>
+				<property name="sysml:appliedMetatypes">
+					<type>d:text</type>
+					<mandatory>false</mandatory>
+					<multiple>true</multiple>
+					<index enabled="true">
+						<atomic>false</atomic>
+						<stored>false</stored>
+						<tokenised>false</tokenised>
+					</index>
+				</property>
+			</properties>
+		</aspect>
+		<aspect name="sysml:Package">
+			<properties>
+				<property name="sysml:isSite">
+					<type>d:boolean</type>
+					<mandatory>false</mandatory>
+					<index enabled="true">
+						<atomic>false</atomic>
+						<stored>false</stored>
+						<tokenised>false</tokenised>
+					</index>
+				</property>
+			</properties>
+		</aspect>
+		<aspect name="sysml:Viewpoint">
+			<properties>
+				<property name="sysml:method">
+					<type>d:noderef</type>
+					<mandatory>false</mandatory>
+					<index enabled="true">
+						<atomic>false</atomic>
+						<stored>false</stored>
+						<tokenised>false</tokenised>
+					</index>
+				</property>
+			</properties>
+		</aspect>
 		<aspect name="sysml:View">
 			<properties>
 				<property name="view2:contains"> <!-- json string cache of the rendered view structure and element transclusion -->
@@ -200,18 +201,18 @@
 					<index enabled="false" />
 				</property>
 				<property name="sysml:contents">
-                    <type>d:noderef</type>
-                    <mandatory>false</mandatory>
-                    <multiple>false</multiple>                 
-                    <index enabled="true">
-                        <atomic>false</atomic>
-                        <stored>false</stored>
-                        <tokenised>false</tokenised>
-                    </index>
-                </property>
+					<type>d:noderef</type>
+					<mandatory>false</mandatory>
+					<multiple>false</multiple>
+					<index enabled="true">
+						<atomic>false</atomic>
+						<stored>false</stored>
+						<tokenised>false</tokenised>
+					</index>
+				</property>
 			</properties>
 			<associations>
-			     <!--  deprecated: replaced by view2:Snapshotable -->
+				<!-- deprecated: replaced by view2:Snapshotable -->
 				<association name="view2:snapshots">
 					<source>
 						<mandatory>false</mandatory>
@@ -246,79 +247,79 @@
 			<mandatory-aspects />
 		</aspect>
 		<aspect name="view2:Snapshotable">
-		  <!--  replaces view2:snapshots -->
-		  <properties>
-		      <property name="view2:snapshotProduct">
-		          <type>d:noderef</type>
-		          <mandatory>false</mandatory>
-		          <multiple>false</multiple>
-		          <index enabled="false"/>
-		      </property>
-		      <property name="view2:productSnapshots">
-		          <type>d:noderef</type>
-		          <mandatory>false</mandatory>
-		          <multiple>true</multiple>
-		          <index enabled="false"/>
-		      </property>
-		  </properties>
+			<!-- replaces view2:snapshots -->
+			<properties>
+				<property name="view2:snapshotProduct">
+					<type>d:noderef</type>
+					<mandatory>false</mandatory>
+					<multiple>false</multiple>
+					<index enabled="false" />
+				</property>
+				<property name="view2:productSnapshots">
+					<type>d:noderef</type>
+					<mandatory>false</mandatory>
+					<multiple>true</multiple>
+					<index enabled="false" />
+				</property>
+			</properties>
 		</aspect>
-		
+
 		<aspect name="view2:timestamped">
-		  <properties>
-		      <property name="view2:timestamp">
-		          <type>d:datetime</type>
-		          <mandatory>false</mandatory>
-		          <multiple>false</multiple>
-		          <index enabled="false"/>
-		      </property>
-		  </properties>
+			<properties>
+				<property name="view2:timestamp">
+					<type>d:datetime</type>
+					<mandatory>false</mandatory>
+					<multiple>false</multiple>
+					<index enabled="false" />
+				</property>
+			</properties>
 		</aspect>
-		
+
 		<aspect name="view2:docbook">
 			<properties>
 				<property name="view2:docbookNode">
-					<type>d:noderef</type> 
+					<type>d:noderef</type>
 					<mandatory>true</mandatory>
 					<multiple>false</multiple>
 					<index enabled="false"></index>
 				</property>
 			</properties>
 		</aspect>
-		
+
 		<aspect name="view2:pdf">
 			<properties>
 				<property name="view2:pdfNode">
-					<type>d:noderef</type> 
+					<type>d:noderef</type>
 					<mandatory>false</mandatory>
 					<multiple>false</multiple>
 					<index enabled="false"></index>
 				</property>
 				<property name="view2:pdfStatus">
-					<type>d:text</type> 
+					<type>d:text</type>
 					<mandatory>false</mandatory>
 					<multiple>false</multiple>
 					<index enabled="false"></index>
 				</property>
 			</properties>
 		</aspect>
-		
+
 		<aspect name="view2:htmlZip">
 			<properties>
 				<property name="view2:htmlZipNode">
-					<type>d:noderef</type> 
+					<type>d:noderef</type>
 					<mandatory>true</mandatory>
 					<multiple>false</multiple>
 					<index enabled="false"></index>
 				</property>
 				<property name="view2:htmlZipStatus">
-					<type>d:text</type> 
+					<type>d:text</type>
 					<mandatory>false</mandatory>
 					<multiple>false</multiple>
 					<index enabled="false"></index>
 				</property>
 			</properties>
 		</aspect>
-		
+
 		<aspect name="sysml:Comment">
 			<properties>
 				<property name="sysml:body">
@@ -347,26 +348,56 @@
 		</aspect>
 		<aspect name="sysml:Property">
 			<properties>
-			    <property name="sysml:lower">
-                    <type>d:noderef</type>
-                    <mandatory>false</mandatory>
+				<property name="sysml:lower">
+					<type>d:noderef</type>
+					<mandatory>false</mandatory>
+					<multiple>false</multiple>
+					<index enabled="true">
+						<atomic>false</atomic>
+						<stored>false</stored>
+						<tokenised>false</tokenised>
+					</index>
+				</property>
+				<property name="sysml:upper">
+					<type>d:noderef</type>
+					<mandatory>false</mandatory>
+					<multiple>false</multiple>
+					<index enabled="true">
+						<atomic>false</atomic>
+						<stored>false</stored>
+						<tokenised>false</tokenised>
+					</index>
+				</property>
+				<property name="sysml:multiplicityMin">
+					<type>d:int</type>
+					<mandatory>false</mandatory>
                     <multiple>false</multiple>
-                    <index enabled="true">
-                        <atomic>false</atomic>
-                        <stored>false</stored>
-                        <tokenised>false</tokenised>
-                    </index>
-                </property>
-                <property name="sysml:upper">
-                    <type>d:noderef</type>
-                    <mandatory>false</mandatory>
+					<index enabled="true">
+						<atomic>false</atomic>
+						<stored>false</stored>
+						<tokenised>false</tokenised>
+					</index>
+				</property>
+				<property name="sysml:multiplicityMax">
+					<type>d:int</type>
+					<mandatory>false</mandatory>
                     <multiple>false</multiple>
-                    <index enabled="true">
-                        <atomic>false</atomic>
-                        <stored>false</stored>
-                        <tokenised>false</tokenised>
-                    </index>
-                </property>
+					<index enabled="true">
+						<atomic>false</atomic>
+						<stored>false</stored>
+						<tokenised>false</tokenised>
+					</index>
+				</property>
+				<property name="sysml:redefines">
+					<type>d:noderef</type>
+					<mandatory>false</mandatory>
+					<multiple>true</multiple>
+					<index enabled="true">
+						<atomic>false</atomic>
+						<stored>false</stored>
+						<tokenised>false</tokenised>
+					</index>
+				</property>
 				<property name="sysml:isDerived">
 					<type>d:boolean</type>
 					<mandatory>false</mandatory>
@@ -397,38 +428,38 @@
 						<tokenised>false</tokenised>
 					</index>
 				</property>
-                <property name="sysml:propertyType">
-                    <type>d:noderef</type>
-                    <mandatory>false</mandatory>
-                    <multiple>false</multiple>
-                    <index enabled="true">
-                        <atomic>false</atomic>
-                        <stored>false</stored>
-                        <tokenised>false</tokenised>
-                    </index>
-                </property>
-                <property name="sysml:aggregation">
-                    <type>d:text</type>
-                    <mandatory>false</mandatory>
-                    <index enabled="true">
-                        <atomic>false</atomic>
-                        <stored>false</stored>
-                        <tokenised>true</tokenised>
-                    </index>
-                    <constraints>
-                        <constraint name="sysml:aggregation_constraint" type="LIST">
-                            <parameter name="allowedValues">
-                                <list>
-                                    <value>COMPOSITE</value>
-                                    <value>SHARED</value>
-                                    <value>NONE</value>
-                                </list>
-                            </parameter>
-                        </constraint>
-                    </constraints>
-                </property>
+				<property name="sysml:propertyType">
+					<type>d:noderef</type>
+					<mandatory>false</mandatory>
+					<multiple>false</multiple>
+					<index enabled="true">
+						<atomic>false</atomic>
+						<stored>false</stored>
+						<tokenised>false</tokenised>
+					</index>
+				</property>
+				<property name="sysml:aggregation">
+					<type>d:text</type>
+					<mandatory>false</mandatory>
+					<index enabled="true">
+						<atomic>false</atomic>
+						<stored>false</stored>
+						<tokenised>true</tokenised>
+					</index>
+					<constraints>
+						<constraint name="sysml:aggregation_constraint" type="LIST">
+							<parameter name="allowedValues">
+								<list>
+									<value>COMPOSITE</value>
+									<value>SHARED</value>
+									<value>NONE</value>
+								</list>
+							</parameter>
+						</constraint>
+					</constraints>
+				</property>
 			</properties>
-			<associations/>
+			<associations />
 			<overrides />
 			<mandatory-aspects />
 		</aspect>
@@ -459,107 +490,107 @@
 		</aspect>
 		<aspect name="sysml:Dependency">
 			<parent>sysml:DirectedRelationship</parent>
-            <properties>
-                <!-- This property exists only to ensure that the addition and removal 
-                    of this aspect is tracked in the version history. Be sure to change 
-                    this property when adding the aspect, and be sure to remove the property 
-                    when removing the aspect. -->
-                <property name="sysml:dependency">
-                    <type>d:int</type>
-                    <mandatory>false</mandatory>
-                    <multiple>false</multiple>
-                    <index enabled="false"/>
-                </property>
-            </properties>
+			<properties>
+				<!-- This property exists only to ensure that the addition and removal 
+					of this aspect is tracked in the version history. Be sure to change this 
+					property when adding the aspect, and be sure to remove the property when 
+					removing the aspect. -->
+				<property name="sysml:dependency">
+					<type>d:int</type>
+					<mandatory>false</mandatory>
+					<multiple>false</multiple>
+					<index enabled="false" />
+				</property>
+			</properties>
 		</aspect>
 		<aspect name="sysml:Expose">
 			<parent>sysml:Dependency</parent>
-            <properties>
-                <!-- This property exists only to ensure that the addition and removal 
-                    of this aspect is tracked in the version history. Be sure to change 
-                    this property when adding the aspect, and be sure to remove the property 
-                    when removing the aspect. -->
-                <property name="sysml:expose">
-                    <type>d:int</type>
-                    <mandatory>false</mandatory>
-                    <multiple>false</multiple>
-                    <index enabled="false"/>
-                </property>
-            </properties>
+			<properties>
+				<!-- This property exists only to ensure that the addition and removal 
+					of this aspect is tracked in the version history. Be sure to change this 
+					property when adding the aspect, and be sure to remove the property when 
+					removing the aspect. -->
+				<property name="sysml:expose">
+					<type>d:int</type>
+					<mandatory>false</mandatory>
+					<multiple>false</multiple>
+					<index enabled="false" />
+				</property>
+			</properties>
 		</aspect>
 		<aspect name="sysml:Conform">
 			<parent>sysml:Dependency</parent>
-            <properties>
-                <!-- This property exists only to ensure that the addition and removal 
-                    of this aspect is tracked in the version history. Be sure to change 
-                    this property when adding the aspect, and be sure to remove the property 
-                    when removing the aspect. -->
-                <property name="sysml:conform">
-                    <type>d:int</type>
-                    <mandatory>false</mandatory>
-                    <multiple>false</multiple>
-                    <index enabled="false"/>
-                </property>
-            </properties>
+			<properties>
+				<!-- This property exists only to ensure that the addition and removal 
+					of this aspect is tracked in the version history. Be sure to change this 
+					property when adding the aspect, and be sure to remove the property when 
+					removing the aspect. -->
+				<property name="sysml:conform">
+					<type>d:int</type>
+					<mandatory>false</mandatory>
+					<multiple>false</multiple>
+					<index enabled="false" />
+				</property>
+			</properties>
 		</aspect>
 		<aspect name="sysml:Generalization">
 			<parent>sysml:DirectedRelationship</parent>
-            <properties>
-                <!-- This property exists only to ensure that the addition and removal 
-                    of this aspect is tracked in the version history. Be sure to change 
-                    this property when adding the aspect, and be sure to remove the property 
-                    when removing the aspect. -->
-                <property name="sysml:generalization">
-                    <type>d:int</type>
-                    <mandatory>false</mandatory>
-                    <multiple>false</multiple>
-                    <index enabled="false"/>
-                </property>
-            </properties>
+			<properties>
+				<!-- This property exists only to ensure that the addition and removal 
+					of this aspect is tracked in the version history. Be sure to change this 
+					property when adding the aspect, and be sure to remove the property when 
+					removing the aspect. -->
+				<property name="sysml:generalization">
+					<type>d:int</type>
+					<mandatory>false</mandatory>
+					<multiple>false</multiple>
+					<index enabled="false" />
+				</property>
+			</properties>
 		</aspect>
 
-        <aspect name="sysml:relationshipsAsSource">
-            <properties>
-                <property name="sysml:relAsSource">
-                    <type>d:noderef</type>
-                    <mandatory>true</mandatory>
-                    <multiple>true</multiple>
-                    <index enabled="true">
-                        <atomic>false</atomic>
-                        <stored>false</stored>
-                        <tokenised>false</tokenised>
-                    </index>
-                </property>
-            </properties>
-        </aspect>
-        <aspect name="sysml:relationshipsAsTarget">
-            <properties>
-                <property name="sysml:relAsTarget">
-                    <type>d:noderef</type>
-                    <mandatory>true</mandatory>
-                    <multiple>true</multiple>
-                    <index enabled="true">
-                        <atomic>false</atomic>
-                        <stored>false</stored>
-                        <tokenised>false</tokenised>
-                    </index>
-                </property>
-            </properties>
-        </aspect>
-        <aspect name="sysml:undirectedRelationships">
-            <properties>
-                <property name="sysml:undirectedRel">
-                    <type>d:noderef</type>
-                    <mandatory>true</mandatory>
-                    <multiple>true</multiple>
-                    <index enabled="true">
-                        <atomic>false</atomic>
-                        <stored>false</stored>
-                        <tokenised>false</tokenised>
-                    </index>
-                </property>
-            </properties>
-        </aspect>
+		<aspect name="sysml:relationshipsAsSource">
+			<properties>
+				<property name="sysml:relAsSource">
+					<type>d:noderef</type>
+					<mandatory>true</mandatory>
+					<multiple>true</multiple>
+					<index enabled="true">
+						<atomic>false</atomic>
+						<stored>false</stored>
+						<tokenised>false</tokenised>
+					</index>
+				</property>
+			</properties>
+		</aspect>
+		<aspect name="sysml:relationshipsAsTarget">
+			<properties>
+				<property name="sysml:relAsTarget">
+					<type>d:noderef</type>
+					<mandatory>true</mandatory>
+					<multiple>true</multiple>
+					<index enabled="true">
+						<atomic>false</atomic>
+						<stored>false</stored>
+						<tokenised>false</tokenised>
+					</index>
+				</property>
+			</properties>
+		</aspect>
+		<aspect name="sysml:undirectedRelationships">
+			<properties>
+				<property name="sysml:undirectedRel">
+					<type>d:noderef</type>
+					<mandatory>true</mandatory>
+					<multiple>true</multiple>
+					<index enabled="true">
+						<atomic>false</atomic>
+						<stored>false</stored>
+						<tokenised>false</tokenised>
+					</index>
+				</property>
+			</properties>
+		</aspect>
 
 
 		<aspect name="sysml:ValueSpecification">
@@ -619,31 +650,31 @@
 				</property>
 			</properties>
 		</aspect>
-        <aspect name="sysml:LiteralSet">
-            <parent>sysml:ValueSpecification</parent>
-            <properties>
-                <property name="sysml:set">
-                    <type>d:noderef</type>
-                    <mandatory>true</mandatory>
-                    <multiple>true</multiple>
-                    <index enabled="true">
-                        <atomic>false</atomic>
-                        <stored>false</stored>
-                        <tokenised>false</tokenised>
-                    </index>
-                </property>
-                <property name="sysml:setOperand">
-                    <type>d:noderef</type>
-                    <mandatory>false</mandatory>
-                    <multiple>false</multiple>
-                    <index enabled="true">
-                        <atomic>false</atomic>
-                        <stored>false</stored>
-                        <tokenised>false</tokenised>
-                    </index>
-                </property>
-            </properties>
-        </aspect>
+		<aspect name="sysml:LiteralSet">
+			<parent>sysml:ValueSpecification</parent>
+			<properties>
+				<property name="sysml:set">
+					<type>d:noderef</type>
+					<mandatory>true</mandatory>
+					<multiple>true</multiple>
+					<index enabled="true">
+						<atomic>false</atomic>
+						<stored>false</stored>
+						<tokenised>false</tokenised>
+					</index>
+				</property>
+				<property name="sysml:setOperand">
+					<type>d:noderef</type>
+					<mandatory>false</mandatory>
+					<multiple>false</multiple>
+					<index enabled="true">
+						<atomic>false</atomic>
+						<stored>false</stored>
+						<tokenised>false</tokenised>
+					</index>
+				</property>
+			</properties>
+		</aspect>
 		<aspect name="sysml:Expression">
 			<parent>sysml:ValueSpecification</parent>
 			<properties>
@@ -705,18 +736,18 @@
 		</aspect>
 		<aspect name="sysml:LiteralNull">
 			<parent>sysml:ValueSpecification</parent>
-            <properties>
-                <!-- This property exists only to ensure that the addition and removal 
-                    of this aspect is tracked in the version history. Be sure to change 
-                    this property when adding the aspect, and be sure to remove the property 
-                    when removing the aspect. -->
-                <property name="sysml:literalNull">
-                    <type>d:int</type>
-                    <mandatory>false</mandatory>
-                    <multiple>false</multiple>
-                    <index enabled="false"/>
-                </property>
-            </properties>
+			<properties>
+				<!-- This property exists only to ensure that the addition and removal 
+					of this aspect is tracked in the version history. Be sure to change this 
+					property when adding the aspect, and be sure to remove the property when 
+					removing the aspect. -->
+				<property name="sysml:literalNull">
+					<type>d:int</type>
+					<mandatory>false</mandatory>
+					<multiple>false</multiple>
+					<index enabled="false" />
+				</property>
+			</properties>
 		</aspect>
 		<aspect name="sysml:LiteralReal">
 			<parent>sysml:ValueSpecification</parent>
@@ -845,26 +876,26 @@
 						<tokenised>false</tokenised>
 					</index>
 				</property>
-                <property name="sysml:classifier">
-                    <type>d:noderef</type>
-                    <mandatory>false</mandatory>
-                    <multiple>true</multiple>
-                    <index enabled="true">
-                        <atomic>false</atomic>
-                        <stored>false</stored>
-                        <tokenised>false</tokenised>
-                    </index>
-                </property>
-                <property name="sysml:slots">
-                    <type>d:noderef</type>
-                    <mandatory>false</mandatory>
-                    <multiple>true</multiple>
-                    <index enabled="true">
-                        <atomic>false</atomic>
-                        <stored>false</stored>
-                        <tokenised>false</tokenised>
-                    </index>
-                </property>
+				<property name="sysml:classifier">
+					<type>d:noderef</type>
+					<mandatory>false</mandatory>
+					<multiple>true</multiple>
+					<index enabled="true">
+						<atomic>false</atomic>
+						<stored>false</stored>
+						<tokenised>false</tokenised>
+					</index>
+				</property>
+				<property name="sysml:slots">
+					<type>d:noderef</type>
+					<mandatory>false</mandatory>
+					<multiple>true</multiple>
+					<index enabled="true">
+						<atomic>false</atomic>
+						<stored>false</stored>
+						<tokenised>false</tokenised>
+					</index>
+				</property>
 			</properties>
 		</aspect>
 		<aspect name="sysml:Constraint">
@@ -916,68 +947,68 @@
 			</properties>
 		</aspect>
 		<aspect name="sysml:Connector">
-		    <parent>sysml:DirectedRelationship</parent>
+			<parent>sysml:DirectedRelationship</parent>
 			<properties>
-			    <property name="sysml:targetLower">
-                    <type>d:noderef</type>
-                    <mandatory>false</mandatory>
-                    <multiple>false</multiple>
-                    <index enabled="true">
-                        <atomic>false</atomic>
-                        <stored>false</stored>
-                        <tokenised>false</tokenised>
-                    </index>
-                </property>
-                <property name="sysml:targetUpper">
-                    <type>d:noderef</type>
-                    <mandatory>false</mandatory>
-                    <multiple>false</multiple>
-                    <index enabled="true">
-                        <atomic>false</atomic>
-                        <stored>false</stored>
-                        <tokenised>false</tokenised>
-                    </index>
-                </property>
-                <property name="sysml:sourceLower">
-                    <type>d:noderef</type>
-                    <mandatory>false</mandatory>
-                    <multiple>false</multiple>
-                    <index enabled="true">
-                        <atomic>false</atomic>
-                        <stored>false</stored>
-                        <tokenised>false</tokenised>
-                    </index>
-                </property>
-                <property name="sysml:sourceUpper">
-                    <type>d:noderef</type>
-                    <mandatory>false</mandatory>
-                    <multiple>false</multiple>
-                    <index enabled="true">
-                        <atomic>false</atomic>
-                        <stored>false</stored>
-                        <tokenised>false</tokenised>
-                    </index>
-                </property>
-                <property name="sysml:sourcePath">
-                    <type>d:noderef</type>
-                    <mandatory>true</mandatory>
-                    <multiple>true</multiple>
-                    <index enabled="true">
-                        <atomic>false</atomic>
-                        <stored>false</stored>
-                        <tokenised>false</tokenised>
-                    </index>
-                </property>
-                <property name="sysml:targetPath">
-                    <type>d:noderef</type>
-                    <mandatory>true</mandatory>
-                    <multiple>true</multiple>
-                    <index enabled="true">
-                        <atomic>false</atomic>
-                        <stored>false</stored>
-                        <tokenised>false</tokenised>
-                    </index>
-                </property>
+				<property name="sysml:targetLower">
+					<type>d:noderef</type>
+					<mandatory>false</mandatory>
+					<multiple>false</multiple>
+					<index enabled="true">
+						<atomic>false</atomic>
+						<stored>false</stored>
+						<tokenised>false</tokenised>
+					</index>
+				</property>
+				<property name="sysml:targetUpper">
+					<type>d:noderef</type>
+					<mandatory>false</mandatory>
+					<multiple>false</multiple>
+					<index enabled="true">
+						<atomic>false</atomic>
+						<stored>false</stored>
+						<tokenised>false</tokenised>
+					</index>
+				</property>
+				<property name="sysml:sourceLower">
+					<type>d:noderef</type>
+					<mandatory>false</mandatory>
+					<multiple>false</multiple>
+					<index enabled="true">
+						<atomic>false</atomic>
+						<stored>false</stored>
+						<tokenised>false</tokenised>
+					</index>
+				</property>
+				<property name="sysml:sourceUpper">
+					<type>d:noderef</type>
+					<mandatory>false</mandatory>
+					<multiple>false</multiple>
+					<index enabled="true">
+						<atomic>false</atomic>
+						<stored>false</stored>
+						<tokenised>false</tokenised>
+					</index>
+				</property>
+				<property name="sysml:sourcePath">
+					<type>d:noderef</type>
+					<mandatory>true</mandatory>
+					<multiple>true</multiple>
+					<index enabled="true">
+						<atomic>false</atomic>
+						<stored>false</stored>
+						<tokenised>false</tokenised>
+					</index>
+				</property>
+				<property name="sysml:targetPath">
+					<type>d:noderef</type>
+					<mandatory>true</mandatory>
+					<multiple>true</multiple>
+					<index enabled="true">
+						<atomic>false</atomic>
+						<stored>false</stored>
+						<tokenised>false</tokenised>
+					</index>
+				</property>
 				<property name="sysml:connectorKind">
 					<type>d:text</type>
 					<mandatory>false</mandatory>
@@ -988,206 +1019,205 @@
 						<tokenised>false</tokenised>
 					</index>
 					<constraints>
-                        <constraint name="sysml:connectorKind_constraint" type="LIST">
-                            <parameter name="allowedValues">
-                                <list>
-                                    <value>BINDING</value>
-                                    <value>DIRECTED</value>
-                                    <value>NONE</value>
-                                </list>
-                            </parameter>
-                        </constraint>
-                    </constraints>
+						<constraint name="sysml:connectorKind_constraint" type="LIST">
+							<parameter name="allowedValues">
+								<list>
+									<value>BINDING</value>
+									<value>DIRECTED</value>
+									<value>NONE</value>
+								</list>
+							</parameter>
+						</constraint>
+					</constraints>
 				</property>
 				<property name="sysml:connectorValue">
-                    <type>d:noderef</type>
-                    <mandatory>false</mandatory>
-                    <multiple>false</multiple>
-                    <index enabled="true">
-                        <atomic>false</atomic>
-                        <stored>false</stored>
-                        <tokenised>false</tokenised>
-                    </index>
-                </property>
-                <property name="sysml:connectorType">
-                    <type>d:noderef</type>
-                    <mandatory>false</mandatory>
-                    <multiple>false</multiple>
-                    <index enabled="true">
-                        <atomic>false</atomic>
-                        <stored>false</stored>
-                        <tokenised>false</tokenised>
-                    </index>
-                </property>
+					<type>d:noderef</type>
+					<mandatory>false</mandatory>
+					<multiple>false</multiple>
+					<index enabled="true">
+						<atomic>false</atomic>
+						<stored>false</stored>
+						<tokenised>false</tokenised>
+					</index>
+				</property>
+				<property name="sysml:connectorType">
+					<type>d:noderef</type>
+					<mandatory>false</mandatory>
+					<multiple>false</multiple>
+					<index enabled="true">
+						<atomic>false</atomic>
+						<stored>false</stored>
+						<tokenised>false</tokenised>
+					</index>
+				</property>
 			</properties>
 		</aspect>
-        <aspect name="sysml:Association">
-            <parent>sysml:DirectedRelationship</parent>
-            <properties>
-                <property name="sysml:ownedEnd">
-                    <type>d:noderef</type>
-                    <mandatory>false</mandatory>
-                    <multiple>true</multiple>
-                    <index enabled="true">
-                        <atomic>false</atomic>
-                        <stored>false</stored>
-                        <tokenised>false</tokenised>
-                    </index>
-                </property>
-                <property name="sysml:sourceAggregation">
-                    <!-- can be COMPOSITE, SHARED, NONE -->
-                    <type>d:text</type>
-                    <mandatory>true</mandatory>
-                    <multiple>false</multiple>
-                    <index enabled="true">
-                        <atomic>false</atomic>
-                        <stored>false</stored>
-                        <tokenised>false</tokenised>
-                    </index>
-                    <constraints>
-                        <constraint name="sysml:sourceAggregation_constraint" type="LIST">
-                            <parameter name="allowedValues">
-                                <list>
-                                    <value>COMPOSITE</value>
-                                    <value>SHARED</value>
-                                    <value>NONE</value>
-                                </list>
-                            </parameter>
-                        </constraint>
-                    </constraints>
-                </property>
-                <property name="sysml:targetAggregation">
-                    <!-- can be COMPOSITE, SHARED, NONE -->
-                    <type>d:text</type>
-                    <mandatory>true</mandatory>
-                    <multiple>false</multiple>
-                    <index enabled="true">
-                        <atomic>false</atomic>
-                        <stored>false</stored>
-                        <tokenised>false</tokenised>
-                    </index>
-                    <constraints>
-                        <constraint name="sysml:targetAggregation_constraint" type="LIST">
-                            <parameter name="allowedValues">
-                                <list>
-                                    <value>COMPOSITE</value>
-                                    <value>SHARED</value>
-                                    <value>NONE</value>
-                                </list>
-                            </parameter>
-                        </constraint>
-                    </constraints>
-                </property>
-            </properties>
-        </aspect>
-        <aspect name="sysml:OwnsAttribute">
-            <properties>
-                <property name="sysml:ownedAttribute">
-                    <type>d:noderef</type>
-                    <mandatory>false</mandatory>
-                    <multiple>true</multiple>
-                    <index enabled="true">
-                        <atomic>false</atomic>
-                        <stored>false</stored>
-                        <tokenised>false</tokenised>
-                    </index>
-                </property>
-				<!-- This property is updated whenever an aspect is added or deleted. We're 
-					putting it here because the OwnsAttribute aspect is added to every element. -->
-                <!-- <property name="sysml:bogusProperty">
-                    <type>d:int</type>
-                    <mandatory>false</mandatory>
-                    <multiple>false</multiple>
-                    <index enabled="false"/>
-                </property> -->
-            </properties>
-        </aspect>
-        <aspect name="sysml:Characterizes">
-            <parent>sysml:DirectedRelationship</parent>
-            <properties>
-                <!-- This property exists only to ensure that the addition and removal 
-                    of this aspect is tracked in the version history. Be sure to change 
-                    this property when adding the aspect, and be sure to remove the property 
-                    when removing the aspect. -->
-                <property name="sysml:characterizes">
-                    <type>d:int</type>
-                    <mandatory>false</mandatory>
-                    <multiple>false</multiple>
-                    <index enabled="false"/>
-                </property>
-            </properties>
-        </aspect>
-        <aspect name="sysml:Succession">
-            <parent>sysml:Connector</parent>
-            <properties>
-                <!-- This property exists only to ensure that the addition and removal 
-                    of this aspect is tracked in the version history. Be sure to change 
-                    this property when adding the aspect, and be sure to remove the property 
-                    when removing the aspect. -->
-                <property name="sysml:succession">
-                    <type>d:int</type>
-                    <mandatory>false</mandatory>
-                    <multiple>false</multiple>
-                    <index enabled="false"/>
-                </property>
-            </properties>
-        </aspect>
-        <aspect name="sysml:Binding">
-            <parent>sysml:Connector</parent>
-            <properties>
-                <!-- This property exists only to ensure that the addition and removal 
-                    of this aspect is tracked in the version history. Be sure to change 
-                    this property when adding the aspect, and be sure to remove the property 
-                    when removing the aspect. -->
-                <property name="sysml:binding">
-                    <type>d:int</type>
-                    <mandatory>false</mandatory>
-                    <multiple>false</multiple>
-                    <index enabled="false"/>
-                </property>
-            </properties>
-        </aspect>
-        <aspect name="sysml:Untyped">
-            <properties>
-                <!-- This property exists only to ensure that the addition and removal 
-                    of this aspect is tracked in the version history. Be sure to change 
-                    this property when adding the aspect, and be sure to remove the property 
-                    when removing the aspect. -->
-                <property name="sysml:untyped">
-                    <type>d:int</type>
-                    <mandatory>false</mandatory>
-                    <multiple>false</multiple>
-                    <index enabled="false"/>
-                </property>
-            </properties>
-        </aspect>
-        <aspect name="sysml:Metaclass">
-            <properties>
-                <!-- This property exists only to ensure that the addition and removal 
-                    of this aspect is tracked in the version history. Be sure to change 
-                    this property when adding the aspect, and be sure to remove the property 
-                    when removing the aspect. -->
-                <property name="sysml:metaclass">
-                    <type>d:int</type>
-                    <mandatory>false</mandatory>
-                    <multiple>false</multiple>
-                    <index enabled="false"/>
-                </property>
-            </properties>
-        </aspect>
-        <aspect name="sysml:Stereotype">
-            <properties>
-                <!-- This property exists only to ensure that the addition and removal 
-                    of this aspect is tracked in the version history. Be sure to change 
-                    this property when adding the aspect, and be sure to remove the property 
-                    when removing the aspect. -->
-                <property name="sysml:stereotype">
-                    <type>d:int</type>
-                    <mandatory>false</mandatory>
-                    <multiple>false</multiple>
-                    <index enabled="false"/>
-                </property>
-            </properties>
-        </aspect>
+		<aspect name="sysml:Association">
+			<parent>sysml:DirectedRelationship</parent>
+			<properties>
+				<property name="sysml:ownedEnd">
+					<type>d:noderef</type>
+					<mandatory>false</mandatory>
+					<multiple>true</multiple>
+					<index enabled="true">
+						<atomic>false</atomic>
+						<stored>false</stored>
+						<tokenised>false</tokenised>
+					</index>
+				</property>
+				<property name="sysml:sourceAggregation">
+					<!-- can be COMPOSITE, SHARED, NONE -->
+					<type>d:text</type>
+					<mandatory>true</mandatory>
+					<multiple>false</multiple>
+					<index enabled="true">
+						<atomic>false</atomic>
+						<stored>false</stored>
+						<tokenised>false</tokenised>
+					</index>
+					<constraints>
+						<constraint name="sysml:sourceAggregation_constraint"
+							type="LIST">
+							<parameter name="allowedValues">
+								<list>
+									<value>COMPOSITE</value>
+									<value>SHARED</value>
+									<value>NONE</value>
+								</list>
+							</parameter>
+						</constraint>
+					</constraints>
+				</property>
+				<property name="sysml:targetAggregation">
+					<!-- can be COMPOSITE, SHARED, NONE -->
+					<type>d:text</type>
+					<mandatory>true</mandatory>
+					<multiple>false</multiple>
+					<index enabled="true">
+						<atomic>false</atomic>
+						<stored>false</stored>
+						<tokenised>false</tokenised>
+					</index>
+					<constraints>
+						<constraint name="sysml:targetAggregation_constraint"
+							type="LIST">
+							<parameter name="allowedValues">
+								<list>
+									<value>COMPOSITE</value>
+									<value>SHARED</value>
+									<value>NONE</value>
+								</list>
+							</parameter>
+						</constraint>
+					</constraints>
+				</property>
+			</properties>
+		</aspect>
+		<aspect name="sysml:OwnsAttribute">
+			<properties>
+				<property name="sysml:ownedAttribute">
+					<type>d:noderef</type>
+					<mandatory>false</mandatory>
+					<multiple>true</multiple>
+					<index enabled="true">
+						<atomic>false</atomic>
+						<stored>false</stored>
+						<tokenised>false</tokenised>
+					</index>
+				</property>
+				<!-- This property is updated whenever an aspect is added or deleted. 
+					We're putting it here because the OwnsAttribute aspect is added to every 
+					element. -->
+				<!-- <property name="sysml:bogusProperty"> <type>d:int</type> <mandatory>false</mandatory> 
+					<multiple>false</multiple> <index enabled="false"/> </property> -->
+			</properties>
+		</aspect>
+		<aspect name="sysml:Characterizes">
+			<parent>sysml:DirectedRelationship</parent>
+			<properties>
+				<!-- This property exists only to ensure that the addition and removal 
+					of this aspect is tracked in the version history. Be sure to change this 
+					property when adding the aspect, and be sure to remove the property when 
+					removing the aspect. -->
+				<property name="sysml:characterizes">
+					<type>d:int</type>
+					<mandatory>false</mandatory>
+					<multiple>false</multiple>
+					<index enabled="false" />
+				</property>
+			</properties>
+		</aspect>
+		<aspect name="sysml:Succession">
+			<parent>sysml:Connector</parent>
+			<properties>
+				<!-- This property exists only to ensure that the addition and removal 
+					of this aspect is tracked in the version history. Be sure to change this 
+					property when adding the aspect, and be sure to remove the property when 
+					removing the aspect. -->
+				<property name="sysml:succession">
+					<type>d:int</type>
+					<mandatory>false</mandatory>
+					<multiple>false</multiple>
+					<index enabled="false" />
+				</property>
+			</properties>
+		</aspect>
+		<aspect name="sysml:Binding">
+			<parent>sysml:Connector</parent>
+			<properties>
+				<!-- This property exists only to ensure that the addition and removal 
+					of this aspect is tracked in the version history. Be sure to change this 
+					property when adding the aspect, and be sure to remove the property when 
+					removing the aspect. -->
+				<property name="sysml:binding">
+					<type>d:int</type>
+					<mandatory>false</mandatory>
+					<multiple>false</multiple>
+					<index enabled="false" />
+				</property>
+			</properties>
+		</aspect>
+		<aspect name="sysml:Untyped">
+			<properties>
+				<!-- This property exists only to ensure that the addition and removal 
+					of this aspect is tracked in the version history. Be sure to change this 
+					property when adding the aspect, and be sure to remove the property when 
+					removing the aspect. -->
+				<property name="sysml:untyped">
+					<type>d:int</type>
+					<mandatory>false</mandatory>
+					<multiple>false</multiple>
+					<index enabled="false" />
+				</property>
+			</properties>
+		</aspect>
+		<aspect name="sysml:Metaclass">
+			<properties>
+				<!-- This property exists only to ensure that the addition and removal 
+					of this aspect is tracked in the version history. Be sure to change this 
+					property when adding the aspect, and be sure to remove the property when 
+					removing the aspect. -->
+				<property name="sysml:metaclass">
+					<type>d:int</type>
+					<mandatory>false</mandatory>
+					<multiple>false</multiple>
+					<index enabled="false" />
+				</property>
+			</properties>
+		</aspect>
+		<aspect name="sysml:Stereotype">
+			<properties>
+				<!-- This property exists only to ensure that the addition and removal 
+					of this aspect is tracked in the version history. Be sure to change this 
+					property when adding the aspect, and be sure to remove the property when 
+					removing the aspect. -->
+				<property name="sysml:stereotype">
+					<type>d:int</type>
+					<mandatory>false</mandatory>
+					<multiple>false</multiple>
+					<index enabled="false" />
+				</property>
+			</properties>
+		</aspect>
 	</aspects>
 </model>

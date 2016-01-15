@@ -86,7 +86,16 @@ public abstract class EmsTransaction {
             }
         } catch (Throwable e) {
             tryRollback( trx, e, "DB transaction failed" );
-            if (responseStatus.getCode() != HttpServletResponse.SC_BAD_REQUEST) {
+            // FIXME: Need to figure out how to do this appropriately in ModelSearch
+            // squash on ModelSearch, since a aspect not found will result in DB tx rollback
+            boolean skip = false;
+            for(StackTraceElement ste: e.getStackTrace()) {
+                if (ste.getClassName().contains( "ModelSearch" )) {
+                    skip = true;
+                    break;
+                }
+            }
+            if (!skip && responseStatus.getCode() != HttpServletResponse.SC_BAD_REQUEST) {
                 responseStatus.setCode( HttpServletResponse.SC_BAD_REQUEST );
                 response.append( "Could not complete DB transaction, see Alfresco logs for details" );
             }
@@ -176,11 +185,7 @@ public abstract class EmsTransaction {
             msg = "DB transaction failed";
         }
         try {
-//            log( Level.ERROR,
-//                 msg + "\n\t####### ERROR: Need to rollback: " + e.getMessage(),
-//                 HttpServletResponse.SC_INTERNAL_SERVER_ERROR );
             e.printStackTrace();
-//            logger.warn( "try rollback on trx=" + trx.hashCode() );
             trx.rollback();
         } catch ( Throwable ee ) {
             log( Level.ERROR, "\tryRollback(): rollback failed: " + ee.getMessage(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR );

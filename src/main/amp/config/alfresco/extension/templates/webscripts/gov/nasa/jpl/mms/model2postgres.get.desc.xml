@@ -1,0 +1,11 @@
+<webscript>
+	<shortname>Alfresco 2 Postgres</shortname>
+	<description>
+		Store alfresco nodes as a graph in Postgres database.
+	</description>
+	<url>/model2postgres/{workspaceId}</url>
+	<format default="json">argument</format>
+	<authentication>user</authentication>
+	<transaction>none</transaction>
+	<family>MMS REST API</family>
+</webscript>

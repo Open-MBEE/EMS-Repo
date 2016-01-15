@@ -87,6 +87,12 @@ public class SiteGet extends AbstractJavaWebScript {
         //clearCaches();
 
         Map<String, Object> model = new HashMap<String, Object>();
+        if (checkMmsVersions) {
+            if(compareMmsVersions(req, getResponse(), getResponseStatus()));{
+                model.put("res", createResponseJson());
+                return model;
+            }
+        } 
         JSONObject json = null;
 
         try {
@@ -106,12 +112,13 @@ public class SiteGet extends AbstractJavaWebScript {
         } catch (Exception e) {
             log(Level.ERROR, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Internal error stack trace:\n %s \n", e.getLocalizedMessage());
             e.printStackTrace();
-        }
-        if (json == null) {
-            model.put("res", createResponseJson());
-        } else {
-            model.put("res", NodeUtil.jsonToString( json ));
-        }
+       	}
+       	if (json == null) {
+       		model.put("res", createResponseJson());
+       	} else {
+       		model.put("res", NodeUtil.jsonToString( json ));
+       	}
+
         status.setCode(responseStatus.getCode());
 
         printFooter();
@@ -136,7 +143,6 @@ public class SiteGet extends AbstractJavaWebScript {
         NodeRef parentRef;
         NodeRef siteRef;
 
-        // TODO: Check to see if we need to filter our the sites based on the user
         List<SiteInfo> sites = services.getSiteService().listSites(null);
 
         // Create json array of info for each site in the workspace:
@@ -148,7 +154,7 @@ public class SiteGet extends AbstractJavaWebScript {
             }
 
             if (siteRef != null) {
-                	emsNode = new EmsScriptNode(siteRef, services);
+                emsNode = new EmsScriptNode(siteRef, services);
                 	if (emsNode.hasAspect( "ems:Deleted" )) continue;
                 	// skip if doesn't have Models directory or if no site characterization
                 	if (!emsNode.hasPermission( PermissionService.READ )) continue;
@@ -162,15 +168,18 @@ public class SiteGet extends AbstractJavaWebScript {
                 	    continue;
                 	}
 
+                	// add in the sites parent site
                 	EmsScriptNode parentNode = null;
                 	String parentId = null;
                 	if (parentRef != null) {
                 	    parentNode = new EmsScriptNode(parentRef, services, response);
-                	    parentId = parentNode.getSysmlId();
+                	    // skip parent if you don't have permissions on parent
+                	    if (emsNode.hasPermission( PermissionService.READ )) {
+                	        parentId = parentNode.getSysmlId();
+                	    }
                 	}
 
-                	// Note: workspace is null if its the master, and in that case we consider it to contain
-                	//		 all sites.
+                	// Note: workspace null if master, consider it to contain all sites.
                 	if (!name.equals("no_site") &&
                 		(workspace == null || (workspace != null && workspace.contains(emsNode))) ) {
 

@@ -47,9 +47,17 @@ public class MmsProductsGet extends AbstractJavaWebScript {
         printHeader( req );
 
         //clearCaches();
-
         Map<String, Object> model = new HashMap<String, Object>();
-
+        
+        // Checks mms versions
+        if(checkMmsVersions)
+        {
+        	if(compareMmsVersions(req, getResponse(), getResponseStatus())){
+		    	model.put("res", createResponseJson());
+		    	return model;
+        	}
+        }
+        
         MmsProductsGet instance = new MmsProductsGet(repository, getServices());
 
         JSONObject jsonObject = NodeUtil.newJsonObject();
@@ -69,6 +77,7 @@ public class MmsProductsGet extends AbstractJavaWebScript {
             }
             e.printStackTrace();
         }
+        
 
         status.setCode(responseStatus.getCode());
 
