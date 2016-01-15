@@ -375,7 +375,7 @@ public class EmsScriptNode extends ScriptNode implements
         EmsScriptNode child = node.childByNamePath( path );
         if ( child != null && child.exists() ) {
             if ( changeUser ) {
-                AuthenticationUtil.setRunAsUser( runAsUser );
+                if ( runAsUser != null) AuthenticationUtil.setRunAsUser( runAsUser );
             }
             return child;
         }
@@ -391,13 +391,13 @@ public class EmsScriptNode extends ScriptNode implements
             }
             if ( child != null && child.exists() ) {
                 if ( changeUser ) {
-                    AuthenticationUtil.setRunAsUser( runAsUser );
+                    if ( runAsUser != null) AuthenticationUtil.setRunAsUser( runAsUser );
                 }
                 return child;
             }
         }
         if ( changeUser ) {
-            AuthenticationUtil.setRunAsUser( runAsUser );
+            if ( runAsUser != null) AuthenticationUtil.setRunAsUser( runAsUser );
         }
         return null;
     }
@@ -502,7 +502,7 @@ public class EmsScriptNode extends ScriptNode implements
         ScriptNode child = super.childByNamePath( path );
 
         if ( changeUser ) {
-            AuthenticationUtil.setRunAsUser( runAsUser );
+            if ( runAsUser != null) AuthenticationUtil.setRunAsUser( runAsUser );
         }
 
         if ( child == null || !child.exists() ) {
@@ -4600,7 +4600,7 @@ public class EmsScriptNode extends ScriptNode implements
 
                 // Return to original running user.
                 if ( changeUser ) {
-                    AuthenticationUtil.setRunAsUser( runAsUser );
+                    if ( runAsUser != null) AuthenticationUtil.setRunAsUser( runAsUser );
                 }
 
                 // Log warning for missing permissions.

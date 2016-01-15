@@ -4987,7 +4987,7 @@ public class NodeUtil {
         String origUser = AuthenticationUtil.getRunAsUser();
         AuthenticationUtil.setRunAsUser("admin");
         ppAddQualifiedNameId2JsonImpl( req, model );
-        AuthenticationUtil.setRunAsUser(origUser);
+        if ( origUser != null) AuthenticationUtil.setRunAsUser(origUser);
     }
     public static void ppAddQualifiedNameId2JsonImpl( WebScriptRequest req,
                                                       Map< String, Object > model ) {

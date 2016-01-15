@@ -1289,7 +1289,7 @@ public class CommitUtil {
 			e.printStackTrace();
 		} finally {
 			if (switchUser)
-				AuthenticationUtil.setRunAsUser(origUser);
+		        if ( origUser != null) AuthenticationUtil.setRunAsUser(origUser);
 		}
 
 		return true;
