@@ -301,6 +301,19 @@ public class PostgresHelper {
 		return result;
 	}
 	
+	public boolean checkWorkspaceExists() {
+	    String query = String.format("select true from pg_tables where tablename='nodes%s'",
+	                                 workspaceName);
+	    try {
+        	    ResultSet rs = execQuery(query);
+        	    while (rs.next()) {
+        	        return rs.getBoolean( 1 );
+        	    }
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	    }
+	    return false;
+	}
 	
 	public Map<String,Set<String>> getImmediateParentRoots(String sysmlId, DbEdgeTypes et) {
 		Map<String, Set<String>> result = new HashMap<String, Set<String>>();

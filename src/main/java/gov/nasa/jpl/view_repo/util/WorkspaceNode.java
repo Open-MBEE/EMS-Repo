@@ -226,54 +226,54 @@ public class WorkspaceNode extends EmsScriptNode {
                           + ")" );
         }
 
-    	if ( Utils.isNullOrEmpty( wsName ) ) {
-    		wsName = NodeUtil.createId( services );
-    	}
-    	if ( folder == null || !folder.exists() ) {
-    		//String userName = ws.getOwner();
-    		if ( userName != null && userName.length() > 0 ) {
-    			folder = NodeUtil.getUserHomeFolder( userName, true );
-    			if ( Debug.isOn() ) Debug.outln( "user home folder: " + folder );
-    		}
-    	}
-    	if ( folder == null || !folder.exists() ) {
-    		Debug.error( true, false, "\n%%% Error! no folder, " + folder
-    				+ ", within which to create workspace, "
-    				+ wsName );
-    	}
+        if ( Utils.isNullOrEmpty( wsName ) ) {
+            wsName = NodeUtil.createId( services );
+        }
+        if ( folder == null || !folder.exists() ) {
+            //String userName = ws.getOwner();
+            if ( userName != null && userName.length() > 0 ) {
+                folder = NodeUtil.getUserHomeFolder( userName, true );
+                if ( Debug.isOn() ) Debug.outln( "user home folder: " + folder );
+            }
+        }
+        if ( folder == null || !folder.exists() ) {
+            Debug.error( true, false, "\n%%% Error! no folder, " + folder
+                    + ", within which to create workspace, "
+                    + wsName );
+        }
 
         WorkspaceNode parentWorkspace =
                 WorkspaceNode.getWorkspaceFromId( sourceNameOrId, services,
                                                   response, status, //false
                                                   userName );
-    	String cmName = wsName + '_' + getName( parentWorkspace );
-    	String cmTitle = cmName;
+        String cmName = wsName + '_' + getName( parentWorkspace );
+        String cmTitle = cmName;
 
-    	// Make sure the workspace does not already exist in the target folder with the same
-    	// parent workspace:
-    	Set<EmsScriptNode> childs = folder.getChildNodes(); 
-    	for (EmsScriptNode child : childs) {
-    	    if ( child != null && child.exists() ) {
-    	        String childWsName = (String)child.getProperty("ems:workspace_name");
-    	        // ems:parent is workspace meta property, so dateTime/workspace args dont matter
-    	        NodeRef childWsParentRef = (NodeRef)child.getNodeRefProperty("ems:parent", null, null);
-    	        EmsScriptNode childWsParent = childWsParentRef != null ? new EmsScriptNode(childWsParentRef, services) : null;
-    	        String childWsParentName = childWsParent != null ? childWsParent.getId() : null;
-    	        if (childWsName != null && childWsName.equals( wsName ) && 
-    	            ((childWsParentName == null && sourceNameOrId.equals( "master" )) || (childWsParentName != null && childWsParentName.equals( sourceNameOrId )))) {
+        // Make sure the workspace does not already exist in the target folder with the same
+        // parent workspace:
+        Set<EmsScriptNode> childs = folder.getChildNodes(); 
+        for (EmsScriptNode child : childs) {
+            if ( child != null && child.exists() ) {
+                String childWsName = (String)child.getProperty("ems:workspace_name");
+                // ems:parent is workspace meta property, so dateTime/workspace args dont matter
+                NodeRef childWsParentRef = (NodeRef)child.getNodeRefProperty("ems:parent", null, null);
+                EmsScriptNode childWsParent = childWsParentRef != null ? new EmsScriptNode(childWsParentRef, services) : null;
+                String childWsParentName = childWsParent != null ? childWsParent.getId() : null;
+                if (childWsName != null && childWsName.equals( wsName ) && 
+                    ((childWsParentName == null && sourceNameOrId.equals( "master" )) || (childWsParentName != null && childWsParentName.equals( sourceNameOrId )))) {
                     String msg = "ERROR! Trying to create an workspace with the same user: "+folder.getName()+", the same name: "+wsName+", and same parent workspace: "+sourceNameOrId+"\n";
                     response.append( msg );
                     if ( status != null ) {
                         status.setCode( HttpServletResponse.SC_BAD_REQUEST, msg );
                     }
                     return null;
-    	        }
+                }
             }
-    	}
+        }
 
-    	// Make sure the workspace does not already exist otherwise
-    	// So workspaces can be named the same, we store the name as the title, then update the
-    	// name to be unique with the nodeID as the name
+        // Make sure the workspace does not already exist otherwise
+        // So workspaces can be named the same, we store the name as the title, then update the
+        // name to be unique with the nodeID as the name
     NodeRef ref = NodeUtil.findNodeRefById( cmName, true, null, null, services, false );
     // FIXME -- This does not find workspaces that are not visible to the user!
     if ( ref != null ) {
@@ -285,8 +285,8 @@ public class WorkspaceNode extends EmsScriptNode {
         return null;
     }
 
-    	WorkspaceNode ws = new WorkspaceNode( folder.createFolder( cmName ).getNodeRef(),
-    	                                      services, response, status );
+        WorkspaceNode ws = new WorkspaceNode( folder.createFolder( cmName ).getNodeRef(),
+                                              services, response, status );
 
     ws.setProperty("cm:title", cmTitle);
     cmName = ws.getId() + "_" + getId( parentWorkspace );
@@ -295,27 +295,27 @@ public class WorkspaceNode extends EmsScriptNode {
     ws.addAspect( "ems:HasWorkspace" );
     ws.setProperty("ems:workspace", ws.getNodeRef() );
 
-    	ws.addAspect( "ems:Workspace" );
+        ws.addAspect( "ems:Workspace" );
     ws.setProperty("ems:workspace_name", wsName );
-    	ws.createOrUpdateProperty( "ems:lastTimeSyncParent", new Date() );
-    	if ( copyTime != null ) {
-    	    ws.createOrUpdateProperty( "ems:copyTime", copyTime );
-    	}
+        ws.createOrUpdateProperty( "ems:lastTimeSyncParent", new Date() );
+        if ( copyTime != null ) {
+            ws.createOrUpdateProperty( "ems:copyTime", copyTime );
+        }
 
-    	if ( Debug.isOn() ) Debug.outln( "parent workspace: " + parentWorkspace );
-    	if(parentWorkspace != null) {
-    		parentWorkspace.appendToPropertyNodeRefs( "ems:children", ws.getNodeRef() );
-    		ws.setProperty( "ems:parent", parentWorkspace.getNodeRef() );
-    	}
-    	if ( Debug.isOn() ) Debug.outln( "created workspace " + ws + " in folder " + folder );
+        if ( Debug.isOn() ) Debug.outln( "parent workspace: " + parentWorkspace );
+        if(parentWorkspace != null) {
+            parentWorkspace.appendToPropertyNodeRefs( "ems:children", ws.getNodeRef() );
+            ws.setProperty( "ems:parent", parentWorkspace.getNodeRef() );
+        }
+        if ( Debug.isOn() ) Debug.outln( "created workspace " + ws + " in folder " + folder );
 
         if (description != null) {
             ws.setProperty("ems:description", description );
         }
         
-    	ws.getOrSetCachedVersion();
+        ws.getOrSetCachedVersion();
 
-    	return ws;
+        return ws;
     }
 
     public void delete( boolean deleteChildWorkspaces ) {
@@ -775,7 +775,7 @@ public class WorkspaceNode extends EmsScriptNode {
         Date commonBranchPoint = thisWs != null ? thisWs.getCopyTime(otherWs) : null;
         if (commonBranchPoint == null && thisWs != null) 
         {
-        	commonBranchPoint = thisWs.getCopyTime();
+            commonBranchPoint = thisWs.getCopyTime();
         }
         Pair<WorkspaceNode, WorkspaceNode> p = getChildrenOfCommonParent(thisWs, otherWs);
         Date thisChildOfCommonParentCopyTime = p != null && p.first != null ? p.first.getCopyTime() : null;
@@ -1262,21 +1262,21 @@ public class WorkspaceNode extends EmsScriptNode {
      */
     public static boolean isRevert( WorkspaceNode ws1, Date t1,
                                     WorkspaceNode ws2, Date t2 ) {
-    	if(t1 != null && t2 != null){
-    		if (t1.after( t2 )) return false;
-    	}
-    	
+        if(t1 != null && t2 != null){
+            if (t1.after( t2 )) return false;
+        }
+        
         Pair< WorkspaceNode, Date > cbp = WorkspaceDiff.getCommonBranchPoint( ws1, ws2, t1, t2 );
         if (ws1 == null) {
             if (cbp.first == null) {
-            	if(t1 != null){
-            		if (cbp.second.after( t1 )) return false;
-            	}
+                if(t1 != null){
+                    if (cbp.second.after( t1 )) return false;
+                }
             }
         } else {
             if (!ws1.equals( cbp.first )) return false;
             if(t1 != null){
-            	if (cbp.second.after( t1 )) return false;
+                if (cbp.second.after( t1 )) return false;
             }
         }
         return true;

@@ -1,58 +1,58 @@
 {
-    "workspace2": {
-        "movedElements": [],
-        "deletedElements": [],
-        "conflictedElements": [],
-        "qualifiedName": "master/wsA/wsB",
-        "addedElements": [],
-        "name": "wsB",
-        "updatedElements": [{
-            "owner": "holding_bin_no_site_no_project",
-            "qualifiedName": "/no_site/no_site_no_project/holding_bin/300",
-            "documentation": "x is x",
-            "name": "300",
-            "specialization": {
-                "type": "Property",
-                "value": [{
-                    "valueExpression": null,
-                    "string": "the x value",
-                    "type": "LiteralString"
-                }]
-            },
-            "sysmlid": "x"
-        }]
-    },
     "workspace1": {
         "qualifiedName": "master/wsA",
+        "name": "wsA",
         "elements": [
             {
-                "owner": "holding_bin_no_site_no_project",
-                "editable": true,
+                "qualifiedName": "/no_site/no_site_no_project/holding_bin",
+                "name": "holding_bin",
+                "sysmlid": "holding_bin_no_site_no_project",
+                "owner": "no_site_no_project",
+                "specialization": {"type": "Package"},
+                "editable": true
+            },
+            {
                 "qualifiedName": "/no_site/no_site_no_project/holding_bin/300",
-                "documentation": "something",
                 "name": "300",
+                "sysmlid": "x",
+                "owner": "holding_bin_no_site_no_project",
+                "documentation": "something",
                 "specialization": {
+                    "propertyType": null,
                     "isSlot": false,
                     "isDerived": false,
-                    "propertyType": null,
-                    "type": "Property",
                     "value": [{
                         "valueExpression": null,
                         "string": "dlam_string",
                         "type": "LiteralString"
-                    }]
+                    }],
+                    "type": "Property"
                 },
-                "sysmlid": "x"
-            },
-            {
-                "owner": "no_site_no_project",
-                "editable": true,
-                "qualifiedName": "/no_site/no_site_no_project/holding_bin",
-                "name": "holding_bin",
-                "specialization": {"type": "Package"},
-                "sysmlid": "holding_bin_no_site_no_project"
+                "editable": true
             }
-        ],
-        "name": "wsA"
+        ]
+    },
+    "workspace2": {
+        "deletedElements": [],
+        "addedElements": [],
+        "conflictedElements": [],
+        "updatedElements": [{
+            "qualifiedName": "/no_site/no_site_no_project/holding_bin/300",
+            "name": "300",
+            "sysmlid": "x",
+            "owner": "holding_bin_no_site_no_project",
+            "documentation": "x is x",
+            "specialization": {
+                "value": [{
+                    "valueExpression": null,
+                    "string": "the x value",
+                    "type": "LiteralString"
+                }],
+                "type": "Property"
+            }
+        }],
+        "qualifiedName": "master/wsA/wsB",
+        "name": "wsB",
+        "movedElements": []
     }
 }

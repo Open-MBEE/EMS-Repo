@@ -1,7 +1,57 @@
 {
     "elements": [
         {
-            "qualifiedName": "/europa/SRR Agenda/JW_TEST/GreaterEquals",
+            "qualifiedName": "/europa/JW_TEST/initialDuration",
+            "sysmlid": "arg_ev_33001",
+            "editable": true,
+            "creator": "admin",
+            "name": "initialDuration",
+            "documentation": "",
+            "owner": "123456",
+            "specialization": {
+                "propertyType": null,
+                "isSlot": false,
+                "isDerived": false,
+                "value": [{
+                    "valueExpression": null,
+                    "integer": 1145811389,
+                    "type": "LiteralInteger"
+                }],
+                "type": "Property"
+            }
+        },
+        {
+            "qualifiedName": "/europa/JW_TEST/GreaterEquals/y",
+            "sysmlid": "op_param_31869",
+            "editable": true,
+            "creator": "admin",
+            "name": "y",
+            "documentation": "",
+            "owner": "op_ev_31835",
+            "specialization": {"type": "Element"}
+        },
+        {
+            "qualifiedName": "/europa/JW_TEST/GreaterEquals/x",
+            "sysmlid": "op_param_31868",
+            "editable": true,
+            "creator": "admin",
+            "name": "x",
+            "documentation": "",
+            "owner": "op_ev_31835",
+            "specialization": {"type": "Element"}
+        },
+        {
+            "qualifiedName": "/europa/JW_TEST/GreaterEquals/result",
+            "sysmlid": "op_param_31867",
+            "editable": true,
+            "creator": "admin",
+            "name": "result",
+            "documentation": "",
+            "owner": "op_ev_31835",
+            "specialization": {"type": "Element"}
+        },
+        {
+            "qualifiedName": "/europa/JW_TEST/GreaterEquals",
             "sysmlid": "op_ev_31835",
             "editable": true,
             "creator": "admin",
@@ -18,7 +68,47 @@
             }
         },
         {
-            "qualifiedName": "/europa/SRR Agenda/JW_TEST/",
+            "qualifiedName": "/europa/JW_TEST/duration_1",
+            "sysmlid": "arg_ev_38307_1",
+            "editable": true,
+            "creator": "admin",
+            "name": "duration_1",
+            "documentation": "",
+            "owner": "123456",
+            "specialization": {
+                "propertyType": null,
+                "isSlot": false,
+                "isDerived": false,
+                "value": [{
+                    "valueExpression": null,
+                    "integer": 1760504929,
+                    "type": "LiteralInteger"
+                }],
+                "type": "Property"
+            }
+        },
+        {
+            "qualifiedName": "/europa/JW_TEST/duration",
+            "sysmlid": "arg_ev_38307",
+            "editable": true,
+            "creator": "admin",
+            "name": "duration",
+            "documentation": "",
+            "owner": "123456",
+            "specialization": {
+                "propertyType": null,
+                "isSlot": false,
+                "isDerived": false,
+                "value": [{
+                    "valueExpression": null,
+                    "integer": 22,
+                    "type": "LiteralInteger"
+                }],
+                "type": "Property"
+            }
+        },
+        {
+            "qualifiedName": "/europa/JW_TEST/",
             "sysmlid": "constraint_32165",
             "editable": true,
             "creator": "admin",
@@ -49,96 +139,6 @@
                 },
                 "type": "Constraint"
             }
-        },
-        {
-            "qualifiedName": "/europa/SRR Agenda/JW_TEST/duration",
-            "sysmlid": "arg_ev_38307",
-            "editable": true,
-            "creator": "admin",
-            "name": "duration",
-            "documentation": "",
-            "owner": "123456",
-            "specialization": {
-                "propertyType": null,
-                "isSlot": false,
-                "isDerived": false,
-                "value": [{
-                    "valueExpression": null,
-                    "integer": 22,
-                    "type": "LiteralInteger"
-                }],
-                "type": "Property"
-            }
-        },
-        {
-            "qualifiedName": "/europa/SRR Agenda/JW_TEST/duration_1",
-            "sysmlid": "arg_ev_38307_1",
-            "editable": true,
-            "creator": "admin",
-            "name": "duration_1",
-            "documentation": "",
-            "owner": "123456",
-            "specialization": {
-                "propertyType": null,
-                "isSlot": false,
-                "isDerived": false,
-                "value": [{
-                    "valueExpression": null,
-                    "integer": 1760504929,
-                    "type": "LiteralInteger"
-                }],
-                "type": "Property"
-            }
-        },
-        {
-            "qualifiedName": "/europa/SRR Agenda/JW_TEST/GreaterEquals/y",
-            "sysmlid": "op_param_31869",
-            "editable": true,
-            "creator": "admin",
-            "name": "y",
-            "documentation": "",
-            "owner": "op_ev_31835",
-            "specialization": {"type": "Element"}
-        },
-        {
-            "qualifiedName": "/europa/SRR Agenda/JW_TEST/GreaterEquals/x",
-            "sysmlid": "op_param_31868",
-            "editable": true,
-            "creator": "admin",
-            "name": "x",
-            "documentation": "",
-            "owner": "op_ev_31835",
-            "specialization": {"type": "Element"}
-        },
-        {
-            "qualifiedName": "/europa/SRR Agenda/JW_TEST/initialDuration",
-            "sysmlid": "arg_ev_33001",
-            "editable": true,
-            "creator": "admin",
-            "name": "initialDuration",
-            "documentation": "",
-            "owner": "123456",
-            "specialization": {
-                "propertyType": null,
-                "isSlot": false,
-                "isDerived": false,
-                "value": [{
-                    "valueExpression": null,
-                    "integer": 1145811389,
-                    "type": "LiteralInteger"
-                }],
-                "type": "Property"
-            }
-        },
-        {
-            "qualifiedName": "/europa/SRR Agenda/JW_TEST/GreaterEquals/result",
-            "sysmlid": "op_param_31867",
-            "editable": true,
-            "creator": "admin",
-            "name": "result",
-            "documentation": "",
-            "owner": "op_ev_31835",
-            "specialization": {"type": "Element"}
         }
     ]
 }

@@ -265,28 +265,59 @@ create_curl_cmd(type="GET", data="search?keyword=some*", base_url=BASE_URL_WS,
                 branch="master/"),
 True,
 common_filters,
-["test", "workspaces"],
+["test", "workspaces", "develop"],
 None,
 None,
 None,
 80
 ],
 
-# [
-# 99,
-# "GetSearch",
-# "Get search",
-# create_curl_cmd(type="GET",data="element/search?keyword=some*",base_url=BASE_URL_WS,
-#                branch="master/"),
-# True, 
-# common_filters,
-# ["foo"],
-# None,
-# Node,
-# None,
-# 0
-# ],
+# skip the next two as the order of results of lucene search aren't guaranteed across different instances
+[
+111,
+"GetSearchPage0",
+"Get search paginated 0",
+create_curl_cmd(type="GET",data="element/search?keyword=some*&maxItems=1&skipCount=0",base_url=BASE_URL_WS,
+               branch="master/"),
+True, 
+common_filters + ['"sysmlid"', '"owner"', '"qualifiedId"', '"qualifiedName"'],
+[],
+None,
+None,
+None,
+0
+],
 
+[
+112,
+"GetSearchPage1",
+"Get search paginated 1",
+create_curl_cmd(type="GET",data="element/search?keyword=some*&maxItems=1&skipCount=1",base_url=BASE_URL_WS,
+               branch="master/"),
+True, 
+common_filters + ['"sysmlid"', '"owner"', '"qualifiedId"', '"qualifiedName"'],
+[],
+None,
+None,
+None,
+0
+],
+
+[
+112,
+"GetSearchPageBad",
+"Get search paginated bad",
+create_curl_cmd(type="GET",data="element/search?keyword=some*&maxItems=-1&skipCount=25",base_url=BASE_URL_WS,
+               branch="master/"),
+True, 
+common_filters,
+["test", "workspaces", "develop"],
+None,
+None,
+None,
+0
+],
+         
 # DELETES: ==========================    
       
 [

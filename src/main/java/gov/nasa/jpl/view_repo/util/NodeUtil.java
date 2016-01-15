@@ -1074,14 +1074,27 @@ public class NodeUtil {
 
     public static ResultSet luceneSearch( String queryPattern,
                                           ServiceRegistry services ) {
-        if ( services == null ) services = getServices();
-        return luceneSearch( queryPattern,
-                             services == null ? null
-                                             : services.getSearchService() );
+        return luceneSearch( queryPattern, services, null, null );
     }
 
     public static ResultSet luceneSearch( String queryPattern,
-                                          SearchService searchService ) {
+                                          ServiceRegistry services, Integer maxItems, Integer skipCount ) {
+        if ( services == null ) services = getServices();
+        return luceneSearch( queryPattern,
+                             services == null ? null
+                                             : services.getSearchService(),
+                                             maxItems, skipCount);
+    }
+
+    public static ResultSet luceneSearch( String queryPattern,
+                                          SearchService searchService) {
+        return luceneSearch(queryPattern, searchService, null, null);
+    }
+
+    public static ResultSet luceneSearch( String queryPattern,
+                                          SearchService searchService,
+                                          Integer maxItems,
+                                          Integer skipCount) {
 
         timerLucene = Timer.startTimer( timerLucene, timeEvents );
 
@@ -1094,7 +1107,7 @@ public class NodeUtil {
         if ( searchService != null ) {
             try {
                 results =
-                        searchService.query( getSearchParameters( queryPattern ) );
+                        searchService.query( getSearchParameters( queryPattern, maxItems, skipCount ) );
             } catch ( Exception e ) {
                 logger.warn( e.getMessage() );
                 results = null;
@@ -1110,7 +1123,12 @@ public class NodeUtil {
         return results;
     }
 
+    
     public static SearchParameters getSearchParameters( String queryPattern ) {
+        return getSearchParameters(queryPattern, -1, -1);
+    }
+    
+    public static SearchParameters getSearchParameters( String queryPattern, Integer maxItems, Integer skipCount ) {
         final SearchParameters params = new SearchParameters();
         params.addStore( getStoreRef() );
         params.setLanguage( SearchService.LANGUAGE_LUCENE );
@@ -1119,7 +1137,15 @@ public class NodeUtil {
         params.setLimit( 0 );
         params.setMaxPermissionChecks( 100000 );
         params.setMaxPermissionCheckTimeMillis( 100000 );
-        params.setMaxItems( -1 );
+        if (maxItems == null || maxItems < 0) {
+            params.setMaxItems( -1 );
+        } else {
+            // only set skip count if maxItems specified
+            params.setMaxItems( maxItems );
+            if (skipCount != null && skipCount >= 0) {
+                params.setSkipCount( skipCount );
+            }
+        }
         return params;
     }
 
@@ -5319,7 +5345,11 @@ public class NodeUtil {
             // start from 1 since the first token is empty
             for ( int ii = 1; ii < qids.length; ii++ ) {
                 String id = qids[ ii ];
-                String name = qnames[ ii ];
+                String name = null;
+                if (ii < qnames.length) {
+                    // possible that qname doesn't have final name
+                    name = qnames[ ii ];
+                }
                 id2name.put( id, name );
 
                 if ( ii < qids.length - 1 ) {

@@ -1,157 +1,66 @@
 {
+    "message": "[WARN]: setting node id=arg_ev_33001 name=initialDuration to value of Parameter: GeneratedClass0:e5e49056-715a-4cb7-944a-a6dbc944dae7=1145811389\n[WARN]: setting node id=arg_ev_38307_1 name=duration_1 to value of Parameter: GeneratedClass0:7c231b8d-e304-476a-a453-3626e8ca5612=1760504929\n[INFO]: Updated all node values to satisfy the constraints!\n",
     "elements": [
         {
-            "owner": "123456",
-            "creator": "admin",
-            "read": "2016-01-07T13:14:38.728-0800",
-            "created": "Thu Jan 07 13:02:03 PST 2016",
-            "qualifiedName": "/europa/JW_TEST2/duration",
-            "editable": true,
-            "modifier": "admin",
-            "documentation": "",
             "siteCharacterizationId": "europa",
-            "sysmlid": "arg_ev_38307",
-            "nodeRefId": "workspace://SpacesStore/0e5b7105-94d2-4a2a-87d6-a9465140200f",
-            "versionedRefId": "versionStore://version2Store/c4cfd11d-59e7-47f9-84de-48a124b8ea3c",
-            "qualifiedId": "/europa/123456/arg_ev_38307",
-            "name": "duration",
-            "modified": "2016-01-07T13:02:03.928-0800",
-            "specialization": {
-                "isSlot": false,
-                "isDerived": false,
-                "propertyType": null,
-                "type": "Property",
-                "value": [{
-                    "valueExpression": null,
-                    "integer": 22,
-                    "type": "LiteralInteger"
-                }]
-            }
-        },
-        {
-            "owner": "123456",
-            "creator": "admin",
-            "read": "2016-01-07T13:14:38.735-0800",
-            "created": "Thu Jan 07 13:02:02 PST 2016",
-            "qualifiedName": "/europa/JW_TEST2/GreaterEquals",
-            "editable": true,
-            "modifier": "admin",
-            "documentation": "",
-            "siteCharacterizationId": "europa",
+            "qualifiedId": "/europa/PROJECT-afa9754e-04d3-4ba0-b80f-9de9f2a6fe41/123456/op_ev_31835",
+            "nodeRefId": "workspace://SpacesStore/198bdf06-ef98-4505-821c-f080608bf046",
+            "versionedRefId": "versionStore://version2Store/b0a7ec7c-b414-4243-bde2-36c8d7094788",
+            "qualifiedName": "/europa/SRR Agenda/JW_TEST/GreaterEquals",
             "sysmlid": "op_ev_31835",
-            "nodeRefId": "workspace://SpacesStore/12397b3a-df79-41c3-96f9-445e7436200e",
-            "versionedRefId": "versionStore://version2Store/edaa6449-27b6-478b-ad87-17deaa06a5d3",
-            "qualifiedId": "/europa/123456/op_ev_31835",
+            "editable": true,
+            "modified": "2015-12-09T09:37:07.784-0800",
+            "creator": "admin",
+            "modifier": "admin",
+            "created": "Wed Dec 09 09:37:04 PST 2015",
             "name": "GreaterEquals",
-            "modified": "2016-01-07T13:02:03.649-0800",
+            "documentation": "",
+            "owner": "123456",
+            "read": "2016-01-14T18:40:46.825-0800",
             "specialization": {
-                "type": "Operation",
                 "parameters": [
                     "op_param_31867",
                     "op_param_31868",
                     "op_param_31869"
-                ]
+                ],
+                "type": "Operation"
             }
         },
         {
-            "owner": "op_ev_31835",
-            "creator": "admin",
-            "read": "2016-01-07T13:14:38.742-0800",
-            "created": "Thu Jan 07 13:02:03 PST 2016",
-            "qualifiedName": "/europa/JW_TEST2/GreaterEquals/y",
-            "editable": true,
-            "modifier": "admin",
-            "documentation": "",
             "siteCharacterizationId": "europa",
-            "sysmlid": "op_param_31869",
-            "nodeRefId": "workspace://SpacesStore/251cbbea-93db-4445-a192-187a811a79e6",
-            "versionedRefId": "versionStore://version2Store/141351ec-597f-4e1e-825f-3dcdb5c99caa",
-            "qualifiedId": "/europa/123456/op_ev_31835/op_param_31869",
-            "name": "y",
-            "modified": "2016-01-07T13:02:03.829-0800",
-            "specialization": {"type": "Element"}
-        },
-        {
-            "owner": "123456",
-            "creator": "admin",
-            "read": "2016-01-07T13:14:38.748-0800",
-            "created": "Thu Jan 07 13:02:02 PST 2016",
-            "qualifiedName": "/europa/JW_TEST2/duration_1",
-            "editable": true,
-            "modifier": "admin",
-            "documentation": "",
-            "siteCharacterizationId": "europa",
-            "sysmlid": "arg_ev_38307_1",
-            "nodeRefId": "workspace://SpacesStore/42ed6913-0a3b-45bc-8494-8966ab20acbb",
-            "versionedRefId": "versionStore://version2Store/4d91d56c-52ca-46d8-b1fb-97d58e6a66f3",
-            "qualifiedId": "/europa/123456/arg_ev_38307_1",
-            "name": "duration_1",
-            "modified": "2016-01-07T13:02:03.533-0800",
-            "specialization": {
-                "isSlot": false,
-                "isDerived": false,
-                "propertyType": null,
-                "type": "Property",
-                "value": [{
-                    "valueExpression": null,
-                    "integer": 10,
-                    "type": "LiteralInteger"
-                }]
-            }
-        },
-        {
-            "owner": "op_ev_31835",
-            "creator": "admin",
-            "read": "2016-01-07T13:14:38.754-0800",
-            "created": "Thu Jan 07 13:02:02 PST 2016",
-            "qualifiedName": "/europa/JW_TEST2/GreaterEquals/result",
-            "editable": true,
-            "modifier": "admin",
-            "documentation": "",
-            "siteCharacterizationId": "europa",
-            "sysmlid": "op_param_31867",
-            "nodeRefId": "workspace://SpacesStore/7cbc1eb4-032d-4208-a6c2-dc3d32f029ca",
-            "versionedRefId": "versionStore://version2Store/11836afa-9cba-463e-b61a-a4ff804abae2",
-            "qualifiedId": "/europa/123456/op_ev_31835/op_param_31867",
-            "name": "result",
-            "modified": "2016-01-07T13:02:03.725-0800",
-            "specialization": {"type": "Element"}
-        },
-        {
-            "owner": "123456",
-            "creator": "admin",
-            "read": "2016-01-07T13:14:38.760-0800",
-            "created": "Thu Jan 07 13:02:03 PST 2016",
-            "qualifiedName": "/europa/JW_TEST2/",
-            "editable": true,
-            "modifier": "admin",
-            "documentation": "",
-            "siteCharacterizationId": "europa",
+            "qualifiedId": "/europa/PROJECT-afa9754e-04d3-4ba0-b80f-9de9f2a6fe41/123456/constraint_32165",
+            "nodeRefId": "workspace://SpacesStore/4afcfc96-c01a-458b-8012-b1595aee1aea",
+            "versionedRefId": "versionStore://version2Store/f95e5780-7cfd-4f4b-bd34-fd3ac0db5718",
+            "qualifiedName": "/europa/SRR Agenda/JW_TEST/",
             "sysmlid": "constraint_32165",
-            "nodeRefId": "workspace://SpacesStore/b2efc8f8-efd7-4928-8a36-4824385c8848",
-            "versionedRefId": "versionStore://version2Store/d2b766e7-2521-4733-9247-4100c7cd2d3c",
-            "qualifiedId": "/europa/123456/constraint_32165",
+            "editable": true,
+            "modified": "2015-12-09T09:37:06.661-0800",
+            "creator": "admin",
+            "modifier": "admin",
+            "created": "Wed Dec 09 09:37:03 PST 2015",
             "name": "",
-            "modified": "2016-01-07T13:02:04.344-0800",
+            "documentation": "",
+            "owner": "123456",
+            "read": "2016-01-14T18:40:46.829-0800",
             "specialization": {
                 "specification": {
                     "valueExpression": null,
                     "type": "Expression",
                     "operand": [
                         {
+                            "element": "op_ev_31835",
                             "valueExpression": null,
-                            "type": "ElementValue",
-                            "element": "op_ev_31835"
+                            "type": "ElementValue"
                         },
                         {
+                            "element": "arg_ev_38307_1",
                             "valueExpression": null,
-                            "type": "ElementValue",
-                            "element": "arg_ev_38307_1"
+                            "type": "ElementValue"
                         },
                         {
+                            "element": "arg_ev_33001",
                             "valueExpression": null,
-                            "type": "ElementValue",
-                            "element": "arg_ev_33001"
+                            "type": "ElementValue"
                         }
                     ]
                 },
@@ -159,52 +68,143 @@
             }
         },
         {
-            "owner": "op_ev_31835",
-            "creator": "admin",
-            "read": "2016-01-07T13:14:38.770-0800",
-            "created": "Thu Jan 07 13:02:03 PST 2016",
-            "qualifiedName": "/europa/JW_TEST2/GreaterEquals/x",
-            "editable": true,
-            "modifier": "admin",
-            "documentation": "",
             "siteCharacterizationId": "europa",
-            "sysmlid": "op_param_31868",
-            "nodeRefId": "workspace://SpacesStore/b7f2c466-85a3-428a-a57c-5232b0ad79da",
-            "versionedRefId": "versionStore://version2Store/4c0a9ff3-a08a-4f2e-91e3-690d796890d0",
-            "qualifiedId": "/europa/123456/op_ev_31835/op_param_31868",
-            "name": "x",
-            "modified": "2016-01-07T13:02:03.778-0800",
+            "qualifiedId": "/europa/PROJECT-afa9754e-04d3-4ba0-b80f-9de9f2a6fe41/123456/arg_ev_38307",
+            "nodeRefId": "workspace://SpacesStore/55f62bd7-5086-4514-83ef-2991a26d5660",
+            "versionedRefId": "versionStore://version2Store/1c14e7cd-613f-44bd-a6d5-bddaf59e6c65",
+            "qualifiedName": "/europa/SRR Agenda/JW_TEST/duration",
+            "sysmlid": "arg_ev_38307",
+            "editable": true,
+            "modified": "2015-12-09T09:37:07.525-0800",
+            "creator": "admin",
+            "modifier": "admin",
+            "created": "Wed Dec 09 09:37:04 PST 2015",
+            "name": "duration",
+            "documentation": "",
+            "owner": "123456",
+            "read": "2016-01-14T18:40:46.837-0800",
+            "specialization": {
+                "propertyType": null,
+                "isSlot": false,
+                "isDerived": false,
+                "value": [{
+                    "valueExpression": null,
+                    "integer": 22,
+                    "type": "LiteralInteger"
+                }],
+                "type": "Property"
+            }
+        },
+        {
+            "siteCharacterizationId": "europa",
+            "qualifiedId": "/europa/PROJECT-afa9754e-04d3-4ba0-b80f-9de9f2a6fe41/123456/arg_ev_38307_1",
+            "nodeRefId": "workspace://SpacesStore/7c231b8d-e304-476a-a453-3626e8ca5612",
+            "versionedRefId": "versionStore://version2Store/bd4e600e-6acb-45b5-b5a0-db56cdcd85d7",
+            "qualifiedName": "/europa/SRR Agenda/JW_TEST/duration_1",
+            "sysmlid": "arg_ev_38307_1",
+            "editable": true,
+            "modified": "2016-01-14T18:40:46.766-0800",
+            "creator": "admin",
+            "modifier": "admin",
+            "created": "Wed Dec 09 09:37:03 PST 2015",
+            "name": "duration_1",
+            "documentation": "",
+            "owner": "123456",
+            "read": "2016-01-14T18:40:46.840-0800",
+            "specialization": {
+                "propertyType": null,
+                "isSlot": false,
+                "isDerived": false,
+                "value": [{
+                    "valueExpression": null,
+                    "integer": 1760504929,
+                    "type": "LiteralInteger"
+                }],
+                "type": "Property"
+            }
+        },
+        {
+            "siteCharacterizationId": "europa",
+            "qualifiedId": "/europa/PROJECT-afa9754e-04d3-4ba0-b80f-9de9f2a6fe41/123456/op_ev_31835/op_param_31869",
+            "nodeRefId": "workspace://SpacesStore/b0f63770-d825-4660-a5e2-7472d553fe06",
+            "versionedRefId": "versionStore://version2Store/8f1c4d57-5ca8-4cad-b39c-bcc7f7a7c0c6",
+            "qualifiedName": "/europa/SRR Agenda/JW_TEST/GreaterEquals/y",
+            "sysmlid": "op_param_31869",
+            "editable": true,
+            "modified": "2015-12-09T09:37:07.968-0800",
+            "creator": "admin",
+            "modifier": "admin",
+            "created": "Wed Dec 09 09:37:05 PST 2015",
+            "name": "y",
+            "documentation": "",
+            "owner": "op_ev_31835",
+            "read": "2016-01-14T18:40:46.860-0800",
             "specialization": {"type": "Element"}
         },
         {
-            "owner": "123456",
-            "creator": "admin",
-            "read": "2016-01-07T13:14:38.775-0800",
-            "created": "Thu Jan 07 13:02:03 PST 2016",
-            "qualifiedName": "/europa/JW_TEST2/initialDuration",
-            "editable": true,
-            "modifier": "admin",
-            "documentation": "",
             "siteCharacterizationId": "europa",
+            "qualifiedId": "/europa/PROJECT-afa9754e-04d3-4ba0-b80f-9de9f2a6fe41/123456/op_ev_31835/op_param_31868",
+            "nodeRefId": "workspace://SpacesStore/b3ce2419-9610-4ac9-b52c-5777b4ef72de",
+            "versionedRefId": "versionStore://version2Store/75106bd4-6802-4404-8218-ef94323aede8",
+            "qualifiedName": "/europa/SRR Agenda/JW_TEST/GreaterEquals/x",
+            "sysmlid": "op_param_31868",
+            "editable": true,
+            "modified": "2015-12-09T09:37:07.920-0800",
+            "creator": "admin",
+            "modifier": "admin",
+            "created": "Wed Dec 09 09:37:04 PST 2015",
+            "name": "x",
+            "documentation": "",
+            "owner": "op_ev_31835",
+            "read": "2016-01-14T18:40:46.861-0800",
+            "specialization": {"type": "Element"}
+        },
+        {
+            "siteCharacterizationId": "europa",
+            "qualifiedId": "/europa/PROJECT-afa9754e-04d3-4ba0-b80f-9de9f2a6fe41/123456/arg_ev_33001",
+            "nodeRefId": "workspace://SpacesStore/e5e49056-715a-4cb7-944a-a6dbc944dae7",
+            "versionedRefId": "versionStore://version2Store/fc62bc88-3470-48d9-a88d-0a333561cfb2",
+            "qualifiedName": "/europa/SRR Agenda/JW_TEST/initialDuration",
             "sysmlid": "arg_ev_33001",
-            "nodeRefId": "workspace://SpacesStore/e705bb88-d504-4374-9d3d-ee5548d059b9",
-            "versionedRefId": "versionStore://version2Store/6e8ed5d7-c9f4-4cb5-886f-9b9f6244602a",
-            "qualifiedId": "/europa/123456/arg_ev_33001",
+            "editable": true,
+            "modified": "2016-01-14T18:40:46.753-0800",
+            "creator": "admin",
+            "modifier": "admin",
+            "created": "Wed Dec 09 09:37:05 PST 2015",
             "name": "initialDuration",
-            "modified": "2016-01-07T13:02:04.604-0800",
+            "documentation": "",
+            "owner": "123456",
+            "read": "2016-01-14T18:40:46.862-0800",
             "specialization": {
+                "propertyType": null,
                 "isSlot": false,
                 "isDerived": false,
-                "propertyType": null,
-                "type": "Property",
                 "value": [{
                     "valueExpression": null,
-                    "integer": 11,
+                    "integer": 1145811389,
                     "type": "LiteralInteger"
-                }]
+                }],
+                "type": "Property"
             }
+        },
+        {
+            "siteCharacterizationId": "europa",
+            "qualifiedId": "/europa/PROJECT-afa9754e-04d3-4ba0-b80f-9de9f2a6fe41/123456/op_ev_31835/op_param_31867",
+            "nodeRefId": "workspace://SpacesStore/eb9f6e6e-57e6-41c9-abd4-7b01b1a26f07",
+            "versionedRefId": "versionStore://version2Store/91238909-6012-4b15-a43d-3576712b0a2c",
+            "qualifiedName": "/europa/SRR Agenda/JW_TEST/GreaterEquals/result",
+            "sysmlid": "op_param_31867",
+            "editable": true,
+            "modified": "2015-12-09T09:37:07.864-0800",
+            "creator": "admin",
+            "modifier": "admin",
+            "created": "Wed Dec 09 09:37:04 PST 2015",
+            "name": "result",
+            "documentation": "",
+            "owner": "op_ev_31835",
+            "read": "2016-01-14T18:40:46.880-0800",
+            "specialization": {"type": "Element"}
         }
-    ],
-    "message": "Could not complete DB transaction, see Alfresco logs for details"
+    ]
 }
-400
+200

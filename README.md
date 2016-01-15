@@ -11,7 +11,11 @@
 		export MAVEN_OPTS='-Xms256m -Xmx1G -XX:PermSize=300m -Xdebug  -Xrunjdwp:transport=dt_socket,address=10000,server=y,suspend=n -javaagent:/Applications/jrebel/jrebel.jar'
 	
 3. Clone alfresco-view-repo using the Eclipse git tool. If you need instructions on installing and using git in eclipse see this section: [typical local environment instructions](#typical)
-4. Right click your project and run maven >> Update project
+4. Clone the m2 repository for the artifacts
+	1. <code>cd ~/git</code>
+	2. <code>git clone https://github.jpl.nasa.gov/mbee-dev/m2</code>
+	3. <code>cp -r ./m2 ~/.m2/repository</code>
+	4. Inside of Eclipse right click your project and run maven >> Update project
 5. Install jrebel and scala from Eclipse using Help >> Eclipse Marketplace
 6. From the command line navigate to git/alfresco-view-repo  and update the last line sudo vim /etc/hosts to read:
 	 
