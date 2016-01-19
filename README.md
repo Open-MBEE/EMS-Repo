@@ -31,7 +31,7 @@ src/main/java/gov/nasa/jpl/view_repo/db/mms.sql to initialize the database (as f
   
         http://www.moncefbelyamani.com/how-to-install-postgresql-on-a-mac-with-homebrew-and-lunchy/
   
-  - Create mmsuser using the postgres createuser. Set password to test123 (or whatever you want).
+  - Create mmsuser using the postgres createuser. Set password to password (or whatever you want).
     If you change the password, please change DbContracts.java to use the same.
   
   - On production servers, switch to postgres user     
