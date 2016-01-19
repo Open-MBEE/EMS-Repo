@@ -299,10 +299,11 @@ resourceTypes:
       post:
           is: [postable]
       /{elementId}:
-        type: collection
-        uriParameters:
-          elementId:
-            description: Sysml ID for the element under consideration
+        #type: collection
+        delete:
+          description: Delete the element specified by the Sysml ID
+        get:
+          description: Sysml ID for the element under consideration
     /configurations:
       #type: collection
       get:
@@ -369,7 +370,7 @@ resourceTypes:
             body:
               application/json:
                 schema: projects
-          type: readCollection
+          #type: readCollection
           #get:
           #  description: Retrieve all projects for which user has read permissions
           #  responses:
@@ -489,6 +490,8 @@ resourceTypes:
                 responses:
                   200:
     /projects:
+      get:
+        description: Get all projects for a workspace
       post:
         description: Post a project using the supplied json
         body:
@@ -500,19 +503,22 @@ resourceTypes:
           projectId:
             description: MD project ID for the project under consideration
     /search:
-      description: Service for searching for elements in a particular workspace
+      description: Service for searching for elements in a particular workspace. Works only on latest for workspace
       get:
-        is: [sliceable]
+        #is: [sliceable]
         queryParameters:
-          propertyName:
-            description: The property name to search for
-            required: false
           keyword:
             description: Mandatory field for specifying what to look for.
             required: true
           filters:
             description: Comma separated list of id, documentation, name, value, aspect, appliedMetatypes, metatypes to search against. If not specified, defaults to documentation. appliedMetatypes and metatypes search using the ID of the metatypes.
             required: true
+          maxItems:
+            description: Maximum items to display per filter specified, default is -1 (e.g., returns all results)
+            required: false
+          skipCount:
+            description: Page number to display, default is 0 (first page)
+            required: false
 #/operations:
 #  description: Service for executing operations, e.g., like the OCL Execution capabilities in MDK. Details still TBD.
 /diff:
@@ -546,7 +552,19 @@ resourceTypes:
               recalculate:
                 description: Perform a new diff calculation if the current found one is outdated.  Must supply diffTime also.
                 type: boolean
-                required: false 
+                required: false
+              changesForMerge:
+                description: Perform a diff for merging workspace2 into workspace1.  This is the default behavior.
+                type: boolean
+                required: false
+              fullCompare:
+                description: Perform a full diff of workspace1 and workspace2.
+                type: boolean
+                required: false
+              bothDirections:
+                description: Perform a for merging workspace2 into workspace1 and workspace1 into workspace2.
+                type: boolean
+                required: false
 #/merge:
 #  description: Service for merging two workspaces.  timestamp args are not implemented yet.
 #  post:

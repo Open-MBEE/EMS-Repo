@@ -156,10 +156,21 @@
 					}
 				},
 
+                "conflictedElements": 
+                {
+                    "type": "array",
+                    "description": "List of elements conflicted between WS2 from WS1",
+                    "items": 
+                    {
+                        "type": "object",
+                        "$ref": "file:///../elements.json#/definitions/Element"
+                    }
+                },
+
 				"graph": 
 				{
 					"type": "array",
-					"description": "A map of the graph for WS1 (Read-Only)",
+					"description": "A map of the graph for WS1 (Read-Only). not currently used.",
 					"items": 
 					{
 						"type": "object",
@@ -170,7 +181,7 @@
 				"conflicts":
 				{
 				    "type": "array",
-				    "description": "A list of conflicts between the workspaces (Read-Only)",
+				    "description": "A list of conflicts between the workspaces (Read-Only). not currently used.",
 				    "items":
 				    {
 				        "type": "object",

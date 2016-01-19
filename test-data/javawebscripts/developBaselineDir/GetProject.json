@@ -1,2 +1,8 @@
-{"elements":[{"name":"JW_TEST","sysmlid":"123456","specialization":{"type":"Project"}}]}
+{"elements": [{
+    "qualifiedId": "/europa/123456",
+    "qualifiedName": "/europa/JW_TEST",
+    "name": "JW_TEST",
+    "sysmlid": "123456",
+    "specialization": {"type": "Project"}
+}]}
 200

@@ -22,26 +22,26 @@
         }
     },
     {
-        "modifier": "admin",
         "qualifiedId": "/europa/123456/300/301/302/303/304",
-        "name": "304",
         "qualifiedName": "/europa/JW_TEST/300/301/302/303/304",
-        "documentation": "about",
-        "owner": "303",
         "sysmlid": "304",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "304",
+        "owner": "303",
+        "documentation": "about",
         "specialization": {
             "propertyType": null,
-            "isSlot": false,
             "isDerived": false,
+            "isSlot": false,
             "value": [{
                 "valueExpression": null,
                 "string": "dlam_string",
                 "type": "LiteralString"
             }],
             "type": "Property"
-        },
-        "editable": true,
-        "creator": "admin"
+        }
     },
     {
         "qualifiedId": "/europa/123456/300/301/302/303",
@@ -64,27 +64,6 @@
             }],
             "type": "Property"
         }
-    },
-    {
-        "qualifiedId": "/europa/123456/300/301/302/y",
-        "modifier": "admin",
-        "qualifiedName": "/europa/JW_TEST/300/301/302/null",
-        "owner": "302",
-        "documentation": "y is y",
-        "sysmlid": "y",
-        "specialization": {
-            "propertyType": null,
-            "isSlot": false,
-            "isDerived": false,
-            "value": [{
-                "valueExpression": null,
-                "string": "the y value",
-                "type": "LiteralString"
-            }],
-            "type": "Property"
-        },
-        "editable": true,
-        "creator": "admin"
     }
 ]}
 200

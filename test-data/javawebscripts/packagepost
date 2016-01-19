@@ -1,0 +1,26 @@
+#!/bin/bash
+
+# This script will either create a new package or update an existing package
+# To create a new package, pass in 3 arguments: 1) the new package sysmlId 2) its parent sysmlId and 3) its site characterization flag [true | false].
+# To update a package site characterization, pass in 2 arguments: 1) the existing package sysmlId and 2) its site characterization flag [true | false].
+#
+# NOTE: 
+#	1. Be sure Alfresco Share is running when interacting with packages. Alfresco repo makes calls to Share to create/delete site dashboards.
+#	2. Be sure to at minimum run regression suite test case #10, which creates europa site and "123456" project
+#
+# Example:
+#	#creates site characterized package "AAA" under project "123456" 
+#	./packagepost AAA 123456 true
+#
+
+if [[ "$#" -eq 3 ]]; then
+	#creating new package
+	echo curl -w "\n%{http_code}\n" -u admin:admin -X POST -H "Content-Type:application/json" -d '{ "elements" : [{"documentation" : "Site package '$1'", "sysmlid":"'$1'", "name":"'$1'","owner":"'$2'","specialization": {"type":"Package","isSite":'$3'}}]}' "http://localhost:8080/alfresco/service/workspaces/master/sites/europa/elements"
+	curl -w "\n%{http_code}\n" -u admin:admin -X POST -H "Content-Type:application/json" -d '{ "elements" : [{"documentation" : "Site package '$1'", "sysmlid":"'$1'", "name":"'$1'","owner":"'$2'","specialization": {"type":"Package","isSite":'$3'}}]}' "http://localhost:8080/alfresco/service/workspaces/master/sites/europa/elements"
+elif [[ "$#" -eq 2 ]]; then
+	#updating package
+	echo curl -w "\n%{http_code}\n" -u admin:admin -X POST -H "Content-Type:application/json" -d '{ "elements" : [{"sysmlid":"'$1'","specialization": {"type":"Package","isSite":'$2'}}]}' "http://localhost:8080/alfresco/service/workspaces/master/sites/europa/elements"
+	curl -w "\n%{http_code}\n" -u admin:admin -X POST -H "Content-Type:application/json" -d '{ "elements" : [{"sysmlid":"'$1'","specialization": {"type":"Package","isSite":'$2'}}]}' "http://localhost:8080/alfresco/service/workspaces/master/sites/europa/elements"
+else 
+	echo please enter either 2 or 3 arguments: [target, owner and isSiteCharacterization] or [target and isSiteCharacterization]
+fi;

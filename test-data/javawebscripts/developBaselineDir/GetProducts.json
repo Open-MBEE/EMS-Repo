@@ -1,11 +1,13 @@
 {"products": [{
-    "modifier": "admin",
     "qualifiedId": "/europa/123456/300/301",
-    "name": "301",
     "qualifiedName": "/europa/JW_TEST/300/301",
+    "sysmlid": "301",
+    "editable": true,
+    "creator": "admin",
+    "modifier": "admin",
+    "name": "301",
     "documentation": "else",
     "owner": "300",
-    "sysmlid": "301",
     "specialization": {
         "view2view": [{
             "childrenViews": [
@@ -33,8 +35,6 @@
             "type": "Paragraph"
         }],
         "type": "Product"
-    },
-    "editable": true,
-    "creator": "admin"
+    }
 }]}
 200

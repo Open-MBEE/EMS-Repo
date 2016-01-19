@@ -429,8 +429,8 @@ public class View extends List implements sysml.view.View< EmsScriptNode >, Comp
         // This is a List of a collection of nodes, where the value of exposed
         // parameter is a collection of nodes:
         paramValList.add( exposed );
-        SystemModelToAeExpression< EmsScriptNode, EmsScriptNode, String, Object, EmsSystemModel > sysmlToAeExpr =
-                new SystemModelToAeExpression< EmsScriptNode, EmsScriptNode, String, Object, EmsSystemModel >( getModel() );
+        SystemModelToAeExpression< Object, EmsScriptNode, EmsScriptNode, String, Object, EmsSystemModel > sysmlToAeExpr =
+                new SystemModelToAeExpression< Object, EmsScriptNode, EmsScriptNode, String, Object, EmsSystemModel >( getModel() );
         Expression< Object > aeExpr = sysmlToAeExpr.operationToAeExpression(viewpointOp, paramValList);
 
         if ( aeExpr == null ) return false;
@@ -462,6 +462,10 @@ public class View extends List implements sysml.view.View< EmsScriptNode >, Comp
 //                        (java.util.List< Viewable<EmsScriptNode> >)Utils.asList( c );
 //                addAll( viewables );
             }
+
+        // TODO -- figure out why eclipse gives compile errors for
+        // including the exceptions while mvn gives errors for not
+        // including them.
         } catch ( IllegalAccessException e1 ) {
             // TODO Auto-generated catch block
             //e1.printStackTrace();

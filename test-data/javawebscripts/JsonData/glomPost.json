@@ -1,0 +1,13 @@
+{ "elements" : [
+
+    {"documentation" : "glomPost", 
+     "sysmlid":"glomPost", 
+     "name":"glomPost", 
+     "owner":"123456", 
+     "specialization": {"type":"Property",
+                        "isDerived":false, 
+                        "value":[{"type":"LiteralString",
+                                  "string":"on a shoe"}]}
+    },
+    
+]}

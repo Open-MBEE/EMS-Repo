@@ -227,6 +227,37 @@ public class DocBookWrapper {
 				}
 			}
 		}
+
+		//sanitize emphasis tags
+		list = body.select("emphasis");
+		String val = "";
+		for(Element elm : list){
+			val = elm.html().trim();
+			if(val.length() == 0 || val.compareToIgnoreCase("&nbsp;") == 0 || val.compareTo("&#160;") == 0){
+				//removes empty emphasis tags
+				elm.remove();
+			}
+			else{
+				//checks wheter or not emphasis tag has para ancestor
+				boolean hasPara = false;
+				Elements parents = elm.parents();
+				for(Element p : parents){
+					if(p.tagName().compareToIgnoreCase("para")==0){
+						hasPara = true;
+						break;
+					}
+				}
+				
+				if(!hasPara){
+					//wraps para tag around emphasis tag that does not have para ancestor
+					Element para = document.createElement("para");
+					elm.replaceWith(para);
+					para.appendChild(elm);
+				}
+			}
+		}
+
+		
 		
 		// removes <itemizedlist>/<orderedlist> without <listitem> children
 		isSanitized = false;
@@ -549,8 +580,8 @@ public class DocBookWrapper {
 			if(pdfPath == null || pdfPath.isEmpty()) throw new Exception("Failed to transform from DocBook to PDF!");
 
 			if(!this.saveFileToRepo(node, MimetypeMap.MIMETYPE_PDF, pdfPath)) throw new Exception("Failed to save PDF artifact to repository!");
-			//this.snapshotNode.createOrUpdateAspect("view2:pdf");
-			//this.snapshotNode.createOrUpdateProperty("view2:pdfNode", node.getNodeRef());
+			this.snapshotNode.createOrUpdateAspect("view2:pdf");
+			this.snapshotNode.createOrUpdateProperty("view2:pdfNode", node.getNodeRef());
 
 			if ( node != null ) node.getOrSetCachedVersion();
 			this.pdfNode = node;
