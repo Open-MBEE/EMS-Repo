@@ -886,13 +886,18 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
                                        WorkspaceNode workspace, Date dateTime,
                                        Integer maxItems,
                                        Integer skipCount ) {
-        // TODO: can't search against snapshots - non-null date time is caught upstream
-        if (NodeUtil.doGraphDb) { 
-            return searchForElementsPostgres( type, pattern, ignoreWorkspace, workspace, dateTime, maxItems, skipCount );
-        } else {
-            return searchForElementsOriginal( type, pattern, ignoreWorkspace, workspace, dateTime );
-        }
-    }
+    	// TODO: can't search against snapshots - non-null date time is caught upstream
+    	return searchForElementsOriginal( type, pattern, ignoreWorkspace, workspace, dateTime );
+       }
+    protected Map< String, EmsScriptNode >
+    searchForElements( ArrayList<String> types, String pattern,
+                               boolean ignoreWorkspace,
+                               WorkspaceNode workspace, Date dateTime,
+                               Integer maxItems,
+                               Integer skipCount ) {
+    	// TODO: can't search against snapshots - non-null date time is caught upstream
+    	return searchForElementsPostgres( types, pattern, ignoreWorkspace, workspace, dateTime, maxItems, skipCount );
+    	}
 
 	/**
 	 * Perform Lucene search for the specified pattern and ACM type
@@ -921,7 +926,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
 	 * @param dateTime
 	 * @return
 	 */
-	protected Map<String, EmsScriptNode> searchForElementsPostgres(String type,
+	protected Map<String, EmsScriptNode> searchForElementsPostgres(ArrayList<String> types,
                                                                   String pattern,
                                                                   boolean ignoreWorkspace,
                                                                   WorkspaceNode workspace,
@@ -930,8 +935,13 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
                                                                   Integer skipCount) {
 	    Map<String, EmsScriptNode> resultsMap = new HashMap<String, EmsScriptNode>();
 	    ResultSet results = null;
-        String queryPattern = type + pattern + "\"";
-        results = NodeUtil.luceneSearch( queryPattern, services, maxItems, skipCount );
+	    StringBuffer queryPattern= new StringBuffer();
+	    queryPattern.append("\"");
+		for(int i = 0; i< types.size()-1;i++){
+			queryPattern.append(types.get(i) + pattern + " OR \"");
+		}
+	    queryPattern.append(types.get(types.size()-1) + pattern + "\"");
+        results = NodeUtil.luceneSearch( queryPattern.toString(), services, maxItems, skipCount );
         if (results != null) {
             ArrayList< NodeRef > resultList =
                     NodeUtil.resultSetToNodeRefList( results );
