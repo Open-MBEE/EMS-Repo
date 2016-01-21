@@ -99,12 +99,12 @@ public class List extends ArrayList< Viewable< EmsScriptNode > >
     	addToList( c );
     }
     protected void addToList( Object[] c ) {
-        System.out.println("addToList( " + MoreToString.Helper.toString( c ) + " )");
+        if ( Debug.isOn() ) Debug.outln("addToList( " + MoreToString.Helper.toString( c ) + " )");
         if ( c == null ) return;
         for (Object obj : c) {
             Throwable t = null;
             if ( obj instanceof Viewable ) {
-                System.out.println("addToList viewable: " + obj);
+                if ( Debug.isOn() ) Debug.outln("addToList viewable: " + obj);
                 this.add( (Viewable< EmsScriptNode >)obj );
             } else if (obj instanceof Expression<?>) {
                 Object eval = null;
@@ -112,7 +112,7 @@ public class List extends ArrayList< Viewable< EmsScriptNode > >
                     eval = ( (Expression< ? >)obj ).evaluate( true );
                     if ( eval == null || obj == eval ) {
                         Text text = new Text( "" + obj );
-                        System.out.println("addToList expression evaluation: " + text);
+                        if ( Debug.isOn() ) Debug.outln("addToList expression evaluation: " + text);
                         this.add( text );
                     } else {
                         if ( eval instanceof Call ) {
@@ -160,7 +160,7 @@ public class List extends ArrayList< Viewable< EmsScriptNode > >
                     }
                 }
             } else {
-                System.out.println("addToList object: " + obj);
+                if ( Debug.isOn() ) Debug.outln("addToList object: " + obj);
                 this.add( new Text( "" + obj ) );
             }
             // ERROR

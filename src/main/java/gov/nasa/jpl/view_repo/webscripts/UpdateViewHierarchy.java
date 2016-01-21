@@ -215,16 +215,15 @@ public class UpdateViewHierarchy {
 	 */
 	protected void addJsonForViewHierarchyChanges(JSONObject jsonObj)
 			throws Exception {
-		System.out
-				.println("%%%%%%%%%%%%%%%%%         start addJsonForViewHierarchyChanges          %%%%%%%%%%%%%%%%%");
+		Debug.outln("%%%%%%%%%%%%%%%%%         start addJsonForViewHierarchyChanges          %%%%%%%%%%%%%%%%%");
 		if (jsonObj == null)
 			return; // null;
 		this.jsonObject = jsonObj;
 
 		preprocessJson(jsonObject);
 
-		System.out.println("before jsonObject = " + jsonObject);
-		System.out.println("before elementsInJson = " + elementsInJson);
+		if ( Debug.isOn() ) Debug.outln("before jsonObject = " + jsonObject);
+		if ( Debug.isOn() ) Debug.outln("before elementsInJson = " + elementsInJson);
 
 		// Make sure that the ownedAttributes and Associations agree with the
 		// childViews.
@@ -232,13 +231,13 @@ public class UpdateViewHierarchy {
 			processViewChildView(e);
 		}
 
-		System.out.println("after jsonObject = " + jsonObject);
-		System.out.println("after elementsInJson = " + elementsInJson);
-		System.out
-				.println("%%%%%%%%%%%%%%%%%         end addJsonForViewHierarchyChanges          %%%%%%%%%%%%%%%%%");
-		System.out
-				.println("%%%%%%%%%%%%%%%%%         end addJsonForViewHierarchyChanges          %%%%%%%%%%%%%%%%%");
-
+        if ( Debug.isOn() ) {
+            Debug.outln( "after jsonObject = " + jsonObject );
+            Debug.outln( "after elementsInJson = " + elementsInJson );
+            Debug.outln( "%%%%%%%%%%%%%%%%%         end addJsonForViewHierarchyChanges          %%%%%%%%%%%%%%%%%" );
+            Debug.outln( "%%%%%%%%%%%%%%%%%         end addJsonForViewHierarchyChanges          %%%%%%%%%%%%%%%%%" );
+        }
+		
 		// For each new view that does not have one, create an
 		// InstanceSpecification and make the view its parent. The contents of
 		// the new view will be an InstanceValue in an Expression that

@@ -125,6 +125,8 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
 		}
 	}*/
 
+    protected static boolean writeConstraintsOut = true;
+
     public static final int MAX_PRINT = 200;
     public static boolean checkMmsVersions = false;
     public static boolean defaultRunWithoutTransactions = false;
@@ -1404,6 +1406,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
     }
 
     public static EmsSystemModel globalSystemModel = null;
+    
     public static EmsSystemModel getGlobalSystemModel() {
         if ( globalSystemModel == null ) {
             globalSystemModel = new EmsSystemModel(NodeUtil.getServices() );
@@ -1876,12 +1879,20 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         } else {
             lockOtherParameters( elements, constraints, systemModelToAe );
     
+            //Collection<Constraint> constraints = getConstraints( true, null );
+            if ( writeConstraintsOut  ) {
+              System.out.println("All " + constraints.size() + " constraints: ");
+              for (Constraint c : constraints) {
+                System.out.println("Constraint: " + c);
+              }
+            }
+
             Random.reset();
     
             // Solve!!!!
             boolean result = false;
             try {
-                Debug.turnOn();
+                //ebug.turnOn();
 //                for ( Constraint c : constraints ) {
 //                    Set< Variable< ? >> vars = c.getFreeVariables();
 //                    for ( Variable<?> v : vars ) {
@@ -1897,9 +1908,26 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
             }
             if (!result) {
                 log( Level.ERROR, "Was not able to satisfy all of the constraints!" );
+                Collection< Constraint > unsatisfiedConstraints =
+                        ConstraintLoopSolver.getUnsatisfiedConstraints( constraints );
+                    if ( unsatisfiedConstraints.isEmpty() ) {
+                      System.out.println( (constraints.size() - unsatisfiedConstraints.size())
+                                          + " out of " + constraints.size()
+                                          + " constraints were satisfied!" );
+                    } else {
+                      System.err.println( "Could not resolve the following "
+                                          + unsatisfiedConstraints.size()
+                                          + " constraints:" );
+                      for ( Constraint c : unsatisfiedConstraints ) {
+                        System.err.println( c.toString() );
+                        c.isSatisfied( true, null ); // REVIEW -- can look shallow since constraints
+                                                     // were gathered deep?!
+                      }
+                    }
             }
             else {
                 log( Level.WARN, "Satisfied all of the constraints!" );
+            }
     
                 // Update the values of the nodes after solving the constraints:
                 final Map< EmsScriptNode, Parameter< Object > > params = getGlobalSystemModelAe().getExprParamMap();
@@ -1951,7 +1979,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
                         }
                     };
                 }
-            }
+            //}
         } // End if constraints list is non-empty
     
     }

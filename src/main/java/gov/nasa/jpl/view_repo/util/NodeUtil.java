@@ -4727,6 +4727,7 @@ public class NodeUtil {
     }
     
     public static EmsScriptNode getNodeFromPostgresNode( Node pgnode ) {
+        if ( pgnode == null ) return null;
         return new EmsScriptNode( new NodeRef( pgnode.getNodeRefId() ),
                                   services, null );
     }

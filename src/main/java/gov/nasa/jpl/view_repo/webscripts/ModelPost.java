@@ -2777,15 +2777,9 @@ public class ModelPost extends AbstractJavaWebScript {
 			// Fix constraints if desired.
 			if (fix) {
 				sendProgress("Fixing constraints", projectId, true);
-				new EmsTransaction(getServices(), getResponse(),
-						getResponseStatus(), runWithoutTransactions) {
-					@Override
-					public void run() throws Exception {
-						fixWithTransactions(elements, workspace);
-						sendProgress("Fixing constraints completed", projectId,
-								true);
-					}
-				};
+				fixWithTransactions(elements, workspace);
+				sendProgress("Fixing constraints completed", projectId,
+						true);
 			}
 
 			if (!suppressElementJson) {

@@ -63,7 +63,7 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, Object, 
 
     public EmsSystemModel( ServiceRegistry services ) {
         this.services = ( services == null ? NodeUtil.getServiceRegistry() : services );
-        if (Debug.isOn()) System.out.println("ServiceRegistry = " + this.services);
+        if (logger.isDebugEnabled()) logger.debug("ServiceRegistry = " + this.services);
         if ( this.services == null ) {
             // REVIEW -- complain?
         }
@@ -549,7 +549,7 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, Object, 
             if ( childNodes.size() > 0 ) return childNodes;
         }
         List< EmsScriptNode > list = EmsScriptNode.toEmsScriptNodeList( refs, getServices(), response, status );
-        //System.out.println("getElementWithName(" + context + ", " + specifier + ", " + dateTime + ") = " + list);
+        //if (logger.isDebugEnabled()) logger.debug("getElementWithName(" + context + ", " + specifier + ", " + dateTime + ") = " + list);
         return list;
     }
 
@@ -567,7 +567,7 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, Object, 
         NodeRef element = NodeUtil.findNodeRefById( specifier, true, null, null, services, false );
         EmsScriptNode emsSN = new EmsScriptNode( element, services );
         ArrayList< EmsScriptNode > list = Utils.newList( emsSN );
-        //System.out.println("getElementWithIdentifier(" + context + ", " + specifier + ") = " + list);
+        //if (logger.isDebugEnabled()) logger.debug("getElementWithIdentifier(" + context + ", " + specifier + ") = " + list);
         return list;
     }
 
@@ -633,7 +633,7 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, Object, 
             if ( childNodes.size() > 0 ) return childNodes;
         }
         List< EmsScriptNode > list = EmsScriptNode.toEmsScriptNodeList( refs, getServices(), response, status );
-        //System.out.println("getElementWithName(" + context + ", " + specifier + ", " + dateTime + ") = " + list);
+        //if (logger.isDebugEnabled()) logger.debug("getElementWithName(" + context + ", " + specifier + ", " + dateTime + ") = " + list);
         return list;
     }
 
@@ -804,7 +804,7 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, Object, 
     }
 
     public Collection< EmsScriptNode > getProperties( EmsScriptNode element ) {
-        //System.out.println("==========================>>> getProperties(" + element.getSysmlName() + ")" );
+        //if (logger.isDebugEnabled()) logger.debug("==========================>>> getProperties(" + element.getSysmlName() + ")" );
         if ( element == null ) return null;
         return getProperties( element, element.getWorkspace(), null );
     }
@@ -819,7 +819,7 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, Object, 
                                              workspace, dateTime, false, true,
                                              services, false );
         elements = EmsScriptNode.toEmsScriptNodeList( (Collection<NodeRef>)refs );
-        //System.out.println("==========================>>> getProperties(" + element.getSysmlName() + ") = " + elements );
+        //if (logger.isDebugEnabled()) logger.debug("==========================>>> getProperties(" + element.getSysmlName() + ") = " + elements );
         return elements;
     }
     
@@ -862,7 +862,7 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, Object, 
                 elements = getProperties( node, ws, date );
             }
 
-            //System.out.println("==========================>>> getProperty(" + node.getSysmlName() + ", " + specifier + ") = " + elements );
+            //if (logger.isDebugEnabled()) logger.debug("==========================>>> getProperty(" + node.getSysmlName() + ", " + specifier + ") = " + elements );
 
             // No need to resolve ws and date in else case since
             // getElementWithName() does that.
@@ -881,7 +881,7 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, Object, 
             
             if ( elements != null ) {
                 if ( elements.size() > 0 ) {
-                    //System.out.println("\ngetProperty(" + context + ", " + specifier + ") = " + elements);
+                    //if (logger.isDebugEnabled()) logger.debug("\ngetProperty(" + context + ", " + specifier + ") = " + elements);
                     return elements;
                 }
             }
@@ -916,21 +916,21 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, Object, 
 
         	}
 
-            //System.out.println("\ngetProperty(" + context + ", " + specifier + ") = allProperties = " + allProperties);
+            //if (logger.isDebugEnabled()) logger.debug("\ngetProperty(" + context + ", " + specifier + ") = allProperties = " + allProperties);
             return allProperties;
         }
 
         if ( context != null ) {
             // TODO -- error????  Are there any other contexts than an EmsScriptNode that would have a property?
             Debug.error("context is not an EmsScriptNode!  " + context );
-            //System.out.println("getProperty(" + context + ", " + specifier + ") = null");
+            //if (logger.isDebugEnabled()) logger.debug("getProperty(" + context + ", " + specifier + ") = null");
             return null;
         }
 
         // context is null; look for nodes of type Property that match the specifier
         if ( mySpecifier != null ) {
             Collection< EmsScriptNode > e =getElementWithName( context, "" + mySpecifier );
-            //System.out.println("\ngetProperty(" + context + ", " + specifier + ") = getElementWithName(" + context + ", " + specifier + ") = " + e);
+            //if (logger.isDebugEnabled()) logger.debug("\ngetProperty(" + context + ", " + specifier + ") = getElementWithName(" + context + ", " + specifier + ") = " + e);
             return e;
         }
 
@@ -943,10 +943,10 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, Object, 
             for ( EmsScriptNode prop : propertyTypes ) {
                 allProperties.addAll( getElementWithType( context, prop ) );
             }
-            //System.out.println("\ngetProperty(" + context + ", " + specifier + ") = allProperties2 = " + allProperties);
+            //if (logger.isDebugEnabled()) logger.debug("\ngetProperty(" + context + ", " + specifier + ") = allProperties2 = " + allProperties);
             return allProperties;
         }
-        //System.out.println("\ngetProperty(" + context + ", " + specifier + ") = null2");
+        //if (logger.isDebugEnabled()) logger.debug("\ngetProperty(" + context + ", " + specifier + ") = null2");
         return null;
     }
 
@@ -999,11 +999,11 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, Object, 
             }
         } else if ( specifier == null ) {
             list = getProperty(context, null);
-            //System.out.println("getPropertyWithTypeName(" + context + ", " + specifier  + ") = " + list);
+            //if (logger.isDebugEnabled()) logger.debug("getPropertyWithTypeName(" + context + ", " + specifier  + ") = " + list);
             return list;
         }
         // Remaining case is specifier != nil && !(context instanceof EmsScriptNode)
-        //System.out.println("getPropertyWithTypeName(" + context + ", " + specifier + ") = " + nodes);
+        //if (logger.isDebugEnabled()) logger.debug("getPropertyWithTypeName(" + context + ", " + specifier + ") = " + nodes);
         return nodes;
     }
     
@@ -1139,7 +1139,7 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, Object, 
                 }
             }
         }
-        System.out.println("\nobjectToEmsScriptNode(" + context + ") = " + node + "\n");
+        if (logger.isDebugEnabled()) logger.debug("\nobjectToEmsScriptNode(" + context + ") = " + node + "\n");
         return node;
     }
     
@@ -1149,8 +1149,8 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, Object, 
 
     	// TODO see EmsScriptNode.getConnectedNodes(), as a lot of this code can
         //      be used for this method.
-System.out.println("RRRRRRRRRRRRR");
-System.out.println("RRRRRR");
+if (logger.isDebugEnabled()) logger.debug("RRRRRRRRRRRRR");
+if (logger.isDebugEnabled()) logger.debug("RRRRRR");
         List< EmsScriptNode > relationships = null;
         if ( !coerce && !(context instanceof EmsScriptNode) ) return null;
         EmsScriptNode node = objectToEmsScriptNode( context );
@@ -1324,7 +1324,7 @@ System.out.println("RRRRRR");
 //                NodeUtil.findScriptNodeById( typeName, null, null, false,
 //                                             getServices(), node.getResponse() );
 //            if ( typeNode != null ) {
-//                System.out.println( "getType("+ node.getSysmlName() + ") = " + typeNode );
+//                if (logger.isDebugEnabled()) logger.debug( "getType("+ node.getSysmlName() + ") = " + typeNode );
 //                return Utils.newList( typeNode );
 //            }
 //        }
@@ -2035,7 +2035,7 @@ System.out.println("RRRRRR");
         } else if ( multiValued && !( val instanceof Collection ) ) {
             value = Utils.newList(val);
         }
-        System.out.println( "setting value of " + type + " to " + value );
+        if (logger.isDebugEnabled()) logger.debug( "setting value of " + type + " to " + value );
 
         // Handle case where setting the value of a value spec owner.
 	    if ( !Utils.isNullOrEmpty( acmValueType ) ) {
@@ -2060,7 +2060,7 @@ System.out.println("RRRRRR");
                 }
             }
             //Object valSpecObj = getAlfrescoProperty( node, acmValueType, true );
-            System.out.println("valSpecObj = " + valSpecObj );
+            if (logger.isDebugEnabled()) logger.debug("valSpecObj = " + valSpecObj );
             // Convert the value spec node into an EmsScriptNode.
             if ( valSpecObj instanceof NodeRef ) {
                 valSpecObj = new EmsScriptNode( (NodeRef)valSpecObj, getServices() );
@@ -2073,7 +2073,7 @@ System.out.println("RRRRRR");
                           .hasOrInheritsAspect( Acm.ACM_VALUE_SPECIFICATION ) ) ) {
                 EmsScriptNode valSpecNode = (EmsScriptNode)valSpecObj;
                 if ( NodeUtil.exists( valSpecNode ) ) {
-                    System.out.println( "setting value of " + node
+                    if (logger.isDebugEnabled()) logger.debug( "setting value of " + node
                                         + " of type " + type
                                         + " by setting value spec node, "
                                         + valSpecNode + " of type "
@@ -2083,7 +2083,7 @@ System.out.println("RRRRRR");
             } else {
                 // Else, if the value is a value spec, then we just need to replace
                 // the one that's there. This means deleting the existing one.
-                System.out.println( "setting value of " + node + " of type "
+                if (logger.isDebugEnabled()) logger.debug( "setting value of " + node + " of type "
                                     + type + ":" + acmValueType + " to "
                                     + value );
                 wasSet = node.createOrUpdateProperty( acmValueType, value );
@@ -2132,8 +2132,8 @@ System.out.println("RRRRRR");
                 Debug.error("setValue(): unrecognized type: "+type);
             }
         }
-        System.out.println( "wasSet = " + wasSet );
-        System.out.println( "value of " + node + " of type " + type + ":" + acmValueType + " = " + getValue( node, null ) );
+        if (logger.isDebugEnabled()) logger.debug( "wasSet = " + wasSet );
+        if (logger.isDebugEnabled()) logger.debug( "value of " + node + " of type " + type + ":" + acmValueType + " = " + getValue( node, null ) );
         return wasSet;
     }
     
@@ -2275,7 +2275,7 @@ System.out.println("RRRRRR");
 
         
         Collection< ? > result = call.map( elements, 1 );
-        System.out.println("map(" + elements + ", " + call + ", 1) = " + result);
+        if (logger.isDebugEnabled()) logger.debug("map(" + elements + ", " + call + ", 1) = " + result);
         return result;
     }
 
@@ -2284,7 +2284,7 @@ System.out.println("RRRRRR");
                  int indexOfObjectArgument ) throws InvocationTargetException {
 
         Collection< Object > result = call.map( elements, indexOfObjectArgument );
-        System.out.println("map(" + elements + ", " + call + ", " + indexOfObjectArgument + ") = " + result);
+        if (logger.isDebugEnabled()) logger.debug("map(" + elements + ", " + call + ", " + indexOfObjectArgument + ") = " + result);
         return result;
     }
     
@@ -2350,7 +2350,7 @@ System.out.println("RRRRRR");
         
         // invoke the map
         Collection< ? > result = call.map( elements, indexOfObjectArgument );
-        System.out.println("map(" + elements + ", " + call + ", " + indexOfObjectArgument + ", " + otherArguments + ") = " + result);
+        if (logger.isDebugEnabled()) logger.debug("map(" + elements + ", " + call + ", " + indexOfObjectArgument + ", " + otherArguments + ") = " + result);
         return result;
     }
     
@@ -2544,7 +2544,7 @@ System.out.println("RRRRRR");
 
         // invoke the filter
         Collection< ? > result = call.filter( elements, indexOfObjectArgument );
-        System.out.println("filter(" + elements + ", " + call + ", " + indexOfObjectArgument + ", " + otherArguments + ") = " + result);
+        if (logger.isDebugEnabled()) logger.debug("filter(" + elements + ", " + call + ", " + indexOfObjectArgument + ", " + otherArguments + ") = " + result);
         return result;
     }
     
@@ -2564,7 +2564,7 @@ System.out.println("RRRRRR");
     }
     
     public boolean nameStartsWithN( Object s ) {
-        System.out.println("NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN");
+        if (logger.isDebugEnabled()) logger.debug("NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN");
         if ( s instanceof EmsScriptNode ) {
             return ( (EmsScriptNode)s ).getSysmlName().startsWith( "N" );
         } else if ( s instanceof String ) {
@@ -2574,11 +2574,11 @@ System.out.println("RRRRRR");
     }
 
     public boolean sourceIs( EmsScriptNode relationshipNode, EmsScriptNode nodeToMatch ) {
-        System.out.println("ZZZZZZZZZZZZZZZZZZ    sourceIs( " + relationshipNode + ", " + nodeToMatch + " )" );
+        if (logger.isDebugEnabled()) logger.debug("ZZZZZZZZZZZZZZZZZZ    sourceIs( " + relationshipNode + ", " + nodeToMatch + " )" );
         Object sourceRef = relationshipNode.getNodeRefProperty( Acm.ACM_SOURCE, true, null, null );
         if ( sourceRef instanceof NodeRef ) {
             EmsScriptNode n = new EmsScriptNode( (NodeRef)sourceRef, relationshipNode.getServices() );
-            System.out.println("ZZZZZZZZZZZZZZZZZZ    source " + n + ";  nodeToMatch " + nodeToMatch );
+            if (logger.isDebugEnabled()) logger.debug("ZZZZZZZZZZZZZZZZZZ    source " + n + ";  nodeToMatch " + nodeToMatch );
             if ( nodeToMatch.getNodeRef().equals( sourceRef ) ) {
                 return true;
             }
@@ -2587,12 +2587,12 @@ System.out.println("RRRRRR");
     }
 
     public double getTime( EmsScriptNode n ) {
-        System.out.println("ZZZZZZZZZZZZZZZZZZ    getTime( " + n + " )" );        
+        if (logger.isDebugEnabled()) logger.debug("ZZZZZZZZZZZZZZZZZZ    getTime( " + n + " )" );        
         Collection<?> c = getValue( n, null );
         if ( Utils.isNullOrEmpty( c ) ) return 999;
         Object v = c.iterator().next();
         try {
-            System.out.println( "VVVVVVVVVVVVVVVVVV    getTime( "
+            if (logger.isDebugEnabled()) logger.debug( "VVVVVVVVVVVVVVVVVV    getTime( "
                                 + n
                                 + " ): v = "
                                 + v
@@ -2611,7 +2611,7 @@ System.out.println("RRRRRR");
         }
     }
     public long getTimeFromDate( Date d ) {
-        System.out.println("DDDDDDDDDDDDDDDDDDDD    getTime( " + d + " )" );        
+        if (logger.isDebugEnabled()) logger.debug("DDDDDDDDDDDDDDDDDDDD    getTime( " + d + " )" );        
         //Date d = TimeUtils.dateFromTimestamp( timestamp );
         return d.getTime();
     }
@@ -2640,7 +2640,7 @@ System.out.println("RRRRRR");
     public String getTimeOfDayStringFromMillis( double millis ) {
         long millisLong = ((Double)millis).longValue();
         String s = formatDate( millisLong, "HH:mm", "PST" );
-        System.out.println("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@   getTimeOfDayStringFromMillis(" + millis + ") = " + s);
+        if (logger.isDebugEnabled()) logger.debug("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@   getTimeOfDayStringFromMillis(" + millis + ") = " + s);
         return s;
     }
     public String getTimeOfDayString( long millis ) {
@@ -2665,7 +2665,7 @@ System.out.println("RRRRRR");
     }
     
     public boolean targetIs( EmsScriptNode relationshipNode, EmsScriptNode nodeToMatch ) {
-        System.out.println("YYYYYYYYYYYYYYYYYYYYYYYYYYYY");
+        if (logger.isDebugEnabled()) logger.debug("YYYYYYYYYYYYYYYYYYYYYYYYYYYY");
         Object targetRef = relationshipNode.getNodeRefProperty( Acm.ACM_TARGET, true, null, null );
         if ( targetRef instanceof NodeRef ) {
             if ( nodeToMatch.getNodeRef().equals( targetRef ) ) {
@@ -2701,7 +2701,7 @@ System.out.println("RRRRRR");
     }
     
     public boolean isA( Object o, String type ) {
-        System.out.println("SSSSSSSSSSSSSSSSSSSSSSSSS");
+        if (logger.isDebugEnabled()) logger.debug("SSSSSSSSSSSSSSSSSSSSSSSSS");
         if (o == null || Utils.isNullOrEmpty( type ) ) return false;
         if ( o.getClass().getSimpleName().toLowerCase().startsWith( type.toLowerCase() ) ) {
             return true;
@@ -2870,15 +2870,15 @@ System.out.println("RRRRRR");
                         propNode.getNodeRefProperty( Acm.ACM_PROPERTY_TYPE,
                                                      null, ws );
                 if ( propType instanceof NodeRef ) {
-                    System.out.println("getViewFromProperty(" + propNode + ") 6 propType = " + propType);
+                    if (logger.isDebugEnabled()) logger.debug("getViewFromProperty(" + propNode + ") 6 propType = " + propType);
                     EmsScriptNode node =
                             new EmsScriptNode( (NodeRef)propType,
                                                propNode.getServices() );
 
                     if ( NodeUtil.exists( node ) ) {
-                        System.out.println("getViewFromProperty(" + propNode + ") 7 node = " + node);
+                        if (logger.isDebugEnabled()) logger.debug("getViewFromProperty(" + propNode + ") 7 node = " + node);
                         if ( node.hasOrInheritsAspect( Acm.ACM_VIEW ) ) {
-                            System.out.println("getViewFromProperty(" + propNode + ") 8 node = " + node);
+                            if (logger.isDebugEnabled()) logger.debug("getViewFromProperty(" + propNode + ") 8 node = " + node);
                             return node;
                         }
                     }
@@ -2916,7 +2916,7 @@ System.out.println("RRRRRR");
                                                                      EmsScriptNode product,
                                                                      WorkspaceNode workspace,
                                                                      Date dateTime ) {
-        //System.out.println( "============>> getParentViewsFromViewToView(" + view +", " + product + ")" );
+        //if (logger.isDebugEnabled()) logger.debug( "============>> getParentViewsFromViewToView(" + view +", " + product + ")" );
         if ( view == null ) return null;
         Map<String, Set< String > > productParentMap =
                 new LinkedHashMap<String, Set< String > >();
@@ -2924,7 +2924,7 @@ System.out.println("RRRRRR");
         
         Map< EmsScriptNode, JSONArray > view2views =
                 getViewToViews( view, product, workspace, dateTime );
-        //System.out.println( "============>> getParentViewsFromViewToView(" + view.getSysmlName()
+        //if (logger.isDebugEnabled()) logger.debug( "============>> getParentViewsFromViewToView(" + view.getSysmlName()
         //                    + "): getViewToViews("+ view.getSysmlName() +") = " + view2views );
 
         for ( Entry< EmsScriptNode, JSONArray > e : view2views.entrySet() ) {
@@ -2938,7 +2938,7 @@ System.out.println("RRRRRR");
                 String parentId = o.optString( "id" );
                 if ( Utils.isNullOrEmpty( parentId ) ) continue; // ERROR?
                 JSONArray childrenViews = o.optJSONArray("childrenViews");
-                //System.out.println( "============>> getParentViewsFromViewToView(" + view.getSysmlName()
+                //if (logger.isDebugEnabled()) logger.debug( "============>> getParentViewsFromViewToView(" + view.getSysmlName()
                 //                    + "): id = "+ parentId  +",  childrenViews = " + childrenViews );
                 if ( childrenViews == null ) continue;
                 for ( int j = 0; j < childrenViews.length(); ++j ) {
@@ -2987,7 +2987,7 @@ System.out.println("RRRRRR");
             refs = Utils.newList( product.getNodeRef() );
         } else {
             refs = getProductRefsForView( view, workspace, dateTime );
-            //System.out.println( "============>> getViewToViews(" + view.getSysmlName()
+            //if (logger.isDebugEnabled()) logger.debug( "============>> getViewToViews(" + view.getSysmlName()
             //                    + "): getProductRefsForView("+ view.getSysmlName() +") = " + refs );
         }
         String productId = product == null ? null : product.getSysmlId();
@@ -2997,7 +2997,7 @@ System.out.println("RRRRRR");
             String prodId = node.getSysmlId();
             if ( Utils.isNullOrEmpty( prodId ) ) continue; // ERROR?
             View prod = new View( node );
-            //System.out.println( "============>> getViewToViews(" + view.getSysmlName()
+            //if (logger.isDebugEnabled()) logger.debug( "============>> getViewToViews(" + view.getSysmlName()
             //                    + "): productId = "+ productId +", prodId = " + prodId + ", prod = " + prod );
             if ( productId != null ) {
                 if ( !productId.equals( prodId ) ) {
@@ -3012,23 +3012,23 @@ System.out.println("RRRRRR");
     }
     
     public EmsScriptNode getParentViewFromAssociations( EmsScriptNode view ) {//, EmsScriptNode product ) {
-        //System.out.println("getParentView(" + view + ") 0");
+        //if (logger.isDebugEnabled()) logger.debug("getParentView(" + view + ") 0");
         if ( view == null ) return null;
         String viewId = view.getSysmlId();
         EmsScriptNode prev = null;
         WorkspaceNode ws = view.getWorkspace();
         Set< EmsScriptNode > rels = view.getRelationships( null, ws );
         for ( EmsScriptNode rel : rels ) {
-            //System.out.println("getParentView(" + view + ") 1 rel = " + rel);
+            //if (logger.isDebugEnabled()) logger.debug("getParentView(" + view + ") 1 rel = " + rel);
             if ( !rel.hasOrInheritsAspect( Acm.ACM_ASSOCIATION ) ) continue;
-            //System.out.println("getParentView(" + view + ") 2");
+            //if (logger.isDebugEnabled()) logger.debug("getParentView(" + view + ") 2");
             ////Object owned = rel.getNodeRefProperty( Acm.ACM_OWNED_END, null, ws );
             Object prop = rel.getNodeRefProperty( Acm.ACM_SOURCE, null, ws );
             Object propT = rel.getNodeRefProperty( Acm.ACM_TARGET, null, ws );
             if ( prop instanceof NodeRef ) {
-                //System.out.println("getParentView(" + view + ") 3 prop = " + prop);
+                //if (logger.isDebugEnabled()) logger.debug("getParentView(" + view + ") 3 prop = " + prop);
                 //if ( propT instanceof NodeRef ) {
-                //    System.out.println("getParentView(" + view + ") 3 propT = " + propT);
+                //    if (logger.isDebugEnabled()) logger.debug("getParentView(" + view + ") 3 propT = " + propT);
                 //}
                 EmsScriptNode propNode =
                         new EmsScriptNode( (NodeRef)prop, view.getServices() );
@@ -3083,12 +3083,12 @@ System.out.println("RRRRRR");
         if ( view == null ) return null;
         EmsScriptNode prev = null;
         EmsScriptNode parentNode = getParentView( view, null );
-        System.out.println( "============>> getPreviousView(" + view.getSysmlName()
+        if (logger.isDebugEnabled()) logger.debug( "============>> getPreviousView(" + view.getSysmlName()
                             + "): getParentView("+ view.getSysmlName() +") = " + parentNode );
         if ( parentNode == null ) return null;
         
         List< String > children = getChildViewIds( parentNode, null, null, null );
-        //System.out.println( "============>> getPreviousView(" + view.getSysmlName()
+        //if (logger.isDebugEnabled()) logger.debug( "============>> getPreviousView(" + view.getSysmlName()
         //                    + "): getChildViewIds("+ parentNode.getSysmlName() +") = " + children );
 
         String viewId = view.getSysmlId();
@@ -3101,17 +3101,17 @@ System.out.println("RRRRRR");
                 prevId = id;
             }
         }
-        //System.out.println( "============================================================>>");
-        //System.out.println( "============================================================>>");
-        //System.out.println( "============================================================>>");
+        //if (logger.isDebugEnabled()) logger.debug( "============================================================>>");
+        //if (logger.isDebugEnabled()) logger.debug( "============================================================>>");
+        //if (logger.isDebugEnabled()) logger.debug( "============================================================>>");
         if ( prevId == null ) {
             prev = parentNode;
-            System.out.println( "============>> getPreviousView(" + view.getSysmlName()
+            if (logger.isDebugEnabled()) logger.debug( "============>> getPreviousView(" + view.getSysmlName()
                                 + "): prevId = null; prev = parentNode = "+ prev );
             return prev;
         }
         
-        //System.out.println( "============>> getPreviousView(" + view.getSysmlName()
+        //if (logger.isDebugEnabled()) logger.debug( "============>> getPreviousView(" + view.getSysmlName()
         //                    + "): prevId = "+ prevId );
 
         
@@ -3130,10 +3130,10 @@ System.out.println("RRRRRR");
         // if there is no previous sibling, use the parent view as the previous
         if ( prev == null ) {
             prev = parentNode;
-            System.out.println( "============>> getPreviousView(" + view.getSysmlName()
+            if (logger.isDebugEnabled()) logger.debug( "============>> getPreviousView(" + view.getSysmlName()
                                 + "): prev = parentNode = "+ prev );
         } else {
-            System.out.println( "============>> getPreviousView(" + view.getSysmlName()
+            if (logger.isDebugEnabled()) logger.debug( "============>> getPreviousView(" + view.getSysmlName()
                                 + "): prev = "+ prev );
         }
         
