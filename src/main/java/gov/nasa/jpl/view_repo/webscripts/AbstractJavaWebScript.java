@@ -936,11 +936,16 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
 	    Map<String, EmsScriptNode> resultsMap = new HashMap<String, EmsScriptNode>();
 	    ResultSet results = null;
 	    StringBuffer queryPattern= new StringBuffer();
-	    queryPattern.append("\"");
+	    //queryPattern.append("\"");
 		for(int i = 0; i< types.size()-1;i++){
-			queryPattern.append(types.get(i) + pattern + " OR \"");
+			if(types.get(i).equals("ASPECT:\"{http://jpl.nasa.gov/model/sysml-lite/1.0}")){
+				continue;
+			}
+			else{
+				queryPattern.append(types.get(i) + pattern + "\" OR ");
+			}
 		}
-	    queryPattern.append(types.get(types.size()-1) + pattern + "\"");
+	    queryPattern.append(types.get(types.size()-1)+ pattern + "\"");
         results = NodeUtil.luceneSearch( queryPattern.toString(), services, maxItems, skipCount );
         if (results != null) {
             ArrayList< NodeRef > resultList =
