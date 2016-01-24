@@ -708,10 +708,10 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, Object, 
     @Override
     public String getName( Object context ) {
 
+        EmsScriptNode node = asElement( context ); 
+        
     	// Assuming that we can only have EmsScriptNode context:
-    	if (context instanceof EmsScriptNode) {
-
-    		EmsScriptNode node = (EmsScriptNode) context;
+    	if (node != null) {
 
     		// Note: This returns the sysml:name not the cm:name, which is what we
     		//		 want
@@ -840,9 +840,10 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, Object, 
         if ( context instanceof Collection && ((Collection<?>)context).size() == 1 ) {
             context = ((Collection<?>)context).iterator().next();
         }
-        if ( context instanceof EmsScriptNode ) {
+        EmsScriptNode node = asElement( context );
+        if ( node != null ) {
 
-            EmsScriptNode node = (EmsScriptNode)context;
+            //EmsScriptNode node = (EmsScriptNode)context;
 
             // Look for Properties with specifier as name and
             // context as owner.
@@ -1623,7 +1624,7 @@ if (logger.isDebugEnabled()) logger.debug("RRRRRR");
         
     	// Assuming that we can only have EmsScriptNode context:
         Pair< Boolean, EmsScriptNode > p = ClassUtils.coerce( context, EmsScriptNode.class, false );
-        if ( p != null && p.first ) {
+        if ( p != null && p.first != null && p.first == true ) {
             context = p.second;
         }
         
@@ -2628,6 +2629,12 @@ if (logger.isDebugEnabled()) logger.debug("RRRRRR");
         return d;
     }
     
+    public Date getDateFromDouble( double t ) {
+        long tl = (new Double(t)).longValue();
+        Date d = new Date( tl );
+        return d;
+    }
+    
 //    public String getTimeOfDayStringFromMillis( EmsScriptNode node ) {
 //        Collection< Object > vals = getValue(node,null);
 //        if ( Utils.isNullOrEmpty( vals ) ) return null;
@@ -3139,4 +3146,24 @@ if (logger.isDebugEnabled()) logger.debug("RRRRRR");
         
         return prev;
     }
+    
+    @Override
+    public EmsScriptNode asProperty( Object o ) {
+        EmsScriptNode n = super.asProperty( o );
+        if ( n != null ) {
+            // Make sure we return null if n is just a value of some other
+            // element. This helps solver code differentiate variables from
+            // values.
+            if ( n.isOwnedValueSpec( null, null ) ) {
+                return null;
+            }
+            return n;
+        }
+        return null;
+    }
+    
+    public static Object same( Object o ) { 
+        return o;
+    }
+    
 }

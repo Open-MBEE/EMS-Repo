@@ -6268,8 +6268,10 @@ public class EmsScriptNode extends ScriptNode implements
                 (NodeRef)node.getNodeRefProperty( Acm.ACM_VALUE_EXPRESSION,
                                                   true, dateTime,
                                                   node.getWorkspace() );
-        putInJson( json, Acm.JSON_VALUE_EXPRESSION,
-                   addNodeRefIdJSON( valExprNode ), filter );
+        if ( valExprNode != null ) {
+            putInJson( json, Acm.JSON_VALUE_EXPRESSION,
+                       addNodeRefIdJSON( valExprNode ), filter );
+        }
 
     }
 

@@ -1904,35 +1904,33 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
                 result = solver.solve(constraints);
     
             } finally {
-                Debug.turnOff();
+                //Debug.turnOff();
             }
             if (!result) {
-                log( Level.ERROR, "Was not able to satisfy all of the constraints!" );
+                logger.warn( "Was not able to satisfy all of the constraints!" );
                 Collection< Constraint > unsatisfiedConstraints =
                         ConstraintLoopSolver.getUnsatisfiedConstraints( constraints );
                     if ( unsatisfiedConstraints.isEmpty() ) {
-                      System.out.println( (constraints.size() - unsatisfiedConstraints.size())
+                        logger.warn( (constraints.size() - unsatisfiedConstraints.size())
                                           + " out of " + constraints.size()
                                           + " constraints were satisfied!" );
                     } else {
-                      System.err.println( "Could not resolve the following "
+                        logger.warn( "Could not resolve the following "
                                           + unsatisfiedConstraints.size()
                                           + " constraints:" );
                       for ( Constraint c : unsatisfiedConstraints ) {
-                        System.err.println( c.toString() );
-                        c.isSatisfied( true, null ); // REVIEW -- can look shallow since constraints
-                                                     // were gathered deep?!
+                          logger.warn( c.toString() );
                       }
                     }
             }
             else {
-                log( Level.WARN, "Satisfied all of the constraints!" );
+                logger.warn( "Satisfied all of the constraints!" );
             }
     
                 // Update the values of the nodes after solving the constraints:
                 final Map< EmsScriptNode, Parameter< Object > > params = getGlobalSystemModelAe().getExprParamMap();
                 if ( Utils.isNullOrEmpty( params ) ) {
-                    log( Level.ERROR, "Solver had no parameters in map to assign the solution!" );
+                    logger.error( "Solver had no parameters in map to assign the solution!" );
                 } else {
 //                    new EmsTransaction(getServices(), getResponse(),
 //                                       getResponseStatus()) {
@@ -1945,7 +1943,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
                                 Parameter<Object> param;
                                 node = entry.getKey();
                                 // screen out elements that weren't part of the post
-                                if ( !elements.contains( node ) ) {
+                                if ( node == null || !elements.contains( node ) ) {
                                     continue;
                                 }
                                 param = entry.getValue();
@@ -1959,8 +1957,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
 //                                Object v = systemModel.getValue( node, null );
                                     //if (Debug.isOn())
                                     if ( logger.isEnabledFor( Level.WARN ) ) {
-                                        log( Level.WARN,
-                                             "setting node id="
+                                        logger.warn( "setting node id="
                                                      + node.getSysmlId()
                                                      + " name="
                                                      + node.getSysmlName()
@@ -1975,7 +1972,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
 //                                System.out.println("XXXXXXXXXXXXXXXXXXXXXXXX value after setting = " + v);
                                 }
                             }
-                            log( Level.INFO, "Updated all node values to satisfy the constraints!" );
+                            logger.info( "Updated all node values to satisfy the constraints!" );
                         }
                     };
                 }
