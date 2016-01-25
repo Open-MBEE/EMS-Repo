@@ -175,7 +175,12 @@ public class SiteGet extends AbstractJavaWebScript {
                 	    parentNode = new EmsScriptNode(parentRef, services, response);
                 	    // skip parent if you don't have permissions on parent
                 	    if (emsNode.hasPermission( PermissionService.READ )) {
-                	        parentId = parentNode.getSysmlId();
+                	        try {
+                	            parentId = parentNode.getSysmlId();
+                	        } catch (org.alfresco.repo.security.permissions.AccessDeniedException e) {
+                	            // ignore permission error
+                	            continue;
+                	        }
                 	    }
                 	}
 
