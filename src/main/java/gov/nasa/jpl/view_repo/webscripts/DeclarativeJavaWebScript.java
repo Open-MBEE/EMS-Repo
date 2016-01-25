@@ -193,17 +193,27 @@ public class DeclarativeJavaWebScript extends AbstractWebScript
     private boolean setCacheHeaders( WebScriptRequest req, Cache cache ) {
         String[] names = req.getParameterNames();
         boolean cacheUpdated = false;
+
         // check if timestamp
         for (String name: names) {
             if (name.equals( "timestamp" )) {
-                cacheUpdated = updateCache(cache);
+                String webscript = req.getServiceMatch().getWebScript().toString();
+                if ( webscript.equals( "gov/nasa/jpl/mms/workspaces/elements.put" ) ||
+                        webscript.equals( "gov/nasa/jpl/mms/workspaces/elements.get" ) ) {
+                    // do nothing since ModelsGet calls take bodies, which proxy cache doesn't support
+                } else {
+                    cacheUpdated = updateCache(cache);
+                }
                 break;
             }
         }
+
+        // get url without the parameters
+        String url = req.getServicePath();
+
         // check if configuration snapshots and products
         if (!cacheUpdated) {
             if (cacheSnapshotsFlag) {
-                String url = req.getURL();
                 if (url.contains( "configurations" )) {
                     if (url.contains( "snapshots") || url.contains( "products" )) {
                         cacheUpdated = updateCache(cache);
@@ -218,7 +228,7 @@ public class DeclarativeJavaWebScript extends AbstractWebScript
     private boolean updateCache(Cache cache) {
         if (!cache.getIsPublic()) {
             cache.setIsPublic( true );
-            cache.setMaxAge( new Long(31557000) );
+            cache.setMaxAge( new Long(315570000) );
             // following are true by default, so need to set them to false
             cache.setNeverCache( false ); 
             cache.setMustRevalidate( false );
