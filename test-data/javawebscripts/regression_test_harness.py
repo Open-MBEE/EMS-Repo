@@ -223,6 +223,27 @@ common_filters + ['"MMS_', 'MMS_'],
 ],
 
 [
+68,
+"GetElements",
+"Get elements using body to specify elements",
+"curl -u admin:admin -X GET -H Content-Type:application/json http://localhost:8080/alfresco/s/workspaces/master/elements -d @JsonData/elementsGet.json",
+True,
+common_filters + ['"MMS_', 'MMS_'],
+["test", "workspaces", "develop"]
+],
+
+[
+69,
+"PutElements",
+"Get elements using body to specify elements",
+"curl -u admin:admin -X PUT -H Content-Type:application/json http://localhost:8080/alfresco/s/workspaces/master/elements -d @JsonData/elementsGet.json",
+True,
+common_filters + ['"MMS_', 'MMS_'],
+["test", "workspaces", "develop"]
+],
+
+
+[
 70,
 "GetViews",
 "Get views",

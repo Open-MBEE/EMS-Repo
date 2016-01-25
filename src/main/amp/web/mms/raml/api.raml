@@ -297,7 +297,11 @@ resourceTypes:
     /elements:
       type: collection
       post:
-          is: [postable]
+       is: [postable]
+      get:
+        description: Returns all the elements of specified in the body. Body is a JSONArray of "elements" that only specify "sysmlid". 
+      put:
+        description: Returns all the elements of specified in the body. Body is a JSONArray of "elements" that only specify "sysmlid".
       /{elementId}:
         #type: collection
         delete:
