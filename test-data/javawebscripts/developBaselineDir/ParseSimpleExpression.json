@@ -1,19 +1,5 @@
 {"elements": [
     {
-        "qualifiedId": "/no_site/no_site_no_project/holding_bin_no_site_no_project/operations/EQ",
-        "qualifiedName": "/no_site/no_site_no_project/holding_bin/operations/EQ",
-        "sysmlid": "EQ",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "EQ",
-        "owner": "operations",
-        "specialization": {
-            "parameters": [],
-            "type": "Operation"
-        }
-    },
-    {
         "qualifiedId": "/no_site/no_site_no_project/holding_bin_no_site_no_project/operations/Equals",
         "qualifiedName": "/no_site/no_site_no_project/holding_bin/operations/Equals",
         "sysmlid": "Equals",
@@ -39,13 +25,13 @@
         "specialization": {"type": "Package"}
     },
     {
-        "qualifiedId": "/no_site/no_site_no_project/holding_bin_no_site_no_project/operations/Max",
-        "qualifiedName": "/no_site/no_site_no_project/holding_bin/operations/Max",
-        "sysmlid": "Max",
+        "qualifiedId": "/no_site/no_site_no_project/holding_bin_no_site_no_project/operations/sum",
+        "qualifiedName": "/no_site/no_site_no_project/holding_bin/operations/sum",
+        "sysmlid": "sum",
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
-        "name": "Max",
+        "name": "sum",
         "owner": "operations",
         "specialization": {
             "parameters": [],
@@ -53,13 +39,97 @@
         }
     },
     {
-        "qualifiedId": "/no_site/no_site_no_project/holding_bin_no_site_no_project/operations/Less",
-        "qualifiedName": "/no_site/no_site_no_project/holding_bin/operations/Less",
-        "sysmlid": "Less",
+        "qualifiedId": "/no_site/no_site_no_project/holding_bin_no_site_no_project/operations/max",
+        "qualifiedName": "/no_site/no_site_no_project/holding_bin/operations/max",
+        "sysmlid": "max",
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
-        "name": "Less",
+        "name": "max",
+        "owner": "operations",
+        "specialization": {
+            "parameters": [],
+            "type": "Operation"
+        }
+    },
+    {
+        "qualifiedId": "/no_site/no_site_no_project/holding_bin_no_site_no_project/operations/EQ",
+        "qualifiedName": "/no_site/no_site_no_project/holding_bin/operations/EQ",
+        "sysmlid": "EQ",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "EQ",
+        "owner": "operations",
+        "specialization": {
+            "parameters": [],
+            "type": "Operation"
+        }
+    },
+    {
+        "qualifiedId": "/no_site/no_site_no_project/holding_bin_no_site_no_project/operations/Minus",
+        "qualifiedName": "/no_site/no_site_no_project/holding_bin/operations/Minus",
+        "sysmlid": "Minus",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "Minus",
+        "owner": "operations",
+        "specialization": {
+            "parameters": [],
+            "type": "Operation"
+        }
+    },
+    {
+        "qualifiedId": "/no_site/no_site_no_project/holding_bin_no_site_no_project/operations/Not",
+        "qualifiedName": "/no_site/no_site_no_project/holding_bin/operations/Not",
+        "sysmlid": "Not",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "Not",
+        "owner": "operations",
+        "specialization": {
+            "parameters": [],
+            "type": "Operation"
+        }
+    },
+    {
+        "qualifiedId": "/no_site/no_site_no_project/holding_bin_no_site_no_project/operations/GreaterEquals",
+        "qualifiedName": "/no_site/no_site_no_project/holding_bin/operations/GreaterEquals",
+        "sysmlid": "GreaterEquals",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "GreaterEquals",
+        "owner": "operations",
+        "specialization": {
+            "parameters": [],
+            "type": "Operation"
+        }
+    },
+    {
+        "qualifiedId": "/no_site/no_site_no_project/holding_bin_no_site_no_project/operations/Sum",
+        "qualifiedName": "/no_site/no_site_no_project/holding_bin/operations/Sum",
+        "sysmlid": "Sum",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "Sum",
+        "owner": "operations",
+        "specialization": {
+            "parameters": [],
+            "type": "Operation"
+        }
+    },
+    {
+        "qualifiedId": "/no_site/no_site_no_project/holding_bin_no_site_no_project/operations/Sub",
+        "qualifiedName": "/no_site/no_site_no_project/holding_bin/operations/Sub",
+        "sysmlid": "Sub",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "Sub",
         "owner": "operations",
         "specialization": {
             "parameters": [],
@@ -81,6 +151,34 @@
         }
     },
     {
+        "qualifiedId": "/no_site/no_site_no_project/holding_bin_no_site_no_project/operations/Divide",
+        "qualifiedName": "/no_site/no_site_no_project/holding_bin/operations/Divide",
+        "sysmlid": "Divide",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "Divide",
+        "owner": "operations",
+        "specialization": {
+            "parameters": [],
+            "type": "Operation"
+        }
+    },
+    {
+        "qualifiedId": "/no_site/no_site_no_project/holding_bin_no_site_no_project/operations/Type",
+        "qualifiedName": "/no_site/no_site_no_project/holding_bin/operations/Type",
+        "sysmlid": "Type",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "Type",
+        "owner": "operations",
+        "specialization": {
+            "parameters": [],
+            "type": "Operation"
+        }
+    },
+    {
         "qualifiedId": "/no_site/no_site_no_project/holding_bin_no_site_no_project/operations/GTE",
         "qualifiedName": "/no_site/no_site_no_project/holding_bin/operations/GTE",
         "sysmlid": "GTE",
@@ -95,6 +193,188 @@
         }
     },
     {
+        "qualifiedId": "/no_site/no_site_no_project/holding_bin_no_site_no_project/operations/Add",
+        "qualifiedName": "/no_site/no_site_no_project/holding_bin/operations/Add",
+        "sysmlid": "Add",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "Add",
+        "owner": "operations",
+        "specialization": {
+            "parameters": [],
+            "type": "Operation"
+        }
+    },
+    {
+        "qualifiedId": "/no_site/no_site_no_project/holding_bin_no_site_no_project/operations/Or",
+        "qualifiedName": "/no_site/no_site_no_project/holding_bin/operations/Or",
+        "sysmlid": "Or",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "Or",
+        "owner": "operations",
+        "specialization": {
+            "parameters": [],
+            "type": "Operation"
+        }
+    },
+    {
+        "qualifiedId": "/no_site/no_site_no_project/holding_bin_no_site_no_project/operations/Times",
+        "qualifiedName": "/no_site/no_site_no_project/holding_bin/operations/Times",
+        "sysmlid": "Times",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "Times",
+        "owner": "operations",
+        "specialization": {
+            "parameters": [],
+            "type": "Operation"
+        }
+    },
+    {
+        "qualifiedId": "/no_site/no_site_no_project/holding_bin_no_site_no_project/operations/List",
+        "qualifiedName": "/no_site/no_site_no_project/holding_bin/operations/List",
+        "sysmlid": "List",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "List",
+        "owner": "operations",
+        "specialization": {
+            "parameters": [],
+            "type": "Operation"
+        }
+    },
+    {
+        "qualifiedId": "/no_site/no_site_no_project/holding_bin_no_site_no_project/operations/GT",
+        "qualifiedName": "/no_site/no_site_no_project/holding_bin/operations/GT",
+        "sysmlid": "GT",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "GT",
+        "owner": "operations",
+        "specialization": {
+            "parameters": [],
+            "type": "Operation"
+        }
+    },
+    {
+        "qualifiedId": "/no_site/no_site_no_project/holding_bin_no_site_no_project/operations/Evaluate",
+        "qualifiedName": "/no_site/no_site_no_project/holding_bin/operations/Evaluate",
+        "sysmlid": "Evaluate",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "Evaluate",
+        "owner": "operations",
+        "specialization": {
+            "parameters": [],
+            "type": "Operation"
+        }
+    },
+    {
+        "qualifiedId": "/no_site/no_site_no_project/holding_bin_no_site_no_project/operations/DoesThereExist",
+        "qualifiedName": "/no_site/no_site_no_project/holding_bin/operations/DoesThereExist",
+        "sysmlid": "DoesThereExist",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "DoesThereExist",
+        "owner": "operations",
+        "specialization": {
+            "parameters": [],
+            "type": "Operation"
+        }
+    },
+    {
+        "qualifiedId": "/no_site/no_site_no_project/holding_bin_no_site_no_project/operations/Max",
+        "qualifiedName": "/no_site/no_site_no_project/holding_bin/operations/Max",
+        "sysmlid": "Max",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "Max",
+        "owner": "operations",
+        "specialization": {
+            "parameters": [],
+            "type": "Operation"
+        }
+    },
+    {
+        "qualifiedId": "/no_site/no_site_no_project/holding_bin_no_site_no_project/operations/LT",
+        "qualifiedName": "/no_site/no_site_no_project/holding_bin/operations/LT",
+        "sysmlid": "LT",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "LT",
+        "owner": "operations",
+        "specialization": {
+            "parameters": [],
+            "type": "Operation"
+        }
+    },
+    {
+        "qualifiedId": "/no_site/no_site_no_project/holding_bin_no_site_no_project/operations/Name",
+        "qualifiedName": "/no_site/no_site_no_project/holding_bin/operations/Name",
+        "sysmlid": "Name",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "Name",
+        "owner": "operations",
+        "specialization": {
+            "parameters": [],
+            "type": "Operation"
+        }
+    },
+    {
+        "qualifiedId": "/no_site/no_site_no_project/holding_bin_no_site_no_project/operations/Conditional",
+        "qualifiedName": "/no_site/no_site_no_project/holding_bin/operations/Conditional",
+        "sysmlid": "Conditional",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "Conditional",
+        "owner": "operations",
+        "specialization": {
+            "parameters": [],
+            "type": "Operation"
+        }
+    },
+    {
+        "qualifiedId": "/no_site/no_site_no_project/holding_bin_no_site_no_project/operations/Greater",
+        "qualifiedName": "/no_site/no_site_no_project/holding_bin/operations/Greater",
+        "sysmlid": "Greater",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "Greater",
+        "owner": "operations",
+        "specialization": {
+            "parameters": [],
+            "type": "Operation"
+        }
+    },
+    {
+        "qualifiedId": "/no_site/no_site_no_project/holding_bin_no_site_no_project/operations/ForAll",
+        "qualifiedName": "/no_site/no_site_no_project/holding_bin/operations/ForAll",
+        "sysmlid": "ForAll",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "ForAll",
+        "owner": "operations",
+        "specialization": {
+            "parameters": [],
+            "type": "Operation"
+        }
+    },
+    {
         "qualifiedId": "/no_site/no_site_no_project/holding_bin_no_site_no_project/operations/Min",
         "qualifiedName": "/no_site/no_site_no_project/holding_bin/operations/Min",
         "sysmlid": "Min",
@@ -102,6 +382,76 @@
         "creator": "admin",
         "modifier": "admin",
         "name": "Min",
+        "owner": "operations",
+        "specialization": {
+            "parameters": [],
+            "type": "Operation"
+        }
+    },
+    {
+        "qualifiedId": "/no_site/no_site_no_project/holding_bin_no_site_no_project/operations/Text",
+        "qualifiedName": "/no_site/no_site_no_project/holding_bin/operations/Text",
+        "sysmlid": "Text",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "Text",
+        "owner": "operations",
+        "specialization": {
+            "parameters": [],
+            "type": "Operation"
+        }
+    },
+    {
+        "qualifiedId": "/no_site/no_site_no_project/holding_bin_no_site_no_project/operations/Id",
+        "qualifiedName": "/no_site/no_site_no_project/holding_bin/operations/Id",
+        "sysmlid": "Id",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "Id",
+        "owner": "operations",
+        "specialization": {
+            "parameters": [],
+            "type": "Operation"
+        }
+    },
+    {
+        "qualifiedId": "/no_site/no_site_no_project/holding_bin_no_site_no_project/operations/LessEquals",
+        "qualifiedName": "/no_site/no_site_no_project/holding_bin/operations/LessEquals",
+        "sysmlid": "LessEquals",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "LessEquals",
+        "owner": "operations",
+        "specialization": {
+            "parameters": [],
+            "type": "Operation"
+        }
+    },
+    {
+        "qualifiedId": "/no_site/no_site_no_project/holding_bin_no_site_no_project/operations/Less",
+        "qualifiedName": "/no_site/no_site_no_project/holding_bin/operations/Less",
+        "sysmlid": "Less",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "Less",
+        "owner": "operations",
+        "specialization": {
+            "parameters": [],
+            "type": "Operation"
+        }
+    },
+    {
+        "qualifiedId": "/no_site/no_site_no_project/holding_bin_no_site_no_project/operations/ThereExists",
+        "qualifiedName": "/no_site/no_site_no_project/holding_bin/operations/ThereExists",
+        "sysmlid": "ThereExists",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "ThereExists",
         "owner": "operations",
         "specialization": {
             "parameters": [],
@@ -137,272 +487,6 @@
         }
     },
     {
-        "qualifiedId": "/no_site/no_site_no_project/holding_bin_no_site_no_project/operations/max",
-        "qualifiedName": "/no_site/no_site_no_project/holding_bin/operations/max",
-        "sysmlid": "max",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "max",
-        "owner": "operations",
-        "specialization": {
-            "parameters": [],
-            "type": "Operation"
-        }
-    },
-    {
-        "qualifiedId": "/no_site/no_site_no_project/holding_bin_no_site_no_project/operations/Text",
-        "qualifiedName": "/no_site/no_site_no_project/holding_bin/operations/Text",
-        "sysmlid": "Text",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "Text",
-        "owner": "operations",
-        "specialization": {
-            "parameters": [],
-            "type": "Operation"
-        }
-    },
-    {
-        "qualifiedId": "/no_site/no_site_no_project/holding_bin_no_site_no_project/operations/Not",
-        "qualifiedName": "/no_site/no_site_no_project/holding_bin/operations/Not",
-        "sysmlid": "Not",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "Not",
-        "owner": "operations",
-        "specialization": {
-            "parameters": [],
-            "type": "Operation"
-        }
-    },
-    {
-        "qualifiedId": "/no_site/no_site_no_project/holding_bin_no_site_no_project/operations/Sum",
-        "qualifiedName": "/no_site/no_site_no_project/holding_bin/operations/Sum",
-        "sysmlid": "Sum",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "Sum",
-        "owner": "operations",
-        "specialization": {
-            "parameters": [],
-            "type": "Operation"
-        }
-    },
-    {
-        "qualifiedId": "/no_site/no_site_no_project/holding_bin_no_site_no_project/operations/Negative",
-        "qualifiedName": "/no_site/no_site_no_project/holding_bin/operations/Negative",
-        "sysmlid": "Negative",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "Negative",
-        "owner": "operations",
-        "specialization": {
-            "parameters": [],
-            "type": "Operation"
-        }
-    },
-    {
-        "qualifiedId": "/no_site/no_site_no_project/holding_bin_no_site_no_project/operations/Greater",
-        "qualifiedName": "/no_site/no_site_no_project/holding_bin/operations/Greater",
-        "sysmlid": "Greater",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "Greater",
-        "owner": "operations",
-        "specialization": {
-            "parameters": [],
-            "type": "Operation"
-        }
-    },
-    {
-        "qualifiedId": "/no_site/no_site_no_project/holding_bin_no_site_no_project/operations/Or",
-        "qualifiedName": "/no_site/no_site_no_project/holding_bin/operations/Or",
-        "sysmlid": "Or",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "Or",
-        "owner": "operations",
-        "specialization": {
-            "parameters": [],
-            "type": "Operation"
-        }
-    },
-    {
-        "qualifiedId": "/no_site/no_site_no_project/holding_bin_no_site_no_project/operations/Id",
-        "qualifiedName": "/no_site/no_site_no_project/holding_bin/operations/Id",
-        "sysmlid": "Id",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "Id",
-        "owner": "operations",
-        "specialization": {
-            "parameters": [],
-            "type": "Operation"
-        }
-    },
-    {
-        "qualifiedId": "/no_site/no_site_no_project/holding_bin_no_site_no_project/operations/ThereExists",
-        "qualifiedName": "/no_site/no_site_no_project/holding_bin/operations/ThereExists",
-        "sysmlid": "ThereExists",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "ThereExists",
-        "owner": "operations",
-        "specialization": {
-            "parameters": [],
-            "type": "Operation"
-        }
-    },
-    {
-        "qualifiedId": "/no_site/no_site_no_project/holding_bin_no_site_no_project/operations/sum",
-        "qualifiedName": "/no_site/no_site_no_project/holding_bin/operations/sum",
-        "sysmlid": "sum",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "sum",
-        "owner": "operations",
-        "specialization": {
-            "parameters": [],
-            "type": "Operation"
-        }
-    },
-    {
-        "qualifiedId": "/no_site/no_site_no_project/holding_bin_no_site_no_project/operations/Xor",
-        "qualifiedName": "/no_site/no_site_no_project/holding_bin/operations/Xor",
-        "sysmlid": "Xor",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "Xor",
-        "owner": "operations",
-        "specialization": {
-            "parameters": [],
-            "type": "Operation"
-        }
-    },
-    {
-        "qualifiedId": "/no_site/no_site_no_project/holding_bin_no_site_no_project/operations/Times",
-        "qualifiedName": "/no_site/no_site_no_project/holding_bin/operations/Times",
-        "sysmlid": "Times",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "Times",
-        "owner": "operations",
-        "specialization": {
-            "parameters": [],
-            "type": "Operation"
-        }
-    },
-    {
-        "qualifiedId": "/no_site/no_site_no_project/holding_bin_no_site_no_project/operations/Name",
-        "qualifiedName": "/no_site/no_site_no_project/holding_bin/operations/Name",
-        "sysmlid": "Name",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "Name",
-        "owner": "operations",
-        "specialization": {
-            "parameters": [],
-            "type": "Operation"
-        }
-    },
-    {
-        "qualifiedId": "/no_site/no_site_no_project/holding_bin_no_site_no_project/operations/DoesThereExist",
-        "qualifiedName": "/no_site/no_site_no_project/holding_bin/operations/DoesThereExist",
-        "sysmlid": "DoesThereExist",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "DoesThereExist",
-        "owner": "operations",
-        "specialization": {
-            "parameters": [],
-            "type": "Operation"
-        }
-    },
-    {
-        "qualifiedId": "/no_site/no_site_no_project/holding_bin_no_site_no_project/operations/Conditional",
-        "qualifiedName": "/no_site/no_site_no_project/holding_bin/operations/Conditional",
-        "sysmlid": "Conditional",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "Conditional",
-        "owner": "operations",
-        "specialization": {
-            "parameters": [],
-            "type": "Operation"
-        }
-    },
-    {
-        "qualifiedId": "/no_site/no_site_no_project/holding_bin_no_site_no_project/operations/GreaterEquals",
-        "qualifiedName": "/no_site/no_site_no_project/holding_bin/operations/GreaterEquals",
-        "sysmlid": "GreaterEquals",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "GreaterEquals",
-        "owner": "operations",
-        "specialization": {
-            "parameters": [],
-            "type": "Operation"
-        }
-    },
-    {
-        "qualifiedId": "/no_site/no_site_no_project/holding_bin_no_site_no_project/operations/LessEquals",
-        "qualifiedName": "/no_site/no_site_no_project/holding_bin/operations/LessEquals",
-        "sysmlid": "LessEquals",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "LessEquals",
-        "owner": "operations",
-        "specialization": {
-            "parameters": [],
-            "type": "Operation"
-        }
-    },
-    {
-        "qualifiedId": "/no_site/no_site_no_project/holding_bin_no_site_no_project/operations/dateFromTimestamp",
-        "qualifiedName": "/no_site/no_site_no_project/holding_bin/operations/dateFromTimestamp",
-        "sysmlid": "dateFromTimestamp",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "dateFromTimestamp",
-        "owner": "operations",
-        "specialization": {
-            "parameters": [],
-            "type": "Operation"
-        }
-    },
-    {
-        "qualifiedId": "/no_site/no_site_no_project/holding_bin_no_site_no_project/operations/Type",
-        "qualifiedName": "/no_site/no_site_no_project/holding_bin/operations/Type",
-        "sysmlid": "Type",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "Type",
-        "owner": "operations",
-        "specialization": {
-            "parameters": [],
-            "type": "Operation"
-        }
-    },
-    {
         "qualifiedId": "/no_site/no_site_no_project/holding_bin_no_site_no_project/operations/NEQ",
         "qualifiedName": "/no_site/no_site_no_project/holding_bin/operations/NEQ",
         "sysmlid": "NEQ",
@@ -410,34 +494,6 @@
         "creator": "admin",
         "modifier": "admin",
         "name": "NEQ",
-        "owner": "operations",
-        "specialization": {
-            "parameters": [],
-            "type": "Operation"
-        }
-    },
-    {
-        "qualifiedId": "/no_site/no_site_no_project/holding_bin_no_site_no_project/operations/LT",
-        "qualifiedName": "/no_site/no_site_no_project/holding_bin/operations/LT",
-        "sysmlid": "LT",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "LT",
-        "owner": "operations",
-        "specialization": {
-            "parameters": [],
-            "type": "Operation"
-        }
-    },
-    {
-        "qualifiedId": "/no_site/no_site_no_project/holding_bin_no_site_no_project/operations/Sub",
-        "qualifiedName": "/no_site/no_site_no_project/holding_bin/operations/Sub",
-        "sysmlid": "Sub",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "Sub",
         "owner": "operations",
         "specialization": {
             "parameters": [],
@@ -459,62 +515,6 @@
         }
     },
     {
-        "qualifiedId": "/no_site/no_site_no_project/holding_bin_no_site_no_project/operations/Minus",
-        "qualifiedName": "/no_site/no_site_no_project/holding_bin/operations/Minus",
-        "sysmlid": "Minus",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "Minus",
-        "owner": "operations",
-        "specialization": {
-            "parameters": [],
-            "type": "Operation"
-        }
-    },
-    {
-        "qualifiedId": "/no_site/no_site_no_project/holding_bin_no_site_no_project/operations/Divide",
-        "qualifiedName": "/no_site/no_site_no_project/holding_bin/operations/Divide",
-        "sysmlid": "Divide",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "Divide",
-        "owner": "operations",
-        "specialization": {
-            "parameters": [],
-            "type": "Operation"
-        }
-    },
-    {
-        "qualifiedName": "/no_site/no_site_no_project/holding_bin/null",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "owner": "holding_bin_no_site_no_project",
-        "specialization": {
-            "valueExpression": null,
-            "type": "Expression",
-            "operand": [
-                {
-                    "valueExpression": null,
-                    "string": "Plus",
-                    "type": "LiteralString"
-                },
-                {
-                    "valueExpression": null,
-                    "integer": 1,
-                    "type": "LiteralInteger"
-                },
-                {
-                    "valueExpression": null,
-                    "integer": 1,
-                    "type": "LiteralInteger"
-                }
-            ]
-        }
-    },
-    {
         "qualifiedId": "/no_site/no_site_no_project/holding_bin_no_site_no_project/operations/And",
         "qualifiedName": "/no_site/no_site_no_project/holding_bin/operations/And",
         "sysmlid": "And",
@@ -529,13 +529,51 @@
         }
     },
     {
-        "qualifiedId": "/no_site/no_site_no_project/holding_bin_no_site_no_project/operations/List",
-        "qualifiedName": "/no_site/no_site_no_project/holding_bin/operations/List",
-        "sysmlid": "List",
+        "qualifiedName": "/no_site/no_site_no_project/holding_bin/null",
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
-        "name": "List",
+        "owner": "holding_bin_no_site_no_project",
+        "specialization": {
+            "operand": [
+                {
+                    "string": "Plus",
+                    "type": "LiteralString"
+                },
+                {
+                    "integer": 1,
+                    "type": "LiteralInteger"
+                },
+                {
+                    "integer": 1,
+                    "type": "LiteralInteger"
+                }
+            ],
+            "type": "Expression"
+        }
+    },
+    {
+        "qualifiedId": "/no_site/no_site_no_project/holding_bin_no_site_no_project/operations/Xor",
+        "qualifiedName": "/no_site/no_site_no_project/holding_bin/operations/Xor",
+        "sysmlid": "Xor",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "Xor",
+        "owner": "operations",
+        "specialization": {
+            "parameters": [],
+            "type": "Operation"
+        }
+    },
+    {
+        "qualifiedId": "/no_site/no_site_no_project/holding_bin_no_site_no_project/operations/dateFromTimestamp",
+        "qualifiedName": "/no_site/no_site_no_project/holding_bin/operations/dateFromTimestamp",
+        "sysmlid": "dateFromTimestamp",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "dateFromTimestamp",
         "owner": "operations",
         "specialization": {
             "parameters": [],
@@ -557,55 +595,13 @@
         }
     },
     {
-        "qualifiedId": "/no_site/no_site_no_project/holding_bin_no_site_no_project/operations/Evaluate",
-        "qualifiedName": "/no_site/no_site_no_project/holding_bin/operations/Evaluate",
-        "sysmlid": "Evaluate",
+        "qualifiedId": "/no_site/no_site_no_project/holding_bin_no_site_no_project/operations/Negative",
+        "qualifiedName": "/no_site/no_site_no_project/holding_bin/operations/Negative",
+        "sysmlid": "Negative",
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
-        "name": "Evaluate",
-        "owner": "operations",
-        "specialization": {
-            "parameters": [],
-            "type": "Operation"
-        }
-    },
-    {
-        "qualifiedId": "/no_site/no_site_no_project/holding_bin_no_site_no_project/operations/ForAll",
-        "qualifiedName": "/no_site/no_site_no_project/holding_bin/operations/ForAll",
-        "sysmlid": "ForAll",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "ForAll",
-        "owner": "operations",
-        "specialization": {
-            "parameters": [],
-            "type": "Operation"
-        }
-    },
-    {
-        "qualifiedId": "/no_site/no_site_no_project/holding_bin_no_site_no_project/operations/GT",
-        "qualifiedName": "/no_site/no_site_no_project/holding_bin/operations/GT",
-        "sysmlid": "GT",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "GT",
-        "owner": "operations",
-        "specialization": {
-            "parameters": [],
-            "type": "Operation"
-        }
-    },
-    {
-        "qualifiedId": "/no_site/no_site_no_project/holding_bin_no_site_no_project/operations/Add",
-        "qualifiedName": "/no_site/no_site_no_project/holding_bin/operations/Add",
-        "sysmlid": "Add",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "Add",
+        "name": "Negative",
         "owner": "operations",
         "specialization": {
             "parameters": [],

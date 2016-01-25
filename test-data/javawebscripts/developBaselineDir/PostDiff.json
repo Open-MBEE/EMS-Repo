@@ -1,7 +1,7 @@
 {
     "workspace1": {
-        "qualifiedName": "master/ws2",
         "name": "ws2",
+        "qualifiedName": "master/ws2",
         "elements": [{
             "qualifiedName": "/europa/JW_TEST2/400/401/402",
             "sysmlid": "402",
@@ -9,14 +9,13 @@
             "creator": "admin",
             "modifier": "admin",
             "name": "402",
-            "documentation": "4to",
             "owner": "401",
+            "documentation": "4to",
             "specialization": {
                 "propertyType": null,
-                "isDerived": false,
                 "isSlot": false,
+                "isDerived": false,
                 "value": [{
-                    "valueExpression": null,
                     "string": "dlam_string",
                     "type": "LiteralString"
                 }],
@@ -32,14 +31,13 @@
             "editable": true,
             "creator": "admin",
             "modifier": "admin",
-            "owner": "holding_bin_no_site_no_project",
             "documentation": "x is x",
+            "owner": "holding_bin_no_site_no_project",
             "specialization": {
                 "propertyType": null,
-                "isDerived": false,
                 "isSlot": false,
+                "isDerived": false,
                 "value": [{
-                    "valueExpression": null,
                     "string": "the element added to ws1",
                     "type": "LiteralString"
                 }],
@@ -54,22 +52,21 @@
             "creator": "admin",
             "modifier": "admin",
             "name": "402",
-            "documentation": "x is x",
             "owner": "401",
+            "documentation": "x is x",
             "specialization": {
                 "propertyType": null,
-                "isDerived": false,
                 "isSlot": false,
+                "isDerived": false,
                 "value": [{
-                    "valueExpression": null,
                     "string": "the x value",
                     "type": "LiteralString"
                 }],
                 "type": "Property"
             }
         }],
-        "qualifiedName": "master/ws2",
         "name": "ws2",
+        "qualifiedName": "master/ws2",
         "movedElements": []
     }
 }

@@ -1,8 +1,10 @@
 {"elements": [{
-    "creator": "admin",
+    "qualifiedName": "/no_site/no_site_no_project/holding_bin/Product X/VIEW V",
     "isMetatype": false,
     "editable": true,
-    "qualifiedName": "/no_site/no_site_no_project/holding_bin/Product X/VIEW V",
+    "creator": "admin",
+    "ownedAttribute": [
+    ],
     "modifier": "admin",
     "name": "VIEW V",
     "specialization": {
@@ -14,13 +16,8 @@
                 "aggregation": "COMPOSITE",
             }
         ],
-        "contents": {
-            "valueExpression": null,
-            "type": "Expression"
-        },
+        "contents": {"type": "Expression"},
         "type": "View"
-    },
-    "ownedAttribute": [
-    ]
+    }
 }]}
 200

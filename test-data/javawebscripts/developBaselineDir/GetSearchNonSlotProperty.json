@@ -13,12 +13,11 @@
         "owner": "_17_0_5_1_407019f_1402422718524_458809_16434",
         "specialization": {
             "propertyType": null,
-            "isDerived": false,
             "isSlot": false,
+            "isDerived": false,
             "value": [{
-                "valueExpression": null,
-                "double": 34.5,
-                "type": "LiteralReal"
+                "type": "LiteralReal",
+                "double": 34.5
             }],
             "type": "Property"
         }

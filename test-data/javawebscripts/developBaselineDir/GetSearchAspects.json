@@ -47,7 +47,6 @@
                 "isSlot": false,
                 "isDerived": false,
                 "value": [{
-                    "valueExpression": null,
                     "string": "dlam_string",
                     "type": "LiteralString"
                 }],
@@ -151,7 +150,6 @@
                 "isSlot": false,
                 "isDerived": false,
                 "value": [{
-                    "valueExpression": null,
                     "string": "dlam_string",
                     "type": "LiteralString"
                 }],
@@ -206,10 +204,7 @@
         "documentation": "View updates",
         "owner": "123456",
         "specialization": {
-            "contents": {
-                "valueExpression": null,
-                "type": "Expression"
-            },
+            "contents": {"type": "Expression"},
             "type": "View"
         }
     },
