@@ -31,12 +31,16 @@ package gov.nasa.jpl.view_repo.webscripts;
 
 import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.mbee.util.Utils;
+import gov.nasa.jpl.view_repo.db.PostgresHelper;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 
+import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
@@ -44,14 +48,11 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.log4j.*;
 import org.alfresco.repo.model.Repository;
 import org.alfresco.service.ServiceRegistry;
-
+import org.alfresco.service.cmr.repository.NodeRef;
 import org.json.JSONArray;
-
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import org.json.JSONObject;
-
 import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
@@ -166,16 +167,44 @@ public class ModelsGet extends AbstractJavaWebScript {
 
         JSONArray elementsToFindJson;
         elementsToFindJson = requestJson.getJSONArray( "elements" );
-
+        List<String> sysmlids = new ArrayList<String>();
         for (int ii = 0; ii < elementsToFindJson.length(); ii++) {
-            String id = elementsToFindJson.getJSONObject( ii ).getString( "sysmlid" );
-            EmsScriptNode node = NodeUtil.findScriptNodeById( id, workspace, dateTime, false, services, response );
-            if (node != null) {
-                try {
-                    elementsFoundJson.put( node.toJSONObject( workspace, dateTime ) );
-                } catch (JSONException e) {
-                    log(Level.ERROR, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Could not create JSON");
-                    e.printStackTrace();
+            sysmlids.add( elementsToFindJson.getJSONObject(ii).getString( "sysmlid" ) );
+        }
+
+        boolean graphSearched = false;
+        if (NodeUtil.doGraphDb ) {
+            PostgresHelper pgh = new PostgresHelper(workspace);
+            try {
+                pgh.connect();
+            
+                if (dateTime == null && pgh.checkWorkspaceExists()) {
+                    List<String> noderefids = pgh.getNodesInWorkspace( sysmlids );
+                    graphSearched = true;
+
+                    for (int ii = 0; ii < noderefids.size(); ii++) {
+                        EmsScriptNode node = new EmsScriptNode(new NodeRef(noderefids.get( ii )), services, response);
+                        elementsFoundJson.put(node.toJSONObject(workspace, dateTime));
+                    }
+                }
+                
+                pgh.close();
+            } catch ( ClassNotFoundException | SQLException e ) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+        }
+        
+        if (!graphSearched) {
+            for (int ii = 0; ii < sysmlids.size(); ii++) {
+                EmsScriptNode node = NodeUtil.findScriptNodeById( sysmlids.get( ii ), workspace, dateTime, false, services, response );
+                if (node != null) {
+                    try {
+                        elementsFoundJson.put( node.toJSONObject( workspace, dateTime ) );
+                    } catch (JSONException e) {
+                        log(Level.ERROR, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Could not create JSON");
+                        e.printStackTrace();
+                    }
                 }
             }
         }

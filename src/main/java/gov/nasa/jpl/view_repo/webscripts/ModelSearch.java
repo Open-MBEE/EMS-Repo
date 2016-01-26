@@ -276,7 +276,7 @@ public class ModelSearch extends ModelGet {
                         pgh.connect();
                         
                         filteredNoderefs =
-                                pgh.filterNodesByWorkspace( noderefs, workspaceId  );
+                                pgh.filterNodeRefsByWorkspace( noderefs, workspaceId  );
         
                         pgh.close();
                     }

@@ -553,7 +553,7 @@ public class PostgresHelper {
 		}
 	}
 
-	public List<String> filterNodesByWorkspace(List<String> noderefs,
+	public List<String> filterNodeRefsByWorkspace(List<String> noderefs,
 			String workspace) {
 		List<String> result = new ArrayList<String>();
 		String query = "select noderefid from nodes" + workspace
@@ -577,5 +577,27 @@ public class PostgresHelper {
 		}
 
 		return result;
+	}
+	
+	public List<String> getNodesInWorkspace(List<String> sysmlids) {
+	    List<String> result = new ArrayList<String>();
+	    for (int ii = 0; ii < sysmlids.size(); ii++) {
+	        sysmlids.set( ii, String.format("'%s'", sysmlids.get(ii)) );
+	    }
+	    String query  = String.format("select noderefid from nodes%s where sysmlid in (%s);",
+	                                  this.workspaceName, StringUtils.join(sysmlids, ",") );
+	    
+	    ResultSet rs;
+	    try {
+	        rs = execQuery(query);
+	        
+	        while (rs.next()) {
+	            result.add(rs.getString(1));
+	        }
+	    } catch (SQLException e) {
+	        e.printStackTrace();
+	    }
+	    
+	    return result;
 	}
 }
