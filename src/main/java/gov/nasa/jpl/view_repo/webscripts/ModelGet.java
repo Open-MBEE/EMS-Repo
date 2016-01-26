@@ -192,7 +192,7 @@ public class ModelGet extends AbstractJavaWebScript {
 		setIsViewRequest(isViewRequest);
 
 		JSONObject top = NodeUtil.newJsonObject();
-		JSONArray elementsJson = handleRequest(req, top, NodeUtil.doGraphDb);
+		JSONArray elementsJson = handleRequest(req, top);
 
 		try {
 			if (elementsJson.length() > 0) {
@@ -232,7 +232,7 @@ public class ModelGet extends AbstractJavaWebScript {
 	 * @param top
 	 * @return
 	 */
-	private JSONArray handleRequest(WebScriptRequest req, final JSONObject top, boolean useDb) {
+	private JSONArray handleRequest(WebScriptRequest req, final JSONObject top) {
 		// REVIEW -- Why check for errors here if validate has already been
 		// called? Is the error checking code different? Why?
 		try {
@@ -276,7 +276,7 @@ public class ModelGet extends AbstractJavaWebScript {
 			
 			// search using db if enabled - if not there revert to modelRootNode
 			// DB can only be used against latest at the moment
-			if (useDb && dateTime == null) {
+			if (NodeUtil.doGraphDb && dateTime == null) {
 			    PostgresHelper pgh = new PostgresHelper(workspace);
 			    try {
                     pgh.connect();
@@ -289,7 +289,7 @@ public class ModelGet extends AbstractJavaWebScript {
 			if (modelRootNode == null) {
 			    modelRootNode = findScriptNodeById(modelId,
 			                                       workspace, dateTime, findDeleted);
-			    useDb = false;
+			    NodeUtil.doGraphDb = false;
 			}
 			
 			if (logger.isDebugEnabled())
@@ -312,7 +312,7 @@ public class ModelGet extends AbstractJavaWebScript {
 			} else {
 				handleElementHierarchy(modelRootNode, workspace, dateTime,
 						depth, new Long(0), connected, relationship,
-						new HashSet<String>(), useDb);
+						new HashSet<String>());
 			}
 
 			boolean checkReadPermission = true; // TODO -- REVIEW -- Shouldn't
@@ -444,9 +444,9 @@ public class ModelGet extends AbstractJavaWebScript {
 	protected void handleElementHierarchy(EmsScriptNode root,
 			WorkspaceNode workspace, Date dateTime, final Long maxDepth,
 			Long currDepth, boolean connected, String relationship,
-			Set<String> visited, boolean useDb) throws JSONException, SQLException {
+			Set<String> visited) throws JSONException, SQLException {
 
-		if (dateTime == null && !connected && useDb) {
+		if (dateTime == null && !connected && NodeUtil.doGraphDb) {
 			handleElementHierarchyPostgres(root, workspace, dateTime, maxDepth,
 					currDepth, connected, relationship, visited);
 		}
