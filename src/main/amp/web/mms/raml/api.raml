@@ -36,6 +36,8 @@ schemas:
     
   - connections: !include connections.json-schema
   
+  - history: !include versions.json-schema
+    
   # include post/ put and delete responses
   #- elementsResponse: !include postResponse.json-schema
   #- viewsResponse: !include postResponse.json-schema
@@ -299,7 +301,7 @@ resourceTypes:
       post:
        is: [postable]
       get:
-        description: Returns all the elements of specified in the body. Body is a JSONArray of "elements" that only specify "sysmlid". 
+        description: Returns all the elements of specified in the body. Body is a JSONArray of "elements" that only specify "sysmlid".
       put:
         description: Returns all the elements of specified in the body. Body is a JSONArray of "elements" that only specify "sysmlid".
       /{elementId}:
@@ -308,6 +310,12 @@ resourceTypes:
           description: Delete the element specified by the Sysml ID
         get:
           description: Sysml ID for the element under consideration
+    /history:
+      /{elementId}:
+        get:
+          description: Get the version history of specified element.
+          body:
+            schema: history
     /configurations:
       #type: collection
       get:
