@@ -4999,11 +4999,11 @@ public class NodeUtil {
         Map< String, String > child2owner = new HashMap< String, String >();
 
         String topLevelKeys[] =
-                { "elements", "products", "views", "workspace1" };
+                { "elements", "products", "views", "workspace1", "workspace2" };
         for ( int ii = 0; ii < topLevelKeys.length; ii++ ) {
             String key = topLevelKeys[ ii ];
             if ( json.has( key ) ) {
-                if ( !key.equals( "workspace1" ) ) {
+                if ( !key.equals( "workspace1" ) && !key.equals( "workspace2" ) ) {
                     JSONArray elementsJson = json.getJSONArray( key );
                     try {
                         ppHandleElements( req, elementsJson, id2name, id2siteName,

@@ -460,7 +460,6 @@ public class ModelGet extends AbstractJavaWebScript {
 			WorkspaceNode workspace, Date dateTime, final Long maxDepth,
 			Long currDepth, boolean connected, String relationship,
 			Set<String> visited) throws JSONException, SQLException {
-
 		// Note: root sysmlid will never have _pkg at the end.
 		// don't return any elements
 		if (!root.exists()) {
@@ -477,17 +476,19 @@ public class ModelGet extends AbstractJavaWebScript {
 
 		List<Pair<String, Pair<String, String>>> childrenNodeRefIds = null;
 		try {
-			pgh.connect();
 			int depth = 1000000;
-			if (maxDepth >= 0)
+			if (maxDepth >= 0) {
 				depth = maxDepth.intValue();
-			childrenNodeRefIds = pgh.getChildren(root.getSysmlId(),
-					DbEdgeTypes.REGULAR, depth);
-			pgh.close();
+			}
+            pgh.connect();
+    		    childrenNodeRefIds = pgh.getChildren(root.getSysmlId(),
+    					DbEdgeTypes.REGULAR, depth);
+    			pgh.close();
 		} catch (SQLException | ClassNotFoundException e) {
 			e.printStackTrace();
 		}
 
+		if (childrenNodeRefIds == null) return;
 		for (Pair<String, Pair<String, String>> c : childrenNodeRefIds) {
 			EmsScriptNode ecn = new EmsScriptNode(new NodeRef(c.second.second),
 					services, response);
