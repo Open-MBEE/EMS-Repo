@@ -774,14 +774,7 @@ public class WorkspaceDiff implements Serializable {
      * @throws JSONException
      */
     public JSONObject toJSONObject(Date time1, Date time2) throws JSONException {
-        JSONObject deltaJson = toJSONObject( time1, time2, true );
-        // If we came up with nothing (!isDiff()), then maybe we computed it
-        // another way and should return the existing diffJson.
-        if ( diffJson == null || isDiff( deltaJson ) ) {
-            diffJson = deltaJson;
-        }
-        
-        return diffJson;
+        return toJSONObject( time1, time2, true );
     }
 
     /**
@@ -797,6 +790,8 @@ public class WorkspaceDiff implements Serializable {
     }
     
     public JSONObject toJSONObject(Date time1, Date time2, boolean showAll, boolean includeQualified) throws JSONException {
+        if (diffJson != null && !isDiffPrecalculated()) return diffJson;
+        
         JSONObject deltaJson = NodeUtil.newJsonObject();
         JSONObject ws1Json = NodeUtil.newJsonObject();
         JSONObject ws2Json = NodeUtil.newJsonObject();
@@ -815,16 +810,21 @@ public class WorkspaceDiff implements Serializable {
 
         deltaJson.put( "workspace1", ws1Json );
         deltaJson.put( "workspace2", ws2Json );
-
+        
         // If we came up with nothing (!isDiff()), then maybe we computed it
         // another way and should return the existing diffJson.
-        if ( diffJson == null || isDiff() ) {
+        if ( diffJson == null || isDiff(deltaJson) ) {
             diffJson = deltaJson;
         }
         
         return diffJson;
     }
     
+    /**
+     * Does glomming to check if there are any differences
+     * @param diff
+     * @return
+     */
     public static boolean isDiff( JSONObject diff ) {
         JsonDiffDiff diffDiff = new JsonDiffDiff( diff );
         return !diffDiff.getAffectedIds().isEmpty();
@@ -1371,7 +1371,7 @@ public class WorkspaceDiff implements Serializable {
         return true;
     }
 
-    public boolean isDiff() {
+    public boolean isDiffPrecalculated() {
         if (addedElements.size() > 0 || deletedElements.size() > 0 || movedElements.size() > 0 || updatedElements.size() > 0) {
             return true;
         }

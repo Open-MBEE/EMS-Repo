@@ -568,7 +568,7 @@ public class MmsDiffGet extends AbstractJavaWebScript {
             results.put( "res", createResponseJson() );
         } else {
             // since commits don't have qualified paths, need to add them in after the fact
-//            addQualifiedNamesToDiff( top, ws1, ws2, dateTime1, dateTime2 );
+            addQualifiedNamesToDiff( top, ws1, ws2, dateTime1, dateTime2 );
             results.put( "res", NodeUtil.jsonToString( top, 4 ) );
         }
 

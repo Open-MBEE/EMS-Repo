@@ -178,7 +178,7 @@ public class MmsModelDelete extends AbstractJavaWebScript {
                 boolean showAll = false;
                 result = wsDiff.toJSONObject( start, end, showAll );
         
-                if (wsDiff.isDiff()) {
+                if (wsDiff.isDiffPrecalculated()) {
                     // Send deltas to all listeners
                     if ( !CommitUtil.sendDeltas(result, wsId, projectId, source) ) {
                         //log(Level.WARN, "createOrUpdateModel deltas not posted properly");

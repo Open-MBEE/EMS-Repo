@@ -278,8 +278,8 @@ public class MmsWorkspaceDiffPost extends ModelPost {
 	            String projectId = !updatedElements.isEmpty() ?
 	                                           updatedElements.iterator().next().getProjectId(targetWs) :
 	                                           NO_PROJECT_ID;
-	            boolean modelPostDiff = wsDiff.isDiff();
-	            boolean modelDeleteDiff = deleteWsDiff != null && deleteWsDiff.isDiff();
+	            boolean modelPostDiff = wsDiff.isDiffPrecalculated();
+	            boolean modelDeleteDiff = deleteWsDiff != null && deleteWsDiff.isDiffPrecalculated();
 	            
 	            if (modelDeleteDiff || modelPostDiff) {
 	                

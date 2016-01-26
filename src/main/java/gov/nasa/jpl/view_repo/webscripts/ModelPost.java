@@ -472,7 +472,7 @@ public class ModelPost extends AbstractJavaWebScript {
 			timerUpdateModel = Timer.startTimer(timerUpdateModel, timeEvents);
 
 			// Send deltas to all listeners
-			if (createCommit && wsDiff.isDiff()) {
+			if (createCommit && wsDiff.isDiffPrecalculated()) {
 				sendProgress("Sending deltas and creating commit node",
 						projectId, false);
 				if (runWithoutTransactions) {
