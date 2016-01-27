@@ -1867,6 +1867,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
     
         Map< EmsScriptNode, Collection< Constraint > > constraintMap = getAeConstraints( elements, ws );
         ArrayList< Constraint > constraints = new ArrayList< Constraint >();
+        
 //        Set< EmsScriptNode > v
 //        for ( Entry< EmsScriptNode, Collection< Constraint >> e : constraintMap.entrySet() ) {
 //            
@@ -1877,6 +1878,12 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         for ( Collection< Constraint > coll : constraintMap.values() ) {
             constraints.addAll( coll );
         }
+        // Ensure that the class with all of the Parameters can access the
+        // constraints in order to do LazyUpdating and caching of Call
+        // evaluations.
+        ParameterListenerImpl theClass = getGlobalSystemModelAe().getClassData().getCurrentAeClass();
+        theClass.getConstraintExpressions().addAll( Utils.asList( constraints,
+                                                                  ConstraintExpression.class ) );
 //        }
     
         // Solve the constraints:
