@@ -1408,7 +1408,7 @@ public class ModelPost extends AbstractJavaWebScript {
 			for (String acmType : Acm.TYPES_WITH_VALUESPEC.get(type)) {
 				String jsonType = Acm.getACM2JSON().get(acmType);
 				if (jsonType != null && jsonToCheck.has(jsonType)) {
-					Collection<EmsScriptNode> oldVals = getSystemModel()
+					Collection<EmsScriptNode> oldVals = getEmsSystemModel()
 							.getProperty(node, acmType);
 
 					boolean myChanged = processValueSpecPropertyImpl(

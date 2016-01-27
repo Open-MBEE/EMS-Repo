@@ -1398,12 +1398,20 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         return !Utils.isNullOrEmpty( resStr ) ? String.format("{\"message\":\"%s\"}", resStr) : "{}";
     }
 
-    public EmsSystemModel getSystemModel() {
+    public EmsSystemModel getEmsSystemModel() {
         if ( systemModel == null ) {
             systemModel = new EmsSystemModel(this.services);
         }
         return systemModel;
     }
+    
+    public SystemModel< ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? > getSystemModel() {
+        if ( systemModel == null ) {
+            systemModel = new EmsSystemModel(this.services);
+        }
+        return (SystemModel< ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? >)systemModel;
+    }
+
 
     public static EmsSystemModel globalSystemModel = null;
     
@@ -1430,7 +1438,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
 
     public void setSystemModelAe() {
         sysmlToAe =
-                new SystemModelToAeExpression< Object, EmsScriptNode, EmsScriptNode, String, Object, EmsSystemModel >( getSystemModel() );
+                new SystemModelToAeExpression< Object, EmsScriptNode, EmsScriptNode, String, Object, EmsSystemModel >( getEmsSystemModel() );
     
     }
 
@@ -1839,7 +1847,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
     
         
     public void fix( final Set< EmsScriptNode > elements, final WorkspaceNode ws ) {
-        fix(elements, ws, getServices(), getResponse(), getResponseStatus(), getSystemModel(), getSystemModelAe() );
+        fix(elements, ws, getServices(), getResponse(), getResponseStatus(), getEmsSystemModel(), getSystemModelAe() );
     }
 
     public static void fixBetter( final Set< EmsScriptNode > elements, final WorkspaceNode ws, ServiceRegistry services, StringBuffer response, Status status, final EmsSystemModel systemModel, SystemModelToAeExpression< Object, EmsScriptNode, EmsScriptNode, String, Object, EmsSystemModel > systemModelToAe ) {

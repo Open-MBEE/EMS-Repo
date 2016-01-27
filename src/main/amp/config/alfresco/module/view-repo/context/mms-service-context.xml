@@ -4,7 +4,7 @@
 	<!-- enable toggling of all flags -->
 	<bean id="webscript.gov.nasa.jpl.utils.allflags.get" class="gov.nasa.jpl.view_repo.webscripts.AllFlagsGet"
 		parent="webscript">
-	</bean>
+	</bean> 
 
 	<bean id="webscript.gov.nasa.jpl.utils.updateworkspaceldapgroup.post"
 		class="gov.nasa.jpl.view_repo.webscripts.UpdateWorkspaceLdapGroup"
@@ -493,5 +493,5 @@
     	class="gov.nasa.jpl.view_repo.webscripts.MmsVersion" parent="webscript" singleton="false">
     	<property name="repositoryHelper" ref="repositoryHelper"/>
     	<property name="services" ref="ServiceRegistry"/>
-    </bean>      
+    </bean>   
 </beans>
