@@ -176,7 +176,7 @@ public class MmsModelDelete extends AbstractJavaWebScript {
                 Date end = new Date();
         
                 boolean showAll = false;
-                result = wsDiff.toJSONObject( start, end, showAll );
+                result = wsDiff.toJSONObject( start, end, showAll, false );
         
                 if (wsDiff.isDiffPrecalculated()) {
                     // Send deltas to all listeners
