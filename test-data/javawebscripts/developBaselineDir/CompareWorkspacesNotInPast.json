@@ -1,26 +1,8 @@
 {
     "workspace1": {
-        "qualifiedName": "master",
         "name": "master",
+        "qualifiedName": "master",
         "elements": [{
-            "name": "notInThePast",
-            "qualifiedName": "/europa/JW_TEST/notInThePast",
-            "documentation": "",
-            "owner": "123456",
-            "sysmlid": "notInThePast",
-            "specialization": {
-                "specification": {
-                    "valueExpression": null,
-                    "expressionBody": ["foo8"],
-                    "type": "OpaqueExpression"
-                },
-                "type": "Constraint"
-            },
-            "editable": true,
-        }]
-    },
-    "workspace2": {
-        "deletedElements": [{
             "qualifiedName": "/europa/JW_TEST/notInThePast",
             "sysmlid": "notInThePast",
             "editable": true,
@@ -35,12 +17,29 @@
                 },
                 "type": "Constraint"
             }
+        }]
+    },
+    "workspace2": {
+        "deletedElements": [{
+            "name": "notInThePast",
+            "owner": "123456",
+            "documentation": "",
+            "sysmlid": "notInThePast",
+            "specialization": {
+                "specification": {
+                    "valueExpression": null,
+                    "expressionBody": ["foo8"],
+                    "type": "OpaqueExpression"
+                },
+                "type": "Constraint"
+            },
+            "editable": true,
         }],
         "addedElements": [],
         "conflictedElements": [],
         "updatedElements": [],
-        "qualifiedName": "master",
         "name": "master",
+        "qualifiedName": "master",
         "movedElements": []
     }
 }
