@@ -17,12 +17,10 @@
                 "isDerived": false,
                 "value": [
                     {
-                        "valueExpression": null,
                         "type": "LiteralReal",
                         "double": 5
                     },
                     {
-                        "valueExpression": null,
                         "type": "LiteralReal",
                         "double": 5.39
                     }
@@ -44,12 +42,10 @@
                 "isDerived": false,
                 "value": [
                     {
-                        "valueExpression": null,
                         "type": "LiteralReal",
                         "double": 15
                     },
                     {
-                        "valueExpression": null,
                         "type": "LiteralReal",
                         "double": 15.39
                     }

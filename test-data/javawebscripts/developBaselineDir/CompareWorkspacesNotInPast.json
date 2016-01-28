@@ -11,7 +11,7 @@
             "owner": "123456",
             "specialization": {
                 "specification": {
-                    "valueExpression": null,
+                    
                     "expressionBody": ["foo8"],
                     "type": "OpaqueExpression"
                 },
@@ -27,7 +27,7 @@
             "sysmlid": "notInThePast",
             "specialization": {
                 "specification": {
-                    "valueExpression": null,
+                    
                     "expressionBody": ["foo8"],
                     "type": "OpaqueExpression"
                 },

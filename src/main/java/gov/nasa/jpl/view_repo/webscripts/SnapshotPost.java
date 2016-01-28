@@ -488,6 +488,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
         docBookMgr = new DocBookWrapper( snapshotName, snapshotNode, false );
         try {
             DBBook docBook = createDocBook( product );
+            docBook.setInstLogo("http://div27.jpl.nasa.gov/2740/files/logos/jpl_logo%28220x67%29.jpg");
             //docBook.setRemoveBlankPages( true );
 
             View productView = product.getView();

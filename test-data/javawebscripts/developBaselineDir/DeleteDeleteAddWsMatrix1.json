@@ -15,7 +15,7 @@
                 "isSlot": false,
                 "isDerived": false,
                 "value": [{
-                    "valueExpression": null,
+                    
                     "string": "on a shoe",
                     "type": "LiteralString"
                 }],

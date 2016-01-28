@@ -16,6 +16,15 @@
     },
     
     {
+        "sysmlid" : "dateFromTimestamp",
+        "name" : "dateFromTimestamp",
+        "owner" : "operations",
+        "specialization" : {
+            "type" : "Operation"
+        }
+    },
+    
+    {
         "sysmlid" : "sum",
         "name" : "sum",
         "owner" : "operations",
@@ -277,6 +286,15 @@
     },
     
     {
+        "sysmlid" : "max",
+        "name" : "max",
+        "owner" : "operations",
+        "specialization" : {
+            "type" : "Operation"
+        }
+    },
+    
+    {
         "sysmlid" : "Max",
         "name" : "Max",
         "owner" : "operations",
@@ -288,6 +306,33 @@
     {
         "sysmlid" : "Name",
         "name" : "Name",
+        "owner" : "operations",
+        "specialization" : {
+            "type" : "Operation"
+        }
+    },
+
+    {
+        "sysmlid" : "Value",
+        "name" : "Value",
+        "owner" : "operations",
+        "specialization" : {
+            "type" : "Operation"
+        }
+    },
+
+    {
+        "sysmlid" : "Id",
+        "name" : "Id",
+        "owner" : "operations",
+        "specialization" : {
+            "type" : "Operation"
+        }
+    },
+
+    {
+        "sysmlid" : "Type",
+        "name" : "Type",
         "owner" : "operations",
         "specialization" : {
             "type" : "Operation"

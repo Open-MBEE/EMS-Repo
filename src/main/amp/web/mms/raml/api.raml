@@ -159,7 +159,18 @@ traits:
           description: If true, returns a simple json
           type: boolean
           required: false
-        
+  - formattable:
+      queryParameters:
+        format:
+          description: May be passed k or json.
+          type: string
+          required: false
+  - affectable:
+      queryParameters:
+        affectedIds:
+          description: If true, the request returns ids of elements affected by an element, E, in E's json.
+          type: boolean
+          required: false
           
 resourceTypes:
   - readCollection:
@@ -168,7 +179,7 @@ resourceTypes:
       description: Read operations for <<resourcePathName>>
       get:
           #is: [recursable, searchable, sliceable]
-          is: [recursable, sliceable] # Not searchable yet
+          is: [recursable, sliceable] # Not searchable or formattable, yet
           description: Read operation for <<resourcePathName>>
           responses:
               200:
@@ -316,6 +327,12 @@ resourceTypes:
           description: Get the version history of specified element.
           body:
             schema: history
+#    /k:
+#      type: collection
+#      /{elementId}:
+#        #type: collection
+#        get:
+#          description: get K text for the element specified by the Sysml ID 
     /configurations:
       #type: collection
       get:

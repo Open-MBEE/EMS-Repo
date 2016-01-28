@@ -22,7 +22,6 @@
                     "isSlot": false,
                     "isDerived": false,
                     "value": [{
-                        "valueExpression": null,
                         "string": "dlam_string",
                         "type": "LiteralString"
                     }],
@@ -44,7 +43,6 @@
             "documentation": "x is x",
             "specialization": {
                 "value": [{
-                    "valueExpression": null,
                     "string": "the x value",
                     "type": "LiteralString"
                 }],

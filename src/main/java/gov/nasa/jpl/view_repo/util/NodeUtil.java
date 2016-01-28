@@ -100,10 +100,15 @@ public class NodeUtil {
         DOCUMENTATION( "@sysml\\:documentation:\"" ),
         NAME( "@sysml\\:name:\"" ), CM_NAME( "@cm\\:name:\"" ),
         ID( "@sysml\\:id:\"" ), STRING( "@sysml\\:string:\"" ),
-        BODY( "@sysml\\:body:\"" ), CHECKSUM( "@view\\:cs:\"" ),
-        WORKSPACE( "@ems\\:workspace:\"" ),
-        WORKSPACE_NAME( "@ems\\:workspace_name:\"" ),
-        OWNER( "@ems\\:owner:\"" ), ASPECT( "ASPECT:\"" ), TYPE( "TYPE:\"" );
+        BODY( "@sysml\\:body:\"" ),
+        PROPERTY_TYPE( "@sysml\\:propertyType:\"" ),
+        VIEW2VIEW( "@view2\\:view2view:\"" ),
+        CHECKSUM( "@view\\:cs:\"" ),
+        WORKSPACE("@ems\\:workspace:\"" ),
+        WORKSPACE_NAME("@ems\\:workspace_name:\"" ),
+        OWNER("@ems\\:owner:\"" ),
+        ASPECT("ASPECT:\""),
+        TYPE("TYPE:\"");
 
         public String prefix;
 
@@ -401,6 +406,12 @@ public class NodeUtil {
                                                      + nodeRef + ", "
                                                      + propertyName + ", "
                                                      + value + ")" );
+        if ( logger.isDebugEnabled() ) {
+            if ( propertyName.contains( "roperty" ) ) {
+                logger.debug( "propertyCachePut(" + nodeRef + ", " + propertyName
+                                    + ", " + value + ")" );
+            }
+        }
         if ( value == null ) value = NULL_OBJECT;
         return Utils.put( propertyCache, nodeRef, propertyName, value );
     }
@@ -452,7 +463,7 @@ public class NodeUtil {
             return null;
         }
         Object o = Utils.get( propertyCache, nodeRef, propertyName );
-        if ( logger.isTraceEnabled() ) logger.trace( "propertyCachePut("
+        if ( logger.isTraceEnabled() ) logger.trace( "propertyCacheGet("
                                                      + nodeRef + ", "
                                                      + propertyName + ", " + o
                                                      + ")" );
@@ -760,7 +771,7 @@ public class NodeUtil {
         Date mod = null;
         // Only cache json with a modified date so that we know when to update
         // it.
-        if ( modString != null ) {
+        if ( !Utils.isNullOrEmpty(modString)) {
             mod = TimeUtils.dateFromTimestamp( modString );
             if ( mod != null && jsonStringCache.containsKey( json ) ) {
                 Pair< Date, String > p =
@@ -1152,6 +1163,7 @@ public class NodeUtil {
     public static ArrayList< NodeRef >
             resultSetToNodeRefList( ResultSet results ) {
         ArrayList< NodeRef > nodes = new ArrayList< NodeRef >();
+        if ( results == null ) return nodes;
         for ( ResultSetRow row : results ) {
             if ( row.getNodeRef() != null ) {
                 nodes.add( row.getNodeRef() );
@@ -1225,7 +1237,7 @@ public class NodeUtil {
         String queryPattern = prefix + name + "\"";
         results = luceneSearch( queryPattern, services );
         ArrayList< NodeRef > resultList = resultSetToNodeRefList( results );
-        results.close();
+        if ( results != null ) results.close();
         return resultList;
     }
 
@@ -1329,6 +1341,17 @@ public class NodeUtil {
                                    dateTime, justFirst, optimisticJustFirst,
                                    exactMatch, services, includeDeleted,
                                    siteName );
+    }
+
+    public static ArrayList< NodeRef > findNodeRefsByType( String specifier,
+                                                           String prefix,
+                                                           QueryContext ctxt ) {
+        return findNodeRefsByType( specifier, prefix, ctxt.ignoreWorkspaces,
+                                   ctxt.workspace, ctxt.onlyThisWorkspace,
+                                   ctxt.dateTime, ctxt.justFirst, true,
+                                   ctxt.exactMatch,
+                                   ctxt.serviceContext.services,
+                                   ctxt.includeDeleted, ctxt.siteName );
     }
 
     public static ArrayList< NodeRef >
@@ -3124,6 +3147,10 @@ public class NodeUtil {
     public static NodeRef findNodeRefByAlfrescoId( String id,
                                                    boolean includeDeleted,
                                                    boolean giveError ) {
+        // Protect the lucene search from some of the common bad input since
+        // lucene can fail with an exception.
+        if ( id.startsWith( "_" ) ) return null;
+        if ( id.length() < 25 ) return null;
         if ( !id.contains( "://" ) ) {
             id = "workspace://SpacesStore/" + id;
         }
@@ -3306,10 +3333,14 @@ public class NodeUtil {
         QName qName =
                 oIsString ? NodeUtil.createQName( keyStr, services )
                          : (QName)key;
-        Object result;
+        Object result = null;
         if ( useFoundationalApi ) {
             if ( services == null ) services = NodeUtil.getServices();
-            result = services.getNodeService().getProperty( node, qName );
+            try {
+                result = services.getNodeService().getProperty( node, qName );
+            } catch ( Exception e ) {
+                e.printStackTrace();
+            }
             if ( logger.isTraceEnabled() ) logger.trace( "^ cache miss!  getNodeProperty("
                                                          + node
                                                          + ", "
@@ -4696,6 +4727,7 @@ public class NodeUtil {
     }
     
     public static EmsScriptNode getNodeFromPostgresNode( Node pgnode ) {
+        if ( pgnode == null ) return null;
         return new EmsScriptNode( new NodeRef( pgnode.getNodeRefId() ),
                                   services, null );
     }
@@ -4979,6 +5011,13 @@ public class NodeUtil {
      */
     public static void ppAddQualifiedNameId2Json( WebScriptRequest req,
                                                   Map< String, Object > model ) {
+        String origUser = AuthenticationUtil.getRunAsUser();
+        AuthenticationUtil.setRunAsUser("admin");
+        ppAddQualifiedNameId2JsonImpl( req, model );
+        if ( origUser != null) AuthenticationUtil.setRunAsUser(origUser);
+    }
+    public static void ppAddQualifiedNameId2JsonImpl( WebScriptRequest req,
+                                                      Map< String, Object > model ) {
         if ( !doPostProcessQualified ) return;
 
         if ( !model.containsKey( "res" ) ) return;
@@ -5113,7 +5152,9 @@ public class NodeUtil {
         String qname = "/" + childName;
         String qid = "/" + childId;
         String site = null;
-        while ( child2owner.containsKey( childId ) ) {
+        Set<String> seen = new HashSet<String>();
+        while ( child2owner.containsKey( childId ) && !seen.contains( childId ) ) {
+            seen.add( childId );
             childId = child2owner.get( childId );
             childName = id2name.get( childId );
             qname = "/" + childName + qname;
@@ -5154,6 +5195,7 @@ public class NodeUtil {
             ids.addAll( id2name.keySet() );
             for ( String id : ids ) {
                 EmsScriptNode node = null;
+                boolean useDb = false;
                 if ( NodeUtil.doGraphDb && wsId.equals( "master" )
                      && dateTime == null ) {
                     PostgresHelper pgh = new PostgresHelper( wsId );
@@ -5162,12 +5204,14 @@ public class NodeUtil {
                         node =
                                 NodeUtil.getNodeFromPostgresNode( pgh.getNodeFromSysmlId( id ) );
                         pgh.close();
+                        useDb = true;
                     } catch ( ClassNotFoundException e ) {
                         e.printStackTrace();
                     } catch ( SQLException e ) {
-                        e.printStackTrace();
+                    	e.printStackTrace();
                     }
-                } else {
+                } 
+                if(!useDb) {
                     WorkspaceNode ws =
                             WorkspaceNode.getWorkspaceFromId( wsId, services,
                                                               null, null, null );
@@ -5183,6 +5227,7 @@ public class NodeUtil {
         // for all owners, recurse to build up all the owner paths
         for ( String owner : owners ) {
             if ( !visitedOwners.contains( owner ) ) {
+            	boolean useDb = false;
                 if ( NodeUtil.doGraphDb && wsId.equals( "master" )
                      && dateTime == null ) {
                     PostgresHelper pgh = new PostgresHelper( wsId );
@@ -5192,17 +5237,81 @@ public class NodeUtil {
                                            owner2children, child2owner,
                                            visitedOwners, wsId, dateTime );
                         pgh.close();
+                        useDb = true;
                     } catch ( ClassNotFoundException e ) {
                         e.printStackTrace();
                     } catch ( SQLException e ) {
                         e.printStackTrace();
                     }
-                } else {
+                } 
+                if(!useDb) {
+                    //ppRecurseOwnersOriginal
+//                    ppRecurseOwnersNew( owner, id2name, id2siteName,
+//                                             owner2children, child2owner,
+//                                             visitedOwners, wsId, dateTime );
                     ppRecurseOwnersOriginal( owner, id2name, id2siteName,
-                                             owner2children, child2owner,
-                                             visitedOwners, wsId, dateTime );
+                            owner2children, child2owner,
+                            visitedOwners, wsId, dateTime );
                 }
             }
+        }
+    }
+
+    /**
+     * Post processing utility for traversing owners using graphDb
+     */
+    private static void
+           ppRecurseOwnersNew( String sysmlId, //PostgresHelper pgh,
+                               Map< String, String > id2name,
+                               Map< String, String > id2siteName,
+                               Map< String, Set< String >> owner2children,
+                               Map< String, String > child2owner,
+                               Set< String > visitedOwners, String wsId,
+                               Date dateTime ) {
+        Status status = new Status();
+        WorkspaceNode ws =
+                WorkspaceNode.getWorkspaceFromId( wsId, services, null, null,
+                                                  null );
+        if ( status.getCode() != HttpServletResponse.SC_OK ) { return; }
+        EmsScriptNode node =
+                findScriptNodeById( sysmlId, ws, dateTime, false, services,
+                                    null );
+//        EmsScriptNode node = 
+//                NodeUtil.getNodeFromPostgresNode( pgh.getNodeFromSysmlId( sysmlId ) );
+        String sysmlName = node.getSysmlName();
+
+        id2name.put( sysmlId, sysmlName );
+        Boolean isSite = (Boolean)node.getProperty( Acm.ACM_IS_SITE );
+        if ( isSite != null && isSite ) {
+            id2siteName.put( sysmlId, sysmlName );
+        }
+
+        EmsScriptNode owner = node.getOwningParent( dateTime, ws, true, false );
+
+        if ( exists( owner ) && !"Models".equals(owner.getSysmlId()) ) {
+//        Set< Pair< String, String > > parents =
+//                pgh.getImmediateParents( sysmlId, DbEdgeTypes.REGULAR );
+//        if ( parents.size() > 0 ) {
+//            for ( Pair< String, String > parent : parents ) {
+//                String parentId = parent.first;
+            String parentId = owner.getSysmlId();
+                if ( !owner2children.containsKey( parentId ) ) {
+                    owner2children.put( parentId, new HashSet< String >() );
+                }
+                owner2children.get( parentId ).add( sysmlId );
+                child2owner.put( sysmlId, parentId );
+                if ( !visitedOwners.contains( parentId ) ) {
+                    ppRecurseOwnersNew( parentId, //pgh,
+                                        id2name, id2siteName,
+                                       owner2children, child2owner,
+                                       visitedOwners, wsId, dateTime );
+                }
+                visitedOwners.add( parentId );
+//            }
+        } else {
+            // no parent, so lets look for top level site
+            ppAddSiteOwnerInfo( sysmlId, node, id2name, id2siteName,
+                                owner2children, child2owner, visitedOwners );
         }
     }
 
@@ -5326,7 +5435,7 @@ public class NodeUtil {
                                 Set< String > visitedOwners ) {
         if ( node == null ) return;
         EmsScriptNode parent = node.getParent();
-        while ( !parent.getName().equals( "Sites" ) || parent == null ) {
+        while ( parent != null && !parent.getName().equals( "Sites" ) ) {
             node = parent;
             parent = node.getParent();
         }

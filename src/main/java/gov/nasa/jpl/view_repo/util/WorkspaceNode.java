@@ -71,7 +71,7 @@ public class WorkspaceNode extends EmsScriptNode {
 
     @Override
     public WorkspaceNode getWorkspace() {
-        log( "Warning! calling getWorkspace on a workspace! " + getName() );
+        if ( logger.isDebugEnabled() ) logDebug( "Warning! calling getWorkspace on a workspace! " + getName() );
         return this;
     }
 
@@ -320,7 +320,7 @@ public class WorkspaceNode extends EmsScriptNode {
 
     public void delete( boolean deleteChildWorkspaces ) {
         if ( !checkPermissions( PermissionService.WRITE, getResponse(), getStatus() ) ) {
-            log( "no write permissions to delete workpsace " + getName() );
+            if ( logger.isDebugEnabled() ) logDebug( "no write permissions to delete workpsace " + getName() );
             return;
         }
 
@@ -370,7 +370,7 @@ public class WorkspaceNode extends EmsScriptNode {
                                                        getResponse(),
                                                        getStatus() );
             if ( !NodeUtil.exists( childWs ) ) {
-                log( "trying to delete non-existent child workspace " +
+                if ( logger.isDebugEnabled() ) logDebug( "trying to delete non-existent child workspace " +
                      ( childWs == null ? "" : "," + childWs.getName() + ", " ) +
                      " from parent, " + getName() );
             } else {

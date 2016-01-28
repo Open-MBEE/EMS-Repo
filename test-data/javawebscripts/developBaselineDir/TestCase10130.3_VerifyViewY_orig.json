@@ -1,0 +1,34 @@
+{"elements": [{
+    "owner": "holding_bin_no_site_no_project",
+    "creator": "admin",
+    "read": "2016-01-07T14:50:52.709-0800",
+    "isMetatype": false,
+    "created": "Thu Jan 07 14:31:01 PST 2016",
+    "editable": true,
+    "qualifiedName": "/no_site/no_site_no_project/holding_bin/View Y",
+    "modifier": "admin",
+    "documentation": "",
+    "siteCharacterizationId": "no_site",
+    "sysmlid": "MMS_1450390431247_8a4b76d2-394c-4569-9abe-5c51dc4b0812",
+    "nodeRefId": "versionStore://version2Store/52144ccd-13b7-4acf-a5c3-0878530e4cb8",
+    "versionedRefId": "versionStore://version2Store/52144ccd-13b7-4acf-a5c3-0878530e4cb8",
+    "appliedMetatypes": [
+        "_17_0_1_232f03dc_1325612611695_581988_21583",
+        "_9_0_62a020a_1105704885343_144138_7929"
+    ],
+    "qualifiedId": "/no_site/no_site_no_project/holding_bin_no_site_no_project/MMS_1450390431247_8a4b76d2-394c-4569-9abe-5c51dc4b0812",
+    "name": "View Y",
+    "modified": "2016-01-07T14:31:02.293-0800",
+    "specialization": {
+        "contents": {
+            "valueExpression": null,
+            "type": "Expression",
+            "operand": []
+        },
+        "childrenViews": [],
+        "type": "View",
+        "displayedElements": [],
+        "allowedElements": []
+    }
+}]}
+200

@@ -11,6 +11,7 @@ import org.json.JSONObject;
 
 import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
+import gov.nasa.jpl.view_repo.util.NodeUtil;
 import sysml.view.Viewable;
 
 /**
@@ -54,6 +55,13 @@ public class Text implements Viewable< EmsScriptNode > {
     @Override
     public Collection< EmsScriptNode > getDisplayedElements() {
         return Utils.getEmptyList();
+    }
+
+    @Override
+    public String toString() {
+        JSONObject jo = toViewJson(null);
+        if ( jo != null ) return NodeUtil.jsonToString( jo );
+        return super.toString();
     }
 
 }

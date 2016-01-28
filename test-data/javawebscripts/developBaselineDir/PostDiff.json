@@ -1,5 +1,4 @@
 {
-    "sequence": 54,
     "workspace1": {
         "name": "ws2",
         "qualifiedName": "master/ws2",
@@ -9,14 +8,13 @@
             "creator": "admin",
             "modifier": "admin",
             "name": "402",
-            "documentation": "4to",
             "owner": "401",
+            "documentation": "4to",
             "specialization": {
                 "propertyType": null,
                 "isSlot": false,
                 "isDerived": false,
                 "value": [{
-                    "valueExpression": null,
                     "string": "dlam_string",
                     "type": "LiteralString"
                 }],
@@ -28,15 +26,14 @@
         "deletedElements": [],
         "addedElements": [{
             "modifier": "admin",
-            "owner": "holding_bin_no_site_no_project",
             "documentation": "x is x",
             "sysmlid": "newElement",
+            "owner": "holding_bin_no_site_no_project",
             "specialization": {
                 "propertyType": null,
                 "isSlot": false,
                 "isDerived": false,
                 "value": [{
-                    "valueExpression": null,
                     "string": "the element added to ws1",
                     "type": "LiteralString"
                 }],
@@ -52,14 +49,13 @@
             "creator": "admin",
             "modifier": "admin",
             "name": "402",
-            "documentation": "x is x",
             "owner": "401",
+            "documentation": "x is x",
             "specialization": {
                 "propertyType": null,
                 "isSlot": false,
                 "isDerived": false,
                 "value": [{
-                    "valueExpression": null,
                     "string": "the x value",
                     "type": "LiteralString"
                 }],

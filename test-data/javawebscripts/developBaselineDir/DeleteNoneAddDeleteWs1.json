@@ -14,7 +14,7 @@
                 "isSlot": false,
                 "isDerived": false,
                 "value": [{
-                    "valueExpression": null,
+                    
                     "string": "this is it",
                     "type": "LiteralString"
                 }],

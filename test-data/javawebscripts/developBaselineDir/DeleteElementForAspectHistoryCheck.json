@@ -12,7 +12,7 @@
                 "isSlot": false,
                 "isDerived": false,
                 "value": [{
-                    "valueExpression": null,
+                    
                     "string": "the p value",
                     "type": "LiteralString"
                 }],

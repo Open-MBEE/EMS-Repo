@@ -198,6 +198,13 @@ public class ModelGet extends AbstractJavaWebScript {
 			if (elementsJson.length() > 0) {
 				top.put("elements", elementsJson);
 			}
+//            boolean evaluate = getBooleanArg( req, "evaluate", false );
+//            WorkspaceNode ws = getWorkspace( req );
+//            if ( evaluate ) {
+//                Set< EmsScriptNode > elementSet = new HashSet<EmsScriptNode>( elementsFound.values() );
+//                Map< Object, Object > r = evaluate(elementSet , ws);
+//                top
+//            }
 
 			if (!Utils.isNullOrEmpty(response.toString()))
 				top.put("message", response.toString());
@@ -256,6 +263,7 @@ public class ModelGet extends AbstractJavaWebScript {
 			Date dateTime = TimeUtils.dateFromTimestamp(timestamp);
 			boolean connected = getBooleanArg(req, "connected", false);
 			boolean evaluate = getBooleanArg(req, "evaluate", false);
+            boolean affected = getBooleanArg(req, "affected", false);
 			String relationship = req.getParameter("relationship");
 
 			WorkspaceNode workspace = getWorkspace(req);
@@ -318,7 +326,7 @@ public class ModelGet extends AbstractJavaWebScript {
 												// this be false?
 			
 			handleElements(workspace, dateTime, includeQualified, false, evaluate,
-					top, checkReadPermission);
+					affected, top, checkReadPermission);
 		} catch (JSONException e) {
 			e.printStackTrace();
 		} catch (SQLException e) {
@@ -338,24 +346,31 @@ public class ModelGet extends AbstractJavaWebScript {
 	private Long getDepthFromRequest(WebScriptRequest req) {
 		Long depth = null;
 		String depthParam = req.getParameter("depth");
+        // recurse default is false
+        boolean recurse = getBooleanArg( req, "recurse", false );
+
 		if (depthParam != null) {
 			try {
-				depth = Long.parseLong(req.getParameter("depth"));
+                depth = Long.parseLong( depthParam );
 			} catch (NumberFormatException nfe) {
-				// don't do any recursion, ignore the depth
-				log(Level.WARN, HttpServletResponse.SC_BAD_REQUEST,
-						"Bad depth specified, returning depth 0");
+                if ( !recurse ) {
+                    // don't do any recursion, ignore the depth
+                    log(Level.WARN, HttpServletResponse.SC_BAD_REQUEST,
+                        "Bad depth specified: " + depthParam + ", returning depth 0" );
+                }
 			}
 		}
 
-		// recurse default is false
-		boolean recurse = getBooleanArg(req, "recurse", false);
 		// for backwards compatiblity convert recurse to infinite depth (this
-		// overrides
-		// any depth setting)
+        // overrides any depth setting)
 		if (recurse) {
-			depth = new Long(-1);
-		}
+            // If depth wasn't specified, it will be null.
+            if ( depth == null ) { // || 
+//                 ( depth <= 0 && ( Utils.isNullOrEmpty( depthParam ) ||
+//                                   !depthParam.trim().equals( "0" ) ) ) ) {
+                depth = new Long(-1);
+            }
+        }
 
 		if (depth == null) {
 			depth = new Long(0);
@@ -522,8 +537,9 @@ public class ModelGet extends AbstractJavaWebScript {
 		visited.add(sysmlId);
 		if (!elementsFound.containsKey(sysmlId)) {
 			// dont add reified packages
-			if (!rootName.endsWith("_pkg")
-					&& !root.isOwnedValueSpec(dateTime, workspace)) {
+            if ( maxDepth == null || maxDepth == 0 ||
+                 ( !rootName.endsWith( "_pkg" ) &&
+                   !root.isOwnedValueSpec( dateTime, workspace ) ) ) {
 				elementsFound.put(sysmlId, root);
 			}
 		}
@@ -584,9 +600,12 @@ public class ModelGet extends AbstractJavaWebScript {
 	 * @throws JSONException
 	 */
 	protected void handleElements(WorkspaceNode ws, Date dateTime,
-			boolean includeQualified, boolean isIncludeDocument, boolean evaluate, JSONObject top,
+			boolean includeQualified, boolean isIncludeDocument, boolean evaluate, boolean affected, JSONObject top,
 			boolean checkPermission) throws JSONException {
 		final Map<EmsScriptNode, JSONObject> elementsJsonMap = new LinkedHashMap<EmsScriptNode, JSONObject>();
+        if( affected ){
+            addAffectedElements(ws, dateTime);
+        }
 		for (String id : elementsFound.keySet()) {
 			EmsScriptNode node = elementsFound.get(id);
 
@@ -611,6 +630,29 @@ public class ModelGet extends AbstractJavaWebScript {
 				// TODO Auto-generated catch block
 				// e.printStackTrace();
 			}
+		}
+	}
+
+	protected void addAffectedElements(WorkspaceNode ws, Date dateTime) {
+		for(  String id : new ArrayList<String>( elementsFound.keySet() ) ){
+		    EmsScriptNode value= elementsFound.get(id);
+		    if(value != null){
+                List< NodeRef > nodeRefs =
+                        value.getAffectedElementsRecursive( false, false,
+                                                            dateTime, ws,
+                                                            false, true, true,
+                                                            false, null );
+		    	for(NodeRef ref: nodeRefs){
+		    		EmsScriptNode node = new EmsScriptNode(ref, services);
+		    		String nodeId = node.getSysmlId();
+		    		if(elementsFound.containsKey(nodeId) ){
+		    			continue;
+		    		}
+		    		else{
+		    			elementsFound.put(nodeId, node);
+		    		}
+		    	}
+		    }
 		}
 	}
 

@@ -91,11 +91,11 @@ public class ViewPost extends AbstractJavaWebScript {
         try {
             JSONObject json = //JSONObject.make( 
                     (JSONObject)req.parseContent();// );
-			updateViews(json, workspace);
-		} catch (JSONException e) {
-			log(Level.ERROR, HttpServletResponse.SC_BAD_REQUEST, "JSON parse exception: %s", e.getMessage());
-			e.printStackTrace();
-		}
+            updateViews(json, workspace);
+        } catch (JSONException e) {
+            log(Level.ERROR, HttpServletResponse.SC_BAD_REQUEST, "JSON parse exception: %s", e.getMessage());
+            e.printStackTrace();
+        }
 
         status.setCode(responseStatus.getCode());
 		model.put("res", createResponseJson());
@@ -104,7 +104,7 @@ public class ViewPost extends AbstractJavaWebScript {
 		return model;
 	}
 
-	
+
 	private void updateViews(JSONObject jsonObject, WorkspaceNode workspace) throws JSONException {
 	    Date start = new Date();
 	    Map<String, EmsScriptNode> elements = new HashMap<String, EmsScriptNode>();

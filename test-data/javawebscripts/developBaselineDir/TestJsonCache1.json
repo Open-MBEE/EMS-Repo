@@ -6,11 +6,10 @@
     "creator": "admin",
     "modifier": "admin",
     "name": "jsonTest1",
-    "owner": "123456",
     "documentation": "",
+    "owner": "123456",
     "specialization": {
         "specification": {
-            "valueExpression": null,
             "integer": 1,
             "type": "LiteralInteger"
         },

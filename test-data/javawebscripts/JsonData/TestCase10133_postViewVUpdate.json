@@ -1,0 +1,24 @@
+{"elements": [{
+    "specialization": {
+        "childViews": [
+            {
+                "id": "MMS_1450390431247_8a4b76d2-394c-4569-9abe-5c51dc4b0812",
+                "aggregation": "COMPOSITE"
+            },
+            {
+                "id": "MMS_1450390431247_8a4b76d2-394c-4569-9abe-5c51dc4b0813",
+                "aggregation": "COMPOSITE"
+            },
+            {
+                "id": "MMS_1450390431247_8a4b76d2-394c-4569-9abe-5c51dc4b0811",
+                "aggregation": "COMPOSITE"
+            }
+        ],
+        "type": "View",
+        "contents": {"type": "Expression"}
+    },
+    "owner": "MMS_1450390431247_8a4b76d2-394c-4569-9abe-5c51dc4b0711",
+    "name": "VIEW V",
+    "isMetatype": false,
+    "sysmlid":"MMS_1450390431247_8a4b76d2-394c-4569-9abe-5c51dc4b0814"
+}]}

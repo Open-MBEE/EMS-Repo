@@ -1,40 +1,41 @@
-{
-    "message": "[WARNING]: The type supplied Conform is different than the stored type DirectedRelationship\n[WARNING]: The type supplied Untyped is different than the stored type Element\n",
-    "elements": [
-        {
-            "modifier": "admin",
-            "qualifiedId": "/europa/123456/aspect_history_zzz/directed_relationship_zzz",
-            "siteCharacterizationId": "europa",
-            "created": "Tue Sep 22 09:44:02 PDT 2015",
-            "qualifiedName": "/europa/JW_TEST2/null/null",
-            "sysmlid": "directed_relationship_zzz",
-            "documentation": "d is d",
-            "owner": "aspect_history_zzz",
-            "read": "2015-09-22T09:44:03.581-0700",
-            "specialization": {
-                "source": null,
-                "target": null,
-                "type": "Conform"
-            },
-            "editable": true,
-            "creator": "admin",
-            "modified": "2015-09-22T09:44:03.412-0700"
-        },
-        {
-            "modifier": "admin",
-            "qualifiedId": "/europa/123456/aspect_history_zzz/element_zzz",
-            "siteCharacterizationId": "europa",
-            "created": "Tue Sep 22 09:44:02 PDT 2015",
-            "qualifiedName": "/europa/JW_TEST2/null/null",
-            "sysmlid": "element_zzz",
-            "documentation": "e is e",
-            "owner": "aspect_history_zzz",
-            "read": "2015-09-22T09:44:03.586-0700",
-            "specialization": {"type": "Untyped"},
-            "editable": true,
-            "creator": "admin",
-            "modified": "2015-09-22T09:44:03.451-0700"
+{"elements": [
+    {
+        "owner": "aspect_history_zzz",
+        "creator": "admin",
+        "read": "2016-01-07T12:38:24.388-0800",
+        "created": "Thu Jan 07 12:10:09 PST 2016",
+        "editable": true,
+        "qualifiedName": "/europa/JW_TEST2/null/null",
+        "modifier": "admin",
+        "documentation": "d is d",
+        "siteCharacterizationId": "europa",
+        "sysmlid": "directed_relationship_zzz",
+        "nodeRefId": "workspace://SpacesStore/20d17c40-d7c3-46eb-8051-1af2c1728cdd",
+        "versionedRefId": "versionStore://version2Store/8b495b64-a36c-4911-8a63-5612127958b3",
+        "qualifiedId": "/europa/123456/aspect_history_zzz/directed_relationship_zzz",
+        "modified": "2016-01-07T12:10:11.884-0800",
+        "specialization": {
+            "source": null,
+            "type": "Conform",
+            "target": null
         }
-    ]
-}
+    },
+    {
+        "owner": "aspect_history_zzz",
+        "creator": "admin",
+        "read": "2016-01-07T12:38:24.391-0800",
+        "created": "Thu Jan 07 12:10:09 PST 2016",
+        "editable": true,
+        "qualifiedName": "/europa/JW_TEST2/null/null",
+        "modifier": "admin",
+        "documentation": "e is e",
+        "siteCharacterizationId": "europa",
+        "sysmlid": "element_zzz",
+        "nodeRefId": "workspace://SpacesStore/4af6d096-fff8-48d2-ad74-a35ad7419b36",
+        "versionedRefId": "versionStore://version2Store/80233c0a-786a-4a12-9c80-b8be9e7399a2",
+        "qualifiedId": "/europa/123456/aspect_history_zzz/element_zzz",
+        "modified": "2016-01-07T12:10:11.844-0800",
+        "specialization": {"type": "Untyped"}
+    }
+]}
 200

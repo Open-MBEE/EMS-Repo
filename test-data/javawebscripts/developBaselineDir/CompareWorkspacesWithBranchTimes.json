@@ -15,7 +15,7 @@
                     "isDerived": false,
                     "isSlot": false,
                     "value": [{
-                        "valueExpression": null,
+                        
                         "string": "dlam_string",
                         "type": "LiteralString"
                     }],
@@ -34,7 +34,7 @@
                     "isSlot": false,
                     "isDerived": false,
                     "value": [{
-                        "valueExpression": null,
+                        
                         "string": "dlam_string",
                         "type": "LiteralString"
                     }],
@@ -53,7 +53,7 @@
                     "isSlot": false,
                     "isDerived": false,
                     "value": [{
-                        "valueExpression": null,
+                        
                         "string": "dlam_string",
                         "type": "LiteralString"
                     }],
@@ -79,7 +79,7 @@
                     "isSlot": false,
                     "isDerived": false,
                     "value": [{
-                        "valueExpression": null,
+                        
                         "string": "the y value",
                         "type": "LiteralString"
                     }],
@@ -99,7 +99,7 @@
                     "isSlot": false,
                     "isDerived": false,
                     "value": [{
-                        "valueExpression": null,
+                        
                         "string": "dlam_string",
                         "type": "LiteralString"
                     }],
@@ -154,7 +154,7 @@
                     "isSlot": false,
                     "isDerived": false,
                     "value": [{
-                        "valueExpression": null,
+                        
                         "string": "dlam_string",
                         "type": "LiteralString"
                     }],
@@ -173,7 +173,7 @@
                     "isSlot": false,
                     "isDerived": false,
                     "value": [{
-                        "valueExpression": null,
+                        
                         "string": "dlam_string",
                         "type": "LiteralString"
                     }],
@@ -192,7 +192,7 @@
                     "isSlot": false,
                     "isDerived": false,
                     "value": [{
-                        "valueExpression": null,
+                        
                         "string": "dlam_string",
                         "type": "LiteralString"
                     }],
@@ -247,7 +247,7 @@
                     "isSlot": false,
                     "isDerived": false,
                     "value": [{
-                        "valueExpression": null,
+                        
                         "string": "dlam_string",
                         "type": "LiteralString"
                     }],
@@ -266,7 +266,7 @@
                 "isDerived": false,
                 "isSlot": false,
                 "value": [{
-                    "valueExpression": null,
+                    
                     "string": "the y value",
                     "type": "LiteralString"
                 }],
@@ -284,7 +284,7 @@
                 "isSlot": false,
                 "isDerived": false,
                 "value": [{
-                    "valueExpression": null,
+                    
                     "string": "the z value",
                     "type": "LiteralString"
                 }],
@@ -317,7 +317,7 @@
                 "owner": "302",
                 "specialization": {
                     "value": [{
-                        "valueExpression": null,
+                        
                         "string": "dlam_string modified",
                         "type": "LiteralString"
                     }],

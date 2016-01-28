@@ -8,14 +8,13 @@
         "creator": "admin",
         "modifier": "admin",
         "name": "childOfParentToDelete2",
-        "owner": "parentToDelete2",
         "documentation": "Child",
+        "owner": "parentToDelete2",
         "specialization": {
             "propertyType": null,
-            "isDerived": false,
             "isSlot": false,
+            "isDerived": false,
             "value": [{
-                "valueExpression": null,
                 "string": "gg_string3",
                 "type": "LiteralString"
             }],
