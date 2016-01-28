@@ -239,7 +239,7 @@ public class ModelGet extends AbstractJavaWebScript {
 	 * @param top
 	 * @return
 	 */
-	private JSONArray handleRequest(WebScriptRequest req, final JSONObject top, boolean useDb) {
+	protected JSONArray handleRequest(WebScriptRequest req, final JSONObject top, boolean useDb) {
 		// REVIEW -- Why check for errors here if validate has already been
 		// called? Is the error checking code different? Why?
 		try {
@@ -611,8 +611,9 @@ public class ModelGet extends AbstractJavaWebScript {
 
 			if (!checkPermission
 					|| checkPermissions(node, PermissionService.READ)) {
-				JSONObject json = node.toJSONObject(ws, dateTime,
-						includeQualified, isIncludeDocument, elementProperties.get(id));
+			    
+			    JSONObject json = jobOrEle(node, ws, dateTime, id, includeQualified, isIncludeDocument);
+			    
 				elements.put(json);
 				elementsJsonMap.put(node, json);
 			} // TODO -- REVIEW -- Warning if no permissions?
@@ -632,6 +633,11 @@ public class ModelGet extends AbstractJavaWebScript {
 			}
 		}
 	}
+	
+    protected JSONObject jobOrEle(EmsScriptNode element, WorkspaceNode ws, Date dateTime, String id,
+                             boolean includeQualified, boolean isIncludeDocument ) {
+              return element.toJSONObject( ws,  dateTime, includeQualified, isIncludeDocument, elementProperties.get(id) );
+    }
 
 	protected void addAffectedElements(WorkspaceNode ws, Date dateTime) {
 		for(  String id : new ArrayList<String>( elementsFound.keySet() ) ){
