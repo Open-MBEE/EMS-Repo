@@ -5,6 +5,10 @@
 	<bean id="webscript.gov.nasa.jpl.utils.allflags.get" class="gov.nasa.jpl.view_repo.webscripts.AllFlagsGet"
 		parent="webscript">
 	</bean>
+    
+    <bean id="webscript.gov.nasa.jpl.utils.loglevel.post" class="gov.nasa.jpl.view_repo.webscripts.LogLevelPost"
+        parent="webscript">
+    </bean>
 
 	<bean id="webscript.gov.nasa.jpl.utils.updateworkspaceldapgroup.post"
 		class="gov.nasa.jpl.view_repo.webscripts.UpdateWorkspaceLdapGroup"

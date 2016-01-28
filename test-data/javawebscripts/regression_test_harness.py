@@ -3182,6 +3182,16 @@ create_curl_cmd("GET", data="flags/checkMmsVersions?off", base_url=SERVICE_URL, 
 False,
 common_filters + ['"timestamp"'],
 ["test","workspaces","develop", "develop2"]
+],
+     
+[
+10130,
+"LogLevelPost",
+"Sets the log level of a class on mms",
+create_curl_cmd("POST", data="loglevel.json", base_url=SERVICE_URL, branch="loglevel", post_type=""),
+False,
+common_filters,
+["develop"]
 ]
 ]
 
