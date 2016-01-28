@@ -52,6 +52,7 @@ import gov.nasa.jpl.view_repo.util.EmsTransaction;
 import gov.nasa.jpl.view_repo.util.JsonDiffDiff.DiffType;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
 import gov.nasa.jpl.view_repo.util.NodeUtil.SearchType;
+import gov.nasa.jpl.view_repo.webscripts.ModelSearch.UnsupportedSearchException;
 import gov.nasa.jpl.view_repo.util.WorkspaceDiff;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 
@@ -106,7 +107,8 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
  *
  */
 public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
-    private static Logger logger = Logger.getLogger(AbstractJavaWebScript.class);
+	
+	private static Logger logger = Logger.getLogger(AbstractJavaWebScript.class);
     // FIXME -- Why is this not static? Concurrent webscripts with different
     // loglevels will interfere with each other.
     public Level logLevel = Level.WARN;
@@ -896,8 +898,8 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
                                Integer maxItems,
                                Integer skipCount ) {
     	// TODO: can't search against snapshots - non-null date time is caught upstream
-    	return searchForElementsPostgres( types, pattern, ignoreWorkspace, workspace, dateTime, maxItems, skipCount );
-    	}
+    	return searchForElementsPostgres( types, pattern, ignoreWorkspace, workspace, dateTime, maxItems, skipCount );	
+    }
 
 	/**
 	 * Perform Lucene search for the specified pattern and ACM type
@@ -933,10 +935,9 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
                                                                   Date dateTime,
                                                                   Integer maxItems,
                                                                   Integer skipCount) {
-	    Map<String, EmsScriptNode> resultsMap = new HashMap<String, EmsScriptNode>();
+		Map<String, EmsScriptNode> resultsMap = new HashMap<String, EmsScriptNode>();
 	    ResultSet results = null;
 	    StringBuffer queryPattern= new StringBuffer();
-	    //queryPattern.append("\"");
 		for(int i = 0; i< types.size()-1;i++){
 			if(types.get(i).equals("ASPECT:\"{http://jpl.nasa.gov/model/sysml-lite/1.0}")){
 				continue;
@@ -955,7 +956,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
                 EmsScriptNode node = new EmsScriptNode(nr, services, response);
                 resultsMap.put( node.getNodeRef().toString(), node );
             }
-        }
+        }		
         return resultsMap;
 	}
 
