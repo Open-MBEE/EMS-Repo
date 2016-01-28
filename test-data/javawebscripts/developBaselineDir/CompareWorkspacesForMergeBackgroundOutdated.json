@@ -1,24 +1,23 @@
 {
-    "email": "admin@alfresco.com",
     "status": "OUTDATED",
+    "email": "admin@alfresco.com",
     "user": "admin",
     "workspace1": {
-        "name": "wsA",
         "qualifiedName": "master/wsA",
+        "name": "wsA",
         "elements": [
             {
                 "qualifiedName": "/no_site/no_site_no_project/holding_bin/300",
                 "sysmlid": "x",
                 "editable": true,
                 "name": "300",
-                "documentation": "something",
                 "owner": "holding_bin_no_site_no_project",
+                "documentation": "something",
                 "specialization": {
                     "propertyType": null,
-                    "isDerived": false,
                     "isSlot": false,
+                    "isDerived": false,
                     "value": [{
-                        "valueExpression": null,
                         "string": "dlam_string",
                         "type": "LiteralString"
                     }],
@@ -40,22 +39,21 @@
         "addedElements": [],
         "conflictedElements": [],
         "updatedElements": [{
-            "qualifiedName": "/no_site/no_site_no_project/holding_bin/300",
             "name": "300",
-            "sysmlid": "x",
-            "documentation": "x is x",
+            "qualifiedName": "/no_site/no_site_no_project/holding_bin/300",
             "owner": "holding_bin_no_site_no_project",
+            "documentation": "x is x",
+            "sysmlid": "x",
             "specialization": {
                 "value": [{
-                    "valueExpression": null,
                     "string": "the x value",
                     "type": "LiteralString"
                 }],
                 "type": "Property"
             }
         }],
-        "name": "wsB",
         "qualifiedName": "master/wsA/wsB",
+        "name": "wsB",
         "movedElements": []
     }
 }

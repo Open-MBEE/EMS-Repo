@@ -1,7 +1,11 @@
 package gov.nasa.jpl.view_repo.sysml;
 
+import gov.nasa.jpl.ae.event.Call;
 import gov.nasa.jpl.ae.event.Expression;
 import gov.nasa.jpl.mbee.util.CompareUtils;
+import gov.nasa.jpl.mbee.util.Debug;
+import gov.nasa.jpl.mbee.util.HasPreference;
+import gov.nasa.jpl.mbee.util.MoreToString;
 import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
@@ -25,9 +29,21 @@ import sysml.view.Viewable;
  * @see viewable.List
  * 
  */
-public class List extends ArrayList< Viewable< EmsScriptNode > > implements sysml.view.List< EmsScriptNode > {
+public class List extends ArrayList< Viewable< EmsScriptNode > >
+        implements sysml.view.List< EmsScriptNode > {//, HasPreference< java.util.List< Class > > {
 
     private static final long serialVersionUID = 3954654861037876503L;
+    
+    /**
+     * The preferred constructor arguments.
+     */
+    protected static final HasPreference.Helper< java.util.List< Class > > preferences =
+            new HasPreference.Helper< java.util.List< Class > >( (java.util.List< java.util.List< Class > >)Utils.newList( (java.util.List< Class >)Utils.newList( (Class)EmsScriptNode.class ),
+                                                                           (java.util.List< Class >)Utils.newList( (Class)sysml.view.List.class ),
+                                                                           (java.util.List< Class >)Utils.newList( (Class)Collection.class ),
+                                                                           (java.util.List< Class >)Utils.newList( (Class)Object[].class ) ) );
+    
+    
     protected boolean ordered = false;
     
     /**
@@ -52,6 +68,16 @@ public class List extends ArrayList< Viewable< EmsScriptNode > > implements sysm
      * @param c
      * @see java.util.List#List(Collection)
      */
+    public List( sysml.view.List< EmsScriptNode > c ) {
+        this();
+        add(c);
+    }
+
+    /**
+     * Create a List and add the {@link Viewable}s in the input {@link Collection}.
+     * @param c
+     * @see java.util.List#List(Collection)
+     */
     public List( Collection< ? > c ) {
         this(c.toArray() );
     }
@@ -70,34 +96,76 @@ public class List extends ArrayList< Viewable< EmsScriptNode > > implements sysm
     	
     	this();
 
-    	for (Object obj : c) {
-    		if (obj instanceof Expression<?>) {
-    			Object eval = null;
+    	addToList( c );
+    }
+    protected void addToList( Object[] c ) {
+        if ( Debug.isOn() ) Debug.outln("addToList( " + MoreToString.Helper.toString( c ) + " )");
+        if ( c == null ) return;
+        for (Object obj : c) {
+            Throwable t = null;
+            if ( obj instanceof Viewable ) {
+                if ( Debug.isOn() ) Debug.outln("addToList viewable: " + obj);
+                this.add( (Viewable< EmsScriptNode >)obj );
+            } else if (obj instanceof Expression<?>) {
+                Object eval = null;
                 try {
-                    eval = ((Expression<?>) obj).evaluate(true);
-                    
-                // TODO -- figure out why eclipse gives compile errors for
-                // including the exceptions while mvn gives errors for not
-                // including them.
+                    eval = ( (Expression< ? >)obj ).evaluate( true );
+                    if ( eval == null || obj == eval ) {
+                        Text text = new Text( "" + obj );
+                        if ( Debug.isOn() ) Debug.outln("addToList expression evaluation: " + text);
+                        this.add( text );
+                    } else {
+                        if ( eval instanceof Call ) {
+                          eval = ((Call)eval).evaluate( true );
+                        }
+                        // package new result in an array and try again
+                        if ( !eval.getClass().isArray() ) {
+                            eval = new Object[] { eval };
+                        }
+                        this.addToList( (Object[])eval );
+                    }
                 } catch ( IllegalAccessException e ) {
-                    // TODO Auto-generated catch block
-                    //e.printStackTrace();
+                    t = e;
                 } catch ( InvocationTargetException e ) {
-                    // TODO Auto-generated catch block
-                    //e.printStackTrace();
+                    t = e;
                 } catch ( InstantiationException e ) {
-                    // TODO Auto-generated catch block
-                    //e.printStackTrace();
+                    t = e;
+                } finally {
+                    if ( t != null ) {
+                        Debug.error(true, false, t.getLocalizedMessage() );
+                    }
                 }
-    			if ( eval instanceof Viewable ) {
-    			    this.add((Viewable<EmsScriptNode>)eval);
-    			} else if ( eval instanceof Viewable ) {
-    			    this.add(new Text("" + eval));
-    			}
-    		} else if ( obj instanceof Viewable ) {
-    		    this.add((Viewable<EmsScriptNode>)obj);
-    		}
-    	}
+            } else if ( obj != null && obj.getClass().isArray() ) {
+                this.addToList( (Object[])obj );
+            } else if ( obj instanceof Collection ) {
+                Collection< ? > coll = (Collection< ? >)obj;
+                this.addToList( coll.toArray() );
+            } else if ( obj instanceof Call ) {
+                try {
+                    Object eval = ((Call)obj).evaluate( true );
+                    if ( eval.getClass().isArray() ) {
+                        this.addToList( (Object[])eval );
+                    } else {
+                        this.addToList( new Object[]{ eval } );
+                    }
+                } catch ( IllegalAccessException e ) {
+                    t = e;
+                } catch ( InvocationTargetException e ) {
+                    t = e;
+                } catch ( InstantiationException e ) {
+                    t = e;
+                } finally {
+                    if ( t != null ) {
+                        Debug.error(true, false, t.getLocalizedMessage() );
+                    }
+                }
+            } else {
+                if ( Debug.isOn() ) Debug.outln("addToList object: " + obj);
+                this.add( new Text( "" + obj ) );
+            }
+            // ERROR
+            //Debug.error(true, false, "bad arg to List(Object[]): " + c);
+        }
     }
 
     public static Viewable<EmsScriptNode> toViewable( Object obj ) {
@@ -213,5 +281,16 @@ public class List extends ArrayList< Viewable< EmsScriptNode > > implements sysm
         JSONObject jo = toViewJson(null);
         if ( jo != null ) return NodeUtil.jsonToString( jo );
         return super.toString();
+    }
+
+    //@Override
+    public boolean prefer( java.util.List< Class > t1,
+                           java.util.List< Class > t2 ) {
+        return preferences.prefer( t1, t2 );
+    }
+
+    //@Override
+    public int rank( java.util.List< Class > t ) {
+        return preferences.rank( t );
     }
 }

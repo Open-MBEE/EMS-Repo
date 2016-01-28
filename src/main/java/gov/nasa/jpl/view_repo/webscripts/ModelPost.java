@@ -41,6 +41,7 @@ import gov.nasa.jpl.view_repo.util.CommitUtil;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.EmsTransaction;
 import gov.nasa.jpl.view_repo.util.JsonDiffDiff;
+import gov.nasa.jpl.view_repo.util.K;
 import gov.nasa.jpl.view_repo.util.ModStatus;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
 import gov.nasa.jpl.view_repo.util.WorkspaceDiff;
@@ -51,6 +52,8 @@ import gov.nasa.jpl.view_repo.webscripts.util.ShareUtils;
 //import k.frontend.Frontend;
 //import k.frontend.ModelParser;
 //import k.frontend.ModelParser.ModelContext;
+
+
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -67,8 +70,6 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 
 import javax.servlet.http.HttpServletResponse;
-
-import k.frontend.Frontend;
 
 //import javax.transaction.UserTransaction;
 import org.apache.log4j.*;
@@ -307,8 +308,9 @@ public class ModelPost extends AbstractJavaWebScript {
 	private void sendDeltasAndCommit(WorkspaceNode targetWS,
 			TreeSet<EmsScriptNode> elements, long start, long end)
 			throws JSONException {
+	    // don't include qualified in commit, it's not needed
 		JSONObject deltaJson = wsDiff.toJSONObject(new Date(start), new Date(
-				end));
+				end), true, false);
 
 		// commit is run as admin user already
 		String msg = "model post";
@@ -471,7 +473,7 @@ public class ModelPost extends AbstractJavaWebScript {
 			timerUpdateModel = Timer.startTimer(timerUpdateModel, timeEvents);
 
 			// Send deltas to all listeners
-			if (createCommit && wsDiff.isDiff()) {
+			if (createCommit && wsDiff.isDiffPrecalculated()) {
 				sendProgress("Sending deltas and creating commit node",
 						projectId, false);
 				if (runWithoutTransactions) {
@@ -1268,7 +1270,7 @@ public class ModelPost extends AbstractJavaWebScript {
 
 	}
 
-	private void updateTransactionableWsState(final EmsScriptNode element,
+	public void updateTransactionableWsState(final EmsScriptNode element,
 			final String jsonId, final ModStatus modStatus, final boolean ingest) {
 
 		if (runWithoutTransactions) {// || internalRunWithoutTransactions) {
@@ -1407,7 +1409,7 @@ public class ModelPost extends AbstractJavaWebScript {
 			for (String acmType : Acm.TYPES_WITH_VALUESPEC.get(type)) {
 				String jsonType = Acm.getACM2JSON().get(acmType);
 				if (jsonType != null && jsonToCheck.has(jsonType)) {
-					Collection<EmsScriptNode> oldVals = getSystemModel()
+					Collection<EmsScriptNode> oldVals = getEmsSystemModel()
 							.getProperty(node, acmType);
 
 					boolean myChanged = processValueSpecPropertyImpl(
@@ -2543,10 +2545,10 @@ public class ModelPost extends AbstractJavaWebScript {
 		if (reifiedPkgNode != null) {
 			reifiedPkgNode.getOrSetCachedVersion();
 
-			JSONObject rp = new JSONObject();
-			rp.put("nodeRefId", reifiedPkgNode.getNodeRef().toString());
-			rp.put("versionedRefId", NodeUtil.getVersionedRefId(reifiedPkgNode));
-			rp.put("sysmlId", reifiedPkgNode.getSysmlId());
+//			JSONObject rp = new JSONObject();
+//			rp.put("nodeRefId", reifiedPkgNode.getNodeRef().toString());
+//			rp.put("versionedRefId", NodeUtil.getVersionedRefId(reifiedPkgNode));
+//			rp.put("sysmlId", reifiedPkgNode.getSysmlId());
 
 //			reifiedPkgs.put(rp);
 		}
@@ -2671,6 +2673,15 @@ public class ModelPost extends AbstractJavaWebScript {
 							getProjectNodeFromRequest(req, true);
 						}
 					};
+					
+					UpdateViewHierarchy uvh = new UpdateViewHierarchy( this );
+                    // Handle view and association changes
+                    try {
+                        uvh.addJsonForViewHierarchyChanges( postJson );
+                    } catch ( Throwable t ) {
+                        t.printStackTrace();
+                    }
+                    
 					// FIXME: this is a hack to get the right site permissions
 					// if DB rolled back, it's because the no_site node couldn't
 					// be created
@@ -2713,65 +2724,7 @@ public class ModelPost extends AbstractJavaWebScript {
 		return model;
 	}
 
-	public static JSONObject kToJson(String k) {
-		return kToJson(k, null);
-	}
-
-	/**
-	 * Add elements' sysmlids in given json. sysmlids are only added where they
-	 * do not already exist. If there is more than one element, the prefix is
-	 * appended with an underscore followed by a count index. For example, if
-	 * there are three elements, and the prefix is "foo", then the sysmlids will
-	 * be foo_0, foo_1, and foo_2. This can be useful for temporary generated
-	 * elements so that they can overwrite themselves and reduce pollution.
-	 * 
-	 * @param json
-	 * @param sysmlidPrefix
-	 */
-	public static void addSysmlIdsToElementJson(JSONObject json,
-			String sysmlidPrefix) {
-		if (json == null)
-			return;
-		if (sysmlidPrefix == null)
-			sysmlidPrefix = "generated_sysmlid_";
-		JSONArray elemsJson = json.optJSONArray("elements");
-		if (elemsJson != null) {
-			for (int i = 0; i < elemsJson.length(); ++i) {
-				JSONObject elemJson = elemsJson.getJSONObject(i);
-				if (elemJson != null && !elemJson.has("sysmlid")) {
-					String id = sysmlidPrefix
-							+ (elemsJson.length() > 1 ? "_" + i : "");
-					elemJson.put("sysmlid", id);
-				}
-			}
-		}
-	}
-
-	public static JSONObject kToJson(String k, String sysmlidPrefix) {
-		// JSONObject json = new JSONObject(KExpParser.parseExpression(k));
-		JSONObject json = new JSONObject(Frontend.exp2Json2(k));
-
-		if (sysmlidPrefix != null) {
-			addSysmlIdsToElementJson(json, sysmlidPrefix);
-		}
-
-		if (logger.isDebugEnabled()) {
-			log(Level.DEBUG,
-					"********************************************************************************");
-			log(Level.DEBUG, k);
-			if (logger.isDebugEnabled())
-				log(Level.DEBUG, NodeUtil.jsonToString(json, 4));
-			// log(LogLevel.DEBUG, NodeUtil.jsonToString( exprJson0, 4 ));
-			log(Level.DEBUG,
-					"********************************************************************************");
-
-			log(Level.DEBUG, "kToJson(k) = \n" + json.toString(4));
-		}
-
-		return json;
-	}
-
-	public JSONObject getPostJson(boolean jsonNotK, Object content) {
+    public JSONObject getPostJson(boolean jsonNotK, Object content) {
 		return getPostJson(jsonNotK, content, null);
 	}
 
@@ -2782,8 +2735,9 @@ public class ModelPost extends AbstractJavaWebScript {
 		if (!jsonNotK) {
 			String k = (String) content;
 			logger.warn("k = " + k);
-			postJson = kToJson(k);
-		} else {
+            postJson = K.kToJson( k, myWorkspace, elementMap.keySet() );
+        }
+        else {
 			if (content instanceof JSONObject) {
 				postJson = (JSONObject) content;
 			} else if (content instanceof String) {
@@ -2798,7 +2752,8 @@ public class ModelPost extends AbstractJavaWebScript {
 			postJson.put("elements", jarr);
 		}
 		if (!Utils.isNullOrEmpty(expressionString)) {
-			JSONObject exprJson = kToJson(expressionString);
+            JSONObject exprJson = 
+                    K.kToJson(expressionString, myWorkspace, elementMap.keySet());
 			JSONArray expJarr = exprJson.getJSONArray("elements");
 			for (int i = 0; i < expJarr.length(); ++i) {
 				jarr.put(expJarr.get(i));
@@ -2823,15 +2778,9 @@ public class ModelPost extends AbstractJavaWebScript {
 			// Fix constraints if desired.
 			if (fix) {
 				sendProgress("Fixing constraints", projectId, true);
-				new EmsTransaction(getServices(), getResponse(),
-						getResponseStatus(), runWithoutTransactions) {
-					@Override
-					public void run() throws Exception {
-						fix(elements, workspace);
-						sendProgress("Fixing constraints completed", projectId,
-								true);
-					}
-				};
+				fixWithTransactions(elements, workspace);
+				sendProgress("Fixing constraints completed", projectId,
+						true);
 			}
 
 			if (!suppressElementJson) {

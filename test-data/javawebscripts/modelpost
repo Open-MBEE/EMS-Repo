@@ -1,12 +1,33 @@
 #!/bin/bash
 
-if [ "$#" -eq 1 ]; then     # the json file is imported into the project
+# Import elements from json file into workspace.
+#
+# usage> modelpost [<workspace>] <json_file_name>
+# example> modelpost master foo.json
+# example> modelpost foo.json
 
-echo  curl -w "\n%{http_code}\n" -u admin:admin -X POST -H "Content-Type:application/json" --data @JsonData/$1 "http://localhost:8080/alfresco/service/workspaces/master/elements"
-curl -w "\n%{http_code}\n" -u admin:admin -X POST -H "Content-Type:application/json" --data @JsonData/$1 "http://localhost:8080/alfresco/service/workspaces/master/elements"
+# Get the input json file and the workspace from the arguments passed in.
+if [ "$#" -eq 1 ]; then
+  file=$1
+  workspace=master
+else
+  file=$2
+  workspace=$1
+fi
+if [[ ! -e "$file" ]]; then
+  file="JsonData/"$file
+fi
+if [[ ! -e "$file" ]]; then
+  echo "input file $file not found!"
+  exit 1
+fi
 
-else      # 
+dataType=json
+if [[ $file == *".k" ]]
+then
+    dataType=k
+fi
 
-echo curl -w "\n%{http_code}\n" -X POST -u admin:admin -H Content-Type:application/json --data @JsonData/$2 http://localhost:8080/alfresco/service/workspaces/$1/elements
-curl -w "\n%{http_code}\n" -X POST -u admin:admin -H Content-Type:application/json --data @JsonData/$2 http://localhost:8080/alfresco/service/workspaces/$1/elements
-fi;
+# Import the file
+echo  curl -w "\"\n%{http_code}\n\"" -u admin:admin -X POST -H "Content-Type:application/$dataType" --data @$file "\"http://localhost:8080/alfresco/service/workspaces/${workspace}/elements\""
+curl -w "\n%{http_code}\n" -u admin:admin -X POST -H "Content-Type:application/$dataType" --data @$file "http://localhost:8080/alfresco/service/workspaces/${workspace}/elements"

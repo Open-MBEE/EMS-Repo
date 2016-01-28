@@ -6,7 +6,6 @@
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
-        "searchTypes": "aspect",
         "name": "Components",
         "documentation": "",
         "owner": "connectorViewDataFolder",
@@ -47,7 +46,6 @@
                 "isSlot": false,
                 "isDerived": false,
                 "value": [{
-                    "valueExpression": null,
                     "string": "dlam_string",
                     "type": "LiteralString"
                 }],
@@ -57,7 +55,6 @@
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
-        "searchTypes": "aspect",
         "name": "301",
         "documentation": "else",
         "owner": "300",
@@ -97,7 +94,6 @@
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
-        "searchTypes": "aspect",
         "name": "Context",
         "documentation": "",
         "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
@@ -110,7 +106,6 @@
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
-        "searchTypes": "aspect",
         "name": "Components",
         "documentation": "",
         "owner": "123456",
@@ -151,7 +146,6 @@
                 "isSlot": false,
                 "isDerived": false,
                 "value": [{
-                    "valueExpression": null,
                     "string": "dlam_string",
                     "type": "LiteralString"
                 }],
@@ -161,7 +155,6 @@
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
-        "searchTypes": "aspect",
         "name": "401",
         "documentation": "4else",
         "owner": "4000",
@@ -201,15 +194,11 @@
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
-        "searchTypes": "aspect",
         "name": "viewWithContents",
         "documentation": "View updates",
         "owner": "123456",
         "specialization": {
-            "contents": {
-                "valueExpression": null,
-                "type": "Expression"
-            },
+            "contents": {"type": "Expression"},
             "type": "View"
         }
     },
@@ -220,7 +209,6 @@
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
-        "searchTypes": "aspect",
         "name": "viewNull",
         "documentation": "View with null values",
         "owner": "123456",

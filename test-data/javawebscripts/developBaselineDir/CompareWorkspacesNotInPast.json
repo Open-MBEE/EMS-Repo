@@ -1,46 +1,45 @@
 {
     "workspace1": {
-        "qualifiedName": "master",
         "name": "master",
+        "qualifiedName": "master",
         "elements": [{
-            "name": "notInThePast",
             "qualifiedName": "/europa/JW_TEST/notInThePast",
+            "sysmlid": "notInThePast",
+            "editable": true,
+            "name": "notInThePast",
             "documentation": "",
             "owner": "123456",
+            "specialization": {
+                "specification": {
+                    
+                    "expressionBody": ["foo8"],
+                    "type": "OpaqueExpression"
+                },
+                "type": "Constraint"
+            }
+        }]
+    },
+    "workspace2": {
+        "deletedElements": [{
+            "name": "notInThePast",
+            "owner": "123456",
+            "documentation": "",
             "sysmlid": "notInThePast",
             "specialization": {
                 "specification": {
-                    "valueExpression": null,
+                    
                     "expressionBody": ["foo8"],
                     "type": "OpaqueExpression"
                 },
                 "type": "Constraint"
             },
             "editable": true,
-        }]
-    },
-    "workspace2": {
-        "deletedElements": [{
-            "qualifiedName": "/europa/JW_TEST/notInThePast",
-            "sysmlid": "notInThePast",
-            "editable": true,
-            "name": "notInThePast",
-            "documentation": "",
-            "owner": "123456",
-            "specialization": {
-                "specification": {
-                    "valueExpression": null,
-                    "expressionBody": ["foo8"],
-                    "type": "OpaqueExpression"
-                },
-                "type": "Constraint"
-            }
         }],
         "addedElements": [],
         "conflictedElements": [],
         "updatedElements": [],
-        "qualifiedName": "master",
         "name": "master",
+        "qualifiedName": "master",
         "movedElements": []
     }
 }

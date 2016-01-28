@@ -33,7 +33,7 @@ public class AllFlagsGet extends FlagSet {
                            "glom",
                            "cleanJson",
                            "diffDefaultIsMerge", 
-                           "viewPointExpressions",
+                           "viewpointExpressions",
                            "diffDefaultIsMerge",
                            "cacheSnapshots",
                            "checkMmsVersions",
@@ -104,8 +104,12 @@ public class AllFlagsGet extends FlagSet {
             NodeUtil.timeEvents = val;
         } else if (path.equalsIgnoreCase("versionCacheDebug")) {
             EmsScriptNode.versionCacheDebugPrint = val;
-        }  else if (path.equalsIgnoreCase("viewPointExpressions")) {
-            EmsScriptNode.expressionStuff = val;
+        }  else if (path.equalsIgnoreCase("viewpointExpressions")) {
+            if ( val && !EmsScriptNode.expressionStuffDefault ) {
+                NodeUtil.jsonCache.clear();
+            }
+            EmsScriptNode.expressionStuffDefault = val;
+            //EmsScriptNode.addingAffectedIds = val;
         } else if (path.equalsIgnoreCase("versionCache")) {
             NodeUtil.doVersionCaching = val;
         } else if (path.equalsIgnoreCase("versionHistoryCache")) {
@@ -175,8 +179,8 @@ public class AllFlagsGet extends FlagSet {
             return NodeUtil.timeEvents;
         } else if (path.equalsIgnoreCase("versionCacheDebug")) {
             return EmsScriptNode.versionCacheDebugPrint;
-        }  else if (path.equalsIgnoreCase("viewPointExpressions")) {
-            return EmsScriptNode.expressionStuff;
+        }  else if (path.equalsIgnoreCase("viewpointExpressions")) {
+            return EmsScriptNode.expressionStuffDefault;
         }  else if (path.equalsIgnoreCase("versionCache")) {
             return NodeUtil.doVersionCaching;
         } else if (path.equalsIgnoreCase("versionHistoryCache")) {
@@ -262,8 +266,8 @@ public class AllFlagsGet extends FlagSet {
             return false;
         } else if (path.equalsIgnoreCase("versionCacheDebug")) {
             return false;
-        } else if (path.equalsIgnoreCase("viewPointExpressions")) {
-        	    return false;
+        } else if (path.equalsIgnoreCase("viewpointExpressions")) {
+        	return false;
         } else if (path.equalsIgnoreCase("skipWorkspacePermissionCheck")) {
             return false;
         } else if (path.equalsIgnoreCase("optimisticJustFirst")) {
@@ -328,7 +332,7 @@ public class AllFlagsGet extends FlagSet {
             return "timeEvents";
         } else if (path.equalsIgnoreCase("versionCacheDebug")) {
             return "versionCacheDebugPrint";
-        } else if (path.equalsIgnoreCase("viewPointExpressions")) {
+        } else if (path.equalsIgnoreCase("viewpointExpressions")) {
             return "expressionStuff";
         } else if (path.equalsIgnoreCase("versionCache")) {
             return "doVersionCaching";

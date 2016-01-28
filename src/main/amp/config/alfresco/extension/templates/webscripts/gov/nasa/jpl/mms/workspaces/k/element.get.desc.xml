@@ -1,0 +1,11 @@
+<webscript>
+	<shortname>get K for element with {elementId}</shortname>
+    <description>
+    	get K for element with {elementId}
+	</description>
+  	<url>/workspaces/{workspaceId}/k/{elementId}</url>
+  	<format default="k">argument</format>
+  	<authentication>user</authentication>
+    <transaction>none</transaction>
+  	<family>MMS REST API</family>
+ </webscript>

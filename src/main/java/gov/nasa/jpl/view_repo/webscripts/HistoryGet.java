@@ -78,7 +78,7 @@ public class HistoryGet extends ModelGet {
         Collection<Version> versions = history.getAllVersions();
 
         if (versions != null) {
-            jsonAr = new JSONArray(versions);
+            jsonAr = new JSONArray(versions.toArray());
         }
 
         return jsonAr;
