@@ -7,6 +7,7 @@ import regression_test_harness
 
 OUTPUT_FILENAME = "regression_test_suite.robot"
 
+
 def set_test_suite_settings(file_action):
     # Add the settings for the test case
     # Setting Headers
@@ -20,6 +21,7 @@ def set_test_suite_settings(file_action):
         file_object.write("Suite Setup\t\t" + "parse_command_line\n")
         file_object.write("\n")
 
+
 def set_test_suite_variables(file_action):
     with open(OUTPUT_FILENAME, file_action) as file_object:
         # Variable Declarations
@@ -29,15 +31,16 @@ def set_test_suite_variables(file_action):
         # file_object.write("${TEST_NUMS}\t\t" + "\n")
         # file_object.write("${TEST_NAMES}\t\t" + "\n")
         # file_object.write("${CMD_GIT_BRANCH}\t\t" + "\n")
-        file_object.write("${evaluate_only}\t\t" + "set_true" +"\n")
+        file_object.write("${evaluate_only}\t\t" + "set_true" + "\n")
         file_object.write("\n")
+
 
 def set_test_suite_keywords(file_action):
     with open(OUTPUT_FILENAME, file_action) as file_object:
         file_object.write("*** Keywords ***\n")
 
         file_object.write("Create Curl Command\n")
-        file_object.write("\t[Arguments]\t\t\t" + "@{varargs}"+ "\n")
+        file_object.write("\t[Arguments]\t\t\t" + "@{varargs}" + "\n")
         file_object.write("\tcreate_curl_cmd\t\t" + "@{varargs}" + "\n")
 
         file_object.write("\n")
@@ -48,6 +51,7 @@ def set_test_suite_keywords(file_action):
 
         file_object.write("Regression\n")
         file_object.write("\tregression_test_harness.run curl test\t\t" + "@{varargs}\n")
+
 
 def generate_test_suite(file_action):
     generated_keywords = []
@@ -68,9 +72,9 @@ def generate_test_suite(file_action):
 
             # Setup and Teardown of the test (Both optional)
             #   Checks if a setup function was given
-            # if (test_spec_length > 7):
-            #     if (test[7] is not None):
-            #         file_object.write("\t[Setup]\t\t\t\t" + str(test[7].__name__) + "\n")
+            if (test_spec_length > 7):
+                if (test[7] is not None):
+                    file_object.write("\t[Setup]\t\t\t\t" + str(test[7].__name__) + "\n")
 
             # Set the test number for the test case
             file_object.write("\t${test_num} = \t\t Set Variable\t\t" + str(test[0]) + "\n")
@@ -102,8 +106,8 @@ def generate_test_suite(file_action):
             http_code_length = len("%{http_code}")
             hc_begin_index = curl_string.find("%{http_code}")
             new_curl_string = curl_string[0:hc_begin_index] \
-                            + "\%{http_code}" + curl_string[hc_begin_index
-                            + http_code_length:len(curl_string)]
+                              + "\%{http_code}" \
+                              + curl_string[hc_begin_index + http_code_length:len(curl_string)]
 
             # file_object.write("\tCreate Curl Command\t\t" + new_curl_string)
             # file_object.write("\n")
@@ -125,16 +129,24 @@ def generate_test_suite(file_action):
             # Run Curl Test Takes the arguments in the following order:
             #   test_num        test_name       test_desc           curl_cmd   use_json_diff=False
             #   filters=None    setupFcn=None   postProcessFcn=None teardownFcn=None    delay=None
-            file_object.write("\trun curl test\t\t" + str(test[0]) + "\t\t" + str(test[1]) + "\t\t" + str(test[2]) +
+            file_object.write("\trun curl test\t\t" + str(test[0]) + "\t\t" + test[1] + "\t\t" + test[2] +
                               "\t\t" + new_curl_string + "\t\t")
 
-            for index in range(4,test_spec_length):
-                file_object.write("\"" + str(test[index]) + "\"" + "\t\t" )
+            # file_object.write("\trun curl test\t\t" + str(test[0]) + "\t\t" + str(test[1]) + "\t\t" + str(test[2]) +
+            #                   "\t\t" + str(test[3])+ "\t\t")
+
+            for index in range(4, test_spec_length):
+                file_object.write(str(test[index]) + "\t\t")
 
             file_object.write("\n")
             file_object.write("\n")
 
             # file_object.write("Regression\t\t" + str(test[0]) + "\n")
+
+
+def generate_test_case(file_action):
+    with open(OUTPUT_FILENAME, file_action) as file_object:
+        file_object.write()
 
 
 # Automatically generate the Robot Framework Test Suite for the MMS when executing the python file.

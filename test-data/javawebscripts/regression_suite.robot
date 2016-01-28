@@ -6,8 +6,8 @@ Documentation       This is the main robot test suite for the Alfresco View Repo
 ...
 ...
 ...
-Library     regression_lib.py
-Library     regression_test_harness.py
+#Library     regression_lib.py
+#Library     regression_test_harness.py
 Library     OperatingSystem
 #Library     keyword_lib
 
@@ -34,10 +34,8 @@ ${DELAY}
 ${REGRESSION_TESTS}     regression_test_harness.tests
 
 *** Test Cases ***
-Initial Test
-    [Documentation]     This is the initial test to attempt to get the currently implemented MMS test library.
-
-
-Another Test
-*** Keywords ***
-    [Arguments]     
+Test title
+    [Tags]    DEBUG
+    ${output}=  run    ./regress.sh -g develop
+    log                 ${output}
+    log to console      ${output}
