@@ -181,18 +181,20 @@ public class ModelsGet extends AbstractJavaWebScript {
             
                 if (dateTime == null && pgh.checkWorkspaceExists()) {
                     List<String> noderefids = pgh.getNodesInWorkspace( sysmlids );
-                    graphSearched = true;
 
                     for (int ii = 0; ii < noderefids.size(); ii++) {
                         EmsScriptNode node = new EmsScriptNode(new NodeRef(noderefids.get( ii )), services, response);
                         elementsFoundJson.put(node.toJSONObject(workspace, dateTime));
                     }
+                    graphSearched = true;
                 }
                 
                 pgh.close();
             } catch ( ClassNotFoundException | SQLException e ) {
-                // TODO Auto-generated catch block
                 e.printStackTrace();
+                // clear out in case this was done midstream
+                elementsFoundJson = new JSONArray();
+                graphSearched = false;
             }
         }
         
