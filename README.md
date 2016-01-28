@@ -49,7 +49,7 @@ src/main/java/gov/nasa/jpl/view_repo/db/mms.sql to initialize the database (as f
 
        	   <path to psql> -U mmsuser -f <path to mms.sql> mydb
 
-  - In a browser, or using curl on the command line:
+  - If data is stale (--only if you have data from mms prior to 2.3) run this in a browser, or using curl on the command line:
 
        	    GET http://127.0.0.1:8080/alfresco/service/model2postgres/
 
