@@ -61,7 +61,6 @@
     "editable": true,
     "creator": "admin",
     "modifier": "admin",
-    "searchTypes": "name",
     "name": "steroetyped eleme",
     "owner": "123456",
     "specialization": {"type": "Element"}
