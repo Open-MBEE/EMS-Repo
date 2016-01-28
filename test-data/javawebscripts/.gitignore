@@ -2,3 +2,4 @@
 /testBaselineDir/
 /output/
 /developBaselineDir/sorted_*
+*.pyc
