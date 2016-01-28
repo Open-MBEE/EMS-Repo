@@ -283,13 +283,12 @@ public class ModelGet extends AbstractJavaWebScript {
                     modelRootNode = NodeUtil.getNodeFromPostgresNode(pgh.getNodeFromSysmlId( modelId ));
                     pgh.close();
                 } catch ( Exception e ) {
-                    logger.warn( "Reverting to alfresco lookup. Could not find element in graph db " + modelId );
+                    logger.info( "Reverting to alfresco lookup. Could not find element in graph db " + modelId );
                 }
 			}
 			if (modelRootNode == null) {
 			    modelRootNode = findScriptNodeById(modelId,
 			                                       workspace, dateTime, findDeleted);
-			    NodeUtil.doGraphDb = false;
 			}
 			
 			if (logger.isDebugEnabled())
