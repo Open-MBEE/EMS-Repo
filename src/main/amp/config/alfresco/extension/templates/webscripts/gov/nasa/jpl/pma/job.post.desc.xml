@@ -1,0 +1,11 @@
+<webscript>
+	<shortname>perform action on job</shortname>
+	<description>
+		perform action on job 
+	</description>
+	<url>/workspaces/{workspaceId}/elements/{elementId}/jobs/action</url>
+	<format default="json">argument</format>
+	<authentication>user</authentication>
+	<transaction>none</transaction>
+	<family>PMA REST API</family>
+</webscript>
