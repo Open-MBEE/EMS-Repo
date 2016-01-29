@@ -54,21 +54,23 @@ import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
 
-public class JobPost {
+public class JobPost extends ModelPost {
     static Logger logger = Logger.getLogger(JobPost.class);
     
     public JobPost() {
         super();
     }
-/*
+
     public JobPost(Repository repositoryHelper, ServiceRegistry registry) {
         super(repositoryHelper, registry);
     }
-*/
+
+    @Override
     protected Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {        
         return null;
     }
     
+    @Override
     protected Map<String, Object> executeImplImpl(WebScriptRequest req, 
             Status status, Cache cache) {
 
