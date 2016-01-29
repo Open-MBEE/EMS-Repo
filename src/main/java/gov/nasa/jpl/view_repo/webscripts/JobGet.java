@@ -92,11 +92,16 @@ public class JobGet extends ModelGet {
         setIsViewRequest(isViewRequest);
 
         JSONObject top = NodeUtil.newJsonObject();
-        JSONArray elementsJson = handleRequest(req, top, NodeUtil.doGraphDb);
+        JSONArray jobsJson = handleRequest(req, top, NodeUtil.doGraphDb);
 
         try {
-            if (elementsJson.length() > 0) {
-                top.put("jobs", elementsJson);
+            for(int i = 0; i < jobsJson.length(); i++) {
+                JSONObject job = (JSONObject)jobsJson.get(i);
+                job.remove( "specialization" );
+            }
+            
+            if (jobsJson.length() > 0) {
+                top.put("jobs", jobsJson);
             }
 
             if (!Utils.isNullOrEmpty(response.toString()))
