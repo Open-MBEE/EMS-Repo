@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<robot generated="20160126 08:50:10.791" generator="Robot 3.0 (Python 2.7.10 on darwin)">
+<suite source="/Users/dank/mbee-dev/alfresco-view-repo/test-data/javawebscripts/robottesting/robot/tests/regression_suite.robot" id="s1" name="Regression Suite">
+<test id="s1-t1" name="Initial Test">
+<kw name="20">
+<arguments>
+<arg>b</arg>
+<arg>c</arg>
+</arguments>
+<msg timestamp="20160126 08:50:10.816" level="FAIL">No keyword with name '20' found.</msg>
+<status status="FAIL" endtime="20160126 08:50:10.816" starttime="20160126 08:50:10.816"></status>
+</kw>
+<status status="FAIL" endtime="20160126 08:50:10.817" critical="yes" starttime="20160126 08:50:10.815">No keyword with name '20' found.</status>
+</test>
+<doc>This is the main robot test suite for the Alfresco View Repo.
+
+Suite contains all regression tests that are ran within the regression_test_harness.py
+The test code and setup
+
+
+</doc>
+<status status="FAIL" endtime="20160126 08:50:10.817" starttime="20160126 08:50:10.793"></status>
+</suite>
+<statistics>
+<total>
+<stat fail="1" pass="0">Critical Tests</stat>
+<stat fail="1" pass="0">All Tests</stat>
+</total>
+<tag>
+</tag>
+<suite>
+<stat fail="1" id="s1" name="Regression Suite" pass="0">Regression Suite</stat>
+</suite>
+</statistics>
+<errors>
+<msg timestamp="20160126 08:50:10.814" level="ERROR">Error in file '/Users/dank/mbee-dev/alfresco-view-repo/test-data/javawebscripts/robottesting/robot/tests/regression_suite.robot': Test library 'regression_lib.py' does not exist.</msg>
+<msg timestamp="20160126 08:50:10.814" level="ERROR">Error in file '/Users/dank/mbee-dev/alfresco-view-repo/test-data/javawebscripts/robottesting/robot/tests/regression_suite.robot': Test library 'regression_test_harness.py' does not exist.</msg>
+</errors>
+</robot>

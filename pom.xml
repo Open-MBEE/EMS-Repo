@@ -286,15 +286,16 @@
 			<artifactId>json</artifactId>
 			<version>20140107</version>
 		</dependency>
-
 		<dependency>
 			<groupId>org.antlr</groupId>
 			<artifactId>antlr4</artifactId>
 			<version>4.5</version>
 		</dependency>
-
-
-
+		<dependency>
+		      <groupId>com.offbytwo.jenkins</groupId>
+		      <artifactId>jenkins-client</artifactId>
+		      <version>0.3.3</version>
+		</dependency>
 		<!-- <metadata><groupId>com.microsoft.z3</groupId> <artifactId>libz3java</artifactId> 
 			<versioning> <latest>4.3.2.5a45711f22d9</latest> <release>4.3.2.5a45711f22d9</release> 
 			<versions> <version>4.3.2-bb56885147e4</version> <version>4.3.2.5a45711f22d9</version> 
