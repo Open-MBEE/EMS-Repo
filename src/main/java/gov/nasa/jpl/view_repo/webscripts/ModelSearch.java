@@ -286,15 +286,6 @@ public class ModelSearch extends ModelGet {
 
             boolean checkReadPermission = true; // TODO -- REVIEW -- Should this
                                                 // be false?
-//<<<<<<< HEAD
-//            boolean includeQualified = false;
-//            handleElements( workspace, dateTime, includeQualified, true, evaluate, false, top,
-//=======
-//            boolean includeQualified = true;
-//            if (NodeUtil.doPostProcessQualified) includeQualified = false;
-//            handleElements( workspace, dateTime, includeQualified, true, evaluate, top,
-//            handleElements( workspace, dateTime, includeQualified, true, evaluate, false, top,
-//                            checkReadPermission );
             
             boolean includeQualified = true;
             if (NodeUtil.doPostProcessQualified) includeQualified = false;

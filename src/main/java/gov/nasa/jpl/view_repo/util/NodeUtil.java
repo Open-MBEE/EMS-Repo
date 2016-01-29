@@ -1143,7 +1143,7 @@ public class NodeUtil {
             // only set skip count if maxItems specified
             params.setMaxItems( maxItems );
             if (skipCount != null && skipCount >= 0) {
-                params.setSkipCount( skipCount );
+                params.setSkipCount( skipCount * maxItems );
             }
         }
         return params;
