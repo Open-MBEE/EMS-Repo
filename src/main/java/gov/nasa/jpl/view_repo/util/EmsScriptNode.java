@@ -6085,7 +6085,7 @@ public class EmsScriptNode extends ScriptNode implements
         }
         
         // childViews
-        JSONArray childViewArr = UpdateViewHierarchy.getChildViews( node );
+        JSONArray childViewArr = UpdateViewHierarchy.getChildViews( node, dateTime );
         if ( childViewArr != null ) {
             json.put( "childViews", childViewArr );
         }
