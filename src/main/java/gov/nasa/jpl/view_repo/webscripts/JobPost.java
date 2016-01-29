@@ -60,17 +60,15 @@ public class JobPost {
     public JobPost() {
         super();
     }
-
+/*
     public JobPost(Repository repositoryHelper, ServiceRegistry registry) {
         super(repositoryHelper, registry);
     }
-
-    @Override
+*/
     protected Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {        
         return null;
     }
     
-    @Override
     protected Map<String, Object> executeImplImpl(WebScriptRequest req, 
             Status status, Cache cache) {
 
