@@ -15,8 +15,6 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-import kexpparser.KExpParser;
-
 import org.alfresco.service.ServiceRegistry;
 import org.json.JSONArray;
 import org.json.JSONObject;

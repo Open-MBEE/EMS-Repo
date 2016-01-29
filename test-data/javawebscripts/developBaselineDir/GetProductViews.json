@@ -7,14 +7,13 @@
         "creator": "admin",
         "modifier": "admin",
         "name": "302",
-        "owner": "301",
         "documentation": "to",
+        "owner": "301",
         "specialization": {
             "propertyType": null,
-            "isDerived": false,
             "isSlot": false,
+            "isDerived": false,
             "value": [{
-                "valueExpression": null,
                 "string": "dlam_string",
                 "type": "LiteralString"
             }],
@@ -22,35 +21,36 @@
         }
     },
     {
-        "modifier": "admin",
         "qualifiedId": "/europa/123456/300/301/302/303/304",
-        "name": "304",
         "qualifiedName": "/europa/JW_TEST/300/301/302/303/304",
+        "sysmlid": "304",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "304",
         "documentation": "about",
         "owner": "303",
-        "sysmlid": "304",
         "specialization": {
             "propertyType": null,
             "isSlot": false,
             "isDerived": false,
             "value": [{
-                "valueExpression": null,
                 "string": "dlam_string",
                 "type": "LiteralString"
             }],
             "type": "Property"
-        },
-        "editable": true,
-        "creator": "admin"
+        }
     },
     {
-        "modifier": "admin",
         "qualifiedId": "/europa/123456/300/301",
-        "name": "301",
         "qualifiedName": "/europa/JW_TEST/300/301",
+        "sysmlid": "301",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "301",
         "documentation": "else",
         "owner": "300",
-        "sysmlid": "301",
         "specialization": {
             "view2view": [{
                 "childrenViews": [
@@ -78,9 +78,7 @@
                 "type": "Paragraph"
             }],
             "type": "Product"
-        },
-        "editable": true,
-        "creator": "admin"
+        }
     }
 ]}
 200

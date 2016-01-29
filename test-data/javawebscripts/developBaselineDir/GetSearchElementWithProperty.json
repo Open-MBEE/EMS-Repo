@@ -17,12 +17,10 @@
                 "isDerived": false,
                 "value": [
                     {
-                        "valueExpression": null,
                         "type": "LiteralReal",
                         "double": 5
                     },
                     {
-                        "valueExpression": null,
                         "type": "LiteralReal",
                         "double": 5.39
                     }
@@ -44,12 +42,10 @@
                 "isDerived": false,
                 "value": [
                     {
-                        "valueExpression": null,
                         "type": "LiteralReal",
                         "double": 15
                     },
                     {
-                        "valueExpression": null,
                         "type": "LiteralReal",
                         "double": 15.39
                     }
@@ -61,7 +57,6 @@
     "editable": true,
     "creator": "admin",
     "modifier": "admin",
-    "searchTypes": "name",
     "name": "steroetyped eleme",
     "owner": "123456",
     "specialization": {"type": "Element"}

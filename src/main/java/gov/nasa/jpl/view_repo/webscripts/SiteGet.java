@@ -44,7 +44,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.log4j.*;
 import org.alfresco.repo.model.Repository;
-import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.security.PermissionService;
@@ -160,8 +159,8 @@ public class SiteGet extends AbstractJavaWebScript {
                 	if (!emsNode.hasPermission( PermissionService.READ )) continue;
 //                	if (emsNode.childByNamePath( "Models" ) == null                	        
 //                	        && !emsNode.hasAspect(Acm.ACM_SITE) ) continue;
-                	name = emsNode.getName();
                 	try {
+                    name = emsNode.getName();
                 	    parentRef = (NodeRef)emsNode.getPropertyAtTime(Acm.ACM_SITE_PARENT, dateTime);
                 	} catch (org.alfresco.repo.security.permissions.AccessDeniedException e) {
                 	    // permission error, so ignore
@@ -174,9 +173,14 @@ public class SiteGet extends AbstractJavaWebScript {
                 	if (parentRef != null) {
                 	    parentNode = new EmsScriptNode(parentRef, services, response);
                 	    // skip parent if you don't have permissions on parent
-                	    if (emsNode.hasPermission( PermissionService.READ )) {
-                	        parentId = parentNode.getSysmlId();
-                	    }
+                	    if (!parentNode.hasPermission( PermissionService.READ )) continue;
+            	        try {
+            	            // use try just in case
+            	            parentId = parentNode.getSysmlId();
+            	        } catch (org.alfresco.repo.security.permissions.AccessDeniedException e) {
+            	            // ignore permission error if any, shouldn't 
+            	            continue;
+            	        }
                 	}
 
                 	// Note: workspace null if master, consider it to contain all sites.

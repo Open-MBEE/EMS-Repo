@@ -45,7 +45,6 @@ public class ElementReference implements Viewable<EmsScriptNode> {
     }
     
     protected void init( Object object, Attribute attribute ) {
-        //System.out.println("############  init( Object " + object + ",  " + attribute + " )  ###############");
         if ( object instanceof EmsScriptNode ) {
             init( (EmsScriptNode)object, attribute );
         } else if ( object instanceof String ) {
@@ -61,7 +60,6 @@ public class ElementReference implements Viewable<EmsScriptNode> {
     }
 
     protected void init( String id, Attribute attribute) {
-        //System.out.println("############  init( String " + id + ",  " + attribute + " )  ###############");
         NodeRef ref =
                 NodeUtil.findNodeRefById( id, false, null, null,
                                           NodeUtil.getServices(), false );
@@ -87,7 +85,6 @@ public class ElementReference implements Viewable<EmsScriptNode> {
     protected void init( EmsScriptNode element, Attribute attribute,
                          Seen< EmsScriptNode > seen ) {
         
-	    //System.out.println("##### DUDE #######  init( EmsScriptNode " + element + ",  " + attribute + " )  ###############");
 	    Pair< Boolean, Seen< EmsScriptNode > > p = Utils.seen( element, true, seen );
 	    String typeName;
 	    if ( element != null && ((typeName = element.getTypeName()) != null) &&
@@ -144,11 +141,12 @@ public class ElementReference implements Viewable<EmsScriptNode> {
 	@Override
 	public JSONObject toViewJson(Date dateTime) {
 		
+	    String sourceType = "reference";
+        String text = null;
 		if (element == null) {
 	        if (object == null) {
 	            return null;
 	        }
-	        String text = null;
 	        switch ( attribute ) {
 	            case NAME:
 	                text = "" + ClassUtils.getName( object );
@@ -157,10 +155,22 @@ public class ElementReference implements Viewable<EmsScriptNode> {
                     text = "" + ClassUtils.getValue( object );
                     break;
 	            case TYPE:
-                    text = "" + ClassUtils.getType( object );
+                    sourceType = "text";
+                    if ( object instanceof EmsScriptNode ) {
+                        text = ((EmsScriptNode)object).getTypeName();
+                    }
+                    if ( text == null ) {
+                        text = "" + ClassUtils.getType( object );
+                    }
                     break;
                 case ID:
-                    text = "" + ClassUtils.getId( object );
+                    sourceType = "text";
+                    if ( object instanceof EmsScriptNode ) {
+                        text = ((EmsScriptNode)object).getSysmlId();
+                    }
+                    if ( text == null ) {
+                        text = "" + ClassUtils.getId( object );
+                    }
                     break;
 	            case DOCUMENTATION:
 	                // TODO
@@ -170,15 +180,57 @@ public class ElementReference implements Viewable<EmsScriptNode> {
 	                // TODO -- error!
 	        }
 	        return (new Text( text )).toViewJson( null );
-		}
-		
+		} else {
+            switch ( attribute ) {
+                case NAME:
+                    break;
+                case VALUE:
+                    break;
+                case TYPE:
+                    sourceType = "text";
+                    text = element.getTypeName();
+                    if ( text == null ) {
+                        Object typ = ClassUtils.getType( element );
+                        if ( typ != null ) {
+                            text = "" + typ;
+                        }
+                    }
+                    if ( text == null ) {//&& object != null ) {
+                        text = "" + ClassUtils.getType( object );
+                    }
+                    break;
+                case ID:
+                    sourceType = "text";
+                    text = element.getSysmlId();
+                    if ( text == null ) {
+                        Object id = ClassUtils.getId( element );
+                        if ( id != null ) text = "" + id;
+                    }
+                    if ( text == null ) {
+                        text = "" + ClassUtils.getId( object );
+                    }
+                    break;
+                case DOCUMENTATION:
+                    break;
+                default:
+                    // TODO -- error!
+            }
+    	}
+
         JSONObject json = new JSONObject();
 
         try {
             json.put("type", "Paragraph");
-            json.put("sourceType", "reference");
-            json.put("source", element.getSysmlId()); 
-            json.put("sourceProperty", attribute.toString().toLowerCase() );
+            json.put("sourceType", sourceType);
+            if ( sourceType.equals("reference") ) {
+                json.put("source", element.getSysmlId());
+                json.put("sourceProperty", attribute.toString().toLowerCase() );
+            } else {
+                if ( text == null ) {
+                    text = "" + object;
+                }
+                json.put("text", text );
+            }
 
         } catch ( JSONException e ) {
             // TODO Auto-generated catch block

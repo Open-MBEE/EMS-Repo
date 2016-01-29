@@ -278,8 +278,8 @@ public class MmsWorkspaceDiffPost extends ModelPost {
 	            String projectId = !updatedElements.isEmpty() ?
 	                                           updatedElements.iterator().next().getProjectId(targetWs) :
 	                                           NO_PROJECT_ID;
-	            boolean modelPostDiff = wsDiff.isDiff();
-	            boolean modelDeleteDiff = deleteWsDiff != null && deleteWsDiff.isDiff();
+	            boolean modelPostDiff = wsDiff.isDiffPrecalculated();
+	            boolean modelDeleteDiff = deleteWsDiff != null && deleteWsDiff.isDiffPrecalculated();
 	            
 	            if (modelDeleteDiff || modelPostDiff) {
 	                
@@ -307,7 +307,8 @@ public class MmsWorkspaceDiffPost extends ModelPost {
 	                }
 	                
 	                // This has to be done before adding deleted aspects
-	                finalJsonDiff = wsDiff.toJSONObject( new Date(start), new Date(end) ); 
+	                // don't save qualified id/name in anything that goes in commit
+	                finalJsonDiff = wsDiff.toJSONObject( new Date(start), new Date(end), true, false ); 
 	                
 	                // Apply the deleted aspects if needed to the deleted nodes:
 	                if (modelDeleteDiff) {

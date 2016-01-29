@@ -1,7 +1,7 @@
 {
     "workspace1": {
-        "qualifiedName": "master/wsMatrix1",
         "name": "wsMatrix1",
+        "qualifiedName": "master/wsMatrix1",
         "elements": [
             {
                 "qualifiedName": "/europa/JW_TEST2/update_add_gg",
@@ -13,10 +13,9 @@
                 "documentation": "update_add_gg updatedWs1",
                 "specialization": {
                     "propertyType": null,
-                    "isDerived": false,
                     "isSlot": false,
+                    "isDerived": false,
                     "value": [{
-                        "valueExpression": null,
                         "string": "on a shoe",
                         "type": "LiteralString"
                     }],
@@ -24,11 +23,11 @@
                 }
             },
             {
-                "qualifiedName": "/europa/JW_TEST2/update_delete_gg",
                 "name": "update_delete_gg",
-                "sysmlid": "update_delete_gg",
-                "documentation": "update_delete_gg updatedWs1",
+                "qualifiedName": "/europa/JW_TEST2/update_delete_gg",
                 "owner": "123456",
+                "documentation": "update_delete_gg updatedWs1",
+                "sysmlid": "update_delete_gg",
                 "specialization": {"type": "Property"}
             },
             {
@@ -41,10 +40,9 @@
                 "owner": "123456",
                 "specialization": {
                     "propertyType": null,
-                    "isSlot": false,
                     "isDerived": false,
+                    "isSlot": false,
                     "value": [{
-                        "valueExpression": null,
                         "string": "on a shoe",
                         "type": "LiteralString"
                     }],
@@ -60,10 +58,9 @@
                 "owner": "123456",
                 "specialization": {
                     "propertyType": null,
-                    "isSlot": false,
                     "isDerived": false,
+                    "isSlot": false,
                     "value": [{
-                        "valueExpression": null,
                         "string": "on a shoe",
                         "type": "LiteralString"
                     }],
@@ -79,10 +76,9 @@
                 "documentation": "update_update_gg updatedWs1",
                 "specialization": {
                     "propertyType": null,
-                    "isDerived": false,
                     "isSlot": false,
+                    "isDerived": false,
                     "value": [{
-                        "valueExpression": null,
                         "string": "on a shoe",
                         "type": "LiteralString"
                     }],
@@ -99,10 +95,9 @@
                 "owner": "123456",
                 "specialization": {
                     "propertyType": null,
-                    "isSlot": false,
                     "isDerived": false,
+                    "isSlot": false,
                     "value": [{
-                        "valueExpression": null,
                         "string": "on a shoe",
                         "type": "LiteralString"
                     }],
@@ -118,10 +113,9 @@
                 "owner": "123456",
                 "specialization": {
                     "propertyType": null,
-                    "isSlot": false,
                     "isDerived": false,
+                    "isSlot": false,
                     "value": [{
-                        "valueExpression": null,
                         "string": "on a shoe",
                         "type": "LiteralString"
                     }],
@@ -137,10 +131,9 @@
                 "documentation": "add_update_gg",
                 "specialization": {
                     "propertyType": null,
-                    "isDerived": false,
                     "isSlot": false,
+                    "isDerived": false,
                     "value": [{
-                        "valueExpression": null,
                         "string": "on a shoe",
                         "type": "LiteralString"
                     }],
@@ -152,16 +145,16 @@
     "workspace2": {
         "deletedElements": [
             {
-                "name": "update_delete_gg",
                 "qualifiedName": "/europa/JW_TEST2/update_delete_gg",
-                "owner": "123456",
-                "documentation": "update_delete_gg updatedWs1",
+                "name": "update_delete_gg",
                 "sysmlid": "update_delete_gg",
+                "documentation": "update_delete_gg updatedWs1",
+                "owner": "123456",
                 "specialization": {"type": "Property"}
             },
             {
-                "name": "none_delete_gg",
                 "qualifiedName": "/europa/JW_TEST2/none_delete_gg",
+                "name": "none_delete_gg",
                 "owner": "123456",
                 "sysmlid": "none_delete_gg",
                 "specialization": {"type": "Property"},
@@ -177,10 +170,9 @@
                 "documentation": "none_add_gg",
                 "specialization": {
                     "propertyType": null,
-                    "isDerived": false,
                     "isSlot": false,
+                    "isDerived": false,
                     "value": [{
-                        "valueExpression": null,
                         "string": "on a shoe",
                         "type": "LiteralString"
                     }],
@@ -197,10 +189,9 @@
                 "owner": "123456",
                 "specialization": {
                     "propertyType": null,
-                    "isSlot": false,
                     "isDerived": false,
+                    "isSlot": false,
                     "value": [{
-                        "valueExpression": null,
                         "string": "on a shoe",
                         "type": "LiteralString"
                     }],
@@ -208,21 +199,21 @@
                 }
             },
             {
-                "qualifiedName": "/europa/JW_TEST2/delete_update_gg",
                 "name": "delete_update_gg",
-                "sysmlid": "delete_update_gg",
-                "documentation": "delete_update_gg updatedWs2",
+                "qualifiedName": "/europa/JW_TEST2/delete_update_gg",
                 "owner": "123456",
+                "documentation": "delete_update_gg updatedWs2",
+                "sysmlid": "delete_update_gg",
                 "specialization": {"type": "Property"}
             }
         ],
         "conflictedElements": [
             {
-                "qualifiedName": "/europa/JW_TEST2/update_delete_gg",
                 "name": "update_delete_gg",
-                "sysmlid": "update_delete_gg",
-                "documentation": "update_delete_gg updatedWs1",
+                "qualifiedName": "/europa/JW_TEST2/update_delete_gg",
                 "owner": "123456",
+                "documentation": "update_delete_gg updatedWs1",
+                "sysmlid": "update_delete_gg",
                 "specialization": {"type": "Property"}
             },
             {
@@ -235,10 +226,9 @@
                 "documentation": "delete_add_gg",
                 "specialization": {
                     "propertyType": null,
-                    "isDerived": false,
                     "isSlot": false,
+                    "isDerived": false,
                     "value": [{
-                        "valueExpression": null,
                         "string": "on a shoe",
                         "type": "LiteralString"
                     }],
@@ -246,74 +236,74 @@
                 }
             },
             {
-                "name": "delete_update_gg",
                 "qualifiedName": "/europa/JW_TEST2/delete_update_gg",
-                "owner": "123456",
-                "documentation": "delete_update_gg updatedWs2",
+                "name": "delete_update_gg",
                 "sysmlid": "delete_update_gg",
+                "documentation": "delete_update_gg updatedWs2",
+                "owner": "123456",
                 "specialization": {"type": "Property"}
             },
             {
-                "qualifiedName": "/europa/JW_TEST2/add_update_gg",
-                "sysmlid": "add_update_gg",
                 "name": "add_update_gg",
-                "owner": "123456",
+                "qualifiedName": "/europa/JW_TEST2/add_update_gg",
                 "documentation": "add_update_gg updatedWs2",
-                "specialization": {"type": "Property"}
+                "owner": "123456",
+                "sysmlid": "add_update_gg",
+                "specialization": {"type": "Property"},
             },
             {
-                "name": "update_update_gg",
                 "qualifiedName": "/europa/JW_TEST2/update_update_gg",
-                "owner": "123456",
-                "sysmlid": "update_update_gg",
+                "name": "update_update_gg",
                 "documentation": "update_update_gg updatedWs2",
+                "sysmlid": "update_update_gg",
+                "owner": "123456",
                 "specialization": {"type": "Property"}
             },
             {
-                "qualifiedName": "/europa/JW_TEST2/update_add_gg",
-                "sysmlid": "update_add_gg",
                 "name": "update_add_gg",
-                "owner": "123456",
+                "qualifiedName": "/europa/JW_TEST2/update_add_gg",
                 "documentation": "update_add_gg",
+                "owner": "123456",
+                "sysmlid": "update_add_gg",
                 "specialization": {"type": "Property"}
             }
         ],
         "updatedElements": [
             {
-                "name": "add_update_gg",
                 "qualifiedName": "/europa/JW_TEST2/add_update_gg",
-                "owner": "123456",
-                "documentation": "add_update_gg updatedWs2",
+                "name": "add_update_gg",
                 "sysmlid": "add_update_gg",
+                "documentation": "add_update_gg updatedWs2",
+                "owner": "123456",
                 "specialization": {"type": "Property"},
             },
             {
-                "name": "update_add_gg",
                 "qualifiedName": "/europa/JW_TEST2/update_add_gg",
-                "owner": "123456",
-                "documentation": "update_add_gg",
+                "name": "update_add_gg",
                 "sysmlid": "update_add_gg",
+                "documentation": "update_add_gg",
+                "owner": "123456",
                 "specialization": {"type": "Property"}
             },
             {
-                "name": "none_update_gg",
                 "qualifiedName": "/europa/JW_TEST2/none_update_gg",
-                "owner": "123456",
-                "documentation": "none_update_gg updatedWs2",
+                "name": "none_update_gg",
                 "sysmlid": "none_update_gg",
+                "documentation": "none_update_gg updatedWs2",
+                "owner": "123456",
                 "specialization": {"type": "Property"}
             },
             {
-                "name": "update_update_gg",
                 "qualifiedName": "/europa/JW_TEST2/update_update_gg",
-                "owner": "123456",
-                "documentation": "update_update_gg updatedWs2",
+                "name": "update_update_gg",
                 "sysmlid": "update_update_gg",
+                "documentation": "update_update_gg updatedWs2",
+                "owner": "123456",
                 "specialization": {"type": "Property"}
             }
         ],
-        "qualifiedName": "master/wsMatrix2",
         "name": "wsMatrix2",
+        "qualifiedName": "master/wsMatrix2",
         "movedElements": []
     }
 }

@@ -86,14 +86,6 @@
 	            <type>jar</type>
 	            <systemPath>${project.basedir}/src/main/amp/web/WEB-INF/lib/mbee_util.jar</systemPath>
 	        </dependency>
-	        <dependency>
-	            <groupId>kexpparser</groupId>
-	            <artifactId>kexpparser</artifactId>
-	            <version>0.0.8</version>
-	            <scope>system</scope>
-	            <type>jar</type>
-	            <systemPath>${project.basedir}/src/main/amp/web/WEB-INF/lib/kexpparser.jar</systemPath>
-	        </dependency>
             </dependencies>
             <properties>
                 <env.BUILD_NUMBER>1</env.BUILD_NUMBER>
@@ -117,14 +109,6 @@
                     <artifactId>bae</artifactId>
                     <version>${mbee.version}</version>
                 </dependency>
-                <dependency>
-                    <groupId>kexpparser</groupId>
-                    <artifactId>kexpparser</artifactId>
-                    <version>0.0.8</version>
-	                <scope>system</scope>
-	                <type>jar</type>
-	                <systemPath>${project.basedir}/src/main/amp/web/WEB-INF/lib/kexpparser.jar</systemPath>
-               </dependency>
             </dependencies>
             <properties>
                 <env.BUILD_NUMBER>1</env.BUILD_NUMBER>
@@ -142,14 +126,6 @@
                     <groupId>gov.nasa.jpl.mbee.sysml</groupId>
                     <artifactId>sysml</artifactId>
                     <version>${mbee.version}</version>
-               </dependency>
-                <dependency>
-                    <groupId>kexpparser</groupId>
-                    <artifactId>kexpparser</artifactId>
-                    <version>0.0.8</version>
-                    <scope>system</scope>
-                    <type>jar</type>
-                    <systemPath>${project.basedir}/src/main/amp/web/WEB-INF/lib/kexpparser.jar</systemPath>
                </dependency>
                 <dependency>
                     <groupId>gov.nasa.jpl.mbee.bae</groupId>

@@ -774,14 +774,7 @@ public class WorkspaceDiff implements Serializable {
      * @throws JSONException
      */
     public JSONObject toJSONObject(Date time1, Date time2) throws JSONException {
-        JSONObject deltaJson = toJSONObject( time1, time2, true );
-        // If we came up with nothing (!isDiff()), then maybe we computed it
-        // another way and should return the existing diffJson.
-        if ( diffJson == null || isDiff( deltaJson ) ) {
-            diffJson = deltaJson;
-        }
-        
-        return diffJson;
+        return toJSONObject( time1, time2, true );
     }
 
     /**
@@ -793,35 +786,45 @@ public class WorkspaceDiff implements Serializable {
      * @throws JSONException
      */
     public JSONObject toJSONObject(Date time1, Date time2, boolean showAll) throws JSONException {
+        return toJSONObject(time1, time2, showAll, true);
+    }
+    
+    public JSONObject toJSONObject(Date time1, Date time2, boolean showAll, boolean includeQualified) throws JSONException {
+        if (diffJson != null && !isDiffPrecalculated()) return diffJson;
+        
         JSONObject deltaJson = NodeUtil.newJsonObject();
         JSONObject ws1Json = NodeUtil.newJsonObject();
         JSONObject ws2Json = NodeUtil.newJsonObject();
 
-        addJSONArray(ws1Json, "elements", elements, elementsVersions, ws1, time1, true);
+        addJSONArray(ws1Json, "elements", elements, elementsVersions, ws1, time1, true, includeQualified);
         addWorkspaceMetadata( ws1Json, ws1, time1 );
 
-        addJSONArray(ws2Json, "addedElements", addedElements, ws2, time2, true);
-        addJSONArray(ws2Json, "movedElements", movedElements, ws2, time2, showAll);
+        addJSONArray(ws2Json, "addedElements", addedElements, ws2, time2, true, includeQualified);
+        addJSONArray(ws2Json, "movedElements", movedElements, ws2, time2, showAll, includeQualified);
         // Note: deleteElements should use time1 and not time2, and ws1 not ws2, 
         //       as element was found in ws1 at time1, not ws2 at time2!
-        addJSONArray(ws2Json, "deletedElements", deletedElements, ws1, time1, showAll);
-        addJSONArray(ws2Json, "updatedElements", updatedElements, ws2, time2, showAll);
-        addJSONArray(ws2Json, "conflictedElements", conflictedElements, ws2, time2, showAll);
+        addJSONArray(ws2Json, "deletedElements", deletedElements, ws1, time1, showAll, includeQualified);
+        addJSONArray(ws2Json, "updatedElements", updatedElements, ws2, time2, showAll, includeQualified);
+        addJSONArray(ws2Json, "conflictedElements", conflictedElements, ws2, time2, showAll, includeQualified);
         addWorkspaceMetadata( ws2Json, ws2, time2);
 
         deltaJson.put( "workspace1", ws1Json );
         deltaJson.put( "workspace2", ws2Json );
-
+        
         // If we came up with nothing (!isDiff()), then maybe we computed it
         // another way and should return the existing diffJson.
-        if ( diffJson == null || isDiff() ) {
+        if ( diffJson == null || isDiff(deltaJson) ) {
             diffJson = deltaJson;
         }
         
         return diffJson;
-
     }
     
+    /**
+     * Does glomming to check if there are any differences
+     * @param diff
+     * @return
+     */
     public static boolean isDiff( JSONObject diff ) {
         JsonDiffDiff diffDiff = new JsonDiffDiff( diff );
         return !diffDiff.getAffectedIds().isEmpty();
@@ -842,20 +845,21 @@ public class WorkspaceDiff implements Serializable {
     }
 
     private boolean addJSONArray(JSONObject jsonObject, String key, Map< String, EmsScriptNode > map,
-                                 WorkspaceNode ws, Date dateTime, boolean showAll) throws JSONException {
-            return addJSONArray(jsonObject, key, map, null, ws, dateTime, showAll);
+                                 WorkspaceNode ws, Date dateTime, boolean showAll, boolean includeQualified) throws JSONException {
+            return addJSONArray(jsonObject, key, map, null, ws, dateTime, showAll, includeQualified);
     }
 
     private boolean addJSONArray(JSONObject jsonObject, String key, Map< String, EmsScriptNode > map, 
-                                 Map< String, Version> versions, WorkspaceNode ws, Date dateTime, boolean showAll) throws JSONException {
-        return addJSONArray( jsonObject, key, map, versions, ws, dateTime, showAll, nodeDiff );
+                                 Map< String, Version> versions, WorkspaceNode ws, Date dateTime, boolean showAll, boolean includeQualified) throws JSONException {
+        return addJSONArray( jsonObject, key, map, versions, ws, dateTime, showAll, nodeDiff, includeQualified );
     }
+    
     public static boolean addJSONArray(JSONObject jsonObject, String key, Map< String, EmsScriptNode > map, 
                                         Map< String, Version> versions, WorkspaceNode ws, Date dateTime, boolean showAll,
-                                        NodeDiff nodeDiff ) throws JSONException {
+                                        NodeDiff nodeDiff, boolean includeQualified ) throws JSONException {
         boolean emptyArray = true;
         if (map != null && map.size() > 0) {
-            jsonObject.put( key, convertMapToJSONArray( map, versions, ws, dateTime, showAll, nodeDiff ) );
+            jsonObject.put( key, convertMapToJSONArray( map, versions, ws, dateTime, showAll, nodeDiff, includeQualified ) );
             emptyArray = false;
         } else {
             // add in the empty array
@@ -906,22 +910,14 @@ public class WorkspaceDiff implements Serializable {
         return filter;
     }
 
-    protected JSONArray convertMapToJSONArray(Map<String, EmsScriptNode> map,
-                                              Map<String, Version> versions, 
-                                              WorkspaceNode workspace, Date dateTime,
-                                              boolean showAll) throws JSONException {
-        return convertMapToJSONArray( map, versions, workspace, dateTime, showAll, nodeDiff );
-    }
-
     protected static JSONArray convertMapToJSONArray(Map<String, EmsScriptNode> map,
                                                      Map<String, Version> versions, 
                                                      WorkspaceNode workspace, Date dateTime,
-                                                     boolean showAll, NodeDiff nodeDiff) throws JSONException {
+                                                     boolean showAll, NodeDiff nodeDiff,
+                                                     boolean includeQualified) throws JSONException {
         Set<String> filter = null;
         if (!showAll) {
             filter = getFilter();
-//            filter = new HashSet<String>();
-//            filter.add("id");
         }
 
         JSONArray array = new JSONArray();
@@ -931,7 +927,6 @@ public class WorkspaceDiff implements Serializable {
                 NodeRef r = NodeUtil.getNodeRefAtTime( node.getNodeRef(),
                                                        workspace, dateTime );
                 if ( r == null ) node = null;
-                //else node = new EmsScriptNode( r, getServices() ); 
             }
             if ( node == null ) {
                 continue;
@@ -962,13 +957,12 @@ public class WorkspaceDiff implements Serializable {
                 filter.add(Acm.JSON_NAME);
                 filter.add(Acm.JSON_TYPE);
             }
-            boolean includeQualified = true;
             Version version = null;
             if ( !Utils.isNullOrEmpty( versions ) ) {
                 version = versions.get( node.getSysmlId() );
-//                filter.add( "id" );
-//                filter.add( "version" );
             }
+
+            // diffs don't need to have qualified
             JSONObject jsonObject =
                     node.toJSONObject( filter, false, workspace, dateTime,
                                        includeQualified, false, version, null );
@@ -1377,7 +1371,7 @@ public class WorkspaceDiff implements Serializable {
         return true;
     }
 
-    public boolean isDiff() {
+    public boolean isDiffPrecalculated() {
         if (addedElements.size() > 0 || deletedElements.size() > 0 || movedElements.size() > 0 || updatedElements.size() > 0) {
             return true;
         }

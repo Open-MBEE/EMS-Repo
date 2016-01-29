@@ -6,11 +6,10 @@
     "creator": "admin",
     "modifier": "admin",
     "name": "notInThePast",
-    "owner": "123456",
     "documentation": "",
+    "owner": "123456",
     "specialization": {
         "specification": {
-            "valueExpression": null,
             "expressionBody": ["foo8"],
             "type": "OpaqueExpression"
         },

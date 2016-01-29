@@ -1,0 +1,129 @@
+{"elements": [
+    {
+        "owner": "holding_bin_no_site_no_project",
+        "creator": "admin",
+        "read": "2016-01-07T14:49:09.768-0800",
+        "isMetatype": false,
+        "created": "Thu Jan 07 14:31:01 PST 2016",
+        "editable": true,
+        "qualifiedName": "/no_site/no_site_no_project/holding_bin/View Z",
+        "modifier": "admin",
+        "documentation": "",
+        "siteCharacterizationId": "no_site",
+        "sysmlid": "MMS_1450390431247_8a4b76d2-394c-4569-9abe-5c51dc4b0813",
+        "nodeRefId": "workspace://SpacesStore/1e37f7ee-1319-4c05-8dbb-d8d64c8d35af",
+        "versionedRefId": "versionStore://version2Store/3b527bcb-9cd0-47ea-9cfa-f20403412c2b",
+        "appliedMetatypes": [
+            "_17_0_1_232f03dc_1325612611695_581988_21583",
+            "_9_0_62a020a_1105704885343_144138_7929"
+        ],
+        "qualifiedId": "/no_site/no_site_no_project/holding_bin_no_site_no_project/MMS_1450390431247_8a4b76d2-394c-4569-9abe-5c51dc4b0813",
+        "name": "View Z",
+        "modified": "2016-01-07T14:49:09.195-0800",
+        "specialization": {
+            "contents": {
+                "valueExpression": null,
+                "type": "Expression",
+                "operand": []
+            },
+            "childrenViews": [],
+            "type": "View",
+            "displayedElements": [],
+            "allowedElements": []
+        }
+    },
+    {
+        "owner": "holding_bin_no_site_no_project",
+        "creator": "admin",
+        "read": "2016-01-07T14:49:09.782-0800",
+        "isMetatype": false,
+        "created": "Thu Jan 07 14:31:00 PST 2016",
+        "editable": true,
+        "qualifiedName": "/no_site/no_site_no_project/holding_bin/View X",
+        "modifier": "admin",
+        "documentation": "",
+        "siteCharacterizationId": "no_site",
+        "sysmlid": "MMS_1450390431247_8a4b76d2-394c-4569-9abe-5c51dc4b0811",
+        "nodeRefId": "workspace://SpacesStore/22ebc068-bd74-4867-81df-65d8df9997ed",
+        "versionedRefId": "versionStore://version2Store/973727c3-ebb0-49d0-990c-623cdf6f83d8",
+        "appliedMetatypes": [
+            "_17_0_1_232f03dc_1325612611695_581988_21583",
+            "_9_0_62a020a_1105704885343_144138_7929"
+        ],
+        "qualifiedId": "/no_site/no_site_no_project/holding_bin_no_site_no_project/MMS_1450390431247_8a4b76d2-394c-4569-9abe-5c51dc4b0811",
+        "name": "View X",
+        "modified": "2016-01-07T14:49:08.898-0800",
+        "specialization": {
+            "contents": {
+                "valueExpression": null,
+                "type": "Expression",
+                "operand": []
+            },
+            "childrenViews": [],
+            "type": "View",
+            "displayedElements": [],
+            "allowedElements": []
+        }
+    },
+    {
+        "owner": "holding_bin_no_site_no_project",
+        "creator": "admin",
+        "read": "2016-01-07T14:49:09.788-0800",
+        "isMetatype": false,
+        "created": "Thu Jan 07 14:31:00 PST 2016",
+        "editable": true,
+        "qualifiedName": "/no_site/no_site_no_project/holding_bin/Product X",
+        "modifier": "admin",
+        "siteCharacterizationId": "no_site",
+        "sysmlid": "MMS_1450390431247_8a4b76d2-394c-4569-9abe-5c51dc4b0711",
+        "nodeRefId": "workspace://SpacesStore/689d2425-a83e-4189-bc7a-95b3d1f64a2e",
+        "versionedRefId": "versionStore://version2Store/7ac46ecd-bd6d-4acf-86a4-687f41f8eb3f",
+        "qualifiedId": "/no_site/no_site_no_project/holding_bin_no_site_no_project/MMS_1450390431247_8a4b76d2-394c-4569-9abe-5c51dc4b0711",
+        "name": "Product X",
+        "modified": "2016-01-07T14:49:08.842-0800",
+        "specialization": {
+            "contents": {
+                "valueExpression": null,
+                "type": "Expression",
+                "operand": []
+            },
+            "type": "Product",
+            "displayedElements": [],
+            "allowedElements": []
+        }
+    },
+    {
+        "owner": "holding_bin_no_site_no_project",
+        "creator": "admin",
+        "read": "2016-01-07T14:49:09.795-0800",
+        "isMetatype": false,
+        "created": "Thu Jan 07 14:31:01 PST 2016",
+        "editable": true,
+        "qualifiedName": "/no_site/no_site_no_project/holding_bin/View Y",
+        "modifier": "admin",
+        "documentation": "",
+        "siteCharacterizationId": "no_site",
+        "sysmlid": "MMS_1450390431247_8a4b76d2-394c-4569-9abe-5c51dc4b0812",
+        "nodeRefId": "workspace://SpacesStore/bbbc07d6-4cfb-4c45-a4df-b4ce45756b6a",
+        "versionedRefId": "versionStore://version2Store/52144ccd-13b7-4acf-a5c3-0878530e4cb8",
+        "appliedMetatypes": [
+            "_17_0_1_232f03dc_1325612611695_581988_21583",
+            "_9_0_62a020a_1105704885343_144138_7929"
+        ],
+        "qualifiedId": "/no_site/no_site_no_project/holding_bin_no_site_no_project/MMS_1450390431247_8a4b76d2-394c-4569-9abe-5c51dc4b0812",
+        "name": "View Y",
+        "modified": "2016-01-07T14:49:09.121-0800",
+        "specialization": {
+            "contents": {
+                "valueExpression": null,
+                "type": "Expression",
+                "operand": []
+            },
+            "childrenViews": [],
+            "type": "View",
+            "displayedElements": [],
+            "allowedElements": []
+        }
+    }
+]}
+200

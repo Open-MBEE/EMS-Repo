@@ -17,9 +17,9 @@
     "definitions": {
         "Version": {
             "properties": {
-                "sysmlid": {
+                "modifier": {
                     "type": "string",
-                    "description": "Unique model identifier of the element. Equivalent to MDID"
+                    "description": "Modifier of the specified version"
                 },
                 "timestamp": {
                     "type": "string",
