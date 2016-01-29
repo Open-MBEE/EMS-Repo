@@ -13,18 +13,13 @@ public interface ExecutionEngine {
     void createEngine();
 
     /**
-     * Execute currently queued job
-     */
-    void execute();
-
-    /**
      * execute
      * 
      * Execute specified event
      * 
      * @param event
      */
-    void execute(Object event);
+    void execute( Object event );
 
     /**
      * execute
@@ -33,17 +28,8 @@ public interface ExecutionEngine {
      * 
      * @param events
      */
-    void execute(List<Object> events);
+    void execute( List< Object > events );
 
-    /**
-     * executeQueue
-     * 
-     * Executes all events that are in queue.
-     * 
-     * @param event
-     */
-    void executeQueue();
-    
     /**
      * isRunning
      * 
@@ -63,75 +49,41 @@ public interface ExecutionEngine {
     int getExecutionStatus();
 
     /**
-     * getEvent
+     * getEventDetail Searches for specific detail within the queue of events to
+     * be executed.
      * 
-     * Returns an Object of the event to be executed.
-     * 
-     * @return Object type of event
-     */
-    Object getEvent();
-
-    /**
-     * getEvents
-     * 
-     * Returns a list of objects that are in queue to be executed
-     * 
-     * @return
-     */
-    Map<String, Object> getEvents();
-
-    /**
-     * getExecutionQueue
-     * 
-     * Returns all events that are in queue to be executed by the
-     * ExecutionEngine
-     * 
-     * @return
-     */
-    String getExecutionQueue();
-
-    /**
-     * getEventDetail
-     *  Searches for specific detail within the queue of events to be executed.
-     *  
      * @param detail
      * @return
      */
-    Object getEventDetail(String detail);
-    
-    /**
-     * getEventDetail
-     * 
-     * This method will return the details of the event that is to be executed next.
-     * @return
-     */
-    Object getEventDetails();
-    
+    String getEventDetail( String eventName, String detail );
+
     /**
      * setEvent
      * 
      * Sets a single event to be executed.
      * 
-     * @param event 
+     * @param event
      */
-    void setEvent(Object event);
+    void setEvent( Object event );
 
     /**
      * setEvents
      * 
      * Sets multiple events to be executed.
      * 
-     * @param event 
+     * @param event
      */
-    void setEvents(List<Object> event);
-    
-    void updateEvent(String event);
+    void setEvents( List< Object > event );
+
+    void updateEvent( String event );
 
     /**
      * Stops currently executing event and should also stop all further events
      * to be executed as well.
      * 
-     * @return Returns boolean if the execution was stopped properly. Should Return false if the execution is not running or if event is not found.
+     * @return Returns boolean if the execution was stopped properly. Should
+     *         Return false if the execution is not running or if event is not
+     *         found.
      */
     boolean stopExecution();
 
@@ -142,7 +94,10 @@ public interface ExecutionEngine {
      * removed from the list.
      * 
      * @param event
-     * @return returns if the removal of the event was successful. Should return false if the event is not found.
+     * @return returns if the removal of the event was successful. Should return
+     *         false if the event is not found.
      */
-    boolean removeEvent(Object event);
+    boolean removeEvent( Object event );
+
+    long getExecutionTime();
 }
