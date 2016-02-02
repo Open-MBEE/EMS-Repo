@@ -16,6 +16,7 @@ import org.alfresco.repo.cmis.rest.CMISPropertyValueMethod.NULL;
 import com.offbytwo.jenkins.JenkinsServer;
 import com.offbytwo.jenkins.model.Build;
 import com.offbytwo.jenkins.model.BuildWithDetails;
+import com.offbytwo.jenkins.model.Executor;
 import com.offbytwo.jenkins.model.FolderJob;
 import com.offbytwo.jenkins.model.Job;
 import com.offbytwo.jenkins.model.JobWithDetails;
@@ -23,6 +24,7 @@ import com.offbytwo.jenkins.model.JobWithDetails;
 public class JenkinsEngine implements ExecutionEngine {
 
     private JenkinsServer jenkins;
+    private Executor runningJob;
     private String username;
     private String passwordOrToken;
     private URI jenkinsURI;
@@ -95,8 +97,7 @@ public class JenkinsEngine implements ExecutionEngine {
 
     @Override
     public int getExecutionStatus() {
-        // TODO Auto-generated method stub
-        return 0;
+        return runningJob.getProgress();
     }
 
     public Map< String, Job > getJenkinBuilds() throws IOException {
@@ -198,7 +199,7 @@ public class JenkinsEngine implements ExecutionEngine {
     @Override
     public void setEvent( Object event ) {
         // TODO Auto-generated method stub
-
+        
     }
 
     @Override
@@ -210,6 +211,13 @@ public class JenkinsEngine implements ExecutionEngine {
     @Override
     public boolean stopExecution() {
         // TODO Auto-generated method stub
+        /*
+         * Stop all running instances of job / jobs
+         */
+        
+        if ( jenkins.isRunning() ) {
+            // stop execution only if the server is running
+        }
         return false;
     }
 
