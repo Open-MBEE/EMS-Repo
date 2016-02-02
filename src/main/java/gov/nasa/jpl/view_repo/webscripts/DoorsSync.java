@@ -462,8 +462,6 @@ public class DoorsSync extends AbstractJavaWebScript {
 
     protected String createUpdateRequirementFromDoors(Requirement r) {
 
-        addSlotsFromDoors( r );
-
         JSONObject postJson = new JSONObject();
         JSONArray elements = new JSONArray();
 
