@@ -67,9 +67,10 @@ create index on doors(sysmlId);
 create table doorsFields
 (
   project text not null,
-  propertyName text not null,
-  doorsAttrName text not null,
-  constraint unique_fields unique(project, propertyName)
+  propertyId text not null,
+  propertyType text default 'string',
+  doorsAttr text not null,
+  constraint unique_fields unique(project, propertyId, propertyType, doorsAttr)
 );
 
 -- given two nodeRefId, insert an edge between the two
