@@ -35,7 +35,10 @@ import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 import gov.nasa.jpl.view_repo.webscripts.ModelGet;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
+import gov.nasa.jpl.pma.JenkinsEngine;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -80,10 +83,22 @@ public class JobGet extends ModelGet {
     @Override
     protected Map<String, Object> executeImplImpl(WebScriptRequest req, 
             Status status, Cache cache) {
+        JenkinsEngine jenkins = null;
+        URI uri = null;
+
         if (logger.isDebugEnabled()) {
             String user = AuthenticationUtil.getFullyAuthenticatedUser();
             logger.debug(user + " " + req.getURL());
         }
+        
+        try {
+            uri = new URI ("http://cae-jenkins.jpl.nasa.gov");
+        } catch ( URISyntaxException e1 ) {
+            // TODO Auto-generated catch block
+            e1.printStackTrace();
+        }
+
+        jenkins.createEngine( uri, "euroint", "letmein" );
         Timer timer = new Timer();
         printHeader(req);
 
