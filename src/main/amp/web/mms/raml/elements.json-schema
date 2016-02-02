@@ -64,7 +64,7 @@
                 },
                 "affectedIds": {
                     "type": "array",
-                    "description": "[MMS specific] An array of all of the ids of elements that are affected by changes to the element,
+                    "description": "[MMS specific] An array of all of the ids of elements that are affected by changes to the element",
                     "items": {
                         "type": "String",
                         "description": "Sysml ID of the affected element"
