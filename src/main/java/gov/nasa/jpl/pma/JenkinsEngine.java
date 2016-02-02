@@ -10,13 +10,10 @@ import java.net.URI;
 import java.util.List;
 import java.util.Map;
 
-import org.activiti.engine.impl.transformer.IntegerToString;
-import org.alfresco.repo.cmis.rest.CMISPropertyValueMethod.NULL;
-
 import com.offbytwo.jenkins.JenkinsServer;
 import com.offbytwo.jenkins.model.Build;
 import com.offbytwo.jenkins.model.BuildWithDetails;
-import com.offbytwo.jenkins.model.FolderJob;
+//import com.offbytwo.jenkins.model.FolderJob;
 import com.offbytwo.jenkins.model.Job;
 import com.offbytwo.jenkins.model.JobWithDetails;
 
@@ -31,8 +28,10 @@ public class JenkinsEngine implements ExecutionEngine {
     /**
      * Default Constructor of JenkinsEngine
      */
-    public JenkinsEngine() {
+    public JenkinsEngine(URI uri) {
         // TODO Auto-generated constructor stub
+        jenkins = new JenkinsServer(uri);
+        System.out.println( "Creating a new jenkins server.\n");
     }
 
     /**
@@ -77,9 +76,6 @@ public class JenkinsEngine implements ExecutionEngine {
     @Override
     public void execute( Object event ) {}
 
-    public String runScript( String script ) throws IOException {
-        return jenkins.runScript( script );
-    }
 
     @Override
     public void execute( List< Object > events ) {
@@ -99,25 +95,6 @@ public class JenkinsEngine implements ExecutionEngine {
         return 0;
     }
 
-    public Map< String, Job > getJenkinBuilds() throws IOException {
-        return this.jenkins.getJobs( null, null );
-    }
-
-    public Map< String, Job > getEvents( String event ) throws IOException {
-        return this.jenkins.getJobs( null, event );
-    }
-
-    public Map< String, Job >
-           getEvents( FolderJob jobGroup ) throws IOException {
-        return this.jenkins.getJobs( jobGroup, null );
-    }
-
-    public Map< String, Job > getEvents( FolderJob folder,
-                                         String event ) throws IOException {
-        return this.jenkins.getJobs( folder, event );
-    }
-
-    
     /**
      * This method is used to find the job that the user specifies within <b>eventName</b> and specifying
      *  which detail they would like from the job.

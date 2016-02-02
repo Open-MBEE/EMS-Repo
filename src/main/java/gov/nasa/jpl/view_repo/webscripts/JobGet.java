@@ -35,8 +35,9 @@ import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 import gov.nasa.jpl.view_repo.webscripts.ModelGet;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
-import gov.nasa.jpl.pma.JenkinsEngine;
+//import gov.nasa.jpl.pma.JenkinsEngine;
 
+import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Date;
@@ -56,6 +57,10 @@ import org.json.JSONObject;
 import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
+
+import com.offbytwo.jenkins.JenkinsServer;
+
+//import com.offbytwo.jenkins.JenkinsServer;
 
 public class JobGet extends ModelGet {
     static Logger logger = Logger.getLogger(JobGet.class);
@@ -82,7 +87,6 @@ public class JobGet extends ModelGet {
     @Override
     protected Map<String, Object> executeImplImpl(WebScriptRequest req, 
             Status status, Cache cache) {
-        JenkinsEngine jenkins = null;
         URI uri = null;
 
         if (logger.isDebugEnabled()) {
@@ -91,13 +95,32 @@ public class JobGet extends ModelGet {
         }
         
         try {
-            uri = new URI ("http://cae-jenkins.jpl.nasa.gov");
+            uri = new URI ("https://cae-jenkins.jpl.nasa.gov");
+            System.out.println( "Setting base URI to CAE-Jenkins.jpl.nasa.gov\n" );
         } catch ( URISyntaxException e1 ) {
+            // TODO Auto-generated catch block
+            System.out.println( "\nURISyntaxException e1\n") ;
+            e1.printStackTrace();
+        }
+
+        JenkinsServer jenkins = null;
+
+//        JenkinsEngine jenkins = new JenkinsEngine(uri);
+        try {
+            jenkins = new JenkinsServer(new URI("https://cae-jenkins.jpl.nasa.gov/jenkins"),"dank","x1g4c8F5Pa!f");
+        } catch ( URISyntaxException e1 ) {
+            // TODO Auto-generated catch block
+            System.out.println( "URISyntaxException e1") ;
+            e1.printStackTrace();
+        }
+        
+        try {
+            jenkins.getJobs();
+        } catch ( IOException e1 ) {
             // TODO Auto-generated catch block
             e1.printStackTrace();
         }
 
-        jenkins.createEngine( uri, "euroint", "letmein" );
         Timer timer = new Timer();
         printHeader(req);
 
