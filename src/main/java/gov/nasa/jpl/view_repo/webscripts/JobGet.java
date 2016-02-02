@@ -68,7 +68,6 @@ public class JobGet extends ModelGet {
         super(repositoryHelper, registry);
     }
 
-    // DO WE NEED THIS?
     protected JSONArray jobs = new JSONArray();
     protected Map<String, EmsScriptNode> jobsFound = new HashMap<String, EmsScriptNode>();
     protected Map<String, List<EmsScriptNode>> jobProperties = new HashMap<String, List<EmsScriptNode>>();
@@ -112,7 +111,8 @@ public class JobGet extends ModelGet {
         try {
             for(int i = 0; i < jobsJson.length(); i++) {
                 JSONObject job = (JSONObject)jobsJson.get(i);
-                job.remove( "specialization" );
+                if (job.has( "specialization" )) 
+                    job.remove( "specialization" );
             }
             
             if (jobsJson.length() > 0) {

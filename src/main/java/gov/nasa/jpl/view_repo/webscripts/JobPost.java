@@ -29,24 +29,64 @@
 
 package gov.nasa.jpl.view_repo.webscripts;
 
+import gov.nasa.jpl.mbee.util.Debug;
+import gov.nasa.jpl.mbee.util.Pair;
+import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.mbee.util.Timer;
 import gov.nasa.jpl.mbee.util.Utils;
+import gov.nasa.jpl.view_repo.actions.ActionUtil;
+import gov.nasa.jpl.view_repo.actions.ModelLoadActionExecuter;
+import gov.nasa.jpl.view_repo.util.Acm;
+import gov.nasa.jpl.view_repo.util.CommitUtil;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
-import gov.nasa.jpl.view_repo.util.WorkspaceNode;
-import gov.nasa.jpl.view_repo.webscripts.ModelGet;
+import gov.nasa.jpl.view_repo.util.EmsTransaction;
+import gov.nasa.jpl.view_repo.util.JsonDiffDiff;
+import gov.nasa.jpl.view_repo.util.K;
+import gov.nasa.jpl.view_repo.util.ModelContext;
+import gov.nasa.jpl.view_repo.util.ModStatus;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
+import gov.nasa.jpl.view_repo.util.ServiceContext;
+import gov.nasa.jpl.view_repo.util.WorkspaceDiff;
+import gov.nasa.jpl.view_repo.util.WorkspaceNode;
+import gov.nasa.jpl.view_repo.util.JsonDiffDiff.DiffType;
+import gov.nasa.jpl.view_repo.webscripts.util.ShareUtils;
 
+//import k.frontend.Frontend;
+//import k.frontend.ModelParser;
+//import k.frontend.ModelParser.ModelContext;
+
+
+
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.TreeMap;
+import java.util.TreeSet;
 
 import javax.servlet.http.HttpServletResponse;
 
+//import javax.transaction.UserTransaction;
 import org.apache.log4j.*;
 import org.alfresco.repo.model.Repository;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
+import org.alfresco.service.cmr.action.Action;
+import org.alfresco.service.cmr.action.ActionService;
+import org.alfresco.service.cmr.dictionary.AspectDefinition;
+import org.alfresco.service.cmr.dictionary.DictionaryService;
+import org.alfresco.service.cmr.repository.NodeRef;
+import org.alfresco.service.cmr.security.PermissionService;
+import org.alfresco.service.cmr.site.SiteInfo;
+import org.alfresco.service.cmr.version.Version;
+import org.alfresco.service.namespace.QName;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -67,15 +107,268 @@ public class JobPost extends ModelPost {
 
     @Override
     protected Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {        
-        return null;
+
+        JobPost instance = new JobPost(repository, services);
+        instance.setServices(getServices());
+        // Run without transactions since ModePost breaks them up itself.
+        return instance.executeImplImpl(req, status, cache, true);
     }
     
     @Override
-    protected Map<String, Object> executeImplImpl(WebScriptRequest req, 
-            Status status, Cache cache) {
+    protected Map<String, Object> executeImplImpl(final WebScriptRequest req, 
+            final Status status, Cache cache) {
+        Timer timer = new Timer();
 
+        printHeader(req);
 
-        return null;
+        Map<String, Object> model = new HashMap<String, Object>();
+        // clearCaches();
+
+        boolean runInBackground = getBooleanArg(req, "background", false);
+        boolean fix = getBooleanArg(req, "fix", false);
+        String expressionString = req.getParameter("expression");
+        boolean evaluate = getBooleanArg(req, "evaluate", false);
+        boolean suppressElementJson = getBooleanArg(req, "suppressElementJson",
+                false);
+
+        // see if prettyPrint default is overridden and change
+        prettyPrint = getBooleanArg(req, "pretty", prettyPrint);
+
+        final String user = AuthenticationUtil.getFullyAuthenticatedUser();
+        String wsId = null;
+
+        if (logger.isInfoEnabled()) {
+            logger.info(user + " " + req.getURL());
+            logger.info(req.parseContent());
+        }
+
+        if (runWithoutTransactions) {// || internalRunWithoutTransactions) {
+            myWorkspace = getWorkspace(req, user);
+        } else {
+            new EmsTransaction(getServices(), getResponse(),
+                    getResponseStatus()) {
+                @Override
+                public void run() throws Exception {
+                    myWorkspace = getWorkspace(req, user);
+                }
+            };
+        }
+
+        boolean wsFound = myWorkspace != null;
+        if (!wsFound) {
+            wsId = getWorkspaceId(req);
+            if (wsId != null && wsId.equalsIgnoreCase("master")) {
+                wsFound = true;
+            }
+        }
+        if (!wsFound) {
+            log(Level.ERROR,
+                    Utils.isNullOrEmpty(wsId) ? HttpServletResponse.SC_NOT_FOUND
+                            : HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+                    "Could not find or create %s workspace.\n", wsId);
+        }
+
+        if (wsFound && validateRequest(req, status)) {
+            try {
+                if (runInBackground) {
+                    // Get the project node from the request:
+                    if (runWithoutTransactions) {// ||
+                                                    // internalRunWithoutTransactions)
+                                                    // {
+                        saveAndStartAction(req, myWorkspace, status);
+                    } else {
+                        new EmsTransaction(getServices(), getResponse(),
+                                getResponseStatus()) {
+                            @Override
+                            public void run() throws Exception {
+                                saveAndStartAction(req, myWorkspace, status);
+                            }
+                        };
+                    }
+                    if (status.getCode() == HttpServletResponse.SC_OK) {
+                        response.append("JSON uploaded, model load being processed in background.\n");
+                        response.append("You will be notified via email when the model load has finished.\n");
+                    }
+                } else {
+                    // Check if input is K or JSON
+                    String contentType = req.getContentType() == null ? ""
+                            : req.getContentType().toLowerCase();
+                    Object content;
+                    boolean jsonNotK = !contentType.contains("application/k");
+                    if (!jsonNotK) {
+                        content = req.getContent().getContent();
+                    } else {
+                        content = (JSONObject) req.parseContent();
+                    }
+
+                    JSONObject postJson = getPostJson(jsonNotK, content,
+                            expressionString);
+
+                    // Get the project node from the request:
+                    new EmsTransaction(getServices(), getResponse(),
+                            getResponseStatus(), runWithoutTransactions) {// ||
+                                                                            // internalRunWithoutTransactions
+                                                                            // )
+                                                                            // {
+                        @Override
+                        public void run() throws Exception {
+                            getProjectNodeFromRequest(req, true);
+                        }
+                    };
+
+                    preProcessJson( postJson );
+                    
+                    // FIXME: this is a hack to get the right site permissions
+                    // if DB rolled back, it's because the no_site node couldn't
+                    // be created
+                    // this is indicative of no permissions (inside the DB
+                    // transaction)
+                    if (getResponseStatus().getCode() == HttpServletResponse.SC_BAD_REQUEST) {
+                        log(Level.WARN, HttpServletResponse.SC_FORBIDDEN,
+                                "No write priveleges");
+                    } else if (projectNode != null) {
+                        handleUpdate(postJson, status, myWorkspace, evaluate,
+                                fix, model, true, suppressElementJson);
+                    }
+                }
+            } catch (JSONException e) {
+                log(Level.ERROR, HttpServletResponse.SC_BAD_REQUEST,
+                        "JSON malformed\n");
+                e.printStackTrace();
+            } catch (Exception e) {
+                log(Level.ERROR, HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+                        "Internal error stack trace:\n%s\n",
+                        e.getLocalizedMessage());
+                e.printStackTrace();
+            }
+        }
+        if (!model.containsKey("res")) {
+            model.put("res", createResponseJson());
+        }
+
+        status.setCode(responseStatus.getCode());
+
+        sendProgress("Load/sync/update request is finished processing.",
+                projectId, true);
+
+        printFooter();
+
+        if (logger.isInfoEnabled()) {
+            logger.info("JobPost: " + timer);
+        }
+
+        return model;
     }
+    
+    @Override
+    protected Set<EmsScriptNode> handleUpdate(JSONObject postJson,
+              Status status, final WorkspaceNode workspace, boolean evaluate,
+              final boolean fix, Map<String, Object> model, boolean createCommit,
+              boolean suppressElementJson) throws Exception {
+          final JSONObject top = NodeUtil.newJsonObject();
+          final Set<EmsScriptNode> elements = createOrUpdateModel(postJson,
+                  status, workspace, null, createCommit);
+          
+//          final Set< EmsScriptNode > elements = 
+//                  ModelLoadActionExecuter.loadJson( postJson, null,
+//                                                    null );
+    
+          if (!Utils.isNullOrEmpty(elements)) {
+              sendProgress("Adding relationships to properties", projectId, true);
+              addRelationshipsToProperties(elements, workspace);
+    
+              // Fix constraints if desired.
+              if (fix) {
+                  sendProgress("Fixing constraints", projectId, true);
+                  fixWithTransactions(elements, workspace);
+                  sendProgress("Fixing constraints completed", projectId,
+                          true);
+              }
+    
+              if (!suppressElementJson) {
+    
+                  // Create JSON object of the elements to return:
+                  final JSONArray elementsJson = new JSONArray();
+                  final Map<EmsScriptNode, JSONObject> elementsJsonMap = new LinkedHashMap<EmsScriptNode, JSONObject>();
+    
+                  sendProgress("Getting json for elements", projectId, true);
+                  new EmsTransaction(getServices(), getResponse(),
+                          getResponseStatus(), runWithoutTransactions) {
+                      @Override
+                      public void run() throws Exception {
+                          for (EmsScriptNode element : elements) {
+    
+                              JSONObject json = null;
+                              if ( NodeUtil.doJsonCaching && !fix
+                                   && notChanging.contains( element.getSysmlId() ) ) {
+                                  json = NodeUtil.jsonCacheGet( element.getNodeRef().toString(),
+                                                                0, false );
+                              }
+                              if ( json == null ) {
+                                  json = element.toJSONObject( workspace, null );
+                              }                           
+                              
+                              elementsJson.put(json);
+                              elementsJsonMap.put(element, json);
+                          }
+                          sendProgress("Getting json for elements completed",
+                                  projectId, true);
+                      }
+                  };
+    
+                  if (evaluate) {
+                      sendProgress("Evaluating constraints and expressions",
+                              projectId, true);
+    
+                      new EmsTransaction(getServices(), getResponse(),
+                              getResponseStatus(), runWithoutTransactions) {
+                          @Override
+                          public void run() throws Exception {
+                              evaluate(elementsJsonMap, top, workspace);
+                              sendProgress( "Evaluating constraints and expressions completed",
+                                            projectId, true);
+                          }
+                      };
+                  }
+    
+                  top.put("elements", elementsJson);
+              }
+          }
+    
+          if (!Utils.isNullOrEmpty(response.toString())) {
+              top.put("message", response.toString());
+          }
+    
+          if (!Utils.isNullOrEmpty(ownersNotFound)) {
+    
+              JSONArray ownerArray = new JSONArray();
+              top.put("ownersNotFound", ownerArray);
+    
+              for (String ownerId : ownersNotFound) {
+                  JSONObject element = new JSONObject();
+                  ownerArray.put(element);
+                  element.put(Acm.JSON_ID, ownerId);
+              }
+          }
+    
+          if (prettyPrint) {
+              model.put("res", NodeUtil.jsonToString(top, 4));
+          } else {
+              model.put("res", NodeUtil.jsonToString(top));
+          }
+    
+          return elements;
+      }
+
+      @Override
+      protected void preProcessJson( JSONObject json ) {
+          UpdateViewHierarchy uvh = new UpdateViewHierarchy( this );
+          // Handle view and association changes
+          try {
+              uvh.addJsonForViewHierarchyChanges( json );
+          } catch ( Throwable t ) {
+              t.printStackTrace();
+          }
+      }
 
 }

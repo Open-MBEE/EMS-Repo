@@ -135,11 +135,11 @@ public class ModelPost extends AbstractJavaWebScript {
 	 */
 	private JSONObject elementHierarchyJson;
 
-	private EmsScriptNode projectNode = null;
+	protected EmsScriptNode projectNode = null;
 	private EmsScriptNode siteNode = null;
 	private EmsScriptNode sitePackageNode = null;
 	// private boolean internalRunWithoutTransactions = false;
-	private Set<String> ownersNotFound = null;
+	protected Set<String> ownersNotFound = null;
 	private final int minElementsForProgress = 100;
 	private double elementProcessedCnt = 0;
 	private double elementMetadataProcessedCnt = 0;
@@ -2569,7 +2569,7 @@ public class ModelPost extends AbstractJavaWebScript {
 	}
 
 	WorkspaceNode myWorkspace = null;
-	private String projectId;
+	protected String projectId;
 
 	@Override
 	protected Map<String, Object> executeImplImpl(final WebScriptRequest req,
@@ -2673,14 +2673,8 @@ public class ModelPost extends AbstractJavaWebScript {
 						}
 					};
 					
-					UpdateViewHierarchy uvh = new UpdateViewHierarchy( this );
-                    // Handle view and association changes
-                    try {
-                        uvh.addJsonForViewHierarchyChanges( postJson );
-                    } catch ( Throwable t ) {
-                        t.printStackTrace();
-                    }
-                    
+					 preProcessJson( postJson );
+
 					// FIXME: this is a hack to get the right site permissions
 					// if DB rolled back, it's because the no_site node couldn't
 					// be created
@@ -2721,6 +2715,16 @@ public class ModelPost extends AbstractJavaWebScript {
 		}
 
 		return model;
+	}
+	
+	protected void preProcessJson( JSONObject json ) {
+        UpdateViewHierarchy uvh = new UpdateViewHierarchy( this );
+        // Handle view and association changes
+        try {
+            uvh.addJsonForViewHierarchyChanges( json );
+        } catch ( Throwable t ) {
+            t.printStackTrace();
+        }
 	}
 
     public JSONObject getPostJson(boolean jsonNotK, Object content) {
