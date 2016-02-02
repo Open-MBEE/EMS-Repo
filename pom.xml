@@ -130,7 +130,7 @@
 				<dependency>
 					<groupId>gov.nasa.jpl.mbee.doorsng</groupId>
 					<artifactId>doorsng</artifactId>
-					<version>0.1.8</version>
+					<version>0.2.2</version>
 				</dependency>
 			</dependencies>
 			<properties>
@@ -203,7 +203,7 @@
 		<dependency>
 			<groupId>gov.nasa.jpl.mbee.doorsng</groupId>
 			<artifactId>doorsng</artifactId>
-			<version>0.1.8</version>
+			<version>0.2.2</version>
 		</dependency>
 		<dependency>
 			<groupId>junit</groupId>
