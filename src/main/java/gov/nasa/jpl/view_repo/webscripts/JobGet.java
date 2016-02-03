@@ -31,16 +31,14 @@ package gov.nasa.jpl.view_repo.webscripts;
 
 import gov.nasa.jpl.mbee.util.Timer;
 import gov.nasa.jpl.mbee.util.Utils;
-import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 import gov.nasa.jpl.view_repo.webscripts.ModelGet;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
 import gov.nasa.jpl.pma.JenkinsEngine;
 
-import java.io.IOException;
 import java.net.URI;
-import java.net.URISyntaxException;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -52,7 +50,6 @@ import org.apache.log4j.*;
 import org.alfresco.repo.model.Repository;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
-import org.alfresco.service.cmr.repository.NodeRef;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -60,12 +57,13 @@ import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
 
-import com.offbytwo.jenkins.JenkinsServer;
-
+//import com.offbytwo.jenkins.JenkinsServer;
 
 public class JobGet extends ModelGet {
     static Logger logger = Logger.getLogger(JobGet.class);
     
+    public static final String jobStereotypeId = "_18_0_2_6620226_1453944322658_194833_14413";
+
     public JobGet() {
         super();
     }
@@ -142,20 +140,33 @@ public class JobGet extends ModelGet {
         return model;
     }
     
+    public boolean isJob( EmsScriptNode node ) {
+        if ( node.hasAspect( "HasMetatype" ) ) {
+            Object stereotypes = 
+                    node.getProperty("sysml:appliedMetatypes", true);
+            // stereotypes should be a List< String >
+            if ( stereotypes instanceof Collection ) {
+                Collection<?> c = (Collection< ? >)stereotypes;
+                for ( Object o : c ) {
+                    if ( o instanceof String ) {
+                        String s = (String)o;
+                        if ( jobStereotypeId.equals( s ) ) {
+                            return true;
+                        }
+                    }
+                }
+            }
+        }  
+        return false;
+    }
+    
     @Override
     protected JSONObject jobOrEle(EmsScriptNode job, WorkspaceNode ws, Date dateTime, String id,
                              boolean includeQualified, boolean isIncludeDocument ) {
-        // we potentially get a list of Jobs which 
-              if ( job.hasAspect( "HasMetatype" ) ) {
-                  Object stereotypes = job
-                      .getProperty("sysml:appliedMetatypes",
-                              true);  
-                  if(stereotypes.toString().contains( "Job" )) {
-                      
-                  }
-              }              
-                  
-              return job.toJSONObject( ws,  dateTime, includeQualified, isIncludeDocument, jobProperties.get(id) );            
+        if  ( isJob( job ) ) {
+            return new JSONObject();
+        }
+        return job.toJSONObject( ws,  dateTime, includeQualified, isIncludeDocument, jobProperties.get(id) );            
     }
 
 }
