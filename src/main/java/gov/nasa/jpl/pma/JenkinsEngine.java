@@ -246,7 +246,6 @@ public class JenkinsEngine implements ExecutionEngine {
     }
 
     /**
-<<<<<<< HEAD
      * This method is used to find the job that the user specifies within <b>eventName</b> and specifying
      *  which detail they would like from the job.
      *  <b>detailName</b> These are the parameters it accepts: 
@@ -259,24 +258,7 @@ public class JenkinsEngine implements ExecutionEngine {
      *  <li>stable
      *  <li>unstable
      *  </ul>
-     * @param String eventName
-=======
-     * This method is used to find the job that the user specifies within
-     * <b>eventName</b> and specifying which detail they would like from the
-     * job. <b>detailName</b> These are the parameters it accepts:
-     * <ul>
-     * <li>name
-     * <li>url
-     * <li>failed
-     * <li>successful
-     * <li>unsuccessful
-     * <li>stable
-     * <li>unstable
-     * </ul>
-     * 
-     * @param String
-     *            eventName, String detailName
->>>>>>> f6ca6afe384d5908a66ddb4ef8089605dd12ddf9
+     * @param String eventName, String detailName
      * @return Event details in a string form
      * @Override
      */
@@ -386,8 +368,8 @@ public class JenkinsEngine implements ExecutionEngine {
     public boolean removeEvent( String event ) {
         // TODO Auto-generated method stub
                 
-        if( events.remove( event ) )
-            return true;
+        //if( events.remove( event ) )
+        //    return true;
         
         return false;
     }

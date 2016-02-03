@@ -165,7 +165,7 @@ public class JobGet extends ModelGet {
     @Override
     protected JSONObject jobOrEle(EmsScriptNode job, WorkspaceNode ws, Date dateTime, String id,
                              boolean includeQualified, boolean isIncludeDocument ) {
-        // we potentially get a list of Jobs which 
+        // stereotypes should be a List< String >
               if ( job.hasAspect( "HasMetatype" ) ) {
                   Object stereotypes = job
                       .getProperty("sysml:appliedMetatypes",
