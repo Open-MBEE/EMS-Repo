@@ -116,7 +116,7 @@ public class DoorsSync extends AbstractJavaWebScript {
         JSONObject json = null;
 
         try {
-            logger.setLevel(Level.DEBUG);
+            //logger.setLevel(Level.DEBUG);
             String[] idKeys = { "modelid", "elementid", "elementId" };
             String modelId = null;
             for (String idKey : idKeys) {
@@ -508,8 +508,6 @@ public class DoorsSync extends AbstractJavaWebScript {
                 reqParent = folderSysmlId;
             }
         }
-
-        
 
         specElement.put("name", "");
         specElement.put("sysmlid", specSysmlId);
