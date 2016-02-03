@@ -8,8 +8,6 @@ package gov.nasa.jpl.pma;
 import java.io.IOException;
 import java.net.URI;
 import java.util.List;
-import java.util.Map;
-import java.io.IOException;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpException;
@@ -33,10 +31,8 @@ import org.apache.http.protocol.HttpContext;
 import org.apache.http.util.EntityUtils;
 
 import com.offbytwo.jenkins.JenkinsServer;
-import com.offbytwo.jenkins.model.Build;
 import com.offbytwo.jenkins.model.BuildWithDetails;
 // import com.offbytwo.jenkins.model.FolderJob;
-import com.offbytwo.jenkins.model.Job;
 import com.offbytwo.jenkins.model.JobWithDetails;
 
 public class JenkinsEngine implements ExecutionEngine {
@@ -44,7 +40,11 @@ public class JenkinsEngine implements ExecutionEngine {
     private JenkinsServer jenkins;
     private String username;
     private String passwordOrToken;
-    private URI jenkinsURI;
+    private String url = "https://cae-jenkins.jpl.nasa.gov";
+    private String jenkinsToken = "build";
+    public String job = "empty";
+    public String executeUrl;
+    public DefaultHttpClient jenkinsClient;
     private long executionTime;
 
     public JenkinsEngine() {
@@ -56,27 +56,26 @@ public class JenkinsEngine implements ExecutionEngine {
          */
 
         // Credentials
-        String username = "dank";
-        String password = "";
+        String username = this.username;
+        String password = this.passwordOrToken;
 
         // Jenkins url
-        String jenkinsUrl = "https://cae-jenkins.jpl.nasa.gov";
-
+        String jenkinsUrl = this.url;
         // Build name
         String jobName = "MDKTest";
 
         // Build token
-        String buildToken = "build";
+        String buildToken = this.jenkinsToken;
 
         // Create your httpclient
-        DefaultHttpClient client = new DefaultHttpClient();
+        jenkinsClient = new DefaultHttpClient();
 
         // Then provide the right credentials
-        client.getCredentialsProvider()
-              .setCredentials( new AuthScope( AuthScope.ANY_HOST,
-                                              AuthScope.ANY_PORT ),
-                               new UsernamePasswordCredentials( username,
-                                                                password ) );
+        jenkinsClient.getCredentialsProvider()
+                     .setCredentials( new AuthScope( AuthScope.ANY_HOST,
+                                                     AuthScope.ANY_PORT ),
+                                      new UsernamePasswordCredentials( username,
+                                                                       password ) );
 
         // Generate BASIC scheme object and stick it to the execution
         // context
@@ -87,18 +86,17 @@ public class JenkinsEngine implements ExecutionEngine {
         // Add as the first (because of the zero) request interceptor
         // It will first intercept the request and preemptively
         // initialize the authentication scheme if there is not
-        client.addRequestInterceptor( new PreemptiveAuth(), 0 );
+        jenkinsClient.addRequestInterceptor( new PreemptiveAuth(), 0 );
 
         // You get request that will start the build
         String getUrl =
-//                jenkinsUrl + "/job/" + jobName + "/build?delay=0";// + buildToken;
                 jenkinsUrl + "/job/" + jobName + "/build?token=" + buildToken;
         System.out.println( "The Build url is " + getUrl );
         HttpGet get = new HttpGet( getUrl );
 
         try {
             // Execute your request with the given context
-            HttpResponse response = client.execute( get, context );
+            HttpResponse response = jenkinsClient.execute( get, context );
             System.out.println( "The response is " + response.toString() );
             HttpEntity entity = response.getEntity();
             EntityUtils.consume( entity );
@@ -184,12 +182,7 @@ public class JenkinsEngine implements ExecutionEngine {
      * Creates an instance of the Jenkins Engine
      */
     @Override
-    public void createEngine() {
-        // Create a server using default values for the Jenkins URI, username
-        // and Password / Token
-        jenkins = new JenkinsServer( this.jenkinsURI, this.username,
-                                     this.passwordOrToken );
-    }
+    public void createEngine() {}
 
     /**
      * Creates an instance of the Jenkins Engine
@@ -206,7 +199,6 @@ public class JenkinsEngine implements ExecutionEngine {
     @Override
     public void execute( List< Object > events ) {
         // TODO Auto-generated method stub
-
     }
 
     @Override
