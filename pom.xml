@@ -221,6 +221,16 @@
 			<artifactId>alfresco-repository</artifactId>
 			<version>${alfresco.version}</version>
 			<scope>provided</scope>
+			<exclusions>
+			 <exclusion>
+                 <groupId>org.apache.httpcomponents</groupId>
+                 <artifactId>httpclient-cache</artifactId>
+    		 </exclusion>
+			<exclusion>
+			     <groupId>org.apache.httpcomponents</groupId>
+			     <artifactId>httpclient</artifactId>
+			 </exclusion>
+			</exclusions>
 		<!-- Test dependencies -->
 		</dependency>
 		<dependency>
@@ -322,7 +332,11 @@
 			<artifactId>antlr4</artifactId>
 			<version>4.5</version>
 		</dependency>
-		
+		<dependency>
+		  <groupId>org.apache.httpcomponents</groupId>
+		  <artifactId>httpclient</artifactId>
+		  <version>4.1.2</version>
+		</dependency>
 		<!-- <metadata><groupId>com.microsoft.z3</groupId> <artifactId>libz3java</artifactId> 
 			<versioning> <latest>4.3.2.5a45711f22d9</latest> <release>4.3.2.5a45711f22d9</release> 
 			<versions> <version>4.3.2-bb56885147e4</version> <version>4.3.2.5a45711f22d9</version> 
