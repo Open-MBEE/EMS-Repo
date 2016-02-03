@@ -31,11 +31,16 @@ package gov.nasa.jpl.view_repo.webscripts;
 
 import gov.nasa.jpl.mbee.util.Timer;
 import gov.nasa.jpl.mbee.util.Utils;
+import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 import gov.nasa.jpl.view_repo.webscripts.ModelGet;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
+//import gov.nasa.jpl.pma.JenkinsEngine;
 
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -47,12 +52,17 @@ import org.apache.log4j.*;
 import org.alfresco.repo.model.Repository;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
+import org.alfresco.service.cmr.repository.NodeRef;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
+
+import com.offbytwo.jenkins.JenkinsServer;
+
+//import com.offbytwo.jenkins.JenkinsServer;
 
 public class JobGet extends ModelGet {
     static Logger logger = Logger.getLogger(JobGet.class);
@@ -79,10 +89,40 @@ public class JobGet extends ModelGet {
     @Override
     protected Map<String, Object> executeImplImpl(WebScriptRequest req, 
             Status status, Cache cache) {
+        URI uri = null;
+
         if (logger.isDebugEnabled()) {
             String user = AuthenticationUtil.getFullyAuthenticatedUser();
             logger.debug(user + " " + req.getURL());
         }
+        
+        try {
+            uri = new URI ("https://cae-jenkins.jpl.nasa.gov");
+            System.out.println( "Setting base URI to CAE-Jenkins.jpl.nasa.gov\n" );
+        } catch ( URISyntaxException e1 ) {
+            // TODO Auto-generated catch block
+            System.out.println( "\nURISyntaxException e1\n") ;
+            e1.printStackTrace();
+        }
+
+        JenkinsServer jenkins = null;
+
+//        JenkinsEngine jenkins = new JenkinsEngine(uri);
+        try {
+            jenkins = new JenkinsServer(new URI("https://cae-jenkins.jpl.nasa.gov/jenkins"),"dank","x1g4c8F5Pa!f");
+        } catch ( URISyntaxException e1 ) {
+            // TODO Auto-generated catch block
+            System.out.println( "URISyntaxException e1") ;
+            e1.printStackTrace();
+        }
+        
+        try {
+            jenkins.getJobs();
+        } catch ( IOException e1 ) {
+            // TODO Auto-generated catch block
+            e1.printStackTrace();
+        }
+
         Timer timer = new Timer();
         printHeader(req);
 
@@ -130,7 +170,17 @@ public class JobGet extends ModelGet {
     @Override
     protected JSONObject jobOrEle(EmsScriptNode job, WorkspaceNode ws, Date dateTime, String id,
                              boolean includeQualified, boolean isIncludeDocument ) {
-              return job.toJSONObject( ws,  dateTime, includeQualified, isIncludeDocument, jobProperties.get(id) );
+        // we potentially get a list of Jobs which 
+              if ( job.hasAspect( "HasMetatype" ) ) {
+                  Object stereotypes = job
+                      .getProperty("sysml:appliedMetatypes",
+                              true);  
+                  if(stereotypes.toString().contains( "Job" )) {
+                      
+                  }
+              }              
+                  
+              return job.toJSONObject( ws,  dateTime, includeQualified, isIncludeDocument, jobProperties.get(id) );            
     }
 
 }
