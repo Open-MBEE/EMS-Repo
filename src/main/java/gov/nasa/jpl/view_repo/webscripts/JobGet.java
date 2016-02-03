@@ -95,28 +95,8 @@ public class JobGet extends ModelGet {
             logger.debug(user + " " + req.getURL());
         }
         
-//        try {
-////            uri = new URI ("cae-jenkins.jpl.nasa.gov");
-//            System.out.println( "Setting base URI to CAE-Jenkins.jpl.nasa.gov\n" );
-//        } catch ( URISyntaxException e1 ) {
-//            // TODO Auto-generated catch block
-//            System.out.println( "\nURISyntaxException e1\n") ;
-//            e1.printStackTrace();
-//        }
 
-//        JenkinsServer jenkins = null;
-
-//      JenkinsEngine jenkins = new JenkinsEngine(uri);
-
-//        try {
-//            jenkins = new JenkinsServer(new URI("https://cae-jenkins.jpl.nasa.gov"),"eurointeg","dhcp3LugH#Meg!i");
-            JenkinsEngine jenkins = new JenkinsEngine();
-//        } catch ( URISyntaxException e1 ) {
-//            // TODO Auto-generated catch block
-//            System.out.println( "URISyntaxException e1") ;
-//            e1.printStackTrace();
-//        }
-        
+        JenkinsEngine jenkins = new JenkinsEngine();
 
         Timer timer = new Timer();
         printHeader(req);

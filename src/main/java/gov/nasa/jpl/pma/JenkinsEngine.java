@@ -10,6 +10,9 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.httpclient.HttpMethod;
+import org.apache.commons.httpclient.methods.GetMethod;
+import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpException;
 import org.apache.http.HttpHost;
@@ -23,6 +26,7 @@ import org.apache.http.auth.Credentials;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.protocol.ClientContext;
 import org.apache.http.impl.auth.BasicScheme;
 import org.apache.http.impl.client.DefaultHttpClient;
@@ -32,19 +36,23 @@ import org.apache.http.protocol.HttpContext;
 import org.apache.http.util.EntityUtils;
 
 import org.apache.log4j.Logger;
+import org.eclipse.jetty.http.HttpContent;
+import org.springframework.extensions.surf.util.Base64.InputStream;
 
 import com.offbytwo.jenkins.JenkinsServer;
 import com.offbytwo.jenkins.model.BuildWithDetails;
 // import com.offbytwo.jenkins.model.FolderJob;
 import com.offbytwo.jenkins.model.JobWithDetails;
 
+import gov.nasa.jpl.view_repo.util.JSONObject;
 import gov.nasa.jpl.view_repo.webscripts.JobGet;
+import thredds.wcs.v1_1_0.Request;
 
 public class JenkinsEngine implements ExecutionEngine {
-    static Logger logger = Logger.getLogger(JenkinsEngine.class);
-    
+    static Logger logger = Logger.getLogger( JenkinsEngine.class );
+
     private JenkinsServer jenkins;
-    private String username;
+    private String username = "dank";
     private String passwordOrToken;
     private String url = "https://cae-jenkins.jpl.nasa.gov";
     private String jenkinsToken = "build";
@@ -52,8 +60,9 @@ public class JenkinsEngine implements ExecutionEngine {
     public String executeUrl;
     public DefaultHttpClient jenkinsClient;
     private long executionTime;
-    
-    //private List< QueueItem > eventQueue;
+    public JSONObject jsonResponse;
+
+    // private List< QueueItem > eventQueue;
 
     public JenkinsEngine() {
 
@@ -66,9 +75,11 @@ public class JenkinsEngine implements ExecutionEngine {
         // Credentials
         String username = this.username;
         String password = this.passwordOrToken;
+        boolean success = false;
+        GetMethod getMethod = null;
 
         // Jenkins url
-        String jenkinsUrl = this.url;
+        String jenkinsUrl = "https://cae-jenkins.jpl.nasa.gov/api/json?depth=2";
         // Build name
         String jobName = "MDKTest";
 
@@ -89,6 +100,7 @@ public class JenkinsEngine implements ExecutionEngine {
         // context
         BasicScheme basicAuth = new BasicScheme();
         BasicHttpContext context = new BasicHttpContext();
+
         context.setAttribute( "preemptive-auth", basicAuth );
 
         // Add as the first (because of the zero) request interceptor
@@ -97,16 +109,29 @@ public class JenkinsEngine implements ExecutionEngine {
         jenkinsClient.addRequestInterceptor( new PreemptiveAuth(), 0 );
 
         // You get request that will start the build
-        String getUrl =
-                jenkinsUrl + "/job/" + jobName + "/build?token=" + buildToken;
+        // String getUrl = jenkinsUrl + "/job/" + jobName + "/build?token=" +
+        // buildToken;
+        String getUrl = jenkinsUrl;
         System.out.println( "The Build url is " + getUrl );
         HttpGet get = new HttpGet( getUrl );
 
         try {
-            // Execute your request with the given context
+            // HttpResponse response = jenkinsClient.execute( postRequest,
+            // context );
             HttpResponse response = jenkinsClient.execute( get, context );
-            System.out.println( "The response is " + response.toString() );
+            
+            java.io.InputStream instream;
+
             HttpEntity entity = response.getEntity();
+            String retSrc =EntityUtils.toString( entity );
+
+            jsonResponse = new JSONObject(retSrc);
+
+            System.out.println( "Content of the JSON Object is " + jsonResponse.toString());
+            System.out.println();
+
+            System.out.println( "The response is " + response.toString() );
+            System.out.println();
             EntityUtils.consume( entity );
         } catch ( IOException e ) {
             // TODO Auto-generated catch block
@@ -205,24 +230,24 @@ public class JenkinsEngine implements ExecutionEngine {
     public void execute( Object event ) {
         // This depends on what we want to do with the event that comes in...
         // could be trigger a build, etc.
-//        try {
-//            ( (Job)event ).build();
-//        }
-//        catch (IOException e) {
-//            // some exception
-//        }
+        // try {
+        // ( (Job)event ).build();
+        // }
+        // catch (IOException e) {
+        // // some exception
+        // }
     }
 
     @Override
     public void execute( List< Object > events ) {
         // TODO Auto-generated method stub
-//        try {
-//            for(Object event : events) 
-//                ( (Job)event ).build();
-//        }
-//        catch (IOException e) {
-//         // some exception
-//        }
+        // try {
+        // for(Object event : events)
+        // ( (Job)event ).build();
+        // }
+        // catch (IOException e) {
+        // // some exception
+        // }
     }
 
     @Override
@@ -232,28 +257,13 @@ public class JenkinsEngine implements ExecutionEngine {
 
     @Override
     public int getExecutionStatus() {
-        if (jenkins.isRunning()) {
-            
+        if ( jenkins.isRunning() ) {
+
         }
         return 0;
     }
 
     /**
-<<<<<<< HEAD
-     * This method is used to find the job that the user specifies within <b>eventName</b> and specifying
-     *  which detail they would like from the job.
-     *  <b>detailName</b> These are the parameters it accepts: 
-     *  <ul>
-     *  <li>name
-     *  <li>url
-     *  <li>failed
-     *  <li>successful
-     *  <li>unsuccessful
-     *  <li>stable
-     *  <li>unstable
-     *  </ul>
-     * @param String eventName
-=======
      * This method is used to find the job that the user specifies within
      * <b>eventName</b> and specifying which detail they would like from the
      * job. <b>detailName</b> These are the parameters it accepts:
@@ -269,71 +279,30 @@ public class JenkinsEngine implements ExecutionEngine {
      * 
      * @param String
      *            eventName, String detailName
->>>>>>> f6ca6afe384d5908a66ddb4ef8089605dd12ddf9
      * @return Event details in a string form
      * @Override
      */
-    public String getEventDetail( String eventName, String detailName ) {
-        // Declare Variables
-        List< String > details; // List of strings representing the details of a
-                                // job.
-        JobWithDetails jobDetails; // Jenkins Job Details Class
-        JobWithDetails singleJob; // Will contain the details of a single job
-        BuildWithDetails singleBuild; // Build containing the details of a job
-        String detail; // An Individual detail from a job
+    public String getEventDetail( List< String > detailName ) {
 
-        // Initialize Variables
-        detail = "none";
-        jobDetails = null;
-        singleJob = null;
+        // Use Base url then append this to create call
+        /**
+         * Example:
+         * 
+         * https://cae-jenkins.jpl.nasa.gov/api/json?tree=jobs[name],views[name,
+         * jobs[name]]
+         * 
+         * To get varying amounts of information use depth=
+         * 
+         * High level https://cae-jenkins.jpl.nasa.gov/api/json?depth=1
+         * 
+         * More Detail https://cae-jenkins.jpl.nasa.gov/api/json?depth=2
+         * 
+         * A ton of detail https://cae-jenkins.jpl.nasa.gov/api/json?depth=3
+         * 
+         */
+        JSONObject jsonObject;
 
-        // Checks to see if Jenkins is running before attempting to retreive the
-        // jobs
-        if ( jenkins.isRunning() ) {
-            try {
-                singleJob = jenkins.getJob( eventName );
-            } catch ( IOException e ) {
-                e.printStackTrace();
-                return null;
-            }
-        }
-
-        if ( singleJob != null ) {
-            try {
-                jobDetails = singleJob.details();
-            } catch ( IOException e ) {
-                e.printStackTrace();
-            }
-
-            switch ( detailName.toLowerCase() ) {
-                case "name":
-                    detail = singleJob.getName();
-                    break;
-                case "url":
-                    detail = singleJob.getUrl();
-                    break;
-                case "failed":
-                    detail = singleJob.getLastFailedBuild().toString();
-                    break;
-                case "successful":
-                    detail = singleJob.getLastSuccessfulBuild().toString();
-                    break;
-                case "unsuccessful":
-                    detail = singleJob.getLastUnsuccessfulBuild().toString();
-                    break;
-                case "stable":
-                    detail = singleJob.getLastStableBuild().toString();
-                    break;
-                case "unstable":
-                    detail = singleJob.getLastUnstableBuild().toString();
-                    break;
-                default:
-
-                    detail = detailName + " is not a proper detail parameter.";
-                    break;
-            }
-        }
-        return detail;
+        return "";
     }
 
     @Override
@@ -341,26 +310,27 @@ public class JenkinsEngine implements ExecutionEngine {
         try {
             String eventXml = jenkins.getJobXml( event );
             jenkins.createJob( event, eventXml );
-        } catch (IOException e) {
-            // some exception 
+        } catch ( IOException e ) {
+            // some exception
         }
-        
-        // There will be some queue of events ... should these events be QueueItem?
-        //events.add(event);
-        //execute( events );
-        
+
+        // There will be some queue of events ... should these events be
+        // QueueItem?
+        // events.add(event);
+        // execute( events );
+
     }
 
     @Override
     public void setEvents( List< String > events ) {
 
-        for(String event: events)
+        for ( String event : events )
             setEvent( event );
-        
-        // events may need to be List< QueueItem > 
-        //for(Object event: events) 
-        //    events.add(event);
-        //execute( event );
+
+        // events may need to be List< QueueItem >
+        // for(Object event: events)
+        // events.add(event);
+        // execute( event );
     }
 
     @Override
@@ -368,7 +338,7 @@ public class JenkinsEngine implements ExecutionEngine {
         /*
          * Stop all running instances of job / jobs
          */
-        
+
         if ( jenkins.isRunning() ) {
             // stop execution only if the server is running
         }
@@ -377,22 +347,28 @@ public class JenkinsEngine implements ExecutionEngine {
 
     @Override
     public boolean removeEvent( String event ) {
-//        // TODO Auto-generated method stub
-//                
-//        if( events.remove( event ) )
-//            return true;
-//        
+        // // TODO Auto-generated method stub
+        //
+        // if( events.remove( event ) )
+        // return true;
+        //
         return false;
     }
 
     @Override
     public void updateEvent( String event ) {
         // TODO Auto-generated method stub
-        
+
     }
 
     @Override
     public long getExecutionTime() {
         return executionTime;
+    }
+
+    @Override
+    public String getEventDetail( String eventName, String detail ) {
+        // TODO Auto-generated method stub
+        return null;
     }
 }
