@@ -7,6 +7,7 @@ package gov.nasa.jpl.pma;
 
 import java.io.IOException;
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.http.HttpEntity;
@@ -30,13 +31,18 @@ import org.apache.http.protocol.ExecutionContext;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.util.EntityUtils;
 
+import org.apache.log4j.Logger;
+
 import com.offbytwo.jenkins.JenkinsServer;
 import com.offbytwo.jenkins.model.BuildWithDetails;
 // import com.offbytwo.jenkins.model.FolderJob;
 import com.offbytwo.jenkins.model.JobWithDetails;
 
-public class JenkinsEngine implements ExecutionEngine {
+import gov.nasa.jpl.view_repo.webscripts.JobGet;
 
+public class JenkinsEngine implements ExecutionEngine {
+    static Logger logger = Logger.getLogger(JenkinsEngine.class);
+    
     private JenkinsServer jenkins;
     private String username;
     private String passwordOrToken;
@@ -46,6 +52,8 @@ public class JenkinsEngine implements ExecutionEngine {
     public String executeUrl;
     public DefaultHttpClient jenkinsClient;
     private long executionTime;
+    
+    //private List< QueueItem > eventQueue;
 
     public JenkinsEngine() {
 
@@ -194,26 +202,58 @@ public class JenkinsEngine implements ExecutionEngine {
     }
 
     @Override
-    public void execute( Object event ) {}
+    public void execute( Object event ) {
+        // This depends on what we want to do with the event that comes in...
+        // could be trigger a build, etc.
+//        try {
+//            ( (Job)event ).build();
+//        }
+//        catch (IOException e) {
+//            // some exception
+//        }
+    }
 
     @Override
     public void execute( List< Object > events ) {
         // TODO Auto-generated method stub
+//        try {
+//            for(Object event : events) 
+//                ( (Job)event ).build();
+//        }
+//        catch (IOException e) {
+//         // some exception
+//        }
     }
 
     @Override
     public boolean isRunning() {
-        // TODO Auto-generated method stub
         return jenkins.isRunning();
     }
 
     @Override
     public int getExecutionStatus() {
-        // TODO Auto-generated method stub
+        if (jenkins.isRunning()) {
+            
+        }
         return 0;
     }
 
     /**
+<<<<<<< HEAD
+     * This method is used to find the job that the user specifies within <b>eventName</b> and specifying
+     *  which detail they would like from the job.
+     *  <b>detailName</b> These are the parameters it accepts: 
+     *  <ul>
+     *  <li>name
+     *  <li>url
+     *  <li>failed
+     *  <li>successful
+     *  <li>unsuccessful
+     *  <li>stable
+     *  <li>unstable
+     *  </ul>
+     * @param String eventName
+=======
      * This method is used to find the job that the user specifies within
      * <b>eventName</b> and specifying which detail they would like from the
      * job. <b>detailName</b> These are the parameters it accepts:
@@ -229,6 +269,7 @@ public class JenkinsEngine implements ExecutionEngine {
      * 
      * @param String
      *            eventName, String detailName
+>>>>>>> f6ca6afe384d5908a66ddb4ef8089605dd12ddf9
      * @return Event details in a string form
      * @Override
      */
@@ -287,6 +328,7 @@ public class JenkinsEngine implements ExecutionEngine {
                     detail = singleJob.getLastUnstableBuild().toString();
                     break;
                 default:
+
                     detail = detailName + " is not a proper detail parameter.";
                     break;
             }
@@ -295,33 +337,58 @@ public class JenkinsEngine implements ExecutionEngine {
     }
 
     @Override
-    public void setEvent( Object event ) {
-        // TODO Auto-generated method stub
-
+    public void setEvent( String event ) {
+        try {
+            String eventXml = jenkins.getJobXml( event );
+            jenkins.createJob( event, eventXml );
+        } catch (IOException e) {
+            // some exception 
+        }
+        
+        // There will be some queue of events ... should these events be QueueItem?
+        //events.add(event);
+        //execute( events );
+        
     }
 
     @Override
-    public void setEvents( List< Object > event ) {
-        // TODO Auto-generated method stub
+    public void setEvents( List< String > events ) {
 
+        for(String event: events)
+            setEvent( event );
+        
+        // events may need to be List< QueueItem > 
+        //for(Object event: events) 
+        //    events.add(event);
+        //execute( event );
     }
 
     @Override
     public boolean stopExecution() {
-        // TODO Auto-generated method stub
+        /*
+         * Stop all running instances of job / jobs
+         */
+        
+        if ( jenkins.isRunning() ) {
+            // stop execution only if the server is running
+        }
         return false;
     }
 
     @Override
-    public boolean removeEvent( Object event ) {
-        // TODO Auto-generated method stub
+    public boolean removeEvent( String event ) {
+//        // TODO Auto-generated method stub
+//                
+//        if( events.remove( event ) )
+//            return true;
+//        
         return false;
     }
 
     @Override
     public void updateEvent( String event ) {
         // TODO Auto-generated method stub
-
+        
     }
 
     @Override

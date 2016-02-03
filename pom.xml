@@ -188,7 +188,6 @@
 					<type>jar</type>
 					<systemPath>${project.basedir}/src/main/amp/web/WEB-INF/lib/jenkins-client.jar</systemPath>
 				</dependency>
-
 			</dependencies>
 		</profile>
 	</profiles>

@@ -31,6 +31,7 @@ package gov.nasa.jpl.view_repo.webscripts;
 
 import gov.nasa.jpl.mbee.util.Timer;
 import gov.nasa.jpl.mbee.util.Utils;
+import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 import gov.nasa.jpl.view_repo.webscripts.ModelGet;
@@ -51,6 +52,7 @@ import org.apache.log4j.*;
 import org.alfresco.repo.model.Repository;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
+import org.alfresco.service.cmr.repository.NodeRef;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -163,7 +165,17 @@ public class JobGet extends ModelGet {
     @Override
     protected JSONObject jobOrEle(EmsScriptNode job, WorkspaceNode ws, Date dateTime, String id,
                              boolean includeQualified, boolean isIncludeDocument ) {
-              return job.toJSONObject( ws,  dateTime, includeQualified, isIncludeDocument, jobProperties.get(id) );
+        // we potentially get a list of Jobs which 
+              if ( job.hasAspect( "HasMetatype" ) ) {
+                  Object stereotypes = job
+                      .getProperty("sysml:appliedMetatypes",
+                              true);  
+                  if(stereotypes.toString().contains( "Job" )) {
+                      
+                  }
+              }              
+                  
+              return job.toJSONObject( ws,  dateTime, includeQualified, isIncludeDocument, jobProperties.get(id) );            
     }
 
 }

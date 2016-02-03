@@ -64,7 +64,7 @@ public interface ExecutionEngine {
      * 
      * @param event
      */
-    void setEvent( Object event );
+    void setEvent( String event );
 
     /**
      * setEvents
@@ -73,7 +73,7 @@ public interface ExecutionEngine {
      * 
      * @param event
      */
-    void setEvents( List< Object > event );
+    void setEvents( List< String > event );
 
     void updateEvent( String event );
 
@@ -97,7 +97,7 @@ public interface ExecutionEngine {
      * @return returns if the removal of the event was successful. Should return
      *         false if the event is not found.
      */
-    boolean removeEvent( Object event );
+    boolean removeEvent( String event );
 
     long getExecutionTime();
 }
