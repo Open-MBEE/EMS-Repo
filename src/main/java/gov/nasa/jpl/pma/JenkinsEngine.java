@@ -9,11 +9,33 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.List;
 import java.util.Map;
+import java.io.IOException;
+
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpException;
+import org.apache.http.HttpHost;
+import org.apache.http.HttpRequest;
+import org.apache.http.HttpRequestInterceptor;
+import org.apache.http.HttpResponse;
+import org.apache.http.auth.AuthScheme;
+import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.AuthState;
+import org.apache.http.auth.Credentials;
+import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.client.CredentialsProvider;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.protocol.ClientContext;
+import org.apache.http.impl.auth.BasicScheme;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.protocol.BasicHttpContext;
+import org.apache.http.protocol.ExecutionContext;
+import org.apache.http.protocol.HttpContext;
+import org.apache.http.util.EntityUtils;
 
 import com.offbytwo.jenkins.JenkinsServer;
 import com.offbytwo.jenkins.model.Build;
 import com.offbytwo.jenkins.model.BuildWithDetails;
-//import com.offbytwo.jenkins.model.FolderJob;
+// import com.offbytwo.jenkins.model.FolderJob;
 import com.offbytwo.jenkins.model.Job;
 import com.offbytwo.jenkins.model.JobWithDetails;
 
@@ -25,13 +47,118 @@ public class JenkinsEngine implements ExecutionEngine {
     private URI jenkinsURI;
     private long executionTime;
 
+    public JenkinsEngine() {
+
+        /**
+         * Simple class to launch a jenkins build on run@Cloud platform, should
+         * also work on every jenkins instance (not tested)
+         *
+         */
+
+        // Credentials
+        String username = "dank";
+        String password = "";
+
+        // Jenkins url
+        String jenkinsUrl = "https://cae-jenkins.jpl.nasa.gov";
+
+        // Build name
+        String jobName = "MDKTest";
+
+        // Build token
+        String buildToken = "build";
+
+        // Create your httpclient
+        DefaultHttpClient client = new DefaultHttpClient();
+
+        // Then provide the right credentials
+        client.getCredentialsProvider()
+              .setCredentials( new AuthScope( AuthScope.ANY_HOST,
+                                              AuthScope.ANY_PORT ),
+                               new UsernamePasswordCredentials( username,
+                                                                password ) );
+
+        // Generate BASIC scheme object and stick it to the execution
+        // context
+        BasicScheme basicAuth = new BasicScheme();
+        BasicHttpContext context = new BasicHttpContext();
+        context.setAttribute( "preemptive-auth", basicAuth );
+
+        // Add as the first (because of the zero) request interceptor
+        // It will first intercept the request and preemptively
+        // initialize the authentication scheme if there is not
+        client.addRequestInterceptor( new PreemptiveAuth(), 0 );
+
+        // You get request that will start the build
+        String getUrl =
+//                jenkinsUrl + "/job/" + jobName + "/build?delay=0";// + buildToken;
+                jenkinsUrl + "/job/" + jobName + "/build?token=" + buildToken;
+        System.out.println( "The Build url is " + getUrl );
+        HttpGet get = new HttpGet( getUrl );
+
+        try {
+            // Execute your request with the given context
+            HttpResponse response = client.execute( get, context );
+            System.out.println( "The response is " + response.toString() );
+            HttpEntity entity = response.getEntity();
+            EntityUtils.consume( entity );
+        } catch ( IOException e ) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Preemptive authentication interceptor
+     *
+     */
+    static class PreemptiveAuth implements HttpRequestInterceptor {
+
+        /*
+         * (non-Javadoc)
+         *
+         * @see org.apache.http.HttpRequestInterceptor#process(org.apache.
+         * http.HttpRequest, org.apache.http.protocol.HttpContext)
+         */
+        public void process( HttpRequest request,
+                             HttpContext context ) throws HttpException,
+                                                   IOException {
+            // Get the AuthState
+            AuthState authState =
+                    (AuthState)context.getAttribute( ClientContext.TARGET_AUTH_STATE );
+
+            // If no auth scheme available yet, try to initialize it
+            // preemptively
+            if ( authState.getAuthScheme() == null ) {
+                AuthScheme authScheme =
+                        (AuthScheme)context.getAttribute( "preemptive-auth" );
+                CredentialsProvider credsProvider =
+                        (CredentialsProvider)context.getAttribute( ClientContext.CREDS_PROVIDER );
+                HttpHost targetHost =
+                        (HttpHost)context.getAttribute( ExecutionContext.HTTP_TARGET_HOST );
+                if ( authScheme != null ) {
+                    Credentials creds =
+                            credsProvider.getCredentials( new AuthScope( targetHost.getHostName(),
+                                                                         targetHost.getPort() ) );
+                    if ( creds == null ) {
+                        throw new HttpException( "No credentials for preemptive authentication" );
+                    }
+                    authState.setAuthScheme( authScheme );
+                    authState.setCredentials( creds );
+                }
+            }
+
+        }
+
+    }
+
     /**
      * Default Constructor of JenkinsEngine
      */
-    public JenkinsEngine(URI uri) {
+    public JenkinsEngine( URI uri ) {
         // TODO Auto-generated constructor stub
-        jenkins = new JenkinsServer(uri);
-        System.out.println( "Creating a new jenkins server.\n");
+        jenkins = new JenkinsServer( uri );
+        System.out.println( "Creating a new jenkins server.\n" );
     }
 
     /**
@@ -76,7 +203,6 @@ public class JenkinsEngine implements ExecutionEngine {
     @Override
     public void execute( Object event ) {}
 
-
     @Override
     public void execute( List< Object > events ) {
         // TODO Auto-generated method stub
@@ -96,36 +222,40 @@ public class JenkinsEngine implements ExecutionEngine {
     }
 
     /**
-     * This method is used to find the job that the user specifies within <b>eventName</b> and specifying
-     *  which detail they would like from the job.
-     *  <b>detailName</b> These are the parameters it accepts: 
-     *  <ul>
-     *  <li>name
-     *  <li>url
-     *  <li>failed
-     *  <li>successful
-     *  <li>unsuccessful
-     *  <li>stable
-     *  <li>unstable
-     *  </ul>
-     * @param String eventName, String detailName
+     * This method is used to find the job that the user specifies within
+     * <b>eventName</b> and specifying which detail they would like from the
+     * job. <b>detailName</b> These are the parameters it accepts:
+     * <ul>
+     * <li>name
+     * <li>url
+     * <li>failed
+     * <li>successful
+     * <li>unsuccessful
+     * <li>stable
+     * <li>unstable
+     * </ul>
+     * 
+     * @param String
+     *            eventName, String detailName
      * @return Event details in a string form
      * @Override
      */
     public String getEventDetail( String eventName, String detailName ) {
         // Declare Variables
-        List< String >      details;        // List of strings representing the details of a job.
-        JobWithDetails      jobDetails;     // Jenkins Job Details Class
-        JobWithDetails      singleJob;      // Will contain the details of a single job
-        BuildWithDetails    singleBuild;    // Build containing the details of a job
-        String              detail;         // An Individual detail from a job
+        List< String > details; // List of strings representing the details of a
+                                // job.
+        JobWithDetails jobDetails; // Jenkins Job Details Class
+        JobWithDetails singleJob; // Will contain the details of a single job
+        BuildWithDetails singleBuild; // Build containing the details of a job
+        String detail; // An Individual detail from a job
 
         // Initialize Variables
         detail = "none";
         jobDetails = null;
         singleJob = null;
 
-        // Checks to see if Jenkins is running before attempting to retreive the jobs
+        // Checks to see if Jenkins is running before attempting to retreive the
+        // jobs
         if ( jenkins.isRunning() ) {
             try {
                 singleJob = jenkins.getJob( eventName );
@@ -149,23 +279,23 @@ public class JenkinsEngine implements ExecutionEngine {
                 case "url":
                     detail = singleJob.getUrl();
                     break;
-                case "failed": 
+                case "failed":
                     detail = singleJob.getLastFailedBuild().toString();
                     break;
-                case "successful": 
+                case "successful":
                     detail = singleJob.getLastSuccessfulBuild().toString();
                     break;
-                case "unsuccessful": 
+                case "unsuccessful":
                     detail = singleJob.getLastUnsuccessfulBuild().toString();
                     break;
-                case "stable": 
+                case "stable":
                     detail = singleJob.getLastStableBuild().toString();
                     break;
-                case "unstable" :
+                case "unstable":
                     detail = singleJob.getLastUnstableBuild().toString();
                     break;
                 default:
-                        detail = detailName + " is not a proper detail parameter.";
+                    detail = detailName + " is not a proper detail parameter.";
                     break;
             }
         }
