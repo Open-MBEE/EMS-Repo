@@ -3,7 +3,7 @@
 	<description>
 		get job with {jobId}
 	</description>
-	<url>/workspaces/{workspaceId}/elements/{elementId}/jobs?recurse={recurse?}?depth={depth?}</url>
+	<url>/workspaces/{workspaceId}/jobs/{jobId}?recurse={recurse?}?depth={depth?}</url>
 	<format default="json">argument</format>
 	<authentication>user</authentication>
 	<transaction>none</transaction>

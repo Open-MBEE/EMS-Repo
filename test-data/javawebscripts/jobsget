@@ -1,6 +1,6 @@
 #!/bin/bash
 
-echo curl -w "%{http_code} %{time_connect}:%{time_starttransfer}:%{time_total}\n" -X GET -u admin:admin "http://localhost:8080/alfresco/service/workspaces/master/elements/$1/jobs";
-curl -w "%{http_code} %{time_connect}:%{time_starttransfer}:%{time_total}\n" -X GET -u admin:admin "http://localhost:8080/alfresco/service/workspaces/master/elements/$1/jobs" ;
+echo curl -w "%{http_code} %{time_connect}:%{time_starttransfer}:%{time_total}\n" -X GET -u admin:admin "http://localhost:8080/alfresco/service/workspaces/master/jobs/$1";
+curl -w "%{http_code} %{time_connect}:%{time_starttransfer}:%{time_total}\n" -X GET -u admin:admin "http://localhost:8080/alfresco/service/workspaces/master/jobs/$1" ;
 
 

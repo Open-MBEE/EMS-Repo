@@ -96,6 +96,12 @@ public class JobGet extends ModelGet {
 
         JenkinsEngine jenkins = new JenkinsEngine();
 
+        // TESTING STUFFS
+        JSONObject jenkinsJson = jenkins.jsonResponse;
+        JSONArray jobJson = jenkinsJson.getJSONArray( "jobs" );
+        
+        System.out.println( jobJson );
+        
         Timer timer = new Timer();
         printHeader(req);
 
@@ -108,9 +114,13 @@ public class JobGet extends ModelGet {
 
         try {
             for(int i = 0; i < jobsJson.length(); i++) {
+                /* THE MAGIC HAPPENS IN HERE... 
+                 * PARSE OUT THE DATA FROM THE JSON OBJECT / ARRAY AND 
+                 * STORE PUT IN JOB */
                 JSONObject job = (JSONObject)jobsJson.get(i);
                 if (job.has( "specialization" )) 
-                    job.remove( "specialization" );
+                    job.remove( "specialization" );  
+                job.put( "data", jobJson );
             }
             
             if (jobsJson.length() > 0) {
@@ -140,6 +150,10 @@ public class JobGet extends ModelGet {
         return model;
     }
     
+    public void updateJob( ) {
+        
+    }
+    
     public boolean isJob( EmsScriptNode node ) {
         if ( node.hasAspect( "HasMetatype" ) ) {
             Object stereotypes = 
@@ -164,9 +178,9 @@ public class JobGet extends ModelGet {
     protected JSONObject jobOrEle(EmsScriptNode job, WorkspaceNode ws, Date dateTime, String id,
                              boolean includeQualified, boolean isIncludeDocument ) {
         if  ( isJob( job ) ) {
-            return new JSONObject();
+            return job.toJSONObject( ws,  dateTime, includeQualified, isIncludeDocument, jobProperties.get(id) );
         }
-        return job.toJSONObject( ws,  dateTime, includeQualified, isIncludeDocument, jobProperties.get(id) );            
+        return new JSONObject();        
     }
 
 }

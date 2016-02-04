@@ -39,14 +39,12 @@ import org.apache.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import com.offbytwo.jenkins.JenkinsServer;
 
 // import gov.nasa.jpl.view_repo.util.JSONObject;
 
 public class JenkinsEngine implements ExecutionEngine {
     static Logger logger = Logger.getLogger( JenkinsEngine.class );
 
-    private JenkinsServer jenkins;
     private String username = "eurointeg"; // User name to be used to connect to
                                            // jenkins
     private String passwordOrToken = "dhcp3LugH#Meg!i"; // Token or password
@@ -94,7 +92,12 @@ public class JenkinsEngine implements ExecutionEngine {
         String jenkinsUrl;
 
         // Jenkins url
+        //String jenkinsUrl = "https://cae-jenkins.jpl.nasa.gov/api/json?tree=jobs[name]";
+        // Build name
+        String jobName = "MDKTest";
+
         jenkinsUrl = url + jenkinsApiURL + apiCallDepth;
+
 
         // jenkinsUrl = "https://cae-jenkins.jpl.nasa.gov/api/json?depth=2";
 
@@ -259,21 +262,17 @@ public class JenkinsEngine implements ExecutionEngine {
             // Will throw an error if the execution fails from either incorrect
             // setup or if the jenkinsClient has not been instantiated.
         } catch ( IOException e ) {
-            e.printStackTrace();
+            e.printStackTrace(); 
         }
-
     }
 
     @Override
     public boolean isRunning() {
-        return jenkins != null;
+        return this.jenkinsClient != null;
     }
 
     @Override
     public int getExecutionStatus() {
-        if ( jenkins.isRunning() ) {
-
-        }
         return 0;
     }
 
@@ -331,12 +330,6 @@ public class JenkinsEngine implements ExecutionEngine {
 
     @Override
     public void setEvent( String event ) {
-        try {
-            String eventXml = jenkins.getJobXml( event );
-            jenkins.createJob( event, eventXml );
-        } catch ( IOException e ) {
-            // some exception
-        }
     }
 
     @Override
@@ -489,10 +482,6 @@ public class JenkinsEngine implements ExecutionEngine {
         constructJobUrl( detail.NAME );
         execute();
         obj = jsonResponse.getJSONArray( "jobs" );
-        System.out.println( "");
-        System.out.println( "------" );
-        System.out.println( "");
-        System.out.println( obj.toString() );
         return obj;
     }
     public JSONArray getJobColor() {
@@ -501,10 +490,6 @@ public class JenkinsEngine implements ExecutionEngine {
         constructJobUrl( detail.COLOR);
         execute();
         obj = jsonResponse.getJSONArray( "jobs" );
-        System.out.println( "");
-        System.out.println( "------" );
-        System.out.println( "");
-        System.out.println( obj.toString() );
         return obj;
     }
     public JSONArray getLastSuccessfullBuild() {
@@ -513,10 +498,6 @@ public class JenkinsEngine implements ExecutionEngine {
         constructJobUrl( detail.LAST_SUCCESSFULL_BUILD);
         execute();
         obj = jsonResponse.getJSONArray( "jobs" );
-        System.out.println( "");
-        System.out.println( "------" );
-        System.out.println( "");
-        System.out.println( obj.toString() );
         return obj;
     }
     public JSONArray getLastUnsuccesfullBuild() {
@@ -525,10 +506,6 @@ public class JenkinsEngine implements ExecutionEngine {
         constructJobUrl( detail.LAST_UNSUCCESFULL_BUILD );
         execute();
         obj = jsonResponse.getJSONArray( "jobs" );
-        System.out.println( "");
-        System.out.println( "------" );
-        System.out.println( "");
-        System.out.println( obj.toString() );
         return obj;
     }
     public JSONArray getLastBuild() {
@@ -537,10 +514,6 @@ public class JenkinsEngine implements ExecutionEngine {
         constructJobUrl( detail.LAST_BUILD );
         execute();
         obj = jsonResponse.getJSONArray( "jobs" );
-        System.out.println( "");
-        System.out.println( "------" );
-        System.out.println( "");
-        System.out.println( obj.toString() );
         return obj;
     }
     public JSONArray getLastFailedBuild() {
@@ -549,10 +522,6 @@ public class JenkinsEngine implements ExecutionEngine {
         constructJobUrl( detail.LAST_FAILED_BUILD );
         execute();
         obj = jsonResponse.getJSONArray( "jobs" );
-        System.out.println( "");
-        System.out.println( "------" );
-        System.out.println( "");
-        System.out.println( obj.toString() );
         return obj;
     }
     public JSONArray getLastCompletedBuild() {
@@ -561,10 +530,6 @@ public class JenkinsEngine implements ExecutionEngine {
         constructJobUrl( detail.LAST_COMPLETED_BUILD);
         execute();
         obj = jsonResponse.getJSONArray( "jobs" );
-        System.out.println( "");
-        System.out.println( "------" );
-        System.out.println( "");
-        System.out.println( obj.toString() );
         return obj;
     }
     public JSONArray getJobDescription() {
@@ -572,14 +537,6 @@ public class JenkinsEngine implements ExecutionEngine {
         constructJobUrl( detail.DESCRIPTION);
         execute();
         obj = jsonResponse.getJSONArray( "jobs" );
-        System.out.println( "");
-        System.out.println( "------" );
-        System.out.println( "");
-        System.out.println( obj.toString() );
         return obj;
     }
-
-
-
-
 }
