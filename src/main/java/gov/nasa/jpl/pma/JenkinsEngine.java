@@ -78,11 +78,20 @@ public class JenkinsEngine implements ExecutionEngine {
     }
     private boolean DEBUG = false;
 
+    /**
+     * This is the main constructor for using the JenkinsEngine interface.
+     *  The constructor will create the initial connection to the server that
+     *  is specified before calling 'new' on JenkinsEngine. It is required
+     *  that the JenkinesEngine is initialized before attempting to make
+     *  any queries to the jenkins server because Jenkins will require any
+     *  calls made to be authenticated before completing.
+     */
     public JenkinsEngine() {
 
         /**
          * Simple class to launch a jenkins build on run@Cloud platform, should
          * also work on every jenkins instance (not tested)
+         * 
          *
          */
 
@@ -91,15 +100,7 @@ public class JenkinsEngine implements ExecutionEngine {
         String password = this.passwordOrToken;
         String jenkinsUrl;
 
-        // Jenkins url
-        //String jenkinsUrl = "https://cae-jenkins.jpl.nasa.gov/api/json?tree=jobs[name]";
-        // Build name
-        String jobName = "MDKTest";
-
         jenkinsUrl = url + jenkinsApiURL + apiCallDepth;
-
-
-        // jenkinsUrl = "https://cae-jenkins.jpl.nasa.gov/api/json?depth=2";
 
         // Create your httpclient
         this.jenkinsClient = new DefaultHttpClient();
