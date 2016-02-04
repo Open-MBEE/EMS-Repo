@@ -1973,8 +1973,6 @@ public class NodeUtil {
             if ( isDeleted( r ) ) {
                 if ( workspaceMatters ) {
                     deletedRefs.add( r );
-                } else {
-                    correctedRefs.add( r );
                 }
             } else {
                 correctedRefs.add( r );
