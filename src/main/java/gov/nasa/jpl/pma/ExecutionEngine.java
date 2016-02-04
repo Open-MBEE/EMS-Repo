@@ -19,16 +19,7 @@ public interface ExecutionEngine {
      * 
      * @param event
      */
-    void execute( Object event );
-
-    /**
-     * execute
-     * 
-     * Provides a set of events for the executionEngine to process.
-     * 
-     * @param events
-     */
-    void execute( List< Object > events );
+    void execute( );
 
     /**
      * isRunning
