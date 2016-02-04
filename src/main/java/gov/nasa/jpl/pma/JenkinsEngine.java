@@ -1,18 +1,16 @@
 /**
- * JenkinsEngine --------------------------------------------- Implements the
- * ExecutionEngine as a way to execute jobs (events) on the Jenkins server.
+ * JenkinsEngine ----
+ * 
+ * Implements the ExecutionEngine as a way to execute jobs (events) on the
+ * Jenkins server.
  * 
  */
 package gov.nasa.jpl.pma;
 
 import java.io.IOException;
-import java.net.URI;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
-import org.apache.commons.httpclient.HttpMethod;
-import org.apache.commons.httpclient.methods.GetMethod;
-import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpException;
 import org.apache.http.HttpHost;
@@ -26,7 +24,6 @@ import org.apache.http.auth.Credentials;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.protocol.ClientContext;
 import org.apache.http.impl.auth.BasicScheme;
 import org.apache.http.impl.client.DefaultHttpClient;
@@ -36,33 +33,48 @@ import org.apache.http.protocol.HttpContext;
 import org.apache.http.util.EntityUtils;
 
 import org.apache.log4j.Logger;
-import org.eclipse.jetty.http.HttpContent;
-import org.springframework.extensions.surf.util.Base64.InputStream;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import com.offbytwo.jenkins.JenkinsServer;
-import com.offbytwo.jenkins.model.BuildWithDetails;
-// import com.offbytwo.jenkins.model.FolderJob;
-import com.offbytwo.jenkins.model.JobWithDetails;
 
-import gov.nasa.jpl.view_repo.util.JSONObject;
-import gov.nasa.jpl.view_repo.webscripts.JobGet;
-import thredds.wcs.v1_1_0.Request;
+// import gov.nasa.jpl.view_repo.util.JSONObject;
 
 public class JenkinsEngine implements ExecutionEngine {
     static Logger logger = Logger.getLogger( JenkinsEngine.class );
 
     private JenkinsServer jenkins;
-    private String username = "perey";
-    private String passwordOrToken = "12Patty56!";
-    private String url = "https://cae-jenkins.jpl.nasa.gov";
-    private String jenkinsToken = "build";
-    public String job = "empty";
+    private String username = "eurointeg"; // User name to be used to connect to
+                                           // jenkins
+    private String passwordOrToken = "dhcp3LugH#Meg!i"; // Token or password
+                                                        // that is associated
+                                                        // with the user name
+    private String url = "https://cae-jenkins.jpl.nasa.gov"; // URL of the
+                                                             // Jenkins server
+                                                             // to execute the
+                                                             // job on
+    private String jenkinsToken = "build"; // The build the token associated
+                                           // with the build configuration on
+                                           // the Jenkins server.
+    public String jobName = "MDKTest"; // Build name - the name of the job to be
+                                       // executed on the Jenkins server.
+    public String jenkinsApiURL = "/api/json?depth=";
+    public int apiCallDepth = 1;
     public String executeUrl;
-    public DefaultHttpClient jenkinsClient;
+    public DefaultHttpClient jenkinsClient; //
     private long executionTime;
-    public JSONObject jsonResponse;
+    public JSONObject jsonResponse; //
+    public Map< String, String > detailResultMap;
 
-    // private List< QueueItem > eventQueue;
+    private BasicScheme basicAuth;
+    private BasicHttpContext context;
+
+    private enum detail {
+                         NAME, COLOR, URL, DURATION, EST_DURATION, TIMESTAMP,
+                         DESCRIPTION, LAST_SUCCESSFULL_BUILD, LAST_FAILED_BUILD,
+                         LAST_COMPLETED_BUILD, LAST_UNSUCCESFULL_BUILD,
+                         LAST_BUILD
+    }
 
     public JenkinsEngine() {
 
@@ -75,68 +87,61 @@ public class JenkinsEngine implements ExecutionEngine {
         // Credentials
         String username = this.username;
         String password = this.passwordOrToken;
-        boolean success = false;
-        GetMethod getMethod = null;
+        String jenkinsUrl;
 
         // Jenkins url
-        String jenkinsUrl = "https://cae-jenkins.jpl.nasa.gov/api/json?tree=jobs[name]";
+        //String jenkinsUrl = "https://cae-jenkins.jpl.nasa.gov/api/json?tree=jobs[name]";
         // Build name
         String jobName = "MDKTest";
 
-        // Build token
-        String buildToken = this.jenkinsToken;
+        jenkinsUrl = url + jenkinsApiURL + apiCallDepth;
+
+
+        // jenkinsUrl = "https://cae-jenkins.jpl.nasa.gov/api/json?depth=2";
 
         // Create your httpclient
-        jenkinsClient = new DefaultHttpClient();
+        this.jenkinsClient = new DefaultHttpClient();
 
         // Then provide the right credentials
-        jenkinsClient.getCredentialsProvider()
-                     .setCredentials( new AuthScope( AuthScope.ANY_HOST,
-                                                     AuthScope.ANY_PORT ),
-                                      new UsernamePasswordCredentials( username,
-                                                                       password ) );
+        this.jenkinsClient.getCredentialsProvider()
+                          .setCredentials( new AuthScope( AuthScope.ANY_HOST,
+                                                          AuthScope.ANY_PORT ),
+                                           new UsernamePasswordCredentials( username,
+                                                                            password ) );
 
         // Generate BASIC scheme object and stick it to the execution
         // context
-        BasicScheme basicAuth = new BasicScheme();
-        BasicHttpContext context = new BasicHttpContext();
+        this.basicAuth = new BasicScheme();
+        this.context = new BasicHttpContext();
 
-        context.setAttribute( "preemptive-auth", basicAuth );
+        this.context.setAttribute( "preemptive-auth", basicAuth );
 
         // Add as the first (because of the zero) request interceptor
         // It will first intercept the request and preemptively
         // initialize the authentication scheme if there is not
-        jenkinsClient.addRequestInterceptor( new PreemptiveAuth(), 0 );
+        this.jenkinsClient.addRequestInterceptor( new PreemptiveAuth(), 0 );
 
         // You get request that will start the build
-        // String getUrl = jenkinsUrl + "/job/" + jobName + "/build?token=" +
-        // buildToken;
+        // Example for setting a build REST call:
+        // String getUrl = jenkinsUrl + "/job/" + jobName + "/build?token="
+        // + buildToken;
         String getUrl = jenkinsUrl;
         System.out.println( "The Build url is " + getUrl );
         HttpGet get = new HttpGet( getUrl );
 
         try {
-            // HttpResponse response = jenkinsClient.execute( postRequest,
-            // context );
-            HttpResponse response = jenkinsClient.execute( get, context );
-            
-            java.io.InputStream instream;
-
+            HttpResponse response =
+                    this.jenkinsClient.execute( get, this.context );
             HttpEntity entity = response.getEntity();
-            String retSrc =EntityUtils.toString( entity );
-
-            jsonResponse = new JSONObject(retSrc);
-            
-            
-
-            System.out.println( "Content of the JSON Object is " + jsonResponse.toString( ));
-            System.out.println();
 
             System.out.println( "The response is " + response.toString() );
+            String retSrc = EntityUtils.toString( entity );
+            jsonResponse = new JSONObject( retSrc );
+            System.out.println( "Content of the JSON Object is "
+                                + jsonResponse.toString() );
             System.out.println();
             EntityUtils.consume( entity );
         } catch ( IOException e ) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
     }
@@ -148,8 +153,6 @@ public class JenkinsEngine implements ExecutionEngine {
     static class PreemptiveAuth implements HttpRequestInterceptor {
 
         /*
-         * (non-Javadoc)
-         *
          * @see org.apache.http.HttpRequestInterceptor#process(org.apache.
          * http.HttpRequest, org.apache.http.protocol.HttpContext)
          */
@@ -186,15 +189,6 @@ public class JenkinsEngine implements ExecutionEngine {
     }
 
     /**
-     * Default Constructor of JenkinsEngine
-     */
-    public JenkinsEngine( URI uri ) {
-        // TODO Auto-generated constructor stub
-        jenkins = new JenkinsServer( uri );
-        System.out.println( "Creating a new jenkins server.\n" );
-    }
-
-    /**
      * Sets the username to be used with the connection on Jenkins
      * 
      * @param name
@@ -214,55 +208,64 @@ public class JenkinsEngine implements ExecutionEngine {
     }
 
     /**
+     * This method will set the job that will be executed the by the
+     * JenkinsEngine.
+     * 
+     * @param job
+     */
+    public void setJob( String job ) {
+        this.jobName = job;
+    }
+
+    /**
+     * This method is used to set the token that is required when attempting to
+     * execute a build on the jenkins server.
+     * 
+     * @param token
+     */
+    public void setJobToken( String token ) {
+        this.jenkinsToken = token;
+    }
+
+    /**
      * Creates an instance of the Jenkins Engine
      */
     @Override
     public void createEngine() {}
 
-    /**
-     * Creates an instance of the Jenkins Engine
-     */
-    public void createEngine( URI serverURI, String name, String pass ) {
-        // Create a server using default values for the Jenkins URI, username
-        // and Password / Token
-        jenkins = new JenkinsServer( serverURI, name, pass );
-    }
-
     @Override
-    public void execute( Object event ) {
-        // This depends on what we want to do with the event that comes in...
-        // could be trigger a build, etc.
-        /*
+    public void execute() {
+        // This sets the URL to an Object specifically for making GET calls
+        HttpGet get = new HttpGet( this.executeUrl );
+        String entityString;
+
         try {
-            ( (Job)event ).build();     NOTE: MOST LIKELY DO NOT NEED THIS 
-            
-            String getUrl = jenkinsUrl + "/job/" + jobName + "/build?token=" +
-            buildToken;
-            HttpResponse response = jenkinsClient.execute( get, context );
-        }
-        catch (IOException e) {
-            // some exception
-        }
-        */
-    }
+            // This will tell the Jenkins HTTP Client to execute the GET
+            // call with the context that was set during the instantiation
+            // of the Jenkins HttpClient.
+            HttpResponse response = jenkinsClient.execute( get, this.context );
 
-    @Override
-    public void execute( List< Object > events ) {
-        // TODO Auto-generated method stub
-        // try {
-        // for(Object event : events)
-        // ( (Job)event ).build();
-        // }
-        // catch (IOException e) {
-        // // some exception
-        // }
-        
-        
+            // Takes the HttpResponse and turns it into an Entity that can
+            // be manipulated into a string.
+            HttpEntity entity = response.getEntity();
+            entityString = EntityUtils.toString( entity );
+
+            // Converts the HttpEntity String from the response of the GET
+            // call into a JSON object then consumes the entity to close the
+            // connection.
+            jsonResponse = new JSONObject( entityString );
+            EntityUtils.consume( entity );
+
+            // Will throw an error if the execution fails from either incorrect
+            // setup or if the jenkinsClient has not been instantiated.
+        } catch ( IOException e ) {
+            e.printStackTrace(); 
+        }
     }
 
     @Override
     public boolean isRunning() {
-        return jenkins.isRunning();
+        return jenkins != null;
     }
 
     @Override
@@ -292,27 +295,37 @@ public class JenkinsEngine implements ExecutionEngine {
      * @return Event details in a string form
      * @Override
      */
-    public String getEventDetail( List< String > detailName ) {
+    public String getEventDetail( String jobName, String detailName ) {
+        String returnString = null;
 
-        // Use Base url then append this to create call
-        /**
-         * Example:
-         * 
-         * https://cae-jenkins.jpl.nasa.gov/api/json?tree=jobs[name],views[name,
-         * jobs[name]]
-         * 
-         * To get varying amounts of information use depth=
-         * 
-         * High level https://cae-jenkins.jpl.nasa.gov/api/json?depth=1
-         * 
-         * More Detail https://cae-jenkins.jpl.nasa.gov/api/json?depth=2
-         * 
-         * A ton of detail https://cae-jenkins.jpl.nasa.gov/api/json?depth=3
-         * 
-         */
-        JSONObject jsonObject;
+        if ( !detailName.isEmpty() && jsonResponse != null ) {
+            try {
 
-        return "";
+            } catch ( Exception e ) {
+
+            }
+        }
+
+        return returnString;
+    }
+
+    /**
+     * DO NOT USE --- Exception Handling Not Implemented!
+     * 
+     * @param detailName
+     * @return
+     */
+    public String getEventDetails( List< String > detailName ) {
+        String returnString = "";
+        // if ( !detailName.isEmpty() && jsonResponse != null ) {
+        // for ( String det : detailName ) {
+        // System.out.println( "Detail name : "
+        // + jsonResponse.get( det ).toString() );
+        // detailResultMap.put( det, jsonResponse.get( det ).toString() );
+        // returnString += jsonResponse.getString( det ).toString() + ", ";
+        // }
+        // }
+        return returnString;
     }
 
     @Override
@@ -323,35 +336,16 @@ public class JenkinsEngine implements ExecutionEngine {
         } catch ( IOException e ) {
             // some exception
         }
-
-        // There will be some queue of events ... should these events be
-        // QueueItem?
-        // events.add(event);
-        // execute( events );
-
     }
 
     @Override
     public void setEvents( List< String > events ) {
-
         for ( String event : events )
             setEvent( event );
-
-        // events may need to be List< QueueItem >
-        // for(Object event: events)
-        // events.add(event);
-        // execute( event );
     }
 
     @Override
     public boolean stopExecution() {
-        /*
-         * Stop all running instances of job / jobs
-         */
-
-        if ( jenkins.isRunning() ) {
-            // stop execution only if the server is running
-        }
         return false;
     }
 
@@ -363,7 +357,6 @@ public class JenkinsEngine implements ExecutionEngine {
     @Override
     public void updateEvent( String event ) {
         // TODO Auto-generated method stub
-
     }
 
     @Override
@@ -371,9 +364,115 @@ public class JenkinsEngine implements ExecutionEngine {
         return executionTime;
     }
 
-    @Override
-    public String getEventDetail( String eventName, String detail ) {
-        // TODO Auto-generated method stub
-        return null;
+    /**
+     * Private method for constructing urls to be executed on Jenkins.
+     * 
+     * Allowed Arguments for Detail Property:
+     * <ul>
+     * <li>NAME
+     * <li>COLOR
+     * <li>URL
+     * <li>DURATION
+     * <li>EST_DURATION
+     * <li>TIMESTAMP
+     * <li>DESCRIPTION
+     * <li>LAST_SUCCESSFULL_BUILD
+     * <li>LAST_FAILED_BUILD
+     * <li>LAST_COMPLETED_BUILD
+     * <li>LAST_UNSUCCESFULL_BUILD
+     * <li>LAST_BUILD
+     * </ul>
+     * 
+     * @param jobUrl
+     * @param property
+     */
+    private void constructJobUrl( detail property ) {
+        String url;
+
+        url = "/api/json?tree=jobs";
+        System.out.println( "Current constuction url is " + url );
+
+        switch ( property ) {
+            case NAME:
+                url = url + "[name]";
+                break;
+            case URL:
+                url = url + "[url]";
+                break;
+            case COLOR:
+                url = url + "[color]";
+                break;
+            case LAST_COMPLETED_BUILD:
+                url = url + "[lastCompletedBuild]";
+                break;
+            case LAST_FAILED_BUILD:
+                url = url + "[lastFailedBuild]";
+                break;
+            case LAST_SUCCESSFULL_BUILD:
+                url = url + "[lastSuccessfullBuild]";
+                break;
+            case LAST_UNSUCCESFULL_BUILD:
+                url = url + "[lastUnsuccesfullBuild]";
+                break;
+            case DESCRIPTION:
+                url = url + "[description]";
+                break;
+            case LAST_BUILD:
+                url = url + "[lastBuild]";
+        }
+        this.executeUrl = this.url + url;
+    }
+
+    private void constructBuildUrl( String jobUrl, detail property ) {
+
+        String url;
+
+        if ( !jobUrl.startsWith( "/" ) ) {
+            jobUrl = "/" + jobUrl;
+        }
+        url = "/job" + jobUrl;
+
+        if ( !url.endsWith( "/" ) ) {
+            url = url + "/";
+        }
+
+        url = url + "api/json?tree=builds";
+
+        System.out.println( "Current constuction url is " + url );
+
+        switch ( property ) {
+            case NAME:
+                url = url + "[displayName]";
+                break;
+            case URL:
+                url = url + "[url]";
+                break;
+            case DURATION:
+                url = url + "[duration]";
+                break;
+            case EST_DURATION:
+                url = url + "[estimatedDuration]";
+                break;
+            case TIMESTAMP:
+                url = url + "[timestamp]";
+                break;
+            case DESCRIPTION:
+                url = url + "[description]";
+                break;
+            default:
+                url = "";
+        }
+        this.executeUrl = this.url + url;
+        System.out.println( "Execution url is " + this.executeUrl );
+    }
+    public JSONArray getJobUrls(){
+        JSONArray obj;
+
+        constructJobUrl(detail.URL);
+        execute();
+        obj = jsonResponse.getJSONArray( "jobs" );
+
+        return obj;
+
     }
 }
