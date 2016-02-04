@@ -52,8 +52,8 @@ public class JenkinsEngine implements ExecutionEngine {
     static Logger logger = Logger.getLogger( JenkinsEngine.class );
 
     private JenkinsServer jenkins;
-    private String username = "dank";
-    private String passwordOrToken;
+    private String username = "perey";
+    private String passwordOrToken = "12Patty56!";
     private String url = "https://cae-jenkins.jpl.nasa.gov";
     private String jenkinsToken = "build";
     public String job = "empty";
@@ -79,7 +79,7 @@ public class JenkinsEngine implements ExecutionEngine {
         GetMethod getMethod = null;
 
         // Jenkins url
-        String jenkinsUrl = "https://cae-jenkins.jpl.nasa.gov/api/json?depth=2";
+        String jenkinsUrl = "https://cae-jenkins.jpl.nasa.gov/api/json?tree=jobs[name]";
         // Build name
         String jobName = "MDKTest";
 
@@ -126,8 +126,10 @@ public class JenkinsEngine implements ExecutionEngine {
             String retSrc =EntityUtils.toString( entity );
 
             jsonResponse = new JSONObject(retSrc);
+            
+            
 
-            System.out.println( "Content of the JSON Object is " + jsonResponse.toString());
+            System.out.println( "Content of the JSON Object is " + jsonResponse.toString( ));
             System.out.println();
 
             System.out.println( "The response is " + response.toString() );
@@ -230,12 +232,18 @@ public class JenkinsEngine implements ExecutionEngine {
     public void execute( Object event ) {
         // This depends on what we want to do with the event that comes in...
         // could be trigger a build, etc.
-        // try {
-        // ( (Job)event ).build();
-        // }
-        // catch (IOException e) {
-        // // some exception
-        // }
+        /*
+        try {
+            ( (Job)event ).build();     NOTE: MOST LIKELY DO NOT NEED THIS 
+            
+            String getUrl = jenkinsUrl + "/job/" + jobName + "/build?token=" +
+            buildToken;
+            HttpResponse response = jenkinsClient.execute( get, context );
+        }
+        catch (IOException e) {
+            // some exception
+        }
+        */
     }
 
     @Override
@@ -248,6 +256,8 @@ public class JenkinsEngine implements ExecutionEngine {
         // catch (IOException e) {
         // // some exception
         // }
+        
+        
     }
 
     @Override
@@ -264,7 +274,6 @@ public class JenkinsEngine implements ExecutionEngine {
     }
 
     /**
-<<<<<<< HEAD
      * This method is used to find the job that the user specifies within
      * <b>eventName</b> and specifying which detail they would like from the
      * job. <b>detailName</b> These are the parameters it accepts:
@@ -280,21 +289,6 @@ public class JenkinsEngine implements ExecutionEngine {
      * 
      * @param String
      *            eventName, String detailName
-=======
-     * This method is used to find the job that the user specifies within <b>eventName</b> and specifying
-     *  which detail they would like from the job.
-     *  <b>detailName</b> These are the parameters it accepts: 
-     *  <ul>
-     *  <li>name
-     *  <li>url
-     *  <li>failed
-     *  <li>successful
-     *  <li>unsuccessful
-     *  <li>stable
-     *  <li>unstable
-     *  </ul>
-     * @param String eventName, String detailName
->>>>>>> d767272ad595776ad3df6b1f70c55b73a62880c9
      * @return Event details in a string form
      * @Override
      */
