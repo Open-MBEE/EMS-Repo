@@ -6752,7 +6752,11 @@ public class EmsScriptNode extends ScriptNode implements
         ArrayList< EmsScriptNode > nodes = new ArrayList< EmsScriptNode >();
         if ( refs == null ) return nodes;
         for ( NodeRef ref : refs ) {
-            nodes.add( new EmsScriptNode( ref, NodeUtil.getServices() ) );
+            if (ref != null) {
+                nodes.add( new EmsScriptNode( ref, NodeUtil.getServices() ) );
+            } else {
+                logger.error( "trying to add a null noderef" );
+            }
         }
         return nodes;
     }

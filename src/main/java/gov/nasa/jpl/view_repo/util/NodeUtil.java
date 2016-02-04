@@ -1973,6 +1973,8 @@ public class NodeUtil {
             if ( isDeleted( r ) ) {
                 if ( workspaceMatters ) {
                     deletedRefs.add( r );
+                } else {
+                    correctedRefs.add( r );
                 }
             } else {
                 correctedRefs.add( r );
@@ -4366,11 +4368,11 @@ public class NodeUtil {
             String sender = hostname + "@jpl.nasa.gov";
             String recipient;
 
-            if ( hostname.toLowerCase().contains( "europa" ) ) {
-                recipient = "kerzhner@jpl.nasa.gov";
-                ActionUtil.sendEmailTo( sender, recipient, msg, subject,
-                                        services );
-            }
+//            if ( hostname.toLowerCase().contains( "europa" ) ) {
+//                recipient = "kerzhner@jpl.nasa.gov";
+//                ActionUtil.sendEmailTo( sender, recipient, msg, subject,
+//                                        services );
+//            }
             recipient = "mbee-dev-admin@jpl.nasa.gov";
             ActionUtil.sendEmailTo( sender, recipient, msg, subject, services );
             heisenbugSeen = true;
