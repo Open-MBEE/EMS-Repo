@@ -4,6 +4,9 @@
  * Implements the ExecutionEngine as a way to execute jobs (events) on the
  * Jenkins server.
  * 
+ * @author  Dan Karlsson (dank)
+ * @date    2/04/16
+ * 
  */
 package gov.nasa.jpl.pma;
 
@@ -75,6 +78,7 @@ public class JenkinsEngine implements ExecutionEngine {
                          LAST_COMPLETED_BUILD, LAST_UNSUCCESFULL_BUILD,
                          LAST_BUILD
     }
+    private boolean DEBUG = false;
 
     public JenkinsEngine() {
 
@@ -120,22 +124,25 @@ public class JenkinsEngine implements ExecutionEngine {
         // Example for setting a build REST call:
         // String getUrl = jenkinsUrl + "/job/" + jobName + "/build?token="
         // + buildToken;
-        String getUrl = jenkinsUrl;
-        System.out.println( "The Build url is " + getUrl );
-        HttpGet get = new HttpGet( getUrl );
+        if ( DEBUG ) {
 
-        try {
-            HttpResponse response =
-                    this.jenkinsClient.execute( get, this.context );
-            HttpEntity entity = response.getEntity();
-            String retSrc = EntityUtils.toString( entity );
-            jsonResponse = new JSONObject( retSrc );
-            System.out.println( "Content of the JSON Object is "
-                                + jsonResponse.toString() );
-            System.out.println();
-            EntityUtils.consume( entity );
-        } catch ( IOException e ) {
-            e.printStackTrace();
+            String getUrl = jenkinsUrl;
+            System.out.println( "The Build url is " + getUrl );
+            HttpGet get = new HttpGet( getUrl );
+
+            try {
+                HttpResponse response =
+                        this.jenkinsClient.execute( get, this.context );
+                HttpEntity entity = response.getEntity();
+                String retSrc = EntityUtils.toString( entity );
+                jsonResponse = new JSONObject( retSrc );
+                System.out.println( "Content of the JSON Object is "
+                                    + jsonResponse.toString() );
+                System.out.println();
+                EntityUtils.consume( entity );
+            } catch ( IOException e ) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -380,11 +387,10 @@ public class JenkinsEngine implements ExecutionEngine {
      * @param jobUrl
      * @param property
      */
-    private void constructJobUrl( detail property ) {
+    public void constructJobUrl( detail property ) {
         String url;
 
         url = "/api/json?tree=jobs";
-        System.out.println( "Current constuction url is " + url );
 
         switch ( property ) {
             case NAME:
@@ -413,11 +419,13 @@ public class JenkinsEngine implements ExecutionEngine {
                 break;
             case LAST_BUILD:
                 url = url + "[lastBuild]";
+            default:
+                break;
         }
         this.executeUrl = this.url + url;
     }
 
-    private void constructBuildUrl( String jobUrl, detail property ) {
+    public void constructBuildUrl( String jobUrl, detail property ) {
 
         String url;
 
@@ -459,14 +467,119 @@ public class JenkinsEngine implements ExecutionEngine {
         this.executeUrl = this.url + url;
         System.out.println( "Execution url is " + this.executeUrl );
     }
-    public JSONArray getJobUrls(){
+
+    public JSONArray getJobUrls() {
         JSONArray obj;
 
-        constructJobUrl(detail.URL);
+        constructJobUrl( detail.URL );
         execute();
         obj = jsonResponse.getJSONArray( "jobs" );
+        System.out.println( "");
+        System.out.println( "------" );
+        System.out.println( "");
 
+        System.out.println( obj.toString() );
         return obj;
 
     }
+
+    public JSONArray getJobNames() {
+        JSONArray obj;
+
+        constructJobUrl( detail.NAME );
+        execute();
+        obj = jsonResponse.getJSONArray( "jobs" );
+        System.out.println( "");
+        System.out.println( "------" );
+        System.out.println( "");
+        System.out.println( obj.toString() );
+        return obj;
+    }
+    public JSONArray getJobColor() {
+        JSONArray obj;
+
+        constructJobUrl( detail.COLOR);
+        execute();
+        obj = jsonResponse.getJSONArray( "jobs" );
+        System.out.println( "");
+        System.out.println( "------" );
+        System.out.println( "");
+        System.out.println( obj.toString() );
+        return obj;
+    }
+    public JSONArray getLastSuccessfullBuild() {
+        JSONArray obj;
+
+        constructJobUrl( detail.LAST_SUCCESSFULL_BUILD);
+        execute();
+        obj = jsonResponse.getJSONArray( "jobs" );
+        System.out.println( "");
+        System.out.println( "------" );
+        System.out.println( "");
+        System.out.println( obj.toString() );
+        return obj;
+    }
+    public JSONArray getLastUnsuccesfullBuild() {
+        JSONArray obj;
+
+        constructJobUrl( detail.LAST_UNSUCCESFULL_BUILD );
+        execute();
+        obj = jsonResponse.getJSONArray( "jobs" );
+        System.out.println( "");
+        System.out.println( "------" );
+        System.out.println( "");
+        System.out.println( obj.toString() );
+        return obj;
+    }
+    public JSONArray getLastBuild() {
+        JSONArray obj;
+
+        constructJobUrl( detail.LAST_BUILD );
+        execute();
+        obj = jsonResponse.getJSONArray( "jobs" );
+        System.out.println( "");
+        System.out.println( "------" );
+        System.out.println( "");
+        System.out.println( obj.toString() );
+        return obj;
+    }
+    public JSONArray getLastFailedBuild() {
+        JSONArray obj;
+
+        constructJobUrl( detail.LAST_FAILED_BUILD );
+        execute();
+        obj = jsonResponse.getJSONArray( "jobs" );
+        System.out.println( "");
+        System.out.println( "------" );
+        System.out.println( "");
+        System.out.println( obj.toString() );
+        return obj;
+    }
+    public JSONArray getLastCompletedBuild() {
+        JSONArray obj;
+
+        constructJobUrl( detail.LAST_COMPLETED_BUILD);
+        execute();
+        obj = jsonResponse.getJSONArray( "jobs" );
+        System.out.println( "");
+        System.out.println( "------" );
+        System.out.println( "");
+        System.out.println( obj.toString() );
+        return obj;
+    }
+    public JSONArray getJobDescription() {
+        JSONArray obj;
+        constructJobUrl( detail.DESCRIPTION);
+        execute();
+        obj = jsonResponse.getJSONArray( "jobs" );
+        System.out.println( "");
+        System.out.println( "------" );
+        System.out.println( "");
+        System.out.println( obj.toString() );
+        return obj;
+    }
+
+
+
+
 }
