@@ -3,7 +3,7 @@
 	<description>
 		perform action on job 
 	</description>
-	<url>/workspaces/{workspaceId}/elements/{elementId}/jobs/action</url>
+	<url>/workspaces/{workspaceId}/jobs/{jobId}/action</url>
 	<format default="json">argument</format>
 	<authentication>user</authentication>
 	<transaction>none</transaction>
