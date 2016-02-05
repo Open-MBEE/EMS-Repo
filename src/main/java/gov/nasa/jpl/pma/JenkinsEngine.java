@@ -98,7 +98,6 @@ public class JenkinsEngine implements ExecutionEngine {
 
         jenkinsUrl = url + jenkinsApiURL + apiCallDepth;
 
-
         // jenkinsUrl = "https://cae-jenkins.jpl.nasa.gov/api/json?depth=2";
 
         // Create your httpclient
@@ -494,7 +493,7 @@ public class JenkinsEngine implements ExecutionEngine {
     }
 
     public JSONObject getJobs(String jobUrl, detail name) {
-        JSONArray obj;
+        jobUrl = jobUrl.replaceAll(" ", "%20");
         
         constructJobJson(jobUrl, name);
         execute();
