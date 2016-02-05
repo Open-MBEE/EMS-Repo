@@ -4,8 +4,8 @@
  * Implements the ExecutionEngine as a way to execute jobs (events) on the
  * Jenkins server.
  * 
- * @author  Dan Karlsson (dank)
- * @date    2/04/16
+ * @author Dan Karlsson (dank)
+ * @date 2/04/16
  * 
  */
 package gov.nasa.jpl.pma;
@@ -38,7 +38,6 @@ import org.apache.http.util.EntityUtils;
 import org.apache.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONObject;
-
 
 // import gov.nasa.jpl.view_repo.util.JSONObject;
 
@@ -76,15 +75,16 @@ public class JenkinsEngine implements ExecutionEngine {
                          LAST_COMPLETED_BUILD, LAST_UNSUCCESFULL_BUILD,
                          LAST_BUILD
     }
+
     private boolean DEBUG = false;
 
     /**
-     * This is the main constructor for using the JenkinsEngine interface.
-     *  The constructor will create the initial connection to the server that
-     *  is specified before calling 'new' on JenkinsEngine. It is required
-     *  that the JenkinesEngine is initialized before attempting to make
-     *  any queries to the jenkins server because Jenkins will require any
-     *  calls made to be authenticated before completing.
+     * This is the main constructor for using the JenkinsEngine interface. The
+     * constructor will create the initial connection to the server that is
+     * specified before calling 'new' on JenkinsEngine. It is required that the
+     * JenkinesEngine is initialized before attempting to make any queries to
+     * the jenkins server because Jenkins will require any calls made to be
+     * authenticated before completing.
      */
     public JenkinsEngine() {
 
@@ -263,7 +263,7 @@ public class JenkinsEngine implements ExecutionEngine {
             // Will throw an error if the execution fails from either incorrect
             // setup or if the jenkinsClient has not been instantiated.
         } catch ( IOException e ) {
-            e.printStackTrace(); 
+            e.printStackTrace();
         }
     }
 
@@ -330,8 +330,7 @@ public class JenkinsEngine implements ExecutionEngine {
     }
 
     @Override
-    public void setEvent( String event ) {
-    }
+    public void setEvent( String event ) {}
 
     @Override
     public void setEvents( List< String > events ) {
@@ -464,80 +463,101 @@ public class JenkinsEngine implements ExecutionEngine {
 
     public JSONArray getJobUrls() {
         JSONArray obj;
-
         constructJobUrl( detail.URL );
         execute();
         obj = jsonResponse.getJSONArray( "jobs" );
-        System.out.println( "");
-        System.out.println( "------" );
-        System.out.println( "");
-
-        System.out.println( obj.toString() );
         return obj;
-
     }
 
     public JSONArray getJobNames() {
         JSONArray obj;
-
         constructJobUrl( detail.NAME );
         execute();
         obj = jsonResponse.getJSONArray( "jobs" );
         return obj;
     }
+
     public JSONArray getJobColor() {
         JSONArray obj;
-
-        constructJobUrl( detail.COLOR);
+        constructJobUrl( detail.COLOR );
         execute();
         obj = jsonResponse.getJSONArray( "jobs" );
         return obj;
     }
+
     public JSONArray getLastSuccessfullBuild() {
         JSONArray obj;
-
-        constructJobUrl( detail.LAST_SUCCESSFULL_BUILD);
+        constructJobUrl( detail.LAST_SUCCESSFULL_BUILD );
         execute();
         obj = jsonResponse.getJSONArray( "jobs" );
         return obj;
     }
+
     public JSONArray getLastUnsuccesfullBuild() {
         JSONArray obj;
-
         constructJobUrl( detail.LAST_UNSUCCESFULL_BUILD );
         execute();
         obj = jsonResponse.getJSONArray( "jobs" );
         return obj;
     }
+
     public JSONArray getLastBuild() {
         JSONArray obj;
-
         constructJobUrl( detail.LAST_BUILD );
         execute();
         obj = jsonResponse.getJSONArray( "jobs" );
         return obj;
     }
+
     public JSONArray getLastFailedBuild() {
         JSONArray obj;
-
         constructJobUrl( detail.LAST_FAILED_BUILD );
         execute();
         obj = jsonResponse.getJSONArray( "jobs" );
         return obj;
     }
+
     public JSONArray getLastCompletedBuild() {
         JSONArray obj;
-
-        constructJobUrl( detail.LAST_COMPLETED_BUILD);
+        constructJobUrl( detail.LAST_COMPLETED_BUILD );
         execute();
         obj = jsonResponse.getJSONArray( "jobs" );
         return obj;
     }
+
     public JSONArray getJobDescription() {
-        JSONArray obj;
-        constructJobUrl( detail.DESCRIPTION);
+        constructJobUrl( detail.DESCRIPTION );
         execute();
-        obj = jsonResponse.getJSONArray( "jobs" );
-        return obj;
+        return jsonResponse.getJSONArray( "jobs" );
+    }
+
+    public JSONArray getBuildName( String jobConfigUrl ) {
+        constructBuildUrl( jobConfigUrl, detail.NAME );
+        execute();
+        return jsonResponse.getJSONArray( "jobs" );
+    }
+
+    public JSONArray getBuildDuration( String jobConfigUrl ) {
+        constructBuildUrl( jobConfigUrl, detail.DURATION );
+        execute();
+        return jsonResponse.getJSONArray( "jobs" );
+    }
+
+    public JSONArray getBuildEstimatedDuration( String jobConfigUrl ) {
+        constructBuildUrl( jobConfigUrl, detail.EST_DURATION );
+        execute();
+        return jsonResponse.getJSONArray( "jobs" );
+    }
+
+    public JSONArray getBuildTimestamp( String jobConfigUrl ) {
+        constructBuildUrl( jobConfigUrl, detail.TIMESTAMP );
+        execute();
+        return jsonResponse.getJSONArray( "jobs" );
+    }
+
+    public JSONArray getBuildDescription( String jobConfigUrl ) {
+        constructBuildUrl( jobConfigUrl, detail.DESCRIPTION );
+        execute();
+        return jsonResponse.getJSONArray( "jobs" );
     }
 }
