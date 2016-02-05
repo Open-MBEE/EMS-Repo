@@ -70,7 +70,7 @@ public class JenkinsEngine implements ExecutionEngine {
     private BasicScheme basicAuth;
     private BasicHttpContext context;
 
-    private enum detail {
+    public enum detail {
                          NAME, COLOR, URL, DURATION, EST_DURATION, TIMESTAMP,
                          DESCRIPTION, LAST_SUCCESSFULL_BUILD, LAST_FAILED_BUILD,
                          LAST_COMPLETED_BUILD, LAST_UNSUCCESFULL_BUILD,
@@ -416,6 +416,7 @@ public class JenkinsEngine implements ExecutionEngine {
                 break;
         }
         this.executeUrl = this.url + url;
+        System.out.println( "Execution url is " + this.executeUrl );
     }
 
     public void constructBuildUrl( String jobUrl, detail property ) {
@@ -460,6 +461,27 @@ public class JenkinsEngine implements ExecutionEngine {
         this.executeUrl = this.url + url;
         System.out.println( "Execution url is " + this.executeUrl );
     }
+    
+    public void constructJobJson( String jobUrl, detail property ) {
+
+        String url;
+
+        if ( !jobUrl.startsWith( "/" ) ) {
+            jobUrl = "/" + jobUrl;
+        }
+        url = "/job" + jobUrl;
+
+        if ( !url.endsWith( "/" ) ) {
+            url = url + "/";
+        }
+
+        url = url + "api/json";
+
+        System.out.println( "Current constuction url is " + url );
+
+        this.executeUrl = this.url + url;
+        System.out.println( "Execution url is " + this.executeUrl );
+    }
 
     public JSONArray getJobUrls() {
         JSONArray obj;
@@ -467,15 +489,18 @@ public class JenkinsEngine implements ExecutionEngine {
         constructJobUrl( detail.URL );
         execute();
         obj = jsonResponse.getJSONArray( "jobs" );
-        System.out.println( "");
-        System.out.println( "------" );
-        System.out.println( "");
-
-        System.out.println( obj.toString() );
         return obj;
 
     }
 
+    public JSONObject getJobs(String jobUrl, detail name) {
+        JSONArray obj;
+        
+        constructJobJson(jobUrl, name);
+        execute();
+        return jsonResponse;
+    }
+    
     public JSONArray getJobNames() {
         JSONArray obj;
 
