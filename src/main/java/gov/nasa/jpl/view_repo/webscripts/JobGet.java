@@ -86,8 +86,6 @@ public class JobGet extends ModelGet {
     @Override
     protected Map<String, Object> executeImplImpl(WebScriptRequest req, 
             Status status, Cache cache) {
-        URI uri = null;
-
         if (logger.isDebugEnabled()) {
             String user = AuthenticationUtil.getFullyAuthenticatedUser();
             logger.debug(user + " " + req.getURL());
@@ -95,12 +93,12 @@ public class JobGet extends ModelGet {
         
 
         JenkinsEngine jenkins = new JenkinsEngine();
-
+        JSONArray jobNames = jenkins.getJobNames();
         // TESTING STUFFS
-        JSONObject jenkinsJson = jenkins.jsonResponse;
-        JSONArray jobJson = jenkinsJson.getJSONArray( "jobs" );
+        //JSONObject jenkinsJson = jenkins.jsonResponse;
+        //JSONArray jobJson = jenkinsJson.getJSONArray( "jobs" );
         
-        System.out.println( jobJson );
+        //System.out.println( jenkins.getJobUrls() );        
         
         Timer timer = new Timer();
         printHeader(req);
@@ -119,8 +117,20 @@ public class JobGet extends ModelGet {
                  * STORE PUT IN JOB */
                 JSONObject job = (JSONObject)jobsJson.get(i);
                 if (job.has( "specialization" )) 
-                    job.remove( "specialization" );  
-                job.put( "data", jobJson );
+                    job.remove( "specialization" ); 
+
+                for(int ii = 0; ii < jobNames.length(); ii++) {
+                    JSONObject name = jobNames.getJSONObject( ii );
+                    
+                    JSONObject test = jenkins.getJobs(
+                                                     name.get( "name" ).toString(), 
+                                                     JenkinsEngine.detail.NAME);
+                                     
+                    job.put( "job" , test );
+                }
+                
+                
+                //job.put( "data", jenkins.getJobUrls() );                
             }
             
             if (jobsJson.length() > 0) {
@@ -178,9 +188,10 @@ public class JobGet extends ModelGet {
     protected JSONObject jobOrEle(EmsScriptNode job, WorkspaceNode ws, Date dateTime, String id,
                              boolean includeQualified, boolean isIncludeDocument ) {
         if  ( isJob( job ) ) {
-            return job.toJSONObject( ws,  dateTime, includeQualified, isIncludeDocument, jobProperties.get(id) );
+            return new JSONObject();  
+            //return job.toJSONObject( ws,  dateTime, includeQualified, isIncludeDocument, jobProperties.get(id) );
         }
-        return new JSONObject();        
+        return job.toJSONObject( ws,  dateTime, includeQualified, isIncludeDocument, jobProperties.get(id) );
     }
 
 }

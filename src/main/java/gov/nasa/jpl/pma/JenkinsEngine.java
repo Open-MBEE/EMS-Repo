@@ -69,11 +69,11 @@ public class JenkinsEngine implements ExecutionEngine {
     private BasicScheme basicAuth;
     private BasicHttpContext context;
 
-    private enum detail {
-                         NAME, COLOR, URL, DURATION, EST_DURATION, TIMESTAMP,
-                         DESCRIPTION, LAST_SUCCESSFULL_BUILD, LAST_FAILED_BUILD,
-                         LAST_COMPLETED_BUILD, LAST_UNSUCCESFULL_BUILD,
-                         LAST_BUILD
+    public enum detail {
+                        NAME, COLOR, URL, DURATION, EST_DURATION, TIMESTAMP,
+                        DESCRIPTION, LAST_SUCCESSFULL_BUILD, LAST_FAILED_BUILD,
+                        LAST_COMPLETED_BUILD, LAST_UNSUCCESFULL_BUILD,
+                        LAST_BUILD
     }
 
     private boolean DEBUG = false;
@@ -416,6 +416,7 @@ public class JenkinsEngine implements ExecutionEngine {
                 break;
         }
         this.executeUrl = this.url + url;
+        System.out.println( "Execution url is " + this.executeUrl );
     }
 
     public void constructBuildUrl( String jobUrl, detail property ) {
@@ -461,68 +462,79 @@ public class JenkinsEngine implements ExecutionEngine {
         System.out.println( "Execution url is " + this.executeUrl );
     }
 
+    public void constructJobJson( String jobUrl, detail property ) {
+
+        String url;
+
+        if ( !jobUrl.startsWith( "/" ) ) {
+            jobUrl = "/" + jobUrl;
+        }
+        url = "/job" + jobUrl;
+
+        if ( !url.endsWith( "/" ) ) {
+            url = url + "/";
+        }
+
+        url = url + "api/json";
+
+        System.out.println( "Current constuction url is " + url );
+
+        this.executeUrl = this.url + url;
+        System.out.println( "Execution url is " + this.executeUrl );
+    }
+
     public JSONArray getJobUrls() {
-        JSONArray obj;
         constructJobUrl( detail.URL );
         execute();
-        obj = jsonResponse.getJSONArray( "jobs" );
-        return obj;
+        return jsonResponse.getJSONArray( "jobs" );
+    }
+
+    public JSONObject getJobs( String jobUrl, detail name ) {
+        constructJobJson( jobUrl, name );
+        execute();
+        return jsonResponse;
     }
 
     public JSONArray getJobNames() {
-        JSONArray obj;
         constructJobUrl( detail.NAME );
         execute();
-        obj = jsonResponse.getJSONArray( "jobs" );
-        return obj;
+        return jsonResponse.getJSONArray( "jobs" );
     }
 
     public JSONArray getJobColor() {
-        JSONArray obj;
         constructJobUrl( detail.COLOR );
         execute();
-        obj = jsonResponse.getJSONArray( "jobs" );
-        return obj;
+        return jsonResponse.getJSONArray( "jobs" );
     }
 
     public JSONArray getLastSuccessfullBuild() {
-        JSONArray obj;
         constructJobUrl( detail.LAST_SUCCESSFULL_BUILD );
         execute();
-        obj = jsonResponse.getJSONArray( "jobs" );
-        return obj;
+        return jsonResponse.getJSONArray( "jobs" );
     }
 
     public JSONArray getLastUnsuccesfullBuild() {
-        JSONArray obj;
         constructJobUrl( detail.LAST_UNSUCCESFULL_BUILD );
         execute();
-        obj = jsonResponse.getJSONArray( "jobs" );
-        return obj;
+        return jsonResponse.getJSONArray( "jobs" );
     }
 
     public JSONArray getLastBuild() {
-        JSONArray obj;
         constructJobUrl( detail.LAST_BUILD );
         execute();
-        obj = jsonResponse.getJSONArray( "jobs" );
-        return obj;
+        return jsonResponse.getJSONArray( "jobs" );
     }
 
     public JSONArray getLastFailedBuild() {
-        JSONArray obj;
         constructJobUrl( detail.LAST_FAILED_BUILD );
         execute();
-        obj = jsonResponse.getJSONArray( "jobs" );
-        return obj;
+        return jsonResponse.getJSONArray( "jobs" );
     }
 
     public JSONArray getLastCompletedBuild() {
-        JSONArray obj;
         constructJobUrl( detail.LAST_COMPLETED_BUILD );
         execute();
-        obj = jsonResponse.getJSONArray( "jobs" );
-        return obj;
+        return jsonResponse.getJSONArray( "jobs" );
     }
 
     public JSONArray getJobDescription() {
