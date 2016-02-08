@@ -116,7 +116,7 @@ public class DoorsSync extends AbstractJavaWebScript {
         JSONObject json = null;
 
         try {
-            //logger.setLevel(Level.DEBUG);
+            logger.setLevel(Level.DEBUG);
             String[] idKeys = { "modelid", "elementid", "elementId" };
             String modelId = null;
             for (String idKey : idKeys) {
@@ -222,14 +222,14 @@ public class DoorsSync extends AbstractJavaWebScript {
                 siteNode = new EmsScriptNode(siteRef, services);
                 name = siteNode.getName();
 
-                siteJson.put("sysmlId", name);
-                siteJson.put("name", siteInfo.getTitle());
+                siteJson.put("sysmlId", siteNode.getSysmlId());
+                siteJson.put("name", name);
 
                 if (workspace == null || (workspace != null && workspace.contains(siteNode))) {
                     try {
-                        doors = new DoorsClient(name);
+                        doors = new DoorsClient( name );
                         pgh.connect();
-                        customFields = mapFields(name);
+                        customFields = mapFields( name );
                         syncFromDoors();
                         for (EmsScriptNode n : siteNode.getChildNodes()) {
                             syncToDoors(n);
@@ -262,23 +262,24 @@ public class DoorsSync extends AbstractJavaWebScript {
                 rootProjectId = n.getSysmlId();
             }
 
-            if (n.hasAspect(Acm.ACM_PACKAGE) && !n.getSysmlId().endsWith("_pkg")) {
-                if (n.getSysmlName() != null) {
-                    if (logger.isDebugEnabled()) {
-                        logger.debug(String.format("Updating/Creating Folder in Doors: %s", n.getSysmlName()));
-                    }
-                    createFolder(n);
-                }
-            }
-
             ArrayList<?> appliedMetatype = (ArrayList<?>) n.getProperty(Acm.ACM_APPLIED_METATYPES);
             if (appliedMetatype != null && appliedMetatype.contains("_11_5EAPbeta_be00301_1147873190330_159934_2220")) {
                 String sysmlId = n.getSysmlId();
                 if (!processed.contains(sysmlId)) {
+
+                    Set<EmsScriptNode> folders = getFolderHierarchyFromMMS(n);
+
+                    EmsScriptNode[] folderArray = folders.toArray(new EmsScriptNode[folders.size()]);
+                    for (Integer i = folderArray.length - 1; i >= 0; i--) {
+                        EmsScriptNode folder = folderArray[i];
+                        createFolder(folder);
+                    }
+
                     createUpdateRequirementFromMMS(n);
                     if (logger.isDebugEnabled()) {
                         logger.debug(String.format("Updating/Creating Requirement in Doors: %s", sysmlId));
                     }
+
                 } else {
                     if (logger.isDebugEnabled()) {
                         logger.debug(String.format("Already processed: %s : %s", n.getSysmlName(), sysmlId));
@@ -435,11 +436,12 @@ public class DoorsSync extends AbstractJavaWebScript {
         Requirement doorsReq = new Requirement();
 
         doorsReq.setTitle(title);
-        doorsReq.setCustomField(doors.getField("sysmlid"), sysmlId);
+        System.out.println("SysmlId: " + doors.getField("sysmlid"));
         doorsReq.setDescription(description);
         doorsReq.setModified(lastModified);
 
         doorsReq = addSlotsFromMMS(n, doorsReq);
+        doorsReq.setCustomField(doors.getField("sysmlid"), sysmlId);
 
         if (parentResourceUrl != null) {
             doorsReq.setParent(URI.create(parentResourceUrl));
@@ -592,18 +594,31 @@ public class DoorsSync extends AbstractJavaWebScript {
         String parentResourceUrl = mapResourceUrl(n.getParent().getSysmlId().replace("_pkg", ""));
 
         if (resourceUrl == null) {
+
             Folder folder = new Folder();
             folder.setTitle(n.getSysmlName());
+            folder.setDescription(n.getSysmlId());
 
             if (parentResourceUrl != null) {
                 folder.setParent(URI.create(parentResourceUrl));
             }
 
+            if (logger.isDebugEnabled()) {
+                logger.debug(String.format("Updating/Creating Folder in Doors: %s", n.getSysmlName()));
+            }
+
             resourceUrl = doors.create(folder);
+
             if (mapResourceUrl(n.getSysmlId(), resourceUrl)) {
+
                 return resourceUrl;
+
+            } else {
+                // Couldn't map for whatever reason, delete the resource.
+                doors.delete(resourceUrl);
             }
         }
+
         return resourceUrl;
     }
 
@@ -636,6 +651,23 @@ public class DoorsSync extends AbstractJavaWebScript {
         }
 
         return sysmlId;
+    }
+
+    protected Set<EmsScriptNode> getFolderHierarchyFromMMS(EmsScriptNode n) {
+
+        Set<EmsScriptNode> result = new LinkedHashSet<EmsScriptNode>();
+
+        EmsScriptNode p = n.getOwningParent(null, null, false);
+        while (p != null) {
+            if (p.hasAspect(Acm.ACM_PACKAGE) && !p.getSysmlId().endsWith("_pkg") && p.getSysmlName() != null) {
+                result.add(p);
+                p = p.getOwningParent(null, null, false);
+            } else {
+                p = null;
+            }
+        }
+
+        return result;
     }
 
     protected Set<Folder> getFolderHierarchyFromDoors(String resourceUrl) {
