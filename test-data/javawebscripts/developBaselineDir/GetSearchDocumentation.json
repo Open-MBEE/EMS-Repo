@@ -5,7 +5,6 @@
     "editable": true,
     "creator": "admin",
     "modifier": "admin",
-    "searchTypes": "documentation",
     "name": "300",
     "documentation": "something",
     "owner": "123456",
@@ -14,7 +13,6 @@
         "isSlot": false,
         "isDerived": false,
         "value": [{
-            "valueExpression": null,
             "string": "dlam_string",
             "type": "LiteralString"
         }],

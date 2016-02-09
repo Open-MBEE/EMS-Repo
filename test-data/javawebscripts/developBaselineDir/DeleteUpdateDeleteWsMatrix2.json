@@ -1,45 +1,43 @@
 {
-  "workspace1": {
-    "qualifiedName": "master/wsMatrix2",
-    "name": "wsMatrix2",
-    "elements": [{
-      "qualifiedName": "/europa/JW_TEST2/update_delete_gg",
-      "sysmlid": "update_delete_gg",
-      "editable": true,
-      "creator": "admin",
-      "modifier": "admin",
-      "name": "update_delete_gg",
-      "documentation": "update_delete_gg",
-      "owner": "123456",
-      "specialization": {
-        "propertyType": null,
-        "isDerived": false,
-        "isSlot": false,
-        "value": [{
-          "valueExpression": null,
-          "string": "on a shoe",
-          "type": "LiteralString"
+    "workspace1": {
+        "name": "wsMatrix2",
+        "qualifiedName": "master/wsMatrix2",
+        "elements": [{
+            "sysmlid": "update_delete_gg",
+            "editable": true,
+            "creator": "admin",
+            "modifier": "admin",
+            "name": "update_delete_gg",
+            "documentation": "update_delete_gg",
+            "owner": "123456",
+            "specialization": {
+                "propertyType": null,
+                "isSlot": false,
+                "isDerived": false,
+                "value": [{
+                    
+                    "string": "on a shoe",
+                    "type": "LiteralString"
+                }],
+                "type": "Property"
+            }
+        }]
+    },
+    "workspace2": {
+        "deletedElements": [{
+            "modifier": "admin",
+            "name": "update_delete_gg",
+            "owner": "123456",
+            "sysmlid": "update_delete_gg",
+            "specialization": {"type": "Property"},
+            "creator": "admin"
         }],
-        "type": "Property"
-      }
-    }]
-  },
-  "workspace2": {
-    "deletedElements": [{
-      "modifier": "admin",
-      "name": "update_delete_gg",
-      "qualifiedName": "/europa/JW_TEST2/update_delete_gg",
-      "sysmlid": "update_delete_gg",
-      "owner": "123456",
-      "specialization": {"type": "Property"},
-      "creator": "admin",
-    }],
-    "addedElements": [],
-    "conflictedElements": [],
-    "updatedElements": [],
-    "qualifiedName": "master/wsMatrix2",
-    "name": "wsMatrix2",
-    "movedElements": []
-  }
+        "addedElements": [],
+        "conflictedElements": [],
+        "updatedElements": [],
+        "name": "wsMatrix2",
+        "qualifiedName": "master/wsMatrix2",
+        "movedElements": []
+    }
 }
 200

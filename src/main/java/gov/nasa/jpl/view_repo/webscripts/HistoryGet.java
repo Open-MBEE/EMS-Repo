@@ -75,10 +75,15 @@ public class HistoryGet extends ModelGet {
         } catch (Exception error) {
             logger.error(error.getMessage());
         }
+        if (history == null) {
+            logger.warn("couldn't get history for: " + ref);
+            return jsonAr;
+        }
+        
         Collection<Version> versions = history.getAllVersions();
 
         if (versions != null) {
-            jsonAr = new JSONArray(versions);
+            jsonAr = new JSONArray(versions.toArray());
         }
 
         return jsonAr;

@@ -74,9 +74,9 @@ create or replace function get_children(integer, integer, text, integer)
       union
       select (c.depth + 1) as depth, edge.child as nid, path || cast(edge.child as bigint) as path, edge.child = ANY(path) as cycle
         from ' || format('edges%s', $3) || ' edge, children c where edge.parent = nid and 
-        edge.edgeType = ' || $2 || ' and not cycle
+        edge.edgeType = ' || $2 || ' and not cycle and depth < ' || $4 || '
       )
-      select distinct nid from children where depth <= ' || $4 || ';';
+      select distinct nid from children;';
   end;
 $$ language plpgsql;
 

@@ -223,6 +223,27 @@ common_filters + ['"MMS_', 'MMS_'],
 ],
 
 [
+68,
+"GetElements",
+"Get elements using body to specify elements",
+"curl -u admin:admin -X GET -H Content-Type:application/json http://localhost:8080/alfresco/s/workspaces/master/elements -d @JsonData/elementsGet.json",
+True,
+common_filters + ['"MMS_', 'MMS_'],
+["test", "workspaces", "develop"]
+],
+
+[
+69,
+"PutElements",
+"Get elements using body to specify elements",
+"curl -u admin:admin -X PUT -H Content-Type:application/json http://localhost:8080/alfresco/s/workspaces/master/elements -d @JsonData/elementsGet.json",
+True,
+common_filters + ['"MMS_', 'MMS_'],
+["test", "workspaces", "develop"]
+],
+
+
+[
 70,
 "GetViews",
 "Get views",
@@ -1585,6 +1606,16 @@ common_filters + ['"id"', '"qualifiedId"', '"creator"', '"modifier"'],
 
 # EXPRESSIONS: ==========================    
 
+[
+254,
+"TurnOnExpressionStuff",
+"Make sure switch is turned on for handling expressions in viewpoints, etc.",
+create_curl_cmd(type="GET", data="", base_url="http://localhost:8080/alfresco/service/", branch="flags/viewpointExpressions?on"),
+False,
+common_filters,
+["test", "develop", "workspaces"]
+],
+
 # Note: currently not an equivalent in workspaces for this URL, but we may add it
 [
 255,
@@ -1595,8 +1626,8 @@ create_curl_cmd(type="POST", base_url=BASE_URL_WS,
                 branch="master/",
                 post_type="elements?fix=true"),
 True,
-common_filters,
-["test", "workspaces"]
+common_filters + ['"modifier"', '"message"', '"qualifiedId"'],
+["test", "develop", "workspaces"]
 ],
         
 [
@@ -1695,6 +1726,16 @@ create_curl_cmd(type="GET", data="views/_17_0_2_3_e610336_1394148311476_17302_29
 True,
 common_filters,
 ["test", "workspaces", "develop2", ]
+],
+
+[
+297,
+"TurnOffExpressionStuff",
+"Make sure switch is turned off for handling expressions in viewpoints, etc.",
+create_curl_cmd(type="GET", data="", base_url="http://localhost:8080/alfresco/service/", branch="flags/viewpointExpressions?off"),
+False,
+common_filters,
+["test", "develop","workspaces"]
 ],
 
 
@@ -2116,7 +2157,7 @@ set_json_output_to_gv3
 "Post a diff to merge workspaces",
 'curl %s %s \'$gv3\' "%sdiff"' % (CURL_FLAGS, CURL_POST_FLAGS, SERVICE_URL),
 True,
-common_filters + ['"id"', '"qualifiedId"', '"timestamp"'],
+common_filters + ['"id"', '"qualifiedId"', '"timestamp"', '"sequence"'],
 ["test", "workspaces", "develop"],
 ],
        
@@ -2145,6 +2186,16 @@ common_filters + ['"id"', '"qualifiedId"', '"creator"', '"modifier"'],
 
  
 # EXPRESSION PARSING =====================================================
+# [
+# 599.9,
+# "TurnOnExpressionStuff",
+# "Make sure switch is turned on for handling expressions in viewpoints, etc.",
+# create_curl_cmd(type="GET", data="", base_url="http://localhost:8080/alfresco/service/", branch="flags/viewpointExpressions?off"),
+# False,
+# common_filters,
+# ["test", "develop","workspaces"]
+# ],
+
 
 [
 600,
@@ -2164,9 +2215,20 @@ common_filters + ['MMS_'],
 create_curl_cmd(type="POST", data="onePlusOne.k", base_url=BASE_URL_WS,
                 post_type="elements?evaluate", branch="master/"),
 True,
-common_filters + ['MMS_'],
+common_filters + ['MMS_', '"evaluationResult"'],
 ["test", "workspaces", "develop", "develop2", "parsek"]
 ],
+
+# [
+# 605,
+# "TurnOffExpressionStuff",
+# "Make sure switch is turned off for handling expressions in viewpoints, etc.",
+# create_curl_cmd(type="GET", data="", base_url="http://localhost:8080/alfresco/service/", branch="flags/viewpointExpressions?off"),
+# False,
+# common_filters,
+# ["test", "develop","workspaces"]
+# ],
+
 # PERMISSION TESTING =====================================================
 
 # Creating users for user testing
@@ -2496,7 +2558,7 @@ common_filters,
 create_curl_cmd(type="GET", data="elements/123456?recurse=true", base_url=BASE_URL_WS,
                 branch="master/"),
 True,
-common_filters + ['"MMS_', 'MMS_'],
+common_filters + ['MMS_'],
 ["test", "workspaces", "develop"]
 ],
 
@@ -2616,7 +2678,7 @@ common_filters + ['"timestamp"', '"MMS_', '"id"', '"qualifiedId"', '"version"', 
 create_curl_cmd(type="POST", data="aspectChanges.json", base_url=BASE_URL_WS,
                 post_type="elements", branch="master/"),
 True,
-common_filters,
+common_filters + ['"message"'],
 ["test", "workspaces", "develop", "develop2"]
 ],
 
@@ -3161,9 +3223,101 @@ create_curl_cmd("GET", data="flags/checkMmsVersions?off", base_url=SERVICE_URL, 
 False,
 common_filters + ['"timestamp"'],
 ["test","workspaces","develop", "develop2"]
+],
+     
+[
+10130,
+"LogLevelPost",
+"Sets the log level of a class on mms",
+create_curl_cmd("POST", data="loglevel.json", base_url=SERVICE_URL, branch="loglevel", post_type=""),
+False,
+common_filters,
+["develop"]
 ]
-]
+,
+[
+    10130,
+    "TestCase10130_PostElements",
+    "Post elements",
+    create_curl_cmd(type="POST", data="TestCase10130_elements.json", base_url=BASE_URL_WS,
+                    post_type="elements", branch="master/"),
+    True,
+    common_filters,
+    ["test", "workspaces", "develop", "develop2"]
+],
+[
+10130.1,
+"TestCase10130.1_VerifyProductX",
+"Verify elements for ProductX",
+create_curl_cmd(type="GET", data="sites/europa/elements/MMS_1450390431247_8a4b76d2-394c-4569-9abe-5c51dc4b0711", base_url=BASE_URL_WS,
+                branch="master/"),
+True,
+common_filters + ['"timestamp"'],
+["test", "workspaces", "develop", "develop2"]
+],
+[
+10130.2,
+"TestCase10130.2_VerifyViewX",
+"Verify elements for View X",
+create_curl_cmd(type="GET", data="sites/europa/elements/MMS_1450390431247_8a4b76d2-394c-4569-9abe-5c51dc4b0811", base_url=BASE_URL_WS,
+                branch="master/"),
+True,
+common_filters + ['"timestamp"'],
+["test", "workspaces", "develop", "develop2"]
+],
+[
+10130.3,
+"TestCase10130.3_VerifyViewY",
+"Verify elements for View Y",
+create_curl_cmd(type="GET", data="sites/europa/elements/MMS_1450390431247_8a4b76d2-394c-4569-9abe-5c51dc4b0812", base_url=BASE_URL_WS,
+                branch="master/"),
+True,
+common_filters + ['"timestamp"'],
+["test", "workspaces", "develop", "develop2"]
+],
+[
+10130.4,
+"TestCase10130.4_VerifyViewZ",
+"Verify elements for View Z",
+create_curl_cmd(type="GET", data="sites/europa/elements/MMS_1450390431247_8a4b76d2-394c-4569-9abe-5c51dc4b0813", base_url=BASE_URL_WS,
+                branch="master/"),
+True,
+common_filters + ['"timestamp"'],
+["test", "workspaces", "develop", "develop2"]
+],
+[
+10131,
+"TestCase10131_PostViewV",
+"Post view V",
+create_curl_cmd(type="POST", data="TestCase10131_postViewV.json", base_url=BASE_URL_WS,
+                post_type="elements", branch="master/"),
+True,
+common_filters + ['MMS_', '"timestamp"'],
+["test", "workspaces", "develop", "develop2"]
+],
+[
+10132,
+"TestCase10132_PostViewVRemove",
+"Post view V",
+create_curl_cmd(type="POST", data="TestCase10132_postViewVRemove.json", base_url=BASE_URL_WS,
+                post_type="elements", branch="master/"),
+True,
+common_filters + ['MMS_', '"timestamp"'],
+["test", "workspaces", "develop", "develop2"]
+],
+[
+10133,
+"TestCase10133_PostViewVUpdate",
+"Post view V",
+create_curl_cmd(type="POST", data="TestCase10133_postViewVUpdate.json", base_url=BASE_URL_WS,
+                post_type="elements", branch="master/"),
+True,
+common_filters + ['MMS_', '"timestamp"'],
+["test", "workspaces", "develop", "develop2"]
+],
 
+
+]
 
 ##########################################################################################    
 #

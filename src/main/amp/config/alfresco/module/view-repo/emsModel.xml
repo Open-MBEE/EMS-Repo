@@ -251,7 +251,7 @@
                   <type>d:noderef</type>
                   <mandatory>false</mandatory>
                   <multiple>false</multiple>
-                  <index enabled="false">
+                  <index enabled="true">
                       <atomic>false</atomic>
                       <stored>false</stored>
                       <tokenised>false</tokenised>

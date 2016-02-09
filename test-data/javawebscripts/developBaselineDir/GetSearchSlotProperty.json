@@ -13,18 +13,16 @@
             "owner": "_17_0_5_1_407019f_1402422826468_433871_16515",
             "specialization": {
                 "propertyType": "_17_0_5_1_407019f_1402422797514_105511_16509",
-                "isDerived": false,
                 "isSlot": true,
+                "isDerived": false,
                 "value": [
                     {
-                        "valueExpression": null,
-                        "double": 5,
-                        "type": "LiteralReal"
+                        "type": "LiteralReal",
+                        "double": 5
                     },
                     {
-                        "valueExpression": null,
-                        "double": 5.39,
-                        "type": "LiteralReal"
+                        "type": "LiteralReal",
+                        "double": 5.39
                     }
                 ],
                 "type": "Property"
@@ -40,18 +38,16 @@
             "owner": "_17_0_5_1_407019f_1402422826468_433871_16515_2",
             "specialization": {
                 "propertyType": "_17_0_5_1_407019f_1402422797514_105511_16509",
-                "isDerived": false,
                 "isSlot": true,
+                "isDerived": false,
                 "value": [
                     {
-                        "valueExpression": null,
-                        "double": 15,
-                        "type": "LiteralReal"
+                        "type": "LiteralReal",
+                        "double": 15
                     },
                     {
-                        "valueExpression": null,
-                        "double": 15.39,
-                        "type": "LiteralReal"
+                        "type": "LiteralReal",
+                        "double": 15.39
                     }
                 ],
                 "type": "Property"

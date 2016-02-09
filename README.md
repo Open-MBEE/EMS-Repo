@@ -71,7 +71,7 @@ src/main/java/gov/nasa/jpl/view_repo/db/mms.sql to initialize the database (as f
 ###[Documentation Links](#doc-links)
 ###[Miscellaneous](#misc)
 ###[Debugging Overview](#debug-overview)
-
+###[Running Regression Tests](#regression)
 
 ***
 
@@ -256,8 +256,8 @@ in the /resources/[community|enterprise] directory.
 
 ### Enterprise settings with Maven 
 
-Need to update settings.xml to connect to the Alfresco private repository. Ask Ly or Cin-Young
-for username and password.  On a Mac the path for this file is: /Users/[USER_NAME]/.m2/settings.xml.
+Need to update settings.xml to connect to the Alfresco private repository. Ask someone
+for the username and password.  On a Mac the path for this file is: /Users/[USER_NAME]/.m2/settings.xml.
 
 	<settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
 	  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -557,3 +557,9 @@ The tomcat port (ex. 9091) and the debug port (ex. 10002) may or may not be open
     
 If on the amazon cloud, the ports may also need to be opened from the AWS console.
 
+# Regression <a name="regression"></a>
+
+#### [return to table of contents](#contents)
+When you commit changes to this respository you should run `./regress.sh` in `{projectdir}/test-java/javawebscripts/regress.sh`.  All the tests should pass in the develop branch.  The tests
+compare a baseline json file against the output of the Alfresco server.  To run the tests locally make sure to 
+run `./regress.sh -g develop`.  This makes sure to use the git branch of the develop branch to run the test.

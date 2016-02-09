@@ -1,34 +1,33 @@
 {
     "workspace1": {
-        "qualifiedName": "master/wsA",
         "name": "wsA",
+        "qualifiedName": "master/wsA",
         "elements": [
             {
-                "name": "300",
                 "qualifiedName": "/no_site/no_site_no_project/holding_bin/300",
+                "sysmlid": "x",
+                "editable": true,
+                "name": "300",
                 "documentation": "something",
                 "owner": "holding_bin_no_site_no_project",
-                "sysmlid": "x",
                 "specialization": {
                     "propertyType": null,
-                    "isSlot": false,
                     "isDerived": false,
+                    "isSlot": false,
                     "value": [{
-                        "valueExpression": null,
                         "string": "dlam_string",
                         "type": "LiteralString"
                     }],
                     "type": "Property"
-                },
-                "editable": true,
+                }
             },
             {
-                "name": "holding_bin",
                 "qualifiedName": "/no_site/no_site_no_project/holding_bin",
                 "sysmlid": "holding_bin_no_site_no_project",
-                "owner": "no_site_no_project",
-                "specialization": {"type": "Package"},
                 "editable": true,
+                "name": "holding_bin",
+                "owner": "no_site_no_project",
+                "specialization": {"type": "Package"}
             }
         ]
     },
@@ -37,22 +36,21 @@
         "addedElements": [],
         "conflictedElements": [],
         "updatedElements": [{
-            "name": "300",
             "qualifiedName": "/no_site/no_site_no_project/holding_bin/300",
-            "owner": "holding_bin_no_site_no_project",
-            "documentation": "x is x",
+            "name": "300",
             "sysmlid": "x",
+            "documentation": "x is x",
+            "owner": "holding_bin_no_site_no_project",
             "specialization": {
                 "value": [{
-                    "valueExpression": null,
                     "string": "the x value",
                     "type": "LiteralString"
                 }],
                 "type": "Property"
             }
         }],
-        "qualifiedName": "master/wsA/wsB",
         "name": "wsB",
+        "qualifiedName": "master/wsA/wsB",
         "movedElements": []
     }
 }
