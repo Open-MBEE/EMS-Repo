@@ -4,7 +4,7 @@
         <view:properties>
             <cm:firstName>MMS</cm:firstName>
             <cm:lastName>Admin</cm:lastName>
-            <cm:email>cinyoung@jpl.nasa.gov</cm:email>
+            <cm:email>${adminemail}</cm:email>
             <cm:userName>${adminusername}</cm:userName>
             <cm:homeFolder>workspace://SpacesStore/${adminusername}</cm:homeFolder>
             <cm:organizationId></cm:organizationId>

@@ -180,7 +180,7 @@ public class DiscussionsEmailNotificationActionExecutor  extends ActionExecuterA
 		String subject = "New Post in Discussion: " + topicTitle;
         Action mailAction = services.getActionService().createAction(MailActionExecuter.NAME);
         mailAction.setParameterValue(MailActionExecuter.PARAM_SUBJECT, subject);
-        mailAction.setParameterValue(MailActionExecuter.PARAM_FROM, "europaems@jpl.nasa.gov");
+        mailAction.setParameterValue(MailActionExecuter.PARAM_FROM, "${ems.url}");
         mailAction.setParameterValue(MailActionExecuter.PARAM_TEMPLATE, template);
     	for (int i = 0; i < emailAddresses.size(); i++) {
     		String email = emailAddresses.get(i);

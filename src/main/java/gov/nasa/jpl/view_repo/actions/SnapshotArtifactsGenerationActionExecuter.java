@@ -139,7 +139,7 @@ public class SnapshotArtifactsGenerationActionExecuter  extends ActionExecuterAb
         ex.printStackTrace();
         response.append("\n[ERROR]: " + sb.toString());
         ActionUtil.sendEmailToModifier(jobNode, String.format("An unexpected error occurred and your PDF generation failed.\n%s%s", ex.getMessage(), sb.toString()), "PDF Generation Failed", services);
-        ActionUtil.sendEmailTo("mbee-dev-admin@jpl.nasa.gov", "mbee-dev-admin@jpl.nasa.gov", 
+        ActionUtil.sendEmailTo("${adminemail}", "${adminemail}", 
                 String.format("Server: %s\nSite: %s\nWorkspace: %s\nSnapshot Id: %s\nError: %s%s%s", 
                         new HostnameGet(this.repository, this.services).getAlfrescoUrl(),
                         siteName,

@@ -4332,15 +4332,10 @@ public class NodeUtil {
         if ( !heisenbugSeen ) {
             String hostname = services.getSysAdminParams().getAlfrescoHost();
 
-            String sender = hostname + "@jpl.nasa.gov";
+            String sender = hostname + "@${org.url}";
             String recipient;
 
-            if ( hostname.toLowerCase().contains( "europa" ) ) {
-                recipient = "kerzhner@jpl.nasa.gov";
-                ActionUtil.sendEmailTo( sender, recipient, msg, subject,
-                                        services );
-            }
-            recipient = "mbee-dev-admin@jpl.nasa.gov";
+            recipient = "${adminemail}";
             ActionUtil.sendEmailTo( sender, recipient, msg, subject, services );
             heisenbugSeen = true;
         }

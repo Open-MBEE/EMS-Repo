@@ -137,7 +137,7 @@ public class ActionUtil {
         EmsScriptNode user = new EmsScriptNode(services.getPersonService().getPerson(username), services, new StringBuffer());
         String recipient = (String) user.getProperty("cm:email");
 
-        String sender = NodeUtil.getHostname() + "@jpl.nasa.gov";
+        String sender = NodeUtil.getHostname() + "@${org.url}";
         sendEmailTo(sender, recipient, msg, subject, services);
     }
 

@@ -1340,7 +1340,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         if (sendEmail) {
             String hostname = NodeUtil.getHostname();
             if (!Utils.isNullOrEmpty( hostname )) {
-                String sender = hostname + "@jpl.nasa.gov";
+                String sender = hostname + "@{org.url}";
                 String username = NodeUtil.getUserName();
                 if (!Utils.isNullOrEmpty( username )) {
                     EmsScriptNode user = new EmsScriptNode(services.getPersonService().getPerson(username), 
