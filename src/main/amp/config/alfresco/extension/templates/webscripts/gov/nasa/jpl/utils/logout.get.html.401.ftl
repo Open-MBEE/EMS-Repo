@@ -23,36 +23,16 @@ var pageData = { baseUrl: "${url.context}/service" };
 		<nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
 			<div class="navbar-header">
 					{{#environment.development}}
-						<a class="navbar-brand" href="/">Europa View Editor {{ title }}</a>
-					{{/environment.development}}
-					{{^environment.development}}
-						<a class="navbar-brand" href="${url.context}/service/ve/documents/europa">Europa View Editor {{ title }}</a>
+						<a class="navbar-brand" href="/"> View Editor {{ title }}</a>
 					{{/environment.development}}
 			</div>
 			<ul class="nav navbar-nav">
-				<li><a href="/share/page/">Europa EMS Dashboard</a></li>
+				<li><a href="/share/page/"> EMS Dashboard</a></li>
 			</ul>
 
 
 			<div class="pull-right">
-				<img class="europa-icon" src="${url.context}/scripts/vieweditor/images/europa-icon.png" />
 			</div>
-			<!-- 
-
-	      <ul class="nav navbar-nav pull-right">
-	       <li><a href="${url.context}/service/logout?next=${url.full}">logout</a></li>
-	      </ul>
-
-			<form class="navbar-form navbar-right" action="">
-	      <div class="form-group">
-	        <select id="workspace-selector" class="form-control input-sm" value="{{ settings.currentWorkspace }}">
-	          <option value="modeler">Modeler</option>
-	          <option value="reviewer">Reviewer</option>
-	          <option value="manager">Manager</option>
-	        </select>
-	      </div>
-	    </form>
-	  -->
 
 		</nav>
 
@@ -88,87 +68,10 @@ var pageData = { baseUrl: "${url.context}/service" };
 
 
     {{#(settings.currentWorkspace != 'modeler')}}
-<!--       <div class="panel">
-        <div class="panel-heading">Tips and tricks</div>
-        <ul class="list-group">
-          <li class="list-group-item">
-            Things go here
-          </li>
-        </ul>
-      </div>
- -->    {{/()}}
-
-  </div>
-
-<!--   <div class="col-md-4">
-    
-    {{#(settings.currentWorkspace != 'reviewer')}}
-    <div class="panel">
-      <div class="panel-heading">My documents</div>
-      <ul class="list-group">
-        <li class="list-group-item">
-          <small><span class="pull-right text-muted">yesterday at 4:22 pm</span></small>
-          <a href="plan.html">Europa System Engineering Management Plan</a>
-        </li>
-      </ul>
-    </div>
     {{/()}}
 
-    <div class="panel">
-      <div class="panel-heading">Pending review</div>
-      <ul class="list-group">
-        <li class="list-group-item">
-          <small><span class="pull-right text-muted">yesterday at 4:22 pm</span></small>
-          <a href="plan.html">Europa System Engineering Management Plan</a>
-        </li>
-      </ul>
-    </div>
-
-
   </div>
 
-  <div class="col-md-4">
-    
-    {{#(settings.currentWorkspace === 'modeler')}}
-    <div class="panel">
-      <div class="panel-heading">Recent comments</div>
-      <ul class="list-group">
-          <li class="list-group-item">
-            <small><span class="pull-right text-muted">a few minutes ago</span></small>
-            <a href="plan.html">Some comment</a>
-          </li>
-          <li class="list-group-item">
-            <small><span class="pull-right text-muted">yesterday at 10:18 am</span></small>
-            <a href="plan.html">Another comment</a>
-          </li>
-      </ul>
-    </div>
-    {{/()}}
-
-    <div class="panel">
-      <div class="panel-heading">Recent changes</div>
-      <ul class="list-group">
-        <li class="list-group-item">
-          <small><span class="pull-right text-muted">yesterday at 4:22 pm</span></small>
-          <a href="plan.html">Europa System Engineering Management Plan</a>
-        </li>
-      </ul>
-    </div>
-
-  </div>
-
-</div>
-		</div>
-
-		
-		
-		<!--  -->
-		
-		
-		
-		
-		
-		
 	</script><script src="${url.context}/scripts/vieweditor/vendor/jquery.min.js"></script>
 <script src="${url.context}/scripts/vieweditor/vendor/jquery-ui.min.js"></script>
 <script src="${url.context}/scripts/vieweditor/vendor/jquery.hotkeys.js"></script>
