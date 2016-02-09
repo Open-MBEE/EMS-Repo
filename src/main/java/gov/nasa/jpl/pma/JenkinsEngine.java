@@ -11,9 +11,21 @@
 package gov.nasa.jpl.pma;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.Authenticator;
+import java.net.HttpURLConnection;
+import java.net.PasswordAuthentication;
+import java.net.URL;
+import java.net.URLConnection;
 import java.util.List;
 import java.util.Map;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+
+import org.activiti.engine.impl.util.json.XML;
+import org.apache.commons.net.util.Base64;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpException;
 import org.apache.http.HttpHost;
@@ -38,7 +50,8 @@ import org.apache.http.util.EntityUtils;
 import org.apache.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONObject;
-
+import org.w3c.dom.Document;
+import org.xml.sax.SAXException;
 
 // import gov.nasa.jpl.view_repo.util.JSONObject;
 
@@ -91,14 +104,7 @@ public class JenkinsEngine implements ExecutionEngine {
         String password = this.passwordOrToken;
         String jenkinsUrl;
 
-        // Jenkins url
-        //String jenkinsUrl = "https://cae-jenkins.jpl.nasa.gov/api/json?tree=jobs[name]";
-        // Build name
-        String jobName = "MDKTest";
-
         jenkinsUrl = url + jenkinsApiURL + apiCallDepth;
-
-        // jenkinsUrl = "https://cae-jenkins.jpl.nasa.gov/api/json?depth=2";
 
         // Create your httpclient
         this.jenkinsClient = new DefaultHttpClient();
@@ -277,7 +283,7 @@ public class JenkinsEngine implements ExecutionEngine {
 
     /**
      * This method is used to find the job that the user specifies within
-     * <b>eventName</b> and specifying which detail they would like from the
+     * <b>jobName</b> and specifying which detail they would like from the
      * job. <b>detailName</b> These are the parameters it accepts:
      * <ul>
      * <li>name
@@ -290,7 +296,7 @@ public class JenkinsEngine implements ExecutionEngine {
      * </ul>
      * 
      * @param String
-     *            eventName, String detailName
+     *            jobName, String detailName
      * @return Event details in a string form
      * @Override
      */
@@ -299,7 +305,7 @@ public class JenkinsEngine implements ExecutionEngine {
 
         if ( !detailName.isEmpty() && jsonResponse != null ) {
             try {
-
+                
             } catch ( Exception e ) {
 
             }
@@ -431,7 +437,7 @@ public class JenkinsEngine implements ExecutionEngine {
             url = url + "/";
         }
 
-        url = url + "api/json?tree=builds";
+        url = url + "api/json?tree=";
 
         System.out.println( "Current constuction url is " + url );
 
@@ -443,13 +449,13 @@ public class JenkinsEngine implements ExecutionEngine {
                 url = url + "[url]";
                 break;
             case DURATION:
-                url = url + "[duration]";
+                url = url + "lastCompletedBuild[duration]";
                 break;
             case EST_DURATION:
-                url = url + "[estimatedDuration]";
+                url = url + "lastCompletedBuild[estimatedDuration]";
                 break;
             case TIMESTAMP:
-                url = url + "[timestamp]";
+                url = url + "lastCompletedBuild[timestamp]";
                 break;
             case DESCRIPTION:
                 url = url + "[description]";
@@ -459,6 +465,21 @@ public class JenkinsEngine implements ExecutionEngine {
         }
         this.executeUrl = this.url + url;
         System.out.println( "Execution url is " + this.executeUrl );
+    }
+
+    public void constructAllJobs() {        
+        url = url + "/api/json?tree=jobs[name,description,color,url,lastCompletedBuild[duration,timestamp,estimatedDuration]]";
+        
+        System.out.println( "Current constuction url is " + url );
+
+        this.executeUrl = this.url;
+        System.out.println( "Execution url is " + this.executeUrl );
+    }
+    
+    public JSONObject getAllJobs() {
+        constructAllJobs();
+        execute();
+        return jsonResponse;
     }
     
     public void constructJobJson( String jobUrl, detail property ) {
@@ -481,7 +502,61 @@ public class JenkinsEngine implements ExecutionEngine {
         this.executeUrl = this.url + url;
         System.out.println( "Execution url is " + this.executeUrl );
     }
-
+    
+    public void configXmlToJson() throws SAXException, ParserConfigurationException {
+        String uri = "https://cae-jenkins.jpl.nasa.gov/job/01-JPL-MBEE-1800-02-VanillaMagicDraw/config.xml";
+        try {            
+            URL url = new URL(uri);
+                      
+            URLConnection connection =
+                (URLConnection) url.openConnection();
+            
+            String userpass = this.username + ":" + this.passwordOrToken;
+            String basicAuth = "Basic " + javax.xml.bind.DatatypeConverter.printBase64Binary(userpass.getBytes());
+            connection.setRequestProperty( "Authorization", basicAuth );      
+            
+            InputStream xml = connection.getInputStream();
+    
+            DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+            DocumentBuilder db = dbf.newDocumentBuilder();
+            Document doc = db.parse(xml);
+            
+            System.out.println( doc );
+        }
+        catch( IOException e ) {
+            e.printStackTrace();
+        }
+        catch ( SAXException e ) {
+            e.printStackTrace();
+        } catch ( ParserConfigurationException e ) {
+            e.printStackTrace();
+        }
+    }
+    
+    public JSONObject getJob(String jobUrl, detail name) {
+        jobUrl = jobUrl.replaceAll(" ", "%20");
+        
+        if(name == JenkinsEngine.detail.DURATION
+           || name == JenkinsEngine.detail.TIMESTAMP
+           || name == JenkinsEngine.detail.EST_DURATION) {
+            constructBuildUrl( jobUrl, name);
+            execute();
+            if(jsonResponse.isNull( "lastCompletedBuild" )) {
+                JSONObject n = new JSONObject();
+                return n.put( name.toString(), JSONObject.NULL );
+            }
+            else {
+                JSONObject prop = (JSONObject)jsonResponse.get( "lastCompletedBuild" );
+                return prop;
+            }
+        }
+        else
+            constructJobJson(jobUrl, name);
+        
+        execute();
+        return jsonResponse;
+    }
+    
     public JSONArray getJobUrls() {
         JSONArray obj;
 
@@ -490,14 +565,6 @@ public class JenkinsEngine implements ExecutionEngine {
         obj = jsonResponse.getJSONArray( "jobs" );
         return obj;
 
-    }
-
-    public JSONObject getJobs(String jobUrl, detail name) {
-        jobUrl = jobUrl.replaceAll(" ", "%20");
-        
-        constructJobJson(jobUrl, name);
-        execute();
-        return jsonResponse;
     }
     
     public JSONArray getJobNames() {

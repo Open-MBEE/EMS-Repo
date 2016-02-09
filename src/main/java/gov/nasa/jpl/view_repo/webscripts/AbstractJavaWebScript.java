@@ -1482,7 +1482,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
             logger.warn( "called toAeExpression() with null argument" );
             return null;
         }
-        Expression<Call> expressionCall = getGlobalSystemModelAe().toAeExpression( exprNode );
+        Expression<Call> expressionCall = getGlobalSystemModelAe().toAeExpression( exprNode, null );
         if ( expressionCall == null ) {
             logger.warn( "toAeExpression("+exprNode+") returned null" );
             return null;

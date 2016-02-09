@@ -45,6 +45,7 @@ import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
+import javax.xml.parsers.ParserConfigurationException;
 
 import org.apache.log4j.*;
 import org.alfresco.repo.model.Repository;
@@ -56,6 +57,7 @@ import org.json.JSONObject;
 import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
+import org.xml.sax.SAXException;
 
 //import com.offbytwo.jenkins.JenkinsServer;
 
@@ -92,13 +94,7 @@ public class JobGet extends ModelGet {
         }
         
 
-        JenkinsEngine jenkins = new JenkinsEngine();
-        JSONArray jobNames = jenkins.getJobNames();
-        // TESTING STUFFS
-        //JSONObject jenkinsJson = jenkins.jsonResponse;
-        //JSONArray jobJson = jenkinsJson.getJSONArray( "jobs" );
-        
-        //System.out.println( jenkins.getJobUrls() );        
+        JenkinsEngine jenkins = new JenkinsEngine();     
         
         Timer timer = new Timer();
         printHeader(req);
@@ -108,33 +104,60 @@ public class JobGet extends ModelGet {
         setIsViewRequest(isViewRequest);
 
         JSONObject top = NodeUtil.newJsonObject();
-        JSONArray jobsJson = handleRequest(req, top, NodeUtil.doGraphDb);
+        JSONArray res = handleRequest(req, top, NodeUtil.doGraphDb);
 
+        System.out.println( res );
+        
         try {
-            for(int i = 0; i < jobsJson.length(); i++) {
-                /* THE MAGIC HAPPENS IN HERE... 
-                 * PARSE OUT THE DATA FROM THE JSON OBJECT / ARRAY AND 
-                 * STORE PUT IN JOB */
-                JSONObject job = (JSONObject)jobsJson.get(i);
-                if (job.has( "specialization" )) 
-                    job.remove( "specialization" ); 
-
-                for(int ii = 0; ii < jobNames.length(); ii++) {
-                    JSONObject name = jobNames.getJSONObject( ii );
+            for(int i = 0; i < res.length(); i++) {
+                JSONObject element = (JSONObject)res.get(i);
+                if (element.has( "specialization" )) 
+                    element.remove( "specialization" ); 
+ 
+                JSONObject jobsJson = jenkins.getAllJobs();
+                JSONArray jobs = jobsJson.getJSONArray( "jobs" );
+                
+                for(int ii = 0; ii < jobs.length(); ii++) {
+                    JSONObject job = (JSONObject)jobs.get( ii );
+                    job.put( "status", job.get( "color" ) );
+                    job.remove( "color" );
                     
-                    JSONObject test = jenkins.getJobs(
-                                                     name.get( "name" ).toString(), 
-                                                     JenkinsEngine.detail.NAME);
-                                     
-                    job.put( "job" , test );
+                    //j.put( "ics", j.get( "lastCompletedBuild" ) );                
+                    //j.remove( "lastCompletedBuild");
+                     
+                    // if the job has not run yet
+                    if(job.isNull( "lastCompletedBuild" )) {
+                        JSONObject n = new JSONObject();
+                        n.put( "duration", JSONObject.NULL );
+                        n.put( "estimatedDuration", JSONObject.NULL );
+                        n.put( "startTime", JSONObject.NULL );
+                        
+                        job.put( "ics", n);
+                        job.remove( "lastCompletedBuild");
+                    }
+                    else {
+                        JSONObject o = (JSONObject)job.get( "lastCompletedBuild" );
+                        
+                        o.put( "startTime", o.get( "timestamp" ));
+                        o.remove( "timestamp" );
+                        
+                        job.put( "ics", o);
+                        job.remove( "lastCompletedBuild" );
+                    }
+                    
+                    job.put( "sysmlid", element.get( "sysmlid" ));
+                    job.put( "owner", element.get( "owner" ));
                 }
                 
-                
-                //job.put( "data", jenkins.getJobUrls() );                
+                element.put( "jobs", jobsJson.get( "jobs" ) );
+                      
+                // TODO: GET THE CONFIG.XML FOR EACH JOB, GET THE SCHEDULE (maybe other properties too)
+                //       AND THEN PUT INTO THE JSON
+                jenkins.configXmlToJson();
             }
             
-            if (jobsJson.length() > 0) {
-                top.put("jobs", jobsJson);
+            if (res.length() > 0) {
+                top.put("elements", res);
             }
 
             if (!Utils.isNullOrEmpty(response.toString()))
@@ -146,6 +169,12 @@ public class JobGet extends ModelGet {
             log(Level.ERROR, HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
                     "Could not create JSONObject");
             model.put("res", createResponseJson());
+            e.printStackTrace();
+        } catch ( SAXException e ) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch ( ParserConfigurationException e ) {
+            // TODO Auto-generated catch block
             e.printStackTrace();
         }
 
@@ -162,6 +191,34 @@ public class JobGet extends ModelGet {
     
     public void updateJob( ) {
         
+    }
+    
+    public JSONObject parseJob( JSONObject job ) {
+        job.remove( "concurrentBuild" );
+        job.remove( "keepDependencies" );
+        job.remove( "buildable" );
+        job.remove( "lastUnstableBuild" );
+        job.remove( "lastSuccessfulBuild" );
+        job.remove( "lastCompletedBuild" );
+        job.remove( "nextBuildNumber" );
+        job.remove( "upstreamProjects" );
+        job.remove( "builds" );
+        job.remove( "firstBuild" );
+        job.remove( "inQueue" );
+        job.remove( "property" );
+        job.remove( "healthReport" );
+        job.remove( "downstreamProjects" );
+        job.remove( "lastBuild" );
+        job.remove( "lastUnsuccessfulBuild" );
+        job.remove( "displayNameOrNull" );
+        job.remove( "lastStableBuild" );
+        job.remove( "lastFailedBuild" );
+        job.remove( "displayName" );
+        job.remove( "actions" );
+        job.remove( "scm" );
+        job.remove( "modules" );
+        job.remove( "queueItem" );
+        return job;
     }
     
     public boolean isJob( EmsScriptNode node ) {
