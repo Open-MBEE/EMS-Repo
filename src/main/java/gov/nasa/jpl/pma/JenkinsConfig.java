@@ -1,19 +1,25 @@
 package gov.nasa.jpl.pma;
 
-// import org.w3c.dom.*;
-import javax.xml.parsers.*;
-// import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+
+import org.w3c.dom.Document;
+import org.xml.sax.SAXException;
+
+import com.google.common.collect.ImmutableBiMap.Builder;
 
 public class JenkinsConfig extends JenkinsEngine {
 
-    public JenkinsConfig() {
-        StringBuilder xmlStringBuilder = new StringBuilder();
-        xmlStringBuilder.append( "<?xml )
-    }
+    private DocumentBuilder builder = null;
+    public JenkinsConfig() {}
 
     private DocumentBuilder createDocumentBuilder() {
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-        DocumentBuilder builder = null;
         try {
             builder = factory.newDocumentBuilder();
         } catch ( ParserConfigurationException e ) {
@@ -22,4 +28,27 @@ public class JenkinsConfig extends JenkinsEngine {
         return builder;
     }
 
+    private Document getDocument() {
+        StringBuilder xmlStringBuilder = new StringBuilder();
+
+        xmlStringBuilder.append( "<?xml version=\"1.0\"?> <class> </class>" );
+        ByteArrayInputStream input = null;
+        try {
+            input = new ByteArrayInputStream( xmlStringBuilder.toString().getBytes( "UTF-8" ) );
+        } catch ( UnsupportedEncodingException e ) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        Document doc;
+        try {
+            doc = builder.parse( input );
+        } catch ( SAXException e ) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch ( IOException e ) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        return doc;
+    }
 }
