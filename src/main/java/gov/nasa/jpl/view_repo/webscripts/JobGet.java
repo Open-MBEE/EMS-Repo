@@ -59,18 +59,12 @@ import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
 import org.xml.sax.SAXException;
 
-import org.jruby.*;
-import org.jruby.embed.ScriptingContainer;
-import org.jruby.embed.LocalVariableBehavior;
-
 //import com.offbytwo.jenkins.JenkinsServer;
 
 public class JobGet extends ModelGet {
     static Logger logger = Logger.getLogger(JobGet.class);
     
     public static final String jobStereotypeId = "_18_0_2_6620226_1453944322658_194833_14413";
-
-    private ScriptingContainer ruby;
     
     public JobGet() {
         super();
@@ -101,10 +95,6 @@ public class JobGet extends ModelGet {
         
         JenkinsEngine jenkins = new JenkinsEngine();     
         
-        // TODO: this should be in a new class... (related to pma???) 
-        // possibly called RubyEngine
-        ruby = new ScriptingContainer();
-        
         Timer timer = new Timer();
         printHeader(req);
 
@@ -133,33 +123,30 @@ public class JobGet extends ModelGet {
                     job.remove( "color" );
                      
                     // if the job has not run yet
-                    if(job.isNull( "lastCompletedBuild" )) {
-                        //JSONObject n = new JSONObject();
-                        
+                    if(job.isNull( "lastCompletedBuild" )) {                       
                         job.put( "duration", JSONObject.NULL );
                         job.put( "estimatedDuration", JSONObject.NULL );
                         job.put( "startTime", JSONObject.NULL );
-                        
-                       // job.put( "ics", n);
                         job.remove( "lastCompletedBuild");
                     }
                     else {
-                        JSONObject o = (JSONObject)job.get( "lastCompletedBuild" );
-                        
+                        JSONObject o = (JSONObject)job.get( "lastCompletedBuild" );                     
                         job.put( "duration", o.get( "duration" ) );
                         job.put( "estimatedDuration", o.get( "estimatedDuration" ) );
                         job.put( "startTime", o.get( "timestamp" ));
                         job.remove( "timestamp" );
-                        
-                        //job.put( "ics", o);
                         job.remove( "lastCompletedBuild" );
                     }
                     
-                    JSONObject schedule = jenkins.configXmlToJson( Urls.getJSONObject( ii ).get( "url" ).toString() );               
-                    job.put( "schedule", schedule.get( "schedule" ) );
+                    JSONObject schedule = jenkins.configXmlToJson( 
+                                                                  Urls.getJSONObject( ii )
+                                                                  .get( "url" ).toString() );     
                     
+                    job.put( "schedule", schedule.get( "schedule" ) );                    
                     job.put( "sysmlid", element.get( "sysmlid" ));
                     job.put( "owner", element.get( "owner" ));
+                    
+                    // TODO: Create a property "ics" which will be populated by schedule? 
                 }
                 
                 element.put( "jobs", jobsJson.get( "jobs" ) );
