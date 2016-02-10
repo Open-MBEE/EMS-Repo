@@ -12,6 +12,7 @@ package gov.nasa.jpl.pma;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.StringReader;
 import java.net.Authenticator;
 import java.net.HttpURLConnection;
 import java.net.PasswordAuthentication;
@@ -51,6 +52,10 @@ import org.apache.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 // import gov.nasa.jpl.view_repo.util.JSONObject;
@@ -272,7 +277,11 @@ public class JenkinsEngine implements ExecutionEngine {
             // call into a JSON object then consumes the entity to close the
             // connection.
             jsonResponse = new JSONObject( entityString );
-            EntityUtils.consume( entity );
+            
+            // COMMENTED OUT BECAUSE THIS WILL CLOSE THE CONNECTION WHEN
+            // YOU GET JSON BUT NEEDS TO STAY OPEN FOR XML TOO
+            
+            //EntityUtils.consume( entity );
 
             // Will throw an error if the execution fails from either incorrect
             // setup or if the jenkinsClient has not been instantiated.
@@ -477,11 +486,11 @@ public class JenkinsEngine implements ExecutionEngine {
     }
 
     public void constructAllJobs() {        
-        url = url + "/api/json?tree=jobs[name,description,color,url,lastCompletedBuild[duration,timestamp,estimatedDuration]]";
+        String url = this.url + "/api/json?tree=jobs[name,description,color,url,lastCompletedBuild[duration,timestamp,estimatedDuration]]";
         
         System.out.println( "Current constuction url is " + url );
 
-        this.executeUrl = this.url;
+        this.executeUrl = url;
         System.out.println( "Execution url is " + this.executeUrl );
     }
     
@@ -512,34 +521,44 @@ public class JenkinsEngine implements ExecutionEngine {
         System.out.println( "Execution url is " + this.executeUrl );
     }
     
-    public void configXmlToJson() throws SAXException, ParserConfigurationException {
-        String uri = "https://cae-jenkins.jpl.nasa.gov/job/01-JPL-MBEE-1800-02-VanillaMagicDraw/config.xml";
-        try {            
-            URL url = new URL(uri);
-                      
-            URLConnection connection =
-                (URLConnection) url.openConnection();
+    public JSONObject configXmlToJson(String jobUrl) throws SAXException, ParserConfigurationException {
+        String getUrl = jobUrl + "config.xml";
+
+        JSONObject o = new JSONObject();
+        
+        HttpGet get = new HttpGet( getUrl );
+           
+        try {
+            HttpResponse response =
+                    this.jenkinsClient.execute( get, this.context );
+            HttpEntity entity = response.getEntity();
+            String xml = EntityUtils.toString( entity );
             
-            String userpass = this.username + ":" + this.passwordOrToken;
-            String basicAuth = "Basic " + javax.xml.bind.DatatypeConverter.printBase64Binary(userpass.getBytes());
-            connection.setRequestProperty( "Authorization", basicAuth );      
-            
-            InputStream xml = connection.getInputStream();
-    
             DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-            DocumentBuilder db = dbf.newDocumentBuilder();
-            Document doc = db.parse(xml);
+            DocumentBuilder db = dbf.newDocumentBuilder();           
+            Document doc = db.parse( new InputSource( new StringReader( xml )) );
             
-            System.out.println( doc );
-        }
-        catch( IOException e ) {
+            // get the first element
+            Element element = doc.getDocumentElement();
+            //element.getElementsByTagName( "spec" ).item( 0 ).getTextContent();
+            
+            // if there is a schedule, add to the json 
+            if( element.getElementsByTagName( "spec" ).getLength() > 0) 
+                o.put( "schedule", element.getElementsByTagName( "spec" ).item( 0 ).getTextContent().replaceAll( "\\n", " " ) );
+            
+            else 
+                o.put( "schedule", JSONObject.NULL );
+                                                          
+            EntityUtils.consume( entity );           
+        } catch ( IOException e ) {
             e.printStackTrace();
         }
-        catch ( SAXException e ) {
+          catch ( SAXException e ) {
             e.printStackTrace();
         } catch ( ParserConfigurationException e ) {
             e.printStackTrace();
         }
+        return o; 
     }
     
     public JSONObject getJob(String jobUrl, detail name) {

@@ -59,6 +59,10 @@ import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
 import org.xml.sax.SAXException;
 
+import org.jruby.*;
+import org.jruby.embed.ScriptingContainer;
+import org.jruby.embed.LocalVariableBehavior;
+
 //import com.offbytwo.jenkins.JenkinsServer;
 
 public class JobGet extends ModelGet {
@@ -66,6 +70,8 @@ public class JobGet extends ModelGet {
     
     public static final String jobStereotypeId = "_18_0_2_6620226_1453944322658_194833_14413";
 
+    private ScriptingContainer ruby;
+    
     public JobGet() {
         super();
     }
@@ -93,8 +99,11 @@ public class JobGet extends ModelGet {
             logger.debug(user + " " + req.getURL());
         }
         
-
         JenkinsEngine jenkins = new JenkinsEngine();     
+        
+        // TODO: this should be in a new class... (related to pma???) 
+        // possibly called RubyEngine
+        ruby = new ScriptingContainer();
         
         Timer timer = new Timer();
         printHeader(req);
@@ -106,7 +115,8 @@ public class JobGet extends ModelGet {
         JSONObject top = NodeUtil.newJsonObject();
         JSONArray res = handleRequest(req, top, NodeUtil.doGraphDb);
 
-        System.out.println( res );
+        // This is used to get the URLs of every job to get data easier
+        JSONArray Urls = jenkins.getJobUrls();
         
         try {
             for(int i = 0; i < res.length(); i++) {
@@ -121,39 +131,38 @@ public class JobGet extends ModelGet {
                     JSONObject job = (JSONObject)jobs.get( ii );
                     job.put( "status", job.get( "color" ) );
                     job.remove( "color" );
-                    
-                    //j.put( "ics", j.get( "lastCompletedBuild" ) );                
-                    //j.remove( "lastCompletedBuild");
                      
                     // if the job has not run yet
                     if(job.isNull( "lastCompletedBuild" )) {
-                        JSONObject n = new JSONObject();
-                        n.put( "duration", JSONObject.NULL );
-                        n.put( "estimatedDuration", JSONObject.NULL );
-                        n.put( "startTime", JSONObject.NULL );
+                        //JSONObject n = new JSONObject();
                         
-                        job.put( "ics", n);
+                        job.put( "duration", JSONObject.NULL );
+                        job.put( "estimatedDuration", JSONObject.NULL );
+                        job.put( "startTime", JSONObject.NULL );
+                        
+                       // job.put( "ics", n);
                         job.remove( "lastCompletedBuild");
                     }
                     else {
                         JSONObject o = (JSONObject)job.get( "lastCompletedBuild" );
                         
-                        o.put( "startTime", o.get( "timestamp" ));
-                        o.remove( "timestamp" );
+                        job.put( "duration", o.get( "duration" ) );
+                        job.put( "estimatedDuration", o.get( "estimatedDuration" ) );
+                        job.put( "startTime", o.get( "timestamp" ));
+                        job.remove( "timestamp" );
                         
-                        job.put( "ics", o);
+                        //job.put( "ics", o);
                         job.remove( "lastCompletedBuild" );
                     }
+                    
+                    JSONObject schedule = jenkins.configXmlToJson( Urls.getJSONObject( ii ).get( "url" ).toString() );               
+                    job.put( "schedule", schedule.get( "schedule" ) );
                     
                     job.put( "sysmlid", element.get( "sysmlid" ));
                     job.put( "owner", element.get( "owner" ));
                 }
                 
                 element.put( "jobs", jobsJson.get( "jobs" ) );
-                      
-                // TODO: GET THE CONFIG.XML FOR EACH JOB, GET THE SCHEDULE (maybe other properties too)
-                //       AND THEN PUT INTO THE JSON
-                jenkins.configXmlToJson();
             }
             
             if (res.length() > 0) {
@@ -169,14 +178,14 @@ public class JobGet extends ModelGet {
             log(Level.ERROR, HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
                     "Could not create JSONObject");
             model.put("res", createResponseJson());
-            e.printStackTrace();
+            e.printStackTrace(); 
         } catch ( SAXException e ) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         } catch ( ParserConfigurationException e ) {
             // TODO Auto-generated catch block
             e.printStackTrace();
-        }
+        } 
 
         status.setCode(responseStatus.getCode());
 
