@@ -357,8 +357,7 @@ public class JenkinsEngine implements ExecutionEngine {
 
     @Override
     public void setEvents( List< String > events ) {
-        for ( String event : events )
-            setEvent( event );
+
     }
 
     @Override
@@ -387,16 +386,13 @@ public class JenkinsEngine implements ExecutionEngine {
      * Allowed Arguments for Detail Property:
      * <ul>
      * <li>NAME
-     * <li>COLOR
      * <li>URL
-     * <li>DURATION
-     * <li>EST_DURATION
-     * <li>TIMESTAMP
-     * <li>DESCRIPTION
-     * <li>LAST_SUCCESSFULL_BUILD
-     * <li>LAST_FAILED_BUILD
+     * <li>COLOR
      * <li>LAST_COMPLETED_BUILD
+     * <li>LAST_FAILED_BUILD
+     * <li>LAST_SUCCESSFULL_BUILD
      * <li>LAST_UNSUCCESFULL_BUILD
+     * <li>DESCRIPTION 
      * <li>LAST_BUILD
      * </ul>
      * 
@@ -467,13 +463,13 @@ public class JenkinsEngine implements ExecutionEngine {
                 url = url + "[url]";
                 break;
             case DURATION:
-                url = url + "lastCompletedBuild[duration]";
+                url = url + "[lastCompletedBuild[duration]]";
                 break;
             case EST_DURATION:
-                url = url + "lastCompletedBuild[estimatedDuration]";
+                url = url + "[lastCompletedBuild[estimatedDuration]]";
                 break;
             case TIMESTAMP:
-                url = url + "lastCompletedBuild[timestamp]";
+                url = url + "[lastCompletedBuild[timestamp]]";
                 break;
             case DESCRIPTION:
                 url = url + "[description]";
@@ -489,38 +485,10 @@ public class JenkinsEngine implements ExecutionEngine {
         String url = this.url + "/api/json?tree=jobs[name,description,color,url,lastCompletedBuild[duration,timestamp,estimatedDuration]]";
         
         System.out.println( "Current constuction url is " + url );
-
         this.executeUrl = url;
         System.out.println( "Execution url is " + this.executeUrl );
     }
-    
-    public JSONObject getAllJobs() {
-        constructAllJobs();
-        execute();
-        return jsonResponse;
-    }
 
-    public void constructJobJson( String jobUrl, detail property ) {
-
-        String url;
-
-        if ( !jobUrl.startsWith( "/" ) ) {
-            jobUrl = "/" + jobUrl;
-        }
-        url = "/job" + jobUrl;
-
-        if ( !url.endsWith( "/" ) ) {
-            url = url + "/";
-        }
-
-        url = url + "api/json";
-
-        System.out.println( "Current constuction url is " + url );
-
-        this.executeUrl = this.url + url;
-        System.out.println( "Execution url is " + this.executeUrl );
-    }
-    
     public JSONObject configXmlToJson(String jobUrl) throws SAXException, ParserConfigurationException {
         String getUrl = jobUrl + "config.xml";
 
@@ -563,28 +531,8 @@ public class JenkinsEngine implements ExecutionEngine {
         return o; 
     }
     
-    public JSONObject getJob(String jobUrl, detail name) {
-        jobUrl = jobUrl.replaceAll(" ", "%20");
-        
-        // if the detail is one of these, return the specific property 
-        if(name == JenkinsEngine.detail.DURATION
-           || name == JenkinsEngine.detail.TIMESTAMP
-           || name == JenkinsEngine.detail.EST_DURATION) {
-            constructBuildUrl( jobUrl, name);
-            execute();
-            
-            if(jsonResponse.isNull( "lastCompletedBuild" )) {
-                JSONObject n = new JSONObject();
-                return n.put( name.toString(), JSONObject.NULL );
-            }
-            else {
-                JSONObject prop = (JSONObject)jsonResponse.get( "lastCompletedBuild" );
-                return prop;
-            }
-        }
-        else
-            constructJobJson(jobUrl, name);
-        
+    public JSONObject getAllJobs() {
+        constructAllJobs();
         execute();
         return jsonResponse;
     }
@@ -594,13 +542,7 @@ public class JenkinsEngine implements ExecutionEngine {
         execute();
         return jsonResponse.getJSONArray( "jobs" );
     }
-
-    public JSONObject getJobs( String jobUrl, detail name ) {
-        constructJobJson( jobUrl, name );
-        execute();
-        return jsonResponse;
-    }
-
+    
     public JSONArray getJobNames() {
         constructJobUrl( detail.NAME );
         execute();
