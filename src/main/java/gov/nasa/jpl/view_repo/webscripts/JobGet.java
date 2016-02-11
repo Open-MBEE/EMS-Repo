@@ -155,7 +155,7 @@ public class JobGet extends ModelGet {
                 
                 // TODO: Create a property "ics" which will be populated by schedule? 
             
-                job.put( "ics", "");
+                job.put( "ics", new JSONObject() );
                 
                 res.put( job );
             }   

@@ -110,7 +110,7 @@ public class JobPost extends ModelPost {
 
         JobPost instance = new JobPost(repository, services);
         instance.setServices(getServices());
-        // Run without transactions since ModePost breaks them up itself.
+        // Run without transactions since JobPost breaks them up itself.
         return instance.executeImplImpl(req, status, cache, true);
     }
     
@@ -200,10 +200,19 @@ public class JobPost extends ModelPost {
                     } else {
                         content = (JSONObject) req.parseContent();
                     }
-
+                    
                     JSONObject postJson = getPostJson(jsonNotK, content,
                             expressionString);
 
+                    JSONArray jobs = postJson.getJSONArray( "jobs" );
+                    
+                    // index starts at 1, to skip the initial element json from JobGet
+                    for(int i = 1; i < jobs.length(); i++) {
+                        System.out.println( "*************JOB*************\n" );
+                        System.out.println( jobs.get( i ) );
+                        System.out.println( "*************JOB*************\n" );
+                    }
+                    
                     // Get the project node from the request:
                     new EmsTransaction(getServices(), getResponse(),
                             getResponseStatus(), runWithoutTransactions) {// ||
@@ -266,21 +275,21 @@ public class JobPost extends ModelPost {
               final boolean fix, Map<String, Object> model, boolean createCommit,
               boolean suppressElementJson) throws Exception {
           final JSONObject top = NodeUtil.newJsonObject();
-          final Set<EmsScriptNode> elements = createOrUpdateModel(postJson,
-                  status, workspace, null, createCommit);
+          //final Set<EmsScriptNode> elements = createOrUpdateModel(postJson,
+          //        status, workspace, null, createCommit);
           
-//          final Set< EmsScriptNode > elements = 
-//                  ModelLoadActionExecuter.loadJson( postJson, null,
-//                                                    null );
+          final Set< EmsScriptNode > jobs = 
+                  ModelLoadActionExecuter.loadJson( postJson, null,
+                                                    null );
     
-          if (!Utils.isNullOrEmpty(elements)) {
+          if (!Utils.isNullOrEmpty(jobs)) {
               sendProgress("Adding relationships to properties", projectId, true);
-              addRelationshipsToProperties(elements, workspace);
+              addRelationshipsToProperties(jobs, workspace);
     
               // Fix constraints if desired.
               if (fix) {
                   sendProgress("Fixing constraints", projectId, true);
-                  fixWithTransactions(elements, workspace);
+                  fixWithTransactions(jobs, workspace);
                   sendProgress("Fixing constraints completed", projectId,
                           true);
               }
@@ -288,30 +297,30 @@ public class JobPost extends ModelPost {
               if (!suppressElementJson) {
     
                   // Create JSON object of the elements to return:
-                  final JSONArray elementsJson = new JSONArray();
-                  final Map<EmsScriptNode, JSONObject> elementsJsonMap = new LinkedHashMap<EmsScriptNode, JSONObject>();
+                  final JSONArray jobsJson = new JSONArray();
+                  final Map<EmsScriptNode, JSONObject> jobsJsonMap = new LinkedHashMap<EmsScriptNode, JSONObject>();
     
-                  sendProgress("Getting json for elements", projectId, true);
+                  sendProgress("Getting json for jobs", projectId, true);
                   new EmsTransaction(getServices(), getResponse(),
                           getResponseStatus(), runWithoutTransactions) {
                       @Override
                       public void run() throws Exception {
-                          for (EmsScriptNode element : elements) {
+                          for (EmsScriptNode job : jobs) {
     
                               JSONObject json = null;
                               if ( NodeUtil.doJsonCaching && !fix
-                                   && notChanging.contains( element.getSysmlId() ) ) {
-                                  json = NodeUtil.jsonCacheGet( element.getNodeRef().toString(),
+                                   && notChanging.contains( job.getSysmlId() ) ) {
+                                  json = NodeUtil.jsonCacheGet( job.getNodeRef().toString(),
                                                                 0, false );
                               }
                               if ( json == null ) {
-                                  json = element.toJSONObject( workspace, null );
+                                  json = job.toJSONObject( workspace, null );
                               }                           
                               
-                              elementsJson.put(json);
-                              elementsJsonMap.put(element, json);
+                              jobsJson.put(json);
+                              jobsJsonMap.put(job, json);
                           }
-                          sendProgress("Getting json for elements completed",
+                          sendProgress("Getting json for jobs completed",
                                   projectId, true);
                       }
                   };
@@ -324,14 +333,14 @@ public class JobPost extends ModelPost {
                               getResponseStatus(), runWithoutTransactions) {
                           @Override
                           public void run() throws Exception {
-                              evaluate(elementsJsonMap, top, workspace);
+                              evaluate(jobsJsonMap, top, workspace);
                               sendProgress( "Evaluating constraints and expressions completed",
                                             projectId, true);
                           }
                       };
                   }
     
-                  top.put("elements", elementsJson);
+                  top.put("jobs", jobsJson);
               }
           }
     
@@ -357,7 +366,7 @@ public class JobPost extends ModelPost {
               model.put("res", NodeUtil.jsonToString(top));
           }
     
-          return elements;
+          return jobs;
       }
 
       @Override
@@ -370,5 +379,7 @@ public class JobPost extends ModelPost {
               t.printStackTrace();
           }
       }
+      
+      
 
 }
