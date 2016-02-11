@@ -29,6 +29,7 @@
 
 package gov.nasa.jpl.view_repo.webscripts;
 
+import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.mbee.util.Timer;
 import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
@@ -41,6 +42,7 @@ import java.net.URI;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -77,7 +79,7 @@ public class JobGet extends ModelGet {
     protected JSONArray jobs = new JSONArray();
     protected Map<String, EmsScriptNode> jobsFound = new HashMap<String, EmsScriptNode>();
     protected Map<String, List<EmsScriptNode>> jobProperties = new HashMap<String, List<EmsScriptNode>>();
-
+    
     @Override
     protected Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {        
         JobGet instance = new JobGet(repository, getServices());
@@ -93,6 +95,11 @@ public class JobGet extends ModelGet {
             logger.debug(user + " " + req.getURL());
         }
         
+        // NOTE: THIS MAY SERVE IMPORTANCE FOR GETTING OWNED PROPERTIES
+        String timestamp = req.getParameter( "timestamp" );
+        Date dateTime = TimeUtils.dateFromTimestamp( timestamp );
+        addElementProperties( this.getWorkspace( req ), dateTime );
+        
         JenkinsEngine jenkins = new JenkinsEngine();     
         
         Timer timer = new Timer();
@@ -103,57 +110,66 @@ public class JobGet extends ModelGet {
         setIsViewRequest(isViewRequest);
 
         JSONObject top = NodeUtil.newJsonObject();
-        JSONArray res = handleRequest(req, top, NodeUtil.doGraphDb);
-
-        // This is used to get the URLs of every job to get data easier
-        JSONArray Urls = jenkins.getJobUrls();
         
-        try {
-            for(int i = 0; i < res.length(); i++) {
-                JSONObject element = (JSONObject)res.get(i);
-                if (element.has( "specialization" )) 
-                    element.remove( "specialization" ); 
- 
-                JSONObject jobsJson = jenkins.getAllJobs();
-                JSONArray jobs = jobsJson.getJSONArray( "jobs" );
+        // some information about alfresco
+        JSONArray res = handleRequest(req, top, NodeUtil.doGraphDb);
+        JSONObject element = (JSONObject)res.get( 0 );
+        
+        // This is used to get the URLs for every job to get data easier
+        JSONArray Urls = jenkins.getJobUrls();
+              
+        JSONObject jobsFromJenkins = jenkins.getAllJobs();
+        JSONArray jobs = jobsFromJenkins.getJSONArray( "jobs" );
+        
+        try {   
+            // get job data from jenkins
+            for(int i = 0; i < jobs.length(); i++) {
+                JSONObject job = (JSONObject)jobs.get( i );
                 
-                for(int ii = 0; ii < jobs.length(); ii++) {
-                    JSONObject job = (JSONObject)jobs.get( ii );
-                    job.put( "status", job.get( "color" ) );
-                    job.remove( "color" );
-                     
-                    // if the job has not run yet
-                    if(job.isNull( "lastCompletedBuild" )) {                       
-                        job.put( "duration", JSONObject.NULL );
-                        job.put( "estimatedDuration", JSONObject.NULL );
-                        job.put( "startTime", JSONObject.NULL );
-                        job.remove( "lastCompletedBuild");
-                    }
-                    else {
-                        JSONObject o = (JSONObject)job.get( "lastCompletedBuild" );                     
-                        job.put( "duration", o.get( "duration" ) );
-                        job.put( "estimatedDuration", o.get( "estimatedDuration" ) );
-                        job.put( "startTime", o.get( "timestamp" ));
-                        job.remove( "timestamp" );
-                        job.remove( "lastCompletedBuild" );
-                    }
-                    
-                    JSONObject schedule = jenkins.configXmlToJson( 
-                                                                  Urls.getJSONObject( ii )
-                                                                  .get( "url" ).toString() );     
-                    
-                    job.put( "schedule", schedule.get( "schedule" ) );                    
-                    job.put( "sysmlid", element.get( "sysmlid" ));
-                    job.put( "owner", element.get( "owner" ));
-                    
-                    // TODO: Create a property "ics" which will be populated by schedule? 
+                job.put( "status", job.get( "color" ) );
+                job.remove( "color" );
+                 
+                // if the job has not run yet
+                if(job.isNull( "lastCompletedBuild" )) {                       
+                    job.put( "duration", JSONObject.NULL );
+                    job.put( "estimatedDuration", JSONObject.NULL );
+                    job.put( "startTime", JSONObject.NULL );
+                    job.remove( "lastCompletedBuild");
                 }
+                else {
+                    JSONObject o = (JSONObject)job.get( "lastCompletedBuild" );                     
+                    job.put( "duration", o.get( "duration" ) );
+                    job.put( "estimatedDuration", o.get( "estimatedDuration" ) );
+                    job.put( "startTime", o.get( "timestamp" ));
+                    job.remove( "timestamp" );
+                    job.remove( "lastCompletedBuild" );
+                }
+                                
+                JSONObject schedule = jenkins.configXmlToJson( 
+                                                              Urls.getJSONObject( i )
+                                                              .get( "url" ).toString() );     
                 
-                element.put( "jobs", jobsJson.get( "jobs" ) );
-            }
+                job.put( "schedule", schedule.get( "schedule" ) );                    
+                job.put( "sysmlid", element.get( "sysmlid" ));
+                job.put( "owner", element.get( "owner" ));
+                
+                // TODO: Create a property "ics" which will be populated by schedule? 
             
-            if (res.length() > 0) {
-                top.put("elements", res);
+                job.put( "ics", "");
+                
+                res.put( job );
+            }   
+            
+            if (res.length() > 0) { 
+                /*
+                 * MIGHT KEEP THIS, SO JUST COMMENTING IT OUT
+                if( element.has( "specialization" ) ){
+                    element.remove( "specialization" );
+                }
+                *
+                */
+                
+                top.put("jobs", res);
             }
 
             if (!Utils.isNullOrEmpty(response.toString()))
@@ -185,38 +201,6 @@ public class JobGet extends ModelGet {
         return model;
     }
     
-    public void updateJob( ) {
-        
-    }
-    
-    public JSONObject parseJob( JSONObject job ) {
-        job.remove( "concurrentBuild" );
-        job.remove( "keepDependencies" );
-        job.remove( "buildable" );
-        job.remove( "lastUnstableBuild" );
-        job.remove( "lastSuccessfulBuild" );
-        job.remove( "lastCompletedBuild" );
-        job.remove( "nextBuildNumber" );
-        job.remove( "upstreamProjects" );
-        job.remove( "builds" );
-        job.remove( "firstBuild" );
-        job.remove( "inQueue" );
-        job.remove( "property" );
-        job.remove( "healthReport" );
-        job.remove( "downstreamProjects" );
-        job.remove( "lastBuild" );
-        job.remove( "lastUnsuccessfulBuild" );
-        job.remove( "displayNameOrNull" );
-        job.remove( "lastStableBuild" );
-        job.remove( "lastFailedBuild" );
-        job.remove( "displayName" );
-        job.remove( "actions" );
-        job.remove( "scm" );
-        job.remove( "modules" );
-        job.remove( "queueItem" );
-        return job;
-    }
-    
     public boolean isJob( EmsScriptNode node ) {
         if ( node.hasAspect( "HasMetatype" ) ) {
             Object stereotypes = 
@@ -240,6 +224,7 @@ public class JobGet extends ModelGet {
     @Override
     protected JSONObject jobOrEle(EmsScriptNode job, WorkspaceNode ws, Date dateTime, String id,
                              boolean includeQualified, boolean isIncludeDocument ) {
+        // NOTE: THIS FUNCTION MIGHT BE DEPREACTED         
         if  ( isJob( job ) ) {
             return new JSONObject();  
             //return job.toJSONObject( ws,  dateTime, includeQualified, isIncludeDocument, jobProperties.get(id) );

@@ -540,12 +540,14 @@ public class JenkinsEngine implements ExecutionEngine {
             
             // get the first element
             Element element = doc.getDocumentElement();
-            //element.getElementsByTagName( "spec" ).item( 0 ).getTextContent();
             
-            // if there is a schedule, add to the json 
+            // if there is a schedule for the job, add the property 
             if( element.getElementsByTagName( "spec" ).getLength() > 0) 
-                o.put( "schedule", element.getElementsByTagName( "spec" ).item( 0 ).getTextContent().replaceAll( "\\n", " " ) );
-            
+                o.put( "schedule", 
+                       element.getElementsByTagName( "spec" )
+                       .item( 0 )
+                       .getTextContent()
+                       .replaceAll( "\\n", " " ) );           
             else 
                 o.put( "schedule", JSONObject.NULL );
                                                           
@@ -564,11 +566,13 @@ public class JenkinsEngine implements ExecutionEngine {
     public JSONObject getJob(String jobUrl, detail name) {
         jobUrl = jobUrl.replaceAll(" ", "%20");
         
+        // if the detail is one of these, return the specific property 
         if(name == JenkinsEngine.detail.DURATION
            || name == JenkinsEngine.detail.TIMESTAMP
            || name == JenkinsEngine.detail.EST_DURATION) {
             constructBuildUrl( jobUrl, name);
             execute();
+            
             if(jsonResponse.isNull( "lastCompletedBuild" )) {
                 JSONObject n = new JSONObject();
                 return n.put( name.toString(), JSONObject.NULL );
