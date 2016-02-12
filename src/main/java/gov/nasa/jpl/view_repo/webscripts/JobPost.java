@@ -98,6 +98,8 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
 public class JobPost extends ModelPost {
     static Logger logger = Logger.getLogger(JobPost.class);
     
+    protected boolean doJenkins = false;
+    
     public JobPost() {
         super();
     }
@@ -118,26 +120,7 @@ public class JobPost extends ModelPost {
     @Override
     protected Map<String, Object> executeImplImpl(final WebScriptRequest req, 
             final Status status, Cache cache) {      
-        JenkinsEngine jenkins = new JenkinsEngine();
-        
-        JSONArray Urls = jenkins.getJobUrls();
-        
-        // POTENTIAL FLAG?
-        
-        // instead of posting all jobs, we need to send the request for a single job
-        // which the req was made from... can we parameterize the job name / job url
-        
-        // it would be ideal to retrieve the job URL 
-        // (i.e. https://<jenkins_server>.jpl.nasa.gov/job/<job_name> 
-        // because it would save us from a REST call to Jenkins
-        
-        // 
-        for(int i = 0; i < Urls.length(); i++) {
-            jenkins.postConfigXml( Urls.getJSONObject( i )
-                                   .get( "url" )
-                                   .toString() );
-        }
-        
+
         Timer timer = new Timer();
 
         printHeader(req);
@@ -225,10 +208,10 @@ public class JobPost extends ModelPost {
                     JSONObject postJson = getPostJson(jsonNotK, content,
                             expressionString);
 
+                    /*
                     JSONArray jobs = postJson.getJSONArray( "jobs" );
                     
                     // index starts at 1, to skip the initial element json from JobGet
-                    /*
                     for(int i = 1; i < jobs.length(); i++) {
                         jobs.get( i );
                     }
@@ -246,7 +229,10 @@ public class JobPost extends ModelPost {
                         }
                     };
 
-                    preProcessJson( postJson );
+                    preProcessJson( postJson, myWorkspace );
+                    
+                    if ( doJenkins ) doJenkinsStuff();
+
                     
                     // FIXME: this is a hack to get the right site permissions
                     // if DB rolled back, it's because the no_site node couldn't
@@ -290,6 +276,28 @@ public class JobPost extends ModelPost {
         return model;
     }
     
+    protected void doJenkinsStuff() {
+        JenkinsEngine jenkins = new JenkinsEngine();
+        
+        JSONArray Urls = jenkins.getJobUrls();
+        
+        // POTENTIAL FLAG?
+        
+        // instead of posting all jobs, we need to send the request for a single job
+        // which the req was made from... can we parameterize the job name / job url
+        
+        // it would be ideal to retrieve the job URL 
+        // (i.e. https://<jenkins_server>.jpl.nasa.gov/job/<job_name> 
+        // because it would save us from a REST call to Jenkins
+        
+        // 
+        for(int i = 0; i < Urls.length(); i++) {
+            jenkins.postConfigXml( Urls.getJSONObject( i )
+                                   .get( "url" )
+                                   .toString() );
+        }
+    }
+
     @Override
     protected Set<EmsScriptNode> handleUpdate(JSONObject postJson,
               Status status, final WorkspaceNode workspace, boolean evaluate,
@@ -392,15 +400,66 @@ public class JobPost extends ModelPost {
     
           return jobs;
       }
+    
+    @Override
+    protected void preProcessJson( JSONObject json, WorkspaceNode workspace ) {
+        super.preProcessJson( json, workspace );
+        processJobJson( json, workspace );
+    }
 
-      @Override
-      protected void preProcessJson( JSONObject json ) {
-          UpdateViewHierarchy uvh = new UpdateViewHierarchy( this );
-          // Handle view and association changes
-          try {
-              uvh.addJsonForViewHierarchyChanges( json );
-          } catch ( Throwable t ) {
-              t.printStackTrace();
-          }
-      }
+    protected void processJobJson( JSONObject json, WorkspaceNode workspace ) {
+        if ( json == null ) return;
+        
+        // Get "jobs" as opposed to "elements"
+        JSONArray jobs = json.optJSONArray( "jobs" );
+        if ( jobs == null ) {
+            return;
+        }
+        for ( int i = 1; i < jobs.length(); i++ ) {
+            JSONObject job = jobs.optJSONObject( i );
+            if ( job == null ) {
+                log( Level.ERROR, "Bad job json: " + job );
+                continue;
+            }
+            
+            // Get the id
+            String jobId = job.optString( "id" );
+            if ( Utils.isNullOrEmpty( jobId ) ) {
+                jobId = job.optString( "sysmlid" );
+            }
+            if ( Utils.isNullOrEmpty( jobId ) ) {
+                jobId = NodeUtil.createId( getServices() );
+            }
+            
+            EmsScriptNode jobNode = findScriptNodeById( jobId, workspace, null, false );
+            boolean createNewJob = jobNode == null;
+            
+            // Process status.
+            String status = job.optString( "status" );
+            if ( status == null ) {
+                // TODO -- What if status is set to null?  JSONObject.NULL??
+            } else {
+                if ( !createNewJob ) {
+                    Object statusNode = getSystemModel().getProperty( jobNode, "status" );
+                }
+            }
+            
+            // Maybe don't need json of existing object.
+            if ( false && !createNewJob ) {
+                jobNode.toJSONObject( workspace, dateTime, false, false, null );
+            }
+            
+            
+            
+            
+            // Expand job properties into separate elements.
+            
+            if ( false ) jobNode.getOwnedChildren( false, dateTime, workspace );
+            
+            
+        }
+    }
+    
+    
+
 }
