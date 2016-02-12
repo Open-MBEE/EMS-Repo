@@ -42,6 +42,8 @@ public class UpdateViewHierarchy {
 	Map<String, Set<JSONObject>> associationTargets = new LinkedHashMap<String, Set<JSONObject>>();
 	Map<String, JSONObject> elementsInJson = new LinkedHashMap<String, JSONObject>();
 
+    // FIXME -- need to add workspace to constructor and use in methods in this
+    // class instead of the workspaces of nodes encountered.
 	public UpdateViewHierarchy(ModelPost mp) {
 		this.mp = mp;
 	}

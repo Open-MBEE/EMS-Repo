@@ -436,17 +436,51 @@ public class JobPost extends ModelPost {
             
             // Process status.
             String status = job.optString( "status" );
+            String statusId = null;
             if ( status == null ) {
                 // TODO -- What if status is set to null?  JSONObject.NULL??
             } else {
                 if ( !createNewJob ) {
-                    Object statusNode = getSystemModel().getProperty( jobNode, "status" );
+                     Collection< EmsScriptNode > statusNodes = 
+                             getSystemModel().getProperty( jobNode, "status" );
+                     if ( !Utils.isNullOrEmpty( statusNodes ) ) {
+                         if ( statusNodes.size() > 1 ) {
+                             // TODO -- ERROR
+                         }
+                         EmsScriptNode statusNode = statusNodes.iterator().next();
+                         statusId = statusNode.getSysmlId();
+                     }
                 }
+                if ( Utils.isNullOrEmpty( statusId ) ) {
+                    status = NodeUtil.createId( getServices() );
+                }
+                JSONObject statusPropertyJson = new JSONObject();
+                statusPropertyJson.put( "sysmlid", statusId );
+                JSONObject specJson = new JSONObject();
+                statusPropertyJson.put( "specialization", specJson );
+                specJson.put( "type", "Property" );
+                JSONArray valueArr = new JSONArray();
+                specJson.put( "value", valueArr );
+                JSONObject value = new JSONObject();
+                valueArr.put(value);
+                value.put( "type", "LiteralString" );
+                value.put( "string", status );                
+            }
+
+
+            // TODO -- handle schedule, etc.
+            
+            // If creating job, transform job JSONObject object into element
+            // json by stripping out status, schedule, and other job-specific
+            // propertiess. If no exisiting specialization, then add a
+            // specialization of just type Element.
+            if ( createNewJob ) {
+                // TODO
             }
             
             // Maybe don't need json of existing object.
             if ( false && !createNewJob ) {
-                jobNode.toJSONObject( workspace, dateTime, false, false, null );
+                jobNode.toJSONObject( workspace, null, false, false, null );
             }
             
             
@@ -454,7 +488,7 @@ public class JobPost extends ModelPost {
             
             // Expand job properties into separate elements.
             
-            if ( false ) jobNode.getOwnedChildren( false, dateTime, workspace );
+            if ( false ) jobNode.getOwnedChildren( false, null, workspace );
             
             
         }
