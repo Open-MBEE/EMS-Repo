@@ -95,10 +95,12 @@ public class JobGet extends ModelGet {
             logger.debug(user + " " + req.getURL());
         }
         
-        // NOTE: THIS MAY SERVE IMPORTANCE FOR GETTING OWNED PROPERTIES
+        // TODO: THIS MAY SERVE IMPORTANCE FOR GETTING OWNED PROPERTIES
+        /*
         String timestamp = req.getParameter( "timestamp" );
         Date dateTime = TimeUtils.dateFromTimestamp( timestamp );
         addElementProperties( this.getWorkspace( req ), dateTime );
+        */
         
         JenkinsEngine jenkins = new JenkinsEngine();     
         

@@ -34,6 +34,7 @@ import gov.nasa.jpl.mbee.util.Pair;
 import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.mbee.util.Timer;
 import gov.nasa.jpl.mbee.util.Utils;
+import gov.nasa.jpl.pma.JenkinsEngine;
 import gov.nasa.jpl.view_repo.actions.ActionUtil;
 import gov.nasa.jpl.view_repo.actions.ModelLoadActionExecuter;
 import gov.nasa.jpl.view_repo.util.Acm;
@@ -116,7 +117,27 @@ public class JobPost extends ModelPost {
     
     @Override
     protected Map<String, Object> executeImplImpl(final WebScriptRequest req, 
-            final Status status, Cache cache) {
+            final Status status, Cache cache) {      
+        JenkinsEngine jenkins = new JenkinsEngine();
+        
+        JSONArray Urls = jenkins.getJobUrls();
+        
+        // POTENTIAL FLAG?
+        
+        // instead of posting all jobs, we need to send the request for a single job
+        // which the req was made from... can we parameterize the job name / job url
+        
+        // it would be ideal to retrieve the job URL 
+        // (i.e. https://<jenkins_server>.jpl.nasa.gov/job/<job_name> 
+        // because it would save us from a REST call to Jenkins
+        
+        // 
+        for(int i = 0; i < Urls.length(); i++) {
+            jenkins.postConfigXml( Urls.getJSONObject( i )
+                                   .get( "url" )
+                                   .toString() );
+        }
+        
         Timer timer = new Timer();
 
         printHeader(req);
@@ -207,11 +228,11 @@ public class JobPost extends ModelPost {
                     JSONArray jobs = postJson.getJSONArray( "jobs" );
                     
                     // index starts at 1, to skip the initial element json from JobGet
+                    /*
                     for(int i = 1; i < jobs.length(); i++) {
-                        System.out.println( "*************JOB*************\n" );
-                        System.out.println( jobs.get( i ) );
-                        System.out.println( "*************JOB*************\n" );
+                        jobs.get( i );
                     }
+                    */
                     
                     // Get the project node from the request:
                     new EmsTransaction(getServices(), getResponse(),
@@ -275,7 +296,10 @@ public class JobPost extends ModelPost {
               final boolean fix, Map<String, Object> model, boolean createCommit,
               boolean suppressElementJson) throws Exception {
           final JSONObject top = NodeUtil.newJsonObject();
-          //final Set<EmsScriptNode> elements = createOrUpdateModel(postJson,
+          
+          // TODO: BETWEEN THESE TWO FUNCTIONS, YOU NEED TO RETRIEVE INFORMATION
+          //       FOR JOBS...
+          //final Set<EmsScriptNode> jobs = createOrUpdateModel(postJson,
           //        status, workspace, null, createCommit);
           
           final Set< EmsScriptNode > jobs = 
@@ -379,7 +403,4 @@ public class JobPost extends ModelPost {
               t.printStackTrace();
           }
       }
-      
-      
-
 }

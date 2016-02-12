@@ -40,7 +40,9 @@ import org.apache.http.auth.Credentials;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.protocol.ClientContext;
+import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.impl.auth.BasicScheme;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.protocol.BasicHttpContext;
@@ -68,6 +70,9 @@ public class JenkinsEngine implements ExecutionEngine {
     private String passwordOrToken = "dhcp3LugH#Meg!i"; // Token or password
                                                         // that is associated
                                                         // with the user name
+    
+    // TODO: WE NEED TO ADJUST THE URL ACCORDING TO ANY SERVER,
+    //       DEPENDING WHERE THE USER CHOOSES TO 
     private String url = "https://cae-jenkins.jpl.nasa.gov"; // URL of the
                                                              // Jenkins server
                                                              // to execute the
@@ -75,7 +80,7 @@ public class JenkinsEngine implements ExecutionEngine {
     private String jenkinsToken = "build"; // The build the token associated
                                            // with the build configuration on
                                            // the Jenkins server.
-    public String jobName = "MDKTest"; // Build name - the name of the job to be
+    public String jobName = ""; // Build name - the name of the job to be
                                        // executed on the Jenkins server.
     public String jenkinsApiURL = "/api/json?depth=";
     public int apiCallDepth = 1;
@@ -518,8 +523,9 @@ public class JenkinsEngine implements ExecutionEngine {
                        .replaceAll( "\\n", " " ) );           
             else 
                 o.put( "schedule", JSONObject.NULL );
-                                                          
-            EntityUtils.consume( entity );           
+              
+            // NOTE: THIS WILL LEAVE THE CONNECTION OPEN, WE MIGHT NOT WANT THIS.
+            //EntityUtils.consume( entity );           
         } catch ( IOException e ) {
             e.printStackTrace();
         }
@@ -529,6 +535,37 @@ public class JenkinsEngine implements ExecutionEngine {
             e.printStackTrace();
         }
         return o; 
+    }
+    
+    // NOTE: THIS WILL BE CALLED WHEN YOU CHANGE THE NAME, STATUS AND ON JOB CREATION 
+    public void postConfigXml( String jobName ) {
+        String getUrl = jobName + "config.xml";
+        String postUrl = "https://cae-jenkins.jpl.nasa.gov/createItem";
+        
+        HttpGet get = new HttpGet( getUrl );        
+        HttpPost post = new HttpPost( postUrl );
+        post.setHeader( "Content-Type", "application/xml" );
+        
+        try {
+            HttpResponse response = 
+                    this.jenkinsClient.execute( get, this.context );
+ 
+            // Get the config.xml
+            HttpEntity entity = response.getEntity();
+            String xml = EntityUtils.toString( entity );
+            
+            // Prepare to post it 
+            entity = new ByteArrayEntity(xml.getBytes("UTF-8"));
+            post.setEntity( entity );
+            
+            response = this.jenkinsClient.execute( post, this.context );
+
+            System.out.println( response );
+            
+            String result = EntityUtils.toString(response.getEntity());
+        } catch( Exception e ) {
+            e.printStackTrace();
+        }
     }
     
     public JSONObject getAllJobs() {
