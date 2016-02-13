@@ -70,7 +70,9 @@ import gov.nasa.jpl.view_repo.util.NodeUtil;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 
 /**
+ *
  * @author Jason Han
+ *
  */
 public class DoorsSync extends AbstractJavaWebScript {
 
@@ -111,7 +113,7 @@ public class DoorsSync extends AbstractJavaWebScript {
         JSONObject json = null;
 
         try {
-            logger.setLevel(Level.DEBUG);
+            //logger.setLevel(Level.DEBUG);
             String[] idKeys = { "modelid", "elementid", "elementId" };
             String modelId = null;
             for (String idKey : idKeys) {
@@ -208,18 +210,6 @@ public class DoorsSync extends AbstractJavaWebScript {
             rootProjectId = projectNode.getSysmlId();
             customFields = mapFields(projectNode.getSysmlName());
 
-            /*
-            System.out.println();
-            System.out.println("Key: " + key);
-            System.out.println("Value: " + requirementNode.getSysmlId());
-            System.out.println("Name: " + requirementNode.getSysmlName());
-            System.out.println("GetSiteNode: " + siteNode.getSysmlId());
-            System.out.println("GetSiteNode Name: " + siteNode.getSysmlName());
-            System.out.println("getProjectNode: " + projectNode.getSysmlId());
-            System.out.println("getProjectNode Name: " + projectNode.getSysmlName());
-            System.out.println();
-            */
-
             try {
                 doors = new DoorsClient(projectNode.getSysmlName());
                 if (!processedProjects.contains(projectNode.getSysmlName())) {
@@ -257,7 +247,6 @@ public class DoorsSync extends AbstractJavaWebScript {
         }
 
         processedProjects.add(doors.getProject());
-
     }
 
     protected void compRequirement(EmsScriptNode n, Requirement r) {
@@ -462,11 +451,7 @@ public class DoorsSync extends AbstractJavaWebScript {
             } else {
                 value = r.getCustomField(doors.getField(fieldDef.get("doorsAttr")));
             }
-            System.out.println();
-            System.out.println();
-            System.out.println("Slot Value: " + value);
-            System.out.println();
-            System.out.println();
+
             if (value != null) {
                 slotElement.put("sysmlid", slotSysmlId);
                 slotSpecialization.put("isDerived", false);
@@ -674,6 +659,7 @@ public class DoorsSync extends AbstractJavaWebScript {
                 }
             }
         }
+
         return (slots.isEmpty()) ? null : slots.toArray(new EmsScriptNode[slots.size()]);
     }
 
@@ -687,11 +673,6 @@ public class DoorsSync extends AbstractJavaWebScript {
                 for (Map<String, String> fieldDef : customFields) {
                     Collection<Object> value = esm.getValue(esm.getProperty(cn, "value"), fieldDef.get("propertyType"));
                     if (value.iterator().hasNext()) {
-                        System.out.println();
-                        System.out.println();
-                        System.out.println("Slot Value: " + value.iterator().next().toString());
-                        System.out.println();
-                        System.out.println();
                         if (fieldDef.get("doorsAttr").contains("primaryText")) {
                             r.setPrimaryText(value.iterator().next().toString());
                         } else {
@@ -730,6 +711,7 @@ public class DoorsSync extends AbstractJavaWebScript {
 
         try {
             modelPost.handleUpdate(postJson, status, null, true, false, model, true, true);
+
             return true;
         } catch (Exception e) {
             e.printStackTrace();
