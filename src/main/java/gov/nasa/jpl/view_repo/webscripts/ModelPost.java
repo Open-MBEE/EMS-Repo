@@ -55,6 +55,7 @@ import gov.nasa.jpl.view_repo.webscripts.util.ShareUtils;
 
 
 
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -70,6 +71,7 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 
 import javax.servlet.http.HttpServletResponse;
+
 
 //import javax.transaction.UserTransaction;
 import org.apache.log4j.*;
@@ -2673,7 +2675,7 @@ public class ModelPost extends AbstractJavaWebScript {
 						}
 					};
 					
-					 preProcessJson( postJson );
+					 preProcessJson( postJson, myWorkspace, null );
 
 					// FIXME: this is a hack to get the right site permissions
 					// if DB rolled back, it's because the no_site node couldn't
@@ -2717,7 +2719,7 @@ public class ModelPost extends AbstractJavaWebScript {
 		return model;
 	}
 	
-	protected void preProcessJson( JSONObject json ) {
+	protected void preProcessJson( JSONObject json, WorkspaceNode workspace ) {
         UpdateViewHierarchy uvh = new UpdateViewHierarchy( this );
         // Handle view and association changes
         try {

@@ -1405,11 +1405,11 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         return systemModel;
     }
     
-    public SystemModel< ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? > getSystemModel() {
+    public SystemModel< EmsScriptNode, Object, EmsScriptNode, EmsScriptNode, String, String, Object, EmsScriptNode, String, String, EmsScriptNode > getSystemModel() {
         if ( systemModel == null ) {
             systemModel = new EmsSystemModel(this.services);
         }
-        return (SystemModel< ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? >)systemModel;
+        return systemModel;
     }
 
 

@@ -34,6 +34,7 @@ import gov.nasa.jpl.mbee.util.Pair;
 import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.mbee.util.Timer;
 import gov.nasa.jpl.mbee.util.Utils;
+import gov.nasa.jpl.pma.JenkinsEngine;
 import gov.nasa.jpl.view_repo.actions.ActionUtil;
 import gov.nasa.jpl.view_repo.actions.ModelLoadActionExecuter;
 import gov.nasa.jpl.view_repo.util.Acm;
@@ -97,6 +98,8 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
 public class JobPost extends ModelPost {
     static Logger logger = Logger.getLogger(JobPost.class);
     
+    protected boolean doJenkins = false;
+    
     public JobPost() {
         super();
     }
@@ -116,7 +119,8 @@ public class JobPost extends ModelPost {
     
     @Override
     protected Map<String, Object> executeImplImpl(final WebScriptRequest req, 
-            final Status status, Cache cache) {
+            final Status status, Cache cache) {      
+
         Timer timer = new Timer();
 
         printHeader(req);
@@ -204,14 +208,14 @@ public class JobPost extends ModelPost {
                     JSONObject postJson = getPostJson(jsonNotK, content,
                             expressionString);
 
+                    /*
                     JSONArray jobs = postJson.getJSONArray( "jobs" );
                     
                     // index starts at 1, to skip the initial element json from JobGet
                     for(int i = 1; i < jobs.length(); i++) {
-                        System.out.println( "*************JOB*************\n" );
-                        System.out.println( jobs.get( i ) );
-                        System.out.println( "*************JOB*************\n" );
+                        jobs.get( i );
                     }
+                    */
                     
                     // Get the project node from the request:
                     new EmsTransaction(getServices(), getResponse(),
@@ -225,7 +229,10 @@ public class JobPost extends ModelPost {
                         }
                     };
 
-                    preProcessJson( postJson );
+                    preProcessJson( postJson, myWorkspace );
+                    
+                    if ( doJenkins ) doJenkinsStuff();
+
                     
                     // FIXME: this is a hack to get the right site permissions
                     // if DB rolled back, it's because the no_site node couldn't
@@ -269,13 +276,38 @@ public class JobPost extends ModelPost {
         return model;
     }
     
+    protected void doJenkinsStuff() {
+        JenkinsEngine jenkins = new JenkinsEngine();
+        
+        JSONArray Urls = jenkins.getJobUrls();
+        
+        // POTENTIAL FLAG?
+        
+        // instead of posting all jobs, we need to send the request for a single job
+        // which the req was made from... can we parameterize the job name / job url
+        
+        // it would be ideal to retrieve the job URL 
+        // (i.e. https://<jenkins_server>.jpl.nasa.gov/job/<job_name> 
+        // because it would save us from a REST call to Jenkins
+        
+        // 
+        for(int i = 0; i < Urls.length(); i++) {
+            jenkins.postConfigXml( Urls.getJSONObject( i )
+                                   .get( "url" )
+                                   .toString() );
+        }
+    }
+
     @Override
     protected Set<EmsScriptNode> handleUpdate(JSONObject postJson,
               Status status, final WorkspaceNode workspace, boolean evaluate,
               final boolean fix, Map<String, Object> model, boolean createCommit,
               boolean suppressElementJson) throws Exception {
           final JSONObject top = NodeUtil.newJsonObject();
-          //final Set<EmsScriptNode> elements = createOrUpdateModel(postJson,
+          
+          // TODO: BETWEEN THESE TWO FUNCTIONS, YOU NEED TO RETRIEVE INFORMATION
+          //       FOR JOBS...
+          //final Set<EmsScriptNode> jobs = createOrUpdateModel(postJson,
           //        status, workspace, null, createCommit);
           
           final Set< EmsScriptNode > jobs = 
@@ -368,18 +400,100 @@ public class JobPost extends ModelPost {
     
           return jobs;
       }
+    
+    @Override
+    protected void preProcessJson( JSONObject json, WorkspaceNode workspace ) {
+        super.preProcessJson( json, workspace );
+        processJobJson( json, workspace );
+    }
 
-      @Override
-      protected void preProcessJson( JSONObject json ) {
-          UpdateViewHierarchy uvh = new UpdateViewHierarchy( this );
-          // Handle view and association changes
-          try {
-              uvh.addJsonForViewHierarchyChanges( json );
-          } catch ( Throwable t ) {
-              t.printStackTrace();
-          }
-      }
-      
-      
+    protected void processJobJson( JSONObject json, WorkspaceNode workspace ) {
+        if ( json == null ) return;
+        
+        // Get "jobs" as opposed to "elements"
+        JSONArray jobs = json.optJSONArray( "jobs" );
+        if ( jobs == null ) {
+            return;
+        }
+        for ( int i = 1; i < jobs.length(); i++ ) {
+            JSONObject job = jobs.optJSONObject( i );
+            if ( job == null ) {
+                log( Level.ERROR, "Bad job json: " + job );
+                continue;
+            }
+            
+            // Get the id
+            String jobId = job.optString( "id" );
+            if ( Utils.isNullOrEmpty( jobId ) ) {
+                jobId = job.optString( "sysmlid" );
+            }
+            if ( Utils.isNullOrEmpty( jobId ) ) {
+                jobId = NodeUtil.createId( getServices() );
+            }
+            
+            EmsScriptNode jobNode = findScriptNodeById( jobId, workspace, null, false );
+            boolean createNewJob = jobNode == null;
+            
+            // Process status.
+            String status = job.optString( "status" );
+            String statusId = null;
+            if ( status == null ) {
+                // TODO -- What if status is set to null?  JSONObject.NULL??
+            } else {
+                if ( !createNewJob ) {
+                     Collection< EmsScriptNode > statusNodes = 
+                             getSystemModel().getProperty( jobNode, "status" );
+                     if ( !Utils.isNullOrEmpty( statusNodes ) ) {
+                         if ( statusNodes.size() > 1 ) {
+                             // TODO -- ERROR
+                         }
+                         EmsScriptNode statusNode = statusNodes.iterator().next();
+                         statusId = statusNode.getSysmlId();
+                     }
+                }
+                if ( Utils.isNullOrEmpty( statusId ) ) {
+                    status = NodeUtil.createId( getServices() );
+                }
+                JSONObject statusPropertyJson = new JSONObject();
+                statusPropertyJson.put( "sysmlid", statusId );
+                JSONObject specJson = new JSONObject();
+                statusPropertyJson.put( "specialization", specJson );
+                specJson.put( "type", "Property" );
+                JSONArray valueArr = new JSONArray();
+                specJson.put( "value", valueArr );
+                JSONObject value = new JSONObject();
+                valueArr.put(value);
+                value.put( "type", "LiteralString" );
+                value.put( "string", status );                
+            }
+
+
+            // TODO -- handle schedule, etc.
+            
+            // If creating job, transform job JSONObject object into element
+            // json by stripping out status, schedule, and other job-specific
+            // propertiess. If no exisiting specialization, then add a
+            // specialization of just type Element.
+            if ( createNewJob ) {
+                // TODO
+            }
+            
+            // Maybe don't need json of existing object.
+            if ( false && !createNewJob ) {
+                jobNode.toJSONObject( workspace, null, false, false, null );
+            }
+            
+            
+            
+            
+            // Expand job properties into separate elements.
+            
+            if ( false ) jobNode.getOwnedChildren( false, null, workspace );
+            
+            
+        }
+    }
+    
+    
 
 }
