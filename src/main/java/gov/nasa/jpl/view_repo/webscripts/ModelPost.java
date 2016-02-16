@@ -2675,7 +2675,7 @@ public class ModelPost extends AbstractJavaWebScript {
 						}
 					};
 					
-					 preProcessJson( postJson, myWorkspace, null );
+					 preProcessJson( postJson, myWorkspace );
 
 					// FIXME: this is a hack to get the right site permissions
 					// if DB rolled back, it's because the no_site node couldn't
@@ -2719,7 +2719,7 @@ public class ModelPost extends AbstractJavaWebScript {
 		return model;
 	}
 	
-	protected void preProcessJson( JSONObject json, WorkspaceNode workspace ) {
+	protected void preProcessJson( JSONObject json, WorkspaceNode workspace) {
         UpdateViewHierarchy uvh = new UpdateViewHierarchy( this );
         // Handle view and association changes
         try {

@@ -539,8 +539,8 @@ public class JenkinsEngine implements ExecutionEngine {
     
     // NOTE: THIS WILL BE CALLED WHEN YOU CHANGE THE NAME, STATUS AND ON JOB CREATION 
     public void postConfigXml( String jobName ) {
-        String getUrl = jobName + "config.xml";
-        String postUrl = "https://cae-jenkins.jpl.nasa.gov/createItem";
+        String getUrl = "https://cae-jenkins.jpl.nasa.gov/job/" + jobName + "/config.xml";
+        String postUrl = "https://cae-jenkins.jpl.nasa.gov/createItem?name=" + jobName;
         
         HttpGet get = new HttpGet( getUrl );        
         HttpPost post = new HttpPost( postUrl );
@@ -560,9 +560,6 @@ public class JenkinsEngine implements ExecutionEngine {
             
             response = this.jenkinsClient.execute( post, this.context );
 
-            System.out.println( response );
-            
-            String result = EntityUtils.toString(response.getEntity());
         } catch( Exception e ) {
             e.printStackTrace();
         }

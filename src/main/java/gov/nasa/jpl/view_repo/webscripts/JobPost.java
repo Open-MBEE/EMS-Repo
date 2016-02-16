@@ -228,11 +228,16 @@ public class JobPost extends ModelPost {
                             getProjectNodeFromRequest(req, true);
                         }
                     };
-
+ 
+                    System.out.println( "BEFORE" );
+                    System.out.println( postJson );
+                    
                     preProcessJson( postJson, myWorkspace );
                     
-                    if ( doJenkins ) doJenkinsStuff();
-
+                    System.out.println( "AFTER" );
+                    System.out.println( postJson );
+                    
+                    //if ( doJenkins ) doJenkinsStuff( postJson );
                     
                     // FIXME: this is a hack to get the right site permissions
                     // if DB rolled back, it's because the no_site node couldn't
@@ -276,26 +281,11 @@ public class JobPost extends ModelPost {
         return model;
     }
     
-    protected void doJenkinsStuff() {
+    protected void doJenkinsStuff(JSONObject json) {
+        // TODO: CHECK FOR NULL 
         JenkinsEngine jenkins = new JenkinsEngine();
-        
-        JSONArray Urls = jenkins.getJobUrls();
-        
-        // POTENTIAL FLAG?
-        
-        // instead of posting all jobs, we need to send the request for a single job
-        // which the req was made from... can we parameterize the job name / job url
-        
-        // it would be ideal to retrieve the job URL 
-        // (i.e. https://<jenkins_server>.jpl.nasa.gov/job/<job_name> 
-        // because it would save us from a REST call to Jenkins
-        
-        // 
-        for(int i = 0; i < Urls.length(); i++) {
-            jenkins.postConfigXml( Urls.getJSONObject( i )
-                                   .get( "url" )
-                                   .toString() );
-        }
+
+        jenkins.postConfigXml( json.getString( "sysmlid" ) );       
     }
 
     @Override
@@ -372,7 +362,7 @@ public class JobPost extends ModelPost {
                       };
                   }
     
-                  top.put("jobs", jobsJson);
+                  top.put("elements", jobsJson);
               }
           }
     
@@ -415,6 +405,7 @@ public class JobPost extends ModelPost {
         if ( jobs == null ) {
             return;
         }
+        
         for ( int i = 1; i < jobs.length(); i++ ) {
             JSONObject job = jobs.optJSONObject( i );
             if ( job == null ) {
@@ -452,19 +443,33 @@ public class JobPost extends ModelPost {
                      }
                 }
                 if ( Utils.isNullOrEmpty( statusId ) ) {
-                    status = NodeUtil.createId( getServices() );
+                    statusId = NodeUtil.createId( getServices() );
                 }
                 JSONObject statusPropertyJson = new JSONObject();
                 statusPropertyJson.put( "sysmlid", statusId );
                 JSONObject specJson = new JSONObject();
                 statusPropertyJson.put( "specialization", specJson );
                 specJson.put( "type", "Property" );
+                specJson.put( "isSlot", true);
                 JSONArray valueArr = new JSONArray();
                 specJson.put( "value", valueArr );
                 JSONObject value = new JSONObject();
                 valueArr.put(value);
                 value.put( "type", "LiteralString" );
-                value.put( "string", status );                
+                value.put( "string", status );     
+                        
+                // NOTE: statusPropertyJson has JSON at this point...
+                /*
+                System.out.println( "************************" );
+                System.out.println(job.get( "name" ));                
+                job.put("elements", statusPropertyJson );
+                System.out.println( job );  
+                System.out.println( "************************" );    
+                */
+                
+                // OVERWRITES THE CURRENT JOB JSON, WITH ELEMENT DATA 
+                json.remove( "jobs" );
+                json.put( "elements", statusPropertyJson );
             }
 
 
@@ -492,6 +497,11 @@ public class JobPost extends ModelPost {
             
             
         }
+    }
+    
+    public void reconstruct( JSONObject job ) {
+        // NOTE: YOU NEED TO DECONSTRUCT THE CURRENT JOB JSON YOU HAVE
+        //       THEN REFORM IT INTO PROPER ELEMENT JSON 
     }
     
     
