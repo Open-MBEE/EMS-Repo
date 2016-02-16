@@ -13,13 +13,7 @@ package gov.nasa.jpl.pma;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.StringReader;
-import java.net.Authenticator;
-import java.net.HttpURLConnection;
-import java.net.PasswordAuthentication;
-import java.net.URL;
-import java.net.URLConnection;
 import java.util.List;
 import java.util.Map;
 
@@ -27,9 +21,7 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.activiti.engine.impl.util.json.XML;
 import org.apache.commons.httpclient.methods.InputStreamRequestEntity;
-import org.apache.commons.net.util.Base64;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpException;
 import org.apache.http.HttpHost;
@@ -46,20 +38,18 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.protocol.ClientContext;
 import org.apache.http.entity.ByteArrayEntity;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.auth.BasicScheme;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.protocol.BasicHttpContext;
 import org.apache.http.protocol.ExecutionContext;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.util.EntityUtils;
-
 import org.apache.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
@@ -542,22 +532,22 @@ public class JenkinsEngine implements ExecutionEngine {
     
     // NOTE: THIS WILL BE CALLED WHEN YOU CHANGE THE NAME, STATUS AND ON JOB CREATION 
     public void postConfigXml( String jobName ) {
-        String getUrl = "https://cae-jenkins.jpl.nasa.gov/job/" + jobName + "/config.xml";
         String postUrl = "https://cae-jenkins.jpl.nasa.gov/createItem?name=" + jobName;
 
-        generateConfigXML();
-        File configFile = new File("./config.xml");
+        String configFile = generateConfigXML();
         
         try {
-            HttpEntity xmlEntity = (HttpEntity)new  InputStreamRequestEntity(new FileInputStream(configFile), configFile.length());
-        
-            HttpGet get = new HttpGet( getUrl );        
+            HttpEntity xmlEntity = (HttpEntity)new  StringEntity(configFile);
+    
             HttpPost post = new HttpPost( postUrl );
             post.setHeader( "Content-Type", "application/xml" );
             post.setEntity( xmlEntity );
             HttpResponse response = 
-                    this.jenkinsClient.execute( get, this.context );
- 
+                    this.jenkinsClient.execute( post, this.context );
+            
+            System.out.println( response );
+            
+/*          EXTRA STEP, MAY NOT NEED
             // Get the config.xml
             HttpEntity entity = response.getEntity();
             String xml = EntityUtils.toString( entity );
@@ -567,6 +557,7 @@ public class JenkinsEngine implements ExecutionEngine {
             post.setEntity( entity );
             
             response = this.jenkinsClient.execute( post, this.context );
+*/
 
         } catch( Exception e ) {
             e.printStackTrace();
@@ -663,8 +654,9 @@ public class JenkinsEngine implements ExecutionEngine {
         return jsonResponse.getJSONArray( "jobs" );
     }
     
-    public void generateConfigXML(){
+    public String generateConfigXML(){
         JenkinsBuildConfig config = new JenkinsBuildConfig();
-        config.generateBaseConfigXML();
+        String xml = config.generateBaseConfigXML();
+        return xml;
     }
 }

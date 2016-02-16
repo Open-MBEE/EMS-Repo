@@ -1,0 +1,39 @@
+{"jobs": [
+    {
+        "nodeRefId": "versionStore://version2Store/64752bdf-08dc-4e40-be6c-36ef6a030ac9",
+        "versionedRefId": "versionStore://version2Store/64752bdf-08dc-4e40-be6c-36ef6a030ac9",
+        "sysmlid": "_18_0_2_6620226_1454349097379_29967_15091-slot-_18_0_2_6620226_1453945722485_173783_14567",
+        "isMetatype": false,
+        "editable": true,
+        "creator": "admin",
+        "modified": "2016-02-10T13:10:18.842-0800",
+        "modifier": "admin",
+        "created": "Wed Feb 10 13:10:12 PST 2016",
+        "name": "",
+        "documentation": "",
+        "read": "2016-02-11T09:43:16.053-0800",
+        "appliedMetatypes": ["_9_0_62a020a_1105704885275_885607_7905"],
+        "specialization": {
+            "propertyType": null,
+            "isSlot": true,
+            "isDerived": false,
+            "value": [{
+                "string": "WAITING",
+                "type": "LiteralString"
+            }],
+            "type": "Property"
+        }
+    },
+    {
+        "estimatedDuration": 1550,
+        "startTime": 1453750593290,
+        "duration": 823,
+        "schedule": "# every minute * * * * *",
+        "status": "red",
+        "ics": {},
+        "description": "18.0 SP4 version of: \r\n  - MagicDraw\r\n  - SysML\r\n  - Cameo Business Modeler Plugin\r\n  - Cameo Requirements Modeler Plugin\r\n  - Cameo Simulation Toolkit (18.1 version)\r\n  - Document Modeling Plugin\r\n  - CSV import\r\n  - Model Obfuscator\r\n  - ParaMagic",
+        "name": "01-JPL-MBEE-1800-02-VanillaMagicDraw",
+        "url": "https://cae-jenkins.jpl.nasa.gov/job/01-JPL-MBEE-1800-02-VanillaMagicDraw/",
+	"desiredView": "_18_0_2_6620226_1454349123196_220661_15151"
+    }
+]}

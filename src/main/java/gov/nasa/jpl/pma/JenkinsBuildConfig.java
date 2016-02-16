@@ -19,8 +19,10 @@ import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
+
 import java.io.File;
 import java.io.IOException;
+import java.io.StringWriter;
 
 public class JenkinsBuildConfig {
 
@@ -162,7 +164,7 @@ public class JenkinsBuildConfig {
         }
     }
 
-    public void generateBaseConfigXML() {
+    public String generateBaseConfigXML() {
         DocumentBuilderFactory docBuilderFactory = DocumentBuilderFactory.newInstance();
         try {
             DocumentBuilder docBuilder = docBuilderFactory.newDocumentBuilder();
@@ -377,10 +379,14 @@ public class JenkinsBuildConfig {
             TransformerFactory transformerFactory = TransformerFactory.newInstance();
             Transformer        transformer        = transformerFactory.newTransformer();
             DOMSource          source             = new DOMSource(doc);
-            StreamResult       result             = new StreamResult(new File("./test-output.xml"));
+            StringWriter       stringWriter       = new StringWriter();
+            //StreamResult       result             = new StreamResult(new File("./test-output.xml"));
+            StreamResult       result             = new StreamResult(stringWriter);//new File("./test-output.xml"));
             transformer.transform(source, result);
             StreamResult consoleResult = new StreamResult(System.out);
             transformer.transform(source, consoleResult);
+            
+            return stringWriter.toString();
         } catch (ParserConfigurationException e) {
             e.printStackTrace();
         } catch (TransformerConfigurationException e) {
@@ -388,6 +394,7 @@ public class JenkinsBuildConfig {
         } catch (TransformerException e) {
             e.printStackTrace();
         }
+        return configTemplatePath;
     }
 
     /**

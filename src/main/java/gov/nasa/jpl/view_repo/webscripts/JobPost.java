@@ -34,6 +34,7 @@ import gov.nasa.jpl.mbee.util.Pair;
 import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.mbee.util.Timer;
 import gov.nasa.jpl.mbee.util.Utils;
+import gov.nasa.jpl.pma.JenkinsBuildConfig;
 import gov.nasa.jpl.pma.JenkinsEngine;
 import gov.nasa.jpl.view_repo.actions.ActionUtil;
 import gov.nasa.jpl.view_repo.actions.ModelLoadActionExecuter;
@@ -64,6 +65,9 @@ import gov.nasa.jpl.view_repo.webscripts.util.ShareUtils;
 
 
 
+
+
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -79,6 +83,9 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 
 import javax.servlet.http.HttpServletResponse;
+
+
+
 
 
 
@@ -252,14 +259,8 @@ public class JobPost extends ModelPost {
                             getProjectNodeFromRequest(req, true);
                         }
                     };
- 
-                    System.out.println( "BEFORE" );
-                    System.out.println( postJson );
                     
                     preProcessJson( postJson, myWorkspace );
-                    
-                    System.out.println( "AFTER" );
-                    System.out.println( postJson );
                     
                     //if ( doJenkins ) doJenkinsStuff( postJson );
                     
@@ -305,11 +306,16 @@ public class JobPost extends ModelPost {
         return model;
     }
     
-    protected void doJenkinsStuff(JSONObject json) {
-        // TODO: CHECK FOR NULL 
+    protected void doJenkinsStuff(Map<String,String> propertyValues) {
         JenkinsEngine jenkins = new JenkinsEngine();
-
-        jenkins.postConfigXml( json.getString( "sysmlid" ) );       
+        JenkinsBuildConfig config = new JenkinsBuildConfig();
+        String desiredView = propertyValues.get("desiredView");
+        config.setDocumentID( desiredView );
+        String status = propertyValues.get( "status" );
+        // do something?
+        String schedule = propertyValues.get( "schedule" );
+        // do something?
+        jenkins.postConfigXml( config.getJobID() );       
     }
 
     @Override
@@ -318,15 +324,9 @@ public class JobPost extends ModelPost {
               final boolean fix, Map<String, Object> model, boolean createCommit,
               boolean suppressElementJson) throws Exception {
           final JSONObject top = NodeUtil.newJsonObject();
-          
-          // TODO: BETWEEN THESE TWO FUNCTIONS, YOU NEED TO RETRIEVE INFORMATION
-          //       FOR JOBS...
+
           final Set<EmsScriptNode> jobs = createOrUpdateModel(postJson,
                   status, workspace, null, createCommit);
-          
-          //final Set< EmsScriptNode > jobs = 
-          //        ModelLoadActionExecuter.loadJson( postJson, null,
-          //                                          null );
     
           if (!Utils.isNullOrEmpty(jobs)) {
               sendProgress("Adding relationships to properties", projectId, true);
@@ -468,13 +468,22 @@ public class JobPost extends ModelPost {
         EmsScriptNode jobNode = findScriptNodeById( jobId, workspace, null, false );
         boolean createNewJob = jobNode == null;
         
+        LinkedHashMap<String, String> propertyValues = new LinkedHashMap< String, String >();
+        
         // Process properties and remove them from the job json, which is being
         // transformed into element json.
         for ( String propertyName : jobProperties ) {
+            // Save away the property values for later use;
+            String propertyValue = job.optString( propertyName );
+            if ( propertyValue == null ) continue;
+            propertyValues.put( propertyName, propertyValue );
+            
+            // Update or create the property json.
             JSONObject propertyElementJson =
                     getJobProperty( propertyName, job, createNewJob, jobNode,
                                     elements );
             elements.put( propertyElementJson );
+            
             job.remove( propertyName );
         }
 
@@ -484,13 +493,16 @@ public class JobPost extends ModelPost {
         // Use job json as element json and move to "elements" array. The
         // job-specific properties in the json were stripped out above.
         elements.put(job);
-    }
-    
-    
-    public JSONObject getSchedule(JSONObject job, boolean createNewJob,
-                                  EmsScriptNode jobNode,
-                                  JSONArray elements  ) {
-        return getJobProperty( "schedule", job, createNewJob, jobNode, elements );
+        
+        // If creating a new job with a desiredDocument, push a new
+        // configuration to Jenkins.
+        // TODO -- There should be a generic way to do this, using a "command"
+        // property that runs a function in an available API that syncs Jenkins
+        String desiredView = propertyValues.get( "desiredView" );
+        // with the job.
+        if ( createNewJob && !Utils.isNullOrEmpty( desiredView ) ) {
+            doJenkinsStuff( propertyValues );
+        }
     }
 
     /**
@@ -540,6 +552,9 @@ public class JobPost extends ModelPost {
         if( jobId != null ) {
             propertyJson.put( "owner", jobId );
         }
+        
+        // add name
+        propertyJson.put( "name", propertyName );
         
         // Make sure we have an id for the property.
         if ( Utils.isNullOrEmpty( propertyId ) ) {
