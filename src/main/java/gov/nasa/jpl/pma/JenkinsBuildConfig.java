@@ -164,7 +164,7 @@ public class JenkinsBuildConfig {
         }
     }
 
-    public void generateBaseConfigXML() {
+    public String generateBaseConfigXML() {
         DocumentBuilderFactory docBuilderFactory = DocumentBuilderFactory.newInstance();
         try {
             DocumentBuilder docBuilder = docBuilderFactory.newDocumentBuilder();
@@ -379,12 +379,14 @@ public class JenkinsBuildConfig {
             TransformerFactory transformerFactory = TransformerFactory.newInstance();
             Transformer        transformer        = transformerFactory.newTransformer();
             DOMSource          source             = new DOMSource(doc);
-            StringWriter stringWriter = new StringWriter();
+            StringWriter       stringWriter       = new StringWriter();
             //StreamResult       result             = new StreamResult(new File("./test-output.xml"));
             StreamResult       result             = new StreamResult(stringWriter);//new File("./test-output.xml"));
             transformer.transform(source, result);
             StreamResult consoleResult = new StreamResult(System.out);
             transformer.transform(source, consoleResult);
+            
+            return stringWriter.toString();
         } catch (ParserConfigurationException e) {
             e.printStackTrace();
         } catch (TransformerConfigurationException e) {
@@ -392,6 +394,7 @@ public class JenkinsBuildConfig {
         } catch (TransformerException e) {
             e.printStackTrace();
         }
+        return configTemplatePath;
     }
 
     /**
