@@ -659,4 +659,14 @@ public class JenkinsEngine implements ExecutionEngine {
         String xml = config.generateBaseConfigXML();
         return xml;
     }
+    
+    public void executeJob(String jobName){
+        try{
+            
+            this.executeUrl = "https://cae-jenkins.jpl.nasa.gov/job/" +jobName + "/build?token=" + this.jenkinsToken;
+            this.execute();
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+    }
 }
