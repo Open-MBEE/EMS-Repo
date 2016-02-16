@@ -297,12 +297,12 @@ public class JobPost extends ModelPost {
           
           // TODO: BETWEEN THESE TWO FUNCTIONS, YOU NEED TO RETRIEVE INFORMATION
           //       FOR JOBS...
-          //final Set<EmsScriptNode> jobs = createOrUpdateModel(postJson,
-          //        status, workspace, null, createCommit);
+          final Set<EmsScriptNode> jobs = createOrUpdateModel(postJson,
+                  status, workspace, null, createCommit);
           
-          final Set< EmsScriptNode > jobs = 
-                  ModelLoadActionExecuter.loadJson( postJson, null,
-                                                    null );
+          //final Set< EmsScriptNode > jobs = 
+          //        ModelLoadActionExecuter.loadJson( postJson, null,
+          //                                          null );
     
           if (!Utils.isNullOrEmpty(jobs)) {
               sendProgress("Adding relationships to properties", projectId, true);
@@ -447,8 +447,10 @@ public class JobPost extends ModelPost {
                 }
                 JSONObject statusPropertyJson = new JSONObject();
                 statusPropertyJson.put( "sysmlid", statusId );
+                
                 JSONObject specJson = new JSONObject();
                 statusPropertyJson.put( "specialization", specJson );
+                
                 specJson.put( "type", "Property" );
                 specJson.put( "isSlot", true);
                 JSONArray valueArr = new JSONArray();
@@ -457,7 +459,7 @@ public class JobPost extends ModelPost {
                 valueArr.put(value);
                 value.put( "type", "LiteralString" );
                 value.put( "string", status );     
-                        
+                                       
                 // NOTE: statusPropertyJson has JSON at this point...
                 /*
                 System.out.println( "************************" );
