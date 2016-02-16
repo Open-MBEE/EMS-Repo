@@ -68,7 +68,7 @@ def generate_test_suite(file_action):
 
             # Documentation (Description)
             file_object.write(
-                    "\t[Documentation]\t\t" + "\"Regression Test: " + str(test[0]) + ". " + str(test[2]) + "\"\n")
+                "\t[Documentation]\t\t" + "\"Regression Test: " + str(test[0]) + ". " + str(test[2]) + "\"\n")
 
             # Setup and Teardown of the test (Both optional)
             #   Checks if a setup function was given
@@ -148,9 +148,91 @@ def generate_test_case(file_action):
     with open(OUTPUT_FILENAME, file_action) as file_object:
         file_object.write()
 
+def create_command_line_options():
 
-# Automatically generate the Robot Framework Test Suite for the MMS when executing the python file.
-set_test_suite_settings('w')
-set_test_suite_variables('a')
-generate_test_suite('a')
-set_test_suite_keywords('a')
+    '''Create all the command line options for this application
+
+    Returns
+    --------
+    An optparse.OptionParser object for parsing the command line arguments fed to this application'''
+
+    usageText = '''
+    python regression_test_harness.py [-t <TESTNUMS> -n <TESTNAMES> -b -g <GITBRANCH>]
+
+    To run all tests for the branch:
+
+    python regression_test_harness.py
+
+    To run test numbers 1,2,11,5-9:
+
+    python regression_test_harness.py -t 1,2,11,5-9
+
+    To create baselines of all tests for the branch:
+
+    python regression_test_harness.py -b
+
+    To run tests with names "test1" and "test2"
+
+    python regression_test_harness.py -n test1,test2
+
+    After generating the baselines you will need to copy them from testBaselineDir
+    into the desired folder for that branch, ie workspacesBaselineDir, if you like the results.
+    This is because when running this script outside of jenkins, the script will output to testBaselineDir.
+    Alternatively, change the branch name used using the -g command line arg when creating the baselines,
+    to output to the correct baseline folder.
+
+    When all tests are ran, it runs all the tests mapped to the current branch, which is specified in
+    the tests table.  The current branch is determined via the GIT_BRANCH environment variable, or the
+    -g command line argument.
+
+    The -t option can take test numbers in any order, and it will run them in the order specified.
+    Similarly for -n option.
+    '''
+
+    versionText = 'Version 1 (9_16_2014)'
+
+    parser = optparse.OptionParser(usage=usageText,version=versionText)
+
+    parser.add_option("-t","--testNums",action="callback",type="string",metavar="TESTNUMS",callback=parse_test_nums,
+                      help='''Specify the test numbers to run or create baselines for, ie "1,2,5-9,11".  Can only supply this if not supplying -n also.  (Optional)''')
+    parser.add_option("-n","--testNames",action="callback",type="string",metavar="TESTNAMES",callback=parse_test_names,
+                      help='''Specify the test names to run or create baselines for, ie "test1,test2".  Can only supply this if not supplying -t also.  (Optional)''')
+    parser.add_option("-b","--createBaselines",action="store_true",dest="create_baselines",
+                      help='''Supply this option if you want to create the baseline files for the tests (Optional)''')
+    parser.add_option("-g","--gitBranch",action="callback",type="string",metavar="GITBRANCH",callback=parse_git_branch,
+                      help='''Specify the branch to use, otherwise uses the value of $GIT_BRANCH, and if that env variable is not defined uses 'test'. (Optional)''')
+    parser.add_option("-v","--evaluate",action="store_true",dest="evaluate_only",
+                      help='''Do not execute the tests. Just evaluate the existing output. (Optional)''')
+
+    return parser
+
+def parse_command_line():
+    '''Parse the command line options given to this application'''
+
+    global test_nums, create_baselines, evaluate_only, cmd_git_branch, test_names
+
+    parser = create_command_line_options()
+
+    parser.test_nums = None
+    parser.cmd_git_branch = None
+    parser.test_names = None
+
+    (_options,_args) = parser.parse_args()
+
+    test_nums = parser.test_nums
+    test_names = parser.test_names
+    create_baselines = _options.create_baselines
+    evaluate_only = _options.evaluate_only
+    cmd_git_branch = parser.cmd_git_branch
+
+    if test_nums and test_names:
+        print "ERROR: Cannot supply both the -t and -n options!  Please remove one of them."
+        sys.exit(1)
+
+
+if __name__ == "__main__":
+    # Automatically generate the Robot Framework Test Suite for the MMS when executing the python file.
+    set_test_suite_settings('w')
+    set_test_suite_variables('a')
+    generate_test_suite('a')
+    set_test_suite_keywords('a')
