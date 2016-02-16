@@ -471,7 +471,17 @@ public class JobPost extends ModelPost {
                 
                 // OVERWRITES THE CURRENT JOB JSON, WITH ELEMENT DATA 
                 json.remove( "jobs" );
-                json.put( "elements", statusPropertyJson );
+                //json.put( "elements", statusPropertyJson );
+                
+                JSONArray elements = new JSONArray();
+                JSONObject elementJson = new JSONObject();
+                
+                elements.put(  elementJson );
+                elementJson.put( "sysmlid", statusPropertyJson.get( "sysmlid" ));
+                elementJson.put( "specialization", statusPropertyJson.get( "specialization"));
+                
+                //json.remove( "elements" );
+                json.put("elements", elements);
             }
 
 
