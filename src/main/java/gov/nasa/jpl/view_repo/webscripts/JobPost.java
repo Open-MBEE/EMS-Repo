@@ -58,6 +58,12 @@ import gov.nasa.jpl.view_repo.webscripts.util.ShareUtils;
 
 
 
+
+
+
+
+
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -73,6 +79,12 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 
 import javax.servlet.http.HttpServletResponse;
+
+
+
+
+
+
 
 //import javax.transaction.UserTransaction;
 import org.apache.log4j.*;
@@ -98,6 +110,18 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
 public class JobPost extends ModelPost {
     static Logger logger = Logger.getLogger(JobPost.class);
     
+    static Map<String, String> definingFeatures = new LinkedHashMap< String, String >() {
+        private static final long serialVersionUID = -6503314776361243306L;
+        {
+            // WARNING! FIXME! THESE MAY CHANGE!  MAYBE SEARCH FOR THEM?
+            put( "status", "_18_0_2_6620226_1453945722485_173783_14567");
+            put( "schedule", "_18_0_2_6620226_1453945600718_861466_14565");
+            put( "desiredView", "_18_0_2_6620226_1454345919577_538785_14442");
+        }
+    };
+    static String[] jobProperties =
+            Utils.toArrayOfType( definingFeatures.keySet().toArray(), String.class );    
+
     protected boolean doJenkins = false;
     
     public JobPost() {
@@ -394,10 +418,10 @@ public class JobPost extends ModelPost {
     @Override
     protected void preProcessJson( JSONObject json, WorkspaceNode workspace ) {
         super.preProcessJson( json, workspace );
-        processJobJson( json, workspace );
+        processJobsJson( json, workspace );
     }
 
-    protected void processJobJson( JSONObject json, WorkspaceNode workspace ) {
+    protected void processJobsJson( JSONObject json, WorkspaceNode workspace ) {
         if ( json == null ) return;
         
         // Get "jobs" as opposed to "elements"
@@ -406,114 +430,170 @@ public class JobPost extends ModelPost {
             return;
         }
         
+        // Get or create "elements" array.
+        JSONArray elements = json.optJSONArray( "elements" );
+        if ( elements == null ) {
+            elements = new JSONArray();
+            json.put( "elements", elements );
+        }
+        
+        // Generate or update element json for each of the properties.
         for ( int i = 1; i < jobs.length(); i++ ) {
             JSONObject job = jobs.optJSONObject( i );
-            if ( job == null ) {
-                log( Level.ERROR, "Bad job json: " + job );
-                continue;
-            }
-            
-            // Get the id
-            String jobId = job.optString( "id" );
-            if ( Utils.isNullOrEmpty( jobId ) ) {
-                jobId = job.optString( "sysmlid" );
-            }
-            if ( Utils.isNullOrEmpty( jobId ) ) {
-                jobId = NodeUtil.createId( getServices() );
-            }
-            
-            EmsScriptNode jobNode = findScriptNodeById( jobId, workspace, null, false );
-            boolean createNewJob = jobNode == null;
-            
-            // Process status.
-            String status = job.optString( "status" );
-            String statusId = null;
-            if ( status == null ) {
-                // TODO -- What if status is set to null?  JSONObject.NULL??
-            } else {
-                if ( !createNewJob ) {
-                     Collection< EmsScriptNode > statusNodes = 
-                             getSystemModel().getProperty( jobNode, "status" );
-                     if ( !Utils.isNullOrEmpty( statusNodes ) ) {
-                         if ( statusNodes.size() > 1 ) {
-                             // TODO -- ERROR
-                         }
-                         EmsScriptNode statusNode = statusNodes.iterator().next();
-                         statusId = statusNode.getSysmlId();
-                     }
-                }
-                if ( Utils.isNullOrEmpty( statusId ) ) {
-                    statusId = NodeUtil.createId( getServices() );
-                }
-                JSONObject statusPropertyJson = new JSONObject();
-                statusPropertyJson.put( "sysmlid", statusId );
-                
-                JSONObject specJson = new JSONObject();
-                statusPropertyJson.put( "specialization", specJson );
-                
-                specJson.put( "type", "Property" );
-                specJson.put( "isSlot", true);
-                JSONArray valueArr = new JSONArray();
-                specJson.put( "value", valueArr );
-                JSONObject value = new JSONObject();
-                valueArr.put(value);
-                value.put( "type", "LiteralString" );
-                value.put( "string", status );     
-                                       
-                // NOTE: statusPropertyJson has JSON at this point...
-                /*
-                System.out.println( "************************" );
-                System.out.println(job.get( "name" ));                
-                job.put("elements", statusPropertyJson );
-                System.out.println( job );  
-                System.out.println( "************************" );    
-                */
-                
-                // OVERWRITES THE CURRENT JOB JSON, WITH ELEMENT DATA 
-                json.remove( "jobs" );
-                //json.put( "elements", statusPropertyJson );
-                
-                JSONArray elements = new JSONArray();
-                JSONObject elementJson = new JSONObject();
-                
-                elements.put(  elementJson );
-                elementJson.put( "sysmlid", statusPropertyJson.get( "sysmlid" ));
-                elementJson.put( "specialization", statusPropertyJson.get( "specialization"));
-                
-                //json.remove( "elements" );
-                json.put("elements", elements);
-            }
-
-
-            // TODO -- handle schedule, etc.
-            
-            // If creating job, transform job JSONObject object into element
-            // json by stripping out status, schedule, and other job-specific
-            // propertiess. If no exisiting specialization, then add a
-            // specialization of just type Element.
-            if ( createNewJob ) {
-                // TODO
-            }
-            
-            // Maybe don't need json of existing object.
-            if ( false && !createNewJob ) {
-                jobNode.toJSONObject( workspace, null, false, false, null );
-            }
-            
-            
-            
-            
-            // Expand job properties into separate elements.
-            
-            if ( false ) jobNode.getOwnedChildren( false, null, workspace );
-            
-            
+            processJobJson( job, elements, workspace );
         }
+        
+        json.remove( "jobs" );
+        
     }
     
-    public void reconstruct( JSONObject job ) {
-        // NOTE: YOU NEED TO DECONSTRUCT THE CURRENT JOB JSON YOU HAVE
-        //       THEN REFORM IT INTO PROPER ELEMENT JSON 
+    protected void processJobJson( JSONObject job, JSONArray elements,
+                                   WorkspaceNode workspace ) {
+        if ( job == null ) {
+            log( Level.ERROR, "Bad job json: " + job );
+            return;
+        }
+        
+        // Get the id
+        String jobId = job.optString( "id" );
+        if ( Utils.isNullOrEmpty( jobId ) ) {
+            jobId = job.optString( "sysmlid" );
+        }
+        if ( Utils.isNullOrEmpty( jobId ) ) {
+            jobId = NodeUtil.createId( getServices() );
+            job.put( "sysmlid", jobId );
+        }
+        
+        // Find node for id.
+        EmsScriptNode jobNode = findScriptNodeById( jobId, workspace, null, false );
+        boolean createNewJob = jobNode == null;
+        
+        // Process properties and remove them from the job json, which is being
+        // transformed into element json.
+        for ( String propertyName : jobProperties ) {
+            JSONObject propertyElementJson =
+                    getJobProperty( propertyName, job, createNewJob, jobNode,
+                                    elements );
+            elements.put( propertyElementJson );
+            job.remove( propertyName );
+        }
+
+        // Don't add a specialization to the job json since it may already
+        // exist, and we don't want to change the type.
+
+        // Use job json as element json and move to "elements" array. The
+        // job-specific properties in the json were stripped out above.
+        elements.put(job);
+    }
+    
+    
+    public JSONObject getSchedule(JSONObject job, boolean createNewJob,
+                                  EmsScriptNode jobNode,
+                                  JSONArray elements  ) {
+        return getJobProperty( "schedule", job, createNewJob, jobNode, elements );
+    }
+
+    /**
+     * Find the Property representing the job property (such as status, schedule).
+     * The method assumes that the Property element already exists, either in
+     * the database (MMS) or the input "elements" json.  If it doesn't exist.
+     * the method complains and creates one improperly since it does not find
+     * the applied stereotype instance.
+     * 
+     * @param propertyName
+     * @param job
+     * @param createNewJob
+     * @param jobNode
+     * @param elements
+     * @return
+     */
+    public JSONObject getJobProperty( String propertyName, JSONObject job,
+                                      boolean createNewJob,
+                                      EmsScriptNode jobNode,
+                                      JSONArray elements ) {
+        String propertyValue = job.optString( propertyName );
+        String propertyId = null;
+        if ( propertyValue == null ) return null;
+        
+        // Get the property's id.
+        if ( !createNewJob ) {
+             Collection< EmsScriptNode > statusNodes = 
+                     getSystemModel().getProperty( jobNode, propertyName );
+             if ( !Utils.isNullOrEmpty( statusNodes ) ) {
+                 if ( statusNodes.size() > 1 ) {
+                     // TODO -- ERROR
+                 }
+                 EmsScriptNode statusNode = statusNodes.iterator().next();
+                 propertyId = statusNode.getSysmlId();
+             }
+        }        
+
+        // The property json this method returns
+        JSONObject propertyJson = getPropertyJson(propertyId, elements);
+        propertyJson.put( "sysmlid", propertyId );  // may already be there
+
+        // add owner
+        String jobId = job.optString( "sysmlid" );
+        if ( jobId == null ) {
+            jobId = job.optString( "id" );
+        }        
+        if( jobId != null ) {
+            propertyJson.put( "owner", jobId );
+        }
+        
+        // Make sure we have an id for the property.
+        if ( Utils.isNullOrEmpty( propertyId ) ) {
+            // We would need to find/create the stereotype instance.
+            logger.error( propertyName
+                          + " element must already exist or be passed in the json." );
+            if ( Utils.isNullOrEmpty( jobId ) ) {
+                logger.error("JobPost.getJobProperty(): job id not found!");
+                propertyId = NodeUtil.createId( getServices() );
+            } else {
+                String instanceSpecId = getInstanceSpecId( job );
+                String definingFeatureId = getDefiningFeatureId( propertyName );
+                propertyId = instanceSpecId + "-slot-" + definingFeatureId; 
+            }
+        }
+        
+        // add specialization part with value
+        JSONObject specJson = new JSONObject();
+        propertyJson.put( "specialization", specJson );
+        
+        specJson.put( "type", "Property" );
+        specJson.put( "isSlot", true);
+        JSONArray valueArr = new JSONArray();
+        specJson.put( "value", valueArr );
+        JSONObject value = new JSONObject();
+        valueArr.put(value);
+        value.put( "type", "LiteralString" );
+        value.put( "string", propertyValue );     
+                                       
+        return propertyJson;
+    }
+
+    protected JSONObject getPropertyJson( String propertyId, JSONArray elements ) {
+        JSONObject propertyJson = new JSONObject();
+        for ( int i = 0; i < elements.length(); ++i ) {
+            JSONObject element = elements.optJSONObject( i );
+            if ( element == null ) continue;
+            String id = element.optString( "sysmlid" );
+            if ( id != null && id.equals( propertyId ) ) {
+                propertyJson = element;
+                break;
+            }
+        }
+        return propertyJson;
+    }
+
+    protected String getDefiningFeatureId( String propertyName ) {
+        return definingFeatures.get(propertyName);
+    }
+
+    protected String getInstanceSpecId( JSONObject job ) {
+        logger.error("JobPost.getInstanceSpecId() not yet supported!");
+        // TODO Auto-generated method stub
+        return null;
     }
     
     
