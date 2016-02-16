@@ -39,6 +39,9 @@ public class JenkinsBuildConfig {
     private              String  teamworkPassword   = "letmein";
     private              String  workspace          = "master";
     private              String  jdkVersion         = "(Default)";
+    private              String  gitURL             = "git@github.jpl.nasa.gov:mbee-dev/ems-rci.git";
+    private              String  gitCredentials     = "075d11db-d909-4e1b-bee9-c89eec0a4a13";
+    private              String  gitBranch          = "*/develop";
 
     private String magicdrawSchedulingCommand = " # Tell MMS that this job has started\n" +
             "status=running\n" +
@@ -186,11 +189,40 @@ public class JenkinsBuildConfig {
             rootElement.appendChild(tempElement);
 
             tempElement = doc.createElement("scm");
-            tempElement.setAttribute("class", "hudson.scm.NullSCM");
+            tempElement.setAttribute("class", "hudson.plugins.git.GitSCM");
+            tempElement.setAttribute("plugin", "hudson.plugins.git.GitSCM");
+
+            Element scmTempElement1 = doc.createElement("configVersion");
+            scmTempElement1.appendChild(doc.createTextNode("2"));
+            tempElement.appendChild(scmTempElement1);
+
+            scmTempElement1 = doc.createElement("userRemoteConfigs");
+            Element scmTempElement2 = doc.createElement("hudson.plugins.git.UserRemoteConfig");
+            Element scmTempElement3 = doc.createElement("url");
+            scmTempElement3.appendChild(doc.createTextNode(this.gitURL));
+            scmTempElement2.appendChild(scmTempElement3);
+            scmTempElement3 = doc.createElement("credentialsId");
+            scmTempElement3.appendChild(doc.createTextNode(this.gitCredentials));
+            scmTempElement2.appendChild(scmTempElement3);
+            scmTempElement1.appendChild(scmTempElement2);
+            tempElement.appendChild(scmTempElement1);
+
+            scmTempElement1 = doc.createElement("branches");
+            scmTempElement2 = doc.createElement("hudson.plugins.git.BranchSpec");
+            scmTempElement3 = doc.createElement("name");
+            scmTempElement3.appendChild(doc.createTextNode(this.gitBranch));
+            scmTempElement2.appendChild(scmTempElement3);
+            scmTempElement1.appendChild(scmTempElement2);
+            tempElement.appendChild(scmTempElement1);
+
             rootElement.appendChild(tempElement);
 
             tempElement = doc.createElement("canRoam");
             tempElement.appendChild(doc.createTextNode("true"));
+            rootElement.appendChild(tempElement);
+
+            tempElement = doc.createElement("disabled");
+            tempElement.appendChild(doc.createTextNode("false"));
             rootElement.appendChild(tempElement);
 
             tempElement = doc.createElement("blockBuildWhenDownstreamBuilding");
