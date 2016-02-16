@@ -10,6 +10,8 @@
  */
 package gov.nasa.jpl.pma;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
@@ -26,6 +28,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.activiti.engine.impl.util.json.XML;
+import org.apache.commons.httpclient.methods.InputStreamRequestEntity;
 import org.apache.commons.net.util.Base64;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpException;
@@ -541,12 +544,17 @@ public class JenkinsEngine implements ExecutionEngine {
     public void postConfigXml( String jobName ) {
         String getUrl = "https://cae-jenkins.jpl.nasa.gov/job/" + jobName + "/config.xml";
         String postUrl = "https://cae-jenkins.jpl.nasa.gov/createItem?name=" + jobName;
-        
-        HttpGet get = new HttpGet( getUrl );        
-        HttpPost post = new HttpPost( postUrl );
-        post.setHeader( "Content-Type", "application/xml" );
+
+        generateConfigXML();
+        File configFile = new File("./config.xml");
         
         try {
+            HttpEntity xmlEntity = (HttpEntity)new  InputStreamRequestEntity(new FileInputStream(configFile), configFile.length());
+        
+            HttpGet get = new HttpGet( getUrl );        
+            HttpPost post = new HttpPost( postUrl );
+            post.setHeader( "Content-Type", "application/xml" );
+            post.setEntity( xmlEntity );
             HttpResponse response = 
                     this.jenkinsClient.execute( get, this.context );
  
@@ -658,23 +666,5 @@ public class JenkinsEngine implements ExecutionEngine {
     public void generateConfigXML(){
         JenkinsBuildConfig config = new JenkinsBuildConfig();
         config.generateBaseConfigXML();
-    }
-    public void postConfigXML(){
-        String createBuildURL = "https://cae-jenkins.jpl.nasa.gov/createitem";
-        System.out.println( "The Build url is " + createBuildURL );
-        HttpPost post = new HttpPost( createBuildURL);
-
-        try {
-            HttpResponse response = this.jenkinsClient.execute( post, this.context );
-            HttpEntity entity = response.getEntity();
-            String retSrc = EntityUtils.toString( entity );
-            jsonResponse = new JSONObject( retSrc );
-            System.out.println( "Content of the JSON Object is "
-            + jsonResponse.toString() );
-            System.out.println();
-            EntityUtils.consume( entity );
-        } catch ( IOException e ) {
-           e.printStackTrace();
-        }
     }
 }
