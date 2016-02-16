@@ -654,4 +654,27 @@ public class JenkinsEngine implements ExecutionEngine {
         execute();
         return jsonResponse.getJSONArray( "jobs" );
     }
+    
+    public void generateConfigXML(){
+        JenkinsBuildConfig config = new JenkinsBuildConfig();
+        config.generateBaseConfigXML();
+    }
+    public void postConfigXML(){
+        String createBuildURL = "https://cae-jenkins.jpl.nasa.gov/createitem";
+        System.out.println( "The Build url is " + createBuildURL );
+        HttpPost post = new HttpPost( createBuildURL);
+
+        try {
+            HttpResponse response = this.jenkinsClient.execute( post, this.context );
+            HttpEntity entity = response.getEntity();
+            String retSrc = EntityUtils.toString( entity );
+            jsonResponse = new JSONObject( retSrc );
+            System.out.println( "Content of the JSON Object is "
+            + jsonResponse.toString() );
+            System.out.println();
+            EntityUtils.consume( entity );
+        } catch ( IOException e ) {
+           e.printStackTrace();
+        }
+    }
 }
