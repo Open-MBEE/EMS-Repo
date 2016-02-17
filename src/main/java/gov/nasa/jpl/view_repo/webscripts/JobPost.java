@@ -91,7 +91,7 @@ public class JobPost extends ModelPost {
         config.setDocumentID( desiredView );
         String schedule = propertyValues.get( "schedule" );
         config.setSchedule( schedule );
-        jenkins.postConfigXml( config.getJobID() );
+        jenkins.postConfigXml( config, config.getJobID() );
     }
 
     @Override
