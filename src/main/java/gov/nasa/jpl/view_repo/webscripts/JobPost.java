@@ -29,16 +29,12 @@
 
 package gov.nasa.jpl.view_repo.webscripts;
 
-import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.pma.JenkinsBuildConfig;
 import gov.nasa.jpl.pma.JenkinsEngine;
-import gov.nasa.jpl.view_repo.util.EmsScriptNode;
-import gov.nasa.jpl.view_repo.util.NodeUtil;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 
-import java.util.Collection;
-import java.util.LinkedHashMap;
 import java.util.Map;
+
 import org.apache.log4j.*;
 import org.alfresco.repo.model.Repository;
 import org.alfresco.service.ServiceRegistry;
@@ -51,18 +47,6 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
 public class JobPost extends ModelPost {
     static Logger logger = Logger.getLogger(JobPost.class);
     
-    static Map<String, String> definingFeatures = new LinkedHashMap< String, String >() {
-        private static final long serialVersionUID = -6503314776361243306L;
-        {
-            // WARNING! FIXME! THESE MAY CHANGE!  MAYBE SEARCH FOR THEM?
-            put( "status", "_18_0_2_6620226_1453945722485_173783_14567");
-            put( "schedule", "_18_0_2_6620226_1453945600718_861466_14565");
-            put( "desiredView", "_18_0_2_6620226_1454345919577_538785_14442");
-        }
-    };
-    static String[] jobProperties =
-            Utils.toArrayOfType( definingFeatures.keySet().toArray(), String.class );    
-
     protected boolean doJenkins = false;
     
     public JobPost() {
@@ -80,18 +64,6 @@ public class JobPost extends ModelPost {
         instance.setServices(getServices());
         // Run without transactions since JobPost breaks them up itself.
         return instance.executeImplImpl(req, status, cache, true);
-    }
-        
-    protected void createJenkinsConfig(String jobID,
-                                       Map<String,String> propertyValues) {
-        JenkinsEngine jenkins = new JenkinsEngine();
-        JenkinsBuildConfig config = new JenkinsBuildConfig();
-        config.setJobID( jobID );
-        String desiredView = propertyValues.get("desiredView");
-        config.setDocumentID( desiredView );
-        String schedule = propertyValues.get( "schedule" );
-        config.setSchedule( schedule );
-        jenkins.postConfigXml( config.getJobID() );
     }
 
     @Override
@@ -124,170 +96,6 @@ public class JobPost extends ModelPost {
         
         json.remove( "jobs" );
         
-    }
-    
-    protected void processJobJson( JSONObject job, JSONArray elements,
-                                   WorkspaceNode workspace ) {
-        if ( job == null ) {
-            log( Level.ERROR, "Bad job json: " + job );
-            return;
-        }
-        
-        // Get the id
-        String jobId = job.optString( "id" );
-        if ( Utils.isNullOrEmpty( jobId ) ) {
-            jobId = job.optString( "sysmlid" );
-        }
-        if ( Utils.isNullOrEmpty( jobId ) ) {
-            jobId = NodeUtil.createId( getServices() );
-            job.put( "sysmlid", jobId );
-        }
-        
-        // Find node for id.
-        EmsScriptNode jobNode = findScriptNodeById( jobId, workspace, null, false );
-        boolean createNewJob = jobNode == null;
-        
-        LinkedHashMap<String, String> propertyValues = new LinkedHashMap< String, String >();
-        
-        // Process properties and remove them from the job json, which is being
-        // transformed into element json.
-        for ( String propertyName : jobProperties ) {
-            // Save away the property values for later use;
-            String propertyValue = job.optString( propertyName );
-            if ( propertyValue == null ) continue;
-            propertyValues.put( propertyName, propertyValue );
-            
-            // Update or create the property json.
-            JSONObject propertyElementJson =
-                    getJobProperty( propertyName, job, createNewJob, jobNode,
-                                    elements );
-            elements.put( propertyElementJson );
-            
-            job.remove( propertyName );
-        }
-
-        // Don't add a specialization to the job json since it may already
-        // exist, and we don't want to change the type.
-
-        // Use job json as element json and move to "elements" array. The
-        // job-specific properties in the json were stripped out above.
-        elements.put(job);
-        
-        // If creating a new job with a desiredDocument, push a new
-        // configuration to Jenkins.
-        // TODO -- There should be a generic way to do this, using a "command"
-        // property that runs a function in an available API that syncs Jenkins
-        String desiredView = propertyValues.get( "desiredView" );
-        // with the job.
-        if ( createNewJob && !Utils.isNullOrEmpty( desiredView ) ) {
-            createJenkinsConfig( jobId, propertyValues );
-        }
-    }
-
-    /**
-     * Find the Property representing the job property (such as status, schedule).
-     * The method assumes that the Property element already exists, either in
-     * the database (MMS) or the input "elements" json.  If it doesn't exist.
-     * the method complains and creates one improperly since it does not find
-     * the applied stereotype instance.
-     * 
-     * @param propertyName
-     * @param job
-     * @param createNewJob
-     * @param jobNode
-     * @param elements
-     * @return
-     */
-    public JSONObject getJobProperty( String propertyName, JSONObject job,
-                                      boolean createNewJob,
-                                      EmsScriptNode jobNode,
-                                      JSONArray elements ) {
-        String propertyValue = job.optString( propertyName );
-        String propertyId = null;
-        if ( propertyValue == null ) return null;
-        
-        // Get the property's id.
-        if ( !createNewJob ) {
-             Collection< EmsScriptNode > statusNodes = 
-                     getSystemModel().getProperty( jobNode, propertyName );
-             if ( !Utils.isNullOrEmpty( statusNodes ) ) {
-                 if ( statusNodes.size() > 1 ) {
-                     // TODO -- ERROR
-                 }
-                 EmsScriptNode statusNode = statusNodes.iterator().next();
-                 propertyId = statusNode.getSysmlId();
-             }
-        }        
-
-        // The property json this method returns
-        JSONObject propertyJson = getPropertyJson(propertyId, elements);
-        propertyJson.put( "sysmlid", propertyId );  // may already be there
-
-        // add owner
-        String jobId = job.optString( "sysmlid" );
-        if ( jobId == null ) {
-            jobId = job.optString( "id" );
-        }        
-        if( jobId != null ) {
-            propertyJson.put( "owner", jobId );
-        }
-        
-        // add name
-        propertyJson.put( "name", propertyName );
-        
-        // Make sure we have an id for the property.
-        if ( Utils.isNullOrEmpty( propertyId ) ) {
-            // We would need to find/create the stereotype instance.
-            logger.error( propertyName
-                          + " element must already exist or be passed in the json." );
-            if ( Utils.isNullOrEmpty( jobId ) ) {
-                logger.error("JobPost.getJobProperty(): job id not found!");
-                propertyId = NodeUtil.createId( getServices() );
-            } else {
-                String instanceSpecId = getInstanceSpecId( job );
-                String definingFeatureId = getDefiningFeatureId( propertyName );
-                propertyId = instanceSpecId + "-slot-" + definingFeatureId; 
-            }
-        }
-        
-        // add specialization part with value
-        JSONObject specJson = new JSONObject();
-        propertyJson.put( "specialization", specJson );
-        
-        specJson.put( "type", "Property" );
-        specJson.put( "isSlot", true);
-        JSONArray valueArr = new JSONArray();
-        specJson.put( "value", valueArr );
-        JSONObject value = new JSONObject();
-        valueArr.put(value);
-        value.put( "type", "LiteralString" );
-        value.put( "string", propertyValue );     
-                                       
-        return propertyJson;
-    }
-
-    protected JSONObject getPropertyJson( String propertyId, JSONArray elements ) {
-        JSONObject propertyJson = new JSONObject();
-        for ( int i = 0; i < elements.length(); ++i ) {
-            JSONObject element = elements.optJSONObject( i );
-            if ( element == null ) continue;
-            String id = element.optString( "sysmlid" );
-            if ( id != null && id.equals( propertyId ) ) {
-                propertyJson = element;
-                break;
-            }
-        }
-        return propertyJson;
-    }
-
-    protected String getDefiningFeatureId( String propertyName ) {
-        return definingFeatures.get(propertyName);
-    }
-
-    protected String getInstanceSpecId( JSONObject job ) {
-        logger.error("JobPost.getInstanceSpecId() not yet supported!");
-        // TODO Auto-generated method stub
-        return null;
     }
     
     
