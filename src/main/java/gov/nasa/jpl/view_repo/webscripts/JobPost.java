@@ -72,7 +72,10 @@ public class JobPost extends ModelPost {
         JenkinsBuildConfig config = new JenkinsBuildConfig();
         config.setJobID( jobID );
         String desiredView = propertyValues.get("desiredView");
-        config.setDocumentID( desiredView );
+        //config.setDocumentID( desiredView );
+        
+        // for demo
+        config.setDocumentID( "Basic Document, Rapid Table Document" );
         String schedule = propertyValues.get( "schedule" );
         config.setSchedule( schedule );
         jenkins.postConfigXml( config, config.getJobID() );

@@ -526,7 +526,7 @@ public class JenkinsEngine implements ExecutionEngine {
         return o; 
     }
     
-    // NOTE: THIS WILL BE CALLED WHEN YOU CHANGE THE NAME, STATUS AND ON JOB CREATION 
+    // This should be called when you change the name, status, schedule of a job
     public void postConfigXml( JenkinsBuildConfig config,String jobName ) {
         String postUrl = "https://cae-jenkins.jpl.nasa.gov/createItem?name=" + jobName;
 
