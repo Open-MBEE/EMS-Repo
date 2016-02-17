@@ -2713,7 +2713,7 @@ public class ModelPost extends AbstractJavaWebScript {
 		printFooter();
 
 		if (logger.isInfoEnabled()) {
-			logger.info("ModelPost: " + timer);
+			logger.info(this.getClass().getSimpleName() + ": " + timer);
 		}
 
 		return model;
