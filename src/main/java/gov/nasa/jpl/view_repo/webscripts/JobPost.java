@@ -29,84 +29,27 @@
 
 package gov.nasa.jpl.view_repo.webscripts;
 
-import gov.nasa.jpl.mbee.util.Debug;
-import gov.nasa.jpl.mbee.util.Pair;
-import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.mbee.util.Timer;
 import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.pma.JenkinsBuildConfig;
 import gov.nasa.jpl.pma.JenkinsEngine;
-import gov.nasa.jpl.view_repo.actions.ActionUtil;
-import gov.nasa.jpl.view_repo.actions.ModelLoadActionExecuter;
 import gov.nasa.jpl.view_repo.util.Acm;
-import gov.nasa.jpl.view_repo.util.CommitUtil;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.EmsTransaction;
-import gov.nasa.jpl.view_repo.util.JsonDiffDiff;
-import gov.nasa.jpl.view_repo.util.K;
-import gov.nasa.jpl.view_repo.util.ModelContext;
-import gov.nasa.jpl.view_repo.util.ModStatus;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
-import gov.nasa.jpl.view_repo.util.ServiceContext;
-import gov.nasa.jpl.view_repo.util.WorkspaceDiff;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
-import gov.nasa.jpl.view_repo.util.JsonDiffDiff.DiffType;
-import gov.nasa.jpl.view_repo.webscripts.util.ShareUtils;
 
-//import k.frontend.Frontend;
-//import k.frontend.ModelParser;
-//import k.frontend.ModelParser.ModelContext;
-
-
-
-
-
-
-
-
-
-
-
-
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
-import java.util.TreeMap;
-import java.util.TreeSet;
-
 import javax.servlet.http.HttpServletResponse;
 
-
-
-
-
-
-
-
-
-
-//import javax.transaction.UserTransaction;
 import org.apache.log4j.*;
 import org.alfresco.repo.model.Repository;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
-import org.alfresco.service.cmr.action.Action;
-import org.alfresco.service.cmr.action.ActionService;
-import org.alfresco.service.cmr.dictionary.AspectDefinition;
-import org.alfresco.service.cmr.dictionary.DictionaryService;
-import org.alfresco.service.cmr.repository.NodeRef;
-import org.alfresco.service.cmr.security.PermissionService;
-import org.alfresco.service.cmr.site.SiteInfo;
-import org.alfresco.service.cmr.version.Version;
-import org.alfresco.service.namespace.QName;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -306,16 +249,15 @@ public class JobPost extends ModelPost {
         return model;
     }
     
-    protected void doJenkinsStuff(Map<String,String> propertyValues) {
+    protected void doJenkinsStuff(String jobID, Map<String,String> propertyValues) {
         JenkinsEngine jenkins = new JenkinsEngine();
         JenkinsBuildConfig config = new JenkinsBuildConfig();
+        config.setJobID( jobID );
         String desiredView = propertyValues.get("desiredView");
         config.setDocumentID( desiredView );
-        String status = propertyValues.get( "status" );
-        // do something?
         String schedule = propertyValues.get( "schedule" );
-        // do something?
-        jenkins.postConfigXml( config.getJobID() );       
+        config.setSchedule( schedule );
+        jenkins.postConfigXml( config.getJobID() );
     }
 
     @Override
@@ -501,7 +443,7 @@ public class JobPost extends ModelPost {
         String desiredView = propertyValues.get( "desiredView" );
         // with the job.
         if ( createNewJob && !Utils.isNullOrEmpty( desiredView ) ) {
-            doJenkinsStuff( propertyValues );
+            doJenkinsStuff( jobId, propertyValues );
         }
     }
 

@@ -6,8 +6,6 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
-import com.bea.core.security.legacy.internal.Logger;
-
 import gov.nasa.jpl.mbee.util.FileUtils;
 import gov.nasa.jpl.mbee.util.Utils;
 
@@ -31,7 +29,22 @@ import java.io.IOException;
 import java.io.StringWriter;
 
 public class JenkinsBuildConfig {
-
+/*  parameters from PMADrone on 2/16/2016
+            JOB_ID=job0000
+            DOCUMENTS="Basic Document, Rapid Table Document"
+            #DOCUMENTS="_18_1111_111_111"
+            #MMS_SERVER=cae-jenkins
+            MMS_USER=mmsadmin
+            MMS_PASSWORD=letmein
+            TEAMWORK_PROJECT="Intern Testing Project"
+            TEAMWORK_SERVER="cae-tw.jpl.nasa.gov"
+            TEAMWORK_PORT=18001
+            TEAMWORK_USER=tester
+            TEAMWORK_PASSWORD=AuToTeStEr
+            WORKSPACE=master
+*/
+    
+    
     static final         String  outputEncoding     = "UTF-8";
     private static final boolean DEBUG              = true;
     private              String  configTemplatePath = "./BuildConfigTemplate.xml";
@@ -50,6 +63,7 @@ public class JenkinsBuildConfig {
     private              String  gitURL             = "git@github.jpl.nasa.gov:mbee-dev/ems-rci.git";
     private              String  gitCredentials     = "075d11db-d909-4e1b-bee9-c89eec0a4a13";
     private              String  gitBranch          = "*/develop";
+    private              String  schedule           = null;
 
     private String magicdrawSchedulingCommand = " # Tell MMS that this job has started\n" +
             "status=running\n" +
@@ -247,6 +261,13 @@ public class JenkinsBuildConfig {
             rootElement.appendChild(tempElement);
 
             tempElement = doc.createElement("triggers");
+            if ( !Utils.isNullOrEmpty( getSchedule() ) ) {
+                Element hudTrig = doc.createElement("hudson.triggers.SCMTrigger");
+                Element spec = doc.createElement("spec");
+                spec.appendChild( doc.createTextNode( schedule ) );
+                hudTrig.appendChild( spec );
+                tempElement.appendChild( hudTrig );
+            }
             rootElement.appendChild(tempElement);
 
             tempElement = doc.createElement("concurrentBuild");
@@ -609,5 +630,19 @@ public class JenkinsBuildConfig {
 
     public void setJobID(String jobID) {
         this.jobID = jobID;
+    }
+
+    /**
+     * @return the schedule
+     */
+    public String getSchedule() {
+        return schedule;
+    }
+
+    /**
+     * @param schedule the schedule to set
+     */
+    public void setSchedule( String schedule ) {
+        this.schedule = schedule;
     }
 }
