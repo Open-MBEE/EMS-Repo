@@ -172,8 +172,9 @@ public class JenkinsBuildConfig {
             Element         tempElement;
 
             // Root Element
-            Element rootElement = doc.createElement("maven2-moduleset");
-            rootElement.setAttribute("plugin", "maven-plugin@2.10");
+            Element rootElement = doc.createElement("project");
+            // this would specify a maven plugin... 
+            //rootElement.setAttribute("plugin", "maven-plugin@2.10");
             doc.appendChild(rootElement);
 
             tempElement = doc.createElement("actions");
