@@ -2719,7 +2719,7 @@ public class ModelPost extends AbstractJavaWebScript {
 		return model;
 	}
 	
-	protected void preProcessJson( JSONObject json, WorkspaceNode workspace) {
+	public void preProcessJson( JSONObject json, WorkspaceNode workspace) {
         UpdateViewHierarchy uvh = new UpdateViewHierarchy( this );
         // Handle view and association changes
         try {
