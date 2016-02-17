@@ -2534,9 +2534,11 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         // property that runs a function in an available API that syncs Jenkins
         String desiredView = propertyValues.get( "desiredView" );
         // with the job.
-        if ( createNewJob && !Utils.isNullOrEmpty( desiredView ) ) {
-            createJenkinsConfig( jobId, propertyValues );
-        }
+
+        // Always overwrite or create the job so that things are updated.
+//        if ( createNewJob && !Utils.isNullOrEmpty( desiredView ) ) {
+        createJenkinsConfig( jobId, propertyValues );
+//        }
     }
     
     
@@ -2678,6 +2680,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         // Generate or update element json for each of the properties.
         for ( int i = 1; i < elements.length(); i++ ) {
             JSONObject job = elements.optJSONObject( i );
+            if ( EmsScriptNode.isJob( json ) )
             processJobJson( job, elements, workspace );
         }
         

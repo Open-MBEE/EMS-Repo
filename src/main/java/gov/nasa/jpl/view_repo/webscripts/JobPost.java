@@ -63,11 +63,11 @@ public class JobPost extends ModelPost {
         return instance.executeImplImpl(req, status, cache, true);
     }
 
-    @Override
-    protected void preProcessJson( JSONObject json, WorkspaceNode workspace ) {
-        super.preProcessJson( json, workspace );
-        processJobsJson( json, workspace );
-    }
+//    @Override
+//    protected void preProcessJson( JSONObject json, WorkspaceNode workspace ) {
+//        super.preProcessJson( json, workspace );
+//        processJobsJson( json, workspace );
+//    }
 
     
     
