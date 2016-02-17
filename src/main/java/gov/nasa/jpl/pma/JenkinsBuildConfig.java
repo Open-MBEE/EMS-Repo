@@ -6,6 +6,11 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
+import com.bea.core.security.legacy.internal.Logger;
+
+import gov.nasa.jpl.mbee.util.FileUtils;
+import gov.nasa.jpl.mbee.util.Utils;
+
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -21,6 +26,7 @@ import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.StringWriter;
 
@@ -254,6 +260,32 @@ public class JenkinsBuildConfig {
             tempElement = doc.createElement("builders");
             Element hudson  = doc.createElement("hudson.tasks.Shell");
             Element command = doc.createElement("command");
+            
+            // Get the script file and put the string contents in
+            // magicdrawSchedulingCommand.
+            String s = null;
+            try {
+                s = FileUtils.fileToString( "mms/docwebJenkinsScript.sh" );
+                if ( !Utils.isNullOrEmpty( s ) ) {
+                    this.magicdrawSchedulingCommand = s;
+                    System.out.println("\n\n\nGot file first try!\n\n\n");
+                }
+            } catch ( FileNotFoundException e ) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+            if ( Utils.isNullOrEmpty( s ) ) {
+                File file = FileUtils.findFile( "docwebJenkinsScript.sh" );
+                try {
+                    s = FileUtils.fileToString( file );
+                    this.magicdrawSchedulingCommand = s;
+                    System.out.println("\n\n\nGot file second try! " + file.getPath() + "\n\n\n");
+                } catch ( FileNotFoundException e ) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+            }
+
             command.appendChild(doc.createTextNode(this.magicdrawSchedulingCommand));
             hudson.appendChild(command);
             tempElement.appendChild(hudson);
