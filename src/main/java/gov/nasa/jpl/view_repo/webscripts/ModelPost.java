@@ -2727,6 +2727,7 @@ public class ModelPost extends AbstractJavaWebScript {
         } catch ( Throwable t ) {
             t.printStackTrace();
         }
+        processJobsJson( json, workspace );
 	}
 
     public JSONObject getPostJson(boolean jsonNotK, Object content) {
@@ -2863,7 +2864,7 @@ public class ModelPost extends AbstractJavaWebScript {
 		return elements;
 	}
 
-	public void addRelationshipsToProperties(Set<EmsScriptNode> elems,
+    public void addRelationshipsToProperties(Set<EmsScriptNode> elems,
 			final WorkspaceNode ws) {
 
 		for (final EmsScriptNode element : elems) {

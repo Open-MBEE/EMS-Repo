@@ -36,7 +36,6 @@ import java.util.Map;
 import org.apache.log4j.*;
 import org.alfresco.repo.model.Repository;
 import org.alfresco.service.ServiceRegistry;
-import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
@@ -70,31 +69,6 @@ public class JobPost extends ModelPost {
         processJobsJson( json, workspace );
     }
 
-    protected void processJobsJson( JSONObject json, WorkspaceNode workspace ) {
-        if ( json == null ) return;
-        
-        // Get "jobs" as opposed to "elements"
-        JSONArray jobs = json.optJSONArray( "jobs" );
-        if ( jobs == null ) {
-            return;
-        }
-        
-        // Get or create "elements" array.
-        JSONArray elements = json.optJSONArray( "elements" );
-        if ( elements == null ) {
-            elements = new JSONArray();
-            json.put( "elements", elements );
-        }
-        
-        // Generate or update element json for each of the properties.
-        for ( int i = 1; i < jobs.length(); i++ ) {
-            JSONObject job = jobs.optJSONObject( i );
-            processJobJson( job, elements, workspace );
-        }
-        
-        json.remove( "jobs" );
-        
-    }
     
     
 

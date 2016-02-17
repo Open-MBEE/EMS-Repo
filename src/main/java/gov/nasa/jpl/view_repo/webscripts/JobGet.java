@@ -37,7 +37,6 @@ import gov.nasa.jpl.view_repo.webscripts.ModelGet;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
 import gov.nasa.jpl.pma.JenkinsEngine;
 
-import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -200,31 +199,11 @@ public class JobGet extends ModelGet {
         return model;
     }
     
-    public boolean isJob( EmsScriptNode node ) {
-        if ( node.hasAspect( "HasMetatype" ) ) {
-            Object stereotypes = 
-                    node.getProperty("sysml:appliedMetatypes", true);
-            // stereotypes should be a List< String >
-            if ( stereotypes instanceof Collection ) {
-                Collection<?> c = (Collection< ? >)stereotypes;
-                for ( Object o : c ) {
-                    if ( o instanceof String ) {
-                        String s = (String)o;
-                        if ( jobStereotypeId.equals( s ) ) {
-                            return true;
-                        }
-                    }
-                }
-            }
-        }  
-        return false;
-    }
-    
     @Override
     protected JSONObject jobOrEle(EmsScriptNode job, WorkspaceNode ws, Date dateTime, String id,
                              boolean includeQualified, boolean isIncludeDocument ) {
         // NOTE: THIS FUNCTION MIGHT BE DEPREACTED         
-        if  ( isJob( job ) ) {
+        if  ( job.isJob( ) ) {
             return new JSONObject();  
             //return job.toJSONObject( ws,  dateTime, includeQualified, isIncludeDocument, jobProperties.get(id) );
         }

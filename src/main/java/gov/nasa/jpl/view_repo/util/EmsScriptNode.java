@@ -47,6 +47,7 @@ import gov.nasa.jpl.view_repo.sysml.View;
 import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.NodeUtil.SearchType;
 import gov.nasa.jpl.view_repo.webscripts.AbstractJavaWebScript;
+import gov.nasa.jpl.view_repo.webscripts.JobGet;
 import gov.nasa.jpl.view_repo.webscripts.UpdateViewHierarchy;
 
 import java.io.Serializable;
@@ -7001,4 +7002,38 @@ public class EmsScriptNode extends ScriptNode implements
 
         return node;
     }
+
+    public boolean isJob( ) {
+        if ( hasAspect( "HasMetatype" ) ) {
+            Object stereotypes = 
+                    getProperty("sysml:appliedMetatypes", true);
+            // stereotypes should be a List< String >
+            if ( stereotypes instanceof Collection ) {
+                Collection<?> c = (Collection< ? >)stereotypes;
+                for ( Object o : c ) {
+                    if ( o instanceof String ) {
+                        String s = (String)o;
+                        if ( JobGet.jobStereotypeId.equals( s ) ) {
+                            return true;
+                        }
+                    }
+                }
+            }
+        }  
+        return false;
+    }
+    
+    public static boolean isJob( JSONObject json ) {
+        JSONArray metatypeArr = json.optJSONArray(Acm.JSON_APPLIED_METATYPES);
+        if ( metatypeArr == null ) return false;
+        for ( int i = 0; i < metatypeArr.length(); ++i ) {
+            String metatype = metatypeArr.optString( i );
+            if ( metatype == null ) continue;
+            if ( metatype.equals( JobGet.jobStereotypeId ) ) { // TODO move this id out of JobGet?
+                return true;
+            }
+        }
+        return false;
+    }
+
 }

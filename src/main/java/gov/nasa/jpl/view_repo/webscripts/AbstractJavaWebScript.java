@@ -2538,6 +2538,8 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
             createJenkinsConfig( jobId, propertyValues );
         }
     }
+    
+    
     /**
      * Find the Property representing the job property (such as status, schedule).
      * The method assumes that the Property element already exists, either in
@@ -2640,7 +2642,56 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         // TODO Auto-generated method stub
         return null;
     }
-    
-    
+
+    /*
+    protected void processJobs( Set< EmsScriptNode > elems ) {
+        if ( elems == null ) return;
+        for ( EmsScriptNode node : elems ) {
+            if ( node == null ) continue;
+            if ( node.isJob() ) {
+                if ( !jenkinsConfigExists( node.getSysmlId() ) ) {
+                    // TODO
+                }
+            }
+        }
+    }
+    */
+
+    private boolean jenkinsConfigExists( String sysmlId ) {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    protected void processJobsJson( JSONObject json, WorkspaceNode workspace ) {
+        if ( json == null ) return;
+        
+        // Get "jobs" as opposed to "elements"
+        JSONArray jobs = json.optJSONArray( "jobs" );
+        
+        // Get or create "elements" array.
+        JSONArray elements = json.optJSONArray( "elements" );
+        if ( elements == null ) {
+            elements = new JSONArray();
+            json.put( "elements", elements );
+        }
+        
+        // Generate or update element json for each of the properties.
+        for ( int i = 1; i < elements.length(); i++ ) {
+            JSONObject job = jobs.optJSONObject( i );
+            processJobJson( job, elements, workspace );
+        }
+        
+        // Generate or update element json for each of the properties.
+        if ( jobs != null ) {
+            for ( int i = 1; i < jobs.length(); i++ ) {
+                JSONObject job = jobs.optJSONObject( i );
+                processJobJson( job, elements, workspace );
+            }
+        }
+        
+        json.remove( "jobs" );
+        
+    }
+
     
 }
