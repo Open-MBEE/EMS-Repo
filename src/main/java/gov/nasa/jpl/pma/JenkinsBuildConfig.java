@@ -53,11 +53,15 @@ public class JenkinsBuildConfig {
     private              String  mmsServer          = "cae-jenkins";
     private              String  mmsUser            = "mmsadmin";
     private              String  mmsPassword        = "letmein";
-    private              String  teamworkProject    = "MD Forever";
-    private              String  teamworkServer     = "secae-fn.jpl.nasa.gov";
+    //private              String  teamworkProject    = "MD Forever";
+    private              String  teamworkProject    = "Intern Testing Project";
+    //private              String  teamworkServer     = "secae-fn.jpl.nasa.gov";
+    private              String  teamworkServer     = "cae-tw.jpl.nasa.gov";
     private              String  teamworkPort       = "18001";
-    private              String  teamworkUser       = "mmsadmin";
-    private              String  teamworkPassword   = "letmein";
+    //private              String  teamworkUser       = "mmsadmin";
+    //private              String  teamworkPassword   = "letmein";
+    private              String  teamworkUser       = "tester";
+    private              String  teamworkPassword   = "AuToTeStEr";
     private              String  workspace          = "master";
     private              String  jdkVersion         = "(Default)";
     private              String  gitURL             = "git@github.jpl.nasa.gov:mbee-dev/ems-rci.git";
@@ -184,7 +188,7 @@ public class JenkinsBuildConfig {
         }
     }
 
-    public String generateBaseConfigXML() {
+    public String generateBaseConfigXML( JenkinsBuildConfig config ) {
         DocumentBuilderFactory docBuilderFactory = DocumentBuilderFactory.newInstance();
         try {
             DocumentBuilder docBuilder = docBuilderFactory.newDocumentBuilder();
@@ -388,12 +392,12 @@ public class JenkinsBuildConfig {
             Element propertiesContent    = doc.createElement("propertiesContent");
             Element injectEnvironmentVar = doc.createElement("EnvInjectBuildWrapper");
             propertiesContent.appendChild(doc.createTextNode("\n"));
-            propertiesContent.appendChild(doc.createTextNode("JOB_ID=" + this.jobID + "\n"));
-            propertiesContent.appendChild(doc.createTextNode("DOCUMENTS=" + this.documentID + "\n"));
+            propertiesContent.appendChild(doc.createTextNode("JOB_ID=" + config.jobID + "\n"));
+            propertiesContent.appendChild(doc.createTextNode("DOCUMENTS=" + config.documentID + "\n"));
             propertiesContent.appendChild(doc.createTextNode("MMS_SERVER=" + this.mmsServer + "\n"));
             propertiesContent.appendChild(doc.createTextNode("MMS_USER=" + this.mmsUser + "\n"));
             propertiesContent.appendChild(doc.createTextNode("MMS_PASSWORD=" + this.mmsPassword + "\n"));
-            propertiesContent.appendChild(doc.createTextNode("TEAMWORK_PROJECT=" + this.teamworkServer + "\n"));
+            propertiesContent.appendChild(doc.createTextNode("TEAMWORK_PROJECT=" + this.teamworkProject + "\n"));
             propertiesContent.appendChild(doc.createTextNode("TEAMWORK_SERVER=" + this.teamworkServer + "\n"));
             propertiesContent.appendChild(doc.createTextNode("TEAMWORK_PORT=" + this.teamworkPort + "\n"));
             propertiesContent.appendChild(doc.createTextNode("TEAMWORK_USER=" + this.teamworkUser + "\n"));

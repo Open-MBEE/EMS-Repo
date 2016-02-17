@@ -29,6 +29,8 @@
 
 package gov.nasa.jpl.view_repo.webscripts;
 
+import gov.nasa.jpl.pma.JenkinsBuildConfig;
+import gov.nasa.jpl.pma.JenkinsEngine;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 
 import java.util.Map;
@@ -61,6 +63,21 @@ public class JobPost extends ModelPost {
         instance.setServices(getServices());
         // Run without transactions since JobPost breaks them up itself.
         return instance.executeImplImpl(req, status, cache, true);
+    }
+        
+    protected void createJenkinsConfig(String jobID,
+                                       Map<String,String> propertyValues) {
+        JenkinsEngine jenkins = new JenkinsEngine();
+        JenkinsBuildConfig config = new JenkinsBuildConfig();
+        config.setJobID( jobID );
+        String desiredView = propertyValues.get("desiredView");
+        //config.setDocumentID( desiredView );
+        
+        // for demo
+        config.setDocumentID( "Basic Document, Rapid Table Document" );
+        String schedule = propertyValues.get( "schedule" );
+        config.setSchedule( schedule );
+        jenkins.postConfigXml( config, config.getJobID() );
     }
 
 //    @Override

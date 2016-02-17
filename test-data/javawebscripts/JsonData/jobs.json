@@ -1,29 +1,56 @@
 {"jobs": [
-    {
-        "nodeRefId": "versionStore://version2Store/64752bdf-08dc-4e40-be6c-36ef6a030ac9",
-        "versionedRefId": "versionStore://version2Store/64752bdf-08dc-4e40-be6c-36ef6a030ac9",
-        "sysmlid": "_18_0_2_6620226_1454349097379_29967_15091-slot-_18_0_2_6620226_1453945722485_173783_14567",
-        "isMetatype": false,
-        "editable": true,
-        "creator": "admin",
-        "modified": "2016-02-10T13:10:18.842-0800",
-        "modifier": "admin",
-        "created": "Wed Feb 10 13:10:12 PST 2016",
-        "name": "",
-        "documentation": "",
-        "read": "2016-02-11T09:43:16.053-0800",
-        "appliedMetatypes": ["_9_0_62a020a_1105704885275_885607_7905"],
-        "specialization": {
-            "propertyType": null,
-            "isSlot": true,
-            "isDerived": false,
-            "value": [{
-                "string": "WAITING",
-                "type": "LiteralString"
+{
+    "siteCharacterizationId": "europa",
+    "qualifiedId": "/europa/PROJECT-a41b7560-5e3e-45e4-b001-f985c716e4b4/_18_0_2_6620226_1455725018660_326095_15263/_18_0_2_6620226_1454349123196_220661_15151",
+    "nodeRefId": "versionStore://version2Store/132b4771-6fda-4fff-9a18-423193285bd6",
+    "versionedRefId": "versionStore://version2Store/132b4771-6fda-4fff-9a18-423193285bd6",
+    "qualifiedName": "/europa/Job/Job/Job",
+    "sysmlid": "_18_0_2_6620226_1454349123196_220661_15151",
+    "isMetatype": false,
+    "editable": true,
+    "creator": "admin",
+    "modified": "2016-02-17T08:51:23.664-0800",
+    "ownedAttribute": ["_18_0_2_6620226_1454349198475_567099_15292"],
+    "modifier": "admin",
+    "created": "Wed Feb 17 08:50:54 PST 2016",
+    "name": "Job",
+    "documentation": "",
+    "owner": "_18_0_2_6620226_1455725018660_326095_15263",
+    "appliedMetatypes": [
+        "_17_0_2_3_87b0275_1371477871400_792964_43374",
+        "_18_0beta_9150291_1392290067481_33752_4359",
+        "_9_0_62a020a_1105704885343_144138_7929"
+    ],
+    "read": "2016-02-17T08:52:35.118-0800",
+    "specialization": {
+        "displayedElements": ["_18_0_2_6620226_1454349123196_220661_15151"],
+        "childViews": [{
+            "id": "_18_0_2_6620226_1454349127920_716185_15214",
+            "aggregation": "COMPOSITE"
+        }],
+        "view2view": [
+            {
+                "id": "_18_0_2_6620226_1454349127920_716185_15214",
+                "childrenViews": []
+            },
+            {
+                "id": "_18_0_2_6620226_1454349123196_220661_15151",
+                "childrenViews": ["_18_0_2_6620226_1454349127920_716185_15214"]
+            }
+        ],
+        "contents": {
+            "operand": [{
+                "type": "InstanceValue",
+                "instance": "_18_0_2_6620226_1454351312930_875282_15730"
             }],
-            "type": "Property"
-        }
-    },
+            "type": "Expression"
+        },
+        "allowedElements": [],
+        "contains": [],
+        "noSections": [],
+        "type": "Product"
+    }
+},
     {
         "estimatedDuration": 1550,
         "startTime": 1453750593290,

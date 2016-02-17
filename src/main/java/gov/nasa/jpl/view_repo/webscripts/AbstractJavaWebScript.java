@@ -2478,7 +2478,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         config.setDocumentID( desiredView );
         String schedule = propertyValues.get( "schedule" );
         config.setSchedule( schedule );
-        jenkins.postConfigXml( config.getJobID() );
+        jenkins.postConfigXml( config, config.getJobID() );
     }
 
     protected void processJobJson( JSONObject job, JSONArray elements,
