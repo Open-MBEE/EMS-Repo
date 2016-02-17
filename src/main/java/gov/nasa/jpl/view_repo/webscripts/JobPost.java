@@ -259,14 +259,8 @@ public class JobPost extends ModelPost {
                             getProjectNodeFromRequest(req, true);
                         }
                     };
- 
-                    System.out.println( "BEFORE" );
-                    System.out.println( postJson );
                     
                     preProcessJson( postJson, myWorkspace );
-                    
-                    System.out.println( "AFTER" );
-                    System.out.println( postJson );
                     
                     //if ( doJenkins ) doJenkinsStuff( postJson );
                     
@@ -317,7 +311,11 @@ public class JobPost extends ModelPost {
         JenkinsBuildConfig config = new JenkinsBuildConfig();
         String desiredView = propertyValues.get("desiredView");
         config.setDocumentID( desiredView );
-        //jenkins.postConfigXml( propertyValues.getString( "sysmlid" ) );       
+        String status = propertyValues.get( "status" );
+        // do something?
+        String schedule = propertyValues.get( "schedule" );
+        // do something?
+        jenkins.postConfigXml( config.getJobID() );       
     }
 
     @Override
@@ -326,15 +324,9 @@ public class JobPost extends ModelPost {
               final boolean fix, Map<String, Object> model, boolean createCommit,
               boolean suppressElementJson) throws Exception {
           final JSONObject top = NodeUtil.newJsonObject();
-          
-          // TODO: BETWEEN THESE TWO FUNCTIONS, YOU NEED TO RETRIEVE INFORMATION
-          //       FOR JOBS...
+
           final Set<EmsScriptNode> jobs = createOrUpdateModel(postJson,
                   status, workspace, null, createCommit);
-          
-          //final Set< EmsScriptNode > jobs = 
-          //        ModelLoadActionExecuter.loadJson( postJson, null,
-          //                                          null );
     
           if (!Utils.isNullOrEmpty(jobs)) {
               sendProgress("Adding relationships to properties", projectId, true);

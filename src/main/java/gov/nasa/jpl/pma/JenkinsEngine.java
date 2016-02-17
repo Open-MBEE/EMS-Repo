@@ -38,6 +38,7 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.protocol.ClientContext;
 import org.apache.http.entity.ByteArrayEntity;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.auth.BasicScheme;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.protocol.BasicHttpContext;
@@ -531,32 +532,18 @@ public class JenkinsEngine implements ExecutionEngine {
     
     // NOTE: THIS WILL BE CALLED WHEN YOU CHANGE THE NAME, STATUS AND ON JOB CREATION 
     public void postConfigXml( String jobName ) {
-        String getUrl = "https://cae-jenkins.jpl.nasa.gov/job/" + jobName + "/config.xml";
         String postUrl = "https://cae-jenkins.jpl.nasa.gov/createItem?name=" + jobName;
 
-        generateConfigXML();
-        File configFile = new File("./config.xml");
+        String configFile = generateConfigXML();
         
         try {
-            HttpEntity xmlEntity = (HttpEntity)new  InputStreamRequestEntity(new FileInputStream(configFile), configFile.length());
-        
-            HttpGet get = new HttpGet( getUrl );        
+            HttpEntity xmlEntity = (HttpEntity)new  StringEntity(configFile);
+    
             HttpPost post = new HttpPost( postUrl );
             post.setHeader( "Content-Type", "application/xml" );
             post.setEntity( xmlEntity );
             HttpResponse response = 
-                    this.jenkinsClient.execute( get, this.context );
- 
-            // Get the config.xml
-            HttpEntity entity = response.getEntity();
-            String xml = EntityUtils.toString( entity );
-            
-            // Prepare to post it 
-            entity = new ByteArrayEntity(xml.getBytes("UTF-8"));
-            post.setEntity( entity );
-            
-            response = this.jenkinsClient.execute( post, this.context );
-
+                    this.jenkinsClient.execute( post, this.context );
         } catch( Exception e ) {
             e.printStackTrace();
         }
@@ -652,8 +639,19 @@ public class JenkinsEngine implements ExecutionEngine {
         return jsonResponse.getJSONArray( "jobs" );
     }
     
-    public void generateConfigXML(){
+    public String generateConfigXML(){
         JenkinsBuildConfig config = new JenkinsBuildConfig();
-        config.generateBaseConfigXML();
+        String xml = config.generateBaseConfigXML();
+        return xml;
+    }
+    
+    public void executeJob(String jobName){
+        try{
+            
+            this.executeUrl = "https://cae-jenkins.jpl.nasa.gov/job/" +jobName + "/build?token=" + this.jenkinsToken;
+            this.execute();
+        }catch(Exception e){
+            e.printStackTrace();
+        }
     }
 }
