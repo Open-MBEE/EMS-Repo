@@ -527,10 +527,10 @@ public class JenkinsEngine implements ExecutionEngine {
     }
     
     // NOTE: THIS WILL BE CALLED WHEN YOU CHANGE THE NAME, STATUS AND ON JOB CREATION 
-    public void postConfigXml( String jobName ) {
+    public void postConfigXml( JenkinsBuildConfig config,String jobName ) {
         String postUrl = "https://cae-jenkins.jpl.nasa.gov/createItem?name=" + jobName;
 
-        String configFile = generateConfigXML();
+        String configFile = generateConfigXML( config );
         
         try {
             HttpEntity xmlEntity = (HttpEntity)new  StringEntity(configFile);
@@ -635,9 +635,8 @@ public class JenkinsEngine implements ExecutionEngine {
         return jsonResponse.getJSONArray( "jobs" );
     }
     
-    public String generateConfigXML(){
-        JenkinsBuildConfig config = new JenkinsBuildConfig();
-        String xml = config.generateBaseConfigXML();
+    public String generateConfigXML( JenkinsBuildConfig config ){
+        String xml = config.generateBaseConfigXML( config );
         return xml;
     }
     

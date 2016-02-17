@@ -184,7 +184,7 @@ public class JenkinsBuildConfig {
         }
     }
 
-    public String generateBaseConfigXML() {
+    public String generateBaseConfigXML( JenkinsBuildConfig config ) {
         DocumentBuilderFactory docBuilderFactory = DocumentBuilderFactory.newInstance();
         try {
             DocumentBuilder docBuilder = docBuilderFactory.newDocumentBuilder();
@@ -388,8 +388,8 @@ public class JenkinsBuildConfig {
             Element propertiesContent    = doc.createElement("propertiesContent");
             Element injectEnvironmentVar = doc.createElement("EnvInjectBuildWrapper");
             propertiesContent.appendChild(doc.createTextNode("\n"));
-            propertiesContent.appendChild(doc.createTextNode("JOB_ID=" + this.jobID + "\n"));
-            propertiesContent.appendChild(doc.createTextNode("DOCUMENTS=" + this.documentID + "\n"));
+            propertiesContent.appendChild(doc.createTextNode("JOB_ID=" + config.jobID + "\n"));
+            propertiesContent.appendChild(doc.createTextNode("DOCUMENTS=" + config.documentID + "\n"));
             propertiesContent.appendChild(doc.createTextNode("MMS_SERVER=" + this.mmsServer + "\n"));
             propertiesContent.appendChild(doc.createTextNode("MMS_USER=" + this.mmsUser + "\n"));
             propertiesContent.appendChild(doc.createTextNode("MMS_PASSWORD=" + this.mmsPassword + "\n"));
