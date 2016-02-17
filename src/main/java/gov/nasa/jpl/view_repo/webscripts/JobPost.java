@@ -29,8 +29,6 @@
 
 package gov.nasa.jpl.view_repo.webscripts;
 
-import gov.nasa.jpl.pma.JenkinsBuildConfig;
-import gov.nasa.jpl.pma.JenkinsEngine;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 
 import java.util.Map;
