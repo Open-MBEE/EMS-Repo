@@ -47,7 +47,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.alfresco.repo.model.Repository;
 import org.alfresco.service.ServiceRegistry;
-import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.eclipse.lyo.client.exception.ResourceNotFoundException;
 import org.json.JSONArray;
@@ -204,9 +203,12 @@ public class DoorsSync extends AbstractJavaWebScript {
 
         Map<String, EmsScriptNode> requirements = searchForElementsPostgres(types, appliedMetatype, false, workspace, dateTime, null, null);
         for (String key : requirements.keySet()) {
+            JSONObject projectJson = null;
+            projectJson = new JSONObject();
+
             EmsScriptNode requirementNode = requirements.get(key);
-            //EmsScriptNode siteNode = requirementNode.getSiteNode(dateTime, workspace);
             EmsScriptNode projectNode = requirementNode.getProjectNode(null);
+            projectJson.put("project", projectNode.getSysmlName());
             rootProjectId = projectNode.getSysmlId();
             customFields = mapFields(projectNode.getSysmlName());
 
@@ -218,18 +220,20 @@ public class DoorsSync extends AbstractJavaWebScript {
                 if (!processedRequirements.contains(requirementNode.getSysmlId())) {
                     compRequirement(requirementNode, null);
                 }
+                projectJson.put("status", "Sync Complete");
             } catch (ClassNotFoundException | SQLException e) {
                 if (logger.isDebugEnabled()) {
                     e.printStackTrace();
                 }
             } catch (ResourceNotFoundException e) {
-                System.out.println("Project not found");
+                projectJson.put("status", "Project not found");
             } catch (Exception e) {
                 if (logger.isDebugEnabled()) {
                     e.printStackTrace();
                 }
-                System.out.println("Issue during sync");
+                projectJson.put("status", "Issue during sync");
             }
+            json.put(projectJson);
         }
 
         return json;
