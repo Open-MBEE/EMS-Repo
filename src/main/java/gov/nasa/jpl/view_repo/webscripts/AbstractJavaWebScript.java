@@ -2482,7 +2482,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
     }
 
     protected void processJobJson( JSONObject job, JSONArray elements,
-                                   WorkspaceNode workspace ) {
+                                   WorkspaceNode workspace, boolean noAdd ) {
         if ( job == null ) {
             log( Level.ERROR, "Bad job json: " + job );
             return;
@@ -2526,7 +2526,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
     
         // Use job json as element json and move to "elements" array. The
         // job-specific properties in the json were stripped out above.
-        elements.put(job);
+        if ( !noAdd ) elements.put(job);
         
         // If creating a new job with a desiredDocument, push a new
         // configuration to Jenkins.
@@ -2681,14 +2681,14 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         for ( int i = 1; i < elements.length(); i++ ) {
             JSONObject job = elements.optJSONObject( i );
             if ( EmsScriptNode.isJob( job ) )
-            processJobJson( job, elements, workspace );
+            processJobJson( job, elements, workspace, true );
         }
         
         // Generate or update element json for each of the properties.
         if ( jobs != null ) {
             for ( int i = 1; i < jobs.length(); i++ ) {
                 JSONObject job = jobs.optJSONObject( i );
-                processJobJson( job, elements, workspace );
+                processJobJson( job, elements, workspace, false );
             }
         }
         
