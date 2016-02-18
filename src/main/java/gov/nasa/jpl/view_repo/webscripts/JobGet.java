@@ -78,7 +78,7 @@ public class JobGet extends ModelGet {
     private boolean fromJenkins = false;
     
     @Override
-    protected Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {        
+    protected Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
         JobGet instance = new JobGet(repository, getServices());
         return instance.executeImplImpl(req, status, cache,
                 runWithoutTransactions);

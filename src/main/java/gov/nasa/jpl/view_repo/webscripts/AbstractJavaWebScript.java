@@ -117,7 +117,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
     // FIXME -- Why is this not static? Concurrent webscripts with different
     // loglevels will interfere with each other.
     public Level logLevel = Level.WARN;
-    
+
     public Formatter formatter = new Formatter ();
     /*public enum LogLevel {
 		DEBUG(0), INFO(1), WARNING(2), ERROR(3);
@@ -182,14 +182,14 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
                                  String permission, boolean b ) {
         Utils.put( permissionCache, realUser, nodeRef, getPermType(permission), b );
     }
-    
-    
+
+
     public boolean usingExistsCache = false; // not yet implemented
     enum ExistType { InAlfresco, InModel };
     // Cache for whether node exists: node -> exist_type -> true|false
     public Map< NodeRef, Map< ExistType, Boolean > > existsCache =
             new HashMap< NodeRef, Map< ExistType, Boolean > >();
-    
+
     public boolean usingAspectsCache = false; // not yet implemented
     // Cache for whether node exists: node -> aspect -> true|false
     public Map< NodeRef, Map< ExistType, Boolean > > hasAspectCache =
@@ -247,7 +247,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         // FIXME -- Why is this not static?
         logger.setLevel(logLevel);
     }
-    
+
     /**
 	 * Utility for clearing out caches
 	 * TODO: do we need to clear caches if Spring isn't making singleton instances
@@ -261,7 +261,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
             NodeUtil.setBeenOutsideTransaction( false );
             NodeUtil.setInsideTransactionNow( false );
 	    }
-	    
+	
 		foundElements = new HashMap<String, EmsScriptNode>();
 		response = new StringBuffer();
 		responseStatus.setCode(HttpServletResponse.SC_OK);
@@ -277,7 +277,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
             return;
         }
         Map< String, EmsScriptNode > nodesToClean = new LinkedHashMap< String, EmsScriptNode >();
-        
+
         Seen< String > seen = new SeenHashSet< String >();
         for ( EmsScriptNode node : foundElements.values() ) {
             if ( node.renamed || node.moved ) {
@@ -285,17 +285,17 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
                 collectChildNodesToClean( sysmlId, node, nodesToClean, seen );
             }
         }
-        
+
         for ( EmsScriptNode node : nodesToClean.values() ) {
             node.removeFromJsonCache( false );
         }
     }
-    
+
     protected void collectChildNodesToClean( String id, EmsScriptNode node,
                                              Map< String, EmsScriptNode > nodesToClean,
                                              Seen< String > seen ) {
         //String sysmlId = node.getSysmlId();
-        
+
         Pair< Boolean, Seen< String > > p = Utils.seen( id, true, seen );
         if ( p.first ) return;
         seen = p.second;
@@ -315,7 +315,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
     abstract protected Map< String, Object > executeImplImpl( final WebScriptRequest req,
                                                               final Status status,
                                                               final Cache cache );
-    
+
     protected Map< String, Object > executeImplImpl( final WebScriptRequest req,
                                                      final Status status, final Cache cache,
                                                      boolean withoutTransactions ) {
@@ -334,7 +334,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         clearCaches( true );
         clearCaches(); // calling twice for those redefine clearCaches() to
                        // always call clearCaches( false )
-        
+
         new EmsTransaction( getServices(), getResponse(), getResponseStatus(), withoutTransactions ) {
             @Override
             public void run() throws Exception {
@@ -346,13 +346,13 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         };
         if ( !model.containsKey( "res" ) && response != null && response.toString().length() > 0 ) {
             model.put( "res", response.toString() );
-            
+
         }
         // need to check if the transaction resulted in rollback, if so change the status code
         // TODO: figure out how to get the response message in (response is always empty)
         if (getResponseStatus().getCode() != HttpServletResponse.SC_ACCEPTED) {
             status.setCode( getResponseStatus().getCode() );
-            
+
         }
 		
         return model;
@@ -413,7 +413,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
 				siteNode = NodeUtil.getSiteNode( siteName, false, workspace, dateTime,
 			                 					services, response );
 			}
-	        if ( errorOnNull && siteNode == null ) {	            
+	        if ( errorOnNull && siteNode == null ) {	
 	            log(Level.ERROR,  HttpServletResponse.SC_BAD_REQUEST, "Site node is null");
 	        }
 		}
@@ -541,8 +541,8 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
                                                        Date dateTime, boolean findDeleted) {
         return NodeUtil.findScriptNodesBySysmlName( name, false, workspace, dateTime, services, findDeleted, false );
     }
-    
-    
+
+
     // Updated log methods with log4j methods (still works with old log calls)
     // String concatenation replaced with C formatting; only for calls with parameters
     protected void log (Level level, int code, String msg, Object...params) {
@@ -552,10 +552,10 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
     		log (level,code,formattedMsg);
     	}
 	}
-    
+
     // If no need for string formatting (calls with no string concatenation)
     protected void log(Level level, int code, String msg) {
-        String levelMessage = addLevelInfoToMsg (level,msg); 
+        String levelMessage = addLevelInfoToMsg (level,msg);
         updateResponse(code, levelMessage);
 		if (level.toInt() >= logger.getLevel().toInt()) {
 			// print to response stream if >= existing log level
@@ -700,8 +700,8 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
     public static final String NO_WORKSPACE_ID = "master"; // default is master if unspecified
     public static final String NO_PROJECT_ID = "no_project";
     public static final String NO_SITE_ID = "no_site";
-    
-    
+
+
     public String getSiteName( WebScriptRequest req ) {
         return getSiteName( req, false );
     }
@@ -818,7 +818,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         }
         return workspaceId;
     }
-    
+
     private static String getWorkspaceNum( WebScriptRequest req, boolean isWs1 ) {
         String key = isWs1 ? WORKSPACE1 : WORKSPACE2;
         String workspaceId = req.getServiceMatch().getTemplateVars().get(key);
@@ -827,7 +827,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         }
         return workspaceId;
     }
-    
+
     private static String getTimestampNum( WebScriptRequest req, boolean isTs1 ) {
         String key = isTs1 ? TIMESTAMP1 : TIMESTAMP2;
         String timestamp = req.getServiceMatch().getTemplateVars().get(key);
@@ -836,7 +836,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         }
         return timestamp;
     }
-    
+
     public static String getWorkspace1( WebScriptRequest req) {
         return getWorkspaceNum(req, true);
     }
@@ -844,7 +844,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
     public static String getWorkspace2( WebScriptRequest req) {
         return getWorkspaceNum(req, false);
     }
-    
+
     public static String getTimestamp1( WebScriptRequest req) {
         return getTimestampNum(req, true);
     }
@@ -852,7 +852,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
     public static String getTimestamp2( WebScriptRequest req) {
         return getTimestampNum(req, false);
     }
-    
+
     public static String getArtifactId( WebScriptRequest req ) {
         String artifactId = req.getServiceMatch().getTemplateVars().get(ARTIFACT_ID);
         if ( artifactId == null || artifactId.length() <= 0 ) {
@@ -899,16 +899,16 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         }
         return true;
     }
-    
+
     /**
      * Returns true if the user has permission to do workspace operations, which is determined
      * by the LDAP group or if the user is admin.
-     * 
+     *
      */
     protected boolean userHasWorkspaceLdapPermissions() {
-        
+
         if (!NodeUtil.userHasWorkspaceLdapPermissions()) {
-            log(Level.ERROR, HttpServletResponse.SC_FORBIDDEN, "User %s does not have LDAP permissions to perform workspace operations.  LDAP group with permissions: %s", 
+            log(Level.ERROR, HttpServletResponse.SC_FORBIDDEN, "User %s does not have LDAP permissions to perform workspace operations.  LDAP group with permissions: %s",
             		NodeUtil.getUserName(), NodeUtil.getWorkspaceLdapGroup());
             return false;
         }
@@ -931,7 +931,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
                                        Integer maxItems,
                                        Integer skipCount ) {
         // TODO: can't search against snapshots - non-null date time is caught upstream
-        if (NodeUtil.doGraphDb) { 
+        if (NodeUtil.doGraphDb) {
             return searchForElementsPostgres( type, pattern, ignoreWorkspace, workspace, dateTime, maxItems, skipCount );
         } else {
             return searchForElementsOriginal( type, pattern, ignoreWorkspace, workspace, dateTime );
@@ -957,7 +957,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
 	 * Perform Lucene search for the specified pattern and ACM type
 	 * As opposed to searchForElementsOriginal, this returns a Map of noderef ids to
 	 * script nodes - since postgres db needs this to look up properly
-	 * 
+	 *
 	 * @param type
 	 * @param pattern
 	 * @param ignoreWorkspace
@@ -1148,9 +1148,9 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         return wsDiff;
     }
 
-    
 
-    
+
+
     /**
      * Determines the project site for the passed site node.  Also, determines the
      * site package node if applicable.
@@ -1159,13 +1159,13 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
     public Pair<EmsScriptNode,EmsScriptNode> findProjectSite(String siteName,
                                                              Date dateTime,
                                                              WorkspaceNode workspace,
-                                                             EmsScriptNode initialSiteNode) {        
+                                                             EmsScriptNode initialSiteNode) {
         String runAsUser = AuthenticationUtil.getRunAsUser();
         boolean changeUser = !EmsScriptNode.ADMIN_USER_NAME.equals( runAsUser );
         if ( changeUser ) {
             AuthenticationUtil.setRunAsUser( EmsScriptNode.ADMIN_USER_NAME );
         }
-        Pair< EmsScriptNode, EmsScriptNode > p = 
+        Pair< EmsScriptNode, EmsScriptNode > p =
                 findProjectSiteImpl( siteName, dateTime, workspace, initialSiteNode );
         if ( changeUser ) {
             AuthenticationUtil.setRunAsUser( runAsUser );
@@ -1343,7 +1343,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         return pkgSiteParentNode;
     }
 
-    
+
     /**
      * This needs to be called with the incoming JSON request to populate the local source
      * variable that is used in the sendDeltas call.
@@ -1357,10 +1357,10 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
             source = null;
         }
     }
-    
+
     /**
      * Send progress messages to the log, JMS, and email.
-     * 
+     *
      * @param msg  The message
      * @param projectSysmlId  The project sysml id
      * @param workspaceName  The workspace name
@@ -1368,18 +1368,18 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
      */
     public void sendProgress( String msg, String projectSysmlId, String workspaceName,
                               boolean sendEmail) {
-        
+
         String projectId = Utils.isNullOrEmpty(projectSysmlId) ? "unknown_project" : projectSysmlId;
-        String workspaceId = Utils.isNullOrEmpty(workspaceName) ? "unknown_workspace" : workspaceName;        
+        String workspaceId = Utils.isNullOrEmpty(workspaceName) ? "unknown_workspace" : workspaceName;
         String subject = "Progress for project: "+projectId+" workspace: "+workspaceId;
 
         // Log the progress:
         log(Level.INFO,"%s msg: %s\n",subject,msg);
         //logger.info(subject+" msg: "+msg+"\n");
-        
+
         // Send the progress over JMS:
         CommitUtil.sendProgress(msg, workspaceId, projectId);
-        
+
         // Email the progress (this takes a long time, so only do it for critical events):
         if (sendEmail) {
             String hostname = NodeUtil.getHostname();
@@ -1387,7 +1387,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
                 String sender = hostname + "@jpl.nasa.gov";
                 String username = NodeUtil.getUserName();
                 if (!Utils.isNullOrEmpty( username )) {
-                    EmsScriptNode user = new EmsScriptNode(services.getPersonService().getPerson(username), 
+                    EmsScriptNode user = new EmsScriptNode(services.getPersonService().getPerson(username),
                                                            services);
                     if (user != null) {
                         String recipient = (String) user.getProperty("cm:email");
@@ -1398,12 +1398,12 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
                 }
             }
         }
-        
+
     }
-    
+
     /**
      * Creates a json like object in a string and puts the response in the message key
-     * 
+     *
      * @return The resulting string, ie "{'message':response}" or "{}"
      */
     public String createResponseJson() {
@@ -1418,7 +1418,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         }
         return systemModel;
     }
-    
+
     public SystemModel< EmsScriptNode, Object, EmsScriptNode, EmsScriptNode, String, String, Object, EmsScriptNode, String, String, EmsScriptNode > getSystemModel() {
         if ( systemModel == null ) {
             systemModel = new EmsSystemModel(this.services);
@@ -1428,7 +1428,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
 
 
     public static EmsSystemModel globalSystemModel = null;
-    
+
     public static EmsSystemModel getGlobalSystemModel() {
         if ( globalSystemModel == null ) {
             globalSystemModel = new EmsSystemModel(NodeUtil.getServices() );
@@ -1453,12 +1453,12 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
     public void setSystemModelAe() {
         sysmlToAe =
                 new SystemModelToAeExpression< Object, EmsScriptNode, EmsScriptNode, String, Object, EmsSystemModel >( getEmsSystemModel() );
-    
+
     }
 
     public static void setGlobalSystemModelAe() {
         globalSysmlToAe =
-                new SystemModelToAeExpression< Object, EmsScriptNode, EmsScriptNode, String, Object, EmsSystemModel >( getGlobalSystemModel() );    
+                new SystemModelToAeExpression< Object, EmsScriptNode, EmsScriptNode, String, Object, EmsSystemModel >( getGlobalSystemModel() );
     }
 
     /**
@@ -1468,16 +1468,16 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
      * @param constraints The list of Constraints to add for tje node
      */
     public static void addConstraintExpression(EmsScriptNode constraintNode, Map< EmsScriptNode, Collection< Constraint >> constraints, WorkspaceNode ws) {
-    
+
         if (constraintNode == null || constraints == null) return;
-    
+
         EmsScriptNode exprNode = getConstraintExpression(constraintNode, ws);
-    
+
         if (exprNode != null) {
             Expression<Boolean> expression = toAeExpression( exprNode );
-    
+
             if (expression != null) {
-    
+
                 Collection< Constraint > constrs = constraints.get( constraintNode );
                 if ( constrs == null ) {
                     constrs = new ArrayList< Constraint >();
@@ -1512,7 +1512,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         } else {
         try {
             expression = new Expression<T>(call.evaluate(true, false));
-            
+
         // TODO -- figure out why eclipse gives compile errors for
         // including the exceptions while mvn gives errors for not
         // including them.
@@ -1533,39 +1533,39 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
     // TODO -- look at getAffectedIds()
     public static Map< EmsScriptNode, Collection< Constraint > > getAeConstraints( Set< EmsScriptNode > elements, WorkspaceNode ws ) {
         //Map<EmsScriptNode, Constraint> constraints = new LinkedHashMap<EmsScriptNode, Constraint>();
-        Map< EmsScriptNode, Collection< Constraint > >  constraints = 
+        Map< EmsScriptNode, Collection< Constraint > >  constraints =
                 new LinkedHashMap< EmsScriptNode, Collection< Constraint > >();
-    
+
         // Search for all constraints in the database:
         Collection<EmsScriptNode> constraintNodes = getGlobalSystemModel().getType(null, Acm.ACM_CONSTRAINT);
 //log(Level.INFO, "all constraints in database: " + constraintNodes);
 
         if (!Utils.isNullOrEmpty(constraintNodes)) {
-    
+
             // Loop through each found constraint and check if it contains any of the elements
             // to be posted:
             for (EmsScriptNode constraintNode : constraintNodes) {
-    
+
                 // Parse the constraint node for all of the cm:names of the nodes in its expression tree:
                 Set<String> constrElemNames = getConstraintElementNames(constraintNode, ws);
-    
+
                 // Check if any of the posted elements are in the constraint expression tree, and add
                 // constraint if they are:
                 // Note: if a Constraint element is in elements then it will also get added here b/c it
                 //          will be in the database already via createOrUpdateMode()
                 for (EmsScriptNode element : elements) {
-    
+
                     String name = element.getName();
 //log(Level.INFO, "element (" + element + ") vs. constraint (" + constraintNode + ")");
                     if ( element.equals( constraintNode ) || ( name != null && constrElemNames.contains(name) ) ) {
                         addConstraintExpression(constraintNode, constraints, ws);
                         break;
                     }
-    
+
                 } // Ends loop through elements
-    
+
             } // Ends loop through constraintNodes
-    
+
         } // Ends if there was constraint nodes found in the database
 
         // TODO -- This is temporarily commented out until code is added to tie
@@ -1579,7 +1579,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
 //            //       Can we get duplicate ParameterListeners in the aeClassses map?
 //            constraints.addAll( listener.getConstraints( true, null ) );
 //        }
-    
+
         return constraints;
     }
 
@@ -1631,7 +1631,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
                 ( elements.size() != 1 || !elements.iterator().next().hasAspect( Acm.ACM_EXPRESSION ) ) ) {
         Map< EmsScriptNode, Collection< Constraint > > constraints = getAeConstraints( elements, ws );
 //log(Level.INFO, "constraints: " + constraints);
-    
+
         if ( !Utils.isNullOrEmpty( constraints ) ) {
             for ( Entry< EmsScriptNode, Collection< Constraint > > e : constraints.entrySet() ) {
                 EmsScriptNode constraintNode = null;
@@ -1661,8 +1661,8 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         }
         return results;
     }
-    
-    
+
+
     /**
      * Construct a JSONArray from a Collection without triggering an infinite loop.
      *
@@ -1699,14 +1699,14 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         }
         return a;
     }
-    
+
     /**
      * Fixes bug in JSONObject.wrap() where putting an unexpected object in a
      * JSONObject results in an infinite loop. The fix is to convert the object
      * to a string if it's type is not one of the usual suspects.
-     * 
+     *
      * @param object
-     * @return an Object that can be inserted as a value into a JSONObject 
+     * @return an Object that can be inserted as a value into a JSONObject
      */
     public static Object jsonWrap( Object object ) {
         try {
@@ -1737,7 +1737,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
             return null;
         }
     }
-    
+
     /**
      * Construct a JSONObject from a Map without triggering an infinite loop.
      *
@@ -1796,12 +1796,12 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
             r.put( "value", "" + v );
             resultJarr.put( r );
         }
-        
+
         //top.put( "elements", elementsJson );
         if ( resultJarr.length() > 0 ) top.put( "evaluations", resultJarr );
 
     }
-    
+
     public void fixWithTransactions( final Set< EmsScriptNode > elements, final WorkspaceNode ws ) {
         new EmsTransaction(getServices(), getResponse(),
                            getResponseStatus()) {
@@ -1811,9 +1811,9 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
             }
         };
     }
-    
+
 //    public void lock( Variable<?> v ) {
-//        
+//
 //    }
     public static void lock( Variable<?> v ) {
         Object val = v.getValue( true );
@@ -1821,7 +1821,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
             v.setDomain( new SingleValueDomain( val ) );
         }
     }
-    
+
     protected void lockOtherParameters( Set< EmsScriptNode > elements, ArrayList< Constraint > constraints ) {
         lockOtherParameters( elements, constraints, getSystemModelAe() );
     }
@@ -1829,15 +1829,15 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
 //        // get all Variables from Constraints
 //        Set<Variable<?>> vars = new LinkedHashSet<Variable<?>>();
 //        for ( Constraint c : constraints ) {
-//            vars.addAll( c.getVariables() ); 
+//            vars.addAll( c.getVariables() );
 //        }
-//        
+//
 //        // get all cm:names of nodes that we don't want to lock
 //        Set<String> unlockedCmNames = new HashSet<String>();
 //        for ( EmsScriptNode element : elements ) {
 //           unlockedCmNames.add(element.getName() );
 //        }
-        
+
         // lock all Variables that are not in unlockedCmNames by getting all variables from the paramMap in classData that are keyed by cm:name.
         Map< EmsScriptNode, Parameter< Object > > paramMap = systemModelToAe.getExprParamMap();
         for ( Entry< EmsScriptNode, Parameter< Object > > e : paramMap.entrySet() ) {
@@ -1858,8 +1858,8 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
 //            }
 //        }
     }
-    
-        
+
+
     public void fix( final Set< EmsScriptNode > elements, final WorkspaceNode ws ) {
         fix(elements, ws, getServices(), getResponse(), getResponseStatus(), getEmsSystemModel(), getSystemModelAe() );
     }
@@ -1872,22 +1872,22 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
     }
 
     public static void fix( final Set< EmsScriptNode > elements, final WorkspaceNode ws, ServiceRegistry services, StringBuffer response, Status status, final EmsSystemModel systemModel, SystemModelToAeExpression< Object, EmsScriptNode, EmsScriptNode, String, Object, EmsSystemModel > systemModelToAe ) {
-    
+
         log(Level.INFO, "Will attempt to fix constraint violations if found!");
-    
-        SystemModelSolver// < EmsScriptNode, Object, EmsScriptNode, EmsScriptNode, String, String, Object, EmsScriptNode, String, String, EmsScriptNode >  
-            solver = new SystemModelSolver( //< EmsScriptNode, Object, EmsScriptNode, EmsScriptNode, String, String, Object, EmsScriptNode, String, String, EmsScriptNode >(systemModel, 
+
+        SystemModelSolver// < EmsScriptNode, Object, EmsScriptNode, EmsScriptNode, String, String, Object, EmsScriptNode, String, String, EmsScriptNode >
+            solver = new SystemModelSolver( //< EmsScriptNode, Object, EmsScriptNode, EmsScriptNode, String, String, Object, EmsScriptNode, String, String, EmsScriptNode >(systemModel,
                                             new ConstraintLoopSolver() );
-    
+
         Map< EmsScriptNode, Collection< Constraint > > constraintMap = getAeConstraints( elements, ws );
         ArrayList< Constraint > constraints = new ArrayList< Constraint >();
-        
+
 //        Set< EmsScriptNode > v
 //        for ( Entry< EmsScriptNode, Collection< Constraint >> e : constraintMap.entrySet() ) {
-//            
+//
 //            EmsScriptNode constraintNode = e.getKey();
 //            Set<String> constrElemNames = getConstraintElementNames(constraintNode , ws);
-            
+
 
         for ( Collection< Constraint > coll : constraintMap.values() ) {
             constraints.addAll( coll );
@@ -1899,7 +1899,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         theClass.getConstraintExpressions().addAll( Utils.asList( constraints,
                                                                   ConstraintExpression.class ) );
 //        }
-    
+
         // Solve the constraints:
         if (Utils.isNullOrEmpty( constraints )) {
             logger.warn( "fix"
@@ -1907,7 +1907,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
                          + ": No constraints to solve!" );
         } else {
             lockOtherParameters( elements, constraints, systemModelToAe );
-    
+
             //Collection<Constraint> constraints = getConstraints( true, null );
             if ( writeConstraintsOut  ) {
               System.out.println("All " + constraints.size() + " constraints: ");
@@ -1917,7 +1917,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
             }
 
             Random.reset();
-    
+
             // Solve!!!!
             boolean result = false;
             try {
@@ -1931,7 +1931,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
 //                    }
 //                }
                 result = solver.solve(constraints);
-    
+
             } finally {
                 //Debug.turnOff();
             }
@@ -1955,7 +1955,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
             else {
                 logger.warn( "Satisfied all of the constraints!" );
             }
-    
+
                 // Update the values of the nodes after solving the constraints:
                 final Map< EmsScriptNode, Parameter< Object > > params = getGlobalSystemModelAe().getExprParamMap();
                 if ( Utils.isNullOrEmpty( params ) ) {
@@ -2007,7 +2007,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
                 }
             //}
         } // End if constraints list is non-empty
-    
+
     }
 
     /**
@@ -2018,24 +2018,24 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
      * @return Set of cm:name
      */
     protected static Set<String> getPropertyElementNames(EmsScriptNode propertyNode) {
-    
+
         Set<String> names = new HashSet<String>();
-    
+
         if (propertyNode != null) {
-    
+
             String name = propertyNode.getName();
-    
+
             if (name != null) names.add(name);
-    
+
             // See if it has a value property:
             Collection< EmsScriptNode > propertyValues =
                     getGlobalSystemModel().getProperty(propertyNode, Acm.JSON_VALUE);
-    
+
             if (!Utils.isNullOrEmpty(propertyValues)) {
                   for (EmsScriptNode value : propertyValues) {
-    
+
                       names.add(value.getName());
-    
+
                       // TODO REVIEW
                       //      need to be able to handle all ValueSpecification types?
                       //      some of them have properties that point to nodes, so
@@ -2043,7 +2043,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
                   }
             }
         }
-    
+
         return names;
     }
 
@@ -2055,24 +2055,24 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
      * @return Set of cm:name
      */
     protected static Set<String> getParameterElementNames(EmsScriptNode paramNode) {
-    
+
         Set<String> names = new HashSet<String>();
-    
+
         if (paramNode != null) {
-    
+
             String name = paramNode.getName();
-    
+
             if (name != null) names.add(name);
-    
+
             // See if it has a defaultParamaterValue property:
             Collection< EmsScriptNode > paramValues =
                     getGlobalSystemModel().getProperty(paramNode, Acm.JSON_PARAMETER_DEFAULT_VALUE);
-    
+
             if (!Utils.isNullOrEmpty(paramValues)) {
                   names.add(paramValues.iterator().next().getName());
             }
         }
-    
+
         return names;
     }
 
@@ -2084,33 +2084,33 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
      * @return Set of cm:name
      */
     protected static Set<String> getOperationElementNames(EmsScriptNode opNode) {
-    
+
         Set<String> names = new HashSet<String>();
-    
+
         if (opNode != null) {
-    
+
             String name = opNode.getName();
-    
+
             if (name != null) names.add(name);
-    
+
             // See if it has a operationParameter and/or operationExpression property:
             Collection< EmsScriptNode > opParamNodes =
                     getGlobalSystemModel().getProperty(opNode, Acm.JSON_OPERATION_PARAMETER);
-    
+
             if (!Utils.isNullOrEmpty(opParamNodes)) {
               for (EmsScriptNode opParamNode : opParamNodes) {
                   names.addAll(getParameterElementNames(opParamNode));
               }
             }
-    
+
             Collection< EmsScriptNode > opExprNodes =
                     getGlobalSystemModel().getProperty(opNode, Acm.JSON_OPERATION_EXPRESSION);
-    
+
             if (!Utils.isNullOrEmpty(opExprNodes)) {
                 names.add(opExprNodes.iterator().next().getName());
             }
         }
-    
+
         return names;
     }
 
@@ -2119,93 +2119,93 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
      * in the expression.
      *
      * @param expressionNode The node to parse
-     * @param ws 
-     * @param date 
+     * @param ws
+     * @param date
      * @return Set of cm:name
      */
     protected static Set<String> getExpressionElementNames(EmsScriptNode expressionNode, Date date , WorkspaceNode ws ) {
-    
+
         Set<String> names = new HashSet<String>();
-    
+
         if (expressionNode != null) {
-    
+
             // Add the name of the Expression itself:
             String name = expressionNode.getName();
-    
+
             if (name != null) names.add(name);
-    
-            // FIXME -- need to give date/workspace context 
+
+            // FIXME -- need to give date/workspace context
             // Process all of the operand properties:
             Collection< EmsScriptNode > properties =
                     getGlobalSystemModel().getProperty( expressionNode, Acm.JSON_OPERAND);
-    
+
             if (!Utils.isNullOrEmpty(properties)) {
-    
+
               EmsScriptNode valueOfElementNode = null;
-    
+
               for (EmsScriptNode operandProp : properties) {
-    
+
                 if (operandProp != null) {
-    
+
                     names.add(operandProp.getName());
-    
-                    // FIXME -- need to give date/workspace context 
+
+                    // FIXME -- need to give date/workspace context
                     // Get the valueOfElementProperty node:
                     Collection< EmsScriptNode > valueOfElemNodes =
                             getGlobalSystemModel().getProperty(operandProp, Acm.JSON_ELEMENT_VALUE_ELEMENT);
-    
+
                     // If it is a elementValue, then this will be non-empty:
                     if (!Utils.isNullOrEmpty(valueOfElemNodes)) {
-    
+
                       // valueOfElemNodes should always be size 1 b/c elementValueOfElement
                       // is a single NodeRef
                       valueOfElementNode = valueOfElemNodes.iterator().next();
                     }
-    
+
                     // Otherwise just use the node itself as we are not dealing with
                     // elementValue types:
                     else {
                       valueOfElementNode = operandProp;
                     }
-    
+
                     if (valueOfElementNode != null) {
-    
-                      // FIXME -- need to give date/workspace context 
+
+                      // FIXME -- need to give date/workspace context
                       String typeString = getGlobalSystemModel().getTypeString(valueOfElementNode, null);
-    
-                      // FIXME -- need to give date/workspace context 
+
+                      // FIXME -- need to give date/workspace context
                       // If it is a Operation then see if it then process it:
                       if (typeString.equals(Acm.JSON_OPERATION)) {
                           names.addAll(getOperationElementNames(valueOfElementNode));
                       }
-    
+
                       // If it is a Expression then process it recursively:
                       else if (typeString.equals(Acm.JSON_EXPRESSION)) {
                           names.addAll(getExpressionElementNames(valueOfElementNode, date, ws));
                       }
-    
-                      // FIXME -- need to give date/workspace context 
+
+                      // FIXME -- need to give date/workspace context
                       // If it is a Parameter then process it:
                       else if (typeString.equals(Acm.JSON_PARAMETER)) {
                           names.addAll(getParameterElementNames(valueOfElementNode));
                       }
-    
-                      // FIXME -- need to give date/workspace context 
+
+                      // FIXME -- need to give date/workspace context
                       // If it is a Property then process it:
                       else if (typeString.equals(Acm.JSON_PROPERTY)) {
                           names.addAll(getPropertyElementNames(valueOfElementNode));
                       }
-    
+
                     } // ends if valueOfElementNode != null
-    
+
                 } // ends if operandProp != null
-    
+
               } // ends for loop through operand properties
-    
+
             } // ends if operand properties not null or empty
-    
+
         } // ends if expressionNode != null
-    
+
         return names;
     }
 
@@ -2214,37 +2214,37 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
      * names in the expression.
      *
      * @param constraintNode The node to parse
-     * @param ws 
+     * @param ws
      * @return Set of cm:name
      */
     protected static Set<String> getConstraintElementNames(EmsScriptNode constraintNode, WorkspaceNode ws ) {
-    
+
         Set<String> names = new LinkedHashSet<String>();
-    
+
         if (constraintNode != null) {
-    
+
             // Add the name of the Constraint:
             String name = constraintNode.getName();
-    
+
             if (name != null) names.add(name);
-    
+
             // Get the Expression for the Constraint:
             EmsScriptNode exprNode = getConstraintExpression(constraintNode, ws);
-    
+
             // Add the names of all nodes in the Expression:
             if (exprNode != null) {
-    
+
                 // Get elements names from the Expression:
                 names.addAll(getExpressionElementNames(exprNode, null, ws));
-    
+
                 // REVIEW: Not using the child associations b/c
                 // ElementValue's elementValueOfElement has a different
                 // owner, and wont work for our demo either b/c
                 // not everything is under one parent
             }
-    
+
         }
-    
+
         return names;
     }
 
@@ -2255,19 +2255,19 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
      * @return The Expression node for the constraint
      */
     private static EmsScriptNode getConstraintExpression(EmsScriptNode constraintNode, WorkspaceNode ws) {
-    
+
         if (constraintNode == null) return null;
-    
-        // FIXME -- need to give date/workspace context 
+
+        // FIXME -- need to give date/workspace context
         // Get the constraint expression:
         Collection<EmsScriptNode> expressions =
                 getGlobalSystemModel().getProperty( constraintNode, Acm.JSON_CONSTRAINT_SPECIFICATION );
-    
+
         // This should always be of size 1:
         return Utils.isNullOrEmpty( expressions ) ? null :  expressions.iterator().next();
-    
+
     }
-    
+
     /**
      * compareMmsVersions
      * <br>
@@ -2308,14 +2308,14 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         String paramArg = paramVal;
         // Checks data member requestJSON to see if it is not null and if
         // paramVal is none
-        
+
 //     // Check if input is K or JSON
         String contentType = req.getContentType() == null ? ""
                 : req.getContentType().toLowerCase();
 
         boolean jsonNotK = !contentType.contains("application/k");
 
-        
+
         if (!jsonNotK && paramVal.equals("none")) {
                 jsonRequest = getRequestJSON(req);
 
@@ -2378,13 +2378,13 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
      * getMMSversion<br>
      * Returns a JSONObject representing the mms version being used. It's format
      * will be
-     * 
+     *
      * <pre>
      *  {
      *     "mmsVersion":"2.2"
      * }
      * </pre>
-     * 
+     *
      * @return JSONObject mmsVersion
      */
     public static JSONObject getMMSversion() {
@@ -2395,7 +2395,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
     /**
      * getMMSversion <br/>
      * getMMSversion wraps
-     * 
+     *
      * @param req
      * @return
      */
@@ -2442,7 +2442,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
      * This will set the AbstractJavaWebScript data member requestJSON. It will
      * make the parsedContent JSONObject remain within the scope of the
      * AbstractJavaWebScript. {@link #requestJSON}
-     * 
+     *
      * @param req
      *            WebScriptRequest
      */
@@ -2461,7 +2461,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
     public JSONObject getRequestJSON() {
         return privateRequestJSON;
     }
-    
+
     public JSONObject getRequestJSON(WebScriptRequest req) {
         // Returns immediately if requestJSON has already been set before checking MMS Versions
         if(privateRequestJSON == null) return privateRequestJSON;
@@ -2469,7 +2469,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         setRequestJSON(req);
         return privateRequestJSON;
     }
-    
+
     protected void createJenkinsConfig(String jobID,
                                        Map<String,String> propertyValues) {
         JenkinsEngine jenkins = new JenkinsEngine();
@@ -2489,7 +2489,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
             log( Level.ERROR, "Bad job json: " + job );
             return;
         }
-        
+
         // Get the id
         String jobId = job.optString( "id" );
         if ( Utils.isNullOrEmpty( jobId ) ) {
@@ -2499,24 +2499,24 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
             jobId = NodeUtil.createId( getServices() );
             job.put( "sysmlid", jobId );
         }
-        
+
         // Find node for id.
         EmsScriptNode jobNode = findScriptNodeById( jobId, workspace, null, false );
         boolean createNewJob = jobNode == null;
-        
+
         LinkedHashMap<String, String> propertyValues = new LinkedHashMap< String, String >();
-        
+
         // Process properties and remove them from the job json, which is being
         // transformed into element json.
         for ( String propertyName : jobProperties ) {
             // Save away the property values for later use;
             if ( isElement ) {
-                
+
             }
             String propertyValue = job.optString( propertyName );
             if ( propertyValue == null ) continue;
             propertyValues.put( propertyName, propertyValue );
-            
+
             // Update or create the property json.
             // FIXME -- If this is updating the passed in json, then it's
             // getting added to the elements array twice.
@@ -2524,17 +2524,17 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
                     getJobProperty( propertyName, job, createNewJob, jobNode,
                                     elements );
             elements.put( propertyElementJson );
-            
+
             job.remove( propertyName );
         }
-    
+
         // Don't add a specialization to the job json since it may already
         // exist, and we don't want to change the type.
-    
+
         // Use job json as element json and move to "elements" array. The
         // job-specific properties in the json were stripped out above.
         if ( !isElement ) elements.put(job);
-        
+
         // If creating a new job with a desiredDocument, push a new
         // configuration to Jenkins.
         // TODO -- There should be a generic way to do this, using a "command"
@@ -2547,9 +2547,9 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         createJenkinsConfig( jobId, propertyValues );
 //        }
     }
-    
+
     public EmsScriptNode getJobPropertyNode(Object jobNode, Object propertyName  ) {
-        Collection< EmsScriptNode > statusNodes = 
+        Collection< EmsScriptNode > statusNodes =
                 getSystemModel().getProperty( jobNode, propertyName );
         if ( !Utils.isNullOrEmpty( statusNodes ) ) {
             if ( statusNodes.size() > 1 ) {
@@ -2557,17 +2557,17 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
             }
             EmsScriptNode statusNode = statusNodes.iterator().next();
             return statusNode;
-        }        
+        }
         return null;
     }
-    
+
     /**
      * Find the Property representing the job property (such as status, schedule).
      * The method assumes that the Property element already exists, either in
      * the database (MMS) or the input "elements" json.  If it doesn't exist.
      * the method complains and creates one improperly since it does not find
      * the applied stereotype instance.
-     * 
+     *
      * @param propertyName
      * @param job
      * @param createNewJob
@@ -2582,7 +2582,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         String propertyValue = job.optString( propertyName );
         String propertyId = null;
         if ( propertyValue == null ) return null;
-        
+
         // Get the property's id.
         if ( !createNewJob ) {
             EmsScriptNode statusNode =
@@ -2590,17 +2590,17 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
             if ( statusNode != null ) {
                 propertyId = statusNode.getSysmlId();
             }
-        }        
-    
+        }
+
         // The property json this method returns
         JSONObject propertyJson = getPropertyJson(propertyId, elements);
-        
+
         // Add one if it isn't there already.
         if ( propertyJson == null ) propertyJson = new JSONObject();
         if ( propertyId != null ) {
             propertyJson.put( "sysmlid", propertyId );  // may already be there
         }
-    
+
         // add owner
         String jobId = job.optString( "sysmlid" );
         if ( jobId == null ) {
@@ -2609,10 +2609,10 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         if( jobId != null ) {
             propertyJson.put( "owner", jobId );
         }
-        
+
         // add name
         propertyJson.put( "name", propertyName );
-        
+
         // Make sure we have an id for the property.
         if ( Utils.isNullOrEmpty( propertyId ) ) {
             // We would need to find/create the stereotype instance.
@@ -2624,14 +2624,14 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
             } else {
                 String instanceSpecId = getInstanceSpecId( job );
                 String definingFeatureId = getDefiningFeatureId( propertyName );
-                propertyId = instanceSpecId + "-slot-" + definingFeatureId; 
+                propertyId = instanceSpecId + "-slot-" + definingFeatureId;
             }
         }
-        
+
         // add specialization part with value
         JSONObject specJson = new JSONObject();
         propertyJson.put( "specialization", specJson );
-        
+
         specJson.put( "type", "Property" );
         specJson.put( "isSlot", true);
         JSONArray valueArr = new JSONArray();
@@ -2639,10 +2639,11 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         JSONObject value = new JSONObject();
         valueArr.put(value);
         value.put( "type", "LiteralString" );
-        value.put( "string", propertyValue );     
-                                       
+        value.put( "string", propertyValue );
+
         return propertyJson;
     }
+
     protected JSONObject getPropertyJson( String propertyId, JSONArray elements ) {
         if ( propertyId == null ) return null;
         JSONObject propertyJson = null;//new JSONObject();
@@ -2657,9 +2658,11 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         }
         return propertyJson;
     }
+
     protected String getDefiningFeatureId( String propertyName ) {
         return definingFeatures.get(propertyName);
     }
+
     protected String getInstanceSpecId( JSONObject job ) {
         logger.error("JobPost.getInstanceSpecId() not yet supported!");
         // TODO Auto-generated method stub
@@ -2687,17 +2690,17 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
 
     protected void processJobsJson( JSONObject json, WorkspaceNode workspace ) {
         if ( json == null ) return;
-        
+
         // Get "jobs" as opposed to "elements"
         JSONArray jobs = json.optJSONArray( "jobs" );
-        
+
         // Get or create "elements" array.
         JSONArray elements = json.optJSONArray( "elements" );
         if ( elements == null ) {
             elements = new JSONArray();
             json.put( "elements", elements );
         }
-        
+
         Map< String, JSONObject > elementMap = new LinkedHashMap< String, JSONObject >();
         for ( int i = 1; i < elements.length(); i++ ) {
             JSONObject elem = elements.optJSONObject( i );
@@ -2706,7 +2709,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
             if ( sysmlId == null ) continue;
             elementMap.put( sysmlId, elem );
         }
-        
+
         // Generate or update element json for each of the properties.
         for ( int i = 1; i < elements.length(); i++ ) {
             JSONObject elem = elements.optJSONObject( i );
@@ -2714,7 +2717,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
                 processJobJson( elem, elements, elementMap, workspace, true );
             }
         }
-        
+
         // Generate or update element json for each of the properties.
         if ( jobs != null ) {
             for ( int i = 1; i < jobs.length(); i++ ) {
@@ -2722,10 +2725,10 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
                 processJobJson( job, elements, elementMap, workspace, false );
             }
         }
-        
+
         json.remove( "jobs" );
-        
+
     }
 
-    
+
 }
