@@ -75,6 +75,8 @@ public class JobGet extends ModelGet {
     protected JSONArray jobs = new JSONArray();
     protected Map<String, EmsScriptNode> jobsFound = new HashMap<String, EmsScriptNode>();
     protected Map<String, List<EmsScriptNode>> jobProperties = new HashMap<String, List<EmsScriptNode>>();
+
+    private boolean fromJenkins = false;
     
     @Override
     protected Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {        
@@ -82,10 +84,19 @@ public class JobGet extends ModelGet {
         return instance.executeImplImpl(req, status, cache,
                 runWithoutTransactions);
     }
-    
+
     @Override
-    protected Map<String, Object> executeImplImpl(WebScriptRequest req, 
-            Status status, Cache cache) {
+    protected Map<String, Object> executeImplImpl(WebScriptRequest req,
+                                                  Status status, Cache cache) {
+        if ( fromJenkins ) {
+            return executeImplImplNew( req, status, cache );
+        } else {
+            return super.executeImplImpl( req, status, cache );
+        }
+    }
+    
+    protected Map<String, Object> executeImplImplNew(WebScriptRequest req, 
+                                                  Status status, Cache cache) {
         if (logger.isDebugEnabled()) {
             String user = AuthenticationUtil.getFullyAuthenticatedUser();
             logger.debug(user + " " + req.getURL());
@@ -186,7 +197,7 @@ public class JobGet extends ModelGet {
         } catch ( ParserConfigurationException e ) {
             // TODO Auto-generated catch block
             e.printStackTrace();
-        } 
+        }
 
         status.setCode(responseStatus.getCode());
 
@@ -203,7 +214,7 @@ public class JobGet extends ModelGet {
     protected JSONObject jobOrEle(EmsScriptNode job, WorkspaceNode ws, Date dateTime, String id,
                              boolean includeQualified, boolean isIncludeDocument ) {
         // NOTE: THIS FUNCTION MIGHT BE DEPREACTED         
-        if  ( job.isJob( ) ) {
+        if  ( false && job.isJob( ) ) {
             return new JSONObject();  
             //return job.toJSONObject( ws,  dateTime, includeQualified, isIncludeDocument, jobProperties.get(id) );
         }

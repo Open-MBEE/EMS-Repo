@@ -2482,7 +2482,8 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
     }
 
     protected void processJobJson( JSONObject job, JSONArray elements,
-                                   WorkspaceNode workspace, boolean noAdd ) {
+                                   Map<String, JSONObject> elementMap,
+                                   WorkspaceNode workspace, boolean isElement ) {
         if ( job == null ) {
             log( Level.ERROR, "Bad job json: " + job );
             return;
@@ -2508,6 +2509,9 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         // transformed into element json.
         for ( String propertyName : jobProperties ) {
             // Save away the property values for later use;
+            if ( isElement ) {
+                
+            }
             String propertyValue = job.optString( propertyName );
             if ( propertyValue == null ) continue;
             propertyValues.put( propertyName, propertyValue );
@@ -2526,7 +2530,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
     
         // Use job json as element json and move to "elements" array. The
         // job-specific properties in the json were stripped out above.
-        if ( !noAdd ) elements.put(job);
+        if ( !isElement ) elements.put(job);
         
         // If creating a new job with a desiredDocument, push a new
         // configuration to Jenkins.
@@ -2579,13 +2583,18 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
     
         // The property json this method returns
         JSONObject propertyJson = getPropertyJson(propertyId, elements);
-        propertyJson.put( "sysmlid", propertyId );  // may already be there
+        
+        // Add one if it isn't there already.
+        if ( propertyJson == null ) propertyJson = new JSONObject();
+        if ( propertyId != null ) {
+            propertyJson.put( "sysmlid", propertyId );  // may already be there
+        }
     
         // add owner
         String jobId = job.optString( "sysmlid" );
         if ( jobId == null ) {
             jobId = job.optString( "id" );
-        }        
+        }
         if( jobId != null ) {
             propertyJson.put( "owner", jobId );
         }
@@ -2624,7 +2633,8 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         return propertyJson;
     }
     protected JSONObject getPropertyJson( String propertyId, JSONArray elements ) {
-        JSONObject propertyJson = new JSONObject();
+        if ( propertyId == null ) return null;
+        JSONObject propertyJson = null;//new JSONObject();
         for ( int i = 0; i < elements.length(); ++i ) {
             JSONObject element = elements.optJSONObject( i );
             if ( element == null ) continue;
@@ -2677,18 +2687,28 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
             json.put( "elements", elements );
         }
         
+        Map< String, JSONObject > elementMap = new LinkedHashMap< String, JSONObject >();
+        for ( int i = 1; i < elements.length(); i++ ) {
+            JSONObject elem = elements.optJSONObject( i );
+            if ( elem == null ) continue;
+            String sysmlId = elem.optString( "sysmlid" );
+            if ( sysmlId == null ) continue;
+            elementMap.put( sysmlId, elem );
+        }
+        
         // Generate or update element json for each of the properties.
         for ( int i = 1; i < elements.length(); i++ ) {
-            JSONObject job = elements.optJSONObject( i );
-            if ( EmsScriptNode.isJob( job ) )
-            processJobJson( job, elements, workspace, true );
+            JSONObject elem = elements.optJSONObject( i );
+            if ( EmsScriptNode.isJob( elem ) ) {
+                processJobJson( elem, elements, elementMap, workspace, true );
+            }
         }
         
         // Generate or update element json for each of the properties.
         if ( jobs != null ) {
             for ( int i = 1; i < jobs.length(); i++ ) {
                 JSONObject job = jobs.optJSONObject( i );
-                processJobJson( job, elements, workspace, false );
+                processJobJson( job, elements, elementMap, workspace, false );
             }
         }
         
