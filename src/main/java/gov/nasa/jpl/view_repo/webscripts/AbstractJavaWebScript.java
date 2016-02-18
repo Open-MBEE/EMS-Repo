@@ -2709,6 +2709,25 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
             if ( sysmlId == null ) continue;
             elementMap.put( sysmlId, elem );
         }
+        
+        // Add json for job elements whose Properties are posted without the job.
+        // We do this because only jobs that show up in the json are processed.
+        int length = elements.length();  // get length before loop since we will append to elements
+        for ( int i = 1; i < length; i++ ) {
+            JSONObject elem = elements.optJSONObject( i );
+            if ( elem == null ) continue;
+            EmsScriptNode job = getOwningJobOfPropertyJson( elem, workspace, null );
+            if ( job != null ) {
+                String jobId = job.getSysmlId();
+                if ( jobId != null && !elementMap.containsKey( jobId ) ) {
+                    // add placeholder json for job
+                    JSONObject jobJson = new JSONObject();
+                    jobJson.put( "sysmlid", jobId );
+                }
+                
+            }
+
+        }        
 
         // Generate or update element json for each of the properties.
         for ( int i = 1; i < elements.length(); i++ ) {
@@ -2728,6 +2747,17 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
 
         json.remove( "jobs" );
 
+    }
+
+    protected EmsScriptNode getOwningJobOfPropertyJson( JSONObject elem,
+                                                        WorkspaceNode workspace,
+                                                        Date dateTime ) {
+        if ( elem == null ) return null;
+        String ownerId = elem.optString( "owner" );
+        if ( ownerId == null ) return null;
+        EmsScriptNode owner = findScriptNodeById( ownerId, workspace, dateTime, false );
+        if ( owner.isJob() ) return owner;
+        return null;
     }
 
 
