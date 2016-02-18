@@ -74,7 +74,6 @@ public class JobGet extends ModelGet {
 
     protected JSONArray jobs = new JSONArray();
     protected Map<String, EmsScriptNode> jobsFound = new HashMap<String, EmsScriptNode>();
-    protected Map<String, List<EmsScriptNode>> jobProperties = new HashMap<String, List<EmsScriptNode>>();
 
     private boolean fromJenkins = false;
     
@@ -93,6 +92,7 @@ public class JobGet extends ModelGet {
         } else {
             return super.executeImplImpl( req, status, cache );
         }
+
     }
     
     protected Map<String, Object> executeImplImplNew(WebScriptRequest req, 
@@ -213,12 +213,17 @@ public class JobGet extends ModelGet {
     @Override
     protected JSONObject jobOrEle(EmsScriptNode job, WorkspaceNode ws, Date dateTime, String id,
                              boolean includeQualified, boolean isIncludeDocument ) {
+        JSONObject json = job.toJSONObject( ws,  dateTime, includeQualified, isIncludeDocument, elementProperties.get(id) );
         // NOTE: THIS FUNCTION MIGHT BE DEPREACTED         
-        if  ( false && job.isJob( ) ) {
-            return new JSONObject();  
+        if  ( job.isJob( ) ) {
+            for ( String propertyName : jobProperties ) {
+                EmsScriptNode propertyNode = getJobPropertyNode( job, propertyName );
+                // get value and add to json
+                
+            }
             //return job.toJSONObject( ws,  dateTime, includeQualified, isIncludeDocument, jobProperties.get(id) );
         }
-        return job.toJSONObject( ws,  dateTime, includeQualified, isIncludeDocument, jobProperties.get(id) );
+        return json;
     }
 
 }

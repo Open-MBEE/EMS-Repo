@@ -194,6 +194,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
     // Cache for whether node exists: node -> aspect -> true|false
     public Map< NodeRef, Map< ExistType, Boolean > > hasAspectCache =
             new HashMap< NodeRef, Map< ExistType, Boolean > >();
+
     static Map<String, String> definingFeatures = new LinkedHashMap< String, String >() {
         private static final long serialVersionUID = -6503314776361243306L;
         {
@@ -204,7 +205,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         }
     };
     static String[] jobProperties =
-    Utils.toArrayOfType( definingFeatures.keySet().toArray(), String.class );
+            Utils.toArrayOfType( definingFeatures.keySet().toArray(), String.class );
 
     protected void initMemberVariables(String siteName) {
 		companyhome = new ScriptNode(repository.getCompanyHome(), services);
@@ -2517,6 +2518,8 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
             propertyValues.put( propertyName, propertyValue );
             
             // Update or create the property json.
+            // FIXME -- If this is updating the passed in json, then it's
+            // getting added to the elements array twice.
             JSONObject propertyElementJson =
                     getJobProperty( propertyName, job, createNewJob, jobNode,
                                     elements );
@@ -2545,6 +2548,18 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
 //        }
     }
     
+    public EmsScriptNode getJobPropertyNode(Object jobNode, Object propertyName  ) {
+        Collection< EmsScriptNode > statusNodes = 
+                getSystemModel().getProperty( jobNode, propertyName );
+        if ( !Utils.isNullOrEmpty( statusNodes ) ) {
+            if ( statusNodes.size() > 1 ) {
+                // TODO -- ERROR
+            }
+            EmsScriptNode statusNode = statusNodes.iterator().next();
+            return statusNode;
+        }        
+        return null;
+    }
     
     /**
      * Find the Property representing the job property (such as status, schedule).
@@ -2570,15 +2585,11 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         
         // Get the property's id.
         if ( !createNewJob ) {
-             Collection< EmsScriptNode > statusNodes = 
-                     getSystemModel().getProperty( jobNode, propertyName );
-             if ( !Utils.isNullOrEmpty( statusNodes ) ) {
-                 if ( statusNodes.size() > 1 ) {
-                     // TODO -- ERROR
-                 }
-                 EmsScriptNode statusNode = statusNodes.iterator().next();
-                 propertyId = statusNode.getSysmlId();
-             }
+            EmsScriptNode statusNode =
+                    getJobPropertyNode( jobNode, propertyName );
+            if ( statusNode != null ) {
+                propertyId = statusNode.getSysmlId();
+            }
         }        
     
         // The property json this method returns
