@@ -3316,7 +3316,18 @@ common_filters + ['MMS_', '"timestamp"'],
 ["test", "workspaces", "develop", "develop2"]
 ],
 
-
+# CAEDVO-2987: make sure folks can post to a specified holding bin
+[
+10140,
+"PostToHoldingBin",
+"Post new element to holding bin",
+create_curl_cmd(type="POST", data="holdingBinOwner.json", base_url=BASE_URL_WS,
+                post_type="elements", branch="master/"),
+True,
+common_filters,
+["develop"]
+]
+         
 ]
 
 ##########################################################################################    

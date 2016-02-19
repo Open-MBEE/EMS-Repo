@@ -1,0 +1,8 @@
+{ "elements":
+  [
+    {
+      "sysmlid":"elementHoldingBin1",
+      "owner": "holding_bin_123456"
+    }
+  ]
+}
