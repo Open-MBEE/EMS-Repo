@@ -915,7 +915,7 @@ public class ModelPost extends AbstractJavaWebScript {
 
     protected boolean buildTransactionableElementMap(JSONArray jsonArray,
                                                      WorkspaceNode workspace, Map<String, Boolean> status) throws JSONException {
-	    boolean result = true;
+	    boolean result = true; 
 
 	    Map<String, String> child2OwnerMap = new HashMap<String, String>();
 	    Set<String> elementIds = new HashSet<String>();
@@ -964,6 +964,7 @@ public class ModelPost extends AbstractJavaWebScript {
 	        EmsScriptNode element = findScriptNodeById( sysmlId, workspace, null, true );
 	        if ( element != null ) {
 	            foundElements.put( sysmlId, element );
+	            updateProjectNodeId( workspace );
 	        } else {
 	            newElements.add( sysmlId );
 	        }
@@ -972,18 +973,23 @@ public class ModelPost extends AbstractJavaWebScript {
 	    String holdingBinFolderId = null;
 	    // lets create the holding bins if necessary
 	    for ( String sysmlId: elementIds ) {
-	        if ( !foundElements.containsKey( sysmlId ) ) {
-	            String ownerId = child2OwnerMap.get( sysmlId );
-	            if ( ownerId == null || ownerId.startsWith( "holding_bin" ) ) {
+            String ownerId = child2OwnerMap.get( sysmlId );
+            if ( ownerId == null ) {
+                if ( newElements.contains(sysmlId) ) {
                     if (holdingBinFolderId == null) {
                         holdingBinFolderId = injectHoldingBinFolders( jsonArray, workspace, child2OwnerMap, ownerId );
                     }
                     insertElementInHoldingBin( sysmlId, holdingBinFolderId, jsonArray, child2OwnerMap );
-  	            }
-	        }
+                }
+            } else if ( ownerId.startsWith( "holding_bin" ) ) {
+                if (holdingBinFolderId == null) {
+                    holdingBinFolderId = injectHoldingBinFolders( jsonArray, workspace, child2OwnerMap, ownerId );
+                }
+                insertElementInHoldingBin( sysmlId, holdingBinFolderId, jsonArray, child2OwnerMap );
+            }
 	    }
 	    
-	    // set the elementHierarchy
+	    // set the elementHierarchy and rootElements
 	    for ( String sysmlId: child2OwnerMap.keySet() ) {
 	        String ownerId = child2OwnerMap.get( sysmlId );
 	        
@@ -1179,46 +1185,44 @@ public class ModelPost extends AbstractJavaWebScript {
 	 * @return
 	 */
 	private String injectHoldingBinFolders(JSONArray jsonArray, WorkspaceNode workspace, Map<String, String> child2OwnerMap, String ownerId) {
-        // CAEDVO-2987: add holding bin partitions that aren't found
-	    if ( ownerId.startsWith( "holding_bin" )) {
+	    if ( ownerId != null && ownerId.startsWith( "holding_bin" )) {
 	        projectNodeId = ownerId.replace("holding_bin_", "");
 	        projectNode = findScriptNodeById(projectNodeId, workspace, null, false);
-	    } else {
-	        updateProjectNodeId(workspace);
 	    }
+	    String holdingBinId = "holding_bin_" + projectNodeId;
+	    
+	    preprocessJson( holdingBinId, projectNodeId, jsonArray, workspace, child2OwnerMap, false );
 
-	    JSONObject elementJson = new JSONObject();
         Calendar cal = Calendar.getInstance();
         int folders[] = {Calendar.YEAR, Calendar.MONTH, Calendar.DAY_OF_MONTH, Calendar.HOUR_OF_DAY};
-
+        String prefix[] = { "YY", "MM", "DD", "HH" }; 
+        
         // don't have owner for year - this should automatically get added to holding_bin
-        String folderId = String.format("%d_%s", cal.get(folders[0]), projectNodeId);
-        elementJson.put( "sysmlid", folderId );
-        elementJson.put( "name", String.format("%s", cal.get( folders[0] )) );
-        jsonArray.put( elementJson );
-        add2NewAndFoundElements( folderId, workspace, elementJson, false );
+        String folderId = String.format("%s_%d_%s", prefix[0], cal.get(folders[0]), projectNodeId);
+        preprocessJson( folderId, holdingBinId, jsonArray, workspace, child2OwnerMap, false );
         for (int ii = 1; ii < folders.length; ii++) {
-            folderId = String.format("%d_%s", cal.get(folders[ii]), projectNodeId);
-            String ownerFolderId = String.format( "%d_%s", cal.get(folders[ii-1]), projectNodeId);
-            elementJson = new JSONObject();
-            elementJson.put( "sysmlid", folderId );
-            elementJson.put( "name", String.format("%s", cal.get( folders[ii] )) );
-            elementJson.put( "owner", ownerFolderId );
-            jsonArray.put( elementJson );
-            child2OwnerMap.put( folderId, ownerFolderId );
-            add2NewAndFoundElements( folderId, workspace, elementJson, false );
+            folderId = String.format("%s_%d_%s", prefix[ii], cal.get(folders[ii]), projectNodeId);
+            String ownerFolderId = String.format( "%s_%d_%s", prefix[ii-1], cal.get(folders[ii-1]), projectNodeId);
+            preprocessJson( folderId, ownerFolderId, jsonArray, workspace, child2OwnerMap, false );
         }
 
         return folderId;
 	}
 	
 	private void insertElementInHoldingBin(String sysmlId, String holdingBinFolderId, JSONArray jsonArray, Map<String, String> child2OwnerMap) {
-        JSONObject elementJson = new JSONObject();
-        elementJson.put( "sysmlid", sysmlId );
-        elementJson.put( "owner", holdingBinFolderId );
-        jsonArray.put( elementJson );
-        child2OwnerMap.put( sysmlId, holdingBinFolderId );
-        add2NewAndFoundElements( sysmlId, null, elementJson, true );
+	    preprocessJson( sysmlId, holdingBinFolderId, jsonArray, null, child2OwnerMap, true );
+	}
+	
+	private void preprocessJson(String sysmlId, String ownerId, JSONArray jsonArray, WorkspaceNode ws, Map<String, String> child2OwnerMap, boolean forceNew) {
+	    JSONObject elementJson = elementMap.containsKey( sysmlId ) ? elementMap.get( sysmlId ) : new JSONObject();
+	    elementJson.put( "sysmlid", sysmlId );
+	    elementJson.put( "owner", ownerId );
+	    if ( !elementJson.has( "name" ) ) {
+	        elementJson.put( "name", sysmlId );
+	    }
+	    jsonArray.put( elementJson );
+	    child2OwnerMap.put( sysmlId, ownerId );
+	    add2NewAndFoundElements( sysmlId, ws, elementJson, forceNew );
 	}
 	
 	protected boolean fillRootElements(WorkspaceNode workspace)
