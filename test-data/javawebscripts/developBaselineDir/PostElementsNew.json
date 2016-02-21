@@ -1,10 +1,8 @@
 {"elements": [
     {
-        "sysmlid": "DD_20_123456",
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
-        "name": "DD_20_123456",
         "specialization": {"type": "Package"}
     },
     {
@@ -125,11 +123,9 @@
         }
     },
     {
-        "sysmlid": "YY_2016_123456",
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
-        "name": "YY_2016_123456",
         "specialization": {"type": "Package"}
     },
     {
@@ -205,11 +201,9 @@
         }
     },
     {
-        "sysmlid": "HH_23_123456",
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
-        "name": "HH_23_123456",
         "specialization": {"type": "Package"}
     },
     {
@@ -231,11 +225,9 @@
         }
     },
     {
-        "sysmlid": "MM_1_123456",
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
-        "name": "MM_1_123456",
         "specialization": {"type": "Package"}
     },
     {

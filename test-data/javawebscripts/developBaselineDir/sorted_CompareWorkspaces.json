@@ -1,21 +1,10 @@
 {
     "workspace1": {
-        "qualifiedName": "master/wsA",
         "name": "wsA",
         "elements": [
             {
-                "qualifiedName": "/no_site/no_site_no_project/holding_bin",
-                "name": "holding_bin",
-                "sysmlid": "holding_bin_no_site_no_project",
-                "owner": "no_site_no_project",
-                "specialization": {"type": "Package"},
-                "editable": true
-            },
-            {
-                "qualifiedName": "/no_site/no_site_no_project/holding_bin/300",
                 "name": "300",
                 "sysmlid": "x",
-                "owner": "holding_bin_no_site_no_project",
                 "documentation": "something",
                 "specialization": {
                     "propertyType": null,
@@ -28,6 +17,28 @@
                     "type": "Property"
                 },
                 "editable": true
+            },
+            {
+                "name": "holding_bin_123456",
+                "sysmlid": "holding_bin_123456",
+                "specialization": {"type": "Package"},
+                "editable": true
+            },
+            {
+                "specialization": {"type": "Package"},
+                "editable": true
+            },
+            {
+                "specialization": {"type": "Package"},
+                "editable": true
+            },
+            {
+                "specialization": {"type": "Package"},
+                "editable": true
+            },
+            {
+                "specialization": {"type": "Package"},
+                "editable": true
             }
         ]
     },
@@ -36,10 +47,8 @@
         "addedElements": [],
         "conflictedElements": [],
         "updatedElements": [{
-            "qualifiedName": "/no_site/no_site_no_project/holding_bin/300",
             "name": "300",
             "sysmlid": "x",
-            "owner": "holding_bin_no_site_no_project",
             "documentation": "x is x",
             "specialization": {
                 "value": [{
@@ -49,7 +58,6 @@
                 "type": "Property"
             }
         }],
-        "qualifiedName": "master/wsA/wsB",
         "name": "wsB",
         "movedElements": []
     }
