@@ -1,15 +1,12 @@
 {
     "workspace1": {
         "name": "wsA",
-        "qualifiedName": "master/wsA",
         "elements": [
             {
-                "qualifiedName": "/no_site/no_site_no_project/holding_bin/300",
                 "sysmlid": "x",
                 "editable": true,
                 "name": "300",
                 "documentation": "something",
-                "owner": "holding_bin_no_site_no_project",
                 "specialization": {
                     "propertyType": null,
                     "isDerived": false,
@@ -22,11 +19,33 @@
                 }
             },
             {
-                "qualifiedName": "/no_site/no_site_no_project/holding_bin",
-                "sysmlid": "holding_bin_no_site_no_project",
+                "sysmlid": "HH_22_123456",
                 "editable": true,
-                "name": "holding_bin",
-                "owner": "no_site_no_project",
+                "name": "HH_22_123456",
+                "specialization": {"type": "Package"}
+            },
+            {
+                "sysmlid": "DD_20_123456",
+                "editable": true,
+                "name": "DD_20_123456",
+                "specialization": {"type": "Package"}
+            },
+            {
+                "sysmlid": "MM_1_123456",
+                "editable": true,
+                "name": "MM_1_123456",
+                "specialization": {"type": "Package"}
+            },
+            {
+                "sysmlid": "YY_2016_123456",
+                "editable": true,
+                "name": "YY_2016_123456",
+                "specialization": {"type": "Package"}
+            },
+            {
+                "sysmlid": "holding_bin_123456",
+                "editable": true,
+                "name": "holding_bin_123456",
                 "specialization": {"type": "Package"}
             }
         ]
@@ -34,11 +53,9 @@
     "workspace2": {
         "deletedElements": [],
         "addedElements": [{
-            "qualifiedName": "/europa/JW_TEST/glomPost",
             "sysmlid": "glomPost",
             "editable": true,
             "name": "glomPost",
-            "owner": "123456",
             "documentation": "glomPost",
             "specialization": {
                 "propertyType": null,
@@ -53,11 +70,9 @@
         }],
         "conflictedElements": [],
         "updatedElements": [{
-            "qualifiedName": "/no_site/no_site_no_project/holding_bin/300",
             "name": "300",
             "sysmlid": "x",
             "documentation": "x is x",
-            "owner": "holding_bin_no_site_no_project",
             "specialization": {
                 "value": [{
                     "string": "the x value",
@@ -67,7 +82,6 @@
             }
         }],
         "name": "wsB",
-        "qualifiedName": "master/wsA/wsB",
         "movedElements": []
     }
 }

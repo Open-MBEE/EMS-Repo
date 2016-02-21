@@ -21,15 +21,15 @@
         }
     },
     {
-        "qualifiedId": "/no_site/no_site_no_project/holding_bin_no_site_no_project/x",
-        "qualifiedName": "/no_site/no_site_no_project/holding_bin/300",
+        "qualifiedId": "/europa/123456/holding_bin_123456/YY_2016_123456/MM_1_123456/DD_20_123456/HH_22_123456/x",
+        "qualifiedName": "/europa/JW_TEST/holding_bin_123456/YY_2016_123456/MM_1_123456/DD_20_123456/HH_22_123456/300",
         "sysmlid": "x",
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
         "name": "300",
         "documentation": "something",
-        "owner": "holding_bin_no_site_no_project",
+        "owner": "HH_22_123456",
         "specialization": {
             "propertyType": null,
             "isSlot": false,

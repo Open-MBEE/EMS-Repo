@@ -913,6 +913,14 @@ public class ModelPost extends AbstractJavaWebScript {
 		return isValid;
 	}
 
+	/**
+	 * Build the element map adding in holding_bin
+	 * @param jsonArray
+	 * @param workspace
+	 * @param status
+	 * @return
+	 * @throws JSONException
+	 */
     protected boolean buildTransactionableElementMap(JSONArray jsonArray,
                                                      WorkspaceNode workspace, Map<String, Boolean> status) throws JSONException {
 	    boolean result = true; 
@@ -1019,148 +1027,14 @@ public class ModelPost extends AbstractJavaWebScript {
         
 	    return result;
 	}
-	
-//	protected boolean buildTransactionableElementMap(JSONArray jsonArray,
-//			WorkspaceNode workspace, Map<String, Boolean> status) throws JSONException {
-//		boolean isValid = true;
-//		
-//		for (int ii = 0; ii < jsonArray.length(); ii++) {
-//			JSONObject elementJson = jsonArray.getJSONObject(ii);
-//
-//			// If element does not have a ID, then create one for it using the
-//			// alfresco id (cm:id):
-//			if (!elementJson.has(Acm.JSON_ID)) {
-//				elementJson.put(Acm.JSON_ID, NodeUtil.createId(services));
-//			}
-//			String sysmlId = null;
-//			try {
-//				sysmlId = elementJson.getString(Acm.JSON_ID);
-//			} catch (JSONException e) {
-//				// ignore
-//			}
-//			if (sysmlId == null) {
-//				log(Level.ERROR, HttpServletResponse.SC_NOT_FOUND,
-//						"No id in element json!");
-//				continue;
-//			}
-//			elementMap.put(sysmlId, elementJson);
-//
-//			EmsScriptNode node = findScriptNodeById(sysmlId, workspace, null,
-//					true);
-//			if (node == null) {
-//				newElements.add(sysmlId);
-//			} else {
-//				foundElements.put(sysmlId, node);
-//			}
-//
-//			// create the hierarchy
-//			if (elementJson.has(Acm.JSON_OWNER)) {
-//				Object ownerJson = elementJson.get(Acm.JSON_OWNER);
-//				String ownerId = null;
-//				if (!ownerJson.equals(JSONObject.NULL)) {
-//					ownerId = elementJson.getString(Acm.JSON_OWNER);
-//				}
-//				// if owner is null, leave at project root level
-//				if (ownerId == null) { // || ownerId.equals("null")) {
-//					if (projectNode != null) {
-//						ownerId = projectNode.getSysmlId();
-//					} else {
-//						String siteName = (getSiteInfo() == null ? NO_SITE_ID
-//								: getSiteInfo().getShortName());
-//						// If project is null, put it in NO_PROJECT.
-//						// TODO -- REVIEW -- this probably deserves a
-//						// warning--we should never get here, right?
-//						ownerId = siteName + "_" + NO_PROJECT_ID;
-//						EmsScriptNode noProjectNode = findScriptNodeById(
-//								ownerId, workspace, null, false);
-//						if (noProjectNode == null) {
-//							ProjectPost pp = new ProjectPost(repository,
-//									services);
-//							pp.updateOrCreateProject(new JSONObject(),
-//									workspace, ownerId, siteName, true, false);
-//						}
-//					}
-//					rootElements.add(sysmlId);
-//				}
-//				if (foundElements.containsKey(ownerId)
-//						|| newElements.contains(ownerId)) {
-//					// skip -- already got it, or it's new and we don't care
-//				} else {
-//					EmsScriptNode ownerNode = findScriptNodeById(ownerId,
-//							workspace, null, true);
-//					if (ownerNode != null) {
-//						foundElements.put(ownerId, ownerNode);
-//					}
-//				}
-//				if (!elementHierarchyJson.has(ownerId)) {
-//					elementHierarchyJson.put(ownerId, new JSONArray());
-//				}
-//				elementHierarchyJson.getJSONArray(ownerId).put(sysmlId);
-//			} else {
-//				// if no owners are specified, add directly to root elements
-//			    // just add to elementHierarchy
-//				rootElements.add(sysmlId);
-//	             if (!elementHierarchyJson.has(sysmlId)) {
-//	                    elementHierarchyJson.put(sysmlId, new JSONArray());
-//                }
-//			}
-//		}
-//
-//		for (EmsScriptNode node : foundElements.values()) {
-//			if (!checkPermissions(node, PermissionService.WRITE)) {
-//				// bail on whole thing
-//				isValid = false;
-//				log(Level.WARN, HttpServletResponse.SC_FORBIDDEN,
-//						"No permission to write to %s:%s", node.getSysmlId(),
-//						node.getSysmlName());
-//			}
-//		}
-//
-//		// Put anything without a found owner in the holding bin in year/month/day/hour folders
-//		String holdingBinFolderId = null;
-//        
-//        Iterator<?> keys = elementHierarchyJson.keys();
-//        Set<String> visited = new HashSet<String>();
-//        
-//		while (keys.hasNext()) {
-//			String ownerId = (String) keys.next();
-//			JSONArray children = elementHierarchyJson.getJSONArray( ownerId );
-//			
-//			for (int ii = 0; ii < children.length(); ii++) {
-//                // if trying to place in holding_bin, need to modify
-//                if (ownerId.startsWith( "holding_bin" )) {
-//                    String childId = children.getString( ii );
-//                    if ( !newElements.contains(childId) || !foundElements.containsKey(childId) ) {
-//                        if (holdingBinFolderId == null) {
-//                            holdingBinFolderId = injectHoldingBinFolders( jsonArray, workspace );
-//                        }
-//                        insertElementInHoldingBin( childId, holdingBinFolderId, jsonArray );
-//                    }
-//                    visited.add( childId );
-//                }
-//			}
-//			
-//			if ( !visited.contains( ownerId ) ) {
-//                if ( !foundElements.containsKey(ownerId) ) {
-//                    if (holdingBinFolderId == null) {
-//                        holdingBinFolderId = injectHoldingBinFolders( jsonArray, workspace );
-//                    }
-//                    insertElementInHoldingBin( ownerId, holdingBinFolderId, jsonArray );
-//                }
-//                visited.add( ownerId );
-//			}
-//		}
-//
-//		if (isValid) {
-//			isValid = fillRootElements(workspace);
-//		}
-//		
-//		if (status != null) {
-//		    status.put( "foldersInserted", holdingBinFolderId == null ? false : true );
-//		}
-//		return isValid;
-//	}
-
+    
+    /**
+     * Utility for adding new and found elements to the global variables
+     * @param sysmlId
+     * @param workspace
+     * @param elementJson
+     * @param forceNew
+     */
 	private void add2NewAndFoundElements(String sysmlId, WorkspaceNode workspace, JSONObject elementJson, boolean forceNew) {
         if ( elementJson != null ) {
             elementMap.put( sysmlId, elementJson );
@@ -1189,7 +1063,6 @@ public class ModelPost extends AbstractJavaWebScript {
 	private String injectHoldingBinFolders(JSONArray jsonArray, WorkspaceNode workspace, Map<String, String> child2OwnerMap, String ownerId) {
 	    
 	    if ( ownerId != null && ownerId.startsWith( "holding_bin" )) {
-	        //projectNodeId = ownerId.replace("holding_bin_", "");
 	        projectNode = findScriptNodeById(ownerId.replace("holding_bin_", ""), workspace, null, false);
 	    }
 	    if (projectNodeId == null) {
@@ -1220,6 +1093,16 @@ public class ModelPost extends AbstractJavaWebScript {
 	    preprocessJson( sysmlId, holdingBinFolderId, jsonArray, null, child2OwnerMap, true, false );
 	}
 	
+	/**
+	 * Add element with holding_bin elements into JSON
+	 * @param sysmlId
+	 * @param ownerId
+	 * @param jsonArray
+	 * @param ws
+	 * @param child2OwnerMap
+	 * @param forceNew
+	 * @param isPackage
+	 */
 	private void preprocessJson(String sysmlId, String ownerId, JSONArray jsonArray, WorkspaceNode ws, Map<String, String> child2OwnerMap, boolean forceNew, boolean isPackage) {
 	    JSONObject elementJson = elementMap.containsKey( sysmlId ) ? elementMap.get( sysmlId ) : new JSONObject();
 	    elementJson.put( "sysmlid", sysmlId );

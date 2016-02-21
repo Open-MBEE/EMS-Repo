@@ -3,15 +3,12 @@
     "email": "admin@alfresco.com",
     "user": "admin",
     "workspace1": {
-        "qualifiedName": "master/wsA",
         "name": "wsA",
         "elements": [
             {
-                "qualifiedName": "/no_site/no_site_no_project/holding_bin/300",
                 "sysmlid": "x",
                 "editable": true,
                 "name": "300",
-                "owner": "holding_bin_no_site_no_project",
                 "documentation": "something",
                 "specialization": {
                     "propertyType": null,
@@ -25,11 +22,33 @@
                 }
             },
             {
-                "qualifiedName": "/no_site/no_site_no_project/holding_bin",
-                "sysmlid": "holding_bin_no_site_no_project",
+                "sysmlid": "HH_22_123456",
                 "editable": true,
-                "name": "holding_bin",
-                "owner": "no_site_no_project",
+                "name": "HH_22_123456",
+                "specialization": {"type": "Package"}
+            },
+            {
+                "sysmlid": "DD_20_123456",
+                "editable": true,
+                "name": "DD_20_123456",
+                "specialization": {"type": "Package"}
+            },
+            {
+                "sysmlid": "MM_1_123456",
+                "editable": true,
+                "name": "MM_1_123456",
+                "specialization": {"type": "Package"}
+            },
+            {
+                "sysmlid": "YY_2016_123456",
+                "editable": true,
+                "name": "YY_2016_123456",
+                "specialization": {"type": "Package"}
+            },
+            {
+                "sysmlid": "holding_bin_123456",
+                "editable": true,
+                "name": "holding_bin_123456",
                 "specialization": {"type": "Package"}
             }
         ]
@@ -40,8 +59,6 @@
         "conflictedElements": [],
         "updatedElements": [{
             "name": "300",
-            "qualifiedName": "/no_site/no_site_no_project/holding_bin/300",
-            "owner": "holding_bin_no_site_no_project",
             "documentation": "x is x",
             "sysmlid": "x",
             "specialization": {
@@ -52,7 +69,6 @@
                 "type": "Property"
             }
         }],
-        "qualifiedName": "master/wsA/wsB",
         "name": "wsB",
         "movedElements": []
     }

@@ -1,6 +1,4 @@
 {"elements": [{
-    "qualifiedId": "/no_site/no_site_no_project/holding_bin_no_site_no_project/MMS_1450390431247_8a4b76d2-394c-4569-9abe-5c51dc4b0811",
-    "qualifiedName": "/no_site/no_site_no_project/holding_bin/View X",
     "sysmlid": "MMS_1450390431247_8a4b76d2-394c-4569-9abe-5c51dc4b0811",
     "isMetatype": false,
     "editable": true,
@@ -8,7 +6,6 @@
     "modifier": "admin",
     "name": "View X",
     "documentation": "",
-    "owner": "holding_bin_no_site_no_project",
     "appliedMetatypes": [
         "_17_0_1_232f03dc_1325612611695_581988_21583",
         "_9_0_62a020a_1105704885343_144138_7929"

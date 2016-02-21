@@ -1,26 +1,18 @@
 {"elements": [
     {
-        "qualifiedId": "/europa/123456/dlam",
-        "qualifiedName": "/europa/JW_TEST/dlam",
-        "sysmlid": "dlam",
+        "sysmlid": "123456",
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
-        "name": "dlam",
-        "documentation": "to make compatible with value specs (this is just a Element)",
-        "owner": "123456",
-        "specialization": {"type": "Element"}
+        "name": "JW_TEST",
     },
     {
-        "qualifiedId": "/europa/123456/4000",
-        "qualifiedName": "/europa/JW_TEST/400",
         "sysmlid": "4000",
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
         "name": "400",
         "documentation": "4something",
-        "owner": "123456",
         "specialization": {
             "propertyType": null,
             "isSlot": false,
@@ -33,15 +25,12 @@
         }
     },
     {
-        "qualifiedId": "/europa/123456/300",
-        "qualifiedName": "/europa/JW_TEST/300",
         "sysmlid": "300",
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
         "name": "300",
         "documentation": "something",
-        "owner": "123456",
         "specialization": {
             "propertyType": null,
             "isSlot": false,
@@ -54,26 +43,45 @@
         }
     },
     {
-        "qualifiedId": "/europa/123456/multRedefPackage",
-        "qualifiedName": "/europa/JW_TEST/multRedefPackage",
+        "sysmlid": "dlam",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "dlam",
+        "documentation": "to make compatible with value specs (this is just a Element)",
+        "specialization": {"type": "Element"}
+    },
+    {
+        "sysmlid": "holding_bin_123456",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "holding_bin_123456",
+        "specialization": {"type": "Package"}
+    },
+    {
         "sysmlid": "multRedefPackage",
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
         "name": "multRedefPackage",
         "documentation": "package for testing multiplicity and redefines attributes of Property",
-        "owner": "123456",
         "specialization": {"type": "Package"}
     },
     {
-        "qualifiedId": "/europa/123456",
-        "qualifiedName": "/europa/JW_TEST",
-        "sysmlid": "123456",
+        "sysmlid": "found",
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
-        "name": "JW_TEST",
-        "owner": null,
+        "name": "found",
+        "documentation": "",
+        "specialization": {
+            "specification": {
+                "expressionBody": ["foo8"],
+                "type": "OpaqueExpression"
+            },
+            "type": "Constraint"
+        }
     }
 ]}
 200

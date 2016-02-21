@@ -1,16 +1,56 @@
-{"elements": [{
-    "modifier": "admin",
-    "qualifiedId": "/no_site/no_site_no_project/holding_bin_no_site_no_project/f",
-    "qualifiedName": "/no_site/no_site_no_project/holding_bin/null",
-    "sysmlid": "f",
-    "documentation": "f is f",
-    "owner": "holding_bin_no_site_no_project",
-    "specialization": {
-        "source": null,
-        "target": null,
-        "type": "Expose"
+{"elements": [
+    {
+        "sysmlid": "holding_bin_no_site_no_project",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "holding_bin_no_site_no_project",
+        "specialization": {"type": "Package"}
     },
-    "editable": true,
-    "creator": "admin",
-}]}
+    {
+        "sysmlid": "MM_1_no_site_no_project",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "MM_1_no_site_no_project",
+        "specialization": {"type": "Package"}
+    },
+    {
+        "sysmlid": "HH_22_no_site_no_project",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "HH_22_no_site_no_project",
+        "specialization": {"type": "Package"}
+    },
+    {
+        "sysmlid": "f",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "f",
+        "documentation": "f is f",
+        "specialization": {
+            "source": null,
+            "target": null,
+            "type": "Expose"
+        }
+    },
+    {
+        "sysmlid": "DD_20_no_site_no_project",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "DD_20_no_site_no_project",
+        "specialization": {"type": "Package"}
+    },
+    {
+        "sysmlid": "YY_2016_no_site_no_project",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "YY_2016_no_site_no_project",
+        "specialization": {"type": "Package"}
+    }
+]}
 200

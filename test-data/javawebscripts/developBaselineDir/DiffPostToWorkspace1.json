@@ -1,21 +1,61 @@
-{"elements": [{
-    "qualifiedId": "/no_site/no_site_no_project/holding_bin_no_site_no_project/newElement",
-    "qualifiedName": "/no_site/no_site_no_project/holding_bin/null",
-    "sysmlid": "newElement",
-    "editable": true,
-    "creator": "admin",
-    "modifier": "admin",
-    "documentation": "x is x",
-    "owner": "holding_bin_no_site_no_project",
-    "specialization": {
-        "propertyType": null,
-        "isSlot": false,
-        "isDerived": false,
-        "value": [{
-            "string": "the element added to ws1",
-            "type": "LiteralString"
-        }],
-        "type": "Property"
+{"elements": [
+    {
+        "sysmlid": "holding_bin_no_site_no_project",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "holding_bin_no_site_no_project",
+        "specialization": {"type": "Package"}
+    },
+    {
+        "sysmlid": "DD_20_no_site_no_project",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "DD_20_no_site_no_project",
+        "specialization": {"type": "Package"}
+    },
+    {
+        "sysmlid": "MM_1_no_site_no_project",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "MM_1_no_site_no_project",
+        "specialization": {"type": "Package"}
+    },
+    {
+        "sysmlid": "YY_2016_no_site_no_project",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "YY_2016_no_site_no_project",
+        "specialization": {"type": "Package"}
+    },
+    {
+        "sysmlid": "newElement",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "newElement",
+        "documentation": "x is x",
+        "specialization": {
+            "propertyType": null,
+            "isSlot": false,
+            "isDerived": false,
+            "value": [{
+                "string": "the element added to ws1",
+                "type": "LiteralString"
+            }],
+            "type": "Property"
+        }
+    },
+    {
+        "sysmlid": "HH_22_no_site_no_project",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "HH_22_no_site_no_project",
+        "specialization": {"type": "Package"}
     }
-}]}
+]}
 200
