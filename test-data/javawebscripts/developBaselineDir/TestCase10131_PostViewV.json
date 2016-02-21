@@ -24,6 +24,7 @@
         "creator": "admin",
         "modifier": "admin",
         "specialization": {
+            "aggregation": "COMPOSITE",
             "isSlot": false,
             "isDerived": false,
             "type": "Property"
@@ -34,25 +35,6 @@
         "creator": "admin",
         "modifier": "admin",
         "specialization": {
-            "ownedEnd": [],
-            "type": "Association"
-        }
-    },
-    {
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "specialization": {
-            "ownedEnd": [],
-            "type": "Association"
-        }
-    },
-    {
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "specialization": {
-            "aggregation": "COMPOSITE",
             "isSlot": false,
             "isDerived": false,
             "type": "Property"
@@ -87,9 +69,8 @@
         "creator": "admin",
         "modifier": "admin",
         "specialization": {
-            "isSlot": false,
-            "isDerived": false,
-            "type": "Property"
+            "ownedEnd": [],
+            "type": "Association"
         }
     },
     {
@@ -100,6 +81,15 @@
             "isSlot": false,
             "isDerived": false,
             "type": "Property"
+        }
+    },
+    {
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "specialization": {
+            "ownedEnd": [],
+            "type": "Association"
         }
     },
     {
@@ -108,6 +98,16 @@
         "modifier": "admin",
         "specialization": {
             "aggregation": "COMPOSITE",
+            "isSlot": false,
+            "isDerived": false,
+            "type": "Property"
+        }
+    },
+    {
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "specialization": {
             "isSlot": false,
             "isDerived": false,
             "type": "Property"

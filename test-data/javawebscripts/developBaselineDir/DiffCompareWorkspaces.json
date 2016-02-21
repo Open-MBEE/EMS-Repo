@@ -3,26 +3,18 @@
         "name": "ws2",
         "elements": [
             {
-                "name": "DD_20_no_site_no_project",
-                "sysmlid": "DD_20_no_site_no_project",
                 "specialization": {"type": "Package"},
                 "editable": true,
             },
             {
-                "name": "HH_22_no_site_no_project",
-                "sysmlid": "HH_22_no_site_no_project",
                 "specialization": {"type": "Package"},
                 "editable": true,
             },
             {
-                "name": "MM_1_no_site_no_project",
-                "sysmlid": "MM_1_no_site_no_project",
                 "specialization": {"type": "Package"},
                 "editable": true,
             },
             {
-                "name": "YY_2016_no_site_no_project",
-                "sysmlid": "YY_2016_no_site_no_project",
                 "specialization": {"type": "Package"},
                 "editable": true,
             },

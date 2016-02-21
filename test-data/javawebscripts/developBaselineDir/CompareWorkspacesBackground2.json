@@ -22,27 +22,19 @@
                 }
             },
             {
-                "sysmlid": "HH_22_123456",
                 "editable": true,
-                "name": "HH_22_123456",
                 "specialization": {"type": "Package"}
             },
             {
-                "sysmlid": "DD_20_123456",
                 "editable": true,
-                "name": "DD_20_123456",
                 "specialization": {"type": "Package"}
             },
             {
-                "sysmlid": "MM_1_123456",
                 "editable": true,
-                "name": "MM_1_123456",
                 "specialization": {"type": "Package"}
             },
             {
-                "sysmlid": "YY_2016_123456",
                 "editable": true,
-                "name": "YY_2016_123456",
                 "specialization": {"type": "Package"}
             },
             {

@@ -8,14 +8,6 @@
         "specialization": {"type": "Package"}
     },
     {
-        "sysmlid": "holding_bin_123456",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "holding_bin_123456",
-        "specialization": {"type": "Package"}
-    },
-    {
         "sysmlid": "notFound",
         "editable": true,
         "creator": "admin",
@@ -24,11 +16,50 @@
         "specialization": {"type": "Element"}
     },
     {
-        "sysmlid": "HH_22_123456",
+        "sysmlid": "holding_bin_123456",
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
-        "name": "HH_22_123456",
+        "name": "holding_bin_123456",
+        "specialization": {"type": "Package"}
+    },
+    {
+        "sysmlid": "notFoundTest2",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "notFoundTest2",
+        "documentation": "",
+        "specialization": {
+            "specification": {
+                "expressionBody": ["foo8"],
+                "type": "OpaqueExpression"
+            },
+            "type": "Constraint"
+        }
+    },
+    {
+        "sysmlid": "YY_2016_123456",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "YY_2016_123456",
+        "specialization": {"type": "Package"}
+    },
+    {
+        "sysmlid": "notFound2",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "notFound2",
+        "specialization": {"type": "Element"}
+    },
+    {
+        "sysmlid": "HH_23_123456",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "HH_23_123456",
         "specialization": {"type": "Package"}
     },
     {
@@ -68,37 +99,6 @@
             },
             "type": "Constraint"
         }
-    },
-    {
-        "sysmlid": "notFoundTest2",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "notFoundTest2",
-        "documentation": "",
-        "specialization": {
-            "specification": {
-                "expressionBody": ["foo8"],
-                "type": "OpaqueExpression"
-            },
-            "type": "Constraint"
-        }
-    },
-    {
-        "sysmlid": "notFound2",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "notFound2",
-        "specialization": {"type": "Element"}
-    },
-    {
-        "sysmlid": "YY_2016_123456",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "YY_2016_123456",
-        "specialization": {"type": "Package"}
     }
 ]}
 200

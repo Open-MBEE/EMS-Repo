@@ -1,107 +1,53 @@
 {"elements": [
     {
-        "sysmlid": "List",
+        "sysmlid": "Not",
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
-        "name": "List",
+        "name": "Not",
         "specialization": {
             "parameters": [],
             "type": "Operation"
         }
     },
     {
-        "sysmlid": "EQ",
+        "sysmlid": "Type",
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
-        "name": "EQ",
+        "name": "Type",
         "specialization": {
             "parameters": [],
             "type": "Operation"
         }
     },
     {
-        "sysmlid": "ForAll",
+        "sysmlid": "GT",
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
-        "name": "ForAll",
+        "name": "GT",
         "specialization": {
             "parameters": [],
             "type": "Operation"
         }
     },
     {
-        "sysmlid": "Min",
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
-        "name": "Min",
-        "specialization": {
-            "parameters": [],
-            "type": "Operation"
-        }
-    },
-    {
-        "sysmlid": "DD_20_no_site_no_project",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "DD_20_no_site_no_project",
         "specialization": {"type": "Package"}
     },
     {
-        "sysmlid": "sum",
+        "sysmlid": "Name",
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
-        "name": "sum",
+        "name": "Name",
         "specialization": {
             "parameters": [],
             "type": "Operation"
         }
-    },
-    {
-        "sysmlid": "Equals",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "Equals",
-        "specialization": {
-            "parameters": [],
-            "type": "Operation"
-        }
-    },
-    {
-        "sysmlid": "Xor",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "Xor",
-        "specialization": {
-            "parameters": [],
-            "type": "Operation"
-        }
-    },
-    {
-        "sysmlid": "LT",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "LT",
-        "specialization": {
-            "parameters": [],
-            "type": "Operation"
-        }
-    },
-    {
-        "sysmlid": "MM_1_no_site_no_project",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "MM_1_no_site_no_project",
-        "specialization": {"type": "Package"}
     },
     {
         "sysmlid": "DoesThereExist",
@@ -109,17 +55,6 @@
         "creator": "admin",
         "modifier": "admin",
         "name": "DoesThereExist",
-        "specialization": {
-            "parameters": [],
-            "type": "Operation"
-        }
-    },
-    {
-        "sysmlid": "GTE",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "GTE",
         "specialization": {
             "parameters": [],
             "type": "Operation"
@@ -137,134 +72,74 @@
         }
     },
     {
-        "sysmlid": "Table",
+        "sysmlid": "NotEquals",
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
-        "name": "Table",
+        "name": "NotEquals",
         "specialization": {
             "parameters": [],
             "type": "Operation"
         }
     },
     {
-        "sysmlid": "Less",
+        "sysmlid": "List",
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
-        "name": "Less",
+        "name": "List",
         "specialization": {
             "parameters": [],
             "type": "Operation"
         }
     },
     {
-        "sysmlid": "Text",
+        "sysmlid": "Id",
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
-        "name": "Text",
+        "name": "Id",
         "specialization": {
             "parameters": [],
             "type": "Operation"
         }
     },
     {
-        "sysmlid": "Value",
+        "sysmlid": "operations",
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
-        "name": "Value",
-        "specialization": {
-            "parameters": [],
-            "type": "Operation"
-        }
-    },
-    {
-        "sysmlid": "Sum",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "Sum",
-        "specialization": {
-            "parameters": [],
-            "type": "Operation"
-        }
-    },
-    {
-        "sysmlid": "GreaterEquals",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "GreaterEquals",
-        "specialization": {
-            "parameters": [],
-            "type": "Operation"
-        }
-    },
-    {
-        "sysmlid": "dateFromTimestamp",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "dateFromTimestamp",
-        "specialization": {
-            "parameters": [],
-            "type": "Operation"
-        }
-    },
-    {
-        "sysmlid": "Plus",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "Plus",
-        "specialization": {
-            "parameters": [],
-            "type": "Operation"
-        }
-    },
-    {
-        "sysmlid": "holding_bin_no_site_no_project",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "holding_bin_no_site_no_project",
+        "name": "operations",
         "specialization": {"type": "Package"}
     },
     {
-        "sysmlid": "Type",
+        "sysmlid": "Greater",
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
-        "name": "Type",
+        "name": "Greater",
         "specialization": {
             "parameters": [],
             "type": "Operation"
         }
     },
     {
-        "sysmlid": "HH_22_no_site_no_project",
+        "sysmlid": "LTE",
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
-        "name": "HH_22_no_site_no_project",
-        "specialization": {"type": "Package"}
+        "name": "LTE",
+        "specialization": {
+            "parameters": [],
+            "type": "Operation"
+        }
     },
     {
-        "sysmlid": "YY_2016_no_site_no_project",
+        "sysmlid": "Add",
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
-        "name": "YY_2016_no_site_no_project",
-        "specialization": {"type": "Package"}
-    },
-    {
-        "sysmlid": "Or",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "Or",
+        "name": "Add",
         "specialization": {
             "parameters": [],
             "type": "Operation"
@@ -293,66 +168,29 @@
         }
     },
     {
-        "sysmlid": "Name",
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
-        "name": "Name",
-        "specialization": {
-            "parameters": [],
-            "type": "Operation"
-        }
+        "specialization": {"type": "Package"}
     },
     {
-        "sysmlid": "ThereExists",
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
-        "name": "ThereExists",
-        "specialization": {
-            "parameters": [],
-            "type": "Operation"
-        }
+        "specialization": {"type": "Package"}
     },
     {
-        "sysmlid": "Add",
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
-        "name": "Add",
-        "specialization": {
-            "parameters": [],
-            "type": "Operation"
-        }
+        "specialization": {"type": "Package"}
     },
     {
-        "sysmlid": "Conditional",
+        "sysmlid": "Text",
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
-        "name": "Conditional",
-        "specialization": {
-            "parameters": [],
-            "type": "Operation"
-        }
-    },
-    {
-        "sysmlid": "Divide",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "Divide",
-        "specialization": {
-            "parameters": [],
-            "type": "Operation"
-        }
-    },
-    {
-        "sysmlid": "Minus",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "Minus",
+        "name": "Text",
         "specialization": {
             "parameters": [],
             "type": "Operation"
@@ -370,99 +208,44 @@
         }
     },
     {
-        "sysmlid": "Greater",
+        "sysmlid": "Divide",
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
-        "name": "Greater",
+        "name": "Divide",
         "specialization": {
             "parameters": [],
             "type": "Operation"
         }
     },
     {
-        "sysmlid": "max",
+        "sysmlid": "Evaluate",
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
-        "name": "max",
+        "name": "Evaluate",
         "specialization": {
             "parameters": [],
             "type": "Operation"
         }
     },
     {
-        "sysmlid": "Negative",
+        "sysmlid": "LT",
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
-        "name": "Negative",
+        "name": "LT",
         "specialization": {
             "parameters": [],
             "type": "Operation"
         }
     },
     {
-        "sysmlid": "NotEquals",
+        "sysmlid": "EQ",
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
-        "name": "NotEquals",
-        "specialization": {
-            "parameters": [],
-            "type": "Operation"
-        }
-    },
-    {
-        "sysmlid": "And",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "And",
-        "specialization": {
-            "parameters": [],
-            "type": "Operation"
-        }
-    },
-    {
-        "sysmlid": "Sub",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "Sub",
-        "specialization": {
-            "parameters": [],
-            "type": "Operation"
-        }
-    },
-    {
-        "sysmlid": "LessEquals",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "LessEquals",
-        "specialization": {
-            "parameters": [],
-            "type": "Operation"
-        }
-    },
-    {
-        "sysmlid": "Id",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "Id",
-        "specialization": {
-            "parameters": [],
-            "type": "Operation"
-        }
-    },
-    {
-        "sysmlid": "LTE",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "LTE",
+        "name": "EQ",
         "specialization": {
             "parameters": [],
             "type": "Operation"
@@ -480,41 +263,250 @@
         }
     },
     {
-        "sysmlid": "Not",
+        "sysmlid": "Equals",
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
-        "name": "Not",
+        "name": "Equals",
         "specialization": {
             "parameters": [],
             "type": "Operation"
         }
     },
     {
-        "sysmlid": "GT",
+        "sysmlid": "GTE",
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
-        "name": "GT",
+        "name": "GTE",
         "specialization": {
             "parameters": [],
             "type": "Operation"
         }
     },
     {
-        "sysmlid": "operations",
+        "sysmlid": "LessEquals",
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
-        "name": "operations",
+        "name": "LessEquals",
+        "specialization": {
+            "parameters": [],
+            "type": "Operation"
+        }
+    },
+    {
+        "sysmlid": "max",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "max",
+        "specialization": {
+            "parameters": [],
+            "type": "Operation"
+        }
+    },
+    {
+        "sysmlid": "Plus",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "Plus",
+        "specialization": {
+            "parameters": [],
+            "type": "Operation"
+        }
+    },
+    {
+        "sysmlid": "And",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "And",
+        "specialization": {
+            "parameters": [],
+            "type": "Operation"
+        }
+    },
+    {
+        "sysmlid": "Or",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "Or",
+        "specialization": {
+            "parameters": [],
+            "type": "Operation"
+        }
+    },
+    {
+        "sysmlid": "ThereExists",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "ThereExists",
+        "specialization": {
+            "parameters": [],
+            "type": "Operation"
+        }
+    },
+    {
+        "sysmlid": "ForAll",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "ForAll",
+        "specialization": {
+            "parameters": [],
+            "type": "Operation"
+        }
+    },
+    {
+        "sysmlid": "Xor",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "Xor",
+        "specialization": {
+            "parameters": [],
+            "type": "Operation"
+        }
+    },
+    {
+        "sysmlid": "GreaterEquals",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "GreaterEquals",
+        "specialization": {
+            "parameters": [],
+            "type": "Operation"
+        }
+    },
+    {
+        "sysmlid": "Min",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "Min",
+        "specialization": {
+            "parameters": [],
+            "type": "Operation"
+        }
+    },
+    {
+        "sysmlid": "Value",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "Value",
+        "specialization": {
+            "parameters": [],
+            "type": "Operation"
+        }
+    },
+    {
+        "sysmlid": "Table",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "Table",
+        "specialization": {
+            "parameters": [],
+            "type": "Operation"
+        }
+    },
+    {
+        "sysmlid": "holding_bin_no_site_no_project",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "holding_bin_no_site_no_project",
         "specialization": {"type": "Package"}
     },
     {
-        "sysmlid": "Evaluate",
+        "sysmlid": "Negative",
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
-        "name": "Evaluate",
+        "name": "Negative",
+        "specialization": {
+            "parameters": [],
+            "type": "Operation"
+        }
+    },
+    {
+        "sysmlid": "Sub",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "Sub",
+        "specialization": {
+            "parameters": [],
+            "type": "Operation"
+        }
+    },
+    {
+        "sysmlid": "sum",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "sum",
+        "specialization": {
+            "parameters": [],
+            "type": "Operation"
+        }
+    },
+    {
+        "sysmlid": "Minus",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "Minus",
+        "specialization": {
+            "parameters": [],
+            "type": "Operation"
+        }
+    },
+    {
+        "sysmlid": "Conditional",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "Conditional",
+        "specialization": {
+            "parameters": [],
+            "type": "Operation"
+        }
+    },
+    {
+        "sysmlid": "Sum",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "Sum",
+        "specialization": {
+            "parameters": [],
+            "type": "Operation"
+        }
+    },
+    {
+        "sysmlid": "Less",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "Less",
+        "specialization": {
+            "parameters": [],
+            "type": "Operation"
+        }
+    },
+    {
+        "sysmlid": "dateFromTimestamp",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "dateFromTimestamp",
         "specialization": {
             "parameters": [],
             "type": "Operation"

@@ -1,5 +1,11 @@
 {"elements": [
     {
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "specialization": {"type": "Package"}
+    },
+    {
         "sysmlid": "c",
         "editable": true,
         "creator": "admin",
@@ -9,19 +15,9 @@
         "specialization": {"type": "Untyped"}
     },
     {
-        "sysmlid": "MM_1_no_site_no_project",
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
-        "name": "MM_1_no_site_no_project",
-        "specialization": {"type": "Package"}
-    },
-    {
-        "sysmlid": "DD_20_no_site_no_project",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "DD_20_no_site_no_project",
         "specialization": {"type": "Package"}
     },
     {
@@ -33,19 +29,15 @@
         "specialization": {"type": "Package"}
     },
     {
-        "sysmlid": "HH_22_no_site_no_project",
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
-        "name": "HH_22_no_site_no_project",
         "specialization": {"type": "Package"}
     },
     {
-        "sysmlid": "YY_2016_no_site_no_project",
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
-        "name": "YY_2016_no_site_no_project",
         "specialization": {"type": "Package"}
     }
 ]}
