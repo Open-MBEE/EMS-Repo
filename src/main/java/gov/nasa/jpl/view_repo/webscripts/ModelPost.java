@@ -657,7 +657,7 @@ public class ModelPost extends AbstractJavaWebScript {
 
       // if project node not specified, grab it from foundElements
       // same with site
-      if (projectNode.getSysmlId().endsWith(NO_PROJECT_ID)) {
+      if (projectNode == null || projectNode.getSysmlId().endsWith(NO_PROJECT_ID)) {
           if ( foundElements.size() > 0) {
               EmsScriptNode firstElement = foundElements.values().iterator().next();
               projectNode = firstElement.getProjectNode( ws );
@@ -993,7 +993,9 @@ public class ModelPost extends AbstractJavaWebScript {
 	    for ( String sysmlId: child2OwnerMap.keySet() ) {
 	        String ownerId = child2OwnerMap.get( sysmlId );
 	        
-	        if ( ownerId != null ) {
+	        if ( ownerId == null ) {
+	            rootElements.add( sysmlId );
+	        } else {
 	            if ( !elementHierarchyJson.has( ownerId ) ) {
 	                elementHierarchyJson.put(ownerId, new JSONArray());
 	            }
@@ -1185,13 +1187,18 @@ public class ModelPost extends AbstractJavaWebScript {
 	 * @return
 	 */
 	private String injectHoldingBinFolders(JSONArray jsonArray, WorkspaceNode workspace, Map<String, String> child2OwnerMap, String ownerId) {
+	    
 	    if ( ownerId != null && ownerId.startsWith( "holding_bin" )) {
-	        projectNodeId = ownerId.replace("holding_bin_", "");
-	        projectNode = findScriptNodeById(projectNodeId, workspace, null, false);
+	        //projectNodeId = ownerId.replace("holding_bin_", "");
+	        projectNode = findScriptNodeById(ownerId.replace("holding_bin_", ""), workspace, null, false);
+	    }
+	    if (projectNodeId == null) {
+	        projectNodeId = "no_site_no_project";
+	        projectNode =  findScriptNodeById("no_site_no_project", workspace, null, false);
 	    }
 	    String holdingBinId = "holding_bin_" + projectNodeId;
 	    
-	    preprocessJson( holdingBinId, projectNodeId, jsonArray, workspace, child2OwnerMap, false );
+	    preprocessJson( holdingBinId, projectNodeId, jsonArray, workspace, child2OwnerMap, false, true );
 
         Calendar cal = Calendar.getInstance();
         int folders[] = {Calendar.YEAR, Calendar.MONTH, Calendar.DAY_OF_MONTH, Calendar.HOUR_OF_DAY};
@@ -1199,26 +1206,31 @@ public class ModelPost extends AbstractJavaWebScript {
         
         // don't have owner for year - this should automatically get added to holding_bin
         String folderId = String.format("%s_%d_%s", prefix[0], cal.get(folders[0]), projectNodeId);
-        preprocessJson( folderId, holdingBinId, jsonArray, workspace, child2OwnerMap, false );
+        preprocessJson( folderId, holdingBinId, jsonArray, workspace, child2OwnerMap, false, true );
         for (int ii = 1; ii < folders.length; ii++) {
             folderId = String.format("%s_%d_%s", prefix[ii], cal.get(folders[ii]), projectNodeId);
             String ownerFolderId = String.format( "%s_%d_%s", prefix[ii-1], cal.get(folders[ii-1]), projectNodeId);
-            preprocessJson( folderId, ownerFolderId, jsonArray, workspace, child2OwnerMap, false );
+            preprocessJson( folderId, ownerFolderId, jsonArray, workspace, child2OwnerMap, false, true );
         }
 
         return folderId;
 	}
 	
 	private void insertElementInHoldingBin(String sysmlId, String holdingBinFolderId, JSONArray jsonArray, Map<String, String> child2OwnerMap) {
-	    preprocessJson( sysmlId, holdingBinFolderId, jsonArray, null, child2OwnerMap, true );
+	    preprocessJson( sysmlId, holdingBinFolderId, jsonArray, null, child2OwnerMap, true, false );
 	}
 	
-	private void preprocessJson(String sysmlId, String ownerId, JSONArray jsonArray, WorkspaceNode ws, Map<String, String> child2OwnerMap, boolean forceNew) {
+	private void preprocessJson(String sysmlId, String ownerId, JSONArray jsonArray, WorkspaceNode ws, Map<String, String> child2OwnerMap, boolean forceNew, boolean isPackage) {
 	    JSONObject elementJson = elementMap.containsKey( sysmlId ) ? elementMap.get( sysmlId ) : new JSONObject();
 	    elementJson.put( "sysmlid", sysmlId );
 	    elementJson.put( "owner", ownerId );
 	    if ( !elementJson.has( "name" ) ) {
 	        elementJson.put( "name", sysmlId );
+	    }
+	    if (isPackage) {
+	        JSONObject specializationJson = new JSONObject();
+	        specializationJson.put( "type", "Package" );
+	        elementJson.put( "specialization", specializationJson );
 	    }
 	    jsonArray.put( elementJson );
 	    child2OwnerMap.put( sysmlId, ownerId );
