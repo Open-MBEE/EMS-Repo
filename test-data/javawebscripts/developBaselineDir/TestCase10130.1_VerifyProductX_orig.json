@@ -1,28 +1,27 @@
 {"elements": [{
-    "owner": "holding_bin_no_site_no_project",
-    "creator": "admin",
-    "read": "2016-01-07T14:50:48.319-0800",
-    "isMetatype": false,
-    "created": "Thu Jan 07 14:31:00 PST 2016",
-    "editable": true,
-    "qualifiedName": "/no_site/no_site_no_project/holding_bin/Product X",
-    "modifier": "admin",
     "siteCharacterizationId": "no_site",
+    "qualifiedId": "/no_site/no_site_no_project/holding_bin_no_site_no_project/YY_2016_no_site_no_project/MM_1_no_site_no_project/DD_20_no_site_no_project/HH_22_no_site_no_project/MMS_1450390431247_8a4b76d2-394c-4569-9abe-5c51dc4b0711",
+    "nodeRefId": "versionStore://version2Store/972626ee-da71-466e-9e00-7d9117f7fb4c",
+    "versionedRefId": "versionStore://version2Store/972626ee-da71-466e-9e00-7d9117f7fb4c",
+    "qualifiedName": "/no_site/no_site_no_project/holding_bin_no_site_no_project/YY_2016_no_site_no_project/MM_1_no_site_no_project/DD_20_no_site_no_project/HH_22_no_site_no_project/Product X",
     "sysmlid": "MMS_1450390431247_8a4b76d2-394c-4569-9abe-5c51dc4b0711",
-    "nodeRefId": "versionStore://version2Store/7ac46ecd-bd6d-4acf-86a4-687f41f8eb3f",
-    "versionedRefId": "versionStore://version2Store/7ac46ecd-bd6d-4acf-86a4-687f41f8eb3f",
-    "qualifiedId": "/no_site/no_site_no_project/holding_bin_no_site_no_project/MMS_1450390431247_8a4b76d2-394c-4569-9abe-5c51dc4b0711",
+    "isMetatype": false,
+    "editable": true,
+    "modified": "2016-02-20T22:23:16.923-0800",
+    "creator": "admin",
+    "modifier": "admin",
+    "created": "Sat Feb 20 22:23:16 PST 2016",
     "name": "Product X",
-    "modified": "2016-01-07T14:31:01.625-0800",
+    "owner": "HH_22_no_site_no_project",
+    "read": "2016-02-20T22:23:17.672-0800",
     "specialization": {
+        "displayedElements": [],
         "contents": {
-            "valueExpression": null,
             "type": "Expression",
             "operand": []
         },
-        "type": "Product",
-        "displayedElements": [],
-        "allowedElements": []
+        "allowedElements": [],
+        "type": "Product"
     }
 }]}
 200
