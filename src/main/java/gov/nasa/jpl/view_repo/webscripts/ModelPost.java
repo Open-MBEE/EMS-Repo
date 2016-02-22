@@ -895,15 +895,8 @@ public class ModelPost extends AbstractJavaWebScript {
 											// {
 			@Override
 			public void run() throws Exception {
-			    Map<String, Boolean> status = new HashMap<String, Boolean>();
 				boolean valid = buildTransactionableElementMap(jsonArray,
-						workspace, status);
-//				if (status.containsKey( "foldersInserted" )) {
-//				    if (status.get( "foldersInserted" )) {
-//				        status = new HashMap<String, Boolean>();
-//				        valid = buildTransactionableElementMap(jsonArray, workspace, status);
-//				    }
-//				}
+						workspace);
 				validList.add(valid);
 			}
 		};
@@ -922,7 +915,7 @@ public class ModelPost extends AbstractJavaWebScript {
 	 * @throws JSONException
 	 */
     protected boolean buildTransactionableElementMap(JSONArray jsonArray,
-                                                     WorkspaceNode workspace, Map<String, Boolean> status) throws JSONException {
+                                                     WorkspaceNode workspace) throws JSONException {
 	    boolean result = true; 
 
 	    Map<String, String> child2OwnerMap = new HashMap<String, String>();
