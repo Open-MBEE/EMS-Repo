@@ -2676,7 +2676,7 @@ public class ModelPost extends AbstractJavaWebScript {
 					};
 					 
 					 preProcessJson( postJson, myWorkspace );
-					 System.out.println( postJson );
+					 
 					// FIXME: this is a hack to get the right site permissions
 					// if DB rolled back, it's because the no_site node couldn't
 					// be created

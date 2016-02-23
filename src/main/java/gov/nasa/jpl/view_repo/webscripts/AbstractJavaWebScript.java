@@ -2484,7 +2484,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
 
     protected void processJobJson( JSONObject job, JSONArray elements,
                                    Map<String, JSONObject> elementMap,
-                                   WorkspaceNode workspace, boolean isElement ) {
+                                   WorkspaceNode workspace, boolean isElement ) {       
         if ( job == null ) {
             log( Level.ERROR, "Bad job json: " + job );
             return;
@@ -2522,10 +2522,12 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
             // getting added to the elements array twice.
             JSONObject propertyElementJson =
                     getJobProperty( propertyName, job, createNewJob, jobNode,
-                                    elements );
-            elements.put( propertyElementJson );
+                                    elements, elementMap );
             
-            job.remove( propertyName );
+            if( propertyElementJson != null ) {             
+                elements.put( propertyElementJson );           
+                job.remove( propertyName );
+            }
         }
     
         // Don't add a specialization to the job json since it may already
@@ -2571,8 +2573,12 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
     public JSONObject getJobProperty( String propertyName, JSONObject job,
                                       boolean createNewJob,
                                       EmsScriptNode jobNode,
-                                      JSONArray elements ) {
-        String propertyValue = job.optString( propertyName );
+                                      JSONArray elements, Map<String, JSONObject> elementMap) {      
+        if( !job.has( propertyName ) ) 
+            return null;
+            
+        String propertyValue = job.optString( propertyName);
+        
         String propertyId = null;
         if ( propertyValue == null ) return null;
         
@@ -2692,7 +2698,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         }
         
         Map< String, JSONObject > elementMap = new LinkedHashMap< String, JSONObject >();
-        for ( int i = 1; i < elements.length(); i++ ) {
+        for ( int i = 0; i < elements.length(); i++ ) {
             JSONObject elem = elements.optJSONObject( i );
             if ( elem == null ) continue;
             String sysmlId = elem.optString( "sysmlid" );
@@ -2701,10 +2707,10 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         }
         
         // Generate or update element json for each of the properties.
-        for ( int i = 1; i < elements.length(); i++ ) {
+        for ( int i = 0; i < elements.length(); i++ ) {
             JSONObject elem = elements.optJSONObject( i );
             if ( EmsScriptNode.isJob( elem ) ) {
-                processJobJson( elem, elements, elementMap, workspace, true );
+                processJobJson( elem, elements, elementMap, workspace, true );               
             }
         }
         
