@@ -4614,7 +4614,7 @@ public class NodeUtil {
                 for (int ii = 0; ii < operand.length(); ii++) {
                     JSONObject value = operand.getJSONObject( ii );
                     if (value.has( "instance" )) {
-                        documentEdges.add( new Pair<String, String>(sysmlId, value.getString("instance") ));
+                        documentEdges.add( new Pair<String, String>(value.getString("instance"), sysmlId));
                     }
                 }
             }
@@ -4646,8 +4646,8 @@ public class NodeUtil {
                         EmsScriptNode instance =
                                 new EmsScriptNode( instanceNr, services, null );
                         documentEdges.add( new Pair< String, String >(
-                                                                       sysmlId,
-                                                                       instance.getSysmlId() ) );
+                                                                       instance.getSysmlId(),
+                                                                       sysmlId ) );
                     }
                 }
             }
@@ -4662,7 +4662,9 @@ public class NodeUtil {
                 Set<Object> sources = findKeyValueInJsonObject(json, "source");
                 for (Object source: sources) {
                     if (source instanceof String) {
-                        documentEdges.add( new Pair<String, String>(sysmlId, (String) source));
+                        if ( !sysmlId.equals((String) source) ) {
+                            documentEdges.add( new Pair<String, String>(sysmlId, (String) source));
+                        }
                     }
                 }
             }
