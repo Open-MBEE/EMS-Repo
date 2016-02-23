@@ -220,27 +220,16 @@ public class JobGet extends ModelGet {
         if  ( job.isJob( job ) ) {
             for ( String propertyName : jobProperties ) {
                 EmsScriptNode propertyNode = getJobPropertyNode( job, propertyName );
-                // get all tag values and add to json (check for null)
+                // get property values and add to json (check for null)
 
-                Object o = getSystemModel().getProperty( propertyNode, propertyName );
-                
-                o = getSystemModel().getValue( o, null );
-                
-                // NOTE: Currently finding a way to get the value and how to add that value
-                //       to the json 
-                
-                // The solution may be to get the sysml ID and then getting the value that way             
-                
-                // probably don't need
-                String propertyId = propertyNode.getSysmlId();
-                
-                JSONObject property = propertyNode.toJSONObject( ws, dateTime, includeQualified, isIncludeDocument, elementProperties.get(propertyId)); 
-                
-                json.append( "properties", property );
+                if( propertyNode != null ) {
+                    Object o = getSystemModel().getProperty( propertyNode, propertyName );               
+                    o = getSystemModel().getValue( o, null );
+                }
             }
         }
         
-        // TODO: should we return an error if the job is not a job? (i.e. isJob( job ) returns false 
+        // TODO: return an error if the node is not a job
         
         return json;
     }
