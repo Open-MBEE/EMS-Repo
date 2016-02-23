@@ -38,7 +38,10 @@ public class HtmlToPdfActionExecuter extends ActionExecuterAbstractBase {
     public static final String NAME = "htmlToPdf";
     public static final String PARAM_SITE_NAME = "siteName";
     public static final String PARAM_DOCUMENT_ID = "documentId";
+    public static final String PARAM_COVER = "cover";
     public static final String PARAM_HTML = "html";
+    public static final String PARAM_HEADER = "header";
+    public static final String PARAM_FOOTER = "footer";
     public static final String PARAM_TAG_ID = "tagId";
     public static final String PARAM_TIME_STAMP = "timeStamp";
     public static final String PARAM_WORKSPACE = "workspace";
@@ -77,8 +80,11 @@ public class HtmlToPdfActionExecuter extends ActionExecuterAbstractBase {
         String tagId = (String)action.getParameterValue(PARAM_TAG_ID);
         String timeStamp = (String)action.getParameterValue(PARAM_TIME_STAMP);
         String htmlContent = (String)action.getParameterValue(PARAM_HTML);
+        String coverContent = (String)action.getParameterValue(PARAM_COVER);
+        String headerContent = (String)action.getParameterValue(PARAM_HEADER);
+        String footerContent = (String)action.getParameterValue(PARAM_FOOTER);
         HtmlToPdfPost htmlToPdf = new HtmlToPdfPost(repository, services);
-        EmsScriptNode pdfNode = htmlToPdf.convert(documentId, tagId, timeStamp, htmlContent);
+        EmsScriptNode pdfNode = htmlToPdf.convert(documentId, tagId, timeStamp, htmlContent, coverContent, headerContent, footerContent);
         if(pdfNode != null){
         	sendEmail(jobNode, pdfNode, response);
         }
