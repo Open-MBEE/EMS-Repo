@@ -656,6 +656,16 @@ public class ModelGet extends AbstractJavaWebScript {
                         jobOrEle( node, ws, dateTime, id, includeQualified,
                                   isIncludeDocument );
 
+                if( json.has( "properties" )) {
+                    JSONArray arr = json.optJSONArray( "properties" );
+                    
+                    for(int i = 0; i < arr.length(); i++) {
+                        elements.put( arr.get( i ));
+                    }
+
+                    json.remove( "properties" );
+                }
+                
                 elements.put( json );
                 elementsJsonMap.put( node, json );
             } // TODO -- REVIEW -- Warning if no permissions?

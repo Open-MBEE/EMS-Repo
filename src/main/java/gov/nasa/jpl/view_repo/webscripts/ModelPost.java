@@ -2662,7 +2662,7 @@ public class ModelPost extends AbstractJavaWebScript {
 
 					JSONObject postJson = getPostJson(jsonNotK, content,
 							expressionString);
-
+					
 					// Get the project node from the request:
 					new EmsTransaction(getServices(), getResponse(),
 							getResponseStatus(), runWithoutTransactions) {// ||
@@ -2674,9 +2674,9 @@ public class ModelPost extends AbstractJavaWebScript {
 							getProjectNodeFromRequest(req, true);
 						}
 					};
-					
+					 
 					 preProcessJson( postJson, myWorkspace );
-
+					 System.out.println( postJson );
 					// FIXME: this is a hack to get the right site permissions
 					// if DB rolled back, it's because the no_site node couldn't
 					// be created

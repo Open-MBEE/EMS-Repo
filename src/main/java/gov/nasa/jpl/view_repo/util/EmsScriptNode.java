@@ -7003,8 +7003,7 @@ public class EmsScriptNode extends ScriptNode implements
         return node;
     }
 
-    public boolean isJob( ) {
-        if ( hasAspect( "HasMetatype" ) ) {
+    public boolean isJob( EmsScriptNode node ) {
             Object stereotypes = 
                     getProperty("sysml:appliedMetatypes", true);
             // stereotypes should be a List< String >
@@ -7019,7 +7018,6 @@ public class EmsScriptNode extends ScriptNode implements
                     }
                 }
             }
-        }  
         return false;
     }
     

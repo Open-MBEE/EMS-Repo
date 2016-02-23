@@ -67,7 +67,7 @@ public class JobPost extends ModelPost {
         JenkinsEngine jenkins = new JenkinsEngine();
         JenkinsBuildConfig config = new JenkinsBuildConfig();
         config.setJobID( jobID );
-        String desiredView = propertyValues.get("desiredView");
+        String command = propertyValues.get("command");
         //config.setDocumentID( desiredView );
         
         // for demo

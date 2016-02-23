@@ -201,7 +201,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
             // WARNING! FIXME! THESE MAY CHANGE!  MAYBE SEARCH FOR THEM?
             put( "status", "_18_0_2_6620226_1453945722485_173783_14567");
             put( "schedule", "_18_0_2_6620226_1453945600718_861466_14565");
-            put( "desiredView", "_18_0_2_6620226_1454345919577_538785_14442");
+            put( "command", "_18_0_2_6620226_1453945276117_966030_14557");
         }
     };
     static String[] jobProperties =
@@ -2475,8 +2475,8 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         JenkinsEngine jenkins = new JenkinsEngine();
         JenkinsBuildConfig config = new JenkinsBuildConfig();
         config.setJobID( jobID );
-        String desiredView = propertyValues.get("desiredView");
-        config.setDocumentID( desiredView );
+        String command = propertyValues.get("command");
+        config.setDocumentID( "" );
         String schedule = propertyValues.get( "schedule" );
         config.setSchedule( schedule );
         jenkins.postConfigXml( config, config.getJobID() );
@@ -2534,13 +2534,6 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         // Use job json as element json and move to "elements" array. The
         // job-specific properties in the json were stripped out above.
         if ( !isElement ) elements.put(job);
-        
-        // If creating a new job with a desiredDocument, push a new
-        // configuration to Jenkins.
-        // TODO -- There should be a generic way to do this, using a "command"
-        // property that runs a function in an available API that syncs Jenkins
-        String desiredView = propertyValues.get( "desiredView" );
-        // with the job.
 
         // Always overwrite or create the job so that things are updated.
 //        if ( createNewJob && !Utils.isNullOrEmpty( desiredView ) ) {
