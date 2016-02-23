@@ -1,0 +1,13 @@
+<webscript>
+	<shortname>Alfresco 2 doors</shortname>
+	<description>
+		Sync alfresco nodes to DoorsNG.
+	</description>
+	<url>/doors</url>
+	<url>/doors/workspaces/{workspaceId}</url>
+	<url>/doors/workspaces/{workspaceId}/elements/{elementId}</url>
+	<format default="json">argument</format>
+	<authentication>user</authentication>
+	<transaction>none</transaction>
+	<family>MMS REST API</family>
+</webscript>

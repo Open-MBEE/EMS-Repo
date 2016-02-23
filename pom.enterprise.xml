@@ -127,6 +127,11 @@
 				<!-- <dependency> <groupId>klang</groupId> <artifactId>klang</artifactId> 
 					<version>0.0.9</version> <scope>system</scope> <type>jar</type> <systemPath>${project.basedir}/src/main/amp/web/WEB-INF/lib/klang.jar</systemPath> 
 					</dependency> -->
+				<dependency>
+					<groupId>gov.nasa.jpl.mbee.doorsng</groupId>
+					<artifactId>doorsng</artifactId>
+					<version>0.2.2</version>
+				</dependency>
 			</dependencies>
 			<properties>
 				<env.BUILD_NUMBER>1</env.BUILD_NUMBER>
@@ -194,6 +199,11 @@
 			<groupId>gov.nasa.jpl.mbee.docbook</groupId>
 			<artifactId>docbook</artifactId>
 			<version>0.0.5</version>
+		</dependency>
+		<dependency>
+			<groupId>gov.nasa.jpl.mbee.doorsng</groupId>
+			<artifactId>doorsng</artifactId>
+			<version>0.2.2</version>
 		</dependency>
 		<dependency>
 			<groupId>junit</groupId>
