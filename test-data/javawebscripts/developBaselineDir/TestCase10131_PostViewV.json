@@ -1,6 +1,5 @@
 {"elements": [
     {
-        "qualifiedName": "/no_site/no_site_no_project/holding_bin/Product X/VIEW V/null",
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
@@ -12,51 +11,15 @@
         }
     },
     {
-        "qualifiedName": "/no_site/no_site_no_project/holding_bin/null",
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
-        "owner": "holding_bin_no_site_no_project",
         "specialization": {
             "ownedEnd": [],
             "type": "Association"
         }
     },
     {
-        "qualifiedName": "/no_site/no_site_no_project/holding_bin/null",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "owner": "holding_bin_no_site_no_project",
-        "specialization": {
-            "ownedEnd": [],
-            "type": "Association"
-        }
-    },
-    {
-        "qualifiedName": "/no_site/no_site_no_project/holding_bin/null/null",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "specialization": {
-            "isSlot": false,
-            "isDerived": false,
-            "type": "Property"
-        }
-    },
-    {
-        "qualifiedName": "/no_site/no_site_no_project/holding_bin/null/null",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "specialization": {
-            "isSlot": false,
-            "isDerived": false,
-            "type": "Property"
-        }
-    },
-    {
-        "qualifiedName": "/no_site/no_site_no_project/holding_bin/Product X/VIEW V/null",
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
@@ -68,30 +31,6 @@
         }
     },
     {
-        "qualifiedName": "/no_site/no_site_no_project/holding_bin/Product X/VIEW V/null",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "specialization": {
-            "aggregation": "COMPOSITE",
-            "isSlot": false,
-            "isDerived": false,
-            "type": "Property"
-        }
-    },
-    {
-        "qualifiedName": "/no_site/no_site_no_project/holding_bin/null",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "owner": "holding_bin_no_site_no_project",
-        "specialization": {
-            "ownedEnd": [],
-            "type": "Association"
-        }
-    },
-    {
-        "qualifiedName": "/no_site/no_site_no_project/holding_bin/null/null",
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
@@ -102,7 +41,6 @@
         }
     },
     {
-        "qualifiedName": "/no_site/no_site_no_project/holding_bin/Product X/VIEW V",
         "isMetatype": false,
         "editable": true,
         "creator": "admin",
@@ -124,6 +62,55 @@
             ],
             "contents": {"type": "Expression"},
             "type": "View"
+        }
+    },
+    {
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "specialization": {
+            "ownedEnd": [],
+            "type": "Association"
+        }
+    },
+    {
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "specialization": {
+            "isSlot": false,
+            "isDerived": false,
+            "type": "Property"
+        }
+    },
+    {
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "specialization": {
+            "ownedEnd": [],
+            "type": "Association"
+        }
+    },
+    {
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "specialization": {
+            "aggregation": "COMPOSITE",
+            "isSlot": false,
+            "isDerived": false,
+            "type": "Property"
+        }
+    },
+    {
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "specialization": {
+            "isSlot": false,
+            "isDerived": false,
+            "type": "Property"
         }
     }
 ]}

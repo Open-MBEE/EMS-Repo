@@ -1,67 +1,63 @@
 {
-  "sequence": 1,
-  "workspace1": {
-    "timestamp": "2015-09-22T09:40:10.774-0700",
-    "qualifiedId": "master",
-    "id": "master",
-    "qualifiedName": "master",
-    "name": "master",
-    "elements": [{
-      "qualifiedId": "/no_site/no_site_no_project/holding_bin_no_site_no_project/6666",
-      "siteCharacterizationId": "no_site",
-      "qualifiedName": "/no_site/no_site_no_project/holding_bin/6666_name",
-      "sysmlid": "6666",
-      "editable": true,
-      "version": "1.1",
-      "creator": "admin",
-      "modified": "2015-09-22T09:40:10.779-0700",
-      "modifier": "admin",
-      "id": "7e8de292-6e39-4040-ae5d-992bd97aca03",
-      "created": "Tue Sep 22 09:40:03 PDT 2015",
-      "name": "6666_name",
-      "owner": "holding_bin_no_site_no_project",
-      "documentation": "",
-      "read": "2015-09-22T09:40:10.825-0700",
-      "specialization": {
-        "valueExpression": null,
-        "type": "Expression",
-        "operand": [
-          {
-            "element": "300",
-            "valueExpression": null,
-            "type": "ElementValue"
-          },
-          {
-            "element": "302",
-            "valueExpression": null,
-            "type": "ElementValue"
-          }
-        ]
-      }
-    }]
-  },
-  "workspace2": {
-    "timestamp": "2015-09-22T09:40:10.803-0700",
-    "qualifiedId": "master",
-    "id": "master",
-    "deletedElements": [{
-      "id": "7e8de292-6e39-4040-ae5d-992bd97aca03",
-      "qualifiedId": "/no_site/no_site_no_project/holding_bin_no_site_no_project/6666",
-      "name": "6666_name",
-      "qualifiedName": "/no_site/no_site_no_project/holding_bin/6666_name",
-      "owner": "holding_bin_no_site_no_project",
-      "sysmlid": "6666",
-      "read": "2015-09-22T09:40:10.825-0700",
-      "specialization": {"type": "Expression"},
-      "modified": "2015-09-22T09:40:10.779-0700",
-      "creator": "admin"
-    }],
-    "addedElements": [],
-    "conflictedElements": [],
-    "updatedElements": [],
-    "qualifiedName": "master",
-    "name": "master",
-    "movedElements": []
-  }
+    "sequence": 5,
+    "workspace1": {
+        "id": "master",
+        "qualifiedId": "master",
+        "timestamp": "2016-02-20T22:19:13.469-0800",
+        "name": "master",
+        "qualifiedName": "master",
+        "elements": [{
+            "nodeRefId": "workspace://SpacesStore/649e04e3-5931-457d-8454-35304940b98b",
+            "versionedRefId": "versionStore://version2Store/3923cdd6-ae93-442a-964f-b76dbdcf95ae",
+            "sysmlid": "6666",
+            "editable": true,
+            "creator": "admin",
+            "modified": "2016-02-20T22:19:13.506-0800",
+            "version": "1.3",
+            "id": "649e04e3-5931-457d-8454-35304940b98b",
+            "modifier": "admin",
+            "created": "Sat Feb 20 22:17:45 PST 2016",
+            "name": "6666_name",
+            "documentation": "",
+            "owner": "HH_22_123456",
+            "read": "2016-02-20T22:19:13.573-0800",
+            "specialization": {
+                "operand": [
+                    {
+                        "element": "300",
+                        "type": "ElementValue"
+                    },
+                    {
+                        "element": "302",
+                        "type": "ElementValue"
+                    }
+                ],
+                "type": "Expression"
+            }
+        }]
+    },
+    "workspace2": {
+        "deletedElements": [{
+            "modifier": "admin",
+            "nodeRefId": "workspace://SpacesStore/649e04e3-5931-457d-8454-35304940b98b",
+            "versionedRefId": "versionStore://version2Store/3923cdd6-ae93-442a-964f-b76dbdcf95ae",
+            "created": "Sat Feb 20 22:17:45 PST 2016",
+            "name": "6666_name",
+            "owner": "HH_22_123456",
+            "sysmlid": "6666",
+            "specialization": {"type": "Expression"},
+            "modified": "2016-02-20T22:19:13.506-0800",
+            "creator": "admin"
+        }],
+        "id": "master",
+        "qualifiedId": "master",
+        "timestamp": "2016-02-20T22:19:13.570-0800",
+        "addedElements": [],
+        "conflictedElements": [],
+        "updatedElements": [],
+        "name": "master",
+        "qualifiedName": "master",
+        "movedElements": []
+    }
 }
 200

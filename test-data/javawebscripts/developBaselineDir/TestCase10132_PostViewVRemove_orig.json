@@ -1,19 +1,23 @@
 {"elements": [{
-    "owner": "MMS_1450390431247_8a4b76d2-394c-4569-9abe-5c51dc4b0711",
-    "creator": "admin",
-    "read": "2016-01-07T15:28:49.630-0800",
-    "isMetatype": false,
-    "created": "Thu Jan 07 15:28:43 PST 2016",
-    "editable": true,
-    "qualifiedName": "/no_site/no_site_no_project/holding_bin/Product X/VIEW V",
-    "modifier": "admin",
     "siteCharacterizationId": "no_site",
+    "qualifiedId": "/no_site/no_site_no_project/holding_bin_no_site_no_project/YY_2016_no_site_no_project/MM_1_no_site_no_project/DD_20_no_site_no_project/HH_22_no_site_no_project/MMS_1450390431247_8a4b76d2-394c-4569-9abe-5c51dc4b0711/MMS_1450390431247_8a4b76d2-394c-4569-9abe-5c51dc4b0814",
+    "nodeRefId": "workspace://SpacesStore/bf227a28-d024-49ad-af9d-9fab3d878956",
+    "versionedRefId": "versionStore://version2Store/429bd244-a601-43c5-934a-340e6aa20337",
+    "qualifiedName": "/no_site/no_site_no_project/holding_bin_no_site_no_project/YY_2016_no_site_no_project/MM_1_no_site_no_project/DD_20_no_site_no_project/HH_22_no_site_no_project/Product X/VIEW V",
     "sysmlid": "MMS_1450390431247_8a4b76d2-394c-4569-9abe-5c51dc4b0814",
-    "nodeRefId": "workspace://SpacesStore/2a435c43-fe12-46b2-8c80-ce84d43837f7",
-    "versionedRefId": "versionStore://version2Store/868dd932-4ea2-4f8f-b690-b7736706d8e3",
-    "qualifiedId": "/no_site/no_site_no_project/holding_bin_no_site_no_project/MMS_1450390431247_8a4b76d2-394c-4569-9abe-5c51dc4b0711/MMS_1450390431247_8a4b76d2-394c-4569-9abe-5c51dc4b0814",
+    "isMetatype": false,
+    "editable": true,
+    "creator": "admin",
+    "ownedAttribute": [
+        "MMS_1456035797894_2b36337d-a5e0-48d0-a4e7-f329a98ae214",
+        "MMS_1456035797904_ad3cfe93-0f07-4019-b0ed-0075a4f68635"
+    ],
+    "modified": "2016-02-20T22:23:19.469-0800",
+    "modifier": "admin",
+    "created": "Sat Feb 20 22:23:18 PST 2016",
     "name": "VIEW V",
-    "modified": "2016-01-07T15:28:49.270-0800",
+    "owner": "MMS_1450390431247_8a4b76d2-394c-4569-9abe-5c51dc4b0711",
+    "read": "2016-02-20T22:23:19.542-0800",
     "specialization": {
         "childViews": [
             {
@@ -25,15 +29,8 @@
                 "id": "MMS_1450390431247_8a4b76d2-394c-4569-9abe-5c51dc4b0813"
             }
         ],
-        "contents": {
-            "valueExpression": null,
-            "type": "Expression"
-        },
+        "contents": {"type": "Expression"},
         "type": "View"
-    },
-    "ownedAttribute": [
-        "MMS_1452209323262_55b09c77-7cf3-4513-b7c1-d7d85317ed99",
-        "MMS_1452209323299_85ab04eb-9e87-4648-b1d3-f89f4e200e5f"
-    ]
+    }
 }]}
 200

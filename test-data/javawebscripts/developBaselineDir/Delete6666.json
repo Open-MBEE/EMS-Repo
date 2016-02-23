@@ -1,7 +1,6 @@
 {
     "workspace1": {
         "name": "master",
-        "qualifiedName": "master",
         "elements": [{
             "sysmlid": "6666",
             "editable": true,
@@ -9,7 +8,6 @@
             "modifier": "admin",
             "name": "6666_name",
             "documentation": "",
-            "owner": "holding_bin_no_site_no_project",
             "specialization": {
                 "operand": [
                     {
@@ -29,7 +27,6 @@
         "deletedElements": [{
             "modifier": "admin",
             "name": "6666_name",
-            "owner": "holding_bin_no_site_no_project",
             "sysmlid": "6666",
             "specialization": {"type": "Expression"},
             "creator": "admin"
@@ -38,7 +35,6 @@
         "conflictedElements": [],
         "updatedElements": [],
         "name": "master",
-        "qualifiedName": "master",
         "movedElements": []
     }
 }
