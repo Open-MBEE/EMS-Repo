@@ -29,6 +29,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.UUID;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -64,6 +65,8 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
 public class HtmlToPdfPost extends AbstractJavaWebScript {
 	static Logger logger = Logger.getLogger(HtmlToPdfPost.class);
 	protected String dirRoot = "/mnt/alf_data/temp/";
+	protected UUID guid = UUID.randomUUID();
+	
 	//dir containing full doc generation resources (prerenderer.io, phantomJS, wkhtmltopdf)
 	protected String fullDocGenDir = "/opt/local/fullDocGen/";
 //	protected String htmlPath;
@@ -187,39 +190,34 @@ public class HtmlToPdfPost extends AbstractJavaWebScript {
         */
 	}
 	
-	public EmsScriptNode convert(String docId, String tagId, String timeStamp, String htmlContent){
+	public EmsScriptNode convert(String docId, String tagId, String timeStamp,
+			String htmlContent, String coverContent, String headerContent, String footerContent) {
 		EmsScriptNode pdfNode = null;
 		String htmlFilename = "test.html";
 		String pdfFilename = "test.pdf";
 		String coverFilename = "cover.html";
-//		String htmlContent = "<html><body>Hello, world!</body></html>";
-//		String docId;
-//		String timeStamp;
-		String ws;
 		DateTime now = new DateTime();
-
+		response.append(String.format("Converting HTML to PDF for document Id %s, tag Id: %s, timestamp: %s...", docId, tagId, timeStamp));
+		
 		try {
-//			htmlContent = json.optString("html");
-//			docId = json.optString("docId");
-//			timeStamp = json.optString("time");
-//			ws = json.optString("workspace");
-
 			htmlFilename = String.format("%s_%s_%s.html", docId, timeStamp,
 					now.getMillis()).replace(":", "");
 			pdfFilename = String.format("%s_%s_%s.pdf", docId, timeStamp,
 					now.getMillis()).replace(":", "");
-			coverFilename = String.format("%s_%s_%s_cover.html", docId, timeStamp,
-					now.getMillis()).replace(":", "");
+			coverFilename = String.format("%s_%s_%s_cover.html", docId,
+					timeStamp, now.getMillis()).replace(":", "");
 			this.user = AuthenticationUtil.getRunAsUser();
 			EmsScriptNode userHomeFolder = getUserHomeFolder(user);
 			createUserFilesystemPath(user);
-			String htmlPath = saveHtmlToFilesystem(user, htmlFilename, htmlContent);
+			String htmlPath = saveHtmlToFilesystem(user, htmlFilename,
+					htmlContent, coverFilename, coverContent);
 			handleEmbeddedImage(htmlFilename);
 			saveHtmlToRepo(userHomeFolder, htmlFilename, htmlContent);
-			String pdfPath = html2pdf(docId, tagId, timeStamp, user, htmlPath, pdfFilename, coverFilename,
-					userHomeFolder);
+			String pdfPath = html2pdf(docId, tagId, timeStamp, user, htmlPath,
+					pdfFilename, coverFilename, userHomeFolder, headerContent, footerContent);
 			pdfNode = savePdfToRepo(userHomeFolder, pdfPath);
 		} catch (Exception ex) {
+			response.append(String.format("ERROR: Failed to convert HTML to PDF for document Id: %s, tag Id: %s, timestamp: %s! %s", docId, tagId, timeStamp, ex.getMessage()));
 			System.out.println(ex.getMessage());
 		}
 		return pdfNode;
@@ -230,7 +228,7 @@ public class HtmlToPdfPost extends AbstractJavaWebScript {
 	}
 	
 	protected void createUserFilesystemPath(String user) {
-		Path userPath = Paths.get(dirRoot, user);
+		Path userPath = Paths.get(dirRoot, user, this.guid.toString());
 		try {
 			File up = new File(userPath.toString());
 			if (!up.exists()) {
@@ -255,6 +253,12 @@ public class HtmlToPdfPost extends AbstractJavaWebScript {
 	
 	protected EmsScriptNode savePdfToRepo(EmsScriptNode userHomeFolder,
 			String pdfPath) {
+		Path path = Paths.get(pdfPath);
+		if(!Files.exists(path)){
+			response.append(String.format("PDF generation failed! Unable to locate PDF file at %s!", pdfPath));
+			return null;
+		}
+		
 		EmsScriptNode pdfNode = NodeUtil.getOrCreateContentNode(userHomeFolder,
 				Paths.get(pdfPath).getFileName().toString(), services);
 		if (pdfNode == null) {
@@ -303,7 +307,7 @@ public class HtmlToPdfPost extends AbstractJavaWebScript {
 				.get("/opt/local/apache-tomcat/webapps/alfresco/mmsapp/css");
 		try {
 			FileUtils.copyDirectory(new File(cssPath.toString()), new File(
-					Paths.get(dirRoot, user, "css").toString()));
+					Paths.get(dirRoot, user, guid.toString(), "css").toString()));
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -331,8 +335,9 @@ public class HtmlToPdfPost extends AbstractJavaWebScript {
 	 * @return path to saved HTML file.
 	 */
 	protected String saveHtmlToFilesystem(String user, String htmlFilename,
-			String htmlContent) {
-		Path htmlPath = Paths.get(dirRoot, user, htmlFilename);
+			String htmlContent, String coverFilename, String coverContent) {
+		Path htmlPath = Paths.get(dirRoot, user, guid.toString(), htmlFilename);
+		Path coverPath = Paths.get(dirRoot, user, guid.toString(), coverFilename);
 
 		try {
 			if (Files.exists(htmlPath)) {
@@ -346,6 +351,11 @@ public class HtmlToPdfPost extends AbstractJavaWebScript {
 			BufferedWriter bw = new BufferedWriter(new FileWriter(htmlFile));
 			bw.write(htmlContent);
 			bw.close();
+			
+			File coverFile = new File(coverPath.toString());
+			bw = new BufferedWriter(new FileWriter(coverFile));
+			bw.write(coverContent);
+			bw.close();
 		} catch (Exception ex) {
 			// TODO error handling/logging
 			logger.error(ex.getMessage(), ex);
@@ -354,7 +364,7 @@ public class HtmlToPdfPost extends AbstractJavaWebScript {
 	}
 	
 	protected String html2pdf(String docId, String tagId, String timeStamp, String user, String htmlPath, String pdfFilename, String coverFilename,
-			EmsScriptNode userHomeFolder)
+			EmsScriptNode userHomeFolder, String headerContent, String footerContent)
 			throws Exception {
 		if (!Files.exists(Paths.get(htmlPath))) {
 			throw new Exception(
@@ -363,14 +373,17 @@ public class HtmlToPdfPost extends AbstractJavaWebScript {
 							htmlPath));
 		}
 		
-		String pdfPath = Paths.get(dirRoot, user, pdfFilename).toString();
-		String coverPath = Paths.get(dirRoot, user, coverFilename).toString();
+		String pdfPath = Paths.get(dirRoot, user, guid.toString(), pdfFilename).toString();
+		String coverPath = Paths.get(dirRoot, user, guid.toString(), coverFilename).toString();
 
-		createCoverPage(docId, tagId, timeStamp, htmlPath, coverPath); //NEED FOR COVER
+		//createCoverPage(docId, tagId, timeStamp, htmlPath, coverPath); //NEED FOR COVER
 		// createFooterPage(this.footerPath);
 		// createHeaderPage(this.headerPath);
 		// String tagName = this.getTimeTagName();
 		String tagName = tagId;
+		
+		if(Utils.isNullOrEmpty(headerContent)) headerContent = "";
+		if(Utils.isNullOrEmpty(footerContent)) footerContent = "Paper copies of this document may not be current and should not be relied on for official purposes. JPL/Caltech proprietary. Not for public release.";
 
 		List<String> command = new ArrayList<String>();
 		command.add("wkhtmltopdf");
@@ -394,7 +407,7 @@ public class HtmlToPdfPost extends AbstractJavaWebScript {
 		// command.add("--footer-left");
 		// command.add(tagName.substring(0,10));
 		command.add("--footer-center");
-		command.add("Paper copies of this document may not be current and should not be relied on for official purposes. JPL/Caltech proprietary. Not for public release.");
+		command.add(footerContent);
 		command.add("--footer-right");
 		command.add("[page]");
 		// command.add("--footer-html");
@@ -415,7 +428,8 @@ public class HtmlToPdfPost extends AbstractJavaWebScript {
 		command.add(htmlPath);
 		command.add(pdfPath);
 
-		System.out.println("htmltopdf command: " + command);
+		System.out.println("htmltopdf command: " + command.toString().replace(",", ""));
+		response.append("htmltopdf command: " + command.toString().replace(",", ""));
 
 		int attempts = 0;
 		int ATTEMPTS_MAX = 3;
@@ -565,7 +579,10 @@ public class HtmlToPdfPost extends AbstractJavaWebScript {
 		htmlToPdfAction.setParameterValue(HtmlToPdfActionExecuter.PARAM_DOCUMENT_ID, postJson.optString("docId"));
 		htmlToPdfAction.setParameterValue(HtmlToPdfActionExecuter.PARAM_TAG_ID, postJson.optString("tagId"));
 		htmlToPdfAction.setParameterValue(HtmlToPdfActionExecuter.PARAM_TIME_STAMP, postJson.optString("time"));
+		htmlToPdfAction.setParameterValue(HtmlToPdfActionExecuter.PARAM_COVER, postJson.optString("cover"));
 		htmlToPdfAction.setParameterValue(HtmlToPdfActionExecuter.PARAM_HTML, postJson.optString("html"));
+		htmlToPdfAction.setParameterValue(HtmlToPdfActionExecuter.PARAM_HEADER, postJson.optString("header"));
+		htmlToPdfAction.setParameterValue(HtmlToPdfActionExecuter.PARAM_FOOTER, postJson.optString("footer"));
 		services.getActionService().executeAction(htmlToPdfAction, jobNode.getNodeRef(), true, true);
 	}
 
@@ -628,7 +645,7 @@ public class HtmlToPdfPost extends AbstractJavaWebScript {
 	
     public void handleEmbeddedImage(String htmlFilename) throws Exception
     {
-    	Path htmlPath = Paths.get(dirRoot, this.user, htmlFilename);
+    	Path htmlPath = Paths.get(dirRoot, this.user, guid.toString(), htmlFilename);
     	if(!Files.exists(htmlPath)) return;
 
     	File htmlFile = new File(htmlPath.toString());
@@ -731,7 +748,7 @@ public class HtmlToPdfPost extends AbstractJavaWebScript {
     }
     
     protected void handleRelativeHyperlinks(String user, String htmlFilename) throws Exception{
-    	Path htmlPath = Paths.get(dirRoot, user, htmlFilename);
+    	Path htmlPath = Paths.get(dirRoot, user, guid.toString(), htmlFilename);
     	if(!Files.exists(htmlPath)) return;
 
     	File htmlFile = new File(htmlPath.toString());
@@ -777,7 +794,7 @@ public class HtmlToPdfPost extends AbstractJavaWebScript {
     
 
     private DBImage retrieveEmbeddedImage(String user, String storeName, String nodeId, String imgName, WorkspaceNode workspace, Object timestamp) throws UnsupportedEncodingException{
-    	Path imageDirName = Paths.get(dirRoot, user, "images");
+    	Path imageDirName = Paths.get(dirRoot, user, guid.toString(), "images");
 		NodeRef imgNodeRef = NodeUtil.getNodeRefFromNodeId(storeName, nodeId);
 		if(imgNodeRef == null) return null;
 
