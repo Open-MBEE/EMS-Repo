@@ -383,6 +383,12 @@
 			<name>external-releases</name>
 			<url>http://europambee-build.jpl.nasa.gov:8082/artifactory/ext-release-local</url>
 		</repository>
+        <repository>
+            <id>artifactory-external-snapshot</id>
+            <name>external-snapshot</name>
+            <url>http://europambee-build.jpl.nasa.gov:8082/artifactory/ext-snapshot-local</url>
+        </repository>
+		
 		<repository>
 			<id>alfresco-public</id>
 			<url>https://artifacts.alfresco.com/nexus/content/groups/public</url>
