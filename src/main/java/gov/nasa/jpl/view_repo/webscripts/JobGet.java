@@ -29,34 +29,24 @@
 
 package gov.nasa.jpl.view_repo.webscripts;
 
-import gov.nasa.jpl.mbee.util.Timer;
 import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 import gov.nasa.jpl.view_repo.webscripts.ModelGet;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
-import gov.nasa.jpl.pma.JenkinsEngine;
-
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-
-import javax.servlet.http.HttpServletResponse;
-import javax.xml.parsers.ParserConfigurationException;
 
 import org.apache.log4j.*;
 import org.alfresco.repo.model.Repository;
-import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
-import org.xml.sax.SAXException;
 
 //import com.offbytwo.jenkins.JenkinsServer;
 
@@ -64,6 +54,8 @@ public class JobGet extends ModelGet {
     static Logger logger = Logger.getLogger(JobGet.class);
     
     public static final String jobStereotypeId = "_18_0_2_6620226_1453944322658_194833_14413";
+
+    protected JSONArray jobsJsonArray = new JSONArray(); 
     
     public JobGet() {
         super();
@@ -86,139 +78,15 @@ public class JobGet extends ModelGet {
     }
 
     @Override
-    protected Map<String, Object> executeImplImpl(WebScriptRequest req,
-                                                  Status status, Cache cache) {
-        if ( fromJenkins ) {
-            return executeImplImplNew( req, status, cache );
-        } else {
-            return super.executeImplImpl( req, status, cache );
-        }
-
-    }
-    
-    protected Map<String, Object> executeImplImplNew(WebScriptRequest req, 
-                                                  Status status, Cache cache) {
-        if (logger.isDebugEnabled()) {
-            String user = AuthenticationUtil.getFullyAuthenticatedUser();
-            logger.debug(user + " " + req.getURL());
-        }
-        
-        // TODO: THIS MAY SERVE IMPORTANCE FOR GETTING OWNED PROPERTIES
-        /*
-        String timestamp = req.getParameter( "timestamp" );
-        Date dateTime = TimeUtils.dateFromTimestamp( timestamp );
-        addElementProperties( this.getWorkspace( req ), dateTime );
-        */
-        
-        JenkinsEngine jenkins = new JenkinsEngine();     
-        
-        Timer timer = new Timer();
-        printHeader(req);
-
-        Map<String, Object> model = new HashMap<String, Object>();
-        // make sure to pass down view request flag to instance
-        setIsViewRequest(isViewRequest);
-        
-        JSONObject top = NodeUtil.newJsonObject();
-        
-        // some information about alfresco
-        JSONArray res = handleRequest(req, top, NodeUtil.doGraphDb);
-/*
-        JSONObject element = (JSONObject)res.get( 0 );
-        
-        // This is used to get the URLs for every job to get data easier
-        JSONArray Urls = jenkins.getJobUrls();
-              
-        JSONObject jobsFromJenkins = jenkins.getAllJobs();
-        JSONArray jobs = jobsFromJenkins.getJSONArray( "jobs" );
-*/        
-        try {   
-/*
-            // get job data from jenkins
-            for(int i = 0; i < jobs.length(); i++) {
-                JSONObject job = (JSONObject)jobs.get( i );
-                
-                job.put( "status", job.get( "color" ) );
-                job.remove( "color" );
-                 
-                // if the job has not run yet
-                if(job.isNull( "lastCompletedBuild" )) {                       
-                    job.put( "duration", JSONObject.NULL );
-                    job.put( "estimatedDuration", JSONObject.NULL );
-                    job.put( "startTime", JSONObject.NULL );
-                    job.remove( "lastCompletedBuild");
-                }
-                else {
-                    JSONObject o = (JSONObject)job.get( "lastCompletedBuild" );                     
-                    job.put( "duration", o.get( "duration" ) );
-                    job.put( "estimatedDuration", o.get( "estimatedDuration" ) );
-                    job.put( "startTime", o.get( "timestamp" ));
-                    job.remove( "timestamp" );
-                    job.remove( "lastCompletedBuild" );
-                }
-                                
-                JSONObject schedule = jenkins.configXmlToJson( 
-                                                              Urls.getJSONObject( i )
-                                                              .get( "url" ).toString() );     
-                
-                job.put( "schedule", schedule.get( "schedule" ) );                    
-                job.put( "sysmlid", element.get( "sysmlid" ));
-                job.put( "owner", element.get( "owner" ));
-                
-                // TODO: Create a property "ics" which will be populated by schedule? 
-            
-                job.put( "ics", new JSONObject() );
-                
-                res.put( job );
-            }   
-            
-            if (res.length() > 0) { 
-                if( element.has( "specialization" ) ){
-                    element.remove( "specialization" );
-                }
-
-                
-                top.put("jobs", res);
-
-            }
-
-            if (!Utils.isNullOrEmpty(response.toString()))
-                top.put("message", response.toString());
-            else {
-                model.put("res", NodeUtil.jsonToString(top));
-            }
-*/
-        } catch (JSONException e) {
-            log(Level.ERROR, HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-                    "Could not create JSONObject");
-            model.put("res", createResponseJson());
-            e.printStackTrace(); 
-        }/* catch ( SAXException e ) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch ( ParserConfigurationException e ) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }*/
-
-        status.setCode(responseStatus.getCode());
-
-        printFooter();
-
-        if (logger.isInfoEnabled()) {
-            log(Level.INFO, "JobGet: %s", timer);
-        }
-
-        return model;
-    }
-    
-    @Override
     protected JSONObject jobOrEle(EmsScriptNode job, WorkspaceNode ws, Date dateTime, String id,
                              boolean includeQualified, boolean isIncludeDocument ) {
                
-        JSONObject json = job.toJSONObject( ws,  dateTime, includeQualified, isIncludeDocument, elementProperties.get(id) );
+        JSONObject json =
+                job.toJSONObject( ws, dateTime, includeQualified,
+                                  isIncludeDocument, elementProperties.get( id ) );
         
-        if  ( job.isJob( job ) ) {            
+        if  ( job.isJob( job ) ) {
+            JSONObject jobJson = null;
             for ( String propertyName : jobProperties ) {
                 
                 EmsScriptNode propertyNode = getJobPropertyNode( job, propertyName );
@@ -226,11 +94,20 @@ public class JobGet extends ModelGet {
 
                 if( propertyNode != null ) {
                     Collection< Object> values = getSystemModel().getValue( propertyNode, null );
-                    if( values instanceof Collection ) {
-                        
+                    if ( !Utils.isNullOrEmpty( values ) ) {
+                        if ( values.size() > 1 ) {
+                            // TODO -- ERROR?
+                        }
+                        Object value = values.iterator().next();
+                        if ( value != null ) {
+                            jobJson = addJobPropertyToJson( propertyName, value,
+                                                            jobJson, json );
+                        }
                     }
                 }
-                
+            }
+            if ( jobJson != null ) {
+                jobsJsonArray.put(jobJson);
             }
         }
         
@@ -238,5 +115,23 @@ public class JobGet extends ModelGet {
         
         return json;
     }
+    
+    protected JSONObject addJobPropertyToJson( String propertyName, Object value, JSONObject jobJson,
+                                               JSONObject json ) {
+        if ( json == null ) return jobJson;
+        if ( jobJson == null ) {    
+            jobJson = NodeUtil.clone( json );
+        }
+        jobJson.put(propertyName, jsonWrap( value ) );
+        return jobJson;
+    }
+
+    @Override
+    protected void postProcessJson( JSONObject top ) {
+        if ( jobsJsonArray != null ) {
+            top.put( "jobs", jobsJsonArray );
+        }        
+    }
+
 
 }

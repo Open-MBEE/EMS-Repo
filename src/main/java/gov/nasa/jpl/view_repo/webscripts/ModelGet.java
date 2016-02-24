@@ -201,6 +201,7 @@ public class ModelGet extends AbstractJavaWebScript {
             if ( elementsJson.length() > 0 ) {
                 top.put( "elements", elementsJson );
             }
+            postProcessJson(top);
             // boolean evaluate = getBooleanArg( req, "evaluate", false );
             // WorkspaceNode ws = getWorkspace( req );
             // if ( evaluate ) {
@@ -233,6 +234,10 @@ public class ModelGet extends AbstractJavaWebScript {
         }
 
         return model;
+    }
+
+    protected void postProcessJson( JSONObject top ) {
+        // redefine this if you want
     }
 
     /**
@@ -344,6 +349,7 @@ public class ModelGet extends AbstractJavaWebScript {
             e.printStackTrace();
         }
 
+        postProcessJson(top);
         return elements;
     }
 
@@ -656,6 +662,7 @@ public class ModelGet extends AbstractJavaWebScript {
                         jobOrEle( node, ws, dateTime, id, includeQualified,
                                   isIncludeDocument );
 
+                // Move the properties out of the element into separate elements.
                 if( json.has( "properties" )) {
                     JSONArray arr = json.optJSONArray( "properties" );
                     
@@ -665,6 +672,7 @@ public class ModelGet extends AbstractJavaWebScript {
 
                     json.remove( "properties" );
                 }
+                
                 
                 elements.put( json );
                 elementsJsonMap.put( node, json );
