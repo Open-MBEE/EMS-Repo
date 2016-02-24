@@ -68,8 +68,6 @@ public class JobGet extends ModelGet {
     protected JSONArray jobs = new JSONArray();
     protected Map<String, EmsScriptNode> jobsFound = new HashMap<String, EmsScriptNode>();
 
-    private boolean fromJenkins = false;
-    
     @Override
     protected Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
         JobGet instance = new JobGet(repository, getServices());
