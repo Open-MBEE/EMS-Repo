@@ -2478,7 +2478,11 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         JenkinsBuildConfig config = new JenkinsBuildConfig();
         config.setJobID( jobID );
         String command = propertyValues.get("command");
-        config.setDocumentID( "" );
+        String[] commandArgs = command.split( "," );
+        if ( commandArgs.length >= 4 && commandArgs[1].trim().equals("Doc Web") ) {
+            config.setDocumentID( commandArgs[2].trim() );
+            config.setTeamworkProject( commandArgs[3].trim() );
+        }
         String schedule = propertyValues.get( "schedule" );
         config.setSchedule( schedule );
         jenkins.postConfigXml( config, config.getJobID() );

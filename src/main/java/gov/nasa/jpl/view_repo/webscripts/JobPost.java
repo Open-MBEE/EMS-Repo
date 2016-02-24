@@ -62,20 +62,20 @@ public class JobPost extends ModelPost {
         return instance.executeImplImpl(req, status, cache, true);
     }
         
-    protected void createJenkinsConfig(String jobID,
-                                       Map<String,String> propertyValues) {
-        JenkinsEngine jenkins = new JenkinsEngine();
-        JenkinsBuildConfig config = new JenkinsBuildConfig();
-        config.setJobID( jobID );
-        String command = propertyValues.get("command");
-        //config.setDocumentID( desiredView );
-        
-        // for demo
-        config.setDocumentID( "Basic Document, Rapid Table Document" );
-        String schedule = propertyValues.get( "schedule" );
-        config.setSchedule( schedule );
-        jenkins.postConfigXml( config, config.getJobID() );
-    }
+//    protected void createJenkinsConfig(String jobID,
+//                                       Map<String,String> propertyValues) {
+//        JenkinsEngine jenkins = new JenkinsEngine();
+//        JenkinsBuildConfig config = new JenkinsBuildConfig();
+//        config.setJobID( jobID );
+//        String command = propertyValues.get("command");
+//        //config.setDocumentID( desiredView );
+//        
+//        // for demo
+//        config.setDocumentID( "Basic Document, Rapid Table Document" );
+//        String schedule = propertyValues.get( "schedule" );
+//        config.setSchedule( schedule );
+//        jenkins.postConfigXml( config, config.getJobID() );
+//    }
 
 //    @Override
 //    protected void preProcessJson( JSONObject json, WorkspaceNode workspace ) {
