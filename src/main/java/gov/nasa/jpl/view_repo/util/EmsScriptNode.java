@@ -7027,7 +7027,7 @@ public class EmsScriptNode extends ScriptNode implements
         for ( int i = 0; i < metatypeArr.length(); ++i ) {
             String metatype = metatypeArr.optString( i );
             if ( metatype == null ) continue;
-            if ( metatype.equals( JobGet.jobStereotypeId ) ) { // TODO move this id out of JobGet?
+            if ( metatype.equals( JobGet.jobStereotypeId ) || metatype.equals( "_9_0_62a020a_1105704885275_885607_7905" )) { // TODO move this id out of JobGet?
                 return true;
             }
         }

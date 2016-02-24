@@ -2505,13 +2505,26 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         boolean createNewJob = jobNode == null;
 
         LinkedHashMap<String, String> propertyValues = new LinkedHashMap< String, String >();
-
+        
         // Process properties and remove them from the job json, which is being
         // transformed into element json.
         for ( String propertyName : jobProperties ) {
             // Save away the property values for later use;
             if ( isElement ) {
-
+                // trying to map out the property name with an object to identify the name coming from MD
+                JSONObject element = elementMap.get( jobId );   
+                String property = element.getString( "sysmlid" );
+                // split the string and get the defining feature 
+                String[] properties = property.split( "-slot-" );
+                // then compare it and set it when they map correctly
+                if( properties.length > 1 ) {
+                    if( properties[1].equals( definingFeatures.get( propertyName ) ) ) {
+                        job.put( "name", propertyName );
+                        return;
+                    }
+                    // go to the next property name
+                    continue;
+                }
             }
             String propertyValue = job.optString( propertyName );
             if ( propertyValue == null ) continue;
@@ -2712,7 +2725,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         // Add json for job elements whose Properties are posted without the job.
         // We do this because only jobs that show up in the json are processed.
         int length = elements.length();  // get length before loop since we will append to elements
-        for ( int i = 1; i < length; i++ ) {
+        for ( int i = 0; i < length; i++ ) {
             JSONObject elem = elements.optJSONObject( i );
             if ( elem == null ) continue;
             EmsScriptNode job = getOwningJobOfPropertyJson( elem, workspace, null );

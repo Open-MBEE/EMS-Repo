@@ -37,6 +37,7 @@ import gov.nasa.jpl.view_repo.webscripts.ModelGet;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
 import gov.nasa.jpl.pma.JenkinsEngine;
 
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -217,15 +218,19 @@ public class JobGet extends ModelGet {
                
         JSONObject json = job.toJSONObject( ws,  dateTime, includeQualified, isIncludeDocument, elementProperties.get(id) );
         
-        if  ( job.isJob( job ) ) {
+        if  ( job.isJob( job ) ) {            
             for ( String propertyName : jobProperties ) {
+                
                 EmsScriptNode propertyNode = getJobPropertyNode( job, propertyName );
                 // get property values and add to json (check for null)
 
                 if( propertyNode != null ) {
-                    Object o = getSystemModel().getProperty( propertyNode, propertyName );               
-                    o = getSystemModel().getValue( o, null );
+                    Collection< Object> values = getSystemModel().getValue( propertyNode, null );
+                    if( values instanceof Collection ) {
+                        
+                    }
                 }
+                
             }
         }
         
