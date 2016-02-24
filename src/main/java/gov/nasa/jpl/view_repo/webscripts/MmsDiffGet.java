@@ -313,7 +313,8 @@ public class MmsDiffGet extends AbstractJavaWebScript {
 //        }
 //        return diffJson;
 //    }
-    public static JSONObject performDiff( WorkspaceNode w1, WorkspaceNode w2,
+    public static JSONObject performDiff( AbstractJavaWebScript webscript,
+                                          WorkspaceNode w1, WorkspaceNode w2,
                                           Date date1, Date date2,
                                           StringBuffer aResponse,
                                           Status aResponseStatus,
@@ -333,7 +334,7 @@ public class MmsDiffGet extends AbstractJavaWebScript {
                     diffJson = workspaceDiff.diffJson;
                 } else {
                     workspaceDiff.forceJsonCacheUpdate = false;
-                    diffJson = workspaceDiff.toJSONObject( date1, date2, false );
+                    diffJson = workspaceDiff.toJSONObject( webscript, date1, date2, false );
                 }
                 if (!Utils.isNullOrEmpty(aResponse.toString()) && diffJson != null) {
                     diffJson.put("message", aResponse.toString());
@@ -405,13 +406,13 @@ public class MmsDiffGet extends AbstractJavaWebScript {
         
         // This assumes that the timepoint of the new diff is after the
         // timepoint of the old for each workspace.
-        JSONObject diff1Json = performDiff( ws1, ws1, date0_1, date1, getResponse(),
+        JSONObject diff1Json = performDiff( this, ws1, ws1, date0_1, date1, getResponse(),
                                             getResponseStatus(), DiffType.COMPARE, false, true );
         // Error case for commit nodes not being migrated:
         if (diff1Json == null) {
             return null;
         }
-        JSONObject diff2Json = performDiff( ws2, ws2, date0_2, date2, getResponse(),
+        JSONObject diff2Json = performDiff( this, ws2, ws2, date0_2, date2, getResponse(),
                                             getResponseStatus(), DiffType.COMPARE, false, true );
         // Error case for commit nodes not being migrated:
         if (diff2Json == null) {
@@ -561,7 +562,7 @@ public class MmsDiffGet extends AbstractJavaWebScript {
             //      supposed to control the glom flag of WorkspaceDiff?
             //      If it is, then we should pass true for forceNonGlom
             //      in the function call below.
-            top = performDiff( ws1, ws2, dateTime1, dateTime2, response,
+            top = performDiff( this, ws1, ws2, dateTime1, dateTime2, response,
                                responseStatus, diffType, false, false );
         }
         if ( top == null ) {

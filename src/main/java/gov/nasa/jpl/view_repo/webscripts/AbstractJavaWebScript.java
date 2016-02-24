@@ -91,6 +91,7 @@ import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.search.ResultSet;
 import org.alfresco.service.cmr.site.SiteInfo;
 import org.alfresco.service.cmr.site.SiteVisibility;
+import org.alfresco.service.cmr.version.Version;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.json.JSONArray;
@@ -183,6 +184,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         Utils.put( permissionCache, realUser, nodeRef, getPermType(permission), b );
     }
 
+    LinkedHashMap<String, String> propertyValues = new LinkedHashMap< String, String >();
 
     public boolean usingExistsCache = false; // not yet implemented
     enum ExistType { InAlfresco, InModel };
@@ -194,7 +196,11 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
     // Cache for whether node exists: node -> aspect -> true|false
     public Map< NodeRef, Map< ExistType, Boolean > > hasAspectCache =
             new HashMap< NodeRef, Map< ExistType, Boolean > >();
+    protected Map< String, List< EmsScriptNode > > elementProperties = new HashMap< String, List< EmsScriptNode > >();
 
+    /**
+     * The defining features of slots for the Job stereotype.
+     */
     static Map<String, String> definingFeatures = new LinkedHashMap< String, String >() {
         private static final long serialVersionUID = -6503314776361243306L;
         {
@@ -204,7 +210,13 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
             put( "command", "_18_0_2_6620226_1453945276117_966030_14557");
         }
     };
-    static String[] jobProperties =
+
+    // This array can be populated with json for found jobs when generating json
+    // for elements.  This is defined in AbstractJavaWebscript because job json
+    // will be sent with commit deltas for ModelPost.
+    protected JSONArray jobsJsonArray = new JSONArray();
+
+    protected static String[] jobProperties =
             Utils.toArrayOfType( definingFeatures.keySet().toArray(), String.class );
 
     protected void initMemberVariables(String siteName) {
@@ -2504,8 +2516,6 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         EmsScriptNode jobNode = findScriptNodeById( jobId, workspace, null, false );
         boolean createNewJob = jobNode == null;
 
-        LinkedHashMap<String, String> propertyValues = new LinkedHashMap< String, String >();
-        
         // Process properties and remove them from the job json, which is being
         // transformed into element json.
         for ( String propertyName : jobProperties ) {
@@ -2768,9 +2778,103 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         String ownerId = elem.optString( "owner" );
         if ( ownerId == null ) return null;
         EmsScriptNode owner = findScriptNodeById( ownerId, workspace, dateTime, false );
-        if ( owner.isJob( elem ) ) return owner;
+        if ( owner.isJob() ) return owner;
         return null;
     }
 
+    protected JSONObject getJsonForElement( EmsScriptNode element,
+                                            WorkspaceNode ws, Date dateTime,
+                                            String id,
+                                            boolean includeQualified,
+                                            boolean isIncludeDocument ) {
+        return getJsonForElement( element, ws, dateTime, includeQualified,
+                                  isIncludeDocument, null,
+                                  elementProperties.get( id ) );
+    }
+    protected JSONObject getJsonForElement( EmsScriptNode element,
+                                            WorkspaceNode ws, Date dateTime,
+                                            boolean includeQualified,
+                                            boolean isIncludeDocument,
+                                            Version version,
+                                            List<EmsScriptNode> ownedProperties ) {
+        return element.toJSONObject( null, false, ws, dateTime,
+                                     includeQualified, isIncludeDocument, version,
+                                     ownedProperties );
+    }
+    
+    public void postProcessJson( JSONObject top ) {
+        // redefine this if you want to add jobs or other things; see
+        // JobGet.postProcessJson()
+    }
+    
+    public JSONObject getJsonForElementAndJob( EmsScriptNode job,
+                                               WorkspaceNode ws,
+                                               Date dateTime,
+                                               boolean includeQualified,
+                                               boolean isIncludeDocument,
+                                               Version version,
+                                               List<EmsScriptNode> ownedProperties ) {
+        JSONObject json =
+                this.getJsonForElement( job, ws, dateTime, includeQualified,
+                                        isIncludeDocument, version,
+                                        ownedProperties );
+        getJsonForJob(job, json);
+        return json;
+    }
+
+    public JSONObject getJsonForElementAndJob( EmsScriptNode job,
+                                               WorkspaceNode ws,
+                                               Date dateTime, String id,
+                                               boolean includeQualified,
+                                               boolean isIncludeDocument ) {
+
+        JSONObject json =
+                this.getJsonForElement( job, ws, dateTime, id,
+                                        includeQualified, isIncludeDocument );
+        getJsonForJob(job, json);
+        return json;
+    }
+
+    public void getJsonForJob(EmsScriptNode job, JSONObject json) {
+        if ( job.isJob() ) {
+            JSONObject jobJson = null;
+            for ( String propertyName : jobProperties ) {
+
+                EmsScriptNode propertyNode =
+                        getJobPropertyNode( job, propertyName );
+                // get property values and add to json (check for null)
+
+                if ( propertyNode != null ) {
+                    Collection< Object > values =
+                            getSystemModel().getValue( propertyNode, null );
+                    if ( !Utils.isNullOrEmpty( values ) ) {
+                        if ( values.size() > 1 ) {
+                            // TODO -- ERROR?
+                        }
+                        Object value = values.iterator().next();
+                        if ( value != null ) {
+                            jobJson = addJobPropertyToJson( propertyName, value,
+                                                            jobJson, json );
+                        }
+                    }
+                }
+            }
+            if ( jobJson != null ) {
+                jobsJsonArray.put( jobJson );
+            }
+        }
+    }
+
+    protected JSONObject addJobPropertyToJson( String propertyName,
+                                               Object value,
+                                               JSONObject jobJson,
+                                               JSONObject json ) {
+        if ( json == null ) return jobJson;
+        if ( jobJson == null ) {
+            jobJson = NodeUtil.clone( json );
+        }
+        jobJson.put( propertyName, jsonWrap( value ) );
+        return jobJson;
+    }
 
 }

@@ -310,7 +310,7 @@ public class ModelPost extends AbstractJavaWebScript {
 	private void sendDeltasAndCommit(WorkspaceNode targetWS,
 			TreeSet<EmsScriptNode> elements, long start, long end)
 			throws JSONException {
-		JSONObject deltaJson = wsDiff.toJSONObject(new Date(start), new Date(
+		JSONObject deltaJson = wsDiff.toJSONObject(this, new Date(start), new Date(
 				end));
 
 		// commit is run as admin user already

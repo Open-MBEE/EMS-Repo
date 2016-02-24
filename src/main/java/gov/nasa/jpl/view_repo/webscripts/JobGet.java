@@ -29,12 +29,10 @@
 
 package gov.nasa.jpl.view_repo.webscripts;
 
-import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 import gov.nasa.jpl.view_repo.webscripts.ModelGet;
-import gov.nasa.jpl.view_repo.util.NodeUtil;
-import java.util.Collection;
+
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -55,8 +53,6 @@ public class JobGet extends ModelGet {
     
     public static final String jobStereotypeId = "_18_0_2_6620226_1453944322658_194833_14413";
 
-    protected JSONArray jobsJsonArray = new JSONArray(); 
-    
     public JobGet() {
         super();
     }
@@ -70,66 +66,29 @@ public class JobGet extends ModelGet {
 
     @Override
     protected Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
-        JobGet instance = new JobGet(repository, getServices());
+        AbstractJavaWebScript instance = new JobGet(repository, getServices());
         return instance.executeImplImpl(req, status, cache,
                 runWithoutTransactions);
     }
 
     @Override
-    protected JSONObject jobOrEle(EmsScriptNode job, WorkspaceNode ws, Date dateTime, String id,
-                             boolean includeQualified, boolean isIncludeDocument ) {
-               
-        JSONObject json =
-                job.toJSONObject( ws, dateTime, includeQualified,
-                                  isIncludeDocument, elementProperties.get( id ) );
-        
-        if  ( job.isJob( job ) ) {
-            JSONObject jobJson = null;
-            for ( String propertyName : jobProperties ) {
-                
-                EmsScriptNode propertyNode = getJobPropertyNode( job, propertyName );
-                // get property values and add to json (check for null)
-
-                if( propertyNode != null ) {
-                    Collection< Object> values = getSystemModel().getValue( propertyNode, null );
-                    if ( !Utils.isNullOrEmpty( values ) ) {
-                        if ( values.size() > 1 ) {
-                            // TODO -- ERROR?
-                        }
-                        Object value = values.iterator().next();
-                        if ( value != null ) {
-                            jobJson = addJobPropertyToJson( propertyName, value,
-                                                            jobJson, json );
-                        }
-                    }
-                }
-            }
-            if ( jobJson != null ) {
-                jobsJsonArray.put(jobJson);
-            }
-        }
-        
-        // TODO: return an error if the node is not a job
-        
-        return json;
-    }
-    
-    protected JSONObject addJobPropertyToJson( String propertyName, Object value, JSONObject jobJson,
-                                               JSONObject json ) {
-        if ( json == null ) return jobJson;
-        if ( jobJson == null ) {    
-            jobJson = NodeUtil.clone( json );
-        }
-        jobJson.put(propertyName, jsonWrap( value ) );
-        return jobJson;
+    public JSONObject getJsonForElement( EmsScriptNode job,
+                                            WorkspaceNode ws, Date dateTime,
+                                            String id,
+                                            boolean includeQualified,
+                                            boolean isIncludeDocument ) {
+        return getJsonForElementAndJob( job, ws, dateTime, id,
+                                        includeQualified, isIncludeDocument );
     }
 
     @Override
-    protected void postProcessJson( JSONObject top ) {
+    public void postProcessJson( JSONObject top ) {
         if ( jobsJsonArray != null ) {
             top.put( "jobs", jobsJsonArray );
-        }        
+            // flush the jobs array so that it can be repopulated for
+            // returned json after sending deltas
+            jobsJsonArray = null;
+        }
     }
-
 
 }
