@@ -183,6 +183,8 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         Utils.put( permissionCache, realUser, nodeRef, getPermType(permission), b );
     }
 
+    LinkedHashMap< String, Map< String, String >> propertyValues =
+            new LinkedHashMap< String, Map< String, String >>();
 
     public boolean usingExistsCache = false; // not yet implemented
     enum ExistType { InAlfresco, InModel };
@@ -2504,7 +2506,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         EmsScriptNode jobNode = findScriptNodeById( jobId, workspace, null, false );
         boolean createNewJob = jobNode == null;
 
-        LinkedHashMap<String, String> propertyValues = new LinkedHashMap< String, String >();
+        //LinkedHashMap<String, String> propertyValues = new LinkedHashMap< String, String >();
         
         // Process properties and remove them from the job json, which is being
         // transformed into element json.
@@ -2528,7 +2530,8 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
             }
             String propertyValue = job.optString( propertyName );
             if ( propertyValue == null ) continue;
-            propertyValues.put( propertyName, propertyValue );
+            Utils.put( propertyValues, jobId, propertyName, propertyValue );
+            //propertyValues.put( propertyName, propertyValue );
 
             // Update or create the property json.
             // FIXME -- If this is updating the passed in json, then it's
@@ -2552,7 +2555,9 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
 
         // Always overwrite or create the job so that things are updated.
 //        if ( createNewJob && !Utils.isNullOrEmpty( desiredView ) ) {
-        createJenkinsConfig( jobId, propertyValues );
+//        if ( EmsScriptNode.isJob( job ) ) {
+//            createJenkinsConfig( jobId, propertyValues );
+//        }
 //        }
     }
 
@@ -2700,6 +2705,19 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         return false;
     }
 
+    protected String getJobIdFromJson( JSONObject job ) {
+        // Get the id
+        String jobId = job.optString( "id" );
+        if ( Utils.isNullOrEmpty( jobId ) ) {
+            jobId = job.optString( "sysmlid" );
+        }
+        if ( Utils.isNullOrEmpty( jobId ) ) {
+            jobId = NodeUtil.createId( getServices() );
+            job.put( "sysmlid", jobId );
+        }
+        return jobId;
+    }
+    
     protected void processJobsJson( JSONObject json, WorkspaceNode workspace ) {
         if ( json == null ) return;
 
@@ -2755,6 +2773,11 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
                 JSONObject job = jobs.optJSONObject( i );
                 processJobJson( job, elements, elementMap, workspace, false );
             }
+        }
+        
+        for ( String jobId : propertyValues.keySet() ) {
+            Map< String, String > properties = propertyValues.get( jobId );
+            createJenkinsConfig( jobId, properties );
         }
 
         json.remove( "jobs" );
