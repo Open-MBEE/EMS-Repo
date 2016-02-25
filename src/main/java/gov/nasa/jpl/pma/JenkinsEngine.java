@@ -636,7 +636,7 @@ public class JenkinsEngine implements ExecutionEngine {
     }
     
     public String generateConfigXML( JenkinsBuildConfig config ){
-        String xml = config.generateBaseConfigXML( config );
+        String xml = config.generateBaseConfigXML();
         return xml;
     }
     
