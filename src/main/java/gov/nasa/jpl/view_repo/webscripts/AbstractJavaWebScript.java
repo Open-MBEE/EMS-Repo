@@ -2478,12 +2478,11 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         JenkinsBuildConfig config = new JenkinsBuildConfig();
         config.setJobID( jobID );
         String command = propertyValues.get("command");
-        //String[] commandArgs = command.split( "," );
-        //if ( commandArgs.length >= 4 && commandArgs[1].trim().equals("Doc Web") ) {
-        //    config.setDocumentID( commandArgs[2].trim() );
-        //    config.setTeamworkProject( commandArgs[3].trim() );
-        //}
-        config.setDocumentID( command );
+        String[] commandArgs = command.split( "," );
+        if ( commandArgs.length >= 4 && commandArgs[1].trim().equals("Doc Web") ) {
+            config.setDocumentID( commandArgs[2].trim() );
+            config.setTeamworkProject( commandArgs[3].trim() );
+        }
         String schedule = propertyValues.get( "schedule" );
         config.setSchedule( schedule );
         jenkins.postConfigXml( config, config.getJobID() );
@@ -2786,17 +2785,17 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         
         // By the time you get here, you have propertyValues AND a the job you want to post to Jenkins
         
-        Map< String, String > jobProperties = null;
+        HashMap< String, String > jobProperties = new HashMap< String, String >();
         
         for ( String jobId : propertyValues.keySet() ) {
             Map< String, String > properties = propertyValues.get( jobId );
+            Entry<String, String> entry = properties.entrySet().iterator().next();
             
-            //jobProperties.put( properties. )
-        //}
-        
-        //if ( EmsScriptNode.isJob( jobToPost ) ) {
-            createJenkinsConfig( jobToPost.optString( "sysmlid" ), properties );
+            if ( entry.getKey() != null && entry.getValue() != null )
+                jobProperties.put( entry.getKey(), entry.getValue() );
         }
+
+        createJenkinsConfig( jobToPost.optString( "sysmlid" ), jobProperties );
 
         json.remove( "jobs" );
 
@@ -2809,7 +2808,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         String ownerId = elem.optString( "owner" );
         if ( ownerId == null ) return null;
         EmsScriptNode owner = findScriptNodeById( ownerId, workspace, dateTime, false );
-        if ( owner.isJob( elem ) ) return owner;
+        if ( EmsScriptNode.isJob( elem ) ) return owner;
         return null;
     }
 

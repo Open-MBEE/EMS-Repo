@@ -269,7 +269,7 @@ public class JenkinsBuildConfig {
             if ( !Utils.isNullOrEmpty( getSchedule() ) ) {
                 Element hudTrig = doc.createElement("hudson.triggers.SCMTrigger");
                 Element spec = doc.createElement("spec");
-                spec.appendChild( doc.createTextNode( schedule ) );
+                spec.appendChild( doc.createTextNode( config.schedule ) );
                 hudTrig.appendChild( spec );
                 tempElement.appendChild( hudTrig );
             }
@@ -291,22 +291,13 @@ public class JenkinsBuildConfig {
             // Get the script file and put the string contents in
             // magicdrawSchedulingCommand.
             String s = null;
-            try {
-                s = FileUtils.fileToString( "mms/docwebJenkinsScript.sh" );
-                if ( !Utils.isNullOrEmpty( s ) ) {
-                    this.magicdrawSchedulingCommand = s;
-                    System.out.println("\n\n\nGot file first try!\n\n\n");
-                }
-            } catch ( FileNotFoundException e ) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
+
             if ( Utils.isNullOrEmpty( s ) ) {
                 File file = FileUtils.findFile( "docwebJenkinsScript.sh" );
                 try {
                     s = FileUtils.fileToString( file );
                     this.magicdrawSchedulingCommand = s;
-                    System.out.println("\n\n\nGot file second try! " + file.getPath() + "\n\n\n");
+                    System.out.println("\n\n\nGot file for command in the following path: " + file.getPath() + "\n\n\n");
                 } catch ( FileNotFoundException e ) {
                     // TODO Auto-generated catch block
                     e.printStackTrace();
@@ -398,7 +389,7 @@ public class JenkinsBuildConfig {
             propertiesContent.appendChild(doc.createTextNode("MMS_SERVER=" + this.mmsServer + "\n"));
             propertiesContent.appendChild(doc.createTextNode("MMS_USER=" + this.mmsUser + "\n"));
             propertiesContent.appendChild(doc.createTextNode("MMS_PASSWORD=" + this.mmsPassword + "\n"));
-            propertiesContent.appendChild(doc.createTextNode("TEAMWORK_PROJECT=" + this.teamworkProject + "\n"));
+            propertiesContent.appendChild(doc.createTextNode("TEAMWORK_PROJECT=" + config.teamworkProject + "\n"));
             propertiesContent.appendChild(doc.createTextNode("TEAMWORK_SERVER=" + this.teamworkServer + "\n"));
             propertiesContent.appendChild(doc.createTextNode("TEAMWORK_PORT=" + this.teamworkPort + "\n"));
             propertiesContent.appendChild(doc.createTextNode("TEAMWORK_USER=" + this.teamworkUser + "\n"));
