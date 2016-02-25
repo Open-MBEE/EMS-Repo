@@ -2479,9 +2479,20 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         config.setJobID( jobID );
         String command = propertyValues.get("command");
         String[] commandArgs = command.split( "," );
-        if ( commandArgs.length >= 4 && commandArgs[1].trim().equals("Doc Web") ) {
+        if ( commandArgs.length >= 6 &&
+             commandArgs[0].trim().toLowerCase().equals("jenkins") &&
+             ( commandArgs[1].trim().toLowerCase().equals("doc web") ||
+               commandArgs[1].trim().toLowerCase().equals("docweb") ) ) {
             config.setDocumentID( commandArgs[2].trim() );
-            config.setTeamworkProject( commandArgs[3].trim() );
+            config.setTeamworkServer( commandArgs[3].trim() );
+            config.setTeamworkPort( commandArgs[4].trim() );
+            config.setTeamworkProject( commandArgs[5].trim() );
+            if ( commandArgs.length > 6 ) {
+                config.setWorkspace( commandArgs[6].trim() );
+            }
+        } else {
+            String message = "Command not supported: " + command;
+            log(Level.WARN, HttpServletResponse.SC_NOT_IMPLEMENTED, message);
         }
         String schedule = propertyValues.get( "schedule" );
         config.setSchedule( schedule );
