@@ -2770,7 +2770,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
             if( EmsScriptNode.isJob( elem ) ) {
                 jobToPost = elem;
             }
-            if ( EmsScriptNode.isJobSlot( elem ) ) {
+            if ( EmsScriptNode.maybeJobProperty( elem ) ) {
                 processJobJson( elem, elements, elementMap, workspace, true );               
             }
         }

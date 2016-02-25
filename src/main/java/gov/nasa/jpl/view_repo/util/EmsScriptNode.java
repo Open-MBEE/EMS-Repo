@@ -7034,12 +7034,13 @@ public class EmsScriptNode extends ScriptNode implements
         return false;
     }
     
-    public static boolean isJobSlot( JSONObject json ) {
+    public static boolean maybeJobProperty( JSONObject json ) {
         JSONArray metatypeArr = json.optJSONArray(Acm.JSON_APPLIED_METATYPES);
         if ( metatypeArr == null ) return false;
         for ( int i = 0; i < metatypeArr.length(); ++i ) {
             String metatype = metatypeArr.optString( i );
             if ( metatype == null ) continue;
+            // this refers to a 'slot', it may or may not be a property containing this applied metatype 
             if ( metatype.equals( "_9_0_62a020a_1105704885275_885607_7905" ) ) { // TODO move this id out of JobGet?
                 return true;
             }
