@@ -2479,13 +2479,18 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         JenkinsBuildConfig config = new JenkinsBuildConfig();
         config.setJobID( jobID );
         String command = propertyValues.get("command");
-        String[] commandArgs = command.split( "," );
-        if ( commandArgs.length >= 4 && commandArgs[1].trim().equals("Doc Web") ) {
-            config.setDocumentID( commandArgs[2].trim() );
-            config.setTeamworkProject( commandArgs[3].trim() );
+        if ( !Utils.isNullOrEmpty( command ) ) {
+            String[] commandArgs = command.split( "," );
+            if ( commandArgs.length >= 4 && commandArgs[1].trim().equals("Doc Web") ) {
+                config.setDocumentID( commandArgs[2].trim() );
+                config.setTeamworkProject( commandArgs[3].trim() );
+            }
         }
-        String schedule = propertyValues.get( "schedule" );
-        config.setSchedule( schedule );
+        boolean hasSchedule = propertyValues.containsKey( "schedule" );
+        if ( hasSchedule ) {
+            String schedule = propertyValues.get( "schedule" );
+            config.setSchedule( schedule );
+        }
         jenkins.postConfigXml( config, config.getJobID() );
     }
 
@@ -2948,7 +2953,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
 
         // Generate or update element json for each of the properties.
         if ( jobs != null ) {
-            for ( int i = 1; i < jobs.length(); i++ ) {
+            for ( int i = 0; i < jobs.length(); i++ ) {
                 JSONObject job = jobs.optJSONObject( i );
                 processJobAsJob( job, elements, elementMap, workspace );
             }
