@@ -1,6 +1,6 @@
 # Tell MMS that this job has started
 status=running
-curl -w "\n%{http_code}\n" -u ${MMS_USER}:${MMS_PASSWORD} -X POST -H Content-Type:application/json --data "{\"jobs\":[{\"id\":\"${JOB_ID}\", \"status\":\"${status}\"]}" "localhost:9000/alfresco/service/workspaces/master/jobs"
+curl -w "\n%{http_code}\n" -u ${MMS_USER}:${MMS_PASSWORD} -X POST -H Content-Type:application/json --data "{\"jobs\":[{\"sysmlid\":\"${JOB_ID}\", \"status\":\"${status}\"}]}" "https://${MMS_SERVER}/alfresco/service/workspaces/master/jobs"
 
 git submodule init
 
@@ -11,10 +11,10 @@ ant -buildfile jenkinsbuild.xml
 cd /opt/local/MD
 
 #complete classpath to launch magicdraw via java
-export CLASSPATH=${CLASSPATH}:/opt/local/jenkins/working_dir/workspace/MDKTest/bin/
-export CLASSPATH=${CLASSPATH}:/opt/local/jenkins/working_dir/workspace/MDKTest/lib/*
-export CLASSPATH=${CLASSPATH}:/opt/local/jenkins/working_dir/workspace/MDKTest/mdk_module/lib/*
-export CLASSPATH=${CLASSPATH}:/opt/local/jenkins/working_dir/workspace/MDKTest/mdk_module/lib/test/*
+export CLASSPATH=${CLASSPATH}:/opt/local/jenkins/working_dir/workspace/${JOB_ID}/bin/
+export CLASSPATH=${CLASSPATH}:/opt/local/jenkins/working_dir/workspace/${JOB_ID}/lib/*
+export CLASSPATH=${CLASSPATH}:/opt/local/jenkins/working_dir/workspace/${JOB_ID}/mdk_module/lib/*
+export CLASSPATH=${CLASSPATH}:/opt/local/jenkins/working_dir/workspace/${JOB_ID}/mdk_module/lib/test/*
 export CLASSPATH=${CLASSPATH}:/opt/local/MD/lib/*
 export CLASSPATH=${CLASSPATH}:/opt/local/MD/lib/graphics/*
 export CLASSPATH=${CLASSPATH}:/opt/local/MD/lib/webservice/*
@@ -43,5 +43,5 @@ java -Xmx1200m -XX:PermSize=1200m -XX:MaxPermSize=1200m gov.nasa.jpl.mbee.emsrci
 # and change status to &quot;completed.&quot;  Otherwise, we assume that $status has been set to an appropriate value elsewhere.
 
 if [ "$status" == "running" ]; then status=completed; fi
-curl -w "\n%{http_code}\n" -u ${MMS_USER}:${MMS_PASSWORD} -X POST -H Content-Type:application/json --data "{\"elements\":[{\"id\":\"${JOB_ID}\", \"status\":\"${status}\"]}" "localhost:9000/alfresco/service/workspaces/master/elements" 
+curl -w "\n%{http_code}\n" -u ${MMS_USER}:${MMS_PASSWORD} -X POST -H Content-Type:application/json --data "{\"jobs\":[{\"sysmlid\":\"${JOB_ID}\", \"status\":\"${status}\"}]}" "https://${MMS_SERVER}/alfresco/service/workspaces/master/elements" 
 

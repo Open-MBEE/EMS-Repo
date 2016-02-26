@@ -50,7 +50,7 @@ public class JenkinsBuildConfig {
     private              String  configTemplatePath = "./BuildConfigTemplate.xml";
     private              String  jobID              = "job0000";
     private              String  documentID         = "_18_1111_111_111";
-    private              String  mmsServer          = "cae-jenkins";
+    private              String  mmsServer          = "cae-ems-test.jpl.nasa.gov";
     private              String  mmsUser            = "mmsadmin";
     private              String  mmsPassword        = "letmein";
     //private              String  teamworkProject    = "MD Forever";
@@ -70,69 +70,7 @@ public class JenkinsBuildConfig {
     private              String  gitBranch          = "*/develop";
     private              String  schedule           = null;
 
-    private String magicdrawSchedulingCommand = " # Tell MMS that this job has started\n" +
-            "status=running\n" +
-            "curl -w &quot;\\n%{http_code}\\n&quot; -u ${MMS_USER}:${MMS_PASSWORD} -X POST -H Content-Type:application/json " +
-            "--data &quot;{\\&quot;jobs\\&quot;:[{\\&quot;id\\&quot;:\\&quot;${JOB_ID}\\&quot;, \\&quot;\\&quot;status\\&quot;" +
-            ":\\&quot;${status}\\&quot;]}&quot; &quot;${MMS_SERVER}/alfresco/service/workspaces/master/jobs&quot;\n\n\n" +
-            "#curl -o temp http://cae-artifactory.jpl.nasa" +
-            ".gov/artifactory/simple/ext-release-local/gov/nasa/jpl/cae/magicdraw/packages/cae_md18_0_sp5_mdk/2" +
-            ".3-RC3/cae_md18_0_sp5_mdk-2.3-RC3.zip\n\n" +
-            "pwd\n\n" +
-            "git submodule init\n\n" +
-            "git submodule update\n\n" +
-            "ant -buildfile jenkinsbuild.xml\n\n" +
-            "cd /opt/local/MD\n\n" +
-            "#complete classpath to launch magicdraw via java\n" +
-            "export CLASSPATH=${CLASSPATH}:/opt/local/jenkins/working_dir/workspace/MDKTest/bin/\n" +
-            "export CLASSPATH=${CLASSPATH}:/opt/local/jenkins/working_dir/workspace/MDKTest/lib/*\n" +
-            "export CLASSPATH=${CLASSPATH}:/opt/local/jenkins/working_dir/workspace/MDKTest/mdk_module/lib/*\n" +
-            "export CLASSPATH=${CLASSPATH}:/opt/local/jenkins/working_dir/workspace/MDKTest/mdk_module/lib/test/*\n" +
-            "export CLASSPATH=${CLASSPATH}:/opt/local/MD/lib/*\n" +
-            "export CLASSPATH=${CLASSPATH}:/opt/local/MD/lib/graphics/*\n" +
-            "export CLASSPATH=${CLASSPATH}:/opt/local/MD/lib/webservice/*\n\n" +
-            "#export display of magicdraw to vnc with gui installed (required to launch)\n" +
-            "export DISPLAY=:1\n\n" +
-            "#robot disabled pending determination of alternate command line argument pass in\n" +
-            "#java org.robotframework.RobotFramework -d " +
-            "/opt/local/jenkins/working_dir/workspace/MDKTest/mdk/robot/report/TeamworkTest " +
-            "/opt/local/jenkins/working_dir/workspace/MDKTest/mdk/robot/test/TeamworkTest.robot\n\n" +
-            "# test case argument list:\n" +
-            "# -d &lt;String&gt; : uses supplied string as date. not implemented elsewhere atm\n" +
-            "# -tstnm &lt;string&gt; : uses supplied string as testName, either to find a local test file or to store reference" +
-            " output. probably not something you&apos;ll use.\n" +
-            "# -tstrt &lt;string&gt; : uses supplied string as testRoot location. again, probably not something you&apos;ll " +
-            "use\n" +
-            "# -twprj &lt;string&gt; : specifies teamwork project name\n" +
-            "# -twsrv &lt;string&gt; : specifies teamwork server\n" +
-            "# -twprt &lt;string&gt; : specifies teamwork port\n" +
-            "# -twusr &lt;string&gt; : specifies teamwork user\n" +
-            "# -twpsd &lt;string&gt; : specifies teamwork password\n" +
-            "# -wkspc : specifies workspace. not currently implemented.\n" +
-            "# -mmsusr &lt;string&gt; : specifies mms username\n" +
-            "# -mmspsd &lt;string&gt; : specifies mms password\n\n\n" +
-            "#secondary java 7 command line test calls\n" +
-            "java -Xmx1200m -XX:PermSize=1200m -XX:MaxPermSize=1200m gov.nasa.jpl.mbee.emsrci.mdk.test" +
-            ".TableElementCopyWithVEChange -tstrt /opt/local/jenkins/working_dir/workspace/MDKTest/ -ptrlc /opt/local/node" +
-            ".js/bin/\n" +
-            "#java -Xmx1200m -XX:PermSize=1200m -XX:MaxPermSize=1200m gov.nasa.jpl.mbee.emsrci.mdk.test.TeamworkTest -tstrt " +
-            "&quot;/opt/local/jenkins/working_dir/workspace/MDKTest/&quot;# -ptrlc &quot;/opt/local/node.js/bin/&quot;\n\n" +
-            "#java -Xmx1200m -XX:PermSize=1200m -XX:MaxPermSize=1200m gov.nasa.jpl.mbee.emsrci.mdk.test.SyncTest -tstrt &quot;" +
-            "/opt/local/jenkins/working_dir/workspace/MDKTest/&quot;\n\n\n\n" +
-            "#secondary java 8 command line test calls\n" +
-            "#java -Xmx1200m gov.nasa.jpl.mbee.emsrci.mdk.test.TeamworkTest -tstrt &quot;" +
-            "/opt/local/jenkins/working_dir/workspace/MDKTest/&quot;# -ptrlc &quot;/opt/local/node.js/bin/&quot;\n\n" +
-            "#protractor tests\n" +
-            "#/bin/bash /opt/local/jenkins/working_dir/workspace/MDKTest/test.sh tablecopytest " +
-            "/opt/local/jenkins/working_dir/workspace/MDKTest/\n\n" +
-            "# Tell MMS that this job has completed.  If it&apos;s in the &quot;running&quot; state, then we assume everything " +
-            "executed properly\n" +
-            "# and change status to &quot;completed.&quot;  Otherwise, we assume that $status has been set to an appropriate " +
-            "value elsewhere.\n" +
-            "if [ &quot;$status&quot; == &quot;running&quot; ]; then status=completed; fi\n" +
-            "curl -w &quot;\\n%{http_code}\\n&quot; -u ${MMS_USER}:${MMS_PASSWORD} -X POST -H Content-Type:application/json " +
-            "--data &quot;{\\&quot;elements\\&quot;:[{\\&quot;id\\&quot;:\\&quot;${JOB_ID}\\&quot;, \\&quot;status\\&quot;" +
-            ":\\&quot;${status}\\&quot;]}&quot; &quot;${MMS_SERVER}/alfresco/service/workspaces/master/elements&quot;  ";
+    private String magicdrawSchedulingCommand = null;
     public JenkinsBuildConfig() {
         // TODO Auto-generated constructor stub
     }
