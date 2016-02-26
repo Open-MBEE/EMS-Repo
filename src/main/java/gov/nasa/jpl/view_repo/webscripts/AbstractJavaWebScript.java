@@ -2853,7 +2853,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
 
         // Generate or update element json for each of the properties.
         if ( jobs != null ) {
-            for ( int i = 1; i < jobs.length(); i++ ) {
+            for ( int i = 0; i < jobs.length(); i++ ) {
                 JSONObject job = jobs.optJSONObject( i );
                 processJobJsonAsJob( job, elements, elementMap, workspace );
             }
