@@ -2573,11 +2573,9 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
             }
         }
 
-        // Don't add a specialization to the job json since it may already
-        // exist, and we don't want to change the type.
-
         // Use job json as element json and move to "elements" array. The
         // job-specific properties in the json were stripped out above.
+        // FIXME -- this appends only a sysmlid to "elements
         elements.put(jobJson);
     }
 
