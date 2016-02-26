@@ -2672,8 +2672,8 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
                                       boolean createNewJob,
                                       EmsScriptNode jobNode,
                                       JSONArray elements ) {      
-        //if( !job.has( propertyName ) ) 
-        //    return null;
+        if( !job.has( propertyName ) ) 
+            return null;
             
         //String propertyValue = job.optString( propertyName);
         
