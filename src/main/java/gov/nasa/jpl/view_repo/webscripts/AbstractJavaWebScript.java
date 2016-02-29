@@ -2835,14 +2835,12 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
             }
         }        
 
-        JSONObject jobToPost = new JSONObject();
         // Loop through the "elements" json array, and for each element, check
         // to see if it is a job and process it to gather property values to add
         // to the Jenkins configuration.
         for ( int i = 0; i < elements.length(); i++ ) {
             JSONObject elem = elements.optJSONObject( i );
             if ( EmsScriptNode.isJob( elem ) ) {
-                jobToPost = elem;
                 processJobAsElement( elem, elements, elementMap, workspace );
             } 
         }
@@ -2857,7 +2855,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         
         for ( String jobId : propertyValues.keySet() ) {
             Map< String, String > properties = propertyValues.get( jobId );
-            createJenkinsConfig( jobToPost.optString( "sysmlid" ), properties );
+            createJenkinsConfig( jobId, properties );
         }
 
         json.remove( "jobs" );
