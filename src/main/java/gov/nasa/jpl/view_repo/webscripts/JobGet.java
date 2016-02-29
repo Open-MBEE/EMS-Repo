@@ -54,7 +54,8 @@ public class JobGet extends ModelGet {
     static Logger logger = Logger.getLogger(JobGet.class);
     
     public static final String jobStereotypeId = "_18_0_2_6620226_1453944322658_194833_14413";
-
+    public static final String slotId = "_9_0_62a020a_1105704885275_885607_7905";
+    
     protected JSONArray jobsJsonArray = new JSONArray(); 
     
     public JobGet() {

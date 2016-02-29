@@ -7041,7 +7041,7 @@ public class EmsScriptNode extends ScriptNode implements
             String metatype = metatypeArr.optString( i );
             if ( metatype == null ) continue;
             // this refers to a 'slot', it may or may not be a property containing this applied metatype 
-            if ( metatype.equals( "_9_0_62a020a_1105704885275_885607_7905" ) ) { // TODO move this id out of JobGet?
+            if ( metatype.equals( JobGet.slotId ) ) { // TODO move this id out of JobGet?
                 return true;
             }
         }

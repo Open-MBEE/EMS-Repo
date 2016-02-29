@@ -2851,16 +2851,13 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         if ( jobs != null ) {
             for ( int i = 0; i < jobs.length(); i++ ) {
                 JSONObject job = jobs.optJSONObject( i );
-
                 processJobAsJob( job, elements, elementMap, workspace );
-
             }
         }
         
         for ( String jobId : propertyValues.keySet() ) {
             Map< String, String > properties = propertyValues.get( jobId );
             createJenkinsConfig( jobToPost.optString( "sysmlid" ), properties );
-
         }
 
         json.remove( "jobs" );
