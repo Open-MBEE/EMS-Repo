@@ -38,7 +38,8 @@ public class AllFlagsGet extends FlagSet {
                            "cacheSnapshots",
                            "checkMmsVersions",
                            "graphDb",
-                           "postProcessQualified"};
+                           "postProcessQualified",
+                           "doorsSync"};
     
     public String[] getAllFlags() {
         return flags;
@@ -134,6 +135,8 @@ public class AllFlagsGet extends FlagSet {
             NodeUtil.doGraphDb = val;
         } else if (path.equalsIgnoreCase("postProcessQualified")) {
             NodeUtil.doPostProcessQualified = val;
+        } else if (path.equalsIgnoreCase("doorsSync")) {
+            NodeUtil.doorsSync = val;
         }
         return true;
     }
@@ -203,6 +206,8 @@ public class AllFlagsGet extends FlagSet {
         	    return AbstractJavaWebScript.checkMmsVersions;
         } else if (path.equalsIgnoreCase( "postProcessQualified" )) {
             return NodeUtil.doPostProcessQualified;
+        } else if (path.equalsIgnoreCase( "doorsSync" )) {
+            return NodeUtil.doorsSync;
         }
         return false;
     }
@@ -284,6 +289,8 @@ public class AllFlagsGet extends FlagSet {
             return false;
         } else if (path.equalsIgnoreCase( "doPostProcessQualified" )) {
             return false;
+        } else if (path.equalsIgnoreCase( "doorsSync" )) {
+            return false;
         }
         return false;
     };
@@ -358,6 +365,8 @@ public class AllFlagsGet extends FlagSet {
             return "graphDb";
         } else if (path.equalsIgnoreCase("postProcessQualified")) {
             return "postProcessQualified";
+        } else if (path.equalsIgnoreCase("doorsSync")) {
+            return "doorsSync";
         }
         return null;
     }
