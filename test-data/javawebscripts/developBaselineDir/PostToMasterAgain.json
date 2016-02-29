@@ -1,34 +1,9 @@
 {"elements": [
     {
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "specialization": {"type": "Package"}
-    },
-    {
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "specialization": {"type": "Package"}
-    },
-    {
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "specialization": {"type": "Package"}
-    },
-    {
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "specialization": {"type": "Package"}
-    },
-    {
         "sysmlid": "a",
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
-        "name": "a",
         "documentation": "a is a",
         "specialization": {
             "propertyType": null,
@@ -42,11 +17,35 @@
         }
     },
     {
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "specialization": {"type": "Package"}
+    },
+    {
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "specialization": {"type": "Package"}
+    },
+    {
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "specialization": {"type": "Package"}
+    },
+    {
         "sysmlid": "holding_bin_no_site_no_project",
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
-        "name": "holding_bin_no_site_no_project",
+        "name": "holding_bin",
+        "specialization": {"type": "Package"}
+    },
+    {
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
         "specialization": {"type": "Package"}
     }
 ]}

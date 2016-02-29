@@ -1,11 +1,5 @@
 {"elements": [
     {
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "specialization": {"type": "Package"}
-    },
-    {
         "sysmlid": "MMS_1450390431247_8a4b76d2-394c-4569-9abe-5c51dc4b0711",
         "isMetatype": false,
         "editable": true,
@@ -21,24 +15,6 @@
             "allowedElements": [],
             "type": "Product"
         }
-    },
-    {
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "specialization": {"type": "Package"}
-    },
-    {
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "specialization": {"type": "Package"}
-    },
-    {
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "specialization": {"type": "Package"}
     },
     {
         "sysmlid": "MMS_1450390431247_8a4b76d2-394c-4569-9abe-5c51dc4b0812",
@@ -64,14 +40,6 @@
         }
     },
     {
-        "sysmlid": "holding_bin_no_site_no_project",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "holding_bin_no_site_no_project",
-        "specialization": {"type": "Package"}
-    },
-    {
         "sysmlid": "MMS_1450390431247_8a4b76d2-394c-4569-9abe-5c51dc4b0813",
         "isMetatype": false,
         "editable": true,
@@ -95,6 +63,18 @@
         }
     },
     {
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "specialization": {"type": "Package"}
+    },
+    {
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "specialization": {"type": "Package"}
+    },
+    {
         "sysmlid": "MMS_1450390431247_8a4b76d2-394c-4569-9abe-5c51dc4b0811",
         "isMetatype": false,
         "editable": true,
@@ -116,6 +96,26 @@
             "allowedElements": [],
             "type": "View"
         }
+    },
+    {
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "specialization": {"type": "Package"}
+    },
+    {
+        "sysmlid": "holding_bin_no_site_no_project",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "holding_bin",
+        "specialization": {"type": "Package"}
+    },
+    {
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "specialization": {"type": "Package"}
     }
 ]}
 200

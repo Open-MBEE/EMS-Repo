@@ -10,7 +10,6 @@
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
-        "name": "f",
         "documentation": "f is f",
         "specialization": {
             "source": null,
@@ -41,7 +40,7 @@
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
-        "name": "holding_bin_no_site_no_project",
+        "name": "holding_bin",
         "specialization": {"type": "Package"}
     }
 ]}

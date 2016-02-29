@@ -1,9 +1,16 @@
 {"elements": [
     {
+        "sysmlid": "d",
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
-        "specialization": {"type": "Package"}
+        "documentation": "d is d",
+        "specialization": {
+            "propertyType": null,
+            "isSlot": false,
+            "isDerived": false,
+            "type": "Property"
+        }
     },
     {
         "editable": true,
@@ -28,22 +35,14 @@
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
-        "name": "holding_bin_no_site_no_project",
+        "name": "holding_bin",
         "specialization": {"type": "Package"}
     },
     {
-        "sysmlid": "d",
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
-        "name": "d",
-        "documentation": "d is d",
-        "specialization": {
-            "propertyType": null,
-            "isSlot": false,
-            "isDerived": false,
-            "type": "Property"
-        }
+        "specialization": {"type": "Package"}
     }
 ]}
 200
