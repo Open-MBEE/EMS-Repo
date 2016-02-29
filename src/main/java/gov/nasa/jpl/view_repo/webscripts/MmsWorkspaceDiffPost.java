@@ -307,7 +307,7 @@ public class MmsWorkspaceDiffPost extends ModelPost {
 	                }
 	                
 	                // This has to be done before adding deleted aspects
-	                finalJsonDiff = wsDiff.toJSONObject( new Date(start), new Date(end) ); 
+	                finalJsonDiff = wsDiff.toJSONObject( this, new Date(start), new Date(end) ); 
 	                
 	                // Apply the deleted aspects if needed to the deleted nodes:
 	                if (modelDeleteDiff) {

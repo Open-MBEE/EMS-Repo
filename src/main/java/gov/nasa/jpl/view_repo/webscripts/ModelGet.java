@@ -95,9 +95,6 @@ public class ModelGet extends AbstractJavaWebScript {
     protected JSONArray elements = new JSONArray();
     protected Map< String, EmsScriptNode > elementsFound =
             new HashMap< String, EmsScriptNode >();
-    protected Map< String, List< EmsScriptNode > > elementProperties =
-            new HashMap< String, List< EmsScriptNode > >();
-
     protected boolean prettyPrint = true;
 
     @Override
@@ -174,7 +171,7 @@ public class ModelGet extends AbstractJavaWebScript {
     @Override
     protected Map< String, Object > executeImpl( WebScriptRequest req,
                                                  Status status, Cache cache ) {
-        ModelGet instance = new ModelGet( repository, getServices() );
+        AbstractJavaWebScript instance = new ModelGet( repository, getServices() );
         return instance.executeImplImpl( req, status, cache,
                                          runWithoutTransactions );
     }
@@ -234,10 +231,6 @@ public class ModelGet extends AbstractJavaWebScript {
         }
 
         return model;
-    }
-
-    protected void postProcessJson( JSONObject top ) {
-        // redefine this if you want
     }
 
     /**
@@ -659,7 +652,7 @@ public class ModelGet extends AbstractJavaWebScript {
                  || checkPermissions( node, PermissionService.READ ) ) {
 
                 JSONObject json =
-                        jobOrEle( node, ws, dateTime, id, includeQualified,
+                        getJsonForElement( node, ws, dateTime, id, includeQualified,
                                   isIncludeDocument );
 
                 // Move the properties out of the element into separate elements.
@@ -692,15 +685,6 @@ public class ModelGet extends AbstractJavaWebScript {
                 // e.printStackTrace();
             }
         }
-    }
-
-    protected JSONObject jobOrEle( EmsScriptNode element, WorkspaceNode ws,
-                                   Date dateTime, String id,
-                                   boolean includeQualified,
-                                   boolean isIncludeDocument ) {
-        return element.toJSONObject( ws, dateTime, includeQualified,
-                                     isIncludeDocument,
-                                     elementProperties.get( id ) );
     }
 
     protected void addAffectedElements( WorkspaceNode ws, Date dateTime ) {

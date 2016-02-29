@@ -982,6 +982,20 @@ public class NodeUtil {
         return newJson;
     }
 
+    public static JSONArray clone( JSONArray json ) {
+        JSONArray jarr = new JSONArray();
+        for ( int i = 0; i < json.length(); ++i ) {
+            Object o = json.get( i );
+            if ( o instanceof JSONObject ) {
+                o = clone( (JSONObject)o );
+            } else if ( o instanceof JSONArray ) {
+                o = clone( (JSONArray)o );
+            }
+            jarr.put( o );
+        }
+        return jarr;
+    }
+    
     public static JSONObject clone( JSONObject json ) {
         if ( json == null ) return null;
         JSONObject newJson = newJsonObject();
@@ -992,9 +1006,11 @@ public class NodeUtil {
             Object value;
             try {
                 value = json.get( key );
-                if ( key.equals( Acm.JSON_SPECIALIZATION )
-                     && value instanceof JSONObject ) {
+                if ( //key.equals( Acm.JSON_SPECIALIZATION ) &&
+                     value instanceof JSONObject ) {
                     value = clone( (JSONObject)value );
+                } else if ( value instanceof JSONArray ) {
+                    value = clone( (JSONArray)value );
                 }
                 newJson.put( key, value );
             } catch ( JSONException e ) {
