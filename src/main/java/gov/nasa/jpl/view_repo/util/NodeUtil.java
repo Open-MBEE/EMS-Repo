@@ -229,6 +229,8 @@ public class NodeUtil {
     public static boolean skipGetNodeRefAtTime = true;
     public static boolean skipWorkspacePermissionCheck = true;
     public static boolean doOptimisticJustFirst = true;
+    
+    public static boolean doorsSync = false;
 
     // global flag that is enabled once heisenbug is seen, so it will email
     // admins the first time heisenbug is seen
