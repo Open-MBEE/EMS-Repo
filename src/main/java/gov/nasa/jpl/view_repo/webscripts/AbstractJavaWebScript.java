@@ -2487,6 +2487,8 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         JenkinsEngine jenkins = new JenkinsEngine();
         JenkinsBuildConfig config = new JenkinsBuildConfig();
         config.setJobID( jobID );
+        String schedule = propertyValues.get("schedule");
+        config.setSchedule( schedule );
         String command = propertyValues.get("command");
         String[] commandArgs = command.split( "," );
         if ( commandArgs.length >= 6 &&
