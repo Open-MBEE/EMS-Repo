@@ -342,7 +342,6 @@ public class ModelGet extends AbstractJavaWebScript {
             e.printStackTrace();
         }
 
-        postProcessJson(top);
         return elements;
     }
 
