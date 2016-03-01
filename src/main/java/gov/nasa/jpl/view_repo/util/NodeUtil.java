@@ -12,7 +12,6 @@ import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.actions.ActionUtil;
 import gov.nasa.jpl.view_repo.db.Node;
 import gov.nasa.jpl.view_repo.db.PostgresHelper;
-import gov.nasa.jpl.view_repo.db.PostgresHelper.DbEdgeTypes;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode.EmsVersion;
 import gov.nasa.jpl.view_repo.webscripts.AbstractJavaWebScript;
 
@@ -1182,53 +1181,6 @@ public class NodeUtil {
         return findNodeRefsByType( name, type.prefix, services );
     }
 
-    private static ArrayList< NodeRef > searchInElastic() {
-        try {
-            ArrayList< NodeRef > nodes = new ArrayList< NodeRef >();
-            DefaultHttpClient client = new DefaultHttpClient();
-            HttpPost request =
-                    new HttpPost( "http://localhost:9200/mms/element/_search" );
-            StringEntity postData =
-                    new StringEntity(
-                                      "{\"query\": {\"filtered\" : {\"query\" : {\"query_string\" : {\"query\" : \"paper\" } }, "
-                                              + "\"filter\" : {\"term\" : { \"creator\" : \"admin\" }   }   } }}" );
-            request.setEntity( postData );
-
-            HttpResponse response = client.execute( request );
-            InputStream ips = response.getEntity().getContent();
-            BufferedReader buf =
-                    new BufferedReader( new InputStreamReader( ips, "UTF-8" ) );
-            if ( response.getStatusLine().getStatusCode() != HttpStatus.SC_OK ) {
-                throw new Exception( response.getStatusLine().getReasonPhrase() );
-            }
-            StringBuilder sb = new StringBuilder();
-            String s;
-            while ( true ) {
-                s = buf.readLine();
-                if ( s == null || s.length() == 0 ) break;
-                sb.append( s );
-            }
-            buf.close();
-            ips.close();
-
-            JSONObject responseObject = new JSONObject( sb.toString() );
-            JSONArray hits =
-                    responseObject.getJSONObject( "hits" )
-                                  .getJSONArray( "hits" );
-
-            for ( int i = 0; i < hits.length(); i++ ) {
-                JSONObject hit = hits.getJSONObject( i );
-                String nodeRefId =
-                        hit.getJSONObject( "_source" ).getString( "nodeRefId" );
-                NodeRef node = findNodeRefByAlfrescoId( nodeRefId );
-                nodes.add( node );
-            }
-            return nodes;
-        } catch ( Exception e ) {
-            e.printStackTrace();
-            return null;
-        }
-    }
 
     public static ArrayList< NodeRef >
             findNodeRefsByType( String name, String prefix,
@@ -3822,7 +3774,6 @@ public class NodeUtil {
                                        false );
         } else {
             PersonService personService = getServices().getPersonService();
-            NodeService nodeService = getServices().getNodeService();
             NodeRef personNode = personService.getPerson( userName );
             homeFolderNode =
                     (NodeRef)getNodeProperty( personNode,
@@ -4614,7 +4565,7 @@ public class NodeUtil {
                 for (int ii = 0; ii < operand.length(); ii++) {
                     JSONObject value = operand.getJSONObject( ii );
                     if (value.has( "instance" )) {
-                        documentEdges.add( new Pair<String, String>(value.getString("instance"), sysmlId));
+                        documentEdges.add( new Pair<String, String>(sysmlId, value.getString("instance")));
                     }
                 }
             }
@@ -4646,8 +4597,8 @@ public class NodeUtil {
                         EmsScriptNode instance =
                                 new EmsScriptNode( instanceNr, services, null );
                         documentEdges.add( new Pair< String, String >(
-                                                                       instance.getSysmlId(),
-                                                                       sysmlId ) );
+                                sysmlId, 
+                                instance.getSysmlId() ) );
                     }
                 }
             }

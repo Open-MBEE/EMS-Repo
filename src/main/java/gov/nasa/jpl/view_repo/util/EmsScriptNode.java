@@ -3564,8 +3564,17 @@ public class EmsScriptNode extends ScriptNode implements
     private Set<Pair<String, String>> getDbGraphDoc( Pair< String, String > child,
                                        String acmType, PostgresHelper pgh, Set<String> visited ) {
         Set<Pair<String, String>> result = new HashSet<Pair<String, String>>();
+
         if (visited == null) {
             visited = new HashSet<String>();
+        }
+        visited.add( child.first );
+        
+        // lets check the current child
+        EmsScriptNode childNode = new EmsScriptNode(new NodeRef(child.second), services, null);
+        if ( childNode.hasAspect( acmType )) {
+            result.add(child);
+            return result;
         }
         
         Set< Pair< String, String >> immediateParents = pgh.getImmediateParents( child.first, DbEdgeTypes.DOCUMENT );
