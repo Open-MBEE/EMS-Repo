@@ -3284,8 +3284,57 @@ True,
 common_filters + ['MMS_', '"timestamp"'],
 ["test", "workspaces", "develop", "develop2"]
 ],
-
-
+[
+10134,
+"PostJobViaModelPost",
+"Using the model post service to try & create a job",
+create_curl_cmd(type="POST", data="testjob.json", base_url=BASE_URL_WS,
+                post_type="elements", branch="master/"),
+True,
+common_filters,
+["test", "workspaces", "develop", "develop2"]
+],
+[
+10135,
+"PostJobViaJobPost",
+"Using the job post service to try & create a job",
+create_curl_cmd(type="POST", data="testjob.json", base_url=BASE_URL_WS,
+                post_type="elements", branch="master/"),
+True,
+common_filters,
+["test", "workspaces", "develop", "develop2"]
+],
+[
+10136,
+"UpdateJob",
+"Change value(s) of a job",
+create_curl_cmd(type="POST", data="testjob_update.json", base_url=BASE_URL_WS,
+                post_type="elements", branch="master/"),
+True,
+common_filters,
+["test", "workspaces", "develop", "develop2"]
+],  
+[
+10137,
+"GetJobViaModelGet",
+"Using the model get service to try & get job data",
+create_curl_cmd(type="GET", data="testjob.json", base_url=BASE_URL_WS,
+                branch="master/"),
+True,
+common_filters,
+["test", "workspaces", "develop", "develop2"]
+],
+[
+10138,
+"GetJobViaJobGet",
+"Using the job get service to try & get job data",
+create_curl_cmd(type="GET", data="testjob.json", base_url=BASE_URL_WS,
+                branch="master/"),
+True,
+common_filters,
+["test", "workspaces", "develop", "develop2"]
+]
+    
 ]
 
 ##########################################################################################    
