@@ -2897,7 +2897,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         // redefine this if you want to add jobs or other things; see
         // JobGet.postProcessJson()
     }
-/*
+
     protected JSONObject getJsonForElement( EmsScriptNode element,
                                             WorkspaceNode ws, Date dateTime,
                                             String id,
@@ -2975,7 +2975,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
             }
         }
     }
-*/
+
     protected JSONObject addJobPropertyToJson( String propertyName,
                                                Object value,
                                                JSONObject jobJson,
