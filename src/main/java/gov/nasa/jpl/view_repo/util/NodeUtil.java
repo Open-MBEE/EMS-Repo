@@ -15,10 +15,8 @@ import gov.nasa.jpl.view_repo.db.PostgresHelper;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode.EmsVersion;
 import gov.nasa.jpl.view_repo.webscripts.AbstractJavaWebScript;
 
-import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.nio.charset.Charset;
@@ -228,6 +226,8 @@ public class NodeUtil {
     public static boolean skipGetNodeRefAtTime = true;
     public static boolean skipWorkspacePermissionCheck = true;
     public static boolean doOptimisticJustFirst = true;
+
+    public static boolean doorsSync = false;
 
     // global flag that is enabled once heisenbug is seen, so it will email
     // admins the first time heisenbug is seen
