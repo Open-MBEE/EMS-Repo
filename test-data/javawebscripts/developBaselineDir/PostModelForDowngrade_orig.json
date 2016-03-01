@@ -1,37 +1,120 @@
-{"elements": [{
-    "modifier": "admin",
-    "qualifiedId": "/no_site/no_site_no_project/holding_bin_no_site_no_project/54321",
-    "siteCharacterizationId": "no_site",
-    "created": "Tue Sep 22 09:42:32 PDT 2015",
-    "qualifiedName": "/no_site/no_site_no_project/holding_bin/null",
-    "sysmlid": "54321",
-    "owner": "holding_bin_no_site_no_project",
-    "read": "2015-09-22T09:42:33.078-0700",
-    "specialization": {
-        "view2view": [{
-            "childrenViews": [
-                "301",
-                "302"
-            ],
-            "sysmlid": "301"
-        }],
-        "displayedElements": [
-            "301",
-            "302",
-            "303"
-        ],
-        "childrenViews": [],
-        "allowedElements": [
-            "301",
-            "302",
-            "303"
-        ],
-        "noSections": ["302"],
-        "contains": [],
-        "type": "Product"
+{"elements": [
+    {
+        "siteCharacterizationId": "no_site",
+        "qualifiedId": "/no_site/no_site_no_project/holding_bin_no_site_no_project/YY_2016_no_site_no_project/MM_1_no_site_no_project/DD_20_no_site_no_project",
+        "nodeRefId": "workspace://SpacesStore/1822d550-0a8a-461c-9590-721020d8f59d",
+        "versionedRefId": "versionStore://version2Store/86a93395-a82f-4c9d-bfc4-df3d29f7e378",
+        "qualifiedName": "/no_site/no_site_no_project/holding_bin_no_site_no_project/YY_2016_no_site_no_project/MM_1_no_site_no_project/DD_20_no_site_no_project",
+        "sysmlid": "DD_20_no_site_no_project",
+        "editable": true,
+        "creator": "admin",
+        "modified": "2016-02-20T22:20:20.457-0800",
+        "modifier": "admin",
+        "created": "Sat Feb 20 22:20:20 PST 2016",
+        "name": "DD_20_no_site_no_project",
+        "owner": "MM_1_no_site_no_project",
+        "read": "2016-02-20T22:21:27.735-0800",
+        "specialization": {"type": "Package"}
     },
-    "editable": true,
-    "creator": "admin",
-    "modified": "2015-09-22T09:42:32.946-0700"
-}]}
+    {
+        "siteCharacterizationId": "no_site",
+        "qualifiedId": "/no_site/no_site_no_project/holding_bin_no_site_no_project/YY_2016_no_site_no_project/MM_1_no_site_no_project",
+        "nodeRefId": "workspace://SpacesStore/2fdbd6a9-742f-42ab-9a79-f722325940af",
+        "versionedRefId": "versionStore://version2Store/4292fb40-a349-4ce3-9281-a84fc30c7ce5",
+        "qualifiedName": "/no_site/no_site_no_project/holding_bin_no_site_no_project/YY_2016_no_site_no_project/MM_1_no_site_no_project",
+        "sysmlid": "MM_1_no_site_no_project",
+        "editable": true,
+        "creator": "admin",
+        "modified": "2016-02-20T22:20:20.429-0800",
+        "modifier": "admin",
+        "created": "Sat Feb 20 22:20:20 PST 2016",
+        "name": "MM_1_no_site_no_project",
+        "owner": "YY_2016_no_site_no_project",
+        "read": "2016-02-20T22:21:27.737-0800",
+        "specialization": {"type": "Package"}
+    },
+    {
+        "siteCharacterizationId": "no_site",
+        "qualifiedId": "/no_site/no_site_no_project/holding_bin_no_site_no_project/YY_2016_no_site_no_project/MM_1_no_site_no_project/DD_20_no_site_no_project/HH_22_no_site_no_project/54321",
+        "nodeRefId": "workspace://SpacesStore/675c90e3-00a4-49a9-8ffd-4f0d7005f806",
+        "versionedRefId": "versionStore://version2Store/9e71795c-fae0-451c-ba03-a2382796ee5c",
+        "qualifiedName": "/no_site/no_site_no_project/holding_bin_no_site_no_project/YY_2016_no_site_no_project/MM_1_no_site_no_project/DD_20_no_site_no_project/HH_22_no_site_no_project/54321",
+        "sysmlid": "54321",
+        "editable": true,
+        "creator": "admin",
+        "modified": "2016-02-20T22:21:27.610-0800",
+        "modifier": "admin",
+        "created": "Sat Feb 20 22:21:27 PST 2016",
+        "name": "54321",
+        "owner": "HH_22_no_site_no_project",
+        "read": "2016-02-20T22:21:27.738-0800",
+        "specialization": {
+            "displayedElements": [
+                "301",
+                "302",
+                "303"
+            ],
+            "view2view": [{
+                "childrenViews": [
+                    "301",
+                    "302"
+                ],
+                "sysmlid": "301"
+            }],
+            "noSections": ["302"],
+            "type": "Product"
+        }
+    },
+    {
+        "siteCharacterizationId": "no_site",
+        "qualifiedId": "/no_site/no_site_no_project/holding_bin_no_site_no_project",
+        "nodeRefId": "workspace://SpacesStore/6804b35e-fc69-4de5-91d2-502f9604ac66",
+        "versionedRefId": "versionStore://version2Store/6db0a159-464b-4005-86da-9b9ea9e2d2a0",
+        "qualifiedName": "/no_site/no_site_no_project/holding_bin_no_site_no_project",
+        "sysmlid": "holding_bin_no_site_no_project",
+        "editable": true,
+        "creator": "admin",
+        "modified": "2016-02-20T22:20:20.378-0800",
+        "modifier": "admin",
+        "created": "Sat Feb 20 22:20:19 PST 2016",
+        "name": "holding_bin_no_site_no_project",
+        "owner": "no_site_no_project",
+        "read": "2016-02-20T22:21:27.740-0800",
+        "specialization": {"type": "Package"}
+    },
+    {
+        "siteCharacterizationId": "no_site",
+        "qualifiedId": "/no_site/no_site_no_project/holding_bin_no_site_no_project/YY_2016_no_site_no_project/MM_1_no_site_no_project/DD_20_no_site_no_project/HH_22_no_site_no_project",
+        "nodeRefId": "workspace://SpacesStore/6cc03d7b-fd85-4a76-8c16-cd75d560de8e",
+        "versionedRefId": "versionStore://version2Store/a4a3d962-75b5-496a-a263-8c4b4859fdeb",
+        "qualifiedName": "/no_site/no_site_no_project/holding_bin_no_site_no_project/YY_2016_no_site_no_project/MM_1_no_site_no_project/DD_20_no_site_no_project/HH_22_no_site_no_project",
+        "sysmlid": "HH_22_no_site_no_project",
+        "editable": true,
+        "creator": "admin",
+        "modified": "2016-02-20T22:21:27.545-0800",
+        "modifier": "admin",
+        "created": "Sat Feb 20 22:20:20 PST 2016",
+        "name": "HH_22_no_site_no_project",
+        "owner": "DD_20_no_site_no_project",
+        "read": "2016-02-20T22:21:27.741-0800",
+        "specialization": {"type": "Package"}
+    },
+    {
+        "siteCharacterizationId": "no_site",
+        "qualifiedId": "/no_site/no_site_no_project/holding_bin_no_site_no_project/YY_2016_no_site_no_project",
+        "nodeRefId": "workspace://SpacesStore/71af24c1-a831-4caf-b2d7-3b0bcd5a4cb7",
+        "versionedRefId": "versionStore://version2Store/ae96442d-5899-4c64-8e8b-45256e0990ea",
+        "qualifiedName": "/no_site/no_site_no_project/holding_bin_no_site_no_project/YY_2016_no_site_no_project",
+        "sysmlid": "YY_2016_no_site_no_project",
+        "editable": true,
+        "creator": "admin",
+        "modified": "2016-02-20T22:20:20.403-0800",
+        "modifier": "admin",
+        "created": "Sat Feb 20 22:20:19 PST 2016",
+        "name": "YY_2016_no_site_no_project",
+        "owner": "holding_bin_no_site_no_project",
+        "read": "2016-02-20T22:21:27.745-0800",
+        "specialization": {"type": "Package"}
+    }
+]}
 200

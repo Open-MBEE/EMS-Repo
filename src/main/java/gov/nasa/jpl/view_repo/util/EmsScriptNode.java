@@ -3492,7 +3492,10 @@ public class EmsScriptNode extends ScriptNode implements
                     Set< Pair< String, String >> immediateParents = pgh.getImmediateParents( this.getSysmlId(), DbEdgeTypes.DOCUMENT );
                     Set< Pair<String, String>> viewImmediateParents = new HashSet<Pair<String, String>>();
                     for (Pair<String, String> immediateParent: immediateParents) {
-                        viewImmediateParents.addAll( getDbGraphDoc( immediateParent, Acm.ACM_VIEW, pgh, null ) );
+                        // SSCAES-2838: ignore when parent is same as self - this was allowed previously
+                        if ( !immediateParent.first.equals( this.getSysmlId() ) ) {
+                            viewImmediateParents.addAll( getDbGraphDoc( immediateParent, Acm.ACM_VIEW, pgh, null ) );
+                        }
                     }
                     for (Pair<String, String> immediateParent: viewImmediateParents) {
                         Set<Pair<String, String>> rootIds = getDbGraphDoc(immediateParent, Acm.ACM_PRODUCT, pgh, null);

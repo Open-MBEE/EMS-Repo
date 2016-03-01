@@ -1,25 +1,57 @@
-{"elements": [{
-    "qualifiedName": "/no_site/no_site_no_project/holding_bin/null",
-    "editable": true,
-    "creator": "admin",
-    "modifier": "admin",
-    "owner": "holding_bin_no_site_no_project",
-    "specialization": {
-        "operand": [
-            {
-                "element": "Plus",
-                "type": "ElementValue"
-            },
-            {
-                "integer": 1,
-                "type": "LiteralInteger"
-            },
-            {
-                "integer": 1,
-                "type": "LiteralInteger"
-            }
-        ],
-        "type": "Expression"
+{"elements": [
+    {
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "specialization": {"type": "Package"}
+    },
+    {
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "specialization": {"type": "Package"}
+    },
+    {
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "specialization": {"type": "Package"}
+    },
+    {
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "specialization": {"type": "Package"}
+    },
+    {
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "specialization": {
+            "operand": [
+                {
+                    "element": "Plus",
+                    "type": "ElementValue"
+                },
+                {
+                    "integer": 1,
+                    "type": "LiteralInteger"
+                },
+                {
+                    "integer": 1,
+                    "type": "LiteralInteger"
+                }
+            ],
+            "type": "Expression"
+        }
+    },
+    {
+        "sysmlid": "holding_bin_no_site_no_project",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "holding_bin_no_site_no_project",
+        "specialization": {"type": "Package"}
     }
-}]}
+]}
 200

@@ -1,0 +1,515 @@
+{"elements": [
+    {
+        "siteCharacterizationId": "europa",
+        "qualifiedId": "/europa/123456/300/500",
+        "nodeRefId": "workspace://SpacesStore/03ff00be-c05a-40f1-9c28-2e23fccbb28d",
+        "versionedRefId": "versionStore://version2Store/ffa443f8-aa4f-4dc4-831c-411165681656",
+        "qualifiedName": "/europa/JW_TEST/300/500",
+        "sysmlid": "500",
+        "editable": true,
+        "modified": "2016-02-20T22:17:46.850-0800",
+        "creator": "admin",
+        "modifier": "admin",
+        "created": "Sat Feb 20 22:17:44 PST 2016",
+        "name": "500",
+        "documentation": "directed_relationship",
+        "owner": "300",
+        "read": "2016-02-20T22:17:48.838-0800",
+        "specialization": {
+            "source": "302",
+            "target": "303",
+            "type": "DirectedRelationship"
+        }
+    },
+    {
+        "siteCharacterizationId": "europa",
+        "qualifiedId": "/europa/123456/dlam",
+        "nodeRefId": "workspace://SpacesStore/0940a205-1f76-405f-9e5a-441b595c69c6",
+        "versionedRefId": "versionStore://version2Store/6b63c741-e0f9-447e-8ca5-abcfaa8f5ec3",
+        "qualifiedName": "/europa/JW_TEST/dlam",
+        "sysmlid": "dlam",
+        "editable": true,
+        "modified": "2016-02-20T22:17:46.903-0800",
+        "creator": "admin",
+        "modifier": "admin",
+        "created": "Sat Feb 20 22:17:44 PST 2016",
+        "name": "dlam",
+        "documentation": "to make compatible with value specs (this is just a Element)",
+        "owner": "123456",
+        "read": "2016-02-20T22:17:48.840-0800",
+        "specialization": {"type": "Element"}
+    },
+    {
+        "siteCharacterizationId": "europa",
+        "qualifiedId": "/europa/123456/4000/401/402/403",
+        "nodeRefId": "workspace://SpacesStore/11117e8b-f770-4ebb-94c8-491e4c4ab474",
+        "versionedRefId": "versionStore://version2Store/6835b4a6-a428-417b-ae4e-33836466d4dc",
+        "qualifiedName": "/europa/JW_TEST/400/401/402/403",
+        "sysmlid": "403",
+        "editable": true,
+        "modified": "2016-02-20T22:17:48.014-0800",
+        "creator": "admin",
+        "modifier": "admin",
+        "created": "Sat Feb 20 22:17:45 PST 2016",
+        "name": "403",
+        "documentation": "4talk",
+        "owner": "402",
+        "read": "2016-02-20T22:17:48.842-0800",
+        "specialization": {
+            "propertyType": null,
+            "isSlot": false,
+            "isDerived": false,
+            "value": [{
+                "string": "dlam_string",
+                "type": "LiteralString"
+            }],
+            "type": "Property"
+        }
+    },
+    {
+        "siteCharacterizationId": "europa",
+        "qualifiedId": "/europa/123456/300/301",
+        "nodeRefId": "workspace://SpacesStore/12aa8e55-6c7c-4b21-a04a-12b929f2bb94",
+        "versionedRefId": "versionStore://version2Store/97e52613-f50d-44fd-967a-ba0dd369c1e6",
+        "qualifiedName": "/europa/JW_TEST/300/301",
+        "sysmlid": "301",
+        "editable": true,
+        "modified": "2016-02-20T22:17:46.388-0800",
+        "creator": "admin",
+        "modifier": "admin",
+        "created": "Sat Feb 20 22:17:43 PST 2016",
+        "name": "301",
+        "documentation": "else",
+        "owner": "300",
+        "read": "2016-02-20T22:17:48.848-0800",
+        "specialization": {
+            "propertyType": null,
+            "isSlot": false,
+            "isDerived": false,
+            "value": [{
+                "string": "dlam_string",
+                "type": "LiteralString"
+            }],
+            "type": "Property"
+        }
+    },
+    {
+        "siteCharacterizationId": "europa",
+        "qualifiedId": "/europa/123456/holding_bin_123456/YY_2016_123456/MM_1_123456/DD_20_123456",
+        "nodeRefId": "workspace://SpacesStore/22295f7e-7fd9-4c66-b101-4182bfd10224",
+        "versionedRefId": "versionStore://version2Store/1e6519da-9974-4e80-92d3-ed85e390bbfc",
+        "qualifiedName": "/europa/JW_TEST/holding_bin_123456/YY_2016_123456/MM_1_123456/DD_20_123456",
+        "sysmlid": "DD_20_123456",
+        "editable": true,
+        "creator": "admin",
+        "modified": "2016-02-20T22:17:47.051-0800",
+        "modifier": "admin",
+        "created": "Sat Feb 20 22:17:44 PST 2016",
+        "name": "DD_20_123456",
+        "owner": "MM_1_123456",
+        "read": "2016-02-20T22:17:48.852-0800",
+        "specialization": {"type": "Package"}
+    },
+    {
+        "siteCharacterizationId": "europa",
+        "qualifiedId": "/europa/123456/holding_bin_123456",
+        "nodeRefId": "workspace://SpacesStore/310981c9-f606-478d-9243-a97d8254cb7c",
+        "versionedRefId": "versionStore://version2Store/5ab13bea-7f9e-476b-96c8-6301cc9537ee",
+        "qualifiedName": "/europa/JW_TEST/holding_bin_123456",
+        "sysmlid": "holding_bin_123456",
+        "editable": true,
+        "creator": "admin",
+        "modified": "2016-02-20T22:17:46.938-0800",
+        "modifier": "admin",
+        "created": "Sat Feb 20 22:17:44 PST 2016",
+        "name": "holding_bin_123456",
+        "owner": "123456",
+        "read": "2016-02-20T22:17:48.854-0800",
+        "specialization": {"type": "Package"}
+    },
+    {
+        "siteCharacterizationId": "europa",
+        "qualifiedId": "/europa/123456/4000",
+        "nodeRefId": "workspace://SpacesStore/50f7bbe1-4aac-411c-89dd-cb4abace7bba",
+        "versionedRefId": "versionStore://version2Store/281bdd8e-21cd-4f1b-8a63-b1c8540a249a",
+        "qualifiedName": "/europa/JW_TEST/400",
+        "sysmlid": "4000",
+        "editable": true,
+        "modified": "2016-02-20T22:17:47.759-0800",
+        "creator": "admin",
+        "modifier": "admin",
+        "created": "Sat Feb 20 22:17:45 PST 2016",
+        "name": "400",
+        "documentation": "4something",
+        "owner": "123456",
+        "read": "2016-02-20T22:17:48.856-0800",
+        "specialization": {
+            "propertyType": null,
+            "isSlot": false,
+            "isDerived": false,
+            "value": [{
+                "string": "dlam_string",
+                "type": "LiteralString"
+            }],
+            "type": "Property"
+        }
+    },
+    {
+        "siteCharacterizationId": "europa",
+        "qualifiedId": "/europa/123456/holding_bin_123456/YY_2016_123456/MM_1_123456/DD_20_123456/HH_22_123456",
+        "nodeRefId": "workspace://SpacesStore/625cff0e-899d-40a2-8e6e-704d35df3702",
+        "versionedRefId": "versionStore://version2Store/17f49a07-9135-4ec2-97e2-0ec92592e62a",
+        "qualifiedName": "/europa/JW_TEST/holding_bin_123456/YY_2016_123456/MM_1_123456/DD_20_123456/HH_22_123456",
+        "sysmlid": "HH_22_123456",
+        "editable": true,
+        "creator": "admin",
+        "modified": "2016-02-20T22:17:47.089-0800",
+        "modifier": "admin",
+        "created": "Sat Feb 20 22:17:45 PST 2016",
+        "name": "HH_22_123456",
+        "owner": "DD_20_123456",
+        "read": "2016-02-20T22:17:48.860-0800",
+        "specialization": {"type": "Package"}
+    },
+    {
+        "siteCharacterizationId": "europa",
+        "qualifiedId": "/europa/123456/holding_bin_123456/YY_2016_123456/MM_1_123456/DD_20_123456/HH_22_123456/6666",
+        "nodeRefId": "workspace://SpacesStore/649e04e3-5931-457d-8454-35304940b98b",
+        "versionedRefId": "versionStore://version2Store/7ce4ea87-fd07-4b27-a298-4926434862f1",
+        "qualifiedName": "/europa/JW_TEST/holding_bin_123456/YY_2016_123456/MM_1_123456/DD_20_123456/HH_22_123456/6666_name",
+        "sysmlid": "6666",
+        "editable": true,
+        "modified": "2016-02-20T22:17:47.321-0800",
+        "creator": "admin",
+        "modifier": "admin",
+        "created": "Sat Feb 20 22:17:45 PST 2016",
+        "name": "6666_name",
+        "documentation": "",
+        "owner": "HH_22_123456",
+        "read": "2016-02-20T22:17:48.867-0800",
+        "specialization": {
+            "operand": [
+                {
+                    "element": "300",
+                    "type": "ElementValue"
+                },
+                {
+                    "element": "302",
+                    "type": "ElementValue"
+                }
+            ],
+            "type": "Expression"
+        }
+    },
+    {
+        "siteCharacterizationId": "europa",
+        "qualifiedId": "/europa/123456/holding_bin_123456/YY_2016_123456/MM_1_123456/DD_20_123456/HH_22_123456/600",
+        "nodeRefId": "workspace://SpacesStore/64df0bac-eefb-48d5-85c5-615eb4c8f58c",
+        "versionedRefId": "versionStore://version2Store/f59f8d03-280a-4b45-afac-a41bab91a630",
+        "qualifiedName": "/europa/JW_TEST/holding_bin_123456/YY_2016_123456/MM_1_123456/DD_20_123456/HH_22_123456/600",
+        "sysmlid": "600",
+        "editable": true,
+        "modified": "2016-02-20T22:17:47.505-0800",
+        "creator": "admin",
+        "modifier": "admin",
+        "created": "Sat Feb 20 22:17:45 PST 2016",
+        "name": "600",
+        "documentation": "element values",
+        "owner": "HH_22_123456",
+        "read": "2016-02-20T22:17:48.873-0800",
+        "specialization": {
+            "propertyType": null,
+            "isSlot": false,
+            "isDerived": false,
+            "value": [
+                {
+                    "element": "300",
+                    "type": "ElementValue"
+                },
+                {
+                    "element": "302",
+                    "type": "ElementValue"
+                }
+            ],
+            "type": "Property"
+        }
+    },
+    {
+        "siteCharacterizationId": "europa",
+        "qualifiedId": "/europa/123456/300/301/302/303/304",
+        "nodeRefId": "workspace://SpacesStore/74263938-e0cf-46d2-854a-157ad8343850",
+        "versionedRefId": "versionStore://version2Store/43d201c0-42f2-46c3-b0ca-7a975131db2f",
+        "qualifiedName": "/europa/JW_TEST/300/301/302/303/304",
+        "sysmlid": "304",
+        "editable": true,
+        "modified": "2016-02-20T22:17:46.755-0800",
+        "creator": "admin",
+        "modifier": "admin",
+        "created": "Sat Feb 20 22:17:44 PST 2016",
+        "name": "304",
+        "documentation": "about",
+        "owner": "303",
+        "read": "2016-02-20T22:17:48.879-0800",
+        "specialization": {
+            "propertyType": null,
+            "isSlot": false,
+            "isDerived": false,
+            "value": [{
+                "string": "dlam_string",
+                "type": "LiteralString"
+            }],
+            "type": "Property"
+        }
+    },
+    {
+        "siteCharacterizationId": "europa",
+        "qualifiedId": "/europa/123456/holding_bin_123456/YY_2016_123456/MM_1_123456/DD_20_123456/HH_22_123456/x",
+        "nodeRefId": "workspace://SpacesStore/7aab7793-f1f2-4b8e-a2f8-c52b2d641928",
+        "versionedRefId": "versionStore://version2Store/5d429cf9-4f90-4129-a8ef-2edaf2ce0546",
+        "qualifiedName": "/europa/JW_TEST/holding_bin_123456/YY_2016_123456/MM_1_123456/DD_20_123456/HH_22_123456/300",
+        "sysmlid": "x",
+        "editable": true,
+        "modified": "2016-02-20T22:17:47.646-0800",
+        "creator": "admin",
+        "modifier": "admin",
+        "created": "Sat Feb 20 22:17:45 PST 2016",
+        "name": "300",
+        "documentation": "something",
+        "owner": "HH_22_123456",
+        "read": "2016-02-20T22:17:48.883-0800",
+        "specialization": {
+            "propertyType": null,
+            "isSlot": false,
+            "isDerived": false,
+            "value": [{
+                "string": "dlam_string",
+                "type": "LiteralString"
+            }],
+            "type": "Property"
+        }
+    },
+    {
+        "siteCharacterizationId": "europa",
+        "qualifiedId": "/europa/123456/holding_bin_123456/YY_2016_123456/MM_1_123456",
+        "nodeRefId": "workspace://SpacesStore/8539790a-1cae-4f29-8fea-86cfefeccbfe",
+        "versionedRefId": "versionStore://version2Store/0f2e4247-36b1-4596-bf67-aa8a4ac0d1fb",
+        "qualifiedName": "/europa/JW_TEST/holding_bin_123456/YY_2016_123456/MM_1_123456",
+        "sysmlid": "MM_1_123456",
+        "editable": true,
+        "creator": "admin",
+        "modified": "2016-02-20T22:17:47.015-0800",
+        "modifier": "admin",
+        "created": "Sat Feb 20 22:17:44 PST 2016",
+        "name": "MM_1_123456",
+        "owner": "YY_2016_123456",
+        "read": "2016-02-20T22:17:48.886-0800",
+        "specialization": {"type": "Package"}
+    },
+    {
+        "siteCharacterizationId": "europa",
+        "qualifiedId": "/europa/123456/4000/401",
+        "nodeRefId": "workspace://SpacesStore/8ab46816-9d9f-474d-9185-264dab5cada1",
+        "versionedRefId": "versionStore://version2Store/f364d9a4-a7cc-46b0-8fa0-c68035d2a523",
+        "qualifiedName": "/europa/JW_TEST/400/401",
+        "sysmlid": "401",
+        "editable": true,
+        "modified": "2016-02-20T22:17:47.843-0800",
+        "creator": "admin",
+        "modifier": "admin",
+        "created": "Sat Feb 20 22:17:45 PST 2016",
+        "name": "401",
+        "documentation": "4else",
+        "owner": "4000",
+        "read": "2016-02-20T22:17:48.888-0800",
+        "specialization": {
+            "propertyType": null,
+            "isSlot": false,
+            "isDerived": false,
+            "value": [{
+                "string": "dlam_string",
+                "type": "LiteralString"
+            }],
+            "type": "Property"
+        }
+    },
+    {
+        "siteCharacterizationId": "europa",
+        "qualifiedId": "/europa/123456/300/301/302/303",
+        "nodeRefId": "workspace://SpacesStore/a3e4b231-d9fd-4ef8-a999-88bed0e17085",
+        "versionedRefId": "versionStore://version2Store/8e210ca0-b8bf-4550-8e7e-24736d503b23",
+        "qualifiedName": "/europa/JW_TEST/300/301/302/303",
+        "sysmlid": "303",
+        "editable": true,
+        "modified": "2016-02-20T22:17:48.760-0800",
+        "creator": "admin",
+        "modifier": "admin",
+        "created": "Sat Feb 20 22:17:44 PST 2016",
+        "name": "303",
+        "documentation": "talk",
+        "owner": "302",
+        "read": "2016-02-20T22:17:48.892-0800",
+        "specialization": {
+            "propertyType": null,
+            "isSlot": false,
+            "isDerived": false,
+            "value": [{
+                "string": "dlam_string",
+                "type": "LiteralString"
+            }],
+            "type": "Property"
+        }
+    },
+    {
+        "siteCharacterizationId": "europa",
+        "qualifiedId": "/europa/123456/4000/401/402",
+        "nodeRefId": "workspace://SpacesStore/b603d427-df8b-480b-bc04-f78f6b52e918",
+        "versionedRefId": "versionStore://version2Store/c8520cec-4a6d-4d52-b785-51fcd4571280",
+        "qualifiedName": "/europa/JW_TEST/400/401/402",
+        "sysmlid": "402",
+        "editable": true,
+        "modified": "2016-02-20T22:17:47.930-0800",
+        "creator": "admin",
+        "modifier": "admin",
+        "created": "Sat Feb 20 22:17:45 PST 2016",
+        "name": "402",
+        "documentation": "4to",
+        "owner": "401",
+        "read": "2016-02-20T22:17:48.897-0800",
+        "specialization": {
+            "propertyType": null,
+            "isSlot": false,
+            "isDerived": false,
+            "value": [{
+                "string": "dlam_string",
+                "type": "LiteralString"
+            }],
+            "type": "Property"
+        }
+    },
+    {
+        "siteCharacterizationId": "europa",
+        "qualifiedId": "/europa/123456/holding_bin_123456/YY_2016_123456/MM_1_123456/DD_20_123456/HH_22_123456/305",
+        "nodeRefId": "workspace://SpacesStore/bc25ad42-5319-4f69-9562-0e64e9fb46f6",
+        "versionedRefId": "versionStore://version2Store/7c47471f-d86e-48de-bc28-abdc460e1982",
+        "qualifiedName": "/europa/JW_TEST/holding_bin_123456/YY_2016_123456/MM_1_123456/DD_20_123456/HH_22_123456/305",
+        "sysmlid": "305",
+        "editable": true,
+        "modified": "2016-02-20T22:17:47.147-0800",
+        "creator": "admin",
+        "modifier": "admin",
+        "created": "Sat Feb 20 22:17:45 PST 2016",
+        "name": "305",
+        "documentation": "no owner",
+        "owner": "HH_22_123456",
+        "read": "2016-02-20T22:17:48.901-0800",
+        "specialization": {
+            "propertyType": null,
+            "isSlot": false,
+            "isDerived": false,
+            "value": [{
+                "string": "dlam_string",
+                "type": "LiteralString"
+            }],
+            "type": "Property"
+        }
+    },
+    {
+        "siteCharacterizationId": "europa",
+        "qualifiedId": "/europa/123456/300/301/302",
+        "nodeRefId": "workspace://SpacesStore/c2dbe6cf-71d7-4004-a797-a84cf44e03a8",
+        "versionedRefId": "versionStore://version2Store/a9afb226-4876-4392-bb7d-17bfa30b6fa9",
+        "qualifiedName": "/europa/JW_TEST/300/301/302",
+        "sysmlid": "302",
+        "editable": true,
+        "modified": "2016-02-20T22:17:48.753-0800",
+        "creator": "admin",
+        "modifier": "admin",
+        "created": "Sat Feb 20 22:17:43 PST 2016",
+        "name": "302",
+        "documentation": "to",
+        "owner": "301",
+        "read": "2016-02-20T22:17:48.904-0800",
+        "specialization": {
+            "propertyType": null,
+            "isSlot": false,
+            "isDerived": false,
+            "value": [{
+                "string": "dlam_string",
+                "type": "LiteralString"
+            }],
+            "type": "Property"
+        }
+    },
+    {
+        "siteCharacterizationId": "europa",
+        "qualifiedId": "/europa/123456/300",
+        "nodeRefId": "workspace://SpacesStore/c6650302-072c-49c8-aa69-59a8e8df01f3",
+        "versionedRefId": "versionStore://version2Store/17cdda31-80c0-42bd-abd2-0ed37f1e27b2",
+        "qualifiedName": "/europa/JW_TEST/300",
+        "sysmlid": "300",
+        "editable": true,
+        "modified": "2016-02-20T22:17:46.236-0800",
+        "creator": "admin",
+        "modifier": "admin",
+        "created": "Sat Feb 20 22:17:43 PST 2016",
+        "name": "300",
+        "documentation": "something",
+        "owner": "123456",
+        "read": "2016-02-20T22:17:48.909-0800",
+        "specialization": {
+            "propertyType": null,
+            "isSlot": false,
+            "isDerived": false,
+            "value": [{
+                "string": "dlam_string",
+                "type": "LiteralString"
+            }],
+            "type": "Property"
+        }
+    },
+    {
+        "siteCharacterizationId": "europa",
+        "qualifiedId": "/europa/123456/holding_bin_123456/YY_2016_123456",
+        "nodeRefId": "workspace://SpacesStore/f44f738a-64d6-4212-8365-8ef8355e2a39",
+        "versionedRefId": "versionStore://version2Store/9df6587a-09ee-4468-9431-3e484e433b24",
+        "qualifiedName": "/europa/JW_TEST/holding_bin_123456/YY_2016_123456",
+        "sysmlid": "YY_2016_123456",
+        "editable": true,
+        "creator": "admin",
+        "modified": "2016-02-20T22:17:46.977-0800",
+        "modifier": "admin",
+        "created": "Sat Feb 20 22:17:44 PST 2016",
+        "name": "YY_2016_123456",
+        "owner": "holding_bin_123456",
+        "read": "2016-02-20T22:17:48.913-0800",
+        "specialization": {"type": "Package"}
+    },
+    {
+        "siteCharacterizationId": "europa",
+        "qualifiedId": "/europa/123456/4000/401/402/403/404",
+        "nodeRefId": "workspace://SpacesStore/fd2be34d-8007-4519-9e23-3b4bd2547ec5",
+        "versionedRefId": "versionStore://version2Store/47621c17-85c9-43f2-a4c9-f697dc76df33",
+        "qualifiedName": "/europa/JW_TEST/400/401/402/403/404",
+        "sysmlid": "404",
+        "editable": true,
+        "modified": "2016-02-20T22:17:48.106-0800",
+        "creator": "admin",
+        "modifier": "admin",
+        "created": "Sat Feb 20 22:17:46 PST 2016",
+        "name": "404",
+        "documentation": "4about",
+        "owner": "403",
+        "read": "2016-02-20T22:17:48.915-0800",
+        "specialization": {
+            "propertyType": null,
+            "isSlot": false,
+            "isDerived": false,
+            "value": [{
+                "string": "dlam_string",
+                "type": "LiteralString"
+            }],
+            "type": "Property"
+        }
+    }
+]}
+200

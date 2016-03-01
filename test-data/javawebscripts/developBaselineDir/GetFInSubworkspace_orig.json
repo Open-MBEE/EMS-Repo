@@ -1,0 +1,23 @@
+{"elements": [{
+    "siteCharacterizationId": "no_site",
+    "qualifiedId": "/no_site/no_site_no_project/holding_bin_no_site_no_project/YY_2016_no_site_no_project/MM_1_no_site_no_project/DD_20_no_site_no_project/HH_22_no_site_no_project/f",
+    "nodeRefId": "versionStore://version2Store/d147badf-7d4d-4b07-8d4d-923bbf658ef6",
+    "versionedRefId": "versionStore://version2Store/d147badf-7d4d-4b07-8d4d-923bbf658ef6",
+    "qualifiedName": "/no_site/no_site_no_project/holding_bin_no_site_no_project/YY_2016_no_site_no_project/MM_1_no_site_no_project/DD_20_no_site_no_project/HH_22_no_site_no_project/f",
+    "sysmlid": "f",
+    "editable": true,
+    "modified": "2016-02-20T22:20:55.032-0800",
+    "creator": "admin",
+    "modifier": "admin",
+    "created": "Sat Feb 20 22:20:54 PST 2016",
+    "name": "f",
+    "documentation": "f is f",
+    "owner": "HH_22_no_site_no_project",
+    "read": "2016-02-20T22:20:56.253-0800",
+    "specialization": {
+        "source": null,
+        "target": null,
+        "type": "Expose"
+    }
+}]}
+200

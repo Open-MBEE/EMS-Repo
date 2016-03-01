@@ -1,65 +1,39 @@
 {"elements": [
     {
-        "qualifiedId": "/europa/123456/300/301",
-        "qualifiedName": "/europa/JW_TEST/300/301",
-        "sysmlid": "301",
+        "sysmlid": "found",
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
-        "name": "301",
-        "documentation": "else",
-        "owner": "300",
+        "name": "found",
+        "documentation": "",
         "specialization": {
-            "view2view": [{
-                "childrenViews": [
-                    "301",
-                    "302"
-                ],
-                "sysmlid": "301"
-            }],
-            "childrenViews": ["304"],
-            "displayedElements": [
-                "301",
-                "302",
-                "303"
-            ],
-            "allowedElements": [
-                "301",
-                "302",
-                "303"
-            ],
-            "noSections": ["302"],
-            "contains": [{
-                "sourceType": "reference",
-                "source": "301",
-                "sourceProperty": "documentation",
-                "type": "Paragraph"
-            }],
-            "type": "Product"
+            "specification": {
+                "expressionBody": ["foo8"],
+                "type": "OpaqueExpression"
+            },
+            "type": "Constraint"
         }
     },
     {
-        "qualifiedId": "/europa/123456/dlam",
-        "qualifiedName": "/europa/JW_TEST/dlam",
-        "sysmlid": "dlam",
+        "sysmlid": "500",
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
-        "name": "dlam",
-        "documentation": "to make compatible with value specs (this is just a Element)",
-        "owner": "123456",
-        "specialization": {"type": "Element"}
+        "name": "500",
+        "documentation": "directed_relationship",
+        "specialization": {
+            "source": "302",
+            "target": "303",
+            "type": "DirectedRelationship"
+        }
     },
     {
-        "qualifiedId": "/europa/123456/4000",
-        "qualifiedName": "/europa/JW_TEST/400",
-        "sysmlid": "4000",
+        "sysmlid": "300",
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
-        "name": "400",
-        "documentation": "4something",
-        "owner": "123456",
+        "name": "300",
+        "documentation": "something",
         "specialization": {
             "propertyType": null,
             "isSlot": false,
@@ -72,15 +46,30 @@
         }
     },
     {
-        "qualifiedId": "/europa/123456/4000/401",
-        "qualifiedName": "/europa/JW_TEST/400/401",
+        "sysmlid": "SomeClass",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "SomeClass",
+        "documentation": "class for testing the 'redefines' attribute of a Property",
+        "specialization": {"type": "Element"}
+    },
+    {
+        "sysmlid": "multRedefPackage",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "multRedefPackage",
+        "documentation": "package for testing multiplicity and redefines attributes of Property",
+        "specialization": {"type": "Package"}
+    },
+    {
         "sysmlid": "401",
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
         "name": "401",
         "documentation": "4else",
-        "owner": "4000",
         "specialization": {
             "view2view": [{
                 "childrenViews": [
@@ -111,27 +100,12 @@
         }
     },
     {
-        "qualifiedId": "/europa/123456/multRedefPackage/SomeClass",
-        "qualifiedName": "/europa/JW_TEST/multRedefPackage/SomeClass",
-        "sysmlid": "SomeClass",
+        "sysmlid": "4000",
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
-        "name": "SomeClass",
-        "documentation": "class for testing the 'redefines' attribute of a Property",
-        "owner": "multRedefPackage",
-        "specialization": {"type": "Element"}
-    },
-    {
-        "qualifiedId": "/europa/123456/300",
-        "qualifiedName": "/europa/JW_TEST/300",
-        "sysmlid": "300",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "300",
-        "documentation": "something",
-        "owner": "123456",
+        "name": "400",
+        "documentation": "4something",
         "specialization": {
             "propertyType": null,
             "isSlot": false,
@@ -144,37 +118,72 @@
         }
     },
     {
-        "qualifiedId": "/europa/123456/multRedefPackage",
-        "qualifiedName": "/europa/JW_TEST/multRedefPackage",
-        "sysmlid": "multRedefPackage",
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
-        "name": "multRedefPackage",
-        "documentation": "package for testing multiplicity and redefines attributes of Property",
-        "owner": "123456",
         "specialization": {"type": "Package"}
     },
     {
-        "qualifiedId": "/europa/123456",
-        "qualifiedName": "/europa/JW_TEST",
-        "sysmlid": "123456",
+        "sysmlid": "301",
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
-        "name": "JW_TEST",
-        "owner": null,
+        "name": "301",
+        "documentation": "else",
+        "specialization": {
+            "view2view": [{
+                "childrenViews": [
+                    "301",
+                    "302"
+                ],
+                "sysmlid": "301"
+            }],
+            "childrenViews": ["304"],
+            "displayedElements": [
+                "301",
+                "302",
+                "303"
+            ],
+            "allowedElements": [
+                "301",
+                "302",
+                "303"
+            ],
+            "noSections": ["302"],
+            "contains": [{
+                "sourceType": "reference",
+                "source": "301",
+                "sourceProperty": "documentation",
+                "type": "Paragraph"
+            }],
+            "type": "Product"
+        }
     },
     {
-        "qualifiedId": "/europa/123456/multRedefPackage/multDefGeneralization",
-        "qualifiedName": "/europa/JW_TEST/multRedefPackage/multDefGeneralization",
+        "sysmlid": "dlam",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "dlam",
+        "documentation": "to make compatible with value specs (this is just a Element)",
+        "specialization": {"type": "Element"}
+    },
+    {
+        "sysmlid": "SomeOtherClass",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "SomeOtherClass",
+        "documentation": "another class for testing the 'redefines' attribute of a Property",
+        "specialization": {"type": "Element"}
+    },
+    {
         "sysmlid": "multDefGeneralization",
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
         "name": "multDefGeneralization",
         "documentation": "generalization for testing the 'redefines' attribute of a Property",
-        "owner": "multRedefPackage",
         "specialization": {
             "source": "SomeOtherClass",
             "target": "SomeClass",
@@ -182,32 +191,19 @@
         }
     },
     {
-        "qualifiedId": "/europa/123456/multRedefPackage/SomeOtherClass",
-        "qualifiedName": "/europa/JW_TEST/multRedefPackage/SomeOtherClass",
-        "sysmlid": "SomeOtherClass",
+        "sysmlid": "123456",
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
-        "name": "SomeOtherClass",
-        "documentation": "another class for testing the 'redefines' attribute of a Property",
-        "owner": "multRedefPackage",
-        "specialization": {"type": "Element"}
+        "name": "JW_TEST",
     },
     {
-        "qualifiedId": "/europa/123456/300/500",
-        "qualifiedName": "/europa/JW_TEST/300/500",
-        "sysmlid": "500",
+        "sysmlid": "holding_bin_123456",
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
-        "name": "500",
-        "documentation": "directed_relationship",
-        "owner": "300",
-        "specialization": {
-            "source": "302",
-            "target": "303",
-            "type": "DirectedRelationship"
-        }
+        "name": "holding_bin_123456",
+        "specialization": {"type": "Package"}
     }
 ]}
 200
