@@ -2883,7 +2883,21 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
 
         return null;
     }
-
+    
+    protected JSONObject jobOrEle( EmsScriptNode element, WorkspaceNode ws,
+                                   Date dateTime, String id,
+                                   boolean includeQualified,
+                                   boolean isIncludeDocument ) {
+        return element.toJSONObject( ws, dateTime, includeQualified,
+                                     isIncludeDocument,
+                                     elementProperties.get( id ) );
+    }
+    
+    public void postProcessJson( JSONObject top ) {
+        // redefine this if you want to add jobs or other things; see
+        // JobGet.postProcessJson()
+    }
+/*
     protected JSONObject getJsonForElement( EmsScriptNode element,
                                             WorkspaceNode ws, Date dateTime,
                                             String id,
@@ -2902,11 +2916,6 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         return element.toJSONObject( null, false, ws, dateTime,
                                      includeQualified, isIncludeDocument, version,
                                      ownedProperties );
-    }
-    
-    public void postProcessJson( JSONObject top ) {
-        // redefine this if you want to add jobs or other things; see
-        // JobGet.postProcessJson()
     }
     
     public JSONObject getJsonForElementAndJob( EmsScriptNode job,
@@ -2938,7 +2947,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
     }
 
     public void getJsonForJob(EmsScriptNode job, JSONObject json) {
-        if ( job.isJob() ) {
+        if ( job.isJob( job ) ) {
             JSONObject jobJson = null;
             for ( String propertyName : jobProperties ) {
 
@@ -2966,7 +2975,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
             }
         }
     }
-
+*/
     protected JSONObject addJobPropertyToJson( String propertyName,
                                                Object value,
                                                JSONObject jobJson,

@@ -7003,7 +7003,7 @@ public class EmsScriptNode extends ScriptNode implements
         return node;
     }
 
-    public boolean isJob() {
+    public boolean isJob( EmsScriptNode node ) {
             Object stereotypes = 
                     getProperty("sysml:appliedMetatypes", true);
             // stereotypes should be a List< String >

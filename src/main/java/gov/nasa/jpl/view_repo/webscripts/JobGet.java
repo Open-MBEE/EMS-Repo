@@ -29,10 +29,12 @@
 
 package gov.nasa.jpl.view_repo.webscripts;
 
+import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 import gov.nasa.jpl.view_repo.webscripts.ModelGet;
 
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -74,7 +76,7 @@ public class JobGet extends ModelGet {
         return instance.executeImplImpl(req, status, cache,
                 runWithoutTransactions);
     }
-
+/*
     @Override
     public JSONObject getJsonForElement( EmsScriptNode job,
                                             WorkspaceNode ws, Date dateTime,
@@ -84,7 +86,47 @@ public class JobGet extends ModelGet {
         return getJsonForElementAndJob( job, ws, dateTime, id,
                                         includeQualified, isIncludeDocument );
     }
+*/
+    
+    @Override
+    protected JSONObject jobOrEle(EmsScriptNode job, WorkspaceNode ws, Date dateTime, String id,
+                             boolean includeQualified, boolean isIncludeDocument ) {
+               
+        JSONObject json =
+                job.toJSONObject( ws, dateTime, includeQualified,
+                                  isIncludeDocument, elementProperties.get( id ) );
+        
+        if  ( job.isJob( job ) ) {
+            JSONObject jobJson = null;
+            for ( String propertyName : jobProperties ) {
+                
+                EmsScriptNode propertyNode = getJobPropertyNode( job, propertyName );
+                // get property values and add to json (check for null)
 
+                if( propertyNode != null ) {
+                    Collection< Object> values = getSystemModel().getValue( propertyNode, null );
+                    if ( !Utils.isNullOrEmpty( values ) ) {
+                        if ( values.size() > 1 ) {
+                            // TODO -- ERROR?
+                        }
+                        Object value = values.iterator().next();
+                        if ( value != null ) {
+                            jobJson = addJobPropertyToJson( propertyName, value,
+                                                            jobJson, json );
+                        }
+                    }
+                }
+            }
+            if ( jobJson != null ) {
+                jobsJsonArray.put(jobJson);
+            }
+        }
+        
+        // TODO: return an error if the node is not a job
+        
+        return json;
+    }
+    
     @Override
     public void postProcessJson( JSONObject top ) {
         if ( jobsJsonArray != null ) {

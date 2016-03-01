@@ -652,20 +652,8 @@ public class ModelGet extends AbstractJavaWebScript {
                  || checkPermissions( node, PermissionService.READ ) ) {
 
                 JSONObject json =
-                        getJsonForElement( node, ws, dateTime, id, includeQualified,
+                        jobOrEle( node, ws, dateTime, id, includeQualified,
                                   isIncludeDocument );
-
-                // Move the properties out of the element into separate elements.
-                if( json.has( "properties" )) {
-                    JSONArray arr = json.optJSONArray( "properties" );
-                    
-                    for(int i = 0; i < arr.length(); i++) {
-                        elements.put( arr.get( i ));
-                    }
-
-                    json.remove( "properties" );
-                }
-                
                 
                 elements.put( json );
                 elementsJsonMap.put( node, json );
