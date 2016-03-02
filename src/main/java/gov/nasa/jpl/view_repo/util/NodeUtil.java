@@ -5340,7 +5340,7 @@ public class NodeUtil {
                                Date dateTime ) {
         EmsScriptNode node = null;
         if (pgh.checkWorkspaceExists()) {
-            NodeUtil.getNodeFromPostgresNode( pgh.getNodeFromSysmlId( sysmlId ) );
+            node = NodeUtil.getNodeFromPostgresNode( pgh.getNodeFromSysmlId( sysmlId ) );
             if (node == null) {
                 logger.error( "Postgres could not find node: " + sysmlId );
                 return;
