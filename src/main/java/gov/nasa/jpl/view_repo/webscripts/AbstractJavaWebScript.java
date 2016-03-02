@@ -3030,7 +3030,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
                     }
                 }
             }
-            if ( jobJson != null ) {
+            if ( jobJson != null && jobsJsonArray != null) {
                 jobsJsonArray.put( jobJson );
             }
         }
@@ -3043,9 +3043,8 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         if ( json == null ) return jobJson;
         if ( jobJson == null ) {
             jobJson = NodeUtil.clone( json );
-        } else {
-            jobJson.put( propertyName, jsonWrap( value ) );
         }
+        jobJson.put( propertyName, jsonWrap( value ) );
         return jobJson;
     }
 

@@ -29,12 +29,10 @@
 
 package gov.nasa.jpl.view_repo.webscripts;
 
-import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 import gov.nasa.jpl.view_repo.webscripts.ModelGet;
 
-import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -93,7 +91,7 @@ public class JobGet extends ModelGet {
             top.put( "jobs", jobsJsonArray );
             // flush the jobs array so that it can be repopulated for
             // returned json after sending deltas
-            jobsJsonArray = null;
+            jobsJsonArray = new JSONArray();
         }
     }
 

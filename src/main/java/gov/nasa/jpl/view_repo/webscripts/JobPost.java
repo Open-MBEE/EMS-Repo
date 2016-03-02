@@ -29,14 +29,12 @@
 
 package gov.nasa.jpl.view_repo.webscripts;
 
-import gov.nasa.jpl.pma.JenkinsBuildConfig;
-import gov.nasa.jpl.pma.JenkinsEngine;
-
 import java.util.Map;
 
 import org.apache.log4j.*;
 import org.alfresco.repo.model.Repository;
 import org.alfresco.service.ServiceRegistry;
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
@@ -70,7 +68,7 @@ public class JobPost extends ModelPost {
             top.put( "jobs", jobsJsonArray );
             // flush the jobs array so that it can be repopulated for
             // returned json after sending deltas
-            jobsJsonArray = null;
+            jobsJsonArray = new JSONArray();
         }
     }
 
