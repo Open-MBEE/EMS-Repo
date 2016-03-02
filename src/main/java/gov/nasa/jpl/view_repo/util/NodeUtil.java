@@ -5141,6 +5141,7 @@ public class NodeUtil {
         String timestamp =
                 req.getServiceMatch().getTemplateVars().get( "timestamp" );
         Date dateTime = TimeUtils.dateFromTimestamp( timestamp );
+        WorkspaceNode workspace = null;
 
         // if no owners, walk up to site to get appropriate information
         if ( owners.size() <= 0 ) {
@@ -5152,6 +5153,11 @@ public class NodeUtil {
                 if ( NodeUtil.doGraphDb && wsId.equals( "master" )
                      && dateTime == null ) {
                     PostgresHelper pgh = new PostgresHelper( wsId );
+                    if ( wsId.equals( "master" ) ) {
+                        workspace = null; 
+                    } else {
+                        workspace = WorkspaceNode.getWorkspaceFromId( wsId, services, null, null, "admin" );
+                    }
                     try {
                         pgh.connect();
                         node =
@@ -5188,7 +5194,8 @@ public class NodeUtil {
                         pgh.connect();
                         ppRecurseOwnersDb( owner, pgh, id2name, id2siteName,
                                            owner2children, child2owner,
-                                           visitedOwners, wsId, dateTime );
+                                           visitedOwners, wsId, workspace,
+                                           dateTime );
                         pgh.close();
                         useDb = true;
                     } catch ( ClassNotFoundException e ) {
@@ -5327,10 +5334,25 @@ public class NodeUtil {
                                Map< String, String > id2siteName,
                                Map< String, Set< String >> owner2children,
                                Map< String, String > child2owner,
-                               Set< String > visitedOwners, String wsId,
+                               Set< String > visitedOwners, 
+                               String wsId,
+                               WorkspaceNode workspace,
                                Date dateTime ) {
-        EmsScriptNode node =
-                NodeUtil.getNodeFromPostgresNode( pgh.getNodeFromSysmlId( sysmlId ) );
+        EmsScriptNode node = null;
+        if (pgh.checkWorkspaceExists()) {
+            NodeUtil.getNodeFromPostgresNode( pgh.getNodeFromSysmlId( sysmlId ) );
+            if (node == null) {
+                logger.error( "Postgres could not find node: " + sysmlId );
+                return;
+            }
+        } else {
+            node = findScriptNodeByIdForWorkspace( sysmlId, workspace, dateTime, false, services, null );
+            if (node == null) {
+                logger.error( "Couldn't find script node: " + sysmlId );
+                return;
+            }
+        }
+        
         String sysmlName = node.getSysmlName();
 
         id2name.put( sysmlId, sysmlName );
