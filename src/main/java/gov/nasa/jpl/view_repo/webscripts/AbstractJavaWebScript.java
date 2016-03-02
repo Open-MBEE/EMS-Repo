@@ -2498,7 +2498,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         String command = propertyValues.get("command");
         if( command != null ) {
             String[] commandArgs = command.split( "," );
-            if ( commandArgs.length >= 6 &&
+            if ( commandArgs.length >= 7 &&
                  commandArgs[0].trim().toLowerCase().equals("jenkins") &&
                  ( commandArgs[1].trim().toLowerCase().equals("doc web") ||
                    commandArgs[1].trim().toLowerCase().equals("docweb") ) ) {
@@ -2506,8 +2506,9 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
                 config.setTeamworkServer( commandArgs[3].trim() );
                 config.setTeamworkPort( commandArgs[4].trim() );
                 config.setTeamworkProject( commandArgs[5].trim() );
-                if ( commandArgs.length > 6 ) {
+                if ( commandArgs.length > 7 ) {
                     config.setWorkspace( commandArgs[6].trim() );
+                    config.setMmsServer( commandArgs[7].trim() );
                 }
             } else {
                 String message = "Command not supported: " + command;
@@ -2595,6 +2596,9 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
             String propertyValue = jobJson.optString( propertyName );
             if ( propertyValue != null && jobJson.has( propertyName ) ) {
                 Utils.put( propertyValues, jobId, propertyName, propertyValue );
+            }
+            else if( jobNode != null ) {
+                
             }
    
             // Update or create the property json. The returned json is null
