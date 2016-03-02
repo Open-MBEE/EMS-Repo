@@ -2489,24 +2489,30 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         JenkinsEngine jenkins = new JenkinsEngine();
         JenkinsBuildConfig config = new JenkinsBuildConfig();
         config.setJobID( jobID );
+        
         String schedule = propertyValues.get("schedule");
-        config.setSchedule( schedule );
+        if( schedule != null ) {
+            config.setSchedule( schedule );
+        }
+        
         String command = propertyValues.get("command");
-        String[] commandArgs = command.split( "," );
-        if ( commandArgs.length >= 6 &&
-             commandArgs[0].trim().toLowerCase().equals("jenkins") &&
-             ( commandArgs[1].trim().toLowerCase().equals("doc web") ||
-               commandArgs[1].trim().toLowerCase().equals("docweb") ) ) {
-            config.setDocumentID( commandArgs[2].trim() );
-            config.setTeamworkServer( commandArgs[3].trim() );
-            config.setTeamworkPort( commandArgs[4].trim() );
-            config.setTeamworkProject( commandArgs[5].trim() );
-            if ( commandArgs.length > 6 ) {
-                config.setWorkspace( commandArgs[6].trim() );
+        if( command != null ) {
+            String[] commandArgs = command.split( "," );
+            if ( commandArgs.length >= 6 &&
+                 commandArgs[0].trim().toLowerCase().equals("jenkins") &&
+                 ( commandArgs[1].trim().toLowerCase().equals("doc web") ||
+                   commandArgs[1].trim().toLowerCase().equals("docweb") ) ) {
+                config.setDocumentID( commandArgs[2].trim() );
+                config.setTeamworkServer( commandArgs[3].trim() );
+                config.setTeamworkPort( commandArgs[4].trim() );
+                config.setTeamworkProject( commandArgs[5].trim() );
+                if ( commandArgs.length > 6 ) {
+                    config.setWorkspace( commandArgs[6].trim() );
+                }
+            } else {
+                String message = "Command not supported: " + command;
+                log(Level.WARN, HttpServletResponse.SC_NOT_IMPLEMENTED, message);
             }
-        } else {
-            String message = "Command not supported: " + command;
-            log(Level.WARN, HttpServletResponse.SC_NOT_IMPLEMENTED, message);
         }
                
         jenkins.postConfigXml( config, config.getJobID(), createNewJob );
