@@ -525,26 +525,53 @@ public class JenkinsEngine implements ExecutionEngine {
         }
         return o; 
     }
+
+    // This should be called when you change the name, status, schedule of a job
+    public boolean getConfigXml( JenkinsBuildConfig config,String jobName ) {
+        String getUrl = "https://cae-jenkins.jpl.nasa.gov/job/" + jobName + "/config.xml";
+
+        try {            
+            HttpGet get = new HttpGet( getUrl );
+            get.setHeader( "Content-Type", "application/xml" );
+
+            HttpResponse response = 
+                    this.jenkinsClient.execute( get, this.context );
+            
+            if( response.getStatusLine().getStatusCode() == 200 ) {
+                return true;
+            }                        
+        } catch( Exception e ) {
+            e.printStackTrace();
+        }
+        return false;
+    }
     
     // This should be called when you change the name, status, schedule of a job
-    public void postConfigXml( JenkinsBuildConfig config,String jobName ) {
-        String postUrl = "https://cae-jenkins.jpl.nasa.gov/createItem?name=" + jobName;
+    public void postConfigXml( JenkinsBuildConfig config,String jobName, boolean newConfig ) {
+        String postUrl = null;
+        if( newConfig )
+            postUrl = "https://cae-jenkins.jpl.nasa.gov/createItem?name=" + jobName;
+        else
+            postUrl = "https://cae-jenkins.jpl.nasa.gov/job/" + jobName + "/config.xml";
 
+        System.out.println( postUrl );
+        
         String configFile = generateConfigXML( config );
         
         try {
             HttpEntity xmlEntity = (HttpEntity)new  StringEntity(configFile);
-    
+            
             HttpPost post = new HttpPost( postUrl );
             post.setHeader( "Content-Type", "application/xml" );
             post.setEntity( xmlEntity );
             HttpResponse response = 
                     this.jenkinsClient.execute( post, this.context );
+            
         } catch( Exception e ) {
             e.printStackTrace();
         }
     }
-    
+
     public JSONObject getAllJobs() {
         constructAllJobs();
         execute();

@@ -2484,6 +2484,8 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
 
     protected void createJenkinsConfig(String jobID,
                                        Map<String,String> propertyValues) {
+        boolean newConfig = true;
+        
         JenkinsEngine jenkins = new JenkinsEngine();
         JenkinsBuildConfig config = new JenkinsBuildConfig();
         config.setJobID( jobID );
@@ -2506,7 +2508,12 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
             String message = "Command not supported: " + command;
             log(Level.WARN, HttpServletResponse.SC_NOT_IMPLEMENTED, message);
         }
-        jenkins.postConfigXml( config, config.getJobID() );
+        
+        
+        if( jenkins.getConfigXml( config, config.getJobID() ) )
+            newConfig = false;
+               
+        jenkins.postConfigXml( config, config.getJobID(), newConfig );
     }
 
     /**
@@ -2925,8 +2932,10 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
                                                boolean isIncludeDocument ) {
 
         JSONObject json =
-                this.getJsonForElement( job, ws, dateTime, id,
-                                        includeQualified, isIncludeDocument );
+                this.getJsonForElement( job, ws, dateTime,
+                                        includeQualified, isIncludeDocument,
+                                        null,
+                                        elementProperties.get( id ) );
         getJsonForJob(job, json);
         return json;
     }

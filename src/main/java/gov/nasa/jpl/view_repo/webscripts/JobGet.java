@@ -57,7 +57,7 @@ public class JobGet extends ModelGet {
 
     public static final String slotId = "_9_0_62a020a_1105704885275_885607_7905";
     
-    protected JSONArray jobsJsonArray = new JSONArray(); 
+    //protected JSONArray jobsJsonArray = new JSONArray(); 
 
     public JobGet() {
         super();
@@ -76,7 +76,7 @@ public class JobGet extends ModelGet {
         return instance.executeImplImpl(req, status, cache,
                 runWithoutTransactions);
     }
-/* 
+ 
     @Override
     public JSONObject getJsonForElement( EmsScriptNode job,
                                             WorkspaceNode ws, Date dateTime,
@@ -85,46 +85,6 @@ public class JobGet extends ModelGet {
                                             boolean isIncludeDocument ) {
         return getJsonForElementAndJob( job, ws, dateTime, id,
                                         includeQualified, isIncludeDocument );
-    }
-*/
-    
-    @Override
-    protected JSONObject jobOrEle(EmsScriptNode job, WorkspaceNode ws, Date dateTime, String id,
-                             boolean includeQualified, boolean isIncludeDocument ) {
-               
-        JSONObject json =
-                job.toJSONObject( ws, dateTime, includeQualified,
-                                  isIncludeDocument, elementProperties.get( id ) );
-        
-        if  ( job.isJob( job ) ) {
-            JSONObject jobJson = null;
-            for ( String propertyName : jobProperties ) {
-                
-                EmsScriptNode propertyNode = getJobPropertyNode( job, propertyName );
-                // get property values and add to json (check for null)
-
-                if( propertyNode != null ) {
-                    Collection< Object> values = getSystemModel().getValue( propertyNode, null );
-                    if ( !Utils.isNullOrEmpty( values ) ) {
-                        if ( values.size() > 1 ) {
-                            // TODO -- ERROR?
-                        }
-                        Object value = values.iterator().next();
-                        if ( value != null ) {
-                            jobJson = addJobPropertyToJson( propertyName, value,
-                                                            jobJson, json );
-                        }
-                    }
-                }
-            }
-            if ( jobJson != null ) {
-                jobsJsonArray.put(jobJson);
-            }
-        }
-        
-        // TODO: return an error if the node is not a job
-        
-        return json;
     }
     
     @Override

@@ -651,7 +651,7 @@ public class ModelGet extends AbstractJavaWebScript {
                  || checkPermissions( node, PermissionService.READ ) ) {
 
                 JSONObject json =
-                        jobOrEle( node, ws, dateTime, id, includeQualified,
+                        getJsonForElement( node, ws, dateTime, id, includeQualified,
                                   isIncludeDocument );
                 
                 elements.put( json );
