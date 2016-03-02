@@ -2703,7 +2703,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
                                       EmsScriptNode jobNode,
                                       String jobId,
                                       JSONArray elements ) {  
-        JSONObject propertyJson = property;
+        //JSONObject propertyJson = property;
         String propertyId = property.optString( "sysmlid" );
         String propertyValue = null;
         
@@ -2712,14 +2712,11 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         // if so, store it
         if( property.has(  propertyName ))
             propertyValue = property.optString( propertyName );
-        else if( propertyJson.optString( "name" ).equals( propertyName ) ) {
+        else if( property.optString( "name" ).equals( propertyName ) ) {
             propertyValue = getStringValueFromPropertyJson( property );
         }
-        // these might be necessary, just testing
-        //else return null;
 
-        //if ( propertyValue == null ) return null;
-
+        
         // Get the property's id.
         if ( !createNewJob || propertyValue == null ) {
             EmsScriptNode propertyNode =
@@ -2744,7 +2741,8 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
             }
         }
 
-        // The property json this method returns       
+        // The property json this method returns    
+        JSONObject propertyJson = getPropertyJson(propertyId, elements);
         if ( propertyJson != null ) {   
             // The property value should have been provided in the job
             // json. If it wasn't, then try to get it from the property json. If
@@ -2808,6 +2806,21 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         value.put( "type", "LiteralString" );
         value.put( "string", propertyValue );
 
+        return propertyJson;
+    }
+    
+    protected JSONObject getPropertyJson( String propertyId, JSONArray elements ) {
+        if ( propertyId == null ) return null;
+        JSONObject propertyJson = null;//new JSONObject();
+        for ( int i = 0; i < elements.length(); ++i ) {
+            JSONObject element = elements.optJSONObject( i );
+            if ( element == null ) continue;
+            String id = element.optString( "sysmlid" );
+            if ( id != null && id.equals( propertyId ) ) {
+                propertyJson = element;
+                break;
+            }
+        }
         return propertyJson;
     }
 

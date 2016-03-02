@@ -2810,7 +2810,7 @@ public class ModelPost extends AbstractJavaWebScript {
                             }
                             if ( json == null ) {
                                 boolean isQualified = NodeUtil.doPostProcessQualified;                     
-                                json = getJsonForElementAndJob( element, workspace, 
+                                json = getJsonForElementAndJob( element, null, false, workspace, 
                                                           null, element.getSysmlId(), 
                                                           isQualified, false );
                             }						    
