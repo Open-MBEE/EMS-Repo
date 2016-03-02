@@ -343,6 +343,30 @@ public class JenkinsBuildConfig {
             tempElement = doc.createElement("reporters");
             rootElement.appendChild(tempElement);
             tempElement = doc.createElement("publishers");
+            Element artifactArchiver = doc.createElement("hudson.tasks.ArtifactArchiver");
+            Element secondTempElem = doc.createElement( "artifacts" );
+
+            secondTempElem.appendChild( doc.createTextNode( "guilog.html" ));
+            artifactArchiver.appendChild( secondTempElem );
+
+            secondTempElem = doc.createElement("allowEmptyArchive");
+            secondTempElem.appendChild( doc.createTextNode( "false" ) );
+            artifactArchiver.appendChild( secondTempElem );
+
+            secondTempElem = doc.createElement("onlyIfSuccessful");
+            secondTempElem.appendChild( doc.createTextNode( "false" ) );
+            artifactArchiver.appendChild( secondTempElem );
+
+            secondTempElem = doc.createElement("fingerprint");
+            secondTempElem.appendChild( doc.createTextNode( "false" ) );
+            artifactArchiver.appendChild( secondTempElem );
+
+            secondTempElem = doc.createElement("defaultExcludes");
+            secondTempElem.appendChild( doc.createTextNode( "true" ) );
+            artifactArchiver.appendChild( secondTempElem );
+
+            tempElement.appendChild( artifactArchiver );
+
             rootElement.appendChild(tempElement);
 
             rootElement.appendChild(doc.createElement("prebuilders"));

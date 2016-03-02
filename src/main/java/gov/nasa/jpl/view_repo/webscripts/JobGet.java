@@ -79,11 +79,11 @@ public class JobGet extends ModelGet {
  
     @Override
     public JSONObject getJsonForElement( EmsScriptNode job,
-                                            WorkspaceNode ws, Date dateTime,
-                                            String id,
-                                            boolean includeQualified,
-                                            boolean isIncludeDocument ) {
-        return getJsonForElementAndJob( job, ws, dateTime, id,
+                                         WorkspaceNode ws, Date dateTime,
+                                         String id,
+                                         boolean includeQualified,
+                                         boolean isIncludeDocument ) {
+        return getJsonForElementAndJob( job, null, false, ws, dateTime, id,
                                         includeQualified, isIncludeDocument );
     }
     

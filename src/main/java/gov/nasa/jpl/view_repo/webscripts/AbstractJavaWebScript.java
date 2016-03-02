@@ -2930,37 +2930,42 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
                                             String id,
                                             boolean includeQualified,
                                             boolean isIncludeDocument ) {
-        return getJsonForElement( element, ws, dateTime, includeQualified,
+        return getJsonForElement( element, null, false, ws, dateTime, includeQualified,
                                   isIncludeDocument, null,
                                   elementProperties.get( id ) );
     }
     protected JSONObject getJsonForElement( EmsScriptNode element,
+                                            Set<String> filter,
+                                            boolean isExpOrProp,
                                             WorkspaceNode ws, Date dateTime,
                                             boolean includeQualified,
                                             boolean isIncludeDocument,
                                             Version version,
                                             List<EmsScriptNode> ownedProperties ) {
-        return element.toJSONObject( null, false, ws, dateTime,
+        return element.toJSONObject( filter, isExpOrProp, ws, dateTime,
                                      includeQualified, isIncludeDocument, version,
                                      ownedProperties );
     }
   
     public JSONObject getJsonForElementAndJob( EmsScriptNode job,
+                                               Set<String> filter,
+                                               boolean isExpOrProp,
                                                WorkspaceNode ws,
                                                Date dateTime, String id,
                                                boolean includeQualified,
                                                boolean isIncludeDocument ) {
 
         JSONObject json =
-                this.getJsonForElement( job, ws, dateTime,
+                this.getJsonForElement( job, filter, isExpOrProp, ws, dateTime,
                                         includeQualified, isIncludeDocument,
-                                        null,
-                                        elementProperties.get( id ) );
+                                        null, elementProperties.get( id ) );
         getJsonForJob(job, json);
         return json;
     }
     
     public JSONObject getJsonForElementAndJob( EmsScriptNode job,
+                                               Set<String> filter,
+                                               boolean isExpOrProp,
                                                WorkspaceNode ws,
                                                Date dateTime,
                                                boolean includeQualified,
@@ -2968,7 +2973,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
                                                Version version,
                                                List<EmsScriptNode> ownedProperties ) {
         JSONObject json =
-                this.getJsonForElement( job, ws, dateTime, includeQualified,
+                this.getJsonForElement( job, filter, isExpOrProp, ws, dateTime, includeQualified,
                                         isIncludeDocument, version,
                                         ownedProperties );
         getJsonForJob(job, json);

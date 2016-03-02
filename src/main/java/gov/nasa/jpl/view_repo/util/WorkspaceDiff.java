@@ -814,7 +814,7 @@ public class WorkspaceDiff implements Serializable {
 
         deltaJson.put( "workspace1", ws1Json );
         deltaJson.put( "workspace2", ws2Json );
-
+        
         // If we came up with nothing (!isDiff()), then maybe we computed it
         // another way and should return the existing diffJson.
         if ( diffJson == null || isDiff() ) {
@@ -823,6 +823,13 @@ public class WorkspaceDiff implements Serializable {
         
         return diffJson;
 
+    }
+    
+    protected void addCachedJobs( AbstractJavaWebScript webscript, JSONObject json, String keyName ) {
+        webscript.postProcessJson(json);
+        JSONArray jobs = json.optJSONArray( "jobs" );
+        json.remove("jobs");
+        json.put(keyName, jobs);
     }
     
     public static boolean isDiff( JSONObject diff ) {
@@ -855,7 +862,7 @@ public class WorkspaceDiff implements Serializable {
                                  Map< String, Version> versions, WorkspaceNode ws, Date dateTime, boolean showAll) throws JSONException {
         return addJSONArray( webscript, jsonObject, key, map, versions, ws, dateTime, showAll, nodeDiff );
     }
-    public static boolean addJSONArray(AbstractJavaWebScript webscript,
+    public boolean addJSONArray(AbstractJavaWebScript webscript,
                                        JSONObject jsonObject, String key, Map< String, EmsScriptNode > map, 
                                         Map< String, Version> versions, WorkspaceNode ws, Date dateTime, boolean showAll,
                                         NodeDiff nodeDiff ) throws JSONException {
@@ -864,6 +871,9 @@ public class WorkspaceDiff implements Serializable {
             jsonObject.put( key, convertMapToJSONArray( webscript, map, versions,
                                                         ws, dateTime, showAll,
                                                         nodeDiff ) );
+            key = key.replace( "Elements", "Jobs" );
+            key = key.replace( "elements", "jobs" );
+            addCachedJobs( webscript, jsonObject, key );
             emptyArray = false;
         } else {
             // add in the empty array
@@ -984,7 +994,7 @@ public class WorkspaceDiff implements Serializable {
                     webscript == null ?
                     node.toJSONObject( filter, false, workspace, dateTime,
                                        includeQualified, false, version, null ) :
-                    webscript.getJsonForElementAndJob( node, workspace, dateTime,
+                    webscript.getJsonForElementAndJob( node, filter, false, workspace, dateTime,
                                                        includeQualified, false,
                                                        version, null );
             array.put( jsonObject );
