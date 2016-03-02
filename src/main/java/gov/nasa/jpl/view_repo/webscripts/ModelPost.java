@@ -2809,7 +2809,10 @@ public class ModelPost extends AbstractJavaWebScript {
                                                               0, false );
                             }
                             if ( json == null ) {
-                                json = element.toJSONObject( workspace, null );
+                                boolean isQualified = NodeUtil.doPostProcessQualified;                     
+                                json = getJsonForElementAndJob( element, workspace, 
+                                                          null, element.getSysmlId(), 
+                                                          isQualified, false );
                             }						    
 						    
 							elementsJson.put(json);

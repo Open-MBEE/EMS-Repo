@@ -537,8 +537,6 @@ public class JenkinsEngine implements ExecutionEngine {
             postUrl = "https://cae-jenkins.jpl.nasa.gov/createItem?name=" + jobName;
         else
             postUrl = "https://cae-jenkins.jpl.nasa.gov/job/" + jobName + "/config.xml";
-
-        System.out.println( postUrl );
         
         String configFile = generateConfigXML( config );
         

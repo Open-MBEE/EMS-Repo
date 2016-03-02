@@ -2506,8 +2506,8 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
                 config.setTeamworkServer( commandArgs[3].trim() );
                 config.setTeamworkPort( commandArgs[4].trim() );
                 config.setTeamworkProject( commandArgs[5].trim() );
+                config.setWorkspace( commandArgs[6].trim() );
                 if ( commandArgs.length > 7 ) {
-                    config.setWorkspace( commandArgs[6].trim() );
                     config.setMmsServer( commandArgs[7].trim() );
                 }
             } else {
@@ -2544,7 +2544,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
 
         // Find node for id.
         EmsScriptNode jobNode = findScriptNodeById( jobId, workspace, null, false );
-        boolean createNewJob = jobNode == null;
+        boolean createNewJob = jobNode.getType().contains( "Element" );
         
         for( int i = 0; i < elements.length(); i++ ) {
             JSONObject property = elements.optJSONObject( i );
@@ -2596,9 +2596,6 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
             String propertyValue = jobJson.optString( propertyName );
             if ( propertyValue != null && jobJson.has( propertyName ) ) {
                 Utils.put( propertyValues, jobId, propertyName, propertyValue );
-            }
-            else if( jobNode != null ) {
-                
             }
    
             // Update or create the property json. The returned json is null
@@ -2718,16 +2715,32 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         else if( propertyJson.optString( "name" ).equals( propertyName ) ) {
             propertyValue = getStringValueFromPropertyJson( property );
         }
-        else return null;
+        // these might be necessary, just testing
+        //else return null;
 
-        if ( propertyValue == null ) return null;
+        //if ( propertyValue == null ) return null;
 
         // Get the property's id.
-        if ( !createNewJob ) {
+        if ( !createNewJob || propertyValue == null ) {
             EmsScriptNode propertyNode =
                     getJobPropertyNode( jobNode, propertyName );
             if ( propertyNode != null ) {
                 propertyId = propertyNode.getSysmlId();
+            }
+            
+             Map< String, String > props = propertyValues.get( jobId );
+            if ( props != null && !props.containsKey( propertyName ) ) {
+                Collection< Object > values = getSystemModel().getValue( propertyNode, null );
+    
+                if ( !Utils.isNullOrEmpty( values ) ) {
+                    if ( values.size() > 1 ) {
+                        // TODO -- ERROR?
+                    }
+                    Object value = values.iterator().next();
+                    if ( value != null ) {
+                      Utils.put( propertyValues, jobId, propertyName, value.toString() );  
+                    }
+                }
             }
         }
 
