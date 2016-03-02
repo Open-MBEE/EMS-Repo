@@ -283,6 +283,10 @@ public class JenkinsEngine implements ExecutionEngine {
             e.printStackTrace();
         }
     }
+    
+    public void closeConn( HttpEntity entity) {
+        
+    }
 
     @Override
     public boolean isRunning() {
@@ -524,26 +528,6 @@ public class JenkinsEngine implements ExecutionEngine {
             e.printStackTrace();
         }
         return o; 
-    }
-
-    // This should be called when you change the name, status, schedule of a job
-    public boolean getConfigXml( JenkinsBuildConfig config,String jobName ) {
-        String getUrl = "https://cae-jenkins.jpl.nasa.gov/job/" + jobName + "/config.xml";
-
-        try {            
-            HttpGet get = new HttpGet( getUrl );
-            get.setHeader( "Content-Type", "application/xml" );
-
-            HttpResponse response = 
-                    this.jenkinsClient.execute( get, this.context );
-            
-            if( response.getStatusLine().getStatusCode() == 200 ) {
-                return true;
-            }                        
-        } catch( Exception e ) {
-            e.printStackTrace();
-        }
-        return false;
     }
     
     // This should be called when you change the name, status, schedule of a job

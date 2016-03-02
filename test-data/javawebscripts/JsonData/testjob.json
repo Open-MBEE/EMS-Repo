@@ -30,7 +30,7 @@
             "isDerived": false,
             "value": [{
                 "valueExpression": null,
-                "string": "H/5 * * * *",
+                "string": "H/10 * * * *",
                 "type": "LiteralString"
             }],
             "type": "Property"

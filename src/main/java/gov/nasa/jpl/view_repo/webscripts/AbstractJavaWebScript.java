@@ -2483,8 +2483,8 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
     }
 
     protected void createJenkinsConfig(String jobID,
-                                       Map<String,String> propertyValues) {
-        boolean newConfig = true;
+                                       Map<String,String> propertyValues,
+                                       boolean createNewJob) {
         
         JenkinsEngine jenkins = new JenkinsEngine();
         JenkinsBuildConfig config = new JenkinsBuildConfig();
@@ -2508,12 +2508,8 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
             String message = "Command not supported: " + command;
             log(Level.WARN, HttpServletResponse.SC_NOT_IMPLEMENTED, message);
         }
-        
-        
-        if( jenkins.getConfigXml( config, config.getJobID() ) )
-            newConfig = false;
                
-        jenkins.postConfigXml( config, config.getJobID(), newConfig );
+        jenkins.postConfigXml( config, config.getJobID(), createNewJob );
     }
 
     /**
@@ -2526,20 +2522,23 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
      * @param elementMap
      * @param workspace
      * @param isElement
+     * 
+     * @return whether or not the job is new or already created
      */  
-    protected void processJobAsElement(JSONObject jobAsElementJson, JSONArray elements,
+    protected boolean processJobAsElement(JSONObject jobAsElementJson, JSONArray elements,
                                        Map<String, JSONObject> elementMap,
                                        WorkspaceNode workspace ) {
         if ( jobAsElementJson == null ) {
             log( Level.ERROR, "Bad job json: " + jobAsElementJson );
-            return;
+            return false;
         }
 
         String jobId = getJobIdFromJson( jobAsElementJson, true );
 
         // Find node for id.
         EmsScriptNode jobNode = findScriptNodeById( jobId, workspace, null, false );
-
+        boolean createNewJob = jobNode == null;
+        
         for( int i = 0; i < elements.length(); i++ ) {
             JSONObject property = elements.optJSONObject( i );
             
@@ -2553,6 +2552,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
                 }        
             }
         }
+        return createNewJob;
     }
 
     /**
@@ -2565,13 +2565,15 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
      * @param elementMap
      * @param workspace
      * @param isElement
+     * 
+     * @return whether or not the job is new or already created
      */
-    protected void processJobAsJob(JSONObject jobJson, JSONArray elements,
+    protected boolean processJobAsJob(JSONObject jobJson, JSONArray elements,
                                    Map<String, JSONObject> elementMap,
                                    WorkspaceNode workspace ) {
         if ( jobJson == null ) {
             log( Level.ERROR, "Bad job json: " + jobJson );
-            return;
+            return false;
         }
 
         String jobId = getJobIdFromJson( jobJson, true );
@@ -2607,6 +2609,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
             // FIXME -- this appends only a sysmlid to "elements
             elements.put(jobJson);
         }
+        return createNewJob;
     }
     
     protected String getStringValueFromPropertyJson( JSONObject propertyJson ) {
@@ -2853,13 +2856,18 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
             }
         }        
 
+        HashMap<String, Boolean> createNewJob = new HashMap<String, Boolean>();
+        
         // Loop through the "elements" json array, and for each element, check
         // to see if it is a job and process it to gather property values to add
         // to the Jenkins configuration.
         for ( int i = 0; i < elements.length(); i++ ) {
             JSONObject elem = elements.optJSONObject( i );
+            
             if ( EmsScriptNode.isJob( elem ) ) {
-                processJobAsElement( elem, elements, elementMap, workspace );
+                boolean isNew = processJobAsElement( elem, elements, elementMap, workspace );
+                String id = getJobIdFromJson( elem, false );
+                if( id != null ) createNewJob.put( id, isNew );   
             } 
         }
 
@@ -2867,13 +2875,15 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         if ( jobs != null ) {
             for ( int i = 0; i < jobs.length(); i++ ) {
                 JSONObject job = jobs.optJSONObject( i );
-                processJobAsJob( job, elements, elementMap, workspace );
+                boolean isNew = processJobAsJob( job, elements, elementMap, workspace );
+                String id = getJobIdFromJson( job, false );
+                if( id != null ) createNewJob.put( id, isNew );                    
             }
         }
         
         for ( String jobId : propertyValues.keySet() ) {
-            Map< String, String > properties = propertyValues.get( jobId );
-            createJenkinsConfig( jobId, properties );
+            Map< String, String > properties = propertyValues.get( jobId );            
+            createJenkinsConfig( jobId, properties, createNewJob.get( jobId ) == true );
         }
 
         json.remove( "jobs" );
