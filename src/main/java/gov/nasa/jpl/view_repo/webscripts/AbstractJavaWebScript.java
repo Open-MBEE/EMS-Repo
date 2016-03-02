@@ -2544,7 +2544,9 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
 
         // Find node for id.
         EmsScriptNode jobNode = findScriptNodeById( jobId, workspace, null, false );
-        boolean createNewJob = jobNode.getType().contains( "Element" );
+        
+        boolean createNewJob = false;
+        if( jobNode == null || jobNode.getType().contains( "Element" )) createNewJob = true;
         
         for( int i = 0; i < elements.length(); i++ ) {
             JSONObject property = elements.optJSONObject( i );
