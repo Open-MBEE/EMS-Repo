@@ -3030,8 +3030,9 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         if ( json == null ) return jobJson;
         if ( jobJson == null ) {
             jobJson = NodeUtil.clone( json );
+        } else {
+            jobJson.put( propertyName, jsonWrap( value ) );
         }
-        jobJson.put( propertyName, jsonWrap( value ) );
         return jobJson;
     }
 
