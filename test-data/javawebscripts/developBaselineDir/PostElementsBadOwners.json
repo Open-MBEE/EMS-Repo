@@ -1,27 +1,5 @@
 {"elements": [
     {
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "specialization": {"type": "Package"}
-    },
-    {
-        "sysmlid": "notFound",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "notFound",
-        "specialization": {"type": "Element"}
-    },
-    {
-        "sysmlid": "holding_bin_123456",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "holding_bin_123456",
-        "specialization": {"type": "Package"}
-    },
-    {
         "sysmlid": "notFoundTest2",
         "editable": true,
         "creator": "admin",
@@ -37,17 +15,10 @@
         }
     },
     {
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "specialization": {"type": "Package"}
-    },
-    {
         "sysmlid": "notFound2",
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
-        "name": "notFound2",
         "specialization": {"type": "Element"}
     },
     {
@@ -55,6 +26,33 @@
         "creator": "admin",
         "modifier": "admin",
         "specialization": {"type": "Package"}
+    },
+    {
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "specialization": {"type": "Package"}
+    },
+    {
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "specialization": {"type": "Package"}
+    },
+    {
+        "sysmlid": "found",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "found",
+        "documentation": "",
+        "specialization": {
+            "specification": {
+                "expressionBody": ["foo8"],
+                "type": "OpaqueExpression"
+            },
+            "type": "Constraint"
+        }
     },
     {
         "sysmlid": "notFoundTest",
@@ -78,19 +76,19 @@
         "specialization": {"type": "Package"}
     },
     {
-        "sysmlid": "found",
+        "sysmlid": "notFound",
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
-        "name": "found",
-        "documentation": "",
-        "specialization": {
-            "specification": {
-                "expressionBody": ["foo8"],
-                "type": "OpaqueExpression"
-            },
-            "type": "Constraint"
-        }
+        "specialization": {"type": "Element"}
+    },
+    {
+        "sysmlid": "holding_bin_123456",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "holding_bin",
+        "specialization": {"type": "Package"}
     }
 ]}
 200

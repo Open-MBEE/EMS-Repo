@@ -21,10 +21,8 @@
     "workspace2": {
         "deletedElements": [],
         "addedElements": [{
-            "sysmlid": "newElement",
-            "editable": true,
-            "name": "newElement",
             "documentation": "x is x",
+            "sysmlid": "newElement",
             "specialization": {
                 "propertyType": null,
                 "isSlot": false,
@@ -34,7 +32,8 @@
                     "type": "LiteralString"
                 }],
                 "type": "Property"
-            }
+            },
+            "editable": true,
         }],
         "conflictedElements": [],
         "updatedElements": [{

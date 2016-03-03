@@ -19,12 +19,6 @@
         }
     },
     {
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "specialization": {"type": "Package"}
-    },
-    {
         "sysmlid": "4000",
         "editable": true,
         "creator": "admin",
@@ -100,6 +94,12 @@
         "specialization": {"type": "Package"}
     },
     {
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "specialization": {"type": "Package"}
+    },
+    {
         "sysmlid": "notFoundTest2",
         "editable": true,
         "creator": "admin",
@@ -134,7 +134,7 @@
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
-        "name": "holding_bin_123456",
+        "name": "holding_bin",
         "specialization": {"type": "Package"}
     },
     {
@@ -310,6 +310,12 @@
         "specialization": {"type": "Element"}
     },
     {
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "specialization": {"type": "Package"}
+    },
+    {
         "sysmlid": "6666",
         "editable": true,
         "creator": "admin",
@@ -357,7 +363,6 @@
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
-        "name": "notFound2",
         "specialization": {"type": "Element"}
     },
     {
@@ -377,12 +382,6 @@
             }],
             "type": "Property"
         }
-    },
-    {
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "specialization": {"type": "Package"}
     },
     {
         "sysmlid": "401",
@@ -461,7 +460,6 @@
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
-        "name": "notFound",
         "specialization": {"type": "Element"}
     },
     {

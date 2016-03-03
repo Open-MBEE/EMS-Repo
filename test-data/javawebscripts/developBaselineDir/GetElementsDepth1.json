@@ -1,47 +1,5 @@
 {"elements": [
     {
-        "sysmlid": "found",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "found",
-        "documentation": "",
-        "specialization": {
-            "specification": {
-                "expressionBody": ["foo8"],
-                "type": "OpaqueExpression"
-            },
-            "type": "Constraint"
-        }
-    },
-    {
-        "sysmlid": "dlam",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "dlam",
-        "documentation": "to make compatible with value specs (this is just a Element)",
-        "specialization": {"type": "Element"}
-    },
-    {
-        "sysmlid": "300",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "300",
-        "documentation": "something",
-        "specialization": {
-            "propertyType": null,
-            "isSlot": false,
-            "isDerived": false,
-            "value": [{
-                "string": "dlam_string",
-                "type": "LiteralString"
-            }],
-            "type": "Property"
-        }
-    },
-    {
         "sysmlid": "multRedefPackage",
         "editable": true,
         "creator": "admin",
@@ -49,13 +7,6 @@
         "name": "multRedefPackage",
         "documentation": "package for testing multiplicity and redefines attributes of Property",
         "specialization": {"type": "Package"}
-    },
-    {
-        "sysmlid": "123456",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "JW_TEST",
     },
     {
         "sysmlid": "4000",
@@ -80,8 +31,57 @@
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
-        "name": "holding_bin_123456",
+        "name": "holding_bin",
         "specialization": {"type": "Package"}
+    },
+    {
+        "sysmlid": "dlam",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "dlam",
+        "documentation": "to make compatible with value specs (this is just a Element)",
+        "specialization": {"type": "Element"}
+    },
+    {
+        "sysmlid": "found",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "found",
+        "documentation": "",
+        "specialization": {
+            "specification": {
+                "expressionBody": ["foo8"],
+                "type": "OpaqueExpression"
+            },
+            "type": "Constraint"
+        }
+    },
+    {
+        "sysmlid": "123456",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "JW_TEST",
+    },
+    {
+        "sysmlid": "300",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "300",
+        "documentation": "something",
+        "specialization": {
+            "propertyType": null,
+            "isSlot": false,
+            "isDerived": false,
+            "value": [{
+                "string": "dlam_string",
+                "type": "LiteralString"
+            }],
+            "type": "Property"
+        }
     }
 ]}
 200

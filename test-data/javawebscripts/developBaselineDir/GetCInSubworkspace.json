@@ -3,7 +3,6 @@
     "editable": true,
     "creator": "admin",
     "modifier": "admin",
-    "name": "c",
     "documentation": "c is c",
     "specialization": {"type": "Untyped"}
 }]}

@@ -40,7 +40,7 @@
             {
                 "sysmlid": "holding_bin_123456",
                 "editable": true,
-                "name": "holding_bin_123456",
+                "name": "holding_bin",
                 "specialization": {"type": "Package"}
             }
         ]

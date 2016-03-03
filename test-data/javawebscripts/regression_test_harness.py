@@ -3326,6 +3326,19 @@ create_curl_cmd(type="POST", data="holdingBinOwner.json", base_url=BASE_URL_WS,
 True,
 common_filters + ['YY_', 'MM_', 'DD_', 'HH_', '"owner"', '"qualifiedId"', '"qualifiedName"'],
 ["develop"]
+],
+         
+# CAEDVO-623: stripping images should leave all other attributes
+# FIXME: ignore documentation since there's alfresco specific id that causes diff
+[
+10150,
+"PostImage",
+"Post image with styles",
+create_curl_cmd(type="POST", data="elements.json.images", base_url=BASE_URL_WS,
+                post_type="elements", branch="master/"),
+True,
+common_filters + ['YY_', 'MM_', 'DD_', 'HH_', '"owner"', '"qualifiedId"', '"qualifiedName"', '"documentation"'],
+["develop"]
 ]
          
 ]

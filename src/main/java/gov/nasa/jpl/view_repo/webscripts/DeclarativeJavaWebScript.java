@@ -229,7 +229,8 @@ public class DeclarativeJavaWebScript extends AbstractWebScript
     private boolean updateCache(Cache cache) {
         if (!cache.getIsPublic()) {
             cache.setIsPublic( true );
-            cache.setMaxAge( new Long(315570000) );
+            // set to one year
+            cache.setMaxAge( new Long(31536000) );
             // following are true by default, so need to set them to false
             cache.setNeverCache( false ); 
             cache.setMustRevalidate( false );

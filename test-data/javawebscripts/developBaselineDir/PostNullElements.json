@@ -1,5 +1,14 @@
 {"elements": [
     {
+        "sysmlid": "viewNull",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "viewNull",
+        "documentation": "View with null values",
+        "specialization": {"type": "View"}
+    },
+    {
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
@@ -18,18 +27,6 @@
         }
     },
     {
-        "sysmlid": "parameterNull",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "parameterNull",
-        "documentation": "Parameter with null values",
-        "specialization": {
-            "defaultValue": null,
-            "type": "Parameter"
-        }
-    },
-    {
         "sysmlid": "durationIntervalNull",
         "editable": true,
         "creator": "admin",
@@ -43,12 +40,22 @@
         }
     },
     {
-        "sysmlid": "holding_bin_123456",
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
-        "name": "holding_bin_123456",
         "specialization": {"type": "Package"}
+    },
+    {
+        "sysmlid": "parameterNull",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "parameterNull",
+        "documentation": "Parameter with null values",
+        "specialization": {
+            "defaultValue": null,
+            "type": "Parameter"
+        }
     },
     {
         "sysmlid": "propertyMissing",
@@ -57,6 +64,30 @@
         "modifier": "admin",
         "name": "propertyMissing",
         "documentation": "Property with missing propertyType and null owner",
+        "specialization": {
+            "propertyType": null,
+            "isSlot": false,
+            "isDerived": false,
+            "value": [{
+                "string": "dlam_string",
+                "type": "LiteralString"
+            }],
+            "type": "Property"
+        }
+    },
+    {
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "specialization": {"type": "Package"}
+    },
+    {
+        "sysmlid": "propertyNull",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "propertyNull",
+        "documentation": "Property with null values",
         "specialization": {
             "propertyType": null,
             "isSlot": false,
@@ -80,97 +111,6 @@
             "target": null,
             "type": "DirectedRelationship"
         }
-    },
-    {
-        "sysmlid": "instanceValueNull",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "instanceValueNull",
-        "documentation": "InstanceValue with null values",
-        "specialization": {
-            "instance": null,
-            "type": "InstanceValue"
-        }
-    },
-    {
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "specialization": {"type": "Package"}
-    },
-    {
-        "sysmlid": "instanceSpecificationNull",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "instanceSpecificationNull",
-        "documentation": "InstanceSpecification with null values",
-        "specialization": {
-            "slots": ["elementValueNull"],
-            "classifier": ["propertyNull"],
-            "type": "InstanceSpecification"
-        }
-    },
-    {
-        "sysmlid": "elementValueNull",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "elementValueNull",
-        "documentation": "ElementValue with null values",
-        "specialization": {
-            "element": null,
-            "type": "ElementValue"
-        }
-    },
-    {
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "specialization": {"type": "Package"}
-    },
-    {
-        "sysmlid": "too_many_bugs",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "too_many_bugs",
-        "specialization": {
-            "propertyType": null,
-            "isSlot": false,
-            "isDerived": false,
-            "value": [{"type": "LiteralReal"}],
-            "type": "Property"
-        }
-    },
-    {
-        "sysmlid": "timeIntervalNull",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "timeIntervalNull",
-        "documentation": "TimeInterval with null values",
-        "specialization": {
-            "min": null,
-            "max": null,
-            "type": "TimeInterval"
-        }
-    },
-    {
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "specialization": {"type": "Package"}
-    },
-    {
-        "sysmlid": "viewNull",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "viewNull",
-        "documentation": "View with null values",
-        "specialization": {"type": "View"}
     },
     {
         "sysmlid": "connectorNull",
@@ -210,6 +150,12 @@
         }
     },
     {
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "specialization": {"type": "Package"}
+    },
+    {
         "sysmlid": "valueSpecificationNull",
         "editable": true,
         "creator": "admin",
@@ -219,21 +165,74 @@
         "specialization": {"type": "ValueSpecification"}
     },
     {
-        "sysmlid": "propertyNull",
+        "sysmlid": "too_many_bugs",
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
-        "name": "propertyNull",
-        "documentation": "Property with null values",
         "specialization": {
             "propertyType": null,
             "isSlot": false,
             "isDerived": false,
-            "value": [{
-                "string": "dlam_string",
-                "type": "LiteralString"
-            }],
+            "value": [{"type": "LiteralReal"}],
             "type": "Property"
+        }
+    },
+    {
+        "sysmlid": "instanceValueNull",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "instanceValueNull",
+        "documentation": "InstanceValue with null values",
+        "specialization": {
+            "instance": null,
+            "type": "InstanceValue"
+        }
+    },
+    {
+        "sysmlid": "holding_bin_123456",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "holding_bin",
+        "specialization": {"type": "Package"}
+    },
+    {
+        "sysmlid": "instanceSpecificationNull",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "instanceSpecificationNull",
+        "documentation": "InstanceSpecification with null values",
+        "specialization": {
+            "slots": ["elementValueNull"],
+            "classifier": ["propertyNull"],
+            "type": "InstanceSpecification"
+        }
+    },
+    {
+        "sysmlid": "elementValueNull",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "elementValueNull",
+        "documentation": "ElementValue with null values",
+        "specialization": {
+            "element": null,
+            "type": "ElementValue"
+        }
+    },
+    {
+        "sysmlid": "timeIntervalNull",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "timeIntervalNull",
+        "documentation": "TimeInterval with null values",
+        "specialization": {
+            "min": null,
+            "max": null,
+            "type": "TimeInterval"
         }
     }
 ]}

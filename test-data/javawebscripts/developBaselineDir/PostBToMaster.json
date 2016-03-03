@@ -10,7 +10,6 @@
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
-        "name": "b",
         "documentation": "b is b",
         "specialization": {
             "propertyType": null,
@@ -36,17 +35,17 @@
         "specialization": {"type": "Package"}
     },
     {
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "specialization": {"type": "Package"}
-    },
-    {
         "sysmlid": "holding_bin_no_site_no_project",
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
-        "name": "holding_bin_no_site_no_project",
+        "name": "holding_bin",
+        "specialization": {"type": "Package"}
+    },
+    {
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
         "specialization": {"type": "Package"}
     }
 ]}
