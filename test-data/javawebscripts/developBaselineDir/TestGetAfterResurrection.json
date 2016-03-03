@@ -3,33 +3,124 @@
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
-        "name": "",
-        "documentation": "",
-        "specialization": {
-            "source": "_17_0_2_3_e610336_1394148311476_17302_29388",
-            "target": "_17_0_2_4_f3a0363_1394142290412_487571_28478",
-            "type": "Expose"
-        }
+        "specialization": {"type": "Package"}
     },
     {
-        "sysmlid": "s1_param",
+        "sysmlid": "op_name_arg_1",
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
-        "name": "s1_param",
+        "name": "name_arg_1",
         "documentation": "",
         "specialization": {
-            "defaultValue": null,
-            "type": "Parameter"
+            "operand": [
+                {
+                    "element": "op_name_arg",
+                    "type": "ElementValue"
+                },
+                {
+                    "element": "s1_param",
+                    "type": "ElementValue"
+                }
+            ],
+            "type": "Expression"
         }
     },
     {
-        "sysmlid": "sourceId",
+        "sysmlid": "vp_expression_2",
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
-        "name": "sourceId",
-        "documentation": "source",
+        "name": "vp_expression_2",
+        "documentation": "",
+        "specialization": {
+            "operand": [
+                {
+                    "element": "op_list",
+                    "type": "ElementValue"
+                },
+                {
+                    "element": "op_name_arg_1",
+                    "type": "ElementValue"
+                },
+                {
+                    "element": "op_name_arg_2",
+                    "type": "ElementValue"
+                }
+            ],
+            "type": "Expression"
+        }
+    },
+    {
+        "sysmlid": "_17_0_2_3_e610336_1394148311476_17302_29388",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "Components",
+        "documentation": "",
+        "specialization": {"type": "View"}
+    },
+    {
+        "sysmlid": "childOfParentToDelete2",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "childOfParentToDelete2",
+        "documentation": "Child",
+        "specialization": {
+            "propertyType": null,
+            "isSlot": false,
+            "isDerived": false,
+            "value": [{
+                "string": "gg_string3",
+                "type": "LiteralString"
+            }],
+            "type": "Property"
+        }
+    },
+    {
+        "sysmlid": "too_many_bugs",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "specialization": {
+            "propertyType": null,
+            "isSlot": false,
+            "isDerived": false,
+            "value": [{"type": "LiteralReal"}],
+            "type": "Property"
+        }
+    },
+    {
+        "sysmlid": "jsonTest1",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "jsonTest1",
+        "documentation": "",
+        "specialization": {
+            "specification": {
+                "integer": 1,
+                "type": "LiteralInteger"
+            },
+            "type": "Constraint"
+        }
+    },
+    {
+        "sysmlid": "_17_0_2_4_f3a0363_1394140452779_641658_27742",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "dont care1",
+        "specialization": {"type": "Package"}
+    },
+    {
+        "sysmlid": "_17_0_2_4_f3a0363_1394141831980_671275_28387",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "radiation",
+        "documentation": "",
         "specialization": {
             "propertyType": null,
             "isSlot": false,
@@ -38,12 +129,12 @@
         }
     },
     {
-        "sysmlid": "propertyMissing",
+        "sysmlid": "302",
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
-        "name": "propertyMissing",
-        "documentation": "Property with missing propertyType and null owner",
+        "name": "302",
+        "documentation": "to",
         "specialization": {
             "propertyType": null,
             "isSlot": false,
@@ -56,39 +147,143 @@
         }
     },
     {
-        "sysmlid": "_17_0_2_3_e610336_1394148461465_93174_29599",
+        "sysmlid": "123456",
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
-        "name": "conform relationship",
+        "name": "JW_TEST2",
+    },
+    {
+        "sysmlid": "arg_ev_38307_1",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "duration_1",
         "documentation": "",
         "specialization": {
-            "source": "_17_0_2_3_e610336_1394148233838_91795_29332",
-            "target": "_17_0_2_3_e610336_1394148443742_79128_29536",
-            "type": "Conform"
+            "propertyType": null,
+            "isSlot": false,
+            "isDerived": false,
+            "value": [{
+                "integer": 10,
+                "type": "LiteralInteger"
+            }],
+            "type": "Property"
         }
     },
     {
-        "sysmlid": "BLUCamTest",
+        "sysmlid": "402",
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
-        "name": "BLUCamTest",
-        "specialization": {"type": "Package"}
+        "name": "402",
+        "documentation": "4to",
+        "specialization": {
+            "propertyType": null,
+            "isSlot": false,
+            "isDerived": false,
+            "value": [{
+                "string": "dlam_string",
+                "type": "LiteralString"
+            }],
+            "type": "Property"
+        }
     },
     {
-        "sysmlid": "notInThePast",
+        "sysmlid": "metatype1",
+        "isMetatype": true,
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
-        "name": "notInThePast",
+        "name": "metatype1",
+        "documentation": "metatype",
+        "metatypes": [
+            "target",
+            "source"
+        ],
+        "specialization": {"type": "Element"}
+    },
+    {
+        "sysmlid": "viewContents",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "viewContents",
+        "documentation": "View content",
+        "specialization": {"type": "Expression"}
+    },
+    {
+        "sysmlid": "op_param_31869",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "y",
+        "documentation": "",
+        "specialization": {"type": "Element"}
+    },
+    {
+        "sysmlid": "_17_0_2_3_e610336_1394148449252_91190_29556",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "ComponentViewPoint",
+        "documentation": "",
+        "specialization": {
+            "method": "name_list",
+            "type": "Viewpoint"
+        }
+    },
+    {
+        "sysmlid": "elementValueNull",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "elementValueNull",
+        "documentation": "ElementValue with null values",
+        "specialization": {
+            "element": null,
+            "type": "ElementValue"
+        }
+    },
+    {
+        "sysmlid": "jsonTest3",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "jsonTest3",
         "documentation": "",
         "specialization": {
             "specification": {
-                "expressionBody": ["foo8"],
-                "type": "OpaqueExpression"
+                "integer": 3,
+                "type": "LiteralInteger"
             },
             "type": "Constraint"
+        }
+    },
+    {
+        "sysmlid": "instanceValueNull",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "instanceValueNull",
+        "documentation": "InstanceValue with null values",
+        "specialization": {
+            "instance": null,
+            "type": "InstanceValue"
+        }
+    },
+    {
+        "sysmlid": "targetId",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "targetId",
+        "documentation": "target",
+        "specialization": {
+            "propertyType": null,
+            "isSlot": false,
+            "isDerived": false,
+            "type": "Property"
         }
     },
     {
@@ -107,94 +302,183 @@
         }
     },
     {
-        "sysmlid": "404",
+        "sysmlid": "_17_0_2_3_e610336_1394148233838_91795_29332",
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
-        "name": "404",
-        "documentation": "4about",
-        "specialization": {
-            "propertyType": null,
-            "isSlot": false,
-            "isDerived": false,
-            "value": [{
-                "string": "dlam_string",
-                "type": "LiteralString"
-            }],
-            "type": "Property"
-        }
+        "name": "Context",
+        "documentation": "",
+        "specialization": {"type": "View"}
     },
     {
-        "sysmlid": "x",
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
-        "name": "300",
-        "documentation": "x is x",
-        "specialization": {
-            "propertyType": null,
-            "isSlot": false,
-            "isDerived": false,
-            "value": [{
-                "string": "the x value",
-                "type": "LiteralString"
-            }],
-            "type": "Property"
-        }
+        "specialization": {"type": "Package"}
     },
     {
-        "sysmlid": "testCmed416",
+        "sysmlid": "hasAppliedMetatype1",
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
-        "name": "testName",
-        "specialization": {
-            "propertyType": null,
-            "isSlot": false,
-            "isDerived": false,
-            "type": "Property"
-        }
+        "name": "hasAppliedMetatype1",
+        "documentation": "hasAppliedMetatype",
+        "appliedMetatypes": ["metatype"],
+        "specialization": {"type": "Element"}
     },
     {
-        "sysmlid": "jsonTest2",
+        "sysmlid": "_17_0_2_4_f3a0363_1394140326296_809805_27600",
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
-        "name": "jsonTest2",
+        "name": "ContextStuffs",
+        "documentation": "",
+        "specialization": {"type": "Element"}
+    },
+    {
+        "sysmlid": "s2_param",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "s2_param",
         "documentation": "",
         "specialization": {
-            "specification": {
-                "integer": 2,
-                "type": "LiteralInteger"
-            },
-            "type": "Constraint"
+            "defaultValue": null,
+            "type": "Parameter"
         }
     },
     {
-        "sysmlid": "multDefGeneralization",
+        "sysmlid": "literalSet",
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
-        "name": "multDefGeneralization",
-        "documentation": "generalization for testing the 'redefines' attribute of a Property",
+        "name": "literalSet",
+        "documentation": "LiteralSet",
         "specialization": {
-            "source": "SomeOtherClass",
-            "target": "SomeClass",
-            "type": "Generalization"
+            "set": [
+                {
+                    "string": "I",
+                    "type": "LiteralString"
+                },
+                {
+                    "string": "Love",
+                    "type": "LiteralString"
+                },
+                {
+                    "string": "Bears",
+                    "type": "LiteralString"
+                }
+            ],
+            "setOperand": {
+                "string": "Bears",
+                "type": "LiteralString"
+            },
+            "type": "LiteralSet"
         }
     },
     {
-        "sysmlid": "targetId",
+        "sysmlid": "get_two_names",
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
-        "name": "targetId",
-        "documentation": "target",
+        "name": "get_two_names_op",
+        "documentation": "",
+        "specialization": {
+            "expression": {
+                "type": "Expression",
+                "operand": [
+                    {
+                        "element": "get_names",
+                        "type": "ElementValue"
+                    },
+                    {
+                        "element": "_17_0_2_4_f3a0363_1394141845089_115460_28389",
+                        "type": "ElementValue"
+                    },
+                    {
+                        "element": "_17_0_2_4_f3a0363_1394141831980_671275_28387",
+                        "type": "ElementValue"
+                    }
+                ]
+            },
+            "parameters": [],
+            "type": "Operation"
+        }
+    },
+    {
+        "sysmlid": "_17_0_2_4_f3a0363_1394142290412_487571_28478",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "BLUCam CubeSat A",
+        "documentation": "",
+        "specialization": {"type": "Package"}
+    },
+    {
+        "sysmlid": "y",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "Collaborator",
+        "documentation": "y is y",
         "specialization": {
             "propertyType": null,
             "isSlot": false,
             "isDerived": false,
+            "value": [{
+                "string": "the y value",
+                "type": "LiteralString"
+            }],
             "type": "Property"
+        }
+    },
+    {
+        "sysmlid": "timeIntervalNull",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "timeIntervalNull",
+        "documentation": "TimeInterval with null values",
+        "specialization": {
+            "min": null,
+            "max": null,
+            "type": "TimeInterval"
+        }
+    },
+    {
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "",
+        "documentation": "",
+        "specialization": {
+            "source": "_17_0_2_3_e610336_1394148311476_17302_29388",
+            "target": "_17_0_2_4_f3a0363_1394142290412_487571_28478",
+            "type": "Expose"
+        }
+    },
+    {
+        "sysmlid": "get_two_names_expression",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "get_two_names_expression",
+        "documentation": "",
+        "specialization": {
+            "operand": [
+                {
+                    "element": "get_names",
+                    "type": "ElementValue"
+                },
+                {
+                    "element": "_17_0_2_4_f3a0363_1394141845089_115460_28389",
+                    "type": "ElementValue"
+                },
+                {
+                    "element": "_17_0_2_4_f3a0363_1394141831980_671275_28387",
+                    "type": "ElementValue"
+                }
+            ],
+            "type": "Expression"
         }
     },
     {
@@ -234,314 +518,11 @@
         }
     },
     {
-        "sysmlid": "op_name_arg_2",
+        "sysmlid": "testCmed416",
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
-        "name": "name_arg_2",
-        "documentation": "",
-        "specialization": {
-            "operand": [
-                {
-                    "element": "op_name_arg",
-                    "type": "ElementValue"
-                },
-                {
-                    "element": "s2_param",
-                    "type": "ElementValue"
-                }
-            ],
-            "type": "Expression"
-        }
-    },
-    {
-        "sysmlid": "parentToDelete1",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "parentToDelete1",
-        "documentation": "Parent 1",
-        "specialization": {
-            "propertyType": null,
-            "isSlot": false,
-            "isDerived": false,
-            "value": [],
-            "type": "Property"
-        }
-    },
-    {
-        "sysmlid": "elementValueNull",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "elementValueNull",
-        "documentation": "ElementValue with null values",
-        "specialization": {
-            "element": null,
-            "type": "ElementValue"
-        }
-    },
-    {
-        "sysmlid": "viewpointNull",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "viewpointNull",
-        "documentation": "Viewpoint with null values",
-        "specialization": {
-            "method": null,
-            "type": "Viewpoint"
-        }
-    },
-    {
-        "sysmlid": "_17_0_2_4_f3a0363_1394141831980_671275_28387",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "radiation",
-        "documentation": "",
-        "specialization": {
-            "propertyType": null,
-            "isSlot": false,
-            "isDerived": false,
-            "type": "Property"
-        }
-    },
-    {
-        "sysmlid": "instanceValueNull",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "instanceValueNull",
-        "documentation": "InstanceValue with null values",
-        "specialization": {
-            "instance": null,
-            "type": "InstanceValue"
-        }
-    },
-    {
-        "sysmlid": "_17_0_2_3_e610336_1394148233838_91795_29332",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "Context",
-        "documentation": "",
-        "specialization": {"type": "View"}
-    },
-    {
-        "sysmlid": "holding_bin_123456",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "holding_bin",
-        "specialization": {"type": "Package"}
-    },
-    {
-        "sysmlid": "vp_expression_2",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "vp_expression_2",
-        "documentation": "",
-        "specialization": {
-            "operand": [
-                {
-                    "element": "op_list",
-                    "type": "ElementValue"
-                },
-                {
-                    "element": "op_name_arg_1",
-                    "type": "ElementValue"
-                },
-                {
-                    "element": "op_name_arg_2",
-                    "type": "ElementValue"
-                }
-            ],
-            "type": "Expression"
-        }
-    },
-    {
-        "sysmlid": "jsonTest4",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "jsonTest4",
-        "documentation": "",
-        "specialization": {
-            "specification": {
-                "expressionBody": [
-                    "hello",
-                    "there"
-                ],
-                "type": "OpaqueExpression"
-            },
-            "type": "Constraint"
-        }
-    },
-    {
-        "sysmlid": "parameterNull",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "parameterNull",
-        "documentation": "Parameter with null values",
-        "specialization": {
-            "defaultValue": null,
-            "type": "Parameter"
-        }
-    },
-    {
-        "sysmlid": "notFoundTest",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "notFoundTest",
-        "documentation": "",
-        "specialization": {
-            "specification": {
-                "expressionBody": ["foo8"],
-                "type": "OpaqueExpression"
-            },
-            "type": "Constraint"
-        }
-    },
-    {
-        "sysmlid": "op_param_31867",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "result",
-        "documentation": "",
-        "specialization": {"type": "Element"}
-    },
-    {
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "specialization": {"type": "Package"}
-    },
-    {
-        "sysmlid": "600",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "600",
-        "documentation": "element values",
-        "specialization": {
-            "propertyType": null,
-            "isSlot": false,
-            "isDerived": false,
-            "value": [
-                {
-                    "element": "300",
-                    "type": "ElementValue"
-                },
-                {
-                    "element": "302",
-                    "type": "ElementValue"
-                }
-            ],
-            "type": "Property"
-        }
-    },
-    {
-        "sysmlid": "get_names",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "get_names_op",
-        "documentation": "",
-        "specialization": {
-            "expression": {
-                "type": "Expression",
-                "operand": [
-                    {
-                        "element": "op_list",
-                        "type": "ElementValue"
-                    },
-                    {
-                        "element": "op_name_arg_1",
-                        "type": "ElementValue"
-                    },
-                    {
-                        "element": "op_name_arg_2",
-                        "type": "ElementValue"
-                    }
-                ]
-            },
-            "parameters": [
-                "s1_param",
-                "s2_param"
-            ],
-            "type": "Operation"
-        }
-    },
-    {
-        "sysmlid": "303",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "303",
-        "documentation": "talk",
-        "specialization": {
-            "propertyType": null,
-            "isSlot": false,
-            "isDerived": false,
-            "value": [{
-                "string": "dlam_string",
-                "type": "LiteralString"
-            }],
-            "type": "Property"
-        }
-    },
-    {
-        "sysmlid": "500",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "500",
-        "documentation": "directed_relationship2",
-        "specialization": {
-            "source": "303",
-            "target": "304",
-            "type": "DirectedRelationship"
-        }
-    },
-    {
-        "sysmlid": "viewContents",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "viewContents",
-        "documentation": "View content",
-        "specialization": {"type": "Expression"}
-    },
-    {
-        "sysmlid": "_17_0_2_4_f3a0363_1394140326296_809805_27600",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "ContextStuffs",
-        "documentation": "",
-        "specialization": {"type": "Element"}
-    },
-    {
-        "sysmlid": "op_param_31868",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "x",
-        "documentation": "",
-        "specialization": {"type": "Element"}
-    },
-    {
-        "sysmlid": "_17_0_2_4_f3a0363_1394141845089_115460_28389",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "ionosphere",
-        "documentation": "",
+        "name": "testName",
         "specialization": {
             "propertyType": null,
             "isSlot": false,
@@ -563,78 +544,18 @@
         }
     },
     {
-        "sysmlid": "402",
+        "sysmlid": "sourceId",
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
-        "name": "402",
-        "documentation": "4to",
+        "name": "sourceId",
+        "documentation": "source",
         "specialization": {
-            "propertyType": null,
-            "isSlot": false,
-            "isDerived": false,
-            "value": [{
-                "string": "dlam_string",
-                "type": "LiteralString"
-            }],
-            "type": "Property"
-        }
-    },
-    {
-        "sysmlid": "md",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "md",
-        "documentation": "Magic Draw Meta-Data",
-        "specialization": {
-            "type": "MagicDrawData",
-            "mdData": "A blob of meta-data"
-        }
-    },
-    {
-        "sysmlid": "connectorSource",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "connectorSource",
-        "documentation": "Connector source",
-        "specialization": {
-            "upper": {
-                "string": "lower!",
-                "type": "LiteralString"
-            },
-            "lower": {
-                "string": "lower!",
-                "type": "LiteralString"
-            },
             "propertyType": null,
             "isSlot": false,
             "isDerived": false,
             "type": "Property"
         }
-    },
-    {
-        "sysmlid": "timeIntervalNull",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "timeIntervalNull",
-        "documentation": "TimeInterval with null values",
-        "specialization": {
-            "min": null,
-            "max": null,
-            "type": "TimeInterval"
-        }
-    },
-    {
-        "sysmlid": "multRedefPackage",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "multRedefPackage",
-        "documentation": "package for testing multiplicity and redefines attributes of Property",
-        "specialization": {"type": "Package"}
     },
     {
         "sysmlid": "name_list",
@@ -675,27 +596,19 @@
         }
     },
     {
-        "sysmlid": "123456",
+        "sysmlid": "notFoundTest",
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
-        "name": "JW_TEST2",
-    },
-    {
-        "sysmlid": "notFound",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "specialization": {"type": "Element"}
-    },
-    {
-        "sysmlid": "SomeClass",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "SomeClass",
-        "documentation": "class for testing the 'redefines' attribute of a Property",
-        "specialization": {"type": "Element"}
+        "name": "notFoundTest",
+        "documentation": "",
+        "specialization": {
+            "specification": {
+                "expressionBody": ["foo8"],
+                "type": "OpaqueExpression"
+            },
+            "type": "Constraint"
+        }
     },
     {
         "sysmlid": "connector",
@@ -732,6 +645,780 @@
             },
             "connectorKind": "BINDING",
             "type": "Connector"
+        }
+    },
+    {
+        "sysmlid": "_17_0_2_3_e610336_1394148461465_93174_29599",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "conform relationship",
+        "documentation": "",
+        "specialization": {
+            "source": "_17_0_2_3_e610336_1394148233838_91795_29332",
+            "target": "_17_0_2_3_e610336_1394148443742_79128_29536",
+            "type": "Conform"
+        }
+    },
+    {
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "specialization": {"type": "Package"}
+    },
+    {
+        "sysmlid": "association",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "association",
+        "documentation": "association",
+        "specialization": {
+            "targetAggregation": "SHARED",
+            "source": "sourceId",
+            "sourceAggregation": "COMPOSITE",
+            "target": "targetId",
+            "ownedEnd": ["AssocOwnedEnd"],
+            "type": "Association"
+        }
+    },
+    {
+        "sysmlid": "characterizes",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "characterizes",
+        "documentation": "Characterizes",
+        "specialization": {
+            "source": "sourceId",
+            "target": "targetId",
+            "type": "Characterizes"
+        }
+    },
+    {
+        "sysmlid": "op_name_arg_2",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "name_arg_2",
+        "documentation": "",
+        "specialization": {
+            "operand": [
+                {
+                    "element": "op_name_arg",
+                    "type": "ElementValue"
+                },
+                {
+                    "element": "s2_param",
+                    "type": "ElementValue"
+                }
+            ],
+            "type": "Expression"
+        }
+    },
+    {
+        "sysmlid": "op_ev_31835",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "GreaterEquals",
+        "documentation": "",
+        "specialization": {
+            "parameters": [
+                "op_param_31867",
+                "op_param_31868",
+                "op_param_31869"
+            ],
+            "type": "Operation"
+        }
+    },
+    {
+        "sysmlid": "op_param_31867",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "result",
+        "documentation": "",
+        "specialization": {"type": "Element"}
+    },
+    {
+        "sysmlid": "instanceSpecificationNull",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "instanceSpecificationNull",
+        "documentation": "InstanceSpecification with null values",
+        "specialization": {
+            "slots": ["elementValueNull"],
+            "classifier": ["propertyNull"],
+            "type": "InstanceSpecification"
+        }
+    },
+    {
+        "sysmlid": "arg_ev_38307",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "duration",
+        "documentation": "",
+        "specialization": {
+            "propertyType": null,
+            "isSlot": false,
+            "isDerived": false,
+            "value": [{
+                "integer": 22,
+                "type": "LiteralInteger"
+            }],
+            "type": "Property"
+        }
+    },
+    {
+        "sysmlid": "301",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "301",
+        "documentation": "else",
+        "specialization": {
+            "view2view": [{
+                "childrenViews": [
+                    "301",
+                    "302"
+                ],
+                "sysmlid": "301"
+            }],
+            "childrenViews": ["304"],
+            "displayedElements": [
+                "301",
+                "302",
+                "303"
+            ],
+            "allowedElements": [
+                "301",
+                "302",
+                "303"
+            ],
+            "noSections": ["302"],
+            "contains": [{
+                "sourceType": "reference",
+                "source": "301",
+                "sourceProperty": "documentation",
+                "type": "Paragraph"
+            }],
+            "type": "Product"
+        }
+    },
+    {
+        "sysmlid": "303",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "303",
+        "documentation": "talk",
+        "specialization": {
+            "propertyType": null,
+            "isSlot": false,
+            "isDerived": false,
+            "value": [{
+                "string": "dlam_string",
+                "type": "LiteralString"
+            }],
+            "type": "Property"
+        }
+    },
+    {
+        "sysmlid": "_17_0_2_3_e610336_1394148443742_79128_29536",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "ContextViewpoint",
+        "documentation": "",
+        "specialization": {
+            "method": "get_two_names",
+            "type": "Viewpoint"
+        }
+    },
+    {
+        "sysmlid": "403",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "403",
+        "documentation": "4talk",
+        "specialization": {
+            "propertyType": null,
+            "isSlot": false,
+            "isDerived": false,
+            "value": [{
+                "string": "dlam_string",
+                "type": "LiteralString"
+            }],
+            "type": "Property"
+        }
+    },
+    {
+        "sysmlid": "get_names",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "get_names_op",
+        "documentation": "",
+        "specialization": {
+            "expression": {
+                "type": "Expression",
+                "operand": [
+                    {
+                        "element": "op_list",
+                        "type": "ElementValue"
+                    },
+                    {
+                        "element": "op_name_arg_1",
+                        "type": "ElementValue"
+                    },
+                    {
+                        "element": "op_name_arg_2",
+                        "type": "ElementValue"
+                    }
+                ]
+            },
+            "parameters": [
+                "s1_param",
+                "s2_param"
+            ],
+            "type": "Operation"
+        }
+    },
+    {
+        "sysmlid": "AssocOwnedEnd",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "AssocOwnedEnd",
+        "documentation": "Associations's owned end",
+        "specialization": {
+            "propertyType": null,
+            "isSlot": false,
+            "isDerived": false,
+            "type": "Property"
+        }
+    },
+    {
+        "sysmlid": "md",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "md",
+        "documentation": "Magic Draw Meta-Data",
+        "specialization": {
+            "type": "MagicDrawData",
+            "mdData": "A blob of meta-data"
+        }
+    },
+    {
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "expose relationship",
+        "documentation": "",
+        "specialization": {
+            "source": "_17_0_2_3_e610336_1394148233838_91795_29332",
+            "target": "_17_0_2_4_f3a0363_1394140326296_809805_27600",
+            "type": "Expose"
+        }
+    },
+    {
+        "sysmlid": "BLUCamTest",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "BLUCamTest",
+        "specialization": {"type": "Package"}
+    },
+    {
+        "sysmlid": "arg_ev_33001",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "initialDuration",
+        "documentation": "",
+        "specialization": {
+            "propertyType": null,
+            "isSlot": false,
+            "isDerived": false,
+            "value": [{
+                "integer": 11,
+                "type": "LiteralInteger"
+            }],
+            "type": "Property"
+        }
+    },
+    {
+        "sysmlid": "x",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "300",
+        "documentation": "x is x",
+        "specialization": {
+            "propertyType": null,
+            "isSlot": false,
+            "isDerived": false,
+            "value": [{
+                "string": "the x value",
+                "type": "LiteralString"
+            }],
+            "type": "Property"
+        }
+    },
+    {
+        "sysmlid": "notFound",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "specialization": {"type": "Element"}
+    },
+    {
+        "sysmlid": "connectorTarget",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "connectorTarget",
+        "documentation": "Connector target",
+        "specialization": {
+            "propertyType": null,
+            "isSlot": false,
+            "isDerived": false,
+            "type": "Property"
+        }
+    },
+    {
+        "sysmlid": "valueSpecificationNull",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "valueSpecificationNull",
+        "documentation": "ValueSpecification with null values",
+        "specialization": {"type": "ValueSpecification"}
+    },
+    {
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "specialization": {"type": "Package"}
+    },
+    {
+        "sysmlid": "propertyMissing",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "propertyMissing",
+        "documentation": "Property with missing propertyType and null owner",
+        "specialization": {
+            "propertyType": null,
+            "isSlot": false,
+            "isDerived": false,
+            "value": [{
+                "string": "dlam_string",
+                "type": "LiteralString"
+            }],
+            "type": "Property"
+        }
+    },
+    {
+        "sysmlid": "directedRelationshipNull",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "directedRelationshipNull",
+        "documentation": "directed_relationship with null values",
+        "specialization": {
+            "source": null,
+            "target": null,
+            "type": "DirectedRelationship"
+        }
+    },
+    {
+        "sysmlid": "propertyOfSomeClass",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "propertyOfSomeClass",
+        "documentation": "Property for testing the 'redefines' attribute of a Property",
+        "specialization": {
+            "propertyType": null,
+            "isSlot": false,
+            "isDerived": false,
+            "value": [{
+                "string": "a string value",
+                "type": "LiteralString"
+            }],
+            "type": "Property"
+        }
+    },
+    {
+        "sysmlid": "jsonTest2",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "jsonTest2",
+        "documentation": "",
+        "specialization": {
+            "specification": {
+                "integer": 2,
+                "type": "LiteralInteger"
+            },
+            "type": "Constraint"
+        }
+    },
+    {
+        "sysmlid": "propertyNull",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "propertyNull",
+        "documentation": "Property with null values",
+        "specialization": {
+            "propertyType": null,
+            "isSlot": false,
+            "isDerived": false,
+            "value": [{
+                "string": "dlam_string",
+                "type": "LiteralString"
+            }],
+            "type": "Property"
+        }
+    },
+    {
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "specialization": {"type": "Package"}
+    },
+    {
+        "sysmlid": "jsonTest4",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "jsonTest4",
+        "documentation": "",
+        "specialization": {
+            "specification": {
+                "expressionBody": [
+                    "hello",
+                    "there"
+                ],
+                "type": "OpaqueExpression"
+            },
+            "type": "Constraint"
+        }
+    },
+    {
+        "sysmlid": "notFound2",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "specialization": {"type": "Element"}
+    },
+    {
+        "sysmlid": "600",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "600",
+        "documentation": "element values",
+        "specialization": {
+            "propertyType": null,
+            "isSlot": false,
+            "isDerived": false,
+            "value": [
+                {
+                    "element": "300",
+                    "type": "ElementValue"
+                },
+                {
+                    "element": "302",
+                    "type": "ElementValue"
+                }
+            ],
+            "type": "Property"
+        }
+    },
+    {
+        "sysmlid": "305",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "305",
+        "documentation": "no owner",
+        "specialization": {
+            "propertyType": null,
+            "isSlot": false,
+            "isDerived": false,
+            "value": [{
+                "string": "dlam_string",
+                "type": "LiteralString"
+            }],
+            "type": "Property"
+        }
+    },
+    {
+        "sysmlid": "viewNull",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "viewNull",
+        "documentation": "View with null values",
+        "specialization": {"type": "View"}
+    },
+    {
+        "sysmlid": "multDefGeneralization",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "multDefGeneralization",
+        "documentation": "generalization for testing the 'redefines' attribute of a Property",
+        "specialization": {
+            "source": "SomeOtherClass",
+            "target": "SomeClass",
+            "type": "Generalization"
+        }
+    },
+    {
+        "sysmlid": "viewpointNull",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "viewpointNull",
+        "documentation": "Viewpoint with null values",
+        "specialization": {
+            "method": null,
+            "type": "Viewpoint"
+        }
+    },
+    {
+        "sysmlid": "op_param_31868",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "x",
+        "documentation": "",
+        "specialization": {"type": "Element"}
+    },
+    {
+        "sysmlid": "SomeClass",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "SomeClass",
+        "documentation": "class for testing the 'redefines' attribute of a Property",
+        "specialization": {"type": "Element"}
+    },
+    {
+        "sysmlid": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "dont care2",
+        "specialization": {"type": "Package"}
+    },
+    {
+        "sysmlid": "viewWithContents",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "viewWithContents",
+        "documentation": "View updates",
+        "specialization": {
+            "contents": {"type": "Expression"},
+            "type": "View"
+        }
+    },
+    {
+        "sysmlid": "connectorSource",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "connectorSource",
+        "documentation": "Connector source",
+        "specialization": {
+            "upper": {
+                "string": "lower!",
+                "type": "LiteralString"
+            },
+            "lower": {
+                "string": "lower!",
+                "type": "LiteralString"
+            },
+            "propertyType": null,
+            "isSlot": false,
+            "isDerived": false,
+            "type": "Property"
+        }
+    },
+    {
+        "sysmlid": "500",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "500",
+        "documentation": "directed_relationship2",
+        "specialization": {
+            "source": "303",
+            "target": "304",
+            "type": "DirectedRelationship"
+        }
+    },
+    {
+        "sysmlid": "multRedefProp",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "multRedefProp",
+        "documentation": "for testing multiplicity and redefines attributes of Property",
+        "specialization": {
+            "multiplicityMax": -1,
+            "propertyType": null,
+            "isSlot": false,
+            "isDerived": false,
+            "value": [{
+                "string": "another string value",
+                "type": "LiteralString"
+            }],
+            "multiplicityMin": 1,
+            "redefines": ["propertyOfSomeClass"],
+            "type": "Property"
+        }
+    },
+    {
+        "sysmlid": "_17_0_2_4_f3a0363_1394141845089_115460_28389",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "ionosphere",
+        "documentation": "",
+        "specialization": {
+            "propertyType": null,
+            "isSlot": false,
+            "isDerived": false,
+            "type": "Property"
+        }
+    },
+    {
+        "sysmlid": "parentToDelete1",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "parentToDelete1",
+        "documentation": "Parent 1",
+        "specialization": {
+            "propertyType": null,
+            "isSlot": false,
+            "isDerived": false,
+            "value": [],
+            "type": "Property"
+        }
+    },
+    {
+        "sysmlid": "SomeOtherClass",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "SomeOtherClass",
+        "documentation": "another class for testing the 'redefines' attribute of a Property",
+        "specialization": {"type": "Element"}
+    },
+    {
+        "sysmlid": "parameterNull",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "parameterNull",
+        "documentation": "Parameter with null values",
+        "specialization": {
+            "defaultValue": null,
+            "type": "Parameter"
+        }
+    },
+    {
+        "sysmlid": "notFoundTest2",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "notFoundTest2",
+        "documentation": "",
+        "specialization": {
+            "specification": {
+                "expressionBody": ["foo8"],
+                "type": "OpaqueExpression"
+            },
+            "type": "Constraint"
+        }
+    },
+    {
+        "sysmlid": "_17_0_2_3_e610336_1394148464681_90735_29608",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "",
+        "documentation": "",
+        "specialization": {
+            "source": "_17_0_2_3_e610336_1394148311476_17302_29388",
+            "target": "_17_0_2_3_e610336_1394148449252_91190_29556",
+            "type": "Conform"
+        }
+    },
+    {
+        "sysmlid": "s1_param",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "s1_param",
+        "documentation": "",
+        "specialization": {
+            "defaultValue": null,
+            "type": "Parameter"
+        }
+    },
+    {
+        "sysmlid": "multRedefPackage",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "multRedefPackage",
+        "documentation": "package for testing multiplicity and redefines attributes of Property",
+        "specialization": {"type": "Package"}
+    },
+    {
+        "sysmlid": "300",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "300",
+        "documentation": "something",
+        "specialization": {
+            "propertyType": null,
+            "isSlot": false,
+            "isDerived": false,
+            "value": [{
+                "string": "dlam_string",
+                "type": "LiteralString"
+            }],
+            "type": "Property"
+        }
+    },
+    {
+        "sysmlid": "notInThePast",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "notInThePast",
+        "documentation": "",
+        "specialization": {
+            "specification": {
+                "expressionBody": ["foo8"],
+                "type": "OpaqueExpression"
+            },
+            "type": "Constraint"
         }
     },
     {
@@ -772,79 +1459,12 @@
         }
     },
     {
-        "sysmlid": "op_param_31869",
+        "sysmlid": "404",
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
-        "name": "y",
-        "documentation": "",
-        "specialization": {"type": "Element"}
-    },
-    {
-        "sysmlid": "valueSpecificationNull",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "valueSpecificationNull",
-        "documentation": "ValueSpecification with null values",
-        "specialization": {"type": "ValueSpecification"}
-    },
-    {
-        "sysmlid": "directedRelationshipNull",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "directedRelationshipNull",
-        "documentation": "directed_relationship with null values",
-        "specialization": {
-            "source": null,
-            "target": null,
-            "type": "DirectedRelationship"
-        }
-    },
-    {
-        "sysmlid": "arg_ev_33001",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "initialDuration",
-        "documentation": "",
-        "specialization": {
-            "propertyType": null,
-            "isSlot": false,
-            "isDerived": false,
-            "value": [{
-                "integer": 11,
-                "type": "LiteralInteger"
-            }],
-            "type": "Property"
-        }
-    },
-    {
-        "sysmlid": "propertyOfSomeClass",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "propertyOfSomeClass",
-        "documentation": "Property for testing the 'redefines' attribute of a Property",
-        "specialization": {
-            "propertyType": null,
-            "isSlot": false,
-            "isDerived": false,
-            "value": [{
-                "string": "a string value",
-                "type": "LiteralString"
-            }],
-            "type": "Property"
-        }
-    },
-    {
-        "sysmlid": "304",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "304",
-        "documentation": "about",
+        "name": "404",
+        "documentation": "4about",
         "specialization": {
             "propertyType": null,
             "isSlot": false,
@@ -857,326 +1477,11 @@
         }
     },
     {
-        "sysmlid": "_17_0_2_4_f3a0363_1394142290412_487571_28478",
+        "sysmlid": "found",
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
-        "name": "BLUCam CubeSat A",
-        "documentation": "",
-        "specialization": {"type": "Package"}
-    },
-    {
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "specialization": {"type": "Package"}
-    },
-    {
-        "sysmlid": "_17_0_2_3_e610336_1394148449252_91190_29556",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "ComponentViewPoint",
-        "documentation": "",
-        "specialization": {
-            "method": "name_list",
-            "type": "Viewpoint"
-        }
-    },
-    {
-        "sysmlid": "s2_param",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "s2_param",
-        "documentation": "",
-        "specialization": {
-            "defaultValue": null,
-            "type": "Parameter"
-        }
-    },
-    {
-        "sysmlid": "hasAppliedMetatype1",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "hasAppliedMetatype1",
-        "documentation": "hasAppliedMetatype",
-        "appliedMetatypes": ["metatype"],
-        "specialization": {"type": "Element"}
-    },
-    {
-        "sysmlid": "op_ev_31835",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "GreaterEquals",
-        "documentation": "",
-        "specialization": {
-            "parameters": [
-                "op_param_31867",
-                "op_param_31868",
-                "op_param_31869"
-            ],
-            "type": "Operation"
-        }
-    },
-    {
-        "sysmlid": "op_name_arg_1",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "name_arg_1",
-        "documentation": "",
-        "specialization": {
-            "operand": [
-                {
-                    "element": "op_name_arg",
-                    "type": "ElementValue"
-                },
-                {
-                    "element": "s1_param",
-                    "type": "ElementValue"
-                }
-            ],
-            "type": "Expression"
-        }
-    },
-    {
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "expose relationship",
-        "documentation": "",
-        "specialization": {
-            "source": "_17_0_2_3_e610336_1394148233838_91795_29332",
-            "target": "_17_0_2_4_f3a0363_1394140326296_809805_27600",
-            "type": "Expose"
-        }
-    },
-    {
-        "sysmlid": "metatype1",
-        "isMetatype": true,
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "metatype1",
-        "documentation": "metatype",
-        "metatypes": [
-            "target",
-            "source"
-        ],
-        "specialization": {"type": "Element"}
-    },
-    {
-        "sysmlid": "jsonTest3",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "jsonTest3",
-        "documentation": "",
-        "specialization": {
-            "specification": {
-                "integer": 3,
-                "type": "LiteralInteger"
-            },
-            "type": "Constraint"
-        }
-    },
-    {
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "specialization": {"type": "Package"}
-    },
-    {
-        "sysmlid": "SomeOtherClass",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "SomeOtherClass",
-        "documentation": "another class for testing the 'redefines' attribute of a Property",
-        "specialization": {"type": "Element"}
-    },
-    {
-        "sysmlid": "301",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "301",
-        "documentation": "else",
-        "specialization": {
-            "view2view": [{
-                "childrenViews": [
-                    "301",
-                    "302"
-                ],
-                "sysmlid": "301"
-            }],
-            "childrenViews": ["304"],
-            "displayedElements": [
-                "301",
-                "302",
-                "303"
-            ],
-            "allowedElements": [
-                "301",
-                "302",
-                "303"
-            ],
-            "noSections": ["302"],
-            "contains": [{
-                "sourceType": "reference",
-                "source": "301",
-                "sourceProperty": "documentation",
-                "type": "Paragraph"
-            }],
-            "type": "Product"
-        }
-    },
-    {
-        "sysmlid": "305",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "305",
-        "documentation": "no owner",
-        "specialization": {
-            "propertyType": null,
-            "isSlot": false,
-            "isDerived": false,
-            "value": [{
-                "string": "dlam_string",
-                "type": "LiteralString"
-            }],
-            "type": "Property"
-        }
-    },
-    {
-        "sysmlid": "childOfParentToDelete2",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "childOfParentToDelete2",
-        "documentation": "Child",
-        "specialization": {
-            "propertyType": null,
-            "isSlot": false,
-            "isDerived": false,
-            "value": [{
-                "string": "gg_string3",
-                "type": "LiteralString"
-            }],
-            "type": "Property"
-        }
-    },
-    {
-        "sysmlid": "notFound2",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "specialization": {"type": "Element"}
-    },
-    {
-        "sysmlid": "300",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "300",
-        "documentation": "something",
-        "specialization": {
-            "propertyType": null,
-            "isSlot": false,
-            "isDerived": false,
-            "value": [{
-                "string": "dlam_string",
-                "type": "LiteralString"
-            }],
-            "type": "Property"
-        }
-    },
-    {
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "specialization": {"type": "Package"}
-    },
-    {
-        "sysmlid": "too_many_bugs",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "specialization": {
-            "propertyType": null,
-            "isSlot": false,
-            "isDerived": false,
-            "value": [{"type": "LiteralReal"}],
-            "type": "Property"
-        }
-    },
-    {
-        "sysmlid": "403",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "403",
-        "documentation": "4talk",
-        "specialization": {
-            "propertyType": null,
-            "isSlot": false,
-            "isDerived": false,
-            "value": [{
-                "string": "dlam_string",
-                "type": "LiteralString"
-            }],
-            "type": "Property"
-        }
-    },
-    {
-        "sysmlid": "viewWithContents",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "viewWithContents",
-        "documentation": "View updates",
-        "specialization": {
-            "contents": {"type": "Expression"},
-            "type": "View"
-        }
-    },
-    {
-        "sysmlid": "arg_ev_38307_1",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "duration_1",
-        "documentation": "",
-        "specialization": {
-            "propertyType": null,
-            "isSlot": false,
-            "isDerived": false,
-            "value": [{
-                "integer": 10,
-                "type": "LiteralInteger"
-            }],
-            "type": "Property"
-        }
-    },
-    {
-        "sysmlid": "dlam",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "dlam",
-        "documentation": "to make compatible with value specs (this is just a Element)",
-        "specialization": {"type": "Element"}
-    },
-    {
-        "sysmlid": "notFoundTest2",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "notFoundTest2",
+        "name": "found",
         "documentation": "",
         "specialization": {
             "specification": {
@@ -1184,31 +1489,6 @@
                 "type": "OpaqueExpression"
             },
             "type": "Constraint"
-        }
-    },
-    {
-        "sysmlid": "get_two_names_expression",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "get_two_names_expression",
-        "documentation": "",
-        "specialization": {
-            "operand": [
-                {
-                    "element": "get_names",
-                    "type": "ElementValue"
-                },
-                {
-                    "element": "_17_0_2_4_f3a0363_1394141845089_115460_28389",
-                    "type": "ElementValue"
-                },
-                {
-                    "element": "_17_0_2_4_f3a0363_1394141831980_671275_28387",
-                    "type": "ElementValue"
-                }
-            ],
-            "type": "Expression"
         }
     },
     {
@@ -1240,250 +1520,13 @@
         }
     },
     {
-        "sysmlid": "propertyNull",
+        "sysmlid": "dlam",
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
-        "name": "propertyNull",
-        "documentation": "Property with null values",
-        "specialization": {
-            "propertyType": null,
-            "isSlot": false,
-            "isDerived": false,
-            "value": [{
-                "string": "dlam_string",
-                "type": "LiteralString"
-            }],
-            "type": "Property"
-        }
-    },
-    {
-        "sysmlid": "_17_0_2_4_f3a0363_1394140452779_641658_27742",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "dont care1",
-        "specialization": {"type": "Package"}
-    },
-    {
-        "sysmlid": "characterizes",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "characterizes",
-        "documentation": "Characterizes",
-        "specialization": {
-            "source": "sourceId",
-            "target": "targetId",
-            "type": "Characterizes"
-        }
-    },
-    {
-        "sysmlid": "multRedefProp",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "multRedefProp",
-        "documentation": "for testing multiplicity and redefines attributes of Property",
-        "specialization": {
-            "multiplicityMax": -1,
-            "propertyType": null,
-            "isSlot": false,
-            "isDerived": false,
-            "value": [{
-                "string": "another string value",
-                "type": "LiteralString"
-            }],
-            "multiplicityMin": 1,
-            "redefines": ["propertyOfSomeClass"],
-            "type": "Property"
-        }
-    },
-    {
-        "sysmlid": "viewNull",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "viewNull",
-        "documentation": "View with null values",
-        "specialization": {"type": "View"}
-    },
-    {
-        "sysmlid": "found",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "found",
-        "documentation": "",
-        "specialization": {
-            "specification": {
-                "expressionBody": ["foo8"],
-                "type": "OpaqueExpression"
-            },
-            "type": "Constraint"
-        }
-    },
-    {
-        "sysmlid": "jsonTest1",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "jsonTest1",
-        "documentation": "",
-        "specialization": {
-            "specification": {
-                "integer": 1,
-                "type": "LiteralInteger"
-            },
-            "type": "Constraint"
-        }
-    },
-    {
-        "sysmlid": "association",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "association",
-        "documentation": "association",
-        "specialization": {
-            "targetAggregation": "SHARED",
-            "source": "sourceId",
-            "sourceAggregation": "COMPOSITE",
-            "target": "targetId",
-            "ownedEnd": ["AssocOwnedEnd"],
-            "type": "Association"
-        }
-    },
-    {
-        "sysmlid": "AssocOwnedEnd",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "AssocOwnedEnd",
-        "documentation": "Associations's owned end",
-        "specialization": {
-            "propertyType": null,
-            "isSlot": false,
-            "isDerived": false,
-            "type": "Property"
-        }
-    },
-    {
-        "sysmlid": "_17_0_2_3_e610336_1394148464681_90735_29608",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "",
-        "documentation": "",
-        "specialization": {
-            "source": "_17_0_2_3_e610336_1394148311476_17302_29388",
-            "target": "_17_0_2_3_e610336_1394148449252_91190_29556",
-            "type": "Conform"
-        }
-    },
-    {
-        "sysmlid": "arg_ev_38307",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "duration",
-        "documentation": "",
-        "specialization": {
-            "propertyType": null,
-            "isSlot": false,
-            "isDerived": false,
-            "value": [{
-                "integer": 22,
-                "type": "LiteralInteger"
-            }],
-            "type": "Property"
-        }
-    },
-    {
-        "sysmlid": "literalSet",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "literalSet",
-        "documentation": "LiteralSet",
-        "specialization": {
-            "set": [
-                {
-                    "string": "I",
-                    "type": "LiteralString"
-                },
-                {
-                    "string": "Love",
-                    "type": "LiteralString"
-                },
-                {
-                    "string": "Bears",
-                    "type": "LiteralString"
-                }
-            ],
-            "setOperand": {
-                "string": "Bears",
-                "type": "LiteralString"
-            },
-            "type": "LiteralSet"
-        }
-    },
-    {
-        "sysmlid": "instanceSpecificationNull",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "instanceSpecificationNull",
-        "documentation": "InstanceSpecification with null values",
-        "specialization": {
-            "slots": ["elementValueNull"],
-            "classifier": ["propertyNull"],
-            "type": "InstanceSpecification"
-        }
-    },
-    {
-        "sysmlid": "connectorTarget",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "connectorTarget",
-        "documentation": "Connector target",
-        "specialization": {
-            "propertyType": null,
-            "isSlot": false,
-            "isDerived": false,
-            "type": "Property"
-        }
-    },
-    {
-        "sysmlid": "302",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "302",
-        "documentation": "to",
-        "specialization": {
-            "propertyType": null,
-            "isSlot": false,
-            "isDerived": false,
-            "value": [{
-                "string": "dlam_string",
-                "type": "LiteralString"
-            }],
-            "type": "Property"
-        }
-    },
-    {
-        "sysmlid": "_17_0_2_3_e610336_1394148443742_79128_29536",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "ContextViewpoint",
-        "documentation": "",
-        "specialization": {
-            "method": "get_two_names",
-            "type": "Viewpoint"
-        }
+        "name": "dlam",
+        "documentation": "to make compatible with value specs (this is just a Element)",
+        "specialization": {"type": "Element"}
     },
     {
         "sysmlid": "4000",
@@ -1504,67 +1547,30 @@
         }
     },
     {
-        "sysmlid": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
+        "sysmlid": "304",
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
-        "name": "dont care2",
-        "specialization": {"type": "Package"}
-    },
-    {
-        "sysmlid": "get_two_names",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "get_two_names_op",
-        "documentation": "",
-        "specialization": {
-            "expression": {
-                "type": "Expression",
-                "operand": [
-                    {
-                        "element": "get_names",
-                        "type": "ElementValue"
-                    },
-                    {
-                        "element": "_17_0_2_4_f3a0363_1394141845089_115460_28389",
-                        "type": "ElementValue"
-                    },
-                    {
-                        "element": "_17_0_2_4_f3a0363_1394141831980_671275_28387",
-                        "type": "ElementValue"
-                    }
-                ]
-            },
-            "parameters": [],
-            "type": "Operation"
-        }
-    },
-    {
-        "sysmlid": "_17_0_2_3_e610336_1394148311476_17302_29388",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "Components",
-        "documentation": "",
-        "specialization": {"type": "View"}
-    },
-    {
-        "sysmlid": "y",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "Collaborator",
-        "documentation": "y is y",
+        "name": "304",
+        "documentation": "about",
         "specialization": {
             "propertyType": null,
             "isSlot": false,
             "isDerived": false,
             "value": [{
-                "string": "the y value",
+                "string": "dlam_string",
                 "type": "LiteralString"
             }],
             "type": "Property"
         }
+    },
+    {
+        "sysmlid": "holding_bin_123456",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "holding_bin",
+        "specialization": {"type": "Package"}
     }
 ]}
 200
