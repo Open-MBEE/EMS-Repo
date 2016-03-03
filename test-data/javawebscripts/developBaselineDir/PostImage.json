@@ -6,15 +6,19 @@
         "specialization": {"type": "Package"}
     },
     {
-        "sysmlid": "f",
+        "sysmlid": "imageid",
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
-        "documentation": "f is f",
         "specialization": {
-            "source": null,
-            "target": null,
-            "type": "Expose"
+            "propertyType": null,
+            "isSlot": false,
+            "isDerived": false,
+            "value": [{
+                "string": "ws1 value2",
+                "type": "LiteralString"
+            }],
+            "type": "Property"
         }
     },
     {

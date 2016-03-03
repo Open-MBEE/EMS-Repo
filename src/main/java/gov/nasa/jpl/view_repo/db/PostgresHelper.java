@@ -497,6 +497,20 @@ public class PostgresHelper {
 		}
 	}
 
+	   public void deleteEdgesForParentNode(String sysmlId, DbEdgeTypes edgeType) {
+	        try {
+	            Node n = getNodeFromSysmlId(sysmlId);
+
+	            if (n == null)
+	                return;
+
+	            execUpdate("delete from edges" + workspaceName + " where parent = "
+	                    + n.getId() + " and edgeType = " + edgeType.getValue());
+	        } catch (Exception e) {
+	            e.printStackTrace();
+	        }
+	    }
+
 	public void deleteEdges(String parentSysmlId, String childSysmlId) {
 		try {
 			Node pn = getNodeFromSysmlId(parentSysmlId);

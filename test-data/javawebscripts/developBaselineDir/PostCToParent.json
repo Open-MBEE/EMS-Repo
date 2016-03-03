@@ -6,11 +6,22 @@
         "specialization": {"type": "Package"}
     },
     {
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "specialization": {"type": "Package"}
+    },
+    {
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "specialization": {"type": "Package"}
+    },
+    {
         "sysmlid": "c",
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
-        "name": "c",
         "documentation": "c is c",
         "specialization": {"type": "Untyped"}
     },
@@ -25,19 +36,7 @@
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
-        "name": "holding_bin_no_site_no_project",
-        "specialization": {"type": "Package"}
-    },
-    {
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "specialization": {"type": "Package"}
-    },
-    {
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
+        "name": "holding_bin",
         "specialization": {"type": "Package"}
     }
 ]}

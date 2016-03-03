@@ -212,6 +212,9 @@ public class Model2Postgres extends AbstractJavaWebScript {
 
 		int i = 0;
 
+		if (logger.isInfoEnabled()) {
+		    logger.info( "inserting nodes and creating documentation edges" );
+		}
 		if (!n.getSysmlId().endsWith( "_pkg" )) {
         		pgh.insertNode(n.getNodeRef().toString(),
         				NodeUtil.getVersionedRefId(n), n.getSysmlId());
@@ -239,7 +242,9 @@ public class Model2Postgres extends AbstractJavaWebScript {
     			}
 		}
 
-
+        if (logger.isInfoEnabled()) {
+            logger.info( "creating edges" );
+        }
 		try {
         		// traverse alfresco containment since ownedChildren may not be accurate
             for (EmsScriptNode cn : n.getChildNodes()) {
@@ -259,6 +264,11 @@ public class Model2Postgres extends AbstractJavaWebScript {
 		    logger.error( String.format("could not get children for parent %s:", n.getId()) );
 		    mnre.printStackTrace();
 		}
+
+		if (logger.isInfoEnabled()) {
+            logger.info( "completed inserting nodes" );
+        }
+
 		return i;
 	}
 

@@ -103,6 +103,11 @@ import org.apache.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.parser.Parser;
+import org.jsoup.select.Elements;
 import org.mozilla.javascript.Scriptable;
 import org.springframework.extensions.webscripts.Status;
 
@@ -898,56 +903,43 @@ public class EmsScriptNode extends ScriptNode implements
 
     public String extractAndReplaceImageData( String value, WorkspaceNode ws ) {
         if ( value == null ) return null;
-        String v = value;
-        Pattern p =
-                Pattern.compile( "(.*)<img[^>]*\\ssrc\\s*=\\s*[\"']data:image/([^;]*);\\s*base64\\s*,([^\"']*)[\"'][^>]*>(.*)",
-                                 Pattern.DOTALL );
-        while ( true ) {
-            Matcher m = p.matcher( v );
-            if ( !m.matches() ) {
-                if ( Debug.isOn() ) {
-                    Debug.outln( "no match found for v="
-                                 + v.substring( 0, Math.min( v.length(), 100 ) )
-                                 + ( v.length() > 100 ? " . . ." : "" ) + ")" );
-                }
+        
+        // use XML parser, not HTML, otherwise will embed in <html>
+        Document doc = Jsoup.parse( value, "", Parser.xmlParser() );
+        Elements images = doc.select( "img" );
+        
+        for (Element image : images) {
+            String src = image.attr( "src" );
+            
+            String DATA_IMAGE = "data:image/";
+            if ( !src.contains( DATA_IMAGE )) continue;
+            
+            String content = src.substring( src.lastIndexOf( "," ) );
+            int extStart = src.indexOf( DATA_IMAGE ) + DATA_IMAGE.length();
+            int extEnd = src.substring( extStart ).indexOf( ";" ) + extStart;
+            String extension = src.substring( extStart, extEnd );
+            String name = "img_" + System.currentTimeMillis();
+
+            // No need to pass a date since this is called in the context of
+            // updating a node, so the time is the current time (which is
+            // null).
+            EmsScriptNode artNode =
+                    findOrCreateArtifact( name, extension, content,
+                                          getSiteName( null, ws ),
+                                          "images", ws, null );
+            if ( artNode == null || !artNode.exists() ) {
+                logDebug( "Failed to pull out image data for value! " + value );
                 break;
-            } else {
-                if ( Debug.isOn() ) {
-                    Debug.outln( "match found for v="
-                                 + v.substring( 0, Math.min( v.length(), 100 ) )
-                                 + ( v.length() > 100 ? " . . ." : "" ) + ")" );
-                }
-                if ( m.groupCount() != 4 ) {
-                    if ( logger.isDebugEnabled() ) logDebug( "Expected 4 match groups, got " + m.groupCount()
-                         + "! " + m );
-                    break;
-                }
-                String extension = m.group( 2 );
-                String content = m.group( 3 );
-                String name = "img_" + System.currentTimeMillis();
-
-                // No need to pass a date since this is called in the context of
-                // updating a node, so the time is the current time (which is
-                // null).
-                EmsScriptNode artNode =
-                        findOrCreateArtifact( name, extension, content,
-                                              getSiteName( null, ws ),
-                                              "images", ws, null );
-                if ( artNode == null || !artNode.exists() ) {
-                    logDebug( "Failed to pull out image data for value! " + value );
-                    break;
-                }
-
-                String url = artNode.getUrl();
-                String link = "<img src=\"" + url + "\"/>";
-                link =
-                        link.replace( "/d/d/",
-                                      "/alfresco/service/api/node/content/" );
-                v = m.group( 1 ) + link + m.group( 4 );
             }
+
+            String url = artNode.getUrl();
+            url.replace( "/d/d/",
+                    "/alfresco/service/api/node/content/" );
+            
+            image.attr( "src", url );
         }
-        // Debug.turnOff();
-        return v;
+        
+        return doc.html();
     }
 
     public String getSiteTitle( Date dateTime, WorkspaceNode ws ) {
@@ -2325,7 +2317,9 @@ public class EmsScriptNode extends ScriptNode implements
         // again, maybe keeping track of duplicates; for example, 
         //  debugLog(String msg,
         //           StringBuffer response, Map<String, Pair< String, Integer > >responsesAndCountsByResponseId).
-        logger.debug( msg );
+        if (logger.isDebugEnabled()) {
+            logger.debug( msg );
+        }
     }
 
     /**
@@ -3570,8 +3564,17 @@ public class EmsScriptNode extends ScriptNode implements
     private Set<Pair<String, String>> getDbGraphDoc( Pair< String, String > child,
                                        String acmType, PostgresHelper pgh, Set<String> visited ) {
         Set<Pair<String, String>> result = new HashSet<Pair<String, String>>();
+
         if (visited == null) {
             visited = new HashSet<String>();
+        }
+        visited.add( child.first );
+        
+        // lets check the current child
+        EmsScriptNode childNode = new EmsScriptNode(new NodeRef(child.second), services, null);
+        if ( childNode.hasAspect( acmType )) {
+            result.add(child);
+            return result;
         }
         
         Set< Pair< String, String >> immediateParents = pgh.getImmediateParents( child.first, DbEdgeTypes.DOCUMENT );
@@ -6040,7 +6043,7 @@ public class EmsScriptNode extends ScriptNode implements
         boolean noFilter = filter == null || filter.size() == 0;
         if ( expressionStuff && ( property == null || property.length() <= 0 ) ) {
             if ( noFilter || filter.contains( "contains" ) ) {
-            	JSONArray containsJson = getView().getContainsJson(true,dateTime,ws);
+                JSONArray containsJson = getView().getContainsJson(true,dateTime,ws);
                 if ( containsJson != null && containsJson.length() > 0 ) {
                     json.put( "contains", containsJson  );
                 }
@@ -6901,7 +6904,7 @@ public class EmsScriptNode extends ScriptNode implements
                                                        false, true, false, seen );
             allRefs.addAll( moreRefs );
         };
-    	return allRefs;
+        return allRefs;
     }
 
     public ArrayList< NodeRef >

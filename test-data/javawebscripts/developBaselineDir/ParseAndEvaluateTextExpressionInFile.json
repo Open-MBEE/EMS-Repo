@@ -18,9 +18,11 @@
         "specialization": {"type": "Package"}
     },
     {
+        "sysmlid": "holding_bin_no_site_no_project",
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
+        "name": "holding_bin",
         "specialization": {"type": "Package"}
     },
     {
@@ -46,11 +48,9 @@
         }
     },
     {
-        "sysmlid": "holding_bin_no_site_no_project",
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
-        "name": "holding_bin_no_site_no_project",
         "specialization": {"type": "Package"}
     }
 ]}

@@ -110,6 +110,13 @@ public class DoorsSync extends AbstractJavaWebScript {
 
         Map<String, Object> model = new HashMap<String, Object>();
         JSONObject json = null;
+        
+        if(!NodeUtil.doorsSync) {
+            json = new JSONObject();
+            json.put("status", "DoorsSync is off");
+            model.put("res", NodeUtil.jsonToString(json));
+            return model;
+        }
 
         try {
             //logger.setLevel(Level.DEBUG);
