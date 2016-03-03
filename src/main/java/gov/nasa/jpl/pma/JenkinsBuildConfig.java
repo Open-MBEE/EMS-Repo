@@ -233,6 +233,9 @@ public class JenkinsBuildConfig {
 
             if ( Utils.isNullOrEmpty( s ) ) {
                 File file = FileUtils.findFile( "docwebJenkinsScript.sh" );
+               
+                String curDir = System.getProperty( "user.dir" );
+                System.out.println( curDir );
                 try {
                     s = FileUtils.fileToString( file );
                     this.magicdrawSchedulingCommand = s;
