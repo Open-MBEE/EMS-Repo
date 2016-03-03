@@ -4537,23 +4537,28 @@ public class NodeUtil {
     public static void
             processV2VEdges( String sysmlid, JSONArray v2v,
                              List< Pair< String, String >> documentEdges ) {
-        if ( v2v != null ) {
-            for ( int i2 = 0; i2 < v2v.length(); i2++ ) {
-                JSONObject o = v2v.getJSONObject( i2 );
-                String id = null;
-                if ( o.has( "sysmlid" ) ) id = o.getString( "sysmlid" );
-                else if ( o.has( "id" ) ) id = o.getString( "id" );
-                else continue;
-
-                if ( o.has( "childrenViews" ) ) {
-                    JSONArray childViews = o.getJSONArray( "childrenViews" );
-                    for ( int j = 0; j < childViews.length(); j++ ) {
-                        documentEdges.add( new Pair< String, String >(
-                                                                       id,
-                                                                       childViews.getString( j ) ) );
+        try { 
+            if ( v2v != null ) {
+                for ( int i2 = 0; i2 < v2v.length(); i2++ ) {
+                    JSONObject o = v2v.getJSONObject( i2 );
+                    String id = null;
+                    if ( o.has( "sysmlid" ) ) id = o.getString( "sysmlid" );
+                    else if ( o.has( "id" ) ) id = o.getString( "id" );
+                    else continue;
+    
+                    if ( o.has( "childrenViews" ) ) {
+                        JSONArray childViews = o.getJSONArray( "childrenViews" );
+                        for ( int j = 0; j < childViews.length(); j++ ) {
+                            documentEdges.add( new Pair< String, String >(
+                                                                           id,
+                                                                           childViews.getString( j ) ) );
+                        }
                     }
                 }
             }
+        } catch (Exception e) {
+            logger.error("Could not process v2vedges for: " + sysmlid);
+            e.printStackTrace();
         }
     }
 
@@ -4633,18 +4638,23 @@ public class NodeUtil {
             processInstanceSpecificationSpecificationNodeRef( String sysmlId,
                                                        NodeRef iss,
                                                        List< Pair< String, String >> documentEdges ) {
-        if (iss != null) {
-            EmsScriptNode issNode = new EmsScriptNode(iss, services, null);
-            String string = (String) issNode.getProperty( Acm.ACM_STRING );
-            if (string != null) {
-                JSONObject json = new JSONObject(string);
-                Set<Object> sources = findKeyValueInJsonObject(json, "source");
-                for (Object source: sources) {
-                    if (source instanceof String) {
-                        documentEdges.add( new Pair<String, String>(sysmlId, (String)source) );
+        try {
+            if (iss != null) {
+                EmsScriptNode issNode = new EmsScriptNode(iss, services, null);
+                String string = (String) issNode.getProperty( Acm.ACM_STRING );
+                if (string != null) {
+                    JSONObject json = new JSONObject(string);
+                    Set<Object> sources = findKeyValueInJsonObject(json, "source");
+                    for (Object source: sources) {
+                        if (source instanceof String) {
+                            documentEdges.add( new Pair<String, String>(sysmlId, (String)source) );
+                        }
                     }
                 }
             }
+        } catch (Exception e) {
+            logger.error( "Couldn't add instanceSpecificationSpecification: " + sysmlId );
+            e.printStackTrace();
         }
     }
     
