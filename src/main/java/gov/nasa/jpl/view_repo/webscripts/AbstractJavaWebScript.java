@@ -2727,8 +2727,8 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
                 propertyId = propertyNode.getSysmlId();
             }
             
-             Map< String, String > props = propertyValues.get( jobId );
-            if ( props != null && !props.containsKey( propertyName ) ) {
+            Map< String, String > props = propertyValues.get( jobId );
+            if ( propertyNode != null && props != null && !props.containsKey( propertyName ) ) {
                 Collection< Object > values = getSystemModel().getValue( propertyNode, null );
     
                 if ( !Utils.isNullOrEmpty( values ) ) {
@@ -2759,7 +2759,9 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
                               + ") says the value is " + value + "; using " + propertyValue + " !" );
                 value = propertyValue;
             }
-            Utils.put( propertyValues, jobId, propertyName, value );
+            if ( value != null ) {
+                Utils.put( propertyValues, jobId, propertyName, value );
+            }
 
             // Returning null to indicate that no new element json was created
             return null;
