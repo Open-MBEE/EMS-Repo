@@ -3,19 +3,19 @@
         "name": "wsMatrix2",
         "qualifiedName": "master/wsMatrix2",
         "elements": [{
-            "qualifiedName": "/europa/JW_TEST2/none_delete_gg",
             "sysmlid": "none_delete_gg",
             "editable": true,
             "creator": "admin",
             "modifier": "admin",
             "name": "none_delete_gg",
-            "owner": "123456",
             "documentation": "none_delete_gg",
+            "owner": "123456",
             "specialization": {
                 "propertyType": null,
                 "isSlot": false,
                 "isDerived": false,
                 "value": [{
+                    
                     "string": "on a shoe",
                     "type": "LiteralString"
                 }],
@@ -26,7 +26,6 @@
     "workspace2": {
         "deletedElements": [{
             "modifier": "admin",
-            "qualifiedName": "/europa/JW_TEST2/none_delete_gg",
             "name": "none_delete_gg",
             "owner": "123456",
             "sysmlid": "none_delete_gg",

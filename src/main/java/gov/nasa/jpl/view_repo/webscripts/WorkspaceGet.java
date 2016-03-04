@@ -96,13 +96,13 @@ public class WorkspaceGet extends AbstractJavaWebScript{
 		        WorkspaceNode.addWorkspaceNamesAndIds(interiorJson, ws, true );
 		        jsonArray.put(interiorJson);
 		    } else {
-	            log(Level.WARN, HttpServletResponse.SC_NOT_FOUND, "Workspace not found: %s", (ws == null ? null : ws.getSysmlId()));
+	            log(Level.WARN, HttpServletResponse.SC_NOT_FOUND, "Workspace not found: %s", (ws == null ? null : wsID));
 		    }
 		} else {
 		    if(checkPermissions(ws, PermissionService.READ))  {
 		        jsonArray.put(ws.toJSONObject(ws, null));
 		    } else {
-                log(Level.WARN, HttpServletResponse.SC_FORBIDDEN, "No read permissions for workspace: %s", (ws == null ? null : ws.getSysmlId()));
+                log(Level.WARN, HttpServletResponse.SC_FORBIDDEN, "No read permissions for workspace: %s", (ws == null ? null : wsID));
 		    }
 		}
 		json.put("workspace" , jsonArray);

@@ -568,11 +568,42 @@ public class MmsDiffGet extends AbstractJavaWebScript {
         if ( top == null ) {
             results.put( "res", createResponseJson() );
         } else {
+            // since commits don't have qualified paths, need to add them in after the fact
+            addQualifiedNamesToDiff( top, ws1, ws2, dateTime1, dateTime2 );
             results.put( "res", NodeUtil.jsonToString( top, 4 ) );
         }
 
         if ( switchUser ) AuthenticationUtil.setRunAsUser( originalUser );
+    }
+    
+    private void addQualifiedNamesToDiff( JSONObject top, WorkspaceNode ws1,
+                                    WorkspaceNode ws2, Date dateTime1,
+                                    Date dateTime2 ) {
+        JSONObject ws1Json = top.getJSONObject( "workspace1" );
+        addQualifiedNamesToWorkspace(ws1Json, ws1, dateTime1);
         
+        JSONObject ws2Json = top.getJSONObject( "workspace2" );
+        addQualifiedNamesToWorkspace(ws2Json, ws2, dateTime2);
+    }
+
+    private void addQualifiedNamesToWorkspace( JSONObject wsJson,
+                                               WorkspaceNode workspace, Date dateTime ) {
+        String keys[] = {"elements", "conflictedElements", "addedElements", "movedElements", "updatedElements", "deletedElements"};
+        for (String key: keys) {
+            if (wsJson.has( key )) {
+                JSONArray elemsJson = wsJson.getJSONArray( key );
+                for (int ii = 0; ii < elemsJson.length(); ii++) {
+                    JSONObject elemJson = elemsJson.getJSONObject( ii );
+                    if (!elemJson.has( "qualifiedId" )) {
+                        EmsScriptNode node = findScriptNodeById( elemJson.getString( "sysmlid" ), workspace, dateTime, true );
+                        if (node != null) {
+                            elemJson.put( "qualifiedName", node.getSysmlQName( dateTime, workspace, true ));
+                            elemJson.put( "qualifiedId", node.getSysmlQId( dateTime, workspace, true));
+                        }
+                    }
+                }
+            }
+        }
     }
     
     protected JSONObject diffJsonFromJobNode( EmsScriptNode jobNode ) {

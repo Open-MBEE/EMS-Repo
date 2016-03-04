@@ -3,29 +3,28 @@
         "name": "master",
         "qualifiedName": "master",
         "elements": [{
-            "qualifiedName": "/europa/JW_TEST2/null/null",
-            "sysmlid": "property_zzz",
-            "editable": true,
-            "creator": "admin",
             "modifier": "admin",
             "documentation": "p is p",
             "owner": "aspect_history_zzz",
+            "sysmlid": "property_zzz",
             "specialization": {
                 "propertyType": null,
                 "isSlot": false,
                 "isDerived": false,
                 "value": [{
+                    
                     "string": "the p value",
                     "type": "LiteralString"
                 }],
                 "type": "Property"
-            }
+            },
+            "editable": true,
+            "creator": "admin"
         }]
     },
     "workspace2": {
         "deletedElements": [{
             "modifier": "admin",
-            "qualifiedName": "/europa/JW_TEST2/null/null",
             "owner": "aspect_history_zzz",
             "sysmlid": "property_zzz",
             "specialization": {"type": "Property"},

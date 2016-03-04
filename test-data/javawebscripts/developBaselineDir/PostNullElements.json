@@ -1,14 +1,69 @@
 {"elements": [
     {
-        "qualifiedId": "/no_site/no_site_no_project/holding_bin_no_site_no_project/propertyMissing",
-        "qualifiedName": "/no_site/no_site_no_project/holding_bin/propertyMissing",
+        "sysmlid": "viewNull",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "viewNull",
+        "documentation": "View with null values",
+        "specialization": {"type": "View"}
+    },
+    {
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "specialization": {"type": "Package"}
+    },
+    {
+        "sysmlid": "viewpointNull",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "viewpointNull",
+        "documentation": "Viewpoint with null values",
+        "specialization": {
+            "method": null,
+            "type": "Viewpoint"
+        }
+    },
+    {
+        "sysmlid": "durationIntervalNull",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "durationIntervalNull",
+        "documentation": "DurationInterval with null values",
+        "specialization": {
+            "min": null,
+            "max": null,
+            "type": "DurationInterval"
+        }
+    },
+    {
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "specialization": {"type": "Package"}
+    },
+    {
+        "sysmlid": "parameterNull",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "parameterNull",
+        "documentation": "Parameter with null values",
+        "specialization": {
+            "defaultValue": null,
+            "type": "Parameter"
+        }
+    },
+    {
         "sysmlid": "propertyMissing",
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
         "name": "propertyMissing",
         "documentation": "Property with missing propertyType and null owner",
-        "owner": "holding_bin_no_site_no_project",
         "specialization": {
             "propertyType": null,
             "isSlot": false,
@@ -21,116 +76,49 @@
         }
     },
     {
-        "qualifiedId": "/europa/123456/viewNull",
-        "qualifiedName": "/europa/JW_TEST2/viewNull",
-        "sysmlid": "viewNull",
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
-        "name": "viewNull",
-        "documentation": "View with null values",
-        "owner": "123456",
-        "specialization": {"type": "View"}
+        "specialization": {"type": "Package"}
     },
     {
-        "qualifiedId": "/europa/123456/instanceSpecificationNull",
-        "qualifiedName": "/europa/JW_TEST2/instanceSpecificationNull",
-        "sysmlid": "instanceSpecificationNull",
+        "sysmlid": "propertyNull",
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
-        "name": "instanceSpecificationNull",
-        "documentation": "InstanceSpecification with null values",
-        "owner": "123456",
+        "name": "propertyNull",
+        "documentation": "Property with null values",
         "specialization": {
-            "slots": ["elementValueNull"],
-            "classifier": ["propertyNull"],
-            "type": "InstanceSpecification"
+            "propertyType": null,
+            "isSlot": false,
+            "isDerived": false,
+            "value": [{
+                "string": "dlam_string",
+                "type": "LiteralString"
+            }],
+            "type": "Property"
         }
     },
     {
-        "qualifiedId": "/europa/123456/valueSpecificationNull",
-        "qualifiedName": "/europa/JW_TEST2/valueSpecificationNull",
-        "sysmlid": "valueSpecificationNull",
+        "sysmlid": "directedRelationshipNull",
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
-        "name": "valueSpecificationNull",
-        "documentation": "ValueSpecification with null values",
-        "owner": "123456",
-        "specialization": {"type": "ValueSpecification"}
-    },
-    {
-        "qualifiedId": "/europa/123456/instanceValueNull",
-        "qualifiedName": "/europa/JW_TEST2/instanceValueNull",
-        "sysmlid": "instanceValueNull",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "instanceValueNull",
-        "documentation": "InstanceValue with null values",
-        "owner": "123456",
+        "name": "directedRelationshipNull",
+        "documentation": "directed_relationship with null values",
         "specialization": {
-            "instance": null,
-            "type": "InstanceValue"
+            "source": null,
+            "target": null,
+            "type": "DirectedRelationship"
         }
     },
     {
-        "qualifiedId": "/europa/123456/durationIntervalNull",
-        "qualifiedName": "/europa/JW_TEST2/durationIntervalNull",
-        "sysmlid": "durationIntervalNull",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "durationIntervalNull",
-        "documentation": "DurationInterval with null values",
-        "owner": "123456",
-        "specialization": {
-            "min": null,
-            "max": null,
-            "type": "DurationInterval"
-        }
-    },
-    {
-        "qualifiedId": "/europa/123456/elementValueNull",
-        "qualifiedName": "/europa/JW_TEST2/elementValueNull",
-        "sysmlid": "elementValueNull",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "elementValueNull",
-        "documentation": "ElementValue with null values",
-        "owner": "123456",
-        "specialization": {
-            "element": null,
-            "type": "ElementValue"
-        }
-    },
-    {
-        "qualifiedId": "/europa/123456/parameterNull",
-        "qualifiedName": "/europa/JW_TEST2/parameterNull",
-        "sysmlid": "parameterNull",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "parameterNull",
-        "documentation": "Parameter with null values",
-        "owner": "123456",
-        "specialization": {
-            "defaultValue": null,
-            "type": "Parameter"
-        }
-    },
-    {
-        "qualifiedId": "/europa/123456/connectorNull",
-        "qualifiedName": "/europa/JW_TEST2/connectorNull",
         "sysmlid": "connectorNull",
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
         "name": "connectorNull",
         "documentation": "Connector with null values",
-        "owner": "123456",
         "specialization": {
             "connectorType": null,
             "targetPath": [],
@@ -162,87 +150,89 @@
         }
     },
     {
-        "qualifiedId": "/europa/123456/viewpointNull",
-        "qualifiedName": "/europa/JW_TEST2/viewpointNull",
-        "sysmlid": "viewpointNull",
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
-        "name": "viewpointNull",
-        "documentation": "Viewpoint with null values",
-        "owner": "123456",
-        "specialization": {
-            "method": null,
-            "type": "Viewpoint"
-        }
+        "specialization": {"type": "Package"}
     },
     {
-        "qualifiedId": "/europa/123456/directedRelationshipNull",
-        "qualifiedName": "/europa/JW_TEST2/directedRelationshipNull",
-        "sysmlid": "directedRelationshipNull",
+        "sysmlid": "valueSpecificationNull",
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
-        "name": "directedRelationshipNull",
-        "documentation": "directed_relationship with null values",
-        "owner": "123456",
-        "specialization": {
-            "source": null,
-            "target": null,
-            "type": "DirectedRelationship"
-        }
+        "name": "valueSpecificationNull",
+        "documentation": "ValueSpecification with null values",
+        "specialization": {"type": "ValueSpecification"}
     },
     {
-        "qualifiedId": "/europa/123456/propertyNull",
-        "qualifiedName": "/europa/JW_TEST2/propertyNull",
-        "sysmlid": "propertyNull",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "propertyNull",
-        "documentation": "Property with null values",
-        "owner": "123456",
-        "specialization": {
-            "propertyType": null,
-            "isSlot": false,
-            "isDerived": false,
-            "value": [{
-                "string": "dlam_string",
-                "type": "LiteralString"
-            }],
-            "type": "Property"
-        }
-    },
-    {
-        "qualifiedId": "/europa/123456/timeIntervalNull",
-        "qualifiedName": "/europa/JW_TEST2/timeIntervalNull",
-        "sysmlid": "timeIntervalNull",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "timeIntervalNull",
-        "documentation": "TimeInterval with null values",
-        "owner": "123456",
-        "specialization": {
-            "min": null,
-            "max": null,
-            "type": "TimeInterval"
-        }
-    },
-    {
-        "qualifiedId": "/no_site/no_site_no_project/holding_bin_no_site_no_project/too_many_bugs",
-        "qualifiedName": "/no_site/no_site_no_project/holding_bin/null",
         "sysmlid": "too_many_bugs",
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
-        "owner": "holding_bin_no_site_no_project",
         "specialization": {
             "propertyType": null,
             "isSlot": false,
             "isDerived": false,
             "value": [{"type": "LiteralReal"}],
             "type": "Property"
+        }
+    },
+    {
+        "sysmlid": "instanceValueNull",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "instanceValueNull",
+        "documentation": "InstanceValue with null values",
+        "specialization": {
+            "instance": null,
+            "type": "InstanceValue"
+        }
+    },
+    {
+        "sysmlid": "holding_bin_123456",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "holding_bin",
+        "specialization": {"type": "Package"}
+    },
+    {
+        "sysmlid": "instanceSpecificationNull",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "instanceSpecificationNull",
+        "documentation": "InstanceSpecification with null values",
+        "specialization": {
+            "slots": ["elementValueNull"],
+            "classifier": ["propertyNull"],
+            "type": "InstanceSpecification"
+        }
+    },
+    {
+        "sysmlid": "elementValueNull",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "elementValueNull",
+        "documentation": "ElementValue with null values",
+        "specialization": {
+            "element": null,
+            "type": "ElementValue"
+        }
+    },
+    {
+        "sysmlid": "timeIntervalNull",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "timeIntervalNull",
+        "documentation": "TimeInterval with null values",
+        "specialization": {
+            "min": null,
+            "max": null,
+            "type": "TimeInterval"
         }
     }
 ]}

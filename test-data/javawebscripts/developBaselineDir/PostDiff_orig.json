@@ -1,0 +1,93 @@
+{
+    "sequence": 56,
+    "workspace1": {
+        "id": "0233f49c-f0bc-488a-bf6e-fe48de16e0c9",
+        "qualifiedId": "master/0233f49c-f0bc-488a-bf6e-fe48de16e0c9",
+        "timestamp": "2016-02-20T22:21:30.949-0800",
+        "name": "ws2",
+        "qualifiedName": "master/ws2",
+        "elements": [{
+            "nodeRefId": "workspace://SpacesStore/b603d427-df8b-480b-bc04-f78f6b52e918",
+            "versionedRefId": "versionStore://version2Store/c8520cec-4a6d-4d52-b785-51fcd4571280",
+            "sysmlid": "402",
+            "editable": true,
+            "modified": "2016-02-20T22:17:47.930-0800",
+            "creator": "admin",
+            "modifier": "admin",
+            "created": "Sat Feb 20 22:17:45 PST 2016",
+            "name": "402",
+            "documentation": "4to",
+            "owner": "401",
+            "read": "2016-02-20T22:21:32.458-0800",
+            "specialization": {
+                "propertyType": null,
+                "isSlot": false,
+                "isDerived": false,
+                "value": [{
+                    "string": "dlam_string",
+                    "type": "LiteralString"
+                }],
+                "type": "Property"
+            }
+        }]
+    },
+    "workspace2": {
+        "deletedElements": [],
+        "id": "0233f49c-f0bc-488a-bf6e-fe48de16e0c9",
+        "qualifiedId": "master/0233f49c-f0bc-488a-bf6e-fe48de16e0c9",
+        "timestamp": "2016-02-20T22:21:32.413-0800",
+        "addedElements": [{
+            "nodeRefId": "workspace://SpacesStore/115fa80d-9482-4e87-bf99-208cbb191278",
+            "versionedRefId": "versionStore://version2Store/3949b2b8-0768-4cce-99eb-268307241369",
+            "sysmlid": "newElement",
+            "editable": true,
+            "modified": "2016-02-20T22:21:32.174-0800",
+            "creator": "admin",
+            "modifier": "admin",
+            "created": "Sat Feb 20 22:21:31 PST 2016",
+            "name": "newElement",
+            "documentation": "x is x",
+            "owner": "HH_22_no_site_no_project",
+            "read": "2016-02-20T22:21:32.487-0800",
+            "specialization": {
+                "propertyType": null,
+                "isSlot": false,
+                "isDerived": false,
+                "value": [{
+                    "string": "the element added to ws1",
+                    "type": "LiteralString"
+                }],
+                "type": "Property"
+            }
+        }],
+        "conflictedElements": [],
+        "updatedElements": [{
+            "nodeRefId": "workspace://SpacesStore/b603d427-df8b-480b-bc04-f78f6b52e918",
+            "versionedRefId": "versionStore://version2Store/58d5f0ef-a667-48b7-90f3-380a03802cc3",
+            "sysmlid": "402",
+            "editable": true,
+            "modified": "2016-02-20T22:21:32.403-0800",
+            "creator": "admin",
+            "modifier": "admin",
+            "created": "Sat Feb 20 22:17:45 PST 2016",
+            "name": "402",
+            "documentation": "x is x",
+            "owner": "401",
+            "read": "2016-02-20T22:21:32.526-0800",
+            "specialization": {
+                "propertyType": null,
+                "isSlot": false,
+                "isDerived": false,
+                "value": [{
+                    "string": "the x value",
+                    "type": "LiteralString"
+                }],
+                "type": "Property"
+            }
+        }],
+        "name": "ws2",
+        "qualifiedName": "master/ws2",
+        "movedElements": []
+    }
+}
+200

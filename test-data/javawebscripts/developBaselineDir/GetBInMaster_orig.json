@@ -1,0 +1,28 @@
+{"elements": [{
+    "siteCharacterizationId": "no_site",
+    "qualifiedId": "/no_site/no_site_no_project/holding_bin_no_site_no_project/YY_2016_no_site_no_project/MM_1_no_site_no_project/DD_20_no_site_no_project/HH_22_no_site_no_project/b",
+    "nodeRefId": "versionStore://version2Store/2166c3cb-d630-427e-904d-2b9160fe0227",
+    "versionedRefId": "versionStore://version2Store/2166c3cb-d630-427e-904d-2b9160fe0227",
+    "qualifiedName": "/no_site/no_site_no_project/holding_bin_no_site_no_project/YY_2016_no_site_no_project/MM_1_no_site_no_project/DD_20_no_site_no_project/HH_22_no_site_no_project/b",
+    "sysmlid": "b",
+    "editable": true,
+    "modified": "2016-02-20T22:20:51.405-0800",
+    "creator": "admin",
+    "modifier": "admin",
+    "created": "Sat Feb 20 22:20:51 PST 2016",
+    "name": "b",
+    "documentation": "b is b",
+    "owner": "HH_22_no_site_no_project",
+    "read": "2016-02-20T22:20:55.708-0800",
+    "specialization": {
+        "propertyType": null,
+        "isSlot": false,
+        "isDerived": false,
+        "value": [{
+            "string": "the b value",
+            "type": "LiteralString"
+        }],
+        "type": "Property"
+    }
+}]}
+200

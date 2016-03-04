@@ -3,19 +3,19 @@
         "name": "master",
         "qualifiedName": "master",
         "elements": [{
-            "qualifiedName": "/europa/JW_TEST2/update_add_gg",
             "sysmlid": "update_add_gg",
             "editable": true,
             "creator": "admin",
             "modifier": "admin",
             "name": "update_add_gg",
-            "owner": "123456",
             "documentation": "update_add_gg",
+            "owner": "123456",
             "specialization": {
                 "propertyType": null,
                 "isSlot": false,
                 "isDerived": false,
                 "value": [{
+                    
                     "string": "on a shoe",
                     "type": "LiteralString"
                 }],
@@ -26,7 +26,6 @@
     "workspace2": {
         "deletedElements": [{
             "modifier": "admin",
-            "qualifiedName": "/europa/JW_TEST2/update_add_gg",
             "name": "update_add_gg",
             "owner": "123456",
             "sysmlid": "update_add_gg",

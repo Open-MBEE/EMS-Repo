@@ -10,6 +10,7 @@ import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -603,7 +604,7 @@ public class UpdateViewHierarchy {
 	 * @param parentNode
 	 * @return
 	 */
-	public static JSONArray getChildViews(EmsScriptNode parentNode) {
+	public static JSONArray getChildViews(EmsScriptNode parentNode, Date dateTime) {
 		if (parentNode == null || !NodeUtil.exists(parentNode)) {
 			return null;
 		}
@@ -616,7 +617,7 @@ public class UpdateViewHierarchy {
 		// TODO reuse instance getOwnedAttributes()
 		List<String> ownedAttributeIds = new ArrayList<String>();
 		Object ownedAttRefs = parentNode.getNodeRefProperty(
-				Acm.ACM_OWNED_ATTRIBUTE, null, ws);
+				Acm.ACM_OWNED_ATTRIBUTE, dateTime, ws);
 		if (ownedAttRefs instanceof Collection) {
 			List<NodeRef> refs = Utils.asList((Collection<?>) ownedAttRefs,
 					NodeRef.class);

@@ -57,6 +57,7 @@ import gov.nasa.jpl.view_repo.util.EmsTransaction;
 import gov.nasa.jpl.view_repo.util.JsonDiffDiff.DiffType;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
 import gov.nasa.jpl.view_repo.util.NodeUtil.SearchType;
+import gov.nasa.jpl.view_repo.webscripts.ModelSearch.UnsupportedSearchException;
 import gov.nasa.jpl.view_repo.util.WorkspaceDiff;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 
@@ -113,7 +114,8 @@ import sysml.SystemModel;
  *
  */
 public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
-    private static Logger logger = Logger.getLogger(AbstractJavaWebScript.class);
+	
+	private static Logger logger = Logger.getLogger(AbstractJavaWebScript.class);
     // FIXME -- Why is this not static? Concurrent webscripts with different
     // loglevels will interfere with each other.
     public Level logLevel = Level.WARN;
@@ -942,12 +944,17 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
                                        WorkspaceNode workspace, Date dateTime,
                                        Integer maxItems,
                                        Integer skipCount ) {
-        // TODO: can't search against snapshots - non-null date time is caught upstream
-        if (NodeUtil.doGraphDb) {
-            return searchForElementsPostgres( type, pattern, ignoreWorkspace, workspace, dateTime, maxItems, skipCount );
-        } else {
-            return searchForElementsOriginal( type, pattern, ignoreWorkspace, workspace, dateTime );
-        }
+    	// TODO: can't search against snapshots - non-null date time is caught upstream
+    	return searchForElementsOriginal( type, pattern, ignoreWorkspace, workspace, dateTime );
+    }
+    protected Map< String, EmsScriptNode >
+    searchForElements( ArrayList<String> types, String pattern,
+                               boolean ignoreWorkspace,
+                               WorkspaceNode workspace, Date dateTime,
+                               Integer maxItems,
+                               Integer skipCount ) {
+    	// TODO: can't search against snapshots - non-null date time is caught upstream
+    	return searchForElementsPostgres( types, pattern, ignoreWorkspace, workspace, dateTime, maxItems, skipCount );	
     }
 
 	/**
@@ -977,17 +984,26 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
 	 * @param dateTime
 	 * @return
 	 */
-	protected Map<String, EmsScriptNode> searchForElementsPostgres(String type,
+	protected Map<String, EmsScriptNode> searchForElementsPostgres(ArrayList<String> types,
                                                                   String pattern,
                                                                   boolean ignoreWorkspace,
                                                                   WorkspaceNode workspace,
                                                                   Date dateTime,
                                                                   Integer maxItems,
                                                                   Integer skipCount) {
-	    Map<String, EmsScriptNode> resultsMap = new HashMap<String, EmsScriptNode>();
+		Map<String, EmsScriptNode> resultsMap = new HashMap<String, EmsScriptNode>();
 	    ResultSet results = null;
-        String queryPattern = type + pattern + "\"";
-        results = NodeUtil.luceneSearch( queryPattern, services, maxItems, skipCount );
+	    StringBuffer queryPattern= new StringBuffer();
+		for(int i = 0; i< types.size()-1;i++){
+			if(types.get(i).equals("ASPECT:\"{http://jpl.nasa.gov/model/sysml-lite/1.0}")){
+				continue;
+			}
+			else{
+				queryPattern.append(types.get(i) + pattern + "\" OR ");
+			}
+		}
+	    queryPattern.append(types.get(types.size()-1)+ pattern + "\"");
+        results = NodeUtil.luceneSearch( queryPattern.toString(), services, maxItems, skipCount );
         if (results != null) {
             ArrayList< NodeRef > resultList =
                     NodeUtil.resultSetToNodeRefList( results );
@@ -996,7 +1012,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
                 EmsScriptNode node = new EmsScriptNode(nr, services, response);
                 resultsMap.put( node.getNodeRef().toString(), node );
             }
-        }
+        }		
         return resultsMap;
 	}
 

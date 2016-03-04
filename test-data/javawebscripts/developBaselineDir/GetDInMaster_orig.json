@@ -1,0 +1,24 @@
+{"elements": [{
+    "siteCharacterizationId": "no_site",
+    "qualifiedId": "/no_site/no_site_no_project/holding_bin_no_site_no_project/YY_2016_no_site_no_project/MM_1_no_site_no_project/DD_20_no_site_no_project/HH_22_no_site_no_project/d",
+    "nodeRefId": "versionStore://version2Store/32126667-224d-431c-8b54-fc289a2a84c8",
+    "versionedRefId": "versionStore://version2Store/32126667-224d-431c-8b54-fc289a2a84c8",
+    "qualifiedName": "/no_site/no_site_no_project/holding_bin_no_site_no_project/YY_2016_no_site_no_project/MM_1_no_site_no_project/DD_20_no_site_no_project/HH_22_no_site_no_project/d",
+    "sysmlid": "d",
+    "editable": true,
+    "modified": "2016-02-20T22:20:53.224-0800",
+    "creator": "admin",
+    "modifier": "admin",
+    "created": "Sat Feb 20 22:20:53 PST 2016",
+    "name": "d",
+    "documentation": "d is d",
+    "owner": "HH_22_no_site_no_project",
+    "read": "2016-02-20T22:20:56.017-0800",
+    "specialization": {
+        "propertyType": null,
+        "isSlot": false,
+        "isDerived": false,
+        "type": "Property"
+    }
+}]}
+200
