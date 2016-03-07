@@ -349,7 +349,7 @@ public class JenkinsBuildConfig {
             Element artifactArchiver = doc.createElement("hudson.tasks.ArtifactArchiver");
             Element secondTempElem = doc.createElement( "artifacts" );
 
-            secondTempElem.appendChild( doc.createTextNode( "guilog.html" ));
+            secondTempElem.appendChild( doc.createTextNode( "mdNotificationWindowText.html" ));
             artifactArchiver.appendChild( secondTempElem );
 
             secondTempElem = doc.createElement("allowEmptyArchive");
