@@ -504,8 +504,7 @@ public class ModelGet extends AbstractJavaWebScript {
 
 		if (childrenNodeRefIds == null) return;
 		for (Pair<String, Pair<String, String>> c : childrenNodeRefIds) {
-		    // grab the current ref
-			EmsScriptNode ecn = new EmsScriptNode(new NodeRef(c.second.first),
+			EmsScriptNode ecn = new EmsScriptNode(new NodeRef(c.second.second),
 					services, response);
 
 			if (!ecn.exists() || ecn.getSysmlId().endsWith("_pkg")
@@ -513,7 +512,7 @@ public class ModelGet extends AbstractJavaWebScript {
 					|| !checkPermissions(ecn, PermissionService.READ))
 				continue;
 
-			elementsFound.put(c.first, ecn);
+			elementsFound.put(c.second.second, ecn);
 		}
 	}
 
