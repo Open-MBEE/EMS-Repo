@@ -2501,6 +2501,8 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
     protected void createJenkinsConfig(String jobID,
                                        Map<String,String> propertyValues,
                                        boolean createNewJob) {
+        if( createNewJob ) System.out.println("CREATING JOB " + jobID);
+        else System.out.println("UPDATING JOB " + jobID);
         
         JenkinsEngine jenkins = new JenkinsEngine();
         JenkinsBuildConfig config = new JenkinsBuildConfig();
@@ -2562,19 +2564,21 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         EmsScriptNode jobNode = findScriptNodeById( jobId, workspace, null, false );
         
         boolean createNewJob = false;
-        if( jobNode == null || jobNode.getType().contains( "Element" )) createNewJob = true;
+        if( jobNode == null ) createNewJob = true;
         
         for( int i = 0; i < elements.length(); i++ ) {
             JSONObject property = elements.optJSONObject( i );
             
             if( EmsScriptNode.maybeJobProperty( property ) ) {
                 // Save away the property values getJobProperty
-                processJobPropertyAsElement( property, elements, elementMap, workspace );
+                boolean isJobProperty = processJobPropertyAsElement( property, elements, elementMap, workspace );
                 
-                for ( String propertyName : jobProperties ) {
-                    getJobProperty( propertyName, property, false, jobNode, jobId,
-                                    elements );
-                }        
+                if( isJobProperty ) {
+                    for ( String propertyName : jobProperties ) {
+                        putJobProperty( propertyName, property, false, jobNode, jobId,
+                                        elements );
+                    }        
+                }
             }
         }
         return createNewJob;
@@ -2605,7 +2609,9 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
 
         // Find node for id.
         EmsScriptNode jobNode = findScriptNodeById( jobId, workspace, null, false );
-        boolean createNewJob = jobNode == null;
+
+        boolean createNewJob = false;
+        if( jobNode == null ) createNewJob = true;
         
         // Process properties and remove them from the job json, which is being
         // transformed into element json.
@@ -2615,24 +2621,25 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
             if ( propertyValue != null && jobJson.has( propertyName ) ) {
                 Utils.put( propertyValues, jobId, propertyName, propertyValue );
             }
+            else jobJson.put( "name", propertyName );
    
             // Update or create the property json. The returned json is null
             // unless new element json was added.
             JSONObject propertyElementJson =
-                    getJobProperty( propertyName, jobJson, createNewJob, jobNode, jobId,
+                    putJobProperty( propertyName, jobJson, createNewJob, jobNode, jobId,
                                     elements );            
 
             if( propertyElementJson != null ) {
                 elements.put( propertyElementJson );
                 // Remove the property from the job json so that we can use it
                 // as the element json for the model post.
-                jobJson.remove( propertyName );
+                if( jobJson.has( propertyName ) ) jobJson.remove( propertyName );
+                else if( jobJson.has( "name" ) ) jobJson.remove( "name" );
             }
 
             // Use job json as element json and move to "elements" array. The
             // job-specific properties in the json were stripped out above.
-            // FIXME -- this appends only a sysmlid to "elements
-            elements.put(jobJson);
+            if( jobJson.length() > 1) elements.put(jobJson);
         }
         return createNewJob;
     }
@@ -2661,12 +2668,12 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
      * @param workspace
      * @param isElement
      */
-    protected void processJobPropertyAsElement(JSONObject elementJson, JSONArray elements,
+    protected boolean processJobPropertyAsElement(JSONObject elementJson, JSONArray elements,
                                                Map<String, JSONObject> elementMap,
                                                WorkspaceNode workspace ) {
         if ( elementJson == null ) {
             log( Level.ERROR, "Bad job json: " + elementJson );
-            return;
+            return false;
         }
 
         for ( String propertyName : jobProperties ) {
@@ -2680,29 +2687,44 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
                 String definingFeatureIdForSlot = slotIdParts[1];
                 if( definingFeatures.get( propertyName ).equals( definingFeatureIdForSlot ) ) {
                     elementJson.put( "name", propertyName );
-                    return;
+                    return true;
                 }
                 // go to the next property name
                 continue;
             }
         }
+        return false;
     }
 
-    public EmsScriptNode getJobPropertyNode(Object jobNode, Object propertyName  ) {
+    public EmsScriptNode getJobPropertyNode(EmsScriptNode jobNode, Object propertyName  ) {
+        if( jobNode == null )
+            return null;
+        
         Collection< EmsScriptNode > statusNodes =
                 getSystemModel().getProperty( jobNode, propertyName );
+        
+        EmsScriptNode statusNode = null;
         if ( !Utils.isNullOrEmpty( statusNodes ) ) {
             if ( statusNodes.size() > 1 ) {
-                // TODO -- ERROR
+                Iterator< EmsScriptNode > itr = statusNodes.iterator();
+                while( itr.hasNext() ) {
+                    // find the node which pertains to the current job
+                    statusNode = itr.next();
+                    
+                    if( statusNode
+                            .getSysmlQName( null, null, false )
+                            .contains( jobNode.getSysmlName() ) ) return statusNode;
+                }
             }
-            EmsScriptNode statusNode = statusNodes.iterator().next();
+            statusNode = statusNodes.iterator().next();
             return statusNode;
         }
         return null;
     }
 
     /**
-     * Find the Property representing the job property (such as status, schedule).
+     * Find the Property representing the job property (such as status, schedule) and then put it within a map
+     * for easy access.
      * The method assumes that the Property element already exists, either in
      * the database (MMS) or the input "elements" json.  If it doesn't exist.
      * the method complains and creates one improperly since it does not find
@@ -2715,7 +2737,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
      * @param elements
      * @return
      */
-    public JSONObject getJobProperty( String propertyName,
+    public JSONObject putJobProperty( String propertyName,
                                       JSONObject property,
                                       boolean createNewJob,
                                       EmsScriptNode jobNode,
@@ -2730,8 +2752,8 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         // if so, store it
         if( property.has(  propertyName ))
             propertyValue = property.optString( propertyName );
-        else if( property.optString( "name" ).equals( propertyName ) ) {
-            propertyValue = getStringValueFromPropertyJson( property );
+        else if( !property.optString( "name" ).equals( propertyName ) ) {
+            return null;
         }
 
         

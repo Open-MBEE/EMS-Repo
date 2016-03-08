@@ -533,10 +533,12 @@ public class JenkinsEngine implements ExecutionEngine {
     // This should be called when you change the name, status, schedule of a job
     public void postConfigXml( JenkinsBuildConfig config,String jobName, boolean newConfig ) {
         String postUrl = null;
-        if( newConfig )
+        if( newConfig ) {
             postUrl = "https://cae-jenkins.jpl.nasa.gov/createItem?name=" + jobName;
-        else
+        }
+        else {
             postUrl = "https://cae-jenkins.jpl.nasa.gov/job/" + jobName + "/config.xml";
+        }
         
         String configFile = generateConfigXML( config );
         

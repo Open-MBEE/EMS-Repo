@@ -247,13 +247,15 @@ public class JenkinsBuildConfig {
                 }
                 else {
                     curDir = tomcat.toString() + "/webapps/alfresco";
+                    System.setProperty( "user.dir", curDir );
                 }
-                
+              
+                // what are we using this for?
                 File alfresco = new File( curDir );
                 
                 File file = FileUtils.findFile( "docwebJenkinsScript.sh" );
                   
-                System.out.println( "The current working directory is: " + curDir );
+                System.out.println( "The current working directory is: " + System.getProperty( "user.dir" )  );
 
                 try {
                     s = FileUtils.fileToString( file );
