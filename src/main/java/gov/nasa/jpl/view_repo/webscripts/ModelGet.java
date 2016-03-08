@@ -192,7 +192,8 @@ public class ModelGet extends AbstractJavaWebScript {
         setIsViewRequest( isViewRequest );
 
         JSONObject top = NodeUtil.newJsonObject();
-        JSONArray elementsJson = handleRequest( req, top, NodeUtil.doGraphDb );
+        JSONArray elementsJson = handleRequest( req, top );
+        
 
         try {
             if ( elementsJson.length() > 0 ) {
@@ -242,7 +243,7 @@ public class ModelGet extends AbstractJavaWebScript {
      * @return
      */
     protected JSONArray handleRequest( WebScriptRequest req,
-                                       final JSONObject top, boolean useDb ) {
+                                       final JSONObject top ) {
         // REVIEW -- Why check for errors here if validate has already been
         // called? Is the error checking code different? Why?
         try {
@@ -282,30 +283,28 @@ public class ModelGet extends AbstractJavaWebScript {
             boolean includeQualified = getBooleanArg( req, "qualified", true );
             if ( NodeUtil.doPostProcessQualified ) includeQualified = false;
 
-            if ( logger.isDebugEnabled() ) logger.debug( "modelId = "
-                                                         + modelId );
-            boolean findDeleted = depth == 0 ? true : false;
-            EmsScriptNode modelRootNode = null;
-
-            // search using db if enabled - if not there revert to modelRootNode
-            // DB can only be used against latest at the moment
-            if ( useDb && dateTime == null ) {
-                PostgresHelper pgh = new PostgresHelper( workspace );
-                try {
+			if (logger.isDebugEnabled())
+				logger.debug("modelId = " + modelId);
+			boolean findDeleted = depth == 0 ? true : false;
+			EmsScriptNode modelRootNode = null;
+			
+			// search using db if enabled - if not there revert to modelRootNode
+			// DB can only be used against latest at the moment
+			if (NodeUtil.doGraphDb && dateTime == null) {
+			    PostgresHelper pgh = new PostgresHelper(workspace);
+			    try {
                     pgh.connect();
                     modelRootNode =
                             NodeUtil.getNodeFromPostgresNode( pgh.getNodeFromSysmlId( modelId ) );
                     pgh.close();
                 } catch ( Exception e ) {
-                    logger.warn( "Reverting to alfresco lookup. Could not find element in graph db "
-                                 + modelId );
+                    logger.info( "Reverting to alfresco lookup. Could not find element in graph db " + modelId );
                 }
-            }
-            if ( modelRootNode == null ) {
-                modelRootNode = findScriptNodeById( modelId, workspace,
-                                                    dateTime, findDeleted );
-                useDb = false;
-            }
+			}
+			if (modelRootNode == null) {
+			    modelRootNode = findScriptNodeById(modelId,
+			                                       workspace, dateTime, findDeleted);
+			}
 
             if ( logger.isDebugEnabled() ) logger.debug( "modelRootNode = "
                                                          + modelRootNode );
@@ -321,15 +320,14 @@ public class ModelGet extends AbstractJavaWebScript {
                 return new JSONArray();
             }
 
-            if ( isViewRequest ) {
-                handleViewHierarchy( modelRootNode, workspace, dateTime, depth,
-                                     new Long( 0 ) );
-            } else {
-                handleElementHierarchy( modelRootNode, workspace, dateTime,
-                                        depth, new Long( 0 ), connected,
-                                        relationship, new HashSet< String >(),
-                                        useDb );
-            }
+			if (isViewRequest) {
+				handleViewHierarchy(modelRootNode, workspace, dateTime, depth,
+						new Long(0));
+			} else {
+				handleElementHierarchy(modelRootNode, workspace, dateTime,
+						depth, new Long(0), connected, relationship,
+						new HashSet<String>());
+			}
 
             boolean checkReadPermission = true; // TODO -- REVIEW -- Shouldn't
                                                 // this be false?
@@ -370,279 +368,250 @@ public class ModelGet extends AbstractJavaWebScript {
             }
         }
 
-        // for backwards compatiblity convert recurse to infinite depth (this
+		// for backwards compatiblity convert recurse to infinite depth (this
         // overrides any depth setting)
-        if ( recurse ) {
+		if (recurse) {
             // If depth wasn't specified, it will be null.
-            if ( depth == null ) { // ||
-                // ( depth <= 0 && ( Utils.isNullOrEmpty( depthParam ) ||
-                // !depthParam.trim().equals( "0" ) ) ) ) {
-                depth = new Long( -1 );
+            if ( depth == null ) { // || 
+//                 ( depth <= 0 && ( Utils.isNullOrEmpty( depthParam ) ||
+//                                   !depthParam.trim().equals( "0" ) ) ) ) {
+                depth = new Long(-1);
             }
         }
 
-        if ( depth == null ) {
-            depth = new Long( 0 );
-        }
+		if (depth == null) {
+			depth = new Long(0);
+		}
 
-        return depth;
-    }
+		return depth;
+	}
 
-    /**
-     * Recurse a view hierarchy to get all allowed elements
-     * 
-     * @param root
-     *            Root view to find elements for
-     * @param recurse
-     *            If true, find elements for children views
-     * @throws JSONException
-     *             JSON element creation error
-     */
-    protected void handleViewHierarchy( EmsScriptNode root,
-                                        WorkspaceNode workspace, Date dateTime,
-                                        final Long maxDepth,
-                                        Long currDepth ) throws JSONException {
-        Object allowedElements = root.getProperty( Acm.ACM_ALLOWED_ELEMENTS );
-        if ( allowedElements != null ) {
-            JSONArray childElementJson =
-                    new JSONArray( allowedElements.toString() );
-            for ( int ii = 0; ii < childElementJson.length(); ii++ ) {
-                // FIXME: Use graph db to find all the nodes
-                String id = childElementJson.getString( ii );
-                EmsScriptNode childElement =
-                        findScriptNodeById( id, workspace, dateTime, false );
+	/**
+	 * Recurse a view hierarchy to get all allowed elements
+	 * 
+	 * @param root
+	 *            Root view to find elements for
+	 * @param recurse
+	 *            If true, find elements for children views
+	 * @throws JSONException
+	 *             JSON element creation error
+	 */
+	protected void handleViewHierarchy(EmsScriptNode root,
+			WorkspaceNode workspace, Date dateTime, final Long maxDepth,
+			Long currDepth) throws JSONException {
+		Object allowedElements = root.getProperty(Acm.ACM_ALLOWED_ELEMENTS);
+		if (allowedElements != null) {
+			JSONArray childElementJson = new JSONArray(
+					allowedElements.toString());
+			for (int ii = 0; ii < childElementJson.length(); ii++) {
+			    // FIXME: Use graph db to find all the nodes
+				String id = childElementJson.getString(ii);
+				EmsScriptNode childElement = findScriptNodeById(id, workspace,
+						dateTime, false);
 
-                // TODO Need to report that allowedElements can't be found
-                if ( childElement != null && childElement.exists() ) {
-                    if ( checkPermissions( childElement,
-                                           PermissionService.READ ) ) {
-                        elementsFound.put( id, childElement );
-                    } // TODO -- REVIEW -- Warning if no permissions?
-                } else {
-                    log( Level.WARN, HttpServletResponse.SC_NOT_FOUND,
-                         "Element %s not found",
-                         id + ( dateTime == null ? "" : " at " + dateTime ) );
-                }
-            }
-            if ( maxDepth != null
-                 && ( maxDepth < 0 || currDepth < maxDepth ) ) {
-                currDepth++;
-                Object childrenViews =
-                        root.getProperty( Acm.ACM_CHILDREN_VIEWS );
-                if ( childrenViews != null ) {
-                    JSONArray childViewJson =
-                            new JSONArray( childrenViews.toString() );
-                    for ( int ii = 0; ii < childViewJson.length(); ii++ ) {
-                        String id = childViewJson.getString( ii );
-                        EmsScriptNode childView =
-                                findScriptNodeById( id, workspace, dateTime,
-                                                    false );
-                        if ( childView != null && childView.exists() ) {
-                            if ( checkPermissions( childView,
-                                                   PermissionService.READ ) ) {
-                                handleViewHierarchy( childView, workspace,
-                                                     dateTime, maxDepth,
-                                                     currDepth );
-                            } // TODO -- REVIEW -- Warning if no permissions?
-                        } else {
-                            log( Level.WARN, HttpServletResponse.SC_NOT_FOUND,
-                                 "Element %s not found",
-                                 id + ( dateTime == null ? "" : " at "
-                                                                + dateTime ) );
-                        }
-                    }
-                }
-            }
-        }
-    }
+				// TODO Need to report that allowedElements can't be found
+				if (childElement != null && childElement.exists()) {
+					if (checkPermissions(childElement, PermissionService.READ)) {
+						elementsFound.put(id, childElement);
+					} // TODO -- REVIEW -- Warning if no permissions?
+				} else {
+					log(Level.WARN, HttpServletResponse.SC_NOT_FOUND,
+							"Element %s not found", id
+									+ (dateTime == null ? "" : " at "
+											+ dateTime));
+				}
+			}
+			if (maxDepth != null && (maxDepth < 0 || currDepth < maxDepth)) {
+				currDepth++;
+				Object childrenViews = root.getProperty(Acm.ACM_CHILDREN_VIEWS);
+				if (childrenViews != null) {
+					JSONArray childViewJson = new JSONArray(
+							childrenViews.toString());
+					for (int ii = 0; ii < childViewJson.length(); ii++) {
+						String id = childViewJson.getString(ii);
+						EmsScriptNode childView = findScriptNodeById(id,
+								workspace, dateTime, false);
+						if (childView != null && childView.exists()) {
+							if (checkPermissions(childView,
+									PermissionService.READ)) {
+								handleViewHierarchy(childView, workspace,
+										dateTime, maxDepth, currDepth);
+							} // TODO -- REVIEW -- Warning if no permissions?
+						} else {
+							log(Level.WARN, HttpServletResponse.SC_NOT_FOUND,
+									"Element %s not found", id
+											+ (dateTime == null ? "" : " at "
+													+ dateTime));
+						}
+					}
+				}
+			}
+		}
+	}
 
-    /**
-     * Get all elements in tree from the specified root
-     * 
-     * @param root
-     *            Root node to get children for
-     * @param recurse
-     * @param workspace
-     * @param dateTime
-     * @param maxDepth
-     * @param currDepth
-     * @throws JSONException
-     * @throws SQLException
-     */
-    protected void handleElementHierarchy( EmsScriptNode root,
-                                           WorkspaceNode workspace,
-                                           Date dateTime, final Long maxDepth,
-                                           Long currDepth, boolean connected,
-                                           String relationship,
-                                           Set< String > visited,
-                                           boolean useDb ) throws JSONException,
-                                                           SQLException {
+	/**
+	 * Get all elements in tree from the specified root
+	 * 
+	 * @param root
+	 *            Root node to get children for
+	 * @param recurse
+	 * @param workspace
+	 * @param dateTime
+	 * @param maxDepth
+	 * @param currDepth
+	 * @throws JSONException
+	 * @throws SQLException
+	 */
+	protected void handleElementHierarchy(EmsScriptNode root,
+			WorkspaceNode workspace, Date dateTime, final Long maxDepth,
+			Long currDepth, boolean connected, String relationship,
+			Set<String> visited) throws JSONException, SQLException {
 
-        if ( dateTime == null && !connected && useDb ) {
-            handleElementHierarchyPostgres( root, workspace, dateTime, maxDepth,
-                                            currDepth, connected, relationship,
-                                            visited );
-        } else {
-            handleElementHierarchyOriginal( root, workspace, dateTime, maxDepth,
-                                            currDepth, connected, relationship,
-                                            visited );
-        }
-    }
+		if (dateTime == null && !connected && NodeUtil.doGraphDb) {
+			handleElementHierarchyPostgres(root, workspace, dateTime, maxDepth,
+					currDepth, connected, relationship, visited);
+		}
+		else {
+			handleElementHierarchyOriginal(root, workspace, dateTime, maxDepth,
+					currDepth, connected, relationship, visited);
+		}
+	}
 
-    protected void
-              handleElementHierarchyPostgres( EmsScriptNode root,
-                                              WorkspaceNode workspace,
-                                              Date dateTime,
-                                              final Long maxDepth,
-                                              Long currDepth, boolean connected,
-                                              String relationship,
-                                              Set< String > visited ) throws JSONException,
-                                                                      SQLException {
+	protected void handleElementHierarchyPostgres(EmsScriptNode root,
+			WorkspaceNode workspace, Date dateTime, final Long maxDepth,
+			Long currDepth, boolean connected, String relationship,
+			Set<String> visited) throws JSONException, SQLException {
+		// Note: root sysmlid will never have _pkg at the end.
+		// don't return any elements
+		if (!root.exists()) {
+			return;
+		}
+		
+		// no permissions, return
+		if (!checkPermissions( root, PermissionService.READ )) {
+		    return;
+		}
 
-        // Note: root sysmlid will never have _pkg at the end.
-        // don't return any elements
-        if ( !root.exists() ) {
-            return;
-        }
+		// get children for given sysmlId from database
+		PostgresHelper pgh = new PostgresHelper(workspace);
 
-        // no permissions, return
-        if ( !checkPermissions( root, PermissionService.READ ) ) {
-            return;
-        }
-
-        // get children for given sysmlId from database
-        PostgresHelper pgh = new PostgresHelper( workspace );
-
-        List< Pair< String, Pair< String, String > > > childrenNodeRefIds =
-                null;
-        try {
+		List<Pair<String, Pair<String, String>>> childrenNodeRefIds = null;
+		try {
+			int depth = 1000000;
+			if (maxDepth >= 0) {
+				depth = maxDepth.intValue();
+			}
             pgh.connect();
-            int depth = 1000000;
-            if ( maxDepth >= 0 ) depth = maxDepth.intValue();
-            childrenNodeRefIds = pgh.getChildren( root.getSysmlId(),
-                                                  DbEdgeTypes.REGULAR, depth );
-            pgh.close();
-        } catch ( SQLException | ClassNotFoundException e ) {
-            e.printStackTrace();
-        }
+    		    childrenNodeRefIds = pgh.getChildren(root.getSysmlId(),
+    					DbEdgeTypes.REGULAR, depth);
+    		pgh.close();
+		} catch (SQLException | ClassNotFoundException e) {
+			e.printStackTrace();
+		}
 
-        for ( Pair< String, Pair< String, String > > c : childrenNodeRefIds ) {
-            EmsScriptNode ecn =
-                    new EmsScriptNode( new NodeRef( c.second.second ), services,
-                                       response );
+		if (childrenNodeRefIds == null) return;
+		for (Pair<String, Pair<String, String>> c : childrenNodeRefIds) {
+			EmsScriptNode ecn = new EmsScriptNode(new NodeRef(c.second.second),
+					services, response);
 
-            if ( !ecn.exists() || ecn.getSysmlId().endsWith( "_pkg" )
-                 || ecn.isOwnedValueSpec( dateTime, workspace )
-                 || !checkPermissions( ecn, PermissionService.READ ) ) continue;
+			if (!ecn.exists() || ecn.getSysmlId().endsWith("_pkg")
+					|| ecn.isOwnedValueSpec(dateTime, workspace)
+					|| !checkPermissions(ecn, PermissionService.READ))
+				continue;
 
-            elementsFound.put( c.second.second, ecn );
-        }
-    }
+			elementsFound.put(c.second.second, ecn);
+		}
+	}
 
-    protected void
-              handleElementHierarchyOriginal( EmsScriptNode root,
-                                              WorkspaceNode workspace,
-                                              Date dateTime,
-                                              final Long maxDepth,
-                                              Long currDepth, boolean connected,
-                                              String relationship,
-                                              Set< String > visited ) throws JSONException,
-                                                                      SQLException {
-        String sysmlId = root.getSysmlId();
+	protected void handleElementHierarchyOriginal(EmsScriptNode root,
+			WorkspaceNode workspace, Date dateTime, final Long maxDepth,
+			Long currDepth, boolean connected, String relationship,
+			Set<String> visited) throws JSONException, SQLException {
+		String sysmlId = root.getSysmlId();
 
-        if ( visited.contains( sysmlId ) ) {
-            return;
-        }
+		if (visited.contains(sysmlId)) {
+			return;
+		}
 
-        // don't return any elements
-        if ( !root.exists() ) {
-            return;
-        }
+		// don't return any elements
+		if (!root.exists()) {
+			return;
+		}
 
-        // add root element to elementsFound if its not already there
-        // (if it's there, it's probably because the root is a reified pkg node)
-        String rootName = sysmlId;
-        visited.add( sysmlId );
-        if ( !elementsFound.containsKey( sysmlId ) ) {
-            // dont add reified packages
-            if ( maxDepth == null || maxDepth == 0
-                 || ( !rootName.endsWith( "_pkg" )
-                      && !root.isOwnedValueSpec( dateTime, workspace ) ) ) {
-                elementsFound.put( sysmlId, root );
-            }
-        }
+		// add root element to elementsFound if its not already there
+		// (if it's there, it's probably because the root is a reified pkg node)
+		String rootName = sysmlId;
+		visited.add(sysmlId);
+		if (!elementsFound.containsKey(sysmlId)) {
+			// dont add reified packages
+            if ( maxDepth == null || maxDepth == 0 ||
+                 ( !rootName.endsWith( "_pkg" ) &&
+                   !root.isOwnedValueSpec( dateTime, workspace ) ) ) {
+				elementsFound.put(sysmlId, root);
+			}
+		}
 
-        if ( maxDepth != null && ( maxDepth < 0 || currDepth < maxDepth ) ) {
-            ++currDepth;
-            // Find all the children, recurse or add to array as needed.
-            // If it is a reified package, then need get the reifiedNode
-            if ( rootName.endsWith( "_pkg" ) ) {
-                EmsScriptNode reifiedNode = findScriptNodeById(
-                                                                rootName.substring( 0,
-                                                                                    rootName.lastIndexOf( "_pkg" ) ),
-                                                                workspace,
-                                                                dateTime,
-                                                                false );
-                if ( reifiedNode != null ) {
-                    handleElementHierarchyOriginal( reifiedNode, workspace,
-                                                    dateTime, maxDepth,
-                                                    currDepth, connected,
-                                                    relationship, visited );
-                } // TODO -- REVIEW -- Warning or error?
-            }
+		if (maxDepth != null && (maxDepth < 0 || currDepth < maxDepth)) {
+			++currDepth;
+			// Find all the children, recurse or add to array as needed.
+			// If it is a reified package, then need get the reifiedNode
+			if (rootName.endsWith("_pkg")) {
+				EmsScriptNode reifiedNode = findScriptNodeById(
+						rootName.substring(0, rootName.lastIndexOf("_pkg")),
+						workspace, dateTime, false);
+				if (reifiedNode != null) {
+					handleElementHierarchyOriginal(reifiedNode, workspace,
+							dateTime, maxDepth, currDepth, connected,
+							relationship, visited);
+				} // TODO -- REVIEW -- Warning or error?
+			}
 
-            // Handle all the children in this workspace:
-            List< NodeRef > childRefs =
-                    connected ? root.getConnectedNodes( dateTime, workspace,
-                                                        relationship )
-                              : root.getOwnedChildren( false, dateTime,
-                                                       workspace );
+			// Handle all the children in this workspace:
+			List<NodeRef> childRefs = connected ? root.getConnectedNodes(
+					dateTime, workspace, relationship) : root.getOwnedChildren(
+					false, dateTime, workspace);
 
-            for ( NodeRef childRef : childRefs ) {
-                if ( childRef == null ) continue;
-                EmsScriptNode child =
-                        new EmsScriptNode( childRef, services, response );
-                if ( checkPermissions( child, PermissionService.READ ) ) {
-                    if ( child.exists()
-                         && !child.isOwnedValueSpec( dateTime, workspace ) ) {
+			for (NodeRef childRef : childRefs) {
+				if (childRef == null)
+					continue;
+				EmsScriptNode child = new EmsScriptNode(childRef, services,
+						response);
+				if (checkPermissions(child, PermissionService.READ)) {
+					if (child.exists()
+							&& !child.isOwnedValueSpec(dateTime, workspace)) {
 
-                        String value = child.getSysmlId();
+						String value = child.getSysmlId();
 
-                        if ( value != null && !value.endsWith( "_pkg" ) ) {
-                            elementsFound.put( value, child );
-                        }
+						if (value != null && !value.endsWith("_pkg")) {
+							elementsFound.put(value, child);
+						}
 
-                        handleElementHierarchyOriginal( child, workspace,
-                                                        dateTime, maxDepth,
-                                                        currDepth, connected,
-                                                        relationship, visited );
+						handleElementHierarchyOriginal(child, workspace,
+								dateTime, maxDepth, currDepth, connected,
+								relationship, visited);
 
-                    } // ends if (child.exists() && !child.isOwnedValueSpec())
-                } // ends if ( checkPermissions( child, PermissionService.READ )
-                  // )
-            }
+					} // ends if (child.exists() && !child.isOwnedValueSpec())
+				} // ends if ( checkPermissions( child, PermissionService.READ )
+					// )
+			}
 
-        } // ends if (recurse)
-    }
+		} // ends if (recurse)
+	}
 
-    /**
-     * Build up the element JSONObject
-     * 
-     * @param top
-     * @param evaluate
-     * 
-     * @throws JSONException
-     */
-    protected void
-              handleElements( WorkspaceNode ws, Date dateTime,
-                              boolean includeQualified,
-                              boolean isIncludeDocument, boolean evaluate,
-                              boolean affected, JSONObject top,
-                              boolean checkPermission ) throws JSONException {
-        final Map< EmsScriptNode, JSONObject > elementsJsonMap =
-                new LinkedHashMap< EmsScriptNode, JSONObject >();
-        if ( affected ) {
-            addAffectedElements( ws, dateTime );
+	/**
+	 * Build up the element JSONObject
+	 * 
+	 * @param top
+	 * @param evaluate
+	 * 
+	 * @throws JSONException
+	 */
+	protected void handleElements(WorkspaceNode ws, Date dateTime,
+			boolean includeQualified, boolean isIncludeDocument, boolean evaluate, boolean affected, JSONObject top,
+			boolean checkPermission) throws JSONException {
+		final Map<EmsScriptNode, JSONObject> elementsJsonMap = new LinkedHashMap<EmsScriptNode, JSONObject>();
+        if( affected ){
+            addAffectedElements(ws, dateTime);
         }
         for ( String id : elementsFound.keySet() ) {
             EmsScriptNode node = elementsFound.get( id );

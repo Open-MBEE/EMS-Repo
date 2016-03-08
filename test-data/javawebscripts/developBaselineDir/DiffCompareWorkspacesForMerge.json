@@ -1,15 +1,34 @@
 {
     "workspace1": {
         "name": "ws2",
-        "qualifiedName": "master/ws2",
         "elements": [
             {
-                "qualifiedName": "/europa/JW_TEST2/400/401/402",
+                "specialization": {"type": "Package"},
+                "editable": true,
+            },
+            {
+                "specialization": {"type": "Package"},
+                "editable": true,
+            },
+            {
+                "specialization": {"type": "Package"},
+                "editable": true,
+            },
+            {
+                "specialization": {"type": "Package"},
+                "editable": true,
+            },
+            {
+                "name": "holding_bin",
+                "sysmlid": "holding_bin_no_site_no_project",
+                "specialization": {"type": "Package"},
+                "editable": true,
+            },
+            {
                 "sysmlid": "402",
                 "editable": true,
                 "name": "402",
                 "documentation": "4to",
-                "owner": "401",
                 "specialization": {
                     "propertyType": null,
                     "isDerived": false,
@@ -22,19 +41,9 @@
                 }
             },
             {
-                "qualifiedName": "/no_site/no_site_no_project/holding_bin",
-                "sysmlid": "holding_bin_no_site_no_project",
-                "editable": true,
-                "name": "holding_bin",
-                "owner": "no_site_no_project",
-                "specialization": {"type": "Package"}
-            },
-            {
-                "qualifiedName": "/europa/JW_TEST2/400/401",
                 "sysmlid": "401",
                 "editable": true,
                 "name": "401",
-                "owner": "4000",
                 "documentation": "4else",
                 "specialization": {
                     "view2view": [{
@@ -66,11 +75,9 @@
                 }
             },
             {
-                "qualifiedName": "/europa/JW_TEST2/400",
                 "sysmlid": "4000",
                 "editable": true,
                 "name": "400",
-                "owner": "123456",
                 "documentation": "4something",
                 "specialization": {
                     "propertyType": null,
@@ -88,11 +95,8 @@
     "workspace2": {
         "deletedElements": [],
         "addedElements": [{
-            "qualifiedName": "/no_site/no_site_no_project/holding_bin/null",
-            "sysmlid": "newElement",
-            "editable": true,
             "documentation": "x is x",
-            "owner": "holding_bin_no_site_no_project",
+            "sysmlid": "newElement",
             "specialization": {
                 "propertyType": null,
                 "isSlot": false,
@@ -102,15 +106,14 @@
                     "type": "LiteralString"
                 }],
                 "type": "Property"
-            }
+            },
+            "editable": true,
         }],
         "conflictedElements": [],
         "updatedElements": [{
-            "qualifiedName": "/europa/JW_TEST2/400/401/402",
             "name": "402",
             "sysmlid": "402",
             "documentation": "x is x",
-            "owner": "401",
             "specialization": {
                 "value": [{
                     "string": "the x value",
@@ -120,7 +123,6 @@
             }
         }],
         "name": "ws1",
-        "qualifiedName": "master/ws1",
         "movedElements": []
     }
 }

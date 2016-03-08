@@ -100,6 +100,14 @@
     },
     {
      "sysmlid": "_17_0_2_3_f4a035d_1366702935947_453687_36949"
+    },
+    {
+     "comment": "requirements stereotype",
+     "sysmlid": "_11_5EAPbeta_be00301_1147873190330_159934_2220"
+    },
+    {
+        "comment": "requirements text property",
+        "sysmlid": "_11_5EAPbeta_be00301_1147873226632_528960_2311"
     }
 ]}
 

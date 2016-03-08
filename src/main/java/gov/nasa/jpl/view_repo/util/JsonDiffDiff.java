@@ -1535,6 +1535,8 @@ public class JsonDiffDiff extends AbstractDiff<JSONObject, Object, String> {
 			add("id");
 			add("version"); // REVIEW added this because sometimes the version is not there
 			add("editable");
+			add("qualifiedId");
+			add("qualifiedName");
 		}
 	};
 

@@ -4,19 +4,19 @@
         "qualifiedName": "master",
         "elements": [
             {
-                "qualifiedName": "/europa/JW_TEST2/parentToDelete1/parentToDelete2/childOfParentToDelete2",
                 "sysmlid": "childOfParentToDelete2",
                 "editable": true,
                 "creator": "admin",
                 "modifier": "admin",
                 "name": "childOfParentToDelete2",
-                "owner": "parentToDelete2",
                 "documentation": "Child",
+                "owner": "parentToDelete2",
                 "specialization": {
                     "propertyType": null,
                     "isSlot": false,
                     "isDerived": false,
                     "value": [{
+                        
                         "string": "gg_string3",
                         "type": "LiteralString"
                     }],
@@ -24,19 +24,19 @@
                 }
             },
             {
-                "qualifiedName": "/europa/JW_TEST2/parentToDelete1",
                 "sysmlid": "parentToDelete1",
                 "editable": true,
                 "creator": "admin",
                 "modifier": "admin",
                 "name": "parentToDelete1",
-                "owner": "123456",
                 "documentation": "Parent 1",
+                "owner": "123456",
                 "specialization": {
                     "propertyType": null,
                     "isSlot": false,
                     "isDerived": false,
                     "value": [{
+                        
                         "string": "gg_string",
                         "type": "LiteralString"
                     }],
@@ -44,19 +44,19 @@
                 }
             },
             {
-                "qualifiedName": "/europa/JW_TEST2/parentToDelete1/parentToDelete2",
                 "sysmlid": "parentToDelete2",
                 "editable": true,
                 "creator": "admin",
                 "modifier": "admin",
                 "name": "parentToDelete2",
-                "owner": "parentToDelete1",
                 "documentation": "Parent 2",
+                "owner": "parentToDelete1",
                 "specialization": {
                     "propertyType": null,
                     "isSlot": false,
                     "isDerived": false,
                     "value": [{
+                        
                         "string": "gg_string2",
                         "type": "LiteralString"
                     }],
@@ -69,7 +69,6 @@
         "deletedElements": [
             {
                 "modifier": "admin",
-                "qualifiedName": "/europa/JW_TEST2/parentToDelete1/parentToDelete2/childOfParentToDelete2",
                 "name": "childOfParentToDelete2",
                 "owner": "parentToDelete2",
                 "sysmlid": "childOfParentToDelete2",
@@ -78,7 +77,6 @@
             },
             {
                 "modifier": "admin",
-                "qualifiedName": "/europa/JW_TEST2/parentToDelete1",
                 "name": "parentToDelete1",
                 "owner": "123456",
                 "sysmlid": "parentToDelete1",
@@ -87,7 +85,6 @@
             },
             {
                 "modifier": "admin",
-                "qualifiedName": "/europa/JW_TEST2/parentToDelete1/parentToDelete2",
                 "name": "parentToDelete2",
                 "owner": "parentToDelete1",
                 "sysmlid": "parentToDelete2",

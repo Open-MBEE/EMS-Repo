@@ -1,20 +1,156 @@
 {"elements": [
     {
-        "owner": "MMS_1450390431247_8a4b76d2-394c-4569-9abe-5c51dc4b0711",
-        "creator": "admin",
-        "read": "2016-01-07T15:28:45.359-0800",
-        "isMetatype": false,
-        "created": "Thu Jan 07 15:28:43 PST 2016",
-        "editable": true,
-        "qualifiedName": "/no_site/no_site_no_project/holding_bin/Product X/VIEW V",
-        "modifier": "admin",
         "siteCharacterizationId": "no_site",
+        "nodeRefId": "workspace://SpacesStore/15e1809e-acb4-4535-b68b-343be7a25588",
+        "qualifiedId": "/no_site/no_site_no_project/holding_bin_no_site_no_project/YY_2016_no_site_no_project/MM_1_no_site_no_project/DD_20_no_site_no_project/HH_22_no_site_no_project/MMS_1450390431247_8a4b76d2-394c-4569-9abe-5c51dc4b0711/MMS_1450390431247_8a4b76d2-394c-4569-9abe-5c51dc4b0814/MMS_1456035797884_95d7d92d-542d-43e8-b2ed-66a4599e9299",
+        "versionedRefId": "versionStore://version2Store/8f2fbef6-9773-4166-bd20-17f5d4043a56",
+        "qualifiedName": "/no_site/no_site_no_project/holding_bin_no_site_no_project/YY_2016_no_site_no_project/MM_1_no_site_no_project/DD_20_no_site_no_project/HH_22_no_site_no_project/Product X/VIEW V/null",
+        "sysmlid": "MMS_1456035797884_95d7d92d-542d-43e8-b2ed-66a4599e9299",
+        "editable": true,
+        "creator": "admin",
+        "modified": "2016-02-20T22:23:19.114-0800",
+        "modifier": "admin",
+        "created": "Sat Feb 20 22:23:18 PST 2016",
+        "owner": "MMS_1450390431247_8a4b76d2-394c-4569-9abe-5c51dc4b0814",
+        "read": "2016-02-20T22:23:19.237-0800",
+        "specialization": {
+            "aggregation": "COMPOSITE",
+            "propertyType": "MMS_1450390431247_8a4b76d2-394c-4569-9abe-5c51dc4b0811",
+            "isSlot": false,
+            "isDerived": false,
+            "type": "Property"
+        }
+    },
+    {
+        "siteCharacterizationId": "no_site",
+        "qualifiedId": "/no_site/no_site_no_project/holding_bin_no_site_no_project/YY_2016_no_site_no_project/MM_1_no_site_no_project/DD_20_no_site_no_project/HH_22_no_site_no_project/MMS_1456035797882_8e78d8ec-4af6-4e4c-b88f-cff654acab76",
+        "nodeRefId": "workspace://SpacesStore/5b909977-4274-4a77-8705-1910c26d558c",
+        "versionedRefId": "versionStore://version2Store/115a4723-2a53-45fe-ba4b-6ce1131950c7",
+        "qualifiedName": "/no_site/no_site_no_project/holding_bin_no_site_no_project/YY_2016_no_site_no_project/MM_1_no_site_no_project/DD_20_no_site_no_project/HH_22_no_site_no_project/null",
+        "sysmlid": "MMS_1456035797882_8e78d8ec-4af6-4e4c-b88f-cff654acab76",
+        "editable": true,
+        "creator": "admin",
+        "modified": "2016-02-20T22:23:18.878-0800",
+        "ownedAttribute": ["MMS_1456035797883_cfd6d4b5-b3f9-4a31-a422-382874c35463"],
+        "modifier": "admin",
+        "created": "Sat Feb 20 22:23:18 PST 2016",
+        "owner": "HH_22_no_site_no_project",
+        "read": "2016-02-20T22:23:19.239-0800",
+        "specialization": {
+            "source": "MMS_1456035797883_cfd6d4b5-b3f9-4a31-a422-382874c35463",
+            "target": "MMS_1456035797884_95d7d92d-542d-43e8-b2ed-66a4599e9299",
+            "ownedEnd": [],
+            "type": "Association"
+        }
+    },
+    {
+        "siteCharacterizationId": "no_site",
+        "nodeRefId": "workspace://SpacesStore/63904dc4-bd2a-4556-a548-52ec085ff53e",
+        "qualifiedId": "/no_site/no_site_no_project/holding_bin_no_site_no_project/YY_2016_no_site_no_project/MM_1_no_site_no_project/DD_20_no_site_no_project/HH_22_no_site_no_project/MMS_1456035797902_8d2a5969-26b9-44bc-9ca5-03a064e9e9cf/MMS_1456035797903_15ddda12-a666-4d0a-834b-3028a73aaef4",
+        "versionedRefId": "versionStore://version2Store/ff0f2dbb-5fc3-4619-bf85-fddfc79b21c6",
+        "qualifiedName": "/no_site/no_site_no_project/holding_bin_no_site_no_project/YY_2016_no_site_no_project/MM_1_no_site_no_project/DD_20_no_site_no_project/HH_22_no_site_no_project/null/null",
+        "sysmlid": "MMS_1456035797903_15ddda12-a666-4d0a-834b-3028a73aaef4",
+        "editable": true,
+        "creator": "admin",
+        "modified": "2016-02-20T22:23:19.197-0800",
+        "modifier": "admin",
+        "created": "Sat Feb 20 22:23:18 PST 2016",
+        "owner": "MMS_1456035797902_8d2a5969-26b9-44bc-9ca5-03a064e9e9cf",
+        "read": "2016-02-20T22:23:19.242-0800",
+        "specialization": {
+            "propertyType": "MMS_1450390431247_8a4b76d2-394c-4569-9abe-5c51dc4b0814",
+            "isSlot": false,
+            "isDerived": false,
+            "type": "Property"
+        }
+    },
+    {
+        "siteCharacterizationId": "no_site",
+        "qualifiedId": "/no_site/no_site_no_project/holding_bin_no_site_no_project/YY_2016_no_site_no_project/MM_1_no_site_no_project/DD_20_no_site_no_project/HH_22_no_site_no_project/MMS_1456035797892_270010cb-ebc7-48ac-81af-00c87146d4d8",
+        "nodeRefId": "workspace://SpacesStore/6de0de91-3920-4adf-ba6b-c2e851661ce7",
+        "versionedRefId": "versionStore://version2Store/3c051e1a-b76a-499d-aee5-29d5d1c41ffc",
+        "qualifiedName": "/no_site/no_site_no_project/holding_bin_no_site_no_project/YY_2016_no_site_no_project/MM_1_no_site_no_project/DD_20_no_site_no_project/HH_22_no_site_no_project/null",
+        "sysmlid": "MMS_1456035797892_270010cb-ebc7-48ac-81af-00c87146d4d8",
+        "editable": true,
+        "creator": "admin",
+        "modified": "2016-02-20T22:23:18.630-0800",
+        "ownedAttribute": ["MMS_1456035797893_79e21784-3343-450a-a745-4a3231e69122"],
+        "modifier": "admin",
+        "created": "Sat Feb 20 22:23:17 PST 2016",
+        "owner": "HH_22_no_site_no_project",
+        "read": "2016-02-20T22:23:19.244-0800",
+        "specialization": {
+            "source": "MMS_1456035797893_79e21784-3343-450a-a745-4a3231e69122",
+            "target": "MMS_1456035797894_2b36337d-a5e0-48d0-a4e7-f329a98ae214",
+            "ownedEnd": [],
+            "type": "Association"
+        }
+    },
+    {
+        "siteCharacterizationId": "no_site",
+        "qualifiedId": "/no_site/no_site_no_project/holding_bin_no_site_no_project/YY_2016_no_site_no_project/MM_1_no_site_no_project/DD_20_no_site_no_project/HH_22_no_site_no_project/MMS_1456035797902_8d2a5969-26b9-44bc-9ca5-03a064e9e9cf",
+        "nodeRefId": "workspace://SpacesStore/895f3960-c11a-4045-a33c-f458205246d4",
+        "versionedRefId": "versionStore://version2Store/024a4753-73e4-4645-b285-ea9be7a27d75",
+        "qualifiedName": "/no_site/no_site_no_project/holding_bin_no_site_no_project/YY_2016_no_site_no_project/MM_1_no_site_no_project/DD_20_no_site_no_project/HH_22_no_site_no_project/null",
+        "sysmlid": "MMS_1456035797902_8d2a5969-26b9-44bc-9ca5-03a064e9e9cf",
+        "editable": true,
+        "creator": "admin",
+        "modified": "2016-02-20T22:23:18.937-0800",
+        "ownedAttribute": ["MMS_1456035797903_15ddda12-a666-4d0a-834b-3028a73aaef4"],
+        "modifier": "admin",
+        "created": "Sat Feb 20 22:23:18 PST 2016",
+        "owner": "HH_22_no_site_no_project",
+        "read": "2016-02-20T22:23:19.246-0800",
+        "specialization": {
+            "source": "MMS_1456035797903_15ddda12-a666-4d0a-834b-3028a73aaef4",
+            "target": "MMS_1456035797904_ad3cfe93-0f07-4019-b0ed-0075a4f68635",
+            "ownedEnd": [],
+            "type": "Association"
+        }
+    },
+    {
+        "siteCharacterizationId": "no_site",
+        "nodeRefId": "workspace://SpacesStore/96c4bd38-c95b-4901-ab30-421ae16ae9c4",
+        "qualifiedId": "/no_site/no_site_no_project/holding_bin_no_site_no_project/YY_2016_no_site_no_project/MM_1_no_site_no_project/DD_20_no_site_no_project/HH_22_no_site_no_project/MMS_1450390431247_8a4b76d2-394c-4569-9abe-5c51dc4b0711/MMS_1450390431247_8a4b76d2-394c-4569-9abe-5c51dc4b0814/MMS_1456035797894_2b36337d-a5e0-48d0-a4e7-f329a98ae214",
+        "versionedRefId": "versionStore://version2Store/b193ede9-0e45-455e-a9e8-8958bf5f5eb1",
+        "qualifiedName": "/no_site/no_site_no_project/holding_bin_no_site_no_project/YY_2016_no_site_no_project/MM_1_no_site_no_project/DD_20_no_site_no_project/HH_22_no_site_no_project/Product X/VIEW V/null",
+        "sysmlid": "MMS_1456035797894_2b36337d-a5e0-48d0-a4e7-f329a98ae214",
+        "editable": true,
+        "creator": "admin",
+        "modified": "2016-02-20T22:23:19.153-0800",
+        "modifier": "admin",
+        "created": "Sat Feb 20 22:23:18 PST 2016",
+        "owner": "MMS_1450390431247_8a4b76d2-394c-4569-9abe-5c51dc4b0814",
+        "read": "2016-02-20T22:23:19.249-0800",
+        "specialization": {
+            "aggregation": "COMPOSITE",
+            "propertyType": "MMS_1450390431247_8a4b76d2-394c-4569-9abe-5c51dc4b0812",
+            "isSlot": false,
+            "isDerived": false,
+            "type": "Property"
+        }
+    },
+    {
+        "siteCharacterizationId": "no_site",
+        "qualifiedId": "/no_site/no_site_no_project/holding_bin_no_site_no_project/YY_2016_no_site_no_project/MM_1_no_site_no_project/DD_20_no_site_no_project/HH_22_no_site_no_project/MMS_1450390431247_8a4b76d2-394c-4569-9abe-5c51dc4b0711/MMS_1450390431247_8a4b76d2-394c-4569-9abe-5c51dc4b0814",
+        "nodeRefId": "workspace://SpacesStore/bf227a28-d024-49ad-af9d-9fab3d878956",
+        "versionedRefId": "versionStore://version2Store/5979538d-81db-418e-9175-58cbbcc07bec",
+        "qualifiedName": "/no_site/no_site_no_project/holding_bin_no_site_no_project/YY_2016_no_site_no_project/MM_1_no_site_no_project/DD_20_no_site_no_project/HH_22_no_site_no_project/Product X/VIEW V",
         "sysmlid": "MMS_1450390431247_8a4b76d2-394c-4569-9abe-5c51dc4b0814",
-        "nodeRefId": "workspace://SpacesStore/2a435c43-fe12-46b2-8c80-ce84d43837f7",
-        "versionedRefId": "versionStore://version2Store/77b752ba-a680-4239-afe2-2fc60a6b6acd",
-        "qualifiedId": "/no_site/no_site_no_project/holding_bin_no_site_no_project/MMS_1450390431247_8a4b76d2-394c-4569-9abe-5c51dc4b0711/MMS_1450390431247_8a4b76d2-394c-4569-9abe-5c51dc4b0814",
+        "isMetatype": false,
+        "editable": true,
+        "creator": "admin",
+        "ownedAttribute": [
+            "MMS_1456035797884_95d7d92d-542d-43e8-b2ed-66a4599e9299",
+            "MMS_1456035797894_2b36337d-a5e0-48d0-a4e7-f329a98ae214",
+            "MMS_1456035797904_ad3cfe93-0f07-4019-b0ed-0075a4f68635"
+        ],
+        "modified": "2016-02-20T22:23:18.708-0800",
+        "modifier": "admin",
+        "created": "Sat Feb 20 22:23:18 PST 2016",
         "name": "VIEW V",
-        "modified": "2016-01-07T15:28:44.393-0800",
+        "owner": "MMS_1450390431247_8a4b76d2-394c-4569-9abe-5c51dc4b0711",
+        "read": "2016-02-20T22:23:19.250-0800",
         "specialization": {
             "childViews": [
                 {
@@ -30,210 +166,71 @@
                     "id": "MMS_1450390431247_8a4b76d2-394c-4569-9abe-5c51dc4b0813"
                 }
             ],
-            "contents": {
-                "valueExpression": null,
-                "type": "Expression"
-            },
+            "contents": {"type": "Expression"},
             "type": "View"
-        },
-        "ownedAttribute": [
-            "MMS_1452209323250_6fecfc05-440e-4548-8a69-05132533e49f",
-            "MMS_1452209323262_55b09c77-7cf3-4513-b7c1-d7d85317ed99",
-            "MMS_1452209323299_85ab04eb-9e87-4648-b1d3-f89f4e200e5f"
-        ]
+        }
     },
     {
-        "owner": "MMS_1450390431247_8a4b76d2-394c-4569-9abe-5c51dc4b0814",
-        "creator": "admin",
-        "read": "2016-01-07T15:28:45.370-0800",
-        "created": "Thu Jan 07 15:28:43 PST 2016",
-        "editable": true,
-        "qualifiedName": "/no_site/no_site_no_project/holding_bin/Product X/VIEW V/null",
-        "modifier": "admin",
         "siteCharacterizationId": "no_site",
-        "sysmlid": "MMS_1452209323299_85ab04eb-9e87-4648-b1d3-f89f4e200e5f",
-        "nodeRefId": "workspace://SpacesStore/2d27c865-25d2-4ffc-a943-ea84e825f96b",
-        "versionedRefId": "versionStore://version2Store/4f340da7-ab64-417a-b505-5640956697a9",
-        "qualifiedId": "/no_site/no_site_no_project/holding_bin_no_site_no_project/MMS_1450390431247_8a4b76d2-394c-4569-9abe-5c51dc4b0711/MMS_1450390431247_8a4b76d2-394c-4569-9abe-5c51dc4b0814/MMS_1452209323299_85ab04eb-9e87-4648-b1d3-f89f4e200e5f",
-        "modified": "2016-01-07T15:28:45.314-0800",
+        "nodeRefId": "workspace://SpacesStore/daff3169-67c0-4d85-b8e7-cd0f5ebfcd72",
+        "qualifiedId": "/no_site/no_site_no_project/holding_bin_no_site_no_project/YY_2016_no_site_no_project/MM_1_no_site_no_project/DD_20_no_site_no_project/HH_22_no_site_no_project/MMS_1456035797892_270010cb-ebc7-48ac-81af-00c87146d4d8/MMS_1456035797893_79e21784-3343-450a-a745-4a3231e69122",
+        "versionedRefId": "versionStore://version2Store/a619de03-0360-4b04-abfa-96c6e7ca3356",
+        "qualifiedName": "/no_site/no_site_no_project/holding_bin_no_site_no_project/YY_2016_no_site_no_project/MM_1_no_site_no_project/DD_20_no_site_no_project/HH_22_no_site_no_project/null/null",
+        "sysmlid": "MMS_1456035797893_79e21784-3343-450a-a745-4a3231e69122",
+        "editable": true,
+        "creator": "admin",
+        "modified": "2016-02-20T22:23:19.149-0800",
+        "modifier": "admin",
+        "created": "Sat Feb 20 22:23:17 PST 2016",
+        "owner": "MMS_1456035797892_270010cb-ebc7-48ac-81af-00c87146d4d8",
+        "read": "2016-02-20T22:23:19.256-0800",
         "specialization": {
+            "propertyType": "MMS_1450390431247_8a4b76d2-394c-4569-9abe-5c51dc4b0814",
             "isSlot": false,
             "isDerived": false,
+            "type": "Property"
+        }
+    },
+    {
+        "siteCharacterizationId": "no_site",
+        "nodeRefId": "workspace://SpacesStore/db017482-27d2-4037-8d44-7d0febae38be",
+        "qualifiedId": "/no_site/no_site_no_project/holding_bin_no_site_no_project/YY_2016_no_site_no_project/MM_1_no_site_no_project/DD_20_no_site_no_project/HH_22_no_site_no_project/MMS_1456035797882_8e78d8ec-4af6-4e4c-b88f-cff654acab76/MMS_1456035797883_cfd6d4b5-b3f9-4a31-a422-382874c35463",
+        "versionedRefId": "versionStore://version2Store/81cffd6c-2a64-4a32-a2f6-e22ccd9e40c3",
+        "qualifiedName": "/no_site/no_site_no_project/holding_bin_no_site_no_project/YY_2016_no_site_no_project/MM_1_no_site_no_project/DD_20_no_site_no_project/HH_22_no_site_no_project/null/null",
+        "sysmlid": "MMS_1456035797883_cfd6d4b5-b3f9-4a31-a422-382874c35463",
+        "editable": true,
+        "creator": "admin",
+        "modified": "2016-02-20T22:23:19.111-0800",
+        "modifier": "admin",
+        "created": "Sat Feb 20 22:23:18 PST 2016",
+        "owner": "MMS_1456035797882_8e78d8ec-4af6-4e4c-b88f-cff654acab76",
+        "read": "2016-02-20T22:23:19.258-0800",
+        "specialization": {
+            "propertyType": "MMS_1450390431247_8a4b76d2-394c-4569-9abe-5c51dc4b0814",
+            "isSlot": false,
+            "isDerived": false,
+            "type": "Property"
+        }
+    },
+    {
+        "siteCharacterizationId": "no_site",
+        "nodeRefId": "workspace://SpacesStore/f7ed6df3-a7b2-477c-9f2c-7b556923ca29",
+        "qualifiedId": "/no_site/no_site_no_project/holding_bin_no_site_no_project/YY_2016_no_site_no_project/MM_1_no_site_no_project/DD_20_no_site_no_project/HH_22_no_site_no_project/MMS_1450390431247_8a4b76d2-394c-4569-9abe-5c51dc4b0711/MMS_1450390431247_8a4b76d2-394c-4569-9abe-5c51dc4b0814/MMS_1456035797904_ad3cfe93-0f07-4019-b0ed-0075a4f68635",
+        "versionedRefId": "versionStore://version2Store/bfbf3230-ca6d-453b-bc16-093becd4cc86",
+        "qualifiedName": "/no_site/no_site_no_project/holding_bin_no_site_no_project/YY_2016_no_site_no_project/MM_1_no_site_no_project/DD_20_no_site_no_project/HH_22_no_site_no_project/Product X/VIEW V/null",
+        "sysmlid": "MMS_1456035797904_ad3cfe93-0f07-4019-b0ed-0075a4f68635",
+        "editable": true,
+        "creator": "admin",
+        "modified": "2016-02-20T22:23:19.200-0800",
+        "modifier": "admin",
+        "created": "Sat Feb 20 22:23:18 PST 2016",
+        "owner": "MMS_1450390431247_8a4b76d2-394c-4569-9abe-5c51dc4b0814",
+        "read": "2016-02-20T22:23:19.260-0800",
+        "specialization": {
+            "aggregation": "COMPOSITE",
             "propertyType": "MMS_1450390431247_8a4b76d2-394c-4569-9abe-5c51dc4b0813",
-            "aggregation": "COMPOSITE",
-            "type": "Property"
-        }
-    },
-    {
-        "owner": "MMS_1452209323298_9b44114c-ce99-4d13-9216-db5c37b96b1a",
-        "creator": "admin",
-        "read": "2016-01-07T15:28:45.374-0800",
-        "created": "Thu Jan 07 15:28:43 PST 2016",
-        "editable": true,
-        "qualifiedName": "/no_site/no_site_no_project/holding_bin/null/null",
-        "modifier": "admin",
-        "siteCharacterizationId": "no_site",
-        "sysmlid": "MMS_1452209323299_3bbbd679-5770-45ce-992e-773b53605bb8",
-        "nodeRefId": "workspace://SpacesStore/345e48b8-7da0-4d54-88f5-cbcb069abfc6",
-        "versionedRefId": "versionStore://version2Store/6146bef3-421e-453b-aed5-424acb8b30eb",
-        "qualifiedId": "/no_site/no_site_no_project/holding_bin_no_site_no_project/MMS_1452209323298_9b44114c-ce99-4d13-9216-db5c37b96b1a/MMS_1452209323299_3bbbd679-5770-45ce-992e-773b53605bb8",
-        "modified": "2016-01-07T15:28:45.309-0800",
-        "specialization": {
             "isSlot": false,
             "isDerived": false,
-            "propertyType": "MMS_1450390431247_8a4b76d2-394c-4569-9abe-5c51dc4b0814",
-            "type": "Property"
-        }
-    },
-    {
-        "owner": "holding_bin_no_site_no_project",
-        "creator": "admin",
-        "read": "2016-01-07T15:28:45.377-0800",
-        "created": "Thu Jan 07 15:28:43 PST 2016",
-        "editable": true,
-        "qualifiedName": "/no_site/no_site_no_project/holding_bin/null",
-        "modifier": "admin",
-        "siteCharacterizationId": "no_site",
-        "sysmlid": "MMS_1452209323261_add90580-d5ab-4dfc-84c6-bdc7afcd1218",
-        "nodeRefId": "workspace://SpacesStore/8980e6ea-cb77-4cee-bea6-e4ee4b7cb703",
-        "versionedRefId": "versionStore://version2Store/584b34e6-5265-4eea-9e29-deeb9f554c6c",
-        "qualifiedId": "/no_site/no_site_no_project/holding_bin_no_site_no_project/MMS_1452209323261_add90580-d5ab-4dfc-84c6-bdc7afcd1218",
-        "modified": "2016-01-07T15:28:44.621-0800",
-        "specialization": {
-            "source": "MMS_1452209323262_ccf749f2-49da-4647-a57a-2100553f5071",
-            "type": "Association",
-            "ownedEnd": [],
-            "target": "MMS_1452209323262_55b09c77-7cf3-4513-b7c1-d7d85317ed99"
-        },
-        "ownedAttribute": ["MMS_1452209323262_ccf749f2-49da-4647-a57a-2100553f5071"]
-    },
-    {
-        "owner": "holding_bin_no_site_no_project",
-        "creator": "admin",
-        "read": "2016-01-07T15:28:45.382-0800",
-        "created": "Thu Jan 07 15:28:44 PST 2016",
-        "editable": true,
-        "qualifiedName": "/no_site/no_site_no_project/holding_bin/null",
-        "modifier": "admin",
-        "siteCharacterizationId": "no_site",
-        "sysmlid": "MMS_1452209323248_753706e7-da40-495d-93dc-cc95cb669d17",
-        "nodeRefId": "workspace://SpacesStore/b9011fe3-ff66-4cbe-a96c-59426b30d1ad",
-        "versionedRefId": "versionStore://version2Store/2fff8bd3-8def-4259-be8a-dc9ec73cab80",
-        "qualifiedId": "/no_site/no_site_no_project/holding_bin_no_site_no_project/MMS_1452209323248_753706e7-da40-495d-93dc-cc95cb669d17",
-        "modified": "2016-01-07T15:28:44.691-0800",
-        "specialization": {
-            "source": "MMS_1452209323249_11782a8e-1ee0-4466-9804-009379721d16",
-            "type": "Association",
-            "ownedEnd": [],
-            "target": "MMS_1452209323250_6fecfc05-440e-4548-8a69-05132533e49f"
-        },
-        "ownedAttribute": ["MMS_1452209323249_11782a8e-1ee0-4466-9804-009379721d16"]
-    },
-    {
-        "owner": "MMS_1452209323261_add90580-d5ab-4dfc-84c6-bdc7afcd1218",
-        "creator": "admin",
-        "read": "2016-01-07T15:28:45.386-0800",
-        "created": "Thu Jan 07 15:28:44 PST 2016",
-        "editable": true,
-        "qualifiedName": "/no_site/no_site_no_project/holding_bin/null/null",
-        "modifier": "admin",
-        "siteCharacterizationId": "no_site",
-        "sysmlid": "MMS_1452209323262_ccf749f2-49da-4647-a57a-2100553f5071",
-        "nodeRefId": "workspace://SpacesStore/b9ca435d-79e3-4613-b07d-e90850ace07a",
-        "versionedRefId": "versionStore://version2Store/c92f1066-ae9a-4265-a61c-f9d79b1fa8e4",
-        "qualifiedId": "/no_site/no_site_no_project/holding_bin_no_site_no_project/MMS_1452209323261_add90580-d5ab-4dfc-84c6-bdc7afcd1218/MMS_1452209323262_ccf749f2-49da-4647-a57a-2100553f5071",
-        "modified": "2016-01-07T15:28:45.197-0800",
-        "specialization": {
-            "isSlot": false,
-            "isDerived": false,
-            "propertyType": "MMS_1450390431247_8a4b76d2-394c-4569-9abe-5c51dc4b0814",
-            "type": "Property"
-        }
-    },
-    {
-        "owner": "MMS_1450390431247_8a4b76d2-394c-4569-9abe-5c51dc4b0814",
-        "creator": "admin",
-        "read": "2016-01-07T15:28:45.388-0800",
-        "created": "Thu Jan 07 15:28:43 PST 2016",
-        "editable": true,
-        "qualifiedName": "/no_site/no_site_no_project/holding_bin/Product X/VIEW V/null",
-        "modifier": "admin",
-        "siteCharacterizationId": "no_site",
-        "sysmlid": "MMS_1452209323262_55b09c77-7cf3-4513-b7c1-d7d85317ed99",
-        "nodeRefId": "workspace://SpacesStore/bb6fe757-0c35-4480-bd5a-6e6bb77462c7",
-        "versionedRefId": "versionStore://version2Store/52befa42-f901-47c8-88e4-c2a73f1f1d18",
-        "qualifiedId": "/no_site/no_site_no_project/holding_bin_no_site_no_project/MMS_1450390431247_8a4b76d2-394c-4569-9abe-5c51dc4b0711/MMS_1450390431247_8a4b76d2-394c-4569-9abe-5c51dc4b0814/MMS_1452209323262_55b09c77-7cf3-4513-b7c1-d7d85317ed99",
-        "modified": "2016-01-07T15:28:45.202-0800",
-        "specialization": {
-            "isSlot": false,
-            "isDerived": false,
-            "propertyType": "MMS_1450390431247_8a4b76d2-394c-4569-9abe-5c51dc4b0812",
-            "aggregation": "COMPOSITE",
-            "type": "Property"
-        }
-    },
-    {
-        "owner": "holding_bin_no_site_no_project",
-        "creator": "admin",
-        "read": "2016-01-07T15:28:45.390-0800",
-        "created": "Thu Jan 07 15:28:43 PST 2016",
-        "editable": true,
-        "qualifiedName": "/no_site/no_site_no_project/holding_bin/null",
-        "modifier": "admin",
-        "siteCharacterizationId": "no_site",
-        "sysmlid": "MMS_1452209323298_9b44114c-ce99-4d13-9216-db5c37b96b1a",
-        "nodeRefId": "workspace://SpacesStore/e2cd8476-c50a-4c32-a266-9533f1fd8344",
-        "versionedRefId": "versionStore://version2Store/18975d8e-bda2-4a38-826b-7409d929880a",
-        "qualifiedId": "/no_site/no_site_no_project/holding_bin_no_site_no_project/MMS_1452209323298_9b44114c-ce99-4d13-9216-db5c37b96b1a",
-        "modified": "2016-01-07T15:28:44.296-0800",
-        "specialization": {
-            "source": "MMS_1452209323299_3bbbd679-5770-45ce-992e-773b53605bb8",
-            "type": "Association",
-            "ownedEnd": [],
-            "target": "MMS_1452209323299_85ab04eb-9e87-4648-b1d3-f89f4e200e5f"
-        },
-        "ownedAttribute": ["MMS_1452209323299_3bbbd679-5770-45ce-992e-773b53605bb8"]
-    },
-    {
-        "owner": "MMS_1450390431247_8a4b76d2-394c-4569-9abe-5c51dc4b0814",
-        "creator": "admin",
-        "read": "2016-01-07T15:28:45.393-0800",
-        "created": "Thu Jan 07 15:28:43 PST 2016",
-        "editable": true,
-        "qualifiedName": "/no_site/no_site_no_project/holding_bin/Product X/VIEW V/null",
-        "modifier": "admin",
-        "siteCharacterizationId": "no_site",
-        "sysmlid": "MMS_1452209323250_6fecfc05-440e-4548-8a69-05132533e49f",
-        "nodeRefId": "workspace://SpacesStore/e4791498-18d4-4dff-a86b-7411aad5badb",
-        "versionedRefId": "versionStore://version2Store/9c9f2b0d-f738-4681-8ac9-07aaebab82a9",
-        "qualifiedId": "/no_site/no_site_no_project/holding_bin_no_site_no_project/MMS_1450390431247_8a4b76d2-394c-4569-9abe-5c51dc4b0711/MMS_1450390431247_8a4b76d2-394c-4569-9abe-5c51dc4b0814/MMS_1452209323250_6fecfc05-440e-4548-8a69-05132533e49f",
-        "modified": "2016-01-07T15:28:45.262-0800",
-        "specialization": {
-            "isSlot": false,
-            "isDerived": false,
-            "propertyType": "MMS_1450390431247_8a4b76d2-394c-4569-9abe-5c51dc4b0811",
-            "aggregation": "COMPOSITE",
-            "type": "Property"
-        }
-    },
-    {
-        "owner": "MMS_1452209323248_753706e7-da40-495d-93dc-cc95cb669d17",
-        "creator": "admin",
-        "read": "2016-01-07T15:28:45.395-0800",
-        "created": "Thu Jan 07 15:28:44 PST 2016",
-        "editable": true,
-        "qualifiedName": "/no_site/no_site_no_project/holding_bin/null/null",
-        "modifier": "admin",
-        "siteCharacterizationId": "no_site",
-        "sysmlid": "MMS_1452209323249_11782a8e-1ee0-4466-9804-009379721d16",
-        "nodeRefId": "workspace://SpacesStore/eb4b360e-30ad-4b2f-b803-7bb02f41f2e1",
-        "versionedRefId": "versionStore://version2Store/9ecd3c95-746b-4ba2-99ab-976baa3d3973",
-        "qualifiedId": "/no_site/no_site_no_project/holding_bin_no_site_no_project/MMS_1452209323248_753706e7-da40-495d-93dc-cc95cb669d17/MMS_1452209323249_11782a8e-1ee0-4466-9804-009379721d16",
-        "modified": "2016-01-07T15:28:45.259-0800",
-        "specialization": {
-            "isSlot": false,
-            "isDerived": false,
-            "propertyType": "MMS_1450390431247_8a4b76d2-394c-4569-9abe-5c51dc4b0814",
             "type": "Property"
         }
     }

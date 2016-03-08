@@ -75,6 +75,11 @@ public class HistoryGet extends ModelGet {
         } catch (Exception error) {
             logger.error(error.getMessage());
         }
+        if (history == null) {
+            logger.warn("couldn't get history for: " + ref);
+            return jsonAr;
+        }
+        
         Collection<Version> versions = history.getAllVersions();
 
         if (versions != null) {
@@ -175,7 +180,7 @@ public class HistoryGet extends ModelGet {
      * @param top
      * @return
      */
-    private JSONArray handleRequest(WebScriptRequest req, final JSONObject top) {
+    protected JSONArray handleRequest(WebScriptRequest req, final JSONObject top) {
         // REVIEW -- Why check for errors here if validate has already been
         // called? Is the error checking code different? Why?
 

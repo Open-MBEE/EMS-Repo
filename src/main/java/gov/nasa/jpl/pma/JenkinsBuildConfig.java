@@ -6,6 +6,8 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
+import com.sun.xml.fastinfoset.stax.events.Util;
+
 import gov.nasa.jpl.mbee.util.FileUtils;
 import gov.nasa.jpl.mbee.util.Utils;
 
@@ -232,10 +234,29 @@ public class JenkinsBuildConfig {
             String s = null;
 
             if ( Utils.isNullOrEmpty( s ) ) {
+                String sysEnvStr = System.getenv("TOMCAT_HOME");
+
+                if( sysEnvStr == null )
+                    sysEnvStr = "";
+                
+                File tomcat = new File( sysEnvStr ); 
+                String curDir = null;
+                
+                if( Util.isEmptyString( sysEnvStr ) || tomcat == null) {
+                    curDir = System.getProperty( "user.dir" ); 
+                }
+                else {
+                    curDir = tomcat.toString() + "/webapps/alfresco";
+                    System.setProperty( "user.dir", curDir );
+                }
+              
+                // what are we using this for?
+                File alfresco = new File( curDir );
+                
                 File file = FileUtils.findFile( "docwebJenkinsScript.sh" );
-               
-                String curDir = System.getProperty( "user.dir" );
-                System.out.println( curDir );
+                  
+                System.out.println( "The current working directory is: " + System.getProperty( "user.dir" )  );
+
                 try {
                     s = FileUtils.fileToString( file );
                     this.magicdrawSchedulingCommand = s;

@@ -1,0 +1,172 @@
+{
+    "workspace1": {
+        "id": "6e6ad7a8-39d0-4814-b53d-56d605827f8f",
+        "qualifiedId": "master/6e6ad7a8-39d0-4814-b53d-56d605827f8f",
+        "name": "wsA",
+        "qualifiedName": "master/wsA",
+        "elements": [
+            {
+                "qualifiedId": "/europa/123456/holding_bin_123456/YY_2016_123456/MM_1_123456/DD_20_123456/HH_22_123456/x",
+                "nodeRefId": "workspace://SpacesStore/c18725e7-0e9a-48ce-b2c6-3f39197f0ba5",
+                "versionedRefId": "versionStore://version2Store/29296f6b-1ca7-4f77-8402-01e75689f699",
+                "qualifiedName": "/europa/JW_TEST/holding_bin_123456/YY_2016_123456/MM_1_123456/DD_20_123456/HH_22_123456/300",
+                "sysmlid": "x",
+                "editable": true,
+                "modified": "2016-02-20T22:26:17.379-0800",
+                "creator": "admin",
+                "modifier": "admin",
+                "created": "Sat Feb 20 22:26:15 PST 2016",
+                "name": "300",
+                "owner": "HH_22_123456",
+                "documentation": "something",
+                "read": "2016-02-20T22:27:49.997-0800",
+                "specialization": {
+                    "propertyType": null,
+                    "isDerived": false,
+                    "isSlot": false,
+                    "value": [{
+                        "string": "dlam_string",
+                        "type": "LiteralString"
+                    }],
+                    "type": "Property"
+                }
+            },
+            {
+                "siteCharacterizationId": "europa",
+                "qualifiedId": "/europa/123456/holding_bin_123456/YY_2016_123456/MM_1_123456/DD_20_123456/HH_22_123456",
+                "nodeRefId": "workspace://SpacesStore/a886fc07-fb75-4a4f-ace8-7af6b12cbd20",
+                "versionedRefId": "versionStore://version2Store/dfbf752e-05cd-4199-837b-ec9855077628",
+                "qualifiedName": "/europa/JW_TEST/holding_bin_123456/YY_2016_123456/MM_1_123456/DD_20_123456/HH_22_123456",
+                "sysmlid": "HH_22_123456",
+                "editable": true,
+                "creator": "admin",
+                "modified": "2016-02-20T22:27:45.952-0800",
+                "modifier": "admin",
+                "created": "Sat Feb 20 22:26:14 PST 2016",
+                "name": "HH_22_123456",
+                "owner": "DD_20_123456",
+                "read": "2016-02-20T22:28:32.701-0800",
+                "specialization": {"type": "Package"}
+            },
+            {
+                "siteCharacterizationId": "europa",
+                "qualifiedId": "/europa/123456/holding_bin_123456/YY_2016_123456/MM_1_123456/DD_20_123456",
+                "nodeRefId": "workspace://SpacesStore/624d4d66-46f2-4b75-ba81-5a79d81b722c",
+                "versionedRefId": "versionStore://version2Store/f191568d-1e96-483a-90d1-529b5b8f19b6",
+                "qualifiedName": "/europa/JW_TEST/holding_bin_123456/YY_2016_123456/MM_1_123456/DD_20_123456",
+                "sysmlid": "DD_20_123456",
+                "editable": true,
+                "creator": "admin",
+                "modified": "2016-02-20T22:26:16.694-0800",
+                "modifier": "admin",
+                "created": "Sat Feb 20 22:26:14 PST 2016",
+                "name": "DD_20_123456",
+                "owner": "MM_1_123456",
+                "read": "2016-02-20T22:28:32.711-0800",
+                "specialization": {"type": "Package"}
+            },
+            {
+                "siteCharacterizationId": "europa",
+                "qualifiedId": "/europa/123456/holding_bin_123456/YY_2016_123456/MM_1_123456",
+                "nodeRefId": "workspace://SpacesStore/e6696162-9169-4f4e-894e-8deaaa9d12a8",
+                "versionedRefId": "versionStore://version2Store/bcb0407e-83fa-4368-967b-fd99f11f601b",
+                "qualifiedName": "/europa/JW_TEST/holding_bin_123456/YY_2016_123456/MM_1_123456",
+                "sysmlid": "MM_1_123456",
+                "editable": true,
+                "creator": "admin",
+                "modified": "2016-02-20T22:26:16.659-0800",
+                "modifier": "admin",
+                "created": "Sat Feb 20 22:26:14 PST 2016",
+                "name": "MM_1_123456",
+                "owner": "YY_2016_123456",
+                "read": "2016-02-20T22:28:32.719-0800",
+                "specialization": {"type": "Package"}
+            },
+            {
+                "siteCharacterizationId": "europa",
+                "qualifiedId": "/europa/123456/holding_bin_123456/YY_2016_123456",
+                "nodeRefId": "workspace://SpacesStore/604ef16f-f705-40b1-817c-b690da888c9c",
+                "versionedRefId": "versionStore://version2Store/ccd9c971-e430-44c6-890f-ae8ce0253d1c",
+                "qualifiedName": "/europa/JW_TEST/holding_bin_123456/YY_2016_123456",
+                "sysmlid": "YY_2016_123456",
+                "editable": true,
+                "creator": "admin",
+                "modified": "2016-02-20T22:26:16.625-0800",
+                "modifier": "admin",
+                "created": "Sat Feb 20 22:26:14 PST 2016",
+                "name": "YY_2016_123456",
+                "owner": "holding_bin_123456",
+                "read": "2016-02-20T22:28:32.726-0800",
+                "specialization": {"type": "Package"}
+            },
+            {
+                "siteCharacterizationId": "europa",
+                "qualifiedId": "/europa/123456/holding_bin_123456",
+                "nodeRefId": "workspace://SpacesStore/2503d1f0-9481-44ea-ae8b-820379475cbc",
+                "versionedRefId": "versionStore://version2Store/425f46f0-1916-49aa-a4d7-220b395a8213",
+                "qualifiedName": "/europa/JW_TEST/holding_bin_123456",
+                "sysmlid": "holding_bin_123456",
+                "editable": true,
+                "creator": "admin",
+                "modified": "2016-02-20T22:26:16.586-0800",
+                "modifier": "admin",
+                "created": "Sat Feb 20 22:26:14 PST 2016",
+                "name": "holding_bin_123456",
+                "owner": "123456",
+                "read": "2016-02-20T22:28:32.731-0800",
+                "specialization": {"type": "Package"}
+            }
+        ]
+    },
+    "workspace2": {
+        "deletedElements": [],
+        "id": "4dbee5ac-6114-4cff-a55f-6ba4545c4349",
+        "qualifiedId": "master/6e6ad7a8-39d0-4814-b53d-56d605827f8f/4dbee5ac-6114-4cff-a55f-6ba4545c4349",
+        "addedElements": [{
+            "qualifiedId": "/europa/123456/glomPost",
+            "nodeRefId": "workspace://SpacesStore/fe5adbc2-732b-4638-8727-ca2d071f46be",
+            "versionedRefId": "versionStore://version2Store/1572d760-0f31-48b7-866b-84d449be7bca",
+            "qualifiedName": "/europa/JW_TEST/glomPost",
+            "sysmlid": "glomPost",
+            "editable": true,
+            "modified": "2016-02-20T22:28:32.125-0800",
+            "creator": "admin",
+            "modifier": "admin",
+            "created": "Sat Feb 20 22:28:31 PST 2016",
+            "name": "glomPost",
+            "documentation": "glomPost",
+            "owner": "123456",
+            "read": "2016-02-20T22:28:32.231-0800",
+            "specialization": {
+                "propertyType": null,
+                "isSlot": false,
+                "isDerived": false,
+                "value": [{
+                    "string": "on a shoe",
+                    "type": "LiteralString"
+                }],
+                "type": "Property"
+            }
+        }],
+        "conflictedElements": [],
+        "updatedElements": [{
+            "qualifiedId": "/europa/123456/holding_bin_123456/YY_2016_123456/MM_1_123456/DD_20_123456/HH_22_123456/x",
+            "name": "300",
+            "qualifiedName": "/europa/JW_TEST/holding_bin_123456/YY_2016_123456/MM_1_123456/DD_20_123456/HH_22_123456/300",
+            "sysmlid": "x",
+            "documentation": "x is x",
+            "owner": "HH_22_123456",
+            "specialization": {
+                "value": [{
+                    "string": "the x value",
+                    "type": "LiteralString"
+                }],
+                "type": "Property"
+            }
+        }],
+        "name": "wsB",
+        "qualifiedName": "master/wsA/wsB",
+        "movedElements": []
+    }
+}
+200

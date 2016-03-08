@@ -115,7 +115,8 @@ public class MmsSnapshotsGet extends AbstractJavaWebScript {
     private JSONArray handleProductSnapshot( WebScriptRequest req, String productId ) throws JSONException {
         Date timestamp = TimeUtils.dateFromTimestamp(req.getParameter("timestamp"));
         WorkspaceNode workspace = getWorkspace( req );
-        EmsScriptNode product = findScriptNodeById( productId, workspace, timestamp, false);
+        // find deleted product - so this displays for old products
+        EmsScriptNode product = findScriptNodeById( productId, workspace, timestamp, true);
 
         if (product == null) {
             log(Level.WARN, HttpServletResponse.SC_NOT_FOUND, "Could not find product");

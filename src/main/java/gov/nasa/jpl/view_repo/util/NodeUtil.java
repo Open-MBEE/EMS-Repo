@@ -12,14 +12,11 @@ import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.actions.ActionUtil;
 import gov.nasa.jpl.view_repo.db.Node;
 import gov.nasa.jpl.view_repo.db.PostgresHelper;
-import gov.nasa.jpl.view_repo.db.PostgresHelper.DbEdgeTypes;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode.EmsVersion;
 import gov.nasa.jpl.view_repo.webscripts.AbstractJavaWebScript;
 
-import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.nio.charset.Charset;
@@ -229,6 +226,8 @@ public class NodeUtil {
     public static boolean skipGetNodeRefAtTime = true;
     public static boolean skipWorkspacePermissionCheck = true;
     public static boolean doOptimisticJustFirst = true;
+
+    public static boolean doorsSync = false;
 
     // global flag that is enabled once heisenbug is seen, so it will email
     // admins the first time heisenbug is seen
@@ -1159,7 +1158,7 @@ public class NodeUtil {
             // only set skip count if maxItems specified
             params.setMaxItems( maxItems );
             if (skipCount != null && skipCount >= 0) {
-                params.setSkipCount( skipCount );
+                params.setSkipCount( skipCount * maxItems );
             }
         }
         return params;
@@ -1198,53 +1197,6 @@ public class NodeUtil {
         return findNodeRefsByType( name, type.prefix, services );
     }
 
-    private static ArrayList< NodeRef > searchInElastic() {
-        try {
-            ArrayList< NodeRef > nodes = new ArrayList< NodeRef >();
-            DefaultHttpClient client = new DefaultHttpClient();
-            HttpPost request =
-                    new HttpPost( "http://localhost:9200/mms/element/_search" );
-            StringEntity postData =
-                    new StringEntity(
-                                      "{\"query\": {\"filtered\" : {\"query\" : {\"query_string\" : {\"query\" : \"paper\" } }, "
-                                              + "\"filter\" : {\"term\" : { \"creator\" : \"admin\" }   }   } }}" );
-            request.setEntity( postData );
-
-            HttpResponse response = client.execute( request );
-            InputStream ips = response.getEntity().getContent();
-            BufferedReader buf =
-                    new BufferedReader( new InputStreamReader( ips, "UTF-8" ) );
-            if ( response.getStatusLine().getStatusCode() != HttpStatus.SC_OK ) {
-                throw new Exception( response.getStatusLine().getReasonPhrase() );
-            }
-            StringBuilder sb = new StringBuilder();
-            String s;
-            while ( true ) {
-                s = buf.readLine();
-                if ( s == null || s.length() == 0 ) break;
-                sb.append( s );
-            }
-            buf.close();
-            ips.close();
-
-            JSONObject responseObject = new JSONObject( sb.toString() );
-            JSONArray hits =
-                    responseObject.getJSONObject( "hits" )
-                                  .getJSONArray( "hits" );
-
-            for ( int i = 0; i < hits.length(); i++ ) {
-                JSONObject hit = hits.getJSONObject( i );
-                String nodeRefId =
-                        hit.getJSONObject( "_source" ).getString( "nodeRefId" );
-                NodeRef node = findNodeRefByAlfrescoId( nodeRefId );
-                nodes.add( node );
-            }
-            return nodes;
-        } catch ( Exception e ) {
-            e.printStackTrace();
-            return null;
-        }
-    }
 
     public static ArrayList< NodeRef >
             findNodeRefsByType( String name, String prefix,
@@ -3838,7 +3790,6 @@ public class NodeUtil {
                                        false );
         } else {
             PersonService personService = getServices().getPersonService();
-            NodeService nodeService = getServices().getNodeService();
             NodeRef personNode = personService.getPerson( userName );
             homeFolderNode =
                     (NodeRef)getNodeProperty( personNode,
@@ -4382,11 +4333,11 @@ public class NodeUtil {
             String sender = hostname + "@jpl.nasa.gov";
             String recipient;
 
-            if ( hostname.toLowerCase().contains( "europa" ) ) {
-                recipient = "kerzhner@jpl.nasa.gov";
-                ActionUtil.sendEmailTo( sender, recipient, msg, subject,
-                                        services );
-            }
+//            if ( hostname.toLowerCase().contains( "europa" ) ) {
+//                recipient = "kerzhner@jpl.nasa.gov";
+//                ActionUtil.sendEmailTo( sender, recipient, msg, subject,
+//                                        services );
+//            }
             recipient = "mbee-dev-admin@jpl.nasa.gov";
             ActionUtil.sendEmailTo( sender, recipient, msg, subject, services );
             heisenbugSeen = true;
@@ -4602,23 +4553,28 @@ public class NodeUtil {
     public static void
             processV2VEdges( String sysmlid, JSONArray v2v,
                              List< Pair< String, String >> documentEdges ) {
-        if ( v2v != null ) {
-            for ( int i2 = 0; i2 < v2v.length(); i2++ ) {
-                JSONObject o = v2v.getJSONObject( i2 );
-                String id = null;
-                if ( o.has( "sysmlid" ) ) id = o.getString( "sysmlid" );
-                else if ( o.has( "id" ) ) id = o.getString( "id" );
-                else continue;
-
-                if ( o.has( "childrenViews" ) ) {
-                    JSONArray childViews = o.getJSONArray( "childrenViews" );
-                    for ( int j = 0; j < childViews.length(); j++ ) {
-                        documentEdges.add( new Pair< String, String >(
-                                                                       id,
-                                                                       childViews.getString( j ) ) );
+        try { 
+            if ( v2v != null ) {
+                for ( int i2 = 0; i2 < v2v.length(); i2++ ) {
+                    JSONObject o = v2v.getJSONObject( i2 );
+                    String id = null;
+                    if ( o.has( "sysmlid" ) ) id = o.getString( "sysmlid" );
+                    else if ( o.has( "id" ) ) id = o.getString( "id" );
+                    else continue;
+    
+                    if ( o.has( "childrenViews" ) ) {
+                        JSONArray childViews = o.getJSONArray( "childrenViews" );
+                        for ( int j = 0; j < childViews.length(); j++ ) {
+                            documentEdges.add( new Pair< String, String >(
+                                                                           id,
+                                                                           childViews.getString( j ) ) );
+                        }
                     }
                 }
             }
+        } catch (Exception e) {
+            logger.error("Could not process v2vedges for: " + sysmlid);
+            e.printStackTrace();
         }
     }
 
@@ -4630,7 +4586,7 @@ public class NodeUtil {
                 for (int ii = 0; ii < operand.length(); ii++) {
                     JSONObject value = operand.getJSONObject( ii );
                     if (value.has( "instance" )) {
-                        documentEdges.add( new Pair<String, String>(sysmlId, value.getString("instance") ));
+                        documentEdges.add( new Pair<String, String>(sysmlId, value.getString("instance")));
                     }
                 }
             }
@@ -4662,8 +4618,8 @@ public class NodeUtil {
                         EmsScriptNode instance =
                                 new EmsScriptNode( instanceNr, services, null );
                         documentEdges.add( new Pair< String, String >(
-                                                                       sysmlId,
-                                                                       instance.getSysmlId() ) );
+                                sysmlId, 
+                                instance.getSysmlId() ) );
                     }
                 }
             }
@@ -4678,7 +4634,9 @@ public class NodeUtil {
                 Set<Object> sources = findKeyValueInJsonObject(json, "source");
                 for (Object source: sources) {
                     if (source instanceof String) {
-                        documentEdges.add( new Pair<String, String>(sysmlId, (String) source));
+                        if ( !sysmlId.equals((String) source) ) {
+                            documentEdges.add( new Pair<String, String>(sysmlId, (String) source));
+                        }
                     }
                 }
             }
@@ -4696,18 +4654,23 @@ public class NodeUtil {
             processInstanceSpecificationSpecificationNodeRef( String sysmlId,
                                                        NodeRef iss,
                                                        List< Pair< String, String >> documentEdges ) {
-        if (iss != null) {
-            EmsScriptNode issNode = new EmsScriptNode(iss, services, null);
-            String string = (String) issNode.getProperty( Acm.ACM_STRING );
-            if (string != null) {
-                JSONObject json = new JSONObject(string);
-                Set<Object> sources = findKeyValueInJsonObject(json, "source");
-                for (Object source: sources) {
-                    if (source instanceof String) {
-                        documentEdges.add( new Pair<String, String>(sysmlId, (String)source) );
+        try {
+            if (iss != null) {
+                EmsScriptNode issNode = new EmsScriptNode(iss, services, null);
+                String string = (String) issNode.getProperty( Acm.ACM_STRING );
+                if (string != null) {
+                    JSONObject json = new JSONObject(string);
+                    Set<Object> sources = findKeyValueInJsonObject(json, "source");
+                    for (Object source: sources) {
+                        if (source instanceof String) {
+                            documentEdges.add( new Pair<String, String>(sysmlId, (String)source) );
+                        }
                     }
                 }
             }
+        } catch (Exception e) {
+            logger.error( "Couldn't add instanceSpecificationSpecification: " + sysmlId );
+            e.printStackTrace();
         }
     }
     
@@ -5054,11 +5017,12 @@ public class NodeUtil {
         Map< String, String > child2owner = new HashMap< String, String >();
 
         String topLevelKeys[] =
-                { "elements", "jobs", "products", "views", "workspace1" };
+                { "elements", "jobs", "products", "views", "workspace1", "workspace2" };
+
         for ( int ii = 0; ii < topLevelKeys.length; ii++ ) {
             String key = topLevelKeys[ ii ];
             if ( json.has( key ) ) {
-                if ( !key.equals( "workspace1" ) ) {
+                if ( !key.equals( "workspace1" ) && !key.equals( "workspace2" ) ) {
                     JSONArray elementsJson = json.getJSONArray( key );
                     try {
                         ppHandleElements( req, elementsJson, id2name, id2siteName,
@@ -5204,6 +5168,7 @@ public class NodeUtil {
         String timestamp =
                 req.getServiceMatch().getTemplateVars().get( "timestamp" );
         Date dateTime = TimeUtils.dateFromTimestamp( timestamp );
+        WorkspaceNode workspace = null;
 
         // if no owners, walk up to site to get appropriate information
         if ( owners.size() <= 0 ) {
@@ -5215,6 +5180,11 @@ public class NodeUtil {
                 if ( NodeUtil.doGraphDb && wsId.equals( "master" )
                      && dateTime == null ) {
                     PostgresHelper pgh = new PostgresHelper( wsId );
+                    if ( wsId.equals( "master" ) ) {
+                        workspace = null; 
+                    } else {
+                        workspace = WorkspaceNode.getWorkspaceFromId( wsId, services, null, null, "admin" );
+                    }
                     try {
                         pgh.connect();
                         node =
@@ -5251,7 +5221,8 @@ public class NodeUtil {
                         pgh.connect();
                         ppRecurseOwnersDb( owner, pgh, id2name, id2siteName,
                                            owner2children, child2owner,
-                                           visitedOwners, wsId, dateTime );
+                                           visitedOwners, wsId, workspace,
+                                           dateTime );
                         pgh.close();
                         useDb = true;
                     } catch ( ClassNotFoundException e ) {
@@ -5390,10 +5361,25 @@ public class NodeUtil {
                                Map< String, String > id2siteName,
                                Map< String, Set< String >> owner2children,
                                Map< String, String > child2owner,
-                               Set< String > visitedOwners, String wsId,
+                               Set< String > visitedOwners, 
+                               String wsId,
+                               WorkspaceNode workspace,
                                Date dateTime ) {
-        EmsScriptNode node =
-                NodeUtil.getNodeFromPostgresNode( pgh.getNodeFromSysmlId( sysmlId ) );
+        EmsScriptNode node = null;
+        if (pgh.checkWorkspaceExists()) {
+            node = NodeUtil.getNodeFromPostgresNode( pgh.getNodeFromSysmlId( sysmlId ) );
+            if (node == null) {
+                logger.error( "Postgres could not find node: " + sysmlId );
+                return;
+            }
+        } else {
+            node = findScriptNodeByIdForWorkspace( sysmlId, workspace, dateTime, false, services, null );
+            if (node == null) {
+                logger.error( "Couldn't find script node: " + sysmlId );
+                return;
+            }
+        }
+        
         String sysmlName = node.getSysmlName();
 
         id2name.put( sysmlId, sysmlName );

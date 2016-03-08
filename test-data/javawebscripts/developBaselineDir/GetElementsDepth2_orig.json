@@ -1,0 +1,336 @@
+{"elements": [
+    {
+        "siteCharacterizationId": "europa",
+        "qualifiedId": "/europa/123456/300/301",
+        "nodeRefId": "versionStore://version2Store/54917404-a862-4978-aaa6-e9b8f52c5811",
+        "versionedRefId": "versionStore://version2Store/54917404-a862-4978-aaa6-e9b8f52c5811",
+        "qualifiedName": "/europa/JW_TEST/300/301",
+        "sysmlid": "301",
+        "editable": true,
+        "modified": "2016-02-20T22:17:51.377-0800",
+        "creator": "admin",
+        "modifier": "admin",
+        "created": "Sat Feb 20 22:17:43 PST 2016",
+        "name": "301",
+        "documentation": "else",
+        "owner": "300",
+        "read": "2016-02-20T22:17:52.143-0800",
+        "specialization": {
+            "view2view": [{
+                "childrenViews": [
+                    "301",
+                    "302"
+                ],
+                "sysmlid": "301"
+            }],
+            "childrenViews": ["304"],
+            "displayedElements": [
+                "301",
+                "302",
+                "303"
+            ],
+            "allowedElements": [
+                "301",
+                "302",
+                "303"
+            ],
+            "noSections": ["302"],
+            "contains": [{
+                "sourceType": "reference",
+                "source": "301",
+                "sourceProperty": "documentation",
+                "type": "Paragraph"
+            }],
+            "type": "Product"
+        }
+    },
+    {
+        "siteCharacterizationId": "europa",
+        "qualifiedId": "/europa/123456/multRedefPackage/SomeOtherClass",
+        "nodeRefId": "versionStore://version2Store/d99127cc-1574-446c-9603-a11a06432ab6",
+        "versionedRefId": "versionStore://version2Store/b5f95488-7efb-42fa-8807-9eee9be233b4",
+        "qualifiedName": "/europa/JW_TEST/multRedefPackage/SomeOtherClass",
+        "sysmlid": "SomeOtherClass",
+        "editable": true,
+        "modified": "2016-02-20T22:17:50.673-0800",
+        "creator": "admin",
+        "modifier": "admin",
+        "created": "Sat Feb 20 22:17:50 PST 2016",
+        "name": "SomeOtherClass",
+        "documentation": "another class for testing the 'redefines' attribute of a Property",
+        "owner": "multRedefPackage",
+        "read": "2016-02-20T22:17:52.146-0800",
+        "specialization": {"type": "Element"}
+    },
+    {
+        "siteCharacterizationId": "europa",
+        "qualifiedId": "/europa/123456/4000",
+        "nodeRefId": "versionStore://version2Store/281bdd8e-21cd-4f1b-8a63-b1c8540a249a",
+        "versionedRefId": "versionStore://version2Store/281bdd8e-21cd-4f1b-8a63-b1c8540a249a",
+        "qualifiedName": "/europa/JW_TEST/400",
+        "sysmlid": "4000",
+        "editable": true,
+        "modified": "2016-02-20T22:17:47.759-0800",
+        "creator": "admin",
+        "modifier": "admin",
+        "created": "Sat Feb 20 22:17:45 PST 2016",
+        "name": "400",
+        "documentation": "4something",
+        "owner": "123456",
+        "read": "2016-02-20T22:17:52.148-0800",
+        "specialization": {
+            "propertyType": null,
+            "isSlot": false,
+            "isDerived": false,
+            "value": [{
+                "string": "dlam_string",
+                "type": "LiteralString"
+            }],
+            "type": "Property"
+        }
+    },
+    {
+        "siteCharacterizationId": "europa",
+        "qualifiedId": "/europa/123456/4000/401",
+        "nodeRefId": "versionStore://version2Store/4c8452d1-080d-4d43-b3db-554daeb782a5",
+        "versionedRefId": "versionStore://version2Store/4c8452d1-080d-4d43-b3db-554daeb782a5",
+        "qualifiedName": "/europa/JW_TEST/400/401",
+        "sysmlid": "401",
+        "editable": true,
+        "modified": "2016-02-20T22:17:51.384-0800",
+        "creator": "admin",
+        "modifier": "admin",
+        "created": "Sat Feb 20 22:17:45 PST 2016",
+        "name": "401",
+        "documentation": "4else",
+        "owner": "4000",
+        "read": "2016-02-20T22:17:52.151-0800",
+        "specialization": {
+            "view2view": [{
+                "childrenViews": [
+                    "401",
+                    "402"
+                ],
+                "sysmlid": "401"
+            }],
+            "childrenViews": ["404"],
+            "displayedElements": [
+                "401",
+                "402",
+                "403"
+            ],
+            "allowedElements": [
+                "401",
+                "402",
+                "403"
+            ],
+            "noSections": ["402"],
+            "contains": [{
+                "sourceType": "reference",
+                "source": "401",
+                "sourceProperty": "documentation",
+                "type": "Paragraph"
+            }],
+            "type": "Product"
+        }
+    },
+    {
+        "siteCharacterizationId": "europa",
+        "qualifiedId": "/europa/123456/multRedefPackage/multDefGeneralization",
+        "nodeRefId": "versionStore://version2Store/c9122d9b-7a15-4425-bd54-006bacc320e1",
+        "versionedRefId": "versionStore://version2Store/c9122d9b-7a15-4425-bd54-006bacc320e1",
+        "qualifiedName": "/europa/JW_TEST/multRedefPackage/multDefGeneralization",
+        "sysmlid": "multDefGeneralization",
+        "editable": true,
+        "modified": "2016-02-20T22:17:50.937-0800",
+        "creator": "admin",
+        "modifier": "admin",
+        "created": "Sat Feb 20 22:17:50 PST 2016",
+        "name": "multDefGeneralization",
+        "documentation": "generalization for testing the 'redefines' attribute of a Property",
+        "owner": "multRedefPackage",
+        "read": "2016-02-20T22:17:52.155-0800",
+        "specialization": {
+            "source": "SomeOtherClass",
+            "target": "SomeClass",
+            "type": "Generalization"
+        }
+    },
+    {
+        "siteCharacterizationId": "europa",
+        "qualifiedId": "/europa/123456/multRedefPackage/SomeClass",
+        "nodeRefId": "versionStore://version2Store/652d1700-59ac-4891-bf72-973efcd847e4",
+        "versionedRefId": "versionStore://version2Store/48d31de4-983e-4a53-b632-3632b4f2f561",
+        "qualifiedName": "/europa/JW_TEST/multRedefPackage/SomeClass",
+        "sysmlid": "SomeClass",
+        "editable": true,
+        "modified": "2016-02-20T22:17:50.815-0800",
+        "creator": "admin",
+        "modifier": "admin",
+        "created": "Sat Feb 20 22:17:50 PST 2016",
+        "name": "SomeClass",
+        "documentation": "class for testing the 'redefines' attribute of a Property",
+        "owner": "multRedefPackage",
+        "read": "2016-02-20T22:17:52.157-0800",
+        "specialization": {"type": "Element"}
+    },
+    {
+        "siteCharacterizationId": "europa",
+        "qualifiedId": "/europa/123456/multRedefPackage",
+        "nodeRefId": "versionStore://version2Store/a6c5a49f-1159-49cb-bd3c-88640b3f9d65",
+        "versionedRefId": "versionStore://version2Store/a6c5a49f-1159-49cb-bd3c-88640b3f9d65",
+        "qualifiedName": "/europa/JW_TEST/multRedefPackage",
+        "sysmlid": "multRedefPackage",
+        "editable": true,
+        "modified": "2016-02-20T22:17:50.640-0800",
+        "creator": "admin",
+        "modifier": "admin",
+        "created": "Sat Feb 20 22:17:50 PST 2016",
+        "name": "multRedefPackage",
+        "documentation": "package for testing multiplicity and redefines attributes of Property",
+        "owner": "123456",
+        "read": "2016-02-20T22:17:52.159-0800",
+        "specialization": {"type": "Package"}
+    },
+    {
+        "nodeRefId": "workspace://SpacesStore/aee1d0ef-6454-472a-a8ee-57c1bd5f9a13",
+        "qualifiedId": "/europa/123456",
+        "versionedRefId": "workspace://SpacesStore/aee1d0ef-6454-472a-a8ee-57c1bd5f9a13",
+        "qualifiedName": "/europa/JW_TEST",
+        "sysmlid": "123456",
+        "editable": true,
+        "creator": "admin",
+        "modified": "2016-02-20T22:17:50.224-0800",
+        "modifier": "admin",
+        "created": "Sat Feb 20 22:17:43 PST 2016",
+        "name": "JW_TEST",
+        "owner": null,
+        "read": "2016-02-20T22:17:52.162-0800"
+    },
+    {
+        "siteCharacterizationId": "europa",
+        "qualifiedId": "/europa/123456/holding_bin_123456/YY_2016_123456",
+        "nodeRefId": "versionStore://version2Store/9df6587a-09ee-4468-9431-3e484e433b24",
+        "versionedRefId": "versionStore://version2Store/9df6587a-09ee-4468-9431-3e484e433b24",
+        "qualifiedName": "/europa/JW_TEST/holding_bin_123456/YY_2016_123456",
+        "sysmlid": "YY_2016_123456",
+        "editable": true,
+        "creator": "admin",
+        "modified": "2016-02-20T22:17:46.977-0800",
+        "modifier": "admin",
+        "created": "Sat Feb 20 22:17:44 PST 2016",
+        "name": "YY_2016_123456",
+        "owner": "holding_bin_123456",
+        "read": "2016-02-20T22:17:52.164-0800",
+        "specialization": {"type": "Package"}
+    },
+    {
+        "siteCharacterizationId": "europa",
+        "qualifiedId": "/europa/123456/300/500",
+        "nodeRefId": "versionStore://version2Store/ffa443f8-aa4f-4dc4-831c-411165681656",
+        "versionedRefId": "versionStore://version2Store/ffa443f8-aa4f-4dc4-831c-411165681656",
+        "qualifiedName": "/europa/JW_TEST/300/500",
+        "sysmlid": "500",
+        "editable": true,
+        "modified": "2016-02-20T22:17:46.850-0800",
+        "creator": "admin",
+        "modifier": "admin",
+        "created": "Sat Feb 20 22:17:44 PST 2016",
+        "name": "500",
+        "documentation": "directed_relationship",
+        "owner": "300",
+        "read": "2016-02-20T22:17:52.166-0800",
+        "specialization": {
+            "source": "302",
+            "target": "303",
+            "type": "DirectedRelationship"
+        }
+    },
+    {
+        "siteCharacterizationId": "europa",
+        "qualifiedId": "/europa/123456/300",
+        "nodeRefId": "versionStore://version2Store/17cdda31-80c0-42bd-abd2-0ed37f1e27b2",
+        "versionedRefId": "versionStore://version2Store/17cdda31-80c0-42bd-abd2-0ed37f1e27b2",
+        "qualifiedName": "/europa/JW_TEST/300",
+        "sysmlid": "300",
+        "editable": true,
+        "modified": "2016-02-20T22:17:46.236-0800",
+        "creator": "admin",
+        "modifier": "admin",
+        "created": "Sat Feb 20 22:17:43 PST 2016",
+        "name": "300",
+        "documentation": "something",
+        "owner": "123456",
+        "read": "2016-02-20T22:17:52.168-0800",
+        "specialization": {
+            "propertyType": null,
+            "isSlot": false,
+            "isDerived": false,
+            "value": [{
+                "string": "dlam_string",
+                "type": "LiteralString"
+            }],
+            "type": "Property"
+        }
+    },
+    {
+        "siteCharacterizationId": "europa",
+        "qualifiedId": "/europa/123456/dlam",
+        "nodeRefId": "versionStore://version2Store/6b63c741-e0f9-447e-8ca5-abcfaa8f5ec3",
+        "versionedRefId": "versionStore://version2Store/6b63c741-e0f9-447e-8ca5-abcfaa8f5ec3",
+        "qualifiedName": "/europa/JW_TEST/dlam",
+        "sysmlid": "dlam",
+        "editable": true,
+        "modified": "2016-02-20T22:17:46.903-0800",
+        "creator": "admin",
+        "modifier": "admin",
+        "created": "Sat Feb 20 22:17:44 PST 2016",
+        "name": "dlam",
+        "documentation": "to make compatible with value specs (this is just a Element)",
+        "owner": "123456",
+        "read": "2016-02-20T22:17:52.171-0800",
+        "specialization": {"type": "Element"}
+    },
+    {
+        "siteCharacterizationId": "europa",
+        "qualifiedId": "/europa/123456/holding_bin_123456",
+        "nodeRefId": "versionStore://version2Store/5ab13bea-7f9e-476b-96c8-6301cc9537ee",
+        "versionedRefId": "versionStore://version2Store/5ab13bea-7f9e-476b-96c8-6301cc9537ee",
+        "qualifiedName": "/europa/JW_TEST/holding_bin_123456",
+        "sysmlid": "holding_bin_123456",
+        "editable": true,
+        "creator": "admin",
+        "modified": "2016-02-20T22:17:46.938-0800",
+        "modifier": "admin",
+        "created": "Sat Feb 20 22:17:44 PST 2016",
+        "name": "holding_bin_123456",
+        "owner": "123456",
+        "read": "2016-02-20T22:17:52.172-0800",
+        "specialization": {"type": "Package"}
+    },
+    {
+        "siteCharacterizationId": "europa",
+        "qualifiedId": "/europa/123456/found",
+        "nodeRefId": "versionStore://version2Store/4aa29236-1f11-4c0a-aa72-43d95b52145c",
+        "versionedRefId": "versionStore://version2Store/4aa29236-1f11-4c0a-aa72-43d95b52145c",
+        "qualifiedName": "/europa/JW_TEST/found",
+        "sysmlid": "found",
+        "editable": true,
+        "modified": "2016-02-20T22:17:49.797-0800",
+        "creator": "admin",
+        "modifier": "admin",
+        "created": "Sat Feb 20 22:17:49 PST 2016",
+        "name": "found",
+        "documentation": "",
+        "owner": "123456",
+        "read": "2016-02-20T22:17:52.175-0800",
+        "specialization": {
+            "specification": {
+                "expressionBody": ["foo8"],
+                "type": "OpaqueExpression"
+            },
+            "type": "Constraint"
+        }
+    }
+]}
+200

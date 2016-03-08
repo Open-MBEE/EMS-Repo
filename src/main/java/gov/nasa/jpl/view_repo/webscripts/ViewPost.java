@@ -52,6 +52,7 @@ import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
 
+@Deprecated
 public class ViewPost extends AbstractJavaWebScript {
     static Logger logger = Logger.getLogger(ViewPost.class);
     

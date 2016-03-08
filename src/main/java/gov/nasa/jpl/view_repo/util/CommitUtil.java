@@ -12,6 +12,7 @@ import gov.nasa.jpl.view_repo.webscripts.AbstractJavaWebScript;
 import gov.nasa.jpl.view_repo.webscripts.MmsDiffGet;
 import gov.nasa.jpl.view_repo.webscripts.WebScriptUtil;
 import gov.nasa.jpl.view_repo.webscripts.util.ConfigurationsWebscript;
+
 import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -45,14 +46,14 @@ public class CommitUtil {
 	public static final String TYPE_DELTA = "DELTA";
 	public static final String TYPE_MERGE = "MERGE";
 	public static boolean cleanJson = false;
-
+	
 	private CommitUtil() {
 		// defeat instantiation
 	}
 
 	private static JmsConnection jmsConnection = null;
 	private static RestPostConnection restConnection = null;
-
+	
 	public static void setJmsConnection(JmsConnection jmsConnection) {
 		if (logger.isInfoEnabled())
 			logger.info("Setting jms");
@@ -65,6 +66,7 @@ public class CommitUtil {
 		CommitUtil.restConnection = restConnection;
 	}
 
+	
 	/**
 	 * Gets the commit package in the specified workspace (creates if possible)
 	 * 
@@ -890,17 +892,27 @@ public class CommitUtil {
 				pgh.updateNodeRefIds(e.getString("sysmlid"),
 						e.getString("versionedRefId"), e.getString("nodeRefId"));
 
-				if (e.has("documentation")) {
-					String doc = (String) e.getString("documentation");
-					NodeUtil.processDocumentEdges(e.getString("sysmlid"), doc,
-							documentEdges);
-				}
-				if (e.has("specialization")
-						&& e.getJSONObject("specialization").has("view2view")) {
-					JSONArray view2viewProperty = e.getJSONObject(
-							"specialization").getJSONArray("view2view");
-					NodeUtil.processV2VEdges(e.getString("sysmlid"),
-							view2viewProperty, documentEdges);
+				// CAEDVO-3097: delete all children edges, then rebuild
+				pgh.deleteEdgesForParentNode( e.getString("sysmlid"), DbEdgeTypes.DOCUMENT );
+
+                if (e.has("documentation")) {
+                    String doc = (String) e.getString("documentation");
+                    NodeUtil.processDocumentEdges(e.getString("sysmlid"), doc,
+                            documentEdges);
+                }
+				if (e.has("specialization")) {
+				    JSONObject specialization = e.getJSONObject( "specialization" );
+                    if (specialization.has("view2view")) {
+                        JSONArray view2viewProperty = specialization.getJSONArray("view2view");
+                        NodeUtil.processV2VEdges(e.getString("sysmlid"),
+                                view2viewProperty, documentEdges);
+                    } else if (specialization.has( "contents" )) {
+                        JSONObject contents = specialization.getJSONObject( "contents" );
+                        NodeUtil.processContentsJson( e.getString("sysmlid"), contents, documentEdges );
+                    } else if (specialization.has( "instanceSpecificationSpecification" )) {
+                        JSONObject iss = specialization.getJSONObject( "instanceSpecificationSpecification" );
+                        NodeUtil.processInstanceSpecificationSpecificationJson( e.getString("sysmlid"), iss, documentEdges );
+                    }
 				}
 			}
 
