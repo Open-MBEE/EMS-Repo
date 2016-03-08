@@ -5054,7 +5054,7 @@ public class NodeUtil {
         Map< String, String > child2owner = new HashMap< String, String >();
 
         String topLevelKeys[] =
-                { "elements", "products", "views", "workspace1" };
+                { "elements", "jobs", "products", "views", "workspace1" };
         for ( int ii = 0; ii < topLevelKeys.length; ii++ ) {
             String key = topLevelKeys[ ii ];
             if ( json.has( key ) ) {
