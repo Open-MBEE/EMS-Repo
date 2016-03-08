@@ -376,7 +376,7 @@ public class PostgresHelper {
 			if (n == null)
 				return result;
 
-			String query = "SELECT N.sysmlid, N.versionedrefid FROM nodes%s N JOIN "
+			String query = "SELECT N.sysmlid, N.noderefid FROM nodes%s N JOIN "
 					+ "(SELECT * FROM get_parents(%s, %d, '%s')) P ON N.id=P.id ORDER BY P.height";
 			ResultSet rs = execQuery(String.format(query, workspaceName,
 					n.getId(), DbEdgeTypes.REGULAR.getValue(), workspaceName));
