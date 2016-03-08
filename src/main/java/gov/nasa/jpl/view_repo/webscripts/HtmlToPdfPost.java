@@ -399,24 +399,44 @@ public class HtmlToPdfPost extends AbstractJavaWebScript {
 		//head.append("<link href=\"https://fonts.googleapis.com/css?family=Droid+Serif:400,700,400italic,700italic\" rel=\"stylesheet\" type=\"text/css\" />");
 		head.append("<link href=\"css/mm-mms.styles.min.css\" rel=\"stylesheet\" type=\"text/css\" />");
 		head.append("<link href=\"css/ve-mms.styles.min.css\" rel=\"stylesheet\" type=\"text/css\" />");
-		head.append("<style type=\"text/css\">tr {page-break-inside:avoid;} .ng-hide {display:none;} TABLE {width:100%} </style>");
+		StringBuffer style = new StringBuffer();
+		style.append("<style type=\"text/css\">");
+		style.append("	TR { page-break-inside:avoid; }");
+		style.append("	.ng-hide { display:none; }");
+		style.append("	TABLE { width:100%; }");
+		style.append("	THEAD, TFOOT { display: table-row-group; }");
+		style.append("	TD, TH {");
+		style.append("		width:1%;");
+		style.append("	    overflow-wrap: break-word;");
+		style.append("	    word-wrap: break-word;");
+		style.append("	    break-word: break-word;");
+		style.append("		-ms-word-break: break-all;");
+		style.append("	    word-break: break-all;");
+		style.append("	    word-break: break-word;");
+		style.append("		-ms-hyphens: auto;");
+		style.append("		-moz-hyphens: auto;");
+		style.append("		-webkit-hyphens: auto;");
+		style.append("		hyphens: auto;");
+		style.append("	}");		
+		style.append("</style>");
+		head.append(style.toString());
 		//adding custom CSS link
 		head.append("<link href=\"css/customStyles.css\" rel=\"stylesheet\" type=\"text/css\" />");
 
 		return document.outerHtml();
 	}
 
-	protected String addJscripts(String htmlContent) throws Throwable{
-		log("Adding JavaScripts to HTML...");
-		Document document = Jsoup.parse(htmlContent, "UTF-8");
-		if(document == null){
-			throw new Throwable("Failed to parse HTML content!");
-		}
-		Element head = document.head();
-		String s = getTableVerticalSplitScript();
-		head.append(getTableVerticalSplitScript());
-		return document.outerHtml();
-	}
+//	protected String addJscripts(String htmlContent) throws Throwable{
+//		log("Adding JavaScripts to HTML...");
+//		Document document = Jsoup.parse(htmlContent, "UTF-8");
+//		if(document == null){
+//			throw new Throwable("Failed to parse HTML content!");
+//		}
+//		
+////		Element head = document.head();
+////		head.append(getTableVerticalSplitScript());
+//		return document.outerHtml();
+//	}
 	
 	/**
 	 * @param htmlFilename
@@ -448,7 +468,7 @@ public class HtmlToPdfPost extends AbstractJavaWebScript {
 			}
 			copyCssFilesToWorkingDir();
 			htmlContent = addCssLinks(htmlContent);
-			htmlContent = addJscripts(htmlContent);
+			//htmlContent = addJscripts(htmlContent);
 
 			File htmlFile = new File(htmlPath.toString());
 			BufferedWriter bw = new BufferedWriter(new FileWriter(htmlFile));
@@ -720,33 +740,61 @@ public class HtmlToPdfPost extends AbstractJavaWebScript {
 		
     	File footerFile = new File(footerPath.toString());
     	StringBuffer html = new StringBuffer();
-    	html.append("<!DOCTYPE html SYSTEM \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">");
+//    	html.append("<!DOCTYPE html SYSTEM \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">");
+    	html.append("<!DOCTYPE html>");
+    	html.append(System.lineSeparator());
         html.append("<html><head><title></title>");
+        html.append(System.lineSeparator());
         html.append("	<style type=\"text/css\">");
-        html.append("		BODY{font-family:\"Times New Roman\"; margin:0; padding: 0;}");
+        html.append(System.lineSeparator());
+        html.append("		BODY{font-family:\"Times New Roman\"; margin:0 auto; padding: 0 auto;}");
+        html.append(System.lineSeparator());
         html.append("		HR{width: 100%;margin: 0 auto;}");
-        html.append("		.itar{text-align:center;font-size:8pt;font-style:italic;font-weight:normal;}");
-        html.append("		.page{text-align:center;font-size:10pt;}");
+        html.append(System.lineSeparator());
+        html.append("		.itar{position:relative;margin-bottom:9px;text-align:center;font-size:8pt;font-style:italic;font-weight:normal;line-height:9px;}");
+        html.append(System.lineSeparator());
+        html.append("		.page{text-align:center;font-size:8pt;}");
+        html.append(System.lineSeparator());
         html.append("	</style>");
+        html.append(System.lineSeparator());
         html.append("</head>");
+        html.append(System.lineSeparator());
      	html.append("<body>");
+     	html.append(System.lineSeparator());
      	html.append(" 	<hr/>");
+     	html.append(System.lineSeparator());
  		html.append("	<div class=\"page\"></div>");
+ 		html.append(System.lineSeparator());
  		html.append("		<div class=\"itar\">");
+ 		html.append(System.lineSeparator());
  		html.append(footerContent);
+ 		html.append(System.lineSeparator());
  		html.append("		</div>");
+ 		html.append(System.lineSeparator());
  		html.append("		<script type=\"text/javascript\">");
+ 		html.append(System.lineSeparator());
         html.append("			(function() {");
+        html.append(System.lineSeparator());
         html.append("			var vars={};");
+        html.append(System.lineSeparator());
         html.append("			var x=document.location.search.substring(1).split('&');");
+        html.append(System.lineSeparator());
         html.append("			for(var i in x) {var z=x[i].split('=',2);vars[z[0]] = unescape(z[1]);}");
+        html.append(System.lineSeparator());
         html.append("			var x=['frompage','topage','page','webpage','section','subsection','subsubsection'];");
+        html.append(System.lineSeparator());
         html.append("			for(var i in x) {");
+        html.append(System.lineSeparator());
         html.append("				var y = document.getElementsByClassName(x[i]);");
+        html.append(System.lineSeparator());
         html.append("				for(var j=0; j<y.length; ++j) y[j].textContent = vars[x[i]]-3;");
+        html.append(System.lineSeparator());
         html.append("			}");
+        html.append(System.lineSeparator());
         html.append("		})();");
+        html.append(System.lineSeparator());
         html.append("		</script>");
+        html.append(System.lineSeparator());
  		html.append("</body></html>");
  		BufferedWriter bw = new BufferedWriter(new FileWriter(footerFile));
         bw.write(html.toString());
@@ -769,24 +817,43 @@ public class HtmlToPdfPost extends AbstractJavaWebScript {
 		}
 			
 		html.append("<!DOCTYPE html SYSTEM \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">");
+		html.append(System.lineSeparator());
 		html.append("<html xmlns=\"http://www.w3.org/1999/xhtml\">");
+		html.append(System.lineSeparator());
 		html.append("    <head>");
+		html.append(System.lineSeparator());
 		html.append("        <title></title>");
+		html.append(System.lineSeparator());
 		html.append("        <style type=\"text/css\">");
+		html.append(System.lineSeparator());
 		html.append("            BODY{");
+		html.append(System.lineSeparator());
 		html.append("				font-size:8pt;font-family: \"Times New Roman\";");
+		html.append(System.lineSeparator());
 		html.append("				margin: 0 auto;}");
+		html.append(System.lineSeparator());
 		html.append("            HR{ width: 100%;}");
+		html.append(System.lineSeparator());
 		html.append("            .container{ }");
-		html.append("            .child{ margin: 5px 0 5px 0;overflow:hidden;}");
-		html.append("            .left{ float:left; width:74%;}");
-		html.append("            .right{float:right; width:25%;text-align:right;}");
+		html.append(System.lineSeparator());
+		html.append("            .child{ margin: 5px 0 5px 0;overflow:hidden;line-heigh:11px;}");
+		html.append(System.lineSeparator());
+		html.append("            .left{ float:left; width:84%;}");
+		html.append(System.lineSeparator());
+		html.append("            .right{float:right; width:15%;text-align:right;}");
+		html.append(System.lineSeparator());
 		html.append("			</style>");
+		html.append(System.lineSeparator());
 		html.append("    </head>");
+		html.append(System.lineSeparator());
 		html.append("    <body>");
+		html.append(System.lineSeparator());
 		html.append("        <div class=\"container\">");
+		html.append(System.lineSeparator());
 		html.append("            <div class=\"child left\">");
+		html.append(System.lineSeparator());
 		html.append(headerContent);
+		html.append(System.lineSeparator());
 //			html.append("                <div class=\"docNum\">");
 //			if(!Utils.isNullOrEmpty(docNum)) html.append(docNum);
 //			html.append("				</div>");
@@ -794,15 +861,24 @@ public class HtmlToPdfPost extends AbstractJavaWebScript {
 //			html.append(tagId);
 //			html.append("				</div>");
 		html.append("            </div>");
+		html.append(System.lineSeparator());
 		html.append("            <div class=\"child right\">");
+		html.append(System.lineSeparator());
 		html.append("                <div class=\"date\">");
+		html.append(System.lineSeparator());
 //			html.append(getFormattedDate(d));
 		html.append(displayTime);
+		html.append(System.lineSeparator());
 		html.append("				</div>");
+		html.append(System.lineSeparator());
 		html.append("            </div>");
+		html.append(System.lineSeparator());
 		html.append("            <hr/>");
+		html.append(System.lineSeparator());
 		html.append("        </div>");
+		html.append(System.lineSeparator());
 		html.append("    </body>");
+		html.append(System.lineSeparator());
 		html.append("</html>");
 
 		BufferedWriter bw = new BufferedWriter(new FileWriter(headerFile));

@@ -102,12 +102,12 @@ public class HtmlToPdfActionExecuter extends ActionExecuterAbstractBase {
 				htmlContent, coverContent, headerContent, footerContent, docNum, displayTime, customCss);
 			response.append(htmlToPdf.getResponse().toString());
 			response.append("Sending email to user...");
-//			htmlToPdf.cleanupFiles();
 		}
 		catch(Throwable ex){
-			
+			ex.printStackTrace();
 		}
 		finally{
+			htmlToPdf.cleanupFiles();
 			sendEmail(jobNode, pdfNode, response);
 		}
 	}
@@ -150,8 +150,11 @@ public class HtmlToPdfActionExecuter extends ActionExecuterAbstractBase {
 		
 		EmsScriptNode parentNode = pdfNode.getParent();
 		if(parentNode != null){
+			String shareUrl = hostnameGet.getShareUrl();
 			buf.append("Directory link: ");
-			buf.append(contextUrl + parentNode.getUrl());
+			buf.append(shareUrl);
+			buf.append("/share/page/context/mine/myfiles#filter=path%7C%2F");
+			buf.append(parentNode.getName());
 			buf.append(System.lineSeparator());
 			buf.append(System.lineSeparator());
 		}
