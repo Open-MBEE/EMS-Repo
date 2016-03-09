@@ -4,6 +4,7 @@ import gov.nasa.jpl.mbee.util.Debug;
 import gov.nasa.jpl.mbee.util.Pair;
 import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.mbee.util.Utils;
+import gov.nasa.jpl.view_repo.db.PostgresHelper;
 import gov.nasa.jpl.view_repo.util.JsonDiffDiff.DiffOp;
 import gov.nasa.jpl.view_repo.util.JsonDiffDiff.DiffType;
 import gov.nasa.jpl.view_repo.webscripts.AbstractJavaWebScript;
@@ -956,7 +957,12 @@ public class WorkspaceDiff implements Serializable {
         }
 
         JSONArray array = new JSONArray();
-        for (EmsScriptNode node: map.values()) {
+        Map<String, JSONObject> elementJsonMap = 
+                new LinkedHashMap< String, JSONObject >();
+                
+        for (Map.Entry< String, EmsScriptNode > entry : map.entrySet()) {
+            String sysmlid = entry.getKey();
+            EmsScriptNode node = entry.getValue();
             // Make sure the element exists at the dateTime.
             if ( node != null ) {
                 NodeRef r = NodeUtil.getNodeRefAtTime( node.getNodeRef(),
@@ -999,13 +1005,40 @@ public class WorkspaceDiff implements Serializable {
 
             // diffs don't need to have qualified
             JSONObject jsonObject =
-                    webscript == null ?
-                    node.toJSONObject( filter, false, workspace, dateTime,
-                                       includeQualified, false, version, null ) :
-                    webscript.getJsonForElementAndJob( node, filter, false, workspace, dateTime,
-                                                       includeQualified, false,
-                                                       version, null );
+                    //webscript == null ?
+                                       node.toJSONObject( filter, false,
+                                                           workspace, dateTime,
+                                                           includeQualified,
+                                                           false, version, null )
+                                      //: webscript.getJsonForElementAndJob( node,
+                                      //                 filter, false, workspace,
+                                      //                 dateTime, includeQualified,
+                                      //                 false, version, null )
+                                                           ;
             array.put( jsonObject );
+            elementJsonMap.put( sysmlid, jsonObject );
+        }
+        
+        // Add json for job elements whose Properties are posted without changes
+        // to the job.
+        ArrayList< String > jobIds = 
+                webscript.getJobsIdsForPropertyElementJson( elementJsonMap, workspace );
+        for ( String jobId : jobIds ) {
+            // add placeholder json for job
+            JSONObject jobJson = new JSONObject();
+            jobJson.put( "sysmlid", jobId );
+            elementJsonMap.put( jobId, jobJson );
+        }
+        
+        for (Entry< String, JSONObject > entry : elementJsonMap.entrySet()) {
+            String sysmlid = entry.getKey();
+            EmsScriptNode node = map.get( sysmlid );
+            if ( node == null ) {
+                node = NodeUtil.getNodeFromSysmlIdViaPostgres( sysmlid, workspace );
+            }
+            JSONObject jsonObject = entry.getValue();
+            if ( jsonObject == null ) continue;
+            webscript.getJsonForJob(node, jsonObject);
         }
 
         return array;

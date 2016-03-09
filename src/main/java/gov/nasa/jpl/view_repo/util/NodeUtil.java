@@ -62,7 +62,6 @@ import org.alfresco.service.cmr.repository.ContentData;
 import org.alfresco.service.cmr.repository.ContentWriter;
 import org.alfresco.service.cmr.repository.InvalidNodeRefException;
 import org.alfresco.service.cmr.repository.NodeRef;
-import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.search.LimitBy;
 import org.alfresco.service.cmr.search.ResultSet;
@@ -79,11 +78,6 @@ import org.alfresco.service.cmr.version.VersionHistory;
 import org.alfresco.service.namespace.NamespaceService;
 import org.alfresco.service.namespace.QName;
 import org.apache.commons.logging.Log;
-import org.apache.http.HttpResponse;
-import org.apache.http.HttpStatus;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -4705,6 +4699,13 @@ public class NodeUtil {
         return result;
     }
     
+    public static EmsScriptNode getNodeFromSysmlIdViaPostgres( String sysmlid, WorkspaceNode workspace ) {
+        PostgresHelper pgh = new PostgresHelper( getWorkspaceId( workspace ) );
+        Node node = pgh.getNodeFromSysmlId( sysmlid );
+        EmsScriptNode esn = NodeUtil.getNodeFromPostgresNode( node );
+        return esn;
+    }
+
     public static EmsScriptNode getNodeFromPostgresNode( Node pgnode ) {
         if ( pgnode == null ) return null;
         return new EmsScriptNode( new NodeRef( pgnode.getNodeRefId() ),

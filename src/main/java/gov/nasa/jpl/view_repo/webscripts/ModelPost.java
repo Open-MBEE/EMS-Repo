@@ -2901,12 +2901,12 @@ public class ModelPost extends AbstractJavaWebScript {
                                                               0, false );
                             }
                             if ( json == null ) {
-                                boolean isQualified = NodeUtil.doPostProcessQualified;                     
+                                boolean isQualified = NodeUtil.doPostProcessQualified;
                                 json = getJsonForElementAndJob( element, null, false, workspace, 
                                                           null, element.getSysmlId(), 
                                                           isQualified, false );
-                            }						    
-						    
+                            }
+
 							elementsJson.put(json);
 							elementsJsonMap.put(element, json);
 						}

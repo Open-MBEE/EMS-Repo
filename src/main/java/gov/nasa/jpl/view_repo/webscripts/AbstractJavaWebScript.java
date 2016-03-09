@@ -57,7 +57,6 @@ import gov.nasa.jpl.view_repo.util.EmsTransaction;
 import gov.nasa.jpl.view_repo.util.JsonDiffDiff.DiffType;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
 import gov.nasa.jpl.view_repo.util.NodeUtil.SearchType;
-import gov.nasa.jpl.view_repo.webscripts.ModelSearch.UnsupportedSearchException;
 import gov.nasa.jpl.view_repo.util.WorkspaceDiff;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 
@@ -2621,7 +2620,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
             if ( propertyValue != null && jobJson.has( propertyName ) ) {
                 Utils.put( propertyValues, jobId, propertyName, propertyValue );
             }
-            else jobJson.put( "name", propertyName );
+//            else jobJson.put( "name", propertyName );
    
             // Update or create the property json. The returned json is null
             // unless new element json was added.
@@ -2676,21 +2675,19 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
             return false;
         }
 
-        for ( String propertyName : jobProperties ) {
-            // trying to map out the property name with an object to
-            // identify the name coming from MD
-            String propertyId = elementJson.getString( "sysmlid" );
-            // split the string and get the defining feature 
-            String[] slotIdParts = propertyId.split( "-slot-" );
-            // then compare it and set it when they map correctly
-            if( slotIdParts.length > 1 ) {
-                String definingFeatureIdForSlot = slotIdParts[1];
+        // trying to map out the property name with an object to
+        // identify the name coming from MD
+        String propertyId = elementJson.getString( "sysmlid" );
+        // split the string and get the defining feature 
+        String[] slotIdParts = propertyId.split( "-slot-" );
+        // then compare it and set it when they map correctly
+        if( slotIdParts.length > 1 ) {
+            String definingFeatureIdForSlot = slotIdParts[1];
+            for ( String propertyName : jobProperties ) {
                 if( definingFeatures.get( propertyName ).equals( definingFeatureIdForSlot ) ) {
                     elementJson.put( "name", propertyName );
                     return true;
                 }
-                // go to the next property name
-                continue;
             }
         }
         return false;
@@ -2735,7 +2732,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
      * @param createNewJob
      * @param jobNode
      * @param elements
-     * @return
+     * @return the property json if it is newly created
      */
     public JSONObject putJobProperty( String propertyName,
                                       JSONObject property,
@@ -2750,10 +2747,10 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         // check to see if the property value can be grabbed already, 
         // whether it comes in as a job or element 
         // if so, store it
-        if( property.has(  propertyName ))
+        if( property.has(  propertyName )) {
             propertyValue = property.optString( propertyName );
-        else if( !property.optString( "name" ).equals( propertyName ) ) {
-            return null;
+//        else if( !property.optString( "name" ).equals( propertyName ) ) {
+//            return null;
         }
 
         
@@ -2818,7 +2815,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         }
 
         // add name
-        propertyJson.put( "name", propertyName );
+        //propertyJson.put( "name", propertyName );
 
         // Make sure we have an id for the property.
         if ( Utils.isNullOrEmpty( propertyId ) ) {
@@ -2851,6 +2848,14 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         return propertyJson;
     }
     
+    /**
+     * Get the JSONObject, if it exists, in the input JSONArray with the
+     * specified sysmlid.
+     * 
+     * @param propertyId
+     * @param elements
+     * @return the JSONObject or null if not found
+     */
     protected JSONObject getPropertyJson( String propertyId, JSONArray elements ) {
         if ( propertyId == null ) return null;
         JSONObject propertyJson = null;//new JSONObject();
@@ -2894,6 +2899,30 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         return jobId;
     }
     
+    /**
+     * Add json for job elements whose Properties are posted without the job.
+     * We do this because only jobs that show up in the json are processed.
+     * @param elements
+     * @return
+     */
+    public ArrayList< String >
+          getJobsIdsForPropertyElementJson( Map< String, JSONObject > elementMap,
+                                            WorkspaceNode workspace ) {
+        ArrayList< String > jobIds = new ArrayList< String >();
+        for ( JSONObject elem : elementMap.values() ) {
+            if ( elem == null ) continue;
+            EmsScriptNode job =
+                    getOwningJobOfPropertyJson( elem, workspace, null );
+            if ( job != null ) {
+                String jobId = job.getSysmlId();
+                if ( jobId != null && !elementMap.containsKey( jobId ) ) {
+                    jobIds.add( jobId );
+                }
+            }
+        }
+        return jobIds;
+    }
+    
     protected void processJobsJson( JSONObject json, WorkspaceNode workspace ) {
         if ( json == null ) return;
 
@@ -2907,6 +2936,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
             json.put( "elements", elements );
         }
 
+        // Create an elementMap for quick lookup of element JSONObjects.
         Map< String, JSONObject > elementMap = new LinkedHashMap< String, JSONObject >();
         for ( int i = 0; i < elements.length(); i++ ) {
             JSONObject elem = elements.optJSONObject( i );
@@ -2918,21 +2948,13 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         
         // Add json for job elements whose Properties are posted without the job.
         // We do this because only jobs that show up in the json are processed.
-        int length = elements.length();  // get length before loop since we will append to elements
-        for ( int i = 0; i < length; i++ ) {
-            JSONObject elem = elements.optJSONObject( i );
-            if ( elem == null ) continue;
-            EmsScriptNode job = getOwningJobOfPropertyJson( elem, workspace, null );
-            if ( job != null ) {
-                String jobId = job.getSysmlId();
-                if ( jobId != null && !elementMap.containsKey( jobId ) ) {
-                    // add placeholder json for job
-                    JSONObject jobJson = new JSONObject();
-                    jobJson.put( "sysmlid", jobId );
-                }
-                
-            }
-        }        
+        ArrayList< String > jobIds = getJobsIdsForPropertyElementJson( elementMap, workspace );
+        for ( String jobId : jobIds ) {
+            // add placeholder json for job
+            JSONObject jobJson = new JSONObject();
+            jobJson.put( "sysmlid", jobId );
+            elements.put( jobJson );
+        }
 
         HashMap<String, Boolean> createNewJob = new HashMap<String, Boolean>();
         
@@ -2946,7 +2968,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
                 boolean isNew = processJobAsElement( elem, elements, elementMap, workspace );
                 String id = getJobIdFromJson( elem, false );
                 if( id != null ) createNewJob.put( id, isNew );   
-            } 
+            }
         }
 
         // Generate or update element json for each of the properties.
@@ -2959,6 +2981,8 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
             }
         }
         
+        // FIXME -- Don't send the jenkins config until the post is complete; in
+        // fact, the propertyValues should be gathered after the fact.
         for ( String jobId : propertyValues.keySet() ) {
             Map< String, String > properties = propertyValues.get( jobId );            
             createJenkinsConfig( jobId, properties, createNewJob.get( jobId ) == true );
