@@ -3003,15 +3003,6 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         return null;
     }
     
-    protected JSONObject jobOrEle( EmsScriptNode element, WorkspaceNode ws,
-                                   Date dateTime, String id,
-                                   boolean includeQualified,
-                                   boolean isIncludeDocument ) {
-        return element.toJSONObject( ws, dateTime, includeQualified,
-                                     isIncludeDocument,
-                                     elementProperties.get( id ) );
-    }
-    
     public void postProcessJson( JSONObject top ) {
         // redefine this if you want to add jobs or other things; see
         // JobGet.postProcessJson()

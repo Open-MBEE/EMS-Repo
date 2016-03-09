@@ -242,6 +242,7 @@ public class JenkinsBuildConfig {
                 File tomcat = new File( sysEnvStr ); 
                 String curDir = null;
                 
+                // try to get the tomcat environment var to find the file
                 if( Util.isEmptyString( sysEnvStr ) || tomcat == null) {
                     curDir = System.getProperty( "user.dir" ); 
                 }
