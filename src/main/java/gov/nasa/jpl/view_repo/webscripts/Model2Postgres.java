@@ -140,7 +140,13 @@ public class Model2Postgres extends AbstractJavaWebScript {
 		List<Pair<String, String>> edges = new ArrayList<Pair<String, String>>();
 		List<Pair<String, String>> documentEdges = new ArrayList<Pair<String, String>>();
 
+		int count = 0;
+		int numSites = sites.size();
 		for (SiteInfo siteInfo : sites) {
+		    count++;
+		    if (logger.isInfoEnabled()) {
+		        logger.info( String.format("Processing %d of %d: %s", count, numSites, siteInfo.getShortName()) );
+		    }
 			JSONObject siteJson = new JSONObject();
 
 			siteRef = siteInfo.getNodeRef();
@@ -181,6 +187,10 @@ public class Model2Postgres extends AbstractJavaWebScript {
 			}
 		}
 
+        if (logger.isInfoEnabled()) {
+            logger.info( "Inserting edges into DB" );
+        }
+
 		try {
 			pgh.connect();
 			for (Pair<String, String> entry : edges) {
@@ -202,6 +212,10 @@ public class Model2Postgres extends AbstractJavaWebScript {
 			e.printStackTrace();
 		}
 
+        if (logger.isInfoEnabled()) {
+            logger.info( "Completed edge insertions" );
+        }
+
 		return json;
 	}
 
@@ -212,9 +226,6 @@ public class Model2Postgres extends AbstractJavaWebScript {
 
 		int i = 0;
 
-		if (logger.isInfoEnabled()) {
-		    logger.info( "inserting nodes and creating documentation edges" );
-		}
 		if (!n.getSysmlId().endsWith( "_pkg" )) {
         		pgh.insertNode(n.getNodeRef().toString(),
         				NodeUtil.getVersionedRefId(n), n.getSysmlId());
@@ -242,9 +253,6 @@ public class Model2Postgres extends AbstractJavaWebScript {
     			}
 		}
 
-        if (logger.isInfoEnabled()) {
-            logger.info( "creating edges" );
-        }
 		try {
         		// traverse alfresco containment since ownedChildren may not be accurate
             for (EmsScriptNode cn : n.getChildNodes()) {
@@ -264,10 +272,6 @@ public class Model2Postgres extends AbstractJavaWebScript {
 		    logger.error( String.format("could not get children for parent %s:", n.getId()) );
 		    mnre.printStackTrace();
 		}
-
-		if (logger.isInfoEnabled()) {
-            logger.info( "completed inserting nodes" );
-        }
 
 		return i;
 	}

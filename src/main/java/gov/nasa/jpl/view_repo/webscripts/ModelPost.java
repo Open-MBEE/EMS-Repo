@@ -920,7 +920,7 @@ public class ModelPost extends AbstractJavaWebScript {
 
         Map<String, String> child2OwnerMap = new HashMap<String, String>();
         Set<String> elementIds = new HashSet<String>();
-        
+
         // build child to owner map
         for ( int ii = 0; ii < jsonArray.length(); ii++ ) {
             JSONObject elementJson = jsonArray.getJSONObject( ii );
@@ -961,10 +961,14 @@ public class ModelPost extends AbstractJavaWebScript {
             }
         }
         
+
+        // get project node if being posted to site - override if found element
+        updateProjectNodeId( workspace );
         for ( String sysmlId: elementIds) {
             EmsScriptNode element = findScriptNodeById( sysmlId, workspace, null, true );
             if ( element != null ) {
                 foundElements.put( sysmlId, element );
+                projectNodeId = null;
                 updateProjectNodeId( workspace );
             } else {
                 newElements.add( sysmlId );

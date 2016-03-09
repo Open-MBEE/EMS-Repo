@@ -68,7 +68,7 @@ public class HtmlToPdfPost extends AbstractJavaWebScript {
 	protected UUID guid = UUID.randomUUID();
 	
 	//dir containing full doc generation resources (prerenderer.io, phantomJS, wkhtmltopdf)
-	protected String fullDocGenDir = "/opt/local/fullDocGen/";
+	protected String fullDocGenDir = "/usr/local/bin/";
 //	protected String htmlPath;
 	private String user, storeName, nodeId, filename;
 	
