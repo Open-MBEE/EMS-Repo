@@ -502,7 +502,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
      * @param dateTime
 	 * @return		ScriptNode with name if found, null otherwise
 	 */
-	protected EmsScriptNode findScriptNodeById(String id,
+	public EmsScriptNode findScriptNodeById(String id,
 	                                           WorkspaceNode workspace,
 	                                           Date dateTime, boolean findDeleted) {
 	    return findScriptNodeById( id, workspace, dateTime, findDeleted, null );
@@ -2570,13 +2570,11 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
             
             if( EmsScriptNode.maybeJobProperty( property ) ) {
                 // Save away the property values getJobProperty
-                boolean isJobProperty = processJobPropertyAsElement( property, elements, elementMap, workspace );
+                String identifiedJobProperty = processJobPropertyAsElement( property, elements, elementMap, workspace );
                 
-                if( isJobProperty ) {
-                    for ( String propertyName : jobProperties ) {
-                        putJobProperty( propertyName, property, false, jobNode, jobId,
-                                        elements );
-                    }        
+                if( !Utils.isNullOrEmpty( identifiedJobProperty ) ) {
+                        putJobProperty( identifiedJobProperty, property, false, jobNode, jobId,
+                                        elements );                     
                 }
             }
         }
@@ -2620,7 +2618,6 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
             if ( propertyValue != null && jobJson.has( propertyName ) ) {
                 Utils.put( propertyValues, jobId, propertyName, propertyValue );
             }
-//            else jobJson.put( "name", propertyName );
    
             // Update or create the property json. The returned json is null
             // unless new element json was added.
@@ -2633,7 +2630,6 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
                 // Remove the property from the job json so that we can use it
                 // as the element json for the model post.
                 if( jobJson.has( propertyName ) ) jobJson.remove( propertyName );
-                else if( jobJson.has( "name" ) ) jobJson.remove( "name" );
             }
 
             // Use job json as element json and move to "elements" array. The
@@ -2667,12 +2663,12 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
      * @param workspace
      * @param isElement
      */
-    protected boolean processJobPropertyAsElement(JSONObject elementJson, JSONArray elements,
+    protected String processJobPropertyAsElement(JSONObject elementJson, JSONArray elements,
                                                Map<String, JSONObject> elementMap,
                                                WorkspaceNode workspace ) {
         if ( elementJson == null ) {
             log( Level.ERROR, "Bad job json: " + elementJson );
-            return false;
+            return null;
         }
 
         // trying to map out the property name with an object to
@@ -2685,37 +2681,38 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
             String definingFeatureIdForSlot = slotIdParts[1];
             for ( String propertyName : jobProperties ) {
                 if( definingFeatures.get( propertyName ).equals( definingFeatureIdForSlot ) ) {
-                    elementJson.put( "name", propertyName );
-                    return true;
+                    return propertyName;
                 }
             }
         }
-        return false;
+        return null;
     }
 
-    public EmsScriptNode getJobPropertyNode(EmsScriptNode jobNode, Object propertyName  ) {
+    public EmsScriptNode getJobPropertyNode( EmsScriptNode jobNode, String propertyName ) {
         if( jobNode == null )
-            return null;
+            return null;        
+        Collection<EmsScriptNode> slots = jobNode.getAllSlots( jobNode, 
+                                                               false, null, null, 
+                                                               services, response, responseStatus, null );
         
-        Collection< EmsScriptNode > statusNodes =
-                getSystemModel().getProperty( jobNode, propertyName );
-        
-        EmsScriptNode statusNode = null;
-        if ( !Utils.isNullOrEmpty( statusNodes ) ) {
-            if ( statusNodes.size() > 1 ) {
-                Iterator< EmsScriptNode > itr = statusNodes.iterator();
-                while( itr.hasNext() ) {
-                    // find the node which pertains to the current job
-                    statusNode = itr.next();
-                    
-                    if( statusNode
-                            .getSysmlQName( null, null, false )
-                            .contains( jobNode.getSysmlName() ) ) return statusNode;
+        EmsScriptNode propertyNode = null;
+        if( !Utils.isNullOrEmpty( slots ) ) {
+            Iterator< EmsScriptNode > itr = slots.iterator();
+            
+            while( itr.hasNext() ) {
+                String definingFeatureId = getDefiningFeatureId( propertyName );
+                propertyNode = itr.next();
+                
+                String[] slotIdParts = propertyNode.getSysmlId().split( "-slot-" );
+                // then compare it and set it when they map correctly
+                if( slotIdParts.length > 1 ) {
+                    if( slotIdParts[1].equals( definingFeatureId ) ) {                    
+                        return propertyNode;
+                    }
                 }
             }
-            statusNode = statusNodes.iterator().next();
-            return statusNode;
         }
+
         return null;
     }
 
@@ -2747,14 +2744,12 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         // check to see if the property value can be grabbed already, 
         // whether it comes in as a job or element 
         // if so, store it
-        if( property.has(  propertyName )) {
+        if( property.has( propertyName ) ) {
             propertyValue = property.optString( propertyName );
-//        else if( !property.optString( "name" ).equals( propertyName ) ) {
-//            return null;
         }
 
         
-        // Get the property's id.
+        // Attempts to find the node and retrieve the value that way.
         if ( !createNewJob || propertyValue == null ) {
             EmsScriptNode propertyNode =
                     getJobPropertyNode( jobNode, propertyName );
@@ -2772,13 +2767,19 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
                     }
                     Object value = values.iterator().next();
                     if ( value != null ) {
-                      Utils.put( propertyValues, jobId, propertyName, value.toString() );  
+                      Utils.put( propertyValues, jobId, propertyName, value.toString() ); 
+                      
+                   // Returning null to indicate that no new element json was created
+                      return null;
                     }
                 }
             }
         }
 
-        // The property json this method returns    
+        // If the property exists within the elements map, then get the value from that 
+        
+        // NOTE: we may not need 'propertyJson' because 'property' should come in as the 
+        //       correct job property 
         JSONObject propertyJson = getPropertyJson(propertyId, elements);
         if ( propertyJson != null ) {   
             // The property value should have been provided in the job
@@ -2815,7 +2816,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         }
 
         // add name
-        //propertyJson.put( "name", propertyName );
+        propertyJson.put( "name", "" );
 
         // Make sure we have an id for the property.
         if ( Utils.isNullOrEmpty( propertyId ) ) {
@@ -2858,7 +2859,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
      */
     protected JSONObject getPropertyJson( String propertyId, JSONArray elements ) {
         if ( propertyId == null ) return null;
-        JSONObject propertyJson = null;//new JSONObject();
+        JSONObject propertyJson = null;
         for ( int i = 0; i < elements.length(); ++i ) {
             JSONObject element = elements.optJSONObject( i );
             if ( element == null ) continue;
@@ -3071,7 +3072,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
                 EmsScriptNode propertyNode =
                         getJobPropertyNode( job, propertyName );
                 // get property values and add to json (check for null)
-
+                
                 if ( propertyNode != null ) {
                     Collection< Object > values =
                             getSystemModel().getValue( propertyNode, null );

@@ -415,7 +415,7 @@ public class DoorsSync extends AbstractJavaWebScript {
                 }
             }
         } else {
-            EmsScriptNode instance = getInstanceSpecification(existing);
+            EmsScriptNode instance = existing.getInstanceSpecification();
             specSysmlId = instance.getSysmlId();
             sysmlId = existing.getSysmlId();
         }
@@ -632,24 +632,9 @@ public class DoorsSync extends AbstractJavaWebScript {
         return n;
     }
 
-    protected EmsScriptNode getInstanceSpecification(EmsScriptNode n) {
-
-        EmsSystemModel esm = new EmsSystemModel();
-        Collection<EmsScriptNode> is = esm.getProperty(n, null);
-
-        for (EmsScriptNode instance : is) {
-            ArrayList<?> appliedMetatype = (ArrayList<?>) instance.getProperty(Acm.ACM_APPLIED_METATYPES);
-            if (appliedMetatype != null && appliedMetatype.contains("_9_0_62a020a_1105704885251_933969_7897")) {
-                return instance;
-            }
-        }
-
-        return null;
-    }
-
     protected EmsScriptNode[] getAllSlots(EmsScriptNode n) {
 
-        EmsScriptNode instanceSpec = getInstanceSpecification(n);
+        EmsScriptNode instanceSpec = n.getInstanceSpecification();
 
         Collection<EmsScriptNode> slots = new HashSet<EmsScriptNode>();
 
