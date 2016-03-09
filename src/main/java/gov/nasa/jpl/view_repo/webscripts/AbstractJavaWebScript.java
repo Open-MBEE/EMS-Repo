@@ -2691,7 +2691,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         return null;
     }
 
-    public EmsScriptNode getJobPropertyNode( EmsScriptNode jobNode, Object propertyName ) {
+    public EmsScriptNode getJobPropertyNode( EmsScriptNode jobNode, String propertyName ) {
         if( jobNode == null )
             return null;        
         Collection<EmsScriptNode> slots = jobNode.getAllSlots( jobNode, 
@@ -2703,7 +2703,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
             Iterator< EmsScriptNode > itr = slots.iterator();
             
             while( itr.hasNext() ) {
-                String definingFeatureId = getDefiningFeatureId( (String)propertyName );
+                String definingFeatureId = getDefiningFeatureId( propertyName );
                 propertyNode = itr.next();
                 
                 String[] slotIdParts = propertyNode.getSysmlId().split( "-slot-" );
