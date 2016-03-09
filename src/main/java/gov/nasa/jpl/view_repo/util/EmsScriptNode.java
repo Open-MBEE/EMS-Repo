@@ -7067,7 +7067,7 @@ public class EmsScriptNode extends ScriptNode implements
 
         for (EmsScriptNode instance : is) {
             ArrayList<?> appliedMetatype = (ArrayList<?>) instance.getProperty(Acm.ACM_APPLIED_METATYPES);
-            if (appliedMetatype != null && appliedMetatype.contains( JobGet.slotId )) {
+            if (appliedMetatype != null && appliedMetatype.contains( "_9_0_62a020a_1105704885251_933969_7897" )) {
                 return instance;
             }
         }
@@ -7089,7 +7089,7 @@ public class EmsScriptNode extends ScriptNode implements
         
         if (instanceSpec != null) {
             Map< String, EmsScriptNode > nodeList = NodeUtil.searchForElements(NodeUtil.SearchType.ID.prefix, 
-                                                                               instanceSpec.getSysmlId() + "-slot-", ignoreWorkspace,
+                                                                               instanceSpec.getSysmlId() + "-slot-*", ignoreWorkspace,
                                                                                workspace, dateTime, services, response,
                                                                                status, siteName);
             

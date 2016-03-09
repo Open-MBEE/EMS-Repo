@@ -2693,45 +2693,29 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
 
     public EmsScriptNode getJobPropertyNode( EmsScriptNode jobNode, Object propertyName ) {
         if( jobNode == null )
-            return null;
+            return null;        
+        Collection<EmsScriptNode> slots = jobNode.getAllSlots( jobNode, 
+                                                               false, null, null, 
+                                                               services, response, responseStatus, null );
         
-        EmsScriptNode instanceSpecNode = jobNode.getInstanceSpecification();
-        
-        System.out.println( instanceSpecNode );
-/*      
-        instanceSpecNode.getAllSlots( instanceSpecNode, 
-                                      ignoreWorkspace, workspace, dateTime, 
-                                      services, response, status, siteName );
-      
-        Collection< EmsScriptNode > statusNodes =
-                getSystemModel().getProperty( jobNode, null );
-        
-        EmsScriptNode statusNode = null;
-        if ( !Utils.isNullOrEmpty( statusNodes ) ) {
-                Iterator< EmsScriptNode > itr = statusNodes.iterator();
-                while( itr.hasNext() ) {
-                    // find the node which pertains to the current job
-                    statusNode = itr.next();
-                    System.out.println( statusNode.getContent() );
-                    if( statusNode.getType().contains( "InstanceSpecification" ) ) {
-                        Collection< EmsScriptNode > propertyNodes =
-                                getSystemModel().getProperty( statusNode, null );
-                        
-                        String definingFeatureId = getDefiningFeatureId( (String)propertyName );
-
-                        itr = propertyNodes.iterator();
-                        
-                        while( itr.hasNext() ) {
-                            statusNode = itr.next();
-                            
-                            if( statusNode
-                                    .getSysmlId()
-                                    .contains( definingFeatureId ) ) return statusNode;
-                        }
+        EmsScriptNode propertyNode = null;
+        if( !Utils.isNullOrEmpty( slots ) ) {
+            Iterator< EmsScriptNode > itr = slots.iterator();
+            
+            while( itr.hasNext() ) {
+                String definingFeatureId = getDefiningFeatureId( (String)propertyName );
+                propertyNode = itr.next();
+                
+                String[] slotIdParts = propertyNode.getSysmlId().split( "-slot-" );
+                // then compare it and set it when they map correctly
+                if( slotIdParts.length > 1 ) {
+                    if( slotIdParts[1].equals( definingFeatureId ) ) {                    
+                        return propertyNode;
                     }
                 }
+            }
         }
-*/
+
         return null;
     }
 
@@ -3063,8 +3047,6 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
                 EmsScriptNode propertyNode =
                         getJobPropertyNode( job, propertyName );
                 // get property values and add to json (check for null)
-
-                System.out.println( getSystemModel().getProperty( propertyNode, null ) );
                 
                 if ( propertyNode != null ) {
                     Collection< Object > values =
