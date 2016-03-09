@@ -751,7 +751,7 @@ public class HtmlToPdfPost extends AbstractJavaWebScript {
         html.append(System.lineSeparator());
         html.append("		HR{width: 100%;margin: 0 auto;}");
         html.append(System.lineSeparator());
-        html.append("		.itar{position:relative;margin-bottom:9px;text-align:center;font-size:8pt;font-style:italic;font-weight:normal;line-height:9px;}");
+        html.append("		.itar{position:relative;margin:0 0 3px 0;display:inline-block;text-align:center;font-size:8pt;font-style:italic;font-weight:normal;line-height:9px;}");
         html.append(System.lineSeparator());
         html.append("		.page{text-align:center;font-size:8pt;}");
         html.append(System.lineSeparator());
