@@ -406,7 +406,7 @@ public class HtmlToPdfPost extends AbstractJavaWebScript {
 		style.append("	TABLE { width:100%; }");
 		style.append("	THEAD, TFOOT { display: table-row-group; }");
 		style.append("	TD, TH {");
-		style.append("		width:1%;");
+//		style.append("		width:1%;");
 		style.append("	    overflow-wrap: break-word;");
 		style.append("	    word-wrap: break-word;");
 		style.append("	    break-word: break-word;");
