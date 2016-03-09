@@ -41,6 +41,7 @@ import gov.nasa.jpl.mbee.util.Pair;
 import gov.nasa.jpl.mbee.util.Seen;
 import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.mbee.util.Utils;
+import gov.nasa.jpl.view_repo.db.Node;
 import gov.nasa.jpl.view_repo.db.PostgresHelper;
 import gov.nasa.jpl.view_repo.db.PostgresHelper.DbEdgeTypes;
 import gov.nasa.jpl.view_repo.sysml.View;
@@ -94,6 +95,7 @@ import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.security.PermissionService;
+import org.alfresco.service.cmr.site.SiteInfo;
 import org.alfresco.service.cmr.version.Version;
 import org.alfresco.service.cmr.version.VersionHistory;
 import org.alfresco.service.cmr.version.VersionService;
@@ -7057,5 +7059,42 @@ public class EmsScriptNode extends ScriptNode implements
         }
         return false;
     }
+    
+    public EmsScriptNode getInstanceSpecification() {
 
+        EmsSystemModel esm = new EmsSystemModel();
+        Collection<EmsScriptNode> is = esm.getProperty(this, null);
+
+        for (EmsScriptNode instance : is) {
+            ArrayList<?> appliedMetatype = (ArrayList<?>) instance.getProperty(Acm.ACM_APPLIED_METATYPES);
+            if (appliedMetatype != null && appliedMetatype.contains( JobGet.slotId )) {
+                return instance;
+            }
+        }
+
+        return null;
+    }
+    
+    public Collection<EmsScriptNode> getAllSlots(EmsScriptNode n,
+                                          boolean ignoreWorkspace,
+                                          WorkspaceNode workspace, Date dateTime,
+                                          ServiceRegistry services, StringBuffer response,
+                                          Status status, String siteName) {
+        
+        EmsScriptNode instanceSpec = n.getInstanceSpecification();
+    
+        Collection<EmsScriptNode> slots = new HashSet<EmsScriptNode>();
+        
+        //PostgresHelper pgh = new PostgresHelper(workspace);
+        
+        if (instanceSpec != null) {
+            Map< String, EmsScriptNode > nodeList = NodeUtil.searchForElements(NodeUtil.SearchType.ID.prefix, 
+                                                                               instanceSpec.getSysmlId() + "-slot-", ignoreWorkspace,
+                                                                               workspace, dateTime, services, response,
+                                                                               status, siteName);
+            
+            return nodeList.values();
+        }
+        return slots;
+    }
 }
