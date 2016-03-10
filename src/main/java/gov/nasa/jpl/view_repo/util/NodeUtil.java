@@ -4571,7 +4571,7 @@ public class NodeUtil {
                 for (int ii = 0; ii < operand.length(); ii++) {
                     JSONObject value = operand.getJSONObject( ii );
                     if (value.has( "instance" )) {
-                        if (value.isNull( "instance" )) {
+                        if (!value.isNull( "instance" )) {
                             documentEdges.add( new Pair<String, String>(sysmlId, value.getString("instance")));
                         }
                     }
