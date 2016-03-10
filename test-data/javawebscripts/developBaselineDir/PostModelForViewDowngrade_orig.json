@@ -1,32 +1,28 @@
 {
     "message": "[WARNING]: The type supplied View is different than the stored type Product\n",
     "elements": [{
-        "modifier": "admin",
-        "qualifiedId": "/no_site/no_site_no_project/holding_bin_no_site_no_project/54321",
         "siteCharacterizationId": "no_site",
-        "created": "Tue Sep 22 09:42:32 PDT 2015",
-        "qualifiedName": "/no_site/no_site_no_project/holding_bin/null",
+        "qualifiedId": "/no_site/no_site_no_project/holding_bin_no_site_no_project/YY_2016_no_site_no_project/MM_1_no_site_no_project/DD_20_no_site_no_project/HH_22_no_site_no_project/54321",
+        "nodeRefId": "workspace://SpacesStore/675c90e3-00a4-49a9-8ffd-4f0d7005f806",
+        "versionedRefId": "versionStore://version2Store/2310211a-13ae-4223-a343-85c421dd9dbe",
+        "qualifiedName": "/no_site/no_site_no_project/holding_bin_no_site_no_project/YY_2016_no_site_no_project/MM_1_no_site_no_project/DD_20_no_site_no_project/HH_22_no_site_no_project/54321",
         "sysmlid": "54321",
-        "owner": "holding_bin_no_site_no_project",
-        "read": "2015-09-22T09:42:33.329-0700",
+        "editable": true,
+        "creator": "admin",
+        "modified": "2016-02-20T22:21:27.827-0800",
+        "modifier": "admin",
+        "created": "Sat Feb 20 22:21:27 PST 2016",
+        "name": "54321",
+        "owner": "HH_22_no_site_no_project",
+        "read": "2016-02-20T22:21:27.879-0800",
         "specialization": {
             "displayedElements": [
                 "301",
                 "302",
                 "303"
             ],
-            "childrenViews": [],
-            "allowedElements": [
-                "301",
-                "302",
-                "303"
-            ],
-            "contains": [],
             "type": "View"
-        },
-        "editable": true,
-        "creator": "admin",
-        "modified": "2015-09-22T09:42:33.171-0700"
+        }
     }]
 }
 200

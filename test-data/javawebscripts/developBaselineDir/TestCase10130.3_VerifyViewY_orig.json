@@ -1,34 +1,33 @@
 {"elements": [{
-    "owner": "holding_bin_no_site_no_project",
-    "creator": "admin",
-    "read": "2016-01-07T14:50:52.709-0800",
-    "isMetatype": false,
-    "created": "Thu Jan 07 14:31:01 PST 2016",
-    "editable": true,
-    "qualifiedName": "/no_site/no_site_no_project/holding_bin/View Y",
-    "modifier": "admin",
-    "documentation": "",
     "siteCharacterizationId": "no_site",
+    "qualifiedId": "/no_site/no_site_no_project/holding_bin_no_site_no_project/YY_2016_no_site_no_project/MM_1_no_site_no_project/DD_20_no_site_no_project/HH_22_no_site_no_project/MMS_1450390431247_8a4b76d2-394c-4569-9abe-5c51dc4b0812",
+    "nodeRefId": "versionStore://version2Store/bf8b7ec3-dce6-4e86-be9b-e24ae552c152",
+    "versionedRefId": "versionStore://version2Store/bf8b7ec3-dce6-4e86-be9b-e24ae552c152",
+    "qualifiedName": "/no_site/no_site_no_project/holding_bin_no_site_no_project/YY_2016_no_site_no_project/MM_1_no_site_no_project/DD_20_no_site_no_project/HH_22_no_site_no_project/View Y",
     "sysmlid": "MMS_1450390431247_8a4b76d2-394c-4569-9abe-5c51dc4b0812",
-    "nodeRefId": "versionStore://version2Store/52144ccd-13b7-4acf-a5c3-0878530e4cb8",
-    "versionedRefId": "versionStore://version2Store/52144ccd-13b7-4acf-a5c3-0878530e4cb8",
+    "isMetatype": false,
+    "editable": true,
+    "creator": "admin",
+    "modified": "2016-02-20T22:23:17.028-0800",
+    "modifier": "admin",
+    "created": "Sat Feb 20 22:23:16 PST 2016",
+    "name": "View Y",
+    "documentation": "",
+    "owner": "HH_22_no_site_no_project",
+    "read": "2016-02-20T22:23:17.781-0800",
     "appliedMetatypes": [
         "_17_0_1_232f03dc_1325612611695_581988_21583",
         "_9_0_62a020a_1105704885343_144138_7929"
     ],
-    "qualifiedId": "/no_site/no_site_no_project/holding_bin_no_site_no_project/MMS_1450390431247_8a4b76d2-394c-4569-9abe-5c51dc4b0812",
-    "name": "View Y",
-    "modified": "2016-01-07T14:31:02.293-0800",
     "specialization": {
+        "childrenViews": [],
+        "displayedElements": [],
         "contents": {
-            "valueExpression": null,
             "type": "Expression",
             "operand": []
         },
-        "childrenViews": [],
-        "type": "View",
-        "displayedElements": [],
-        "allowedElements": []
+        "allowedElements": [],
+        "type": "View"
     }
 }]}
 200

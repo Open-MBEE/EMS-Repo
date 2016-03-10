@@ -50,6 +50,8 @@ create table edges
   constraint unique_edges unique(parent, child, edgeType)
 );
 
+alter table edges add constraint parent_cannot_equal_child_check check(parent <> child); 
+
 create index childIndex on edges (child);
 create index parentIndex on edges (parent);
 

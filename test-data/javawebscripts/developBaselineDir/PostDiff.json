@@ -1,14 +1,10 @@
 {
     "workspace1": {
         "name": "ws2",
-        "qualifiedName": "master/ws2",
         "elements": [{
             "sysmlid": "402",
             "editable": true,
-            "creator": "admin",
-            "modifier": "admin",
             "name": "402",
-            "owner": "401",
             "documentation": "4to",
             "specialization": {
                 "propertyType": null,
@@ -25,10 +21,8 @@
     "workspace2": {
         "deletedElements": [],
         "addedElements": [{
-            "modifier": "admin",
             "documentation": "x is x",
             "sysmlid": "newElement",
-            "owner": "holding_bin_no_site_no_project",
             "specialization": {
                 "propertyType": null,
                 "isSlot": false,
@@ -40,16 +34,12 @@
                 "type": "Property"
             },
             "editable": true,
-            "creator": "admin"
         }],
         "conflictedElements": [],
         "updatedElements": [{
             "sysmlid": "402",
             "editable": true,
-            "creator": "admin",
-            "modifier": "admin",
             "name": "402",
-            "owner": "401",
             "documentation": "x is x",
             "specialization": {
                 "propertyType": null,
@@ -63,7 +53,6 @@
             }
         }],
         "name": "ws2",
-        "qualifiedName": "master/ws2",
         "movedElements": []
     }
 }

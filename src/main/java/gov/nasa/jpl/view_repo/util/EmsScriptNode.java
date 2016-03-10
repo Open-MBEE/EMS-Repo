@@ -1162,27 +1162,9 @@ public class EmsScriptNode extends ScriptNode implements
      */
     @Override
     public EmsScriptNode createNode( String name, String type ) {
-        // NodeRef nr = findNodeRefByType( name, SearchType.CM_NAME.prefix,
-        // true,
-        // workspace, null, false );
-        //
-        // EmsScriptNode n = new EmsScriptNode( nr, getServices() );
-        // if ( !n.checkPermissions( PermissionService.ADD_CHILDREN,
-        // getResponse(),
-        // getStatus() ) ) {
-        // log( "No permissions to add children to " + n.getName() );
-        // return null;
-        // }
-
-        // System.out.println("createNode(" + name + ", " + type + ")\n" );// +
-        // Debug.stackTrace() );
-
         EmsScriptNode result = null;
         // Date start = new Date(), end;
 
-        // if ( type == null ) {
-        // type = "sysml:Element";
-        // }
         if ( !useFoundationalApi ) {
             makeSureNodeRefIsNotFrozen();
             ScriptNode scriptNode = super.createNode( name, type );
@@ -1225,6 +1207,10 @@ public class EmsScriptNode extends ScriptNode implements
             }
         }
 
+        if (name != null && name.endsWith( "no_project" )) {
+            result.addAspect( "sysml:Package" );
+        }
+        
         // Set the workspace to be the same as this one's.
         // WARNING! The parent must already be replicated in the specified
         // workspace.
@@ -3492,7 +3478,10 @@ public class EmsScriptNode extends ScriptNode implements
                     Set< Pair< String, String >> immediateParents = pgh.getImmediateParents( this.getSysmlId(), DbEdgeTypes.DOCUMENT );
                     Set< Pair<String, String>> viewImmediateParents = new HashSet<Pair<String, String>>();
                     for (Pair<String, String> immediateParent: immediateParents) {
-                        viewImmediateParents.addAll( getDbGraphDoc( immediateParent, Acm.ACM_VIEW, pgh, null ) );
+                        // SSCAES-2838: ignore when parent is same as self - this was allowed previously
+                        if ( !immediateParent.first.equals( this.getSysmlId() ) ) {
+                            viewImmediateParents.addAll( getDbGraphDoc( immediateParent, Acm.ACM_VIEW, pgh, null ) );
+                        }
                     }
                     for (Pair<String, String> immediateParent: viewImmediateParents) {
                         Set<Pair<String, String>> rootIds = getDbGraphDoc(immediateParent, Acm.ACM_PRODUCT, pgh, null);
@@ -3567,8 +3556,17 @@ public class EmsScriptNode extends ScriptNode implements
     private Set<Pair<String, String>> getDbGraphDoc( Pair< String, String > child,
                                        String acmType, PostgresHelper pgh, Set<String> visited ) {
         Set<Pair<String, String>> result = new HashSet<Pair<String, String>>();
+
         if (visited == null) {
             visited = new HashSet<String>();
+        }
+        visited.add( child.first );
+        
+        // lets check the current child
+        EmsScriptNode childNode = new EmsScriptNode(new NodeRef(child.second), services, null);
+        if ( childNode.hasAspect( acmType )) {
+            result.add(child);
+            return result;
         }
         
         Set< Pair< String, String >> immediateParents = pgh.getImmediateParents( child.first, DbEdgeTypes.DOCUMENT );

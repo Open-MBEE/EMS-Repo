@@ -376,7 +376,7 @@ public class PostgresHelper {
 			if (n == null)
 				return result;
 
-			String query = "SELECT N.sysmlid, N.versionedrefid FROM nodes%s N JOIN "
+			String query = "SELECT N.sysmlid, N.noderefid FROM nodes%s N JOIN "
 					+ "(SELECT * FROM get_parents(%s, %d, '%s')) P ON N.id=P.id ORDER BY P.height";
 			ResultSet rs = execQuery(String.format(query, workspaceName,
 					n.getId(), DbEdgeTypes.REGULAR.getValue(), workspaceName));
@@ -496,6 +496,20 @@ public class PostgresHelper {
 			e.printStackTrace();
 		}
 	}
+
+	   public void deleteEdgesForParentNode(String sysmlId, DbEdgeTypes edgeType) {
+	        try {
+	            Node n = getNodeFromSysmlId(sysmlId);
+
+	            if (n == null)
+	                return;
+
+	            execUpdate("delete from edges" + workspaceName + " where parent = "
+	                    + n.getId() + " and edgeType = " + edgeType.getValue());
+	        } catch (Exception e) {
+	            e.printStackTrace();
+	        }
+	    }
 
 	public void deleteEdges(String parentSysmlId, String childSysmlId) {
 		try {
