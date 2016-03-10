@@ -4701,8 +4701,19 @@ public class NodeUtil {
     
     public static EmsScriptNode getNodeFromSysmlIdViaPostgres( String sysmlid, WorkspaceNode workspace ) {
         PostgresHelper pgh = new PostgresHelper( getWorkspaceId( workspace ) );
-        Node node = pgh.getNodeFromSysmlId( sysmlid );
-        EmsScriptNode esn = NodeUtil.getNodeFromPostgresNode( node );
+        EmsScriptNode esn =  null;
+        try {
+            pgh.connect();
+            Node node = pgh.getNodeFromSysmlId( sysmlid );
+            esn = NodeUtil.getNodeFromPostgresNode( node );
+            pgh.close();
+        } catch ( ClassNotFoundException e ) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch ( SQLException e ) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
         return esn;
     }
 

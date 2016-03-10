@@ -1027,6 +1027,9 @@ public class CommitUtil {
 			String workspaceId, String projectId) {
 		boolean status = false;
 		if (jmsConnection != null) {
+            logger.warn( "publishing to jms eventType=" + eventType
+                         + "workspaceId" + workspaceId + "; projectId="
+                         + projectId + ":\n" + json.toString( 4 ) + "\n" );
 			status = jmsConnection.publish(json, eventType, workspaceId,
 					projectId);
 		} else {

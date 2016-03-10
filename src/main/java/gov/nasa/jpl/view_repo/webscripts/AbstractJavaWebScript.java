@@ -2999,7 +2999,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         String ownerId = elem.optString( "owner" );
         if ( ownerId == null ) return null;
         EmsScriptNode owner = findScriptNodeById( ownerId, workspace, dateTime, false );
-        if ( EmsScriptNode.isJob( elem ) ) return owner;
+        if ( owner.isJob() ) return owner;
 
         return null;
     }
@@ -3065,7 +3065,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
     }
 
     public void getJsonForJob(EmsScriptNode job, JSONObject json) {
-        if ( job.isJob( job ) ) {
+        if ( job.isJob() ) {
             JSONObject jobJson = null;
             for ( String propertyName : jobProperties ) {
 
