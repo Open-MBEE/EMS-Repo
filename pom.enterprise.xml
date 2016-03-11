@@ -475,6 +475,25 @@
 							</resources>
 						</configuration>
 					</execution>
+					<execution>
+						<id>copy-enterprise-properties</id>
+						<phase>compile</phase>
+						<goals>
+							<goal>copy-resources</goal>
+						</goals>
+						<configuration>
+							<overwrite>true</overwrite>
+							<outputDirectory>${project.build.directory}/${project.build.finalName}/web/WEB-INF/classes</outputDirectory>
+							<resources>
+								<resource>
+									<directory>${basedir}/config/alfresco/community</directory>
+									<includes>
+										<include>alfresco-global.properties</include>
+									</includes>
+								</resource>
+							</resources>
+						</configuration>
+					</execution>
 				</executions>
 			</plugin>
 

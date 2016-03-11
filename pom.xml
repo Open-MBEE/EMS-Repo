@@ -532,7 +532,7 @@
 						</configuration>
 					</execution>
 					<execution>
-						<id>copy-enterprise-resources</id>
+						<id>copy-community-properties</id>
 						<phase>compile</phase>
 						<goals>
 							<goal>copy-resources</goal>
@@ -542,7 +542,7 @@
 							<outputDirectory>${project.build.directory}/${project.build.finalName}/web/WEB-INF/classes</outputDirectory>
 							<resources>
 								<resource>
-									<directory>${basedir}/config/alfresco</directory>
+									<directory>${basedir}/config/alfresco/community</directory>
 									<includes>
 										<include>alfresco-global.properties</include>
 									</includes>
