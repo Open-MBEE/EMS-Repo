@@ -219,7 +219,7 @@ public class NodeUtil {
     public static boolean doJsonStringCaching = false;
     public static boolean doPropertyCaching = true;
     public static boolean doGraphDb = true;
-    public static boolean doPostProcessQualified = true;
+    public static boolean doPostProcessQualified = false;
 
     public static boolean addEmptyEntriesToFullCache = false; // this was broken
                                                               // last tried
