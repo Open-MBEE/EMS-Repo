@@ -486,7 +486,7 @@
 							<outputDirectory>${project.build.directory}/${project.build.finalName}/web/WEB-INF/classes</outputDirectory>
 							<resources>
 								<resource>
-									<directory>${basedir}/config/alfresco/community</directory>
+									<directory>${basedir}/config/alfresco/enterprise</directory>
 									<includes>
 										<include>alfresco-global.properties</include>
 									</includes>
