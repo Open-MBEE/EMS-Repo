@@ -2999,12 +2999,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         String ownerId = elem.optString( "owner" );
         if ( ownerId == null ) return null;
         EmsScriptNode owner = findScriptNodeById( ownerId, workspace, dateTime, false );
-<<<<<<< HEAD
-        if ( owner == null ) return null;
-        if ( owner.isJob() ) return owner;
-=======
         if ( owner != null && owner.isJob() ) return owner;
->>>>>>> 9157f818b398333359becbe59621998cfa3dc8b2
 
         return null;
     }
