@@ -6369,10 +6369,9 @@ public class EmsScriptNode extends ScriptNode implements
 
         // Dont need the correct workspace b/c sysml ids are immutable:
         NodeRef instanceNode =
-                (NodeRef)node.getNodeRefProperty( Acm.ACM_INSTANCE, true,
+                (NodeRef)node.getNodeRefProperty( Acm.ACM_INSTANCE, false,
                                                   dateTime, node.getWorkspace() );
         putInJson( json, "instance", addNodeRefIdJSON( instanceNode ), filter );
-
     }
 
     protected
