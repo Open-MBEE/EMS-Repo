@@ -68,12 +68,12 @@
     <bean id="UserUtil" class="gov.nasa.jpl.view_repo.util.UserUtil" parent="baseJavaScriptExtension">
         <property name="siteService" ref="SiteService"/>
         <property name="personService" ref="PersonService"/>
-        <property name="siteName" value="europa"/>
+        <property name="siteName" value="${app.name}"/>
         <property name="extensionName" value="UserUtil" />
         <property name="ignore" value="true" />
     </bean>
     
-    <!-- add in the Actions -->    
+    <!-- add in the Actions -->
     <bean id="modelLoad" class="gov.nasa.jpl.view_repo.actions.ModelLoadActionExecuter" parent="action-executer">
         <property name="services" ref="ServiceRegistry"/>
         <property name="repository" ref="repositoryHelper"/>
@@ -120,7 +120,12 @@
         <property name="uri" value="https://orasoa-dev07.jpl.nasa.gov:8121/PublishMessageRestful" />
     </bean>
 
-    <!--  Definitions for static methods -->        
+    <!--  Definitions for static methods -->
+    <bean class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+        <property name="staticMethod" value="gov.nasa.jpl.view_repo.util.EmsConfig.setProperties" />
+        <property name="arguments" ref="global-properties"/>
+    </bean>
+    
     <bean class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
         <property name="staticMethod" value="gov.nasa.jpl.view_repo.webscripts.util.ShareUtils.setUsername" />
         <property name="arguments" value="mmsadmin"/>
@@ -148,6 +153,5 @@
         <property name="staticMethod" value="gov.nasa.jpl.view_repo.util.CommitUtil.setRestConnection" />
         <property name="arguments" ref="restConnection"/>
     </bean>
-    
 
 </beans>

@@ -49,6 +49,7 @@ import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.actions.ActionUtil;
 import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.CommitUtil;
+import gov.nasa.jpl.view_repo.util.EmsConfig;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.EmsSystemModel;
 import gov.nasa.jpl.view_repo.util.EmsTransaction;
@@ -2470,5 +2471,9 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         // Sets privateRequestJSON
         setRequestJSON(req);
         return privateRequestJSON;
+    }
+    
+    public static String getConfig(String key) {
+        return EmsConfig.get(key);
     }
 }
