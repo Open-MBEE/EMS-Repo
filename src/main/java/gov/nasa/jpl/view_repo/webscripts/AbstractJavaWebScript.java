@@ -2939,7 +2939,11 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         
         if ( jobs != null ) {
             for ( int i = 0; i < jobs.length(); i++ ) {
-                elements.put(  jobs.get( i ) );
+                JSONObject job = jobs.optJSONObject( i );
+                if ( job != null ) {
+                    addJobMetatype(job);
+                    elements.put( job );
+                }
             }
         }
 
@@ -2998,6 +3002,25 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         json.remove( "jobs" );
     }
 
+    public void addJobMetatype( JSONObject job ) {
+        JSONArray appliedMetatypes = job.optJSONArray( "appliedMetatypes" );
+        if ( appliedMetatypes == null ) {
+            appliedMetatypes = new JSONArray();
+            job.put("appliedMetatypes", appliedMetatypes);
+        }
+        boolean found = false;
+        for ( int j = 0; j < appliedMetatypes.length(); ++j ) {
+            String m = appliedMetatypes.optString( j );
+            if ( m != null && m.equals( JobGet.jobStereotypeId ) ) {
+                found = true;
+                break;
+            }
+        }
+        if (!found) {
+            appliedMetatypes.put( JobGet.jobStereotypeId );
+        }        
+    }
+    
     protected EmsScriptNode getOwningJobOfPropertyJson( JSONObject elem,
                                                         WorkspaceNode workspace,
                                                         Date dateTime ) {
