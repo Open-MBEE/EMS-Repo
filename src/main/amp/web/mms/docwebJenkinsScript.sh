@@ -4,6 +4,8 @@ curl -w "\n%{http_code}\n" -u ${MMS_USER}:${MMS_PASSWORD} -X POST -H Content-Typ
 
 git submodule init
 
+rm -rf mdk_module; rm -rf .git/modules/mdk_module/
+
 git submodule update
 
 ant -buildfile jenkinsbuild.xml
