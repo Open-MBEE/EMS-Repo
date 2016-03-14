@@ -2936,6 +2936,12 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
             elements = new JSONArray();
             json.put( "elements", elements );
         }
+        
+        if ( jobs != null ) {
+            for ( int i = 0; i < jobs.length(); i++ ) {
+                elements.put(  jobs.get( i ) );
+            }
+        }
 
         // Create an elementMap for quick lookup of element JSONObjects.
         Map< String, JSONObject > elementMap = new LinkedHashMap< String, JSONObject >();
