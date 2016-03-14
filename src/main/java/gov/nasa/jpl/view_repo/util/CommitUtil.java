@@ -930,11 +930,11 @@ public class CommitUtil {
 			for (Pair<String, String> e : documentEdges) {
 				pgh.insertEdge(e.first, e.second, DbEdgeTypes.DOCUMENT);
 			}
-
-			pgh.close();
 		} catch (Exception e1) {
 		    logger.warn( "Could not complete graph storage" );
 			e1.printStackTrace();
+		} finally {
+		    pgh.close();
 		}
 
 	}
@@ -993,10 +993,11 @@ public class CommitUtil {
 		try {
 			pgh.connect();
 			pgh.createBranchFromWorkspace(created.getId());
-			pgh.close();
 		} catch (ClassNotFoundException | java.sql.SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+		} finally {
+		    pgh.close();
 		}
 
 		return sendJmsMsg(branchJson, TYPE_BRANCH, null, null);

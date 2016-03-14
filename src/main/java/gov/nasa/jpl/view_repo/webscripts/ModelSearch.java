@@ -243,20 +243,16 @@ public class ModelSearch extends ModelGet {
                     // make sure workspace exists
                     pgh.connect();
                     if (!pgh.checkWorkspaceExists()) throw new UnsupportedSearchException("Workspace is not search compatible");
-                    pgh.close();
-                    
                     if (noderefs.size() > 0) {
-                        pgh.connect();
-                        
                         filteredNoderefs =
                                 pgh.filterNodeRefsByWorkspace( noderefs, workspaceId  );
-        
-                        pgh.close();
                     }
                 } catch ( SQLException e ) {
                     e.printStackTrace();
                 } catch ( ClassNotFoundException e ) {
                     e.printStackTrace();
+                } finally {
+                    pgh.close();
                 }
             
                 if (filteredNoderefs != null && filteredNoderefs.size() > 0) {
