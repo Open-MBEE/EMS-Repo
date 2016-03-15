@@ -190,8 +190,8 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
             new LinkedHashMap< String, Map< String, String > >();
     LinkedHashMap< String, Map< String, JSONObject > > propertyJson =
             new LinkedHashMap< String, Map< String, JSONObject > >();
-    LinkedHashMap<String, JSONObject> instanceSpecs = 
-            new LinkedHashMap< String, JSONObject >();
+//    LinkedHashMap<String, JSONObject> instanceSpecs = 
+//            new LinkedHashMap< String, JSONObject >();
 
     public boolean usingExistsCache = false; // not yet implemented
     enum ExistType { InAlfresco, InModel };
@@ -2653,6 +2653,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
             // job-specific properties in the json were stripped out above.
             if( jobJson.length() > 1) elements.put(jobJson);
         }
+        
         return createNewJob;
     }
     
@@ -2837,45 +2838,20 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         // Make sure we have an id for the property.
         if ( Utils.isNullOrEmpty( propertyId ) ) {
             String instanceSpecId = null;
+            JSONObject instanceSpec = null;
             
-            // the instance spec can already exist in the MMS
-            if ( jobNode != null ) {
-                EmsScriptNode spec = jobNode.getInstanceSpecification();
-                if ( spec != null ) {
-                    instanceSpecId = spec.getSysmlId();
-                    
-                    JSONObject instanceSpec = createInstanceSpecificationJson( instanceSpecId, jobId );
-                    instanceSpecs.put( instanceSpecId, instanceSpec );
-                } // there may also be no instance spec, so we would have to create a new one 
-                else if ( spec == null ) {                   
-                    instanceSpecId = NodeUtil.createId( NodeUtil.getServiceRegistry() );
-                    
-                    JSONObject instanceSpec = createInstanceSpecificationJson( instanceSpecId, jobId );
-                    instanceSpecs.put( instanceSpecId, instanceSpec );
-                }
+            // We need the instance spec id and defining feature id to determine the property/slot id.
+            // We may not have an instance spec for a new job and need to create one.
+            instanceSpecId = getOrCreateInstanceSpecFromJob( jobNode, jobId, elements );
+            // If we didn't find/create the id, then see if we can dig it out of
+            // the property id in the json.
+            if ( Utils.isNullOrEmpty( instanceSpecId ) ) {
+                instanceSpecId = getInstanceSpecIdFromSlotId( propertyJson );
             }
-
-            // instance spec may also be in the JSON, which we will have to loop through every element to identify it
-            // by comparing the owner ID with the job ID 
-            if ( propertyJson != null ) {
-                
-                for(int i = 0; i < elements.length(); i++) {
-                    JSONObject element = elements.optJSONObject( i );
-                    
-                    String ownerId = element.optString( "owner" );
-                    
-                    if( ownerId != null && ownerId == jobId) {
-                        instanceSpecId = element.optString( "sysmlid" );
-                        JSONObject instanceSpec = element;
-                        instanceSpecs.put( instanceSpecId, instanceSpec );
-                    }
-                }
-                               
-            }
-            
-            instanceSpecId = getInstanceSpecIdFromSlotId( propertyJson );
             String definingFeatureId = getDefiningFeatureId( propertyName );
             propertyId = instanceSpecId + "-slot-" + definingFeatureId;
+            
+            propertyJson.put( "sysmlid", propertyId );
         }
 
         // add specialization part with value
@@ -2894,18 +2870,97 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         return propertyJson;
     }
     
-    protected JSONObject createInstanceSpecificationJson(String specSysmlId, String jobId  ) {
+    /**
+     * Get or create a job's instance spec for connecting slots for its
+     * properties. The element json for the instance spec is placed in this
+     * webscript's instanceSpecs map to b
+     * 
+     * @param jobNode
+     *            a node for the job element, for which the instance spec is
+     *            sought; this may be null
+     * @param jobId
+     *            the id of the job (which must match that of the jobNode if
+     *            jobNode is not null; this must be non-null
+     * @param elements
+     *            the set of posted elements
+     * @return the id of the existing or new instance spec or null if jobId is
+     *         null
+     */
+    protected String getOrCreateInstanceSpecFromJob( EmsScriptNode jobNode,
+                                                     String jobId,
+                                                     JSONArray elements ) {
+        if ( jobId == null ) return null; 
+        String instanceSpecId = null;
+        JSONObject instanceSpec = null;
+
+        // the instance spec can already exist in the MMS
+        if ( jobNode != null ) {
+            EmsScriptNode spec = jobNode.getInstanceSpecification();
+            if ( spec != null ) {
+                instanceSpecId = spec.getSysmlId();
+                // Since the instance spec already exists, we only need the id
+                // in the json.
+                instanceSpec = new JSONObject();
+                instanceSpec.put( "sysmlid", instanceSpecId );
+            }
+        }
+
+        // The instance spec may also be in the JSON, which we will have to loop
+        // through every element to identify it by comparing the owner ID with
+        // the job ID.
+        // We do this whether
+        if ( propertyJson != null ) {
+            
+            for(int i = 0; i < elements.length(); i++) {
+                JSONObject element = elements.optJSONObject( i );
+                
+                String ownerId = element.optString( "owner" );
+                
+                if( ownerId != null && ownerId.equals( jobId ) ) {
+                    instanceSpecId = element.optString( "sysmlid" );
+                    instanceSpec = element;
+                    break;
+                }
+            }
+
+        }
+     
+        // Create the instance spec if we can't find it.
+        if ( instanceSpec == null ) {
+            instanceSpecId = NodeUtil.createId( NodeUtil.getServiceRegistry() );
+            instanceSpec = createJobInstanceSpecificationJson( instanceSpecId, jobId );
+        }
+        
+        if ( instanceSpec == null ) {
+            // It should be impossible to get here.
+            logger.error( "Could not find or create instance spec for " + jobId );
+        } else {
+            // WARNING: This isn't going into the elementsMap being passed
+            // around so don't count on it being there. Find it in the
+            // instanceSpecs map for this object where it is placed below.
+            elements.put( instanceSpec );
+        }
+        
+//        // Save for use in creating new job json or the ids of the job's slots.
+//        instanceSpecs.put( jobId, instanceSpec );
+        
+        return instanceSpecId;
+
+    }
+    
+    protected JSONObject createJobInstanceSpecificationJson(String specSysmlId, String jobId  ) {
         JSONObject specElement = new JSONObject();
         specElement.put("name", "");
         specElement.put("sysmlid", specSysmlId);
         specElement.put("owner", jobId);
         specElement.put("documentation", "");
         JSONArray specAppliedMetatypes = new JSONArray();
+        // Add the instance specification metatype id.
         specAppliedMetatypes.put("_9_0_62a020a_1105704885251_933969_7897");
         specElement.put("appliedMetatypes", specAppliedMetatypes);
         JSONObject specSpecialization = new JSONObject();
         JSONArray specClassifier = new JSONArray();
-        specClassifier.put("_11_5EAPbeta_be00301_1147873190330_159934_2220");
+        specClassifier.put(JobGet.jobStereotypeId);
         specSpecialization.put("classifier", specClassifier);
         specSpecialization.put("type", "InstanceSpecification");
         specElement.put("specialization", specSpecialization);
