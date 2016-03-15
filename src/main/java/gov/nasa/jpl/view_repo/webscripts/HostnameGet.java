@@ -1,5 +1,6 @@
 package gov.nasa.jpl.view_repo.webscripts;
 
+import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
 
 import java.util.HashMap;
@@ -100,6 +101,28 @@ public class HostnameGet extends AbstractJavaWebScript {
 		return alfrescoUrl;
 	}
 
+	private String shareHost;
+	public String getShareHost(){ return shareHost;}
+	
+	private int sharePort;
+	public int getSharePoint(){return sharePort;}
+	
+	private String shareProtocol;
+	public String getShareProtocol(){return shareProtocol;}
+	
+	private String shareUrl;
+	public String getShareUrl(){
+		if(Utils.isNullOrEmpty(shareUrl)){
+			if(this.shareHost.compareToIgnoreCase(LOCAL_HOST)==0 || this.shareHost.compareToIgnoreCase(LOCAL_HOST_IP)==0){
+				shareUrl = this.shareProtocol + "://" + this.shareHost + ":" + sharePort;
+			}
+			else{
+				shareUrl = this.shareProtocol + "://" + this.shareHost;
+			}
+		}
+		return shareUrl;
+	}
+
 	public HostnameGet(){
 		super();
 
@@ -112,6 +135,10 @@ public class HostnameGet extends AbstractJavaWebScript {
 		this.alfrescoHost = sysAdminParams.getAlfrescoHost();
 		this.alfrescoPort = sysAdminParams.getAlfrescoPort();
 		this.alfrescoProtocol = sysAdminParams.getAlfrescoProtocol();
+		
+		this.shareHost = sysAdminParams.getShareHost();
+		this.sharePort = sysAdminParams.getSharePort();
+		this.shareProtocol = sysAdminParams.getShareProtocol();
 	}
 
 }

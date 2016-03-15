@@ -219,7 +219,7 @@ public class NodeUtil {
     public static boolean doJsonStringCaching = false;
     public static boolean doPropertyCaching = true;
     public static boolean doGraphDb = true;
-    public static boolean doPostProcessQualified = true;
+    public static boolean doPostProcessQualified = false;
 
     public static boolean addEmptyEntriesToFullCache = false; // this was broken
                                                               // last tried
@@ -4566,11 +4566,14 @@ public class NodeUtil {
                                            List< Pair< String, String >> documentEdges) {
         if (contents != null) {
             if (contents.has( "operand" )) {
+                if (contents.isNull( "operand" )) return;
                 JSONArray operand = contents.getJSONArray( "operand" );
                 for (int ii = 0; ii < operand.length(); ii++) {
                     JSONObject value = operand.getJSONObject( ii );
                     if (value.has( "instance" )) {
-                        documentEdges.add( new Pair<String, String>(sysmlId, value.getString("instance")));
+                        if (!value.isNull( "instance" )) {
+                            documentEdges.add( new Pair<String, String>(sysmlId, value.getString("instance")));
+                        }
                     }
                 }
             }
@@ -4613,6 +4616,7 @@ public class NodeUtil {
     public static void processInstanceSpecificationSpecificationJson( String sysmlId, JSONObject iss, List<Pair<String, String>> documentEdges) {
         if (iss != null) {
             if (iss.has( "string" )) {
+                if (iss.isNull( "string" )) return;
                 String string = iss.getString( "string" );
                 JSONObject json = new JSONObject(string);
                 Set<Object> sources = findKeyValueInJsonObject(json, "source");
@@ -4960,9 +4964,7 @@ public class NodeUtil {
             mmsVersion = jsonModule.get( "mmsVersion" ).toString();
         }
 
-        int endIndex = mmsVersion.lastIndexOf( "." );
-
-        return mmsVersion.substring( 0, endIndex );
+        return mmsVersion;
     }
 
     /**
@@ -5012,7 +5014,8 @@ public class NodeUtil {
                                       owner2children, child2owner );
                     } catch (Exception e) {
                         logger.error( "Post process qname not working. Setting postProcessQualified to false" );
-                        NodeUtil.doPostProcessQualified = false;
+                        logger.error( elementsJson );
+                        //NodeUtil.doPostProcessQualified = false;
                         e.printStackTrace();
                     }
                 } else {
@@ -5082,6 +5085,10 @@ public class NodeUtil {
                                  Map< String, String > id2siteName,
                                  Map< String, Set< String >> owner2children,
                                  Map< String, String > child2owner ) {
+        if ( !elementJson.has("sysmlid") ) {
+            logger.warn( "Could not find sysmlid: " + elementJson );
+            return;
+        }
         String sysmlid = elementJson.getString( "sysmlid" );
         Map< String, String > qpathMap = new HashMap< String, String >();
 
@@ -5172,12 +5179,13 @@ public class NodeUtil {
                         pgh.connect();
                         node =
                                 NodeUtil.getNodeFromPostgresNode( pgh.getNodeFromSysmlId( id ) );
-                        pgh.close();
                         useDb = true;
                     } catch ( ClassNotFoundException e ) {
                         e.printStackTrace();
                     } catch ( SQLException e ) {
-                    	e.printStackTrace();
+                    	    e.printStackTrace();
+                    } finally {
+                        pgh.close();
                     }
                 } 
                 if(!useDb) {

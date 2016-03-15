@@ -289,9 +289,10 @@ public class ModelGet extends AbstractJavaWebScript {
 			    try {
                     pgh.connect();
                     modelRootNode = NodeUtil.getNodeFromPostgresNode(pgh.getNodeFromSysmlId( modelId ));
-                    pgh.close();
                 } catch ( Exception e ) {
                     logger.info( "Reverting to alfresco lookup. Could not find element in graph db " + modelId );
+                } finally {
+                    pgh.close();
                 }
 			}
 			if (modelRootNode == null) {
@@ -497,15 +498,15 @@ public class ModelGet extends AbstractJavaWebScript {
             pgh.connect();
     		    childrenNodeRefIds = pgh.getChildren(root.getSysmlId(),
     					DbEdgeTypes.REGULAR, depth);
-    			pgh.close();
 		} catch (SQLException | ClassNotFoundException e) {
 			e.printStackTrace();
+		} finally {
+		    pgh.close();
 		}
 
 		if (childrenNodeRefIds == null) return;
 		for (Pair<String, Pair<String, String>> c : childrenNodeRefIds) {
-		    // grab the current ref
-			EmsScriptNode ecn = new EmsScriptNode(new NodeRef(c.second.first),
+			EmsScriptNode ecn = new EmsScriptNode(new NodeRef(c.second.second),
 					services, response);
 
 			if (!ecn.exists() || ecn.getSysmlId().endsWith("_pkg")
@@ -513,7 +514,7 @@ public class ModelGet extends AbstractJavaWebScript {
 					|| !checkPermissions(ecn, PermissionService.READ))
 				continue;
 
-			elementsFound.put(c.first, ecn);
+			elementsFound.put(c.second.second, ecn);
 		}
 	}
 
