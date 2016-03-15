@@ -2562,26 +2562,28 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
             return false;
         }
 
-//        String jobId = getJobIdFromJson( jobAsElementJson, true );
-
         // Find node for id.
         final EmsScriptNode jobNode = findScriptNodeById( jobId, workspace, null, false );
         
-        for( int i = 0; i < elements.length(); i++ ) {
-            JSONObject propertyJson = elements.optJSONObject( i );
-            
-            if( EmsScriptNode.maybeJobProperty( propertyJson ) ) {
-                // Get the property name from the id of the slot of the job
-                // property json.
-                String identifiedJobPropertyName =
-                        getNameOfJobPropertyForSlot( propertyJson, //elements,
-                                                     elementMap, workspace );
+        // get the slots so you can loop through each one and identify which property it is, for the job
+        Collection<EmsScriptNode> slots = jobNode.getAllSlots( jobNode, 
+                                                               false, workspace, null, 
+                                                               services, response, responseStatus, null );
+        if( !Utils.isNullOrEmpty( slots ) ) {
+            for( EmsScriptNode slot : slots ) {
+                JSONObject propertyJson = slot.toJSONObject( workspace, null );
                 
-                if( !Utils.isNullOrEmpty( identifiedJobPropertyName ) ) {
-                    String propertyValue = getStringValueFromPropertyJson(propertyJson);
-                    Utils.put( propertyValues, jobId, identifiedJobPropertyName, propertyValue);
-//                        putJobProperty( identifiedJobPropertyName, propertyJson, false, jobNode, jobId,
-//                                        elements );                     
+                if( EmsScriptNode.maybeJobProperty( propertyJson ) ) {
+                    // Get the property name from the id of the slot of the job
+                    // property json.
+                    String identifiedJobPropertyName =
+                            getNameOfJobPropertyForSlot( propertyJson, //elements,
+                                                         elementMap, workspace );
+                    
+                    if( !Utils.isNullOrEmpty( identifiedJobPropertyName ) ) {
+                        String propertyValue = getStringValueFromPropertyJson(propertyJson);
+                        Utils.put( propertyValues, jobId, identifiedJobPropertyName, propertyValue);
+                    }
                 }
             }
         }
@@ -3129,8 +3131,8 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
             JSONObject elem = elements.optJSONObject( i );
             
             if ( EmsScriptNode.isJob( elem ) ) {
-                boolean isNew = processJobAsElement( elem, elements, elementMap, workspace );
                 String id = getJobIdFromJson( elem, false );
+                boolean isNew = processJobAsElement( id, elements, elementMap, workspace );
                 if( id != null ) createNewJob.put( id, isNew );   
             }
         }
@@ -3146,7 +3148,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         }
         
         // Get missing property values from DB for jenkins config
-        getMissingPropertyValues(jobIds);
+        //getMissingPropertyValues(jobIds);
         
         // FIXME -- Don't send the jenkins config until the post is complete; in
         // fact, the propertyValues should be gathered after the fact.
