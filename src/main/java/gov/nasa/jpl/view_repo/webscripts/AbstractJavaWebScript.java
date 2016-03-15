@@ -2888,8 +2888,19 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
     }
 
     protected String getInstanceSpecId( JSONObject job ) {
-        logger.error("JobPost.getInstanceSpecId() not yet supported!");
-        // TODO Auto-generated method stub
+
+        String propertyId = job.getString( "sysmlid" );
+        // split the string and get the instance spec
+        String[] slotIdParts = propertyId.split( "-slot-" );
+        // store the instance spec in this variable
+        String instanceSpecId = null;
+
+        // the instance spec id will be obtained from an existing property
+        if( slotIdParts.length > 1 ) {
+            instanceSpecId = slotIdParts[0];
+            return instanceSpecId;
+        }
+        
         return null;
     }
 
