@@ -96,28 +96,29 @@ public class Model2Postgres extends AbstractJavaWebScript {
 		Map<String, Object> model = new HashMap<String, Object>();
 		JSONObject json = null;
 
-		try {
 			if (validateRequest(req, status) || true) {
 				WorkspaceNode workspace = getWorkspace(req);
 				pgh = new PostgresHelper(workspace);
-
-				String sitesReq = req.getParameter("sites");
-				String timestamp = req.getParameter("timestamp");
-				Date dateTime = TimeUtils.dateFromTimestamp(timestamp);
-				JSONArray jsonArray = handleSite(workspace, dateTime, sitesReq);
-				json = new JSONObject();
-				json.put("sites", jsonArray);
+		        try {
+        				String sitesReq = req.getParameter("siteId");
+        				String timestamp = req.getParameter("timestamp");
+        				Date dateTime = TimeUtils.dateFromTimestamp(timestamp);
+        				JSONArray jsonArray = handleSite(workspace, dateTime, sitesReq);
+        				json = new JSONObject();
+        				json.put("sites", jsonArray);
+		        } catch (JSONException e) {
+		            log(Level.ERROR, HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+		                    "JSON could not be created\n");
+		            e.printStackTrace();
+		        } catch (Exception e) {
+		            log(Level.ERROR, HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+		                    "Internal error stack trace:\n %s \n",
+		                    e.getLocalizedMessage());
+		            e.printStackTrace();
+		        } finally {
+		            pgh.close();
+		        }
 			}
-		} catch (JSONException e) {
-			log(Level.ERROR, HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-					"JSON could not be created\n");
-			e.printStackTrace();
-		} catch (Exception e) {
-			log(Level.ERROR, HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-					"Internal error stack trace:\n %s \n",
-					e.getLocalizedMessage());
-			e.printStackTrace();
-		}
 		if (json == null) {
 			model.put("res", createResponseJson());
 		} else {
@@ -177,11 +178,10 @@ public class Model2Postgres extends AbstractJavaWebScript {
 								}
 							}
 						}
-
-						pgh.close();
-
 					} catch (ClassNotFoundException | SQLException e) {
 						e.printStackTrace();
+					} finally {
+					    pgh.close();
 					}
 				}
 			}

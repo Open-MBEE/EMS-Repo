@@ -3531,13 +3531,14 @@ public class EmsScriptNode extends ScriptNode implements
                             relatedDocuments.put( relatedDoc );
                         }
                     }
-                    pgh.close();
                 } catch ( ClassNotFoundException e ) {
                     // TODO Auto-generated catch block
                     e.printStackTrace();
                 } catch ( SQLException e ) {
                     // TODO Auto-generated catch block
                     e.printStackTrace();
+                } finally {
+                    pgh.close();
                 }
             }
             if (relatedDocuments.length()>0) {

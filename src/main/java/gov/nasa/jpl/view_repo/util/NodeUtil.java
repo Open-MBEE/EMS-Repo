@@ -4964,9 +4964,7 @@ public class NodeUtil {
             mmsVersion = jsonModule.get( "mmsVersion" ).toString();
         }
 
-        int endIndex = mmsVersion.lastIndexOf( "." );
-
-        return mmsVersion.substring( 0, endIndex );
+        return mmsVersion;
     }
 
     /**
@@ -5181,12 +5179,13 @@ public class NodeUtil {
                         pgh.connect();
                         node =
                                 NodeUtil.getNodeFromPostgresNode( pgh.getNodeFromSysmlId( id ) );
-                        pgh.close();
                         useDb = true;
                     } catch ( ClassNotFoundException e ) {
                         e.printStackTrace();
                     } catch ( SQLException e ) {
-                    	e.printStackTrace();
+                    	    e.printStackTrace();
+                    } finally {
+                        pgh.close();
                     }
                 } 
                 if(!useDb) {
