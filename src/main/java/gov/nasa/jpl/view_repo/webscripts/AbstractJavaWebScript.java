@@ -2554,15 +2554,15 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
      * 
      * @return whether or not the job is new or already created
      */  
-    protected boolean processJobAsElement(JSONObject jobAsElementJson, JSONArray elements,
+    protected boolean processJobAsElement(String jobId, JSONArray elements,
                                        Map<String, JSONObject> elementMap,
                                        WorkspaceNode workspace ) {
-        if ( jobAsElementJson == null ) {
-            log( Level.ERROR, "Bad job json: " + jobAsElementJson );
+        if ( jobId == null ) {
+            log( Level.ERROR, "Bad job json: " + jobId );
             return false;
         }
 
-        String jobId = getJobIdFromJson( jobAsElementJson, true );
+//        String jobId = getJobIdFromJson( jobAsElementJson, true );
 
         // Find node for id.
         final EmsScriptNode jobNode = findScriptNodeById( jobId, workspace, null, false );
@@ -2584,6 +2584,12 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
 //                                        elements );                     
                 }
             }
+        }
+        
+        // Make sure we get properties not passed in the json so that we can
+        // build a complete jenkins config.
+        if ( jobNode != null ) {
+            getMissingPropertyValues( jobNode );
         }
         
         boolean createNewJob = false;
@@ -2997,7 +3003,11 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
 
     protected String getInstanceSpecIdFromSlotId( JSONObject slotJson ) {
 
+        // make sure the json has a slot id
         String propertyId = slotJson.getString( "sysmlid" );
+        if ( Utils.isNullOrEmpty( propertyId ) ) return null;
+        if ( !propertyId.contains( "-slot-" ) ) return null;
+        
         // split the string and get the instance spec
         String[] slotIdParts = propertyId.split( "-slot-" );
         // store the instance spec in this variable
@@ -3044,7 +3054,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         for ( JSONObject elem : elementMap.values() ) {
             if ( elem == null ) continue;
             EmsScriptNode job =
-                    getOwningJobOfPropertyJson( elem, workspace, null );
+                    getOwningJobOfPropertyJson( elem, elementMap, workspace, null );
             if ( job != null ) {
                 String jobId = job.getSysmlId();
                 if ( jobId != null && !elementMap.containsKey( jobId ) ) {
@@ -3135,6 +3145,9 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
             }
         }
         
+        // Get missing property values from DB for jenkins config
+        getMissingPropertyValues(jobIds);
+        
         // FIXME -- Don't send the jenkins config until the post is complete; in
         // fact, the propertyValues should be gathered after the fact.
         for ( String jobId : propertyValues.keySet() ) {
@@ -3145,6 +3158,41 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         json.remove( "jobs" );
     }
 
+    /**
+     * 
+     * @param jobNode
+     */
+    private void getMissingPropertyValues( EmsScriptNode jobNode ) {
+        if ( jobNode == null ) return;
+        Collection<EmsScriptNode> slots = jobNode.getAllSlots( jobNode, 
+                                                               false, null, null, 
+                                                               services, response, responseStatus, null );
+        
+        for ( String propertyName : AbstractJavaWebScript.jobProperties ) {
+            //String definingFeature = definingFeatures.get( propertyName );
+            getMissingPropertyValues( propertyName, jobNode );
+        }
+    }
+    private void getMissingPropertyValues( String propertyName,
+                                           EmsScriptNode jobNode ) {
+        // Attempts to find the node and retrieve the value that way.
+        EmsScriptNode propertyNode =
+                getJobPropertyNode( jobNode, propertyName );
+        
+        Collection< Object > values = getSystemModel().getValue( propertyNode, null );
+
+        if ( !Utils.isNullOrEmpty( values ) ) {
+            if ( values.size() > 1 ) {
+                // TODO -- ERROR?
+            }
+            String jobId = jobNode.getSysmlId();
+            Object value = values.iterator().next();
+            if ( value != null ) {
+                Utils.put( propertyValues, jobId, propertyName, value.toString() ); 
+            }
+        }
+    }
+    
     public void addJobMetatype( JSONObject job ) {
         JSONArray appliedMetatypes = job.optJSONArray( "appliedMetatypes" );
         if ( appliedMetatypes == null ) {
@@ -3165,12 +3213,35 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
     }
     
     protected EmsScriptNode getOwningJobOfPropertyJson( JSONObject elem,
+                                                        Map< String, JSONObject > elementMap,
                                                         WorkspaceNode workspace,
                                                         Date dateTime ) {
         if ( elem == null ) return null;
-        String ownerId = elem.optString( "owner" );
-        if ( ownerId == null ) return null;
-        EmsScriptNode owner = findScriptNodeById( ownerId, workspace, dateTime, false );
+
+        String instanceSpecId = getInstanceSpecIdFromSlotId( elem );
+        if ( Utils.isNullOrEmpty( instanceSpecId ) ) return null;
+
+        JSONObject instanceSpecJson = elementMap.get(instanceSpecId);
+        EmsScriptNode owner = null;
+        String ownerId = null;
+        if ( instanceSpecJson != null ) {
+            ownerId = instanceSpecJson.optString( "owner" );
+        } else {
+            // look for node in DB
+            EmsScriptNode instanceSpecNode = findScriptNodeById( instanceSpecId, workspace, dateTime, false );
+            if ( instanceSpecNode != null ) {
+                owner = instanceSpecNode.getOwningParent( dateTime, workspace, false );
+                if ( owner != null ) {
+                    ownerId = owner.getSysmlId();
+                }
+            }
+        }
+        
+        if ( owner == null && ownerId == null ) return null;
+
+        if ( owner == null ) {
+            owner = findScriptNodeById( ownerId, workspace, dateTime, false );
+        }
         if ( owner != null && owner.isJob() ) return owner;
 
         return null;
@@ -3178,6 +3249,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
     
     public void postProcessJson( JSONObject top ) {
         // redefine this if you want to add jobs or other things; see
+        logger.error( "AbstractJavaWebscript.postProcess() not redefined!");
         // JobGet.postProcessJson()
     }
 
