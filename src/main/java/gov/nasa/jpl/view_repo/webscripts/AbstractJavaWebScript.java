@@ -2836,26 +2836,46 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
 
         // Make sure we have an id for the property.
         if ( Utils.isNullOrEmpty( propertyId ) ) {
-            String instanceSpecId = null;//getInstanceSpecIdFromSlotId( propertyJson );
+            String instanceSpecId = null;
+            
+            // the instance spec can already exist in the MMS
             if ( jobNode != null ) {
                 EmsScriptNode spec = jobNode.getInstanceSpecification();
                 if ( spec != null ) {
                     instanceSpecId = spec.getSysmlId();
+                    
+                    JSONObject instanceSpec = createInstanceSpecificationJson( instanceSpecId, jobId );
+                    instanceSpecs.put( instanceSpecId, instanceSpec );
+                } // there may also be no instance spec, so we would have to create a new one 
+                else if ( spec == null ) {                   
+                    instanceSpecId = NodeUtil.createId( NodeUtil.getServiceRegistry() );
+                    
+                    JSONObject instanceSpec = createInstanceSpecificationJson( instanceSpecId, jobId );
+                    instanceSpecs.put( instanceSpecId, instanceSpec );
                 }
             }
-            // FIXME -- this code is not done!  We need to be able to create instance specs!
-            // We would need to find/create the stereotype instance.
-            // Doesn't the code from DoorsSync do this??!!
-            logger.error( "Creating job property instance specs and slot ids are not yet supported! " + propertyName
-                          + " element must already exist or be passed in the json." );
-//            if ( Utils.isNullOrEmpty( propertyId ) ) {
-//                logger.error("JobPost.getJobProperty(): job id not found!");
-//                propertyId = NodeUtil.createId( getServices() );
-//            } else {
-                String instanceSpecId = getInstanceSpecIdFromSlotId( propertyJson );
-                String definingFeatureId = getDefiningFeatureId( propertyName );
-                propertyId = instanceSpecId + "-slot-" + definingFeatureId;
-//            }
+
+            // instance spec may also be in the JSON, which we will have to loop through every element to identify it
+            // by comparing the owner ID with the job ID 
+            if ( propertyJson != null ) {
+                
+                for(int i = 0; i < elements.length(); i++) {
+                    JSONObject element = elements.optJSONObject( i );
+                    
+                    String ownerId = element.optString( "owner" );
+                    
+                    if( ownerId != null && ownerId == jobId) {
+                        instanceSpecId = element.optString( "sysmlid" );
+                        JSONObject instanceSpec = element;
+                        instanceSpecs.put( instanceSpecId, instanceSpec );
+                    }
+                }
+                               
+            }
+            
+            instanceSpecId = getInstanceSpecIdFromSlotId( propertyJson );
+            String definingFeatureId = getDefiningFeatureId( propertyName );
+            propertyId = instanceSpecId + "-slot-" + definingFeatureId;
         }
 
         // add specialization part with value
@@ -2870,8 +2890,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         valueArr.put(value);
         value.put( "type", "LiteralString" );
         value.put( "string", propertyValue );
-
-        instanceSpecs.put( jobId, propertyJson );        
+      
         return propertyJson;
     }
     
