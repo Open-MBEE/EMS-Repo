@@ -4964,9 +4964,7 @@ public class NodeUtil {
             mmsVersion = jsonModule.get( "mmsVersion" ).toString();
         }
 
-        int endIndex = mmsVersion.lastIndexOf( "." );
-
-        return mmsVersion.substring( 0, endIndex );
+        return mmsVersion;
     }
 
     /**

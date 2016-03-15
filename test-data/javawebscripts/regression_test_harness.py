@@ -3187,13 +3187,14 @@ common_filters + ['"timestamp"'],
 ["test","workspaces","develop", "develop2"]
 ],
 [
+# FIXME: removed JSON diff since timestamp is in version and is in message, so needs to be ignored 
 10106,
 "CheckMmsVersion-Incorrect",
 "Checks the MMS version when requesting an element, versions should NOT match",
 create_curl_cmd(type="GET", data="elements/303?mmsVersion=2.0", base_url=BASE_URL_WS,
         branch="master/"),
-True,
-common_filters + ['"timestamp"'],
+False,
+common_filters + ['"timestamp"', '"message"'],
 ["test","workspaces","develop", "develop2"]
 ],
 [
