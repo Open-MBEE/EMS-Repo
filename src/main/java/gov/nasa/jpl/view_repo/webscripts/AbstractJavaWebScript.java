@@ -190,6 +190,8 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
             new LinkedHashMap< String, Map< String, String > >();
     LinkedHashMap< String, Map< String, JSONObject > > propertyJson =
             new LinkedHashMap< String, Map< String, JSONObject > >();
+    LinkedHashMap<String, JSONObject> instanceSpecs = 
+            new LinkedHashMap< String, JSONObject >();
 
     public boolean usingExistsCache = false; // not yet implemented
     enum ExistType { InAlfresco, InModel };
@@ -2637,6 +2639,11 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
 
             if( propertyElementJson != null ) {
                 elements.put( propertyElementJson );
+                String propertyId = propertyElementJson.optString("sysmlid");
+                if ( !Utils.isNullOrEmpty( propertyId ) ) {
+                    elementMap.put( propertyId, propertyElementJson );
+                }
+                                
                 // Remove the property from the job json so that we can use it
                 // as the element json for the model post.
                 if( jobJson.has( propertyName ) ) jobJson.remove( propertyName );
@@ -2829,19 +2836,26 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
 
         // Make sure we have an id for the property.
         if ( Utils.isNullOrEmpty( propertyId ) ) {
+            String instanceSpecId = null;//getInstanceSpecIdFromSlotId( propertyJson );
+            if ( jobNode != null ) {
+                EmsScriptNode spec = jobNode.getInstanceSpecification();
+                if ( spec != null ) {
+                    instanceSpecId = spec.getSysmlId();
+                }
+            }
             // FIXME -- this code is not done!  We need to be able to create instance specs!
             // We would need to find/create the stereotype instance.
             // Doesn't the code from DoorsSync do this??!!
             logger.error( "Creating job property instance specs and slot ids are not yet supported! " + propertyName
                           + " element must already exist or be passed in the json." );
-            if ( Utils.isNullOrEmpty( jobId ) ) {
-                logger.error("JobPost.getJobProperty(): job id not found!");
-                jobId = NodeUtil.createId( getServices() );
-            } else {
-                String instanceSpecId = getInstanceSpecId( jobJson );
+//            if ( Utils.isNullOrEmpty( propertyId ) ) {
+//                logger.error("JobPost.getJobProperty(): job id not found!");
+//                propertyId = NodeUtil.createId( getServices() );
+//            } else {
+                String instanceSpecId = getInstanceSpecIdFromSlotId( propertyJson );
                 String definingFeatureId = getDefiningFeatureId( propertyName );
-                jobId = instanceSpecId + "-slot-" + definingFeatureId;
-            }
+                propertyId = instanceSpecId + "-slot-" + definingFeatureId;
+//            }
         }
 
         // add specialization part with value
@@ -2857,7 +2871,27 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         value.put( "type", "LiteralString" );
         value.put( "string", propertyValue );
 
+        instanceSpecs.put( jobId, propertyJson );        
         return propertyJson;
+    }
+    
+    protected JSONObject createInstanceSpecificationJson(String specSysmlId, String jobId  ) {
+        JSONObject specElement = new JSONObject();
+        specElement.put("name", "");
+        specElement.put("sysmlid", specSysmlId);
+        specElement.put("owner", jobId);
+        specElement.put("documentation", "");
+        JSONArray specAppliedMetatypes = new JSONArray();
+        specAppliedMetatypes.put("_9_0_62a020a_1105704885251_933969_7897");
+        specElement.put("appliedMetatypes", specAppliedMetatypes);
+        JSONObject specSpecialization = new JSONObject();
+        JSONArray specClassifier = new JSONArray();
+        specClassifier.put("_11_5EAPbeta_be00301_1147873190330_159934_2220");
+        specSpecialization.put("classifier", specClassifier);
+        specSpecialization.put("type", "InstanceSpecification");
+        specElement.put("specialization", specSpecialization);
+        specElement.put("isMetatype", false);
+        return specElement;
     }
     
     /**
@@ -2887,9 +2921,9 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         return definingFeatures.get(propertyName);
     }
 
-    protected String getInstanceSpecId( JSONObject job ) {
+    protected String getInstanceSpecIdFromSlotId( JSONObject slotJson ) {
 
-        String propertyId = job.getString( "sysmlid" );
+        String propertyId = slotJson.getString( "sysmlid" );
         // split the string and get the instance spec
         String[] slotIdParts = propertyId.split( "-slot-" );
         // store the instance spec in this variable
