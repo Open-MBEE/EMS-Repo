@@ -81,6 +81,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.servlet.http.HttpServletResponse;
+
 import org.alfresco.repo.jscript.ScriptNode;
 import org.alfresco.repo.model.Repository;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
@@ -184,8 +185,11 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         Utils.put( permissionCache, realUser, nodeRef, getPermType(permission), b );
     }
 
+    // Temporary cache of element id to property name to value used for jobs.
     LinkedHashMap< String, Map< String, String > > propertyValues =
             new LinkedHashMap< String, Map< String, String > >();
+    LinkedHashMap< String, Map< String, JSONObject > > propertyJson =
+            new LinkedHashMap< String, Map< String, JSONObject > >();
 
     public boolean usingExistsCache = false; // not yet implemented
     enum ExistType { InAlfresco, InModel };
@@ -2568,7 +2572,8 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
                 // Get the property name from the id of the slot of the job
                 // property json.
                 String identifiedJobPropertyName =
-                        getNameOfJobPropertyForSlot( propertyJson, elements, elementMap, workspace );
+                        getNameOfJobPropertyForSlot( propertyJson, //elements,
+                                                     elementMap, workspace );
                 
                 if( !Utils.isNullOrEmpty( identifiedJobPropertyName ) ) {
                     String propertyValue = getStringValueFromPropertyJson(propertyJson);
@@ -2669,7 +2674,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
      * @param workspace
      * @return the name of the property (ex, schedule, command, status, ...)
      */
-    protected String getNameOfJobPropertyForSlot(JSONObject elementJson, JSONArray elements,
+    protected String getNameOfJobPropertyForSlot(JSONObject elementJson,// JSONArray elements,
                                                Map<String, JSONObject> elementMap,
                                                WorkspaceNode workspace ) {
         if ( elementJson == null ) {
@@ -2760,96 +2765,74 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
             return null;
         }
         
-        // Attempts to find the node and retrieve the value that way.
-        // It gets the alfresco property id if it can for later use.
+        String propertyId = null;
+        
+        // Attempt to find an existing property node in the database and get its
+        // id.
         if ( jobNode != null ) {
             EmsScriptNode propertyNode =
                     getJobPropertyNode( jobNode, propertyName );
             if ( propertyNode != null ) {
-                jobId = propertyNode.getSysmlId();
-            }
-            
-            // If we couldn't find a value in the passed in json
-            // (propertyValue), then we can try and get it from alfresco and be
-            // done.
-            Map< String, String > props = propertyValues.get( jobId );
-            if ( propertyValue == null && propertyNode != null && props != null && !props.containsKey( propertyName ) ) {
-                Collection< Object > values = getSystemModel().getValue( propertyNode, null );
-    
-                if ( !Utils.isNullOrEmpty( values ) ) {
-                    if ( values.size() > 1 ) {
-                        // TODO -- ERROR?
-                    }
-                    Object value = values.iterator().next();
-                    if ( value != null ) {
-                      Utils.put( propertyValues, jobId, propertyName, value.toString() );
-                      
-                      // Returning null to indicate that no new element json was created
-                      return null;
-                    }
-                }
+                propertyId = propertyNode.getSysmlId();
             }
         }
 
-        // At this point, we may have a value from the passed in
-        // jobOrPropertyJson if it's job json.
-        //
-        // If we don't, we have already checked to see if it's in alfresco.
-        //
-        // If jobOrPropertyJson is property json, then the value may be embedded
-        // in its specialization.
-        
-        // If the property exists within the elements map, then get the value from that 
-        
-        // jobOrPropertyId is either the actual property id if the passed in json is
-        // the property json for the propertyName or if jobNode != null and the
-        // corresponding property was found.
-        //
-        // So, the propertyJson below may end up being the property json from
-        // the passed in elements, or the job json, or null.  Keep in mind that
-        // the jobOrPropertJson passed in may be the property json.
-        JSONObject propertyJson = getPropertyJson(jobId, elements);
-        if ( propertyJson != null ) {
-            // The property value should have been provided in the job
-            // json. If it wasn't, then try to get it from the property json. If
-            // they both provide property values, throw an error if they
-            // disagree.
-            String value = getStringValueFromPropertyJson( propertyJson );
-            if ( value != null && propertyValue != null && !value.equals( propertyValue ) ) {
-                String jsonPropertyId = propertyJson.optString( "sysmlid" );
-                logger.error( "job json says value of " + propertyName + " is \""
-                              + propertyValue
-                              + "\", but posting element json (id=" + jsonPropertyId
-                              + ") says the value is " + value + "; using " + propertyValue + " !" );
-                value = propertyValue;
-            }
-            if ( value != null ) {
-                Utils.put( propertyValues, jobId, propertyName, value );
-            }
+//        JSONObject propertyJson = getPropertyJson(propertyId, elements);
+//        if ( propertyJson != null ) {
+//            // The property value should have been provided in the job
+//            // json. If it wasn't, then try to get it from the property json. If
+//            // they both provide property values, throw an error if they
+//            // disagree.
+//            String value = getStringValueFromPropertyJson( propertyJson );
+//            if ( value != null && propertyValue != null && !value.equals( propertyValue ) ) {
+//                String jsonPropertyId = propertyJson.optString( "sysmlid" );
+//                logger.error( "job json says value of " + propertyName + " is \""
+//                              + propertyValue
+//                              + "\", but posting element json (id=" + jsonPropertyId
+//                              + ") says the value is " + value + "; using " + propertyValue + " !" );
+//                value = propertyValue;
+//            }
+//            if ( value != null ) {
+//                Utils.put( propertyValues, jobId, propertyName, value );
+//            }
+//
+//            // Returning null to indicate that no new element json was created
+//            return null;
+//        }
 
-            // Returning null to indicate that no new element json was created
-            return null;
-        }
-        
+        JSONObject propertyJson = Utils.get(this.propertyJson, jobId, propertyName);
 
+        
+        boolean creatingNewPropertyJson = propertyJson == null;
+        
         // Add one if it isn't there already.
-        if ( propertyJson == null ) propertyJson = new JSONObject();
-        if ( jobId != null ) {
-            propertyJson.put( "sysmlid", jobId );  // may already be there
+        if ( creatingNewPropertyJson ) {
+            propertyJson = new JSONObject();
+            // elements.put( propertyJson ); // do this from caller
+        }
+        if ( propertyId != null ) {
+            propertyJson.put( "sysmlid", propertyId );  // may already be there
+            //elementsMap.put(propertyId, propertyJson);  // do this from caller
+        } else if ( propertyJson.has( "sysmlid" ) ) {
+            propertyId = propertyJson.getString( "sysmlid" );
         }
 
         // add owner
-        if( jobId != null ) {
+        if( jobId != null && !propertyJson.has("owner") ) {
             propertyJson.put( "owner", jobId );
         }
 
         // add name
-        propertyJson.put( "name", "" );
+        if( !propertyJson.has("name") ) {
+            propertyJson.put( "name", "" );  // Slots in MagicDraw have "" names.
+        }
 
         // Make sure we have an id for the property.
-        if ( Utils.isNullOrEmpty( jobId ) ) {
+        if ( Utils.isNullOrEmpty( propertyId ) ) {
+            // FIXME -- this code is not done!  We need to be able to create instance specs!
             // We would need to find/create the stereotype instance.
-            logger.error( propertyName
+            // Doesn't the code from DoorsSync do this??!!
+            logger.error( "Creating job property instance specs and slot ids are not yet supported! " + propertyName
                           + " element must already exist or be passed in the json." );
             if ( Utils.isNullOrEmpty( jobId ) ) {
                 logger.error("JobPost.getJobProperty(): job id not found!");
@@ -2936,6 +2919,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
      */
     public ArrayList< String >
           getJobsIdsForPropertyElementJson( Map< String, JSONObject > elementMap,
+                                            //JSONArray elements,
                                             WorkspaceNode workspace ) {
         ArrayList< String > jobIds = new ArrayList< String >();
         for ( JSONObject elem : elementMap.values() ) {
@@ -2946,6 +2930,11 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
                 String jobId = job.getSysmlId();
                 if ( jobId != null && !elementMap.containsKey( jobId ) ) {
                     jobIds.add( jobId );
+                }
+                String propName = getNameOfJobPropertyForSlot( elem, //elements,
+                                                               elementMap, workspace );
+                if ( !Utils.isNullOrEmpty( propName ) ) {
+                    Utils.put(propertyJson, jobId, propName, elem);
                 }
             }
         }
@@ -2990,7 +2979,8 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         
         // Add json for job elements whose Properties are posted without the job.
         // We do this because only jobs that show up in the json are processed.
-        ArrayList< String > jobIds = getJobsIdsForPropertyElementJson( elementMap, workspace );
+        ArrayList< String > jobIds = getJobsIdsForPropertyElementJson( elementMap, //elements,
+                                                                       workspace );
         for ( String jobId : jobIds ) {
             // add placeholder json for job
             JSONObject jobJson = new JSONObject();
