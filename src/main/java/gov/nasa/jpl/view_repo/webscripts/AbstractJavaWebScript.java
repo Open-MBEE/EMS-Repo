@@ -2582,7 +2582,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
                 String identifiedJobPropertyName =
                         getNameOfJobPropertyForSlot( propertyJson );
                 IdNodeJson job = getOwningJobOfPropertyJson( propertyJson, elementMap, workspace, null );
-                String jobId = job.id;
+                String jobId = job == null ? null : job.id;
                 if( !Utils.isNullOrEmpty( identifiedJobPropertyName ) ) {
                     String propertyValue = getStringValueFromPropertyJson(propertyJson);
                     Utils.put( propertyValues, jobId, identifiedJobPropertyName,
