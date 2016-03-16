@@ -3369,8 +3369,6 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
     
     public void postProcessJson( JSONObject top ) {
         // redefine this if you want to add jobs or other things; see
-        logger.error( "AbstractJavaWebscript.postProcess() not redefined!");
-        // JobGet.postProcessJson()
     }
 
     protected JSONObject getJsonForElement( EmsScriptNode element,
