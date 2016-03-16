@@ -2868,33 +2868,37 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
             propertyId = propertyJson.getString( "sysmlid" );
         }
 
-        // add owner
-        if( jobId != null && !propertyJson.has("owner") ) {
-            propertyJson.put( "owner", jobId );
-        }
-
         // add name
         if( !propertyJson.has("name") ) {
             propertyJson.put( "name", "" );  // Slots in MagicDraw have "" names.
         }
 
+        String instanceSpecId = null;
+        
+        // We need the instance spec id and defining feature id to determine the property/slot id.
+        // We may not have an instance spec for a new job and need to create one.
+        instanceSpecId = getOrCreateInstanceSpecFromJob( jobNode, jobId, elements );
+        // If we didn't find/create the id, then see if we can dig it out of
+        // the property id in the json.
+        if ( Utils.isNullOrEmpty( instanceSpecId ) ) {
+            instanceSpecId = getInstanceSpecIdFromSlotId( propertyJson );
+        }
+        if ( Utils.isNullOrEmpty( instanceSpecId ) ) {
+            logger.error( "Could not find or create an instance spec id for the "
+                          + propertyName + " property of " + jobId );
+            return null;
+       }
         // Make sure we have an id for the property.
         if ( Utils.isNullOrEmpty( propertyId ) ) {
-            String instanceSpecId = null;
-            JSONObject instanceSpec = null;
-            
-            // We need the instance spec id and defining feature id to determine the property/slot id.
-            // We may not have an instance spec for a new job and need to create one.
-            instanceSpecId = getOrCreateInstanceSpecFromJob( jobNode, jobId, elements );
-            // If we didn't find/create the id, then see if we can dig it out of
-            // the property id in the json.
-            if ( Utils.isNullOrEmpty( instanceSpecId ) ) {
-                instanceSpecId = getInstanceSpecIdFromSlotId( propertyJson );
-            }
             String definingFeatureId = getDefiningFeatureId( propertyName );
             propertyId = instanceSpecId + "-slot-" + definingFeatureId;
             
             propertyJson.put( "sysmlid", propertyId );
+        }
+        
+        // add owner
+        if( instanceSpecId != null && !propertyJson.has("owner") ) {
+            propertyJson.put( "owner", instanceSpecId );
         }
 
         // add specialization part with value
@@ -2905,10 +2909,12 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         specJson.put( "isSlot", true);
         JSONArray valueArr = new JSONArray();
         specJson.put( "value", valueArr );
-        JSONObject value = new JSONObject();
-        valueArr.put(value);
-        value.put( "type", "LiteralString" );
-        value.put( "string", propertyValue );
+        if ( propertyValue != null ) {
+            JSONObject value = new JSONObject();
+            valueArr.put(value);
+            value.put( "type", "LiteralString" );
+            value.put( "string", propertyValue );
+        }
       
         return propertyJson;
     }
