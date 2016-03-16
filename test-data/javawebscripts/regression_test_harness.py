@@ -3187,13 +3187,14 @@ common_filters + ['"timestamp"'],
 ["test","workspaces","develop", "develop2"]
 ],
 [
+# FIXME: removed JSON diff since timestamp is in version and is in message, so needs to be ignored 
 10106,
 "CheckMmsVersion-Incorrect",
 "Checks the MMS version when requesting an element, versions should NOT match",
 create_curl_cmd(type="GET", data="elements/303?mmsVersion=2.0", base_url=BASE_URL_WS,
         branch="master/"),
-True,
-common_filters + ['"timestamp"'],
+False,
+common_filters + ['"timestamp"', '"message"'],
 ["test","workspaces","develop", "develop2"]
 ],
 [
@@ -3376,19 +3377,6 @@ create_curl_cmd(type="POST", data="holdingBinOwner.json", base_url=BASE_URL_WS,
                 post_type="elements", branch="master/"),
 True,
 common_filters + ['YY_', 'MM_', 'DD_', 'HH_', '"owner"', '"qualifiedId"', '"qualifiedName"'],
-["develop"]
-],
-         
-# CAEDVO-623: stripping images should leave all other attributes
-# FIXME: ignore documentation since there's alfresco specific id that causes diff
-[
-10150,
-"PostImage",
-"Post image with styles",
-create_curl_cmd(type="POST", data="elements.json.images", base_url=BASE_URL_WS,
-                post_type="elements", branch="master/"),
-True,
-common_filters + ['YY_', 'MM_', 'DD_', 'HH_', '"owner"', '"qualifiedId"', '"qualifiedName"', '"documentation"'],
 ["develop"]
 ]
 ]

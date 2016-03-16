@@ -96,28 +96,29 @@ public class Model2Postgres extends AbstractJavaWebScript {
 		Map<String, Object> model = new HashMap<String, Object>();
 		JSONObject json = null;
 
-		try {
 			if (validateRequest(req, status) || true) {
 				WorkspaceNode workspace = getWorkspace(req);
 				pgh = new PostgresHelper(workspace);
-
-				String sitesReq = req.getParameter("sites");
-				String timestamp = req.getParameter("timestamp");
-				Date dateTime = TimeUtils.dateFromTimestamp(timestamp);
-				JSONArray jsonArray = handleSite(workspace, dateTime, sitesReq);
-				json = new JSONObject();
-				json.put("sites", jsonArray);
+		        try {
+        				String sitesReq = req.getParameter("siteId");
+        				String timestamp = req.getParameter("timestamp");
+        				Date dateTime = TimeUtils.dateFromTimestamp(timestamp);
+        				JSONArray jsonArray = handleSite(workspace, dateTime, sitesReq);
+        				json = new JSONObject();
+        				json.put("sites", jsonArray);
+		        } catch (JSONException e) {
+		            log(Level.ERROR, HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+		                    "JSON could not be created\n");
+		            e.printStackTrace();
+		        } catch (Exception e) {
+		            log(Level.ERROR, HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+		                    "Internal error stack trace:\n %s \n",
+		                    e.getLocalizedMessage());
+		            e.printStackTrace();
+		        } finally {
+		            pgh.close();
+		        }
 			}
-		} catch (JSONException e) {
-			log(Level.ERROR, HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-					"JSON could not be created\n");
-			e.printStackTrace();
-		} catch (Exception e) {
-			log(Level.ERROR, HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-					"Internal error stack trace:\n %s \n",
-					e.getLocalizedMessage());
-			e.printStackTrace();
-		}
 		if (json == null) {
 			model.put("res", createResponseJson());
 		} else {
@@ -140,7 +141,13 @@ public class Model2Postgres extends AbstractJavaWebScript {
 		List<Pair<String, String>> edges = new ArrayList<Pair<String, String>>();
 		List<Pair<String, String>> documentEdges = new ArrayList<Pair<String, String>>();
 
+		int count = 0;
+		int numSites = sites.size();
 		for (SiteInfo siteInfo : sites) {
+		    count++;
+		    if (logger.isInfoEnabled()) {
+		        logger.info( String.format("Processing %d of %d: %s", count, numSites, siteInfo.getShortName()) );
+		    }
 			JSONObject siteJson = new JSONObject();
 
 			siteRef = siteInfo.getNodeRef();
@@ -171,15 +178,18 @@ public class Model2Postgres extends AbstractJavaWebScript {
 								}
 							}
 						}
-
-						pgh.close();
-
 					} catch (ClassNotFoundException | SQLException e) {
 						e.printStackTrace();
+					} finally {
+					    pgh.close();
 					}
 				}
 			}
 		}
+
+        if (logger.isInfoEnabled()) {
+            logger.info( "Inserting edges into DB" );
+        }
 
 		try {
 			pgh.connect();
@@ -202,6 +212,10 @@ public class Model2Postgres extends AbstractJavaWebScript {
 			e.printStackTrace();
 		}
 
+        if (logger.isInfoEnabled()) {
+            logger.info( "Completed edge insertions" );
+        }
+
 		return json;
 	}
 
@@ -212,9 +226,6 @@ public class Model2Postgres extends AbstractJavaWebScript {
 
 		int i = 0;
 
-		if (logger.isInfoEnabled()) {
-		    logger.info( "inserting nodes and creating documentation edges" );
-		}
 		if (!n.getSysmlId().endsWith( "_pkg" )) {
         		pgh.insertNode(n.getNodeRef().toString(),
         				NodeUtil.getVersionedRefId(n), n.getSysmlId());
@@ -242,9 +253,6 @@ public class Model2Postgres extends AbstractJavaWebScript {
     			}
 		}
 
-        if (logger.isInfoEnabled()) {
-            logger.info( "creating edges" );
-        }
 		try {
         		// traverse alfresco containment since ownedChildren may not be accurate
             for (EmsScriptNode cn : n.getChildNodes()) {
@@ -264,10 +272,6 @@ public class Model2Postgres extends AbstractJavaWebScript {
 		    logger.error( String.format("could not get children for parent %s:", n.getId()) );
 		    mnre.printStackTrace();
 		}
-
-		if (logger.isInfoEnabled()) {
-            logger.info( "completed inserting nodes" );
-        }
 
 		return i;
 	}

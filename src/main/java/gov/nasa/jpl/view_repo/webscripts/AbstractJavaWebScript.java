@@ -2362,9 +2362,10 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
             // Calls NodeUtil's getMMSversion
             jsonVersion = getMMSversion();
             mmsVersion = jsonVersion.get("mmsVersion").toString();
-
+            
             log(Level.INFO, HttpServletResponse.SC_OK, "Comparing Versions....");
-            if (mmsVersion.equals(paramVal)) {
+            // version match only needs to be on the first two digits
+            if (mmsVersion.startsWith(paramVal)) {
                 // Compared versions matches
                 logCase = '1';
                 incorrectVersion = false;
@@ -2384,18 +2385,18 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
                 log(Level.INFO, HttpServletResponse.SC_OK, "Correct Versions");
                 break;
             case '2' :
-                log(Level.WARN, HttpServletResponse.SC_CONFLICT,
+                log(Level.WARN, HttpServletResponse.SC_NOT_ACCEPTABLE,
                         "Versions do not match! Expected Version " + mmsVersion
                                 + ". Instead received " + paramVal);
                 break;
             case '3' :
-                log(Level.ERROR, HttpServletResponse.SC_CONFLICT,
+                log(Level.ERROR, HttpServletResponse.SC_NOT_ACCEPTABLE,
                         "Missing MMS Version or invalid parameter. Received parameter:" + paramArg + " and argument:" + mmsVersion + ". Request was: " + jsonRequest);
                 break;
             // TODO: This should be removed but for the moment I am leaving this
             // in as a contingency if anything else may break this.
             case '4' :
-                log(Level.ERROR, HttpServletResponse.SC_CONFLICT,
+                log(Level.ERROR, HttpServletResponse.SC_NOT_ACCEPTABLE,
                         "Wrong MMS Version or invalid input. Expected mmsVersion="
                                 + mmsVersion + ". Instead received "
                                 + paramVal);
