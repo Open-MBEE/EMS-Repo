@@ -16,9 +16,11 @@
 <tr><td>/demo</td><td>rules/demo.post.desc.xml</td><td>../src/main/amp/config/alfresco/extension/templates/webscripts/gov/nasa/jpl/rules/demo.post.js</td></tr>
 <tr><td>/diff/{workspace1}/{workspace2}/{timestamp1}/{timestamp2}</td><td>mms/diff.get.desc.xml</td><td>gov.nasa.jpl.view_repo.webscripts.MmsDiffGet</td></tr>
 <tr><td>/diff?timestamp1={timestamp1}&amp;timestamp2={timestamp2}</td><td>mms/diff.post.desc.xml</td><td>gov.nasa.jpl.view_repo.webscripts.MmsWorkspaceDiffPost</td></tr>
+<tr><td>/doors</td><td>mms/doors.get.desc.xml</td><td>gov.nasa.jpl.view_repo.webscripts.DoorsSync</td></tr>
 <tr><td>/flags/all</td><td>utils/allflags.get.desc.xml</td><td>gov.nasa.jpl.view_repo.webscripts.AllFlagsGet</td></tr>
 <tr><td>/java_query</td><td>java_query.get.desc.xml</td><td>../src/main/amp/config/alfresco/extension/templates/webscripts/gov/nasa/jpl/java_query.get.js</td></tr>
 <tr><td>/javawebscripts/hostname</td><td>javawebscripts/hostname.get.desc.xml</td><td>gov.nasa.jpl.view_repo.webscripts.HostnameGet</td></tr>
+<tr><td>/loglevel</td><td>utils/loglevel.post.desc.xml</td><td>gov.nasa.jpl.view_repo.webscripts.LogLevelPost</td></tr>
 <tr><td>/logout</td><td>utils/logout.get.desc.xml</td><td>gov.nasa.jpl.view_repo.webscripts.LogoutWebScript</td></tr>
 <tr><td>/logout/info</td><td>utils/logoutlanding.get.desc.xml</td><td>../src/main/amp/config/alfresco/extension/templates/webscripts/gov/nasa/jpl/utils/logoutlanding.get.js</td></tr>
 <tr><td>/merge?target={target}&amp;source={source}</td><td>mms/merge.post.desc.xml</td><td>gov.nasa.jpl.view_repo.webscripts.WorkspacesMerge</td></tr>
@@ -57,6 +59,7 @@
 <tr><td>/workspaces/{workspaceId}/elements</td><td>mms/workspaces/elements.delete.desc.xml</td><td>gov.nasa.jpl.view_repo.webscripts.MmsModelDelete</td></tr>
 <tr><td>/workspaces/{workspaceId}/elements</td><td>mms/workspaces/elements.post.desc.xml</td><td>gov.nasa.jpl.view_repo.webscripts.ModelPost</td></tr>
 <tr><td>/workspaces/{workspaceId}/elements</td><td>mms/workspaces/elements.get.desc.xml</td><td>gov.nasa.jpl.view_repo.webscripts.ModelsGet</td></tr>
+<tr><td>/workspaces/{workspaceId}/elements</td><td>mms/workspaces/elements.put.desc.xml</td><td>gov.nasa.jpl.view_repo.webscripts.ModelsGet</td></tr>
 <tr><td>/workspaces/{workspaceId}/elements/{elementId}</td><td>mms/workspaces/elements/element.get.desc.xml</td><td>gov.nasa.jpl.view_repo.webscripts.ModelGet</td></tr>
 <tr><td>/workspaces/{workspaceId}/elements/{elementId}</td><td>mms/workspaces/elements/element.delete.desc.xml</td><td>gov.nasa.jpl.view_repo.webscripts.MmsModelDelete</td></tr>
 <tr><td>/workspaces/{workspaceId}/history/{elementId}</td><td>mms/workspaces/history/element.get.desc.xml</td><td>gov.nasa.jpl.view_repo.webscripts.HistoryGet</td></tr>
@@ -79,6 +82,7 @@
 <tr><td>/workspaces/{workspaceId}/sites/{siteId}/configurations/{configurationId}/products</td><td>mms/workspaces/sites/configurations/products.get.desc.xml</td><td>gov.nasa.jpl.view_repo.webscripts.MmsProductsGet</td></tr>
 <tr><td>/workspaces/{workspaceId}/sites/{siteId}/configurations/{configurationId}/snapshots</td><td>mms/workspaces/sites/configurations/snapshots.post.desc.xml</td><td>gov.nasa.jpl.view_repo.webscripts.MmsConfigurationsPost</td></tr>
 <tr><td>/workspaces/{workspaceId}/sites/{siteId}/configurations/{configurationId}/snapshots</td><td>mms/workspaces/sites/configurations/snapshots.get.desc.xml</td><td>gov.nasa.jpl.view_repo.webscripts.MmsSnapshotsGet</td></tr>
+<tr><td>/workspaces/{workspaceId}/sites/{siteId}/documents/{documentId}/htmlToPdf/{dummyId}</td><td>mms/workspaces/sites/products/fulldocs/htmlToPdf.post.desc.xml</td><td>gov.nasa.jpl.view_repo.webscripts.HtmlToPdfPost</td></tr>
 <tr><td>/workspaces/{workspaceId}/sites/{siteId}/elements</td><td>mms/workspaces/sites/elements.post.desc.xml</td><td>gov.nasa.jpl.view_repo.webscripts.ModelPost</td></tr>
 <tr><td>/workspaces/{workspaceId}/sites/{siteId}/products</td><td>mms/workspaces/sites/products.get.desc.xml</td><td>gov.nasa.jpl.view_repo.webscripts.MmsProductsGet</td></tr>
 <tr><td>/workspaces/{workspaceId}/sites/{siteId}/products</td><td>mms/workspaces/sites/products.post.desc.xml</td><td>gov.nasa.jpl.view_repo.webscripts.ProductPost</td></tr>
