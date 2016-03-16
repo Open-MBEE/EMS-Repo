@@ -280,7 +280,8 @@ public class ModelGet extends AbstractJavaWebScript {
 			if (logger.isDebugEnabled())
 				logger.debug("modelId = " + modelId);
 			boolean findDeleted = depth == 0 ? true : false;
-			EmsScriptNode modelRootNode = null;
+			boolean notFoundInGraphDb = false;
+			EmsScriptNode modelRootNode = null;			
 			
 			// search using db if enabled - if not there revert to modelRootNode
 			// DB can only be used against latest at the moment
@@ -290,14 +291,20 @@ public class ModelGet extends AbstractJavaWebScript {
                     pgh.connect();
                     modelRootNode = NodeUtil.getNodeFromPostgresNode(pgh.getNodeFromSysmlId( modelId ));
                 } catch ( Exception e ) {
-                    logger.info( "Reverting to alfresco lookup. Could not find element in graph db " + modelId );
+                    logger.info( "Could not find element in graph db " + modelId );
                 } finally {
                     pgh.close();
                 }
+			    if (modelRootNode == null) notFoundInGraphDb = true;
 			}
 			if (modelRootNode == null) {
 			    modelRootNode = findScriptNodeById(modelId,
 			                                       workspace, dateTime, findDeleted);
+			    if (modelRootNode != null && notFoundInGraphDb) {
+			        // put it back in the graph if it wasn't there. this will make things a bit slow..
+			        Model2Postgres m2p = new Model2Postgres(repository, services);
+			        m2p.buildGraphDb( modelRootNode, dateTime, workspace, modelRootNode.getSysmlId() );
+			    }
 			}
 			
 			if (logger.isDebugEnabled())
