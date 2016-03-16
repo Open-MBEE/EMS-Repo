@@ -6,6 +6,8 @@ unset SSH_ASKPASS
 
 git submodule init
 
+rm -rf mdk_module; rm -rf .git/modules/mdk_module/
+
 git submodule update
 
 ant -buildfile jenkinsbuild.xml

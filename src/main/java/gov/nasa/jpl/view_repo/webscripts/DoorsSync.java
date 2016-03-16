@@ -455,7 +455,6 @@ public class DoorsSync extends AbstractJavaWebScript {
             }
         } else {
             EmsScriptNode instance = getInstanceSpecification( existing );
-
             specSysmlId = instance.getSysmlId();
             sysmlId = existing.getSysmlId();
         }

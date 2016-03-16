@@ -294,10 +294,7 @@ public class ModelGet extends AbstractJavaWebScript {
 			    PostgresHelper pgh = new PostgresHelper(workspace);
 			    try {
                     pgh.connect();
-
-                    modelRootNode =
-                            NodeUtil.getNodeFromPostgresNode( pgh.getNodeFromSysmlId( modelId ) );
-
+                    modelRootNode = NodeUtil.getNodeFromPostgresNode(pgh.getNodeFromSysmlId( modelId ));
                 } catch ( Exception e ) {
                     logger.info( "Reverting to alfresco lookup. Could not find element in graph db " + modelId );
                 } finally {
