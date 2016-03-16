@@ -2573,15 +2573,6 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
     protected void processJobProperties(JSONArray elements,
                                            Map<String, JSONObject> elementMap,
                                            WorkspaceNode workspace ) {
-//        if ( jobId == null ) {
-//            log( Level.ERROR, "Bad job json: " + jobId );
-//            return false;
-//        }
-//
-//        // Find node for id.
-//        final EmsScriptNode jobNode = findScriptNodeById( jobId, workspace, null, false );
-        
-//<<<<<<< HEAD
         for( int i = 0; i < elements.length(); i++ ) {
             
             JSONObject propertyJson = elements.optJSONObject( i );            
@@ -2596,42 +2587,9 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
                     String propertyValue = getStringValueFromPropertyJson(propertyJson);
                     Utils.put( propertyValues, jobId, identifiedJobPropertyName,
                                propertyValue);
-//=======
-//        // get the slots so you can loop through each one and identify which property it is, for the job
-//        Collection<EmsScriptNode> slots = jobNode.getAllSlots( jobNode, 
-//                                                               false, workspace, null, 
-//                                                               services, response, responseStatus, null );
-//        if( !Utils.isNullOrEmpty( slots ) ) {
-//            for( EmsScriptNode slot : slots ) {
-//                JSONObject propertyJson = slot.toJSONObject( workspace, null );
-//                
-//                if( EmsScriptNode.maybeJobProperty( propertyJson ) ) {
-//                    // Get the property name from the id of the slot of the job
-//                    // property json.
-//                    String identifiedJobPropertyName =
-//                            getNameOfJobPropertyForSlot( propertyJson, //elements,
-//                                                         elementMap, workspace );
-//                    
-//                    if( !Utils.isNullOrEmpty( identifiedJobPropertyName ) ) {
-//                        String propertyValue = getStringValueFromPropertyJson(propertyJson);
-//                        Utils.put( propertyValues, jobId, identifiedJobPropertyName, propertyValue);
-//                    }
-//>>>>>>> branch 'developintopma' of git@github.jpl.nasa.gov:mbee-dev/alfresco-view-repo.git
                 }
             }
         }
-/*        
-        // Make sure we get properties not passed in the json so that we can
-        // build a complete jenkins config.
-        if ( jobNode != null ) {
-            getMissingPropertyValues( jobNode );
-        }
-        
-        boolean createNewJob = false;
-        // This tells us whether the job is being updated or created new--the caller uses this. 
-        if( jobNode == null ) createNewJob = true;
-  */      
-//        return createNewJob;
     }
 
     /**
