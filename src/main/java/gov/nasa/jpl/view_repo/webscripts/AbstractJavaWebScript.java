@@ -3077,7 +3077,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
             if ( elem == null ) continue;
             IdNodeJson jobStuff =
                     getOwningJobOfPropertyJson( elem, elementMap, workspace, null );
-            EmsScriptNode job = jobStuff.node;
+            EmsScriptNode job = jobStuff == null ? null : jobStuff.node;
             if ( job != null ) {
                 String jobId = job.getSysmlId();
                 if ( jobId != null && !elementMap.containsKey( jobId ) ) {
