@@ -2568,20 +2568,18 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         final EmsScriptNode jobNode = findScriptNodeById( jobId, workspace, null, false );
         
         for( int i = 0; i < elements.length(); i++ ) {
-            JSONObject propertyJson = elements.optJSONObject( i );
             
+            JSONObject propertyJson = elements.optJSONObject( i );            
             if( EmsScriptNode.maybeJobProperty( propertyJson ) ) {
                 // Get the property name from the id of the slot of the job
                 // property json.
                 String identifiedJobPropertyName =
                         getNameOfJobPropertyForSlot( propertyJson, //elements,
                                                      elementMap, workspace );
-                
                 if( !Utils.isNullOrEmpty( identifiedJobPropertyName ) ) {
                     String propertyValue = getStringValueFromPropertyJson(propertyJson);
-                    Utils.put( propertyValues, jobId, identifiedJobPropertyName, propertyValue);
-//                        putJobProperty( identifiedJobPropertyName, propertyJson, false, jobNode, jobId,
-//                                        elements );                     
+                    Utils.put( propertyValues, jobId, identifiedJobPropertyName,
+                               propertyValue);
                 }
             }
         }
