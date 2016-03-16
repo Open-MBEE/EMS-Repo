@@ -3024,7 +3024,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
     protected String getInstanceSpecIdFromSlotId( JSONObject slotJson ) {
 
         // make sure the json has a slot id
-        String propertyId = slotJson.getString( "sysmlid" );
+        String propertyId = slotJson.optString( "sysmlid" );
         if ( Utils.isNullOrEmpty( propertyId ) ) return null;
         if ( !propertyId.contains( "-slot-" ) ) return null;
         
