@@ -254,7 +254,7 @@ public class PostgresHelper {
 		} catch (Exception e) {
 			if (e.getMessage().contains("duplicate key")) {
 				if (logger.isInfoEnabled()) {
-					e.printStackTrace();
+				    logger.info( e.getStackTrace().toString() );
 				}
 			} else {
 				e.printStackTrace();

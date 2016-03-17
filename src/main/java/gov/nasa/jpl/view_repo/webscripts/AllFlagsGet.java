@@ -39,7 +39,8 @@ public class AllFlagsGet extends FlagSet {
                            "checkMmsVersions",
                            "graphDb",
                            "postProcessQualified",
-                           "doorsSync"};
+                           "doorsSync",
+                           "autoBuildGraphDb"};
     
     public String[] getAllFlags() {
         return flags;
@@ -137,6 +138,8 @@ public class AllFlagsGet extends FlagSet {
             NodeUtil.doPostProcessQualified = val;
         } else if (path.equalsIgnoreCase("doorsSync")) {
             NodeUtil.doorsSync = val;
+        } else if (path.equalsIgnoreCase("autoBuildGraphDb")) {
+            NodeUtil.doAutoBuildGraphDb = val;
         }
         return true;
     }
@@ -208,6 +211,8 @@ public class AllFlagsGet extends FlagSet {
             return NodeUtil.doPostProcessQualified;
         } else if (path.equalsIgnoreCase( "doorsSync" )) {
             return NodeUtil.doorsSync;
+        } else if (path.equalsIgnoreCase( "autoBuildGraphDb" )) {
+            return NodeUtil.doAutoBuildGraphDb;
         }
         return false;
     }
