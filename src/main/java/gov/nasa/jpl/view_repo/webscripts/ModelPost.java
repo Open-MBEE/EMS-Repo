@@ -3077,22 +3077,24 @@ public class ModelPost extends AbstractJavaWebScript {
         // requirement that
         // there should never be more than one project per site on Europa.
         if (projectId.equals(siteName + "_" + NO_PROJECT_ID)) {
-            // // search JSON for owner that is project
-            // JSONObject json = (JSONObject)req.parseContent();
-            // if (json.has( "elements" )) {
-            // JSONArray elementsJson = json.getJSONArray( "elements" );
-            // for (int ii = 0; ii < elementsJson.length(); ii++) {
-            // JSONObject elementJson = elementsJson.getJSONObject( ii );
-            // if (elementJson.has( "owner" )) {
-            // String owner = elementJson.getString( "owner" );
-            // if (owner.startsWith( "PROJECT-" )) {
-            // projectId = owner;
-            // break;
-            // }
-            // }
-            // }
-            // }
+            // search JSON for owner that is project
+            JSONObject json = (JSONObject)req.parseContent();
+            if ( json.has( "elements" ) ) {
+                JSONArray elementsJson = json.getJSONArray( "elements" );
+                for ( int ii = 0; ii < elementsJson.length(); ii++ ) {
+                    JSONObject elementJson = elementsJson.getJSONObject( ii );
+                    if ( elementJson.has( "owner" ) ) {
+                        String owner = elementJson.getString( "owner" );
+                        if ( owner.indexOf( "PROJECT-" ) >= 0 ) {
+                            projectId = owner.substring( owner.indexOf( "PROJECT-" ) );
+                            logger.info( "found project owner, using ProjectId " + projectId );
+                            break;
+                        }
+                    }
+                }
+            }
 
+            // if doesn't start with project, put in first project found by default
             if (!projectId.startsWith("PROJECT-")) {
                 Map<String, EmsScriptNode> nodeList = searchForElements(
                         NodeUtil.SearchType.TYPE.prefix, Acm.ACM_PROJECT,

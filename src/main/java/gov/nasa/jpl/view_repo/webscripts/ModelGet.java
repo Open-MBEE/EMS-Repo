@@ -300,10 +300,12 @@ public class ModelGet extends AbstractJavaWebScript {
 			if (modelRootNode == null) {
 			    modelRootNode = findScriptNodeById(modelId,
 			                                       workspace, dateTime, findDeleted);
+// FIXME: this needs to be tested when there is a large concurrent load
 			    if (modelRootNode != null && notFoundInGraphDb) {
+			        logger.warn( "Could not find element in graphDb: " + modelId );
 			        // put it back in the graph if it wasn't there. this will make things a bit slow..
-			        Model2Postgres m2p = new Model2Postgres(repository, services);
-			        m2p.buildGraphDb( modelRootNode, dateTime, workspace, modelRootNode.getSysmlId() );
+//			        Model2Postgres m2p = new Model2Postgres(repository, services);
+//			        m2p.buildGraphDb( modelRootNode, dateTime, workspace, modelRootNode.getSysmlId() );
 			    }
 			}
 			
@@ -311,7 +313,7 @@ public class ModelGet extends AbstractJavaWebScript {
 				logger.debug("modelRootNode = " + modelRootNode);
 
 			if (modelRootNode == null) {
-				log(Level.ERROR, HttpServletResponse.SC_NOT_FOUND,
+				log(Level.INFO, HttpServletResponse.SC_NOT_FOUND,
 						"Element %s not found", modelId
 								+ (dateTime == null ? "" : " at " + dateTime));
 				return new JSONArray();
@@ -327,7 +329,7 @@ public class ModelGet extends AbstractJavaWebScript {
 			} else {
 				handleElementHierarchy(modelRootNode, workspace, dateTime,
 						depth, new Long(0), connected, relationship,
-						new HashSet<String>());
+						new HashSet<String>(), notFoundInGraphDb);
 			}
 
 			boolean checkReadPermission = true; // TODO -- REVIEW -- Shouldn't
@@ -466,9 +468,9 @@ public class ModelGet extends AbstractJavaWebScript {
 	protected void handleElementHierarchy(EmsScriptNode root,
 			WorkspaceNode workspace, Date dateTime, final Long maxDepth,
 			Long currDepth, boolean connected, String relationship,
-			Set<String> visited) throws JSONException, SQLException {
+			Set<String> visited, boolean notFoundInGraphDb) throws JSONException, SQLException {
 
-		if (dateTime == null && !connected && NodeUtil.doGraphDb) {
+		if (!notFoundInGraphDb && dateTime == null && !connected && NodeUtil.doGraphDb) {
 			handleElementHierarchyPostgres(root, workspace, dateTime, maxDepth,
 					currDepth, connected, relationship, visited);
 		}

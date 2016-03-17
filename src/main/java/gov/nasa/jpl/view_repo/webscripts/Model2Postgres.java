@@ -135,6 +135,14 @@ public class Model2Postgres extends AbstractJavaWebScript {
         return model;
     }
 
+    /**
+     * In case something isn't in the DB, put it in with relationship to its owner
+     * @param node
+     * @param dateTime
+     * @param workspace
+     * @param name
+     * @return
+     */
     public int buildGraphDb( EmsScriptNode node, Date dateTime,
                               WorkspaceNode workspace, String name ) {
         int nodesInserted = 0;
@@ -143,6 +151,8 @@ public class Model2Postgres extends AbstractJavaWebScript {
         List< Pair< String, String >> documentEdges =
                 new ArrayList< Pair< String, String >>();
 
+        // FIXME:since there might be a simultaneous load, this should only load in itself
+        // with relationships to the node that ones it.
         if (pgh == null) pgh = new PostgresHelper(workspace);
         try {
             pgh.connect();
