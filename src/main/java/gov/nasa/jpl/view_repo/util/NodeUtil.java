@@ -4562,16 +4562,13 @@ public class NodeUtil {
     public static void processContentsJson(String sysmlId, JSONObject contents,
                                            List< Pair< String, String >> documentEdges) {
         if (contents != null) {
-            if (contents.has( "operand" )) {
-                if (contents.isNull( "operand" )) return;
+            if (contents.has( "operand" ) && !contents.isNull( "operand" )) {
                 try {
                     JSONArray operand = contents.getJSONArray( "operand" );
                     for (int ii = 0; ii < operand.length(); ii++) {
                         JSONObject value = operand.getJSONObject( ii );
-                        if (value.has( "instance" )) {
-                            if (!value.isNull( "instance" )) {
-                                documentEdges.add( new Pair<String, String>(sysmlId, value.getString("instance")));
-                            }
+                        if (value.has( "instance" ) && !value.isNull( "instance" )) {
+                            documentEdges.add( new Pair<String, String>(sysmlId, value.getString("instance")));
                         }
                     }
                 } catch (Exception e) {
@@ -4617,8 +4614,7 @@ public class NodeUtil {
 
     public static void processInstanceSpecificationSpecificationJson( String sysmlId, JSONObject iss, List<Pair<String, String>> documentEdges) {
         if (iss != null) {
-            if (iss.has( "string" )) {
-                if (iss.isNull( "string" )) return;
+            if (iss.has( "string" ) && !iss.isNull( "string" )) {
                 String string = iss.getString( "string" );
                 try {
                     JSONObject json = new JSONObject(string);

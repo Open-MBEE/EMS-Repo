@@ -3081,11 +3081,11 @@ public class ModelPost extends AbstractJavaWebScript {
         if (projectId.equals(siteName + "_" + NO_PROJECT_ID)) {
             // search JSON for owner that is project
             JSONObject json = (JSONObject)req.parseContent();
-            if ( json.has( "elements" ) ) {
+            if ( json != null && json.has( "elements" ) && !json.isNull("elements")) {
                 JSONArray elementsJson = json.getJSONArray( "elements" );
                 for ( int ii = 0; ii < elementsJson.length(); ii++ ) {
                     JSONObject elementJson = elementsJson.getJSONObject( ii );
-                    if ( elementJson.has( "owner" ) ) {
+                    if ( elementJson.has( "owner" ) && !elementJson.isNull( "owner" )) {
                         String owner = elementJson.getString( "owner" );
                         if ( owner.indexOf( "PROJECT-" ) >= 0 ) {
                             projectId = owner.substring( owner.indexOf( "PROJECT-" ) );
