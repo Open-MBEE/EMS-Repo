@@ -402,6 +402,7 @@ public class HtmlToPdfPost extends AbstractJavaWebScript {
 		head.append("<link href=\"css/ve-mms.styles.min.css\" rel=\"stylesheet\" type=\"text/css\" />");
 		StringBuffer style = new StringBuffer();
 		style.append("<style type=\"text/css\">");
+		style.append("	BODY{font-size:12pt;}");
 		style.append("	TR { page-break-inside:avoid; }");
 		style.append("	.ng-hide { display:none; }");
 		style.append("	TABLE { width:100%; }");
@@ -411,11 +412,13 @@ public class HtmlToPdfPost extends AbstractJavaWebScript {
 			style.append("		width:1%;");
 		}
 		style.append("	    overflow-wrap: break-word;");
+		style.append("	}");
+		style.append("	TD {");
 		style.append("	    word-wrap: break-word;");
-		style.append("	    break-word: break-word;");
-		style.append("		-ms-word-break: break-all;");
-		style.append("	    word-break: break-all;");
-		style.append("	    word-break: break-word;");
+//		style.append("	    break-word: break-word;");
+//		style.append("		-ms-word-break: break-all;");
+//		style.append("	    word-break: break-all;");
+//		style.append("	    word-break: break-word;");
 		style.append("		-ms-hyphens: auto;");
 		style.append("		-moz-hyphens: auto;");
 		style.append("		-webkit-hyphens: auto;");
