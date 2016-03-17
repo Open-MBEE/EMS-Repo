@@ -971,7 +971,9 @@ public class ModelPost extends AbstractJavaWebScript {
                 projectNodeId = null;
                 updateProjectNodeId( workspace );
             } else {
-                newElements.add( sysmlId );
+                if (!sysmlId.startsWith( "holding_bin" )) {
+                    newElements.add( sysmlId );
+                }
             }
         }
 
