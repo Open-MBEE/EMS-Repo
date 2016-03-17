@@ -49,10 +49,6 @@ import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 import gov.nasa.jpl.view_repo.util.JsonDiffDiff.DiffType;
 import gov.nasa.jpl.view_repo.webscripts.util.ShareUtils;
 
-//import k.frontend.Frontend;
-//import k.frontend.ModelParser;
-//import k.frontend.ModelParser.ModelContext;
-
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
@@ -2661,13 +2657,8 @@ public class ModelPost extends AbstractJavaWebScript {
         return instance.executeImplImpl(req, status, cache, true);
     }
 
-//<<<<<<< HEAD
 	WorkspaceNode myWorkspace = null;
 	protected String projectId;
-//=======
-//    WorkspaceNode myWorkspace = null;
-//    private String projectId;
-//>>>>>>> refs/remotes/origin/develop
 
     @Override
     protected Map<String, Object> executeImplImpl(final WebScriptRequest req,

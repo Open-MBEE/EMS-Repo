@@ -4,8 +4,6 @@ import gov.nasa.jpl.mbee.util.Debug;
 import gov.nasa.jpl.mbee.util.Pair;
 import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.mbee.util.Utils;
-import gov.nasa.jpl.view_repo.db.PostgresHelper;
-import gov.nasa.jpl.view_repo.util.JsonDiffDiff.DiffOp;
 import gov.nasa.jpl.view_repo.util.JsonDiffDiff.DiffType;
 import gov.nasa.jpl.view_repo.webscripts.AbstractJavaWebScript;
 
@@ -777,14 +775,7 @@ public class WorkspaceDiff implements Serializable {
      */
     public JSONObject toJSONObject(AbstractJavaWebScript webscript,
                                    Date time1, Date time2) throws JSONException {
-        JSONObject deltaJson = toJSONObject( webscript, time1, time2, true );
-        // If we came up with nothing (!isDiff()), then maybe we computed it
-        // another way and should return the existing diffJson.
-        if ( diffJson == null || isDiff( deltaJson ) ) {
-            diffJson = deltaJson;
-        }
-        
-        return diffJson;
+        return toJSONObject( webscript, time1, time2, true );
     }
 
     /**
@@ -1005,16 +996,8 @@ public class WorkspaceDiff implements Serializable {
 
             // diffs don't need to have qualified
             JSONObject jsonObject =
-                    //webscript == null ?
-                                       node.toJSONObject( filter, false,
-                                                           workspace, dateTime,
-                                                           includeQualified,
-                                                           false, version, null )
-                                      //: webscript.getJsonForElementAndJob( node,
-                                      //                 filter, false, workspace,
-                                      //                 dateTime, includeQualified,
-                                      //                 false, version, null )
-                                                           ;
+                    node.toJSONObject( filter, false, workspace, dateTime,
+                                       includeQualified, false, version, null );
             array.put( jsonObject );
             elementJsonMap.put( sysmlid, jsonObject );
         }

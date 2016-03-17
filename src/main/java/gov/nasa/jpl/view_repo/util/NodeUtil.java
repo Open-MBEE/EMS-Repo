@@ -4710,13 +4710,14 @@ public class NodeUtil {
             pgh.connect();
             Node node = pgh.getNodeFromSysmlId( sysmlid );
             esn = NodeUtil.getNodeFromPostgresNode( node );
-            pgh.close();
         } catch ( ClassNotFoundException e ) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         } catch ( SQLException e ) {
             // TODO Auto-generated catch block
             e.printStackTrace();
+        } finally {
+            pgh.close();
         }
         return esn;
     }
