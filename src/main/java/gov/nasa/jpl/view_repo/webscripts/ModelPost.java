@@ -2807,7 +2807,7 @@ public class ModelPost extends AbstractJavaWebScript {
 	}
 	
 	public void preProcessJson( JSONObject json, WorkspaceNode workspace) {
-        logger.warn( "preProcessJson(" + json + ")");
+        logger.debug( "preProcessJson(" + json + ")");
         UpdateViewHierarchy uvh = new UpdateViewHierarchy( this );
         // Handle view and association changes
         try {
@@ -2816,7 +2816,7 @@ public class ModelPost extends AbstractJavaWebScript {
             t.printStackTrace();
         }
         processJobsJson( json, workspace );
-        logger.warn( "preProcessJson() returning\n" + json.toString(4) );
+        logger.debug( "preProcessJson() returning\n" + json.toString(4) );
 	}
 
     public JSONObject getPostJson(boolean jsonNotK, Object content) {
