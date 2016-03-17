@@ -300,12 +300,14 @@ public class ModelGet extends AbstractJavaWebScript {
 			if (modelRootNode == null) {
 			    modelRootNode = findScriptNodeById(modelId,
 			                                       workspace, dateTime, findDeleted);
-// FIXME: this needs to be tested when there is a large concurrent load
 			    if (modelRootNode != null && notFoundInGraphDb) {
 			        logger.warn( "Could not find element in graphDb: " + modelId );
+			        // FIXME: this needs to be tested, so it's off by default
 			        // put it back in the graph if it wasn't there. this will make things a bit slow..
-//			        Model2Postgres m2p = new Model2Postgres(repository, services);
-//			        m2p.buildGraphDb( modelRootNode, dateTime, workspace, modelRootNode.getSysmlId() );
+			        if ( NodeUtil.doAutoBuildGraphDb ) {
+        			        Model2Postgres m2p = new Model2Postgres(repository, services);
+        			        m2p.buildGraphDb( modelRootNode, dateTime, workspace, modelRootNode.getSysmlId() );
+			        }
 			    }
 			}
 			

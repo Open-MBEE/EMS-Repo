@@ -214,6 +214,8 @@ public class NodeUtil {
     public static boolean doPropertyCaching = true;
     public static boolean doGraphDb = true;
     public static boolean doPostProcessQualified = false;
+    // toggles whether modelget adds to graphDb if there's a graphDb miss, but Alfresco hit    
+    public static boolean doAutoBuildGraphDb = false;  
 
     public static boolean addEmptyEntriesToFullCache = false; // this was broken
                                                               // last tried
@@ -3150,6 +3152,7 @@ public class NodeUtil {
 
     public static VersionLowerBoundComparator versionLowerBoundComparator =
             new VersionLowerBoundComparator();
+
 
     public static int compareVersions( NodeRef ref1, NodeRef ref2 ) {
         Date d1 = getLastModified( ref1 );
