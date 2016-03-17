@@ -68,7 +68,7 @@
     <bean id="UserUtil" class="gov.nasa.jpl.view_repo.util.UserUtil" parent="baseJavaScriptExtension">
         <property name="siteService" ref="SiteService"/>
         <property name="personService" ref="PersonService"/>
-        <property name="siteName" value="${app.name}"/>
+        <property name="siteName" value="#{systemProperties['deploymentName']}"/>
         <property name="extensionName" value="UserUtil" />
         <property name="ignore" value="true" />
     </bean>
@@ -123,7 +123,7 @@
     <!--  Definitions for static methods -->
     <bean class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
         <property name="staticMethod" value="gov.nasa.jpl.view_repo.util.EmsConfig.setProperties" />
-        <property name="arguments" ref="global-properties"/>
+        <property name="arguments" value="#{systemProperties['deploymentName']}.properties"/>
     </bean>
     
     <bean class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">

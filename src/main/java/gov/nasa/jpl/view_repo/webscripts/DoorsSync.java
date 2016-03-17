@@ -168,7 +168,7 @@ public class DoorsSync extends AbstractJavaWebScript {
                         return model;
                     }
                     String project = modelRootNode.getSiteName(dateTime, workspace);
-                    doors = new DoorsClient(project);
+                    doors = new DoorsClient(getConfig("doors.user"), getConfig("doors.pass"), getConfig("doors.url"), project);
 
                     customFields = mapFields(project);
                     compRequirement(modelRootNode, null);
@@ -220,7 +220,7 @@ public class DoorsSync extends AbstractJavaWebScript {
             customFields = mapFields(projectNode.getSysmlName());
 
             try {
-                doors = new DoorsClient(projectNode.getSysmlName());
+                doors = new DoorsClient(getConfig("doors.user"), getConfig("doors.pass"), getConfig("doors.url"), projectNode.getSysmlName());
                 if (!processedProjects.contains(projectNode.getSysmlName())) {
                     syncFromDoors();
                 }

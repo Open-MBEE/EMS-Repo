@@ -210,7 +210,7 @@ public class ProjectPost extends AbstractJavaWebScript {
             if (siteNode == null) {
                 if (createSite) {
                     if ( siteName == null || siteName.length() == 0 ) {
-                        siteName="europa";
+                        siteName = getConfig("app.name");
                     }
                     siteNode = createSite( siteName, workspace );
                 } else {

@@ -152,6 +152,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
     // response to HTTP request, made as class variable so all methods can update
     protected StringBuffer response = new StringBuffer();
     protected Status responseStatus = new Status();
+    protected String deploymentName;
 
     protected WorkspaceDiff wsDiff = null;
 
@@ -208,6 +209,11 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
 	public void setServices(ServiceRegistry registry) {
         if ( registry == null ) return;
 		this.services = registry;
+	}
+	
+	public void setDeploymentName(String deploymentName) {
+        if ( deploymentName == null ) return;
+		this.deploymentName = deploymentName;
 	}
 
 	public AbstractJavaWebScript( Repository repository,
