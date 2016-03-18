@@ -242,9 +242,101 @@ public class DoorsSync extends AbstractJavaWebScript {
             }
             json.put(projectJson);
         }
+        
+        
+        //Added
+        if (requirements.size() == 0) {
+        	
+        	json = checkDoorsWhenEmptyMMS();
+        
+        }
+        
+        
 
         return json;
     }
+    
+    
+    /***
+     * Author: Bruce Meeks Jr
+     * Description: Handles case where there are requirements in DoorsNG but no requirement nodes in MMS repo (i.e. no Magic Draw requirements in project)
+     * 				Will synch DoorsNG requirements into MMS
+     * 				Previously, an empty JSONArray would be returned if MMS was empty while DoorsNG non-empty
+     */
+    protected JSONArray checkDoorsWhenEmptyMMS() {
+    	
+    	
+    	JSONArray result = new JSONArray();
+    	
+    	JSONObject projectJson = new JSONObject();
+   	 
+    	String doorsProjArea = "";
+    
+        Node mdProjectPGNode = pgh.findMagicDrawProject();
+        
+        
+        if(mdProjectPGNode != null) {
+        	
+        	
+        	  try {
+        		  
+        		  doorsProjArea = NodeUtil.getNodeFromPostgresNode(mdProjectPGNode).getSysmlName();
+        		  
+        		  doors = new DoorsClient(doorsProjArea);
+        		  
+        		  if( doors.getRequirements().length > 0 ) {
+        		  
+        			  syncFromDoors();
+        		  
+        	          projectJson = new JSONObject();
+
+        	          projectJson.put("project", doorsProjArea);
+        	          
+        	          projectJson.put("status", "Sync Complete");
+        	          
+        	          result.put(projectJson);
+        	          
+        	          return result;
+
+              
+        		  }
+        		  
+        	  }
+        	  catch(Exception e) {
+        		  
+    	          
+    	          projectJson.put("status", "Issue syncing from Doors");
+    	          
+    	          result.put(projectJson);
+
+    	          return result;
+
+    	          
+        	  }
+            
+            
+        }
+    	
+        else {
+        		          
+	          projectJson.put("status", "Magic Draw project hasn't been created and/or initialized");
+	          
+	          result.put(projectJson);
+	          
+	          return result;
+
+	        	
+	        	
+	    }
+    	
+    	
+    	// No requirements in Doors or MMS
+    	return result;
+    	
+    	
+    }
+    
+    
 
     protected void syncFromDoors() {
 
