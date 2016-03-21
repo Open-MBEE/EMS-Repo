@@ -2,11 +2,7 @@
 status=running
 curl -w "\n%{http_code}\n" -u ${MMS_USER}:${MMS_PASSWORD} -X POST -H Content-Type:application/json --data "{\"jobs\":[{\"sysmlid\":\"${JOB_ID}\", \"status\":\"${status}\"}]}" "https://${MMS_SERVER}/alfresco/service/workspaces/master/jobs"
 
-unset SSH_ASKPASS
-
 git submodule init
-
-rm -rf mdk_module; rm -rf .git/modules/mdk_module/
 
 git submodule update
 

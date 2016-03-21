@@ -62,8 +62,8 @@ public class JenkinsBuildConfig {
     private              String  teamworkPort       = "18001";
     //private              String  teamworkUser       = "mmsadmin";
     //private              String  teamworkPassword   = "letmein";
-    private              String  teamworkUser       = "tester";
-    private              String  teamworkPassword   = "AuToTeStEr";
+    private              String  teamworkUser       = "docgen";
+    private              String  teamworkPassword   = "docgen";
     private              String  workspace          = "master";
     // this might have to be (Default)
     private              String  jdkVersion         = "jdk1.8.0_45";
