@@ -2,8 +2,8 @@
 <import resource="classpath:alfresco/extension/js/utils.js">
 
 //var europaSite = siteService.getSite("europa").node;
-var modelFolder = companyhome.childByNamePath("Sites/${deploymentName}/ViewEditor/model");
-var snapshotFolder = companyhome.childByNamePath("Sites/${deploymentName}/ViewEditor/snapshots");
+var modelFolder = companyhome.childByNamePath("Sites/europa/ViewEditor/model");
+var snapshotFolder = companyhome.childByNamePath("Sites/europa/ViewEditor/snapshots");
 var res = [];
 var seen = [];
 var viewdone = [];
