@@ -5,7 +5,7 @@
             "qualifiedId": "/europa/PROJECT-0ecf5891-653a-443a-82e6-ed8ad2a09692/_18_0_2_6620226_1456959665438_723746_15025/_18_0_2_6620226_1456959739177_654072_15172/_18_0_2_6620226_1456959728734_53627_15088",
             "nodeRefId": "versionStore://version2Store/fc2ee200-b1e2-48af-9207-a6f41d13fc5b",
             "versionedRefId": "versionStore://version2Store/7cb11734-0da0-40ab-b49d-80d40ffa3887",
-            "status": "waiting",
+            "status": "running",
             "qualifiedName": "/europa/Job_To_MMS/Jobs/View contains Job/Job_block",
             "sysmlid": "_18_0_2_6620226_1456959728734_53627_15088",
             "isMetatype": false,
@@ -32,7 +32,7 @@
             "qualifiedId": "/europa/PROJECT-0ecf5891-653a-443a-82e6-ed8ad2a09692/_18_0_2_6620226_1456959665438_723746_15025/_18_0_2_6620226_1456959739177_654072_15172/_18_0_2_6620226_1456966279773_280717_15402",
             "nodeRefId": "versionStore://version2Store/dc004ccc-769d-47e1-96bf-c14131b1736e",
             "versionedRefId": "versionStore://version2Store/bee573f3-aa3d-4fa7-8039-4877df2af60c",
-            "status": "waiting",
+            "status": "running",
             "qualifiedName": "/europa/Job_To_MMS/Jobs/View contains Job/Job_block1",
             "sysmlid": "_18_0_2_6620226_1456966279773_280717_15402",
             "isMetatype": false,
@@ -254,7 +254,7 @@
                 "isDerived": false,
                 "isSlot": true,
                 "value": [{
-                    "string": "waiting",
+                    "string": "running",
                     "type": "LiteralString"
                 }],
                 "type": "Property"
@@ -433,7 +433,7 @@
                 "isDerived": false,
                 "isSlot": true,
                 "value": [{
-                    "string": "waiting",
+                    "string": "running",
                     "type": "LiteralString"
                 }],
                 "type": "Property"
