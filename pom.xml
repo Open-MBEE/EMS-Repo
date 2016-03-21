@@ -21,12 +21,12 @@
 		<repository>
 			<id>artifactory</id>
 			<name>releases</name>
-			<url>http://europambee-build.jpl.nasa.gov:8082/artifactory/libs-release-local</url>
+			<url>${releases.url}</url>
 		</repository>
 		<snapshotRepository>
 			<id>artifactory</id>
 			<name>snapshots</name>
-			<url>http://europambee-build.jpl.nasa.gov:8082/artifactory/libs-snapshot-local</url>
+			<url>${snapshots.url}</url>
 		</snapshotRepository>
 	</distributionManagement>
 
@@ -242,8 +242,6 @@
 			<version>3.0.6.RELEASE</version>
 			<scope>provided</scope>
 		</dependency>
-
-
 		<!-- apache chemistry opencmis CLIENT -->
 		<dependency>
 			<groupId>org.apache.chemistry.opencmis</groupId>
@@ -303,57 +301,6 @@
 			<version>4.5</version>
 		</dependency>
 
-
-
-		<!-- <metadata><groupId>com.microsoft.z3</groupId> <artifactId>libz3java</artifactId> 
-			<versioning> <latest>4.3.2.5a45711f22d9</latest> <release>4.3.2.5a45711f22d9</release> 
-			<versions> <version>4.3.2-bb56885147e4</version> <version>4.3.2.5a45711f22d9</version> 
-			</versions></versioning></metadata> -->
-		<!-- <dependency> <groupId>com.microsoft.z3</groupId> <artifactId>libz3java</artifactId> 
-			<version>4.3.2</version> <version>4.3.2-bb56885147e4</version> <type>so</type> 
-			<classifier>linux64</classifier> </dependency> -->
-		<!-- <dependency> <groupId>com.microsoft.z3</groupId> <artifactId>libz3</artifactId> 
-			<version>4.3.2</version> <version>4.3.2-bb56885147e4</version> <type>so</type> 
-			<classifier>linux64</classifier> </dependency> <dependency> <groupId>com.microsoft.z3</groupId> 
-			<artifactId>z3</artifactId> <version>4.3.2</version> <version>4.3.2-bb56885147e4</version> 
-			<type>uexe</type> <classifier>linux64</classifier> </dependency> -->
-		<!-- <dependency> <groupId>com.microsoft.z3</groupId> <artifactId>libz3java</artifactId> 
-			<version>4.3.2-bb56885147e4</version> <type>so</type> <classifier>linux32</classifier> 
-			</dependency> <dependency> <groupId>com.microsoft.z3</groupId> <artifactId>libz3</artifactId> 
-			<version>4.3.2-bb56885147e4</version> <type>so</type> <classifier>linux32</classifier> 
-			</dependency> <dependency> <groupId>com.microsoft.z3</groupId> <artifactId>z3</artifactId> 
-			<version>4.3.2-bb56885147e4</version> <type>uexe</type> <classifier>linux32</classifier> 
-			</dependency> <dependency> <groupId>com.microsoft.z3</groupId> <artifactId>libz3java</artifactId> 
-			<version>4.3.2-bb56885147e4</version> <type>dylib</type> <classifier>osx</classifier> 
-			</dependency> <dependency> <groupId>com.microsoft.z3</groupId> <artifactId>libz3</artifactId> 
-			<version>4.3.2-bb56885147e4</version> <type>dylib</type> <classifier>osx</classifier> 
-			</dependency> <dependency> <groupId>com.microsoft.z3</groupId> <artifactId>z3</artifactId> 
-			<version>4.3.2-bb56885147e4</version> <type>uexe</type> <classifier>osx</classifier> 
-			</dependency> <dependency> <groupId>com.microsoft.z3</groupId> <artifactId>z3java</artifactId> 
-			<version>4.3.2-bb56885147e4</version> <type>dll</type> <classifier>windows64</classifier> 
-			</dependency> <dependency> <groupId>com.microsoft.z3</groupId> <artifactId>libz3</artifactId> 
-			<version>4.3.2-bb56885147e4</version> <type>dll</type> <classifier>windows64</classifier> 
-			</dependency> <dependency> <groupId>com.microsoft.z3</groupId> <artifactId>z3</artifactId> 
-			<version>4.3.2-bb56885147e4</version> <type>exe</type> <classifier>windows64</classifier> 
-			</dependency> <dependency> <groupId>com.microsoft.z3</groupId> <artifactId>z3java</artifactId> 
-			<version>4.3.2-bb56885147e4</version> <type>dll</type> <classifier>windows32</classifier> 
-			</dependency> <dependency> <groupId>com.microsoft.z3</groupId> <artifactId>libz3</artifactId> 
-			<version>4.3.2-bb56885147e4</version> <type>dll</type> <classifier>windows32</classifier> 
-			</dependency> <dependency> <groupId>com.microsoft.z3</groupId> <artifactId>z3</artifactId> 
-			<version>4.3.2-bb56885147e4</version> <type>exe</type> <classifier>windows32</classifier> 
-			</dependency> <dependency> <groupId>com.microsoft.z3</groupId> <artifactId>vcomp100</artifactId> 
-			<version>10.0</version> <type>dll</type> <classifier>64</classifier> </dependency> 
-			<dependency> <groupId>com.microsoft.z3</groupId> <artifactId>msvcp100</artifactId> 
-			<version>10.0</version> <type>dll</type> <classifier>64</classifier> </dependency> 
-			<dependency> <groupId>com.microsoft.z3</groupId> <artifactId>msvcr100</artifactId> 
-			<version>10.0</version> <type>dll</type> <classifier>64</classifier> </dependency> 
-			<dependency> <groupId>com.microsoft.z3</groupId> <artifactId>vcomp100</artifactId> 
-			<version>10.0</version> <type>dll</type> <classifier>32</classifier> </dependency> 
-			<dependency> <groupId>com.microsoft.z3</groupId> <artifactId>msvcp100</artifactId> 
-			<version>10.0</version> <type>dll</type> <classifier>32</classifier> </dependency> 
-			<dependency> <groupId>com.microsoft.z3</groupId> <artifactId>msvcr100</artifactId> 
-			<version>10.0</version> <type>dll</type> <classifier>32</classifier> </dependency> -->
-
 		<dependency>
 			<groupId>org.postgresql</groupId>
 			<artifactId>postgresql</artifactId>
@@ -371,31 +318,31 @@
 		<repository>
 			<id>artifactory-snapshots</id>
 			<name>snapshots</name>
-			<url>http://europambee-build.jpl.nasa.gov:8082/artifactory/libs-snapshot-local</url>
+			<url>${snapshots.url}</url>
 		</repository>
 		<repository>
 			<id>artifactory-releases</id>
 			<name>releases</name>
-			<url>http://europambee-build.jpl.nasa.gov:8082/artifactory/libs-release-local</url>
+			<url>${releases.url}</url>
 		</repository>
 		<repository>
 			<id>artifactory-external-releases</id>
 			<name>external-releases</name>
-			<url>http://europambee-build.jpl.nasa.gov:8082/artifactory/ext-release-local</url>
+			<url>${external.releases.url}</url>
 		</repository>
         <repository>
             <id>artifactory-external-snapshot</id>
             <name>external-snapshot</name>
-            <url>http://europambee-build.jpl.nasa.gov:8082/artifactory/ext-snapshot-local</url>
+            <url>${external.snapshots.url}</url>
         </repository>
 		
 		<repository>
 			<id>alfresco-public</id>
-			<url>https://artifacts.alfresco.com/nexus/content/groups/public</url>
+			<url>${alfresco.public.url}</url>
 		</repository>
 		<repository>
 			<id>alfresco-public-snapshots</id>
-			<url>https://artifacts.alfresco.com/nexus/content/groups/public-snapshots</url>
+			<url>${alfresco.public.snapshots.url}</url>
 			<snapshots>
 				<enabled>true</enabled>
 				<updatePolicy>daily</updatePolicy>
@@ -405,7 +352,7 @@
 		<!-- soap ui plugin -->
 		<repository>
 			<id>smartbear-sweden-plugin-repository</id>
-			<url>http://www.soapui.org/repository/maven2/</url>
+			<url>${soap.ui.url}</url>
 		</repository>
 	</repositories>
 
@@ -416,9 +363,24 @@
 				<artifactId>build-helper-maven-plugin</artifactId>
 				<version>1.8</version>
 			</plugin>
-			<!-- <plugin> <groupId>org.apache.maven.plugins</groupId> <artifactId>maven-javadoc-plugin</artifactId> 
-				<version>2.10.1</version> <configuration> <show>private</show> <nohelp>true</nohelp> 
-				</configuration> </plugin> -->
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>properties-maven-plugin</artifactId>
+				<version>1.0.0</version>
+				<executions>
+					<execution>
+						<phase>initialize</phase>
+						<goals>
+							<goal>read-project-properties</goal>
+						</goals>
+						<configuration>
+							<files>
+								<file>config/alfresco/repository.properties</file>
+							</files>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>			
 			<plugin>
 				<groupId>org.zeroturnaround</groupId>
 				<artifactId>jrebel-maven-plugin</artifactId>
@@ -553,41 +515,6 @@
 				</executions>
 			</plugin>
 
-			<!-- <plugin> -->
-			<!-- <artifactId>maven-javadoc-plugin</artifactId> -->
-			<!-- <version>2.10.3</version> -->
-			<!-- <executions> -->
-			<!-- <execution> -->
-			<!-- <id>javadoc</id> -->
-			<!-- <phase>package</phase> -->
-			<!-- <goals> -->
-			<!-- <goal>javadoc</goal> -->
-			<!-- </goals> -->
-			<!-- <configuration> -->
-			<!-- <outputDirectory>${project.build.directory}/${project.build.finalName}/web/javadoc</outputDirectory> -->
-			<!-- <destdir>myapidocs</destdir> -->
-			<!-- switch on dependency-driven aggregation -->
-			<!-- <includeDependencySources>true</includeDependencySources> -->
-			<!-- <dependencySourceIncludes> -->
-			<!-- <dependencySourceInclude>gov.nasa.jpl.*</dependencySourceInclude> -->
-			<!-- <dependencySourceInclude>sysml.*</dependencySourceInclude> -->
-			<!-- <dependencySourceInclude>javaparser-1.0.8-src.japa.parser</dependencySourceInclude> -->
-			<!-- </dependencySourceIncludes> -->
-			<!-- <dependencySourceExcludes> -->
-			<!-- <dependencySourceExclude>gov.nasa.jpl.mbee.docbook</dependencySourceExclude> -->
-			<!-- <dependencySourceExclude>javaparser-1.0.8-src.japa.parser</dependencySourceExclude> -->
-			<!-- <dependencySourceExclude>javaparser-1.0.8-src.japa.parser.*</dependencySourceExclude> -->
-			<!-- <dependencySourceExclude>javaparser*</dependencySourceExclude> -->
-			<!-- <dependencySourceExclude>japa*</dependencySourceExclude> -->
-			<!-- </dependencySourceExcludes> -->
-			<!-- <dependencySourceExcludes> -->
-			<!-- <dependencySourceExclude>org.atinject:inject-tck:jar:1.0.0-PFD-3-jboss-1</dependencySourceExclude> -->
-			<!-- </dependencySourceExcludes> -->
-			<!-- </configuration> -->
-			<!-- </execution> -->
-			<!-- </executions> -->
-			<!-- </plugin> -->
-
 		</plugins>
 		<pluginManagement>
 			<plugins>
@@ -649,15 +576,6 @@
 	</build>
 	<reporting>
 		<plugins>
-			<!-- This doesn't seem to work Tried generating with 'mvn site' and 'mvn 
-				javadoc:javadoc' -->
-			<!-- <plugin> <groupId>org.apache.maven.plugins</groupId> <artifactId>maven-javadoc-plugin</artifactId> 
-				<version>2.10.3</version> <configuration> <reportOutputDirectory>${basedir}/src/main/amp/web/scripts</reportOutputDirectory> 
-				<destDir>myapidocs</destDir> <show>public</show> <dependencySourceIncludes> 
-				<dependencySourceInclude>gov.nasa.jpl.*</dependencySourceInclude> <dependencySourceInclude>sysml.*</dependencySourceInclude> 
-				</dependencySourceIncludes> <dependencySourceExcludes> <dependencySourceExclude>gov.nasa.jpl.mbee.docbook</dependencySourceExclude> 
-				<dependencySourceExclude>javaparser*</dependencySourceExclude> <dependencySourceExclude>japa*</dependencySourceExclude> 
-				</dependencySourceExcludes> </configuration> </plugin> -->
 		</plugins>
 	</reporting>
 </project>
