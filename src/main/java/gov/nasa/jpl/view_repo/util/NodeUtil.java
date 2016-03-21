@@ -62,7 +62,6 @@ import org.alfresco.service.cmr.repository.ContentData;
 import org.alfresco.service.cmr.repository.ContentWriter;
 import org.alfresco.service.cmr.repository.InvalidNodeRefException;
 import org.alfresco.service.cmr.repository.NodeRef;
-import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.search.LimitBy;
 import org.alfresco.service.cmr.search.ResultSet;
@@ -79,11 +78,6 @@ import org.alfresco.service.cmr.version.VersionHistory;
 import org.alfresco.service.namespace.NamespaceService;
 import org.alfresco.service.namespace.QName;
 import org.apache.commons.logging.Log;
-import org.apache.http.HttpResponse;
-import org.apache.http.HttpStatus;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -220,6 +214,8 @@ public class NodeUtil {
     public static boolean doPropertyCaching = true;
     public static boolean doGraphDb = true;
     public static boolean doPostProcessQualified = false;
+    // toggles whether modelget adds to graphDb if there's a graphDb miss, but Alfresco hit    
+    public static boolean doAutoBuildGraphDb = false;  
 
     public static boolean addEmptyEntriesToFullCache = false; // this was broken
                                                               // last tried
@@ -3157,6 +3153,7 @@ public class NodeUtil {
     public static VersionLowerBoundComparator versionLowerBoundComparator =
             new VersionLowerBoundComparator();
 
+
     public static int compareVersions( NodeRef ref1, NodeRef ref2 ) {
         Date d1 = getLastModified( ref1 );
         Date d2 = getLastModified( ref2 );
@@ -4565,16 +4562,18 @@ public class NodeUtil {
     public static void processContentsJson(String sysmlId, JSONObject contents,
                                            List< Pair< String, String >> documentEdges) {
         if (contents != null) {
-            if (contents.has( "operand" )) {
-                if (contents.isNull( "operand" )) return;
-                JSONArray operand = contents.getJSONArray( "operand" );
-                for (int ii = 0; ii < operand.length(); ii++) {
-                    JSONObject value = operand.getJSONObject( ii );
-                    if (value.has( "instance" )) {
-                        if (!value.isNull( "instance" )) {
+            if (contents.has( "operand" ) && !contents.isNull( "operand" )) {
+                try {
+                    JSONArray operand = contents.getJSONArray( "operand" );
+                    for (int ii = 0; ii < operand.length(); ii++) {
+                        JSONObject value = operand.getJSONObject( ii );
+                        if (value.has( "instance" ) && !value.isNull( "instance" )) {
                             documentEdges.add( new Pair<String, String>(sysmlId, value.getString("instance")));
                         }
                     }
+                } catch (Exception e) {
+                    logger.error( "Could not parse: " + contents.toString() );
+                    e.printStackTrace();
                 }
             }
         }
@@ -4615,17 +4614,21 @@ public class NodeUtil {
 
     public static void processInstanceSpecificationSpecificationJson( String sysmlId, JSONObject iss, List<Pair<String, String>> documentEdges) {
         if (iss != null) {
-            if (iss.has( "string" )) {
-                if (iss.isNull( "string" )) return;
+            if (iss.has( "string" ) && !iss.isNull( "string" )) {
                 String string = iss.getString( "string" );
-                JSONObject json = new JSONObject(string);
-                Set<Object> sources = findKeyValueInJsonObject(json, "source");
-                for (Object source: sources) {
-                    if (source instanceof String) {
-                        if ( !sysmlId.equals((String) source) ) {
-                            documentEdges.add( new Pair<String, String>(sysmlId, (String) source));
+                try {
+                    JSONObject json = new JSONObject(string);
+                    Set<Object> sources = findKeyValueInJsonObject(json, "source");
+                    for (Object source: sources) {
+                        if (source instanceof String) {
+                            if ( !sysmlId.equals((String) source) ) {
+                                documentEdges.add( new Pair<String, String>(sysmlId, (String) source));
+                            }
                         }
                     }
+                } catch (Exception e) {
+                    logger.error( "Could not parse: " + iss.toString() );
+                    e.printStackTrace();
                 }
             }
         }
@@ -5214,12 +5217,13 @@ public class NodeUtil {
                                            owner2children, child2owner,
                                            visitedOwners, wsId, workspace,
                                            dateTime );
-                        pgh.close();
                         useDb = true;
                     } catch ( ClassNotFoundException e ) {
                         e.printStackTrace();
                     } catch ( SQLException e ) {
                         e.printStackTrace();
+                    } finally {
+                        pgh.close();
                     }
                 } 
                 if(!useDb) {
@@ -5360,10 +5364,14 @@ public class NodeUtil {
         if (pgh.checkWorkspaceExists()) {
             node = NodeUtil.getNodeFromPostgresNode( pgh.getNodeFromSysmlId( sysmlId ) );
             if (node == null) {
-                logger.error( "Postgres could not find node: " + sysmlId );
-                return;
+                if (logger.isInfoEnabled()) {
+                    logger.info( "Postgres could not find node: " + sysmlId );
+                }
             }
-        } else {
+        } 
+        
+        // revert to old way if it can't be found by Postgres
+        if (node == null) {
             node = findScriptNodeByIdForWorkspace( sysmlId, workspace, dateTime, false, services, null );
             if (node == null) {
                 logger.error( "Couldn't find script node: " + sysmlId );
