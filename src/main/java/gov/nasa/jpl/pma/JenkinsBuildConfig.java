@@ -208,7 +208,7 @@ public class JenkinsBuildConfig {
 
             tempElement = doc.createElement("triggers");
             if ( !Utils.isNullOrEmpty( getSchedule() ) ) {
-                Element hudTrig = doc.createElement("hudson.triggers.SCMTrigger");
+                Element hudTrig = doc.createElement("hudson.triggers.TimerTrigger");
                 Element spec = doc.createElement("spec");
                 spec.appendChild( doc.createTextNode( this.schedule ) );
                 hudTrig.appendChild( spec );
