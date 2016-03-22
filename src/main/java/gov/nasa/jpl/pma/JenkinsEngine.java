@@ -455,22 +455,22 @@ public class JenkinsEngine implements ExecutionEngine {
 
         switch ( property ) {
             case NAME:
-                url = url + "[displayName]";
+                url = url + "displayName";
                 break;
             case URL:
-                url = url + "[url]";
+                url = url + "url";
                 break;
             case DURATION:
-                url = url + "[lastCompletedBuild[duration]]";
+                url = url + "lastCompletedBuild[duration]";
                 break;
             case EST_DURATION:
-                url = url + "[lastCompletedBuild[estimatedDuration]]";
+                url = url + "lastCompletedBuild[estimatedDuration]";
                 break;
             case TIMESTAMP:
-                url = url + "[lastCompletedBuild[timestamp]]";
+                url = url + "lastCompletedBuild[timestamp]";
                 break;
             case DESCRIPTION:
-                url = url + "[description]";
+                url = url + "description";
                 break;
             default:
                 url = "";
@@ -550,6 +550,8 @@ public class JenkinsEngine implements ExecutionEngine {
             post.setEntity( xmlEntity );
             HttpResponse response = 
                     this.jenkinsClient.execute( post, this.context );
+            
+            EntityUtils.consume( response.getEntity() );
             
         } catch( Exception e ) {
             e.printStackTrace();

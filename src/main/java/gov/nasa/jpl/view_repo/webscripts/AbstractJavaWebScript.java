@@ -2539,7 +2539,15 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
             }
         }
                
-        jenkins.postConfigXml( config, config.getJobID(), createNewJob );
+        jenkins.postConfigXml( config, config.getJobID(), createNewJob );    
+               
+        // Recreate a Jenkin's instance so we can query for the job's URL and add it to the json
+        // so the user can have easy access to it 
+        jenkins = new JenkinsEngine();
+        
+        jenkins.constructBuildUrl( jobID, JenkinsEngine.detail.URL );
+        jenkins.execute();
+        String jobUrl = jenkins.jsonResponse.optString( "url" );
     }
     
     
