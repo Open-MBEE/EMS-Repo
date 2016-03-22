@@ -312,10 +312,11 @@ public class ProjectPost extends AbstractJavaWebScript {
     	    try {
 			pgh.connect();
 			pgh.insertNode(projectNode.getNodeRef().toString(), NodeUtil.getVersionedRefId(projectNode), projectNode.getSysmlId());
-			pgh.close();
 		} catch (ClassNotFoundException | java.sql.SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+		} finally {
+		    pgh.close();
 		}
     }
     

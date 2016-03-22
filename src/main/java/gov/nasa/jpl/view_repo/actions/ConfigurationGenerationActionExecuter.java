@@ -31,11 +31,13 @@ package gov.nasa.jpl.view_repo.actions;
 import gov.nasa.jpl.mbee.util.Debug;
 import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.util.Acm;
+import gov.nasa.jpl.view_repo.util.EmsConfig;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
-import gov.nasa.jpl.view_repo.util.EmsTransaction;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
+
 import org.apache.log4j.*;
+
 import gov.nasa.jpl.view_repo.webscripts.HostnameGet;
 import gov.nasa.jpl.view_repo.webscripts.SnapshotPost;
 
@@ -193,8 +195,8 @@ public class ConfigurationGenerationActionExecuter extends ActionExecuterAbstrac
         EmsScriptNode logNode = ActionUtil.saveLogToFile(jobNode, "text/plain", services, response.toString());
 
         String hostname = ActionUtil.getHostName();
-        if (!hostname.endsWith( ".jpl.nasa.gov" )) {
-            hostname += ".jpl.nasa.gov";
+        if (!hostname.endsWith( "." + EmsConfig.get("app.domain.name") )) {
+            hostname += "." + EmsConfig.get( "app.domain.name" );
         }
         HostnameGet hostnameGet = new HostnameGet(this.repository, this.services);
         String contextUrl = hostnameGet.getAlfrescoUrl() + "/alfresco";

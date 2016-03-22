@@ -66,8 +66,12 @@ public class PostgresHelper {
         }
 	}
 
-	public void close() throws SQLException {
-		conn.close();
+	public void close() {
+		try {
+            conn.close();
+        } catch ( SQLException e ) {
+            e.printStackTrace();
+        }
 	}
 
 	public boolean connect() throws SQLException, ClassNotFoundException {

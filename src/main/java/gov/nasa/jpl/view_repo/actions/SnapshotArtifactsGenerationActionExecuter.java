@@ -1,10 +1,12 @@
 package gov.nasa.jpl.view_repo.actions;
 
 import gov.nasa.jpl.mbee.util.TimeUtils;
+import gov.nasa.jpl.view_repo.util.EmsConfig;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.EmsTransaction;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
+
 
 
 
@@ -139,7 +141,7 @@ public class SnapshotArtifactsGenerationActionExecuter  extends ActionExecuterAb
         ex.printStackTrace();
         response.append("\n[ERROR]: " + sb.toString());
         ActionUtil.sendEmailToModifier(jobNode, String.format("An unexpected error occurred and your PDF generation failed.\n%s%s", ex.getMessage(), sb.toString()), "PDF Generation Failed", services);
-        ActionUtil.sendEmailTo("mbee-dev-admin@jpl.nasa.gov", "mbee-dev-admin@jpl.nasa.gov", 
+        ActionUtil.sendEmailTo(EmsConfig.get( "app.email.admin" ), EmsConfig.get( "app.email.admin" ), 
                 String.format("Server: %s\nSite: %s\nWorkspace: %s\nSnapshot Id: %s\nError: %s%s%s", 
                         new HostnameGet(this.repository, this.services).getAlfrescoUrl(),
                         siteName,

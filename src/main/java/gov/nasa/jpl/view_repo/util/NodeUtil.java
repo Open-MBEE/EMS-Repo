@@ -219,7 +219,7 @@ public class NodeUtil {
     public static boolean doJsonStringCaching = false;
     public static boolean doPropertyCaching = true;
     public static boolean doGraphDb = true;
-    public static boolean doPostProcessQualified = true;
+    public static boolean doPostProcessQualified = false;
 
     public static boolean addEmptyEntriesToFullCache = false; // this was broken
                                                               // last tried
@@ -2901,48 +2901,6 @@ public class NodeUtil {
         return qname;
     }
 
-    // public static QName makeContentModelQName( String cmName ) {
-    // return makeContentModelQName( cmName, null );
-    // }
-    // public static QName makeContentModelQName( String cmName, ServiceRegistry
-    // services ) {
-    // if ( services == null ) services = getServices();
-    //
-    // if ( cmName == null ) return null;
-    // if ( Acm.getJSON2ACM().keySet().contains( cmName ) ) {
-    // cmName = Acm.getACM2JSON().get( cmName );
-    // }
-    // String[] split = cmName.split( ":" );
-    //
-    // String nameSpace = null;
-    // String localName = null;
-    // if ( split.length == 2 ) {
-    // nameSpace = split[0];
-    // localName = split[1];
-    // } else if ( split.length == 1 ) {
-    // localName = split[0];
-    // } else {
-    // return null;
-    // }
-    // if ( localName == null ) {
-    // return null;
-    // }
-    // DictionaryService dServ = services.getDictionaryService();
-    // QName qName = null;
-    // if ( nameSpace != null ) {
-    // if ( nameSpace.equals( "sysml" ) ) {
-    // qName = QName.createQName( "{http://jpl.nasa.gov/model/sysml-lite/1.0}"
-    // + localName );
-    // } else if ( nameSpace.equals( "view2" ) ) {
-    // qName = QName.createQName( "{http://jpl.nasa.gov/model/view/2.0}"
-    // + localName );
-    // } else if ( nameSpace.equals( "view" ) ) {
-    // qName = QName.createQName( "{http://jpl.nasa.gov/model/view/1.0}"
-    // + localName );
-    // }
-    // }
-    // return qName;
-    // }
 
     /**
      * This method behaves the same as if calling
@@ -4314,15 +4272,10 @@ public class NodeUtil {
         if ( !heisenbugSeen ) {
             String hostname = services.getSysAdminParams().getAlfrescoHost();
 
-            String sender = hostname + "@jpl.nasa.gov";
+            String sender = hostname + "@" + EmsConfig.get( "app.domain.name" );
             String recipient;
 
-//            if ( hostname.toLowerCase().contains( "europa" ) ) {
-//                recipient = "kerzhner@jpl.nasa.gov";
-//                ActionUtil.sendEmailTo( sender, recipient, msg, subject,
-//                                        services );
-//            }
-            recipient = "mbee-dev-admin@jpl.nasa.gov";
+            recipient = EmsConfig.get( "app.email.admin" );
             ActionUtil.sendEmailTo( sender, recipient, msg, subject, services );
             heisenbugSeen = true;
         }
@@ -4566,11 +4519,14 @@ public class NodeUtil {
                                            List< Pair< String, String >> documentEdges) {
         if (contents != null) {
             if (contents.has( "operand" )) {
+                if (contents.isNull( "operand" )) return;
                 JSONArray operand = contents.getJSONArray( "operand" );
                 for (int ii = 0; ii < operand.length(); ii++) {
                     JSONObject value = operand.getJSONObject( ii );
                     if (value.has( "instance" )) {
-                        documentEdges.add( new Pair<String, String>(sysmlId, value.getString("instance")));
+                        if (!value.isNull( "instance" )) {
+                            documentEdges.add( new Pair<String, String>(sysmlId, value.getString("instance")));
+                        }
                     }
                 }
             }
@@ -4613,6 +4569,7 @@ public class NodeUtil {
     public static void processInstanceSpecificationSpecificationJson( String sysmlId, JSONObject iss, List<Pair<String, String>> documentEdges) {
         if (iss != null) {
             if (iss.has( "string" )) {
+                if (iss.isNull( "string" )) return;
                 String string = iss.getString( "string" );
                 JSONObject json = new JSONObject(string);
                 Set<Object> sources = findKeyValueInJsonObject(json, "source");
@@ -4960,9 +4917,7 @@ public class NodeUtil {
             mmsVersion = jsonModule.get( "mmsVersion" ).toString();
         }
 
-        int endIndex = mmsVersion.lastIndexOf( "." );
-
-        return mmsVersion.substring( 0, endIndex );
+        return mmsVersion;
     }
 
     /**
@@ -5012,7 +4967,8 @@ public class NodeUtil {
                                       owner2children, child2owner );
                     } catch (Exception e) {
                         logger.error( "Post process qname not working. Setting postProcessQualified to false" );
-                        NodeUtil.doPostProcessQualified = false;
+                        logger.error( elementsJson );
+                        //NodeUtil.doPostProcessQualified = false;
                         e.printStackTrace();
                     }
                 } else {
@@ -5082,6 +5038,10 @@ public class NodeUtil {
                                  Map< String, String > id2siteName,
                                  Map< String, Set< String >> owner2children,
                                  Map< String, String > child2owner ) {
+        if ( !elementJson.has("sysmlid") ) {
+            logger.warn( "Could not find sysmlid: " + elementJson );
+            return;
+        }
         String sysmlid = elementJson.getString( "sysmlid" );
         Map< String, String > qpathMap = new HashMap< String, String >();
 
@@ -5172,12 +5132,13 @@ public class NodeUtil {
                         pgh.connect();
                         node =
                                 NodeUtil.getNodeFromPostgresNode( pgh.getNodeFromSysmlId( id ) );
-                        pgh.close();
                         useDb = true;
                     } catch ( ClassNotFoundException e ) {
                         e.printStackTrace();
                     } catch ( SQLException e ) {
-                    	e.printStackTrace();
+                    	    e.printStackTrace();
+                    } finally {
+                        pgh.close();
                     }
                 } 
                 if(!useDb) {
