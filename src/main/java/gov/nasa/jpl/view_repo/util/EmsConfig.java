@@ -7,10 +7,11 @@ public class EmsConfig {
 
     public static void setProperties(String propertiesFile) throws Exception {
         System.out.println("Properties: " + propertiesFile);
-        String[] propertiesFiles = propertiesFile.split( "," );
-        for (String file: propertiesFiles) { 
-            EmsConfig.properties.load(Thread.currentThread().getContextClassLoader().getResourceAsStream(file));
-        }
+        EmsConfig.properties.load(Thread.currentThread().getContextClassLoader().getResourceAsStream(propertiesFile));
+//        String[] propertiesFiles = propertiesFile.split( "," );
+//        for (String file: propertiesFiles) { 
+//            EmsConfig.properties.load(Thread.currentThread().getContextClassLoader().getResourceAsStream(file));
+//        }
     }
 
     public static String get(String key) {

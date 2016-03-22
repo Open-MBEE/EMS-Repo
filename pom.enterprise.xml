@@ -485,7 +485,7 @@
 						</configuration>
 					</execution>
 					<execution>
-						<id>copy-enterprise-properties</id>
+						<id>copy-properties</id>
 						<phase>compile</phase>
 						<goals>
 							<goal>copy-resources</goal>
@@ -495,7 +495,7 @@
 							<outputDirectory>${project.build.directory}/${project.build.finalName}/web/WEB-INF/classes</outputDirectory>
 							<resources>
 								<resource>
-									<directory>${basedir}/config/alfresco/enterprise</directory>
+									<directory>${basedir}/config/alfresco</directory>
 									<includes>
 										<include>${deploymentName}.properties</include>
 									</includes>
