@@ -13,19 +13,15 @@
 3. Clone alfresco-view-repo using the Eclipse git tool. If you need instructions on installing and using git in eclipse see this section: [typical local environment instructions](#typical)
 4. Clone the m2 repository for the artifacts
 	1. <code>cd ~/git</code>
-	2. <code>git clone https://github.jpl.nasa.gov/mbee-dev/m2</code>
+	2. <code>git clone https://github.com/Open-MBEE/EMS-Repo</code>
 	3. <code>cp -r ./m2 ~/.m2/repository</code>
 	4. Inside of Eclipse right click your project and run maven >> Update project
-5. Install jrebel and scala from Eclipse using Help >> Eclipse Marketplace
+5. (Optional) Install jrebel and scala from Eclipse using Help >> Eclipse Marketplace
 6. From the command line navigate to git/alfresco-view-repo  and update the last line sudo vim /etc/hosts to read:
 	 
 		127.0.0.1  'your-machine-name'
 
-7. Run this script from the command line:
-
-		./cpr.sh
-
-8. Install Postgres DB on your localhost and use the
+7. Install Postgres DB on your localhost and use the
 src/main/java/gov/nasa/jpl/view_repo/db/mms.sql to initialize the database (as follows):
   - On Mac, can install postgres using homembrew
   
@@ -53,7 +49,18 @@ src/main/java/gov/nasa/jpl/view_repo/db/mms.sql to initialize the database (as f
 
        	    GET http://127.0.0.1:8080/alfresco/service/model2postgres/
 
-    This will transfer the existing Alfresco graph to Postgres, which is then used for all computations. 
+    This will transfer the existing Alfresco graph to Postgres, which is then used for all computations.
+
+7. To deploy and run, you will need to update ems.properties and mms-parent-pom.xml with appropriate values and urls
+ 
+  - ems.properties should be copied into config/alfresco
+      - When running maven, use the -DdeploymentName=ems to point to that properties file (update runserver.sh as appropriate)
+  - mms-parent-pom.xml should be copied into config/
+        
+8. Run this script from the command line to run the system:
+
+        ./cpr.sh
+    
 	
 ###The remaining instructions of the readme will guide you through specific set ups 
 
@@ -170,7 +177,7 @@ Eclipse/Maven
         mvn install:install-file -Dfile=lib/sysml.jar -DgroupId=gov.nasa.jpl -DartifactId=sysml -Dversion=1.0 -Dpackaging=jar
 
     For the bae, sysml, and util projects you will need to update the build.properties file and rebel.xml file with your home directory and folder of where magic draw is installed.  For instance:
-        home=/home/gcgandhi
+        home=/home/username
         md=/opt/local/magicdraw
 
     If you are not using Eclispse yoxos, then you will need to install the IMCE Eclipse plug ins.  Do the following:
