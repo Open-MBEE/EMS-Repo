@@ -10,6 +10,10 @@
         parent="webscript">
     </bean>
 
+    <bean id="webscript.gov.nasa.jpl.utils.emsconfig.post" class="gov.nasa.jpl.view_repo.webscripts.EmsConfigPost"
+        parent="webscript">
+    </bean>
+
 	<bean id="webscript.gov.nasa.jpl.utils.updateworkspaceldapgroup.post"
 		class="gov.nasa.jpl.view_repo.webscripts.UpdateWorkspaceLdapGroup"
 		parent="webscript" singleton="false">
