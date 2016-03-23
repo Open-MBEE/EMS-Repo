@@ -13,7 +13,7 @@
 		<groupId>gov.nasa.jpl</groupId>
 		<artifactId>mms-parent-pom</artifactId>
 		<version>1.0.0</version>
-		<relativePath>config/mms-parent-pom.xml</relativePath>
+		<relativePath>config/mvn/mms-parent-pom.xml</relativePath>
 	</parent>
 
     <properties>
