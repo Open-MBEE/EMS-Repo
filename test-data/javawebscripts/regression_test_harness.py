@@ -3326,7 +3326,7 @@ common_filters + ['YY_', 'MM_', 'DD_', 'HH_', 'MMS_', '"timestamp"', '"owner"', 
 "Using the job post service to create two jobs",
 create_curl_cmd(type="POST", data="testjob.json", base_url=BASE_URL_WS, post_type="jobs", branch="master/"),
 True,
-common_filters,
+common_filters + ['YY_', 'MM_', 'DD_', 'HH_', 'MMS_', '"timestamp"', '"qualifiedId"', '"qualifiedName"'],
 ["test", "workspaces", "develop", "develop2"]
 ],
 [
@@ -3336,7 +3336,7 @@ common_filters,
 create_curl_cmd(type="POST", data="testjob_update.json", base_url=BASE_URL_WS,
                 post_type="jobs", branch="master/"),
 True,
-common_filters,
+common_filters + ['YY_', 'MM_', 'DD_', 'HH_', 'MMS_', '"timestamp"', '"qualifiedId"', '"qualifiedName"'],
 ["test", "workspaces", "develop", "develop2"]
 ],  
 [
@@ -3346,7 +3346,7 @@ common_filters,
 create_curl_cmd(type="POST", data="testjob2.json", base_url=BASE_URL_WS,
                 post_type="jobs", branch="master/"),
 True,
-common_filters,
+common_filters + ['YY_', 'MM_', 'DD_', 'HH_', 'MMS_', '"timestamp"', '"qualifiedId"', '"qualifiedName"'],
 ["test", "workspaces", "develop", "develop2"]
 ],
 [
@@ -3356,19 +3356,19 @@ common_filters,
 create_curl_cmd(type="POST", data="testjob_emptySchedule.json", base_url=BASE_URL_WS, 
                 post_type="jobs", branch="master/"),
 True,
-common_filters,
+common_filters + ['YY_', 'MM_', 'DD_', 'HH_', 'MMS_', '"timestamp"', '"qualifiedId"', '"qualifiedName"'],
 ["test", "workspaces", "develop", "develop2"]
-],
+],  
 [
 10138,
 "GetJobViaJobGet",
 "Obtaining the JSON for jobs contained by a view",
-create_curl_cmd(type="GET", data="_18_0_2_6620226_1456959739177_654072_15172?recurse=1", base_url=BASE_URL_WS,
+create_curl_cmd(type="GET", data="jobs/_18_0_2_6620226_1456959739177_654072_15172?recurse=1", base_url=BASE_URL_WS,
                 branch="master/"),
 True,
-common_filters,
+common_filters + ['YY_', 'MM_', 'DD_', 'HH_', 'MMS_', '"timestamp"', '"qualifiedId"', '"qualifiedName"'],
 ["test", "workspaces", "develop", "develop2"]
-],
+],       
 
 # CAEDVO-2987: make sure folks can post to a specified holding bin
 [
