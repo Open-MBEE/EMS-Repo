@@ -565,11 +565,8 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
     // Updated log methods with log4j methods (still works with old log calls)
     // String concatenation replaced with C formatting; only for calls with parameters
     protected void log (Level level, int code, String msg, Object...params) {
-    	if (level.toInt() >= logger.getLevel().toInt()) {
     		String formattedMsg = formatMessage(msg,params);
-    		//String formattedMsg = formatter.format (msg,params).toString();
     		log (level,code,formattedMsg);
-    	}
 	}
 
     // If no need for string formatting (calls with no string concatenation)

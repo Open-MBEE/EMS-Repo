@@ -286,7 +286,8 @@ public class ModelGet extends AbstractJavaWebScript {
 			if (logger.isDebugEnabled())
 				logger.debug("modelId = " + modelId);
 			boolean findDeleted = depth == 0 ? true : false;
-			EmsScriptNode modelRootNode = null;
+			boolean notFoundInGraphDb = false;
+			EmsScriptNode modelRootNode = null;			
 			
 			// search using db if enabled - if not there revert to modelRootNode
 			// DB can only be used against latest at the moment
@@ -296,14 +297,24 @@ public class ModelGet extends AbstractJavaWebScript {
                     pgh.connect();
                     modelRootNode = NodeUtil.getNodeFromPostgresNode(pgh.getNodeFromSysmlId( modelId ));
                 } catch ( Exception e ) {
-                    logger.info( "Reverting to alfresco lookup. Could not find element in graph db " + modelId );
+                    logger.info( "Could not find element in graph db " + modelId );
                 } finally {
                     pgh.close();
                 }
+			    if (modelRootNode == null) notFoundInGraphDb = true;
 			}
 			if (modelRootNode == null) {
 			    modelRootNode = findScriptNodeById(modelId,
 			                                       workspace, dateTime, findDeleted);
+			    if (modelRootNode != null && notFoundInGraphDb) {
+			        logger.warn( "Could not find element in graphDb: " + modelId );
+			        // FIXME: this needs to be tested, so it's off by default
+			        // put it back in the graph if it wasn't there. this will make things a bit slow..
+			        if ( NodeUtil.doAutoBuildGraphDb ) {
+        			        Model2Postgres m2p = new Model2Postgres(repository, services);
+        			        m2p.buildGraphDb( modelRootNode, dateTime, workspace, modelRootNode.getSysmlId() );
+			        }
+			    }
 			}
 
             if ( logger.isDebugEnabled() ) logger.debug( "modelRootNode = "
@@ -326,7 +337,7 @@ public class ModelGet extends AbstractJavaWebScript {
 			} else {
 				handleElementHierarchy(modelRootNode, workspace, dateTime,
 						depth, new Long(0), connected, relationship,
-						new HashSet<String>());
+						new HashSet<String>(), notFoundInGraphDb);
 			}
 
             boolean checkReadPermission = true; // TODO -- REVIEW -- Shouldn't
@@ -465,9 +476,9 @@ public class ModelGet extends AbstractJavaWebScript {
 	protected void handleElementHierarchy(EmsScriptNode root,
 			WorkspaceNode workspace, Date dateTime, final Long maxDepth,
 			Long currDepth, boolean connected, String relationship,
-			Set<String> visited) throws JSONException, SQLException {
+			Set<String> visited, boolean notFoundInGraphDb) throws JSONException, SQLException {
 
-		if (dateTime == null && !connected && NodeUtil.doGraphDb) {
+		if (!notFoundInGraphDb && dateTime == null && !connected && NodeUtil.doGraphDb) {
 			handleElementHierarchyPostgres(root, workspace, dateTime, maxDepth,
 					currDepth, connected, relationship, visited);
 		}

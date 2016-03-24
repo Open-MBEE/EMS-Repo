@@ -185,6 +185,7 @@ public class HtmlToPdfPost extends AbstractJavaWebScript {
 			String htmlPath = saveHtmlToFilesystem(htmlFilename, htmlContent,
 					coverFilename, coverContent, footerFilename, footerContent, headerFilename, headerContent, tagId, timeStamp, docNum, displayTime, customCss, isSameWidthTableCell);
 
+			handleEmbeddedImage(coverFilename);
 			handleEmbeddedImage(htmlFilename);
 //			saveCoverToRepo(coverFilename, coverContent);
 			saveHtmlToRepo(htmlFilename, htmlContent);
@@ -401,6 +402,7 @@ public class HtmlToPdfPost extends AbstractJavaWebScript {
 		head.append("<link href=\"css/ve-mms.styles.min.css\" rel=\"stylesheet\" type=\"text/css\" />");
 		StringBuffer style = new StringBuffer();
 		style.append("<style type=\"text/css\">");
+		style.append("	BODY{font-size:12pt;}");
 		style.append("	TR { page-break-inside:avoid; }");
 		style.append("	.ng-hide { display:none; }");
 		style.append("	TABLE { width:100%; }");
@@ -410,11 +412,13 @@ public class HtmlToPdfPost extends AbstractJavaWebScript {
 			style.append("		width:1%;");
 		}
 		style.append("	    overflow-wrap: break-word;");
+		style.append("	}");
+		style.append("	TD {");
 		style.append("	    word-wrap: break-word;");
-		style.append("	    break-word: break-word;");
-		style.append("		-ms-word-break: break-all;");
-		style.append("	    word-break: break-all;");
-		style.append("	    word-break: break-word;");
+//		style.append("	    break-word: break-word;");
+//		style.append("		-ms-word-break: break-all;");
+//		style.append("	    word-break: break-all;");
+//		style.append("	    word-break: break-word;");
 		style.append("		-ms-hyphens: auto;");
 		style.append("		-moz-hyphens: auto;");
 		style.append("		-webkit-hyphens: auto;");
@@ -466,11 +470,11 @@ public class HtmlToPdfPost extends AbstractJavaWebScript {
 			bw.write(htmlContent);
 			bw.close();
 
-			log(String.format("Saving %s to filesystem...", coverFilename));
-			File coverFile = new File(coverPath.toString());
-			bw = new BufferedWriter(new FileWriter(coverFile));
-			bw.write(coverContent);
-			bw.close();
+//			log(String.format("Saving %s to filesystem...", coverFilename));
+//			File coverFile = new File(coverPath.toString());
+//			bw = new BufferedWriter(new FileWriter(coverFile));
+//			bw.write(coverContent);
+//			bw.close();
 
 			if (!Utils.isNullOrEmpty(customCss)) {
 				log(String.format("Saving %s to filesystem...",
@@ -481,6 +485,7 @@ public class HtmlToPdfPost extends AbstractJavaWebScript {
 				bw.close();
 			}
 			
+			createCoverPage(coverFilename, coverContent);
 			createFooterPage(footerFilename, footerContent);
 			createHeaderPage(headerFilename, headerContent, tagId, timeStamp, docNum, displayTime);
 		} catch (Throwable ex) {
@@ -680,6 +685,32 @@ public class HtmlToPdfPost extends AbstractJavaWebScript {
 		services.getActionService().executeAction(htmlToPdfAction, jobNode.getNodeRef(), true, true);
 	}
 	
+	protected void createCoverPage(String coverFilename, String coverContent) throws Throwable{
+		log(String.format("Saving %s to filesystem...", coverFilename));
+		Path coverPath = Paths.get(this.fsWorkingDir, coverFilename);
+		Document document = Jsoup.parse(coverContent, "UTF-8");
+		if (document == null) {
+			throw new Throwable("Failed to parse HTML cover content!");
+		}
+		Element head = document.head();
+		head.append("<meta charset=\"utf-8\" />");
+		StringBuffer style = new StringBuffer();
+		style.append("<link href=\"css/mm-mms.styles.min.css\" rel=\"stylesheet\" type=\"text/css\" />");
+		style.append("<link href=\"css/ve-mms.styles.min.css\" rel=\"stylesheet\" type=\"text/css\" />");
+		head.append(style.toString());
+		BufferedWriter bw = null;
+		try {
+			bw = new BufferedWriter(new FileWriter(coverPath.toString()));
+			bw.write(document.toString());
+		}
+		catch(Throwable ex){
+			ex.printStackTrace();
+			throw new Throwable(String.format("Failed to save %s to filesystem! %s", coverFilename, ex.getMessage()));
+		}finally {
+			if(bw != null) bw.close();
+		}
+	}
+	
 	protected void createFooterPage(String footerFilename, String footerContent) throws IOException{
 		log(String.format("Saving %s to filesystem...", footerFilename));
 		Path footerPath = Paths.get(this.fsWorkingDir, footerFilename);
@@ -733,7 +764,7 @@ public class HtmlToPdfPost extends AbstractJavaWebScript {
         html.append(System.lineSeparator());
         html.append("				var y = document.getElementsByClassName(x[i]);");
         html.append(System.lineSeparator());
-        html.append("				for(var j=0; j<y.length; ++j) y[j].textContent = vars[x[i]]-3;");
+        html.append("				for(var j=0; j<y.length; ++j) y[j].textContent = vars[x[i]];");
         html.append(System.lineSeparator());
         html.append("			}");
         html.append(System.lineSeparator());
@@ -843,7 +874,7 @@ public class HtmlToPdfPost extends AbstractJavaWebScript {
     }
 
 	public void handleEmbeddedImage(String htmlFilename) throws Exception {
-		log("Saving images to filesystem...");
+		log(String.format("Saving images in %s to filesystem...", htmlFilename));
 		Path htmlPath = Paths.get(this.fsWorkingDir, htmlFilename);
 		if (!Files.exists(htmlPath))
 			return;
