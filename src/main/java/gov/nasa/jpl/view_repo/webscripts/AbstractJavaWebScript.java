@@ -214,6 +214,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
             put( "status", "_18_0_2_6620226_1453945722485_173783_14567");
             put( "schedule", "_18_0_2_6620226_1453945600718_861466_14565");
             put( "command", "_18_0_2_6620226_1453945276117_966030_14557");
+            put( "url", "_18_0_2_6620226_1458836769913_512779_14411");
         }
     };
 
@@ -2503,7 +2504,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         return privateRequestJSON;
     }
 
-    protected void createJenkinsConfig(String jobID,
+    protected String createJenkinsConfig(String jobID,
                                        Map<String,String> propertyValues,
                                        boolean createNewJob) {
         if( createNewJob ) System.out.println("CREATING JOB " + jobID);
@@ -2543,11 +2544,13 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
                
         // Recreate a Jenkin's instance so we can query for the job's URL and add it to the json
         // so the user can have easy access to it 
-        //jenkins = new JenkinsEngine();
+        jenkins = new JenkinsEngine();
         
-        //jenkins.constructBuildUrl( jobID, JenkinsEngine.detail.URL );
-        //jenkins.execute();
-        //String jobUrl = jenkins.jsonResponse.optString( "url" );
+        jenkins.constructBuildUrl( jobID, JenkinsEngine.detail.URL );
+        jenkins.execute();
+        String jobUrl = jenkins.jsonResponse.optString( "url" );
+        
+        return jobUrl;
     }
     
     
@@ -3201,7 +3204,28 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         // fact, the propertyValues should be gathered after the fact.
         for ( String jobId : propertyValues.keySet() ) {
             Map< String, String > properties = propertyValues.get( jobId );
-            createJenkinsConfig( jobId, properties, createNewJob.get( jobId ) == true );
+            String jobUrl = createJenkinsConfig( jobId, properties, createNewJob.get( jobId ) == true );
+            
+            // NOTE: how can we get the jobUrlJson? either way, up to this point
+            //       we have a URL by returning it (implies the job has been created)
+
+            if( jobUrl != null ) {
+                properties.put( "url", jobUrl );
+            }
+            
+            /*  
+             JSONObject jobUrlJson = ??
+             if( jobUrlJson != null) {
+                 elements.put( jobUrlJson );
+                 String urlId = propertyElementJson.optString("sysmlid");
+                 if ( !Utils.isNullOrEmpty( propertyId ) ) {
+                     elementMap.put( propertyId, propertyElementJson );
+                 }
+                 
+             }
+             
+             if( jobJson.has( "url" ) ) jobJson.remove( "url" );
+             */
         }
 
         json.remove( "jobs" );
