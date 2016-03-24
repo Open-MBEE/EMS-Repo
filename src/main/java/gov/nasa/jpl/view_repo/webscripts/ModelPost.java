@@ -3075,7 +3075,7 @@ public class ModelPost extends AbstractJavaWebScript {
         // project found within
         // the site. Give a warning if multiple projects are found. There is a
         // requirement that
-        // there should never be more than one project per site on Europa.
+        // there should never be more than one project per site
         if (projectId.equals(siteName + "_" + NO_PROJECT_ID)) {
             // // search JSON for owner that is project
             // JSONObject json = (JSONObject)req.parseContent();

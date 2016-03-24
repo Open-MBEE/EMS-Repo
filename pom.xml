@@ -431,9 +431,27 @@
 							</resources>
 						</configuration>
 					</execution>
-				</executions>
+                    <execution>
+                        <id>copy-global-properties-resources</id>
+                        <phase>validate</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <overwrite>true</overwrite>
+                            <outputDirectory>${basedir}/src/main/amp/config/alfresco/module/view-repo</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>${basedir}/config/alfresco</directory>
+	                                <includes>
+	                                    <include>alfresco-global.properties</include>
+	                                </includes>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+			</executions>
 			</plugin>
-
 		</plugins>
 		<pluginManagement>
 			<plugins>

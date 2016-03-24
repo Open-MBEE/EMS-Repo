@@ -20,4 +20,4 @@ ${url.serverPath}/alfresco/navigate/browse/${workspace}/${storenode}
 
 Regards
 
-Europa MDEV
+APP.HOSTNAME

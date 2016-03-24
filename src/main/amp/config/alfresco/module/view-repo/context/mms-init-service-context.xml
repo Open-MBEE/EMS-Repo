@@ -117,7 +117,7 @@
         <property name="services" ref="ServiceRegistry"/>
     </bean>
     <bean id="restConnection" class="gov.nasa.jpl.view_repo.connections.RestPostConnection">
-        <property name="uri" value="https://orasoa-dev07.jpl.nasa.gov:8121/PublishMessageRestful" />
+        <property name="uri" value="${app.rest.url}" />
     </bean>
 
     <!--  Definitions for static methods -->
@@ -128,11 +128,11 @@
     
     <bean class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
         <property name="staticMethod" value="gov.nasa.jpl.view_repo.webscripts.util.ShareUtils.setUsername" />
-        <property name="arguments" value="mmsadmin"/>
+        <property name="arguments" value="${app.admin.username}"/>
     </bean>
     <bean class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
         <property name="staticMethod" value="gov.nasa.jpl.view_repo.webscripts.util.ShareUtils.setPassword" />
-        <property name="arguments" value="letmein"/>
+        <property name="arguments" value="${app.admin.password}"/>
     </bean>
     <bean class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
         <property name="staticMethod" value="gov.nasa.jpl.view_repo.webscripts.util.ShareUtils.setServices" />

@@ -203,7 +203,7 @@ public class ConfigurationGenerationActionExecuter extends ActionExecuterAbstrac
         
         // Send off notification email
         String subject =
-                "[EuropaEMS] Tag generation in workspace "
+                "[EMS] Tag generation in workspace "
                         + WorkspaceNode.getWorkspaceName( workspace )
                         + ( siteName == null ? "" : ", siteName " + siteName )
                         + ": status = " + jobStatus;
