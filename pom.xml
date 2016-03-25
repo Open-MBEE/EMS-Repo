@@ -162,39 +162,6 @@
 				</dependency>
 			</dependencies>
 		</profile>
-		<profile>
-			<id>jenkins-client</id>
-			<dependencies>
-				<dependency>
-					<groupId>gov.nasa.jpl.mbee.util</groupId>
-					<artifactId>mbee_util</artifactId>
-					<version>${mbee.version}</version>
-				</dependency>
-				<dependency>
-					<groupId>gov.nasa.jpl.mbee.sysml</groupId>
-					<artifactId>sysml</artifactId>
-					<version>${mbee.version}</version>
-				</dependency>
-				<dependency>
-					<groupId>gov.nasa.jpl.mbee.bae</groupId>
-					<artifactId>bae</artifactId>
-					<version>${mbee.version}</version>
-				</dependency>
-				<dependency>
-					<groupId>gov.nasa.jpl.mbee.klang</groupId>
-					<artifactId>klang</artifactId>
-					<version>${mbee.version}</version>
-				</dependency>
-				<dependency>
-					<groupId>jenkins-client</groupId>
-					<artifactId>jenkins-client</artifactId>
-					<version>1.0</version>
-					<scope>system</scope>
-					<type>jar</type>
-					<systemPath>${project.basedir}/src/main/amp/web/WEB-INF/lib/jenkins-client.jar</systemPath>
-				</dependency>
-			</dependencies>
-		</profile>
 	</profiles>
 
 	<!-- Here we realize the connection with the Alfresco selected platform 
@@ -226,18 +193,8 @@
 			<artifactId>alfresco-repository</artifactId>
 			<version>${alfresco.version}</version>
 			<scope>provided</scope>
-			<exclusions>
-			 <exclusion>
-                 <groupId>org.apache.httpcomponents</groupId>
-                 <artifactId>httpclient-cache</artifactId>
-    		 </exclusion>
-			<exclusion>
-			     <groupId>org.apache.httpcomponents</groupId>
-			     <artifactId>httpclient</artifactId>
-			 </exclusion>
-			</exclusions>
-		<!-- Test dependencies -->
 		</dependency>
+		<!-- Test dependencies -->
 		<dependency>
 			<groupId>gov.nasa.jpl.mbee.docbook</groupId>
 			<artifactId>docbook</artifactId>
