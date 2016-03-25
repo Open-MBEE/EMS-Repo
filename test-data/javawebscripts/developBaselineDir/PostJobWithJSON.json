@@ -1,76 +1,119 @@
-{"elements": [
-    {
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "",
-        "specialization": {
-            "propertyType": null,
-            "isDerived": false,
-            "isSlot": true,
-            "value": [{
-                "string": "waiting",
-                "type": "LiteralString"
-            }],
-            "type": "Property"
+{
+    "message": "Error! No element found for _18_0_2_6620226_1453944322658_194833_14413.\n",
+    "elements": [
+        {
+            "isMetatype": false,
+            "editable": true,
+            "creator": "admin",
+            "modifier": "admin",
+            "name": "",
+            "documentation": "",
+            "appliedMetatypes": ["_9_0_62a020a_1105704885251_933969_7897"],
+            "specialization": {
+                "slots": [],
+                "classifier": [],
+                "type": "InstanceSpecification"
+            }
+        },
+        {
+            "editable": true,
+            "creator": "admin",
+            "modifier": "admin",
+            "name": "",
+            "specialization": {
+                "propertyType": null,
+                "isDerived": false,
+                "isSlot": true,
+                "value": [{
+                    "string": "waiting",
+                    "type": "LiteralString"
+                }],
+                "type": "Property"
+            }
+        },
+        {
+            "editable": true,
+            "creator": "admin",
+            "modifier": "admin",
+            "name": "",
+            "specialization": {
+                "propertyType": null,
+                "isDerived": false,
+                "isSlot": true,
+                "value": [{
+                    "string": "0 18 * * *",
+                    "type": "LiteralString"
+                }],
+                "type": "Property"
+            }
+        },
+        {
+            "editable": true,
+            "creator": "admin",
+            "modifier": "admin",
+            "specialization": {"type": "Package"}
+        },
+        {
+            "editable": true,
+            "creator": "admin",
+            "modifier": "admin",
+            "owner": "holding_bin_no_site_no_project",
+            "specialization": {"type": "Package"}
+        },
+        {
+            "editable": true,
+            "creator": "admin",
+            "modifier": "admin",
+            "specialization": {"type": "Element"}
+        },
+        {
+            "sysmlid": "holding_bin_no_site_no_project",
+            "editable": true,
+            "creator": "admin",
+            "modifier": "admin",
+            "name": "holding_bin",
+            "owner": "no_site_no_project",
+            "specialization": {"type": "Package"}
+        },
+        {
+            "editable": true,
+            "creator": "admin",
+            "modifier": "admin",
+            "specialization": {"type": "Package"}
+        },
+        {
+            "editable": true,
+            "creator": "admin",
+            "modifier": "admin",
+            "specialization": {"type": "Package"}
+        },
+        {
+            "isMetatype": false,
+            "editable": true,
+            "creator": "admin",
+            "modifier": "admin",
+            "name": "Job to test post",
+            "documentation": "",
+            "owner": "_18_0_2_6620226_1456959739177_654072_15172",
+            "appliedMetatypes": ["_18_0_2_6620226_1453944322658_194833_14413"],
+            "specialization": {"type": "Element"}
+        },
+        {
+            "editable": true,
+            "creator": "admin",
+            "modifier": "admin",
+            "name": "",
+            "specialization": {
+                "propertyType": null,
+                "isDerived": false,
+                "isSlot": true,
+                "value": [{
+                    "string": "Jenkins, Doc Web, Basic Document, cae-tw.jpl.nasa.gov, 18051, Intern Testing Project, master, cae-ems-test-origin.jpl.nasa.gov",
+                    "type": "LiteralString"
+                }],
+                "type": "Property"
+            }
         }
-    },
-    {
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "",
-        "specialization": {
-            "propertyType": null,
-            "isDerived": false,
-            "isSlot": true,
-            "value": [{
-                "string": "0 18 * * *",
-                "type": "LiteralString"
-            }],
-            "type": "Property"
-        }
-    },
-    {
-        "isMetatype": false,
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "Job to test post",
-        "documentation": "",
-        "owner": "_18_0_2_6620226_1456959739177_654072_15172",
-        "appliedMetatypes": ["_18_0_2_6620226_1453944322658_194833_14413"],
-        "specialization": {"type": "Element"}
-    },
-    {
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "",
-        "specialization": {
-            "propertyType": null,
-            "isDerived": false,
-            "isSlot": true,
-            "value": [{
-                "string": "Jenkins, Doc Web, Basic Document, cae-tw.jpl.nasa.gov, 18051, Intern Testing Project, master, cae-ems-test-origin.jpl.nasa.gov",
-                "type": "LiteralString"
-            }],
-            "type": "Property"
-        }
-    },
-    {
-        "isMetatype": false,
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "",
-        "documentation": "",
-        "appliedMetatypes": ["_9_0_62a020a_1105704885251_933969_7897"],
-        "specialization": {
-            "slots": [],
-            "classifier": ["_18_0_2_6620226_1453944322658_194833_14413"],
-            "type": "InstanceSpecification"
-        }
-    }
-]}
-200
+    ]
+}
+400
