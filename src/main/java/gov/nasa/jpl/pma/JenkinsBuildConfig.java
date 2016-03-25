@@ -59,7 +59,7 @@ public class JenkinsBuildConfig {
     private              String  teamworkProject    = "Intern Testing Project";
     //private              String  teamworkServer     = "secae-fn.jpl.nasa.gov";
     private              String  teamworkServer     = "cae-tw.jpl.nasa.gov";
-    private              String  teamworkPort       = "18001";
+    private              String  teamworkPort       = "18051";
     //private              String  teamworkUser       = "mmsadmin";
     //private              String  teamworkPassword   = "letmein";
     private              String  teamworkUser       = "docgen";

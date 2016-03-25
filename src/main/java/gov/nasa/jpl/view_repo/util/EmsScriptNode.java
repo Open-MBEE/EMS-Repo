@@ -7005,6 +7005,8 @@ public class EmsScriptNode extends ScriptNode implements
         return node;
     }
 
+    // NOTE: if we ever specialize job, this will have to look for everything 
+    //       that specializes job as well 
     public boolean isJob() {
             Object stereotypes = 
                     getProperty("sysml:appliedMetatypes", true);
@@ -7057,7 +7059,7 @@ public class EmsScriptNode extends ScriptNode implements
 
         for (EmsScriptNode instance : is) {
             ArrayList<?> appliedMetatype = (ArrayList<?>) instance.getProperty(Acm.ACM_APPLIED_METATYPES);
-            if (appliedMetatype != null && appliedMetatype.contains( "_9_0_62a020a_1105704885251_933969_7897" )) {
+            if (appliedMetatype != null && appliedMetatype.contains( JobGet.instanceSpecId )) {
                 return instance;
             }
         }

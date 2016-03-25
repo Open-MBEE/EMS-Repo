@@ -1001,8 +1001,7 @@ public class NodeUtil {
             Object value;
             try {
                 value = json.get( key );
-                if ( //key.equals( Acm.JSON_SPECIALIZATION ) &&
-                     value instanceof JSONObject ) {
+                if ( value instanceof JSONObject ) {
                     value = clone( (JSONObject)value );
                 } else if ( value instanceof JSONArray ) {
                     value = clone( (JSONArray)value );

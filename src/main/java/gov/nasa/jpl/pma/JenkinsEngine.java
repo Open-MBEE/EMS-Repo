@@ -144,7 +144,7 @@ public class JenkinsEngine implements ExecutionEngine {
         if ( DEBUG ) {
 
             String getUrl = jenkinsUrl;
-            System.out.println( "The Build url is " + getUrl );
+            if (logger.isDebugEnabled()) logger.debug( "The Build url is " + getUrl );
             HttpGet get = new HttpGet( getUrl );
 
             try {
@@ -153,9 +153,8 @@ public class JenkinsEngine implements ExecutionEngine {
                 HttpEntity entity = response.getEntity();
                 String retSrc = EntityUtils.toString( entity );
                 jsonResponse = new JSONObject( retSrc );
-                System.out.println( "Content of the JSON Object is "
+                logger.info( "Content of the JSON Object is "
                                     + jsonResponse.toString() );
-                System.out.println();
                 EntityUtils.consume( entity );
             } catch ( IOException e ) {
                 e.printStackTrace();
@@ -433,7 +432,7 @@ public class JenkinsEngine implements ExecutionEngine {
                 break;
         }
         this.executeUrl = this.url + url;
-        System.out.println( "Execution url is " + this.executeUrl );
+        if (logger.isDebugEnabled()) logger.debug( "Execution url is " + this.executeUrl );
     }
 
     public void constructBuildUrl( String jobUrl, detail property ) {
@@ -451,7 +450,7 @@ public class JenkinsEngine implements ExecutionEngine {
 
         url = url + "api/json?tree=";
 
-        System.out.println( "Current constuction url is " + url );
+        if (logger.isDebugEnabled()) logger.debug( "Current constuction url is " + url );
 
         switch ( property ) {
             case NAME:
@@ -476,15 +475,15 @@ public class JenkinsEngine implements ExecutionEngine {
                 url = "";
         }
         this.executeUrl = this.url + url;
-        System.out.println( "Execution url is " + this.executeUrl );
+        if (logger.isDebugEnabled()) logger.debug( "Execution url is " + this.executeUrl );
     }
 
     public void constructAllJobs() {        
         String url = this.url + "/api/json?tree=jobs[name,description,color,url,lastCompletedBuild[duration,timestamp,estimatedDuration]]";
         
-        System.out.println( "Current constuction url is " + url );
+        if (logger.isDebugEnabled()) logger.debug( "Current constuction url is " + url );
         this.executeUrl = url;
-        System.out.println( "Execution url is " + this.executeUrl );
+        if (logger.isDebugEnabled()) logger.debug( "Execution url is " + this.executeUrl );
     }
 
     public JSONObject configXmlToJson(String jobUrl) throws SAXException, ParserConfigurationException {

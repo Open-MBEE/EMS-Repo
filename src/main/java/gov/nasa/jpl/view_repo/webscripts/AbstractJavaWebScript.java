@@ -2520,20 +2520,22 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         }
         
         String command = propertyValues.get("command");
-        if( command != null ) {
+        if( command != null ) {            
             String[] commandArgs = command.split( "," );
-            if ( commandArgs.length >= 7 &&
-                 commandArgs[0].trim().toLowerCase().equals("jenkins") &&
-                 ( commandArgs[1].trim().toLowerCase().equals("doc web") ||
-                   commandArgs[1].trim().toLowerCase().equals("docweb") ) ) {
-                config.setDocumentID( commandArgs[2].trim() );
-                config.setTeamworkServer( commandArgs[3].trim() );
-                config.setTeamworkPort( commandArgs[4].trim() );
-                config.setTeamworkProject( commandArgs[5].trim() );
-                config.setWorkspace( commandArgs[6].trim() );
-                if ( commandArgs.length > 7 ) {
-                    config.setMmsServer( commandArgs[7].trim() );
-                }
+            if ( commandArgs.length >= 3 ) {
+                
+                // TODO: We need a way of parameterizing teamwork items because command 
+                //       will not be coming from the client side 
+                
+                // NOTE: this may also mean that there will be no 'command' property 
+                //       in the defining features
+                config.setDocumentID( commandArgs[0].trim() );
+                config.setTeamworkServer( commandArgs[1].trim() );
+                config.setTeamworkPort( commandArgs[2].trim() );
+                config.setTeamworkProject( commandArgs[3].trim() );
+                config.setWorkspace( "master" );
+
+                config.setMmsServer( ActionUtil.getHostName() );                
             } else {
                 String message = "Command not supported: " + command;
                 log(Level.WARN, HttpServletResponse.SC_NOT_IMPLEMENTED, message);
@@ -2980,7 +2982,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         JSONArray metatypes = element.optJSONArray( Acm.JSON_APPLIED_METATYPES );
         for ( int i = 0; i < metatypes.length(); ++i ) {
             String metatype = metatypes.optString(i);
-            if ( metatype != null && metatype.equals( "_9_0_62a020a_1105704885251_933969_7897" ) ) {
+            if ( metatype != null && metatype.equals( JobGet.instanceSpecId ) ) {
                 return true;
             }
         }
