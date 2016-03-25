@@ -245,7 +245,9 @@ public class DoorsSync extends AbstractJavaWebScript {
             customFields = mapFields( projectNode.getSysmlName() );
 
             try {
-                doors = new DoorsClient(getConfig("doors.user"), getConfig("doors.pass"), getConfig("doors.url"), projectNode.getSysmlName());
+                if (doors == null || doors.getProject() != projectNode.getSysmlName()) {
+                    doors = new DoorsClient(getConfig("doors.user"), getConfig("doors.pass"), getConfig("doors.url"), projectNode.getSysmlName());
+                }
                 if (!processedProjects.contains(projectNode.getSysmlName())) {
                     syncFromDoors();
                 }
@@ -738,19 +740,16 @@ public class DoorsSync extends AbstractJavaWebScript {
         EmsScriptNode[] childProps = getAllSlots( n );
 
         if ( childProps != null ) {
-            for ( EmsScriptNode cn : childProps ) {
-                for ( Map< String, String > fieldDef : customFields ) {
-                    Collection< Object > value =
-                            esm.getValue( esm.getProperty( cn, "value" ),
-                                          fieldDef.get( "propertyType" ) );
-                    if ( value.iterator().hasNext() ) {
-                        if ( fieldDef.get( "doorsAttr" )
-                                     .contains( "primaryText" ) ) {
-                            r.setPrimaryText( value.iterator().next()
-                                                   .toString() );
-                        } else {
-                            r.setCustomField( doors.getField( fieldDef.get( "doorsAttr" ) ),
-                                              value.iterator().next() );
+            for ( Map<String, String> fieldDef : customFields ) {
+                for ( EmsScriptNode cn : childProps ) {
+                    if ( cn.getSysmlId().contains(fieldDef.get("propertyId")) ) {
+                        Collection<Object> value = esm.getValue(esm.getProperty(cn, "value"), fieldDef.get("propertyType"));
+                        if ( value.iterator().hasNext() ) {
+                            if ( fieldDef.get("doorsAttr").contains("primaryText") ) {
+                                r.setPrimaryText(value.iterator().next().toString());
+                            } else {
+                                r.setCustomField(doors.getField(fieldDef.get("doorsAttr")), value.iterator().next());
+                            }
                         }
                     }
                 }
@@ -893,7 +892,6 @@ public class DoorsSync extends AbstractJavaWebScript {
     protected List< Map< String, String >> mapFields( String project ) {
 
         try {
-            Map< String, String > values = new HashMap< String, String >();
             List< Map< String, String >> results =
                     new ArrayList< Map< String, String >>();
             String query =
@@ -901,6 +899,7 @@ public class DoorsSync extends AbstractJavaWebScript {
                                    project );
             ResultSet rs = pgh.execQuery( query );
             while ( rs.next() ) {
+                Map<String, String> values = new HashMap<String, String>();
                 values.put( "propertyId", rs.getString( 1 ) );
                 values.put( "propertyType", rs.getString( 2 ) );
                 values.put( "doorsAttr", rs.getString( 3 ) );
