@@ -222,6 +222,9 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
     // for elements.  This is defined in AbstractJavaWebscript because job json
     // will be sent with commit deltas for ModelPost.
     protected JSONArray jobsJsonArray = new JSONArray();
+    
+    // This object will be used to get the job url which can be linked to Jenkins 
+    protected JSONObject jobUrl = new JSONObject();
 
     protected static String[] jobProperties =
             Utils.toArrayOfType( definingFeatures.keySet().toArray(), String.class );
@@ -2642,7 +2645,12 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
                     createOrUpdatePropertyJson( propertyName, jobJson, createNewJob, jobNode, jobId,
                                                 elements );
 
-            if( propertyElementJson != null ) {
+            if( propertyElementJson != null && propertyName.equals( "url" )) {
+                jobUrl = propertyElementJson;
+
+                if( jobJson.has( propertyName ) ) jobJson.remove( propertyName );
+            }            
+            else if( propertyElementJson != null ) {
                 elements.put( propertyElementJson );
                 String propertyId = propertyElementJson.optString("sysmlid");
                 if ( !Utils.isNullOrEmpty( propertyId ) ) {
@@ -3103,7 +3111,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
 
         // Get "jobs" as opposed to "elements"
         JSONArray jobs = json.optJSONArray( "jobs" );
-
+        
         // Get or create "elements" array.
         JSONArray elements = json.optJSONArray( "elements" );
         if ( elements == null ) {
@@ -3201,15 +3209,26 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         // fact, the propertyValues should be gathered after the fact.
         for ( String jobId : propertyValues.keySet() ) {
             Map< String, String > properties = propertyValues.get( jobId );
-            String jobUrl = createJenkinsConfig( jobId, properties, createNewJob.get( jobId ) == true );
+            String url = createJenkinsConfig( jobId, properties, createNewJob.get( jobId ) == true );
             
             // NOTE: how can we get the jobUrlJson? either way, up to this point
             //       we have a URL by returning it (implies the job has been created)
 
-            if( jobUrl != null ) {
-                properties.put( "url", jobUrl );
+            if( url != null ) {                
+                JSONObject specJson = jobUrl.optJSONObject( Acm.JSON_SPECIALIZATION );
+                if ( specJson != null && specJson.has( "value"  ) ) {
+                    JSONArray valueArr = specJson.getJSONArray( "value" );
+                    if ( valueArr.length() > 0 ) {
+                        JSONObject valueSpec = valueArr.optJSONObject( 0 );
+                        if ( valueSpec != null ) {
+                            valueSpec.put( "string", url );
+                        }
+                    }
+                }
+                
+                elements.put( jobUrl );
             }
-            
+                       
             /*  
              JSONObject jobUrlJson = ??
              if( jobUrlJson != null) {
