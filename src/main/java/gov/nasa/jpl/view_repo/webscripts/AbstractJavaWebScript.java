@@ -204,6 +204,8 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
             new HashMap< NodeRef, Map< ExistType, Boolean > >();
     protected Map< String, List< EmsScriptNode > > elementProperties = new HashMap< String, List< EmsScriptNode > >();
 
+    protected Map< String, Map< String, String > > teamworkMap = new HashMap< String, Map< String, String > >();
+    
     /**
      * The defining features of slots for the Job stereotype.
      */
@@ -2522,7 +2524,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         String command = propertyValues.get("command");
         if( command != null ) {            
             String[] commandArgs = command.split( "," );
-            if ( commandArgs.length >= 3 ) {
+            if ( commandArgs.length >= 2 ) {
                 
                 // TODO: We need a way of parameterizing teamwork items because command 
                 //       will not be coming from the client side 
@@ -2530,17 +2532,18 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
                 // NOTE: this may also mean that there will be no 'command' property 
                 //       in the defining features
                 config.setDocumentID( commandArgs[0].trim() );
-                config.setTeamworkServer( commandArgs[1].trim() );
-                config.setTeamworkPort( commandArgs[2].trim() );
-                config.setTeamworkProject( commandArgs[3].trim() );
-                config.setWorkspace( "master" );
-
-                config.setMmsServer( ActionUtil.getHostName() );                
+                config.setTeamworkProject( commandArgs[1].trim() );            
             } else {
                 String message = "Command not supported: " + command;
                 log(Level.WARN, HttpServletResponse.SC_NOT_IMPLEMENTED, message);
             }
         }
+        
+        // Some values which are not currently subject to change
+        config.setTeamworkServer( "cae-tw-uat.jpl.nasa.gov" ); 
+        config.setTeamworkPort( "18051" );        
+        config.setWorkspace( "master" );
+        config.setMmsServer( ActionUtil.getHostName() );   
                
         jenkins.postConfigXml( config, config.getJobID(), createNewJob );    
                
