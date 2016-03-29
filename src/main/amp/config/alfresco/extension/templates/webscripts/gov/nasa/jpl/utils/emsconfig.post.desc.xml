@@ -1,9 +1,9 @@
 <webscript>
-	<shortname>Set log level for class</shortname>
+	<shortname>Set ems config properties</shortname>
     <description>
-    	Set log level for specified class
+    	Set ems config properties
 	</description>
-    <url>/loglevel</url>
+    <url>/emsconfig</url>
   	<format default="json">argument</format>
   	<authentication>user</authentication>
   	<transaction>required</transaction>

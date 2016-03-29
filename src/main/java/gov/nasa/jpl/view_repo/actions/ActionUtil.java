@@ -31,6 +31,7 @@ package gov.nasa.jpl.view_repo.actions;
 
 import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.util.Acm;
+import gov.nasa.jpl.view_repo.util.EmsConfig;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
@@ -70,8 +71,8 @@ public class ActionUtil {
         if (hostname.endsWith("/" )) {
             hostname = hostname.substring( 0, hostname.lastIndexOf( "/" ) );
         } 
-        if (!hostname.contains( "jpl.nasa.gov" )) {
-            hostname += ".jpl.nasa.gov";
+        if (!hostname.contains( EmsConfig.get("app.domain.name") )) {
+            hostname += "." + EmsConfig.get("app.domain.name");
         }
         return "https://" + hostname + "/alfresco"; 
     }
@@ -137,7 +138,7 @@ public class ActionUtil {
         EmsScriptNode user = new EmsScriptNode(services.getPersonService().getPerson(username), services, new StringBuffer());
         String recipient = (String) user.getProperty("cm:email");
 
-        String sender = NodeUtil.getHostname() + "@jpl.nasa.gov";
+        String sender = NodeUtil.getHostname() + "@" + EmsConfig.get("app.domain.name");
         sendEmailTo(sender, recipient, msg, subject, services);
     }
 
