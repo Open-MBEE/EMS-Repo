@@ -45,6 +45,7 @@ import gov.nasa.jpl.view_repo.actions.ActionUtil;
 import gov.nasa.jpl.view_repo.actions.SnapshotArtifactsGenerationActionExecuter;
 import gov.nasa.jpl.view_repo.sysml.View;
 import gov.nasa.jpl.view_repo.util.Acm;
+import gov.nasa.jpl.view_repo.util.EmsConfig;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
@@ -67,7 +68,6 @@ import java.util.UUID;
 
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.log4j.*;
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.admin.SysAdminParams;
 import org.alfresco.repo.model.Repository;
@@ -85,7 +85,7 @@ import org.alfresco.service.cmr.security.PermissionService;
 import org.alfresco.service.cmr.security.PersonService;
 import org.alfresco.service.cmr.site.SiteInfo;
 import org.alfresco.util.TempFileProvider;
-import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormatter;
@@ -488,7 +488,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
         docBookMgr = new DocBookWrapper( snapshotName, snapshotNode, false );
         try {
             DBBook docBook = createDocBook( product );
-            docBook.setInstLogo("http://div27.jpl.nasa.gov/2740/files/logos/jpl_logo%28220x67%29.jpg");
+            docBook.setInstLogo(EmsConfig.get( "app.logo.url" ));
             //docBook.setRemoveBlankPages( true );
 
             View productView = product.getView();

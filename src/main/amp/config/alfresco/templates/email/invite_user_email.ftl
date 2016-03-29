@@ -12,4 +12,4 @@ ${msg("templates.invite_user_email.regards")}
 
 Regards
 
-Europa MDEV
+APP.HOSTNAME

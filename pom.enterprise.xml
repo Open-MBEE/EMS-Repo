@@ -3,62 +3,45 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
-	<groupId>gov.nasa.jpl</groupId>
 	<artifactId>mms-repo-ent</artifactId>
-	<version>2.3-SNAPSHOT</version>
+	<version>2.3.3-SNAPSHOT</version>
 	<name>view-repo AMP project</name>
 	<packaging>amp</packaging>
 	<description>Manages the lifecycle of the view-repo AMP (Alfresco Module Package)</description>
 
 	<parent>
-		<groupId>org.alfresco.maven</groupId>
-		<artifactId>alfresco-sdk-parent</artifactId>
-		<version>1.1.1</version>
+		<groupId>gov.nasa.jpl</groupId>
+		<artifactId>mms-parent-pom</artifactId>
+		<version>1.0.0</version>
+		<relativePath>config/mvn/mms-parent-pom.xml</relativePath>
 	</parent>
 
-	<distributionManagement>
-		<!-- use mvn -U deploy -DgeneratePom=true -Dpackaging=jar -->
-		<repository>
-			<id>artifactory</id>
-			<name>releases</name>
-			<url>http://europambee-build.jpl.nasa.gov:8082/artifactory/libs-release-local</url>
-		</repository>
-		<snapshotRepository>
-			<id>artifactory</id>
-			<name>snapshots</name>
-			<url>http://europambee-build.jpl.nasa.gov:8082/artifactory/libs-snapshot-local</url>
-		</snapshotRepository>
-	</distributionManagement>
-
-	<!-- | SDK properties have sensible defaults in the SDK parent, | but you 
-		can override the properties below to use another version. | For more available 
-		properties see the alfresco-sdk-parent POM. -->
-	<properties>
-		<!-- Defines the alfresco edition to compile against. Allowed values are 
-			[org.alfresco|org.alfresco.enterprise] -->
-		<alfresco.groupId>org.alfresco</alfresco.groupId>
-		<!-- Defines the alfresco version to compile against -->
+    <properties>
+        <!-- Defines the alfresco edition to compile against. Allowed values are 
+            [org.alfresco|org.alfresco.enterprise] -->
+        <alfresco.groupId>org.alfresco</alfresco.groupId>
+        <!-- Defines the alfresco version to compile against -->
 		<alfresco.version>4.2.3.3</alfresco.version>
-		<app.log.root.level>WARN</app.log.root.level>
-		<alfresco.data.location>alf_data</alfresco.data.location>
-		<!-- Defines the target WAR artifactId to run this amp, only used with 
-			the -Pamp-to-war switch . | Allowed values: alfresco | share. Defaults to 
-			a repository AMP, but could point to your foundation WAR -->
-		<alfresco.client.war>alfresco</alfresco.client.war>
-		<!-- Defines the target WAR groupId to run this amp, only used with the 
-			-Pamp-to-war switch . | Could be org.alfresco | org.alfresco.enterprise or 
-			your corporate groupId -->
-		<alfresco.client.war.groupId>org.alfresco</alfresco.client.war.groupId>
-		<!-- Defines the target WAR version to run this amp, only used with the 
-			-Pamp-to-war switch -->
-		<alfresco.client.war.version>4.2.3.3</alfresco.client.war.version>
-		<!-- This controls which properties will be picked in src/test/properties 
-			for embedded run -->
-		<env>local</env>
-		<maven.test.skip>false</maven.test.skip>
-		<mbee.version>2.3.1-SNAPSHOT</mbee.version>
-	</properties>
-
+        <app.log.root.level>WARN</app.log.root.level>
+        <alfresco.data.location>alf_data</alfresco.data.location>
+        <!-- Defines the target WAR artifactId to run this amp, only used with 
+            the -Pamp-to-war switch . | Allowed values: alfresco | share. Defaults to 
+            a repository AMP, but could point to your foundation WAR -->
+        <alfresco.client.war>alfresco</alfresco.client.war>
+        <!-- Defines the target WAR groupId to run this amp, only used with the 
+            -Pamp-to-war switch . | Could be org.alfresco | org.alfresco.enterprise or 
+            your corporate groupId -->
+        <alfresco.client.war.groupId>org.alfresco</alfresco.client.war.groupId>
+        <!-- Defines the target WAR version to run this amp, only used with the 
+            -Pamp-to-war switch -->
+        <alfresco.client.war.version>4.2.3.3</alfresco.client.war.version>
+        <!-- This controls which properties will be picked in src/test/properties 
+            for embedded run -->
+        <env>local</env>
+        <maven.test.skip>false</maven.test.skip>
+        <mbee.version>2.3.1-SNAPSHOT</mbee.version>
+    </properties>
+    
 	<!-- profiles for specific dependencies for developers or users -->
 	<profiles>
 		<profile>
@@ -130,7 +113,7 @@
 				<dependency>
 					<groupId>gov.nasa.jpl.mbee.doorsng</groupId>
 					<artifactId>doorsng</artifactId>
-					<version>0.2.3</version>
+					<version>0.2.5</version>
 				</dependency>
 			</dependencies>
 			<properties>
@@ -203,7 +186,7 @@
 		<dependency>
 			<groupId>gov.nasa.jpl.mbee.doorsng</groupId>
 			<artifactId>doorsng</artifactId>
-			<version>0.2.3</version>
+			<version>0.2.5</version>
 		</dependency>
 		<dependency>
 			<groupId>junit</groupId>
@@ -309,43 +292,6 @@
 	</dependencies>
 
 
-	<!-- This repository is only needed to retrieve Alfresco parent POM. NOTE: 
-		This can be removed when/if Alfresco will be on Maven Central NOTE: The repository 
-		to be used for Alfresco Enterprise artifacts is https://artifacts.alfresco.com/nexus/content/groups/private/. 
-		Please check with Alfresco Support to get credentials to add to your ~/.m2/settings.xml 
-		if you are a Enterprise customer or Partner -->
-	<repositories>
-		<repository>
-			<id>alfresco-private-repository</id>
-			<url>https://artifacts.alfresco.com/nexus/content/groups/private</url>
-		</repository>
-		<repository>
-			<id>artifactory-snapshots</id>
-			<name>snapshots</name>
-			<url>http://europambee-build.jpl.nasa.gov:8082/artifactory/libs-snapshot-local</url>
-		</repository>
-		<repository>
-			<id>artifactory-releases</id>
-			<name>releases</name>
-			<url>http://europambee-build.jpl.nasa.gov:8082/artifactory/libs-release-local</url>
-		</repository>
-		<repository>
-			<id>artifactory-external-releases</id>
-			<name>external-releases</name>
-			<url>http://europambee-build.jpl.nasa.gov:8082/artifactory/ext-release-local</url>
-		</repository>
-        <repository>
-            <id>artifactory-external-snapshot</id>
-            <name>external-snapshot</name>
-            <url>http://europambee-build.jpl.nasa.gov:8082/artifactory/ext-snapshot-local</url>
-        </repository>
-
-		<!-- soap ui plugin -->
-		<repository>
-			<id>smartbear-sweden-plugin-repository</id>
-			<url>http://www.soapui.org/repository/maven2/</url>
-		</repository>
-	</repositories>
 
 	<build>
 		<plugins>
@@ -353,15 +299,6 @@
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>build-helper-maven-plugin</artifactId>
 				<version>1.8</version>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-javadoc-plugin</artifactId>
-				<version>2.10.1</version>
-				<configuration>
-					<show>private</show>
-					<nohelp>true</nohelp>
-				</configuration>
 			</plugin>
 			<plugin>
 				<groupId>org.zeroturnaround</groupId>
@@ -475,9 +412,46 @@
 							</resources>
 						</configuration>
 					</execution>
-				</executions>
+					<execution>
+						<id>copy-properties</id>
+						<phase>compile</phase>
+						<goals>
+							<goal>copy-resources</goal>
+						</goals>
+						<configuration>
+							<overwrite>true</overwrite>
+							<outputDirectory>${project.build.directory}/${project.build.finalName}/web/WEB-INF/classes</outputDirectory>
+							<resources>
+								<resource>
+									<directory>${basedir}/config/alfresco</directory>
+									<includes>
+										<include>${deploymentName}.properties</include>
+									</includes>
+								</resource>
+							</resources>
+						</configuration>
+					</execution>
+                    <execution>
+                        <id>copy-global-properties-resources</id>
+                        <phase>validate</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <overwrite>true</overwrite>
+                            <outputDirectory>${basedir}/src/main/amp/config/alfresco/module/view-repo</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>${basedir}/config/alfresco</directory>
+	                                <includes>
+	                                    <include>alfresco-global.properties</include>
+	                                </includes>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+			</executions>
 			</plugin>
-
 		</plugins>
 		<pluginManagement>
 			<plugins>
@@ -539,15 +513,6 @@
 	</build>
 	<reporting>
 		<plugins>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-javadoc-plugin</artifactId>
-				<version>2.10.3</version>
-				<configuration>
-					<!-- <stylesheetfile>${basedir}/src/main/javadoc/stylesheet.css</stylesheetfile> -->
-					<show>public</show>
-				</configuration>
-			</plugin>
 		</plugins>
 	</reporting>
 </project>

@@ -105,8 +105,8 @@ session.setAttribute(LoginBean.LOGIN_NOPERMISSIONS, null);
 <table border=0 cellspacing=4 cellpadding=2>
 <tr>
 <td colspan=2>
-<img src='<%=request.getContextPath()%>/scripts/vieweditor/images/europa-icon.png' width=60 height=52 alt="Europa EMS" title="Europa EMS">
-<span style="font-size:30px;"><b>  Europa EMS</b></span>
+<img src='<%=request.getContextPath()%>/scripts/vieweditor/images/europa-icon.png' width=60 height=52 alt="APP.HOSTNAME EMS" title="APP.HOSTNAME EMS">
+<span style="font-size:30px;"><b>  APP.HOSTNAME EMS</b></span>
 </td>
 </tr>
 

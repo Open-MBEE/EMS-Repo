@@ -51,6 +51,7 @@ import gov.nasa.jpl.pma.JenkinsEngine;
 import gov.nasa.jpl.view_repo.actions.ActionUtil;
 import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.CommitUtil;
+import gov.nasa.jpl.view_repo.util.EmsConfig;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.EmsSystemModel;
 import gov.nasa.jpl.view_repo.util.EmsTransaction;
@@ -152,6 +153,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
     // response to HTTP request, made as class variable so all methods can update
     protected StringBuffer response = new StringBuffer();
     protected Status responseStatus = new Status();
+    protected String deploymentName;
 
     protected WorkspaceDiff wsDiff = null;
 
@@ -243,6 +245,11 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
 	public void setServices(ServiceRegistry registry) {
         if ( registry == null ) return;
 		this.services = registry;
+	}
+	
+	public void setDeploymentName(String deploymentName) {
+        if ( deploymentName == null ) return;
+		this.deploymentName = deploymentName;
 	}
 
 	public AbstractJavaWebScript( Repository repository,
@@ -1419,7 +1426,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         if (sendEmail) {
             String hostname = NodeUtil.getHostname();
             if (!Utils.isNullOrEmpty( hostname )) {
-                String sender = hostname + "@jpl.nasa.gov";
+                String sender = hostname + "@" + EmsConfig.get( "app.domain.name" );
                 String username = NodeUtil.getUserName();
                 if (!Utils.isNullOrEmpty( username )) {
                     EmsScriptNode user = new EmsScriptNode(services.getPersonService().getPerson(username),
@@ -3476,6 +3483,10 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         jobJson.put( propertyName, jsonWrap( value ) );
         
         return jobJson;
+    }
+    
+    public static String getConfig(String key) {
+        return EmsConfig.get(key);
     }
 
 }

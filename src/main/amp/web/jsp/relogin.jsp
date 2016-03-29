@@ -67,7 +67,7 @@ response.addCookie(authCookie);
 <table border=0 cellspacing=4 cellpadding=2>
 <tr>
 <td align=center>
-<img src='<%=request.getContextPath()%>/scripts/vieweditor/images/europa-icon.png' width=60 height=52 alt="Europa EMS" title="Europa EMS">
+<img src='<%=request.getContextPath()%>/scripts/vieweditor/images/europa-icon.png' width=60 height=52 alt="APP.HOSTNAME EMS" title="APP.HOSTNAME EMS">
 </td>
 </tr>
 

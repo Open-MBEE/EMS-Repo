@@ -27,9 +27,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 /**
- * curl -u admin:admin -H Content-Type:application/json http://localhost:8080/alfresco/service/connection/jms -d '{"ctxFactory":"weblogic.jndi.WLInitialContextFactory", "username":"mmsjmsuser", "password":"mm$jm$u$3r", "connFactory":"jms/JPLEuropaJMSModuleCF", "topicName":"jms/MMSDistributedTopic", "uri":"t3s://orasoa-dev07.jpl.nasa.gov:8111"}'
- * curl -u admin:admin -H Content-Type:application/json http://localhost:8080/alfresco/service/connection/jms -d '{"ctxFactory":"weblogic.jndi.WLInitialContextFactory", "username":"mmsjmsuser", "password":"mm$jm$u$3r", "connFactory":"jms/JPLEuropaJMSModuleCF", "topicName":"jms/MMSDistributedTopic", "uri":"t3://orasoa-dev07.jpl.nasa.gov:8011"}'
- * curl -u admin:admin -H Content-Type:application/json http://localhost:8080/alfresco/service/connection/jms -d '{"ctxFactory":"org.apache.activemq.jndi.ActiveMQInitialContextFactory", "username":null, "password":null, "connFactory":"ConnectionFactory", "topicName":"master", "uri":"tcp://localhost:61616"}'
  * @author cinyoung
  *
  */
