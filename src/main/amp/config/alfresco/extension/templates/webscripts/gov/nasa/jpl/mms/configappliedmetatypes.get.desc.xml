@@ -1,0 +1,11 @@
+<webscript>
+	<shortname>Configure Applied Metatypes</shortname>
+	<description>
+		Configure Applied Metatypes
+	</description>
+	<url>/configappliedmetatypes</url>
+	<format default="json">argument</format>
+	<authentication>user</authentication>
+	<transaction>none</transaction>
+	<family>MMS REST API</family>
+</webscript>

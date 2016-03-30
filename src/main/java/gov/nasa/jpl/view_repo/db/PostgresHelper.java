@@ -646,6 +646,57 @@ public class PostgresHelper {
 		return null; // magic draw project has not been created, initialized, and/or sent to MMS
 				
 	}
+	
+
+	
+	public boolean createProjectAppliedMetatypesTable() {
+        		
+  		
+  		try {
+  			  			
+  			execUpdate("drop table projectAppliedMetatypes");
+
+  			execUpdate("create table projectAppliedMetatypes (project text not null, appliedmetatypeid text not null)");
+
+  	  		return true;
+
+  			
+  		} 
+  		catch (SQLException e) {
+  			
+  			e.printStackTrace();
+  			
+  			return false;
+  			
+  		}
+  		
+  	    catch (Exception e) {
+  			
+  			e.printStackTrace();
+  			
+  			return false;
+  			
+  		}
+  		
+  		  	    
+  	}
+       
+    public void storeAppliedMetatypeId(String project, String appliedMetatypeId) {
+    	
+    	
+    	try {
+	  			
+  			execUpdate("insert into projectAppliedMetatypes (project, appliedmetatypeid) VALUES ('" + project + "','" + appliedMetatypeId + "')");
+
+  		} 
+  		catch (SQLException e) {
+  			
+  			e.printStackTrace();
+  			
+  		}
+  		
+    	
+    }
 		
 		
 	

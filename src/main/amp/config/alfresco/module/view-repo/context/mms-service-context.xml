@@ -165,6 +165,14 @@
 		<property name="repositoryHelper" ref="repositoryHelper" />
 		<property name="services" ref="ServiceRegistry" />
 	</bean>
+	
+	 <!-- adding new bean -->
+	<bean id="webscript.gov.nasa.jpl.mms.configappliedmetatypes.get"
+		class="gov.nasa.jpl.view_repo.webscripts.ConfigureAppliedMetatypes" parent="webscript"
+		singleton="false">
+		<property name="repositoryHelper" ref="repositoryHelper" />
+		<property name="services" ref="ServiceRegistry" />
+	</bean>
 
 	<!-- adding new bean -->
 	<bean id="webscript.gov.nasa.jpl.mms.workspaces.sites.post" class="gov.nasa.jpl.view_repo.webscripts.ModelPost"
