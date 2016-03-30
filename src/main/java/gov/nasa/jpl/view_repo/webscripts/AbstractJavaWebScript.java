@@ -2531,26 +2531,35 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         String command = propertyValues.get("command");
         if( command != null ) {            
             String[] commandArgs = command.split( "," );
-            if ( commandArgs.length >= 2 ) {
+            if ( commandArgs.length >= 4 &&
+                    commandArgs[0].trim().toLowerCase().equals("jenkins") &&
+                    ( commandArgs[1].trim().toLowerCase().equals("doc web") ||
+                      commandArgs[1].trim().toLowerCase().equals("docweb") ) ) {
                 
-                // TODO: We need a way of parameterizing teamwork items because command 
-                //       will not be coming from the client side 
+             // NOTE: initializing config will be from EmsConfig.get( "<some configuration>")
                 
-                // NOTE: this may also mean that there will be no 'command' property 
-                //       in the defining features
-                config.setDocumentID( commandArgs[0].trim() );
-                config.setTeamworkProject( commandArgs[1].trim() );            
+                config.setDocumentID( commandArgs[2].trim() );
+                config.setTeamworkProject( commandArgs[3].trim() );            
             } else {
                 String message = "Command not supported: " + command;
                 log(Level.WARN, HttpServletResponse.SC_NOT_IMPLEMENTED, message);
             }
         }
         
+        String mmsServer = ActionUtil.getHostName();
+              
+        mmsServer = mmsServer.replace("-origin", "");
+        if( !mmsServer.contains( "jpl.nasa.gov" ) ) {
+            mmsServer = mmsServer + "jpl.nasa.gov";
+        }
+        
+        String teamWorkServer = mmsServer.replace( "ems", "tw" );
+        
         // Some values which are not currently subject to change
-        config.setTeamworkServer( "cae-tw-uat.jpl.nasa.gov" ); 
+        config.setTeamworkServer( teamWorkServer ); 
         config.setTeamworkPort( "18051" );        
         config.setWorkspace( "master" );
-        config.setMmsServer( ActionUtil.getHostName() );   
+        config.setMmsServer( "https://" + ActionUtil.getHostName() );    
                
         jenkins.postConfigXml( config, config.getJobID(), createNewJob );    
                
