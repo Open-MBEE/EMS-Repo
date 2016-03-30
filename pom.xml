@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<artifactId>mms-repo</artifactId>
-	<version>2.3.3-SNAPSHOT</version>
+	<version>2.3-SNAPSHOT</version>
 	<name>view-repo AMP project</name>
 	<packaging>amp</packaging>
 	<description>Manages the lifecycle of the view-repo AMP (Alfresco Module Package)</description>
@@ -425,7 +425,8 @@
 								<resource>
 									<directory>${basedir}/config/alfresco</directory>
 									<includes>
-										<include>${deploymentName}.properties</include>
+										<!--<include>${deploymentName}.properties</include>-->
+										<include>mms.properties</include>
 									</includes>
 								</resource>
 							</resources>
