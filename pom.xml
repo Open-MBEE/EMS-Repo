@@ -425,7 +425,8 @@
 								<resource>
 									<directory>${basedir}/config/alfresco</directory>
 									<includes>
-										<include>${deploymentName}.properties</include>
+										<!--<include>${deploymentName}.properties</include>-->
+										<include>mms.properties</include>
 									</includes>
 								</resource>
 							</resources>

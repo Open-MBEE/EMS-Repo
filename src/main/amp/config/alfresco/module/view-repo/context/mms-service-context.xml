@@ -128,7 +128,7 @@
 		singleton="false">
 		<property name="repositoryHelper" ref="repositoryHelper" />
 		<property name="services" ref="ServiceRegistry" />
-		<property name="deploymentName" value="#{systemProperties['deploymentName']}" />
+		<!--<property name="deploymentName" value="#{systemProperties['deploymentName']}" />-->
 	</bean>
 
 	<!-- adding new bean -->
