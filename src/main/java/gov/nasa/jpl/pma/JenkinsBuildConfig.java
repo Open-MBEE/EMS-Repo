@@ -65,7 +65,7 @@ public class JenkinsBuildConfig {
     private              String  teamworkUser       = "docgen";
     private              String  teamworkPassword   = "docgen";
     private              String  workspace          = "master";
-    // this might have to be (Default)
+    // jdk might have to be (Default)
     private              String  jdkVersion         = "jdk1.8.0_45";
     private              String  gitURL             = "git@github.jpl.nasa.gov:mbee-dev/ems-rci.git";
     private              String  gitCredentials     = "075d11db-d909-4e1b-bee9-c89eec0a4a13";

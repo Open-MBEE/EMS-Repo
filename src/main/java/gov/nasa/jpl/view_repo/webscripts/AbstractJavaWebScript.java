@@ -2516,8 +2516,8 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
     protected String createJenkinsConfig(String jobID,
                                        Map<String,String> propertyValues,
                                        boolean createNewJob) {
-        if( createNewJob ) System.out.println("CREATING JOB " + jobID);
-        else System.out.println("UPDATING JOB " + jobID);
+        if( createNewJob ) logger.debug("CREATING JOB " + jobID);
+        else logger.debug("UPDATING JOB " + jobID);
         
         JenkinsEngine jenkins = new JenkinsEngine();
         JenkinsBuildConfig config = new JenkinsBuildConfig();
@@ -2559,7 +2559,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         config.setWorkspace( "master" );  
 
         
-        String mmsServer = EmsConfig.get( "app.url" );
+        String mmsServer = getConfig( "app.url" );
         if( mmsServer == null ) {
             mmsServer = ActionUtil.getHostName();
             
@@ -2573,7 +2573,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
             mmsServer.replace(":8080", "");
         }
         
-        String teamworkServer = EmsConfig.get( "tw.url" );
+        String teamworkServer = getConfig( "tw.url" );
         if( teamworkServer == null ) {
             teamworkServer = mmsServer.replace( "ems", "tw" );
         }
