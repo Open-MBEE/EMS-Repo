@@ -52,13 +52,13 @@ public class JenkinsBuildConfig {
     private              String  configTemplatePath = "./BuildConfigTemplate.xml";
     private              String  jobID              = "job0000";
     private              String  documentID         = "_18_1111_111_111";
-    private              String  mmsServer          = "cae-ems-test.jpl.nasa.gov";
+    private              String  mmsServer          = "cae-ems-uat.jpl.nasa.gov";
     private              String  mmsUser            = "mmsadmin";
     private              String  mmsPassword        = "letmein";
     //private              String  teamworkProject    = "MD Forever";
     private              String  teamworkProject    = "Intern Testing Project";
     //private              String  teamworkServer     = "secae-fn.jpl.nasa.gov";
-    private              String  teamworkServer     = "cae-tw.jpl.nasa.gov";
+    private              String  teamworkServer     = "cae-tw-uat.jpl.nasa.gov";
     private              String  teamworkPort       = "18051";
     //private              String  teamworkUser       = "mmsadmin";
     //private              String  teamworkPassword   = "letmein";

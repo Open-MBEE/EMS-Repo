@@ -2531,12 +2531,20 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         String command = propertyValues.get("command");
         if( command != null ) {            
             String[] commandArgs = command.split( "," );
+            
+            if( commandArgs[0].trim().toLowerCase().equals("doc web") || 
+                    commandArgs[0].trim().toLowerCase().equals("docweb") ) {
+                commandArgs[0] = "jenkins";
+            }
+            
+            if( commandArgs[1].trim().toLowerCase().equals("jenkins") ) {
+                commandArgs[1] = "docweb";
+            }
+            
             if ( commandArgs.length >= 4 &&
                     commandArgs[0].trim().toLowerCase().equals("jenkins") &&
                     ( commandArgs[1].trim().toLowerCase().equals("doc web") ||
                       commandArgs[1].trim().toLowerCase().equals("docweb") ) ) {
-                
-             // NOTE: initializing config will be from EmsConfig.get( "<some configuration>")
                 
                 config.setDocumentID( commandArgs[2].trim() );
                 config.setTeamworkProject( commandArgs[3].trim() );            
@@ -2546,21 +2554,34 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
             }
         }
         
-        String mmsServer = ActionUtil.getHostName();
-              
-        mmsServer = mmsServer.replace("-origin", "");
-        if( !mmsServer.contains( "jpl.nasa.gov" ) ) {
-            mmsServer = mmsServer + "jpl.nasa.gov";
+        // Some values which are not currently subject to change
+        config.setTeamworkPort( "18051" );        
+        config.setWorkspace( "master" );  
+
+        
+        String mmsServer = EmsConfig.get( "app.url" );
+        if( mmsServer == null ) {
+            mmsServer = ActionUtil.getHostName();
+            
+            mmsServer = mmsServer.replace("-origin", "");
+            if( !mmsServer.contains( "jpl.nasa.gov" ) ) {
+                mmsServer = mmsServer + "jpl.nasa.gov";
+            }            
         }
         
-        String teamWorkServer = mmsServer.replace( "ems", "tw" );
+        if( mmsServer.contains( ":8080" ) ) {
+            mmsServer.replace(":8080", "");
+        }
         
-        // Some values which are not currently subject to change
-        config.setTeamworkServer( teamWorkServer ); 
-        config.setTeamworkPort( "18051" );        
-        config.setWorkspace( "master" );
-        config.setMmsServer( "https://" + ActionUtil.getHostName() );    
-               
+        String teamworkServer = EmsConfig.get( "tw.url" );
+        if( teamworkServer == null ) {
+            teamworkServer = mmsServer.replace( "ems", "tw" );
+        }
+                
+        // Setting the MMS and TW Servers
+        config.setMmsServer( mmsServer );
+        config.setTeamworkServer( teamworkServer );
+        
         jenkins.postConfigXml( config, config.getJobID(), createNewJob );    
                
         // Recreate a Jenkin's instance so we can query for the job's URL and add it to the json
