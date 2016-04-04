@@ -2532,15 +2532,6 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         if( command != null ) {            
             String[] commandArgs = command.split( "," );
             
-            if( commandArgs[0].trim().toLowerCase().equals("doc web") || 
-                    commandArgs[0].trim().toLowerCase().equals("docweb") ) {
-                commandArgs[0] = "jenkins";
-            }
-            
-            if( commandArgs[1].trim().toLowerCase().equals("jenkins") ) {
-                commandArgs[1] = "docweb";
-            }
-            
             if ( commandArgs.length >= 4 &&
                     commandArgs[0].trim().toLowerCase().equals("jenkins") &&
                     ( commandArgs[1].trim().toLowerCase().equals("doc web") ||
@@ -2554,28 +2545,41 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
             }
         }
         
-        // Some values which are not currently subject to change
-        config.setTeamworkPort( "18051" );        
-        config.setWorkspace( "master" );  
+        config.setTeamworkPort( config.getTeamworkPort() );        
+        config.setWorkspace( config.getWorkspace() );  
 
-        
+        // Manipulating the string comes from the mms.properties fle 
+        // so it can run properly on Jenkin's 
         String mmsServer = getConfig( "app.url" );
         if( mmsServer == null ) {
             mmsServer = ActionUtil.getHostName();
             
-            mmsServer = mmsServer.replace("-origin", "");
+            mmsServer = "https://" + mmsServer;
+            
             if( !mmsServer.contains( "jpl.nasa.gov" ) ) {
                 mmsServer = mmsServer + "jpl.nasa.gov";
             }            
         }
         
         if( mmsServer.contains( ":8080" ) ) {
-            mmsServer.replace(":8080", "");
+            mmsServer = mmsServer.replace(":8080", "");
         }
         
         String teamworkServer = getConfig( "tw.url" );
         if( teamworkServer == null ) {
             teamworkServer = mmsServer.replace( "ems", "tw" );
+            
+            if( !teamworkServer.contains( "jpl.nasa.gov" ) ) {
+                teamworkServer = teamworkServer + "jpl.nasa.gov";
+            }    
+        }
+        
+        if( teamworkServer.contains( "https://") ) {
+            teamworkServer = teamworkServer.replace( "https://", "" );
+        }
+        
+        if( teamworkServer.contains( ":18051" ) ) {
+            teamworkServer = teamworkServer.replace(":18051", "");
         }
                 
         // Setting the MMS and TW Servers
@@ -3269,21 +3273,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
                 }
                 
                 elements.put( jobUrl );
-            }
-                       
-            /*  
-             JSONObject jobUrlJson = ??
-             if( jobUrlJson != null) {
-                 elements.put( jobUrlJson );
-                 String urlId = propertyElementJson.optString("sysmlid");
-                 if ( !Utils.isNullOrEmpty( propertyId ) ) {
-                     elementMap.put( propertyId, propertyElementJson );
-                 }
-                 
-             }
-             
-             if( jobJson.has( "url" ) ) jobJson.remove( "url" );
-             */
+            }                       
         }
 
         json.remove( "jobs" );

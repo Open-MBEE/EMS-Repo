@@ -30,6 +30,8 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.StringWriter;
 
+import gov.nasa.jpl.view_repo.util.EmsConfig;
+
 public class JenkinsBuildConfig {
 /*  parameters from PMADrone on 2/16/2016
             JOB_ID=job0000
@@ -52,18 +54,8 @@ public class JenkinsBuildConfig {
     private              String  configTemplatePath = "./BuildConfigTemplate.xml";
     private              String  jobID              = "job0000";
     private              String  documentID         = "_18_1111_111_111";
-    private              String  mmsServer          = "cae-ems-uat.jpl.nasa.gov";
-    private              String  mmsUser            = "mmsadmin";
-    private              String  mmsPassword        = "letmein";
-    //private              String  teamworkProject    = "MD Forever";
     private              String  teamworkProject    = "Intern Testing Project";
-    //private              String  teamworkServer     = "secae-fn.jpl.nasa.gov";
-    private              String  teamworkServer     = "cae-tw-uat.jpl.nasa.gov";
     private              String  teamworkPort       = "18051";
-    //private              String  teamworkUser       = "mmsadmin";
-    //private              String  teamworkPassword   = "letmein";
-    private              String  teamworkUser       = "docgen";
-    private              String  teamworkPassword   = "docgen";
     private              String  workspace          = "master";
     // jdk might have to be (Default)
     private              String  jdkVersion         = "jdk1.8.0_45";
@@ -71,6 +63,12 @@ public class JenkinsBuildConfig {
     private              String  gitCredentials     = "075d11db-d909-4e1b-bee9-c89eec0a4a13";
     private              String  gitBranch          = "*/develop";
     private              String  schedule           = null;
+    private              String  mmsUser            = EmsConfig.get( "app.user" );
+    private              String  mmsPassword        = EmsConfig.get( "app.pass" );
+    private              String  mmsServer          = EmsConfig.get( "app.url" );
+    private              String  teamworkUser       = EmsConfig.get( "tw.user" );
+    private              String  teamworkPassword   = EmsConfig.get( "tw.pass" );
+    private              String  teamworkServer     = EmsConfig.get( "tw.url" );
 
     private String magicdrawSchedulingCommand = null;
     public JenkinsBuildConfig() {

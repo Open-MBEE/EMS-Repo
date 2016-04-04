@@ -49,14 +49,16 @@ import org.w3c.dom.Element;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
+import gov.nasa.jpl.view_repo.util.EmsConfig;
+
 // import gov.nasa.jpl.view_repo.util.JSONObject;
 
 public class JenkinsEngine implements ExecutionEngine {
     static Logger logger = Logger.getLogger( JenkinsEngine.class );
 
-    private String username = "eurointeg"; // User name to be used to connect to
+    private String username = "perey"; // User name to be used to connect to
                                            // jenkins
-    private String passwordOrToken = "dhcp3LugH#Meg!i"; // Token or password
+    private String passwordOrToken = "1234Patty56!"; // Token or password
                                                         // that is associated
                                                         // with the user name
     
