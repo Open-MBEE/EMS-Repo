@@ -811,6 +811,11 @@ public class WorkspaceDiff implements Serializable {
         addJSONArray(webscript, ws2Json, "conflictedElements", conflictedElements, ws2, time2, showAll, includeQualified);
         addWorkspaceMetadata( ws2Json, ws2, time2);
     
+        JSONArray jobs = ws1Json.optJSONArray( "jobs" );
+        if( jobs != null ) {
+            ws2Json.put( "updatedJobs", jobs.get( 0 ) );
+        }
+        
         deltaJson.put( "workspace1", ws1Json );
         deltaJson.put( "workspace2", ws2Json );
         
