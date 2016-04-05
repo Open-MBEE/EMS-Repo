@@ -2169,8 +2169,8 @@ public class ModelPost extends AbstractJavaWebScript {
                                                                 // id ) ) {
             if (type == null || type.trim().isEmpty()) {
                 if (Debug.isOn())
-                    System.out
-                            .println("PREFIX: type not found for " + jsonType);
+                    logger.debug
+                            ("PREFIX: type not found for " + jsonType);
                 return null;
             } else {
                 changing.add( id );
@@ -2187,8 +2187,8 @@ public class ModelPost extends AbstractJavaWebScript {
                     // }
                 } catch (Exception e) {
                     if (Debug.isOn())
-                        System.out
-                                .println("Got exception in "
+                        logger.debug
+                                ("Got exception in "
                                         + "updateOrCreateTransactionableElement(elementJson="
                                         + elementJson + ", parent=(" + parent
                                         + "), children=(" + children

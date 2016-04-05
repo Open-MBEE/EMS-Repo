@@ -1139,7 +1139,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
             id = req.getServiceMatch().getTemplateVars().get(idv);
             if ( id != null ) break;
         }
-        if (Debug.isOn()) System.out.println("Got id = " + id);
+        if (Debug.isOn()) logger.debug("Got id = " + id);
         if ( id == null ) return null;
         boolean gotElementSuffix  = ( id.toLowerCase().trim().endsWith("/elements") );
         if ( gotElementSuffix ) {
@@ -1150,7 +1150,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
                 id = id.substring( 0, id.lastIndexOf( "/views" ) );
             }
         }
-        if (Debug.isOn()) System.out.println("id = " + id);
+        if (Debug.isOn()) logger.debug("id = " + id);
         return id;
     }
 
@@ -1952,9 +1952,9 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
 
             //Collection<Constraint> constraints = getConstraints( true, null );
             if ( writeConstraintsOut  ) {
-              System.out.println("All " + constraints.size() + " constraints: ");
+              logger.info("All " + constraints.size() + " constraints: ");
               for (Constraint c : constraints) {
-                System.out.println("Constraint: " + c);
+                logger.info("Constraint: " + c);
               }
             }
 
