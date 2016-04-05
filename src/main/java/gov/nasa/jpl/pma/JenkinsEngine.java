@@ -56,15 +56,15 @@ import gov.nasa.jpl.view_repo.util.EmsConfig;
 public class JenkinsEngine implements ExecutionEngine {
     static Logger logger = Logger.getLogger( JenkinsEngine.class );
 
-    private String username = "perey"; // User name to be used to connect to
-                                           // jenkins
-    private String passwordOrToken = "1234Patty56!"; // Token or password
+    private String username = EmsConfig.get( "jenkins.user" ); // User name to be used to connect to jenkins
+    
+    private String passwordOrToken = EmsConfig.get( "jenkins.pass" ); // Token or password
                                                         // that is associated
                                                         // with the user name
     
     // TODO: WE NEED TO ADJUST THE URL ACCORDING TO ANY SERVER,
     //       DEPENDING WHERE THE USER CHOOSES TO 
-    private String url = "https://cae-jenkins.jpl.nasa.gov"; // URL of the
+    private String url = EmsConfig.get( "jenkins.url" ); // URL of the
                                                              // Jenkins server
                                                              // to execute the
                                                              // job on

@@ -24,6 +24,7 @@ import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
+import org.apache.log4j.Logger;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -31,6 +32,7 @@ import java.io.IOException;
 import java.io.StringWriter;
 
 import gov.nasa.jpl.view_repo.util.EmsConfig;
+import gov.nasa.jpl.view_repo.webscripts.ModelGet;
 
 public class JenkinsBuildConfig {
 /*  parameters from PMADrone on 2/16/2016
@@ -48,6 +50,7 @@ public class JenkinsBuildConfig {
             WORKSPACE=master
 */
     
+    static Logger logger = Logger.getLogger( JenkinsBuildConfig.class );
     
     static final         String  outputEncoding     = "UTF-8";
     private static final boolean DEBUG              = true;
@@ -108,10 +111,10 @@ public class JenkinsBuildConfig {
                 Node nNode = nodeList.item(index);
                 if (DEBUG) {
 
-                    System.out.println("\nCurrent builder : " + nNode.getNodeName());
+                    logger.debug("\nCurrent builder : " + nNode.getNodeName());
                     if (nNode.getNodeType() == Node.ELEMENT_NODE) {
                         Element currentElement = (Element) nNode;
-                        System.out.println("Current command is " +
+                        logger.debug("Current command is " +
                                 currentElement.getElementsByTagName("hudson.tasks.Shell").item(0).getTextContent());
                     }
                 }
@@ -254,12 +257,12 @@ public class JenkinsBuildConfig {
                 
                 File file = FileUtils.findFile( "docwebJenkinsScript.sh" );
                   
-                System.out.println( "The current working directory is: " + System.getProperty( "user.dir" )  );
+                logger.debug( "The current working directory is: " + System.getProperty( "user.dir" )  );
 
                 try {
                     s = FileUtils.fileToString( file );
                     this.magicdrawSchedulingCommand = s;
-                    System.out.println("\n\n\nGot file for command in the following path: " + file.getPath() + "\n\n\n");
+                    logger.debug("\n\n\nGot file for command in the following path: " + file.getPath() + "\n\n\n");
                 } catch ( FileNotFoundException e ) {
                     // TODO Auto-generated catch block
                     e.printStackTrace();
