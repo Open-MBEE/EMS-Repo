@@ -41,6 +41,7 @@ import org.apache.http.protocol.BasicHttpContext;
 import org.apache.http.protocol.ExecutionContext;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.util.EntityUtils;
+import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -532,16 +533,22 @@ public class JenkinsEngine implements ExecutionEngine {
     }
     
     // This should be called when you change the name, status, schedule of a job
-    public void postConfigXml( JenkinsBuildConfig config,String jobName, boolean newConfig ) {
+    public boolean postConfigXml( JenkinsBuildConfig config,String jobName, boolean newConfig ) {
         String postUrl = null;
         if( newConfig ) {
-            postUrl = "https://cae-jenkins.jpl.nasa.gov/createItem?name=" + jobName;
+            postUrl = this.url + "/createItem?name=" + jobName;
         }
         else {
-            postUrl = "https://cae-jenkins.jpl.nasa.gov/job/" + jobName + "/config.xml";
+            postUrl = this.url + "/job/" + jobName + "/config.xml";
         }
         
         String configFile = generateConfigXML( config );
+        
+        if( configFile == null ) {
+            logger.error(
+                "FAILED TO CREATE JOB: " + jobName);
+            return false;
+        }
         
         try {
             HttpEntity xmlEntity = (HttpEntity)new  StringEntity(configFile);
@@ -553,10 +560,10 @@ public class JenkinsEngine implements ExecutionEngine {
                     this.jenkinsClient.execute( post, this.context );
             
             EntityUtils.consume( response.getEntity() );
-            
         } catch( Exception e ) {
             e.printStackTrace();
         }
+        return true;
     }
 
     public JSONObject getAllJobs() {
@@ -651,13 +658,16 @@ public class JenkinsEngine implements ExecutionEngine {
     
     public String generateConfigXML( JenkinsBuildConfig config ){
         String xml = config.generateBaseConfigXML();
-        return xml;
+        
+        if( xml != null ) return xml;
+        
+        return null;
     }
     
     public void executeJob(String jobName){
         try{
             
-            this.executeUrl = "https://cae-jenkins.jpl.nasa.gov/job/" +jobName + "/build?token=" + this.jenkinsToken;
+            this.executeUrl = this.url + "/job/" +jobName + "/build?token=" + this.jenkinsToken;
             this.execute();
         }catch(Exception e){
             e.printStackTrace();

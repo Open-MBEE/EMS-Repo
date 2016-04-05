@@ -20,50 +20,27 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
-import javax.xml.xpath.XPath;
-import javax.xml.xpath.XPathConstants;
-import javax.xml.xpath.XPathExpressionException;
-import javax.xml.xpath.XPathFactory;
 import org.apache.log4j.Logger;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.io.StringWriter;
 
 import gov.nasa.jpl.view_repo.util.EmsConfig;
-import gov.nasa.jpl.view_repo.webscripts.ModelGet;
 
 public class JenkinsBuildConfig {
-/*  parameters from PMADrone on 2/16/2016
-            JOB_ID=job0000
-            DOCUMENTS="Basic Document, Rapid Table Document"
-            #DOCUMENTS="_18_1111_111_111"
-            #MMS_SERVER=cae-jenkins
-            MMS_USER=mmsadmin
-            MMS_PASSWORD=letmein
-            TEAMWORK_PROJECT="Intern Testing Project"
-            TEAMWORK_SERVER="cae-tw.jpl.nasa.gov"
-            TEAMWORK_PORT=18001
-            TEAMWORK_USER=tester
-            TEAMWORK_PASSWORD=AuToTeStEr
-            WORKSPACE=master
-*/
     
     static Logger logger = Logger.getLogger( JenkinsBuildConfig.class );
     
     static final         String  outputEncoding     = "UTF-8";
     private static final boolean DEBUG              = true;
-    private              String  configTemplatePath = "./BuildConfigTemplate.xml";
     private              String  jobID              = "job0000";
     private              String  documentID         = "_18_1111_111_111";
-    private              String  teamworkProject    = "Intern Testing Project";
-    private              String  teamworkPort       = "18051";
+    // Projects can be found in some Teamwork Server and it case sensitive
+    private              String  teamworkProject    = "Some project from Teamwork";
     private              String  workspace          = "master";
     // jdk might have to be (Default)
     private              String  jdkVersion         = "jdk1.8.0_45";
-    private              String  gitURL             = "git@github.jpl.nasa.gov:mbee-dev/ems-rci.git";
-    private              String  gitCredentials     = "075d11db-d909-4e1b-bee9-c89eec0a4a13";
     private              String  gitBranch          = "*/develop";
     private              String  schedule           = null;
     private              String  mmsUser            = EmsConfig.get( "app.user" );
@@ -72,66 +49,17 @@ public class JenkinsBuildConfig {
     private              String  teamworkUser       = EmsConfig.get( "tw.user" );
     private              String  teamworkPassword   = EmsConfig.get( "tw.pass" );
     private              String  teamworkServer     = EmsConfig.get( "tw.url" );
+    private              String  teamworkPort       = EmsConfig.get( "tw.port" );
+    private              String  gitURL             = EmsConfig.get( "git.url" );
+    private              String  gitCredentials     = EmsConfig.get( "git.credentials" );
 
-    private String magicdrawSchedulingCommand = null;
+    private              String magicdrawSchedulingCommand = null;
     public JenkinsBuildConfig() {
         // TODO Auto-generated constructor stub
     }
 
-    public void parseConfigDOM(String fileNamePath) {
-        // Create the DocumentBuilder
-        DocumentBuilderFactory factory        = DocumentBuilderFactory.newInstance();
-        DocumentBuilder        builder        = null;
-        Document               configDocument = null;
-        File                   xmlFile        = null;
-
-        // Create a Document from a file or stream
-        try {
-            builder = factory.newDocumentBuilder();
-
-            if (fileNamePath.isEmpty()) {
-                fileNamePath = configTemplatePath;
-            }
-
-            xmlFile = new File(fileNamePath);
-
-            if (builder != null) {
-                configDocument = builder.parse(xmlFile);
-                if (configDocument != null) {
-                    configDocument.getDocumentElement().normalize();
-                }
-            }
-
-            XPath xPath = XPathFactory.newInstance().newXPath();
-
-            String   buildersExpression = "/project/builders";
-            NodeList nodeList           = (NodeList) xPath.compile(buildersExpression)
-                    .evaluate(configDocument, XPathConstants.NODESET);
-            for (int index = 0; index < nodeList.getLength(); index++) {
-                Node nNode = nodeList.item(index);
-                if (DEBUG) {
-
-                    logger.debug("\nCurrent builder : " + nNode.getNodeName());
-                    if (nNode.getNodeType() == Node.ELEMENT_NODE) {
-                        Element currentElement = (Element) nNode;
-                        logger.debug("Current command is " +
-                                currentElement.getElementsByTagName("hudson.tasks.Shell").item(0).getTextContent());
-                    }
-                }
-            }
-        } catch (SAXException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (ParserConfigurationException e) {
-            e.printStackTrace();
-        } catch (XPathExpressionException e) {
-            e.printStackTrace();
-        }
-    }
-
     public String generateBaseConfigXML() {
-   // public String generateBaseConfigXML( JenkinsBuildConfig config ) {
+
         DocumentBuilderFactory docBuilderFactory = DocumentBuilderFactory.newInstance();
         try {
             DocumentBuilder docBuilder = docBuilderFactory.newDocumentBuilder();
@@ -433,7 +361,7 @@ public class JenkinsBuildConfig {
         } catch (TransformerException e) {
             e.printStackTrace();
         }
-        return configTemplatePath;
+        return null;
     }
 
     /**
@@ -584,21 +512,6 @@ public class JenkinsBuildConfig {
      */
     public void setWorkspace(String workspace) {
         this.workspace = workspace;
-    }
-
-    /**
-     * @return the configTemplatePath
-     */
-    public String getConfigTemplatePath() {
-        return configTemplatePath;
-    }
-
-    /**
-     * @param configTemplatePath
-     *         the configTemplatePath to set
-     */
-    public void setConfigTemplatePath(String configTemplatePath) {
-        this.configTemplatePath = configTemplatePath;
     }
 
     public void setJDK(String version) {
