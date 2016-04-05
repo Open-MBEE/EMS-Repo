@@ -811,6 +811,19 @@ public class WorkspaceDiff implements Serializable {
         addJSONArray(webscript, ws2Json, "conflictedElements", conflictedElements, ws2, time2, showAll, includeQualified);
         addWorkspaceMetadata( ws2Json, ws2, time2);
         
+        // this is necessary to make sure STOMP doesn't break
+        JSONArray jobs = ws1Json.optJSONArray( "jobs" );
+        
+        if( jobs != null ) {
+            JSONObject job = jobs.optJSONObject( 0 );
+            
+            if( job.has( "name" ) && job.has( "owner" ) ) {
+                JSONObject updatedJob = ws2Json.optJSONArray( "updatedJobs" ).optJSONObject( 0 );
+                updatedJob.put( "name", job.optString( "name" ) );
+                updatedJob.put( "owner", job.optString( "owner" ) );
+            }
+        }
+        
         deltaJson.put( "workspace1", ws1Json );
         deltaJson.put( "workspace2", ws2Json );
         

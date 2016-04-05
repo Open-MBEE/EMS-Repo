@@ -36,13 +36,14 @@ public class JenkinsBuildConfig {
     private static final boolean DEBUG              = true;
     private              String  jobID              = "job0000";
     private              String  documentID         = "_18_1111_111_111";
-    // Projects can be found in some Teamwork Server and it case sensitive
-    private              String  teamworkProject    = "Some project from Teamwork";
-    private              String  workspace          = "master";
     // jdk might have to be (Default)
     private              String  jdkVersion         = "jdk1.8.0_45";
     private              String  gitBranch          = "*/develop";
+    private              String  workspace          = "master";
+    // Teamwork projects can be found in any Teamwork Server and should be case sensitive
+    private              String  teamworkProject    = null;
     private              String  schedule           = null;
+    private              String magicdrawSchedulingCommand = null;
     private              String  mmsUser            = EmsConfig.get( "app.user" );
     private              String  mmsPassword        = EmsConfig.get( "app.pass" );
     private              String  mmsServer          = EmsConfig.get( "app.url" );
@@ -52,8 +53,7 @@ public class JenkinsBuildConfig {
     private              String  teamworkPort       = EmsConfig.get( "tw.port" );
     private              String  gitURL             = EmsConfig.get( "git.url" );
     private              String  gitCredentials     = EmsConfig.get( "git.credentials" );
-
-    private              String magicdrawSchedulingCommand = null;
+    
     public JenkinsBuildConfig() {
         // TODO Auto-generated constructor stub
     }
