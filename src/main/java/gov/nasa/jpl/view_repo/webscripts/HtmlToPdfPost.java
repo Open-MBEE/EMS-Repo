@@ -454,7 +454,7 @@ public class HtmlToPdfPost extends AbstractJavaWebScript {
 			String docNum, String displayTime, String customCss, Boolean isSameWidthTableCell) throws Throwable {
 		log(String.format("Saving %s to filesystem...", htmlFilename));
 		Path htmlPath = Paths.get(this.fsWorkingDir, htmlFilename);
-		Path coverPath = Paths.get(this.fsWorkingDir, coverFilename);
+//		Path coverPath = Paths.get(this.fsWorkingDir, coverFilename);
 		Path customCssPath = Paths.get(this.fsWorkingDir, "css", "customStyles.css");
 
 		try {
@@ -781,16 +781,17 @@ public class HtmlToPdfPost extends AbstractJavaWebScript {
 	protected void createHeaderPage(String headerFilename,
 			String headerContent, String tagId, String timestamp,
 			String docNum, String displayTime) throws IOException {
-		log(String.format("Sving %s to filesystem...", headerFilename));
+		log(String.format("Saving %s to filesystem...", headerFilename));
 		Path headerPath = Paths.get(this.fsWorkingDir, headerFilename);
 
     	File headerFile = new File(headerPath.toString());
 
+    	String contentRight = displayTime;
 		StringBuffer html = new StringBuffer();
 		if(Utils.isNullOrEmpty(displayTime)){
 			Date d = new Date();
 			if(timestamp.compareToIgnoreCase("latest") != 0) d = TimeUtils.dateFromTimestamp(timestamp);
-			displayTime = getFormattedDate(d);
+			contentRight = getFormattedDate(d);
 		}
 			
 		html.append("<!DOCTYPE html SYSTEM \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">");
@@ -815,9 +816,9 @@ public class HtmlToPdfPost extends AbstractJavaWebScript {
 		html.append(System.lineSeparator());
 		html.append("            .child{ margin: 5px 0 5px 0;overflow:hidden;line-heigh:11px;}");
 		html.append(System.lineSeparator());
-		html.append("            .left{ float:left; width:84%;}");
+		html.append("            .left{ float:left; width:49%;}");
 		html.append(System.lineSeparator());
-		html.append("            .right{float:right; width:15%;text-align:right;}");
+		html.append("            .right{float:right; width:50%;text-align:right;}");
 		html.append(System.lineSeparator());
 		html.append("			</style>");
 		html.append(System.lineSeparator());
@@ -837,7 +838,10 @@ public class HtmlToPdfPost extends AbstractJavaWebScript {
 		html.append(System.lineSeparator());
 		html.append("                <div class=\"date\">");
 		html.append(System.lineSeparator());
-		html.append(displayTime);
+		
+		if(timestamp.compareToIgnoreCase("latest") != 0) contentRight = String.format("%s %s", tagId, contentRight);
+		
+		html.append(contentRight);
 		html.append(System.lineSeparator());
 		html.append("				</div>");
 		html.append(System.lineSeparator());
