@@ -5,6 +5,8 @@ import gov.nasa.jpl.mbee.util.Pair;
 import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.webscripts.AbstractJavaWebScript;
+import gov.nasa.jpl.view_repo.util.JsonDiffDiff.DiffOp;
+import gov.nasa.jpl.view_repo.util.JsonDiffDiff.DiffType;
 
 import java.util.ArrayList;
 import java.io.Serializable;
