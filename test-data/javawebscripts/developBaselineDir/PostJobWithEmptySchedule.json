@@ -54,7 +54,7 @@
         "name": "Job with no schedule",
         "documentation": "",
         "owner": "_18_0_2_6620226_1456959739177_654072_15172",
-        "appliedMetatypes": ["_18_0_2_6620226_1453944322658_194833_14413"],
+        "appliedMetatypes": ["_18_0_5_407019f_1458258829038_313297_14086"],
         "specialization": {"type": "Element"}
     },
     {
@@ -67,7 +67,7 @@
             "isDerived": false,
             "isSlot": true,
             "value": [{
-                "string": "Jenkins, Doc Web, Basic Document, cae-tw.jpl.nasa.gov, 18051, Intern Testing Project, master, cae-ems-test-origin.jpl.nasa.gov",
+                "string": "Jenkins, DocWeb, Basic Document, Intern Testing Project",
                 "type": "LiteralString"
             }],
             "type": "Property"
@@ -83,7 +83,7 @@
         "appliedMetatypes": ["_9_0_62a020a_1105704885251_933969_7897"],
         "specialization": {
             "slots": [],
-            "classifier": ["_18_0_2_6620226_1453944322658_194833_14413"],
+            "classifier": ["_18_0_5_407019f_1458258829038_313297_14086"],
             "type": "InstanceSpecification"
         }
     },

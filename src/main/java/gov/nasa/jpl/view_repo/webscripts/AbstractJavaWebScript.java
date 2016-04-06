@@ -215,10 +215,10 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         private static final long serialVersionUID = -6503314776361243306L;
         {
             // WARNING! FIXME! THESE MAY CHANGE!  MAYBE SEARCH FOR THEM?
-            put( "status", "_18_0_2_6620226_1453945722485_173783_14567");
-            put( "schedule", "_18_0_2_6620226_1453945600718_861466_14565");
-            put( "command", "_18_0_2_6620226_1453945276117_966030_14557");
-            put( "url", "_18_0_2_6620226_1458836769913_512779_14411");
+            put( "status", "_18_0_5_407019f_1458259018041_351899_14098");
+            put( "schedule", "_18_0_5_407019f_1458259033014_844708_14099");
+            put( "command", "_18_0_5_407019f_1458258991043_482001_14097");
+            put( "url", "_18_0_5_407019f_1459284115836_664841_14086");
         }
     };
 

@@ -10,7 +10,7 @@
             "modifier": "perey",
             "schedule": "H 20 * * *",
             "name": "Job_block",
-            "command": "Jenkins, Doc Web, Basic Document, cae-tw.jpl.nasa.gov, 18051, Intern Testing Project, master, cae-ems-test-origin.jpl.nasa.gov",
+            "command": "Jenkins, DocWeb, Basic Document, Intern Testing Project",
             "owner": "_18_0_2_6620226_1456959739177_654072_15172",
             "documentation": "",
             "appliedMetatypes": [
@@ -30,7 +30,7 @@
             "modifier": "perey",
             "schedule": "H 23 * * *",
             "name": "Job_block1",
-            "command": "Jenkins, Doc Web, DocGen User's Guide, cae-tw.jpl.nasa.gov, 18051, OpenCAE, master, cae-ems-test-origin.jpl.nasa.gov",
+            "command": "Jenkins, DocWeb, Basic Document, Intern Testing Project",
             "owner": "_18_0_2_6620226_1456959739177_654072_15172",
             "documentation": "",
             "appliedMetatypes": [
