@@ -203,12 +203,75 @@ public class DoorsSync extends AbstractJavaWebScript {
     }
 
     private JSONArray handleRequirements(WorkspaceNode workspace, Date dateTime) {
+    	
         JSONArray json = new JSONArray();
         ArrayList<String> types = new ArrayList<String>();
         types.add("@sysml\\:appliedMetatypes:\"");
-        String appliedMetatype = "_11_5EAPbeta_be00301_1147873190330_159934_2220";
 
-        Map<String, EmsScriptNode> requirements = searchForElementsPostgres(types, appliedMetatype, false, workspace, dateTime, null, null);
+        
+        Map<String, EmsScriptNode> foundMMSRequirements = new HashMap<String, EmsScriptNode>();
+        
+        Map<String, EmsScriptNode> requirements = new HashMap<String, EmsScriptNode>();
+        
+    	ArrayList<String> curAppliedMetatypes = new ArrayList<String>();
+    	
+    	//Retrieve all project/applied metatype IDs from database
+    	HashMap<String,ArrayList<String>> storedAppliedMetatypeIds = getConfiguredAppliedMetatypeIDs();
+   
+    	//TODO adding error handling; debug output
+    	
+    	if( storedAppliedMetatypeIds.size() > 0 ) {
+    		
+    
+		        Set<Map.Entry<String,ArrayList<String>>> setOfAppliedMetatypeIdConfigs = storedAppliedMetatypeIds.entrySet();
+		    	
+		    	
+		    	for(Map.Entry<String,ArrayList<String>> curAppliedMetatypeConfig : setOfAppliedMetatypeIdConfigs) { //TODO adding error handling; debug output
+		    		
+		    		curAppliedMetatypes = curAppliedMetatypeConfig.getValue();
+		    		
+		    		
+		    			for(int i=0; i < curAppliedMetatypes.size(); i++ ){
+		    			
+		    				//searching MMS for each applied metatype id configuration found in database
+		    		        foundMMSRequirements = searchForElementsPostgres(types, curAppliedMetatypes.get(i), false, workspace, dateTime, null, null);
+		
+		    		        //if matching requirements were found in MMS, verify that the requirement's project name is consistent with what was configured in database
+		    		        //filtering
+		    		        for(Map.Entry<String,EmsScriptNode> curMMSRequirement : foundMMSRequirements.entrySet()) {
+		    		        	
+		    		        
+		    		        	if(storedAppliedMetatypeIds.containsKey(curMMSRequirement.getValue().getProjectNode(workspace).getSysmlName()) &&
+		    		        			storedAppliedMetatypeIds.get(curMMSRequirement.getValue().getProjectNode(workspace).getSysmlName()).contains(curAppliedMetatypes.get(i))	) {
+		    		        		
+		    		        			//match found; filtered results
+		    		            		requirements.put(curMMSRequirement.getKey(),curMMSRequirement.getValue());
+		      		
+		    		        		
+		    		        		
+		    		        	}
+		    		        	
+		    		            
+		    		        }
+		    		        
+		    			
+		    			}
+		    				
+		    	}
+		    	
+    	}
+    	
+    	//If no pre-loaded applied metatype id configurations were found in database, use default requirement
+    	else {
+    		
+
+	        requirements = searchForElementsPostgres(types, "_11_5EAPbeta_be00301_1147873190330_159934_2220", false, workspace, dateTime, null, null);
+
+    		
+    	}
+        
+        
+        
         for (String key : requirements.keySet()) {
             JSONObject projectJson = null;
             projectJson = new JSONObject();
@@ -254,6 +317,55 @@ public class DoorsSync extends AbstractJavaWebScript {
         
 
         return json;
+    }
+    
+    
+    
+    private HashMap<String,ArrayList<String>> getConfiguredAppliedMetatypeIDs() {
+ 	
+		
+ 		HashMap<String,ArrayList<String>> storedAppliedMetatypeConfigurations = new HashMap<String,ArrayList<String>>();
+ 		
+ 		try {
+ 		
+ 			ResultSet rs = pgh.execQuery("SELECT * FROM doorsAppliedMetatypeIDs");
+
+ 			while (rs.next()) {
+ 				
+ 				String project = rs.getString(1);
+ 				
+ 				String appliedMetatype = rs.getString(2);
+ 				
+ 				//This unique project has not been added as of yet
+ 				if(!storedAppliedMetatypeConfigurations.keySet().contains(project)) {
+ 					
+ 					storedAppliedMetatypeConfigurations.put(project,new ArrayList<String>());
+ 					
+ 					storedAppliedMetatypeConfigurations.get(project).add(appliedMetatype);
+ 					
+ 					
+ 				}
+ 				
+ 				//unique project has already been added , now we want to add the current applied metatype to the project
+ 				else if(storedAppliedMetatypeConfigurations.keySet().contains(project)) {
+ 					
+ 					storedAppliedMetatypeConfigurations.get(project).add(appliedMetatype);
+ 					
+ 				}
+ 				
+ 				
+ 			}
+ 			
+ 			
+
+ 		} catch (Exception e) {
+ 			e.printStackTrace();
+ 		}
+
+ 		
+ 		return storedAppliedMetatypeConfigurations;
+ 		
+ 		
     }
     
     
