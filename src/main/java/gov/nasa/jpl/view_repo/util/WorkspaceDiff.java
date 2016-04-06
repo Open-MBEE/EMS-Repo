@@ -817,7 +817,7 @@ public class WorkspaceDiff implements Serializable {
         if( jobs != null ) {
             JSONObject job = jobs.optJSONObject( 0 );
             
-            if( job.has( "name" ) && job.has( "owner" ) ) {
+            if( job != null ) {
                 JSONObject updatedJob = ws2Json.optJSONArray( "updatedJobs" ).optJSONObject( 0 );
                 updatedJob.put( "name", job.optString( "name" ) );
                 updatedJob.put( "owner", job.optString( "owner" ) );
