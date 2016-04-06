@@ -47,6 +47,7 @@ import gov.nasa.jpl.view_repo.sysml.View;
 import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.NodeUtil.SearchType;
 import gov.nasa.jpl.view_repo.webscripts.AbstractJavaWebScript;
+import gov.nasa.jpl.view_repo.webscripts.JobGet;
 import gov.nasa.jpl.view_repo.webscripts.UpdateViewHierarchy;
 
 import java.io.Serializable;
@@ -7002,5 +7003,90 @@ public class EmsScriptNode extends ScriptNode implements
         }
 
         return node;
+    }
+
+    // NOTE: if we ever specialize job, this will have to look for everything 
+    //       that specializes job as well 
+    public boolean isJob() {
+            Object stereotypes = 
+                    getProperty("sysml:appliedMetatypes", true);
+            // stereotypes should be a List< String >
+            if ( stereotypes instanceof Collection ) {
+                Collection<?> c = (Collection< ? >)stereotypes;
+                for ( Object o : c ) {
+                    if ( o instanceof String ) {
+                        String s = (String)o;
+                        if ( JobGet.jobStereotypeId.equals( s ) ) {
+                            return true;
+                        }
+                    }
+                }
+            }
+        return false;
+    }
+    
+    public static boolean isJob( JSONObject json ) {
+        JSONArray metatypeArr = json.optJSONArray(Acm.JSON_APPLIED_METATYPES);
+        if ( metatypeArr == null ) return false;
+        for ( int i = 0; i < metatypeArr.length(); ++i ) {
+            String metatype = metatypeArr.optString( i );
+            if ( metatype == null ) continue;
+            if ( metatype.equals( JobGet.jobStereotypeId ) ) { // TODO move this id out of JobGet?
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    public static boolean maybeJobProperty( JSONObject json ) {
+        JSONArray metatypeArr = json.optJSONArray(Acm.JSON_APPLIED_METATYPES);
+        if ( metatypeArr == null ) return false;
+        for ( int i = 0; i < metatypeArr.length(); ++i ) {
+            String metatype = metatypeArr.optString( i );
+            if ( metatype == null ) continue;
+            // this refers to a 'slot', it may or may not be a property containing this applied metatype 
+            if ( metatype.equals( JobGet.slotId ) ) { // TODO move this id out of JobGet?
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    public EmsScriptNode getInstanceSpecification() {
+
+        EmsSystemModel esm = new EmsSystemModel();
+        Collection<EmsScriptNode> is = esm.getProperty(this, null);
+
+        for (EmsScriptNode instance : is) {
+            ArrayList<?> appliedMetatype = (ArrayList<?>) instance.getProperty(Acm.ACM_APPLIED_METATYPES);
+            if (appliedMetatype != null && appliedMetatype.contains( JobGet.instanceSpecId )) {
+                return instance;
+            }
+        }
+
+        return null;
+    }
+    
+    public Collection<EmsScriptNode> getAllSlots(EmsScriptNode n,
+                                          boolean ignoreWorkspace,
+                                          WorkspaceNode workspace, Date dateTime,
+                                          ServiceRegistry services, StringBuffer response,
+                                          Status status, String siteName) {
+        
+        EmsScriptNode instanceSpec = n.getInstanceSpecification();
+    
+        Collection<EmsScriptNode> slots = new HashSet<EmsScriptNode>();
+        
+        //PostgresHelper pgh = new PostgresHelper(workspace);
+        
+        if (instanceSpec != null) {
+            Map< String, EmsScriptNode > nodeList = NodeUtil.searchForElements(NodeUtil.SearchType.ID.prefix, 
+                                                                               instanceSpec.getSysmlId() + "-slot-*", ignoreWorkspace,
+                                                                               workspace, dateTime, services, response,
+                                                                               status, siteName);
+            
+            return nodeList.values();
+        }
+        return slots;
     }
 }

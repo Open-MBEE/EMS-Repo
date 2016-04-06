@@ -123,7 +123,7 @@ public class ViewPost extends AbstractJavaWebScript {
 	    wsDiff.setUpdatedElements( elements );
 		
 		Date end = new Date();
-		JSONObject deltaJson = wsDiff.toJSONObject( start, end );
+		JSONObject deltaJson = wsDiff.toJSONObject( this, start, end );
 		String wsId = "master";
 		if (workspace != null) wsId = workspace.getId();
         // FIXME: split elements by project Id - since they may not always be in same project

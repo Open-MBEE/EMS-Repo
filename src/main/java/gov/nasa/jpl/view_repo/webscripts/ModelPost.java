@@ -66,6 +66,7 @@ import java.util.TreeSet;
 
 import javax.servlet.http.HttpServletResponse;
 
+
 import org.apache.log4j.*;
 import org.alfresco.repo.model.Repository;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
@@ -129,14 +130,14 @@ public class ModelPost extends AbstractJavaWebScript {
      */
     private JSONObject elementHierarchyJson;
 
-    private EmsScriptNode projectNode = null;
-    private EmsScriptNode siteNode = null;
-    private EmsScriptNode sitePackageNode = null;
-    // private boolean internalRunWithoutTransactions = false;
-    private Set<String> ownersNotFound = null;
-    private final int minElementsForProgress = 100;
-    private double elementProcessedCnt = 0;
-    private double elementMetadataProcessedCnt = 0;
+	protected EmsScriptNode projectNode = null;
+	private EmsScriptNode siteNode = null;
+	private EmsScriptNode sitePackageNode = null;
+	// private boolean internalRunWithoutTransactions = false;
+	protected Set<String> ownersNotFound = null;
+	private final int minElementsForProgress = 100;
+	private double elementProcessedCnt = 0;
+	private double elementMetadataProcessedCnt = 0;
 
     /**
      * Keep track of update elements
@@ -302,7 +303,7 @@ public class ModelPost extends AbstractJavaWebScript {
             TreeSet<EmsScriptNode> elements, long start, long end)
             throws JSONException {
         // don't include qualified in commit, it's not needed
-        JSONObject deltaJson = wsDiff.toJSONObject(new Date(start), new Date(
+        JSONObject deltaJson = wsDiff.toJSONObject(this, new Date(start), new Date(
                 end), true, false);
 
         // commit is run as admin user already
@@ -2168,8 +2169,8 @@ public class ModelPost extends AbstractJavaWebScript {
                                                                 // id ) ) {
             if (type == null || type.trim().isEmpty()) {
                 if (Debug.isOn())
-                    System.out
-                            .println("PREFIX: type not found for " + jsonType);
+                    logger.debug
+                            ("PREFIX: type not found for " + jsonType);
                 return null;
             } else {
                 changing.add( id );
@@ -2186,8 +2187,8 @@ public class ModelPost extends AbstractJavaWebScript {
                     // }
                 } catch (Exception e) {
                     if (Debug.isOn())
-                        System.out
-                                .println("Got exception in "
+                        logger.debug
+                                ("Got exception in "
                                         + "updateOrCreateTransactionableElement(elementJson="
                                         + elementJson + ", parent=(" + parent
                                         + "), children=(" + children
@@ -2658,8 +2659,8 @@ public class ModelPost extends AbstractJavaWebScript {
         return instance.executeImplImpl(req, status, cache, true);
     }
 
-    WorkspaceNode myWorkspace = null;
-    private String projectId;
+	WorkspaceNode myWorkspace = null;
+	protected String projectId;
 
     @Override
     protected Map<String, Object> executeImplImpl(final WebScriptRequest req,
@@ -2748,56 +2749,50 @@ public class ModelPost extends AbstractJavaWebScript {
                         content = (JSONObject) req.parseContent();
                     }
 
-                    JSONObject postJson = getPostJson(jsonNotK, content,
-                            expressionString);
-
-                    // Get the project node from the request:
-                    new EmsTransaction(getServices(), getResponse(),
-                            getResponseStatus(), runWithoutTransactions) {// ||
-                                                                            // internalRunWithoutTransactions
-                                                                            // )
-                                                                            // {
-                        @Override
-                        public void run() throws Exception {
-                            getProjectNodeFromRequest(req, true);
-                        }
-                    };
-                    
-                    UpdateViewHierarchy uvh = new UpdateViewHierarchy( this );
-                    // Handle view and association changes
-                    try {
-                        uvh.addJsonForViewHierarchyChanges( postJson );
-                    } catch ( Throwable t ) {
-                        t.printStackTrace();
-                    }
-                    
-                    // FIXME: this is a hack to get the right site permissions
-                    // if DB rolled back, it's because the no_site node couldn't
-                    // be created
-                    // this is indicative of no permissions (inside the DB
-                    // transaction)
-                    if (getResponseStatus().getCode() == HttpServletResponse.SC_BAD_REQUEST) {
-                        log(Level.WARN, HttpServletResponse.SC_FORBIDDEN,
-                                "No write priveleges");
-                    } else if (projectNode != null) {
-                        handleUpdate(postJson, status, myWorkspace, evaluate,
-                                fix, model, true, suppressElementJson);
-                    }
-                }
-            } catch (JSONException e) {
-                log(Level.ERROR, HttpServletResponse.SC_BAD_REQUEST,
-                        "JSON malformed\n");
-                e.printStackTrace();
-            } catch (Exception e) {
-                log(Level.ERROR, HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-                        "Internal error stack trace:\n%s\n",
-                        e.getLocalizedMessage());
-                e.printStackTrace();
-            }
-        }
-        if (!model.containsKey("res")) {
-            model.put("res", createResponseJson());
-        }
+					JSONObject postJson = getPostJson(jsonNotK, content,
+							expressionString);
+					
+					// Get the project node from the request:
+					new EmsTransaction(getServices(), getResponse(),
+							getResponseStatus(), runWithoutTransactions) {// ||
+																			// internalRunWithoutTransactions
+																			// )
+																			// {
+						@Override
+						public void run() throws Exception {
+							getProjectNodeFromRequest(req, true);
+						}
+					};
+					 
+					 preProcessJson( postJson, myWorkspace );
+					 
+					// FIXME: this is a hack to get the right site permissions
+					// if DB rolled back, it's because the no_site node couldn't
+					// be created
+					// this is indicative of no permissions (inside the DB
+					// transaction)
+					if (getResponseStatus().getCode() == HttpServletResponse.SC_BAD_REQUEST) {
+						log(Level.WARN, HttpServletResponse.SC_FORBIDDEN,
+								"No write priveleges");
+					} else if (projectNode != null) {
+						handleUpdate(postJson, status, myWorkspace, evaluate,
+								fix, model, true, suppressElementJson);
+					}
+				}
+			} catch (JSONException e) {
+				log(Level.ERROR, HttpServletResponse.SC_BAD_REQUEST,
+						"JSON malformed\n");
+				e.printStackTrace();
+			} catch (Exception e) {
+				log(Level.ERROR, HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+						"Internal error stack trace:\n%s\n",
+						e.getLocalizedMessage());
+				e.printStackTrace();
+			}
+		}
+		if (!model.containsKey("res")) {
+			model.put("res", createResponseJson());
+		}
 
         status.setCode(responseStatus.getCode());
 
@@ -2806,12 +2801,25 @@ public class ModelPost extends AbstractJavaWebScript {
 
         printFooter();
 
-        if (logger.isInfoEnabled()) {
-            logger.info("ModelPost: " + timer);
+		if (logger.isInfoEnabled()) {
+			logger.info(this.getClass().getSimpleName() + ": " + timer);
+		}
+		
+		return model;
+	}
+	
+	public void preProcessJson( JSONObject json, WorkspaceNode workspace) {
+        logger.debug( "preProcessJson(" + json + ")");
+        UpdateViewHierarchy uvh = new UpdateViewHierarchy( this );
+        // Handle view and association changes
+        try {
+            uvh.addJsonForViewHierarchyChanges( json );
+        } catch ( Throwable t ) {
+            t.printStackTrace();
         }
-
-        return model;
-    }
+        processJobsJson( json, workspace );
+        logger.debug( "preProcessJson() returning\n" + json.toString(4) );
+	}
 
     public JSONObject getPostJson(boolean jsonNotK, Object content) {
         return getPostJson(jsonNotK, content, null);
@@ -2892,16 +2900,19 @@ public class ModelPost extends AbstractJavaWebScript {
                                                               0, false );
                             }
                             if ( json == null ) {
-                                json = element.toJSONObject( workspace, null );
-                            }                           
-                            
-                            elementsJson.put(json);
-                            elementsJsonMap.put(element, json);
-                        }
-                        sendProgress("Getting json for elements completed",
-                                projectId, true);
-                    }
-                };
+                                boolean isQualified = !NodeUtil.doPostProcessQualified;
+                                json = getJsonForElementAndJob( element, null, false, workspace, 
+                                                          null, element.getSysmlId(), 
+                                                          isQualified, false );
+                            }
+
+							elementsJson.put(json);
+							elementsJsonMap.put(element, json);
+						}
+						sendProgress("Getting json for elements completed",
+								projectId, true);
+					}
+				};
 
                 if (evaluate) {
                     sendProgress("Evaluating constraints and expressions",
@@ -2948,7 +2959,7 @@ public class ModelPost extends AbstractJavaWebScript {
     }
 
     public void addRelationshipsToProperties(Set<EmsScriptNode> elems,
-            final WorkspaceNode ws) {
+			final WorkspaceNode ws) {
 
         for (final EmsScriptNode element : elems) {
             new EmsTransaction(getServices(), getResponse(),
