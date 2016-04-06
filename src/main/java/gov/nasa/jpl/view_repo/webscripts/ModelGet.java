@@ -321,9 +321,9 @@ public class ModelGet extends AbstractJavaWebScript {
                                                          + modelRootNode );
 
             if ( modelRootNode == null ) {
-                log( Level.ERROR, HttpServletResponse.SC_NOT_FOUND,
-                     "Element %s not found",
-                     modelId + ( dateTime == null ? "" : " at " + dateTime ) );
+				log(Level.INFO, HttpServletResponse.SC_NOT_FOUND,
+				    String.format("Element %s not found", modelId
+								+ (dateTime == null ? "" : " at " + dateTime)));
                 return new JSONArray();
             } else if ( modelRootNode.isDeleted() ) {
                 log( Level.DEBUG, HttpServletResponse.SC_GONE,
