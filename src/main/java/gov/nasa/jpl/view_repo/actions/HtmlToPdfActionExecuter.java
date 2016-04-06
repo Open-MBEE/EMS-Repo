@@ -52,6 +52,10 @@ public class HtmlToPdfActionExecuter extends ActionExecuterAbstractBase {
 	public static final String PARAM_CUSTOM_CSS = "customCss";
 	public static final String PARAM_WORKSPACE = "workspace";
 	public static final String PARAM_POST_JSON = "postJson";
+	public static final String PARAM_TOC = "toc";
+	public static final String PARAM_TOF = "tof";
+	public static final String PARAM_TOT = "tot";
+	public static final String PARAM_INDEX = "index";
 
 	public void setRepository(Repository rep) {
 		repository = rep;
@@ -89,6 +93,10 @@ public class HtmlToPdfActionExecuter extends ActionExecuterAbstractBase {
 		String timeStamp = (String) action.getParameterValue(PARAM_TIME_STAMP);
 		String htmlContent = (String) action.getParameterValue(PARAM_HTML);
 		String coverContent = (String) action.getParameterValue(PARAM_COVER);
+		String toc = (String) action.getParameterValue(PARAM_TOC);
+		String tof = (String) action.getParameterValue(PARAM_TOF);
+		String tot = (String) action.getParameterValue(PARAM_TOT);
+		String indices = (String) action.getParameterValue(PARAM_INDEX);
 		String headerContent = (String) action.getParameterValue(PARAM_HEADER);
 		String footerContent = (String) action.getParameterValue(PARAM_FOOTER);
 		String docNum = (String) action.getParameterValue(PARAM_DOC_NUM);
@@ -100,7 +108,7 @@ public class HtmlToPdfActionExecuter extends ActionExecuterAbstractBase {
 		EmsScriptNode pdfNode = null;
 		try{
 			pdfNode = htmlToPdf.convert(documentId, tagId, timeStamp,
-				htmlContent, coverContent, headerContent, footerContent, docNum, displayTime, customCss, isSameWidthTableCell);
+				htmlContent, coverContent, toc, tof, tot, indices, headerContent, footerContent, docNum, displayTime, customCss, isSameWidthTableCell);
 			response.append(htmlToPdf.getResponse().toString());
 			response.append("Sending email to user...");
 		}
@@ -149,7 +157,8 @@ public class HtmlToPdfActionExecuter extends ActionExecuterAbstractBase {
 		buf.append(System.lineSeparator());
 		buf.append(System.lineSeparator());
 		
-		EmsScriptNode parentNode = pdfNode.getParent();
+		EmsScriptNode parentNode = null;
+		if(pdfNode != null) parentNode = pdfNode.getParent();
 		if(parentNode != null){
 			String shareUrl = hostnameGet.getShareUrl();
 			buf.append("Directory link: ");
