@@ -1,10 +1,7 @@
 package gov.nasa.jpl.view_repo.util;
 
-import java.io.File;
 import java.io.InputStream;
 import java.util.Properties;
-
-import gov.nasa.jpl.mbee.util.FileUtils;
 
 public class EmsConfig {
     public static Properties properties = new Properties();
