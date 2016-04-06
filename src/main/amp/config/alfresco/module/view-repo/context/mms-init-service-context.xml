@@ -149,5 +149,9 @@
         <property name="arguments" ref="restConnection"/>
     </bean>
     
+    <bean class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+        <property name="staticMethod" value="gov.nasa.jpl.view_repo.webscripts.ConfigureAppliedMetatypeIDs.loadAppliedMetatypeIDs" />
+    </bean>
+    
 
 </beans>

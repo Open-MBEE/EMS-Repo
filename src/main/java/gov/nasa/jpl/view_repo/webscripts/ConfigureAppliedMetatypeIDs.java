@@ -38,16 +38,15 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-import java.util.StringTokenizer;
 import org.alfresco.repo.model.Repository;
 import org.alfresco.service.ServiceRegistry;
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
 import gov.nasa.jpl.view_repo.db.PostgresHelper;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
-import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 
 
 /**
@@ -55,19 +54,21 @@ import gov.nasa.jpl.view_repo.util.WorkspaceNode;
  * @author Bruce Meeks Jr
  *
  */
-public class ConfigureAppliedMetatypes extends AbstractJavaWebScript {
+public class ConfigureAppliedMetatypeIDs extends AbstractJavaWebScript {
 	
 
-    PostgresHelper pgh = null;
+    static PostgresHelper pgh = null;
     
+    static HashMap<String,ArrayList<String>> configuredAppliedMetatypeIDs = new HashMap<String,ArrayList<String>>();
 
-    public ConfigureAppliedMetatypes() {
+    
+    public ConfigureAppliedMetatypeIDs() {
     	
         super();
         
     }
 
-    public ConfigureAppliedMetatypes(Repository repositoryHelper, ServiceRegistry registry) {
+    public ConfigureAppliedMetatypeIDs(Repository repositoryHelper, ServiceRegistry registry) {
     	
         super(repositoryHelper, registry);
         
@@ -77,158 +78,112 @@ public class ConfigureAppliedMetatypes extends AbstractJavaWebScript {
     @Override
     protected Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
 
-    	ConfigureAppliedMetatypes instance = new ConfigureAppliedMetatypes(repository, getServices());
+    	ConfigureAppliedMetatypeIDs instance = new ConfigureAppliedMetatypeIDs(repository, getServices());
 
         return instance.executeImplImpl(req, status, cache);
     }
 
     @Override
     protected Map<String, Object> executeImplImpl(WebScriptRequest req, Status status, Cache cache) {
+    	
+    	
 
     	Map<String, Object> model = new HashMap<String, Object>();
-    	 
-        JSONObject json = new JSONObject();
-
-    	WorkspaceNode workspace = getWorkspace(req);
     	
-        HashMap<String,ArrayList<String>> projectsAppliedMetatypes = new HashMap<String,ArrayList<String>>();
-
-        projectsAppliedMetatypes = ingestProjectAppliedMetatypes();
     	
-        if(projectsAppliedMetatypes.size() > 0) {
+    	JSONObject loadStatus = new JSONObject();
+    	
+  					   
+        if( loadAppliedMetatypeIDs() ) {
         	
-		        
-		        pgh = new PostgresHelper(workspace);
-		        
-		        try {
-		        	
-					pgh.connect();
-					
-					if( pgh.createProjectAppliedMetatypesTable() ) {
-					
-						storeProjectAppliedMetatypes(projectsAppliedMetatypes);
-						
-					}
-					else {
-				        json.put("status", "problem creating projectappliedmetatypes table");
-				        model.put("res", NodeUtil.jsonToString(json));
-				        return model;
-					}
-		
-					
-				} catch (ClassNotFoundException e) {
-					
-					e.printStackTrace();
-					json.put("status", "Could not connect to postgres");
-			        model.put("res", NodeUtil.jsonToString(json));
-			        
-			        return model;
-					
-				} catch (SQLException e) {
-					
-					e.printStackTrace();
-					json.put("status", "Could not connect to postgres");
-			        model.put("res", NodeUtil.jsonToString(json));
-			        
-			        return model;
-					
-				} 
-		        
-		        
-		        json.put("status", "AppliedMetatypesIDs Configured Successfully");
-		        
-		        model.put("res", NodeUtil.jsonToString(json));
-		       
-		        return model;
-
+        	  
+        	loadStatus.put("status", "Applied Metatype IDs configured successfully");
+	        
+	        model.put("res", NodeUtil.jsonToString(loadStatus));
+	       
+	        return model;
+	        
+        	
         }
+        
         else {
         	
-        	
-        	json.put("status", "No AppliedMetatypesIDs Configuration Found");
-            model.put("res", NodeUtil.jsonToString(json));
-           
-            return model;
-        	
+        	loadStatus.put("status", "Problem loading applied metatype ids into database");
+	        
+	        model.put("res", NodeUtil.jsonToString(loadStatus));
+	       
+	        return model;
         	
         	
         }
         
         
+    
         
     }
     
-    
-    /***
-     * Reading in project/applied metatype id configurations and storing in data structure
-     * @return
-     */
-    private HashMap<String,ArrayList<String>> ingestProjectAppliedMetatypes() {
+
+    //TODO adding error handling (i.e. bad json format ); debug output
+
+    private static void ingestProjectAppliedMetatypes() {
     	
     	
-    	HashMap<String,ArrayList<String>> projectsAppliedMetatypes = new HashMap<String,ArrayList<String>>();
+    	configuredAppliedMetatypeIDs = new HashMap<String,ArrayList<String>>();
     	
     	BufferedReader configurationReader = null;
-    	
-    	String curMapping = "";
+    	    	
+    	String configurationInput = "";
     	
     	
     	try {
     		
-    		 configurationReader = new BufferedReader( new FileReader("applied_metatypes.properties"));
-    		 
-    		 StringTokenizer tokenizer = null;
-    		 
-    		 String curProj = "";
-    		 
-    		 ArrayList<String> curAppliedMetatypes = null;
-    		 
-    		 String curAppliedMetatype = null;
-    		 
-    		 int index = 0;
     		
-			while ((curMapping = configurationReader.readLine()) != null ) {
+    		 configurationReader = new BufferedReader( new FileReader("doorsAppliedMetatypeIDs.txt"));
+   
+    		 JSONObject curProject = null;
+    		 
+    		 JSONObject curAppliedMetatypeID = null;
+
+    		 ArrayList<String> curAppliedMetatypeIDs = null;
+    		 
+    		
+    		 while ((configurationInput = configurationReader.readLine()) != null ) {
 				
-					tokenizer = new StringTokenizer(curMapping);
 					
-					curAppliedMetatypes = new ArrayList<String>();
-					
-					while(tokenizer.hasMoreTokens() ) {
-						
-						if( index==0 ){
-							
-							curProj = tokenizer.nextToken();
-							index++;
-						
-						}
-						else {
-							
-							curAppliedMetatype = tokenizer.nextToken();
-							
-							//prevent duplicates applied metatype ids for same project
-							if(!curAppliedMetatypes.contains(curAppliedMetatype)) {
-								
-								curAppliedMetatypes.add(curAppliedMetatype);
-							
-							}
-							
-						}
-						
-					}
-					
-					index = 0;
-					
-					//prevent duplicate project entries
-					if(!projectsAppliedMetatypes.containsKey(curProj)) {
-						
-						projectsAppliedMetatypes.put(curProj,curAppliedMetatypes);
-					
-					}
+				    JSONArray appliedMetatypeIDConfigurationJSON = new JSONArray(configurationInput);
+				    
+				    //iterate through json configuration of project and applied metatype ids, then store those relationships in static global data structure
+				    for(int i=0; i < appliedMetatypeIDConfigurationJSON.length(); i++) {
+				    	
+				    		curProject = (JSONObject) appliedMetatypeIDConfigurationJSON.get(i);
+				    		
+			    			curAppliedMetatypeIDs = new ArrayList<String>();
+
+				    		for(int j=0; j < curProject.getJSONArray("appliedMetatypeIDs").length() ; j++) {
+				    	
+				    			curAppliedMetatypeID = (JSONObject)curProject.getJSONArray("appliedMetatypeIDs").get(j);
+				    			
+				    			curAppliedMetatypeIDs.add(curAppliedMetatypeID.getString("appliedMetatypeID"));
+				    	
+				    	
+				    		}
+				    	
+			    			configuredAppliedMetatypeIDs.put(curProject.getString("project"), curAppliedMetatypeIDs );
+
+				    }
+
+				    
+				    break;
+				    
 					
 				
 			}
 			
-		} 
+			configurationReader.close();
+			
+			
+		}
+    	
     	catch (FileNotFoundException e) {
     		
 			e.printStackTrace();
@@ -243,22 +198,52 @@ public class ConfigureAppliedMetatypes extends AbstractJavaWebScript {
 			e.printStackTrace();
 			
 		}
-    
     	
-        return projectsAppliedMetatypes;
-        
+    	        
     	
     }
     
+   
+    //TODO add error conditions and logging for when problems occur during startup
+    // Will be bootstrapped during MMS start up
+    public static boolean loadAppliedMetatypeIDs() {
+    	
+    	//read in json configuration of projects and applied metatype ids
+    	ingestProjectAppliedMetatypes();
+    	
     
-    /***
-     * Storing project and applied metatypes id relationships in PG
-     * @param projectAppliedMetatypes
-     */
-    private void storeProjectAppliedMetatypes(HashMap<String,ArrayList<String>> projectAppliedMetatypes) {
+	     try {
+	    	 
+	    	pgh = new PostgresHelper("master");
+	
+	 		pgh.connect();
+	 		 
+			pgh.execUpdate("create table doorsAppliedMetatypeIDs (project text not null, appliedmetatypeid text not null)");
+			
+			
+		} catch (SQLException e) {
+			
+			e.printStackTrace();
+			
+			if(!e.getMessage().contains("already exists")) {
+			
+				return false;
+			
+			}
+			
+		}
+	     
+	    catch (ClassNotFoundException e) {
+				
+			e.printStackTrace();
+			
+			return false;
+				
+	    }
+
     	
-    	
-    	Set<Map.Entry<String,ArrayList<String>>> configurations = projectAppliedMetatypes.entrySet();
+    	//Traverse static global data structure containing projects and applied metatype ids, then store mappings into database
+    	Set<Map.Entry<String,ArrayList<String>>> configurations = configuredAppliedMetatypeIDs.entrySet();
     	
     	ArrayList<String> curAppliedMetatypes = null;
     	
@@ -266,22 +251,35 @@ public class ConfigureAppliedMetatypes extends AbstractJavaWebScript {
     		
     		curAppliedMetatypes = curRelationship.getValue();
     		
+    		
     			for(int i=0; i < curAppliedMetatypes.size(); i++ ){
     			
-    				pgh.storeAppliedMetatypeId(curRelationship.getKey(),curAppliedMetatypes.get(i));
+    				
+    				try {
+    		  			
+    		 			pgh.execUpdate("insert into doorsAppliedMetatypeIDs (project, appliedmetatypeid) VALUES ('" + curRelationship.getKey() + "','" + curAppliedMetatypes.get(i) + "')");
+
+    		 		} 
+    		 		catch (SQLException e) {
+    		 			
+    		 			e.printStackTrace();
+    		 			
+    		 		}
+    		 		
+    		   	
+    		   }
     		
-    			
-    			}
+    
     			
     		
     	}
     	
-        	
+    	
+    	return true;
     	
     }
     
    
-
     /**
      * Validate the request and check some permissions
      */
@@ -300,5 +298,5 @@ public class ConfigureAppliedMetatypes extends AbstractJavaWebScript {
         return true;
     }
     
-
+    
 }
