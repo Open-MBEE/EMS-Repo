@@ -426,7 +426,7 @@ public class HtmlToPdfPost extends AbstractJavaWebScript {
 		style.append(headerContent);
 		style.append("    \"}");
 		style.append("    @top-right {");
-		style.append("        font-size: 9px;");
+		style.append("        font-size: 9px;min-width: 100px;");
 		style.append("        content: \"");
 		style.append(buildHeaderContentRHS(tagId, timeStamp, displayTime));
 		style.append("    \"}");
