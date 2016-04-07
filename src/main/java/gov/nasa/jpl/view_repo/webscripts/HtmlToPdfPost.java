@@ -150,17 +150,13 @@ public class HtmlToPdfPost extends AbstractJavaWebScript {
 			String htmlContent, String coverContent, String toc, String tof,
 			String tot, String indices, String headerContent,
 			String footerContent, String docNum, String displayTime,
-			String customCss, Boolean isSameWidthTableCell) {
+			String customCss) {
 		EmsScriptNode pdfNode = null;
 		String htmlFilename = String.format("%s_%s.html", docId, timeStamp)
 				.replace(":", "");
 		String pdfFilename = String.format("%s_%s.pdf", docId, timeStamp)
 				.replace(":", "");
 		String coverFilename = String.format("%s_%s_cover.html", docId,
-				timeStamp).replace(":", "");
-		String footerFilename = String.format("%s_%s_footer.html", docId,
-				timeStamp).replace(":", "");
-		String headerFilename = String.format("%s_%s_header.html", docId,
 				timeStamp).replace(":", "");
 		String zipFilename = String.format("%s_%s.zip", docId, timeStamp)
 				.replace(":", "");
@@ -183,9 +179,8 @@ public class HtmlToPdfPost extends AbstractJavaWebScript {
 			createUserFilesystemPath(user);
 			String htmlPath = saveHtmlToFilesystem(htmlFilename, htmlContent,
 					coverFilename, coverContent, toc, tof, tot, indices,
-					footerFilename, footerContent, headerFilename, headerContent,
-					tagId, timeStamp, docNum, displayTime,
-					customCss, isSameWidthTableCell);
+					footerContent, headerContent, tagId, timeStamp,
+					docNum, displayTime, customCss);
 
 			handleEmbeddedImage(coverFilename);
 			handleEmbeddedImage(htmlFilename);
@@ -193,8 +188,7 @@ public class HtmlToPdfPost extends AbstractJavaWebScript {
 			saveHtmlToRepo(htmlFilename, htmlContent);
 
 			String pdfPath = html2pdf(docId, tagId, timeStamp, htmlPath,
-					pdfFilename, coverFilename, userHomeFolder, headerFilename,
-					footerFilename, customCss);
+					pdfFilename, coverFilename, userHomeFolder, customCss);
 
 			pdfNode = savePdfToRepo(pdfPath);
 
@@ -394,13 +388,12 @@ public class HtmlToPdfPost extends AbstractJavaWebScript {
 		}
 	}
 
-	protected String addCssLinks(String htmlContent, String headerContent,
+	protected Document addCssLinks(Document document, String headerContent,
 			String footerContent, String tagId, String timeStamp,
 			String displayTime) throws Throwable {
 		log("Adding CSS links to HTML...");
-		Document document = Jsoup.parse(htmlContent, "UTF-8");
 		if (document == null) {
-			throw new Throwable("Failed to parse HTML content!");
+			throw new Throwable("Null referenced HTML document input!");
 		}
 		Element head = document.head();
 		head.append("<meta charset=\"utf-8\" />");
@@ -447,7 +440,7 @@ public class HtmlToPdfPost extends AbstractJavaWebScript {
 		// adding custom CSS link
 		head.append("<link href=\"css/customStyles.css\" rel=\"stylesheet\" type=\"text/css\" />");
 
-		return document.outerHtml();
+		return document;
 	}
 
 	/**
@@ -455,39 +448,30 @@ public class HtmlToPdfPost extends AbstractJavaWebScript {
 	 * @param htmlContent
 	 * @param coverFilename
 	 * @param coverContent
-	 * @param toc
-	 *            TODO
-	 * @param tof
-	 *            TODO
-	 * @param tot
-	 *            TODO
-	 * @param indices TODO
-	 * @param headerFilename
-	 *            TODO
 	 * @param headerContent
 	 *            TODO
 	 * @param tagId
 	 *            TODO
 	 * @param displayTime
 	 *            TODO
-	 * @param isSameWidthTableCell
-	 *            TODO
 	 * @param timestamp
 	 *            TODO
 	 * @param jplDocNum
 	 *            TODO
+	 * @param toc: table of contents. passed in from VE
+	 * @param tof: table of figures. if passed in from VE, we'd use that. otherwise, generate our default.
+	 * @param tot: table of tables. if passed in from VE, we'd use that. otherwise, generate our default.
+	 * @param indices: indexes. if passed in from VE, include it to end of document
 	 * @return path to saved HTML file.
 	 * @throws Throwable
 	 */
 	protected String saveHtmlToFilesystem(String htmlFilename,
 			String htmlContent, String coverFilename, String coverContent,
 			String toc, String tof, String tot, String indices,
-			String footerFilename, String footerContent, String headerFilename,
-			String headerContent, String tagId, String timeStamp, String docNum,
-			String displayTime, String customCss, Boolean isSameWidthTableCell) throws Throwable {
+			String footerContent, String headerContent, String tagId,
+			String timeStamp, String docNum, String displayTime, String customCss) throws Throwable {
 		log(String.format("Saving %s to filesystem...", htmlFilename));
 		Path htmlPath = Paths.get(this.fsWorkingDir, htmlFilename);
-		Path coverPath = Paths.get(this.fsWorkingDir, coverFilename);
 		Path customCssPath = Paths.get(this.fsWorkingDir, "css",
 				"customStyles.css");
 		try {
@@ -495,16 +479,17 @@ public class HtmlToPdfPost extends AbstractJavaWebScript {
 				// TODO file already exists, should we override?
 			}
 			copyCssFilesToWorkingDir();
-			htmlContent = addCssLinks(htmlContent, headerContent,
+			Document htmlDocument = loadHtmlDocument(htmlContent);
+			htmlDocument = addCssLinks(htmlDocument, headerContent,
 					footerContent, tagId, timeStamp, displayTime);
-			htmlContent = addTot(htmlContent, tot);
-			htmlContent = addTof(htmlContent, tof);
-			htmlContent = addToc(htmlContent, toc);
-			htmlContent = addIndices(htmlContent, indices);
+			htmlDocument = addTot(htmlDocument, tot);
+			htmlDocument = addTof(htmlDocument, tof);
+			htmlDocument = addToc(htmlDocument, toc);
+			htmlDocument = addIndices(htmlDocument, indices);
 
 			File htmlFile = new File(htmlPath.toString());
 			BufferedWriter bw = new BufferedWriter(new FileWriter(htmlFile));
-			bw.write(htmlContent);
+			bw.write(htmlDocument.toString());
 			bw.close();
 
 			if (!Utils.isNullOrEmpty(customCss)) {
@@ -525,121 +510,156 @@ public class HtmlToPdfPost extends AbstractJavaWebScript {
 		}
 		return htmlPath.toString();
 	}
+	
+	
+	/**
+	 * loads HTML string into a JSoup HTML Document object
+	 * @param htmlString
+	 * @return JSoup HTML Document object
+	 */
+	protected Document loadHtmlDocument(String htmlString) throws Throwable {
+		Document document = Jsoup.parse(htmlString, "UTF-8");
+		if (document == null) {
+			throw new Throwable("Failed to load HTML content!");
+		}
+		return document;
+	}
 
-	protected String addToc(String htmlContent, String toc) throws Throwable {
-		if (Utils.isNullOrEmpty(toc))
-			return htmlContent;
+	/*
+	 * adds HTML content to the start/beginning of an HTML document
+	 *
+	 * @param document: an JSoup HTML Document object
+	 * @param htmlString: an HTML string to add
+	 * @return Document: a JSoup HTML Document object
+	 * 
+	 */
+	protected Document addHtmlToStartOfDocument(Document document, String htmlString){
+		if(Utils.isNullOrEmpty(htmlString)) return document;
+		Element body = document.body();
+		if(body != null){
+			if(body.child(0) == null){
+				Element elem = document.createElement("DIV");
+				body.appendChild(elem);
+			}
+			body.child(0).before(htmlString);
+		}
+		return document;
+	}
+	
+	protected Document addToc(Document document, String toc) throws Throwable {
 		log("Adding table of contents to HTML...");
-		Document document = Jsoup.parse(htmlContent, "UTF-8");
 		if (document == null) {
-			throw new Throwable("Failed to parse HTML content!");
+			throw new Throwable("Null referenced input HTML document object!");
 		}
-		document.body().child(0).before(toc);
-		return document.outerHtml();
+		if (Utils.isNullOrEmpty(toc))
+			return document;
+		
+		return addHtmlToStartOfDocument(document, toc);
 	}
 
-	protected String addTof(String htmlContent, String tof) throws Throwable {
-		if (Utils.isNullOrEmpty(tof))
-			tof = buildTableOfFigures(htmlContent);
+	protected Document addTof(Document document, String tof) throws Throwable {
 		log("Adding list of figures to HTML...");
-		Document document = Jsoup.parse(htmlContent, "UTF-8");
 		if (document == null) {
-			throw new Throwable("Failed to parse HTML content!");
+			throw new Throwable("Null referenced input HTML document object!");
 		}
-		document.body().child(0).before(tof);
-		return document.outerHtml();
+		if (Utils.isNullOrEmpty(tof))
+			tof = buildTableOfFigures(document);
+		return addHtmlToStartOfDocument(document, tof);
 	}
 
-	protected String addTot(String htmlContent, String tot) throws Throwable {
-		if (Utils.isNullOrEmpty(tot))
-			tot = buildTableOfTables(htmlContent);
+	protected Document addTot(Document document, String tot) throws Throwable {
 		log("Adding list of tables to HTML...");
-		Document document = Jsoup.parse(htmlContent, "UTF-8");
+		if (Utils.isNullOrEmpty(tot))
+			tot = buildTableOfTables(document);
 		if (document == null) {
-			throw new Throwable("Failed to parse HTML content!");
+			throw new Throwable("Null referenced HTML document input object!");
 		}
-		document.body().child(0).before(tot);
-		return document.outerHtml();
+		return addHtmlToStartOfDocument(document, tot);
 	}
 
-	protected String addIndices(String htmlContent, String indices) throws Throwable{
-		if(Utils.isNullOrEmpty(indices)) return htmlContent;
+	protected Document addIndices(Document document, String indices) throws Throwable{
 		log("Adding indices to HTML...");
-		Document document = Jsoup.parse(htmlContent, "UTF-8");
+		if(Utils.isNullOrEmpty(indices)) return document;
+		
 		if (document == null) {
-			throw new Throwable("Failed to parse HTML content!");
+			throw new Throwable("Null referenced input HTML document object!");
 		}
 		Element elem = document.createElement("DIV");
 		document.body().appendChild(elem);
 		elem.attr("class", "indices");
 		elem.append(indices);
-		return document.outerHtml();
+		return document;
 	}
 	
-	protected String buildTableOfFigures(String htmlContent) throws Throwable {
-		StringBuffer tof = new StringBuffer();
-		Document document = Jsoup.parse(htmlContent, "UTF-8");
+	protected String buildTableOfFigures(Document document) throws Throwable {
 		if (document == null) {
-			throw new Throwable("Failed to parse HTML content!");
+			throw new Throwable("Null referenced input HTML document object!");
 		}
-		Elements figures = document.body().select("FIGURE");
-		if (figures.size() > 0) {
-			tof.append("<div class='tof'>");
-			tof.append("   <div class='header'>List of Figures</div>");
-			tof.append("   <ul>");
-			int index = 0;
-			for (Element f : figures) {
-				tof.append("  <li><a href='#");
-				tof.append(f.parent().parent().attr("id"));
-				tof.append(" '>");
-				Elements caption = f.select("> figcaption");
-				tof.append("Figure ");
-				tof.append(++index);
-				tof.append(": ");
-				if (caption != null && caption.size() > 0) {
-					tof.append(caption.get(0).text());
-				} else {
-					tof.append("Untitled");
+		StringBuffer tof = new StringBuffer();
+		Element body = document.body();
+		if (body != null) {
+			Elements figures = document.body().select("FIGURE");
+			if (figures.size() > 0) {
+				tof.append("<div class='tof'>");
+				tof.append("   <div class='header'>List of Figures</div>");
+				tof.append("   <ul>");
+				int index = 0;
+				for (Element f : figures) {
+					tof.append("  <li><a href='#");
+					tof.append(f.parent().parent().attr("id"));
+					tof.append(" '>");
+					Elements caption = f.select("> figcaption");
+					tof.append("Figure ");
+					tof.append(++index);
+					tof.append(": ");
+					if (caption != null && caption.size() > 0) {
+						tof.append(caption.get(0).text());
+					} else {
+						tof.append("Untitled");
+					}
+					tof.append("</a></li>");
 				}
-				tof.append("</a></li>");
-			}
 
-			tof.append("	</ul>");
-			tof.append("</div>");
+				tof.append("	</ul>");
+				tof.append("</div>");
+			}
 		}
 		return tof.toString();
 	}
 
-	protected String buildTableOfTables(String htmlContent) throws Throwable {
-		StringBuffer tot = new StringBuffer();
-		Document document = Jsoup.parse(htmlContent, "UTF-8");
+	protected String buildTableOfTables(Document document) throws Throwable {
+		log("Buildiing list of tables...");
 		if (document == null) {
-			throw new Throwable("Failed to parse HTML content!");
+			throw new Throwable("Null referenced input HTML document object!");
 		}
-		Elements tables = document.body().select("TABLE");
-		if (tables.size() > 0) {
-			tot.append("<div class='tot'>");
-			tot.append("   <div class='header'>List of Tables</div>");
-			tot.append("   <ul>");
-			int index = 0;
-			for (Element t : tables) {
-				tot.append("  <li><a href='#");
-				tot.append(t.parent().parent().attr("id"));
-				tot.append(" '>");
-				Elements caption = t.select("> caption");
-				tot.append("Table ");
-				tot.append(++index);
-				tot.append(": ");
-				if (caption != null && caption.size() > 0) {
-					tot.append(caption.get(0).text());
-				} else {
-					tot.append("Untitled");
+		StringBuffer tot = new StringBuffer();
+		Element body = document.body();
+		if (body != null) {
+			Elements tables = document.body().select("TABLE");
+			if (tables.size() > 0) {
+				tot.append("<div class='tot'>");
+				tot.append("   <div class='header'>List of Tables</div>");
+				tot.append("   <ul>");
+				int index = 0;
+				for (Element t : tables) {
+					tot.append("  <li><a href='#");
+					tot.append(t.parent().parent().attr("id"));
+					tot.append(" '>");
+					Elements caption = t.select("> caption");
+					tot.append("Table ");
+					tot.append(++index);
+					tot.append(": ");
+					if (caption != null && caption.size() > 0) {
+						tot.append(caption.get(0).text());
+					} else {
+						tot.append("Untitled");
+					}
+					tot.append("</a></li>");
 				}
-				tot.append("</a></li>");
-			}
 
-			tot.append("	</ul>");
-			tot.append("</div>");
+				tot.append("	</ul>");
+				tot.append("</div>");
+			}
 		}
 		return tot.toString();
 	}
@@ -658,7 +678,6 @@ public class HtmlToPdfPost extends AbstractJavaWebScript {
 			tot.append("   <ul>");
 			int figIndex = 0;
 			int tableIndex = 0;
-			String name = null;
 			String tagName = null;
 			for (Element t : tables) {
 				tot.append("  <li><a href='#");
@@ -693,8 +712,7 @@ public class HtmlToPdfPost extends AbstractJavaWebScript {
 
 	protected String html2pdf(String docId, String tagId, String timeStamp,
 			String htmlPath, String pdfFilename, String coverFilename,
-			EmsScriptNode userHomeFolder, String headerFilename,
-			String footerFilename, String customCss) throws Throwable {
+			EmsScriptNode userHomeFolder, String customCss) throws Throwable {
 		log("Converting HTML to PDF...");
 		if (!Files.exists(Paths.get(htmlPath))) {
 			throw new Throwable(
@@ -705,10 +723,6 @@ public class HtmlToPdfPost extends AbstractJavaWebScript {
 
 		String pdfPath = Paths.get(this.fsWorkingDir, pdfFilename).toString();
 		String coverPath = Paths.get(this.fsWorkingDir, coverFilename)
-				.toString();
-		String footerPath = Paths.get(this.fsWorkingDir, footerFilename)
-				.toString();
-		String headerPath = Paths.get(this.fsWorkingDir, headerFilename)
 				.toString();
 
 		List<String> command = new ArrayList<String>();
@@ -862,7 +876,6 @@ public class HtmlToPdfPost extends AbstractJavaWebScript {
 		htmlToPdfAction.setParameterValue(HtmlToPdfActionExecuter.PARAM_FOOTER, postJson.optString("footer"));
 		htmlToPdfAction.setParameterValue(HtmlToPdfActionExecuter.PARAM_DOC_NUM, postJson.optString("docNum"));
 		htmlToPdfAction.setParameterValue(HtmlToPdfActionExecuter.PARAM_DISPLAY_TIME, postJson.optString("displayTime"));
-		htmlToPdfAction.setParameterValue(HtmlToPdfActionExecuter.PARAM_IS_SAME_WIDTH_TABLE_CELL,postJson.optString("isSameWidthTableCell"));
 		htmlToPdfAction.setParameterValue(HtmlToPdfActionExecuter.PARAM_CUSTOM_CSS, postJson.optString("customCss"));
 		htmlToPdfAction.setParameterValue(HtmlToPdfActionExecuter.PARAM_TOC, postJson.optString("toc"));
 		htmlToPdfAction.setParameterValue(HtmlToPdfActionExecuter.PARAM_TOF, postJson.optString("tof"));

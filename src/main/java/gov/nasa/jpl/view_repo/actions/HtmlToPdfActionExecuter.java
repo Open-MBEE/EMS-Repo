@@ -48,7 +48,6 @@ public class HtmlToPdfActionExecuter extends ActionExecuterAbstractBase {
 	public static final String PARAM_VERSION = "version";
 	public static final String PARAM_TIME_STAMP = "timeStamp";
 	public static final String PARAM_DISPLAY_TIME = "displayTime";
-	public static final String PARAM_IS_SAME_WIDTH_TABLE_CELL = "isSameWidthTableCell";
 	public static final String PARAM_CUSTOM_CSS = "customCss";
 	public static final String PARAM_WORKSPACE = "workspace";
 	public static final String PARAM_POST_JSON = "postJson";
@@ -101,14 +100,13 @@ public class HtmlToPdfActionExecuter extends ActionExecuterAbstractBase {
 		String footerContent = (String) action.getParameterValue(PARAM_FOOTER);
 		String docNum = (String) action.getParameterValue(PARAM_DOC_NUM);
 		String displayTime = (String) action.getParameterValue(PARAM_DISPLAY_TIME);
-		Boolean isSameWidthTableCell = Boolean.valueOf((String) action.getParameterValue(PARAM_IS_SAME_WIDTH_TABLE_CELL));
 		String customCss = (String) action.getParameterValue(PARAM_CUSTOM_CSS);
 		HtmlToPdfPost htmlToPdf = new HtmlToPdfPost(repository, services);
 		htmlToPdf.setLogLevel(Level.DEBUG);
 		EmsScriptNode pdfNode = null;
 		try{
 			pdfNode = htmlToPdf.convert(documentId, tagId, timeStamp,
-				htmlContent, coverContent, toc, tof, tot, indices, headerContent, footerContent, docNum, displayTime, customCss, isSameWidthTableCell);
+				htmlContent, coverContent, toc, tof, tot, indices, headerContent, footerContent, docNum, displayTime, customCss);
 			response.append(htmlToPdf.getResponse().toString());
 			response.append("Sending email to user...");
 		}
