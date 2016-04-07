@@ -10,22 +10,24 @@ git submodule update
 
 ant -buildfile jenkinsbuild.xml
 
-cd /opt/local/MD
+export MAGICDRAW_HOME=/opt/local/MD
 
 #complete classpath to launch magicdraw via java
-export CLASSPATH=${CLASSPATH}:/opt/local/jenkins/working_dir/workspace/${JOB_ID}/bin/
-export CLASSPATH=${CLASSPATH}:/opt/local/jenkins/working_dir/workspace/${JOB_ID}/lib/*
-export CLASSPATH=${CLASSPATH}:/opt/local/jenkins/working_dir/workspace/${JOB_ID}/mdk_module/lib/*
-export CLASSPATH=${CLASSPATH}:/opt/local/jenkins/working_dir/workspace/${JOB_ID}/mdk_module/lib/test/*
-export CLASSPATH=${CLASSPATH}:/opt/local/MD/lib/*
-export CLASSPATH=${CLASSPATH}:/opt/local/MD/lib/graphics/*
-export CLASSPATH=${CLASSPATH}:/opt/local/MD/lib/webservice/*
+export CLASSPATH=$WORKSPACE/bin/
+export CLASSPATH=${CLASSPATH}:$WORKSPACE/lib/*
+export CLASSPATH=${CLASSPATH}:$WORKSPACE/mdk_module/lib/*
+export CLASSPATH=${CLASSPATH}:$WORKSPACE/mdk_module/lib/test/*
+export CLASSPATH=${CLASSPATH}:$MAGICDRAW_HOME/plugins/gov.nasa.jpl.mbee.docgen/*
+export CLASSPATH=${CLASSPATH}:$MAGICDRAW_HOME/plugins/com.nomagic.magicdraw.automaton/*
+export CLASSPATH=${CLASSPATH}:$MAGICDRAW_HOME/lib/*
+export CLASSPATH=${CLASSPATH}:$MAGICDRAW_HOME/lib/graphics/*
+export CLASSPATH=${CLASSPATH}:$MAGICDRAW_HOME/lib/webservice/*
 
-#export display of magicdraw to vnc with gui installed (required to launch)
+#echo $CLASSPATH
 export DISPLAY=:1
 
-#secondary java 7 command line test calls
-java -Xmx1200m -XX:PermSize=1200m -XX:MaxPermSize=1200m gov.nasa.jpl.mbee.emsrci.mdk.pma.PMADrone -tstrt /opt/local/jenkins/working_dir/workspace/${JOB_ID}/ -twsrv $TEAMWORK_SERVER -twprt $TEAMWORK_PORT -twusr $TEAMWORK_USER -twpsd $TEAMWORK_PASSWORD -twprj $TEAMWORK_PROJECT -mmsusr $MMS_USER -mmspsd $MMS_PASSWORD --doclist $DOCUMENTS
+#robot disabled pending determination of alternate command line argument pass in
+java -Xmx4096M -XX:PermSize=64M -XX:MaxPermSize=512M gov.nasa.jpl.mbee.emsrci.mdk.pma.PMADrone -tstrt $WORKSPACE -crdlc $CREDENTIALS -twprj $TEAMWORK_PROJECT --doclist $DOCUMENTS
 
 # Tell MMS that this job has completed.  If it&apos;s in the &quot;running&quot; state, then we assume everything executed properly
 # and change status to &quot;completed.&quot;  Otherwise, we assume that $status has been set to an appropriate value elsewhere.

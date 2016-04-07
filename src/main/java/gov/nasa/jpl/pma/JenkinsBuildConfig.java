@@ -287,7 +287,7 @@ public class JenkinsBuildConfig {
             propertiesContent.appendChild(doc.createTextNode("TEAMWORK_PORT=" + this.teamworkPort + "\n"));
             propertiesContent.appendChild(doc.createTextNode("TEAMWORK_USER=" + this.teamworkUser + "\n"));
             propertiesContent.appendChild(doc.createTextNode("TEAMWORK_PASSWORD=" + this.teamworkPassword + "\n"));
-            propertiesContent.appendChild(doc.createTextNode("WORKSPACE=" + this.workspace + "\n"));
+            propertiesContent.appendChild(doc.createTextNode("MMS_WORKSPACE=" + this.workspace + "\n"));
             injectEnvironmentVar.setAttribute("plugin", "envinject@1.91.3");
             infoElement.appendChild(propertiesContent);
             injectEnvironmentVar.appendChild(infoElement);
