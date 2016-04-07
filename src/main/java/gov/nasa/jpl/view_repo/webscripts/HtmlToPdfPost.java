@@ -490,7 +490,6 @@ public class HtmlToPdfPost extends AbstractJavaWebScript {
 		Path coverPath = Paths.get(this.fsWorkingDir, coverFilename);
 		Path customCssPath = Paths.get(this.fsWorkingDir, "css",
 				"customStyles.css");
-
 		try {
 			if (Files.exists(htmlPath)) {
 				// TODO file already exists, should we override?
@@ -934,7 +933,7 @@ public class HtmlToPdfPost extends AbstractJavaWebScript {
 			return new SimpleDateFormat("MMMM d'th,' yyyy").format(date);
 		}
 	}
-
+	
 	public void handleEmbeddedImage(String htmlFilename) throws Exception {
 		log(String.format("Saving images in %s to filesystem...", htmlFilename));
 		Path htmlPath = Paths.get(this.fsWorkingDir, htmlFilename);

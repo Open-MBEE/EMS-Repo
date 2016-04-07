@@ -1,0 +1,10 @@
+{"jobs": [{
+    "schedule": "0 18 * * *",
+    "status": "waiting",
+    "name": "Job to test post",
+    "documentation": "",
+    "owner": "_18_0_2_6620226_1456959739177_654072_15172",
+    "command": "Jenkins, DocWeb, Basic Document, Intern Testing Project",
+    "specialization": {"type": "Element"},
+    "isMetatype": false
+}]}

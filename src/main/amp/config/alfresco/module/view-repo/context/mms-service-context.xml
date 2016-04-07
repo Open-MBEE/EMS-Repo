@@ -526,4 +526,20 @@
     	<property name="repositoryHelper" ref="repositoryHelper"/>
     	<property name="services" ref="ServiceRegistry"/>
     </bean>   
+    
+   	<!-- Service for PMA -->
+	<bean id="webscript.gov.nasa.jpl.pma.job.get"
+		class="gov.nasa.jpl.view_repo.webscripts.JobGet"
+		parent="webscript" singleton="false">
+		<property name="repositoryHelper" ref="repositoryHelper" />
+		<property name="services" ref="ServiceRegistry" />
+	</bean>
+	
+   	<!-- Service for PMA -->
+	<bean id="webscript.gov.nasa.jpl.pma.job.post"
+		class="gov.nasa.jpl.view_repo.webscripts.JobPost"
+		parent="webscript" singleton="false">
+		<property name="repositoryHelper" ref="repositoryHelper" />
+		<property name="services" ref="ServiceRegistry" />
+	</bean>
 </beans>

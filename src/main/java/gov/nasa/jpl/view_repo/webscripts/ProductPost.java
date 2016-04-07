@@ -138,7 +138,7 @@ public class ProductPost extends AbstractJavaWebScript {
 		};
 
 		Date end = new Date();
-		JSONObject deltaJson = wsDiff.toJSONObject(start, end);
+		JSONObject deltaJson = wsDiff.toJSONObject(this, start, end);
 		String wsId = "master";
 		if (workspace != null)
 			wsId = workspace.getId();

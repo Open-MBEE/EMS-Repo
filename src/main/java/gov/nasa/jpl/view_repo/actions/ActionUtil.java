@@ -188,7 +188,7 @@ public class ActionUtil {
                 logNode.addAspect("cm:versionable");
             }
             // TODO: check if node for log is of type Job
-            node.createOrUpdateProperty("ems:job_log", logNode);
+            node.createOrUpdateProperty("ems:job_log", logNode.getNodeRef());
         }
 
         saveStringToFile(logNode, mimeType, services, data);
