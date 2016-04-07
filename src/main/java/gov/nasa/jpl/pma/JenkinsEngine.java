@@ -156,7 +156,7 @@ public class JenkinsEngine implements ExecutionEngine {
                 HttpEntity entity = response.getEntity();
                 String retSrc = EntityUtils.toString( entity );
                 jsonResponse = new JSONObject( retSrc );
-                logger.info( "Content of the JSON Object is "
+                logger.debug( "Content of the JSON Object is "
                                     + jsonResponse.toString() );
                 EntityUtils.consume( entity );
             } catch ( IOException e ) {
@@ -279,6 +279,22 @@ public class JenkinsEngine implements ExecutionEngine {
             
             //EntityUtils.consume( entity );
 
+            // Will throw an error if the execution fails from either incorrect
+            // setup or if the jenkinsClient has not been instantiated.
+        } catch ( IOException e ) {
+            e.printStackTrace();
+        }
+    }
+    
+    public void build() {
+        // This sets the URL to an Object specifically for making GET calls
+        HttpPost post = new HttpPost( this.executeUrl );
+        
+        try {
+            HttpResponse response = 
+                    this.jenkinsClient.execute( post, this.context );
+            
+            EntityUtils.consume( response.getEntity() );
             // Will throw an error if the execution fails from either incorrect
             // setup or if the jenkinsClient has not been instantiated.
         } catch ( IOException e ) {
@@ -536,7 +552,7 @@ public class JenkinsEngine implements ExecutionEngine {
     public boolean postConfigXml( JenkinsBuildConfig config,String jobName, boolean newConfig ) {
         String postUrl = null;
         if( newConfig ) {
-            postUrl = this.url + "/createItem?name=" + jobName;
+            postUrl = this.url + "/view/DocWeb%20(cae-ems-uat)/createItem?name=" + jobName;
         }
         else {
             postUrl = this.url + "/job/" + jobName + "/config.xml";
@@ -668,7 +684,7 @@ public class JenkinsEngine implements ExecutionEngine {
         try{
             
             this.executeUrl = this.url + "/job/" +jobName + "/build?token=" + this.jenkinsToken;
-            this.execute();
+            this.build();
         }catch(Exception e){
             e.printStackTrace();
         }

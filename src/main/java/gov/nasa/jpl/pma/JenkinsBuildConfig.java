@@ -350,8 +350,8 @@ public class JenkinsBuildConfig {
             //StreamResult       result             = new StreamResult(new File("./test-output.xml"));
             StreamResult       result             = new StreamResult(stringWriter);//new File("./test-output.xml"));
             transformer.transform(source, result);
-            StreamResult consoleResult = new StreamResult(System.out);
-            transformer.transform(source, consoleResult);
+            //StreamResult consoleResult = new StreamResult(System.out);
+            //transformer.transform(source, consoleResult);
             
             return stringWriter.toString();
         } catch (ParserConfigurationException e) {
