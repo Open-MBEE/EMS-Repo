@@ -27,7 +27,7 @@ export CLASSPATH=${CLASSPATH}:$MAGICDRAW_HOME/lib/webservice/*
 export DISPLAY=:1
 
 #robot disabled pending determination of alternate command line argument pass in
-java -Xmx4096M -XX:PermSize=64M -XX:MaxPermSize=512M gov.nasa.jpl.mbee.emsrci.mdk.pma.PMADrone -tstrt $WORKSPACE -crdlc $CREDENTIALS -twprj $TEAMWORK_PROJECT --doclist $DOCUMENTS
+java -Xmx4096M -XX:PermSize=64M -XX:MaxPermSize=512M gov.nasa.jpl.mbee.emsrci.mdk.pma.PMADrone -tstrt $WORKSPACE/ -twsrv $TEAMWORK_SERVER -twprt $TEAMWORK_PORT -twusr $TEAMWORK_USER -twpsd $TEAMWORK_PASSWORD -twprj $TEAMWORK_PROJECT -mmsusr $MMS_USER -mmspsd $MMS_PASSWORD --doclist $DOCUMENTS
 
 # Tell MMS that this job has completed.  If it&apos;s in the &quot;running&quot; state, then we assume everything executed properly
 # and change status to &quot;completed.&quot;  Otherwise, we assume that $status has been set to an appropriate value elsewhere.
