@@ -53,6 +53,7 @@ public class JenkinsBuildConfig {
     private              String  teamworkPort       = EmsConfig.get( "tw.port" );
     private              String  gitURL             = EmsConfig.get( "git.url" );
     private              String  gitCredentials     = EmsConfig.get( "git.credentials" );
+    private              String     timeOutForJob      = "60";
     
     public JenkinsBuildConfig() {
         // TODO Auto-generated constructor stub
@@ -279,15 +280,27 @@ public class JenkinsBuildConfig {
             propertiesContent.appendChild(doc.createTextNode("\n"));
             propertiesContent.appendChild(doc.createTextNode("JOB_ID=" + this.jobID + "\n"));
             propertiesContent.appendChild(doc.createTextNode("DOCUMENTS=" + this.documentID + "\n"));
-            propertiesContent.appendChild(doc.createTextNode("MMS_SERVER=" + this.mmsServer + "\n"));
+            propertiesContent.appendChild(doc.createTextNode("CREDENTIALS=/opt/local/jenkins/credentials/mms.properties\n"));
+            propertiesContent.appendChild(doc.createTextNode("TEAMWORK_PROJECT=" + this.teamworkProject + "\n"));
+            propertiesContent.appendChild(doc.createTextNode("MMS_WORKSPACE=" + this.workspace + "\n"));
             propertiesContent.appendChild(doc.createTextNode("MMS_USER=" + this.mmsUser + "\n"));
             propertiesContent.appendChild(doc.createTextNode("MMS_PASSWORD=" + this.mmsPassword + "\n"));
-            propertiesContent.appendChild(doc.createTextNode("TEAMWORK_PROJECT=" + this.teamworkProject + "\n"));
-            propertiesContent.appendChild(doc.createTextNode("TEAMWORK_SERVER=" + this.teamworkServer + "\n"));
-            propertiesContent.appendChild(doc.createTextNode("TEAMWORK_PORT=" + this.teamworkPort + "\n"));
-            propertiesContent.appendChild(doc.createTextNode("TEAMWORK_USER=" + this.teamworkUser + "\n"));
-            propertiesContent.appendChild(doc.createTextNode("TEAMWORK_PASSWORD=" + this.teamworkPassword + "\n"));
-            propertiesContent.appendChild(doc.createTextNode("MMS_WORKSPACE=" + this.workspace + "\n"));
+            propertiesContent.appendChild(doc.createTextNode("MMS_SERVER=" + this.mmsServer + "\n"));
+
+            Element hudsonTimeout = doc.createElement("hudson.plugins.build__timeout.BuildTimeoutWrapper");
+            Element strategy = doc.createElement("strategy");
+            Element timeOut = doc.createElement( "timeoutMinutes" );
+            timeOut.appendChild( doc.createTextNode( timeOutForJob ) );
+            Element operationList = doc.createElement("operationList");
+            
+            hudsonTimeout.setAttribute( "plugin", "build-timeout@1.14.1" );
+            strategy.setAttribute( "class", "hudson.plugins.build_timeout.impl.AbsoluteTimeOutStrategy");
+    
+            strategy.appendChild( operationList );
+            strategy.appendChild( timeOut );
+            hudsonTimeout.appendChild( strategy);
+            buildWrappers.appendChild( hudsonTimeout );
+            
             injectEnvironmentVar.setAttribute("plugin", "envinject@1.91.3");
             infoElement.appendChild(propertiesContent);
             injectEnvironmentVar.appendChild(infoElement);

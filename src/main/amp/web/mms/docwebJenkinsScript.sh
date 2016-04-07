@@ -27,11 +27,10 @@ export CLASSPATH=${CLASSPATH}:$MAGICDRAW_HOME/lib/webservice/*
 export DISPLAY=:1
 
 #robot disabled pending determination of alternate command line argument pass in
-java -Xmx4096M -XX:PermSize=64M -XX:MaxPermSize=512M gov.nasa.jpl.mbee.emsrci.mdk.pma.PMADrone -tstrt $WORKSPACE/ -twsrv $TEAMWORK_SERVER -twprt $TEAMWORK_PORT -twusr $TEAMWORK_USER -twpsd $TEAMWORK_PASSWORD -twprj $TEAMWORK_PROJECT -mmsusr $MMS_USER -mmspsd $MMS_PASSWORD --doclist $DOCUMENTS
+java -Xmx4096M -XX:PermSize=64M -XX:MaxPermSize=512M gov.nasa.jpl.mbee.emsrci.mdk.pma.PMADrone -tstrt $WORKSPACE/ -twprj $TEAMWORK_PROJECT -crdlc $CREDENTIALS --doclist $DOCUMENTS
 
 # Tell MMS that this job has completed.  If it&apos;s in the &quot;running&quot; state, then we assume everything executed properly
 # and change status to &quot;completed.&quot;  Otherwise, we assume that $status has been set to an appropriate value elsewhere.
 
 if [ "$status" == "running" ]; then status=completed; fi
 curl -w "\n%{http_code}\n" -u ${MMS_USER}:${MMS_PASSWORD} -X POST -H Content-Type:application/json --data "{\"jobs\":[{\"sysmlid\":\"${JOB_ID}\", \"status\":\"${status}\"}]}" "${MMS_SERVER}/alfresco/service/workspaces/master/jobs" 
-
