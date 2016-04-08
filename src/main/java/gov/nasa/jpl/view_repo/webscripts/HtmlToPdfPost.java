@@ -738,7 +738,7 @@ public class HtmlToPdfPost extends AbstractJavaWebScript {
 		command.add("-o");
 		command.add(pdfPath);
 
-		System.out.println("htmltopdf command: "
+		System.out.println("Prince commandline: "
 				+ command.toString().replace(",", ""));
 		log("htmltopdf command: " + command.toString().replace(",", ""));
 
@@ -750,21 +750,26 @@ public class HtmlToPdfPost extends AbstractJavaWebScript {
 		Process process = null;
 
 		boolean runProcess = true;
-		while (attempts++ < ATTEMPTS_MAX && !success) {
-			if (!runProcess) {
-				exec = new RuntimeExec();
-				exec.setCommand(list2Array(command));
-				execResult = exec.execute();
-			} else {
-				ProcessBuilder pb = new ProcessBuilder(command);
-				process = pb.start();
-				process.waitFor();
+		try {
+			while (attempts++ < ATTEMPTS_MAX && !success) {
+				if (!runProcess) {
+					exec = new RuntimeExec();
+					exec.setCommand(list2Array(command));
+					execResult = exec.execute();
+				} else {
+					ProcessBuilder pb = new ProcessBuilder(command);
+					process = pb.start();
+					process.waitFor();
+				}
+				if (Files.exists(Paths.get(pdfPath))) {
+					success = true;
+					break;
+				}
+				Thread.sleep(5000);
 			}
-			if (Files.exists(Paths.get(pdfPath))) {
-				success = true;
-				break;
-			}
-			Thread.sleep(5000);
+		} catch (Exception ex) {
+			ex.printStackTrace();
+			throw new Throwable(String.format("Failed to invoke PrinceXml! Please be sure PrinceXml is installed. %s", ex.getMessage()));
 		}
 
 		if (!success && !Files.exists(Paths.get(pdfPath))) {
