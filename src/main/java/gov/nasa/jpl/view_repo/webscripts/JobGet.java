@@ -29,6 +29,8 @@
 
 package gov.nasa.jpl.view_repo.webscripts;
 
+import gov.nasa.jpl.mbee.util.Utils;
+import gov.nasa.jpl.pma.JenkinsEngine;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 import gov.nasa.jpl.view_repo.webscripts.ModelGet;
@@ -87,6 +89,8 @@ public class JobGet extends ModelGet {
     @Override
     public void postProcessJson( JSONObject top ) {
         if ( jobsJsonArray != null ) {
+            // TODO -- Shouldn't we do this in JobPost, too?
+            correctJobStatus();
             top.put( "jobs", jobsJsonArray );
             // flush the jobs array so that it can be repopulated for
             // returned json after sending deltas
@@ -94,4 +98,101 @@ public class JobGet extends ModelGet {
         }
     }
 
+    public static boolean isRunning( String status ) {
+        if ( status == null ) return false;
+        if ( status.equals( "running" ) ) return true;
+        return false;
+    }
+    
+    /**
+     * If the status of a job in the MMS is running, then we need to
+     * get an update from Jenkins to see if the job died before
+     * reporting its status back to the MMS.
+     */
+    protected void correctJobStatus() {
+        if ( jobsJsonArray == null ) return;
+        for ( int i = 0; i < jobsJsonArray.length(); ++i ) {
+            JSONObject jobJson = jobsJsonArray.optJSONObject( i );
+            if ( jobJson == null ) continue;
+            String jobStatus = jobJson.optString( "status" );
+            if ( jobStatus != null ) {
+                // If the status of a job in the mms is running, then we need to
+                // get an update from Jenkins to see if the job died before
+                // reporting its status back to the mms.
+                if ( isRunning( jobStatus ) ) {
+                    JenkinsEngine eng = new JenkinsEngine();
+                    String jobName = jobJson.optString( "name" );
+                    if ( !Utils.isNullOrEmpty( jobName ) ) {
+                        JSONObject jenkinsJobJson = eng.getJob( jobName );
+                        String newStatus = getMmsStatus(jenkinsJobJson);
+                        // TODO -- The job json is corrected below, but the
+                        // status should also be changed in the model
+                        // repository.
+                        if ( !Utils.isNullOrEmpty( newStatus ) ) {
+                            jobJson.put( "status", newStatus );
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Get the job status as stored by MMS for the job json from Jenkins in the
+     * format of the examples below.
+     * 
+     * <pre>
+     *    {
+     *      "description" : " ",
+     *      "name" : "MMS_1460066361360_37dcd9e7-4d36-44aa-9dff-f36552689e74",
+     *      "url" : "https://some-jenkins-server.someorganization.com/job/MMS_1460066361360_37dcd9e7-4d36-44aa-9dff-f36552689e74/",
+     *      "color" : "notbuilt",
+     *      "lastCompletedBuild" : null
+     *    },
+     *    {
+     *      "description" : " ",
+     *      "name" : "MMS_1460067117709_b5f26105-8581-406e-b54d-8525012044c5",
+     *      "url" : "https://some-jenkins-server.someorganization.com/job/MMS_1460067117709_b5f26105-8581-406e-b54d-8525012044c5/",
+     *      "color" : "blue",
+     *      "lastCompletedBuild" : {
+     *        "duration" : 2108466,
+     *        "estimatedDuration" : 1326904,
+     *        "timestamp" : 1460072080801
+     *      }
+     *    },
+     *    {
+     *      "description" : " ",
+     *      "name" : "MMS_1460067294691_30e71836-727b-4472-95bb-c8a7e8e3b243",
+     *      "url" : "https://some-jenkins-server.someorganization.com/job/MMS_1460067294691_30e71836-727b-4472-95bb-c8a7e8e3b243/",
+     *      "color" : "red",
+     *      "lastCompletedBuild" : {
+     *        "duration" : 899,
+     *        "estimatedDuration" : 356602,
+     *        "timestamp" : 1460092200445
+     *      }
+     *    }
+     * </pre>
+     * 
+     * @param jenkinsJobJson
+     * @return
+     */
+    protected String getMmsStatus( JSONObject jenkinsJobJson ) {
+        if ( jenkinsJobJson == null ) return "job not found";
+        String color = jenkinsJobJson.optString( "color" );
+        if ( Utils.isNullOrEmpty( color ) ) return null;
+        String status = jenkinsColorToMmsStatus( color ); 
+        return status;
+    }
+
+    protected String jenkinsColorToMmsStatus( String color ) {
+        if ( Utils.isNullOrEmpty( color ) ) return null;
+        if ( color.contains( "anim" ) ) return "running";
+        if ( color.equals( "red" ) ) return "failed";
+        if ( color.equals( "red" ) ) return "failed";
+        if ( color.equals( "blue" ) ) return "completed";
+        if ( color.equals( "grey" ) ) return "aborted";
+        if ( color.equals( "gray" ) ) return "aborted";
+        if ( color.equalsIgnoreCase( "notbuilt" ) ) return "waiting";
+        return color;
+    }
 }
