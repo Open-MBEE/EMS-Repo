@@ -2,7 +2,7 @@
 
 # Tell MMS that this job has started
 status=running
-curl -w "\n%{http_code}\n" -u ${MMS_USER}:${MMS_PASSWORD} -X POST -H Content-Type:application/json --data "{\"jobs\":[{\"sysmlid\":\"${JOB_ID}\", \"status\":\"${status}\"}]}" "${MMS_SERVER}/alfresco/service/workspaces/master/jobs"
+(curl -w "\n%{http_code}\n" -u ${MMS_USER}:${MMS_PASSWORD} -X POST -H Content-Type:application/json --data "{\"jobs\":[{\"sysmlid\":\"${JOB_ID}\", \"status\":\"${status}\"}]}" "${MMS_SERVER}/alfresco/service/workspaces/master/jobs") || echo "curl failed"
 
 git submodule init
 
@@ -33,4 +33,4 @@ java -Xmx4096M -XX:PermSize=64M -XX:MaxPermSize=512M gov.nasa.jpl.mbee.emsrci.md
 # and change status to &quot;completed.&quot;  Otherwise, we assume that $status has been set to an appropriate value elsewhere.
 
 if [ "$status" == "running" ]; then status=completed; fi
-curl -w "\n%{http_code}\n" -u ${MMS_USER}:${MMS_PASSWORD} -X POST -H Content-Type:application/json --data "{\"jobs\":[{\"sysmlid\":\"${JOB_ID}\", \"status\":\"${status}\"}]}" "${MMS_SERVER}/alfresco/service/workspaces/master/jobs" 
+(curl -w "\n%{http_code}\n" -u ${MMS_USER}:${MMS_PASSWORD} -X POST -H Content-Type:application/json --data "{\"jobs\":[{\"sysmlid\":\"${JOB_ID}\", \"status\":\"${status}\"}]}" "${MMS_SERVER}/alfresco/service/workspaces/master/jobs")  echo "curl failed" 
