@@ -52,8 +52,6 @@ import org.xml.sax.SAXException;
 import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.util.EmsConfig;
 
-// import gov.nasa.jpl.view_repo.util.JSONObject;
-
 /**
  * Implements the ExecutionEngine as a way to execute jobs (events) on the
  * Jenkins server.
