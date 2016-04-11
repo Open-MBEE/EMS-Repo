@@ -321,6 +321,10 @@ public class DoorsSync extends AbstractJavaWebScript {
     
     
     
+    /***
+     * Author: Bruce Meeks Jr
+     * Description: Pulls all project applied metatype ids relationships from database
+     */
     private HashMap<String,ArrayList<String>> getConfiguredAppliedMetatypeIDs() {
  	
 		
@@ -342,7 +346,7 @@ public class DoorsSync extends AbstractJavaWebScript {
  					storedAppliedMetatypeConfigurations.put(project,new ArrayList<String>());
  					
  					storedAppliedMetatypeConfigurations.get(project).add(appliedMetatype);
- 					
+ 				
  					
  				}
  				
