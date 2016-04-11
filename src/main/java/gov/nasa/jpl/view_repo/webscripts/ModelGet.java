@@ -280,7 +280,8 @@ public class ModelGet extends AbstractJavaWebScript {
 			if (logger.isDebugEnabled())
 				logger.debug("modelId = " + modelId);
 			boolean findDeleted = depth == 0 ? true : false;
-			EmsScriptNode modelRootNode = null;
+			boolean notFoundInGraphDb = false;
+			EmsScriptNode modelRootNode = null;			
 			
 			// search using db if enabled - if not there revert to modelRootNode
 			// DB can only be used against latest at the moment
@@ -289,23 +290,34 @@ public class ModelGet extends AbstractJavaWebScript {
 			    try {
                     pgh.connect();
                     modelRootNode = NodeUtil.getNodeFromPostgresNode(pgh.getNodeFromSysmlId( modelId ));
-                    pgh.close();
                 } catch ( Exception e ) {
-                    logger.info( "Reverting to alfresco lookup. Could not find element in graph db " + modelId );
+                    logger.info( "Could not find element in graph db " + modelId );
+                } finally {
+                    pgh.close();
                 }
+			    if (modelRootNode == null) notFoundInGraphDb = true;
 			}
 			if (modelRootNode == null) {
 			    modelRootNode = findScriptNodeById(modelId,
 			                                       workspace, dateTime, findDeleted);
+			    if (modelRootNode != null && notFoundInGraphDb) {
+			        logger.warn( "Could not find element in graphDb: " + modelId );
+			        // FIXME: this needs to be tested, so it's off by default
+			        // put it back in the graph if it wasn't there. this will make things a bit slow..
+			        if ( NodeUtil.doAutoBuildGraphDb ) {
+        			        Model2Postgres m2p = new Model2Postgres(repository, services);
+        			        m2p.buildGraphDb( modelRootNode, dateTime, workspace, modelRootNode.getSysmlId() );
+			        }
+			    }
 			}
 			
 			if (logger.isDebugEnabled())
 				logger.debug("modelRootNode = " + modelRootNode);
 
 			if (modelRootNode == null) {
-				log(Level.ERROR, HttpServletResponse.SC_NOT_FOUND,
-						"Element %s not found", modelId
-								+ (dateTime == null ? "" : " at " + dateTime));
+				log(Level.INFO, HttpServletResponse.SC_NOT_FOUND,
+				    String.format("Element %s not found", modelId
+								+ (dateTime == null ? "" : " at " + dateTime)));
 				return new JSONArray();
 			} else if (modelRootNode.isDeleted()) {
 				log(Level.DEBUG, HttpServletResponse.SC_GONE,
@@ -319,7 +331,7 @@ public class ModelGet extends AbstractJavaWebScript {
 			} else {
 				handleElementHierarchy(modelRootNode, workspace, dateTime,
 						depth, new Long(0), connected, relationship,
-						new HashSet<String>());
+						new HashSet<String>(), notFoundInGraphDb);
 			}
 
 			boolean checkReadPermission = true; // TODO -- REVIEW -- Shouldn't
@@ -458,9 +470,9 @@ public class ModelGet extends AbstractJavaWebScript {
 	protected void handleElementHierarchy(EmsScriptNode root,
 			WorkspaceNode workspace, Date dateTime, final Long maxDepth,
 			Long currDepth, boolean connected, String relationship,
-			Set<String> visited) throws JSONException, SQLException {
+			Set<String> visited, boolean notFoundInGraphDb) throws JSONException, SQLException {
 
-		if (dateTime == null && !connected && NodeUtil.doGraphDb) {
+		if (!notFoundInGraphDb && dateTime == null && !connected && NodeUtil.doGraphDb) {
 			handleElementHierarchyPostgres(root, workspace, dateTime, maxDepth,
 					currDepth, connected, relationship, visited);
 		}
@@ -497,15 +509,15 @@ public class ModelGet extends AbstractJavaWebScript {
             pgh.connect();
     		    childrenNodeRefIds = pgh.getChildren(root.getSysmlId(),
     					DbEdgeTypes.REGULAR, depth);
-    			pgh.close();
 		} catch (SQLException | ClassNotFoundException e) {
 			e.printStackTrace();
+		} finally {
+		    pgh.close();
 		}
 
 		if (childrenNodeRefIds == null) return;
 		for (Pair<String, Pair<String, String>> c : childrenNodeRefIds) {
-		    // grab the current ref
-			EmsScriptNode ecn = new EmsScriptNode(new NodeRef(c.second.first),
+			EmsScriptNode ecn = new EmsScriptNode(new NodeRef(c.second.second),
 					services, response);
 
 			if (!ecn.exists() || ecn.getSysmlId().endsWith("_pkg")
@@ -513,7 +525,7 @@ public class ModelGet extends AbstractJavaWebScript {
 					|| !checkPermissions(ecn, PermissionService.READ))
 				continue;
 
-			elementsFound.put(c.first, ecn);
+			elementsFound.put(c.second.second, ecn);
 		}
 	}
 

@@ -188,13 +188,13 @@ public class ModelsGet extends AbstractJavaWebScript {
                     }
                     graphSearched = true;
                 }
-                
-                pgh.close();
             } catch ( ClassNotFoundException | SQLException e ) {
                 e.printStackTrace();
                 // clear out in case this was done midstream
                 elementsFoundJson = new JSONArray();
                 graphSearched = false;
+            } finally {
+                pgh.close();
             }
         }
         

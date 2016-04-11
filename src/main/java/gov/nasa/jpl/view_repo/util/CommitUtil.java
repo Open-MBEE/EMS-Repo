@@ -3,6 +3,7 @@ package gov.nasa.jpl.view_repo.util;
 import gov.nasa.jpl.mbee.util.Pair;
 import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.mbee.util.Utils;
+import gov.nasa.jpl.view_repo.actions.ActionUtil;
 import gov.nasa.jpl.view_repo.connections.JmsConnection;
 import gov.nasa.jpl.view_repo.connections.RestPostConnection;
 import gov.nasa.jpl.view_repo.db.PostgresHelper;
@@ -930,11 +931,22 @@ public class CommitUtil {
 			for (Pair<String, String> e : documentEdges) {
 				pgh.insertEdge(e.first, e.second, DbEdgeTypes.DOCUMENT);
 			}
-
-			pgh.close();
 		} catch (Exception e1) {
-		    logger.warn( "Could not complete graph storage" );
+		    String subject = "Graph DB storage failed, reverting to no graphDb lookup";
+		    logger.error( subject );
+		    NodeUtil.doGraphDb = false;
+		    
+		    String msg = "Need to run model2postgres to fix. Offending JSON is " + delta.toString();
+		    ServiceRegistry services = NodeUtil.getServices();
+		    String hostname = services.getSysAdminParams().getAlfrescoHost();
+            String sender = hostname + "@jpl.nasa.gov";
+		    String recipient = "mbee-dev-admin@jpl.nasa.gov";
+		    ActionUtil.sendEmailTo( sender, recipient, msg, subject,
+		                            services );
+
 			e1.printStackTrace();
+		} finally {
+		    pgh.close();
 		}
 
 	}
@@ -993,10 +1005,11 @@ public class CommitUtil {
 		try {
 			pgh.connect();
 			pgh.createBranchFromWorkspace(created.getId());
-			pgh.close();
 		} catch (ClassNotFoundException | java.sql.SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+		} finally {
+		    pgh.close();
 		}
 
 		return sendJmsMsg(branchJson, TYPE_BRANCH, null, null);

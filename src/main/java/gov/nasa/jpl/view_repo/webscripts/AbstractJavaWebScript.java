@@ -55,7 +55,6 @@ import gov.nasa.jpl.view_repo.util.EmsTransaction;
 import gov.nasa.jpl.view_repo.util.JsonDiffDiff.DiffType;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
 import gov.nasa.jpl.view_repo.util.NodeUtil.SearchType;
-import gov.nasa.jpl.view_repo.webscripts.ModelSearch.UnsupportedSearchException;
 import gov.nasa.jpl.view_repo.util.WorkspaceDiff;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 
@@ -534,11 +533,8 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
     // Updated log methods with log4j methods (still works with old log calls)
     // String concatenation replaced with C formatting; only for calls with parameters
     protected void log (Level level, int code, String msg, Object...params) {
-    	if (level.toInt() >= logger.getLevel().toInt()) {
     		String formattedMsg = formatMessage(msg,params);
-    		//String formattedMsg = formatter.format (msg,params).toString();
     		log (level,code,formattedMsg);
-    	}
 	}
     
     // If no need for string formatting (calls with no string concatenation)
@@ -2330,9 +2326,10 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
             // Calls NodeUtil's getMMSversion
             jsonVersion = getMMSversion();
             mmsVersion = jsonVersion.get("mmsVersion").toString();
-
+            
             log(Level.INFO, HttpServletResponse.SC_OK, "Comparing Versions....");
-            if (mmsVersion.equals(paramVal)) {
+            // version match only needs to be on the first two digits
+            if (mmsVersion.startsWith(paramVal)) {
                 // Compared versions matches
                 logCase = '1';
                 incorrectVersion = false;
@@ -2352,18 +2349,18 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
                 log(Level.INFO, HttpServletResponse.SC_OK, "Correct Versions");
                 break;
             case '2' :
-                log(Level.WARN, HttpServletResponse.SC_CONFLICT,
+                log(Level.WARN, HttpServletResponse.SC_NOT_ACCEPTABLE,
                         "Versions do not match! Expected Version " + mmsVersion
                                 + ". Instead received " + paramVal);
                 break;
             case '3' :
-                log(Level.ERROR, HttpServletResponse.SC_CONFLICT,
+                log(Level.ERROR, HttpServletResponse.SC_NOT_ACCEPTABLE,
                         "Missing MMS Version or invalid parameter. Received parameter:" + paramArg + " and argument:" + mmsVersion + ". Request was: " + jsonRequest);
                 break;
             // TODO: This should be removed but for the moment I am leaving this
             // in as a contingency if anything else may break this.
             case '4' :
-                log(Level.ERROR, HttpServletResponse.SC_CONFLICT,
+                log(Level.ERROR, HttpServletResponse.SC_NOT_ACCEPTABLE,
                         "Wrong MMS Version or invalid input. Expected mmsVersion="
                                 + mmsVersion + ". Instead received "
                                 + paramVal);

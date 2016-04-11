@@ -3531,13 +3531,14 @@ public class EmsScriptNode extends ScriptNode implements
                             relatedDocuments.put( relatedDoc );
                         }
                     }
-                    pgh.close();
                 } catch ( ClassNotFoundException e ) {
                     // TODO Auto-generated catch block
                     e.printStackTrace();
                 } catch ( SQLException e ) {
                     // TODO Auto-generated catch block
                     e.printStackTrace();
+                } finally {
+                    pgh.close();
                 }
             }
             if (relatedDocuments.length()>0) {
@@ -6369,10 +6370,9 @@ public class EmsScriptNode extends ScriptNode implements
 
         // Dont need the correct workspace b/c sysml ids are immutable:
         NodeRef instanceNode =
-                (NodeRef)node.getNodeRefProperty( Acm.ACM_INSTANCE, true,
+                (NodeRef)node.getNodeRefProperty( Acm.ACM_INSTANCE, false,
                                                   dateTime, node.getWorkspace() );
         putInJson( json, "instance", addNodeRefIdJSON( instanceNode ), filter );
-
     }
 
     protected
