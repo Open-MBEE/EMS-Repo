@@ -1,0 +1,1 @@
+[{"project":"myMMSMD","artifactMappings":[{"doorsArtifactType":"some_doors_resource_url","appliedMetatypeIDs":[{"id":"_11_5EAPbeta_be00301_1147873190330_159934_2220"}]}]}]

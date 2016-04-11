@@ -1,9 +1,9 @@
 <webscript>
-	<shortname>Configure Applied Metatypes</shortname>
+	<shortname>Configure Applied Metatype IDs</shortname>
 	<description>
-		Configure Applied Metatypes
+		Post/Configure Applied Metatype IDs dynamically
 	</description>
-	<url>/configappliedmetatypes</url>
+	<url>/doorsartifactmappings</url>
 	<format default="json">argument</format>
 	<authentication>user</authentication>
 	<transaction>none</transaction>

@@ -88,6 +88,9 @@ public class DoorsSync extends AbstractJavaWebScript {
             new ArrayList< Map< String, String >>();
 
     static Logger logger = Logger.getLogger( DoorsSync.class );
+    
+    HashMap<String,HashMap<String,ArrayList<String>>> artifactMappings = new HashMap<String,HashMap<String,ArrayList<String>>>();
+
 
     public DoorsSync() {
         super();
@@ -223,19 +226,99 @@ public class DoorsSync extends AbstractJavaWebScript {
 
         return model;
     }
+    
+    
+    
 
 
-    private JSONArray
-            handleRequirements( WorkspaceNode workspace, Date dateTime ) {
-        JSONArray json = new JSONArray();
-        ArrayList< String > types = new ArrayList< String >();
-        types.add( "@sysml\\:appliedMetatypes:\"" );
-        String appliedMetatype =
-                "_11_5EAPbeta_be00301_1147873190330_159934_2220";
+   private JSONArray handleRequirements(WorkspaceNode workspace, Date dateTime) {
+ 	
+ 	
+     JSONArray json = new JSONArray();
+     
+     ArrayList<String> types = new ArrayList<String>();
+     
+     types.add("@sysml\\:appliedMetatypes:\""); 
+     
+     Map<String, EmsScriptNode> foundMMSRequirements = new HashMap<String, EmsScriptNode>();
+     
+     Map<String, EmsScriptNode> requirements = new HashMap<String, EmsScriptNode>();
+     
+ 	 HashMap<String,ArrayList<String>> curArtifactMappings = new HashMap<String,ArrayList<String>>();
+ 	 
+ 	 String curArtifactType = "";
+ 	 
+ 	 ArrayList<String> curAppliedMetatypeIDs = new ArrayList<String>();
+ 	 
+ 	 String curAppliedMetatypeID = "";
+ 	
+ 	 artifactMappings = getArtifactMappings(); // will return mapping of projects, doors artifact types, and appliedmetatype ids
+ 	
+ 	
+ 	
+ 	 if( artifactMappings.size() > 0 ) {
+ 		
+ 				String curProj = "";
+ 	    
+ 				Set<Map.Entry<String,HashMap<String,ArrayList<String>>>> setOfProjArtifactMappings = artifactMappings.entrySet();
+	    	
+ 				//Traverse all project, artifact type, and appliedmetatype id mappings and search MMS for each appliedmetatype id
+ 				//Also filter on project
+ 				for(Map.Entry<String,HashMap<String,ArrayList<String>>> curProjArtifactMapping : setOfProjArtifactMappings) { //TODO adding error handling; debug output
+	    		
+ 						curArtifactMappings = curProjArtifactMapping.getValue();
+	    		
+ 						curProj =  curProjArtifactMapping.getKey();
 
-        Map< String, EmsScriptNode > requirements =
-                searchForElementsPostgres( types, appliedMetatype, false,
-                                           workspace, dateTime, null, null );
+ 						Set<Map.Entry<String,ArrayList<String>>> setOfArtifactMappings = curArtifactMappings.entrySet();
+	    		
+ 						for(Map.Entry<String,ArrayList<String>> curArtifactMapping : setOfArtifactMappings) {
+
+ 								curArtifactType = curArtifactMapping.getKey();
+		    		
+ 								curAppliedMetatypeIDs = curArtifactMapping.getValue();
+		    		 
+ 								for(int i=0; i < curAppliedMetatypeIDs.size(); i++ ){
+	    			
+ 										curAppliedMetatypeID = curAppliedMetatypeIDs.get(i);
+	    				
+ 										foundMMSRequirements = searchForElementsPostgres(types, curAppliedMetatypeID, false, workspace, dateTime, null, null);
+	
+ 										for(Map.Entry<String,EmsScriptNode> curMMSRequirement : foundMMSRequirements.entrySet()) { 
+	    		        	
+ 												//Filter on project name
+ 												if( curMMSRequirement.getValue().getProjectNode(workspace).getSysmlName().equals(curProj)) {
+	    		        		
+ 													//match found
+ 													requirements.put(curMMSRequirement.getKey(),curMMSRequirement.getValue());
+	      		
+	    		        		
+ 												}
+	    		        	
+	    		        	
+	    		            
+ 										}
+	    		        
+	    			
+ 								}
+
+ 						}
+	    				
+ 				}
+	    	
+ 	 	}
+	
+ 	 	//If no pre-loaded applied metatype id configurations were found, use default requirement
+ 	 	//And/or could also check the static global data structure in the DoorsArtifactMappings webscript which has the pre-loaded artifact mappings
+ 	 	else {
+		
+ 	 		//Use default requirement appliedmetatype id if no artifact mappings were found in database
+ 	 		requirements = searchForElementsPostgres(types, "_11_5EAPbeta_be00301_1147873190330_159934_2220", false, workspace, dateTime, null, null);
+
+ 	 	}
+ 	
+                                           
+                                           
         for ( String key : requirements.keySet() ) {
 
             JSONObject projectJson = null;
@@ -285,58 +368,7 @@ public class DoorsSync extends AbstractJavaWebScript {
     }
     
     
-    
-    /***
-     * Author: Bruce Meeks Jr
-     * Description: Pulls all project applied metatype ids relationships from database
-     */
-    private HashMap<String,ArrayList<String>> getConfiguredAppliedMetatypeIDs() {
- 	
-		
- 		HashMap<String,ArrayList<String>> storedAppliedMetatypeConfigurations = new HashMap<String,ArrayList<String>>();
- 		
- 		try {
- 		
- 			ResultSet rs = pgh.execQuery("SELECT * FROM doorsAppliedMetatypeIDs");
-
- 			while (rs.next()) {
- 				
- 				String project = rs.getString(1);
- 				
- 				String appliedMetatype = rs.getString(2);
- 				
- 				//This unique project has not been added as of yet
- 				if(!storedAppliedMetatypeConfigurations.keySet().contains(project)) {
- 					
- 					storedAppliedMetatypeConfigurations.put(project,new ArrayList<String>());
- 					
- 					storedAppliedMetatypeConfigurations.get(project).add(appliedMetatype);
- 				
- 					
- 				}
- 				
- 				//unique project has already been added , now we want to add the current applied metatype to the project
- 				else if(storedAppliedMetatypeConfigurations.keySet().contains(project)) {
- 					
- 					storedAppliedMetatypeConfigurations.get(project).add(appliedMetatype);
- 					
- 				}
- 				
- 				
- 			}
- 			
- 			
-
- 		} catch (Exception e) {
- 			e.printStackTrace();
- 		}
-
- 		
- 		return storedAppliedMetatypeConfigurations;
- 		
- 		
-    }
-    
+   
     
     /***
      * Author: Bruce Meeks Jr
@@ -1085,5 +1117,131 @@ public class DoorsSync extends AbstractJavaWebScript {
 
         return true;
     }
+    
+    
+    
+    
+    
+    private HashMap<String,HashMap<String,ArrayList<String>>> getArtifactMappings() {
+    	
+     	
+ 		HashMap<String,HashMap<String,ArrayList<String>>> artifactConfiguration = new HashMap<String,HashMap<String,ArrayList<String>>>();
+		 		
+ 		
+ 		
+ 		try {
+ 		
+ 			
+ 			ResultSet rs = pgh.execQuery("SELECT * FROM doorsartifactmappings");
+
+ 			while (rs.next()) {
+ 				
+ 				String project = rs.getString(1);
+ 				
+ 				String artifacttype = rs.getString(2);
+
+ 				String appliedMetatype = rs.getString(3);
+ 				
+ 				if(!artifactConfiguration.keySet().contains(project)) {
+ 					
+ 					artifactConfiguration.put(project, new HashMap<String,ArrayList<String>>());
+ 					artifactConfiguration.get(project).put(artifacttype, new ArrayList<String>());
+ 					artifactConfiguration.get(project).get(artifacttype).add(appliedMetatype);
+
+ 					
+ 				}
+ 				
+ 				//unique project has already been added , now we want to add the current applied metatype to the project
+ 				else  {
+ 					
+ 	 				if(!artifactConfiguration.get(project).keySet().contains(artifacttype)) {
+ 	 					
+ 	 					artifactConfiguration.get(project).put(artifacttype,new ArrayList<String>());
+ 	 					artifactConfiguration.get(project).get(artifacttype).add(appliedMetatype);
+ 	 					
+ 	 					
+ 	 				}
+ 	 				
+ 	 				else {
+ 	 					
+ 	 					artifactConfiguration.get(project).get(artifacttype).add(appliedMetatype);
+
+ 	 				}
+
+ 					
+ 	 					
+ 				}
+ 				
+ 				
+ 				
+ 				
+ 				
+ 			}
+ 			
+ 			
+
+ 		} 
+ 		catch (SQLException e) {
+ 			
+ 			e.printStackTrace();
+ 			
+ 			if (logger.isDebugEnabled()) {
+	        	
+                logger.error(HttpServletResponse.SC_INTERNAL_SERVER_ERROR + "Could not retrieve artifact mappings from the database\n");
+                e.printStackTrace();
+                
+          }
+ 			
+ 		}
+ 		catch (Exception e) {
+ 			
+ 			e.printStackTrace();
+ 			
+ 		}
+
+		
+ 		
+ 		return artifactConfiguration;
+ 		
+ 		
+ }
+    
+    private String getArtifactType(String project, String sysmlappliedmetatype) {
+        
+    	String artifactType = "defaultResourceURL";
+   
+    	Set<Map.Entry<String,ArrayList<String>>> treeOfArtifactType = artifactMappings.get(project).entrySet();
+    	
+        ArrayList<String> curAppliedMetatypeIDs = new ArrayList<String>();
+        
+    	
+    	for(Map.Entry<String,ArrayList<String>> curArtifactMapping : treeOfArtifactType) {
+    		
+    		artifactType = curArtifactMapping.getKey();
+
+    		curAppliedMetatypeIDs = curArtifactMapping.getValue();
+    		
+	    		 
+    			for(int i=0; i < curAppliedMetatypeIDs.size(); i++ ){
+    			
+    				if(curAppliedMetatypeIDs.get(i).equals(sysmlappliedmetatype)) {
+    				
+    					return artifactType;
+    		            
+    		        }
+    		        
+    			
+    			}
+    	
+    				
+    	}
+    	
+	
+    	return artifactType;
+    	
+    }
+ 
+    
+    
 
 }
