@@ -283,7 +283,7 @@ public class JenkinsEngine implements ExecutionEngine {
             // be manipulated into a string.
             HttpEntity entity = response.getEntity();
             entityString = EntityUtils.toString( entity );
-
+           
             // Converts the HttpEntity String from the response of the GET
             // call into a JSON object then consumes the entity to close the
             // connection.
@@ -571,7 +571,7 @@ public class JenkinsEngine implements ExecutionEngine {
     public boolean postConfigXml( JenkinsBuildConfig config,String jobName, boolean newConfig ) {
         String postUrl = null;
         if( newConfig ) {
-            postUrl = this.url + "/view/DocWeb/createItem?name=" + jobName;
+            postUrl = this.url + "/view/DocWeb%20(cae-ems-uat)/createItem?name=" + jobName;
         }
         else {
             postUrl = this.url + "/job/" + jobName + "/config.xml";

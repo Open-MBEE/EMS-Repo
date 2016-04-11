@@ -119,18 +119,16 @@ public class JobGet extends ModelGet {
                 // If the status of a job in the mms is running, then we need to
                 // get an update from Jenkins to see if the job died before
                 // reporting its status back to the mms.
-                if ( isRunning( jobStatus ) ) {
-                    JenkinsEngine eng = new JenkinsEngine();
-                    String jobName = jobJson.optString( "name" );
-                    if ( !Utils.isNullOrEmpty( jobName ) ) {
-                        JSONObject jenkinsJobJson = eng.getJob( jobName );
-                        String newStatus = getMmsStatus(jenkinsJobJson);
-                        // TODO -- The job json is corrected below, but the
-                        // status should also be changed in the model
-                        // repository.
-                        if ( !Utils.isNullOrEmpty( newStatus ) ) {
-                            jobJson.put( "status", newStatus );
-                        }
+                JenkinsEngine eng = new JenkinsEngine();
+                String jobName = jobJson.optString( "sysmlid" );
+                if ( !Utils.isNullOrEmpty( jobName ) ) {
+                    JSONObject jenkinsJobJson = eng.getJob( jobName );
+                    String newStatus = getMmsStatus(jenkinsJobJson);
+                    // TODO -- The job json is corrected below, but the
+                    // status should also be changed in the model
+                    // repository.
+                    if ( !Utils.isNullOrEmpty( newStatus ) ) {
+                        jobJson.put( "status", newStatus );
                     }
                 }
             }
@@ -186,12 +184,13 @@ public class JobGet extends ModelGet {
 
     protected String jenkinsColorToMmsStatus( String color ) {
         if ( Utils.isNullOrEmpty( color ) ) return null;
-        if ( color.contains( "anim" ) ) return "running";
-        if ( color.equals( "red" ) ) return "failed";
+        if ( color.contains( "anime" ) ) return "running";
         if ( color.equals( "red" ) ) return "failed";
         if ( color.equals( "blue" ) ) return "completed";
         if ( color.equals( "grey" ) ) return "aborted";
         if ( color.equals( "gray" ) ) return "aborted";
+        if ( color.equals( "yellow" ) ) return "unstable";
+        if ( color.equals( "disabled" ) ) return "disabled";
         if ( color.equalsIgnoreCase( "notbuilt" ) ) return "waiting";
         return color;
     }

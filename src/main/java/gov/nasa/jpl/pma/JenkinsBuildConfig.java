@@ -85,6 +85,35 @@ public class JenkinsBuildConfig {
             rootElement.appendChild(tempElement);
 
             tempElement = doc.createElement("properties");
+            
+            Element throttlePlugin = doc.createElement( "hudson.plugins.throttleconcurrents.ThrottleJobProperty" );
+            throttlePlugin.setAttribute("plugin", "throttle-concurrents@1.8.5");
+            Element maxPerNode = doc.createElement( "maxConcurrentPerNode" );
+            maxPerNode.appendChild( doc.createTextNode( "0" ) );
+            Element maxTotal = doc.createElement( "maxConcurrentTotal" );
+            maxTotal.appendChild( doc.createTextNode( "0" ) );
+            Element categories = doc.createElement( "categories" );
+            categories.setAttribute("class", "java.util.concurrent.CopyOnWriteArrayList");
+            Element docgen = doc.createElement( "string" );
+            docgen.appendChild( doc.createTextNode( "DocGen" ) );
+            categories.appendChild( docgen );
+            Element throttleEnabled = doc.createElement( "throttleEnabled" );
+            throttleEnabled.appendChild( doc.createTextNode( "true") );
+            Element throttleOption = doc.createElement( "throttleOption" );
+            throttleOption.appendChild( doc.createTextNode( "category" ) );
+            Element limit = doc.createElement( "limitOneJobWithMatchingParams" );
+            limit.appendChild( doc.createTextNode( "false" ) );          
+            Element paramUseForLimit = doc.createElement( "limitOneJobWithMatchingParams" );
+            
+            throttlePlugin.appendChild( paramUseForLimit );
+            throttlePlugin.appendChild( limit );
+            throttlePlugin.appendChild( throttleOption );
+            throttlePlugin.appendChild( throttleEnabled );
+            throttlePlugin.appendChild( categories );
+            throttlePlugin.appendChild( maxTotal );
+            throttlePlugin.appendChild( maxPerNode );
+            tempElement.appendChild( throttlePlugin );            
+            
             rootElement.appendChild(tempElement);
 
             tempElement = doc.createElement("scm");
