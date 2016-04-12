@@ -725,4 +725,14 @@ public class JenkinsEngine implements ExecutionEngine {
             e.printStackTrace();
         }
     }
+    
+    public void deleteJob(String jobName){
+        try{
+            
+            this.executeUrl = this.url + "/job/" +jobName + "/doDelete";
+            this.build();
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+    }
 }
