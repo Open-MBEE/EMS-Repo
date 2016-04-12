@@ -3317,11 +3317,21 @@ True,
 common_filters + ['YY_', 'MM_', 'DD_', 'HH_', 'MMS_', '"timestamp"', '"owner"', '"qualifiedId"', '"qualifiedName"'],
 ["test", "workspaces", "develop", "develop2"]
 ],
+     
+[
+10134,
+"PostPresentElemClassifiers",
+"posting job sysmlid and job stereotype ids",
+create_curl_cmd(type="POST", data="presentElemClassifiers.json", base_url=BASE_URL_WS, post_type="jobs", branch="master/"),
+True,
+common_filters + ['YY_', 'MM_', 'DD_', 'HH_', 'MMS_', '"timestamp"', '"qualifiedId"', '"qualifiedName"'],
+["test", "workspaces", "develop", "develop2"]
+],     
          
 # PMA test cases, 10134 - 10138
 
 [
-10134,
+10135,
 "PostJobViaJobPost",
 "Using the job post service to create two jobs",
 create_curl_cmd(type="POST", data="testjob.json", base_url=BASE_URL_WS, post_type="jobs", branch="master/"),
@@ -3330,7 +3340,7 @@ common_filters + ['YY_', 'MM_', 'DD_', 'HH_', 'MMS_', '"timestamp"', '"qualified
 ["test", "workspaces", "develop", "develop2"]
 ],
 [
-10135,
+10136,
 "UpdateJob",
 "Change values of existing jobs", 
 create_curl_cmd(type="POST", data="testjob_update.json", base_url=BASE_URL_WS,
@@ -3340,7 +3350,7 @@ common_filters + ['YY_', 'MM_', 'DD_', 'HH_', 'MMS_', '"timestamp"', '"qualified
 ["test", "workspaces", "develop", "develop2"]
 ],  
 [
-10136,
+10137,
 "PostJobWithJSON",
 "Posting a single job without element json",
 create_curl_cmd(type="POST", data="testjob2.json", base_url=BASE_URL_WS,
@@ -3350,7 +3360,7 @@ common_filters + ['YY_', 'MM_', 'DD_', 'HH_', 'MMS_', '"timestamp"', '"qualified
 ["test", "workspaces", "develop", "develop2"]
 ],
 [
-10137,
+10138,
 "PostJobWithEmptySchedule",
 "Posting a job with no specified schedule",
 create_curl_cmd(type="POST", data="testjob_emptySchedule.json", base_url=BASE_URL_WS, 
@@ -3360,7 +3370,7 @@ common_filters + ['YY_', 'MM_', 'DD_', 'HH_', 'MMS_', '"timestamp"', '"qualified
 ["test", "workspaces", "develop", "develop2"]
 ],  
 [
-10138,
+10139,
 "GetJobViaJobGet",
 "Obtaining the JSON for jobs contained by a view",
 create_curl_cmd(type="GET", data="jobs/_18_0_2_6620226_1456959739177_654072_15172?recurse=1", base_url=BASE_URL_WS,
