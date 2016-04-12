@@ -44,6 +44,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.log4j.*;
 import org.alfresco.repo.model.Repository;
+import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.security.PermissionService;
@@ -147,6 +148,7 @@ public class SiteGet extends AbstractJavaWebScript {
         // Create json array of info for each site in the workspace:
         //	Note: currently every workspace should contain every site created
         for (SiteInfo siteInfo : sites ) {
+            
             try {
                 siteRef = siteInfo.getNodeRef();
                 if ( dateTime != null ) {
@@ -161,7 +163,11 @@ public class SiteGet extends AbstractJavaWebScript {
     //                	if (emsNode.childByNamePath( "Models" ) == null                	        
     //                	        && !emsNode.hasAspect(Acm.ACM_SITE) ) continue;
                     name = emsNode.getName();
+                    
+                    String realUser = AuthenticationUtil.getFullyAuthenticatedUser();
+                    AuthenticationUtil.setAdminUserAsFullyAuthenticatedUser();
                 	    parentRef = (NodeRef)emsNode.getPropertyAtTime(Acm.ACM_SITE_PARENT, dateTime);
+                    AuthenticationUtil.setRunAsUser( realUser );
     
                     	// add in the sites parent site
                     	EmsScriptNode parentNode = null;
@@ -181,9 +187,12 @@ public class SiteGet extends AbstractJavaWebScript {
                     		siteJson.put("sysmlid", name);
                     		siteJson.put("name", siteInfo.getTitle());
                     		siteJson.put("parent", parentId );
+                    		
+                    		AuthenticationUtil.setAdminUserAsFullyAuthenticatedUser();
                     		siteJson.put("isCharacterization", 
                     		             emsNode.getNodeRefProperty(Acm.ACM_SITE_PACKAGE, dateTime, workspace) != null );
-    
+                    		AuthenticationUtil.setRunAsUser( realUser );
+                    		
                     		json.put(siteJson);
                     	}
                 }
