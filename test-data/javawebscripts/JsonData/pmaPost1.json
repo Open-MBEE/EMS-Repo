@@ -1,0 +1,114 @@
+{
+"jobs": [{
+    "status": "waiting",
+    "sysmlid": "jobB",
+    "isMetatype": false,
+    "editable": true,
+    "schedule": "",
+    "name": "jobB",
+    "command": "",
+    "owner": "PMA_Jobs",
+    "appliedMetatypes": ["_18_0_5_407019f_1458258829038_313297_14086"],
+    "specialization": {"type": "Element"}
+},
+{
+    "status": "waiting",
+    "sysmlid": "jobC",
+    "isMetatype": false,
+    "editable": true,
+    "schedule": "",
+    "name": "jobC",
+    "command": "",
+    "owner": "PMA_Jobs",
+    "appliedMetatypes": ["_18_0_5_407019f_1458258829038_313297_14086"],
+    "specialization": {"type": "Element"}
+},
+{
+    "status": "waiting",
+    "sysmlid": "jobD",
+    "isMetatype": false,
+    "editable": true,
+    "schedule": "",
+    "name": "jobD",
+    "command": "",
+    "owner": "PMA_Jobs",
+    "appliedMetatypes": ["_18_0_5_407019f_1458258829038_313297_14086"],
+    "specialization": {"type": "Element"}
+},
+{
+    "status": "waiting",
+    "sysmlid": "jobF",
+    "isMetatype": false,
+    "editable": true,
+    "schedule": "",
+    "name": "jobF",
+    "command": "",
+    "owner": "PMA_Jobs",
+    "appliedMetatypes": ["_18_0_5_407019f_1458258829038_313297_14086"],
+    "specialization": {"type": "Element"}
+}],
+"elements": [
+{
+    "qualifiedName": "/europa/JW_TEST/PMA Jobs",
+    "editable": true,
+    "name": "PMA_Jobs",
+    "documentation": "",
+    "owner": "123456",
+    "specialization": {"type": "Package"}
+},
+{
+    "sysmlid": "IS_B",
+    "isMetatype": false,
+    "editable": true,
+    "name": "IS_B",
+    "documentation": "",
+    "owner": "jobB",
+    "appliedMetatypes": ["_9_0_62a020a_1105704885251_933969_7897"],
+    "specialization": {
+        "slots": [],
+        "classifier": [],
+        "type": "InstanceSpecification"
+    }
+},
+{
+    "sysmlid": "IS_C",
+    "isMetatype": false,
+    "editable": true,
+    "name": "IS_C",
+    "documentation": "",
+    "owner": "jobC",
+    "appliedMetatypes": ["_9_0_62a020a_1105704885251_933969_7897"],
+    "specialization": {
+        "slots": [],
+        "classifier": [],
+        "type": "InstanceSpecification"
+    }
+},
+{
+    "sysmlid": "IS_D",
+    "isMetatype": false,
+    "editable": true,
+    "name": "IS_D",
+    "documentation": "",
+    "owner": "jobD",
+    "appliedMetatypes": ["_9_0_62a020a_1105704885251_933969_7897"],
+    "specialization": {
+        "slots": [],
+        "classifier": [],
+        "type": "InstanceSpecification"
+    }
+},
+{
+    "sysmlid": "IS_F",
+    "isMetatype": false,
+    "editable": true,
+    "name": "IS_F",
+    "documentation": "",
+    "owner": "jobF",
+    "appliedMetatypes": ["_9_0_62a020a_1105704885251_933969_7897"],
+    "specialization": {
+        "slots": [],
+        "classifier": [],
+        "type": "InstanceSpecification"
+    }
+}]}

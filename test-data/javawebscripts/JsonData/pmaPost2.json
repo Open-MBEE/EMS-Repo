@@ -1,0 +1,154 @@
+{
+"jobs": [{
+    "status": "waiting",
+    "sysmlid": "jobA",
+    "isMetatype": false,
+    "editable": true,
+    "schedule": " ",
+    "name": "jobA",
+    "command": "",
+    "owner": "PMA_Jobs",
+    "appliedMetatypes": ["_18_0_5_407019f_1458258829038_313297_14086"],
+    "specialization": {"type": "Element"}
+},
+{
+    "status": "new status",
+    "sysmlid": "jobC",
+    "isMetatype": false,
+    "editable": true,
+    "schedule": " ",
+    "name": "jobC",
+    "command": "",
+    "owner": "PMA_Jobs",
+    "appliedMetatypes": ["_18_0_5_407019f_1458258829038_313297_14086"],
+    "specialization": {"type": "Element"}
+},
+{
+    "status": "waiting",
+    "sysmlid": "jobE",
+    "isMetatype": false,
+    "editable": true,
+    "schedule": " ",
+    "name": "jobE",
+    "command": "",
+    "owner": "PMA_Jobs",
+    "appliedMetatypes": ["_18_0_5_407019f_1458258829038_313297_14086"],
+    "specialization": {"type": "Element"}
+},
+{
+    "status": "new status",
+    "sysmlid": "jobF",
+    "isMetatype": false,
+    "editable": true,
+    "schedule": " ",
+    "name": "jobF",
+    "command": "",
+    "owner": "PMA_Jobs",
+    "appliedMetatypes": ["_18_0_5_407019f_1458258829038_313297_14086"],
+    "specialization": {"type": "Element"}
+}],
+"elements": [
+{
+    "sysmlid": "IS_A-slot-_18_0_5_407019f_1458259018041_351899_14098",
+    "isMetatype": false,
+    "editable": true,
+    "name": "property_A1",
+    "documentation": "",
+    "owner": "jobA",
+    "appliedMetatypes": ["_9_0_62a020a_1105704885275_885607_7905"],
+    "specialization": {
+        "propertyType": null,
+        "isDerived": false,
+        "isSlot": true,
+        "value": [{
+            "string": "waiting",
+            "type": "LiteralString"
+        }],
+        "type": "Property"
+    }
+},
+{
+    "sysmlid": "IS_B-slot-_18_0_5_407019f_1458259018041_351899_14098",
+    "isMetatype": false,
+    "editable": true,
+    "name": "property_B1",
+    "documentation": "",
+    "owner": "jobB",
+    "appliedMetatypes": ["_9_0_62a020a_1105704885275_885607_7905"],
+    "specialization": {
+        "propertyType": null,
+        "isDerived": false,
+        "isSlot": true,
+        "value": [{
+            "string": "waiting",
+            "type": "LiteralString"
+        }],
+        "type": "Property"
+    }
+},
+{
+    "sysmlid": "IS_C-slot-_18_0_5_407019f_1458259018041_351899_14098",
+    "isMetatype": false,
+    "editable": true,
+    "name": "property_C1",
+    "documentation": "",
+    "owner": "jobC",
+    "appliedMetatypes": ["_9_0_62a020a_1105704885275_885607_7905"],
+    "specialization": {
+        "propertyType": null,
+        "isDerived": false,
+        "isSlot": true,
+        "value": [{
+            "string": "waiting",
+            "type": "LiteralString"
+        }],
+        "type": "Property"
+    }
+},
+{
+    "sysmlid": "IS_D-slot-_18_0_5_407019f_1458259018041_351899_14098",
+    "isMetatype": false,
+    "editable": true,
+    "name": "property_D1",
+    "documentation": "",
+    "owner": "jobD",
+    "appliedMetatypes": ["_9_0_62a020a_1105704885275_885607_7905"],
+    "specialization": {
+        "propertyType": null,
+        "isDerived": false,
+        "isSlot": true,
+        "value": [{
+            "string": "waiting",
+            "type": "LiteralString"
+        }],
+        "type": "Property"
+    }
+},
+{
+    "sysmlid": "IS_A",
+    "isMetatype": false,
+    "editable": true,
+    "name": "IS_A",
+    "documentation": "",
+    "owner": "jobA",
+    "appliedMetatypes": ["_9_0_62a020a_1105704885251_933969_7897"],
+    "specialization": {
+        "slots": [],
+        "classifier": [],
+        "type": "InstanceSpecification"
+    }
+},
+{
+    "sysmlid": "IS_E",
+    "isMetatype": false,
+    "editable": true,
+    "name": "IS_E",
+    "documentation": "",
+    "owner": "jobE",
+    "appliedMetatypes": ["_9_0_62a020a_1105704885251_933969_7897"],
+    "specialization": {
+        "slots": [],
+        "classifier": [],
+        "type": "InstanceSpecification"
+    }
+}]}
