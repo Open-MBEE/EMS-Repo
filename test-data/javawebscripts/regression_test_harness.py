@@ -3317,19 +3317,18 @@ True,
 common_filters + ['YY_', 'MM_', 'DD_', 'HH_', 'MMS_', '"timestamp"', '"owner"', '"qualifiedId"', '"qualifiedName"'],
 ["test", "workspaces", "develop", "develop2"]
 ],
-
+     
 [
 10134,
 "PostPresentElemClassifiers",
-"this post is required so the PMA test cases can reference sysmlids",
-create_curl_cmd(type="POST", data="presentElemClassifiers.json", base_url=BASE_URL_WS, post_type="elements", branch="master/"),
+"posting job sysmlid and job stereotype ids",
+create_curl_cmd(type="POST", data="presentElemClassifiers.json", base_url=BASE_URL_WS, post_type="jobs", branch="master/"),
 True,
 common_filters + ['YY_', 'MM_', 'DD_', 'HH_', 'MMS_', '"timestamp"', '"qualifiedId"', '"qualifiedName"'],
 ["test", "workspaces", "develop", "develop2"]
-],
+],     
          
 # PMA test cases, 10135 - 10139
-
 [
 10135,
 "PostJobViaJobPost",

@@ -2,9 +2,6 @@ package gov.nasa.jpl.pma;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-import org.xml.sax.SAXException;
 
 import com.sun.xml.fastinfoset.stax.events.Util;
 
@@ -53,6 +50,7 @@ public class JenkinsBuildConfig {
     private              String  teamworkPort       = EmsConfig.get( "tw.port" );
     private              String  gitURL             = EmsConfig.get( "git.url" );
     private              String  gitCredentials     = EmsConfig.get( "git.credentials" );
+    private              String     timeOutForJob      = "60";
     
     public JenkinsBuildConfig() {
         // TODO Auto-generated constructor stub
@@ -84,6 +82,35 @@ public class JenkinsBuildConfig {
             rootElement.appendChild(tempElement);
 
             tempElement = doc.createElement("properties");
+            
+            Element throttlePlugin = doc.createElement( "hudson.plugins.throttleconcurrents.ThrottleJobProperty" );
+            throttlePlugin.setAttribute("plugin", "throttle-concurrents@1.8.5");
+            Element maxPerNode = doc.createElement( "maxConcurrentPerNode" );
+            maxPerNode.appendChild( doc.createTextNode( "0" ) );
+            Element maxTotal = doc.createElement( "maxConcurrentTotal" );
+            maxTotal.appendChild( doc.createTextNode( "0" ) );
+            Element categories = doc.createElement( "categories" );
+            categories.setAttribute("class", "java.util.concurrent.CopyOnWriteArrayList");
+            Element docgen = doc.createElement( "string" );
+            docgen.appendChild( doc.createTextNode( "DocGen" ) );
+            categories.appendChild( docgen );
+            Element throttleEnabled = doc.createElement( "throttleEnabled" );
+            throttleEnabled.appendChild( doc.createTextNode( "true") );
+            Element throttleOption = doc.createElement( "throttleOption" );
+            throttleOption.appendChild( doc.createTextNode( "category" ) );
+            Element limit = doc.createElement( "limitOneJobWithMatchingParams" );
+            limit.appendChild( doc.createTextNode( "false" ) );          
+            Element paramUseForLimit = doc.createElement( "limitOneJobWithMatchingParams" );
+            
+            throttlePlugin.appendChild( paramUseForLimit );
+            throttlePlugin.appendChild( limit );
+            throttlePlugin.appendChild( throttleOption );
+            throttlePlugin.appendChild( throttleEnabled );
+            throttlePlugin.appendChild( categories );
+            throttlePlugin.appendChild( maxTotal );
+            throttlePlugin.appendChild( maxPerNode );
+            tempElement.appendChild( throttlePlugin );            
+            
             rootElement.appendChild(tempElement);
 
             tempElement = doc.createElement("scm");
@@ -279,15 +306,27 @@ public class JenkinsBuildConfig {
             propertiesContent.appendChild(doc.createTextNode("\n"));
             propertiesContent.appendChild(doc.createTextNode("JOB_ID=" + this.jobID + "\n"));
             propertiesContent.appendChild(doc.createTextNode("DOCUMENTS=" + this.documentID + "\n"));
-            propertiesContent.appendChild(doc.createTextNode("MMS_SERVER=" + this.mmsServer + "\n"));
+            propertiesContent.appendChild(doc.createTextNode("CREDENTIALS=/opt/local/jenkins/credentials/mms.properties\n"));
+            propertiesContent.appendChild(doc.createTextNode("TEAMWORK_PROJECT=" + this.teamworkProject + "\n"));
+            propertiesContent.appendChild(doc.createTextNode("MMS_WORKSPACE=" + this.workspace + "\n"));
             propertiesContent.appendChild(doc.createTextNode("MMS_USER=" + this.mmsUser + "\n"));
             propertiesContent.appendChild(doc.createTextNode("MMS_PASSWORD=" + this.mmsPassword + "\n"));
-            propertiesContent.appendChild(doc.createTextNode("TEAMWORK_PROJECT=" + this.teamworkProject + "\n"));
-            propertiesContent.appendChild(doc.createTextNode("TEAMWORK_SERVER=" + this.teamworkServer + "\n"));
-            propertiesContent.appendChild(doc.createTextNode("TEAMWORK_PORT=" + this.teamworkPort + "\n"));
-            propertiesContent.appendChild(doc.createTextNode("TEAMWORK_USER=" + this.teamworkUser + "\n"));
-            propertiesContent.appendChild(doc.createTextNode("TEAMWORK_PASSWORD=" + this.teamworkPassword + "\n"));
-            propertiesContent.appendChild(doc.createTextNode("WORKSPACE=" + this.workspace + "\n"));
+            propertiesContent.appendChild(doc.createTextNode("MMS_SERVER=" + this.mmsServer + "\n"));
+
+            Element hudsonTimeout = doc.createElement("hudson.plugins.build__timeout.BuildTimeoutWrapper");
+            Element strategy = doc.createElement("strategy");
+            Element timeOut = doc.createElement( "timeoutMinutes" );
+            timeOut.appendChild( doc.createTextNode( timeOutForJob ) );
+            Element operationList = doc.createElement("operationList");
+            
+            hudsonTimeout.setAttribute( "plugin", "build-timeout@1.14.1" );
+            strategy.setAttribute( "class", "hudson.plugins.build_timeout.impl.AbsoluteTimeOutStrategy");
+    
+            strategy.appendChild( operationList );
+            strategy.appendChild( timeOut );
+            hudsonTimeout.appendChild( strategy);
+            buildWrappers.appendChild( hudsonTimeout );
+            
             injectEnvironmentVar.setAttribute("plugin", "envinject@1.91.3");
             infoElement.appendChild(propertiesContent);
             injectEnvironmentVar.appendChild(infoElement);
@@ -350,8 +389,8 @@ public class JenkinsBuildConfig {
             //StreamResult       result             = new StreamResult(new File("./test-output.xml"));
             StreamResult       result             = new StreamResult(stringWriter);//new File("./test-output.xml"));
             transformer.transform(source, result);
-            StreamResult consoleResult = new StreamResult(System.out);
-            transformer.transform(source, consoleResult);
+            //StreamResult consoleResult = new StreamResult(System.out);
+            //transformer.transform(source, consoleResult);
             
             return stringWriter.toString();
         } catch (ParserConfigurationException e) {
