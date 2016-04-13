@@ -1,33 +1,5 @@
 {"elements": [
     {
-        "sysmlid": "_17_0_1_244d03ea_1319491425433_59610_23629",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "specialization": {"type": "Element"}
-    },
-    {
-        "sysmlid": "_18_0beta_9150291_1392290067481_33752_4359",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "specialization": {"type": "Element"}
-    },
-    {
-        "sysmlid": "_11_5EAPbeta_be00301_1147873226632_528960_2311",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "specialization": {"type": "Element"}
-    },
-    {
-        "sysmlid": "_17_0_5_1_407019f_1431903758416_800749_12055",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "specialization": {"type": "Element"}
-    },
-    {
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
@@ -35,125 +7,7 @@
         "specialization": {"type": "Package"}
     },
     {
-        "sysmlid": "_17_0_2_3_e9f034d_1375464993159_319060_29362",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "specialization": {"type": "Element"}
-    },
-    {
-        "sysmlid": "_17_0_5_1_407019f_1430628276506_565_12080",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "specialization": {"type": "Element"}
-    },
-    {
-        "sysmlid": "_17_0_5_1_407019f_1430628211976_255218_12002",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "specialization": {"type": "Element"}
-    },
-    {
-        "sysmlid": "_17_0_2_3_e9f034d_1375464775176_680884_29346",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "specialization": {"type": "Element"}
-    },
-    {
-        "sysmlid": "_17_0_2_3_e9f034d_1375474838722_505212_29347",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "specialization": {"type": "Element"}
-    },
-    {
         "sysmlid": "_17_0_5_1_407019f_1430628206190_469511_11978",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "specialization": {"type": "Element"}
-    },
-    {
-        "sysmlid": "_17_0_2_3_e9f034d_1375464914291_213939_29352",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "specialization": {"type": "Element"}
-    },
-    {
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "specialization": {"type": "Package"}
-    },
-    {
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "specialization": {"type": "Package"}
-    },
-    {
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "specialization": {"type": "Package"}
-    },
-    {
-        "sysmlid": "_17_0_2_3_e9f034d_1375474838719_217024_29345",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "specialization": {"type": "Element"}
-    },
-    {
-        "sysmlid": "_17_0_2_3_407019f_1390932221980_272368_29104",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "specialization": {"type": "Element"}
-    },
-    {
-        "sysmlid": "_17_0_2_3_f4a035d_1366647903992_983742_36991",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "specialization": {"type": "Element"}
-    },
-    {
-        "sysmlid": "_17_0_5_1_407019f_1431903748021_2367_12034",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "specialization": {"type": "Element"}
-    },
-    {
-        "sysmlid": "_17_0_2_3_f4a035d_1366702935947_453687_36949",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "specialization": {"type": "Element"}
-    },
-    {
-        "sysmlid": "_18_0beta_9150291_1392290115432_487113_4413",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "specialization": {"type": "Element"}
-    },
-    {
-        "sysmlid": "holding_bin_no_site_no_project",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "holding_bin",
-        "owner": "no_site_no_project",
-        "specialization": {"type": "Package"}
-    },
-    {
-        "sysmlid": "_17_0_2_3_407019f_1375477696989_696093_29350",
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
@@ -167,42 +21,28 @@
         "specialization": {"type": "Element"}
     },
     {
-        "sysmlid": "_17_0_2_3_407019f_1383079906610_910368_29070",
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
-        "specialization": {"type": "Element"}
+        "specialization": {"type": "Package"}
     },
     {
-        "sysmlid": "_17_0_2_3_e9f034d_1375464942934_241960_29357",
+        "sysmlid": "holding_bin_no_site_no_project",
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
-        "specialization": {"type": "Element"}
+        "name": "holding_bin",
+        "owner": "no_site_no_project",
+        "specialization": {"type": "Package"}
     },
     {
-        "sysmlid": "_17_0_2_3_f4a035d_1366647903995_472834_36999",
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
-        "specialization": {"type": "Element"}
+        "specialization": {"type": "Package"}
     },
     {
-        "sysmlid": "_17_0_2_3_f4a035d_1366647903994_370992_36997",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "specialization": {"type": "Element"}
-    },
-    {
-        "sysmlid": "_17_0_5_1_407019f_1431903724067_825986_11992",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "specialization": {"type": "Element"}
-    },
-    {
-        "sysmlid": "_17_0_1_244d03ea_1319490607459_890787_23148",
+        "sysmlid": "_18_0_5_407019f_1459284115836_664841_14086",
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
@@ -216,14 +56,35 @@
         "specialization": {"type": "Element"}
     },
     {
-        "sysmlid": "_11_5EAPbeta_be00301_1147873190330_159934_2220",
+        "sysmlid": "_17_0_2_3_f4a035d_1366647903995_472834_36999",
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
         "specialization": {"type": "Element"}
     },
     {
-        "sysmlid": "_17_0_5_1_407019f_1430628190151_363897_11927",
+        "sysmlid": "_17_0_2_3_e9f034d_1375464942934_241960_29357",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "specialization": {"type": "Element"}
+    },
+    {
+        "sysmlid": "_18_0_5_407019f_1458259033014_844708_14099",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "specialization": {"type": "Element"}
+    },
+    {
+        "sysmlid": "_17_0_1_244d03ea_1319490607459_890787_23148",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "specialization": {"type": "Element"}
+    },
+    {
+        "sysmlid": "_17_0_2_3_f4a035d_1366647903994_370992_36997",
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
@@ -237,21 +98,55 @@
         "specialization": {"type": "Element"}
     },
     {
-        "sysmlid": "_17_0_5_1_407019f_1430628197332_560980_11953",
+        "sysmlid": "_17_0_1_244d03ea_1319491234677_804504_23559",
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
         "specialization": {"type": "Element"}
     },
     {
-        "sysmlid": "_17_0_5_1_407019f_1431905053808_352752_11992",
+        "sysmlid": "_17_0_2_3_407019f_1375477696989_696093_29350",
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
         "specialization": {"type": "Element"}
     },
     {
-        "sysmlid": "_17_0_5_1_407019f_1430628178633_708586_11903",
+        "sysmlid": "_17_0_5_1_407019f_1431903724067_825986_11992",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "specialization": {"type": "Element"}
+    },
+    {
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "specialization": {"type": "Package"}
+    },
+    {
+        "sysmlid": "_17_0_2_3_f4a035d_1366702935947_453687_36949",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "specialization": {"type": "Element"}
+    },
+    {
+        "sysmlid": "_17_0_1_244d03ea_1319491425433_59610_23629",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "specialization": {"type": "Element"}
+    },
+    {
+        "sysmlid": "_18_0_5_407019f_1458259018041_351899_14098",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "specialization": {"type": "Element"}
+    },
+    {
+        "sysmlid": "_17_0_5_1_407019f_1430628190151_363897_11927",
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
@@ -265,6 +160,104 @@
         "specialization": {"type": "Element"}
     },
     {
+        "sysmlid": "_18_0beta_9150291_1392290067481_33752_4359",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "specialization": {"type": "Element"}
+    },
+    {
+        "sysmlid": "_17_0_2_3_e9f034d_1375474838719_217024_29345",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "specialization": {"type": "Element"}
+    },
+    {
+        "sysmlid": "_17_0_5_1_407019f_1430628211976_255218_12002",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "specialization": {"type": "Element"}
+    },
+    {
+        "sysmlid": "_17_0_5_1_407019f_1431903748021_2367_12034",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "specialization": {"type": "Element"}
+    },
+    {
+        "sysmlid": "_11_5EAPbeta_be00301_1147873190330_159934_2220",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "specialization": {"type": "Element"}
+    },
+    {
+        "sysmlid": "_17_0_2_3_f4a035d_1366647903992_983742_36991",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "specialization": {"type": "Element"}
+    },
+    {
+        "sysmlid": "_17_0_2_3_407019f_1383079906610_910368_29070",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "specialization": {"type": "Element"}
+    },
+    {
+        "sysmlid": "_17_0_2_3_e9f034d_1375464993159_319060_29362",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "specialization": {"type": "Element"}
+    },
+    {
+        "sysmlid": "_17_0_2_3_e9f034d_1375464775176_680884_29346",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "specialization": {"type": "Element"}
+    },
+    {
+        "sysmlid": "_17_0_5_1_407019f_1431905053808_352752_11992",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "specialization": {"type": "Element"}
+    },
+    {
+        "sysmlid": "_17_0_2_3_e9f034d_1375474838722_505212_29347",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "specialization": {"type": "Element"}
+    },
+    {
+        "sysmlid": "_17_0_5_1_407019f_1430628197332_560980_11953",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "specialization": {"type": "Element"}
+    },
+    {
+        "sysmlid": "_11_5EAPbeta_be00301_1147873226632_528960_2311",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "specialization": {"type": "Element"}
+    },
+    {
+        "sysmlid": "_17_0_2_3_e9f034d_1375464914291_213939_29352",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "specialization": {"type": "Element"}
+    },
+    {
         "sysmlid": "_17_0_2_3_87b0275_1371477871400_792964_43374",
         "editable": true,
         "creator": "admin",
@@ -272,7 +265,7 @@
         "specialization": {"type": "Element"}
     },
     {
-        "sysmlid": "_17_0_1_244d03ea_1319491234677_804504_23559",
+        "sysmlid": "_18_0beta_9150291_1392290115432_487113_4413",
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
@@ -284,7 +277,41 @@
         "creator": "admin",
         "modifier": "admin",
         "specialization": {"type": "Element"}
+    },
+    {
+        "sysmlid": "_17_0_5_1_407019f_1430628276506_565_12080",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "specialization": {"type": "Element"}
+    },
+    {
+        "sysmlid": "_17_0_2_3_407019f_1390932221980_272368_29104",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "specialization": {"type": "Element"}
+    },
+    {
+        "sysmlid": "_18_0_5_407019f_1458258991043_482001_14097",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "specialization": {"type": "Element"}
+    },
+    {
+        "sysmlid": "_17_0_5_1_407019f_1431903758416_800749_12055",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "specialization": {"type": "Element"}
+    },
+    {
+        "sysmlid": "_17_0_5_1_407019f_1430628178633_708586_11903",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "specialization": {"type": "Element"}
     }
 ]}
 200
-

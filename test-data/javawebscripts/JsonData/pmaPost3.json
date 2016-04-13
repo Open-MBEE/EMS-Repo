@@ -13,7 +13,7 @@
 }],
 "elements": [
 {
-    "sysmlid": "IS_G-slot-_18_0_5_407019f_1458259018041_351899_14098",
+    "sysmlid": "IS_G-slot-_18_0_5_407019f_1458258991043_482001_14097",
     "isMetatype": false,
     "editable": true,
     "name": "property_G1",
@@ -25,7 +25,7 @@
         "isDerived": false,
         "isSlot": true,
         "value": [{
-            "string": "waiting",
+            "string": "Jenkins,DocWeb,some_tw_doc,some_tw_proj",
             "type": "LiteralString"
         }],
         "type": "Property"

@@ -12,11 +12,11 @@
     "specialization": {"type": "Element"}
 },
 {
-    "status": "new status",
+    "status": "waiting",
     "sysmlid": "jobC",
     "isMetatype": false,
     "editable": true,
-    "schedule": " ",
+    "schedule": "0 21 * * *",
     "name": "jobC",
     "command": "",
     "owner": "PMA_Jobs",
@@ -36,11 +36,11 @@
     "specialization": {"type": "Element"}
 },
 {
-    "status": "new status",
+    "status": "waiting",
     "sysmlid": "jobF",
     "isMetatype": false,
     "editable": true,
-    "schedule": " ",
+    "schedule": "0 18 * * *",
     "name": "jobF",
     "command": "",
     "owner": "PMA_Jobs",
@@ -61,14 +61,14 @@
         "isDerived": false,
         "isSlot": true,
         "value": [{
-            "string": "waiting",
+            "string": " ",
             "type": "LiteralString"
         }],
         "type": "Property"
     }
 },
 {
-    "sysmlid": "IS_B-slot-_18_0_5_407019f_1458259018041_351899_14098",
+    "sysmlid": "IS_B-slot-_18_0_5_407019f_1458259033014_844708_14099",
     "isMetatype": false,
     "editable": true,
     "name": "property_B1",
@@ -80,14 +80,14 @@
         "isDerived": false,
         "isSlot": true,
         "value": [{
-            "string": "waiting",
+            "string": " ",
             "type": "LiteralString"
         }],
         "type": "Property"
     }
 },
 {
-    "sysmlid": "IS_C-slot-_18_0_5_407019f_1458259018041_351899_14098",
+    "sysmlid": "IS_C-slot-_18_0_5_407019f_1458259033014_844708_14099",
     "isMetatype": false,
     "editable": true,
     "name": "property_C1",
@@ -99,14 +99,14 @@
         "isDerived": false,
         "isSlot": true,
         "value": [{
-            "string": "waiting",
+            "string": "0 21 * * *",
             "type": "LiteralString"
         }],
         "type": "Property"
     }
 },
 {
-    "sysmlid": "IS_D-slot-_18_0_5_407019f_1458259018041_351899_14098",
+    "sysmlid": "IS_D-slot-_18_0_5_407019f_1458259033014_844708_14099",
     "isMetatype": false,
     "editable": true,
     "name": "property_D1",
@@ -118,7 +118,7 @@
         "isDerived": false,
         "isSlot": true,
         "value": [{
-            "string": "waiting",
+            "string": " ",
             "type": "LiteralString"
         }],
         "type": "Property"

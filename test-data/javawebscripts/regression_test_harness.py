@@ -3322,37 +3322,37 @@ common_filters + ['YY_', 'MM_', 'DD_', 'HH_', 'MMS_', '"timestamp"', '"owner"', 
 10134,
 "PostPresentElemClassifiers",
 "posting job sysmlid and job stereotype ids",
-create_curl_cmd(type="POST", data="presentElemClassifiers.json", base_url=BASE_URL_WS, post_type="jobs", branch="master/"),
+create_curl_cmd(type="POST", data="presentElemClassifiers.json", base_url=BASE_URL_WS, post_type="elements", branch="master/"),
 True,
 common_filters + ['YY_', 'MM_', 'DD_', 'HH_', 'MMS_', '"timestamp"', '"qualifiedId"', '"qualifiedName"'],
 ["test", "workspaces", "develop", "develop2"]
 ],     
          
-# PMA test cases, 10135 - 10139
+# PMA test cases, 10135 - 10140
 [
 10135,
-"PostJobViaJobPost",
-"Using the job post service to create two jobs",
-create_curl_cmd(type="POST", data="testjob.json", base_url=BASE_URL_WS, post_type="jobs?addToJenkins=false", branch="master/"),
+"PostJobsBCDF",
+"post jobs B, C, D, F",
+create_curl_cmd(type="POST", data="pmaPost1.json", base_url=BASE_URL_WS, post_type="jobs?addToJenkins=false", branch="master/"),
 True,
 common_filters + ['YY_', 'MM_', 'DD_', 'HH_', 'MMS_', '"timestamp"', '"qualifiedId"', '"qualifiedName"'],
 ["test", "workspaces", "develop", "develop2"]
 ],
 [
 10136,
-"UpdateJob",
+"GetJobsBCDF",
 "Change values of existing jobs", 
-create_curl_cmd(type="POST", data="testjob_update.json", base_url=BASE_URL_WS,
-                post_type="jobs?addToJenkins=false", branch="master/"),
+create_curl_cmd(type="GET", data="jobs/PMA_Jobs?recurse=1", base_url=BASE_URL_WS,
+                branch="master/"),
 True,
 common_filters + ['YY_', 'MM_', 'DD_', 'HH_', 'MMS_', '"timestamp"', '"qualifiedId"', '"qualifiedName"'],
 ["test", "workspaces", "develop", "develop2"]
 ],  
 [
 10137,
-"PostJobWithJSON",
+"PostJobsAE_and_UpdateProperties",
 "Posting a single job without element json",
-create_curl_cmd(type="POST", data="testjob2.json", base_url=BASE_URL_WS,
+create_curl_cmd(type="POST", data="pmaPost1.json", base_url=BASE_URL_WS,
                 post_type="jobs?addToJenkins=false", branch="master/"),
 True,
 common_filters + ['YY_', 'MM_', 'DD_', 'HH_', 'MMS_', '"timestamp"', '"qualifiedId"', '"qualifiedName"'],
@@ -3360,28 +3360,38 @@ common_filters + ['YY_', 'MM_', 'DD_', 'HH_', 'MMS_', '"timestamp"', '"qualified
 ],
 [
 10138,
-"PostJobWithEmptySchedule",
+"VerifyUpdate",
 "Posting a job with no specified schedule",
-create_curl_cmd(type="POST", data="testjob_emptySchedule.json", base_url=BASE_URL_WS, 
-                post_type="jobs?addToJenkins=false", branch="master/"),
+create_curl_cmd(type="GET", data="jobs/PMA_Jobs?recurse=1", base_url=BASE_URL_WS,
+                branch="master/"),
 True,
 common_filters + ['YY_', 'MM_', 'DD_', 'HH_', 'MMS_', '"timestamp"', '"qualifiedId"', '"qualifiedName"'],
 ["test", "workspaces", "develop", "develop2"]
 ],  
 [
 10139,
-"GetJobViaJobGet",
+"PostJobGwithProperties",
 "Obtaining the JSON for jobs contained by a view",
-create_curl_cmd(type="GET", data="jobs/_18_0_2_6620226_1456959739177_654072_15172?recurse=1", base_url=BASE_URL_WS,
+create_curl_cmd(type="POST", data="pmaPost3.json", base_url=BASE_URL_WS,
+                post_type="jobs?addToJenkins=false", branch="master/"),
+True,
+common_filters + ['YY_', 'MM_', 'DD_', 'HH_', 'MMS_', '"timestamp"', '"qualifiedId"', '"qualifiedName"'],
+["test", "workspaces", "develop", "develop2"]
+],   
+[
+10140,
+"GetJobG",
+"Obtaining the JSON for jobs contained by a view",
+create_curl_cmd(type="GET", data="jobs/PMA_Jobs?recurse=1", base_url=BASE_URL_WS,
                 branch="master/"),
 True,
 common_filters + ['YY_', 'MM_', 'DD_', 'HH_', 'MMS_', '"timestamp"', '"qualifiedId"', '"qualifiedName"'],
 ["test", "workspaces", "develop", "develop2"]
-],       
+],      
 
 # CAEDVO-2987: make sure folks can post to a specified holding bin
 [
-10140,
+10141,
 "PostToHoldingBin",
 "Post new element to holding bin",
 create_curl_cmd(type="POST", data="holdingBinOwner.json", base_url=BASE_URL_WS,
