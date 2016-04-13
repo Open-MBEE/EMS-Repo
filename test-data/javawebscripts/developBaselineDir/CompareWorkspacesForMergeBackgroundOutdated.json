@@ -1,6 +1,6 @@
 {
-    "status": "OUTDATED",
     "email": "admin@alfresco.com",
+    "status": "OUTDATED",
     "user": "admin",
     "workspace1": {
         "name": "wsA",
@@ -12,8 +12,8 @@
                 "documentation": "something",
                 "specialization": {
                     "propertyType": null,
-                    "isSlot": false,
                     "isDerived": false,
+                    "isSlot": false,
                     "value": [{
                         "string": "dlam_string",
                         "type": "LiteralString"
@@ -23,24 +23,29 @@
             },
             {
                 "editable": true,
+                "appliedMetatypes": ["_9_0_62a020a_1105704885298_713292_7913"],
                 "specialization": {"type": "Package"}
             },
             {
                 "editable": true,
+                "appliedMetatypes": ["_9_0_62a020a_1105704885298_713292_7913"],
                 "specialization": {"type": "Package"}
             },
             {
                 "editable": true,
+                "appliedMetatypes": ["_9_0_62a020a_1105704885298_713292_7913"],
                 "specialization": {"type": "Package"}
             },
             {
                 "editable": true,
+                "appliedMetatypes": ["_9_0_62a020a_1105704885298_713292_7913"],
                 "specialization": {"type": "Package"}
             },
             {
                 "sysmlid": "holding_bin_123456",
                 "editable": true,
                 "name": "holding_bin",
+                "appliedMetatypes": ["_9_0_62a020a_1105704885298_713292_7913"],
                 "specialization": {"type": "Package"}
             }
         ]
@@ -51,8 +56,8 @@
         "conflictedElements": [],
         "updatedElements": [{
             "name": "300",
-            "documentation": "x is x",
             "sysmlid": "x",
+            "documentation": "x is x",
             "specialization": {
                 "value": [{
                     "string": "the x value",

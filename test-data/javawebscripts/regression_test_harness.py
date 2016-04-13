@@ -52,7 +52,7 @@ None,
 create_curl_cmd(type="POST", data="elementsNew.json", base_url=BASE_URL_WS,
                 post_type="elements", branch="master/"),
 True,
-common_filters + ['YY_', 'MM_', 'DD_', 'HH_', '"owner"', '"qualifiedId"', '"qualifiedName"'],
+common_filters + holding_bin_filters,
 ["test", "workspaces", "ws", "develop", "develop2", "parsek"]
 ],
         
@@ -63,7 +63,7 @@ common_filters + ['YY_', 'MM_', 'DD_', 'HH_', '"owner"', '"qualifiedId"', '"qual
 create_curl_cmd(type="POST", data="badOwners.json", base_url=BASE_URL_WS,
                 post_type="elements", branch="master/"),
 True,
-common_filters + ['YY_', 'MM_', 'DD_', 'HH_', '"owner"', '"qualifiedId"', '"qualifiedName"'],
+common_filters + holding_bin_filters,
 ["test", "workspaces", "develop", "develop2"]
 ],
         
@@ -141,7 +141,7 @@ None,
 create_curl_cmd(type="GET", data="elements/123456?recurse=true", base_url=BASE_URL_WS,
                 branch="master/"),
 True,
-common_filters + ['YY_', 'MM_', 'DD_', 'HH_', '"MMS_', 'MMS_', '"owner"', '"qualifiedId"', '"qualifiedName"'],
+common_filters + holding_bin_filters + ['"MMS_', 'MMS_'],
 ["test", "workspaces", "develop"]
 ],
 
@@ -163,7 +163,7 @@ common_filters + ['"MMS_', 'MMS_'],
 create_curl_cmd(type="GET", data="elements/123456?depth=1", base_url=BASE_URL_WS,
                 branch="master/"),
 True,
-common_filters + ['YY_', 'MM_', 'DD_', 'HH_', '"MMS_', 'MMS_', '"owner"', '"qualifiedId"', '"qualifiedName"'],
+common_filters + holding_bin_filters + ['"MMS_', 'MMS_'],
 ["test", "workspaces", "develop"]
 ],
 
@@ -174,7 +174,7 @@ common_filters + ['YY_', 'MM_', 'DD_', 'HH_', '"MMS_', 'MMS_', '"owner"', '"qual
 create_curl_cmd(type="GET", data="elements/123456?depth=2", base_url=BASE_URL_WS,
                 branch="master/"),
 True,
-common_filters + ['YY_', 'MM_', 'DD_', 'HH_', '"MMS_', 'MMS_', '"owner"', '"qualifiedId"', '"qualifiedName"'],
+common_filters + holding_bin_filters + ['"MMS_', 'MMS_'],
 ["test", "workspaces", "develop"]
 ],
 
@@ -185,7 +185,7 @@ common_filters + ['YY_', 'MM_', 'DD_', 'HH_', '"MMS_', 'MMS_', '"owner"', '"qual
 create_curl_cmd(type="GET", data="elements/123456?depth=-1", base_url=BASE_URL_WS,
                 branch="master/"),
 True,
-common_filters + ['YY_', 'MM_', 'DD_', 'HH_', '"MMS_', 'MMS_', '"owner"', '"qualifiedId"', '"qualifiedName"'],
+common_filters + holding_bin_filters + ['"MMS_', 'MMS_'],
 ["test", "workspaces", "develop"]
 ],
 
@@ -207,7 +207,7 @@ common_filters + ['"MMS_', 'MMS_'],
 create_curl_cmd(type="GET", data="elements/300?recurse=true&connected=true", base_url=BASE_URL_WS,
                 branch="master/"),
 True,
-common_filters + ['YY_', 'MM_', 'DD_', 'HH_', '"MMS_', 'MMS_', '"owner"', '"qualifiedId"', '"qualifiedName"'],
+common_filters + holding_bin_filters + ['"MMS_', 'MMS_'],
 ["test", "workspaces", "develop"]
 ],
         
@@ -285,7 +285,7 @@ common_filters,
 create_curl_cmd(type="GET", data="search?keyword=some*", base_url=BASE_URL_WS,
                 branch="master/"),
 True,
-common_filters + ['YY_', 'MM_', 'DD_', 'HH_', '"owner"', '"qualifiedId"', '"qualifiedName"'],
+common_filters + holding_bin_filters,
 ["test", "workspaces", "develop"],
 None,
 None,
@@ -316,7 +316,7 @@ None,
 create_curl_cmd(type="GET",data="element/search?keyword=some*&maxItems=1&skipCount=1",base_url=BASE_URL_WS,
                branch="master/"),
 True, 
-common_filters + ['YY_', 'MM_', 'DD_', 'HH_', '"sysmlid"', '"owner"', '"qualifiedId"', '"qualifiedName"'],
+common_filters + holding_bin_filters + ['"sysmlid"'],
 [],
 None,
 None,
@@ -348,7 +348,7 @@ None,
 create_curl_cmd(type="DELETE", data="elements/6666", base_url=BASE_URL_WS,
                 branch="master/"),
 True,
-common_filters + ['YY_', 'MM_', 'DD_', 'HH_', '"timestamp"', '"MMS_', '"id"', '"qualifiedId"', '"version"', '"modified"', '"sequence"', '"owner"', '"qualifiedId"', '"qualifiedName"'],
+common_filters + holding_bin_filters + ['"timestamp"', '"MMS_', '"id"', '"version"', '"modified"', '"sequence"'],
 ["test", "workspaces", "develop", "develop2"]
 ],
         
@@ -521,7 +521,7 @@ common_filters + ['"branched"', '"created"', '"id"', '"qualifiedId"', '"parent"'
 create_curl_cmd(type="POST", data="x.json", base_url=BASE_URL_WS,
                 post_type="elements", branch="$gv2/"),
 True,
-common_filters + ['YY_', 'MM_', 'DD_', 'HH_', '"owner"', '"qualifiedId"', '"qualifiedName"'],
+common_filters + holding_bin_filters,
 ["test", "workspaces", "develop"],
 None,
 None,
@@ -536,7 +536,7 @@ set_read_to_gv4
 create_curl_cmd(type="GET", base_url=SERVICE_URL,
                 branch="diff/$gv1/$gv2/latest/latest?changesForMerge"),
 True,
-common_filters + ['YY_', 'MM_', 'DD_', 'HH_', '"id"', '"qualifiedId"', '"creator"', '"modifier"', '"owner"', '"qualifiedName"'],
+common_filters + holding_bin_filters + ['"id"', '"creator"', '"modifier"'],
 ["test", "workspaces", "develop"],
 None,
 None,
@@ -551,7 +551,7 @@ None
 create_curl_cmd(type="GET", base_url=SERVICE_URL,
                 branch="diff/$gv1/$gv2/latest/latest?fullCompare"),
 True,
-common_filters + ['YY_', 'MM_', 'DD_', 'HH_', '"id"', '"qualifiedId"', '"creator"', '"modifier"', '"owner"', '"qualifiedName"'],
+common_filters + holding_bin_filters + ['"id"', '"creator"', '"modifier"'],
 ["test", "workspaces", "develop"],
 None,
 None,
@@ -588,7 +588,7 @@ common_filters + ['"id"', '"qualifiedId"', '"diffTime"', '"creator"', '"modifier
 create_curl_cmd(type="GET", base_url=SERVICE_URL,
                 branch="diff/$gv1/$gv2/latest/latest?background&changesForMerge"),
 True,
-common_filters + ['YY_', 'MM_', 'DD_', 'HH_', '"id"', '"qualifiedId"', '"diffTime"', '"creator"', '"modifier"', '"owner"', '"qualifiedName"'],
+common_filters + holding_bin_filters + ['"id"', '"diffTime"', '"creator"', '"modifier"'],
 ["test", "workspaces", "develop"],
 None,
 None,
@@ -603,7 +603,7 @@ None,
 create_curl_cmd(type="GET", base_url=SERVICE_URL,
                 branch="diff/$gv1/$gv2/latest/latest?background&fullCompare"),
 True,
-common_filters + ['YY_', 'MM_', 'DD_', 'HH_', '"id"', '"qualifiedId"', '"diffTime"', '"creator"', '"modifier"', '"owner"', '"qualifiedName"'],
+common_filters + holding_bin_filters + ['"id"', '"diffTime"', '"creator"', '"modifier"'],
 ["test", "workspaces", "develop"],
 None,
 None,
@@ -618,7 +618,7 @@ None,
 create_curl_cmd(type="GET", base_url=SERVICE_URL,
                 branch="diff/$gv1/$gv2/latest/latest?changesForMerge"),
 True,
-common_filters + ['YY_', 'MM_', 'DD_', 'HH_', '"id"', '"qualifiedId"', '"diffTime"', '"creator"', '"modifier"', '"owner"', '"qualifiedName"'],
+common_filters + holding_bin_filters + ['"id"', '"diffTime"', '"creator"', '"modifier"'],
 ["test", "workspaces", "develop"],
 None,
 None,
@@ -632,7 +632,7 @@ None,
 create_curl_cmd(type="GET", base_url=SERVICE_URL,
                 branch="diff/$gv1/$gv2/latest/latest?fullCompare"),
 True,
-common_filters + ['YY_', 'MM_', 'DD_', 'HH_', '"id"', '"qualifiedId"', '"diffTime"', '"creator"', '"modifier"', '"owner"', '"qualifiedName"'],
+common_filters + holding_bin_filters + ['"id"', '"diffTime"', '"creator"', '"modifier"'],
 ["test", "workspaces", "develop"],
 None,
 None,
@@ -660,7 +660,7 @@ None,
 create_curl_cmd(type="GET", base_url=SERVICE_URL,
                 branch="diff/$gv1/$gv2/latest/latest?changesForMerge"),
 True,
-common_filters + ['YY_', 'MM_', 'DD_', 'HH_', '"id"', '"qualifiedId"', '"diffTime"', '"creator"', '"modifier"', '"owner"', '"qualifiedName"'],
+common_filters + holding_bin_filters + ['"id"', '"diffTime"', '"creator"', '"modifier"'],
 ["test", "workspaces", "develop"],
 None,
 None,
@@ -674,7 +674,7 @@ None,
 create_curl_cmd(type="GET", base_url=SERVICE_URL,
                 branch="diff/$gv1/$gv2/latest/latest?fullCompare"),
 True,
-common_filters + ['YY_', 'MM_', 'DD_', 'HH_', '"id"', '"qualifiedId"', '"diffTime"', '"creator"', '"modifier"', '"owner"', '"qualifiedName"'],
+common_filters + holding_bin_filters + ['"id"', '"diffTime"', '"creator"', '"modifier"'],
 ["test", "workspaces", "develop"],
 None,
 None,
@@ -862,7 +862,7 @@ common_filters + ['"id"', '"qualifiedId"', '"creator"', '"modifier"'],
 create_curl_cmd(type="GET", base_url=SERVICE_URL,
                 branch="diff/$gv1/$gv2/latest/latest?background&changesForMerge"),
 True,
-common_filters + ['YY_', 'MM_', 'DD_', 'HH_', '"id"', '"qualifiedId"', '"diffTime"', '"creator"', '"modifier"', '"owner"', '"qualifiedName"'],
+common_filters + holding_bin_filters + ['"id"', '"diffTime"', '"creator"', '"modifier"'],
 ["test", "workspaces", "develop"],
 ],
 
@@ -873,7 +873,7 @@ common_filters + ['YY_', 'MM_', 'DD_', 'HH_', '"id"', '"qualifiedId"', '"diffTim
 create_curl_cmd(type="GET", base_url=SERVICE_URL,
                 branch="diff/$gv1/$gv2/latest/latest?background&fullCompare"),
 True,
-common_filters + ['YY_', 'MM_', 'DD_', 'HH_', '"id"', '"qualifiedId"', '"diffTime"', '"creator"', '"modifier"', '"owner"', '"qualifiedName"'],
+common_filters + holding_bin_filters + ['"id"', '"diffTime"', '"creator"', '"modifier"'],
 ["test", "workspaces", "develop"],
 ],
 
@@ -947,7 +947,7 @@ common_filters,
 create_curl_cmd(type="POST", data="x.json", base_url=BASE_URL_WS,
                 post_type="elements", branch="$gv1/"),
 True,
-common_filters + ['YY_', 'MM_', 'DD_', 'HH_', '"owner"', '"qualifiedId"', '"qualifiedName"'],
+common_filters + holding_bin_filters,
 ["test", "workspaces", "develop"],
 None,
 None,
@@ -1011,7 +1011,7 @@ common_filters + ['"id"', '"qualifiedId"', '"timestamp"', '"creator"', '"modifie
 create_curl_cmd(type="GET", base_url=SERVICE_URL,
                 branch="diff/$gv1/$gv2/$gv3/$gv4?fullCompare"),
 True,
-common_filters + ['YY_', 'MM_', 'DD_', 'HH_', '"id"', '"qualifiedId"', '"timestamp"', '"creator"', '"modifier"', '"owner"', '"qualifiedName"'],
+common_filters + holding_bin_filters + ['"id"', '"timestamp"', '"creator"', '"modifier"'],
 ["test", "workspaces", "develop"]
 ],
 
@@ -1055,7 +1055,7 @@ common_filters + ['"id"', '"qualifiedId"', '"timestamp"', '"creator"', '"modifie
 create_curl_cmd(type="GET", base_url=SERVICE_URL,
                 branch="diff/$gv1/$gv2/$gv3/$gv4?fullCompare"),
 True,
-common_filters + ['YY_', 'MM_', 'DD_', 'HH_', '"id"', '"qualifiedId"', '"timestamp"', '"creator"', '"modifier"', '"owner"', '"qualifiedName"'],
+common_filters + holding_bin_filters + ['"id"', '"timestamp"', '"creator"', '"modifier"'],
 ["test", "workspaces", "develop"]
 ],
 
@@ -1190,7 +1190,7 @@ set_wsid_to_gv1
 create_curl_cmd(type="POST", data="a.json", base_url=BASE_URL_WS,
                 post_type="elements", branch="master/"),
 True,
-common_filters + ['YY_', 'MM_', 'DD_', 'HH_', '"owner"', '"qualifiedId"', '"qualifiedName"'],
+common_filters + holding_bin_filters,
 ["test", "workspaces", "develop", "develop2"],
 None,
 None,
@@ -1229,7 +1229,7 @@ common_filters,
 "Post element a to master.",
 create_curl_cmd(type="POST", data="a.json", base_url=BASE_URL_WS, post_type="elements", branch="master/", project_post=False),
 True,
-common_filters + ['YY_', 'MM_', 'DD_', 'HH_', '"owner"', '"qualifiedId"', '"qualifiedName"'],
+common_filters + holding_bin_filters,
 ["test", "develop"]
 ],
 
@@ -1249,7 +1249,7 @@ common_filters + ['"branched"', '"created"', '"id"', '"qualifiedId"'],
 "Post element b to master.",
 create_curl_cmd(type="POST", data="b.json", base_url=BASE_URL_WS, post_type="elements", branch="master/", project_post=False),
 True,
-common_filters + ['YY_', 'MM_', 'DD_', 'HH_', '"owner"', '"qualifiedId"', '"qualifiedName"'],
+common_filters + holding_bin_filters,
 ["test", "develop"]
 ],
 
@@ -1259,7 +1259,7 @@ common_filters + ['YY_', 'MM_', 'DD_', 'HH_', '"owner"', '"qualifiedId"', '"qual
 "Post element c to the parent workspace.",
 create_curl_cmd(type="POST", data="c.json", base_url=BASE_URL_WS, post_type="elements", branch="theParentWorkspace/", project_post=False),
 True,
-common_filters + ['YY_', 'MM_', 'DD_', 'HH_', '"owner"', '"qualifiedId"', '"qualifiedName"'],
+common_filters + holding_bin_filters,
 ["test", "develop"]
 ],
 
@@ -1279,7 +1279,7 @@ common_filters + ['"branched"', '"created"', '"id"', '"qualifiedId"', '"parent"'
 "Post element d to master.",
 create_curl_cmd(type="POST", data="d.json", base_url=BASE_URL_WS, post_type="elements", branch="master/", project_post=False),
 True,
-common_filters + ['YY_', 'MM_', 'DD_', 'HH_', '"owner"', '"qualifiedId"', '"qualifiedName"'],
+common_filters + holding_bin_filters,
 ["test", "develop"]
 ],
 
@@ -1289,7 +1289,7 @@ common_filters + ['YY_', 'MM_', 'DD_', 'HH_', '"owner"', '"qualifiedId"', '"qual
 "Post element e to the parent workspace.",
 create_curl_cmd(type="POST", data="e.json", base_url=BASE_URL_WS, post_type="elements", branch="theParentWorkspace/", project_post=False),
 True,
-common_filters + ['YY_', 'MM_', 'DD_', 'HH_', '"owner"', '"qualifiedId"', '"qualifiedName"'],
+common_filters + holding_bin_filters,
 ["test", "develop"]
 ],
 
@@ -1299,7 +1299,7 @@ common_filters + ['YY_', 'MM_', 'DD_', 'HH_', '"owner"', '"qualifiedId"', '"qual
 "Post element f to the subworkspace.",
 create_curl_cmd(type="POST", data="f.json", base_url=BASE_URL_WS, post_type="elements", branch="theSubworkspace/", project_post=False),
 True,
-common_filters + ['YY_', 'MM_', 'DD_', 'HH_', '"owner"', '"qualifiedId"', '"qualifiedName"'],
+common_filters + holding_bin_filters,
 ["test", "develop"]
 ],
 
@@ -1309,7 +1309,7 @@ common_filters + ['YY_', 'MM_', 'DD_', 'HH_', '"owner"', '"qualifiedId"', '"qual
 "Get element a in the master workspace.",
 create_curl_cmd(type="GET", data="elements/a", base_url=BASE_URL_WS, post_type="elements", branch="master/", project_post=False),
 True,
-common_filters + ['YY_', 'MM_', 'DD_', 'HH_', '"owner"', '"qualifiedId"', '"qualifiedName"'],
+common_filters + holding_bin_filters,
 ["test", "develop"]
 ],
 
@@ -1319,7 +1319,7 @@ common_filters + ['YY_', 'MM_', 'DD_', 'HH_', '"owner"', '"qualifiedId"', '"qual
 "Get element a in the parent workspace.",
 create_curl_cmd(type="GET", data="elements/a", base_url=BASE_URL_WS, post_type="elements", branch="theParentWorkspace/", project_post=False),
 True,
-common_filters + ['YY_', 'MM_', 'DD_', 'HH_', '"owner"', '"qualifiedId"', '"qualifiedName"'],
+common_filters + holding_bin_filters,
 ["test", "develop"]
 ],
 
@@ -1329,7 +1329,7 @@ common_filters + ['YY_', 'MM_', 'DD_', 'HH_', '"owner"', '"qualifiedId"', '"qual
 "Get element a in the subworkspace.",
 create_curl_cmd(type="GET", data="elements/a", base_url=BASE_URL_WS, post_type="elements", branch="theSubworkspace/", project_post=False),
 True,
-common_filters + ['YY_', 'MM_', 'DD_', 'HH_', '"owner"', '"qualifiedId"', '"qualifiedName"'],
+common_filters + holding_bin_filters,
 ["test", "develop"]
 ],
 
@@ -1339,7 +1339,7 @@ common_filters + ['YY_', 'MM_', 'DD_', 'HH_', '"owner"', '"qualifiedId"', '"qual
 "Get element b in the master workspace.",
 create_curl_cmd(type="GET", data="elements/b", base_url=BASE_URL_WS, post_type="elements", branch="master/", project_post=False),
 True,
-common_filters + ['YY_', 'MM_', 'DD_', 'HH_', '"owner"', '"qualifiedId"', '"qualifiedName"'],
+common_filters + holding_bin_filters,
 ["test", "develop"]
 ],
 
@@ -1379,7 +1379,7 @@ common_filters,
 "Get element c in the parent workspace.",
 create_curl_cmd(type="GET", data="elements/c", base_url=BASE_URL_WS, post_type="elements", branch="theParentWorkspace/", project_post=False),
 True,
-common_filters + ['YY_', 'MM_', 'DD_', 'HH_', '"owner"', '"qualifiedId"', '"qualifiedName"'],
+common_filters + holding_bin_filters,
 ["test", "develop"]
 ],
 
@@ -1389,7 +1389,7 @@ common_filters + ['YY_', 'MM_', 'DD_', 'HH_', '"owner"', '"qualifiedId"', '"qual
 "Get element c in the subworkspace.",
 create_curl_cmd(type="GET", data="elements/c", base_url=BASE_URL_WS, post_type="elements", branch="theSubworkspace/", project_post=False),
 True,
-common_filters + ['YY_', 'MM_', 'DD_', 'HH_', '"owner"', '"qualifiedId"', '"qualifiedName"'],
+common_filters + holding_bin_filters,
 ["test", "develop"]
 ],
 
@@ -1399,7 +1399,7 @@ common_filters + ['YY_', 'MM_', 'DD_', 'HH_', '"owner"', '"qualifiedId"', '"qual
 "Get element d in the master workspace.",
 create_curl_cmd(type="GET", data="elements/d", base_url=BASE_URL_WS, post_type="elements", branch="master/", project_post=False),
 True,
-common_filters + ['YY_', 'MM_', 'DD_', 'HH_', '"owner"', '"qualifiedId"', '"qualifiedName"'],
+common_filters + holding_bin_filters,
 ["test", "develop"]
 ],
 
@@ -1439,7 +1439,7 @@ common_filters,
 "Get element e in the parent workspace.",
 create_curl_cmd(type="GET", data="elements/e", base_url=BASE_URL_WS, post_type="elements", branch="theParentWorkspace/", project_post=False),
 True,
-common_filters + ['YY_', 'MM_', 'DD_', 'HH_', '"owner"', '"qualifiedId"', '"qualifiedName"'],
+common_filters + holding_bin_filters,
 ["test", "develop"]
 ],
 
@@ -1479,7 +1479,7 @@ common_filters,
 "Get element f in the subworkspace.",
 create_curl_cmd(type="GET", data="elements/f", base_url=BASE_URL_WS, post_type="elements", branch="theSubworkspace/", project_post=False),
 True,
-common_filters + ['YY_', 'MM_', 'DD_', 'HH_', '"owner"', '"qualifiedId"', '"qualifiedName"'],
+common_filters + holding_bin_filters,
 ["test", "develop"]
 ],
         
@@ -1700,7 +1700,7 @@ create_curl_cmd(type="POST", base_url=BASE_URL_WS,
                 branch="master/sites/demo3site/",
                 post_type="elements"),
 True,
-common_filters + ['YY_', 'MM_', 'DD_', 'HH_', '"MMS_', 'MMS_', '"owner"', '"qualifiedId"', '"qualifiedName"'],
+common_filters + holding_bin_filters + ['"MMS_', 'MMS_'],
 ["test", "workspaces", "develop", "develop2"]
 ],
         
@@ -1774,7 +1774,7 @@ common_filters,
 create_curl_cmd(type="POST", data="x.json", base_url=BASE_URL_WS,
                 post_type="elements", branch="master/sites/europa/"),
 True,
-common_filters + ['YY_', 'MM_', 'DD_', 'HH_', '"owner"', '"qualifiedId"', '"qualifiedName"'],
+common_filters + holding_bin_filters,
 ["test", "workspaces", "develop", "develop2"],
 None,
 None,
@@ -2027,7 +2027,7 @@ None,
 create_curl_cmd(type="POST", data="productsDowngrade.json", base_url=BASE_URL_WS,
                 post_type="elements", branch="master/"),
 True,
-common_filters + ['YY_', 'MM_', 'DD_', 'HH_', '"owner"', '"qualifiedId"', '"qualifiedName"'],
+common_filters + holding_bin_filters,
 ["test", "workspaces", "develop", "develop2"]
 ],
 
@@ -2038,7 +2038,7 @@ common_filters + ['YY_', 'MM_', 'DD_', 'HH_', '"owner"', '"qualifiedId"', '"qual
 create_curl_cmd(type="POST", data="viewDowngrade.json", base_url=BASE_URL_WS,
                 post_type="elements", branch="master/"),
 True,
-common_filters + ['YY_', 'MM_', 'DD_', 'HH_', '"owner"', '"qualifiedId"', '"qualifiedName"'],
+common_filters + holding_bin_filters,
 ["test", "workspaces", "develop", "develop2"]
 ],
 
@@ -2049,7 +2049,7 @@ common_filters + ['YY_', 'MM_', 'DD_', 'HH_', '"owner"', '"qualifiedId"', '"qual
 create_curl_cmd(type="POST", data="elementDowngrade.json", base_url=BASE_URL_WS,
                 post_type="elements", branch="master/"),
 True,
-common_filters + ['YY_', 'MM_', 'DD_', 'HH_', '"owner"', '"qualifiedId"', '"qualifiedName"'],
+common_filters + holding_bin_filters,
 ["test", "workspaces", "develop", "develop2"],
 None,
 None,
@@ -2106,7 +2106,7 @@ common_filters + ['"timestamp"', '"MMS_', '"id"', '"qualifiedId"', '"version"', 
 create_curl_cmd(type="POST", data="newElement.json", base_url=BASE_URL_WS,
                 post_type="elements", branch="$gv1/"),
 True,
-common_filters + ['YY_', 'MM_', 'DD_', 'HH_', '"owner"', '"qualifiedId"', '"qualifiedName"'],
+common_filters + holding_bin_filters,
 ["test", "workspaces", "develop", "develop2"]
 ],
         
@@ -2129,7 +2129,7 @@ common_filters,
 create_curl_cmd(type="GET", base_url=SERVICE_URL,
                 branch="diff/$gv2/$gv1/latest/latest?changesForMerge"),
 True,
-common_filters + ['YY_', 'MM_', 'DD_', 'HH_', '"id"', '"qualifiedId"', '"creator"', '"modifier"', '"owner"', '"qualifiedName"'],
+common_filters + holding_bin_filters + ['"id"', '"creator"', '"modifier"'],
 ["test", "workspaces", "develop"],
 None,
 None,
@@ -2143,7 +2143,7 @@ set_json_output_to_gv3
 create_curl_cmd(type="GET", base_url=SERVICE_URL,
                 branch="diff/$gv2/$gv1/latest/latest?fullCompare"),
 True,
-common_filters + ['YY_', 'MM_', 'DD_', 'HH_', '"id"', '"qualifiedId"', '"creator"', '"modifier"', '"owner"', '"qualifiedName"'],
+common_filters + holding_bin_filters + ['"id"', '"creator"', '"modifier"'],
 ["test", "workspaces", "develop"],
 None,
 None,
@@ -2157,7 +2157,7 @@ set_json_output_to_gv3
 "Post a diff to merge workspaces",
 'curl %s %s \'$gv3\' "%sdiff"' % (CURL_FLAGS, CURL_POST_FLAGS, SERVICE_URL),
 True,
-common_filters + ['YY_', 'MM_', 'DD_', 'HH_', '"id"', '"qualifiedId"', '"timestamp"', '"sequence"', '"creator"', '"modifier"', '"owner"', '"qualifiedName"'],
+common_filters + holding_bin_filters + ['"id"', '"timestamp"', '"sequence"', '"creator"', '"modifier"'],
 ["test", "workspaces", "develop"],
 ],
        
@@ -2169,7 +2169,7 @@ common_filters + ['YY_', 'MM_', 'DD_', 'HH_', '"id"', '"qualifiedId"', '"timesta
 create_curl_cmd(type="GET", base_url=SERVICE_URL,
                 branch="diff/$gv2/$gv1/latest/latest?changesForMerge"),
 True,
-common_filters + ['YY_', 'MM_', 'DD_', 'HH_', '"id"', '"qualifiedId"', '"creator"', '"modifier"', '"owner"', '"qualifiedName"'],
+common_filters + holding_bin_filters + ['"id"', '"creator"', '"modifier"'],
 ["test", "workspaces", "develop"],
 ],
 
@@ -2180,7 +2180,7 @@ common_filters + ['YY_', 'MM_', 'DD_', 'HH_', '"id"', '"qualifiedId"', '"creator
 create_curl_cmd(type="GET", base_url=SERVICE_URL,
                 branch="diff/$gv2/$gv1/latest/latest?fullCompare"),
 True,
-common_filters + ['YY_', 'MM_', 'DD_', 'HH_', '"id"', '"qualifiedId"', '"creator"', '"modifier"', '"owner"', '"qualifiedName"'],
+common_filters + holding_bin_filters + ['"id"', '"creator"', '"modifier"'],
 ["test", "workspaces", "develop"],
 ],
 
@@ -2204,7 +2204,7 @@ common_filters + ['YY_', 'MM_', 'DD_', 'HH_', '"id"', '"qualifiedId"', '"creator
 create_curl_cmd(type="POST", data="operation.json", base_url=BASE_URL_WS,
                 post_type="elements?expression=1%2B1", branch="master/"),
 True,
-common_filters + ['YY_', 'MM_', 'DD_', 'HH_', 'MMS_', '"owner"', '"qualifiedId"', '"qualifiedName"'],
+common_filters + holding_bin_filters + ['MMS_'],
 ["test", "workspaces", "develop", "develop2", "parsek"]
 ],
 
@@ -2215,7 +2215,7 @@ common_filters + ['YY_', 'MM_', 'DD_', 'HH_', 'MMS_', '"owner"', '"qualifiedId"'
 create_curl_cmd(type="POST", data="onePlusOne.k", base_url=BASE_URL_WS,
                 post_type="elements?evaluate", branch="master/"),
 True,
-common_filters + ['YY_', 'MM_', 'DD_', 'HH_', 'MMS_', '"evaluationResult"', '"owner"', '"qualifiedId"', '"qualifiedName"'],
+common_filters + holding_bin_filters + ['MMS_', '"evaluationResult"'],
 ["test", "workspaces", "develop", "develop2", "parsek"]
 ],
 
@@ -2463,7 +2463,7 @@ None
 create_curl_cmd(type="POST", data="nullElements.json", base_url=BASE_URL_WS,
                 post_type="elements", branch="master/"),
 True,
-common_filters + ['YY_', 'MM_', 'DD_', 'HH_', '"owner"', '"qualifiedId"', '"qualifiedName"'],
+common_filters + holding_bin_filters,
 ["test", "workspaces", "develop", "develop2"]
 ],
         
@@ -2559,7 +2559,7 @@ common_filters,
 create_curl_cmd(type="GET", data="elements/123456?recurse=true", base_url=BASE_URL_WS,
                 branch="master/"),
 True,
-common_filters + ['YY_', 'MM_', 'DD_', 'HH_', 'MMS_', '"owner"', '"qualifiedId"', '"qualifiedName"'],
+common_filters + holding_bin_filters + ['MMS_'],
 []
 ],
 
@@ -3244,7 +3244,7 @@ common_filters,
     create_curl_cmd(type="POST", data="TestCase10130_elements.json", base_url=BASE_URL_WS,
                     post_type="elements", branch="master/"),
     True,
-    common_filters + ['YY_', 'MM_', 'DD_', 'HH_', '"owner"', '"qualifiedId"', '"qualifiedName"'],
+    common_filters + holding_bin_filters,
     ["test", "workspaces", "develop", "develop2"]
 ],
 [
@@ -3254,7 +3254,7 @@ common_filters,
 create_curl_cmd(type="GET", data="sites/europa/elements/MMS_1450390431247_8a4b76d2-394c-4569-9abe-5c51dc4b0711", base_url=BASE_URL_WS,
                 branch="master/"),
 True,
-common_filters + ['YY_', 'MM_', 'DD_', 'HH_', '"timestamp"', '"owner"', '"qualifiedId"', '"qualifiedName"'],
+common_filters + holding_bin_filters + ['"timestamp"'],
 ["test", "workspaces", "develop", "develop2"]
 ],
 [
@@ -3264,7 +3264,7 @@ common_filters + ['YY_', 'MM_', 'DD_', 'HH_', '"timestamp"', '"owner"', '"qualif
 create_curl_cmd(type="GET", data="sites/europa/elements/MMS_1450390431247_8a4b76d2-394c-4569-9abe-5c51dc4b0811", base_url=BASE_URL_WS,
                 branch="master/"),
 True,
-common_filters + ['YY_', 'MM_', 'DD_', 'HH_', '"timestamp"', '"owner"', '"qualifiedId"', '"qualifiedName"'],
+common_filters + holding_bin_filters + ['"timestamp"'],
 ["test", "workspaces", "develop", "develop2"]
 ],
 [
@@ -3274,7 +3274,7 @@ common_filters + ['YY_', 'MM_', 'DD_', 'HH_', '"timestamp"', '"owner"', '"qualif
 create_curl_cmd(type="GET", data="sites/europa/elements/MMS_1450390431247_8a4b76d2-394c-4569-9abe-5c51dc4b0812", base_url=BASE_URL_WS,
                 branch="master/"),
 True,
-common_filters + ['YY_', 'MM_', 'DD_', 'HH_', '"timestamp"', '"owner"', '"qualifiedId"', '"qualifiedName"'],
+common_filters + holding_bin_filters + ['"timestamp"'],
 ["test", "workspaces", "develop", "develop2"]
 ],
 [
@@ -3284,7 +3284,7 @@ common_filters + ['YY_', 'MM_', 'DD_', 'HH_', '"timestamp"', '"owner"', '"qualif
 create_curl_cmd(type="GET", data="sites/europa/elements/MMS_1450390431247_8a4b76d2-394c-4569-9abe-5c51dc4b0813", base_url=BASE_URL_WS,
                 branch="master/"),
 True,
-common_filters + ['YY_', 'MM_', 'DD_', 'HH_', '"timestamp"', '"owner"', '"qualifiedId"', '"qualifiedName"'],
+common_filters + holding_bin_filters + ['"timestamp"'],
 ["test", "workspaces", "develop", "develop2"]
 ],
 [
@@ -3294,7 +3294,7 @@ common_filters + ['YY_', 'MM_', 'DD_', 'HH_', '"timestamp"', '"owner"', '"qualif
 create_curl_cmd(type="POST", data="TestCase10131_postViewV.json", base_url=BASE_URL_WS,
                 post_type="elements", branch="master/"),
 True,
-common_filters + ['YY_', 'MM_', 'DD_', 'HH_', 'MMS_', '"timestamp"', '"owner"', '"qualifiedId"', '"qualifiedName"'],
+common_filters + holding_bin_filters + ['MMS_', '"timestamp"'],
 ["test", "workspaces", "develop", "develop2"]
 ],
 [
@@ -3304,7 +3304,7 @@ common_filters + ['YY_', 'MM_', 'DD_', 'HH_', 'MMS_', '"timestamp"', '"owner"', 
 create_curl_cmd(type="POST", data="TestCase10132_postViewVRemove.json", base_url=BASE_URL_WS,
                 post_type="elements", branch="master/"),
 True,
-common_filters + ['YY_', 'MM_', 'DD_', 'HH_', 'MMS_', '"timestamp"', '"owner"', '"qualifiedId"', '"qualifiedName"'],
+common_filters + holding_bin_filters + ['MMS_', '"timestamp"'],
 ["test", "workspaces", "develop", "develop2"]
 ],
 [
@@ -3314,7 +3314,7 @@ common_filters + ['YY_', 'MM_', 'DD_', 'HH_', 'MMS_', '"timestamp"', '"owner"', 
 create_curl_cmd(type="POST", data="TestCase10133_postViewVUpdate.json", base_url=BASE_URL_WS,
                 post_type="elements", branch="master/"),
 True,
-common_filters + ['YY_', 'MM_', 'DD_', 'HH_', 'MMS_', '"timestamp"', '"owner"', '"qualifiedId"', '"qualifiedName"'],
+common_filters + holding_bin_filters + ['MMS_', '"timestamp"'],
 ["test", "workspaces", "develop", "develop2"]
 ],
 
@@ -3324,7 +3324,7 @@ common_filters + ['YY_', 'MM_', 'DD_', 'HH_', 'MMS_', '"timestamp"', '"owner"', 
 "this post is required so the PMA test cases can reference sysmlids",
 create_curl_cmd(type="POST", data="presentElemClassifiers.json", base_url=BASE_URL_WS, post_type="elements", branch="master/"),
 True,
-common_filters + ['YY_', 'MM_', 'DD_', 'HH_', 'MMS_', '"timestamp"', '"qualifiedId"', '"qualifiedName"'],
+common_filters  + ['YY_', 'MM_', 'DD_', 'HH_', 'MMS_', '"timestamp"', '"qualifiedId"', '"qualifiedName"'],
 ["test", "workspaces", "develop", "develop2"]
 ],
          
@@ -3336,7 +3336,7 @@ common_filters + ['YY_', 'MM_', 'DD_', 'HH_', 'MMS_', '"timestamp"', '"qualified
 "Using the job post service to create two jobs",
 create_curl_cmd(type="POST", data="testjob.json", base_url=BASE_URL_WS, post_type="jobs", branch="master/"),
 True,
-common_filters + ['YY_', 'MM_', 'DD_', 'HH_', 'MMS_', '"timestamp"', '"qualifiedId"', '"qualifiedName"'],
+common_filters + holding_bin_filters + ['MMS_', '"timestamp"'],
 ["test", "workspaces", "develop", "develop2"]
 ],
 [
@@ -3346,7 +3346,7 @@ common_filters + ['YY_', 'MM_', 'DD_', 'HH_', 'MMS_', '"timestamp"', '"qualified
 create_curl_cmd(type="POST", data="testjob_update.json", base_url=BASE_URL_WS,
                 post_type="jobs", branch="master/"),
 True,
-common_filters + ['YY_', 'MM_', 'DD_', 'HH_', 'MMS_', '"timestamp"', '"qualifiedId"', '"qualifiedName"'],
+common_filters + holding_bin_filters + ['MMS_', '"timestamp"'],
 ["test", "workspaces", "develop", "develop2"]
 ],  
 [
@@ -3356,7 +3356,7 @@ common_filters + ['YY_', 'MM_', 'DD_', 'HH_', 'MMS_', '"timestamp"', '"qualified
 create_curl_cmd(type="POST", data="testjob2.json", base_url=BASE_URL_WS,
                 post_type="jobs", branch="master/"),
 True,
-common_filters + ['YY_', 'MM_', 'DD_', 'HH_', 'MMS_', '"timestamp"', '"qualifiedId"', '"qualifiedName"'],
+common_filters + holding_bin_filters + ['MMS_', '"timestamp"'],
 ["test", "workspaces", "develop", "develop2"]
 ],
 [
@@ -3366,7 +3366,7 @@ common_filters + ['YY_', 'MM_', 'DD_', 'HH_', 'MMS_', '"timestamp"', '"qualified
 create_curl_cmd(type="POST", data="testjob_emptySchedule.json", base_url=BASE_URL_WS, 
                 post_type="jobs", branch="master/"),
 True,
-common_filters + ['YY_', 'MM_', 'DD_', 'HH_', 'MMS_', '"timestamp"', '"qualifiedId"', '"qualifiedName"'],
+common_filters + holding_bin_filters + ['MMS_', '"timestamp"'],
 ["test", "workspaces", "develop", "develop2"]
 ],  
 [
@@ -3376,7 +3376,7 @@ common_filters + ['YY_', 'MM_', 'DD_', 'HH_', 'MMS_', '"timestamp"', '"qualified
 create_curl_cmd(type="GET", data="jobs/_18_0_2_6620226_1456959739177_654072_15172?recurse=1", base_url=BASE_URL_WS,
                 branch="master/"),
 True,
-common_filters + ['YY_', 'MM_', 'DD_', 'HH_', 'MMS_', '"timestamp"', '"qualifiedId"', '"qualifiedName"'],
+common_filters + holding_bin_filters + ['MMS_', '"timestamp"'],
 ["test", "workspaces", "develop", "develop2"]
 ],       
 
@@ -3388,7 +3388,7 @@ common_filters + ['YY_', 'MM_', 'DD_', 'HH_', 'MMS_', '"timestamp"', '"qualified
 create_curl_cmd(type="POST", data="holdingBinOwner.json", base_url=BASE_URL_WS,
                 post_type="elements", branch="master/"),
 True,
-common_filters + ['YY_', 'MM_', 'DD_', 'HH_', '"owner"', '"qualifiedId"', '"qualifiedName"'],
+common_filters + holding_bin_filters,
 ["develop"]
 ]
 ]
