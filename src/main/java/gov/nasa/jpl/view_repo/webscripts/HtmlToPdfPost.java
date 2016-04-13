@@ -372,22 +372,36 @@ public class HtmlToPdfPost extends AbstractJavaWebScript {
 		}
 		return bSuccess;
 	}
-
-	protected void copyCssFilesToWorkingDir() {
-		log("Copying CSS files to working directory...");
-		Path cssPath = Paths
-				.get("/opt/local/apache-tomcat/webapps/alfresco/mmsapp/css");
-		try {
-			FileUtils.copyDirectory(new File(cssPath.toString()), new File(
-					Paths.get(this.fsWorkingDir, "css").toString()));
-		} catch (IOException e) {
-			// not having CSS is not critical; allow process to continue w/o CSS
-			log("Failed to copy CSS files to working directory!");
-			log(e.getMessage());
-			e.printStackTrace();
-		}
+	
+	protected void saveCustomCssToFileSystem(String customCss) throws Throwable{
+		log("Saving custom CSS to filesystem...");
+		Path customCssPath = Paths.get(this.fsWorkingDir, "css",
+				"customStyles.css");
+		saveStringToFileSystem(customCss, customCssPath);
 	}
 
+	protected void saveStringToFileSystem(String stringContent, Path filePath) throws Throwable{
+		if(Utils.isNullOrEmpty(stringContent)) return;
+		if(filePath == null) return;
+		Path folder = filePath.getParent();
+		try{
+			try{
+				if(!Files.exists(folder)) new File(folder.toString()).mkdirs();
+			}
+			catch(Throwable ex){
+				throw new Throwable(String.format("Failed to create %s directory! %s",folder.toString(), ex.getMessage()));
+			}
+			
+			File file = new File(filePath.toString());
+			BufferedWriter bw = new BufferedWriter(new FileWriter(file));
+			bw.write(stringContent);
+			bw.close();
+		}
+		catch(Throwable ex){
+			throw new Throwable(String.format("Failed to save %s to filesystem! %s", filePath.toString(), ex.getMessage()));
+		}
+	}
+	
 	protected Document addCssLinks(Document document, String headerContent,
 			String footerContent, String tagId, String timeStamp,
 			String displayTime) throws Throwable {
@@ -397,9 +411,6 @@ public class HtmlToPdfPost extends AbstractJavaWebScript {
 		}
 		Element head = document.head();
 		head.append("<meta charset=\"utf-8\" />");
-		// head.append("<link href=\"https://fonts.googleapis.com/css?family=Droid+Serif:400,700,400italic,700italic\" rel=\"stylesheet\" type=\"text/css\" />");
-		head.append("<link href=\"css/mm-mms.styles.min.css\" rel=\"stylesheet\" type=\"text/css\" />");
-		head.append("<link href=\"css/ve-mms.styles.min.css\" rel=\"stylesheet\" type=\"text/css\" />");
 		StringBuffer style = new StringBuffer();
 		style.append("<style type=\"text/css\">");
 		style.append(" 	li > a[href]::after {content: leader(\".\") target-counter(attr(href), page);}");
@@ -472,13 +483,11 @@ public class HtmlToPdfPost extends AbstractJavaWebScript {
 			String timeStamp, String docNum, String displayTime, String customCss) throws Throwable {
 		log(String.format("Saving %s to filesystem...", htmlFilename));
 		Path htmlPath = Paths.get(this.fsWorkingDir, htmlFilename);
-		Path customCssPath = Paths.get(this.fsWorkingDir, "css",
-				"customStyles.css");
+
 		try {
 			if (Files.exists(htmlPath)) {
 				// TODO file already exists, should we override?
 			}
-			copyCssFilesToWorkingDir();
 			Document htmlDocument = loadHtmlDocument(htmlContent);
 			htmlDocument = addCssLinks(htmlDocument, headerContent,
 					footerContent, tagId, timeStamp, displayTime);
@@ -487,18 +496,9 @@ public class HtmlToPdfPost extends AbstractJavaWebScript {
 			htmlDocument = addToc(htmlDocument, toc);
 			htmlDocument = addIndices(htmlDocument, indices);
 
-			File htmlFile = new File(htmlPath.toString());
-			BufferedWriter bw = new BufferedWriter(new FileWriter(htmlFile));
-			bw.write(htmlDocument.toString());
-			bw.close();
-
+			saveStringToFileSystem(htmlDocument.toString(), htmlPath);
 			if (!Utils.isNullOrEmpty(customCss)) {
-				log(String.format("Saving %s to filesystem...",
-						customCssPath.getFileName()));
-				File customCssFile = new File(customCssPath.toString());
-				bw = new BufferedWriter(new FileWriter(customCssFile));
-				bw.write(customCss);
-				bw.close();
+				saveCustomCssToFileSystem(customCss);
 			}
 
 			createCoverPage(coverFilename, coverContent);
