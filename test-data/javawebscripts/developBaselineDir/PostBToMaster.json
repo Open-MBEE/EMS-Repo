@@ -3,6 +3,7 @@
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
+        "appliedMetatypes": ["_9_0_62a020a_1105704885298_713292_7913"],
         "specialization": {"type": "Package"}
     },
     {
@@ -13,8 +14,8 @@
         "documentation": "b is b",
         "specialization": {
             "propertyType": null,
-            "isSlot": false,
             "isDerived": false,
+            "isSlot": false,
             "value": [{
                 "string": "the b value",
                 "type": "LiteralString"
@@ -26,12 +27,21 @@
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
+        "appliedMetatypes": ["_9_0_62a020a_1105704885298_713292_7913"],
         "specialization": {"type": "Package"}
     },
     {
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
+        "appliedMetatypes": ["_9_0_62a020a_1105704885298_713292_7913"],
+        "specialization": {"type": "Package"}
+    },
+    {
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "appliedMetatypes": ["_9_0_62a020a_1105704885298_713292_7913"],
         "specialization": {"type": "Package"}
     },
     {
@@ -40,12 +50,7 @@
         "creator": "admin",
         "modifier": "admin",
         "name": "holding_bin",
-        "specialization": {"type": "Package"}
-    },
-    {
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
+        "appliedMetatypes": ["_9_0_62a020a_1105704885298_713292_7913"],
         "specialization": {"type": "Package"}
     }
 ]}
