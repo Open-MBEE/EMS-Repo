@@ -408,6 +408,23 @@ public class JenkinsEngine implements ExecutionEngine {
     public long getExecutionTime() {
         return executionTime;
     }
+    
+    public void getBuildArtifact( String jobId ) {
+        String url;
+
+        if ( !jobId.startsWith( "/" ) ) {
+            jobId = "/" + jobId;
+        }
+        url = "/job" + jobId;
+
+        if ( !url.endsWith( "/" ) ) {
+            url = url + "/";
+        }
+
+        url = url + "lastSuccessfulBuild/artifact/mdNotificationWindowText.html"; 
+        
+        this.executeUrl = this.url + url;
+    }
 
     
     // https://some-jenkins-server.someorganization.com/job/MMS_1460067117709_b5f26105-8581-406e-b54d-8525012044c5/lastBuild/api/json?pretty=true

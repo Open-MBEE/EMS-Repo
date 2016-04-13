@@ -3333,7 +3333,7 @@ common_filters + ['YY_', 'MM_', 'DD_', 'HH_', 'MMS_', '"timestamp"', '"qualified
 10135,
 "PostJobViaJobPost",
 "Using the job post service to create two jobs",
-create_curl_cmd(type="POST", data="testjob.json", base_url=BASE_URL_WS, post_type="jobs", branch="master/"),
+create_curl_cmd(type="POST", data="testjob.json", base_url=BASE_URL_WS, post_type="jobs?addToJenkins=false", branch="master/"),
 True,
 common_filters + ['YY_', 'MM_', 'DD_', 'HH_', 'MMS_', '"timestamp"', '"qualifiedId"', '"qualifiedName"'],
 ["test", "workspaces", "develop", "develop2"]
@@ -3343,7 +3343,7 @@ common_filters + ['YY_', 'MM_', 'DD_', 'HH_', 'MMS_', '"timestamp"', '"qualified
 "UpdateJob",
 "Change values of existing jobs", 
 create_curl_cmd(type="POST", data="testjob_update.json", base_url=BASE_URL_WS,
-                post_type="jobs", branch="master/"),
+                post_type="jobs?addToJenkins=false", branch="master/"),
 True,
 common_filters + ['YY_', 'MM_', 'DD_', 'HH_', 'MMS_', '"timestamp"', '"qualifiedId"', '"qualifiedName"'],
 ["test", "workspaces", "develop", "develop2"]
@@ -3353,7 +3353,7 @@ common_filters + ['YY_', 'MM_', 'DD_', 'HH_', 'MMS_', '"timestamp"', '"qualified
 "PostJobWithJSON",
 "Posting a single job without element json",
 create_curl_cmd(type="POST", data="testjob2.json", base_url=BASE_URL_WS,
-                post_type="jobs", branch="master/"),
+                post_type="jobs?addToJenkins=false", branch="master/"),
 True,
 common_filters + ['YY_', 'MM_', 'DD_', 'HH_', 'MMS_', '"timestamp"', '"qualifiedId"', '"qualifiedName"'],
 ["test", "workspaces", "develop", "develop2"]
@@ -3363,7 +3363,7 @@ common_filters + ['YY_', 'MM_', 'DD_', 'HH_', 'MMS_', '"timestamp"', '"qualified
 "PostJobWithEmptySchedule",
 "Posting a job with no specified schedule",
 create_curl_cmd(type="POST", data="testjob_emptySchedule.json", base_url=BASE_URL_WS, 
-                post_type="jobs", branch="master/"),
+                post_type="jobs?addToJenkins=false", branch="master/"),
 True,
 common_filters + ['YY_', 'MM_', 'DD_', 'HH_', 'MMS_', '"timestamp"', '"qualifiedId"', '"qualifiedName"'],
 ["test", "workspaces", "develop", "develop2"]

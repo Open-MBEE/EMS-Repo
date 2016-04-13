@@ -2672,6 +2672,7 @@ public class ModelPost extends AbstractJavaWebScript {
         Map<String, Object> model = new HashMap<String, Object>();
         // clearCaches();
 
+        boolean addToJenkins = getBooleanArg( req, "addToJenkins", true );
         boolean runInBackground = getBooleanArg(req, "background", false);
         boolean fix = getBooleanArg(req, "fix", false);
         String expressionString = req.getParameter("expression");
@@ -2762,9 +2763,9 @@ public class ModelPost extends AbstractJavaWebScript {
 						public void run() throws Exception {
 							getProjectNodeFromRequest(req, true);
 						}
-					};
-					 
-					 preProcessJson( postJson, myWorkspace );
+					};					 
+										
+					preProcessJson( postJson, myWorkspace, addToJenkins );
 					 
 					// FIXME: this is a hack to get the right site permissions
 					// if DB rolled back, it's because the no_site node couldn't
@@ -2808,7 +2809,7 @@ public class ModelPost extends AbstractJavaWebScript {
 		return model;
 	}
 	
-	public void preProcessJson( JSONObject json, WorkspaceNode workspace) {
+	public void preProcessJson( JSONObject json, WorkspaceNode workspace, boolean addToJenkins ) {
         logger.debug( "preProcessJson(" + json + ")");
         UpdateViewHierarchy uvh = new UpdateViewHierarchy( this );
         // Handle view and association changes
@@ -2817,7 +2818,7 @@ public class ModelPost extends AbstractJavaWebScript {
         } catch ( Throwable t ) {
             t.printStackTrace();
         }
-        processJobsJson( json, workspace );
+        processJobsJson( json, workspace, addToJenkins );
         logger.debug( "preProcessJson() returning\n" + json.toString(4) );
 	}
 
