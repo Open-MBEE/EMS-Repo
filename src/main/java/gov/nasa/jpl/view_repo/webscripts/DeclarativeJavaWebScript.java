@@ -420,7 +420,7 @@ public class DeclarativeJavaWebScript extends AbstractWebScript
         // Checks data member requestJSON to see if it is not null and if
         // paramVal is none
 
-//     // Check if input is K or JSON
+       // Check if input is K or JSON
         String contentType = req.getContentType() == null ? ""
                 : req.getContentType().toLowerCase();
 
@@ -433,8 +433,6 @@ public class DeclarativeJavaWebScript extends AbstractWebScript
             }
             return false;
         }
-//                logger.info( "Description Path is : " + descriptionPath );
-//        }
 
         if (!jsonNotK && paramVal.equals("none")) {
                 jsonRequest = getRequestJSON(req);
