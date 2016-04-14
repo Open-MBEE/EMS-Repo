@@ -139,13 +139,13 @@ public class ViewGet extends AbstractJavaWebScript {
         //clearCaches();
 
         Map<String, Object> model = new HashMap<String, Object>();
-        
-            if (checkMmsVersions) {
-                if(compareMmsVersions(req, getResponse(), getResponseStatus()));{
-                    model.put("res", createResponseJson());
-                    return model;
-                }
-            }
+//        TODO: REMOVE THIS CODE
+//            if (checkMmsVersions) {
+//                if(compareMmsVersions(req, getResponse(), getResponseStatus()));{
+//                    model.put("res", createResponseJson());
+//                    return model;
+//                }
+//            }
             // default recurse=false but recurse only applies to displayed elements and contained views
             boolean recurse = getBooleanArg(req, "recurse", false);
             // default generate=false - generation with viewpoints takes a long time

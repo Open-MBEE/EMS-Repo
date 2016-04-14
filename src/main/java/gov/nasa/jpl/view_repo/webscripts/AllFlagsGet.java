@@ -131,7 +131,8 @@ public class AllFlagsGet extends FlagSet {
         } else if (path.equalsIgnoreCase("cacheSnapshots")) {
             DeclarativeJavaWebScript.cacheSnapshotsFlag = val;
         } else if (path.equalsIgnoreCase("checkMmsVersions")){
-        	AbstractJavaWebScript.checkMmsVersions = val;
+//        	AbstractJavaWebScript.checkMmsVersions = val;
+        	DeclarativeJavaWebScript.checkMmsVersions = val;
         } else if (path.equalsIgnoreCase("graphDb")) {
             NodeUtil.doGraphDb = val;
         } else if (path.equalsIgnoreCase("postProcessQualified")) {
@@ -206,7 +207,8 @@ public class AllFlagsGet extends FlagSet {
         } else if (path.equalsIgnoreCase( "graphDb" )) {
             return NodeUtil.doGraphDb;
         } else if (path.equalsIgnoreCase("checkMmsVersions")){
-        	    return AbstractJavaWebScript.checkMmsVersions;
+//            return AbstractJavaWebScript.checkMmsVersions;
+            return DeclarativeJavaWebScript.checkMmsVersions;
         } else if (path.equalsIgnoreCase( "postProcessQualified" )) {
             return NodeUtil.doPostProcessQualified;
         } else if (path.equalsIgnoreCase( "doorsSync" )) {
