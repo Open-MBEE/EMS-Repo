@@ -42,14 +42,14 @@ import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
 
-public class JenkinsPost extends AbstractJavaWebScript {
-    static Logger logger = Logger.getLogger(JenkinsPost.class);
+public class JobExecute extends AbstractJavaWebScript {
+    static Logger logger = Logger.getLogger(JobExecute.class);
 
-    public JenkinsPost() {
+    public JobExecute() {
         super();
     }
     
-    public JenkinsPost(Repository repositoryHelper, ServiceRegistry registry) {
+    public JobExecute(Repository repositoryHelper, ServiceRegistry registry) {
         super(repositoryHelper, registry);
     }
     
@@ -61,7 +61,7 @@ public class JenkinsPost extends AbstractJavaWebScript {
 
     @Override
     protected Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
-        JenkinsPost instance = new JenkinsPost(repository, services);
+        JobExecute instance = new JobExecute(repository, services);
         instance.setServices(getServices());
         return instance.executeImplImpl(req, status, cache,
                                         true);

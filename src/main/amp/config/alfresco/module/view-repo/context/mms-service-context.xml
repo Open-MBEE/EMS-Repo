@@ -545,7 +545,7 @@
 	
 	   	<!-- Service for PMA -->
 	<bean id="webscript.gov.nasa.jpl.pma.jenkins.post"
-		class="gov.nasa.jpl.view_repo.webscripts.JenkinsPost"
+		class="gov.nasa.jpl.view_repo.webscripts.JobExecute"
 		parent="webscript" singleton="false">
 		<property name="repositoryHelper" ref="repositoryHelper" />
 		<property name="services" ref="ServiceRegistry" />
