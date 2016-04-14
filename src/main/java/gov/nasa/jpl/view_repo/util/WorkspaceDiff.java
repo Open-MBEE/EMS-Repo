@@ -812,16 +812,40 @@ public class WorkspaceDiff implements Serializable {
         addJSONArray(webscript, ws2Json, "conflictedElements", conflictedElements, ws2, time2, showAll, includeQualified);
         addWorkspaceMetadata( ws2Json, ws2, time2);
         
-        // this is necessary to make sure STOMP doesn't break
+        // Add the name and owner--the View Editor, at least, needs it.
+        // TODO -- Are we sure that the jobs will be in ws1?
+        // TODO -- Otherwise, we need to get the EmsScriptNode.
+        // TODO -- Pull this out into a separate function.
         JSONArray jobs = ws1Json.optJSONArray( "jobs" );
         
-        if( jobs != null ) {
-            JSONObject job = jobs.optJSONObject( 0 );
+        if( jobs != null && jobs.length() > 0 ) {
+            for (int i = 0; i < jobs.length(); ++i ) {
             
-            if( job != null ) {
-                JSONObject updatedJob = ws2Json.optJSONArray( "updatedJobs" ).optJSONObject( 0 );
-                updatedJob.put( "name", job.optString( "name" ) );
-                updatedJob.put( "owner", job.optString( "owner" ) );
+                JSONObject job = jobs.optJSONObject( i );
+                String jobId = job.optString("sysmlid");
+                if ( jobId == null ) continue;
+                if( job != null ) {
+                    JSONArray updatedJobs = ws2Json.optJSONArray( "updatedJobs" );
+                    if ( updatedJobs != null && updatedJobs.length() > 0 ) {
+                        for (int j = 0; j < updatedJobs.length(); ++j ) {
+                            
+                            JSONObject updatedJob = updatedJobs.optJSONObject( j );
+                            String updatedJobId = updatedJob.optString("sysmlid");
+                            if ( updatedJobId == null ) continue;
+                            if ( jobId.equals( updatedJobId ) ) {
+                                String name = job.optString( "name" );
+                                if ( !Utils.isNullOrEmpty( name ) ) {
+                                    updatedJob.put( "name", name );
+                                }
+                                String owner = job.optString( "owner" );
+                                if ( !Utils.isNullOrEmpty( owner ) ) {
+                                    updatedJob.put( "owner", owner );
+                                }
+                                break;
+                            }
+                        }
+                    }
+                }
             }
         }
         
@@ -835,7 +859,7 @@ public class WorkspaceDiff implements Serializable {
         }
         
         return diffJson;
-}
+    }
     
     protected void addCachedJobs( AbstractJavaWebScript webscript, JSONObject json, String keyName ) {
         webscript.postProcessJson(json);
