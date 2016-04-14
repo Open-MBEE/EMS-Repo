@@ -89,7 +89,7 @@ public class DeclarativeJavaWebScript extends AbstractWebScript
             {
                 if(compareMmsVersions(req))
                 {
-                    model.put("res", res);
+                    model.put("res", getRequestJSON());
                 }
             }
 
@@ -426,6 +426,8 @@ public class DeclarativeJavaWebScript extends AbstractWebScript
 
         boolean jsonNotK = !contentType.contains("application/k");
 
+        String descriptionPath = getDescription().getDescPath();
+        logger.info( "Description Path is : " + descriptionPath );
 
         if (!jsonNotK && paramVal.equals("none")) {
                 jsonRequest = getRequestJSON(req);
