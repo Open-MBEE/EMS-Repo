@@ -427,7 +427,14 @@ public class DeclarativeJavaWebScript extends AbstractWebScript
         boolean jsonNotK = !contentType.contains("application/k");
 
         String descriptionPath = getDescription().getDescPath();
-        logger.info( "Description Path is : " + descriptionPath );
+        if(descriptionPath.contains( ".get" )){
+            if (logger.isDebugEnabled()){
+                logger.info( "Get was found within the description path");
+            }
+            return false;
+        }
+//                logger.info( "Description Path is : " + descriptionPath );
+//        }
 
         if (!jsonNotK && paramVal.equals("none")) {
                 jsonRequest = getRequestJSON(req);
