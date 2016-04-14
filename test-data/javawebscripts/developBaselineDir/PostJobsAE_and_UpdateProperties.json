@@ -1,94 +1,10 @@
 {"elements": [
     {
-        "sysmlid": "IS_B-slot-_18_0_5_407019f_1458259033014_844708_14099",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "",
-        "owner": "IS_B",
-        "specialization": {
-            "propertyType": null,
-            "isDerived": false,
-            "isSlot": true,
-            "value": [{
-                "string": " ",
-                "type": "LiteralString"
-            }],
-            "type": "Property"
-        }
-    },
-    {
-        "sysmlid": "jobD",
-        "isMetatype": false,
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "jobD",
-        "owner": "PMA_Jobs",
-        "appliedMetatypes": ["_18_0_5_407019f_1458258829038_313297_14086"],
-        "specialization": {"type": "Element"}
-    },
-    {
-        "sysmlid": "IS_C-slot-_18_0_5_407019f_1458259033014_844708_14099",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "",
-        "owner": "IS_C",
-        "specialization": {
-            "propertyType": null,
-            "isDerived": false,
-            "isSlot": true,
-            "value": [{
-                "string": "0 0 * * *",
-                "type": "LiteralString"
-            }],
-            "type": "Property"
-        }
-    },
-    {
-        "sysmlid": "IS_F-slot-_18_0_5_407019f_1458259018041_351899_14098",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "",
-        "owner": "IS_F",
-        "specialization": {
-            "propertyType": null,
-            "isDerived": false,
-            "isSlot": true,
-            "value": [{
-                "string": "waiting",
-                "type": "LiteralString"
-            }],
-            "type": "Property"
-        }
-    },
-    {
-        "sysmlid": "IS_F-slot-_18_0_5_407019f_1458259033014_844708_14099",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "",
-        "owner": "IS_F",
-        "specialization": {
-            "propertyType": null,
-            "isDerived": false,
-            "isSlot": true,
-            "value": [{
-                "string": "0 0 * * *",
-                "type": "LiteralString"
-            }],
-            "type": "Property"
-        }
-    },
-    {
         "sysmlid": "IS_C-slot-_18_0_5_407019f_1458259018041_351899_14098",
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
         "name": "",
-        "owner": "IS_C",
         "specialization": {
             "propertyType": null,
             "isDerived": false,
@@ -101,50 +17,21 @@
         }
     },
     {
-        "sysmlid": "IS_D-slot-_18_0_5_407019f_1458259018041_351899_14098",
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
-        "name": "",
-        "owner": "IS_D",
-        "specialization": {
-            "propertyType": null,
-            "isDerived": false,
-            "isSlot": true,
-            "value": [{
-                "string": "waiting",
-                "type": "LiteralString"
-            }],
-            "type": "Property"
-        }
+        "name": "PMA_Jobs",
+        "documentation": "",
+        "specialization": {"type": "Package"}
     },
     {
-        "sysmlid": "IS_D-slot-_18_0_5_407019f_1458259033014_844708_14099",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "",
-        "owner": "IS_D",
-        "specialization": {
-            "propertyType": null,
-            "isDerived": false,
-            "isSlot": true,
-            "value": [{
-                "string": " ",
-                "type": "LiteralString"
-            }],
-            "type": "Property"
-        }
-    },
-    {
-        "sysmlid": "IS_F",
+        "sysmlid": "IS_D",
         "isMetatype": false,
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
-        "name": "IS_F",
+        "name": "IS_D",
         "documentation": "",
-        "owner": "jobF",
         "appliedMetatypes": ["_9_0_62a020a_1105704885251_933969_7897"],
         "specialization": {
             "slots": [],
@@ -159,50 +46,18 @@
         "creator": "admin",
         "modifier": "admin",
         "name": "jobC",
-        "owner": "PMA_Jobs",
         "appliedMetatypes": ["_18_0_5_407019f_1458258829038_313297_14086"],
         "specialization": {"type": "Element"}
     },
     {
-        "sysmlid": "IS_C",
+        "sysmlid": "jobD",
         "isMetatype": false,
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
-        "name": "IS_C",
-        "documentation": "",
-        "owner": "jobC",
-        "appliedMetatypes": ["_9_0_62a020a_1105704885251_933969_7897"],
-        "specialization": {
-            "slots": [],
-            "classifier": [],
-            "type": "InstanceSpecification"
-        }
-    },
-    {
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "PMA_Jobs",
-        "documentation": "",
-        "owner": "123456",
-        "specialization": {"type": "Package"}
-    },
-    {
-        "sysmlid": "IS_D",
-        "isMetatype": false,
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "IS_D",
-        "documentation": "",
-        "owner": "jobD",
-        "appliedMetatypes": ["_9_0_62a020a_1105704885251_933969_7897"],
-        "specialization": {
-            "slots": [],
-            "classifier": [],
-            "type": "InstanceSpecification"
-        }
+        "name": "jobD",
+        "appliedMetatypes": ["_18_0_5_407019f_1458258829038_313297_14086"],
+        "specialization": {"type": "Element"}
     },
     {
         "sysmlid": "IS_B",
@@ -212,7 +67,6 @@
         "modifier": "admin",
         "name": "IS_B",
         "documentation": "",
-        "owner": "jobB",
         "appliedMetatypes": ["_9_0_62a020a_1105704885251_933969_7897"],
         "specialization": {
             "slots": [],
@@ -227,17 +81,15 @@
         "creator": "admin",
         "modifier": "admin",
         "name": "jobB",
-        "owner": "PMA_Jobs",
         "appliedMetatypes": ["_18_0_5_407019f_1458258829038_313297_14086"],
         "specialization": {"type": "Element"}
     },
     {
-        "sysmlid": "IS_B-slot-_18_0_5_407019f_1458259018041_351899_14098",
+        "sysmlid": "IS_D-slot-_18_0_5_407019f_1458259018041_351899_14098",
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
         "name": "",
-        "owner": "IS_B",
         "specialization": {
             "propertyType": null,
             "isDerived": false,
@@ -256,9 +108,140 @@
         "creator": "admin",
         "modifier": "admin",
         "name": "jobF",
-        "owner": "PMA_Jobs",
         "appliedMetatypes": ["_18_0_5_407019f_1458258829038_313297_14086"],
         "specialization": {"type": "Element"}
+    },
+    {
+        "sysmlid": "IS_F-slot-_18_0_5_407019f_1458259018041_351899_14098",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "",
+        "specialization": {
+            "propertyType": null,
+            "isDerived": false,
+            "isSlot": true,
+            "value": [{
+                "string": "waiting",
+                "type": "LiteralString"
+            }],
+            "type": "Property"
+        }
+    },
+    {
+        "sysmlid": "IS_D-slot-_18_0_5_407019f_1458259033014_844708_14099",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "",
+        "specialization": {
+            "propertyType": null,
+            "isDerived": false,
+            "isSlot": true,
+            "value": [{
+                "string": " ",
+                "type": "LiteralString"
+            }],
+            "type": "Property"
+        }
+    },
+    {
+        "sysmlid": "IS_F-slot-_18_0_5_407019f_1458259033014_844708_14099",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "",
+        "specialization": {
+            "propertyType": null,
+            "isDerived": false,
+            "isSlot": true,
+            "value": [{
+                "string": "0 0 * * *",
+                "type": "LiteralString"
+            }],
+            "type": "Property"
+        }
+    },
+    {
+        "sysmlid": "IS_B-slot-_18_0_5_407019f_1458259018041_351899_14098",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "",
+        "specialization": {
+            "propertyType": null,
+            "isDerived": false,
+            "isSlot": true,
+            "value": [{
+                "string": "waiting",
+                "type": "LiteralString"
+            }],
+            "type": "Property"
+        }
+    },
+    {
+        "sysmlid": "IS_C",
+        "isMetatype": false,
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "IS_C",
+        "documentation": "",
+        "appliedMetatypes": ["_9_0_62a020a_1105704885251_933969_7897"],
+        "specialization": {
+            "slots": [],
+            "classifier": [],
+            "type": "InstanceSpecification"
+        }
+    },
+    {
+        "sysmlid": "IS_B-slot-_18_0_5_407019f_1458259033014_844708_14099",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "",
+        "specialization": {
+            "propertyType": null,
+            "isDerived": false,
+            "isSlot": true,
+            "value": [{
+                "string": " ",
+                "type": "LiteralString"
+            }],
+            "type": "Property"
+        }
+    },
+    {
+        "sysmlid": "IS_C-slot-_18_0_5_407019f_1458259033014_844708_14099",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "",
+        "specialization": {
+            "propertyType": null,
+            "isDerived": false,
+            "isSlot": true,
+            "value": [{
+                "string": "0 0 * * *",
+                "type": "LiteralString"
+            }],
+            "type": "Property"
+        }
+    },
+    {
+        "sysmlid": "IS_F",
+        "isMetatype": false,
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "IS_F",
+        "documentation": "",
+        "appliedMetatypes": ["_9_0_62a020a_1105704885251_933969_7897"],
+        "specialization": {
+            "slots": [],
+            "classifier": [],
+            "type": "InstanceSpecification"
+        }
     }
 ]}
 200

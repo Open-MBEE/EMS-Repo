@@ -86,9 +86,9 @@ public class JenkinsBuildConfig {
             Element throttlePlugin = doc.createElement( "hudson.plugins.throttleconcurrents.ThrottleJobProperty" );
             throttlePlugin.setAttribute("plugin", "throttle-concurrents@1.8.5");
             Element maxPerNode = doc.createElement( "maxConcurrentPerNode" );
-            maxPerNode.appendChild( doc.createTextNode( "0" ) );
+            maxPerNode.appendChild( doc.createTextNode( "1" ) );
             Element maxTotal = doc.createElement( "maxConcurrentTotal" );
-            maxTotal.appendChild( doc.createTextNode( "0" ) );
+            maxTotal.appendChild( doc.createTextNode( "1" ) );
             Element categories = doc.createElement( "categories" );
             categories.setAttribute("class", "java.util.concurrent.CopyOnWriteArrayList");
             Element docgen = doc.createElement( "string" );
@@ -114,33 +114,7 @@ public class JenkinsBuildConfig {
             rootElement.appendChild(tempElement);
 
             tempElement = doc.createElement("scm");
-            tempElement.setAttribute("class", "hudson.plugins.git.GitSCM");
-            tempElement.setAttribute("plugin", "hudson.plugins.git.GitSCM");
-
-            Element scmTempElement1 = doc.createElement("configVersion");
-            scmTempElement1.appendChild(doc.createTextNode("2"));
-            tempElement.appendChild(scmTempElement1);
-
-            scmTempElement1 = doc.createElement("userRemoteConfigs");
-            Element scmTempElement2 = doc.createElement("hudson.plugins.git.UserRemoteConfig");
-            Element scmTempElement3 = doc.createElement("url");
-            scmTempElement3.appendChild(doc.createTextNode(this.gitURL));
-            scmTempElement2.appendChild(scmTempElement3);
-            scmTempElement3 = doc.createElement("credentialsId");
-            scmTempElement3.appendChild(doc.createTextNode(this.gitCredentials));
-            scmTempElement2.appendChild(scmTempElement3);
-            scmTempElement1.appendChild(scmTempElement2);
-            tempElement.appendChild(scmTempElement1);
-
-            scmTempElement1 = doc.createElement("branches");
-            scmTempElement2 = doc.createElement("hudson.plugins.git.BranchSpec");
-            scmTempElement3 = doc.createElement("name");
-            scmTempElement3.appendChild(doc.createTextNode(this.gitBranch));
-            scmTempElement2.appendChild(scmTempElement3);
-            scmTempElement1.appendChild(scmTempElement2);
-            tempElement.appendChild(scmTempElement1);
-
-            rootElement.appendChild(tempElement);
+            tempElement.setAttribute("class", "hudson.scm.NullSCM");
 
             tempElement = doc.createElement("canRoam");
             tempElement.appendChild(doc.createTextNode("true"));
@@ -308,10 +282,8 @@ public class JenkinsBuildConfig {
             propertiesContent.appendChild(doc.createTextNode("DOCUMENTS=" + this.documentID + "\n"));
             propertiesContent.appendChild(doc.createTextNode("CREDENTIALS=/opt/local/jenkins/credentials/mms.properties\n"));
             propertiesContent.appendChild(doc.createTextNode("TEAMWORK_PROJECT=" + this.teamworkProject + "\n"));
-            propertiesContent.appendChild(doc.createTextNode("MMS_WORKSPACE=" + this.workspace + "\n"));
-            propertiesContent.appendChild(doc.createTextNode("MMS_USER=" + this.mmsUser + "\n"));
-            propertiesContent.appendChild(doc.createTextNode("MMS_PASSWORD=" + this.mmsPassword + "\n"));
             propertiesContent.appendChild(doc.createTextNode("MMS_SERVER=" + this.mmsServer + "\n"));
+            propertiesContent.appendChild(doc.createTextNode("MMS_WORKSPACE=" + this.workspace + "\n"));
 
             Element hudsonTimeout = doc.createElement("hudson.plugins.build__timeout.BuildTimeoutWrapper");
             Element strategy = doc.createElement("strategy");
@@ -339,11 +311,11 @@ public class JenkinsBuildConfig {
             Element artifactArchiver = doc.createElement("hudson.tasks.ArtifactArchiver");
             Element secondTempElem = doc.createElement( "artifacts" );
 
-            secondTempElem.appendChild( doc.createTextNode( "mdNotificationWindowText.html" ));
+            secondTempElem.appendChild( doc.createTextNode( "MDNotificationWindowText.html" ));
             artifactArchiver.appendChild( secondTempElem );
 
             secondTempElem = doc.createElement("allowEmptyArchive");
-            secondTempElem.appendChild( doc.createTextNode( "false" ) );
+            secondTempElem.appendChild( doc.createTextNode( "true" ) );
             artifactArchiver.appendChild( secondTempElem );
 
             secondTempElem = doc.createElement("onlyIfSuccessful");
@@ -359,7 +331,41 @@ public class JenkinsBuildConfig {
             artifactArchiver.appendChild( secondTempElem );
 
             tempElement.appendChild( artifactArchiver );
+            
+            Element wsCleanup = doc.createElement( "hudson.plugins.ws__cleanup.WsCleanup" );
+            Element delDirs = doc.createElement( "delDirs" );
+            delDirs.appendChild( doc.createTextNode( "false" ));
+            Element skipWhenFailed = doc.createElement( "skipWhenFailed" );
+            skipWhenFailed.appendChild( doc.createTextNode( "false" ));
+            Element cleanWhenSuccess = doc.createElement( "cleanWhenSuccess" );
+            cleanWhenSuccess.appendChild( doc.createTextNode( "true" ));
+            Element cleanWhenUnstable = doc.createElement( "cleanWhenUnstable" );
+            cleanWhenUnstable.appendChild( doc.createTextNode( "true" ));
+            Element cleanWhenFailure = doc.createElement( "cleanWhenFailure" );
+            cleanWhenFailure.appendChild( doc.createTextNode( "true" ));
+            Element cleanWhenNotBuilt = doc.createElement( "cleanWhenNotBuilt" );
+            cleanWhenNotBuilt.appendChild( doc.createTextNode( "true" ));
+            Element cleanWhenAborted = doc.createElement( "cleanWhenAborted" );
+            cleanWhenAborted.appendChild( doc.createTextNode( "true" ));
+            Element notFailBuild = doc.createElement( "notFailBuild" );
+            notFailBuild.appendChild( doc.createTextNode( "false" ));
+            Element cleanupMatrixParent = doc.createElement( "cleanupMatrixParent" );
+            cleanupMatrixParent.appendChild( doc.createTextNode( "false" ));
+            Element externalDelete = doc.createElement( "externalDelete" );
+            
+            wsCleanup.appendChild( externalDelete );
+            wsCleanup.appendChild( cleanupMatrixParent );
+            wsCleanup.appendChild( notFailBuild );
+            wsCleanup.appendChild( cleanWhenAborted );
+            wsCleanup.appendChild( cleanWhenNotBuilt );
+            wsCleanup.appendChild( cleanWhenFailure );
+            wsCleanup.appendChild( cleanWhenUnstable );
+            wsCleanup.appendChild( cleanWhenSuccess );
+            wsCleanup.appendChild( skipWhenFailed );
+            wsCleanup.appendChild( delDirs );
 
+            rootElement.appendChild(tempElement);
+            tempElement.appendChild(wsCleanup);
             rootElement.appendChild(tempElement);
 
             rootElement.appendChild(doc.createElement("prebuilders"));
