@@ -409,7 +409,7 @@ public class JenkinsEngine implements ExecutionEngine {
         return executionTime;
     }
     
-    public void getBuildArtifact( String jobId ) {
+    public String getMagicDrawLogFromJob( String jobId ) {
         String url;
 
         if ( !jobId.startsWith( "/" ) ) {
@@ -421,9 +421,9 @@ public class JenkinsEngine implements ExecutionEngine {
             url = url + "/";
         }
 
-        url = url + "lastSuccessfulBuild/artifact/mdNotificationWindowText.html"; 
-        
-        this.executeUrl = this.url + url;
+        url = this.url + url + "ws/MDNotificationWindowText.html"; 
+        return url;
+        //this.executeUrl = this.url + url;
     }
 
     

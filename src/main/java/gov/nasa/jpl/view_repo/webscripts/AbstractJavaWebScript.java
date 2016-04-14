@@ -2596,11 +2596,11 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         if( jobWasCreated ) {
             jenkins = new JenkinsEngine();
             
-            jenkins.constructBuildUrl( jobID, JenkinsEngine.detail.URL );
-            jenkins.execute();
-            if( jenkins.jsonResponse != null ) {
-                jobUrl = jenkins.jsonResponse.optString( "url" );
-            }
+            jobUrl = jenkins.getMagicDrawLogFromJob( jobID );
+            //jenkins.execute();
+            //if( jenkins.jsonResponse != null ) {
+            //    jobUrl = jenkins.jsonResponse.optString( "url" );
+            //}
         }
         
         return jobUrl;
