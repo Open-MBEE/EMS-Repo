@@ -1,43 +1,19 @@
 {"elements": [
     {
-        "sysmlid": "multRedefPackage",
+        "sysmlid": "SomeOtherClass",
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
-        "name": "multRedefPackage",
-        "documentation": "package for testing multiplicity and redefines attributes of Property",
+        "name": "SomeOtherClass",
+        "documentation": "another class for testing the 'redefines' attribute of a Property",
+        "specialization": {"type": "Element"}
+    },
+    {
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "appliedMetatypes": ["_9_0_62a020a_1105704885298_713292_7913"],
         "specialization": {"type": "Package"}
-    },
-    {
-        "sysmlid": "4000",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "400",
-        "documentation": "4something",
-        "specialization": {
-            "propertyType": null,
-            "isSlot": false,
-            "isDerived": false,
-            "value": [{
-                "string": "dlam_string",
-                "type": "LiteralString"
-            }],
-            "type": "Property"
-        }
-    },
-    {
-        "sysmlid": "multDefGeneralization",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "multDefGeneralization",
-        "documentation": "generalization for testing the 'redefines' attribute of a Property",
-        "specialization": {
-            "source": "SomeOtherClass",
-            "target": "SomeClass",
-            "type": "Generalization"
-        }
     },
     {
         "sysmlid": "holding_bin_123456",
@@ -45,16 +21,44 @@
         "creator": "admin",
         "modifier": "admin",
         "name": "holding_bin",
+        "appliedMetatypes": ["_9_0_62a020a_1105704885298_713292_7913"],
         "specialization": {"type": "Package"}
     },
     {
-        "sysmlid": "dlam",
+        "sysmlid": "401",
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
-        "name": "dlam",
-        "documentation": "to make compatible with value specs (this is just a Element)",
-        "specialization": {"type": "Element"}
+        "name": "401",
+        "documentation": "4else",
+        "specialization": {
+            "displayedElements": [
+                "401",
+                "402",
+                "403"
+            ],
+            "childrenViews": ["404"],
+            "view2view": [{
+                "childrenViews": [
+                    "401",
+                    "402"
+                ],
+                "sysmlid": "401"
+            }],
+            "allowedElements": [
+                "401",
+                "402",
+                "403"
+            ],
+            "contains": [{
+                "sourceType": "reference",
+                "source": "401",
+                "sourceProperty": "documentation",
+                "type": "Paragraph"
+            }],
+            "noSections": ["402"],
+            "type": "Product"
+        }
     },
     {
         "sysmlid": "500",
@@ -77,6 +81,12 @@
         "name": "301",
         "documentation": "else",
         "specialization": {
+            "displayedElements": [
+                "301",
+                "302",
+                "303"
+            ],
+            "childrenViews": ["304"],
             "view2view": [{
                 "childrenViews": [
                     "301",
@@ -84,61 +94,44 @@
                 ],
                 "sysmlid": "301"
             }],
-            "childrenViews": ["304"],
-            "displayedElements": [
-                "301",
-                "302",
-                "303"
-            ],
             "allowedElements": [
                 "301",
                 "302",
                 "303"
             ],
-            "noSections": ["302"],
             "contains": [{
                 "sourceType": "reference",
                 "source": "301",
                 "sourceProperty": "documentation",
                 "type": "Paragraph"
             }],
+            "noSections": ["302"],
             "type": "Product"
         }
     },
     {
-        "sysmlid": "401",
+        "sysmlid": "123456",
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
-        "name": "401",
-        "documentation": "4else",
+        "name": "JW_TEST",
+    },
+    {
+        "sysmlid": "300",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "300",
+        "documentation": "something",
         "specialization": {
-            "view2view": [{
-                "childrenViews": [
-                    "401",
-                    "402"
-                ],
-                "sysmlid": "401"
+            "propertyType": null,
+            "isDerived": false,
+            "isSlot": false,
+            "value": [{
+                "string": "dlam_string",
+                "type": "LiteralString"
             }],
-            "childrenViews": ["404"],
-            "displayedElements": [
-                "401",
-                "402",
-                "403"
-            ],
-            "allowedElements": [
-                "401",
-                "402",
-                "403"
-            ],
-            "noSections": ["402"],
-            "contains": [{
-                "sourceType": "reference",
-                "source": "401",
-                "sourceProperty": "documentation",
-                "type": "Paragraph"
-            }],
-            "type": "Product"
+            "type": "Property"
         }
     },
     {
@@ -149,6 +142,37 @@
         "name": "SomeClass",
         "documentation": "class for testing the 'redefines' attribute of a Property",
         "specialization": {"type": "Element"}
+    },
+    {
+        "sysmlid": "dlam",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "dlam",
+        "documentation": "to make compatible with value specs (this is just a Element)",
+        "specialization": {"type": "Element"}
+    },
+    {
+        "sysmlid": "multDefGeneralization",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "multDefGeneralization",
+        "documentation": "generalization for testing the 'redefines' attribute of a Property",
+        "specialization": {
+            "source": "SomeOtherClass",
+            "target": "SomeClass",
+            "type": "Generalization"
+        }
+    },
+    {
+        "sysmlid": "multRedefPackage",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "multRedefPackage",
+        "documentation": "package for testing multiplicity and redefines attributes of Property",
+        "specialization": {"type": "Package"}
     },
     {
         "sysmlid": "found",
@@ -166,38 +190,16 @@
         }
     },
     {
+        "sysmlid": "4000",
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
-        "specialization": {"type": "Package"}
-    },
-    {
-        "sysmlid": "123456",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "JW_TEST",
-    },
-    {
-        "sysmlid": "SomeOtherClass",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "SomeOtherClass",
-        "documentation": "another class for testing the 'redefines' attribute of a Property",
-        "specialization": {"type": "Element"}
-    },
-    {
-        "sysmlid": "300",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "300",
-        "documentation": "something",
+        "name": "400",
+        "documentation": "4something",
         "specialization": {
             "propertyType": null,
-            "isSlot": false,
             "isDerived": false,
+            "isSlot": false,
             "value": [{
                 "string": "dlam_string",
                 "type": "LiteralString"

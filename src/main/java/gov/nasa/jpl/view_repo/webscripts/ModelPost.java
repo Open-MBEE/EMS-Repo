@@ -122,8 +122,6 @@ public class ModelPost extends AbstractJavaWebScript {
 
     private final String ELEMENTS = "elements";
     
-//  public JSONArray reifiedPkgs = new JSONArray();
-
     /**
      * JSONObject of element hierarchy { elementId: [childElementId, ...], ...
      * },
@@ -1117,9 +1115,15 @@ public class ModelPost extends AbstractJavaWebScript {
             }
         }
         if (isPackage) {
+            // add the package specialization
             JSONObject specializationJson = new JSONObject();
             specializationJson.put( "type", "Package" );
             elementJson.put( "specialization", specializationJson );
+            
+            // add the package stereotype
+            JSONArray appliedMetatypes = new JSONArray();
+            appliedMetatypes.put( "_9_0_62a020a_1105704885298_713292_7913" );
+            elementJson.put( "appliedMetatypes", appliedMetatypes );
         }
         jsonArray.put( elementJson );
         child2OwnerMap.put( sysmlId, ownerId );
