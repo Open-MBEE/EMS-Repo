@@ -1,7 +1,7 @@
 <webscript>
 	<shortname>Set log level for class</shortname>
     <description>
-    	Ste log level for specified class
+    	Set log level for specified class
 	</description>
     <url>/loglevel</url>
   	<format default="json">argument</format>

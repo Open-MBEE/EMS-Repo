@@ -5,6 +5,7 @@ import gov.nasa.jpl.mbee.util.Debug;
 import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.view_repo.sysml.View;
 import gov.nasa.jpl.view_repo.util.Acm;
+import gov.nasa.jpl.view_repo.util.EmsConfig;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.EmsTransaction;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
@@ -797,8 +798,8 @@ public class FullDocPost extends AbstractJavaWebScript {
         }
         String legalNotice = "Paper copies of this document may not be current and should not be relied on for official purposes. JPL/Caltech proprietary. Not for public release.";
         String pageLegalNotice = "This Document has not been reviewed for export control. Not for distribution to or access by foreign persons.";
-        String jplName = "Jet Propulsion Laboratory";
-        String caltechName = "California Institute of Technology";
+        String orgName = EmsConfig.get( "app.org.name" ); 
+        String instName = EmsConfig.get( "app.inst.name");
         Date date = this.getTime();
         String tag = this.getTimeTagName();
                             
@@ -819,8 +820,8 @@ public class FullDocPost extends AbstractJavaWebScript {
                     +"</div>"
                     + "<div style=\"top:85%; left:10%; position:absolute;\">"
                     + "<div>"
-                    + "<img src=\"http://div27.jpl.nasa.gov/2740/files/logos/jpl_logo%28220x67%29.jpg\" alt=\"JPL Logo\"/>"
-                    + "<p style=\"color:#B6B6B4\">" + jplName + "<br/><i>" + caltechName + "</i></p>" //did separate jpl/caltech label to always have the stamp on pdf
+                    + "<img src=\"" + EmsConfig.get( "app.logo.url" )+ "\" alt=\"" + EmsConfig.get("app.logo.alt") + "\"/>"
+                    + "<p style=\"color:#B6B6B4\">" + orgName + "<br/><i>" + instName + "</i></p>" //did separate jpl/caltech label to always have the stamp on pdf
                     + "</div>"
                     + "</div>"
                 + "</body>"

@@ -1,5 +1,7 @@
 import robottesting.robot.lib.keyword_lib
 from robot.api.deco import keyword
+import sys
+import optparse
 import re
 
 # MMS Test Library
@@ -68,7 +70,7 @@ def generate_test_suite(file_action):
 
             # Documentation (Description)
             file_object.write(
-                    "\t[Documentation]\t\t" + "\"Regression Test: " + str(test[0]) + ". " + str(test[2]) + "\"\n")
+                "\t[Documentation]\t\t" + "\"Regression Test: " + str(test[0]) + ". " + str(test[2]) + "\"\n")
 
             # Setup and Teardown of the test (Both optional)
             #   Checks if a setup function was given
@@ -149,8 +151,10 @@ def generate_test_case(file_action):
         file_object.write()
 
 
-# Automatically generate the Robot Framework Test Suite for the MMS when executing the python file.
-set_test_suite_settings('w')
-set_test_suite_variables('a')
-generate_test_suite('a')
-set_test_suite_keywords('a')
+
+if __name__ == "__main__":
+    # Automatically generate the Robot Framework Test Suite for the MMS when executing the python file.
+    set_test_suite_settings('w')
+    set_test_suite_variables('a')
+    generate_test_suite('a')
+    set_test_suite_keywords('a')

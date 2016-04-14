@@ -3,26 +3,31 @@
         "name": "ws2",
         "elements": [
             {
-                "specialization": {"type": "Package"},
                 "editable": true,
+                "appliedMetatypes": ["_9_0_62a020a_1105704885298_713292_7913"],
+                "specialization": {"type": "Package"}
             },
             {
-                "specialization": {"type": "Package"},
                 "editable": true,
+                "appliedMetatypes": ["_9_0_62a020a_1105704885298_713292_7913"],
+                "specialization": {"type": "Package"}
             },
             {
-                "specialization": {"type": "Package"},
                 "editable": true,
+                "appliedMetatypes": ["_9_0_62a020a_1105704885298_713292_7913"],
+                "specialization": {"type": "Package"}
             },
             {
-                "specialization": {"type": "Package"},
                 "editable": true,
+                "appliedMetatypes": ["_9_0_62a020a_1105704885298_713292_7913"],
+                "specialization": {"type": "Package"}
             },
             {
-                "name": "holding_bin",
                 "sysmlid": "holding_bin_no_site_no_project",
-                "specialization": {"type": "Package"},
                 "editable": true,
+                "name": "holding_bin",
+                "appliedMetatypes": ["_9_0_62a020a_1105704885298_713292_7913"],
+                "specialization": {"type": "Package"}
             },
             {
                 "sysmlid": "402",
@@ -31,8 +36,8 @@
                 "documentation": "4to",
                 "specialization": {
                     "propertyType": null,
-                    "isDerived": false,
                     "isSlot": false,
+                    "isDerived": false,
                     "value": [{
                         "string": "dlam_string",
                         "type": "LiteralString"
@@ -46,6 +51,12 @@
                 "name": "401",
                 "documentation": "4else",
                 "specialization": {
+                    "displayedElements": [
+                        "401",
+                        "402",
+                        "403"
+                    ],
+                    "childrenViews": ["404"],
                     "view2view": [{
                         "childrenViews": [
                             "401",
@@ -53,24 +64,18 @@
                         ],
                         "sysmlid": "401"
                     }],
-                    "childrenViews": ["404"],
-                    "displayedElements": [
-                        "401",
-                        "402",
-                        "403"
-                    ],
                     "allowedElements": [
                         "401",
                         "402",
                         "403"
                     ],
-                    "noSections": ["402"],
                     "contains": [{
                         "sourceType": "reference",
                         "source": "401",
                         "sourceProperty": "documentation",
                         "type": "Paragraph"
                     }],
+                    "noSections": ["402"],
                     "type": "Product"
                 }
             },
@@ -81,8 +86,8 @@
                 "documentation": "4something",
                 "specialization": {
                     "propertyType": null,
-                    "isSlot": false,
                     "isDerived": false,
+                    "isSlot": false,
                     "value": [{
                         "string": "dlam_string",
                         "type": "LiteralString"
@@ -95,25 +100,25 @@
     "workspace2": {
         "deletedElements": [],
         "addedElements": [{
-            "documentation": "x is x",
             "sysmlid": "newElement",
+            "editable": true,
+            "documentation": "x is x",
             "specialization": {
                 "propertyType": null,
-                "isSlot": false,
                 "isDerived": false,
+                "isSlot": false,
                 "value": [{
                     "string": "the element added to ws1",
                     "type": "LiteralString"
                 }],
                 "type": "Property"
-            },
-            "editable": true,
+            }
         }],
         "conflictedElements": [],
         "updatedElements": [{
             "name": "402",
-            "sysmlid": "402",
             "documentation": "x is x",
+            "sysmlid": "402",
             "specialization": {
                 "value": [{
                     "string": "the x value",

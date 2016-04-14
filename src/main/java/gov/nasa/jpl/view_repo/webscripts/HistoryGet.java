@@ -180,7 +180,7 @@ public class HistoryGet extends ModelGet {
      * @param top
      * @return
      */
-    private JSONArray handleRequest(WebScriptRequest req, final JSONObject top) {
+    protected JSONArray handleRequest(WebScriptRequest req, final JSONObject top) {
         // REVIEW -- Why check for errors here if validate has already been
         // called? Is the error checking code different? Why?
 

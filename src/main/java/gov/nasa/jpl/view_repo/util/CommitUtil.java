@@ -9,6 +9,7 @@ import gov.nasa.jpl.view_repo.connections.RestPostConnection;
 import gov.nasa.jpl.view_repo.db.PostgresHelper;
 import gov.nasa.jpl.view_repo.db.PostgresHelper.DbEdgeTypes;
 import gov.nasa.jpl.view_repo.util.JsonDiffDiff.DiffType;
+import gov.nasa.jpl.view_repo.webscripts.AbstractJavaWebScript;
 import gov.nasa.jpl.view_repo.webscripts.MmsDiffGet;
 import gov.nasa.jpl.view_repo.webscripts.WebScriptUtil;
 import gov.nasa.jpl.view_repo.webscripts.util.ConfigurationsWebscript;
@@ -1039,6 +1040,9 @@ public class CommitUtil {
 			String workspaceId, String projectId) {
 		boolean status = false;
 		if (jmsConnection != null) {
+            logger.info( "publishing to jms eventType=" + eventType
+                         + "workspaceId" + workspaceId + "; projectId="
+                         + projectId + ":\n" + json.toString( 4 ) + "\n" );
 			status = jmsConnection.publish(json, eventType, workspaceId,
 					projectId);
 		} else {
@@ -1075,7 +1079,8 @@ public class CommitUtil {
 		return true;
 	}
 
-	private static JSONObject migrateCommitUsingDiff(JSONArray elements,
+	private static JSONObject migrateCommitUsingDiff(AbstractJavaWebScript webscript,
+	                                                 JSONArray elements,
 			JSONArray updated, JSONArray added, JSONArray deleted,
 			WorkspaceNode ws1, WorkspaceNode ws2, Date dateTime1,
 			Date dateTime2, StringBuffer response, Status responseStatus) {
@@ -1098,7 +1103,7 @@ public class CommitUtil {
 
 				// Perform the diff using the workspaces and timestamps
 				// from the commit node:
-				JSONObject json = MmsDiffGet.performDiff(ws1, ws2, dateTime1,
+				JSONObject json = MmsDiffGet.performDiff(webscript, ws1, ws2, dateTime1,
 						dateTime2, response, responseStatus, DiffType.COMPARE,
 						true, false);
 				return json;
