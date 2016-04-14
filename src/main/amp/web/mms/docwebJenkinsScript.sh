@@ -2,7 +2,7 @@
 
 # Tell MMS that this job has started
 status=running
-(curl -w "\n%{http_code}\n" --netrc-file ~/.netrc -X POST -H Content-Type:application/json --data "{\"jobs\":[{\"sysmlid\":\"${JOB_ID}\", \"status\":\"${status}\"}]}" "${MMS_SERVER}/alfresco/service/workspaces/master/jobs") || echo "curl failed"
+(curl -w "\n%{http_code}\n" -n -X POST -H Content-Type:application/json --data "{\"jobs\":[{\"sysmlid\":\"${JOB_ID}\", \"status\":\"${status}\"}]}" "${MMS_SERVER}/alfresco/service/workspaces/master/jobs") || echo "curl failed"
 
 # Run docweb job
 export MD_HOME=/opt/local/MD
@@ -12,4 +12,4 @@ bash /opt/local/MD/automations/docweb.sh "${TEAMWORK_PROJECT}" "${DOCUMENTS}" "$
 # and change status to &quot;completed.&quot;  Otherwise, we assume that $status has been set to an appropriate value elsewhere.
 
 if [ "$status" == "running" ]; then status=completed; fi
-(curl -w "\n%{http_code}\n" --netrc-file ~/.netrc -X POST -H Content-Type:application/json --data "{\"jobs\":[{\"sysmlid\":\"${JOB_ID}\", \"status\":\"${status}\"}]}" "${MMS_SERVER}/alfresco/service/workspaces/master/jobs")  echo "curl failed" 
+(curl -w "\n%{http_code}\n" -n -X POST -H Content-Type:application/json --data "{\"jobs\":[{\"sysmlid\":\"${JOB_ID}\", \"status\":\"${status}\"}]}" "${MMS_SERVER}/alfresco/service/workspaces/master/jobs")  echo "curl failed" 

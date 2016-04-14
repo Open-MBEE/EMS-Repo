@@ -812,10 +812,24 @@ public class WorkspaceDiff implements Serializable {
         addJSONArray(webscript, ws2Json, "conflictedElements", conflictedElements, ws2, time2, showAll, includeQualified);
         addWorkspaceMetadata( ws2Json, ws2, time2);
         
+        updatedJobsInWs2( ws1Json, ws2Json );
+        
+        deltaJson.put( "workspace1", ws1Json );
+        deltaJson.put( "workspace2", ws2Json );
+        
+        // If we came up with nothing (!isDiff()), then maybe we computed it
+        // another way and should return the existing diffJson.
+        if ( diffJson == null || isDiff(deltaJson) ) {
+            diffJson = deltaJson;
+        }
+        
+        return diffJson;
+    }
+    
+    protected static void updatedJobsInWs2( JSONObject ws1Json, JSONObject ws2Json ) {
         // Add the name and owner--the View Editor, at least, needs it.
         // TODO -- Are we sure that the jobs will be in ws1?
         // TODO -- Otherwise, we need to get the EmsScriptNode.
-        // TODO -- Pull this out into a separate function.
         JSONArray jobs = ws1Json.optJSONArray( "jobs" );
         
         if( jobs != null && jobs.length() > 0 ) {
@@ -847,18 +861,7 @@ public class WorkspaceDiff implements Serializable {
                     }
                 }
             }
-        }
-        
-        deltaJson.put( "workspace1", ws1Json );
-        deltaJson.put( "workspace2", ws2Json );
-        
-        // If we came up with nothing (!isDiff()), then maybe we computed it
-        // another way and should return the existing diffJson.
-        if ( diffJson == null || isDiff(deltaJson) ) {
-            diffJson = deltaJson;
-        }
-        
-        return diffJson;
+        }        
     }
     
     protected void addCachedJobs( AbstractJavaWebScript webscript, JSONObject json, String keyName ) {
