@@ -421,7 +421,7 @@ public class JenkinsEngine implements ExecutionEngine {
             url = url + "/";
         }
 
-        url = this.url + url + "ws/MDNotificationWindowText.html"; 
+        url = this.url + url + "lastSuccessfulBuild/artifact/MDNotificationWindowText.html"; 
         return url;
         //this.executeUrl = this.url + url;
     }
