@@ -3413,6 +3413,12 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
     
     public void postProcessJson( JSONObject top ) {
         // redefine this if you want to add jobs or other things; see
+        if ( jobsJsonArray != null ) {
+            top.put( "jobs", jobsJsonArray );
+            // flush the jobs array so that it can be repopulated for
+            // returned json after sending deltas
+            jobsJsonArray = new JSONArray();
+        }
     }
 
     protected JSONObject getJsonForElement( EmsScriptNode element,
