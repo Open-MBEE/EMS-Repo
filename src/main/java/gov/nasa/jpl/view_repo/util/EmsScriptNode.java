@@ -3358,8 +3358,8 @@ public class EmsScriptNode extends ScriptNode implements
         } else {
             // If not using a filter, check to remove qualifiedId/Name.
             if ( !isIncludeQualified ) {
-                boolean hasId = json.get( "qualifiedId" ) != null;
-                boolean hasName = json.get( "qualifiedName" ) != null;
+                boolean hasId = json.opt( "qualifiedId" ) != null;
+                boolean hasName = json.opt( "qualifiedName" ) != null;
                 if ( hasId || hasName ) {
                     json = NodeUtil.clone( json );
                     if ( Debug.isOn() ) Debug.outln( "remove qualifiedId? "

@@ -193,7 +193,7 @@ public class ModelLoadActionExecuter extends ActionExecuterAbstractBase {
 //        boolean succeeded = false;
         Set<EmsScriptNode> elements = null;
         try {
-            modelService.preProcessJson( content, modelContext.workspace );
+            modelService.preProcessJson( content, modelContext.workspace, false );
             if ( serviceContext.status == null ) serviceContext.status = new Status();
             if ( serviceContext.response == null ) serviceContext.response = new StringBuffer();
             // FIXME: make sure this all matches with ModelService handleUpdate

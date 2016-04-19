@@ -3,7 +3,7 @@
  * 
  * Implements the ExecutionEngine as a way to execute jobs (events) on the
  * Jenkins server.
- * 
+ *
  * @author Dan Karlsson (dank)
  * @date 2/04/16
  * 
@@ -41,7 +41,6 @@ import org.apache.http.protocol.BasicHttpContext;
 import org.apache.http.protocol.ExecutionContext;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.util.EntityUtils;
-import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -50,10 +49,24 @@ import org.w3c.dom.Element;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
+import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.util.EmsConfig;
 
-// import gov.nasa.jpl.view_repo.util.JSONObject;
-
+/**
+ * Implements the ExecutionEngine as a way to execute jobs (events) on the
+ * Jenkins server.
+ *<p>
+ * Example jenkins api queries:
+ * <ul>
+ * <li>
+ * https://some-jenkins-server.someorganization.com/job/MMS_1460067117709_b5f26105-8581-406e-b54d-8525012044c5/lastBuild/api/json?pretty=true
+ * <li>
+ * https://some-jenkins-server.someorganization.com/job/MMS_1460074360091_e6271b6a-0bb6-46d3-8283-0c2aaa7d1866/lastBuild/api/json?tree=building,result&pretty=true
+ * <li>
+ * https://some-jenkins-server.someorganization.com/api/json?tree=jobs[name,description,color,url,lastCompletedBuild[duration,timestamp,estimatedDuration]]&pretty=true
+ * </ul>
+ * 
+ */
 public class JenkinsEngine implements ExecutionEngine {
     static Logger logger = Logger.getLogger( JenkinsEngine.class );
 
@@ -156,7 +169,7 @@ public class JenkinsEngine implements ExecutionEngine {
                 HttpEntity entity = response.getEntity();
                 String retSrc = EntityUtils.toString( entity );
                 jsonResponse = new JSONObject( retSrc );
-                logger.info( "Content of the JSON Object is "
+                logger.debug( "Content of the JSON Object is "
                                     + jsonResponse.toString() );
                 EntityUtils.consume( entity );
             } catch ( IOException e ) {
@@ -268,7 +281,7 @@ public class JenkinsEngine implements ExecutionEngine {
             // be manipulated into a string.
             HttpEntity entity = response.getEntity();
             entityString = EntityUtils.toString( entity );
-
+           
             // Converts the HttpEntity String from the response of the GET
             // call into a JSON object then consumes the entity to close the
             // connection.
@@ -279,6 +292,22 @@ public class JenkinsEngine implements ExecutionEngine {
             
             //EntityUtils.consume( entity );
 
+            // Will throw an error if the execution fails from either incorrect
+            // setup or if the jenkinsClient has not been instantiated.
+        } catch ( IOException e ) {
+            e.printStackTrace();
+        }
+    }
+    
+    public void build() {
+        // This sets the URL to an Object specifically for making GET calls
+        HttpPost post = new HttpPost( this.executeUrl );
+        
+        try {
+            HttpResponse response = 
+                    this.jenkinsClient.execute( post, this.context );
+            
+            EntityUtils.consume( response.getEntity() );
             // Will throw an error if the execution fails from either incorrect
             // setup or if the jenkinsClient has not been instantiated.
         } catch ( IOException e ) {
@@ -379,7 +408,28 @@ public class JenkinsEngine implements ExecutionEngine {
     public long getExecutionTime() {
         return executionTime;
     }
+    
+    public void getBuildArtifact( String jobId ) {
+        String url;
 
+        if ( !jobId.startsWith( "/" ) ) {
+            jobId = "/" + jobId;
+        }
+        url = "/job" + jobId;
+
+        if ( !url.endsWith( "/" ) ) {
+            url = url + "/";
+        }
+
+        url = url + "lastSuccessfulBuild/artifact/mdNotificationWindowText.html"; 
+        
+        this.executeUrl = this.url + url;
+    }
+
+    
+    // https://some-jenkins-server.someorganization.com/job/MMS_1460067117709_b5f26105-8581-406e-b54d-8525012044c5/lastBuild/api/json?pretty=true
+    
+    
     /**
      * Private method for constructing urls to be executed on Jenkins.
      * 
@@ -536,7 +586,7 @@ public class JenkinsEngine implements ExecutionEngine {
     public boolean postConfigXml( JenkinsBuildConfig config,String jobName, boolean newConfig ) {
         String postUrl = null;
         if( newConfig ) {
-            postUrl = this.url + "/createItem?name=" + jobName;
+            postUrl = this.url + "/view/DocWeb%20(cae-ems-uat)/createItem?name=" + jobName;
         }
         else {
             postUrl = this.url + "/job/" + jobName + "/config.xml";
@@ -565,7 +615,26 @@ public class JenkinsEngine implements ExecutionEngine {
         }
         return true;
     }
+    
+    public JSONObject getJob( String jobName ) {
+        JSONObject json = null;
+        JSONObject allJobs = getAllJobs();
+        if ( allJobs == null ) return null;
+        JSONArray jobs = allJobs.optJSONArray( "jobs" );
+        if ( jobs == null || jobs.length() <= 0 ) return null;
+        for ( int i = 0; i < jobs.length(); ++i ) {
+            JSONObject job = jobs.optJSONObject( i );
+            if ( job == null ) continue;
+            String name = job.optString("name");
+            if ( !Utils.isNullOrEmpty( name ) && name.equals( jobName ) ) {
+                json = job;
+                break;
+            }
+        }
+        return json;
+    }
 
+    
     public JSONObject getAllJobs() {
         constructAllJobs();
         execute();
@@ -668,7 +737,7 @@ public class JenkinsEngine implements ExecutionEngine {
         try{
             
             this.executeUrl = this.url + "/job/" +jobName + "/build?token=" + this.jenkinsToken;
-            this.execute();
+            this.build();
         }catch(Exception e){
             e.printStackTrace();
         }
