@@ -56,8 +56,14 @@ src/main/java/gov/nasa/jpl/view_repo/db/mms.sql to initialize the database (as f
   - ems.properties should be copied into config/alfresco
       - When running maven, use the -DdeploymentName=ems to point to that properties file (update runserver.sh as appropriate)
   - mms-parent-pom.xml should be copied into config/
+ 
+8. Register and update the ems-config submodule. If this step is skipped the next step will fail.
         
-8. Run this script from the command line to run the system:
+        git submodule init
+        git submodule update
+        git status
+
+9. Run this script from the command line to run the system:
 
         ./cpr.sh
     

@@ -1,30 +1,28 @@
 {"elements": [
     {
-        "isMetatype": false,
+        "sysmlid": "IS_C-slot-_18_0_5_407019f_1458259018041_351899_14098",
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
         "name": "",
-        "documentation": "",
-        "appliedMetatypes": ["_9_0_62a020a_1105704885275_885607_7905"],
         "specialization": {
             "propertyType": null,
             "isDerived": false,
             "isSlot": true,
             "value": [{
-                "string": "2",
+                "string": "waiting",
                 "type": "LiteralString"
             }],
             "type": "Property"
         }
     },
     {
-        "sysmlid": "_18_0_2_6620226_1456959739177_361030_15173",
+        "sysmlid": "IS_D",
         "isMetatype": false,
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
-        "name": "",
+        "name": "IS_D",
         "documentation": "",
         "appliedMetatypes": ["_9_0_62a020a_1105704885251_933969_7897"],
         "specialization": {
@@ -34,16 +32,6 @@
         }
     },
     {
-        "isMetatype": false,
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "Testing Job",
-        "documentation": "",
-        "appliedMetatypes": ["_18_0_5_407019f_1458258829038_313297_14086"],
-        "specialization": {"type": "Element"}
-    },
-    {
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
@@ -51,45 +39,17 @@
         "specialization": {"type": "Package"}
     },
     {
-        "sysmlid": "_18_0_2_6620226_1456966279773_280717_15402",
+        "sysmlid": "jobC",
         "isMetatype": false,
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
-        "name": "Job_block1",
-        "documentation": "",
-        "appliedMetatypes": [
-            "_11_5EAPbeta_be00301_1147424179914_458922_958",
-            "_18_0_5_407019f_1458258829038_313297_14086",
-            "_9_0_62a020a_1105704885343_144138_7929"
-        ],
+        "name": "jobC",
+        "appliedMetatypes": ["_18_0_5_407019f_1458258829038_313297_14086"],
         "specialization": {"type": "Element"}
     },
     {
-        "sysmlid": "_18_0_2_6620226_1456959728735_383512_15089-slot-_18_0_5_407019f_1458259033014_844708_14099",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "",
-        "specialization": {
-            "propertyType": null,
-            "isDerived": false,
-            "isSlot": true,
-            "value": [{
-                "string": "H 20 * * *",
-                "type": "LiteralString"
-            }],
-            "type": "Property"
-        }
-    },
-    {
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "specialization": {"type": "Element"}
-    },
-    {
-        "sysmlid": "holding_bin_no_site_no_project",
+        "sysmlid": "holding_bin_123456",
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
@@ -98,19 +58,22 @@
         "specialization": {"type": "Package"}
     },
     {
-        "sysmlid": "_18_0_2_6620226_1456966279774_260190_15403",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "PMA_Jobs",
+        "documentation": "",
+        "specialization": {"type": "Package"}
+    },
+    {
+        "sysmlid": "jobD",
         "isMetatype": false,
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
-        "name": "",
-        "documentation": "",
-        "appliedMetatypes": ["_9_0_62a020a_1105704885251_933969_7897"],
-        "specialization": {
-            "slots": [],
-            "classifier": [],
-            "type": "InstanceSpecification"
-        }
+        "name": "jobD",
+        "appliedMetatypes": ["_18_0_5_407019f_1458258829038_313297_14086"],
+        "specialization": {"type": "Element"}
     },
     {
         "editable": true,
@@ -120,24 +83,39 @@
         "specialization": {"type": "Package"}
     },
     {
-        "sysmlid": "_18_0_2_6620226_1456966279774_260190_15403-slot-_18_0_5_407019f_1458258991043_482001_14097",
+        "sysmlid": "PMA_Jobs",
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
-        "name": "",
+        "specialization": {"type": "Element"}
+    },
+    {
+        "sysmlid": "IS_B",
+        "isMetatype": false,
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "IS_B",
+        "documentation": "",
+        "appliedMetatypes": ["_9_0_62a020a_1105704885251_933969_7897"],
         "specialization": {
-            "propertyType": null,
-            "isDerived": false,
-            "isSlot": true,
-            "value": [{
-                "string": "Jenkins, DocWeb, Basic Document, Intern Testing Project",
-                "type": "LiteralString"
-            }],
-            "type": "Property"
+            "slots": [],
+            "classifier": [],
+            "type": "InstanceSpecification"
         }
     },
     {
-        "sysmlid": "_18_0_2_6620226_1456959728735_383512_15089-slot-_18_0_5_407019f_1458259018041_351899_14098",
+        "sysmlid": "jobB",
+        "isMetatype": false,
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "jobB",
+        "appliedMetatypes": ["_18_0_5_407019f_1458258829038_313297_14086"],
+        "specialization": {"type": "Element"}
+    },
+    {
+        "sysmlid": "IS_D-slot-_18_0_5_407019f_1458259018041_351899_14098",
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
@@ -154,50 +132,17 @@
         }
     },
     {
+        "sysmlid": "jobF",
+        "isMetatype": false,
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
+        "name": "jobF",
         "appliedMetatypes": ["_18_0_5_407019f_1458258829038_313297_14086"],
         "specialization": {"type": "Element"}
     },
     {
-        "isMetatype": false,
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "MDK Manual Job",
-        "documentation": "",
-        "appliedMetatypes": ["_18_0_5_407019f_1458258829038_313297_14086"],
-        "specialization": {"type": "Element"}
-    },
-    {
-        "sysmlid": "_18_0_2_6620226_1456959728734_53627_15088",
-        "isMetatype": false,
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "Job_block",
-        "documentation": "",
-        "appliedMetatypes": [
-            "_11_5EAPbeta_be00301_1147424179914_458922_958",
-            "_18_0_5_407019f_1458258829038_313297_14086",
-            "_9_0_62a020a_1105704885343_144138_7929"
-        ],
-        "specialization": {"type": "Element"}
-    },
-    {
-        "sysmlid": "_18_0_2_6620226_1456959739177_654072_15172",
-        "isMetatype": false,
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "View contains Job",
-        "documentation": "",
-        "appliedMetatypes": ["_9_0_62a020a_1105704885343_144138_7929"],
-        "specialization": {"type": "View"}
-    },
-    {
-        "sysmlid": "_18_0_2_6620226_1456966279774_260190_15403-slot-_18_0_5_407019f_1458259018041_351899_14098",
+        "sysmlid": "IS_F-slot-_18_0_5_407019f_1458259018041_351899_14098",
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
@@ -221,7 +166,7 @@
         "specialization": {"type": "Package"}
     },
     {
-        "sysmlid": "_18_0_2_6620226_1456959728735_383512_15089-slot-_18_0_5_407019f_1458258991043_482001_14097",
+        "sysmlid": "IS_D-slot-_18_0_5_407019f_1458259033014_844708_14099",
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
@@ -231,19 +176,53 @@
             "isDerived": false,
             "isSlot": true,
             "value": [{
-                "string": "Jenkins, DocWeb, Basic Document, Intern Testing Project",
+                "string": " ",
                 "type": "LiteralString"
             }],
             "type": "Property"
         }
     },
     {
-        "sysmlid": "_18_0_2_6620226_1456959728735_383512_15089",
-        "isMetatype": false,
+        "sysmlid": "IS_F-slot-_18_0_5_407019f_1458259033014_844708_14099",
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
         "name": "",
+        "specialization": {
+            "propertyType": null,
+            "isDerived": false,
+            "isSlot": true,
+            "value": [{
+                "string": "0 0 * * *",
+                "type": "LiteralString"
+            }],
+            "type": "Property"
+        }
+    },
+    {
+        "sysmlid": "IS_B-slot-_18_0_5_407019f_1458259018041_351899_14098",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "",
+        "specialization": {
+            "propertyType": null,
+            "isDerived": false,
+            "isSlot": true,
+            "value": [{
+                "string": "waiting",
+                "type": "LiteralString"
+            }],
+            "type": "Property"
+        }
+    },
+    {
+        "sysmlid": "IS_C",
+        "isMetatype": false,
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "IS_C",
         "documentation": "",
         "appliedMetatypes": ["_9_0_62a020a_1105704885251_933969_7897"],
         "specialization": {
@@ -253,21 +232,7 @@
         }
     },
     {
-        "sysmlid": "_18_0_2_6620226_1456959665438_723746_15025",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "specialization": {"type": "Element"}
-    },
-    {
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "appliedMetatypes": ["_9_0_62a020a_1105704885298_713292_7913"],
-        "specialization": {"type": "Package"}
-    },
-    {
-        "sysmlid": "_18_0_2_6620226_1456966279774_260190_15403-slot-_18_0_5_407019f_1458259033014_844708_14099",
+        "sysmlid": "IS_B-slot-_18_0_5_407019f_1458259033014_844708_14099",
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
@@ -277,10 +242,49 @@
             "isDerived": false,
             "isSlot": true,
             "value": [{
-                "string": "H 23 * * *",
+                "string": " ",
                 "type": "LiteralString"
             }],
             "type": "Property"
+        }
+    },
+    {
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "appliedMetatypes": ["_9_0_62a020a_1105704885298_713292_7913"],
+        "specialization": {"type": "Package"}
+    },
+    {
+        "sysmlid": "IS_C-slot-_18_0_5_407019f_1458259033014_844708_14099",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "",
+        "specialization": {
+            "propertyType": null,
+            "isDerived": false,
+            "isSlot": true,
+            "value": [{
+                "string": "0 0 * * *",
+                "type": "LiteralString"
+            }],
+            "type": "Property"
+        }
+    },
+    {
+        "sysmlid": "IS_F",
+        "isMetatype": false,
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "IS_F",
+        "documentation": "",
+        "appliedMetatypes": ["_9_0_62a020a_1105704885251_933969_7897"],
+        "specialization": {
+            "slots": [],
+            "classifier": [],
+            "type": "InstanceSpecification"
         }
     }
 ]}

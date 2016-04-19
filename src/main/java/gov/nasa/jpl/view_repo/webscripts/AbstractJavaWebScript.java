@@ -101,6 +101,7 @@ import org.json.JSONObject;
 import org.json.JSONString;
 import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
+import org.springframework.extensions.webscripts.WebScript;
 import org.springframework.extensions.webscripts.WebScriptRequest;
 import sysml.SystemModel;
 
@@ -2587,6 +2588,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         config.setTeamworkServer( teamworkServer );
         
         boolean jobWasCreated = jenkins.postConfigXml( config, config.getJobID(), createNewJob );    
+        
         String jobUrl = null;   
         
         // Recreate a Jenkin's instance so we can query for the job's URL and add it to the json
@@ -2596,7 +2598,9 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
             
             jenkins.constructBuildUrl( jobID, JenkinsEngine.detail.URL );
             jenkins.execute();
-            jobUrl = jenkins.jsonResponse.optString( "url" );
+            if( jenkins.jsonResponse != null ) {
+                jobUrl = jenkins.jsonResponse.optString( "url" );
+            }
         }
         
         return jobUrl;
@@ -3155,7 +3159,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         return jobIds;
     }
     
-    protected void processJobsJson( JSONObject json, WorkspaceNode workspace ) {
+    protected void processJobsJson( JSONObject json, WorkspaceNode workspace, boolean addToJenkins ) {
         if ( json == null ) return;
 
         // Get "jobs" as opposed to "elements"
@@ -3252,31 +3256,32 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         
         // Get missing property values from DB for jenkins config
         //getMissingPropertyValues(jobIds);
-        
-        // Step 7
-        // FIXME -- Don't send the jenkins config until the post is complete; in
-        // fact, the propertyValues should be gathered after the fact.
-        for ( String jobId : propertyValues.keySet() ) {
-            Map< String, String > properties = propertyValues.get( jobId );
-            String url = createJenkinsConfig( jobId, properties, createNewJob.get( jobId ) == true );
-            
-            // NOTE: how can we get the jobUrlJson? either way, up to this point
-            //       we have a URL by returning it (implies the job has been created)
-
-            if( url != null ) {                
-                JSONObject specJson = jobUrl.optJSONObject( Acm.JSON_SPECIALIZATION );
-                if ( specJson != null && specJson.has( "value"  ) ) {
-                    JSONArray valueArr = specJson.getJSONArray( "value" );
-                    if ( valueArr.length() > 0 ) {
-                        JSONObject valueSpec = valueArr.optJSONObject( 0 );
-                        if ( valueSpec != null ) {
-                            valueSpec.put( "string", url );
+        if( addToJenkins ) {
+            // Step 7
+            // FIXME -- Don't send the jenkins config until the post is complete; in
+            // fact, the propertyValues should be gathered after the fact.
+            for ( String jobId : propertyValues.keySet() ) {
+                Map< String, String > properties = propertyValues.get( jobId );
+                String url = createJenkinsConfig( jobId, properties, createNewJob.get( jobId ) == true );
+                
+                // NOTE: how can we get the jobUrlJson? either way, up to this point
+                //       we have a URL by returning it (implies the job has been created)
+    
+                if( url != null ) {                
+                    JSONObject specJson = jobUrl.optJSONObject( Acm.JSON_SPECIALIZATION );
+                    if ( specJson != null && specJson.has( "value"  ) ) {
+                        JSONArray valueArr = specJson.getJSONArray( "value" );
+                        if ( valueArr.length() > 0 ) {
+                            JSONObject valueSpec = valueArr.optJSONObject( 0 );
+                            if ( valueSpec != null ) {
+                                valueSpec.put( "string", url );
+                            }
                         }
                     }
-                }
-                
-                elements.put( jobUrl );
-            }                       
+                    
+                    elements.put( jobUrl );
+                }                       
+            }
         }
 
         json.remove( "jobs" );

@@ -1,0 +1,124 @@
+{"elements": [
+    {
+        "siteCharacterizationId": "no_site",
+        "qualifiedId": "/no_site/no_site_no_project/holding_bin_no_site_no_project/YY_2016_no_site_no_project/MM_3_no_site_no_project/DD_13_no_site_no_project/HH_13_no_site_no_project/PMA_Jobs/jobG/IS_G/IS_G-slot-_18_0_5_407019f_1458259033014_844708_14099",
+        "nodeRefId": "workspace://SpacesStore/061cc8f7-2f92-4086-893c-944309663a00",
+        "versionedRefId": "versionStore://version2Store/fb43bb38-1421-4c05-b258-1494f995510a",
+        "qualifiedName": "/no_site/no_site_no_project/holding_bin/YY_2016/MM_3/DD_13/HH_13/null/jobG/IS_G/",
+        "sysmlid": "IS_G-slot-_18_0_5_407019f_1458259033014_844708_14099",
+        "editable": true,
+        "creator": "admin",
+        "modified": "2016-04-13T13:02:12.069-0700",
+        "modifier": "admin",
+        "created": "Wed Apr 13 13:02:11 PDT 2016",
+        "name": "",
+        "owner": "IS_G",
+        "read": "2016-04-13T13:02:12.802-0700",
+        "specialization": {
+            "propertyType": null,
+            "isDerived": false,
+            "isSlot": true,
+            "value": [{
+                "string": " ",
+                "type": "LiteralString"
+            }],
+            "type": "Property"
+        }
+    },
+    {
+        "siteCharacterizationId": "no_site",
+        "nodeRefId": "workspace://SpacesStore/0ed3d900-41e8-41f4-b674-8800f28ce02b",
+        "qualifiedId": "/no_site/no_site_no_project/holding_bin_no_site_no_project/YY_2016_no_site_no_project/MM_3_no_site_no_project/DD_13_no_site_no_project/HH_13_no_site_no_project/PMA_Jobs/jobG",
+        "versionedRefId": "versionStore://version2Store/018726f1-ac4f-4a11-8756-369fc61fda6a",
+        "qualifiedName": "/no_site/no_site_no_project/holding_bin/YY_2016/MM_3/DD_13/HH_13/null/jobG",
+        "sysmlid": "jobG",
+        "isMetatype": false,
+        "editable": true,
+        "creator": "admin",
+        "modified": "2016-04-13T13:02:11.640-0700",
+        "modifier": "admin",
+        "created": "Wed Apr 13 13:02:10 PDT 2016",
+        "name": "jobG",
+        "owner": "PMA_Jobs",
+        "appliedMetatypes": ["_18_0_5_407019f_1458258829038_313297_14086"],
+        "read": "2016-04-13T13:02:12.825-0700",
+        "specialization": {"type": "Element"}
+    },
+    {
+        "siteCharacterizationId": "no_site",
+        "qualifiedId": "/no_site/no_site_no_project/holding_bin_no_site_no_project/YY_2016_no_site_no_project/MM_3_no_site_no_project/DD_13_no_site_no_project/HH_13_no_site_no_project/PMA_Jobs/jobG/IS_G",
+        "nodeRefId": "workspace://SpacesStore/2cd92336-f027-4afd-b5c1-041e97e24c9b",
+        "versionedRefId": "versionStore://version2Store/47d7e6ee-e791-4740-b9fb-d58c25fc3318",
+        "qualifiedName": "/no_site/no_site_no_project/holding_bin/YY_2016/MM_3/DD_13/HH_13/null/jobG/IS_G",
+        "sysmlid": "IS_G",
+        "isMetatype": false,
+        "editable": true,
+        "creator": "admin",
+        "modified": "2016-04-13T13:02:11.743-0700",
+        "modifier": "admin",
+        "created": "Wed Apr 13 13:02:11 PDT 2016",
+        "name": "IS_G",
+        "documentation": "",
+        "owner": "jobG",
+        "appliedMetatypes": ["_9_0_62a020a_1105704885251_933969_7897"],
+        "read": "2016-04-13T13:02:12.914-0700",
+        "specialization": {
+            "slots": [],
+            "classifier": [],
+            "type": "InstanceSpecification"
+        }
+    },
+    {
+        "siteCharacterizationId": "no_site",
+        "qualifiedId": "/no_site/no_site_no_project/holding_bin_no_site_no_project/YY_2016_no_site_no_project/MM_3_no_site_no_project/DD_13_no_site_no_project/HH_13_no_site_no_project/PMA_Jobs/jobG/IS_G/IS_G-slot-_18_0_5_407019f_1458258991043_482001_14097",
+        "nodeRefId": "workspace://SpacesStore/60c0351f-bd70-46cc-9b99-a697c7a6d7ca",
+        "versionedRefId": "versionStore://version2Store/f6a831e4-2aee-4f97-8b0b-79e572d77be0",
+        "qualifiedName": "/no_site/no_site_no_project/holding_bin/YY_2016/MM_3/DD_13/HH_13/null/jobG/IS_G/",
+        "sysmlid": "IS_G-slot-_18_0_5_407019f_1458258991043_482001_14097",
+        "editable": true,
+        "creator": "admin",
+        "modified": "2016-04-13T13:02:12.245-0700",
+        "modifier": "admin",
+        "created": "Wed Apr 13 13:02:11 PDT 2016",
+        "name": "",
+        "owner": "IS_G",
+        "read": "2016-04-13T13:02:12.936-0700",
+        "specialization": {
+            "propertyType": null,
+            "isDerived": false,
+            "isSlot": true,
+            "value": [{
+                "string": "Jenkins,DocWeb,some_tw_doc,some_tw_proj",
+                "type": "LiteralString"
+            }],
+            "type": "Property"
+        }
+    },
+    {
+        "siteCharacterizationId": "no_site",
+        "qualifiedId": "/no_site/no_site_no_project/holding_bin_no_site_no_project/YY_2016_no_site_no_project/MM_3_no_site_no_project/DD_13_no_site_no_project/HH_13_no_site_no_project/PMA_Jobs/jobG/IS_G/IS_G-slot-_18_0_5_407019f_1458259018041_351899_14098",
+        "nodeRefId": "workspace://SpacesStore/768cb48c-ed88-4e65-9ce3-c8fde7a399e7",
+        "versionedRefId": "versionStore://version2Store/d95253c0-0190-4846-8875-ca8a70162b56",
+        "qualifiedName": "/no_site/no_site_no_project/holding_bin/YY_2016/MM_3/DD_13/HH_13/null/jobG/IS_G/",
+        "sysmlid": "IS_G-slot-_18_0_5_407019f_1458259018041_351899_14098",
+        "editable": true,
+        "creator": "admin",
+        "modified": "2016-04-13T13:02:11.890-0700",
+        "modifier": "admin",
+        "created": "Wed Apr 13 13:02:11 PDT 2016",
+        "name": "",
+        "owner": "IS_G",
+        "read": "2016-04-13T13:02:12.961-0700",
+        "specialization": {
+            "propertyType": null,
+            "isDerived": false,
+            "isSlot": true,
+            "value": [{
+                "string": "waiting",
+                "type": "LiteralString"
+            }],
+            "type": "Property"
+        }
+    }
+]}
+200
