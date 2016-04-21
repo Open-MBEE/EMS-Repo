@@ -2781,7 +2781,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         Collection<EmsScriptNode> slots = jobNode.getAllSlots( jobNode, 
                                                                false, null, null, 
                                                                services, response, responseStatus, null );
-        
+
         EmsScriptNode propertyNode = null;
         if( !Utils.isNullOrEmpty( slots ) ) {
             Iterator< EmsScriptNode > itr = slots.iterator();
@@ -3413,12 +3413,6 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
     
     public void postProcessJson( JSONObject top ) {
         // redefine this if you want to add jobs or other things; see
-        if ( jobsJsonArray != null ) {
-            top.put( "jobs", jobsJsonArray );
-            // flush the jobs array so that it can be repopulated for
-            // returned json after sending deltas
-            jobsJsonArray = new JSONArray();
-        }
     }
 
     protected JSONObject getJsonForElement( EmsScriptNode element,
@@ -3478,7 +3472,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
 
     public void getJsonForJob(EmsScriptNode job, JSONObject json) {
         if ( job.isJob() ) {
-            JSONObject jobJson = null;
+            JSONObject jobJson = NodeUtil.clone( json );
             for ( String propertyName : jobProperties ) {
 
                 EmsScriptNode propertyNode =
@@ -3510,10 +3504,6 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
                                                Object value,
                                                JSONObject jobJson,
                                                JSONObject json ) {
-        if ( json == null ) return jobJson;
-        if ( jobJson == null ) {
-            jobJson = NodeUtil.clone( json );
-        } 
         jobJson.put( propertyName, jsonWrap( value ) );
         
         return jobJson;

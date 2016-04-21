@@ -830,7 +830,7 @@ public class WorkspaceDiff implements Serializable {
         // Add the name and owner--the View Editor, at least, needs it.
         // TODO -- Are we sure that the jobs will be in ws1?
         // TODO -- Otherwise, we need to get the EmsScriptNode.
-        JSONArray jobs = ws1Json.optJSONArray( "jobs" );
+         JSONArray jobs = ws1Json.optJSONArray( "jobs" );
         
         if( jobs != null && jobs.length() > 0 ) {
             for (int i = 0; i < jobs.length(); ++i ) {
@@ -1058,7 +1058,7 @@ public class WorkspaceDiff implements Serializable {
             String sysmlid = entry.getKey();
             EmsScriptNode node = map.get( sysmlid );
             if ( node == null ) {
-                node = NodeUtil.getNodeFromSysmlIdViaPostgres( sysmlid, workspace );
+                node = webscript.findScriptNodeById( sysmlid, workspace, null, true );
             }
             JSONObject jsonObject = entry.getValue();
             if ( jsonObject == null ) continue;

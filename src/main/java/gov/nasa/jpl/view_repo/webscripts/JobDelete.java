@@ -10,6 +10,7 @@ import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.extensions.webscripts.Cache;
@@ -19,7 +20,9 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
 import gov.nasa.jpl.mbee.util.Timer;
 import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.pma.JenkinsEngine;
+import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
+import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 
 public class JobDelete extends MmsModelDelete {
     static Logger logger = Logger.getLogger(JobDelete.class);
@@ -111,5 +114,16 @@ public class JobDelete extends MmsModelDelete {
 
         return model;
     }
+    
+    @Override
+    public void postProcessJson( JSONObject top ) {         
+        if ( jobsJsonArray != null ) {
+            top.put( "jobs", jobsJsonArray );
+            // flush the jobs array so that it can be repopulated for
+            // returned json after sending deltas
+            jobsJsonArray = new JSONArray();
+        }
+    }
+
 
 }

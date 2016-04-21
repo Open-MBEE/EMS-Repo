@@ -2682,7 +2682,7 @@ public class NodeUtil {
         resultSet =
                 findNodeRefsByType( pattern, type, /* false, */
                                     ignoreWorkspace, workspace, dateTime,
-                                    false, false, getServices(), false,
+                                    false, false, getServices(), true,
                                     siteName );
         for ( NodeRef nodeRef : resultSet ) {
             EmsScriptNode node =

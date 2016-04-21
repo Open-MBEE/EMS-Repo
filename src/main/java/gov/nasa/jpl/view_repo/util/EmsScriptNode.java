@@ -7010,6 +7010,7 @@ public class EmsScriptNode extends ScriptNode implements
     public boolean isJob() {
             Object stereotypes = 
                     getProperty("sysml:appliedMetatypes", true);
+            
             // stereotypes should be a List< String >
             if ( stereotypes instanceof Collection ) {
                 Collection<?> c = (Collection< ? >)stereotypes;
@@ -7076,9 +7077,7 @@ public class EmsScriptNode extends ScriptNode implements
         EmsScriptNode instanceSpec = n.getInstanceSpecification();
     
         Collection<EmsScriptNode> slots = new HashSet<EmsScriptNode>();
-        
-        //PostgresHelper pgh = new PostgresHelper(workspace);
-        
+
         if (instanceSpec != null) {
             Map< String, EmsScriptNode > nodeList = NodeUtil.searchForElements(NodeUtil.SearchType.ID.prefix, 
                                                                                instanceSpec.getSysmlId() + "-slot-*", ignoreWorkspace,

@@ -40,6 +40,8 @@ import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
 
+import gov.nasa.jpl.view_repo.util.WorkspaceNode;
+
 public class JobPost extends ModelPost {
     static Logger logger = Logger.getLogger(JobPost.class);
     
@@ -63,7 +65,7 @@ public class JobPost extends ModelPost {
     }
     
     @Override
-    public void postProcessJson( JSONObject top) {
+    public void postProcessJson(JSONObject top) {
         if ( jobsJsonArray != null ) {
             top.put( "jobs", jobsJsonArray );
             // flush the jobs array so that it can be repopulated for
