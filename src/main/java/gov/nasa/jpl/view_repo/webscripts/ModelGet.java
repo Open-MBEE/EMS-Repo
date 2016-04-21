@@ -293,14 +293,16 @@ public class ModelGet extends AbstractJavaWebScript {
 			// DB can only be used against latest at the moment
 			if (NodeUtil.doGraphDb && dateTime == null) {
 			    PostgresHelper pgh = new PostgresHelper(workspace);
-			    try {
-                    pgh.connect();
-                    modelRootNode = NodeUtil.getNodeFromPostgresNode(pgh.getNodeFromSysmlId( modelId ));
-                } catch ( Exception e ) {
-                    logger.info( "Could not find element in graph db " + modelId );
-                } finally {
-                    pgh.close();
-                }
+    			        try {
+                        pgh.connect();
+                        if (pgh.checkWorkspaceExists()) {
+                            modelRootNode = NodeUtil.getNodeFromPostgresNode(pgh.getNodeFromSysmlId( modelId ));
+                        }
+                    } catch ( Exception e ) {
+                        logger.info( "Could not find element in graph db " + modelId );
+                    } finally {
+                        pgh.close();
+                    }
 			    if (modelRootNode == null) notFoundInGraphDb = true;
 			}
 			if (modelRootNode == null) {

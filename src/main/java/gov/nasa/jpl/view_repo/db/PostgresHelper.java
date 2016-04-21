@@ -28,6 +28,7 @@ public class PostgresHelper {
 	private static String dbName;
 	private static String user;
 	private static String pass;
+	private static Boolean workspaceExists = null;
 
 	public static enum DbEdgeTypes {
 		REGULAR(1), DOCUMENT(2);
@@ -306,17 +307,22 @@ public class PostgresHelper {
 	}
 	
 	public boolean checkWorkspaceExists() {
+	    if (workspaceExists != null) return workspaceExists;
+	    
 	    String query = String.format("select true from pg_tables where tablename='nodes%s'",
 	                                 workspaceName);
 	    try {
         	    ResultSet rs = execQuery(query);
         	    while (rs.next()) {
-        	        return rs.getBoolean( 1 );
+        	        workspaceExists = rs.getBoolean( 1 );
+        	        break;
         	    }
 	    } catch (Exception e) {
-	        e.printStackTrace();
+	        // do nothing, just means workspace doesn't exist
+	        if (logger.isInfoEnabled()) logger.info( "Couldn't find workspace " + workspaceName );
+	        workspaceExists = false;
 	    }
-	    return false;
+	    return workspaceExists;
 	}
 	
 	public Map<String,Set<String>> getImmediateParentRoots(String sysmlId, DbEdgeTypes et) {

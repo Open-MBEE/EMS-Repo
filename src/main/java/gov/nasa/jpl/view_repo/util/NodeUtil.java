@@ -208,14 +208,15 @@ public class NodeUtil {
     public static boolean doVersionCaching = false;
     public static boolean activeVersionCaching = true;
     public static boolean doVersionHistoryCaching = true;
-    public static boolean doJsonCaching = false;
+    public static boolean doJsonCaching = true;
     public static boolean doJsonDeepCaching = false;
     public static boolean doJsonStringCaching = false;
     public static boolean doPropertyCaching = true;
     public static boolean doGraphDb = true;
     public static boolean doPostProcessQualified = false;
     // toggles whether modelget adds to graphDb if there's a graphDb miss, but Alfresco hit    
-    public static boolean doAutoBuildGraphDb = false;  
+    public static boolean doAutoBuildGraphDb = false; 
+    public static boolean skipQualified = false;
 
     public static boolean addEmptyEntriesToFullCache = false; // this was broken
                                                               // last tried

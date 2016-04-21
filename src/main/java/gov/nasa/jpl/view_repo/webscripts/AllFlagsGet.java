@@ -40,7 +40,8 @@ public class AllFlagsGet extends FlagSet {
                            "graphDb",
                            "postProcessQualified",
                            "doorsSync",
-                           "autoBuildGraphDb"};
+                           "autoBuildGraphDb",
+                           "skipQualified"};
     
     public String[] getAllFlags() {
         return flags;
@@ -131,7 +132,7 @@ public class AllFlagsGet extends FlagSet {
         } else if (path.equalsIgnoreCase("cacheSnapshots")) {
             DeclarativeJavaWebScript.cacheSnapshotsFlag = val;
         } else if (path.equalsIgnoreCase("checkMmsVersions")){
-        	AbstractJavaWebScript.checkMmsVersions = val;
+        	    AbstractJavaWebScript.checkMmsVersions = val;
         } else if (path.equalsIgnoreCase("graphDb")) {
             NodeUtil.doGraphDb = val;
         } else if (path.equalsIgnoreCase("postProcessQualified")) {
@@ -140,6 +141,8 @@ public class AllFlagsGet extends FlagSet {
             NodeUtil.doorsSync = val;
         } else if (path.equalsIgnoreCase("autoBuildGraphDb")) {
             NodeUtil.doAutoBuildGraphDb = val;
+        } else if (path.equalsIgnoreCase("skipQualified")) {
+            NodeUtil.skipQualified = val;
         }
         return true;
     }
@@ -213,6 +216,8 @@ public class AllFlagsGet extends FlagSet {
             return NodeUtil.doorsSync;
         } else if (path.equalsIgnoreCase( "autoBuildGraphDb" )) {
             return NodeUtil.doAutoBuildGraphDb;
+        } else if (path.equalsIgnoreCase( "skipQualified" )) {
+            return NodeUtil.skipQualified;
         }
         return false;
     }
@@ -277,7 +282,7 @@ public class AllFlagsGet extends FlagSet {
         } else if (path.equalsIgnoreCase("versionCacheDebug")) {
             return false;
         } else if (path.equalsIgnoreCase("viewpointExpressions")) {
-        	return false;
+        	    return false;
         } else if (path.equalsIgnoreCase("skipWorkspacePermissionCheck")) {
             return false;
         } else if (path.equalsIgnoreCase("optimisticJustFirst")) {
@@ -295,6 +300,10 @@ public class AllFlagsGet extends FlagSet {
         } else if (path.equalsIgnoreCase( "doPostProcessQualified" )) {
             return false;
         } else if (path.equalsIgnoreCase( "doorsSync" )) {
+            return false;
+        } else if (path.equalsIgnoreCase( "autoBuildGraphDb" )) {
+            return false;
+        } else if (path.equalsIgnoreCase( "skipQualified" )) {
             return false;
         }
         return false;
@@ -372,6 +381,10 @@ public class AllFlagsGet extends FlagSet {
             return "postProcessQualified";
         } else if (path.equalsIgnoreCase("doorsSync")) {
             return "doorsSync";
+        } else if (path.equalsIgnoreCase( "autoBuildGraphDb" )) {
+            return "autoBuildGraphDb";
+        } else if (path.equalsIgnoreCase("skipQualified")) {
+            return "skipQualified";
         }
         return null;
     }
