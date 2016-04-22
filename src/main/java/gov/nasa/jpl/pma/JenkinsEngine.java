@@ -532,7 +532,9 @@ public class JenkinsEngine implements ExecutionEngine {
     }
 
     public void constructAllJobs() {        
-        String url = this.url + "/api/json?tree=jobs[name,description,color,url,lastCompletedBuild[duration,timestamp,estimatedDuration]]";
+        String url = this.url + "/view/DocWeb%20(cae-ems-uat)/api/json?tree=jobs";
+        
+        
         
         if (logger.isDebugEnabled()) logger.debug( "Current constuction url is " + url );
         this.executeUrl = url;
@@ -752,4 +754,5 @@ public class JenkinsEngine implements ExecutionEngine {
             e.printStackTrace();
         }
     }
+
 }
