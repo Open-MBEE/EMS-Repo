@@ -1,43 +1,41 @@
 {
-    "workspace1": {
-        "name": "wsMerge1",
-        "qualifiedName": "master/wsMerge1",
-        "elements": [{
-            "sysmlid": "add_add_before",
-            "editable": true,
-            "creator": "admin",
-            "modifier": "admin",
-            "name": "add_add_before",
-            "documentation": "add_add_before",
-            "owner": "123456",
-            "specialization": {
-                "propertyType": null,
-                "isSlot": false,
-                "isDerived": false,
-                "value": [{
-                    
-                    "string": "this is it",
-                    "type": "LiteralString"
-                }],
-                "type": "Property"
-            }
-        }]
-    },
-    "workspace2": {
-        "deletedElements": [{
-            "modifier": "admin",
-            "name": "add_add_before",
-            "owner": "123456",
-            "sysmlid": "add_add_before",
-            "specialization": {"type": "Property"},
-            "creator": "admin"
+  "workspace1": {
+    "qualifiedName": "master/wsMerge1",
+    "name": "wsMerge1",
+    "elements": [{
+      "sysmlid": "add_add_before",
+      "editable": true,
+      "creator": "admin",
+      "modifier": "admin",
+      "name": "add_add_before",
+      "owner": "123456",
+      "documentation": "add_add_before",
+      "specialization": {
+        "propertyType": null,
+        "isDerived": false,
+        "isSlot": false,
+        "value": [{
+          "string": "this is it",
+          "type": "LiteralString"
         }],
-        "addedElements": [],
-        "conflictedElements": [],
-        "updatedElements": [],
-        "name": "wsMerge1",
-        "qualifiedName": "master/wsMerge1",
-        "movedElements": []
-    }
+        "type": "Property"
+      }
+    }]
+  },
+  "workspace2": {
+    "deletedElements": [{
+      "name": "add_add_before",
+      "sysmlid": "add_add_before",
+      "owner": "123456",
+      "specialization": {"type": "Property"},
+      "creator": "admin",
+    }],
+    "addedElements": [],
+    "conflictedElements": [],
+    "updatedElements": [],
+    "qualifiedName": "master/wsMerge1",
+    "name": "wsMerge1",
+    "movedElements": []
+  }
 }
 200

@@ -32,6 +32,7 @@
   <url>/flags/postProcessQualified?on={on?}&amp;off={off?}</url>
   <url>/flags/doorsSync?on={on?}&amp;off={off?}</url>
   <url>/flags/autoBuildGraphDb?on={on?}&amp;off={off?}</url>
+  <url>/flags/skipQualified?on={on?}&amp;off={off?}</url>
   <authentication>user</authentication>
   <format default="html">argument</format>
   <family>EMS Utils</family>
