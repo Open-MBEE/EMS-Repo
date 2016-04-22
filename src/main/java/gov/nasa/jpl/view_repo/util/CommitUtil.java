@@ -1040,9 +1040,14 @@ public class CommitUtil {
 			String workspaceId, String projectId) {
 		boolean status = false;
 		if (jmsConnection != null) {
-            logger.info( "publishing to jms eventType=" + eventType
-                         + "workspaceId" + workspaceId + "; projectId="
-                         + projectId + ":\n" + json.toString( 4 ) + "\n" );
+		    if (logger.isInfoEnabled()) {
+                logger.info( "publishing to jms eventType=" + eventType
+                             + "workspaceId" + workspaceId + "; projectId="
+                             + projectId );
+		    }
+		    if (logger.isDebugEnabled()) {
+		        logger.debug( json.toString( 4 ) );
+		    }
 			status = jmsConnection.publish(json, eventType, workspaceId,
 					projectId);
 		} else {

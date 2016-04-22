@@ -1,41 +1,39 @@
 {
-    "workspace1": {
-        "name": "master",
-        "qualifiedName": "master",
-        "elements": [{
-            "modifier": "admin",
-            "documentation": "p is p",
-            "owner": "aspect_history_zzz",
-            "sysmlid": "property_zzz",
-            "specialization": {
-                "propertyType": null,
-                "isSlot": false,
-                "isDerived": false,
-                "value": [{
-                    
-                    "string": "the p value",
-                    "type": "LiteralString"
-                }],
-                "type": "Property"
-            },
-            "editable": true,
-            "creator": "admin"
-        }]
-    },
-    "workspace2": {
-        "deletedElements": [{
-            "modifier": "admin",
-            "owner": "aspect_history_zzz",
-            "sysmlid": "property_zzz",
-            "specialization": {"type": "Property"},
-            "creator": "admin"
+  "workspace1": {
+    "qualifiedName": "master",
+    "name": "master",
+    "elements": [{
+      "sysmlid": "property_zzz",
+      "editable": true,
+      "creator": "admin",
+      "modifier": "admin",
+      "owner": "aspect_history_zzz",
+      "documentation": "p is p",
+      "specialization": {
+        "propertyType": null,
+        "isDerived": false,
+        "isSlot": false,
+        "value": [{
+          "string": "the p value",
+          "type": "LiteralString"
         }],
-        "addedElements": [],
-        "conflictedElements": [],
-        "updatedElements": [],
-        "name": "master",
-        "qualifiedName": "master",
-        "movedElements": []
-    }
+        "type": "Property"
+      }
+    }]
+  },
+  "workspace2": {
+    "deletedElements": [{
+      "sysmlid": "property_zzz",
+      "owner": "aspect_history_zzz",
+      "specialization": {"type": "Property"},
+      "creator": "admin",
+    }],
+    "addedElements": [],
+    "conflictedElements": [],
+    "updatedElements": [],
+    "qualifiedName": "master",
+    "name": "master",
+    "movedElements": []
+  }
 }
 200
