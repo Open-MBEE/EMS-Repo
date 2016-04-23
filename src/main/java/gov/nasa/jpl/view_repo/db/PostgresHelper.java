@@ -608,8 +608,12 @@ public class PostgresHelper {
 	    for (int ii = 0; ii < sysmlids.size(); ii++) {
 	        sysmlids.set( ii, String.format("'%s'", sysmlids.get(ii)) );
 	    }
-	    String query  = String.format("select versionedrefid from nodes%s where sysmlid in (%s);",
-	                                  this.workspaceName, StringUtils.join(sysmlids, ",") );
+	    String column = "versionedrefid";
+	    if (this.workspaceName.equals( "" )) {
+	        column = "noderefid"; // to be safe on trunk always get node ref
+	    }
+	    String query  = String.format("select %s from nodes%s where sysmlid in (%s);",
+	                                  column, this.workspaceName, StringUtils.join(sysmlids, ",") );
 	    
 	    ResultSet rs;
 	    try {
