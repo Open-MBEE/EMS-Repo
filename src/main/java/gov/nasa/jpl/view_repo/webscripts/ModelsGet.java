@@ -50,10 +50,8 @@ import org.alfresco.repo.model.Repository;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.json.JSONArray;
-
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
@@ -64,6 +62,8 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
  *
  */
 public class ModelsGet extends AbstractJavaWebScript {
+    static Logger logger = Logger.getLogger( ModelsGet.class );
+
     public ModelsGet() {
         super();
     }
@@ -173,6 +173,7 @@ public class ModelsGet extends AbstractJavaWebScript {
             sysmlids.add( elementsToFindJson.getJSONObject(ii).getString( "sysmlid" ) );
         }
 
+        if (logger.isDebugEnabled()) logger.debug("[TIMING] starting search");
         boolean graphSearched = false;
         if (NodeUtil.doGraphDb ) {
             PostgresHelper pgh = new PostgresHelper(workspace);
@@ -180,11 +181,15 @@ public class ModelsGet extends AbstractJavaWebScript {
                 pgh.connect();
             
                 if (dateTime == null && pgh.checkWorkspaceExists()) {
+                    if (logger.isDebugEnabled()) logger.debug("[TIMING] getting nodes in workspace");
                     List<String> noderefids = pgh.getNodesInWorkspace( sysmlids );
 
                     for (int ii = 0; ii < noderefids.size(); ii++) {
+                        if (logger.isDebugEnabled()) logger.debug("[TIMING] getting script node: " + ii);
                         EmsScriptNode node = new EmsScriptNode(new NodeRef(noderefids.get( ii )), services, response);
+                        if (logger.isDebugEnabled()) logger.debug("[TIMING] converting to json for sysmlid: " + node.getSysmlId());
                         elementsFoundJson.put(node.toJSONObject(workspace, dateTime));
+                        if (logger.isDebugEnabled()) logger.debug("[TIMING] added json");
                     }
                     graphSearched = true;
                 }
@@ -200,10 +205,14 @@ public class ModelsGet extends AbstractJavaWebScript {
         
         if (!graphSearched) {
             for (int ii = 0; ii < sysmlids.size(); ii++) {
+                if (logger.isDebugEnabled()) logger.debug("[TIMING] [NO GRAPH] finding script node");
                 EmsScriptNode node = NodeUtil.findScriptNodeById( sysmlids.get( ii ), workspace, dateTime, false, services, response );
+                if (logger.isDebugEnabled()) logger.debug("[TIMING] [NO GRAPH] found script node");
                 if (node != null) {
                     try {
+                        if (logger.isDebugEnabled()) logger.debug("[TIMING] [NO GRAPH] dumping to json for " + node.getSysmlId());
                         elementsFoundJson.put( node.toJSONObject( workspace, dateTime ) );
+                        if (logger.isDebugEnabled()) logger.debug("[TIMING] [NO GRAPH] finished dumping json");
                     } catch (JSONException e) {
                         log(Level.ERROR, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Could not create JSON");
                         e.printStackTrace();
