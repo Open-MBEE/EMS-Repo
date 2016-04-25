@@ -4,6 +4,7 @@ import gov.nasa.jpl.mbee.util.ClassUtils;
 import gov.nasa.jpl.mbee.util.CompareUtils;
 import gov.nasa.jpl.mbee.util.CompareUtils.GenericComparator;
 import gov.nasa.jpl.mbee.util.Debug;
+import gov.nasa.jpl.mbee.util.FileUtils;
 import gov.nasa.jpl.mbee.util.MethodCall;
 import gov.nasa.jpl.mbee.util.Pair;
 import gov.nasa.jpl.mbee.util.TimeUtils;
@@ -16,10 +17,14 @@ import gov.nasa.jpl.view_repo.util.EmsScriptNode.EmsVersion;
 import gov.nasa.jpl.view_repo.webscripts.AbstractJavaWebScript;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -77,6 +82,7 @@ import org.alfresco.service.cmr.version.Version;
 import org.alfresco.service.cmr.version.VersionHistory;
 import org.alfresco.service.namespace.NamespaceService;
 import org.alfresco.service.namespace.QName;
+import org.apache.commons.lang.NullArgumentException;
 import org.apache.commons.logging.Log;
 import org.apache.log4j.Logger;
 import org.json.JSONArray;
@@ -4130,6 +4136,150 @@ public class NodeUtil {
 
         return artifactNode;
     }
+    
+	public static EmsScriptNode updateOrCreateArtifactPng(EmsScriptNode svgNode, Path pngPath,
+			String targetSiteName, String subfolderName,
+			WorkspaceNode workspace, Date dateTime, StringBuffer response,
+			Status status, boolean ignoreName) throws Throwable {
+		if(svgNode == null){
+			throw new NullArgumentException("SVG script node");
+		}
+		if(!Files.exists(pngPath)){
+			throw new NullArgumentException("PNG path");
+		}
+		
+		EmsScriptNode pngNode;
+		String finalType = "png";
+		String artifactId = pngPath.getFileName().toString();
+
+		byte[] content = Files.readAllBytes(pngPath);
+		long cs = EmsScriptNode.getChecksum(content);
+
+		// see if image already exists by looking up by checksum
+		ArrayList<NodeRef> refs = findNodeRefsByType("" + cs,
+				SearchType.CHECKSUM.prefix, false, workspace, dateTime, false,
+				false, services, false);
+		// ResultSet existingArtifacts =
+		// NodeUtil.findNodeRefsByType( "" + cs, SearchType.CHECKSUM,
+		// services );
+		// Set< EmsScriptNode > nodeSet = toEmsScriptNodeSet( existingArtifacts
+		// );
+		List<EmsScriptNode> nodeList = EmsScriptNode.toEmsScriptNodeList(refs,
+				services, response, status);
+		// existingArtifacts.close();
+
+		EmsScriptNode matchingNode = null;
+
+		if (nodeList != null && nodeList.size() > 0) {
+			matchingNode = nodeList.iterator().next();
+		}
+
+		// No need to update if the checksum and name match (even if it is in a
+		// parent branch):
+		if (matchingNode != null
+				&& (ignoreName || matchingNode.getSysmlId().equals(artifactId))) {
+			return matchingNode;
+		}
+
+		// Create new artifact:
+		// find subfolder in site or create it
+		String artifactFolderName = "Artifacts"
+				+ (Utils.isNullOrEmpty(subfolderName) ? "" : "/"
+						+ subfolderName);
+
+		EmsScriptNode targetSiteNode = getSiteNodeForWorkspace(targetSiteName,
+				false, workspace, dateTime, services, response);
+
+		// find site; it must exist!
+		if (targetSiteNode == null || !targetSiteNode.exists()) {
+			Debug.err("Can't find node for site: " + targetSiteName + "!\n");
+			return null;
+		}
+
+		// find or create subfolder
+		EmsScriptNode subfolder = mkdir(targetSiteNode, artifactFolderName,
+				services, response, status);
+		if (subfolder == null || !subfolder.exists()) {
+			Debug.err("Can't create subfolder for site, " + targetSiteName
+					+ ", in artifact folder, " + artifactFolderName + "!\n");
+			return null;
+		}
+
+		// find or create node:
+		pngNode = findScriptNodeByIdForWorkspace(artifactId, workspace,
+				dateTime, false, services, response);
+
+		// Node wasnt found, so create one:
+		if (pngNode == null) {
+			pngNode = subfolder.createNode(artifactId, "cm:content");
+			subfolder.getOrSetCachedVersion();
+		}
+
+		if (pngNode == null || !pngNode.exists()) {
+			Debug.err("Failed to create new PNG artifact " + artifactId + "!\n");
+			return null;
+		}
+
+		pngNode.makeSureNodeRefIsNotFrozen();
+		if (!pngNode.hasAspect("cm:versionable")) {
+			pngNode.addAspect("cm:versionable");
+		}
+		if (!pngNode.hasAspect("cm:indexControl")) {
+			pngNode.addAspect("cm:indexControl");
+		}
+		if (!pngNode.hasAspect(Acm.ACM_IDENTIFIABLE)) {
+			pngNode.addAspect(Acm.ACM_IDENTIFIABLE);
+		}
+		if (!pngNode.hasAspect("view:Checksummable")) {
+			pngNode.addAspect("view:Checksummable");
+		}
+
+		pngNode.createOrUpdateProperty(Acm.CM_TITLE, artifactId);
+		pngNode.createOrUpdateProperty("cm:isIndexed", true);
+		pngNode.createOrUpdateProperty("cm:isContentIndexed", false);
+		pngNode.createOrUpdateProperty(Acm.ACM_ID, artifactId);
+		pngNode.createOrUpdateProperty("view:cs", cs);
+
+		if (logger.isDebugEnabled()) {
+			logger.debug("Creating PNG artifact with indexing: "
+					+ pngNode.getProperty("cm:isIndexed"));
+		}
+
+		ContentWriter writer = services.getContentService().getWriter(
+				pngNode.getNodeRef(), ContentModel.PROP_CONTENT, true);
+		InputStream contentStream = new ByteArrayInputStream(content);
+		writer.putContent(contentStream);
+
+		ContentData contentData = writer.getContentData();
+		contentData = ContentData.setMimetype(contentData,
+				EmsScriptNode.getMimeType(finalType));
+		contentData = ContentData.setEncoding(contentData, "UTF-8");
+		pngNode.makeSureNodeRefIsNotFrozen();
+		pngNode.transactionCheck();
+		services.getNodeService().setProperty(pngNode.getNodeRef(),
+				ContentModel.PROP_CONTENT, contentData);
+		NodeUtil.propertyCachePut(pngNode.getNodeRef(),
+				NodeUtil.getShortQName(ContentModel.PROP_CONTENT), contentData);
+
+		// if only version, save dummy version so snapshots can reference
+		// versioned images - need to check against 1 since if someone
+		// deleted previously a "dead" version is left in its place
+//		Object[] versionHistory = pngNode.getEmsVersionHistory();
+//
+//		if (versionHistory == null || versionHistory.length <= 1) {
+//			pngNode.makeSureNodeRefIsNotFrozen();
+//			pngNode.createVersion("creating the version history", false);
+//		}
+
+		for(int i = svgNode.getEmsVersionHistory().length - 1; i > 0; i--){
+			pngNode.makeSureNodeRefIsNotFrozen();
+			pngNode.createVersion("creating the version history", false);
+		}
+		
+		pngNode.getOrSetCachedVersion();
+
+		return pngNode;
+	}
 
     /**
      * Given a parent and path, builds the path recursively as necessary
