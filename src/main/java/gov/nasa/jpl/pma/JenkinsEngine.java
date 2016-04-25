@@ -753,7 +753,6 @@ public class JenkinsEngine implements ExecutionEngine {
             e.printStackTrace();
         }
     }
-    
 
     public JSONObject isJobInQueue( JSONObject jenkinsJobJson ) {
         try{
@@ -800,5 +799,18 @@ public class JenkinsEngine implements ExecutionEngine {
         return position;
     }
 
-
+    public void cancelJob(String jobName){
+    	try{
+            if(true) { // If job is running; Stop it
+            	this.executeUrl = this.url + "/job/" +jobName + "/stop" + "?token=" + this.jenkinsToken;
+            	this.build();
+            } 
+            else { // If job has not yet start; Cancel it
+            	this.executeUrl = this.url + "/queue/cancelItem?id=" +jobName + "?token=" + this.jenkinsToken;
+                this.build();
+            }
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+    }
 }
