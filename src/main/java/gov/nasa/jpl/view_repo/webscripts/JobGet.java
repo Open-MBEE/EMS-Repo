@@ -123,11 +123,20 @@ public class JobGet extends ModelGet {
                 String jobName = jobJson.optString( "sysmlid" );
                 if ( !Utils.isNullOrEmpty( jobName ) ) {
                     JSONObject jenkinsJobJson = eng.getJob( jobName );
+
+                    JSONObject jobInQueue = eng.isJobInQueue( jenkinsJobJson );
+                    
+                    if (jobInQueue != null) {
+                        jenkinsJobJson.put( "color", "queue" );
+                        int pos = eng.numberInQueue( jobInQueue );
+                        jobJson.put( "queuePosition", pos + 1 );
+                    }
+                    
                     String newStatus = getMmsStatus(jenkinsJobJson);
                     // TODO -- The job json is corrected below, but the
                     // status should also be changed in the model
                     // repository.
-                    if ( !Utils.isNullOrEmpty( newStatus ) ) {
+                    if ( !Utils.isNullOrEmpty( newStatus ) ) {                        
                         jobJson.put( "status", newStatus );
                     }
                 }
@@ -175,7 +184,9 @@ public class JobGet extends ModelGet {
      * @return
      */
     protected String getMmsStatus( JSONObject jenkinsJobJson ) {
+        
         if ( jenkinsJobJson == null ) return "job not found";
+        
         String color = jenkinsJobJson.optString( "color" );
         if ( Utils.isNullOrEmpty( color ) ) return null;
         String status = jenkinsColorToMmsStatus( color ); 
@@ -184,6 +195,7 @@ public class JobGet extends ModelGet {
 
     protected String jenkinsColorToMmsStatus( String color ) {
         if ( Utils.isNullOrEmpty( color ) ) return null;
+        if (color.contains( "queue" ) ) return "in queue";
         if ( color.contains( "anime" ) ) return "running";
         if ( color.equals( "red" ) ) return "failed";
         if ( color.equals( "blue" ) ) return "completed";
@@ -192,6 +204,7 @@ public class JobGet extends ModelGet {
         if ( color.equals( "yellow" ) ) return "unstable";
         if ( color.equals( "disabled" ) ) return "disabled";
         if ( color.equalsIgnoreCase( "notbuilt" ) ) return "waiting";
+        // TODO: make a status "in queue" but the question is, how will we identify that?
         return color;
     }
 }

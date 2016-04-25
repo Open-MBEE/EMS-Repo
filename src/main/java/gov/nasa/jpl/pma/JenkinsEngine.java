@@ -12,6 +12,8 @@ package gov.nasa.jpl.pma;
 
 import java.io.IOException;
 import java.io.StringReader;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -93,6 +95,7 @@ public class JenkinsEngine implements ExecutionEngine {
     public DefaultHttpClient jenkinsClient; //
     private long executionTime;
     public JSONObject jsonResponse; //
+    public ArrayList<JSONObject> jenkinsQueue = new ArrayList<JSONObject>();
     public Map< String, String > detailResultMap;
 
     private BasicScheme basicAuth;
@@ -423,11 +426,7 @@ public class JenkinsEngine implements ExecutionEngine {
 
         url = this.url + url + "lastSuccessfulBuild/artifact/MDNotificationWindowText.html"; 
         return url;
-        //this.executeUrl = this.url + url;
     }
-
-    
-    // https://some-jenkins-server.someorganization.com/job/MMS_1460067117709_b5f26105-8581-406e-b54d-8525012044c5/lastBuild/api/json?pretty=true
     
     
     /**
@@ -532,7 +531,7 @@ public class JenkinsEngine implements ExecutionEngine {
     }
 
     public void constructAllJobs() {        
-        String url = this.url + "/view/DocWeb%20(cae-ems-uat)/api/json?tree=jobs";
+        String url = this.url + "/view/DocWeb%20(cae-ems-uat)/api/json?tree=jobs[name,color]";
         
         
         
@@ -754,5 +753,52 @@ public class JenkinsEngine implements ExecutionEngine {
             e.printStackTrace();
         }
     }
+    
+
+    public JSONObject isJobInQueue( JSONObject jenkinsJobJson ) {
+        try{
+            this.executeUrl = this.url + "/queue/api/json";
+            execute();
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+        
+        String sysmlid = jenkinsJobJson.optString( "name" );
+        
+        // items are the jobs that are in the queue of Jenkins
+        JSONArray jobs = this.jsonResponse.optJSONArray( "items" );
+        
+        if( jobs != null ) {
+            for(int i = 0; i < jobs.length(); i++) {
+                JSONObject job = jobs.optJSONObject( i );
+                
+                if( job != null ) {
+                    // append jobs into this queue 
+                    jenkinsQueue.add( i, job );
+                    
+                    String jenkinsJobName = job.optJSONObject( "task" ).optString( "name" );
+                    
+                    // found the job, so return it
+                    if( jenkinsJobName.equals( sysmlid )) {
+                        return job;
+                    }
+                }
+            }
+        }
+        
+        return null;
+    }
+
+    public int numberInQueue( JSONObject jobInQueue ) {
+        String sysmlid = jobInQueue.optString( "name" );
+        
+        int position = -1;
+        
+        if( sysmlid != null ) {
+            position = this.jenkinsQueue.indexOf( jobInQueue );
+        }
+        return position;
+    }
+
 
 }
