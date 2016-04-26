@@ -285,10 +285,19 @@ public class JenkinsEngine implements ExecutionEngine {
             HttpEntity entity = response.getEntity();
             entityString = EntityUtils.toString( entity );
            
+            // this means there is no proper response... comes in as HTML? 
+            // returning will prevent json errors
+            if(entityString.contains( "<html>" )) {
+                return;
+            }
+            
             // Converts the HttpEntity String from the response of the GET
             // call into a JSON object then consumes the entity to close the
             // connection.
-            jsonResponse = new JSONObject( entityString );
+
+            if( !Utils.isNullOrEmpty( entityString )) {
+                jsonResponse = new JSONObject( entityString );
+            }
             
             // COMMENTED OUT BECAUSE THIS WILL CLOSE THE CONNECTION WHEN
             // YOU GET JSON BUT NEEDS TO STAY OPEN FOR XML TOO
@@ -424,7 +433,7 @@ public class JenkinsEngine implements ExecutionEngine {
             url = url + "/";
         }
 
-        url = this.url + url + "lastSuccessfulBuild/artifact/MDNotificationWindowText.html"; 
+        url = this.url + url + "lastBuild/artifact/MDNotificationWindowText.html"; 
         return url;
     }
     
@@ -736,7 +745,7 @@ public class JenkinsEngine implements ExecutionEngine {
     
     public void executeJob(String jobName){
         try{
-            
+            this.setJobToken( "build" );
             this.executeUrl = this.url + "/job/" +jobName + "/build?token=" + this.jenkinsToken;
             this.build();
         }catch(Exception e){
@@ -799,18 +808,57 @@ public class JenkinsEngine implements ExecutionEngine {
         return position;
     }
 
-    public void cancelJob(String jobName){
+    public void cancelJob(String jobName, String buildNumber){
     	try{
-            if(true) { // If job is running; Stop it
-            	this.executeUrl = this.url + "/job/" +jobName + "/stop" + "?token=" + this.jenkinsToken;
-            	this.build();
+            if(true) { // If job is running; Stop it                
+            	this.executeUrl = this.url + "/job/" +jobName + "/" + buildNumber + "/stop";
+            	
+            	// this is a GET
+            	this.execute();
             } 
             else { // If job has not yet start; Cancel it
-            	this.executeUrl = this.url + "/queue/cancelItem?id=" +jobName + "?token=" + this.jenkinsToken;
+                
+                // -- TODO --
+                // jobName is not what we want. we want the 'id' from the queue which will have to be 
+                // handled in a different function (similar to isJobInQueue( jenkinsJob ) ) 
+                
+            	this.executeUrl = this.url + "/queue/cancelItem?id=" +jobName;
+            	
+            	// this is a POST
                 this.build();
             }
         }catch(Exception e){
             e.printStackTrace();
         }
+    }
+    
+    public String getBuildNumber(String jobName) {
+        try{
+            this.executeUrl = this.url + "/job/" + jobName + "/api/json?tree=builds[number]";
+            execute();
+            
+            JSONArray builds = this.jsonResponse.optJSONArray( "builds" );
+            
+            if( builds.length() > 0 ) {
+                JSONObject build = builds.optJSONObject( 0 );
+                
+                if(build != null) {
+                    String buildNumber = build.optString( "number" );
+                    return buildNumber;
+                }
+            }
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+        
+        return null;
+    }
+    
+    public String getQueueId(String jobName) {
+        
+        // TODO -- this function should build the URL to get a job's queue ID number
+        //         so we can put it on the URL to get cancel a job that is in queue
+        
+        return null;
     }
 }

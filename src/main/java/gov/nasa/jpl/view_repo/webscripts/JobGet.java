@@ -119,11 +119,14 @@ public class JobGet extends ModelGet {
                 // If the status of a job in the mms is running, then we need to
                 // get an update from Jenkins to see if the job died before
                 // reporting its status back to the mms.
-                JenkinsEngine eng = new JenkinsEngine();
                 String jobName = jobJson.optString( "sysmlid" );
                 if ( !Utils.isNullOrEmpty( jobName ) ) {
+                    JenkinsEngine eng = new JenkinsEngine();
+                    
                     JSONObject jenkinsJobJson = eng.getJob( jobName );
 
+                    // check if the job is in the Jenkins queue and report it 
+                    // as that status, if it is before checking for other statuses
                     JSONObject jobInQueue = eng.isJobInQueue( jenkinsJobJson );
                     
                     if (jobInQueue != null) {
@@ -204,7 +207,7 @@ public class JobGet extends ModelGet {
         if ( color.equals( "yellow" ) ) return "unstable";
         if ( color.equals( "disabled" ) ) return "disabled";
         if ( color.equalsIgnoreCase( "notbuilt" ) ) return "waiting";
-        // TODO: make a status "in queue" but the question is, how will we identify that?
+
         return color;
     }
 }

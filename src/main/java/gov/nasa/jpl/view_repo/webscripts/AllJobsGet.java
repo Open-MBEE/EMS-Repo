@@ -49,16 +49,11 @@ public class AllJobsGet extends AbstractJavaWebScript {
         JSONArray jobs = jenkinsRes.optJSONArray( "jobs" );
         
         final Map< String, Object > model = new HashMap<String, Object>();
-
-        clearCaches( true );
-        clearCaches(); // calling twice for those redefine clearCaches() to
-                       // always call clearCaches( false )
         
         if (getResponseStatus().getCode() != HttpServletResponse.SC_ACCEPTED) {
             status.setCode( getResponseStatus().getCode() );
 
         }
-        
         
         model.put( "res", jobs.length() );
         

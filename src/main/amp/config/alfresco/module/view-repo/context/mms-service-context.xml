@@ -549,7 +549,7 @@
 		<property name="services" ref="ServiceRegistry" />
 	</bean>
 	
-	<bean id="webscript.gov.nasa.jpl.pma.job.cancel"
+	<bean id="webscript.gov.nasa.jpl.pma.jobcancel.post"
 		class="gov.nasa.jpl.view_repo.webscripts.JobCancel"
 		parent="webscript" singleton="false">
 		<property name="repositoryHelper" ref="repositoryHelper" />
@@ -558,6 +558,13 @@
 	
 	<bean id="webscript.gov.nasa.jpl.pma.jenkins.post"
 		class="gov.nasa.jpl.view_repo.webscripts.JobExecute"
+		parent="webscript" singleton="false">
+		<property name="repositoryHelper" ref="repositoryHelper" />
+		<property name="services" ref="ServiceRegistry" />
+	</bean>
+	
+		<bean id="webscript.gov.nasa.jpl.pma.alljobs.get"
+		class="gov.nasa.jpl.view_repo.webscripts.AllJobsGet"
 		parent="webscript" singleton="false">
 		<property name="repositoryHelper" ref="repositoryHelper" />
 		<property name="services" ref="ServiceRegistry" />

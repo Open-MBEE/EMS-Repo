@@ -17,11 +17,9 @@ import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
 
 import gov.nasa.jpl.mbee.util.Timer;
-import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.pma.JenkinsEngine;
-import gov.nasa.jpl.view_repo.util.NodeUtil;
 
-public class JobCancel extends MmsModelDelete {
+public class JobCancel extends AbstractJavaWebScript {
     static Logger logger = Logger.getLogger(JobCancel.class);
     
     public JobCancel() {
@@ -75,15 +73,16 @@ public class JobCancel extends MmsModelDelete {
                 }
             }
             
-            JenkinsEngine jenkins = new JenkinsEngine();
+            // Using multiple Jenkins instances to work around the Entity Consume issue
+            // NOTE: may need one for the cancel queue part too...
+            JenkinsEngine jenkins = new JenkinsEngine();           
+            JenkinsEngine grabBuildNumber = new JenkinsEngine();
             
-            jenkins.cancelJob( jobId );
+            String buildNumber = grabBuildNumber.getBuildNumber( jobId );
             
-            result = handleRequest( req );
-            if (result != null) {
-                if (!Utils.isNullOrEmpty(response.toString())) result.put("message", response.toString());
-                model.put( "res", NodeUtil.jsonToString( result, 2 ) );
-            }
+            // create a URL that will stop a job in it's current running state
+            jenkins.cancelJob( jobId, buildNumber );
+
         } catch (JSONException e) {
            log(Level.ERROR, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Could not create JSON\n");
            e.printStackTrace();
@@ -104,12 +103,17 @@ public class JobCancel extends MmsModelDelete {
 
         printFooter();
 
-        if (logger.isInfoEnabled()) logger.info( "Deletion completed" );
         if ( logger.isInfoEnabled() ) {
             logger.info( String.format( "JobCancel: %s", timer ) );
         }
 
         return model;
+    }
+
+    @Override
+    protected boolean validateRequest( WebScriptRequest req, Status status ) {
+        // TODO Auto-generated method stub
+        return false;
     }
 
 }
