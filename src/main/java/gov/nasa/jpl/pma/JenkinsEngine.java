@@ -13,7 +13,6 @@ package gov.nasa.jpl.pma;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -53,6 +52,7 @@ import org.xml.sax.SAXException;
 
 import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.util.EmsConfig;
+import gov.nasa.jpl.view_repo.webscripts.JobPost;
 
 /**
  * Implements the ExecutionEngine as a way to execute jobs (events) on the
@@ -774,27 +774,63 @@ public class JenkinsEngine implements ExecutionEngine {
         String sysmlid = jenkinsJobJson.optString( "name" );
         
         // items are the jobs that are in the queue of Jenkins
-        JSONArray jobs = this.jsonResponse.optJSONArray( "items" );
-        
-        if( jobs != null ) {
-            for(int i = 0; i < jobs.length(); i++) {
-                JSONObject job = jobs.optJSONObject( i );
-                
-                if( job != null ) {
-                    // append jobs into this queue 
-                    jenkinsQueue.add( i, job );
+        if( this.jsonResponse != null ) {
+            JSONArray jobs = this.jsonResponse.optJSONArray( "items" );
+            
+            if( jobs != null ) {
+                for(int i = 0; i < jobs.length(); i++) {
+                    JSONObject job = jobs.optJSONObject( i );
                     
-                    String jenkinsJobName = job.optJSONObject( "task" ).optString( "name" );
-                    
-                    // found the job, so return it
-                    if( jenkinsJobName.equals( sysmlid )) {
-                        return job;
+                    if( job != null ) {
+                        // append jobs into this queue 
+                        jenkinsQueue.add( i, job );
+                        
+                        String jenkinsJobName = job.optJSONObject( "task" ).optString( "name" );
+                        
+                        // found the job, so return it
+                        if( jenkinsJobName.equals( sysmlid )) {
+                            return job;
+                        }
                     }
                 }
             }
         }
         
         return null;
+    }
+    
+    public boolean isJobInQueue( String jobName ) {
+        try{
+            this.executeUrl = this.url + "/queue/api/json";
+            execute();
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+        
+        // items are the jobs that are in the queue of Jenkins
+        if( this.jsonResponse != null ) {
+            JSONArray jobs = this.jsonResponse.optJSONArray( "items" );
+            
+            if( jobs != null ) {
+                for(int i = 0; i < jobs.length(); i++) {
+                    JSONObject job = jobs.optJSONObject( i );
+                    
+                    if( job != null ) {
+                        // append jobs into this queue 
+                        jenkinsQueue.add( i, job );
+                        
+                        String jenkinsJobName = job.optJSONObject( "task" ).optString( "name" );
+                        
+                        // found the job, so return it
+                        if( jenkinsJobName.equals( jobName )) {
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+        
+        return false;
     }
 
     public int numberInQueue( JSONObject jobInQueue ) {
@@ -808,23 +844,23 @@ public class JenkinsEngine implements ExecutionEngine {
         return position;
     }
 
-    public void cancelJob(String jobName, String buildNumber){
-    	try{
-            if(true) { // If job is running; Stop it                
-            	this.executeUrl = this.url + "/job/" +jobName + "/" + buildNumber + "/stop";
+    public void cancelJob(String jobName, String cancelId, boolean isInQueue){
+    	try{    	    
+            if(!isInQueue) {    // If job is running; Stop it                
+            	this.executeUrl = this.url + "/job/" +jobName + "/" + cancelId + "/stop";
             	
-            	// this is a GET
+            	// this has to be a GET
             	this.execute();
             } 
-            else { // If job has not yet start; Cancel it
+            else {              // If job has not yet start; Cancel it
                 
-                // -- TODO --
+                // TODO --
                 // jobName is not what we want. we want the 'id' from the queue which will have to be 
                 // handled in a different function (similar to isJobInQueue( jenkinsJob ) ) 
                 
-            	this.executeUrl = this.url + "/queue/cancelItem?id=" +jobName;
+            	this.executeUrl = this.url + "/queue/cancelItem?id=" + cancelId;
             	
-            	// this is a POST
+            	// this has to be a POST
                 this.build();
             }
         }catch(Exception e){
@@ -837,14 +873,16 @@ public class JenkinsEngine implements ExecutionEngine {
             this.executeUrl = this.url + "/job/" + jobName + "/api/json?tree=builds[number]";
             execute();
             
-            JSONArray builds = this.jsonResponse.optJSONArray( "builds" );
-            
-            if( builds.length() > 0 ) {
-                JSONObject build = builds.optJSONObject( 0 );
+            if( this.jsonResponse != null ) {
+                JSONArray builds = this.jsonResponse.optJSONArray( "builds" );
                 
-                if(build != null) {
-                    String buildNumber = build.optString( "number" );
-                    return buildNumber;
+                if( builds != null && builds.length() > 0 ) {
+                    JSONObject build = builds.optJSONObject( 0 );
+                    
+                    if(build != null) {
+                        String buildNumber = build.optString( "number" );
+                        return buildNumber;
+                    }
                 }
             }
         }catch(Exception e){
@@ -858,6 +896,37 @@ public class JenkinsEngine implements ExecutionEngine {
         
         // TODO -- this function should build the URL to get a job's queue ID number
         //         so we can put it on the URL to get cancel a job that is in queue
+        
+        try{
+            this.executeUrl = this.url + "/queue/api/json";
+            execute();
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+        
+        // items are the jobs that are in the queue of Jenkins
+        if( this.jsonResponse != null ) {
+            JSONArray jobs = this.jsonResponse.optJSONArray( "items" );
+            
+            if( jobs != null ) {
+                for(int i = 0; i < jobs.length(); i++) {
+                    JSONObject job = jobs.optJSONObject( i );
+                    
+                    if( job != null ) {                    
+                        String jenkinsJobName = job.optJSONObject( "task" ).optString( "name" );
+                        
+                        // found the job, so return it
+                        if( jenkinsJobName.equals( jobName )) {
+                            String queueId = job.optString( "id" );
+                            
+                            if( queueId != null ) {
+                                return queueId;
+                            }
+                        }
+                    }
+                }
+            }
+        }
         
         return null;
     }

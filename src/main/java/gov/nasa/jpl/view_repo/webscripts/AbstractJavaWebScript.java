@@ -378,7 +378,6 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         };
         if ( !model.containsKey( "res" ) && response != null && response.toString().length() > 0 ) {
             model.put( "res", response.toString() );
-
         }
         // need to check if the transaction resulted in rollback, if so change the status code
         // TODO: figure out how to get the response message in (response is always empty)
@@ -3221,7 +3220,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
             
             if ( EmsScriptNode.isJob( elem ) ) {
                 String id = getJobIdFromJson( elem, false );
-//              // Find node for id.
+                // Find node for id.
                 // FIXME -- if the id of a deleted job is posted, we won't get
                 // the properties of the deleted node unless we pass true in the
                 // find call below.
@@ -3250,18 +3249,18 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
             }
         }
         
+        // Only create a job on the jenkins server if the job was properly posted to MMS 
+        boolean postToJenkinsServer = responseStatus.getCode() == 200 ? true : false;
+        
         // Get missing property values from DB for jenkins config
         //getMissingPropertyValues(jobIds);
-        if( addToJenkins ) {
+        if( addToJenkins && postToJenkinsServer ) {
             // Step 7
             // FIXME -- Don't send the jenkins config until the post is complete; in
             // fact, the propertyValues should be gathered after the fact.
             for ( String jobId : propertyValues.keySet() ) {
                 Map< String, String > properties = propertyValues.get( jobId );
                 String url = createJenkinsConfig( jobId, properties, createNewJob.get( jobId ) == true );
-                
-                // NOTE: how can we get the jobUrlJson? either way, up to this point
-                //       we have a URL by returning it (implies the job has been created)
     
                 if( url != null ) {                
                     JSONObject specJson = jobUrl.optJSONObject( Acm.JSON_SPECIALIZATION );

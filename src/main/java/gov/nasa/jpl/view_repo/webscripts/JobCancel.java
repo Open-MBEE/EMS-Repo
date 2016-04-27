@@ -73,15 +73,25 @@ public class JobCancel extends AbstractJavaWebScript {
                 }
             }
             
+            String cancelId = null;
+            
             // Using multiple Jenkins instances to work around the Entity Consume issue
             // NOTE: may need one for the cancel queue part too...
             JenkinsEngine jenkins = new JenkinsEngine();           
             JenkinsEngine grabBuildNumber = new JenkinsEngine();
+            JenkinsEngine getQueueId = new JenkinsEngine();
             
-            String buildNumber = grabBuildNumber.getBuildNumber( jobId );
+            boolean isInQueue = jenkins.isJobInQueue( jobId );
             
+            if( isInQueue ) {
+                cancelId = getQueueId.getQueueId( jobId );    
+            }
+            else {               
+                cancelId = grabBuildNumber.getBuildNumber( jobId );                
+            }
+                        
             // create a URL that will stop a job in it's current running state
-            jenkins.cancelJob( jobId, buildNumber );
+            jenkins.cancelJob( jobId, cancelId, isInQueue );
 
         } catch (JSONException e) {
            log(Level.ERROR, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Could not create JSON\n");

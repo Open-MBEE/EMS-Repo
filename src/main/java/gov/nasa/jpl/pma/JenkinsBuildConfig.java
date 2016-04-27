@@ -83,6 +83,30 @@ public class JenkinsBuildConfig {
 
             tempElement = doc.createElement("properties");
             
+            Element discardOldBuilds = doc.createElement("jenkins.model.BuildDiscarderProperty");
+            
+            Element logRotator = doc.createElement("strategy");
+            logRotator.setAttribute("class", "hudson.tasks.LogRotator");
+            
+            Element daysToKeep = doc.createElement("daysToKeep");
+            daysToKeep.appendChild( doc.createTextNode( "-1" ) );
+            Element numToKeep = doc.createElement("numToKeep");
+            numToKeep.appendChild( doc.createTextNode( "-1" ) );
+            Element artifactDaysToKeep = doc.createElement("artifactDaysToKeep");
+            artifactDaysToKeep.appendChild( doc.createTextNode( "28" ) );
+            Element artifactNumToKeep = doc.createElement("artifactNumToKeep");
+            artifactNumToKeep.appendChild( doc.createTextNode( "-1" ) );
+
+            logRotator.appendChild( daysToKeep );
+            logRotator.appendChild( numToKeep );
+            logRotator.appendChild( artifactDaysToKeep );
+            logRotator.appendChild( artifactNumToKeep );
+            
+            discardOldBuilds.appendChild( logRotator );
+            
+            tempElement.appendChild( discardOldBuilds );
+            rootElement.appendChild(tempElement);
+            
             Element throttlePlugin = doc.createElement( "hudson.plugins.throttleconcurrents.ThrottleJobProperty" );
             throttlePlugin.setAttribute("plugin", "throttle-concurrents@1.8.5");
             Element maxPerNode = doc.createElement( "maxConcurrentPerNode" );
@@ -331,41 +355,6 @@ public class JenkinsBuildConfig {
             artifactArchiver.appendChild( secondTempElem );
 
             tempElement.appendChild( artifactArchiver );
-            
-            Element wsCleanup = doc.createElement( "hudson.plugins.ws__cleanup.WsCleanup" );
-            Element delDirs = doc.createElement( "delDirs" );
-            delDirs.appendChild( doc.createTextNode( "false" ));
-            Element skipWhenFailed = doc.createElement( "skipWhenFailed" );
-            skipWhenFailed.appendChild( doc.createTextNode( "false" ));
-            Element cleanWhenSuccess = doc.createElement( "cleanWhenSuccess" );
-            cleanWhenSuccess.appendChild( doc.createTextNode( "true" ));
-            Element cleanWhenUnstable = doc.createElement( "cleanWhenUnstable" );
-            cleanWhenUnstable.appendChild( doc.createTextNode( "true" ));
-            Element cleanWhenFailure = doc.createElement( "cleanWhenFailure" );
-            cleanWhenFailure.appendChild( doc.createTextNode( "true" ));
-            Element cleanWhenNotBuilt = doc.createElement( "cleanWhenNotBuilt" );
-            cleanWhenNotBuilt.appendChild( doc.createTextNode( "true" ));
-            Element cleanWhenAborted = doc.createElement( "cleanWhenAborted" );
-            cleanWhenAborted.appendChild( doc.createTextNode( "true" ));
-            Element notFailBuild = doc.createElement( "notFailBuild" );
-            notFailBuild.appendChild( doc.createTextNode( "false" ));
-            Element cleanupMatrixParent = doc.createElement( "cleanupMatrixParent" );
-            cleanupMatrixParent.appendChild( doc.createTextNode( "false" ));
-            Element externalDelete = doc.createElement( "externalDelete" );
-            
-            wsCleanup.appendChild( externalDelete );
-            wsCleanup.appendChild( cleanupMatrixParent );
-            wsCleanup.appendChild( notFailBuild );
-            wsCleanup.appendChild( cleanWhenAborted );
-            wsCleanup.appendChild( cleanWhenNotBuilt );
-            wsCleanup.appendChild( cleanWhenFailure );
-            wsCleanup.appendChild( cleanWhenUnstable );
-            wsCleanup.appendChild( cleanWhenSuccess );
-            wsCleanup.appendChild( skipWhenFailed );
-            wsCleanup.appendChild( delDirs );
-
-            rootElement.appendChild(tempElement);
-            tempElement.appendChild(wsCleanup);
             rootElement.appendChild(tempElement);
 
             rootElement.appendChild(doc.createElement("prebuilders"));

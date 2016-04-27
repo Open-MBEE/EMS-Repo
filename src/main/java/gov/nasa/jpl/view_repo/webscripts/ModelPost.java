@@ -2800,7 +2800,7 @@ public class ModelPost extends AbstractJavaWebScript {
 		}
 
         status.setCode(responseStatus.getCode());
-
+        
         sendProgress("Load/sync/update request is finished processing.",
                 projectId, true);
 

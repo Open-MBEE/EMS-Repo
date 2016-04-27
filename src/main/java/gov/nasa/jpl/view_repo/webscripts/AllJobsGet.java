@@ -52,7 +52,6 @@ public class AllJobsGet extends AbstractJavaWebScript {
         
         if (getResponseStatus().getCode() != HttpServletResponse.SC_ACCEPTED) {
             status.setCode( getResponseStatus().getCode() );
-
         }
         
         model.put( "res", jobs.length() );

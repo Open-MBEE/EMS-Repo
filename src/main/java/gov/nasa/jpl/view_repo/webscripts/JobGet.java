@@ -48,8 +48,6 @@ import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
 
-//import com.offbytwo.jenkins.JenkinsServer;
-
 public class JobGet extends ModelGet {
     static Logger logger = Logger.getLogger(JobGet.class);
     
@@ -57,7 +55,7 @@ public class JobGet extends ModelGet {
     public static final String jobStereotypeId = "_18_0_5_407019f_1458258829038_313297_14086";
     public static final String slotId = "_9_0_62a020a_1105704885275_885607_7905";
     public static final String instanceSpecId = "_9_0_62a020a_1105704885251_933969_7897";
-
+    
     public JobGet() {
         super();
     }
@@ -139,8 +137,14 @@ public class JobGet extends ModelGet {
                     // TODO -- The job json is corrected below, but the
                     // status should also be changed in the model
                     // repository.
-                    if ( !Utils.isNullOrEmpty( newStatus ) ) {                        
+                    if ( !Utils.isNullOrEmpty( newStatus ) ) {     
                         jobJson.put( "status", newStatus );
+                        
+                        updateMmsStatus( jobJson );
+                        
+                        // NOTE: this call will only update the JSON
+                        //       we need to also send updated JSON to the MMS
+                        // updateStatus.processJobsJson( jobJson, null, true );
                     }
                 }
             }
@@ -209,5 +213,9 @@ public class JobGet extends ModelGet {
         if ( color.equalsIgnoreCase( "notbuilt" ) ) return "waiting";
 
         return color;
+    }
+    
+    protected void updateMmsStatus(JSONObject jobJsonToUpdate) {
+
     }
 }

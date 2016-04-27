@@ -45,8 +45,6 @@ import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 public class JobPost extends ModelPost {
     static Logger logger = Logger.getLogger(JobPost.class);
     
-    protected boolean doJenkins = false;
-    
     public JobPost() {
         super();
     }
@@ -57,11 +55,11 @@ public class JobPost extends ModelPost {
 
     @Override
     protected Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {        
-
-        JobPost instance = new JobPost(repository, services);
-        instance.setServices(getServices());
-        // Run without transactions since JobPost breaks them up itself.
-        return instance.executeImplImpl(req, status, cache, true);
+            JobPost instance = new JobPost(repository, services);
+            instance.setServices(getServices());
+            
+            // Run without transactions since JobPost breaks them up itself.
+            return instance.executeImplImpl(req, status, cache, true);
     }
     
     @Override
@@ -73,6 +71,5 @@ public class JobPost extends ModelPost {
             jobsJsonArray = new JSONArray();
         }
     }
-
-
+    
 }
