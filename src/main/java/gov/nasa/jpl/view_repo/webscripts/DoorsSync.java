@@ -59,8 +59,9 @@ import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
 
 import gov.nasa.jpl.mbee.doorsng.DoorsClient;
-import gov.nasa.jpl.mbee.doorsng.Folder;
-import gov.nasa.jpl.mbee.doorsng.Requirement;
+import gov.nasa.jpl.mbee.doorsng.model.Requirement;
+import gov.nasa.jpl.mbee.doorsng.model.Folder;
+
 import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.view_repo.db.Node;
 import gov.nasa.jpl.view_repo.db.PostgresHelper;
@@ -86,6 +87,7 @@ public class DoorsSync extends AbstractJavaWebScript {
     List< String > processedProjects = new ArrayList< String >();
     List< Map< String, String >> customFields =
             new ArrayList< Map< String, String >>();
+    String currentProject;
 
     static Logger logger = Logger.getLogger( DoorsSync.class );
 
@@ -245,10 +247,13 @@ public class DoorsSync extends AbstractJavaWebScript {
             customFields = mapFields( projectNode.getSysmlName() );
 
             try {
-                if (doors == null || doors.getProject() != projectNode.getSysmlName()) {
+                if (doors == null || currentProject != projectNode.getSysmlName()) {
+                    System.out.println("Logging in Doors");
                     doors = new DoorsClient(getConfig("doors.user"), getConfig("doors.pass"), getConfig("doors.url"), projectNode.getSysmlName());
+                    currentProject = projectNode.getSysmlName();
                 }
-                if (!processedProjects.contains(projectNode.getSysmlName())) {
+                if ( !processedProjects.contains( currentProject ) ) {
+                    processedProjects.add( currentProject );
                     syncFromDoors();
                 }
                 if ( !processedRequirements.contains( requirementNode.getSysmlId() ) ) {
@@ -285,7 +290,6 @@ public class DoorsSync extends AbstractJavaWebScript {
             compRequirement( null, req );
         }
 
-        processedProjects.add( doors.getProject() );
     }
 
     protected void compRequirement( EmsScriptNode n, Requirement r ) {
@@ -563,10 +567,10 @@ public class DoorsSync extends AbstractJavaWebScript {
         String resourceUrl = mapResourceUrl( n.getSysmlId() );
         System.out.println( "Folder Resource: " + resourceUrl );
 
-        String parentResourceUrl =
-                mapResourceUrl( n.getParent().getSysmlId().replace( "_pkg", "" ) );
-
         if ( resourceUrl == null ) {
+
+            String parentResourceUrl =
+                    mapResourceUrl( n.getParent().getSysmlId().replace( "_pkg", "" ) );
 
             Folder folder = new Folder();
             folder.setTitle( n.getSysmlName() );
