@@ -108,7 +108,9 @@ public class DeclarativeJavaWebScript extends AbstractWebScript
             model.put("status", status);
             model.put("cache", cache);
 
-            NodeUtil.ppAddQualifiedNameId2Json(req, model); // TODO: weave in as aspect
+            if (!NodeUtil.skipQualified) {
+                NodeUtil.ppAddQualifiedNameId2Json(req, model); // TODO: weave in as aspect
+            }
             
             try
             {

@@ -39,12 +39,12 @@
             "creator": "admin",
             "modifier": "admin",
             "name": "302",
-            "owner": "301",
             "documentation": "to",
+            "owner": "301",
             "specialization": {
                 "propertyType": null,
-                "isSlot": false,
                 "isDerived": false,
+                "isSlot": false,
                 "value": [{
                     "string": "dlam_string",
                     "type": "LiteralString"
@@ -59,6 +59,12 @@
         "documentation": "else",
         "owner": "300",
         "specialization": {
+            "displayedElements": [
+                "301",
+                "302",
+                "303"
+            ],
+            "childrenViews": ["304"],
             "view2view": [{
                 "childrenViews": [
                     "301",
@@ -66,24 +72,18 @@
                 ],
                 "sysmlid": "301"
             }],
-            "childrenViews": ["304"],
-            "displayedElements": [
-                "301",
-                "302",
-                "303"
-            ],
             "allowedElements": [
                 "301",
                 "302",
                 "303"
             ],
-            "noSections": ["302"],
             "contains": [{
                 "sourceType": "reference",
                 "source": "301",
                 "sourceProperty": "documentation",
                 "type": "Paragraph"
             }],
+            "noSections": ["302"],
             "type": "Product"
         }
     },
@@ -113,14 +113,6 @@
     },
     {
         "qualifiedId": "/europa/123456/4000/401",
-        "relatedDocuments": [{
-            "parentViews": [{
-                "name": "401",
-                "sysmlid": "401"
-            }],
-            "name": "401",
-            "sysmlid": "401"
-        }],
         "qualifiedName": "/europa/JW_TEST2/400/401",
         "sysmlid": "401",
         "properties": [{
@@ -139,12 +131,12 @@
             "creator": "admin",
             "modifier": "admin",
             "name": "402",
-            "owner": "401",
             "documentation": "4to",
+            "owner": "401",
             "specialization": {
                 "propertyType": null,
-                "isSlot": false,
                 "isDerived": false,
+                "isSlot": false,
                 "value": [{
                     "string": "dlam_string",
                     "type": "LiteralString"
@@ -156,8 +148,8 @@
         "creator": "admin",
         "modifier": "admin",
         "name": "401",
-        "documentation": "4else",
         "owner": "4000",
+        "documentation": "4else",
         "specialization": {
             "view2view": [{
                 "childrenViews": [
@@ -195,8 +187,8 @@
         "creator": "admin",
         "modifier": "admin",
         "name": "viewWithContents",
-        "documentation": "View updates",
         "owner": "123456",
+        "documentation": "View updates",
         "specialization": {
             "contents": {"type": "Expression"},
             "type": "View"
@@ -210,8 +202,8 @@
         "creator": "admin",
         "modifier": "admin",
         "name": "viewNull",
-        "documentation": "View with null values",
         "owner": "123456",
+        "documentation": "View with null values",
         "specialization": {"type": "View"}
     }
 ]}
