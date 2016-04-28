@@ -267,9 +267,9 @@ public class DoorsSync extends AbstractJavaWebScript {
             } catch ( ResourceNotFoundException e ) {
                 projectJson.put( "status", "Project not found" );
             } catch ( Exception e ) {
-                //if ( logger.isDebugEnabled() ) {
+                if ( logger.isDebugEnabled() ) {
                     e.printStackTrace();
-                //}
+                }
                 projectJson.put( "status", "Issue during sync" );
             }
             json.put( projectJson );
