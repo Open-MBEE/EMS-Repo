@@ -309,6 +309,7 @@ public class PostgresHelper {
 	public boolean checkWorkspaceExists() {
 	    if (workspaceExists != null) return workspaceExists;
 	    
+	    workspaceExists = false;
 	    String query = String.format("select true from pg_tables where tablename='nodes%s'",
 	                                 workspaceName);
 	    try {
@@ -320,7 +321,6 @@ public class PostgresHelper {
 	    } catch (Exception e) {
 	        // do nothing, just means workspace doesn't exist
 	        if (logger.isInfoEnabled()) logger.info( "Couldn't find workspace " + workspaceName );
-	        workspaceExists = false;
 	    }
 	    return workspaceExists;
 	}
