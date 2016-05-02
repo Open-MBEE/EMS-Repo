@@ -44,6 +44,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.log4j.*;
 import org.alfresco.repo.model.Repository;
+import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.security.PermissionService;
@@ -61,6 +62,7 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
  *
  */
 public class SiteGet extends AbstractJavaWebScript {
+    static Logger logger = Logger.getLogger(SiteGet.class);
 
     public SiteGet() {
         super();
@@ -96,7 +98,6 @@ public class SiteGet extends AbstractJavaWebScript {
 
         try {
             if (validateRequest(req, status)) {
-
                 WorkspaceNode workspace = getWorkspace( req );
                 String timestamp = req.getParameter( "timestamp" );
                 Date dateTime = TimeUtils.dateFromTimestamp( timestamp );
@@ -138,7 +139,7 @@ public class SiteGet extends AbstractJavaWebScript {
 
         JSONArray json = new JSONArray();
         EmsScriptNode emsNode;
-        String name;
+        String name = null;
         NodeRef parentRef;
         NodeRef siteRef;
 
@@ -147,55 +148,58 @@ public class SiteGet extends AbstractJavaWebScript {
         // Create json array of info for each site in the workspace:
         //	Note: currently every workspace should contain every site created
         for (SiteInfo siteInfo : sites ) {
-            siteRef = siteInfo.getNodeRef();
-            if ( dateTime != null ) {
-                siteRef = NodeUtil.getNodeRefAtTime( siteRef, dateTime );
-            }
-
-            if (siteRef != null) {
-                emsNode = new EmsScriptNode(siteRef, services);
-                	if (emsNode.hasAspect( "ems:Deleted" )) continue;
-                	// skip if doesn't have Models directory or if no site characterization
-                	if (!emsNode.hasPermission( PermissionService.READ )) continue;
-//                	if (emsNode.childByNamePath( "Models" ) == null                	        
-//                	        && !emsNode.hasAspect(Acm.ACM_SITE) ) continue;
-                	try {
+            
+            try {
+                siteRef = siteInfo.getNodeRef();
+                if ( dateTime != null ) {
+                    siteRef = NodeUtil.getNodeRefAtTime( siteRef, dateTime );
+                }
+    
+                if (siteRef != null) {
+                    emsNode = new EmsScriptNode(siteRef, services);
+                    	if (emsNode.hasAspect( "ems:Deleted" )) continue;
+                    	// skip if doesn't have Models directory or if no site characterization
+                    	if (!emsNode.hasPermission( PermissionService.READ )) continue;
+    //                	if (emsNode.childByNamePath( "Models" ) == null                	        
+    //                	        && !emsNode.hasAspect(Acm.ACM_SITE) ) continue;
                     name = emsNode.getName();
+                    
+                    String realUser = AuthenticationUtil.getFullyAuthenticatedUser();
+                    AuthenticationUtil.setAdminUserAsFullyAuthenticatedUser();
                 	    parentRef = (NodeRef)emsNode.getPropertyAtTime(Acm.ACM_SITE_PARENT, dateTime);
-                	} catch (org.alfresco.repo.security.permissions.AccessDeniedException e) {
-                	    // permission error, so ignore
-                	    continue;
-                	}
-
-                	// add in the sites parent site
-                	EmsScriptNode parentNode = null;
-                	String parentId = null;
-                	if (parentRef != null) {
-                	    parentNode = new EmsScriptNode(parentRef, services, response);
-                	    // skip parent if you don't have permissions on parent
-                	    if (!parentNode.hasPermission( PermissionService.READ )) continue;
-            	        try {
-            	            // use try just in case
+                    AuthenticationUtil.setRunAsUser( realUser );
+    
+                    	// add in the sites parent site
+                    	EmsScriptNode parentNode = null;
+                    	String parentId = null;
+                    	if (parentRef != null) {
+                    	    parentNode = new EmsScriptNode(parentRef, services, response);
+                    	    // skip parent if you don't have permissions on parent
+                    	    if (!parentNode.hasPermission( PermissionService.READ )) continue;
             	            parentId = parentNode.getSysmlId();
-            	        } catch (org.alfresco.repo.security.permissions.AccessDeniedException e) {
-            	            // ignore permission error if any, shouldn't 
-            	            continue;
-            	        }
-                	}
-
-                	// Note: workspace null if master, consider it to contain all sites.
-                	if (!name.equals("no_site") &&
-                		(workspace == null || (workspace != null && workspace.contains(emsNode))) ) {
-
-                		JSONObject siteJson = new JSONObject();
-                		siteJson.put("sysmlid", name);
-                		siteJson.put("name", siteInfo.getTitle());
-                		siteJson.put("parent", parentId );
-                		siteJson.put("isCharacterization", 
-                		             emsNode.getNodeRefProperty(Acm.ACM_SITE_PACKAGE, dateTime, workspace) != null );
-
-                		json.put(siteJson);
-                	}
+                    	}
+    
+                    	// Note: workspace null if master, consider it to contain all sites.
+                    	if (!name.equals("no_site") &&
+                    		(workspace == null || (workspace != null && workspace.contains(emsNode))) ) {
+    
+                    		JSONObject siteJson = new JSONObject();
+                    		siteJson.put("sysmlid", name);
+                    		siteJson.put("name", siteInfo.getTitle());
+                    		siteJson.put("parent", parentId );
+                    		
+                    		AuthenticationUtil.setAdminUserAsFullyAuthenticatedUser();
+                    		siteJson.put("isCharacterization", 
+                    		             emsNode.getNodeRefProperty(Acm.ACM_SITE_PACKAGE, dateTime, workspace) != null );
+                    		AuthenticationUtil.setRunAsUser( realUser );
+                    		
+                    		json.put(siteJson);
+                    	}
+                }
+            } catch (Exception e) {
+                logger.warn(String.format("User [%s] cannot access site [%s] due to [%s]", 
+                                          services.getAuthenticationService().getCurrentUserName(),
+                                          name, e.getClass()));
             }
         }
 

@@ -2,6 +2,7 @@ package gov.nasa.jpl.view_repo.db;
 
 import gov.nasa.jpl.mbee.util.Pair;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
+import gov.nasa.jpl.view_repo.util.EmsConfig;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -21,11 +22,13 @@ public class PostgresHelper {
 	static Logger logger = Logger.getLogger(PostgresHelper.class);
 
 	private Connection conn;
-	private String host;
-	private String dbName;
-	private String user;
-	private String pass;
 	private String workspaceName;
+
+	private static String host;
+	private static String dbName;
+	private static String user;
+	private static String pass;
+	private Boolean workspaceExists = null;
 
 	public static enum DbEdgeTypes {
 		REGULAR(1), DOCUMENT(2);
@@ -41,11 +44,10 @@ public class PostgresHelper {
 		}
 	}
 
-	
-   public PostgresHelper(WorkspaceNode workspace) {
-       String workspaceName = workspace == null ? "" : workspace.getId() ;
-       constructorHelper(workspaceName);
-   }
+	public PostgresHelper(WorkspaceNode workspace) {
+		String workspaceName = workspace == null ? "" : workspace.getId() ;
+		constructorHelper(workspaceName);
+	}
 
 	
 	public PostgresHelper(String workspaceName) {
@@ -53,10 +55,11 @@ public class PostgresHelper {
 	}
 	
 	private void constructorHelper(String workspaceName) {
-        this.host = DbContract.HOST;
-        this.dbName = DbContract.DB_NAME;
-        this.user = DbContract.USERNAME;
-        this.pass = DbContract.PASSWORD;
+	    host = EmsConfig.get("pg.host");
+	    dbName = EmsConfig.get("pg.name");
+	    user = EmsConfig.get("pg.user");
+	    pass = EmsConfig.get("pg.pass");
+
         if (workspaceName == null || workspaceName.equals("master")) {
             this.workspaceName = "";
         } else {
@@ -73,14 +76,12 @@ public class PostgresHelper {
 	}
 
 	public boolean connect() throws SQLException, ClassNotFoundException {
-		if (host.isEmpty() || dbName.isEmpty() || user.isEmpty()
-				|| pass.isEmpty()) {
+		if (host.isEmpty() || dbName.isEmpty() || user.isEmpty() || pass.isEmpty()) {
 			throw new SQLException("Database credentials missing");
 		}
 
 		Class.forName("org.postgresql.Driver");
-		this.conn = DriverManager.getConnection(this.host + this.dbName,
-				this.user, this.pass);
+		this.conn = DriverManager.getConnection(host + dbName, user, pass);
 		return true;
 	}
 
@@ -306,17 +307,22 @@ public class PostgresHelper {
 	}
 	
 	public boolean checkWorkspaceExists() {
+	    if (workspaceExists != null) return workspaceExists;
+	    
 	    String query = String.format("select true from pg_tables where tablename='nodes%s'",
 	                                 workspaceName);
 	    try {
         	    ResultSet rs = execQuery(query);
         	    while (rs.next()) {
-        	        return rs.getBoolean( 1 );
+        	        workspaceExists = rs.getBoolean( 1 );
+        	        break;
         	    }
 	    } catch (Exception e) {
-	        e.printStackTrace();
+	        // do nothing, just means workspace doesn't exist
+	        if (logger.isInfoEnabled()) logger.info( "Couldn't find workspace " + workspaceName );
+	        workspaceExists = false;
 	    }
-	    return false;
+	    return workspaceExists;
 	}
 	
 	public Map<String,Set<String>> getImmediateParentRoots(String sysmlId, DbEdgeTypes et) {
@@ -602,8 +608,12 @@ public class PostgresHelper {
 	    for (int ii = 0; ii < sysmlids.size(); ii++) {
 	        sysmlids.set( ii, String.format("'%s'", sysmlids.get(ii)) );
 	    }
-	    String query  = String.format("select noderefid from nodes%s where sysmlid in (%s);",
-	                                  this.workspaceName, StringUtils.join(sysmlids, ",") );
+	    String column = "versionedrefid";
+	    if (this.workspaceName.equals( "" )) {
+	        column = "noderefid"; // to be safe on trunk always get node ref
+	    }
+	    String query  = String.format("select %s from nodes%s where sysmlid in (%s);",
+	                                  column, this.workspaceName, StringUtils.join(sysmlids, ",") );
 	    
 	    ResultSet rs;
 	    try {

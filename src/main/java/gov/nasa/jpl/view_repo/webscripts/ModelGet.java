@@ -79,203 +79,209 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
  * 
  */
 public class ModelGet extends AbstractJavaWebScript {
-	static Logger logger = Logger.getLogger(ModelGet.class);
+    static Logger logger = Logger.getLogger( ModelGet.class );
 
-	public ModelGet() {
-		super();
-	}
+    public ModelGet() {
+        super();
+    }
 
-	public ModelGet(Repository repositoryHelper, ServiceRegistry registry) {
-		super(repositoryHelper, registry);
-	}
+    public ModelGet( Repository repositoryHelper, ServiceRegistry registry ) {
+        super( repositoryHelper, registry );
+    }
 
-	// injected via spring configuration
-	protected boolean isViewRequest = false;
+    // injected via spring configuration
+    protected boolean isViewRequest = false;
 
-	protected JSONArray elements = new JSONArray();
-	protected Map<String, EmsScriptNode> elementsFound = new HashMap<String, EmsScriptNode>();
-	protected Map<String, List<EmsScriptNode>> elementProperties = new HashMap<String, List<EmsScriptNode>>();
+    protected JSONArray elements = new JSONArray();
+    protected Map< String, EmsScriptNode > elementsFound =
+            new HashMap< String, EmsScriptNode >();
+    protected boolean prettyPrint = true;
 
-	protected boolean prettyPrint = true;
+    @Override
+    protected void clearCaches() {
+        super.clearCaches();
+        elements = new JSONArray();
+        elementsFound = new HashMap< String, EmsScriptNode >();
+        elementProperties = new HashMap< String, List< EmsScriptNode > >();
+    }
 
-	@Override
-	protected void clearCaches() {
-		super.clearCaches();
-		elements = new JSONArray();
-		elementsFound = new HashMap<String, EmsScriptNode>();
-		elementProperties = new HashMap<String, List<EmsScriptNode>>();
-	}
+    @Override
+    protected boolean validateRequest( WebScriptRequest req, Status status ) {
+        // This is all unnecessary as it's already checked in the handle
+        // String[] idKeys = {"modelid", "elementid", "elementId"};
+        // String modelId = null;
+        // for (String idKey: idKeys) {
+        // modelId = req.getServiceMatch().getTemplateVars().get( idKey );
+        // if (modelId != null) {
+        // break;
+        // }
+        // }
+        //
+        // if (modelId == null) {
+        // log(Level.ERROR, HttpServletResponse.SC_BAD_REQUEST,
+        // "Element id not specified.\n");
+        // return false;
+        // }
+        //
+        // // get timestamp if specified
+        // String timestamp = req.getParameter( "timestamp" );
+        // Date dateTime = TimeUtils.dateFromTimestamp( timestamp );
+        //
+        // EmsScriptNode modelRootNode = null;
+        //
+        // WorkspaceNode workspace = getWorkspace( req );
+        // boolean wsFound = workspace != null && workspace.exists();
+        // if ( !wsFound ) {
+        // String wsId = getWorkspaceId( req );
+        // if ( wsId != null && wsId.equalsIgnoreCase( "master" ) ) {
+        // wsFound = true;
+        // } else {
+        // log( Level.ERROR, HttpServletResponse.SC_NOT_FOUND,
+        // "Workspace with id, %s not found", wsId
+        // + ( dateTime == null ? "" : " at " + dateTime ));
+        // return false;
+        // }
+        // }
+        // // need to find deleted elements in workspace, so can return not
+        // found rather than
+        // // the node from parent workspace
+        // boolean findDeleted = true;
+        // if ( wsFound ) modelRootNode = findScriptNodeById(modelId, workspace,
+        // dateTime, findDeleted);
+        //
+        // if (modelRootNode == null || modelRootNode.isDeleted() ) {
+        // log( Level.WARN, HttpServletResponse.SC_NOT_FOUND,
+        // "Element with id, %s not found", modelId
+        // + ( dateTime == null ? "" : " at " + dateTime ));
+        // return false;
+        // }
+        //
+        // // TODO: need to check permissions on every node ref - though it
+        // looks like this might throw an error
+        // if (!checkPermissions(modelRootNode, PermissionService.READ)) {
+        // return false;
+        // }
 
-	@Override
-	protected boolean validateRequest(WebScriptRequest req, Status status) {
-		// This is all unnecessary as it's already checked in the handle
-		// String[] idKeys = {"modelid", "elementid", "elementId"};
-		// String modelId = null;
-		// for (String idKey: idKeys) {
-		// modelId = req.getServiceMatch().getTemplateVars().get( idKey );
-		// if (modelId != null) {
-		// break;
-		// }
-		// }
-		//
-		// if (modelId == null) {
-		// log(Level.ERROR, HttpServletResponse.SC_BAD_REQUEST,
-		// "Element id not specified.\n");
-		// return false;
-		// }
-		//
-		// // get timestamp if specified
-		// String timestamp = req.getParameter( "timestamp" );
-		// Date dateTime = TimeUtils.dateFromTimestamp( timestamp );
-		//
-		// EmsScriptNode modelRootNode = null;
-		//
-		// WorkspaceNode workspace = getWorkspace( req );
-		// boolean wsFound = workspace != null && workspace.exists();
-		// if ( !wsFound ) {
-		// String wsId = getWorkspaceId( req );
-		// if ( wsId != null && wsId.equalsIgnoreCase( "master" ) ) {
-		// wsFound = true;
-		// } else {
-		// log( Level.ERROR, HttpServletResponse.SC_NOT_FOUND,
-		// "Workspace with id, %s not found", wsId
-		// + ( dateTime == null ? "" : " at " + dateTime ));
-		// return false;
-		// }
-		// }
-		// // need to find deleted elements in workspace, so can return not
-		// found rather than
-		// // the node from parent workspace
-		// boolean findDeleted = true;
-		// if ( wsFound ) modelRootNode = findScriptNodeById(modelId, workspace,
-		// dateTime, findDeleted);
-		//
-		// if (modelRootNode == null || modelRootNode.isDeleted() ) {
-		// log( Level.WARN, HttpServletResponse.SC_NOT_FOUND,
-		// "Element with id, %s not found", modelId
-		// + ( dateTime == null ? "" : " at " + dateTime ));
-		// return false;
-		// }
-		//
-		// // TODO: need to check permissions on every node ref - though it
-		// looks like this might throw an error
-		// if (!checkPermissions(modelRootNode, PermissionService.READ)) {
-		// return false;
-		// }
+        return true;
+    }
 
-		return true;
-	}
+    /**
+     * Entry point
+     */
+    @Override
+    protected Map< String, Object > executeImpl( WebScriptRequest req,
+                                                 Status status, Cache cache ) {
+        AbstractJavaWebScript instance = new ModelGet( repository, getServices() );
+        return instance.executeImplImpl( req, status, cache,
+                                         runWithoutTransactions );
+    }
 
-	/**
-	 * Entry point
-	 */
-	@Override
-	protected Map<String, Object> executeImpl(WebScriptRequest req,
-			Status status, Cache cache) {
-		ModelGet instance = new ModelGet(repository, getServices());
-		return instance.executeImplImpl(req, status, cache,
-				runWithoutTransactions);
-	}
-	
-	@Override
-	protected Map<String, Object> executeImplImpl(WebScriptRequest req,
-			Status status, Cache cache) {
-		if (logger.isDebugEnabled()) {
-			String user = AuthenticationUtil.getFullyAuthenticatedUser();
-			logger.debug(user + " " + req.getURL());
-		}
-		Timer timer = new Timer();
-		printHeader(req);
+    @Override
+    protected Map< String, Object > executeImplImpl( WebScriptRequest req,
+                                                     Status status,
+                                                     Cache cache ) {
+        if ( logger.isDebugEnabled() ) {
+            String user = AuthenticationUtil.getFullyAuthenticatedUser();
+            logger.debug( user + " " + req.getURL() );
+        }
+        Timer timer = new Timer();
+        printHeader( req );
 
-		Map<String, Object> model = new HashMap<String, Object>();
-		// make sure to pass down view request flag to instance
-		setIsViewRequest(isViewRequest);
+        Map< String, Object > model = new HashMap< String, Object >();
+        // make sure to pass down view request flag to instance
+        setIsViewRequest( isViewRequest );
 
-		JSONObject top = NodeUtil.newJsonObject();
-		JSONArray elementsJson = handleRequest(req, top);
+        JSONObject top = NodeUtil.newJsonObject();
+        JSONArray elementsJson = handleRequest( req, top );
+        
 
-		try {
-			if (elementsJson.length() > 0) {
-				top.put("elements", elementsJson);
-			}
-//            boolean evaluate = getBooleanArg( req, "evaluate", false );
-//            WorkspaceNode ws = getWorkspace( req );
-//            if ( evaluate ) {
-//                Set< EmsScriptNode > elementSet = new HashSet<EmsScriptNode>( elementsFound.values() );
-//                Map< Object, Object > r = evaluate(elementSet , ws);
-//                top
-//            }
+        try {
+            if ( elementsJson.length() > 0 ) {
+                top.put( "elements", elementsJson );
+            }
+            postProcessJson(top);
+            // boolean evaluate = getBooleanArg( req, "evaluate", false );
+            // WorkspaceNode ws = getWorkspace( req );
+            // if ( evaluate ) {
+            // Set< EmsScriptNode > elementSet = new HashSet<EmsScriptNode>(
+            // elementsFound.values() );
+            // Map< Object, Object > r = evaluate(elementSet , ws);
+            // top
+            // }
 
-			if (!Utils.isNullOrEmpty(response.toString()))
-				top.put("message", response.toString());
-			if (prettyPrint) {
-				model.put("res", NodeUtil.jsonToString(top, 4));
-			} else {
-				model.put("res", NodeUtil.jsonToString(top));
-			}
-		} catch (JSONException e) {
-			log(Level.ERROR, HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-					"Could not create JSONObject");
-			model.put("res", createResponseJson());
-			e.printStackTrace();
-		}
+            if ( !Utils.isNullOrEmpty( response.toString() ) ) top.put( "message",
+                                                                        response.toString() );
+            if ( prettyPrint ) {
+                model.put( "res", NodeUtil.jsonToString( top, 4 ) );
+            } else {
+                model.put( "res", NodeUtil.jsonToString( top ) );
+            }
+        } catch ( JSONException e ) {
+            log( Level.ERROR, HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+                 "Could not create JSONObject" );
+            model.put( "res", createResponseJson() );
+            e.printStackTrace();
+        }
 
-		status.setCode(responseStatus.getCode());
+        status.setCode( responseStatus.getCode() );
 
-		printFooter();
+        printFooter();
 
-		if (logger.isInfoEnabled()) {
-			log(Level.INFO, "ModelGet: %s", timer);
-		}
+        if ( logger.isInfoEnabled() ) {
+            log( Level.INFO, "ModelGet: %s", timer );
+        }
 
-		return model;
-	}
+        return model;
+    }
 
-	/**
-	 * Wrapper for handling a request and getting the appropriate JSONArray of
-	 * elements
-	 * 
-	 * @param req
-	 * @param top
-	 * @return
-	 */
-	private JSONArray handleRequest(WebScriptRequest req, final JSONObject top) {
-		// REVIEW -- Why check for errors here if validate has already been
-		// called? Is the error checking code different? Why?
-		try {
-			String[] idKeys = { "modelid", "elementid", "elementId" };
-			String modelId = null;
-			for (String idKey : idKeys) {
-				modelId = req.getServiceMatch().getTemplateVars().get(idKey);
-				if (modelId != null) {
-					break;
-				}
-			}
+    /**
+     * Wrapper for handling a request and getting the appropriate JSONArray of
+     * elements
+     * 
+     * @param req
+     * @param top
+     * @return
+     */
+    protected JSONArray handleRequest( WebScriptRequest req,
+                                       final JSONObject top ) {
+        // REVIEW -- Why check for errors here if validate has already been
+        // called? Is the error checking code different? Why?
+        try {
+            String[] idKeys =
+                    { "modelid", "elementid", "elementId", "jobid", "jobId" };
+            String modelId = null;
+            for ( String idKey : idKeys ) {
+                modelId = req.getServiceMatch().getTemplateVars().get( idKey );
+                if ( modelId != null ) {
+                    break;
+                }
+            }
 
-			if (null == modelId) {
-				log(Level.ERROR, HttpServletResponse.SC_NOT_FOUND,
-						"Could not find element %s", modelId);
-				return new JSONArray();
-			}
+            if ( null == modelId ) {
+                log( Level.ERROR, HttpServletResponse.SC_NOT_FOUND,
+                     "Could not find element %s", modelId );
+                return new JSONArray();
+            }
 
-			// get timestamp if specified
-			String timestamp = req.getParameter("timestamp");
-			Date dateTime = TimeUtils.dateFromTimestamp(timestamp);
-			boolean connected = getBooleanArg(req, "connected", false);
-			boolean evaluate = getBooleanArg(req, "evaluate", false);
-            boolean affected = getBooleanArg(req, "affected", false);
-			String relationship = req.getParameter("relationship");
+            // get timestamp if specified
+            String timestamp = req.getParameter( "timestamp" );
+            Date dateTime = TimeUtils.dateFromTimestamp( timestamp );
+            boolean connected = getBooleanArg( req, "connected", false );
+            boolean evaluate = getBooleanArg( req, "evaluate", false );
+            boolean affected = getBooleanArg( req, "affected", false );
+            String relationship = req.getParameter( "relationship" );
 
-			WorkspaceNode workspace = getWorkspace(req);
+            WorkspaceNode workspace = getWorkspace( req );
 
-			// see if prettyPrint default is overridden and change
-			prettyPrint = getBooleanArg(req, "pretty", prettyPrint);
+            // see if prettyPrint default is overridden and change
+            prettyPrint = getBooleanArg( req, "pretty", prettyPrint );
 
-			Long depth = getDepthFromRequest(req);
-			// force qualified to be false so DeclarativeWebscripts can inject it later
-			
-			boolean includeQualified = getBooleanArg(req, "qualified", true);
-			if (NodeUtil.doPostProcessQualified) includeQualified = false;
+            Long depth = getDepthFromRequest( req );
+            // force qualified to be false so DeclarativeWebscripts can inject
+            // it later
+
+            boolean includeQualified = getBooleanArg( req, "qualified", true );
+            if ( NodeUtil.doPostProcessQualified ) includeQualified = false;
 
 			if (logger.isDebugEnabled())
 				logger.debug("modelId = " + modelId);
@@ -287,14 +293,16 @@ public class ModelGet extends AbstractJavaWebScript {
 			// DB can only be used against latest at the moment
 			if (NodeUtil.doGraphDb && dateTime == null) {
 			    PostgresHelper pgh = new PostgresHelper(workspace);
-			    try {
-                    pgh.connect();
-                    modelRootNode = NodeUtil.getNodeFromPostgresNode(pgh.getNodeFromSysmlId( modelId ));
-                } catch ( Exception e ) {
-                    logger.info( "Could not find element in graph db " + modelId );
-                } finally {
-                    pgh.close();
-                }
+    			        try {
+                        pgh.connect();
+                        if (pgh.checkWorkspaceExists()) {
+                            modelRootNode = NodeUtil.getNodeFromPostgresNode(pgh.getNodeFromSysmlId( modelId ));
+                        }
+                    } catch ( Exception e ) {
+                        logger.info( "Could not find element in graph db " + modelId );
+                    } finally {
+                        pgh.close();
+                    }
 			    if (modelRootNode == null) notFoundInGraphDb = true;
 			}
 			if (modelRootNode == null) {
@@ -310,20 +318,20 @@ public class ModelGet extends AbstractJavaWebScript {
 			        }
 			    }
 			}
-			
-			if (logger.isDebugEnabled())
-				logger.debug("modelRootNode = " + modelRootNode);
 
-			if (modelRootNode == null) {
+            if ( logger.isDebugEnabled() ) logger.debug( "modelRootNode = "
+                                                         + modelRootNode );
+
+            if ( modelRootNode == null ) {
 				log(Level.INFO, HttpServletResponse.SC_NOT_FOUND,
 				    String.format("Element %s not found", modelId
 								+ (dateTime == null ? "" : " at " + dateTime)));
-				return new JSONArray();
-			} else if (modelRootNode.isDeleted()) {
-				log(Level.DEBUG, HttpServletResponse.SC_GONE,
-						"Element exists, but is deleted.");
-				return new JSONArray();
-			}
+                return new JSONArray();
+            } else if ( modelRootNode.isDeleted() ) {
+                log( Level.DEBUG, HttpServletResponse.SC_GONE,
+                     "Element exists, but is deleted." );
+                return new JSONArray();
+            }
 
 			if (isViewRequest) {
 				handleViewHierarchy(modelRootNode, workspace, dateTime, depth,
@@ -334,44 +342,44 @@ public class ModelGet extends AbstractJavaWebScript {
 						new HashSet<String>(), notFoundInGraphDb);
 			}
 
-			boolean checkReadPermission = true; // TODO -- REVIEW -- Shouldn't
-												// this be false?
-			
-			handleElements(workspace, dateTime, includeQualified, false, evaluate,
-					affected, top, checkReadPermission);
-		} catch (JSONException e) {
-			e.printStackTrace();
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
+            boolean checkReadPermission = true; // TODO -- REVIEW -- Shouldn't
+                                                // this be false?
 
-		return elements;
-	}
+            handleElements( workspace, dateTime, includeQualified, false,
+                            evaluate, affected, top, checkReadPermission );
+        } catch ( JSONException e ) {
+            e.printStackTrace();
+        } catch ( SQLException e ) {
+            e.printStackTrace();
+        }
 
-	/**
-	 * Get the depth to recurse to from the request parameter.
-	 * 
-	 * @param req
-	 * @return Depth < 0 is infinite recurse, depth = 0 is just the element (if
-	 *         no request parameter)
-	 */
-	private Long getDepthFromRequest(WebScriptRequest req) {
-		Long depth = null;
-		String depthParam = req.getParameter("depth");
+        return elements;
+    }
+
+    /**
+     * Get the depth to recurse to from the request parameter.
+     * 
+     * @param req
+     * @return Depth < 0 is infinite recurse, depth = 0 is just the element (if
+     *         no request parameter)
+     */
+    private Long getDepthFromRequest( WebScriptRequest req ) {
+        Long depth = null;
+        String depthParam = req.getParameter( "depth" );
         // recurse default is false
         boolean recurse = getBooleanArg( req, "recurse", false );
 
-		if (depthParam != null) {
-			try {
+        if ( depthParam != null ) {
+            try {
                 depth = Long.parseLong( depthParam );
-			} catch (NumberFormatException nfe) {
+            } catch ( NumberFormatException nfe ) {
                 if ( !recurse ) {
                     // don't do any recursion, ignore the depth
-                    log(Level.WARN, HttpServletResponse.SC_BAD_REQUEST,
-                        "Bad depth specified: " + depthParam + ", returning depth 0" );
+                    log( Level.WARN, HttpServletResponse.SC_BAD_REQUEST,
+                         "Bad depth specified: " + depthParam + ", returning depth 0" );
                 }
-			}
-		}
+            }
+        }
 
 		// for backwards compatiblity convert recurse to infinite depth (this
         // overrides any depth setting)
@@ -619,221 +627,236 @@ public class ModelGet extends AbstractJavaWebScript {
         if( affected ){
             addAffectedElements(ws, dateTime);
         }
-		for (String id : elementsFound.keySet()) {
-			EmsScriptNode node = elementsFound.get(id);
+        for ( String id : elementsFound.keySet() ) {
+            EmsScriptNode node = elementsFound.get( id );
 
-			if (!checkPermission
-					|| checkPermissions(node, PermissionService.READ)) {
-				JSONObject json = node.toJSONObject(ws, dateTime,
-						includeQualified, isIncludeDocument, elementProperties.get(id));
-				elements.put(json);
-				elementsJsonMap.put(node, json);
-			} // TODO -- REVIEW -- Warning if no permissions?
-		}
-		if (evaluate) {
-			try {
-				evaluate(elementsJsonMap, top, ws);
-			} catch (IllegalAccessException e) {
-				// TODO Auto-generated catch block
-				// e.printStackTrace();
-			} catch (InvocationTargetException e) {
-				// TODO Auto-generated catch block
-				// e.printStackTrace();
-			} catch (InstantiationException e) {
-				// TODO Auto-generated catch block
-				// e.printStackTrace();
-			}
-		}
-	}
+            if ( !checkPermission
+                 || checkPermissions( node, PermissionService.READ ) ) {
 
-	protected void addAffectedElements(WorkspaceNode ws, Date dateTime) {
-		for(  String id : new ArrayList<String>( elementsFound.keySet() ) ){
-		    EmsScriptNode value= elementsFound.get(id);
-		    if(value != null){
+                JSONObject json =
+                        getJsonForElement( node, ws, dateTime, id, includeQualified,
+                                  isIncludeDocument );
+                
+                elements.put( json );
+                elementsJsonMap.put( node, json );
+            } // TODO -- REVIEW -- Warning if no permissions?
+        }
+        if ( evaluate ) {
+            try {
+                evaluate( elementsJsonMap, top, ws );
+            } catch ( IllegalAccessException e ) {
+                // TODO Auto-generated catch block
+                // e.printStackTrace();
+            } catch ( InvocationTargetException e ) {
+                // TODO Auto-generated catch block
+                // e.printStackTrace();
+            } catch ( InstantiationException e ) {
+                // TODO Auto-generated catch block
+                // e.printStackTrace();
+            }
+        }
+    }
+
+    protected void addAffectedElements( WorkspaceNode ws, Date dateTime ) {
+        for ( String id : new ArrayList< String >( elementsFound.keySet() ) ) {
+            EmsScriptNode value = elementsFound.get( id );
+            if ( value != null ) {
                 List< NodeRef > nodeRefs =
                         value.getAffectedElementsRecursive( false, false,
-                                                            dateTime, ws,
-                                                            false, true, true,
-                                                            false, null );
-		    	for(NodeRef ref: nodeRefs){
-		    		EmsScriptNode node = new EmsScriptNode(ref, services);
-		    		String nodeId = node.getSysmlId();
-		    		if(elementsFound.containsKey(nodeId) ){
-		    			continue;
-		    		}
-		    		else{
-		    			elementsFound.put(nodeId, node);
-		    		}
-		    	}
-		    }
-		}
-	}
+                                                            dateTime, ws, false,
+                                                            true, true, false,
+                                                            null );
+                for ( NodeRef ref : nodeRefs ) {
+                    EmsScriptNode node = new EmsScriptNode( ref, services );
+                    String nodeId = node.getSysmlId();
+                    if ( elementsFound.containsKey( nodeId ) ) {
+                        continue;
+                    } else {
+                        elementsFound.put( nodeId, node );
+                    }
+                }
+            }
+        }
+    }
 
-	/**
-	 * Need to differentiate between View or Element request - specified during
-	 * Spring configuration
-	 * 
-	 * @param flag
-	 */
-	public void setIsViewRequest(boolean flag) {
-		isViewRequest = flag;
-	}
+    /**
+     * Need to differentiate between View or Element request - specified during
+     * Spring configuration
+     * 
+     * @param flag
+     */
+    public void setIsViewRequest( boolean flag ) {
+        isViewRequest = flag;
+    }
 
-	/**
-	 * Special filtering for embedded value specs. Adds element that "owns" the
-	 * value spec. If propertyName is not null, filters out all the elements
-	 * that dont "own" properties that have the specified propertyName.
-	 * 
-	 * @param propertyName
-	 * @param ws
-	 * @param dateTime
-	 */
-	protected void filterValueSpecs(String propertyName, WorkspaceNode ws,
-			Date dateTime) {
+    /**
+     * Special filtering for embedded value specs. Adds element that "owns" the
+     * value spec. If propertyName is not null, filters out all the elements
+     * that dont "own" properties that have the specified propertyName.
+     * 
+     * @param propertyName
+     * @param ws
+     * @param dateTime
+     */
+    protected void filterValueSpecs( String propertyName, WorkspaceNode ws,
+                                     Date dateTime ) {
 
-		// REVIEW do we only want to do this for Property? Currently for all
-		// value specs.
+        // REVIEW do we only want to do this for Property? Currently for all
+        // value specs.
 
-		Map<String, EmsScriptNode> elementsToAdd = new HashMap<String, EmsScriptNode>();
-		Set<String> valueSpecsToRemove = new HashSet<String>();
+        Map< String, EmsScriptNode > elementsToAdd =
+                new HashMap< String, EmsScriptNode >();
+        Set< String > valueSpecsToRemove = new HashSet< String >();
 
-		for (Entry<String, EmsScriptNode> entry : elementsFound.entrySet()) {
+        for ( Entry< String, EmsScriptNode > entry : elementsFound.entrySet() ) {
 
-			EmsScriptNode element = entry.getValue();
-			String valueSpecId = entry.getKey();
+            EmsScriptNode element = entry.getValue();
+            String valueSpecId = entry.getKey();
 
-			// If its a embedded value spec:
-			if (element.isOwnedValueSpec(dateTime, ws)) {
+            // If its a embedded value spec:
+            if ( element.isOwnedValueSpec( dateTime, ws ) ) {
 
-				// Get the value spec owner, ie a Property:
-				EmsScriptNode valueSpecOwner = element.getValueSpecOwner(
-						dateTime, ws);
+                // Get the value spec owner, ie a Property:
+                EmsScriptNode valueSpecOwner =
+                        element.getValueSpecOwner( dateTime, ws );
 
-				if (valueSpecOwner != null) {
-					EmsScriptNode elementWithProperty = null;
-					String propertyNameFnd = null;
+                if ( valueSpecOwner != null ) {
+                    EmsScriptNode elementWithProperty = null;
+                    String propertyNameFnd = null;
 
-					if (valueSpecOwner.hasAspect(Acm.ACM_PROPERTY)) {
+                    if ( valueSpecOwner.hasAspect( Acm.ACM_PROPERTY ) ) {
 
-						NodeRef propertyTypeRef = (NodeRef) valueSpecOwner
-								.getNodeRefProperty(Acm.ACM_PROPERTY_TYPE,
-										dateTime, ws);
+                        NodeRef propertyTypeRef =
+                                (NodeRef)valueSpecOwner.getNodeRefProperty( Acm.ACM_PROPERTY_TYPE,
+                                                                            dateTime,
+                                                                            ws );
 
-						// The property name is the name of the propertyType
-						// (property is a slot):
-						if (propertyTypeRef != null) {
-							EmsScriptNode propertyType = new EmsScriptNode(
-									propertyTypeRef, services);
-							propertyNameFnd = propertyType.getSysmlName();
-							EmsScriptNode stereotypeInstance = valueSpecOwner
-									.getUnreifiedParent(dateTime, ws);
+                        // The property name is the name of the propertyType
+                        // (property is a slot):
+                        if ( propertyTypeRef != null ) {
+                            EmsScriptNode propertyType =
+                                    new EmsScriptNode( propertyTypeRef,
+                                                       services );
+                            propertyNameFnd = propertyType.getSysmlName();
+                            EmsScriptNode stereotypeInstance =
+                                    valueSpecOwner.getUnreifiedParent( dateTime,
+                                                                       ws );
 
-							if (stereotypeInstance != null) {
-								elementWithProperty = stereotypeInstance
-										.getUnreifiedParent(dateTime, ws);
-							}
-						}
-						// The property name is the name of the property:
-						else {
-							propertyNameFnd = valueSpecOwner.getSysmlName();
-							elementWithProperty = valueSpecOwner
-									.getUnreifiedParent(dateTime, ws);
-						}
+                            if ( stereotypeInstance != null ) {
+                                elementWithProperty =
+                                        stereotypeInstance.getUnreifiedParent( dateTime,
+                                                                               ws );
+                            }
+                        }
+                        // The property name is the name of the property:
+                        else {
+                            propertyNameFnd = valueSpecOwner.getSysmlName();
+                            elementWithProperty =
+                                    valueSpecOwner.getUnreifiedParent( dateTime,
+                                                                       ws );
+                        }
 
-					} // Ends if a Property
-					else {
-						// We want the owner of the value spec owner:
-						elementWithProperty = valueSpecOwner
-								.getUnreifiedParent(dateTime, ws);
-					}
+                    } // Ends if a Property
+                    else {
+                        // We want the owner of the value spec owner:
+                        elementWithProperty =
+                                valueSpecOwner.getUnreifiedParent( dateTime,
+                                                                   ws );
+                    }
 
-					if (elementWithProperty != null) {
+                    if ( elementWithProperty != null ) {
 
-						boolean elementFnd = true;
+                        boolean elementFnd = true;
 
-						// If we are searching for specific propertyName:
-						if (!Utils.isNullOrEmpty(propertyName)) {
+                        // If we are searching for specific propertyName:
+                        if ( !Utils.isNullOrEmpty( propertyName ) ) {
 
-							// The property names match, so add the element with
-							// the property:
-							elementFnd = propertyName.equals(propertyNameFnd);
-						}
+                            // The property names match, so add the element with
+                            // the property:
+                            elementFnd = propertyName.equals( propertyNameFnd );
+                        }
 
-						if (elementFnd) {
-							valueSpecsToRemove.add(valueSpecId);
-							elementsToAdd.put(elementWithProperty.getSysmlId(),
-									elementWithProperty);
-						}
-					} // ends if (elementWithProperty != null)
+                        if ( elementFnd ) {
+                            valueSpecsToRemove.add( valueSpecId );
+                            elementsToAdd.put( elementWithProperty.getSysmlId(),
+                                               elementWithProperty );
+                        }
+                    } // ends if (elementWithProperty != null)
 
-				} // ends if (valueSpecOwner != null)
-			} // ends if (element.isOwnedValueSpec( dateTime, ws ))
+                } // ends if (valueSpecOwner != null)
+            } // ends if (element.isOwnedValueSpec( dateTime, ws ))
 
-		} // ends for
+        } // ends for
 
-		// Add the found property owners:
-		if (!Utils.isNullOrEmpty(propertyName)) {
-			elementsFound = elementsToAdd;
-		} else {
-			elementsFound.putAll(elementsToAdd);
-			elementsFound.keySet().removeAll(valueSpecsToRemove);
-		}
+        // Add the found property owners:
+        if ( !Utils.isNullOrEmpty( propertyName ) ) {
+            elementsFound = elementsToAdd;
+        } else {
+            elementsFound.putAll( elementsToAdd );
+            elementsFound.keySet().removeAll( valueSpecsToRemove );
+        }
 
-	}
+    }
 
-	/**
-	 * Adds the owned properties of the found elements to elementProperties
-	 * 
-	 * @param ws
-	 * @param dateTime
-	 */
-	protected void addElementProperties(WorkspaceNode ws, Date dateTime) {
+    /**
+     * Adds the owned properties of the found elements to elementProperties
+     * 
+     * @param ws
+     * @param dateTime
+     */
+    protected void addElementProperties( WorkspaceNode ws, Date dateTime ) {
 
-		// For every element, find the owned properties:
-		for (Entry<String, EmsScriptNode> entry : elementsFound.entrySet()) {
+        // For every element, find the owned properties:
+        for ( Entry< String, EmsScriptNode > entry : elementsFound.entrySet() ) {
 
-			EmsScriptNode element = entry.getValue();
-			List<EmsScriptNode> props = new ArrayList<EmsScriptNode>();
+            EmsScriptNode element = entry.getValue();
+            List< EmsScriptNode > props = new ArrayList< EmsScriptNode >();
 
-			// some issues with results in graph DB throw errors, catch and move on
-			try { 
-        			for (NodeRef childRef : element.getOwnedChildren(false, dateTime,
-        					ws)) {
-        				if (childRef != null) {
-        					EmsScriptNode child = new EmsScriptNode(childRef, services);
-        
-        					// If it is a property then add it:
-        					if (child.hasAspect(Acm.ACM_PROPERTY)) {
-        						props.add(child);
-        					}
-        					// If it is a applied stereotype, then check its children:
-        					else if (child.hasAspect(Acm.ACM_INSTANCE_SPECIFICATION)) {
-        
-        						for (NodeRef specChildRef : child.getOwnedChildren(
-        								false, dateTime, ws)) {
-        
-        							if (specChildRef != null) {
-        
-        								EmsScriptNode specChild = new EmsScriptNode(
-        										specChildRef, services);
-        
-        								if (specChild.hasAspect(Acm.ACM_PROPERTY)) {
-        									props.add(specChild);
-        								}
-        							}
-        						} // ends for
-        					}
-        				} // ends if (childRef != null)
-        			} // ends for
-			} catch (Exception e) {
-			    logger.warn("Could not find owner. Dumping stack trace.");
-			    e.printStackTrace();
-			}
+            // some issues with results in graph DB throw errors, catch and move
+            // on
+            try {
+                for ( NodeRef childRef : element.getOwnedChildren( false,
+                                                                   dateTime,
+                                                                   ws ) ) {
+                    if ( childRef != null ) {
+                        EmsScriptNode child =
+                                new EmsScriptNode( childRef, services );
 
-			elementProperties.put(element.getSysmlId(), props);
+                        // If it is a property then add it:
+                        if ( child.hasAspect( Acm.ACM_PROPERTY ) ) {
+                            props.add( child );
+                        }
+                        // If it is a applied stereotype, then check its
+                        // children:
+                        else if ( child.hasAspect( Acm.ACM_INSTANCE_SPECIFICATION ) ) {
 
-		} // ends for
+                            for ( NodeRef specChildRef : child.getOwnedChildren( false,
+                                                                                 dateTime,
+                                                                                 ws ) ) {
 
-	}
+                                if ( specChildRef != null ) {
+
+                                    EmsScriptNode specChild =
+                                            new EmsScriptNode( specChildRef,
+                                                               services );
+
+                                    if ( specChild.hasAspect( Acm.ACM_PROPERTY ) ) {
+                                        props.add( specChild );
+                                    }
+                                }
+                            } // ends for
+                        }
+                    } // ends if (childRef != null)
+                } // ends for
+            } catch ( Exception e ) {
+                logger.warn( "Could not find owner. Dumping stack trace." );
+                e.printStackTrace();
+            }
+
+            elementProperties.put( element.getSysmlId(), props );
+
+        } // ends for
+
+    }
 
 }

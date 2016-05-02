@@ -47,6 +47,7 @@ import gov.nasa.jpl.view_repo.sysml.View;
 import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.NodeUtil.SearchType;
 import gov.nasa.jpl.view_repo.webscripts.AbstractJavaWebScript;
+import gov.nasa.jpl.view_repo.webscripts.JobGet;
 import gov.nasa.jpl.view_repo.webscripts.UpdateViewHierarchy;
 
 import java.io.Serializable;
@@ -120,7 +121,7 @@ public class EmsScriptNode extends ScriptNode implements
 
     public static final String ADMIN_USER_NAME = "admin";
 
-    static Logger logger = Logger.getLogger( ScriptNode.class );
+    static Logger logger = Logger.getLogger( EmsScriptNode.class );
 
     public static boolean expressionStuffDefault = false; // The value here is ignored.
     public boolean expressionStuff = expressionStuffDefault; // The value here is ignored.
@@ -2789,6 +2790,7 @@ public class EmsScriptNode extends ScriptNode implements
                             Version version ) throws JSONException {
         if ( this == null || !this.exists() ) return;
         // mandatory elements put in directly
+        if (logger.isDebugEnabled()) logger.debug( "[TIMING] addElementJson adding creator information" );
         elementJson.put( Acm.JSON_ID, this.getProperty( Acm.ACM_ID ) );
         EmsScriptNode originalNode = this.getOriginalNode();
         elementJson.put( "creator", originalNode.getProperty( "cm:creator" ) );
@@ -2796,6 +2798,7 @@ public class EmsScriptNode extends ScriptNode implements
         elementJson.put( "nodeRefId", originalNode.getNodeRef().toString() );
         elementJson.put( "versionedRefId", NodeUtil.getVersionedRefId( this ) );
 
+        if (logger.isDebugEnabled()) logger.debug( "[TIMING] addElementJson adding modifier information" );
         Pair< Date, String > pair = this.getLastModifiedAndModifier( dateTime );
         if ( pair != null ) {
             elementJson.put( "modifier", pair.second );
@@ -2803,6 +2806,7 @@ public class EmsScriptNode extends ScriptNode implements
                              TimeUtils.toTimestamp( pair.first ) );
         }
 
+        if (logger.isDebugEnabled()) logger.debug( "[TIMING] addElementJson adding name and documentation" );
         putInJson( elementJson, Acm.JSON_NAME,
                    this.getProperty( Acm.ACM_NAME ), filter );
         putInJson( elementJson, Acm.JSON_DOCUMENTATION,
@@ -2810,7 +2814,7 @@ public class EmsScriptNode extends ScriptNode implements
 
         // add affected ids
         if ( addingAffectedIds  ) {
-            logger.debug( "addingAffectedIds = " + addingAffectedIds );
+            if (logger.isDebugEnabled()) logger.debug( "[TIMING] addingAffectedIds = " + addingAffectedIds );
             if ( filter == null || filter.isEmpty() || filter.contains( "affectedIds" ) ) {
                 List< NodeRef > refs = this.getAffectedElementsRecursive( false, false, dateTime, getWorkspace(), false, false, true, false, null );
                 JSONArray affectedIds = addNodeRefIdsJSON( refs );
@@ -2822,6 +2826,7 @@ public class EmsScriptNode extends ScriptNode implements
         
         // check properties rather than aspect since aspect may not be applied
         // on creation
+        if (logger.isDebugEnabled()) logger.debug( "[TIMING] addElementJson adding metatype information" );
         Object appliedMetatypes = this.getProperty( Acm.ACM_APPLIED_METATYPES );
         Object isMetatype = this.getProperty( Acm.ACM_IS_METATYPE );
         Object metatypes = this.getProperty( Acm.ACM_METATYPES );
@@ -2831,6 +2836,7 @@ public class EmsScriptNode extends ScriptNode implements
                                                    isMetatype );
         if ( metatypes != null ) elementJson.put( Acm.JSON_METATYPES, metatypes );
 
+        if (logger.isDebugEnabled()) logger.debug( "[TIMING] addElementJson adding ownedAttributes" );
         ArrayList< NodeRef > nodeRefsOwnedAttribute =
                 (ArrayList< NodeRef >)this.getNodeRefProperty( Acm.ACM_OWNED_ATTRIBUTE,
                                                                true,
@@ -2843,6 +2849,7 @@ public class EmsScriptNode extends ScriptNode implements
                        ownedAttributeIds, filter );
         }
 
+        if (logger.isDebugEnabled()) logger.debug( "[TIMING] addElementJson adding qualified" );
         // NOTE: DeclarativeJavaWebScript does this when isIncludeQualified is false
         // isIncludeQualified should only be called for diffs 
         if ( isIncludeQualified ) {
@@ -2867,6 +2874,7 @@ public class EmsScriptNode extends ScriptNode implements
                            filter );
             }
         }
+        if (logger.isDebugEnabled()) logger.debug( "[TIMING] addElementJson adding owner" );
         if ( filter == null || filter.size() == 0 || filter.contains( "owner" ) ) {
 
             // not passing in dateTime/workspace since sysml id is immutable
@@ -2906,6 +2914,7 @@ public class EmsScriptNode extends ScriptNode implements
         // may be in
         // different workspaces, but informative nonetheless
         if ( version != null ) {
+            if (logger.isDebugEnabled()) logger.debug( "[TIMING] addElementJson adding version" );
             EmsScriptNode vNode =
                     new EmsScriptNode( version.getVersionedNodeRef(),
                                        getServices(), getResponse() );
@@ -2939,6 +2948,7 @@ public class EmsScriptNode extends ScriptNode implements
             // }
             // }
         }
+        if (logger.isDebugEnabled()) logger.debug( "[TIMING] addElementJson finished" );
     }
 
     public enum SpecEnum {
@@ -3200,9 +3210,11 @@ public class EmsScriptNode extends ScriptNode implements
         if ( !Utils.isNullOrEmpty( ownedProperties ) ) {
             JSONArray props = new JSONArray();
             for ( EmsScriptNode prop : ownedProperties ) {
+                if (logger.isDebugEnabled()) logger.debug("[TIMING] adding prop");
                 props.put( prop.toJSONObject( ws, dateTime, isIncludeQualified,
                                               isIncludeDocument, null ) );
                 putInJson( json, "properties", props, jsonFilter );
+                if (logger.isDebugEnabled()) logger.debug("[TIMING] finished prop");
             }
         }
 
@@ -3357,8 +3369,8 @@ public class EmsScriptNode extends ScriptNode implements
         } else {
             // If not using a filter, check to remove qualifiedId/Name.
             if ( !isIncludeQualified ) {
-                boolean hasId = json.get( "qualifiedId" ) != null;
-                boolean hasName = json.get( "qualifiedName" ) != null;
+                boolean hasId = json.opt( "qualifiedId" ) != null;
+                boolean hasName = json.opt( "qualifiedName" ) != null;
                 if ( hasId || hasName ) {
                     json = NodeUtil.clone( json );
                     if ( Debug.isOn() ) Debug.outln( "remove qualifiedId? "
@@ -3426,14 +3438,19 @@ public class EmsScriptNode extends ScriptNode implements
         Long readTime = System.currentTimeMillis();
 
         if ( isExprOrProp ) {
+            if (logger.isDebugEnabled()) logger.debug("[TIMING] adding specialization");
             addSpecializationJSON( element, filter, ws, dateTime );
+            if (logger.isDebugEnabled()) logger.debug("[TIMING] finished specialization");
         } else {
+            if (logger.isDebugEnabled()) logger.debug("[TIMING] adding element json");
             addElementJSON( element, filter, dateTime, isIncludeQualified,
                             version );
+            if (logger.isDebugEnabled()) logger.debug("[TIMING] finished adding element json and starting specialization");
             addSpecializationJSON( specializationJSON, filter, ws, dateTime );
             if ( specializationJSON.length() > 0 ) {
                 element.put( Acm.JSON_SPECIALIZATION, specializationJSON );
             }
+            if (logger.isDebugEnabled()) logger.debug("[TIMING] finished specialization");
         }
 
         // add read time
@@ -7002,5 +7019,90 @@ public class EmsScriptNode extends ScriptNode implements
         }
 
         return node;
+    }
+
+    // NOTE: if we ever specialize job, this will have to look for everything 
+    //       that specializes job as well 
+    public boolean isJob() {
+            Object stereotypes = 
+                    getProperty("sysml:appliedMetatypes", true);
+            // stereotypes should be a List< String >
+            if ( stereotypes instanceof Collection ) {
+                Collection<?> c = (Collection< ? >)stereotypes;
+                for ( Object o : c ) {
+                    if ( o instanceof String ) {
+                        String s = (String)o;
+                        if ( JobGet.jobStereotypeId.equals( s ) ) {
+                            return true;
+                        }
+                    }
+                }
+            }
+        return false;
+    }
+    
+    public static boolean isJob( JSONObject json ) {
+        JSONArray metatypeArr = json.optJSONArray(Acm.JSON_APPLIED_METATYPES);
+        if ( metatypeArr == null ) return false;
+        for ( int i = 0; i < metatypeArr.length(); ++i ) {
+            String metatype = metatypeArr.optString( i );
+            if ( metatype == null ) continue;
+            if ( metatype.equals( JobGet.jobStereotypeId ) ) { // TODO move this id out of JobGet?
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    public static boolean maybeJobProperty( JSONObject json ) {
+        JSONArray metatypeArr = json.optJSONArray(Acm.JSON_APPLIED_METATYPES);
+        if ( metatypeArr == null ) return false;
+        for ( int i = 0; i < metatypeArr.length(); ++i ) {
+            String metatype = metatypeArr.optString( i );
+            if ( metatype == null ) continue;
+            // this refers to a 'slot', it may or may not be a property containing this applied metatype 
+            if ( metatype.equals( JobGet.slotId ) ) { // TODO move this id out of JobGet?
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    public EmsScriptNode getInstanceSpecification() {
+
+        EmsSystemModel esm = new EmsSystemModel();
+        Collection<EmsScriptNode> is = esm.getProperty(this, null);
+
+        for (EmsScriptNode instance : is) {
+            ArrayList<?> appliedMetatype = (ArrayList<?>) instance.getProperty(Acm.ACM_APPLIED_METATYPES);
+            if (appliedMetatype != null && appliedMetatype.contains( JobGet.instanceSpecId )) {
+                return instance;
+            }
+        }
+
+        return null;
+    }
+    
+    public Collection<EmsScriptNode> getAllSlots(EmsScriptNode n,
+                                          boolean ignoreWorkspace,
+                                          WorkspaceNode workspace, Date dateTime,
+                                          ServiceRegistry services, StringBuffer response,
+                                          Status status, String siteName) {
+        
+        EmsScriptNode instanceSpec = n.getInstanceSpecification();
+    
+        Collection<EmsScriptNode> slots = new HashSet<EmsScriptNode>();
+        
+        //PostgresHelper pgh = new PostgresHelper(workspace);
+        
+        if (instanceSpec != null) {
+            Map< String, EmsScriptNode > nodeList = NodeUtil.searchForElements(NodeUtil.SearchType.ID.prefix, 
+                                                                               instanceSpec.getSysmlId() + "-slot-*", ignoreWorkspace,
+                                                                               workspace, dateTime, services, response,
+                                                                               status, siteName);
+            
+            return nodeList.values();
+        }
+        return slots;
     }
 }

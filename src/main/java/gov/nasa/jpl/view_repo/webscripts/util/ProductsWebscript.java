@@ -22,6 +22,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.log4j.*;
 import org.alfresco.repo.model.Repository;
+import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.security.PermissionService;
@@ -300,9 +301,15 @@ public class ProductsWebscript extends AbstractJavaWebScript {
             Set<EmsScriptNode> nodes = new HashSet<EmsScriptNode>(nodeList.values());
             for ( EmsScriptNode node : nodes) {
                 if (node != null) {
+                    if ( !node.hasPermission( PermissionService.READ ) ) continue;
+                    
                     String nodeSiteName = node.getSiteCharacterizationId(dateTime, workspace);
                     if (nodeSiteName != null && siteName.equals( nodeSiteName)) {
+                        // makes sure to call as admin user so no chance of permission error 
+                        String realUser = AuthenticationUtil.getFullyAuthenticatedUser();
+                        AuthenticationUtil.setAdminUserAsFullyAuthenticatedUser();
                         productsJson.put( node.toJSONObject( workspace, dateTime ) );
+                        AuthenticationUtil.setRunAsUser( realUser );
                     } else if (nodeSiteName == null) {
                         if (logger.isInfoEnabled()) { 
                             logger.info( String.format("couldn't get node site name for sysmlid[%s] id[%s]",

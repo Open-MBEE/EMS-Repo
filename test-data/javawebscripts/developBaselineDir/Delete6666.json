@@ -1,41 +1,40 @@
 {
-    "workspace1": {
-        "name": "master",
-        "elements": [{
-            "sysmlid": "6666",
-            "editable": true,
-            "creator": "admin",
-            "modifier": "admin",
-            "name": "6666_name",
-            "documentation": "",
-            "specialization": {
-                "operand": [
-                    {
-                        "element": "300",
-                        "type": "ElementValue"
-                    },
-                    {
-                        "element": "302",
-                        "type": "ElementValue"
-                    }
-                ],
-                "type": "Expression"
-            }
-        }]
-    },
-    "workspace2": {
-        "deletedElements": [{
-            "modifier": "admin",
-            "name": "6666_name",
-            "sysmlid": "6666",
-            "specialization": {"type": "Expression"},
-            "creator": "admin"
-        }],
-        "addedElements": [],
-        "conflictedElements": [],
-        "updatedElements": [],
-        "name": "master",
-        "movedElements": []
-    }
+  "workspace1": {
+    "name": "master",
+    "elements": [{
+      "sysmlid": "6666",
+      "editable": true,
+      "creator": "admin",
+      "modifier": "admin",
+      "name": "6666_name",
+      "documentation": "",
+      "specialization": {
+        "type": "Expression",
+        "operand": [
+          {
+            "element": "300",
+            "type": "ElementValue"
+          },
+          {
+            "element": "302",
+            "type": "ElementValue"
+          }
+        ]
+      }
+    }]
+  },
+  "workspace2": {
+    "deletedElements": [{
+      "name": "6666_name",
+      "sysmlid": "6666",
+      "specialization": {"type": "Expression"},
+      "creator": "admin",
+    }],
+    "addedElements": [],
+    "conflictedElements": [],
+    "updatedElements": [],
+    "name": "master",
+    "movedElements": []
+  }
 }
 200

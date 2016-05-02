@@ -59,8 +59,9 @@ import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
 
 import gov.nasa.jpl.mbee.doorsng.DoorsClient;
-import gov.nasa.jpl.mbee.doorsng.Folder;
-import gov.nasa.jpl.mbee.doorsng.Requirement;
+import gov.nasa.jpl.mbee.doorsng.model.Requirement;
+import gov.nasa.jpl.mbee.doorsng.model.Folder;
+
 import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.view_repo.db.Node;
 import gov.nasa.jpl.view_repo.db.PostgresHelper;
@@ -86,6 +87,7 @@ public class DoorsSync extends AbstractJavaWebScript {
     List< String > processedProjects = new ArrayList< String >();
     List< Map< String, String >> customFields =
             new ArrayList< Map< String, String >>();
+    String currentProject;
 
     static Logger logger = Logger.getLogger( DoorsSync.class );
     
@@ -187,9 +189,8 @@ public class DoorsSync extends AbstractJavaWebScript {
                         }
                         return model;
                     }
-                    String project =
-                            modelRootNode.getSiteName( dateTime, workspace );
-                    doors = new DoorsClient( project );
+                    String project = modelRootNode.getSiteName(dateTime, workspace);
+                    doors = new DoorsClient(getConfig("doors.user"), getConfig("doors.pass"), getConfig("doors.url"), project);
 
                     customFields = mapFields( project );
                     compRequirement( modelRootNode, null );
@@ -331,8 +332,13 @@ public class DoorsSync extends AbstractJavaWebScript {
             customFields = mapFields( projectNode.getSysmlName() );
 
             try {
-                doors = new DoorsClient( projectNode.getSysmlName() );
-                if ( !processedProjects.contains( projectNode.getSysmlName() ) ) {
+                if (doors == null || currentProject != projectNode.getSysmlName()) {
+                    System.out.println("Logging in Doors");
+                    doors = new DoorsClient(getConfig("doors.user"), getConfig("doors.pass"), getConfig("doors.url"), projectNode.getSysmlName());
+                    currentProject = projectNode.getSysmlName();
+                }
+                if ( !processedProjects.contains( currentProject ) ) {
+                    processedProjects.add( currentProject );
                     syncFromDoors();
                 }
                 if ( !processedRequirements.contains( requirementNode.getSysmlId() ) ) {
@@ -463,7 +469,6 @@ public class DoorsSync extends AbstractJavaWebScript {
             compRequirement( null, req );
         }
 
-        processedProjects.add( doors.getProject() );
     }
 
     protected void compRequirement( EmsScriptNode n, Requirement r ) {
@@ -741,10 +746,10 @@ public class DoorsSync extends AbstractJavaWebScript {
         String resourceUrl = mapResourceUrl( n.getSysmlId() );
         System.out.println( "Folder Resource: " + resourceUrl );
 
-        String parentResourceUrl =
-                mapResourceUrl( n.getParent().getSysmlId().replace( "_pkg", "" ) );
-
         if ( resourceUrl == null ) {
+
+            String parentResourceUrl =
+                    mapResourceUrl( n.getParent().getSysmlId().replace( "_pkg", "" ) );
 
             Folder folder = new Folder();
             folder.setTitle( n.getSysmlName() );
@@ -918,19 +923,16 @@ public class DoorsSync extends AbstractJavaWebScript {
         EmsScriptNode[] childProps = getAllSlots( n );
 
         if ( childProps != null ) {
-            for ( EmsScriptNode cn : childProps ) {
-                for ( Map< String, String > fieldDef : customFields ) {
-                    Collection< Object > value =
-                            esm.getValue( esm.getProperty( cn, "value" ),
-                                          fieldDef.get( "propertyType" ) );
-                    if ( value.iterator().hasNext() ) {
-                        if ( fieldDef.get( "doorsAttr" )
-                                     .contains( "primaryText" ) ) {
-                            r.setPrimaryText( value.iterator().next()
-                                                   .toString() );
-                        } else {
-                            r.setCustomField( doors.getField( fieldDef.get( "doorsAttr" ) ),
-                                              value.iterator().next() );
+            for ( Map<String, String> fieldDef : customFields ) {
+                for ( EmsScriptNode cn : childProps ) {
+                    if ( cn.getSysmlId().contains(fieldDef.get("propertyId")) ) {
+                        Collection<Object> value = esm.getValue(esm.getProperty(cn, "value"), fieldDef.get("propertyType"));
+                        if ( value.iterator().hasNext() ) {
+                            if ( fieldDef.get("doorsAttr").contains("primaryText") ) {
+                                r.setPrimaryText(value.iterator().next().toString());
+                            } else {
+                                r.setCustomField(doors.getField(fieldDef.get("doorsAttr")), value.iterator().next());
+                            }
                         }
                     }
                 }
@@ -1073,7 +1075,6 @@ public class DoorsSync extends AbstractJavaWebScript {
     protected List< Map< String, String >> mapFields( String project ) {
 
         try {
-            Map< String, String > values = new HashMap< String, String >();
             List< Map< String, String >> results =
                     new ArrayList< Map< String, String >>();
             String query =
@@ -1081,6 +1082,7 @@ public class DoorsSync extends AbstractJavaWebScript {
                                    project );
             ResultSet rs = pgh.execQuery( query );
             while ( rs.next() ) {
+                Map<String, String> values = new HashMap<String, String>();
                 values.put( "propertyId", rs.getString( 1 ) );
                 values.put( "propertyType", rs.getString( 2 ) );
                 values.put( "doorsAttr", rs.getString( 3 ) );

@@ -1,0 +1,11 @@
+<webscript>
+	<shortname>Set ems config properties</shortname>
+    <description>
+    	Set ems config properties
+	</description>
+    <url>/emsconfig</url>
+  	<format default="json">argument</format>
+  	<authentication>user</authentication>
+  	<transaction>required</transaction>
+  	<family>MMS REST API</family>
+ </webscript>

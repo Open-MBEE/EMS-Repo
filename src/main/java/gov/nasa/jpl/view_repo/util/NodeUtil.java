@@ -208,14 +208,15 @@ public class NodeUtil {
     public static boolean doVersionCaching = false;
     public static boolean activeVersionCaching = true;
     public static boolean doVersionHistoryCaching = true;
-    public static boolean doJsonCaching = false;
+    public static boolean doJsonCaching = true;
     public static boolean doJsonDeepCaching = false;
     public static boolean doJsonStringCaching = false;
     public static boolean doPropertyCaching = true;
     public static boolean doGraphDb = true;
     public static boolean doPostProcessQualified = false;
     // toggles whether modelget adds to graphDb if there's a graphDb miss, but Alfresco hit    
-    public static boolean doAutoBuildGraphDb = false;  
+    public static boolean doAutoBuildGraphDb = false; 
+    public static boolean skipQualified = false;
 
     public static boolean addEmptyEntriesToFullCache = false; // this was broken
                                                               // last tried
@@ -977,6 +978,20 @@ public class NodeUtil {
         return newJson;
     }
 
+    public static JSONArray clone( JSONArray json ) {
+        JSONArray jarr = new JSONArray();
+        for ( int i = 0; i < json.length(); ++i ) {
+            Object o = json.get( i );
+            if ( o instanceof JSONObject ) {
+                o = clone( (JSONObject)o );
+            } else if ( o instanceof JSONArray ) {
+                o = clone( (JSONArray)o );
+            }
+            jarr.put( o );
+        }
+        return jarr;
+    }
+    
     public static JSONObject clone( JSONObject json ) {
         if ( json == null ) return null;
         JSONObject newJson = newJsonObject();
@@ -987,9 +1002,10 @@ public class NodeUtil {
             Object value;
             try {
                 value = json.get( key );
-                if ( key.equals( Acm.JSON_SPECIALIZATION )
-                     && value instanceof JSONObject ) {
+                if ( value instanceof JSONObject ) {
                     value = clone( (JSONObject)value );
+                } else if ( value instanceof JSONArray ) {
+                    value = clone( (JSONArray)value );
                 }
                 newJson.put( key, value );
             } catch ( JSONException e ) {
@@ -2897,48 +2913,6 @@ public class NodeUtil {
         return qname;
     }
 
-    // public static QName makeContentModelQName( String cmName ) {
-    // return makeContentModelQName( cmName, null );
-    // }
-    // public static QName makeContentModelQName( String cmName, ServiceRegistry
-    // services ) {
-    // if ( services == null ) services = getServices();
-    //
-    // if ( cmName == null ) return null;
-    // if ( Acm.getJSON2ACM().keySet().contains( cmName ) ) {
-    // cmName = Acm.getACM2JSON().get( cmName );
-    // }
-    // String[] split = cmName.split( ":" );
-    //
-    // String nameSpace = null;
-    // String localName = null;
-    // if ( split.length == 2 ) {
-    // nameSpace = split[0];
-    // localName = split[1];
-    // } else if ( split.length == 1 ) {
-    // localName = split[0];
-    // } else {
-    // return null;
-    // }
-    // if ( localName == null ) {
-    // return null;
-    // }
-    // DictionaryService dServ = services.getDictionaryService();
-    // QName qName = null;
-    // if ( nameSpace != null ) {
-    // if ( nameSpace.equals( "sysml" ) ) {
-    // qName = QName.createQName( "{http://jpl.nasa.gov/model/sysml-lite/1.0}"
-    // + localName );
-    // } else if ( nameSpace.equals( "view2" ) ) {
-    // qName = QName.createQName( "{http://jpl.nasa.gov/model/view/2.0}"
-    // + localName );
-    // } else if ( nameSpace.equals( "view" ) ) {
-    // qName = QName.createQName( "{http://jpl.nasa.gov/model/view/1.0}"
-    // + localName );
-    // }
-    // }
-    // return qName;
-    // }
 
     /**
      * This method behaves the same as if calling
@@ -3700,7 +3674,9 @@ public class NodeUtil {
 
     public static String getVersionedRefId( EmsScriptNode n ) {
         String versionString = n.getNodeRef().toString();
-        Version headVersionNode = n.getHeadVersion();
+        // TODO: getting head version is too expensive and current version does same
+        //        Version headVersionNode = n.getHeadVersion();
+        Version headVersionNode = n.getCurrentVersion();
         if ( headVersionNode != null ) {
             NodeRef versionNode = headVersionNode.getFrozenStateNodeRef();
             if ( versionNode != null ) versionString = versionNode.toString();
@@ -4311,15 +4287,10 @@ public class NodeUtil {
         if ( !heisenbugSeen ) {
             String hostname = services.getSysAdminParams().getAlfrescoHost();
 
-            String sender = hostname + "@jpl.nasa.gov";
+            String sender = hostname + "@" + EmsConfig.get( "app.domain.name" );
             String recipient;
 
-//            if ( hostname.toLowerCase().contains( "europa" ) ) {
-//                recipient = "kerzhner@jpl.nasa.gov";
-//                ActionUtil.sendEmailTo( sender, recipient, msg, subject,
-//                                        services );
-//            }
-            recipient = "mbee-dev-admin@jpl.nasa.gov";
+            recipient = EmsConfig.get( "app.email.admin" );
             ActionUtil.sendEmailTo( sender, recipient, msg, subject, services );
             heisenbugSeen = true;
         }
@@ -4696,6 +4667,25 @@ public class NodeUtil {
         return result;
     }
     
+    public static EmsScriptNode getNodeFromSysmlIdViaPostgres( String sysmlid, WorkspaceNode workspace ) {
+        PostgresHelper pgh = new PostgresHelper( getWorkspaceId( workspace ) );
+        EmsScriptNode esn =  null;
+        try {
+            pgh.connect();
+            Node node = pgh.getNodeFromSysmlId( sysmlid );
+            esn = NodeUtil.getNodeFromPostgresNode( node );
+        } catch ( ClassNotFoundException e ) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch ( SQLException e ) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } finally {
+            pgh.close();
+        }
+        return esn;
+    }
+
     public static EmsScriptNode getNodeFromPostgresNode( Node pgnode ) {
         if ( pgnode == null ) return null;
         return new EmsScriptNode( new NodeRef( pgnode.getNodeRefId() ),
@@ -4979,6 +4969,11 @@ public class NodeUtil {
      */
     public static void ppAddQualifiedNameId2Json( WebScriptRequest req,
                                                   Map< String, Object > model ) {
+        String[] names = req.getParameterNames();
+        // never add for simple, which is saying don't put in qualified names
+        for (String name: names) {
+            if (name.equalsIgnoreCase( "simple" )) return;
+        }
         String origUser = AuthenticationUtil.getRunAsUser();
         AuthenticationUtil.setRunAsUser("admin");
         ppAddQualifiedNameId2JsonImpl( req, model );
@@ -5006,7 +5001,8 @@ public class NodeUtil {
         Map< String, String > child2owner = new HashMap< String, String >();
 
         String topLevelKeys[] =
-                { "elements", "products", "views", "workspace1", "workspace2" };
+                { "elements", "jobs", "products", "views", "workspace1", "workspace2" };
+
         for ( int ii = 0; ii < topLevelKeys.length; ii++ ) {
             String key = topLevelKeys[ ii ];
             if ( json.has( key ) ) {

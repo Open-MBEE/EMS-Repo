@@ -3,18 +3,21 @@
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
+        "appliedMetatypes": ["_9_0_62a020a_1105704885298_713292_7913"],
         "specialization": {"type": "Package"}
     },
     {
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
+        "appliedMetatypes": ["_9_0_62a020a_1105704885298_713292_7913"],
         "specialization": {"type": "Package"}
     },
     {
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
+        "appliedMetatypes": ["_9_0_62a020a_1105704885298_713292_7913"],
         "specialization": {"type": "Package"}
     },
     {
@@ -26,17 +29,19 @@
         "specialization": {"type": "Untyped"}
     },
     {
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "specialization": {"type": "Package"}
-    },
-    {
         "sysmlid": "holding_bin_no_site_no_project",
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
         "name": "holding_bin",
+        "appliedMetatypes": ["_9_0_62a020a_1105704885298_713292_7913"],
+        "specialization": {"type": "Package"}
+    },
+    {
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "appliedMetatypes": ["_9_0_62a020a_1105704885298_713292_7913"],
         "specialization": {"type": "Package"}
     }
 ]}

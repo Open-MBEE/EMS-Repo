@@ -1,0 +1,66 @@
+{
+"jobs": [{
+    "status": "waiting",
+    "sysmlid": "jobG",
+    "isMetatype": false,
+    "editable": true,
+    "schedule": " ",
+    "name": "jobG",
+    "command": "Jenkins,DocWeb,some_tw_doc,some_tw_proj",
+    "owner": "PMA_Jobs",
+    "appliedMetatypes": ["_18_0_5_407019f_1458258829038_313297_14086"],
+    "specialization": {"type": "Element"}
+}],
+"elements": [
+{
+    "sysmlid": "IS_G-slot-_18_0_5_407019f_1458258991043_482001_14097",
+    "isMetatype": false,
+    "editable": true,
+    "name": "property_G1",
+    "documentation": "",
+    "owner": "jobG",
+    "appliedMetatypes": ["_9_0_62a020a_1105704885275_885607_7905"],
+    "specialization": {
+        "propertyType": null,
+        "isDerived": false,
+        "isSlot": true,
+        "value": [{
+            "string": "Jenkins,DocWeb,some_tw_doc,some_tw_proj",
+            "type": "LiteralString"
+        }],
+        "type": "Property"
+    }
+},
+{
+    "sysmlid": "IS_G-slot-_18_0_5_407019f_1458259033014_844708_14099",
+    "isMetatype": false,
+    "editable": true,
+    "name": "property_G2",
+    "documentation": "",
+    "owner": "jobG",
+    "appliedMetatypes": ["_9_0_62a020a_1105704885275_885607_7905"],
+    "specialization": {
+        "propertyType": null,
+        "isDerived": false,
+        "isSlot": true,
+        "value": [{
+            "string": " ",
+            "type": "LiteralString"
+        }],
+        "type": "Property"
+    }
+},
+{
+    "sysmlid": "IS_G",
+    "isMetatype": false,
+    "editable": true,
+    "name": "IS_G",
+    "documentation": "",
+    "owner": "jobG",
+    "appliedMetatypes": ["_9_0_62a020a_1105704885251_933969_7897"],
+    "specialization": {
+        "slots": [],
+        "classifier": [],
+        "type": "InstanceSpecification"
+    }
+}]}
