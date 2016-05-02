@@ -154,5 +154,17 @@
         <property name="staticMethod" value="gov.nasa.jpl.view_repo.util.CommitUtil.setRestConnection" />
         <property name="arguments" ref="restConnection"/>
     </bean>
+    
+    <bean class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+        <property name="staticMethod" value="gov.nasa.jpl.view_repo.webscripts.DoorsArtifactMappingPost.bootstrapArtifactMappings" />
+    </bean>
+    
+    <bean class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+        <property name="staticMethod" value="gov.nasa.jpl.view_repo.webscripts.DoorsArtifactLinkMappingPost.bootstrapArtifactLinkMappings" />
+    </bean>
+    
+    <bean class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+        <property name="staticMethod" value="gov.nasa.jpl.view_repo.webscripts.DoorsProjectMappingPost.bootstrapProjectMappings" />
+    </bean>
 
 </beans>

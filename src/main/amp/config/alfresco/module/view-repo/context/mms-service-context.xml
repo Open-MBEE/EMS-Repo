@@ -171,13 +171,46 @@
 		<property name="services" ref="ServiceRegistry" />
 	</bean>
 	
-	 <!-- adding new bean -->
-	<bean id="webscript.gov.nasa.jpl.mms.doorsartifactmappings.post"
-		class="gov.nasa.jpl.view_repo.webscripts.DoorsArtifactMappings" parent="webscript"
+	<!-- adding new bean -->
+	<bean id="webscript.gov.nasa.jpl.mms.doorsartifactmapping.post"
+		class="gov.nasa.jpl.view_repo.webscripts.DoorsArtifactMappingPost" parent="webscript"
 		singleton="false">
 		<property name="repositoryHelper" ref="repositoryHelper" />
 		<property name="services" ref="ServiceRegistry" />
 	</bean>
+	
+	<!-- adding new bean -->
+    <bean id="webscript.gov.nasa.jpl.mms.doorsartifactmapping.get"
+        class="gov.nasa.jpl.view_repo.webscripts.DoorsArtifactMappingGet" parent="webscript"
+        singleton="false">
+        <property name="repositoryHelper" ref="repositoryHelper" />
+        <property name="services" ref="ServiceRegistry" />
+    </bean>
+	
+	
+	<!-- adding new bean -->
+    <bean id="webscript.gov.nasa.jpl.mms.doorsartifactlinkmapping.post"
+        class="gov.nasa.jpl.view_repo.webscripts.DoorsArtifactLinkMappingPost" parent="webscript"
+        singleton="false">
+        <property name="repositoryHelper" ref="repositoryHelper" />
+        <property name="services" ref="ServiceRegistry" />
+    </bean>
+    
+    <!-- adding new bean -->
+    <bean id="webscript.gov.nasa.jpl.mms.doorsprojectmapping.post"
+        class="gov.nasa.jpl.view_repo.webscripts.DoorsProjectMappingPost" parent="webscript"
+        singleton="false">
+        <property name="repositoryHelper" ref="repositoryHelper" />
+        <property name="services" ref="ServiceRegistry" />
+    </bean>
+    
+    <!-- adding new bean -->
+    <bean id="webscript.gov.nasa.jpl.mms.doorsprojectmapping.get"
+        class="gov.nasa.jpl.view_repo.webscripts.DoorsProjectMappingGet" parent="webscript"
+        singleton="false">
+        <property name="repositoryHelper" ref="repositoryHelper" />
+        <property name="services" ref="ServiceRegistry" />
+    </bean>
 
 	<!-- adding new bean -->
 	<bean id="webscript.gov.nasa.jpl.mms.workspaces.sites.post" class="gov.nasa.jpl.view_repo.webscripts.ModelPost"
