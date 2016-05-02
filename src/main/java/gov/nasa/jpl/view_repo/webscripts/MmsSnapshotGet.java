@@ -50,13 +50,14 @@ public class MmsSnapshotGet extends AbstractJavaWebScript {
         printHeader( req );
 
         Map<String, Object> model = new HashMap<String, Object>();
-       	if (checkMmsVersions) {
-    		if(compareMmsVersions(req, getResponse(), getResponseStatus()));
-		    {
-            	model.put("res", createResponseJson());
-            	return model;
-            }
-        }
+        // TODO: REMOVE THIS CODE
+//       	if (checkMmsVersions) {
+//    		if(compareMmsVersions(req, getResponse(), getResponseStatus()));
+//		    {
+//            	model.put("res", createResponseJson());
+//            	return model;
+//            }
+//        }
 
         MmsSnapshotGet instance = new MmsSnapshotGet(repository, getServices());
 

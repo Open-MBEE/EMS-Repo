@@ -1,0 +1,28 @@
+{"elements": [{
+    "nodeRefId": "versionStore://version2Store/671a6e33-2eda-4ac1-91dd-a5a058eea029",
+    "qualifiedId": "/europa/123456/300/301/302/303",
+    "siteCharacterizationId": "europa",
+    "versionedRefId": "versionStore://version2Store/671a6e33-2eda-4ac1-91dd-a5a058eea029",
+    "qualifiedName": "/europa/JW_TEST2/300/301/302/303",
+    "sysmlid": "303",
+    "editable": true,
+    "creator": "admin",
+    "modified": "2016-04-19T13:46:49.913-0700",
+    "modifier": "admin",
+    "created": "Tue Apr 19 13:25:15 PDT 2016",
+    "name": "303",
+    "documentation": "CY is really sick!",
+    "owner": "302",
+    "read": "2016-04-19T14:12:25.993-0700",
+    "specialization": {
+        "propertyType": null,
+        "isDerived": false,
+        "isSlot": false,
+        "value": [{
+            "string": "really, really sick!!!!",
+            "type": "LiteralString"
+        }],
+        "type": "Property"
+    }
+}]}
+200
