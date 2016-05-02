@@ -368,12 +368,240 @@ public class DoorsSync extends AbstractJavaWebScript {
         
         }
         
-        
+        syncLinksFromMMS(requirements);
 
         return json;
     }
     
     
+   /***
+    * Author: Bruce Meek Jr
+    * Description: For each matching requirement element found in MMS from the handleRequirements method, find all source/target link associations
+    *              If two MMS nodes share the same link element, create a link relationship between the two corresponding Doors artifacts based on database mappings
+    * @param requirements
+    */
+   private void syncLinksFromMMS(Map<String, EmsScriptNode> requirements) {
+   	
+   	
+       Map<String,String> artifactResourceMap = new HashMap<String,String>();
+   	   ArrayList<NodeRef> curNodeSrcReferences = new ArrayList<NodeRef>();
+   	   ArrayList<NodeRef> curNodeTgtReferences = new ArrayList<NodeRef>();
+   	   HashMap<String,String> linkMetatypeIDMap = new HashMap<String,String>(); //link sysml id to its applied metatype id
+   	   ArrayList<String> curLinkMetatypeIDs = new ArrayList<String>();
+
+	   EmsScriptNode newEmsScriptNode = null;
+	   NodeRef newRefNode = null;
+	   StringBuffer sb = null;
+
+	   HashMap<String,String> sourceMap = new HashMap<String,String>(); //link sysmlid to src element sysmlid
+	   HashMap<String,String> targetMap = new HashMap<String,String>(); //link sysmlid to tgt element sysmlid
+       Set< Map.Entry<String, EmsScriptNode>> matchingRequirmenets = requirements.entrySet();
+       
+       String project = "";
+       
+       try {
+       	
+            ResultSet doorsArtifacts = pgh.execQuery("SELECT * from doors");
+            
+            while(doorsArtifacts.next()) {
+           	 
+           	 artifactResourceMap.put(doorsArtifacts.getString(1),doorsArtifacts.getString(2));
+           	 
+            }
+       
+       }
+       catch(SQLException e) {
+       	e.printStackTrace();
+       }
+       
+   	
+       try {
+       	
+       	
+	    	for(Map.Entry<String, EmsScriptNode> curElementNode : matchingRequirmenets) {
+       
+	  
+	             curNodeSrcReferences = curElementNode.getValue().getPropertyNodeRefs("sysml:relAsSource", true, null, null);
+	    		     
+	             curNodeTgtReferences = curElementNode.getValue().getPropertyNodeRefs("sysml:relAsTarget", true, null, null);
+
+	             //link nodes found in which current element is a src
+	    		 for(int sr = 0 ; sr < curNodeSrcReferences.size(); sr++) {
+	    		    	 
+	    		         sb = new StringBuffer();
+
+	    		    	 newRefNode = curNodeSrcReferences.get(sr);
+	    		    	 
+	    		    	 newEmsScriptNode = new EmsScriptNode(newRefNode,services,sb);
+	    		    	 
+	    		    	 curLinkMetatypeIDs = (ArrayList<String>) newEmsScriptNode.getProperty(Acm.ACM_APPLIED_METATYPES);
+
+	    		    	 linkMetatypeIDMap.put((String)newEmsScriptNode.getProperty(Acm.ACM_ID),curLinkMetatypeIDs.get(0));
+	    		    	 
+	    		    	 sourceMap.put((String)newEmsScriptNode.getProperty(Acm.ACM_ID),(String)curElementNode.getValue().getProperty(Acm.ACM_ID));
+	    		    	 	    		    	 
+	    		    	 
+	    		     }
+	    		     
+	             //link nodes found in which current element is a tgt
+	    		 for(int tr = 0 ; tr < curNodeTgtReferences.size(); tr++) {
+	    		    	 
+	    		    	 sb = new StringBuffer();
+
+	    		    	 newRefNode = curNodeTgtReferences.get(tr);
+	    		    	 
+	    		    	 newEmsScriptNode = new EmsScriptNode(newRefNode,services,sb);
+	    		    	 
+	    		    	 //only need once
+	    		    	 if(tr==0) {
+	    		    		 
+	    		    		 project = newEmsScriptNode.getProjectNode(null).getSysmlName();
+	    		    		 
+	    		    	 }
+
+	    		    	 curLinkMetatypeIDs = new ArrayList<String>();
+	    		    	 
+	    		    	 curLinkMetatypeIDs = (ArrayList<String>) newEmsScriptNode.getProperty(Acm.ACM_APPLIED_METATYPES);
+
+	    		    	 linkMetatypeIDMap.put((String)newEmsScriptNode.getProperty(Acm.ACM_ID),curLinkMetatypeIDs.get(0));
+	    		    	 
+	    		    	 targetMap.put((String)newEmsScriptNode.getProperty(Acm.ACM_ID),(String)curElementNode.getValue().getProperty(Acm.ACM_ID));
+
+	    		  }
+	    		     
+	    		     
+	    		      
+	    		     
+	    		
+	    	}
+	    	
+	    	 
+	    	Set< Map.Entry<String, String>> sourceMapSet = sourceMap.entrySet();
+	    	Set< Map.Entry<String, String>> targetMapSet = targetMap.entrySet();
+	    	String curLink = "";
+	    	
+	    	 
+			for(Map.Entry<String, String> curSource :  sourceMapSet) {
+
+					curLink = curSource.getKey();
+
+					for(Map.Entry<String, String> curTarget : targetMapSet) {
+	 				
+	 					// Two elements share a link; link them based on database mappings
+						if(curTarget.getKey().equals(curLink)) {
+							
+					        Requirement source = doors.getRequirement(artifactResourceMap.get(curSource.getValue()));
+					        
+					        source.setResourceUrl(artifactResourceMap.get(curSource.getValue()));
+
+					        ResultSet linkMappings = pgh.execQuery("select source , target from doorsartifactlinkmappings"
+					        		        + " where project ='" + project + "' and sysmlappliedmetatypeid ='" + linkMetatypeIDMap.get(curLink) + "'");
+					        
+					        
+					        while(linkMappings.next()) {
+					        	
+					        	
+					        	String sourceType = linkMappings.getString(1);
+					        	
+					        	if(sourceType.equals("elaboratedBy")) {
+					        		
+							        source.addElaboratedBy(new Link( new URI (artifactResourceMap.get(curTarget.getValue()))));
+					        		
+					        	}
+					        	else if(sourceType.equals("elaborates")) {
+					        		
+							        source.addElaborates(new Link( new URI (artifactResourceMap.get(curTarget.getValue()))));
+					        		
+					        	}
+					        	else if(sourceType.equals("specifiedBy")) {
+					        		
+							        source.addSpecifiedBy(new Link( new URI (artifactResourceMap.get(curTarget.getValue()))));
+					        		
+					        	}
+					        	else if(sourceType.equals("specifies")) {
+					        		
+							        source.addSpecifies(new Link( new URI (artifactResourceMap.get(curTarget.getValue()))));
+					        		
+					        	}
+					        	else if(sourceType.equals("validatedBy")) {
+					        		
+							        source.addValidatedBy(new Link( new URI (artifactResourceMap.get(curTarget.getValue()))));
+					        		
+					        	}
+					        	else if(sourceType.equals("constrainedBy")) {
+					        		
+							        source.addConstrainedBy(new Link( new URI (artifactResourceMap.get(curTarget.getValue()))));
+					        		
+					        	}
+					        	else if(sourceType.equals("constrains")) {
+					        		
+							        source.addConstrains(new Link( new URI (artifactResourceMap.get(curTarget.getValue()))));
+					        		
+					        	}
+					        	else if(sourceType.equals("affectedBy")) {
+					        		
+							        source.addAffectedBy(new Link( new URI (artifactResourceMap.get(curTarget.getValue()))));
+					        		
+					        	}
+					        	else if(sourceType.equals("decomposedBy")) {
+					        		
+							        source.addDecomposedBy(new Link( new URI (artifactResourceMap.get(curTarget.getValue()))));
+					        		
+					        	}
+					        	else if(sourceType.equals("decomposes")) {
+					        		
+							        source.addDecomposes(new Link( new URI (artifactResourceMap.get(curTarget.getValue()))));
+					        		
+					        	}
+					        
+					        	else if(sourceType.equals("implementedBy")) {
+					        		
+							        source.addImplementedBy(new Link( new URI (artifactResourceMap.get(curTarget.getValue()))));
+					        		
+					        	}
+					        	else if(sourceType.equals("satisfiedBy")) {
+					        		
+							        source.addSatisfiedBy(new Link( new URI (artifactResourceMap.get(curTarget.getValue()))));
+					        		
+					        	}
+					        	else if(sourceType.equals("satisfies")) {
+					        		
+							        source.addSatisfies(new Link( new URI (artifactResourceMap.get(curTarget.getValue()))));
+					        		
+					        	}
+					        	else if(sourceType.equals("trackedBy")) {
+					        		
+							        source.addTrackedBy(new Link( new URI (artifactResourceMap.get(curTarget.getValue()))));
+					        		
+					        	}
+					        	
+					        	//creating link in Doors between two artifacts
+							    doors.update(source);
+
+					        	
+					        }
+					        
+
+						}
+						
+	 				
+					}
+				
+				
+			}
+
+	
+	    	
+       }
+       catch(Exception e) {
+       	
+       	e.printStackTrace();
+       	
+       }
+       
+      
+   	
+   }
    
     
     /***
