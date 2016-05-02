@@ -50,6 +50,8 @@ import javax.servlet.http.HttpServletResponse;
 import org.alfresco.repo.model.Repository;
 import org.alfresco.service.ServiceRegistry;
 import org.apache.log4j.Logger;
+import org.alfresco.service.cmr.repository.NodeRef;
+import org.eclipse.lyo.oslc4j.core.model.Link;
 import org.eclipse.lyo.client.exception.ResourceNotFoundException;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -628,9 +630,7 @@ public class DoorsSync extends AbstractJavaWebScript {
         	  try {
         		  
         		  doorsProjArea = NodeUtil.getNodeFromPostgresNode(mdProjectPGNode).getSysmlName();
-        		  
-        		  doors = new DoorsClient(doorsProjArea);
-        		  
+        		          		  
         		  if( doors.getRequirements().length > 0 ) {
         		  
         			  syncFromDoors();
