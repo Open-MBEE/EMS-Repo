@@ -1,0 +1,28 @@
+{"elements": [{
+    "nodeRefId": "versionStore://version2Store/9c0dc525-7140-4968-b986-558a91828638",
+    "qualifiedId": "/europa/123456/300/301/302/303",
+    "siteCharacterizationId": "europa",
+    "versionedRefId": "versionStore://version2Store/c235bf97-f641-4c65-856a-ae441ba77634",
+    "qualifiedName": "/europa/JW_TEST2/300/301/302/303",
+    "sysmlid": "303",
+    "editable": true,
+    "creator": "admin",
+    "modified": "2016-04-19T14:56:48.319-0700",
+    "modifier": "admin",
+    "created": "Tue Apr 19 14:56:45 PDT 2016",
+    "name": "303",
+    "documentation": "talk",
+    "owner": "302",
+    "read": "2016-04-19T15:02:38.493-0700",
+    "specialization": {
+        "propertyType": null,
+        "isDerived": false,
+        "isSlot": false,
+        "value": [{
+            "string": "dlam_string",
+            "type": "LiteralString"
+        }],
+        "type": "Property"
+    }
+}]}
+200

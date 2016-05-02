@@ -49,14 +49,14 @@ public class MmsProductsGet extends AbstractJavaWebScript {
         //clearCaches();
         Map<String, Object> model = new HashMap<String, Object>();
         
-        // Checks mms versions
-        if(checkMmsVersions)
-        {
-        	if(compareMmsVersions(req, getResponse(), getResponseStatus())){
-		    	model.put("res", createResponseJson());
-		    	return model;
-        	}
-        }
+        // TODO: REMOVE THIS CODE! Checks mms versions
+//        if(checkMmsVersions)
+//        {
+//        	if(compareMmsVersions(req, getResponse(), getResponseStatus())){
+//		    	model.put("res", createResponseJson());
+//		    	return model;
+//        	}
+//        }
         
         MmsProductsGet instance = new MmsProductsGet(repository, getServices());
 
