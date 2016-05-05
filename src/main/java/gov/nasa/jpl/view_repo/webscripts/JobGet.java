@@ -31,13 +31,16 @@ package gov.nasa.jpl.view_repo.webscripts;
 
 import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.pma.JenkinsEngine;
+import gov.nasa.jpl.view_repo.actions.ModelLoadActionExecuter;
+import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 import gov.nasa.jpl.view_repo.webscripts.ModelGet;
 
+
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Map;
+
 
 import org.apache.log4j.*;
 import org.alfresco.repo.model.Repository;
@@ -50,6 +53,10 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
 
 public class JobGet extends ModelGet {
     static Logger logger = Logger.getLogger(JobGet.class);
+    
+    // It is required to perform a JobPost in order to make sure the status is 
+    // up to date with "jobs" and "elements" json
+    AbstractJavaWebScript job = new JobPost(repository, getServices());
     
     // These IDs are important to identifying jobs and job properties
     public static final String jobStereotypeId = "_18_0_5_407019f_1458258829038_313297_14086";
@@ -64,11 +71,9 @@ public class JobGet extends ModelGet {
         super(repositoryHelper, registry);
     }
 
-    protected JSONArray jobs = new JSONArray();
-    protected Map<String, EmsScriptNode> jobsFound = new HashMap<String, EmsScriptNode>();
-
     @Override
     protected Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
+        
         AbstractJavaWebScript instance = new JobGet(repository, getServices());
         return instance.executeImplImpl(req, status, cache,
                 runWithoutTransactions);
@@ -95,7 +100,7 @@ public class JobGet extends ModelGet {
             jobsJsonArray = new JSONArray();
         }
     }
-
+    
     public static boolean isRunning( String status ) {
         if ( status == null ) return false;
         if ( status.equals( "running" ) ) return true;
@@ -123,28 +128,61 @@ public class JobGet extends ModelGet {
                     
                     JSONObject jenkinsJobJson = eng.getJob( jobName );
 
-                    // check if the job is in the Jenkins queue and report it 
-                    // as that status, if it is before checking for other statuses
-                    JSONObject jobInQueue = eng.isJobInQueue( jenkinsJobJson );
-                    
-                    if (jobInQueue != null) {
-                        jenkinsJobJson.put( "color", "queue" );
-                        int pos = eng.numberInQueue( jobInQueue );
-                        jobJson.put( "queuePosition", pos + 1 );
-                    }
-                    
-                    String newStatus = getMmsStatus(jenkinsJobJson);
-                    // TODO -- The job json is corrected below, but the
-                    // status should also be changed in the model
-                    // repository.
-                    if ( !Utils.isNullOrEmpty( newStatus ) ) {     
-                        jobJson.put( "status", newStatus );
+                    if( jenkinsJobJson != null) {
+                        // TODO -- this will change and the logic will be moved to
+                        //         JobPost when queuePosition is an appliedMetatype 
                         
-                        updateMmsStatus( jobJson );
+                        JSONObject jobInQueue = eng.isJobInQueue( jenkinsJobJson );
                         
-                        // NOTE: this call will only update the JSON
-                        //       we need to also send updated JSON to the MMS
-                        // updateStatus.processJobsJson( jobJson, null, true );
+                        if (jobInQueue != null) {
+                            jenkinsJobJson.put( "color", "queue" );
+                            int pos = eng.numberInQueue( jobInQueue );
+                            jobJson.put( "queuePosition", pos + 1 );
+                        }
+                        
+                        String newStatus = getMmsStatus(jenkinsJobJson);
+                        // TODO -- The job json is corrected below, but the
+                        // status should also be changed in the model
+                        // repository.
+                        if ( !Utils.isNullOrEmpty( newStatus ) ) {                                                          
+                            String jobId = jobJson.optString( "sysmlid" );
+                            
+                            if( jobId != null ) {
+                                EmsScriptNode j = findScriptNodeById( jobId, null, null, true );                                
+                                
+                                EmsScriptNode p = job.getJobPropertyNode( j, "status" );  
+                                
+                                JSONObject prop = p.toJSONObject( null, null );
+                                
+                                JSONObject specJson = prop.optJSONObject( Acm.JSON_SPECIALIZATION );
+                                if ( specJson != null && specJson.has( "value"  ) ) {
+                                    JSONArray valueArr = specJson.getJSONArray( "value" );
+                                    
+                                    // FIXME -- if the code goes into here, the value array
+                                    //          contains some random string (i.e. "a5m2nva636") 
+                                    //          is this because of the conversion from script node to json?
+                                    
+                                    //          also, sometimes it seems that this process is slow and the MMS status value
+                                    //          is only the previous state of the Job json status value
+                                    valueArr.remove( 0 );
+                                    JSONObject valueSpec = new JSONObject();
+                                    
+                                    valueSpec.put( "string", newStatus);
+                                    valueSpec.put( "type", "LiteralString");                                        
+                                    valueArr.put(valueSpec);                               
+                                }
+
+                                JSONArray json = new JSONArray();
+                                json.put( prop );
+                                JSONObject elements = new JSONObject();
+                                elements.put( "elements", json );
+                                                               
+                                updateMmsStatus( elements ); 
+
+                                jobJson.put( "status", newStatus );
+                            }     
+                                                                    
+                        }
                     }
                 }
             }
@@ -210,12 +248,14 @@ public class JobGet extends ModelGet {
         if ( color.equals( "gray" ) ) return "aborted";
         if ( color.equals( "yellow" ) ) return "unstable";
         if ( color.equals( "disabled" ) ) return "disabled";
-        if ( color.equalsIgnoreCase( "notbuilt" ) ) return "waiting";
+        if ( color.equalsIgnoreCase( "notbuilt" ) ) return "in queue";
 
         return color;
     }
     
-    protected void updateMmsStatus(JSONObject jobJsonToUpdate) {
-
+    protected void updateMmsStatus(JSONObject elements) {
+        
+        // This will allow a JobPost to be performed 
+        ModelLoadActionExecuter.loadJson( elements, null, null, true );                             
     }
 }
