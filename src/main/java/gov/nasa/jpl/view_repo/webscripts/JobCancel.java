@@ -76,7 +76,10 @@ public class JobCancel extends AbstractJavaWebScript {
             String cancelId = null;
             
             // Using multiple Jenkins instances to work around the Entity Consume issue
-            // NOTE: may need one for the cancel queue part too...
+            // NOTE: The Entity Consume issue is that we cannot issue multiple forms
+            //       of HTTP requests for one instance of a JenkinsEngine class
+            //       (i.e. if you post, you cannot subsequently make another post
+            //             or a get, put, delete, etc... )
             JenkinsEngine jenkins = new JenkinsEngine();           
             JenkinsEngine grabBuildNumber = new JenkinsEngine();
             JenkinsEngine getQueueId = new JenkinsEngine();
