@@ -1,7 +1,6 @@
 package gov.nasa.jpl.view_repo.webscripts;
 
 import gov.nasa.jpl.pma.JenkinsEngine;
-import gov.nasa.jpl.view_repo.util.EmsTransaction;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -11,8 +10,6 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.log4j.*;
 import org.alfresco.repo.model.Repository;
 import org.alfresco.service.ServiceRegistry;
-import org.json.JSONArray;
-import org.json.JSONObject;
 import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
@@ -42,11 +39,11 @@ public class AllJobsGet extends AbstractJavaWebScript {
                                                      final Status status,
                                                      final Cache cache ) {
 
+        int totalNumberOfJobs = 0;
+        
         JenkinsEngine jenkins = new JenkinsEngine();
         
-        JSONObject jenkinsRes = jenkins.getAllJobs();
-        
-        JSONArray jobs = jenkinsRes.optJSONArray( "jobs" );
+        totalNumberOfJobs = jenkins.getTotalNumberOfJobsInQueue();
         
         final Map< String, Object > model = new HashMap<String, Object>();
         
@@ -54,7 +51,7 @@ public class AllJobsGet extends AbstractJavaWebScript {
             status.setCode( getResponseStatus().getCode() );
         }
         
-        model.put( "res", jobs.length() );
+        model.put( "res", totalNumberOfJobs );
         
         return model;
     }
