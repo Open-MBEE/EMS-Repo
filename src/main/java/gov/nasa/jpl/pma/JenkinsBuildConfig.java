@@ -56,6 +56,12 @@ public class JenkinsBuildConfig {
         // TODO Auto-generated constructor stub
     }
 
+    // You can reference the Jenkins XML Schema at the following link:
+    // http://javadoc.jenkins-ci.org/
+    
+    // It isn't precise because of the flexibility Jenkins allows but if
+    // you want to change the configuration, that will be a good aid to search
+    
     public String generateBaseConfigXML() {
 
         DocumentBuilderFactory docBuilderFactory = DocumentBuilderFactory.newInstance();
