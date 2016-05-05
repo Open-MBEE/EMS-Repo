@@ -40,8 +40,6 @@ import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
 
-import gov.nasa.jpl.view_repo.util.WorkspaceNode;
-
 public class JobPost extends ModelPost {
     static Logger logger = Logger.getLogger(JobPost.class);
     

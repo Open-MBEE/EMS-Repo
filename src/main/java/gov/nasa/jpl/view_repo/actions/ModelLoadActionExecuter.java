@@ -35,6 +35,7 @@ import gov.nasa.jpl.view_repo.util.ModelContext;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
 import gov.nasa.jpl.view_repo.util.ServiceContext;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
+import gov.nasa.jpl.view_repo.webscripts.JobPost;
 import gov.nasa.jpl.view_repo.webscripts.ModelPost;
 
 import java.util.List;
@@ -182,11 +183,13 @@ public class ModelLoadActionExecuter extends ActionExecuterAbstractBase {
 
     public static Set<EmsScriptNode> loadJson( JSONObject content,
                                                ModelContext modelContext,
-                                               ServiceContext serviceContext ) {
+                                               ServiceContext serviceContext) {
         if ( modelContext == null ) modelContext = new ModelContext();
         if ( serviceContext == null ) serviceContext = new ServiceContext();
+        
         ModelPost modelService = new ModelPost(serviceContext.repository,
                                                serviceContext.services);
+
         modelService.setLogLevel(Level.DEBUG);
         modelService.setRunWithoutTransactions(false);
         modelService.setProjectNode( modelContext.projectNode );
@@ -208,7 +211,9 @@ public class ModelLoadActionExecuter extends ActionExecuterAbstractBase {
 //        if (status.getCode() == HttpServletResponse.SC_OK) {
 //            succeeded = true;
 //        }
+
         serviceContext.response.append(modelService.getResponse().toString());
+
         return elements;
     }
     

@@ -31,6 +31,8 @@ package gov.nasa.jpl.view_repo.webscripts;
 
 import java.util.HashMap;
 import java.util.Map;
+
+
 import gov.nasa.jpl.pma.JenkinsEngine;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
 
@@ -93,9 +95,8 @@ public class JobExecute extends AbstractJavaWebScript {
         
         jenkins.executeJob( jobId );
         
-        logger.info( "\nJOB STARTED\n" );
-        
-        return model;
-    }
+        logger.debug( "JOB STARTED" );
 
+        return model;        
+    }
 }

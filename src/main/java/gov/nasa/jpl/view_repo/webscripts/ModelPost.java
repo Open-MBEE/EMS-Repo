@@ -211,6 +211,7 @@ public class ModelPost extends AbstractJavaWebScript {
 
         if (!(elementsArray == null))
             collections.add(elementsArray);
+        
         TreeSet<EmsScriptNode> elements = new TreeSet<EmsScriptNode>();
 
         // Note: Cannot have any sendProgress methods before setting

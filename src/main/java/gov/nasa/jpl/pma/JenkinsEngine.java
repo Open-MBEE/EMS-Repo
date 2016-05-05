@@ -894,9 +894,6 @@ public class JenkinsEngine implements ExecutionEngine {
     
     public String getQueueId(String jobName) {
         
-        // TODO -- this function should build the URL to get a job's queue ID number
-        //         so we can put it on the URL to get cancel a job that is in queue
-        
         try{
             this.executeUrl = this.url + "/queue/api/json";
             execute();
@@ -929,5 +926,28 @@ public class JenkinsEngine implements ExecutionEngine {
         }
         
         return null;
+    }
+    
+    public int getTotalNumberOfJobsInQueue() {
+        int total = 0;
+        
+        try{
+            this.executeUrl = this.url + "/queue/api/json";
+            execute();
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+        
+        // items are the jobs that are in the queue of Jenkins
+        if( this.jsonResponse != null ) {
+            JSONArray jobs = this.jsonResponse.optJSONArray( "items" );
+            
+            if( jobs != null ) {
+                total = jobs.length();
+                return total;
+            }
+        }
+        
+        return total;
     }
 }
