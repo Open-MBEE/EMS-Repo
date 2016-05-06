@@ -43,6 +43,8 @@ public class AllJobsGet extends AbstractJavaWebScript {
         
         JenkinsEngine jenkins = new JenkinsEngine();
         
+        // jenkins.getAllJobs() can also be called which would provide
+        // the total number of jobs in the Jenkins server
         totalNumberOfJobs = jenkins.getTotalNumberOfJobsInQueue();
         
         final Map< String, Object > model = new HashMap<String, Object>();

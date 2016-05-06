@@ -47,6 +47,10 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
 public class JobExecute extends AbstractJavaWebScript {
     static Logger logger = Logger.getLogger(JobExecute.class);
 
+    /* This is a helper class which is going to send a call to the
+     * Jenkin's server to start a job.  
+     * */
+    
     public JobExecute() {
         super();
     }

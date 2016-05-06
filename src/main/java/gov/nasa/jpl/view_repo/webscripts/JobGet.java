@@ -101,12 +101,6 @@ public class JobGet extends ModelGet {
         }
     }
     
-    public static boolean isRunning( String status ) {
-        if ( status == null ) return false;
-        if ( status.equals( "running" ) ) return true;
-        return false;
-    }
-    
     /**
      * If the status of a job in the MMS is running, then we need to
      * get an update from Jenkins to see if the job died before
@@ -128,7 +122,6 @@ public class JobGet extends ModelGet {
                     
                     JSONObject jenkinsJobJson = eng.getJob( jobName );
 
-
                     // TODO -- this will change and the logic will be moved to
                     //         JobPost when queuePosition is an appliedMetatype 
                     
@@ -143,9 +136,7 @@ public class JobGet extends ModelGet {
                     }
                     
                     String newStatus = getMmsStatus(jenkinsJobJson);
-                    // TODO -- The job json is corrected below, but the
-                    // status should also be changed in the model
-                    // repository.
+
                     if ( !Utils.isNullOrEmpty( newStatus ) ) {                                                          
                         String jobId = jobJson.optString( "sysmlid" );
                         
@@ -159,13 +150,9 @@ public class JobGet extends ModelGet {
                             JSONObject specJson = prop.optJSONObject( Acm.JSON_SPECIALIZATION );
                             if ( specJson != null && specJson.has( "value"  ) ) {
                                 JSONArray valueArr = specJson.getJSONArray( "value" );
-                                
-                                // FIXME -- if the code goes into here, the value array
-                                //          contains some random string (i.e. "a5m2nva636") 
-                                //          is this because of the conversion from script node to json?
-                                
-                                //          also, sometimes it seems that this process is slow and the MMS status value
-                                //          is only the previous state of the Job json status value
+
+                                // clear the current values and create the new value 
+                                // with the current status
                                 valueArr.remove( 0 );
                                 JSONObject valueSpec = new JSONObject();
                                 
@@ -182,8 +169,7 @@ public class JobGet extends ModelGet {
                             updateMmsStatus( elements ); 
 
                             jobJson.put( "status", newStatus );
-                        }     
-                                                                
+                        }                                                                   
                     }
                     
                 }
@@ -257,7 +243,8 @@ public class JobGet extends ModelGet {
     
     protected void updateMmsStatus(JSONObject elements) {
         
-        // This will allow a JobPost to be performed 
+        // This will perform a JobPost so the status will be updated
+        // in the MMS
         ModelLoadActionExecuter.loadJson( elements, null, null );                             
     }
 }

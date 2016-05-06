@@ -57,12 +57,13 @@ public class JenkinsBuildConfig {
         // TODO Auto-generated constructor stub
     }
 
-    // You can reference the Jenkins XML Schema at the following link:
+    // You can reference the Jenkins XML Schema if you have questions
+    // about any of the elements in this file at the following link:
     // http://javadoc.jenkins-ci.org/
     
-    // It isn't precise because of the flexibility Jenkins allows but if
-    // you want to change the configuration, that will be a good aid to search
-    
+    // It isn't exact because of the flexibility Jenkins allows but if
+    // you want to change the configuration, that will be a good resource to use for 
+    // reference and also looking to add additional elements
     public String generateBaseConfigXML() {
 
         DocumentBuilderFactory docBuilderFactory = DocumentBuilderFactory.newInstance();
@@ -368,7 +369,7 @@ public class JenkinsBuildConfig {
 
             /*
              * Comment this out and fill in appropriate values if you would like to add 
-             * pre or post build steps to the job configuration
+             * pre or post build steps to the job configuration. Currently have no use for these
              * 
             rootElement.appendChild(doc.createElement("prebuilders"));
             rootElement.appendChild(doc.createElement("postbuilders"));
@@ -396,11 +397,8 @@ public class JenkinsBuildConfig {
             Transformer        transformer        = transformerFactory.newTransformer();
             DOMSource          source             = new DOMSource(doc);
             StringWriter       stringWriter       = new StringWriter();
-            //StreamResult       result             = new StreamResult(new File("./test-output.xml"));
-            StreamResult       result             = new StreamResult(stringWriter);//new File("./test-output.xml"));
+            StreamResult       result             = new StreamResult(stringWriter);
             transformer.transform(source, result);
-            //StreamResult consoleResult = new StreamResult(System.out);
-            //transformer.transform(source, consoleResult);
             
             return stringWriter.toString();
         } catch (ParserConfigurationException e) {

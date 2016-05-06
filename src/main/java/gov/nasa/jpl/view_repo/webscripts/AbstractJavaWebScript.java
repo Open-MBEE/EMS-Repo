@@ -2305,7 +2305,8 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
 
     }
 
-
+    // This function will get information which are essential to be communicated
+    // over to the Jenkins job and then send it over as an XML file (config.xml) 
     protected String createJenkinsConfig(String jobID,
                                        Map<String,String> propertyValues,
                                        boolean createNewJob) {
@@ -2418,6 +2419,14 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         return jobUrl;
     }
     
+    /* this class is used to get one of following values:
+     *              id      (element)
+     *              node    (database)
+     *              json    (JobPost)
+     *              
+     *  from a job because it will come in from one of these 
+     *  specifications
+     */
     
     class IdNodeJson {
         public IdNodeJson( String id, EmsScriptNode node, JSONObject json ) {
@@ -2670,29 +2679,6 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
             }
         }
 
-//        JSONObject propertyJson = getPropertyJson(propertyId, elements);
-//        if ( propertyJson != null ) {
-//            // The property value should have been provided in the job
-//            // json. If it wasn't, then try to get it from the property json. If
-//            // they both provide property values, throw an error if they
-//            // disagree.
-//            String value = getStringValueFromPropertyJson( propertyJson );
-//            if ( value != null && propertyValue != null && !value.equals( propertyValue ) ) {
-//                String jsonPropertyId = propertyJson.optString( "sysmlid" );
-//                logger.error( "job json says value of " + propertyName + " is \""
-//                              + propertyValue
-//                              + "\", but posting element json (id=" + jsonPropertyId
-//                              + ") says the value is " + value + "; using " + propertyValue + " !" );
-//                value = propertyValue;
-//            }
-//            if ( value != null ) {
-//                Utils.put( propertyValues, jobId, propertyName, value );
-//            }
-//
-//            // Returning null to indicate that no new element json was created
-//            return null;
-//        }
-
         JSONObject propertyJson = Utils.get(this.propertyJson, jobId, propertyName);
 
         
@@ -2832,8 +2818,8 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
             elements.put( instanceSpec );
         }
         
-//        // Save for use in creating new job json or the ids of the job's slots.
-//        instanceSpecs.put( jobId, instanceSpec );
+        // Save for use in creating new job json or the ids of the job's slots.
+        // instanceSpecs.put( jobId, instanceSpec );
         
         return instanceSpecId;
     }
@@ -2924,11 +2910,6 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         }
         
         return null;
-    }
-
-    private boolean jenkinsConfigExists( String sysmlId ) {
-        // TODO Auto-generated method stub
-        return false;
     }
 
     protected String getJobIdFromJson( JSONObject job, boolean createAndAddIfMissing ) {
@@ -3183,6 +3164,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         }        
     }
     
+    // attempt various ways to get the job based off a property element
     protected IdNodeJson getOwningJobOfPropertyJson( JSONObject propertyJson,
                                                      Map< String, JSONObject > elementMap,
                                                      WorkspaceNode workspace,
