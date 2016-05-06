@@ -220,6 +220,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
             put( "schedule", "_18_0_5_407019f_1458259033014_844708_14099");
             put( "command", "_18_0_5_407019f_1458258991043_482001_14097");
             put( "url", "_18_0_5_407019f_1459284115836_664841_14086");
+            put( "queuePosition", "_18_0_5_407019f_1462494095249_141884_14076");
         }
     };
 

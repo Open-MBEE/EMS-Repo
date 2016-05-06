@@ -128,10 +128,11 @@ public class JobGet extends ModelGet {
                     
                     JSONObject jenkinsJobJson = eng.getJob( jobName );
 
+
+                    // TODO -- this will change and the logic will be moved to
+                    //         JobPost when queuePosition is an appliedMetatype 
+                    
                     if( jenkinsJobJson != null) {
-                        // TODO -- this will change and the logic will be moved to
-                        //         JobPost when queuePosition is an appliedMetatype 
-                        
                         JSONObject jobInQueue = eng.isJobInQueue( jenkinsJobJson );
                         
                         if (jobInQueue != null) {
@@ -139,51 +140,52 @@ public class JobGet extends ModelGet {
                             int pos = eng.numberInQueue( jobInQueue );
                             jobJson.put( "queuePosition", pos + 1 );
                         }
-                        
-                        String newStatus = getMmsStatus(jenkinsJobJson);
-                        // TODO -- The job json is corrected below, but the
-                        // status should also be changed in the model
-                        // repository.
-                        if ( !Utils.isNullOrEmpty( newStatus ) ) {                                                          
-                            String jobId = jobJson.optString( "sysmlid" );
-                            
-                            if( jobId != null ) {
-                                EmsScriptNode j = findScriptNodeById( jobId, null, null, true );                                
-                                
-                                EmsScriptNode p = job.getJobPropertyNode( j, "status" );  
-                                
-                                JSONObject prop = p.toJSONObject( null, null );
-                                
-                                JSONObject specJson = prop.optJSONObject( Acm.JSON_SPECIALIZATION );
-                                if ( specJson != null && specJson.has( "value"  ) ) {
-                                    JSONArray valueArr = specJson.getJSONArray( "value" );
-                                    
-                                    // FIXME -- if the code goes into here, the value array
-                                    //          contains some random string (i.e. "a5m2nva636") 
-                                    //          is this because of the conversion from script node to json?
-                                    
-                                    //          also, sometimes it seems that this process is slow and the MMS status value
-                                    //          is only the previous state of the Job json status value
-                                    valueArr.remove( 0 );
-                                    JSONObject valueSpec = new JSONObject();
-                                    
-                                    valueSpec.put( "string", newStatus);
-                                    valueSpec.put( "type", "LiteralString");                                        
-                                    valueArr.put(valueSpec);                               
-                                }
-
-                                JSONArray json = new JSONArray();
-                                json.put( prop );
-                                JSONObject elements = new JSONObject();
-                                elements.put( "elements", json );
-                                                               
-                                updateMmsStatus( elements ); 
-
-                                jobJson.put( "status", newStatus );
-                            }     
-                                                                    
-                        }
                     }
+                    
+                    String newStatus = getMmsStatus(jenkinsJobJson);
+                    // TODO -- The job json is corrected below, but the
+                    // status should also be changed in the model
+                    // repository.
+                    if ( !Utils.isNullOrEmpty( newStatus ) ) {                                                          
+                        String jobId = jobJson.optString( "sysmlid" );
+                        
+                        if( jobId != null ) {
+                            EmsScriptNode j = findScriptNodeById( jobId, null, null, true );                                
+                            
+                            EmsScriptNode p = job.getJobPropertyNode( j, "status" );  
+                            
+                            JSONObject prop = p.toJSONObject( null, null );
+                            
+                            JSONObject specJson = prop.optJSONObject( Acm.JSON_SPECIALIZATION );
+                            if ( specJson != null && specJson.has( "value"  ) ) {
+                                JSONArray valueArr = specJson.getJSONArray( "value" );
+                                
+                                // FIXME -- if the code goes into here, the value array
+                                //          contains some random string (i.e. "a5m2nva636") 
+                                //          is this because of the conversion from script node to json?
+                                
+                                //          also, sometimes it seems that this process is slow and the MMS status value
+                                //          is only the previous state of the Job json status value
+                                valueArr.remove( 0 );
+                                JSONObject valueSpec = new JSONObject();
+                                
+                                valueSpec.put( "string", newStatus);
+                                valueSpec.put( "type", "LiteralString");                                        
+                                valueArr.put(valueSpec);                               
+                            }
+
+                            JSONArray json = new JSONArray();
+                            json.put( prop );
+                            JSONObject elements = new JSONObject();
+                            elements.put( "elements", json );
+                                                           
+                            updateMmsStatus( elements ); 
+
+                            jobJson.put( "status", newStatus );
+                        }     
+                                                                
+                    }
+                    
                 }
             }
         }

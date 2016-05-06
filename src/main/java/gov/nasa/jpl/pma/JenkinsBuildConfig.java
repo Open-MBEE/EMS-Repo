@@ -50,6 +50,7 @@ public class JenkinsBuildConfig {
     private              String  teamworkPort       = EmsConfig.get( "tw.port" );
     private              String  gitURL             = EmsConfig.get( "git.url" );
     private              String  gitCredentials     = EmsConfig.get( "git.credentials" );
+    private              String  buildAgent         = EmsConfig.get( "analysis.agent" );
     private              String     timeOutForJob      = "60";
     
     public JenkinsBuildConfig() {
@@ -116,16 +117,13 @@ public class JenkinsBuildConfig {
             Element throttlePlugin = doc.createElement( "hudson.plugins.throttleconcurrents.ThrottleJobProperty" );
             throttlePlugin.setAttribute("plugin", "throttle-concurrents@1.8.5");
             Element maxPerNode = doc.createElement( "maxConcurrentPerNode" );
-            maxPerNode.appendChild( doc.createTextNode( "1" ) );
+            maxPerNode.appendChild( doc.createTextNode( "0" ) );
             Element maxTotal = doc.createElement( "maxConcurrentTotal" );
-            maxTotal.appendChild( doc.createTextNode( "1" ) );
+            maxTotal.appendChild( doc.createTextNode( "0" ) );
             Element categories = doc.createElement( "categories" );
             categories.setAttribute("class", "java.util.concurrent.CopyOnWriteArrayList");
-            Element docgen = doc.createElement( "string" );
-            docgen.appendChild( doc.createTextNode( "DocGen" ) );
-            categories.appendChild( docgen );
             Element throttleEnabled = doc.createElement( "throttleEnabled" );
-            throttleEnabled.appendChild( doc.createTextNode( "true") );
+            throttleEnabled.appendChild( doc.createTextNode( "false") );
             Element throttleOption = doc.createElement( "throttleOption" );
             throttleOption.appendChild( doc.createTextNode( "category" ) );
             Element limit = doc.createElement( "limitOneJobWithMatchingParams" );
@@ -145,9 +143,14 @@ public class JenkinsBuildConfig {
 
             tempElement = doc.createElement("scm");
             tempElement.setAttribute("class", "hudson.scm.NullSCM");
+            rootElement.appendChild(tempElement);
 
+            tempElement = doc.createElement("assignedNode");
+            tempElement.appendChild(doc.createTextNode(this.buildAgent));
+            rootElement.appendChild(tempElement);
+            
             tempElement = doc.createElement("canRoam");
-            tempElement.appendChild(doc.createTextNode("true"));
+            tempElement.appendChild(doc.createTextNode("false"));
             rootElement.appendChild(tempElement);
 
             tempElement = doc.createElement("disabled");
@@ -363,6 +366,10 @@ public class JenkinsBuildConfig {
             tempElement.appendChild( artifactArchiver );
             rootElement.appendChild(tempElement);
 
+            /*
+             * Comment this out and fill in appropriate values if you would like to add 
+             * pre or post build steps to the job configuration
+             * 
             rootElement.appendChild(doc.createElement("prebuilders"));
             rootElement.appendChild(doc.createElement("postbuilders"));
 
@@ -380,6 +387,8 @@ public class JenkinsBuildConfig {
             runPostStepsIfResultsElement.appendChild(doc.createElement("completeBuild").appendChild(doc.createTextNode("true")));
 
             rootElement.appendChild(runPostStepsIfResultsElement);
+            */
+            
             //  Save this in case the above code does not work and an element needs to be made for each individual build tag
             //            Element Element                     = doc.createElement("");
 
