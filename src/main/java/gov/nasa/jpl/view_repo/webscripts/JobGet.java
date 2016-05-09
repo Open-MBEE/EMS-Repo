@@ -143,32 +143,40 @@ public class JobGet extends ModelGet {
                         if( jobId != null ) {
                             EmsScriptNode j = findScriptNodeById( jobId, null, null, true );                                
                             
-                            EmsScriptNode p = job.getJobPropertyNode( j, "status" );  
-                            
-                            JSONObject prop = p.toJSONObject( null, null );
-                            
-                            JSONObject specJson = prop.optJSONObject( Acm.JSON_SPECIALIZATION );
-                            if ( specJson != null && specJson.has( "value"  ) ) {
-                                JSONArray valueArr = specJson.getJSONArray( "value" );
-
-                                // clear the current values and create the new value 
-                                // with the current status
-                                valueArr.remove( 0 );
-                                JSONObject valueSpec = new JSONObject();
+                            if( j != null ) {
+                                EmsScriptNode p = job.getJobPropertyNode( j, "status" );  
                                 
-                                valueSpec.put( "string", newStatus);
-                                valueSpec.put( "type", "LiteralString");                                        
-                                valueArr.put(valueSpec);                               
+                                if( p != null ) {
+                                    JSONObject prop = p.toJSONObject( null, null );
+                                    
+                                    if( prop != null ) {
+                                        JSONObject specJson = prop.optJSONObject( Acm.JSON_SPECIALIZATION );
+                                        if ( specJson != null && specJson.has( "value"  ) ) {
+                                            JSONArray valueArr = specJson.getJSONArray( "value" );
+            
+                                            if( valueArr != null ) {
+                                                // clear the current values and create the new value 
+                                                // with the current status
+                                                valueArr.remove( 0 );
+                                                JSONObject valueSpec = new JSONObject();
+                                                
+                                                valueSpec.put( "string", newStatus);
+                                                valueSpec.put( "type", "LiteralString");                                        
+                                                valueArr.put(valueSpec);         
+                                            }
+                                        }
+            
+                                        JSONArray json = new JSONArray();
+                                        json.put( prop );
+                                        JSONObject elements = new JSONObject();
+                                        elements.put( "elements", json );
+                                                                       
+                                        updateMmsStatus( elements ); 
+            
+                                        jobJson.put( "status", newStatus );
+                                    }
+                                }
                             }
-
-                            JSONArray json = new JSONArray();
-                            json.put( prop );
-                            JSONObject elements = new JSONObject();
-                            elements.put( "elements", json );
-                                                           
-                            updateMmsStatus( elements ); 
-
-                            jobJson.put( "status", newStatus );
                         }                                                                   
                     }
                     
