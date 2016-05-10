@@ -6,12 +6,12 @@
     "creator": "admin",
     "modifier": "admin",
     "name": "303",
-    "documentation": "talk",
     "owner": "302",
+    "documentation": "talk",
     "specialization": {
         "propertyType": null,
-        "isDerived": false,
         "isSlot": false,
+        "isDerived": false,
         "value": [{
             "string": "dlam_string",
             "type": "LiteralString"
