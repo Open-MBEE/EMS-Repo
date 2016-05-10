@@ -50,9 +50,10 @@ public class DeclarativeJavaWebScript extends AbstractWebScript
 {
     // Logger
     private static final Log logger = LogFactory.getLog(DeclarativeJavaWebScript.class);  
-    private JSONObject privateRequestJSON = null;
-    public static boolean checkMmsVersions = false;
-    public static boolean cacheSnapshotsFlag = false;
+    private JSONObject      privateRequestJSON = null;
+    private String          mmsVersionResponse = null;
+    public static boolean   checkMmsVersions = false;
+    public static boolean   cacheSnapshotsFlag = false;
     
     /* (non-Javadoc)
      * @see org.alfresco.web.scripts.WebScript#execute(org.alfresco.web.scripts.WebScriptRequest, org.alfresco.web.scripts.WebScriptResponse)
@@ -61,7 +62,7 @@ public class DeclarativeJavaWebScript extends AbstractWebScript
     {
         // retrieve requested format
         String format = req.getFormat();
-        
+        Map<String, Object> model;
         try
         {
             // establish mimetype from format
@@ -76,24 +77,40 @@ public class DeclarativeJavaWebScript extends AbstractWebScript
             Cache cache = new Cache(getDescription().getRequiredCache());
             setCacheHeaders(req, cache); // add in custom headers for nginx caching
 
-            Map<String, Object> model = executeImpl(req, status, cache);
-            
+            // if the flag for checking for MMS Version has been enabled it will then -
+            if(checkMmsVersions)
+            {
+                // Compare the version given by the request to the mms version. If the request versions match or if the request is a GET call
+                //  then function will executeImpl, else it will put a responseJSON into the model to be returned.
+                if(compareMmsVersions(req))
+                {
+                    model = new HashMap<String, Object>(8, 1.0f);
+                    model.put("res", createMmsVersionResponseJson());
+                    // TODO: Set the cache and status to be put into the model
+                }
+                else
+                {
+                    // If version checking turned passed the executeImpl.
+                    model = executeImpl(req, status, cache);
+                }
+            }
+            else
+            {
+                // executeImpl if checking of MMS versions has been turned off.
+                model = executeImpl(req, status, cache);
+            }
+
             if (model == null)
             {
                 model = new HashMap<String, Object>(8, 1.0f);
             }
+
             model.put("status", status);
             model.put("cache", cache);
-        
-            if(checkMmsVersions)
-            {
-                if(compareMmsVersions(req))
-                {
-                    model.put("res", res);
-                }
-            }
 
-            NodeUtil.ppAddQualifiedNameId2Json(req, model); // TODO: weave in as aspect
+            if (!NodeUtil.skipQualified) {
+                NodeUtil.ppAddQualifiedNameId2Json(req, model); // TODO: weave in as aspect
+            }
             
             try
             {
@@ -408,6 +425,7 @@ public class DeclarativeJavaWebScript extends AbstractWebScript
         // TODO: Possibly remove this and implement as an aspect?
         boolean incorrectVersion = true;
         JSONObject jsonRequest = null;
+        String responseString = null;
         char logCase = '0';
         JSONObject jsonVersion = null;
         String mmsVersion = null;
@@ -420,25 +438,33 @@ public class DeclarativeJavaWebScript extends AbstractWebScript
         // Checks data member requestJSON to see if it is not null and if
         // paramVal is none
 
-//     // Check if input is K or JSON
+       // Check if input is K or JSON
         String contentType = req.getContentType() == null ? ""
                 : req.getContentType().toLowerCase();
 
         boolean jsonNotK = !contentType.contains("application/k");
 
+        String descriptionPath = getDescription().getDescPath();
+        if(descriptionPath.contains( ".get" )){
+            if (logger.isDebugEnabled()){
+                logger.info( "Get was found within the description path");
+            }
+            return false;
+        }
 
         if (!jsonNotK && paramVal.equals("none")) {
                 jsonRequest = getRequestJSON(req);
 
             if (jsonRequest != null) {
                 paramVal = jsonRequest.optString("mmsVersion");
+                paramVal = paramVal.substring(0, 2);
             }
         }
 
         if (paramVal != null && !paramVal.equals("none") && paramVal.length() > 0) {
             // Calls NodeUtil's getMMSversion
             jsonVersion = getMMSversion();
-            mmsVersion = jsonVersion.get("mmsVersion").toString();
+            mmsVersion = jsonVersion.get("mmsVersion").toString().substring(0,3);
              
             if (logger.isDebugEnabled()){
                 logger.info("Comparing Versions....");
@@ -461,30 +487,35 @@ public class DeclarativeJavaWebScript extends AbstractWebScript
         }
         switch (logCase) {
             case '1' :
+                responseString = "Correct Versions";
                 if (logger.isDebugEnabled()){
-                    logger.info( "Correct Versions");
+                    logger.info(responseString);
                 }
                 break;
             case '2' :
+                responseString = "Versions do not match! Expected Version " + mmsVersion + ". Instead received " + paramVal;
                 if (logger.isDebugEnabled())
-                    logger.warn("Versions do not match! Expected Version " + mmsVersion + ". Instead received " + paramVal);
+                    logger.warn(responseString);
                 break;
             case '3' :
+                    responseString ="Missing MMS Version or invalid parameter. Received parameter:" 
+                       + paramArg + " and argument:" + mmsVersion + ". Request was: " + jsonRequest;
                 if (logger.isDebugEnabled()){
-                    logger.error("Missing MMS Version or invalid parameter. Received parameter:" 
-                       + paramArg + " and argument:" + mmsVersion + ". Request was: " + jsonRequest);
+                    logger.error(responseString);
                 }
                 break;
             // TODO: This should be removed but for the moment I am leaving this
             // in as a contingency if anything else may break this.
             case '4' :
-                if (logger.isDebugEnabled()){
-                    logger.error("Wrong MMS Version or invalid input. Expected mmsVersion="
+                responseString = "Wrong MMS Version or invalid input. Expected mmsVersion="
                                 + mmsVersion + ". Instead received "
-                                + paramVal);
+                                + paramVal;
+                if (logger.isDebugEnabled()){
+                    logger.error(responseString);
                 }
                 break;
         }
+        mmsVersionResponse = responseString;
         // Returns true if it is either the wrong version or if it failed to
         // compare it
         // Returns false if it was successful in retrieving the mmsVersions from
@@ -612,5 +643,17 @@ public class DeclarativeJavaWebScript extends AbstractWebScript
         Boolean b = Utils.isTrue( paramVal, false );
         if ( b != null ) return b;
         return defaultValue;
+    }
+    
+    /**
+     * Creates a json like object in a string and puts the response in the message key. Made this private so it is
+     * not used by any inherited class and thus AbstractJavaWebscript will remain relatively unaffected by this. 
+     *
+     * @return The resulting string, ie "{'message':response}" or "{}"
+     */
+    private String createMmsVersionResponseJson() {
+//        String resToString = response.toString();
+//        String resStr = !Utils.isNullOrEmpty( resToString ) ? resToString.replaceAll( "\n", "" ) : "";
+        return !Utils.isNullOrEmpty( mmsVersionResponse ) ? String.format("{\"message\":\"%s\"}", mmsVersionResponse) : "{}";
     }
 }

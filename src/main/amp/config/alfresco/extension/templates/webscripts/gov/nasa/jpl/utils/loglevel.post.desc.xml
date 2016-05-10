@@ -5,7 +5,7 @@
 	</description>
     <url>/loglevel</url>
   	<format default="json">argument</format>
-  	<authentication>user</authentication>
+  	<authentication>admin</authentication>
   	<transaction>required</transaction>
   	<family>MMS REST API</family>
  </webscript>

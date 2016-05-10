@@ -127,6 +127,9 @@ public class RestPostConnection implements ConnectionInterface, Runnable {
     @Override
     public void run() {
         Client client = Client.create();
+        int interval = 1000; // in milliseconds
+        client.setConnectTimeout( interval );
+        client.setReadTimeout( interval );
         WebResource webResource = client.resource(uri);
         ClientResponse response = null;
         try {

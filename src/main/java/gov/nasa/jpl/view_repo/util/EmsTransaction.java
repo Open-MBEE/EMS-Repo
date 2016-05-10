@@ -17,11 +17,27 @@ import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.springframework.extensions.webscripts.Status;
 
+/**
+ * Allow for nested UserTransactions by splitting overlapping transactions into
+ * separate back-to-back transactions.
+ * <p>
+ * For example, the four EmsTransactions below
+ * <br>
+ * <pre>
+ * |------------------|
+ *   |---------| |--|
+ *      |------|      
+ * </pre>
+ * would be processed as the following six UserTransactions:
+ * <pre>
+ * |-|--|------|-|--|-|
+ * </pre>
+ */
 public abstract class EmsTransaction {
     public static boolean syncTransactions = false;
     static Logger logger = Logger.getLogger(EmsTransaction.class);
     // injected members
-    protected ServiceRegistry services;     // get any of the Alfresco services
+    protected ServiceRegistry services = NodeUtil.getServiceRegistry();     // get any of the Alfresco services
     // response to HTTP request, made as class variable so all methods can update
     protected StringBuffer response = new StringBuffer();
     protected Status responseStatus = new Status();
@@ -42,8 +58,15 @@ public abstract class EmsTransaction {
         this.response = response;
         this.responseStatus = responseStatus;
         this.services = services;
+        
+        transactionedRun( noTransaction );
+    }
+    
+    protected void transactionedRun( boolean noTransaction ) {
         if ( noTransaction ) {
             // run without transactions
+            // REVIEW -- Consider not catching exception or provide flag to
+            // optionally throw it again.
             try {
                 run();
             } catch ( Throwable e ) {

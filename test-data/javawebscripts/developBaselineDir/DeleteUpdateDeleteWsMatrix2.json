@@ -1,43 +1,41 @@
 {
-    "workspace1": {
-        "name": "wsMatrix2",
-        "qualifiedName": "master/wsMatrix2",
-        "elements": [{
-            "sysmlid": "update_delete_gg",
-            "editable": true,
-            "creator": "admin",
-            "modifier": "admin",
-            "name": "update_delete_gg",
-            "documentation": "update_delete_gg",
-            "owner": "123456",
-            "specialization": {
-                "propertyType": null,
-                "isSlot": false,
-                "isDerived": false,
-                "value": [{
-                    
-                    "string": "on a shoe",
-                    "type": "LiteralString"
-                }],
-                "type": "Property"
-            }
-        }]
-    },
-    "workspace2": {
-        "deletedElements": [{
-            "modifier": "admin",
-            "name": "update_delete_gg",
-            "owner": "123456",
-            "sysmlid": "update_delete_gg",
-            "specialization": {"type": "Property"},
-            "creator": "admin"
+  "workspace1": {
+    "qualifiedName": "master/wsMatrix2",
+    "name": "wsMatrix2",
+    "elements": [{
+      "sysmlid": "update_delete_gg",
+      "editable": true,
+      "creator": "admin",
+      "modifier": "admin",
+      "name": "update_delete_gg",
+      "owner": "123456",
+      "documentation": "update_delete_gg",
+      "specialization": {
+        "propertyType": null,
+        "isDerived": false,
+        "isSlot": false,
+        "value": [{
+          "string": "on a shoe",
+          "type": "LiteralString"
         }],
-        "addedElements": [],
-        "conflictedElements": [],
-        "updatedElements": [],
-        "name": "wsMatrix2",
-        "qualifiedName": "master/wsMatrix2",
-        "movedElements": []
-    }
+        "type": "Property"
+      }
+    }]
+  },
+  "workspace2": {
+    "deletedElements": [{
+      "name": "update_delete_gg",
+      "sysmlid": "update_delete_gg",
+      "owner": "123456",
+      "specialization": {"type": "Property"},
+      "creator": "admin",
+    }],
+    "addedElements": [],
+    "conflictedElements": [],
+    "updatedElements": [],
+    "qualifiedName": "master/wsMatrix2",
+    "name": "wsMatrix2",
+    "movedElements": []
+  }
 }
 200

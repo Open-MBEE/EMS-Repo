@@ -208,14 +208,15 @@ public class NodeUtil {
     public static boolean doVersionCaching = false;
     public static boolean activeVersionCaching = true;
     public static boolean doVersionHistoryCaching = true;
-    public static boolean doJsonCaching = false;
+    public static boolean doJsonCaching = true;
     public static boolean doJsonDeepCaching = false;
     public static boolean doJsonStringCaching = false;
     public static boolean doPropertyCaching = true;
     public static boolean doGraphDb = true;
     public static boolean doPostProcessQualified = false;
     // toggles whether modelget adds to graphDb if there's a graphDb miss, but Alfresco hit    
-    public static boolean doAutoBuildGraphDb = false;  
+    public static boolean doAutoBuildGraphDb = false; 
+    public static boolean skipQualified = false;
 
     public static boolean addEmptyEntriesToFullCache = false; // this was broken
                                                               // last tried
@@ -3673,7 +3674,9 @@ public class NodeUtil {
 
     public static String getVersionedRefId( EmsScriptNode n ) {
         String versionString = n.getNodeRef().toString();
-        Version headVersionNode = n.getHeadVersion();
+        // TODO: getting head version is too expensive and current version does same
+        //        Version headVersionNode = n.getHeadVersion();
+        Version headVersionNode = n.getCurrentVersion();
         if ( headVersionNode != null ) {
             NodeRef versionNode = headVersionNode.getFrozenStateNodeRef();
             if ( versionNode != null ) versionString = versionNode.toString();
@@ -4966,6 +4969,11 @@ public class NodeUtil {
      */
     public static void ppAddQualifiedNameId2Json( WebScriptRequest req,
                                                   Map< String, Object > model ) {
+        String[] names = req.getParameterNames();
+        // never add for simple, which is saying don't put in qualified names
+        for (String name: names) {
+            if (name.equalsIgnoreCase( "simple" )) return;
+        }
         String origUser = AuthenticationUtil.getRunAsUser();
         AuthenticationUtil.setRunAsUser("admin");
         ppAddQualifiedNameId2JsonImpl( req, model );
