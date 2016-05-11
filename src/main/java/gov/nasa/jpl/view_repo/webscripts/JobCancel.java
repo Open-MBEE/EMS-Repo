@@ -46,12 +46,6 @@ public class JobCancel extends AbstractJavaWebScript {
             String user = AuthenticationUtil.getFullyAuthenticatedUser();
             logger.info( user + " " + req.getURL() );
         }
-
-
-        if ( logger.isInfoEnabled() ) {
-            String user = AuthenticationUtil.getFullyAuthenticatedUser();
-            logger.info( user + " " + req.getURL() );
-        }
         
         Timer timer = new Timer();
         
