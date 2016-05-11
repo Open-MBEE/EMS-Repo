@@ -1036,7 +1036,24 @@ public class CommitUtil {
 		return sendJmsMsg(mergeJson, TYPE_MERGE, null, null);
 	}
 
-	protected static boolean sendJmsMsg(JSONObject json, String eventType,
+    protected static boolean sendJmsMsg(final JSONObject json, final String eventType,
+                                        final String workspaceId, final String projectId) {
+        final List<Boolean> result = new ArrayList<Boolean>();
+        new EmsTransaction(null, null, null) {
+            
+            @Override
+            public void run() throws Exception {
+                boolean b = sendJmsMsgImpl( json, eventType, workspaceId, projectId );
+                result.add( b );
+                // TODO Auto-generated method stub
+                
+            }
+        };
+        Boolean bb = result.isEmpty() ? false : result.get( 0 );
+        return bb == true;
+    }
+    
+	protected static boolean sendJmsMsgImpl(JSONObject json, String eventType,
 			String workspaceId, String projectId) {
 		boolean status = false;
 		if (jmsConnection != null) {
