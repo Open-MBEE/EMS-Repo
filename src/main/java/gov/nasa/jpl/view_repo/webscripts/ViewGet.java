@@ -129,7 +129,7 @@ public class ViewGet extends AbstractJavaWebScript {
     protected Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
         ViewGet instance = new ViewGet();
         instance.setServices( getServices() );
-        return instance.executeImplImpl( req, status, cache );
+        return instance.executeImplImpl( req, status, cache, runWithoutTransactions );
     }
     protected Map<String, Object> executeImplImpl(WebScriptRequest req, Status status, Cache cache) {
         Timer timer = new Timer();

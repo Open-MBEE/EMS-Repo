@@ -44,7 +44,7 @@ public class WorkspacesMerge extends AbstractJavaWebScript{
 	protected Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache){
 	    WorkspacesMerge instance = new WorkspacesMerge(repository, getServices());
         // Run without transactions since WorkspacesMerge breaks them up itself.
-	    return instance.executeImplImpl( req, status, cache, true );
+	    return instance.executeImplImpl( req, status, cache, runWithoutTransactions );
 	}
 
 	private JSONObject tmpResult;
