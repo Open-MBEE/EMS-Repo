@@ -1050,6 +1050,9 @@ public class CommitUtil {
 		    }
 			status = jmsConnection.publish(json, eventType, workspaceId,
 					projectId);
+			if (logger.isInfoEnabled()) {
+			    logger.info( "finished publishing to jms" );
+			}
 		} else {
 			if (logger.isInfoEnabled())
 				logger.info("JMS Connection not avalaible");
