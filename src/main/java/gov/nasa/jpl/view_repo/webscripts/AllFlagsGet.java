@@ -2,6 +2,7 @@ package gov.nasa.jpl.view_repo.webscripts;
 
 import gov.nasa.jpl.mbee.util.Debug;
 import gov.nasa.jpl.view_repo.actions.SnapshotArtifactsGenerationActionExecuter;
+import gov.nasa.jpl.view_repo.connections.RestPostConnection;
 import gov.nasa.jpl.view_repo.util.CommitUtil;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.EmsTransaction;
@@ -41,7 +42,8 @@ public class AllFlagsGet extends FlagSet {
                            "postProcessQualified",
                            "doorsSync",
                            "autoBuildGraphDb",
-                           "skipQualified"};
+                           "skipQualified",
+                           "restPost"};
     
     public String[] getAllFlags() {
         return flags;
@@ -143,6 +145,8 @@ public class AllFlagsGet extends FlagSet {
             NodeUtil.doAutoBuildGraphDb = val;
         } else if (path.equalsIgnoreCase("skipQualified")) {
             NodeUtil.skipQualified = val;
+        } else if (path.equalsIgnoreCase("restPost")) {
+            RestPostConnection.doRestPost = val;
         }
         return true;
     }
@@ -218,6 +222,8 @@ public class AllFlagsGet extends FlagSet {
             return NodeUtil.doAutoBuildGraphDb;
         } else if (path.equalsIgnoreCase( "skipQualified" )) {
             return NodeUtil.skipQualified;
+        } else if (path.equalsIgnoreCase("restPost")) {
+            return RestPostConnection.doRestPost;
         }
         return false;
     }
@@ -305,6 +311,8 @@ public class AllFlagsGet extends FlagSet {
             return false;
         } else if (path.equalsIgnoreCase( "skipQualified" )) {
             return false;
+        } else if (path.equalsIgnoreCase("restPost")) {
+            return false;
         }
         return false;
     };
@@ -385,6 +393,8 @@ public class AllFlagsGet extends FlagSet {
             return "autoBuildGraphDb";
         } else if (path.equalsIgnoreCase("skipQualified")) {
             return "skipQualified";
+        } else if (path.equalsIgnoreCase("restPost")) {
+            return "restPost";
         }
         return null;
     }
