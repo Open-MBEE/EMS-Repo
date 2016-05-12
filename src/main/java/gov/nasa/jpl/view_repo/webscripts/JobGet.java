@@ -167,11 +167,15 @@ public class JobGet extends ModelGet {
                                         }
             
                                         JSONArray json = new JSONArray();
+                                        // TODO -- when queue position is implemented, you will also need
+                                        //         to grab that value and change it accordingly 
+                                        //         append the updated property in json (i.e. json.put(_queueProp_))
+                                        
                                         json.put( prop );
                                         JSONObject elements = new JSONObject();
                                         elements.put( "elements", json );
                                                                        
-                                        updateMmsStatus( elements ); 
+                                        updateMmsJobStatus( elements ); 
             
                                         jobJson.put( "status", newStatus );
                                     }
@@ -240,19 +244,19 @@ public class JobGet extends ModelGet {
         if ( color.contains( "anime" ) ) return "running";
         if ( color.equals( "red" ) ) return "failed";
         if ( color.equals( "blue" ) ) return "completed";
-        if ( color.equals( "grey" ) ) return "aborted";
-        if ( color.equals( "gray" ) ) return "aborted";
-        if ( color.equals( "yellow" ) ) return "unstable";
-        if ( color.equals( "disabled" ) ) return "disabled";
+        //if ( color.equals( "grey" ) ) return "aborted";
+        //if ( color.equals( "gray" ) ) return "aborted";
+        //if ( color.equals( "yellow" ) ) return "unstable";
+        //if ( color.equals( "disabled" ) ) return "disabled";
         if ( color.equalsIgnoreCase( "notbuilt" ) ) return "in queue";
 
         return color;
     }
     
-    protected void updateMmsStatus(JSONObject elements) {
+    protected void updateMmsJobStatus(JSONObject elements) {
         
         // This will perform a JobPost so the status will be updated
         // in the MMS
-        ModelLoadActionExecuter.loadJson( elements, null, null );                             
+        ModelLoadActionExecuter.loadJson( elements, null, null, true );                             
     }
 }

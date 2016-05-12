@@ -34,19 +34,28 @@ import java.util.Map;
 
 
 import gov.nasa.jpl.pma.JenkinsEngine;
+import gov.nasa.jpl.view_repo.actions.ModelLoadActionExecuter;
+import gov.nasa.jpl.view_repo.util.Acm;
+import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
 
 import org.alfresco.repo.model.Repository;
 import org.alfresco.service.ServiceRegistry;
 import org.apache.log4j.*;
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
 
-public class JobExecute extends AbstractJavaWebScript {
+public class JobExecute extends JobPost {
     static Logger logger = Logger.getLogger(JobExecute.class);
 
+    // It is required to perform a JobPost in order to make sure the status is 
+    // up to date with "jobs" and "elements" json
+    AbstractJavaWebScript job = new JobPost(repository, getServices());
+    
+    
     /* This is a helper class which is going to send a call to the
      * Jenkin's server to start a job.  
      * */
@@ -100,7 +109,51 @@ public class JobExecute extends AbstractJavaWebScript {
         jenkins.executeJob( jobId );
         
         logger.debug( "JOB STARTED" );
+        
+        if( jobId != null ) {
+            EmsScriptNode j = findScriptNodeById( jobId, null, null, true );                                
+            
+            if( j != null ) {               
+                EmsScriptNode p = job.getJobPropertyNode( j, "status" );  
+                
+                if( p != null ) {
+                    JSONObject prop = p.toJSONObject( null, null );
+                    
+                    if( prop != null ) {
+                        JSONObject specJson = prop.optJSONObject( Acm.JSON_SPECIALIZATION );
+                        if ( specJson != null && specJson.has( "value"  ) ) {
+                            JSONArray valueArr = specJson.getJSONArray( "value" );
+
+                            if( valueArr != null ) {
+                                // clear the current values and create the new value 
+                                // with the current status
+                                valueArr.remove( 0 );
+                                JSONObject valueSpec = new JSONObject();
+                                
+                                valueSpec.put( "string", "in queue");
+                                valueSpec.put( "type", "LiteralString");                                        
+                                valueArr.put(valueSpec);         
+                            }
+                        }
+
+                        JSONArray json = new JSONArray();
+                        json.put( prop );
+                        JSONObject elements = new JSONObject();
+                        elements.put( "elements", json );
+                                                       
+                        updateMmsJob( elements ); 
+                    }
+                }
+            }
+        }         
 
         return model;        
+    }
+    
+    protected void updateMmsJob(JSONObject jobs) {
+        
+        // This will perform a JobPost so the status will be updated
+        // in the MMS
+        ModelLoadActionExecuter.loadJson( jobs, null, null, true );                             
     }
 }
