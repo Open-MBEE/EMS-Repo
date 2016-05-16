@@ -3439,6 +3439,65 @@ create_curl_cmd(type="POST", data="holdingBinOwner.json", base_url=BASE_URL_WS,
 True,
 common_filters + holding_bin_filters,
 ["develop"]
+],
+
+[
+30000,
+"PostDoorsProjectMappings",
+"Post Doors Project Mappings",
+"curl -u admin:admin -X POST -H Content-Type:application/json http://localhost:8080/alfresco/service/doors/project/mappings -d @JsonData/doorsprojectmappings.json",
+True,
+None,
+["test", "workspaces", "develop", "develop2"]
+],
+
+[
+30001,
+"GetDoorsProjectMappings",
+"Get Doors Project Mappings",
+"curl -u admin:admin -X GET -H Content-Type:application/json http://localhost:8080/alfresco/service/doors/project/mappings",
+True,
+None,
+["test", "workspaces", "develop", "develop2"]
+],
+
+[
+30002,
+"PostDoorsArtifactMappings",
+"Post Doors Artifact Mappings",
+"curl -u admin:admin -X POST -H Content-Type:application/json http://localhost:8080/alfresco/service/doors/artifact/mappings -d @JsonData/doorsartifactmappingspost.json",
+True,
+None,
+["test", "workspaces", "develop", "develop2"]
+],
+
+[
+30003,
+"GetDoorsArtifactMappings",
+"Get Doors Artifact Mappings",
+"curl -u admin:admin -X GET -H Content-Type:application/json http://localhost:8080/alfresco/service/doors/artifact/mappings",
+True,
+None,
+["test", "workspaces", "develop", "develop2"]
+],
+[
+30004,
+"PostDoorsArtifactLinkMappings",
+"Post Doors Artifact Link Mappings",
+"curl -u admin:admin -X POST -H Content-Type:application/json http://localhost:8080/alfresco/service/doors/artifactlink/mappings -d @JsonData/doorsartifactlinkmappingspost.json",
+True,
+None,
+["test", "workspaces", "develop", "develop2"]
+],
+
+[
+30005,
+"GetDoorsArtifactLinkMappings",
+"Get Doors Artifact Link Mappings",
+"curl -u admin:admin -X GET -H Content-Type:application/json http://localhost:8080/alfresco/service/doors/artifactlink/mappings",
+True,
+None,
+["test", "workspaces", "develop", "develop2"]
 ]
 ]
 
