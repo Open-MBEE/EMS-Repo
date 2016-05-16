@@ -29,6 +29,8 @@ public class RestPostConnection implements ConnectionInterface, Runnable {
     private String message;
     private String destination;
     
+    public static boolean doRestPost = false;
+    
     public RestPostConnection() {
         
     }
@@ -43,7 +45,8 @@ public class RestPostConnection implements ConnectionInterface, Runnable {
     }
     
     public boolean publish(String msg, String dst) {
-        if (uri == null) return false;
+        if ( uri == null ) return false;
+        if ( !doRestPost ) return true;
     
         message = msg;
         destination = dst;
@@ -127,6 +130,9 @@ public class RestPostConnection implements ConnectionInterface, Runnable {
     @Override
     public void run() {
         Client client = Client.create();
+        int interval = 60000; // in milliseconds
+        client.setConnectTimeout( interval );
+        client.setReadTimeout( interval );
         WebResource webResource = client.resource(uri);
         ClientResponse response = null;
         try {

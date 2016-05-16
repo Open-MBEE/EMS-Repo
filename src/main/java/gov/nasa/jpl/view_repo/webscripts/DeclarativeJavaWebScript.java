@@ -1,5 +1,7 @@
 package gov.nasa.jpl.view_repo.webscripts;
 
+import gov.nasa.jpl.mbee.util.Utils;
+
 /**
  * Copyright (C) 2005-2009 Alfresco Software Limited.
  *
@@ -31,6 +33,8 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.log4j.Level;
+import org.json.JSONObject;
 import org.springframework.extensions.webscripts.*;
 
 
@@ -46,8 +50,10 @@ public class DeclarativeJavaWebScript extends AbstractWebScript
 {
     // Logger
     private static final Log logger = LogFactory.getLog(DeclarativeJavaWebScript.class);  
-
-    public static boolean cacheSnapshotsFlag = false;
+    private JSONObject      privateRequestJSON = null;
+    private String          mmsVersionResponse = null;
+    public static boolean   checkMmsVersions = false;
+    public static boolean   cacheSnapshotsFlag = false;
     
     /* (non-Javadoc)
      * @see org.alfresco.web.scripts.WebScript#execute(org.alfresco.web.scripts.WebScriptRequest, org.alfresco.web.scripts.WebScriptResponse)
@@ -56,7 +62,7 @@ public class DeclarativeJavaWebScript extends AbstractWebScript
     {
         // retrieve requested format
         String format = req.getFormat();
-
+        Map<String, Object> model;
         try
         {
             // establish mimetype from format
@@ -71,12 +77,34 @@ public class DeclarativeJavaWebScript extends AbstractWebScript
             Cache cache = new Cache(getDescription().getRequiredCache());
             setCacheHeaders(req, cache); // add in custom headers for nginx caching
 
-            Map<String, Object> model = executeImpl(req, status, cache);
-            
+            // if the flag for checking for MMS Version has been enabled it will then -
+            if(checkMmsVersions)
+            {
+                // Compare the version given by the request to the mms version. If the request versions match or if the request is a GET call
+                //  then function will executeImpl, else it will put a responseJSON into the model to be returned.
+                if(compareMmsVersions(req))
+                {
+                    model = new HashMap<String, Object>(8, 1.0f);
+                    model.put("res", createMmsVersionResponseJson());
+                    // TODO: Set the cache and status to be put into the model
+                }
+                else
+                {
+                    // If version checking turned passed the executeImpl.
+                    model = executeImpl(req, status, cache);
+                }
+            }
+            else
+            {
+                // executeImpl if checking of MMS versions has been turned off.
+                model = executeImpl(req, status, cache);
+            }
+
             if (model == null)
             {
                 model = new HashMap<String, Object>(8, 1.0f);
             }
+
             model.put("status", status);
             model.put("cache", cache);
 
@@ -369,4 +397,263 @@ public class DeclarativeJavaWebScript extends AbstractWebScript
         return createTemplateParameters(req, res, model);
     }
 
+    /**
+     * compareMmsVersions
+     * <br>
+     * <h3>Note: Returns true if this compare fails for either incorrect versions or if there is an error with the request.<br/>
+     * Returns false if the check is successful and the versions match.</h3>
+     * <pre>
+     * Takes a request created when a service is called and will retrieve the mmsVersion that is sent with it.
+     *  <b>The flag checkMmsVersions needs to be set to true for this service to work.</b>
+     *  <br/><b>1. </b>Check if there the request comes with the parameter mmsVersion=2.#. If the global flag
+     *  is set to check for mmsVersion it will then return either none if either invalid input or if none has been
+     *  specified, or the value of the version the service is being called with.
+     *  <br/><b>2. </b>If the value that is received after checking for mmsVersion in the request, is 'none' then
+     *  it will call parseContent of the request to create a JSONObject. If that fails, an exception is thrown
+     *  and the boolean value 'true' is returned to the calling method to signify failure of the check. Else it
+     *  will try to grab the mmsVersion from where ever it may lie within the JSONObject.
+     *  <br/><b>3. </b>
+     * </pre>
+     * @param req WebScriptRequest
+     * @param response StringBuffer response
+     * @param status Status of the request
+     * @author EDK
+     * @return boolean false if versions match, true if they do not match or if is an incorrect request.
+     */
+    public boolean compareMmsVersions(WebScriptRequest req ) {
+        // Calls getBooleanArg to check if they have request for mms version
+        // TODO: Possibly remove this and implement as an aspect?
+        boolean incorrectVersion = true;
+        JSONObject jsonRequest = null;
+        String responseString = null;
+        char logCase = '0';
+        JSONObject jsonVersion = null;
+        String mmsVersion = null;
+
+        // Checks if the argument is mmsVersion and returns the value specified
+        // by the request
+        // if there is no request it will return 'none'
+        String paramVal = getStringArg(req, "mmsVersion", "none");
+        String paramArg = paramVal;
+        // Checks data member requestJSON to see if it is not null and if
+        // paramVal is none
+
+       // Check if input is K or JSON
+        String contentType = req.getContentType() == null ? ""
+                : req.getContentType().toLowerCase();
+
+        boolean jsonNotK = !contentType.contains("application/k");
+
+        String descriptionPath = getDescription().getDescPath();
+        if(descriptionPath.contains( ".get" )){
+            if (logger.isDebugEnabled()){
+                logger.info( "Get was found within the description path");
+            }
+            return false;
+        }
+
+        if (!jsonNotK && paramVal.equals("none")) {
+                jsonRequest = getRequestJSON(req);
+
+            if (jsonRequest != null) {
+                paramVal = jsonRequest.optString("mmsVersion");
+                paramVal = paramVal.substring(0, 2);
+            }
+        }
+
+        if (paramVal != null && !paramVal.equals("none") && paramVal.length() > 0) {
+            // Calls NodeUtil's getMMSversion
+            jsonVersion = getMMSversion();
+            mmsVersion = jsonVersion.get("mmsVersion").toString().substring(0,3);
+             
+            if (logger.isDebugEnabled()){
+                logger.info("Comparing Versions....");
+            }
+            // version match only needs to be on the first two digits
+            if (mmsVersion.startsWith(paramVal)) {
+                // Compared versions matches
+                logCase = '1';
+                incorrectVersion = false;
+            } else {
+                // Versions do not match
+                logCase = '2';
+            }
+        } else if (Utils.isNullOrEmpty(paramVal) || paramVal.equals("none")) {
+            // Missing MMS Version parameter
+            logCase = '3';
+        } else {
+            // Wrong MMS Version or Invalid input
+            logCase = '4';
+        }
+        switch (logCase) {
+            case '1' :
+                responseString = "Correct Versions";
+                if (logger.isDebugEnabled()){
+                    logger.info(responseString);
+                }
+                break;
+            case '2' :
+                responseString = "Versions do not match! Expected Version " + mmsVersion + ". Instead received " + paramVal;
+                if (logger.isDebugEnabled())
+                    logger.warn(responseString);
+                break;
+            case '3' :
+                    responseString ="Missing MMS Version or invalid parameter. Received parameter:" 
+                       + paramArg + " and argument:" + mmsVersion + ". Request was: " + jsonRequest;
+                if (logger.isDebugEnabled()){
+                    logger.error(responseString);
+                }
+                break;
+            // TODO: This should be removed but for the moment I am leaving this
+            // in as a contingency if anything else may break this.
+            case '4' :
+                responseString = "Wrong MMS Version or invalid input. Expected mmsVersion="
+                                + mmsVersion + ". Instead received "
+                                + paramVal;
+                if (logger.isDebugEnabled()){
+                    logger.error(responseString);
+                }
+                break;
+        }
+        mmsVersionResponse = responseString;
+        // Returns true if it is either the wrong version or if it failed to
+        // compare it
+        // Returns false if it was successful in retrieving the mmsVersions from
+        // both the MMS and the request and
+        return incorrectVersion;
+    }
+
+    /**
+     * getMMSversion<br>
+     * Returns a JSONObject representing the mms version being used. It's format
+     * will be
+     *
+     * <pre>
+     * {
+     *     "mmsVersion":"2.3"
+     * }
+     * </pre>
+     *
+     * @return JSONObject mmsVersion
+     */
+    public static JSONObject getMMSversion() {
+        JSONObject version = new JSONObject();
+        version.put("mmsVersion", NodeUtil.getMMSversion());
+        return version;
+    }
+    /**
+     * getMMSversion <br/>
+     * getMMSversion wraps
+     *
+     * @param req
+     * @return
+     */
+    public static JSONObject getMMSversion(WebScriptRequest req) {
+        // Calls getBooleanArg to check if they have request for mms version
+        // TODO: Possibly remove this and implement as an aspect?
+        JSONObject jsonVersion = null;
+        boolean paramVal = getBooleanArg(req, "mmsVersion", false);
+        if (paramVal) {
+            jsonVersion = new JSONObject();
+            jsonVersion = getMMSversion();
+        }
+
+        return jsonVersion;
+    }
+
+    /**
+     * Helper utility to get the String value of a request parameter, calls on
+     * getParameterNames from the WebScriptRequest object to compare the
+     * parameter name passed in that is desired from the header.
+     *
+     * @param req
+     *            WebScriptRequest with parameter to be checked
+     * @param name
+     *            String of the request parameter name to check
+     * @param defaultValue
+     *            default value if there is no parameter with the given name
+     * @author dank
+     * @return 'empty' if the parameter is assigned no value, if it is assigned
+     *         "parameter value" (ignoring case), or if it's default is default
+     *         value and it is not assigned "empty" (ignoring case).
+     */
+    public static String getStringArg(WebScriptRequest req, String name,
+            String defaultValue) {
+        if (!Utils.toSet(req.getParameterNames()).contains(name)) {
+            return defaultValue;
+        }
+        String paramVal = req.getParameter(name);
+        return paramVal;
+    }
+
+    /**
+     * setRequestJSON <br>
+     * This will set the AbstractJavaWebScript data member requestJSON. It will
+     * make the parsedContent JSONObject remain within the scope of the
+     * AbstractJavaWebScript. {@link #requestJSON}
+     *
+     * @param req
+     *            WebScriptRequest
+     */
+    public void setRequestJSON(WebScriptRequest req) {
+
+        try {
+//            privateRequestJSON = new JSONObject();
+            privateRequestJSON = (JSONObject) req.parseContent();
+        } catch (Exception e) {
+            e.printStackTrace();
+            if (logger.isDebugEnabled()){
+                logger.error("Could not retrieve JSON");
+            }
+        }
+    }
+
+    public JSONObject getRequestJSON() {
+        return privateRequestJSON;
+    }
+
+    public JSONObject getRequestJSON(WebScriptRequest req) {
+        // Returns immediately if requestJSON has already been set before checking MMS Versions
+        if(privateRequestJSON == null) return privateRequestJSON;
+        // Sets privateRequestJSON
+        setRequestJSON(req);
+        return privateRequestJSON;
+    }
+    
+    /**
+     * Helper utility to get the value of a Boolean request parameter
+     *
+     * @param req
+     *            WebScriptRequest with parameter to be checked
+     * @param name
+     *            String of the request parameter name to check
+     * @param defaultValue
+     *            default value if there is no parameter with the given name
+     * @return true if the parameter is assigned no value, if it is assigned
+     *         "true" (ignoring case), or if it's default is true and it is not
+     *         assigned "false" (ignoring case).
+     */
+    public static boolean getBooleanArg(WebScriptRequest req, String name,
+                                        boolean defaultValue) {
+        if ( !Utils.toSet( req.getParameterNames() ).contains( name ) ) {
+            return defaultValue;
+        }
+        String paramVal = req.getParameter(name);
+        if ( Utils.isNullOrEmpty( paramVal ) ) return true;
+        Boolean b = Utils.isTrue( paramVal, false );
+        if ( b != null ) return b;
+        return defaultValue;
+    }
+    
+    /**
+     * Creates a json like object in a string and puts the response in the message key. Made this private so it is
+     * not used by any inherited class and thus AbstractJavaWebscript will remain relatively unaffected by this. 
+     *
+     * @return The resulting string, ie "{'message':response}" or "{}"
+     */
+    private String createMmsVersionResponseJson() {
+//        String resToString = response.toString();
+//        String resStr = !Utils.isNullOrEmpty( resToString ) ? resToString.replaceAll( "\n", "" ) : "";
+        return !Utils.isNullOrEmpty( mmsVersionResponse ) ? String.format("{\"message\":\"%s\"}", mmsVersionResponse) : "{}";
+    }
 }

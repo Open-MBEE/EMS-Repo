@@ -78,7 +78,7 @@ public class SiteGet extends AbstractJavaWebScript {
     @Override
     protected Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
         SiteGet instance = new SiteGet(repository, getServices());
-        return instance.executeImplImpl( req, status, cache );
+        return instance.executeImplImpl( req, status, cache, runWithoutTransactions );
     }
 
     @Override
@@ -88,12 +88,13 @@ public class SiteGet extends AbstractJavaWebScript {
         //clearCaches();
 
         Map<String, Object> model = new HashMap<String, Object>();
-        if (checkMmsVersions) {
-            if(compareMmsVersions(req, getResponse(), getResponseStatus()));{
-                model.put("res", createResponseJson());
-                return model;
-            }
-        } 
+//        TODO: REMOVE THIS CODE
+//        if (checkMmsVersions) {
+//            if(compareMmsVersions(req, getResponse(), getResponseStatus()));{
+//                model.put("res", createResponseJson());
+//                return model;
+//            }
+//        } 
         JSONObject json = null;
 
         try {

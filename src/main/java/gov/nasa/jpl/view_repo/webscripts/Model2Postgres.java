@@ -88,7 +88,7 @@ public class Model2Postgres extends AbstractJavaWebScript {
                                                  Status status, Cache cache ) {
         Model2Postgres instance =
                 new Model2Postgres( repository, getServices() );
-        return instance.executeImplImpl( req, status, cache );
+        return instance.executeImplImpl( req, status, cache, runWithoutTransactions );
     }
 
     @Override

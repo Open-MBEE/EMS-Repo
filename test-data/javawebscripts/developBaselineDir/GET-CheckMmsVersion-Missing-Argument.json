@@ -1,0 +1,22 @@
+{"elements": [{
+    "qualifiedId": "/europa/123456/300/301/302/303",
+    "qualifiedName": "/europa/JW_TEST2/300/301/302/303",
+    "sysmlid": "303",
+    "editable": true,
+    "creator": "admin",
+    "modifier": "admin",
+    "name": "303",
+    "documentation": "talk",
+    "owner": "302",
+    "specialization": {
+        "propertyType": null,
+        "isDerived": false,
+        "isSlot": false,
+        "value": [{
+            "string": "dlam_string",
+            "type": "LiteralString"
+        }],
+        "type": "Property"
+    }
+}]}
+200

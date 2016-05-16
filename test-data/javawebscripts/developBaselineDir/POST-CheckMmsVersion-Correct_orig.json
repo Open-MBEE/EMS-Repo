@@ -1,0 +1,28 @@
+{"elements": [{
+    "nodeRefId": "workspace://SpacesStore/9eefd0a8-605c-4198-9c93-ee1990f6ec72",
+    "qualifiedId": "/europa/123456/300/301/302/303",
+    "siteCharacterizationId": "europa",
+    "versionedRefId": "versionStore://version2Store/967a2974-95fe-414f-8d13-92ab7917ef59",
+    "qualifiedName": "/europa/JW_TEST2/300/301/302/303",
+    "sysmlid": "303",
+    "editable": true,
+    "creator": "admin",
+    "modified": "2016-04-19T15:02:38.670-0700",
+    "modifier": "admin",
+    "created": "Tue Apr 19 14:56:45 PDT 2016",
+    "name": "303",
+    "documentation": "CY is really sick!",
+    "owner": "302",
+    "read": "2016-04-19T15:02:38.761-0700",
+    "specialization": {
+        "propertyType": null,
+        "isDerived": false,
+        "isSlot": false,
+        "value": [{
+            "string": "really, really sick!!!!",
+            "type": "LiteralString"
+        }],
+        "type": "Property"
+    }
+}]}
+200

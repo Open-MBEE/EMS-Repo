@@ -45,6 +45,7 @@ import org.alfresco.service.cmr.repository.ContentReader;
 import org.alfresco.service.cmr.repository.ContentService;
 import org.alfresco.service.cmr.repository.ContentWriter;
 import org.alfresco.service.cmr.repository.NodeRef;
+import org.alfresco.util.GUID;
 import org.alfresco.util.exec.RuntimeExec;
 import org.alfresco.util.exec.RuntimeExec.ExecutionResult;
 import org.apache.commons.io.FileUtils;
@@ -445,6 +446,7 @@ public class HtmlToPdfPost extends AbstractJavaWebScript {
 		style.append("        font-size: 9px;");
 		style.append("        content: counter(page)");
 		style.append("    }");
+		style.append("   prince-shrink-to-fit:auto;");
 		style.append("}");
 		style.append("</style>");
 		head.append(style.toString());
@@ -604,9 +606,23 @@ public class HtmlToPdfPost extends AbstractJavaWebScript {
 				tof.append("   <div class='header'>List of Figures</div>");
 				tof.append("   <ul>");
 				int index = 0;
+				
 				for (Element f : figures) {
+					String id = null;
+					Element gp = null;
+					if(f.parent() != null && f.parent().parent() != null){
+						gp = f.parent().parent();
+						id = gp.attr("id");
+					}
+					if(Utils.isNullOrEmpty(id)){
+						id = f.attr("id");
+						if(Utils.isNullOrEmpty(id)){
+							id = GUID.generate();
+							f.attr("id", id);
+						}
+					}
 					tof.append("  <li><a href='#");
-					tof.append(f.parent().parent().attr("id"));
+					tof.append(id);
 					tof.append(" '>");
 					Elements caption = f.select("> figcaption");
 					tof.append("Figure ");
@@ -641,9 +657,23 @@ public class HtmlToPdfPost extends AbstractJavaWebScript {
 				tot.append("   <div class='header'>List of Tables</div>");
 				tot.append("   <ul>");
 				int index = 0;
+				
 				for (Element t : tables) {
+					String id = null;
+					Element gp = null;
+					if(t.parent() != null && t.parent().parent() != null){
+						gp = t.parent().parent();
+						id = gp.attr("id");
+					}
+					if(Utils.isNullOrEmpty(id)){
+						id = t.attr("id");
+						if(Utils.isNullOrEmpty(id)){
+							id = GUID.generate();
+							t.attr("id", id);
+						}
+					}
 					tot.append("  <li><a href='#");
-					tot.append(t.parent().parent().attr("id"));
+					tot.append(id);
 					tot.append(" '>");
 					Elements caption = t.select("> caption");
 					tot.append("Table ");

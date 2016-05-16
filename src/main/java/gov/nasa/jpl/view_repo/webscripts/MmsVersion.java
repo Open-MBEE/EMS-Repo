@@ -39,7 +39,7 @@ public class MmsVersion extends AbstractJavaWebScript {
     @Override
     protected Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
     	MmsVersion instance = new MmsVersion(repository, getServices());
-        return instance.executeImplImpl(req,  status, cache);
+        return instance.executeImplImpl(req,  status, cache, runWithoutTransactions);
     }
 	@Override
 	protected Map<String, Object> executeImplImpl(WebScriptRequest req, Status status, Cache cache) {
