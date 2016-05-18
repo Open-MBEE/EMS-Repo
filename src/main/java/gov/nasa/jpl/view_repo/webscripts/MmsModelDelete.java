@@ -68,13 +68,8 @@ public class MmsModelDelete extends AbstractJavaWebScript {
                                                  Status status, Cache cache ) {
         if ( logger.isInfoEnabled() ) {
             String user = AuthenticationUtil.getFullyAuthenticatedUser();
-            logger.info( user + " " + req.getURL() );
-        }
-
-
-        if ( logger.isInfoEnabled() ) {
-            String user = AuthenticationUtil.getFullyAuthenticatedUser();
-            logger.info( user + " " + req.getURL() );
+            logger.info(user + " " + req.getURL());
+            logger.info(req.parseContent());
         }
         
         Timer timer = new Timer();

@@ -219,7 +219,7 @@ public class NodeUtil {
     public static boolean doJsonDeepCaching = false;
     public static boolean doJsonStringCaching = false;
     public static boolean doPropertyCaching = true;
-    public static boolean doGraphDb = true;
+    public static boolean doGraphDb = false;
     public static boolean doPostProcessQualified = false;
     // toggles whether modelget adds to graphDb if there's a graphDb miss, but Alfresco hit    
     public static boolean doAutoBuildGraphDb = false; 
