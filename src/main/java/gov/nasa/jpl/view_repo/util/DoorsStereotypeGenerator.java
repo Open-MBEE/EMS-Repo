@@ -244,7 +244,9 @@ public class DoorsStereotypeGenerator {
 
 		} catch (SQLException e) {
 			e.printStackTrace();
-		}
+		}finally {
+            pgh.close();
+        }
 
 	}
 

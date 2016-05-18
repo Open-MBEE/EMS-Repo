@@ -37,7 +37,6 @@ import java.util.Map;
 import javax.servlet.http.HttpServletResponse;
 import org.alfresco.repo.model.Repository;
 import org.alfresco.service.ServiceRegistry;
-import org.apache.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.extensions.webscripts.Cache;
@@ -58,8 +57,6 @@ public class DoorsProjectMappingGet extends AbstractJavaWebScript {
 
     static PostgresHelper pgh = null;
         
-    static Logger logger = Logger.getLogger(DoorsProjectMappingGet.class);
-    
     public DoorsProjectMappingGet() {
     	
         super();
@@ -91,7 +88,7 @@ public class DoorsProjectMappingGet extends AbstractJavaWebScript {
     	JSONArray projectMappings = new JSONArray();
     	JSONObject curProjectMappings = new JSONObject();
     	
-        pgh = new PostgresHelper(getWorkspace(req));
+        pgh = new PostgresHelper("null");
         
         
 		try {
@@ -117,47 +114,25 @@ public class DoorsProjectMappingGet extends AbstractJavaWebScript {
 		
 		}
 		catch(SQLException e) {
-			
 			 e.printStackTrace();
 			 message.put("status", "Could not retrieve artifact type mappings from database");
 			 getResult.put("res", NodeUtil.jsonToString(message));
-		        
-		     if (logger.isDebugEnabled()) {
-	                logger.error(HttpServletResponse.SC_INTERNAL_SERVER_ERROR + "Could not retrieve artifact type mappings from database\n");
-	                e.printStackTrace();
-	          }
-		     
 		     return getResult;
-        	
-			
 		}
 		catch(ClassNotFoundException e) {
-			
 			 e.printStackTrace();
 			 message.put("status", "Class not found");
 			 getResult.put("res", NodeUtil.jsonToString(message));
-			 
-			 if (logger.isDebugEnabled()) {
-	                logger.error(HttpServletResponse.SC_INTERNAL_SERVER_ERROR + "Class not found\n");
-	                e.printStackTrace();
-	          }
-			 
 		     return getResult;
-
 			 
 		}
 		catch(Exception e) {
-			
 			e.printStackTrace();
-			
-			if (logger.isDebugEnabled()) {
-                logger.error(HttpServletResponse.SC_INTERNAL_SERVER_ERROR + "Internal error occured\n");
-                e.printStackTrace();
-			}
-		 
 			return getResult;
 			
-		}
+		}finally {
+            pgh.close();
+        }
         
       
 		message.put("projectMappings", projectMappings);
@@ -169,19 +144,8 @@ public class DoorsProjectMappingGet extends AbstractJavaWebScript {
     }
     
     
-    
     @Override
     protected boolean validateRequest(WebScriptRequest req, Status status) {
-
-        if (!checkRequestContent(req)) {
-            return false;
-        }
-
-        String id = req.getServiceMatch().getTemplateVars().get(WORKSPACE_ID);
-        if (!checkRequestVariable(id, WORKSPACE_ID)) {
-            return false;
-        }
-
         return true;
     }
    

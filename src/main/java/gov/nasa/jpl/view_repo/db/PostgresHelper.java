@@ -631,37 +631,4 @@ public class PostgresHelper {
 	
 	
 	
-	/***
-	   * Author Bruce Meeks Jr
-	   * @return
-	   */
-	public Node findMagicDrawProject() {
-				
-				
-		try {
-
-			ResultSet rs = execQuery("select sysmlid from nodes where sysmlid LIKE '%PROJECT%'");
-							
-			while (rs.next()) {
-										    					
-				return(getNodeFromSysmlId(rs.getString(1)));
-						
-			}
-					
-					
-		} 
-		
-		catch (Exception e) {
-				
-			e.printStackTrace();
-					
-		}
-				
-		return null; // magic draw project has not been created, initialized, and/or sent to MMS
-				
-	}
-	
-
-
-	
 }
