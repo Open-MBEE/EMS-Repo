@@ -41,7 +41,8 @@ public class AllFlagsGet extends FlagSet {
                            "postProcessQualified",
                            "doorsSync",
                            "autoBuildGraphDb",
-                           "skipQualified"};
+                           "skipQualified",
+                           "skipSvgToPng"};
     
     public String[] getAllFlags() {
         return flags;
@@ -143,7 +144,10 @@ public class AllFlagsGet extends FlagSet {
             NodeUtil.doAutoBuildGraphDb = val;
         } else if (path.equalsIgnoreCase("skipQualified")) {
             NodeUtil.skipQualified = val;
+        } else if (path.equalsIgnoreCase("skipSvgToPng")){
+        	NodeUtil.skipSvgToPng = val;
         }
+        
         return true;
     }
 
@@ -218,7 +222,9 @@ public class AllFlagsGet extends FlagSet {
             return NodeUtil.doAutoBuildGraphDb;
         } else if (path.equalsIgnoreCase( "skipQualified" )) {
             return NodeUtil.skipQualified;
-        }
+		} else if (path.equalsIgnoreCase( "skipSvgToPng" )) {
+			return NodeUtil.skipSvgToPng;
+		}
         return false;
     }
     
@@ -305,6 +311,8 @@ public class AllFlagsGet extends FlagSet {
             return false;
         } else if (path.equalsIgnoreCase( "skipQualified" )) {
             return false;
+        } else if (path.equalsIgnoreCase( "skipSvgToPng" )) {
+            return false;
         }
         return false;
     };
@@ -385,6 +393,8 @@ public class AllFlagsGet extends FlagSet {
             return "autoBuildGraphDb";
         } else if (path.equalsIgnoreCase("skipQualified")) {
             return "skipQualified";
+        } else if (path.equalsIgnoreCase( "skipSvgToPng")) {
+        	return "skipSvgToPg";
         }
         return null;
     }

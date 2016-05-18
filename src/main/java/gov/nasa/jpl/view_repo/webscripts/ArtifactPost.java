@@ -168,19 +168,23 @@ public class ArtifactPost extends AbstractJavaWebScript {
 		    	        															 siteName,
 		    																		 path, workspace, null,
 		    																		 response, null, false);
-		    	        	try{
-		    	        		Path svgPath = saveSvgToFilesystem(artifactId, extension, content);
-			    	        	Path pngPath = svgToPng(svgPath);
-		    	        		EmsScriptNode pngArtifact = NodeUtil.updateOrCreateArtifactPng(artifact, pngPath, siteName, path, workspace, null, response, null, false);
-		    	        		if(pngArtifact == null){
-		    	        			log(Level.ERROR, HttpServletResponse.SC_BAD_REQUEST, "Failed to convert SVG to PNG!\n");
-		    	        		}
-		    	        		else{
-		    	        			pngArtifact.getOrSetCachedVersion();
-		    	        		}
-		    	        	}
-		    	        	catch(Throwable ex){
-		    	        		log(Level.ERROR, HttpServletResponse.SC_BAD_REQUEST, "Failed to convert SVG to PNG!\n");
+		    	        	if( !NodeUtil.skipSvgToPng){
+			    	        	try{
+			    	        		Path svgPath = saveSvgToFilesystem(artifactId, extension, content);
+				    	        	Path pngPath = svgToPng(svgPath);
+			    	        		EmsScriptNode pngArtifact = NodeUtil.updateOrCreateArtifactPng(artifact, pngPath, siteName, path, workspace, null, response, null, false);
+			    	        		if(pngArtifact == null){
+			    	        			log(Level.ERROR, HttpServletResponse.SC_BAD_REQUEST, "Failed to convert SVG to PNG!\n");
+			    	        		}
+			    	        		else{
+			    	        			pngArtifact.getOrSetCachedVersion();
+			    	        		}
+			    	        		Files.deleteIfExists(svgPath);
+			    	        		Files.deleteIfExists(pngPath);
+			    	        	}
+			    	        	catch(Throwable ex){
+			    	        		log(Level.ERROR, HttpServletResponse.SC_BAD_REQUEST, "Failed to convert SVG to PNG!\n");
+			    	        	}
 		    	        	}
 
 		    	        	if (artifact == null) {

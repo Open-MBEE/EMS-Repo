@@ -105,7 +105,8 @@ public class NodeUtil {
         WORKSPACE_NAME("@ems\\:workspace_name:\"" ),
         OWNER("@ems\\:owner:\"" ),
         ASPECT("ASPECT:\""),
-        TYPE("TYPE:\"");
+        TYPE("TYPE:\""),
+        MIMETYPE("@cm\\:content.mimetype:\"");
 
         public String prefix;
 
@@ -227,6 +228,7 @@ public class NodeUtil {
     public static boolean addEmptyEntriesToFullCache = false; // this was broken
                                                               // last tried
     public static boolean skipGetNodeRefAtTime = true;
+    public static boolean skipSvgToPng = false;
     public static boolean skipWorkspacePermissionCheck = true;
     public static boolean doOptimisticJustFirst = true;
 

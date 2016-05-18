@@ -1814,7 +1814,7 @@ None,
 350,
 "PostArtifact",
 "Post artifact to the master branch",
-'curl %s %s -H "Content-Type: multipart/form-data;" --form "file=@JsonData/x.json" --form "title=JsonData/x.json" --form "desc=stuffs" --form "content=@JsonData/x.json" %smaster/sites/europa/artifacts/folder1/folder2/xartifact' % (CURL_FLAGS, CURL_POST_FLAGS_NO_DATA, BASE_URL_WS),
+'curl %s %s -H "Content-Type: multipart/form-data;" --form "file=@JsonData/x.json" --form "title=JsonData/x.json" --form "desc=stuffs" --form "content=@JsonData/sample.svg" %smaster/sites/europa/artifacts/folder1/folder2/xartifact' % (CURL_FLAGS, CURL_POST_FLAGS_NO_DATA, BASE_URL_WS),
 True,
 None,
 ["test", "workspaces", "develop", "develop2"]
