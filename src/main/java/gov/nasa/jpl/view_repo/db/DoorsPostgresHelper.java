@@ -34,7 +34,17 @@ public class DoorsPostgresHelper {
 
                 String artifacttype = rs.getString( 2 );
 
+                if ( artifacttype == null || artifacttype.length() == 0 ) {
+                    artifacttype = "Requirement";
+                }
+
                 String appliedMetatype = rs.getString( 3 );
+
+                if ( appliedMetatype == null
+                     || appliedMetatype.length() == 0 ) {
+                    appliedMetatype =
+                            "_11_5EAPbeta_be00301_1147873190330_159934_2220";
+                }
 
                 if ( !artifactConfiguration.keySet().contains( project ) ) {
 
