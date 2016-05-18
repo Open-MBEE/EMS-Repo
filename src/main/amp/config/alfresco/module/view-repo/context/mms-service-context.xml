@@ -13,6 +13,10 @@
     <bean id="webscript.gov.nasa.jpl.utils.emsconfig.post" class="gov.nasa.jpl.view_repo.webscripts.EmsConfigPost"
         parent="webscript">
     </bean>
+    
+    <bean id="webscript.gov.nasa.jpl.utils.loginticket.get" class="gov.nasa.jpl.view_repo.webscripts.util.LoginTicket" parent="webscript">
+      <property name="ticketComponent" ref="ticketComponent" />
+    </bean>
 
 	<bean id="webscript.gov.nasa.jpl.utils.updateworkspaceldapgroup.post"
 		class="gov.nasa.jpl.view_repo.webscripts.UpdateWorkspaceLdapGroup"
