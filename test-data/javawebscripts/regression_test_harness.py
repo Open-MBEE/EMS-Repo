@@ -1824,13 +1824,24 @@ None,
 360,
 "GetArtifact",
 "Get artifact from the master branch",
-create_curl_cmd(type="GET", data="artifacts/xartifact?extension=svg&cs=3463563326", base_url=BASE_URL_WS,
+create_curl_cmd(type="GET", data="artifacts/xartifact?extension=svg&cs=2572447377", base_url=BASE_URL_WS,
                 branch="master/"),
 False,
 ['"url"'],
 ["test", "workspaces", "develop", "develop2"]
 ],
-                                   
+ 
+[
+361,
+"GetArtifactPng",
+"Get PNG artifact from the master branch",
+create_curl_cmd(type="GET", data="artifacts/xartifact?extension=png&cs=372689118", base_url=BASE_URL_WS,
+                branch="master/"),
+False,
+['"url"'],
+["test", "workspaces", "develop", "develop2"]
+],
+
 [
 370,
 "CreateWorkspaceDelete1",
