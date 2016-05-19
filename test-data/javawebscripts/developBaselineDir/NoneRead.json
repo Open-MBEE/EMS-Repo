@@ -1,2 +1,2 @@
-{"message": "Warning! No READ priveleges to sysmlid: y."}
-403
+{"message": "[INFO]: Element y not found\n"}
+404
