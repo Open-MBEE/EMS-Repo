@@ -3439,7 +3439,40 @@ create_curl_cmd(type="POST", data="holdingBinOwner.json", base_url=BASE_URL_WS,
 True,
 common_filters + holding_bin_filters,
 ["develop"]
-]
+],
+         
+# MMS-308/311: loginticket doesn't require authentication to return
+[
+10150,
+"LoginTicketPost",
+"Get valid login ticket",
+"curl -X POST -H Content-Type:application/json http://localhost:8080/alfresco/s/api/login -d '{\"username\":\"admin\", \"password\":\"admin\"}'",
+False,
+common_filters + ["data", "ticket"],
+["test", "workspaces", "ws", "develop"],
+None,
+None,
+set_ticket_to_gv1
+],
+
+[
+10151,
+"LoginTicketGetValid",
+"Get ticket status for valid ticket",
+"curl http://localhost:8080/alfresco/service/mms/login/ticket/$gv1",
+common_filters,
+["test", "workspaces", "ws", "develop"]
+],
+
+[
+10152,
+"LoginTicketGetInvalid",
+"Get ticket status for invalid ticket",
+"curl http://localhost:8080/alfresco/service/mms/login/ticket/TICKET_INVALID",
+common_filters,
+["test", "workspaces", "ws", "develop"]
+]         
+                 
 ]
 
 ##########################################################################################    

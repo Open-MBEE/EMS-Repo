@@ -24,8 +24,8 @@ import java.util.Map;
 import javax.servlet.http.HttpServletResponse;
 
 import org.alfresco.repo.security.authentication.AuthenticationException;
-import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.authentication.TicketComponent;
+import org.json.JSONObject;
 import org.springframework.extensions.webscripts.DeclarativeWebScript;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptException;
@@ -33,7 +33,9 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
 
 
 /**
- * Login Ticket copied from org.alfresco.repo.web.scripts.bean.LoginTicket
+ *  [CYL]: LoginTicket copied from org.alfresco.repo.web.scripts.bean.LoginTicket to remove 
+ *  permissions checks
+ *  Returns the username the ticket belongs to
  * 
  * @author davidc
  */
@@ -66,19 +68,25 @@ public class LoginTicket extends DeclarativeWebScript
         
         // construct model for ticket
         Map<String, Object> model = new HashMap<String, Object>(1, 1.0f);
-        model.put("ticket",  ticket);
+        //model.put("ticket",  ticket);
         
+        String username = null;
+        JSONObject result = new JSONObject();
         try
         {
-            ticketComponent.validateTicket(ticket);
+            username = ticketComponent.validateTicket(ticket);
+            result.put( "username", username );
         }
         catch (AuthenticationException e)
         {
-            status.setRedirect(true);
+            // Need to turn off redirect otherwise 
+//            status.setRedirect(true);
             status.setCode(HttpServletResponse.SC_NOT_FOUND);
             status.setMessage("Ticket not found");
+            result.put( "message", "Ticket not found" );
         }
         
+        model.put( "res", result.toString() );
         return model;
     }
 

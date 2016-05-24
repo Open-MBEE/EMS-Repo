@@ -304,6 +304,13 @@ def set_read_to_gv6_delta_gv7(delta=3):
      date = datetime.datetime.strptime(gv6.split(".")[0], "%Y-%m-%dT%H:%M:%S")
      date = date + datetime.timedelta(seconds=delta)
      gv7 = date.strftime("%Y-%m-%dT%H:%M:%S.000")
+
+def set_ticket_to_gv1():
+    '''Get the json output, and sets gv to the alf_ticket'''
+    json_output = get_json_output_no_status()
+    j = json.loads(json_output)
+    if j:
+         set_gv1(j["data"]["ticket"])        
      
 def set_gv1_to_current_time():
     '''Gets the current time'''
