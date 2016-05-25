@@ -844,6 +844,7 @@ def run(testArray):
         os.makedirs(baseline_dir)
          
     print "\nUSING BASELINE DIR: '%s'\nOUTPUT DIR: '%s'\n"%(baseline_dir, result_dir)
+    print tests
      
     # Run tests or create baselines:
     # If there were test numbers specified:

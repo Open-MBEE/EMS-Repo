@@ -3460,6 +3460,7 @@ set_ticket_to_gv1
 "LoginTicketGetValid",
 "Get ticket status for valid ticket",
 "curl http://localhost:8080/alfresco/service/mms/login/ticket/$gv1",
+True,
 common_filters,
 ["test", "workspaces", "ws", "develop"]
 ],
@@ -3469,6 +3470,7 @@ common_filters,
 "LoginTicketGetInvalid",
 "Get ticket status for invalid ticket",
 "curl http://localhost:8080/alfresco/service/mms/login/ticket/TICKET_INVALID",
+True,
 common_filters,
 ["test", "workspaces", "ws", "develop"]
 ]         
