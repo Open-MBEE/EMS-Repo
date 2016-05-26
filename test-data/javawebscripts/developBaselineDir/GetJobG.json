@@ -1,19 +1,7 @@
 {
     "jobs": [
         {
-            "status": "waiting",
-            "sysmlid": "jobB",
-            "isMetatype": false,
-            "editable": true,
-            "creator": "admin",
-            "modifier": "admin",
-            "schedule": " ",
-            "name": "jobB",
-            "appliedMetatypes": ["_18_0_5_407019f_1458258829038_313297_14086"],
-            "specialization": {"type": "Element"}
-        },
-        {
-            "status": "waiting",
+            "status": "job not found",
             "sysmlid": "jobF",
             "isMetatype": false,
             "editable": true,
@@ -25,19 +13,20 @@
             "specialization": {"type": "Element"}
         },
         {
-            "status": "waiting",
-            "sysmlid": "jobC",
+            "status": "job not found",
+            "sysmlid": "jobG",
             "isMetatype": false,
             "editable": true,
             "creator": "admin",
             "modifier": "admin",
-            "schedule": "0 0 * * *",
-            "name": "jobC",
+            "schedule": " ",
+            "name": "jobG",
+            "command": "Jenkins,DocWeb,some_tw_doc,some_tw_proj",
             "appliedMetatypes": ["_18_0_5_407019f_1458258829038_313297_14086"],
             "specialization": {"type": "Element"}
         },
         {
-            "status": "waiting",
+            "status": "job not found",
             "sysmlid": "jobD",
             "isMetatype": false,
             "editable": true,
@@ -49,30 +38,31 @@
             "specialization": {"type": "Element"}
         },
         {
-            "status": "waiting",
-            "sysmlid": "jobG",
+            "status": "job not found",
+            "sysmlid": "jobC",
             "isMetatype": false,
             "editable": true,
             "creator": "admin",
             "modifier": "admin",
-            "schedule": " ",
-            "name": "jobG",
-            "command": "Jenkins,DocWeb,some_tw_doc,some_tw_proj",
+            "schedule": "0 0 * * *",
+            "name": "jobC",
             "appliedMetatypes": ["_18_0_5_407019f_1458258829038_313297_14086"],
             "specialization": {"type": "Element"}
-        }
-    ],
-    "elements": [
+        },
         {
+            "status": "job not found",
             "sysmlid": "jobB",
             "isMetatype": false,
             "editable": true,
             "creator": "admin",
             "modifier": "admin",
+            "schedule": " ",
             "name": "jobB",
             "appliedMetatypes": ["_18_0_5_407019f_1458258829038_313297_14086"],
             "specialization": {"type": "Element"}
-        },
+        }
+    ],
+    "elements": [
         {
             "sysmlid": "jobF",
             "isMetatype": false,
@@ -82,21 +72,6 @@
             "name": "jobF",
             "appliedMetatypes": ["_18_0_5_407019f_1458258829038_313297_14086"],
             "specialization": {"type": "Element"}
-        },
-        {
-            "sysmlid": "IS_D",
-            "isMetatype": false,
-            "editable": true,
-            "creator": "admin",
-            "modifier": "admin",
-            "name": "IS_D",
-            "documentation": "",
-            "appliedMetatypes": ["_9_0_62a020a_1105704885251_933969_7897"],
-            "specialization": {
-                "slots": [],
-                "classifier": [],
-                "type": "InstanceSpecification"
-            }
         },
         {
             "sysmlid": "IS_F",
@@ -114,38 +89,21 @@
             }
         },
         {
+            "sysmlid": "IS_G-slot-_18_0_5_407019f_1458259018041_351899_14098",
+            "editable": true,
+            "creator": "admin",
             "modifier": "admin",
             "name": "",
-            "sysmlid": "IS_F-slot-_18_0_5_407019f_1458259018041_351899_14098",
             "specialization": {
                 "propertyType": null,
-                "isSlot": true,
                 "isDerived": false,
+                "isSlot": true,
                 "value": [{
                     "string": "waiting",
                     "type": "LiteralString"
                 }],
                 "type": "Property"
-            },
-            "editable": true,
-            "creator": "admin"
-        },
-        {
-            "modifier": "admin",
-            "name": "",
-            "sysmlid": "IS_D-slot-_18_0_5_407019f_1458259033014_844708_14099",
-            "specialization": {
-                "propertyType": null,
-                "isSlot": true,
-                "isDerived": false,
-                "value": [{
-                    "string": " ",
-                    "type": "LiteralString"
-                }],
-                "type": "Property"
-            },
-            "editable": true,
-            "creator": "admin"
+            }
         },
         {
             "sysmlid": "IS_G",
@@ -161,6 +119,104 @@
                 "classifier": [],
                 "type": "InstanceSpecification"
             }
+        },
+        {
+            "sysmlid": "IS_B",
+            "isMetatype": false,
+            "editable": true,
+            "creator": "admin",
+            "modifier": "admin",
+            "name": "IS_B",
+            "documentation": "",
+            "appliedMetatypes": ["_9_0_62a020a_1105704885251_933969_7897"],
+            "specialization": {
+                "slots": [],
+                "classifier": [],
+                "type": "InstanceSpecification"
+            }
+        },
+        {
+            "modifier": "admin",
+            "name": "",
+            "sysmlid": "IS_B-slot-_18_0_5_407019f_1458259033014_844708_14099",
+            "specialization": {
+                "propertyType": null,
+                "isSlot": true,
+                "isDerived": false,
+                "value": [{
+                    "string": " ",
+                    "type": "LiteralString"
+                }],
+                "type": "Property"
+            },
+            "editable": true,
+            "creator": "admin"
+        },
+        {
+            "modifier": "admin",
+            "name": "",
+            "sysmlid": "IS_D-slot-_18_0_5_407019f_1458259018041_351899_14098",
+            "specialization": {
+                "propertyType": null,
+                "isSlot": true,
+                "isDerived": false,
+                "value": [{
+                    "string": "waiting",
+                    "type": "LiteralString"
+                }],
+                "type": "Property"
+            },
+            "editable": true,
+            "creator": "admin"
+        },
+        {
+            "modifier": "admin",
+            "sysmlid": "PMA_Jobs",
+            "specialization": {"type": "Element"},
+            "editable": true,
+            "creator": "admin"
+        },
+        {
+            "sysmlid": "IS_D",
+            "isMetatype": false,
+            "editable": true,
+            "creator": "admin",
+            "modifier": "admin",
+            "name": "IS_D",
+            "documentation": "",
+            "appliedMetatypes": ["_9_0_62a020a_1105704885251_933969_7897"],
+            "specialization": {
+                "slots": [],
+                "classifier": [],
+                "type": "InstanceSpecification"
+            }
+        },
+        {
+            "modifier": "admin",
+            "name": "",
+            "sysmlid": "IS_F-slot-_18_0_5_407019f_1458259033014_844708_14099",
+            "specialization": {
+                "propertyType": null,
+                "isSlot": true,
+                "isDerived": false,
+                "value": [{
+                    "string": "0 0 * * *",
+                    "type": "LiteralString"
+                }],
+                "type": "Property"
+            },
+            "editable": true,
+            "creator": "admin"
+        },
+        {
+            "sysmlid": "jobG",
+            "isMetatype": false,
+            "editable": true,
+            "creator": "admin",
+            "modifier": "admin",
+            "name": "jobG",
+            "appliedMetatypes": ["_18_0_5_407019f_1458258829038_313297_14086"],
+            "specialization": {"type": "Element"}
         },
         {
             "modifier": "admin",
@@ -180,14 +236,55 @@
             "creator": "admin"
         },
         {
-            "sysmlid": "jobC",
-            "isMetatype": false,
+            "sysmlid": "IS_G-slot-_18_0_5_407019f_1458259033014_844708_14099",
             "editable": true,
             "creator": "admin",
             "modifier": "admin",
-            "name": "jobC",
-            "appliedMetatypes": ["_18_0_5_407019f_1458258829038_313297_14086"],
-            "specialization": {"type": "Element"}
+            "name": "",
+            "specialization": {
+                "propertyType": null,
+                "isDerived": false,
+                "isSlot": true,
+                "value": [{
+                    "string": " ",
+                    "type": "LiteralString"
+                }],
+                "type": "Property"
+            }
+        },
+        {
+            "modifier": "admin",
+            "name": "",
+            "sysmlid": "IS_D-slot-_18_0_5_407019f_1458259033014_844708_14099",
+            "specialization": {
+                "propertyType": null,
+                "isSlot": true,
+                "isDerived": false,
+                "value": [{
+                    "string": " ",
+                    "type": "LiteralString"
+                }],
+                "type": "Property"
+            },
+            "editable": true,
+            "creator": "admin"
+        },
+        {
+            "sysmlid": "IS_G-slot-_18_0_5_407019f_1458258991043_482001_14097",
+            "editable": true,
+            "creator": "admin",
+            "modifier": "admin",
+            "name": "",
+            "specialization": {
+                "propertyType": null,
+                "isDerived": false,
+                "isSlot": true,
+                "value": [{
+                    "string": "Jenkins,DocWeb,some_tw_doc,some_tw_proj",
+                    "type": "LiteralString"
+                }],
+                "type": "Property"
+            }
         },
         {
             "sysmlid": "jobD",
@@ -200,26 +297,19 @@
             "specialization": {"type": "Element"}
         },
         {
-            "modifier": "admin",
-            "name": "",
-            "sysmlid": "IS_C-slot-_18_0_5_407019f_1458259018041_351899_14098",
-            "specialization": {
-                "propertyType": null,
-                "isSlot": true,
-                "isDerived": false,
-                "value": [{
-                    "string": "waiting",
-                    "type": "LiteralString"
-                }],
-                "type": "Property"
-            },
+            "sysmlid": "jobC",
+            "isMetatype": false,
             "editable": true,
-            "creator": "admin"
+            "creator": "admin",
+            "modifier": "admin",
+            "name": "jobC",
+            "appliedMetatypes": ["_18_0_5_407019f_1458258829038_313297_14086"],
+            "specialization": {"type": "Element"}
         },
         {
             "modifier": "admin",
             "name": "",
-            "sysmlid": "IS_D-slot-_18_0_5_407019f_1458259018041_351899_14098",
+            "sysmlid": "IS_C-slot-_18_0_5_407019f_1458259018041_351899_14098",
             "specialization": {
                 "propertyType": null,
                 "isSlot": true,
@@ -253,41 +343,17 @@
         {
             "modifier": "admin",
             "name": "",
-            "sysmlid": "IS_F-slot-_18_0_5_407019f_1458259033014_844708_14099",
+            "sysmlid": "IS_F-slot-_18_0_5_407019f_1458259018041_351899_14098",
             "specialization": {
                 "propertyType": null,
                 "isSlot": true,
                 "isDerived": false,
-                "value": [{
-                    "string": "0 0 * * *",
-                    "type": "LiteralString"
-                }],
-                "type": "Property"
-            },
-            "editable": true,
-            "creator": "admin"
-        },
-        {
-            "sysmlid": "IS_G-slot-_18_0_5_407019f_1458259018041_351899_14098",
-            "editable": true,
-            "creator": "admin",
-            "modifier": "admin",
-            "name": "",
-            "specialization": {
-                "propertyType": null,
-                "isDerived": false,
-                "isSlot": true,
                 "value": [{
                     "string": "waiting",
                     "type": "LiteralString"
                 }],
                 "type": "Property"
-            }
-        },
-        {
-            "modifier": "admin",
-            "sysmlid": "PMA_Jobs",
-            "specialization": {"type": "Element"},
+            },
             "editable": true,
             "creator": "admin"
         },
@@ -307,80 +373,14 @@
             }
         },
         {
-            "sysmlid": "IS_B",
+            "sysmlid": "jobB",
             "isMetatype": false,
             "editable": true,
             "creator": "admin",
             "modifier": "admin",
-            "name": "IS_B",
-            "documentation": "",
-            "appliedMetatypes": ["_9_0_62a020a_1105704885251_933969_7897"],
-            "specialization": {
-                "slots": [],
-                "classifier": [],
-                "type": "InstanceSpecification"
-            }
-        },
-        {
-            "sysmlid": "IS_G-slot-_18_0_5_407019f_1458258991043_482001_14097",
-            "editable": true,
-            "creator": "admin",
-            "modifier": "admin",
-            "name": "",
-            "specialization": {
-                "propertyType": null,
-                "isDerived": false,
-                "isSlot": true,
-                "value": [{
-                    "string": "Jenkins,DocWeb,some_tw_doc,some_tw_proj",
-                    "type": "LiteralString"
-                }],
-                "type": "Property"
-            }
-        },
-        {
-            "sysmlid": "IS_G-slot-_18_0_5_407019f_1458259033014_844708_14099",
-            "editable": true,
-            "creator": "admin",
-            "modifier": "admin",
-            "name": "",
-            "specialization": {
-                "propertyType": null,
-                "isDerived": false,
-                "isSlot": true,
-                "value": [{
-                    "string": " ",
-                    "type": "LiteralString"
-                }],
-                "type": "Property"
-            }
-        },
-        {
-            "sysmlid": "jobG",
-            "isMetatype": false,
-            "editable": true,
-            "creator": "admin",
-            "modifier": "admin",
-            "name": "jobG",
+            "name": "jobB",
             "appliedMetatypes": ["_18_0_5_407019f_1458258829038_313297_14086"],
             "specialization": {"type": "Element"}
-        },
-        {
-            "modifier": "admin",
-            "name": "",
-            "sysmlid": "IS_B-slot-_18_0_5_407019f_1458259033014_844708_14099",
-            "specialization": {
-                "propertyType": null,
-                "isSlot": true,
-                "isDerived": false,
-                "value": [{
-                    "string": " ",
-                    "type": "LiteralString"
-                }],
-                "type": "Property"
-            },
-            "editable": true,
-            "creator": "admin"
         }
     ]
 }

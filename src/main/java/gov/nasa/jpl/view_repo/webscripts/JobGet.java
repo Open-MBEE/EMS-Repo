@@ -173,9 +173,7 @@ public class JobGet extends ModelGet {
                                         
                                         json.put( prop );
                                         JSONObject elements = new JSONObject();
-                                        elements.put( "elements", json );
-                                                                       
-                                        updateMmsJobStatus( elements ); 
+                                        elements.put( "elements", json );                                                                 
             
                                         jobJson.put( "status", newStatus );
                                     }
@@ -253,10 +251,4 @@ public class JobGet extends ModelGet {
         return color;
     }
     
-    protected void updateMmsJobStatus(JSONObject elements) {
-        
-        // This will perform a JobPost so the status will be updated
-        // in the MMS
-        ModelLoadActionExecuter.loadJson( elements, null, null, true );                             
-    }
 }
