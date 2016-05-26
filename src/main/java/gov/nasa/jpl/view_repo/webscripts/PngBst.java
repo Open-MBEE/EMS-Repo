@@ -7,10 +7,10 @@ import gov.nasa.jpl.view_repo.util.EmsScriptNode;
  * @author lho
  *
  */
-public class EmsBst {
-	public static EmsBstNode root;
+public class PngBst {
+	public static PngBstNode root;
 	
-	public EmsBst(){
+	public PngBst(){
 		this.root = null;
 	}
 	
@@ -20,8 +20,8 @@ public class EmsBst {
 	 * @param node
 	 * @return
 	 */
-	public boolean find(EmsBstNode node){
-		EmsBstNode current = root;
+	public boolean find(PngBstNode node){
+		PngBstNode current = root;
 		while(current != null && current.data != null && node != null && node.data != null){
 			int c = current.data.getName().compareTo(node.data.getName().replace(".svg", ".png")); 
 			if(c == 0) return true;
@@ -33,13 +33,13 @@ public class EmsBst {
 	
 	public void insert(EmsScriptNode emsScriptNode){
 		if(emsScriptNode == null) return;
-		EmsBstNode newNode = new EmsBstNode(emsScriptNode);
+		PngBstNode newNode = new PngBstNode(emsScriptNode);
 		if(root == null){
 			root = newNode;
 			return;
 		}
-		EmsBstNode current = root;
-		EmsBstNode parent = null;
+		PngBstNode current = root;
+		PngBstNode parent = null;
 		while(true){
 			parent = current;
 			int c = emsScriptNode.getName().compareTo(current.data.getName());
@@ -61,7 +61,7 @@ public class EmsBst {
 		}
 	}
 	
-	public void display(EmsBstNode root){
+	public void display(PngBstNode root){
 		if(root != null){
 			display(root.left);
 			System.out.println(" " + root.data.getName());
@@ -71,11 +71,11 @@ public class EmsBst {
 	
 }
 
-class EmsBstNode{
+class PngBstNode{
 	EmsScriptNode data;
-	EmsBstNode left;
-	EmsBstNode right;
-	public EmsBstNode(EmsScriptNode data){
+	PngBstNode left;
+	PngBstNode right;
+	public PngBstNode(EmsScriptNode data){
 		this.data = data;
 		left = null;
 		right = null;
