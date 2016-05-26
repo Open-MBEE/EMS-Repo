@@ -9,8 +9,9 @@ public interface ExecutionEngine {
      * createEngine
      * 
      * Creates an instance of the engine to be ran
+     * @return 
      */
-    void createEngine();
+    JenkinsEngine createEngine();
 
     /**
      * execute
@@ -20,24 +21,6 @@ public interface ExecutionEngine {
      * @param event
      */
     void execute( );
-
-    /**
-     * isRunning
-     * 
-     * Returns the status of the executionEngine if it is running or not.
-     * 
-     * @return
-     */
-    boolean isRunning();
-
-    /**
-     * getExecutionStatus
-     * 
-     * Returns the integer form of status from the last execution
-     * 
-     * @return
-     */
-    int getExecutionStatus();
 
     /**
      * getEventDetail Searches for specific detail within the queue of events to

@@ -252,7 +252,7 @@ public class Evaluate implements Viewable< EmsScriptNode > {
             
             Set< EmsScriptNode > elements = 
                     ModelLoadActionExecuter.loadJson( json, this.modelContext,
-                                                      this.serviceContext );
+                                                      this.serviceContext, false);
             if ( Utils.isNullOrEmpty( elements ) ) {
                 logger.warn( "Expression \"" + expression + "\" failed to parse!" );
             } else {

@@ -64,6 +64,9 @@
 <tr><td>/workspaces/{workspaceId}/elements/{elementId}</td><td>mms/workspaces/elements/element.get.desc.xml</td><td>gov.nasa.jpl.view_repo.webscripts.ModelGet</td></tr>
 <tr><td>/workspaces/{workspaceId}/elements/{elementId}</td><td>mms/workspaces/elements/element.delete.desc.xml</td><td>gov.nasa.jpl.view_repo.webscripts.MmsModelDelete</td></tr>
 <tr><td>/workspaces/{workspaceId}/history/{elementId}</td><td>mms/workspaces/history/element.get.desc.xml</td><td>gov.nasa.jpl.view_repo.webscripts.HistoryGet</td></tr>
+<tr><td>/workspaces/{workspaceId}/jobs/allJobs</td><td>pma/alljobs.get.desc.xml</td><td>gov.nasa.jpl.view_repo.webscripts.AllJobsGet</td></tr>
+<tr><td>/workspaces/{workspaceId}/jobs/{jobId}</td><td>pma/job.delete.desc.xml</td><td>gov.nasa.jpl.view_repo.webscripts.JobDelete</td></tr>
+<tr><td>/workspaces/{workspaceId}/jobs/{jobId}/cancel</td><td>pma/jobcancel.post.desc.xml</td><td>gov.nasa.jpl.view_repo.webscripts.JobCancel</td></tr>
 <tr><td>/workspaces/{workspaceId}/jobs/{jobId}/execute</td><td>pma/jenkins.post.desc.xml</td><td>gov.nasa.jpl.view_repo.webscripts.JobExecute</td></tr>
 <tr><td>/workspaces/{workspaceId}/jobs/{jobId}?recurse={recurse?}&amp;?depth={depth?}</td><td>pma/job.get.desc.xml</td><td>gov.nasa.jpl.view_repo.webscripts.JobGet</td></tr>
 <tr><td>/workspaces/{workspaceId}/jobs?addToJenkins={addToJenkins?}</td><td>pma/job.post.desc.xml</td><td>gov.nasa.jpl.view_repo.webscripts.JobPost</td></tr>
