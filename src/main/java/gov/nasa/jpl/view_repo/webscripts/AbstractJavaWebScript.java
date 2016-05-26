@@ -1421,7 +1421,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         if (sendEmail) {
             String hostname = NodeUtil.getHostname();
             if (!Utils.isNullOrEmpty( hostname )) {
-                String sender = hostname + "@" + EmsConfig.get( "app.domain.name" );
+                String sender = hostname + "@" + getConfig( "app.domain.name" );
                 String username = NodeUtil.getUserName();
                 if (!Utils.isNullOrEmpty( username )) {
                     EmsScriptNode user = new EmsScriptNode(services.getPersonService().getPerson(username),
@@ -1462,7 +1462,6 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         }
         return systemModel;
     }
-
 
     public static EmsSystemModel globalSystemModel = null;
 
@@ -1896,7 +1895,6 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
 //        }
     }
 
-
     public void fix( final Set< EmsScriptNode > elements, final WorkspaceNode ws ) {
         fix(elements, ws, getServices(), getResponse(), getResponseStatus(), getEmsSystemModel(), getSystemModelAe() );
     }
@@ -2302,11 +2300,13 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
 
         // This should always be of size 1:
         return Utils.isNullOrEmpty( expressions ) ? null :  expressions.iterator().next();
-
     }
 
-    // This function will get information which are essential to be communicated
-    // over to the Jenkins job and then send it over as an XML file (config.xml) 
+    /* TODO -- move the code from (2314 - 3308) 
+     *         outside of AbstractJavaWebScript 
+     * */
+    
+    // This function will grab information and then send it over as an XML file (config.xml) 
     protected String createJenkinsConfig(String jobID,
                                        Map<String,String> propertyValues,
                                        boolean createNewJob) {
@@ -2334,40 +2334,19 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
             if (  commandArgs[0].trim().toLowerCase().equals("jenkins") &&
                     ( commandArgs[1].trim().toLowerCase().equals("doc web") ||
                       commandArgs[1].trim().toLowerCase().equals("docweb") ) ) {
-                
-                String documentID = job.optString( "name" );
-                
-                if( documentID != null ) {
-                    // three cases to ensure we get the proper document for teamwork
-                    if( documentID.contains( "_job" )) {
-                        config.setDocumentID( documentID.replace( "_job", "" ).trim() );
-                    }
-                    else if( commandArgs.length > 4 ){
-                        String document = "";
-                        for(int i = 2; i < commandArgs.length - 1; i++) {
-                            document = document + commandArgs[i] + ",";
-                        }          
-                        
-                        if( document.endsWith( "," ) ) document = document.substring( 0, document.length()-1 );
-                        config.setDocumentID( document.trim() );
-                    }
-                    else {
-                        config.setDocumentID( commandArgs[2].trim() );
-                    }
-
-                }
-                config.setTeamworkProject( commandArgs[commandArgs.length - 1].trim() );            
-            } else {
+                      config.setDocumentID( commandArgs[2].trim() );
+                      config.setTeamworkProject( commandArgs[3].trim() );    
+                    }        
+        } else {
                 String message = "Command not supported: " + command;
                 log(Level.WARN, HttpServletResponse.SC_NOT_IMPLEMENTED, message);
-            }
         }
         
         config.setTeamworkPort( config.getTeamworkPort() );        
         config.setWorkspace( config.getWorkspace() );  
 
-        // Manipulating the string comes from the mms.properties fle 
-        // so it can run properly on Jenkin's 
+
+        // grabbing properties from a file that contains mms info
         String mmsServer = getConfig( "app.url" );
         if( mmsServer == null ) {
             mmsServer = ActionUtil.getHostName();
@@ -2409,10 +2388,8 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         String jobUrl = null;   
         
         // Recreate a Jenkin's instance so we can query for the job's URL and add it to the json
-        // so the user can have easy access to it 
         if( jobWasCreated ) {
-            jenkins = new JenkinsEngine();
-            
+            jenkins = new JenkinsEngine();      
             jobUrl = jenkins.getMagicDrawLogFromJob( jobID );
         }
         
@@ -2439,7 +2416,6 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         EmsScriptNode node;
         JSONObject json;
     }
-   
 
     /**
      * For element json that could be for job properties, dig the property
@@ -2457,16 +2433,15 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
                                            Map<String, JSONObject> elementMap,
                                            WorkspaceNode workspace ) {
         for( int i = 0; i < elements.length(); i++ ) {
-            
             JSONObject propertyJson = elements.optJSONObject( i );            
             if( EmsScriptNode.maybeJobProperty( propertyJson ) ) {
                 // Get the property name from the id of the slot of the job
                 // property json.
                 String identifiedJobPropertyName =
                         getNameOfJobPropertyForSlot( propertyJson );
-                IdNodeJson job = getOwningJobOfPropertyJson( propertyJson, elementMap, workspace, null );
-                String jobId = job == null ? null : job.id;
                 if( !Utils.isNullOrEmpty( identifiedJobPropertyName ) ) {
+                    IdNodeJson job = getOwningJobOfPropertyJson( propertyJson, elementMap, workspace, null );
+                    String jobId = job == null ? null : job.id;
                     String propertyValue = getStringValueFromPropertyJson(propertyJson);
                     Utils.put( propertyValues, jobId, identifiedJobPropertyName,
                                propertyValue);
@@ -2521,12 +2496,10 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
 
             if( propertyElementJson != null && propertyName.equals( "url" )) {
                 jobUrl = propertyElementJson;
-
                 if( jobJson.has( propertyName ) ) jobJson.remove( propertyName );
             }   
             else if( propertyElementJson != null && propertyName.equals( "queuePosition" )) {
-                jobQueuePosition = propertyElementJson;
-                
+                jobQueuePosition = propertyElementJson;       
                 if( jobJson.has( propertyName ) ) jobJson.remove( propertyName );
             }
             else if( propertyElementJson != null ) {
@@ -2582,23 +2555,26 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
 
         // trying to map out the property name with an object to
         // identify the name coming from MD
-        String propertyId = elementJson.getString( "sysmlid" );
+        String propertyId = elementJson.optString( "sysmlid" );
         return getNameOfJobPropertyForSlot( propertyId);
     }
     
     protected String getNameOfJobPropertyForSlot(String  slotId ) {
-        // split the string and get the defining feature 
-        String[] slotIdParts = slotId.split( "-slot-" );
-        // then compare it and set it when they map correctly
-        if( slotIdParts.length > 1 ) {
-            String definingFeatureIdForSlot = slotIdParts[1];
-            for ( String propertyName : jobProperties ) {
-                if( definingFeatures.get( propertyName ).equals( definingFeatureIdForSlot ) ) {
-                    return propertyName;
+        if( slotId != null ) {
+            // split the string and get the defining feature 
+            String[] slotIdParts = slotId.split( "-slot-" );
+            // then compare it and set it when they map correctly
+            if( slotIdParts.length > 1 ) {
+                String definingFeatureIdForSlot = slotIdParts[1];
+                for ( String propertyName : jobProperties ) {
+                    if( definingFeatures.get( propertyName ).equals( definingFeatureIdForSlot ) ) {
+                        return propertyName;
+                    }
                 }
             }
         }
         return null;
+        
     }
 
     public EmsScriptNode getJobPropertyNode( EmsScriptNode jobNode, String propertyName ) {
@@ -2693,7 +2669,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
             propertyJson.put( "sysmlid", propertyId );  // may already be there
             //elementsMap.put(propertyId, propertyJson);  // do this from caller
         } else if ( propertyJson.has( "sysmlid" ) ) {
-            propertyId = propertyJson.getString( "sysmlid" );
+            propertyId = propertyJson.optString( "sysmlid" );
         }
 
         // add name
@@ -2945,6 +2921,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
             EmsScriptNode job = jobStuff == null ? null : jobStuff.node;
             if ( job != null ) {
                 String jobId = job.getSysmlId();
+                // add a job to the list of jobs that will get posted
                 if ( jobId != null && !elementMap.containsKey( jobId ) ) {
                     jobIds.add( jobId );
                 }
@@ -2998,7 +2975,6 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         // Step 3
         // Add json for job elements whose Properties are posted without the job.
         // We do this because only jobs that show up in the json are processed.
-        // This call also saves wa
         ArrayList< String > jobIdsNotPosted =
                 getJobsIdsForPropertyElementJson( elementMap, //elements,
                                                   workspace );
@@ -3093,12 +3069,14 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
                                 StringBuilder sb = new StringBuilder();
                                 sb.append("");
                                 sb.append(pos);
-                                String queuePosition = sb.toString();
-                                
+                                String queuePosition = sb.toString();                           
                                 valueSpec.put( "string", queuePosition );
                             }
                         }
                     }
+                    
+                    // NOTE: commented out until DocWeb next iteration 
+                    // elements.put( jobQueuePosition );
                 }                       
             }
         }
@@ -3118,17 +3096,9 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         for ( EmsScriptNode slot : slots ) {
             getMissingPropertyValues( slot, jobNode );
         }
-//        for ( String propertyName : AbstractJavaWebScript.jobProperties ) {
-//            //String definingFeature = definingFeatures.get( propertyName );
-//            getMissingPropertyValues( propertyName, jobNode );
-//        }
     }
     private void getMissingPropertyValues( EmsScriptNode slot,
-                                           EmsScriptNode jobNode ) {
-        // Attempts to find the node and retrieve the value that way.
-//        EmsScriptNode propertyNode =
-//                getJobPropertyNode( jobNode, propertyName );
-        
+                                           EmsScriptNode jobNode ) {        
         Collection< Object > values = getSystemModel().getValue( slot, null );
 
         String slotId = slot.getSysmlId();
@@ -3192,7 +3162,6 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         }
 
         if ( owner == null && ownerId == null ) return null;
-
         
         if ( owner == null ) {
             owner = findScriptNodeById( ownerId, workspace, dateTime, false );
