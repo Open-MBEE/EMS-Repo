@@ -35,7 +35,6 @@ import gov.nasa.jpl.view_repo.util.ModelContext;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
 import gov.nasa.jpl.view_repo.util.ServiceContext;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
-import gov.nasa.jpl.view_repo.webscripts.JobPost;
 import gov.nasa.jpl.view_repo.webscripts.ModelPost;
 
 import java.util.List;
