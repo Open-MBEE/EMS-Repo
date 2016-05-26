@@ -1814,7 +1814,7 @@ None,
 350,
 "PostArtifact",
 "Post artifact to the master branch",
-'curl %s %s -H "Content-Type: multipart/form-data;" --form "file=@JsonData/x.json" --form "title=JsonData/x.json" --form "desc=stuffs" --form "content=@JsonData/x.json" %smaster/sites/europa/artifacts/folder1/folder2/xartifact' % (CURL_FLAGS, CURL_POST_FLAGS_NO_DATA, BASE_URL_WS),
+'curl %s %s -H "Content-Type: multipart/form-data;" --form "file=@JsonData/x.json" --form "title=JsonData/x.json" --form "desc=stuffs" --form "content=@JsonData/sample.svg" %smaster/sites/europa/artifacts/folder1/folder2/xartifact' % (CURL_FLAGS, CURL_POST_FLAGS_NO_DATA, BASE_URL_WS),
 True,
 None,
 ["test", "workspaces", "develop", "develop2"]
@@ -1824,13 +1824,24 @@ None,
 360,
 "GetArtifact",
 "Get artifact from the master branch",
-create_curl_cmd(type="GET", data="artifacts/xartifact?extension=svg&cs=3463563326", base_url=BASE_URL_WS,
+create_curl_cmd(type="GET", data="artifacts/xartifact?extension=svg&cs=2572447377", base_url=BASE_URL_WS,
                 branch="master/"),
 False,
 ['"url"'],
 ["test", "workspaces", "develop", "develop2"]
 ],
-                                   
+ 
+[
+361,
+"GetArtifactPng",
+"Get PNG artifact from the master branch",
+create_curl_cmd(type="GET", data="artifacts/xartifact?extension=png&cs=372689118", base_url=BASE_URL_WS,
+                branch="master/"),
+False,
+['"url"'],
+["test", "workspaces", "develop", "develop2"]
+],
+
 [
 370,
 "CreateWorkspaceDelete1",

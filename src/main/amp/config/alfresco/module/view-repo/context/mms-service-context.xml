@@ -531,6 +531,12 @@
     	<property name="services" ref="ServiceRegistry"/>
     </bean>   
     
+    <bean id="webscript.gov.nasa.jpl.mms.utils.svgtopng.post"
+        class="gov.nasa.jpl.view_repo.webscripts.SvgToPngPost" parent="webscript" singleton="false">
+        <property name="repositoryHelper" ref="repositoryHelper"/>
+        <property name="services" ref="ServiceRegistry"/>
+    </bean>   
+    
    	<!-- Services for PMA -->
 	<bean id="webscript.gov.nasa.jpl.pma.job.get"
 		class="gov.nasa.jpl.view_repo.webscripts.JobGet"
