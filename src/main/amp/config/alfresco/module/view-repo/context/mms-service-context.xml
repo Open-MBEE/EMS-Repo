@@ -13,6 +13,10 @@
     <bean id="webscript.gov.nasa.jpl.utils.emsconfig.post" class="gov.nasa.jpl.view_repo.webscripts.EmsConfigPost"
         parent="webscript">
     </bean>
+    
+    <bean id="webscript.gov.nasa.jpl.utils.loginticket.get" class="gov.nasa.jpl.view_repo.webscripts.util.LoginTicket" parent="webscript">
+      <property name="ticketComponent" ref="ticketComponent" />
+    </bean>
 
 	<bean id="webscript.gov.nasa.jpl.utils.updateworkspaceldapgroup.post"
 		class="gov.nasa.jpl.view_repo.webscripts.UpdateWorkspaceLdapGroup"
@@ -533,7 +537,7 @@
         <property name="services" ref="ServiceRegistry"/>
     </bean>   
     
-   	<!-- Service for PMA -->
+   	<!-- Services for PMA -->
 	<bean id="webscript.gov.nasa.jpl.pma.job.get"
 		class="gov.nasa.jpl.view_repo.webscripts.JobGet"
 		parent="webscript" singleton="false">
@@ -541,7 +545,6 @@
 		<property name="services" ref="ServiceRegistry" />
 	</bean>
 	
-   	<!-- Service for PMA -->
 	<bean id="webscript.gov.nasa.jpl.pma.job.post"
 		class="gov.nasa.jpl.view_repo.webscripts.JobPost"
 		parent="webscript" singleton="false">
@@ -549,9 +552,29 @@
 		<property name="services" ref="ServiceRegistry" />
 	</bean>
 	
-	   	<!-- Service for PMA -->
+	<bean id="webscript.gov.nasa.jpl.pma.job.delete"
+		class="gov.nasa.jpl.view_repo.webscripts.JobDelete"
+		parent="webscript" singleton="false">
+		<property name="repositoryHelper" ref="repositoryHelper" />
+		<property name="services" ref="ServiceRegistry" />
+	</bean>
+	
+	<bean id="webscript.gov.nasa.jpl.pma.jobcancel.post"
+		class="gov.nasa.jpl.view_repo.webscripts.JobCancel"
+		parent="webscript" singleton="false">
+		<property name="repositoryHelper" ref="repositoryHelper" />
+		<property name="services" ref="ServiceRegistry" />
+	</bean>		
+	
 	<bean id="webscript.gov.nasa.jpl.pma.jenkins.post"
 		class="gov.nasa.jpl.view_repo.webscripts.JobExecute"
+		parent="webscript" singleton="false">
+		<property name="repositoryHelper" ref="repositoryHelper" />
+		<property name="services" ref="ServiceRegistry" />
+	</bean>
+	
+		<bean id="webscript.gov.nasa.jpl.pma.alljobs.get"
+		class="gov.nasa.jpl.view_repo.webscripts.AllJobsGet"
 		parent="webscript" singleton="false">
 		<property name="repositoryHelper" ref="repositoryHelper" />
 		<property name="services" ref="ServiceRegistry" />

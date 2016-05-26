@@ -633,6 +633,8 @@ public class ModelGet extends AbstractJavaWebScript {
             if ( !checkPermission
                  || checkPermissions( node, PermissionService.READ ) ) {
 
+                // don't return deleted elements
+                if (node.isDeleted()) continue;
                 JSONObject json =
                         getJsonForElement( node, ws, dateTime, id, includeQualified,
                                   isIncludeDocument );

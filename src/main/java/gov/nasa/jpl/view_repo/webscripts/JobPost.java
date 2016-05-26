@@ -43,8 +43,6 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
 public class JobPost extends ModelPost {
     static Logger logger = Logger.getLogger(JobPost.class);
     
-    protected boolean doJenkins = false;
-    
     public JobPost() {
         super();
     }
@@ -55,15 +53,15 @@ public class JobPost extends ModelPost {
 
     @Override
     protected Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {        
-
-        JobPost instance = new JobPost(repository, services);
-        instance.setServices(getServices());
-        // Run without transactions since JobPost breaks them up itself.
-        return instance.executeImplImpl(req, status, cache, true);
+            JobPost instance = new JobPost(repository, services);
+            instance.setServices(getServices());
+            
+            // Run without transactions since JobPost breaks them up itself.
+            return instance.executeImplImpl(req, status, cache, true);
     }
     
     @Override
-    public void postProcessJson( JSONObject top) {
+    public void postProcessJson(JSONObject top) {
         if ( jobsJsonArray != null ) {
             top.put( "jobs", jobsJsonArray );
             // flush the jobs array so that it can be repopulated for
@@ -71,6 +69,5 @@ public class JobPost extends ModelPost {
             jobsJsonArray = new JSONArray();
         }
     }
-
-
+    
 }
