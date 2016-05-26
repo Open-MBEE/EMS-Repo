@@ -211,6 +211,7 @@ public class ModelPost extends AbstractJavaWebScript {
 
         if (!(elementsArray == null))
             collections.add(elementsArray);
+        
         TreeSet<EmsScriptNode> elements = new TreeSet<EmsScriptNode>();
 
         // Note: Cannot have any sendProgress methods before setting
@@ -465,7 +466,7 @@ public class ModelPost extends AbstractJavaWebScript {
             timerUpdateModel = Timer.startTimer(timerUpdateModel, timeEvents);
 
             // Send deltas to all listeners
-            if (createCommit && wsDiff.isDiffPrecalculated()) {
+            if (createCommit && wsDiff.isDiffPrecalculated()) { 
                 sendProgress("Sending deltas and creating commit node",
                         projectId, false);
                 if (runWithoutTransactions) {
@@ -2800,7 +2801,7 @@ public class ModelPost extends AbstractJavaWebScript {
 		}
 
         status.setCode(responseStatus.getCode());
-
+        
         sendProgress("Load/sync/update request is finished processing.",
                 projectId, true);
 

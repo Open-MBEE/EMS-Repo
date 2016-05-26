@@ -147,7 +147,7 @@ public class AllFlagsGet extends FlagSet {
         } else if (path.equalsIgnoreCase("skipQualified")) {
             NodeUtil.skipQualified = val;
         } else if (path.equalsIgnoreCase("skipSvgToPng")){
-        	NodeUtil.skipSvgToPng = val;
+            NodeUtil.skipSvgToPng = val;
         } else if (path.equalsIgnoreCase("restPost")) {
             RestPostConnection.doRestPost = val;
         }
@@ -318,7 +318,7 @@ public class AllFlagsGet extends FlagSet {
         } else if (path.equalsIgnoreCase( "skipQualified" )) {
             return false;
         } else if (path.equalsIgnoreCase( "skipSvgToPng" )) {
-        	return false;
+        	    return false;
         } else if (path.equalsIgnoreCase("restPost")) {
             return false;
         }
@@ -402,7 +402,7 @@ public class AllFlagsGet extends FlagSet {
         } else if (path.equalsIgnoreCase("skipQualified")) {
             return "skipQualified";
         } else if (path.equalsIgnoreCase( "skipSvgToPng")) {
-        	return "skipSvgToPg";
+        	    return "skipSvgToPg";
         } else if (path.equalsIgnoreCase("restPost")) {
             return "restPost";
         }

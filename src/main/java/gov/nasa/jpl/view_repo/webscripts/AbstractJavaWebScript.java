@@ -220,6 +220,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
             put( "schedule", "_18_0_5_407019f_1458259033014_844708_14099");
             put( "command", "_18_0_5_407019f_1458258991043_482001_14097");
             put( "url", "_18_0_5_407019f_1459284115836_664841_14086");
+            put( "queuePosition", "_18_0_5_407019f_1462494095249_141884_14076");
         }
     };
 
@@ -230,6 +231,9 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
     
     // This object will be used to get the job url which can be linked to Jenkins 
     protected JSONObject jobUrl = new JSONObject();
+    
+    // This object will be used to get the job url which can be linked to Jenkins 
+    protected JSONObject jobQueuePosition = new JSONObject();
 
     protected static String[] jobProperties =
             Utils.toArrayOfType( definingFeatures.keySet().toArray(), String.class );
@@ -369,7 +373,6 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         };
         if ( !model.containsKey( "res" ) && response != null && response.toString().length() > 0 ) {
             model.put( "res", response.toString() );
-
         }
         // need to check if the transaction resulted in rollback, if so change the status code
         // TODO: figure out how to get the response message in (response is always empty)
@@ -2302,7 +2305,8 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
 
     }
 
-
+    // This function will get information which are essential to be communicated
+    // over to the Jenkins job and then send it over as an XML file (config.xml) 
     protected String createJenkinsConfig(String jobID,
                                        Map<String,String> propertyValues,
                                        boolean createNewJob) {
@@ -2311,6 +2315,11 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         
         JenkinsEngine jenkins = new JenkinsEngine();
         JenkinsBuildConfig config = new JenkinsBuildConfig();
+        
+        JSONObject job = new JSONObject();
+        
+        if( jobsJsonArray.length() > 0 ) job = jobsJsonArray.optJSONObject( 0 );
+        
         config.setJobID( jobID );
         
         String schedule = propertyValues.get("schedule");
@@ -2322,13 +2331,32 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         if( command != null ) {            
             String[] commandArgs = command.split( "," );
             
-            if ( commandArgs.length >= 4 &&
-                    commandArgs[0].trim().toLowerCase().equals("jenkins") &&
+            if (  commandArgs[0].trim().toLowerCase().equals("jenkins") &&
                     ( commandArgs[1].trim().toLowerCase().equals("doc web") ||
                       commandArgs[1].trim().toLowerCase().equals("docweb") ) ) {
                 
-                config.setDocumentID( commandArgs[2].trim() );
-                config.setTeamworkProject( commandArgs[3].trim() );            
+                String documentID = job.optString( "name" );
+                
+                if( documentID != null ) {
+                    // three cases to ensure we get the proper document for teamwork
+                    if( documentID.contains( "_job" )) {
+                        config.setDocumentID( documentID.replace( "_job", "" ).trim() );
+                    }
+                    else if( commandArgs.length > 4 ){
+                        String document = "";
+                        for(int i = 2; i < commandArgs.length - 1; i++) {
+                            document = document + commandArgs[i] + ",";
+                        }          
+                        
+                        if( document.endsWith( "," ) ) document = document.substring( 0, document.length()-1 );
+                        config.setDocumentID( document.trim() );
+                    }
+                    else {
+                        config.setDocumentID( commandArgs[2].trim() );
+                    }
+
+                }
+                config.setTeamworkProject( commandArgs[commandArgs.length - 1].trim() );            
             } else {
                 String message = "Command not supported: " + command;
                 log(Level.WARN, HttpServletResponse.SC_NOT_IMPLEMENTED, message);
@@ -2385,16 +2413,20 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         if( jobWasCreated ) {
             jenkins = new JenkinsEngine();
             
-            jenkins.constructBuildUrl( jobID, JenkinsEngine.detail.URL );
-            jenkins.execute();
-            if( jenkins.jsonResponse != null ) {
-                jobUrl = jenkins.jsonResponse.optString( "url" );
-            }
+            jobUrl = jenkins.getMagicDrawLogFromJob( jobID );
         }
         
         return jobUrl;
     }
     
+    /* this class is used to get one of following values:
+     *              id      (element)
+     *              node    (database)
+     *              json    (JobPost)
+     *              
+     *  from a job because it will come in from one of these 
+     *  specifications
+     */
     
     class IdNodeJson {
         public IdNodeJson( String id, EmsScriptNode node, JSONObject json ) {
@@ -2491,7 +2523,12 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
                 jobUrl = propertyElementJson;
 
                 if( jobJson.has( propertyName ) ) jobJson.remove( propertyName );
-            }            
+            }   
+            else if( propertyElementJson != null && propertyName.equals( "queuePosition" )) {
+                jobQueuePosition = propertyElementJson;
+                
+                if( jobJson.has( propertyName ) ) jobJson.remove( propertyName );
+            }
             else if( propertyElementJson != null ) {
                 elements.put( propertyElementJson );
                 String propertyId = propertyElementJson.optString("sysmlid");
@@ -2570,7 +2607,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         Collection<EmsScriptNode> slots = jobNode.getAllSlots( jobNode, 
                                                                false, null, null, 
                                                                services, response, responseStatus, null );
-        
+
         EmsScriptNode propertyNode = null;
         if( !Utils.isNullOrEmpty( slots ) ) {
             Iterator< EmsScriptNode > itr = slots.iterator();
@@ -2641,29 +2678,6 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
                 propertyId = propertyNode.getSysmlId();
             }
         }
-
-//        JSONObject propertyJson = getPropertyJson(propertyId, elements);
-//        if ( propertyJson != null ) {
-//            // The property value should have been provided in the job
-//            // json. If it wasn't, then try to get it from the property json. If
-//            // they both provide property values, throw an error if they
-//            // disagree.
-//            String value = getStringValueFromPropertyJson( propertyJson );
-//            if ( value != null && propertyValue != null && !value.equals( propertyValue ) ) {
-//                String jsonPropertyId = propertyJson.optString( "sysmlid" );
-//                logger.error( "job json says value of " + propertyName + " is \""
-//                              + propertyValue
-//                              + "\", but posting element json (id=" + jsonPropertyId
-//                              + ") says the value is " + value + "; using " + propertyValue + " !" );
-//                value = propertyValue;
-//            }
-//            if ( value != null ) {
-//                Utils.put( propertyValues, jobId, propertyName, value );
-//            }
-//
-//            // Returning null to indicate that no new element json was created
-//            return null;
-//        }
 
         JSONObject propertyJson = Utils.get(this.propertyJson, jobId, propertyName);
 
@@ -2804,8 +2818,8 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
             elements.put( instanceSpec );
         }
         
-//        // Save for use in creating new job json or the ids of the job's slots.
-//        instanceSpecs.put( jobId, instanceSpec );
+        // Save for use in creating new job json or the ids of the job's slots.
+        // instanceSpecs.put( jobId, instanceSpec );
         
         return instanceSpecId;
     }
@@ -2896,11 +2910,6 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         }
         
         return null;
-    }
-
-    private boolean jenkinsConfigExists( String sysmlId ) {
-        // TODO Auto-generated method stub
-        return false;
     }
 
     protected String getJobIdFromJson( JSONObject job, boolean createAndAddIfMissing ) {
@@ -3014,7 +3023,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
             
             if ( EmsScriptNode.isJob( elem ) ) {
                 String id = getJobIdFromJson( elem, false );
-//              // Find node for id.
+                // Find node for id.
                 // FIXME -- if the id of a deleted job is posted, we won't get
                 // the properties of the deleted node unless we pass true in the
                 // find call below.
@@ -3037,25 +3046,28 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         if ( jobs != null ) {
             for ( int i = 0; i < jobs.length(); i++ ) {
                 JSONObject job = jobs.optJSONObject( i );
+                
                 boolean isNew = processJobAsJob( job, elements, elementMap, workspace );
                 String id = getJobIdFromJson( job, false );
                 if( id != null ) createNewJob.put( id, isNew );                    
             }
         }
         
+        // Only create a job on the jenkins server if the job was properly posted to MMS 
+        boolean postToJenkinsServer = responseStatus.getCode() == 200 ? true : false;
+        
         // Get missing property values from DB for jenkins config
         //getMissingPropertyValues(jobIds);
-        if( addToJenkins ) {
+        if( addToJenkins && postToJenkinsServer ) {
             // Step 7
             // FIXME -- Don't send the jenkins config until the post is complete; in
             // fact, the propertyValues should be gathered after the fact.
             for ( String jobId : propertyValues.keySet() ) {
                 Map< String, String > properties = propertyValues.get( jobId );
                 String url = createJenkinsConfig( jobId, properties, createNewJob.get( jobId ) == true );
-                
-                // NOTE: how can we get the jobUrlJson? either way, up to this point
-                //       we have a URL by returning it (implies the job has been created)
     
+                // if there is url, this implies that a job exists and will also
+                // check if it is in a queue'd position
                 if( url != null ) {                
                     JSONObject specJson = jobUrl.optJSONObject( Acm.JSON_SPECIALIZATION );
                     if ( specJson != null && specJson.has( "value"  ) ) {
@@ -3069,6 +3081,24 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
                     }
                     
                     elements.put( jobUrl );
+                    
+                    int pos = getJobQueueNumber(jobId);
+                    
+                    specJson = jobQueuePosition.optJSONObject( Acm.JSON_SPECIALIZATION );
+                    if ( specJson != null && specJson.has( "value"  ) ) {
+                        JSONArray valueArr = specJson.getJSONArray( "value" );
+                        if ( valueArr.length() > 0 ) {
+                            JSONObject valueSpec = valueArr.optJSONObject( 0 );
+                            if ( valueSpec != null ) {
+                                StringBuilder sb = new StringBuilder();
+                                sb.append("");
+                                sb.append(pos);
+                                String queuePosition = sb.toString();
+                                
+                                valueSpec.put( "string", queuePosition );
+                            }
+                        }
+                    }
                 }                       
             }
         }
@@ -3114,26 +3144,6 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
             }
         }
     }
-
-    private void getMissingPropertyValues( String propertyName,
-                                           EmsScriptNode jobNode ) {
-        // Attempts to find the node and retrieve the value that way.
-        EmsScriptNode propertyNode =
-                getJobPropertyNode( jobNode, propertyName );
-        
-        Collection< Object > values = getSystemModel().getValue( propertyNode, null );
-
-        if ( !Utils.isNullOrEmpty( values ) ) {
-            if ( values.size() > 1 ) {
-                // TODO -- ERROR?
-            }
-            String jobId = jobNode.getSysmlId();
-            Object value = values.iterator().next();
-            if ( value != null ) {
-                Utils.put( propertyValues, jobId, propertyName, value.toString() ); 
-            }
-        }
-    }
     
     public void addJobMetatype( JSONObject job ) {
         JSONArray appliedMetatypes = job.optJSONArray( "appliedMetatypes" );
@@ -3154,6 +3164,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         }        
     }
     
+    // attempt various ways to get the job based off a property element
     protected IdNodeJson getOwningJobOfPropertyJson( JSONObject propertyJson,
                                                      Map< String, JSONObject > elementMap,
                                                      WorkspaceNode workspace,
@@ -3261,7 +3272,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
 
     public void getJsonForJob(EmsScriptNode job, JSONObject json) {
         if ( job.isJob() ) {
-            JSONObject jobJson = null;
+            JSONObject jobJson = NodeUtil.clone( json );
             for ( String propertyName : jobProperties ) {
 
                 EmsScriptNode propertyNode =
@@ -3293,13 +3304,27 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
                                                Object value,
                                                JSONObject jobJson,
                                                JSONObject json ) {
-        if ( json == null ) return jobJson;
-        if ( jobJson == null ) {
-            jobJson = NodeUtil.clone( json );
-        } 
         jobJson.put( propertyName, jsonWrap( value ) );
         
         return jobJson;
+    }
+    
+    public int getJobQueueNumber(String jobID) {
+        
+        JenkinsEngine jenkins = new JenkinsEngine();
+        
+        JSONObject jenkinsJobJson = jenkins.getJob( jobID );
+
+        if( jenkinsJobJson != null) {
+            JSONObject jobInQueue = jenkins.isJobInQueue( jenkinsJobJson );
+        
+            if (jobInQueue != null) {
+                jenkinsJobJson.put( "color", "queue" );
+                int pos = jenkins.numberInQueue( jobInQueue );
+                return pos + 1;
+            }
+        }
+        return 0;
     }
     
     public static String getConfig(String key) {
