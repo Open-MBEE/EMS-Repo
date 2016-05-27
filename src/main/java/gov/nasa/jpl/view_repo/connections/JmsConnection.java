@@ -62,7 +62,7 @@ public class JmsConnection implements ConnectionInterface {
         public String username = null;
         public String password = null;
         public String destName = "master";
-        public String uri = "tcp://localhost:61616";
+        public String uri = "tcp://localhost:61616?useCompression=true";
         public ConnectionFactory connectionFactory = null;
         public DestinationType destType = DestinationType.TOPIC;
     }
