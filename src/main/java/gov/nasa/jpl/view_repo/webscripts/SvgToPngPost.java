@@ -136,10 +136,10 @@ public class SvgToPngPost extends AbstractJavaWebScript {
 				List<EmsScriptNode> pngList = getPngs();
 				if (pngList != null && pngList.size() > 0) {
 					log(String.format("%s PNGs found!", pngList.size()));
-					EmsBst bst = buildPngBst(pngList);
+					PngBst bst = buildPngBst(pngList);
 					log("Iterating through SVG list...\n");
 					for (EmsScriptNode ems : svgList) {
-						if (!bst.find(new EmsBstNode(ems))) {
+						if (!bst.find(new PngBstNode(ems))) {
 							String name = ems.getName();
 							log(String.format("No corresponding PNG found for %s", name));
 							try {
@@ -185,11 +185,11 @@ public class SvgToPngPost extends AbstractJavaWebScript {
 		return findEmsScriptNodeByType("@cm\\:content.mimetype:\"", "image/png");
 	}
 
-	protected EmsBst buildPngBst(List<EmsScriptNode> pngList) throws Throwable {
+	protected PngBst buildPngBst(List<EmsScriptNode> pngList) throws Throwable {
 		log("Building PNGs binary search tree...");
 		if (pngList == null)
 			throw new NullArgumentException("PNG List");
-		EmsBst bst = new EmsBst();
+		PngBst bst = new PngBst();
 		for (EmsScriptNode ems : pngList) {
 			bst.insert(ems);
 		}

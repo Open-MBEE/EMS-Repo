@@ -4273,7 +4273,10 @@ public class NodeUtil {
 //			pngNode.createVersion("creating the version history", false);
 //		}
 
-		for(int i = svgNode.getEmsVersionHistory().length - 1; i > 0; i--){
+		int svgHistLen = svgNode.getEmsVersionHistory().length;
+		int pngHistLen = pngNode.getEmsVersionHistory().length;
+		
+		for(int i = svgHistLen-pngHistLen; i >= 0; i--){
 			pngNode.makeSureNodeRefIsNotFrozen();
 			pngNode.createVersion("creating the version history", false);
 		}
