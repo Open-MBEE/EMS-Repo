@@ -1,0 +1,15 @@
+#!/bin/bash
+
+if [ "$#" -eq 1 ]; then
+  echo curl -w "%{http_code}\n" -X GET -u admin:admin "http://localhost:8080/alfresco/service/diff/master/$1/latest/latest?fullCompare"
+  curl -w "%{http_code}\n" -X GET -u admin:admin "http://localhost:8080/alfresco/service/diff/master/$1/latest/latest?fullCompare"
+elif [ "$#" -eq 2 ]; then
+  echo curl -w "%{http_code}\n" -X GET -u admin:admin "http://localhost:8080/alfresco/service/diff/$1/$2/latest/latest?fullCompare"
+  curl -w "%{http_code}\n" -X GET -u admin:admin "http://localhost:8080/alfresco/service/diff/$1/$2/latest/latest?fullCompare"
+elif [ "$#" -eq 4 ]; then
+  echo curl -w "%{http_code}\n" -X GET -u admin:admin "http://localhost:8080/alfresco/service/diff/$1/$2/$3/$4?fullCompare"
+  curl -w "%{http_code}\n" -X GET -u admin:admin "http://localhost:8080/alfresco/service/diff/$1/$2/$3/$4?fullCompare"
+else
+  echo "Error!  Expected 1, 2, or 4 args!"
+fi;
+

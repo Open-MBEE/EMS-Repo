@@ -1,15 +1,41 @@
 {
     "workspace1": {
-        "qualifiedName": "master/ws2",
         "name": "ws2",
-        "elements": []
+        "elements": [
+            {
+                "editable": true,
+                "appliedMetatypes": ["_9_0_62a020a_1105704885298_713292_7913"],
+                "specialization": {"type": "Package"}
+            },
+            {
+                "editable": true,
+                "appliedMetatypes": ["_9_0_62a020a_1105704885298_713292_7913"],
+                "specialization": {"type": "Package"}
+            },
+            {
+                "editable": true,
+                "appliedMetatypes": ["_9_0_62a020a_1105704885298_713292_7913"],
+                "specialization": {"type": "Package"}
+            },
+            {
+                "editable": true,
+                "appliedMetatypes": ["_9_0_62a020a_1105704885298_713292_7913"],
+                "specialization": {"type": "Package"}
+            },
+            {
+                "sysmlid": "holding_bin_no_site_no_project",
+                "editable": true,
+                "name": "holding_bin",
+                "appliedMetatypes": ["_9_0_62a020a_1105704885298_713292_7913"],
+                "specialization": {"type": "Package"}
+            }
+        ]
     },
     "workspace2": {
         "deletedElements": [],
         "addedElements": [],
         "conflictedElements": [],
         "updatedElements": [],
-        "qualifiedName": "master/ws1",
         "name": "ws1",
         "movedElements": []
     }

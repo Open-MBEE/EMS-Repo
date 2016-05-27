@@ -234,7 +234,11 @@
 				<property name="view2:view2view"> <!-- json string cache of the whole document view hierarchy -->
 					<type>d:text</type>
 					<mandatory>false</mandatory>
-					<index enabled="false" />
+                    <index enabled="true">
+                        <atomic>true</atomic>
+                        <stored>false</stored>
+                        <tokenised>false</tokenised>
+                    </index>
 				</property>
 				<property name="view2:noSections"> <!-- json string cache of which views are no sections (may go away in future) -->
 					<type>d:text</type>

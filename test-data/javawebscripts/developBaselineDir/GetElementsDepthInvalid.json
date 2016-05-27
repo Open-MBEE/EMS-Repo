@@ -1,5 +1,5 @@
 {
-    "message": "[WARNING]: Bad depth specified, returning depth 0\n",
+    "message": "[WARNING]: Bad depth specified: invalid, returning depth 0\n",
     "elements": [{
         "qualifiedId": "/europa/123456",
         "modifier": "admin",

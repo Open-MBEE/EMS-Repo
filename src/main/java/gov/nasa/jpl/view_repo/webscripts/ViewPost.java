@@ -52,6 +52,7 @@ import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
 
+@Deprecated
 public class ViewPost extends AbstractJavaWebScript {
     static Logger logger = Logger.getLogger(ViewPost.class);
     
@@ -90,11 +91,11 @@ public class ViewPost extends AbstractJavaWebScript {
         try {
             JSONObject json = //JSONObject.make( 
                     (JSONObject)req.parseContent();// );
-			updateViews(json, workspace);
-		} catch (JSONException e) {
-			log(Level.ERROR, HttpServletResponse.SC_BAD_REQUEST, "JSON parse exception: %s", e.getMessage());
-			e.printStackTrace();
-		}
+            updateViews(json, workspace);
+        } catch (JSONException e) {
+            log(Level.ERROR, HttpServletResponse.SC_BAD_REQUEST, "JSON parse exception: %s", e.getMessage());
+            e.printStackTrace();
+        }
 
         status.setCode(responseStatus.getCode());
 		model.put("res", createResponseJson());
@@ -103,7 +104,7 @@ public class ViewPost extends AbstractJavaWebScript {
 		return model;
 	}
 
-	
+
 	private void updateViews(JSONObject jsonObject, WorkspaceNode workspace) throws JSONException {
 	    Date start = new Date();
 	    Map<String, EmsScriptNode> elements = new HashMap<String, EmsScriptNode>();
@@ -122,7 +123,7 @@ public class ViewPost extends AbstractJavaWebScript {
 	    wsDiff.setUpdatedElements( elements );
 		
 		Date end = new Date();
-		JSONObject deltaJson = wsDiff.toJSONObject( start, end );
+		JSONObject deltaJson = wsDiff.toJSONObject( this, start, end );
 		String wsId = "master";
 		if (workspace != null) wsId = workspace.getId();
         // FIXME: split elements by project Id - since they may not always be in same project

@@ -12,14 +12,11 @@ import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.actions.ActionUtil;
 import gov.nasa.jpl.view_repo.db.Node;
 import gov.nasa.jpl.view_repo.db.PostgresHelper;
-import gov.nasa.jpl.view_repo.db.PostgresHelper.DbEdgeTypes;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode.EmsVersion;
 import gov.nasa.jpl.view_repo.webscripts.AbstractJavaWebScript;
 
-import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.nio.charset.Charset;
@@ -65,7 +62,6 @@ import org.alfresco.service.cmr.repository.ContentData;
 import org.alfresco.service.cmr.repository.ContentWriter;
 import org.alfresco.service.cmr.repository.InvalidNodeRefException;
 import org.alfresco.service.cmr.repository.NodeRef;
-import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.search.LimitBy;
 import org.alfresco.service.cmr.search.ResultSet;
@@ -82,11 +78,6 @@ import org.alfresco.service.cmr.version.VersionHistory;
 import org.alfresco.service.namespace.NamespaceService;
 import org.alfresco.service.namespace.QName;
 import org.apache.commons.logging.Log;
-import org.apache.http.HttpResponse;
-import org.apache.http.HttpStatus;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -100,10 +91,15 @@ public class NodeUtil {
         DOCUMENTATION( "@sysml\\:documentation:\"" ),
         NAME( "@sysml\\:name:\"" ), CM_NAME( "@cm\\:name:\"" ),
         ID( "@sysml\\:id:\"" ), STRING( "@sysml\\:string:\"" ),
-        BODY( "@sysml\\:body:\"" ), CHECKSUM( "@view\\:cs:\"" ),
-        WORKSPACE( "@ems\\:workspace:\"" ),
-        WORKSPACE_NAME( "@ems\\:workspace_name:\"" ),
-        OWNER( "@ems\\:owner:\"" ), ASPECT( "ASPECT:\"" ), TYPE( "TYPE:\"" );
+        BODY( "@sysml\\:body:\"" ),
+        PROPERTY_TYPE( "@sysml\\:propertyType:\"" ),
+        VIEW2VIEW( "@view2\\:view2view:\"" ),
+        CHECKSUM( "@view\\:cs:\"" ),
+        WORKSPACE("@ems\\:workspace:\"" ),
+        WORKSPACE_NAME("@ems\\:workspace_name:\"" ),
+        OWNER("@ems\\:owner:\"" ),
+        ASPECT("ASPECT:\""),
+        TYPE("TYPE:\"");
 
         public String prefix;
 
@@ -212,18 +208,23 @@ public class NodeUtil {
     public static boolean doVersionCaching = false;
     public static boolean activeVersionCaching = true;
     public static boolean doVersionHistoryCaching = true;
-    public static boolean doJsonCaching = false;
+    public static boolean doJsonCaching = true;
     public static boolean doJsonDeepCaching = false;
     public static boolean doJsonStringCaching = false;
     public static boolean doPropertyCaching = true;
-    public static boolean doGraphDb = true;
-    public static boolean doPostProcessQualified = true;
+    public static boolean doGraphDb = false;
+    public static boolean doPostProcessQualified = false;
+    // toggles whether modelget adds to graphDb if there's a graphDb miss, but Alfresco hit    
+    public static boolean doAutoBuildGraphDb = false; 
+    public static boolean skipQualified = false;
 
     public static boolean addEmptyEntriesToFullCache = false; // this was broken
                                                               // last tried
     public static boolean skipGetNodeRefAtTime = true;
     public static boolean skipWorkspacePermissionCheck = true;
     public static boolean doOptimisticJustFirst = true;
+
+    public static boolean doorsSync = false;
 
     // global flag that is enabled once heisenbug is seen, so it will email
     // admins the first time heisenbug is seen
@@ -401,6 +402,12 @@ public class NodeUtil {
                                                      + nodeRef + ", "
                                                      + propertyName + ", "
                                                      + value + ")" );
+        if ( logger.isDebugEnabled() ) {
+            if ( propertyName.contains( "roperty" ) ) {
+                logger.debug( "propertyCachePut(" + nodeRef + ", " + propertyName
+                                    + ", " + value + ")" );
+            }
+        }
         if ( value == null ) value = NULL_OBJECT;
         return Utils.put( propertyCache, nodeRef, propertyName, value );
     }
@@ -452,7 +459,7 @@ public class NodeUtil {
             return null;
         }
         Object o = Utils.get( propertyCache, nodeRef, propertyName );
-        if ( logger.isTraceEnabled() ) logger.trace( "propertyCachePut("
+        if ( logger.isTraceEnabled() ) logger.trace( "propertyCacheGet("
                                                      + nodeRef + ", "
                                                      + propertyName + ", " + o
                                                      + ")" );
@@ -760,7 +767,7 @@ public class NodeUtil {
         Date mod = null;
         // Only cache json with a modified date so that we know when to update
         // it.
-        if ( modString != null ) {
+        if ( !Utils.isNullOrEmpty(modString)) {
             mod = TimeUtils.dateFromTimestamp( modString );
             if ( mod != null && jsonStringCache.containsKey( json ) ) {
                 Pair< Date, String > p =
@@ -971,6 +978,20 @@ public class NodeUtil {
         return newJson;
     }
 
+    public static JSONArray clone( JSONArray json ) {
+        JSONArray jarr = new JSONArray();
+        for ( int i = 0; i < json.length(); ++i ) {
+            Object o = json.get( i );
+            if ( o instanceof JSONObject ) {
+                o = clone( (JSONObject)o );
+            } else if ( o instanceof JSONArray ) {
+                o = clone( (JSONArray)o );
+            }
+            jarr.put( o );
+        }
+        return jarr;
+    }
+    
     public static JSONObject clone( JSONObject json ) {
         if ( json == null ) return null;
         JSONObject newJson = newJsonObject();
@@ -981,9 +1002,10 @@ public class NodeUtil {
             Object value;
             try {
                 value = json.get( key );
-                if ( key.equals( Acm.JSON_SPECIALIZATION )
-                     && value instanceof JSONObject ) {
+                if ( value instanceof JSONObject ) {
                     value = clone( (JSONObject)value );
+                } else if ( value instanceof JSONArray ) {
+                    value = clone( (JSONArray)value );
                 }
                 newJson.put( key, value );
             } catch ( JSONException e ) {
@@ -1132,7 +1154,7 @@ public class NodeUtil {
             // only set skip count if maxItems specified
             params.setMaxItems( maxItems );
             if (skipCount != null && skipCount >= 0) {
-                params.setSkipCount( skipCount );
+                params.setSkipCount( skipCount * maxItems );
             }
         }
         return params;
@@ -1152,6 +1174,7 @@ public class NodeUtil {
     public static ArrayList< NodeRef >
             resultSetToNodeRefList( ResultSet results ) {
         ArrayList< NodeRef > nodes = new ArrayList< NodeRef >();
+        if ( results == null ) return nodes;
         for ( ResultSetRow row : results ) {
             if ( row.getNodeRef() != null ) {
                 nodes.add( row.getNodeRef() );
@@ -1170,53 +1193,6 @@ public class NodeUtil {
         return findNodeRefsByType( name, type.prefix, services );
     }
 
-    private static ArrayList< NodeRef > searchInElastic() {
-        try {
-            ArrayList< NodeRef > nodes = new ArrayList< NodeRef >();
-            DefaultHttpClient client = new DefaultHttpClient();
-            HttpPost request =
-                    new HttpPost( "http://localhost:9200/mms/element/_search" );
-            StringEntity postData =
-                    new StringEntity(
-                                      "{\"query\": {\"filtered\" : {\"query\" : {\"query_string\" : {\"query\" : \"paper\" } }, "
-                                              + "\"filter\" : {\"term\" : { \"creator\" : \"admin\" }   }   } }}" );
-            request.setEntity( postData );
-
-            HttpResponse response = client.execute( request );
-            InputStream ips = response.getEntity().getContent();
-            BufferedReader buf =
-                    new BufferedReader( new InputStreamReader( ips, "UTF-8" ) );
-            if ( response.getStatusLine().getStatusCode() != HttpStatus.SC_OK ) {
-                throw new Exception( response.getStatusLine().getReasonPhrase() );
-            }
-            StringBuilder sb = new StringBuilder();
-            String s;
-            while ( true ) {
-                s = buf.readLine();
-                if ( s == null || s.length() == 0 ) break;
-                sb.append( s );
-            }
-            buf.close();
-            ips.close();
-
-            JSONObject responseObject = new JSONObject( sb.toString() );
-            JSONArray hits =
-                    responseObject.getJSONObject( "hits" )
-                                  .getJSONArray( "hits" );
-
-            for ( int i = 0; i < hits.length(); i++ ) {
-                JSONObject hit = hits.getJSONObject( i );
-                String nodeRefId =
-                        hit.getJSONObject( "_source" ).getString( "nodeRefId" );
-                NodeRef node = findNodeRefByAlfrescoId( nodeRefId );
-                nodes.add( node );
-            }
-            return nodes;
-        } catch ( Exception e ) {
-            e.printStackTrace();
-            return null;
-        }
-    }
 
     public static ArrayList< NodeRef >
             findNodeRefsByType( String name, String prefix,
@@ -1225,7 +1201,7 @@ public class NodeUtil {
         String queryPattern = prefix + name + "\"";
         results = luceneSearch( queryPattern, services );
         ArrayList< NodeRef > resultList = resultSetToNodeRefList( results );
-        results.close();
+        if ( results != null ) results.close();
         return resultList;
     }
 
@@ -1329,6 +1305,17 @@ public class NodeUtil {
                                    dateTime, justFirst, optimisticJustFirst,
                                    exactMatch, services, includeDeleted,
                                    siteName );
+    }
+
+    public static ArrayList< NodeRef > findNodeRefsByType( String specifier,
+                                                           String prefix,
+                                                           QueryContext ctxt ) {
+        return findNodeRefsByType( specifier, prefix, ctxt.ignoreWorkspaces,
+                                   ctxt.workspace, ctxt.onlyThisWorkspace,
+                                   ctxt.dateTime, ctxt.justFirst, true,
+                                   ctxt.exactMatch,
+                                   ctxt.serviceContext.services,
+                                   ctxt.includeDeleted, ctxt.siteName );
     }
 
     public static ArrayList< NodeRef >
@@ -2926,48 +2913,6 @@ public class NodeUtil {
         return qname;
     }
 
-    // public static QName makeContentModelQName( String cmName ) {
-    // return makeContentModelQName( cmName, null );
-    // }
-    // public static QName makeContentModelQName( String cmName, ServiceRegistry
-    // services ) {
-    // if ( services == null ) services = getServices();
-    //
-    // if ( cmName == null ) return null;
-    // if ( Acm.getJSON2ACM().keySet().contains( cmName ) ) {
-    // cmName = Acm.getACM2JSON().get( cmName );
-    // }
-    // String[] split = cmName.split( ":" );
-    //
-    // String nameSpace = null;
-    // String localName = null;
-    // if ( split.length == 2 ) {
-    // nameSpace = split[0];
-    // localName = split[1];
-    // } else if ( split.length == 1 ) {
-    // localName = split[0];
-    // } else {
-    // return null;
-    // }
-    // if ( localName == null ) {
-    // return null;
-    // }
-    // DictionaryService dServ = services.getDictionaryService();
-    // QName qName = null;
-    // if ( nameSpace != null ) {
-    // if ( nameSpace.equals( "sysml" ) ) {
-    // qName = QName.createQName( "{http://jpl.nasa.gov/model/sysml-lite/1.0}"
-    // + localName );
-    // } else if ( nameSpace.equals( "view2" ) ) {
-    // qName = QName.createQName( "{http://jpl.nasa.gov/model/view/2.0}"
-    // + localName );
-    // } else if ( nameSpace.equals( "view" ) ) {
-    // qName = QName.createQName( "{http://jpl.nasa.gov/model/view/1.0}"
-    // + localName );
-    // }
-    // }
-    // return qName;
-    // }
 
     /**
      * This method behaves the same as if calling
@@ -3124,6 +3069,10 @@ public class NodeUtil {
     public static NodeRef findNodeRefByAlfrescoId( String id,
                                                    boolean includeDeleted,
                                                    boolean giveError ) {
+        // Protect the lucene search from some of the common bad input since
+        // lucene can fail with an exception.
+        if ( id.startsWith( "_" ) ) return null;
+        if ( id.length() < 25 ) return null;
         if ( !id.contains( "://" ) ) {
             id = "workspace://SpacesStore/" + id;
         }
@@ -3177,6 +3126,7 @@ public class NodeUtil {
 
     public static VersionLowerBoundComparator versionLowerBoundComparator =
             new VersionLowerBoundComparator();
+
 
     public static int compareVersions( NodeRef ref1, NodeRef ref2 ) {
         Date d1 = getLastModified( ref1 );
@@ -3306,10 +3256,14 @@ public class NodeUtil {
         QName qName =
                 oIsString ? NodeUtil.createQName( keyStr, services )
                          : (QName)key;
-        Object result;
+        Object result = null;
         if ( useFoundationalApi ) {
             if ( services == null ) services = NodeUtil.getServices();
-            result = services.getNodeService().getProperty( node, qName );
+            try {
+                result = services.getNodeService().getProperty( node, qName );
+            } catch ( Exception e ) {
+                e.printStackTrace();
+            }
             if ( logger.isTraceEnabled() ) logger.trace( "^ cache miss!  getNodeProperty("
                                                          + node
                                                          + ", "
@@ -3720,7 +3674,9 @@ public class NodeUtil {
 
     public static String getVersionedRefId( EmsScriptNode n ) {
         String versionString = n.getNodeRef().toString();
-        Version headVersionNode = n.getHeadVersion();
+        // TODO: getting head version is too expensive and current version does same
+        //        Version headVersionNode = n.getHeadVersion();
+        Version headVersionNode = n.getCurrentVersion();
         if ( headVersionNode != null ) {
             NodeRef versionNode = headVersionNode.getFrozenStateNodeRef();
             if ( versionNode != null ) versionString = versionNode.toString();
@@ -3791,7 +3747,6 @@ public class NodeUtil {
                                        false );
         } else {
             PersonService personService = getServices().getPersonService();
-            NodeService nodeService = getServices().getNodeService();
             NodeRef personNode = personService.getPerson( userName );
             homeFolderNode =
                     (NodeRef)getNodeProperty( personNode,
@@ -4332,10 +4287,10 @@ public class NodeUtil {
         if ( !heisenbugSeen ) {
             String hostname = services.getSysAdminParams().getAlfrescoHost();
 
-            String sender = hostname + "@${org.url}";
+            String sender = hostname + "@" + EmsConfig.get( "app.domain.name" );
             String recipient;
 
-            recipient = "${adminemail}";
+            recipient = EmsConfig.get( "app.email.admin" );
             ActionUtil.sendEmailTo( sender, recipient, msg, subject, services );
             heisenbugSeen = true;
         }
@@ -4550,36 +4505,46 @@ public class NodeUtil {
     public static void
             processV2VEdges( String sysmlid, JSONArray v2v,
                              List< Pair< String, String >> documentEdges ) {
-        if ( v2v != null ) {
-            for ( int i2 = 0; i2 < v2v.length(); i2++ ) {
-                JSONObject o = v2v.getJSONObject( i2 );
-                String id = null;
-                if ( o.has( "sysmlid" ) ) id = o.getString( "sysmlid" );
-                else if ( o.has( "id" ) ) id = o.getString( "id" );
-                else continue;
-
-                if ( o.has( "childrenViews" ) ) {
-                    JSONArray childViews = o.getJSONArray( "childrenViews" );
-                    for ( int j = 0; j < childViews.length(); j++ ) {
-                        documentEdges.add( new Pair< String, String >(
-                                                                       id,
-                                                                       childViews.getString( j ) ) );
+        try { 
+            if ( v2v != null ) {
+                for ( int i2 = 0; i2 < v2v.length(); i2++ ) {
+                    JSONObject o = v2v.getJSONObject( i2 );
+                    String id = null;
+                    if ( o.has( "sysmlid" ) ) id = o.getString( "sysmlid" );
+                    else if ( o.has( "id" ) ) id = o.getString( "id" );
+                    else continue;
+    
+                    if ( o.has( "childrenViews" ) ) {
+                        JSONArray childViews = o.getJSONArray( "childrenViews" );
+                        for ( int j = 0; j < childViews.length(); j++ ) {
+                            documentEdges.add( new Pair< String, String >(
+                                                                           id,
+                                                                           childViews.getString( j ) ) );
+                        }
                     }
                 }
             }
+        } catch (Exception e) {
+            logger.error("Could not process v2vedges for: " + sysmlid);
+            e.printStackTrace();
         }
     }
 
     public static void processContentsJson(String sysmlId, JSONObject contents,
                                            List< Pair< String, String >> documentEdges) {
         if (contents != null) {
-            if (contents.has( "operand" )) {
-                JSONArray operand = contents.getJSONArray( "operand" );
-                for (int ii = 0; ii < operand.length(); ii++) {
-                    JSONObject value = operand.getJSONObject( ii );
-                    if (value.has( "instance" )) {
-                        documentEdges.add( new Pair<String, String>(sysmlId, value.getString("instance") ));
+            if (contents.has( "operand" ) && !contents.isNull( "operand" )) {
+                try {
+                    JSONArray operand = contents.getJSONArray( "operand" );
+                    for (int ii = 0; ii < operand.length(); ii++) {
+                        JSONObject value = operand.getJSONObject( ii );
+                        if (value.has( "instance" ) && !value.isNull( "instance" )) {
+                            documentEdges.add( new Pair<String, String>(sysmlId, value.getString("instance")));
+                        }
                     }
+                } catch (Exception e) {
+                    logger.error( "Could not parse: " + contents.toString() );
+                    e.printStackTrace();
                 }
             }
         }
@@ -4610,8 +4575,8 @@ public class NodeUtil {
                         EmsScriptNode instance =
                                 new EmsScriptNode( instanceNr, services, null );
                         documentEdges.add( new Pair< String, String >(
-                                                                       sysmlId,
-                                                                       instance.getSysmlId() ) );
+                                sysmlId, 
+                                instance.getSysmlId() ) );
                     }
                 }
             }
@@ -4620,14 +4585,21 @@ public class NodeUtil {
 
     public static void processInstanceSpecificationSpecificationJson( String sysmlId, JSONObject iss, List<Pair<String, String>> documentEdges) {
         if (iss != null) {
-            if (iss.has( "string" )) {
+            if (iss.has( "string" ) && !iss.isNull( "string" )) {
                 String string = iss.getString( "string" );
-                JSONObject json = new JSONObject(string);
-                Set<Object> sources = findKeyValueInJsonObject(json, "source");
-                for (Object source: sources) {
-                    if (source instanceof String) {
-                        documentEdges.add( new Pair<String, String>(sysmlId, (String) source));
+                try {
+                    JSONObject json = new JSONObject(string);
+                    Set<Object> sources = findKeyValueInJsonObject(json, "source");
+                    for (Object source: sources) {
+                        if (source instanceof String) {
+                            if ( !sysmlId.equals((String) source) ) {
+                                documentEdges.add( new Pair<String, String>(sysmlId, (String) source));
+                            }
+                        }
                     }
+                } catch (Exception e) {
+                    logger.error( "Could not parse: " + iss.toString() );
+                    e.printStackTrace();
                 }
             }
         }
@@ -4644,18 +4616,23 @@ public class NodeUtil {
             processInstanceSpecificationSpecificationNodeRef( String sysmlId,
                                                        NodeRef iss,
                                                        List< Pair< String, String >> documentEdges ) {
-        if (iss != null) {
-            EmsScriptNode issNode = new EmsScriptNode(iss, services, null);
-            String string = (String) issNode.getProperty( Acm.ACM_STRING );
-            if (string != null) {
-                JSONObject json = new JSONObject(string);
-                Set<Object> sources = findKeyValueInJsonObject(json, "source");
-                for (Object source: sources) {
-                    if (source instanceof String) {
-                        documentEdges.add( new Pair<String, String>(sysmlId, (String)source) );
+        try {
+            if (iss != null) {
+                EmsScriptNode issNode = new EmsScriptNode(iss, services, null);
+                String string = (String) issNode.getProperty( Acm.ACM_STRING );
+                if (string != null) {
+                    JSONObject json = new JSONObject(string);
+                    Set<Object> sources = findKeyValueInJsonObject(json, "source");
+                    for (Object source: sources) {
+                        if (source instanceof String) {
+                            documentEdges.add( new Pair<String, String>(sysmlId, (String)source) );
+                        }
                     }
                 }
             }
+        } catch (Exception e) {
+            logger.error( "Couldn't add instanceSpecificationSpecification: " + sysmlId );
+            e.printStackTrace();
         }
     }
     
@@ -4690,7 +4667,27 @@ public class NodeUtil {
         return result;
     }
     
+    public static EmsScriptNode getNodeFromSysmlIdViaPostgres( String sysmlid, WorkspaceNode workspace ) {
+        PostgresHelper pgh = new PostgresHelper( getWorkspaceId( workspace ) );
+        EmsScriptNode esn =  null;
+        try {
+            pgh.connect();
+            Node node = pgh.getNodeFromSysmlId( sysmlid );
+            esn = NodeUtil.getNodeFromPostgresNode( node );
+        } catch ( ClassNotFoundException e ) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch ( SQLException e ) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } finally {
+            pgh.close();
+        }
+        return esn;
+    }
+
     public static EmsScriptNode getNodeFromPostgresNode( Node pgnode ) {
+        if ( pgnode == null ) return null;
         return new EmsScriptNode( new NodeRef( pgnode.getNodeRefId() ),
                                   services, null );
     }
@@ -4960,9 +4957,7 @@ public class NodeUtil {
             mmsVersion = jsonModule.get( "mmsVersion" ).toString();
         }
 
-        int endIndex = mmsVersion.lastIndexOf( "." );
-
-        return mmsVersion.substring( 0, endIndex );
+        return mmsVersion;
     }
 
     /**
@@ -4974,6 +4969,18 @@ public class NodeUtil {
      */
     public static void ppAddQualifiedNameId2Json( WebScriptRequest req,
                                                   Map< String, Object > model ) {
+        String[] names = req.getParameterNames();
+        // never add for simple, which is saying don't put in qualified names
+        for (String name: names) {
+            if (name.equalsIgnoreCase( "simple" )) return;
+        }
+        String origUser = AuthenticationUtil.getRunAsUser();
+        AuthenticationUtil.setRunAsUser("admin");
+        ppAddQualifiedNameId2JsonImpl( req, model );
+        if ( origUser != null) AuthenticationUtil.setRunAsUser(origUser);
+    }
+    public static void ppAddQualifiedNameId2JsonImpl( WebScriptRequest req,
+                                                      Map< String, Object > model ) {
         if ( !doPostProcessQualified ) return;
 
         if ( !model.containsKey( "res" ) ) return;
@@ -4994,18 +5001,20 @@ public class NodeUtil {
         Map< String, String > child2owner = new HashMap< String, String >();
 
         String topLevelKeys[] =
-                { "elements", "products", "views", "workspace1" };
+                { "elements", "jobs", "products", "views", "workspace1", "workspace2" };
+
         for ( int ii = 0; ii < topLevelKeys.length; ii++ ) {
             String key = topLevelKeys[ ii ];
             if ( json.has( key ) ) {
-                if ( !key.equals( "workspace1" ) ) {
+                if ( !key.equals( "workspace1" ) && !key.equals( "workspace2" ) ) {
                     JSONArray elementsJson = json.getJSONArray( key );
                     try {
                         ppHandleElements( req, elementsJson, id2name, id2siteName,
                                       owner2children, child2owner );
                     } catch (Exception e) {
                         logger.error( "Post process qname not working. Setting postProcessQualified to false" );
-                        NodeUtil.doPostProcessQualified = false;
+                        logger.error( elementsJson );
+                        //NodeUtil.doPostProcessQualified = false;
                         e.printStackTrace();
                     }
                 } else {
@@ -5075,6 +5084,10 @@ public class NodeUtil {
                                  Map< String, String > id2siteName,
                                  Map< String, Set< String >> owner2children,
                                  Map< String, String > child2owner ) {
+        if ( !elementJson.has("sysmlid") ) {
+            logger.warn( "Could not find sysmlid: " + elementJson );
+            return;
+        }
         String sysmlid = elementJson.getString( "sysmlid" );
         Map< String, String > qpathMap = new HashMap< String, String >();
 
@@ -5108,7 +5121,9 @@ public class NodeUtil {
         String qname = "/" + childName;
         String qid = "/" + childId;
         String site = null;
-        while ( child2owner.containsKey( childId ) ) {
+        Set<String> seen = new HashSet<String>();
+        while ( child2owner.containsKey( childId ) && !seen.contains( childId ) ) {
+            seen.add( childId );
             childId = child2owner.get( childId );
             childName = id2name.get( childId );
             qname = "/" + childName + qname;
@@ -5142,6 +5157,7 @@ public class NodeUtil {
         String timestamp =
                 req.getServiceMatch().getTemplateVars().get( "timestamp" );
         Date dateTime = TimeUtils.dateFromTimestamp( timestamp );
+        WorkspaceNode workspace = null;
 
         // if no owners, walk up to site to get appropriate information
         if ( owners.size() <= 0 ) {
@@ -5149,20 +5165,29 @@ public class NodeUtil {
             ids.addAll( id2name.keySet() );
             for ( String id : ids ) {
                 EmsScriptNode node = null;
+                boolean useDb = false;
                 if ( NodeUtil.doGraphDb && wsId.equals( "master" )
                      && dateTime == null ) {
                     PostgresHelper pgh = new PostgresHelper( wsId );
+                    if ( wsId.equals( "master" ) ) {
+                        workspace = null; 
+                    } else {
+                        workspace = WorkspaceNode.getWorkspaceFromId( wsId, services, null, null, "admin" );
+                    }
                     try {
                         pgh.connect();
                         node =
                                 NodeUtil.getNodeFromPostgresNode( pgh.getNodeFromSysmlId( id ) );
-                        pgh.close();
+                        useDb = true;
                     } catch ( ClassNotFoundException e ) {
                         e.printStackTrace();
                     } catch ( SQLException e ) {
-                        e.printStackTrace();
+                    	    e.printStackTrace();
+                    } finally {
+                        pgh.close();
                     }
-                } else {
+                } 
+                if(!useDb) {
                     WorkspaceNode ws =
                             WorkspaceNode.getWorkspaceFromId( wsId, services,
                                                               null, null, null );
@@ -5178,6 +5203,7 @@ public class NodeUtil {
         // for all owners, recurse to build up all the owner paths
         for ( String owner : owners ) {
             if ( !visitedOwners.contains( owner ) ) {
+            	boolean useDb = false;
                 if ( NodeUtil.doGraphDb && wsId.equals( "master" )
                      && dateTime == null ) {
                     PostgresHelper pgh = new PostgresHelper( wsId );
@@ -5185,19 +5211,85 @@ public class NodeUtil {
                         pgh.connect();
                         ppRecurseOwnersDb( owner, pgh, id2name, id2siteName,
                                            owner2children, child2owner,
-                                           visitedOwners, wsId, dateTime );
-                        pgh.close();
+                                           visitedOwners, wsId, workspace,
+                                           dateTime );
+                        useDb = true;
                     } catch ( ClassNotFoundException e ) {
                         e.printStackTrace();
                     } catch ( SQLException e ) {
                         e.printStackTrace();
+                    } finally {
+                        pgh.close();
                     }
-                } else {
+                } 
+                if(!useDb) {
+                    //ppRecurseOwnersOriginal
+//                    ppRecurseOwnersNew( owner, id2name, id2siteName,
+//                                             owner2children, child2owner,
+//                                             visitedOwners, wsId, dateTime );
                     ppRecurseOwnersOriginal( owner, id2name, id2siteName,
-                                             owner2children, child2owner,
-                                             visitedOwners, wsId, dateTime );
+                            owner2children, child2owner,
+                            visitedOwners, wsId, dateTime );
                 }
             }
+        }
+    }
+
+    /**
+     * Post processing utility for traversing owners using graphDb
+     */
+    private static void
+           ppRecurseOwnersNew( String sysmlId, //PostgresHelper pgh,
+                               Map< String, String > id2name,
+                               Map< String, String > id2siteName,
+                               Map< String, Set< String >> owner2children,
+                               Map< String, String > child2owner,
+                               Set< String > visitedOwners, String wsId,
+                               Date dateTime ) {
+        Status status = new Status();
+        WorkspaceNode ws =
+                WorkspaceNode.getWorkspaceFromId( wsId, services, null, null,
+                                                  null );
+        if ( status.getCode() != HttpServletResponse.SC_OK ) { return; }
+        EmsScriptNode node =
+                findScriptNodeById( sysmlId, ws, dateTime, false, services,
+                                    null );
+//        EmsScriptNode node = 
+//                NodeUtil.getNodeFromPostgresNode( pgh.getNodeFromSysmlId( sysmlId ) );
+        String sysmlName = node.getSysmlName();
+
+        id2name.put( sysmlId, sysmlName );
+        Boolean isSite = (Boolean)node.getProperty( Acm.ACM_IS_SITE );
+        if ( isSite != null && isSite ) {
+            id2siteName.put( sysmlId, sysmlName );
+        }
+
+        EmsScriptNode owner = node.getOwningParent( dateTime, ws, true, false );
+
+        if ( exists( owner ) && !"Models".equals(owner.getSysmlId()) ) {
+//        Set< Pair< String, String > > parents =
+//                pgh.getImmediateParents( sysmlId, DbEdgeTypes.REGULAR );
+//        if ( parents.size() > 0 ) {
+//            for ( Pair< String, String > parent : parents ) {
+//                String parentId = parent.first;
+            String parentId = owner.getSysmlId();
+                if ( !owner2children.containsKey( parentId ) ) {
+                    owner2children.put( parentId, new HashSet< String >() );
+                }
+                owner2children.get( parentId ).add( sysmlId );
+                child2owner.put( sysmlId, parentId );
+                if ( !visitedOwners.contains( parentId ) ) {
+                    ppRecurseOwnersNew( parentId, //pgh,
+                                        id2name, id2siteName,
+                                       owner2children, child2owner,
+                                       visitedOwners, wsId, dateTime );
+                }
+                visitedOwners.add( parentId );
+//            }
+        } else {
+            // no parent, so lets look for top level site
+            ppAddSiteOwnerInfo( sysmlId, node, id2name, id2siteName,
+                                owner2children, child2owner, visitedOwners );
         }
     }
 
@@ -5260,10 +5352,29 @@ public class NodeUtil {
                                Map< String, String > id2siteName,
                                Map< String, Set< String >> owner2children,
                                Map< String, String > child2owner,
-                               Set< String > visitedOwners, String wsId,
+                               Set< String > visitedOwners, 
+                               String wsId,
+                               WorkspaceNode workspace,
                                Date dateTime ) {
-        EmsScriptNode node =
-                NodeUtil.getNodeFromPostgresNode( pgh.getNodeFromSysmlId( sysmlId ) );
+        EmsScriptNode node = null;
+        if (pgh.checkWorkspaceExists()) {
+            node = NodeUtil.getNodeFromPostgresNode( pgh.getNodeFromSysmlId( sysmlId ) );
+            if (node == null) {
+                if (logger.isInfoEnabled()) {
+                    logger.info( "Postgres could not find node: " + sysmlId );
+                }
+            }
+        } 
+        
+        // revert to old way if it can't be found by Postgres
+        if (node == null) {
+            node = findScriptNodeByIdForWorkspace( sysmlId, workspace, dateTime, false, services, null );
+            if (node == null) {
+                logger.error( "Couldn't find script node: " + sysmlId );
+                return;
+            }
+        }
+        
         String sysmlName = node.getSysmlName();
 
         id2name.put( sysmlId, sysmlName );
@@ -5321,7 +5432,7 @@ public class NodeUtil {
                                 Set< String > visitedOwners ) {
         if ( node == null ) return;
         EmsScriptNode parent = node.getParent();
-        while ( !parent.getName().equals( "Sites" ) || parent == null ) {
+        while ( parent != null && !parent.getName().equals( "Sites" ) ) {
             node = parent;
             parent = node.getParent();
         }

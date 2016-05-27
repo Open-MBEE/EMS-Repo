@@ -3,27 +3,25 @@ package gov.nasa.jpl.view_repo.util;
 import gov.nasa.jpl.mbee.util.Pair;
 import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.mbee.util.Utils;
+import gov.nasa.jpl.view_repo.actions.ActionUtil;
 import gov.nasa.jpl.view_repo.connections.JmsConnection;
 import gov.nasa.jpl.view_repo.connections.RestPostConnection;
 import gov.nasa.jpl.view_repo.db.PostgresHelper;
 import gov.nasa.jpl.view_repo.db.PostgresHelper.DbEdgeTypes;
 import gov.nasa.jpl.view_repo.util.JsonDiffDiff.DiffType;
+import gov.nasa.jpl.view_repo.webscripts.AbstractJavaWebScript;
 import gov.nasa.jpl.view_repo.webscripts.MmsDiffGet;
 import gov.nasa.jpl.view_repo.webscripts.WebScriptUtil;
 import gov.nasa.jpl.view_repo.webscripts.util.ConfigurationsWebscript;
-import groovy.lang.Tuple;
 
 import java.net.InetAddress;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
@@ -49,14 +47,14 @@ public class CommitUtil {
 	public static final String TYPE_DELTA = "DELTA";
 	public static final String TYPE_MERGE = "MERGE";
 	public static boolean cleanJson = false;
-
+	
 	private CommitUtil() {
 		// defeat instantiation
 	}
 
 	private static JmsConnection jmsConnection = null;
 	private static RestPostConnection restConnection = null;
-
+	
 	public static void setJmsConnection(JmsConnection jmsConnection) {
 		if (logger.isInfoEnabled())
 			logger.info("Setting jms");
@@ -69,6 +67,7 @@ public class CommitUtil {
 		CommitUtil.restConnection = restConnection;
 	}
 
+	
 	/**
 	 * Gets the commit package in the specified workspace (creates if possible)
 	 * 
@@ -405,12 +404,13 @@ public class CommitUtil {
 	/**
 	 * Gets all the commits in the specified time range from the startWorkspace
 	 * to the endWorkspace. If the endWorkspace is not a parent of the
-	 * startWorkspace, this will search to the master.
+	 * startWorkspace, this will search to the master.  Commits are returned in
+	 * reverse chronological order.
 	 * 
 	 * @param fromDateTime
 	 * @param toDateTime
-	 * @param startWorkspace
-	 * @param endWorkspace
+	 * @param startWorkspace child workspace
+	 * @param endWorkspace parent workspace
 	 * @param services
 	 * @param response
 	 * @return
@@ -893,17 +893,27 @@ public class CommitUtil {
 				pgh.updateNodeRefIds(e.getString("sysmlid"),
 						e.getString("versionedRefId"), e.getString("nodeRefId"));
 
-				if (e.has("documentation")) {
-					String doc = (String) e.getString("documentation");
-					NodeUtil.processDocumentEdges(e.getString("sysmlid"), doc,
-							documentEdges);
-				}
-				if (e.has("specialization")
-						&& e.getJSONObject("specialization").has("view2view")) {
-					JSONArray view2viewProperty = e.getJSONObject(
-							"specialization").getJSONArray("view2view");
-					NodeUtil.processV2VEdges(e.getString("sysmlid"),
-							view2viewProperty, documentEdges);
+				// CAEDVO-3097: delete all children edges, then rebuild
+				pgh.deleteEdgesForParentNode( e.getString("sysmlid"), DbEdgeTypes.DOCUMENT );
+
+                if (e.has("documentation")) {
+                    String doc = (String) e.getString("documentation");
+                    NodeUtil.processDocumentEdges(e.getString("sysmlid"), doc,
+                            documentEdges);
+                }
+				if (e.has("specialization")) {
+				    JSONObject specialization = e.getJSONObject( "specialization" );
+                    if (specialization.has("view2view")) {
+                        JSONArray view2viewProperty = specialization.getJSONArray("view2view");
+                        NodeUtil.processV2VEdges(e.getString("sysmlid"),
+                                view2viewProperty, documentEdges);
+                    } else if (specialization.has( "contents" )) {
+                        JSONObject contents = specialization.getJSONObject( "contents" );
+                        NodeUtil.processContentsJson( e.getString("sysmlid"), contents, documentEdges );
+                    } else if (specialization.has( "instanceSpecificationSpecification" )) {
+                        JSONObject iss = specialization.getJSONObject( "instanceSpecificationSpecification" );
+                        NodeUtil.processInstanceSpecificationSpecificationJson( e.getString("sysmlid"), iss, documentEdges );
+                    }
 				}
 			}
 
@@ -922,11 +932,22 @@ public class CommitUtil {
 			for (Pair<String, String> e : documentEdges) {
 				pgh.insertEdge(e.first, e.second, DbEdgeTypes.DOCUMENT);
 			}
-
-			pgh.close();
 		} catch (Exception e1) {
-		    logger.warn( "Could not complete graph storage" );
+		    String subject = "Graph DB storage failed, reverting to no graphDb lookup";
+		    logger.error( subject );
+		    NodeUtil.doGraphDb = false;
+		    
+		    String msg = "Need to run model2postgres to fix. Offending JSON is " + delta.toString();
+		    ServiceRegistry services = NodeUtil.getServices();
+		    String hostname = services.getSysAdminParams().getAlfrescoHost();
+            String sender = hostname + "@jpl.nasa.gov";
+		    String recipient = "mbee-dev-admin@jpl.nasa.gov";
+		    ActionUtil.sendEmailTo( sender, recipient, msg, subject,
+		                            services );
+
 			e1.printStackTrace();
+		} finally {
+		    pgh.close();
 		}
 
 	}
@@ -985,10 +1006,11 @@ public class CommitUtil {
 		try {
 			pgh.connect();
 			pgh.createBranchFromWorkspace(created.getId());
-			pgh.close();
 		} catch (ClassNotFoundException | java.sql.SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+		} finally {
+		    pgh.close();
 		}
 
 		return sendJmsMsg(branchJson, TYPE_BRANCH, null, null);
@@ -1014,12 +1036,40 @@ public class CommitUtil {
 		return sendJmsMsg(mergeJson, TYPE_MERGE, null, null);
 	}
 
-	protected static boolean sendJmsMsg(JSONObject json, String eventType,
+    protected static boolean sendJmsMsg(final JSONObject json, final String eventType,
+                                        final String workspaceId, final String projectId) {
+        final List<Boolean> result = new ArrayList<Boolean>();
+        new EmsTransaction(null, null, null) {
+            
+            @Override
+            public void run() throws Exception {
+                boolean b = sendJmsMsgImpl( json, eventType, workspaceId, projectId );
+                result.add( b );
+                // TODO Auto-generated method stub
+                
+            }
+        };
+        Boolean bb = result.isEmpty() ? false : result.get( 0 );
+        return bb == true;
+    }
+    
+	protected static boolean sendJmsMsgImpl(JSONObject json, String eventType,
 			String workspaceId, String projectId) {
 		boolean status = false;
 		if (jmsConnection != null) {
+		    if (logger.isInfoEnabled()) {
+                logger.info( "publishing to jms eventType=" + eventType
+                             + "workspaceId" + workspaceId + "; projectId="
+                             + projectId );
+		    }
+		    if (logger.isDebugEnabled()) {
+		        logger.debug( json.toString( 4 ) );
+		    }
 			status = jmsConnection.publish(json, eventType, workspaceId,
 					projectId);
+			if (logger.isInfoEnabled()) {
+			    logger.info( "finished publishing to jms" );
+			}
 		} else {
 			if (logger.isInfoEnabled())
 				logger.info("JMS Connection not avalaible");
@@ -1054,7 +1104,8 @@ public class CommitUtil {
 		return true;
 	}
 
-	private static JSONObject migrateCommitUsingDiff(JSONArray elements,
+	private static JSONObject migrateCommitUsingDiff(AbstractJavaWebScript webscript,
+	                                                 JSONArray elements,
 			JSONArray updated, JSONArray added, JSONArray deleted,
 			WorkspaceNode ws1, WorkspaceNode ws2, Date dateTime1,
 			Date dateTime2, StringBuffer response, Status responseStatus) {
@@ -1077,7 +1128,7 @@ public class CommitUtil {
 
 				// Perform the diff using the workspaces and timestamps
 				// from the commit node:
-				JSONObject json = MmsDiffGet.performDiff(ws1, ws2, dateTime1,
+				JSONObject json = MmsDiffGet.performDiff(webscript, ws1, ws2, dateTime1,
 						dateTime2, response, responseStatus, DiffType.COMPARE,
 						true, false);
 				return json;
@@ -1288,7 +1339,7 @@ public class CommitUtil {
 			e.printStackTrace();
 		} finally {
 			if (switchUser)
-				AuthenticationUtil.setRunAsUser(origUser);
+		        if ( origUser != null) AuthenticationUtil.setRunAsUser(origUser);
 		}
 
 		return true;

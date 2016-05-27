@@ -1,6 +1,7 @@
 package gov.nasa.jpl.view_repo.actions;
 
 import gov.nasa.jpl.view_repo.util.NodeUtil;
+import gov.nasa.jpl.view_repo.util.EmsConfig;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -180,7 +181,7 @@ public class DiscussionsEmailNotificationActionExecutor  extends ActionExecuterA
 		String subject = "New Post in Discussion: " + topicTitle;
         Action mailAction = services.getActionService().createAction(MailActionExecuter.NAME);
         mailAction.setParameterValue(MailActionExecuter.PARAM_SUBJECT, subject);
-        mailAction.setParameterValue(MailActionExecuter.PARAM_FROM, "${ems.url}");
+        mailAction.setParameterValue(MailActionExecuter.PARAM_FROM, EmsConfig.get("app.email.from"));
         mailAction.setParameterValue(MailActionExecuter.PARAM_TEMPLATE, template);
     	for (int i = 0; i < emailAddresses.size(); i++) {
     		String email = emailAddresses.get(i);

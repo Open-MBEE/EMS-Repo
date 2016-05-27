@@ -4,6 +4,7 @@ import gov.nasa.jpl.mbee.util.Debug;
 import gov.nasa.jpl.mbee.util.Pair;
 import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.mbee.util.Utils;
+import gov.nasa.jpl.view_repo.webscripts.AbstractJavaWebScript;
 import gov.nasa.jpl.view_repo.util.JsonDiffDiff.DiffOp;
 import gov.nasa.jpl.view_repo.util.JsonDiffDiff.DiffType;
 
@@ -773,15 +774,9 @@ public class WorkspaceDiff implements Serializable {
      * @return  JSONObject of the delta
      * @throws JSONException
      */
-    public JSONObject toJSONObject(Date time1, Date time2) throws JSONException {
-        JSONObject deltaJson = toJSONObject( time1, time2, true );
-        // If we came up with nothing (!isDiff()), then maybe we computed it
-        // another way and should return the existing diffJson.
-        if ( diffJson == null || isDiff( deltaJson ) ) {
-            diffJson = deltaJson;
-        }
-        
-        return diffJson;
+    public JSONObject toJSONObject(AbstractJavaWebScript webscript,
+                                   Date time1, Date time2) throws JSONException {
+        return toJSONObject( webscript, time1, time2, true );
     }
 
     /**
@@ -792,36 +787,92 @@ public class WorkspaceDiff implements Serializable {
      * @return  JSONObject of the delta
      * @throws JSONException
      */
-    public JSONObject toJSONObject(Date time1, Date time2, boolean showAll) throws JSONException {
+    public JSONObject toJSONObject(AbstractJavaWebScript webscript, Date time1, Date time2, boolean showAll) throws JSONException {
+        return toJSONObject(webscript, time1, time2, showAll, true);
+    }
+
+    public JSONObject toJSONObject(AbstractJavaWebScript webscript,
+                                   Date time1, Date time2, boolean showAll, boolean includeQualified) throws JSONException {        
+        if (diffJson != null && !isDiffPrecalculated()) return diffJson;
+    
         JSONObject deltaJson = NodeUtil.newJsonObject();
         JSONObject ws1Json = NodeUtil.newJsonObject();
         JSONObject ws2Json = NodeUtil.newJsonObject();
-
-        addJSONArray(ws1Json, "elements", elements, elementsVersions, ws1, time1, true);
+    
+        addJSONArray(webscript, ws1Json, "elements", elements, elementsVersions, ws1, time1, true, includeQualified);
         addWorkspaceMetadata( ws1Json, ws1, time1 );
-
-        addJSONArray(ws2Json, "addedElements", addedElements, ws2, time2, true);
-        addJSONArray(ws2Json, "movedElements", movedElements, ws2, time2, showAll);
+    
+        addJSONArray(webscript, ws2Json, "addedElements", addedElements, ws2, time2, true, includeQualified);
+        addJSONArray(webscript, ws2Json, "movedElements", movedElements, ws2, time2, showAll, includeQualified);
+    
         // Note: deleteElements should use time1 and not time2, and ws1 not ws2, 
         //       as element was found in ws1 at time1, not ws2 at time2!
-        addJSONArray(ws2Json, "deletedElements", deletedElements, ws1, time1, showAll);
-        addJSONArray(ws2Json, "updatedElements", updatedElements, ws2, time2, showAll);
-        addJSONArray(ws2Json, "conflictedElements", conflictedElements, ws2, time2, showAll);
+        addJSONArray(webscript, ws2Json, "deletedElements", deletedElements, ws1, time1, showAll, includeQualified);
+        addJSONArray(webscript, ws2Json, "updatedElements", updatedElements, ws2, time2, showAll, includeQualified);
+        addJSONArray(webscript, ws2Json, "conflictedElements", conflictedElements, ws2, time2, showAll, includeQualified);
         addWorkspaceMetadata( ws2Json, ws2, time2);
-
+        
+        // Add the name and owner--the View Editor, at least, needs it.
+        // TODO -- Are we sure that the jobs will be in ws1?
+        // TODO -- Otherwise, we need to get the EmsScriptNode.
+        // TODO -- Pull this out into a separate function.
+        JSONArray jobs = ws1Json.optJSONArray( "jobs" );
+        
+        if( jobs != null && jobs.length() > 0 ) {
+            for (int i = 0; i < jobs.length(); ++i ) {
+            
+                JSONObject job = jobs.optJSONObject( i );
+                String jobId = job.optString("sysmlid");
+                if ( jobId == null ) continue;
+                if( job != null ) {
+                    JSONArray updatedJobs = ws2Json.optJSONArray( "updatedJobs" );
+                    if ( updatedJobs != null && updatedJobs.length() > 0 ) {
+                        for (int j = 0; j < updatedJobs.length(); ++j ) {
+                            
+                            JSONObject updatedJob = updatedJobs.optJSONObject( j );
+                            String updatedJobId = updatedJob.optString("sysmlid");
+                            if ( updatedJobId == null ) continue;
+                            if ( jobId.equals( updatedJobId ) ) {
+                                String name = job.optString( "name" );
+                                if ( !Utils.isNullOrEmpty( name ) ) {
+                                    updatedJob.put( "name", name );
+                                }
+                                String owner = job.optString( "owner" );
+                                if ( !Utils.isNullOrEmpty( owner ) ) {
+                                    updatedJob.put( "owner", owner );
+                                }
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        
         deltaJson.put( "workspace1", ws1Json );
         deltaJson.put( "workspace2", ws2Json );
-
+        
         // If we came up with nothing (!isDiff()), then maybe we computed it
         // another way and should return the existing diffJson.
-        if ( diffJson == null || isDiff() ) {
+        if ( diffJson == null || isDiff(deltaJson) ) {
             diffJson = deltaJson;
         }
         
         return diffJson;
-
     }
     
+    protected void addCachedJobs( AbstractJavaWebScript webscript, JSONObject json, String keyName ) {
+        webscript.postProcessJson(json);
+        JSONArray jobs = json.optJSONArray( "jobs" );
+        json.remove("jobs");
+        json.put(keyName, jobs);
+    }
+    
+    /**
+     * Does glomming to check if there are any differences
+     * @param diff
+     * @return
+     */
     public static boolean isDiff( JSONObject diff ) {
         JsonDiffDiff diffDiff = new JsonDiffDiff( diff );
         return !diffDiff.getAffectedIds().isEmpty();
@@ -841,21 +892,28 @@ public class WorkspaceDiff implements Serializable {
         }
     }
 
-    private boolean addJSONArray(JSONObject jsonObject, String key, Map< String, EmsScriptNode > map,
-                                 WorkspaceNode ws, Date dateTime, boolean showAll) throws JSONException {
-            return addJSONArray(jsonObject, key, map, null, ws, dateTime, showAll);
+    private boolean addJSONArray(AbstractJavaWebScript webscript, JSONObject jsonObject, String key, Map< String, EmsScriptNode > map,
+                                 WorkspaceNode ws, Date dateTime, boolean showAll, boolean includeQualified) throws JSONException {
+            return addJSONArray(webscript, jsonObject, key, map, null, ws, dateTime, showAll, includeQualified);
     }
 
-    private boolean addJSONArray(JSONObject jsonObject, String key, Map< String, EmsScriptNode > map, 
-                                 Map< String, Version> versions, WorkspaceNode ws, Date dateTime, boolean showAll) throws JSONException {
-        return addJSONArray( jsonObject, key, map, versions, ws, dateTime, showAll, nodeDiff );
+    private boolean addJSONArray(AbstractJavaWebScript webscript, JSONObject jsonObject, String key, Map< String, EmsScriptNode > map, 
+                                 Map< String, Version> versions, WorkspaceNode ws, Date dateTime, boolean showAll, boolean includeQualified) throws JSONException {
+        return addJSONArray( webscript, jsonObject, key, map, versions, ws, dateTime, showAll, nodeDiff, includeQualified );
     }
-    public static boolean addJSONArray(JSONObject jsonObject, String key, Map< String, EmsScriptNode > map, 
+    
+    public boolean addJSONArray(AbstractJavaWebScript webscript, JSONObject jsonObject, String key, Map< String, EmsScriptNode > map, 
                                         Map< String, Version> versions, WorkspaceNode ws, Date dateTime, boolean showAll,
-                                        NodeDiff nodeDiff ) throws JSONException {
+                                        NodeDiff nodeDiff, boolean includeQualified ) throws JSONException {
         boolean emptyArray = true;
         if (map != null && map.size() > 0) {
-            jsonObject.put( key, convertMapToJSONArray( map, versions, ws, dateTime, showAll, nodeDiff ) );
+
+            jsonObject.put( key, convertMapToJSONArray( webscript, map, versions, ws, dateTime, showAll, nodeDiff, includeQualified ) );
+
+            key = key.replace( "Elements", "Jobs" );
+            key = key.replace( "elements", "jobs" );
+            addCachedJobs( webscript, jsonObject, key );
+
             emptyArray = false;
         } else {
             // add in the empty array
@@ -906,32 +964,39 @@ public class WorkspaceDiff implements Serializable {
         return filter;
     }
 
-    protected JSONArray convertMapToJSONArray(Map<String, EmsScriptNode> map,
+    protected JSONArray convertMapToJSONArray(AbstractJavaWebScript webscript,
+                                              Map<String, EmsScriptNode> map,
                                               Map<String, Version> versions, 
                                               WorkspaceNode workspace, Date dateTime,
-                                              boolean showAll) throws JSONException {
-        return convertMapToJSONArray( map, versions, workspace, dateTime, showAll, nodeDiff );
+                                              boolean showAll,
+                                              boolean includeQualified) throws JSONException {
+        return convertMapToJSONArray( webscript, map, versions, workspace,
+                                      dateTime, showAll, nodeDiff, includeQualified );
     }
 
-    protected static JSONArray convertMapToJSONArray(Map<String, EmsScriptNode> map,
+    protected static JSONArray convertMapToJSONArray(AbstractJavaWebScript webscript,
+                                                     Map<String, EmsScriptNode> map,
                                                      Map<String, Version> versions, 
                                                      WorkspaceNode workspace, Date dateTime,
-                                                     boolean showAll, NodeDiff nodeDiff) throws JSONException {
+                                                     boolean showAll, NodeDiff nodeDiff,
+                                                     boolean includeQualified) throws JSONException {
         Set<String> filter = null;
         if (!showAll) {
             filter = getFilter();
-//            filter = new HashSet<String>();
-//            filter.add("id");
         }
 
         JSONArray array = new JSONArray();
-        for (EmsScriptNode node: map.values()) {
+        Map<String, JSONObject> elementJsonMap = 
+                new LinkedHashMap< String, JSONObject >();
+                
+        for (Map.Entry< String, EmsScriptNode > entry : map.entrySet()) {
+            String sysmlid = entry.getKey();
+            EmsScriptNode node = entry.getValue();
             // Make sure the element exists at the dateTime.
             if ( node != null ) {
                 NodeRef r = NodeUtil.getNodeRefAtTime( node.getNodeRef(),
                                                        workspace, dateTime );
                 if ( r == null ) node = null;
-                //else node = new EmsScriptNode( r, getServices() ); 
             }
             if ( node == null ) {
                 continue;
@@ -962,17 +1027,39 @@ public class WorkspaceDiff implements Serializable {
                 filter.add(Acm.JSON_NAME);
                 filter.add(Acm.JSON_TYPE);
             }
-            boolean includeQualified = true;
             Version version = null;
             if ( !Utils.isNullOrEmpty( versions ) ) {
                 version = versions.get( node.getSysmlId() );
-//                filter.add( "id" );
-//                filter.add( "version" );
             }
+
+            // diffs don't need to have qualified
             JSONObject jsonObject =
                     node.toJSONObject( filter, false, workspace, dateTime,
                                        includeQualified, false, version, null );
             array.put( jsonObject );
+            elementJsonMap.put( sysmlid, jsonObject );
+        }
+        
+        // Add json for job elements whose Properties are posted without changes
+        // to the job.
+        ArrayList< String > jobIds = 
+                webscript.getJobsIdsForPropertyElementJson( elementJsonMap, workspace );
+        for ( String jobId : jobIds ) {
+            // add placeholder json for job
+            JSONObject jobJson = new JSONObject();
+            jobJson.put( "sysmlid", jobId );
+            elementJsonMap.put( jobId, jobJson );
+        }
+        
+        for (Entry< String, JSONObject > entry : elementJsonMap.entrySet()) {
+            String sysmlid = entry.getKey();
+            EmsScriptNode node = map.get( sysmlid );
+            if ( node == null ) {
+                node = NodeUtil.getNodeFromSysmlIdViaPostgres( sysmlid, workspace );
+            }
+            JSONObject jsonObject = entry.getValue();
+            if ( jsonObject == null ) continue;
+            webscript.getJsonForJob(node, jsonObject);
         }
 
         return array;
@@ -1377,7 +1464,7 @@ public class WorkspaceDiff implements Serializable {
         return true;
     }
 
-    public boolean isDiff() {
+    public boolean isDiffPrecalculated() {
         if (addedElements.size() > 0 || deletedElements.size() > 0 || movedElements.size() > 0 || updatedElements.size() > 0) {
             return true;
         }

@@ -1,12 +1,9 @@
 {"elements": [
     {
-        "qualifiedId": "/europa/123456/300",
-        "qualifiedName": "/europa/JW_TEST/300",
         "sysmlid": "300",
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
-        "searchTypes": "documentation",
         "name": "300",
         "documentation": "something",
         "owner": "123456",
@@ -15,7 +12,6 @@
             "isSlot": false,
             "isDerived": false,
             "value": [{
-                "valueExpression": null,
                 "string": "dlam_string",
                 "type": "LiteralString"
             }],
@@ -23,22 +19,17 @@
         }
     },
     {
-        "qualifiedId": "/no_site/no_site_no_project/holding_bin_no_site_no_project/x",
-        "qualifiedName": "/no_site/no_site_no_project/holding_bin/300",
         "sysmlid": "x",
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
-        "searchTypes": "documentation",
         "name": "300",
         "documentation": "something",
-        "owner": "holding_bin_no_site_no_project",
         "specialization": {
             "propertyType": null,
             "isSlot": false,
             "isDerived": false,
             "value": [{
-                "valueExpression": null,
                 "string": "dlam_string",
                 "type": "LiteralString"
             }],

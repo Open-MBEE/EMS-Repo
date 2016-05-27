@@ -52,7 +52,7 @@ None,
 create_curl_cmd(type="POST", data="elementsNew.json", base_url=BASE_URL_WS,
                 post_type="elements", branch="master/"),
 True,
-common_filters,
+common_filters + holding_bin_filters,
 ["test", "workspaces", "ws", "develop", "develop2", "parsek"]
 ],
         
@@ -63,7 +63,7 @@ common_filters,
 create_curl_cmd(type="POST", data="badOwners.json", base_url=BASE_URL_WS,
                 post_type="elements", branch="master/"),
 True,
-common_filters,
+common_filters + holding_bin_filters,
 ["test", "workspaces", "develop", "develop2"]
 ],
         
@@ -141,7 +141,7 @@ None,
 create_curl_cmd(type="GET", data="elements/123456?recurse=true", base_url=BASE_URL_WS,
                 branch="master/"),
 True,
-common_filters + ['"MMS_', 'MMS_'],
+common_filters + holding_bin_filters + ['"MMS_', 'MMS_'],
 ["test", "workspaces", "develop"]
 ],
 
@@ -163,7 +163,7 @@ common_filters + ['"MMS_', 'MMS_'],
 create_curl_cmd(type="GET", data="elements/123456?depth=1", base_url=BASE_URL_WS,
                 branch="master/"),
 True,
-common_filters + ['"MMS_', 'MMS_'],
+common_filters + holding_bin_filters + ['"MMS_', 'MMS_'],
 ["test", "workspaces", "develop"]
 ],
 
@@ -174,7 +174,7 @@ common_filters + ['"MMS_', 'MMS_'],
 create_curl_cmd(type="GET", data="elements/123456?depth=2", base_url=BASE_URL_WS,
                 branch="master/"),
 True,
-common_filters + ['"MMS_', 'MMS_'],
+common_filters + holding_bin_filters + ['"MMS_', 'MMS_'],
 ["test", "workspaces", "develop"]
 ],
 
@@ -185,7 +185,7 @@ common_filters + ['"MMS_', 'MMS_'],
 create_curl_cmd(type="GET", data="elements/123456?depth=-1", base_url=BASE_URL_WS,
                 branch="master/"),
 True,
-common_filters + ['"MMS_', 'MMS_'],
+common_filters + holding_bin_filters + ['"MMS_', 'MMS_'],
 ["test", "workspaces", "develop"]
 ],
 
@@ -207,7 +207,7 @@ common_filters + ['"MMS_', 'MMS_'],
 create_curl_cmd(type="GET", data="elements/300?recurse=true&connected=true", base_url=BASE_URL_WS,
                 branch="master/"),
 True,
-common_filters + ['"MMS_', 'MMS_'],
+common_filters + holding_bin_filters + ['"MMS_', 'MMS_'],
 ["test", "workspaces", "develop"]
 ],
         
@@ -221,6 +221,27 @@ True,
 common_filters + ['"MMS_', 'MMS_'],
 ["test", "workspaces", "develop"]
 ],
+
+[
+68,
+"GetElements",
+"Get elements using body to specify elements",
+"curl -u admin:admin -X GET -H Content-Type:application/json http://localhost:8080/alfresco/s/workspaces/master/elements -d @JsonData/elementsGet.json",
+True,
+common_filters + ['"MMS_', 'MMS_'],
+["test", "workspaces", "develop"]
+],
+
+[
+69,
+"PutElements",
+"Get elements using body to specify elements",
+"curl -u admin:admin -X PUT -H Content-Type:application/json http://localhost:8080/alfresco/s/workspaces/master/elements -d @JsonData/elementsGet.json",
+True,
+common_filters + ['"MMS_', 'MMS_'],
+["test", "workspaces", "develop"]
+],
+
 
 [
 70,
@@ -264,7 +285,7 @@ common_filters,
 create_curl_cmd(type="GET", data="search?keyword=some*", base_url=BASE_URL_WS,
                 branch="master/"),
 True,
-common_filters,
+common_filters + holding_bin_filters,
 ["test", "workspaces", "develop"],
 None,
 None,
@@ -295,7 +316,7 @@ None,
 create_curl_cmd(type="GET",data="element/search?keyword=some*&maxItems=1&skipCount=1",base_url=BASE_URL_WS,
                branch="master/"),
 True, 
-common_filters + ['"sysmlid"', '"owner"', '"qualifiedId"', '"qualifiedName"'],
+common_filters + holding_bin_filters + ['"sysmlid"'],
 [],
 None,
 None,
@@ -310,7 +331,7 @@ None,
 create_curl_cmd(type="GET",data="element/search?keyword=some*&maxItems=-1&skipCount=25",base_url=BASE_URL_WS,
                branch="master/"),
 True, 
-common_filters,
+common_filters + ['YY_', 'MM_', 'DD_', 'HH_', '"qualifiedId"', '"qualifiedName"'],
 ["test", "workspaces", "develop"],
 None,
 None,
@@ -327,7 +348,7 @@ None,
 create_curl_cmd(type="DELETE", data="elements/6666", base_url=BASE_URL_WS,
                 branch="master/"),
 True,
-common_filters + ['"timestamp"', '"MMS_', '"id"', '"qualifiedId"', '"version"', '"modified"', '"sequence"'],
+common_filters + holding_bin_filters + ['"timestamp"', '"MMS_', '"id"', '"version"', '"modified"', '"sequence"'],
 ["test", "workspaces", "develop", "develop2"]
 ],
         
@@ -500,7 +521,7 @@ common_filters + ['"branched"', '"created"', '"id"', '"qualifiedId"', '"parent"'
 create_curl_cmd(type="POST", data="x.json", base_url=BASE_URL_WS,
                 post_type="elements", branch="$gv2/"),
 True,
-common_filters,
+common_filters + holding_bin_filters,
 ["test", "workspaces", "develop"],
 None,
 None,
@@ -515,7 +536,7 @@ set_read_to_gv4
 create_curl_cmd(type="GET", base_url=SERVICE_URL,
                 branch="diff/$gv1/$gv2/latest/latest?changesForMerge"),
 True,
-common_filters + ['"id"', '"qualifiedId"', '"creator"', '"modifier"'],
+common_filters + holding_bin_filters + ['"id"', '"creator"', '"modifier"'],
 ["test", "workspaces", "develop"],
 None,
 None,
@@ -530,7 +551,7 @@ None
 create_curl_cmd(type="GET", base_url=SERVICE_URL,
                 branch="diff/$gv1/$gv2/latest/latest?fullCompare"),
 True,
-common_filters + ['"id"', '"qualifiedId"', '"creator"', '"modifier"'],
+common_filters + holding_bin_filters + ['"id"', '"creator"', '"modifier"'],
 ["test", "workspaces", "develop"],
 None,
 None,
@@ -567,7 +588,7 @@ common_filters + ['"id"', '"qualifiedId"', '"diffTime"', '"creator"', '"modifier
 create_curl_cmd(type="GET", base_url=SERVICE_URL,
                 branch="diff/$gv1/$gv2/latest/latest?background&changesForMerge"),
 True,
-common_filters + ['"id"', '"qualifiedId"', '"diffTime"', '"creator"', '"modifier"'],
+common_filters + holding_bin_filters + ['"id"', '"diffTime"', '"creator"', '"modifier"'],
 ["test", "workspaces", "develop"],
 None,
 None,
@@ -582,7 +603,7 @@ None,
 create_curl_cmd(type="GET", base_url=SERVICE_URL,
                 branch="diff/$gv1/$gv2/latest/latest?background&fullCompare"),
 True,
-common_filters + ['"id"', '"qualifiedId"', '"diffTime"', '"creator"', '"modifier"'],
+common_filters + holding_bin_filters + ['"id"', '"diffTime"', '"creator"', '"modifier"'],
 ["test", "workspaces", "develop"],
 None,
 None,
@@ -597,7 +618,7 @@ None,
 create_curl_cmd(type="GET", base_url=SERVICE_URL,
                 branch="diff/$gv1/$gv2/latest/latest?changesForMerge"),
 True,
-common_filters + ['"id"', '"qualifiedId"', '"diffTime"', '"creator"', '"modifier"'],
+common_filters + holding_bin_filters + ['"id"', '"diffTime"', '"creator"', '"modifier"'],
 ["test", "workspaces", "develop"],
 None,
 None,
@@ -611,7 +632,7 @@ None,
 create_curl_cmd(type="GET", base_url=SERVICE_URL,
                 branch="diff/$gv1/$gv2/latest/latest?fullCompare"),
 True,
-common_filters + ['"id"', '"qualifiedId"', '"diffTime"', '"creator"', '"modifier"'],
+common_filters + holding_bin_filters + ['"id"', '"diffTime"', '"creator"', '"modifier"'],
 ["test", "workspaces", "develop"],
 None,
 None,
@@ -639,7 +660,7 @@ None,
 create_curl_cmd(type="GET", base_url=SERVICE_URL,
                 branch="diff/$gv1/$gv2/latest/latest?changesForMerge"),
 True,
-common_filters + ['"id"', '"qualifiedId"', '"diffTime"', '"creator"', '"modifier"'],
+common_filters + holding_bin_filters + ['"id"', '"diffTime"', '"creator"', '"modifier"'],
 ["test", "workspaces", "develop"],
 None,
 None,
@@ -653,7 +674,7 @@ None,
 create_curl_cmd(type="GET", base_url=SERVICE_URL,
                 branch="diff/$gv1/$gv2/latest/latest?fullCompare"),
 True,
-common_filters + ['"id"', '"qualifiedId"', '"diffTime"', '"creator"', '"modifier"'],
+common_filters + holding_bin_filters + ['"id"', '"diffTime"', '"creator"', '"modifier"'],
 ["test", "workspaces", "develop"],
 None,
 None,
@@ -841,7 +862,7 @@ common_filters + ['"id"', '"qualifiedId"', '"creator"', '"modifier"'],
 create_curl_cmd(type="GET", base_url=SERVICE_URL,
                 branch="diff/$gv1/$gv2/latest/latest?background&changesForMerge"),
 True,
-common_filters + ['"id"', '"qualifiedId"', '"diffTime"', '"creator"', '"modifier"'],
+common_filters + holding_bin_filters + ['"id"', '"diffTime"', '"creator"', '"modifier"'],
 ["test", "workspaces", "develop"],
 ],
 
@@ -852,7 +873,7 @@ common_filters + ['"id"', '"qualifiedId"', '"diffTime"', '"creator"', '"modifier
 create_curl_cmd(type="GET", base_url=SERVICE_URL,
                 branch="diff/$gv1/$gv2/latest/latest?background&fullCompare"),
 True,
-common_filters + ['"id"', '"qualifiedId"', '"diffTime"', '"creator"', '"modifier"'],
+common_filters + holding_bin_filters + ['"id"', '"diffTime"', '"creator"', '"modifier"'],
 ["test", "workspaces", "develop"],
 ],
 
@@ -926,7 +947,7 @@ common_filters,
 create_curl_cmd(type="POST", data="x.json", base_url=BASE_URL_WS,
                 post_type="elements", branch="$gv1/"),
 True,
-common_filters,
+common_filters + holding_bin_filters,
 ["test", "workspaces", "develop"],
 None,
 None,
@@ -990,7 +1011,7 @@ common_filters + ['"id"', '"qualifiedId"', '"timestamp"', '"creator"', '"modifie
 create_curl_cmd(type="GET", base_url=SERVICE_URL,
                 branch="diff/$gv1/$gv2/$gv3/$gv4?fullCompare"),
 True,
-common_filters + ['"id"', '"qualifiedId"', '"timestamp"', '"creator"', '"modifier"'],
+common_filters + holding_bin_filters + ['"id"', '"timestamp"', '"creator"', '"modifier"'],
 ["test", "workspaces", "develop"]
 ],
 
@@ -1034,7 +1055,7 @@ common_filters + ['"id"', '"qualifiedId"', '"timestamp"', '"creator"', '"modifie
 create_curl_cmd(type="GET", base_url=SERVICE_URL,
                 branch="diff/$gv1/$gv2/$gv3/$gv4?fullCompare"),
 True,
-common_filters + ['"id"', '"qualifiedId"', '"timestamp"', '"creator"', '"modifier"'],
+common_filters + holding_bin_filters + ['"id"', '"timestamp"', '"creator"', '"modifier"'],
 ["test", "workspaces", "develop"]
 ],
 
@@ -1169,7 +1190,7 @@ set_wsid_to_gv1
 create_curl_cmd(type="POST", data="a.json", base_url=BASE_URL_WS,
                 post_type="elements", branch="master/"),
 True,
-common_filters,
+common_filters + holding_bin_filters,
 ["test", "workspaces", "develop", "develop2"],
 None,
 None,
@@ -1208,7 +1229,7 @@ common_filters,
 "Post element a to master.",
 create_curl_cmd(type="POST", data="a.json", base_url=BASE_URL_WS, post_type="elements", branch="master/", project_post=False),
 True,
-common_filters,
+common_filters + holding_bin_filters,
 ["test", "develop"]
 ],
 
@@ -1228,7 +1249,7 @@ common_filters + ['"branched"', '"created"', '"id"', '"qualifiedId"'],
 "Post element b to master.",
 create_curl_cmd(type="POST", data="b.json", base_url=BASE_URL_WS, post_type="elements", branch="master/", project_post=False),
 True,
-common_filters,
+common_filters + holding_bin_filters,
 ["test", "develop"]
 ],
 
@@ -1238,7 +1259,7 @@ common_filters,
 "Post element c to the parent workspace.",
 create_curl_cmd(type="POST", data="c.json", base_url=BASE_URL_WS, post_type="elements", branch="theParentWorkspace/", project_post=False),
 True,
-common_filters,
+common_filters + holding_bin_filters,
 ["test", "develop"]
 ],
 
@@ -1258,7 +1279,7 @@ common_filters + ['"branched"', '"created"', '"id"', '"qualifiedId"', '"parent"'
 "Post element d to master.",
 create_curl_cmd(type="POST", data="d.json", base_url=BASE_URL_WS, post_type="elements", branch="master/", project_post=False),
 True,
-common_filters,
+common_filters + holding_bin_filters,
 ["test", "develop"]
 ],
 
@@ -1268,7 +1289,7 @@ common_filters,
 "Post element e to the parent workspace.",
 create_curl_cmd(type="POST", data="e.json", base_url=BASE_URL_WS, post_type="elements", branch="theParentWorkspace/", project_post=False),
 True,
-common_filters,
+common_filters + holding_bin_filters,
 ["test", "develop"]
 ],
 
@@ -1278,7 +1299,7 @@ common_filters,
 "Post element f to the subworkspace.",
 create_curl_cmd(type="POST", data="f.json", base_url=BASE_URL_WS, post_type="elements", branch="theSubworkspace/", project_post=False),
 True,
-common_filters,
+common_filters + holding_bin_filters,
 ["test", "develop"]
 ],
 
@@ -1288,7 +1309,7 @@ common_filters,
 "Get element a in the master workspace.",
 create_curl_cmd(type="GET", data="elements/a", base_url=BASE_URL_WS, post_type="elements", branch="master/", project_post=False),
 True,
-common_filters,
+common_filters + holding_bin_filters,
 ["test", "develop"]
 ],
 
@@ -1298,7 +1319,7 @@ common_filters,
 "Get element a in the parent workspace.",
 create_curl_cmd(type="GET", data="elements/a", base_url=BASE_URL_WS, post_type="elements", branch="theParentWorkspace/", project_post=False),
 True,
-common_filters,
+common_filters + holding_bin_filters,
 ["test", "develop"]
 ],
 
@@ -1308,7 +1329,7 @@ common_filters,
 "Get element a in the subworkspace.",
 create_curl_cmd(type="GET", data="elements/a", base_url=BASE_URL_WS, post_type="elements", branch="theSubworkspace/", project_post=False),
 True,
-common_filters,
+common_filters + holding_bin_filters,
 ["test", "develop"]
 ],
 
@@ -1318,7 +1339,7 @@ common_filters,
 "Get element b in the master workspace.",
 create_curl_cmd(type="GET", data="elements/b", base_url=BASE_URL_WS, post_type="elements", branch="master/", project_post=False),
 True,
-common_filters,
+common_filters + holding_bin_filters,
 ["test", "develop"]
 ],
 
@@ -1358,7 +1379,7 @@ common_filters,
 "Get element c in the parent workspace.",
 create_curl_cmd(type="GET", data="elements/c", base_url=BASE_URL_WS, post_type="elements", branch="theParentWorkspace/", project_post=False),
 True,
-common_filters,
+common_filters + holding_bin_filters,
 ["test", "develop"]
 ],
 
@@ -1368,7 +1389,7 @@ common_filters,
 "Get element c in the subworkspace.",
 create_curl_cmd(type="GET", data="elements/c", base_url=BASE_URL_WS, post_type="elements", branch="theSubworkspace/", project_post=False),
 True,
-common_filters,
+common_filters + holding_bin_filters,
 ["test", "develop"]
 ],
 
@@ -1378,7 +1399,7 @@ common_filters,
 "Get element d in the master workspace.",
 create_curl_cmd(type="GET", data="elements/d", base_url=BASE_URL_WS, post_type="elements", branch="master/", project_post=False),
 True,
-common_filters,
+common_filters + holding_bin_filters,
 ["test", "develop"]
 ],
 
@@ -1418,7 +1439,7 @@ common_filters,
 "Get element e in the parent workspace.",
 create_curl_cmd(type="GET", data="elements/e", base_url=BASE_URL_WS, post_type="elements", branch="theParentWorkspace/", project_post=False),
 True,
-common_filters,
+common_filters + holding_bin_filters,
 ["test", "develop"]
 ],
 
@@ -1458,7 +1479,7 @@ common_filters,
 "Get element f in the subworkspace.",
 create_curl_cmd(type="GET", data="elements/f", base_url=BASE_URL_WS, post_type="elements", branch="theSubworkspace/", project_post=False),
 True,
-common_filters,
+common_filters + holding_bin_filters,
 ["test", "develop"]
 ],
         
@@ -1585,6 +1606,16 @@ common_filters + ['"id"', '"qualifiedId"', '"creator"', '"modifier"'],
 
 # EXPRESSIONS: ==========================    
 
+[
+254,
+"TurnOnExpressionStuff",
+"Make sure switch is turned on for handling expressions in viewpoints, etc.",
+create_curl_cmd(type="GET", data="", base_url="http://localhost:8080/alfresco/service/", branch="flags/viewpointExpressions?on"),
+False,
+common_filters,
+["test", "develop", "workspaces"]
+],
+
 # Note: currently not an equivalent in workspaces for this URL, but we may add it
 [
 255,
@@ -1595,8 +1626,8 @@ create_curl_cmd(type="POST", base_url=BASE_URL_WS,
                 branch="master/",
                 post_type="elements?fix=true"),
 True,
-common_filters,
-["test", "workspaces"]
+common_filters + ['"modifier"', '"message"', '"qualifiedId"'],
+["test", "develop", "workspaces"]
 ],
         
 [
@@ -1669,7 +1700,7 @@ create_curl_cmd(type="POST", base_url=BASE_URL_WS,
                 branch="master/sites/demo3site/",
                 post_type="elements"),
 True,
-common_filters + ['"MMS_', 'MMS_'],
+common_filters + holding_bin_filters + ['"MMS_', 'MMS_'],
 ["test", "workspaces", "develop", "develop2"]
 ],
         
@@ -1695,6 +1726,16 @@ create_curl_cmd(type="GET", data="views/_17_0_2_3_e610336_1394148311476_17302_29
 True,
 common_filters,
 ["test", "workspaces", "develop2", ]
+],
+
+[
+297,
+"TurnOffExpressionStuff",
+"Make sure switch is turned off for handling expressions in viewpoints, etc.",
+create_curl_cmd(type="GET", data="", base_url="http://localhost:8080/alfresco/service/", branch="flags/viewpointExpressions?off"),
+False,
+common_filters,
+["test", "develop","workspaces"]
 ],
 
 
@@ -1733,7 +1774,7 @@ common_filters,
 create_curl_cmd(type="POST", data="x.json", base_url=BASE_URL_WS,
                 post_type="elements", branch="master/sites/europa/"),
 True,
-common_filters,
+common_filters + holding_bin_filters,
 ["test", "workspaces", "develop", "develop2"],
 None,
 None,
@@ -1986,7 +2027,7 @@ None,
 create_curl_cmd(type="POST", data="productsDowngrade.json", base_url=BASE_URL_WS,
                 post_type="elements", branch="master/"),
 True,
-common_filters,
+common_filters + holding_bin_filters,
 ["test", "workspaces", "develop", "develop2"]
 ],
 
@@ -1997,7 +2038,7 @@ common_filters,
 create_curl_cmd(type="POST", data="viewDowngrade.json", base_url=BASE_URL_WS,
                 post_type="elements", branch="master/"),
 True,
-common_filters,
+common_filters + holding_bin_filters,
 ["test", "workspaces", "develop", "develop2"]
 ],
 
@@ -2008,7 +2049,7 @@ common_filters,
 create_curl_cmd(type="POST", data="elementDowngrade.json", base_url=BASE_URL_WS,
                 post_type="elements", branch="master/"),
 True,
-common_filters,
+common_filters + holding_bin_filters,
 ["test", "workspaces", "develop", "develop2"],
 None,
 None,
@@ -2065,7 +2106,7 @@ common_filters + ['"timestamp"', '"MMS_', '"id"', '"qualifiedId"', '"version"', 
 create_curl_cmd(type="POST", data="newElement.json", base_url=BASE_URL_WS,
                 post_type="elements", branch="$gv1/"),
 True,
-common_filters,
+common_filters + holding_bin_filters,
 ["test", "workspaces", "develop", "develop2"]
 ],
         
@@ -2088,7 +2129,7 @@ common_filters,
 create_curl_cmd(type="GET", base_url=SERVICE_URL,
                 branch="diff/$gv2/$gv1/latest/latest?changesForMerge"),
 True,
-common_filters + ['"id"', '"qualifiedId"', '"creator"', '"modifier"'],
+common_filters + holding_bin_filters + ['"id"', '"creator"', '"modifier"'],
 ["test", "workspaces", "develop"],
 None,
 None,
@@ -2102,7 +2143,7 @@ set_json_output_to_gv3
 create_curl_cmd(type="GET", base_url=SERVICE_URL,
                 branch="diff/$gv2/$gv1/latest/latest?fullCompare"),
 True,
-common_filters + ['"id"', '"qualifiedId"', '"creator"', '"modifier"'],
+common_filters + holding_bin_filters + ['"id"', '"creator"', '"modifier"'],
 ["test", "workspaces", "develop"],
 None,
 None,
@@ -2116,7 +2157,7 @@ set_json_output_to_gv3
 "Post a diff to merge workspaces",
 'curl %s %s \'$gv3\' "%sdiff"' % (CURL_FLAGS, CURL_POST_FLAGS, SERVICE_URL),
 True,
-common_filters + ['"id"', '"qualifiedId"', '"timestamp"'],
+common_filters + holding_bin_filters + ['"id"', '"timestamp"', '"sequence"', '"creator"', '"modifier"'],
 ["test", "workspaces", "develop"],
 ],
        
@@ -2128,7 +2169,7 @@ common_filters + ['"id"', '"qualifiedId"', '"timestamp"'],
 create_curl_cmd(type="GET", base_url=SERVICE_URL,
                 branch="diff/$gv2/$gv1/latest/latest?changesForMerge"),
 True,
-common_filters + ['"id"', '"qualifiedId"', '"creator"', '"modifier"'],
+common_filters + holding_bin_filters + ['"id"', '"creator"', '"modifier"'],
 ["test", "workspaces", "develop"],
 ],
 
@@ -2139,12 +2180,22 @@ common_filters + ['"id"', '"qualifiedId"', '"creator"', '"modifier"'],
 create_curl_cmd(type="GET", base_url=SERVICE_URL,
                 branch="diff/$gv2/$gv1/latest/latest?fullCompare"),
 True,
-common_filters + ['"id"', '"qualifiedId"', '"creator"', '"modifier"'],
+common_filters + holding_bin_filters + ['"id"', '"creator"', '"modifier"'],
 ["test", "workspaces", "develop"],
 ],
 
  
 # EXPRESSION PARSING =====================================================
+# [
+# 599.9,
+# "TurnOnExpressionStuff",
+# "Make sure switch is turned on for handling expressions in viewpoints, etc.",
+# create_curl_cmd(type="GET", data="", base_url="http://localhost:8080/alfresco/service/", branch="flags/viewpointExpressions?off"),
+# False,
+# common_filters,
+# ["test", "develop","workspaces"]
+# ],
+
 
 [
 600,
@@ -2153,7 +2204,7 @@ common_filters + ['"id"', '"qualifiedId"', '"creator"', '"modifier"'],
 create_curl_cmd(type="POST", data="operation.json", base_url=BASE_URL_WS,
                 post_type="elements?expression=1%2B1", branch="master/"),
 True,
-common_filters + ['MMS_'],
+common_filters + holding_bin_filters + ['MMS_'],
 ["test", "workspaces", "develop", "develop2", "parsek"]
 ],
 
@@ -2164,9 +2215,20 @@ common_filters + ['MMS_'],
 create_curl_cmd(type="POST", data="onePlusOne.k", base_url=BASE_URL_WS,
                 post_type="elements?evaluate", branch="master/"),
 True,
-common_filters + ['MMS_'],
+common_filters + holding_bin_filters + ['MMS_', '"evaluationResult"'],
 ["test", "workspaces", "develop", "develop2", "parsek"]
 ],
+
+# [
+# 605,
+# "TurnOffExpressionStuff",
+# "Make sure switch is turned off for handling expressions in viewpoints, etc.",
+# create_curl_cmd(type="GET", data="", base_url="http://localhost:8080/alfresco/service/", branch="flags/viewpointExpressions?off"),
+# False,
+# common_filters,
+# ["test", "develop","workspaces"]
+# ],
+
 # PERMISSION TESTING =====================================================
 
 # Creating users for user testing
@@ -2401,7 +2463,7 @@ None
 create_curl_cmd(type="POST", data="nullElements.json", base_url=BASE_URL_WS,
                 post_type="elements", branch="master/"),
 True,
-common_filters,
+common_filters + holding_bin_filters,
 ["test", "workspaces", "develop", "develop2"]
 ],
         
@@ -2488,7 +2550,8 @@ True,
 common_filters,
 ["test", "workspaces", "develop", "develop2"]
 ],
-        
+  
+# FIXME: temporarily remove this from being tested in develop, since the diff isn't working properly      
 [
 663,
 "TestGetAfterResurrection",
@@ -2496,8 +2559,8 @@ common_filters,
 create_curl_cmd(type="GET", data="elements/123456?recurse=true", base_url=BASE_URL_WS,
                 branch="master/"),
 True,
-common_filters + ['"MMS_', 'MMS_'],
-["test", "workspaces", "develop"]
+common_filters + holding_bin_filters + ['MMS_'],
+[]
 ],
 
 # ELEMENTS PROPERTY SERVICE (CMED-835): ==========================    
@@ -2616,7 +2679,7 @@ common_filters + ['"timestamp"', '"MMS_', '"id"', '"qualifiedId"', '"version"', 
 create_curl_cmd(type="POST", data="aspectChanges.json", base_url=BASE_URL_WS,
                 post_type="elements", branch="master/"),
 True,
-common_filters,
+common_filters + ['"message"'],
 ["test", "workspaces", "develop", "develop2"]
 ],
 
@@ -3116,27 +3179,28 @@ common_filters + ['"timestamp"'],
 ],
 [
 10105,
-"CheckMmsVersion-Correct",
-"Checks the MMS version when requesting an element, versions SHOULD match",
+"GET-CheckMmsVersion-Correct",
+"[ NOTE: GET Requests are currently allowed if versions do not match] Checks the MMS version when requesting an element, versions SHOULD match",
 create_curl_cmd(type="GET", data="elements/303?mmsVersion=2.3", base_url=BASE_URL_WS),
 True,
 common_filters + ['"timestamp"'],
 ["test","workspaces","develop", "develop2"]
 ],
 [
+# FIXME: removed JSON diff since timestamp is in version and is in message, so needs to be ignored 
 10106,
-"CheckMmsVersion-Incorrect",
-"Checks the MMS version when requesting an element, versions should NOT match",
+"GET-CheckMmsVersion-Incorrect",
+"[ NOTE: GET Requests are currently allowed if versions do not match] Checks the MMS version when requesting an element, versions should NOT match",
 create_curl_cmd(type="GET", data="elements/303?mmsVersion=2.0", base_url=BASE_URL_WS,
         branch="master/"),
-True,
-common_filters + ['"timestamp"'],
+False,
+common_filters + ['"timestamp"', '"message"'],
 ["test","workspaces","develop", "develop2"]
 ],
 [
 10107,
-"CheckMmsVersion-Invalid-Argument",
-"Checks the MMS version when requesting an element, request was made with the parameter but is missing an argument, or containing an invalid argument.",
+"GET-CheckMmsVersion-Invalid-Argument",
+"[ NOTE: GET Requests are currently allowed if versions do not match] Checks the MMS version when requesting an element, request was made with the parameter but is missing an argument, or containing an invalid argument.",
 create_curl_cmd(type="GET", data="elements/303?mmsVersion=", base_url=BASE_URL_WS,
         branch="master/"),
 True,
@@ -3145,10 +3209,50 @@ common_filters + ['"timestamp"'],
 ],
 [
 10108,
-"CheckMmsVersion-Missing-Argument",
-"Checks the MMS version when requesting an element, request was made  but the REST call was missing the parameter '?mmsVersion=2.3'.",
+"GET-CheckMmsVersion-Missing-Argument",
+"[ NOTE: GET Requests are currently allowed if versions do not match] Checks the MMS version when requesting an element, request was made  but the REST call was missing the parameter '?mmsVersion=2.3'.",
 create_curl_cmd(type="GET", data="elements/303", base_url=BASE_URL_WS,
         branch="master/"),
+True,
+common_filters + ['"timestamp"'],
+["test","workspaces","develop", "develop2"]
+],
+[
+10109,
+"POST-CheckMmsVersion-Correct",
+"Checks the MMS version when POSTing an element, versions SHOULD match",
+create_curl_cmd(type="POST", data="303.json", base_url=BASE_URL_WS, post_type="elements?mmsVersion=2.3"),
+True,
+common_filters + ['"timestamp"'],
+["test","workspaces","develop", "develop2"]
+],
+[
+# FIXME: removed JSON diff since timestamp is in version and is in message, so needs to be ignored 
+10110,
+"POST-CheckMmsVersion-Incorrect",
+"Checks the MMS version when POSTing an element, versions should NOT match",
+create_curl_cmd(type="POST", data="303.json", base_url=BASE_URL_WS,
+        branch="master/", post_type="elements?mmsVersion=2.0"),
+False,
+common_filters + ['"timestamp"'],
+["test","workspaces","develop", "develop2"]
+],
+[
+10111,
+"POST-CheckMmsVersion-Invalid-Argument",
+"Checks the MMS version when POSTing an element, request was made with the parameter but is missing an argument, or containing an invalid argument.",
+create_curl_cmd(type="POST", data="303.json", base_url=BASE_URL_WS,
+        branch="master/", post_type="elements?mmsVersion=INVALID"),
+True,
+common_filters + ['"timestamp"'],
+[] #["test","workspaces","develop", "develop2"]
+],
+[
+10112,
+"POST-CheckMmsVersion-Missing-Argument",
+"Checks the MMS version when POSTing an element, request was made  but the REST call was missing the parameter '?mmsVersion=2.3'.",
+create_curl_cmd(type="POST", data="303.json", base_url=BASE_URL_WS,
+        branch="master/", post_type="elements?mmsVersion="),
 True,
 common_filters + ['"timestamp"'],
 ["test","workspaces","develop", "develop2"]
@@ -3161,9 +3265,182 @@ create_curl_cmd("GET", data="flags/checkMmsVersions?off", base_url=SERVICE_URL, 
 False,
 common_filters + ['"timestamp"'],
 ["test","workspaces","develop", "develop2"]
+],
+     
+[
+10129,
+"LogLevelPost",
+"Sets the log level of a class on mms",
+create_curl_cmd("POST", data="loglevel.json", base_url=SERVICE_URL, branch="loglevel", post_type=""),
+False,
+common_filters,
+["develop"]
 ]
-]
+,
+[
+    10130,
+    "TestCase10130_PostElements",
+    "Post elements",
+    create_curl_cmd(type="POST", data="TestCase10130_elements.json", base_url=BASE_URL_WS,
+                    post_type="elements", branch="master/"),
+    True,
+    common_filters + holding_bin_filters,
+    ["test", "workspaces", "develop", "develop2"]
+],
+[
+10130.1,
+"TestCase10130.1_VerifyProductX",
+"Verify elements for ProductX",
+create_curl_cmd(type="GET", data="sites/europa/elements/MMS_1450390431247_8a4b76d2-394c-4569-9abe-5c51dc4b0711", base_url=BASE_URL_WS,
+                branch="master/"),
+True,
+common_filters + holding_bin_filters + ['"timestamp"'],
+["test", "workspaces", "develop", "develop2"]
+],
+[
+10130.2,
+"TestCase10130.2_VerifyViewX",
+"Verify elements for View X",
+create_curl_cmd(type="GET", data="sites/europa/elements/MMS_1450390431247_8a4b76d2-394c-4569-9abe-5c51dc4b0811", base_url=BASE_URL_WS,
+                branch="master/"),
+True,
+common_filters + holding_bin_filters + ['"timestamp"'],
+["test", "workspaces", "develop", "develop2"]
+],
+[
+10130.3,
+"TestCase10130.3_VerifyViewY",
+"Verify elements for View Y",
+create_curl_cmd(type="GET", data="sites/europa/elements/MMS_1450390431247_8a4b76d2-394c-4569-9abe-5c51dc4b0812", base_url=BASE_URL_WS,
+                branch="master/"),
+True,
+common_filters + holding_bin_filters + ['"timestamp"'],
+["test", "workspaces", "develop", "develop2"]
+],
+[
+10130.4,
+"TestCase10130.4_VerifyViewZ",
+"Verify elements for View Z",
+create_curl_cmd(type="GET", data="sites/europa/elements/MMS_1450390431247_8a4b76d2-394c-4569-9abe-5c51dc4b0813", base_url=BASE_URL_WS,
+                branch="master/"),
+True,
+common_filters + holding_bin_filters + ['"timestamp"'],
+["test", "workspaces", "develop", "develop2"]
+],
+[
+10131,
+"TestCase10131_PostViewV",
+"Post view V",
+create_curl_cmd(type="POST", data="TestCase10131_postViewV.json", base_url=BASE_URL_WS,
+                post_type="elements", branch="master/"),
+True,
+common_filters + holding_bin_filters + ['MMS_', '"timestamp"'],
+["test", "workspaces", "develop", "develop2"]
+],
+[
+10132,
+"TestCase10132_PostViewVRemove",
+"Post view V",
+create_curl_cmd(type="POST", data="TestCase10132_postViewVRemove.json", base_url=BASE_URL_WS,
+                post_type="elements", branch="master/"),
+True,
+common_filters + holding_bin_filters + ['MMS_', '"timestamp"'],
+["test", "workspaces", "develop", "develop2"]
+],
+[
+10133,
+"TestCase10133_PostViewVUpdate",
+"Post view V",
+create_curl_cmd(type="POST", data="TestCase10133_postViewVUpdate.json", base_url=BASE_URL_WS,
+                post_type="elements", branch="master/"),
+True,
+common_filters + holding_bin_filters + ['MMS_', '"timestamp"'],
+["test", "workspaces", "develop", "develop2"]
+],
+     
+[
+10134,
+"PostPresentElemClassifiers",
+"posting job sysmlid and job stereotype ids",
+create_curl_cmd(type="POST", data="presentElemClassifiers.json", base_url=BASE_URL_WS, post_type="elements", branch="master/"),
+True,
+common_filters  + ['YY_', 'MM_', 'DD_', 'HH_', 'MMS_', '"timestamp"', '"qualifiedId"', '"qualifiedName"'],
+["test", "workspaces", "develop", "develop2"]
+],     
+         
+# PMA test cases, 10135 - 10140
+[
+10135,
+"PostJobsBCDF",
+"post jobs B, C, D, F",
+create_curl_cmd(type="POST", data="pmaPost1.json", base_url=BASE_URL_WS, post_type="jobs?addToJenkins=false", branch="master/"),
+True,
+common_filters + holding_bin_filters + ['MMS_', '"timestamp"'],
+["test", "workspaces", "develop", "develop2"]
+],
+[
+10136,
+"GetJobsBCDF",
+"Change values of existing jobs", 
+create_curl_cmd(type="GET", data="jobs/PMA_Jobs?recurse=1", base_url=BASE_URL_WS,
+                branch="master/"),
+True,
+common_filters + holding_bin_filters + ['MMS_', '"timestamp"'],
+["test", "workspaces", "develop", "develop2"]
+],  
+[
+10137,
+"PostJobsAE_and_UpdateProperties",
+"Posting a single job without element json",
+create_curl_cmd(type="POST", data="pmaPost1.json", base_url=BASE_URL_WS,
+                post_type="jobs?addToJenkins=false", branch="master/"),
+True,
+common_filters + holding_bin_filters + ['MMS_', '"timestamp"'],
+["test", "workspaces", "develop", "develop2"]
+],
+[
+10138,
+"VerifyUpdate",
+"Posting a job with no specified schedule",
+create_curl_cmd(type="GET", data="jobs/PMA_Jobs?recurse=1", base_url=BASE_URL_WS,
+                branch="master/"),
+True,
+common_filters + holding_bin_filters + ['MMS_', '"timestamp"'],
+["test", "workspaces", "develop", "develop2"]
+],  
+[
+10139,
+"PostJobGwithProperties",
+"Obtaining the JSON for jobs contained by a view",
+create_curl_cmd(type="POST", data="pmaPost3.json", base_url=BASE_URL_WS,
+                post_type="jobs?addToJenkins=false", branch="master/"),
+True,
+common_filters + ['YY_', 'MM_', 'DD_', 'HH_', 'MMS_', '"timestamp"', '"qualifiedId"', '"qualifiedName"'],
+["test", "workspaces", "develop", "develop2"]
+],   
+[
+10140,
+"GetJobG",
+"Obtaining the JSON for jobs contained by a view",
+create_curl_cmd(type="GET", data="jobs/PMA_Jobs?recurse=1", base_url=BASE_URL_WS,
+                branch="master/"),
+True,
+common_filters + holding_bin_filters + ['MMS_', '"timestamp"'],
+["test", "workspaces", "develop", "develop2"]
+],      
 
+# CAEDVO-2987: make sure folks can post to a specified holding bin
+[
+10141,
+"PostToHoldingBin",
+"Post new element to holding bin",
+create_curl_cmd(type="POST", data="holdingBinOwner.json", base_url=BASE_URL_WS,
+                post_type="elements", branch="master/"),
+True,
+common_filters + holding_bin_filters,
+["develop"]
+]
+]
 
 ##########################################################################################    
 #

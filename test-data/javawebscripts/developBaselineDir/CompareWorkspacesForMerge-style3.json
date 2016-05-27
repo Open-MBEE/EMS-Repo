@@ -1,16 +1,15 @@
 {
     "workspace1": {
-        "qualifiedName": "master",
         "name": "master",
+        "qualifiedName": "master",
         "elements": [
             {
-                "qualifiedName": "/europa/JW_TEST2/update_delete_consistent",
                 "name": "update_delete_consistent",
-                "sysmlid": "update_delete_consistent",
+                "qualifiedName": "/europa/JW_TEST2/update_delete_consistent",
                 "owner": "123456",
+                "sysmlid": "update_delete_consistent",
                 "specialization": {
                     "value": [{
-                        "valueExpression": null,
                         "string": "this is update 1",
                         "type": "LiteralString"
                     }],
@@ -22,14 +21,13 @@
                 "sysmlid": "update_update_consistent",
                 "editable": true,
                 "name": "update_update_consistent",
-                "documentation": "update_update_consistent",
                 "owner": "123456",
+                "documentation": "update_update_consistent",
                 "specialization": {
                     "propertyType": null,
-                    "isDerived": false,
                     "isSlot": false,
+                    "isDerived": false,
                     "value": [{
-                        "valueExpression": null,
                         "string": "this is update 1",
                         "type": "LiteralString"
                     }],
@@ -37,35 +35,33 @@
                 }
             },
             {
-                "name": "delete_update_consistent",
                 "qualifiedName": "/europa/JW_TEST2/delete_update_consistent",
+                "sysmlid": "delete_update_consistent",
+                "editable": true,
+                "name": "delete_update_consistent",
                 "documentation": "delete_update_consistent",
                 "owner": "123456",
-                "sysmlid": "delete_update_consistent",
                 "specialization": {
                     "propertyType": null,
-                    "isSlot": false,
                     "isDerived": false,
+                    "isSlot": false,
                     "value": [{
-                        "valueExpression": null,
                         "string": "this is it",
                         "type": "LiteralString"
                     }],
                     "type": "Property"
-                },
-                "editable": true,
+                }
             }
         ]
     },
     "workspace2": {
         "deletedElements": [{
-            "name": "update_delete_consistent",
             "qualifiedName": "/europa/JW_TEST2/update_delete_consistent",
-            "owner": "123456",
+            "name": "update_delete_consistent",
             "sysmlid": "update_delete_consistent",
+            "owner": "123456",
             "specialization": {
                 "value": [{
-                    "valueExpression": null,
                     "string": "this is update 1",
                     "type": "LiteralString"
                 }],
@@ -73,13 +69,12 @@
             }
         }],
         "addedElements": [{
-            "qualifiedName": "/europa/JW_TEST2/delete_update_consistent",
             "name": "delete_update_consistent",
-            "sysmlid": "delete_update_consistent",
+            "qualifiedName": "/europa/JW_TEST2/delete_update_consistent",
             "owner": "123456",
+            "sysmlid": "delete_update_consistent",
             "specialization": {
                 "value": [{
-                    "valueExpression": null,
                     "string": "this is updated in conflict",
                     "type": "LiteralString"
                 }],
@@ -88,13 +83,12 @@
         }],
         "conflictedElements": [
             {
-                "name": "update_update_consistent",
                 "qualifiedName": "/europa/JW_TEST2/update_update_consistent",
-                "owner": "123456",
+                "name": "update_update_consistent",
                 "sysmlid": "update_update_consistent",
+                "owner": "123456",
                 "specialization": {
                     "value": [{
-                        "valueExpression": null,
                         "string": "this is updated in conflict",
                         "type": "LiteralString"
                     }],
@@ -102,13 +96,12 @@
                 }
             },
             {
-                "name": "delete_update_consistent",
                 "qualifiedName": "/europa/JW_TEST2/delete_update_consistent",
-                "owner": "123456",
+                "name": "delete_update_consistent",
                 "sysmlid": "delete_update_consistent",
+                "owner": "123456",
                 "specialization": {
                     "value": [{
-                        "valueExpression": null,
                         "string": "this is updated in conflict",
                         "type": "LiteralString"
                     }],
@@ -116,13 +109,12 @@
                 }
             },
             {
-                "qualifiedName": "/europa/JW_TEST2/update_delete_consistent",
                 "name": "update_delete_consistent",
-                "sysmlid": "update_delete_consistent",
+                "qualifiedName": "/europa/JW_TEST2/update_delete_consistent",
                 "owner": "123456",
+                "sysmlid": "update_delete_consistent",
                 "specialization": {
                     "value": [{
-                        "valueExpression": null,
                         "string": "this is update 1",
                         "type": "LiteralString"
                     }],
@@ -131,21 +123,20 @@
             }
         ],
         "updatedElements": [{
-            "name": "update_update_consistent",
             "qualifiedName": "/europa/JW_TEST2/update_update_consistent",
-            "owner": "123456",
+            "name": "update_update_consistent",
             "sysmlid": "update_update_consistent",
+            "owner": "123456",
             "specialization": {
                 "value": [{
-                    "valueExpression": null,
                     "string": "this is updated in conflict",
                     "type": "LiteralString"
                 }],
                 "type": "Property"
             }
         }],
-        "qualifiedName": "master/wsMerge1",
         "name": "wsMerge1",
+        "qualifiedName": "master/wsMerge1",
         "movedElements": []
     }
 }

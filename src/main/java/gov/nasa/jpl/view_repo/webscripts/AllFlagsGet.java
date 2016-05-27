@@ -2,6 +2,7 @@ package gov.nasa.jpl.view_repo.webscripts;
 
 import gov.nasa.jpl.mbee.util.Debug;
 import gov.nasa.jpl.view_repo.actions.SnapshotArtifactsGenerationActionExecuter;
+import gov.nasa.jpl.view_repo.connections.RestPostConnection;
 import gov.nasa.jpl.view_repo.util.CommitUtil;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.EmsTransaction;
@@ -33,12 +34,16 @@ public class AllFlagsGet extends FlagSet {
                            "glom",
                            "cleanJson",
                            "diffDefaultIsMerge", 
-                           "viewPointExpressions",
+                           "viewpointExpressions",
                            "diffDefaultIsMerge",
                            "cacheSnapshots",
                            "checkMmsVersions",
                            "graphDb",
-                           "postProcessQualified"};
+                           "postProcessQualified",
+                           "doorsSync",
+                           "autoBuildGraphDb",
+                           "skipQualified",
+                           "restPost"};
     
     public String[] getAllFlags() {
         return flags;
@@ -104,8 +109,12 @@ public class AllFlagsGet extends FlagSet {
             NodeUtil.timeEvents = val;
         } else if (path.equalsIgnoreCase("versionCacheDebug")) {
             EmsScriptNode.versionCacheDebugPrint = val;
-        }  else if (path.equalsIgnoreCase("viewPointExpressions")) {
-            EmsScriptNode.expressionStuff = val;
+        }  else if (path.equalsIgnoreCase("viewpointExpressions")) {
+            if ( val && !EmsScriptNode.expressionStuffDefault ) {
+                NodeUtil.jsonCache.clear();
+            }
+            EmsScriptNode.expressionStuffDefault = val;
+            //EmsScriptNode.addingAffectedIds = val;
         } else if (path.equalsIgnoreCase("versionCache")) {
             NodeUtil.doVersionCaching = val;
         } else if (path.equalsIgnoreCase("versionHistoryCache")) {
@@ -125,11 +134,19 @@ public class AllFlagsGet extends FlagSet {
         } else if (path.equalsIgnoreCase("cacheSnapshots")) {
             DeclarativeJavaWebScript.cacheSnapshotsFlag = val;
         } else if (path.equalsIgnoreCase("checkMmsVersions")){
-        	AbstractJavaWebScript.checkMmsVersions = val;
+        	    DeclarativeJavaWebScript.checkMmsVersions = val;
         } else if (path.equalsIgnoreCase("graphDb")) {
             NodeUtil.doGraphDb = val;
         } else if (path.equalsIgnoreCase("postProcessQualified")) {
             NodeUtil.doPostProcessQualified = val;
+        } else if (path.equalsIgnoreCase("doorsSync")) {
+            NodeUtil.doorsSync = val;
+        } else if (path.equalsIgnoreCase("autoBuildGraphDb")) {
+            NodeUtil.doAutoBuildGraphDb = val;
+        } else if (path.equalsIgnoreCase("skipQualified")) {
+            NodeUtil.skipQualified = val;
+        } else if (path.equalsIgnoreCase("restPost")) {
+            RestPostConnection.doRestPost = val;
         }
         return true;
     }
@@ -175,8 +192,8 @@ public class AllFlagsGet extends FlagSet {
             return NodeUtil.timeEvents;
         } else if (path.equalsIgnoreCase("versionCacheDebug")) {
             return EmsScriptNode.versionCacheDebugPrint;
-        }  else if (path.equalsIgnoreCase("viewPointExpressions")) {
-            return EmsScriptNode.expressionStuff;
+        }  else if (path.equalsIgnoreCase("viewpointExpressions")) {
+            return EmsScriptNode.expressionStuffDefault;
         }  else if (path.equalsIgnoreCase("versionCache")) {
             return NodeUtil.doVersionCaching;
         } else if (path.equalsIgnoreCase("versionHistoryCache")) {
@@ -196,9 +213,17 @@ public class AllFlagsGet extends FlagSet {
         } else if (path.equalsIgnoreCase( "graphDb" )) {
             return NodeUtil.doGraphDb;
         } else if (path.equalsIgnoreCase("checkMmsVersions")){
-        	    return AbstractJavaWebScript.checkMmsVersions;
+            return DeclarativeJavaWebScript.checkMmsVersions;
         } else if (path.equalsIgnoreCase( "postProcessQualified" )) {
             return NodeUtil.doPostProcessQualified;
+        } else if (path.equalsIgnoreCase( "doorsSync" )) {
+            return NodeUtil.doorsSync;
+        } else if (path.equalsIgnoreCase( "autoBuildGraphDb" )) {
+            return NodeUtil.doAutoBuildGraphDb;
+        } else if (path.equalsIgnoreCase( "skipQualified" )) {
+            return NodeUtil.skipQualified;
+        } else if (path.equalsIgnoreCase("restPost")) {
+            return RestPostConnection.doRestPost;
         }
         return false;
     }
@@ -262,7 +287,7 @@ public class AllFlagsGet extends FlagSet {
             return false;
         } else if (path.equalsIgnoreCase("versionCacheDebug")) {
             return false;
-        } else if (path.equalsIgnoreCase("viewPointExpressions")) {
+        } else if (path.equalsIgnoreCase("viewpointExpressions")) {
         	    return false;
         } else if (path.equalsIgnoreCase("skipWorkspacePermissionCheck")) {
             return false;
@@ -279,6 +304,14 @@ public class AllFlagsGet extends FlagSet {
         } else if (path.equalsIgnoreCase( "doGraphDb" )) {
             return false;
         } else if (path.equalsIgnoreCase( "doPostProcessQualified" )) {
+            return false;
+        } else if (path.equalsIgnoreCase( "doorsSync" )) {
+            return false;
+        } else if (path.equalsIgnoreCase( "autoBuildGraphDb" )) {
+            return false;
+        } else if (path.equalsIgnoreCase( "skipQualified" )) {
+            return false;
+        } else if (path.equalsIgnoreCase("restPost")) {
             return false;
         }
         return false;
@@ -328,7 +361,7 @@ public class AllFlagsGet extends FlagSet {
             return "timeEvents";
         } else if (path.equalsIgnoreCase("versionCacheDebug")) {
             return "versionCacheDebugPrint";
-        } else if (path.equalsIgnoreCase("viewPointExpressions")) {
+        } else if (path.equalsIgnoreCase("viewpointExpressions")) {
             return "expressionStuff";
         } else if (path.equalsIgnoreCase("versionCache")) {
             return "doVersionCaching";
@@ -354,6 +387,14 @@ public class AllFlagsGet extends FlagSet {
             return "graphDb";
         } else if (path.equalsIgnoreCase("postProcessQualified")) {
             return "postProcessQualified";
+        } else if (path.equalsIgnoreCase("doorsSync")) {
+            return "doorsSync";
+        } else if (path.equalsIgnoreCase( "autoBuildGraphDb" )) {
+            return "autoBuildGraphDb";
+        } else if (path.equalsIgnoreCase("skipQualified")) {
+            return "skipQualified";
+        } else if (path.equalsIgnoreCase("restPost")) {
+            return "restPost";
         }
         return null;
     }

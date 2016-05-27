@@ -13,19 +13,15 @@
 3. Clone alfresco-view-repo using the Eclipse git tool. If you need instructions on installing and using git in eclipse see this section: [typical local environment instructions](#typical)
 4. Clone the m2 repository for the artifacts
 	1. <code>cd ~/git</code>
-	2. <code>git clone https://github.jpl.nasa.gov/mbee-dev/m2</code>
+	2. <code>git clone https://github.com/Open-MBEE/EMS-Repo</code>
 	3. <code>cp -r ./m2 ~/.m2/repository</code>
 	4. Inside of Eclipse right click your project and run maven >> Update project
-5. Install jrebel and scala from Eclipse using Help >> Eclipse Marketplace
+5. (Optional) Install jrebel and scala from Eclipse using Help >> Eclipse Marketplace
 6. From the command line navigate to git/alfresco-view-repo  and update the last line sudo vim /etc/hosts to read:
 	 
 		127.0.0.1  'your-machine-name'
 
-7. Run this script from the command line:
-
-		./cpr.sh
-
-8. Install Postgres DB on your localhost and use the
+7. Install Postgres DB on your localhost and use the
 src/main/java/gov/nasa/jpl/view_repo/db/mms.sql to initialize the database (as follows):
   - On Mac, can install postgres using homembrew
   
@@ -53,7 +49,24 @@ src/main/java/gov/nasa/jpl/view_repo/db/mms.sql to initialize the database (as f
 
        	    GET http://127.0.0.1:8080/alfresco/service/model2postgres/
 
-    This will transfer the existing Alfresco graph to Postgres, which is then used for all computations. 
+    This will transfer the existing Alfresco graph to Postgres, which is then used for all computations.
+
+7. To deploy and run, you will need to update ems.properties and mms-parent-pom.xml with appropriate values and urls
+ 
+  - ems.properties should be copied into config/alfresco
+      - When running maven, use the -DdeploymentName=ems to point to that properties file (update runserver.sh as appropriate)
+  - mms-parent-pom.xml should be copied into config/
+ 
+8. Register and update the ems-config submodule. If this step is skipped the next step will fail.
+        
+        git submodule init
+        git submodule update
+        git status
+
+9. Run this script from the command line to run the system:
+
+        ./cpr.sh
+    
 	
 ###The remaining instructions of the readme will guide you through specific set ups 
 
@@ -71,7 +84,7 @@ src/main/java/gov/nasa/jpl/view_repo/db/mms.sql to initialize the database (as f
 ###[Documentation Links](#doc-links)
 ###[Miscellaneous](#misc)
 ###[Debugging Overview](#debug-overview)
-
+###[Running Regression Tests](#regression)
 
 ***
 
@@ -170,7 +183,7 @@ Eclipse/Maven
         mvn install:install-file -Dfile=lib/sysml.jar -DgroupId=gov.nasa.jpl -DartifactId=sysml -Dversion=1.0 -Dpackaging=jar
 
     For the bae, sysml, and util projects you will need to update the build.properties file and rebel.xml file with your home directory and folder of where magic draw is installed.  For instance:
-        home=/home/gcgandhi
+        home=/home/username
         md=/opt/local/magicdraw
 
     If you are not using Eclispse yoxos, then you will need to install the IMCE Eclipse plug ins.  Do the following:
@@ -256,8 +269,8 @@ in the /resources/[community|enterprise] directory.
 
 ### Enterprise settings with Maven 
 
-Need to update settings.xml to connect to the Alfresco private repository. Ask Ly or Cin-Young
-for username and password.  On a Mac the path for this file is: /Users/[USER_NAME]/.m2/settings.xml.
+Need to update settings.xml to connect to the Alfresco private repository. Ask someone
+for the username and password.  On a Mac the path for this file is: /Users/[USER_NAME]/.m2/settings.xml.
 
 	<settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
 	  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -557,3 +570,9 @@ The tomcat port (ex. 9091) and the debug port (ex. 10002) may or may not be open
     
 If on the amazon cloud, the ports may also need to be opened from the AWS console.
 
+# Regression <a name="regression"></a>
+
+#### [return to table of contents](#contents)
+When you commit changes to this respository you should run `./regress.sh` in `{projectdir}/test-java/javawebscripts/regress.sh`.  All the tests should pass in the develop branch.  The tests
+compare a baseline json file against the output of the Alfresco server.  To run the tests locally make sure to 
+run `./regress.sh -g develop`.  This makes sure to use the git branch of the develop branch to run the test.

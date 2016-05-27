@@ -1,0 +1,11 @@
+<webscript>
+	<shortname>get elements</shortname>
+    <description>
+    	get elements
+	</description>
+  	<url>/workspaces/{workspaceId}/elements</url>
+  	<format default="json">argument</format>
+  	<authentication>user</authentication>
+  	<transaction>none</transaction>
+  	<family>MMS REST API</family>
+ </webscript>

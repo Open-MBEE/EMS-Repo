@@ -210,7 +210,7 @@ public class ProjectPost extends AbstractJavaWebScript {
             if (siteNode == null) {
                 if (createSite) {
                     if ( siteName == null || siteName.length() == 0 ) {
-                        siteName="europa";
+                        siteName = getConfig("app.name");
                     }
                     siteNode = createSite( siteName, workspace );
                 } else {
@@ -312,10 +312,11 @@ public class ProjectPost extends AbstractJavaWebScript {
     	    try {
 			pgh.connect();
 			pgh.insertNode(projectNode.getNodeRef().toString(), NodeUtil.getVersionedRefId(projectNode), projectNode.getSysmlId());
-			pgh.close();
 		} catch (ClassNotFoundException | java.sql.SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+		} finally {
+		    pgh.close();
 		}
     }
     

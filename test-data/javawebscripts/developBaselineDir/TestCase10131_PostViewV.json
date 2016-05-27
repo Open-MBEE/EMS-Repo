@@ -1,0 +1,117 @@
+{"elements": [
+    {
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "specialization": {
+            "aggregation": "COMPOSITE",
+            "isSlot": false,
+            "isDerived": false,
+            "type": "Property"
+        }
+    },
+    {
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "specialization": {
+            "ownedEnd": [],
+            "type": "Association"
+        }
+    },
+    {
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "specialization": {
+            "aggregation": "COMPOSITE",
+            "isSlot": false,
+            "isDerived": false,
+            "type": "Property"
+        }
+    },
+    {
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "specialization": {
+            "isSlot": false,
+            "isDerived": false,
+            "type": "Property"
+        }
+    },
+    {
+        "isMetatype": false,
+        "editable": true,
+        "creator": "admin",
+        "ownedAttribute": [
+        ],
+        "modifier": "admin",
+        "name": "VIEW V",
+        "specialization": {
+            "childViews": [
+                {
+                    "aggregation": "COMPOSITE",
+                },
+                {
+                    "aggregation": "COMPOSITE",
+                },
+                {
+                    "aggregation": "COMPOSITE",
+                }
+            ],
+            "contents": {"type": "Expression"},
+            "type": "View"
+        }
+    },
+    {
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "specialization": {
+            "ownedEnd": [],
+            "type": "Association"
+        }
+    },
+    {
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "specialization": {
+            "isSlot": false,
+            "isDerived": false,
+            "type": "Property"
+        }
+    },
+    {
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "specialization": {
+            "ownedEnd": [],
+            "type": "Association"
+        }
+    },
+    {
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "specialization": {
+            "aggregation": "COMPOSITE",
+            "isSlot": false,
+            "isDerived": false,
+            "type": "Property"
+        }
+    },
+    {
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "specialization": {
+            "isSlot": false,
+            "isDerived": false,
+            "type": "Property"
+        }
+    }
+]}
+200

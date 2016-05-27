@@ -1,22 +1,57 @@
-{"elements": [{
-    "modifier": "admin",
-    "qualifiedId": "/no_site/no_site_no_project/holding_bin_no_site_no_project/newElement",
-    "qualifiedName": "/no_site/no_site_no_project/holding_bin/null",
-    "sysmlid": "newElement",
-    "documentation": "x is x",
-    "owner": "holding_bin_no_site_no_project",
-    "specialization": {
-        "propertyType": null,
-        "isDerived": false,
-        "isSlot": false,
-        "value": [{
-            "valueExpression": null,
-            "string": "the element added to ws1",
-            "type": "LiteralString"
-        }],
-        "type": "Property"
+{"elements": [
+    {
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "appliedMetatypes": ["_9_0_62a020a_1105704885298_713292_7913"],
+        "specialization": {"type": "Package"}
     },
-    "editable": true,
-    "creator": "admin",
-}]}
+    {
+        "sysmlid": "newElement",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "documentation": "x is x",
+        "specialization": {
+            "propertyType": null,
+            "isDerived": false,
+            "isSlot": false,
+            "value": [{
+                "string": "the element added to ws1",
+                "type": "LiteralString"
+            }],
+            "type": "Property"
+        }
+    },
+    {
+        "sysmlid": "holding_bin_no_site_no_project",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "holding_bin",
+        "appliedMetatypes": ["_9_0_62a020a_1105704885298_713292_7913"],
+        "specialization": {"type": "Package"}
+    },
+    {
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "appliedMetatypes": ["_9_0_62a020a_1105704885298_713292_7913"],
+        "specialization": {"type": "Package"}
+    },
+    {
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "appliedMetatypes": ["_9_0_62a020a_1105704885298_713292_7913"],
+        "specialization": {"type": "Package"}
+    },
+    {
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "appliedMetatypes": ["_9_0_62a020a_1105704885298_713292_7913"],
+        "specialization": {"type": "Package"}
+    }
+]}
 200

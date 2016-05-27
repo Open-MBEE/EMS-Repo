@@ -49,7 +49,6 @@ import java.util.Set;
 
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.log4j.*;
 import org.alfresco.repo.model.Repository;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.version.Version;
@@ -84,7 +83,7 @@ public class MmsWorkspaceDiffPost extends ModelPost {
 	@Override
 	protected Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
 	    MmsWorkspaceDiffPost instance = new MmsWorkspaceDiffPost(repository, getServices());
-	    return instance.executeImplImpl( req, status, cache, true);
+	    return instance.executeImplImpl( req, status, cache, runWithoutTransactions);
 	}
 
 
@@ -278,8 +277,8 @@ public class MmsWorkspaceDiffPost extends ModelPost {
 	            String projectId = !updatedElements.isEmpty() ?
 	                                           updatedElements.iterator().next().getProjectId(targetWs) :
 	                                           NO_PROJECT_ID;
-	            boolean modelPostDiff = wsDiff.isDiff();
-	            boolean modelDeleteDiff = deleteWsDiff != null && deleteWsDiff.isDiff();
+	            boolean modelPostDiff = wsDiff.isDiffPrecalculated();
+	            boolean modelDeleteDiff = deleteWsDiff != null && deleteWsDiff.isDiffPrecalculated();
 	            
 	            if (modelDeleteDiff || modelPostDiff) {
 	                
@@ -307,7 +306,8 @@ public class MmsWorkspaceDiffPost extends ModelPost {
 	                }
 	                
 	                // This has to be done before adding deleted aspects
-	                finalJsonDiff = wsDiff.toJSONObject( new Date(start), new Date(end) ); 
+	                // don't save qualified id/name in anything that goes in commit
+	                finalJsonDiff = wsDiff.toJSONObject( this, new Date(start), new Date(end), true, false ); 
 	                
 	                // Apply the deleted aspects if needed to the deleted nodes:
 	                if (modelDeleteDiff) {

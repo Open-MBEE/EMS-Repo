@@ -1,0 +1,35 @@
+#!/bin/bash
+
+# Import elements from json file into workspace.
+#  Tests the checking of mms versions between client and server.
+#
+# usage> modelpost [<workspace>] <json_file_name>
+# example> modelpost master foo.json
+# example> modelpost foo.json
+
+# Get the input json file and the workspace from the arguments passed in.
+if [ "$#" -eq 1 ]; then
+  file=$1
+  # The version number is set just for the time being. Will need to be updated for future use.
+  version=
+else
+  file=$2
+  version=$1
+fi
+if [[ ! -e "$file" ]]; then
+  file="JsonData/"$file
+fi
+if [[ ! -e "$file" ]]; then
+  echo "input file $file not found!"
+  exit 1
+fi
+
+dataType=json
+if [[ $file == *".k" ]]
+then
+    dataType=k
+fi
+
+# Import the file
+echo  curl -w "\"\n%{http_code}\n\"" -u admin:admin -X POST -H "Content-Type:application/$dataType" --data @$file "\"http://localhost:8080/alfresco/service/workspaces/master/elements?mmsVersion=${version}\""
+curl -w "\n%{http_code}\n" -u admin:admin -X POST -H "Content-Type:application/$dataType" --data @$file "http://localhost:8080/alfresco/service/workspaces/master/elements?mmsVersion=${version}"

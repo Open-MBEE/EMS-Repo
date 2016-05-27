@@ -1,0 +1,18 @@
+{"elements": [{
+    "sysmlid": "MMS_1450390431247_8a4b76d2-394c-4569-9abe-5c51dc4b0711",
+    "isMetatype": false,
+    "editable": true,
+    "creator": "admin",
+    "modifier": "admin",
+    "name": "Product X",
+    "specialization": {
+        "displayedElements": [],
+        "contents": {
+            "type": "Expression",
+            "operand": []
+        },
+        "allowedElements": [],
+        "type": "Product"
+    }
+}]}
+200

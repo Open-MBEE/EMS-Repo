@@ -16,10 +16,7 @@ import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.commons.httpclient.methods.StringRequestEntity;
-import gov.nasa.jpl.view_repo.webscripts.AbstractJavaWebScript;
-import org.apache.log4j.*;
 import org.apache.log4j.Logger;
-import org.apache.log4j.Level;
 import org.json.JSONException;
 import org.json.JSONObject;
 

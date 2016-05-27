@@ -6,14 +6,13 @@
     "creator": "admin",
     "modifier": "admin",
     "name": "402",
-    "owner": "401",
     "documentation": "x is x",
+    "owner": "401",
     "specialization": {
         "propertyType": null,
-        "isDerived": false,
         "isSlot": false,
+        "isDerived": false,
         "value": [{
-            "valueExpression": null,
             "string": "the x value",
             "type": "LiteralString"
         }],

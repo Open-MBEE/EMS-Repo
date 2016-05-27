@@ -3,20 +3,18 @@
     "qualifiedName": "master/wsMerge1",
     "name": "wsMerge1",
     "elements": [{
-      "qualifiedName": "/europa/JW_TEST2/update_delete_consistent",
       "sysmlid": "update_delete_consistent",
       "editable": true,
       "creator": "admin",
       "modifier": "admin",
       "name": "update_delete_consistent",
-      "documentation": "update_delete_consistent",
       "owner": "123456",
+      "documentation": "update_delete_consistent",
       "specialization": {
         "propertyType": null,
         "isDerived": false,
         "isSlot": false,
         "value": [{
-          "valueExpression": null,
           "string": "this is it",
           "type": "LiteralString"
         }],
@@ -26,9 +24,7 @@
   },
   "workspace2": {
     "deletedElements": [{
-      "modifier": "admin",
       "name": "update_delete_consistent",
-      "qualifiedName": "/europa/JW_TEST2/update_delete_consistent",
       "sysmlid": "update_delete_consistent",
       "owner": "123456",
       "specialization": {"type": "Property"},

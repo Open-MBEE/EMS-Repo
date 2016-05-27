@@ -3,20 +3,18 @@
     "qualifiedName": "master/wsMatrix2",
     "name": "wsMatrix2",
     "elements": [{
-      "qualifiedName": "/europa/JW_TEST2/delete_delete_gg",
       "sysmlid": "delete_delete_gg",
       "editable": true,
       "creator": "admin",
       "modifier": "admin",
       "name": "delete_delete_gg",
-      "documentation": "delete_delete_gg",
       "owner": "123456",
+      "documentation": "delete_delete_gg",
       "specialization": {
         "propertyType": null,
         "isDerived": false,
         "isSlot": false,
         "value": [{
-          "valueExpression": null,
           "string": "on a shoe",
           "type": "LiteralString"
         }],
@@ -26,9 +24,7 @@
   },
   "workspace2": {
     "deletedElements": [{
-      "modifier": "admin",
       "name": "delete_delete_gg",
-      "qualifiedName": "/europa/JW_TEST2/delete_delete_gg",
       "sysmlid": "delete_delete_gg",
       "owner": "123456",
       "specialization": {"type": "Property"},

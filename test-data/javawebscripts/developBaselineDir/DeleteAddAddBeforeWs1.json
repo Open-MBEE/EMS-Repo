@@ -3,20 +3,18 @@
     "qualifiedName": "master/wsMerge1",
     "name": "wsMerge1",
     "elements": [{
-      "qualifiedName": "/europa/JW_TEST2/add_add_before",
       "sysmlid": "add_add_before",
       "editable": true,
       "creator": "admin",
       "modifier": "admin",
       "name": "add_add_before",
-      "documentation": "add_add_before",
       "owner": "123456",
+      "documentation": "add_add_before",
       "specialization": {
         "propertyType": null,
         "isDerived": false,
         "isSlot": false,
         "value": [{
-          "valueExpression": null,
           "string": "this is it",
           "type": "LiteralString"
         }],
@@ -26,9 +24,7 @@
   },
   "workspace2": {
     "deletedElements": [{
-      "modifier": "admin",
       "name": "add_add_before",
-      "qualifiedName": "/europa/JW_TEST2/add_add_before",
       "sysmlid": "add_add_before",
       "owner": "123456",
       "specialization": {"type": "Property"},

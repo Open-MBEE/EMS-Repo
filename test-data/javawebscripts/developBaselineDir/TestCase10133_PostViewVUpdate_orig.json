@@ -1,0 +1,108 @@
+{"elements": [
+    {
+        "siteCharacterizationId": "no_site",
+        "nodeRefId": "workspace://SpacesStore/12031a27-6584-44ab-b15c-d8a9045cb9ee",
+        "qualifiedId": "/no_site/no_site_no_project/holding_bin_no_site_no_project/YY_2016_no_site_no_project/MM_1_no_site_no_project/DD_20_no_site_no_project/HH_22_no_site_no_project/MMS_1450390431247_8a4b76d2-394c-4569-9abe-5c51dc4b0711/MMS_1450390431247_8a4b76d2-394c-4569-9abe-5c51dc4b0814/MMS_1456035799589_40637e7f-171a-4683-b9dc-29ff23ce19ef",
+        "versionedRefId": "versionStore://version2Store/a0b7b619-9773-4446-95f8-1edd61b6aecb",
+        "qualifiedName": "/no_site/no_site_no_project/holding_bin_no_site_no_project/YY_2016_no_site_no_project/MM_1_no_site_no_project/DD_20_no_site_no_project/HH_22_no_site_no_project/Product X/VIEW V/null",
+        "sysmlid": "MMS_1456035799589_40637e7f-171a-4683-b9dc-29ff23ce19ef",
+        "editable": true,
+        "creator": "admin",
+        "modified": "2016-02-20T22:23:20.163-0800",
+        "modifier": "admin",
+        "created": "Sat Feb 20 22:23:19 PST 2016",
+        "owner": "MMS_1450390431247_8a4b76d2-394c-4569-9abe-5c51dc4b0814",
+        "read": "2016-02-20T22:23:20.198-0800",
+        "specialization": {
+            "aggregation": "COMPOSITE",
+            "propertyType": "MMS_1450390431247_8a4b76d2-394c-4569-9abe-5c51dc4b0811",
+            "isSlot": false,
+            "isDerived": false,
+            "type": "Property"
+        }
+    },
+    {
+        "siteCharacterizationId": "no_site",
+        "qualifiedId": "/no_site/no_site_no_project/holding_bin_no_site_no_project/YY_2016_no_site_no_project/MM_1_no_site_no_project/DD_20_no_site_no_project/HH_22_no_site_no_project/MMS_1456035799587_672d23c1-f990-4baf-a786-6ccce83f9b62",
+        "nodeRefId": "workspace://SpacesStore/169a8e4e-8765-4924-b47c-7edb8e6553ab",
+        "versionedRefId": "versionStore://version2Store/e584ca8f-e425-48e4-ba46-89bf4a1119d8",
+        "qualifiedName": "/no_site/no_site_no_project/holding_bin_no_site_no_project/YY_2016_no_site_no_project/MM_1_no_site_no_project/DD_20_no_site_no_project/HH_22_no_site_no_project/null",
+        "sysmlid": "MMS_1456035799587_672d23c1-f990-4baf-a786-6ccce83f9b62",
+        "editable": true,
+        "creator": "admin",
+        "modified": "2016-02-20T22:23:19.883-0800",
+        "ownedAttribute": ["MMS_1456035799588_fe7c2b9c-901e-4db6-8540-6de623c47264"],
+        "modifier": "admin",
+        "created": "Sat Feb 20 22:23:19 PST 2016",
+        "owner": "HH_22_no_site_no_project",
+        "read": "2016-02-20T22:23:20.201-0800",
+        "specialization": {
+            "source": "MMS_1456035799588_fe7c2b9c-901e-4db6-8540-6de623c47264",
+            "target": "MMS_1456035799589_40637e7f-171a-4683-b9dc-29ff23ce19ef",
+            "ownedEnd": [],
+            "type": "Association"
+        }
+    },
+    {
+        "siteCharacterizationId": "no_site",
+        "nodeRefId": "workspace://SpacesStore/6c7a420e-c967-4a41-89f8-83dbf80b9bd5",
+        "qualifiedId": "/no_site/no_site_no_project/holding_bin_no_site_no_project/YY_2016_no_site_no_project/MM_1_no_site_no_project/DD_20_no_site_no_project/HH_22_no_site_no_project/MMS_1456035799587_672d23c1-f990-4baf-a786-6ccce83f9b62/MMS_1456035799588_fe7c2b9c-901e-4db6-8540-6de623c47264",
+        "versionedRefId": "versionStore://version2Store/3a43dd3f-5f3d-4bcb-8f80-6ad54e464825",
+        "qualifiedName": "/no_site/no_site_no_project/holding_bin_no_site_no_project/YY_2016_no_site_no_project/MM_1_no_site_no_project/DD_20_no_site_no_project/HH_22_no_site_no_project/null/null",
+        "sysmlid": "MMS_1456035799588_fe7c2b9c-901e-4db6-8540-6de623c47264",
+        "editable": true,
+        "creator": "admin",
+        "modified": "2016-02-20T22:23:20.160-0800",
+        "modifier": "admin",
+        "created": "Sat Feb 20 22:23:19 PST 2016",
+        "owner": "MMS_1456035799587_672d23c1-f990-4baf-a786-6ccce83f9b62",
+        "read": "2016-02-20T22:23:20.203-0800",
+        "specialization": {
+            "propertyType": "MMS_1450390431247_8a4b76d2-394c-4569-9abe-5c51dc4b0814",
+            "isSlot": false,
+            "isDerived": false,
+            "type": "Property"
+        }
+    },
+    {
+        "siteCharacterizationId": "no_site",
+        "qualifiedId": "/no_site/no_site_no_project/holding_bin_no_site_no_project/YY_2016_no_site_no_project/MM_1_no_site_no_project/DD_20_no_site_no_project/HH_22_no_site_no_project/MMS_1450390431247_8a4b76d2-394c-4569-9abe-5c51dc4b0711/MMS_1450390431247_8a4b76d2-394c-4569-9abe-5c51dc4b0814",
+        "nodeRefId": "workspace://SpacesStore/bf227a28-d024-49ad-af9d-9fab3d878956",
+        "versionedRefId": "versionStore://version2Store/12a57aa5-ae56-40f8-8aff-84065b0c4326",
+        "qualifiedName": "/no_site/no_site_no_project/holding_bin_no_site_no_project/YY_2016_no_site_no_project/MM_1_no_site_no_project/DD_20_no_site_no_project/HH_22_no_site_no_project/Product X/VIEW V",
+        "sysmlid": "MMS_1450390431247_8a4b76d2-394c-4569-9abe-5c51dc4b0814",
+        "isMetatype": false,
+        "editable": true,
+        "creator": "admin",
+        "ownedAttribute": [
+            "MMS_1456035797894_2b36337d-a5e0-48d0-a4e7-f329a98ae214",
+            "MMS_1456035797904_ad3cfe93-0f07-4019-b0ed-0075a4f68635",
+            "MMS_1456035799589_40637e7f-171a-4683-b9dc-29ff23ce19ef"
+        ],
+        "modified": "2016-02-20T22:23:19.949-0800",
+        "modifier": "admin",
+        "created": "Sat Feb 20 22:23:18 PST 2016",
+        "name": "VIEW V",
+        "owner": "MMS_1450390431247_8a4b76d2-394c-4569-9abe-5c51dc4b0711",
+        "read": "2016-02-20T22:23:20.205-0800",
+        "specialization": {
+            "childViews": [
+                {
+                    "aggregation": "COMPOSITE",
+                    "id": "MMS_1450390431247_8a4b76d2-394c-4569-9abe-5c51dc4b0812"
+                },
+                {
+                    "aggregation": "COMPOSITE",
+                    "id": "MMS_1450390431247_8a4b76d2-394c-4569-9abe-5c51dc4b0813"
+                },
+                {
+                    "aggregation": "COMPOSITE",
+                    "id": "MMS_1450390431247_8a4b76d2-394c-4569-9abe-5c51dc4b0811"
+                }
+            ],
+            "contents": {"type": "Expression"},
+            "type": "View"
+        }
+    }
+]}
+200

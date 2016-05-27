@@ -1,81 +1,88 @@
 {"elements": [
     {
-        "modifier": "admin",
-        "qualifiedId": "/europa/123456/300",
-        "name": "300",
-        "qualifiedName": "/europa/JW_TEST/300",
-        "documentation": "something",
-        "owner": "123456",
-        "sysmlid": "300",
-        "specialization": {
-            "propertyType": null,
-            "isSlot": false,
-            "isDerived": false,
-            "value": [{
-                "valueExpression": null,
-                "string": "dlam_string",
-                "type": "LiteralString"
-            }],
-            "type": "Property"
-        },
+        "sysmlid": "holding_bin_123456",
         "editable": true,
-        "creator": "admin"
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "holding_bin",
+        "appliedMetatypes": ["_9_0_62a020a_1105704885298_713292_7913"],
+        "specialization": {"type": "Package"}
     },
     {
-        "qualifiedId": "/europa/123456",
-        "modifier": "admin",
-        "qualifiedName": "/europa/JW_TEST",
-        "name": "JW_TEST",
-        "owner": null,
         "sysmlid": "123456",
         "editable": true,
-        "creator": "admin"
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "JW_TEST",
     },
     {
-        "modifier": "admin",
-        "qualifiedId": "/europa/123456/dlam",
-        "name": "dlam",
-        "qualifiedName": "/europa/JW_TEST/dlam",
-        "documentation": "to make compatible with value specs (this is just a Element)",
-        "owner": "123456",
-        "sysmlid": "dlam",
-        "specialization": {"type": "Element"},
+        "sysmlid": "300",
         "editable": true,
-        "creator": "admin"
-    },
-    {
+        "creator": "admin",
         "modifier": "admin",
-        "qualifiedId": "/europa/123456/4000",
-        "name": "400",
-        "qualifiedName": "/europa/JW_TEST/400",
-        "documentation": "4something",
-        "owner": "123456",
-        "sysmlid": "4000",
+        "name": "300",
+        "documentation": "something",
         "specialization": {
             "propertyType": null,
-            "isSlot": false,
             "isDerived": false,
+            "isSlot": false,
             "value": [{
-                "valueExpression": null,
                 "string": "dlam_string",
                 "type": "LiteralString"
             }],
             "type": "Property"
-        },
-        "editable": true,
-        "creator": "admin"
+        }
     },
     {
-        "modifier": "admin",
-        "qualifiedId": "/europa/123456/multRedefPackage",
-        "name": "multRedefPackage",
-        "qualifiedName": "/europa/JW_TEST/multRedefPackage",
-        "documentation": "package for testing multiplicity and redefines attributes of Property",
-        "owner": "123456",
-        "sysmlid": "multRedefPackage",
-        "specialization": {"type": "Package"},
+        "sysmlid": "dlam",
         "editable": true,
-        "creator": "admin"
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "dlam",
+        "documentation": "to make compatible with value specs (this is just a Element)",
+        "specialization": {"type": "Element"}
+    },
+    {
+        "sysmlid": "multRedefPackage",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "multRedefPackage",
+        "documentation": "package for testing multiplicity and redefines attributes of Property",
+        "specialization": {"type": "Package"}
+    },
+    {
+        "sysmlid": "4000",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "400",
+        "documentation": "4something",
+        "specialization": {
+            "propertyType": null,
+            "isDerived": false,
+            "isSlot": false,
+            "value": [{
+                "string": "dlam_string",
+                "type": "LiteralString"
+            }],
+            "type": "Property"
+        }
+    },
+    {
+        "sysmlid": "found",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "found",
+        "documentation": "",
+        "specialization": {
+            "specification": {
+                "expressionBody": ["foo8"],
+                "type": "OpaqueExpression"
+            },
+            "type": "Constraint"
+        }
     }
 ]}
 200

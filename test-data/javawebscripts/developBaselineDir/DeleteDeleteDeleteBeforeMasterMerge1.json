@@ -3,20 +3,18 @@
     "qualifiedName": "master",
     "name": "master",
     "elements": [{
-      "qualifiedName": "/europa/JW_TEST2/delete_delete_before",
       "sysmlid": "delete_delete_before",
       "editable": true,
       "creator": "admin",
       "modifier": "admin",
       "name": "delete_delete_before",
-      "documentation": "delete_delete_before",
       "owner": "123456",
+      "documentation": "delete_delete_before",
       "specialization": {
         "propertyType": null,
         "isDerived": false,
         "isSlot": false,
         "value": [{
-          "valueExpression": null,
           "string": "this is it",
           "type": "LiteralString"
         }],
@@ -26,9 +24,7 @@
   },
   "workspace2": {
     "deletedElements": [{
-      "modifier": "admin",
       "name": "delete_delete_before",
-      "qualifiedName": "/europa/JW_TEST2/delete_delete_before",
       "sysmlid": "delete_delete_before",
       "owner": "123456",
       "specialization": {"type": "Property"},

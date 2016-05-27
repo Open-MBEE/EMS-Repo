@@ -23,11 +23,12 @@ import gov.nasa.jpl.mbee.util.Seen;
 import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.actions.ModelLoadActionExecuter;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
+import gov.nasa.jpl.view_repo.util.K;
 import gov.nasa.jpl.view_repo.util.ModelContext;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
 import gov.nasa.jpl.view_repo.util.ServiceContext;
+import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 import gov.nasa.jpl.view_repo.webscripts.AbstractJavaWebScript;
-import gov.nasa.jpl.view_repo.webscripts.ModelPost;
 import sysml.view.Viewable;
 
 /**
@@ -201,6 +202,10 @@ public class Evaluate implements Viewable< EmsScriptNode > {
                 interpretation = (Viewable<?>)resultObj;
                 return;
             }
+            if ( resultObj instanceof Collection ) {
+                interpretation = new Evaluate( resultObj );
+                return;
+            }
             interpretation = new Text( "" + resultObj );
             return;
         }
@@ -221,9 +226,18 @@ public class Evaluate implements Viewable< EmsScriptNode > {
             // call and not pollute as much.
            JSONObject json = null;
            try {
-               json = ModelPost.kToJson( expression, "temp_Evaluate_evaluate_expression" );
+               WorkspaceNode ws = null;
+               if ( modelContext == null ) {
+                   // TODO -- ERROR?
+               } else {
+                   ws = modelContext.workspace;
+               }
+               json = K.kToJson( expression, 
+                                         "temp_Evaluate_evaluate_expression",
+                                         ws, null );
            } catch (Throwable t) {
                // ignore -- we'll try to handle this gracefully below.
+               if ( logger.isDebugEnabled() ) t.printStackTrace();
            }
            
             if ( json == null || json.length() == 0
@@ -233,6 +247,8 @@ public class Evaluate implements Viewable< EmsScriptNode > {
                 // TODO -- might be nice to add an error message!
                 return new Text(expression);
             }
+            
+            logger.warn("kToJson(" + expression + ") = \n" + json.toString( 4 ) );
             
             Set< EmsScriptNode > elements = 
                     ModelLoadActionExecuter.loadJson( json, this.modelContext,
@@ -263,14 +279,15 @@ public class Evaluate implements Viewable< EmsScriptNode > {
                     } else {
                         result = results.get( sysmlid );
                     }
-                    logger.warn( "Success!  Evaluated expression \""
-                                 + expression + "\" and got " + result );
+                    if ( logger.isDebugEnabled() )
+                        logger.warn( "Success!  Evaluated expression \""
+                                     + expression + "\" and got " + result );
                     return result;
                 }
             }
         } catch (Throwable t) {
             logger.error( "Failed to parse, load, or evaluate expression, \"" + expression + "\"" );
-            t.printStackTrace();
+            if (logger.isDebugEnabled() ) t.printStackTrace();
         }
         // Failed, so we'll just show the input as a string;
         // TODO -- might be nice to add an error message!

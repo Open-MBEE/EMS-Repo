@@ -17,7 +17,7 @@
   <url>/flags/simpleCache?on={on?}&amp;off={off?}</url>
   <url>/flags/syncTransactions?on={on?}&amp;off={off?}</url>
   <url>/flags/timeEvents?on={on?}&amp;off={off?}</url>
-  <url>/flags/viewPointExpressions?on={on?}&amp;off={off?}</url>
+  <url>/flags/viewpointExpressions?on={on?}&amp;off={off?}</url>
   <url>/flags/versionCacheDebug?on={on?}&amp;off={off?}</url>
   <url>/flags/versionCache?on={on?}&amp;off={off?}</url>
   <url>/flags/versionHistoryCache?on={on?}&amp;off={off?}</url>
@@ -30,6 +30,10 @@
   <url>/flags/checkMmsVersions?on={on?}&amp;off={off?}</url>
   <url>/flags/graphDb?on={on?}&amp;off={off?}</url>
   <url>/flags/postProcessQualified?on={on?}&amp;off={off?}</url>
+  <url>/flags/doorsSync?on={on?}&amp;off={off?}</url>
+  <url>/flags/autoBuildGraphDb?on={on?}&amp;off={off?}</url>
+  <url>/flags/skipQualified?on={on?}&amp;off={off?}</url>
+  <url>/flags/restPost?on={on?}&amp;off={off?}</url>
   <authentication>user</authentication>
   <format default="html">argument</format>
   <family>EMS Utils</family>

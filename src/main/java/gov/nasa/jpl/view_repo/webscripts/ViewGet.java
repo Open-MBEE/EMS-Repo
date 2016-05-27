@@ -29,7 +29,6 @@
 
 package gov.nasa.jpl.view_repo.webscripts;
 
-import gov.nasa.jpl.mbee.util.Debug;
 import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.mbee.util.Timer;
 import gov.nasa.jpl.mbee.util.Utils;
@@ -130,7 +129,7 @@ public class ViewGet extends AbstractJavaWebScript {
     protected Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
         ViewGet instance = new ViewGet();
         instance.setServices( getServices() );
-        return instance.executeImplImpl( req, status, cache );
+        return instance.executeImplImpl( req, status, cache, runWithoutTransactions );
     }
     protected Map<String, Object> executeImplImpl(WebScriptRequest req, Status status, Cache cache) {
         Timer timer = new Timer();
@@ -140,13 +139,13 @@ public class ViewGet extends AbstractJavaWebScript {
         //clearCaches();
 
         Map<String, Object> model = new HashMap<String, Object>();
-        
-            if (checkMmsVersions) {
-                if(compareMmsVersions(req, getResponse(), getResponseStatus()));{
-                    model.put("res", createResponseJson());
-                    return model;
-                }
-            }
+//        TODO: REMOVE THIS CODE
+//            if (checkMmsVersions) {
+//                if(compareMmsVersions(req, getResponse(), getResponseStatus()));{
+//                    model.put("res", createResponseJson());
+//                    return model;
+//                }
+//            }
             // default recurse=false but recurse only applies to displayed elements and contained views
             boolean recurse = getBooleanArg(req, "recurse", false);
             // default generate=false - generation with viewpoints takes a long time
@@ -215,13 +214,18 @@ public class ViewGet extends AbstractJavaWebScript {
                  HttpServletResponse.SC_NOT_FOUND, "View not found with ID: %s", viewId);
         }
 
+//        boolean oldExpressionStuff = EmsScriptNode.expressionStuff; 
+//        EmsScriptNode.expressionStuff = true;
         if (checkPermissions(view, PermissionService.READ)) {
             try {
                 View v = new View(view);
                 v.setGenerate( generate );
                 v.setRecurse( recurse );
-                
-                EmsScriptNode.expressionStuff = true;
+
+                // REVIEW -- TODO -- This use of expressionStuff seems bad.
+                // Temporarily turn expressionStuff on for reasons forgotten
+                // since this was added on Oct 21, 2014 with commit,
+                // dd7b11c63e9a603802d2ed492ef737e81eb3db87.
                 if ( gettingDisplayedElements ) {
                     if (logger.isDebugEnabled()) logger.debug("+ + + + + gettingDisplayedElements");
                     // TODO -- need to use recurse flag!
@@ -245,11 +249,12 @@ public class ViewGet extends AbstractJavaWebScript {
                     if (logger.isDebugEnabled()) logger.debug("+ + + + + just the view");
                     viewsJson.put( view.toJSONObject( workspace, dateTime ) );
                 }
-                EmsScriptNode.expressionStuff = false;
             } catch ( JSONException e ) {
                 log( Level.ERROR,
                      HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Could not create views JSON array");
                 e.printStackTrace();
+            } finally {
+//                EmsScriptNode.expressionStuff = oldExpressionStuff;
             }
         }
     }

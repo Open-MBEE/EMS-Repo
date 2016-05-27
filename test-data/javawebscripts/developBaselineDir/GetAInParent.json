@@ -1,22 +1,18 @@
 {"elements": [{
-    "qualifiedId": "/no_site/no_site_no_project/holding_bin_no_site_no_project/a",
-    "modifier": "admin",
-    "qualifiedName": "/no_site/no_site_no_project/holding_bin/null",
-    "owner": "holding_bin_no_site_no_project",
-    "documentation": "a is a",
     "sysmlid": "a",
+    "editable": true,
+    "creator": "admin",
+    "modifier": "admin",
+    "documentation": "a is a",
     "specialization": {
         "propertyType": null,
         "isSlot": false,
         "isDerived": false,
         "value": [{
-            "valueExpression": null,
             "string": "the a value",
             "type": "LiteralString"
         }],
         "type": "Property"
-    },
-    "editable": true,
-    "creator": "admin"
+    }
 }]}
 200

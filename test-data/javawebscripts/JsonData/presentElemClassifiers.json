@@ -1,5 +1,25 @@
 {"elements":[
     {
+     "comment": "job stereotype id",
+     "sysmlid": "_18_0_5_407019f_1458258829038_313297_14086"
+    },
+    {
+     "comment": "job status id",
+     "sysmlid": "_18_0_5_407019f_1458259018041_351899_14098"
+    },
+    {
+     "comment": "job schedule id",
+     "sysmlid": "_18_0_5_407019f_1458259033014_844708_14099"
+    },
+    {
+     "comment": "job command id",
+     "sysmlid": "_18_0_5_407019f_1458258991043_482001_14097"
+    },
+    {
+     "comment": "job url id",
+     "sysmlid": "_18_0_5_407019f_1459284115836_664841_14086"
+    },
+    {
      "sysmlid": "_17_0_5_1_407019f_1431903758416_800749_12055"
     },
     {
@@ -100,6 +120,14 @@
     },
     {
      "sysmlid": "_17_0_2_3_f4a035d_1366702935947_453687_36949"
+    },
+    {
+     "comment": "requirements stereotype",
+     "sysmlid": "_11_5EAPbeta_be00301_1147873190330_159934_2220"
+    },
+    {
+        "comment": "requirements text property",
+        "sysmlid": "_11_5EAPbeta_be00301_1147873226632_528960_2311"
     }
 ]}
 

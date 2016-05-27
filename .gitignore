@@ -9,6 +9,7 @@
 output*.txt
 debug*.txt
 debug*.out
+config*.xml
 .classpath
 /src/main/amp/web/scripts/raml/
 activemq-data/
@@ -77,3 +78,5 @@ activemq-data/
 .iml
 .DS_Store
 /target
+*.pyc
+.pydevproject

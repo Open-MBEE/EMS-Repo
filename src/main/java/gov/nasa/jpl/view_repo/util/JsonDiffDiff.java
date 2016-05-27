@@ -1183,7 +1183,7 @@ public class JsonDiffDiff extends AbstractDiff<JSONObject, Object, String> {
 			if (element == null)
 				continue;
 			String sysmlId = element.optString(Acm.JSON_ID);
-			if (sysmlId == null)
+			if (Utils.isNullOrEmpty(sysmlId))
 				continue;
 			Pair<DiffOp, List<JSONObject>> p = glomMap.get(sysmlId);
 			// If there is no entry in the map for the sysmlid, create a new
@@ -1535,6 +1535,8 @@ public class JsonDiffDiff extends AbstractDiff<JSONObject, Object, String> {
 			add("id");
 			add("version"); // REVIEW added this because sometimes the version is not there
 			add("editable");
+			add("qualifiedId");
+			add("qualifiedName");
 		}
 	};
 

@@ -1,10 +1,10 @@
 {"elements": [{
     "qualifiedId": "/europa/123456/_17_0_5_1_407019f_1402422718524_458809_16434",
-    "qualifiedName": "/europa/JW_TEST2/D no ",
+    "qualifiedName": "/europa/JW_TEST2/D no",
     "sysmlid": "_17_0_5_1_407019f_1402422718524_458809_16434",
     "properties": [{
         "qualifiedId": "/europa/123456/_17_0_5_1_407019f_1402422718524_458809_16434/_17_0_5_1_407019f_1402422739233_300950_16458",
-        "qualifiedName": "/europa/JW_TEST2/D no /real55",
+        "qualifiedName": "/europa/JW_TEST2/D no/real55",
         "sysmlid": "_17_0_5_1_407019f_1402422739233_300950_16458",
         "editable": true,
         "creator": "admin",
@@ -13,12 +13,11 @@
         "owner": "_17_0_5_1_407019f_1402422718524_458809_16434",
         "specialization": {
             "propertyType": null,
-            "isDerived": false,
             "isSlot": false,
+            "isDerived": false,
             "value": [{
-                "valueExpression": null,
-                "double": 34.5,
-                "type": "LiteralReal"
+                "type": "LiteralReal",
+                "double": 34.5
             }],
             "type": "Property"
         }
@@ -26,7 +25,7 @@
     "editable": true,
     "creator": "admin",
     "modifier": "admin",
-    "name": "D no ",
+    "name": "D no",
     "owner": "123456",
     "specialization": {"type": "Element"}
 }]}

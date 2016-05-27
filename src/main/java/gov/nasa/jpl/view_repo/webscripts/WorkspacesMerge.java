@@ -43,8 +43,7 @@ public class WorkspacesMerge extends AbstractJavaWebScript{
 	@Override
 	protected Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache){
 	    WorkspacesMerge instance = new WorkspacesMerge(repository, getServices());
-        // Run without transactions since WorkspacesMerge breaks them up itself.
-	    return instance.executeImplImpl( req, status, cache, true );
+	    return instance.executeImplImpl( req, status, cache, runWithoutTransactions );
 	}
 
 	private JSONObject tmpResult;
@@ -82,7 +81,7 @@ public class WorkspacesMerge extends AbstractJavaWebScript{
 
 
 				// Prints out the differences after merging.
-				JSONObject top = wsDiff.toJSONObject(null, null /*time*/, false);
+				JSONObject top = wsDiff.toJSONObject(this, null, null /*time*/, false);
 		        Iterator< ? > iter = top.keys();
 		        while ( iter.hasNext() ) {
 		            String key = "" + iter.next();
@@ -192,7 +191,7 @@ public class WorkspacesMerge extends AbstractJavaWebScript{
 		//String siteName = node.getSiteName();
 		long end = System.currentTimeMillis();
 		try{
-			result = workspaceDiff.toJSONObject(new Date(start),new Date(end), false);
+			result = workspaceDiff.toJSONObject(this, new Date(start),new Date(end), false);
 			for( EmsScriptNode node: collection) {
 				// editting the JSON
 				node.removeAspect( "ems:Added" );

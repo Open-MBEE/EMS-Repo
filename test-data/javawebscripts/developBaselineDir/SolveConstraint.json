@@ -1,63 +1,68 @@
 {"elements": [
     {
-        "qualifiedId": "/europa/123456/op_ev_31835/op_param_31868",
-        "name": "x",
-        "qualifiedName": "/europa/JW_TEST/GreaterEquals/x",
-        "sysmlid": "op_param_31868",
-        "documentation": "",
-        "owner": "op_ev_31835",
-        "specialization": {"type": "Element"},
+        "qualifiedName": "/europa/JW_TEST/GreaterEquals/result",
+        "sysmlid": "op_param_31867",
         "editable": true,
         "creator": "admin",
+        "name": "result",
+        "documentation": "",
+        "owner": "op_ev_31835",
+        "specialization": {"type": "Element"}
     },
     {
-        "qualifiedId": "/europa/123456/arg_ev_33001",
-        "name": "initialDuration",
-        "qualifiedName": "/europa/JW_TEST/initialDuration",
-        "sysmlid": "arg_ev_33001",
+        "qualifiedName": "/europa/JW_TEST/duration_1",
+        "sysmlid": "arg_ev_38307_1",
+        "editable": true,
+        "creator": "admin",
+        "name": "duration_1",
         "documentation": "",
         "owner": "123456",
         "specialization": {
             "propertyType": null,
-            "isDerived": false,
             "isSlot": false,
+            "isDerived": false,
             "value": [{
-                "valueExpression": null,
-                "integer": -1145811380,
+                "integer": 10,
                 "type": "LiteralInteger"
             }],
             "type": "Property"
-        },
-        "editable": true,
-        "creator": "admin",
+        }
     },
     {
-        "qualifiedId": "/europa/123456/op_ev_31835/op_param_31869",
-        "name": "y",
+        "qualifiedName": "/europa/JW_TEST/duration",
+        "sysmlid": "arg_ev_38307",
+        "editable": true,
+        "creator": "admin",
+        "name": "duration",
+        "documentation": "",
+        "owner": "123456",
+        "specialization": {
+            "propertyType": null,
+            "isSlot": false,
+            "isDerived": false,
+            "value": [{
+                "integer": 22,
+                "type": "LiteralInteger"
+            }],
+            "type": "Property"
+        }
+    },
+    {
         "qualifiedName": "/europa/JW_TEST/GreaterEquals/y",
         "sysmlid": "op_param_31869",
-        "documentation": "",
-        "owner": "op_ev_31835",
-        "specialization": {"type": "Element"},
         "editable": true,
         "creator": "admin",
-    },
-    {
-        "qualifiedId": "/europa/123456/op_ev_31835/op_param_31867",
-        "name": "result",
-        "qualifiedName": "/europa/JW_TEST/GreaterEquals/result",
-        "sysmlid": "op_param_31867",
+        "name": "y",
         "documentation": "",
         "owner": "op_ev_31835",
-        "specialization": {"type": "Element"},
-        "editable": true,
-        "creator": "admin",
+        "specialization": {"type": "Element"}
     },
     {
-        "qualifiedId": "/europa/123456/op_ev_31835",
-        "name": "GreaterEquals",
         "qualifiedName": "/europa/JW_TEST/GreaterEquals",
         "sysmlid": "op_ev_31835",
+        "editable": true,
+        "creator": "admin",
+        "name": "GreaterEquals",
         "documentation": "",
         "owner": "123456",
         "specialization": {
@@ -67,85 +72,65 @@
                 "op_param_31869"
             ],
             "type": "Operation"
-        },
-        "editable": true,
-        "creator": "admin",
+        }
     },
     {
-        "qualifiedId": "/europa/123456/constraint_32165",
-        "name": "",
+        "qualifiedName": "/europa/JW_TEST/initialDuration",
+        "sysmlid": "arg_ev_33001",
+        "editable": true,
+        "creator": "admin",
+        "name": "initialDuration",
+        "documentation": "",
+        "owner": "123456",
+        "specialization": {
+            "propertyType": null,
+            "isSlot": false,
+            "isDerived": false,
+            "value": [{
+                "integer": 11,
+                "type": "LiteralInteger"
+            }],
+            "type": "Property"
+        }
+    },
+    {
         "qualifiedName": "/europa/JW_TEST/",
         "sysmlid": "constraint_32165",
+        "editable": true,
+        "creator": "admin",
+        "name": "",
         "documentation": "",
         "owner": "123456",
         "specialization": {
             "specification": {
-                "valueExpression": null,
+                "type": "Expression",
                 "operand": [
                     {
                         "element": "op_ev_31835",
-                        "valueExpression": null,
                         "type": "ElementValue"
                     },
                     {
                         "element": "arg_ev_38307_1",
-                        "valueExpression": null,
                         "type": "ElementValue"
                     },
                     {
                         "element": "arg_ev_33001",
-                        "valueExpression": null,
                         "type": "ElementValue"
                     }
-                ],
-                "type": "Expression"
+                ]
             },
             "type": "Constraint"
-        },
-        "editable": true,
-        "creator": "admin",
+        }
     },
     {
-        "qualifiedId": "/europa/123456/arg_ev_38307_1",
-        "name": "duration_1",
-        "qualifiedName": "/europa/JW_TEST/duration_1",
-        "sysmlid": "arg_ev_38307_1",
-        "documentation": "",
-        "owner": "123456",
-        "specialization": {
-            "propertyType": null,
-            "isDerived": false,
-            "isSlot": false,
-            "value": [{
-                "valueExpression": null,
-                "integer": 10,
-                "type": "LiteralInteger"
-            }],
-            "type": "Property"
-        },
+        "qualifiedName": "/europa/JW_TEST/GreaterEquals/x",
+        "sysmlid": "op_param_31868",
         "editable": true,
         "creator": "admin",
-    },
-    {
-        "qualifiedId": "/europa/123456/arg_ev_38307",
-        "name": "duration",
-        "qualifiedName": "/europa/JW_TEST/duration",
-        "sysmlid": "arg_ev_38307",
+        "name": "x",
         "documentation": "",
-        "owner": "123456",
-        "specialization": {
-            "propertyType": null,
-            "isDerived": false,
-            "isSlot": false,
-            "value": [{
-                "valueExpression": null,
-                "integer": 22,
-                "type": "LiteralInteger"
-            }],
-            "type": "Property"
-        },
-        "editable": true,
-        "creator": "admin",
+        "owner": "op_ev_31835",
+        "specialization": {"type": "Element"}
     }
 ]}
 200

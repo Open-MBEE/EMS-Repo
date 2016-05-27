@@ -1,40 +1,40 @@
 {
     "workspace1": {
-        "qualifiedName": "master/wsA/wsT",
         "name": "wsT",
+        "qualifiedName": "master/wsA/wsT",
         "elements": [
             {
-                "name": "303",
                 "qualifiedName": "/europa/JW_TEST/300/301/302/303",
-                "documentation": "talk",
-                "owner": "302",
                 "sysmlid": "303",
+                "editable": true,
+                "name": "303",
+                "owner": "302",
+                "documentation": "talk",
                 "specialization": {
                     "propertyType": null,
-                    "isSlot": false,
                     "isDerived": false,
+                    "isSlot": false,
                     "value": [{
-                        "valueExpression": null,
+                        
                         "string": "dlam_string",
                         "type": "LiteralString"
                     }],
                     "type": "Property"
-                },
-                "editable": true,
+                }
             },
             {
                 "qualifiedName": "/europa/JW_TEST/400/401/402/403/404",
                 "sysmlid": "404",
                 "editable": true,
                 "name": "404",
-                "documentation": "4about",
                 "owner": "403",
+                "documentation": "4about",
                 "specialization": {
                     "propertyType": null,
-                    "isDerived": false,
                     "isSlot": false,
+                    "isDerived": false,
                     "value": [{
-                        "valueExpression": null,
+                        
                         "string": "dlam_string",
                         "type": "LiteralString"
                     }],
@@ -46,14 +46,14 @@
                 "sysmlid": "304",
                 "editable": true,
                 "name": "304",
-                "documentation": "this will create a moved element",
                 "owner": "123456",
+                "documentation": "this will create a moved element",
                 "specialization": {
                     "propertyType": null,
-                    "isDerived": false,
                     "isSlot": false,
+                    "isDerived": false,
                     "value": [{
-                        "valueExpression": null,
+                        
                         "string": "dlam_string",
                         "type": "LiteralString"
                     }],
@@ -65,8 +65,8 @@
                 "sysmlid": "conflict",
                 "editable": true,
                 "name": "conflict",
-                "owner": "123456",
                 "documentation": "this will create a conflict!",
+                "owner": "123456",
                 "specialization": {"type": "Element"}
             },
             {
@@ -76,10 +76,10 @@
                 "sysmlid": "y",
                 "specialization": {
                     "propertyType": null,
-                    "isDerived": false,
                     "isSlot": false,
+                    "isDerived": false,
                     "value": [{
-                        "valueExpression": null,
+                        
                         "string": "the y value",
                         "type": "LiteralString"
                     }],
@@ -88,30 +88,31 @@
                 "editable": true,
             },
             {
-                "name": "302",
                 "qualifiedName": "/europa/JW_TEST/300/301/302",
-                "documentation": "to",
-                "owner": "301",
                 "sysmlid": "302",
+                "editable": true,
+                "name": "302",
+                "owner": "301",
+                "documentation": "to",
                 "specialization": {
                     "propertyType": null,
                     "isSlot": false,
                     "isDerived": false,
                     "value": [{
-                        "valueExpression": null,
+                        
                         "string": "dlam_string",
                         "type": "LiteralString"
                     }],
                     "type": "Property"
-                },
-                "editable": true,
+                }
             },
             {
-                "name": "301",
                 "qualifiedName": "/europa/JW_TEST/300/301",
-                "documentation": "else",
-                "owner": "300",
                 "sysmlid": "301",
+                "editable": true,
+                "name": "301",
+                "owner": "300",
+                "documentation": "else",
                 "specialization": {
                     "view2view": [{
                         "childrenViews": [
@@ -139,27 +140,26 @@
                         "type": "Paragraph"
                     }],
                     "type": "Product"
-                },
-                "editable": true,
+                }
             },
             {
-                "name": "300",
                 "qualifiedName": "/europa/JW_TEST/300",
-                "documentation": "something",
-                "owner": "123456",
                 "sysmlid": "300",
+                "editable": true,
+                "name": "300",
+                "owner": "123456",
+                "documentation": "something",
                 "specialization": {
                     "propertyType": null,
                     "isSlot": false,
                     "isDerived": false,
                     "value": [{
-                        "valueExpression": null,
+                        
                         "string": "dlam_string",
                         "type": "LiteralString"
                     }],
                     "type": "Property"
-                },
-                "editable": true,
+                }
             },
             {
                 "qualifiedName": "/europa/JW_TEST/400/401/402/403",
@@ -170,10 +170,10 @@
                 "documentation": "4talk",
                 "specialization": {
                     "propertyType": null,
-                    "isDerived": false,
                     "isSlot": false,
+                    "isDerived": false,
                     "value": [{
-                        "valueExpression": null,
+                        
                         "string": "dlam_string",
                         "type": "LiteralString"
                     }],
@@ -189,10 +189,10 @@
                 "documentation": "4to",
                 "specialization": {
                     "propertyType": null,
-                    "isDerived": false,
                     "isSlot": false,
+                    "isDerived": false,
                     "value": [{
-                        "valueExpression": null,
+                        
                         "string": "dlam_string",
                         "type": "LiteralString"
                     }],
@@ -207,12 +207,6 @@
                 "owner": "4000",
                 "documentation": "4else",
                 "specialization": {
-                    "displayedElements": [
-                        "401",
-                        "402",
-                        "403"
-                    ],
-                    "childrenViews": ["404"],
                     "view2view": [{
                         "childrenViews": [
                             "401",
@@ -220,18 +214,24 @@
                         ],
                         "sysmlid": "401"
                     }],
+                    "childrenViews": ["404"],
+                    "displayedElements": [
+                        "401",
+                        "402",
+                        "403"
+                    ],
                     "allowedElements": [
                         "401",
                         "402",
                         "403"
                     ],
+                    "noSections": ["402"],
                     "contains": [{
                         "sourceType": "reference",
                         "source": "401",
                         "sourceProperty": "documentation",
                         "type": "Paragraph"
                     }],
-                    "noSections": ["402"],
                     "type": "Product"
                 }
             },
@@ -244,10 +244,10 @@
                 "documentation": "4something",
                 "specialization": {
                     "propertyType": null,
-                    "isDerived": false,
                     "isSlot": false,
+                    "isDerived": false,
                     "value": [{
-                        "valueExpression": null,
+                        
                         "string": "dlam_string",
                         "type": "LiteralString"
                     }],
@@ -258,22 +258,21 @@
     },
     "workspace2": {
         "deletedElements": [{
-            "qualifiedName": "/europa/JW_TEST/300/301/302/null",
             "sysmlid": "y",
-            "editable": true,
             "documentation": "y is y",
             "owner": "302",
             "specialization": {
                 "propertyType": null,
-                "isSlot": false,
                 "isDerived": false,
+                "isSlot": false,
                 "value": [{
-                    "valueExpression": null,
+                    
                     "string": "the y value",
                     "type": "LiteralString"
                 }],
                 "type": "Property"
-            }
+            },
+            "editable": true,
         }],
         "addedElements": [{
             "qualifiedName": "/europa/JW_TEST/300/301/302/null",
@@ -282,10 +281,10 @@
             "sysmlid": "z",
             "specialization": {
                 "propertyType": null,
-                "isDerived": false,
                 "isSlot": false,
+                "isDerived": false,
                 "value": [{
-                    "valueExpression": null,
+                    
                     "string": "the z value",
                     "type": "LiteralString"
                 }],
@@ -296,29 +295,29 @@
         "conflictedElements": [{
             "name": "conflict",
             "qualifiedName": "/europa/JW_TEST/conflict",
-            "owner": "123456",
-            "sysmlid": "conflict",
             "documentation": "",
+            "sysmlid": "conflict",
+            "owner": "123456",
             "specialization": {"type": "Element"}
         }],
         "updatedElements": [
             {
                 "name": "conflict",
                 "qualifiedName": "/europa/JW_TEST/conflict",
-                "owner": "123456",
-                "documentation": "",
                 "sysmlid": "conflict",
+                "documentation": "",
+                "owner": "123456",
                 "specialization": {"type": "Element"}
             },
             {
                 "name": "303",
                 "qualifiedName": "/europa/JW_TEST/300/301/302/303",
-                "owner": "302",
-                "documentation": "talk modified",
                 "sysmlid": "303",
+                "documentation": "talk modified",
+                "owner": "302",
                 "specialization": {
                     "value": [{
-                        "valueExpression": null,
+                        
                         "string": "dlam_string modified",
                         "type": "LiteralString"
                     }],
@@ -328,27 +327,27 @@
             {
                 "name": "404",
                 "qualifiedName": "/europa/JW_TEST/400/401/402/403/404",
-                "owner": "403",
                 "sysmlid": "404",
+                "owner": "403",
                 "specialization": {"type": "Property"}
             },
             {
                 "name": "304",
                 "qualifiedName": "/europa/JW_TEST/300/301/302/303/304",
+                "sysmlid": "304",
                 "owner": "303",
                 "documentation": "about",
-                "sysmlid": "304",
                 "specialization": {"type": "Property"}
             }
         ],
-        "qualifiedName": "master/wsA/wsT2",
         "name": "wsT2",
+        "qualifiedName": "master/wsA/wsT2",
         "movedElements": [{
             "name": "304",
             "qualifiedName": "/europa/JW_TEST/300/301/302/303/304",
+            "sysmlid": "304",
             "owner": "303",
             "documentation": "about",
-            "sysmlid": "304",
             "specialization": {"type": "Property"}
         }]
     }

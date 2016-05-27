@@ -2,6 +2,7 @@ package gov.nasa.jpl.view_repo.db;
 
 import gov.nasa.jpl.mbee.util.Pair;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
+import gov.nasa.jpl.view_repo.util.EmsConfig;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -21,11 +22,13 @@ public class PostgresHelper {
 	static Logger logger = Logger.getLogger(PostgresHelper.class);
 
 	private Connection conn;
-	private String host;
-	private String dbName;
-	private String user;
-	private String pass;
 	private String workspaceName;
+
+	private static String host;
+	private static String dbName;
+	private static String user;
+	private static String pass;
+	private Boolean workspaceExists = null;
 
 	public static enum DbEdgeTypes {
 		REGULAR(1), DOCUMENT(2);
@@ -41,11 +44,10 @@ public class PostgresHelper {
 		}
 	}
 
-	
-   public PostgresHelper(WorkspaceNode workspace) {
-       String workspaceName = workspace == null ? "" : workspace.getId() ;
-       constructorHelper(workspaceName);
-   }
+	public PostgresHelper(WorkspaceNode workspace) {
+		String workspaceName = workspace == null ? "" : workspace.getId() ;
+		constructorHelper(workspaceName);
+	}
 
 	
 	public PostgresHelper(String workspaceName) {
@@ -53,10 +55,11 @@ public class PostgresHelper {
 	}
 	
 	private void constructorHelper(String workspaceName) {
-        this.host = DbContract.HOST;
-        this.dbName = DbContract.DB_NAME;
-        this.user = DbContract.USERNAME;
-        this.pass = DbContract.PASSWORD;
+	    host = EmsConfig.get("pg.host");
+	    dbName = EmsConfig.get("pg.name");
+	    user = EmsConfig.get("pg.user");
+	    pass = EmsConfig.get("pg.pass");
+
         if (workspaceName == null || workspaceName.equals("master")) {
             this.workspaceName = "";
         } else {
@@ -64,19 +67,21 @@ public class PostgresHelper {
         }
 	}
 
-	public void close() throws SQLException {
-		conn.close();
+	public void close() {
+		try {
+            conn.close();
+        } catch ( SQLException e ) {
+            e.printStackTrace();
+        }
 	}
 
 	public boolean connect() throws SQLException, ClassNotFoundException {
-		if (host.isEmpty() || dbName.isEmpty() || user.isEmpty()
-				|| pass.isEmpty()) {
+		if (host.isEmpty() || dbName.isEmpty() || user.isEmpty() || pass.isEmpty()) {
 			throw new SQLException("Database credentials missing");
 		}
 
 		Class.forName("org.postgresql.Driver");
-		this.conn = DriverManager.getConnection(this.host + this.dbName,
-				this.user, this.pass);
+		this.conn = DriverManager.getConnection(host + dbName, user, pass);
 		return true;
 	}
 
@@ -250,7 +255,7 @@ public class PostgresHelper {
 		} catch (Exception e) {
 			if (e.getMessage().contains("duplicate key")) {
 				if (logger.isInfoEnabled()) {
-					e.printStackTrace();
+				    logger.info( e.getStackTrace().toString() );
 				}
 			} else {
 				e.printStackTrace();
@@ -302,17 +307,22 @@ public class PostgresHelper {
 	}
 	
 	public boolean checkWorkspaceExists() {
+	    if (workspaceExists != null) return workspaceExists;
+	    
+	    workspaceExists = false;
 	    String query = String.format("select true from pg_tables where tablename='nodes%s'",
 	                                 workspaceName);
 	    try {
         	    ResultSet rs = execQuery(query);
         	    while (rs.next()) {
-        	        return rs.getBoolean( 1 );
+        	        workspaceExists = rs.getBoolean( 1 );
+        	        break;
         	    }
 	    } catch (Exception e) {
-	        e.printStackTrace();
+	        // do nothing, just means workspace doesn't exist
+	        if (logger.isInfoEnabled()) logger.info( "Couldn't find workspace " + workspaceName );
 	    }
-	    return false;
+	    return workspaceExists;
 	}
 	
 	public Map<String,Set<String>> getImmediateParentRoots(String sysmlId, DbEdgeTypes et) {
@@ -376,7 +386,7 @@ public class PostgresHelper {
 			if (n == null)
 				return result;
 
-			String query = "SELECT N.sysmlid, N.versionedrefid FROM nodes%s N JOIN "
+			String query = "SELECT N.sysmlid, N.noderefid FROM nodes%s N JOIN "
 					+ "(SELECT * FROM get_parents(%s, %d, '%s')) P ON N.id=P.id ORDER BY P.height";
 			ResultSet rs = execQuery(String.format(query, workspaceName,
 					n.getId(), DbEdgeTypes.REGULAR.getValue(), workspaceName));
@@ -497,6 +507,20 @@ public class PostgresHelper {
 		}
 	}
 
+	   public void deleteEdgesForParentNode(String sysmlId, DbEdgeTypes edgeType) {
+	        try {
+	            Node n = getNodeFromSysmlId(sysmlId);
+
+	            if (n == null)
+	                return;
+
+	            execUpdate("delete from edges" + workspaceName + " where parent = "
+	                    + n.getId() + " and edgeType = " + edgeType.getValue());
+	        } catch (Exception e) {
+	            e.printStackTrace();
+	        }
+	    }
+
 	public void deleteEdges(String parentSysmlId, String childSysmlId) {
 		try {
 			Node pn = getNodeFromSysmlId(parentSysmlId);
@@ -553,7 +577,7 @@ public class PostgresHelper {
 		}
 	}
 
-	public List<String> filterNodesByWorkspace(List<String> noderefs,
+	public List<String> filterNodeRefsByWorkspace(List<String> noderefs,
 			String workspace) {
 		List<String> result = new ArrayList<String>();
 		String query = "select noderefid from nodes" + workspace
@@ -577,5 +601,31 @@ public class PostgresHelper {
 		}
 
 		return result;
+	}
+	
+	public List<String> getNodesInWorkspace(List<String> sysmlids) {
+	    List<String> result = new ArrayList<String>();
+	    for (int ii = 0; ii < sysmlids.size(); ii++) {
+	        sysmlids.set( ii, String.format("'%s'", sysmlids.get(ii)) );
+	    }
+	    String column = "versionedrefid";
+	    if (this.workspaceName.equals( "" )) {
+	        column = "noderefid"; // to be safe on trunk always get node ref
+	    }
+	    String query  = String.format("select %s from nodes%s where sysmlid in (%s);",
+	                                  column, this.workspaceName, StringUtils.join(sysmlids, ",") );
+	    
+	    ResultSet rs;
+	    try {
+	        rs = execQuery(query);
+	        
+	        while (rs.next()) {
+	            result.add(rs.getString(1));
+	        }
+	    } catch (SQLException e) {
+	        e.printStackTrace();
+	    }
+	    
+	    return result;
 	}
 }

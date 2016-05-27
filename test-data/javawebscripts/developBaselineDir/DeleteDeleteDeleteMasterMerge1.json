@@ -3,20 +3,18 @@
     "qualifiedName": "master",
     "name": "master",
     "elements": [{
-      "qualifiedName": "/europa/JW_TEST2/delete_delete_consistent",
       "sysmlid": "delete_delete_consistent",
       "editable": true,
       "creator": "admin",
       "modifier": "admin",
       "name": "delete_delete_consistent",
-      "documentation": "delete_delete_consistent",
       "owner": "123456",
+      "documentation": "delete_delete_consistent",
       "specialization": {
         "propertyType": null,
         "isDerived": false,
         "isSlot": false,
         "value": [{
-          "valueExpression": null,
           "string": "this is it",
           "type": "LiteralString"
         }],
@@ -26,9 +24,7 @@
   },
   "workspace2": {
     "deletedElements": [{
-      "modifier": "admin",
       "name": "delete_delete_consistent",
-      "qualifiedName": "/europa/JW_TEST2/delete_delete_consistent",
       "sysmlid": "delete_delete_consistent",
       "owner": "123456",
       "specialization": {"type": "Property"},

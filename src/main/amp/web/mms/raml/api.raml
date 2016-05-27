@@ -36,6 +36,8 @@ schemas:
     
   - connections: !include connections.json-schema
   
+  - history: !include versions.json-schema
+    
   # include post/ put and delete responses
   #- elementsResponse: !include postResponse.json-schema
   #- viewsResponse: !include postResponse.json-schema
@@ -157,7 +159,18 @@ traits:
           description: If true, returns a simple json
           type: boolean
           required: false
-        
+  - formattable:
+      queryParameters:
+        format:
+          description: May be passed k or json.
+          type: string
+          required: false
+  - affectable:
+      queryParameters:
+        affectedIds:
+          description: If true, the request returns ids of elements affected by an element, E, in E's json.
+          type: boolean
+          required: false
           
 resourceTypes:
   - readCollection:
@@ -166,7 +179,7 @@ resourceTypes:
       description: Read operations for <<resourcePathName>>
       get:
           #is: [recursable, searchable, sliceable]
-          is: [recursable, sliceable] # Not searchable yet
+          is: [recursable, sliceable] # Not searchable or formattable, yet
           description: Read operation for <<resourcePathName>>
           responses:
               200:
@@ -297,13 +310,29 @@ resourceTypes:
     /elements:
       type: collection
       post:
-          is: [postable]
+       is: [postable]
+      get:
+        description: Returns all the elements of specified in the body. Body is a JSONArray of "elements" that only specify "sysmlid".
+      put:
+        description: Returns all the elements of specified in the body. Body is a JSONArray of "elements" that only specify "sysmlid".
       /{elementId}:
         #type: collection
         delete:
           description: Delete the element specified by the Sysml ID
         get:
           description: Sysml ID for the element under consideration
+    /history:
+      /{elementId}:
+        get:
+          description: Get the version history of specified element.
+          body:
+            schema: history
+#    /k:
+#      type: collection
+#      /{elementId}:
+#        #type: collection
+#        get:
+#          description: get K text for the element specified by the Sysml ID 
     /configurations:
       #type: collection
       get:
@@ -517,7 +546,7 @@ resourceTypes:
             description: Maximum items to display per filter specified, default is -1 (e.g., returns all results)
             required: false
           skipCount:
-            description: Page number to display, default is 0 (first page)
+            description: Number of pages to skip in the search results
             required: false
 #/operations:
 #  description: Service for executing operations, e.g., like the OCL Execution capabilities in MDK. Details still TBD.

@@ -3,7 +3,6 @@
     "qualifiedName": "master",
     "name": "master",
     "elements": [{
-      "qualifiedName": "/europa/JW_TEST2/null/null",
       "sysmlid": "property_zzz",
       "editable": true,
       "creator": "admin",
@@ -15,7 +14,6 @@
         "isDerived": false,
         "isSlot": false,
         "value": [{
-          "valueExpression": null,
           "string": "the p value",
           "type": "LiteralString"
         }],
@@ -25,8 +23,6 @@
   },
   "workspace2": {
     "deletedElements": [{
-      "modifier": "admin",
-      "qualifiedName": "/europa/JW_TEST2/null/null",
       "sysmlid": "property_zzz",
       "owner": "aspect_history_zzz",
       "specialization": {"type": "Property"},

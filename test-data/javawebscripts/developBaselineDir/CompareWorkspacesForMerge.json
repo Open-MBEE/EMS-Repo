@@ -1,34 +1,49 @@
 {
     "workspace1": {
-        "qualifiedName": "master/wsA",
         "name": "wsA",
         "elements": [
             {
-                "name": "300",
-                "qualifiedName": "/no_site/no_site_no_project/holding_bin/300",
-                "documentation": "something",
-                "owner": "holding_bin_no_site_no_project",
                 "sysmlid": "x",
+                "editable": true,
+                "name": "300",
+                "documentation": "something",
                 "specialization": {
                     "propertyType": null,
                     "isSlot": false,
                     "isDerived": false,
                     "value": [{
-                        "valueExpression": null,
                         "string": "dlam_string",
                         "type": "LiteralString"
                     }],
                     "type": "Property"
-                },
-                "editable": true,
+                }
             },
             {
-                "name": "holding_bin",
-                "qualifiedName": "/no_site/no_site_no_project/holding_bin",
-                "sysmlid": "holding_bin_no_site_no_project",
-                "owner": "no_site_no_project",
-                "specialization": {"type": "Package"},
                 "editable": true,
+                "appliedMetatypes": ["_9_0_62a020a_1105704885298_713292_7913"],
+                "specialization": {"type": "Package"}
+            },
+            {
+                "editable": true,
+                "appliedMetatypes": ["_9_0_62a020a_1105704885298_713292_7913"],
+                "specialization": {"type": "Package"}
+            },
+            {
+                "editable": true,
+                "appliedMetatypes": ["_9_0_62a020a_1105704885298_713292_7913"],
+                "specialization": {"type": "Package"}
+            },
+            {
+                "editable": true,
+                "appliedMetatypes": ["_9_0_62a020a_1105704885298_713292_7913"],
+                "specialization": {"type": "Package"}
+            },
+            {
+                "sysmlid": "holding_bin_123456",
+                "editable": true,
+                "name": "holding_bin",
+                "appliedMetatypes": ["_9_0_62a020a_1105704885298_713292_7913"],
+                "specialization": {"type": "Package"}
             }
         ]
     },
@@ -38,20 +53,16 @@
         "conflictedElements": [],
         "updatedElements": [{
             "name": "300",
-            "qualifiedName": "/no_site/no_site_no_project/holding_bin/300",
-            "owner": "holding_bin_no_site_no_project",
             "documentation": "x is x",
             "sysmlid": "x",
             "specialization": {
                 "value": [{
-                    "valueExpression": null,
                     "string": "the x value",
                     "type": "LiteralString"
                 }],
                 "type": "Property"
             }
         }],
-        "qualifiedName": "master/wsA/wsB",
         "name": "wsB",
         "movedElements": []
     }
