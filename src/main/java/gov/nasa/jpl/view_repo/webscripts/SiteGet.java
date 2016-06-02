@@ -78,7 +78,7 @@ public class SiteGet extends AbstractJavaWebScript {
     @Override
     protected Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
         SiteGet instance = new SiteGet(repository, getServices());
-        return instance.executeImplImpl( req, status, cache );
+        return instance.executeImplImpl( req, status, cache, runWithoutTransactions );
     }
 
     @Override

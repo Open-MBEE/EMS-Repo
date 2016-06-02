@@ -46,6 +46,7 @@ public class MmsSnapshotsGet extends AbstractJavaWebScript {
     @Override
     protected  Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
 		MmsSnapshotsGet instance = new MmsSnapshotsGet(repository, getServices());
+		// all desc.xml have transactions required, so need to use the EmsTransaction calls
 		return instance.executeImplImpl(req, status, cache);
     }
 
