@@ -1,0 +1,11 @@
+<webscript>
+	<shortname>get number of jobs on jenkins</shortname>
+	<description>
+		get number of jobs on jenkins
+	</description>
+	<url>/workspaces/{workspaceId}/jobs/allJobs</url>
+	<format default="json">argument</format>
+	<authentication>user</authentication>
+	<transaction>none</transaction>
+	<family>PMA REST API</family>
+</webscript>

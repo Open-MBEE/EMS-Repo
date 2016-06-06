@@ -1814,7 +1814,7 @@ None,
 350,
 "PostArtifact",
 "Post artifact to the master branch",
-'curl %s %s -H "Content-Type: multipart/form-data;" --form "file=@JsonData/x.json" --form "title=JsonData/x.json" --form "desc=stuffs" --form "content=@JsonData/x.json" %smaster/sites/europa/artifacts/folder1/folder2/xartifact' % (CURL_FLAGS, CURL_POST_FLAGS_NO_DATA, BASE_URL_WS),
+'curl %s %s -H "Content-Type: multipart/form-data;" --form "file=@JsonData/x.json" --form "title=JsonData/x.json" --form "desc=stuffs" --form "content=@JsonData/sample.svg" %smaster/sites/europa/artifacts/folder1/folder2/xartifact' % (CURL_FLAGS, CURL_POST_FLAGS_NO_DATA, BASE_URL_WS),
 True,
 None,
 ["test", "workspaces", "develop", "develop2"]
@@ -1824,13 +1824,24 @@ None,
 360,
 "GetArtifact",
 "Get artifact from the master branch",
-create_curl_cmd(type="GET", data="artifacts/xartifact?extension=svg&cs=3463563326", base_url=BASE_URL_WS,
+create_curl_cmd(type="GET", data="artifacts/xartifact?extension=svg&cs=2572447377", base_url=BASE_URL_WS,
                 branch="master/"),
 False,
 ['"url"'],
 ["test", "workspaces", "develop", "develop2"]
 ],
-                                   
+ 
+[
+361,
+"GetArtifactPng",
+"Get PNG artifact from the master branch",
+create_curl_cmd(type="GET", data="artifacts/xartifact?extension=png&cs=372689118", base_url=BASE_URL_WS,
+                branch="master/"),
+False,
+['"url"'],
+["test", "workspaces", "develop", "develop2"]
+],
+
 [
 370,
 "CreateWorkspaceDelete1",
@@ -3439,66 +3450,41 @@ create_curl_cmd(type="POST", data="holdingBinOwner.json", base_url=BASE_URL_WS,
 True,
 common_filters + holding_bin_filters,
 ["develop"]
+],     
+# MMS-308/311: loginticket doesn't require authentication to return
+[
+10150,
+"LoginTicketPost",
+"Get valid login ticket",
+"curl -X POST -H Content-Type:application/json http://localhost:8080/alfresco/s/api/login -d '{\"username\":\"admin\", \"password\":\"admin\"}'",
+False,
+common_filters + ["data", "ticket"],
+["test", "workspaces", "ws", "develop"],
+None,
+None,
+set_ticket_to_gv1
 ],
 
 [
-30000,
-"PostDoorsProjectMappings",
-"Post Doors Project Mappings",
-"curl -u admin:admin -X POST -H Content-Type:application/json http://localhost:8080/alfresco/service/doors/project/mappings -d @JsonData/doorsprojectmappings.json",
+10151,
+"LoginTicketGetValid",
+"Get ticket status for valid ticket",
+"curl http://localhost:8080/alfresco/service/mms/login/ticket/$gv1",
 True,
-None,
-["test", "workspaces", "develop", "develop2"]
+common_filters,
+["test", "workspaces", "ws", "develop"]
 ],
 
 [
-30001,
-"GetDoorsProjectMappings",
-"Get Doors Project Mappings",
-"curl -u admin:admin -X GET -H Content-Type:application/json http://localhost:8080/alfresco/service/doors/project/mappings",
+10152,
+"LoginTicketGetInvalid",
+"Get ticket status for invalid ticket",
+"curl http://localhost:8080/alfresco/service/mms/login/ticket/TICKET_INVALID",
 True,
-None,
-["test", "workspaces", "develop", "develop2"]
-],
-
-[
-30002,
-"PostDoorsArtifactMappings",
-"Post Doors Artifact Mappings",
-"curl -u admin:admin -X POST -H Content-Type:application/json http://localhost:8080/alfresco/service/doors/artifact/mappings -d @JsonData/doorsartifactmappingspost.json",
-True,
-None,
-["test", "workspaces", "develop", "develop2"]
-],
-
-[
-30003,
-"GetDoorsArtifactMappings",
-"Get Doors Artifact Mappings",
-"curl -u admin:admin -X GET -H Content-Type:application/json http://localhost:8080/alfresco/service/doors/artifact/mappings",
-True,
-None,
-["test", "workspaces", "develop", "develop2"]
-],
-[
-30004,
-"PostDoorsArtifactLinkMappings",
-"Post Doors Artifact Link Mappings",
-"curl -u admin:admin -X POST -H Content-Type:application/json http://localhost:8080/alfresco/service/doors/artifactlink/mappings -d @JsonData/doorsartifactlinkmappingspost.json",
-True,
-None,
-["test", "workspaces", "develop", "develop2"]
-],
-
-[
-30005,
-"GetDoorsArtifactLinkMappings",
-"Get Doors Artifact Link Mappings",
-"curl -u admin:admin -X GET -H Content-Type:application/json http://localhost:8080/alfresco/service/doors/artifactlink/mappings",
-True,
-None,
-["test", "workspaces", "develop", "develop2"]
-]
+common_filters,
+["test", "workspaces", "ws", "develop"]
+]         
+         
 ]
 
 ##########################################################################################    

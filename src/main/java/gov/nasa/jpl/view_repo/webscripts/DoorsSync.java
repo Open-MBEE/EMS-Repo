@@ -320,20 +320,14 @@ public class DoorsSync extends AbstractJavaWebScript {
 
         }
 
-        // If no pre-loaded applied metatype id configurations were found, use
-        // default requirement
-        // And/or could also check the static global data structure in the
-        // DoorsArtifactMappings webscript which has the pre-loaded artifact
-        // mappings
+        // use ...2220 if no project/appliedmetatype mappings were found in
+        // database
         else {
 
-            // Use default requirement appliedmetatype id if no artifact
-            // mappings were found in database
             requirements = searchForElementsPostgres( types,
                                                       "_11_5EAPbeta_be00301_1147873190330_159934_2220",
                                                       false, workspace,
                                                       dateTime, null, null );
-
         }
 
         for ( String key : requirements.keySet() ) {
