@@ -58,6 +58,7 @@ import org.alfresco.repo.model.Repository;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.version.Version;
+import org.alfresco.util.TempFileProvider;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.apache.batik.transcoder.TranscoderInput;
@@ -264,7 +265,8 @@ public class ArtifactPost extends AbstractJavaWebScript {
 
 	protected Path saveSvgToFilesystem(String artifactId, String extension, String content) throws Throwable{
 		byte[] svgContent = content.getBytes( Charset.forName( "UTF-8" ) );
-		Path svgPath = Paths.get("/mnt/alf_data/temp/svgToPng/", String.format("%s%s", artifactId, extension));
+		File tempDir = TempFileProvider.getTempDir();
+		Path svgPath = Paths.get(tempDir.getAbsolutePath(), String.format("%s%s", artifactId, extension));
 		File file = new File(svgPath.toString());
 
 		try(final InputStream in = new ByteArrayInputStream( svgContent );){
