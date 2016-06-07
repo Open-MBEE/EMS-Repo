@@ -4068,8 +4068,9 @@ public class NodeUtil {
         // Node wasnt found, so create one:
         if ( artifactNode == null ) {
             artifactNode = subfolder.createNode( artifactId, "cm:content" );
-            subfolder.getOrSetCachedVersion();
+//            subfolder.getOrSetCachedVersion();
         }
+        subfolder.getOrSetCachedVersion();
 
         if ( artifactNode == null || !artifactNode.exists() ) {
             Debug.err( "Failed to create new artifact " + artifactId + "!\n" );
@@ -4263,24 +4264,31 @@ public class NodeUtil {
 		NodeUtil.propertyCachePut(pngNode.getNodeRef(),
 				NodeUtil.getShortQName(ContentModel.PROP_CONTENT), contentData);
 
-		// if only version, save dummy version so snapshots can reference
-		// versioned images - need to check against 1 since if someone
-		// deleted previously a "dead" version is left in its place
-//		Object[] versionHistory = pngNode.getEmsVersionHistory();
-//
-//		if (versionHistory == null || versionHistory.length <= 1) {
+		Object[] versionHistory = pngNode.getEmsVersionHistory();
+
+        if ( versionHistory == null || versionHistory.length <= 1 ) {
+            pngNode.makeSureNodeRefIsNotFrozen();
+            pngNode.createVersion( "creating the version history", false );
+        }
+        
+
+//		Version svgVer = svgNode.getCurrentVersion();
+//		String svgVerLabel = svgVer.getVersionLabel();
+//		Double svgVersion = Double.parseDouble(svgVerLabel);
+//		
+//		Version pngSVer = pngNode.getCurrentVersion();
+//		String pngVerLabel = pngSVer.getVersionLabel();
+//		Double pngVersion = Double.parseDouble(pngVerLabel);
+//		if(svgVersion == 1.1 && pngVersion == 1.0) svgVersion = 1.0;
+//		
+//		while(pngVersion <= svgVersion){
 //			pngNode.makeSureNodeRefIsNotFrozen();
 //			pngNode.createVersion("creating the version history", false);
+//			pngSVer = pngNode.getCurrentVersion();
+//			pngVerLabel = pngSVer.getVersionLabel();
+//			pngVersion = Double.parseDouble(pngVerLabel);
 //		}
 
-		int svgHistLen = svgNode.getEmsVersionHistory().length;
-		int pngHistLen = pngNode.getEmsVersionHistory().length;
-		
-		for(int i = svgHistLen-pngHistLen; i >= 0; i--){
-			pngNode.makeSureNodeRefIsNotFrozen();
-			pngNode.createVersion("creating the version history", false);
-		}
-		
 		pngNode.getOrSetCachedVersion();
 
 		return pngNode;

@@ -56,6 +56,7 @@ import javax.xml.bind.DatatypeConverter;
 import org.alfresco.repo.model.Repository;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
+import org.alfresco.service.cmr.version.Version;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.apache.batik.transcoder.TranscoderInput;
@@ -168,25 +169,6 @@ public class ArtifactPost extends AbstractJavaWebScript {
 		    	        															 siteName,
 		    																		 path, workspace, null,
 		    																		 response, null, false);
-		    	        	if( !NodeUtil.skipSvgToPng){
-			    	        	try{
-			    	        		Path svgPath = saveSvgToFilesystem(artifactId, extension, content);
-				    	        	Path pngPath = svgToPng(svgPath);
-			    	        		EmsScriptNode pngArtifact = NodeUtil.updateOrCreateArtifactPng(artifact, pngPath, siteName, path, workspace, null, response, null, false);
-			    	        		if(pngArtifact == null){
-			    	        			log(Level.ERROR, HttpServletResponse.SC_BAD_REQUEST, "Failed to convert SVG to PNG!\n");
-			    	        		}
-			    	        		else{
-			    	        			pngArtifact.getOrSetCachedVersion();
-			    	        		}
-			    	        		Files.deleteIfExists(svgPath);
-			    	        		Files.deleteIfExists(pngPath);
-			    	        	}
-			    	        	catch(Throwable ex){
-			    	        		log(Level.ERROR, HttpServletResponse.SC_BAD_REQUEST, "Failed to convert SVG to PNG!\n");
-			    	        	}
-		    	        	}
-
 		    	        	if (artifact == null) {
 		    	        		 log(Level.ERROR, HttpServletResponse.SC_BAD_REQUEST, "Was not able to create the artifact!\n");
 								 model.put("res", createResponseJson());
@@ -194,6 +176,25 @@ public class ArtifactPost extends AbstractJavaWebScript {
 		    	        	else {
 		    	        		resultJson.put("upload", artifact);
 		    	        		artifact.getOrSetCachedVersion();
+		    	        		if( !NodeUtil.skipSvgToPng){
+				    	        	try{
+				    	        		Path svgPath = saveSvgToFilesystem(artifactId, extension, content);
+					    	        	Path pngPath = svgToPng(svgPath);
+				    	        		EmsScriptNode pngArtifact = NodeUtil.updateOrCreateArtifactPng(artifact, pngPath, siteName, path, workspace, null, response, null, false);
+				    	        		if(pngArtifact == null){
+				    	        			log(Level.ERROR, HttpServletResponse.SC_BAD_REQUEST, "Failed to convert SVG to PNG!\n");
+				    	        		}
+				    	        		else{
+				    	        			synchSvgAndPngVersions(artifact, pngArtifact);
+				    	        			pngArtifact.getOrSetCachedVersion();
+				    	        		}
+//				    	        		Files.deleteIfExists(svgPath);
+//				    	        		Files.deleteIfExists(pngPath);
+				    	        	}
+				    	        	catch(Throwable ex){
+				    	        		log(Level.ERROR, HttpServletResponse.SC_BAD_REQUEST, "Failed to convert SVG to PNG!\n");
+				    	        	}
+			    	        	}
 		    	        	}
 	    	        	}
 	    	        	else {
@@ -260,5 +261,27 @@ public class ArtifactPost extends AbstractJavaWebScript {
 			throw new Throwable("Failed to convert SVG to PNG! " + ex.getMessage());
 		}
 		return pngPath;
+	}
+	
+	protected void synchSvgAndPngVersions(EmsScriptNode svgNode, EmsScriptNode pngNode){
+		Version svgVer = svgNode.getCurrentVersion();
+		String svgVerLabel = svgVer.getVersionLabel();
+		Double svgVersion = Double.parseDouble(svgVerLabel);
+		
+		Version pngVer = pngNode.getCurrentVersion();
+		String pngVerLabel = pngVer.getVersionLabel();
+		Double pngVersion = Double.parseDouble(pngVerLabel);
+		
+		int svgVerLen = svgNode.getEmsVersionHistory().length;
+		int pngVerLen = pngNode.getEmsVersionHistory().length;
+		
+		while(pngVersion < svgVersion || pngVerLen < svgVerLen){
+			pngNode.makeSureNodeRefIsNotFrozen();
+			pngNode.createVersion("creating the version history", false);
+			pngVer = pngNode.getCurrentVersion();
+			pngVerLabel = pngVer.getVersionLabel();
+			pngVersion = Double.parseDouble(pngVerLabel);
+			pngVerLen = pngNode.getEmsVersionHistory().length;
+		}
 	}
 }
