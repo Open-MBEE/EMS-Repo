@@ -2338,7 +2338,7 @@ public class ModelPost extends AbstractJavaWebScript {
             String siteTitle = pkgSiteNode.getSysmlName();
             String siteDescription = (String) pkgSiteNode
                     .getProperty(Acm.ACM_DOCUMENTATION);
-            boolean isPublic = true;
+            boolean isPublic = false; // MMS-292: changed to private
             if (false == ShareUtils.constructSiteDashboard(sitePreset,
                     siteName, siteTitle, siteDescription, isPublic)) {
                 // FIXME: add some logging and response here that there were
