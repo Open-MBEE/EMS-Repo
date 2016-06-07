@@ -4270,24 +4270,6 @@ public class NodeUtil {
             pngNode.createVersion( "creating the version history", false );
         }
         
-
-//		Version svgVer = svgNode.getCurrentVersion();
-//		String svgVerLabel = svgVer.getVersionLabel();
-//		Double svgVersion = Double.parseDouble(svgVerLabel);
-//		
-//		Version pngSVer = pngNode.getCurrentVersion();
-//		String pngVerLabel = pngSVer.getVersionLabel();
-//		Double pngVersion = Double.parseDouble(pngVerLabel);
-//		if(svgVersion == 1.1 && pngVersion == 1.0) svgVersion = 1.0;
-//		
-//		while(pngVersion <= svgVersion){
-//			pngNode.makeSureNodeRefIsNotFrozen();
-//			pngNode.createVersion("creating the version history", false);
-//			pngSVer = pngNode.getCurrentVersion();
-//			pngVerLabel = pngSVer.getVersionLabel();
-//			pngVersion = Double.parseDouble(pngVerLabel);
-//		}
-
 		pngNode.getOrSetCachedVersion();
 
 		return pngNode;
