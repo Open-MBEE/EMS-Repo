@@ -236,9 +236,11 @@ public class ArtifactPost extends AbstractJavaWebScript {
 
 	protected Path saveSvgToFilesystem(String artifactId, String extension, String content) throws Throwable{
 		byte[] svgContent = content.getBytes( Charset.forName( "UTF-8" ) );
-		Path svgPath = Paths.get("/mnt/alf_data/temp/admin/", String.format("%s%s", artifactId, extension));
+		Path svgPath = Paths.get("/mnt/alf_data/temp/svgToPng/", String.format("%s%s", artifactId, extension));
+		File file = new File(svgPath.toString());
 
 		try(final InputStream in = new ByteArrayInputStream( svgContent );){
+			file.mkdirs();
 			Files.copy(in, svgPath, StandardCopyOption.REPLACE_EXISTING);
 			return svgPath;
 		}
