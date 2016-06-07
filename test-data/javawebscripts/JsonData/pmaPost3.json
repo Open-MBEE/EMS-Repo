@@ -1,6 +1,6 @@
 {
 "jobs": [{
-    "status": "waiting",
+    "status": "job not found",
     "sysmlid": "jobG",
     "isMetatype": false,
     "editable": true,

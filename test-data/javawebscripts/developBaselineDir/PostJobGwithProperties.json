@@ -74,11 +74,11 @@
             "isDerived": false,
             "isSlot": true,
             "value": [{
-                "string": "waiting",
+                "string": "job not found",
                 "type": "LiteralString"
             }],
             "type": "Property"
         }
     }
-]}a
+]}
 200
