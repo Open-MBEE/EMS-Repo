@@ -4068,9 +4068,8 @@ public class NodeUtil {
         // Node wasnt found, so create one:
         if ( artifactNode == null ) {
             artifactNode = subfolder.createNode( artifactId, "cm:content" );
-//            subfolder.getOrSetCachedVersion();
+            subfolder.getOrSetCachedVersion();
         }
-        subfolder.getOrSetCachedVersion();
 
         if ( artifactNode == null || !artifactNode.exists() ) {
             Debug.err( "Failed to create new artifact " + artifactId + "!\n" );
