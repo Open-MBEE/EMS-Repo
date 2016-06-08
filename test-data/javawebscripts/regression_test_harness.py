@@ -3204,7 +3204,7 @@ common_filters + ['"timestamp"'],
 "[ NOTE: GET Requests are currently allowed if versions do not match] Checks the MMS version when requesting an element, versions should NOT match",
 create_curl_cmd(type="GET", data="elements/303?mmsVersion=2.0", base_url=BASE_URL_WS,
         branch="master/"),
-False,
+True, # FIXME: if we ever enable to check on gets
 common_filters + ['"timestamp"', '"message"'],
 ["test","workspaces","develop", "develop2"]
 ],
