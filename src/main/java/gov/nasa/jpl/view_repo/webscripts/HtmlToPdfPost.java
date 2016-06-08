@@ -412,44 +412,6 @@ public class HtmlToPdfPost extends AbstractJavaWebScript {
 		}
 		Element head = document.head();
 		head.append("<meta charset=\"utf-8\" />");
-		StringBuffer style = new StringBuffer();
-		style.append("<style type=\"text/css\">");
-		style.append(" 	li > a[href]::after {content: leader(\".\") target-counter(attr(href), page);}");
-		style.append("  img {max-width: 100%;}");
-		style.append("  .pull-right {float: right;}");
-		style.append("  table {width: 100%; border-collapse: collapse;}");
-		style.append("  table, th, td {border: 1px solid black;}");
-		style.append("  H1 {font-size: 20px;}");
-		style.append("  .ng-hide {display: none;}");
-		style.append("  BODY {font-size: 10px;}");
-		style.append("  .tof, .tot {page-break-after:always}");
-		style.append("  .tof .header, .tot .header { font-size:32px; }");
-		style.append("  .tof UL, .tot UL {list-style-type:none;}");
-		style.append("  .indices { page-break-before: always;}");
-		style.append("  @page {");
-		style.append("     @bottom {");
-		style.append("        font-size: 9px;");
-		style.append("        content: \"");
-		style.append(footerContent);
-		style.append("    \"}");
-		style.append("     @top {");
-		style.append("        font-size: 9px;");
-		style.append("        content: \"");
-		style.append(headerContent);
-		style.append("    \"}");
-		style.append("    @top-right {");
-		style.append("        font-size: 9px;min-width: 100px;");
-		style.append("        content: \"");
-		style.append(buildHeaderContentRHS(tagId, timeStamp, displayTime));
-		style.append("    \"}");
-		style.append("    @bottom-right {");
-		style.append("        font-size: 9px;");
-		style.append("        content: counter(page)");
-		style.append("    }");
-		style.append("   prince-shrink-to-fit:auto;");
-		style.append("}");
-		style.append("</style>");
-		head.append(style.toString());
 		// adding custom CSS link
 		head.append("<link href=\"css/customStyles.css\" rel=\"stylesheet\" type=\"text/css\" />");
 
