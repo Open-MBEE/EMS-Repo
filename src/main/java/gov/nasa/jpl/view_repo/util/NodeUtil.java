@@ -4263,24 +4263,13 @@ public class NodeUtil {
 		NodeUtil.propertyCachePut(pngNode.getNodeRef(),
 				NodeUtil.getShortQName(ContentModel.PROP_CONTENT), contentData);
 
-		// if only version, save dummy version so snapshots can reference
-		// versioned images - need to check against 1 since if someone
-		// deleted previously a "dead" version is left in its place
-//		Object[] versionHistory = pngNode.getEmsVersionHistory();
-//
-//		if (versionHistory == null || versionHistory.length <= 1) {
-//			pngNode.makeSureNodeRefIsNotFrozen();
-//			pngNode.createVersion("creating the version history", false);
-//		}
+		Object[] versionHistory = pngNode.getEmsVersionHistory();
 
-		int svgHistLen = svgNode.getEmsVersionHistory().length;
-		int pngHistLen = pngNode.getEmsVersionHistory().length;
-		
-		for(int i = svgHistLen-pngHistLen; i >= 0; i--){
-			pngNode.makeSureNodeRefIsNotFrozen();
-			pngNode.createVersion("creating the version history", false);
-		}
-		
+        if ( versionHistory == null || versionHistory.length <= 1 ) {
+            pngNode.makeSureNodeRefIsNotFrozen();
+            pngNode.createVersion( "creating the version history", false );
+        }
+        
 		pngNode.getOrSetCachedVersion();
 
 		return pngNode;
