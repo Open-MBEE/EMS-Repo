@@ -164,16 +164,7 @@ public class JobGet extends ModelGet {
                                                 valueSpec.put( "type", "LiteralString");                                        
                                                 valueArr.put(valueSpec);         
                                             }
-                                        }
-            
-                                        JSONArray json = new JSONArray();
-                                        // TODO -- when queue position is implemented, you will also need
-                                        //         to grab that value and change it accordingly 
-                                        //         append the updated property in json (i.e. json.put(_queueProp_))
-                                        
-                                        json.put( prop );
-                                        JSONObject elements = new JSONObject();
-                                        elements.put( "elements", json );                                                                 
+                                        }                                                            
             
                                         jobJson.put( "status", newStatus );
                                     }
