@@ -1831,17 +1831,16 @@ False,
 ["test", "workspaces", "develop", "develop2"]
 ],
 
-# FIXME - PNG does exist, but test case failing on Jenkins 
-# [
-# 361,
-# "GetArtifactPng",
-# "Get PNG artifact from the master branch",
-# create_curl_cmd(type="GET", data="artifacts/xartifact?extension=png&cs=372689118", base_url=BASE_URL_WS,
-#                 branch="master/"),
-# False,
-# ['"url"'],
-# ["test", "workspaces", "develop", "develop2"]
-# ],
+[
+361,
+"GetArtifactPng",
+"Get PNG artifact from the master branch",
+create_curl_cmd(type="GET", data="artifacts/xartifact?extension=png&cs=372689118", base_url=BASE_URL_WS,
+                branch="master/"),
+False,
+['"url"'],
+["test", "workspaces", "develop", "develop2"]
+],
 
 [
 370,
