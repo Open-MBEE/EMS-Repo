@@ -3451,8 +3451,7 @@ create_curl_cmd(type="POST", data="holdingBinOwner.json", base_url=BASE_URL_WS,
 True,
 common_filters + holding_bin_filters,
 ["develop"]
-],
-         
+],     
 # MMS-308/311: loginticket doesn't require authentication to return
 [
 10150,
@@ -3486,7 +3485,7 @@ True,
 common_filters,
 ["test", "workspaces", "ws", "develop"]
 ]         
-                 
+         
 ]
 
 ##########################################################################################    

@@ -1,0 +1,11 @@
+<webscript>
+	<shortname>Post Project Mappings</shortname>
+	<description>
+		Map Doors projects to sysml project ids
+	</description>
+	<url>/doorsprojectmappings</url>
+	<format default="json">argument</format>
+	<authentication>user</authentication>
+	<transaction>none</transaction>
+	<family>MMS REST API</family>
+</webscript>
