@@ -628,7 +628,4 @@ public class PostgresHelper {
 	    
 	    return result;
 	}
-	
-	
-	
 }

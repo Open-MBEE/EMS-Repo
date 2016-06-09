@@ -206,18 +206,14 @@ public class DoorsSync extends AbstractJavaWebScript {
                     json.put( "element", jsonArray );
                 }
             } catch ( JSONException e ) {
-                if ( logger.isDebugEnabled() ) {
-                    logger.error( HttpServletResponse.SC_INTERNAL_SERVER_ERROR
-                                  + " JSON could not be created\n" );
-                    e.printStackTrace();
-                }
+                logger.error( HttpServletResponse.SC_INTERNAL_SERVER_ERROR
+                              + " JSON could not be created\n" );
+                e.printStackTrace();
             } catch ( Exception e ) {
-                if ( logger.isDebugEnabled() ) {
-                    logger.error( HttpServletResponse.SC_INTERNAL_SERVER_ERROR
-                                  + String.format( " Internal error stack trace:\n %s \n",
-                                                   e.getLocalizedMessage() ) );
-                    e.printStackTrace();
-                }
+                logger.error( HttpServletResponse.SC_INTERNAL_SERVER_ERROR
+                              + String.format( " Internal error stack trace:\n %s \n",
+                                               e.getLocalizedMessage() ) );
+                e.printStackTrace();
             } finally {
                 pgh.close();
             }
@@ -344,7 +340,7 @@ public class DoorsSync extends AbstractJavaWebScript {
             try {
                 if ( doors == null
                      || currentProject != projectNode.getSysmlName() ) {
-                    System.out.println( "Logging in Doors" );
+                    if (logger.isDebugEnabled()) logger.debug( "Logging in Doors" );
                     doors = new DoorsClient( getConfig( "doors.user" ),
                                              getConfig( "doors.pass" ),
                                              getConfig( "doors.url" ),
@@ -1003,10 +999,10 @@ public class DoorsSync extends AbstractJavaWebScript {
             return null;
         }
 
-        System.out.println( "Folder Sysmlid: " + n.getSysmlId() );
+        if (logger.isDebugEnabled()) logger.debug( "Folder Sysmlid: " + n.getSysmlId() );
 
         String resourceUrl = mapResourceUrl( n.getSysmlId() );
-        System.out.println( "Folder Resource: " + resourceUrl );
+        if (logger.isDebugEnabled()) logger.debug( "Folder Resource: " + resourceUrl );
 
         if ( resourceUrl == null ) {
 
