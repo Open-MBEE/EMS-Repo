@@ -1067,6 +1067,12 @@ public class HtmlToPdfPost extends AbstractJavaWebScript {
 			ex.printStackTrace();
 		}
 	}
+	
+	protected String removeTicketAuthInfo(String filename){
+		if(!filename.contains("?")) return filename;
+		int idx = filename.indexOf("?");
+		return filename.substring(0, idx);
+	}
 
 	private DBImage retrieveEmbeddedImage(String storeName, String nodeId,
 			String imgName, WorkspaceNode workspace, Object timestamp)
@@ -1076,7 +1082,7 @@ public class HtmlToPdfPost extends AbstractJavaWebScript {
 		if (imgNodeRef == null)
 			return null;
 
-		imgName = URLDecoder.decode(imgName, "UTF-8");
+		imgName = removeTicketAuthInfo(URLDecoder.decode(imgName, "UTF-8"));
 		String imgFilename = imageDirName + File.separator + imgName;
 
 		File imgFile = new File(imgFilename);
