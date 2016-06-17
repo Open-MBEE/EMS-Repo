@@ -108,7 +108,7 @@ public class MmsModelDelete extends AbstractJavaWebScript {
 
         if (logger.isInfoEnabled()) logger.info( "Deletion completed" );
         if ( logger.isInfoEnabled() ) {
-            logger.info( String.format( "ModeDelete: %s", timer ) );
+            logger.info( String.format( "ModelDelete: %s", timer ) );
         }
 
         return model;
@@ -142,12 +142,20 @@ public class MmsModelDelete extends AbstractJavaWebScript {
 
         String projectId = null;
 
+        String elementId = null;
+        String jobId = null;
+        
         // parse based off of URL or content body
-        String elementId = req.getServiceMatch().getTemplateVars().get("elementId");
+        elementId = req.getServiceMatch().getTemplateVars().get("elementId");      
+        if( elementId == null ) {
+            jobId = req.getServiceMatch().getTemplateVars().get("jobId");
+        }
         List<String> ids = new ArrayList<String>();
         if (null != elementId) {
             ids.add( elementId );
-        } else {
+        } else if( null != jobId) {
+            ids.add( jobId );
+        }  else {
             JSONObject requestJson = (JSONObject) req.parseContent();
             if (requestJson != null) {
                 populateSourceFromJson( requestJson );
@@ -171,7 +179,7 @@ public class MmsModelDelete extends AbstractJavaWebScript {
                 Date end = new Date();
         
                 boolean showAll = false;
-
+                
                 result = wsDiff.toJSONObject( this, start, end, showAll, false );
 
         

@@ -1,0 +1,8 @@
+<webscript>
+    <shortname>convert SVG to PNG</shortname>
+    <description>convert SVG to PNG</description>
+    <url>/mms/svgtopng</url>
+    <format default="json">argument</format>
+    <authentication>user</authentication>
+    <transaction>required</transaction>
+ </webscript>

@@ -31,13 +31,16 @@ package gov.nasa.jpl.view_repo.webscripts;
 
 import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.pma.JenkinsEngine;
+import gov.nasa.jpl.view_repo.actions.ModelLoadActionExecuter;
+import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 import gov.nasa.jpl.view_repo.webscripts.ModelGet;
 
+
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Map;
+
 
 import org.apache.log4j.*;
 import org.alfresco.repo.model.Repository;
@@ -48,16 +51,18 @@ import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
 
-//import com.offbytwo.jenkins.JenkinsServer;
-
 public class JobGet extends ModelGet {
     static Logger logger = Logger.getLogger(JobGet.class);
+    
+    // It is required to perform a JobPost in order to make sure the status is 
+    // up to date with "jobs" and "elements" json
+    AbstractJavaWebScript job = new JobPost(repository, getServices());
     
     // These IDs are important to identifying jobs and job properties
     public static final String jobStereotypeId = "_18_0_5_407019f_1458258829038_313297_14086";
     public static final String slotId = "_9_0_62a020a_1105704885275_885607_7905";
     public static final String instanceSpecId = "_9_0_62a020a_1105704885251_933969_7897";
-
+    
     public JobGet() {
         super();
     }
@@ -66,11 +71,9 @@ public class JobGet extends ModelGet {
         super(repositoryHelper, registry);
     }
 
-    protected JSONArray jobs = new JSONArray();
-    protected Map<String, EmsScriptNode> jobsFound = new HashMap<String, EmsScriptNode>();
-
     @Override
     protected Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
+        
         AbstractJavaWebScript instance = new JobGet(repository, getServices());
         return instance.executeImplImpl(req, status, cache,
                 runWithoutTransactions);
@@ -97,12 +100,6 @@ public class JobGet extends ModelGet {
             jobsJsonArray = new JSONArray();
         }
     }
-
-    public static boolean isRunning( String status ) {
-        if ( status == null ) return false;
-        if ( status.equals( "running" ) ) return true;
-        return false;
-    }
     
     /**
      * If the status of a job in the MMS is running, then we need to
@@ -119,17 +116,63 @@ public class JobGet extends ModelGet {
                 // If the status of a job in the mms is running, then we need to
                 // get an update from Jenkins to see if the job died before
                 // reporting its status back to the mms.
-                JenkinsEngine eng = new JenkinsEngine();
                 String jobName = jobJson.optString( "sysmlid" );
                 if ( !Utils.isNullOrEmpty( jobName ) ) {
+                    JenkinsEngine eng = new JenkinsEngine();
+                    
                     JSONObject jenkinsJobJson = eng.getJob( jobName );
-                    String newStatus = getMmsStatus(jenkinsJobJson);
-                    // TODO -- The job json is corrected below, but the
-                    // status should also be changed in the model
-                    // repository.
-                    if ( !Utils.isNullOrEmpty( newStatus ) ) {
-                        jobJson.put( "status", newStatus );
+
+                    // TODO -- this will change and the logic will be moved to
+                    //         JobPost when queuePosition is an appliedMetatype 
+                    
+                    if( jenkinsJobJson != null) {
+                        JSONObject jobInQueue = eng.isJobInQueue( jenkinsJobJson );
+                        
+                        if (jobInQueue != null) {
+                            jenkinsJobJson.put( "color", "queue" );
+                            int pos = eng.numberInQueue( jobInQueue );
+                            jobJson.put( "queuePosition", pos + 1 );
+                        }
                     }
+                    
+                    String newStatus = getMmsStatus(jenkinsJobJson);
+
+                    if ( !Utils.isNullOrEmpty( newStatus ) ) {                                                          
+                        String jobId = jobJson.optString( "sysmlid" );
+                        
+                        if( jobId != null ) {
+                            EmsScriptNode j = findScriptNodeById( jobId, null, null, true );                                
+                            
+                            if( j != null ) {
+                                EmsScriptNode p = job.getJobPropertyNode( j, "status" );  
+                                
+                                if( p != null ) {
+                                    JSONObject prop = p.toJSONObject( null, null );
+                                    
+                                    if( prop != null ) {
+                                        JSONObject specJson = prop.optJSONObject( Acm.JSON_SPECIALIZATION );
+                                        if ( specJson != null && specJson.has( "value"  ) ) {
+                                            JSONArray valueArr = specJson.getJSONArray( "value" );
+            
+                                            if( valueArr != null ) {
+                                                // clear the current values and create the new value 
+                                                // with the current status
+                                                valueArr.remove( 0 );
+                                                JSONObject valueSpec = new JSONObject();
+                                                
+                                                valueSpec.put( "string", newStatus);
+                                                valueSpec.put( "type", "LiteralString");                                        
+                                                valueArr.put(valueSpec);         
+                                            }
+                                        }                                                            
+            
+                                        jobJson.put( "status", newStatus );
+                                    }
+                                }
+                            }
+                        }                                                                   
+                    }
+                    
                 }
             }
         }
@@ -175,7 +218,9 @@ public class JobGet extends ModelGet {
      * @return
      */
     protected String getMmsStatus( JSONObject jenkinsJobJson ) {
+        
         if ( jenkinsJobJson == null ) return "job not found";
+        
         String color = jenkinsJobJson.optString( "color" );
         if ( Utils.isNullOrEmpty( color ) ) return null;
         String status = jenkinsColorToMmsStatus( color ); 
@@ -184,14 +229,17 @@ public class JobGet extends ModelGet {
 
     protected String jenkinsColorToMmsStatus( String color ) {
         if ( Utils.isNullOrEmpty( color ) ) return null;
+        if (color.contains( "queue" ) ) return "in queue";
         if ( color.contains( "anime" ) ) return "running";
         if ( color.equals( "red" ) ) return "failed";
         if ( color.equals( "blue" ) ) return "completed";
-        if ( color.equals( "grey" ) ) return "aborted";
-        if ( color.equals( "gray" ) ) return "aborted";
-        if ( color.equals( "yellow" ) ) return "unstable";
-        if ( color.equals( "disabled" ) ) return "disabled";
-        if ( color.equalsIgnoreCase( "notbuilt" ) ) return "waiting";
+        //if ( color.equals( "grey" ) ) return "aborted";
+        //if ( color.equals( "gray" ) ) return "aborted";
+        //if ( color.equals( "yellow" ) ) return "unstable";
+        //if ( color.equals( "disabled" ) ) return "disabled";
+        if ( color.equalsIgnoreCase( "notbuilt" ) ) return "in queue";
+
         return color;
     }
+    
 }

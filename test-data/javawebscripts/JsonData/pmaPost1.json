@@ -1,6 +1,6 @@
 {
 "jobs": [{
-    "status": "waiting",
+    "status": "job not found",
     "sysmlid": "jobB",
     "isMetatype": false,
     "editable": true,
@@ -12,7 +12,7 @@
     "specialization": {"type": "Element"}
 },
 {
-    "status": "waiting",
+    "status": "job not found",
     "sysmlid": "jobC",
     "isMetatype": false,
     "editable": true,
@@ -24,7 +24,7 @@
     "specialization": {"type": "Element"}
 },
 {
-    "status": "waiting",
+    "status": "job not found",
     "sysmlid": "jobD",
     "isMetatype": false,
     "editable": true,
@@ -36,7 +36,7 @@
     "specialization": {"type": "Element"}
 },
 {
-    "status": "waiting",
+    "status": "job not found",
     "sysmlid": "jobF",
     "isMetatype": false,
     "editable": true,

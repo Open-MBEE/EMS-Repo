@@ -99,6 +99,11 @@
         <property name="repository" ref="repositoryHelper"/>
     </bean>
     
+    <bean id="svgToPng" class="gov.nasa.jpl.view_repo.actions.SvgToPngActionExecuter" parent="action-executer">
+        <property name="services" ref="ServiceRegistry"/>
+        <property name="repository" ref="repositoryHelper"/>
+    </bean>
+    
     <bean id="discussionsEmailNotification" class="gov.nasa.jpl.view_repo.actions.DiscussionsEmailNotificationActionExecutor" parent="action-executer">
         <property name="publicAction"><value>true</value></property>
         <property name="nodeService" ref="NodeService" />
@@ -153,6 +158,18 @@
     <bean class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
         <property name="staticMethod" value="gov.nasa.jpl.view_repo.util.CommitUtil.setRestConnection" />
         <property name="arguments" ref="restConnection"/>
+    </bean>
+    
+    <bean class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+        <property name="staticMethod" value="gov.nasa.jpl.view_repo.webscripts.DoorsArtifactMappingPost.bootstrapArtifactMappings" />
+    </bean>
+    
+    <bean class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+        <property name="staticMethod" value="gov.nasa.jpl.view_repo.webscripts.DoorsArtifactLinkMappingPost.bootstrapArtifactLinkMappings" />
+    </bean>
+    
+    <bean class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+        <property name="staticMethod" value="gov.nasa.jpl.view_repo.webscripts.DoorsProjectMappingPost.bootstrapProjectMappings" />
     </bean>
 
 </beans>

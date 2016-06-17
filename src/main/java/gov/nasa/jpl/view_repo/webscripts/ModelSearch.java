@@ -290,6 +290,10 @@ public class ModelSearch extends ModelGet {
             
             for (int ii = 0; ii < elements.length(); ii++) {
                 JSONObject elementJson = elements.getJSONObject( ii );
+                if (!elementJson.has( "sysmlid" )) {
+                    logger.warn( "sysmlid not found for elements search " + req.getQueryString() );
+                    continue;
+                }
                 String sysmlid = elementJson.getString( "sysmlid" );
                 if (!id2SearchTypes.containsKey( sysmlid )) {
                     logger.warn( "could not find " + sysmlid + " in id2SearchTypes map" );

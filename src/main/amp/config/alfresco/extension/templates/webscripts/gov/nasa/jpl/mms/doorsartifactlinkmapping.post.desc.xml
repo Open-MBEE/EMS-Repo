@@ -1,0 +1,11 @@
+<webscript>
+	<shortname>Configure Doors Artifact Link Types</shortname>
+	<description>
+		Configure Doors Artifact Link Types
+	</description>
+	<url>/doorsartifactlinkmappings</url>
+	<format default="json">argument</format>
+	<authentication>user</authentication>
+	<transaction>none</transaction>
+	<family>MMS REST API</family>
+</webscript>

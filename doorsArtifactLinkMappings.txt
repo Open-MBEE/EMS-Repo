@@ -1,0 +1,1 @@
+[  {  "project":"yourProject","artifactLinkMappings":[ { "sysmlappliedmetatypeid":"_11_5EAPbeta_be00301_1147872860786_209724_1848","source":"elaboratedBy","target":"elaborates" } ]  } ]
