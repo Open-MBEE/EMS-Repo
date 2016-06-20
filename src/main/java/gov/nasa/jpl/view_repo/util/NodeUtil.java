@@ -2688,10 +2688,11 @@ public class NodeUtil {
         ArrayList< NodeRef > resultSet = null;
         // try {
 
+        // don't search for deleted elements
         resultSet =
                 findNodeRefsByType( pattern, type, /* false, */
                                     ignoreWorkspace, workspace, dateTime,
-                                    false, false, getServices(), true,
+                                    false, false, getServices(), false,
                                     siteName );
         for ( NodeRef nodeRef : resultSet ) {
             EmsScriptNode node =
