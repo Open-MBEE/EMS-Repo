@@ -44,12 +44,15 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import gov.nasa.jpl.view_repo.db.DoorsPostgresHelper;
 
 import javax.servlet.http.HttpServletResponse;
 
 import org.alfresco.repo.model.Repository;
 import org.alfresco.service.ServiceRegistry;
 import org.apache.log4j.Logger;
+import org.alfresco.service.cmr.repository.NodeRef;
+import org.eclipse.lyo.oslc4j.core.model.Link;
 import org.eclipse.lyo.client.exception.ResourceNotFoundException;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -85,11 +88,14 @@ public class DoorsSync extends AbstractJavaWebScript {
 
     List< String > processedRequirements = new ArrayList< String >();
     List< String > processedProjects = new ArrayList< String >();
-    List< Map< String, String >> customFields =
-            new ArrayList< Map< String, String >>();
+    List< Map< String, String > > customFields =
+            new ArrayList< Map< String, String > >();
     String currentProject;
 
     static Logger logger = Logger.getLogger( DoorsSync.class );
+
+    HashMap< String, HashMap< String, ArrayList< String > > > artifactMappings =
+            new HashMap< String, HashMap< String, ArrayList< String > > >();
 
     public DoorsSync() {
         super();
@@ -112,8 +118,9 @@ public class DoorsSync extends AbstractJavaWebScript {
     }
 
     @Override
-    protected Map< String, Object >
-            executeImplImpl( WebScriptRequest req, Status status, Cache cache ) {
+    protected Map< String, Object > executeImplImpl( WebScriptRequest req,
+                                                     Status status,
+                                                     Cache cache ) {
 
         Map< String, Object > model = new HashMap< String, Object >();
         JSONObject json = null;
@@ -159,9 +166,8 @@ public class DoorsSync extends AbstractJavaWebScript {
                     }
 
                     if ( modelRootNode == null ) {
-                        modelRootNode =
-                                findScriptNodeById( modelId, workspace,
-                                                    dateTime, false );
+                        modelRootNode = findScriptNodeById( modelId, workspace,
+                                                            dateTime, false );
                     }
 
                     if ( logger.isDebugEnabled() ) {
@@ -172,11 +178,9 @@ public class DoorsSync extends AbstractJavaWebScript {
                         if ( logger.isDebugEnabled() ) {
                             logger.error( HttpServletResponse.SC_NOT_FOUND
                                           + String.format( " Element %s not found",
-                                                           modelId
-                                                                   + ( dateTime == null
-                                                                                       ? ""
-                                                                                       : " at "
-                                                                                         + dateTime ) ) );
+                                                           modelId + ( dateTime == null ? ""
+                                                                                        : " at "
+                                                                                          + dateTime ) ) );
                         }
                         return model;
                     } else if ( modelRootNode.isDeleted() ) {
@@ -186,8 +190,12 @@ public class DoorsSync extends AbstractJavaWebScript {
                         }
                         return model;
                     }
-                    String project = modelRootNode.getSiteName(dateTime, workspace);
-                    doors = new DoorsClient(getConfig("doors.user"), getConfig("doors.pass"), getConfig("doors.url"), project);
+                    String project =
+                            modelRootNode.getSiteName( dateTime, workspace );
+                    doors = new DoorsClient( getConfig( "doors.user" ),
+                                             getConfig( "doors.pass" ),
+                                             getConfig( "doors.url" ),
+                                             project );
 
                     customFields = mapFields( project );
                     compRequirement( modelRootNode, null );
@@ -198,18 +206,14 @@ public class DoorsSync extends AbstractJavaWebScript {
                     json.put( "element", jsonArray );
                 }
             } catch ( JSONException e ) {
-                if ( logger.isDebugEnabled() ) {
-                    logger.error( HttpServletResponse.SC_INTERNAL_SERVER_ERROR
-                                  + " JSON could not be created\n" );
-                    e.printStackTrace();
-                }
+                logger.error( HttpServletResponse.SC_INTERNAL_SERVER_ERROR
+                              + " JSON could not be created\n" );
+                e.printStackTrace();
             } catch ( Exception e ) {
-                if ( logger.isDebugEnabled() ) {
-                    logger.error( HttpServletResponse.SC_INTERNAL_SERVER_ERROR
-                                  + String.format( " Internal error stack trace:\n %s \n",
-                                                   e.getLocalizedMessage() ) );
-                    e.printStackTrace();
-                }
+                logger.error( HttpServletResponse.SC_INTERNAL_SERVER_ERROR
+                              + String.format( " Internal error stack trace:\n %s \n",
+                                               e.getLocalizedMessage() ) );
+                e.printStackTrace();
             } finally {
                 pgh.close();
             }
@@ -225,18 +229,105 @@ public class DoorsSync extends AbstractJavaWebScript {
         return model;
     }
 
-    private JSONArray
-            handleRequirements( WorkspaceNode workspace, Date dateTime ) {
+    private JSONArray handleRequirements( WorkspaceNode workspace,
+                                          Date dateTime ) {
+
         JSONArray json = new JSONArray();
+
         ArrayList< String > types = new ArrayList< String >();
+
         types.add( "@sysml\\:appliedMetatypes:\"" );
-        String appliedMetatype =
-                "_11_5EAPbeta_be00301_1147873190330_159934_2220";
+
+        Map< String, EmsScriptNode > foundMMSRequirements =
+                new HashMap< String, EmsScriptNode >();
 
         Map< String, EmsScriptNode > requirements =
-                searchForElementsPostgres( types, appliedMetatype, false,
-                                           workspace, dateTime, null, null );
+                new HashMap< String, EmsScriptNode >();
+
+        HashMap< String, ArrayList< String > > curArtifactMappings =
+                new HashMap< String, ArrayList< String > >();
+
+        String curArtifactType = "";
+
+        ArrayList< String > curAppliedMetatypeIDs = new ArrayList< String >();
+
+        String curAppliedMetatypeID = "";
+
+        DoorsPostgresHelper dpgh = new DoorsPostgresHelper();
+        artifactMappings = dpgh.getArtifactMappings();
+
+        if ( artifactMappings.size() > 0 ) {
+
+            String curProj = "";
+
+            Set< Map.Entry< String, HashMap< String, ArrayList< String > > > > setOfProjArtifactMappings =
+                    artifactMappings.entrySet();
+
+            // Traverse all project, artifact type, and appliedmetatype id
+            // mappings and search MMS for each appliedmetatype id
+            // Also filter on project
+            for ( Map.Entry< String, HashMap< String, ArrayList< String > > > curProjArtifactMapping : setOfProjArtifactMappings ) {
+
+                curArtifactMappings = curProjArtifactMapping.getValue();
+
+                curProj = curProjArtifactMapping.getKey();
+
+                Set< Map.Entry< String, ArrayList< String > > > setOfArtifactMappings =
+                        curArtifactMappings.entrySet();
+
+                for ( Map.Entry< String, ArrayList< String > > curArtifactMapping : setOfArtifactMappings ) {
+
+                    curArtifactType = curArtifactMapping.getKey();
+
+                    curAppliedMetatypeIDs = curArtifactMapping.getValue();
+
+                    for ( int i = 0; i < curAppliedMetatypeIDs.size(); i++ ) {
+
+                        curAppliedMetatypeID = curAppliedMetatypeIDs.get( i );
+
+                        foundMMSRequirements =
+                                searchForElementsPostgres( types,
+                                                           curAppliedMetatypeID,
+                                                           false, workspace,
+                                                           dateTime, null,
+                                                           null );
+
+                        for ( Map.Entry< String, EmsScriptNode > curMMSRequirement : foundMMSRequirements.entrySet() ) {
+
+                            // Filter on project name
+                            if ( curMMSRequirement.getValue()
+                                                  .getProjectNode( workspace )
+                                                  .getSysmlName()
+                                                  .equals( curProj ) ) {
+
+                                // match found
+                                requirements.put( curMMSRequirement.getKey(),
+                                                  curMMSRequirement.getValue() );
+
+                            }
+
+                        }
+
+                    }
+
+                }
+
+            }
+
+        }
+
+        // use ...2220 if no project/appliedmetatype mappings were found in
+        // database
+        else {
+
+            requirements = searchForElementsPostgres( types,
+                                                      "_11_5EAPbeta_be00301_1147873190330_159934_2220",
+                                                      false, workspace,
+                                                      dateTime, null, null );
+        }
+
         for ( String key : requirements.keySet() ) {
+
             JSONObject projectJson = null;
             projectJson = new JSONObject();
 
@@ -247,9 +338,13 @@ public class DoorsSync extends AbstractJavaWebScript {
             customFields = mapFields( projectNode.getSysmlName() );
 
             try {
-                if (doors == null || currentProject != projectNode.getSysmlName()) {
-                    System.out.println("Logging in Doors");
-                    doors = new DoorsClient(getConfig("doors.user"), getConfig("doors.pass"), getConfig("doors.url"), projectNode.getSysmlName());
+                if ( doors == null
+                     || currentProject != projectNode.getSysmlName() ) {
+                    if (logger.isDebugEnabled()) logger.debug( "Logging in Doors" );
+                    doors = new DoorsClient( getConfig( "doors.user" ),
+                                             getConfig( "doors.pass" ),
+                                             getConfig( "doors.url" ),
+                                             projectNode.getSysmlName() );
                     currentProject = projectNode.getSysmlName();
                 }
                 if ( !processedProjects.contains( currentProject ) ) {
@@ -275,7 +370,349 @@ public class DoorsSync extends AbstractJavaWebScript {
             json.put( projectJson );
         }
 
+        // Ignore for now
+        if ( requirements.size() == 0 ) {
+
+            // json = checkDoorsWhenEmptyMMS();
+
+        }
+
+        syncLinksFromMMS( requirements );
+
         return json;
+    }
+
+    /***
+     * Author: Bruce Meek Jr Description: For each matching requirement element
+     * found in MMS from the handleRequirements method, find all source/target
+     * link associations If two MMS nodes share the same link element, create a
+     * link relationship between the two corresponding Doors artifacts based on
+     * database mappings
+     * 
+     * @param requirements
+     */
+    private void syncLinksFromMMS( Map< String, EmsScriptNode > requirements ) {
+
+        Map< String, String > artifactResourceMap =
+                new HashMap< String, String >();
+        ArrayList< NodeRef > curNodeSrcReferences = new ArrayList< NodeRef >();
+        ArrayList< NodeRef > curNodeTgtReferences = new ArrayList< NodeRef >();
+        HashMap< String, String > linkMetatypeIDMap =
+                new HashMap< String, String >(); // link sysml id to its applied
+                                                 // metatype id
+        ArrayList< String > curLinkMetatypeIDs = new ArrayList< String >();
+
+        EmsScriptNode newEmsScriptNode = null;
+        NodeRef newRefNode = null;
+        StringBuffer sb = null;
+
+        HashMap< String, String > sourceMap = new HashMap< String, String >(); // link
+                                                                               // sysmlid
+                                                                               // to
+                                                                               // src
+                                                                               // element
+                                                                               // sysmlid
+        HashMap< String, String > targetMap = new HashMap< String, String >(); // link
+                                                                               // sysmlid
+                                                                               // to
+                                                                               // tgt
+                                                                               // element
+                                                                               // sysmlid
+        Set< Map.Entry< String, EmsScriptNode > > matchingRequirements =
+                requirements.entrySet();
+
+        String project = "";
+
+        try {
+
+            ResultSet doorsArtifacts = pgh.execQuery( "SELECT * from doors" );
+
+            while ( doorsArtifacts.next() ) {
+
+                artifactResourceMap.put( doorsArtifacts.getString( 1 ),
+                                         doorsArtifacts.getString( 2 ) );
+
+            }
+
+        } catch ( SQLException e ) {
+            e.printStackTrace();
+        }
+
+        try {
+
+            for ( Map.Entry< String, EmsScriptNode > curElementNode : matchingRequirements ) {
+
+                curNodeSrcReferences =
+                        curElementNode.getValue()
+                                      .getPropertyNodeRefs( "sysml:relAsSource",
+                                                            true, null, null );
+
+                curNodeTgtReferences =
+                        curElementNode.getValue()
+                                      .getPropertyNodeRefs( "sysml:relAsTarget",
+                                                            true, null, null );
+
+                // link nodes found in which current element is a src
+                for ( int sr = 0; sr < curNodeSrcReferences.size(); sr++ ) {
+
+                    sb = new StringBuffer();
+
+                    newRefNode = curNodeSrcReferences.get( sr );
+
+                    newEmsScriptNode =
+                            new EmsScriptNode( newRefNode, services, sb );
+
+                    curLinkMetatypeIDs =
+                            (ArrayList< String >)newEmsScriptNode.getProperty( Acm.ACM_APPLIED_METATYPES );
+
+                    linkMetatypeIDMap.put( (String)newEmsScriptNode.getProperty( Acm.ACM_ID ),
+                                           curLinkMetatypeIDs.get( 0 ) );
+
+                    sourceMap.put( (String)newEmsScriptNode.getProperty( Acm.ACM_ID ),
+                                   (String)curElementNode.getValue()
+                                                         .getProperty( Acm.ACM_ID ) );
+
+                }
+
+                // link nodes found in which current element is a tgt
+                for ( int tr = 0; tr < curNodeTgtReferences.size(); tr++ ) {
+
+                    sb = new StringBuffer();
+
+                    newRefNode = curNodeTgtReferences.get( tr );
+
+                    newEmsScriptNode =
+                            new EmsScriptNode( newRefNode, services, sb );
+
+                    // only need once
+                    if ( tr == 0 ) {
+
+                        project = newEmsScriptNode.getProjectNode( null )
+                                                  .getSysmlName();
+
+                    }
+
+                    curLinkMetatypeIDs = new ArrayList< String >();
+
+                    curLinkMetatypeIDs =
+                            (ArrayList< String >)newEmsScriptNode.getProperty( Acm.ACM_APPLIED_METATYPES );
+
+                    linkMetatypeIDMap.put( (String)newEmsScriptNode.getProperty( Acm.ACM_ID ),
+                                           curLinkMetatypeIDs.get( 0 ) );
+
+                    targetMap.put( (String)newEmsScriptNode.getProperty( Acm.ACM_ID ),
+                                   (String)curElementNode.getValue()
+                                                         .getProperty( Acm.ACM_ID ) );
+
+                }
+
+            }
+
+            Set< Map.Entry< String, String > > sourceMapSet =
+                    sourceMap.entrySet();
+            Set< Map.Entry< String, String > > targetMapSet =
+                    targetMap.entrySet();
+            String curLink = "";
+
+            for ( Map.Entry< String, String > curSource : sourceMapSet ) {
+
+                curLink = curSource.getKey();
+
+                for ( Map.Entry< String, String > curTarget : targetMapSet ) {
+
+                    // Two elements share a link; link them based on database
+                    // mappings
+                    if ( curTarget.getKey().equals( curLink ) ) {
+
+                        Requirement source =
+                                doors.getRequirement( artifactResourceMap.get( curSource.getValue() ) );
+
+                        source.setResourceUrl( artifactResourceMap.get( curSource.getValue() ) );
+
+                        ResultSet linkMappings =
+                                pgh.execQuery( "select source , target from doorsartifactlinkmappings"
+                                               + " where project ='" + project
+                                               + "' and sysmlappliedmetatypeid ='"
+                                               + linkMetatypeIDMap.get( curLink )
+                                               + "'" );
+
+                        while ( linkMappings.next() ) {
+
+                            String sourceType = linkMappings.getString( 1 );
+
+                            if ( sourceType.equals( "elaboratedBy" ) ) {
+
+                                source.addElaboratedBy( new Link( new URI( artifactResourceMap.get( curTarget.getValue() ) ) ) );
+
+                            } else if ( sourceType.equals( "elaborates" ) ) {
+
+                                source.addElaborates( new Link( new URI( artifactResourceMap.get( curTarget.getValue() ) ) ) );
+
+                            } else if ( sourceType.equals( "specifiedBy" ) ) {
+
+                                source.addSpecifiedBy( new Link( new URI( artifactResourceMap.get( curTarget.getValue() ) ) ) );
+
+                            } else if ( sourceType.equals( "specifies" ) ) {
+
+                                source.addSpecifies( new Link( new URI( artifactResourceMap.get( curTarget.getValue() ) ) ) );
+
+                            } else if ( sourceType.equals( "validatedBy" ) ) {
+
+                                source.addValidatedBy( new Link( new URI( artifactResourceMap.get( curTarget.getValue() ) ) ) );
+
+                            } else if ( sourceType.equals( "constrainedBy" ) ) {
+
+                                source.addConstrainedBy( new Link( new URI( artifactResourceMap.get( curTarget.getValue() ) ) ) );
+
+                            } else if ( sourceType.equals( "constrains" ) ) {
+
+                                source.addConstrains( new Link( new URI( artifactResourceMap.get( curTarget.getValue() ) ) ) );
+
+                            } else if ( sourceType.equals( "affectedBy" ) ) {
+
+                                source.addAffectedBy( new Link( new URI( artifactResourceMap.get( curTarget.getValue() ) ) ) );
+
+                            } else if ( sourceType.equals( "decomposedBy" ) ) {
+
+                                source.addDecomposedBy( new Link( new URI( artifactResourceMap.get( curTarget.getValue() ) ) ) );
+
+                            } else if ( sourceType.equals( "decomposes" ) ) {
+
+                                source.addDecomposes( new Link( new URI( artifactResourceMap.get( curTarget.getValue() ) ) ) );
+
+                            }
+
+                            else if ( sourceType.equals( "implementedBy" ) ) {
+
+                                source.addImplementedBy( new Link( new URI( artifactResourceMap.get( curTarget.getValue() ) ) ) );
+
+                            } else if ( sourceType.equals( "satisfiedBy" ) ) {
+
+                                source.addSatisfiedBy( new Link( new URI( artifactResourceMap.get( curTarget.getValue() ) ) ) );
+
+                            } else if ( sourceType.equals( "satisfies" ) ) {
+
+                                source.addSatisfies( new Link( new URI( artifactResourceMap.get( curTarget.getValue() ) ) ) );
+
+                            } else if ( sourceType.equals( "trackedBy" ) ) {
+
+                                source.addTrackedBy( new Link( new URI( artifactResourceMap.get( curTarget.getValue() ) ) ) );
+
+                            }
+
+                            // creating link in Doors between two artifacts
+                            doors.update( source );
+
+                        }
+
+                    }
+
+                }
+
+            }
+
+        } catch ( Exception e ) {
+
+            e.printStackTrace();
+
+        }
+
+    }
+
+    /***
+     * Author: Bruce Meeks Jr Description: Handles case where there are
+     * requirements in DoorsNG but no requirement nodes in MMS repo (i.e. no
+     * Magic Draw requirements in project) Will synch DoorsNG requirements into
+     * MMS Previously, an empty JSONArray would be returned if MMS was empty
+     * while DoorsNG non-empty
+     */
+    protected JSONArray checkDoorsWhenEmptyMMS() {
+
+        JSONArray result = new JSONArray();
+
+        JSONObject projectJson = new JSONObject();
+
+        String doorsProjArea = "";
+
+        Node mdProjectPGNode = findMagicDrawProject();
+
+        if ( mdProjectPGNode != null ) {
+
+            try {
+
+                doorsProjArea =
+                        NodeUtil.getNodeFromPostgresNode( mdProjectPGNode )
+                                .getSysmlName();
+
+                if ( doors.getRequirements().length > 0 ) {
+
+                    syncFromDoors();
+
+                    projectJson = new JSONObject();
+
+                    projectJson.put( "project", doorsProjArea );
+
+                    projectJson.put( "status", "Sync Complete" );
+
+                    result.put( projectJson );
+
+                    return result;
+
+                }
+
+            } catch ( Exception e ) {
+
+                projectJson.put( "status", "Issue syncing from Doors" );
+
+                result.put( projectJson );
+
+                return result;
+
+            }
+
+        }
+
+        else {
+
+            projectJson.put( "status",
+                             "Magic Draw project hasn't been created and/or initialized" );
+
+            result.put( projectJson );
+
+            return result;
+
+        }
+
+        // No requirements in Doors or MMS
+        return result;
+
+    }
+
+    /***
+     * Author Bruce Meeks Jr TODO: Rework to account for multiple MMS projects
+     */
+    public Node findMagicDrawProject() {
+
+        try {
+
+            PostgresHelper pgh = new PostgresHelper( "master" );
+            pgh.connect();
+            ResultSet rs =
+                    pgh.execQuery( "select sysmlid from nodes where sysmlid LIKE '%PROJECT%'" );
+
+            while ( rs.next() ) {
+                return ( pgh.getNodeFromSysmlId( rs.getString( 1 ) ) );
+            }
+
+        } catch ( SQLException e ) {
+            e.printStackTrace();
+        } catch ( ClassNotFoundException e ) {
+            e.printStackTrace();
+        }
+
+        return null; // magic draw project has not been created, initialized,
+                     // and/or sent to MMS
+
     }
 
     protected void syncFromDoors() {
@@ -470,7 +907,8 @@ public class DoorsSync extends AbstractJavaWebScript {
         if ( reqParent == null ) {
             reqParent = rootProjectId;
 
-            Set< Folder > folders = getFolderHierarchyFromDoors( r.getParent() );
+            Set< Folder > folders =
+                    getFolderHierarchyFromDoors( r.getParent() );
             Folder[] folderArray =
                     folders.toArray( new Folder[ folders.size() ] );
             for ( Integer i = folderArray.length - 1; i >= 0; i-- ) {
@@ -509,8 +947,7 @@ public class DoorsSync extends AbstractJavaWebScript {
             if ( fieldDef.get( "doorsAttr" ).contains( "primaryText" ) ) {
                 value = r.getPrimaryText();
             } else {
-                value =
-                        r.getCustomField( doors.getField( fieldDef.get( "doorsAttr" ) ) );
+                value = r.getCustomField( doors.getField( fieldDef.get( "doorsAttr" ) ) );
             }
 
             if ( value != null ) {
@@ -562,15 +999,16 @@ public class DoorsSync extends AbstractJavaWebScript {
             return null;
         }
 
-        System.out.println( "Folder Sysmlid: " + n.getSysmlId() );
+        if (logger.isDebugEnabled()) logger.debug( "Folder Sysmlid: " + n.getSysmlId() );
 
         String resourceUrl = mapResourceUrl( n.getSysmlId() );
-        System.out.println( "Folder Resource: " + resourceUrl );
+        if (logger.isDebugEnabled()) logger.debug( "Folder Resource: " + resourceUrl );
 
         if ( resourceUrl == null ) {
 
             String parentResourceUrl =
-                    mapResourceUrl( n.getParent().getSysmlId().replace( "_pkg", "" ) );
+                    mapResourceUrl( n.getParent().getSysmlId().replace( "_pkg",
+                                                                        "" ) );
 
             Folder folder = new Folder();
             folder.setTitle( n.getSysmlName() );
@@ -632,7 +1070,8 @@ public class DoorsSync extends AbstractJavaWebScript {
         return sysmlId;
     }
 
-    protected Set< EmsScriptNode > getFolderHierarchyFromMMS( EmsScriptNode n ) {
+    protected Set< EmsScriptNode >
+              getFolderHierarchyFromMMS( EmsScriptNode n ) {
 
         Set< EmsScriptNode > result = new LinkedHashSet< EmsScriptNode >();
 
@@ -695,18 +1134,16 @@ public class DoorsSync extends AbstractJavaWebScript {
 
         if ( instanceSpec != null ) {
             for ( Map< String, String > fieldDef : customFields ) {
-                String propertySysmlId =
-                        instanceSpec.getSysmlId() + "-slot-"
-                                + fieldDef.get( "propertyId" );
+                String propertySysmlId = instanceSpec.getSysmlId() + "-slot-"
+                                         + fieldDef.get( "propertyId" );
                 Node nodeFromPostgres =
                         pgh.getNodeFromSysmlId( propertySysmlId );
                 EmsScriptNode in = null;
                 if ( nodeFromPostgres != null ) {
                     in = NodeUtil.getNodeFromPostgresNode( nodeFromPostgres );
                     if ( in == null ) {
-                        in =
-                                findScriptNodeById( propertySysmlId, null,
-                                                    null, false );
+                        in = findScriptNodeById( propertySysmlId, null, null,
+                                                 false );
                     }
                 }
 
@@ -716,9 +1153,8 @@ public class DoorsSync extends AbstractJavaWebScript {
             }
         }
 
-        return ( slots.isEmpty() )
-                                  ? null
-                                  : slots.toArray( new EmsScriptNode[ slots.size() ] );
+        return ( slots.isEmpty() ) ? null
+                                   : slots.toArray( new EmsScriptNode[ slots.size() ] );
     }
 
     protected Requirement addSlotsFromMMS( EmsScriptNode n, Requirement r ) {
@@ -727,15 +1163,21 @@ public class DoorsSync extends AbstractJavaWebScript {
         EmsScriptNode[] childProps = getAllSlots( n );
 
         if ( childProps != null ) {
-            for ( Map<String, String> fieldDef : customFields ) {
+            for ( Map< String, String > fieldDef : customFields ) {
                 for ( EmsScriptNode cn : childProps ) {
-                    if ( cn.getSysmlId().contains(fieldDef.get("propertyId")) ) {
-                        Collection<Object> value = esm.getValue(esm.getProperty(cn, "value"), fieldDef.get("propertyType"));
+                    if ( cn.getSysmlId()
+                           .contains( fieldDef.get( "propertyId" ) ) ) {
+                        Collection< Object > value =
+                                esm.getValue( esm.getProperty( cn, "value" ),
+                                              fieldDef.get( "propertyType" ) );
                         if ( value.iterator().hasNext() ) {
-                            if ( fieldDef.get("doorsAttr").contains("primaryText") ) {
-                                r.setPrimaryText(value.iterator().next().toString());
+                            if ( fieldDef.get( "doorsAttr" )
+                                         .contains( "primaryText" ) ) {
+                                r.setPrimaryText( value.iterator().next()
+                                                       .toString() );
                             } else {
-                                r.setCustomField(doors.getField(fieldDef.get("doorsAttr")), value.iterator().next());
+                                r.setCustomField( doors.getField( fieldDef.get( "doorsAttr" ) ),
+                                                  value.iterator().next() );
                             }
                         }
                     }
@@ -876,17 +1318,17 @@ public class DoorsSync extends AbstractJavaWebScript {
         return false;
     }
 
-    protected List< Map< String, String >> mapFields( String project ) {
+    protected List< Map< String, String > > mapFields( String project ) {
 
         try {
-            List< Map< String, String >> results =
-                    new ArrayList< Map< String, String >>();
+            List< Map< String, String > > results =
+                    new ArrayList< Map< String, String > >();
             String query =
                     String.format( "SELECT propertyId, propertyType, doorsAttr FROM doorsFields WHERE project = '%s'",
                                    project );
             ResultSet rs = pgh.execQuery( query );
             while ( rs.next() ) {
-                Map<String, String> values = new HashMap<String, String>();
+                Map< String, String > values = new HashMap< String, String >();
                 values.put( "propertyId", rs.getString( 1 ) );
                 values.put( "propertyType", rs.getString( 2 ) );
                 values.put( "doorsAttr", rs.getString( 3 ) );
@@ -922,6 +1364,39 @@ public class DoorsSync extends AbstractJavaWebScript {
         }
 
         return true;
+    }
+
+    private String getArtifactType( String project,
+                                    String sysmlappliedmetatype ) {
+
+        String artifactType = "defaultResourceURL";
+
+        Set< Map.Entry< String, ArrayList< String > > > treeOfArtifactType =
+                artifactMappings.get( project ).entrySet();
+
+        ArrayList< String > curAppliedMetatypeIDs = new ArrayList< String >();
+
+        for ( Map.Entry< String, ArrayList< String > > curArtifactMapping : treeOfArtifactType ) {
+
+            artifactType = curArtifactMapping.getKey();
+
+            curAppliedMetatypeIDs = curArtifactMapping.getValue();
+
+            for ( int i = 0; i < curAppliedMetatypeIDs.size(); i++ ) {
+
+                if ( curAppliedMetatypeIDs.get( i )
+                                          .equals( sysmlappliedmetatype ) ) {
+
+                    return artifactType;
+
+                }
+
+            }
+
+        }
+
+        return artifactType;
+
     }
 
 }

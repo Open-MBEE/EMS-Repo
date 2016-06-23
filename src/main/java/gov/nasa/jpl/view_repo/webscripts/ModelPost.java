@@ -211,6 +211,7 @@ public class ModelPost extends AbstractJavaWebScript {
 
         if (!(elementsArray == null))
             collections.add(elementsArray);
+        
         TreeSet<EmsScriptNode> elements = new TreeSet<EmsScriptNode>();
 
         // Note: Cannot have any sendProgress methods before setting
@@ -465,7 +466,7 @@ public class ModelPost extends AbstractJavaWebScript {
             timerUpdateModel = Timer.startTimer(timerUpdateModel, timeEvents);
 
             // Send deltas to all listeners
-            if (createCommit && wsDiff.isDiffPrecalculated()) {
+            if (createCommit && wsDiff.isDiffPrecalculated()) { 
                 sendProgress("Sending deltas and creating commit node",
                         projectId, false);
                 if (runWithoutTransactions) {
@@ -991,6 +992,7 @@ public class ModelPost extends AbstractJavaWebScript {
                 if (holdingBinFolderId == null) {
                     holdingBinFolderId = injectHoldingBinFolders( jsonArray, workspace, child2OwnerMap, ownerId );
                 }
+                // injecting holding bin folder already creates
                 insertElementInHoldingBin( sysmlId, null, holdingBinFolderId, jsonArray, child2OwnerMap );
             }
         }
@@ -1072,21 +1074,30 @@ public class ModelPost extends AbstractJavaWebScript {
         preprocessJson( holdingBinId, "holding_bin", projectNodeId, jsonArray, workspace, child2OwnerMap, false, true );
 
         Calendar cal = Calendar.getInstance();
-        int folders[] = {Calendar.YEAR, Calendar.MONTH, Calendar.DAY_OF_MONTH, Calendar.HOUR_OF_DAY};
-        String prefix[] = { "YY", "MM", "DD", "HH" }; 
         
         // add year folder to holding bin
-        String folderName = String.format("%s_%d", prefix[0], cal.get(folders[0]));
+        String ownerFolderId = holdingBinId;
+        String folderName = String.format("YY_%d", cal.get(Calendar.YEAR));
         String folderId = String.format("%s_%s", folderName, projectNodeId);
         preprocessJson( folderId, folderName, holdingBinId, jsonArray, workspace, child2OwnerMap, false, true );
         
-        // add remaining generated folders to previous time marking
-        for (int ii = 1; ii < folders.length; ii++) {
-            String name = String.format( "%s_%d", prefix[ii], cal.get(folders[ii]) );
-            folderId = String.format("%s_%s", name, projectNodeId);
-            String ownerFolderId = String.format( "%s_%d_%s", prefix[ii-1], cal.get(folders[ii-1]), projectNodeId);
-            preprocessJson( folderId, name, ownerFolderId, jsonArray, workspace, child2OwnerMap, false, true );
-        }
+        // add month folder to holding bin
+        ownerFolderId = folderId;
+        folderName = String.format( "MM_%d", cal.get(Calendar.MONTH) );
+        folderId = String.format( "%s_%s", folderName, folderId );
+        preprocessJson(folderId, folderName, ownerFolderId, jsonArray, workspace, child2OwnerMap, false, true);
+        
+        // add day folder
+        ownerFolderId = folderId;
+        folderName = String.format( "DD_%d", cal.get(Calendar.DAY_OF_MONTH) );
+        folderId = String.format( "%s_%s", folderName, folderId );
+        preprocessJson(folderId, folderName, ownerFolderId, jsonArray, workspace, child2OwnerMap, false, true);
+
+        // add hour folder
+        ownerFolderId = folderId;
+        folderName = String.format( "HH_%d", cal.get(Calendar.HOUR_OF_DAY) );
+        folderId = String.format( "%s_%s", folderName, folderId );
+        preprocessJson(folderId, folderName, ownerFolderId, jsonArray, workspace, child2OwnerMap, false, true);
 
         return folderId;
     }
@@ -2337,7 +2348,7 @@ public class ModelPost extends AbstractJavaWebScript {
             String siteTitle = pkgSiteNode.getSysmlName();
             String siteDescription = (String) pkgSiteNode
                     .getProperty(Acm.ACM_DOCUMENTATION);
-            boolean isPublic = true;
+            boolean isPublic = false; // MMS-292: changed to private
             if (false == ShareUtils.constructSiteDashboard(sitePreset,
                     siteName, siteTitle, siteDescription, isPublic)) {
                 // FIXME: add some logging and response here that there were
@@ -2800,7 +2811,7 @@ public class ModelPost extends AbstractJavaWebScript {
 		}
 
         status.setCode(responseStatus.getCode());
-
+        
         sendProgress("Load/sync/update request is finished processing.",
                 projectId, true);
 

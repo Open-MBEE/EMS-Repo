@@ -15,7 +15,7 @@
   ]]>
   </description>
   <url>/mms/login/ticket/{ticket}</url>
-  <format default="xml"/>
+  <format default="json"/>
   <authentication>none</authentication>
   <transaction>required</transaction>
   <lifecycle>public_api</lifecycle>

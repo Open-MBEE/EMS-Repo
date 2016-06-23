@@ -1,0 +1,11 @@
+<webscript>
+	<shortname>Configure Applied Metatype IDs</shortname>
+	<description>
+		Post/Configure Applied Metatype IDs dynamically
+	</description>
+	<url>/doorsartifactmappings</url>
+	<format default="json">argument</format>
+	<authentication>user</authentication>
+	<transaction>none</transaction>
+	<family>MMS REST API</family>
+</webscript>

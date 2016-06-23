@@ -1,0 +1,27 @@
+[
+  {
+    "artifactLinkMappings": [
+      {
+        "sysmlappliedmetatypeid": "_11_5EAPbeta_be00301_1147872860786_209724_1848",
+        "source": "elaboratedBy",
+        "target": "elaborates"
+      },
+      {
+        "sysmlappliedmetatypeid": "_11_5EAPbeta_be00301_1147872860786_209724_0000",
+        "source": "specifiedBy",
+        "target": "specifies"
+      }
+    ],
+    "project": "mars2020Test"
+  },
+  {
+    "artifactLinkMappings": [
+      {
+        "sysmlappliedmetatypeid": "_11_5EAPbeta_be00301_1147872860786_209724_7000",
+        "source": "derivedBy",
+        "target": "derives"
+      }
+    ],
+    "project": "europaTest"
+  }
+]

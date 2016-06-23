@@ -31,20 +31,39 @@ package gov.nasa.jpl.view_repo.webscripts;
 
 import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
+import gov.nasa.jpl.view_repo.util.EmsTransaction;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 
+import java.io.BufferedWriter;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.HashMap;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
+import javax.xml.bind.DatatypeConverter;
 
 import org.alfresco.repo.model.Repository;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
+import org.alfresco.service.cmr.version.Version;
+import org.alfresco.util.TempFileProvider;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.apache.batik.transcoder.TranscoderInput;
+import org.apache.batik.transcoder.TranscoderOutput;
+import org.apache.batik.transcoder.image.PNGTranscoder;
 import org.apache.log4j.*;
 import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
@@ -59,6 +78,16 @@ import org.springframework.extensions.webscripts.servlet.FormData.FormField;
  *
  */
 public class ArtifactPost extends AbstractJavaWebScript {
+	protected EmsScriptNode svgArtifact = null;
+	protected EmsScriptNode pngArtifact = null;
+	protected String artifactId = null;
+	protected String extension = null;
+	protected String content = null;
+	protected String siteName = null;
+	protected String path = null;
+	protected WorkspaceNode workspace  = null;
+	protected Path pngPath = null;
+	
 	public ArtifactPost() {
 	    super();
 	}
@@ -87,9 +116,6 @@ public class ArtifactPost extends AbstractJavaWebScript {
 
 	@Override
     protected Map<String, Object> executeImplImpl(WebScriptRequest req, Status status, Cache cache) {
-
-		String path = null;
-		String content = null;
 		JSONObject resultJson = null;
 		String filename = null;
 		Map<String, Object> model = new HashMap<String, Object>();
@@ -98,13 +124,13 @@ public class ArtifactPost extends AbstractJavaWebScript {
 		//clearCaches();
 
 //        String cs = req.getParameter("cs"); // Ignoring this b/c we calculate it from the data
-        String extension = req.getParameter("extension") != null ? req.getParameter("extension") : ".svg";
+        extension = req.getParameter("extension") != null ? req.getParameter("extension") : ".svg";
 
         if (!extension.startsWith(".")) {
         	extension = "." + extension;
         }
 
-        WorkspaceNode workspace = getWorkspace( req, AuthenticationUtil.getRunAsUser());
+        workspace = getWorkspace( req, AuthenticationUtil.getRunAsUser());
 
         // Get the content from the form data:
         FormData formData = (FormData) req.parseContent();
@@ -119,7 +145,7 @@ public class ArtifactPost extends AbstractJavaWebScript {
         }
 
         // Get the site name from the request:
-        String siteName = getSiteName(req);
+        siteName = getSiteName(req);
 
         if (siteName != null && validateRequest(req,status) ) {
 
@@ -133,7 +159,7 @@ public class ArtifactPost extends AbstractJavaWebScript {
 	        		if (artifactIdPath.length() > (lastIndex+1)) {
 
 	        			path = lastIndex != -1 ? artifactIdPath.substring(0, lastIndex) : "";
-	        			String artifactId = lastIndex != -1 ? artifactIdPath.substring(lastIndex+1) : artifactIdPath;
+	        			artifactId = lastIndex != -1 ? artifactIdPath.substring(lastIndex+1) : artifactIdPath;
 	        			filename = extension != null ? artifactId + extension : artifactId;
 
 	    	        	// Create return json:
@@ -147,19 +173,56 @@ public class ArtifactPost extends AbstractJavaWebScript {
 	    	        	// Update or create the artifact if possible:
 	    	        	if (!Utils.isNullOrEmpty(artifactId) && !Utils.isNullOrEmpty(content)) {
 
-		    	        	EmsScriptNode artifact = NodeUtil.updateOrCreateArtifact(artifactId, extension,
-		    	        															 null, content,
-		    	        															 siteName,
-		    																		 path, workspace, null,
-		    																		 response, null, false);
-
-		    	        	if (artifact == null) {
+	    	        		new EmsTransaction(this.services, this.response, this.responseStatus) {
+								@Override
+								public void run() throws Exception {
+									svgArtifact = NodeUtil.updateOrCreateArtifact(artifactId, extension,
+											 null, content,
+											 siteName,
+											 path, workspace, null,
+											 response, null, false);
+								}
+							};
+							
+		    	        	if (svgArtifact == null) {
 		    	        		 log(Level.ERROR, HttpServletResponse.SC_BAD_REQUEST, "Was not able to create the artifact!\n");
 								 model.put("res", createResponseJson());
 		    	        	}
 		    	        	else {
-		    	        		resultJson.put("upload", artifact);
-		    	        		artifact.getOrSetCachedVersion();
+		    	        		resultJson.put("upload", svgArtifact);
+		    	        		svgArtifact.getOrSetCachedVersion();
+		    	        		if( !NodeUtil.skipSvgToPng){
+				    	        	try{
+				    	        		Path svgPath = saveSvgToFilesystem(artifactId, extension, content);
+					    	        	pngPath = svgToPng(svgPath);
+					    	        	
+					    	        	new EmsTransaction(this.services, this.response, this.responseStatus) {
+											
+											@Override
+											public void run() throws Exception {
+												try{
+													pngArtifact = NodeUtil.updateOrCreateArtifactPng(svgArtifact, pngPath, siteName, path, workspace, null, response, null, false);
+												}
+												catch(Throwable ex){
+													throw new Exception("Failed to convert SVG to PNG!\n");
+												}
+											}
+										};
+				    	        		
+				    	        		if(pngArtifact == null){
+				    	        			log(Level.ERROR, HttpServletResponse.SC_BAD_REQUEST, "Failed to convert SVG to PNG!\n");
+				    	        		}
+				    	        		else{
+				    	        			synchSvgAndPngVersions(svgArtifact, pngArtifact);
+				    	        			pngArtifact.getOrSetCachedVersion();
+				    	        		}
+				    	        		Files.deleteIfExists(svgPath);
+				    	        		Files.deleteIfExists(pngPath);
+				    	        	}
+				    	        	catch(Throwable ex){
+				    	        		log(Level.ERROR, HttpServletResponse.SC_BAD_REQUEST, "Failed to convert SVG to PNG!\n");
+				    	        	}
+			    	        	}
 		    	        	}
 	    	        	}
 	    	        	else {
@@ -200,4 +263,57 @@ public class ArtifactPost extends AbstractJavaWebScript {
 		return model;
 	}
 
+	protected Path saveSvgToFilesystem(String artifactId, String extension, String content) throws Throwable{
+		byte[] svgContent = content.getBytes( Charset.forName( "UTF-8" ) );
+		File tempDir = TempFileProvider.getTempDir();
+		Path svgPath = Paths.get(tempDir.getAbsolutePath(), String.format("%s%s", artifactId, extension));
+		File file = new File(svgPath.toString());
+
+		try(final InputStream in = new ByteArrayInputStream( svgContent );){
+			file.mkdirs();
+			Files.copy(in, svgPath, StandardCopyOption.REPLACE_EXISTING);
+			return svgPath;
+		}
+		
+		catch(Throwable ex){
+			throw new Throwable("Failed to save SVG to filesystem. " + ex.getMessage());
+		}
+	}
+	
+	protected Path svgToPng(Path svgPath) throws Throwable{
+		Path pngPath = Paths.get(svgPath.toString().replace(".svg", ".png"));
+		try(OutputStream png_ostream = new FileOutputStream(pngPath.toString()); ){
+			String svg_URI_input = svgPath.toUri().toURL().toString();
+			TranscoderInput input_svg_image = new TranscoderInput(svg_URI_input);
+	        TranscoderOutput output_png_image = new TranscoderOutput(png_ostream);
+	        PNGTranscoder my_converter = new PNGTranscoder();
+	        my_converter.transcode(input_svg_image, output_png_image);
+		}
+		catch(Throwable ex){
+			throw new Throwable("Failed to convert SVG to PNG! " + ex.getMessage());
+		}
+		return pngPath;
+	}
+	
+	protected void synchSvgAndPngVersions(EmsScriptNode svgNode, EmsScriptNode pngNode){
+		Version svgVer = svgNode.getCurrentVersion();
+		String svgVerLabel = svgVer.getVersionLabel();
+		Double svgVersion = Double.parseDouble(svgVerLabel);
+		
+		Version pngVer = pngNode.getCurrentVersion();
+		String pngVerLabel = pngVer.getVersionLabel();
+		Double pngVersion = Double.parseDouble(pngVerLabel);
+		
+		int svgVerLen = svgNode.getEmsVersionHistory().length;
+		int pngVerLen = pngNode.getEmsVersionHistory().length;
+		
+		while(pngVersion < svgVersion || pngVerLen < svgVerLen){
+			pngNode.makeSureNodeRefIsNotFrozen();
+			pngNode.createVersion("creating the version history", false);
+			pngVer = pngNode.getCurrentVersion();
+			pngVerLabel = pngVer.getVersionLabel();
+			pngVersion = Double.parseDouble(pngVerLabel);
+			pngVerLen = pngNode.getEmsVersionHistory().length;
+		}
+	}
 }

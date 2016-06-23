@@ -1,0 +1,11 @@
+<webscript>
+	<shortname>delete jobs</shortname>
+    <description>
+    	delete jobs
+	</description>
+  	<url>/workspaces/{workspaceId}/jobs/{jobId}</url>
+  	<format default="json">argument</format>
+  	<authentication>user</authentication>
+  	<transaction>none</transaction>
+  	<family>MMS REST API</family>
+ </webscript>

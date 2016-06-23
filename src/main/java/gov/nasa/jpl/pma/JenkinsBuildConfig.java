@@ -50,12 +50,20 @@ public class JenkinsBuildConfig {
     private              String  teamworkPort       = EmsConfig.get( "tw.port" );
     private              String  gitURL             = EmsConfig.get( "git.url" );
     private              String  gitCredentials     = EmsConfig.get( "git.credentials" );
+    private              String  buildAgent         = EmsConfig.get( "analysis.agent" );
     private              String     timeOutForJob      = "60";
     
     public JenkinsBuildConfig() {
         // TODO Auto-generated constructor stub
     }
 
+    // You can reference the Jenkins XML Schema if you have questions
+    // about any of the elements in this file at the following link:
+    // http://javadoc.jenkins-ci.org/
+    
+    // It isn't exact because of the flexibility Jenkins allows but if
+    // you want to change the configuration, that will be a good resource to use for 
+    // reference and also looking to add additional elements
     public String generateBaseConfigXML() {
 
         DocumentBuilderFactory docBuilderFactory = DocumentBuilderFactory.newInstance();
@@ -83,19 +91,40 @@ public class JenkinsBuildConfig {
 
             tempElement = doc.createElement("properties");
             
+            Element discardOldBuilds = doc.createElement("jenkins.model.BuildDiscarderProperty");
+            
+            Element logRotator = doc.createElement("strategy");
+            logRotator.setAttribute("class", "hudson.tasks.LogRotator");
+            
+            Element daysToKeep = doc.createElement("daysToKeep");
+            daysToKeep.appendChild( doc.createTextNode( "-1" ) );
+            Element numToKeep = doc.createElement("numToKeep");
+            numToKeep.appendChild( doc.createTextNode( "-1" ) );
+            Element artifactDaysToKeep = doc.createElement("artifactDaysToKeep");
+            artifactDaysToKeep.appendChild( doc.createTextNode( "28" ) );
+            Element artifactNumToKeep = doc.createElement("artifactNumToKeep");
+            artifactNumToKeep.appendChild( doc.createTextNode( "-1" ) );
+
+            logRotator.appendChild( daysToKeep );
+            logRotator.appendChild( numToKeep );
+            logRotator.appendChild( artifactDaysToKeep );
+            logRotator.appendChild( artifactNumToKeep );
+            
+            discardOldBuilds.appendChild( logRotator );
+            
+            tempElement.appendChild( discardOldBuilds );
+            rootElement.appendChild(tempElement);
+            
             Element throttlePlugin = doc.createElement( "hudson.plugins.throttleconcurrents.ThrottleJobProperty" );
             throttlePlugin.setAttribute("plugin", "throttle-concurrents@1.8.5");
             Element maxPerNode = doc.createElement( "maxConcurrentPerNode" );
-            maxPerNode.appendChild( doc.createTextNode( "1" ) );
+            maxPerNode.appendChild( doc.createTextNode( "0" ) );
             Element maxTotal = doc.createElement( "maxConcurrentTotal" );
-            maxTotal.appendChild( doc.createTextNode( "1" ) );
+            maxTotal.appendChild( doc.createTextNode( "0" ) );
             Element categories = doc.createElement( "categories" );
             categories.setAttribute("class", "java.util.concurrent.CopyOnWriteArrayList");
-            Element docgen = doc.createElement( "string" );
-            docgen.appendChild( doc.createTextNode( "DocGen" ) );
-            categories.appendChild( docgen );
             Element throttleEnabled = doc.createElement( "throttleEnabled" );
-            throttleEnabled.appendChild( doc.createTextNode( "true") );
+            throttleEnabled.appendChild( doc.createTextNode( "false") );
             Element throttleOption = doc.createElement( "throttleOption" );
             throttleOption.appendChild( doc.createTextNode( "category" ) );
             Element limit = doc.createElement( "limitOneJobWithMatchingParams" );
@@ -115,9 +144,14 @@ public class JenkinsBuildConfig {
 
             tempElement = doc.createElement("scm");
             tempElement.setAttribute("class", "hudson.scm.NullSCM");
+            rootElement.appendChild(tempElement);
 
+            tempElement = doc.createElement("assignedNode");
+            tempElement.appendChild(doc.createTextNode(this.buildAgent));
+            rootElement.appendChild(tempElement);
+            
             tempElement = doc.createElement("canRoam");
-            tempElement.appendChild(doc.createTextNode("true"));
+            tempElement.appendChild(doc.createTextNode("false"));
             rootElement.appendChild(tempElement);
 
             tempElement = doc.createElement("disabled");
@@ -331,43 +365,12 @@ public class JenkinsBuildConfig {
             artifactArchiver.appendChild( secondTempElem );
 
             tempElement.appendChild( artifactArchiver );
-            
-            Element wsCleanup = doc.createElement( "hudson.plugins.ws__cleanup.WsCleanup" );
-            Element delDirs = doc.createElement( "delDirs" );
-            delDirs.appendChild( doc.createTextNode( "false" ));
-            Element skipWhenFailed = doc.createElement( "skipWhenFailed" );
-            skipWhenFailed.appendChild( doc.createTextNode( "false" ));
-            Element cleanWhenSuccess = doc.createElement( "cleanWhenSuccess" );
-            cleanWhenSuccess.appendChild( doc.createTextNode( "true" ));
-            Element cleanWhenUnstable = doc.createElement( "cleanWhenUnstable" );
-            cleanWhenUnstable.appendChild( doc.createTextNode( "true" ));
-            Element cleanWhenFailure = doc.createElement( "cleanWhenFailure" );
-            cleanWhenFailure.appendChild( doc.createTextNode( "true" ));
-            Element cleanWhenNotBuilt = doc.createElement( "cleanWhenNotBuilt" );
-            cleanWhenNotBuilt.appendChild( doc.createTextNode( "true" ));
-            Element cleanWhenAborted = doc.createElement( "cleanWhenAborted" );
-            cleanWhenAborted.appendChild( doc.createTextNode( "true" ));
-            Element notFailBuild = doc.createElement( "notFailBuild" );
-            notFailBuild.appendChild( doc.createTextNode( "false" ));
-            Element cleanupMatrixParent = doc.createElement( "cleanupMatrixParent" );
-            cleanupMatrixParent.appendChild( doc.createTextNode( "false" ));
-            Element externalDelete = doc.createElement( "externalDelete" );
-            
-            wsCleanup.appendChild( externalDelete );
-            wsCleanup.appendChild( cleanupMatrixParent );
-            wsCleanup.appendChild( notFailBuild );
-            wsCleanup.appendChild( cleanWhenAborted );
-            wsCleanup.appendChild( cleanWhenNotBuilt );
-            wsCleanup.appendChild( cleanWhenFailure );
-            wsCleanup.appendChild( cleanWhenUnstable );
-            wsCleanup.appendChild( cleanWhenSuccess );
-            wsCleanup.appendChild( skipWhenFailed );
-            wsCleanup.appendChild( delDirs );
-
-            rootElement.appendChild(tempElement);
-            tempElement.appendChild(wsCleanup);
             rootElement.appendChild(tempElement);
 
+            /*
+             * Comment this out and fill in appropriate values if you would like to add 
+             * pre or post build steps to the job configuration. Currently have no use for these
+             * 
             rootElement.appendChild(doc.createElement("prebuilders"));
             rootElement.appendChild(doc.createElement("postbuilders"));
 
@@ -385,6 +388,8 @@ public class JenkinsBuildConfig {
             runPostStepsIfResultsElement.appendChild(doc.createElement("completeBuild").appendChild(doc.createTextNode("true")));
 
             rootElement.appendChild(runPostStepsIfResultsElement);
+            */
+            
             //  Save this in case the above code does not work and an element needs to be made for each individual build tag
             //            Element Element                     = doc.createElement("");
 
@@ -392,11 +397,8 @@ public class JenkinsBuildConfig {
             Transformer        transformer        = transformerFactory.newTransformer();
             DOMSource          source             = new DOMSource(doc);
             StringWriter       stringWriter       = new StringWriter();
-            //StreamResult       result             = new StreamResult(new File("./test-output.xml"));
-            StreamResult       result             = new StreamResult(stringWriter);//new File("./test-output.xml"));
+            StreamResult       result             = new StreamResult(stringWriter);
             transformer.transform(source, result);
-            //StreamResult consoleResult = new StreamResult(System.out);
-            //transformer.transform(source, consoleResult);
             
             return stringWriter.toString();
         } catch (ParserConfigurationException e) {
