@@ -1,0 +1,26 @@
+{"views": [{
+    "modifier": "admin",
+    "name": "Components",
+    "sysmlid": "P_17_0_2_3_e610336_1394148311476_17302_29388",
+    "documentation": "",
+    "owner": "PROJECT-123456",
+    "specialization": {
+        "displayedElements": ["P_17_0_2_4_f3a0363_1394142290412_487571_28478"],
+        "childViews": [],
+        "allowedElements": ["P_17_0_2_4_f3a0363_1394142290412_487571_28478"],
+        "contains": [{
+            "ordered": false,
+            "list": [[{
+                "sourceType": "reference",
+                "source": "P_17_0_2_4_f3a0363_1394142290412_487571_28478",
+                "sourceProperty": "name",
+                "type": "Paragraph"
+            }]],
+            "type": "List"
+        }],
+        "type": "View"
+    },
+    "editable": true,
+    "creator": "admin",
+}]}
+200

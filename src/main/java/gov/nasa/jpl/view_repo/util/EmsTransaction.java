@@ -42,6 +42,14 @@ public abstract class EmsTransaction {
     protected StringBuffer response = new StringBuffer();
     protected Status responseStatus = new Status();
     //private UserTransaction trx;
+    /**
+     * Setting this field to a number n greater than one indicates that only
+     * every nth transaction will the transaction actually end and be committed.
+     * Care should be taken to commit on the last transaction of the thread.
+     * This is achieved by initializing this field to a number less than or
+     * equal to one.
+     */
+    protected int numTransactionsToGroup = 1;
 
     public EmsTransaction(//UserTransaction oldTrx, 
                           ServiceRegistry services,
@@ -54,16 +62,43 @@ public abstract class EmsTransaction {
                            ServiceRegistry services,
                            StringBuffer response, Status responseStatus,
                            boolean noTransaction ) {
+        this( //oldTrx,
+              services, response, responseStatus, false, 1 );
+    }
+    /**
+     * Create an EmsTransaction with options to not actually make a transaction (UserTransaction) or to only commit after every n transactions where n is {@link NodeUtil.transactionPeriod}.
+     * @param services
+     * @param response
+     * @param responseStatus
+     * @param noTransaction
+     * @param commitOnNthTransaction whether or not to group transactions together
+     */
+    public EmsTransaction( //UserTransaction oldTrx,
+                           ServiceRegistry services,
+                           StringBuffer response, Status responseStatus,
+                           boolean noTransaction, boolean commitOnNthTransaction ) {
+        this( //oldTrx,
+              services, response, responseStatus, false, commitOnNthTransaction ? NodeUtil.transactionPeriod : 1 );
+    }
+    public EmsTransaction( //UserTransaction oldTrx,
+                           ServiceRegistry services,
+                           StringBuffer response, Status responseStatus,
+                           boolean noTransaction,
+                           int numTransactionsToGroup ) {
         //this.trx = oldTrx;
         this.response = response;
         this.responseStatus = responseStatus;
         this.services = services;
+        this.numTransactionsToGroup = numTransactionsToGroup;
+        if ( numTransactionsToGroup > 1 ) {
+            NodeUtil.incrementTransactionCount();
+        }
         
         transactionedRun( noTransaction );
     }
     
     protected void transactionedRun( boolean noTransaction ) {
-        if ( noTransaction ) {
+        if ( noTransaction || (numTransactionsToGroup > 1 && NodeUtil.getTransactionCount() % numTransactionsToGroup  != 0 ) ) {
             // run without transactions
             // REVIEW -- Consider not catching exception or provide flag to
             // optionally throw it again.

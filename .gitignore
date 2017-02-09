@@ -78,5 +78,10 @@ activemq-data/
 .iml
 .DS_Store
 /target
+deleteme*
+temp/
+tmp/
+*~
+
 *.pyc
 .pydevproject

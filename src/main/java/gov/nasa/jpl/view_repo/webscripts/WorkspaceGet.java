@@ -1,5 +1,6 @@
 package gov.nasa.jpl.view_repo.webscripts;
 
+import gov.nasa.jpl.mbee.util.Timer;
 import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
@@ -22,7 +23,8 @@ import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
 
 public class WorkspaceGet extends AbstractJavaWebScript{
-
+    static Logger logger = Logger.getLogger( WorkspaceGet.class );
+    
 	public WorkspaceGet(){
 		super();
 	}
@@ -39,8 +41,10 @@ public class WorkspaceGet extends AbstractJavaWebScript{
 
     @Override
     protected Map<String, Object> executeImplImpl (WebScriptRequest req, Status status, Cache cache) {
-		printHeader(req);
-		//clearCaches();
+        Timer timer = new Timer();
+        String user = AuthenticationUtil.getFullyAuthenticatedUser();
+        printHeader(user, logger, req);
+
 		Map<String, Object> model = new HashMap<String, Object>();
 		JSONObject object = null;
 
@@ -77,7 +81,7 @@ public class WorkspaceGet extends AbstractJavaWebScript{
 			}
 		}
 		status.setCode(responseStatus.getCode());
-		printFooter();
+		printFooter(user, logger, timer);
 		return model;
 
 	}
@@ -100,7 +104,7 @@ public class WorkspaceGet extends AbstractJavaWebScript{
 		    }
 		} else {
 		    if(checkPermissions(ws, PermissionService.READ))  {
-		        jsonArray.put(ws.toJSONObject(ws, null));
+		        jsonArray.put(ws.toJSONObject(ws, null, false));
 		    } else {
                 log(Level.WARN, HttpServletResponse.SC_FORBIDDEN, "No read permissions for workspace: %s", (ws == null ? null : wsID));
 		    }

@@ -2,7 +2,7 @@
 
     {
         "sysmlid" : "testCmed416",
-        "owner" : "123456",
+        "owner" : "PROJECT-123456",
         "name"  : "testName",
         "specialization" : {
             "type" : "Property"

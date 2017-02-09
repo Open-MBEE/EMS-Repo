@@ -1,5 +1,6 @@
 package gov.nasa.jpl.view_repo.webscripts;
 
+import gov.nasa.jpl.mbee.util.Timer;
 import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
@@ -20,6 +21,8 @@ import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
 
 public class WorkspaceDelete extends AbstractJavaWebScript {
+    Logger logger = Logger.getLogger( WorkspaceDelete.class );
+    
     public WorkspaceDelete() {
         super();
     }
@@ -49,10 +52,11 @@ public class WorkspaceDelete extends AbstractJavaWebScript {
 
     @Override
     protected Map<String, Object> executeImplImpl(WebScriptRequest req, Status status, Cache cache) {
-       printHeader(req);
-       //clearCaches();
+        Timer timer = new Timer();
+        String user = AuthenticationUtil.getFullyAuthenticatedUser();
+        printHeader(user, logger, req);
+
        Map<String, Object> model = new HashMap<String, Object>();
-       String user = AuthenticationUtil.getRunAsUser();
        JSONObject result = null;
        try {
            if( validateRequest(req, status) ){
@@ -96,7 +100,7 @@ public class WorkspaceDelete extends AbstractJavaWebScript {
                e.printStackTrace();
            }
        }
-       printFooter();
+       printFooter(user, logger, timer);
        return model;
     }
 

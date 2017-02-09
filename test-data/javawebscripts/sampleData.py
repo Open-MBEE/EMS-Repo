@@ -6,7 +6,7 @@ import time
 
 # default parameters
 site = 'europa'
-project = '123456'
+project = 'PROJECT-123456'
 folder = 'generated'
 DELAY_TIME = 5
 
@@ -166,7 +166,7 @@ def writeJsonStr(branch, changesToElement, workspaceName, count, postNumber, lis
 
 def doIt():
     
-    curl_cmd = create_curl_cmd(type="POST",data='\'{"elements":[{"sysmlid":"123456","name":"JW_TEST","specialization":{"type":"Project"}}]}\'',
+    curl_cmd = create_curl_cmd(type="POST",data='\'{"elements":[{"sysmlid":"PROJECT-123456","name":"JW_TEST","specialization":{"type":"Project"}}]}\'',
                 base_url=BASE_URL_WS,
                 branch="master/sites/europa/projects?createSite=true",project_post=True)
     verboseExecuteOptions(curl_cmd, False)
@@ -177,7 +177,7 @@ def doIt():
         print "\n" + "CREATING OWNER IN EACH WORKSPACE\n"
         
     for workspace in workspaces:
-        jsonStr = '{"sysmlid":"' + options.owner + '","name":"' + options.owner + '","owner":"123456"}'
+        jsonStr = '{"sysmlid":"' + options.owner + '","name":"' + options.owner + '","owner":"PROJECT-123456"}'
         entireJsonData = elementsJsonStrTemplate%jsonStr
         curl_cmd = create_curl_cmd(type="POST", 
                                    data=entireJsonData,

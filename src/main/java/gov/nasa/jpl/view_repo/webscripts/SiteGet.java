@@ -30,6 +30,7 @@
 package gov.nasa.jpl.view_repo.webscripts;
 
 import gov.nasa.jpl.mbee.util.TimeUtils;
+import gov.nasa.jpl.mbee.util.Timer;
 import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
@@ -83,18 +84,12 @@ public class SiteGet extends AbstractJavaWebScript {
 
     @Override
     protected Map<String, Object> executeImplImpl(WebScriptRequest req, Status status, Cache cache) {
-        printHeader( req );
-
-        //clearCaches();
-
         Map<String, Object> model = new HashMap<String, Object>();
-//        TODO: REMOVE THIS CODE
-//        if (checkMmsVersions) {
-//            if(compareMmsVersions(req, getResponse(), getResponseStatus()));{
-//                model.put("res", createResponseJson());
-//                return model;
-//            }
-//        } 
+
+        Timer timer = new Timer();
+        String user = AuthenticationUtil.getFullyAuthenticatedUser();
+        printHeader(user, logger, req);
+
         JSONObject json = null;
 
         try {
@@ -122,7 +117,7 @@ public class SiteGet extends AbstractJavaWebScript {
 
         status.setCode(responseStatus.getCode());
 
-        printFooter();
+        printFooter(user, logger, timer);
 
         return model;
     }
@@ -146,10 +141,12 @@ public class SiteGet extends AbstractJavaWebScript {
 
         List<SiteInfo> sites = services.getSiteService().listSites(null);
 
+        // set realUser before looping of course
+        String realUser = AuthenticationUtil.getFullyAuthenticatedUser();
+
         // Create json array of info for each site in the workspace:
         //	Note: currently every workspace should contain every site created
         for (SiteInfo siteInfo : sites ) {
-            
             try {
                 siteRef = siteInfo.getNodeRef();
                 if ( dateTime != null ) {
@@ -165,8 +162,7 @@ public class SiteGet extends AbstractJavaWebScript {
     //                	        && !emsNode.hasAspect(Acm.ACM_SITE) ) continue;
                     name = emsNode.getName();
                     
-                    String realUser = AuthenticationUtil.getFullyAuthenticatedUser();
-                    AuthenticationUtil.setAdminUserAsFullyAuthenticatedUser();
+                    AuthenticationUtil.setRunAsUser(EmsScriptNode.ADMIN_USER_NAME);
                 	    parentRef = (NodeRef)emsNode.getPropertyAtTime(Acm.ACM_SITE_PARENT, dateTime);
                     AuthenticationUtil.setRunAsUser( realUser );
     
@@ -188,8 +184,9 @@ public class SiteGet extends AbstractJavaWebScript {
                     		siteJson.put("sysmlid", name);
                     		siteJson.put("name", siteInfo.getTitle());
                     		siteJson.put("parent", parentId );
+                    		siteJson.put( "editable", emsNode.hasPermission( PermissionService.WRITE ) );
                     		
-                    		AuthenticationUtil.setAdminUserAsFullyAuthenticatedUser();
+                    		AuthenticationUtil.setRunAsUser(EmsScriptNode.ADMIN_USER_NAME);
                     		siteJson.put("isCharacterization", 
                     		             emsNode.getNodeRefProperty(Acm.ACM_SITE_PACKAGE, dateTime, workspace) != null );
                     		AuthenticationUtil.setRunAsUser( realUser );

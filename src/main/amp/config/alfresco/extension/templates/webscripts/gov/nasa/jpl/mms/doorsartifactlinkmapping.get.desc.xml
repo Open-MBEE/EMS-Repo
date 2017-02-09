@@ -1,0 +1,11 @@
+<webscript>
+	<shortname>Retrieve artifact link type mappings</shortname>
+	<description>
+		Retrieve artifact link type mappings
+	</description>
+	<url>/doors/artifact/link/mappings</url>
+	<format default="json">argument</format>
+	<authentication>user</authentication>
+	<transaction>none</transaction>
+	<family>MMS REST API</family>
+</webscript>

@@ -5,7 +5,7 @@
         "documentation": "",
         "sysmlid": "jsonTest4",
         "name": "jsonTest4",
-        "owner": "123456",
+        "owner": "PROJECT-123456",
         "specialization": {"type": "Constraint",
                           "specification":
                             {"type": "OpaqueExpression",

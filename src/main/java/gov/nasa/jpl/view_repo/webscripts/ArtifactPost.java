@@ -29,6 +29,7 @@
 
 package gov.nasa.jpl.view_repo.webscripts;
 
+import gov.nasa.jpl.mbee.util.Timer;
 import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.EmsTransaction;
@@ -78,6 +79,8 @@ import org.springframework.extensions.webscripts.servlet.FormData.FormField;
  *
  */
 public class ArtifactPost extends AbstractJavaWebScript {
+    static Logger logger = Logger.getLogger( ArtifactPost.class );
+
 	protected EmsScriptNode svgArtifact = null;
 	protected EmsScriptNode pngArtifact = null;
 	protected String artifactId = null;
@@ -120,7 +123,9 @@ public class ArtifactPost extends AbstractJavaWebScript {
 		String filename = null;
 		Map<String, Object> model = new HashMap<String, Object>();
 
-        printHeader( req );
+        Timer timer = new Timer();
+        String user = AuthenticationUtil.getFullyAuthenticatedUser();
+        printHeader(user, logger, req);
 		//clearCaches();
 
 //        String cs = req.getParameter("cs"); // Ignoring this b/c we calculate it from the data
@@ -258,7 +263,7 @@ public class ArtifactPost extends AbstractJavaWebScript {
         	model.put("res", resultJson != null ? resultJson : createResponseJson());
         }
 
-		printFooter();
+		printFooter(user, logger, timer);
 
 		return model;
 	}

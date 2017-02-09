@@ -1,22 +1,46 @@
-{"elements": [{
-    "isMetatype": false,
-    "editable": true,
-    "creator": "admin",
-    "ownedAttribute": [
-    ],
-    "modifier": "admin",
-    "name": "VIEW V",
-    "specialization": {
-        "childViews": [
-            {
-                "aggregation": "COMPOSITE",
-            },
-            {
-                "aggregation": "COMPOSITE",
-            }
+{"elements": [
+    {
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "specialization": {
+            "aggregation": "COMPOSITE",
+            "isDerived": false,
+            "isSlot": false,
+            "type": "Property"
+        }
+    },
+    {
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "specialization": {
+            "aggregation": "COMPOSITE",
+            "isDerived": false,
+            "isSlot": false,
+            "type": "Property"
+        }
+    },
+    {
+        "isMetatype": false,
+        "editable": true,
+        "creator": "admin",
+        "ownedAttribute": [
         ],
-        "contents": {"type": "Expression"},
-        "type": "View"
+        "modifier": "admin",
+        "name": "VIEW V",
+        "specialization": {
+            "childViews": [
+                {
+                    "aggregation": "COMPOSITE"
+                },
+                {
+                    "aggregation": "COMPOSITE"
+                }
+            ],
+            "contents": {"type": "Expression"},
+            "type": "View"
+        }
     }
-}]}
+]}
 200

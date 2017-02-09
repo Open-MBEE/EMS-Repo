@@ -33,6 +33,7 @@ import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.EmsConfig;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
+import gov.nasa.jpl.view_repo.util.EmsTransaction;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 
@@ -41,6 +42,7 @@ import org.apache.log4j.*;
 import gov.nasa.jpl.view_repo.webscripts.HostnameGet;
 import gov.nasa.jpl.view_repo.webscripts.SnapshotPost;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -104,17 +106,15 @@ public class ConfigurationGenerationActionExecuter extends ActionExecuterAbstrac
         // Do not get an older version of the node based on the timestamp since
         // new snapshots should be associated with a new configuration. The
         // timestamp refers to the products, not the snapshots themselves.
-        EmsScriptNode jobNode = new EmsScriptNode(nodeRef, services, response);
+        final EmsScriptNode jobNode = new EmsScriptNode(nodeRef, services, response);
         // clear out any existing associated snapshots
         jobNode.removeAssociations("ems:configuredSnapshots");
 
         // Get timestamp if specified. This is for the products, not the
         // snapshots or configuration.
-        Date dateTime = null;
-        dateTime = (Date)action.getParameterValue(PARAM_TIME_STAMP);
+        final Date dateTime = (Date)action.getParameterValue(PARAM_TIME_STAMP);
         
-        WorkspaceNode workspace = null;
-        workspace = (WorkspaceNode)action.getParameterValue(PARAM_WORKSPACE);
+        final WorkspaceNode workspace = (WorkspaceNode)action.getParameterValue(PARAM_WORKSPACE);
 
         @SuppressWarnings("unchecked")
         HashSet<String> productList = (HashSet<String>) action.getParameterValue(PARAM_PRODUCT_LIST);
@@ -157,35 +157,55 @@ public class ConfigurationGenerationActionExecuter extends ActionExecuterAbstrac
         // create snapshots of all documents
         // TODO: perhaps roll these in their own transactions
         String jobStatus = "Succeeded";
-        Set<EmsScriptNode> snapshots = new HashSet<EmsScriptNode>();
-        for (EmsScriptNode product: productSet) {
-        		// only create the filtered list of documents
-        		if (productList.isEmpty() || productList.contains(product.getSysmlId())) {
-	            SnapshotPost snapshotService = new SnapshotPost(repository, services);
-	            snapshotService.setRepositoryHelper(repository);
-	            snapshotService.setServices(services);
-	            snapshotService.setLogLevel(Level.DEBUG);
-	            Status status = new Status();
-                EmsScriptNode snapshot =
-                        snapshotService.createSnapshot( product,
-                                                        product.getSysmlId(),
-                                                        workspace, dateTime );
-                response.append(snapshotService.getResponse().toString());
-                if (snapshot == null || status.getCode() != HttpServletResponse.SC_OK) {
-	                jobStatus = "Failed";
-	                response.append("[ERROR]: could not make snapshot for \t" + product.getProperty(Acm.ACM_NAME) + "\n");
-	            } 
-	            else {
-	                response.append("[INFO]: Successfully created snapshot: \t" + snapshot.getProperty(Acm.CM_NAME) + "\n");
-	            }
-	            if (snapshot != null) {
-	                snapshots.add(snapshot);
-	            }
-        		}
+        final ArrayList<String> jobStatusArr = new ArrayList< String >();
+        final Set<EmsScriptNode> snapshots = new HashSet<EmsScriptNode>();
+        for (final EmsScriptNode product: productSet) {
+    		// only create the filtered list of documents
+    		if (productList.isEmpty() || productList.contains(product.getSysmlId())) {
+    		    new EmsTransaction(services, response,
+                                   responseStatus, false, true) {
+                    
+                    @Override
+                    public void run() throws Exception {
+        	            SnapshotPost snapshotService = new SnapshotPost(repository, services);
+        	            snapshotService.setRepositoryHelper(repository);
+        	            snapshotService.setServices(services);
+        	            snapshotService.setLogLevel(Level.DEBUG);
+        	            Status status = new Status();
+                        EmsScriptNode snapshot =
+                                snapshotService.createSnapshot( product,
+                                                                product.getSysmlId(),
+                                                                workspace, dateTime );
+                        response.append(snapshotService.getResponse().toString());
+                        if (snapshot == null || status.getCode() != HttpServletResponse.SC_OK) {
+        	                //jobStatus = "Failed";
+        	                jobStatusArr.add("Failed");
+        	                response.append("[ERROR]: could not make snapshot for \t" + product.getProperty(Acm.ACM_NAME) + "\n");
+        	            } 
+        	            else {
+        	                response.append("[INFO]: Successfully created snapshot: \t" + snapshot.getProperty(Acm.CM_NAME) + "\n");
+        	            }
+        	            if (snapshot != null) {
+        	                snapshots.add(snapshot);
+        	            }
+            
+                    }
+    		    };
+    		    if ( !jobStatusArr.isEmpty() ) {
+    		        jobStatus = jobStatusArr.get( 0 );
+    		    }
+    		}
         }
         // make relationships between configuration node and all the snapshots
-        for (EmsScriptNode snapshot: snapshots) {
-            jobNode.createOrUpdateAssociation(snapshot, "ems:configuredSnapshots", true);
+        for (final EmsScriptNode snapshot: snapshots) {
+            new EmsTransaction(services, response,
+                               responseStatus, false, true) {
+                
+                @Override
+                public void run() throws Exception {
+                    jobNode.createOrUpdateAssociation(snapshot, "ems:configuredSnapshots", true);
+                }
+            };
         }
         
         // save off the status of the job

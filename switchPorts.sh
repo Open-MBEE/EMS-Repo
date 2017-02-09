@@ -19,7 +19,7 @@ else
 #oldPort=$ALFRESCO_PORT
 newPort=$1
 #echo "newPort = $newPort"
-scripts="configdelete configget configpost curl.tests2.sh curl.tests.sh diff2.sh diffWorkspaceDWdev.sh diffWorkspaceDW.sh diffWorkspaceLIMBOdev.sh diffWorkspaceLIMBO.sh diffWorkspace.sh diffWorkspaceWORKSdev.sh diffWorkspaceWORKS.sh expeval exppost fixconstraint localCurlParams mms.curl.tests.sh modeldelete modelget modelmerge modelpost productget productpost productpost.sh projectadd projectget projectpost projectpost.sh regression_lib.py secureCurlParams snapshotdelete snapshotget snapshotpost viewget viewpost viewpost.sh wsdelete wsdiff wsget wspost"
+scripts="configdelete configget configpost curl.tests2.sh curl.tests.sh diff2.sh diffWorkspaceDWdev.sh diffWorkspaceDW.sh diffWorkspaceLIMBOdev.sh diffWorkspaceLIMBO.sh diffWorkspace.sh diffWorkspaceWORKSdev.sh diffWorkspaceWORKS.sh expeval exppost fixconstraint localCurlParams mms.curl.tests.sh modeldelete modelget modelmerge modelpost productget productpost productpost.sh projectadd projectget projectpost projectpost.sh regression_lib.py secureCurlParams snapshotdelete snapshotget snapshotpost viewget viewpost viewpost.sh wsdelete wsdiff wsdiffull wsdiffmerge wsget wspost move generateView"
 
 #echo "scripts = ${scripts}"
 

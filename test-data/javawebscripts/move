@@ -1,0 +1,28 @@
+#!/bin/bash
+
+# Changes the parent of the first element to the second eleemnt
+#
+# usage> move [<workspace>] childId parentId
+# example> move master _18_0_5_e81034b_1467309986278_867729_14455 _17_5_1_12c903cb_1245415335546_8641_4088
+# example> move _18_0_5_e81034b_1467309986278_867729_14455 _17_5_1_12c903cb_1245415335546_8641_4088
+
+# Get the input json file and the workspace from the arguments passed in.
+workspace=master
+if [ "$#" -eq 1 ]; then
+    echo "Need two or three arguments: usage> move [<workspace>] childId parentId"
+fi
+if [ "$#" -eq 2 ]; then
+  childId=$1
+  parentId=$2
+fi
+if [ "$#" -eq 3 ]; then
+  workspace=$1
+  childId=$2
+  parentId=$3
+fi
+
+dataType=json
+
+# post the change to the owner
+echo  curl -w "\"\n%{http_code}\n\"" -u admin:admin -X POST -H "Content-Type:application/$dataType" --data "{\"elements\":[{\"sysmlid\":\"${childId}\", \"owner\": \"${parentId}\"}]}" "\"http://localhost:8080/alfresco/service/workspaces/${workspace}/elements\""
+curl -w "\n%{http_code}\n" -u admin:admin -X POST -H "Content-Type:application/$dataType" --data "{\"elements\":[{\"sysmlid\":\"${childId}\", \"owner\": \"${parentId}\"}]}" "http://localhost:8080/alfresco/service/workspaces/${workspace}/elements"

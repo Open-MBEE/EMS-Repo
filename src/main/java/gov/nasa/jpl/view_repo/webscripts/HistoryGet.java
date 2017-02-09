@@ -25,6 +25,7 @@ import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.version.Version;
 import org.alfresco.service.cmr.version.VersionHistory;
+import org.alfresco.service.cmr.version.VersionService;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.json.JSONArray;
@@ -71,7 +72,10 @@ public class HistoryGet extends ModelGet {
         // passed into the
         // getVersionHistory method.
         try {
-            history = getServices().getVersionService().getVersionHistory(ref);
+            VersionService versionService = getServices().getVersionService();
+            if (versionService.isVersioned( ref )) {
+                history = versionService.getVersionHistory(ref);
+            }
         } catch (Exception error) {
             logger.error(error.getMessage());
         }
@@ -96,15 +100,12 @@ public class HistoryGet extends ModelGet {
 
     
     protected Map<String, Object> executeImplImpl(WebScriptRequest req, Status status, Cache cache) {
-
         int index;
         Map<String, Object> model = new HashMap<String, Object>();
 
-        if (logger.isDebugEnabled()) {
-            String user = AuthenticationUtil.getFullyAuthenticatedUser();
-            logger.debug(user + " " + req.getURL());
-        }
         Timer timer = new Timer();
+        String user = AuthenticationUtil.getFullyAuthenticatedUser();
+        printHeader(user, logger, req);
 
         // make sure to pass down view request flag to instance
         setIsViewRequest(isViewRequest);
@@ -157,11 +158,7 @@ public class HistoryGet extends ModelGet {
         }
 
         status.setCode(responseStatus.getCode());
-        printFooter();
-
-        if (logger.isInfoEnabled()) {
-            log(Level.INFO, "ModelGet: %s", timer);
-        }
+        printFooter(user, logger, timer);
 
         return model;
     }

@@ -2,6 +2,7 @@ package gov.nasa.jpl.view_repo.webscripts;
 
 import gov.nasa.jpl.mbee.util.Pair;
 import gov.nasa.jpl.mbee.util.TimeUtils;
+import gov.nasa.jpl.mbee.util.Timer;
 import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.actions.ActionUtil;
 import gov.nasa.jpl.view_repo.actions.WorkspaceDiffActionExecuter;
@@ -45,7 +46,8 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
  *
  */
 public class MmsDiffGet extends AbstractJavaWebScript {
-
+    static Logger logger = Logger.getLogger( MmsDiffGet.class );
+    
     public static boolean glom = true;
     public static boolean diffDefaultIsMerge = true;
         
@@ -126,7 +128,9 @@ public class MmsDiffGet extends AbstractJavaWebScript {
     @Override
     protected Map< String, Object > executeImplImpl( WebScriptRequest req,
                                                    Status status, Cache cache ) {
-        printHeader( req );
+        Timer timer = new Timer();
+        String user = AuthenticationUtil.getFullyAuthenticatedUser();
+        printHeader(user, logger, req);
 
         Map<String, Object> results = new HashMap<String, Object>();
 
@@ -238,9 +242,9 @@ public class MmsDiffGet extends AbstractJavaWebScript {
                 String username = (String)NodeUtil.getNodeProperty( diffNode, "cm:modifier",
                                                                     getServices(), true,
                                                                     false );
-                EmsScriptNode user = new EmsScriptNode(services.getPersonService().getPerson(username), 
+                EmsScriptNode userNode = new EmsScriptNode(services.getPersonService().getPerson(username), 
                                                        services, new StringBuffer());
-                String email = (String) user.getProperty("cm:email");
+                String email = (String) userNode.getProperty("cm:email");
                 Date creationTime = diffNode.getCreationDate();
                 
                 if (username != null)
@@ -267,7 +271,7 @@ public class MmsDiffGet extends AbstractJavaWebScript {
             log(Level.ERROR, response.toString());
         }
         
-        printFooter();
+        printFooter(user, logger, timer);
 
         return results;
     }
@@ -491,7 +495,7 @@ public class MmsDiffGet extends AbstractJavaWebScript {
 		    String childId = elem.optString("sysmlId");
 		    String parentId = elem.optString("owner");
 		    JSONObject childJson = null;
-		    while ( parentId != null ) {
+		    while ( !Utils.isNullOrEmpty( parentId ) ) {
 		        JSONObject parentJson =
 		                getElementJson(parentId, diffDiffResult,
 		                               ws1, dateTime1, getServices() );
@@ -501,7 +505,7 @@ public class MmsDiffGet extends AbstractJavaWebScript {
 		        }
                 // Adding the child instead of the parent so that we do not add
                 // the project, which has no owner.
-		        if ( childJson != null && childId != null &&
+		        if ( childJson != null && !Utils.isNullOrEmpty( childId ) &&
 		             !sysmlIdMap.contains( childId ) ) {
 		            ws1Elems.put( childJson );
 		            sysmlIdMap.add( childId );

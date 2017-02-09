@@ -1,0 +1,11 @@
+<webscript>
+	<shortname>Doors Changes Flag</shortname>
+	<description>
+		Toggle on/off whether to sync any DNG changes to MMS
+	</description>
+	<url>/doors/allchanges/flag?on={on?}&amp;off={off?}</url>
+	<format default="json">argument</format>
+	<authentication>admin</authentication>
+	<transaction>required</transaction>
+	<family>MMS REST API</family>
+</webscript>

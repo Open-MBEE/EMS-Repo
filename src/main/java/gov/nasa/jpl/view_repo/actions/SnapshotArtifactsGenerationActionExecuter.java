@@ -238,7 +238,7 @@ public class SnapshotArtifactsGenerationActionExecuter  extends ActionExecuterAb
                             }
                         }
                         EmsScriptNode viewNode = new EmsScriptNode(viewRef, services, response);
-                        snapshotFolder = SnapshotPost.getSnapshotFolderNode(viewNode);
+                        snapshotFolder = SnapshotPost.getSnapshotFolderNode(viewNode, true);
                         
                         fullDoc = new FullDocPost(repository, services);
                         fullDoc.setFullDocId(snapshotId);
@@ -612,7 +612,7 @@ public class SnapshotArtifactsGenerationActionExecuter  extends ActionExecuterAb
     }
 
     private JSONObject populateSnapshotProperties( EmsScriptNode snapshotNode, Date dateTime, WorkspaceNode workspace, String status ) throws JSONException {
-        JSONObject snapshoturl = snapshotNode.toJSONObject( workspace, dateTime );
+        JSONObject snapshoturl = snapshotNode.toJSONObject( workspace, dateTime, false );
         if ( SnapshotPost.hasPdf( snapshotNode ) || SnapshotPost.hasHtmlZip( snapshotNode ) ) {
         	HostnameGet hostnameGet = new HostnameGet(this.repository, this.services);
         	String contextUrl = hostnameGet.getAlfrescoUrl() + "/alfresco";

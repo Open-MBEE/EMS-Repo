@@ -1,6 +1,6 @@
 {"elements": [
     {
-        "qualifiedId": "/europa/123456/parentToDelete1/parentToDelete2/childOfParentToDelete2",
+        "qualifiedId": "/europa/PROJECT-123456/parentToDelete1/parentToDelete2/childOfParentToDelete2",
         "qualifiedName": "/europa/JW_TEST2/parentToDelete1/parentToDelete2/childOfParentToDelete2",
         "sysmlid": "childOfParentToDelete2",
         "editable": true,
@@ -11,8 +11,8 @@
         "owner": "parentToDelete2",
         "specialization": {
             "propertyType": null,
-            "isSlot": false,
             "isDerived": false,
+            "isSlot": false,
             "value": [{
                 "string": "gg_string3",
                 "type": "LiteralString"
@@ -21,28 +21,7 @@
         }
     },
     {
-        "qualifiedId": "/europa/123456/parentToDelete1",
-        "qualifiedName": "/europa/JW_TEST2/parentToDelete1",
-        "sysmlid": "parentToDelete1",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "parentToDelete1",
-        "documentation": "Parent 1",
-        "owner": "123456",
-        "specialization": {
-            "propertyType": null,
-            "isSlot": false,
-            "isDerived": false,
-            "value": [{
-                "string": "gg_string",
-                "type": "LiteralString"
-            }],
-            "type": "Property"
-        }
-    },
-    {
-        "qualifiedId": "/europa/123456/parentToDelete1/parentToDelete2",
+        "qualifiedId": "/europa/PROJECT-123456/parentToDelete1/parentToDelete2",
         "qualifiedName": "/europa/JW_TEST2/parentToDelete1/parentToDelete2",
         "sysmlid": "parentToDelete2",
         "editable": true,
@@ -53,10 +32,31 @@
         "owner": "parentToDelete1",
         "specialization": {
             "propertyType": null,
-            "isSlot": false,
             "isDerived": false,
+            "isSlot": false,
             "value": [{
                 "string": "gg_string2",
+                "type": "LiteralString"
+            }],
+            "type": "Property"
+        }
+    },
+    {
+        "qualifiedId": "/europa/PROJECT-123456/parentToDelete1",
+        "qualifiedName": "/europa/JW_TEST2/parentToDelete1",
+        "sysmlid": "parentToDelete1",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "parentToDelete1",
+        "documentation": "Parent 1",
+        "owner": "PROJECT-123456",
+        "specialization": {
+            "propertyType": null,
+            "isDerived": false,
+            "isSlot": false,
+            "value": [{
+                "string": "gg_string",
                 "type": "LiteralString"
             }],
             "type": "Property"

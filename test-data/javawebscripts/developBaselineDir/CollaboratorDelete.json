@@ -6,7 +6,7 @@
     "name": "master",
     "elements": [
       {
-        "qualifiedId": "/europa/123456/300/301/302/y",
+        "qualifiedId": "/europa/PROJECT-123456/300/301/302/y",
         "qualifiedName": "/europa/JW_TEST2/300/301/302/null",
         "sysmlid": "y",
         "documentation": "y is modified by Collaborator",
@@ -27,7 +27,7 @@
         "version": "1.3"
       },
       {
-        "qualifiedId": "/europa/123456/300/301/302/y/ychild",
+        "qualifiedId": "/europa/PROJECT-123456/300/301/302/y/ychild",
         "qualifiedName": "/europa/JW_TEST2/300/301/302/null/null",
         "sysmlid": "ychild",
         "documentation": "y child",

@@ -4,7 +4,6 @@ import gov.nasa.jpl.mbee.util.ClassUtils;
 import gov.nasa.jpl.mbee.util.CompareUtils;
 import gov.nasa.jpl.mbee.util.CompareUtils.GenericComparator;
 import gov.nasa.jpl.mbee.util.Debug;
-import gov.nasa.jpl.mbee.util.FileUtils;
 import gov.nasa.jpl.mbee.util.MethodCall;
 import gov.nasa.jpl.mbee.util.Pair;
 import gov.nasa.jpl.mbee.util.TimeUtils;
@@ -17,14 +16,12 @@ import gov.nasa.jpl.view_repo.util.EmsScriptNode.EmsVersion;
 import gov.nasa.jpl.view_repo.webscripts.AbstractJavaWebScript;
 
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -157,6 +154,8 @@ public class NodeUtil {
             new LinkedHashMap< Long, Boolean >();
     protected static Map< Long, UserTransaction > transactionMap =
             Collections.synchronizedMap( new LinkedHashMap< Long, UserTransaction >() );
+    protected static Map< Long, Integer > transactionCountMap =
+            Collections.synchronizedMap( new LinkedHashMap< Long, Integer >() );
 
     public static synchronized boolean isInsideTransactionNow() {
         Boolean b =
@@ -181,6 +180,18 @@ public class NodeUtil {
         insideTransactionNow = b;
         insideTransactionNowMap.put( Thread.currentThread().getId(), b );
     }
+
+    public static int getTransactionCount() {
+        Integer i = transactionCountMap.get( Thread.currentThread().getId() );
+        if ( i == null ) return 0;
+        return i;
+    }
+    public static synchronized void incrementTransactionCount() {
+        int ct = getTransactionCount();
+        ++ct;
+        transactionCountMap.put( Thread.currentThread().getId(), ct );
+    }
+
 
     protected static Map< Long, StackTraceElement[] > insideTransactionStrackTrace =
             new LinkedHashMap< Long, StackTraceElement[] >();
@@ -210,12 +221,12 @@ public class NodeUtil {
 
     public static boolean doFullCaching = true;
     public static boolean doSimpleCaching = true;
-    public static boolean doNodeAtTimeCaching = true;
+    public static boolean doNodeAtTimeCaching = false;
     public static boolean doHeisenCheck = true;
     public static boolean doVersionCaching = false;
-    public static boolean activeVersionCaching = true;
-    public static boolean doVersionHistoryCaching = true;
-    public static boolean doJsonCaching = true;
+    public static boolean activeVersionCaching = false;
+    public static boolean doVersionHistoryCaching = false;
+    public static boolean doJsonCaching = false;
     public static boolean doJsonDeepCaching = false;
     public static boolean doJsonStringCaching = false;
     public static boolean doPropertyCaching = true;
@@ -290,10 +301,10 @@ public class NodeUtil {
 
     // Set< String > filter, boolean isExprOrProp,Date dateTime, boolean
     // isIncludeQualified
-    public static Map< String, Map< Long, Map< Boolean, Map< Set< String >, Map< String, JSONObject >>> >> jsonDeepCache =
-            Collections.synchronizedMap( new HashMap< String, Map< Long, Map< Boolean, Map< Set< String >, Map< String, JSONObject >>> >>() );
-    public static Map< String, Map< Long, JSONObject >> jsonCache =
-            Collections.synchronizedMap( new HashMap< String, Map< Long, JSONObject >>() );
+    public static Map< String, Map< String, Map< Long, Map< Boolean, Map< Boolean, Map< Set< String >, Map< String, JSONObject >>>>>>> jsonDeepCache =
+            Collections.synchronizedMap( new HashMap< String, Map< String, Map< Long, Map< Boolean, Map< Boolean, Map< Set< String >, Map< String, JSONObject >>>>>>>() );
+    public static Map< String, Map< String, Map<Long, JSONObject >>> jsonCache =
+            Collections.synchronizedMap( new HashMap< String, Map< String, Map< Long, JSONObject >>>() );
     public static long jsonCacheHits = 0;
     public static long jsonCacheMisses = 0;
 
@@ -507,11 +518,17 @@ public class NodeUtil {
         return null;
     }
 
-    public static JSONObject jsonCacheGet( String id, long millis,
+    public static JSONObject jsonCacheGet( String id, WorkspaceNode ws, Date dateTime,
                                            boolean noMetadata ) {
-        JSONObject json = Utils.get( jsonCache, id, millis );
+        String wsId = getWorkspaceId( ws );
+        long millis = dateTime == null ? 0 : dateTime.getTime();
+        return jsonCacheGet( id, wsId, millis, noMetadata );
+    }
+    public static JSONObject jsonCacheGet( String id, String wsId, long millis,
+                                           boolean noMetadata ) {
+        JSONObject json = Utils.get( jsonCache, wsId, id, millis );
         if ( logger.isDebugEnabled() ) {
-            logger.debug( "jsonCacheGet(" + id + ", " + millis + ", "
+            logger.debug( "jsonCacheGet(" + id + ", " + wsId + ", " + millis + ", "
                           + noMetadata + ") = " + json );
         }
         if ( doJsonStringCaching && noMetadata ) {
@@ -523,46 +540,80 @@ public class NodeUtil {
         return json;
     }
 
-    public static JSONObject jsonCachePut( JSONObject json, String id,
+    public static JSONObject jsonCachePut( JSONObject json, String id, WorkspaceNode ws,
+                                           Date dateTime ) {
+        long millis = dateTime == null ? 0 : dateTime.getTime();
+        String wsId = getWorkspaceId( ws );
+        return jsonCachePut( json, id, wsId, millis );
+    }
+    public static JSONObject jsonCachePut( JSONObject json, String id, String wsId,
                                            long millis ) {
         json = clone( json );
         if ( doJsonStringCaching ) {
             json = addJsonMetadata( json, id, millis, true, null );
         }
         if ( logger.isDebugEnabled() ) {
-            logger.debug( "jsonCachePut(" + id + ", " + millis + ", " + json
+            logger.debug( "jsonCachePut(" + id + ", " + wsId + ", " + millis + ", " + json
                           + ")" );
         }
-        Utils.put( jsonCache, id, millis, json );
+        Utils.put( jsonCache, id, wsId, millis, json );
         return json;
     }
 
-    public static JSONObject jsonDeepCacheGet( String id, long millis,
+    public static JSONObject jsonDeepCacheGet( String id, WorkspaceNode ws, Date dateTime,
                                                boolean isIncludeQualified,
+                                               boolean isIncludeDocument,
+                                               Set< String > jsonFilter,
+                                               String versionLabel,
+                                               boolean noMetadata ) {
+        long millis = dateTime == null ? 0 : dateTime.getTime();
+        String wsId = getWorkspaceId( ws );
+        return jsonDeepCacheGet( id, wsId, millis, isIncludeQualified,
+                                 isIncludeDocument, jsonFilter,
+                                 versionLabel, noMetadata );
+    }
+    public static JSONObject jsonDeepCacheGet( String id, String wsId, long millis,
+                                               boolean isIncludeQualified,
+                                               boolean isIncludeDocument,
                                                Set< String > jsonFilter,
                                                String versionLabel,
                                                boolean noMetadata ) {
         jsonFilter = jsonFilter == null ? new TreeSet< String >() : jsonFilter;
         if ( versionLabel == null ) versionLabel = "";
         JSONObject json =
-                Utils.get( jsonDeepCache, id, millis, isIncludeQualified,
-                           jsonFilter, versionLabel );
+                Utils.get( jsonDeepCache, id, wsId, millis, isIncludeQualified,
+                           isIncludeDocument, jsonFilter, versionLabel );
         if ( doJsonStringCaching && noMetadata ) {
             json = clone( json );
             stripJsonMetadata( json );
         } else if ( !doJsonStringCaching ) {
             stripJsonMetadata( json );
         }
-        if ( Debug.isOn() ) logger.debug( "jsonDeepCacheGet(" + id + ", "
-                                          + millis + ", " + isIncludeQualified
-                                          + ", " + jsonFilter + ", "
-                                          + noMetadata + ") = " + json );
+        if ( logger.isDebugEnabled() ) {
+            logger.debug( "jsonDeepCacheGet(" + id + ", " + millis
+                          + ", isIncludeQualified=" + isIncludeQualified
+                          + ", isIncludeDocument=" + isIncludeDocument + ", "
+                          + jsonFilter + ", versionLabel=" + versionLabel
+                          + ", " + noMetadata + ") = " + json );
+        }
         return json;
     }
 
-    public static JSONObject jsonDeepCachePut( JSONObject json, String id,
+    public static JSONObject jsonDeepCachePut( JSONObject json, String id, WorkspaceNode ws,
+                                               Date dateTime,
+                                               boolean isIncludeQualified,
+                                               boolean isIncludeDocument,
+                                               Set< String > jsonFilter,
+                                               String versionLabel ) {
+        String wsId = getWorkspaceId( ws );
+        long millis = dateTime == null ? 0 : dateTime.getTime();
+        return jsonDeepCachePut( json, id, wsId, millis, isIncludeQualified,
+                                 isIncludeDocument, jsonFilter, versionLabel );
+    }
+    public static JSONObject jsonDeepCachePut( JSONObject json, String id, String wsId,
                                                long millis,
                                                boolean isIncludeQualified,
+                                               boolean isIncludeDocument,
                                                Set< String > jsonFilter,
                                                String versionLabel ) {
         json = clone( json );
@@ -571,13 +622,15 @@ public class NodeUtil {
                 addJsonMetadata( json, id, millis, isIncludeQualified,
                                  jsonFilter );
         if ( versionLabel == null ) versionLabel = "";
-        if ( Debug.isOn() ) {
-            logger.debug( "jsonDeepCachePut(" + id + ", " + millis + ", "
-                          + isIncludeQualified + ", " + jsonFilter + ", "
-                          + versionLabel + ", " + json + ")" );
+        if ( logger.isDebugEnabled() ) {
+            logger.debug( "jsonDeepCachePut(" + id + ", " + millis
+                          + ", isIncludeQualified=" + isIncludeQualified
+                          + ", isIncludeDocument=" + isIncludeDocument + ", jsonFilter="
+                          + jsonFilter + ", versionLabel=" + versionLabel + ", "
+                          + json + ")" );
         }
-        Utils.put( jsonDeepCache, id, millis, isIncludeQualified, jsonFilter,
-                   versionLabel, json );
+        Utils.put( jsonDeepCache, id, wsId, millis, isIncludeQualified,
+                   isIncludeDocument, jsonFilter, versionLabel, json );
         return json;
     }
 
@@ -646,7 +699,7 @@ public class NodeUtil {
 
     protected static JSONObject
             filterJson( JSONObject json, Set< String > jsonFilter,
-                        boolean isIncludeQualified ) throws JSONException {
+                        boolean isIncludeQualified, boolean isIncludeDocument ) throws JSONException {
         JSONObject newJson = new JSONObject();
         Iterator keys = json.keys();
         while ( keys.hasNext() ) {
@@ -657,15 +710,21 @@ public class NodeUtil {
                      && value instanceof JSONObject ) {
                     JSONObject newSpec =
                             filterJson( (JSONObject)value, jsonFilter,
-                                        isIncludeQualified );
+                                        isIncludeQualified, isIncludeDocument );
                     if ( newSpec != null && newSpec.length() > 0 ) {
                         newJson.put( key, newSpec );
-                    }
-                } else if ( isIncludeQualified
-                            || ( !key.equals( "qualifiedId" ) && !key.equals( "qualifiedName" ) ) ) {
-                    if ( Debug.isOn() ) Debug.outln( "add to newJson = " + key
+                    }   
+                } else { 
+                    boolean excludingQualified = !isIncludeQualified && 
+                                                 ( key.equals( "qualifiedId" ) ||
+                                                   key.equals( "qualifiedName" ) );
+                    boolean excludingDocument = !isIncludeDocument && 
+                                                key.equals( "relatedDocuments" );
+                    if ( !excludingQualified && !excludingDocument ) {
+                        if ( Debug.isOn() ) Debug.outln( "add to newJson = " + key
                                                      + ":" + value );
-                    newJson.put( key, value );
+                        newJson.put( key, value );
+                    }
                 }
             }
         }
@@ -1154,7 +1213,7 @@ public class NodeUtil {
         params.setQuery( queryPattern );
         params.setLimitBy( LimitBy.UNLIMITED );
         params.setLimit( 0 );
-        params.setMaxPermissionChecks( 100000 );
+        params.setMaxPermissionChecks( 500000 );
         params.setMaxPermissionCheckTimeMillis( 100000 );
         if (maxItems == null || maxItems < 0) {
             params.setMaxItems( -1 );
@@ -1527,7 +1586,7 @@ public class NodeUtil {
                             EmsScriptNode.toEmsScriptNodeList( nodeRefs,
                                                                services, null,
                                                                null );
-                    Debug.outln( "findNodeRefsByType(" + specifier + ", "
+                    if ( logger.isDebugEnabled() ) logger.debug( "findNodeRefsByType(" + specifier + ", "
                                  + prefix + ", " + workspace + ", " + dateTime
                                  + ", justFirst=" + justFirst + ", exactMatch="
                                  + exactMatch + "): returning " + set );
@@ -3136,6 +3195,9 @@ public class NodeUtil {
     public static VersionLowerBoundComparator versionLowerBoundComparator =
             new VersionLowerBoundComparator();
 
+    public static int defaultTransactionPeriod = 10;
+    public static int transactionPeriod = defaultTransactionPeriod;
+
 
     public static int compareVersions( NodeRef ref1, NodeRef ref2 ) {
         Date d1 = getLastModified( ref1 );
@@ -3235,8 +3297,14 @@ public class NodeUtil {
                     QName qName =
                             oIsString ? NodeUtil.createQName( keyStr, services )
                                      : (QName)key;
-                    Object result2 =
-                            services.getNodeService().getProperty( node, qName );
+                    Object result2 = null;
+                    if(keyStr.equals("cm:name")){
+                        EmsScriptNode newNode = new EmsScriptNode(node, services);
+                        result2 = newNode.getSuperName();
+                    }
+                    else {
+                        result2 = services.getNodeService().getProperty( node, qName );
+                    }
                     if ( result == result2
                          || ( result != null && result2 != null && result.equals( result2 ) ) ) {
                         // cool
@@ -3854,6 +3922,11 @@ public class NodeUtil {
         return names;
     }
 
+    public static List< String > getSysmlIdsAsList( Collection< NodeRef > refs ) {
+        List< EmsScriptNode > nodes = EmsScriptNode.toEmsScriptNodeList( refs );
+        return EmsScriptNode.getSysmlIds( nodes );
+    }
+
     public static String getName( NodeRef ref ) {
         if ( ref == null ) return null;
         EmsScriptNode node = new EmsScriptNode( ref, getServices() );
@@ -4046,7 +4119,7 @@ public class NodeUtil {
 
         // find site; it must exist!
         if ( targetSiteNode == null || !targetSiteNode.exists() ) {
-            Debug.err( "Can't find node for site: " + targetSiteName + "!\n" );
+            if ( logger.isDebugEnabled() ) logger.debug( "Can't find node for site: " + targetSiteName + "!\n" );
             return null;
         }
 
@@ -4055,7 +4128,7 @@ public class NodeUtil {
                 mkdir( targetSiteNode, artifactFolderName, services, response,
                        status );
         if ( subfolder == null || !subfolder.exists() ) {
-            Debug.err( "Can't create subfolder for site, " + targetSiteName
+            if ( logger.isDebugEnabled() ) logger.debug( "Can't create subfolder for site, " + targetSiteName
                        + ", in artifact folder, " + artifactFolderName + "!\n" );
             return null;
         }
@@ -4073,7 +4146,7 @@ public class NodeUtil {
         }
 
         if ( artifactNode == null || !artifactNode.exists() ) {
-            Debug.err( "Failed to create new artifact " + artifactId + "!\n" );
+            if ( logger.isDebugEnabled() ) logger.debug( "Failed to create new artifact " + artifactId + "!\n" );
             return null;
         }
 
@@ -4780,6 +4853,19 @@ public class NodeUtil {
             e.printStackTrace();
         }
     }
+   
+    public static void processChildViewsJson( String sysmlid, JSONArray cvs, 
+                                              List< Pair< String, String > > documentEdges ) {
+        if ( cvs == null || documentEdges == null ) return;
+
+        for ( int ii = 0; ii < cvs.length(); ii++ ) {
+            JSONObject childView = cvs.getJSONObject( ii );
+            if ( childView.has( "id" ) && !childView.isNull( "id" ) ) {
+                documentEdges.add( new Pair<String, String>(sysmlid, childView.getString("id") ) );
+            }
+        }
+    }
+    
     
     public static Set<Object> findKeyValueInJsonObject(JSONObject json, String keyMatch) {
         Set<Object> result = new HashSet<Object>();
@@ -4834,6 +4920,12 @@ public class NodeUtil {
     public static EmsScriptNode getNodeFromPostgresNode( Node pgnode ) {
         if ( pgnode == null ) return null;
         return new EmsScriptNode( new NodeRef( pgnode.getNodeRefId() ),
+                                  services, null );
+    }
+
+    public static EmsScriptNode getVersionedNodeFromPostgresNode( Node pgnode ) {
+        if ( pgnode == null ) return null;
+        return new EmsScriptNode( new NodeRef( pgnode.getVersionedRefId() ),
                                   services, null );
     }
 
@@ -5640,5 +5732,6 @@ public class NodeUtil {
             }
         }
     }
+
 
 }

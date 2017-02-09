@@ -117,14 +117,6 @@
         <property name="model" value="alfresco/extension/permissionDefinitionsExtension.xml" /> 
     </bean>
 
-    <!-- Definitions for sending active sync messages -->
-    <bean id="jmsConnection" class="gov.nasa.jpl.view_repo.connections.JmsConnection">
-        <property name="services" ref="ServiceRegistry"/>
-    </bean>
-    <bean id="restConnection" class="gov.nasa.jpl.view_repo.connections.RestPostConnection">
-        <property name="uri" value="${app.rest.url}" />
-    </bean>
-
     <!--  Definitions for static methods -->
     <bean class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
         <property name="staticMethod" value="gov.nasa.jpl.view_repo.util.EmsConfig.setProperties" />
@@ -160,6 +152,7 @@
         <property name="arguments" ref="restConnection"/>
     </bean>
     
+    <!-- May not initialize sync mappings because the default values will fail pre-sync configuration check
     <bean class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
         <property name="staticMethod" value="gov.nasa.jpl.view_repo.webscripts.DoorsArtifactMappingPost.bootstrapArtifactMappings" />
     </bean>
@@ -170,6 +163,20 @@
     
     <bean class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
         <property name="staticMethod" value="gov.nasa.jpl.view_repo.webscripts.DoorsProjectMappingPost.bootstrapProjectMappings" />
+    </bean>
+    -->
+    
+    <bean class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+        <property name="staticMethod" value="gov.nasa.jpl.view_repo.webscripts.DoorsChangesFlag.bootstrapDoorsFlags" />
+    </bean>
+
+    <!-- Definitions for sending active sync messages -->
+    <bean id="jmsConnection" class="gov.nasa.jpl.view_repo.connections.JmsConnection">
+        <property name="services" ref="ServiceRegistry"/>
+    </bean>
+    <!-- rest post depends on postgreshelper depends on EmsConfig -->
+    <bean id="restConnection" class="gov.nasa.jpl.view_repo.connections.RestPostConnection">
+        <property name="uri" value="${app.rest.url}" />
     </bean>
 
 </beans>

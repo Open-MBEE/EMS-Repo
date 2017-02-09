@@ -2,31 +2,31 @@
     "workspace1": {
         "name": "ws2",
         "elements": [{
-            "sysmlid": "402",
-            "editable": true,
             "name": "402",
+            "sysmlid": "402",
             "documentation": "4to",
             "specialization": {
                 "propertyType": null,
-                "isSlot": false,
                 "isDerived": false,
+                "isSlot": false,
                 "value": [{
                     "string": "dlam_string",
                     "type": "LiteralString"
                 }],
                 "type": "Property"
-            }
+            },
+            "editable": true,
         }]
     },
     "workspace2": {
         "deletedElements": [],
         "addedElements": [{
-            "documentation": "x is x",
             "sysmlid": "newElement",
+            "documentation": "x is x",
             "specialization": {
                 "propertyType": null,
-                "isSlot": false,
                 "isDerived": false,
+                "isSlot": false,
                 "value": [{
                     "string": "the element added to ws1",
                     "type": "LiteralString"
@@ -37,20 +37,20 @@
         }],
         "conflictedElements": [],
         "updatedElements": [{
-            "sysmlid": "402",
-            "editable": true,
             "name": "402",
+            "sysmlid": "402",
             "documentation": "x is x",
             "specialization": {
                 "propertyType": null,
-                "isSlot": false,
                 "isDerived": false,
+                "isSlot": false,
                 "value": [{
                     "string": "the x value",
                     "type": "LiteralString"
                 }],
                 "type": "Property"
-            }
+            },
+            "editable": true,
         }],
         "name": "ws2",
         "movedElements": []

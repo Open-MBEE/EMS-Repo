@@ -29,6 +29,7 @@
 
 package gov.nasa.jpl.view_repo.webscripts;
 
+import gov.nasa.jpl.mbee.util.Timer;
 import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.CommitUtil;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
@@ -80,9 +81,9 @@ public class ViewPost extends AbstractJavaWebScript {
 
 	@Override
     protected Map<String, Object> executeImplImpl(WebScriptRequest req, Status status, Cache cache) {
-        printHeader( req );
-
-		//clearCaches();
+        Timer timer = new Timer();
+        String user = AuthenticationUtil.getFullyAuthenticatedUser();
+        printHeader(user, logger, req);
 
 		Map<String, Object> model = new HashMap<String, Object>();
 
@@ -100,7 +101,7 @@ public class ViewPost extends AbstractJavaWebScript {
         status.setCode(responseStatus.getCode());
 		model.put("res", createResponseJson());
 
-		printFooter();
+		printFooter(user, logger, timer);
 		return model;
 	}
 
@@ -123,7 +124,7 @@ public class ViewPost extends AbstractJavaWebScript {
 	    wsDiff.setUpdatedElements( elements );
 		
 		Date end = new Date();
-		JSONObject deltaJson = wsDiff.toJSONObject( this, start, end );
+		JSONObject deltaJson = wsDiff.toJSONObject( this, start, end, false, false );
 		String wsId = "master";
 		if (workspace != null) wsId = workspace.getId();
         // FIXME: split elements by project Id - since they may not always be in same project

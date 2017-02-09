@@ -7,8 +7,8 @@
     "documentation": "x is x",
     "specialization": {
         "propertyType": null,
-        "isSlot": false,
         "isDerived": false,
+        "isSlot": false,
         "value": [{
             "string": "the x value",
             "type": "LiteralString"

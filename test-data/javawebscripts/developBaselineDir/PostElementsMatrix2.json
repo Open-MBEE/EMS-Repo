@@ -1,6 +1,6 @@
 {"elements": [
     {
-        "qualifiedId": "/europa/123456/add_update_gg",
+        "qualifiedId": "/europa/PROJECT-123456/add_update_gg",
         "qualifiedName": "/europa/JW_TEST2/add_update_gg",
         "sysmlid": "add_update_gg",
         "editable": true,
@@ -8,11 +8,11 @@
         "modifier": "admin",
         "name": "add_update_gg",
         "documentation": "add_update_gg",
-        "owner": "123456",
+        "owner": "PROJECT-123456",
         "specialization": {
             "propertyType": null,
-            "isSlot": false,
             "isDerived": false,
+            "isSlot": false,
             "value": [{
                 "string": "on a shoe",
                 "type": "LiteralString"
@@ -21,7 +21,7 @@
         }
     },
     {
-        "qualifiedId": "/europa/123456/add_delete_gg",
+        "qualifiedId": "/europa/PROJECT-123456/add_delete_gg",
         "qualifiedName": "/europa/JW_TEST2/add_delete_gg",
         "sysmlid": "add_delete_gg",
         "editable": true,
@@ -29,11 +29,11 @@
         "modifier": "admin",
         "name": "add_delete_gg",
         "documentation": "add_delete_gg",
-        "owner": "123456",
+        "owner": "PROJECT-123456",
         "specialization": {
             "propertyType": null,
-            "isSlot": false,
             "isDerived": false,
+            "isSlot": false,
             "value": [{
                 "string": "on a shoe",
                 "type": "LiteralString"

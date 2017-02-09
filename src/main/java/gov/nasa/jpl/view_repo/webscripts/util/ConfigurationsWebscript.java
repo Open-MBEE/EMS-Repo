@@ -4,6 +4,7 @@ import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
+import gov.nasa.jpl.view_repo.util.EmsTransaction;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 import gov.nasa.jpl.view_repo.webscripts.AbstractJavaWebScript;
@@ -460,15 +461,24 @@ public class ConfigurationsWebscript extends AbstractJavaWebScript {
      * @return
      * @throws JSONException
      */
-    public JSONArray getProducts(EmsScriptNode config, WorkspaceNode workspace,
-                                 Date timestamp) throws JSONException {
-        JSONArray productsJson = new JSONArray();
+    public JSONArray getProducts(EmsScriptNode config, final WorkspaceNode workspace,
+                                 final Date timestamp) throws JSONException {
+        final JSONArray productsJson = new JSONArray();
 
         List< EmsScriptNode > products =
                 config.getTargetAssocsNodesByType( "ems:configuredProducts",
                                                    workspace, timestamp );
-        for (EmsScriptNode product: products) {
-            productsJson.put( product.toJSONObject(workspace, timestamp) );
+        for (final EmsScriptNode product: products) {
+
+            new EmsTransaction(getServices(), getResponse(),
+                               getResponseStatus(), false) {
+                
+                @Override
+                public void run() throws Exception {
+
+                    productsJson.put( product.toJSONObject(workspace, timestamp, false) );
+                }
+            };
         }
 
         return productsJson;
@@ -597,7 +607,7 @@ public class ConfigurationsWebscript extends AbstractJavaWebScript {
         if (configNodeRef != null) {
             EmsScriptNode configNode = new EmsScriptNode(configNodeRef, services, response);
             configNode.makeSureNodeRefIsNotFrozen();
-            configNode.addAspect( "ems:Deleted" );
+            configNode.addAspect( Acm.ACM_DELETED );
         }
     }
 

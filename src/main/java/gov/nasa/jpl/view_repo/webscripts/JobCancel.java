@@ -42,14 +42,9 @@ public class JobCancel extends AbstractJavaWebScript {
     @Override
     protected Map< String, Object > executeImplImpl( WebScriptRequest req,
                                                  Status status, Cache cache ) {
-        if ( logger.isInfoEnabled() ) {
-            String user = AuthenticationUtil.getFullyAuthenticatedUser();
-            logger.info( user + " " + req.getURL() );
-        }
-        
         Timer timer = new Timer();
-        
-        printHeader( req );
+        String user = AuthenticationUtil.getFullyAuthenticatedUser();
+        printHeader(user, logger, req);
 
         Map<String, Object> model = new HashMap<String, Object>();
 
@@ -108,11 +103,7 @@ public class JobCancel extends AbstractJavaWebScript {
 
         status.setCode(responseStatus.getCode());
 
-        printFooter();
-
-        if ( logger.isInfoEnabled() ) {
-            logger.info( String.format( "JobCancel: %s", timer ) );
-        }
+        printFooter(user, logger, timer);
 
         return model;
     }

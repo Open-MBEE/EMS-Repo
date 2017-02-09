@@ -69,6 +69,9 @@ public class PostgresHelper {
 
 	public void close() {
 		try {
+		    if (logger.isDebugEnabled()) {
+		        logger.debug( "PostgresHelper closing" );
+		    }
             conn.close();
         } catch ( SQLException e ) {
             e.printStackTrace();
@@ -76,7 +79,11 @@ public class PostgresHelper {
 	}
 
 	public boolean connect() throws SQLException, ClassNotFoundException {
-		if (host.isEmpty() || dbName.isEmpty() || user.isEmpty() || pass.isEmpty()) {
+        if (logger.isDebugEnabled()) {
+            logger.debug( "PostgresHelper connecting" );
+        }
+
+	    if (host.isEmpty() || dbName.isEmpty() || user.isEmpty() || pass.isEmpty()) {
 			throw new SQLException("Database credentials missing");
 		}
 
@@ -86,13 +93,23 @@ public class PostgresHelper {
 	}
 
 	public void execUpdate(String query) throws SQLException {
-		if (logger.isDebugEnabled()) logger.debug("Query: " + query);
-		this.conn.createStatement().executeUpdate(query);
+		try {
+	        if (logger.isDebugEnabled()) logger.debug("Query: " + query);
+		    this.conn.createStatement().executeUpdate(query);
+		} catch (SQLException e) {
+		    logger.warn( "Query failed: " + query );
+		    throw(e);
+		}
 	}
 
 	public ResultSet execQuery(String query) throws SQLException {
-	    if (logger.isDebugEnabled()) logger.debug("Query: " + query);
-		return this.conn.createStatement().executeQuery(query);
+	    try {
+        	    if (logger.isDebugEnabled()) logger.debug("Query: " + query);
+        		return this.conn.createStatement().executeQuery(query);
+	    } catch (SQLException e) {
+	        logger.warn( "Query failed: " + query );
+	        throw(e);
+	    }
 	}
 
 	public int insert(String table, Map<String, String> values)
@@ -107,8 +124,9 @@ public class PostgresHelper {
 
 				if (values.get(col) instanceof String) {
 					vals.append("'").append(values.get(col)).append("',");
-				} else
+				} else {
 					vals.append(values.get(col)).append(",");
+				}
 			}
 
 			columns.setLength(columns.length() - 1);
@@ -147,8 +165,7 @@ public class PostgresHelper {
 			if (rs.next()) {
 				return new Node(rs.getInt(1), rs.getString(2), rs.getString(3),
 						rs.getInt(4), rs.getString(5));
-			} else
-				return null;
+			} 
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -162,8 +179,7 @@ public class PostgresHelper {
 			if (rs.next()) {
 				return new Node(rs.getInt(1), rs.getString(2), rs.getString(3),
 						rs.getInt(4), rs.getString(5));
-			} else
-				return null;
+			}
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -178,8 +194,7 @@ public class PostgresHelper {
 			if (rs.next()) {
 				return new Node(rs.getInt(1), rs.getString(2), rs.getString(3),
 						rs.getInt(4), rs.getString(5));
-			} else
-				return null;
+			}
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -245,6 +260,8 @@ public class PostgresHelper {
 
 		if (parentSysmlId.isEmpty() || childSysmlId.isEmpty())
 			return;
+		if (parentSysmlId.equals( childSysmlId ))
+		    return;
 		try {
 			execUpdate("insert into edges" + workspaceName
 					+ " values((select id from nodes" + workspaceName
@@ -253,13 +270,7 @@ public class PostgresHelper {
 					+ " where sysmlId = '" + childSysmlId + "'), "
 					+ edgeType.getValue() + ")");
 		} catch (Exception e) {
-			if (e.getMessage().contains("duplicate key")) {
-				if (logger.isInfoEnabled()) {
-				    logger.info( e.getStackTrace().toString() );
-				}
-			} else {
-				e.printStackTrace();
-			}
+		    logger.warn( e.getMessage() );
 		}
 
 	}
@@ -627,5 +638,39 @@ public class PostgresHelper {
 	    }
 	    
 	    return result;
+	}
+	
+	public void setMmsProperty( String key, String value ) {
+        try {
+    	        String query = "CREATE TABLE IF NOT EXISTS mms_properties ( key varchar(100) not null unique, value varchar(100) )";
+    	        execUpdate(query);
+    	    
+    	        String property = getMmsProperty(key);
+    	        if (property == null) {
+    	            query = String.format( "INSERT INTO mms_properties VALUES ('%s', '%s')", key, value );
+    	        } else {
+    	            query = String.format( "UPDATE mms_properties SET value='%s' WHERE key='%s'", value, key );
+    	        }
+            execUpdate(query);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+	}
+	
+	public String getMmsProperty( String key ) {
+        try {
+            String query = "CREATE TABLE IF NOT EXISTS mms_properties ( key varchar(100), value varchar(100) )";
+            execUpdate(query);
+        
+            query = String.format( "SELECT value FROM mms_properties WHERE key='%s'", key );
+            ResultSet rs = execQuery(query);
+            if (rs.next()) {
+                return rs.getString( 1 );
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        
+        return null;
 	}
 }

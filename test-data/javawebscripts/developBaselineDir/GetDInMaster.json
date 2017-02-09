@@ -1,14 +1,14 @@
 {"elements": [{
-    "sysmlid": "d",
-    "editable": true,
-    "creator": "admin",
     "modifier": "admin",
+    "sysmlid": "d",
     "documentation": "d is d",
     "specialization": {
         "propertyType": null,
-        "isSlot": false,
         "isDerived": false,
+        "isSlot": false,
         "type": "Property"
-    }
+    },
+    "editable": true,
+    "creator": "admin",
 }]}
 200

@@ -1,0 +1,21 @@
+{
+    "elements": [
+        {
+            "sysmlid": "_18_0_5_407019f_1466704592925_553155_14624",
+            "specialization": {
+                "type": "View",
+                "childViews": [
+                    {
+                        "aggregation": "COMPOSITE",
+                        "id": "_18_0_5_407019f_1466704658028_771482_14847"
+                    },
+                    {
+                        "aggregation": "COMPOSITE",
+                        "id": "_18_0_5_407019f_1466704590650_411603_14577"
+                    }
+                ]
+            }
+        }
+    ]
+}
+

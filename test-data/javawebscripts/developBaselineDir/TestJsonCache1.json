@@ -1,5 +1,5 @@
 {"elements": [{
-    "qualifiedId": "/europa/123456/jsonTest1",
+    "qualifiedId": "/europa/PROJECT-123456/jsonTest1",
     "qualifiedName": "/europa/JW_TEST2/jsonTest1",
     "sysmlid": "jsonTest1",
     "editable": true,
@@ -7,7 +7,7 @@
     "modifier": "admin",
     "name": "jsonTest1",
     "documentation": "",
-    "owner": "123456",
+    "owner": "PROJECT-123456",
     "specialization": {
         "specification": {
             "integer": 1,

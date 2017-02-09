@@ -1,69 +1,115 @@
 {
+    "sysmlid": null,
     "workspace1": {
-        "name": "wsA",
+        "sysmlid": null,
         "elements": [
             {
-                "appliedMetatypes": ["_9_0_62a020a_1105704885298_713292_7913"],
-                "specialization": {"type": "Package"},
-                "editable": true
+                "sysmlid": null,
+                "appliedMetatypes": [
+                    "_9_0_62a020a_1105704885298_713292_7913"
+                ],
+                "editable": true,
+                "specialization": {
+                    "sysmlid": null,
+                    "type": "Package"
+                }
             },
             {
-                "appliedMetatypes": ["_9_0_62a020a_1105704885298_713292_7913"],
-                "specialization": {"type": "Package"},
-                "editable": true
+                "sysmlid": null,
+                "appliedMetatypes": [
+                    "_9_0_62a020a_1105704885298_713292_7913"
+                ],
+                "editable": true,
+                "specialization": {
+                    "sysmlid": null,
+                    "type": "Package"
+                }
             },
             {
-                "appliedMetatypes": ["_9_0_62a020a_1105704885298_713292_7913"],
-                "specialization": {"type": "Package"},
-                "editable": true
+                "sysmlid": null,
+                "appliedMetatypes": [
+                    "_9_0_62a020a_1105704885298_713292_7913"
+                ],
+                "editable": true,
+                "specialization": {
+                    "sysmlid": null,
+                    "type": "Package"
+                }
             },
             {
-                "appliedMetatypes": ["_9_0_62a020a_1105704885298_713292_7913"],
-                "specialization": {"type": "Package"},
-                "editable": true
+                "sysmlid": null,
+                "appliedMetatypes": [
+                    "_9_0_62a020a_1105704885298_713292_7913"
+                ],
+                "editable": true,
+                "specialization": {
+                    "sysmlid": null,
+                    "type": "Package"
+                }
             },
             {
-                "name": "300",
+                "sysmlid": "holding_bin_PROJECT-123456",
+                "appliedMetatypes": [
+                    "_9_0_62a020a_1105704885298_713292_7913"
+                ],
+                "editable": true,
+                "name": "holding_bin",
+                "specialization": {
+                    "sysmlid": null,
+                    "type": "Package"
+                }
+            },
+            {
                 "sysmlid": "x",
                 "documentation": "something",
+                "editable": true,
+                "name": "300",
                 "specialization": {
-                    "propertyType": null,
-                    "isSlot": false,
+                    "sysmlid": null,
                     "isDerived": false,
-                    "value": [{
-                        "string": "dlam_string",
-                        "type": "LiteralString"
-                    }],
-                    "type": "Property"
-                },
-                "editable": true
-            },
-            {
-                "name": "holding_bin",
-                "sysmlid": "holding_bin_123456",
-                "appliedMetatypes": ["_9_0_62a020a_1105704885298_713292_7913"],
-                "specialization": {"type": "Package"},
-                "editable": true
+                    "isSlot": false,
+                    "propertyType": null,
+                    "type": "Property",
+                    "value": [
+                        {
+                            "sysmlid": null,
+                            "string": "dlam_string",
+                            "type": "LiteralString"
+                        }
+                    ]
+                }
             }
-        ]
+        ],
+        "name": "wsA"
     },
     "workspace2": {
-        "deletedElements": [],
-        "addedElements": [],
-        "conflictedElements": [],
-        "updatedElements": [{
-            "name": "300",
-            "sysmlid": "x",
-            "documentation": "x is x",
-            "specialization": {
-                "value": [{
-                    "string": "the x value",
-                    "type": "LiteralString"
-                }],
-                "type": "Property"
-            }
-        }],
+        "sysmlid": null,
+        "addedElements": [
+        ],
+        "conflictedElements": [
+        ],
+        "deletedElements": [
+        ],
+        "movedElements": [
+        ],
         "name": "wsB",
-        "movedElements": []
+        "updatedElements": [
+            {
+                "sysmlid": "x",
+                "documentation": "x is x",
+                "name": "300",
+                "specialization": {
+                    "sysmlid": null,
+                    "type": "Property",
+                    "value": [
+                        {
+                            "sysmlid": null,
+                            "string": "the x value",
+                            "type": "LiteralString"
+                        }
+                    ]
+                }
+            }
+        ]
     }
 }

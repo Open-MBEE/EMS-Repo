@@ -1,13 +1,13 @@
 {
     "workspace1": {
-        "name": "master",
         "qualifiedName": "master",
+        "name": "master",
         "elements": [
             {
-                "name": "update_delete_consistent",
                 "qualifiedName": "/europa/JW_TEST2/update_delete_consistent",
-                "owner": "123456",
+                "name": "update_delete_consistent",
                 "sysmlid": "update_delete_consistent",
+                "owner": "PROJECT-123456",
                 "specialization": {
                     "value": [{
                         "string": "this is update 1",
@@ -21,12 +21,12 @@
                 "sysmlid": "update_update_consistent",
                 "editable": true,
                 "name": "update_update_consistent",
-                "owner": "123456",
                 "documentation": "update_update_consistent",
+                "owner": "PROJECT-123456",
                 "specialization": {
                     "propertyType": null,
-                    "isSlot": false,
                     "isDerived": false,
+                    "isSlot": false,
                     "value": [{
                         "string": "this is update 1",
                         "type": "LiteralString"
@@ -40,11 +40,11 @@
                 "editable": true,
                 "name": "delete_update_consistent",
                 "documentation": "delete_update_consistent",
-                "owner": "123456",
+                "owner": "PROJECT-123456",
                 "specialization": {
                     "propertyType": null,
-                    "isDerived": false,
                     "isSlot": false,
+                    "isDerived": false,
                     "value": [{
                         "string": "this is it",
                         "type": "LiteralString"
@@ -58,8 +58,8 @@
         "deletedElements": [{
             "qualifiedName": "/europa/JW_TEST2/update_delete_consistent",
             "name": "update_delete_consistent",
+            "owner": "PROJECT-123456",
             "sysmlid": "update_delete_consistent",
-            "owner": "123456",
             "specialization": {
                 "value": [{
                     "string": "this is update 1",
@@ -69,10 +69,10 @@
             }
         }],
         "addedElements": [{
-            "name": "delete_update_consistent",
             "qualifiedName": "/europa/JW_TEST2/delete_update_consistent",
-            "owner": "123456",
+            "name": "delete_update_consistent",
             "sysmlid": "delete_update_consistent",
+            "owner": "PROJECT-123456",
             "specialization": {
                 "value": [{
                     "string": "this is updated in conflict",
@@ -85,8 +85,8 @@
             {
                 "qualifiedName": "/europa/JW_TEST2/update_update_consistent",
                 "name": "update_update_consistent",
+                "owner": "PROJECT-123456",
                 "sysmlid": "update_update_consistent",
-                "owner": "123456",
                 "specialization": {
                     "value": [{
                         "string": "this is updated in conflict",
@@ -98,8 +98,8 @@
             {
                 "qualifiedName": "/europa/JW_TEST2/delete_update_consistent",
                 "name": "delete_update_consistent",
+                "owner": "PROJECT-123456",
                 "sysmlid": "delete_update_consistent",
-                "owner": "123456",
                 "specialization": {
                     "value": [{
                         "string": "this is updated in conflict",
@@ -109,10 +109,10 @@
                 }
             },
             {
-                "name": "update_delete_consistent",
                 "qualifiedName": "/europa/JW_TEST2/update_delete_consistent",
-                "owner": "123456",
+                "name": "update_delete_consistent",
                 "sysmlid": "update_delete_consistent",
+                "owner": "PROJECT-123456",
                 "specialization": {
                     "value": [{
                         "string": "this is update 1",
@@ -125,8 +125,8 @@
         "updatedElements": [{
             "qualifiedName": "/europa/JW_TEST2/update_update_consistent",
             "name": "update_update_consistent",
+            "owner": "PROJECT-123456",
             "sysmlid": "update_update_consistent",
-            "owner": "123456",
             "specialization": {
                 "value": [{
                     "string": "this is updated in conflict",
@@ -135,8 +135,8 @@
                 "type": "Property"
             }
         }],
-        "name": "wsMerge1",
         "qualifiedName": "master/wsMerge1",
+        "name": "wsMerge1",
         "movedElements": []
     }
 }

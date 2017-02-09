@@ -6,12 +6,11 @@
     "modifier": "admin",
     "name": "Product X",
     "specialization": {
-        "displayedElements": [],
+        "childViews": [],
         "contents": {
             "type": "Expression",
             "operand": []
         },
-        "allowedElements": [],
         "type": "Product"
     }
 }]}

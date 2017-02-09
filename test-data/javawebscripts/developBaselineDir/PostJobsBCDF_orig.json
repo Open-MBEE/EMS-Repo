@@ -370,11 +370,11 @@
     },
     {
         "siteCharacterizationId": "no_site",
-        "qualifiedId": "/no_site/no_site_no_project/holding_bin_no_site_no_project/YY_2016_no_site_no_project/MM_3_no_site_no_project/DD_13_no_site_no_project/HH_13_no_site_no_project/123456",
+        "qualifiedId": "/no_site/no_site_no_project/holding_bin_no_site_no_project/YY_2016_no_site_no_project/MM_3_no_site_no_project/DD_13_no_site_no_project/HH_13_no_site_no_project/PROJECT-123456",
         "nodeRefId": "workspace://SpacesStore/a817e579-df9b-41f6-ac39-d506342fd106",
         "versionedRefId": "versionStore://version2Store/924cceb3-e507-4750-aeb8-c5733ad1dd11",
         "qualifiedName": "/no_site/no_site_no_project/holding_bin/YY_2016/MM_3/DD_13/HH_13/null",
-        "sysmlid": "123456",
+        "sysmlid": "PROJECT-123456",
         "editable": true,
         "creator": "admin",
         "modified": "2016-04-13T13:01:45.471-0700",
@@ -498,7 +498,7 @@
     },
     {
         "nodeRefId": "workspace://SpacesStore/edb7bf85-713a-460a-ba78-d59b657c989c",
-        "qualifiedId": "/no_site/no_site_no_project/holding_bin_no_site_no_project/YY_2016_no_site_no_project/MM_3_no_site_no_project/DD_13_no_site_no_project/HH_13_no_site_no_project/123456/MMS_1460577704928_55392065-77d4-429e-baa7-01eec9fd0f80",
+        "qualifiedId": "/no_site/no_site_no_project/holding_bin_no_site_no_project/YY_2016_no_site_no_project/MM_3_no_site_no_project/DD_13_no_site_no_project/HH_13_no_site_no_project/PROJECT-123456/MMS_1460577704928_55392065-77d4-429e-baa7-01eec9fd0f80",
         "siteCharacterizationId": "no_site",
         "versionedRefId": "versionStore://version2Store/630c1b75-06b4-478e-8ec4-432ad2be6bd0",
         "qualifiedName": "/no_site/no_site_no_project/holding_bin/YY_2016/MM_3/DD_13/HH_13/null/PMA_Jobs",
@@ -510,7 +510,7 @@
         "created": "Wed Apr 13 13:01:45 PDT 2016",
         "name": "PMA_Jobs",
         "documentation": "",
-        "owner": "123456",
+        "owner": "PROJECT-123456",
         "read": "2016-04-13T13:01:54.076-0700",
         "specialization": {"type": "Package"}
     }

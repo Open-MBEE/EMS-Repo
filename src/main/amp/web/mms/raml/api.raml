@@ -13,7 +13,6 @@ documentation:
       Welcome to the _Model Management System (MMS) API_ Documentation. The _MMS API_
       allows you to connect your application to our RESTful service for accessing
       systems engineering model information.
-
 securitySchemes:
   - basic:
       type: Basic Authentication
@@ -321,6 +320,10 @@ resourceTypes:
           description: Delete the element specified by the Sysml ID
         get:
           description: Sysml ID for the element under consideration
+          queryParameters:
+            connected:
+              description: Get all of the connected nodes also.  Must also supply recurse=true or depth.
+              required: false
     /history:
       /{elementId}:
         get:

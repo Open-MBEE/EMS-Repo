@@ -105,7 +105,7 @@ create or replace function get_immediate_parents(integer, integer, text)
   begin
     return query
     execute '
-    select sysmlid, versionedrefid from nodes' || $3 || ' where id in 
+    select sysmlid, noderefid from nodes' || $3 || ' where id in 
       (select id from get_parents(' || $1 || ',' || $2 || ',''' || format('%s',$3) ||
       ''') where height = 1);';
   end;

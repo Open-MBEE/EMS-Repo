@@ -1,12 +1,12 @@
 {"elements": [{
-    "qualifiedId": "/europa/123456/conflict",
+    "qualifiedId": "/europa/PROJECT-123456/conflict",
     "qualifiedName": "/europa/JW_TEST/conflict",
     "sysmlid": "conflict",
     "editable": true,
     "creator": "admin",
     "modifier": "admin",
     "name": "conflict",
-    "owner": "123456",
+    "owner": "PROJECT-123456",
     "documentation": "this will create a conflict!",
     "specialization": {"type": "Element"}
 }]}

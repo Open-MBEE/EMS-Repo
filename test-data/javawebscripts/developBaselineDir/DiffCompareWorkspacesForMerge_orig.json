@@ -86,7 +86,7 @@
                 "creator": "admin"
             },
             {
-                "qualifiedId": "/europa/123456/4000/401/402",
+                "qualifiedId": "/europa/PROJECT-123456/4000/401/402",
                 "nodeRefId": "workspace://SpacesStore/b603d427-df8b-480b-bc04-f78f6b52e918",
                 "versionedRefId": "versionStore://version2Store/c8520cec-4a6d-4d52-b785-51fcd4571280",
                 "qualifiedName": "/europa/JW_TEST2/400/401/402",
@@ -113,7 +113,7 @@
             },
             {
                 "nodeRefId": "workspace://SpacesStore/8ab46816-9d9f-474d-9185-264dab5cada1",
-                "qualifiedId": "/europa/123456/4000/401",
+                "qualifiedId": "/europa/PROJECT-123456/4000/401",
                 "siteCharacterizationId": "europa",
                 "versionedRefId": "versionStore://version2Store/4c8452d1-080d-4d43-b3db-554daeb782a5",
                 "qualifiedName": "/europa/JW_TEST2/400/401",
@@ -158,7 +158,7 @@
             },
             {
                 "nodeRefId": "workspace://SpacesStore/50f7bbe1-4aac-411c-89dd-cb4abace7bba",
-                "qualifiedId": "/europa/123456/4000",
+                "qualifiedId": "/europa/PROJECT-123456/4000",
                 "siteCharacterizationId": "europa",
                 "versionedRefId": "versionStore://version2Store/281bdd8e-21cd-4f1b-8a63-b1c8540a249a",
                 "qualifiedName": "/europa/JW_TEST2/400",
@@ -169,7 +169,7 @@
                 "modifier": "admin",
                 "created": "Sat Feb 20 22:17:45 PST 2016",
                 "name": "400",
-                "owner": "123456",
+                "owner": "PROJECT-123456",
                 "documentation": "4something",
                 "read": "2016-02-20T22:21:30.635-0800",
                 "specialization": {
@@ -217,7 +217,7 @@
         }],
         "conflictedElements": [],
         "updatedElements": [{
-            "qualifiedId": "/europa/123456/4000/401/402",
+            "qualifiedId": "/europa/PROJECT-123456/4000/401/402",
             "name": "402",
             "qualifiedName": "/europa/JW_TEST2/400/401/402",
             "sysmlid": "402",

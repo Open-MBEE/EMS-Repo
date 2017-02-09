@@ -4,8 +4,8 @@
         "documentation": "A site package",
         "editable": true,
         "name": "package",
-        "owner": "123456",
-        "qualifiedId": "/europa/123456/package",
+        "owner": "PROJECT-123456",
+        "qualifiedId": "/europa/PROJECT-123456/package",
         "qualifiedName": "/europa/JW_TEST2/package",
         "specialization": {
             "isSite": true,

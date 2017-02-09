@@ -6,11 +6,11 @@
         "modifier": "admin",
         "name": "300",
         "documentation": "something",
-        "owner": "123456",
+        "owner": "PROJECT-123456",
         "specialization": {
             "propertyType": null,
-            "isSlot": false,
             "isDerived": false,
+            "isSlot": false,
             "value": [{
                 "string": "dlam_string",
                 "type": "LiteralString"
@@ -27,8 +27,8 @@
         "documentation": "something",
         "specialization": {
             "propertyType": null,
-            "isSlot": false,
             "isDerived": false,
+            "isSlot": false,
             "value": [{
                 "string": "dlam_string",
                 "type": "LiteralString"

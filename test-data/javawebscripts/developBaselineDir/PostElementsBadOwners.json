@@ -58,7 +58,7 @@
         "specialization": {"type": "Element"}
     },
     {
-        "sysmlid": "holding_bin_123456",
+        "sysmlid": "holding_bin_PROJECT-123456",
         "editable": true,
         "creator": "admin",
         "modifier": "admin",

@@ -45,12 +45,10 @@ public class MmsVersion extends AbstractJavaWebScript {
 	protected Map<String, Object> executeImplImpl(WebScriptRequest req, Status status, Cache cache) {
 		// TODO Auto-generated method stub
 		Map<String, Object> model = new HashMap<String, Object>();
-		if (logger.isDebugEnabled()) {
-			String user = AuthenticationUtil.getFullyAuthenticatedUser();
-			logger.debug(user + " " + req.getURL());
-		}
-		Timer timer = new Timer();
-		printHeader(req);
+        Timer timer = new Timer();
+        String user = AuthenticationUtil.getFullyAuthenticatedUser();
+        printHeader(user, logger, req);
+
 		JSONObject mmsVersion = new JSONObject();
 
 		
@@ -70,12 +68,7 @@ public class MmsVersion extends AbstractJavaWebScript {
 
 		status.setCode(responseStatus.getCode());
 
-		printFooter();
-
-		if (logger.isInfoEnabled()) {
-			log(Level.INFO, "MmsVersion: %s", timer);
-			// logger.info( "ModelGet: " + timer );
-		}
+		printFooter(user, logger, timer);
 
 		return model;
 	}

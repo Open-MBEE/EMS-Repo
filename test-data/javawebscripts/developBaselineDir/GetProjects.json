@@ -1,13 +1,6 @@
-{"elements": [
-    {
-        "name": "no_site_no_project",
-        "sysmlid": "no_site_no_project",
-        "specialization": {"type": "Project"}
-    },
-    {
-        "name": "JW_TEST",
-        "sysmlid": "123456",
-        "specialization": {"type": "Project"}
-    }
-]}
+{"elements": [{
+    "name": "JW_TEST",
+    "sysmlid": "PROJECT-123456",
+    "specialization": {"type": "Project"}
+}]}
 200

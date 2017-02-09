@@ -3,7 +3,7 @@
     "elements": [
         {
             "siteCharacterizationId": "europa",
-            "qualifiedId": "/europa/PROJECT-afa9754e-04d3-4ba0-b80f-9de9f2a6fe41/123456/op_ev_31835",
+            "qualifiedId": "/europa/PROJECT-afa9754e-04d3-4ba0-b80f-9de9f2a6fe41/PROJECT-123456/op_ev_31835",
             "nodeRefId": "workspace://SpacesStore/198bdf06-ef98-4505-821c-f080608bf046",
             "versionedRefId": "versionStore://version2Store/b0a7ec7c-b414-4243-bde2-36c8d7094788",
             "qualifiedName": "/europa/SRR Agenda/JW_TEST/GreaterEquals",
@@ -15,7 +15,7 @@
             "created": "Wed Dec 09 09:37:04 PST 2015",
             "name": "GreaterEquals",
             "documentation": "",
-            "owner": "123456",
+            "owner": "PROJECT-123456",
             "read": "2016-01-14T18:40:46.825-0800",
             "specialization": {
                 "parameters": [
@@ -28,7 +28,7 @@
         },
         {
             "siteCharacterizationId": "europa",
-            "qualifiedId": "/europa/PROJECT-afa9754e-04d3-4ba0-b80f-9de9f2a6fe41/123456/constraint_32165",
+            "qualifiedId": "/europa/PROJECT-afa9754e-04d3-4ba0-b80f-9de9f2a6fe41/PROJECT-123456/constraint_32165",
             "nodeRefId": "workspace://SpacesStore/4afcfc96-c01a-458b-8012-b1595aee1aea",
             "versionedRefId": "versionStore://version2Store/f95e5780-7cfd-4f4b-bd34-fd3ac0db5718",
             "qualifiedName": "/europa/SRR Agenda/JW_TEST/",
@@ -40,7 +40,7 @@
             "created": "Wed Dec 09 09:37:03 PST 2015",
             "name": "",
             "documentation": "",
-            "owner": "123456",
+            "owner": "PROJECT-123456",
             "read": "2016-01-14T18:40:46.829-0800",
             "specialization": {
                 "specification": {
@@ -69,7 +69,7 @@
         },
         {
             "siteCharacterizationId": "europa",
-            "qualifiedId": "/europa/PROJECT-afa9754e-04d3-4ba0-b80f-9de9f2a6fe41/123456/arg_ev_38307",
+            "qualifiedId": "/europa/PROJECT-afa9754e-04d3-4ba0-b80f-9de9f2a6fe41/PROJECT-123456/arg_ev_38307",
             "nodeRefId": "workspace://SpacesStore/55f62bd7-5086-4514-83ef-2991a26d5660",
             "versionedRefId": "versionStore://version2Store/1c14e7cd-613f-44bd-a6d5-bddaf59e6c65",
             "qualifiedName": "/europa/SRR Agenda/JW_TEST/duration",
@@ -81,7 +81,7 @@
             "created": "Wed Dec 09 09:37:04 PST 2015",
             "name": "duration",
             "documentation": "",
-            "owner": "123456",
+            "owner": "PROJECT-123456",
             "read": "2016-01-14T18:40:46.837-0800",
             "specialization": {
                 "propertyType": null,
@@ -97,7 +97,7 @@
         },
         {
             "siteCharacterizationId": "europa",
-            "qualifiedId": "/europa/PROJECT-afa9754e-04d3-4ba0-b80f-9de9f2a6fe41/123456/arg_ev_38307_1",
+            "qualifiedId": "/europa/PROJECT-afa9754e-04d3-4ba0-b80f-9de9f2a6fe41/PROJECT-123456/arg_ev_38307_1",
             "nodeRefId": "workspace://SpacesStore/7c231b8d-e304-476a-a453-3626e8ca5612",
             "versionedRefId": "versionStore://version2Store/bd4e600e-6acb-45b5-b5a0-db56cdcd85d7",
             "qualifiedName": "/europa/SRR Agenda/JW_TEST/duration_1",
@@ -109,7 +109,7 @@
             "created": "Wed Dec 09 09:37:03 PST 2015",
             "name": "duration_1",
             "documentation": "",
-            "owner": "123456",
+            "owner": "PROJECT-123456",
             "read": "2016-01-14T18:40:46.840-0800",
             "specialization": {
                 "propertyType": null,
@@ -125,7 +125,7 @@
         },
         {
             "siteCharacterizationId": "europa",
-            "qualifiedId": "/europa/PROJECT-afa9754e-04d3-4ba0-b80f-9de9f2a6fe41/123456/op_ev_31835/op_param_31869",
+            "qualifiedId": "/europa/PROJECT-afa9754e-04d3-4ba0-b80f-9de9f2a6fe41/PROJECT-123456/op_ev_31835/op_param_31869",
             "nodeRefId": "workspace://SpacesStore/b0f63770-d825-4660-a5e2-7472d553fe06",
             "versionedRefId": "versionStore://version2Store/8f1c4d57-5ca8-4cad-b39c-bcc7f7a7c0c6",
             "qualifiedName": "/europa/SRR Agenda/JW_TEST/GreaterEquals/y",
@@ -143,7 +143,7 @@
         },
         {
             "siteCharacterizationId": "europa",
-            "qualifiedId": "/europa/PROJECT-afa9754e-04d3-4ba0-b80f-9de9f2a6fe41/123456/op_ev_31835/op_param_31868",
+            "qualifiedId": "/europa/PROJECT-afa9754e-04d3-4ba0-b80f-9de9f2a6fe41/PROJECT-123456/op_ev_31835/op_param_31868",
             "nodeRefId": "workspace://SpacesStore/b3ce2419-9610-4ac9-b52c-5777b4ef72de",
             "versionedRefId": "versionStore://version2Store/75106bd4-6802-4404-8218-ef94323aede8",
             "qualifiedName": "/europa/SRR Agenda/JW_TEST/GreaterEquals/x",
@@ -161,7 +161,7 @@
         },
         {
             "siteCharacterizationId": "europa",
-            "qualifiedId": "/europa/PROJECT-afa9754e-04d3-4ba0-b80f-9de9f2a6fe41/123456/arg_ev_33001",
+            "qualifiedId": "/europa/PROJECT-afa9754e-04d3-4ba0-b80f-9de9f2a6fe41/PROJECT-123456/arg_ev_33001",
             "nodeRefId": "workspace://SpacesStore/e5e49056-715a-4cb7-944a-a6dbc944dae7",
             "versionedRefId": "versionStore://version2Store/fc62bc88-3470-48d9-a88d-0a333561cfb2",
             "qualifiedName": "/europa/SRR Agenda/JW_TEST/initialDuration",
@@ -173,7 +173,7 @@
             "created": "Wed Dec 09 09:37:05 PST 2015",
             "name": "initialDuration",
             "documentation": "",
-            "owner": "123456",
+            "owner": "PROJECT-123456",
             "read": "2016-01-14T18:40:46.862-0800",
             "specialization": {
                 "propertyType": null,
@@ -189,7 +189,7 @@
         },
         {
             "siteCharacterizationId": "europa",
-            "qualifiedId": "/europa/PROJECT-afa9754e-04d3-4ba0-b80f-9de9f2a6fe41/123456/op_ev_31835/op_param_31867",
+            "qualifiedId": "/europa/PROJECT-afa9754e-04d3-4ba0-b80f-9de9f2a6fe41/PROJECT-123456/op_ev_31835/op_param_31867",
             "nodeRefId": "workspace://SpacesStore/eb9f6e6e-57e6-41c9-abd4-7b01b1a26f07",
             "versionedRefId": "versionStore://version2Store/91238909-6012-4b15-a43d-3576712b0a2c",
             "qualifiedName": "/europa/SRR Agenda/JW_TEST/GreaterEquals/result",

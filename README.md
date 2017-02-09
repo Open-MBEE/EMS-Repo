@@ -1,3 +1,5 @@
+[![Build Status](https://cae-jenkins.jpl.nasa.gov/buildStatus/icon?job=view-repo ENTERPRISE (develop))](https://cae-jenkins.jpl.nasa.gov/view/CAE-EMS%20(develop)/job/view-repo%20ENTERPRISE%20(develop)/)
+
 # This repo represents the view amp for alfresco repository (overlay on alfresco.war)
 
 #MAC OSX Yosemite 10.10.5 Quick Install (assuming you've installed Maven and Eclipse)
@@ -27,7 +29,7 @@ src/main/java/gov/nasa/jpl/view_repo/db/mms.sql to initialize the database (as f
   
         http://www.moncefbelyamani.com/how-to-install-postgresql-on-a-mac-with-homebrew-and-lunchy/
   
-  - Create mmsuser using the postgres createuser. Set password to password (or whatever you want).
+  - Create mmsuser using the postgres createuser using the command below. Set password to test123.
     If you change the password, please change DbContracts.java to use the same.
   
   - On production servers, switch to postgres user     

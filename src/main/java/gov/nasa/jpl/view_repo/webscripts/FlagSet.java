@@ -10,19 +10,26 @@ import org.springframework.extensions.webscripts.DeclarativeWebScript;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
 
+import gov.nasa.jpl.mbee.util.Utils;
+
 /**
  * Allows heisenCache to be turned on/off
  */
 public abstract class FlagSet extends DeclarativeWebScript {
     static Logger logger = Logger.getLogger(FlagSet.class);
    
-    protected abstract boolean set( boolean val ); 
+    protected abstract boolean set( boolean val );
+    protected abstract String handleNonBooleans(WebScriptRequest req);
     protected abstract boolean get();
     protected abstract boolean get(String flagName);
     protected abstract String flag();
     protected abstract String flagName();
     public abstract String[] getAllFlags();
     protected abstract boolean clear();
+    //protected abstract Object getValue(String key);
+    protected abstract long size(String key);
+    protected abstract long objectSize(String key);
+    protected abstract String size();
     
     protected WebScriptRequest req = null;
     
@@ -43,10 +50,18 @@ public abstract class FlagSet extends DeclarativeWebScript {
             return executeImplImpl( req, status, cache );
         }
     }
+    
     protected Map<String, Object> executeImplImpl(WebScriptRequest req,
                 Status status, Cache cache) {
         Map< String, Object > model = new HashMap< String, Object >();
 
+        String size = req.getParameter( "size" );
+        if ( size != null && !size.trim().equalsIgnoreCase( "false" ) ) {
+            String msg = size();
+            model.put( "res", msg );
+            return model;
+        }
+        
         String clear = req.getParameter( "clear" );
         if ( clear != null && !clear.trim().equalsIgnoreCase( "false" ) ) {
             boolean didClear = clear();
@@ -103,6 +118,13 @@ public abstract class FlagSet extends DeclarativeWebScript {
             boolean succ = set( turnOn );
             msg = flagName() + " " + (succ ? "" : "un") + "successfully turned " + onOrOff;
         }
+        
+        String msg2 = handleNonBooleans( req );
+        if ( msg2 == null ) msg2 = "";
+        if ( !msg2.isEmpty() ) {
+            msg = (Utils.isNullOrEmpty( msg ) ? msg2 : (msg + "\n" + msg2));
+        }
+        
         if (logger.isInfoEnabled()) {
             logger.info( ( new Date() ) + ": " + msg );
         }

@@ -1,6 +1,6 @@
 {"elements": [
     {
-        "qualifiedId": "/europa/123456/onBothWorkspaces1",
+        "qualifiedId": "/europa/PROJECT-123456/onBothWorkspaces1",
         "qualifiedName": "/europa/JW_TEST/onBothWorkspaces1",
         "sysmlid": "onBothWorkspaces1",
         "editable": true,
@@ -8,11 +8,11 @@
         "modifier": "admin",
         "name": "onBothWorkspaces1",
         "documentation": "",
-        "owner": "123456",
+        "owner": "PROJECT-123456",
         "specialization": {
             "propertyType": null,
-            "isSlot": false,
             "isDerived": false,
+            "isSlot": false,
             "value": [{
                 "string": "gg_string",
                 "type": "LiteralString"
@@ -21,7 +21,7 @@
         }
     },
     {
-        "qualifiedId": "/europa/123456/onBothWorkspaces2",
+        "qualifiedId": "/europa/PROJECT-123456/onBothWorkspaces2",
         "qualifiedName": "/europa/JW_TEST/onBothWorkspaces2",
         "sysmlid": "onBothWorkspaces2",
         "editable": true,
@@ -29,8 +29,9 @@
         "modifier": "admin",
         "name": "onBothWorkspaces2",
         "documentation": "",
-        "owner": "123456",
+        "owner": "PROJECT-123456",
         "specialization": {
+            "type": "Expression",
             "operand": [
                 {
                     "element": "300",
@@ -40,8 +41,7 @@
                     "element": "302",
                     "type": "ElementValue"
                 }
-            ],
-            "type": "Expression"
+            ]
         }
     }
 ]}

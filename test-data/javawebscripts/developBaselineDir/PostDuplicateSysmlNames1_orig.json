@@ -1,12 +1,12 @@
 {"elements": [{
     "modifier": "admin",
-    "qualifiedId": "/europa/123456/testCmed416",
+    "qualifiedId": "/europa/PROJECT-123456/testCmed416",
     "siteCharacterizationId": "europa",
     "created": "Tue Sep 22 09:42:32 PDT 2015",
     "name": "testName",
     "qualifiedName": "/europa/JW_TEST2/testName",
     "sysmlid": "testCmed416",
-    "owner": "123456",
+    "owner": "PROJECT-123456",
     "read": "2015-09-22T09:42:32.739-0700",
     "specialization": {
         "propertyType": null,

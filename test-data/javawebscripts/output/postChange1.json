@@ -1,7 +1,7 @@
 {"elements": [{
-    "qualifiedId": "123456/holding_bin_europa_123456/MMS_1410557576261_e8471526-2c64-435d-b7f1-985f8a2c9774",
+    "qualifiedId": "PROJECT-123456/holding_bin_europa_PROJECT-123456/MMS_1410557576261_e8471526-2c64-435d-b7f1-985f8a2c9774",
     "qualifiedName": "/null",
-    "owner": "holding_bin_europa_123456",
+    "owner": "holding_bin_europa_PROJECT-123456",
     "specialization": {"type": "Element"},
     "editable": true,
     "creator": "admin",

@@ -1,5 +1,6 @@
 package gov.nasa.jpl.view_repo.webscripts;
 
+import gov.nasa.jpl.mbee.util.Timer;
 import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
 import gov.nasa.jpl.view_repo.webscripts.util.ConfigurationsWebscript;
@@ -11,6 +12,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.log4j.*;
 import org.alfresco.repo.model.Repository;
+import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -19,6 +21,7 @@ import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
 
 public class MmsConfigurationsDelete extends AbstractJavaWebScript {
+    static Logger logger = Logger.getLogger( MmsConfigurationsDelete.class );
     public MmsConfigurationsDelete() {
         super();
     }
@@ -42,7 +45,9 @@ public class MmsConfigurationsDelete extends AbstractJavaWebScript {
 
     @Override
     protected  Map<String, Object> executeImplImpl(WebScriptRequest req, Status status, Cache cache) {
-        printHeader( req );
+        Timer timer = new Timer();
+        String user = AuthenticationUtil.getFullyAuthenticatedUser();
+        printHeader(user, logger, req);
 
         //clearCaches();
 
@@ -70,7 +75,7 @@ public class MmsConfigurationsDelete extends AbstractJavaWebScript {
 
         status.setCode(responseStatus.getCode());
 
-        printFooter();
+        printFooter(user, logger, timer);
 
         return model;
     }

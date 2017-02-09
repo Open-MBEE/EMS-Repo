@@ -1,5 +1,5 @@
 {"elements": [{
-    "qualifiedId": "/europa/123456/304",
+    "qualifiedId": "/europa/PROJECT-123456/304",
     "qualifiedName": "/europa/JW_TEST/304",
     "sysmlid": "304",
     "editable": true,
@@ -7,11 +7,11 @@
     "modifier": "admin",
     "name": "304",
     "documentation": "this will create a moved element",
-    "owner": "123456",
+    "owner": "PROJECT-123456",
     "specialization": {
         "propertyType": null,
-        "isSlot": false,
         "isDerived": false,
+        "isSlot": false,
         "value": [{
             "string": "dlam_string",
             "type": "LiteralString"

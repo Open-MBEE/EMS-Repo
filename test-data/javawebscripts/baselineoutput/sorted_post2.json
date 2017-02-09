@@ -30,7 +30,7 @@
         "documentation": "4something",
         "editable": true,
         "name": "400",
-        "owner": "123456",
+        "owner": "PROJECT-123456",
         "qualifiedName": "/////CY Test/400",
         "specialization": {
             "isDerived": false,
@@ -108,7 +108,7 @@
         "documentation": "something",
         "editable": true,
         "name": "300",
-        "owner": "123456",
+        "owner": "PROJECT-123456",
         "qualifiedName": "/////CY Test/300",
         "specialization": {
             "isDerived": false,
@@ -158,7 +158,7 @@
     {
         "author": "admin",
         "editable": true,
-        "owner": "123456",
+        "owner": "PROJECT-123456",
         "qualifiedName": "/////CY Test/",
         "specialization": {"type": "Element"},
         "sysmlid": "MMS_1404866063565_4d8b4a5a-f05f-4a85-8aac-c692530d962d"

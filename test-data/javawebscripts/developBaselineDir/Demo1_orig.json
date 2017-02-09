@@ -1,10 +1,10 @@
 {"views": [{
-    "qualifiedId": "/europa/123456/_17_0_2_3_e610336_1394148311476_17302_29388",
+    "qualifiedId": "/europa/PROJECT-123456/_17_0_2_3_e610336_1394148311476_17302_29388",
     "name": "Components",
     "qualifiedName": "/europa/JW_TEST/Components",
     "sysmlid": "_17_0_2_3_e610336_1394148311476_17302_29388",
     "documentation": "",
-    "owner": "123456",
+    "owner": "PROJECT-123456",
     "read": "2015-03-27T09:04:17.168-0700",
     "specialization": {
         "displayedElements": ["_17_0_2_4_f3a0363_1394142290412_487571_28478"],

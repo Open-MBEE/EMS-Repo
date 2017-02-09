@@ -272,7 +272,7 @@ public class JenkinsEngine implements ExecutionEngine {
     public void execute() {
         // This sets the URL to an Object specifically for making GET calls
         HttpGet get = new HttpGet( this.executeUrl );
-        String entityString;
+        String entityString = null;
 
         try {
             // This will tell the Jenkins HTTP Client to execute the GET
@@ -302,6 +302,7 @@ public class JenkinsEngine implements ExecutionEngine {
            // Will throw an error if the execution fails from either incorrect
            // setup or if the jenkinsClient has not been instantiated.
         } catch ( IOException e ) {
+            logger.error( "JenkinsEngine.execute(): response \"" + entityString + "\" failed to parse as a JSONObject" );
             e.printStackTrace();
         }
     }

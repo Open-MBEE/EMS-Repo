@@ -1,0 +1,11 @@
+<webscript>
+	<shortname>Post Sysml Project to DNG Folder Mappings</shortname>
+	<description>
+		Specifies which DNG folder to sync Sysml Project requirements into
+	</description>
+	<url>/doors/project/folder/mappings</url>
+	<format default="json">argument</format>
+	<authentication>user</authentication>
+	<transaction>none</transaction>
+	<family>MMS REST API</family>
+</webscript>

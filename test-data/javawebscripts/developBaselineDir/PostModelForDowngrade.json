@@ -7,35 +7,6 @@
         "specialization": {"type": "Package"}
     },
     {
-        "sysmlid": "54321",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "specialization": {
-            "view2view": [{
-                "childrenViews": [
-                    "301",
-                    "302"
-                ],
-                "sysmlid": "301"
-            }],
-            "displayedElements": [
-                "301",
-                "302",
-                "303"
-            ],
-            "noSections": ["302"],
-            "type": "Product"
-        }
-    },
-    {
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "appliedMetatypes": ["_9_0_62a020a_1105704885298_713292_7913"],
-        "specialization": {"type": "Package"}
-    },
-    {
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
@@ -57,6 +28,35 @@
         "name": "holding_bin",
         "appliedMetatypes": ["_9_0_62a020a_1105704885298_713292_7913"],
         "specialization": {"type": "Package"}
+    },
+    {
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "appliedMetatypes": ["_9_0_62a020a_1105704885298_713292_7913"],
+        "specialization": {"type": "Package"}
+    },
+    {
+        "sysmlid": "54321",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "specialization": {
+            "view2view": [{
+                "childrenViews": [
+                    "301",
+                    "302"
+                ],
+                "sysmlid": "301"
+            }],
+            "displayedElements": [
+                "301",
+                "302",
+                "303"
+            ],
+            "noSections": ["302"],
+            "type": "Product"
+        }
     }
 ]}
 200

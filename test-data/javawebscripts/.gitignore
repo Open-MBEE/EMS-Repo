@@ -2,5 +2,8 @@
 /testBaselineDir/
 /output/
 /developBaselineDir/sorted_*
+/developResultDir
+deleteme*
+temp/
 *.pyc
 *.DS_Store

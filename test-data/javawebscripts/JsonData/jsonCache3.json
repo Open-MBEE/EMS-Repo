@@ -5,7 +5,7 @@
         "documentation": "",
         "sysmlid": "jsonTest3",
         "name": "jsonTest3",
-        "owner": "123456",
+        "owner": "PROJECT-123456",
         "specialization": {"type": "Constraint",
                           "specification":
                             {"type": "LiteralInteger",

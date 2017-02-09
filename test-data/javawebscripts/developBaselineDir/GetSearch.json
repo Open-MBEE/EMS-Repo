@@ -8,8 +8,8 @@
         "documentation": "something",
         "specialization": {
             "propertyType": null,
-            "isSlot": false,
             "isDerived": false,
+            "isSlot": false,
             "value": [{
                 "string": "dlam_string",
                 "type": "LiteralString"
@@ -26,8 +26,8 @@
         "documentation": "something",
         "specialization": {
             "propertyType": null,
-            "isSlot": false,
             "isDerived": false,
+            "isSlot": false,
             "value": [{
                 "string": "dlam_string",
                 "type": "LiteralString"

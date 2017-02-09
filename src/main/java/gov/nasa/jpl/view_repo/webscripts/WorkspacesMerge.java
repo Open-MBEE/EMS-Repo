@@ -121,7 +121,7 @@ public class WorkspacesMerge extends AbstractJavaWebScript{
                                 // Create JSON object of the elements to return:
                                 JSONArray elementsJson = new JSONArray();
                                 for ( EmsScriptNode element : elements ) {
-                                    elementsJson.put( element.toJSONObject(targetWS, null) );
+                                    elementsJson.put( element.toJSONObject(targetWS, null, false) );
                                 }
                            //top.put( "elements", elementsJson );
                             //model.put( "res", NodeUtil.jsonToString( top, 4 ) );

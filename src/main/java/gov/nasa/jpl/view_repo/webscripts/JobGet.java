@@ -147,7 +147,7 @@ public class JobGet extends ModelGet {
                                 EmsScriptNode p = job.getJobPropertyNode( j, "status" );  
                                 
                                 if( p != null ) {
-                                    JSONObject prop = p.toJSONObject( null, null );
+                                    JSONObject prop = p.toJSONObject( null, null, false );
                                     
                                     if( prop != null ) {
                                         JSONObject specJson = prop.optJSONObject( Acm.JSON_SPECIALIZATION );

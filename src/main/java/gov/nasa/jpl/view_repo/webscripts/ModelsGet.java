@@ -30,9 +30,11 @@
 package gov.nasa.jpl.view_repo.webscripts;
 
 import gov.nasa.jpl.mbee.util.TimeUtils;
+import gov.nasa.jpl.mbee.util.Timer;
 import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.db.PostgresHelper;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
+import gov.nasa.jpl.view_repo.util.EmsTransaction;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 
@@ -47,6 +49,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.log4j.*;
 import org.alfresco.repo.model.Repository;
+import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.json.JSONArray;
@@ -124,6 +127,10 @@ public class ModelsGet extends AbstractJavaWebScript {
                                                   Status status, Cache cache) {
         Map<String, Object> model = new HashMap<String, Object>();
 
+        String user = AuthenticationUtil.getFullyAuthenticatedUser();
+        printHeader(user, logger, req);
+        Timer timer = new Timer();
+        
         JSONArray elementsJson = new JSONArray();
         if (validateRequest(req, status)) {
             try {
@@ -153,6 +160,8 @@ public class ModelsGet extends AbstractJavaWebScript {
 
         status.setCode(responseStatus.getCode());
 
+        printFooter(user, logger, timer);
+        
         return model;
     }
 
@@ -165,6 +174,8 @@ public class ModelsGet extends AbstractJavaWebScript {
         JSONObject requestJson = //JSONObject.make( 
                 (JSONObject)req.parseContent();// );
         JSONArray elementsFoundJson = new JSONArray();
+
+        final boolean isQualified = getBooleanArg(req, "extended", false);
 
         JSONArray elementsToFindJson;
         elementsToFindJson = requestJson.getJSONArray( "elements" );
@@ -188,7 +199,7 @@ public class ModelsGet extends AbstractJavaWebScript {
                         if (logger.isDebugEnabled()) logger.debug("[TIMING] getting script node: " + ii);
                         EmsScriptNode node = new EmsScriptNode(new NodeRef(noderefids.get( ii )), services, response);
                         if (logger.isDebugEnabled()) logger.debug("[TIMING] converting to json for sysmlid: " + node.getSysmlId());
-                        elementsFoundJson.put(node.toJSONObject(workspace, dateTime));
+                        elementsFoundJson.put(node.toJSONObject(workspace, dateTime, isQualified));
                         if (logger.isDebugEnabled()) logger.debug("[TIMING] added json");
                     }
                     graphSearched = true;
@@ -204,20 +215,34 @@ public class ModelsGet extends AbstractJavaWebScript {
         }
         
         if (!graphSearched) {
+            final JSONArray elementsFoundJsonT = elementsFoundJson;
+
             for (int ii = 0; ii < sysmlids.size(); ii++) {
-                if (logger.isDebugEnabled()) logger.debug("[TIMING] [NO GRAPH] finding script node");
-                EmsScriptNode node = NodeUtil.findScriptNodeById( sysmlids.get( ii ), workspace, dateTime, false, services, response );
-                if (logger.isDebugEnabled()) logger.debug("[TIMING] [NO GRAPH] found script node");
-                if (node != null) {
-                    try {
-                        if (logger.isDebugEnabled()) logger.debug("[TIMING] [NO GRAPH] dumping to json for " + node.getSysmlId());
-                        elementsFoundJson.put( node.toJSONObject( workspace, dateTime ) );
-                        if (logger.isDebugEnabled()) logger.debug("[TIMING] [NO GRAPH] finished dumping json");
-                    } catch (JSONException e) {
-                        log(Level.ERROR, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Could not create JSON");
-                        e.printStackTrace();
+                
+                final String id = sysmlids.get( ii );
+                
+                new EmsTransaction(getServices(), getResponse(),
+                                   getResponseStatus(), false, true) {
+                    
+                    @Override
+                    public void run() throws Exception {
+                        
+                        if (logger.isDebugEnabled()) logger.debug("[TIMING] [NO GRAPH] finding script node");
+                        EmsScriptNode node = NodeUtil.findScriptNodeById( id, workspace, dateTime, false, services, response );
+                        if (logger.isDebugEnabled()) logger.debug("[TIMING] [NO GRAPH] found script node");
+                        if (node != null) {
+                            try {
+                                if (logger.isDebugEnabled()) logger.debug("[TIMING] [NO GRAPH] dumping to json for " + node.getSysmlId());
+                                elementsFoundJsonT.put( node.toJSONObject( workspace, dateTime, isQualified ) );
+                                if (logger.isDebugEnabled()) logger.debug("[TIMING] [NO GRAPH] finished dumping json");
+                            } catch (JSONException e) {
+                                ModelsGet.this.log(Level.ERROR, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Could not create JSON");
+                                e.printStackTrace();
+                            }
+                        }
+                
                     }
-                }
+                };
             }
         }
 

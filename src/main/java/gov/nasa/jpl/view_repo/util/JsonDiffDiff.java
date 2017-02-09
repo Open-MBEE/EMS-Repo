@@ -185,7 +185,7 @@ public class JsonDiffDiff extends AbstractDiff<JSONObject, Object, String> {
 	}
 
 	public static String id(JSONObject o) {
-		return o.optString("sysmlid");
+		return o.optString("sysmlid"); // WARNING: This returns "" if there is no sysmlid.
 	}
 
 	protected void removeFromAdded(String id) {
@@ -293,7 +293,7 @@ public class JsonDiffDiff extends AbstractDiff<JSONObject, Object, String> {
 		JSONObject obj = null;
 		Map<String, JSONObject> m = isSet1 ? getMap1() : getMap2();
 		String id = getId(t);
-		if (id != null) {
+		if (!Utils.isNullOrEmpty( id ) ) {
 			JSONObject objx = m.get(id);
 			if (objx != null)
 				obj = objx;
@@ -471,7 +471,7 @@ public class JsonDiffDiff extends AbstractDiff<JSONObject, Object, String> {
 
 	@Override
 	public String getName(JSONObject t) {
-		return t.optString("name");
+		return t.has( "name" ) ? t.optString("name") : null;
 	}
 
 	@Override

@@ -1,0 +1,1417 @@
+{"elements": [
+    {
+        "sysmlid": "_18_0_5_407019f_1466704587594_388083_14484-slot-_18_0beta_9150291_1392290115432_487113_4413",
+        "isMetatype": false,
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "",
+        "documentation": "",
+        "appliedMetatypes": ["_9_0_62a020a_1105704885275_885607_7905"],
+        "specialization": {
+            "propertyType": "_18_0beta_9150291_1392290115432_487113_4413",
+            "isDerived": false,
+            "isSlot": true,
+            "value": [{
+                "string": "3",
+                "type": "LiteralString"
+            }],
+            "type": "Property"
+        }
+    },
+    {
+        "sysmlid": "_18_0_5_407019f_1466704664886_239391_14895",
+        "isMetatype": false,
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "",
+        "documentation": "",
+        "appliedMetatypes": ["_9_0_62a020a_1105704885473_18793_7971"],
+        "specialization": {
+            "source": "_18_0_5_407019f_1466704664886_160231_14896",
+            "target": "_18_0_5_407019f_1466704664886_990031_14897",
+            "type": "Association",
+            "ownedEnd": ["_18_0_5_407019f_1466704664886_990031_14897"]
+        }
+    },
+    {
+        "sysmlid": "_18_0_5_407019f_1466704588878_148141_14531",
+        "isMetatype": false,
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "",
+        "documentation": "",
+        "appliedMetatypes": ["_9_0_62a020a_1105704885251_933969_7897"],
+        "specialization": {
+            "slots": [],
+            "classifier": [
+                "_17_0_1_232f03dc_1325612611695_581988_21583",
+                "_18_0beta_9150291_1392290067481_33752_4359"
+            ],
+            "type": "InstanceSpecification"
+        }
+    },
+    {
+        "sysmlid": "_18_0_5_407019f_1466704585609_698345_14421-slot-_17_0_2_3_e9f034d_1375464993159_319060_29362",
+        "isMetatype": false,
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "",
+        "documentation": "",
+        "appliedMetatypes": ["_9_0_62a020a_1105704885275_885607_7905"],
+        "specialization": {
+            "propertyType": "_17_0_2_3_e9f034d_1375464993159_319060_29362",
+            "isDerived": false,
+            "isSlot": true,
+            "value": [{
+                "string": "California Institute of Technology",
+                "type": "LiteralString"
+            }],
+            "type": "Property"
+        }
+    },
+    {
+        "sysmlid": "_18_0_5_407019f_1466704664886_160231_14896",
+        "isMetatype": false,
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "view E",
+        "documentation": "",
+        "appliedMetatypes": [
+            "_15_0_be00301_1199377756297_348405_2678",
+            "_9_0_62a020a_1105704884574_96724_7644"
+        ],
+        "specialization": {
+            "aggregation": "COMPOSITE",
+            "multiplicityMax": 1,
+            "propertyType": "_18_0_5_407019f_1466704590650_411603_14577",
+            "isDerived": false,
+            "isSlot": false,
+            "value": [],
+            "multiplicityMin": 1,
+            "type": "Property"
+        }
+    },
+    {
+        "sysmlid": "_18_0_5_407019f_1466704590650_759925_14578",
+        "isMetatype": false,
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "",
+        "documentation": "",
+        "appliedMetatypes": ["_9_0_62a020a_1105704885251_933969_7897"],
+        "specialization": {
+            "slots": [],
+            "classifier": [
+                "_17_0_1_232f03dc_1325612611695_581988_21583",
+                "_18_0beta_9150291_1392290067481_33752_4359"
+            ],
+            "type": "InstanceSpecification"
+        }
+    },
+    {
+        "sysmlid": "Unused_View_Instances-5c79ccb6-68a2-4411-be7b-339a05b9e779",
+        "isMetatype": false,
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "Unused View Instances",
+        "documentation": "",
+        "appliedMetatypes": ["_9_0_62a020a_1105704885298_713292_7913"],
+        "specialization": {
+            "type": "Package",
+            "isSite": false
+        }
+    },
+    {
+        "sysmlid": "_18_0_5_407019f_1468188892967_475373_14548",
+        "isMetatype": false,
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "View E Instances",
+        "documentation": "",
+        "appliedMetatypes": ["_9_0_62a020a_1105704885298_713292_7913"],
+        "specialization": {
+            "type": "Package",
+            "isSite": false
+        }
+    },
+    {
+        "sysmlid": "_18_0_5_407019f_1466704667634_423983_14922",
+        "isMetatype": false,
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "view F",
+        "documentation": "",
+        "appliedMetatypes": [
+            "_15_0_be00301_1199377756297_348405_2678",
+            "_9_0_62a020a_1105704884574_96724_7644"
+        ],
+        "specialization": {
+            "aggregation": "COMPOSITE",
+            "multiplicityMax": 1,
+            "propertyType": "_18_0_5_407019f_1466704658028_771482_14847",
+            "isDerived": false,
+            "isSlot": false,
+            "value": [],
+            "multiplicityMin": 1,
+            "type": "Property"
+        }
+    },
+    {
+        "sysmlid": "_18_0_5_407019f_1466704667635_760971_14923",
+        "isMetatype": false,
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "",
+        "documentation": "",
+        "appliedMetatypes": ["_9_0_62a020a_1105704884574_96724_7644"],
+        "specialization": {
+            "aggregation": "NONE",
+            "multiplicityMax": 1,
+            "propertyType": "_18_0_5_407019f_1466704592925_553155_14624",
+            "isDerived": false,
+            "isSlot": false,
+            "value": [],
+            "multiplicityMin": 1,
+            "type": "Property"
+        }
+    },
+    {
+        "sysmlid": "_18_0_5_407019f_1466704592925_553155_14624",
+        "isMetatype": false,
+        "editable": true,
+        "creator": "admin",
+        "ownedAttribute": [
+            "_18_0_5_407019f_1466704664886_160231_14896",
+            "_18_0_5_407019f_1466704667634_423983_14922"
+        ],
+        "modifier": "admin",
+        "name": "View B",
+        "documentation": "",
+        "appliedMetatypes": [
+            "_17_0_1_232f03dc_1325612611695_581988_21583",
+            "_18_0beta_9150291_1392290067481_33752_4359",
+            "_9_0_62a020a_1105704885343_144138_7929"
+        ],
+        "specialization": {
+            "displayedElements": ["_18_0_5_407019f_1466704592925_553155_14624"],
+            "childViews": [
+                {
+                    "id": "_18_0_5_407019f_1466704590650_411603_14577",
+                    "aggregation": "COMPOSITE"
+                },
+                {
+                    "id": "_18_0_5_407019f_1466704658028_771482_14847",
+                    "aggregation": "COMPOSITE"
+                }
+            ],
+            "contents": {
+                "operand": [{
+                    "type": "InstanceValue",
+                    "instance": "_18_0_5_407019f_1468188892959_961603_14515"
+                }],
+                "type": "Expression"
+            },
+            "type": "View"
+        }
+    },
+    {
+        "sysmlid": "_18_0_5_407019f_1466704592926_803154_14625",
+        "isMetatype": false,
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "",
+        "documentation": "",
+        "appliedMetatypes": ["_9_0_62a020a_1105704885251_933969_7897"],
+        "specialization": {
+            "slots": [],
+            "classifier": [
+                "_17_0_1_232f03dc_1325612611695_581988_21583",
+                "_18_0beta_9150291_1392290067481_33752_4359"
+            ],
+            "type": "InstanceSpecification"
+        }
+    },
+    {
+        "sysmlid": "_18_0_5_407019f_1468188892933_472347_14488",
+        "isMetatype": false,
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "",
+        "documentation": "",
+        "appliedMetatypes": [
+            "_17_0_5_1_407019f_1430628469999_419411_12119",
+            "_9_0_62a020a_1105704885833_713624_8075"
+        ],
+        "specialization": {
+            "source": "_18_0_5_407019f_1466704585609_985766_14420",
+            "target": "_18_0_5_407019f_1468188892932_737130_14487",
+            "type": "Dependency"
+        }
+    },
+    {
+        "sysmlid": "_18_0_5_407019f_1466704649288_809256_14771",
+        "isMetatype": false,
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "view B",
+        "documentation": "",
+        "appliedMetatypes": [
+            "_15_0_be00301_1199377756297_348405_2678",
+            "_9_0_62a020a_1105704884574_96724_7644"
+        ],
+        "specialization": {
+            "aggregation": "COMPOSITE",
+            "multiplicityMax": 1,
+            "propertyType": "_18_0_5_407019f_1466704592925_553155_14624",
+            "isDerived": false,
+            "isSlot": false,
+            "value": [],
+            "multiplicityMin": 1,
+            "type": "Property"
+        }
+    },
+    {
+        "sysmlid": "_18_0_5_407019f_1466704664886_990031_14897",
+        "isMetatype": false,
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "",
+        "documentation": "",
+        "appliedMetatypes": ["_9_0_62a020a_1105704884574_96724_7644"],
+        "specialization": {
+            "aggregation": "NONE",
+            "multiplicityMax": 1,
+            "propertyType": "_18_0_5_407019f_1466704592925_553155_14624",
+            "isDerived": false,
+            "isSlot": false,
+            "value": [],
+            "multiplicityMin": 1,
+            "type": "Property"
+        }
+    },
+    {
+        "sysmlid": "_18_0_5_407019f_1468188892932_737130_14487",
+        "isMetatype": false,
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "Hierarchy Test Doc Instances",
+        "documentation": "",
+        "appliedMetatypes": ["_9_0_62a020a_1105704885298_713292_7913"],
+        "specialization": {
+            "type": "Package",
+            "isSite": false
+        }
+    },
+    {
+        "sysmlid": "_18_0_5_407019f_1466704655412_205074_14822",
+        "isMetatype": false,
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "",
+        "documentation": "",
+        "appliedMetatypes": ["_9_0_62a020a_1105704885473_18793_7971"],
+        "specialization": {
+            "source": "_18_0_5_407019f_1466704655412_905888_14823",
+            "target": "_18_0_5_407019f_1466704655412_391478_14824",
+            "type": "Association",
+            "ownedEnd": ["_18_0_5_407019f_1466704655412_391478_14824"]
+        }
+    },
+    {
+        "sysmlid": "_18_0_5_407019f_1466704655412_391478_14824",
+        "isMetatype": false,
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "",
+        "documentation": "",
+        "appliedMetatypes": ["_9_0_62a020a_1105704884574_96724_7644"],
+        "specialization": {
+            "aggregation": "NONE",
+            "multiplicityMax": 1,
+            "propertyType": "_18_0_5_407019f_1466704583339_1092_14357",
+            "isDerived": false,
+            "isSlot": false,
+            "value": [],
+            "multiplicityMin": 1,
+            "type": "Property"
+        }
+    },
+    {
+        "sysmlid": "_18_0_5_407019f_1466704567277_266148_14321",
+        "isMetatype": false,
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "Test",
+        "documentation": "",
+        "appliedMetatypes": ["_9_0_62a020a_1105704885298_713292_7913"],
+        "specialization": {
+            "type": "Package",
+            "isSite": false
+        }
+    },
+    {
+        "sysmlid": "_18_0_5_407019f_1466704587594_388083_14484",
+        "isMetatype": false,
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "",
+        "documentation": "",
+        "appliedMetatypes": ["_9_0_62a020a_1105704885251_933969_7897"],
+        "specialization": {
+            "slots": [],
+            "classifier": [
+                "_17_0_1_232f03dc_1325612611695_581988_21583",
+                "_18_0beta_9150291_1392290067481_33752_4359"
+            ],
+            "type": "InstanceSpecification"
+        }
+    },
+    {
+        "sysmlid": "_18_0_5_407019f_1466704579022_428530_14322",
+        "isMetatype": false,
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "Untitled1",
+        "documentation": "",
+        "appliedMetatypes": [
+            "_9_0_be00301_1108044380615_150487_0",
+            "_9_0_62a020a_1106296071977_61607_0"
+        ],
+        "specialization": {"type": "Untyped"}
+    },
+    {
+        "sysmlid": "_18_0_5_407019f_1466704585609_985766_14420",
+        "isMetatype": false,
+        "editable": true,
+        "creator": "admin",
+        "ownedAttribute": [
+            "_18_0_5_407019f_1466704646254_805799_14745",
+            "_18_0_5_407019f_1466704649288_809256_14771"
+        ],
+        "modifier": "admin",
+        "name": "Hierarchy Test Doc",
+        "documentation": "",
+        "appliedMetatypes": [
+            "_17_0_2_3_87b0275_1371477871400_792964_43374",
+            "_18_0beta_9150291_1392290067481_33752_4359",
+            "_9_0_62a020a_1105704885343_144138_7929"
+        ],
+        "specialization": {
+            "childViews": [
+                {
+                    "aggregation": "SHARED",
+                    "id": "_18_0_5_407019f_1466704583339_1092_14357"
+                },
+                {
+                    "aggregation": "COMPOSITE",
+                    "id": "_18_0_5_407019f_1466704592925_553155_14624"
+                }
+            ],
+            "displayedElements": ["_18_0_5_407019f_1466704585609_985766_14420"],
+            "contents": {
+                "type": "Expression",
+                "operand": [{
+                    "instance": "_18_0_5_407019f_1468188892949_205422_14491",
+                    "type": "InstanceValue"
+                }]
+            },
+            "type": "Product"
+        }
+    },
+    {
+        "sysmlid": "_18_0_5_407019f_1468188892964_103677_14537",
+        "isMetatype": false,
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "",
+        "documentation": "",
+        "appliedMetatypes": [
+            "_17_0_5_1_407019f_1430628469999_419411_12119",
+            "_9_0_62a020a_1105704885833_713624_8075"
+        ],
+        "specialization": {
+            "source": "_18_0_5_407019f_1466704588878_781465_14530",
+            "target": "_18_0_5_407019f_1468188892964_933766_14536",
+            "type": "Dependency"
+        }
+    },
+    {
+        "sysmlid": "_18_0_5_407019f_1466704652396_258098_14796",
+        "isMetatype": false,
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "",
+        "documentation": "",
+        "appliedMetatypes": ["_9_0_62a020a_1105704885473_18793_7971"],
+        "specialization": {
+            "source": "_18_0_5_407019f_1466704652396_405515_14797",
+            "target": "_18_0_5_407019f_1466704652396_995464_14798",
+            "type": "Association",
+            "ownedEnd": ["_18_0_5_407019f_1466704652396_995464_14798"]
+        }
+    },
+    {
+        "sysmlid": "_18_0_5_407019f_1468188892961_682220_14524",
+        "isMetatype": false,
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "View C Instances",
+        "documentation": "",
+        "appliedMetatypes": ["_9_0_62a020a_1105704885298_713292_7913"],
+        "specialization": {
+            "type": "Package",
+            "isSite": false
+        }
+    },
+    {
+        "sysmlid": "_18_0_5_407019f_1468188892958_63580_14513",
+        "isMetatype": false,
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "",
+        "documentation": "",
+        "appliedMetatypes": [
+            "_17_0_5_1_407019f_1430628469999_419411_12119",
+            "_9_0_62a020a_1105704885833_713624_8075"
+        ],
+        "specialization": {
+            "source": "_18_0_5_407019f_1466704592925_553155_14624",
+            "target": "_18_0_5_407019f_1468188892958_19611_14512",
+            "type": "Dependency"
+        }
+    },
+    {
+        "sysmlid": "_18_0_5_407019f_1466704587594_239414_14483",
+        "isMetatype": false,
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "View C",
+        "documentation": "",
+        "appliedMetatypes": [
+            "_17_0_1_232f03dc_1325612611695_581988_21583",
+            "_18_0beta_9150291_1392290067481_33752_4359",
+            "_9_0_62a020a_1105704885343_144138_7929"
+        ],
+        "specialization": {
+            "displayedElements": ["_18_0_5_407019f_1466704587594_239414_14483"],
+            "childViews": [],
+            "contents": {
+                "operand": [{
+                    "type": "InstanceValue",
+                    "instance": "_18_0_5_407019f_1468188892961_846348_14527"
+                }],
+                "type": "Expression"
+            },
+            "type": "View"
+        }
+    },
+    {
+        "sysmlid": "_18_0_5_407019f_1466704585609_698345_14421",
+        "isMetatype": false,
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "",
+        "documentation": "",
+        "appliedMetatypes": ["_9_0_62a020a_1105704885251_933969_7897"],
+        "specialization": {
+            "slots": [],
+            "classifier": [
+                "_17_0_2_3_87b0275_1371477871400_792964_43374",
+                "_18_0beta_9150291_1392290067481_33752_4359"
+            ],
+            "type": "InstanceSpecification"
+        }
+    },
+    {
+        "sysmlid": "_18_0_5_407019f_1466704652396_995464_14798",
+        "isMetatype": false,
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "",
+        "documentation": "",
+        "appliedMetatypes": ["_9_0_62a020a_1105704884574_96724_7644"],
+        "specialization": {
+            "aggregation": "NONE",
+            "multiplicityMax": 1,
+            "propertyType": "_18_0_5_407019f_1466704583339_1092_14357",
+            "isDerived": false,
+            "isSlot": false,
+            "value": [],
+            "multiplicityMin": 1,
+            "type": "Property"
+        }
+    },
+    {
+        "sysmlid": "_18_0_5_407019f_1468188892969_421040_14561",
+        "isMetatype": false,
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "",
+        "documentation": "",
+        "appliedMetatypes": [
+            "_17_0_5_1_407019f_1430628469999_419411_12119",
+            "_9_0_62a020a_1105704885833_713624_8075"
+        ],
+        "specialization": {
+            "source": "_18_0_5_407019f_1466704658028_771482_14847",
+            "target": "_18_0_5_407019f_1468188892969_128541_14560",
+            "type": "Dependency"
+        }
+    },
+    {
+        "sysmlid": "_18_0_5_407019f_1466704585609_698345_14421-slot-_17_0_2_3_f4a035d_1366647903995_472834_36999",
+        "isMetatype": false,
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "",
+        "documentation": "",
+        "appliedMetatypes": ["_9_0_62a020a_1105704885275_885607_7905"],
+        "specialization": {
+            "propertyType": "_17_0_2_3_f4a035d_1366647903995_472834_36999",
+            "isDerived": false,
+            "isSlot": true,
+            "value": [{
+                "string": "1",
+                "type": "LiteralString"
+            }],
+            "type": "Property"
+        }
+    },
+    {
+        "sysmlid": "_18_0_5_407019f_1468188892967_789351_14549",
+        "isMetatype": false,
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "",
+        "documentation": "",
+        "appliedMetatypes": [
+            "_17_0_5_1_407019f_1430628469999_419411_12119",
+            "_9_0_62a020a_1105704885833_713624_8075"
+        ],
+        "specialization": {
+            "source": "_18_0_5_407019f_1466704590650_411603_14577",
+            "target": "_18_0_5_407019f_1468188892967_475373_14548",
+            "type": "Dependency"
+        }
+    },
+    {
+        "sysmlid": "_18_0_5_407019f_1466704658029_659197_14848-slot-_18_0beta_9150291_1392290115432_487113_4413",
+        "isMetatype": false,
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "",
+        "documentation": "",
+        "appliedMetatypes": ["_9_0_62a020a_1105704885275_885607_7905"],
+        "specialization": {
+            "propertyType": "_18_0beta_9150291_1392290115432_487113_4413",
+            "isDerived": false,
+            "isSlot": true,
+            "value": [{
+                "string": "7",
+                "type": "LiteralString"
+            }],
+            "type": "Property"
+        }
+    },
+    {
+        "sysmlid": "_18_0_5_407019f_1466704585609_698345_14421-slot-_17_0_2_3_f4a035d_1366647903992_983742_36991",
+        "isMetatype": false,
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "",
+        "documentation": "",
+        "appliedMetatypes": ["_9_0_62a020a_1105704885275_885607_7905"],
+        "specialization": {
+            "propertyType": "_17_0_2_3_f4a035d_1366647903992_983742_36991",
+            "isDerived": false,
+            "isSlot": true,
+            "value": [{
+                "string": "center",
+                "type": "LiteralString"
+            }],
+            "type": "Property"
+        }
+    },
+    {
+        "sysmlid": "_18_0_5_407019f_1466704583340_299989_14358",
+        "isMetatype": false,
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "",
+        "documentation": "",
+        "appliedMetatypes": ["_9_0_62a020a_1105704885251_933969_7897"],
+        "specialization": {
+            "slots": [],
+            "classifier": [
+                "_17_0_1_232f03dc_1325612611695_581988_21583",
+                "_18_0beta_9150291_1392290067481_33752_4359"
+            ],
+            "type": "InstanceSpecification"
+        }
+    },
+    {
+        "sysmlid": "_18_0_5_407019f_1466704649288_983833_14772",
+        "isMetatype": false,
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "",
+        "documentation": "",
+        "appliedMetatypes": ["_9_0_62a020a_1105704884574_96724_7644"],
+        "specialization": {
+            "aggregation": "NONE",
+            "multiplicityMax": 1,
+            "propertyType": "_18_0_5_407019f_1466704585609_985766_14420",
+            "isDerived": false,
+            "isSlot": false,
+            "value": [],
+            "multiplicityMin": 1,
+            "type": "Property"
+        }
+    },
+    {
+        "sysmlid": "_18_0_5_407019f_1468188892970_158569_14563",
+        "isMetatype": false,
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "View Documentation",
+        "documentation": "<p>&nbsp;<\/p><p><mms-transclude-doc data-mms-eid=\"_18_0_5_407019f_1466704658028_771482_14847\">[cf.View F.doc]<\/mms-transclude-doc><\/p><p>&nbsp;<\/p>",
+        "appliedMetatypes": ["_9_0_62a020a_1105704885251_933969_7897"],
+        "specialization": {
+            "instanceSpecificationSpecification": {
+                "string": "{\"sourceProperty\":\"documentation\",\"source\":\"_18_0_5_407019f_1468188892970_158569_14563\",\"type\":\"Paragraph\"}",
+                "type": "LiteralString"
+            },
+            "slots": [],
+            "classifier": ["_17_0_5_1_407019f_1431903758416_800749_12055"],
+            "type": "InstanceSpecification"
+        }
+    },
+    {
+        "sysmlid": "_18_0_5_407019f_1468188892961_846348_14527",
+        "isMetatype": false,
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "View Documentation",
+        "documentation": "<p>&nbsp;<\/p><p><mms-transclude-doc data-mms-eid=\"_18_0_5_407019f_1466704587594_239414_14483\">[cf.View C.doc]<\/mms-transclude-doc><\/p><p>&nbsp;<\/p>",
+        "appliedMetatypes": ["_9_0_62a020a_1105704885251_933969_7897"],
+        "specialization": {
+            "instanceSpecificationSpecification": {
+                "string": "{\"sourceProperty\":\"documentation\",\"source\":\"_18_0_5_407019f_1468188892961_846348_14527\",\"type\":\"Paragraph\"}",
+                "type": "LiteralString"
+            },
+            "slots": [],
+            "classifier": ["_17_0_5_1_407019f_1431903758416_800749_12055"],
+            "type": "InstanceSpecification"
+        }
+    },
+    {
+        "sysmlid": "_18_0_5_407019f_1466704652396_405515_14797",
+        "isMetatype": false,
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "view C",
+        "documentation": "",
+        "appliedMetatypes": [
+            "_15_0_be00301_1199378032543_992832_3096",
+            "_9_0_62a020a_1105704884574_96724_7644"
+        ],
+        "specialization": {
+            "aggregation": "NONE",
+            "multiplicityMax": 1,
+            "propertyType": "_18_0_5_407019f_1466704587594_239414_14483",
+            "isDerived": false,
+            "isSlot": false,
+            "value": [],
+            "multiplicityMin": 1,
+            "type": "Property"
+        }
+    },
+    {
+        "sysmlid": "_18_0_5_407019f_1466704585609_698345_14421-slot-_17_0_2_3_f4a035d_1366647903994_370992_36997",
+        "isMetatype": false,
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "",
+        "documentation": "",
+        "appliedMetatypes": ["_9_0_62a020a_1105704885275_885607_7905"],
+        "specialization": {
+            "propertyType": "_17_0_2_3_f4a035d_1366647903994_370992_36997",
+            "isDerived": false,
+            "isSlot": true,
+            "value": [{
+                "string": "\"Paper copies of this document may not be current and should not be relied on for official purposes. JPL/Caltech proprietary. Not for public release.\"",
+                "type": "LiteralString"
+            }],
+            "type": "Property"
+        }
+    },
+    {
+        "sysmlid": "_18_0_5_407019f_1466704667634_956426_14921",
+        "isMetatype": false,
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "",
+        "documentation": "",
+        "appliedMetatypes": ["_9_0_62a020a_1105704885473_18793_7971"],
+        "specialization": {
+            "source": "_18_0_5_407019f_1466704667634_423983_14922",
+            "target": "_18_0_5_407019f_1466704667635_760971_14923",
+            "type": "Association",
+            "ownedEnd": ["_18_0_5_407019f_1466704667635_760971_14923"]
+        }
+    },
+    {
+        "sysmlid": "_18_0_5_407019f_1468188892967_319620_14551",
+        "isMetatype": false,
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "View Documentation",
+        "documentation": "<p>&nbsp;<\/p><p><mms-transclude-doc data-mms-eid=\"_18_0_5_407019f_1466704590650_411603_14577\">[cf.View E.doc]<\/mms-transclude-doc><\/p><p>&nbsp;<\/p>",
+        "appliedMetatypes": ["_9_0_62a020a_1105704885251_933969_7897"],
+        "specialization": {
+            "instanceSpecificationSpecification": {
+                "string": "{\"sourceProperty\":\"documentation\",\"source\":\"_18_0_5_407019f_1468188892967_319620_14551\",\"type\":\"Paragraph\"}",
+                "type": "LiteralString"
+            },
+            "slots": [],
+            "classifier": ["_17_0_5_1_407019f_1431903758416_800749_12055"],
+            "type": "InstanceSpecification"
+        }
+    },
+    {
+        "sysmlid": "_18_0_5_407019f_1466704585609_698345_14421-slot-_17_0_2_3_e9f034d_1375464775176_680884_29346",
+        "isMetatype": false,
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "",
+        "documentation": "",
+        "appliedMetatypes": ["_9_0_62a020a_1105704885275_885607_7905"],
+        "specialization": {
+            "propertyType": "_17_0_2_3_e9f034d_1375464775176_680884_29346",
+            "isDerived": false,
+            "isSlot": true,
+            "value": [{
+                "string": "https://div27.jpl.nasa.gov/2740/files/logos/jpl_logo(220x67).gif",
+                "type": "LiteralString"
+            }],
+            "type": "Property"
+        }
+    },
+    {
+        "sysmlid": "_18_0_5_407019f_1466704646254_261426_14744",
+        "isMetatype": false,
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "",
+        "documentation": "",
+        "appliedMetatypes": ["_9_0_62a020a_1105704885473_18793_7971"],
+        "specialization": {
+            "source": "_18_0_5_407019f_1466704646254_805799_14745",
+            "target": "_18_0_5_407019f_1466704646254_76543_14746",
+            "type": "Association",
+            "ownedEnd": ["_18_0_5_407019f_1466704646254_76543_14746"]
+        }
+    },
+    {
+        "sysmlid": "_18_0_5_407019f_1466704588878_781465_14530",
+        "isMetatype": false,
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "View D",
+        "documentation": "",
+        "appliedMetatypes": [
+            "_17_0_1_232f03dc_1325612611695_581988_21583",
+            "_18_0beta_9150291_1392290067481_33752_4359",
+            "_9_0_62a020a_1105704885343_144138_7929"
+        ],
+        "specialization": {
+            "displayedElements": ["_18_0_5_407019f_1466704588878_781465_14530"],
+            "childViews": [],
+            "contents": {
+                "operand": [{
+                    "type": "InstanceValue",
+                    "instance": "_18_0_5_407019f_1468188892965_490446_14539"
+                }],
+                "type": "Expression"
+            },
+            "type": "View"
+        }
+    },
+    {
+        "sysmlid": "_18_0_5_407019f_1468188892961_808233_14525",
+        "isMetatype": false,
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "",
+        "documentation": "",
+        "appliedMetatypes": [
+            "_17_0_5_1_407019f_1430628469999_419411_12119",
+            "_9_0_62a020a_1105704885833_713624_8075"
+        ],
+        "specialization": {
+            "source": "_18_0_5_407019f_1466704587594_239414_14483",
+            "target": "_18_0_5_407019f_1468188892961_682220_14524",
+            "type": "Dependency"
+        }
+    },
+    {
+        "sysmlid": "_18_0_5_407019f_1466704590650_759925_14578-slot-_18_0beta_9150291_1392290115432_487113_4413",
+        "isMetatype": false,
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "",
+        "documentation": "",
+        "appliedMetatypes": ["_9_0_62a020a_1105704885275_885607_7905"],
+        "specialization": {
+            "propertyType": "_18_0beta_9150291_1392290115432_487113_4413",
+            "isDerived": false,
+            "isSlot": true,
+            "value": [{
+                "string": "5",
+                "type": "LiteralString"
+            }],
+            "type": "Property"
+        }
+    },
+    {
+        "sysmlid": "_18_0_5_407019f_1466704585609_698345_14421-slot-_17_0_2_3_e9f034d_1375464914291_213939_29352",
+        "isMetatype": false,
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "",
+        "documentation": "",
+        "appliedMetatypes": ["_9_0_62a020a_1105704885275_885607_7905"],
+        "specialization": {
+            "propertyType": "_17_0_2_3_e9f034d_1375464914291_213939_29352",
+            "isDerived": false,
+            "isSlot": true,
+            "value": [{
+                "string": "36px",
+                "type": "LiteralString"
+            }],
+            "type": "Property"
+        }
+    },
+    {
+        "sysmlid": "_18_0_5_407019f_1466704588878_148141_14531-slot-_18_0beta_9150291_1392290115432_487113_4413",
+        "isMetatype": false,
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "",
+        "documentation": "",
+        "appliedMetatypes": ["_9_0_62a020a_1105704885275_885607_7905"],
+        "specialization": {
+            "propertyType": "_18_0beta_9150291_1392290115432_487113_4413",
+            "isDerived": false,
+            "isSlot": true,
+            "value": [{
+                "string": "4",
+                "type": "LiteralString"
+            }],
+            "type": "Property"
+        }
+    },
+    {
+        "sysmlid": "_18_0_5_407019f_1468188892959_961603_14515",
+        "isMetatype": false,
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "View Documentation",
+        "documentation": "<p>&nbsp;<\/p><p><mms-transclude-doc data-mms-eid=\"_18_0_5_407019f_1466704592925_553155_14624\">[cf.View B.doc]<\/mms-transclude-doc><\/p><p>&nbsp;<\/p>",
+        "appliedMetatypes": ["_9_0_62a020a_1105704885251_933969_7897"],
+        "specialization": {
+            "instanceSpecificationSpecification": {
+                "string": "{\"sourceProperty\":\"documentation\",\"source\":\"_18_0_5_407019f_1468188892959_961603_14515\",\"type\":\"Paragraph\"}",
+                "type": "LiteralString"
+            },
+            "slots": [],
+            "classifier": ["_17_0_5_1_407019f_1431903758416_800749_12055"],
+            "type": "InstanceSpecification"
+        }
+    },
+    {
+        "sysmlid": "_18_0_5_407019f_1468188892955_514326_14500",
+        "isMetatype": false,
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "View A Instances",
+        "documentation": "",
+        "appliedMetatypes": ["_9_0_62a020a_1105704885298_713292_7913"],
+        "specialization": {
+            "type": "Package",
+            "isSite": false
+        }
+    },
+    {
+        "sysmlid": "_18_0_5_407019f_1466704655412_905888_14823",
+        "isMetatype": false,
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "view D",
+        "documentation": "",
+        "appliedMetatypes": [
+            "_15_0_be00301_1199377756297_348405_2678",
+            "_9_0_62a020a_1105704884574_96724_7644"
+        ],
+        "specialization": {
+            "aggregation": "COMPOSITE",
+            "multiplicityMax": 1,
+            "propertyType": "_18_0_5_407019f_1466704588878_781465_14530",
+            "isDerived": false,
+            "isSlot": false,
+            "value": [],
+            "multiplicityMin": 1,
+            "type": "Property"
+        }
+    },
+    {
+        "sysmlid": "_18_0_5_407019f_1466704646254_805799_14745",
+        "isMetatype": false,
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "view A",
+        "documentation": "",
+        "appliedMetatypes": [
+            "_15_0_be00301_1199378032543_992832_3096",
+            "_9_0_62a020a_1105704884574_96724_7644"
+        ],
+        "specialization": {
+            "aggregation": "SHARED",
+            "multiplicityMax": 1,
+            "propertyType": "_18_0_5_407019f_1466704583339_1092_14357",
+            "isDerived": false,
+            "isSlot": false,
+            "value": [],
+            "multiplicityMin": 1,
+            "type": "Property"
+        }
+    },
+    {
+        "sysmlid": "_18_0_5_407019f_1468188892969_128541_14560",
+        "isMetatype": false,
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "View F Instances",
+        "documentation": "",
+        "appliedMetatypes": ["_9_0_62a020a_1105704885298_713292_7913"],
+        "specialization": {
+            "type": "Package",
+            "isSite": false
+        }
+    },
+    {
+        "sysmlid": "View_Instances-5c79ccb6-68a2-4411-be7b-339a05b9e779",
+        "isMetatype": false,
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "View Instances",
+        "documentation": "",
+        "appliedMetatypes": ["_9_0_62a020a_1105704885298_713292_7913"],
+        "specialization": {
+            "type": "Package",
+            "isSite": false
+        }
+    },
+    {
+        "sysmlid": "_18_0_5_407019f_1466704590650_411603_14577",
+        "isMetatype": false,
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "View E",
+        "documentation": "",
+        "appliedMetatypes": [
+            "_17_0_1_232f03dc_1325612611695_581988_21583",
+            "_18_0beta_9150291_1392290067481_33752_4359",
+            "_9_0_62a020a_1105704885343_144138_7929"
+        ],
+        "specialization": {
+            "displayedElements": ["_18_0_5_407019f_1466704590650_411603_14577"],
+            "childViews": [],
+            "contents": {
+                "operand": [{
+                    "type": "InstanceValue",
+                    "instance": "_18_0_5_407019f_1468188892967_319620_14551"
+                }],
+                "type": "Expression"
+            },
+            "type": "View"
+        }
+    },
+    {
+        "sysmlid": "_18_0_5_407019f_1468188892949_205422_14491",
+        "isMetatype": false,
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "View Documentation",
+        "documentation": "<p>&nbsp;<\/p><p><mms-transclude-doc data-mms-eid=\"_18_0_5_407019f_1466704585609_985766_14420\">[cf.Hierarchy Test Doc.doc]<\/mms-transclude-doc><\/p><p>&nbsp;<\/p>",
+        "appliedMetatypes": ["_9_0_62a020a_1105704885251_933969_7897"],
+        "specialization": {
+            "instanceSpecificationSpecification": {
+                "string": "{\"sourceProperty\":\"documentation\",\"source\":\"_18_0_5_407019f_1468188892949_205422_14491\",\"type\":\"Paragraph\"}",
+                "type": "LiteralString"
+            },
+            "slots": [],
+            "classifier": ["_17_0_5_1_407019f_1431903758416_800749_12055"],
+            "type": "InstanceSpecification"
+        }
+    },
+    {
+        "sysmlid": "_18_0_5_407019f_1466704583339_1092_14357",
+        "isMetatype": false,
+        "editable": true,
+        "creator": "admin",
+        "ownedAttribute": [
+            "_18_0_5_407019f_1466704652396_405515_14797",
+            "_18_0_5_407019f_1466704655412_905888_14823"
+        ],
+        "modifier": "admin",
+        "name": "View A",
+        "documentation": "",
+        "appliedMetatypes": [
+            "_17_0_1_232f03dc_1325612611695_581988_21583",
+            "_18_0beta_9150291_1392290067481_33752_4359",
+            "_9_0_62a020a_1105704885343_144138_7929"
+        ],
+        "specialization": {
+            "displayedElements": ["_18_0_5_407019f_1466704583339_1092_14357"],
+            "childViews": [
+                {
+                    "id": "_18_0_5_407019f_1466704587594_239414_14483",
+                    "aggregation": "NONE"
+                },
+                {
+                    "id": "_18_0_5_407019f_1466704588878_781465_14530",
+                    "aggregation": "COMPOSITE"
+                }
+            ],
+            "contents": {
+                "operand": [{
+                    "type": "InstanceValue",
+                    "instance": "_18_0_5_407019f_1468188892956_831936_14503"
+                }],
+                "type": "Expression"
+            },
+            "type": "View"
+        }
+    },
+    {
+        "sysmlid": "_18_0_5_407019f_1466704646254_76543_14746",
+        "isMetatype": false,
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "",
+        "documentation": "",
+        "appliedMetatypes": ["_9_0_62a020a_1105704884574_96724_7644"],
+        "specialization": {
+            "aggregation": "NONE",
+            "multiplicityMax": 1,
+            "propertyType": "_18_0_5_407019f_1466704585609_985766_14420",
+            "isDerived": false,
+            "isSlot": false,
+            "value": [],
+            "multiplicityMin": 1,
+            "type": "Property"
+        }
+    },
+    {
+        "sysmlid": "_18_0_5_407019f_1468188892964_933766_14536",
+        "isMetatype": false,
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "View D Instances",
+        "documentation": "",
+        "appliedMetatypes": ["_9_0_62a020a_1105704885298_713292_7913"],
+        "specialization": {
+            "type": "Package",
+            "isSite": false
+        }
+    },
+    {
+        "sysmlid": "_18_0_5_407019f_1466704658029_659197_14848",
+        "isMetatype": false,
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "",
+        "documentation": "",
+        "appliedMetatypes": ["_9_0_62a020a_1105704885251_933969_7897"],
+        "specialization": {
+            "slots": [],
+            "classifier": [
+                "_17_0_1_232f03dc_1325612611695_581988_21583",
+                "_18_0beta_9150291_1392290067481_33752_4359"
+            ],
+            "type": "InstanceSpecification"
+        }
+    },
+    {
+        "sysmlid": "_18_0_5_407019f_1468188892965_490446_14539",
+        "isMetatype": false,
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "View Documentation",
+        "documentation": "<p>&nbsp;<\/p><p><mms-transclude-doc data-mms-eid=\"_18_0_5_407019f_1466704588878_781465_14530\">[cf.View D.doc]<\/mms-transclude-doc><\/p><p>&nbsp;<\/p>",
+        "appliedMetatypes": ["_9_0_62a020a_1105704885251_933969_7897"],
+        "specialization": {
+            "instanceSpecificationSpecification": {
+                "string": "{\"sourceProperty\":\"documentation\",\"source\":\"_18_0_5_407019f_1468188892965_490446_14539\",\"type\":\"Paragraph\"}",
+                "type": "LiteralString"
+            },
+            "slots": [],
+            "classifier": ["_17_0_5_1_407019f_1431903758416_800749_12055"],
+            "type": "InstanceSpecification"
+        }
+    },
+    {
+        "sysmlid": "_18_0_5_407019f_1466704583340_299989_14358-slot-_18_0beta_9150291_1392290115432_487113_4413",
+        "isMetatype": false,
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "",
+        "documentation": "",
+        "appliedMetatypes": ["_9_0_62a020a_1105704885275_885607_7905"],
+        "specialization": {
+            "propertyType": "_18_0beta_9150291_1392290115432_487113_4413",
+            "isDerived": false,
+            "isSlot": true,
+            "value": [{
+                "string": "1",
+                "type": "LiteralString"
+            }],
+            "type": "Property"
+        }
+    },
+    {
+        "sysmlid": "_18_0_5_407019f_1466704585609_698345_14421-slot-_17_0_2_3_e9f034d_1375464942934_241960_29357",
+        "isMetatype": false,
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "",
+        "documentation": "",
+        "appliedMetatypes": ["_9_0_62a020a_1105704885275_885607_7905"],
+        "specialization": {
+            "propertyType": "_17_0_2_3_e9f034d_1375464942934_241960_29357",
+            "isDerived": false,
+            "isSlot": true,
+            "value": [{
+                "string": "Jet Propulsion Laboratory",
+                "type": "LiteralString"
+            }],
+            "type": "Property"
+        }
+    },
+    {
+        "sysmlid": "_18_0_5_407019f_1466704585609_698345_14421-slot-_17_0_2_3_f4a035d_1366702935947_453687_36949",
+        "isMetatype": false,
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "",
+        "documentation": "",
+        "appliedMetatypes": ["_9_0_62a020a_1105704885275_885607_7905"],
+        "specialization": {
+            "propertyType": "_17_0_2_3_f4a035d_1366702935947_453687_36949",
+            "isDerived": false,
+            "isSlot": true,
+            "value": [{
+                "boolean": false,
+                "type": "LiteralBoolean"
+            }],
+            "type": "Property"
+        }
+    },
+    {
+        "sysmlid": "_18_0_5_407019f_1466704585609_698345_14421-slot-_18_0beta_9150291_1392290115432_487113_4413",
+        "isMetatype": false,
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "",
+        "documentation": "",
+        "appliedMetatypes": ["_9_0_62a020a_1105704885275_885607_7905"],
+        "specialization": {
+            "propertyType": "_18_0beta_9150291_1392290115432_487113_4413",
+            "isDerived": false,
+            "isSlot": true,
+            "value": [{
+                "string": "2",
+                "type": "LiteralString"
+            }],
+            "type": "Property"
+        }
+    },
+    {
+        "sysmlid": "_18_0_5_407019f_1466704649288_608529_14770",
+        "isMetatype": false,
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "",
+        "documentation": "",
+        "appliedMetatypes": ["_9_0_62a020a_1105704885473_18793_7971"],
+        "specialization": {
+            "source": "_18_0_5_407019f_1466704649288_809256_14771",
+            "target": "_18_0_5_407019f_1466704649288_983833_14772",
+            "type": "Association",
+            "ownedEnd": ["_18_0_5_407019f_1466704649288_983833_14772"]
+        }
+    },
+    {
+        "sysmlid": "_18_0_5_407019f_1468188892955_648031_14501",
+        "isMetatype": false,
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "",
+        "documentation": "",
+        "appliedMetatypes": [
+            "_17_0_5_1_407019f_1430628469999_419411_12119",
+            "_9_0_62a020a_1105704885833_713624_8075"
+        ],
+        "specialization": {
+            "source": "_18_0_5_407019f_1466704583339_1092_14357",
+            "target": "_18_0_5_407019f_1468188892955_514326_14500",
+            "type": "Dependency"
+        }
+    },
+    {
+        "sysmlid": "_18_0_5_407019f_1468188892958_19611_14512",
+        "isMetatype": false,
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "View B Instances",
+        "documentation": "",
+        "appliedMetatypes": ["_9_0_62a020a_1105704885298_713292_7913"],
+        "specialization": {
+            "type": "Package",
+            "isSite": false
+        }
+    },
+    {
+        "sysmlid": "_18_0_5_407019f_1466704592926_803154_14625-slot-_18_0beta_9150291_1392290115432_487113_4413",
+        "isMetatype": false,
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "",
+        "documentation": "",
+        "appliedMetatypes": ["_9_0_62a020a_1105704885275_885607_7905"],
+        "specialization": {
+            "propertyType": "_18_0beta_9150291_1392290115432_487113_4413",
+            "isDerived": false,
+            "isSlot": true,
+            "value": [{
+                "string": "6",
+                "type": "LiteralString"
+            }],
+            "type": "Property"
+        }
+    },
+    {
+        "sysmlid": "_18_0_5_407019f_1466704658028_771482_14847",
+        "isMetatype": false,
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "View F",
+        "documentation": "",
+        "appliedMetatypes": [
+            "_17_0_1_232f03dc_1325612611695_581988_21583",
+            "_18_0beta_9150291_1392290067481_33752_4359",
+            "_9_0_62a020a_1105704885343_144138_7929"
+        ],
+        "specialization": {
+            "displayedElements": ["_18_0_5_407019f_1466704658028_771482_14847"],
+            "childViews": [],
+            "contents": {
+                "operand": [{
+                    "type": "InstanceValue",
+                    "instance": "_18_0_5_407019f_1468188892970_158569_14563"
+                }],
+                "type": "Expression"
+            },
+            "type": "View"
+        }
+    },
+    {
+        "sysmlid": "_18_0_5_407019f_1468188892956_831936_14503",
+        "isMetatype": false,
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "View Documentation",
+        "documentation": "<p>&nbsp;<\/p><p><mms-transclude-doc data-mms-eid=\"_18_0_5_407019f_1466704583339_1092_14357\">[cf.View A.doc]<\/mms-transclude-doc><\/p><p>&nbsp;<\/p>",
+        "appliedMetatypes": ["_9_0_62a020a_1105704885251_933969_7897"],
+        "specialization": {
+            "instanceSpecificationSpecification": {
+                "string": "{\"sourceProperty\":\"documentation\",\"source\":\"_18_0_5_407019f_1468188892956_831936_14503\",\"type\":\"Paragraph\"}",
+                "type": "LiteralString"
+            },
+            "slots": [],
+            "classifier": ["_17_0_5_1_407019f_1431903758416_800749_12055"],
+            "type": "InstanceSpecification"
+        }
+    }
+]}
+200

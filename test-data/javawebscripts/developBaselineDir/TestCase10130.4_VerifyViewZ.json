@@ -11,13 +11,11 @@
         "_9_0_62a020a_1105704885343_144138_7929"
     ],
     "specialization": {
-        "childrenViews": [],
-        "displayedElements": [],
+        "childViews": [],
         "contents": {
-            "type": "Expression",
-            "operand": []
+            "operand": [],
+            "type": "Expression"
         },
-        "allowedElements": [],
         "type": "View"
     }
 }]}

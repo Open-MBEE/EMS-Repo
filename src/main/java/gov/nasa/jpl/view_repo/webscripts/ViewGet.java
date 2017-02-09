@@ -34,6 +34,7 @@ import gov.nasa.jpl.mbee.util.Timer;
 import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.sysml.View;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
+import gov.nasa.jpl.view_repo.util.EmsTransaction;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
 
@@ -133,8 +134,8 @@ public class ViewGet extends AbstractJavaWebScript {
     }
     protected Map<String, Object> executeImplImpl(WebScriptRequest req, Status status, Cache cache) {
         Timer timer = new Timer();
-
-        printHeader( req );
+        String user = AuthenticationUtil.getFullyAuthenticatedUser();
+        printHeader( user, logger, req );
 
         //clearCaches();
 
@@ -150,6 +151,9 @@ public class ViewGet extends AbstractJavaWebScript {
             boolean recurse = getBooleanArg(req, "recurse", false);
             // default generate=false - generation with viewpoints takes a long time
             boolean generate = getBooleanArg( req, "generate", false );
+            boolean evaluate = getBooleanArg( req, "evaluate", false );
+            generate = generate || evaluate;
+            boolean isQualified = getBooleanArg(req, "extended", false);
 
         JSONArray viewsJson = new JSONArray();
         if (validateRequest(req, status)) {
@@ -167,7 +171,7 @@ public class ViewGet extends AbstractJavaWebScript {
             WorkspaceNode workspace = getWorkspace( req );
 
             try {
-                handleView(viewId, viewsJson, generate, recurse, workspace, dateTime);
+                handleView(viewId, viewsJson, generate, recurse, workspace, dateTime, isQualified);
             } catch ( JSONException e ) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
@@ -193,19 +197,15 @@ public class ViewGet extends AbstractJavaWebScript {
 
         status.setCode(responseStatus.getCode());
 
-        printFooter();
-
-        if (logger.isInfoEnabled()) {
-            final String user = AuthenticationUtil.getFullyAuthenticatedUser();
-            logger.info( user + " " + timer + " " + req.getURL() );
-        }
+        printFooter(user, logger, timer);
 
         return model;
     }
 
-    private void handleView( String viewId, JSONArray viewsJson,
+    private void handleView( String viewId, final JSONArray viewsJson,
                              boolean generate, boolean recurse,
-                             WorkspaceNode workspace, Date dateTime )
+                             final WorkspaceNode workspace, final Date dateTime,
+                             final boolean isQualified)
                                      throws JSONException {
         EmsScriptNode view = findScriptNodeById(viewId, workspace, dateTime, false);
 
@@ -214,27 +214,28 @@ public class ViewGet extends AbstractJavaWebScript {
                  HttpServletResponse.SC_NOT_FOUND, "View not found with ID: %s", viewId);
         }
 
-//        boolean oldExpressionStuff = EmsScriptNode.expressionStuff; 
-//        EmsScriptNode.expressionStuff = true;
         if (checkPermissions(view, PermissionService.READ)) {
             try {
                 View v = new View(view);
                 v.setGenerate( generate );
                 v.setRecurse( recurse );
 
-                // REVIEW -- TODO -- This use of expressionStuff seems bad.
-                // Temporarily turn expressionStuff on for reasons forgotten
-                // since this was added on Oct 21, 2014 with commit,
-                // dd7b11c63e9a603802d2ed492ef737e81eb3db87.
                 if ( gettingDisplayedElements ) {
                     if (logger.isDebugEnabled()) logger.debug("+ + + + + gettingDisplayedElements");
                     // TODO -- need to use recurse flag!
                     Collection< EmsScriptNode > elems =
                             v.getDisplayedElements( workspace, dateTime,
                                                     generate, recurse, null );
-                    elems = NodeUtil.getVersionAtTime( elems, dateTime );
-                    for ( EmsScriptNode n : elems ) {
-                        viewsJson.put( n.toJSONObject( workspace, dateTime ) );
+                    for ( final EmsScriptNode n : elems ) {
+
+                        new EmsTransaction(getServices(), getResponse(),
+                                           getResponseStatus(), false, true) {
+                            @Override
+                            public void run() throws Exception {
+                                viewsJson.put( n.toJSONObject( workspace, dateTime, isQualified ) );
+                            }
+                        };
+
                     }
                 } else if ( gettingContainedViews ) {
                     if (logger.isDebugEnabled()) logger.debug("+ + + + + gettingContainedViews");
@@ -242,19 +243,23 @@ public class ViewGet extends AbstractJavaWebScript {
                             v.getContainedViews( recurse, workspace, dateTime,
                                                  null );
                     elems.add( view );
-                    for ( EmsScriptNode n : elems ) {
-                        viewsJson.put( n.toJSONObject( workspace,dateTime ) );
+                    for ( final EmsScriptNode n : elems ) {
+                        new EmsTransaction(getServices(), getResponse(),
+                                           getResponseStatus(), false, true) {
+                            @Override
+                            public void run() throws Exception {
+                                viewsJson.put( n.toJSONObject( workspace, dateTime, isQualified ) );
+                            }
+                        };
                     }
                 } else {
                     if (logger.isDebugEnabled()) logger.debug("+ + + + + just the view");
-                    viewsJson.put( view.toJSONObject( workspace, dateTime ) );
+                    viewsJson.put( view.toJSONObject( workspace, dateTime, isQualified ) );
                 }
             } catch ( JSONException e ) {
                 log( Level.ERROR,
                      HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Could not create views JSON array");
                 e.printStackTrace();
-            } finally {
-//                EmsScriptNode.expressionStuff = oldExpressionStuff;
             }
         }
     }

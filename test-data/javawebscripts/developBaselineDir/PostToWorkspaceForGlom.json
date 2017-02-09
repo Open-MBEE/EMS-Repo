@@ -1,5 +1,5 @@
 {"elements": [{
-    "qualifiedId": "/europa/123456/glomPost",
+    "qualifiedId": "/europa/PROJECT-123456/glomPost",
     "qualifiedName": "/europa/JW_TEST/glomPost",
     "sysmlid": "glomPost",
     "editable": true,
@@ -7,11 +7,11 @@
     "modifier": "admin",
     "name": "glomPost",
     "documentation": "glomPost",
-    "owner": "123456",
+    "owner": "PROJECT-123456",
     "specialization": {
         "propertyType": null,
-        "isSlot": false,
         "isDerived": false,
+        "isSlot": false,
         "value": [{
             "string": "on a shoe",
             "type": "LiteralString"

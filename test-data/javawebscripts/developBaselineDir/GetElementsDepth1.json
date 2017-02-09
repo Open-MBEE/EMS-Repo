@@ -1,26 +1,8 @@
 {"elements": [
     {
-        "sysmlid": "holding_bin_123456",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "holding_bin",
-        "appliedMetatypes": ["_9_0_62a020a_1105704885298_713292_7913"],
-        "specialization": {"type": "Package"}
-    },
-    {
-        "sysmlid": "123456",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "JW_TEST",
-    },
-    {
-        "sysmlid": "300",
-        "editable": true,
-        "creator": "admin",
         "modifier": "admin",
         "name": "300",
+        "sysmlid": "300",
         "documentation": "something",
         "specialization": {
             "propertyType": null,
@@ -31,32 +13,39 @@
                 "type": "LiteralString"
             }],
             "type": "Property"
-        }
-    },
-    {
-        "sysmlid": "dlam",
+        },
         "editable": true,
         "creator": "admin",
+    },
+    {
+        "modifier": "admin",
+        "name": "holding_bin",
+        "sysmlid": "holding_bin_PROJECT-123456",
+        "appliedMetatypes": ["_9_0_62a020a_1105704885298_713292_7913"],
+        "specialization": {"type": "Package"},
+        "editable": true,
+        "creator": "admin",
+    },
+    {
+        "modifier": "admin",
+        "name": "JW_TEST",
+        "sysmlid": "PROJECT-123456",
+        "editable": true,
+        "creator": "admin",
+    },
+    {
         "modifier": "admin",
         "name": "dlam",
+        "sysmlid": "dlam",
         "documentation": "to make compatible with value specs (this is just a Element)",
-        "specialization": {"type": "Element"}
-    },
-    {
-        "sysmlid": "multRedefPackage",
+        "specialization": {"type": "Element"},
         "editable": true,
         "creator": "admin",
-        "modifier": "admin",
-        "name": "multRedefPackage",
-        "documentation": "package for testing multiplicity and redefines attributes of Property",
-        "specialization": {"type": "Package"}
     },
     {
-        "sysmlid": "4000",
-        "editable": true,
-        "creator": "admin",
         "modifier": "admin",
         "name": "400",
+        "sysmlid": "4000",
         "documentation": "4something",
         "specialization": {
             "propertyType": null,
@@ -67,14 +56,23 @@
                 "type": "LiteralString"
             }],
             "type": "Property"
-        }
-    },
-    {
-        "sysmlid": "found",
+        },
         "editable": true,
         "creator": "admin",
+    },
+    {
+        "modifier": "admin",
+        "name": "multRedefPackage",
+        "sysmlid": "multRedefPackage",
+        "documentation": "package for testing multiplicity and redefines attributes of Property",
+        "specialization": {"type": "Package"},
+        "editable": true,
+        "creator": "admin",
+    },
+    {
         "modifier": "admin",
         "name": "found",
+        "sysmlid": "found",
         "documentation": "",
         "specialization": {
             "specification": {
@@ -82,7 +80,9 @@
                 "type": "OpaqueExpression"
             },
             "type": "Constraint"
-        }
+        },
+        "editable": true,
+        "creator": "admin",
     }
 ]}
 200

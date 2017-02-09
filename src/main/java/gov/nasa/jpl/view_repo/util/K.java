@@ -103,8 +103,16 @@ public class K {
     		log(Level.DEBUG,
     				"********************************************************************************");
     
-    		log(Level.DEBUG, "kToJson(k) = \n" + json.toString(4));
-            log(Level.DEBUG, "jsonToK(json) = \n" + jsonToK(json) );
+            if ( logger.isDebugEnabled() ) {
+        		log(Level.DEBUG, "kToJson(k) = \n" + json.toString(4));
+                log(Level.DEBUG, "Try to go from json back to K.");
+        		try {
+        		    String kFromJson = jsonToK(json);
+        		    log(Level.DEBUG, "jsonToK(json) = \n" + kFromJson );
+        		} catch ( JSONException e ) {
+        		    e.printStackTrace();
+        		}
+            }
     	}
     
         changeMissingOperationElementsToStrings(json, ws, postSet);
@@ -123,7 +131,7 @@ public class K {
 
         for ( EmsScriptNode element : elements ) {
             try {
-                JSONObject json = element.toJSONObject(ws, dateTime);
+                JSONObject json = element.toJSONObject(ws, dateTime, false);
                 elementsArr.put( json );
             } catch (JSONException e) {
                 try {

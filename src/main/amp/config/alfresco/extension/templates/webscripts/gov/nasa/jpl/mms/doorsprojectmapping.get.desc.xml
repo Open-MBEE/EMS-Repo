@@ -3,7 +3,7 @@
     <description>
         Retrieve mapping of Doors projects to sysml project ids
     </description>
-    <url>/doorsprojectmappings</url>
+    <url>/doors/project/mappings</url>
     <format default="json">argument</format>
     <authentication>user</authentication>
     <transaction>none</transaction>

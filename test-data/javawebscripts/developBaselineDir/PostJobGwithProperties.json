@@ -1,34 +1,5 @@
 {"elements": [
     {
-        "sysmlid": "IS_G-slot-_18_0_5_407019f_1458259033014_844708_14099",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "",
-        "owner": "IS_G",
-        "specialization": {
-            "propertyType": null,
-            "isDerived": false,
-            "isSlot": true,
-            "value": [{
-                "string": " ",
-                "type": "LiteralString"
-            }],
-            "type": "Property"
-        }
-    },
-    {
-        "sysmlid": "jobG",
-        "isMetatype": false,
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "jobG",
-        "owner": "PMA_Jobs",
-        "appliedMetatypes": ["_18_0_5_407019f_1458258829038_313297_14086"],
-        "specialization": {"type": "Element"}
-    },
-    {
         "sysmlid": "IS_G",
         "isMetatype": false,
         "editable": true,
@@ -45,6 +16,17 @@
         }
     },
     {
+        "sysmlid": "jobG",
+        "isMetatype": false,
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "jobG",
+        "owner": "PMA_Jobs",
+        "appliedMetatypes": ["_18_0_5_407019f_1458258829038_313297_14086"],
+        "specialization": {"type": "Element"}
+    },
+    {
         "sysmlid": "IS_G-slot-_18_0_5_407019f_1458258991043_482001_14097",
         "editable": true,
         "creator": "admin",
@@ -52,7 +34,7 @@
         "name": "",
         "owner": "IS_G",
         "specialization": {
-            "propertyType": null,
+            "propertyType": "_18_0_5_407019f_1458258991043_482001_14097",
             "isDerived": false,
             "isSlot": true,
             "value": [{
@@ -70,11 +52,29 @@
         "name": "",
         "owner": "IS_G",
         "specialization": {
-            "propertyType": null,
+            "propertyType": "_18_0_5_407019f_1458259018041_351899_14098",
             "isDerived": false,
             "isSlot": true,
             "value": [{
                 "string": "job not found",
+                "type": "LiteralString"
+            }],
+            "type": "Property"
+        }
+    },
+    {
+        "sysmlid": "IS_G-slot-_18_0_5_407019f_1458259033014_844708_14099",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "",
+        "owner": "IS_G",
+        "specialization": {
+            "propertyType": "_18_0_5_407019f_1458259033014_844708_14099",
+            "isDerived": false,
+            "isSlot": true,
+            "value": [{
+                "string": " ",
                 "type": "LiteralString"
             }],
             "type": "Property"

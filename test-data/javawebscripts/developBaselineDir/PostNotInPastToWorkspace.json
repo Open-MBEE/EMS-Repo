@@ -1,5 +1,5 @@
 {"elements": [{
-    "qualifiedId": "/europa/123456/notInThePast",
+    "qualifiedId": "/europa/PROJECT-123456/notInThePast",
     "qualifiedName": "/europa/JW_TEST/notInThePast",
     "sysmlid": "notInThePast",
     "editable": true,
@@ -7,7 +7,7 @@
     "modifier": "admin",
     "name": "notInThePast",
     "documentation": "",
-    "owner": "123456",
+    "owner": "PROJECT-123456",
     "specialization": {
         "specification": {
             "expressionBody": ["foo8"],

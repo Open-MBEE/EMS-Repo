@@ -266,7 +266,7 @@ public class ActionUtil {
             //NodeUtil.addElementToCache( snapshotNode );
         } else if ( jobNode.isDeleted() ) {
             // resurrect
-            jobNode.removeAspect( "ems:Deleted" );
+            jobNode.removeAspect( Acm.ACM_DELETED );
         } else if ( !jobNode.exists() ) {
             // TODO -- REVIEW -- Don't know if this works or if it's possible to get here.
             jobNode = jobPkgNode.createNode(jobName, jobType);

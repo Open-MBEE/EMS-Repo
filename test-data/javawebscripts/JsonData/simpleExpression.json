@@ -4,7 +4,7 @@
             "sysmlid":"simpleExpressionPackage",
             "name":"simpleExpressionPackage",
             "documentation":"the simple expression package",
-            "owner":"123456",
+            "owner":"PROJECT-123456",
             "specialization":{
                 "type":"Package"
             }

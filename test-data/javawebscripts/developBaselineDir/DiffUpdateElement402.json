@@ -1,6 +1,6 @@
 {"elements": [{
-    "qualifiedId": "/europa/123456/4000/401/402",
-    "qualifiedName": "/europa/JW_TEST2/400/401/402",
+    "qualifiedId": "/no_site/PROJECT-123456/4000/401/402",
+    "qualifiedName": "/no_site/JW_TEST2/400/401/402",
     "sysmlid": "402",
     "editable": true,
     "creator": "admin",
@@ -10,8 +10,8 @@
     "owner": "401",
     "specialization": {
         "propertyType": null,
-        "isSlot": false,
         "isDerived": false,
+        "isSlot": false,
         "value": [{
             "string": "the x value",
             "type": "LiteralString"

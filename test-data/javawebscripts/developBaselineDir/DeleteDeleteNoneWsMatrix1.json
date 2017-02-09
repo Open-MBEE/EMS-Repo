@@ -6,9 +6,8 @@
       "sysmlid": "delete_none_gg",
       "editable": true,
       "creator": "admin",
-      "modifier": "admin",
       "name": "delete_none_gg",
-      "owner": "123456",
+      "owner": "PROJECT-123456",
       "documentation": "delete_none_gg",
       "specialization": {
         "propertyType": null,
@@ -26,7 +25,7 @@
     "deletedElements": [{
       "name": "delete_none_gg",
       "sysmlid": "delete_none_gg",
-      "owner": "123456",
+      "owner": "PROJECT-123456",
       "specialization": {"type": "Property"},
       "creator": "admin",
     }],

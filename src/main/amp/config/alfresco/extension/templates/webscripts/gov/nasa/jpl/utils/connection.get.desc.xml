@@ -7,7 +7,7 @@
   	<url>/connection/jmswl</url>
   	<url>/connection/rest</url>
   	<format default="json">argument</format>
-  	<authentication>user</authentication>
+  	<authentication>none</authentication>
   	<transaction>required</transaction>
   	<family>MMS REST API</family>
  </webscript>

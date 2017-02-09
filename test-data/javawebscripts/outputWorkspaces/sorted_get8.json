@@ -1,8 +1,8 @@
 {
     "documents": {"301": "301"},
     "name": "europa",
-    "projectVolumes": ["123456"],
+    "projectVolumes": ["PROJECT-123456"],
     "volume2documents": {"300": ["301"]},
-    "volume2volumes": {"123456": ["300"]},
-    "volumes": {"123456": "CY Test"}
+    "volume2volumes": {"PROJECT-123456": ["300"]},
+    "volumes": {"PROJECT-123456": "CY Test"}
 }

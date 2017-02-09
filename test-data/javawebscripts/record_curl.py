@@ -35,7 +35,7 @@ usageText = '''
     
     To post an element to workspace1:
     
-    ./record_curl.py -n CreateTestData1InWorkspace1 --description "Create a parent folder in workspace1" -g develop -t POST -d '{"elements":[{"sysmlid":"testData1","name":"testData1","owner":"123456"}]}' -w "workspace1/" --runBranches "test,develop" -j
+    ./record_curl.py -n CreateTestData1InWorkspace1 --description "Create a parent folder in workspace1" -g develop -t POST -d '{"elements":[{"sysmlid":"testData1","name":"testData1","owner":"PROJECT-123456"}]}' -w "workspace1/" --runBranches "test,develop" -j
     Creates name and description in developBaselineDir
     Curl command uses POST and supplies a string of data to post in workspace1, run regression with test and develop, compare with json diff
     

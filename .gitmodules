@@ -1,4 +1,4 @@
 [submodule "config"]
 	path = config
-	url = git@github.com:open-mbee/ems-config.git
+	url = https://github.com/gpgreen/ems-config.git
 	ignore = dirty

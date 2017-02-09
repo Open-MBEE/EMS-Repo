@@ -1,69 +1,546 @@
-{
-    "status" : 
-  {
-    "code" : 500,
-    "name" : "Internal Error",
-    "description" : "An error inside the HTTP server which prevented it from fulfilling the request."
-  },  
-  
-  "message" : "08220004 Wrapped Exception (with status template): 08220014 Error during processing of the template 'Expression res is undefined on line 1, column 3 in gov\/nasa\/jpl\/mms\/workspaces\/search.get.json.ftl.'. Please contact your system administrator.",  
-  "exception" : "org.springframework.extensions.webscripts.WebScriptException - 08220004 Wrapped Exception (with status template): 08220014 Error during processing of the template 'Expression res is undefined on line 1, column 3 in gov\/nasa\/jpl\/mms\/workspaces\/search.get.json.ftl.'. Please contact your system administrator.",
-  
-  "callstack" : 
-  [ 
-  	  ""      ,"freemarker.core.InvalidReferenceException: Expression res is undefined on line 1, column 3 in gov\/nasa\/jpl\/mms\/workspaces\/search.get.json.ftl."
-      ,"freemarker.core.TemplateObject.assertNonNull(TemplateObject.java:125)"
-      ,"freemarker.core.Expression.getStringValue(Expression.java:118)"
-      ,"freemarker.core.Expression.getStringValue(Expression.java:93)"
-      ,"freemarker.core.DollarVariable.accept(DollarVariable.java:76)"
-      ,"freemarker.core.Environment.visit(Environment.java:221)"
-      ,"freemarker.core.Environment.process(Environment.java:199)"
-      ,"org.alfresco.repo.template.FreeMarkerProcessor.process(FreeMarkerProcessor.java:218)"
-      ,"org.springframework.extensions.webscripts.AbstractWebScript.renderTemplate(AbstractWebScript.java:896)"
-      ,"gov.nasa.jpl.view_repo.webscripts.DeclarativeJavaWebScript.renderFormatTemplate(DeclarativeJavaWebScript.java:295)"
-      ,"gov.nasa.jpl.view_repo.webscripts.DeclarativeJavaWebScript.execute(DeclarativeJavaWebScript.java:155)"
-      ,"org.alfresco.repo.web.scripts.RepositoryContainer.transactionedExecute(RepositoryContainer.java:377)"
-      ,"org.alfresco.repo.web.scripts.RepositoryContainer.transactionedExecuteAs(RepositoryContainer.java:529)"
-      ,"org.alfresco.repo.web.scripts.RepositoryContainer.executeScript(RepositoryContainer.java:341)"
-      ,"org.springframework.extensions.webscripts.AbstractRuntime.executeScript(AbstractRuntime.java:378)"
-      ,"org.springframework.extensions.webscripts.AbstractRuntime.executeScript(AbstractRuntime.java:209)"
-      ,"org.springframework.extensions.webscripts.servlet.WebScriptServlet.service(WebScriptServlet.java:132)"
-      ,"javax.servlet.http.HttpServlet.service(HttpServlet.java:728)"
-      ,"org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:305)"
-      ,"org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:210)"
-      ,"net.bull.javamelody.MonitoringFilter.doFilter(MonitoringFilter.java:208)"
-      ,"net.bull.javamelody.MonitoringFilter.doFilter(MonitoringFilter.java:181)"
-      ,"org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:243)"
-      ,"org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:210)"
-      ,"org.alfresco.web.app.servlet.GlobalLocalizationFilter.doFilter(GlobalLocalizationFilter.java:61)"
-      ,"org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:243)"
-      ,"org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:210)"
-      ,"org.apache.catalina.core.StandardWrapperValve.invoke(StandardWrapperValve.java:222)"
-      ,"org.apache.catalina.core.StandardContextValve.__invoke(StandardContextValve.java:123)"
-      ,"org.apache.catalina.core.StandardContextValve.invoke(StandardContextValve.java)"
-      ,"org.apache.catalina.authenticator.AuthenticatorBase.invoke(AuthenticatorBase.java:472)"
-      ,"org.apache.catalina.core.StandardHostValve.__invoke(StandardHostValve.java:171)"
-      ,"org.apache.catalina.core.StandardHostValve.invoke(StandardHostValve.java)"
-      ,"org.apache.catalina.valves.ErrorReportValve.invoke(ErrorReportValve.java:99)"
-      ,"org.apache.catalina.valves.AccessLogValve.invoke(AccessLogValve.java:936)"
-      ,"org.apache.catalina.core.StandardEngineValve.invoke(StandardEngineValve.java:118)"
-      ,"org.apache.catalina.connector.CoyoteAdapter.service(CoyoteAdapter.java:407)"
-      ,"org.apache.coyote.http11.AbstractHttp11Processor.process(AbstractHttp11Processor.java:1004)"
-      ,"org.apache.coyote.AbstractProtocol$AbstractConnectionHandler.process(AbstractProtocol.java:589)"
-      ,"org.apache.tomcat.util.net.JIoEndpoint$SocketProcessor.run(JIoEndpoint.java:310)"
-      ,"java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1145)"
-      ,"java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:615)"
-      ,"java.lang.Thread.run(Thread.java:745)"
-      ,"org.alfresco.service.cmr.repository.TemplateException: 08220014 Error during processing of the template 'Expression res is undefined on line 1, column 3 in gov\/nasa\/jpl\/mms\/workspaces\/search.get.json.ftl.'. Please contact your system administrator."
-      ,"org.alfresco.repo.template.FreeMarkerProcessor.process(FreeMarkerProcessor.java:222)"
-      ,"org.springframework.extensions.webscripts.WebScriptException: 08220004 Wrapped Exception (with status template): 08220014 Error during processing of the template 'Expression res is undefined on line 1, column 3 in gov\/nasa\/jpl\/mms\/workspaces\/search.get.json.ftl.'. Please contact your system administrator."
-      ,"org.springframework.extensions.webscripts.AbstractWebScript.createStatusException(AbstractWebScript.java:1067)"
- 
-  ],
-  
-  "server" : "Community v4.2.0 (r56674-b4848) schema 6,033",
-  "time" : "Sep 22, 2015 9:44:20 AM"
-}
-
-
-500
+{"elements": [
+    {
+        "nodeRefId": "workspace://SpacesStore/e96ea9f9-0449-451b-ab1f-06614db94a52",
+        "qualifiedId": "/demo3site/PROJECT-71724d08-6d79-42b2-b9ec-dc39f20a3660/connectorViewDataFolder/_17_0_2_3_e610336_1394148311476_17302_29388_X",
+        "siteCharacterizationId": "demo3site",
+        "versionedRefId": "versionStore://version2Store/90c23045-a437-4adb-bdf1-9b5980edb378",
+        "qualifiedName": "/demo3site/BikeProject/Connector View Data Folder/Components",
+        "sysmlid": "_17_0_2_3_e610336_1394148311476_17302_29388_X",
+        "editable": true,
+        "creator": "admin",
+        "modified": "2016-07-05T13:11:56.656-0700",
+        "modifier": "admin",
+        "created": "Tue Jul 05 13:11:51 PDT 2016",
+        "name": "Components",
+        "owner": "connectorViewDataFolder",
+        "documentation": "",
+        "read": "2016-07-05T13:14:13.202-0700",
+        "specialization": {"type": "View"}
+    },
+    {
+        "nodeRefId": "workspace://SpacesStore/414c02a2-ab26-44fb-8478-4e8a6b67c30a",
+        "qualifiedId": "/europa/PROJECT-123456/viewNull",
+        "siteCharacterizationId": "europa",
+        "versionedRefId": "versionStore://version2Store/1e4fa777-161c-488c-88c7-0276bfab9e79",
+        "qualifiedName": "/europa/JW_TEST2/viewNull",
+        "sysmlid": "viewNull",
+        "editable": true,
+        "creator": "admin",
+        "modified": "2016-07-05T13:12:20.295-0700",
+        "modifier": "admin",
+        "created": "Tue Jul 05 13:12:19 PDT 2016",
+        "name": "viewNull",
+        "owner": "PROJECT-123456",
+        "documentation": "View with null values",
+        "read": "2016-07-05T13:14:13.218-0700",
+        "specialization": {"type": "View"}
+    },
+    {
+        "nodeRefId": "workspace://SpacesStore/6d9c03d3-e8d4-44fb-b2d9-18eb1abe9bb0",
+        "qualifiedId": "/europa/PROJECT-123456/viewWithContents",
+        "siteCharacterizationId": "europa",
+        "versionedRefId": "versionStore://version2Store/a6d6132d-3e27-4729-a341-3d8795769916",
+        "qualifiedName": "/europa/JW_TEST2/viewWithContents",
+        "sysmlid": "viewWithContents",
+        "editable": true,
+        "creator": "admin",
+        "modified": "2016-07-05T13:12:05.281-0700",
+        "modifier": "admin",
+        "created": "Tue Jul 05 13:12:04 PDT 2016",
+        "name": "viewWithContents",
+        "owner": "PROJECT-123456",
+        "documentation": "View updates",
+        "read": "2016-07-05T13:14:13.229-0700",
+        "specialization": {
+            "contents": {"type": "Expression"},
+            "type": "View"
+        }
+    },
+    {
+        "nodeRefId": "workspace://SpacesStore/68bd916d-816d-4e5d-b593-c38d75a8b7dd",
+        "qualifiedId": "/europa/PROJECT-123456/BLUCamTest/_17_0_2_4_f3a0363_1394146455624_407543_30441/_17_0_2_3_e610336_1394148233838_91795_29332",
+        "siteCharacterizationId": "europa",
+        "versionedRefId": "versionStore://version2Store/117d55ae-c73d-4724-9153-30f8184a9d4d",
+        "qualifiedName": "/europa/JW_TEST2/BLUCamTest/dont care2/Context",
+        "sysmlid": "_17_0_2_3_e610336_1394148233838_91795_29332",
+        "editable": true,
+        "creator": "admin",
+        "modified": "2016-07-05T13:11:40.627-0700",
+        "modifier": "admin",
+        "created": "Tue Jul 05 13:11:37 PDT 2016",
+        "name": "Context",
+        "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
+        "documentation": "",
+        "read": "2016-07-05T13:14:13.242-0700",
+        "specialization": {"type": "View"}
+    },
+    {
+        "nodeRefId": "workspace://SpacesStore/a0c5bc36-c0d9-4197-8958-55173ab007fa",
+        "qualifiedId": "/europa/PROJECT-123456/4000/401",
+        "siteCharacterizationId": "europa",
+        "relatedDocuments": [{
+            "parentViews": [{
+                "name": "401",
+                "sysmlid": "401"
+            }],
+            "siteCharacterizationId": "europa",
+            "name": "401",
+            "sysmlid": "401"
+        }],
+        "versionedRefId": "versionStore://version2Store/82257043-aca8-45fe-9db3-9a6ddeecb28b",
+        "qualifiedName": "/europa/JW_TEST2/400/401",
+        "sysmlid": "401",
+        "editable": true,
+        "creator": "admin",
+        "modified": "2016-07-05T13:12:14.160-0700",
+        "modifier": "admin",
+        "created": "Tue Jul 05 13:07:41 PDT 2016",
+        "name": "401",
+        "owner": "4000",
+        "documentation": "4else",
+        "read": "2016-07-05T13:14:13.255-0700",
+        "specialization": {
+            "view2view": [{
+                "childrenViews": [
+                    "401",
+                    "402"
+                ],
+                "sysmlid": "401"
+            }],
+            "childrenViews": ["404"],
+            "displayedElements": [
+                "401",
+                "402",
+                "403"
+            ],
+            "allowedElements": [
+                "401",
+                "402",
+                "403"
+            ],
+            "noSections": ["402"],
+            "contains": [{
+                "sourceType": "reference",
+                "source": "401",
+                "sourceProperty": "documentation",
+                "type": "Paragraph"
+            }],
+            "type": "Product"
+        }
+    },
+    {
+        "nodeRefId": "versionStore://version2Store/7cfcad1e-69ee-4d81-bbf9-9f1bb21e43b0",
+        "qualifiedId": "/europa/PROJECT-123456/300/301",
+        "siteCharacterizationId": "europa",
+        "relatedDocuments": [{
+            "parentViews": [{
+                "name": "301",
+                "sysmlid": "301"
+            }],
+            "siteCharacterizationId": "europa",
+            "name": "301",
+            "sysmlid": "301"
+        }],
+        "versionedRefId": "versionStore://version2Store/5f7da61c-3fad-4066-a85d-f5a0468affd9",
+        "qualifiedName": "/europa/JW_TEST/300/301",
+        "sysmlid": "301",
+        "editable": true,
+        "creator": "admin",
+        "modified": "2016-07-05T13:10:08.901-0700",
+        "modifier": "admin",
+        "created": "Tue Jul 05 13:07:39 PDT 2016",
+        "name": "301",
+        "owner": "300",
+        "documentation": "else",
+        "read": "2016-07-05T13:14:13.268-0700",
+        "specialization": {
+            "view2view": [{
+                "childrenViews": [
+                    "301",
+                    "302"
+                ],
+                "sysmlid": "301"
+            }],
+            "childrenViews": ["304"],
+            "displayedElements": [
+                "301",
+                "302",
+                "303"
+            ],
+            "allowedElements": [
+                "301",
+                "302",
+                "303"
+            ],
+            "noSections": ["302"],
+            "contains": [{
+                "sourceType": "reference",
+                "source": "301",
+                "sourceProperty": "documentation",
+                "type": "Paragraph"
+            }],
+            "type": "Product"
+        }
+    },
+    {
+        "nodeRefId": "workspace://SpacesStore/c92c6210-0009-4ec2-92fe-5cfb4d62eabd",
+        "qualifiedId": "/europa/PROJECT-123456/300/301",
+        "siteCharacterizationId": "europa",
+        "relatedDocuments": [{
+            "parentViews": [{
+                "name": "301",
+                "sysmlid": "301"
+            }],
+            "siteCharacterizationId": "europa",
+            "name": "301",
+            "sysmlid": "301"
+        }],
+        "versionedRefId": "versionStore://version2Store/7cfcad1e-69ee-4d81-bbf9-9f1bb21e43b0",
+        "qualifiedName": "/europa/JW_TEST2/300/301",
+        "sysmlid": "301",
+        "editable": true,
+        "creator": "admin",
+        "modified": "2016-07-05T13:07:48.318-0700",
+        "modifier": "admin",
+        "created": "Tue Jul 05 13:07:39 PDT 2016",
+        "name": "301",
+        "owner": "300",
+        "documentation": "else",
+        "read": "2016-07-05T13:14:13.280-0700",
+        "specialization": {
+            "view2view": [{
+                "childrenViews": [
+                    "301",
+                    "302"
+                ],
+                "sysmlid": "301"
+            }],
+            "childrenViews": ["304"],
+            "displayedElements": [
+                "301",
+                "302",
+                "303"
+            ],
+            "allowedElements": [
+                "301",
+                "302",
+                "303"
+            ],
+            "noSections": ["302"],
+            "contains": [{
+                "sourceType": "reference",
+                "source": "301",
+                "sourceProperty": "documentation",
+                "type": "Paragraph"
+            }],
+            "type": "Product"
+        }
+    },
+    {
+        "nodeRefId": "versionStore://version2Store/7cfcad1e-69ee-4d81-bbf9-9f1bb21e43b0",
+        "qualifiedId": "/europa/PROJECT-123456/300/301",
+        "siteCharacterizationId": "europa",
+        "relatedDocuments": [{
+            "parentViews": [{
+                "name": "301",
+                "sysmlid": "301"
+            }],
+            "siteCharacterizationId": "europa",
+            "name": "301",
+            "sysmlid": "301"
+        }],
+        "versionedRefId": "versionStore://version2Store/0b11aea4-3604-410e-90bf-3ef680f2ab50",
+        "qualifiedName": "/europa/JW_TEST/300/301",
+        "sysmlid": "301",
+        "editable": true,
+        "creator": "admin",
+        "modified": "2016-07-05T13:10:04.564-0700",
+        "modifier": "admin",
+        "created": "Tue Jul 05 13:07:39 PDT 2016",
+        "name": "301",
+        "owner": "300",
+        "documentation": "else",
+        "read": "2016-07-05T13:14:13.285-0700",
+        "specialization": {
+            "view2view": [{
+                "childrenViews": [
+                    "301",
+                    "302"
+                ],
+                "sysmlid": "301"
+            }],
+            "childrenViews": ["304"],
+            "displayedElements": [
+                "301",
+                "302",
+                "303"
+            ],
+            "allowedElements": [
+                "301",
+                "302",
+                "303"
+            ],
+            "noSections": ["302"],
+            "contains": [{
+                "sourceType": "reference",
+                "source": "301",
+                "sourceProperty": "documentation",
+                "type": "Paragraph"
+            }],
+            "type": "Product"
+        }
+    },
+    {
+        "nodeRefId": "versionStore://version2Store/7cfcad1e-69ee-4d81-bbf9-9f1bb21e43b0",
+        "qualifiedId": "/europa/PROJECT-123456/300/301",
+        "siteCharacterizationId": "europa",
+        "relatedDocuments": [{
+            "parentViews": [{
+                "name": "301",
+                "sysmlid": "301"
+            }],
+            "siteCharacterizationId": "europa",
+            "name": "301",
+            "sysmlid": "301"
+        }],
+        "versionedRefId": "versionStore://version2Store/ec1d1a3f-07b6-497d-9cae-ed90ce16a92c",
+        "qualifiedName": "/europa/JW_TEST/300/301",
+        "sysmlid": "301",
+        "editable": true,
+        "creator": "admin",
+        "modified": "2016-07-05T13:10:20.245-0700",
+        "modifier": "admin",
+        "created": "Tue Jul 05 13:07:39 PDT 2016",
+        "name": "301",
+        "owner": "300",
+        "documentation": "else",
+        "read": "2016-07-05T13:14:13.297-0700",
+        "specialization": {
+            "view2view": [{
+                "childrenViews": [
+                    "301",
+                    "302"
+                ],
+                "sysmlid": "301"
+            }],
+            "childrenViews": ["304"],
+            "displayedElements": [
+                "301",
+                "302",
+                "303"
+            ],
+            "allowedElements": [
+                "301",
+                "302",
+                "303"
+            ],
+            "noSections": ["302"],
+            "contains": [{
+                "sourceType": "reference",
+                "source": "301",
+                "sourceProperty": "documentation",
+                "type": "Paragraph"
+            }],
+            "type": "Product"
+        }
+    },
+    {
+        "nodeRefId": "workspace://SpacesStore/e935213c-8a86-43e7-b788-b0244451905d",
+        "qualifiedId": "/europa/PROJECT-123456/P_17_0_2_3_e610336_1394148311476_17302_29388",
+        "siteCharacterizationId": "europa",
+        "versionedRefId": "versionStore://version2Store/85e7e47b-dba7-485d-987d-92550d2c9ae8",
+        "qualifiedName": "/europa/JW_TEST2/Components",
+        "sysmlid": "P_17_0_2_3_e610336_1394148311476_17302_29388",
+        "editable": true,
+        "creator": "admin",
+        "modified": "2016-07-05T13:11:36.968-0700",
+        "modifier": "admin",
+        "created": "Tue Jul 05 13:11:35 PDT 2016",
+        "name": "Components",
+        "owner": "PROJECT-123456",
+        "documentation": "",
+        "read": "2016-07-05T13:14:13.308-0700",
+        "specialization": {"type": "View"}
+    },
+    {
+        "nodeRefId": "workspace://SpacesStore/1c4daeaf-bba6-429c-8c81-9c8d1aba8926",
+        "qualifiedId": "/europa/PROJECT-123456/_17_0_2_3_e610336_1394148311476_17302_29388",
+        "siteCharacterizationId": "europa",
+        "versionedRefId": "versionStore://version2Store/cbb4302b-7b8e-4db4-b9ae-c2ad5bb5b61e",
+        "qualifiedName": "/europa/JW_TEST2/Components",
+        "sysmlid": "_17_0_2_3_e610336_1394148311476_17302_29388",
+        "editable": true,
+        "creator": "admin",
+        "modified": "2016-07-05T13:11:27.189-0700",
+        "modifier": "admin",
+        "created": "Tue Jul 05 13:11:25 PDT 2016",
+        "name": "Components",
+        "owner": "PROJECT-123456",
+        "documentation": "",
+        "read": "2016-07-05T13:14:13.319-0700",
+        "specialization": {"type": "View"}
+    },
+    {
+        "nodeRefId": "workspace://SpacesStore/a0c5bc36-c0d9-4197-8958-55173ab007fa",
+        "qualifiedId": "/europa/PROJECT-123456/4000/401",
+        "siteCharacterizationId": "europa",
+        "relatedDocuments": [{
+            "parentViews": [{
+                "name": "401",
+                "sysmlid": "401"
+            }],
+            "siteCharacterizationId": "europa",
+            "name": "401",
+            "sysmlid": "401"
+        }],
+        "versionedRefId": "versionStore://version2Store/d3907e4e-f01e-42d7-a2fe-600809a993d5",
+        "qualifiedName": "/europa/JW_TEST2/400/401",
+        "sysmlid": "401",
+        "editable": true,
+        "creator": "admin",
+        "modified": "2016-07-05T13:12:11.488-0700",
+        "modifier": "admin",
+        "created": "Tue Jul 05 13:07:41 PDT 2016",
+        "name": "401",
+        "owner": "4000",
+        "documentation": "4else",
+        "read": "2016-07-05T13:14:13.332-0700",
+        "specialization": {
+            "view2view": [{
+                "childrenViews": [
+                    "401",
+                    "402"
+                ],
+                "sysmlid": "401"
+            }],
+            "childrenViews": ["404"],
+            "displayedElements": [
+                "401",
+                "402",
+                "403"
+            ],
+            "allowedElements": [
+                "401",
+                "402",
+                "403"
+            ],
+            "noSections": ["402"],
+            "contains": [{
+                "sourceType": "reference",
+                "source": "401",
+                "sourceProperty": "documentation",
+                "type": "Paragraph"
+            }],
+            "type": "Product"
+        }
+    },
+    {
+        "nodeRefId": "workspace://SpacesStore/a0c5bc36-c0d9-4197-8958-55173ab007fa",
+        "qualifiedId": "/europa/PROJECT-123456/4000/401",
+        "siteCharacterizationId": "europa",
+        "relatedDocuments": [{
+            "parentViews": [{
+                "name": "401",
+                "sysmlid": "401"
+            }],
+            "siteCharacterizationId": "europa",
+            "name": "401",
+            "sysmlid": "401"
+        }],
+        "versionedRefId": "versionStore://version2Store/d154cd88-7b44-4352-8dbf-115402997dbe",
+        "qualifiedName": "/europa/JW_TEST2/400/401",
+        "sysmlid": "401",
+        "editable": true,
+        "creator": "admin",
+        "modified": "2016-07-05T13:07:48.330-0700",
+        "modifier": "admin",
+        "created": "Tue Jul 05 13:07:41 PDT 2016",
+        "name": "401",
+        "owner": "4000",
+        "documentation": "4else",
+        "read": "2016-07-05T13:14:13.344-0700",
+        "specialization": {
+            "view2view": [{
+                "childrenViews": [
+                    "401",
+                    "402"
+                ],
+                "sysmlid": "401"
+            }],
+            "childrenViews": ["404"],
+            "displayedElements": [
+                "401",
+                "402",
+                "403"
+            ],
+            "allowedElements": [
+                "401",
+                "402",
+                "403"
+            ],
+            "noSections": ["402"],
+            "contains": [{
+                "sourceType": "reference",
+                "source": "401",
+                "sourceProperty": "documentation",
+                "type": "Paragraph"
+            }],
+            "type": "Product"
+        }
+    },
+    {
+        "nodeRefId": "versionStore://version2Store/d154cd88-7b44-4352-8dbf-115402997dbe",
+        "qualifiedId": "/europa/PROJECT-123456/4000/401",
+        "siteCharacterizationId": "europa",
+        "relatedDocuments": [{
+            "parentViews": [{
+                "name": "401",
+                "sysmlid": "401"
+            }],
+            "siteCharacterizationId": "europa",
+            "name": "401",
+            "sysmlid": "401"
+        }],
+        "versionedRefId": "versionStore://version2Store/1fb65d32-d90a-4695-ab71-0d1e8739e8e1",
+        "qualifiedName": "/europa/JW_TEST/400/401",
+        "sysmlid": "401",
+        "editable": true,
+        "creator": "admin",
+        "modified": "2016-07-05T13:10:07.628-0700",
+        "modifier": "admin",
+        "created": "Tue Jul 05 13:07:41 PDT 2016",
+        "name": "401",
+        "owner": "4000",
+        "documentation": "4else",
+        "read": "2016-07-05T13:14:13.349-0700",
+        "specialization": {
+            "view2view": [{
+                "childrenViews": [
+                    "401",
+                    "402"
+                ],
+                "sysmlid": "401"
+            }],
+            "childrenViews": ["404"],
+            "displayedElements": [
+                "401",
+                "402",
+                "403"
+            ],
+            "allowedElements": [
+                "401",
+                "402",
+                "403"
+            ],
+            "noSections": ["402"],
+            "contains": [{
+                "sourceType": "reference",
+                "source": "401",
+                "sourceProperty": "documentation",
+                "type": "Paragraph"
+            }],
+            "type": "Product"
+        }
+    }
+]}
+200

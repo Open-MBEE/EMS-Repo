@@ -32,17 +32,20 @@
 package gov.nasa.jpl.view_repo.webscripts;
 
 import gov.nasa.jpl.mbee.util.TimeUtils;
+import gov.nasa.jpl.mbee.util.Timer;
 import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.db.PostgresHelper;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 
+import java.lang.reflect.InvocationTargetException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -50,7 +53,9 @@ import java.util.Set;
 import javax.servlet.http.HttpServletResponse;
 
 import org.alfresco.repo.model.Repository;
+import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
+import org.alfresco.service.cmr.security.PermissionService;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.json.JSONArray;
@@ -115,7 +120,9 @@ public class ModelSearch extends ModelGet {
     @Override
     protected Map< String, Object >
             executeImplImpl( WebScriptRequest req, Status status, Cache cache ) {
-        printHeader( req );
+        Timer timer = new Timer();
+        String user = AuthenticationUtil.getFullyAuthenticatedUser();
+        printHeader(user, logger, req);
 
         clearCaches();
 
@@ -141,7 +148,7 @@ public class ModelSearch extends ModelGet {
 
         status.setCode( responseStatus.getCode() );
 
-        printFooter();
+        printFooter(user, logger, timer);
 
         return model;
     }
@@ -210,7 +217,7 @@ public class ModelSearch extends ModelGet {
                     try {
                         // Need to do Double.toString() in case they left out
                         // the decimal in something like 5.0
-                        double d = Double.parseDouble( keyword );
+                        Double.parseDouble( keyword );
                         types.add("@sysml\\:double:\"");
                     } catch ( NumberFormatException nfe ) {
                         // do nothing
@@ -224,9 +231,8 @@ public class ModelSearch extends ModelGet {
                 }
             }
           if (types == null || types.size() < 1) throw new UnsupportedSearchException("types is not specificed correctly");
-          Map<String, EmsScriptNode> results = searchForElements( types,
-          keyword, false,
-          workspace, dateTime, maxItems, skipCount );
+          Map<String, EmsScriptNode> results = searchForElements( types, keyword, false,
+                                                                  workspace, dateTime, maxItems, skipCount );
 		  rawResults.putAll( results );
 
             if (NodeUtil.doGraphDb) {
@@ -269,10 +275,13 @@ public class ModelSearch extends ModelGet {
                 }
             }
 
+            // The keySet below contains nodeRef ids, not sysmlIds
             // filter out _pkgs:
-            for ( String sysmlid : rawResults.keySet() ) {
-                if ( !sysmlid.endsWith( "_pkg" ) ) {
-                    elementsFound.put( sysmlid, rawResults.get( sysmlid ) );
+            for ( String someId : rawResults.keySet() ) {
+                EmsScriptNode node = rawResults.get( someId );
+                String sysmlid = node.getSysmlId();
+                if ( sysmlid != null && !sysmlid.endsWith( "_pkg" ) ) {
+                    elementsFound.put( someId, node );
                 }
             }
 
@@ -284,7 +293,7 @@ public class ModelSearch extends ModelGet {
                                                 // be false?
             
             boolean includeQualified = true;
-            if (NodeUtil.doPostProcessQualified) includeQualified = false;
+//                    if (NodeUtil.doPostProcessQualified) includeQualified = false;
             handleElements( workspace, dateTime, includeQualified, true, evaluate, false, top,
                             checkReadPermission );
             
@@ -313,4 +322,54 @@ public class ModelSearch extends ModelGet {
 
         return elements;
     }
+    
+    /**
+     * Build up the element JSONObject
+     * 
+     * @param top
+     * @param evaluate
+     * 
+     * @throws JSONException
+     */
+    protected void handleElements(WorkspaceNode ws, Date dateTime,
+            boolean includeQualified, boolean isIncludeDocument, boolean evaluate, boolean affected, JSONObject top,
+            boolean checkPermission) throws JSONException {
+        final Map<EmsScriptNode, JSONObject> elementsJsonMap = new LinkedHashMap<EmsScriptNode, JSONObject>();
+        if( affected ){
+            addAffectedElements(ws, dateTime);
+        }
+        for ( String id : elementsFound.keySet() ) {
+            EmsScriptNode node = elementsFound.get( id );
+
+            if ( !checkPermission
+                 || checkPermissions( node, PermissionService.READ ) ) {
+
+                // don't return deleted elements
+                if (node.isDeleted()) continue;
+                // We're passing in the nodes workspace instead of the passed in
+                // workspace because search currently does not filter on workspace.
+                JSONObject json =
+                        getJsonForElement( node, node.getWorkspace(), dateTime, id, includeQualified,
+                                  isIncludeDocument );
+                
+                elements.put( json );
+                elementsJsonMap.put( node, json );
+            } // TODO -- REVIEW -- Warning if no permissions?
+        }
+        if ( evaluate ) {
+            try {
+                evaluate( elementsJsonMap, top, ws );
+            } catch ( IllegalAccessException e ) {
+                // TODO Auto-generated catch block
+                // e.printStackTrace();
+            } catch ( InvocationTargetException e ) {
+                // TODO Auto-generated catch block
+                // e.printStackTrace();
+            } catch ( InstantiationException e ) {
+                // TODO Auto-generated catch block
+                // e.printStackTrace();
+            }
+        }
+    }
+
 }

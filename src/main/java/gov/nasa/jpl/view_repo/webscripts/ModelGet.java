@@ -39,6 +39,7 @@ import gov.nasa.jpl.view_repo.db.*;
 import gov.nasa.jpl.view_repo.db.PostgresHelper.DbEdgeTypes;
 import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
+import gov.nasa.jpl.view_repo.util.EmsTransaction;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 
@@ -180,12 +181,9 @@ public class ModelGet extends AbstractJavaWebScript {
     protected Map< String, Object > executeImplImpl( WebScriptRequest req,
                                                      Status status,
                                                      Cache cache ) {
-        if ( logger.isDebugEnabled() ) {
-            String user = AuthenticationUtil.getFullyAuthenticatedUser();
-            logger.debug( user + " " + req.getURL() );
-        }
         Timer timer = new Timer();
-        printHeader( req );
+        String user = AuthenticationUtil.getFullyAuthenticatedUser();
+        printHeader(user, logger, req);
 
         Map< String, Object > model = new HashMap< String, Object >();
         // make sure to pass down view request flag to instance
@@ -225,11 +223,7 @@ public class ModelGet extends AbstractJavaWebScript {
 
         status.setCode( responseStatus.getCode() );
 
-        printFooter();
-
-        if ( logger.isInfoEnabled() ) {
-            log( Level.INFO, "ModelGet: %s", timer );
-        }
+        printFooter(user, logger, timer);
 
         return model;
     }
@@ -270,6 +264,9 @@ public class ModelGet extends AbstractJavaWebScript {
             boolean evaluate = getBooleanArg( req, "evaluate", false );
             boolean affected = getBooleanArg( req, "affected", false );
             String relationship = req.getParameter( "relationship" );
+            boolean includeQualified = getBooleanArg(req, "extended", false);
+//            boolean includeQualified = getBooleanArg( req, "qualified", true );
+//            if ( NodeUtil.doPostProcessQualified ) includeQualified = false;
 
             WorkspaceNode workspace = getWorkspace( req );
 
@@ -280,11 +277,7 @@ public class ModelGet extends AbstractJavaWebScript {
             // force qualified to be false so DeclarativeWebscripts can inject
             // it later
 
-            boolean includeQualified = getBooleanArg( req, "qualified", true );
-            if ( NodeUtil.doPostProcessQualified ) includeQualified = false;
-
-			if (logger.isDebugEnabled())
-				logger.debug("modelId = " + modelId);
+			if (logger.isTraceEnabled()) logger.trace("modelId = " + modelId);
 			boolean findDeleted = depth == 0 ? true : false;
 			boolean notFoundInGraphDb = false;
 			EmsScriptNode modelRootNode = null;			
@@ -319,7 +312,7 @@ public class ModelGet extends AbstractJavaWebScript {
 			    }
 			}
 
-            if ( logger.isDebugEnabled() ) logger.debug( "modelRootNode = "
+            if ( logger.isTraceEnabled() ) logger.trace( "modelRootNode = "
                                                          + modelRootNode );
 
             if ( modelRootNode == null ) {
@@ -410,7 +403,7 @@ public class ModelGet extends AbstractJavaWebScript {
 	 *             JSON element creation error
 	 */
 	protected void handleViewHierarchy(EmsScriptNode root,
-			WorkspaceNode workspace, Date dateTime, final Long maxDepth,
+			final WorkspaceNode workspace, final Date dateTime, final Long maxDepth,
 			Long currDepth) throws JSONException {
 		Object allowedElements = root.getProperty(Acm.ACM_ALLOWED_ELEMENTS);
 		if (allowedElements != null) {
@@ -418,21 +411,31 @@ public class ModelGet extends AbstractJavaWebScript {
 					allowedElements.toString());
 			for (int ii = 0; ii < childElementJson.length(); ii++) {
 			    // FIXME: Use graph db to find all the nodes
-				String id = childElementJson.getString(ii);
-				EmsScriptNode childElement = findScriptNodeById(id, workspace,
-						dateTime, false);
+				final String id = childElementJson.getString(ii);
+                new EmsTransaction(getServices(), getResponse(),
+                                   getResponseStatus(), false, true) {
+                    
+                    @Override
+                    public void run() throws Exception {
 
-				// TODO Need to report that allowedElements can't be found
-				if (childElement != null && childElement.exists()) {
-					if (checkPermissions(childElement, PermissionService.READ)) {
-						elementsFound.put(id, childElement);
-					} // TODO -- REVIEW -- Warning if no permissions?
-				} else {
-					log(Level.WARN, HttpServletResponse.SC_NOT_FOUND,
-							"Element %s not found", id
-									+ (dateTime == null ? "" : " at "
-											+ dateTime));
-				}
+
+        				EmsScriptNode childElement = findScriptNodeById(id, workspace,
+        						dateTime, false);
+        
+        				// TODO Need to report that allowedElements can't be found
+        				if (childElement != null && childElement.exists()) {
+        					if (checkPermissions(childElement, PermissionService.READ)) {
+        						elementsFound.put(id, childElement);
+        					} // TODO -- REVIEW -- Warning if no permissions?
+        				} else {
+        					this.log(Level.WARN, 
+        							String.format( "Element %s not found", id
+        									+ (dateTime == null ? "" : " at "
+        											+ dateTime)),
+        									HttpServletResponse.SC_NOT_FOUND);
+        				}
+                    }
+                };
 			}
 			if (maxDepth != null && (maxDepth < 0 || currDepth < maxDepth)) {
 				currDepth++;
@@ -442,13 +445,25 @@ public class ModelGet extends AbstractJavaWebScript {
 							childrenViews.toString());
 					for (int ii = 0; ii < childViewJson.length(); ii++) {
 						String id = childViewJson.getString(ii);
-						EmsScriptNode childView = findScriptNodeById(id,
+						final EmsScriptNode childView = findScriptNodeById(id,
 								workspace, dateTime, false);
 						if (childView != null && childView.exists()) {
 							if (checkPermissions(childView,
 									PermissionService.READ)) {
-								handleViewHierarchy(childView, workspace,
-										dateTime, maxDepth, currDepth);
+							    
+							    final Long currDepthT = currDepth;
+				                new EmsTransaction(getServices(), getResponse(),
+				                                   getResponseStatus(), false, true) {
+				                    
+				                    @Override
+				                    public void run() throws Exception {
+
+				                        handleViewHierarchy(childView, workspace,
+				                                            dateTime, maxDepth,
+				                                            currDepthT);
+				                    }
+				                };
+				                
 							} // TODO -- REVIEW -- Warning if no permissions?
 						} else {
 							log(Level.WARN, HttpServletResponse.SC_NOT_FOUND,
@@ -538,9 +553,9 @@ public class ModelGet extends AbstractJavaWebScript {
 	}
 
 	protected void handleElementHierarchyOriginal(EmsScriptNode root,
-			WorkspaceNode workspace, Date dateTime, final Long maxDepth,
-			Long currDepth, boolean connected, String relationship,
-			Set<String> visited) throws JSONException, SQLException {
+			final WorkspaceNode workspace, final Date dateTime, final Long maxDepth,
+			Long currDepth, final boolean connected, final String relationship,
+			final Set<String> visited) throws JSONException, SQLException {
 		String sysmlId = root.getSysmlId();
 
 		if (visited.contains(sysmlId)) {
@@ -585,10 +600,10 @@ public class ModelGet extends AbstractJavaWebScript {
 					dateTime, workspace, relationship) : root.getOwnedChildren(
 					false, dateTime, workspace);
 
-			for (NodeRef childRef : childRefs) {
+			for (final NodeRef childRef : childRefs) {
 				if (childRef == null)
 					continue;
-				EmsScriptNode child = new EmsScriptNode(childRef, services,
+				final EmsScriptNode child = new EmsScriptNode(childRef, services,
 						response);
 				if (checkPermissions(child, PermissionService.READ)) {
 					if (child.exists()
@@ -600,10 +615,18 @@ public class ModelGet extends AbstractJavaWebScript {
 							elementsFound.put(value, child);
 						}
 
-						handleElementHierarchyOriginal(child, workspace,
-								dateTime, maxDepth, currDepth, connected,
-								relationship, visited);
-
+						final Long currDepthT = currDepth; 
+		                new EmsTransaction(getServices(), getResponse(),
+		                                   getResponseStatus(), false, true) {
+		                    
+		                    @Override
+		                    public void run() throws Exception {
+		                        handleElementHierarchyOriginal(child, workspace,
+								  dateTime, maxDepth, currDepthT, connected,
+								  relationship, visited);
+		                    }
+		                };
+		                
 					} // ends if (child.exists() && !child.isOwnedValueSpec())
 				} // ends if ( checkPermissions( child, PermissionService.READ )
 					// )
@@ -620,27 +643,36 @@ public class ModelGet extends AbstractJavaWebScript {
 	 * 
 	 * @throws JSONException
 	 */
-	protected void handleElements(WorkspaceNode ws, Date dateTime,
-			boolean includeQualified, boolean isIncludeDocument, boolean evaluate, boolean affected, JSONObject top,
+	protected void handleElements(final WorkspaceNode ws, final Date dateTime,
+			final boolean includeQualified, final boolean isIncludeDocument, boolean evaluate, boolean affected, JSONObject top,
 			boolean checkPermission) throws JSONException {
 		final Map<EmsScriptNode, JSONObject> elementsJsonMap = new LinkedHashMap<EmsScriptNode, JSONObject>();
         if( affected ){
             addAffectedElements(ws, dateTime);
         }
-        for ( String id : elementsFound.keySet() ) {
-            EmsScriptNode node = elementsFound.get( id );
+        for ( final String id : elementsFound.keySet() ) {
+            final EmsScriptNode node = elementsFound.get( id );
 
             if ( !checkPermission
                  || checkPermissions( node, PermissionService.READ ) ) {
 
                 // don't return deleted elements
                 if (node.isDeleted()) continue;
-                JSONObject json =
-                        getJsonForElement( node, ws, dateTime, id, includeQualified,
-                                  isIncludeDocument );
+
+                new EmsTransaction(getServices(), getResponse(),
+                                   getResponseStatus(), false, true) {
+                    
+                    @Override
+                    public void run() throws Exception {
+                        JSONObject json = getJsonForElement( node, ws, dateTime,
+                                                             id, includeQualified,
+                                                             isIncludeDocument );
+                        
+                        elements.put( json );
+                        elementsJsonMap.put( node, json );
+                    }
+                };
                 
-                elements.put( json );
-                elementsJsonMap.put( node, json );
             } // TODO -- REVIEW -- Warning if no permissions?
         }
         if ( evaluate ) {
@@ -700,8 +732,8 @@ public class ModelGet extends AbstractJavaWebScript {
      * @param ws
      * @param dateTime
      */
-    protected void filterValueSpecs( String propertyName, WorkspaceNode ws,
-                                     Date dateTime ) {
+    protected void filterValueSpecs( String propertyName, final WorkspaceNode ws,
+                                     final Date dateTime ) {
 
         // REVIEW do we only want to do this for Property? Currently for all
         // value specs.
@@ -719,21 +751,37 @@ public class ModelGet extends AbstractJavaWebScript {
             if ( element.isOwnedValueSpec( dateTime, ws ) ) {
 
                 // Get the value spec owner, ie a Property:
-                EmsScriptNode valueSpecOwner =
+                final EmsScriptNode valueSpecOwner =
                         element.getValueSpecOwner( dateTime, ws );
 
                 if ( valueSpecOwner != null ) {
                     EmsScriptNode elementWithProperty = null;
                     String propertyNameFnd = null;
 
+                    
                     if ( valueSpecOwner.hasAspect( Acm.ACM_PROPERTY ) ) {
 
-                        NodeRef propertyTypeRef =
-                                (NodeRef)valueSpecOwner.getNodeRefProperty( Acm.ACM_PROPERTY_TYPE,
-                                                                            dateTime,
-                                                                            ws );
+                        final ArrayList<NodeRef> arr = new ArrayList< NodeRef >();
+                        new EmsTransaction(getServices(), getResponse(),
+                                           getResponseStatus(), false, true) {
+                            
+                            @Override
+                            public void run() throws Exception {
 
-                        // The property name is the name of the propertyType
+                                NodeRef propertyTypeRef =
+                                        (NodeRef)valueSpecOwner.getNodeRefProperty( Acm.ACM_PROPERTY_TYPE,
+                                                                                    dateTime,
+                                                                                    ws );
+                                if ( propertyTypeRef != null ) {
+                                    arr.add( propertyTypeRef );
+                                }
+                            }
+                        };
+                        NodeRef propertyTypeRef = null;
+                        if ( !arr.isEmpty() ) {
+                            propertyTypeRef = arr.get(0);
+                        }
+                                // The property name is the name of the propertyType
                         // (property is a slot):
                         if ( propertyTypeRef != null ) {
                             EmsScriptNode propertyType =
@@ -806,13 +854,19 @@ public class ModelGet extends AbstractJavaWebScript {
      * @param ws
      * @param dateTime
      */
-    protected void addElementProperties( WorkspaceNode ws, Date dateTime ) {
+    protected void addElementProperties( final WorkspaceNode ws, final Date dateTime ) {
 
         // For every element, find the owned properties:
         for ( Entry< String, EmsScriptNode > entry : elementsFound.entrySet() ) {
 
-            EmsScriptNode element = entry.getValue();
-            List< EmsScriptNode > props = new ArrayList< EmsScriptNode >();
+            final EmsScriptNode element = entry.getValue();
+            final List< EmsScriptNode > props = new ArrayList< EmsScriptNode >();
+
+            new EmsTransaction(getServices(), getResponse(),
+                               getResponseStatus(), false, true) {
+                
+                @Override
+                public void run() throws Exception {
 
             // some issues with results in graph DB throw errors, catch and move
             // on
@@ -854,6 +908,9 @@ public class ModelGet extends AbstractJavaWebScript {
                 logger.warn( "Could not find owner. Dumping stack trace." );
                 e.printStackTrace();
             }
+
+                } // end of run()
+            }; // end of new EmsTransaction()
 
             elementProperties.put( element.getSysmlId(), props );
 

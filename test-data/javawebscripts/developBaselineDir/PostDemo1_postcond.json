@@ -1,0 +1,176 @@
+{"elements": [
+    {
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "",
+        "documentation": "",
+        "specialization": {
+            "source": "P_17_0_2_3_e610336_1394148311476_17302_29388",
+            "target": "P_17_0_2_3_e610336_1394148449252_91190_29556",
+            "type": "Conform"
+        }
+    },
+    {
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "appliedMetatypes": ["_9_0_62a020a_1105704885298_713292_7913"],
+        "specialization": {"type": "Package"}
+    },
+    {
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "ComponentViewPoint",
+        "documentation": "",
+        "specialization": {
+            "method": "name_list",
+            "type": "Viewpoint"
+        }
+    },
+    {
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "appliedMetatypes": ["_9_0_62a020a_1105704885298_713292_7913"],
+        "specialization": {"type": "Package"}
+    },
+    {
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "holding_bin",
+        "appliedMetatypes": ["_9_0_62a020a_1105704885298_713292_7913"],
+        "specialization": {"type": "Package"}
+    },
+    {
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "result",
+        "specialization": {
+            "direction": "return",
+            "type": "Parameter",
+            "defaultValue": null
+        }
+    },
+    {
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "BLUCam CubeSat A",
+        "documentation": "",
+        "specialization": {"type": "Package"}
+    },
+    {
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "viewpoint_op_postcond",
+        "documentation": "This constraint is the postcondition of the viewpoint operation that is encoded as result = List(Map(exposed_id, Name))",
+        "specialization": {
+            "specification": {
+                "operand": [
+                    {
+                        "string": "Equals",
+                        "type": "LiteralString"
+                    },
+                    {
+                        "element": "resultParamForViewpointOperation",
+                        "type": "ElementValue"
+                    },
+                    {
+                        "type": "Expression",
+                        "operand": [
+                            {
+                                "element": "op_list",
+                                "type": "ElementValue"
+                            },
+                            {
+                                "operand": [
+                                    {
+                                        "element": "op_map",
+                                        "type": "ElementValue"
+                                    },
+                                    {
+                                        "element": "Pexposed_id",
+                                        "type": "ElementValue"
+                                    },
+                                    {
+                                        "element": "op_name_arg",
+                                        "type": "ElementValue"
+                                    }
+                                ],
+                                "type": "Expression"
+                            }
+                        ]
+                    }
+                ],
+                "type": "Expression"
+            },
+            "type": "Constraint"
+        }
+    },
+    {
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "appliedMetatypes": ["_9_0_62a020a_1105704885298_713292_7913"],
+        "specialization": {"type": "Package"}
+    },
+    {
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "Components",
+        "documentation": "",
+        "specialization": {
+            "childViews": [],
+            "type": "View"
+        }
+    },
+    {
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "",
+        "documentation": "",
+        "specialization": {
+            "source": "P_17_0_2_3_e610336_1394148311476_17302_29388",
+            "target": "P_17_0_2_4_f3a0363_1394142290412_487571_28478",
+            "type": "Expose"
+        }
+    },
+    {
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "exposed",
+        "documentation": "",
+        "specialization": {
+            "type": "Parameter",
+            "defaultValue": null
+        }
+    },
+    {
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "appliedMetatypes": ["_9_0_62a020a_1105704885298_713292_7913"],
+        "specialization": {"type": "Package"}
+    },
+    {
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "viewpoint_op",
+        "documentation": "",
+        "specialization": {
+            "postconditions": ["name_list_postcond"],
+            "parameters": ["Pexposed_id"],
+            "type": "Operation"
+        }
+    }
+]}
+200

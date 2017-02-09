@@ -219,7 +219,7 @@ public class ShareUtils {
 //                        properties.put( ContentModel.PROP_USERNAME, username );
 //                        properties.put( ContentModel.PROP_FIRSTNAME, "MMS" );
 //                        properties.put( ContentModel.PROP_LASTNAME, "Admin");
-//                        properties.put( ContentModel.PROP_EMAIL, "mmsadmin@ems.gov" );
+//                        properties.put( ContentModel.PROP_EMAIL, "mmsadminusername@ems.gov" );
 //                        services.getPersonService().createPerson( properties );
 //                        
 //                        services.getAuthorityService().addAuthority( "GROUP_ALFRESCO_ADMINISTRATORS", username );

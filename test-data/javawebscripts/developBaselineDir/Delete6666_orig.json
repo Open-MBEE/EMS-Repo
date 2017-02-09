@@ -19,7 +19,7 @@
             "created": "Sat Feb 20 22:17:45 PST 2016",
             "name": "6666_name",
             "documentation": "",
-            "owner": "HH_22_123456",
+            "owner": "HH_22_PROJECT-123456",
             "read": "2016-02-20T22:19:13.573-0800",
             "specialization": {
                 "operand": [
@@ -43,7 +43,7 @@
             "versionedRefId": "versionStore://version2Store/3923cdd6-ae93-442a-964f-b76dbdcf95ae",
             "created": "Sat Feb 20 22:17:45 PST 2016",
             "name": "6666_name",
-            "owner": "HH_22_123456",
+            "owner": "HH_22_PROJECT-123456",
             "sysmlid": "6666",
             "specialization": {"type": "Expression"},
             "modified": "2016-02-20T22:19:13.506-0800",

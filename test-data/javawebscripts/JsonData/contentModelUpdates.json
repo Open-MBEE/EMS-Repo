@@ -3,7 +3,7 @@
     {"documentation" : "View updates", 
      "sysmlid":"viewWithContents", 
      "name":"viewWithContents", 
-     "owner":"123456", 
+     "owner":"PROJECT-123456", 
      "specialization": {"type":"View",
                         "contents":"viewContents"}
     },
@@ -11,14 +11,14 @@
     {"documentation" : "View content", 
      "sysmlid":"viewContents", 
      "name":"viewContents", 
-     "owner":"123456",      
+     "owner":"PROJECT-123456",      
      "specialization": {"type":"Expression"}
     },
     
     {"documentation" : "LiteralSet", 
      "sysmlid":"literalSet", 
      "name":"literalSet", 
-     "owner":"123456", 
+     "owner":"PROJECT-123456", 
      "specialization": {"type":"LiteralSet",
                         "set":[{"type":"LiteralString",
                                 "string":"I"},
@@ -33,7 +33,7 @@
     {"documentation" : "Magic Draw Meta-Data", 
      "sysmlid":"md", 
      "name":"md", 
-     "owner":"123456", 
+     "owner":"PROJECT-123456", 
      "specialization": {"type":"MagicDrawData",
                         "mdData":"A blob of meta-data"}
     },
@@ -41,7 +41,7 @@
     {"documentation" : "Connector updates", 
      "sysmlid":"connector", 
      "name":"connector", 
-     "owner":"123456", 
+     "owner":"PROJECT-123456", 
      "specialization": {"type":"Connector",
                         "targetLower":{"type":"LiteralString",
                                        "string":"targetLower!"},
@@ -62,7 +62,7 @@
     {"documentation" : "Connector source", 
      "sysmlid":"connectorSource", 
      "name":"connectorSource", 
-     "owner":"123456", 
+     "owner":"PROJECT-123456", 
      "specialization": {"type":"Property",
                         "lower":{"type":"LiteralString",
                                  "string":"lower!"},
@@ -73,14 +73,14 @@
     {"documentation" : "Connector target", 
      "sysmlid":"connectorTarget", 
      "name":"connectorTarget", 
-     "owner":"123456", 
+     "owner":"PROJECT-123456", 
      "specialization": {"type":"Property"}
     },
     
     {"documentation" : "association", 
      "sysmlid":"association", 
      "name":"association", 
-     "owner":"123456", 
+     "owner":"PROJECT-123456", 
      "specialization": {"type":"Association",
                         "ownedEnd":["AssocOwnedEnd"],
                         "source":"sourceId",
@@ -92,14 +92,14 @@
     {"documentation" : "Associations's owned end", 
      "sysmlid":"AssocOwnedEnd", 
      "name":"AssocOwnedEnd", 
-     "owner":"123456", 
+     "owner":"PROJECT-123456", 
      "specialization": {"type":"Property"}
     },
     
     {"documentation" : "Characterizes", 
      "sysmlid":"characterizes", 
      "name":"characterizes", 
-     "owner":"123456", 
+     "owner":"PROJECT-123456", 
      "specialization": {"type":"Characterizes",
                         "source":"sourceId",
                         "target":"targetId"}
@@ -108,21 +108,21 @@
     {"documentation" : "source", 
      "sysmlid":"sourceId", 
      "name":"sourceId", 
-     "owner":"123456", 
+     "owner":"PROJECT-123456", 
      "specialization": {"type":"Property"}
     },
     
     {"documentation" : "target", 
      "sysmlid":"targetId", 
      "name":"targetId", 
-     "owner":"123456", 
+     "owner":"PROJECT-123456", 
      "specialization": {"type":"Property"}
     },
 
     {"documentation": "metatype",
      "sysmlid":"metatype1",
      "name": "metatype1",
-     "owner": "123456",
+     "owner": "PROJECT-123456",
      "isMetatype": true,
      "metatypes": ["target", "source"]
     },
@@ -130,7 +130,7 @@
     {"documentation": "hasAppliedMetatype",
      "sysmlid": "hasAppliedMetatype1",
      "name": "hasAppliedMetatype1",
-     "owner": "123456",
+     "owner": "PROJECT-123456",
      "appliedMetatypes": ["metatype"]
     }
 

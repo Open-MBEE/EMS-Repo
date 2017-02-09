@@ -29,8 +29,8 @@
 
 package gov.nasa.jpl.view_repo.webscripts;
 
-import gov.nasa.jpl.mbee.util.Debug;
 import gov.nasa.jpl.mbee.util.TimeUtils;
+import gov.nasa.jpl.mbee.util.Timer;
 import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
@@ -45,6 +45,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.log4j.*;
 import org.alfresco.repo.model.Repository;
+import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.json.JSONArray;
@@ -56,6 +57,8 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
 
 // TODO -- this should be a subclass of ViewGet
 public class ProductGet extends AbstractJavaWebScript {
+    static Logger logger = Logger.getLogger( ProductGet.class );
+    
 	protected boolean gettingDisplayedElements = false;
     protected boolean gettingContainedViews = false;
 
@@ -63,7 +66,7 @@ public class ProductGet extends AbstractJavaWebScript {
     protected boolean isViewRequest = false;
 
     protected boolean prettyPrint = true;
-
+    
     public ProductGet() {
 	    super();
 	}
@@ -106,9 +109,9 @@ public class ProductGet extends AbstractJavaWebScript {
 
 	@Override
     protected Map<String, Object> executeImplImpl(WebScriptRequest req, Status status, Cache cache) {
-        printHeader( req );
-
-		//clearCaches();
+        Timer timer = new Timer();
+        String user = AuthenticationUtil.getFullyAuthenticatedUser();
+        printHeader(user, logger, req);
 
 		Map<String, Object> model = new HashMap<String, Object>();
 
@@ -119,14 +122,17 @@ public class ProductGet extends AbstractJavaWebScript {
 			if ( !gettingDisplayedElements ) {
 			    gettingContainedViews  = isContainedViewRequest( req );
 			}
-			if (Debug.isOn()) System.out.println("productId = " + productId);
+			if (logger.isDebugEnabled()) logger.debug("productId = " + productId);
 
 			// default recurse=true but recurse only applies to displayed elements and contained views
             boolean recurse = getBooleanArg( req, "recurse", true );
+            // default generate=false - generation with viewpoints takes a long time
+            boolean generate = getBooleanArg( req, "generate", false );
 
             // default simple=false
             boolean simple = getBooleanArg( req, "simple", false );
-            //System.out.println("simple=" + simple);
+
+            boolean includeQualified = getBooleanArg(req, "extended", false);
 
             // get timestamp if specified
             String timestamp = req.getParameter("timestamp");
@@ -136,11 +142,11 @@ public class ProductGet extends AbstractJavaWebScript {
 
             // see if prettyPrint default is overridden and change
             prettyPrint = getBooleanArg(req, "pretty", prettyPrint );
-            //System.out.println("prettyPrint=" + prettyPrint);
+            if (logger.isDebugEnabled()) logger.debug("prettyPrint=" + prettyPrint);
 
             ProductsWebscript productsWs = new ProductsWebscript(repository, services, response);
             productsWs.simpleJson = simple;
-			productsJson = productsWs.handleProduct(productId, recurse, workspace, dateTime, gettingDisplayedElements, gettingContainedViews);
+			productsJson = productsWs.handleProduct(productId, generate, recurse, workspace, dateTime, gettingDisplayedElements, gettingContainedViews, includeQualified);
 		}
 
 		if (responseStatus.getCode() == HttpServletResponse.SC_OK && productsJson != null) {
@@ -164,7 +170,7 @@ public class ProductGet extends AbstractJavaWebScript {
 
 		status.setCode(responseStatus.getCode());
 
-		printFooter();
+		printFooter(user, logger, timer);
 
 		return model;
 	}

@@ -4,7 +4,7 @@
     {"documentation" : "Parent 1",
      "sysmlid":"parentToDelete1",
      "name":"parentToDelete1",
-     "owner":"123456",
+     "owner":"PROJECT-123456",
      "specialization": {"type":"Property",
                         "isDerived":false,
                         "value":[{"type":"LiteralString",

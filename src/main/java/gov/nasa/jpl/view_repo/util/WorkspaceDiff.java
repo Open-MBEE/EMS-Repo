@@ -5,7 +5,6 @@ import gov.nasa.jpl.mbee.util.Pair;
 import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.webscripts.AbstractJavaWebScript;
-import gov.nasa.jpl.view_repo.util.JsonDiffDiff.DiffOp;
 import gov.nasa.jpl.view_repo.util.JsonDiffDiff.DiffType;
 
 import java.util.ArrayList;
@@ -128,12 +127,38 @@ public class WorkspaceDiff implements Serializable {
                          boolean glom, boolean onlyCollect) {
 
         this(ws1, ws2, response, status);
+        setWorkspaceDiffParameters( ws1, ws2, timestamp1, timestamp2, response, status, diffType, glom, onlyCollect );
+        diff();
+    }
+
+    public void setWorkspaceDiffParameters(WorkspaceNode ws1, WorkspaceNode ws2, Date timestamp1, Date timestamp2,
+                                           StringBuffer response, Status status, DiffType diffType,
+                                           boolean glom, boolean onlyCollect) {
+        setWorkspaceDiffParameters(ws1, ws2, timestamp1, timestamp2, response, status, diffType);
+        this.glom = glom;
+        this.onlyCollect = onlyCollect;
+    }                      
+
+    public void setWorkspaceDiffParameters( WorkspaceNode ws1,
+                                            WorkspaceNode ws2,
+                                            Date timestamp1, Date timestamp2,
+                                            StringBuffer response,
+                                            Status status,
+                                            DiffType diffType ) {
+        setWorkspaceDiffParameters(ws1, ws2, response, status);
         this.timestamp1 = timestamp1;
         this.timestamp2 = timestamp2;
         this.diffType = diffType;
-        this.glom = glom;
-        this.onlyCollect = onlyCollect;
-        diff();
+    }
+
+    public void setWorkspaceDiffParameters( WorkspaceNode ws1,
+                                            WorkspaceNode ws2,
+                                            StringBuffer response,
+                                            Status status ) {
+        this.ws1 = ws1;
+        this.ws2 = ws1;
+        this.response = response;
+        this.status = status;
     }
 
     /**
@@ -799,17 +824,17 @@ public class WorkspaceDiff implements Serializable {
         JSONObject ws1Json = NodeUtil.newJsonObject();
         JSONObject ws2Json = NodeUtil.newJsonObject();
     
-        addJSONArray(webscript, ws1Json, "elements", elements, elementsVersions, ws1, time1, true, includeQualified);
+        addJSONArray(webscript, ws1Json, "elements", elements, elementsVersions, ws1, time1, true, includeQualified, false);
         addWorkspaceMetadata( ws1Json, ws1, time1 );
     
-        addJSONArray(webscript, ws2Json, "addedElements", addedElements, ws2, time2, true, includeQualified);
-        addJSONArray(webscript, ws2Json, "movedElements", movedElements, ws2, time2, showAll, includeQualified);
+        addJSONArray(webscript, ws2Json, "addedElements", addedElements, ws2, time2, true, includeQualified, false);
+        addJSONArray(webscript, ws2Json, "movedElements", movedElements, ws2, time2, showAll, includeQualified, false);
     
         // Note: deleteElements should use time1 and not time2, and ws1 not ws2, 
         //       as element was found in ws1 at time1, not ws2 at time2!
-        addJSONArray(webscript, ws2Json, "deletedElements", deletedElements, ws1, time1, showAll, includeQualified);
-        addJSONArray(webscript, ws2Json, "updatedElements", updatedElements, ws2, time2, showAll, includeQualified);
-        addJSONArray(webscript, ws2Json, "conflictedElements", conflictedElements, ws2, time2, showAll, includeQualified);
+        addJSONArray(webscript, ws2Json, "deletedElements", deletedElements, ws1, time1, showAll, includeQualified, true);
+        addJSONArray(webscript, ws2Json, "updatedElements", updatedElements, ws2, time2, showAll, includeQualified, false);
+        addJSONArray(webscript, ws2Json, "conflictedElements", conflictedElements, ws2, time2, showAll, includeQualified, false);
         addWorkspaceMetadata( ws2Json, ws2, time2);
         
         updatedJobsInWs2( ws1Json, ws2Json );
@@ -896,22 +921,22 @@ public class WorkspaceDiff implements Serializable {
     }
 
     private boolean addJSONArray(AbstractJavaWebScript webscript, JSONObject jsonObject, String key, Map< String, EmsScriptNode > map,
-                                 WorkspaceNode ws, Date dateTime, boolean showAll, boolean includeQualified) throws JSONException {
-            return addJSONArray(webscript, jsonObject, key, map, null, ws, dateTime, showAll, includeQualified);
+                                 WorkspaceNode ws, Date dateTime, boolean showAll, boolean includeQualified, boolean showDeleted) throws JSONException {
+            return addJSONArray(webscript, jsonObject, key, map, null, ws, dateTime, showAll, includeQualified, showDeleted);
     }
 
     private boolean addJSONArray(AbstractJavaWebScript webscript, JSONObject jsonObject, String key, Map< String, EmsScriptNode > map, 
-                                 Map< String, Version> versions, WorkspaceNode ws, Date dateTime, boolean showAll, boolean includeQualified) throws JSONException {
-        return addJSONArray( webscript, jsonObject, key, map, versions, ws, dateTime, showAll, nodeDiff, includeQualified );
+                                 Map< String, Version> versions, WorkspaceNode ws, Date dateTime, boolean showAll, boolean includeQualified, boolean showDeleted) throws JSONException {
+        return addJSONArray( webscript, jsonObject, key, map, versions, ws, dateTime, showAll, nodeDiff, includeQualified, showDeleted );
     }
     
     public boolean addJSONArray(AbstractJavaWebScript webscript, JSONObject jsonObject, String key, Map< String, EmsScriptNode > map, 
                                         Map< String, Version> versions, WorkspaceNode ws, Date dateTime, boolean showAll,
-                                        NodeDiff nodeDiff, boolean includeQualified ) throws JSONException {
+                                        NodeDiff nodeDiff, boolean includeQualified, boolean showDeleted ) throws JSONException {
         boolean emptyArray = true;
         if (map != null && map.size() > 0) {
 
-            jsonObject.put( key, convertMapToJSONArray( webscript, map, versions, ws, dateTime, showAll, nodeDiff, includeQualified ) );
+            jsonObject.put( key, convertMapToJSONArray( webscript, map, versions, ws, dateTime, showAll, nodeDiff, includeQualified, showDeleted ) );
 
             key = key.replace( "Elements", "Jobs" );
             key = key.replace( "elements", "jobs" );
@@ -972,9 +997,10 @@ public class WorkspaceDiff implements Serializable {
                                               Map<String, Version> versions, 
                                               WorkspaceNode workspace, Date dateTime,
                                               boolean showAll,
-                                              boolean includeQualified) throws JSONException {
+                                              boolean includeQualified,
+                                              boolean showDeleted) throws JSONException {
         return convertMapToJSONArray( webscript, map, versions, workspace,
-                                      dateTime, showAll, nodeDiff, includeQualified );
+                                      dateTime, showAll, nodeDiff, includeQualified, showDeleted );
     }
 
     protected static JSONArray convertMapToJSONArray(AbstractJavaWebScript webscript,
@@ -982,7 +1008,7 @@ public class WorkspaceDiff implements Serializable {
                                                      Map<String, Version> versions, 
                                                      WorkspaceNode workspace, Date dateTime,
                                                      boolean showAll, NodeDiff nodeDiff,
-                                                     boolean includeQualified) throws JSONException {
+                                                     boolean includeQualified, boolean showDeleted) throws JSONException {
         Set<String> filter = null;
         if (!showAll) {
             filter = getFilter();
@@ -997,9 +1023,11 @@ public class WorkspaceDiff implements Serializable {
             EmsScriptNode node = entry.getValue();
             // Make sure the element exists at the dateTime.
             if ( node != null ) {
-                NodeRef r = NodeUtil.getNodeRefAtTime( node.getNodeRef(),
-                                                       workspace, dateTime );
-                if ( r == null ) node = null;
+                if (!showDeleted) {
+                    NodeRef r = NodeUtil.getNodeRefAtTime( node.getNodeRef(),
+                                                           workspace, dateTime );
+                    if ( r == null ) node = null;
+                }
             }
             if ( node == null ) {
                 continue;
@@ -1026,6 +1054,7 @@ public class WorkspaceDiff implements Serializable {
                 filter.add(Acm.SYSMLID);
                 filter.add("qualifiedId");
                 filter.add("qualifiedName");
+                //filter.add("relatedDocuments");
                 filter.add(Acm.JSON_OWNER);
                 filter.add(Acm.JSON_NAME);
                 filter.add(Acm.JSON_TYPE);
@@ -1038,7 +1067,7 @@ public class WorkspaceDiff implements Serializable {
             // diffs don't need to have qualified
             JSONObject jsonObject =
                     node.toJSONObject( filter, false, workspace, dateTime,
-                                       includeQualified, false, version, null );
+                                       includeQualified, false, version, null, showDeleted );
             array.put( jsonObject );
             elementJsonMap.put( sysmlid, jsonObject );
         }
@@ -1649,4 +1678,5 @@ public class WorkspaceDiff implements Serializable {
 
         return  new Pair< WorkspaceNode, Date >( commonParent, commonBranchTimePoint );
     }
+
 }

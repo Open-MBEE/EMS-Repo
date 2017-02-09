@@ -1,69 +1,6 @@
 {"elements": [
     {
-        "qualifiedId": "/europa/123456/update_update_consistent",
-        "qualifiedName": "/europa/JW_TEST2/update_update_consistent",
-        "sysmlid": "update_update_consistent",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "update_update_consistent",
-        "documentation": "update_update_consistent",
-        "owner": "123456",
-        "specialization": {
-            "propertyType": null,
-            "isSlot": false,
-            "isDerived": false,
-            "value": [{
-                "string": "this is updated in conflict",
-                "type": "LiteralString"
-            }],
-            "type": "Property"
-        }
-    },
-    {
-        "qualifiedId": "/europa/123456/delete_update_consistent",
-        "qualifiedName": "/europa/JW_TEST2/delete_update_consistent",
-        "sysmlid": "delete_update_consistent",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "delete_update_consistent",
-        "documentation": "delete_update_consistent",
-        "owner": "123456",
-        "specialization": {
-            "propertyType": null,
-            "isSlot": false,
-            "isDerived": false,
-            "value": [{
-                "string": "this is updated in conflict",
-                "type": "LiteralString"
-            }],
-            "type": "Property"
-        }
-    },
-    {
-        "qualifiedId": "/europa/123456/add_add_before",
-        "qualifiedName": "/europa/JW_TEST2/add_add_before",
-        "sysmlid": "add_add_before",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "add_add_before",
-        "documentation": "add_add_before",
-        "owner": "123456",
-        "specialization": {
-            "propertyType": null,
-            "isSlot": false,
-            "isDerived": false,
-            "value": [{
-                "string": "this is it",
-                "type": "LiteralString"
-            }],
-            "type": "Property"
-        }
-    },
-    {
-        "qualifiedId": "/europa/123456/none_add_delete",
+        "qualifiedId": "/europa/PROJECT-123456/none_add_delete",
         "qualifiedName": "/europa/JW_TEST2/none_add_delete",
         "sysmlid": "none_add_delete",
         "editable": true,
@@ -71,11 +8,11 @@
         "modifier": "admin",
         "name": "none_add_delete",
         "documentation": "none_add_delete",
-        "owner": "123456",
+        "owner": "PROJECT-123456",
         "specialization": {
             "propertyType": null,
-            "isSlot": false,
             "isDerived": false,
+            "isSlot": false,
             "value": [{
                 "string": "this is it",
                 "type": "LiteralString"
@@ -84,7 +21,28 @@
         }
     },
     {
-        "qualifiedId": "/europa/123456/delete_delete_before",
+        "qualifiedId": "/europa/PROJECT-123456/update_update_consistent",
+        "qualifiedName": "/europa/JW_TEST2/update_update_consistent",
+        "sysmlid": "update_update_consistent",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "update_update_consistent",
+        "documentation": "update_update_consistent",
+        "owner": "PROJECT-123456",
+        "specialization": {
+            "propertyType": null,
+            "isDerived": false,
+            "isSlot": false,
+            "value": [{
+                "string": "this is updated in conflict",
+                "type": "LiteralString"
+            }],
+            "type": "Property"
+        }
+    },
+    {
+        "qualifiedId": "/europa/PROJECT-123456/delete_delete_before",
         "qualifiedName": "/europa/JW_TEST2/delete_delete_before",
         "sysmlid": "delete_delete_before",
         "editable": true,
@@ -92,11 +50,11 @@
         "modifier": "admin",
         "name": "delete_delete_before",
         "documentation": "delete_delete_before",
-        "owner": "123456",
+        "owner": "PROJECT-123456",
         "specialization": {
             "propertyType": null,
-            "isSlot": false,
             "isDerived": false,
+            "isSlot": false,
             "value": [{
                 "string": "this is it",
                 "type": "LiteralString"
@@ -105,7 +63,49 @@
         }
     },
     {
-        "qualifiedId": "/europa/123456/add_add_consistent",
+        "qualifiedId": "/europa/PROJECT-123456/add_add_before",
+        "qualifiedName": "/europa/JW_TEST2/add_add_before",
+        "sysmlid": "add_add_before",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "add_add_before",
+        "documentation": "add_add_before",
+        "owner": "PROJECT-123456",
+        "specialization": {
+            "propertyType": null,
+            "isDerived": false,
+            "isSlot": false,
+            "value": [{
+                "string": "this is it",
+                "type": "LiteralString"
+            }],
+            "type": "Property"
+        }
+    },
+    {
+        "qualifiedId": "/europa/PROJECT-123456/delete_update_consistent",
+        "qualifiedName": "/europa/JW_TEST2/delete_update_consistent",
+        "sysmlid": "delete_update_consistent",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "delete_update_consistent",
+        "documentation": "delete_update_consistent",
+        "owner": "PROJECT-123456",
+        "specialization": {
+            "propertyType": null,
+            "isDerived": false,
+            "isSlot": false,
+            "value": [{
+                "string": "this is updated in conflict",
+                "type": "LiteralString"
+            }],
+            "type": "Property"
+        }
+    },
+    {
+        "qualifiedId": "/europa/PROJECT-123456/add_add_consistent",
         "qualifiedName": "/europa/JW_TEST2/add_add_consistent",
         "sysmlid": "add_add_consistent",
         "editable": true,
@@ -113,11 +113,11 @@
         "modifier": "admin",
         "name": "add_add_consistent",
         "documentation": "add_add_consistent",
-        "owner": "123456",
+        "owner": "PROJECT-123456",
         "specialization": {
             "propertyType": null,
-            "isSlot": false,
             "isDerived": false,
+            "isSlot": false,
             "value": [{
                 "string": "this is it",
                 "type": "LiteralString"

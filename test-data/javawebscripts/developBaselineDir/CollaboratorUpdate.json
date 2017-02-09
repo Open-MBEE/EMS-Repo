@@ -1,16 +1,16 @@
 {"elements": [{
-    "qualifiedId": "/europa/123456/300/301/302/y",
+    "qualifiedId": "/europa/PROJECT-123456/300/301/302/y",
     "qualifiedName": "/europa/JW_TEST2/300/301/302/null",
     "sysmlid": "y",
     "editable": true,
     "creator": "admin",
     "modifier": "Collaborator",
-    "documentation": "y is modified by Collaborator",
     "owner": "302",
+    "documentation": "y is modified by Collaborator",
     "specialization": {
         "propertyType": null,
-        "isSlot": false,
         "isDerived": false,
+        "isSlot": false,
         "value": [{
             "string": "the y value",
             "type": "LiteralString"

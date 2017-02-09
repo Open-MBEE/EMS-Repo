@@ -32,8 +32,8 @@ export CURL_GET_FLAGS="-X GET"
 echo
 echo 'testPost1'
 # create project and site
-echo curl $CURL_FLAGS $CURL_POST_FLAGS '{"name":"CY Test"}' $BASE_URL"sites/europa/projects/123456?createSite=true" 
-curl $CURL_FLAGS $CURL_POST_FLAGS '{"name":"CY Test"}' $BASE_URL"sites/europa/projects/123456?createSite=true" > outputWorkspaces/post1.json
+echo curl $CURL_FLAGS $CURL_POST_FLAGS '{"name":"CY Test"}' $BASE_URL"sites/europa/projects/PROJECT-123456?createSite=true" 
+curl $CURL_FLAGS $CURL_POST_FLAGS '{"name":"CY Test"}' $BASE_URL"sites/europa/projects/PROJECT-123456?createSite=true" > outputWorkspaces/post1.json
 DIFF=$(diff baselineWorkspaces/post1.json outputWorkspaces/post1.json)
 if [ "$DIFF" != "" ];then
 	failedTest=1
@@ -94,8 +94,8 @@ echo
 
 echo 'testGET1'
 # get project - should just return 200
-echo curl $CURL_FLAGS $CURL_GET_FLAGS $BASE_URL"sites/europa/projects/123456\""
-curl $CURL_FLAGS $CURL_GET_FLAGS $BASE_URL"sites/europa/projects/123456"
+echo curl $CURL_FLAGS $CURL_GET_FLAGS $BASE_URL"sites/europa/projects/PROJECT-123456\""
+curl $CURL_FLAGS $CURL_GET_FLAGS $BASE_URL"sites/europa/projects/PROJECT-123456"
 echo
 echo
 
@@ -197,8 +197,8 @@ echo
 
 echo 'testPOSTCHANGE1'
 # post changes to directed relationships only (without owners)
-echo curl $CURL_FLAGS $CURL_POST_FLAGS @JsonData/directedrelationships.json $BASE_URL"sites/europa/projects/123456\""
-curl $CURL_FLAGS $CURL_POST_FLAGS @JsonData/directedrelationships.json $BASE_URL"sites/europa/projects/123456" | grep -v '"read":' | grep -v '"lastModified"' | grep -v '"sysmlid"' > outputWorkspaces/postChange1.json
+echo curl $CURL_FLAGS $CURL_POST_FLAGS @JsonData/directedrelationships.json $BASE_URL"sites/europa/projects/PROJECT-123456\""
+curl $CURL_FLAGS $CURL_POST_FLAGS @JsonData/directedrelationships.json $BASE_URL"sites/europa/projects/PROJECT-123456" | grep -v '"read":' | grep -v '"lastModified"' | grep -v '"sysmlid"' > outputWorkspaces/postChange1.json
 DIFF=$(diff baselineWorkspaces/postChange1.json outputWorkspaces/postChange1.json | egrep -v "[0-9]+[c|a|d][0-9]+" | grep -ve '---' |grep -v '"author"')
 if [ "$DIFF" != "" ];then
         failedTest=1

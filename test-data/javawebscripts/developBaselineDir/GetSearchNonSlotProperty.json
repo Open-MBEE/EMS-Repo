@@ -1,9 +1,9 @@
 {"elements": [{
-    "qualifiedId": "/europa/123456/_17_0_5_1_407019f_1402422718524_458809_16434",
+    "qualifiedId": "/europa/PROJECT-123456/_17_0_5_1_407019f_1402422718524_458809_16434",
     "qualifiedName": "/europa/JW_TEST2/D no",
     "sysmlid": "_17_0_5_1_407019f_1402422718524_458809_16434",
     "properties": [{
-        "qualifiedId": "/europa/123456/_17_0_5_1_407019f_1402422718524_458809_16434/_17_0_5_1_407019f_1402422739233_300950_16458",
+        "qualifiedId": "/europa/PROJECT-123456/_17_0_5_1_407019f_1402422718524_458809_16434/_17_0_5_1_407019f_1402422739233_300950_16458",
         "qualifiedName": "/europa/JW_TEST2/D no/real55",
         "sysmlid": "_17_0_5_1_407019f_1402422739233_300950_16458",
         "editable": true,
@@ -13,11 +13,11 @@
         "owner": "_17_0_5_1_407019f_1402422718524_458809_16434",
         "specialization": {
             "propertyType": null,
-            "isSlot": false,
             "isDerived": false,
+            "isSlot": false,
             "value": [{
-                "type": "LiteralReal",
-                "double": 34.5
+                "double": 34.5,
+                "type": "LiteralReal"
             }],
             "type": "Property"
         }
@@ -26,7 +26,7 @@
     "creator": "admin",
     "modifier": "admin",
     "name": "D no",
-    "owner": "123456",
+    "owner": "PROJECT-123456",
     "specialization": {"type": "Element"}
 }]}
 200

@@ -1,5 +1,6 @@
 package gov.nasa.jpl.view_repo.webscripts;
 
+import gov.nasa.jpl.mbee.util.CompareUtils;
 import gov.nasa.jpl.mbee.util.Debug;
 import gov.nasa.jpl.mbee.util.Pair;
 import gov.nasa.jpl.mbee.util.Utils;
@@ -22,12 +23,15 @@ import java.util.Set;
 
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
+import org.apache.log4j.Logger;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 public class UpdateViewHierarchy {
+    static Logger logger = Logger.getLogger( UpdateViewHierarchy.class );
 
-	protected ModelPost mp;
+    protected ModelPost mp;
 	protected JSONObject jsonObject;
 
 	Map<String, String> owners = new LinkedHashMap<String, String>();
@@ -35,6 +39,9 @@ public class UpdateViewHierarchy {
 	// Map<String, String> viewOwners = new HashMap< String, String >();
 	Map<String, ArrayList<String>> viewOwners = new LinkedHashMap<String, ArrayList<String>>();
 	Map<String, ArrayList<String>> viewChildViews = new LinkedHashMap<String, ArrayList<String>>();
+    Map<String, ArrayList<String>> view2Views = new LinkedHashMap<String, ArrayList<String>>();
+    Map<String, String> childViewAggregations = new LinkedHashMap<String, String>();
+    Map<String, String> ownedAttributeAggregations = new LinkedHashMap<String, String>();
 	Map<String, JSONObject> viewsInJson = new LinkedHashMap<String, JSONObject>();
 	Map<String, JSONObject> viewAssociationsInJson = new LinkedHashMap<String, JSONObject>();
 	Map<String, JSONObject> viewAssociations = new LinkedHashMap<String, JSONObject>();
@@ -43,11 +50,23 @@ public class UpdateViewHierarchy {
 	Map<String, Set<JSONObject>> associationTargets = new LinkedHashMap<String, Set<JSONObject>>();
 	Map<String, JSONObject> elementsInJson = new LinkedHashMap<String, JSONObject>();
 
+    private ServiceRegistry services;
+    private WorkspaceNode workspace;
+    private StringBuffer response;
+    private List<String> idsToDelete = new ArrayList<String>();
+
     // FIXME -- need to add workspace to constructor and use in methods in this
     // class instead of the workspaces of nodes encountered.
 	public UpdateViewHierarchy(ModelPost mp) {
 		this.mp = mp;
 	}
+
+    public UpdateViewHierarchy(ModelPost mp, WorkspaceNode workspace, ServiceRegistry services, StringBuffer response) {
+        this.mp = mp;
+        this.workspace = workspace;
+        this.services = services;
+        this.response = response;
+    }
 
 	/**
 	 * Process the payload JSON
@@ -101,7 +120,8 @@ public class UpdateViewHierarchy {
 	 */
 	protected void preprocessSpecializationJSONObject(String id,
 			JSONObject elementJson, JSONObject spec) {
-		String type = spec.optString("type");
+        boolean b = spec.has( "type" );
+		String type = b ? spec.optString("type") : null;
 		if ("View".equals(type) || "Product".equals(type)) {
 			preprocessViewOrProduct(id, elementJson, spec);
 		} else if ("Association".equals(type)) {
@@ -124,30 +144,52 @@ public class UpdateViewHierarchy {
 		// viewInJson = true;
 		viewsInJson.put(id, elementJson);
 
-		String owner = elementJson.optString("owner");
+		boolean b = elementJson.has( "owner" );
+		String owner = b ? elementJson.optString("owner") : null;
 		// TODO -- what if owner is specified as null in json? null =
 		// JSONObject.NULL
 		if (!Utils.isNullOrEmpty(owner)) {
 			owners.put(id, owner);
 		}
 
-		JSONArray childViewsArray = getChildViewsArray(elementJson, spec);
-		if (childViewsArray != null) {
-			preprocessChildViews(id, childViewsArray);
+		// If view2view exists, it is used instead of childViews (because of a bug).
+		// FIXME
+        JSONArray view2viewArray = getView2ViewArray(elementJson, spec);
+        if (view2viewArray != null) {
+            preprocessView2Views( view2viewArray);
+		} else {
+		    JSONArray childViewsArray = getChildViewsArray(elementJson, spec);
+		    if (childViewsArray != null) {
+		        preprocessChildViews(id, childViewsArray);
+	        }
 		}
 
 		JSONArray ownedAttributesArray = getOwnedAttributesArray(elementJson,
-				spec);
+		                                                         spec);
 		if (ownedAttributesArray != null) {
 			preprocessOwnedAttributesArray(id, ownedAttributesArray);
 		}
 	}
 
+	// FIXME -- The association aggregation (composite, shared, none) is ignored!
+	// FIXME -- The aggregation should be used to update associations.
 	protected void preprocessChildViews(String id, JSONArray childViewsArray) {
 		ArrayList<String> childViews = new ArrayList<String>();
 		for (int j = 0; j < childViewsArray.length(); ++j) {
-			String childView = childViewsArray.optString(j);
-			childViews.add(childView);
+		    JSONObject childViewObj = childViewsArray.optJSONObject( j );
+		    String childView = null;
+		    String aggregation = null;
+		    if ( childViewObj != null ) {
+		        childView = childViewObj.optString( "id" );
+		        aggregation = childViewObj.optString( "aggregation" );
+		        if (childView != null && aggregation != null) {
+		            childViewAggregations.put(childView, aggregation);
+		        }
+		    } else {
+		        childView = childViewsArray.optString(j);
+		    }
+		    
+		    if ( !Utils.isNullOrEmpty( childView ) ) childViews.add(childView);
 			ArrayList<String> viewOwnerSet = viewOwners.get(childView);
 			// create set if it doesn't yet exist
 			if (viewOwnerSet == null) {
@@ -159,7 +201,44 @@ public class UpdateViewHierarchy {
 		viewChildViews.put(id, childViews);
 	}
 
-	protected void preprocessOwnedAttributesArray(String id,
+    protected void preprocessView2Views(JSONArray view2viewArray) {
+        for (int j = 0; j < view2viewArray.length(); ++j) {
+            JSONObject v2vObj = view2viewArray.optJSONObject( j );
+            if ( v2vObj == null ) continue;
+            String parentId = v2vObj.optString("id");
+            if ( Utils.isNullOrEmpty( parentId ) ) continue;
+            JSONArray childrenViews = v2vObj.optJSONArray( "childrenViews" );
+            if ( childrenViews == null ) continue;
+            
+            ArrayList<String> childViews = new ArrayList<String>();
+            
+            for ( int i = 0; i < childrenViews.length(); ++i ) {
+                String childViewId = childrenViews.optString( i );
+                childViews.add( childViewId );
+                ArrayList<String> viewOwnerSet = viewOwners.get(childViewId);
+                // create set if it doesn't yet exist
+                if (viewOwnerSet == null) {
+                    viewOwnerSet = new ArrayList<String>();
+                    viewOwners.put(childViewId, viewOwnerSet);
+                }
+                viewOwnerSet.add(parentId);
+            }
+            if ( viewChildViews.containsKey( parentId ) ) {
+                // This information exists from somewhere else--could be in conflict!
+                ArrayList< String > existing = viewChildViews.get( parentId );
+                if ( CompareUtils.compareCollections( existing, childViews,
+                                                      false, false ) != 0 ) {
+                    Debug.error( "Conflicting childViews for " + parentId
+                                 + ": existing=" + existing
+                                 + "; from view2view: " + childViews );
+                }
+            } else {
+                viewChildViews.put(parentId, childViews);
+            }
+        }
+    }
+
+    protected void preprocessOwnedAttributesArray(String id,
 			JSONArray ownedAttributesArray) {
 		ArrayList<String> ownedAttributes = new ArrayList<String>();
 		for (int j = 0; j < ownedAttributesArray.length(); ++j) {
@@ -304,22 +383,18 @@ public class UpdateViewHierarchy {
 
 	protected void processViewChildView(Entry<String, ArrayList<String>> e)
 			throws Exception {
-
 		boolean ownedAttributesChanged = false;
 		String parent = e.getKey();
 		ArrayList<String> childViewsArray = e.getValue();
-		List<String> ownedAttributeIds = getOwnedAttributes(parent,
-				elementOwnedAttributes, elementsInJson);
+        List<String> ownedAttributeIds = getOwnedAttributes(parent, elementOwnedAttributes);
 
 		if (Utils.isNullOrEmpty(childViewsArray)
 				&& Utils.isNullOrEmpty(ownedAttributeIds))
-			// nothing to do here...both viewChilds[] and ownedAttribute[] are
-			// empty
+			// nothing to do. both viewChilds[] and ownedAttribute[] are empty
 			return;
 		else if (Utils.isNullOrEmpty(childViewsArray)
 				&& !Utils.isNullOrEmpty(ownedAttributeIds)) {
-			// viewChilds[] is empty so need to remove ownedAttribute[] from
-			// repo
+			// viewChilds[] is empty so remove ownedAttribute[] from repo
 			ownedAttributesChanged = true;
 			setOwnedAttributes(parent, elementOwnedAttributes, elementsInJson,
 					jsonObject, new ArrayList<String>());
@@ -328,6 +403,7 @@ public class UpdateViewHierarchy {
 		}
 
 		ArrayList<String> newOwnedAttributes = new ArrayList<String>();
+		Set<String> childViewIds = new HashSet<String>();
 
 		// Go ahead and find the view ids for the ownedAttributes.
 		Map<String, String> viewIdsForOwnedAttributeIds = new LinkedHashMap<String, String>();
@@ -335,6 +411,11 @@ public class UpdateViewHierarchy {
 		if (ownedAttributeIds != null) {
 			translateOwnedAttributeIdsToViewIds(ownedAttributeIds,
 					viewIdsForOwnedAttributeIds, ownedAttributeIdsForViewIds);
+		}
+		
+		// add aggregations for the ownedAttributeIds
+		for (String vid: childViewAggregations.keySet()) {
+		    ownedAttributeAggregations.put(ownedAttributeIdsForViewIds.get(vid), childViewAggregations.get( vid ));
 		}
 
 		// Initialize loop variables.
@@ -346,14 +427,21 @@ public class UpdateViewHierarchy {
 			ownedAttributeId = attrIter.next();
 			viewIdForOwnedAttribute = viewIdsForOwnedAttributeIds
 					.get(ownedAttributeId);
-			// getViewIdForOwnedAttribute( ownedAttributeId, elementsInJson
-			// );
 		}
 		// See if the ownedAttributes are correct.
 		for (String childViewStr : childViewsArray) {
-			JSONObject childViewJSONObject = new JSONObject(childViewStr);
-			String childViewId = childViewJSONObject.optString("id");
-
+		    JSONObject childViewJSONObject = null;
+		    String childViewId = null;
+		    try {
+	            childViewJSONObject = new JSONObject(childViewStr);
+		        childViewId = childViewJSONObject.optString("id");
+		    } catch (JSONException x) {
+		        childViewId = childViewStr;
+		        childViewJSONObject = new JSONObject();
+		        childViewJSONObject.put( "id", childViewId );
+		    }
+		    childViewIds.add( childViewId );
+		    
 			// Walk through non-view typed attributes
 			while (viewIdForOwnedAttribute == null && ownedAttributeId != null) {
 				if (ownedAttributeId != null) {
@@ -364,8 +452,6 @@ public class UpdateViewHierarchy {
 					ownedAttributeId = attrIter.next();
 					viewIdForOwnedAttribute = viewIdsForOwnedAttributeIds
 							.get(ownedAttributeId);
-					// getViewIdForOwnedAttribute( ownedAttributeId,
-					// elementsInJson );
 				} else {
 					viewIdForOwnedAttribute = null;
 					ownedAttributeId = null;
@@ -454,6 +540,30 @@ public class UpdateViewHierarchy {
 
 		}
 
+        // Remove ownedAttributeIds that are views that didn't show up in the childViews
+        List<String> origOwnedAttributeIds = getOwnedAttributes(parent, null);
+        
+        Map<String, String> origViewIdsForOwnedAttributeIds = new LinkedHashMap<String, String>();
+        Map<String, String> origOwnedAttributeIdsForViewIds = new LinkedHashMap<String, String>();
+        if (ownedAttributeIds != null) {
+            translateOwnedAttributeIdsToViewIds(origOwnedAttributeIds,
+                    origViewIdsForOwnedAttributeIds, origOwnedAttributeIdsForViewIds);
+        }
+        List<String> removedOwnedAttributeIds = new ArrayList<String>();
+        for (String origOwnedAttributeId: origOwnedAttributeIds) {
+            boolean found = false;
+            String origViewId = origViewIdsForOwnedAttributeIds.get( origOwnedAttributeId ); 
+            if ( origViewId != null) {
+                if (childViewIds.contains( origViewIdsForOwnedAttributeIds.get(origOwnedAttributeId) )) {
+                    found = true;
+                }
+                if (!found) {
+                    removedOwnedAttributeIds.add( origOwnedAttributeId );
+                }
+            }
+        }
+        removeOwnedAttributeIds( parent, removedOwnedAttributeIds );
+
 		if (ownedAttributesChanged) {
 			setOwnedAttributes(parent, elementOwnedAttributes, elementsInJson,
 					jsonObject, newOwnedAttributes);
@@ -468,9 +578,15 @@ public class UpdateViewHierarchy {
 			return true;
 
 		for (String jsonStr : childViewsArray) {
-			JSONObject jsonObj = new JSONObject(jsonStr);
-			String viewId = jsonObj.optString("id");
-			if (viewId.equals(viewIdForOwnedAttribute))
+            JSONObject jsonObj = null;
+            String viewId = null;
+            try {
+                jsonObj = new JSONObject(jsonStr);
+                viewId = jsonObj.optString("id");
+            } catch (JSONException x) {
+                viewId = jsonStr;
+            }
+			if (viewId != null && viewId.equals(viewIdForOwnedAttribute))
 				return true;
 		}
 		return false;
@@ -526,19 +642,24 @@ public class UpdateViewHierarchy {
 		removeElement(id, this.jsonObject);
 
 		Set<JSONObject> assocs = associationSources.get(id);
-		assocs.addAll(associationTargets.get(id));
-		for (JSONObject assoc : assocs) {
-			String sysmlId = assoc.optString("sysmlid");
-			if (!Utils.isNullOrEmpty(sysmlId)) {
-				removeElement(sysmlId, seen);
-			}
+		if (assocs != null) {
+		    if (associationTargets.get( id ) != null) {
+        		    assocs.addAll(associationTargets.get(id));
+		    }
+        		for (JSONObject assoc : assocs) {
+        			String sysmlId = assoc.optString("sysmlid");
+        			if (!Utils.isNullOrEmpty(sysmlId)) {
+        				removeElement(sysmlId, seen);
+        			}
+        		}
 		}
 	}
 
 	protected String addElement(JSONObject element) {
 		if (element == null)
 			return null;
-		String id = element.optString("sysmlid");
+		boolean b = element.has( "sysmlid" );
+		String id = b ? element.optString("sysmlid") : null;
 		if (Utils.isNullOrEmpty(id))
 			id = NodeUtil.createId(mp.getServices());
 		JSONArray elements = jsonObject.optJSONArray("elements");
@@ -571,7 +692,7 @@ public class UpdateViewHierarchy {
 			}
 		}
 		List<String> assocIds = new ArrayList<String>();
-		// String assocId = null;
+        
 		Set<JSONObject> assocs = associationSources.get(parentId);
 		if (assocs != null) {
 			for (JSONObject assoc : assocs) {
@@ -594,89 +715,179 @@ public class UpdateViewHierarchy {
 				}
 			}
 		}
+
+        // need to search for associations that have the property as a source
+        if (propertyId != null ) {
+        EmsScriptNode propNode = NodeUtil.findScriptNodeById( propertyId, workspace, null, false, services, response );
+            if (propNode != null) {
+                String searchString = "workspace://SpacesStore/" + propNode.getNodeRef().getId();
+                Map< String, EmsScriptNode > results = NodeUtil.searchForElements( "@sysml\\:source:\"", searchString, false, workspace, null, services, response, null );
+                for (String id: results.keySet()) {
+                    assocIds.add( id );
+                }
+            }
+        }
 		return assocIds;
 	}
 
-	/**
-	 * Given a View node, retrieves its childViews[] based on ownedAttribute
-	 * properties Ids
-	 * 
-	 * @param parentNode
-	 * @return
-	 */
-	public static JSONArray getChildViews(EmsScriptNode parentNode, Date dateTime) {
-		if (parentNode == null || !NodeUtil.exists(parentNode)) {
-			return null;
-		}
-
-		JSONArray childViews = new JSONArray();
-		WorkspaceNode ws = parentNode.getWorkspace();
-		ServiceRegistry services = parentNode.getServices();
-
-		// get ownedAttributes
-		// TODO reuse instance getOwnedAttributes()
-		List<String> ownedAttributeIds = new ArrayList<String>();
-		Object ownedAttRefs = parentNode.getNodeRefProperty(
-				Acm.ACM_OWNED_ATTRIBUTE, dateTime, ws);
-		if (ownedAttRefs instanceof Collection) {
-			List<NodeRef> refs = Utils.asList((Collection<?>) ownedAttRefs,
-					NodeRef.class);
-			ownedAttributeIds = EmsScriptNode.getSysmlIds(EmsScriptNode
-					.toEmsScriptNodeList(refs));
-		}
-		if (Utils.isNullOrEmpty(ownedAttributeIds))
-			return null;
-
-		// translate ownedAttributes to View Ids
-		// TODO reuse instance translateOwnedAttributeIds()
-		String viewId = null;
-		for (String ownedAttributeId : ownedAttributeIds) {
-			EmsScriptNode ownedAttributeNode = NodeUtil.findScriptNodeById(
-					ownedAttributeId, ws, null, false, services, null);
-			if (NodeUtil.exists(ownedAttributeNode)) {
-				Object propType = ownedAttributeNode.getNodeRefProperty(
-						Acm.ACM_PROPERTY_TYPE, true, null, ws);
-				Collection<?> propTypes = null;
-				if (propType instanceof Collection) {
-					propTypes = (Collection<?>) propType;
-				} else if (propType instanceof NodeRef) {
-					propTypes = Utils.newList(propType);
-				}
-				if (Utils.isNullOrEmpty(propTypes))
-					continue;
-
-				for (Object pType : propTypes) {
-					if (UpdateViewHierarchy.isView(pType, services, ws)) {
-						if (pType instanceof NodeRef) {
-							EmsScriptNode propTypeNode = new EmsScriptNode(
-									(NodeRef) pType, services);
-							if (NodeUtil.exists(propTypeNode)
-									&& propTypeNode
-											.hasOrInheritsAspect(Acm.ACM_VIEW)) {
-								viewId = propTypeNode.getSysmlId();
-							}
-						} else if (pType instanceof String) {
-							viewId = (String) pType;
-						}
-					}
-				}
-
-				if (!Utils.isNullOrEmpty(viewId)) {
-					JSONObject jsonObj = new JSONObject();
-					jsonObj.put("id", viewId);
-					String aggregation = (String) ownedAttributeNode
-							.getProperty(Acm.ACM_AGGREGATION);
-					if (Utils.isNullOrEmpty(aggregation))
-						jsonObj.put(Acm.JSON_AGGREGATION, "NONE");
-					else
-						jsonObj.put(Acm.JSON_AGGREGATION, aggregation);
-					childViews.put(jsonObj);
-				}
-			}
-		}
-		return childViews;
-
+    /**
+     * Given a view node, retrieves its childViews based on ownedAttribute propertiesIds
+     *  
+     * @param parentNode   viewNode to retrieve children for
+     * @param ws           Workspace to look children up in
+     * @param dateTime     time to lookup
+     * @return  JSONArray, e.g. [{"id":"childView1","aggregation":"COMPOSITE"}]
+     */
+    public static JSONArray getChildViewsJsonArray(EmsScriptNode parentNode, WorkspaceNode ws, Date dateTime) {
+        return getChildViewsJsonArray(parentNode, ws, dateTime, false);
+    }
+    
+    
+    /**
+     * Given a view node, retrieves its childViews based on ownedAttribute propertiesIds
+     *  
+     * @param parentNode   viewNode to retrieve children for
+     * @param ws           Workspace to look children up in
+     * @param dateTime     time to lookup
+     * @param recurse       true if recursing over childViews, false otherwise
+     * @return  JSONArray, e.g. [{"id":"childView1","aggregation":"COMPOSITE"}]
+     */
+	public static JSONArray getChildViewsJsonArray(EmsScriptNode parentNode, WorkspaceNode ws, Date dateTime, boolean recurse) {
+	    if (parentNode == null || !NodeUtil.exists( parentNode )) return null;
+	    
+	    List<Pair< String, EmsScriptNode > > childViews = new ArrayList<Pair<String, EmsScriptNode>>();
+        Set< String > visited = new HashSet<String>();
+        getChildViews( parentNode, ws, dateTime, recurse, childViews, visited );
+        JSONArray childViewsJsonArray = new JSONArray();
+        
+        for (Pair<String, EmsScriptNode> pair: childViews) {
+            JSONObject childJson = new JSONObject();
+            childJson.put( "id", pair.second.getSysmlId() );
+            childJson.put( Acm.JSON_AGGREGATION, pair.first );
+            childViewsJsonArray.put( childJson );
+        }
+        
+        return childViewsJsonArray;
 	}
+
+    /**
+     * Given a view node, retrieves its childViews based on ownedAttribute propertiesIds
+     *  
+     * @param parentNode   viewNode to retrieve children for
+     * @param ws           Workspace to look children up in
+     * @param dateTime     time to lookup
+     * @param recurse       true if recursing over childViews, false otherwise
+     * @return  Set of all view ids that are children
+     */
+	public static Set<EmsScriptNode> getChildViews(EmsScriptNode parentNode, WorkspaceNode ws, Date dateTime, boolean recurse) {
+        List<Pair< String, EmsScriptNode > > childViews = new ArrayList< Pair<String, EmsScriptNode>>();
+        Set< String > visited = new HashSet<String>();
+        getChildViews( parentNode, ws, dateTime, recurse, childViews, visited );
+        
+        Set<EmsScriptNode> childViewsSet = new HashSet<EmsScriptNode>();
+        for (Pair<String, EmsScriptNode> cv: childViews) {
+            childViewsSet.add(cv.second);
+        }
+        
+        return childViewsSet;
+	}
+
+	/**
+	 * Given a view node, retrieves its childViews based on ownedAttribute propertiesIds
+	 * 
+     * @param parentNode   viewNode to retrieve children for
+     * @param ws           Workspace to look children up in
+     * @param dateTime     time to lookup
+     * @param recurse       true if recursing over childViews, false otherwise
+	 * @param childViews   List of ORDERED ids to the childViews and their aggregation type - this is built up recursively
+	 * @param visited      Set of all ids already visited, so recursion doesn't cycle
+	 */
+   public static void getChildViews(EmsScriptNode parentNode, WorkspaceNode ws, Date dateTime, boolean recurse, List<Pair<String, EmsScriptNode>> childViews, Set<String> visited) {
+        if (childViews == null || visited == null || parentNode == null || !NodeUtil.exists(parentNode)) {
+            return;
+        }
+
+        visited.add( parentNode.getSysmlId() );
+        ServiceRegistry services = parentNode.getServices();
+
+        // get ownedAttributes
+        // TODO reuse instance getOwnedAttributes()
+        List<String> ownedAttributeIds = new ArrayList<String>();
+        Object ownedAttRefs = parentNode.getNodeRefProperty(
+                Acm.ACM_OWNED_ATTRIBUTE, dateTime, ws);
+        if (ownedAttRefs instanceof Collection) {
+            List<NodeRef> refs = Utils.asList((Collection<?>) ownedAttRefs,
+                    NodeRef.class);
+            ownedAttributeIds = EmsScriptNode.getSysmlIds(EmsScriptNode
+                    .toEmsScriptNodeList(refs));
+        }
+        if (Utils.isNullOrEmpty(ownedAttributeIds))
+            return;
+
+        // translate ownedAttributes to View Ids
+        // TODO reuse instance translateOwnedAttributeIds()
+        for (String ownedAttributeId : ownedAttributeIds) {
+            String viewId = null;
+            EmsScriptNode viewNode = null;
+            EmsScriptNode ownedAttributeNode = NodeUtil.findScriptNodeById(
+                    ownedAttributeId, ws, dateTime, false, services, null);
+            if (NodeUtil.exists(ownedAttributeNode)) {
+                Object propType = ownedAttributeNode.getNodeRefProperty(
+                        Acm.ACM_PROPERTY_TYPE, true, null, ws);
+                Collection<?> propTypes = null;
+                if (propType instanceof Collection) {
+                    propTypes = (Collection<?>) propType;
+                } else if (propType instanceof NodeRef) {
+                    propTypes = Utils.newList(propType);
+                }
+                if (Utils.isNullOrEmpty(propTypes))
+                    continue;
+
+                for (Object pType : propTypes) {
+                    if (UpdateViewHierarchy.isView(pType, services, ws)) {
+                        if (pType instanceof NodeRef) {
+                            EmsScriptNode propTypeNode = new EmsScriptNode(
+                                    (NodeRef) pType, services);
+                            if (NodeUtil.exists(propTypeNode)
+                                    && propTypeNode
+                                            .hasOrInheritsAspect(Acm.ACM_VIEW)) {
+                                viewId = propTypeNode.getSysmlId();
+                                viewNode = propTypeNode;
+                            }
+                        } else if (pType instanceof String) {
+                            viewId = (String) pType;
+                            viewNode = NodeUtil.findScriptNodeById( viewId, ws, dateTime, false, services, null );
+                        }
+                    }
+                    if (!Utils.isNullOrEmpty( viewId )) {
+                        break;
+                    }
+                }
+
+                if (!Utils.isNullOrEmpty(viewId)) {
+                    String aggregation = (String) ownedAttributeNode
+                            .getProperty(Acm.ACM_AGGREGATION);
+                    if (Utils.isNullOrEmpty(aggregation)) {
+                        aggregation = "NONE";
+                    }
+                    Pair<String, EmsScriptNode> pair = new Pair<String, EmsScriptNode>(aggregation, viewNode);
+                    childViews.add( pair );
+                }
+            }
+        }
+        
+        if (recurse) {
+            // Copy off child views, so we can modify childViews without concurrent modification exception
+            List<Pair<String, EmsScriptNode>> copiedViews = new ArrayList<Pair<String, EmsScriptNode>>(childViews);
+            for ( Pair<String, EmsScriptNode> cv: copiedViews ) {
+                String id = cv.second.getSysmlId();
+                if (!visited.contains( id )) {
+                    getChildViews( cv.second, ws, dateTime, recurse, childViews, visited );
+                }
+            }
+        }
+    }
+
 
 	protected List<EmsScriptNode> getAssociationNodes(String parentId,
 			String propertyId, String propertyTypeId) {
@@ -698,7 +909,7 @@ public class UpdateViewHierarchy {
 			Set<EmsScriptNode> rels = targetPropNode.getRelationships(null,
 					mp.myWorkspace);
 			for (EmsScriptNode rel : rels) {
-				Object prop = rel.getNodeRefProperty(Acm.ACM_TARGET, null,
+				Object prop = rel.getNodeRefProperty(Acm.ACM_SOURCE, null,
 						mp.myWorkspace);
 				if (prop instanceof NodeRef) {
 					EmsScriptNode propNode = new EmsScriptNode((NodeRef) prop,
@@ -744,26 +955,31 @@ public class UpdateViewHierarchy {
 		List<EmsScriptNode> deleteNodes = getAssociationNodes(parentId,
 				propertyId, childId);
 		List<String> deleteIds = EmsScriptNode.getSysmlIds(deleteNodes);
+		deleteIds.add( propertyId );
+		if (logger.isInfoEnabled()) logger.info( "Deleting: " + deleteIds.toString() );
 
-		deleteNodes(deleteIds);
+		// cache these for use later, otherwise conflict check will trigger
+		this.idsToDelete.addAll( deleteIds );
 	}
 
-	protected void deleteNodes(final List<String> ids) {
-
+	protected boolean deleteNodes() {
+	    if (this.idsToDelete == null) return true;
 		MmsModelDelete mmd = new MmsModelDelete(mp.repository, mp.getServices());
 		mmd.setWsDiff(mp.myWorkspace);
 		try {
-			mmd.deleteNodes(ids, mp.myWorkspace);
+			mmd.findNodesToDelete(this.idsToDelete, mp.myWorkspace);
+			mmd.applyDeletedAspects(); 
 			if (mp.wsDiff == null) {
 				mp.setWsDiff(mp.myWorkspace);
-			} else {
-				mp.wsDiff.getDeletedElements().putAll(
-						mmd.wsDiff.getDeletedElements());
-			}
+			} 
+			mp.wsDiff.getDeletedElements().putAll(
+					mmd.wsDiff.getDeletedElements());
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+			return false;
 		}
+		return true;
 	}
 
 	protected String getPropertyType(String propertyId) {
@@ -796,19 +1012,19 @@ public class UpdateViewHierarchy {
 		return null;
 	}
 
-	protected String addAssociationToProperty(String parentViewId,
-			String propertyId) {
-		// Create the Association
-		JSONObject element = new JSONObject();
-		String id = NodeUtil.createId(mp.getServices());
-		element.put("sysmlid", id);
-		JSONObject spec = new JSONObject();
-		element.put("specialization", spec);
-		spec.put("type", "Association");
-		spec.put(Acm.JSON_SOURCE, parentViewId);
-		spec.put(Acm.JSON_TARGET, propertyId);
-		return id;
-	}
+//	protected String addAssociationToProperty(String parentViewId,
+//			String propertyId) {
+//		// Create the Association
+//		JSONObject element = new JSONObject();
+//		String id = NodeUtil.createId(mp.getServices());
+//		element.put("sysmlid", id);
+//		JSONObject spec = new JSONObject();
+//		element.put("specialization", spec);
+//		spec.put("type", "Association");
+//		spec.put(Acm.JSON_SOURCE, parentViewId);
+//		spec.put(Acm.JSON_TARGET, propertyId);
+//		return id;
+//	}
 
 	protected String addProperty(String propertyId, String parentViewId,
 			String propertyTypeId) {
@@ -839,7 +1055,9 @@ public class UpdateViewHierarchy {
 			propElement.put("specialization", spec);
 		}
 		spec.put("type", "Property");
-		spec.put(Acm.JSON_PROPERTY_TYPE, propertyTypeId);
+		if ( !Utils.isNullOrEmpty( propertyTypeId ) ) {
+		    spec.put(Acm.JSON_PROPERTY_TYPE, propertyTypeId);
+		}
 		if (!Utils.isNullOrEmpty(aggregation)) {
 			spec.put(Acm.JSON_AGGREGATION, aggregation);
 		}
@@ -849,13 +1067,13 @@ public class UpdateViewHierarchy {
 		return propertyId;
 	}
 
-	protected String addAssociationToView(String parentViewId,
-			String childViewId) {
-		// Need a Property of type childView to associate with the parentView.
-		String propertyId = addProperty(null, parentViewId, childViewId);
-		String id = addAssociationToProperty(parentViewId, propertyId);
-		return id;
-	}
+//	protected String addAssociationToView(String parentViewId,
+//			String childViewId) {
+//		// Need a Property of type childView to associate with the parentView.
+//		String propertyId = addProperty(null, parentViewId, childViewId);
+//		String id = addAssociationToProperty(parentViewId, propertyId);
+//		return id;
+//	}
 
 	protected String findAssociationOwner(String parentId) {
 		String lastId = null;
@@ -949,13 +1167,26 @@ public class UpdateViewHierarchy {
 		}
 
 		String childViewId = childViewJSONObject.optString("id");
-		String aggregation = childViewJSONObject
-				.optString(Acm.JSON_AGGREGATION);
-		if (Utils.isNullOrEmpty(aggregation))
+		String aggregation = null;
+		// MMS-657: use childViewAggregations type since not always available as childViewJSONObject
+		//  manual test: create view on VE, create subview on VE, should retain aggregation type
+		//               can remove subview and readd by searching for view to test
+		if (childViewAggregations.containsKey( childViewId )) {
+		    aggregation = childViewAggregations.get( childViewId );
+		} else {
+		    aggregation = childViewJSONObject.optString(Acm.JSON_AGGREGATION);
+		}
+        // FIXME -- Won't this overwrite an existing aggregation if the
+        // aggregation is null? What if we just don't set the aggregation in the
+        // case that it is null?
+		if ( Utils.isNullOrEmpty(aggregation) ) {
 			aggregation = "COMPOSITE";
+		}
 
+		// Association target is its property 
 		String propA = updateOrCreatePropertyJson(propertyId, assocId,
 				parentViewId, null, null);
+		// Association source is the views property
 		String propB = updateOrCreatePropertyJson(propertyId, parentViewId,
 				childViewId, null, aggregation);
 
@@ -971,7 +1202,7 @@ public class UpdateViewHierarchy {
 			List<String> list = new ArrayList<String>();
 			list.add(propA);
 			JSONArray jsonList = new JSONArray(list);
-			element.put(Acm.JSON_OWNED_ATTRIBUTE, jsonList);
+			element.put(Acm.JSON_OWNED_END, jsonList);
 		}
 
 		JSONObject spec = element.optJSONObject("specialization");
@@ -980,8 +1211,8 @@ public class UpdateViewHierarchy {
 			element.put("specialization", spec);
 		}
 		spec.put("type", "Association");
-		spec.put(Acm.JSON_SOURCE, propA);
-		spec.put(Acm.JSON_TARGET, propB);
+		spec.put(Acm.JSON_SOURCE, propB);
+		spec.put(Acm.JSON_TARGET, propA);
 
 		if (addedNew) {
 			preprocessElementJson(element);
@@ -1028,16 +1259,37 @@ public class UpdateViewHierarchy {
 		}
 
 		elementOwnedAttributes.put(parentId, newOwnedAttributes);
-		JSONArray newOwnedAttribuesArray = new JSONArray(newOwnedAttributes);
+		JSONArray newOwnedAttributesArray = new JSONArray(newOwnedAttributes);
 		JSONObject elementJson = elementsInJson.get(parentId);
 		// If the element is not already in the json, create and add it.
 		if (elementJson == null) {
 			elementJson = new JSONObject();
 			elementJson.put("sysmlid", parentId);
 			JSONArray elements = jsonObject.optJSONArray("elements");
-			elements.put(elementJson);
+			if (elements != null) {
+			    elements.put(elementJson);
+			}
 		}
-		elementJson.put(Acm.JSON_OWNED_ATTRIBUTE, newOwnedAttribuesArray);
+	    elementJson.put(Acm.JSON_OWNED_ATTRIBUTE, newOwnedAttributesArray);
+
+	    // inject all the aggregation properties for the childViews
+	    for (String ownedAttr: newOwnedAttributes) {
+	        if (!elementsInJson.containsKey( ownedAttr )) {
+	            if (ownedAttributeAggregations.containsKey( ownedAttr )) {
+        	            JSONObject specJson = new JSONObject();
+        	            specJson.put( "aggregation", ownedAttributeAggregations.get( ownedAttr ) );
+        	            specJson.put( "type", "Property" );
+        	            
+                    elementJson = new JSONObject();
+                    elementJson.put( "sysmlid", ownedAttr );
+                    elementJson.put( "specialization", specJson );
+        	            JSONArray elements = jsonObject.optJSONArray("elements");
+        	            if (elements != null) {
+        	                elements.put(elementJson);
+        	            }
+	            }
+	        }
+	    }
 	}
 
 	/**
@@ -1047,17 +1299,17 @@ public class UpdateViewHierarchy {
 	 * 
 	 * @param parentId
 	 * @param elementOwnedAttributes
-	 * @param elementsInJson
 	 * @return
 	 */
 	protected List<String> getOwnedAttributes(String parentId,
-			Map<String, ArrayList<String>> elementOwnedAttributes,
-			Map<String, JSONObject> elementsInJson) {
+            Map<String, ArrayList<String>> elementOwnedAttributes) {
 		List<String> atts = new ArrayList<String>();
 		// Find in input json.
-		atts = elementOwnedAttributes.get(parentId);
-		if (atts != null)
-			return atts;
+        if (elementOwnedAttributes != null) {
+        		atts = elementOwnedAttributes.get(parentId);
+        		if (atts != null)
+        			return atts;
+        }
 
 		// Find in existing model database.
 		EmsScriptNode parentNode = mp.findScriptNodeById(parentId,
@@ -1178,6 +1430,28 @@ public class UpdateViewHierarchy {
 		}
 		return childViewsArray;
 	}
+    /**
+     * retrieves "childViews" JSONArray within "specialization" object. attempts
+     * to retrieve it from "specialization" wrapper object if it's not found.
+     * 
+     * @param elementJson
+     *            - "specialization"'s wrapper object
+     * @param spec
+     *            - "specialization" object
+     * @return - (JSONArray) this view's children views
+     */
+    protected JSONArray getView2ViewArray(JSONObject elementJson,
+                                          JSONObject spec) {
+        JSONArray view2viewArray = spec.optJSONArray(Acm.JSON_VIEW_2_VIEW);
+        
+        // In case childViews is not in the specialization part of the 
+        // json, . . .
+        if (view2viewArray == null) {
+            view2viewArray = elementJson.optJSONArray(Acm.JSON_VIEW_2_VIEW);
+        }
+        return view2viewArray;
+    }
+
 
 	/**
 	 * retrieves "ownedAttributes" JSONArray within "specialization" object.
