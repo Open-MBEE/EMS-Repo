@@ -856,6 +856,16 @@
 						<tokenised>false</tokenised>
 					</index>
 				</property>
+                <property name="sysml:operationPostcondition">
+                    <type>d:noderef</type>
+                    <mandatory>false</mandatory>
+                    <multiple>true</multiple>
+                    <index enabled="true">
+                        <atomic>false</atomic>
+                        <stored>false</stored>
+                        <tokenised>false</tokenised>
+                    </index>
+                </property>
 				<property name="sysml:operationExpression">
 					<type>d:noderef</type>
 					<mandatory>false</mandatory>

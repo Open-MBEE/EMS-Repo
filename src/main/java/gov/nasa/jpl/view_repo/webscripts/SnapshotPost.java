@@ -40,6 +40,7 @@ import gov.nasa.jpl.docbook.model.DBTableEntry;
 import gov.nasa.jpl.docbook.model.DBText;
 import gov.nasa.jpl.docbook.model.DocumentElement;
 import gov.nasa.jpl.mbee.util.TimeUtils;
+import gov.nasa.jpl.mbee.util.Timer;
 import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.actions.ActionUtil;
 import gov.nasa.jpl.view_repo.actions.SnapshotArtifactsGenerationActionExecuter;
@@ -162,8 +163,9 @@ public class SnapshotPost extends AbstractJavaWebScript {
     @Override
     protected Map< String, Object > executeImplImpl( WebScriptRequest req,
                                                  Status status, Cache cache ) {
-        printHeader( req );
-        //clearCaches();
+        Timer timer = new Timer();
+        String user = AuthenticationUtil.getFullyAuthenticatedUser();
+        printHeader(user, logger, req);
 
         WorkspaceNode workspace = getWorkspace( req );
         Date timestamp = getTimestamp(req);
@@ -186,7 +188,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
                 } else {
                     model.put( "res", result );
                 }
-                printFooter();
+                printFooter(user, logger, timer);
                 return model;
             } else {
                 log( Level.INFO, "Creating snapshot..." );
@@ -197,7 +199,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
 
                 EmsScriptNode topview = findScriptNodeById( viewId, workspace, null, true );
                 EmsScriptNode snapshotFolderNode =
-                        getSnapshotFolderNode( topview );
+                        getSnapshotFolderNode( topview, runWithoutTransactions );
                 if ( snapshotFolderNode == null ) {
                     log( Level.ERROR,
                          HttpServletResponse.SC_BAD_REQUEST, "Cannot create folder for snapshot" );
@@ -706,7 +708,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
         log(Level.INFO, "Begin creating snapshot: \t%s", this.snapshotName);
         
         String contextPath = "alfresco/service/";
-        EmsScriptNode snapshotFolder = getSnapshotFolderNode(view);
+        EmsScriptNode snapshotFolder = getSnapshotFolderNode(view, runWithoutTransactions);
         if(snapshotFolder == null){
             log( Level.ERROR,
                  HttpServletResponse.SC_BAD_REQUEST, "Failed to get snapshot folder node!");
@@ -1104,8 +1106,11 @@ public class SnapshotPost extends AbstractJavaWebScript {
      * @param viewNode
      * @return
      */
-    public static EmsScriptNode getSnapshotFolderNode(EmsScriptNode viewNode) {
-        EmsScriptNode sitesFolder = getSitesFolder(viewNode.getWorkspace());
+//    public EmsScriptNode getSnapshotFolderNode(EmsScriptNode viewNode) {
+//        return getSnapshotFolderNode( viewNode, false );
+//    }
+    public static EmsScriptNode getSnapshotFolderNode(EmsScriptNode viewNode, boolean runWithoutTransactions) {
+        EmsScriptNode sitesFolder = getSitesFolder(viewNode.getWorkspace(), runWithoutTransactions);
         if ( sitesFolder == null ) {
             return null;
         }
@@ -1569,7 +1574,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
 			}
 			else{
 				try {
-					JSONObject jsObj = nameNode.toJSONObject(workspace, timestamp);
+					JSONObject jsObj = nameNode.toJSONObject(workspace, timestamp, false);
 					if(jsObj == null){
 						log(Level.WARN, "JSONObject is null");
 						element.before(transcluded);
@@ -1637,7 +1642,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
 			}
 
 			try {
-				JSONObject jsObj = nameNode.toJSONObject(workspace, timestamp);
+				JSONObject jsObj = nameNode.toJSONObject(workspace, timestamp, false);
 				if(jsObj == null){
 					log(Level.WARN, "JSONObject is null");
 					element.before(transcluded);
@@ -1703,7 +1708,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
 			}
 			else{
 				try {
-					JSONObject jsObj = nameNode.toJSONObject(workspace, timestamp);
+					JSONObject jsObj = nameNode.toJSONObject(workspace, timestamp, false);
 					if(jsObj == null){
 						log(Level.WARN, "JSONObject is null");
 						element.before(transcluded);
@@ -1727,7 +1732,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
 
     private JSONObject populateSnapshotProperties( EmsScriptNode snapshotNode, Date dateTime, WorkspaceNode workspace )
             throws JSONException {
-        JSONObject snapshoturl = snapshotNode.toJSONObject( workspace, dateTime );
+        JSONObject snapshoturl = snapshotNode.toJSONObject( workspace, dateTime, false );
         if ( hasPdf( snapshotNode ) || hasHtmlZip( snapshotNode ) ) {
         	HostnameGet hostnameGet = new HostnameGet(this.repository, this.services);
         	String contextUrl = hostnameGet.getAlfrescoUrl() + "/alfresco";

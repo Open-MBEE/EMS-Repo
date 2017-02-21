@@ -1,17 +1,17 @@
 {"elements": [{
-    "modifier": "admin",
-    "qualifiedId": "/europa/123456/testCmed416",
-    "name": "testName",
+    "qualifiedId": "/europa/PROJECT-123456/testCmed416",
     "qualifiedName": "/europa/JW_TEST2/testName",
     "sysmlid": "testCmed416",
-    "owner": "123456",
+    "editable": true,
+    "creator": "admin",
+    "modifier": "admin",
+    "name": "testName",
+    "owner": "PROJECT-123456",
     "specialization": {
         "propertyType": null,
         "isDerived": false,
         "isSlot": false,
         "type": "Property"
-    },
-    "editable": true,
-    "creator": "admin",
+    }
 }]}
 200

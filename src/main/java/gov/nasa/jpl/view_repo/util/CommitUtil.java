@@ -832,7 +832,8 @@ public class CommitUtil {
 	}
 
 	private static void processDeltasForDb(JSONObject delta, String workspaceId) {
-
+//	    if ( !NodeUtil.doGraphDb ) return;
+	    
 		PostgresHelper pgh = new PostgresHelper(workspaceId);
 
 		JSONObject ws2 = delta.getJSONObject("workspace2");
@@ -874,6 +875,9 @@ public class CommitUtil {
         				} else if (specialization.has( "instanceSpecificationSpecification" )) {
         				    JSONObject iss = specialization.getJSONObject( "instanceSpecificationSpecification" );
         				    NodeUtil.processInstanceSpecificationSpecificationJson( e.getString("sysmlid"), iss, documentEdges );
+        				} else if (specialization.has( "childViews" )) {
+        				    JSONArray cvs = specialization.getJSONArray( "childViews" );
+        				    NodeUtil.processChildViewsJson(e.getString( "sysmlid" ), cvs, documentEdges );
         				}
     				}
 			}
@@ -913,6 +917,9 @@ public class CommitUtil {
                     } else if (specialization.has( "instanceSpecificationSpecification" )) {
                         JSONObject iss = specialization.getJSONObject( "instanceSpecificationSpecification" );
                         NodeUtil.processInstanceSpecificationSpecificationJson( e.getString("sysmlid"), iss, documentEdges );
+                    } else if (specialization.has( "childViews" )) {
+                        JSONArray cvs = specialization.getJSONArray( "childViews" );
+                        NodeUtil.processChildViewsJson(e.getString( "sysmlid" ), cvs, documentEdges );
                     }
 				}
 			}
@@ -921,16 +928,19 @@ public class CommitUtil {
 				JSONObject e = moved.getJSONObject(i);
 				pgh.deleteEdgesForChildNode(e.getString("sysmlid"),
 						DbEdgeTypes.REGULAR);
-				if (e.getString("owner") != null)
+				
+				if (e.getString("owner") != null) {
 					pgh.insertEdge(e.getString("owner"),
 							e.getString("sysmlid"), DbEdgeTypes.REGULAR);
+				}
+				
 				// need to update the reference for the node
                 pgh.updateNodeRefIds(e.getString("sysmlid"),
                                      e.getString("versionedRefId"), e.getString("nodeRefId"));
 			}
 
 			for (Pair<String, String> e : documentEdges) {
-				pgh.insertEdge(e.first, e.second, DbEdgeTypes.DOCUMENT);
+	            pgh.insertEdge(e.first, e.second, DbEdgeTypes.DOCUMENT);
 			}
 		} catch (Exception e1) {
 		    String subject = "Graph DB storage failed, reverting to no graphDb lookup";
@@ -970,6 +980,10 @@ public class CommitUtil {
 		boolean jmsStatus = false;
 		boolean restStatus = false;
 
+		if (logger.isDebugEnabled()) {
+		    logger.debug( deltaJson );
+		}
+		
 		processDeltasForDb(deltaJson, workspaceId);
 
 		if (source != null) {
@@ -1149,7 +1163,7 @@ public class CommitUtil {
 
 				String sysmlId = elementJson.optString(Acm.JSON_ID);
 
-				if (sysmlId != null) {
+				if (!Utils.isNullOrEmpty(sysmlId)) {
 
 					EmsScriptNode node = null;
 					if (nodeMap.containsKey(sysmlId)) {
@@ -1165,7 +1179,7 @@ public class CommitUtil {
 
 					if (node != null) {
 						newJsonArray
-								.put(node.toJSONObject(workspace, dateTime));
+								.put(node.toJSONObject(workspace, dateTime, false));
 					}
 				}
 			}
@@ -1263,7 +1277,8 @@ public class CommitUtil {
 					String timestamp1 = ws1Json.optString("timestamp");
 					String timestamp2 = ws2Json.optString("timestamp");
 
-					if (timestamp1 == null || timestamp2 == null) {
+					if ( Utils.isNullOrEmpty( timestamp1 ) || 
+					     Utils.isNullOrEmpty( timestamp2 ) ) {
 						return false;
 					} else {
 

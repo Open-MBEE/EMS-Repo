@@ -1,0 +1,205 @@
+{"elements": [
+    {
+        "nodeRefId": "workspace://SpacesStore/1d7746e6-7195-4967-8c88-dbc378c5c808",
+        "qualifiedId": "/vetest/PROJECT-5c79ccb6-68a2-4411-be7b-339a05b9e779/_18_0_5_407019f_1466704567277_266148_14321/_18_0_5_407019f_1466704583339_1092_14357/view-a3",
+        "siteCharacterizationId": "vetest",
+        "versionedRefId": "versionStore://version2Store/1ea67a94-85aa-4b05-a3a0-1985fc650a78",
+        "qualifiedName": "/vetest/HierarchyTest/Test/View A/View A3",
+        "sysmlid": "view-a3",
+        "editable": true,
+        "creator": "admin",
+        "modified": "2016-09-13T17:11:15.466-0700",
+        "modifier": "admin",
+        "created": "Tue Sep 13 17:11:15 PDT 2016",
+        "name": "View A3",
+        "documentation": "",
+        "owner": "_18_0_5_407019f_1466704583339_1092_14357",
+        "read": "2016-09-13T17:11:15.757-0700",
+        "specialization": {
+            "childViews": [],
+            "type": "View"
+        }
+    },
+    {
+        "siteCharacterizationId": "vetest",
+        "qualifiedId": "/vetest/PROJECT-5c79ccb6-68a2-4411-be7b-339a05b9e779/_18_0_5_407019f_1466704567277_266148_14321/MMS_1473811875049_3e565551-c734-45ea-8ae2-3b68e6c74c7b/MMS_1473811875049_5169f67b-d0f7-4032-b37d-fab3a25a79cf",
+        "nodeRefId": "workspace://SpacesStore/35a187c1-23c2-4d15-8024-401e89924858",
+        "versionedRefId": "versionStore://version2Store/9e405149-9342-4505-94ad-7db2b05aebf3",
+        "qualifiedName": "/vetest/HierarchyTest/Test/null/null",
+        "sysmlid": "MMS_1473811875049_5169f67b-d0f7-4032-b37d-fab3a25a79cf",
+        "editable": true,
+        "creator": "admin",
+        "modified": "2016-09-13T17:11:15.723-0700",
+        "modifier": "admin",
+        "created": "Tue Sep 13 17:11:15 PDT 2016",
+        "owner": "MMS_1473811875049_3e565551-c734-45ea-8ae2-3b68e6c74c7b",
+        "read": "2016-09-13T17:11:15.768-0700",
+        "specialization": {
+            "propertyType": "_18_0_5_407019f_1466704583339_1092_14357",
+            "isDerived": false,
+            "isSlot": false,
+            "type": "Property"
+        }
+    },
+    {
+        "siteCharacterizationId": "vetest",
+        "qualifiedId": "/vetest/PROJECT-5c79ccb6-68a2-4411-be7b-339a05b9e779/_18_0_5_407019f_1466704567277_266148_14321/_18_0_5_407019f_1466704583339_1092_14357/_18_0_5_407019f_1466704655412_905888_14823",
+        "nodeRefId": "workspace://SpacesStore/38ec86d3-8b0a-4637-a36f-7aeed5fef1b6",
+        "versionedRefId": "versionStore://version2Store/ca12bcf7-5dd7-48d4-8191-fb66afca8506",
+        "qualifiedName": "/vetest/HierarchyTest/Test/View A/view D",
+        "sysmlid": "_18_0_5_407019f_1466704655412_905888_14823",
+        "isMetatype": false,
+        "editable": true,
+        "creator": "admin",
+        "modified": "2016-09-13T17:11:11.986-0700",
+        "modifier": "admin",
+        "created": "Tue Sep 13 17:11:02 PDT 2016",
+        "name": "view D",
+        "documentation": "",
+        "owner": "_18_0_5_407019f_1466704583339_1092_14357",
+        "appliedMetatypes": [
+            "_15_0_be00301_1199377756297_348405_2678",
+            "_9_0_62a020a_1105704884574_96724_7644"
+        ],
+        "read": "2016-09-13T17:11:15.771-0700",
+        "specialization": {
+            "aggregation": "COMPOSITE",
+            "multiplicityMax": 1,
+            "propertyType": "_18_0_5_407019f_1466704588878_781465_14530",
+            "isDerived": false,
+            "isSlot": false,
+            "value": [],
+            "multiplicityMin": 1,
+            "type": "Property"
+        }
+    },
+    {
+        "siteCharacterizationId": "vetest",
+        "qualifiedId": "/vetest/PROJECT-5c79ccb6-68a2-4411-be7b-339a05b9e779/_18_0_5_407019f_1466704567277_266148_14321/_18_0_5_407019f_1466704583339_1092_14357/MMS_1473811875050_19ec1134-93f8-4f57-9d37-338124d3fbd8",
+        "nodeRefId": "workspace://SpacesStore/4a1d6362-d701-412d-a794-5fe3f35a180a",
+        "versionedRefId": "versionStore://version2Store/53b197b0-5b8d-4c1f-9f6a-64a38dc30c2b",
+        "qualifiedName": "/vetest/HierarchyTest/Test/View A/null",
+        "sysmlid": "MMS_1473811875050_19ec1134-93f8-4f57-9d37-338124d3fbd8",
+        "editable": true,
+        "creator": "admin",
+        "modified": "2016-09-13T17:11:15.725-0700",
+        "modifier": "admin",
+        "created": "Tue Sep 13 17:11:15 PDT 2016",
+        "owner": "_18_0_5_407019f_1466704583339_1092_14357",
+        "read": "2016-09-13T17:11:15.774-0700",
+        "specialization": {
+            "aggregation": "COMPOSITE",
+            "propertyType": "view-a3",
+            "isDerived": false,
+            "isSlot": false,
+            "type": "Property"
+        }
+    },
+    {
+        "siteCharacterizationId": "vetest",
+        "qualifiedId": "/vetest/PROJECT-5c79ccb6-68a2-4411-be7b-339a05b9e779/_18_0_5_407019f_1466704567277_266148_14321/_18_0_5_407019f_1466704583339_1092_14357/_18_0_5_407019f_1466704652396_405515_14797",
+        "nodeRefId": "workspace://SpacesStore/aa158102-ea24-4300-bb56-360121062fd5",
+        "versionedRefId": "versionStore://version2Store/de1354ba-2857-4b91-a955-2f140ec0c2bb",
+        "qualifiedName": "/vetest/HierarchyTest/Test/View A/view C",
+        "sysmlid": "_18_0_5_407019f_1466704652396_405515_14797",
+        "isMetatype": false,
+        "editable": true,
+        "creator": "admin",
+        "modified": "2016-09-13T17:11:12.205-0700",
+        "modifier": "admin",
+        "created": "Tue Sep 13 17:11:02 PDT 2016",
+        "name": "view C",
+        "documentation": "",
+        "owner": "_18_0_5_407019f_1466704583339_1092_14357",
+        "appliedMetatypes": [
+            "_15_0_be00301_1199378032543_992832_3096",
+            "_9_0_62a020a_1105704884574_96724_7644"
+        ],
+        "read": "2016-09-13T17:11:15.776-0700",
+        "specialization": {
+            "aggregation": "NONE",
+            "multiplicityMax": 1,
+            "propertyType": "_18_0_5_407019f_1466704587594_239414_14483",
+            "isDerived": false,
+            "isSlot": false,
+            "value": [],
+            "multiplicityMin": 1,
+            "type": "Property"
+        }
+    },
+    {
+        "siteCharacterizationId": "vetest",
+        "qualifiedId": "/vetest/PROJECT-5c79ccb6-68a2-4411-be7b-339a05b9e779/_18_0_5_407019f_1466704567277_266148_14321/_18_0_5_407019f_1466704583339_1092_14357",
+        "nodeRefId": "workspace://SpacesStore/e2382f36-dc35-47b6-910f-376218ced8c3",
+        "versionedRefId": "versionStore://version2Store/502b58d7-bcc9-4905-9fbc-8a911ee01b10",
+        "qualifiedName": "/vetest/HierarchyTest/Test/View A",
+        "sysmlid": "_18_0_5_407019f_1466704583339_1092_14357",
+        "isMetatype": false,
+        "editable": true,
+        "creator": "admin",
+        "modified": "2016-09-13T17:11:15.488-0700",
+        "ownedAttribute": [
+            "_18_0_5_407019f_1466704652396_405515_14797",
+            "_18_0_5_407019f_1466704655412_905888_14823",
+            "MMS_1473811875050_19ec1134-93f8-4f57-9d37-338124d3fbd8"
+        ],
+        "modifier": "admin",
+        "created": "Tue Sep 13 17:11:02 PDT 2016",
+        "name": "View A",
+        "owner": "_18_0_5_407019f_1466704567277_266148_14321",
+        "documentation": "",
+        "read": "2016-09-13T17:11:15.779-0700",
+        "appliedMetatypes": [
+            "_17_0_1_232f03dc_1325612611695_581988_21583",
+            "_18_0beta_9150291_1392290067481_33752_4359",
+            "_9_0_62a020a_1105704885343_144138_7929"
+        ],
+        "specialization": {
+            "childViews": [
+                {
+                    "aggregation": "NONE",
+                    "id": "_18_0_5_407019f_1466704587594_239414_14483"
+                },
+                {
+                    "aggregation": "COMPOSITE",
+                    "id": "_18_0_5_407019f_1466704588878_781465_14530"
+                },
+                {
+                    "aggregation": "COMPOSITE",
+                    "id": "view-a3"
+                }
+            ],
+            "displayedElements": ["_18_0_5_407019f_1466704583339_1092_14357"],
+            "contents": {
+                "type": "Expression",
+                "operand": [{
+                    "instance": "_18_0_5_407019f_1468188892956_831936_14503",
+                    "type": "InstanceValue"
+                }]
+            },
+            "type": "View"
+        }
+    },
+    {
+        "siteCharacterizationId": "vetest",
+        "qualifiedId": "/vetest/PROJECT-5c79ccb6-68a2-4411-be7b-339a05b9e779/_18_0_5_407019f_1466704567277_266148_14321/MMS_1473811875049_3e565551-c734-45ea-8ae2-3b68e6c74c7b",
+        "nodeRefId": "workspace://SpacesStore/ef4c9754-12b6-4879-9221-a83a31f66fab",
+        "versionedRefId": "versionStore://version2Store/ada28b98-f00f-48f9-8dea-a3b3a4223c12",
+        "qualifiedName": "/vetest/HierarchyTest/Test/null",
+        "sysmlid": "MMS_1473811875049_3e565551-c734-45ea-8ae2-3b68e6c74c7b",
+        "editable": true,
+        "creator": "admin",
+        "modified": "2016-09-13T17:11:15.346-0700",
+        "modifier": "admin",
+        "created": "Tue Sep 13 17:11:15 PDT 2016",
+        "owner": "_18_0_5_407019f_1466704567277_266148_14321",
+        "read": "2016-09-13T17:11:15.799-0700",
+        "specialization": {
+            "source": "MMS_1473811875049_5169f67b-d0f7-4032-b37d-fab3a25a79cf",
+            "target": "MMS_1473811875050_19ec1134-93f8-4f57-9d37-338124d3fbd8",
+            "type": "Association",
+            "ownedEnd": ["MMS_1473811875049_5169f67b-d0f7-4032-b37d-fab3a25a79cf"]
+        }
+    }
+]}
+200

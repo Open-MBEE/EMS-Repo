@@ -269,7 +269,7 @@
     },
     {
         "nodeRefId": "workspace://SpacesStore/9be1f9bc-b2b2-427c-8cdd-f76114f55478",
-        "qualifiedId": "/no_site/no_site_no_project/holding_bin_no_site_no_project/YY_2016_no_site_no_project/MM_3_no_site_no_project/DD_13_no_site_no_project/HH_13_no_site_no_project/123456/MMS_1460577721031_6fe328c3-bbce-427b-8707-989c077b5378",
+        "qualifiedId": "/no_site/no_site_no_project/holding_bin_no_site_no_project/YY_2016_no_site_no_project/MM_3_no_site_no_project/DD_13_no_site_no_project/HH_13_no_site_no_project/PROJECT-123456/MMS_1460577721031_6fe328c3-bbce-427b-8707-989c077b5378",
         "siteCharacterizationId": "no_site",
         "versionedRefId": "versionStore://version2Store/0e045ec2-d25c-452a-801a-21bc68d72c5a",
         "qualifiedName": "/no_site/no_site_no_project/holding_bin/YY_2016/MM_3/DD_13/HH_13/null/PMA_Jobs",
@@ -281,7 +281,7 @@
         "created": "Wed Apr 13 13:02:02 PDT 2016",
         "name": "PMA_Jobs",
         "documentation": "",
-        "owner": "123456",
+        "owner": "PROJECT-123456",
         "read": "2016-04-13T13:02:04.062-0700",
         "specialization": {"type": "Package"}
     },

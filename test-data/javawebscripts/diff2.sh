@@ -32,8 +32,8 @@ export CURL_GET_FLAGS="-X GET"
 echo
 echo 'testPost1'
 # create project and site
-echo curl $CURL_FLAGS $CURL_POST_FLAGS '{"name":"CY Test"}' $BASE_URL"sites/europa/projects/123456?fix=true&createSite=true" 
-curl $CURL_FLAGS $CURL_POST_FLAGS '{"name":"CY Test"}' $BASE_URL"sites/europa/projects/123456?fix=true&createSite=true" > output/post1.json
+echo curl $CURL_FLAGS $CURL_POST_FLAGS '{"name":"CY Test"}' $BASE_URL"sites/europa/projects/PROJECT-123456?fix=true&createSite=true" 
+curl $CURL_FLAGS $CURL_POST_FLAGS '{"name":"CY Test"}' $BASE_URL"sites/europa/projects/PROJECT-123456?fix=true&createSite=true" > output/post1.json
 DIFF=$(diff baselineoutput/post1.json output/post1.json)
 if [ "$DIFF" != "" ];then
 	failedTest=1
@@ -44,8 +44,8 @@ echo
 
 echo 'testPost 2'
 #post elements to project
-echo curl $CURL_FLAGS $CURL_POST_FLAGS @JsonData/elementsNew.json $BASE_URL"sites/europa/projects/123456/elements" 
-curl $CURL_FLAGS $CURL_POST_FLAGS @JsonData/elements.json $BASE_URL"sites/europa/projects/123456/elements" | grep -v '"read":'| grep -v '"lastModified"' > output/post2.json
+echo curl $CURL_FLAGS $CURL_POST_FLAGS @JsonData/elementsNew.json $BASE_URL"sites/europa/projects/PROJECT-123456/elements" 
+curl $CURL_FLAGS $CURL_POST_FLAGS @JsonData/elements.json $BASE_URL"sites/europa/projects/PROJECT-123456/elements" | grep -v '"read":'| grep -v '"lastModified"' > output/post2.json
 java -cp .:../../src/main/amp/web/WEB-INF/lib/mbee_util.jar:../../target/mms-repo-war/WEB-INF/lib/json-20090211.jar:../../target/classes gov.nasa.jpl.view_repo.util.JsonDiff baselineoutput/post2.json output/post2.json  | grep -v '"sysmlid"' | grep -v '"author"'| grep -v '}' | grep -ve '---' | egrep -v "[0-9]+[c|a|d][0-9]+"
 echo
 echo
@@ -66,9 +66,9 @@ echo
 echo 'testPost 4'
 # post comments (can only add these to a particular view - though view isn't really checked at the moment)
 echo
-echo curl $CURL_FLAGS $CURL_POST_FLAGS @JsonData/comments.json $BASE_URL"sites/europa/projects/123456/elements"  
+echo curl $CURL_FLAGS $CURL_POST_FLAGS @JsonData/comments.json $BASE_URL"sites/europa/projects/PROJECT-123456/elements"  
 echo
-curl $CURL_FLAGS $CURL_POST_FLAGS @JsonData/comments.json $BASE_URL"sites/europa/projects/123456/elements"  | grep -v '"read":'| grep -v '"lastModified"' | grep -v '"sysmlid"'| grep -v '"author"' > output/post4.json
+curl $CURL_FLAGS $CURL_POST_FLAGS @JsonData/comments.json $BASE_URL"sites/europa/projects/PROJECT-123456/elements"  | grep -v '"read":'| grep -v '"lastModified"' | grep -v '"sysmlid"'| grep -v '"author"' > output/post4.json
 DIFF=$(diff -I 'author' baselineoutput/post4.json output/post4.json | grep -v '"author"')
 if [ "$DIFF" != "" ];then
         failedTest=1
@@ -94,15 +94,15 @@ echo
 
 echo 'testGET1'
 # get project - should just return 200
-echo curl $CURL_FLAGS $CURL_GET_FLAGS $BASE_URL"sites/europa/projects/123456\""
-curl $CURL_FLAGS $CURL_GET_FLAGS $BASE_URL"sites/europa/projects/123456"
+echo curl $CURL_FLAGS $CURL_GET_FLAGS $BASE_URL"sites/europa/projects/PROJECT-123456\""
+curl $CURL_FLAGS $CURL_GET_FLAGS $BASE_URL"sites/europa/projects/PROJECT-123456"
 echo
 echo
 
 echo 'testGET2'
 # get elements
-echo curl $CURL_FLAGS $CURL_GET_FLAGS $BASE_URL"elements/123456?recurse=true\""
-curl $CURL_FLAGS $CURL_GET_FLAGS $BASE_URL"elements/123456?recurse=true" | grep -v '"read":'| grep -v '"lastModified"' > output/get2.jsonjava 
+echo curl $CURL_FLAGS $CURL_GET_FLAGS $BASE_URL"elements/PROJECT-123456?recurse=true\""
+curl $CURL_FLAGS $CURL_GET_FLAGS $BASE_URL"elements/PROJECT-123456?recurse=true" | grep -v '"read":'| grep -v '"lastModified"' > output/get2.jsonjava 
 java -cp .:../../src/main/amp/web/WEB-INF/lib/mbee_util.jar:../../target/mms-repo-war/WEB-INF/lib/json-20090211.jar:../../target/classes gov.nasa.jpl.view_repo.util.JsonDiff baselineoutput/post2.json output/post2.json  | egrep -v "[0-9]+[c|a|d][0-9]+" | grep -ve '---' | grep -v '"author"' | grep -v '"sysmlid":'
 echo
 echo
@@ -197,8 +197,8 @@ echo
 
 echo 'testPOSTCHANGE1'
 # post changes to directed relationships only (without owners)
-echo curl $CURL_FLAGS $CURL_POST_FLAGS @JsonData/directedrelationships.json $BASE_URL"sites/europa/projects/123456/elements\""
-curl $CURL_FLAGS $CURL_POST_FLAGS @JsonData/directedrelationships.json $BASE_URL"sites/europa/projects/123456/elements" | grep -v '"read":' | grep -v '"lastModified"' | grep -v '"sysmlid"' > output/postChange1.json
+echo curl $CURL_FLAGS $CURL_POST_FLAGS @JsonData/directedrelationships.json $BASE_URL"sites/europa/projects/PROJECT-123456/elements\""
+curl $CURL_FLAGS $CURL_POST_FLAGS @JsonData/directedrelationships.json $BASE_URL"sites/europa/projects/PROJECT-123456/elements" | grep -v '"read":' | grep -v '"lastModified"' | grep -v '"sysmlid"' > output/postChange1.json
 DIFF=$(diff baselineoutput/postChange1.json output/postChange1.json | egrep -v "[0-9]+[c|a|d][0-9]+" | grep -ve '---' |grep -v '"author"')
 if [ "$DIFF" != "" ];then
         failedTest=1

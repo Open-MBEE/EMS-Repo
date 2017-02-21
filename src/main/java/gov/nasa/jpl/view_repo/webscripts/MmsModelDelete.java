@@ -2,6 +2,7 @@ package gov.nasa.jpl.view_repo.webscripts;
 
 import gov.nasa.jpl.mbee.util.Timer;
 import gov.nasa.jpl.mbee.util.Utils;
+import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.CommitUtil;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.EmsTransaction;
@@ -66,15 +67,9 @@ public class MmsModelDelete extends AbstractJavaWebScript {
     @Override
     protected Map< String, Object > executeImplImpl( WebScriptRequest req,
                                                  Status status, Cache cache ) {
-        if ( logger.isInfoEnabled() ) {
-            String user = AuthenticationUtil.getFullyAuthenticatedUser();
-            logger.info(user + " " + req.getURL());
-            logger.info(req.parseContent());
-        }
-        
         Timer timer = new Timer();
-        
-        printHeader( req );
+        String user = AuthenticationUtil.getFullyAuthenticatedUser();
+        printHeader(user, logger, req);
 
         Map<String, Object> model = new HashMap<String, Object>();
 
@@ -104,12 +99,7 @@ public class MmsModelDelete extends AbstractJavaWebScript {
 
         status.setCode(responseStatus.getCode());
 
-        printFooter();
-
-        if (logger.isInfoEnabled()) logger.info( "Deletion completed" );
-        if ( logger.isInfoEnabled() ) {
-            logger.info( String.format( "ModelDelete: %s", timer ) );
-        }
+        printFooter(user, logger, timer);
 
         return model;
     }
@@ -175,7 +165,7 @@ public class MmsModelDelete extends AbstractJavaWebScript {
             log(Level.WARN, HttpServletResponse.SC_BAD_REQUEST, "no elements specified for deletion");
         } else {
             try {
-                projectId = deleteNodes(ids, workspace);
+                projectId = findNodesToDelete(ids, workspace);
                 Date end = new Date();
         
                 boolean showAll = false;
@@ -196,7 +186,7 @@ public class MmsModelDelete extends AbstractJavaWebScript {
 
                 // apply aspects after wsDiff JSON has been created since the wsDiff 
                 // toJSONObject skips deleted objects
-                applyAspects();
+                applyDeletedAspects();
                 
             } catch (Exception e) {
                 // do nothing, just a 404 not found
@@ -206,7 +196,7 @@ public class MmsModelDelete extends AbstractJavaWebScript {
         return result;
     }
     
-    protected void applyAspects() {
+    protected void applyDeletedAspects() {
         
         Set<EmsScriptNode> nodesToDelete = new HashSet<EmsScriptNode>();
         nodesToDelete.addAll( wsDiff.getDeletedElements().values() );
@@ -224,7 +214,7 @@ public class MmsModelDelete extends AbstractJavaWebScript {
                         deletedNode.removeAspect( "ems:Added" );
                         deletedNode.removeAspect( "ems:Updated" );
                         deletedNode.removeAspect( "ems:Moved" );
-                        deletedNode.createOrUpdateAspect( "ems:Deleted" );
+                        deletedNode.createOrUpdateAspect( Acm.ACM_DELETED );
                         
                     }
                 };
@@ -233,7 +223,14 @@ public class MmsModelDelete extends AbstractJavaWebScript {
     }
 
 
-    protected String deleteNodes(List<String> ids, WorkspaceNode workspace) throws Exception {
+    /**
+     * creates list of nodes to delete
+     * @param ids
+     * @param workspace
+     * @return
+     * @throws Exception
+     */
+    protected String findNodesToDelete(List<String> ids, WorkspaceNode workspace) throws Exception {
         String projectId = null;
         
         List<EmsScriptNode> nodes = new ArrayList<EmsScriptNode>();
@@ -261,7 +258,7 @@ public class MmsModelDelete extends AbstractJavaWebScript {
                          String.format( "Could not find node %s in workspace %s. %s",
                                         id, workspaceName, msg), 
                         HttpServletResponse.SC_NOT_FOUND);
-                    throw new Exception();
+                    //throw new Exception();
                 }
             }
         }
@@ -321,7 +318,7 @@ public class MmsModelDelete extends AbstractJavaWebScript {
     
     
     /**
-     * Builds up the list of deleted elements
+     * Builds up the list of deleted elements, the applyDeletedAspects should be called afterwards with the wsDiff
      * @param node
      * @param workspace
      */
@@ -347,7 +344,9 @@ public class MmsModelDelete extends AbstractJavaWebScript {
                         new EmsTransaction( getServices(), getResponse(), getResponseStatus() ) {
                             @Override
                             public void run() throws Exception {
-                                EmsScriptNode n = workspace.replicateWithParentFolders( fNode );
+                                EmsScriptNode n = 
+                                        workspace.replicateWithParentFolders( fNode,
+                                                                              runWithoutTransactions );
                                 list.add(n);
                             }
                         };
@@ -476,6 +475,7 @@ public class MmsModelDelete extends AbstractJavaWebScript {
                     @Override
                     public void run() throws Exception {
                         parent.removeFromPropertyNodeRefs("ems:ownedChildren", node.getNodeRef() );
+                        parent.removeFromPropertyNodeRefs( "ems:valueSpecOwnedChildren", node.getNodeRef() );
                     }
                 };
             }

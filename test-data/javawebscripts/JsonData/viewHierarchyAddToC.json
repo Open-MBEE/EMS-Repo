@@ -1,0 +1,25 @@
+{
+    "elements": [
+        {
+            "sysmlid": "view-c1",
+            "owner": "_18_0_5_407019f_1466704587594_239414_14483",
+            "name": "View c1",
+            "documentation": "",
+            "specialization": {
+                "type": "View"
+            }
+        },
+        {
+            "sysmlid": "_18_0_5_407019f_1466704587594_239414_14483",
+            "specialization": {
+                "type": "View",
+                "childViews": [
+                    {
+                        "aggregation": "COMPOSITE",
+                        "id": "view-c1"
+                    }
+                ]
+            }
+        }
+    ]
+}

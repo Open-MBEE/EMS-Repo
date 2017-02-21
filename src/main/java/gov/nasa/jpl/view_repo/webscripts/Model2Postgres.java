@@ -33,6 +33,7 @@ package gov.nasa.jpl.view_repo.webscripts;
 
 import gov.nasa.jpl.mbee.util.Pair;
 import gov.nasa.jpl.mbee.util.TimeUtils;
+import gov.nasa.jpl.mbee.util.Timer;
 import gov.nasa.jpl.view_repo.db.PostgresHelper;
 import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
@@ -49,6 +50,7 @@ import java.util.Map;
 import javax.servlet.http.HttpServletResponse;
 
 import org.alfresco.repo.model.Repository;
+import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.site.SiteInfo;
@@ -94,7 +96,9 @@ public class Model2Postgres extends AbstractJavaWebScript {
     @Override
     protected Map< String, Object >
             executeImplImpl( WebScriptRequest req, Status status, Cache cache ) {
-        printHeader( req );
+        Timer timer = new Timer();
+        String user = AuthenticationUtil.getFullyAuthenticatedUser();
+        printHeader(user, logger, req);
 
         Map< String, Object > model = new HashMap< String, Object >();
         JSONObject json = null;
@@ -130,7 +134,7 @@ public class Model2Postgres extends AbstractJavaWebScript {
         }
         status.setCode( responseStatus.getCode() );
 
-        printFooter();
+        printFooter(user, logger, timer);
 
         return model;
     }

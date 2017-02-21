@@ -8,7 +8,7 @@
       "qualifiedName": "/europa/JW_TEST2/duration",
       "sysmlid": "arg_ev_38307",
       "documentation": "",
-      "owner": "123456",
+      "owner": "PROJECT-123456",
       "specialization": {
         "propertyType": null,
         "isDerived": false,

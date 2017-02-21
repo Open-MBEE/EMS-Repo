@@ -29,6 +29,7 @@
 
 package gov.nasa.jpl.view_repo.webscripts;
 
+import gov.nasa.jpl.mbee.util.Timer;
 import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.CommitUtil;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
@@ -87,7 +88,9 @@ public class ProductPost extends AbstractJavaWebScript {
 		// changing from another
 		// aspect to this one. See ModelPost.checkForObsoleteValueSpecs()
 
-		printHeader(req);
+        Timer timer = new Timer();
+        String user = AuthenticationUtil.getFullyAuthenticatedUser();
+        printHeader(user, logger, req);
 
 		// clearCaches();
 
@@ -108,7 +111,7 @@ public class ProductPost extends AbstractJavaWebScript {
 		status.setCode(responseStatus.getCode());
 		model.put("res", createResponseJson());
 
-		printFooter();
+		printFooter(user, logger, timer);
 
 		return model;
 	}
@@ -138,7 +141,7 @@ public class ProductPost extends AbstractJavaWebScript {
 		};
 
 		Date end = new Date();
-		JSONObject deltaJson = wsDiff.toJSONObject(this, start, end);
+		JSONObject deltaJson = wsDiff.toJSONObject(this, start, end, false, false);
 		String wsId = "master";
 		if (workspace != null)
 			wsId = workspace.getId();

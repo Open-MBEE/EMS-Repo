@@ -1,12 +1,12 @@
 {
     "message": "[WARNING]: Bad depth specified: invalid, returning depth 0\n",
     "elements": [{
-        "qualifiedId": "/europa/123456",
+        "qualifiedId": "/europa/PROJECT-123456",
         "modifier": "admin",
         "qualifiedName": "/europa/JW_TEST",
         "name": "JW_TEST",
         "owner": null,
-        "sysmlid": "123456",
+        "sysmlid": "PROJECT-123456",
         "editable": true,
         "creator": "admin"
     }]

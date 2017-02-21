@@ -326,7 +326,7 @@ public class WorkspaceNode extends EmsScriptNode {
 
         // Add the delete aspect to mark as "deleted"
         makeSureNodeRefIsNotFrozen();
-        addAspect( "ems:Deleted" );
+        addAspect( Acm.ACM_DELETED );
 
         // FIXME -- REVIEW -- Is that enough?! What about the contents? Don't we
         // need to purge? Or is a "deleted" workspaceNode enough?
@@ -401,10 +401,12 @@ public class WorkspaceNode extends EmsScriptNode {
      * workspace if not already present.
      *
      * @param node
+     * @param runWithoutTransactions 
      * @return
      * @throws Exception
      */
-    public EmsScriptNode replicateWithParentFolders( EmsScriptNode node ) {// throws Exception {
+    public EmsScriptNode replicateWithParentFolders( EmsScriptNode node,
+                                                     boolean runWithoutTransactions ) {
         if ( Debug.isOn() ) Debug.outln( "replicateFolderWithChain( " + node + " )" );
         if ( node == null ) return null;
         EmsScriptNode newFolder = node;
@@ -454,7 +456,15 @@ public class WorkspaceNode extends EmsScriptNode {
             }
 
             if ( !this.equals( parent.getWorkspace() ) ) {
-                parent = replicateWithParentFolders( parent );
+                new EmsTransaction(getServices(), getResponse(),
+                                   getStatus(), runWithoutTransactions, true ) {
+                               @Override
+                               public void run() throws Exception {
+                        // TODO Auto-generated method stub
+                        
+                    }
+                };
+                parent = replicateWithParentFolders( parent, runWithoutTransactions );
             }
         } else if ( parent == null || !parent.scriptNodeExists() ) {
             Debug.error("Error! Bad parent when replicating folder chain! " + parent );
@@ -474,9 +484,11 @@ public class WorkspaceNode extends EmsScriptNode {
                 EmsScriptNode np = n.getParent(timeToUseN, n.getWorkspace(), false, true);
                 // Note: need the last check of the parent's in case the node found was in the workspace, but
                 // under a different site, ie Models folder
-                if (n != null && n.scriptNodeExists() && this.equals( n.getWorkspace() ) && np != null && np.equals( parent )) {
+                if (n != null && n.scriptNodeExists() && this.equals( n.getWorkspace() )) {
                     nodeGuess = n;
-                    break;
+                    if ( np != null && np.equals( parent ) ) {
+                        break;
+                    }
                 }
             }
             if ( nodeGuess == null) {
@@ -1057,7 +1069,7 @@ public class WorkspaceNode extends EmsScriptNode {
     }
 
     @Override
-    public JSONObject toJSONObject( WorkspaceNode ws, Date dateTime ) throws JSONException {
+    public JSONObject toJSONObject( WorkspaceNode ws, Date dateTime, boolean isQualified ) throws JSONException {
         JSONObject json = new JSONObject();
 
         addWorkspaceNamesAndIds(json, this, false );

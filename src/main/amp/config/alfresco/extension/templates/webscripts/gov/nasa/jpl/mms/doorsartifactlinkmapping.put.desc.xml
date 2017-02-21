@@ -1,0 +1,11 @@
+<webscript>
+	<shortname>Update Artifact Link Mappings</shortname>
+	<description>
+		Update mapping for doors project artifact link types to sysml applied metatype ids
+	</description>
+	<url>/doors/artifact/link/mappings</url>
+	<format default="json">argument</format>
+	<authentication>user</authentication>
+	<transaction>none</transaction>
+	<family>MMS REST API</family>
+</webscript>

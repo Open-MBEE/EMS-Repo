@@ -5,18 +5,9 @@
         "modifier": "admin",
         "specialization": {
             "aggregation": "COMPOSITE",
-            "isSlot": false,
             "isDerived": false,
+            "isSlot": false,
             "type": "Property"
-        }
-    },
-    {
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "specialization": {
-            "ownedEnd": [],
-            "type": "Association"
         }
     },
     {
@@ -25,8 +16,8 @@
         "modifier": "admin",
         "specialization": {
             "aggregation": "COMPOSITE",
-            "isSlot": false,
             "isDerived": false,
+            "isSlot": false,
             "type": "Property"
         }
     },
@@ -35,8 +26,63 @@
         "creator": "admin",
         "modifier": "admin",
         "specialization": {
-            "isSlot": false,
             "isDerived": false,
+            "isSlot": false,
+            "type": "Property"
+        }
+    },
+    {
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "specialization": {
+            "isDerived": false,
+            "isSlot": false,
+            "type": "Property"
+        }
+    },
+    {
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "specialization": {
+            "type": "Association",
+        }
+    },
+    {
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "specialization": {
+            "type": "Association",
+        }
+    },
+    {
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "specialization": {
+            "type": "Association",
+        }
+    },
+    {
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "specialization": {
+            "aggregation": "COMPOSITE",
+            "isDerived": false,
+            "isSlot": false,
+            "type": "Property"
+        }
+    },
+    {
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "specialization": {
+            "isDerived": false,
+            "isSlot": false,
             "type": "Property"
         }
     },
@@ -51,66 +97,17 @@
         "specialization": {
             "childViews": [
                 {
-                    "aggregation": "COMPOSITE",
+                    "aggregation": "COMPOSITE"
                 },
                 {
-                    "aggregation": "COMPOSITE",
+                    "aggregation": "COMPOSITE"
                 },
                 {
-                    "aggregation": "COMPOSITE",
+                    "aggregation": "COMPOSITE"
                 }
             ],
             "contents": {"type": "Expression"},
             "type": "View"
-        }
-    },
-    {
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "specialization": {
-            "ownedEnd": [],
-            "type": "Association"
-        }
-    },
-    {
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "specialization": {
-            "isSlot": false,
-            "isDerived": false,
-            "type": "Property"
-        }
-    },
-    {
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "specialization": {
-            "ownedEnd": [],
-            "type": "Association"
-        }
-    },
-    {
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "specialization": {
-            "aggregation": "COMPOSITE",
-            "isSlot": false,
-            "isDerived": false,
-            "type": "Property"
-        }
-    },
-    {
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "specialization": {
-            "isSlot": false,
-            "isDerived": false,
-            "type": "Property"
         }
     }
 ]}

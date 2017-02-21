@@ -1,5 +1,6 @@
 package gov.nasa.jpl.view_repo.webscripts;
 
+import gov.nasa.jpl.mbee.util.Timer;
 import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
 import gov.nasa.jpl.view_repo.webscripts.util.ProductsWebscript;
@@ -20,6 +21,8 @@ import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
 
 public class MmsProductsGet extends AbstractJavaWebScript {
+    static Logger logger = Logger.getLogger( MmsProductsGet.class );
+    
     public MmsProductsGet() {
         super();
     }
@@ -43,8 +46,9 @@ public class MmsProductsGet extends AbstractJavaWebScript {
 
     @Override
     protected  Map<String, Object> executeImplImpl(WebScriptRequest req, Status status, Cache cache) {
-//        AuthenticationUtil.setRunAsUser( "admin" );
-        printHeader( req );
+        Timer timer = new Timer();
+        String user = AuthenticationUtil.getFullyAuthenticatedUser();
+        printHeader( user, logger, req );
 
         //clearCaches();
         Map<String, Object> model = new HashMap<String, Object>();
@@ -81,7 +85,7 @@ public class MmsProductsGet extends AbstractJavaWebScript {
 
         status.setCode(responseStatus.getCode());
 
-        printFooter();
+        printFooter(user, logger, timer);
 
         return model;
     }

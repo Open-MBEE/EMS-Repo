@@ -1,16 +1,16 @@
 {"elements": [{
-    "qualifiedId": "/europa/123456/300/301/302/z",
+    "qualifiedId": "/europa/PROJECT-123456/300/301/302/z",
     "qualifiedName": "/europa/JW_TEST/300/301/302/null",
     "sysmlid": "z",
     "editable": true,
     "creator": "admin",
     "modifier": "admin",
-    "documentation": "z is z",
     "owner": "302",
+    "documentation": "z is z",
     "specialization": {
         "propertyType": null,
-        "isSlot": false,
         "isDerived": false,
+        "isSlot": false,
         "value": [{
             "string": "the z value",
             "type": "LiteralString"

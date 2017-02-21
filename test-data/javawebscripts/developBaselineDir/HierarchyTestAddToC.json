@@ -1,0 +1,75 @@
+{"elements": [
+    {
+        "sysmlid": "_18_0_5_407019f_1466704587594_239414_14483",
+        "isMetatype": false,
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "View C",
+        "documentation": "",
+        "appliedMetatypes": [
+            "_17_0_1_232f03dc_1325612611695_581988_21583",
+            "_18_0beta_9150291_1392290067481_33752_4359",
+            "_9_0_62a020a_1105704885343_144138_7929"
+        ],
+        "specialization": {
+            "childViews": [{
+                "aggregation": "COMPOSITE",
+                "id": "view-c1"
+            }],
+            "displayedElements": ["_18_0_5_407019f_1466704587594_239414_14483"],
+            "contents": {
+                "type": "Expression",
+                "operand": [{
+                    "instance": "_18_0_5_407019f_1468188892961_846348_14527",
+                    "type": "InstanceValue"
+                }]
+            },
+            "type": "View"
+        }
+    },
+    {
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "specialization": {
+            "aggregation": "COMPOSITE",
+            "propertyType": "view-c1",
+            "isDerived": false,
+            "isSlot": false,
+            "type": "Property"
+        }
+    },
+    {
+        "sysmlid": "view-c1",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "View c1",
+        "documentation": "",
+        "specialization": {
+            "childViews": [],
+            "type": "View"
+        }
+    },
+    {
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "specialization": {
+            "propertyType": "_18_0_5_407019f_1466704587594_239414_14483",
+            "isDerived": false,
+            "isSlot": false,
+            "type": "Property"
+        }
+    },
+    {
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "specialization": {
+            "type": "Association",
+        }
+    }
+]}
+200

@@ -1,9 +1,9 @@
 {"elements": [{
     "siteCharacterizationId": "europa",
-    "qualifiedId": "/europa/123456/holding_bin_123456/YY_2016_123456/MM_1_123456/DD_20_123456/HH_22_123456/x",
+    "qualifiedId": "/europa/PROJECT-123456/holding_bin_PROJECT-123456/YY_2016_PROJECT-123456/MM_1_PROJECT-123456/DD_20_PROJECT-123456/HH_22_PROJECT-123456/x",
     "nodeRefId": "workspace://SpacesStore/7aab7793-f1f2-4b8e-a2f8-c52b2d641928",
     "versionedRefId": "versionStore://version2Store/a9c652a0-be5b-4219-a530-9b35261223d9",
-    "qualifiedName": "/europa/JW_TEST/holding_bin_123456/YY_2016_123456/MM_1_123456/DD_20_123456/HH_22_123456/300",
+    "qualifiedName": "/europa/JW_TEST/holding_bin_PROJECT-123456/YY_2016_PROJECT-123456/MM_1_PROJECT-123456/DD_20_PROJECT-123456/HH_22_PROJECT-123456/300",
     "sysmlid": "x",
     "editable": true,
     "modified": "2016-02-20T22:21:24.628-0800",
@@ -12,7 +12,7 @@
     "created": "Sat Feb 20 22:17:45 PST 2016",
     "name": "300",
     "documentation": "x is x",
-    "owner": "HH_22_123456",
+    "owner": "HH_22_PROJECT-123456",
     "read": "2016-02-20T22:21:24.701-0800",
     "specialization": {
         "propertyType": null,

@@ -31,9 +31,7 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
 import org.json.JSONObject;
 import org.springframework.extensions.webscripts.*;
 
@@ -48,12 +46,15 @@ import org.springframework.extensions.webscripts.*;
  */
 public class DeclarativeJavaWebScript extends AbstractWebScript 
 {
-    // Logger
-    private static final Log logger = LogFactory.getLog(DeclarativeJavaWebScript.class);  
+    private static final Logger logger = Logger.getLogger(DeclarativeJavaWebScript.class);  
+    
     private JSONObject      privateRequestJSON = null;
     private String          mmsVersionResponse = null;
     public static boolean   checkMmsVersions = false;
     public static boolean   cacheSnapshotsFlag = false;
+    public static boolean   cacheDynamicFlag = false;
+
+    public static Long maxage = new Long(5 * 60 * 1000); // default to 5 minutes
     
     /* (non-Javadoc)
      * @see org.alfresco.web.scripts.WebScript#execute(org.alfresco.web.scripts.WebScriptRequest, org.alfresco.web.scripts.WebScriptResponse)
@@ -228,16 +229,20 @@ public class DeclarativeJavaWebScript extends AbstractWebScript
         // check if timestamp
         for (String name: names) {
             if (name.equals( "timestamp" )) {
-                String webscript = req.getServiceMatch().getWebScript().toString();
-                if ( webscript.equals( "gov/nasa/jpl/mms/workspaces/elements.put" ) ||
-                        webscript.equals( "gov/nasa/jpl/mms/workspaces/elements.get" ) ) {
-                    // do nothing since ModelsGet calls take bodies, which proxy cache doesn't support
-                } else {
-                    cacheUpdated = updateCache(cache);
-                }
+                cacheUpdated = updateCache(cache);
                 break;
+            } 
+        }
+        
+        if (cacheDynamicFlag && !cacheUpdated) {
+            String webscript = req.getServiceMatch().getWebScript().toString();
+            if ( webscript.contains( "post" ) || webscript.contains( "delete" )) {
+                // do nothing with posts and deletes
+            } else {
+                cacheUpdated = updateCache(cache, maxage);
             }
         }
+
 
         // get url without the parameters
         String url = req.getServicePath();
@@ -257,10 +262,14 @@ public class DeclarativeJavaWebScript extends AbstractWebScript
     }
     
     private boolean updateCache(Cache cache) {
+        return updateCache(cache, new Long(31536000));
+    }
+    
+    private boolean updateCache(Cache cache, Long maxAge) {
         if (!cache.getIsPublic()) {
             cache.setIsPublic( true );
             // set to one year
-            cache.setMaxAge( new Long(31536000) );
+            cache.setMaxAge( maxAge );
             // following are true by default, so need to set them to false
             cache.setNeverCache( false ); 
             cache.setMustRevalidate( false );

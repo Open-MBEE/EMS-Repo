@@ -468,11 +468,11 @@ public class JavaQuery extends AbstractModuleComponent {
     public NodeRef getElement( NodeRef context, String identifier ) {//, String version ) {
         List<NodeRef> nodes = get( identifier );
         if ( Utils.isNullOrEmpty( nodes ) ) {
-            Debug.errln( "CMIS getObject(): Could not find node " + identifier + "!" );
+            if ( Debug.isOn() ) Debug.errln( "CMIS getObject(): Could not find node " + identifier + "!" );
             return null;
         }
         if ( nodes.size() > 1 ) {
-            Debug.errln( "CMIS getObject(): Got multiple objects for identifier " + identifier + "! Returning first of " + MoreToString.Helper.toString( nodes ) );
+            if ( Debug.isOn() ) Debug.errln( "CMIS getObject(): Got multiple objects for identifier " + identifier + "! Returning first of " + MoreToString.Helper.toString( nodes ) );
         }
         return nodes.get( 0 );
     }

@@ -135,7 +135,7 @@ public class Evaluate implements Viewable< EmsScriptNode > {
             if ( n.hasOrInheritsAspect( "sysml:Expression" ) ) {
                 Map< Object, Object > result = null;
                 try {
-                    result = AbstractJavaWebScript.evaluate( Utils.newSet( n ),
+                    result = AbstractJavaWebScript.evaluate( null, Utils.newSet( n ),
                                                     modelContext.workspace );
                 } catch ( IllegalAccessException e1 ) {
                     // TODO Auto-generated catch block
@@ -269,7 +269,7 @@ public class Evaluate implements Viewable< EmsScriptNode > {
                 }
                 String sysmlid = exprNode.getSysmlId();
                 Map< Object, Object > results =
-                        AbstractJavaWebScript.evaluate( elements, modelContext.workspace );
+                        AbstractJavaWebScript.evaluate( null, elements, modelContext.workspace );
                 if ( results == null || results.isEmpty() ) {
                     logger.warn( "Expression \"" + expression + "\" had an empty evaluation!" );
                 } else {

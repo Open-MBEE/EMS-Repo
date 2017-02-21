@@ -45,6 +45,7 @@ import gov.nasa.jpl.mbee.util.Random;
 import gov.nasa.jpl.mbee.util.Seen;
 import gov.nasa.jpl.mbee.util.SeenHashSet;
 import gov.nasa.jpl.mbee.util.TimeUtils;
+import gov.nasa.jpl.mbee.util.Timer;
 import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.pma.JenkinsBuildConfig;
 import gov.nasa.jpl.pma.JenkinsEngine;
@@ -55,6 +56,7 @@ import gov.nasa.jpl.view_repo.util.EmsConfig;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.EmsSystemModel;
 import gov.nasa.jpl.view_repo.util.EmsTransaction;
+import gov.nasa.jpl.view_repo.util.ModStatus;
 import gov.nasa.jpl.view_repo.util.JsonDiffDiff.DiffType;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
 import gov.nasa.jpl.view_repo.util.NodeUtil.SearchType;
@@ -76,6 +78,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeSet;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -101,7 +104,6 @@ import org.json.JSONObject;
 import org.json.JSONString;
 import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
-import org.springframework.extensions.webscripts.WebScript;
 import org.springframework.extensions.webscripts.WebScriptRequest;
 import sysml.SystemModel;
 
@@ -115,20 +117,23 @@ import sysml.SystemModel;
  *
  */
 public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
-	
-	private static Logger logger = Logger.getLogger(AbstractJavaWebScript.class);
+    
+    private static Logger logger = Logger.getLogger(AbstractJavaWebScript.class);
     // FIXME -- Why is this not static? Concurrent webscripts with different
     // loglevels will interfere with each other.
     public Level logLevel = Level.WARN;
+    
+    public static boolean timeEvents = false;
+    protected Timer timerCommit = null;
 
     public Formatter formatter = new Formatter ();
     /*public enum LogLevel {
-		DEBUG(0), INFO(1), WARNING(2), ERROR(3);
-		private int value;
-		private LogLevel(int value) {
-			this.value = value;
-		}
-	}*/
+        DEBUG(0), INFO(1), WARNING(2), ERROR(3);
+        private int value;
+        private LogLevel(int value) {
+            this.value = value;
+        }
+    }*/
 
     protected static boolean writeConstraintsOut = true;
 
@@ -137,23 +142,26 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
     public static boolean defaultRunWithoutTransactions = false;
 //    private JSONObject privateRequestJSON = null;
     // injected members
-	protected ServiceRegistry services;		// get any of the Alfresco services
-	protected Repository repository;		// used for lucene search
+    protected ServiceRegistry services;     // get any of the Alfresco services
+    protected Repository repository;        // used for lucene search
 
-	// internal members
+    // internal members
     // when run in background as an action, this needs to be false
     public boolean runWithoutTransactions = defaultRunWithoutTransactions;
     //public UserTransaction trx = null;
-	protected ScriptNode companyhome;
-	protected Map<String, EmsScriptNode> foundElements = new LinkedHashMap<String, EmsScriptNode>();
+    protected ScriptNode companyhome;
+    protected Map<String, EmsScriptNode> foundElements = new LinkedHashMap<String, EmsScriptNode>();
     protected Map<String, EmsScriptNode> movedAndRenamedElements = new LinkedHashMap<String, EmsScriptNode>();
 
-	// needed for Lucene search
-	protected static final StoreRef SEARCH_STORE = new StoreRef(StoreRef.PROTOCOL_WORKSPACE, "SpacesStore");
+    // needed for Lucene search
+    protected static final StoreRef SEARCH_STORE = new StoreRef(StoreRef.PROTOCOL_WORKSPACE, "SpacesStore");
 
     // response to HTTP request, made as class variable so all methods can update
     protected StringBuffer response = new StringBuffer();
     protected Status responseStatus = new Status();
+    
+    protected Boolean satisfied = null;
+
     protected String deploymentName;
 
     protected WorkspaceDiff wsDiff = null;
@@ -164,7 +172,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
     protected String source = null;
     protected EmsSystemModel systemModel;
     protected SystemModelToAeExpression< Object, EmsScriptNode, EmsScriptNode, String, Object, EmsSystemModel > sysmlToAe;
-    protected static SystemModelToAeExpression< Object, EmsScriptNode, EmsScriptNode, String, Object, EmsSystemModel > globalSysmlToAe;
+    //protected static SystemModelToAeExpression< Object, EmsScriptNode, EmsScriptNode, String, Object, EmsSystemModel > globalSysmlToAe;
 
     public boolean usingPermCache = true;
     enum PermType { READ, WRITE };
@@ -239,25 +247,25 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
             Utils.toArrayOfType( definingFeatures.keySet().toArray(), String.class );
 
     protected void initMemberVariables(String siteName) {
-		companyhome = new ScriptNode(repository.getCompanyHome(), services);
-	}
+        companyhome = new ScriptNode(repository.getCompanyHome(), services);
+    }
 
-	public void setRepositoryHelper(Repository repositoryHelper) {
-	    if ( repositoryHelper == null ) return;
-		this.repository = repositoryHelper;
-	}
+    public void setRepositoryHelper(Repository repositoryHelper) {
+        if ( repositoryHelper == null ) return;
+        this.repository = repositoryHelper;
+    }
 
-	public void setServices(ServiceRegistry registry) {
+    public void setServices(ServiceRegistry registry) {
         if ( registry == null ) return;
-		this.services = registry;
-	}
-	
-	public void setDeploymentName(String deploymentName) {
+        this.services = registry;
+    }
+    
+    public void setDeploymentName(String deploymentName) {
         if ( deploymentName == null ) return;
-		this.deploymentName = deploymentName;
-	}
+        this.deploymentName = deploymentName;
+    }
 
-	public AbstractJavaWebScript( Repository repository,
+    public AbstractJavaWebScript( Repository repository,
                                   ServiceRegistry services,
                                   StringBuffer response ) {
         this.setRepositoryHelper( repository );
@@ -277,37 +285,52 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
     }
 
     public AbstractJavaWebScript() {
+        super();
+        // TODO -- set maximum log level; Overrides that specified in log4j.properties (I THINK)
+        // FIXME -- Why is this not static?
+        logger.setLevel(logLevel);
+    }
+    public AbstractJavaWebScript( ServiceRegistry services,
+                                  StringBuffer response,
+                                  Status status,
+                                  final EmsSystemModel systemModel,
+                                  SystemModelToAeExpression< Object, EmsScriptNode, EmsScriptNode, String, Object, EmsSystemModel > systemModelToAe ) {
         // default constructor for spring
         super();
+        if ( services != null ) this.services = services;
+        if ( response != null ) this.response = response;
+        if ( status != null ) this.responseStatus = status;
+        if ( systemModel != null ) this.systemModel = systemModel;
+        if ( systemModelToAe != null ) this.sysmlToAe = systemModelToAe;
         // TODO -- set maximum log level; Overrides that specified in log4j.properties (I THINK)
         // FIXME -- Why is this not static?
         logger.setLevel(logLevel);
     }
 
     /**
-	 * Utility for clearing out caches
-	 * TODO: do we need to clear caches if Spring isn't making singleton instances
-	 */
+     * Utility for clearing out caches
+     * TODO: do we need to clear caches if Spring isn't making singleton instances
+     */
     protected void clearCaches() {
         clearCaches( true );
     }
-	protected void clearCaches( boolean resetTransactionState ) {
-	    if ( resetTransactionState ) {
+    protected void clearCaches( boolean resetTransactionState ) {
+        if ( resetTransactionState ) {
             NodeUtil.setBeenInsideTransaction( false );
             NodeUtil.setBeenOutsideTransaction( false );
             NodeUtil.setInsideTransactionNow( false );
-	    }
-	
-		foundElements = new HashMap<String, EmsScriptNode>();
-		response = new StringBuffer();
-		responseStatus.setCode(HttpServletResponse.SC_OK);
+        }
+    
+        foundElements = new HashMap<String, EmsScriptNode>();
+        response = new StringBuffer();
+        responseStatus.setCode(HttpServletResponse.SC_OK);
         NodeUtil.initHeisenCache();
         if ( alwaysTurnOffDebugOut  ) {
             Debug.turnOff();
         }
-	}
-	
-    protected void cleanJsonCache() {
+    }
+    
+    protected void cleanJsonCache( WorkspaceNode ws ) {
         if ( !NodeUtil.doJsonCaching && !NodeUtil.doJsonDeepCaching &&
              !NodeUtil.doJsonStringCaching ) {
             return;
@@ -323,7 +346,10 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         }
 
         for ( EmsScriptNode node : nodesToClean.values() ) {
-            node.removeFromJsonCache( false );
+            // Pass false to removeFromJsonCache to avoid removing the children.
+            // The children's qualified name and id will change in its json if
+            // the parent changes owner's. That case is handled elsewhere.
+            node.removeFromJsonCache( ws, null, false );
         }
     }
 
@@ -355,9 +381,9 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
     protected Map< String, Object > executeImplImpl( final WebScriptRequest req,
                                                      final Status status, final Cache cache,
                                                      boolean withoutTransactions ) {
-    	
-    	final Map< String, Object > model = new HashMap<String, Object>();
-    	
+        
+        final Map< String, Object > model = new HashMap<String, Object>();
+        
         clearCaches( true );
         clearCaches(); // calling twice for those redefine clearCaches() to
                        // always call clearCaches( false )
@@ -380,19 +406,19 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
             status.setCode( getResponseStatus().getCode() );
 
         }
-		
+        
         return model;
     }
 
 
-	/**
-	 * Parse the request and do validation checks on request
-	 * TODO: Investigate whether or not to deprecate and/or remove
-	 * @param req		Request to be parsed
-	 * @param status	The status to be returned for the request
-	 * @return			true if request valid and parsed, false otherwise
-	 */
-	abstract protected boolean validateRequest(WebScriptRequest req, Status status);
+    /**
+     * Parse the request and do validation checks on request
+     * TODO: Investigate whether or not to deprecate and/or remove
+     * @param req       Request to be parsed
+     * @param status    The status to be returned for the request
+     * @return          true if request valid and parsed, false otherwise
+     */
+    abstract protected boolean validateRequest(WebScriptRequest req, Status status);
 
     /**
      * Get site by name, workspace, and time
@@ -424,28 +450,28 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
      * @return
      */
     private EmsScriptNode getSiteNodeImpl(String siteName, WorkspaceNode workspace,
-            						 	   Date dateTime, boolean forWorkspace, boolean errorOnNull) {
+                                           Date dateTime, boolean forWorkspace, boolean errorOnNull) {
 
-		EmsScriptNode siteNode = null;
+        EmsScriptNode siteNode = null;
 
-		if (siteName == null) {
-		    if ( errorOnNull ) log(Level.ERROR, HttpServletResponse.SC_BAD_REQUEST,"No sitename provided" );
-		} else {
-			if (forWorkspace) {
-				siteNode = NodeUtil.getSiteNodeForWorkspace( siteName, false, workspace, dateTime,
-     											 			 services, response );
-			}
-			else {
-				siteNode = NodeUtil.getSiteNode( siteName, false, workspace, dateTime,
-			                 					services, response );
-			}
-	        if ( errorOnNull && siteNode == null ) {	
-	            log(Level.ERROR,  HttpServletResponse.SC_BAD_REQUEST, "Site node is null");
-	        }
-		}
+        if (siteName == null) {
+            if ( errorOnNull ) log(Level.ERROR, HttpServletResponse.SC_BAD_REQUEST,"No sitename provided" );
+        } else {
+            if (forWorkspace) {
+                siteNode = NodeUtil.getSiteNodeForWorkspace( siteName, false, workspace, dateTime,
+                                                             services, response );
+            }
+            else {
+                siteNode = NodeUtil.getSiteNode( siteName, false, workspace, dateTime,
+                                                services, response );
+            }
+            if ( errorOnNull && siteNode == null ) {    
+                log(Level.ERROR,  HttpServletResponse.SC_BAD_REQUEST, "Site node is null");
+            }
+        }
 
-		return siteNode;
-	}
+        return siteNode;
+    }
 
     /**
      * Get site by name, workspace, and time.  This also checks that the returned node is
@@ -464,7 +490,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         return getSiteNode( siteName, workspace, dateTime, true );
     }
     protected EmsScriptNode getSiteNodeForWorkspace(String siteName, WorkspaceNode workspace,
-                                        			Date dateTime, boolean errorOnNull) {
+                                                    Date dateTime, boolean errorOnNull) {
 
         return getSiteNodeImpl(siteName, workspace, dateTime, true, errorOnNull);
     }
@@ -487,41 +513,41 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         return getSiteNode( siteName, workspace, dateTime, errorOnNull );
     }
 
-	/**
-	 * Find node of specified name (returns first found) - so assume uniquely named ids - this checks sysml:id rather than cm:name
-	 * This does caching of found elements so they don't need to be looked up with a different API each time.
-	 * This also checks that the returned node is in the specified workspace, not just whether its in the workspace
-	 * or any of its parents.
-	 *
-	 * @param id	Node id to search for
-	 * @param workspace
+    /**
+     * Find node of specified name (returns first found) - so assume uniquely named ids - this checks sysml:id rather than cm:name
+     * This does caching of found elements so they don't need to be looked up with a different API each time.
+     * This also checks that the returned node is in the specified workspace, not just whether its in the workspace
+     * or any of its parents.
+     *
+     * @param id    Node id to search for
+     * @param workspace
      * @param dateTime
-	 * @return		ScriptNode with name if found, null otherwise
-	 */
-	protected EmsScriptNode findScriptNodeByIdForWorkspace(String id,
-	                                           				WorkspaceNode workspace,
-	                                           				Date dateTime, boolean findDeleted) {
-		return NodeUtil.findScriptNodeByIdForWorkspace( id, workspace, dateTime, findDeleted,
-	                                        			services, response );
-	}
+     * @return      ScriptNode with name if found, null otherwise
+     */
+    protected EmsScriptNode findScriptNodeByIdForWorkspace(String id,
+                                                            WorkspaceNode workspace,
+                                                            Date dateTime, boolean findDeleted) {
+        return NodeUtil.findScriptNodeByIdForWorkspace( id, workspace, dateTime, findDeleted,
+                                                        services, response );
+    }
 
-	/**
-	 * Find node of specified name (returns first found) - so assume uniquely named ids - this checks sysml:id rather than cm:name
-	 * This does caching of found elements so they don't need to be looked up with a different API each time.
-	 *
-	 * TODO extend so search context can be specified
-	 * @param id	Node id to search for
-	 * @param workspace
+    /**
+     * Find node of specified name (returns first found) - so assume uniquely named ids - this checks sysml:id rather than cm:name
+     * This does caching of found elements so they don't need to be looked up with a different API each time.
+     *
+     * TODO extend so search context can be specified
+     * @param id    Node id to search for
+     * @param workspace
      * @param dateTime
-	 * @return		ScriptNode with name if found, null otherwise
-	 */
-	public EmsScriptNode findScriptNodeById(String id,
-	                                           WorkspaceNode workspace,
-	                                           Date dateTime, boolean findDeleted) {
-	    return findScriptNodeById( id, workspace, dateTime, findDeleted, null );
-	}
+     * @return      ScriptNode with name if found, null otherwise
+     */
+    public EmsScriptNode findScriptNodeById(String id,
+                                               WorkspaceNode workspace,
+                                               Date dateTime, boolean findDeleted) {
+        return findScriptNodeById( id, workspace, dateTime, findDeleted, null );
+    }
 
-	/**
+    /**
      * Find node of specified name (returns first found) - so assume uniquely named ids - this checks sysml:id rather than cm:name
      * This does caching of found elements so they don't need to be looked up with a different API each time.
      *
@@ -558,7 +584,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
                                             services, response, siteName );
     }
 
-	/**
+    /**
      * Find nodes of specified sysml:name
      *
      */
@@ -572,147 +598,147 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
     // Updated log methods with log4j methods (still works with old log calls)
     // String concatenation replaced with C formatting; only for calls with parameters
     protected void log (Level level, int code, String msg, Object...params) {
-    		String formattedMsg = formatMessage(msg,params);
-    		log (level,code,formattedMsg);
-	}
+            String formattedMsg = formatMessage(msg,params);
+            log (level,code,formattedMsg);
+    }
 
     // If no need for string formatting (calls with no string concatenation)
     protected void log(Level level, int code, String msg) {
         String levelMessage = addLevelInfoToMsg (level,msg);
         updateResponse(code, levelMessage);
-		if (level.toInt() >= logger.getLevel().toInt()) {
-			// print to response stream if >= existing log level
-			log (level, levelMessage);
-		}
-	}
+        if (level.toInt() >= logger.getLevel().toInt()) {
+            // print to response stream if >= existing log level
+            log (level, levelMessage);
+        }
+    }
 
     // only logging loglevel and a message (no code)
-	protected void log(Level level, String msg, Object...params) {
-	    if (level.toInt() >= logger.getLevel().toInt()) {
-        	String formattedMsg = formatMessage(msg,params); //formatter.format (msg,params).toString();
-        	String levelMessage = addLevelInfoToMsg (level,formattedMsg);
-        	//TODO: unsure if need to call responseStatus.setMessage(...) since there is no code
-        	response.append(levelMessage);
-        	log (level, levelMessage);
-	    }
-	}
+    protected void log(Level level, String msg, Object...params) {
+        if (level.toInt() >= logger.getLevel().toInt()) {
+            String formattedMsg = formatMessage(msg,params); //formatter.format (msg,params).toString();
+            String levelMessage = addLevelInfoToMsg (level,formattedMsg);
+            //TODO: unsure if need to call responseStatus.setMessage(...) since there is no code
+            response.append(levelMessage);
+            log (level, levelMessage);
+        }
+    }
 
-	// only logging code and a message (no loglevel, and thus, no check for log level status)
-	protected void log(int code, String msg, Object...params) {
-		String formattedMsg = formatMessage(msg,params); //formatter.format (msg,params).toString();
-		updateResponse (code,formattedMsg);
-	}
-	
-	protected void log(String msg, Object...params) {
-		String formattedMsg = formatMessage(msg,params); //formatter.format (msg,params).toString();
-		log (formattedMsg);
-	}
-	
-	protected void updateResponse ( int code, String msg) {
-		response.append(msg);
-		responseStatus.setCode(code);
-		responseStatus.setMessage(msg);
-	}
+    // only logging code and a message (no loglevel, and thus, no check for log level status)
+    protected void log(int code, String msg, Object...params) {
+        String formattedMsg = formatMessage(msg,params); //formatter.format (msg,params).toString();
+        updateResponse (code,formattedMsg);
+    }
+    
+    protected void log(String msg, Object...params) {
+        String formattedMsg = formatMessage(msg,params); //formatter.format (msg,params).toString();
+        log (formattedMsg);
+    }
+    
+    protected void updateResponse ( int code, String msg) {
+        response.append(msg);
+        responseStatus.setCode(code);
+        responseStatus.setMessage(msg);
+    }
 
-	protected void log(String msg) {
-	    response.append(msg + "\n");
-	    //TODO: add to responseStatus too (below)?
-	    //responseStatus.setMessage(msg);
-	}
+    protected void log(String msg) {
+        response.append(msg + "\n");
+        //TODO: add to responseStatus too (below)?
+        //responseStatus.setMessage(msg);
+    }
 
-	protected static void log(Level level, String msg) {
-	    switch(level.toInt()) {
-	        case Level.FATAL_INT:
-	            logger.fatal(msg);
-	            break;
-	        case Level.ERROR_INT:
-	            logger.error( msg );
-	            break;
-	        case Level.WARN_INT:
-	            logger.warn(msg);
-	            break;
-	        case Level.INFO_INT:
-	            logger.info( msg );
-	            break;
-	        case Level.DEBUG_INT:	
-	            if (Debug.isOn()){ logger.debug( msg );}
-	            break;
+    protected static void log(Level level, String msg) {
+        switch(level.toInt()) {
+            case Level.FATAL_INT:
+                logger.fatal(msg);
+                break;
+            case Level.ERROR_INT:
+                logger.error( msg );
+                break;
+            case Level.WARN_INT:
+                logger.warn(msg);
+                break;
+            case Level.INFO_INT:
+                logger.info( msg );
+                break;
+            case Level.DEBUG_INT:   
+                if (Debug.isOn()){ logger.debug( msg );}
+                break;
             default:
                 // TODO: investigate if this the default thing to do
-            	if (Debug.isOn()){ logger.debug( msg ); }
-	            break;
-	    }
-	}
-	
-	protected String addLevelInfoToMsg (Level level, String msg){
-		if (level.toInt() != Level.WARN_INT){
-			return String.format("[%s]: %s\n",level.toString(),msg);
-		}
-		else{
-			return String.format("[WARNING]: %s\n",msg);
-		}
-		
-	}
-	
-	// formatMessage function is used to catch certain objects that must be dealt with individually
-	// formatter.format() is avoided because it applies toString() directly to objects which provide unreadable outputs
-	protected String formatMessage (String initMsg,Object...params){
-		String formattedMsg = initMsg;
-		Pattern p = Pattern.compile("(%s)");
-		Matcher m = p.matcher(formattedMsg);
-		
-		for (Object obj: params){
-			if (obj != null && obj.getClass().isArray()){
-				String arrString = "";
-				if (obj instanceof int []) { arrString = Arrays.toString((int [])obj);}
-				else if (obj instanceof double []) { arrString = Arrays.toString((double [])obj);}
-				else if (obj instanceof float []) { arrString = Arrays.toString((float [])obj);}
-				else if (obj instanceof boolean []) { arrString = Arrays.toString((boolean [])obj);}
-				else if (obj instanceof char []) { arrString = Arrays.toString((char [])obj);}
-				else {arrString = Arrays.toString((Object[])obj);}
-				formattedMsg = m.replaceFirst(arrString);
-			}
-			else { // captures Timer, EmsScriptNode, Date, primitive types, NodeRef, JSONObject type objects; applies toString() on all
-				formattedMsg = m.replaceFirst(obj == null ? "null" : obj.toString());
-			}
-			m = p.matcher(formattedMsg);
-//			if (obj.getClass().isArray()){	
-//				Arrays.toString(obj);
-//				String formattedString = m.replaceFirst(o)
-//			}
-			
-		}
-		return formattedMsg;
-	}
-	
-	/**
-	 * Checks whether user has permissions to the node and logs results and status as appropriate
-	 * @param node         EmsScriptNode to check permissions on
-	 * @param permissions  Permissions to check
-	 * @return             true if user has specified permissions to node, false otherwise
-	 */
-	protected boolean checkPermissions(EmsScriptNode node, String permissions) {
-	    if (node != null) {
-	        Boolean b = null;
-	        if ( usingPermCache ) {
-	            b = permCacheGet( "u", node.getNodeRef(), permissions );
-	        }
-	        if ( b == null ) {
-    	        b = node.checkPermissions( permissions, response, responseStatus );
+                if (Debug.isOn()){ logger.debug( msg ); }
+                break;
+        }
+    }
+    
+    protected String addLevelInfoToMsg (Level level, String msg){
+        if (level.toInt() != Level.WARN_INT){
+            return String.format("[%s]: %s\n",level.toString(),msg);
+        }
+        else{
+            return String.format("[WARNING]: %s\n",msg);
+        }
+        
+    }
+    
+    // formatMessage function is used to catch certain objects that must be dealt with individually
+    // formatter.format() is avoided because it applies toString() directly to objects which provide unreadable outputs
+    protected String formatMessage (String initMsg,Object...params){
+        String formattedMsg = initMsg;
+        Pattern p = Pattern.compile("(%s)");
+        Matcher m = p.matcher(formattedMsg);
+        
+        for (Object obj: params){
+            if (obj != null && obj.getClass().isArray()){
+                String arrString = "";
+                if (obj instanceof int []) { arrString = Arrays.toString((int [])obj);}
+                else if (obj instanceof double []) { arrString = Arrays.toString((double [])obj);}
+                else if (obj instanceof float []) { arrString = Arrays.toString((float [])obj);}
+                else if (obj instanceof boolean []) { arrString = Arrays.toString((boolean [])obj);}
+                else if (obj instanceof char []) { arrString = Arrays.toString((char [])obj);}
+                else {arrString = Arrays.toString((Object[])obj);}
+                formattedMsg = m.replaceFirst(arrString);
+            }
+            else { // captures Timer, EmsScriptNode, Date, primitive types, NodeRef, JSONObject type objects; applies toString() on all
+                formattedMsg = m.replaceFirst(obj == null ? "null" : obj.toString());
+            }
+            m = p.matcher(formattedMsg);
+//          if (obj.getClass().isArray()){  
+//              Arrays.toString(obj);
+//              String formattedString = m.replaceFirst(o)
+//          }
+            
+        }
+        return formattedMsg;
+    }
+    
+    /**
+     * Checks whether user has permissions to the node and logs results and status as appropriate
+     * @param node         EmsScriptNode to check permissions on
+     * @param permissions  Permissions to check
+     * @return             true if user has specified permissions to node, false otherwise
+     */
+    protected boolean checkPermissions(EmsScriptNode node, String permissions) {
+        if (node != null) {
+            Boolean b = null;
+            if ( usingPermCache ) {
+                b = permCacheGet( "u", node.getNodeRef(), permissions );
+            }
+            if ( b == null ) {
+                b = node.checkPermissions( permissions, response, responseStatus );
                 if ( usingPermCache ) {
                     permCachePut( "u", node.getNodeRef(), permissions, b );
                 }
-	        }
-	        return b;
-	    } else {
-	        return false;
-	    }
-	}
+            }
+            return b;
+        } else {
+            return false;
+        }
+    }
 
 
     protected static final String WORKSPACE_ID = "workspaceId";
-	protected static final String PROJECT_ID = "projectId";
-	protected static final String ARTIFACT_ID = "artifactId";
+    protected static final String PROJECT_ID = "projectId";
+    protected static final String ARTIFACT_ID = "artifactId";
     protected static final String SITE_NAME = "siteName";
     protected static final String SITE_NAME2 = "siteId";
     protected static final String WORKSPACE1 = "workspace1";
@@ -754,7 +780,11 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         return siteName;
     }
 
-    public static EmsScriptNode getSitesFolder( WorkspaceNode workspace ) {
+    public EmsScriptNode getSitesFolder( WorkspaceNode workspace) {
+        return getSitesFolder( workspace, runWithoutTransactions );
+    }
+    public static EmsScriptNode getSitesFolder( WorkspaceNode workspace,
+                                                boolean runWithoutTransactions ) {
         EmsScriptNode sitesFolder = null;
         // check and see if the Sites folder already exists
         NodeRef sitesNodeRef = NodeUtil.findNodeRefByType( "Sites", SearchType.CM_NAME, false,
@@ -766,7 +796,8 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
             // replicate, otherwise replicate from the master workspace:
             if ( NodeUtil.exists(sitesFolder) && NodeUtil.exists( workspace )
                  && !workspace.equals( sitesFolder.getWorkspace() ) ) {
-                sitesFolder = workspace.replicateWithParentFolders( sitesFolder );
+                sitesFolder = workspace.replicateWithParentFolders( sitesFolder,
+                                                                    runWithoutTransactions );
             }
 
         }
@@ -807,17 +838,17 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         // If this site is supposed to go into a non-master workspace, then create the site folders
         // there if needed:
         if ( validWorkspace &&
-        	( invalidSiteNode || (!invalidSiteNode && !workspace.equals(siteNode.getWorkspace())) ) ) {
+            ( invalidSiteNode || (!invalidSiteNode && !workspace.equals(siteNode.getWorkspace())) ) ) {
 
-	        EmsScriptNode sitesFolder = getSitesFolder(workspace);
+            EmsScriptNode sitesFolder = getSitesFolder(workspace);
 
-	        // Now, create the site folder:
-	        if (sitesFolder == null ) {
-	            Debug.error("Could not create site " + siteName + "!");
-	        } else {
-	            siteNode = sitesFolder.createFolder( siteName, null, !invalidSiteNode ? siteNode.getNodeRef() : null );
-	            if ( siteNode != null ) siteNode.getOrSetCachedVersion();
-	        }
+            // Now, create the site folder:
+            if (sitesFolder == null ) {
+                Debug.error("Could not create site " + siteName + "!");
+            } else {
+                siteNode = sitesFolder.createFolder( siteName, null, !invalidSiteNode ? siteNode.getNodeRef() : null );
+                if ( siteNode != null ) siteNode.getOrSetCachedVersion();
+            }
         }
 
         return siteNode;
@@ -879,7 +910,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
     public static String getArtifactId( WebScriptRequest req ) {
         String artifactId = req.getServiceMatch().getTemplateVars().get(ARTIFACT_ID);
         if ( artifactId == null || artifactId.length() <= 0 ) {
-        	artifactId = null;
+            artifactId = null;
         }
         return artifactId;
     }
@@ -932,20 +963,20 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
 
         if (!NodeUtil.userHasWorkspaceLdapPermissions()) {
             log(Level.ERROR, HttpServletResponse.SC_FORBIDDEN, "User %s does not have LDAP permissions to perform workspace operations.  LDAP group with permissions: %s",
-            		NodeUtil.getUserName(), NodeUtil.getWorkspaceLdapGroup());
+                    NodeUtil.getUserName(), NodeUtil.getWorkspaceLdapGroup());
             return false;
         }
         return true;
     }
 
 
-	protected boolean checkRequestVariable(Object value, String type) {
-		if (value == null) {
-			log(Level.ERROR, HttpServletResponse.SC_BAD_REQUEST, "%s not found.\n",type);
-			return false;
-		}
-		return true;
-	}
+    protected boolean checkRequestVariable(Object value, String type) {
+        if (value == null) {
+            log(Level.ERROR, HttpServletResponse.SC_BAD_REQUEST, "%s not found.\n",type);
+            return false;
+        }
+        return true;
+    }
 
     protected Map< String, EmsScriptNode >
             searchForElements( String type, String pattern,
@@ -953,8 +984,8 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
                                        WorkspaceNode workspace, Date dateTime,
                                        Integer maxItems,
                                        Integer skipCount ) {
-    	// TODO: can't search against snapshots - non-null date time is caught upstream
-    	return searchForElementsOriginal( type, pattern, ignoreWorkspace, workspace, dateTime );
+        // TODO: can't search against snapshots - non-null date time is caught upstream
+        return searchForElementsOriginal( type, pattern, ignoreWorkspace, workspace, dateTime );
     }
     protected Map< String, EmsScriptNode >
     searchForElements( ArrayList<String> types, String pattern,
@@ -962,56 +993,56 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
                                WorkspaceNode workspace, Date dateTime,
                                Integer maxItems,
                                Integer skipCount ) {
-    	// TODO: can't search against snapshots - non-null date time is caught upstream
-    	return searchForElementsPostgres( types, pattern, ignoreWorkspace, workspace, dateTime, maxItems, skipCount );	
+            // TODO: can't search against snapshots - non-null date time is caught upstream
+            return searchForElementsPostgres( types, pattern, ignoreWorkspace, workspace, dateTime, maxItems, skipCount );  
     }
 
-	/**
-	 * Perform Lucene search for the specified pattern and ACM type
-	 * TODO: Scope Lucene search by adding either parent or path context
-	 * @param type		escaped ACM type for lucene search: e.g. "@sysml\\:documentation:\""
-	 * @param pattern   Pattern to look for
-	 */
-	protected Map<String, EmsScriptNode> searchForElementsOriginal(String type,
-	                                                       String pattern,
-	                                                       boolean ignoreWorkspace,
-	                                                       WorkspaceNode workspace,
-	                                                       Date dateTime) {
-		return this.searchForElements( type, pattern, ignoreWorkspace,
-		                               workspace, dateTime, null );
-	}
+    /**
+     * Perform Lucene search for the specified pattern and ACM type
+     * TODO: Scope Lucene search by adding either parent or path context
+     * @param type      escaped ACM type for lucene search: e.g. "@sysml\\:documentation:\""
+     * @param pattern   Pattern to look for
+     */
+    protected Map<String, EmsScriptNode> searchForElementsOriginal(String type,
+                                                           String pattern,
+                                                           boolean ignoreWorkspace,
+                                                           WorkspaceNode workspace,
+                                                           Date dateTime) {
+        return this.searchForElements( type, pattern, ignoreWorkspace,
+                                       workspace, dateTime, null );
+    }
 
-	/**
-	 * Perform Lucene search for the specified pattern and ACM type
-	 * As opposed to searchForElementsOriginal, this returns a Map of noderef ids to
-	 * script nodes - since postgres db needs this to look up properly
-	 *
-	 * @param type
-	 * @param pattern
-	 * @param ignoreWorkspace
-	 * @param workspace
-	 * @param dateTime
-	 * @return
-	 */
-	protected Map<String, EmsScriptNode> searchForElementsPostgres(ArrayList<String> types,
+    /**
+     * Perform Lucene search for the specified pattern and ACM type
+     * As opposed to searchForElementsOriginal, this returns a Map of noderef ids to
+     * script nodes - since postgres db needs this to look up properly
+     *
+     * @param type
+     * @param pattern
+     * @param ignoreWorkspace
+     * @param workspace
+     * @param dateTime
+     * @return
+     */
+    protected Map<String, EmsScriptNode> searchForElementsPostgres(ArrayList<String> types,
                                                                   String pattern,
                                                                   boolean ignoreWorkspace,
                                                                   WorkspaceNode workspace,
                                                                   Date dateTime,
                                                                   Integer maxItems,
                                                                   Integer skipCount) {
-		Map<String, EmsScriptNode> resultsMap = new HashMap<String, EmsScriptNode>();
-	    ResultSet results = null;
-	    StringBuffer queryPattern= new StringBuffer();
-		for(int i = 0; i< types.size()-1;i++){
-			if(types.get(i).equals("ASPECT:\"{http://jpl.nasa.gov/model/sysml-lite/1.0}")){
-				continue;
-			}
-			else{
-				queryPattern.append(types.get(i) + pattern + "\" OR ");
-			}
-		}
-	    queryPattern.append(types.get(types.size()-1)+ pattern + "\"");
+        Map<String, EmsScriptNode> resultsMap = new HashMap<String, EmsScriptNode>();
+        ResultSet results = null;
+        StringBuffer queryPattern= new StringBuffer();
+        for(int i = 0; i< types.size()-1;i++){
+            if(types.get(i).equals("ASPECT:\"{http://jpl.nasa.gov/model/sysml-lite/1.0}")){
+                continue;
+            }
+            else{
+                queryPattern.append(types.get(i) + pattern + "\" OR ");
+            }
+        }
+        queryPattern.append(types.get(types.size()-1)+ pattern + "\"");
         results = NodeUtil.luceneSearch( queryPattern.toString(), services, maxItems, skipCount );
         if (results != null) {
             ArrayList< NodeRef > resultList =
@@ -1019,14 +1050,16 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
             results.close();
             for (NodeRef nr: resultList) {
                 EmsScriptNode node = new EmsScriptNode(nr, services, response);
-                resultsMap.put( node.getNodeRef().toString(), node );
+                if (node.getWorkspace() == workspace && node.exists()) {
+                    resultsMap.put( node.getSysmlId(), node );
+                }
             }
-        }		
+        }       
         return resultsMap;
-	}
+    }
 
-	
-	/**
+    
+    /**
      * Perform Lucene search for the specified pattern and ACM type for the specified
      * siteName.
      *
@@ -1048,7 +1081,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
                                                           siteName);
     }
 
-	/**
+    /**
      * Helper utility to check the value of a request parameter
      *
      * @param req
@@ -1115,19 +1148,41 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         responseStatus.setCode(instance.getResponseStatus().getCode());
     }
 
+    @Deprecated
     protected void printFooter() {
         log( Level.INFO, "*** completed %s %s", ( new Date() ).toString(), getClass().getSimpleName());
     }
 
+    @Deprecated
     protected void printHeader( WebScriptRequest req ) {
         log( Level.INFO, "*** starting %s %s",( new Date() ).toString(),getClass().getSimpleName() );
         String reqStr = req.getURL();
         log( Level.INFO, "*** request = %s ...", ( reqStr.length() <= MAX_PRINT ? reqStr : reqStr.substring( 0, MAX_PRINT ) ));
     }
 
+    protected void printFooter(String user, Logger logger, Timer timer) {
+        if (logger.isInfoEnabled()) {
+            logger.info( String.format( "%s %s", user, timer ) );
+        }
+    }
+
+    protected void printHeader( String user, Logger logger, WebScriptRequest req ) {
+        if (logger.isInfoEnabled()) {
+            logger.info( String.format( "%s %s", user, req.getURL() ) );
+            try {
+                if (req.parseContent() != null) {
+                    logger.info( req.parseContent() );
+                }
+            } catch (Exception e) {
+                // do nothing, just means no content
+            }
+        }
+    }
+
+    
     protected static String getIdFromRequest( WebScriptRequest req ) {
         String[] ids = new String[] { "id", "modelid", "modelId", "productid", "productId",
-        							  "viewid", "viewId", "workspaceid", "workspaceId",
+                                      "viewid", "viewId", "workspaceid", "workspaceId",
                                       "elementid", "elementId" };
         String id = null;
         for ( String idv : ids ) {
@@ -1175,17 +1230,23 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
 
 
     public void setWsDiff(WorkspaceNode workspace) {
-        wsDiff = new WorkspaceDiff(workspace, workspace, response, responseStatus);
+        if (wsDiff == null) {
+            wsDiff = new WorkspaceDiff(workspace, workspace, response, responseStatus);
+        } else {
+            wsDiff.setWorkspaceDiffParameters( workspace, workspace, response, responseStatus);
+        }
     }
     public void setWsDiff(WorkspaceNode workspace1, WorkspaceNode workspace2, Date time1, Date time2, DiffType diffType) {
-        wsDiff = new WorkspaceDiff(workspace1, workspace2, time1, time2, response, responseStatus, diffType);
+        if (wsDiff == null) {
+            wsDiff = new WorkspaceDiff(workspace1, workspace2, time1, time2, response, responseStatus, diffType);
+        } else {
+            wsDiff.setWorkspaceDiffParameters( workspace1, workspace2, time1, time2, response, responseStatus, diffType );
+        }
     }
 
     public WorkspaceDiff getWsDiff() {
         return wsDiff;
     }
-
-
 
 
     /**
@@ -1302,7 +1363,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
                 pkgSiteParentNode = findScriptNodeById(NodeUtil.sitePkgPrefix+sysmlid, workspace, dateTime, false);
             }
             else {
-            	//TODO NOTE: Not Sure if to invoke pkgNode.toString() or pkgNode.getName() below:
+                //TODO NOTE: Not Sure if to invoke pkgNode.toString() or pkgNode.getName() below:
                 log(Level.WARN, "Parent package site does not have a sysmlid.  Node %s",pkgNode.toString());
             }
         }
@@ -1451,7 +1512,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
 
     public EmsSystemModel getEmsSystemModel() {
         if ( systemModel == null ) {
-            systemModel = new EmsSystemModel(this.services);
+            systemModel = new EmsSystemModel(this.getServices());
         }
         return systemModel;
     }
@@ -1479,12 +1540,12 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         return sysmlToAe;
     }
 
-    public static SystemModelToAeExpression< Object, EmsScriptNode, EmsScriptNode, String, Object, EmsSystemModel > getGlobalSystemModelAe() {
-        if ( globalSysmlToAe == null ) {
-            setGlobalSystemModelAe();
-        }
-        return globalSysmlToAe;
-    }
+//    public static SystemModelToAeExpression< Object, EmsScriptNode, EmsScriptNode, String, Object, EmsSystemModel > getGlobalSystemModelAe() {
+//        if ( globalSysmlToAe == null ) {
+//            setGlobalSystemModelAe();
+//        }
+//        return globalSysmlToAe;
+//    }
 
     public void setSystemModelAe() {
         sysmlToAe =
@@ -1492,18 +1553,31 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
 
     }
 
-    public static void setGlobalSystemModelAe() {
-        globalSysmlToAe =
-                new SystemModelToAeExpression< Object, EmsScriptNode, EmsScriptNode, String, Object, EmsSystemModel >( getGlobalSystemModel() );
-    }
+//    public static void setGlobalSystemModelAe() {
+//        globalSysmlToAe =
+//                new SystemModelToAeExpression< Object, EmsScriptNode, EmsScriptNode, String, Object, EmsSystemModel >( getGlobalSystemModel() );    
+//    }
 
+    /**
+     * @return the isSatisfied
+     */
+    public Boolean isSatisfied() {
+        return satisfied;
+    }
+    /**
+     * @param isSatisfied the isSatisfied to set
+     */
+    public void setSatisfied( Boolean isSatisfied ) {
+        this.satisfied = isSatisfied;
+    }
     /**
      * Creates a ConstraintExpression for the passed constraint node and adds to the passed constraints
      *
      * @param constraintNode The node to parse and create a ConstraintExpression for
      * @param constraints The list of Constraints to add for tje node
      */
-    public static void addConstraintExpression(EmsScriptNode constraintNode, Map< EmsScriptNode, Collection< Constraint >> constraints, WorkspaceNode ws) {
+    public void addConstraintExpression(EmsScriptNode constraintNode, Map< EmsScriptNode, Collection< Constraint >> constraints, WorkspaceNode ws) {
+    //public static void addConstraintExpression(EmsScriptNode constraintNode, Map< EmsScriptNode, Collection< Constraint >> constraints, WorkspaceNode ws) {
 
         if (constraintNode == null || constraints == null) return;
 
@@ -1524,15 +1598,24 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         }
     }
 
-    public static <T> Expression<T> toAeExpression( EmsScriptNode exprNode ) {
+    public static <T> Expression<T> toExpression( AbstractJavaWebScript ajws,
+                                                  EmsScriptNode exprNode ) {
+        if ( ajws == null ) {
+            ajws = makeAbstractJavaWebscript( null, null, null, null, null );
+        }
+        return ajws.toAeExpression( exprNode, true );
+    }
+
+    public <T> Expression<T> toAeExpression( EmsScriptNode exprNode ) {
         return toAeExpression( exprNode, true );
     }
-    public static <T> Expression<T> toAeExpression( EmsScriptNode exprNode, boolean evaluate ) {
+    public <T> Expression<T> toAeExpression( EmsScriptNode exprNode, boolean evaluate ) {
         if ( exprNode == null ) {
             logger.warn( "called toAeExpression() with null argument" );
             return null;
         }
-        Expression<Call> expressionCall = getGlobalSystemModelAe().toAeExpression( exprNode, null );
+        Expression<Call> expressionCall =
+                getSystemModelAe().toAeExpression( exprNode, (Class<?>)null );
         if ( expressionCall == null ) {
             logger.warn( "toAeExpression("+exprNode+") returned null" );
             return null;
@@ -1567,7 +1650,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
     }
 
     // TODO -- look at getAffectedIds()
-    public static Map< EmsScriptNode, Collection< Constraint > > getAeConstraints( Set< EmsScriptNode > elements, WorkspaceNode ws ) {
+    public Map< EmsScriptNode, Collection< Constraint > > getAeConstraints( Set< EmsScriptNode > elements, WorkspaceNode ws ) {
         //Map<EmsScriptNode, Constraint> constraints = new LinkedHashMap<EmsScriptNode, Constraint>();
         Map< EmsScriptNode, Collection< Constraint > >  constraints =
                 new LinkedHashMap< EmsScriptNode, Collection< Constraint > >();
@@ -1619,7 +1702,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         return constraints;
     }
 
-    public static Map< EmsScriptNode, Expression<?> > getAeExpressions( Collection< EmsScriptNode > elements ) {
+    public Map< EmsScriptNode, Expression<?> > getAeExpressions( Collection< EmsScriptNode > elements ) {
         Map<EmsScriptNode, Expression<?>> expressions = new LinkedHashMap< EmsScriptNode, Expression<?> >();
         for ( EmsScriptNode node : elements ) {
             // FIXME -- Don't we need to pass in a date and workspace?
@@ -1656,8 +1739,40 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         }
         return expressions;
     }
+    
+    protected static AbstractJavaWebScript
+            makeAbstractJavaWebscript( ServiceRegistry services,
+                                       StringBuffer response,
+                                       Status status,
+                                       final EmsSystemModel systemModel,
+                                       SystemModelToAeExpression< Object, EmsScriptNode, EmsScriptNode, String, Object, EmsSystemModel > systemModelToAe ) {
+        AbstractJavaWebScript ajws =
+                new AbstractJavaWebScript( services, response, status,
+                                           systemModel, systemModelToAe ) {
+            @Override
+            protected boolean validateRequest( WebScriptRequest req, Status status ) {
+                return false;
+            }
+            @Override
+            protected Map< String, Object >
+                    executeImplImpl( WebScriptRequest req, Status status, Cache cache ) {
+                return null;
+            }
+        };
+        // Make sure we have an instance of the model.
+        ajws.getSystemModel();
+        ajws.getSystemModelAe();
+        return ajws;
+    }
 
-    public static Map<Object, Object> evaluate( Set< EmsScriptNode > elements, WorkspaceNode ws ) throws IllegalAccessException, InvocationTargetException, InstantiationException {
+    public static Map<Object, Object> evaluate( AbstractJavaWebScript ajws, Set< EmsScriptNode > elements, WorkspaceNode ws ) throws IllegalAccessException, InvocationTargetException, InstantiationException {
+        if ( ajws == null ) {
+            ajws = makeAbstractJavaWebscript(null, null, null, null, null);
+        }
+        return ajws.evaluate( elements, ws );
+    }
+    
+    public Map<Object, Object> evaluate( Set< EmsScriptNode > elements, WorkspaceNode ws ) throws IllegalAccessException, InvocationTargetException, InstantiationException {
         log(Level.INFO, "Will attempt to evaluate expressions where found!");
         Map< Object, Object > results = new LinkedHashMap< Object, Object >();
 
@@ -1894,24 +2009,50 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
 //            }
 //        }
     }
-
-    public void fix( final Set< EmsScriptNode > elements, final WorkspaceNode ws ) {
-        fix(elements, ws, getServices(), getResponse(), getResponseStatus(), getEmsSystemModel(), getSystemModelAe() );
+    
+        
+    public Collection<EmsScriptNode> fix( final Set< EmsScriptNode > elements, final WorkspaceNode ws ) {
+        return fixTimes(elements, ws);//, getServices(), getResponse(), getResponseStatus(), getSystemModel(), getSystemModelAe() );
     }
 
-    public static void fixBetter( final Set< EmsScriptNode > elements, final WorkspaceNode ws, ServiceRegistry services, StringBuffer response, Status status, final EmsSystemModel systemModel, SystemModelToAeExpression< Object, EmsScriptNode, EmsScriptNode, String, Object, EmsSystemModel > systemModelToAe ) {
-        Map< String, ParameterListenerImpl > classes = getGlobalSystemModelAe().getClassData().getAeClasses();
+    private void fixBetter( final Set< EmsScriptNode > elements, final WorkspaceNode ws, ServiceRegistry services, StringBuffer response, Status status, final EmsSystemModel systemModel, SystemModelToAeExpression< Object, EmsScriptNode, EmsScriptNode, String, Object, EmsSystemModel > systemModelToAe ) {
+        Map< String, ParameterListenerImpl > classes = getSystemModelAe().getClassData().getAeClasses();
         for ( ParameterListenerImpl aeClass : classes.values() ) {
             aeClass.satisfy( true, null );
         }
     }
 
-    public static void fix( final Set< EmsScriptNode > elements, final WorkspaceNode ws, ServiceRegistry services, StringBuffer response, Status status, final EmsSystemModel systemModel, SystemModelToAeExpression< Object, EmsScriptNode, EmsScriptNode, String, Object, EmsSystemModel > systemModelToAe ) {
-
+    public static boolean fix( AbstractJavaWebScript ajws, final Set< EmsScriptNode > elements, final WorkspaceNode ws, ServiceRegistry services, StringBuffer response, Status status, final EmsSystemModel systemModel, SystemModelToAeExpression< Object, EmsScriptNode, EmsScriptNode, String, Object, EmsSystemModel > systemModelToAe ) {
+        if ( ajws == null ) {
+            ajws = makeAbstractJavaWebscript(services, response, status, systemModel, systemModelToAe);
+        }
+        ajws.setWsDiff( ws );
+        Collection< EmsScriptNode > coll = ajws.fix( elements, ws );
+        return ajws.isSatisfied() == true;
+    }
+    
+    public Collection<EmsScriptNode> fixTimes( final Set< EmsScriptNode > elements, final WorkspaceNode ws) {
+        Collection<EmsScriptNode> result = null;
+        // Try three times, just in case.
+        int numTimes = 2;
+        for ( int i = 0; i < numTimes; ++i ) {
+            logger.warn( "\n\n<><><><><><>  Fix round " + (i+1) + " of " + numTimes + "!\n" );
+            result = fixOnce( elements, ws, services, response, getResponseStatus(), getEmsSystemModel(), getSystemModelAe() );
+        }
+        return result;
+    }
+    public Collection<EmsScriptNode> fixOnce( final Set< EmsScriptNode > elements, final WorkspaceNode ws, ServiceRegistry services, StringBuffer response, Status status, final EmsSystemModel systemModel, SystemModelToAeExpression< Object, EmsScriptNode, EmsScriptNode, String, Object, EmsSystemModel > systemModelToAe ) {
+    
         log(Level.INFO, "Will attempt to fix constraint violations if found!");
+    
+        Date now = new Date();
+        log(Level.INFO, "Starting fix: %s", now);
+        final long start = System.currentTimeMillis();
 
-        SystemModelSolver// < EmsScriptNode, Object, EmsScriptNode, EmsScriptNode, String, String, Object, EmsScriptNode, String, String, EmsScriptNode >
-            solver = new SystemModelSolver( //< EmsScriptNode, Object, EmsScriptNode, EmsScriptNode, String, String, Object, EmsScriptNode, String, String, EmsScriptNode >(systemModel,
+        final TreeSet<EmsScriptNode> updatedElements = new TreeSet< EmsScriptNode >();
+        
+        SystemModelSolver// < EmsScriptNode, Object, EmsScriptNode, EmsScriptNode, String, String, Object, EmsScriptNode, String, String, EmsScriptNode >  
+            solver = new SystemModelSolver( //< EmsScriptNode, Object, EmsScriptNode, EmsScriptNode, String, String, Object, EmsScriptNode, String, String, EmsScriptNode >(systemModel, 
                                             new ConstraintLoopSolver() );
 
         Map< EmsScriptNode, Collection< Constraint > > constraintMap = getAeConstraints( elements, ws );
@@ -1930,7 +2071,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         // Ensure that the class with all of the Parameters can access the
         // constraints in order to do LazyUpdating and caching of Call
         // evaluations.
-        ParameterListenerImpl theClass = getGlobalSystemModelAe().getClassData().getCurrentAeClass();
+        ParameterListenerImpl theClass = getSystemModelAe().getClassData().getCurrentAeClass();
         theClass.getConstraintExpressions().addAll( Utils.asList( constraints,
                                                                   ConstraintExpression.class ) );
 //        }
@@ -1955,22 +2096,23 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
 
             // Solve!!!!
             boolean result = false;
+            int numTimes = 3;
             try {
-                //ebug.turnOn();
-//                for ( Constraint c : constraints ) {
-//                    Set< Variable< ? >> vars = c.getFreeVariables();
-//                    for ( Variable<?> v : vars ) {
-//                        this.
-//                        getSystemModelAe().getClassData().getParamTable();
-//                        lock( v );
-//                    }
-//                }
-                result = solver.solve(constraints);
-
+                // Try multiple times, just in case.
+                for ( int i = 0; i < numTimes; ++i ) {
+                    logger.warn( "\n\n" );
+                    logger.warn( "Solve round " + (i+1) + " of " + numTimes + "!\n");
+                    result = solver.solve(constraints);
+                }
             } finally {
                 //Debug.turnOff();
             }
-            if (!result) {
+            logger.warn( "\n\n" );
+            if (result) {
+                satisfied = true;
+                logger.warn( "Satisfied all of the constraints!" );
+            } else {
+                satisfied = false;
                 logger.warn( "Was not able to satisfy all of the constraints!" );
                 Collection< Constraint > unsatisfiedConstraints =
                         ConstraintLoopSolver.getUnsatisfiedConstraints( constraints );
@@ -1987,12 +2129,10 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
                       }
                     }
             }
-            else {
-                logger.warn( "Satisfied all of the constraints!" );
-            }
-
+            logger.warn( "\n\n" );
+    
                 // Update the values of the nodes after solving the constraints:
-                final Map< EmsScriptNode, Parameter< Object > > params = getGlobalSystemModelAe().getExprParamMap();
+                final Map< EmsScriptNode, Parameter< Object > > params = getSystemModelAe().getExprParamMap();
                 if ( Utils.isNullOrEmpty( params ) ) {
                     logger.error( "Solver had no parameters in map to assign the solution!" );
                 } else {
@@ -2031,7 +2171,15 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
                                     //                              System.out.println("AAAAAAAAAAA  NODEREF = " + node.getId());
 //                                System.out.println("XXXXXXXXXXXXXXX  NODEREF = " + node.getId());
 //                                System.out.println("XXXXXXXXXXXXXXXXXXXXXXXX value before setting = " + v);
-                                    systemModel.setValue(node, newVal, ws);
+                                  boolean changed = systemModel.setValue(node, newVal, ws);
+                                  
+                                  if ( changed ) {
+                                      updatedElements.add( node );
+                                      ModStatus modStatus = new ModStatus();
+                                      modStatus.setState(ModStatus.State.UPDATED);
+                                      updateTransactionableWsState( node, node.getSysmlId(), modStatus ,
+                                                                    true );
+                                  }
 //                                v = systemModel.getValue( node, null );
 //                                System.out.println("XXXXXXXXXXXXXXXXXXXXXXXX value after setting = " + v);
                                 }
@@ -2042,7 +2190,25 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
                 }
             //}
         } // End if constraints list is non-empty
+        if ( !updatedElements.isEmpty() ) {
+            now = new Date();
+            final long end = System.currentTimeMillis();
+            log(Level.INFO, "fix completed %s : %sms\n", now,
+                    (end - start));
+            if (runWithoutTransactions) {
+                sendDeltasAndCommit(ws, updatedElements, start, end);
+            } else {
+                new EmsTransaction(getServices(), getResponse(),
+                        getResponseStatus()) {
+                    @Override
+                    public void run() throws Exception {
+                        sendDeltasAndCommit(ws, updatedElements, start, end);
+                    }
+                };
+            }
+        }
 
+        return updatedElements;
     }
 
     /**
@@ -2301,6 +2467,153 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         // This should always be of size 1:
         return Utils.isNullOrEmpty( expressions ) ? null :  expressions.iterator().next();
     }
+
+    public void updateTransactionableWsState(final EmsScriptNode element,
+            final String jsonId, final ModStatus modStatus, final boolean ingest) {
+    
+        if (runWithoutTransactions) {// || internalRunWithoutTransactions) {
+            updateTransactionableWsStateImpl(element, jsonId, modStatus, ingest);
+        } else {
+            new EmsTransaction(getServices(), getResponse(),
+                    getResponseStatus()) {
+                @Override
+                public void run() throws Exception {
+                    updateTransactionableWsStateImpl(element, jsonId,
+                            modStatus, ingest);
+                }
+            };
+        }
+    }
+    protected void updateTransactionableWsStateImpl(EmsScriptNode element,
+            String jsonId, ModStatus modStatus, boolean ingest) {
+        if (element != null && (element.exists() || element.isDeleted())) {
+            // can't add the node JSON yet since properties haven't been tied in
+            // yet
+            switch (modStatus.getState()) {
+            case ADDED:
+                if (!ingest) {
+                    wsDiff.getAddedElements().put(jsonId, element);
+                    element.createOrUpdateAspect("ems:Added");
+                }
+                break;
+            case UPDATED:
+                if (ingest && !wsDiff.getAddedElements().containsKey(jsonId)) {
+                    element.removeAspect("ems:Moved");
+    
+                    if (element.hasAspect(Acm.ACM_DELETED)) {
+                        wsDiff.getAddedElements().put(jsonId, element);
+                        element.removeAspect(Acm.ACM_DELETED);
+                        element.removeAspect("ems:Updated");
+                        element.createOrUpdateAspect("ems:Added");
+                    } else {
+                        element.removeAspect("ems:Added");
+                        wsDiff.getUpdatedElements().put(jsonId, element);
+                        element.createOrUpdateAspect("ems:Updated");
+                    }
+                }
+                break;
+            case MOVED:
+                if (!ingest && !wsDiff.getAddedElements().containsKey(jsonId)) {
+                    element.removeAspect("ems:Updated");
+                    if (element.hasAspect(Acm.ACM_DELETED)) {
+                        wsDiff.getAddedElements().put(jsonId, element);
+                        element.removeAspect(Acm.ACM_DELETED);
+                        element.removeAspect("ems:Moved");
+                        element.createOrUpdateAspect("ems:Added");
+                    } else {
+                        element.removeAspect("ems:Added");
+                        wsDiff.getMovedElements().put(jsonId, element);
+                        element.createOrUpdateAspect("ems:Moved");
+                    }
+                }
+                break;
+            case UPDATED_AND_MOVED:
+                if (ingest && !wsDiff.getAddedElements().containsKey(jsonId)) {
+                    if (element.hasAspect(Acm.ACM_DELETED)) {
+                        wsDiff.getAddedElements().put(jsonId, element);
+                        element.removeAspect(Acm.ACM_DELETED);
+                        element.removeAspect("ems:Moved");
+                        element.removeAspect("ems:Updated");
+                        element.createOrUpdateAspect("ems:Added");
+                    } else {
+                        element.removeAspect("ems:Added");
+                        wsDiff.getUpdatedElements().put(jsonId, element);
+                        element.createOrUpdateAspect("ems:Updated");
+    
+                        wsDiff.getMovedElements().put(jsonId, element);
+                        element.createOrUpdateAspect("ems:Moved");
+                    }
+                }
+                break;
+            case DELETED:
+                if (!ingest && !wsDiff.getDeletedElements().containsKey(jsonId)) {
+                    wsDiff.getDeletedElements().put(jsonId, element);
+                    if (element.exists()) {
+                        element.removeAspect("ems:Added");
+                        element.removeAspect("ems:Updated");
+                        element.removeAspect("ems:Moved");
+                        element.createOrUpdateAspect(Acm.ACM_DELETED);
+                    }
+                }
+                break;
+            default:
+                // do nothing
+            }
+        }
+    }
+    
+
+    /**
+     * Utility to save off the commit, then send deltas. Send deltas is tied to
+     * the projectId, so MD knows how to filter for it.
+     * 
+     * @param targetWS
+     * @param elements
+     * @param start
+     * @param end
+     * @throws JSONException
+     */
+    protected void sendDeltasAndCommit(WorkspaceNode targetWS,
+                                       TreeSet<EmsScriptNode> elements,
+                                       long start, long end)
+             throws JSONException {
+      // don't include qualified in commit, it's not needed
+        JSONObject deltaJson = wsDiff.toJSONObject(this, new Date(start), new Date(
+                end), true, false);
+
+        // commit is run as admin user already
+        String msg = "model post";
+        timerCommit = Timer.startTimer(timerCommit, timeEvents);
+        CommitUtil.commit(targetWS, deltaJson, msg, runWithoutTransactions,
+                services, new StringBuffer());
+        Timer.stopTimer(timerCommit,
+                "!!!!! updateOrCreateElement(): ws metadata time", timeEvents);
+
+        // FIXME: Need to split elements by project Id - since they won't always
+        // be in same project
+        String projectId = "";
+        if (elements.size() > 0) {
+            // make sure the following are run as admin user, it's possible that
+            // the
+            // workspace doesn't have the project and user doesn't have read
+            // permissions on
+            // the parent workspace (at that level)
+            String origUser = AuthenticationUtil.getRunAsUser();
+            AuthenticationUtil.setRunAsUser("admin");
+            projectId = elements.first().getProjectId(targetWS);
+            AuthenticationUtil.setRunAsUser(origUser);
+        }
+        String wsId = "master";
+        if (targetWS != null) {
+            wsId = targetWS.getId();
+        }
+
+        // FIXME: Need to split by projectId
+        if (!CommitUtil.sendDeltas(deltaJson, wsId, projectId, source)) {
+            logger.warn("send deltas not posted properly");
+        }
+    }
+
 
     /* TODO -- move the code from (2314 - 3308) 
      *         outside of AbstractJavaWebScript 
@@ -2693,8 +3006,9 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
             return null;
        }
         // Make sure we have an id for the property.
+        String definingFeatureId = null;
         if ( Utils.isNullOrEmpty( propertyId ) ) {
-            String definingFeatureId = getDefiningFeatureId( propertyName );
+            definingFeatureId = getDefiningFeatureId( propertyName );
             propertyId = instanceSpecId + "-slot-" + definingFeatureId;
             
             propertyJson.put( "sysmlid", propertyId );
@@ -2710,6 +3024,9 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
         propertyJson.put( "specialization", specJson );
 
         specJson.put( "type", "Property" );
+        if (definingFeatureId != null) {
+            specJson.put( "propertyType", definingFeatureId );
+        }
         specJson.put( "isSlot", true);
         JSONArray valueArr = new JSONArray();
         specJson.put( "value", valueArr );
@@ -3076,7 +3393,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
                     }
                     
                     // NOTE: commented out until DocWeb next iteration 
-                    // elements.put( jobQueuePosition );
+//                    elements.put( jobQueuePosition );
                 }                       
             }
         }

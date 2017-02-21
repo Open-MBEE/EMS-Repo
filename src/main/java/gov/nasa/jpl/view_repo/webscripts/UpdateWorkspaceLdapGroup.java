@@ -29,6 +29,7 @@
 
 package gov.nasa.jpl.view_repo.webscripts;
 
+import gov.nasa.jpl.mbee.util.Timer;
 import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
@@ -55,6 +56,7 @@ import org.apache.log4j.*;
  *
  */
 public class UpdateWorkspaceLdapGroup extends AbstractJavaWebScript {
+    static Logger logger = Logger.getLogger( UpdateWorkspaceLdapGroup.class );
     public UpdateWorkspaceLdapGroup() {
         super();
     }
@@ -86,9 +88,10 @@ public class UpdateWorkspaceLdapGroup extends AbstractJavaWebScript {
 
     @Override
     protected Map<String, Object> executeImplImpl(WebScriptRequest req, Status status, Cache cache) {
-        
-        printHeader( req );
-        //clearCaches();
+        Timer timer = new Timer();
+        String user = AuthenticationUtil.getFullyAuthenticatedUser();
+        printHeader(user, logger, req);
+
         Map<String, Object> model = new HashMap<String, Object>();
 
         try {
@@ -106,7 +109,7 @@ public class UpdateWorkspaceLdapGroup extends AbstractJavaWebScript {
         status.setCode(responseStatus.getCode());
         model.put("res", createResponseJson());
 
-        printFooter();
+        printFooter(user, logger, timer);
         return model;
     }
     

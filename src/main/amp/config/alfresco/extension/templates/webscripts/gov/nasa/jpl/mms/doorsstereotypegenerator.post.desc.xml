@@ -1,0 +1,11 @@
+<webscript>
+	<shortname>Generate sysml stereotype from DNG artifact type</shortname>
+	<description>
+		Generate sysml stereotype from DNG artifact type
+	</description>
+	<url>/doors/stereotypegenerator</url>
+	<format default="json">argument</format>
+	<authentication>user</authentication>
+	<transaction>none</transaction>
+	<family>MMS REST API</family>
+</webscript>

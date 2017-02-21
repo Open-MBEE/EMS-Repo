@@ -1,9 +1,9 @@
 # Example curl command for excercising the MMS REST API
 
     ./projectpost project.json        
-    ./projectget 123456
+    ./projectget PROJECT-123456
     ./modelpost elementsNew.json
-    ./modelget 123456 recursive
+    ./modelget PROJECT-123456 recursive
     ./modelget 303 
     ./viewpost viewsNew.json
     ./viewget 301

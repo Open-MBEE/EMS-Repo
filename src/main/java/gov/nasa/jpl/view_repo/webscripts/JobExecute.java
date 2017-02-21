@@ -117,7 +117,7 @@ public class JobExecute extends JobPost {
                 EmsScriptNode p = job.getJobPropertyNode( j, "status" );  
                 
                 if( p != null ) {
-                    JSONObject prop = p.toJSONObject( null, null );
+                    JSONObject prop = p.toJSONObject( null, null, false );
                     
                     if( prop != null ) {
                         JSONObject specJson = prop.optJSONObject( Acm.JSON_SPECIALIZATION );
@@ -144,6 +144,37 @@ public class JobExecute extends JobPost {
                         updateMmsJob( elements ); 
                     }
                 }
+                
+//                EmsScriptNode queuePos = job.getJobPropertyNode(j , "queuePosition");
+//                
+//                if( queuePos != null) {
+//                	JSONObject prop = queuePos.toJSONObject( null, null );
+//                    int pos = getJobQueueNumber(jobId);
+//                	
+//                    JSONObject specJson = prop.optJSONObject( Acm.JSON_SPECIALIZATION );
+//                    if ( specJson != null && specJson.has( "value"  ) ) {
+//                        JSONArray valueArr = specJson.getJSONArray( "value" );
+//                        
+//                        if( valueArr != null ) {
+//                            // clear the current values and create the new value 
+//                            // with the current status
+//                            valueArr.remove( 0 );
+//                            JSONObject valueSpec = new JSONObject();
+//                            
+//                            valueSpec.put( "string", Integer.toString(pos));
+//                            valueSpec.put( "type", "LiteralString");                                        
+//                            valueArr.put(valueSpec);         
+//                        }
+//                    }
+//
+//                    JSONArray json = new JSONArray();
+//                    json.put( prop );
+//                    JSONObject elements = new JSONObject();
+//                    elements.put( "elements", json );
+//                                                   
+//                    updateMmsJob( elements ); 
+//                	
+//                }
             }
         }         
 

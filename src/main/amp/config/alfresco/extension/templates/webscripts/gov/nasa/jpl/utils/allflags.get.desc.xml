@@ -27,6 +27,7 @@
   <url>/flags/cleanJson?on={on?}&amp;off={off?}</url>
   <url>/flags/diffDefaultIsMerge?on={on?}&amp;off={off?}</url>
   <url>/flags/cacheSnapshots?on={on?}&amp;off={off?}</url>
+  <url>/flags/cacheDynamic?on={on?}&amp;off={off?}&amp;maxage={maxage?}</url>
   <url>/flags/checkMmsVersions?on={on?}&amp;off={off?}</url>
   <url>/flags/graphDb?on={on?}&amp;off={off?}</url>
   <url>/flags/postProcessQualified?on={on?}&amp;off={off?}</url>
@@ -34,6 +35,7 @@
   <url>/flags/autoBuildGraphDb?on={on?}&amp;off={off?}</url>
   <url>/flags/skipQualified?on={on?}&amp;off={off?}</url>
   <url>/flags/restPost?on={on?}&amp;off={off?}</url>
+  <url>/flags/transactionPeriod?on={on?}&amp;off={off?}&amp;n={n?}</url>
   <authentication>user</authentication>
   <format default="html">argument</format>
   <family>EMS Utils</family>

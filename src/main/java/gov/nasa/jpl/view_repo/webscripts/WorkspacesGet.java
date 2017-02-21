@@ -1,5 +1,6 @@
 package gov.nasa.jpl.view_repo.webscripts;
 
+import gov.nasa.jpl.mbee.util.Timer;
 import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
@@ -25,7 +26,7 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
 
 
 public class WorkspacesGet extends AbstractJavaWebScript{
-
+    static Logger logger = Logger.getLogger( WorkspacesGet.class );
 
     protected boolean gettingContainedWorkspaces = false;
 
@@ -55,9 +56,9 @@ public class WorkspacesGet extends AbstractJavaWebScript{
 	 */
     @Override
     protected Map<String, Object> executeImplImpl (WebScriptRequest req, Status status, Cache cache) {
-        printHeader( req );
-
-        //clearCaches();
+        Timer timer = new Timer();
+        String user = AuthenticationUtil.getFullyAuthenticatedUser();
+        printHeader(user, logger, req);
 
         Map<String, Object> model = new HashMap<String, Object>();
         JSONObject json = null;
@@ -88,7 +89,7 @@ public class WorkspacesGet extends AbstractJavaWebScript{
         }
         status.setCode(responseStatus.getCode());
 
-        printFooter();
+        printFooter(user, logger, timer);
 
         return model;
     }
@@ -109,11 +110,11 @@ public class WorkspacesGet extends AbstractJavaWebScript{
             	    WorkspaceNode wsNode = new WorkspaceNode(workspaceNode.getNodeRef(), services, response);
             	    if (findDeleted) {
             	        if (wsNode.isDeleted()) {
-            	            jArray.put(wsNode.toJSONObject(wsNode, null ));
+            	            jArray.put(wsNode.toJSONObject(wsNode, null, false ));
             	        }
             	    } else {
             	        if (wsNode.exists()) {
-            	            jArray.put(wsNode.toJSONObject(wsNode, null ));
+            	            jArray.put(wsNode.toJSONObject(wsNode, null, false ));
             	        }
             	    }
             }

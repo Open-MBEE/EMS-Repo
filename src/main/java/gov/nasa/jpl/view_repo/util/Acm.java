@@ -31,6 +31,7 @@ package gov.nasa.jpl.view_repo.util;
 
 
 import gov.nasa.jpl.mbee.util.Debug;
+import gov.nasa.jpl.mbee.util.Utils;
 
 import java.lang.reflect.Field;
 import java.util.HashMap;
@@ -135,6 +136,8 @@ public class Acm {
     public static final String JSON_TIME_INTERVAL_MIN = "timeIntervalMin";
     public static final String JSON_OPERATION = "Operation";
     public static final String JSON_OPERATION_PARAMETER = PARAMETERS; // Used to be "operationParameter"
+    public static final String JSON_OPERATION_POSTCONDITION = "postconditions";
+    
     public static final String JSON_INSTANCE_SPECIFICATION = "InstanceSpecification";
     public static final String JSON_INSTANCE_SPECIFICATION_SPECIFICATION = "instanceSpecificationSpecification"; 
     public static final String JSON_PARAMETER = "Parameter";
@@ -273,6 +276,7 @@ public class Acm {
     public static final String ACM_TIME_INTERVAL_MIN = SYSML + "timeIntervalMin";
     public static final String ACM_OPERATION = SYSML + JSON_OPERATION;
     public static final String ACM_OPERATION_PARAMETER = SYSML + "operationParameter";
+    public static final String ACM_OPERATION_POSTCONDITION = SYSML + "operationPostcondition";
     public static final String ACM_INSTANCE_SPECIFICATION = SYSML + JSON_INSTANCE_SPECIFICATION;
     public static final String ACM_INSTANCE_SPECIFICATION_SPECIFICATION = SYSML + "instanceSpecificationSpecification";
     public static final String ACM_PARAMETER = SYSML + JSON_PARAMETER;
@@ -364,6 +368,9 @@ public class Acm {
     public static final String ACM_EXPOSE_PROPERTY = SYSML + "expose";
     public static final String ACM_CONFORM_PROPERTY = SYSML + "conform";
     public static final String ACM_GENERALIZATION_PROPERTY = SYSML + "generalization";
+    public static final String ACM_PROPERTY_PROPERTY = SYSML + "property";
+    public static final String ACM_VIEW_PROPERTY = SYSML + "view";
+    public static final String ACM_PRODUCT_PROPERTY = SYSML + "product";
     
     public static final String ACM_CLASSIFIER = SYSML + JSON_CLASSIFIER;
     public static final String ACM_SLOTS = SYSML + JSON_SLOTS;
@@ -437,6 +444,22 @@ public class Acm {
     }
 
     /**
+     * Alfresco content model properties of aspects in their JSON equivalent form.
+     */
+    protected static final Set<String> JSON_ALFRESCO_PROPERTIES = new HashSet<String>() {
+         private static final long serialVersionUID = -2080928480362524333L;
+        {
+            for ( String k : getJSON2ACM().keySet() ) {
+                if ( !Utils.isNullOrEmpty( k ) ) {
+                    if ( Character.isLowerCase( k.charAt( 0 ) ) ) {
+                        add( k );
+                    }
+                }
+            }
+        }
+    };
+
+    /**
      * Properties that are JSONArrays rather than primitive types, so parsing is different
      */
     protected static final Set<String> JSON_ARRAYS = new HashSet<String>() {
@@ -452,6 +475,8 @@ public class Acm {
             add(JSON_OWNED_ATTRIBUTE);
             add(JSON_REDEFINES);
 //            add(JSON_ANNOTATED_ELEMENTS);
+            add(JSON_OPERATION_PARAMETER);
+            add(JSON_OPERATION_POSTCONDITION);
         }
     };
 
@@ -473,6 +498,7 @@ public class Acm {
            add(JSON_TIME_INTERVAL_MAX);
            add(JSON_TIME_INTERVAL_MIN);
            add(JSON_OPERATION_PARAMETER);
+           add(JSON_OPERATION_POSTCONDITION);
            add(JSON_INSTANCE_SPECIFICATION_SPECIFICATION);
            add(JSON_CONSTRAINT_SPECIFICATION);
            add(JSON_PARAMETER_DEFAULT_VALUE);
@@ -559,6 +585,7 @@ public class Acm {
             add(JSON_TIME_INTERVAL_MAX);
             add(JSON_TIME_INTERVAL_MIN);
             add(JSON_OPERATION_PARAMETER);
+            add(JSON_OPERATION_POSTCONDITION);
             add(JSON_INSTANCE_SPECIFICATION_SPECIFICATION);
             add(JSON_PARAMETER_DIRECTION);
             add(JSON_PARAMETER_DEFAULT_VALUE);

@@ -8,7 +8,7 @@
     "name": "master",
     "elements": [{
       "siteCharacterizationId": "europa",
-      "qualifiedId": "/europa/123456/aspect_history_zzz/property_zzz",
+      "qualifiedId": "/europa/PROJECT-123456/aspect_history_zzz/property_zzz",
       "qualifiedName": "/europa/JW_TEST2/null/null",
       "sysmlid": "property_zzz",
       "editable": true,
@@ -39,7 +39,7 @@
     "qualifiedId": "master",
     "id": "master",
     "deletedElements": [{
-      "qualifiedId": "/europa/123456/aspect_history_zzz/property_zzz",
+      "qualifiedId": "/europa/PROJECT-123456/aspect_history_zzz/property_zzz",
       "id": "d31ac3da-506f-477a-95e6-7186a22478bd",
       "qualifiedName": "/europa/JW_TEST2/null/null",
       "sysmlid": "property_zzz",

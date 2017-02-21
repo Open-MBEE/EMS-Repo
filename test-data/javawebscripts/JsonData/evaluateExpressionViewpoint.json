@@ -1,0 +1,31 @@
+{ "elements":[
+    {
+        "sysmlid": "EvaluateExpressionViewpoint",
+        "name": "EvaluateExpressionViewpoint",
+        "documentation": "A view conforming to this viewpoint can expose an expression or a string property whose value is an expression, and that expression will be evaluated to generate the contents of the view.",
+        "owner": "edit_expression_viewpoint",
+        "specialization" : {
+            "method": "evaluateExpressionViewpointMethod",
+            "type": "Viewpoint"
+        }
+    },
+    {
+        "sysmlid": "evaluateExpressionViewpointMethod",
+        "name": "viewpoint_op",
+        "documentation": "Passing in a Property with a string value produces a view where the string is evaluated to produce the view content",
+        "owner": "edit_expression_viewpoint",
+        "specialization" : {
+            "parameters": ["exposed_id"],
+            "type": "Operation",
+            "expression":{
+              "type": "Expression",
+              "operand":[{"type":"ElementValue",
+                                      "element":"op_evaluate"},
+                                     {"type":"ElementValue",
+                                      "element":"exposed_id"}]
+            }
+        }
+    }
+]
+}
+

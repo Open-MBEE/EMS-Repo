@@ -197,7 +197,7 @@ public class DoorsArtifactMappingGet extends AbstractJavaWebScript {
 
                 curArtifactMetatypeMappings = new JSONArray();
 
-                curProj.put( "artifactTypeMappings",
+                curProj.put( "artifactMappings",
                              curArtifactMetatypeMappings );
 
                 curArtifactMappings = curProjArtifactMapping.getValue();
@@ -209,7 +209,7 @@ public class DoorsArtifactMappingGet extends AbstractJavaWebScript {
 
                     curArtifactMetatypeMap = new JSONObject();
 
-                    curArtifactMetatypeMap.put( "artifactType",
+                    curArtifactMetatypeMap.put( "doorsArtifactType",
                                                 curArtifactMapping.getKey() );
 
                     newAppliedMetatypeIDs = new JSONArray();

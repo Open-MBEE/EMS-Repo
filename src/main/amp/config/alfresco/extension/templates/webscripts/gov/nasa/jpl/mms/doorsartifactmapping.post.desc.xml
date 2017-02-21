@@ -1,9 +1,9 @@
 <webscript>
-	<shortname>Configure Applied Metatype IDs</shortname>
+	<shortname>Artifact Type to Applied Metatype ID Mapping</shortname>
 	<description>
-		Post/Configure Applied Metatype IDs dynamically
+		POST DNG artifact to sysml applied metatype id mapping
 	</description>
-	<url>/doorsartifactmappings</url>
+	<url>/doors/artifact/mappings</url>
 	<format default="json">argument</format>
 	<authentication>user</authentication>
 	<transaction>none</transaction>

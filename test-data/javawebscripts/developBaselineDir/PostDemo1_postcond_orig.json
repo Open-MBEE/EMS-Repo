@@ -1,0 +1,241 @@
+{"elements": [
+    {
+        "nodeRefId": "workspace://SpacesStore/0c893f17-4cd9-48f8-ad3c-a3df894924db",
+        "qualifiedId": "/europa/PROJECT-123456/P_17_0_2_3_e610336_1394148311476_17302_29388/P_17_0_2_3_e610336_1394148464681_90735_29608",
+        "siteCharacterizationId": "europa",
+        "versionedRefId": "versionStore://version2Store/e7abae74-b4e5-47b3-b2b0-2e08e79d3ed6",
+        "qualifiedName": "/europa/JW_TEST2/Components/",
+        "sysmlid": "P_17_0_2_3_e610336_1394148464681_90735_29608",
+        "editable": true,
+        "creator": "admin",
+        "modified": "2016-07-01T17:43:29.285-0700",
+        "modifier": "admin",
+        "created": "Fri Jul 01 17:43:27 PDT 2016",
+        "name": "",
+        "owner": "P_17_0_2_3_e610336_1394148311476_17302_29388",
+        "documentation": "",
+        "read": "2016-07-01T17:43:31.589-0700",
+        "specialization": {
+            "source": "P_17_0_2_3_e610336_1394148311476_17302_29388",
+            "target": "P_17_0_2_3_e610336_1394148449252_91190_29556",
+            "type": "Conform"
+        }
+    },
+    {
+        "nodeRefId": "workspace://SpacesStore/15484d86-8084-4e46-b68b-a484b93c7cb9",
+        "qualifiedId": "/europa/PROJECT-123456/P_17_0_2_3_e610336_1394148311476_17302_29388",
+        "siteCharacterizationId": "europa",
+        "versionedRefId": "versionStore://version2Store/65a2629b-ffae-4ee9-97fd-9f3e8e30bd43",
+        "qualifiedName": "/europa/JW_TEST2/Components",
+        "sysmlid": "P_17_0_2_3_e610336_1394148311476_17302_29388",
+        "editable": true,
+        "creator": "admin",
+        "modified": "2016-07-01T17:49:25.077-0700",
+        "modifier": "admin",
+        "created": "Fri Jul 01 17:43:27 PDT 2016",
+        "name": "Components",
+        "owner": "PROJECT-123456",
+        "documentation": "",
+        "read": "2016-07-01T17:49:25.143-0700",
+        "specialization": {
+            "displayedElements": ["P_17_0_2_4_f3a0363_1394142290412_487571_28478"],
+            "allowedElements": ["P_17_0_2_4_f3a0363_1394142290412_487571_28478"],
+            "contains": [{
+                "ordered": false,
+                "list": [[{
+                    "sourceType": "reference",
+                    "source": "P_17_0_2_4_f3a0363_1394142290412_487571_28478",
+                    "sourceProperty": "name",
+                    "type": "Paragraph"
+                }]],
+                "type": "List"
+            }],
+            "type": "View"
+        }
+    },
+    {
+        "nodeRefId": "workspace://SpacesStore/369829a1-0857-4e66-b5c5-14b529e4e0d9",
+        "qualifiedId": "/europa/PROJECT-123456/name_list_postcond",
+        "siteCharacterizationId": "europa",
+        "versionedRefId": "versionStore://version2Store/a28dc7ed-0940-4cd9-aa10-32012e91fb0f",
+        "qualifiedName": "/europa/JW_TEST2/viewpoint_op_postcond",
+        "sysmlid": "name_list_postcond",
+        "editable": true,
+        "creator": "admin",
+        "modified": "2016-07-01T17:43:29.926-0700",
+        "modifier": "admin",
+        "created": "Fri Jul 01 17:43:28 PDT 2016",
+        "name": "viewpoint_op_postcond",
+        "owner": "PROJECT-123456",
+        "documentation": "This constraint is the postcondition of the viewpoint operation that is encoded as result = List(Map(exposed_id, Name))",
+        "read": "2016-07-01T17:43:31.611-0700",
+        "specialization": {
+            "specification": {
+                "type": "Expression",
+                "operand": [
+                    {
+                        "string": "Equals",
+                        "type": "LiteralString"
+                    },
+                    {
+                        "element": "resultParamForViewpointOperation",
+                        "type": "ElementValue"
+                    },
+                    {
+                        "operand": [
+                            {
+                                "element": "op_list",
+                                "type": "ElementValue"
+                            },
+                            {
+                                "type": "Expression",
+                                "operand": [
+                                    {
+                                        "element": "op_map",
+                                        "type": "ElementValue"
+                                    },
+                                    {
+                                        "element": "Pexposed_id",
+                                        "type": "ElementValue"
+                                    },
+                                    {
+                                        "element": "op_name_arg",
+                                        "type": "ElementValue"
+                                    }
+                                ]
+                            }
+                        ],
+                        "type": "Expression"
+                    }
+                ]
+            },
+            "type": "Constraint"
+        }
+    },
+    {
+        "nodeRefId": "workspace://SpacesStore/4d61a688-7dbf-471b-9e8b-67cf309efe8c",
+        "qualifiedId": "/europa/PROJECT-123456/Pexposed_id",
+        "siteCharacterizationId": "europa",
+        "versionedRefId": "versionStore://version2Store/0482d819-9522-45ea-ba49-b0e0fcbff10d",
+        "qualifiedName": "/europa/JW_TEST2/exposed",
+        "sysmlid": "Pexposed_id",
+        "editable": true,
+        "creator": "admin",
+        "modified": "2016-07-01T17:43:29.030-0700",
+        "modifier": "admin",
+        "created": "Fri Jul 01 17:43:27 PDT 2016",
+        "name": "exposed",
+        "owner": "PROJECT-123456",
+        "documentation": "",
+        "read": "2016-07-01T17:43:31.637-0700",
+        "specialization": {
+            "defaultValue": null,
+            "type": "Parameter"
+        }
+    },
+    {
+        "nodeRefId": "workspace://SpacesStore/5fee76f0-b976-4fe0-b9fa-76edfcf147a0",
+        "qualifiedId": "/europa/PROJECT-123456/MMS_1467420564464_87cae276-7637-4230-bda7-a944fd7f719b",
+        "siteCharacterizationId": "europa",
+        "versionedRefId": "versionStore://version2Store/98751359-e457-4e33-930b-e39cf787b514",
+        "qualifiedName": "/europa/JW_TEST2/",
+        "sysmlid": "MMS_1467420564464_87cae276-7637-4230-bda7-a944fd7f719b",
+        "editable": true,
+        "creator": "admin",
+        "modified": "2016-07-01T17:49:24.732-0700",
+        "modifier": "admin",
+        "created": "Fri Jul 01 17:49:24 PDT 2016",
+        "name": "",
+        "owner": "PROJECT-123456",
+        "documentation": "",
+        "read": "2016-07-01T17:49:25.161-0700",
+        "specialization": {
+            "source": "P_17_0_2_3_e610336_1394148311476_17302_29388",
+            "target": "P_17_0_2_4_f3a0363_1394142290412_487571_28478",
+            "type": "Expose"
+        }
+    },
+    {
+        "nodeRefId": "workspace://SpacesStore/8aaaa6d5-e880-4d00-8c29-d31bcd7fbcde",
+        "qualifiedId": "/europa/PROJECT-123456/P_17_0_2_4_f3a0363_1394142290412_487571_28478",
+        "siteCharacterizationId": "europa",
+        "versionedRefId": "versionStore://version2Store/3cda452c-2315-4b55-a8cc-baf6004f20cd",
+        "qualifiedName": "/europa/JW_TEST2/BLUCam CubeSat A",
+        "sysmlid": "P_17_0_2_4_f3a0363_1394142290412_487571_28478",
+        "editable": true,
+        "creator": "admin",
+        "modified": "2016-07-01T17:49:25.080-0700",
+        "modifier": "admin",
+        "created": "Fri Jul 01 17:43:27 PDT 2016",
+        "name": "BLUCam CubeSat A",
+        "owner": "PROJECT-123456",
+        "documentation": "",
+        "read": "2016-07-01T17:49:25.166-0700",
+        "specialization": {"type": "Package"}
+    },
+    {
+        "nodeRefId": "workspace://SpacesStore/d4b71dbb-362d-4ac3-945f-5da9be835b16",
+        "qualifiedId": "/europa/PROJECT-123456/Pname_list",
+        "siteCharacterizationId": "europa",
+        "versionedRefId": "versionStore://version2Store/fa5c11cc-8e83-4b81-bd66-82212ae3c5df",
+        "qualifiedName": "/europa/JW_TEST2/viewpoint_op",
+        "sysmlid": "Pname_list",
+        "editable": true,
+        "creator": "admin",
+        "modified": "2016-07-01T17:44:14.765-0700",
+        "modifier": "admin",
+        "created": "Fri Jul 01 17:43:27 PDT 2016",
+        "name": "viewpoint_op",
+        "owner": "PROJECT-123456",
+        "documentation": "",
+        "read": "2016-07-01T17:44:15.354-0700",
+        "specialization": {
+            "postconditions": ["name_list_postcond"],
+            "parameters": ["Pexposed_id"],
+            "type": "Operation"
+        }
+    },
+    {
+        "nodeRefId": "workspace://SpacesStore/efa6292a-4e99-4267-b3af-9c0bd21d0362",
+        "qualifiedId": "/europa/PROJECT-123456/P_17_0_2_3_e610336_1394148449252_91190_29556",
+        "siteCharacterizationId": "europa",
+        "versionedRefId": "versionStore://version2Store/9e236856-fdd7-43a1-b7aa-ecc99519bcfe",
+        "qualifiedName": "/europa/JW_TEST2/ComponentViewPoint",
+        "sysmlid": "P_17_0_2_3_e610336_1394148449252_91190_29556",
+        "editable": true,
+        "creator": "admin",
+        "modified": "2016-07-01T17:43:31.468-0700",
+        "modifier": "admin",
+        "created": "Fri Jul 01 17:43:27 PDT 2016",
+        "name": "ComponentViewPoint",
+        "owner": "PROJECT-123456",
+        "documentation": "",
+        "read": "2016-07-01T17:43:31.697-0700",
+        "specialization": {
+            "method": "name_list",
+            "type": "Viewpoint"
+        }
+    },
+    {
+        "modifier": "admin",
+        "nodeRefId": "workspace://SpacesStore/f909ab7f-be24-457f-a545-10b396d80059",
+        "qualifiedId": "/europa/PROJECT-123456/holding_bin_PROJECT-123456/YY_2016_PROJECT-123456/MM_6_YY_2016_PROJECT-123456/DD_1_MM_6_YY_2016_PROJECT-123456/HH_17_DD_1_MM_6_YY_2016_PROJECT-123456/resultParamForViewpointOperation",
+        "siteCharacterizationId": "europa",
+        "versionedRefId": "versionStore://version2Store/1fce5d73-cda0-46ca-a950-69aaa3a7a028",
+        "created": "Fri Jul 01 17:43:28 PDT 2016",
+        "name": "result",
+        "qualifiedName": "/europa/JW_TEST2/holding_bin/YY_2016/MM_6/DD_1/HH_17/result",
+        "owner": "HH_17_DD_1_MM_6_YY_2016_PROJECT-123456",
+        "sysmlid": "resultParamForViewpointOperation",
+        "read": "2016-07-01T17:43:31.702-0700",
+        "specialization": {
+            "direction": "RETURN",
+            "defaultValue": null,
+            "type": "Parameter"
+        },
+        "editable": true,
+        "modified": "2016-07-01T17:43:30.452-0700",
+        "creator": "admin"
+    }
+]}
+200

@@ -1,14 +1,66 @@
 {"elements": [
     {
+        "qualifiedName": "/europa/JW_TEST/ComponentViewPoint",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "ComponentViewPoint",
+        "documentation": "",
+        "owner": "PROJECT-123456",
+        "specialization": {
+            "method": "name_list",
+            "type": "Viewpoint"
+        }
+    },
+    {
         "qualifiedName": "/europa/JW_TEST/List",
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
         "name": "List",
         "documentation": "",
-        "owner": "123456",
+        "owner": "PROJECT-123456",
         "specialization": {
             "parameters": [],
+            "type": "Operation"
+        }
+    },
+    {
+        "qualifiedName": "/europa/JW_TEST/viewpoint_op",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "viewpoint_op",
+        "documentation": "",
+        "owner": "PROJECT-123456",
+        "specialization": {
+            "expression": {
+                "operand": [
+                    {
+                        "element": "op_list",
+                        "type": "ElementValue"
+                    },
+                    {
+                        "type": "Expression",
+                        "operand": [
+                            {
+                                "element": "op_map",
+                                "type": "ElementValue"
+                            },
+                            {
+                                "element": "exposed_id",
+                                "type": "ElementValue"
+                            },
+                            {
+                                "element": "op_name_arg",
+                                "type": "ElementValue"
+                            }
+                        ]
+                    }
+                ],
+                "type": "Expression"
+            },
+            "parameters": ["exposed_id"],
             "type": "Operation"
         }
     },
@@ -19,37 +71,47 @@
         "modifier": "admin",
         "name": "Name",
         "documentation": "",
-        "owner": "123456",
+        "owner": "PROJECT-123456",
         "specialization": {
             "parameters": [],
             "type": "Operation"
         }
     },
     {
-        "qualifiedName": "/europa/JW_TEST/ComponentViewPoint",
+        "qualifiedName": "/europa/JW_TEST/Components",
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
-        "name": "ComponentViewPoint",
+        "name": "Components",
         "documentation": "",
-        "owner": "123456",
+        "owner": "PROJECT-123456",
         "specialization": {
-            "method": "name_list",
-            "type": "Viewpoint"
+            "childViews": [],
+            "type": "View"
         }
     },
     {
-        "qualifiedName": "/europa/JW_TEST/map",
+        "qualifiedName": "/europa/JW_TEST/exposed",
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
-        "name": "map",
+        "name": "exposed",
         "documentation": "",
-        "owner": "123456",
+        "owner": "PROJECT-123456",
         "specialization": {
-            "parameters": [],
-            "type": "Operation"
+            "type": "Parameter",
+            "defaultValue": null
         }
+    },
+    {
+        "qualifiedName": "/europa/JW_TEST/BLUCam CubeSat A",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "BLUCam CubeSat A",
+        "documentation": "",
+        "owner": "PROJECT-123456",
+        "specialization": {"type": "Package"}
     },
     {
         "qualifiedName": "/europa/JW_TEST/",
@@ -58,8 +120,9 @@
         "modifier": "admin",
         "name": "",
         "documentation": "",
-        "owner": "123456",
+        "owner": "PROJECT-123456",
         "specialization": {
+            "type": "Expression",
             "operand": [
                 {
                     "element": "op_map",
@@ -73,55 +136,20 @@
                     "element": "op_name_arg",
                     "type": "ElementValue"
                 }
-            ],
-            "type": "Expression"
+            ]
         }
     },
     {
-        "qualifiedName": "/europa/JW_TEST/BLUCam CubeSat A",
+        "qualifiedName": "/europa/JW_TEST/map",
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
-        "name": "BLUCam CubeSat A",
+        "name": "map",
         "documentation": "",
-        "owner": "123456",
-        "specialization": {"type": "Package"}
-    },
-    {
-        "qualifiedName": "/europa/JW_TEST/Components",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "Components",
-        "documentation": "",
-        "owner": "123456",
-        "specialization": {"type": "View"}
-    },
-    {
-        "qualifiedName": "/europa/JW_TEST/",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "",
-        "documentation": "",
-        "owner": "123456",
+        "owner": "PROJECT-123456",
         "specialization": {
-            "source": "_17_0_2_3_e610336_1394148311476_17302_29388",
-            "target": "_17_0_2_4_f3a0363_1394142290412_487571_28478",
-            "type": "Expose"
-        }
-    },
-    {
-        "qualifiedName": "/europa/JW_TEST/exposed",
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "exposed",
-        "documentation": "",
-        "owner": "123456",
-        "specialization": {
-            "defaultValue": null,
-            "type": "Parameter"
+            "parameters": [],
+            "type": "Operation"
         }
     },
     {
@@ -139,42 +167,17 @@
         }
     },
     {
-        "qualifiedName": "/europa/JW_TEST/viewpoint_op",
+        "qualifiedName": "/europa/JW_TEST/",
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
-        "name": "viewpoint_op",
+        "name": "",
         "documentation": "",
-        "owner": "123456",
+        "owner": "PROJECT-123456",
         "specialization": {
-            "expression": {
-                "type": "Expression",
-                "operand": [
-                    {
-                        "element": "op_list",
-                        "type": "ElementValue"
-                    },
-                    {
-                        "operand": [
-                            {
-                                "element": "op_map",
-                                "type": "ElementValue"
-                            },
-                            {
-                                "element": "exposed_id",
-                                "type": "ElementValue"
-                            },
-                            {
-                                "element": "op_name_arg",
-                                "type": "ElementValue"
-                            }
-                        ],
-                        "type": "Expression"
-                    }
-                ]
-            },
-            "parameters": ["exposed_id"],
-            "type": "Operation"
+            "source": "_17_0_2_3_e610336_1394148311476_17302_29388",
+            "target": "_17_0_2_4_f3a0363_1394142290412_487571_28478",
+            "type": "Expose"
         }
     }
 ]}

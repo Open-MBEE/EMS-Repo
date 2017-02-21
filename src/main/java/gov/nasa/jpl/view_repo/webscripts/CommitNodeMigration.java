@@ -1,6 +1,7 @@
 package gov.nasa.jpl.view_repo.webscripts;
 
 
+import gov.nasa.jpl.mbee.util.Timer;
 import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.util.CommitUtil;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
@@ -14,6 +15,7 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.apache.log4j.*;
 import org.springframework.extensions.webscripts.Cache;
@@ -93,7 +95,9 @@ public class CommitNodeMigration extends AbstractJavaWebScript {
     @Override
     protected Map< String, Object > executeImplImpl( WebScriptRequest req,
                                                    Status status, Cache cache ) {
-        printHeader( req );
+        Timer timer = new Timer();
+        String user = AuthenticationUtil.getFullyAuthenticatedUser();
+        printHeader(user, logger, req);
 
         Map<String, Object> results = new HashMap<String, Object>();
 
@@ -130,7 +134,7 @@ public class CommitNodeMigration extends AbstractJavaWebScript {
         
         status.setCode(responseStatus.getCode());
 
-        printFooter();
+        printFooter(user, logger, timer);
 
         return results;
     }

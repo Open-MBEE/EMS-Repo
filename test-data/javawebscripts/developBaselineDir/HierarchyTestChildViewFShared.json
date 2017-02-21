@@ -1,0 +1,44 @@
+{"elements": [
+    {
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "specialization": {
+            "aggregation": "SHARED",
+            "propertyType": "_18_0_5_407019f_1466704658028_771482_14847",
+            "isDerived": false,
+            "isSlot": false,
+            "type": "Property"
+        }
+    },
+    {
+        "sysmlid": "_18_0_5_407019f_1466704588878_781465_14530",
+        "isMetatype": false,
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "View D",
+        "documentation": "",
+        "appliedMetatypes": [
+            "_17_0_1_232f03dc_1325612611695_581988_21583",
+            "_18_0beta_9150291_1392290067481_33752_4359",
+            "_9_0_62a020a_1105704885343_144138_7929"
+        ],
+        "specialization": {
+            "displayedElements": ["_18_0_5_407019f_1466704588878_781465_14530"],
+            "childViews": [{
+                "id": "_18_0_5_407019f_1466704658028_771482_14847",
+                "aggregation": "SHARED"
+            }],
+            "contents": {
+                "operand": [{
+                    "type": "InstanceValue",
+                    "instance": "_18_0_5_407019f_1468188892965_490446_14539"
+                }],
+                "type": "Expression"
+            },
+            "type": "View"
+        }
+    }
+]}
+200

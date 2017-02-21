@@ -1,7 +1,7 @@
 {"views": [
     {
         "siteCharacterizationId": "europa",
-        "qualifiedId": "/europa/123456/300/301/302",
+        "qualifiedId": "/europa/PROJECT-123456/300/301/302",
         "qualifiedName": "/europa/JW_TEST/300/301/302",
         "sysmlid": "302",
         "editable": true,
@@ -27,7 +27,7 @@
     },
     {
         "modifier": "admin",
-        "qualifiedId": "/europa/123456/300/301/302/303/304",
+        "qualifiedId": "/europa/PROJECT-123456/300/301/302/303/304",
         "siteCharacterizationId": "europa",
         "created": "Tue Sep 22 09:40:02 PDT 2015",
         "name": "304",
@@ -53,7 +53,7 @@
     },
     {
         "modifier": "admin",
-        "qualifiedId": "/europa/123456/300/301",
+        "qualifiedId": "/europa/PROJECT-123456/300/301",
         "siteCharacterizationId": "europa",
         "created": "Tue Sep 22 09:40:01 PDT 2015",
         "name": "301",

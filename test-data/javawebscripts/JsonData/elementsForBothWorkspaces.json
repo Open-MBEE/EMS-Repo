@@ -3,7 +3,7 @@
     {"documentation" : "", 
      "sysmlid":"onBothWorkspaces1", 
      "name":"onBothWorkspaces1", 
-     "owner":"123456", 
+     "owner":"PROJECT-123456", 
      "specialization": {"type":"Property",
                         "isDerived":false, 
                         "value":[{"type":"LiteralString",
@@ -12,7 +12,7 @@
 
     {"documentation" : "", 
      "sysmlid":"onBothWorkspaces2",
-     "owner":"123456",
+     "owner":"PROJECT-123456",
      "name":"onBothWorkspaces2", 
      "specialization": {"type":"Expression",
                         "operand":[{"type":"ElementValue",

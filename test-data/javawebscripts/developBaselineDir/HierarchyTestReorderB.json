@@ -1,0 +1,88 @@
+{"elements": [
+    {
+        "sysmlid": "_18_0_5_407019f_1466704592925_553155_14624",
+        "isMetatype": false,
+        "editable": true,
+        "creator": "admin",
+        "ownedAttribute": [
+            "_18_0_5_407019f_1466704667634_423983_14922",
+            "_18_0_5_407019f_1466704664886_160231_14896"
+        ],
+        "modifier": "admin",
+        "name": "View B",
+        "documentation": "",
+        "appliedMetatypes": [
+            "_17_0_1_232f03dc_1325612611695_581988_21583",
+            "_18_0beta_9150291_1392290067481_33752_4359",
+            "_9_0_62a020a_1105704885343_144138_7929"
+        ],
+        "specialization": {
+            "childViews": [
+                {
+                    "aggregation": "COMPOSITE",
+                    "id": "_18_0_5_407019f_1466704658028_771482_14847"
+                },
+                {
+                    "aggregation": "COMPOSITE",
+                    "id": "_18_0_5_407019f_1466704590650_411603_14577"
+                }
+            ],
+            "displayedElements": ["_18_0_5_407019f_1466704592925_553155_14624"],
+            "contents": {
+                "type": "Expression",
+                "operand": [{
+                    "instance": "_18_0_5_407019f_1468188892959_961603_14515",
+                    "type": "InstanceValue"
+                }]
+            },
+            "type": "View"
+        }
+    },
+    {
+        "sysmlid": "_18_0_5_407019f_1466704664886_160231_14896",
+        "isMetatype": false,
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "view E",
+        "documentation": "",
+        "appliedMetatypes": [
+            "_15_0_be00301_1199377756297_348405_2678",
+            "_9_0_62a020a_1105704884574_96724_7644"
+        ],
+        "specialization": {
+            "aggregation": "COMPOSITE",
+            "multiplicityMax": 1,
+            "propertyType": "_18_0_5_407019f_1466704590650_411603_14577",
+            "isDerived": false,
+            "isSlot": false,
+            "value": [],
+            "multiplicityMin": 1,
+            "type": "Property"
+        }
+    },
+    {
+        "sysmlid": "_18_0_5_407019f_1466704667634_423983_14922",
+        "isMetatype": false,
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "view F",
+        "documentation": "",
+        "appliedMetatypes": [
+            "_15_0_be00301_1199377756297_348405_2678",
+            "_9_0_62a020a_1105704884574_96724_7644"
+        ],
+        "specialization": {
+            "aggregation": "COMPOSITE",
+            "multiplicityMax": 1,
+            "propertyType": "_18_0_5_407019f_1466704658028_771482_14847",
+            "isDerived": false,
+            "isSlot": false,
+            "value": [],
+            "multiplicityMin": 1,
+            "type": "Property"
+        }
+    }
+]}
+200

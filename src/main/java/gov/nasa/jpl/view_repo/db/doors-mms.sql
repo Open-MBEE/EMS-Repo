@@ -11,11 +11,45 @@ create table doors
 
 create index on doors(sysmlId);
 
-create table doorsFields
+create table doorsFlags
+(
+  toggletype text not null,
+  flag text not null,
+  constraint unique_Flags unique(toggletype)
+);
+
+create table doorsfields
 (
   project text not null,
   propertyId text not null,
   propertyType text default 'string',
   doorsAttr text not null,
   constraint unique_fields unique(project, propertyId, propertyType, doorsAttr)
+);
+
+create table doorsartifactmappings 
+(
+  project text not null, 
+  doorsartifacttype text not null, 
+  sysmlappliedmetatype text not null
+);
+
+create table doorsprojectmappings 
+(
+  sysmlprojectid text not null, 
+  doorsproject text not null
+);
+
+create table doorsartifactlinkmappings 
+(
+  project text not null, 
+  sysmlappliedmetatypeid text not null, 
+  uri text not null
+);
+
+create table doorsprojectfoldermappings
+(
+  project text not null,
+  doorsfolderid text not null,
+  constraint unique_folders unique(project)
 );

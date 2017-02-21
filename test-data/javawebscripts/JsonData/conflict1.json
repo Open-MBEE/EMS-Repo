@@ -1,7 +1,7 @@
 {"elements":[
     {"name":"conflict",
     "sysmlid":"conflict",
-    "owner":"123456",
+    "owner":"PROJECT-123456",
     "documentation":"",
     "specialization":{"type":"Element"}}
 ]}

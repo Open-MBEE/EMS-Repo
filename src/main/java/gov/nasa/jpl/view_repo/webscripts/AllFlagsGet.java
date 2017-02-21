@@ -1,6 +1,11 @@
 package gov.nasa.jpl.view_repo.webscripts;
 
+import org.springframework.extensions.webscripts.WebScriptRequest;
+
+import com.carrotsearch.sizeof.RamUsageEstimator;
+
 import gov.nasa.jpl.mbee.util.Debug;
+import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.actions.SnapshotArtifactsGenerationActionExecuter;
 import gov.nasa.jpl.view_repo.connections.RestPostConnection;
 import gov.nasa.jpl.view_repo.util.CommitUtil;
@@ -37,6 +42,7 @@ public class AllFlagsGet extends FlagSet {
                            "viewpointExpressions",
                            "diffDefaultIsMerge",
                            "cacheSnapshots",
+                           "cacheDynamic",
                            "checkMmsVersions",
                            "graphDb",
                            "postProcessQualified",
@@ -44,7 +50,8 @@ public class AllFlagsGet extends FlagSet {
                            "autoBuildGraphDb",
                            "skipQualified",
                            "skipSvgToPng",
-                           "restPost"};
+                           "restPost",
+                           "transactionPeriod"};
     
     public String[] getAllFlags() {
         return flags;
@@ -87,10 +94,10 @@ public class AllFlagsGet extends FlagSet {
         } else if (path.equalsIgnoreCase("jsonDeepCache")) {
             // if turning on, flush cache since it might be wrong
             if ( !NodeUtil.doJsonDeepCaching && val ) {
-                NodeUtil.jsonCache.clear();
-                //NodeUtil.jsonDeepCache.clear(); // simple json cache does not depend on deep cache
+                //NodeUtil.jsonCache.clear();  // simple json cache does not depend on deep cache
+                NodeUtil.jsonDeepCache.clear();
             }
-            NodeUtil.doJsonCaching = val;
+            NodeUtil.doJsonDeepCaching = val;
         } else if (path.equalsIgnoreCase("jsonStringCache")) {
             NodeUtil.doJsonStringCaching = val;
         } else if (path.equalsIgnoreCase("modelPostTimeEvents")) {
@@ -134,6 +141,8 @@ public class AllFlagsGet extends FlagSet {
         	    MmsDiffGet.diffDefaultIsMerge = val;
         } else if (path.equalsIgnoreCase("cacheSnapshots")) {
             DeclarativeJavaWebScript.cacheSnapshotsFlag = val;
+        } else if (path.equalsIgnoreCase("cacheDynamic")) {
+            DeclarativeJavaWebScript.cacheDynamicFlag = val;
         } else if (path.equalsIgnoreCase("checkMmsVersions")){
         	    DeclarativeJavaWebScript.checkMmsVersions = val;
         } else if (path.equalsIgnoreCase("graphDb")) {
@@ -149,7 +158,9 @@ public class AllFlagsGet extends FlagSet {
         } else if (path.equalsIgnoreCase("skipSvgToPng")){
             NodeUtil.skipSvgToPng = val;
         } else if (path.equalsIgnoreCase("restPost")) {
-            RestPostConnection.doRestPost = val;
+            RestPostConnection.setDoRestPost( val );
+        } else if (path.equalsIgnoreCase("transactionPeriod")) {
+            NodeUtil.transactionPeriod = val ? NodeUtil.defaultTransactionPeriod : 1;
         }
         
         return true;
@@ -229,7 +240,13 @@ public class AllFlagsGet extends FlagSet {
 		} else if (path.equalsIgnoreCase( "skipSvgToPng" )) {
 			return NodeUtil.skipSvgToPng;
         } else if (path.equalsIgnoreCase("restPost")) {
-            return RestPostConnection.doRestPost;
+            return RestPostConnection.getDoRestPost();
+        } else if (path.equalsIgnoreCase( "cacheSnapshot" )) {
+            return DeclarativeJavaWebScript.cacheSnapshotsFlag;
+        } else if (path.equalsIgnoreCase( "cacheDynamic" )) {
+            return DeclarativeJavaWebScript.cacheDynamicFlag;
+        } else if (path.equalsIgnoreCase( "transactionPeriod" )) {
+            return NodeUtil.transactionPeriod > 1;
         }
         return false;
     }
@@ -321,7 +338,13 @@ public class AllFlagsGet extends FlagSet {
         	    return false;
         } else if (path.equalsIgnoreCase("restPost")) {
             return false;
-        }
+        } else if (path.equalsIgnoreCase( "cacheSnapshot" )) {
+            return false;
+        } else if (path.equalsIgnoreCase( "cacheDynamic" )) {
+            return false;
+        } else if (path.equalsIgnoreCase( "transactionPeriod" )) {
+            return false;
+        } 
         return false;
     };
 
@@ -389,6 +412,8 @@ public class AllFlagsGet extends FlagSet {
             return "diffDefaultIsMerge";
         } else if (path.equalsIgnoreCase("cacheSnapshots")) {
             return "cacheSnapshotsFlag";
+        } else if (path.equalsIgnoreCase("cacheDynamic")) {
+            return "cacheDynamicFlag";
         } else if (path.equalsIgnoreCase("checkMmsVersions")){
         	    return "checkMmsVersions";
         } else if (path.equalsIgnoreCase("graphDb")) {
@@ -405,8 +430,127 @@ public class AllFlagsGet extends FlagSet {
         	    return "skipSvgToPg";
         } else if (path.equalsIgnoreCase("restPost")) {
             return "restPost";
+        } else if (path.equalsIgnoreCase("transactionPeriod")) {
+            return "transactionPeriod";
         }
-        return null;
+        return path;
     }
 
+    @Override
+    protected long size( String path ) {
+        if ( path.equalsIgnoreCase( "fullCache" ) ) {
+            return NodeUtil.elementCache.size();
+        } else if ( path.equalsIgnoreCase( "nodeAtTimeCache" ) ) {
+            return NodeUtil.nodeAtTimeCache.size();
+        } else if ( path.equalsIgnoreCase( "jsonCache" ) ) {
+            return NodeUtil.jsonCache.size();
+        } else if ( path.equalsIgnoreCase( "jsonDeepCache" ) ) {
+            return NodeUtil.jsonDeepCache.size();
+        } else if ( path.equalsIgnoreCase( "jsonStringCache" ) ) {
+            return NodeUtil.jsonStringCache.size();
+        } else if ( path.equalsIgnoreCase( "propertyCache" ) ) {
+            return NodeUtil.propertyCache.size();
+        } else if ( path.equalsIgnoreCase( "simpleCache" ) ) {
+            return NodeUtil.simpleCache.size();
+        } else if ( path.equalsIgnoreCase( "versionCache" ) ) {
+            return NodeUtil.versionCache.size();
+        } else if ( path.equalsIgnoreCase( "versionHistoryCache" ) ) {
+            return NodeUtil.versionHistoryCache.size();
+        }
+        return -1;
+    }
+    
+    protected long objectSize( Object o ) {
+        return RamUsageEstimator.sizeOf( o );
+    }
+    
+    @Override
+    protected long objectSize( String path ) {
+        if (path.equalsIgnoreCase("fullCache")) {
+            return objectSize( NodeUtil.elementCache );
+        } else if ( path.equalsIgnoreCase( "nodeAtTimeCache" ) ) {
+            return objectSize( NodeUtil.nodeAtTimeCache );
+        } else if ( path.equalsIgnoreCase( "jsonCache" ) ) {
+            return objectSize( NodeUtil.jsonCache );
+        } else if ( path.equalsIgnoreCase( "jsonDeepCache" ) ) {
+            return objectSize( NodeUtil.jsonDeepCache );
+        } else if ( path.equalsIgnoreCase( "jsonStringCache" ) ) {
+            return objectSize( NodeUtil.jsonStringCache );
+        } else if ( path.equalsIgnoreCase( "propertyCache" ) ) {
+            return objectSize( NodeUtil.propertyCache );
+        } else if ( path.equalsIgnoreCase( "simpleCache" ) ) {
+            return objectSize( NodeUtil.simpleCache );
+        } else if ( path.equalsIgnoreCase( "versionCache" ) ) {
+            return objectSize( NodeUtil.versionCache );
+        } else if ( path.equalsIgnoreCase( "versionHistoryCache" ) ) {
+            return objectSize( NodeUtil.versionHistoryCache );
+        }
+        return -1;
+    }
+
+    @Override
+    protected String size() {
+        String path = getPath();
+        if ( path.equals( "all" ) || Utils.isNullOrEmpty( path ) ) {
+            StringBuffer msg = new StringBuffer();
+            msg.append( "elementCache.size() = " + NodeUtil.elementCache.size() );
+            msg.append( "\nobject size of elementCache = " + objectSize( NodeUtil.elementCache ) );
+            msg.append( "\nnodeAtTimeCache.size() = " + NodeUtil.nodeAtTimeCache.size() );
+            msg.append( "\nobject size of nodeAtTimeCache = " + objectSize( NodeUtil.nodeAtTimeCache ) );
+            msg.append( "\njsonCache.size() = " + NodeUtil.jsonCache.size() );
+            msg.append( "\nobject size of jsonCache = " + objectSize( NodeUtil.jsonCache ) );
+            msg.append( "\njsonDeepCache.size() = " + NodeUtil.jsonDeepCache.size() );
+            msg.append( "\nobject size of jsonDeepCache = " + objectSize( NodeUtil.jsonDeepCache ) );
+            msg.append( "\njsonStringCache.size() = " + NodeUtil.jsonStringCache.size() );
+            msg.append( "\nobject size of jsonStringCache = " + objectSize( NodeUtil.jsonStringCache ) );
+            msg.append( "\npropertyCache.size() = " + NodeUtil.propertyCache.size() );
+            msg.append( "\nobject size of propertyCache = " + objectSize( NodeUtil.propertyCache ) );
+            msg.append( "\nsimpleCache.size() = " + NodeUtil.simpleCache.size() );
+            msg.append( "\nobject size of simpleCache = " + objectSize( NodeUtil.simpleCache ) );
+            msg.append( "\nversionCache.size() = " + NodeUtil.versionCache.size() );
+            msg.append( "\nobject size of versionCache = " + objectSize( NodeUtil.versionCache ) );
+            msg.append( "\nversionHistoryCache.size() = " + NodeUtil.versionHistoryCache.size() );
+            msg.append( "\nobject size of versionHistoryCache = " + objectSize( NodeUtil.versionHistoryCache ) );
+            return msg.toString();
+        }
+        long s = size(path);
+        return path + ".size() = " + s;
+    }    
+
+    /*
+    @Override
+    protected Object getValue( String path ) {
+        String msg = "";
+        if (path.equalsIgnoreCase( "cacheDynamic" ) || path.equalsIgnoreCase( "maxage" )) {
+            msg = "maxage = " + DeclarativeJavaWebScript.maxage;
+        } else if (path.equalsIgnoreCase( "transactionPeriod" ) || path.equalsIgnoreCase( "n" )) {
+            msg = "transactionPeriod = " + NodeUtil.transactionPeriod;
+        } else if (path.equalsIgnoreCase( "size" ) ) {
+            
+        }
+        return msg;
+    }
+    */
+
+
+    @Override
+    protected String handleNonBooleans( WebScriptRequest req ) {
+        String msg = "";
+        String path = getPath();
+        
+        if (path.equalsIgnoreCase( "cacheDynamic" )) {
+            String maxage = req.getParameter( "maxage" );
+            if (maxage != null) {
+                DeclarativeJavaWebScript.maxage = Long.parseLong( maxage );
+            }
+            msg = "maxage = " + DeclarativeJavaWebScript.maxage;
+        } else if (path.equalsIgnoreCase( "transactionPeriod" )) {
+            String newPeriod = req.getParameter( "n" );
+            if (newPeriod != null) {
+                NodeUtil.transactionPeriod = Integer.parseInt( newPeriod );
+            }
+            msg = "transactionPeriod = " + NodeUtil.transactionPeriod;
+        }
+        return msg;
+    }
 }

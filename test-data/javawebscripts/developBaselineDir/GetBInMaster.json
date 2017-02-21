@@ -1,18 +1,18 @@
 {"elements": [{
-    "sysmlid": "b",
-    "editable": true,
-    "creator": "admin",
     "modifier": "admin",
+    "sysmlid": "b",
     "documentation": "b is b",
     "specialization": {
         "propertyType": null,
-        "isSlot": false,
         "isDerived": false,
+        "isSlot": false,
         "value": [{
             "string": "the b value",
             "type": "LiteralString"
         }],
         "type": "Property"
-    }
+    },
+    "editable": true,
+    "creator": "admin",
 }]}
 200

@@ -42,10 +42,10 @@ echo curl $CURL_FLAGS $CURL_POST_FLAGS @JsonData/products.json $BASE_URL"product
 echo ""
 echo GET
 # get project - should just return 200
-echo curl $CURL_FLAGS $CURL_GET_FLAGS $BASE_URL"sites/europa/projects/123456\""
+echo curl $CURL_FLAGS $CURL_GET_FLAGS $BASE_URL"sites/europa/projects/PROJECT-123456\""
 
 # get elements
-echo curl $CURL_FLAGS $CURL_GET_FLAGS $BASE_URL"elements/123456?recurse=true\""
+echo curl $CURL_FLAGS $CURL_GET_FLAGS $BASE_URL"elements/PROJECT-123456?recurse=true\""
 
 # get views
 echo curl $CURL_FLAGS $CURL_GET_FLAGS $BASE_URL"views/301\""
@@ -85,7 +85,7 @@ echo ""
 echo POST changes
 
 # post changes to directed relationships only (without owners)
-echo curl $CURL_FLAGS $CURL_POST_FLAGS @JsonData/directedrelationships.json $BASE_URL"sites/europa/projects/123456/elements\""
+echo curl $CURL_FLAGS $CURL_POST_FLAGS @JsonData/directedrelationships.json $BASE_URL"sites/europa/projects/PROJECT-123456/elements\""
 
 # get changed element to see if source/target changed
 echo curl $CURL_FLAGS $CURL_GET_FLAGS $BASE_URL"elements/400\""

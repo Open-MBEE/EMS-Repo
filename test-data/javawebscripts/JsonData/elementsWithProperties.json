@@ -2,7 +2,7 @@
     {
         "sysmlid": "_17_0_5_1_407019f_1402422786854_789914_16487",
         "name": "steroetyped eleme",
-        "owner": "123456",
+        "owner": "PROJECT-123456",
         "specialization": {"type": "Element"}
     },
     {
@@ -22,7 +22,7 @@
     {
         "sysmlid": "_17_0_5_1_407019f_1402422797514_105511_16509",
         "name": "real",
-        "owner": "123456",
+        "owner": "PROJECT-123456",
         "specialization": {
             "propertyType": null,
             "isSlot": false,
@@ -74,7 +74,7 @@
     {
         "sysmlid": "_17_0_5_1_407019f_1402422718524_458809_16434",
         "name": "D no",
-        "owner": "123456",
+        "owner": "PROJECT-123456",
         "specialization": {"type": "Element"}
     },
     {

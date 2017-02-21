@@ -53,7 +53,7 @@
     "editable": true,
     "name": "PMA_Jobs",
     "documentation": "",
-    "owner": "123456",
+    "owner": "PROJECT-123456",
     "specialization": {"type": "Package"}
 },
 {

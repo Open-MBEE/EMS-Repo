@@ -1,14 +1,5 @@
 #!/bin/bash
 
-# another way of executing the script
-#echo psql -U $USER -f ./src/main/java/gov/nasa/jpl/view_repo/db/mms.sql
-#psql -U mmsuser -f ./src/main/java/gov/nasa/jpl/view_repo/db/mms.sql
-##Configurations that need a suffix with a database name to run psql command
-#psql -U mmsuser -f ./src/main/java/gov/nasa/jpl/view_repo/db/mms.sql mms
-#psql -U mmsuser -f ./src/main/java/gov/nasa/jpl/view_repo/db/doors-mms.sql mms
-#mvn jrebel:generate
-#./runserver.sh 
-
 dbuser="mmsuser"
 usedb=
 
@@ -66,6 +57,8 @@ done
 
 #Configurations that need a suffix with a database name to run psql command
 psql --set ON_ERROR_STOP=on -U $dbuser -f ./src/main/java/gov/nasa/jpl/view_repo/db/mms.sql $usedb 
+psql --set ON_ERROR_STOP=on -U $dbuser -f ./src/main/java/gov/nasa/jpl/view_repo/db/doors-mms.sql $usedb
+
 
 psql_exit_status=$?
 
@@ -74,6 +67,7 @@ sleep 4
 if [[ $psql_exit_status != 0 ]]; then
     #statements
     psql --set ON_ERROR_STOP=on -U $dbuser -f ./src/main/java/gov/nasa/jpl/view_repo/db/mms.sql mydb
+    psql --set ON_ERROR_STOP=on -U $dbuser -f ./src/main/java/gov/nasa/jpl/view_repo/db/doors-mms.sql mydb
     psql_exit_status=$?
 
 fi
@@ -81,6 +75,7 @@ fi
 if [[ $psql_exit_status != 0 ]]; then
     #statements
     psql --set ON_ERROR_STOP=on -U $USER -f ./src/main/java/gov/nasa/jpl/view_repo/db/mms.sql mydb
+    psql --set ON_ERROR_STOP=on -U $USER -f ./src/main/java/gov/nasa/jpl/view_repo/db/doors-mms.sql mydb
     psql_exit_status=$?
 fi
 
@@ -89,3 +84,21 @@ if [[ $psql_exit_status == 0 ]]; then
     sleep 2
     ./runserver.sh
 fi
+
+
+# commenting out an alternative script
+#echo psql -U $USER -f ./src/main/java/gov/nasa/jpl/view_repo/db/mms.sql mydb
+#psql -U $USER -f ./src/main/java/gov/nasa/jpl/view_repo/db/mms.sql mydb
+#
+#echo psql -U $USER -f ./src/main/java/gov/nasa/jpl/view_repo/db/mms.sql
+#psql -U $USER -f ./src/main/java/gov/nasa/jpl/view_repo/db/mms.sql
+#
+##Configurations that need a suffix with a database name to run psql command
+#echo psql -U mmsuser -f ./src/main/java/gov/nasa/jpl/view_repo/db/mms.sql mydb
+#psql -U mmsuser -f ./src/main/java/gov/nasa/jpl/view_repo/db/mms.sql mydb
+#
+#echo psql mmsuser -U $ -f ./src/main/java/gov/nasa/jpl/view_repo/db/mms.sql
+#psql -U mmsuser -f ./src/main/java/gov/nasa/jpl/view_repo/db/mms.sql
+#
+#mvn jrebel:generate
+#./runserver.sh 

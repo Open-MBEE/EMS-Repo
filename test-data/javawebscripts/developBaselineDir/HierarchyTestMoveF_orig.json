@@ -1,0 +1,177 @@
+{"elements": [
+    {
+        "siteCharacterizationId": "vetest",
+        "qualifiedId": "/vetest/PROJECT-5c79ccb6-68a2-4411-be7b-339a05b9e779/_18_0_5_407019f_1466704567277_266148_14321/_18_0_5_407019f_1466704592925_553155_14624",
+        "nodeRefId": "workspace://SpacesStore/0cd9d1d5-37a9-4f74-911f-1f7b13c60b4e",
+        "versionedRefId": "versionStore://version2Store/2e61888e-a433-4328-ab0c-6948faab76e0",
+        "qualifiedName": "/vetest/HierarchyTest/Test/View B",
+        "sysmlid": "_18_0_5_407019f_1466704592925_553155_14624",
+        "isMetatype": false,
+        "editable": true,
+        "creator": "admin",
+        "modified": "2016-09-13T17:11:17.142-0700",
+        "ownedAttribute": ["_18_0_5_407019f_1466704664886_160231_14896"],
+        "modifier": "admin",
+        "created": "Tue Sep 13 17:11:01 PDT 2016",
+        "name": "View B",
+        "owner": "_18_0_5_407019f_1466704567277_266148_14321",
+        "documentation": "",
+        "read": "2016-09-13T17:11:17.636-0700",
+        "appliedMetatypes": [
+            "_17_0_1_232f03dc_1325612611695_581988_21583",
+            "_18_0beta_9150291_1392290067481_33752_4359",
+            "_9_0_62a020a_1105704885343_144138_7929"
+        ],
+        "specialization": {
+            "childViews": [{
+                "aggregation": "COMPOSITE",
+                "id": "_18_0_5_407019f_1466704590650_411603_14577"
+            }],
+            "displayedElements": ["_18_0_5_407019f_1466704592925_553155_14624"],
+            "contents": {
+                "type": "Expression",
+                "operand": [{
+                    "instance": "_18_0_5_407019f_1468188892959_961603_14515",
+                    "type": "InstanceValue"
+                }]
+            },
+            "type": "View"
+        }
+    },
+    {
+        "siteCharacterizationId": "vetest",
+        "qualifiedId": "/vetest/PROJECT-5c79ccb6-68a2-4411-be7b-339a05b9e779/_18_0_5_407019f_1466704567277_266148_14321/_18_0_5_407019f_1466704592925_553155_14624/_18_0_5_407019f_1466704664886_160231_14896",
+        "nodeRefId": "workspace://SpacesStore/1db4831e-db45-44d1-bbc7-ed8fd8786d96",
+        "versionedRefId": "versionStore://version2Store/dbc98475-ab9a-4cec-a124-02a7514c0536",
+        "qualifiedName": "/vetest/HierarchyTest/Test/View B/view E",
+        "sysmlid": "_18_0_5_407019f_1466704664886_160231_14896",
+        "isMetatype": false,
+        "editable": true,
+        "creator": "admin",
+        "modified": "2016-09-13T17:11:11.944-0700",
+        "modifier": "admin",
+        "created": "Tue Sep 13 17:11:02 PDT 2016",
+        "name": "view E",
+        "documentation": "",
+        "owner": "_18_0_5_407019f_1466704592925_553155_14624",
+        "appliedMetatypes": [
+            "_15_0_be00301_1199377756297_348405_2678",
+            "_9_0_62a020a_1105704884574_96724_7644"
+        ],
+        "read": "2016-09-13T17:11:17.655-0700",
+        "specialization": {
+            "aggregation": "COMPOSITE",
+            "multiplicityMax": 1,
+            "propertyType": "_18_0_5_407019f_1466704590650_411603_14577",
+            "isDerived": false,
+            "isSlot": false,
+            "value": [],
+            "multiplicityMin": 1,
+            "type": "Property"
+        }
+    },
+    {
+        "siteCharacterizationId": "vetest",
+        "qualifiedId": "/vetest/PROJECT-5c79ccb6-68a2-4411-be7b-339a05b9e779/_18_0_5_407019f_1466704567277_266148_14321/MMS_1473811876734_1c19a70a-1f63-473b-8179-0cf684ddaf69/MMS_1473811876735_d5447570-bbfb-49b4-8aed-b637b168c5fd",
+        "nodeRefId": "workspace://SpacesStore/1fcecc4e-2818-43f0-bcd7-ef0c0a5c8f37",
+        "versionedRefId": "versionStore://version2Store/3e82f994-e1e6-4909-857f-a2e070ae6b94",
+        "qualifiedName": "/vetest/HierarchyTest/Test/null/null",
+        "sysmlid": "MMS_1473811876735_d5447570-bbfb-49b4-8aed-b637b168c5fd",
+        "editable": true,
+        "creator": "admin",
+        "modified": "2016-09-13T17:11:17.599-0700",
+        "modifier": "admin",
+        "created": "Tue Sep 13 17:11:16 PDT 2016",
+        "owner": "MMS_1473811876734_1c19a70a-1f63-473b-8179-0cf684ddaf69",
+        "read": "2016-09-13T17:11:17.658-0700",
+        "specialization": {
+            "propertyType": "_18_0_5_407019f_1466704588878_781465_14530",
+            "isDerived": false,
+            "isSlot": false,
+            "type": "Property"
+        }
+    },
+    {
+        "siteCharacterizationId": "vetest",
+        "qualifiedId": "/vetest/PROJECT-5c79ccb6-68a2-4411-be7b-339a05b9e779/_18_0_5_407019f_1466704567277_266148_14321/_18_0_5_407019f_1466704588878_781465_14530/MMS_1473811876736_20e2464a-3af2-4d6e-937d-c58e48b5948b",
+        "nodeRefId": "workspace://SpacesStore/44173986-c8c8-4484-9eb5-8e7f1f7b7218",
+        "versionedRefId": "versionStore://version2Store/259be2a0-1878-4228-a03f-b6f134820545",
+        "qualifiedName": "/vetest/HierarchyTest/Test/View D/null",
+        "sysmlid": "MMS_1473811876736_20e2464a-3af2-4d6e-937d-c58e48b5948b",
+        "editable": true,
+        "creator": "admin",
+        "modified": "2016-09-13T17:11:17.601-0700",
+        "modifier": "admin",
+        "created": "Tue Sep 13 17:11:16 PDT 2016",
+        "owner": "_18_0_5_407019f_1466704588878_781465_14530",
+        "read": "2016-09-13T17:11:17.661-0700",
+        "specialization": {
+            "aggregation": "COMPOSITE",
+            "propertyType": "_18_0_5_407019f_1466704658028_771482_14847",
+            "isDerived": false,
+            "isSlot": false,
+            "type": "Property"
+        }
+    },
+    {
+        "siteCharacterizationId": "vetest",
+        "qualifiedId": "/vetest/PROJECT-5c79ccb6-68a2-4411-be7b-339a05b9e779/_18_0_5_407019f_1466704567277_266148_14321/_18_0_5_407019f_1466704588878_781465_14530",
+        "nodeRefId": "workspace://SpacesStore/63cd380d-e71f-4a1e-b77d-6caef456642b",
+        "versionedRefId": "versionStore://version2Store/695b4579-4cc2-423f-897c-596e9b093197",
+        "qualifiedName": "/vetest/HierarchyTest/Test/View D",
+        "sysmlid": "_18_0_5_407019f_1466704588878_781465_14530",
+        "isMetatype": false,
+        "editable": true,
+        "creator": "admin",
+        "modified": "2016-09-13T17:11:17.227-0700",
+        "ownedAttribute": ["MMS_1473811876736_20e2464a-3af2-4d6e-937d-c58e48b5948b"],
+        "modifier": "admin",
+        "created": "Tue Sep 13 17:11:05 PDT 2016",
+        "name": "View D",
+        "documentation": "",
+        "owner": "_18_0_5_407019f_1466704567277_266148_14321",
+        "appliedMetatypes": [
+            "_17_0_1_232f03dc_1325612611695_581988_21583",
+            "_18_0beta_9150291_1392290067481_33752_4359",
+            "_9_0_62a020a_1105704885343_144138_7929"
+        ],
+        "read": "2016-09-13T17:11:17.664-0700",
+        "specialization": {
+            "displayedElements": ["_18_0_5_407019f_1466704588878_781465_14530"],
+            "childViews": [{
+                "id": "_18_0_5_407019f_1466704658028_771482_14847",
+                "aggregation": "COMPOSITE"
+            }],
+            "contents": {
+                "operand": [{
+                    "type": "InstanceValue",
+                    "instance": "_18_0_5_407019f_1468188892965_490446_14539"
+                }],
+                "type": "Expression"
+            },
+            "type": "View"
+        }
+    },
+    {
+        "siteCharacterizationId": "vetest",
+        "qualifiedId": "/vetest/PROJECT-5c79ccb6-68a2-4411-be7b-339a05b9e779/_18_0_5_407019f_1466704567277_266148_14321/MMS_1473811876734_1c19a70a-1f63-473b-8179-0cf684ddaf69",
+        "nodeRefId": "workspace://SpacesStore/76c678e7-7ae0-4e4d-9a88-a4f26df62e0d",
+        "versionedRefId": "versionStore://version2Store/08ec0732-6adf-49f5-bf8f-f8c3a4e00e1c",
+        "qualifiedName": "/vetest/HierarchyTest/Test/null",
+        "sysmlid": "MMS_1473811876734_1c19a70a-1f63-473b-8179-0cf684ddaf69",
+        "editable": true,
+        "creator": "admin",
+        "modified": "2016-09-13T17:11:17.243-0700",
+        "modifier": "admin",
+        "created": "Tue Sep 13 17:11:16 PDT 2016",
+        "owner": "_18_0_5_407019f_1466704567277_266148_14321",
+        "read": "2016-09-13T17:11:17.683-0700",
+        "specialization": {
+            "source": "MMS_1473811876735_d5447570-bbfb-49b4-8aed-b637b168c5fd",
+            "target": "MMS_1473811876736_20e2464a-3af2-4d6e-937d-c58e48b5948b",
+            "type": "Association",
+            "ownedEnd": ["MMS_1473811876735_d5447570-bbfb-49b4-8aed-b637b168c5fd"]
+        }
+    }
+]}
+200

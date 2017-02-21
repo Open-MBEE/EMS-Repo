@@ -1,5 +1,6 @@
 package gov.nasa.jpl.view_repo.webscripts;
 
+import gov.nasa.jpl.mbee.util.Timer;
 import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.actions.ActionUtil;
 import gov.nasa.jpl.view_repo.actions.HtmlToPdfActionExecuter;
@@ -37,13 +38,15 @@ import org.apache.batik.transcoder.TranscoderOutput;
 import org.apache.batik.transcoder.image.PNGTranscoder;
 import org.apache.commons.lang.NullArgumentException;
 import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
 import org.json.JSONException;
 import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
 
 public class SvgToPngPost extends AbstractJavaWebScript {
-
+    static Logger logger = Logger.getLogger( SvgToPngPost.class );
+    
 	public SvgToPngPost() {
 		super();
 	}
@@ -64,7 +67,9 @@ public class SvgToPngPost extends AbstractJavaWebScript {
 	protected Map<String, Object> executeImplImpl(WebScriptRequest req,
 			Status status, Cache cache) {
 		Map<String, Object> model = new HashMap<String, Object>();
-		printHeader(req);
+        Timer timer = new Timer();
+        String user = AuthenticationUtil.getFullyAuthenticatedUser();
+        printHeader(user, logger, req);
 
 		SvgToPngPost instance = new SvgToPngPost(repository, services);
 		JSONObject result = instance.saveAndStartAction(req, status);
@@ -83,7 +88,7 @@ public class SvgToPngPost extends AbstractJavaWebScript {
 			}
 		}
 
-		printFooter();
+		printFooter(user, logger, timer);
 		return model;
 	}
 	

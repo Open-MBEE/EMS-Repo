@@ -5,7 +5,7 @@ xmlns:sys="http://www.alfresco.org/model/system/1.0" xmlns:usr="http://www.alfre
 	<view:reference view:pathref="../${system.authorities_container.childname}/cm:GROUP_ALFRESCO_ADMINISTRATORS">
 		<view:associations>
 			<cm:member>
-				<view:reference view:pathref="cm:${adminusername}" view:childName="cm:${adminusername}" />
+				<view:reference view:pathref="cm:mmsadminusername" view:childName="cm:mmsadminusername" />
 			</cm:member>
 		</view:associations>
 	</view:reference>

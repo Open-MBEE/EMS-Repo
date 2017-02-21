@@ -1,0 +1,25 @@
+#!/bin/bash
+
+# Uses server-side docgen to generate the contents of a view by posting its id
+# with the evaluate parameter.
+#
+# usage> generateView [<workspace>] viewId
+# example> generateView master P_17_0_2_3_e610336_1394148311476_17302_29388
+# example> generateView P_17_0_2_3_e610336_1394148311476_17302_29388
+
+# Get the input json file and the workspace from the arguments passed in.
+workspace=master
+if [ "$#" -eq 0 ]; then
+    echo "Need one or two arguments: usage> generateView [<workspace>] viewId"
+fi
+if [ "$#" -eq 1 ]; then
+  viewId=$1
+fi
+if [ "$#" -eq 2 ]; then
+  workspace=$1
+  viewId=$2
+fi
+
+# post the change to the owner
+echo curl -w "\"\n%{http_code}\n\"" -u admin:admin -X POST -H "\"Content-Type:application/json\"" --data "\"{\\\"elements\\\":[{\\\"sysmlid\\\":\\\"${viewId}\\\"}]}\"" "\"http://localhost:8080/alfresco/service/workspaces/master/elements?evaluate\""
+curl -w "\n%{http_code}\n" -u admin:admin -X POST -H "Content-Type:application/json" --data "{\"elements\":[{\"sysmlid\":\"${viewId}\"}]}" "http://localhost:8080/alfresco/service/workspaces/master/elements?evaluate"

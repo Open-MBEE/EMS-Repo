@@ -30,6 +30,7 @@
 package gov.nasa.jpl.view_repo.webscripts;
 
 import gov.nasa.jpl.mbee.util.TimeUtils;
+import gov.nasa.jpl.mbee.util.Timer;
 import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
@@ -44,6 +45,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.log4j.*;
 import org.alfresco.repo.model.Repository;
+import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.json.JSONArray;
@@ -61,6 +63,8 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
  *
  */
 public class ProjectGet extends AbstractJavaWebScript {
+    static Logger logger = Logger.getLogger( ProjectGet.class );
+    
     public ProjectGet() {
         super();
     }
@@ -80,8 +84,9 @@ public class ProjectGet extends AbstractJavaWebScript {
 
     @Override
     protected Map<String, Object> executeImplImpl(WebScriptRequest req, Status status, Cache cache) {
-//    	String userName = AuthenticationUtil.getRunAsUser();
-        printHeader( req );
+        Timer timer = new Timer();
+        String user = AuthenticationUtil.getFullyAuthenticatedUser();
+        printHeader(user, logger, req);
 
         //clearCaches();
 
@@ -116,7 +121,7 @@ public class ProjectGet extends AbstractJavaWebScript {
         }
         status.setCode(responseStatus.getCode());
 
-        printFooter();
+        printFooter(user, logger, timer);
 
         return model;
     }

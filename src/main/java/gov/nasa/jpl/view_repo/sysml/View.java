@@ -8,11 +8,16 @@ import gov.nasa.jpl.ae.sysml.SystemModelToAeExpression;
 import gov.nasa.jpl.mbee.util.Debug;
 import gov.nasa.jpl.mbee.util.MoreToString;
 import gov.nasa.jpl.mbee.util.Utils;
+import gov.nasa.jpl.view_repo.actions.ModelLoadActionExecuter;
 import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.EmsSystemModel;
+import gov.nasa.jpl.view_repo.util.ModelContext;
+import gov.nasa.jpl.view_repo.util.EmsTransaction;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
+import gov.nasa.jpl.view_repo.util.ServiceContext;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
+import gov.nasa.jpl.view_repo.webscripts.UpdateViewHierarchy;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
@@ -24,6 +29,8 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.Vector;
 
+import org.alfresco.service.cmr.repository.NodeRef;
+import org.apache.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -39,6 +46,8 @@ public class View extends List implements sysml.view.View< EmsScriptNode >, Comp
 
     private static final long serialVersionUID = -7618965504816221446L;
 
+    static Logger logger = Logger.getLogger( View.class );
+
     protected EmsScriptNode viewNode = null;
 
     protected EmsSystemModel model = null;
@@ -49,11 +58,11 @@ public class View extends List implements sysml.view.View< EmsScriptNode >, Comp
      */
     protected Collection<EmsScriptNode> displayedElements = null;
 
-    protected boolean generate = true;
+    protected boolean generate = true;  // turning this off ensures no docgen views are generated
 
     protected boolean recurse = false;
 
-
+    public boolean generateViewsOnViewGet = false;
 
     /**
      * @see List#List()
@@ -169,7 +178,7 @@ public class View extends List implements sysml.view.View< EmsScriptNode >, Comp
     public Collection< sysml.view.View< EmsScriptNode > > getChildViews() {
         ArrayList< sysml.view.View< EmsScriptNode > > childViews =
                 new ArrayList< sysml.view.View< EmsScriptNode > >();
-        for ( EmsScriptNode node : getChildViewElements( getWorkspace(), null ) ) {
+        for ( EmsScriptNode node : getChildrenViewElements( getWorkspace(), null ) ) {
             childViews.add( new View( node ) );
         }
         return childViews;
@@ -177,49 +186,10 @@ public class View extends List implements sysml.view.View< EmsScriptNode >, Comp
 
     // TODO -- need to support a flag for recursion
     public Collection< EmsScriptNode >
-            getChildViewElements( WorkspaceNode workspace, Date dateTime ) {
-        //        ArrayList< EmsScriptNode > childViews =
-//                new ArrayList< EmsScriptNode >();
+            getChildrenViewElements( WorkspaceNode workspace, Date dateTime ) {
         Object o = viewNode.getProperty( Acm.ACM_CHILDREN_VIEWS );
         Collection< EmsScriptNode > childViews =
                 getElementsForJson( o, workspace, dateTime );
-
-//        JSONArray jarr = null;
-//        if ( o instanceof String ) {
-//            String s = (String)o;
-//            if ( s.length() > 0 && s.charAt( 0 ) == '[' ) {
-//                try {
-//                    jarr = new JSONArray( s );
-//                } catch ( JSONException e ) {
-//                    // TODO Auto-generated catch block
-//                    e.printStackTrace();
-//                }
-//            }
-//        } else if ( o instanceof JSONArray ) {
-//            jarr = (JSONArray)o;
-//        }
-//        if ( jarr != null ) {
-//            for ( int i = 0; i < jarr.length(); ++i ) {
-//                Object o1 = null;
-//                try {
-//                    o1 = jarr.get( i );
-//                } catch ( JSONException e ) {
-//                    // TODO Auto-generated catch block
-//                    e.printStackTrace();
-//                }
-//                if ( o1 instanceof String ) {
-//                    NodeRef nodeRef =
-//                            NodeUtil.findNodeRefById( (String)o1,
-//                                                      getModel().getServices() );
-//                    if ( nodeRef != null ) {
-//                        EmsScriptNode node =
-//                                new EmsScriptNode( nodeRef,
-//                                                   getModel().getServices() );
-//                        childViews.add( node );
-//                    }
-//                }
-//            }
-//        }
 
         return childViews;
     }
@@ -228,15 +198,14 @@ public class View extends List implements sysml.view.View< EmsScriptNode >, Comp
      * Helper method to get the source property for the passed node
      */
     private EmsScriptNode getSource(EmsScriptNode node) {
-
-    	Collection<EmsScriptNode> sources = getModel().getSource( node );
-
-    	if (!Utils.isNullOrEmpty(sources)) {
-    		return sources.iterator().next();
-    	}
-    	else {
-    		return null;
-    	}
+        	Collection<EmsScriptNode> sources = getModel().getSource( node );
+    
+        	if (!Utils.isNullOrEmpty(sources)) {
+        		return sources.iterator().next();
+        	}
+        	else {
+        		return null;
+        	}
     }
 
     /**
@@ -384,6 +353,9 @@ public class View extends List implements sysml.view.View< EmsScriptNode >, Comp
     }
     
     public boolean generateViewables(Date dateTime, WorkspaceNode ws) {
+        if (!generate) {
+            return false;
+        }
         // Get the related elements that define the the view.
 
         EmsScriptNode viewpointOp = getViewpointOperation(dateTime, ws);
@@ -421,12 +393,15 @@ public class View extends List implements sysml.view.View< EmsScriptNode >, Comp
                     if (!(o instanceof Viewable) ) {
                         o = Expression.evaluate( o, Viewable.class, true );
                     }
-                    try {
-                        Viewable< EmsScriptNode > viewable =
-                                (Viewable< EmsScriptNode >)o;
-                        add( viewable );
-                    } catch ( ClassCastException e ) {
-                        Debug.error( "Failed to cast to Viewable: " + o );
+                    if ( o instanceof Viewable ) {
+                        try {
+                            Viewable< EmsScriptNode > viewable =
+                                    (Viewable< EmsScriptNode >)o;
+                            add( viewable );
+                        } catch ( ClassCastException e ) {
+                            logger.error( "Failed to cast to Viewable: " + o );
+                            e.printStackTrace();
+                        }
                     }
                 }
 //                java.util.List< Viewable<EmsScriptNode> > viewables =
@@ -577,6 +552,335 @@ public class View extends List implements sysml.view.View< EmsScriptNode >, Comp
         }
         return json;
     }
+    
+    public NodeRef getContentsNode(Date dateTime, WorkspaceNode ws) {
+        return getContentsNode( generate, dateTime, ws );
+    }
+    
+    public NodeRef getContentsNode(boolean generate, Date dateTime, WorkspaceNode ws) {
+        // 
+        if ( generateViewsOnViewGet  ) {
+            // Don't want to change the past.  Check to see if the element has changed since dateTime.
+            Date lastModified = getElement().getLastModified( null );
+            if ( generate && (dateTime == null || !lastModified.after( dateTime ) ) ) {
+                updateViewInstanceSpecification( generate, dateTime, ws );
+            }
+        }
+        NodeRef contentsNode = (NodeRef) getElement().getNodeRefProperty( Acm.ACM_CONTENTS,
+                                                                          dateTime, ws);
+        return contentsNode;
+    }
+    
+    /**
+     * The structure of contents is an Expression with a list of InstanceValues
+     * as operands. The "instance" of the InstanceValues is the id of an
+     * InstanceSpecification. The "instanceSpecificationSpecification" of the
+     * InstanceSpecification is a ValueSpecification.
+     * <p>
+     * Get the current list of instance values. Create json to create or remove
+     * instanceValues to match the number of top-level viewables. Then create
+     * the rest of the json and post the json.
+     * 
+     * @param ws
+     */
+    public void updateViewInstanceSpecification( boolean doGenerate,
+                                                 Date dateTime, WorkspaceNode ws ) {
+        if ( getElement() == null ) return;
+        String id = getElement().getSysmlId();
+
+        JSONObject json = new JSONObject();
+        JSONArray elements = new JSONArray();
+        json.put( "elements", elements );
+        
+        boolean generated = false;
+        if ( doGenerate && isEmpty() ) {
+            generated = generateViewables(dateTime, ws);
+        }
+        if (!generated && isEmpty()) return;
+
+        JSONArray viewablesJson = new JSONArray();
+        for ( Viewable< EmsScriptNode > viewable : this ) {
+            if ( viewable != null ) {
+                viewablesJson.put( viewable.toViewJson(dateTime) );
+            }
+        }
+
+        // Do nothing if there are no viewables. This assumes that the
+        // existing contents are consistent.
+        if ( viewablesJson.length() == 0 ) {
+            return;
+        }
+        NodeRef contentsRef = 
+                (NodeRef) getElement().getNodeRefProperty( Acm.ACM_CONTENTS, null, ws);
+        EmsScriptNode contentsNode = null;
+        if ( contentsRef != null ) {
+            contentsNode = new EmsScriptNode( contentsRef, getElement().getServices() );
+        }
+        JSONObject contentsExpression =
+                updateViewableInstanceJson( id, contentsNode, viewablesJson, elements, ws );
+        if ( contentsExpression != null ) {
+            JSONObject viewJson = new JSONObject();
+            if ( !Utils.isNullOrEmpty( id ) ) {
+                viewJson.put("sysmlid", id);
+            }
+            JSONObject specialization = new JSONObject();
+            viewJson.put( "specialization", specialization );
+            specialization.put( "contents", contentsExpression );
+            elements.put( viewJson );
+        }
+
+        if ( logger.isDebugEnabled() ) logger.debug( "(((((((((((((((((((((((CONTENT JSON)))))))))))))))))))))))\n" + json.toString( 4 ) );
+
+        if ( elements.length() > 0 ) {
+            // update MMS with json
+            ModelContext modelContext = new ModelContext( false, ws, false, null,
+                                                          null, null, null, null );
+            ServiceContext serviceContext =
+                    new ServiceContext( false, false, 0, false, false, null,
+                                        getElement().getServices(),
+                                        getElement().getResponse(),
+                                        getElement().getStatus() );
+            ModelLoadActionExecuter.loadJson( json, modelContext, serviceContext );
+        }
+    }
+
+    /**
+     * Create json for the "contents" Expression of a View or the section
+     * "instanceSpecificationSpecification" Expression of an
+     * InstanceSpecification.
+     * 
+     * @param id
+     *            sysmlid of the View or InstanceSpecification
+     * @param expressionNode
+     *            the db node of the "contents" or
+     *            "instanceSpecificationSpecification" Expression
+     * @param viewablesJson
+     *            the "contains" json for each presentation element in the
+     *            "contents" or "instanceSpecificationSpecification"
+     * @param elements
+     *            the JSONArray of JSONObjects for the newly generated json
+     * @param ws
+     *            workspace of the View or InstanceSpecification
+     */
+    public JSONObject updateViewableInstanceJson( String id,
+                                                  EmsScriptNode expressionNode,
+                                                  JSONArray viewablesJson,
+                                                  JSONArray elements,
+                                                  WorkspaceNode ws ) {
+        
+        // Create json to overwrite the InstanceValue operands of the contents expression
+
+        // First check to see what is already in the database
+        java.util.List< String > instanceSpecIds = new ArrayList<String>();
+        if ( expressionNode != null ) {
+            // Get the operands
+            Collection<NodeRef> operands = null;
+            Object opsObj = expressionNode.getNodeRefProperty( Acm.ACM_OPERAND, null, ws );
+            if ( opsObj instanceof Collection ) {
+                operands = Utils.asList((Collection<?>)opsObj, NodeRef.class);
+                instanceSpecIds = NodeUtil.getSysmlIdsAsList( operands );
+            }
+        }
+        
+        int numPreexistingInstanceSpecIds = instanceSpecIds.size();
+        
+        JSONObject contentsExpression = null;
+        
+        // Create ids for any additional viewables/InstanceSpecifications.
+        if ( numPreexistingInstanceSpecIds < size() ) {
+            for ( int i = 0; i < size() - numPreexistingInstanceSpecIds; ++i ) {
+                // Can't number instance values--if some are deleted or
+                // reordered, we don't want to preserve the number ordering,
+                // so why have it to begin with?
+                //String numWithLeadingZeroes = String.format( "%04d", i+numPreexistingInstanceSpecIds );
+                //String newId = id + "_" + numWithLeadingZeroes + "_pei";
+                String newId = NodeUtil.createId( getElement().getServices() ) + "_pei";
+                instanceSpecIds.add( newId );
+            }
+        }
+        // Truncate extra ids
+        if ( instanceSpecIds.size() > size() ) {
+            for ( int i = instanceSpecIds.size()-1; i > size()-1; --i ) {
+                instanceSpecIds.remove( i );
+            }
+        }
+
+        // Create the json for the updated contents Expression.
+        contentsExpression = makeExpressionJsonForInstanceValues(instanceSpecIds);
+            
+        if (contentsExpression != null && contentsExpression.length() > 0) {
+            updateInstanceSpecifications(numPreexistingInstanceSpecIds,
+                                         instanceSpecIds, viewablesJson,
+                                         elements, ws);
+        }
+        return contentsExpression;
+    }
+    
+    public void updateInstanceSpecifications(int numPreexistingInstanceSpecIds,
+                                             java.util.List< String > instanceSpecIds,
+                                             JSONArray viewablesJson, 
+                                             JSONArray elements,
+                                             WorkspaceNode ws) {
+        // Create or update the json for the InstanceSpecifications.
+        String ownerId = null;
+        int vct = 0;
+        for ( int i = 0; i < instanceSpecIds.size() && i < size(); ++i ) {
+            Viewable<EmsScriptNode> viewable = this.get( i );
+            if ( viewable == null ) continue;
+            JSONObject viewableContainsJson = viewablesJson.optJSONObject( vct++ );
+            if ( viewableContainsJson == null ) {
+                logger.error( "The \"contains\" json is null for presentation element, " + viewable
+                              + "; The order of presentation elements may be incorrect!" );
+                continue;
+            }
+            JSONObject instanceSpec = new JSONObject();
+            String instanceSpecId = instanceSpecIds.get( i );
+            instanceSpec.put( "sysmlid", instanceSpecId );
+            JSONObject specialization = new JSONObject();
+            instanceSpec.put( "specialization", specialization );
+            specialization.put("type", "InstanceSpecification");
+            JSONObject instanceSpecSpec = viewableJsonToValueSpecJson(instanceSpecId, viewable, viewableContainsJson, elements, ws);
+            if ( instanceSpecSpec != null ) {
+                specialization.put( Acm.JSON_INSTANCE_SPECIFICATION_SPECIFICATION, instanceSpecSpec );
+                
+                // Add the instance specification metatype id.
+                JSONArray specAppliedMetatypes = new JSONArray();
+                specAppliedMetatypes.put("_9_0_62a020a_1105704885251_933969_7897");
+                specialization.put("appliedMetatypes", specAppliedMetatypes);
+                
+                // add owner for new instanceSpecs
+                if ( i >= numPreexistingInstanceSpecIds ) {
+                    if ( ownerId == null ) {
+                        // view instance specs are stored in holding_bin_<projectId>
+                        ownerId = "holding_bin_" + getElement().getProjectId( ws );
+                    }
+                    instanceSpec.put( "owner", ownerId );
+                }
+                
+                // add classifier
+                String classifier = classifierForViewable( viewable );
+                if ( !Utils.isNullOrEmpty( classifier ) ) {
+                    JSONArray jarr = new JSONArray();
+                    jarr.put( classifier );
+                    instanceSpec.put( "classifier", jarr );
+                }
+                elements.put( instanceSpec );
+            }
+        }
+    }
+
+    protected JSONObject makeViewContentsJson( String id,
+                                               java.util.List< String > instanceSpecIds ) {
+        // Create the json for the updated contents Expression.
+        JSONObject contentsExpression = makeExpressionJsonForInstanceValues(instanceSpecIds);
+        
+        JSONObject viewJson = new JSONObject();
+        if ( !Utils.isNullOrEmpty( id ) ) {
+            viewJson.put("sysmlid", id);
+        }
+        JSONObject specialization = new JSONObject();
+        viewJson.put( "specialization", specialization );
+        specialization.put( "contents", contentsExpression );
+        return viewJson;
+    }
+
+    protected JSONObject makeExpressionJsonForInstanceValues( java.util.List< String > instanceSpecIds ) {
+        JSONObject contentsExpression = new JSONObject();
+        contentsExpression.put( "type", "Expression" );
+        JSONArray operandJsonArray = new JSONArray();
+        for ( int i = 0; i < instanceSpecIds.size() && i < size(); ++i ) {
+            JSONObject instanceValue = new JSONObject();
+            instanceValue.put( "type", "InstanceValue" );
+            instanceValue.put( "instance", instanceSpecIds.get( i ) );
+            operandJsonArray.put( instanceValue );
+        }
+        contentsExpression.put( "operand", operandJsonArray );
+        return contentsExpression;
+    }
+
+    public static String classifierForViewable( Viewable< EmsScriptNode > viewable ) {
+        if ( viewable == null ) return null;
+        return classifierForViewableClass( viewable.getClass() );
+    }
+
+    public static String classifierForViewableClass( Class<? extends Viewable> cls ) {
+        if ( Section.class.isAssignableFrom( cls ) ) {
+            return "_17_0_5_1_407019f_1430628211976_255218_12002";
+        } else if ( Table.class.isAssignableFrom( cls ) ) {
+            return "_17_0_5_1_407019f_1430628178633_708586_11903";
+        } else if ( List.class.isAssignableFrom( cls ) ) {
+            return "_17_0_5_1_407019f_1430628190151_363897_11927";
+        } else if ( Image.class.isAssignableFrom( cls ) ) {
+            return "_17_0_5_1_407019f_1430628206190_469511_11978";
+        } else if ( Documentation.class.isAssignableFrom( cls ) ) {
+            return "_17_0_5_1_407019f_1431903758416_800749_12055";            
+        } else if ( Id.class.isAssignableFrom( cls ) ) {
+            return "_17_0_5_1_407019f_1431903758416_800749_12055";            
+        } else if ( Value.class.isAssignableFrom( cls ) ) {
+            return "_17_0_5_1_407019f_1431903758416_800749_12055"; // ???
+        } else if ( Type.class.isAssignableFrom( cls ) ) {
+            return "_17_0_5_1_407019f_1431903758416_800749_12055";            
+        } else if ( Name.class.isAssignableFrom( cls ) ) {
+            return "_17_0_5_1_407019f_1431903758416_800749_12055";            
+        } else if ( Text.class.isAssignableFrom( cls ) ) {
+            return "_17_0_5_1_407019f_1431903758416_800749_12055";            
+        } else if ( Evaluate.class.isAssignableFrom( cls ) ) {
+            return "_17_0_5_1_407019f_1431903758416_800749_12055";
+        }
+        return null;
+    }
+
+    public JSONObject viewableJsonToValueSpecJson( String instanceSpecId,
+                                                   Viewable<EmsScriptNode> v,
+                                                   JSONObject viewableContainsJson,
+                                                   JSONArray elements,
+                                                   WorkspaceNode ws ) {
+        if (v == null) return null;
+        if ( !( v instanceof Section ) ) {
+            JSONObject literalString = new JSONObject();
+            literalString.put( "type", "LiteralString" );
+            literalString.put( "string", viewableContainsJson.toString() );
+            return literalString;
+            // return viewableContainsJson;
+            // return v.toViewJson();
+        }
+        
+        // v is a Section -- need to create an Expression whose operands are
+        // InstanceValues, like the "contents" of a View.
+        
+        // Get section's viewables.
+        JSONArray viewablesJson = viewableContainsJson.optJSONArray( "list" );
+        
+        // Get the "instanceSpecificationSpecification" of the InstanceSpecification.
+        EmsScriptNode instanceSpecSpecNode =
+                getInstanceSpecificationSpecification( instanceSpecId, ws );
+        
+        //makeExpressionJsonForInstanceValues( instanceSpecIds );
+        
+        JSONObject sectionJson =
+                updateViewableInstanceJson( instanceSpecId, instanceSpecSpecNode,
+                                            viewablesJson, elements, ws );
+        return sectionJson;
+    }
+    
+    public EmsScriptNode getInstanceSpecificationSpecification( String instanceSpecId, WorkspaceNode ws ) {
+        NodeRef instanceSpecNodeRef =
+                NodeUtil.findNodeRefById( instanceSpecId, false, ws, null,
+                                          getElement().getServices(), false );
+        EmsScriptNode instanceSpecNode = null;
+        EmsScriptNode instanceSpecSpecNode = null;
+        if ( instanceSpecNodeRef != null ) {
+            instanceSpecNode = 
+                    new EmsScriptNode(instanceSpecNodeRef, getElement().getServices());
+            Object instanceSpecSpecRefObj =
+                    instanceSpecNode.getNodeRefProperty( Acm.ACM_INSTANCE_SPECIFICATION_SPECIFICATION, null, ws );
+            if ( instanceSpecSpecRefObj != null && instanceSpecSpecRefObj instanceof NodeRef ) {
+                instanceSpecSpecNode = new EmsScriptNode( (NodeRef)instanceSpecSpecRefObj,
+                                                          getElement().getServices() );
+            }
+        }
+        return instanceSpecSpecNode;
+    }
 
     public JSONArray getContainsJson(Date dateTime, WorkspaceNode ws ) {
         return getContainsJson( generate, dateTime, ws );
@@ -602,7 +906,7 @@ public class View extends List implements sysml.view.View< EmsScriptNode >, Comp
                         JSONArray jarr = new JSONArray( "" + contains );
                         viewablesJson = jarr;
                     } catch ( JSONException e ) {
-                        Debug.outln( "Tried to parse \"" + contains
+                        if ( Debug.isOn() ) Debug.outln( "Tried to parse \"" + contains
                                             + "\" in element "
                                             + getElement().getSysmlName() + "("
                                             + getElement().getSysmlId() + ")" );
@@ -629,7 +933,7 @@ public class View extends List implements sysml.view.View< EmsScriptNode >, Comp
 
     // TODO -- need to support a flag for recursion?
     public Collection< EmsScriptNode >
-            getDisplayedElements( WorkspaceNode workspace, Date dateTime,
+            getDisplayedElements( final WorkspaceNode workspace, final Date dateTime,
                                   boolean doGenerate, boolean doRecurse,
                                   Set< View > seen ) {
         if ( doRecurse ) {
@@ -638,7 +942,7 @@ public class View extends List implements sysml.view.View< EmsScriptNode >, Comp
             seen.add( this );
         }
 
-        LinkedHashSet<EmsScriptNode> set = new LinkedHashSet<EmsScriptNode>();
+        final LinkedHashSet<EmsScriptNode> set = new LinkedHashSet<EmsScriptNode>();
 
         // Generate Viewables from Viewpoint method, but don't overwrite cached
         // values.
@@ -656,9 +960,18 @@ public class View extends List implements sysml.view.View< EmsScriptNode >, Comp
         set.addAll( versionedElements );
 
         // get elements specified in JSON in the displayed elements property
-        Object dElems = getElement().getProperty( Acm.ACM_DISPLAYED_ELEMENTS );
-        set.addAll( getElementsForJson( dElems, workspace, dateTime ) );
+        final Object dElems = getElement().getProperty( Acm.ACM_DISPLAYED_ELEMENTS );
+        
+        new EmsTransaction(getElement().getServices(), getElement().getResponse(),
+                           getElement().getStatus(), false, true) {
+            
+            @Override
+            public void run() throws Exception {
 
+                set.addAll( getElementsForJson( dElems, workspace, dateTime ) );
+            }
+        };
+        
         if ( doRecurse ) {
 
             // get recursively from child views
@@ -698,17 +1011,17 @@ public class View extends List implements sysml.view.View< EmsScriptNode >, Comp
     }
 
     public Collection< EmsScriptNode >
-            getElementsForJson( Object obj, WorkspaceNode workspace,
-                                Date dateTime ) {
+            getElementsForJson( Object obj, final WorkspaceNode workspace,
+                                final Date dateTime ) {
         if ( obj == null ) return Utils.getEmptyList();
-        LinkedHashSet<EmsScriptNode> nodes = new LinkedHashSet<EmsScriptNode>();
+        final LinkedHashSet<EmsScriptNode> nodes = new LinkedHashSet<EmsScriptNode>();
         if ( obj instanceof JSONArray ) {
             return getElementsForJson( (JSONArray)obj, workspace, dateTime );
         }
         if ( obj instanceof JSONObject ) {
             return getElementsForJson( (JSONObject)obj, workspace, dateTime );
         }
-        String idString = "" + obj;
+        final String idString = "" + obj;
         if ( idString.length() <= 0 ) return Utils.getEmptyList();
         try {
             if ( idString.trim().charAt( 0 ) == '[' ) {
@@ -723,15 +1036,23 @@ public class View extends List implements sysml.view.View< EmsScriptNode >, Comp
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
-        EmsScriptNode node =
-                    EmsScriptNode.convertIdToEmsScriptNode( idString,
-                                                            false,
-                                                            workspace,
-                                                            dateTime,
-                                                            getElement().getServices(),
-                                                            getElement().getResponse(),
-                                                            getElement().getStatus() );
-        if ( node != null ) nodes.add( node );
+
+        new EmsTransaction(getElement().getServices(), getElement().getResponse(),
+                           getElement().getStatus(), false, true) {
+            @Override
+            public void run() throws Exception {
+                EmsScriptNode node =
+                        EmsScriptNode.convertIdToEmsScriptNode( idString,
+                                                                false,
+                                                                workspace,
+                                                                dateTime,
+                                                                getElement().getServices(),
+                                                                getElement().getResponse(),
+                                                                getElement().getStatus() );
+                if ( node != null ) nodes.add( node );
+            }
+        };
+
         return nodes;
     }
 
@@ -797,24 +1118,41 @@ public class View extends List implements sysml.view.View< EmsScriptNode >, Comp
         return json;
     }
 
-    public Collection<EmsScriptNode> getContainedViews( boolean recurse,
-                                                        WorkspaceNode workspace,
-                                                        Date dateTime,
+    public Collection<EmsScriptNode> getContainedViews( final boolean recurse,
+                                                        final WorkspaceNode workspace,
+                                                        final Date dateTime,
                                                         Set<EmsScriptNode> seen ) {
         if ( getElement() == null ) return null;
         if ( seen == null ) seen = new HashSet<EmsScriptNode>();
         if ( seen.contains( getElement() ) ) return Utils.getEmptyList();
         seen.add( getElement() );
-        LinkedHashSet<EmsScriptNode> views = new LinkedHashSet<EmsScriptNode>();
-        views.addAll(getViewToViewPropertyViews(workspace, dateTime));
-        views.addAll(getChildViewElements(workspace, dateTime));
+        final LinkedHashSet<EmsScriptNode> views = new LinkedHashSet<EmsScriptNode>();
+        Collection< EmsScriptNode > v2vPropertyViews = getViewToViewPropertyViews(workspace, dateTime);
+        views.addAll(v2vPropertyViews);
+        if ( v2vPropertyViews == null || v2vPropertyViews.size() == 0 ) {
+            Set< EmsScriptNode > childViews = UpdateViewHierarchy.getChildViews(this.getElement(), workspace, dateTime, true);
+            views.addAll( childViews );
+            if (childViews == null || childViews.size() == 0) {
+                views.addAll(getChildrenViewElements(workspace, dateTime));
+            }
+        }
         views.remove( getElement() );
         ArrayList<EmsScriptNode> viewsCopy = new ArrayList<EmsScriptNode>(views);
+        final Set<EmsScriptNode> seenT = seen;
         if ( recurse ) {
-            for ( EmsScriptNode e :  viewsCopy ) {
-                View v = new View(e);
-                views.addAll( v.getContainedViews( recurse, workspace,
-                                                   dateTime, seen ) );
+            for ( final EmsScriptNode e :  viewsCopy ) {
+                
+                new EmsTransaction(getElement().getServices(), getElement().getResponse(),
+                                   getElement().getStatus(), false, true) {
+                    
+                    @Override
+                    public void run() throws Exception {
+                        View v = new View(e);
+                        views.addAll( v.getContainedViews( recurse, workspace,
+                                                           dateTime, seenT ) );
+                    }
+                };
+
             }
         }
         return views;

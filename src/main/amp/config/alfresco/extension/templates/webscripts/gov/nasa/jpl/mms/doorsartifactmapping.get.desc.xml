@@ -3,7 +3,7 @@
 	<description>
 		Post/Configure Applied Metatype IDs dynamically
 	</description>
-	<url>/doorsartifactmappings</url>
+	<url>/doors/artifact/mappings</url>
 	<format default="json">argument</format>
 	<authentication>user</authentication>
 	<transaction>none</transaction>

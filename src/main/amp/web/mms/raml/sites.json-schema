@@ -32,6 +32,10 @@
               "isCharacterization": {
                 "type": "boolean",
                 "description": "Set to true if it is a site characterization (Read-Only)"
+              },
+              "editable": {
+                "type": "boolean",
+                "description": "True if site is editable by user"
               }
             }
         }

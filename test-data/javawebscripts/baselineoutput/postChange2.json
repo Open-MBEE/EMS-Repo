@@ -4,7 +4,7 @@
     "qualifiedName": "/////CY Test/400",
     "documentation": "4something",
     "sysmlid": "4000",
-    "owner": "123456",
+    "owner": "PROJECT-123456",
     "specialization": {
         "isDerived": false,
         "value": [{

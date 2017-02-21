@@ -8,7 +8,7 @@
             "editable": true,
             "name": "notInThePast",
             "documentation": "",
-            "owner": "123456",
+            "owner": "PROJECT-123456",
             "specialization": {
                 "specification": {
                     
@@ -22,7 +22,7 @@
     "workspace2": {
         "deletedElements": [{
             "name": "notInThePast",
-            "owner": "123456",
+            "owner": "PROJECT-123456",
             "documentation": "",
             "sysmlid": "notInThePast",
             "specialization": {

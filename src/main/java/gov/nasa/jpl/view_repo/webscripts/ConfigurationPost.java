@@ -29,6 +29,7 @@
 
 package gov.nasa.jpl.view_repo.webscripts;
 
+import gov.nasa.jpl.mbee.util.Timer;
 import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.actions.ActionUtil;
 import gov.nasa.jpl.view_repo.actions.ConfigurationGenerationActionExecuter;
@@ -91,14 +92,11 @@ public class ConfigurationPost extends AbstractJavaWebScript {
 	@Override
     protected Map<String, Object> executeImplImpl(WebScriptRequest req,
 			Status status, Cache cache) {
-        if (logger.isInfoEnabled()) {
-            String user = AuthenticationUtil.getRunAsUser();
-            logger.info( user + " " + req.getURL() );
-        }
-
 		Map<String, Object> model = new HashMap<String, Object>();
 
-        printHeader( req );
+        Timer timer = new Timer();
+        String user = AuthenticationUtil.getFullyAuthenticatedUser();
+        printHeader(user, logger, req);
 
         //clearCaches();
 
@@ -119,7 +117,7 @@ public class ConfigurationPost extends AbstractJavaWebScript {
             }
 		}
 
-        printFooter();
+        printFooter(user, logger, timer);
 
 		return model;
 	}
@@ -282,7 +280,7 @@ public class ConfigurationPost extends AbstractJavaWebScript {
             EmsScriptNode node = new EmsScriptNode( r, getServices() );
             if ( !workspace.equals( node.getWorkspace() ) ) {
                 System.out.println("****************** " + node );
-                configNode = workspace.replicateWithParentFolders( node );
+                configNode = workspace.replicateWithParentFolders( node, runWithoutTransactions );
             }
         }
 

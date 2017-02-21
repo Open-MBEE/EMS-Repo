@@ -27,8 +27,11 @@ import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
@@ -56,6 +59,28 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, Object, 
     protected ServiceRegistry services;
     protected EmsScriptNode serviceNode;
 
+    protected Map< String, Map< Object, Map< Object, Object > > > cache =
+            new HashMap< String, Map< Object, Map< Object, Object > > >();
+
+    public static final String NULL_STRING = "null_string";
+   
+    public boolean cacheSysmlApi = true;
+    public Object cacheGet( String methodName, Object context, Object specifier ) {
+        if ( !cacheSysmlApi ) return null;
+        if ( methodName == null ) methodName = NULL_STRING;
+        if ( context == null ) context = JSONObject.NULL;
+        if ( specifier == null ) specifier = JSONObject.NULL;
+        return Utils.get( cache, methodName, context, specifier );
+    }
+    public Object cachePut( String methodName, Object context, Object specifier, Object result ) {
+        if ( !cacheSysmlApi ) return null;
+        if ( methodName == null ) methodName = NULL_STRING;
+        if ( context == null ) context = JSONObject.NULL;
+        if ( specifier == null ) specifier = JSONObject.NULL;
+        if ( result == null ) result = JSONObject.NULL;
+        return Utils.put( cache, methodName, context, specifier, result );
+    }
+    
     public EmsSystemModel() {
         this( null );
     }
@@ -427,8 +452,18 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, Object, 
     @Override
     public Collection< EmsScriptNode > getElement( Object context,
                                                    Object specifier ) {
-        return getElement( context, specifier, SystemModel.ModelItem.NAME );
+        Object c = cacheGet("getElement", context, specifier);
+        if ( c != null && ( c == JSONObject.NULL || c instanceof Collection ) ) {
+            if ( c == JSONObject.NULL ) return null;
+            return (Collection< EmsScriptNode >)c;
+        }
+
+        Collection< EmsScriptNode > coll = getElement( context, specifier, SystemModel.ModelItem.NAME );
+
+        cachePut( "getElement", context, specifier, coll );
+        return coll;
     }
+    
     public Collection< EmsScriptNode > getElement( Object context,
                                                    Object specifier,
                                                    SystemModel.ModelItem itemType) {
@@ -452,9 +487,11 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, Object, 
         boolean ignoreWorkspace = false;
         WorkspaceNode workspace = null;
         
+        EmsScriptNode contextNode = null;
         // Convert context from NodeRef to EmsScriptNode or WorkspaceNode
         if ( context instanceof NodeRef || coerce ) {
             EmsScriptNode ctxt = objectToEmsScriptNode( context );
+            contextNode = ctxt;
             if ( ctxt != null && ctxt.hasAspect( "Workspace" ) ) {
                 context = new WorkspaceNode( ctxt.getNodeRef(), getServices(),
                                              response, status );
@@ -466,8 +503,10 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, Object, 
         // Set workspace from context.
         if ( context instanceof WorkspaceNode ) {
             workspace = (WorkspaceNode)context;
+            contextNode = workspace;
         } else if ( context instanceof EmsScriptNode ) {
-            workspace = ( (EmsScriptNode)context ).getWorkspace();
+            contextNode = (EmsScriptNode)context;
+            workspace = contextNode.getWorkspace();
         } else ignoreWorkspace = true;
         
         // Treat the context as the set to search (or to call getElement() on each).
@@ -535,17 +574,19 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, Object, 
 
         
         if ( Utils.isNullOrEmpty( refs ) ) return Collections.emptyList();
-        if ( refs.size() > 1 && context != null ) {//instanceof EmsScriptNode && !(context instanceof WorkspaceNode) ) {
+        if ( refs.size() > 1 && contextNode != null ) {//instanceof EmsScriptNode && !(context instanceof WorkspaceNode) ) {
             ArrayList< EmsScriptNode > childNodes = new ArrayList< EmsScriptNode >();
             for ( NodeRef ref : refs ) {
                 EmsScriptNode node = new EmsScriptNode( ref, getServices(), response, status );
                 EmsScriptNode owner = node.getOwningParent( dateTime, workspace, false );
-                if ( context.equals( owner )
-                     || ( context instanceof WorkspaceNode && context.equals( node.getWorkspace() ) ) ) {
+                if ( ( contextNode instanceof WorkspaceNode && contextNode.equals( node.getWorkspace() ) ) ||
+                        node.hasParent( contextNode, true, dateTime, workspace, true )//context.equals( owner )
+                      ) {
                     childNodes.add( node );
                 }
             }
-            if ( childNodes.size() > 0 ) return childNodes;
+            //if ( childNodes.size() > 0 ) 
+            return childNodes;
         }
         List< EmsScriptNode > list = EmsScriptNode.toEmsScriptNodeList( refs, getServices(), response, status );
         //if (logger.isDebugEnabled()) logger.debug("getElementWithName(" + context + ", " + specifier + ", " + dateTime + ") = " + list);
@@ -562,18 +603,35 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, Object, 
     @Override
     public Collection< EmsScriptNode >
             getElementWithIdentifier( Object context, String specifier ) {
+        Object c = cacheGet("getElementWithIdentifier", context, specifier);
+        if ( c != null && ( c == JSONObject.NULL || c instanceof Collection ) ) {
+            if ( c == JSONObject.NULL ) return null;
+            return (Collection< EmsScriptNode >)c;
+        }
+
         // TODO -- need to take into account the context!
         NodeRef element = NodeUtil.findNodeRefById( specifier, true, null, null, services, false );
         EmsScriptNode emsSN = new EmsScriptNode( element, services );
         ArrayList< EmsScriptNode > list = Utils.newList( emsSN );
         //if (logger.isDebugEnabled()) logger.debug("getElementWithIdentifier(" + context + ", " + specifier + ") = " + list);
+
+        cachePut( "getElementWithIdentifier", context, specifier, list );
         return list;
     }
 
     @Override
     public Collection< EmsScriptNode > getElementWithName( Object context,
                                                            String specifier ) {
-        return getElementWithName(context, specifier, null);
+        Object c = cacheGet("getElementWithName", context, specifier);
+        if ( c != null && ( c == JSONObject.NULL || c instanceof Collection ) ) {
+            if ( c == JSONObject.NULL ) return null;
+            return (Collection< EmsScriptNode >)c;
+        }
+
+        Collection<EmsScriptNode> coll = getElementWithName(context, specifier, null);
+        
+        cachePut( "getElementWithName", context, specifier, coll );
+        return coll;
     }
     
     public Collection< EmsScriptNode > getElementWithName( Object context,
@@ -639,6 +697,12 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, Object, 
     @Override
     public Collection< EmsScriptNode >
             getElementWithProperty( Object context, EmsScriptNode specifier ) {
+        Object c = cacheGet("getElementWithProperty", context, specifier);
+        if ( c != null && ( c == JSONObject.NULL || c instanceof Collection ) ) {
+            if ( c == JSONObject.NULL ) return null;
+            return (Collection< EmsScriptNode >)c;
+        }
+
         Date date = null;
         WorkspaceNode ws = null;
         if ( context instanceof Date ) {
@@ -651,7 +715,10 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, Object, 
             n = NodeUtil.findScriptNodeById( n.getSysmlId(), ws, date, false,
                                              getServices(), null );
         }
-        return Utils.newList( n );
+        Collection< EmsScriptNode > coll = Utils.newList( n );
+
+        cachePut( "getElementWithProperty", context, specifier, coll );
+        return coll;
     }
 
     @Override
@@ -707,6 +774,13 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, Object, 
     @Override
     public String getName( Object context ) {
 
+        Object c = cacheGet("getName", context, null);
+        if ( c != null && ( c == JSONObject.NULL || c instanceof String ) ) {
+            if ( c == JSONObject.NULL ) return null;
+            return (String)c;
+        }
+        String resultName = null;
+        
         EmsScriptNode node = asElement( context ); 
         
     	// Assuming that we can only have EmsScriptNode context:
@@ -720,35 +794,49 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, Object, 
     		if (tempList != null && !tempList.isEmpty()){
     			name = tempList.get(0);
     		}
-    		return name;
+    		resultName = name;
     	}
 
     	else {
             // TODO -- error????  Are there any other contexts than an EmsScriptNode that would have a property?
             Debug.error("context is not an EmsScriptNode!");
-            return null;
+            resultName = null;
         }
 
+        cachePut( "getName", context, null, resultName );
+        return resultName;
+    	
     }
 
     @Override
     public String getIdentifier( Object context ) {
         if ( context == null ) return null;
-        if ( context instanceof HasId ) {
-            return "" + ((HasId<?>)context).getId();
-        }
-        if ( context instanceof EmsScriptNode ) {
-            return ( (EmsScriptNode)context ).getSysmlId();
-        }
-        if ( context instanceof NodeRef ) {
-            EmsScriptNode node = new EmsScriptNode( (NodeRef)context, getServices() );
-            return getIdentifier( node );
-        }
-        // Hunt for id using reflection
-        Object o = ClassUtils.getId( context );
-        if ( o != null ) return o.toString();
 
-        return null;
+        Object c = cacheGet("getIdentifier", context, null);
+        if ( c != null && ( c == JSONObject.NULL || c instanceof String ) ) {
+            if ( c == JSONObject.NULL ) return null;
+            return (String)c;
+        }
+
+        String resultId = null;
+        if ( context instanceof HasId ) {
+            resultId = "" + ((HasId<?>)context).getId();
+        }
+        else if ( context instanceof EmsScriptNode ) {
+            resultId = ( (EmsScriptNode)context ).getSysmlId();
+        }
+        else if ( context instanceof NodeRef ) {
+            EmsScriptNode node = new EmsScriptNode( (NodeRef)context, getServices() );
+            resultId =  getIdentifier( node );
+        } else {
+            // Hunt for id using reflection
+            Object o = ClassUtils.getId( context );
+            resultId = ( o == null ) ? null : o.toString();
+        }
+        
+        cachePut( "getIdentifier", context, null, resultId );
+        return resultId;
+
     }
 
     /**
@@ -826,6 +914,23 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, Object, 
     public Collection< EmsScriptNode > getProperty( Object context,
                                                     Object specifier ) {
 
+        Object c = cacheGet("getProperty", context, specifier);
+        if ( c != null && ( c == JSONObject.NULL || c instanceof Collection ) ) {
+            if ( c == JSONObject.NULL ) return null;
+            return (Collection< EmsScriptNode >)c;
+        }
+
+
+        Collection< EmsScriptNode > coll = getPropertyImpl( context, specifier, false );
+        
+        cachePut( "getProperty", context, specifier, coll );
+        return coll;
+    }
+    
+    public Collection< EmsScriptNode > getPropertyImpl( Object context,
+                                                    Object specifier,
+                                                    boolean skipElementSearch ) {
+            
         ArrayList< EmsScriptNode > allProperties = new ArrayList< EmsScriptNode >();
 
         Object mySpecifier = specifier;
@@ -842,13 +947,6 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, Object, 
         EmsScriptNode node = asElement( context );
         if ( node != null ) {
 
-            //EmsScriptNode node = (EmsScriptNode)context;
-
-            // Look for Properties with specifier as name and
-            // context as owner.
-            Collection< EmsScriptNode > elements = specifier == null ? null : //(List< EmsScriptNode >)Utils.newList() :
-                    getElementWithName( context, "" + specifier );
-            
             Date date = null;
             WorkspaceNode ws = null;
             if ( context instanceof Date ) {
@@ -856,8 +954,31 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, Object, 
             } else if ( context instanceof WorkspaceNode ) {
                 ws = (WorkspaceNode)context;
             }
+            if ( !( context instanceof WorkspaceNode ) && ws == null ) ws = node.getWorkspace();
 
-            if ( specifier == null ) {
+            // Look for common alfresco properties.
+            if ( specifier instanceof String && ( (String)specifier ).length() > 0 &&
+                    Acm.JSON_ALFRESCO_PROPERTIES.contains( specifier ) ) {
+                mySpecifier = convertMap.get(specifier);
+                // TODO need date/workspace
+                Object prop = node.getNodeRefProperty( "" + mySpecifier, true, date, ws );
+                if ( prop != null )
+                // Attempt to converted to a EmsScriptNode and add to the list
+                // to later return if conversion succeeded:
+                convertToScriptNode(prop, allProperties);
+                
+                if ( !Utils.isNullOrEmpty( allProperties ) ) {
+                    return allProperties;
+                }
+            }
+            
+            // Look for Properties with specifier as name and
+            // context as owner.
+            Collection< EmsScriptNode > elements =
+                    (specifier == null || skipElementSearch) ? null : //(List< EmsScriptNode >)Utils.newList() :
+                    getElementWithName( context, "" + specifier );
+            
+            if ( specifier == null && !skipElementSearch ) {
                 // Find all properties owned by the element.
                 elements = getProperties( node, ws, date );
             }
@@ -908,7 +1029,7 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, Object, 
 
             else {
                 // TODO need date/workspace
-                Object prop = node.getNodeRefProperty( "" + mySpecifier, null, node.getWorkspace() );
+                Object prop = node.getNodeRefProperty( "" + mySpecifier, true, null, node.getWorkspace() );
 
         		// Attempt to converted to a EmsScriptNode and add to the list
         		// to later return if conversion succeeded:
@@ -980,11 +1101,18 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, Object, 
     }
 
     public Collection< EmsScriptNode > getPropertyWithTypeName( Object context, String specifier ) {
+        Object c = cacheGet("getPropertyWithTypeName", context, specifier);
+        if ( c != null && ( c == JSONObject.NULL || c instanceof Collection ) ) {
+            if ( c == JSONObject.NULL ) return null;
+            return (Collection< EmsScriptNode >)c;
+        }
+        Collection<EmsScriptNode> coll = null;
+
         ArrayList< EmsScriptNode > nodes = new ArrayList< EmsScriptNode >();
         Collection< EmsScriptNode > list;
         if ( context instanceof Collection ) {
-            Collection<?> coll = (Collection<?>)context;
-            for ( Object o : coll ) {
+            Collection<?> ccoll = (Collection<?>)context;
+            for ( Object o : ccoll ) {
                 nodes.addAll( getPropertyWithTypeName( o , specifier ) );
             }
         } else if ( specifier != null && context instanceof EmsScriptNode ) {
@@ -1000,11 +1128,16 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, Object, 
         } else if ( specifier == null ) {
             list = getProperty(context, null);
             //if (logger.isDebugEnabled()) logger.debug("getPropertyWithTypeName(" + context + ", " + specifier  + ") = " + list);
-            return list;
+            coll = list;
         }
         // Remaining case is specifier != nil && !(context instanceof EmsScriptNode)
         //if (logger.isDebugEnabled()) logger.debug("getPropertyWithTypeName(" + context + ", " + specifier + ") = " + nodes);
-        return nodes;
+        if ( coll == null ) {
+            coll = nodes;
+        }
+        
+        cachePut( "getPropertyWithTypeName", context, specifier, coll );
+        return coll;
     }
     
     public QueryContext getQueryContext( Object context ) {
@@ -1029,6 +1162,14 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, Object, 
     @Override
     public Collection< EmsScriptNode >
             getPropertyWithType( Object context, EmsScriptNode specifier ) {
+
+        Object c = cacheGet("getPropertyWithType", context, specifier);
+        if ( c != null && ( c == JSONObject.NULL || c instanceof Collection ) ) {
+            if ( c == JSONObject.NULL ) return null;
+            return (Collection< EmsScriptNode >)c;
+        }
+        Collection<EmsScriptNode> coll = null;
+        
         ArrayList< EmsScriptNode > nodes = new ArrayList< EmsScriptNode >();
         if ( specifier != null ) {
             String name = getName( specifier );
@@ -1037,9 +1178,7 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, Object, 
             			getPropertyWithTypeName(context, name);
             	if (result != null) nodes.addAll (result);
             }
-            if ( !Utils.isNullOrEmpty( nodes ) ) {
-                return nodes;
-            }
+            if ( Utils.isNullOrEmpty( nodes ) ) {
             // Process context
             QueryContext ctx = getQueryContext( context );
             String nodeRefId = specifier.getNodeRef().toString();
@@ -1049,10 +1188,15 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, Object, 
                                                  NodeUtil.SearchType.PROPERTY_TYPE.prefix,
                                                  ctx );
             convertToScriptNode( refs, nodes );
-            return nodes;
+            coll = nodes;
+            }
         } else {
-            return getProperty(context, null);
+            coll = getProperty(context, null);
         }
+        
+        cachePut( "getPropertyWithType", context, specifier, coll );
+        return coll;
+
     }
 
     @Override
@@ -1149,13 +1293,21 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, Object, 
 
     	// TODO see EmsScriptNode.getConnectedNodes(), as a lot of this code can
         //      be used for this method.
-if (logger.isDebugEnabled()) logger.debug("RRRRRRRRRRRRR");
-if (logger.isDebugEnabled()) logger.debug("RRRRRR");
         List< EmsScriptNode > relationships = null;
         if ( !coerce && !(context instanceof EmsScriptNode) ) return null;
+        
+        Object c = cacheGet("getRelationship", context, specifier);
+        if ( c != null && ( c == JSONObject.NULL || c instanceof Collection ) ) {
+            if ( c == JSONObject.NULL ) return null;
+            return (Collection< EmsScriptNode >)c;
+        }
+        Collection<EmsScriptNode> coll = null;
+        
+        
         EmsScriptNode node = objectToEmsScriptNode( context );
         
-        if ( node == null ) return relationships;
+        if ( node == null ) coll = relationships;
+        else {
         String relType = null;
         String relName = null;
         String relId = null;
@@ -1164,42 +1316,52 @@ if (logger.isDebugEnabled()) logger.debug("RRRRRR");
             relType = (String)specifier;
 
             if ( avoidConnectFcn ) {
-                return getRelationships( node, null, null, relType );
-            }
+                coll = getRelationships( node, null, null, relType );
+            } else {
             
-            if ( !Utils.isNullOrEmpty( relType ) ) typeNames.add(relType);
+                if ( !Utils.isNullOrEmpty( relType ) ) typeNames.add(relType);
+            }
         } else {
             if ( specifier instanceof EmsScriptNode ) {
                 EmsScriptNode s = (EmsScriptNode)specifier;
                 relName = s.getSysmlName();
                 
                 if ( avoidConnectFcn && !Utils.isNullOrEmpty( relName ) ) {
-                    return getRelationships( node, null, null, relName );
-                }
+                    coll = getRelationships( node, null, null, relName );
+                } else {
 
                 if ( !Utils.isNullOrEmpty( relName ) ) typeNames.add(relName);
                 relId = s.getSysmlId();
                 
                 if ( avoidConnectFcn && !Utils.isNullOrEmpty( relId ) ) {
-                    return getRelationships( node, null, null, relId );
+                    coll = getRelationships( node, null, null, relId );
+                } else {
+                    if ( !Utils.isNullOrEmpty( relId ) ) typeNames.add(relId);
                 }
-                if ( !Utils.isNullOrEmpty( relId ) ) typeNames.add(relId);
+                }
             }
         }
-        ArrayList< NodeRef > refs = null;
-        if ( Utils.isNullOrEmpty( typeNames ) ) {
-            refs = node.getConnectedNodes( null, node.getWorkspace(), null );
-        } else {
-            for ( String type : typeNames ) {
-                refs = node.getConnectedNodes( null, node.getWorkspace(), type );
-                if ( !Utils.isNullOrEmpty( refs ) ) break;
+        if ( coll == null ) {
+            ArrayList< NodeRef > refs = null;
+            if ( Utils.isNullOrEmpty( typeNames ) ) {
+                refs =node.getConnectedNodes( null, node.getWorkspace(), null );
+            } else {
+                for ( String type : typeNames ) {
+                    refs = node.getConnectedNodes( null, node.getWorkspace(), type );
+                    if ( !Utils.isNullOrEmpty( refs ) ) break;
+                }
             }
+            if ( !Utils.isNullOrEmpty( refs ) ) {
+                relationships = node.toEmsScriptNodeList( refs );
+            }
+
+            coll = relationships;
         }
-        if ( !Utils.isNullOrEmpty( refs ) ) {
-            relationships = node.toEmsScriptNodeList( refs );
         }
         
-        return relationships;
+        cachePut( "getRelationship", context, specifier, coll );
+        return coll;
+        
     }
 
     @Override
@@ -1310,6 +1472,12 @@ if (logger.isDebugEnabled()) logger.debug("RRRRRR");
     public Collection< EmsScriptNode >
             getType( Object context, Object specifier ) {
 
+        Object c = cacheGet("getType", context, specifier);
+        if ( c != null && ( c == JSONObject.NULL || c instanceof Collection ) ) {
+            if ( c == JSONObject.NULL ) return null;
+            return (Collection< EmsScriptNode >)c;
+        }
+        Collection< EmsScriptNode > coll = null;
         // TODO -- the code below is relevant to getElementWithType(), not getType().
 
     	// TODO ScriptNode getType returns a QName or String, why does he want a collection
@@ -1366,27 +1534,59 @@ if (logger.isDebugEnabled()) logger.debug("RRRRRR");
 //	            elements.put( e.getId(), e );
 //	        }
             if ( elementColl != null && !elementColl.isEmpty()) {
-            		return elementColl;
+            		coll =  elementColl;
             }
 
     	}
-
-        return Collections.emptyList();
+    	if ( coll == null ) {
+    	    coll = Collections.emptyList();
+    	}
+    	
+        cachePut( "getType", context, specifier, coll );
+        return coll;
     }
 
     // TODO remove this once we fix getType()
     @Override
    public String getTypeString( Object context, Object specifier ) {
+        Object c = cacheGet("getTypeString", context, specifier);
+        if ( c != null && ( c == JSONObject.NULL || c instanceof String ) ) {
+            if ( c == JSONObject.NULL ) return null;
+            return (String)c;
+        }
+        String resultType = null;
 
         // TODO finish this, just a partial implementation
-
-        if (context instanceof EmsScriptNode) {
-        	EmsScriptNode node = (EmsScriptNode) context;
-        	return node.getTypeName();
+        Object originalContext = context;
+        Set<Object> seen = new HashSet<Object>();
+        while (!(context instanceof EmsScriptNode)) {
+            if ( seen.contains( context ) ) break;
+            seen.add( context );
+            if ( context instanceof Wraps ) {
+                Object o = ( (Wraps)context ).getValue( false );
+                if ( o == null ) break;
+                context = o;
+            } else break;
         }
+        if (!(context instanceof EmsScriptNode)) {
+            context = originalContext;
+        }
+        
+        if ( context instanceof EmsScriptNode ) {
+            EmsScriptNode node = (EmsScriptNode)context;
+            resultType = node.getTypeName();
+        } else {
 
-        return "" + ClassUtils.getType( context );
-
+            Object type = ClassUtils.getType( context );
+            if ( type instanceof Class ) {
+                resultType = ( (Class< ? >)type ).getSimpleName();
+            } else {
+                resultType = "" + type;
+            }
+        }
+        
+        cachePut( "getTypeString", context, specifier, resultType );
+        return resultType;
     }
 
     @Override
@@ -1474,7 +1674,7 @@ if (logger.isDebugEnabled()) logger.debug("RRRRRR");
             jsonPropertyName = Acm.getACM2JSON().get( acmPropertyName );
         }
         if ( Acm.JSON_NODEREFS.contains( jsonPropertyName ) ) {
-            result = node.getNodeRefProperty(acmPropertyName, null, node.getWorkspace());
+            result = node.getNodeRefProperty(acmPropertyName, true, null, node.getWorkspace());
             if ( result instanceof Collection ) {
                 Collection<NodeRef> valueNodes = (Collection<NodeRef>)result;
                 ArrayList< Object > resultList = new ArrayList<Object>();
@@ -1495,7 +1695,7 @@ if (logger.isDebugEnabled()) logger.debug("RRRRRR");
             try {
                 result = node.getProperty( acmPropertyName );
             } catch (UnsupportedOperationException e) {
-                result = node.getNodeRefProperty( acmPropertyName, null, node.getWorkspace() );
+                result = node.getNodeRefProperty( acmPropertyName, true, null, node.getWorkspace() );
             }
         }
         return result;
@@ -1522,7 +1722,8 @@ if (logger.isDebugEnabled()) logger.debug("RRRRRR");
         }
         if ( type == null || !Acm.VALUE_Of_VALUESPEC.containsKey( type ) ) {
             if ( type.equals( Acm.ACM_EXPRESSION ) ) {
-                Expression< Object > expr = AbstractJavaWebScript.toAeExpression( node );
+                Expression< Object > expr = 
+                        AbstractJavaWebScript.toExpression( null, node );
                 if ( expr != null ) {
                     try {
                         result = expr.evaluate( true );
@@ -1564,22 +1765,43 @@ if (logger.isDebugEnabled()) logger.debug("RRRRRR");
     @Override
     public Collection< Object > getValue( Object context,
                                           Object specifier ) {
-        Object o = getValueAsObject( context, specifier );
-        if ( o == null ) return null;
-        if ( o instanceof Collection ) return (Collection< Object >)o;
-        if ( o.getClass().isArray() ) {
-            Object[] arr = (Object[])o;
-            List< Object > list = Arrays.asList( arr );
-            return list;
+        Object c = cacheGet("getValue", context, specifier);
+        if ( c != null && ( c == JSONObject.NULL || c instanceof Collection ) ) {
+            if ( c == JSONObject.NULL ) return null;
+            return (Collection< Object >)c;
         }
-//        if ( o instanceof Map ) {
-//            return Arrays.asList( ((Map<?,?>)o).entrySet().toArray() );
-//        }
-        return Utils.newList( o );
+        Collection<Object> coll = null;
+
+        Object o = getValueAsObject( context, specifier );
+        if ( o == null ) {
+            coll = null;
+        } else {
+            if ( o instanceof Collection ) {
+                coll = (Collection< Object >)o;
+            } else {
+                if ( o.getClass().isArray() ) {
+                    Object[] arr = (Object[])o;
+                    List< Object > list = Arrays.asList( arr );
+                    coll = list;
+                } else {
+                    // if ( o instanceof Map ) {
+                    // return Arrays.asList( ((Map<?,?>)o).entrySet().toArray()
+                    // );
+                    // }
+                    coll = Utils.newList( o );
+                }
+            }
+        }
+        
+        cachePut( "getElementWithProperty", context, specifier, coll );
+        return coll;
     }
     
     public Object getValueAsObject( Object context,
                                     Object specifier ) {
+        // Not using cacheGet() here since it's always called through getValue,
+        // which is cached.
+
         // TODO need the workspace, time
 
         Object mySpecifier = specifier;
@@ -1632,7 +1854,7 @@ if (logger.isDebugEnabled()) logger.debug("RRRRRR");
     	        return ( (Wraps<?>)context ).getValue( false );
     	    }
     	    // TODO -- error????  Are there any other contexts than an EmsScriptNode that would have a property?
-    	    Debug.error("context (" + context + ") is not an EmsScriptNode!");
+    	    //Debug.error("context (" + context + ") is not an EmsScriptNode!");
     	    return context;
     	} else {
 
@@ -1980,7 +2202,9 @@ if (logger.isDebugEnabled()) logger.debug("RRRRRR");
      * Set the value for the passed node to the passed value
      *
      * @param node
-     * @param value
+     * @param val the new value for the node
+     * @param ws the workspace where the node's value will change
+     * @return whether the node's value was actually changed
      */
     public < T extends Serializable > boolean setValue(EmsScriptNode node, T val, WorkspaceNode ws ) {
 
@@ -2250,18 +2474,19 @@ if (logger.isDebugEnabled()) logger.debug("RRRRRR");
         return false;
     }
 
-    private boolean fixConstraintViolationsForSet( Set<EmsScriptNode> elements ) {
-        fix( elements, null );
-        return true;
+    public boolean fixConstraintViolationsForSet( Set<EmsScriptNode> elements ) {
+        boolean sat = fix( elements, null );
+        return sat;
     }
 
-    public boolean fixConstraintViolations( EmsScriptNode... elements ) {
+    public boolean fixViolations( EmsScriptNode e1, EmsScriptNode e2  ) {
         logger.warn( "\n\n\n\ncalling fixConstraintViolations()\n\n\n\n\n" );
-        return fixConstraintViolationsForSet( Utils.toSet( elements ) );
+        return fixConstraintViolationsForSet( Utils.toSet( new EmsScriptNode[]{ e1, e2 } ) );
     }
     
-    public void fix( final Set< EmsScriptNode > elements, final WorkspaceNode ws ) {
-        AbstractJavaWebScript.fix( elements, ws, services, null, null, this, null);
+    public boolean fix( final Set< EmsScriptNode > elements, final WorkspaceNode ws ) {
+        return AbstractJavaWebScript.fix( null, elements, ws, getServices(), null,
+                                          null, this, null);
     }
     
     // TODO dont like dependence on BAE for Call here....
@@ -2360,7 +2585,7 @@ if (logger.isDebugEnabled()) logger.debug("RRRRRR");
         // Check if all arguments are collections.
         boolean someTypeCollection = false;
         boolean someNotTypeCollection = false;
-        for ( Object element : elements ) {
+        if ( elements != null ) for ( Object element : elements ) {
             if ( element instanceof Collection )  {
                 someTypeCollection = true;
                 if ( someNotTypeCollection ) break;
@@ -3089,6 +3314,7 @@ if (logger.isDebugEnabled()) logger.debug("RRRRRR");
         if ( view == null ) return null;
         EmsScriptNode prev = null;
         EmsScriptNode parentNode = getParentView( view, null );
+        //logger.setLevel( Level.DEBUG );
         if (logger.isDebugEnabled()) logger.debug( "============>> getPreviousView(" + view.getSysmlName()
                             + "): getParentView("+ view.getSysmlName() +") = " + parentNode );
         if ( parentNode == null ) return null;
@@ -3148,6 +3374,14 @@ if (logger.isDebugEnabled()) logger.debug("RRRRRR");
     
     @Override
     public EmsScriptNode asProperty( Object o ) {
+        String argType = getTypeString( asContext(o), null );
+        if ( !Utils.isNullOrEmpty( argType )
+             && !argType.contains( "Property" )
+             && !argType.contains( "Element" )
+             && !argType.contains( "EmsScriptNode" )
+             && !argType.contains( "Parameter" ) ) {
+            return null;
+        }
         EmsScriptNode n = super.asProperty( o );
         if ( n != null ) {
             // Make sure we return null if n is just a value of some other
@@ -3165,4 +3399,14 @@ if (logger.isDebugEnabled()) logger.debug("RRRRRR");
         return o;
     }
     
+    public static <T> Set<T> S( Collection<T> collection ) {
+        LinkedHashSet<T> s = new LinkedHashSet< T >( collection );
+        return s;
+    }
+
+    public static <T> LinkedHashSet<T> addAll( LinkedHashSet<T> s1, Collection<T> s2 ) {
+        LinkedHashSet<T> s3 = new LinkedHashSet< T >(s1);
+        s3.addAll(s2);
+        return s3;
+    }
 }

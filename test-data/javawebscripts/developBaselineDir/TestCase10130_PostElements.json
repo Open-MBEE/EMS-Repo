@@ -1,62 +1,10 @@
 {"elements": [
     {
+        "sysmlid": "holding_bin_no_site_no_project",
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
-        "appliedMetatypes": ["_9_0_62a020a_1105704885298_713292_7913"],
-        "specialization": {"type": "Package"}
-    },
-    {
-        "sysmlid": "MMS_1450390431247_8a4b76d2-394c-4569-9abe-5c51dc4b0711",
-        "isMetatype": false,
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "Product X",
-        "specialization": {
-            "displayedElements": [],
-            "contents": {
-                "operand": [],
-                "type": "Expression"
-            },
-            "allowedElements": [],
-            "type": "Product"
-        }
-    },
-    {
-        "sysmlid": "MMS_1450390431247_8a4b76d2-394c-4569-9abe-5c51dc4b0811",
-        "isMetatype": false,
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "View X",
-        "documentation": "",
-        "appliedMetatypes": [
-            "_17_0_1_232f03dc_1325612611695_581988_21583",
-            "_9_0_62a020a_1105704885343_144138_7929"
-        ],
-        "specialization": {
-            "displayedElements": [],
-            "childrenViews": [],
-            "contents": {
-                "operand": [],
-                "type": "Expression"
-            },
-            "allowedElements": [],
-            "type": "View"
-        }
-    },
-    {
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "appliedMetatypes": ["_9_0_62a020a_1105704885298_713292_7913"],
-        "specialization": {"type": "Package"}
-    },
-    {
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
+        "name": "holding_bin",
         "appliedMetatypes": ["_9_0_62a020a_1105704885298_713292_7913"],
         "specialization": {"type": "Package"}
     },
@@ -73,13 +21,11 @@
             "_9_0_62a020a_1105704885343_144138_7929"
         ],
         "specialization": {
-            "displayedElements": [],
-            "childrenViews": [],
+            "childViews": [],
             "contents": {
                 "operand": [],
                 "type": "Expression"
             },
-            "allowedElements": [],
             "type": "View"
         }
     },
@@ -91,13 +37,41 @@
         "specialization": {"type": "Package"}
     },
     {
-        "sysmlid": "holding_bin_no_site_no_project",
         "editable": true,
         "creator": "admin",
         "modifier": "admin",
-        "name": "holding_bin",
         "appliedMetatypes": ["_9_0_62a020a_1105704885298_713292_7913"],
         "specialization": {"type": "Package"}
+    },
+    {
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "appliedMetatypes": ["_9_0_62a020a_1105704885298_713292_7913"],
+        "specialization": {"type": "Package"}
+    },
+    {
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "appliedMetatypes": ["_9_0_62a020a_1105704885298_713292_7913"],
+        "specialization": {"type": "Package"}
+    },
+    {
+        "sysmlid": "MMS_1450390431247_8a4b76d2-394c-4569-9abe-5c51dc4b0711",
+        "isMetatype": false,
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "Product X",
+        "specialization": {
+            "childViews": [],
+            "contents": {
+                "type": "Expression",
+                "operand": []
+            },
+            "type": "Product"
+        }
     },
     {
         "sysmlid": "MMS_1450390431247_8a4b76d2-394c-4569-9abe-5c51dc4b0812",
@@ -112,13 +86,32 @@
             "_9_0_62a020a_1105704885343_144138_7929"
         ],
         "specialization": {
-            "displayedElements": [],
-            "childrenViews": [],
+            "childViews": [],
             "contents": {
                 "operand": [],
                 "type": "Expression"
             },
-            "allowedElements": [],
+            "type": "View"
+        }
+    },
+    {
+        "sysmlid": "MMS_1450390431247_8a4b76d2-394c-4569-9abe-5c51dc4b0811",
+        "isMetatype": false,
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "name": "View X",
+        "documentation": "",
+        "appliedMetatypes": [
+            "_17_0_1_232f03dc_1325612611695_581988_21583",
+            "_9_0_62a020a_1105704885343_144138_7929"
+        ],
+        "specialization": {
+            "childViews": [],
+            "contents": {
+                "operand": [],
+                "type": "Expression"
+            },
             "type": "View"
         }
     }

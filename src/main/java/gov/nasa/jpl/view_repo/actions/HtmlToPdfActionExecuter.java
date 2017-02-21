@@ -14,6 +14,7 @@ import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.action.Action;
 import org.alfresco.service.cmr.action.ParameterDefinition;
 import org.alfresco.service.cmr.repository.NodeRef;
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.springframework.extensions.webscripts.Status;
@@ -55,6 +56,7 @@ public class HtmlToPdfActionExecuter extends ActionExecuterAbstractBase {
 	public static final String PARAM_TOF = "tof";
 	public static final String PARAM_TOT = "tot";
 	public static final String PARAM_INDEX = "index";
+	public static final String PARAM_DISABLED_COVER_PAGE = "disabledCoverPage";
 
 	public void setRepository(Repository rep) {
 		repository = rep;
@@ -101,12 +103,17 @@ public class HtmlToPdfActionExecuter extends ActionExecuterAbstractBase {
 		String docNum = (String) action.getParameterValue(PARAM_DOC_NUM);
 		String displayTime = (String) action.getParameterValue(PARAM_DISPLAY_TIME);
 		String customCss = (String) action.getParameterValue(PARAM_CUSTOM_CSS);
+		String disabledCvrPg = (String)action.getParameterValue(PARAM_DISABLED_COVER_PAGE);
+		
+		Boolean disabledCoverPage = false;
+		if(!StringUtils.isEmpty(disabledCvrPg)) disabledCoverPage = Boolean.parseBoolean(disabledCvrPg);
+		
 		HtmlToPdfPost htmlToPdf = new HtmlToPdfPost(repository, services);
 		htmlToPdf.setLogLevel(Level.DEBUG);
 		EmsScriptNode pdfNode = null;
 		try{
 			pdfNode = htmlToPdf.convert(documentId, tagId, timeStamp,
-				htmlContent, coverContent, toc, tof, tot, indices, headerContent, footerContent, docNum, displayTime, customCss);
+				htmlContent, coverContent, toc, tof, tot, indices, headerContent, footerContent, docNum, displayTime, customCss, disabledCoverPage);
 			response.append(htmlToPdf.getResponse().toString());
 			response.append("Sending email to user...");
 		}

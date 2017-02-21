@@ -6,9 +6,8 @@
       "sysmlid": "add_add_before",
       "editable": true,
       "creator": "admin",
-      "modifier": "admin",
       "name": "add_add_before",
-      "owner": "123456",
+      "owner": "PROJECT-123456",
       "documentation": "add_add_before",
       "specialization": {
         "propertyType": null,
@@ -26,7 +25,7 @@
     "deletedElements": [{
       "name": "add_add_before",
       "sysmlid": "add_add_before",
-      "owner": "123456",
+      "owner": "PROJECT-123456",
       "specialization": {"type": "Property"},
       "creator": "admin",
     }],

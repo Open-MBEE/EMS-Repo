@@ -1,5 +1,6 @@
 package gov.nasa.jpl.view_repo.connections;
 
+import gov.nasa.jpl.view_repo.db.PostgresHelper;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
 
 import java.util.HashMap;
@@ -29,10 +30,23 @@ public class RestPostConnection implements ConnectionInterface, Runnable {
     private String message;
     private String destination;
     
-    public static boolean doRestPost = false;
+    private static Boolean doRestPost = null;
     
     public RestPostConnection() {
+        PostgresHelper pgh = new PostgresHelper( "master" );
+        String property = null;
+        try {
+            pgh.connect();
+            property = pgh.getMmsProperty( "rest.post.uri" );
+        } catch ( Exception e ) {
+            e.printStackTrace();
+        } finally {
+            pgh.close();
+        }
         
+        if ( property != null ) {
+            uri = property;
+        }
     }
         
     @Override
@@ -124,6 +138,15 @@ public class RestPostConnection implements ConnectionInterface, Runnable {
     public void ingestJson(JSONObject json) {
         if (json.has( "uri" )) {
             uri = json.isNull( "uri" ) ? null : json.getString( "uri" );
+            PostgresHelper pgh = new PostgresHelper( "master" );
+            try {
+                pgh.connect();
+                pgh.setMmsProperty( "rest.post.uri", uri );
+            } catch ( Exception e ) {
+                e.printStackTrace();
+            } finally {
+                pgh.close();
+            }
         }
     }
 
@@ -148,4 +171,42 @@ public class RestPostConnection implements ConnectionInterface, Runnable {
         }
     }
 
+    public static boolean getDoRestPost() {
+        if (doRestPost == null) {
+            PostgresHelper pgh = new PostgresHelper("master");
+            String property = null;
+            try {
+                pgh.connect();
+                property = pgh.getMmsProperty( "rest.post.on" );
+            } catch ( Exception e ) {
+                e.printStackTrace();
+            } finally {
+                pgh.close();
+            }
+            if ( property == null ) {
+                doRestPost = false;
+            } else {
+                if (property.equalsIgnoreCase( "true" )) {
+                    doRestPost = true; 
+                } else {
+                    doRestPost = false;
+                }
+            }
+        }
+        return doRestPost;
+    }
+    
+    public static void setDoRestPost( boolean value ) {
+        doRestPost = value;
+        PostgresHelper pgh = new PostgresHelper("master");
+        
+        try {
+            pgh.connect();
+            pgh.setMmsProperty( "rest.post.on", value ? "true" : "false");
+        } catch ( Exception e ) {
+            e.printStackTrace();
+        } finally {
+            pgh.close();
+        }
+    }
 }

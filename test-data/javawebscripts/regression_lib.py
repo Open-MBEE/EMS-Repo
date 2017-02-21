@@ -57,7 +57,6 @@ gv7 = None
 
 # These capture the curl output for any teardown functions
 orig_output = None
-filtered_output = None
 orig_json = None
 filtered_json = None
 filter_output = None
@@ -553,6 +552,47 @@ def mbee_util_jar_path4():
     path = "../../target/mms-repo-war/WEB-INF/lib/mbee_util.jar"
     return path
 
+def filterJsonOutput(origJson, filters):
+    #global filtered_json
+
+    origFileExists = True    
+    try:
+        fileOrig = open(origJson, "r")
+    except IOError:
+        origFileExists = False
+        print('cannot open', origJson)
+    
+    
+    # Apply filters to output of curl cmd (not using output b/c getstatusoutput pipes stderr to stdout):
+    origOutput = ""
+    filterOutput = ""
+    if origFileExists:
+        if filters:
+            for line in fileOrig:
+                filterFnd = False
+                for filter in filters:
+                    # If the contains the filter:
+                    if re.search(filter,line):
+                        filterFnd = True
+                        break
+                    
+                # Add line if it does not contain the filter:
+                if not filterFnd:
+                    filterOutput += (line)
+                    
+                # Always add lines to orig_output
+                origOutput += (line)
+        else:
+            stuffRead = fileOrig.read()
+            filterOutput = stuffRead
+            origOutput = stuffRead
+        
+        fileOrig.close()
+
+    return (origOutput,filterOutput)
+
+    
+
 def run_curl_test(test_num, test_name, test_desc, curl_cmd, use_json_diff=False, filters=None,
                   setupFcn=None, postProcessFcn=None, teardownFcn=None, delay=None):
     '''
@@ -569,7 +609,6 @@ def run_curl_test(test_num, test_name, test_desc, curl_cmd, use_json_diff=False,
     '''
     
     global orig_output
-    global filtered_output
     global filter_output
     global orig_json
     global filtered_json
@@ -620,30 +659,8 @@ def run_curl_test(test_num, test_name, test_desc, curl_cmd, use_json_diff=False,
         
     if status == 0:
                 
-        file_orig = open(orig_json, "r")
-        
-        # Apply filters to output of curl cmd (not using output b/c getstatusoutput pipes stderr to stdout):
-        orig_output = ""
-        filter_output = ""
-        if filters:
-            for line in file_orig:
-                filterFnd = False
-                for filter in filters:
-                    # If the contains the filter:
-                    if re.search(filter,line):
-                        filterFnd = True
-                        break
-                    
-                # Add line if it does not contain the filter:
-                if not filterFnd:
-                    filter_output += (line)
-                    
-                # Always add lines to orig_output
-                orig_output += (line)
-        else:
-            stuffRead = file_orig.read()
-            filter_output = stuffRead
-            orig_output = stuffRead
+        (orig_output, filter_output) = filterJsonOutput(orig_json, filters)
+        (baseline_output, filter_baseline_output) = filterJsonOutput(baseline_json, filters) # baseline_json instead of baseline_orig_json
         
         if postProcessFcn: #and not evaluate_only:
             print "calling post-process function"
@@ -654,7 +671,11 @@ def run_curl_test(test_num, test_name, test_desc, curl_cmd, use_json_diff=False,
         file = open(filtered_json, "w")
         file.write(filter_output)
         file.close()
-        file_orig.close()
+
+        # Overwrite filtered baseline with a filtered filtered baseline.
+        file = open(baseline_json, "w")
+        file.write(filter_baseline_output)
+        file.close()
      
         if teardownFcn: #and not evaluate_only:
             print "calling teardown function"
@@ -716,7 +737,7 @@ def create_curl_cmd(type, data="", base_url=BASE_URL_WS, post_type="elements", b
           or the data to get ie views/301 or data to delete ie workspaces/master/elements/771
     base_url:  What base url to use, ie %s
     post_type: "elements", "views", "products"
-    branch: The workspace branch, ie "master/", or the project/site to use to ie "sites/europa/projects/123456/"
+    branch: The workspace branch, ie "master/", or the project/site to use to ie "sites/europa/projects/PROJECT-123456/"
     project_post: Set to True if creating a project
     post_no_data: Set to True if posting with no data
     '''%BASE_URL_WS
@@ -844,7 +865,8 @@ def run(testArray):
         os.makedirs(baseline_dir)
          
     print "\nUSING BASELINE DIR: '%s'\nOUTPUT DIR: '%s'\n"%(baseline_dir, result_dir)
-    print tests
+    if not test_nums and not test_names:
+        print tests
      
     # Run tests or create baselines:
     # If there were test numbers specified:

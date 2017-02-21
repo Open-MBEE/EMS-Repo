@@ -36,7 +36,6 @@ public class JmsConnection implements ConnectionInterface {
     private String workspace = null;
     private String projectId = null;
 
-    private static String hostname = null;
     private static ServiceRegistry services;
     private static Map<String, ConnectionInfo> connectionMap = null;
 
@@ -104,8 +103,8 @@ public class JmsConnection implements ConnectionInterface {
         boolean result = false;
         try {
             json.put( "sequence", sequenceId++ );
-            if (workspaceId != null) this.workspace = workspaceId;
-            if (projectId != null) this.projectId = projectId;
+            this.workspace = workspaceId;
+            this.projectId = projectId;
             result = publishMessage(NodeUtil.jsonToString( json, 2 ), eventType);
         } catch ( JSONException e ) {
             e.printStackTrace();

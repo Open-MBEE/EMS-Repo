@@ -167,7 +167,7 @@
 		<property name="services" ref="ServiceRegistry" />
 	</bean>
 
-	<!-- adding new bean -->
+	<!--  Doors -->
 	<bean id="webscript.gov.nasa.jpl.mms.doors.get"
 		class="gov.nasa.jpl.view_repo.webscripts.DoorsSync" parent="webscript"
 		singleton="false">
@@ -175,7 +175,6 @@
 		<property name="services" ref="ServiceRegistry" />
 	</bean>
 	
-	<!-- adding new bean -->
 	<bean id="webscript.gov.nasa.jpl.mms.doorsartifactmapping.post"
 		class="gov.nasa.jpl.view_repo.webscripts.DoorsArtifactMappingPost" parent="webscript"
 		singleton="false">
@@ -183,7 +182,13 @@
 		<property name="services" ref="ServiceRegistry" />
 	</bean>
 	
-	<!-- adding new bean -->
+	<bean id="webscript.gov.nasa.jpl.mms.doorsartifactmapping.put"
+		class="gov.nasa.jpl.view_repo.webscripts.DoorsArtifactMappingUpdate" parent="webscript"
+		singleton="false">
+		<property name="repositoryHelper" ref="repositoryHelper" />
+		<property name="services" ref="ServiceRegistry" />
+	</bean>
+	
     <bean id="webscript.gov.nasa.jpl.mms.doorsartifactmapping.get"
         class="gov.nasa.jpl.view_repo.webscripts.DoorsArtifactMappingGet" parent="webscript"
         singleton="false">
@@ -191,8 +196,13 @@
         <property name="services" ref="ServiceRegistry" />
     </bean>
 	
+	<bean id="webscript.gov.nasa.jpl.mms.doorsartifactmapping.delete"
+        class="gov.nasa.jpl.view_repo.webscripts.DoorsArtifactMappingDelete" parent="webscript"
+        singleton="false">
+        <property name="repositoryHelper" ref="repositoryHelper" />
+        <property name="services" ref="ServiceRegistry" />
+    </bean>
 	
-	<!-- adding new bean -->
     <bean id="webscript.gov.nasa.jpl.mms.doorsartifactlinkmapping.post"
         class="gov.nasa.jpl.view_repo.webscripts.DoorsArtifactLinkMappingPost" parent="webscript"
         singleton="false">
@@ -200,7 +210,27 @@
         <property name="services" ref="ServiceRegistry" />
     </bean>
     
-    <!-- adding new bean -->
+    <bean id="webscript.gov.nasa.jpl.mms.doorsartifactlinkmapping.delete"
+        class="gov.nasa.jpl.view_repo.webscripts.DoorsArtifactLinkMappingDelete" parent="webscript"
+        singleton="false">
+        <property name="repositoryHelper" ref="repositoryHelper" />
+        <property name="services" ref="ServiceRegistry" />
+    </bean>
+    
+    <bean id="webscript.gov.nasa.jpl.mms.doorsartifactlinkmapping.put"
+        class="gov.nasa.jpl.view_repo.webscripts.DoorsArtifactLinkMappingUpdate" parent="webscript"
+        singleton="false">
+        <property name="repositoryHelper" ref="repositoryHelper" />
+        <property name="services" ref="ServiceRegistry" />
+    </bean>
+    
+    <bean id="webscript.gov.nasa.jpl.mms.doorsartifactlinkmapping.get"
+        class="gov.nasa.jpl.view_repo.webscripts.DoorsArtifactLinkMappingGet" parent="webscript"
+        singleton="false">
+        <property name="repositoryHelper" ref="repositoryHelper" />
+        <property name="services" ref="ServiceRegistry" />
+    </bean>
+    
     <bean id="webscript.gov.nasa.jpl.mms.doorsprojectmapping.post"
         class="gov.nasa.jpl.view_repo.webscripts.DoorsProjectMappingPost" parent="webscript"
         singleton="false">
@@ -208,13 +238,78 @@
         <property name="services" ref="ServiceRegistry" />
     </bean>
     
-    <!-- adding new bean -->
     <bean id="webscript.gov.nasa.jpl.mms.doorsprojectmapping.get"
         class="gov.nasa.jpl.view_repo.webscripts.DoorsProjectMappingGet" parent="webscript"
         singleton="false">
         <property name="repositoryHelper" ref="repositoryHelper" />
         <property name="services" ref="ServiceRegistry" />
     </bean>
+    
+    <bean id="webscript.gov.nasa.jpl.mms.doorsprojectfoldermapping.post"
+        class="gov.nasa.jpl.view_repo.webscripts.DoorsProjectFolderMappingPost" parent="webscript"
+        singleton="false">
+        <property name="repositoryHelper" ref="repositoryHelper" />
+        <property name="services" ref="ServiceRegistry" />
+    </bean>
+    
+    <bean id="webscript.gov.nasa.jpl.mms.doorsattributemapping.post"
+        class="gov.nasa.jpl.view_repo.webscripts.DoorsAttributeMappingPost" parent="webscript"
+        singleton="false">
+        <property name="repositoryHelper" ref="repositoryHelper" />
+        <property name="services" ref="ServiceRegistry" />
+    </bean>
+    
+    <bean id="webscript.gov.nasa.jpl.mms.doorsattributemapping.put"
+        class="gov.nasa.jpl.view_repo.webscripts.DoorsAttributeMappingUpdate" parent="webscript"
+        singleton="false">
+        <property name="repositoryHelper" ref="repositoryHelper" />
+        <property name="services" ref="ServiceRegistry" />
+    </bean>
+    
+    <bean id="webscript.gov.nasa.jpl.mms.doorsattributemapping.delete"
+        class="gov.nasa.jpl.view_repo.webscripts.DoorsAttributeMappingDelete" parent="webscript"
+        singleton="false">
+        <property name="repositoryHelper" ref="repositoryHelper" />
+        <property name="services" ref="ServiceRegistry" />
+    </bean>
+    
+    <bean id="webscript.gov.nasa.jpl.mms.doorsattributemapping.get"
+        class="gov.nasa.jpl.view_repo.webscripts.DoorsAttributeMappingGet" parent="webscript"
+        singleton="false">
+        <property name="repositoryHelper" ref="repositoryHelper" />
+        <property name="services" ref="ServiceRegistry" />
+    </bean>
+    
+    
+    <bean id="webscript.gov.nasa.jpl.mms.doorschangesflag.get"
+        class="gov.nasa.jpl.view_repo.webscripts.DoorsChangesFlag" parent="webscript"
+        singleton="false">
+        <property name="repositoryHelper" ref="repositoryHelper" />
+        <property name="services" ref="ServiceRegistry" />
+    </bean>
+    
+    <bean id="webscript.gov.nasa.jpl.mms.doorscontainmentflag.get"
+        class="gov.nasa.jpl.view_repo.webscripts.DoorsContainmentFlag" parent="webscript"
+        singleton="false">
+        <property name="repositoryHelper" ref="repositoryHelper" />
+        <property name="services" ref="ServiceRegistry" />
+    </bean>
+    
+    <bean id="webscript.gov.nasa.jpl.mms.doorsstereotypegenerator.post"
+        class="gov.nasa.jpl.view_repo.webscripts.DoorsStereotypeGenerator" parent="webscript"
+        singleton="false">
+        <property name="repositoryHelper" ref="repositoryHelper" />
+        <property name="services" ref="ServiceRegistry" />
+    </bean>
+    
+    <bean id="webscript.gov.nasa.jpl.mms.doorschangesflag.post"
+        class="gov.nasa.jpl.view_repo.webscripts.DoorsChangesFlag" parent="webscript"
+        singleton="false">
+        <property name="repositoryHelper" ref="repositoryHelper" />
+        <property name="services" ref="ServiceRegistry" />
+    </bean>
+    
+    <!--  -->
 
 	<!-- adding new bean -->
 	<bean id="webscript.gov.nasa.jpl.mms.workspaces.sites.post" class="gov.nasa.jpl.view_repo.webscripts.ModelPost"

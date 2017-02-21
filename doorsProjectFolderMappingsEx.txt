@@ -1,0 +1,5 @@
+This is the body in which the DoorsProjectFolderMappingPost webscript expects.
+
+[{"project":"yourProject","doorsfolderid":"_ttCGLoVK-EeaX6bAIgQsOIQ"}]
+
+To get the folder id of the Doors folder in which you'd like to sync a sysml project requirements into, in Doors click the folder's menu icon and select "Permalink". The folder id can be found follwing "&folderId="

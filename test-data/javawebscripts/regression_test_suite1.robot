@@ -12,7 +12,7 @@ PostSite
 	${test_num} = 		 Set Variable		10
 	${use_json_diff} =	 Set Variable		False
 	@{branch_names} =	 Set Variable		test			workspaces			ws			develop			develop2			parsek			
-	run curl test		10		PostSite		Create a project and site		curl -w "\n\%{http_code}\n" -u admin:admin -X POST -H "Content-Type:application/json" --data '{"elements":[{"sysmlid":"123456","name":"JW_TEST","specialization":{"type":"Project"}}]}' "http://localhost:8080/alfresco/service/workspaces/master/sites/europa/projects?createSite=true"		False		None		['test', 'workspaces', 'ws', 'develop', 'develop2', 'parsek']		
+	run curl test		10		PostSite		Create a project and site		curl -w "\n\%{http_code}\n" -u admin:admin -X POST -H "Content-Type:application/json" --data '{"elements":[{"sysmlid":"PROJECT-123456","name":"JW_TEST","specialization":{"type":"Project"}}]}' "http://localhost:8080/alfresco/service/workspaces/master/sites/europa/projects?createSite=true"		False		None		['test', 'workspaces', 'ws', 'develop', 'develop2', 'parsek']		
 
 PostElementsNew
 	[Documentation]		"Regression Test: 20. Post elements to the master branch"
@@ -64,7 +64,7 @@ GetProject
 	${test_num} = 		 Set Variable		50
 	${use_json_diff} =	 Set Variable		False
 	@{branch_names} =	 Set Variable		test			workspaces			develop			develop2			
-	run curl test		50		GetProject		Get project		curl -w "\n\%{http_code}\n" -u admin:admin -X GET "http://localhost:8080/alfresco/service/workspaces/master/sites/europa/projects/123456"		False		None		['test', 'workspaces', 'develop', 'develop2']		
+	run curl test		50		GetProject		Get project		curl -w "\n\%{http_code}\n" -u admin:admin -X GET "http://localhost:8080/alfresco/service/workspaces/master/sites/europa/projects/PROJECT-123456"		False		None		['test', 'workspaces', 'develop', 'develop2']		
 
 GetProjects
 	[Documentation]		"Regression Test: 51. Get all projects for master"
@@ -79,7 +79,7 @@ GetElementsRecursively
 	${use_json_diff} =	 Set Variable		True
 	@{output_filters} =	 Set Variable		"nodeRefId"		"versionedRefId"		"created"		"read"		"lastModified"		"modified"		"siteCharacterizationId"		time_total		"MMS_		MMS_		
 	@{branch_names} =	 Set Variable		test			workspaces			develop			
-	run curl test		60		GetElementsRecursively		Get all elements recursively		curl -w "\n\%{http_code}\n" -u admin:admin -X GET "http://localhost:8080/alfresco/service/workspaces/master/elements/123456?recurse=true"		True		['"nodeRefId"', '"versionedRefId"', '"created"', '"read"', '"lastModified"', '"modified"', '"siteCharacterizationId"', 'time_total', '"MMS_', 'MMS_']		['test', 'workspaces', 'develop']		
+	run curl test		60		GetElementsRecursively		Get all elements recursively		curl -w "\n\%{http_code}\n" -u admin:admin -X GET "http://localhost:8080/alfresco/service/workspaces/master/elements/PROJECT-123456?recurse=true"		True		['"nodeRefId"', '"versionedRefId"', '"created"', '"read"', '"lastModified"', '"modified"', '"siteCharacterizationId"', 'time_total', '"MMS_', 'MMS_']		['test', 'workspaces', 'develop']		
 
 GetElementsDepth0
 	[Documentation]		"Regression Test: 61. Get elements recursively depth 0"
@@ -87,7 +87,7 @@ GetElementsDepth0
 	${use_json_diff} =	 Set Variable		True
 	@{output_filters} =	 Set Variable		"nodeRefId"		"versionedRefId"		"created"		"read"		"lastModified"		"modified"		"siteCharacterizationId"		time_total		"MMS_		MMS_		
 	@{branch_names} =	 Set Variable		test			workspaces			develop			
-	run curl test		61		GetElementsDepth0		Get elements recursively depth 0		curl -w "\n\%{http_code}\n" -u admin:admin -X GET "http://localhost:8080/alfresco/service/workspaces/master/elements/123456?depth=0"		True		['"nodeRefId"', '"versionedRefId"', '"created"', '"read"', '"lastModified"', '"modified"', '"siteCharacterizationId"', 'time_total', '"MMS_', 'MMS_']		['test', 'workspaces', 'develop']		
+	run curl test		61		GetElementsDepth0		Get elements recursively depth 0		curl -w "\n\%{http_code}\n" -u admin:admin -X GET "http://localhost:8080/alfresco/service/workspaces/master/elements/PROJECT-123456?depth=0"		True		['"nodeRefId"', '"versionedRefId"', '"created"', '"read"', '"lastModified"', '"modified"', '"siteCharacterizationId"', 'time_total', '"MMS_', 'MMS_']		['test', 'workspaces', 'develop']		
 
 GetElementsDepth1
 	[Documentation]		"Regression Test: 62. Get elements recursively depth 1"
@@ -95,7 +95,7 @@ GetElementsDepth1
 	${use_json_diff} =	 Set Variable		True
 	@{output_filters} =	 Set Variable		"nodeRefId"		"versionedRefId"		"created"		"read"		"lastModified"		"modified"		"siteCharacterizationId"		time_total		"MMS_		MMS_		
 	@{branch_names} =	 Set Variable		test			workspaces			develop			
-	run curl test		62		GetElementsDepth1		Get elements recursively depth 1		curl -w "\n\%{http_code}\n" -u admin:admin -X GET "http://localhost:8080/alfresco/service/workspaces/master/elements/123456?depth=1"		True		['"nodeRefId"', '"versionedRefId"', '"created"', '"read"', '"lastModified"', '"modified"', '"siteCharacterizationId"', 'time_total', '"MMS_', 'MMS_']		['test', 'workspaces', 'develop']		
+	run curl test		62		GetElementsDepth1		Get elements recursively depth 1		curl -w "\n\%{http_code}\n" -u admin:admin -X GET "http://localhost:8080/alfresco/service/workspaces/master/elements/PROJECT-123456?depth=1"		True		['"nodeRefId"', '"versionedRefId"', '"created"', '"read"', '"lastModified"', '"modified"', '"siteCharacterizationId"', 'time_total', '"MMS_', 'MMS_']		['test', 'workspaces', 'develop']		
 
 GetElementsDepth2
 	[Documentation]		"Regression Test: 63. Get elements recursively depth 2"
@@ -103,7 +103,7 @@ GetElementsDepth2
 	${use_json_diff} =	 Set Variable		True
 	@{output_filters} =	 Set Variable		"nodeRefId"		"versionedRefId"		"created"		"read"		"lastModified"		"modified"		"siteCharacterizationId"		time_total		"MMS_		MMS_		
 	@{branch_names} =	 Set Variable		test			workspaces			develop			
-	run curl test		63		GetElementsDepth2		Get elements recursively depth 2		curl -w "\n\%{http_code}\n" -u admin:admin -X GET "http://localhost:8080/alfresco/service/workspaces/master/elements/123456?depth=2"		True		['"nodeRefId"', '"versionedRefId"', '"created"', '"read"', '"lastModified"', '"modified"', '"siteCharacterizationId"', 'time_total', '"MMS_', 'MMS_']		['test', 'workspaces', 'develop']		
+	run curl test		63		GetElementsDepth2		Get elements recursively depth 2		curl -w "\n\%{http_code}\n" -u admin:admin -X GET "http://localhost:8080/alfresco/service/workspaces/master/elements/PROJECT-123456?depth=2"		True		['"nodeRefId"', '"versionedRefId"', '"created"', '"read"', '"lastModified"', '"modified"', '"siteCharacterizationId"', 'time_total', '"MMS_', 'MMS_']		['test', 'workspaces', 'develop']		
 
 GetElementsDepthAll
 	[Documentation]		"Regression Test: 64. Get elements recursively depth -1"
@@ -111,7 +111,7 @@ GetElementsDepthAll
 	${use_json_diff} =	 Set Variable		True
 	@{output_filters} =	 Set Variable		"nodeRefId"		"versionedRefId"		"created"		"read"		"lastModified"		"modified"		"siteCharacterizationId"		time_total		"MMS_		MMS_		
 	@{branch_names} =	 Set Variable		test			workspaces			develop			
-	run curl test		64		GetElementsDepthAll		Get elements recursively depth -1		curl -w "\n\%{http_code}\n" -u admin:admin -X GET "http://localhost:8080/alfresco/service/workspaces/master/elements/123456?depth=-1"		True		['"nodeRefId"', '"versionedRefId"', '"created"', '"read"', '"lastModified"', '"modified"', '"siteCharacterizationId"', 'time_total', '"MMS_', 'MMS_']		['test', 'workspaces', 'develop']		
+	run curl test		64		GetElementsDepthAll		Get elements recursively depth -1		curl -w "\n\%{http_code}\n" -u admin:admin -X GET "http://localhost:8080/alfresco/service/workspaces/master/elements/PROJECT-123456?depth=-1"		True		['"nodeRefId"', '"versionedRefId"', '"created"', '"read"', '"lastModified"', '"modified"', '"siteCharacterizationId"', 'time_total', '"MMS_', 'MMS_']		['test', 'workspaces', 'develop']		
 
 GetElementsDepthInvalid
 	[Documentation]		"Regression Test: 65. Get elements recursively depth invalid"
@@ -119,7 +119,7 @@ GetElementsDepthInvalid
 	${use_json_diff} =	 Set Variable		True
 	@{output_filters} =	 Set Variable		"nodeRefId"		"versionedRefId"		"created"		"read"		"lastModified"		"modified"		"siteCharacterizationId"		time_total		"MMS_		MMS_		
 	@{branch_names} =	 Set Variable		test			workspaces			develop			
-	run curl test		65		GetElementsDepthInvalid		Get elements recursively depth invalid		curl -w "\n\%{http_code}\n" -u admin:admin -X GET "http://localhost:8080/alfresco/service/workspaces/master/elements/123456?depth=invalid"		True		['"nodeRefId"', '"versionedRefId"', '"created"', '"read"', '"lastModified"', '"modified"', '"siteCharacterizationId"', 'time_total', '"MMS_', 'MMS_']		['test', 'workspaces', 'develop']		
+	run curl test		65		GetElementsDepthInvalid		Get elements recursively depth invalid		curl -w "\n\%{http_code}\n" -u admin:admin -X GET "http://localhost:8080/alfresco/service/workspaces/master/elements/PROJECT-123456?depth=invalid"		True		['"nodeRefId"', '"versionedRefId"', '"created"', '"read"', '"lastModified"', '"modified"', '"siteCharacterizationId"', 'time_total', '"MMS_', 'MMS_']		['test', 'workspaces', 'develop']		
 
 GetElementsConnected
 	[Documentation]		"Regression Test: 66. Get elements that are connected"
@@ -259,7 +259,7 @@ PostProjectWorkspace1
 	${use_json_diff} =	 Set Variable		True
 	@{output_filters} =	 Set Variable		"nodeRefId"		"versionedRefId"		"created"		"read"		"lastModified"		"modified"		"siteCharacterizationId"		time_total		
 	${branch_names} =	 Set Variable		test			develop			
-	run curl test		161		PostProjectWorkspace1		Post project to sync branch version for workspace 1		curl -w "\n\%{http_code}\n" -u admin:admin -X POST -H "Content-Type:application/json" --data '{"elements":[{"sysmlid":"123456","specialization":{"type":"Project", "projectVersion":"0"}}]}' "http://localhost:8080/alfresco/service/workspaces//$gv1/sites/europa/projects?createSite=true"		True		['"nodeRefId"', '"versionedRefId"', '"created"', '"read"', '"lastModified"', '"modified"', '"siteCharacterizationId"', 'time_total']		['test', 'develop']		
+	run curl test		161		PostProjectWorkspace1		Post project to sync branch version for workspace 1		curl -w "\n\%{http_code}\n" -u admin:admin -X POST -H "Content-Type:application/json" --data '{"elements":[{"sysmlid":"PROJECT-123456","specialization":{"type":"Project", "projectVersion":"0"}}]}' "http://localhost:8080/alfresco/service/workspaces//$gv1/sites/europa/projects?createSite=true"		True		['"nodeRefId"', '"versionedRefId"', '"created"', '"read"', '"lastModified"', '"modified"', '"siteCharacterizationId"', 'time_total']		['test', 'develop']		
 
 CreateWorkspace2
 	[Documentation]		"Regression Test: 162. Create workspace test 2"
@@ -276,7 +276,7 @@ PostProjectWorkspace2
 	${use_json_diff} =	 Set Variable		True
 	@{output_filters} =	 Set Variable		"nodeRefId"		"versionedRefId"		"created"		"read"		"lastModified"		"modified"		"siteCharacterizationId"		time_total		
 	${branch_names} =	 Set Variable		test			develop			
-	run curl test		163		PostProjectWorkspace2		Post project to sync branch version for workspace 2 - sub workspace		curl -w "\n\%{http_code}\n" -u admin:admin -X POST -H "Content-Type:application/json" --data '{"elements":[{"sysmlid":"123456","specialization":{"type":"Project", "projectVersion":"0"}}]}' "http://localhost:8080/alfresco/service/workspaces//$gv2/sites/europa/projects?createSite=true"		True		['"nodeRefId"', '"versionedRefId"', '"created"', '"read"', '"lastModified"', '"modified"', '"siteCharacterizationId"', 'time_total']		['test', 'develop']		
+	run curl test		163		PostProjectWorkspace2		Post project to sync branch version for workspace 2 - sub workspace		curl -w "\n\%{http_code}\n" -u admin:admin -X POST -H "Content-Type:application/json" --data '{"elements":[{"sysmlid":"PROJECT-123456","specialization":{"type":"Project", "projectVersion":"0"}}]}' "http://localhost:8080/alfresco/service/workspaces//$gv2/sites/europa/projects?createSite=true"		True		['"nodeRefId"', '"versionedRefId"', '"created"', '"read"', '"lastModified"', '"modified"', '"siteCharacterizationId"', 'time_total']		['test', 'develop']		
 
 CreateWorkspaceWithJson
 	[Documentation]		"Regression Test: 164. Create a workspace using a json"
@@ -1159,14 +1159,14 @@ UpdateProject
 	${test_num} = 		 Set Variable		330
 	${use_json_diff} =	 Set Variable		False
 	@{branch_names} =	 Set Variable		test			workspaces			develop			develop2			
-	run curl test		330		UpdateProject		Update a project		curl -w "\n\%{http_code}\n" -u admin:admin -X POST -H "Content-Type:application/json" --data '{"elements":[{"sysmlid":"123456","name":"JW_TEST2","specialization":{"type":"Project","projectVersion":"1"}}]}' "http://localhost:8080/alfresco/service/workspaces/master/projects"		False		None		['test', 'workspaces', 'develop', 'develop2']		
+	run curl test		330		UpdateProject		Update a project		curl -w "\n\%{http_code}\n" -u admin:admin -X POST -H "Content-Type:application/json" --data '{"elements":[{"sysmlid":"PROJECT-123456","name":"JW_TEST2","specialization":{"type":"Project","projectVersion":"1"}}]}' "http://localhost:8080/alfresco/service/workspaces/master/projects"		False		None		['test', 'workspaces', 'develop', 'develop2']		
 
 GetProjectOnly
 	[Documentation]		"Regression Test: 340. Get project w/o specifying the site"
 	${test_num} = 		 Set Variable		340
 	${use_json_diff} =	 Set Variable		True
 	@{branch_names} =	 Set Variable		test			workspaces			develop			develop2			
-	run curl test		340		GetProjectOnly		Get project w/o specifying the site		curl -w "\n\%{http_code}\n" -u admin:admin -X GET "http://localhost:8080/alfresco/service/workspaces/master/projects/123456"		True		None		['test', 'workspaces', 'develop', 'develop2']		
+	run curl test		340		GetProjectOnly		Get project w/o specifying the site		curl -w "\n\%{http_code}\n" -u admin:admin -X GET "http://localhost:8080/alfresco/service/workspaces/master/projects/PROJECT-123456"		True		None		['test', 'workspaces', 'develop', 'develop2']		
 
 PostArtifact
 	[Documentation]		"Regression Test: 350. Post artifact to the master branch"
@@ -1646,7 +1646,7 @@ TestGetAfterResurrection
 	${use_json_diff} =	 Set Variable		True
 	@{output_filters} =	 Set Variable		"nodeRefId"		"versionedRefId"		"created"		"read"		"lastModified"		"modified"		"siteCharacterizationId"		time_total		MMS_		
 	@{branch_names} =	 Set Variable		test			workspaces			develop			
-	run curl test		663		TestGetAfterResurrection		Performs a recursive get to make sure the ownedChildren were property set after resurrection.		curl -w "\n\%{http_code}\n" -u admin:admin -X GET "http://localhost:8080/alfresco/service/workspaces/master/elements/123456?recurse=true"		True		['"nodeRefId"', '"versionedRefId"', '"created"', '"read"', '"lastModified"', '"modified"', '"siteCharacterizationId"', 'time_total', 'MMS_']		['test', 'workspaces', 'develop']		
+	run curl test		663		TestGetAfterResurrection		Performs a recursive get to make sure the ownedChildren were property set after resurrection.		curl -w "\n\%{http_code}\n" -u admin:admin -X GET "http://localhost:8080/alfresco/service/workspaces/master/elements/PROJECT-123456?recurse=true"		True		['"nodeRefId"', '"versionedRefId"', '"created"', '"read"', '"lastModified"', '"modified"', '"siteCharacterizationId"', 'time_total', 'MMS_']		['test', 'workspaces', 'develop']		
 
 PostElementsWithProperites
 	[Documentation]		"Regression Test: 670. Post elements for the next several tests"

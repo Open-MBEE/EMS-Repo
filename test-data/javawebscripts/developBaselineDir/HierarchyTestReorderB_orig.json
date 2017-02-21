@@ -1,0 +1,115 @@
+{"elements": [
+    {
+        "siteCharacterizationId": "vetest",
+        "qualifiedId": "/vetest/PROJECT-5c79ccb6-68a2-4411-be7b-339a05b9e779/_18_0_5_407019f_1466704567277_266148_14321/_18_0_5_407019f_1466704592925_553155_14624",
+        "nodeRefId": "workspace://SpacesStore/0cd9d1d5-37a9-4f74-911f-1f7b13c60b4e",
+        "versionedRefId": "versionStore://version2Store/6bcf0a85-45cf-46cc-b978-0e8ac3e6e792",
+        "qualifiedName": "/vetest/HierarchyTest/Test/View B",
+        "sysmlid": "_18_0_5_407019f_1466704592925_553155_14624",
+        "isMetatype": false,
+        "editable": true,
+        "creator": "admin",
+        "modified": "2016-09-13T17:11:16.176-0700",
+        "ownedAttribute": [
+            "_18_0_5_407019f_1466704667634_423983_14922",
+            "_18_0_5_407019f_1466704664886_160231_14896"
+        ],
+        "modifier": "admin",
+        "created": "Tue Sep 13 17:11:01 PDT 2016",
+        "name": "View B",
+        "owner": "_18_0_5_407019f_1466704567277_266148_14321",
+        "documentation": "",
+        "read": "2016-09-13T17:11:16.353-0700",
+        "appliedMetatypes": [
+            "_17_0_1_232f03dc_1325612611695_581988_21583",
+            "_18_0beta_9150291_1392290067481_33752_4359",
+            "_9_0_62a020a_1105704885343_144138_7929"
+        ],
+        "specialization": {
+            "childViews": [
+                {
+                    "aggregation": "COMPOSITE",
+                    "id": "_18_0_5_407019f_1466704658028_771482_14847"
+                },
+                {
+                    "aggregation": "COMPOSITE",
+                    "id": "_18_0_5_407019f_1466704590650_411603_14577"
+                }
+            ],
+            "displayedElements": ["_18_0_5_407019f_1466704592925_553155_14624"],
+            "contents": {
+                "type": "Expression",
+                "operand": [{
+                    "instance": "_18_0_5_407019f_1468188892959_961603_14515",
+                    "type": "InstanceValue"
+                }]
+            },
+            "type": "View"
+        }
+    },
+    {
+        "siteCharacterizationId": "vetest",
+        "qualifiedId": "/vetest/PROJECT-5c79ccb6-68a2-4411-be7b-339a05b9e779/_18_0_5_407019f_1466704567277_266148_14321/_18_0_5_407019f_1466704592925_553155_14624/_18_0_5_407019f_1466704664886_160231_14896",
+        "nodeRefId": "workspace://SpacesStore/1db4831e-db45-44d1-bbc7-ed8fd8786d96",
+        "versionedRefId": "versionStore://version2Store/dbc98475-ab9a-4cec-a124-02a7514c0536",
+        "qualifiedName": "/vetest/HierarchyTest/Test/View B/view E",
+        "sysmlid": "_18_0_5_407019f_1466704664886_160231_14896",
+        "isMetatype": false,
+        "editable": true,
+        "creator": "admin",
+        "modified": "2016-09-13T17:11:11.944-0700",
+        "modifier": "admin",
+        "created": "Tue Sep 13 17:11:02 PDT 2016",
+        "name": "view E",
+        "documentation": "",
+        "owner": "_18_0_5_407019f_1466704592925_553155_14624",
+        "appliedMetatypes": [
+            "_15_0_be00301_1199377756297_348405_2678",
+            "_9_0_62a020a_1105704884574_96724_7644"
+        ],
+        "read": "2016-09-13T17:11:16.373-0700",
+        "specialization": {
+            "aggregation": "COMPOSITE",
+            "multiplicityMax": 1,
+            "propertyType": "_18_0_5_407019f_1466704590650_411603_14577",
+            "isDerived": false,
+            "isSlot": false,
+            "value": [],
+            "multiplicityMin": 1,
+            "type": "Property"
+        }
+    },
+    {
+        "siteCharacterizationId": "vetest",
+        "qualifiedId": "/vetest/PROJECT-5c79ccb6-68a2-4411-be7b-339a05b9e779/_18_0_5_407019f_1466704567277_266148_14321/_18_0_5_407019f_1466704592925_553155_14624/_18_0_5_407019f_1466704667634_423983_14922",
+        "nodeRefId": "workspace://SpacesStore/fac8a7b8-7022-4347-8491-5ff7c4433121",
+        "versionedRefId": "versionStore://version2Store/a6f5c180-5cc6-4307-b2d9-6aca1fee6860",
+        "qualifiedName": "/vetest/HierarchyTest/Test/View B/view F",
+        "sysmlid": "_18_0_5_407019f_1466704667634_423983_14922",
+        "isMetatype": false,
+        "editable": true,
+        "creator": "admin",
+        "modified": "2016-09-13T17:11:12.026-0700",
+        "modifier": "admin",
+        "created": "Tue Sep 13 17:11:01 PDT 2016",
+        "name": "view F",
+        "documentation": "",
+        "owner": "_18_0_5_407019f_1466704592925_553155_14624",
+        "appliedMetatypes": [
+            "_15_0_be00301_1199377756297_348405_2678",
+            "_9_0_62a020a_1105704884574_96724_7644"
+        ],
+        "read": "2016-09-13T17:11:16.376-0700",
+        "specialization": {
+            "aggregation": "COMPOSITE",
+            "multiplicityMax": 1,
+            "propertyType": "_18_0_5_407019f_1466704658028_771482_14847",
+            "isDerived": false,
+            "isSlot": false,
+            "value": [],
+            "multiplicityMin": 1,
+            "type": "Property"
+        }
+    }
+]}
+200

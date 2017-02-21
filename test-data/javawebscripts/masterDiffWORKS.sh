@@ -5,8 +5,8 @@
 failTest=0
 soapServer="128.149.16.xxx:8080"
 
-#start up the server
-pkill -fn 'integration-test'
+#start up the server - force kill
+pkill -9 -fn 'integration-test'
 echo 'KILLING SERVER IF ONE IS RUNNING'
 sleep 3s
 
@@ -43,7 +43,7 @@ done
 
 if [ $server -eq 1 ]; then
 	echo 'SERVER CONNECTED'
-	
+
         # Run regression tests
         # The script will run the desired tests based on the GIT_BRANCH environment variable.
         # Those tests ran can be overwritten by specifying the desired tests using the -t or -n option.
@@ -62,12 +62,12 @@ if [ $server -eq 1 ]; then
         #TestCase="??"
         #./testrunner.sh -f ./soapTestData -s $TestSuite -c $TestCase $classpath
         #cd ./soapStuff
-    
+
         #for i in $(ls . | grep "soapui-project.xml"); do
 	#         echo RUNNING TEST $i
         #            ./Resources/app/bin/testrunner.sh -s $TestSuite ./$i > soapSuite$i.out
         #    done
-       
+
         #DIFF=`grep -i failed soapSuite*.out`
         #	if [ "$DIFF" != "" ]; then
         #	    failTest=1
@@ -86,4 +86,3 @@ if [ $server -eq 2 ]; then
 	echo 'SERVER TIME-OUT'
 	exit 1
 fi
-

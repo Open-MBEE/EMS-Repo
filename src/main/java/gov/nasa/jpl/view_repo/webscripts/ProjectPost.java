@@ -29,6 +29,7 @@
 
 package gov.nasa.jpl.view_repo.webscripts;
 
+import gov.nasa.jpl.mbee.util.Timer;
 import gov.nasa.jpl.view_repo.db.PostgresHelper;
 import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
@@ -42,6 +43,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.log4j.*;
 import org.alfresco.repo.model.Repository;
+import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.json.JSONArray;
@@ -51,14 +53,14 @@ import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
 
-import com.sun.star.sdbc.SQLException;
-
 /**
  * Descriptor at /view-repo/src/main/amp/config/alfresco/extension/templates/webscripts/gov/nasa/jpl/javawebscripts/project.post.desc.xml
  * @author cinyoung
  *
  */
 public class ProjectPost extends AbstractJavaWebScript {
+    static Logger logger = Logger.getLogger( ProjectPost.class );
+    
     public ProjectPost() {
         super();
     }
@@ -82,7 +84,9 @@ public class ProjectPost extends AbstractJavaWebScript {
 
     @Override
     protected Map<String, Object> executeImplImpl(WebScriptRequest req, Status status, Cache cache) {
-        printHeader( req );
+        Timer timer = new Timer();
+        String user = AuthenticationUtil.getFullyAuthenticatedUser();
+        printHeader(user, logger, req);
 
         //clearCaches();
 
@@ -107,13 +111,13 @@ public class ProjectPost extends AbstractJavaWebScript {
 
                 WorkspaceNode workspace = getWorkspace( req );
                 if ( siteName != null && !siteName.equals( NO_SITE_ID ) ) {
-                    statusCode = updateOrCreateProject( projJson,
-                                                        workspace, projectId,
-                                                        siteName, createSite,
-                                                        delete );
+                    updateOrCreateProject( projJson,
+                                           workspace, projectId,
+                                           siteName, createSite,
+                                           delete, responseStatus );
                 } else {
-                    statusCode = updateOrCreateProject( projJson,
-                                                        workspace, projectId);
+                    updateOrCreateProject( projJson,
+                                           workspace, projectId, responseStatus);
                 }
             } else {
                 statusCode = responseStatus.getCode();
@@ -129,18 +133,19 @@ public class ProjectPost extends AbstractJavaWebScript {
         status.setCode(statusCode);
         model.put("res", createResponseJson());
 
-        printFooter();
+        printFooter(user, logger, timer);
 
         return model;
     }
 
-    public int updateOrCreateProject(JSONObject jsonObject, WorkspaceNode workspace, String projectId) throws JSONException {
-          EmsScriptNode projectNode = findScriptNodeById(projectId, workspace, null, true);
+    public EmsScriptNode updateOrCreateProject(JSONObject jsonObject, WorkspaceNode workspace, String projectId, Status status) throws JSONException {
+        EmsScriptNode projectNode = findScriptNodeById(projectId, workspace, null, true);
 
-          if (projectNode == null) {
-              log(Level.ERROR, HttpServletResponse.SC_NOT_FOUND, "Could not find project\n");
-              return HttpServletResponse.SC_NOT_FOUND;
-          }
+        if (projectNode == null) {
+            log(Level.ERROR, HttpServletResponse.SC_NOT_FOUND, "Could not find project\n");
+            status.setCode( HttpServletResponse.SC_NOT_FOUND );
+            return null;
+        }
 
         String projectName = null;
         if (jsonObject.has(Acm.JSON_NAME)) {
@@ -170,7 +175,7 @@ public class ProjectPost extends AbstractJavaWebScript {
                 }
             }
             if ( idChanged || nameChanged ) {
-                projectNode.removeChildrenFromJsonCache( true );
+                projectNode.removeChildrenFromJsonCache( workspace, null, true );
             }
             if (projectVersion != null) {
                 projectNode.createOrUpdateProperty(Acm.ACM_PROJECT_VERSION, projectVersion);
@@ -179,22 +184,25 @@ public class ProjectPost extends AbstractJavaWebScript {
         }
 
         sendProjectDelta(workspace, projectNode);
-        
-        return HttpServletResponse.SC_OK;
+
+        status.setCode( HttpServletResponse.SC_OK );
+        return projectNode;
     }
 
     /**
      * Update or create the project specified by the JSONObject
      * @param jsonObject    JSONObject that has the name of the project
-     * @param projectId        Project ID
-     * @param siteName        Site project should reside in
-     * @return                HttpStatusResponse code for success of the POST request
+     * @param projectId     Project ID
+     * @param siteName      Site project should reside in
+     * @param status        Status for the HTTP response
+     * @return              the project scriptnode
      * @throws JSONException
      */
-    public int updateOrCreateProject(JSONObject jsonObject, WorkspaceNode workspace,
-                                     String projectId, String siteName,
-                                     boolean createSite,
-                                     boolean delete) throws JSONException {
+    public EmsScriptNode updateOrCreateProject(JSONObject jsonObject, WorkspaceNode workspace,
+                                               String projectId, String siteName,
+                                               boolean createSite,
+                                               boolean delete,
+                                               Status status) throws JSONException {
         // see if project exists for workspace
         EmsScriptNode projectNodeAll = findScriptNodeById(projectId, workspace, null, true, siteName);
         EmsScriptNode projectNode = (projectNodeAll != null && NodeUtil.workspacesEqual(projectNodeAll.getWorkspace(),workspace)) ?
@@ -202,7 +210,7 @@ public class ProjectPost extends AbstractJavaWebScript {
 
         boolean idChanged = false;
         boolean nameChanged = false;
-        
+
         // only create site, models, and projects directory in master workspace
         if (workspace == null) {
             EmsScriptNode siteNode = getSiteNodeForWorkspace(siteName, workspace, null, false);
@@ -215,7 +223,8 @@ public class ProjectPost extends AbstractJavaWebScript {
                     siteNode = createSite( siteName, workspace );
                 } else {
                     log(Level.ERROR, HttpServletResponse.SC_NOT_FOUND, "Site not found for %s .\n", siteName);
-                    return HttpServletResponse.SC_NOT_FOUND;
+                    status.setCode( HttpServletResponse.SC_NOT_FOUND );
+                    return null;
                 }
             }
 
@@ -223,7 +232,8 @@ public class ProjectPost extends AbstractJavaWebScript {
             EmsScriptNode modelContainerNode =
                     siteNode.childByNamePath( MODEL_PATH_SEARCH, false, workspace, true );
             if (!checkPermissions(siteNode, "Write")) {
-                return HttpServletResponse.SC_FORBIDDEN;
+                status.setCode( HttpServletResponse.SC_FORBIDDEN );
+                return null;
             }
             if (modelContainerNode == null) {
                 modelContainerNode = siteNode.createFolder("Models");
@@ -245,14 +255,16 @@ public class ProjectPost extends AbstractJavaWebScript {
             if (workspace != null) {
                 EmsScriptNode pnode = findScriptNodeById(projectId, workspace.getParentWorkspace(), null, true, siteName);
                 if (pnode != null) {
-                    projectNode = workspace.replicateWithParentFolders( pnode );
+                    projectNode = workspace.replicateWithParentFolders( pnode,
+                                                                        runWithoutTransactions );
                 }
             }
         }
 
         if (projectNode == null) {
             log(Level.WARN, HttpServletResponse.SC_BAD_REQUEST, "Projects must be created in master workspace.\n");
-            return HttpServletResponse.SC_BAD_REQUEST;
+            status.setCode( HttpServletResponse.SC_BAD_REQUEST );
+            return null;
         }
 
         if (delete) {
@@ -297,29 +309,30 @@ public class ProjectPost extends AbstractJavaWebScript {
                 //                    }
             }
         }
-    
+
         if ( idChanged || nameChanged ) {
-            projectNode.removeChildrenFromJsonCache( true );
+            projectNode.removeChildrenFromJsonCache( workspace, null, true );
         }
         projectNode.getOrSetCachedVersion();
         sendProjectDelta(workspace, projectNode);
-        return HttpServletResponse.SC_OK;
+        status.setCode( HttpServletResponse.SC_OK );
+        return projectNode;
     }
 
-    
+
     private void sendProjectDelta(WorkspaceNode workspace, EmsScriptNode projectNode){
-    	    PostgresHelper pgh = new PostgresHelper(workspace);
-    	    try {
-			pgh.connect();
-			pgh.insertNode(projectNode.getNodeRef().toString(), NodeUtil.getVersionedRefId(projectNode), projectNode.getSysmlId());
-		} catch (ClassNotFoundException | java.sql.SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} finally {
-		    pgh.close();
-		}
+        PostgresHelper pgh = new PostgresHelper(workspace);
+        try {
+            pgh.connect();
+            pgh.insertNode(projectNode.getNodeRef().toString(), NodeUtil.getVersionedRefId(projectNode), projectNode.getSysmlId());
+        } catch (ClassNotFoundException | java.sql.SQLException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } finally {
+            pgh.close();
+        }
     }
-    
+
     /**
      * Validate the request and check some permissions
      */
@@ -330,25 +343,25 @@ public class ProjectPost extends AbstractJavaWebScript {
         }
 
         // check site exists
-//        if (!checkRequestVariable(siteName, SITE_NAME)) {
-//            return false;
-//        }
+        //        if (!checkRequestVariable(siteName, SITE_NAME)) {
+        //            return false;
+        //        }
 
         // get the site
-//        SiteInfo siteInfo = services.getSiteService().getSite(siteName);
-//        if (!checkRequestVariable(siteInfo, "Site")) {
-//            return false;
-//        }
+        //        SiteInfo siteInfo = services.getSiteService().getSite(siteName);
+        //        if (!checkRequestVariable(siteInfo, "Site")) {
+        //            return false;
+        //        }
 
         // check permissions
-//        if (!checkPermissions(siteInfo.getNodeRef(), PermissionService.WRITE)) {
-//            return false;
-//        }
+        //        if (!checkPermissions(siteInfo.getNodeRef(), PermissionService.WRITE)) {
+        //            return false;
+        //        }
 
-//        String projectId = req.getServiceMatch().getTemplateVars().get(PROJECT_ID);
-//        if (!checkRequestVariable(projectId, PROJECT_ID)) {
-//            return false;
-//        }
+        //        String projectId = req.getServiceMatch().getTemplateVars().get(PROJECT_ID);
+        //        if (!checkRequestVariable(projectId, PROJECT_ID)) {
+        //            return false;
+        //        }
 
         return true;
     }

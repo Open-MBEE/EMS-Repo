@@ -2,6 +2,7 @@ package gov.nasa.jpl.view_repo.webscripts;
 
 import gov.nasa.jpl.docbook.model.DBImage;
 import gov.nasa.jpl.mbee.util.TimeUtils;
+import gov.nasa.jpl.mbee.util.Timer;
 import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.actions.ActionUtil;
 import gov.nasa.jpl.view_repo.actions.HtmlToPdfActionExecuter;
@@ -12,6 +13,7 @@ import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -26,9 +28,11 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Queue;
 import java.util.UUID;
 
 import javax.servlet.http.HttpServletResponse;
@@ -49,6 +53,7 @@ import org.alfresco.util.GUID;
 import org.alfresco.util.exec.RuntimeExec;
 import org.alfresco.util.exec.RuntimeExec.ExecutionResult;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.joda.time.DateTime;
@@ -100,13 +105,12 @@ public class HtmlToPdfPost extends AbstractJavaWebScript {
 	@Override
 	protected Map<String, Object> executeImplImpl(WebScriptRequest req,
 			Status status, Cache cache) {
-		if (logger.isInfoEnabled()) {
-			String user = AuthenticationUtil.getRunAsUser();
-			logger.info(user + " " + req.getURL());
-		}
-
 		Map<String, Object> model = new HashMap<String, Object>();
-		printHeader(req);
+
+		Timer timer = new Timer();
+        String user = AuthenticationUtil.getFullyAuthenticatedUser();
+        printHeader(user, logger, req);
+
 		// clearCaches();
 
 		HtmlToPdfPost instance = new HtmlToPdfPost(repository, services);
@@ -127,7 +131,7 @@ public class HtmlToPdfPost extends AbstractJavaWebScript {
 			}
 		}
 
-		printFooter();
+		printFooter(user, logger, timer);
 		return model;
 	}
 
@@ -151,7 +155,7 @@ public class HtmlToPdfPost extends AbstractJavaWebScript {
 			String htmlContent, String coverContent, String toc, String tof,
 			String tot, String indices, String headerContent,
 			String footerContent, String docNum, String displayTime,
-			String customCss) {
+			String customCss, Boolean disabledCoverPage) {
 		EmsScriptNode pdfNode = null;
 		String htmlFilename = String.format("%s_%s.html", docId, timeStamp)
 				.replace(":", "");
@@ -181,18 +185,25 @@ public class HtmlToPdfPost extends AbstractJavaWebScript {
 			String htmlPath = saveHtmlToFilesystem(htmlFilename, htmlContent,
 					coverFilename, coverContent, toc, tof, tot, indices,
 					footerContent, headerContent, tagId, timeStamp,
-					docNum, displayTime, customCss);
+					docNum, displayTime, customCss, disabledCoverPage);
 
 			handleEmbeddedImage(coverFilename);
 			handleEmbeddedImage(htmlFilename);
-			// saveCoverToRepo(coverFilename, coverContent);
+
+			String pdfSlidesPath = html2pdfSlides(htmlPath, pdfFilename, userHomeFolder);
+			savePdfToRepo(pdfSlidesPath);
+			
+			addCssLinks(htmlPath);
+			
 			saveHtmlToRepo(htmlFilename, htmlContent);
 
 			String pdfPath = html2pdf(docId, tagId, timeStamp, htmlPath,
-					pdfFilename, coverFilename, userHomeFolder, customCss);
+					pdfFilename, userHomeFolder, customCss);
 
 			pdfNode = savePdfToRepo(pdfPath);
 
+			tableToCSV(htmlPath);
+			
 			String zipPath = zipWorkingDir(zipFilename);
 			saveZipToRepo(zipPath);
 		} catch (Throwable ex) {
@@ -284,6 +295,61 @@ public class HtmlToPdfPost extends AbstractJavaWebScript {
 		return node;
 	}
 
+	protected void savePdfSlideCss(String htmlPath) throws Throwable{
+		StringBuffer css = new StringBuffer();
+		css.append("img {max-width: 100%; page-break-inside: avoid; page-break-before: auto; page-break-after: auto; display: block;}");
+		css.append("tr, td, th { page-break-inside: avoid; } thead {display: table-header-group;}");
+		css.append(".pull-right {float: right;}");
+		css.append(".view-title {margin-top: 10pt}");
+		css.append(".chapter {page-break-before: always}");
+		css.append("table {width: 100%; border-collapse: collapse;}");
+		css.append("table, th, td {border: 1px solid black; padding: 4px;}");
+		css.append("table, th > p, td > p {margin: 0px; padding: 0px;}");
+		css.append("table, th > div > p, td > div > p {margin: 0px; padding: 0px;}");
+		css.append("th {background-color: #f2f3f2;}");
+		css.append("h1 {font-size: 20px; padding: 0px; margin: 4px;}");
+		css.append(".ng-hide {display: none;}");
+		css.append("body {font-size: 9pt; font-family: 'Times New Roman', Times, serif; }");
+		css.append("caption, figcaption, .mms-equation-caption {text-align: center; font-weight: bold;}");
+		css.append(".mms-equation-caption {float: right;}");
+		css.append("mms-view-equation, mms-view-figure, mms-view-image {page-break-inside: avoid;}.toc, .tof, .tot {page-break-after:always;}");
+		css.append(".toc a, .tof a, .tot a { text-decoration:none; color: #000; font-size:9pt; }");
+		css.append(".toc .header, .tof .header, .tot .header { margin-bottom: 4px; font-weight: bold; font-size:24px; }");
+		css.append(".toc ul, .tof ul, .tot ul {list-style-type:none; margin: 0; }");
+		css.append(".tof ul, .tot ul {padding-left:0;}");
+		css.append(".toc ul {padding-left:4em;}");
+		css.append(".toc > ul {padding-left:0;}");
+		css.append(".toc li > a[href]::after {content: leader('.') target-counter(attr(href), page);}");
+		css.append(".tot li > a[href]::after {content: leader('.') target-counter(attr(href), page);}");
+		css.append(".tof li > a[href]::after {content: leader('.') target-counter(attr(href), page);}");
+		css.append("@page {margin: 1in 0.5in 0.5in 0.5in;}");
+		css.append("@page {size: A4 landscape; margin-bottom: 0.3in;}");
+		css.append("@page {");
+		css.append("	@top-left{"); 
+		css.append("		content: url('http://div27.jpl.nasa.gov/2740/files/logos/nasa_logo(80x66).jpg');"); 
+		css.append("		border-bottom:2px solid green;");
+		css.append("	}");
+		css.append("	@top-right{");
+		css.append("		content:'");
+		css.append(extractDocumentTitle(htmlPath));
+		css.append("';");
+		css.append("		border-bottom:2px solid green;");
+		css.append("		font-size:24pt;");
+		css.append("		color: #8e2a0b;");
+		css.append("		padding-right:10px;");
+		css.append("	}");
+		css.append("	@bottom-right{");
+		css.append("		font-size: 10px; content: counter(page);border-top:1px solid black;");
+		css.append("	}");
+		css.append("}");
+		try{
+			saveStringToFileSystem(css.toString(), Paths.get(this.fsWorkingDir,"css","customPdfSlides.css"));
+		}
+		catch(Throwable ex){
+			throw new Throwable("Failed to save custom PDF slides CSS! " + ex.getMessage());
+		}
+	}
+	
 	protected EmsScriptNode savePdfToRepo(String pdfPath) {
 		log(String.format("Saving %s to repository...", Paths.get(pdfPath)
 				.getFileName()));
@@ -403,19 +469,27 @@ public class HtmlToPdfPost extends AbstractJavaWebScript {
 		}
 	}
 	
-	protected Document addCssLinks(Document document, String headerContent,
-			String footerContent, String tagId, String timeStamp,
-			String displayTime) throws Throwable {
+	protected void addCssLinks(String htmlPath) throws Throwable {
 		log("Adding CSS links to HTML...");
-		if (document == null) {
-			throw new Throwable("Null referenced HTML document input!");
+		if (!Files.exists(Paths.get(htmlPath))) {
+			throw new Throwable(
+					String.format(
+							"Failed to add CSS to HTML file. Expected %s HTML file but it does not exist!",
+							htmlPath));
 		}
-		Element head = document.head();
-		head.append("<meta charset=\"utf-8\" />");
-		// adding custom CSS link
-		head.append("<link href=\"css/customStyles.css\" rel=\"stylesheet\" type=\"text/css\" />");
 
-		return document;
+		try{
+			File htmlFile = new File(htmlPath);
+			Document html = Jsoup.parse(htmlFile, "UTF-8", "");
+			Element head = html.head();
+			head.append("<meta charset=\"utf-8\" />");
+			// adding custom CSS link
+			head.append("<link href=\"css/customStyles.css\" rel=\"stylesheet\" type=\"text/css\" />");
+			saveStringToFileSystem(html.toString(), Paths.get(htmlPath));
+		}
+		catch(Throwable ex){
+			throw new Throwable("Failed to add CSS to HTML file. " + ex.getMessage());
+		}
 	}
 
 	/**
@@ -429,6 +503,7 @@ public class HtmlToPdfPost extends AbstractJavaWebScript {
 	 *            TODO
 	 * @param displayTime
 	 *            TODO
+	 * @param disabledCoverPage TODO
 	 * @param timestamp
 	 *            TODO
 	 * @param jplDocNum
@@ -444,7 +519,7 @@ public class HtmlToPdfPost extends AbstractJavaWebScript {
 			String htmlContent, String coverFilename, String coverContent,
 			String toc, String tof, String tot, String indices,
 			String footerContent, String headerContent, String tagId,
-			String timeStamp, String docNum, String displayTime, String customCss) throws Throwable {
+			String timeStamp, String docNum, String displayTime, String customCss, Boolean disabledCoverPage) throws Throwable {
 		log(String.format("Saving %s to filesystem...", htmlFilename));
 		Path htmlPath = Paths.get(this.fsWorkingDir, htmlFilename);
 
@@ -452,20 +527,28 @@ public class HtmlToPdfPost extends AbstractJavaWebScript {
 			if (Files.exists(htmlPath)) {
 				// TODO file already exists, should we override?
 			}
+			
 			Document htmlDocument = loadHtmlDocument(htmlContent);
-			htmlDocument = addCssLinks(htmlDocument, headerContent,
-					footerContent, tagId, timeStamp, displayTime);
+			Element head = htmlDocument.head();
+			head.append("<meta charset=\"utf-8\" />");
+			//			htmlDocument = addCssLinks(htmlDocument, headerContent,
+//					footerContent, tagId, timeStamp, displayTime);
 			htmlDocument = addTot(htmlDocument, tot);
 			htmlDocument = addTof(htmlDocument, tof);
 			htmlDocument = addToc(htmlDocument, toc);
+			if(!disabledCoverPage){
+				coverContent += "<div style=\"page-break-after: always;\"/>";
+				htmlDocument = addHtmlToStartOfDocument(htmlDocument, coverContent);
+			}
 			htmlDocument = addIndices(htmlDocument, indices);
 
 			saveStringToFileSystem(htmlDocument.toString(), htmlPath);
 			if (!Utils.isNullOrEmpty(customCss)) {
 				saveCustomCssToFileSystem(customCss);
 			}
+			savePdfSlideCss(htmlPath.toString());
 
-			createCoverPage(coverFilename, coverContent);
+			
 		} catch (Throwable ex) {
 			logger.error(ex.getMessage(), ex);
 			log(String.format("Failed to save %s to filesystem!", htmlFilename));
@@ -474,7 +557,6 @@ public class HtmlToPdfPost extends AbstractJavaWebScript {
 		}
 		return htmlPath.toString();
 	}
-	
 	
 	/**
 	 * loads HTML string into a JSoup HTML Document object
@@ -703,8 +785,8 @@ public class HtmlToPdfPost extends AbstractJavaWebScript {
 	}
 
 	protected String html2pdf(String docId, String tagId, String timeStamp,
-			String htmlPath, String pdfFilename, String coverFilename,
-			EmsScriptNode userHomeFolder, String customCss) throws Throwable {
+			String htmlPath, String pdfFilename, EmsScriptNode userHomeFolder,
+			String customCss) throws Throwable {
 		log("Converting HTML to PDF...");
 		if (!Files.exists(Paths.get(htmlPath))) {
 			throw new Throwable(
@@ -714,8 +796,8 @@ public class HtmlToPdfPost extends AbstractJavaWebScript {
 		}
 
 		String pdfPath = Paths.get(this.fsWorkingDir, pdfFilename).toString();
-		String coverPath = Paths.get(this.fsWorkingDir, coverFilename)
-				.toString();
+		//String coverPath = Paths.get(this.fsWorkingDir, coverFilename)
+		//		.toString();
 
 		List<String> command = new ArrayList<String>();
 		command.add("prince");
@@ -725,7 +807,7 @@ public class HtmlToPdfPost extends AbstractJavaWebScript {
 			command.add("--style");
 			command.add(customCss);
 		}
-		command.add(coverPath);
+		//if(!disabledCoverPage) command.add(coverPath);
 		command.add(htmlPath);
 		command.add("-o");
 		command.add(pdfPath);
@@ -781,6 +863,88 @@ public class HtmlToPdfPost extends AbstractJavaWebScript {
 		return pdfPath;
 	}
 
+	private String extractDocumentTitle(String htmlPath) throws Throwable{
+		try{
+			File htmlFile = new File(htmlPath);
+			Document html = Jsoup.parse(htmlFile, "UTF-8", "");
+			Element title = html.select("mms-view > div > h1").first();
+			return title.text();
+		}
+		catch(Throwable ex){
+			throw new Throwable("Failed to extract document title from HTML file. " + ex.getMessage());
+		}
+	}
+	
+	public String html2pdfSlides(String htmlPath, String pdfFilename, EmsScriptNode userHomeFolder)  throws Throwable {
+		log("Converting HTML to PDF slides...");
+		if (!Files.exists(Paths.get(htmlPath))) {
+			throw new Throwable(
+					String.format(
+							"Failed to transform HTML to PDF slides. Expected %s HTML file but it does not exist!",
+							htmlPath));
+		}
+
+		String pdfPath = Paths.get(this.fsWorkingDir, pdfFilename.replace(".pdf", "_slides.pdf")).toString();
+
+		List<String> command = new ArrayList<String>();
+		command.add("prince");
+		command.add("--media");
+		command.add("print");
+		command.add("--style");
+		command.add(Paths.get(this.fsWorkingDir,"css","customPdfSlides.css").toString());
+		command.add(htmlPath);
+		command.add("-o");
+		command.add(pdfPath);
+
+		log("prince command: " + command.toString().replace(",", ""));
+
+		int attempts = 0;
+		int ATTEMPTS_MAX = 3;
+		boolean success = false;
+		RuntimeExec exec = null;
+		ExecutionResult execResult = null;
+		Process process = null;
+
+		boolean runProcess = true;
+		try {
+			while (attempts++ < ATTEMPTS_MAX && !success) {
+				if (!runProcess) {
+					exec = new RuntimeExec();
+					exec.setCommand(list2Array(command));
+					execResult = exec.execute();
+				} else {
+					ProcessBuilder pb = new ProcessBuilder(command);
+					process = pb.start();
+					process.waitFor();
+				}
+				if (Files.exists(Paths.get(pdfPath))) {
+					success = true;
+					break;
+				}
+				Thread.sleep(5000);
+			}
+		} catch (Exception ex) {
+			ex.printStackTrace();
+			throw new Throwable(String.format("Failed to invoke PrinceXml! Please be sure PrinceXml is installed. %s", ex.getMessage()));
+		}
+
+		if (!success && !Files.exists(Paths.get(pdfPath))) {
+			String msg = null;
+			if (!runProcess) {
+				msg = String
+						.format("Failed to transform HTML file '%s' to PDF slides. Exit value: %d",
+								htmlPath, execResult);
+			} else {
+				msg = String
+						.format("Failed to transform HTML file '%s' to PDF slides. Exit value: %d",
+								htmlPath, process.exitValue());
+			}
+			log(msg);
+			throw new Throwable(msg);
+		}
+		return pdfPath;
+    }
+	
 	/**
 	 * Helper method to convert a list to an array of specified type
 	 * 
@@ -878,6 +1042,7 @@ public class HtmlToPdfPost extends AbstractJavaWebScript {
 		htmlToPdfAction.setParameterValue(HtmlToPdfActionExecuter.PARAM_TOF, postJson.optString("tof"));
 		htmlToPdfAction.setParameterValue(HtmlToPdfActionExecuter.PARAM_TOT, postJson.optString("tot"));
 		htmlToPdfAction.setParameterValue(HtmlToPdfActionExecuter.PARAM_INDEX, postJson.optString("index"));
+		htmlToPdfAction.setParameterValue(HtmlToPdfActionExecuter.PARAM_DISABLED_COVER_PAGE, postJson.optString("disabledCoverPage"));
 		services.getActionService().executeAction(htmlToPdfAction, jobNode.getNodeRef(), true, true);
 	}
 
@@ -1135,14 +1300,158 @@ public class HtmlToPdfPost extends AbstractJavaWebScript {
 	}
 
 	public void cleanupFiles() {
-		if (gov.nasa.jpl.mbee.util.FileUtils.exists(this.fsWorkingDir)) {
-			try {
-				FileUtils.forceDelete(new File(this.fsWorkingDir));
-			} catch (IOException ex) {
-				System.out.println(String.format(
-						"Failed to cleanup temporary files at %s",
-						this.fsWorkingDir));
+//		if (gov.nasa.jpl.mbee.util.FileUtils.exists(this.fsWorkingDir)) {
+//			try {
+//				FileUtils.forceDelete(new File(this.fsWorkingDir));
+//			} catch (IOException ex) {
+//				System.out.println(String.format(
+//						"Failed to cleanup temporary files at %s",
+//						this.fsWorkingDir));
+//			}
+//		}
+	}
+
+    private void tableToCSV(String htmlPath) throws Exception{
+		File input = new File(htmlPath);
+		if(!input.exists()) return;
+		
+		try {
+			FileInputStream fileStream = new FileInputStream(input);
+			Document document = Jsoup.parse(fileStream, "UTF-8", "");
+			if(document == null) throw new Exception("Failed to convert tables to CSV! Unabled to load file: " + htmlPath);
+			
+			int tableIndex = 1;
+			int rowIndex = 1;
+			String filename = "";
+			int cols = 0;
+			for(Element table:document.select("table")){
+				List<List<String>> csv = new ArrayList<List<String>>();
+				Queue<TableCell> rowQueue = new LinkedList<TableCell>();
+				Elements elements = table.select("> thead");
+				elements.addAll(table.select("> tbody"));
+				elements.addAll(table.select("> tfoot"));
+				for(Element row: elements.select("> tr")){
+					List<String> csvRow = new ArrayList<String>();
+					cols = row.children().size();
+					for(int i=0; i < cols; i++){
+						if(i >= row.children().size()){
+							for(int k=cols; k > i; k--) csvRow.add("");
+							break;
+						}
+						Element entry = row.child(i);
+						if(entry != null && entry.text() != null && !entry.text().isEmpty()){ 
+							csvRow.add(entry.text());
+							
+							//***handling multi-rows***
+							String moreRows = entry.attr("rowspan");
+							if(moreRows != null && !moreRows.isEmpty()){
+								int additionalRows = Integer.parseInt(moreRows);
+								if(additionalRows > 1){
+									for(int ar = 1; ar <= additionalRows; ar++){
+										TableCell tableCell = new TableCell(rowIndex+ar, i);
+										rowQueue.add(tableCell);
+									}
+								}
+							}
+							//***handling multi-rows***
+							
+							//***handling multi-columns***
+							String rowspan = entry.attr("colspan");
+							if(rowspan == null || rowspan.isEmpty()) continue;
+							
+							int irowspan = Integer.parseInt(rowspan);
+							if(irowspan < 2) continue;
+							for(int j=2; j < irowspan; j++, i++){
+								csvRow.add("");
+							}
+							//***handling multi-columns***
+						}
+						else csvRow.add("");
+					}
+					csv.add(csvRow);
+					rowIndex++;
+				}
+
+				boolean hasTitle = false;
+				Elements title = table.select(" > caption");
+				if(title != null && title.size() > 0){
+					String titleText = title.first().text();
+					if(titleText != null && !titleText.isEmpty()){
+						filename = title.first().text();
+						hasTitle = true;
+					}
+				}
+				
+				if(!hasTitle) filename = "Untitled"; 
+				filename = "table_" + tableIndex++ + "_" + filename;
+				
+				writeCSV(csv, filename, rowQueue, cols);
 			}
+			
+		} 
+		catch (IOException e) {
+			e.printStackTrace();
+			throw new Exception("IOException: unable to read/access file: " + htmlPath);
+		}
+		catch(NumberFormatException ne){
+			ne.printStackTrace();
+			throw new Exception("One or more table row/column does not contain a parsable integer.");
 		}
 	}
+    
+    private String getHtmlText(String htmlString){
+		if(htmlString == null || htmlString.isEmpty()) return "";
+		Document document = Jsoup.parseBodyFragment(htmlString);
+		if(document == null || document.body()== null) return "";
+		return document.body().text();
+	}
+
+    private void writeCSV(List<List<String>> csv, String filename, Queue<TableCell> rowQueue, int cols) throws Exception{
+		String QUOTE = "\"";
+	    String ESCAPED_QUOTE = "\"\"";
+	    char[] CHARACTERS_THAT_MUST_BE_QUOTED = { ',', '"', '\n' };
+	    filename = getHtmlText(filename);
+	    if(filename.length() > 100) filename = filename.substring(0,100);
+		File outputFile = new File(Paths.get(this.fsWorkingDir, filename+".csv").toString());
+		try {
+			FileWriter fw = new FileWriter(outputFile);
+			BufferedWriter writer = new BufferedWriter(fw);
+			int rowIndex = 1;
+			boolean hasMoreRows;
+			for(List<String> row : csv){
+				for(int i=0; i < row.size() && i < cols; i++){
+					if(i >= cols) break;
+					hasMoreRows = false;
+					if(!rowQueue.isEmpty()){
+						TableCell tableCell = rowQueue.peek();
+						if(tableCell.getRow()==rowIndex && tableCell.getColumn()==i){
+							hasMoreRows = true;
+							rowQueue.remove();
+							if(i < cols-1) writer.write(",");
+						}
+					}
+					String s = row.get(i);
+					if(s.contains(QUOTE)){
+						s = s.replace(QUOTE, ESCAPED_QUOTE);
+					}
+					if(StringUtils.indexOfAny(s, CHARACTERS_THAT_MUST_BE_QUOTED) > -1){
+						s = QUOTE + s + QUOTE;
+					}
+				
+					writer.write(s);
+					if(!hasMoreRows) if(i < cols-1) writer.write(",");
+				}
+				writer.write(System.lineSeparator());
+				rowIndex++;
+			}
+			writer.close();
+			fw.close();
+		} catch (IOException e) {
+			String msg = String.format("Failed to save table to CSV to file system for %s. %s", outputFile.getAbsoluteFile(), e.getMessage());
+			log(Level.ERROR, msg);
+			e.printStackTrace();
+			throw new Exception(msg);
+		}
+	}
+
 }

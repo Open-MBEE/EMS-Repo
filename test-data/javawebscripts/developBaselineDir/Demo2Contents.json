@@ -1,0 +1,52 @@
+{
+    "message": "Error! No element found for _17_0_5_1_407019f_1430628190151_363897_11927.\n",
+    "elements": [{
+        "qualifiedId": "/europa/PROJECT-123456/BLUCamTest/_17_0_2_4_f3a0363_1394146455624_407543_30441/_17_0_2_3_e610336_1394148233838_91795_29332",
+        "qualifiedName": "/europa/JW_TEST/BLUCamTest/dont care2/Context",
+        "sysmlid": "_17_0_2_3_e610336_1394148233838_91795_29332",
+        "editable": true,
+        "creator": "admin",
+        "modifier": "admin",
+        "evaluationResult": {},
+        "name": "Context",
+        "documentation": "",
+        "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
+        "specialization": {
+            "displayedElements": [
+                "_17_0_2_4_f3a0363_1394141845089_115460_28389",
+                "_17_0_2_4_f3a0363_1394141831980_671275_28387"
+            ],
+            "childViews": [],
+            "contents": {
+                "operand": [{
+                    "type": "InstanceValue",
+                }],
+                "type": "Expression"
+            },
+            "allowedElements": [
+                "_17_0_2_4_f3a0363_1394141845089_115460_28389",
+                "_17_0_2_4_f3a0363_1394141831980_671275_28387"
+            ],
+            "contains": [{
+                "ordered": false,
+                "list": [[
+                    {
+                        "sourceType": "reference",
+                        "source": "_17_0_2_4_f3a0363_1394141845089_115460_28389",
+                        "sourceProperty": "name",
+                        "type": "Paragraph"
+                    },
+                    {
+                        "sourceType": "reference",
+                        "source": "_17_0_2_4_f3a0363_1394141831980_671275_28387",
+                        "sourceProperty": "name",
+                        "type": "Paragraph"
+                    }
+                ]],
+                "type": "List"
+            }],
+            "type": "View"
+        }
+    }]
+}
+200

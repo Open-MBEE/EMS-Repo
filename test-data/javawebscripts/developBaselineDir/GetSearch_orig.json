@@ -1,8 +1,8 @@
 {"elements": [{
-    "qualifiedId": "/europa/123456/300",
+    "qualifiedId": "/europa/PROJECT-123456/300",
     "qualifiedName": "/europa/JW_TEST/300",
     "name": "300",
-    "owner": "123456",
+    "owner": "PROJECT-123456",
     "documentation": "something",
     "sysmlid": "300",
     "read": "2015-02-24T11:29:56.085-0800",

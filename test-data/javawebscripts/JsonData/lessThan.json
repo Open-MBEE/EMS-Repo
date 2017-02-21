@@ -4,7 +4,7 @@
         "documentation": "",
         "sysmlid": "constraint_32165",
         "name": "",
-        "owner": "123456",
+        "owner": "PROJECT-123456",
         "specialization": {"type": "Constraint",
                           "specification":"expr_32165"
                           }

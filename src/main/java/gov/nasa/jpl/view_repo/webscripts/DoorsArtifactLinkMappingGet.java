@@ -57,8 +57,8 @@ public class DoorsArtifactLinkMappingGet extends AbstractJavaWebScript {
 
     static PostgresHelper pgh = null;
 
-    HashMap< String, HashMap< String, ArrayList< String > > > linkTypeConfiguration =
-            new HashMap< String, HashMap< String, ArrayList< String > > >();
+    HashMap< String, HashMap< String, String > > linkTypeConfiguration =
+            new HashMap< String, HashMap< String, String > >();
 
     public DoorsArtifactLinkMappingGet() {
 
@@ -107,26 +107,20 @@ public class DoorsArtifactLinkMappingGet extends AbstractJavaWebScript {
 
                 String sysmlappliedmetatypeid = rs.getString( 2 );
 
-                String source = rs.getString( 3 );
+                String uri = rs.getString( 3 );
+                
+                /*String source = rs.getString( 3 );
 
-                String target = rs.getString( 4 );
+                String target = rs.getString( 4 );*/
 
                 if ( !linkTypeConfiguration.keySet().contains( project ) ) {
 
                     linkTypeConfiguration.put( project,
-                                               new HashMap< String, ArrayList< String > >() );
+                                               new HashMap< String, String >() );
 
                     linkTypeConfiguration.get( project )
                                          .put( sysmlappliedmetatypeid,
-                                               new ArrayList< String >() );
-
-                    linkTypeConfiguration.get( project )
-                                         .get( sysmlappliedmetatypeid )
-                                         .add( source );
-
-                    linkTypeConfiguration.get( project )
-                                         .get( sysmlappliedmetatypeid )
-                                         .add( target );
+                                               uri );
 
                 }
 
@@ -137,27 +131,16 @@ public class DoorsArtifactLinkMappingGet extends AbstractJavaWebScript {
 
                         linkTypeConfiguration.get( project )
                                              .put( sysmlappliedmetatypeid,
-                                                   new ArrayList< String >() );
-
-                        linkTypeConfiguration.get( project )
-                                             .get( sysmlappliedmetatypeid )
-                                             .add( source );
-
-                        linkTypeConfiguration.get( project )
-                                             .get( sysmlappliedmetatypeid )
-                                             .add( target );
+                                                   uri );
 
                     }
 
-                    // shouldn't occur
+                    // shouldn't occur?
                     else {
 
                         linkTypeConfiguration.get( project )
-                                             .get( sysmlappliedmetatypeid )
-                                             .add( source );
-                        linkTypeConfiguration.get( project )
-                                             .get( sysmlappliedmetatypeid )
-                                             .add( source );
+                        .put( sysmlappliedmetatypeid,
+                              uri );
 
                     }
 
@@ -196,8 +179,8 @@ public class DoorsArtifactLinkMappingGet extends AbstractJavaWebScript {
 
         JSONArray projectArtifactLinkMappings = new JSONArray();
         JSONObject newProj = new JSONObject();
-        HashMap< String, ArrayList< String > > curProjLinkConfiguration =
-                new HashMap< String, ArrayList< String > >();
+        HashMap< String, String > curProjLinkConfiguration =
+                new HashMap< String, String  >();
         HashMap< String, ArrayList< String > > curSysMlLinkMappings =
                 new HashMap< String, ArrayList< String > >();
         ArrayList< String > curAppliedMetatypeIDs = new ArrayList< String >();
@@ -205,12 +188,11 @@ public class DoorsArtifactLinkMappingGet extends AbstractJavaWebScript {
         JSONObject newSysmlLinkMapping = new JSONObject();
         JSONArray sysMlLinkMappingArray = new JSONArray();
         JSONObject newAppliedMetatypeID = new JSONObject();
-        Set< Map.Entry< String, HashMap< String, ArrayList< String > > > > setOfArtifactLinkMappings =
-                linkTypeConfiguration.entrySet();
+        Set< Map.Entry< String, HashMap< String, String > > > setOfArtifactLinkMappings = linkTypeConfiguration.entrySet();
 
         try {
 
-            for ( Map.Entry< String, HashMap< String, ArrayList< String > > > curProj : setOfArtifactLinkMappings ) {
+            for ( Map.Entry< String, HashMap< String, String > > curProj : setOfArtifactLinkMappings ) {
 
                 newProj = new JSONObject();
 
@@ -220,23 +202,17 @@ public class DoorsArtifactLinkMappingGet extends AbstractJavaWebScript {
 
                 curProjLinkConfiguration = curProj.getValue();
 
-                Set< Map.Entry< String, ArrayList< String > > > setOfSyslMlLinkMappings =
-                        curProjLinkConfiguration.entrySet();
+                Set< Map.Entry< String, String  > > setOfSyslMlLinkMappings = curProjLinkConfiguration.entrySet();
 
-                for ( Map.Entry< String, ArrayList< String > > curSysmlLinkMapping : setOfSyslMlLinkMappings ) {
+                for ( Map.Entry< String, String  > curSysmlLinkMapping : setOfSyslMlLinkMappings ) {
 
                     newSysmlLinkMapping = new JSONObject();
 
                     newSysmlLinkMapping.put( "sysmlappliedmetatypeid",
                                              curSysmlLinkMapping.getKey() );
 
-                    newSysmlLinkMapping.put( "source",
-                                             curSysmlLinkMapping.getValue()
-                                                                .get( 0 ) );
-
-                    newSysmlLinkMapping.put( "target",
-                                             curSysmlLinkMapping.getValue()
-                                                                .get( 1 ) );
+                    newSysmlLinkMapping.put( "URI",
+                                             curSysmlLinkMapping.getValue() );
 
                     sysMlLinkMappingArray.put( newSysmlLinkMapping );
 

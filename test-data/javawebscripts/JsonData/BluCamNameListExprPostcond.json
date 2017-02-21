@@ -1,0 +1,110 @@
+{ "elements":[
+    {
+        "sysmlid": "P_17_0_2_3_e610336_1394148449252_91190_29556",
+        "name": "ComponentViewPoint",
+        "documentation": "",
+        "owner": "PROJECT-123456",
+        "specialization" : {
+            "method": "name_list",
+            "type": "Viewpoint"
+        }
+    },
+    {
+        "sysmlid": "P_17_0_2_3_e610336_1394148311476_17302_29388",
+        "name": "Components",
+        "documentation": "",
+        "owner": "PROJECT-123456",
+        "specialization" : {
+            "type": "View"
+        }
+    },
+    {
+        "sysmlid": "P_17_0_2_4_f3a0363_1394142290412_487571_28478",
+        "name": "BLUCam CubeSat A",
+        "documentation": "",
+        "owner": "PROJECT-123456",
+        "specialization" : {
+            "type": "Package"
+        }
+    },
+    {
+        "sysmlid": "Pname_list",
+        "name": "viewpoint_op",
+        "documentation": "",
+        "owner": "PROJECT-123456",
+        "specialization" : {
+            "parameters": ["Pexposed_id"],
+            "type": "Operation",
+            "postconditions":[name_list_postcond]
+        }
+    },
+    {
+        "sysmlid": "resultParamForViewpointOperation",
+        "name": "result",
+        "specialization": {
+            "type": "Parameter",
+            "direction": "return"
+        }
+    },
+    {
+        "sysmlid": "name_list_postcond",
+        "name": "viewpoint_op_postcond",
+        "documentation": "This constraint is the postcondition of the viewpoint operation that is encoded as result = List(Map(exposed_id, Name))",
+        "owner": "PROJECT-123456",
+        "specialization" : {
+            "type": "Constraint",
+            "specification":{
+              "operand":[
+                  {"type": "LiteralString",
+                   "string": "Equals"},
+                  {"type": "ElementValue",
+                   "element": "resultParamForViewpointOperation"},
+                  {"operand":[{"type":"ElementValue",
+                              "element":"op_list"},
+                             {"type":"Expression",
+                              "operand":[{"type":"ElementValue",
+                                          "element":"op_map"},
+                                         {"type":"ElementValue",
+                                          "element":"Pexposed_id"},
+                                         {"type":"ElementValue",
+                                          "element":"op_name_arg"}]}],
+                   "type": "Expression"
+                  }],
+              "type": "Expression"
+            }
+          }
+    },
+    {
+        "sysmlid": "Pexposed_id",
+        "name": "exposed",
+        "documentation": "",
+        "owner": "PROJECT-123456",
+        "specialization" : {
+            "type": "Parameter"
+        }
+    },
+    {
+        "sysmlid": "P_17_0_2_3_e610336_1394148464681_90735_29608",
+        "name": "",
+        "documentation": "",
+        "owner": "P_17_0_2_3_e610336_1394148311476_17302_29388",
+        "specialization" : {
+            "type": "Conform",
+            "source": "P_17_0_2_3_e610336_1394148311476_17302_29388",
+            "target": "P_17_0_2_3_e610336_1394148449252_91190_29556"
+        }
+    },
+    {
+        "id": "P_17_0_2_3_e610336_1394148759911_783211_29758",
+        "name": "",
+        "documentation": "",
+        "owner": "PROJECT-123456",
+        "specialization" : {
+            "type": "Expose",
+            "source": "P_17_0_2_3_e610336_1394148311476_17302_29388",
+            "target": "P_17_0_2_4_f3a0363_1394142290412_487571_28478"
+        }
+    }
+]}
+
+

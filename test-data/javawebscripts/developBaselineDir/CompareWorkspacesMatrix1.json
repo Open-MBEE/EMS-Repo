@@ -11,7 +11,7 @@
                 "version": "1.1",
                 "name": "update_add_poo",
                 "documentation": "update_add_poo",
-                "owner": "123456",
+                "owner": "PROJECT-123456",
                 "specialization": {
                     "propertyType": null,
                     "isSlot": false,
@@ -31,7 +31,7 @@
                 "version": "1.1",
                 "name": "delete_add_poo",
                 "documentation": "delete_add_poo",
-                "owner": "123456",
+                "owner": "PROJECT-123456",
                 "specialization": {
                     "propertyType": null,
                     "isSlot": false,
@@ -48,7 +48,7 @@
                 "name": "add_delete_poo",
                 "qualifiedName": "/europa/JW_TEST2/add_delete_poo",
                 "documentation": "add_delete_poo",
-                "owner": "123456",
+                "owner": "PROJECT-123456",
                 "sysmlid": "add_delete_poo",
                 "specialization": {
                     "propertyType": null,
@@ -67,7 +67,7 @@
                 "name": "update_delete_poo",
                 "qualifiedName": "/europa/JW_TEST2/update_delete_poo",
                 "documentation": "update_delete_poo",
-                "owner": "123456",
+                "owner": "PROJECT-123456",
                 "sysmlid": "update_delete_poo",
                 "specialization": {
                     "propertyType": null,
@@ -86,7 +86,7 @@
                 "name": "delete_delete_poo",
                 "qualifiedName": "/europa/JW_TEST2/delete_delete_poo",
                 "documentation": "delete_delete_poo",
-                "owner": "123456",
+                "owner": "PROJECT-123456",
                 "sysmlid": "delete_delete_poo",
                 "specialization": {
                     "propertyType": null,
@@ -105,7 +105,7 @@
                 "name": "none_delete_poo",
                 "qualifiedName": "/europa/JW_TEST2/none_delete_poo",
                 "documentation": "none_delete_poo",
-                "owner": "123456",
+                "owner": "PROJECT-123456",
                 "sysmlid": "none_delete_poo",
                 "specialization": {
                     "propertyType": null,
@@ -127,7 +127,7 @@
                 "version": "1.1",
                 "name": "add_update_poo",
                 "documentation": "add_update_poo",
-                "owner": "123456",
+                "owner": "PROJECT-123456",
                 "specialization": {
                     "propertyType": null,
                     "isSlot": false,
@@ -147,7 +147,7 @@
                 "version": "1.1",
                 "name": "delete_update_poo",
                 "documentation": "delete_update_poo",
-                "owner": "123456",
+                "owner": "PROJECT-123456",
                 "specialization": {
                     "propertyType": null,
                     "isSlot": false,
@@ -167,7 +167,7 @@
                 "version": "1.1",
                 "name": "none_update_poo",
                 "documentation": "none_update_poo",
-                "owner": "123456",
+                "owner": "PROJECT-123456",
                 "specialization": {
                     "propertyType": null,
                     "isSlot": false,
@@ -187,7 +187,7 @@
                 "version": "1.1",
                 "name": "update_update_poo",
                 "documentation": "update_update_poo",
-                "owner": "123456",
+                "owner": "PROJECT-123456",
                 "specialization": {
                     "propertyType": null,
                     "isSlot": false,
@@ -207,28 +207,28 @@
             {
                 "name": "add_delete_poo",
                 "qualifiedName": "/europa/JW_TEST2/add_delete_poo",
-                "owner": "123456",
+                "owner": "PROJECT-123456",
                 "sysmlid": "add_delete_poo",
                 "specialization": {"type": "Property"}
             },
             {
                 "name": "update_delete_poo",
                 "qualifiedName": "/europa/JW_TEST2/update_delete_poo",
-                "owner": "123456",
+                "owner": "PROJECT-123456",
                 "sysmlid": "update_delete_poo",
                 "specialization": {"type": "Property"}
             },
             {
                 "name": "delete_delete_poo",
                 "qualifiedName": "/europa/JW_TEST2/delete_delete_poo",
-                "owner": "123456",
+                "owner": "PROJECT-123456",
                 "sysmlid": "delete_delete_poo",
                 "specialization": {"type": "Property"}
             },
             {
                 "name": "none_delete_poo",
                 "qualifiedName": "/europa/JW_TEST2/none_delete_poo",
-                "owner": "123456",
+                "owner": "PROJECT-123456",
                 "sysmlid": "none_delete_poo",
                 "specialization": {"type": "Property"}
             }
@@ -240,7 +240,7 @@
                 "editable": true,
                 "name": "update_add_poo",
                 "documentation": "update_add_poo",
-                "owner": "123456",
+                "owner": "PROJECT-123456",
                 "specialization": {
                     "propertyType": null,
                     "isDerived": false,
@@ -259,7 +259,7 @@
                 "editable": true,
                 "name": "delete_add_poo",
                 "documentation": "delete_add_poo",
-                "owner": "123456",
+                "owner": "PROJECT-123456",
                 "specialization": {
                     "propertyType": null,
                     "isDerived": false,
@@ -278,7 +278,7 @@
                 "editable": true,
                 "name": "add_update_poo",
                 "documentation": "add_update_poo updatedWs2",
-                "owner": "123456",
+                "owner": "PROJECT-123456",
                 "specialization": {
                     "propertyType": null,
                     "isDerived": false,
@@ -297,7 +297,7 @@
                 "editable": true,
                 "name": "add_add_poo",
                 "documentation": "add_add_poo",
-                "owner": "123456",
+                "owner": "PROJECT-123456",
                 "specialization": {
                     "propertyType": null,
                     "isDerived": false,
@@ -316,7 +316,7 @@
                 "editable": true,
                 "name": "none_add_poo",
                 "documentation": "none_add_poo",
-                "owner": "123456",
+                "owner": "PROJECT-123456",
                 "specialization": {
                     "propertyType": null,
                     "isDerived": false,
@@ -335,7 +335,7 @@
             {
                 "name": "delete_update_poo",
                 "qualifiedName": "/europa/JW_TEST2/delete_update_poo",
-                "owner": "123456",
+                "owner": "PROJECT-123456",
                 "documentation": "delete_update_poo updatedWs2",
                 "sysmlid": "delete_update_poo",
                 "specialization": {"type": "Property"}
@@ -343,7 +343,7 @@
             {
                 "name": "none_update_poo",
                 "qualifiedName": "/europa/JW_TEST2/none_update_poo",
-                "owner": "123456",
+                "owner": "PROJECT-123456",
                 "documentation": "none_update_poo updatedWs2",
                 "sysmlid": "none_update_poo",
                 "specialization": {"type": "Property"}
@@ -351,7 +351,7 @@
             {
                 "name": "update_update_poo",
                 "qualifiedName": "/europa/JW_TEST2/update_update_poo",
-                "owner": "123456",
+                "owner": "PROJECT-123456",
                 "documentation": "update_update_poo updatedWs2",
                 "sysmlid": "update_update_poo",
                 "specialization": {"type": "Property"}

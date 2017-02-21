@@ -46,20 +46,9 @@ public class JobDelete extends MmsModelDelete {
     @Override
     protected Map< String, Object > executeImplImpl( WebScriptRequest req,
                                                  Status status, Cache cache ) {
-        if ( logger.isInfoEnabled() ) {
-            String user = AuthenticationUtil.getFullyAuthenticatedUser();
-            logger.info( user + " " + req.getURL() );
-        }
-
-
-        if ( logger.isInfoEnabled() ) {
-            String user = AuthenticationUtil.getFullyAuthenticatedUser();
-            logger.info( user + " " + req.getURL() );
-        }
-        
         Timer timer = new Timer();
-        
-        printHeader( req );
+        String user = AuthenticationUtil.getFullyAuthenticatedUser();
+        printHeader(user, logger, req);
 
         Map<String, Object> model = new HashMap<String, Object>();
 
@@ -104,7 +93,7 @@ public class JobDelete extends MmsModelDelete {
 
         status.setCode(responseStatus.getCode());
 
-        printFooter();
+        printFooter(user, logger, timer);
 
         if (logger.isInfoEnabled()) logger.info( "Deletion completed" );
         if ( logger.isInfoEnabled() ) {

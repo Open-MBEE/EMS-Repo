@@ -1,7 +1,7 @@
 { "elements" : [
     {
      "sysmlid" : "aspect_history_zzz",
-     "owner" : "123456",
+     "owner" : "PROJECT-123456",
      "documentation" : "a place to put stuff for the aspect history tests",
      "specialization" : {
        "type": "Package"

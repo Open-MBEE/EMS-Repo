@@ -1,0 +1,43 @@
+{"elements": [
+    {
+	"qualifiedId": "/europawithshare/PROJECT-d9f462a0-570a-459b-bbe8-c94ee64f50c7/_18_0_2_e81034b_1449860382173_375448_12897/_18_0_2_e81034b_1449860643079_277735_14959/_18_0_2_e81034b_1450124479544_297753_15929",
+	"qualifiedName": "/europawithshare/agenda/Agenda/SRR Agenda/",
+	"sysmlid": "_18_0_2_e81034b_1450124479544_297753_15929",
+	"name": "",
+	"documentation": "",
+	"owner": "_18_0_2_e81034b_1449860643079_277735_14959",
+	"specialization": {
+            "source": "_18_0_2_e81034b_1449860643079_277735_14959",
+            "target": "EvaluateExpressionViewpoint",
+            "type": "Conform"
+	}
+    },
+
+    {
+	"qualifiedId": "/europawithshare/PROJECT-d9f462a0-570a-459b-bbe8-c94ee64f50c7/_18_0_2_e81034b_1449860382173_375448_12897/_18_0_2_e81034b_1450124413417_598334_15890",
+	"qualifiedName": "/europawithshare/agenda/Agenda/",
+	"sysmlid": "_18_0_2_e81034b_1450124413417_598334_15890",
+	"name": "",
+	"documentation": "",
+	"owner": "_18_0_2_e81034b_1449860382173_375448_12897",
+	"specialization": {
+            "source": "_18_0_2_e81034b_1449860643079_277735_14959",
+            "target": "propertyWithTextExpression_39393",
+            "type": "Expose"
+	}
+    },
+
+    {
+	"qualifiedId": "/europawithshare/PROJECT-d9f462a0-570a-459b-bbe8-c94ee64f50c7/_18_0_2_e81034b_1449860382173_375448_12897/_18_0_2_e81034b_1449860643079_277735_14959",
+	"qualifiedName": "/europawithshare/agenda/Agenda/SRR Agenda",
+	"sysmlid": "_18_0_2_e81034b_1449860643079_277735_14959",
+	"name": "SRR Agenda",
+	"owner": "_18_0_2_e81034b_1449860382173_375448_12897",
+	"specialization": {
+            "contents": null,
+            "displayedElements": [],
+            "allowedElements": [],
+            "type": "Product"
+	}
+}
+]}

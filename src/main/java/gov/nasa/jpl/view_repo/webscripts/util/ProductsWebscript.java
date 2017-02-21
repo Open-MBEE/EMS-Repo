@@ -5,6 +5,7 @@ import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.sysml.View;
 import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
+import gov.nasa.jpl.view_repo.util.EmsTransaction;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 import gov.nasa.jpl.view_repo.webscripts.AbstractJavaWebScript;
@@ -100,6 +101,8 @@ public class ProductsWebscript extends AbstractJavaWebScript {
         JSONArray productsJson = new JSONArray();
 
         // get timestamp if specified
+        boolean includeQualified = getBooleanArg(req, "extended", false);
+
         String timestamp = req.getParameter( "timestamp" );
         Date dateTime = TimeUtils.dateFromTimestamp( timestamp );
         WorkspaceNode workspace = getWorkspace( req );
@@ -108,9 +111,10 @@ public class ProductsWebscript extends AbstractJavaWebScript {
         // check if it's already in the cache
         String siteName = getSiteName(req);
         if (timestamp == null) {
-            productsJson = getLatestProducts( workspace, dateTime, siteName );
+            productsJson = getLatestProducts( workspace, dateTime, siteName, includeQualified );
         } else {
-            productsJson = getProductsFromCache( workspace, workspaceId, dateTime, timestamp, siteName );
+            productsJson = getProductsFromCache( workspace, workspaceId, dateTime, 
+                                                 timestamp, siteName, includeQualified);
             if (productsJson != null) {
                 return productsJson;
             } else {
@@ -122,12 +126,12 @@ public class ProductsWebscript extends AbstractJavaWebScript {
     }
 
     public JSONArray
-            getProductSnapshots( String productId, String contextPath,
-                                 WorkspaceNode workspace, Date dateTime ) throws JSONException {
+            getProductSnapshots( String productId, final String contextPath,
+                                 final WorkspaceNode workspace, final Date dateTime ) throws JSONException {
         EmsScriptNode product = findScriptNodeById( productId, workspace,
                                                     dateTime, false );
 
-        JSONArray snapshotsJson = new JSONArray();
+        final JSONArray snapshotsJson = new JSONArray();
         List< EmsScriptNode > snapshotsList =
                 product.getTargetAssocsNodesByType( "view2:snapshots",
                                                     workspace, null );
@@ -140,8 +144,13 @@ public class ProductsWebscript extends AbstractJavaWebScript {
 
         Collections.sort( snapshotsList,
                           new EmsScriptNode.EmsScriptNodeComparator() );
-        for ( EmsScriptNode snapshot : snapshotsList ) {
+        for ( final EmsScriptNode snapshot : snapshotsList ) {
             if (!snapshot.isDeleted()) {
+                new EmsTransaction(getServices(), getResponse(),
+                                   getResponseStatus(), false) {
+                    
+                    @Override
+                    public void run() throws Exception {
                 String id = snapshot.getSysmlId();
                 Date date = snapshot.getLastModified( dateTime );
 
@@ -154,6 +163,8 @@ public class ProductsWebscript extends AbstractJavaWebScript {
                                        + snapshot.getSysmlId() );
                 jsonObject.put( "tag", getConfigurationSet( snapshot, workspace, dateTime ) );
                 snapshotsJson.put( jsonObject );
+                    }
+                };
             }
         }
 
@@ -166,12 +177,13 @@ public class ProductsWebscript extends AbstractJavaWebScript {
         return false;
     }
 
-    public JSONArray handleProduct( String productId, boolean recurse,
-                                    WorkspaceNode workspace,
-                                    Date dateTime,
+    public JSONArray handleProduct( String productId, boolean generate, boolean recurse,
+                                    final WorkspaceNode workspace,
+                                    final Date dateTime,
                                     boolean gettingDisplayedElements,
-                                    boolean gettingContainedViews ) {
-        JSONArray productsJson = new JSONArray();
+                                    boolean gettingContainedViews,
+                                    final boolean includeQualified ) {
+        final JSONArray productsJson = new JSONArray();
         EmsScriptNode product = findScriptNodeById( productId, workspace, dateTime, false );
 
         if ( product == null ) {
@@ -184,28 +196,41 @@ public class ProductsWebscript extends AbstractJavaWebScript {
                 View v = new View( product );
                 if ( gettingDisplayedElements ) {
                     Collection< EmsScriptNode > elems =
-                            v.getDisplayedElements();
+                            v.getDisplayedElements( workspace, dateTime, generate, recurse, null );
                     elems = NodeUtil.getVersionAtTime( elems, dateTime );
-                    for ( EmsScriptNode n : elems ) {
+                    for ( final EmsScriptNode n : elems ) {
+                        new EmsTransaction(getServices(), getResponse(),
+                                           getResponseStatus(), false, true) {
+                            
+                            @Override
+                            public void run() throws Exception {
                         if ( simpleJson ) {
                             productsJson.put( n.toSimpleJSONObject( workspace,dateTime ) );
                         } else {
-                            productsJson.put( n.toJSONObject( workspace, dateTime ) );
+                                    productsJson.put( n.toJSONObject( workspace, dateTime, includeQualified ) );
                         }
+                            }
+                        };
                     }
                 } else if ( gettingContainedViews ) {
                     Collection< EmsScriptNode > elems =
                             v.getContainedViews( recurse, workspace, dateTime, null );
                     elems.add( product );
-                    for ( EmsScriptNode n : elems ) {
-                        if ( simpleJson ) {
-                            productsJson.put( n.toSimpleJSONObject( workspace, dateTime ) );
-                        } else {
-                            productsJson.put( n.toJSONObject( workspace, dateTime ) );
-                        }
+                    for ( final EmsScriptNode n : elems ) {
+                        new EmsTransaction(getServices(), getResponse(),
+                                           getResponseStatus(), false, true) {
+                            @Override
+                            public void run() throws Exception {
+                                if ( simpleJson ) {
+                                    productsJson.put( n.toSimpleJSONObject( workspace, dateTime ) );
+                                } else {
+                                    productsJson.put( n.toJSONObject( workspace, dateTime, includeQualified ) );
+                                }
+                            }
+                        };
                     }
                 } else {
-                    productsJson.put( product.toJSONObject( workspace, dateTime ) );
+                    productsJson.put( product.toJSONObject( workspace, dateTime, includeQualified ) );
                 }
             } catch ( JSONException e ) {
                 log( Level.ERROR,
@@ -225,7 +250,8 @@ public class ProductsWebscript extends AbstractJavaWebScript {
     }
     
     protected synchronized JSONArray getProductsFromCache(WorkspaceNode workspace, String workspaceId,
-                                                          Date dateTime, String timestamp, String siteName) {
+                                                          Date dateTime, String timestamp, String siteName,
+                                                          boolean includeQualified) {
         Map<String, JSONArray> timestampCheck = Utils.get(productCache, workspaceId, timestamp);
         JSONArray productsJson = Utils.get(productCache, workspaceId, timestamp, siteName);
         
@@ -234,7 +260,7 @@ public class ProductsWebscript extends AbstractJavaWebScript {
             
         } else {
             if (productsJson == null) { 
-                buildCache(workspace, dateTime, timestamp);
+                buildCache(workspace, dateTime, timestamp, includeQualified);
             }
 
             // now that cache is built can look it up for returning, if not there, return empty
@@ -249,8 +275,8 @@ public class ProductsWebscript extends AbstractJavaWebScript {
     }
     
    
-    protected void buildCache(WorkspaceNode workspace, Date dateTime, String timestamp) {
-        String workspaceId = NodeUtil.getWorkspaceId( workspace, false );
+    protected void buildCache(final WorkspaceNode workspace, final Date dateTime, final String timestamp, final boolean includeQualified) {
+        final String workspaceId = NodeUtil.getWorkspaceId( workspace, false );
         
         // Search for all products within the project site:
         // don't specify a site, since this is running into issues and filter later
@@ -258,38 +284,44 @@ public class ProductsWebscript extends AbstractJavaWebScript {
                                                                 Acm.ACM_PRODUCT, false,
                                                                 workspace, dateTime,
                                                                 null);
-        Set<String> visitedNodes = new HashSet<String>();
+        final Set<String> visitedNodes = new HashSet<String>();
         if (nodeList != null) {
             Set<EmsScriptNode> nodes = new HashSet<EmsScriptNode>(nodeList.values());
-            for ( EmsScriptNode node : nodes) {
+            for ( final EmsScriptNode node : nodes) {
                 if (node != null) {
-                    JSONObject nodeJson = node.toJSONObject(workspace, dateTime);
-                    String nodeSiteName = node.getSiteCharacterizationId(dateTime, workspace);
-
-                    if (timestamp != null && nodeJson != null) {
-                        JSONArray siteCache = Utils.get( productCache, workspaceId, timestamp, nodeSiteName );
-                        if (siteCache == null) {
-                            siteCache = new JSONArray();
-                            if (nodeSiteName == null) nodeSiteName = "null";
-                            Utils.put( productCache, workspaceId, timestamp, nodeSiteName, siteCache);
-                        }
+                    new EmsTransaction(getServices(), getResponse(),
+                                       getResponseStatus(), false, true) {
                         
-                        // in case we have duplicates in search result - seems to be some weird
-                        // behavior going on
-                        String sysmlid = nodeJson.getString( "sysmlid" );
-                        if (sysmlid != null && !visitedNodes.contains( sysmlid )) {
-                            siteCache.put( nodeJson );
-                            visitedNodes.add( nodeJson.getString( "sysmlid" ) );
-                        }
-                    }
-                    
+                        @Override
+                        public void run() throws Exception {
+                            JSONObject nodeJson = node.toJSONObject(workspace, dateTime, includeQualified);
+                            String nodeSiteName = node.getSiteCharacterizationId(dateTime, workspace);
+        
+                            if (timestamp != null && nodeJson != null) {
+                                JSONArray siteCache = Utils.get( productCache, workspaceId, timestamp, nodeSiteName );
+                                if (siteCache == null) {
+                                    siteCache = new JSONArray();
+                                    if (nodeSiteName == null) nodeSiteName = "null";
+                                    Utils.put( productCache, workspaceId, timestamp, nodeSiteName, siteCache);
+                                }
+                                
+                                // in case we have duplicates in search result - seems to be some weird
+                                // behavior going on
+                                String sysmlid = nodeJson.getString( "sysmlid" );
+                                if (sysmlid != null && !visitedNodes.contains( sysmlid )) {
+                                    siteCache.put( nodeJson );
+                                    visitedNodes.add( nodeJson.getString( "sysmlid" ) );
+                                }
+                            }
+                        }           
+                    };
                 }
             }
         }
     }
     
-    protected JSONArray getLatestProducts(WorkspaceNode workspace, Date dateTime, String siteName) {
-        JSONArray productsJson = new JSONArray();
+    protected JSONArray getLatestProducts(final WorkspaceNode workspace, final Date dateTime, String siteName, final boolean includeQualified) {
+        final JSONArray productsJson = new JSONArray();
     
         // Search for all products within the project site:
         // don't specify a site, since this is running into issues and filter later
@@ -299,7 +331,7 @@ public class ProductsWebscript extends AbstractJavaWebScript {
                                                                 null);
         if (nodeList != null) {
             Set<EmsScriptNode> nodes = new HashSet<EmsScriptNode>(nodeList.values());
-            for ( EmsScriptNode node : nodes) {
+            for ( final EmsScriptNode node : nodes) {
                 if (node != null) {
                     if ( !node.hasPermission( PermissionService.READ ) ) continue;
                     
@@ -307,8 +339,16 @@ public class ProductsWebscript extends AbstractJavaWebScript {
                     if (nodeSiteName != null && siteName.equals( nodeSiteName)) {
                         // makes sure to call as admin user so no chance of permission error 
                         String realUser = AuthenticationUtil.getFullyAuthenticatedUser();
-                        AuthenticationUtil.setAdminUserAsFullyAuthenticatedUser();
-                        productsJson.put( node.toJSONObject( workspace, dateTime ) );
+                        AuthenticationUtil.setRunAsUser("admin");
+
+                        new EmsTransaction(getServices(), getResponse(),
+                                           getResponseStatus(), false, true) {
+                            
+                            @Override
+                            public void run() throws Exception {
+                                productsJson.put( node.toJSONObject( workspace, dateTime, includeQualified ) );
+                            }
+                        };
                         AuthenticationUtil.setRunAsUser( realUser );
                     } else if (nodeSiteName == null) {
                         if (logger.isInfoEnabled()) { 

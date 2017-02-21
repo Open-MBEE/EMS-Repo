@@ -1,0 +1,18 @@
+{
+    "elements": [
+                {
+            "sysmlid": "_18_0_5_407019f_1466704588878_781465_14530",
+            "name": "View D",
+            "specialization": {
+                "type": "View",
+                "childViews": [
+                    {
+                        "aggregation": "SHARED",
+                        "id": "_18_0_5_407019f_1466704658028_771482_14847",
+                        "name": "View F"
+                    }
+                ]
+            }
+        }
+    ]
+}

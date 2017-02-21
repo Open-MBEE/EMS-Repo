@@ -30,6 +30,7 @@
 package gov.nasa.jpl.view_repo.webscripts;
 
 import gov.nasa.jpl.mbee.util.TimeUtils;
+import gov.nasa.jpl.mbee.util.Timer;
 import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
@@ -62,7 +63,9 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
  *
  */
 public class ArtifactGet extends AbstractJavaWebScript {
-	public ArtifactGet() {
+    static Logger logger = Logger.getLogger( ArtifactGet.class );
+    
+    public ArtifactGet() {
 	    super();
 	}
 
@@ -95,7 +98,10 @@ public class ArtifactGet extends AbstractJavaWebScript {
 		JSONObject resultJson = null;
 		Map<String, Object> model = new HashMap<String, Object>();
 
-        printHeader( req );
+		Timer timer = new Timer();
+        String user = AuthenticationUtil.getFullyAuthenticatedUser();
+        printHeader(user, logger, req);
+        
 		//clearCaches();
 
         String cs = req.getParameter("cs");
@@ -203,7 +209,7 @@ public class ArtifactGet extends AbstractJavaWebScript {
             model.put("res", resultJson != null ? resultJson : createResponseJson());
         }
 
-		printFooter();
+		printFooter(user, logger, timer);
 
 		return model;
 	}

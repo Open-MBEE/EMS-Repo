@@ -4,7 +4,7 @@
             "documentation":"add_add_consistent",
             "sysmlid":"add_add_consistent",
             "name":"add_add_consistent",
-            "owner":"123456",
+            "owner":"PROJECT-123456",
             "specialization":{
                 "type":"Property",
                 "isDerived":false,
@@ -20,7 +20,7 @@
             "documentation":"update_update_consistent",
             "sysmlid":"update_update_consistent",
             "name":"update_update_consistent",
-            "owner":"123456",
+            "owner":"PROJECT-123456",
             "specialization":{
                 "type":"Property",
                 "isDerived":false,
@@ -36,7 +36,7 @@
             "documentation":"update_delete_consistent",
             "sysmlid":"update_delete_consistent",
             "name":"update_delete_consistent",
-            "owner":"123456",
+            "owner":"PROJECT-123456",
             "specialization":{
                 "type":"Property",
                 "isDerived":false,

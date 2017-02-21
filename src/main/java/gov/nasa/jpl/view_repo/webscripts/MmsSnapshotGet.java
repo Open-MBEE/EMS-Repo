@@ -1,5 +1,6 @@
 package gov.nasa.jpl.view_repo.webscripts;
 
+import gov.nasa.jpl.mbee.util.Timer;
 import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
@@ -13,6 +14,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.log4j.*;
 import org.alfresco.repo.model.Repository;
+import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.InvalidNodeRefException;
 import org.alfresco.service.cmr.repository.NodeRef;
@@ -24,7 +26,8 @@ import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
 
 public class MmsSnapshotGet extends AbstractJavaWebScript {
-
+    static Logger logger = Logger.getLogger( MmsSnapshotGet.class );
+    
     public MmsSnapshotGet() {
         super();
     }
@@ -48,17 +51,11 @@ public class MmsSnapshotGet extends AbstractJavaWebScript {
 
     @Override
     protected  Map<String, Object> executeImplImpl(WebScriptRequest req, Status status, Cache cache) {
-        printHeader( req );
-
         Map<String, Object> model = new HashMap<String, Object>();
-        // TODO: REMOVE THIS CODE
-//       	if (checkMmsVersions) {
-//    		if(compareMmsVersions(req, getResponse(), getResponseStatus()));
-//		    {
-//            	model.put("res", createResponseJson());
-//            	return model;
-//            }
-//        }
+
+        Timer timer = new Timer();
+        String user = AuthenticationUtil.getFullyAuthenticatedUser();
+        printHeader(user, logger, req);
 
         MmsSnapshotGet instance = new MmsSnapshotGet(repository, getServices());
 
@@ -83,7 +80,7 @@ public class MmsSnapshotGet extends AbstractJavaWebScript {
 		
         status.setCode(responseStatus.getCode());
 
-        printFooter();
+        printFooter(user, logger, timer);
 
         return model;
     }

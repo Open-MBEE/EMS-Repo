@@ -31,6 +31,7 @@ package gov.nasa.jpl.view_repo.webscripts;
 
 import gov.nasa.jpl.mbee.util.Debug;
 import gov.nasa.jpl.mbee.util.TimeUtils;
+import gov.nasa.jpl.mbee.util.Timer;
 import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.db.PostgresHelper;
 import gov.nasa.jpl.view_repo.util.CommitUtil;
@@ -66,6 +67,7 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
  */
 
 public class WorkspacesPost extends AbstractJavaWebScript{
+    static Logger logger = Logger.getLogger( WorkspacesPost.class );
 
     public WorkspacesPost() {
         super();
@@ -95,10 +97,12 @@ public class WorkspacesPost extends AbstractJavaWebScript{
 
     @Override
     protected Map<String, Object> executeImplImpl(WebScriptRequest req, Status status, Cache cache){
-        printHeader( req );
+        Timer timer = new Timer();
+        String user = AuthenticationUtil.getFullyAuthenticatedUser();
+        printHeader(user, logger, req);
+
         Map<String, Object> model = new HashMap<String, Object>();
         int statusCode = HttpServletResponse.SC_OK;
-        String user = AuthenticationUtil.getRunAsUser();
         JSONObject json = null;
         try{
             if(validateRequest(req, status)){
@@ -135,7 +139,7 @@ public class WorkspacesPost extends AbstractJavaWebScript{
                 model.put( "res", createResponseJson() );
             }
         status.setCode(statusCode);
-        printFooter();
+        printFooter(user, logger, timer);
         return model;
     }
     protected JSONObject printObject(WorkspaceNode ws) throws JSONException{
@@ -143,7 +147,7 @@ public class WorkspacesPost extends AbstractJavaWebScript{
         JSONArray jsonArray = new JSONArray();
         if (ws != null) {
             if(checkPermissions(ws, PermissionService.READ)) {
-                jsonArray.put(ws.toJSONObject( ws, null ));
+                jsonArray.put(ws.toJSONObject( ws, null, false ));
             }
             else {
                 log(Level.WARN,HttpServletResponse.SC_NOT_FOUND,"No permission to read: %", ws.getSysmlId());

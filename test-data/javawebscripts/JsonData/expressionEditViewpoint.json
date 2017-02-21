@@ -3,7 +3,7 @@
         "sysmlid": "edit_expression_viewpoint",
         "name": "ComponentViewPoint",
         "documentation": "A view can expose an expression or a property whose value is an expression, and that expression will be editable from the view.  The result of that expression will generate the rest of the view.",
-        "owner": "123456",
+        "owner": "PROJECT-123456",
         "specialization" : {
             "type": "Package"
         }

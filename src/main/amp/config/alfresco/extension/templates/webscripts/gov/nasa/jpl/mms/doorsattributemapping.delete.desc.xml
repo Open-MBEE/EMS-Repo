@@ -1,0 +1,11 @@
+<webscript>
+	<shortname>delete Attribute Mappings</shortname>
+	<description>
+		Delete mapping for Map Doors Requirement Attributes to Sysml Requirement slot fields
+	</description>
+	<url>/doors/attribute/mappings</url>
+	<format default="json">argument</format>
+	<authentication>user</authentication>
+	<transaction>none</transaction>
+	<family>MMS REST API</family>
+</webscript>
