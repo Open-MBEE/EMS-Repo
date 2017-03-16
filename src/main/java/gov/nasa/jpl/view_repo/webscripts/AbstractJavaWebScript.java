@@ -1480,9 +1480,8 @@ public abstract class AbstractJavaWebScript extends DeclarativeJavaWebScript {
 
         // Email the progress (this takes a long time, so only do it for critical events):
         if (sendEmail) {
-            String hostname = NodeUtil.getHostname();
-            if (!Utils.isNullOrEmpty( hostname )) {
-                String sender = hostname + "@" + getConfig( "app.domain.name" );
+            String sender = getConfig("app.email.from");
+            if (!Utils.isNullOrEmpty( sender )) {
                 String username = NodeUtil.getUserName();
                 if (!Utils.isNullOrEmpty( username )) {
                     EmsScriptNode user = new EmsScriptNode(services.getPersonService().getPerson(username),

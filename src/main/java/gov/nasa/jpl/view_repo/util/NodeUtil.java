@@ -4503,10 +4503,8 @@ public class NodeUtil {
                                               ServiceRegistry services ) {
         // FIXME: need to base the single send on the same subject
         if ( !heisenbugSeen ) {
-            String hostname = services.getSysAdminParams().getAlfrescoHost();
-
-            String sender = hostname + "@" + EmsConfig.get( "app.domain.name" );
-            String recipient;
+            String sender = EmsConfig.get( "app.email.from" );
+            String recipient = EmsConfig.get( "app.email.admin" );
 
             recipient = EmsConfig.get( "app.email.admin" );
             ActionUtil.sendEmailTo( sender, recipient, msg, subject, services );

@@ -67,14 +67,11 @@ public class ActionUtil {
     
     private static String getContextUrl() {
         
-        String hostname = getHostName();
+        String hostname = EmsConfig.get("app.url");
         if (hostname.endsWith("/" )) {
             hostname = hostname.substring( 0, hostname.lastIndexOf( "/" ) );
         } 
-        if (!hostname.contains( EmsConfig.get("app.domain.name") )) {
-            hostname += "." + EmsConfig.get("app.domain.name");
-        }
-        return "https://" + hostname + "/alfresco"; 
+        return hostname + "/alfresco"; 
     }
     
     /**
@@ -138,7 +135,7 @@ public class ActionUtil {
         EmsScriptNode user = new EmsScriptNode(services.getPersonService().getPerson(username), services, new StringBuffer());
         String recipient = (String) user.getProperty("cm:email");
 
-        String sender = NodeUtil.getHostname() + "@" + EmsConfig.get("app.domain.name");
+        String sender = EmsConfig.get("app.email.from");
         sendEmailTo(sender, recipient, msg, subject, services);
     }
 

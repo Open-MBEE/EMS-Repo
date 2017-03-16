@@ -949,9 +949,8 @@ public class CommitUtil {
 		    
 		    String msg = "Need to run model2postgres to fix. Offending JSON is " + delta.toString();
 		    ServiceRegistry services = NodeUtil.getServices();
-		    String hostname = services.getSysAdminParams().getAlfrescoHost();
-            String sender = hostname + "@jpl.nasa.gov";
-		    String recipient = "mbee-dev-admin@jpl.nasa.gov";
+            String sender = getConfig( "app.email.admin" );
+		    String recipient = getConfig( "app.email.admin" );
 		    ActionUtil.sendEmailTo( sender, recipient, msg, subject,
 		                            services );
 
