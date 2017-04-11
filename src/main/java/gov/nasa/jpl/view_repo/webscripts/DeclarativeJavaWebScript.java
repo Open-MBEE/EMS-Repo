@@ -1,5 +1,6 @@
 package gov.nasa.jpl.view_repo.webscripts;
 
+import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.mbee.util.Utils;
 
 /**
@@ -26,12 +27,15 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.http.HttpStatus;
 import org.apache.log4j.Logger;
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.extensions.webscripts.*;
 
@@ -56,6 +60,9 @@ public class DeclarativeJavaWebScript extends AbstractWebScript
 
     public static Long maxage = new Long(5 * 60 * 1000); // default to 5 minutes
     
+    // Map of uri + body string hash to the current time
+    private static Map<Integer, String> timestampRequests = new HashMap<Integer, String>();
+    
     /* (non-Javadoc)
      * @see org.alfresco.web.scripts.WebScript#execute(org.alfresco.web.scripts.WebScriptRequest, org.alfresco.web.scripts.WebScriptResponse)
      */
@@ -64,6 +71,7 @@ public class DeclarativeJavaWebScript extends AbstractWebScript
         // retrieve requested format
         String format = req.getFormat();
         Map<String, Object> model;
+        
         try
         {
             // establish mimetype from format
@@ -76,29 +84,41 @@ public class DeclarativeJavaWebScript extends AbstractWebScript
             // construct model for script / template
             Status status = new Status();
             Cache cache = new Cache(getDescription().getRequiredCache());
-            setCacheHeaders(req, cache); // add in custom headers for nginx caching
 
-            // if the flag for checking for MMS Version has been enabled it will then -
-            if(checkMmsVersions)
-            {
-                // Compare the version given by the request to the mms version. If the request versions match or if the request is a GET call
-                //  then function will executeImpl, else it will put a responseJSON into the model to be returned.
-                if(compareMmsVersions(req))
+            // MMS-681: Return 201 if timestamped request is already being serviced
+            String requestStartTime = checkRequestActive(req);
+            if (requestStartTime != null) {
+                status.setCode( HttpStatus.SC_ACCEPTED );
+                model = new HashMap<String, Object>(8, 1.0f);
+                model.put( "res", String.format( "{\"startTime\":\"%s\"}", requestStartTime ) );
+            } else {
+                setRequestActive(req);
+                setCacheHeaders(req, cache); // add in custom headers for nginx caching
+    
+                // if the flag for checking for MMS Version has been enabled it will then -
+                if(checkMmsVersions)
                 {
-                    model = new HashMap<String, Object>(8, 1.0f);
-                    model.put("res", createMmsVersionResponseJson());
-                    // TODO: Set the cache and status to be put into the model
+                    // Compare the version given by the request to the mms version. If the request versions match or if the request is a GET call
+                    //  then function will executeImpl, else it will put a responseJSON into the model to be returned.
+                    if(compareMmsVersions(req))
+                    {
+                        model = new HashMap<String, Object>(8, 1.0f);
+                        model.put("res", createMmsVersionResponseJson());
+                        // TODO: Set the cache and status to be put into the model
+                    }
+                    else
+                    {
+                        // If version checking turned passed the executeImpl.
+                        model = executeImpl(req, status, cache);
+                    }
                 }
                 else
                 {
-                    // If version checking turned passed the executeImpl.
+                    // executeImpl if checking of MMS versions has been turned off.
                     model = executeImpl(req, status, cache);
                 }
-            }
-            else
-            {
-                // executeImpl if checking of MMS versions has been turned off.
-                model = executeImpl(req, status, cache);
+                
+                setRequestInactive(req);
             }
 
             if (model == null)
@@ -216,6 +236,50 @@ public class DeclarativeJavaWebScript extends AbstractWebScript
         }
     }
     
+    private void setRequestInactive( WebScriptRequest req ) {
+        int key = getRequestHash( req );
+
+        synchronized(timestampRequests) {
+            timestampRequests.remove( key );
+        }
+    }
+
+    private void setRequestActive( WebScriptRequest req ) {
+        int key = getRequestHash( req );
+
+        synchronized(timestampRequests) {
+            timestampRequests.put( key, TimeUtils.toTimestamp( new Date() ));
+        }        
+    }
+
+    private String checkRequestActive( WebScriptRequest req ) {
+        String timestamp = req.getParameter( "timestamp" );
+        if (timestamp == null) {
+            return null;
+        }
+        
+        int key = getRequestHash( req );
+        
+        synchronized(timestampRequests) {
+            if (timestampRequests.containsKey( key )) {
+                return timestampRequests.get( key );
+            }
+        }
+        
+        return null;
+    }
+    
+    private int getRequestHash( WebScriptRequest req ) {
+        String uri = req.getURL();
+        setRequestJSON(req);
+        
+        if (privateRequestJSON != null) {
+            uri = uri + privateRequestJSON.toString();
+        }
+        
+        return uri.hashCode();      
+    }
+
     /**
      * Set the cache headers for caching server based on the request. This is single place
      * that we need to modify to update cache-control headers across all webscripts.
@@ -607,18 +671,19 @@ public class DeclarativeJavaWebScript extends AbstractWebScript
     public void setRequestJSON(WebScriptRequest req) {
 
         try {
-//            privateRequestJSON = new JSONObject();
-            privateRequestJSON = (JSONObject) req.parseContent();
+            Object content = req.parseContent();
+            if (content instanceof JSONObject) {
+                privateRequestJSON = (JSONObject) content;
+            } else if (content instanceof JSONArray) {
+                privateRequestJSON = new JSONObject();
+                privateRequestJSON.put( "array", (JSONArray) content );
+            }
         } catch (Exception e) {
             e.printStackTrace();
             if (logger.isDebugEnabled()){
                 logger.error("Could not retrieve JSON");
             }
         }
-    }
-
-    public JSONObject getRequestJSON() {
-        return privateRequestJSON;
     }
 
     public JSONObject getRequestJSON(WebScriptRequest req) {

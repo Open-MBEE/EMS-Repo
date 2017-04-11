@@ -2943,7 +2943,7 @@ public class EmsScriptNode extends ScriptNode
         boolean tryCache = NodeUtil.doJsonCaching && !isExprOrProp;
         if (!tryCache) {
             json = toJSONObjectImplImpl(jsonFilter, isExprOrProp, ws, dateTime, isIncludeQualified, isIncludeDocument,
-                            version);
+                            version, showDeleted);
             if (Debug.isOn())
                 Debug.outln("not trying cache returning json " + (json == null ? "null" : json.toString(4)));
             return json;
@@ -3081,12 +3081,6 @@ public class EmsScriptNode extends ScriptNode
     }
 
 
-    public JSONObject toJSONObjectImplImpl(Set<String> filter, boolean isExprOrProp, WorkspaceNode ws, Date dateTime,
-                    boolean isIncludeQualified, boolean isIncludeDocument, Version version) {
-        return toJSONObjectImplImpl(filter, isExprOrProp, ws, dateTime, isIncludeQualified, isIncludeDocument, version,
-                        false);
-    }
-
     /**
      * Convert node into our custom JSONObject
      * 
@@ -3112,6 +3106,7 @@ public class EmsScriptNode extends ScriptNode
         if (isExprOrProp) {
             if (logger.isDebugEnabled())
                 logger.debug("[TIMING] adding specialization");
+            element.put(Acm.JSON_ID, this.getProperty(Acm.ACM_ID));
             addSpecializationJSON(element, filter, ws, dateTime);
             if (logger.isDebugEnabled())
                 logger.debug("[TIMING] finished specialization");

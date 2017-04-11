@@ -186,6 +186,7 @@ public class ModelPost extends AbstractJavaWebScript {
 	public Set<EmsScriptNode> createOrUpdateModel(Object content, 
 			Status status, WorkspaceNode targetWS, WorkspaceNode sourceWS, 
 			boolean createCommit) throws Exception {
+        if (logger.isInfoEnabled()) logger.info( "Starting createOrUpdateModel" );
 
 		JSONObject postJson = (JSONObject) content;
 		populateSourceFromJson(postJson);
@@ -422,10 +423,12 @@ public class ModelPost extends AbstractJavaWebScript {
 					projectId, true);
 
 			// start building up elements from the root elements
+            int count = 0;
 			for (final String rootElement : rootElements) {
-				log(Level.INFO, "ROOT ELEMENT FOUND: %s", rootElement);
-
-				if (runWithoutTransactions) {
+				count++;
+                if (logger.isInfoEnabled()) logger.info( String.format( "Processing element %d: %s", count, rootElement ));
+                
+                if (runWithoutTransactions) {
 					processRootElement(rootElement, targetWS, nodeMap, 
 							elements, elementsWithoutPermissions);
 				} else {
@@ -1230,10 +1233,12 @@ public class ModelPost extends AbstractJavaWebScript {
 		final TreeSet<EmsScriptNode> elements = new TreeSet<EmsScriptNode>();
 		TreeMap<String, EmsScriptNode> nodeMap = new TreeMap<String, EmsScriptNode>();
 
-		if (!elementJson.has(Acm.JSON_ID)) {
-			return elements;
+		String jsonId = elementJson.optString( Acm.JSON_ID );
+		if (jsonId == null || jsonId.contains( "Unused_View" )) {
+		    return elements;
 		}
-		String jsonId = elementJson.getString(Acm.JSON_ID);
+		
+        if (logger.isInfoEnabled()) logger.info( "updateOrCreateElement: " + jsonId);
 
 		boolean elementNotChanging = notChanging.contains(jsonId);
 
@@ -1274,6 +1279,10 @@ public class ModelPost extends AbstractJavaWebScript {
 			// Debug.error("null parent for elementJson: " + elementJson );
 			log(Level.ERROR, "null parent for elementJson: %s", elementJson);
 			return elements;
+		}
+		if (parent.getSysmlId().contains( "Unused_View" )) {
+		    logger.info( String.format( "updateOrCreateElement ignoring %s in %s", element.getSysmlId(), parent.getSysmlId() ) );
+		    return elements;
 		}
 		if (!parent.exists()) {
 			// Debug.error("non-existent parent (" + parent +
@@ -2635,18 +2644,19 @@ public class ModelPost extends AbstractJavaWebScript {
 			reifiedPkgNode = (reifiedPkgNodeAll != null && NodeUtil
 			        .workspacesEqual(reifiedPkgNodeAll.getWorkspace(),
                             workspace)) ? reifiedPkgNodeAll : null;
-			// Verify the reified pkg and node have the same site.
-			// This is needed b/c of CMED-531 as the same pkg can be in multiple
-			// sites.
-			// Passing null in for the date since this is a post to the current
-			// version.
-			if (reifiedPkgNode != null) {
-				EmsScriptNode siteOfReifiedPkg = reifiedPkgNode.getSiteNode(
-                         null, workspace);
-				EmsScriptNode siteOfNode = node.getSiteNode(null, workspace);
-				reifiedPkgNode = (siteOfReifiedPkg != null && siteOfReifiedPkg
-				        .equals(siteOfNode)) ? reifiedPkgNode : null;
-			}
+// SSCAES-6316: site mismatch results in this check being too restrictive 			
+//			// Verify the reified pkg and node have the same site.
+//			// This is needed b/c of CMED-531 as the same pkg can be in multiple
+//			// sites.
+//			// Passing null in for the date since this is a post to the current
+//			// version.
+//			if (reifiedPkgNode != null) {
+//				EmsScriptNode siteOfReifiedPkg = reifiedPkgNode.getSiteNode(
+//                         null, workspace);
+//				EmsScriptNode siteOfNode = node.getSiteNode(null, workspace);
+//				reifiedPkgNode = (siteOfReifiedPkg != null && siteOfReifiedPkg
+//				        .equals(siteOfNode)) ? reifiedPkgNode : null;
+//			}
 			if (reifiedPkgNode == null || !reifiedPkgNode.exists()) {
 				try {
 					reifiedPkgNode = parent.createFolder(
@@ -2933,6 +2943,8 @@ public class ModelPost extends AbstractJavaWebScript {
             Status status, final WorkspaceNode workspace, boolean evaluate,
             final boolean fix, Map<String, Object> model, boolean createCommit,
 			boolean suppressElementJson) throws Exception {
+        if (logger.isInfoEnabled()) logger.info("Starting handleUpdate");
+        
 		final JSONObject top = NodeUtil.newJsonObject();
 		final Set<EmsScriptNode> elements = createOrUpdateModel(postJson, 
                 status, workspace, null, createCommit);

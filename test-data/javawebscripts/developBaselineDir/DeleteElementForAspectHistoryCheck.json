@@ -1,32 +1,10 @@
 {
   "workspace1": {
     "qualifiedName": "master",
-    "name": "master",
-    "elements": [{
-      "sysmlid": "property_zzz",
-      "editable": true,
-      "creator": "admin",
-      "owner": "aspect_history_zzz",
-      "documentation": "p is p",
-      "specialization": {
-        "propertyType": null,
-        "isDerived": false,
-        "isSlot": false,
-        "value": [{
-          "string": "the p value",
-          "type": "LiteralString"
-        }],
-        "type": "Property"
-      }
-    }]
+    "name": "master"
   },
   "workspace2": {
-    "deletedElements": [{
-      "sysmlid": "property_zzz",
-      "owner": "aspect_history_zzz",
-      "specialization": {"type": "Property"},
-      "creator": "admin",
-    }],
+    "deletedElements": [{"sysmlid": "property_zzz"}],
     "addedElements": [],
     "conflictedElements": [],
     "updatedElements": [],

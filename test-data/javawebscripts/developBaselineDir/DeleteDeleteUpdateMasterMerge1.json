@@ -1,34 +1,10 @@
 {
   "workspace1": {
     "qualifiedName": "master",
-    "name": "master",
-    "elements": [{
-      "sysmlid": "delete_update_consistent",
-      "editable": true,
-      "creator": "admin",
-      "name": "delete_update_consistent",
-      "owner": "PROJECT-123456",
-      "documentation": "delete_update_consistent",
-      "specialization": {
-        "propertyType": null,
-        "isDerived": false,
-        "isSlot": false,
-        "value": [{
-          "string": "this is it",
-          "type": "LiteralString"
-        }],
-        "type": "Property"
-      }
-    }]
+    "name": "master"
   },
   "workspace2": {
-    "deletedElements": [{
-      "name": "delete_update_consistent",
-      "sysmlid": "delete_update_consistent",
-      "owner": "PROJECT-123456",
-      "specialization": {"type": "Property"},
-      "creator": "admin",
-    }],
+    "deletedElements": [{"sysmlid": "delete_update_consistent"}],
     "addedElements": [],
     "conflictedElements": [],
     "updatedElements": [],

@@ -1,34 +1,9 @@
 {
   "workspace1": {
-    "name": "master",
-    "elements": [{
-      "sysmlid": "6666",
-      "editable": true,
-      "creator": "admin",
-      "name": "6666_name",
-      "documentation": "",
-      "specialization": {
-        "type": "Expression",
-        "operand": [
-          {
-            "element": "300",
-            "type": "ElementValue"
-          },
-          {
-            "element": "302",
-            "type": "ElementValue"
-          }
-        ]
-      }
-    }]
+    "name": "master"
   },
   "workspace2": {
-    "deletedElements": [{
-      "name": "6666_name",
-      "sysmlid": "6666",
-      "specialization": {"type": "Expression"},
-      "creator": "admin",
-    }],
+    "deletedElements": [{"sysmlid": "6666"}],
     "addedElements": [],
     "conflictedElements": [],
     "updatedElements": [],

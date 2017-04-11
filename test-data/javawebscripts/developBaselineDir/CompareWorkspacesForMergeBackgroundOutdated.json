@@ -1,73 +1,7 @@
 {
+    "message": "Diff being processed in background.\nYou will be notified via email when the diff has finished.\n",
     "email": "admin@alfresco.com",
-    "status": "OUTDATED",
-    "user": "admin",
-    "workspace1": {
-        "name": "wsA",
-        "elements": [
-            {
-                "sysmlid": "x",
-                "editable": true,
-                "name": "300",
-                "documentation": "something",
-                "specialization": {
-                    "propertyType": null,
-                    "isDerived": false,
-                    "isSlot": false,
-                    "value": [{
-                        "string": "dlam_string",
-                        "type": "LiteralString"
-                    }],
-                    "type": "Property"
-                }
-            },
-            {
-                "editable": true,
-                "appliedMetatypes": ["_9_0_62a020a_1105704885298_713292_7913"],
-                "specialization": {"type": "Package"}
-            },
-            {
-                "editable": true,
-                "appliedMetatypes": ["_9_0_62a020a_1105704885298_713292_7913"],
-                "specialization": {"type": "Package"}
-            },
-            {
-                "editable": true,
-                "appliedMetatypes": ["_9_0_62a020a_1105704885298_713292_7913"],
-                "specialization": {"type": "Package"}
-            },
-            {
-                "editable": true,
-                "appliedMetatypes": ["_9_0_62a020a_1105704885298_713292_7913"],
-                "specialization": {"type": "Package"}
-            },
-            {
-                "sysmlid": "holding_bin_PROJECT-123456",
-                "editable": true,
-                "name": "holding_bin",
-                "appliedMetatypes": ["_9_0_62a020a_1105704885298_713292_7913"],
-                "specialization": {"type": "Package"}
-            }
-        ]
-    },
-    "workspace2": {
-        "deletedElements": [],
-        "addedElements": [],
-        "conflictedElements": [],
-        "updatedElements": [{
-            "name": "300",
-            "sysmlid": "x",
-            "documentation": "x is x",
-            "specialization": {
-                "value": [{
-                    "string": "the x value",
-                    "type": "LiteralString"
-                }],
-                "type": "Property"
-            }
-        }],
-        "name": "wsB",
-        "movedElements": []
-    }
+    "status": "GENERATING",
+    "user": "admin"
 }
 200

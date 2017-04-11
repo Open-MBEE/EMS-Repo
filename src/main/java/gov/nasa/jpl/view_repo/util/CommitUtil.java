@@ -512,7 +512,7 @@ public class CommitUtil {
 			final JSONObject body, final String msg,
 			final boolean runWithoutTransactions,
 			final ServiceRegistry services, final StringBuffer response) {
-		// logger.warn( "sync commit start" );
+		if (logger.isInfoEnabled()) logger.info( "sync commit start" );
 		commitRef = null;
 		new EmsTransaction(services, response, null, runWithoutTransactions) {
 
@@ -522,7 +522,7 @@ public class CommitUtil {
 						services, response);
 			}
 		};
-		// logger.warn( "sync commit end" );
+		if (logger.isInfoEnabled()) logger.info( "sync commit end" );
 		return commitRef;
 	}
 
@@ -540,7 +540,7 @@ public class CommitUtil {
 			final Date dateTimeSrc, final Date dateTimeTarget,
 			final String msg, final boolean runWithoutTransactions,
 			final ServiceRegistry services, final StringBuffer response) {
-		// logger.warn( "sync merge start" );
+		if (logger.isInfoEnabled()) logger.info( "sync merge start" );
 		mergeRef = null;
 		new EmsTransaction(services, response, null, runWithoutTransactions) {
 
@@ -550,7 +550,7 @@ public class CommitUtil {
 						dateTimeSrc, dateTimeTarget, msg, services, response);
 			}
 		};
-		// logger.warn( "sync merge end" );
+		if (logger.isInfoEnabled()) logger.info( "sync merge end" );
 		return mergeRef;
 	}
 
@@ -620,7 +620,7 @@ public class CommitUtil {
 			final WorkspaceNode dstWs, final String msg,
 			boolean runWithoutTransactions, ServiceRegistry services,
 			StringBuffer response) {
-		// logger.warn( "sync branch start" );
+		if (logger.isInfoEnabled()) logger.info( "sync branch start" );
 		branchRef = null;
 		new EmsTransaction(services, response, null, runWithoutTransactions) {
 
@@ -630,7 +630,7 @@ public class CommitUtil {
 						response);
 			}
 		};
-		// logger.warn( "sync branch end" );
+		if (logger.isInfoEnabled()) logger.info( "sync branch end" );
 		return branchRef;
 	}
 

@@ -36,6 +36,7 @@
   <url>/flags/skipQualified?on={on?}&amp;off={off?}</url>
   <url>/flags/restPost?on={on?}&amp;off={off?}</url>
   <url>/flags/transactionPeriod?on={on?}&amp;off={off?}&amp;n={n?}</url>
+  <url>/flags/commitWithNoDelta?on={on?}&amp;off={off?}</url>
   <authentication>user</authentication>
   <format default="html">argument</format>
   <family>EMS Utils</family>

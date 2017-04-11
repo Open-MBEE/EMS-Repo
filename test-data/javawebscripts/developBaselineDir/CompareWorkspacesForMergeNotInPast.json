@@ -1,17 +1,2 @@
-{
-    "workspace1": {
-        "qualifiedName": "master",
-        "name": "master",
-        "elements": []
-    },
-    "workspace2": {
-        "deletedElements": [],
-        "addedElements": [],
-        "conflictedElements": [],
-        "updatedElements": [],
-        "qualifiedName": "master",
-        "name": "master",
-        "movedElements": []
-    }
-}
-200
+Could not complete DB transaction, see Alfresco logs for details
+400

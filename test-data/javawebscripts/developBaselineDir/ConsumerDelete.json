@@ -2,8 +2,7 @@
   "workspace1": {
     "qualifiedId": "master",
     "qualifiedName": "master",
-    "name": "master",
-    "elements": []
+    "name": "master"
   },
   "workspace2": {
     "qualifiedId": "master",

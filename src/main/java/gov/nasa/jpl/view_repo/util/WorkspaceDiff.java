@@ -87,7 +87,9 @@ public class WorkspaceDiff implements Serializable {
     public JSONObject diffJson;
 
     public JsonDiffDiff jsonDiffDiff = null;
-    
+
+    public static boolean commitWithNoDelta = true;
+
     private WorkspaceDiff() {
         elements = new TreeMap<String, EmsScriptNode>();
         elementsVersions = new TreeMap<String, Version>();
@@ -804,6 +806,45 @@ public class WorkspaceDiff implements Serializable {
         return toJSONObject( webscript, time1, time2, true );
     }
 
+    public JSONObject toJSONObjectWithNoDelta(AbstractJavaWebScript webscript, Date time1, Date time2, 
+                                              boolean showAll, boolean includeQualified) {
+        JSONObject deltaJson = NodeUtil.newJsonObject();
+        JSONObject ws1Json = NodeUtil.newJsonObject();
+        JSONObject ws2Json = NodeUtil.newJsonObject();
+
+        addWorkspaceMetadata( ws1Json, ws1, time1 );
+        
+        JSONArray deletedArray = new JSONArray();
+        for (String id: deletedElements.keySet()) {
+            JSONObject deleted = new JSONObject();
+            deleted.put( "sysmlid", id );
+            deletedArray.put( deleted );
+        }
+        ws2Json.put("deletedElements", deletedArray);
+        
+        ws2Json.put( "addedElements", getSimpleJsonArray(addedElements, ws2, includeQualified) );
+        ws2Json.put( "movedElements", getSimpleJsonArray(movedElements, ws2, includeQualified) );
+        ws2Json.put( "updatedElements", getSimpleJsonArray(updatedElements, ws2, includeQualified) );
+        ws2Json.put( "conflictedElements", getSimpleJsonArray(conflictedElements, ws2, includeQualified) );
+
+        addWorkspaceMetadata( ws2Json, ws2, time2);
+        
+        deltaJson.put( "workspace1", ws1Json );
+        deltaJson.put( "workspace2", ws2Json );
+        
+        return deltaJson;
+    }
+    
+    private JSONArray getSimpleJsonArray(Map<String, EmsScriptNode> elements, WorkspaceNode ws, boolean includeQualified) {
+        JSONArray array = new JSONArray();
+        for (EmsScriptNode node: elements.values()) {
+            array.put( node.toJSONObject( ws, null, includeQualified ) );
+        }
+
+        return array;
+    }
+    
+    
     /**
      * Dumps the JSON delta based.
      * @param   time1   Timestamp to dump ws1
@@ -817,7 +858,11 @@ public class WorkspaceDiff implements Serializable {
     }
 
     public JSONObject toJSONObject(AbstractJavaWebScript webscript,
-                                   Date time1, Date time2, boolean showAll, boolean includeQualified) throws JSONException {        
+                                   Date time1, Date time2, boolean showAll, boolean includeQualified) throws JSONException {
+        if (commitWithNoDelta) {
+            return toJSONObjectWithNoDelta( webscript, time1, time2, showAll, includeQualified );
+        }
+        
         if (diffJson != null && !isDiffPrecalculated()) return diffJson;
     
         JSONObject deltaJson = NodeUtil.newJsonObject();
@@ -1503,22 +1548,7 @@ public class WorkspaceDiff implements Serializable {
         return false;
     }
     
-    
-//    public String toSimpleString() {
-//        JSONObject top = new JSONObject();
-//        JSONObject ws1 = new JSONObject();
-//        JSONObject ws2 = new JSONObject();
-//        
-//        ws1.put( "workspace", arg1 )
-//        
-//        for (int ii = 0; ii < addedElements.size(); ii++) {
-//            
-//        }
-//        
-//        return top.toString();
-//    }
-    
-    public static boolean noFind = false;
+        
     /**
      * Compute a new diff based on an old diff0 with changes to workspace1 
      * @param diff0
@@ -1677,6 +1707,10 @@ public class WorkspaceDiff implements Serializable {
         }
 
         return  new Pair< WorkspaceNode, Date >( commonParent, commonBranchTimePoint );
+    }
+
+    public static void setCommitWithNoDelta( boolean val ) {
+        commitWithNoDelta = val;
     }
 
 }

@@ -115,20 +115,6 @@
         }
     },
     {
-        "sysmlid": "Unused_View_Instances-5c79ccb6-68a2-4411-be7b-339a05b9e779",
-        "isMetatype": false,
-        "editable": true,
-        "creator": "admin",
-        "modifier": "admin",
-        "name": "Unused View Instances",
-        "documentation": "",
-        "appliedMetatypes": ["_9_0_62a020a_1105704885298_713292_7913"],
-        "specialization": {
-            "type": "Package",
-            "isSite": false
-        }
-    },
-    {
         "sysmlid": "_18_0_5_407019f_1468188892967_475373_14548",
         "isMetatype": false,
         "editable": true,

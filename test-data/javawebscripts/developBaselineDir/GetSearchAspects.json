@@ -178,6 +178,14 @@
         "sysmlid": "401",
         "properties": [{
             "qualifiedId": "/europa/PROJECT-123456/4000/401/402",
+            "relatedDocuments": [{
+                "parentViews": [{
+                    "name": "401",
+                    "sysmlid": "401"
+                }],
+                "name": "401",
+                "sysmlid": "401"
+            }],
             "qualifiedName": "/europa/JW_TEST2/400/401/402",
             "sysmlid": "402",
             "editable": true,

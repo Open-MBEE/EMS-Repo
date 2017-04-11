@@ -1,34 +1,10 @@
 {
   "workspace1": {
     "qualifiedName": "master/wsMerge1",
-    "name": "wsMerge1",
-    "elements": [{
-      "sysmlid": "none_add_delete",
-      "editable": true,
-      "creator": "admin",
-      "name": "none_add_delete",
-      "owner": "PROJECT-123456",
-      "documentation": "none_add_delete",
-      "specialization": {
-        "propertyType": null,
-        "isDerived": false,
-        "isSlot": false,
-        "value": [{
-          "string": "this is it",
-          "type": "LiteralString"
-        }],
-        "type": "Property"
-      }
-    }]
+    "name": "wsMerge1"
   },
   "workspace2": {
-    "deletedElements": [{
-      "name": "none_add_delete",
-      "sysmlid": "none_add_delete",
-      "owner": "PROJECT-123456",
-      "specialization": {"type": "Property"},
-      "creator": "admin",
-    }],
+    "deletedElements": [{"sysmlid": "none_add_delete"}],
     "addedElements": [],
     "conflictedElements": [],
     "updatedElements": [],

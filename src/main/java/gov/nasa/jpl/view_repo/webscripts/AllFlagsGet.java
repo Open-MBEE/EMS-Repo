@@ -12,6 +12,7 @@ import gov.nasa.jpl.view_repo.util.CommitUtil;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.EmsTransaction;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
+import gov.nasa.jpl.view_repo.util.WorkspaceDiff;
 
 public class AllFlagsGet extends FlagSet {
 
@@ -51,7 +52,8 @@ public class AllFlagsGet extends FlagSet {
                            "skipQualified",
                            "skipSvgToPng",
                            "restPost",
-                           "transactionPeriod"};
+                           "transactionPeriod",
+                           "commitWithNoDelta"};
     
     public String[] getAllFlags() {
         return flags;
@@ -161,7 +163,9 @@ public class AllFlagsGet extends FlagSet {
             RestPostConnection.setDoRestPost( val );
         } else if (path.equalsIgnoreCase("transactionPeriod")) {
             NodeUtil.transactionPeriod = val ? NodeUtil.defaultTransactionPeriod : 1;
-        }
+        } else if (path.equalsIgnoreCase("commitWithNoDelta")) {
+            WorkspaceDiff.setCommitWithNoDelta( val );
+        } 
         
         return true;
     }
@@ -247,6 +251,8 @@ public class AllFlagsGet extends FlagSet {
             return DeclarativeJavaWebScript.cacheDynamicFlag;
         } else if (path.equalsIgnoreCase( "transactionPeriod" )) {
             return NodeUtil.transactionPeriod > 1;
+        } else if (path.equalsIgnoreCase( "commitWithNoDelta" )) {
+            return WorkspaceDiff.commitWithNoDelta;
         }
         return false;
     }
@@ -344,6 +350,8 @@ public class AllFlagsGet extends FlagSet {
             return false;
         } else if (path.equalsIgnoreCase( "transactionPeriod" )) {
             return false;
+        } else if (path.equalsIgnoreCase( "commitWithNoDelta" )) {
+            return false;
         } 
         return false;
     };
@@ -432,6 +440,8 @@ public class AllFlagsGet extends FlagSet {
             return "restPost";
         } else if (path.equalsIgnoreCase("transactionPeriod")) {
             return "transactionPeriod";
+        } else if (path.equalsIgnoreCase("commitWithNoDelta")) {
+            return "commitWithNoDelta";
         }
         return path;
     }
