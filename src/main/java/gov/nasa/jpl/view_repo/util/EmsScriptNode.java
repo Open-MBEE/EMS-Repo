@@ -3106,7 +3106,6 @@ public class EmsScriptNode extends ScriptNode
         if (isExprOrProp) {
             if (logger.isDebugEnabled())
                 logger.debug("[TIMING] adding specialization");
-            element.put(Acm.JSON_ID, this.getProperty(Acm.ACM_ID));
             addSpecializationJSON(element, filter, ws, dateTime);
             if (logger.isDebugEnabled())
                 logger.debug("[TIMING] finished specialization");
